@@ -2,14 +2,34 @@
 
 #include <unistd.h>
 
-
 static void _print_error(Symbol code, List detail) {
   List error = cons(Symbol.var(code), detail);
   Stderr.printf("error: %s\n", error.repr());
 }
 
+// Expand one handler template for the evaluator's supported error codes.
+$(defun shell-catches (statement)
+  (let* ((parts (match statement
+            '(try ?body (catchcases (?arm ?fallback)) ?finally)))
+         (arms (map (lambda (code)
+           (search-replace (bound parts '?arm)
+             '(literal ("Symbol") ?spelling bad-arity)
+             `(literal ("Symbol") ,(str code) ,code)))
+           '(bad-arity bad-sig bad-types not-call unbound malformed
+             incomplete not-found io-fail no-symbol bad-result void-op
+             bad-arg bad-enc bad-op bad-shift bad-target conv-range
+             div-zero no-convert))))
+    `(try ,(bound parts '?body)
+       (catchcases ,(append arms (list (bound parts '?fallback))))
+       ,(bound parts '?finally))))
+
+macro Decorator $shell.errors(Statement $body) => {
+  $(shell-catches $body)
+}
+
 static int _eval_input(
   Lisp lisp, Var form, String source, int is_form, int print) {
+  $shell.errors()
   try {
     Var result = is_form ? Lisp.eval(lisp, form)
                          : Lisp.eval_string(lisp, source);
@@ -17,82 +37,6 @@ static int _eval_input(
   }
   catch %(bad-arity *detail): {
     _print_error(<bad-arity>, detail);
-    return 0;
-  }
-  catch %(bad-sig *detail): {
-    _print_error(<bad-sig>, detail);
-    return 0;
-  }
-  catch %(bad-types *detail): {
-    _print_error(<bad-types>, detail);
-    return 0;
-  }
-  catch %(not-call *detail): {
-    _print_error(<not-call>, detail);
-    return 0;
-  }
-  catch %(unbound *detail): {
-    _print_error(<unbound>, detail);
-    return 0;
-  }
-  catch %(malformed *detail): {
-    _print_error(<malformed>, detail);
-    return 0;
-  }
-  catch %(incomplete *detail): {
-    _print_error(<incomplete>, detail);
-    return 0;
-  }
-  catch %(not-found *detail): {
-    _print_error(<not-found>, detail);
-    return 0;
-  }
-  catch %(io-fail *detail): {
-    _print_error(<io-fail>, detail);
-    return 0;
-  }
-  catch %(no-symbol *detail): {
-    _print_error(<no-symbol>, detail);
-    return 0;
-  }
-  catch %(bad-result *detail): {
-    _print_error(<bad-result>, detail);
-    return 0;
-  }
-  catch %(void-op *detail): {
-    _print_error(<void-op>, detail);
-    return 0;
-  }
-  catch %(bad-arg *detail): {
-    _print_error(<bad-arg>, detail);
-    return 0;
-  }
-  catch %(bad-enc *detail): {
-    _print_error(<bad-enc>, detail);
-    return 0;
-  }
-  catch %(bad-op *detail): {
-    _print_error(<bad-op>, detail);
-    return 0;
-  }
-  catch %(bad-shift *detail): {
-    _print_error(<bad-shift>, detail);
-    return 0;
-  }
-  catch %(bad-target *detail): {
-    _print_error(<bad-target>, detail);
-    return 0;
-  }
-  catch %(conv-range *detail): {
-    _print_error(<conv-range>, detail);
-    return 0;
-  }
-  catch %(div-zero *detail): {
-    _print_error(<div-zero>, detail);
-    return 0;
-  }
-  catch %(no-convert *detail): {
-    _print_error(<no-convert>, detail);
     return 0;
   }
   catch: {
@@ -111,12 +55,8 @@ static int _eval_text(Lisp lisp, String source, int print) {
 }
 
 static int _eval_file(Lisp lisp, const char *path, int print) {
-  File input = NULL;
-  int result = 0;
   try {
-    input = File.open(path, "r");
-    String source = input.string_close();
-    result = _eval_text(lisp, source, print);
+    return _eval_text(lisp, File.open(path, "r").string_close(), print);
   }
   catch %(not-found *detail): {
     _print_error(<not-found>, detail);
@@ -130,7 +70,6 @@ static int _eval_file(Lisp lisp, const char *path, int print) {
     Stderr.puts("error: unknown failure\n");
     return 0;
   }
-  return result;
 }
 
 static int _repl(Lisp lisp) {
@@ -224,6 +163,7 @@ static const char *_default_init(char *buffer, size_t size) {
 
 int main(int argc, char **argv) {
   Lisp lisp = Lisp.new_bare();
+  defer Lisp.destroy(lisp);
   const char *init = NULL;
   char probed[512];
   int arg = 1;
@@ -237,12 +177,10 @@ int main(int argc, char **argv) {
     Stderr.printf(
       "lisp: cannot find etc/init.xlisp; set X2C_LISP_INIT or --init\n"
     );
-    Lisp.destroy(lisp);
     return 1;
   }
   int ok = _eval_file(lisp, init, 0);
   if (!ok) {
-    Lisp.destroy(lisp);
     return 1;
   }
   int remaining = argc - arg;
@@ -256,6 +194,5 @@ int main(int argc, char **argv) {
     _usage(argv[0]);
     ok = 0;
   }
-  Lisp.destroy(lisp);
   return ok ? 0 : 1;
 }
