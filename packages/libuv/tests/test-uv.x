@@ -634,12 +634,15 @@ static void watch_reports_an_entry_a_child_creates(void) {
   Array seen = Array.new();
   UvWatch watch = loop.watch(work, seen, _record_entry);
   EXPECT_NULL(watch.entry());
-  loop.timer(5000, 0, seen, _abandon_watch);
+  UvTimer timeout = loop.timer(5000, 0, seen, _abandon_watch);
 
   UvProcess touch = loop.command(%("/usr/bin/touch" "x2c-libuv-same-name"))
     .directory(work).start();
   defer touch.free();
   touch.close_stdin();
+  loop.run(UV_RUN_DEFAULT);
+  timeout.stop();
+  watch.stop();
   loop.run(UV_RUN_DEFAULT);
 
   EXPECT_TRUE(seen.len() > 0);
@@ -666,15 +669,17 @@ static void watch_distinguishes_content_changes(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
   Array seen = %[];
-  loop.watch(path, seen, _record_change);
-  loop.timer(5000, 0, seen, _abandon_watch);
+  UvWatch watch = loop.watch(path, seen, _record_change);
+  UvTimer timeout = loop.timer(5000, 0, seen, _abandon_watch);
   UvProcess append = loop.command(%(
     "/bin/sh" "-c" "printf 'after\\n' >> content.txt"
   )).directory(work).start();
   defer append.free();
   append.close_stdin();
   loop.run(UV_RUN_DEFAULT);
-  if (!append.exited()) loop.run(UV_RUN_DEFAULT);
+  timeout.stop();
+  watch.stop();
+  loop.run(UV_RUN_DEFAULT);
 
   EXPECT_INT_EQ(seen.len(), 2);
   EXPECT_TRUE(((Var) seen[1]).symbol() == <change>);
