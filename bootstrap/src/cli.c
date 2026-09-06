@@ -75,7 +75,7 @@ static CliOption cli_options[] ={
     8721742,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  15397654616,  "--debug",  NULL,  "Enable compiler debug logging",  0
   }
   , {
-    33665524324,  CLI_TRANSLATE,  1052018024,  "--out-dir",  "<dir>",  "Write generated files under <dir> (required)",  0
+    33665524324,  CLI_TRANSLATE,  1052018024,  "--out-dir",  "<dir>",  "Write generated files under <dir> (default: .)",  0
   }
   , {
     31136689190,  CLI_TRANSLATE,  1052018024,  "--no-deps",  NULL,  "Do not write x2c dependency files",  0
@@ -360,7 +360,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new("\nInput syntax:\n");
   _2 = String_new("\nRun \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
   _3 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
-  _4 = String_new("The output directory must already exist. A normal translation requires\n--out-dir; inspection modes that stop before writing output do not.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.");
+  _4 = String_new("The output directory defaults to the current directory and must already\nexist. Use --out-dir to select another directory.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.");
   _5 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
   _6 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
   _7 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.");

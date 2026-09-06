@@ -926,10 +926,6 @@ static void _compile_file(CliRequest request,  String filename,  String output_d
 static void _preflight_translation(CliRequest c){
   struct stat info;
   if(! CliRequest_inspects(c)){
-    if(! String_truth(c -> out_dir)){
-      fprintf(stderr,  "x2c: error: translate requires '--out-dir <dir>'\n");
-      exit(2);
-    }
     if(stat(c -> out_dir,  & info)){
       fprintf(stderr,  "x2c: error: output directory does not exist: %s\n",  c -> out_dir);
       exit(2);
@@ -1114,11 +1110,12 @@ static Array _translation_chunks(List inputs,  int total,  int jobs){
 
 static int _run_translation(CliRequest c){
   unsigned long started_at = report_now_us();
+  if(! String_truth(c -> out_dir)) c -> out_dir = _31;
   _apply_cli_request(c);
   _preflight_translation(c);
   if(c -> verbose || c -> dry_run){
     fprintf(stderr,  "x2c: translate");
-    if(String_truth(c -> out_dir)) fprintf(stderr,  " --out-dir %s",  c -> out_dir);
+    fprintf(stderr,  " --out-dir %s",  c -> out_dir);
     {
       String input;
       Iter _x2c_macro_iterator_8 = List_iter(c -> inputs,  &(struct Iter){
@@ -1136,7 +1133,7 @@ static int _run_translation(CliRequest c){
   }
   if(c -> dry_run) return 0;
   _load_translation_support(c);
-  String output_dir = String_truth(c -> out_dir) ? c -> out_dir : _31;
+  String output_dir = c -> out_dir;
   int total = List_len(c -> inputs),  completed = 0;
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
