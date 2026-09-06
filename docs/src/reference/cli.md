@@ -129,8 +129,12 @@ initialization rules.
 
 ## Bootstrap a native installation
 
-The source-bearing APE release can create a complete native installation
-without a repository checkout:
+The Cosmopolitan APE executable is an experiment for fun only. It can
+bootstrap a minimal native compiler and runtime without a repository checkout,
+but includes no examples, book, or optional packages. Use the full repository
+for normal development; this experiment is no substitute for it.
+
+To try the experiment:
 
 ```sh
 ./x2c.com bootstrap --prefix "$HOME/.local/x2c"

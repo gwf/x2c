@@ -17,7 +17,7 @@ make stage-diff-all    # Compare generated C and headers.
 ./builds/0/x2c translate --dump-ast examples/foreach.x
 ./builds/0/x2c translate --dump-transforms examples/foreach.x
 
-# Build a portable executable that carries its own source.
+# For fun: build the experimental portable bootstrap.
 make ape-build
 ./dist/x2c.com bootstrap --prefix ~/.local/x2c
 ```
@@ -25,5 +25,6 @@ make ape-build
 The compiler and runtime are written in x2c. `make stresstest` builds
 successive compiler stages; `make stage-diff-all` compares their output.
 `--dump-ast` and `--dump-transforms` expose the syntax along the way.
-The Cosmopolitan executable carries its source and can rebuild itself
-into a native compiler and runtime.
+The Cosmopolitan executable is an experiment for fun only. It carries enough
+source to bootstrap a native compiler and runtime, but no examples, book, or
+optional packages. Use the full repository for normal development.

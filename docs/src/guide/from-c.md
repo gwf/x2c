@@ -130,6 +130,10 @@ Use `translate` when Make, Ninja, CMake, or another native build owns
 compilation and linking. Use `build` or `run` when the x2c driver can do
 that itself. Describe reusable projects with several targets in `x2c.toml`.
 The driver builds them the same way as targets named on the command line.
+The Cosmopolitan `bootstrap` command is an experiment for fun only; use the
+full repository for normal development. See [Bootstrap a native
+installation](../reference/cli.md#bootstrap-a-native-installation) for its
+limited contents.
 
 ## Extend types through explicit contracts
 
