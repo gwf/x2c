@@ -52,7 +52,11 @@ After `make examples`, try Threads directly from the repository root:
 ./examples/build/power-threads/threads
 ```
 
-It runs two workers and prints their combined sum of squares.
+It runs two workers and prints their combined sum of squares:
+
+```text
+sum of squares: 91
+```
 
 ## Magic: extend and evaluate the language
 
