@@ -13,8 +13,6 @@ int String_len(String);
 
 int String_truth(String);
 
-int String_getindex(String,  int);
-
 String String_new_len(const char *,  int);
 
 Var Array_push(Array,  Var);
@@ -73,10 +71,11 @@ static inline int _end(String str,  String sep,  int start,  int * next){
 static inline int _line_end(String str,  int start,  int keep_ends,  int * next){
   int length = String_len(str);
   if(! String_truth(str) || start < 0 || start >= length) return - 1;
+  const char * text = str;
   int end = start;
-  while(end < length && String_getindex(str,  end) != '\n' && String_getindex(str,  end) != '\r') end ++;
+  while(end < length && text[end] != '\n' && text[end] != '\r') end ++;
   int ending = 0;
-  if(end < length) ending = String_getindex(str,  end) == '\r' && end + 1 < length && String_getindex(str,  end + 1) == '\n' ? 2 : 1;
+  if(end < length) ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n' ? 2 : 1;
   * next = end + ending;
   return keep_ends ? * next : end;
 }

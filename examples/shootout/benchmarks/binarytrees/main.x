@@ -9,21 +9,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "typed-list.x"
-
 static Var _tree(int item, int depth) {
   if (!depth) return item;
   Var left = _tree(item * 2 - 1, depth - 1);
   Var right = _tree(item * 2, depth - 1);
-  List kids = %($left $right);
-  return ListInt.cons(item, (ListInt) kids);
+  return %[$item, $left, $right];
 }
 
 static int _sum(Var tree) {
   if (tree.is_integer()) return tree.int();
-  ListInt node = (ListInt) tree.list();
-  List kids = node.cdr();
-  return node.car() + _sum(kids.car()) - _sum(kids.cadr());
+  Array node = tree.array();
+  return node[0].int() + _sum(node[1]) - _sum(node[2]);
 }
 
 int main(int argc, char **argv) {
@@ -31,9 +27,9 @@ int main(int argc, char **argv) {
   int depth = atoi(argv[1]), iterations = atoi(argv[2]);
   int64_t checksum = 0;
   for (int item = 0; item < iterations; item++) {
-    List.pool_retain();
+    Scope.retain();
     checksum += _sum(_tree(item, depth));
-    List.pool_release();
+    Scope.release();
   }
   printf("%lld\n", (long long) checksum);
   return 0;
