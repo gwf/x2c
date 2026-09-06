@@ -46,18 +46,17 @@ and checks the curated examples, leaving executables under `examples/build/`.
 - [Imports](power/imports.x): use PCRE2 to extract named request fields.
   This example needs optional package dependencies and is checked separately.
 
-`make examples` puts Counting and its sample input together. From the
-repository root, run it like this:
+After `make examples`, try Threads directly from the repository root:
 
 ```sh
-cd examples/build/power-counting
-./counting
-cd ../../..
+./examples/build/power-threads/threads
 ```
 
-The last command returns to the repository root. Files and Exceptions also
-read sample input from their current directory; `make examples` supplies
-those files beside each executable.
+It runs two workers and prints their combined sum of squares:
+
+```text
+sum of squares: 91
+```
 
 ## Magic: extend and evaluate the language
 
