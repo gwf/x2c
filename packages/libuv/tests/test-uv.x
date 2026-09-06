@@ -222,7 +222,7 @@ static void process_stdio_can_be_captured_inherited_or_ignored(void) {
 static void deadline_kills_a_child_that_overruns(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  UvProcess slow = loop.command(%("/bin/sh" "-c" "sleep 30"))
+  UvProcess slow = loop.command(%("/bin/sh" "-c" "exec sleep 30"))
     .deadline(150).start();
   defer slow.free();
   slow.close_stdin();
@@ -570,7 +570,7 @@ static void loop_phases_reject_bad_arguments(void) {
 static void timer_deadline_stops_a_running_loop(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "sleep 30"));
+  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   defer slow.free();
   slow.close_stdin();
 
@@ -596,7 +596,7 @@ static void _handle_interrupt(UvSignal signal, Var value) {
 static void signal_handler_runs_inside_the_loop(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "sleep 30"));
+  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   defer slow.free();
   slow.close_stdin();
 
@@ -727,7 +727,7 @@ static void _raise_inside_a_signal(UvSignal signal, Var value) {
 static void a_failed_signal_callback_reaches_the_caller_once(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "sleep 30"));
+  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   defer slow.free();
   slow.close_stdin();
   loop.signal(SIGUSR2, 0, _raise_inside_a_signal);
@@ -764,7 +764,7 @@ static void _raise_inside_async(UvAsync async, Var value) {
 static void a_failed_async_callback_stops_and_resumes_the_loop(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "sleep 30"));
+  UvProcess slow = loop.spawn(%("/bin/sh" "-c" "exec sleep 30"));
   defer slow.free();
   slow.close_stdin();
   UvAsync async = loop.async(void, _raise_inside_async);

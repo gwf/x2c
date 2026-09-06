@@ -139,7 +139,7 @@ int main(void) {
     loop, work, environment, %"environment", %"printenv RELEASE_MODE", 2000
   ));
   checks.push(_plan(
-    loop, work, environment, %"slow-scan", %"sleep 30", 200
+    loop, work, environment, %"slow-scan", %"exec sleep 30", 200
   ));
 
   printf("%s", %"${checks.len()} checks in $work\n");
