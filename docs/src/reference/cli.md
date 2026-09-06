@@ -1,17 +1,17 @@
 # Command-line interface
 
-The development compiler is `./builds/0/x2c`; `./bin/x2c` is the checked-in
-bootstrap compiler. Every invocation begins with `translate`, `build`, `run`,
+After building the repository, `./x2c` links to the development compiler;
+`./bin/x2c` is the bootstrap compiler. Every invocation begins with `translate`, `build`, `run`,
 `bootstrap`, or `help`.
 
 The generated help is the short option reference:
 
 ```sh
-./builds/0/x2c --help
-./builds/0/x2c help translate
-./builds/0/x2c build --help
-./builds/0/x2c run --help
-./builds/0/x2c bootstrap --help
+./x2c --help
+./x2c help translate
+./x2c build --help
+./x2c run --help
+./x2c bootstrap --help
 ```
 
 ## Translate to C
@@ -21,11 +21,12 @@ explicit `.x` input:
 
 ```sh
 mkdir -p /tmp/x2c-generated
-./builds/0/x2c translate --out-dir /tmp/x2c-generated \
+./x2c translate --out-dir /tmp/x2c-generated \
   src/main.x src/parse.x
 ```
 
-The output directory must already exist. x2c validates all inputs, output
+Without `--out-dir`, output goes to the current directory. An explicitly
+selected directory must already exist. x2c validates all inputs, output
 stems, and output paths before translating the first unit. Inputs must be
 regular `.x` files; two inputs with the same basename would collide in the
 flat output directory and are rejected.
@@ -44,7 +45,7 @@ new: x2c translate --out-dir out source.x
 inherit the symbol snapshot and header artifact the parent already read:
 
 ```sh
-./builds/0/x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
+./x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
 ```
 
 Each unit is translated by exactly one worker and writes only its own files,
@@ -75,7 +76,7 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 Inspection modes print an intermediate result and stop translation:
 
 ```sh
-./builds/0/x2c translate --dump-tokens source.x
+./x2c translate --dump-tokens source.x
 ```
 
 - `--dump-tokens` prints source tokens and stops.
@@ -101,7 +102,7 @@ Only one inspection mode runs; the last option given wins.
 x2c source, compiles generated and native C, then links an executable:
 
 ```sh
-./builds/0/x2c build --output /tmp/foreach examples/foreach.x
+./x2c build --output /tmp/foreach examples/foreach.x
 /tmp/foreach
 ```
 
@@ -110,7 +111,7 @@ runtime's platform libraries. It also derives one object and dependency path
 per C source. `--kind static-library` uses the selected archiver:
 
 ```sh
-./builds/0/x2c build --kind static-library \
+./x2c build --kind static-library \
   --output /tmp/libwidget.a src/widget.x src/helper.c
 ```
 
@@ -159,7 +160,7 @@ They resolve against compiler-generated targets.
 `run` builds an executable and launches it after the build succeeds:
 
 ```sh
-./builds/0/x2c run examples/foreach.x -- first -second input.x
+./x2c run examples/foreach.x -- first -second input.x
 ```
 
 `--` ends build options. Every later value is passed as one program argument,
@@ -172,7 +173,7 @@ launching anything.
 Shell wildcards work because the shell expands them into explicit operands:
 
 ```sh
-./builds/0/x2c build --output /tmp/tool src/*.x
+./x2c build --output /tmp/tool src/*.x
 ```
 
 x2c does not expand wildcard operand text or recurse through directory
@@ -190,7 +191,7 @@ src/main.x
 src/parse.x
 ```
 
-Invoke one as `./builds/0/x2c @build.rsp`. Whitespace separates arguments;
+Invoke one as `./x2c @build.rsp`. Whitespace separates arguments;
 single and double quotes preserve whitespace; backslash quotes the next
 character. A first-non-whitespace `#` begins a comment. Response files may
 include other response files, but cycles are rejected. `@@name` passes the
@@ -306,6 +307,17 @@ state are cache misses rather than project errors.
 External Make builds are supported. They can call `translate --out-dir`,
 include its `.d` files, and set their own C compiler and linker flags. The
 compiler driver does not replace a project that runs its own native build.
+
+For example, from the repository directory you can translate an example and
+compile its C output yourself:
+
+```sh
+mkdir -p /tmp/x2c-example
+./x2c translate --out-dir /tmp/x2c-example examples/foreach.x
+cc -iquote include /tmp/x2c-example/foreach.c \
+  builds/0/libx2c.a -lm -o /tmp/x2c-example/foreach
+/tmp/x2c-example/foreach
+```
 
 ## Help, version, and status
 

@@ -85,7 +85,7 @@ static CliOption cli_options[] = {
   { <debug>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
-    "Write generated files under <dir> (required)", 0 },
+    "Write generated files under <dir> (default: .)", 0 },
   { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0 },
   { <dep-file>, CLI_TRANSLATE, <output>, "--dep-file", "<file>",
@@ -327,8 +327,8 @@ Translate each x2c input into a matching C source and header.");
   _print_help_row("--", "End option parsing", 2);
   puts("");
   puts(
-    %"The output directory must already exist. A normal translation requires
---out-dir; inspection modes that stop before writing output do not.
+    %"The output directory defaults to the current directory and must already
+exist. Use --out-dir to select another directory.
 Shell wildcards are allowed because the shell expands them; x2c does not
 interpret wildcard characters in input operands.");
 }

@@ -64,6 +64,14 @@ printf '# first non-whitespace comment\n@%s\n' "$BUILD/inner.rsp" \
 "$X2C" @"$BUILD/outer.rsp"
 [[ -f "$BUILD/out/quoted.c" && -f "$BUILD/out/quoted.h" ]]
 
+# An omitted output directory writes beside the invocation, not the source.
+(cd "$BUILD" && "$X2C" translate "$BUILD/space dir/quoted.x")
+cmp "$BUILD/quoted.c" "$BUILD/out/quoted.c"
+cmp "$BUILD/quoted.h" "$BUILD/out/quoted.h"
+[[ -f "$BUILD/quoted.d" ]]
+[[ ! -e "$BUILD/space dir/quoted.c" ]]
+
+
 printf '#include "x2c.x"\n' >"$BUILD/space dir/hash#name.x"
 printf "translate --out-dir %s '%s/space dir/hash#name.x'\n" \
   "$BUILD/out" "$BUILD" >"$BUILD/single-quote.rsp"

@@ -422,10 +422,6 @@ static void _compile_file(
 static void _preflight_translation(CliRequest c) {
   struct stat info;
   if (!c.inspects()) {
-    if (!c.out_dir) {
-      fprintf(stderr, "x2c: error: translate requires '--out-dir <dir>'\n");
-      exit(2);
-    }
     if (stat(c.out_dir, &info)) {
       fprintf(
         stderr, "x2c: error: output directory does not exist: %s\n",
@@ -587,17 +583,18 @@ static Array _translation_chunks(List inputs, int total, int jobs) {
 
 static int _run_translation(CliRequest c) {
   unsigned long started_at = report_now_us();
+  if (!c.out_dir) c.out_dir = %".";
   _apply_cli_request(c);
   _preflight_translation(c);
   if (c.verbose || c.dry_run) {
     fprintf(stderr, "x2c: translate");
-    if (c.out_dir) fprintf(stderr, " --out-dir %s", c.out_dir);
+    fprintf(stderr, " --out-dir %s", c.out_dir);
     foreach (String input, c.inputs) fprintf(stderr, " %s", input);
     fputc('\n', stderr);
   }
   if (c.dry_run) return 0;
   _load_translation_support(c);
-  String output_dir = c.out_dir ? c.out_dir : %".";
+  String output_dir = c.out_dir;
   int total = c.inputs.len(), completed = 0;
   unsigned long long gen_bytes = 0;
   /* A dump writes one ordered stream to stdout, and inspection modes report

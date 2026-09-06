@@ -49,70 +49,45 @@ introductions, and [packages](packages/README.md) add optional C libraries.
    [implementation map](docs/src/internals/implementation-map.md) explain how a
    `.x` file becomes C and where each feature is implemented.
 
-## Build and verify
+## Build and run
 
-The source checkout requires a GCC- or Clang-compatible C compiler, an
-archiver (`ar`), GNU Make, and Python 3 for repository build tooling.
-
-From a fresh checkout:
+You need a GCC- or Clang-compatible C compiler, an archiver (`ar`), GNU Make,
+and Python 3. From the repository directory:
 
 ```sh
-mkdir -p debug
-make build-safe >debug/bootstrap.log 2>&1
+make build-safe
+./x2c run examples/foreach.x
 ```
 
-The normal development loop is:
+After the build, `./x2c` runs the working compiler through the repository
+link. `run` compiles and runs the example in one step. Try another file from the
+[example guide](examples/README.md) the same way.
+
+To keep an executable:
 
 ```sh
-make build
-make verify
+./x2c build examples/foreach.x
+./a.out
 ```
 
-`make verify` includes the compiler phase fixtures. `make check` is an
-optional extended suite that checks tracked artifacts, fixtures, units,
-examples, Lisp, raw/CPP parity, docs, four self-host stages, and exact
-generated C/H equality. It does not run sanitizer builds. Ordinary checks
-never rewrite expectations or bootstrap sources.
-
-Use `builds/0/x2c` as the current development compiler. `bin/x2c` is the
-bootstrap compiler unless stage 0 has intentionally been installed.
-
-The Cosmopolitan executable is an experiment for fun only: a minimal
-compiler bootstrap, not a substitute for the full repository. It omits the
-examples, book, and optional packages. Use the full repository for normal
-development. To build the experiment:
+Use `--output foreach` if you want to choose its name. For help:
 
 ```sh
-make ape-build
+./x2c --help
+./x2c help build
 ```
 
-The first run prepares a checksum-pinned Cosmopolitan toolchain in a
-shared cache. The result is `dist/x2c.com`; later runs reuse the toolchain.
+The [command-line guide](docs/src/reference/cli.md) covers translation to C,
+build options, and integration with your own build system. [Building the
+compiler](docs/src/internals/building.md) explains self-hosting and repository
+checks.
 
-## Compile an existing example
+## For fun: a portable bootstrap
 
-The compiler driver translates, compiles, links the matching stage-0 runtime,
-and names the executable with `--output`:
-
-```sh
-./builds/0/x2c build --output /tmp/foreach examples/foreach.x
-/tmp/foreach
-```
-
-You can compile and link the generated C with your existing build system.
-`translate --out-dir` names an existing generated-C directory:
-
-```sh
-mkdir -p /tmp/x2c-example
-./builds/0/x2c translate --out-dir /tmp/x2c-example examples/foreach.x
-cc -iquote include /tmp/x2c-example/foreach.c \
-  builds/0/libx2c.a -lm -o /tmp/x2c-example/foreach
-/tmp/x2c-example/foreach
-```
-
-`make examples` builds and runs the maintained examples and compares their
-output with the checked-in expectations. See the [example guide](examples/README.md)
-for Love, Power, Magic, larger programs, and the optional language shootout.
+The Cosmopolitan executable is an experiment for fun only: a minimal compiler
+bootstrap, not a substitute for the full repository. It omits the examples,
+book, and optional packages. Use the full repository for normal development.
+See the [experiment's instructions](etc/cosmopolitan/README.md) to try it.
 
 ## Repository map
 
