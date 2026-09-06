@@ -82,8 +82,17 @@ make examples
 ```
 
 The last command opens the interactive Lisp shell; press Ctrl-D to exit.
-Optional third-party package examples have their own
-[build instructions](packages/README.md).
+
+For an animated Game of Life in your terminal, build and run the optional
+termbox2 example:
+
+```sh
+make -C packages/termbox2 run-life-interactive
+```
+
+This prepares the dependency and builds the game as needed. Each cell starts
+alive with 50% probability. Press any key to quit. Other optional package
+examples have their own [build instructions](packages/README.md).
 
 For help:
 
