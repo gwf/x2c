@@ -17,7 +17,7 @@ make stage-diff-all    # Compare generated C and headers.
 ./builds/0/x2c translate --dump-ast examples/foreach.x
 ./builds/0/x2c translate --dump-transforms examples/foreach.x
 
-# Build a portable executable that carries its own source.
+# For fun: build the experimental portable bootstrap.
 make ape-build
 ./dist/x2c.com bootstrap --prefix ~/.local/x2c
 ```
