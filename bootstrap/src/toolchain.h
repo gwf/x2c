@@ -16,7 +16,7 @@ typedef struct Toolchain{
 typedef struct ToolAction{
   Symbol phase;
   List arguments;
-  int verbose,  dry_run,  to_stdout,  report;
+  int verbose,  dry_run,  inherit_stdio,  report;
 }
 * ToolAction;
 

@@ -225,7 +225,8 @@ static int _cpp_wait(pid_t pid) {
    while the parent retains the original streams until wait consumes them. A
    partial setup failure closes the stream that opened but leaves its field
    recorded, so that failure handle is not safe to wait. */
-/** Starts a direct child action and captures stdout and stderr separately.
+/** Starts a direct child action. With `capture`, stdout and stderr go to
+    separate temporary files; otherwise all standard streams are inherited.
     `argv` must be a NULL-terminated vector with a non-NULL first element and
     need remain valid only through this call. The returned handle is
     `Scope`-owned. An invalid action or fork failure is recorded as `pid == -1`
@@ -233,34 +234,38 @@ static int _cpp_wait(pid_t pid) {
     Capture setup failure closes any stream that opened, but a partial failure
     leaves that closed field recorded and does not produce a waitable handle.
 */
-ChildProcess process_start(char **argv) {
+ChildProcess process_start(char **argv, int capture) {
   ChildProcess process = Scope.calloc(1, sizeof(struct ChildProcess));
   if (!argv || !argv[0]) {
     process.pid = -1;
     process.start_error = "invalid empty process action";
     return process;
   }
-  process.output = tmpfile();
-  process.errors = tmpfile();
-  if (!process.output || !process.errors) {
-    if (process.output) process.output.close();
-    if (process.errors) process.errors.close();
-    process.pid = -1;
-    process.start_error = "unable to create process capture files";
-    return process;
+  if (capture) {
+    process.output = tmpfile();
+    process.errors = tmpfile();
+    if (!process.output || !process.errors) {
+      if (process.output) process.output.close();
+      if (process.errors) process.errors.close();
+      process.pid = -1;
+      process.start_error = "unable to create process capture files";
+      return process;
+    }
   }
   pid_t pid = fork();
   process.pid = pid;
   if (pid == 0) {
-    int out_fd = process.output.fileno(), err_fd = process.errors.fileno();
-    if (dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0) {
-      dprintf(
-        STDERR_FILENO, "x2c: unable to capture child output: %s\n",
-        strerror(errno));
-      _exit(127);
+    if (capture) {
+      int out_fd = process.output.fileno(), err_fd = process.errors.fileno();
+      if (dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0) {
+        dprintf(
+          STDERR_FILENO, "x2c: unable to capture child output: %s\n",
+          strerror(errno));
+        _exit(127);
+      }
+      if (out_fd != STDOUT_FILENO) close(out_fd);
+      if (err_fd != STDERR_FILENO) close(err_fd);
     }
-    if (out_fd != STDOUT_FILENO) close(out_fd);
-    if (err_fd != STDERR_FILENO) close(err_fd);
     execvp(argv[0], argv);
     dprintf(
       STDERR_FILENO, "x2c: unable to execute %s: %s\n",
@@ -309,7 +314,7 @@ int ChildProcess.wait(ChildProcess c, String *output, String *errors) {
     returns no defined status; its closed field remains recorded.
 */
 int process_run(char **argv, String *output, String *errors) {
-  ChildProcess process = process_start(argv);
+  ChildProcess process = process_start(argv, 1);
   return process.wait(output, errors);
 }
 

@@ -24,7 +24,7 @@ typedef struct Toolchain {
     canonical pool, and must remain valid through the action's execution.
 */
 typedef struct ToolAction {
-  Symbol phase, List arguments, int verbose, dry_run, to_stdout, report;
+  Symbol phase, List arguments, int verbose, dry_run, inherit_stdio, report;
 } *ToolAction;
 
 /** Tracks one `Scope`-owned started action and its captured child process.
@@ -226,11 +226,10 @@ ToolAction tool_action_new(
   return action;
 }
 
-/** Routes captured stdout to stdout and suppresses the failure summary.
-    Captured stderr still goes to stderr when the action is waited.
+/** Inherits the standard streams and suppresses the failure summary.
 */
 void ToolAction.as_program(ToolAction action) {
-  action.to_stdout = 1;
+  action.inherit_stdio = 1;
   action.report = 0;
 }
 
@@ -288,14 +287,15 @@ ToolRun ToolAction.start(ToolAction action) {
   ToolRun execution = Scope.calloc(1, sizeof(struct ToolRun));
   execution.action = action;
   if (action.dry_run) return execution;
-  execution.process = process_start(_action_argv(action.arguments));
+  execution.process = process_start(
+    _action_argv(action.arguments), !action.inherit_stdio);
   return execution;
 }
 
 /** Waits once for an execution, forwards its captured streams, and returns its
     shell-style status. Signals return `128 + signal`; an invalid action, fork
-    failure, or wait failure returns -1, and a dry run returns 0. Stdout goes
-    to stderr unless `ToolAction.as_program` selected program routing. An
+    failure, or wait failure returns -1, and a dry run returns 0. Captured
+    output goes to stderr; program actions inherit standard streams. An
     execution with partial capture setup is not valid input.
 
     Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
@@ -308,7 +308,7 @@ int ToolRun.wait(ToolRun execution) {
   ChildProcess process = execution.process;
   int status = process.wait(&output, &errors);
   report_suspend();
-  if (output) fputs(output, action.to_stdout ? stdout : stderr);
+  if (output) fputs(output, stderr);
   if (errors) fputs(errors, stderr);
   if (status && action.report)
     fprintf(

@@ -442,6 +442,46 @@ set -e
 [[ $compile_only_status == 2 && $run_status == 0 ]]
 [[ $(cat "$BUILD/direct/run.stdout") == one ]]
 
+cat >"$BUILD/direct/terminal.c" <<'EOF'
+#include <stdio.h>
+#include <unistd.h>
+int main(void) {
+  printf("ready tty=%d%d%d\n", isatty(0), isatty(1), isatty(2));
+  fflush(stdout);
+  return getchar() == 'x' ? 23 : 1;
+}
+EOF
+python3 - "$X2C" "$BUILD/direct/terminal.c" <<'PY'
+import os
+import pty
+import select
+import signal
+import subprocess
+import sys
+import time
+
+master, slave = pty.openpty()
+process = subprocess.Popen(
+    [sys.argv[1], 'run', sys.argv[2]],
+    stdin=slave, stdout=slave, stderr=slave, start_new_session=True)
+os.close(slave)
+try:
+    output = b''
+    deadline = time.monotonic() + 20
+    while b'ready tty=111' not in output:
+        remaining = deadline - time.monotonic()
+        assert remaining > 0, 'run withheld the terminal prompt: ' + repr(output)
+        if select.select([master], [], [], remaining)[0]:
+            output += os.read(master, 65536)
+    os.write(master, b'x\n')
+    assert process.wait(timeout=10) == 23
+finally:
+    if process.poll() is None:
+        os.killpg(process.pid, signal.SIGKILL)
+        process.wait()
+    os.close(master)
+PY
+
 "$X2C" build -### --build-dir "$BUILD/direct/matched-dry" \
   "$BUILD/direct/source.c" >"$BUILD/direct/matched.stdout" \
   2>"$BUILD/direct/matched.stderr"

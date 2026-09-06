@@ -267,7 +267,7 @@ static int _cpp_wait(pid_t pid){
   return - 1;
 }
 
-ChildProcess process_start(char * * argv){
+ChildProcess process_start(char * * argv,  int capture){
   if(! _init_guard_) _file_init_();
   ChildProcess process = Scope_calloc(1,  sizeof(struct ChildProcess));
   if(! argv || ! argv[0]){
@@ -275,25 +275,30 @@ ChildProcess process_start(char * * argv){
     process -> start_error = _6;
     return process;
   }
-  process -> output = tmpfile();
-  process -> errors = tmpfile();
-  if(! process -> output || ! process -> errors){
-    if(process -> output) File_close(process -> output);
-    if(process -> errors) File_close(process -> errors);
-    process -> pid = - 1;
-    process -> start_error = _7;
-    return process;
+  if(capture){
+    process -> output = tmpfile();
+    process -> errors = tmpfile();
+    if(! process -> output || ! process -> errors){
+      if(process -> output) File_close(process -> output);
+      if(process -> errors) File_close(process -> errors);
+      process -> pid = - 1;
+      process -> start_error = _7;
+      return process;
+    }
+
   }
   pid_t pid = fork();
   process -> pid = pid;
   if(pid == 0){
-    int out_fd = File_fileno(process -> output),  err_fd = File_fileno(process -> errors);
-    if(dup2(out_fd,  STDOUT_FILENO) < 0 || dup2(err_fd,  STDERR_FILENO) < 0){
-      dprintf(STDERR_FILENO,  "x2c: unable to capture child output: %s\n",  strerror(errno));
-      _exit(127);
+    if(capture){
+      int out_fd = File_fileno(process -> output),  err_fd = File_fileno(process -> errors);
+      if(dup2(out_fd,  STDOUT_FILENO) < 0 || dup2(err_fd,  STDERR_FILENO) < 0){
+        dprintf(STDERR_FILENO,  "x2c: unable to capture child output: %s\n",  strerror(errno));
+        _exit(127);
+      }
+      if(out_fd != STDOUT_FILENO) close(out_fd);
+      if(err_fd != STDERR_FILENO) close(err_fd);
     }
-    if(out_fd != STDOUT_FILENO) close(out_fd);
-    if(err_fd != STDERR_FILENO) close(err_fd);
     execvp(argv[0],  argv);
     dprintf(STDERR_FILENO,  "x2c: unable to execute %s: %s\n",  argv[0],  strerror(errno));
     _exit(127);
@@ -324,7 +329,7 @@ int ChildProcess_wait(ChildProcess c,  String * output,  String * errors){
 
 int process_run(char * * argv,  String * output,  String * errors){
   if(! _init_guard_) _file_init_();
-  ChildProcess process = process_start(argv);
+  ChildProcess process = process_start(argv,  1);
   return ChildProcess_wait(process,  output,  errors);
 }
 

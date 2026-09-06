@@ -168,6 +168,10 @@ including values that begin with `-` or end in `.x`. x2c returns the program's
 exit status. `-###` prints the build and run actions without creating or
 launching anything.
 
+The program inherits standard input, output, and error, so interactive prompts
+and terminal applications work as they do when launched directly. Shell pipes
+and redirections also apply to the program; its output is not held until exit.
+
 ## Selecting inputs
 
 Shell wildcards work because the shell expands them into explicit operands:

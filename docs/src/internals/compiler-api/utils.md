@@ -13,7 +13,7 @@ System utilities for environment discovery and child processes.
 | Function | Summary |
 | --- | --- |
 | [`process_run`](#process_run) | Starts and waits for one direct child action. |
-| [`process_start`](#process_start) | Starts a direct child action and captures stdout and stderr separately. |
+| [`process_start`](#process_start) | Starts a direct child action. |
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
 | [`worker_fork`](#worker_fork) | Forks a worker that continues the current program with inherited state. |
 | [`worker_wait`](#worker_wait) | Waits once for `pid` and returns its shell-style status. |
@@ -39,13 +39,14 @@ After capture setup succeeds, output, status, and failure behavior follow
 `process_start` and `ChildProcess.wait`. A partial capture setup failure
 returns no defined status; its closed field remains recorded.
 
-Source: `src/utils.x:311`
+Source: `src/utils.x:316`
 
 #### process_start
 
-`ChildProcess process_start(char **argv)`
+`ChildProcess process_start(char **argv, int capture)`
 
-Starts a direct child action and captures stdout and stderr separately.
+Starts a direct child action. With `capture`, stdout and stderr go to
+separate temporary files; otherwise all standard streams are inherited.
 `argv` must be a NULL-terminated vector with a non-NULL first element and
 need remain valid only through this call. The returned handle is
 `Scope`-owned. An invalid action or fork failure is recorded as `pid == -1`
@@ -53,7 +54,7 @@ with `start_error`; an `execvp` failure is a child exit with status 127.
 Capture setup failure closes any stream that opened, but a partial failure
 leaves that closed field recorded and does not produce a waitable handle.
 
-Source: `src/utils.x:236`
+Source: `src/utils.x:237`
 
 #### worker_exit
 
@@ -64,7 +65,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:333`
+Source: `src/utils.x:338`
 
 #### worker_fork
 
@@ -76,7 +77,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:322`
+Source: `src/utils.x:327`
 
 #### worker_wait
 
@@ -86,7 +87,7 @@ Waits once for `pid` and returns its shell-style status.
 Normal exit returns the worker status, a signal returns `128 + signal`, and
 a wait failure returns -1. Interrupted waits are retried.
 
-Source: `src/utils.x:342`
+Source: `src/utils.x:347`
 
 #### x2c_cpp_include_dirs
 
@@ -190,7 +191,7 @@ a valid input to this method.
 reading either capture as a `String`. A failure may leave capture streams
 open.
 
-Source: `src/utils.x:287`
+Source: `src/utils.x:292`
 
 ## Public types
 
