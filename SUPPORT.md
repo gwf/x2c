@@ -13,5 +13,4 @@ and documentation problems. Include the revision, platform, and a small
 reproduction where possible. Reporting an issue does not imply a response
 or resolution commitment.
 
-Send usage questions to [support@x2c-lang.dev](mailto:support@x2c-lang.dev).
 There is no separate public discussion forum at launch.

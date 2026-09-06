@@ -6,7 +6,7 @@ welcome and should be handled privately.
 
 ## Reporting a vulnerability
 
-Report vulnerabilities privately to [security@x2c-lang.dev](mailto:security@x2c-lang.dev).
+Report vulnerabilities privately to [security@flake.org](mailto:security@flake.org).
 Do not place vulnerability details, exploit code, credentials, or other
 secrets in a public issue.
 

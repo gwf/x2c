@@ -37,7 +37,7 @@ compiler, runtime, or release artifact depends on them.
 ## Licensing contact
 
 Send licensing and provenance questions to
-[licensing@x2c-lang.dev](mailto:licensing@x2c-lang.dev).
+[licensing@flake.org](mailto:licensing@flake.org).
 
 ## Hash-table benchmark adaptation
 

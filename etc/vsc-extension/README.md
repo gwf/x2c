@@ -16,8 +16,8 @@ execute workspace code, collect telemetry, or make network requests.
 
 ## Installation
 
-Install a packaged VSIX with **Extensions: Install from VSIX** in VS Code.
-The extension is not yet published on the Marketplace.
+Find **x2c Language Support** by **x2c** in the VS Code Extensions view,
+or install a packaged VSIX with **Extensions: Install from VSIX**.
 
 ## Distinct x2c colors
 
@@ -111,7 +111,7 @@ Light backgrounds:
 }
 ```
 
-![Dark and light x2c highlighting](https://raw.githubusercontent.com/gwf/x2c/dev/etc/vsc-extension/images/vscode-highlighting-sample.png)
+![Dark and light x2c highlighting](https://raw.githubusercontent.com/gwf/x2c/main/etc/vsc-extension/images/vscode-highlighting-sample.png)
 
 The syntax scopes cover `in`, `try`, `catch`, `finally`, `defer`, `raise`,
 `match`, `delegate`, `threaded`, `import`, `with`, `as`, `protocol`,
@@ -169,16 +169,10 @@ When changing the grammar, keep x2c-specific rules ahead of competing C
 operator, call, string, and angle-bracket rules. Add scope tests for both the
 x2c form and the ordinary C syntax it could be confused with.
 
-## First Marketplace publication
+## Marketplace identity
 
-The Marketplace publisher is `x2c-lang`, displayed as x2c. The extension has
-not been published yet; install the VSIX locally for now. Before publishing,
-confirm that the public repository, homepage, and security contact are
-available. The first public release will use version 0.1.23 with the Preview
-label; date its changelog entry when it is published.
-
-The publisher identifier becomes part of the installed extension ID and
-should not be treated as a temporary value after publication.
+The Marketplace publisher is `x2c-lang`, displayed as x2c. The extension ID is
+`x2c-lang.x2c-syntax`. Version 0.1.23 retains the Preview label.
 
 ## License and support
 
