@@ -158,14 +158,13 @@ Complex and mixed-domain objects, attached or caller-owned buffers, packing,
 blocked algorithms, custom kernels, contexts, addons, control trees, and
 threading remain raw.
 
-The admitted build is BLIS 2.1 configured `firestorm`, static,
-single-threaded, with BLAS and CBLAS compatibility disabled. `firestorm`
-selects the tuned Apple silicon microkernels; the portable `generic`
-configuration it replaced ran the same 400x400 double `gemm` in 0.0071 s
-instead of 0.0024 s. Threading stays disabled because BLIS's own threading
-alongside x2c `Thread` in one process is a question nobody needs answered yet.
-`dependency.json`, `PROFILE.json`, and `LICENSES/` record the exact source,
-configuration, linkage, and incorporated notices.
+Both profiles use BLIS 2.1, static and single-threaded, with BLAS and CBLAS
+compatibility disabled. macOS keeps the tuned Apple silicon `firestorm`
+configuration. Linux x86-64 uses portable `generic` kernels; it does not
+require Apple silicon instructions. Threading stays disabled in both.
+`dependency.json` and `PROFILE.json` pin the macOS build;
+`dependency-linux.json` and `PROFILE-linux.json` pin the Linux build.
+`LICENSES/` records the incorporated notices.
 
 x2c preserves imported C qualifiers and rejects conversions that silently
 drop them. `bli_info_get_version_str` returns `const char *`;

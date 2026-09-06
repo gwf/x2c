@@ -4,6 +4,15 @@ include ../package.mk
 
 LIBUV_INCLUDE := $(LIBUV_PREFIX)/include
 LIBUV_STATIC := $(LIBUV_PREFIX)/lib/libuv.a
+ifeq ($(shell uname -s),Linux)
+LIBUV_PLATFORM_HEADER := linux.h
+LIBUV_PLATFORM_SHA256 := \
+	adce0ed0821c8466a87a0a4c9e0df9ea7e4a4b24d099c7d7ed196f72a13f669d
+else
+LIBUV_PLATFORM_HEADER := darwin.h
+LIBUV_PLATFORM_SHA256 := \
+	222b6dd3ce67cfbb735b14b1662f065fc23570d6969acf463b39d946b7590d8c
+endif
 
 PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(LIBUV_INCLUDE)
 PACKAGE_LINK := $(LIBUV_STATIC)
@@ -50,8 +59,8 @@ verify-headers: $(DEPENDENCY_PREREQUISITE)
 	  09ae41099af710289155be012df45c2fce04da6a02e813278b4558935e645938
 	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/unix.h" | cut -d' ' -f1)" = \
 	  06ccd9e0f3f312b610a7e7a8ff16596988e02796e7a0c81a62e29d5f6abe4613
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/darwin.h" | cut -d' ' -f1)" = \
-	  222b6dd3ce67cfbb735b14b1662f065fc23570d6969acf463b39d946b7590d8c
+	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/$(LIBUV_PLATFORM_HEADER)" | cut -d' ' -f1)" = \
+	  $(LIBUV_PLATFORM_SHA256)
 
 verify-licenses:
 	@test "$$(shasum -a 256 LICENSES/libuv-1.52.1-MIT.txt | \
@@ -68,11 +77,7 @@ verify-licenses:
 	  9c3e698639860bd6c45ff70ed43c0c1bba45f3503e5bf527f67d376e9f3175d5
 
 verify-linkage: builds/process-report
-	@unexpected="$$(otool -L builds/process-report | tail -n +2 | \
-	  awk '{print $$1}' | \
-	  grep -Ev '^/usr/lib/libSystem\.B\.dylib$$' || true)"; \
-	  test -z "$$unexpected" || \
-	  { echo "unexpected dynamic dependency: $$unexpected" >&2; exit 1; }
+	python3 ../tools/check-linkage.py --package libuv builds/process-report
 
 builds/process-report: examples/process-report.x $(PACKAGE_ARCHIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/process-report-build \

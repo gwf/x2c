@@ -1,4 +1,4 @@
-# libcurl 8.22.0 macOS profile
+# libcurl 8.22.0 build profiles
 
 This is the pinned build profile for the experimental libcurl package. The
 curl source archive is `https://curl.se/download/curl-8.22.0.tar.xz`, SHA-256
@@ -26,7 +26,9 @@ The resulting library supports HTTP, HTTPS, IPFS/IPNS gateways, and WebSocket
 URLs using libcurl's own code. Its non-platform dependency closure is only
 OpenSSL 3.6.4 (`libssl` and `libcrypto`). The final macOS executable also links
 CoreFoundation, CoreServices, SystemConfiguration, libffi, and libSystem from
-the platform. Other operating systems need separate build and test results.
+the platform. Linux uses `dependency-linux.json`, installs OpenSSL libraries under `lib`,
+and links the system threading and dynamic-loader libraries. Both profiles
+use the same pinned upstream sources and protocol options.
 
 OpenSSL 3.6.4 is Apache-2.0; the exact license file hash is pinned by
 `make verify-profile`. libcurl retains its curl license. Both terms are under
@@ -37,7 +39,8 @@ The OpenSSL source origin is the `openssl-3.6.4.tar.gz` release at
 SHA-256
 `9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef`.
 
-The default CA bundle is pinned to macOS's `/etc/ssl/cert.pem`; libcurl does
+The default CA bundle is pinned to `/etc/ssl/cert.pem` on macOS and
+`/etc/ssl/certs/ca-certificates.crt` on Linux; libcurl does
 not inherit a configure-host probe result. A caller can select another trust
 store through the raw `CURLOPT_CAINFO` or `CURLOPT_CAPATH` options.
 

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "blis",
+  "version": "2.1",
+  "profile": "generic-static-single-threaded-no-blas-linux",
+  "sources": [
+    {
+      "name": "blis",
+      "url": "https://github.com/flame/blis/archive/refs/tags/2.1.tar.gz",
+      "sha256": "901752ec596cd63421ea45a6a06a9f34491cf5ae01cea412ece05f97a2690a96",
+      "root": "blis-2.1"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_blis}",
+      "argv": [
+        "./configure",
+        "--prefix={prefix}",
+        "--disable-shared",
+        "--disable-threading",
+        "--disable-blas",
+        "generic"
+      ]
+    },
+    {
+      "cwd": "{source_blis}",
+      "argv": [
+        "make",
+        "-j{jobs}"
+      ]
+    },
+    {
+      "cwd": "{source_blis}",
+      "argv": [
+        "make",
+        "install"
+      ]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/blis/blis.h",
+    "{prefix}/lib/libblis.a"
+  ]
+}

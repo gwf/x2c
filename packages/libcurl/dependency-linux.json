@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "libcurl",
+  "version": "8.22.0-openssl-3.6.4",
+  "profile": "static-http-openssl-linux",
+  "sources": [
+    {
+      "name": "openssl",
+      "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.4/openssl-3.6.4.tar.gz",
+      "sha256": "9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef",
+      "root": "openssl-3.6.4"
+    },
+    {
+      "name": "curl",
+      "url": "https://curl.se/download/curl-8.22.0.tar.xz",
+      "sha256": "f7ef3ae8a22e521f289803fe93543eb64c329b58aa73a9e224dfd915a2a5f4f7",
+      "root": "curl-8.22.0"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_openssl}",
+      "argv": [
+        "./config",
+        "--prefix={prefix}",
+        "--libdir=lib",
+        "--openssldir={prefix}/ssl",
+        "no-shared",
+        "no-tests"
+      ]
+    },
+    {
+      "cwd": "{source_openssl}",
+      "argv": [
+        "make",
+        "-j{jobs}"
+      ]
+    },
+    {
+      "cwd": "{source_openssl}",
+      "argv": [
+        "make",
+        "install_sw"
+      ]
+    },
+    {
+      "cwd": "{source_curl}",
+      "env": {
+        "CPPFLAGS": "-I{prefix}/include",
+        "LDFLAGS": "-L{prefix}/lib",
+        "PKG_CONFIG_PATH": "{prefix}/lib/pkgconfig"
+      },
+      "argv": [
+        "./configure",
+        "--prefix={prefix}",
+        "--disable-shared",
+        "--enable-static",
+        "--with-openssl={prefix}",
+        "--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt",
+        "--without-zlib",
+        "--without-brotli",
+        "--without-zstd",
+        "--without-libpsl",
+        "--without-libidn2",
+        "--without-nghttp2",
+        "--without-ngtcp2",
+        "--without-nghttp3",
+        "--without-libssh2",
+        "--disable-threaded-resolver",
+        "--disable-ftp",
+        "--disable-file",
+        "--disable-ldap",
+        "--disable-ldaps",
+        "--disable-rtsp",
+        "--disable-dict",
+        "--disable-telnet",
+        "--disable-tftp",
+        "--disable-pop3",
+        "--disable-imap",
+        "--disable-smb",
+        "--disable-smtp",
+        "--disable-gopher",
+        "--disable-mqtt",
+        "--disable-manual"
+      ]
+    },
+    {
+      "cwd": "{source_curl}",
+      "argv": [
+        "make",
+        "-j{jobs}"
+      ]
+    },
+    {
+      "cwd": "{source_curl}",
+      "argv": [
+        "make",
+        "install"
+      ]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/curl/curl.h",
+    "{prefix}/include/openssl/ssl.h",
+    "{prefix}/lib/libcurl.a",
+    "{prefix}/lib/libssl.a",
+    "{prefix}/lib/libcrypto.a",
+    "{prefix}/bin/curl-config",
+    "{prefix}/bin/openssl"
+  ]
+}

@@ -1,9 +1,9 @@
 # BLIS 2.1 licenses
 
 This directory contains license texts and source information for the
-firestorm, static, single-threaded BLIS 2.1 build pinned by this package.
-These records cover that build only, not package-manager binaries, arbitrary
-addons, other configurations, or newer releases.
+static, single-threaded BLIS 2.1 profiles pinned by this package: Firestorm
+on macOS and Generic on Linux x86-64. These records cover those profiles only, not
+package-manager binaries, arbitrary addons, or newer releases.
 
 ## Pinned source
 
@@ -105,22 +105,29 @@ client design.
 
 ## Built profile and closure
 
-The proposed profile is the `firestorm` Apple silicon configuration, static
+The macOS profile is the `firestorm` Apple silicon configuration, static
 only, single-threaded, with BLAS compatibility, CBLAS compatibility, shared
 libraries, and addons disabled. The build consumes BLIS framework sources,
 the firestorm configuration, armv8a kernels, and reference kernels. It does
 not consume the `blastest/f2c` test tree or the `addon` tree. The archive
 contains no BLAS or CBLAS compatibility exports.
 
-The static archive has 48 unresolved external names. They are C library,
+The macOS static archive has 48 unresolved external names. They are C library,
 allocation, math, Mach clock, thread-local-storage, and pthread facilities
 provided by macOS `libSystem`. There are no Fortran, OpenMP-runtime, or other
 third-party library references. `PROFILE.json` retains the complete 48-name
 set; `make verify-profile` compares it, and `make verify-linkage` rejects
 non-system dynamic libraries in the example and test executables.
 
-Clang, `make`, `ar`, `nm`, `jq`, and `otool` are build and verification tools
-rather than distributed runtime dependencies. The integration does not vendor
+The Linux x86-64 `generic` profile uses the same framework and reference sources,
+with generic kernels instead of the Firestorm/armv8a kernels. Its exact
+header hash, archive member count, and unresolved external symbols are
+recorded separately in `PROFILE-linux.json` and checked by the same target.
+The retained armv8a notice applies to the macOS profile. Neither profile
+builds the BLAS compatibility tests or addons.
+
+Clang, `make`, `ar`, `nm`, `jq`, `readelf`, and `otool` are build and
+verification tools rather than distributed runtime dependencies. The integration does not vendor
 BLIS source or a built BLIS archive.
 
 ## Patent and name review
