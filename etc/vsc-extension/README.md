@@ -1,4 +1,4 @@
-# x2c Language Support
+# x2c - C with batteries
 
 This VS Code extension provides the TextMate grammar and language
 configuration for x2c source files (`.x`, `.xc`, `.xh`, `.x2c`, and
@@ -16,7 +16,7 @@ execute workspace code, collect telemetry, or make network requests.
 
 ## Installation
 
-Find **x2c Language Support** by **x2c** in the VS Code Extensions view,
+Find **x2c - C with batteries** by **x2c** in the VS Code Extensions view,
 or install a packaged VSIX with **Extensions: Install from VSIX**.
 
 ## Distinct x2c colors
