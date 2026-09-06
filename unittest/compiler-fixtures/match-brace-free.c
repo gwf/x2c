@@ -37,10 +37,10 @@ int main(void){
 
     switch (Var_symbol(car(_x2c_match_expr))) {
        case 31626: ;
-  static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_1), &_x2c_match_capture)) {hit = 1;  break;
-}
-default: break;
+  { List _x2c_match_cursor;
+  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761650058ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {hit = 1;
+  break; } } default: break;
+
     }
   }
 return hit == 1 ? 0 : 1;

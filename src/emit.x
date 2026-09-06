@@ -887,6 +887,27 @@ static List _match_arm_label(
   return %("case $code: ;");
 }
 
+/* The pattern contains one Symbol and unique single-element captures.
+   Keep the head check even under head dispatch: a failed arm falls through.
+*/
+static List _flat_match_condition(Symbol head, List binders) {
+  Var literal = head;
+  unsigned long long bits = literal.u64;
+  Array condition = %[];
+  condition.push(%"_x2c_match_expr && "
+    + %"_x2c_match_expr->car.u64 == ${bits}ULL && "
+    + "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)");
+  int index = 0;
+  foreach (Var binder, binders) {
+    condition.push(%"&& _x2c_match_cursor && "
+      + %"(_x2c_match_values[$index] = _x2c_match_cursor->car, "
+      + "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)");
+    index++;
+  }
+  condition.push("&& !_x2c_match_cursor");
+  return condition.list_free();
+}
+
 /* Lower each match case to a conditional, in source order. */
 
 static List Emitter._match_if(
@@ -894,12 +915,19 @@ static List Emitter._match_if(
   Array values = %[], heads = %[], int labelling = 1;
   foreach (List rec, ast) {
     List (binders, pattern_ast, body_ast) = rec;
+    Symbol flat_head = e.match_pattern_flat_head(pattern_ast, binders);
     int static_pattern = e.match_pattern_is_static(pattern_ast);
     List pattern = e._emit(pattern_ast, context);
     List body = e._emit(body_ast, context);
     List label = _match_arm_label(e, pattern_ast, heads, &labelling);
     if (label) values.push(label);
     if (pattern === %(*)) values.push(%($body "break;"));
+    else if (flat_head) {
+      List condition = _flat_match_condition(flat_head, binders);
+      List declarations = _make_local_binders(binders, "_x2c_match_values");
+      values.push(%("{ List _x2c_match_cursor;"
+        "if (" @condition ") {" @declarations @body "break; } }"));
+    }
     else {
       String site_name = static_pattern
                        ? e.fresh_name("match_site")

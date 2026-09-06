@@ -225,8 +225,10 @@ subject, `%(*rest)` matches it and binds an empty `List`, and an explicitly
 stored empty `List` inside a larger structure is a visible node that search can
 find. What is *not* a node is the implicit terminal cdr of a proper `List`.
 
-A successful `match` allocates its bindings in the current scope like any other
-`List`, so the rules in [scopes and lifetime](memory.md) apply.
+A `match` statement binds captured values to arm-local variables. Captured
+values keep their ordinary [lifetime rules](memory.md). For a fixed symbol
+followed only by unique named `?` binders, the compiler emits direct checks
+and captures; other patterns use the runtime matcher with the same semantics.
 
 ## break and continue inside an arm
 

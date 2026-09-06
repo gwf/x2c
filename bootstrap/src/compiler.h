@@ -140,6 +140,8 @@ int Compiler_match_pattern_is_static(Compiler compiler,  List pattern);
 
 Symbol Compiler_match_pattern_head_symbol(Compiler compiler,  List pattern);
 
+Symbol Compiler_match_pattern_flat_head(Compiler compiler,  List pattern,  List binders);
+
 List Compiler_match_pattern_binders(Compiler compiler,  List pattern,  List * possible);
 
 void Compiler_define_match_binders(Compiler compiler,  List pattern);
