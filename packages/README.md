@@ -39,50 +39,50 @@ focused reports for thread notification, TCP, named pipes, and UDP. `make
 short-example`, `make example`, and `make lisp-example` build them; `make run`
 runs every standard application for that package.
 
-- `pcre2/examples/parse-log.x`: short. Named captures and `Regexp.split`
+- [pcre2/examples/parse-log.x](pcre2/examples/parse-log.x): short. Named captures and `Regexp.split`
   summarize a syslog batch in 35 lines.
-- `pcre2/examples/request-report.x`: broad. Compiled expressions, named and
+- [pcre2/examples/request-report.x](pcre2/examples/request-report.x): broad. Compiled expressions, named and
   numbered captures, iteration, aggregation, and replacement.
-- `yyjson/examples/service-health.x`: short. Reads a JSON file, reports the
+- [yyjson/examples/service-health.x](yyjson/examples/service-health.x): short. Reads a JSON file, reports the
   unhealthy services, and writes the failures back out in 24 lines.
-- `yyjson/examples/release-catalog.x`: broad. Lossless document views, ordered
+- [yyjson/examples/release-catalog.x](yyjson/examples/release-catalog.x): broad. Lossless document views, ordered
   and duplicate object members, exact numeric intent, explicit x2c-value
   conversion, Patch, and serialization.
-- `libcurl/examples/page-titles.x`: short. Fetches three pages and prints
+- [libcurl/examples/page-titles.x](libcurl/examples/page-titles.x): short. Fetches three pages and prints
   their titles in 24 lines.
-- `libcurl/examples/endpoint-report.x`: broad. Surveys six endpoints with
+- [libcurl/examples/endpoint-report.x](libcurl/examples/endpoint-report.x): broad. Surveys six endpoints with
   GET, HEAD, and POST, then downloads an artifact straight to a file.
-- `termbox2/examples/game-of-life.x`: short. Conway's life on the terminal.
-- `termbox2/examples/incident-filter.x`: broad. A filtered incident list with
+- [termbox2/examples/game-of-life.x](termbox2/examples/game-of-life.x): short. Conway's life on the terminal.
+- [termbox2/examples/incident-filter.x](termbox2/examples/incident-filter.x): broad. A filtered incident list with
   per-severity colour, mouse selection, resize, and Unicode column widths.
-- `blis/examples/page-rank.x`: short. Power iteration where the whole
+- [blis/examples/page-rank.x](blis/examples/page-rank.x): short. Power iteration where the whole
   algorithm is `rank = links * rank` normalized until it converges.
-- `blis/examples/risk-report.x`: broad. Column views, mixed storage and
+- [blis/examples/risk-report.x](blis/examples/risk-report.x): broad. Column views, mixed storage and
   computation precision, and a destination-mutating `gemm`.
-- `libuv/examples/process-report.x`: short. Two children, piped stdin, exit
+- [libuv/examples/process-report.x](libuv/examples/process-report.x): short. Two children, piped stdin, exit
   status.
-- `libuv/examples/thread-notify.x`: an x2c `Thread` wakes the loop and exports
+- [libuv/examples/thread-notify.x](libuv/examples/thread-notify.x): an x2c `Thread` wakes the loop and exports
   its result through `Thread.join`.
-- `libuv/examples/network-report.x`: three loopback TCP clients exchange
+- [libuv/examples/network-report.x](libuv/examples/network-report.x): three loopback TCP clients exchange
   copied binary data and observe EOF.
-- `libuv/examples/ipc-report.x`: a named-pipe client and server exchange one
+- [libuv/examples/ipc-report.x](libuv/examples/ipc-report.x): a named-pipe client and server exchange one
   binary report through a unique filesystem path.
-- `libuv/examples/datagram-report.x`: connected and unconnected UDP preserve
+- [libuv/examples/datagram-report.x](libuv/examples/datagram-report.x): connected and unconnected UDP preserve
   empty, binary, and deliberately truncated datagrams.
-- `libuv/examples/release-checks.x`: broad. Four supervised checks with
+- [libuv/examples/release-checks.x](libuv/examples/release-checks.x): broad. Four supervised checks with
   deadlines, working directories, and environments; one times out, and the
   resulting artifacts are read asynchronously.
-- `raylib/examples/climate-trends.x`: short. A deterministic PNG chart with
+- [raylib/examples/climate-trends.x](raylib/examples/climate-trends.x): short. A deterministic PNG chart with
   no GPU and no display.
-- `raylib/examples/texture-sheet.x`: broad. Loads tiles, filters their pixels
+- [raylib/examples/texture-sheet.x](raylib/examples/texture-sheet.x): broad. Loads tiles, filters their pixels
   as x2c values, composites a sheet, and refuses an unreadable file.
-- `raylib/examples/chart.x` and `raylib/examples/live-chart.x`: shared chart
+- [raylib/examples/chart.x](raylib/examples/chart.x) and [raylib/examples/live-chart.x](raylib/examples/live-chart.x): shared chart
   drawing and its optional desktop-window front end. The package checks compile both;
   only `make run-interactive` launches the window.
-- `pcre2/examples/inline-lisp.x`, `yyjson/examples/inline-lisp.x`, and
-  `libcurl/examples/inline-lisp.x`: each installs its package's Lisp surface
+- [pcre2/examples/inline-lisp.x](pcre2/examples/inline-lisp.x), [yyjson/examples/inline-lisp.x](yyjson/examples/inline-lisp.x), and
+  [libcurl/examples/inline-lisp.x](libcurl/examples/inline-lisp.x): each installs its package's Lisp surface
   into a session and drives it.
-- [http-json-releases](../examples/packages/http-json-releases/):
+- [http-json-releases](../examples/packages/http-json-releases/http-json-releases.x):
   two packages in one program, importing libcurl and yyjson and linking both
   archives.
 
