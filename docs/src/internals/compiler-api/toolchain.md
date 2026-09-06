@@ -14,7 +14,7 @@ Host preprocessing, compilation, archive, and link actions.
 | --- | --- |
 | [`tool_action_new`](#tool_action_new) | Creates a `Scope`-owned action that reports nonzero status by default. |
 | [`toolchain_new`](#toolchain_new) | Creates a `Scope`-owned host toolchain and resolves its native layout. |
-| [`ToolAction.as_program`](#ToolAction.as_program) | Routes captured stdout to stdout and suppresses the failure summary. |
+| [`ToolAction.as_program`](#ToolAction.as_program) | Inherits the standard streams and suppresses the failure summary. |
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
 | [`ToolAction.start`](#ToolAction.start) | Starts the action without a shell and returns a `Scope`-owned execution. |
 | [`ToolRun.wait`](#ToolRun.wait) | Waits once for an execution, forwards its captured streams, and returns its shell-style status. |
@@ -57,10 +57,9 @@ Source: `src/toolchain.x:121`
 
 `void ToolAction.as_program(ToolAction action)`
 
-Routes captured stdout to stdout and suppresses the failure summary.
-Captured stderr still goes to stderr when the action is waited.
+Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:232`
+Source: `src/toolchain.x:231`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -88,7 +87,7 @@ waited exactly once; partial capture setup leaves a non-waitable result.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:283`
+Source: `src/toolchain.x:282`
 
 ### `ToolRun`
 
@@ -99,8 +98,8 @@ Source: `src/toolchain.x:283`
 
 Waits once for an execution, forwards its captured streams, and returns its
 shell-style status. Signals return `128 + signal`; an invalid action, fork
-failure, or wait failure returns -1, and a dry run returns 0. Stdout goes
-to stderr unless `ToolAction.as_program` selected program routing. An
+failure, or wait failure returns -1, and a dry run returns 0. Captured
+output goes to stderr; program actions inherit standard streams. An
 execution with partial capture setup is not valid input.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
@@ -182,7 +181,7 @@ Source: `src/toolchain.x:350`
 <a id="ToolAction"></a>
 ### ToolAction
 
-`typedef struct ToolAction { Symbol phase, List arguments, int verbose, dry_run, to_stdout, report; } *ToolAction`
+`typedef struct ToolAction { Symbol phase, List arguments, int verbose, dry_run, inherit_stdio, report; } *ToolAction`
 
 Describes one `Scope`-owned host-tool argv action and its reporting policy.
 The `arguments` `List` is retained without copying, follows its owning

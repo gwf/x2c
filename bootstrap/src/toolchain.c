@@ -59,7 +59,7 @@ int List_len(List);
 
 void report_suspend(void);
 
-ChildProcess process_start(char * *);
+ChildProcess process_start(char * *,  int);
 
 int ChildProcess_wait(ChildProcess,  String *,  String *);
 
@@ -279,7 +279,7 @@ ToolAction tool_action_new(Symbol phase,  List arguments,  int verbose,  int dry
 }
 
 void ToolAction_as_program(ToolAction action){
-  action -> to_stdout = 1;
+  action -> inherit_stdio = 1;
   action -> report = 0;
 }
 
@@ -381,7 +381,7 @@ ToolRun ToolAction_start(ToolAction action){
   ToolRun execution = Scope_calloc(1,  sizeof(struct ToolRun));
   execution -> action = action;
   if(action -> dry_run) return execution;
-  execution -> process = process_start(_action_argv(action -> arguments));
+  execution -> process = process_start(_action_argv(action -> arguments),  ! action -> inherit_stdio);
   return execution;
 }
 
@@ -392,7 +392,7 @@ int ToolRun_wait(ToolRun execution){
   ChildProcess process = execution -> process;
   int status = ChildProcess_wait(process,  & output,  & errors);
   report_suspend();
-  if(String_truth(output)) fputs(output,  action -> to_stdout ? stdout : stderr);
+  if(String_truth(output)) fputs(output,  stderr);
   if(String_truth(errors)) fputs(errors,  stderr);
   if(status && action -> report) fprintf(stderr,  "x2c: %s failed with status %d\n",  Symbol_str(action -> phase),  status);
   return status;
