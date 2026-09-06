@@ -144,13 +144,13 @@ exact `uv_tcp_t *`.
 
 `UvLoop.pipe` creates a concrete `UvPipe` using ordinary byte streams rather
 than libuv's descriptor-passing mode. `bind`, `connect`, and `listen` use a
-macOS filesystem path; `listen` receives a caller-owned accepted `UvPipe`.
+Unix filesystem path; `listen` receives a caller-owned accepted `UvPipe`.
 `read`, `stop_read`, `write`, `write_bytes`, `shutdown_write`, `close`, and
 `write_queue_size` have the same stream behavior as TCP.
 
 `local_name` and `peer_name` copy libuv's borrowed endpoint names. An unnamed
 client endpoint is the ordinary empty String. Closing a successfully bound
-listener removes its socket path on the pinned macOS profile; it does not
+listener removes its socket path on the Unix profile; it does not
 remove an unrelated path when bind fails. Existing stale paths remain the
 caller's responsibility.
 

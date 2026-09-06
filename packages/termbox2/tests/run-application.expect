@@ -44,7 +44,7 @@ drain_output
 send -- "\033\[<0;6;3M"
 after 50
 drain_output
-exec stty -f $terminal_path rows 14 columns 80
+exec stty rows 14 columns 80 < $terminal_path
 after 100
 drain_output
 send -- "\033"

@@ -1,4 +1,4 @@
-# libuv 1.52.1 macOS profile
+# libuv 1.52.1 static profile
 
 The admitted source is `libuv-v1.52.1.tar.gz` from
 `https://dist.libuv.org/dist/v1.52.1/`, SHA-256
@@ -9,11 +9,14 @@ cache. No source or binary is vendored in Git.
 
 ## Admitted build and linkage
 
-This is the macOS arm64 static profile. Its installed `lib/libuv.a` has 38
-archive members. Package programs link that archive by full path and must have
-no non-system dynamic dependency; `make verify-linkage` checks the built short
-example resolves only `/usr/lib/libSystem.B.dylib`. Linux, Windows, and other
-libuv platforms need separate build and linkage review.
+Package programs link `lib/libuv.a` by full path. The original macOS arm64
+archive has 38 members; archive membership depends on the platform.
+`make verify-linkage` inspects the built short example: on macOS it permits
+only `/usr/lib/libSystem.B.dylib`; on Linux it reads ELF `NEEDED` entries and
+permits only libc, libm, libpthread, libdl, librt, and the system loader.
+Inspection failures fail the check. Windows needs separate build and linkage
+review. These checks describe the build requirements; release qualification
+still requires running the package tests and applications on the target host.
 
 The pinned installed headers have these SHA-256 values:
 
@@ -27,12 +30,16 @@ The pinned installed headers have these SHA-256 values:
   `09ae41099af710289155be012df45c2fce04da6a02e813278b4558935e645938`
 - `uv/unix.h`:
   `06ccd9e0f3f312b610a7e7a8ff16596988e02796e7a0c81a62e29d5f6abe4613`
-- `uv/darwin.h`:
+- `uv/darwin.h` (macOS):
   `222b6dd3ce67cfbb735b14b1662f065fc23570d6969acf463b39d946b7590d8c`
 
+- `uv/linux.h` (Linux):
+  `adce0ed0821c8466a87a0a4c9e0df9ea7e4a4b24d099c7d7ed196f72a13f669d`
+
 `src/uv-152.h` includes the installed upstream header and rejects a release
-other than 1.52.1. `make verify-headers` checks all six hashes before the
-package links.
+other than 1.52.1. `make verify-headers` checks the five common headers and the current platform
+header before the package links. The Linux header hash comes directly from
+the checksum-verified pinned source archive.
 
 ## Retained terms
 

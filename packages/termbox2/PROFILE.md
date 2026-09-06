@@ -12,6 +12,8 @@
 - Linked dependencies: the platform C/POSIX runtime only. At runtime termbox
   reads the host's terminfo database and uses tty, termios, ioctl, select,
   pipe, and signal facilities.
+- On Linux, compilation defines `_GNU_SOURCE` so the system headers
+  declare both `wcwidth` and the BSD functions used by the x2c runtime.
 - Vendored source and local patches: none. The prepared real upstream header
   is included through `src/termbox2-2.5.h`.
 - Release root `LICENSE` SHA-256:

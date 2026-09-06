@@ -1,5 +1,14 @@
 PACKAGE := blis
 DEPENDENCY_PREFIX_VAR := BLIS_PREFIX
+BLIS_PROFILE := PROFILE.json
+BLIS_SHARED := libblis.dylib
+NM_SYMBOL := substr($$1, 2)
+ifeq ($(shell uname -s),Linux)
+DEPENDENCY_MANIFEST := dependency-linux.json
+BLIS_PROFILE := PROFILE-linux.json
+BLIS_SHARED := libblis.so
+NM_SYMBOL := $$1
+endif
 include ../package.mk
 
 BLIS_INCLUDE := $(BLIS_PREFIX)/include
@@ -29,14 +38,14 @@ check-profile:
 	    exit 1; }
 	@test -f "$(BLIS_STATIC)" || \
 	  { echo "missing static archive: $(BLIS_STATIC)" >&2; exit 1; }
-	@test ! -e "$(BLIS_PREFIX)/lib/libblis.dylib" || \
+	@test ! -e "$(BLIS_PREFIX)/lib/$(BLIS_SHARED)" || \
 	  { echo "BLIS_PREFIX must contain only the admitted static build" >&2; \
 	    exit 1; }
 
 verify-profile: verify-dependency check-profile
 	@test "$$(shasum -a 256 $(BLIS_INCLUDE)/blis/blis.h | \
 	  cut -d' ' -f1)" = \
-	  b9dca9af2c37fc36ff28a6718c529abe0cf16a6162686d2badd74caf162fe9e7
+	  "$$(jq -r '.header_sha256' $(BLIS_PROFILE))"
 	@test "$$(shasum -a 256 LICENSES/BLIS-2.1-BSD-3-Clause.txt | \
 	  cut -d' ' -f1)" = \
 	  6b54dbb27c2aeba07c72084ea948d3d7ec206758b119eef37a1cc4f958ac694c
@@ -50,7 +59,7 @@ verify-profile: verify-dependency check-profile
 	  cut -d' ' -f1)" = \
 	  fd725c12cb2d3bbedf0c7bb55fd42ce6ffbc3f82a696051618077808b6b7f3d4
 	@test "$$(ar -t $(BLIS_STATIC) | wc -l | tr -d ' ')" = \
-	  "$$(jq -r '.archive.members' PROFILE.json)"
+	  "$$(jq -r '.archive.members' $(BLIS_PROFILE))"
 # The symbol comparison sorts both sides under LC_ALL=C. Without it the
 # collation follows the caller's locale: en_US.UTF-8 ignores the leading
 # underscores, so _DefaultRuneLocale moves and the diff fails on a machine
@@ -59,27 +68,21 @@ verify-profile: verify-dependency check-profile
 	  trap 'rm -rf "$$profile_tmp"' EXIT; \
 	  export LC_ALL=C; \
 	  nm -g --format=posix $(BLIS_STATIC) | \
-	    awk '$$2 == "U" {print substr($$1, 2)}' | sort -u > \
+	    awk '$$2 == "U" {print $(NM_SYMBOL)}' | sort -u > \
 	    "$$profile_tmp/undefined"; \
 	  nm -g --format=posix $(BLIS_STATIC) | \
-	    awk '$$2 != "U" && NF >= 2 {print substr($$1, 2)}' | sort -u > \
+	    awk '$$2 != "U" && NF >= 2 {print $(NM_SYMBOL)}' | sort -u > \
 	    "$$profile_tmp/defined"; \
 	  comm -23 "$$profile_tmp/undefined" "$$profile_tmp/defined" > \
 	    "$$profile_tmp/external"; \
-	  jq -r '.archive.external_undefined_symbols[]' PROFILE.json | \
+	  jq -r '.archive.external_undefined_symbols[]' $(BLIS_PROFILE) | \
 	    sort -u > "$$profile_tmp/expected"; \
 	  diff -u "$$profile_tmp/expected" "$$profile_tmp/external"
 
 verify-provenance: verify-profile
 
 verify-linkage: builds/page-rank builds/risk-report $(PACKAGE_TEST_PROGRAMS)
-	@for binary in $^; do \
-	  links=$$(otool -L "$$binary" | tail -n +2 | awk '{print $$1}' | \
-	    grep -Ev '^(/usr/lib/|/System/Library/)' || true); \
-	  test -z "$$links" || \
-	    { echo "unexpected dynamic dependency in $$binary: $$links" >&2; \
-	      exit 1; }; \
-	done
+	python3 ../tools/check-linkage.py --package blis $^
 
 builds/page-rank: examples/page-rank.x $(PACKAGE_ARCHIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/page-rank-build \

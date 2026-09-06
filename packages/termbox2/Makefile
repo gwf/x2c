@@ -4,6 +4,10 @@ include ../package.mk
 
 TERMBOX2_INCLUDE := $(TERMBOX2_PREFIX)/include
 PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(TERMBOX2_INCLUDE)
+# glibc needs wcwidth plus the BSD declarations used by the x2c runtime.
+ifeq ($(shell uname -s),Linux)
+PACKAGE_C_FLAGS += -D _GNU_SOURCE
+endif
 # termbox2 is a single header; src/termbox2.c is already in the archive.
 PACKAGE_LINK :=
 PACKAGE_TEST_COMMAND := expect tests/run-test.expect

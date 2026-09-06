@@ -30,7 +30,7 @@ expect {
     exp_continue
   }
   "READY resize" {
-    exec stty -f $terminal_path rows 16 columns 84
+    exec stty rows 16 columns 84 < $terminal_path
     exp_continue
   }
   "READY mouse" {

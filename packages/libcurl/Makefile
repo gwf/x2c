@@ -1,5 +1,11 @@
 PACKAGE := libcurl
 DEPENDENCY_PREFIX_VAR := CURL_PREFIX
+ifeq ($(shell uname -s),Linux)
+DEPENDENCY_MANIFEST := dependency-linux.json
+CURL_CA_BUNDLE := /etc/ssl/certs/ca-certificates.crt
+else
+CURL_CA_BUNDLE := /etc/ssl/cert.pem
+endif
 include ../package.mk
 
 OPENSSL_PREFIX ?= $(CURL_PREFIX)
@@ -7,9 +13,13 @@ CURL_INCLUDE := $(CURL_PREFIX)/include
 
 PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(CURL_INCLUDE)
 PACKAGE_LINK := $(PACKAGE_DEPS)/lib/libcurl.a \
-	-L$(OPENSSL_PREFIX)/lib -lssl -lcrypto \
-	-Wl,-framework,CoreFoundation -Wl,-framework,CoreServices \
+	-L$(OPENSSL_PREFIX)/lib -lssl -lcrypto
+ifeq ($(shell uname -s),Linux)
+PACKAGE_LINK += -ldl -pthread
+else
+PACKAGE_LINK += -Wl,-framework,CoreFoundation -Wl,-framework,CoreServices \
 	-Wl,-framework,SystemConfiguration
+endif
 
 # Every test and example talks to the package-local fixture server instead
 # of the network, so one wrapper starts it and passes its base URL.
@@ -48,7 +58,7 @@ verify-profile: verify-dependency verify-headers
 	  82f2f4427d6545ee5aaac4f0b80428da6cc8ba41c2cf5da3a03680ec327b9681
 	@config="$$($(CURL_PREFIX)/bin/curl-config --configure)"; \
 	  echo "$$config" | grep -q -- \
-	    "--with-ca-bundle=/etc/ssl/cert.pem" || exit 1; \
+	    "--with-ca-bundle=$(CURL_CA_BUNDLE)" || exit 1; \
 	  for option in without-zlib without-brotli without-zstd \
 	    without-libpsl without-libidn2 without-nghttp2 without-ngtcp2 \
 	    without-nghttp3 without-libssh2 disable-threaded-resolver \

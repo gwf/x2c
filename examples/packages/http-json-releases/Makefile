@@ -4,7 +4,7 @@ PACKAGES := $(ROOT)/packages
 CURL_DIR := $(PACKAGES)/libcurl
 JSON_DIR := $(PACKAGES)/yyjson
 DEPS_TOOL := python3 $(PACKAGES)/tools/deps.py
-CURL_PREFIX ?= $(shell $(DEPS_TOOL) path $(CURL_DIR)/dependency.json prefix)
+CURL_PREFIX ?= $(abspath $(CURL_DIR)/deps)
 YYJSON_PREFIX ?= $(shell $(DEPS_TOOL) path $(JSON_DIR)/dependency.json prefix)
 
 # The two packages arrive through --package-dir: an import pulls in each
