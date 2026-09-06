@@ -107,6 +107,22 @@ build options, and integration with your own build system. [Building the
 compiler](docs/src/internals/building.md) explains self-hosting and repository
 checks.
 
+## Performance examples
+
+The [language shootout](examples/shootout/README.md#current-results) compares
+fourteen programs with C and Python references, including execution time and
+source size. In the September 6, 2026 local run, all fourteen x2c programs
+were faster than the saved Python references. The median x2c/C time ratio
+was 1.04; individual results vary substantially. CSV parsing was 2.35 times
+faster than Python, and binary trees was 1.68 times faster.
+
+See the table, source programs, and measurement details before drawing broader
+conclusions. Run the x2c comparisons from the repository root with:
+
+```sh
+make shoot-run
+```
+
 ## For fun: a portable bootstrap
 
 The Cosmopolitan executable is an experiment for fun only: a minimal compiler

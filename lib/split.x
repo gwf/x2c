@@ -59,11 +59,12 @@ static inline int _end(String str, String sep, int start, int *next) {
 static inline int _line_end(String str, int start, int keep_ends, int *next) {
   int length = str.len();
   if (!str || start < 0 || start >= length) return -1;
+  const char *text = str;
   int end = start;
-  while (end < length && str[end] != '\n' && str[end] != '\r') end++;
+  while (end < length && text[end] != '\n' && text[end] != '\r') end++;
   int ending = 0;
   if (end < length)
-    ending = str[end] == '\r' && end + 1 < length && str[end + 1] == '\n'
+    ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n'
       ? 2 : 1;
   *next = end + ending;
   return keep_ends ? *next : end;

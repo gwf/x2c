@@ -38,7 +38,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/split.x:269`
+Source: `lib/split.x:270`
 
 <a id="Split.try_next"></a>
 #### Split.try_next
@@ -67,7 +67,7 @@ boxing adapter for every other binder.
 **Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
 arguments produce exhaustion without raising.
 
-Source: `lib/split.x:243`
+Source: `lib/split.x:244`
 
 ### `String`
 
@@ -90,7 +90,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:206`
+Source: `lib/split.x:207`
 
 <a id="String.split"></a>
 #### String.split
@@ -113,7 +113,7 @@ printf("%s\n", %"a::b".split(":").repr());
 
 **Raises:** the same causes as `String.split_n`.
 
-Source: `lib/split.x:110`
+Source: `lib/split.x:111`
 
 <a id="String.split_lines"></a>
 #### String.split_lines
@@ -132,7 +132,7 @@ actual
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
 result.
 
-Source: `lib/split.x:123`
+Source: `lib/split.x:124`
 
 <a id="String.split_n"></a>
 #### String.split_n
@@ -148,7 +148,7 @@ The canonical fields and `List` remain live until their actual `String` and
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/split.x:80`
+Source: `lib/split.x:81`
 
 <a id="String.splits"></a>
 #### String.splits
@@ -168,7 +168,7 @@ when that residency should be temporary. The cursor borrows `str` and
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 
-Source: `lib/split.x:220`
+Source: `lib/split.x:221`
 
 <a id="String.words"></a>
 #### String.words
@@ -189,7 +189,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:191`
+Source: `lib/split.x:192`
 
 ## Public types
 

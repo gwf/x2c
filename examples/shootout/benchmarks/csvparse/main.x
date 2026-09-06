@@ -6,6 +6,8 @@
  */
 
 /* SPDX-License-Identifier: BSD-3-Clause */
+#include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,24 +21,20 @@ static String _make_csv(int rows) {
   return text.str_free();
 }
 
-static Array _fields(String line) {
-  Array fields = %[];
+static void _fields(String line, double *fields) {
   const char *text = line;
-  int start = 0, quoted = 0, len = line.len();
+  int start = 0, quoted = 0, count = 0, len = line.len();
   for (int i = 0; i <= len; i++) {
     if (i < len && text[i] == '"') quoted = !quoted;
     if (i == len || (text[i] == ',' && !quoted)) {
-      fields.push(line[start:i]);
+      char *stop;
+      errno = 0;
+      double value = strtod(text + start, &stop);
+      while (stop < text + i && isspace((unsigned char) *stop)) stop++;
+      fields[count++] = stop == text + i && errno != ERANGE ? value : 0.0;
       start = i + 1;
     }
   }
-  return fields;
-}
-
-static double _number(String text) {
-  double value;
-  if (!text.try_double(&value)) exit(3);
-  return value;
 }
 
 int main(int argc, char **argv) {
@@ -44,15 +42,12 @@ int main(int argc, char **argv) {
   String csv = _make_csv(atoi(argv[1]));
   double checksum = 0;
   int runs = atoi(argv[2]);
+  double fields[6];
   for (int run = 0; run < runs; run++) {
-    Scope.retain();
     foreach(String line, csv.lines()) {
-      Array fields = _fields(line);
-      checksum += _number(fields[1]) +
-                  _number(fields[3]) +
-                  _number(fields[5]);
+      _fields(line, fields);
+      checksum += fields[1] + fields[3] + fields[5];
     }
-    Scope.release();
   }
   printf("%.6f\n", checksum);
   return 0;
