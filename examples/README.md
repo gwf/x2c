@@ -12,7 +12,14 @@ from the repository root:
 export PATH="$PWD:$PATH"
 x2c run examples/foreach.x
 make examples
+
+# Run two of the executables that make examples built.
+./examples/build/foreach/foreach
+./examples/build/programs-lisp/lisp
 ```
+
+The Lisp shell is interactive; press Ctrl-D to exit. `make examples` builds
+and checks the curated examples, leaving executables under `examples/build/`.
 
 ## Love: values, data, and methods
 
