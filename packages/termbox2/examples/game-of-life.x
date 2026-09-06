@@ -2,16 +2,13 @@
 
 import "termbox2" with Termbox;
 #include "typed-array.x"
+#include <stdlib.h>
+#include <time.h>
 
 static ArrayChar _world(int width, int height) {
   ArrayChar cells = ArrayChar.new();
-  for (int i = 0; i < width * height; i++) cells.push(0);
-  int x = width / 2, y = height / 2;
-  cells[y * width + (x + 1) % width] = 1;
-  cells[((y + 1) % height) * width + (x + 2) % width] = 1;
-  cells[((y + 2) % height) * width + x] = 1;
-  cells[((y + 2) % height) * width + (x + 1) % width] = 1;
-  cells[((y + 2) % height) * width + (x + 2) % width] = 1;
+  for (int i = 0; i < width * height; i++)
+    cells.push(rand() > RAND_MAX / 2);
   return cells;
 }
 
@@ -43,6 +40,7 @@ static void _draw(Termbox terminal, ArrayChar cells, int width, int height) {
 }
 
 int main(void) {
+  srand((unsigned int) time(NULL));
   Termbox terminal = Termbox.open();
   defer terminal.close();
   terminal.hide_cursor();

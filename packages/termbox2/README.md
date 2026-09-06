@@ -73,11 +73,13 @@ input mode admits it. Mouse events need `TB_INPUT_MOUSE` in the input mode.
 
 ## Examples
 
-`examples/game-of-life.x` is the short application (`make short-example`). In
-67 lines it runs toroidal Life over the terminal's own cells: two ordinary
+`examples/game-of-life.x` is the short application (`make short-example`). It
+runs toroidal Life over the terminal's own cells: two ordinary
 x2c Arrays hold the generations, modular Array indexes give the wraparound,
 and each drawn row becomes one `fill` call per run of live cells. Any key
-quits. `make run-life-interactive` plays it.
+quits. Each cell starts alive with 50% probability; resizing starts a fresh
+random world using the new terminal dimensions. `make run-life-interactive`
+plays it.
 
 `examples/incident-filter.x` is the broader application (`make example`). It
 reads `examples/incidents.log` through `File`, keeps each incident as
