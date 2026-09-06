@@ -8,100 +8,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 16212209,
-            "max_rss_bytes": 1556480,
+            "elapsed_ns": 28823917,
+            "max_rss_bytes": 2326528,
             "position": 1,
             "sample": 1,
-            "system_ns": 2303000,
-            "user_ns": 13198000
+            "system_ns": 1060000,
+            "user_ns": 27170000
           },
           {
-            "elapsed_ns": 16459875,
-            "max_rss_bytes": 1572864,
-            "position": 3,
+            "elapsed_ns": 28888500,
+            "max_rss_bytes": 2490368,
+            "position": 4,
             "sample": 2,
-            "system_ns": 2544000,
-            "user_ns": 13074000
+            "system_ns": 925000,
+            "user_ns": 27438000
           },
           {
-            "elapsed_ns": 14549209,
-            "max_rss_bytes": 1556480,
-            "position": 2,
+            "elapsed_ns": 28654709,
+            "max_rss_bytes": 1998848,
+            "position": 3,
             "sample": 3,
-            "system_ns": 2129000,
-            "user_ns": 11820000
+            "system_ns": 826000,
+            "user_ns": 27315000
           },
           {
-            "elapsed_ns": 13536500,
-            "max_rss_bytes": 1572864,
-            "position": 1,
+            "elapsed_ns": 28802125,
+            "max_rss_bytes": 2457600,
+            "position": 2,
             "sample": 4,
-            "system_ns": 1721000,
-            "user_ns": 11241000
+            "system_ns": 1163000,
+            "user_ns": 27049000
           },
           {
-            "elapsed_ns": 14363375,
-            "max_rss_bytes": 1572864,
-            "position": 3,
+            "elapsed_ns": 28688791,
+            "max_rss_bytes": 2621440,
+            "position": 1,
             "sample": 5,
-            "system_ns": 1823000,
-            "user_ns": 11879000
+            "system_ns": 1213000,
+            "user_ns": 26823000
           },
           {
-            "elapsed_ns": 14262834,
-            "max_rss_bytes": 1572864,
-            "position": 2,
+            "elapsed_ns": 28988000,
+            "max_rss_bytes": 1998848,
+            "position": 4,
             "sample": 6,
-            "system_ns": 2074000,
-            "user_ns": 11534000
+            "system_ns": 921000,
+            "user_ns": 27558000
           },
           {
-            "elapsed_ns": 14764958,
-            "max_rss_bytes": 1556480,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 2232000,
-            "user_ns": 11766000
-          },
-          {
-            "elapsed_ns": 15544166,
-            "max_rss_bytes": 1589248,
+            "elapsed_ns": 28821333,
+            "max_rss_bytes": 1998848,
             "position": 3,
-            "sample": 8,
-            "system_ns": 1867000,
-            "user_ns": 13032000
+            "sample": 7,
+            "system_ns": 1062000,
+            "user_ns": 27304000
           },
           {
-            "elapsed_ns": 16527041,
-            "max_rss_bytes": 1572864,
+            "elapsed_ns": 28734375,
+            "max_rss_bytes": 2588672,
             "position": 2,
-            "sample": 9,
-            "system_ns": 2532000,
-            "user_ns": 13302000
+            "sample": 8,
+            "system_ns": 998000,
+            "user_ns": 27136000
           },
           {
-            "elapsed_ns": 14109958,
-            "max_rss_bytes": 1572864,
+            "elapsed_ns": 29004375,
+            "max_rss_bytes": 2424832,
             "position": 1,
-            "sample": 10,
-            "system_ns": 2026000,
-            "user_ns": 11488000
+            "sample": 9,
+            "system_ns": 964000,
+            "user_ns": 27521000
           },
           {
-            "elapsed_ns": 14924792,
-            "max_rss_bytes": 1605632,
+            "elapsed_ns": 29359208,
+            "max_rss_bytes": 2031616,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 962000,
+            "user_ns": 27810000
+          },
+          {
+            "elapsed_ns": 28803292,
+            "max_rss_bytes": 2621440,
             "position": 3,
             "sample": 11,
-            "system_ns": 2303000,
-            "user_ns": 11921000
+            "system_ns": 995000,
+            "user_ns": 27249000
           },
           {
-            "elapsed_ns": 16130750,
-            "max_rss_bytes": 1556480,
+            "elapsed_ns": 29465625,
+            "max_rss_bytes": 2392064,
             "position": 2,
             "sample": 12,
-            "system_ns": 1923000,
-            "user_ns": 13557000
+            "system_ns": 971000,
+            "user_ns": 27877000
           }
         ],
         "source": {
@@ -114,14 +114,14 @@
           "source_lines": 43
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -7.941033822102838,
-          "mad_elapsed_ns": 717104.0,
-          "max_rss_bytes": 1605632,
-          "mean_cpu_ns": 14440750,
-          "median_elapsed_ns": 14844875.0,
-          "median_max_rss_bytes": 1572864.0,
-          "min_elapsed_ns": 13536500,
-          "p95_elapsed_ns": 16490099.7,
+          "first_to_last_window_drift_percent": 1.8571070684112678,
+          "mad_elapsed_ns": 111042.0,
+          "max_rss_bytes": 2621440,
+          "mean_cpu_ns": 28359166.666666668,
+          "median_elapsed_ns": 28822625.0,
+          "median_max_rss_bytes": 2408448.0,
+          "min_elapsed_ns": 28654709,
+          "p95_elapsed_ns": 29407095.65,
           "samples": 12
         }
       },
@@ -144,100 +144,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 112672375,
-            "max_rss_bytes": 12419072,
-            "position": 3,
+            "elapsed_ns": 113132542,
+            "max_rss_bytes": 12468224,
+            "position": 4,
             "sample": 1,
-            "system_ns": 3273000,
-            "user_ns": 107921000
+            "system_ns": 5083000,
+            "user_ns": 105883000
           },
           {
-            "elapsed_ns": 114082125,
-            "max_rss_bytes": 12451840,
-            "position": 2,
+            "elapsed_ns": 111924542,
+            "max_rss_bytes": 12550144,
+            "position": 3,
             "sample": 2,
-            "system_ns": 3849000,
-            "user_ns": 108679000
+            "system_ns": 5098000,
+            "user_ns": 105387000
           },
           {
-            "elapsed_ns": 113153042,
-            "max_rss_bytes": 12451840,
-            "position": 1,
+            "elapsed_ns": 110981292,
+            "max_rss_bytes": 12369920,
+            "position": 2,
             "sample": 3,
-            "system_ns": 3909000,
-            "user_ns": 107732000
+            "system_ns": 4520000,
+            "user_ns": 105284000
           },
           {
-            "elapsed_ns": 117978000,
-            "max_rss_bytes": 12451840,
-            "position": 3,
+            "elapsed_ns": 110132292,
+            "max_rss_bytes": 12369920,
+            "position": 1,
             "sample": 4,
-            "system_ns": 3334000,
-            "user_ns": 112943000
+            "system_ns": 4419000,
+            "user_ns": 104129000
           },
           {
-            "elapsed_ns": 113069375,
-            "max_rss_bytes": 12451840,
-            "position": 2,
+            "elapsed_ns": 109485375,
+            "max_rss_bytes": 12517376,
+            "position": 4,
             "sample": 5,
-            "system_ns": 3553000,
-            "user_ns": 107997000
+            "system_ns": 4689000,
+            "user_ns": 103251000
           },
           {
-            "elapsed_ns": 111917542,
+            "elapsed_ns": 110938917,
             "max_rss_bytes": 12451840,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 3250000,
-            "user_ns": 107272000
-          },
-          {
-            "elapsed_ns": 113097417,
-            "max_rss_bytes": 12419072,
             "position": 3,
-            "sample": 7,
-            "system_ns": 3162000,
-            "user_ns": 108477000
+            "sample": 6,
+            "system_ns": 5106000,
+            "user_ns": 104393000
           },
           {
-            "elapsed_ns": 110624041,
-            "max_rss_bytes": 12419072,
+            "elapsed_ns": 110543208,
+            "max_rss_bytes": 12091392,
             "position": 2,
-            "sample": 8,
-            "system_ns": 3365000,
-            "user_ns": 105834000
+            "sample": 7,
+            "system_ns": 4872000,
+            "user_ns": 104305000
           },
           {
-            "elapsed_ns": 111173750,
-            "max_rss_bytes": 12419072,
+            "elapsed_ns": 111492125,
+            "max_rss_bytes": 12484608,
             "position": 1,
-            "sample": 9,
-            "system_ns": 3215000,
-            "user_ns": 106572000
+            "sample": 8,
+            "system_ns": 4934000,
+            "user_ns": 105031000
           },
           {
-            "elapsed_ns": 111117500,
-            "max_rss_bytes": 12451840,
+            "elapsed_ns": 111061166,
+            "max_rss_bytes": 12386304,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 4837000,
+            "user_ns": 104729000
+          },
+          {
+            "elapsed_ns": 109363791,
+            "max_rss_bytes": 12107776,
             "position": 3,
             "sample": 10,
-            "system_ns": 3230000,
-            "user_ns": 106301000
+            "system_ns": 4459000,
+            "user_ns": 103559000
           },
           {
-            "elapsed_ns": 111341209,
-            "max_rss_bytes": 12419072,
+            "elapsed_ns": 109971875,
+            "max_rss_bytes": 12451840,
             "position": 2,
             "sample": 11,
-            "system_ns": 3554000,
-            "user_ns": 106520000
+            "system_ns": 5011000,
+            "user_ns": 103626000
           },
           {
-            "elapsed_ns": 112656708,
-            "max_rss_bytes": 12451840,
+            "elapsed_ns": 110216792,
+            "max_rss_bytes": 12419072,
             "position": 1,
             "sample": 12,
-            "system_ns": 4201000,
-            "user_ns": 106861000
+            "system_ns": 4719000,
+            "user_ns": 103910000
           }
         ],
         "source": {
@@ -250,14 +250,14 @@
           "source_lines": 17
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -1.601223412093511,
-          "mad_elapsed_ns": 1035166.0,
-          "max_rss_bytes": 12451840,
-          "mean_cpu_ns": 111250333.33333333,
-          "median_elapsed_ns": 112664541.5,
-          "median_max_rss_bytes": 12451840.0,
-          "min_elapsed_ns": 110624041,
-          "p95_elapsed_ns": 115835268.75,
+          "first_to_last_window_drift_percent": -1.744628090593392,
+          "mad_elapsed_ns": 679916.5,
+          "max_rss_bytes": 12550144,
+          "mean_cpu_ns": 109269500,
+          "median_elapsed_ns": 110741062.5,
+          "median_max_rss_bytes": 12435456.0,
+          "min_elapsed_ns": 109363791,
+          "p95_elapsed_ns": 112468142.0,
           "samples": 12
         }
       },
@@ -272,100 +272,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 11807875,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 11061375,
+            "max_rss_bytes": 1146880,
             "position": 1,
             "sample": 1,
-            "system_ns": 619000,
-            "user_ns": 10540000
+            "system_ns": 711000,
+            "user_ns": 9825000
           },
           {
-            "elapsed_ns": 11773625,
-            "max_rss_bytes": 1327104,
-            "position": 3,
+            "elapsed_ns": 11483375,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 2,
-            "system_ns": 587000,
-            "user_ns": 10517000
+            "system_ns": 990000,
+            "user_ns": 10007000
           },
           {
-            "elapsed_ns": 11986875,
-            "max_rss_bytes": 1327104,
-            "position": 2,
+            "elapsed_ns": 11576625,
+            "max_rss_bytes": 1146880,
+            "position": 3,
             "sample": 3,
-            "system_ns": 668000,
-            "user_ns": 10617000
+            "system_ns": 704000,
+            "user_ns": 10378000
           },
           {
-            "elapsed_ns": 12067417,
-            "max_rss_bytes": 1327104,
-            "position": 1,
+            "elapsed_ns": 11251750,
+            "max_rss_bytes": 1146880,
+            "position": 2,
             "sample": 4,
-            "system_ns": 580000,
-            "user_ns": 10823000
+            "system_ns": 656000,
+            "user_ns": 10077000
           },
           {
-            "elapsed_ns": 11596833,
-            "max_rss_bytes": 1327104,
-            "position": 3,
+            "elapsed_ns": 10968709,
+            "max_rss_bytes": 1146880,
+            "position": 1,
             "sample": 5,
-            "system_ns": 594000,
-            "user_ns": 10383000
+            "system_ns": 586000,
+            "user_ns": 9958000
           },
           {
-            "elapsed_ns": 12068958,
-            "max_rss_bytes": 1327104,
-            "position": 2,
+            "elapsed_ns": 11474583,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 6,
-            "system_ns": 942000,
-            "user_ns": 10579000
+            "system_ns": 813000,
+            "user_ns": 10105000
           },
           {
-            "elapsed_ns": 11769875,
-            "max_rss_bytes": 1327104,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 603000,
-            "user_ns": 10464000
-          },
-          {
-            "elapsed_ns": 11723959,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 11241125,
+            "max_rss_bytes": 1146880,
             "position": 3,
-            "sample": 8,
-            "system_ns": 566000,
-            "user_ns": 10540000
+            "sample": 7,
+            "system_ns": 701000,
+            "user_ns": 10034000
           },
           {
-            "elapsed_ns": 11638625,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 11452625,
+            "max_rss_bytes": 1146880,
             "position": 2,
-            "sample": 9,
-            "system_ns": 612000,
-            "user_ns": 10438000
+            "sample": 8,
+            "system_ns": 683000,
+            "user_ns": 10241000
           },
           {
-            "elapsed_ns": 11887875,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 11095167,
+            "max_rss_bytes": 1146880,
             "position": 1,
-            "sample": 10,
-            "system_ns": 712000,
-            "user_ns": 10506000
+            "sample": 9,
+            "system_ns": 700000,
+            "user_ns": 9842000
           },
           {
-            "elapsed_ns": 12439542,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 10849292,
+            "max_rss_bytes": 1146880,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 634000,
+            "user_ns": 9742000
+          },
+          {
+            "elapsed_ns": 11038042,
+            "max_rss_bytes": 1146880,
             "position": 3,
             "sample": 11,
-            "system_ns": 809000,
-            "user_ns": 10880000
+            "system_ns": 662000,
+            "user_ns": 9937000
           },
           {
-            "elapsed_ns": 12096208,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 11369667,
+            "max_rss_bytes": 1146880,
             "position": 2,
             "sample": 12,
-            "system_ns": 803000,
-            "user_ns": 10642000
+            "system_ns": 749000,
+            "user_ns": 10106000
           }
         ],
         "source": {
@@ -378,14 +378,14 @@
           "source_lines": 67
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 2.4418703619406568,
-          "mad_elapsed_ns": 174125.0,
-          "max_rss_bytes": 1327104,
-          "mean_cpu_ns": 11252000,
-          "median_elapsed_ns": 11847875.0,
-          "median_max_rss_bytes": 1327104.0,
-          "min_elapsed_ns": 11596833,
-          "p95_elapsed_ns": 12250708.3,
+          "first_to_last_window_drift_percent": -3.8780672058519428,
+          "mad_elapsed_ns": 207291.5,
+          "max_rss_bytes": 1146880,
+          "mean_cpu_ns": 10736750,
+          "median_elapsed_ns": 11246437.5,
+          "median_max_rss_bytes": 1146880.0,
+          "min_elapsed_ns": 10849292,
+          "p95_elapsed_ns": 11525337.5,
           "samples": 12
         }
       },
@@ -407,100 +407,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 652827542,
-            "max_rss_bytes": 11665408,
-            "position": 3,
+            "elapsed_ns": 649394000,
+            "max_rss_bytes": 11796480,
+            "position": 4,
             "sample": 1,
-            "system_ns": 3806000,
-            "user_ns": 647344000
+            "system_ns": 11541000,
+            "user_ns": 635086000
           },
           {
-            "elapsed_ns": 657070875,
-            "max_rss_bytes": 11993088,
-            "position": 2,
+            "elapsed_ns": 652424125,
+            "max_rss_bytes": 11616256,
+            "position": 3,
             "sample": 2,
-            "system_ns": 3857000,
-            "user_ns": 651693000
+            "system_ns": 13185000,
+            "user_ns": 636699000
           },
           {
-            "elapsed_ns": 657369084,
-            "max_rss_bytes": 11927552,
-            "position": 1,
+            "elapsed_ns": 653062209,
+            "max_rss_bytes": 11812864,
+            "position": 2,
             "sample": 3,
-            "system_ns": 3601000,
-            "user_ns": 652221000
+            "system_ns": 11985000,
+            "user_ns": 637956000
           },
           {
-            "elapsed_ns": 658394667,
-            "max_rss_bytes": 12206080,
-            "position": 3,
+            "elapsed_ns": 650559334,
+            "max_rss_bytes": 11698176,
+            "position": 1,
             "sample": 4,
-            "system_ns": 3779000,
-            "user_ns": 652944000
+            "system_ns": 12291000,
+            "user_ns": 635836000
           },
           {
-            "elapsed_ns": 649426750,
-            "max_rss_bytes": 11665408,
-            "position": 2,
+            "elapsed_ns": 649355542,
+            "max_rss_bytes": 11796480,
+            "position": 4,
             "sample": 5,
-            "system_ns": 4227000,
-            "user_ns": 643778000
+            "system_ns": 12343000,
+            "user_ns": 634250000
           },
           {
-            "elapsed_ns": 654484375,
-            "max_rss_bytes": 11665408,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 3605000,
-            "user_ns": 649270000
-          },
-          {
-            "elapsed_ns": 659061583,
-            "max_rss_bytes": 12107776,
+            "elapsed_ns": 653017958,
+            "max_rss_bytes": 11632640,
             "position": 3,
-            "sample": 7,
-            "system_ns": 4240000,
-            "user_ns": 652713000
+            "sample": 6,
+            "system_ns": 11577000,
+            "user_ns": 639297000
           },
           {
-            "elapsed_ns": 654204792,
-            "max_rss_bytes": 11993088,
+            "elapsed_ns": 646770458,
+            "max_rss_bytes": 11730944,
             "position": 2,
-            "sample": 8,
-            "system_ns": 3483000,
-            "user_ns": 649302000
+            "sample": 7,
+            "system_ns": 12612000,
+            "user_ns": 631611000
           },
           {
-            "elapsed_ns": 667699625,
-            "max_rss_bytes": 11927552,
+            "elapsed_ns": 648377542,
+            "max_rss_bytes": 11730944,
             "position": 1,
-            "sample": 9,
-            "system_ns": 3535000,
-            "user_ns": 661237000
+            "sample": 8,
+            "system_ns": 12641000,
+            "user_ns": 633058000
           },
           {
-            "elapsed_ns": 658443459,
-            "max_rss_bytes": 11665408,
+            "elapsed_ns": 652035000,
+            "max_rss_bytes": 11501568,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 10071000,
+            "user_ns": 639396000
+          },
+          {
+            "elapsed_ns": 645843458,
+            "max_rss_bytes": 11485184,
             "position": 3,
             "sample": 10,
-            "system_ns": 5570000,
-            "user_ns": 650655000
+            "system_ns": 12081000,
+            "user_ns": 631322000
           },
           {
-            "elapsed_ns": 654831166,
-            "max_rss_bytes": 12042240,
+            "elapsed_ns": 649230083,
+            "max_rss_bytes": 11550720,
             "position": 2,
             "sample": 11,
-            "system_ns": 4166000,
-            "user_ns": 648697000
+            "system_ns": 12840000,
+            "user_ns": 634174000
           },
           {
-            "elapsed_ns": 661487959,
-            "max_rss_bytes": 11665408,
+            "elapsed_ns": 649475667,
+            "max_rss_bytes": 11780096,
             "position": 1,
             "sample": 12,
-            "system_ns": 5376000,
-            "user_ns": 653878000
+            "system_ns": 11838000,
+            "user_ns": 635098000
           }
         ],
         "source": {
@@ -513,20 +513,20 @@
           "source_lines": 42
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 0.208894360140377,
-          "mad_elapsed_ns": 2562209.0,
-          "max_rss_bytes": 12206080,
-          "mean_cpu_ns": 655248083.3333334,
-          "median_elapsed_ns": 657219979.5,
-          "median_max_rss_bytes": 11927552.0,
-          "min_elapsed_ns": 649426750,
-          "p95_elapsed_ns": 664283208.7,
+          "first_to_last_window_drift_percent": -0.48956528086695483,
+          "mad_elapsed_ns": 1862333.5,
+          "max_rss_bytes": 11812864,
+          "mean_cpu_ns": 647399000,
+          "median_elapsed_ns": 649434833.5,
+          "median_max_rss_bytes": 11714560.0,
+          "min_elapsed_ns": 645843458,
+          "p95_elapsed_ns": 653037870.95,
           "samples": 12
         }
       },
       "stdout": "NzY2OTI2MDA0MzYzMDc0NjE3Ngo=",
       "stdout_sha256": "4e62b006494c7ec26e49276d835ea9f99ab99d972da7207ac7e3178acdeaa5bb",
-      "title": "String/Map/List brainfuck interpreter"
+      "title": "String/Array/List brainfuck interpreter"
     },
     "calculatorast": {
       "args": [
@@ -535,120 +535,120 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 13219125,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 11442167,
+            "max_rss_bytes": 1146880,
             "position": 1,
             "sample": 1,
-            "system_ns": 609000,
-            "user_ns": 11888000
+            "system_ns": 516000,
+            "user_ns": 10536000
           },
           {
-            "elapsed_ns": 12101750,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 11651250,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 2,
-            "system_ns": 581000,
-            "user_ns": 10858000
+            "system_ns": 725000,
+            "user_ns": 10554000
           },
           {
-            "elapsed_ns": 14151709,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 11679542,
+            "max_rss_bytes": 1146880,
+            "position": 3,
             "sample": 3,
-            "system_ns": 629000,
-            "user_ns": 12818000
+            "system_ns": 500000,
+            "user_ns": 10733000
           },
           {
-            "elapsed_ns": 12735583,
-            "max_rss_bytes": 1310720,
-            "position": 1,
+            "elapsed_ns": 11567250,
+            "max_rss_bytes": 1146880,
+            "position": 2,
             "sample": 4,
-            "system_ns": 637000,
-            "user_ns": 11418000
+            "system_ns": 505000,
+            "user_ns": 10633000
           },
           {
-            "elapsed_ns": 13151458,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 11618291,
+            "max_rss_bytes": 1146880,
+            "position": 1,
             "sample": 5,
-            "system_ns": 614000,
-            "user_ns": 11841000
+            "system_ns": 416000,
+            "user_ns": 10838000
           },
           {
-            "elapsed_ns": 15231875,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 11542333,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 6,
-            "system_ns": 811000,
-            "user_ns": 13633000
+            "system_ns": 513000,
+            "user_ns": 10616000
           },
           {
-            "elapsed_ns": 13043000,
-            "max_rss_bytes": 1310720,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 609000,
-            "user_ns": 11750000
-          },
-          {
-            "elapsed_ns": 13131542,
-            "max_rss_bytes": 1294336,
+            "elapsed_ns": 11419208,
+            "max_rss_bytes": 1146880,
             "position": 3,
-            "sample": 8,
-            "system_ns": 820000,
-            "user_ns": 11582000
+            "sample": 7,
+            "system_ns": 543000,
+            "user_ns": 10494000
           },
           {
-            "elapsed_ns": 12328750,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 12224417,
+            "max_rss_bytes": 1146880,
             "position": 2,
-            "sample": 9,
-            "system_ns": 660000,
-            "user_ns": 10958000
+            "sample": 8,
+            "system_ns": 686000,
+            "user_ns": 11056000
           },
           {
-            "elapsed_ns": 13224667,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 13328292,
+            "max_rss_bytes": 1146880,
             "position": 1,
-            "sample": 10,
-            "system_ns": 629000,
-            "user_ns": 11939000
+            "sample": 9,
+            "system_ns": 486000,
+            "user_ns": 12448000
           },
           {
-            "elapsed_ns": 12410209,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 15196000,
+            "max_rss_bytes": 1146880,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 492000,
+            "user_ns": 14310000
+          },
+          {
+            "elapsed_ns": 11486458,
+            "max_rss_bytes": 1146880,
             "position": 3,
             "sample": 11,
-            "system_ns": 690000,
-            "user_ns": 11072000
+            "system_ns": 491000,
+            "user_ns": 10597000
           },
           {
-            "elapsed_ns": 14811625,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 11428083,
+            "max_rss_bytes": 1146880,
             "position": 2,
             "sample": 12,
-            "system_ns": 587000,
-            "user_ns": 13478000
+            "system_ns": 523000,
+            "user_ns": 10544000
           }
         ],
         "source": {
-          "game_style_gzip_bytes": 705,
+          "game_style_gzip_bytes": 706,
           "nonblank_lines": 57,
           "path": "benchmarks/calculatorast/main.c",
           "physical_lines": 62,
-          "sha256": "171a2276e9c51c41bb44247ca38ec7a6b1a9171adce492051a8428161f70073e",
-          "source_bytes": 1902,
+          "sha256": "77eab7928566c02cf94c260cb427892bf841bc092c8ba4c20317ab8b1a6977f6",
+          "source_bytes": 1874,
           "source_lines": 56
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 0.041924106171919995,
-          "mad_elapsed_ns": 568604.0,
-          "max_rss_bytes": 1310720,
-          "mean_cpu_ns": 12592583.333333334,
-          "median_elapsed_ns": 13141500.0,
-          "median_max_rss_bytes": 1310720.0,
-          "min_elapsed_ns": 12101750,
-          "p95_elapsed_ns": 15000737.5,
+          "first_to_last_window_drift_percent": -1.4143718485141066,
+          "mad_elapsed_ns": 128458.0,
+          "max_rss_bytes": 1146880,
+          "mean_cpu_ns": 11646250,
+          "median_elapsed_ns": 11592770.5,
+          "median_max_rss_bytes": 1146880.0,
+          "min_elapsed_ns": 11419208,
+          "p95_elapsed_ns": 14168760.599999998,
           "samples": 12
         }
       },
@@ -670,100 +670,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 919946834,
-            "max_rss_bytes": 11616256,
-            "position": 3,
+            "elapsed_ns": 901690875,
+            "max_rss_bytes": 11304960,
+            "position": 4,
             "sample": 1,
-            "system_ns": 5520000,
-            "user_ns": 912355000
+            "system_ns": 6746000,
+            "user_ns": 893854000
           },
           {
-            "elapsed_ns": 921856666,
-            "max_rss_bytes": 11649024,
-            "position": 2,
+            "elapsed_ns": 892507791,
+            "max_rss_bytes": 11337728,
+            "position": 3,
             "sample": 2,
-            "system_ns": 4992000,
-            "user_ns": 914825000
+            "system_ns": 6605000,
+            "user_ns": 884442000
           },
           {
-            "elapsed_ns": 923881583,
-            "max_rss_bytes": 11649024,
-            "position": 1,
+            "elapsed_ns": 898269125,
+            "max_rss_bytes": 11304960,
+            "position": 2,
             "sample": 3,
-            "system_ns": 4671000,
-            "user_ns": 917316000
+            "system_ns": 6272000,
+            "user_ns": 890718000
           },
           {
-            "elapsed_ns": 924721916,
-            "max_rss_bytes": 11649024,
-            "position": 3,
+            "elapsed_ns": 910632542,
+            "max_rss_bytes": 11534336,
+            "position": 1,
             "sample": 4,
-            "system_ns": 5389000,
-            "user_ns": 917234000
+            "system_ns": 6598000,
+            "user_ns": 902387000
           },
           {
-            "elapsed_ns": 920352000,
-            "max_rss_bytes": 11894784,
-            "position": 2,
+            "elapsed_ns": 908862084,
+            "max_rss_bytes": 11337728,
+            "position": 4,
             "sample": 5,
-            "system_ns": 5639000,
-            "user_ns": 912763000
+            "system_ns": 6893000,
+            "user_ns": 900717000
           },
           {
-            "elapsed_ns": 918851625,
-            "max_rss_bytes": 12206080,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 5220000,
-            "user_ns": 911682000
-          },
-          {
-            "elapsed_ns": 912578708,
-            "max_rss_bytes": 11649024,
+            "elapsed_ns": 892774583,
+            "max_rss_bytes": 11337728,
             "position": 3,
-            "sample": 7,
-            "system_ns": 4810000,
-            "user_ns": 905787000
+            "sample": 6,
+            "system_ns": 6456000,
+            "user_ns": 885141000
           },
           {
-            "elapsed_ns": 928880375,
-            "max_rss_bytes": 11943936,
+            "elapsed_ns": 895464625,
+            "max_rss_bytes": 11337728,
             "position": 2,
-            "sample": 8,
-            "system_ns": 5322000,
-            "user_ns": 921343000
+            "sample": 7,
+            "system_ns": 5956000,
+            "user_ns": 888328000
           },
           {
-            "elapsed_ns": 932586542,
-            "max_rss_bytes": 11976704,
+            "elapsed_ns": 901939792,
+            "max_rss_bytes": 11337728,
             "position": 1,
-            "sample": 9,
-            "system_ns": 6002000,
-            "user_ns": 924222000
+            "sample": 8,
+            "system_ns": 9234000,
+            "user_ns": 891357000
           },
           {
-            "elapsed_ns": 916496917,
-            "max_rss_bytes": 11649024,
+            "elapsed_ns": 894907834,
+            "max_rss_bytes": 11567104,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 6718000,
+            "user_ns": 887014000
+          },
+          {
+            "elapsed_ns": 887400417,
+            "max_rss_bytes": 11567104,
             "position": 3,
             "sample": 10,
-            "system_ns": 4775000,
-            "user_ns": 909757000
+            "system_ns": 6846000,
+            "user_ns": 879371000
           },
           {
-            "elapsed_ns": 917509791,
-            "max_rss_bytes": 11993088,
+            "elapsed_ns": 893370166,
+            "max_rss_bytes": 11337728,
             "position": 2,
             "sample": 11,
-            "system_ns": 4382000,
-            "user_ns": 911139000
+            "system_ns": 4698000,
+            "user_ns": 887425000
           },
           {
-            "elapsed_ns": 927834083,
-            "max_rss_bytes": 11649024,
+            "elapsed_ns": 907647667,
+            "max_rss_bytes": 11337728,
             "position": 1,
             "sample": 12,
-            "system_ns": 4618000,
-            "user_ns": 921468000
+            "system_ns": 8107000,
+            "user_ns": 897398000
           }
         ],
         "source": {
@@ -776,14 +776,14 @@
           "source_lines": 30
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.471534801485074,
-          "mad_elapsed_ns": 3606062.5,
-          "max_rss_bytes": 12206080,
-          "mean_cpu_ns": 920102583.3333334,
-          "median_elapsed_ns": 921104333.0,
-          "median_max_rss_bytes": 11649024.0,
-          "min_elapsed_ns": 912578708,
-          "p95_elapsed_ns": 930548150.15,
+          "first_to_last_window_drift_percent": -0.545377645034828,
+          "mad_elapsed_ns": 4591542.0,
+          "max_rss_bytes": 11567104,
+          "mean_cpu_ns": 897440083.3333334,
+          "median_elapsed_ns": 896866875.0,
+          "median_max_rss_bytes": 11337728.0,
+          "min_elapsed_ns": 887400417,
+          "p95_elapsed_ns": 909658790.1,
           "samples": 12
         }
       },
@@ -799,100 +799,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 63972333,
-            "max_rss_bytes": 10190848,
+            "elapsed_ns": 60225000,
+            "max_rss_bytes": 10027008,
             "position": 1,
             "sample": 1,
-            "system_ns": 1834000,
-            "user_ns": 61291000
+            "system_ns": 1366000,
+            "user_ns": 58356000
           },
           {
-            "elapsed_ns": 65238208,
-            "max_rss_bytes": 25100288,
-            "position": 3,
+            "elapsed_ns": 61277667,
+            "max_rss_bytes": 7045120,
+            "position": 4,
             "sample": 2,
-            "system_ns": 2442000,
-            "user_ns": 61699000
+            "system_ns": 1525000,
+            "user_ns": 59259000
           },
           {
-            "elapsed_ns": 65108459,
-            "max_rss_bytes": 19169280,
-            "position": 2,
+            "elapsed_ns": 61482166,
+            "max_rss_bytes": 7045120,
+            "position": 3,
             "sample": 3,
-            "system_ns": 2025000,
-            "user_ns": 62086000
+            "system_ns": 1807000,
+            "user_ns": 59168000
           },
           {
-            "elapsed_ns": 63013250,
-            "max_rss_bytes": 10223616,
-            "position": 1,
+            "elapsed_ns": 60624250,
+            "max_rss_bytes": 7045120,
+            "position": 2,
             "sample": 4,
-            "system_ns": 1900000,
-            "user_ns": 60271000
+            "system_ns": 1290000,
+            "user_ns": 58916000
           },
           {
-            "elapsed_ns": 63145041,
-            "max_rss_bytes": 10223616,
-            "position": 3,
+            "elapsed_ns": 60914958,
+            "max_rss_bytes": 7045120,
+            "position": 1,
             "sample": 5,
-            "system_ns": 1771000,
-            "user_ns": 60614000
+            "system_ns": 1307000,
+            "user_ns": 59179000
           },
           {
-            "elapsed_ns": 62936083,
-            "max_rss_bytes": 10190848,
-            "position": 2,
+            "elapsed_ns": 63004208,
+            "max_rss_bytes": 7045120,
+            "position": 4,
             "sample": 6,
-            "system_ns": 1751000,
-            "user_ns": 60362000
+            "system_ns": 1337000,
+            "user_ns": 61242000
           },
           {
-            "elapsed_ns": 64028583,
-            "max_rss_bytes": 16154624,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 2469000,
-            "user_ns": 60676000
-          },
-          {
-            "elapsed_ns": 64939375,
-            "max_rss_bytes": 19136512,
+            "elapsed_ns": 61578958,
+            "max_rss_bytes": 7045120,
             "position": 3,
-            "sample": 8,
-            "system_ns": 2254000,
-            "user_ns": 61626000
+            "sample": 7,
+            "system_ns": 1855000,
+            "user_ns": 59205000
           },
           {
-            "elapsed_ns": 64990250,
-            "max_rss_bytes": 13205504,
+            "elapsed_ns": 63494792,
+            "max_rss_bytes": 18972672,
             "position": 2,
-            "sample": 9,
-            "system_ns": 1909000,
-            "user_ns": 62227000
+            "sample": 8,
+            "system_ns": 1966000,
+            "user_ns": 60777000
           },
           {
-            "elapsed_ns": 63780667,
-            "max_rss_bytes": 13172736,
+            "elapsed_ns": 61965333,
+            "max_rss_bytes": 7045120,
             "position": 1,
-            "sample": 10,
-            "system_ns": 2113000,
-            "user_ns": 60793000
+            "sample": 9,
+            "system_ns": 2192000,
+            "user_ns": 59205000
           },
           {
-            "elapsed_ns": 65397542,
-            "max_rss_bytes": 19169280,
+            "elapsed_ns": 60003333,
+            "max_rss_bytes": 10027008,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 1464000,
+            "user_ns": 58039000
+          },
+          {
+            "elapsed_ns": 60958334,
+            "max_rss_bytes": 7045120,
             "position": 3,
             "sample": 11,
-            "system_ns": 2109000,
-            "user_ns": 62358000
+            "system_ns": 1400000,
+            "user_ns": 59112000
           },
           {
-            "elapsed_ns": 64615250,
-            "max_rss_bytes": 19169280,
+            "elapsed_ns": 60786417,
+            "max_rss_bytes": 7045120,
             "position": 2,
             "sample": 12,
-            "system_ns": 2271000,
-            "user_ns": 61340000
+            "system_ns": 1279000,
+            "user_ns": 59108000
           }
         ],
         "source": {
@@ -905,14 +905,14 @@
           "source_lines": 46
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.7575190805852117,
-          "mad_elapsed_ns": 727438.0,
-          "max_rss_bytes": 25100288,
-          "mean_cpu_ns": 63349250,
-          "median_elapsed_ns": 64321916.5,
-          "median_max_rss_bytes": 14680064.0,
-          "min_elapsed_ns": 62936083,
-          "p95_elapsed_ns": 65309908.3,
+          "first_to_last_window_drift_percent": -0.8016786931525965,
+          "mad_elapsed_ns": 477354.0,
+          "max_rss_bytes": 18972672,
+          "mean_cpu_ns": 60862833.333333336,
+          "median_elapsed_ns": 61118000.5,
+          "median_max_rss_bytes": 7045120.0,
+          "min_elapsed_ns": 60003333,
+          "p95_elapsed_ns": 63224970.8,
           "samples": 12
         }
       },
@@ -935,100 +935,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 302424959,
-            "max_rss_bytes": 28868608,
-            "position": 3,
+            "elapsed_ns": 282222000,
+            "max_rss_bytes": 28196864,
+            "position": 4,
             "sample": 1,
-            "system_ns": 4772000,
-            "user_ns": 295809000
+            "system_ns": 4279000,
+            "user_ns": 276662000
           },
           {
-            "elapsed_ns": 307375334,
-            "max_rss_bytes": 29114368,
-            "position": 2,
+            "elapsed_ns": 279778292,
+            "max_rss_bytes": 28016640,
+            "position": 3,
             "sample": 2,
-            "system_ns": 5260000,
-            "user_ns": 300053000
+            "system_ns": 4788000,
+            "user_ns": 273892000
           },
           {
-            "elapsed_ns": 307835250,
-            "max_rss_bytes": 29032448,
-            "position": 1,
+            "elapsed_ns": 286781125,
+            "max_rss_bytes": 28164096,
+            "position": 2,
             "sample": 3,
-            "system_ns": 5396000,
-            "user_ns": 300521000
+            "system_ns": 4774000,
+            "user_ns": 280743000
           },
           {
-            "elapsed_ns": 296063041,
-            "max_rss_bytes": 28770304,
-            "position": 3,
+            "elapsed_ns": 283213791,
+            "max_rss_bytes": 28065792,
+            "position": 1,
             "sample": 4,
-            "system_ns": 5169000,
-            "user_ns": 289036000
+            "system_ns": 4122000,
+            "user_ns": 277922000
           },
           {
-            "elapsed_ns": 297319416,
-            "max_rss_bytes": 28835840,
-            "position": 2,
+            "elapsed_ns": 289631292,
+            "max_rss_bytes": 28016640,
+            "position": 4,
             "sample": 5,
-            "system_ns": 5385000,
-            "user_ns": 290027000
+            "system_ns": 4761000,
+            "user_ns": 283722000
           },
           {
-            "elapsed_ns": 294064666,
-            "max_rss_bytes": 28442624,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 4942000,
-            "user_ns": 287337000
-          },
-          {
-            "elapsed_ns": 298257750,
-            "max_rss_bytes": 28770304,
+            "elapsed_ns": 288740375,
+            "max_rss_bytes": 28016640,
             "position": 3,
-            "sample": 7,
-            "system_ns": 5461000,
-            "user_ns": 290904000
+            "sample": 6,
+            "system_ns": 4267000,
+            "user_ns": 283338000
           },
           {
-            "elapsed_ns": 307765958,
-            "max_rss_bytes": 29540352,
+            "elapsed_ns": 290883000,
+            "max_rss_bytes": 28000256,
             "position": 2,
-            "sample": 8,
-            "system_ns": 6355000,
-            "user_ns": 298909000
+            "sample": 7,
+            "system_ns": 4932000,
+            "user_ns": 284805000
           },
           {
-            "elapsed_ns": 305210500,
-            "max_rss_bytes": 28835840,
+            "elapsed_ns": 287583292,
+            "max_rss_bytes": 28409856,
             "position": 1,
-            "sample": 9,
-            "system_ns": 5320000,
-            "user_ns": 297729000
+            "sample": 8,
+            "system_ns": 6428000,
+            "user_ns": 279491000
           },
           {
-            "elapsed_ns": 305698750,
-            "max_rss_bytes": 28901376,
+            "elapsed_ns": 287404250,
+            "max_rss_bytes": 28049408,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 4354000,
+            "user_ns": 281948000
+          },
+          {
+            "elapsed_ns": 285052625,
+            "max_rss_bytes": 28082176,
             "position": 3,
             "sample": 10,
-            "system_ns": 5821000,
-            "user_ns": 297571000
+            "system_ns": 4015000,
+            "user_ns": 279859000
           },
           {
-            "elapsed_ns": 302671291,
-            "max_rss_bytes": 28540928,
+            "elapsed_ns": 282128792,
+            "max_rss_bytes": 28016640,
             "position": 2,
             "sample": 11,
-            "system_ns": 4960000,
-            "user_ns": 295855000
+            "system_ns": 3799000,
+            "user_ns": 277231000
           },
           {
-            "elapsed_ns": 299105125,
-            "max_rss_bytes": 28524544,
+            "elapsed_ns": 295793917,
+            "max_rss_bytes": 28016640,
             "position": 1,
             "sample": 12,
-            "system_ns": 4929000,
-            "user_ns": 292181000
+            "system_ns": 4260000,
+            "user_ns": 290326000
           }
         ],
         "source": {
@@ -1041,14 +1041,14 @@
           "source_lines": 17
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -1.5303905289941078,
-          "mad_elapsed_ns": 4558792.0,
-          "max_rss_bytes": 29540352,
-          "mean_cpu_ns": 299975166.6666667,
-          "median_elapsed_ns": 302548125.0,
-          "median_max_rss_bytes": 28835840.0,
-          "min_elapsed_ns": 294064666,
-          "p95_elapsed_ns": 307797139.4,
+          "first_to_last_window_drift_percent": 1.0029781519512948,
+          "mad_elapsed_ns": 3164458.5,
+          "max_rss_bytes": 28409856,
+          "mean_cpu_ns": 285393166.6666667,
+          "median_elapsed_ns": 287092687.5,
+          "median_max_rss_bytes": 28033024.0,
+          "min_elapsed_ns": 279778292,
+          "p95_elapsed_ns": 293092912.65,
           "samples": 12
         }
       },
@@ -1063,100 +1063,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 168558958,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 168477792,
+            "max_rss_bytes": 1179648,
             "position": 1,
             "sample": 1,
-            "system_ns": 703000,
-            "user_ns": 167193000
+            "system_ns": 3219000,
+            "user_ns": 164428000
           },
           {
-            "elapsed_ns": 169583583,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 166562334,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 2,
-            "system_ns": 865000,
-            "user_ns": 167940000
+            "system_ns": 2537000,
+            "user_ns": 163260000
           },
           {
-            "elapsed_ns": 168722916,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 168609583,
+            "max_rss_bytes": 1146880,
+            "position": 3,
             "sample": 3,
-            "system_ns": 739000,
-            "user_ns": 167336000
+            "system_ns": 2281000,
+            "user_ns": 165315000
           },
           {
-            "elapsed_ns": 168527584,
-            "max_rss_bytes": 1310720,
-            "position": 1,
+            "elapsed_ns": 168018625,
+            "max_rss_bytes": 1146880,
+            "position": 2,
             "sample": 4,
-            "system_ns": 731000,
-            "user_ns": 167106000
+            "system_ns": 3070000,
+            "user_ns": 164139000
           },
           {
-            "elapsed_ns": 169908291,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 166033584,
+            "max_rss_bytes": 1146880,
+            "position": 1,
             "sample": 5,
-            "system_ns": 706000,
-            "user_ns": 168488000
+            "system_ns": 2757000,
+            "user_ns": 162393000
           },
           {
-            "elapsed_ns": 171656125,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 168670458,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 6,
-            "system_ns": 756000,
-            "user_ns": 170119000
+            "system_ns": 3013000,
+            "user_ns": 165027000
           },
           {
-            "elapsed_ns": 169356875,
-            "max_rss_bytes": 1310720,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 907000,
-            "user_ns": 167673000
-          },
-          {
-            "elapsed_ns": 168942084,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 168484250,
+            "max_rss_bytes": 1146880,
             "position": 3,
-            "sample": 8,
-            "system_ns": 719000,
-            "user_ns": 167484000
+            "sample": 7,
+            "system_ns": 3117000,
+            "user_ns": 164571000
           },
           {
-            "elapsed_ns": 175621417,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 168781917,
+            "max_rss_bytes": 1179648,
             "position": 2,
-            "sample": 9,
-            "system_ns": 1150000,
-            "user_ns": 170422000
+            "sample": 8,
+            "system_ns": 2591000,
+            "user_ns": 165473000
           },
           {
-            "elapsed_ns": 169060833,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 167588292,
+            "max_rss_bytes": 1212416,
             "position": 1,
-            "sample": 10,
-            "system_ns": 915000,
-            "user_ns": 167354000
+            "sample": 9,
+            "system_ns": 3320000,
+            "user_ns": 163520000
           },
           {
-            "elapsed_ns": 170419583,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 166604375,
+            "max_rss_bytes": 1146880,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 2653000,
+            "user_ns": 163078000
+          },
+          {
+            "elapsed_ns": 166228208,
+            "max_rss_bytes": 1146880,
             "position": 3,
             "sample": 11,
-            "system_ns": 848000,
-            "user_ns": 168849000
+            "system_ns": 2472000,
+            "user_ns": 162837000
           },
           {
-            "elapsed_ns": 170030875,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 168433625,
+            "max_rss_bytes": 1146880,
             "position": 2,
             "sample": 12,
-            "system_ns": 1053000,
-            "user_ns": 168194000
+            "system_ns": 3325000,
+            "user_ns": 164269000
           }
         ],
         "source": {
@@ -1169,14 +1169,14 @@
           "source_lines": 61
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 0.7752112344952655,
-          "mad_elapsed_ns": 653979.5,
-          "max_rss_bytes": 1310720,
-          "mean_cpu_ns": 169020833.33333334,
-          "median_elapsed_ns": 169470229.0,
-          "median_max_rss_bytes": 1310720.0,
-          "min_elapsed_ns": 168527584,
-          "p95_elapsed_ns": 173440506.39999998,
+          "first_to_last_window_drift_percent": -1.1119667332772254,
+          "mad_elapsed_ns": 500062.5,
+          "max_rss_bytes": 1212416,
+          "mean_cpu_ns": 166888750,
+          "median_elapsed_ns": 168226125.0,
+          "median_max_rss_bytes": 1146880.0,
+          "min_elapsed_ns": 166033584,
+          "p95_elapsed_ns": 168720614.55,
           "samples": 12
         }
       },
@@ -1208,100 +1208,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 3414811625,
-            "max_rss_bytes": 11960320,
-            "position": 3,
+            "elapsed_ns": 3384137041,
+            "max_rss_bytes": 11550720,
+            "position": 4,
             "sample": 1,
-            "system_ns": 7145000,
-            "user_ns": 3405033000
+            "system_ns": 51742000,
+            "user_ns": 3323364000
           },
           {
-            "elapsed_ns": 3618710250,
-            "max_rss_bytes": 11632640,
-            "position": 2,
+            "elapsed_ns": 3378653584,
+            "max_rss_bytes": 11616256,
+            "position": 3,
             "sample": 2,
-            "system_ns": 7523000,
-            "user_ns": 3603800000
+            "system_ns": 48637000,
+            "user_ns": 3321567000
           },
           {
-            "elapsed_ns": 3438509375,
-            "max_rss_bytes": 11632640,
-            "position": 1,
+            "elapsed_ns": 3404854042,
+            "max_rss_bytes": 11763712,
+            "position": 2,
             "sample": 3,
-            "system_ns": 9289000,
-            "user_ns": 3422778000
+            "system_ns": 49327000,
+            "user_ns": 3346019000
           },
           {
-            "elapsed_ns": 3455960000,
-            "max_rss_bytes": 11960320,
-            "position": 3,
+            "elapsed_ns": 3346909208,
+            "max_rss_bytes": 11698176,
+            "position": 1,
             "sample": 4,
-            "system_ns": 11531000,
-            "user_ns": 3440048000
+            "system_ns": 49727000,
+            "user_ns": 3288154000
           },
           {
-            "elapsed_ns": 3456382792,
-            "max_rss_bytes": 12206080,
-            "position": 2,
+            "elapsed_ns": 3363637125,
+            "max_rss_bytes": 11501568,
+            "position": 4,
             "sample": 5,
-            "system_ns": 9649000,
-            "user_ns": 3440671000
+            "system_ns": 51764000,
+            "user_ns": 3302135000
           },
           {
-            "elapsed_ns": 3441731167,
-            "max_rss_bytes": 11960320,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 6405000,
-            "user_ns": 3433152000
-          },
-          {
-            "elapsed_ns": 3455998375,
-            "max_rss_bytes": 11943936,
+            "elapsed_ns": 3408337375,
+            "max_rss_bytes": 11321344,
             "position": 3,
-            "sample": 7,
-            "system_ns": 8496000,
-            "user_ns": 3443532000
+            "sample": 6,
+            "system_ns": 52152000,
+            "user_ns": 3347243000
           },
           {
-            "elapsed_ns": 3420355667,
-            "max_rss_bytes": 11632640,
+            "elapsed_ns": 3380177209,
+            "max_rss_bytes": 11583488,
             "position": 2,
-            "sample": 8,
-            "system_ns": 7131000,
-            "user_ns": 3410586000
+            "sample": 7,
+            "system_ns": 43726000,
+            "user_ns": 3326737000
           },
           {
-            "elapsed_ns": 3416727792,
-            "max_rss_bytes": 11632640,
+            "elapsed_ns": 3412493708,
+            "max_rss_bytes": 11665408,
             "position": 1,
-            "sample": 9,
-            "system_ns": 6913000,
-            "user_ns": 3407036000
+            "sample": 8,
+            "system_ns": 52319000,
+            "user_ns": 3351484000
           },
           {
-            "elapsed_ns": 3437209708,
-            "max_rss_bytes": 11632640,
+            "elapsed_ns": 3414918375,
+            "max_rss_bytes": 11812864,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 51797000,
+            "user_ns": 3354904000
+          },
+          {
+            "elapsed_ns": 3387669417,
+            "max_rss_bytes": 11534336,
             "position": 3,
             "sample": 10,
-            "system_ns": 7363000,
-            "user_ns": 3421389000
+            "system_ns": 52529000,
+            "user_ns": 3326861000
           },
           {
-            "elapsed_ns": 3426224958,
-            "max_rss_bytes": 11632640,
+            "elapsed_ns": 3395145125,
+            "max_rss_bytes": 11681792,
             "position": 2,
             "sample": 11,
-            "system_ns": 7568000,
-            "user_ns": 3413257000
+            "system_ns": 48701000,
+            "user_ns": 3336540000
           },
           {
-            "elapsed_ns": 3406563833,
-            "max_rss_bytes": 11894784,
+            "elapsed_ns": 3362022417,
+            "max_rss_bytes": 11911168,
             "position": 1,
             "sample": 12,
-            "system_ns": 7523000,
-            "user_ns": 3396322000
+            "system_ns": 51414000,
+            "user_ns": 3301211000
           }
         ],
         "source": {
@@ -1314,14 +1314,14 @@
           "source_lines": 35
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.3572599536681542,
-          "mad_elapsed_ns": 18119646.0,
-          "max_rss_bytes": 12206080,
-          "mean_cpu_ns": 3444511666.6666665,
-          "median_elapsed_ns": 3437859541.5,
-          "median_max_rss_bytes": 11763712.0,
-          "min_elapsed_ns": 3406563833,
-          "p95_elapsed_ns": 3529430148.1,
+          "first_to_last_window_drift_percent": 0.10438040650257996,
+          "mad_elapsed_ns": 20608458.5,
+          "max_rss_bytes": 11911168,
+          "mean_cpu_ns": 3377504500,
+          "median_elapsed_ns": 3385903229.0,
+          "median_max_rss_bytes": 11640832.0,
+          "min_elapsed_ns": 3346909208,
+          "p95_elapsed_ns": 3413584808.15,
           "samples": 12
         }
       },
@@ -1338,100 +1338,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 6580375,
-            "max_rss_bytes": 1359872,
+            "elapsed_ns": 5500000,
+            "max_rss_bytes": 1196032,
             "position": 1,
             "sample": 1,
-            "system_ns": 1023000,
-            "user_ns": 4758000
+            "system_ns": 536000,
+            "user_ns": 4514000
           },
           {
-            "elapsed_ns": 6269708,
-            "max_rss_bytes": 1359872,
-            "position": 3,
+            "elapsed_ns": 5546458,
+            "max_rss_bytes": 1196032,
+            "position": 4,
             "sample": 2,
-            "system_ns": 796000,
-            "user_ns": 4697000
+            "system_ns": 551000,
+            "user_ns": 4546000
           },
           {
-            "elapsed_ns": 5810917,
-            "max_rss_bytes": 1359872,
-            "position": 2,
+            "elapsed_ns": 6163167,
+            "max_rss_bytes": 1196032,
+            "position": 3,
             "sample": 3,
-            "system_ns": 582000,
-            "user_ns": 4634000
-          },
-          {
-            "elapsed_ns": 6019625,
-            "max_rss_bytes": 1359872,
-            "position": 1,
-            "sample": 4,
-            "system_ns": 636000,
-            "user_ns": 4604000
-          },
-          {
-            "elapsed_ns": 6054583,
-            "max_rss_bytes": 1359872,
-            "position": 3,
-            "sample": 5,
-            "system_ns": 673000,
-            "user_ns": 4670000
-          },
-          {
-            "elapsed_ns": 6125708,
-            "max_rss_bytes": 1359872,
-            "position": 2,
-            "sample": 6,
             "system_ns": 713000,
-            "user_ns": 4671000
+            "user_ns": 4626000
           },
           {
-            "elapsed_ns": 5947208,
-            "max_rss_bytes": 1359872,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 625000,
-            "user_ns": 4695000
-          },
-          {
-            "elapsed_ns": 6029458,
-            "max_rss_bytes": 1359872,
-            "position": 3,
-            "sample": 8,
-            "system_ns": 628000,
-            "user_ns": 4704000
-          },
-          {
-            "elapsed_ns": 5870459,
-            "max_rss_bytes": 1359872,
+            "elapsed_ns": 5619542,
+            "max_rss_bytes": 1196032,
             "position": 2,
-            "sample": 9,
-            "system_ns": 610000,
-            "user_ns": 4627000
+            "sample": 4,
+            "system_ns": 557000,
+            "user_ns": 4616000
           },
           {
-            "elapsed_ns": 6233625,
-            "max_rss_bytes": 1359872,
+            "elapsed_ns": 5661833,
+            "max_rss_bytes": 1196032,
             "position": 1,
-            "sample": 10,
-            "system_ns": 813000,
-            "user_ns": 4690000
+            "sample": 5,
+            "system_ns": 668000,
+            "user_ns": 4530000
           },
           {
-            "elapsed_ns": 5885000,
-            "max_rss_bytes": 1359872,
+            "elapsed_ns": 5597084,
+            "max_rss_bytes": 1196032,
+            "position": 4,
+            "sample": 6,
+            "system_ns": 555000,
+            "user_ns": 4657000
+          },
+          {
+            "elapsed_ns": 5515292,
+            "max_rss_bytes": 1196032,
+            "position": 3,
+            "sample": 7,
+            "system_ns": 502000,
+            "user_ns": 4566000
+          },
+          {
+            "elapsed_ns": 5325333,
+            "max_rss_bytes": 1196032,
+            "position": 2,
+            "sample": 8,
+            "system_ns": 492000,
+            "user_ns": 4429000
+          },
+          {
+            "elapsed_ns": 5382542,
+            "max_rss_bytes": 1196032,
+            "position": 1,
+            "sample": 9,
+            "system_ns": 522000,
+            "user_ns": 4492000
+          },
+          {
+            "elapsed_ns": 5393625,
+            "max_rss_bytes": 1196032,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 513000,
+            "user_ns": 4434000
+          },
+          {
+            "elapsed_ns": 5520625,
+            "max_rss_bytes": 1196032,
             "position": 3,
             "sample": 11,
-            "system_ns": 588000,
-            "user_ns": 4726000
+            "system_ns": 542000,
+            "user_ns": 4575000
           },
           {
-            "elapsed_ns": 6073125,
-            "max_rss_bytes": 1359872,
+            "elapsed_ns": 5439459,
+            "max_rss_bytes": 1196032,
             "position": 2,
             "sample": 12,
-            "system_ns": 704000,
-            "user_ns": 4708000
+            "system_ns": 552000,
+            "user_ns": 4463000
           }
         ],
         "source": {
@@ -1444,14 +1444,14 @@
           "source_lines": 29
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -3.1354410763627216,
-          "mad_elapsed_ns": 125916.5,
-          "max_rss_bytes": 1359872,
-          "mean_cpu_ns": 5381250,
-          "median_elapsed_ns": 6042020.5,
-          "median_max_rss_bytes": 1359872.0,
-          "min_elapsed_ns": 5810917,
-          "p95_elapsed_ns": 6409508.15,
+          "first_to_last_window_drift_percent": -1.9291410842739665,
+          "mad_elapsed_ns": 90354.5,
+          "max_rss_bytes": 1196032,
+          "mean_cpu_ns": 5095916.666666667,
+          "median_elapsed_ns": 5517958.5,
+          "median_max_rss_bytes": 1196032.0,
+          "min_elapsed_ns": 5325333,
+          "p95_elapsed_ns": 5887433.3,
           "samples": 12
         }
       },
@@ -1475,100 +1475,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 1936822166,
-            "max_rss_bytes": 16089088,
-            "position": 3,
+            "elapsed_ns": 1863135416,
+            "max_rss_bytes": 14221312,
+            "position": 4,
             "sample": 1,
-            "system_ns": 7636000,
-            "user_ns": 1925235000
+            "system_ns": 11326000,
+            "user_ns": 1850456000
           },
           {
-            "elapsed_ns": 1935560750,
-            "max_rss_bytes": 16695296,
-            "position": 2,
+            "elapsed_ns": 1861974584,
+            "max_rss_bytes": 15122432,
+            "position": 3,
             "sample": 2,
-            "system_ns": 6929000,
-            "user_ns": 1925213000
+            "system_ns": 5997000,
+            "user_ns": 1854336000
           },
           {
-            "elapsed_ns": 1938044250,
-            "max_rss_bytes": 16613376,
-            "position": 1,
+            "elapsed_ns": 1933881333,
+            "max_rss_bytes": 14598144,
+            "position": 2,
             "sample": 3,
-            "system_ns": 8423000,
-            "user_ns": 1925725000
+            "system_ns": 8527000,
+            "user_ns": 1921796000
           },
           {
-            "elapsed_ns": 1930806750,
-            "max_rss_bytes": 16564224,
-            "position": 3,
+            "elapsed_ns": 1958729666,
+            "max_rss_bytes": 14237696,
+            "position": 1,
             "sample": 4,
-            "system_ns": 7324000,
-            "user_ns": 1919799000
+            "system_ns": 11557000,
+            "user_ns": 1945497000
           },
           {
-            "elapsed_ns": 1931991959,
-            "max_rss_bytes": 16859136,
-            "position": 2,
+            "elapsed_ns": 1868615333,
+            "max_rss_bytes": 16449536,
+            "position": 4,
             "sample": 5,
-            "system_ns": 8521000,
-            "user_ns": 1919258000
+            "system_ns": 13053000,
+            "user_ns": 1853652000
           },
           {
-            "elapsed_ns": 1925656583,
-            "max_rss_bytes": 16105472,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 6271000,
-            "user_ns": 1916159000
-          },
-          {
-            "elapsed_ns": 1941206625,
-            "max_rss_bytes": 15990784,
+            "elapsed_ns": 1894074042,
+            "max_rss_bytes": 13893632,
             "position": 3,
-            "sample": 7,
-            "system_ns": 5999000,
-            "user_ns": 1932393000
+            "sample": 6,
+            "system_ns": 13780000,
+            "user_ns": 1877494000
           },
           {
-            "elapsed_ns": 1928231792,
-            "max_rss_bytes": 15761408,
+            "elapsed_ns": 1884118833,
+            "max_rss_bytes": 14008320,
             "position": 2,
-            "sample": 8,
-            "system_ns": 7131000,
-            "user_ns": 1916712000
+            "sample": 7,
+            "system_ns": 12620000,
+            "user_ns": 1870058000
           },
           {
-            "elapsed_ns": 1976493916,
-            "max_rss_bytes": 16924672,
+            "elapsed_ns": 1877725583,
+            "max_rss_bytes": 15171584,
             "position": 1,
-            "sample": 9,
-            "system_ns": 6995000,
-            "user_ns": 1964866000
+            "sample": 8,
+            "system_ns": 10048000,
+            "user_ns": 1866552000
           },
           {
-            "elapsed_ns": 1906021875,
-            "max_rss_bytes": 15908864,
+            "elapsed_ns": 1880667708,
+            "max_rss_bytes": 14925824,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 10640000,
+            "user_ns": 1867550000
+          },
+          {
+            "elapsed_ns": 1858809625,
+            "max_rss_bytes": 14548992,
             "position": 3,
             "sample": 10,
-            "system_ns": 5342000,
-            "user_ns": 1897312000
+            "system_ns": 11456000,
+            "user_ns": 1845732000
           },
           {
-            "elapsed_ns": 1924235000,
-            "max_rss_bytes": 16498688,
+            "elapsed_ns": 1877199084,
+            "max_rss_bytes": 14041088,
             "position": 2,
             "sample": 11,
-            "system_ns": 6023000,
-            "user_ns": 1913851000
+            "system_ns": 11744000,
+            "user_ns": 1864074000
           },
           {
-            "elapsed_ns": 1960071042,
-            "max_rss_bytes": 16220160,
+            "elapsed_ns": 1900141084,
+            "max_rss_bytes": 14073856,
             "position": 1,
             "sample": 12,
-            "system_ns": 6581000,
-            "user_ns": 1944076000
+            "system_ns": 12548000,
+            "user_ns": 1885757000
           }
         ],
         "source": {
@@ -1581,14 +1581,14 @@
           "source_lines": 21
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.6498875436765306,
-          "mad_elapsed_ns": 6487416.5,
-          "max_rss_bytes": 16924672,
-          "mean_cpu_ns": 1931981166.6666667,
-          "median_elapsed_ns": 1933776354.5,
-          "median_max_rss_bytes": 16359424.0,
-          "min_elapsed_ns": 1906021875,
-          "p95_elapsed_ns": 1967461335.3,
+          "first_to_last_window_drift_percent": 0.7548387454409333,
+          "mad_elapsed_ns": 15469313.0,
+          "max_rss_bytes": 16449536,
+          "mean_cpu_ns": 1886354166.6666667,
+          "median_elapsed_ns": 1879196645.5,
+          "median_max_rss_bytes": 14393344.0,
+          "min_elapsed_ns": 1858809625,
+          "p95_elapsed_ns": 1945063082.85,
           "samples": 12
         }
       },
@@ -1605,100 +1605,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 591589792,
-            "max_rss_bytes": 18448384,
+            "elapsed_ns": 580860000,
+            "max_rss_bytes": 18890752,
             "position": 1,
             "sample": 1,
-            "system_ns": 2896000,
-            "user_ns": 587660000
+            "system_ns": 5761000,
+            "user_ns": 574293000
           },
           {
-            "elapsed_ns": 733141792,
-            "max_rss_bytes": 20332544,
-            "position": 3,
+            "elapsed_ns": 517148125,
+            "max_rss_bytes": 17973248,
+            "position": 4,
             "sample": 2,
-            "system_ns": 3452000,
-            "user_ns": 728828000
+            "system_ns": 5628000,
+            "user_ns": 510947000
           },
           {
-            "elapsed_ns": 782088541,
-            "max_rss_bytes": 20283392,
-            "position": 2,
+            "elapsed_ns": 589490042,
+            "max_rss_bytes": 18890752,
+            "position": 3,
             "sample": 3,
-            "system_ns": 2770000,
-            "user_ns": 777096000
+            "system_ns": 5382000,
+            "user_ns": 583338000
           },
           {
-            "elapsed_ns": 709146125,
-            "max_rss_bytes": 19365888,
-            "position": 1,
+            "elapsed_ns": 659662291,
+            "max_rss_bytes": 18432000,
+            "position": 2,
             "sample": 4,
-            "system_ns": 2760000,
-            "user_ns": 705203000
+            "system_ns": 4715000,
+            "user_ns": 654365000
           },
           {
-            "elapsed_ns": 619202750,
-            "max_rss_bytes": 18448384,
-            "position": 3,
+            "elapsed_ns": 572598500,
+            "max_rss_bytes": 18481152,
+            "position": 1,
             "sample": 5,
-            "system_ns": 2136000,
-            "user_ns": 616078000
+            "system_ns": 4498000,
+            "user_ns": 567422000
           },
           {
-            "elapsed_ns": 749613167,
-            "max_rss_bytes": 20283392,
-            "position": 2,
+            "elapsed_ns": 600598834,
+            "max_rss_bytes": 18890752,
+            "position": 4,
             "sample": 6,
-            "system_ns": 3610000,
-            "user_ns": 744592000
+            "system_ns": 2680000,
+            "user_ns": 597162000
           },
           {
-            "elapsed_ns": 782220583,
-            "max_rss_bytes": 20742144,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 3165000,
-            "user_ns": 777686000
-          },
-          {
-            "elapsed_ns": 607484000,
-            "max_rss_bytes": 18907136,
+            "elapsed_ns": 550200250,
+            "max_rss_bytes": 18890752,
             "position": 3,
-            "sample": 8,
-            "system_ns": 2493000,
-            "user_ns": 604024000
+            "sample": 7,
+            "system_ns": 4263000,
+            "user_ns": 545173000
           },
           {
-            "elapsed_ns": 814309500,
-            "max_rss_bytes": 19824640,
+            "elapsed_ns": 638532000,
+            "max_rss_bytes": 18890752,
             "position": 2,
-            "sample": 9,
-            "system_ns": 2847000,
-            "user_ns": 810169000
+            "sample": 8,
+            "system_ns": 3857000,
+            "user_ns": 634069000
           },
           {
-            "elapsed_ns": 906565458,
-            "max_rss_bytes": 21200896,
+            "elapsed_ns": 622232208,
+            "max_rss_bytes": 20725760,
             "position": 1,
-            "sample": 10,
-            "system_ns": 3864000,
-            "user_ns": 900682000
+            "sample": 9,
+            "system_ns": 4327000,
+            "user_ns": 615445000
           },
           {
-            "elapsed_ns": 602839000,
-            "max_rss_bytes": 19824640,
+            "elapsed_ns": 476855416,
+            "max_rss_bytes": 17973248,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 2314000,
+            "user_ns": 473962000
+          },
+          {
+            "elapsed_ns": 759579167,
+            "max_rss_bytes": 21250048,
             "position": 3,
             "sample": 11,
-            "system_ns": 3626000,
-            "user_ns": 597944000
+            "system_ns": 6418000,
+            "user_ns": 741378000
           },
           {
-            "elapsed_ns": 914736625,
-            "max_rss_bytes": 21659648,
+            "elapsed_ns": 933152833,
+            "max_rss_bytes": 21184512,
             "position": 2,
             "sample": 12,
-            "system_ns": 9313000,
-            "user_ns": 884285000
+            "system_ns": 6634000,
+            "user_ns": 921481000
           }
         ],
         "source": {
@@ -1711,14 +1711,14 @@
           "source_lines": 49
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 23.65486020472285,
-          "mad_elapsed_ns": 97553375.0,
-          "max_rss_bytes": 21659648,
-          "mean_cpu_ns": 731431583.3333334,
-          "median_elapsed_ns": 741377479.5,
-          "median_max_rss_bytes": 20054016.0,
-          "min_elapsed_ns": 591589792,
-          "p95_elapsed_ns": 910242483.15,
+          "first_to_last_window_drift_percent": 30.76802792411253,
+          "mad_elapsed_ns": 44165875.0,
+          "max_rss_bytes": 21250048,
+          "mean_cpu_ns": 622959333.3333334,
+          "median_elapsed_ns": 595044438.0,
+          "median_max_rss_bytes": 18890752.0,
+          "min_elapsed_ns": 476855416,
+          "p95_elapsed_ns": 837687316.6999998,
           "samples": 12
         }
       },
@@ -1742,100 +1742,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 2197152459,
-            "max_rss_bytes": 53477376,
-            "position": 3,
+            "elapsed_ns": 2499661958,
+            "max_rss_bytes": 51609600,
+            "position": 4,
             "sample": 1,
-            "system_ns": 10560000,
-            "user_ns": 2182774000
+            "system_ns": 22697000,
+            "user_ns": 2469205000
           },
           {
-            "elapsed_ns": 2409388416,
-            "max_rss_bytes": 53018624,
-            "position": 2,
+            "elapsed_ns": 2340709125,
+            "max_rss_bytes": 48185344,
+            "position": 3,
             "sample": 2,
-            "system_ns": 11397000,
-            "user_ns": 2394405000
+            "system_ns": 22627000,
+            "user_ns": 2316403000
           },
           {
-            "elapsed_ns": 2428285125,
-            "max_rss_bytes": 53477376,
-            "position": 1,
+            "elapsed_ns": 2188955167,
+            "max_rss_bytes": 48136192,
+            "position": 2,
             "sample": 3,
-            "system_ns": 11644000,
-            "user_ns": 2411976000
+            "system_ns": 19335000,
+            "user_ns": 2168169000
           },
           {
-            "elapsed_ns": 2056759500,
-            "max_rss_bytes": 49954816,
-            "position": 3,
+            "elapsed_ns": 2288838250,
+            "max_rss_bytes": 52936704,
+            "position": 1,
             "sample": 4,
-            "system_ns": 8214000,
-            "user_ns": 2045488000
+            "system_ns": 24504000,
+            "user_ns": 2262553000
           },
           {
-            "elapsed_ns": 2114704125,
-            "max_rss_bytes": 50348032,
-            "position": 2,
+            "elapsed_ns": 1826959000,
+            "max_rss_bytes": 48103424,
+            "position": 4,
             "sample": 5,
-            "system_ns": 8572000,
-            "user_ns": 2101838000
+            "system_ns": 10190000,
+            "user_ns": 1815351000
           },
           {
-            "elapsed_ns": 1943868708,
-            "max_rss_bytes": 49938432,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 7297000,
-            "user_ns": 1934552000
-          },
-          {
-            "elapsed_ns": 2001240833,
-            "max_rss_bytes": 49872896,
+            "elapsed_ns": 1877636667,
+            "max_rss_bytes": 48152576,
             "position": 3,
-            "sample": 7,
-            "system_ns": 7355000,
-            "user_ns": 1991879000
+            "sample": 6,
+            "system_ns": 10001000,
+            "user_ns": 1866093000
           },
           {
-            "elapsed_ns": 2037561917,
-            "max_rss_bytes": 52412416,
+            "elapsed_ns": 1778897083,
+            "max_rss_bytes": 52789248,
             "position": 2,
-            "sample": 8,
-            "system_ns": 7491000,
-            "user_ns": 2028046000
+            "sample": 7,
+            "system_ns": 9738000,
+            "user_ns": 1767541000
           },
           {
-            "elapsed_ns": 2232554209,
-            "max_rss_bytes": 53133312,
+            "elapsed_ns": 1912593625,
+            "max_rss_bytes": 48152576,
             "position": 1,
-            "sample": 9,
-            "system_ns": 9826000,
-            "user_ns": 2218954000
+            "sample": 8,
+            "system_ns": 12978000,
+            "user_ns": 1897962000
           },
           {
-            "elapsed_ns": 2197144042,
-            "max_rss_bytes": 53149696,
+            "elapsed_ns": 1804277334,
+            "max_rss_bytes": 48103424,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 11293000,
+            "user_ns": 1791485000
+          },
+          {
+            "elapsed_ns": 1821482667,
+            "max_rss_bytes": 52789248,
             "position": 3,
             "sample": 10,
-            "system_ns": 10530000,
-            "user_ns": 2183842000
+            "system_ns": 12057000,
+            "user_ns": 1807576000
           },
           {
-            "elapsed_ns": 2187789958,
-            "max_rss_bytes": 53215232,
+            "elapsed_ns": 1896665041,
+            "max_rss_bytes": 50495488,
             "position": 2,
             "sample": 11,
-            "system_ns": 9330000,
-            "user_ns": 2175870000
+            "system_ns": 13192000,
+            "user_ns": 1879271000
           },
           {
-            "elapsed_ns": 2566911167,
-            "max_rss_bytes": 53444608,
+            "elapsed_ns": 2113956583,
+            "max_rss_bytes": 49315840,
             "position": 1,
             "sample": 12,
-            "system_ns": 18105000,
-            "user_ns": 2526484000
+            "system_ns": 16845000,
+            "user_ns": 2095167000
           }
         ],
         "source": {
@@ -1848,14 +1848,14 @@
           "source_lines": 29
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -8.809055965843903,
-          "mad_elapsed_ns": 145306291.5,
-          "max_rss_bytes": 53477376,
-          "mean_cpu_ns": 2193035750,
-          "median_elapsed_ns": 2192467000.0,
-          "median_max_rss_bytes": 53075968.0,
-          "min_elapsed_ns": 1943868708,
-          "p95_elapsed_ns": 2490666843.8999996,
+          "first_to_last_window_drift_percent": -18.970493995062288,
+          "mad_elapsed_ns": 113042124.5,
+          "max_rss_bytes": 52936704,
+          "mean_cpu_ns": 2026852750,
+          "median_elapsed_ns": 1904629333.0,
+          "median_max_rss_bytes": 48750592.0,
+          "min_elapsed_ns": 1778897083,
+          "p95_elapsed_ns": 2412237899.85,
           "samples": 12
         }
       },
@@ -1872,100 +1872,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 9768250,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 9028333,
+            "max_rss_bytes": 1146880,
             "position": 1,
             "sample": 1,
-            "system_ns": 578000,
-            "user_ns": 8542000
+            "system_ns": 648000,
+            "user_ns": 7952000
           },
           {
-            "elapsed_ns": 9864917,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 8815750,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 2,
-            "system_ns": 639000,
-            "user_ns": 8514000
+            "system_ns": 602000,
+            "user_ns": 7806000
           },
           {
-            "elapsed_ns": 10031125,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 9223333,
+            "max_rss_bytes": 1146880,
+            "position": 3,
             "sample": 3,
-            "system_ns": 704000,
-            "user_ns": 8715000
+            "system_ns": 706000,
+            "user_ns": 8023000
           },
           {
-            "elapsed_ns": 10154333,
-            "max_rss_bytes": 1310720,
-            "position": 1,
+            "elapsed_ns": 8972834,
+            "max_rss_bytes": 1146880,
+            "position": 2,
             "sample": 4,
-            "system_ns": 712000,
-            "user_ns": 8751000
+            "system_ns": 641000,
+            "user_ns": 7890000
           },
           {
-            "elapsed_ns": 9815542,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 8731709,
+            "max_rss_bytes": 1146880,
+            "position": 1,
             "sample": 5,
-            "system_ns": 611000,
-            "user_ns": 8514000
+            "system_ns": 573000,
+            "user_ns": 7717000
           },
           {
-            "elapsed_ns": 10158541,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 8827625,
+            "max_rss_bytes": 1146880,
+            "position": 4,
             "sample": 6,
-            "system_ns": 750000,
-            "user_ns": 8634000
+            "system_ns": 567000,
+            "user_ns": 7824000
           },
           {
-            "elapsed_ns": 9954042,
-            "max_rss_bytes": 1310720,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 701000,
-            "user_ns": 8528000
-          },
-          {
-            "elapsed_ns": 9669375,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 9015875,
+            "max_rss_bytes": 1146880,
             "position": 3,
-            "sample": 8,
-            "system_ns": 589000,
-            "user_ns": 8498000
+            "sample": 7,
+            "system_ns": 840000,
+            "user_ns": 7781000
           },
           {
-            "elapsed_ns": 10018083,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 8788125,
+            "max_rss_bytes": 1146880,
             "position": 2,
-            "sample": 9,
-            "system_ns": 744000,
-            "user_ns": 8620000
+            "sample": 8,
+            "system_ns": 624000,
+            "user_ns": 7744000
           },
           {
-            "elapsed_ns": 10126333,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 9027959,
+            "max_rss_bytes": 1146880,
             "position": 1,
-            "sample": 10,
-            "system_ns": 759000,
-            "user_ns": 8603000
+            "sample": 9,
+            "system_ns": 572000,
+            "user_ns": 7982000
           },
           {
-            "elapsed_ns": 9923792,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 8903667,
+            "max_rss_bytes": 1146880,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 557000,
+            "user_ns": 7921000
+          },
+          {
+            "elapsed_ns": 12508875,
+            "max_rss_bytes": 1146880,
             "position": 3,
             "sample": 11,
-            "system_ns": 662000,
-            "user_ns": 8515000
+            "system_ns": 1369000,
+            "user_ns": 9096000
           },
           {
-            "elapsed_ns": 10018709,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 9055125,
+            "max_rss_bytes": 1146880,
             "position": 2,
             "sample": 12,
-            "system_ns": 669000,
-            "user_ns": 8631000
+            "system_ns": 557000,
+            "user_ns": 8095000
           }
         ],
         "source": {
@@ -1978,14 +1978,14 @@
           "source_lines": 45
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 1.5589791581622103,
-          "mad_elapsed_ns": 130708.0,
-          "max_rss_bytes": 1310720,
-          "mean_cpu_ns": 9265250,
-          "median_elapsed_ns": 9986062.5,
-          "median_max_rss_bytes": 1310720.0,
-          "min_elapsed_ns": 9669375,
-          "p95_elapsed_ns": 10156226.6,
+          "first_to_last_window_drift_percent": 0.29675467220804386,
+          "mad_elapsed_ns": 128708.5,
+          "max_rss_bytes": 1146880,
+          "mean_cpu_ns": 8673916.666666666,
+          "median_elapsed_ns": 8994354.5,
+          "median_max_rss_bytes": 1146880.0,
+          "min_elapsed_ns": 8731709,
+          "p95_elapsed_ns": 10701826.899999999,
           "samples": 12
         }
       },
@@ -2009,100 +2009,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 1267626625,
-            "max_rss_bytes": 11993088,
-            "position": 3,
+            "elapsed_ns": 1255067750,
+            "max_rss_bytes": 11567104,
+            "position": 4,
             "sample": 1,
-            "system_ns": 4870000,
-            "user_ns": 1260477000
+            "system_ns": 20544000,
+            "user_ns": 1230728000
           },
           {
-            "elapsed_ns": 1283982583,
-            "max_rss_bytes": 12107776,
-            "position": 2,
+            "elapsed_ns": 1217228958,
+            "max_rss_bytes": 11747328,
+            "position": 3,
             "sample": 2,
-            "system_ns": 5374000,
-            "user_ns": 1275976000
+            "system_ns": 20966000,
+            "user_ns": 1192299000
           },
           {
-            "elapsed_ns": 1255764542,
-            "max_rss_bytes": 11911168,
-            "position": 1,
+            "elapsed_ns": 1241413458,
+            "max_rss_bytes": 11550720,
+            "position": 2,
             "sample": 3,
-            "system_ns": 5455000,
-            "user_ns": 1248117000
+            "system_ns": 20538000,
+            "user_ns": 1216892000
           },
           {
-            "elapsed_ns": 1313033667,
-            "max_rss_bytes": 11649024,
-            "position": 3,
+            "elapsed_ns": 1223220166,
+            "max_rss_bytes": 11747328,
+            "position": 1,
             "sample": 4,
-            "system_ns": 5020000,
-            "user_ns": 1304455000
+            "system_ns": 21139000,
+            "user_ns": 1198193000
           },
           {
-            "elapsed_ns": 1236409250,
-            "max_rss_bytes": 11993088,
-            "position": 2,
+            "elapsed_ns": 1189000041,
+            "max_rss_bytes": 11796480,
+            "position": 4,
             "sample": 5,
-            "system_ns": 5184000,
-            "user_ns": 1228726000
+            "system_ns": 20298000,
+            "user_ns": 1165048000
           },
           {
-            "elapsed_ns": 1212797250,
-            "max_rss_bytes": 11649024,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 5236000,
-            "user_ns": 1205173000
-          },
-          {
-            "elapsed_ns": 1250457750,
-            "max_rss_bytes": 11993088,
+            "elapsed_ns": 1222931667,
+            "max_rss_bytes": 11436032,
             "position": 3,
-            "sample": 7,
-            "system_ns": 6466000,
-            "user_ns": 1241492000
+            "sample": 6,
+            "system_ns": 17099000,
+            "user_ns": 1202234000
           },
           {
-            "elapsed_ns": 1276837916,
-            "max_rss_bytes": 12124160,
+            "elapsed_ns": 1197448834,
+            "max_rss_bytes": 11599872,
             "position": 2,
-            "sample": 8,
-            "system_ns": 4398000,
-            "user_ns": 1270619000
+            "sample": 7,
+            "system_ns": 20918000,
+            "user_ns": 1172623000
           },
           {
-            "elapsed_ns": 1215990666,
-            "max_rss_bytes": 11649024,
+            "elapsed_ns": 1270565959,
+            "max_rss_bytes": 11354112,
             "position": 1,
-            "sample": 9,
-            "system_ns": 5020000,
-            "user_ns": 1208690000
+            "sample": 8,
+            "system_ns": 21823000,
+            "user_ns": 1244652000
           },
           {
-            "elapsed_ns": 1267793375,
-            "max_rss_bytes": 12271616,
+            "elapsed_ns": 1310088708,
+            "max_rss_bytes": 11714560,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 16008000,
+            "user_ns": 1288666000
+          },
+          {
+            "elapsed_ns": 1207793000,
+            "max_rss_bytes": 11534336,
             "position": 3,
             "sample": 10,
-            "system_ns": 7243000,
-            "user_ns": 1256246000
+            "system_ns": 5329000,
+            "user_ns": 1200718000
           },
           {
-            "elapsed_ns": 1226111500,
-            "max_rss_bytes": 11649024,
+            "elapsed_ns": 1226225333,
+            "max_rss_bytes": 11354112,
             "position": 2,
             "sample": 11,
-            "system_ns": 5547000,
-            "user_ns": 1218008000
+            "system_ns": 9071000,
+            "user_ns": 1209015000
           },
           {
-            "elapsed_ns": 1255894167,
-            "max_rss_bytes": 11960320,
+            "elapsed_ns": 1242924125,
+            "max_rss_bytes": 11681792,
             "position": 1,
             "sample": 12,
-            "system_ns": 6722000,
-            "user_ns": 1242302000
+            "system_ns": 14361000,
+            "user_ns": 1223822000
           }
         ],
         "source": {
@@ -2115,14 +2115,14 @@
           "source_lines": 30
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.9255452487833327,
-          "mad_elapsed_ns": 20214333.0,
-          "max_rss_bytes": 12271616,
-          "mean_cpu_ns": 1252234666.6666667,
-          "median_elapsed_ns": 1255829354.5,
-          "median_max_rss_bytes": 11976704.0,
-          "min_elapsed_ns": 1212797250,
-          "p95_elapsed_ns": 1297055570.8,
+          "first_to_last_window_drift_percent": -1.223454192648199,
+          "mad_elapsed_ns": 17565562.5,
+          "max_rss_bytes": 11796480,
+          "mean_cpu_ns": 1229415333.3333333,
+          "median_elapsed_ns": 1224722749.5,
+          "median_max_rss_bytes": 11583488.0,
+          "min_elapsed_ns": 1189000041,
+          "p95_elapsed_ns": 1288351196.05,
           "samples": 12
         }
       },
@@ -2138,100 +2138,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 14562875,
-            "max_rss_bytes": 2080768,
+            "elapsed_ns": 13375167,
+            "max_rss_bytes": 1933312,
             "position": 1,
             "sample": 1,
-            "system_ns": 657000,
-            "user_ns": 13242000
+            "system_ns": 636000,
+            "user_ns": 12313000
           },
           {
-            "elapsed_ns": 14447250,
-            "max_rss_bytes": 2080768,
-            "position": 3,
+            "elapsed_ns": 13695792,
+            "max_rss_bytes": 1933312,
+            "position": 4,
             "sample": 2,
-            "system_ns": 618000,
-            "user_ns": 13186000
+            "system_ns": 639000,
+            "user_ns": 12623000
           },
           {
-            "elapsed_ns": 14626417,
-            "max_rss_bytes": 2080768,
-            "position": 2,
+            "elapsed_ns": 13669834,
+            "max_rss_bytes": 1998848,
+            "position": 3,
             "sample": 3,
-            "system_ns": 650000,
-            "user_ns": 13278000
+            "system_ns": 698000,
+            "user_ns": 12491000
           },
           {
-            "elapsed_ns": 14974375,
-            "max_rss_bytes": 2162688,
-            "position": 1,
+            "elapsed_ns": 13384667,
+            "max_rss_bytes": 1933312,
+            "position": 2,
             "sample": 4,
-            "system_ns": 996000,
-            "user_ns": 13143000
+            "system_ns": 719000,
+            "user_ns": 12288000
           },
           {
-            "elapsed_ns": 14690125,
-            "max_rss_bytes": 2162688,
-            "position": 3,
+            "elapsed_ns": 13088291,
+            "max_rss_bytes": 1933312,
+            "position": 1,
             "sample": 5,
-            "system_ns": 692000,
-            "user_ns": 13317000
+            "system_ns": 638000,
+            "user_ns": 12017000
           },
           {
-            "elapsed_ns": 14370875,
-            "max_rss_bytes": 2080768,
-            "position": 2,
+            "elapsed_ns": 13618875,
+            "max_rss_bytes": 1933312,
+            "position": 4,
             "sample": 6,
-            "system_ns": 584000,
-            "user_ns": 13196000
+            "system_ns": 601000,
+            "user_ns": 12631000
           },
           {
-            "elapsed_ns": 14689334,
-            "max_rss_bytes": 2080768,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 883000,
-            "user_ns": 13214000
-          },
-          {
-            "elapsed_ns": 14398083,
-            "max_rss_bytes": 2080768,
+            "elapsed_ns": 13203000,
+            "max_rss_bytes": 1933312,
             "position": 3,
-            "sample": 8,
-            "system_ns": 583000,
-            "user_ns": 13132000
+            "sample": 7,
+            "system_ns": 540000,
+            "user_ns": 12249000
           },
           {
-            "elapsed_ns": 14511083,
-            "max_rss_bytes": 2080768,
+            "elapsed_ns": 13320667,
+            "max_rss_bytes": 1933312,
             "position": 2,
-            "sample": 9,
-            "system_ns": 642000,
-            "user_ns": 13202000
+            "sample": 8,
+            "system_ns": 547000,
+            "user_ns": 12389000
           },
           {
-            "elapsed_ns": 14561500,
-            "max_rss_bytes": 2080768,
+            "elapsed_ns": 12895958,
+            "max_rss_bytes": 1998848,
             "position": 1,
-            "sample": 10,
-            "system_ns": 715000,
-            "user_ns": 13217000
+            "sample": 9,
+            "system_ns": 561000,
+            "user_ns": 11916000
           },
           {
-            "elapsed_ns": 14762542,
-            "max_rss_bytes": 2162688,
+            "elapsed_ns": 12940334,
+            "max_rss_bytes": 1933312,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 548000,
+            "user_ns": 12003000
+          },
+          {
+            "elapsed_ns": 12805208,
+            "max_rss_bytes": 1933312,
             "position": 3,
             "sample": 11,
-            "system_ns": 823000,
-            "user_ns": 13197000
+            "system_ns": 472000,
+            "user_ns": 11927000
           },
           {
-            "elapsed_ns": 14839000,
-            "max_rss_bytes": 2162688,
+            "elapsed_ns": 13685167,
+            "max_rss_bytes": 1933312,
             "position": 2,
             "sample": 12,
-            "system_ns": 793000,
-            "user_ns": 13283000
+            "system_ns": 592000,
+            "user_ns": 12648000
           }
         ],
         "source": {
@@ -2244,14 +2244,14 @@
           "source_lines": 30
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 1.3710685561745262,
-          "mad_elapsed_ns": 121437.5,
-          "max_rss_bytes": 2162688,
-          "mean_cpu_ns": 13936916.666666666,
-          "median_elapsed_ns": 14594646.0,
-          "median_max_rss_bytes": 2080768.0,
-          "min_elapsed_ns": 14370875,
-          "p95_elapsed_ns": 14899918.75,
+          "first_to_last_window_drift_percent": -5.3365680958525115,
+          "mad_elapsed_ns": 296437.5,
+          "max_rss_bytes": 1998848,
+          "mean_cpu_ns": 12890500,
+          "median_elapsed_ns": 13347917.0,
+          "median_max_rss_bytes": 1933312.0,
+          "min_elapsed_ns": 12805208,
+          "p95_elapsed_ns": 13689948.25,
           "samples": 12
         }
       },
@@ -2274,100 +2274,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 1206292959,
-            "max_rss_bytes": 15581184,
-            "position": 3,
+            "elapsed_ns": 1177039125,
+            "max_rss_bytes": 15187968,
+            "position": 4,
             "sample": 1,
-            "system_ns": 4893000,
-            "user_ns": 1199455000
+            "system_ns": 7704000,
+            "user_ns": 1167258000
           },
           {
-            "elapsed_ns": 1201455334,
-            "max_rss_bytes": 15581184,
-            "position": 2,
+            "elapsed_ns": 1164414375,
+            "max_rss_bytes": 15220736,
+            "position": 3,
             "sample": 2,
-            "system_ns": 4449000,
-            "user_ns": 1195358000
+            "system_ns": 4821000,
+            "user_ns": 1158367000
           },
           {
-            "elapsed_ns": 1225764917,
-            "max_rss_bytes": 15515648,
-            "position": 1,
+            "elapsed_ns": 1191596708,
+            "max_rss_bytes": 15187968,
+            "position": 2,
             "sample": 3,
-            "system_ns": 8057000,
-            "user_ns": 1214581000
+            "system_ns": 6424000,
+            "user_ns": 1181961000
           },
           {
-            "elapsed_ns": 1229164833,
-            "max_rss_bytes": 16105472,
-            "position": 3,
+            "elapsed_ns": 1173703041,
+            "max_rss_bytes": 15286272,
+            "position": 1,
             "sample": 4,
-            "system_ns": 5564000,
-            "user_ns": 1217956000
+            "system_ns": 7947000,
+            "user_ns": 1164187000
           },
           {
-            "elapsed_ns": 1202880291,
-            "max_rss_bytes": 15925248,
-            "position": 2,
+            "elapsed_ns": 1175037125,
+            "max_rss_bytes": 15220736,
+            "position": 4,
             "sample": 5,
-            "system_ns": 6376000,
-            "user_ns": 1193992000
+            "system_ns": 8183000,
+            "user_ns": 1165642000
           },
           {
-            "elapsed_ns": 1216510917,
-            "max_rss_bytes": 15515648,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 5991000,
-            "user_ns": 1207468000
-          },
-          {
-            "elapsed_ns": 1217322500,
-            "max_rss_bytes": 15646720,
+            "elapsed_ns": 1168405208,
+            "max_rss_bytes": 15187968,
             "position": 3,
-            "sample": 7,
-            "system_ns": 6064000,
-            "user_ns": 1209547000
+            "sample": 6,
+            "system_ns": 6830000,
+            "user_ns": 1160428000
           },
           {
-            "elapsed_ns": 1213786167,
-            "max_rss_bytes": 15646720,
+            "elapsed_ns": 1178323833,
+            "max_rss_bytes": 15220736,
             "position": 2,
-            "sample": 8,
-            "system_ns": 4889000,
-            "user_ns": 1206600000
+            "sample": 7,
+            "system_ns": 9461000,
+            "user_ns": 1167329000
           },
           {
-            "elapsed_ns": 1205683459,
-            "max_rss_bytes": 15515648,
+            "elapsed_ns": 1179000250,
+            "max_rss_bytes": 15187968,
             "position": 1,
-            "sample": 9,
-            "system_ns": 5335000,
-            "user_ns": 1198389000
+            "sample": 8,
+            "system_ns": 8721000,
+            "user_ns": 1169062000
           },
           {
-            "elapsed_ns": 1193638000,
-            "max_rss_bytes": 15646720,
+            "elapsed_ns": 1167813958,
+            "max_rss_bytes": 15187968,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 5557000,
+            "user_ns": 1160818000
+          },
+          {
+            "elapsed_ns": 1163061958,
+            "max_rss_bytes": 15187968,
             "position": 3,
             "sample": 10,
-            "system_ns": 5420000,
-            "user_ns": 1186460000
+            "system_ns": 6142000,
+            "user_ns": 1155762000
           },
           {
-            "elapsed_ns": 1219434334,
-            "max_rss_bytes": 15695872,
+            "elapsed_ns": 1162321917,
+            "max_rss_bytes": 15220736,
             "position": 2,
             "sample": 11,
-            "system_ns": 5126000,
-            "user_ns": 1211902000
+            "system_ns": 4931000,
+            "user_ns": 1156242000
           },
           {
-            "elapsed_ns": 1216599833,
-            "max_rss_bytes": 15712256,
+            "elapsed_ns": 1164119208,
+            "max_rss_bytes": 15187968,
             "position": 1,
             "sample": 12,
-            "system_ns": 6860000,
-            "user_ns": 1206807000
+            "system_ns": 4641000,
+            "user_ns": 1158281000
           }
         ],
         "source": {
@@ -2380,14 +2380,14 @@
           "source_lines": 15
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 0.8544254464142975,
-          "mad_elapsed_ns": 9160333.0,
-          "max_rss_bytes": 16105472,
-          "mean_cpu_ns": 1209794916.6666667,
-          "median_elapsed_ns": 1215148542.0,
-          "median_max_rss_bytes": 15646720.0,
-          "min_elapsed_ns": 1193638000,
-          "p95_elapsed_ns": 1227294879.1999998,
+          "first_to_last_window_drift_percent": -1.1874853352899395,
+          "mad_elapsed_ns": 6787333.0,
+          "max_rss_bytes": 15286272,
+          "mean_cpu_ns": 1170558250,
+          "median_elapsed_ns": 1171054124.5,
+          "median_max_rss_bytes": 15187968.0,
+          "min_elapsed_ns": 1162321917,
+          "p95_elapsed_ns": 1184668656.1,
           "samples": 12
         }
       },
@@ -2402,100 +2402,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 160505291,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 153405625,
+            "max_rss_bytes": 1196032,
             "position": 1,
             "sample": 1,
-            "system_ns": 864000,
-            "user_ns": 158900000
+            "system_ns": 2047000,
+            "user_ns": 150493000
           },
           {
-            "elapsed_ns": 160135125,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 154761792,
+            "max_rss_bytes": 1163264,
+            "position": 4,
             "sample": 2,
-            "system_ns": 903000,
-            "user_ns": 158473000
+            "system_ns": 815000,
+            "user_ns": 153303000
           },
           {
-            "elapsed_ns": 159931125,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 154212625,
+            "max_rss_bytes": 1163264,
+            "position": 3,
             "sample": 3,
-            "system_ns": 737000,
-            "user_ns": 158465000
+            "system_ns": 1621000,
+            "user_ns": 151669000
           },
           {
-            "elapsed_ns": 161083625,
-            "max_rss_bytes": 1310720,
-            "position": 1,
+            "elapsed_ns": 155299583,
+            "max_rss_bytes": 1163264,
+            "position": 2,
             "sample": 4,
-            "system_ns": 1007000,
-            "user_ns": 159295000
+            "system_ns": 2435000,
+            "user_ns": 152057000
           },
           {
-            "elapsed_ns": 162214167,
-            "max_rss_bytes": 1310720,
-            "position": 3,
+            "elapsed_ns": 155294125,
+            "max_rss_bytes": 1163264,
+            "position": 1,
             "sample": 5,
-            "system_ns": 900000,
-            "user_ns": 160460000
+            "system_ns": 2185000,
+            "user_ns": 152258000
           },
           {
-            "elapsed_ns": 159797375,
-            "max_rss_bytes": 1310720,
-            "position": 2,
+            "elapsed_ns": 155702291,
+            "max_rss_bytes": 1261568,
+            "position": 4,
             "sample": 6,
-            "system_ns": 758000,
-            "user_ns": 158272000
+            "system_ns": 1564000,
+            "user_ns": 153212000
           },
           {
-            "elapsed_ns": 159756083,
-            "max_rss_bytes": 1310720,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 682000,
-            "user_ns": 158286000
-          },
-          {
-            "elapsed_ns": 159586209,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 156569833,
+            "max_rss_bytes": 1163264,
             "position": 3,
-            "sample": 8,
-            "system_ns": 702000,
-            "user_ns": 158150000
+            "sample": 7,
+            "system_ns": 2223000,
+            "user_ns": 153563000
           },
           {
-            "elapsed_ns": 160016459,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 156282292,
+            "max_rss_bytes": 1163264,
             "position": 2,
-            "sample": 9,
-            "system_ns": 1236000,
-            "user_ns": 158051000
+            "sample": 8,
+            "system_ns": 2301000,
+            "user_ns": 153265000
           },
           {
-            "elapsed_ns": 160012292,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 155378208,
+            "max_rss_bytes": 1163264,
             "position": 1,
-            "sample": 10,
-            "system_ns": 686000,
-            "user_ns": 158677000
+            "sample": 9,
+            "system_ns": 2333000,
+            "user_ns": 152119000
           },
           {
-            "elapsed_ns": 160313958,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 155707583,
+            "max_rss_bytes": 1163264,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 2126000,
+            "user_ns": 152641000
+          },
+          {
+            "elapsed_ns": 155941125,
+            "max_rss_bytes": 1163264,
             "position": 3,
             "sample": 11,
-            "system_ns": 1523000,
-            "user_ns": 158060000
+            "system_ns": 2252000,
+            "user_ns": 152798000
           },
           {
-            "elapsed_ns": 159854042,
-            "max_rss_bytes": 1310720,
+            "elapsed_ns": 158909542,
+            "max_rss_bytes": 1163264,
             "position": 2,
             "sample": 12,
-            "system_ns": 727000,
-            "user_ns": 158442000
+            "system_ns": 1463000,
+            "user_ns": 156487000
           }
         ],
         "source": {
@@ -2508,14 +2508,14 @@
           "source_lines": 117
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.07670584451724416,
-          "mad_elapsed_ns": 237646.5,
-          "max_rss_bytes": 1310720,
-          "mean_cpu_ns": 159521333.33333334,
-          "median_elapsed_ns": 160014375.5,
-          "median_max_rss_bytes": 1310720.0,
-          "min_elapsed_ns": 159586209,
-          "p95_elapsed_ns": 161592368.9,
+          "first_to_last_window_drift_percent": 1.1208550532098238,
+          "mad_elapsed_ns": 571459.0,
+          "max_rss_bytes": 1261568,
+          "mean_cpu_ns": 154769166.66666666,
+          "median_elapsed_ns": 155540249.5,
+          "median_max_rss_bytes": 1163264.0,
+          "min_elapsed_ns": 153405625,
+          "p95_elapsed_ns": 157622702.05,
           "samples": 12
         }
       },
@@ -2550,100 +2550,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 20259321333,
-            "max_rss_bytes": 12369920,
-            "position": 3,
+            "elapsed_ns": 19211888167,
+            "max_rss_bytes": 11943936,
+            "position": 4,
             "sample": 1,
-            "system_ns": 50242000,
-            "user_ns": 20192297000
+            "system_ns": 200600000,
+            "user_ns": 18969850000
           },
           {
-            "elapsed_ns": 20084123250,
-            "max_rss_bytes": 12304384,
-            "position": 2,
+            "elapsed_ns": 19428449292,
+            "max_rss_bytes": 11894784,
+            "position": 3,
             "sample": 2,
-            "system_ns": 29463000,
-            "user_ns": 19977083000
+            "system_ns": 190564000,
+            "user_ns": 19192180000
           },
           {
-            "elapsed_ns": 19984790125,
-            "max_rss_bytes": 11976704,
-            "position": 1,
+            "elapsed_ns": 19407290708,
+            "max_rss_bytes": 11730944,
+            "position": 2,
             "sample": 3,
-            "system_ns": 34358000,
-            "user_ns": 19911491000
+            "system_ns": 193738000,
+            "user_ns": 19169633000
           },
           {
-            "elapsed_ns": 20193006833,
-            "max_rss_bytes": 12288000,
-            "position": 3,
+            "elapsed_ns": 19557584000,
+            "max_rss_bytes": 12025856,
+            "position": 1,
             "sample": 4,
-            "system_ns": 72179000,
-            "user_ns": 20090314000
+            "system_ns": 215290000,
+            "user_ns": 19297354000
           },
           {
-            "elapsed_ns": 20108696125,
-            "max_rss_bytes": 12271616,
-            "position": 2,
+            "elapsed_ns": 19440424625,
+            "max_rss_bytes": 12042240,
+            "position": 4,
             "sample": 5,
-            "system_ns": 31311000,
-            "user_ns": 20060824000
+            "system_ns": 204853000,
+            "user_ns": 19190922000
           },
           {
-            "elapsed_ns": 20026449250,
-            "max_rss_bytes": 11976704,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 25015000,
-            "user_ns": 19987339000
-          },
-          {
-            "elapsed_ns": 19947483375,
-            "max_rss_bytes": 11976704,
+            "elapsed_ns": 19449587625,
+            "max_rss_bytes": 12107776,
             "position": 3,
-            "sample": 7,
-            "system_ns": 19257000,
-            "user_ns": 19891715000
+            "sample": 6,
+            "system_ns": 207123000,
+            "user_ns": 19198353000
           },
           {
-            "elapsed_ns": 20491558792,
-            "max_rss_bytes": 12304384,
-            "position": 2,
-            "sample": 8,
-            "system_ns": 17896000,
-            "user_ns": 20467627000
-          },
-          {
-            "elapsed_ns": 19855738750,
+            "elapsed_ns": 19458697084,
             "max_rss_bytes": 11976704,
-            "position": 1,
-            "sample": 9,
-            "system_ns": 16650000,
-            "user_ns": 19833657000
+            "position": 2,
+            "sample": 7,
+            "system_ns": 206384000,
+            "user_ns": 19206064000
           },
           {
-            "elapsed_ns": 19942551834,
+            "elapsed_ns": 19500523375,
+            "max_rss_bytes": 11960320,
+            "position": 1,
+            "sample": 8,
+            "system_ns": 193739000,
+            "user_ns": 19261357000
+          },
+          {
+            "elapsed_ns": 19518968375,
+            "max_rss_bytes": 11943936,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 200891000,
+            "user_ns": 19275133000
+          },
+          {
+            "elapsed_ns": 19520711583,
             "max_rss_bytes": 11976704,
             "position": 3,
             "sample": 10,
-            "system_ns": 16084000,
-            "user_ns": 19920053000
+            "system_ns": 199620000,
+            "user_ns": 19277818000
           },
           {
-            "elapsed_ns": 20019861708,
-            "max_rss_bytes": 11976704,
+            "elapsed_ns": 19578205166,
+            "max_rss_bytes": 11960320,
             "position": 2,
             "sample": 11,
-            "system_ns": 20256000,
-            "user_ns": 19988332000
+            "system_ns": 202589000,
+            "user_ns": 19329227000
           },
           {
-            "elapsed_ns": 20033423500,
-            "max_rss_bytes": 11976704,
+            "elapsed_ns": 19717373208,
+            "max_rss_bytes": 11894784,
             "position": 1,
             "sample": 12,
-            "system_ns": 31045000,
-            "user_ns": 19982844000
+            "system_ns": 199086000,
+            "user_ns": 19466420000
           }
         ],
         "source": {
@@ -2656,14 +2656,14 @@
           "source_lines": 82
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.3199618982621,
-          "mad_elapsed_ns": 80606375.0,
-          "max_rss_bytes": 12369920,
-          "mean_cpu_ns": 20055611000,
-          "median_elapsed_ns": 20029936375.0,
-          "median_max_rss_bytes": 11976704.0,
-          "min_elapsed_ns": 19855738750,
-          "p95_elapsed_ns": 20363828189.550003,
+          "first_to_last_window_drift_percent": 0.8806713959797818,
+          "mad_elapsed_ns": 46131145.5,
+          "max_rss_bytes": 12107776,
+          "mean_cpu_ns": 19437399000,
+          "median_elapsed_ns": 19479610229.5,
+          "median_max_rss_bytes": 11960320.0,
+          "min_elapsed_ns": 19211888167,
+          "p95_elapsed_ns": 19640830784.9,
           "samples": 12
         }
       },
@@ -2679,100 +2679,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 102856916,
-            "max_rss_bytes": 2949120,
+            "elapsed_ns": 90565334,
+            "max_rss_bytes": 2752512,
             "position": 1,
             "sample": 1,
-            "system_ns": 985000,
-            "user_ns": 101041000
+            "system_ns": 734000,
+            "user_ns": 89429000
           },
           {
-            "elapsed_ns": 101557625,
-            "max_rss_bytes": 2916352,
-            "position": 3,
+            "elapsed_ns": 91024042,
+            "max_rss_bytes": 2752512,
+            "position": 4,
             "sample": 2,
-            "system_ns": 926000,
-            "user_ns": 99889000
+            "system_ns": 764000,
+            "user_ns": 89805000
           },
           {
-            "elapsed_ns": 100822166,
-            "max_rss_bytes": 2949120,
-            "position": 2,
+            "elapsed_ns": 90692209,
+            "max_rss_bytes": 2752512,
+            "position": 3,
             "sample": 3,
-            "system_ns": 1128000,
-            "user_ns": 98917000
+            "system_ns": 780000,
+            "user_ns": 89526000
           },
           {
-            "elapsed_ns": 99928083,
-            "max_rss_bytes": 2916352,
-            "position": 1,
+            "elapsed_ns": 92004750,
+            "max_rss_bytes": 2752512,
+            "position": 2,
             "sample": 4,
-            "system_ns": 663000,
-            "user_ns": 98513000
+            "system_ns": 966000,
+            "user_ns": 90565000
           },
           {
-            "elapsed_ns": 100222458,
-            "max_rss_bytes": 2949120,
-            "position": 3,
+            "elapsed_ns": 89943291,
+            "max_rss_bytes": 2752512,
+            "position": 1,
             "sample": 5,
-            "system_ns": 739000,
-            "user_ns": 98734000
+            "system_ns": 816000,
+            "user_ns": 88641000
           },
           {
-            "elapsed_ns": 101090916,
-            "max_rss_bytes": 2949120,
-            "position": 2,
+            "elapsed_ns": 91718583,
+            "max_rss_bytes": 2752512,
+            "position": 4,
             "sample": 6,
-            "system_ns": 954000,
-            "user_ns": 99372000
+            "system_ns": 1195000,
+            "user_ns": 90046000
           },
           {
-            "elapsed_ns": 100936042,
-            "max_rss_bytes": 2949120,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 856000,
-            "user_ns": 99346000
-          },
-          {
-            "elapsed_ns": 101690958,
-            "max_rss_bytes": 2949120,
+            "elapsed_ns": 91062959,
+            "max_rss_bytes": 2785280,
             "position": 3,
-            "sample": 8,
-            "system_ns": 961000,
-            "user_ns": 99996000
+            "sample": 7,
+            "system_ns": 685000,
+            "user_ns": 89924000
           },
           {
-            "elapsed_ns": 102623375,
-            "max_rss_bytes": 2949120,
+            "elapsed_ns": 92556958,
+            "max_rss_bytes": 2785280,
             "position": 2,
-            "sample": 9,
-            "system_ns": 866000,
-            "user_ns": 100844000
+            "sample": 8,
+            "system_ns": 839000,
+            "user_ns": 91241000
           },
           {
-            "elapsed_ns": 101850500,
-            "max_rss_bytes": 2949120,
+            "elapsed_ns": 90447167,
+            "max_rss_bytes": 2752512,
             "position": 1,
-            "sample": 10,
-            "system_ns": 889000,
-            "user_ns": 100111000
+            "sample": 9,
+            "system_ns": 636000,
+            "user_ns": 89392000
           },
           {
-            "elapsed_ns": 100150458,
-            "max_rss_bytes": 2916352,
+            "elapsed_ns": 91568917,
+            "max_rss_bytes": 2785280,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 1099000,
+            "user_ns": 89946000
+          },
+          {
+            "elapsed_ns": 90415375,
+            "max_rss_bytes": 2752512,
             "position": 3,
             "sample": 11,
-            "system_ns": 758000,
-            "user_ns": 98710000
+            "system_ns": 837000,
+            "user_ns": 89129000
           },
           {
-            "elapsed_ns": 100341583,
-            "max_rss_bytes": 2949120,
+            "elapsed_ns": 89571792,
+            "max_rss_bytes": 2752512,
             "position": 2,
             "sample": 12,
-            "system_ns": 826000,
-            "user_ns": 98809000
+            "system_ns": 816000,
+            "user_ns": 88353000
           }
         ],
         "source": {
@@ -2785,14 +2785,14 @@
           "source_lines": 34
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -1.1973911363130085,
-          "mad_elapsed_ns": 734250.0,
-          "max_rss_bytes": 2949120,
-          "mean_cpu_ns": 100402750,
-          "median_elapsed_ns": 101013479.0,
-          "median_max_rss_bytes": 2949120.0,
-          "min_elapsed_ns": 99928083,
-          "p95_elapsed_ns": 102728468.45,
+          "first_to_last_window_drift_percent": -0.3052456247923163,
+          "mad_elapsed_ns": 576771.0,
+          "max_rss_bytes": 2785280,
+          "mean_cpu_ns": 90513666.66666667,
+          "median_elapsed_ns": 90858125.5,
+          "median_max_rss_bytes": 2752512.0,
+          "min_elapsed_ns": 89571792,
+          "p95_elapsed_ns": 92253243.6,
           "samples": 12
         }
       },
@@ -2815,100 +2815,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 1566954208,
-            "max_rss_bytes": 32784384,
-            "position": 3,
+            "elapsed_ns": 1486125166,
+            "max_rss_bytes": 30720000,
+            "position": 4,
             "sample": 1,
-            "system_ns": 8299000,
-            "user_ns": 1555862000
+            "system_ns": 9965000,
+            "user_ns": 1474456000
           },
           {
-            "elapsed_ns": 1563570709,
-            "max_rss_bytes": 34504704,
-            "position": 2,
+            "elapsed_ns": 1496211375,
+            "max_rss_bytes": 32227328,
+            "position": 3,
             "sample": 2,
-            "system_ns": 8428000,
-            "user_ns": 1551789000
+            "system_ns": 10793000,
+            "user_ns": 1483862000
           },
           {
-            "elapsed_ns": 1569185833,
-            "max_rss_bytes": 34226176,
-            "position": 1,
+            "elapsed_ns": 1496743250,
+            "max_rss_bytes": 32292864,
+            "position": 2,
             "sample": 3,
-            "system_ns": 8052000,
-            "user_ns": 1556755000
+            "system_ns": 11431000,
+            "user_ns": 1483221000
           },
           {
-            "elapsed_ns": 1528114583,
-            "max_rss_bytes": 32587776,
-            "position": 3,
+            "elapsed_ns": 1482922750,
+            "max_rss_bytes": 29016064,
+            "position": 1,
             "sample": 4,
-            "system_ns": 6617000,
-            "user_ns": 1519484000
+            "system_ns": 9367000,
+            "user_ns": 1471830000
           },
           {
-            "elapsed_ns": 1555160875,
-            "max_rss_bytes": 32800768,
-            "position": 2,
+            "elapsed_ns": 1496580750,
+            "max_rss_bytes": 30588928,
+            "position": 4,
             "sample": 5,
-            "system_ns": 6983000,
-            "user_ns": 1545695000
+            "system_ns": 11003000,
+            "user_ns": 1483885000
           },
           {
-            "elapsed_ns": 1569991417,
-            "max_rss_bytes": 33046528,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 8080000,
-            "user_ns": 1557495000
-          },
-          {
-            "elapsed_ns": 1574535709,
-            "max_rss_bytes": 32784384,
+            "elapsed_ns": 1487168833,
+            "max_rss_bytes": 34095104,
             "position": 3,
-            "sample": 7,
-            "system_ns": 9063000,
-            "user_ns": 1563074000
+            "sample": 6,
+            "system_ns": 9408000,
+            "user_ns": 1475038000
           },
           {
-            "elapsed_ns": 1586490750,
-            "max_rss_bytes": 31637504,
+            "elapsed_ns": 1511570584,
+            "max_rss_bytes": 30621696,
             "position": 2,
-            "sample": 8,
-            "system_ns": 9837000,
-            "user_ns": 1572435000
+            "sample": 7,
+            "system_ns": 12145000,
+            "user_ns": 1497007000
           },
           {
-            "elapsed_ns": 1544937292,
-            "max_rss_bytes": 32030720,
+            "elapsed_ns": 1487831875,
+            "max_rss_bytes": 30621696,
             "position": 1,
-            "sample": 9,
-            "system_ns": 7530000,
-            "user_ns": 1533509000
+            "sample": 8,
+            "system_ns": 8678000,
+            "user_ns": 1477655000
           },
           {
-            "elapsed_ns": 1545727917,
-            "max_rss_bytes": 27705344,
+            "elapsed_ns": 1493055042,
+            "max_rss_bytes": 32292864,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 10301000,
+            "user_ns": 1481244000
+          },
+          {
+            "elapsed_ns": 1494075291,
+            "max_rss_bytes": 29016064,
             "position": 3,
             "sample": 10,
-            "system_ns": 7151000,
-            "user_ns": 1534726000
+            "system_ns": 11090000,
+            "user_ns": 1481397000
           },
           {
-            "elapsed_ns": 1563555417,
-            "max_rss_bytes": 27705344,
+            "elapsed_ns": 1488903208,
+            "max_rss_bytes": 30720000,
             "position": 2,
             "sample": 11,
-            "system_ns": 7848000,
-            "user_ns": 1553337000
+            "system_ns": 10051000,
+            "user_ns": 1477352000
           },
           {
-            "elapsed_ns": 1545188583,
-            "max_rss_bytes": 32784384,
+            "elapsed_ns": 1481741375,
+            "max_rss_bytes": 30621696,
             "position": 1,
             "sample": 12,
-            "system_ns": 8313000,
-            "user_ns": 1532649000
+            "system_ns": 6762000,
+            "user_ns": 1473586000
           }
         ],
         "source": {
@@ -2921,14 +2921,14 @@
           "source_lines": 30
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -1.3546210151917815,
-          "mad_elapsed_ns": 9687417.0,
-          "max_rss_bytes": 34504704,
-          "mean_cpu_ns": 1556084250,
-          "median_elapsed_ns": 1563563063.0,
-          "median_max_rss_bytes": 32784384.0,
-          "min_elapsed_ns": 1528114583,
-          "p95_elapsed_ns": 1579915477.45,
+          "first_to_last_window_drift_percent": -0.48844482284463586,
+          "mad_elapsed_ns": 5043104.5,
+          "max_rss_bytes": 34095104,
+          "mean_cpu_ns": 1490127250,
+          "median_elapsed_ns": 1490979125.0,
+          "median_max_rss_bytes": 30670848.0,
+          "min_elapsed_ns": 1481741375,
+          "p95_elapsed_ns": 1503415550.3,
           "samples": 12
         }
       },
@@ -2944,100 +2944,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 3955916,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3433916,
+            "max_rss_bytes": 1671168,
             "position": 1,
             "sample": 1,
-            "system_ns": 689000,
-            "user_ns": 2686000
+            "system_ns": 548000,
+            "user_ns": 2442000
           },
           {
-            "elapsed_ns": 4092958,
-            "max_rss_bytes": 1835008,
-            "position": 3,
+            "elapsed_ns": 3492084,
+            "max_rss_bytes": 2228224,
+            "position": 4,
             "sample": 2,
-            "system_ns": 624000,
-            "user_ns": 2854000
+            "system_ns": 472000,
+            "user_ns": 2473000
           },
           {
-            "elapsed_ns": 3994458,
-            "max_rss_bytes": 1835008,
-            "position": 2,
-            "sample": 3,
-            "system_ns": 566000,
-            "user_ns": 2725000
-          },
-          {
-            "elapsed_ns": 3892125,
-            "max_rss_bytes": 1835008,
-            "position": 1,
-            "sample": 4,
-            "system_ns": 571000,
-            "user_ns": 2678000
-          },
-          {
-            "elapsed_ns": 3905917,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3316250,
+            "max_rss_bytes": 1671168,
             "position": 3,
-            "sample": 5,
-            "system_ns": 593000,
+            "sample": 3,
+            "system_ns": 534000,
+            "user_ns": 2417000
+          },
+          {
+            "elapsed_ns": 3619667,
+            "max_rss_bytes": 2228224,
+            "position": 2,
+            "sample": 4,
+            "system_ns": 526000,
             "user_ns": 2702000
           },
           {
-            "elapsed_ns": 4067375,
-            "max_rss_bytes": 1835008,
-            "position": 2,
+            "elapsed_ns": 3567542,
+            "max_rss_bytes": 1671168,
+            "position": 1,
+            "sample": 5,
+            "system_ns": 502000,
+            "user_ns": 2685000
+          },
+          {
+            "elapsed_ns": 3531792,
+            "max_rss_bytes": 2228224,
+            "position": 4,
             "sample": 6,
-            "system_ns": 623000,
-            "user_ns": 2751000
+            "system_ns": 526000,
+            "user_ns": 2559000
           },
           {
-            "elapsed_ns": 3896625,
-            "max_rss_bytes": 1835008,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 588000,
-            "user_ns": 2721000
-          },
-          {
-            "elapsed_ns": 3925584,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3477625,
+            "max_rss_bytes": 1703936,
             "position": 3,
-            "sample": 8,
-            "system_ns": 578000,
-            "user_ns": 2706000
+            "sample": 7,
+            "system_ns": 486000,
+            "user_ns": 2506000
           },
           {
-            "elapsed_ns": 4211084,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3556917,
+            "max_rss_bytes": 1671168,
             "position": 2,
-            "sample": 9,
-            "system_ns": 697000,
-            "user_ns": 2818000
+            "sample": 8,
+            "system_ns": 529000,
+            "user_ns": 2596000
           },
           {
-            "elapsed_ns": 4238416,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3491542,
+            "max_rss_bytes": 1671168,
             "position": 1,
-            "sample": 10,
-            "system_ns": 700000,
-            "user_ns": 2846000
+            "sample": 9,
+            "system_ns": 443000,
+            "user_ns": 2717000
           },
           {
-            "elapsed_ns": 4076625,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3734791,
+            "max_rss_bytes": 1671168,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 587000,
+            "user_ns": 2525000
+          },
+          {
+            "elapsed_ns": 3668916,
+            "max_rss_bytes": 1671168,
             "position": 3,
             "sample": 11,
-            "system_ns": 609000,
-            "user_ns": 2848000
+            "system_ns": 582000,
+            "user_ns": 2652000
           },
           {
-            "elapsed_ns": 4349709,
-            "max_rss_bytes": 1835008,
+            "elapsed_ns": 3446709,
+            "max_rss_bytes": 2768896,
             "position": 2,
             "sample": 12,
-            "system_ns": 961000,
-            "user_ns": 2755000
+            "system_ns": 542000,
+            "user_ns": 2470000
           }
         ],
         "source": {
@@ -3050,14 +3050,14 @@
           "source_lines": 28
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 6.107411819075326,
-          "mad_elapsed_ns": 115166.0,
-          "max_rss_bytes": 1835008,
-          "mean_cpu_ns": 3407416.6666666665,
-          "median_elapsed_ns": 4030916.5,
-          "median_max_rss_bytes": 1835008.0,
-          "min_elapsed_ns": 3892125,
-          "p95_elapsed_ns": 4288497.85,
+          "first_to_last_window_drift_percent": 6.843498792632086,
+          "mad_elapsed_ns": 60416.5,
+          "max_rss_bytes": 2768896,
+          "mean_cpu_ns": 3085083.3333333335,
+          "median_elapsed_ns": 3511938.0,
+          "median_max_rss_bytes": 1671168.0,
+          "min_elapsed_ns": 3316250,
+          "p95_elapsed_ns": 3698559.75,
           "samples": 12
         }
       },
@@ -3080,100 +3080,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 74997625,
-            "max_rss_bytes": 17891328,
-            "position": 3,
+            "elapsed_ns": 69612875,
+            "max_rss_bytes": 16384000,
+            "position": 4,
             "sample": 1,
-            "system_ns": 3665000,
-            "user_ns": 69686000
+            "system_ns": 3395000,
+            "user_ns": 65216000
           },
           {
-            "elapsed_ns": 76400625,
-            "max_rss_bytes": 18317312,
-            "position": 2,
+            "elapsed_ns": 77827625,
+            "max_rss_bytes": 16302080,
+            "position": 3,
             "sample": 2,
-            "system_ns": 3994000,
-            "user_ns": 70637000
+            "system_ns": 3205000,
+            "user_ns": 73559000
           },
           {
-            "elapsed_ns": 73220792,
-            "max_rss_bytes": 19988480,
-            "position": 1,
+            "elapsed_ns": 70579333,
+            "max_rss_bytes": 16334848,
+            "position": 2,
             "sample": 3,
-            "system_ns": 3820000,
-            "user_ns": 67796000
+            "system_ns": 2995000,
+            "user_ns": 66623000
           },
           {
-            "elapsed_ns": 74296125,
-            "max_rss_bytes": 18186240,
-            "position": 3,
+            "elapsed_ns": 70068958,
+            "max_rss_bytes": 18776064,
+            "position": 1,
             "sample": 4,
-            "system_ns": 3819000,
-            "user_ns": 69060000
+            "system_ns": 3253000,
+            "user_ns": 65829000
           },
           {
-            "elapsed_ns": 72539250,
+            "elapsed_ns": 70562541,
             "max_rss_bytes": 16809984,
-            "position": 2,
+            "position": 4,
             "sample": 5,
-            "system_ns": 3738000,
-            "user_ns": 67299000
+            "system_ns": 3384000,
+            "user_ns": 66055000
           },
           {
-            "elapsed_ns": 71923625,
-            "max_rss_bytes": 16711680,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 3905000,
-            "user_ns": 66559000
-          },
-          {
-            "elapsed_ns": 73825875,
-            "max_rss_bytes": 17825792,
+            "elapsed_ns": 72794583,
+            "max_rss_bytes": 16465920,
             "position": 3,
-            "sample": 7,
-            "system_ns": 3696000,
-            "user_ns": 68685000
+            "sample": 6,
+            "system_ns": 3328000,
+            "user_ns": 68408000
           },
           {
-            "elapsed_ns": 72745583,
-            "max_rss_bytes": 20152320,
+            "elapsed_ns": 71205500,
+            "max_rss_bytes": 16367616,
             "position": 2,
-            "sample": 8,
-            "system_ns": 3968000,
-            "user_ns": 67262000
+            "sample": 7,
+            "system_ns": 3561000,
+            "user_ns": 66471000
           },
           {
-            "elapsed_ns": 73189791,
-            "max_rss_bytes": 20938752,
+            "elapsed_ns": 68843500,
+            "max_rss_bytes": 16220160,
             "position": 1,
-            "sample": 9,
-            "system_ns": 3703000,
-            "user_ns": 67924000
+            "sample": 8,
+            "system_ns": 3149000,
+            "user_ns": 64621000
           },
           {
-            "elapsed_ns": 78530958,
-            "max_rss_bytes": 17858560,
+            "elapsed_ns": 71390458,
+            "max_rss_bytes": 16941056,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 3638000,
+            "user_ns": 66488000
+          },
+          {
+            "elapsed_ns": 71590958,
+            "max_rss_bytes": 16596992,
             "position": 3,
             "sample": 10,
-            "system_ns": 4045000,
-            "user_ns": 73303000
+            "system_ns": 3805000,
+            "user_ns": 66686000
           },
           {
-            "elapsed_ns": 71331834,
-            "max_rss_bytes": 16711680,
+            "elapsed_ns": 70833500,
+            "max_rss_bytes": 18612224,
             "position": 2,
             "sample": 11,
-            "system_ns": 3531000,
-            "user_ns": 66294000
+            "system_ns": 3899000,
+            "user_ns": 65651000
           },
           {
-            "elapsed_ns": 71880292,
-            "max_rss_bytes": 16711680,
+            "elapsed_ns": 70517917,
+            "max_rss_bytes": 18497536,
             "position": 1,
             "sample": 12,
-            "system_ns": 3426000,
-            "user_ns": 67071000
+            "system_ns": 3729000,
+            "user_ns": 65657000
           }
         ],
         "source": {
@@ -3186,14 +3186,14 @@
           "source_lines": 15
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -4.156575624894787,
-          "mad_elapsed_ns": 1186250.0,
-          "max_rss_bytes": 20938752,
-          "mean_cpu_ns": 72240500,
-          "median_elapsed_ns": 73205291.5,
-          "median_max_rss_bytes": 17874944.0,
-          "min_elapsed_ns": 71331834,
-          "p95_elapsed_ns": 77359274.85,
+          "first_to_last_window_drift_percent": 0.36011533291198106,
+          "mad_elapsed_ns": 660750.0,
+          "max_rss_bytes": 18776064,
+          "mean_cpu_ns": 70217083.33333333,
+          "median_elapsed_ns": 70706416.5,
+          "median_max_rss_bytes": 16531456.0,
+          "min_elapsed_ns": 68843500,
+          "p95_elapsed_ns": 75059451.9,
           "samples": 12
         }
       },
@@ -3208,100 +3208,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 129400417,
-            "max_rss_bytes": 1376256,
+            "elapsed_ns": 123326417,
+            "max_rss_bytes": 1196032,
             "position": 1,
             "sample": 1,
-            "system_ns": 917000,
-            "user_ns": 123972000
+            "system_ns": 2195000,
+            "user_ns": 120212000
           },
           {
-            "elapsed_ns": 124366042,
-            "max_rss_bytes": 1376256,
-            "position": 3,
+            "elapsed_ns": 119689041,
+            "max_rss_bytes": 1196032,
+            "position": 4,
             "sample": 2,
-            "system_ns": 852000,
-            "user_ns": 122814000
+            "system_ns": 1817000,
+            "user_ns": 117131000
           },
           {
-            "elapsed_ns": 125149167,
-            "max_rss_bytes": 1376256,
-            "position": 2,
+            "elapsed_ns": 119064959,
+            "max_rss_bytes": 1196032,
+            "position": 3,
             "sample": 3,
-            "system_ns": 709000,
-            "user_ns": 123371000
+            "system_ns": 2084000,
+            "user_ns": 116240000
           },
           {
-            "elapsed_ns": 124206667,
-            "max_rss_bytes": 1376256,
-            "position": 1,
+            "elapsed_ns": 119141500,
+            "max_rss_bytes": 1196032,
+            "position": 2,
             "sample": 4,
-            "system_ns": 723000,
-            "user_ns": 122828000
+            "system_ns": 2190000,
+            "user_ns": 116174000
           },
           {
-            "elapsed_ns": 123516500,
-            "max_rss_bytes": 1327104,
-            "position": 3,
+            "elapsed_ns": 119621833,
+            "max_rss_bytes": 1163264,
+            "position": 1,
             "sample": 5,
-            "system_ns": 625000,
-            "user_ns": 122221000
+            "system_ns": 1823000,
+            "user_ns": 117077000
           },
           {
-            "elapsed_ns": 124245791,
-            "max_rss_bytes": 1376256,
-            "position": 2,
+            "elapsed_ns": 119520625,
+            "max_rss_bytes": 1196032,
+            "position": 4,
             "sample": 6,
-            "system_ns": 745000,
-            "user_ns": 122765000
+            "system_ns": 2316000,
+            "user_ns": 116384000
           },
           {
-            "elapsed_ns": 125202042,
-            "max_rss_bytes": 1376256,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 744000,
-            "user_ns": 123750000
-          },
-          {
-            "elapsed_ns": 125332000,
-            "max_rss_bytes": 1376256,
+            "elapsed_ns": 120010750,
+            "max_rss_bytes": 1196032,
             "position": 3,
-            "sample": 8,
-            "system_ns": 758000,
-            "user_ns": 123824000
+            "sample": 7,
+            "system_ns": 2433000,
+            "user_ns": 116950000
           },
           {
-            "elapsed_ns": 124675792,
-            "max_rss_bytes": 1376256,
+            "elapsed_ns": 120956000,
+            "max_rss_bytes": 1163264,
             "position": 2,
-            "sample": 9,
-            "system_ns": 773000,
-            "user_ns": 123149000
+            "sample": 8,
+            "system_ns": 2470000,
+            "user_ns": 117785000
           },
           {
-            "elapsed_ns": 123277750,
-            "max_rss_bytes": 1327104,
+            "elapsed_ns": 119319625,
+            "max_rss_bytes": 1196032,
             "position": 1,
-            "sample": 10,
-            "system_ns": 849000,
-            "user_ns": 121841000
+            "sample": 9,
+            "system_ns": 2409000,
+            "user_ns": 116114000
           },
           {
-            "elapsed_ns": 124168333,
-            "max_rss_bytes": 1376256,
+            "elapsed_ns": 120382542,
+            "max_rss_bytes": 1196032,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 2500000,
+            "user_ns": 117099000
+          },
+          {
+            "elapsed_ns": 118923500,
+            "max_rss_bytes": 1163264,
             "position": 3,
             "sample": 11,
-            "system_ns": 734000,
-            "user_ns": 122752000
+            "system_ns": 2438000,
+            "user_ns": 115653000
           },
           {
-            "elapsed_ns": 124698333,
-            "max_rss_bytes": 1376256,
+            "elapsed_ns": 120067333,
+            "max_rss_bytes": 1196032,
             "position": 2,
             "sample": 12,
-            "system_ns": 728000,
-            "user_ns": 123211000
+            "system_ns": 2113000,
+            "user_ns": 117267000
           }
         ],
         "source": {
@@ -3314,14 +3314,14 @@
           "source_lines": 43
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -0.783731944456334,
-          "mad_elapsed_ns": 490417.0,
-          "max_rss_bytes": 1376256,
-          "mean_cpu_ns": 123804583.33333333,
-          "median_elapsed_ns": 124520917.0,
-          "median_max_rss_bytes": 1376256.0,
-          "min_elapsed_ns": 123277750,
-          "p95_elapsed_ns": 127162787.65,
+          "first_to_last_window_drift_percent": 0.31606235361181234,
+          "mad_elapsed_ns": 462916.5,
+          "max_rss_bytes": 1196032,
+          "mean_cpu_ns": 119239500,
+          "median_elapsed_ns": 119655437.0,
+          "median_max_rss_bytes": 1196032.0,
+          "min_elapsed_ns": 118923500,
+          "p95_elapsed_ns": 122022687.65,
           "samples": 12
         }
       },
@@ -3343,100 +3343,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 14100298375,
-            "max_rss_bytes": 13303808,
-            "position": 3,
+            "elapsed_ns": 13398431959,
+            "max_rss_bytes": 12599296,
+            "position": 4,
             "sample": 1,
-            "system_ns": 29590000,
-            "user_ns": 13629507000
+            "system_ns": 143989000,
+            "user_ns": 13217748000
           },
           {
-            "elapsed_ns": 14361051958,
-            "max_rss_bytes": 13303808,
-            "position": 2,
+            "elapsed_ns": 13249164250,
+            "max_rss_bytes": 12763136,
+            "position": 3,
             "sample": 2,
-            "system_ns": 22168000,
-            "user_ns": 13870259000
+            "system_ns": 170983000,
+            "user_ns": 13037484000
           },
           {
-            "elapsed_ns": 13782087708,
-            "max_rss_bytes": 13025280,
-            "position": 1,
+            "elapsed_ns": 13213462292,
+            "max_rss_bytes": 12582912,
+            "position": 2,
             "sample": 3,
-            "system_ns": 11392000,
-            "user_ns": 13762219000
+            "system_ns": 181680000,
+            "user_ns": 12997831000
           },
           {
-            "elapsed_ns": 13887164750,
-            "max_rss_bytes": 13320192,
-            "position": 3,
+            "elapsed_ns": 13135958167,
+            "max_rss_bytes": 12566528,
+            "position": 1,
             "sample": 4,
-            "system_ns": 11476000,
-            "user_ns": 13869109000
+            "system_ns": 192846000,
+            "user_ns": 12911176000
           },
           {
-            "elapsed_ns": 13602706000,
-            "max_rss_bytes": 13303808,
-            "position": 2,
+            "elapsed_ns": 13180808125,
+            "max_rss_bytes": 12550144,
+            "position": 4,
             "sample": 5,
-            "system_ns": 10531000,
-            "user_ns": 13584907000
+            "system_ns": 188531000,
+            "user_ns": 12960196000
           },
           {
-            "elapsed_ns": 13525561000,
-            "max_rss_bytes": 13385728,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 9404000,
-            "user_ns": 13509688000
-          },
-          {
-            "elapsed_ns": 13427466583,
-            "max_rss_bytes": 13107200,
+            "elapsed_ns": 13221585959,
+            "max_rss_bytes": 12599296,
             "position": 3,
-            "sample": 7,
-            "system_ns": 19517000,
-            "user_ns": 13401656000
+            "sample": 6,
+            "system_ns": 176055000,
+            "user_ns": 13014175000
           },
           {
-            "elapsed_ns": 13486849250,
-            "max_rss_bytes": 13123584,
+            "elapsed_ns": 13237327167,
+            "max_rss_bytes": 12451840,
             "position": 2,
-            "sample": 8,
-            "system_ns": 21003000,
-            "user_ns": 13458003000
+            "sample": 7,
+            "system_ns": 190948000,
+            "user_ns": 13013344000
           },
           {
-            "elapsed_ns": 13478352167,
-            "max_rss_bytes": 13352960,
+            "elapsed_ns": 13261700542,
+            "max_rss_bytes": 12795904,
             "position": 1,
-            "sample": 9,
-            "system_ns": 28426000,
-            "user_ns": 13442480000
+            "sample": 8,
+            "system_ns": 196095000,
+            "user_ns": 13031709000
           },
           {
-            "elapsed_ns": 13507607000,
-            "max_rss_bytes": 12910592,
+            "elapsed_ns": 13194716958,
+            "max_rss_bytes": 12599296,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 188910000,
+            "user_ns": 12974287000
+          },
+          {
+            "elapsed_ns": 13180616084,
+            "max_rss_bytes": 12599296,
             "position": 3,
             "sample": 10,
-            "system_ns": 22580000,
-            "user_ns": 13478710000
+            "system_ns": 188787000,
+            "user_ns": 12959514000
           },
           {
-            "elapsed_ns": 13558653625,
-            "max_rss_bytes": 13058048,
+            "elapsed_ns": 13239620625,
+            "max_rss_bytes": 12664832,
             "position": 2,
             "sample": 11,
-            "system_ns": 25998000,
-            "user_ns": 13496733000
+            "system_ns": 165352000,
+            "user_ns": 13032976000
           },
           {
-            "elapsed_ns": 13533890875,
-            "max_rss_bytes": 13090816,
+            "elapsed_ns": 13236436292,
+            "max_rss_bytes": 12353536,
             "position": 1,
             "sample": 12,
-            "system_ns": 25171000,
-            "user_ns": 13492608000
+            "system_ns": 196809000,
+            "user_ns": 13010196000
           }
         ],
         "source": {
@@ -3449,14 +3449,14 @@
           "source_lines": 26
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -4.016989463175102,
-          "mad_elapsed_ns": 63671541.5,
-          "max_rss_bytes": 13385728,
-          "mean_cpu_ns": 13602761250,
-          "median_elapsed_ns": 13546272250.0,
-          "median_max_rss_bytes": 13213696.0,
-          "min_elapsed_ns": 13427466583,
-          "p95_elapsed_ns": 14217637487.35,
+          "first_to_last_window_drift_percent": -0.09606611979318114,
+          "mad_elapsed_ns": 26421270.5,
+          "max_rss_bytes": 12795904,
+          "mean_cpu_ns": 13195135083.333334,
+          "median_elapsed_ns": 13229011125.5,
+          "median_max_rss_bytes": 12599296.0,
+          "min_elapsed_ns": 13135958167,
+          "p95_elapsed_ns": 13323229679.65,
           "samples": 12
         }
       },
@@ -3472,100 +3472,100 @@
       "c": {
         "measurements": [
           {
-            "elapsed_ns": 10868834,
-            "max_rss_bytes": 4784128,
+            "elapsed_ns": 11257958,
+            "max_rss_bytes": 10977280,
             "position": 1,
             "sample": 1,
-            "system_ns": 1287000,
-            "user_ns": 8960000
+            "system_ns": 1642000,
+            "user_ns": 9113000
           },
           {
-            "elapsed_ns": 11327125,
-            "max_rss_bytes": 4784128,
-            "position": 3,
+            "elapsed_ns": 10760417,
+            "max_rss_bytes": 4702208,
+            "position": 4,
             "sample": 2,
-            "system_ns": 1461000,
-            "user_ns": 9231000
+            "system_ns": 1495000,
+            "user_ns": 8715000
           },
           {
-            "elapsed_ns": 11439667,
-            "max_rss_bytes": 8011776,
-            "position": 2,
+            "elapsed_ns": 10714875,
+            "max_rss_bytes": 7815168,
+            "position": 3,
             "sample": 3,
-            "system_ns": 1470000,
-            "user_ns": 9352000
+            "system_ns": 1504000,
+            "user_ns": 8670000
           },
           {
-            "elapsed_ns": 10988875,
-            "max_rss_bytes": 4784128,
-            "position": 1,
+            "elapsed_ns": 10944250,
+            "max_rss_bytes": 7815168,
+            "position": 2,
             "sample": 4,
-            "system_ns": 1353000,
-            "user_ns": 8984000
+            "system_ns": 1470000,
+            "user_ns": 8931000
           },
           {
-            "elapsed_ns": 11371084,
-            "max_rss_bytes": 4784128,
-            "position": 3,
+            "elapsed_ns": 10842375,
+            "max_rss_bytes": 4620288,
+            "position": 1,
             "sample": 5,
-            "system_ns": 1360000,
-            "user_ns": 9344000
+            "system_ns": 1562000,
+            "user_ns": 8808000
           },
           {
-            "elapsed_ns": 11358125,
-            "max_rss_bytes": 7979008,
-            "position": 2,
+            "elapsed_ns": 11057250,
+            "max_rss_bytes": 7815168,
+            "position": 4,
             "sample": 6,
-            "system_ns": 1592000,
-            "user_ns": 9054000
+            "system_ns": 1625000,
+            "user_ns": 8921000
           },
           {
-            "elapsed_ns": 12639750,
-            "max_rss_bytes": 8011776,
-            "position": 1,
-            "sample": 7,
-            "system_ns": 1835000,
-            "user_ns": 9968000
-          },
-          {
-            "elapsed_ns": 12572875,
-            "max_rss_bytes": 11190272,
+            "elapsed_ns": 10918167,
+            "max_rss_bytes": 7847936,
             "position": 3,
-            "sample": 8,
-            "system_ns": 2070000,
-            "user_ns": 9746000
+            "sample": 7,
+            "system_ns": 1597000,
+            "user_ns": 8807000
           },
           {
-            "elapsed_ns": 11888125,
-            "max_rss_bytes": 7979008,
+            "elapsed_ns": 10695625,
+            "max_rss_bytes": 4620288,
             "position": 2,
-            "sample": 9,
-            "system_ns": 1545000,
-            "user_ns": 9629000
+            "sample": 8,
+            "system_ns": 1413000,
+            "user_ns": 8810000
           },
           {
-            "elapsed_ns": 11383917,
-            "max_rss_bytes": 8011776,
+            "elapsed_ns": 10826042,
+            "max_rss_bytes": 7798784,
             "position": 1,
-            "sample": 10,
-            "system_ns": 1372000,
-            "user_ns": 9315000
+            "sample": 9,
+            "system_ns": 1522000,
+            "user_ns": 8735000
           },
           {
-            "elapsed_ns": 11173584,
-            "max_rss_bytes": 4784128,
+            "elapsed_ns": 10984291,
+            "max_rss_bytes": 7815168,
+            "position": 4,
+            "sample": 10,
+            "system_ns": 1530000,
+            "user_ns": 8932000
+          },
+          {
+            "elapsed_ns": 10986875,
+            "max_rss_bytes": 7815168,
             "position": 3,
             "sample": 11,
-            "system_ns": 1561000,
-            "user_ns": 8966000
+            "system_ns": 1454000,
+            "user_ns": 9066000
           },
           {
-            "elapsed_ns": 11048583,
-            "max_rss_bytes": 4784128,
+            "elapsed_ns": 11175750,
+            "max_rss_bytes": 7815168,
             "position": 2,
             "sample": 12,
-            "system_ns": 1448000,
-            "user_ns": 8943000
+            "system_ns": 1636000,
+            "user_ns": 9038000
           }
         ],
         "source": {
@@ -3578,14 +3578,14 @@
           "source_lines": 81
         },
         "statistics": {
-          "first_to_last_window_drift_percent": -1.3555160731430038,
-          "mad_elapsed_ns": 253521.0,
-          "max_rss_bytes": 11190272,
-          "mean_cpu_ns": 10820500,
-          "median_elapsed_ns": 11364604.5,
-          "median_max_rss_bytes": 6381568.0,
-          "min_elapsed_ns": 10868834,
-          "p95_elapsed_ns": 12602968.75,
+          "first_to_last_window_drift_percent": 2.104546691824294,
+          "mad_elapsed_ns": 115604.0,
+          "max_rss_bytes": 10977280,
+          "mean_cpu_ns": 10416333.333333334,
+          "median_elapsed_ns": 10931208.5,
+          "median_max_rss_bytes": 7815168.0,
+          "min_elapsed_ns": 10695625,
+          "p95_elapsed_ns": 11212743.600000001,
           "samples": 12
         }
       },
@@ -3619,100 +3619,100 @@
       "python": {
         "measurements": [
           {
-            "elapsed_ns": 90342125,
-            "max_rss_bytes": 16285696,
-            "position": 3,
+            "elapsed_ns": 89334583,
+            "max_rss_bytes": 18792448,
+            "position": 4,
             "sample": 1,
-            "system_ns": 3736000,
-            "user_ns": 84864000
+            "system_ns": 5212000,
+            "user_ns": 82805000
           },
           {
-            "elapsed_ns": 89169625,
-            "max_rss_bytes": 16154624,
-            "position": 2,
+            "elapsed_ns": 89793834,
+            "max_rss_bytes": 19349504,
+            "position": 3,
             "sample": 2,
-            "system_ns": 3425000,
-            "user_ns": 84368000
+            "system_ns": 4709000,
+            "user_ns": 83808000
           },
           {
-            "elapsed_ns": 89343000,
-            "max_rss_bytes": 16072704,
-            "position": 1,
+            "elapsed_ns": 89296958,
+            "max_rss_bytes": 19660800,
+            "position": 2,
             "sample": 3,
-            "system_ns": 3483000,
-            "user_ns": 84483000
+            "system_ns": 4961000,
+            "user_ns": 82924000
           },
           {
-            "elapsed_ns": 89576750,
-            "max_rss_bytes": 16039936,
-            "position": 3,
+            "elapsed_ns": 89814708,
+            "max_rss_bytes": 19775488,
+            "position": 1,
             "sample": 4,
-            "system_ns": 3627000,
-            "user_ns": 84412000
+            "system_ns": 4934000,
+            "user_ns": 83340000
           },
           {
-            "elapsed_ns": 90527958,
-            "max_rss_bytes": 19939328,
-            "position": 2,
-            "sample": 5,
-            "system_ns": 3626000,
-            "user_ns": 85253000
-          },
-          {
-            "elapsed_ns": 91098333,
-            "max_rss_bytes": 19726336,
-            "position": 1,
-            "sample": 6,
-            "system_ns": 3923000,
-            "user_ns": 85502000
-          },
-          {
-            "elapsed_ns": 93640792,
-            "max_rss_bytes": 25018368,
-            "position": 3,
-            "sample": 7,
-            "system_ns": 5025000,
-            "user_ns": 86631000
-          },
-          {
-            "elapsed_ns": 92410083,
+            "elapsed_ns": 90204458,
             "max_rss_bytes": 21495808,
+            "position": 4,
+            "sample": 5,
+            "system_ns": 5333000,
+            "user_ns": 83445000
+          },
+          {
+            "elapsed_ns": 89917875,
+            "max_rss_bytes": 20414464,
+            "position": 3,
+            "sample": 6,
+            "system_ns": 5149000,
+            "user_ns": 83455000
+          },
+          {
+            "elapsed_ns": 89663833,
+            "max_rss_bytes": 19808256,
             "position": 2,
-            "sample": 8,
-            "system_ns": 4758000,
-            "user_ns": 86102000
+            "sample": 7,
+            "system_ns": 4918000,
+            "user_ns": 83312000
           },
           {
-            "elapsed_ns": 92380750,
-            "max_rss_bytes": 20692992,
+            "elapsed_ns": 90041709,
+            "max_rss_bytes": 21250048,
             "position": 1,
-            "sample": 9,
-            "system_ns": 4723000,
-            "user_ns": 85893000
+            "sample": 8,
+            "system_ns": 5049000,
+            "user_ns": 83512000
           },
           {
-            "elapsed_ns": 90201166,
-            "max_rss_bytes": 19644416,
+            "elapsed_ns": 90887917,
+            "max_rss_bytes": 21331968,
+            "position": 4,
+            "sample": 9,
+            "system_ns": 5051000,
+            "user_ns": 84420000
+          },
+          {
+            "elapsed_ns": 89727959,
+            "max_rss_bytes": 20889600,
             "position": 3,
             "sample": 10,
-            "system_ns": 3947000,
-            "user_ns": 84566000
+            "system_ns": 4882000,
+            "user_ns": 83232000
           },
           {
-            "elapsed_ns": 93044250,
-            "max_rss_bytes": 21528576,
+            "elapsed_ns": 89618458,
+            "max_rss_bytes": 20135936,
             "position": 2,
             "sample": 11,
-            "system_ns": 4409000,
-            "user_ns": 86777000
+            "system_ns": 4964000,
+            "user_ns": 83263000
           },
           {
-            "elapsed_ns": 91477458,
-            "max_rss_bytes": 21446656,
+            "elapsed_ns": 90275792,
+            "max_rss_bytes": 19972096,
             "position": 1,
             "sample": 12,
-            "system_ns": 3985000,
-            "user_ns": 85714000
+            "system_ns": 5367000,
+            "user_ns": 83447000
           }
         ],
         "source": {
@@ -3725,14 +3725,14 @@
           "source_lines": 25
         },
         "statistics": {
-          "first_to_last_window_drift_percent": 2.389060139014809,
-          "mad_elapsed_ns": 1353270.5,
-          "max_rss_bytes": 25018368,
-          "mean_cpu_ns": 89436000,
-          "median_elapsed_ns": 90813145.5,
-          "median_max_rss_bytes": 19832832.0,
-          "min_elapsed_ns": 89169625,
-          "p95_elapsed_ns": 93312693.9,
+          "first_to_last_window_drift_percent": 0.44034010882436636,
+          "mad_elapsed_ns": 211625.5,
+          "max_rss_bytes": 21495808,
+          "mean_cpu_ns": 88457666.66666667,
+          "median_elapsed_ns": 89804271.0,
+          "median_max_rss_bytes": 20054016.0,
+          "min_elapsed_ns": 89296958,
+          "p95_elapsed_ns": 90551248.25,
           "samples": 12
         }
       },
@@ -3742,9 +3742,9 @@
     }
   },
   "calibration": {
-    "captured_at_utc": "2026-07-30T15:16:56.514370+00:00",
+    "captured_at_utc": "2026-09-06T18:59:53.037354+00:00",
     "machine": {
-      "captured_at_utc": "2026-07-30T15:16:56.514370+00:00",
+      "captured_at_utc": "2026-09-06T18:59:53.037354+00:00",
       "cc": "/usr/bin/cc",
       "cc_version": "Apple clang version 17.0.0 (clang-1700.6.3.2)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
       "cflags": [
@@ -3758,24 +3758,26 @@
       "cpu_model": "Apple M4 Max",
       "harness_python": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 17.0.0 (clang-1700.6.4.2)]",
       "harness_source_sha256": {
-        "benchmarks.json": "e261e59fb1bc7351b5acf34d04de7b6e765ee3cb97d207d04318b2283ca03894",
+        "benchmarks.json": "3229d1fb4480ebb48f914ce777d3510c0ea146335082479a73d3a239816e551a",
         "tools/measure.c": "68d9d51a4cbb5704caf0f5881722f9e3b5143b6718f7c3e4b21982f647049278",
-        "tools/shootout.py": "c5be8da38a6e76dd409b7a3fec76bd95ea83750fb15aedff2985f3268340a8af"
+        "tools/shootout.py": "feeaca2cddd40c9dfd97df8b918f80b561c4c1bc7760faa6e932388669b5c691"
       },
       "load_average_end": [
-        7.7919921875,
-        6.52734375,
-        6.20263671875
+        2.251953125,
+        3.07470703125,
+        3.60595703125
       ],
       "load_average_start": [
-        4.5869140625,
-        5.11376953125,
-        5.80224609375
+        3.38525390625,
+        4.10693359375,
+        4.22705078125
       ],
       "logical_cores": 16,
       "machine": "arm64",
       "memory_bytes": 137438953472,
-      "performance_environment": {},
+      "performance_environment": {
+        "MallocNanoZone": "0"
+      },
       "physical_cores": 16,
       "platform": "macOS-15.7.7-arm64-arm-64bit-Mach-O",
       "power_source": "Now drawing from 'AC Power'",
@@ -3785,31 +3787,29 @@
       "repository": {
         "dirty": true,
         "dirty_paths": [
-          "M .gitignore",
-          " M Makefile",
-          " M examples/README.md",
-          "?? examples/shootout/"
+          "M examples/shootout/benchmarks/calculatorast/main.c",
+          " M examples/shootout/benchmarks/calculatorast/main.x",
+          " M examples/shootout/benchmarks/calculatorast/ported.x"
         ],
-        "revision": "08bb520052346535e3619421387ee88abc7a21be"
+        "revision": "c7cdc1f0dc441c1df02cb29f28ed5b0f24240cc0"
       },
       "system": "Darwin",
       "translated_process": "0",
-      "x2c_binary_sha256": "20250fcce7e0cda20d235a7eadbc965b6b6af9d13bd173e5b220d865f7c22502",
+      "x2c_binary_sha256": "cc82aa2d315746d70f83235c8f311ce76e2755fca40f2f6bdd2b6177329b1bc8",
       "x2c_build_mode": "optimize",
-      "x2c_include_tree_sha256": "1d642af034c34f4f827f5939da9227537351437ba79f9087c7e3e44553354397",
-      "x2c_runtime_sha256": "ac70a175b6a42728505e07a3c2097972658568bd139b17fff51fb3f5e55cb327"
+      "x2c_include_tree_sha256": "1c5578aa477eb9023f7cf3e30dc7684768cf68e25763c068997b5c948992f237",
+      "x2c_runtime_sha256": "2d20b72c49464572802783854bc2ec04b24e26aec3616138655a6c7ad414e8c2"
     },
     "repository": {
       "dirty": true,
       "dirty_paths": [
-        "M .gitignore",
-        " M Makefile",
-        " M examples/README.md",
-        "?? examples/shootout/"
+        "M examples/shootout/benchmarks/calculatorast/main.c",
+        " M examples/shootout/benchmarks/calculatorast/main.x",
+        " M examples/shootout/benchmarks/calculatorast/ported.x"
       ],
-      "revision": "08bb520052346535e3619421387ee88abc7a21be"
+      "revision": "c7cdc1f0dc441c1df02cb29f28ed5b0f24240cc0"
     },
-    "run_id": "20260730T151656Z"
+    "run_id": "20260906T185953Z"
   },
   "methodology": {
     "cflags": [

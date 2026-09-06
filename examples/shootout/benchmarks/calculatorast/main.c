@@ -6,26 +6,26 @@
 typedef enum { NUMBER, VARIABLE, BINARY, ASSIGN } Kind;
 typedef struct Node {
   Kind kind;
-  int64_t value;
+  int value;
   char name;
   char op;
   struct Node *left, *right;
 } Node;
 
-static Node *node(Kind kind, int64_t value, char name, char op,
+static Node *node(Kind kind, int value, char name, char op,
                   Node *left, Node *right) {
   Node *result = malloc(sizeof(Node));
   *result = (Node){kind, value, name, op, left, right};
   return result;
 }
 
-static int64_t eval(Node *ast, int64_t variables[26]) {
+static int eval(Node *ast, int variables[26]) {
   if (ast->kind == NUMBER) return ast->value;
   if (ast->kind == VARIABLE) return variables[ast->name - 'a'];
   if (ast->kind == ASSIGN)
     return variables[ast->name - 'a'] = eval(ast->right, variables);
-  int64_t left = eval(ast->left, variables);
-  int64_t right = eval(ast->right, variables);
+  int left = eval(ast->left, variables);
+  int right = eval(ast->right, variables);
   switch (ast->op) {
     case '+': return left + right;
     case '-': return left - right;
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   };
   uint64_t checksum = 0;
   for (int run = 0; run < runs; run++) {
-    int64_t variables[26] = {0};
+    int variables[26] = {0};
     for (int i = 0; i < 3; i++) checksum += eval(program[i], variables);
   }
   printf("%llu\n", (unsigned long long)checksum);

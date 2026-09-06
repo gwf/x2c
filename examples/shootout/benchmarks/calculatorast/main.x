@@ -10,18 +10,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static SymbolSet _names = %<<a b>>;
-
-static long _eval(List ast, long *variables) {
+static int _eval(List ast, int *variables) {
   match (ast) {
-    case %(number ?value): return value.long();
-    case %(variable ?name): return variables[_names.index(name)];
+    case %(number ?value): return value.int();
+    case %(variable ?name): return variables[name === <a> ? 0 : 1];
     case %(assign ?name ?expression):
-      return variables[_names.index(name)] =
+      return variables[name === <a> ? 0 : 1] =
         _eval(expression, variables);
     case %(binary ?op ?left ?right): {
-      long a = _eval(left, variables);
-      long b = _eval(right, variables);
+      int a = _eval(left, variables);
+      int b = _eval(right, variables);
       switch (op.symbol()) {
         case <+>: return a + b;
         case <->: return a - b;
@@ -43,7 +41,7 @@ int main(int argc, char **argv) {
       (binary / (number 100) (number 5))));
   uint64_t checksum = 0;
   for (int run = 0; run < runs; run++) {
-    long variables[2] = {0};
+    int variables[2] = {0};
     foreach(List expression, program) checksum += _eval(expression, variables);
   }
   printf("%llu\n", (unsigned long long) checksum);
