@@ -70,7 +70,31 @@ To keep an executable:
 ./a.out
 ```
 
-Use `--output foreach` if you want to choose its name. For help:
+Use `--output foreach` if you want to choose its name.
+
+To build and check the curated examples, then run two of them from the
+repository root:
+
+```sh
+make examples
+./examples/build/foreach/foreach
+./examples/build/programs-lisp/lisp
+```
+
+The last command opens the interactive Lisp shell; press Ctrl-D to exit.
+
+For an animated Game of Life in your terminal, build and run the optional
+termbox2 example:
+
+```sh
+make -C packages/termbox2 run-life-interactive
+```
+
+This prepares the dependency and builds the game as needed. Each cell starts
+alive with 50% probability. Press any key to quit. Other optional package
+examples have their own [build instructions](packages/README.md).
+
+For help:
 
 ```sh
 ./x2c --help
