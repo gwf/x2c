@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/is-type-pointer-parens.x:4:16: parse: pointer type after 'is' must be parenthesized
+    return value is int *;
+                 ^^
+  note: write value is (T *)
+
+limit: too many errors, stopping
+

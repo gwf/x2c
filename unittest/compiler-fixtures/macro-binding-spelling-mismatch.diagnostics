@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-binding-spelling-mismatch.x:12:13: macro: x2c.binding.spelling requires a known binding
+  int value = $spelling(value);
+              ^
+  note: binding: (binding 1 "forged")
+
+limit: too many errors, stopping
+

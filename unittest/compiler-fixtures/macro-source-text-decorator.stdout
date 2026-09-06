@@ -1,0 +1,3 @@
+[static int decorated(void) {
+  return 7;
+}]

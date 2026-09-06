@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/keyword-alias-macro-wrong-position.x:10:3: macro: macro 'fixture.generate' has result kind Unit and cannot be invoked at block scope
+    generate();
+    ^^^^^^^^
+
+limit: too many errors, stopping
+

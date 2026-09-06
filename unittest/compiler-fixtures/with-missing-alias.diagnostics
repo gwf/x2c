@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/with-missing-alias.x:5:17: parse: expected an alias identifier after 'as'
+    with value as {}
+                  ^
+
+limit: too many errors, stopping
+

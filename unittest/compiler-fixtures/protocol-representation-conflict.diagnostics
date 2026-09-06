@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/protocol-representation-conflict.x:14:1: protocol: conflicting adoption declarations for Var(Row)
+  protocol Var(Row) as Map;
+  ^^^^^^^^
+  note: first: unittest/compiler-fixtures/protocol-representation-conflict.x:13:1 second: unittest/compiler-fixtures/protocol-representation-conflict.x:14:1
+
+limit: too many errors, stopping
+

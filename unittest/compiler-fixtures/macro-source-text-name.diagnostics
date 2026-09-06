@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-source-text-name.x:7:16: macro: x2c.source.text requires complete captured syntax
+  String value = $named(identifier);
+                 ^
+
+limit: too many errors, stopping
+

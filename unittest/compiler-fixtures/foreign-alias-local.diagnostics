@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/foreign-alias-local.x:5:3: macro: decorator 'x2c.foreign.alias' targets Unit syntax and cannot be used here
+    $x2c.foreign.alias(abs)
+    ^
+
+limit: too many errors, stopping
+

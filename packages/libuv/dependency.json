@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "libuv",
+  "version": "1.52.1",
+  "profile": "static-macos",
+  "sources": [
+    {
+      "name": "libuv",
+      "url": "https://dist.libuv.org/dist/v1.52.1/libuv-v1.52.1.tar.gz",
+      "sha256": "66d511b9e6e334c0e62279eb234fbfb2b3110b1479c09b95b44c7afca8cff9e7",
+      "root": "libuv-v1.52.1"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_libuv}",
+      "argv": ["sh", "autogen.sh"]
+    },
+    {
+      "cwd": "{source_libuv}",
+      "argv": [
+        "./configure", "--prefix={prefix}", "--disable-shared",
+        "--enable-static"
+      ]
+    },
+    {
+      "cwd": "{source_libuv}",
+      "argv": ["make", "-j{jobs}"]
+    },
+    {
+      "cwd": "{source_libuv}",
+      "argv": ["make", "install"]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/uv.h",
+    "{prefix}/include/uv/version.h",
+    "{prefix}/lib/libuv.a"
+  ]
+}

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-map-entry-wrong-position.x:7:13: macro: macro 'row' cannot be invoked in an expression
+  int value = $row();
+              ^
+
+limit: too many errors, stopping
+

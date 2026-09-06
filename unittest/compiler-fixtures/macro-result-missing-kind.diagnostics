@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-result-missing-kind.x:3:7: parse: macro definition requires a result kind before '$'
+  macro $missing_kind() => {
+        ^
+  note: write the result kind between 'macro' and the macro name
+
+limit: too many errors, stopping
+

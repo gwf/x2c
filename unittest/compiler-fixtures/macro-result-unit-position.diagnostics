@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-result-unit-position.x:8:3: macro: macro 'unit_result' has result kind Unit and cannot be invoked at block scope
+    $unit_result();
+    ^
+
+limit: too many errors, stopping
+

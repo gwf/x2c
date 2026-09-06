@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lisp-bind-duplicate.x:8:1: macro: duplicate native Lisp binding name
+  $lisp.binding(sample, "same")
+  ^
+  note: group: sample name: same
+
+limit: too many errors, stopping
+

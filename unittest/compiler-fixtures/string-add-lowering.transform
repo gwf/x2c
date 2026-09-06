@@ -1,0 +1,81 @@
+
+(preproc "#include \"x2c.x\"")
+
+(function (static "String") 
+ (bind (binding 1 "suffix") ((fnmod (params (param (void) (bind () ())))))) 
+ (block (at 11 (return (expr ("String") (cache 0))))))
+
+(function (int) 
+ (bind (binding 2 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 2 (stmnt 
+         (expr (void) 
+          (call (expr ((func ((void))) void) (ident (binding 3 "Scope_retain"))) 
+           (args (expr (void) ())))))) 
+  (at 3 (declare ("String") 
+         (bindings 
+          (op = (bind (binding 4 "left") ()) (expr ("String") (cache 1))) 
+          (op = (bind (binding 5 "right") ()) (expr ("String") (cache 2)))))) 
+  (at 4 (declare ("String") 
+         (bindings 
+          (op = (bind (binding 6 "joined") ()) 
+           (expr ("String") 
+            (call (expr ((func (("String") ("String"))) "String") 
+                   (ident (binding 7 "String_add"))) 
+             (args (expr ("String") (ident (binding 4 "left"))) 
+              (expr ("String") (ident (binding 5 "right")))))))))) 
+  (at 5 (declare ("String") 
+         (bindings 
+          (op = (bind (binding 8 "mixed") ()) 
+           (expr ("String") 
+            (call (expr ((func (("String") ("String"))) "String") 
+                   (ident (binding 7 "String_add"))) 
+             (args (expr ("String") (ident (binding 4 "left"))) 
+              (expr ("String") (cache 3))))))))) 
+  (at 6 (declare ("String") 
+         (bindings 
+          (op = (bind (binding 9 "constant") ()) (expr ("String") (cache 6)))))) 
+  (at 12 
+   (stmnt 
+    (expr ("String") 
+     (vcompound (expr ("String") (ident (binding 6 "joined"))) 
+      (expr ("Symbol") "56") 
+      (expr ("String") 
+       (call (expr ((func ((void))) "String") (ident (binding 1 "suffix"))) 
+        (args (expr (void) ())))) "_x2c_proto_string_add_update")))) 
+  (at 8 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 10 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%s %s %s\\n\"")) 
+            (expr ("String") (ident (binding 6 "joined"))) 
+            (expr ("String") (ident (binding 8 "mixed"))) 
+            (expr ("String") (ident (binding 9 "constant")))))))) 
+  (at 9 (stmnt 
+         (expr (void) 
+          (call (expr ((func ((void))) void) 
+                 (ident (binding 11 "Scope_release"))) (args (expr (void) ())))))) 
+  (at 13 (return (expr (int) (literal (int) "0"))))))
+
+(function (static "String") 
+ (bind (binding 31 "_x2c_proto_string_add_update") 
+  ((fnmod 
+    (params (param (volatile "String") (bind (binding 32 "lhs") (*))) 
+     (param ("Symbol") (bind (binding 33 "op") ())) 
+     (param ("String") (bind (binding 34 "rhs") ())))))) 
+ (block 
+  (stmnt 
+   (expr ("String") 
+    (op = (expr ("String") 
+           (index (expr (* volatile "String") (ident (binding 32 "lhs"))) 
+            (expr (int) (literal (int) "0")))) 
+     (expr ("String") 
+      (call (expr ((func (("String") ("String"))) "String") 
+             (ident (binding 7 "String_add"))) 
+       (args (expr ("String") 
+              (index (expr (* volatile "String") (ident (binding 32 "lhs"))) 
+               (expr (int) (literal (int) "0")))) 
+        (expr ("String") (ident (binding 34 "rhs"))))))))) 
+  (return 
+   (expr ("String") 
+    (index (expr (* volatile "String") (ident (binding 32 "lhs"))) 
+     (expr (int) (literal (int) "0")))))))

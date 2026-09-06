@@ -1,0 +1,133 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+const { frontmatter } = Astro.props;
+const { title, deck, description, index, jump = [] } = frontmatter;
+---
+
+<BaseLayout title={`${title} - x2c`} description={description}>
+  <section class="story-hero">
+    <div>
+      {index && <p class="story-index">{index}</p>}
+      <h1>{title}</h1>
+      {deck && <p class="story-deck">{deck}</p>}
+    </div>
+  </section>
+
+  {jump.length > 0 && (
+    <nav class="story-jump" aria-label="On this page">
+      {jump.map((item: { href: string; label: string }) => (
+        <a href={item.href}>{item.label}</a>
+      ))}
+    </nav>
+  )}
+
+  <div class="prose">
+    <slot />
+  </div>
+</BaseLayout>
+
+<style>
+  .story-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story-jump {
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  }
+
+  .prose {
+    width: min(100%, calc(var(--page) + 2 * var(--pad)));
+    margin-inline: auto;
+    padding: clamp(40px, 5vw, 68px) var(--pad) clamp(64px, 8vw, 104px);
+  }
+
+  .prose > :global(*) {
+    max-width: 76ch;
+  }
+
+  .prose :global(h2) {
+    scroll-margin-top: calc(var(--header-height) + 56px);
+    margin: 62px 0 18px;
+    padding-top: 26px;
+    border-top: 1px solid var(--hairline);
+    font-size: clamp(23px, 2.3vw, 30px);
+  }
+
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .prose :global(h3) {
+    margin: 38px 0 14px;
+    font-size: clamp(17px, 1.6vw, 20px);
+  }
+
+  .prose :global(p),
+  .prose :global(li) {
+    line-height: 1.68;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 22px;
+  }
+
+  .prose :global(li) {
+    margin: 8px 0;
+  }
+
+  .prose :global(pre) {
+    margin: 22px 0;
+    padding: clamp(16px, 2vw, 24px);
+    overflow-x: auto;
+    border: 1px solid #000;
+    border-top: 4px solid var(--red);
+    background: var(--code) !important;
+    font-size: clamp(12px, 1.15vw, 13.5px);
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  .prose :global(code) {
+    font-family: var(--font-mono);
+  }
+
+  .prose :global(:not(pre) > code) {
+    color: var(--red-tint);
+    font-size: 0.92em;
+  }
+
+  .prose :global(blockquote) {
+    margin: 22px 0;
+    padding: 4px 0 4px 20px;
+    border-left: 3px solid var(--red);
+    color: var(--muted);
+  }
+
+  .prose :global(table) {
+    width: 100%;
+    margin: 22px 0;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 9px 12px;
+    border: 1px solid var(--hairline);
+    text-align: left;
+  }
+
+  .prose :global(th) {
+    font: 600 12px/1.2 var(--font-mono);
+  }
+
+  .prose :global(hr) {
+    margin: 48px 0;
+    border: 0;
+    border-top: 1px solid var(--hairline);
+  }
+</style>

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-representation-body.x:3:1: protocol: 'as' applies only to a concrete protocol adoption
+  protocol Var(T) as List {
+  ^^^^^^^^
+
+limit: too many errors, stopping
+

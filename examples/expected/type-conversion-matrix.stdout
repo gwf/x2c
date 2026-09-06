@@ -1,0 +1,11 @@
+integer: 42
+integer-to-double: 42.000000
+floating: 3.140000
+string: hello
+list-length: 3
+symbol: config
+mixed: i32 42
+mixed: f64 3.140000
+mixed: string hello
+mixed: symbol config
+mixed: list ( alpha beta gamma )

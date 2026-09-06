@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-enumerator-wrong-position.x:7:1: macro: macro 'file_enumerator' has result kind Enumerator and cannot be invoked at file scope
+  $file_enumerator();
+  ^
+
+limit: too many errors, stopping
+

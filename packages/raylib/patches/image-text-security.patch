@@ -1,0 +1,197 @@
+--- a/src/rtextures.c
++++ b/src/rtextures.c
+@@ -69,0 +70 @@
++#include <limits.h>
+@@ -790,3 +791,4 @@
+-    Color *pixels = (Color *)RL_CALLOC(width*height, sizeof(Color));
+-
+-    for (int i = 0; i < width*height; i++) pixels[i] = color;
++    int dataSize = GetPixelDataSize(width, height, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
++    Color *pixels = (dataSize > 0)? (Color *)RL_CALLOC(dataSize, 1) : NULL;
++
++    for (int i = 0; (pixels != NULL) && (i < width*height); i++) pixels[i] = color;
+@@ -1175,12 +1177,28 @@
+-    int bytesPerPixel = GetPixelDataSize(1, 1, image.format);
+-
+-    result.width = (int)rec.width;
+-    result.height = (int)rec.height;
+-    result.data = RL_CALLOC((int)rec.width*(int)rec.height*bytesPerPixel, 1);
+-    result.format = image.format;
+-    result.mipmaps = 1;
+-
+-    for (int y = 0; y < (int)rec.height; y++)
+-    {
+-        memcpy(((unsigned char *)result.data) + y*(int)rec.width*bytesPerPixel, ((unsigned char *)image.data) + ((y + (int)rec.y)*image.width + (int)rec.x)*bytesPerPixel, (int)rec.width*bytesPerPixel);
+-    }
++    // Security check to avoid program crash
++    if ((image.data == NULL) || (image.width == 0) || (image.height == 0)) return result;
++
++    if (image.format < PIXELFORMAT_COMPRESSED_DXT1_RGB)
++	{
++        // Basic rectangle validation: size smaller than image size
++        if ((rec.x >= 0) && (rec.y >= 0) && (rec.width > 0) && (rec.height > 0) &&
++            (((double)rec.x + rec.width) <= image.width) &&
++            (((double)rec.y + rec.height) <= image.height))
++        {
++            int bytesPerPixel = GetPixelDataSize(1, 1, image.format);
++
++            result.width = (int)rec.width;
++            result.height = (int)rec.height;
++            result.data = RL_CALLOC((int)rec.width*(int)rec.height*bytesPerPixel, 1);
++            result.format = image.format;
++            result.mipmaps = 1;
++
++            for (int y = 0; y < (int)rec.height; y++)
++            {
++                memcpy(((unsigned char *)result.data) + y*(int)rec.width*bytesPerPixel,
++                    ((unsigned char *)image.data) + ((y + (int)rec.y)*image.width + (int)rec.x)*bytesPerPixel,
++                    (int)rec.width*bytesPerPixel);
++            }
++        }
++        else TRACELOG(LOG_WARNING, "IMAGE: ImageToImage(), rectangle provided not valid");
++	}
++    else TRACELOG(LOG_WARNING, "IMAGE: Image manipulation not supported for compressed formats");
+@@ -2629,0 +2648 @@
++        int dataSize = GetPixelDataSize(width, height, image->format);
+@@ -2631,20 +2650,12 @@
+-        unsigned char *rotatedData = (unsigned char *)RL_CALLOC(width*height, bytesPerPixel);
+-
+-        for (int y = 0; y < height; y++)
+-        {
+-            for (int x = 0; x < width; x++)
+-            {
+-                float oldX = ((x - width/2.0f)*cosRadius + (y - height/2.0f)*sinRadius) + image->width/2.0f;
+-                float oldY = ((y - height/2.0f)*cosRadius - (x - width/2.0f)*sinRadius) + image->height/2.0f;
+-
+-                if ((oldX >= 0) && (oldX < image->width) && (oldY >= 0) && (oldY < image->height))
+-                {
+-                    int x1 = (int)floorf(oldX);
+-                    int y1 = (int)floorf(oldY);
+-                    int x2 = MIN(x1 + 1, image->width - 1);
+-                    int y2 = MIN(y1 + 1, image->height - 1);
+-
+-                    float px = oldX - x1;
+-                    float py = oldY - y1;
+-
+-                    for (int i = 0; i < bytesPerPixel; i++)
++        unsigned char *rotatedData = (dataSize > 0)? (unsigned char *)RL_CALLOC(dataSize, 1) : NULL;
++
++        if (rotatedData != NULL)
++        {
++            for (int y = 0; y < height; y++)
++            {
++                for (int x = 0; x < width; x++)
++                {
++                    float oldX = ((x - width/2.0f)*cosRadius + (y - height/2.0f)*sinRadius) + image->width/2.0f;
++                    float oldY = ((y - height/2.0f)*cosRadius - (x - width/2.0f)*sinRadius) + image->height/2.0f;
++
++                    if ((oldX >= 0) && (oldX < image->width) && (oldY >= 0) && (oldY < image->height))
+@@ -2652,8 +2663,19 @@
+-                        float f1 = ((unsigned char *)image->data)[(y1*image->width + x1)*bytesPerPixel + i];
+-                        float f2 = ((unsigned char *)image->data)[(y1*image->width + x2)*bytesPerPixel + i];
+-                        float f3 = ((unsigned char *)image->data)[(y2*image->width + x1)*bytesPerPixel + i];
+-                        float f4 = ((unsigned char *)image->data)[(y2*image->width + x2)*bytesPerPixel + i];
+-
+-                        float val = f1*(1 - px)*(1 - py) + f2*px*(1 - py) + f3*(1 - px)*py + f4*px*py;
+-
+-                        rotatedData[(y*width + x)*bytesPerPixel + i] = (unsigned char)val;
++                        int x1 = (int)floorf(oldX);
++                        int y1 = (int)floorf(oldY);
++                        int x2 = MIN(x1 + 1, image->width - 1);
++                        int y2 = MIN(y1 + 1, image->height - 1);
++
++                        float px = oldX - x1;
++                        float py = oldY - y1;
++
++                        for (int i = 0; i < bytesPerPixel; i++)
++                        {
++                            float f1 = ((unsigned char *)image->data)[(y1*image->width + x1)*bytesPerPixel + i];
++                            float f2 = ((unsigned char *)image->data)[(y1*image->width + x2)*bytesPerPixel + i];
++                            float f3 = ((unsigned char *)image->data)[(y2*image->width + x1)*bytesPerPixel + i];
++                            float f4 = ((unsigned char *)image->data)[(y2*image->width + x2)*bytesPerPixel + i];
++
++                            float val = f1*(1 - px)*(1 - py) + f2*px*(1 - py) + f3*(1 - px)*py + f4*px*py;
++
++                            rotatedData[(y*width + x)*bytesPerPixel + i] = (unsigned char)val;
++                        }
+@@ -2663,6 +2685,6 @@
+-        }
+-
+-        RL_FREE(image->data);
+-        image->data = rotatedData;
+-        image->width = width;
+-        image->height = height;
++
++            RL_FREE(image->data);
++            image->data = rotatedData;
++            image->width = width;
++            image->height = height;
++        }
+@@ -5384,11 +5406,18 @@
+-
+-    double bytesPerPixel = (double)bpp/8.0;
+-    dataSize = (int)(bytesPerPixel*width*height); // Total data size in bytes
+-
+-    // Most compressed formats works on 4x4 blocks,
+-    // if texture is smaller, minimum dataSize is 8 or 16
+-    if ((width < 4) && (height < 4))
+-    {
+-        if ((format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) && (format < PIXELFORMAT_COMPRESSED_DXT3_RGBA)) dataSize = 8;
+-        else if ((format >= PIXELFORMAT_COMPRESSED_DXT3_RGBA) && (format < PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA)) dataSize = 16;
+-    }
++
++    unsigned long long dataSizeBytes = ((unsigned long long)width*height*bpp) >> 3;  // Get size in bytes (dividing by 8)
++
++    if (dataSizeBytes < INT_MAX)
++    {
++        dataSize = (int)dataSizeBytes;
++
++        // Most compressed formats works on 4x4 blocks,
++        // if texture is smaller, minimum dataSize is 8 or 16
++        if ((width < 4) && (height < 4))
++        {
++            if ((format >= PIXELFORMAT_COMPRESSED_DXT1_RGB) && (format < PIXELFORMAT_COMPRESSED_DXT3_RGBA)) dataSize = 8;
++            else if ((format >= PIXELFORMAT_COMPRESSED_DXT3_RGBA) && (format < PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA)) dataSize = 16;
++        }
++    }
++
++    // NOTE: In case required image data larger than 2GB, no memory allocated at all (NULL)
++    if (dataSize == 0) TRACELOG(LOG_WARNING, "Requested image size is larger than 2GB, it can not be allocated");
+--- a/src/rtext.c
++++ b/src/rtext.c
+@@ -1697 +1697 @@
+-    if (text != NULL)
++    if ((text != NULL) && (position >= 0) && (length > 0))
+@@ -1969,4 +1969,5 @@
+-
+-    if ((text != NULL) && (insert != NULL))
+-    {
+-        int textLen = TextLength(text);
++    int textLen = TextLength(text);
++
++    if ((text != NULL) && (insert != NULL) && (position >= 0))
++    {
++        if (position > textLen) position = textLen; // End of text string
+@@ -1980,2 +1981,2 @@
+-            for (int i = position; i < insertLen + position; i++) buffer[i] = insert[i - position];
+-            for (int i = (insertLen + position); i < (textLen + insertLen); i++) buffer[i] = text[i];
++            for (int i = 0; i < insertLen; i++) buffer[i+position] = insert[i];
++            for (int i = position; i < textLen; i++) buffer[i+insertLen] = text[i];
+@@ -1996,4 +1997,5 @@
+-
+-    if ((text != NULL) && (insert != NULL))
+-    {
+-        int textLen = TextLength(text);
++    int textLen = TextLength(text);
++
++    if ((text != NULL) && (insert != NULL) && (position >= 0))
++    {
++        if (position > textLen) position = textLen; // End of text string
+@@ -2005,2 +2007,2 @@
+-        for (int i = position; i < insertLen + position; i++) result[i] = insert[i - position];
+-        for (int i = (insertLen + position); i < (textLen + insertLen); i++) result[i] = text[i];
++        for (int i = 0; i < insertLen; i++) result[i+position] = insert[i];
++        for (int i = position; i < textLen; i++) result[i+insertLen] = text[i];
+@@ -2030 +2032 @@
+-        if ((totalLength + textLength) < MAX_TEXT_BUFFER_LENGTH)
++        if ((totalLength + textLength + delimiterLen) < MAX_TEXT_BUFFER_LENGTH)

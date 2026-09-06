@@ -1,0 +1,265 @@
+
+(preproc "#include \"x2c.x\"")
+
+(declare (static "SymbolSet") 
+ (bindings 
+  (op = (bind (binding 1 "values") ()) 
+   (expr ("SymbolSet") 
+    (cast ("SymbolSet") 
+     (expr (* char) 
+      (literal (* char) 
+       "\"\\001\\000\\000\\000\\004\\000\\000\\000\\001\\000\\000\\000\\033\\126\\160\\042\\037\\016\\242\\101\\001\\003\\001\\000\\001\\000\\336\\063\\000\\000\\000\\000\\000\\000\\144\\020\\000\\000\\000\\000\\000\\000\\331\\141\\373\\213\\114\\176\\003\\000\\160\\255\\021\\000\\000\\000\\000\\000\"")))))))
+
+(function (static "SymbolSet") 
+ (bind (binding 2 "same_values") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 12 
+   (return 
+    (expr ("SymbolSet") 
+     (cast ("SymbolSet") 
+      (expr (* char) 
+       (literal (* char) 
+        "\"\\001\\000\\000\\000\\004\\000\\000\\000\\001\\000\\000\\000\\033\\126\\160\\042\\037\\016\\242\\101\\001\\003\\001\\000\\001\\000\\336\\063\\000\\000\\000\\000\\000\\000\\144\\020\\000\\000\\000\\000\\000\\000\\331\\141\\373\\213\\114\\176\\003\\000\\160\\255\\021\\000\\000\\000\\000\\000\""))))))))
+
+(function (int) 
+ (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 13 
+   (declare ("SymbolSet") 
+    (bindings 
+     (op = (bind (binding 4 "empty") ()) 
+      (expr ("SymbolSet") 
+       (cast ("SymbolSet") 
+        (expr (* char) 
+         (literal (* char) 
+          "\"\\001\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\"")))))))) 
+  (at 3 (declare ("List") 
+         (bindings 
+          (op = (bind (binding 5 "ordinary") ()) 
+           (expr ("List") (expr ("List") (cache 3))))))) 
+  (at 4 (declare (int) 
+         (bindings 
+          (op = (bind (binding 6 "ordered") ()) 
+           (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op && 
+                 (expr (int) 
+                  (op && 
+                   (expr (int) 
+                    (op && 
+                     (expr (int) 
+                      (op && 
+                       (expr (int) 
+                        (op && 
+                         (expr (int) 
+                          (op && 
+                           (expr (int) 
+                            (op == 
+                             (expr ("size_t") 
+                              (call (expr ((func (("SymbolSet"))) ("size_t")) 
+                                     (ident (binding 7 "SymbolSet_len"))) 
+                               (args (expr ("SymbolSet") 
+                                      (ident (binding 1 "values")))))) 
+                             (expr (int) (literal (int) "4")))) 
+                           (expr (int) 
+                            (op == 
+                             (expr (int) 
+                              (call (expr ((func (("SymbolSet") ("Symbol"))) 
+                                           (int)) 
+                                     (ident (binding 8 "SymbolSet_index"))) 
+                               (args (expr ("SymbolSet") 
+                                      (ident (binding 1 "values"))) 
+                                (expr ("Symbol") 
+                                 (literal ("Symbol") "<foo>" foo))))) 
+                             (expr (int) (literal (int) "0")))))) 
+                         (expr (int) 
+                          (op == 
+                           (expr (int) 
+                            (call (expr ((func (("SymbolSet") ("Symbol"))) 
+                                         (int)) 
+                                   (ident (binding 8 "SymbolSet_index"))) 
+                             (args (expr ("SymbolSet") 
+                                    (ident (binding 1 "values"))) 
+                              (expr ("Symbol") 
+                               (literal ("Symbol") "<odd/val>" odd/val))))) 
+                           (expr (int) (literal (int) "2")))))) 
+                       (expr (int) 
+                        (op == 
+                         (expr (int) 
+                          (call (expr ((func (("SymbolSet") ("Symbol"))) (int)) 
+                                 (ident (binding 8 "SymbolSet_index"))) 
+                           (args (expr ("SymbolSet") 
+                                  (ident (binding 1 "values"))) 
+                            (expr ("Symbol") 
+                             (literal ("Symbol") "<missing>" missing))))) 
+                         (expr (int) (op - (expr (int) (literal (int) "1")))))))) 
+                     (expr (int) 
+                      (op == 
+                       (expr ("Symbol") 
+                        (call (expr ((func (("SymbolSet") (int))) ("Symbol")) 
+                               (ident (binding 9 "SymbolSet_getindex"))) 
+                         (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                          (expr (int) (literal (int) "1"))))) 
+                       (expr ("Symbol") (literal ("Symbol") "<bar>" bar)))))) 
+                   (expr (int) 
+                    (op == 
+                     (expr ("Symbol") 
+                      (call (expr ((func (("SymbolSet") (int))) ("Symbol")) 
+                             (ident (binding 9 "SymbolSet_getindex"))) 
+                       (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                        (expr (int) (op - (expr (int) (literal (int) "1"))))))) 
+                     (expr ("Symbol") (literal ("Symbol") "<quux>" quux)))))) 
+                 (expr (int) 
+                  (op == 
+                   (expr ("Symbol") 
+                    (call (expr ((func (("SymbolSet") (int))) ("Symbol")) 
+                           (ident (binding 9 "SymbolSet_getindex"))) 
+                     (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                      (expr (int) (literal (int) "4"))))) 
+                   (expr (int) (literal (int) "0")))))) 
+               (expr (int) 
+                (op == 
+                 (expr ("Symbol") 
+                  (call (expr ((func (("SymbolSet") (int))) ("Symbol")) 
+                         (ident (binding 9 "SymbolSet_getindex"))) 
+                   (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                    (expr (int) (op - (expr (int) (literal (int) "5"))))))) 
+                 (expr (int) (literal (int) "0")))))) 
+             (expr (int) 
+              (op == 
+               (expr (int) 
+                (call (expr ((func (("SymbolSet") ("Symbol"))) (int)) 
+                       (ident (binding 8 "SymbolSet_index"))) 
+                 (args (expr ("SymbolSet") 
+                        (call (expr ((func ((void))) "SymbolSet") 
+                               (ident (binding 2 "same_values"))) 
+                         (args (expr (void) ())))) 
+                  (expr ("Symbol") (literal ("Symbol") "<odd/val>" odd/val))))) 
+               (expr (int) (literal (int) "2")))))))))) 
+  (at 5 (declare (int) 
+         (bindings 
+          (op = (bind (binding 10 "membership") ()) 
+           (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op && 
+                 (expr (int) 
+                  (call (expr ((func (("SymbolSet") ("Symbol"))) (int)) 
+                         (ident (binding 11 "SymbolSet_contains"))) 
+                   (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                    (expr ("Symbol") (literal ("Symbol") "<bar>" bar))))) 
+                 (expr (int) 
+                  (op ! (expr (int) 
+                         (call (expr ((func (("SymbolSet") ("Symbol"))) (int)) 
+                                (ident (binding 11 "SymbolSet_contains"))) 
+                          (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                           (expr ("Symbol") 
+                            (literal ("Symbol") "<missing>" missing))))))))) 
+               (expr (int) 
+                (op == 
+                 (expr ("size_t") 
+                  (call (expr ((func (("SymbolSet"))) ("size_t")) 
+                         (ident (binding 7 "SymbolSet_len"))) 
+                   (args (expr ("SymbolSet") (ident (binding 4 "empty")))))) 
+                 (expr (int) (literal (int) "0")))))) 
+             (expr (int) 
+              (op == 
+               (expr (int) 
+                (call (expr ((func (("SymbolSet") ("Symbol"))) (int)) 
+                       (ident (binding 8 "SymbolSet_index"))) 
+                 (args (expr ("SymbolSet") (ident (binding 4 "empty"))) 
+                  (expr ("Symbol") (literal ("Symbol") "<foo>" foo))))) 
+               (expr (int) (op - (expr (int) (literal (int) "1")))))))))))) 
+  (at 6 (declare (int) 
+         (bindings 
+          (op = (bind (binding 12 "atoms") ()) 
+           (expr (int) 
+            (op && 
+             (expr (int) 
+              (call (expr ((func (("Var"))) (int)) 
+                     (ident (binding 14 "Var_is_atom"))) 
+               (args (expr ("Var") 
+                      (call (expr ((func (("List") (int))) ("Var")) 
+                             (ident (binding 13 "List_getindex"))) 
+                       (args (expr ("List") (ident (binding 5 "ordinary"))) 
+                        (expr (int) (literal (int) "0")))))))) 
+             (expr (int) 
+              (call (expr ((func (("Var"))) (int)) 
+                     (ident (binding 14 "Var_is_atom"))) 
+               (args (expr ("Var") 
+                      (call (expr ((func (("List") (int))) ("Var")) 
+                             (ident (binding 13 "List_getindex"))) 
+                       (args (expr ("List") (ident (binding 5 "ordinary"))) 
+                        (expr (int) (literal (int) "1")))))))))))))) 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 15 "iteration") ()) 
+           (expr (int) (literal (int) "0")))))) 
+  (at 14 
+   (block (declare ("Symbol") (bindings (bind (binding 16 "symbol") ()))) 
+    (declare ("Iter") 
+     (bindings 
+      (op = (bind (binding 17 "_x2c_macro_iterator_0") ()) 
+       (expr ("Iter") 
+        (call (expr ((func (("SymbolSet") ("Iter"))) "Iter") 
+               (ident (binding 22 "SymbolSet_iter"))) 
+         (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+          (expr (* struct "Iter") 
+           (op & (expr (struct "Iter") 
+                  (cast (struct "Iter") 
+                   (expr () 
+                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+    (declare ("Var") (bindings (bind (binding 18 "_x2c_macro_item_0") ()))) 
+    (while 
+     (expr (int) 
+      (call (expr ((func (("Iter") (* "Var"))) int) 
+             (ident (binding 23 "Iter_try_next"))) 
+       (args (expr ("Iter") (ident (binding 17 "_x2c_macro_iterator_0"))) 
+        (expr (* "Var") 
+         (op & (expr ("Var") (ident (binding 18 "_x2c_macro_item_0")))))))) 
+     (block 
+      (stmnt 
+       (expr ("Symbol") 
+        (op = (expr ("Symbol") (ident (binding 16 "symbol"))) 
+         (expr ("Symbol") 
+          (call "Var_symbol" 
+           (args (expr ("Var") (ident (binding 18 "_x2c_macro_item_0"))))))))) 
+      (stmnt 
+       (expr (int) 
+        (op += (expr (int) (ident (binding 15 "iteration"))) 
+         (expr (int) 
+          (op + (expr (int) 
+                 (call (expr ((func (("SymbolSet") ("Symbol"))) (int)) 
+                        (ident (binding 8 "SymbolSet_index"))) 
+                  (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
+                   (expr ("Symbol") (ident (binding 16 "symbol")))))) 
+           (expr (int) (literal (int) "1"))))))))))) 
+  (at 10 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 24 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d %d %d\\n\"")) 
+       (expr (int) (ident (binding 6 "ordered"))) 
+       (expr (int) (ident (binding 10 "membership"))) 
+       (expr (int) (ident (binding 12 "atoms"))) 
+       (expr (int) (ident (binding 15 "iteration")))))))) 
+  (at 15 
+   (return 
+    (expr (int) 
+     (op ? (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op && (expr (int) (ident (binding 6 "ordered"))) 
+                 (expr (int) (ident (binding 10 "membership"))))) 
+               (expr (int) (ident (binding 12 "atoms"))))) 
+             (expr (int) 
+              (op == (expr (int) (ident (binding 15 "iteration"))) 
+               (expr (int) (literal (int) "10")))))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

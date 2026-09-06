@@ -1,0 +1,3 @@
+GET requests /docs
+POST requests /build
+DELETE requests /cache

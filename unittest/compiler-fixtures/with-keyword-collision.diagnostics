@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/with-keyword-collision.x:4:1: macro: built-in keyword alias cannot be replaced
+  keyword with $fixture.value;
+  ^^^^^^^
+
+limit: too many errors, stopping
+

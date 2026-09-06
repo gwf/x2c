@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/match-default-not-last.x:7:5: parse: match default arm must be last
+      case %(value):
+      ^^^^
+  note: move default after every case arm
+
+limit: too many errors, stopping
+

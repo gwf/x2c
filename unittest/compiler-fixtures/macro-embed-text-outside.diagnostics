@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-embed-text-outside.x:3:1: macro: x2c.embed.text used outside macro expansion
+  $(x2c.embed.text "macro-embed-text-data.txt")
+  ^^
+
+limit: too many errors, stopping
+

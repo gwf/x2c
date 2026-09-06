@@ -1,0 +1,31 @@
+[book]
+title = "The x2c Book"
+description = "The x2c language, standard library, and compiler."
+authors = ["The x2c authors"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[preprocessor.x2c-highlight]
+command = "node ../site/scripts/highlight-book.mjs"
+renderers = ["html"]
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "light"
+git-repository-url = "https://github.com/gwf/x2c"
+edit-url-template = "https://github.com/gwf/x2c/edit/dev/docs/{path}"
+additional-css = ["theme/x2c.css"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+# A line prefixed with "~" is hidden behind the code block's expander but is
+# still compiled by tools/check-doc-examples.py. Use it for the surrounding
+# declarations a fragment needs, so samples stay short and still translate.
+[output.html.code.hidelines]
+x2c = "~"

@@ -1,0 +1,76 @@
+#!/usr/bin/expect -f
+
+log_user 1
+set transcript [open builds/incident-filter.transcript w]
+fconfigure $transcript -translation binary -encoding binary
+log_file -open $transcript
+set timeout 10
+set env(TERM) xterm-256color
+set env(LC_ALL) C.UTF-8
+set env(LC_CTYPE) C.UTF-8
+
+proc drain_output {} {
+  set saved_timeout $::timeout
+  set ::timeout 0
+  while {1} {
+    expect {
+      -re {.+} {}
+      timeout { break }
+      eof { break }
+    }
+  }
+  set ::timeout $saved_timeout
+}
+
+spawn -noecho sh -c \
+  {stty rows 12 columns 72; exec ./builds/incident-filter}
+fconfigure $spawn_id -translation binary -encoding binary
+set terminal_path $spawn_out(slave,name)
+expect {
+  "incident filter - UTF-8 and EGC output" {}
+  timeout { exit 1 }
+  eof { exit 1 }
+}
+drain_output
+foreach character {a u t h x} {
+  send -- $character
+  after 50
+  drain_output
+}
+send -- "\177"
+after 50
+drain_output
+# SGR mouse press of the left button on the first list row.
+send -- "\033\[<0;6;3M"
+after 50
+drain_output
+exec stty -f $terminal_path rows 14 columns 80
+after 100
+drain_output
+send -- "\033"
+expect {
+  "quit: filter=auth matches=1 selected=auth" {}
+  timeout { exit 1 }
+  eof { exit 1 }
+}
+set normal [wait]
+if {[lindex $normal 2] != 0 || [lindex $normal 3] != 0} {
+  exit 1
+}
+
+spawn -noecho sh -c \
+  {stty rows 12 columns 72; exec ./builds/incident-filter examples/missing-incidents.log}
+fconfigure $spawn_id -translation binary -encoding binary
+set missing "failed: (not-found (operation open) (path "
+append missing {"examples/missing-incidents.log") (errno 2))}
+expect {
+  -exact $missing {}
+  timeout { exit 1 }
+  eof { exit 1 }
+}
+set failed [wait]
+if {[lindex $failed 2] != 0 || [lindex $failed 3] != 2} {
+  exit 1
+}
+log_file
+exit 0

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-decorator-target-kind.x:3:1: parse: decorator first parameter has invalid target kind
+  macro Decorator $invalid(Literal $target) => {
+  ^^^^^
+  note: expected Expression, Function, Statement, Block, Field, or Unit
+
+limit: too many errors, stopping
+

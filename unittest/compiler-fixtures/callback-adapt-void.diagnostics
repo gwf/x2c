@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/callback-adapt-void.x:10:3: type: typed callback adapter does not support void return
+    $x2c.callback.adapt(VoidCallback, consume);
+    ^
+  note: target signature: (* (func (("Var"))) void) source signature: ((func (("String"))) void)
+
+limit: too many errors, stopping
+

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/keyword-alias-import-bare-collision.x:7:17: parse: expected atomic expression
+    private_scope = 1;
+                  ^
+  note: token: = kind: =
+
+limit: too many errors, stopping
+

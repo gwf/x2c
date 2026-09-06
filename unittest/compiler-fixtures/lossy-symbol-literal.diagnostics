@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lossy-symbol-literal.x:3:16: parse: Symbol literal does not round-trip
+  Symbol value = <lossy_literal>;
+                 ^^^^^^^^^^^^^^^
+  note: source spelling: lossy_literal encoded spelling: lossy-lite
+
+limit: too many errors, stopping
+

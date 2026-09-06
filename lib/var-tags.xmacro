@@ -1,0 +1,312 @@
+/*  var-tags.xmacro -- the Var tag ledger and its projections
+
+    Each row gives a tag's dense ID, coarse kind, and encoding fields. The
+    fifteen numeric rows carry two more columns, `bits` and `rank`, that
+    only Var's conversion policy reads; `bits` is either a literal width or
+    the C type whose `sizeof` supplies it. Signedness comes from the tag
+    spelling and floating-ness from the kind, so neither is a column.
+
+    lib/var.x projects the ID enumerator, the info table, the tag set, and
+    the decode switch; lib/varconvert.x projects the numeric table and its
+    tag set. Both import this file because compile-time Lisp definitions do
+    not cross an `#include`.
+*/
+
+$(def var.tag.row-groups '(
+  (
+    (u8        _u8_        integer   0x8002 0x0001 0x0 8 1)
+    (i8        _i8_        integer   0x8002 0x0002 0x0 8 1)
+    (u16       _u16_       integer   0x8002 0x0003 0x0 16 2)
+    (i16       _i16_       integer   0x8002 0x0004 0x0 16 2)
+    (u32       _u32_       integer   0x8002 0x0005 0x0 32 3)
+    (i32       _i32_       integer   0x8002 0x0006 0x0 32 3)
+    (f32       _f32_       floating  0x8002 0x0007 0x0 32 7)
+  )
+  (
+    (u48       _u48_       integer   0x8000 0x0000 0x0 48 4)
+    (i48       _i48_       integer   0x8001 0x0000 0x0 48 4)
+    (p48       _p48_       pointer   0x0000 0x0000 0x0)
+    (f64       _f64_       floating  0x0000 0x0000 0x0 64 8)
+  )
+  (
+    (long      _long_      integer   0x0005 0x0000 0x5 (long) 5)
+    (ulong     _ulong_     integer   0x0005 0x0000 0x6 (unsigned long) 5)
+    (llong     _llong_     integer   0x0005 0x0000 0x7 (long long) 6)
+    (ullong    _ullong_    integer   0x0007 0x0000 0x6 (unsigned long long) 6)
+    (ldouble   _ldouble_   floating  0x0007 0x0000 0x7 (long double) 9)
+  )
+  (
+    (u8*       _u8_p_      pointer   0x0001 0x0000 0x0)
+    (i8*       _i8_p_      pointer   0x0002 0x0000 0x0)
+    (u16*      _u16_p_     pointer   0x0003 0x0000 0x0)
+    (i16*      _i16_p_     pointer   0x0003 0x0000 0x1)
+    (u32*      _u32_p_     pointer   0x0004 0x0000 0x0)
+    (i32*      _i32_p_     pointer   0x0004 0x0000 0x1)
+    (f32*      _f32_p_     pointer   0x0004 0x0000 0x2)
+    (ulong*    _ulong_p_   pointer   0x0004 0x0000 0x3)
+    (long*     _long_p_    pointer   0x0005 0x0000 0x0)
+    (f64*      _f64_p_     pointer   0x0005 0x0000 0x1)
+    (ullong*   _ullong_p_  pointer   0x0005 0x0000 0x2)
+    (llong*    _llong_p_   pointer   0x0005 0x0000 0x3)
+    (ldouble*  _ldouble_p_ pointer   0x0005 0x0000 0x4)
+    (p48*      _p48_p_     pointer   0x0006 0x0000 0x0)
+  )
+  (
+    (u8**      _u8_pp_     pointer   0x0006 0x0000 0x1)
+    (i8**      _i8_pp_     pointer   0x0006 0x0000 0x2)
+    (u16**     _u16_pp_    pointer   0x0006 0x0000 0x3)
+    (i16**     _i16_pp_    pointer   0x0006 0x0000 0x4)
+    (u32**     _u32_pp_    pointer   0x0006 0x0000 0x5)
+    (i32**     _i32_pp_    pointer   0x0006 0x0000 0x6)
+    (f32**     _f32_pp_    pointer   0x0006 0x0000 0x7)
+    (ulong**   _ulong_pp_  pointer   0x0007 0x0000 0x0)
+    (long**    _long_pp_   pointer   0x0007 0x0000 0x1)
+    (f64**     _f64_pp_    pointer   0x0007 0x0000 0x2)
+    (ullong**  _ullong_pp_ pointer   0x0007 0x0000 0x3)
+    (llong**   _llong_pp_  pointer   0x0007 0x0000 0x4)
+    (ldouble** _ldouble_pp_ pointer   0x0007 0x0000 0x5)
+  )
+  (
+    (array     _array_     object    0x0008 0x0000 0x0)
+    (block     _block_     object    0x0008 0x0000 0x1)
+    (buffer    _buffer_    object    0x0008 0x0000 0x2)
+    (bytes     _bytes_     object    0x0008 0x0000 0x3)
+    (context   _context_   object    0x0008 0x0000 0x5)
+    (error     _error_     object    0x0008 0x0000 0x7)
+    (file      _file_      object    0x0009 0x0000 0x0)
+    (func      _func_      object    0x0009 0x0000 0x1)
+    (iter      _iter_      object    0x0009 0x0000 0x2)
+    (lambda    _lambda_    object    0x0009 0x0000 0x3)
+    (list      _list_      object    0x0009 0x0000 0x4)
+    (logger    _logger_    object    0x0009 0x0000 0x5)
+    (map       _map_       object    0x0009 0x0000 0x6)
+  )
+  (
+    (mutex     _mutex_     object    0x000A 0x0000 0x0)
+    (pipe      _pipe_      object    0x000A 0x0000 0x1)
+    (proc      _proc_      object    0x000A 0x0000 0x2)
+    (regexp    _regexp_    object    0x000A 0x0000 0x3)
+    (rope      _rope_      object    0x000A 0x0000 0x4)
+    (scope     _scope_     object    0x000A 0x0000 0x5)
+    (slice     _slice_     object    0x000A 0x0000 0x6)
+    (socket    _socket_    object    0x000A 0x0000 0x7)
+    (stream    _stream_    object    0x000B 0x0000 0x0)
+    (string    _string_    object    0x000B 0x0000 0x1)
+    (symbol    _symbol_    symbol    0x8004 0x800C 0x0)
+    (tensor    _tensor_    object    0x000B 0x0000 0x3)
+    (thread    _thread_    object    0x000B 0x0000 0x4)
+    (token     _token_     object    0x000B 0x0000 0x5)
+    (var       _var_       object    0x000B 0x0000 0x6)
+  )
+  (
+    (array*    _array_p_   reference 0x000C 0x0000 0x0)
+    (block*    _block_p_   reference 0x000C 0x0000 0x1)
+    (buffer*   _buffer_p_  reference 0x000C 0x0000 0x2)
+    (bytes*    _bytes_p_   reference 0x000C 0x0000 0x3)
+    (context*  _context_p_ reference 0x000C 0x0000 0x5)
+    (error*    _error_p_   reference 0x000C 0x0000 0x7)
+    (file*     _file_p_    reference 0x000D 0x0000 0x0)
+    (func*     _func_p_    reference 0x000D 0x0000 0x1)
+    (iter*     _iter_p_    reference 0x000D 0x0000 0x2)
+    (lambda*   _lambda_p_  reference 0x000D 0x0000 0x3)
+    (list*     _list_p_    reference 0x000D 0x0000 0x4)
+    (logger*   _logger_p_  reference 0x000D 0x0000 0x5)
+    (map*      _map_p_     reference 0x000D 0x0000 0x6)
+  )
+  (
+    (mutex*    _mutex_p_   reference 0x000E 0x0000 0x0)
+    (pipe*     _pipe_p_    reference 0x000E 0x0000 0x1)
+    (proc*     _proc_p_    reference 0x000E 0x0000 0x2)
+    (regexp*   _regexp_p_  reference 0x000E 0x0000 0x3)
+    (rope*     _rope_p_    reference 0x000E 0x0000 0x4)
+    (scope*    _scope_p_   reference 0x000E 0x0000 0x5)
+    (slice*    _slice_p_   reference 0x000E 0x0000 0x6)
+    (socket*   _socket_p_  reference 0x000E 0x0000 0x7)
+    (stream*   _stream_p_  reference 0x000F 0x0000 0x0)
+    (string*   _string_p_  reference 0x000F 0x0000 0x1)
+    (symbol*   _symbol_p_  reference 0x000F 0x0000 0x2)
+    (tensor*   _tensor_p_  reference 0x000F 0x0000 0x3)
+    (thread*   _thread_p_  reference 0x000F 0x0000 0x4)
+    (token*    _token_p_   reference 0x000F 0x0000 0x5)
+    (var*      _var_p_     reference 0x000F 0x0000 0x6)
+  )
+  (
+    (nan       _nan_       floating  0x8003 0x0001 0x0)
+    (-inf      _neginf_    floating  0x8003 0x0002 0x0)
+    (+inf      _posinf_    floating  0x8003 0x0003 0x0)
+    (void      _void_      void      0x8003 0xFFFF 0x0)
+  )
+))
+
+$(defun var.tag.id (row) (car (cdr row)))
+$(defun var.tag.kind (row) (car (cdr (cdr row))))
+$(defun var.tag.top (row) (car (cdr (cdr (cdr row)))))
+$(defun var.tag.middle (row) (car (cdr (cdr (cdr (cdr row))))))
+$(defun var.tag.bottom (row)
+  (car (cdr (cdr (cdr (cdr (cdr row)))))))
+
+$(defun var.tag.numeric? (row) (not (null? (cddr (cddr (cddr row))))))
+$(defun var.tag.bits (row) (car (cddr (cddr (cddr row)))))
+$(defun var.tag.rank (row) (cadr (cddr (cddr (cddr row)))))
+$(defun var.tag.floating? (row) (eq? (var.tag.kind row) 'floating))
+$(defun var.tag.unsigned? (row)
+  (equal? (substring (str (car row)) 0 1) "u"))
+
+$(defun var.tag.unique (values seen)
+  (if (null? values) (reverse seen)
+      (var.tag.unique (cdr values)
+        (if (member (car values) seen) seen
+            (cons (car values) seen)))))
+
+$(defun var.tag.id-row (row)
+  (x2c.ident (str (var.tag.id row))))
+
+$(defun var.tag.map (procedure groups)
+  (apply append
+    (map (lambda (group) (map procedure group)) groups)))
+
+$(defun var.tag.filter (predicate groups)
+  (apply append
+    (map (lambda (group) (filter predicate group)) groups)))
+
+$(defun var.tag.info-row (row)
+  (x2c.expr.composite (list
+    (x2c.literal.symbol (car row))
+    (x2c.literal.symbol (var.tag.kind row))
+    (x2c.literal.int (var.tag.top row))
+    (x2c.literal.int (var.tag.middle row))
+    (x2c.literal.int (var.tag.bottom row)))))
+
+$(defun var.tag.info-sentinel ()
+  (x2c.expr.composite (list
+    (x2c.literal.int 0)
+    (x2c.literal.symbol 'void)
+    (x2c.literal.int 0x8000)
+    (x2c.literal.int 0)
+    (x2c.literal.int 0))))
+
+$(defun var.tag.info (rows)
+  (x2c.expr.composite
+    `(,@(var.tag.map var.tag.info-row rows) ,(var.tag.info-sentinel))))
+
+$(defun var.tag.symbolset (rows)
+  (x2c._symbol-set
+    (var.tag.map (lambda (row) (car row)) rows)))
+
+/* The descriptor table is the ledger's boxed rows in ledger order, so a
+   decoded row index selects a descriptor without a second tag search. */
+$(defun var.tag.descriptor? (row)
+  (member (var.tag.kind row) '(object symbol)))
+
+$(defun var.tag.descriptor.count (rows)
+  (x2c.literal.int (length (var.tag.filter var.tag.descriptor? rows))))
+
+$(defun var.tag.numeric-rows (rows)
+  (var.tag.filter var.tag.numeric? rows))
+
+/* A literal width stays a literal; a C type becomes sizeof(T) * CHAR_BIT,
+   which is still a constant expression in a static initializer. */
+$(defun var.tag.bits-expr (row)
+  (let ((bits (var.tag.bits row)))
+    (cond
+      ((number? bits) (x2c.literal.int bits))
+      ((list? bits) `(expr () (op *
+        (expr (unsigned)
+          (sizeof (parens (decl ,bits (bindings (bind () ()))))))
+        ,(x2c.expr.ident '("CHAR_BIT")))))
+      (true (x2c.diagnostic.fail
+        "var tag bits must be a width or a parenthesized C type"
+        (list (string-append "tag: " (str (car row)))))))))
+
+$(defun var.tag.numeric-row (row)
+  (x2c.expr.composite (list
+    (x2c.literal.symbol (car row))
+    (x2c.literal.int (if (var.tag.floating? row) 1 0))
+    (x2c.literal.int (if (var.tag.unsigned? row) 1 0))
+    (var.tag.bits-expr row)
+    (x2c.literal.int (var.tag.rank row)))))
+
+$(defun var.tag.numeric (rows)
+  (x2c.expr.composite
+    (map var.tag.numeric-row (var.tag.numeric-rows rows))))
+
+$(defun var.tag.numeric-symbolset (rows)
+  (x2c._symbol-set
+    (map (lambda (row) (car row)) (var.tag.numeric-rows rows))))
+
+$(defun var.tag.decode-row? (row)
+  (match row '((!not f64 symbol void) *fields)))
+
+$(defun var.tag.decode-return (row)
+  `(return ("VarDecoded")
+    ,(x2c.expr.call
+      (x2c.expr.ident (x2c.ident "_decode_builtin"))
+      (x2c.expr.ident (x2c.ident (str (var.tag.id row))))
+      (x2c.expr.ident (x2c.ident "value")))))
+
+$(defun var.tag.decode-case (row discriminator)
+  (list
+    `(case ,(x2c.literal.int (discriminator row)))
+    (var.tag.decode-return row)))
+
+$(defun var.tag.decode-inner (rows middle bottom)
+  (let* ((top (var.tag.top (car rows)))
+         (immediate (or (= top 0x8002) (= top 0x8003)))
+         (count (length rows))
+         (selector (cond
+           (immediate middle)
+           ((= count 2) `(expr (unsigned)
+             (op & ,bottom ,(x2c.literal.int 1))))
+           ((= count 4) `(expr (unsigned)
+             (op & ,bottom ,(x2c.literal.int 3))))
+           (true bottom)))
+         (discriminator (if immediate var.tag.middle var.tag.bottom)))
+    `(switch ,selector
+      (block ,@(apply append
+        (map
+          (lambda (row) (var.tag.decode-case row discriminator))
+          rows))))))
+
+$(defun var.tag.decode-group (rows middle bottom)
+  (let ((top (var.tag.top (car rows))))
+    (append
+      (list `(case ,(x2c.literal.int top)))
+      (if (= (length rows) 1)
+          (list (var.tag.decode-return (car rows)))
+          (list (var.tag.decode-inner rows middle bottom) '(break))))))
+
+$(defun var.tag.decode-top (top rows middle bottom)
+  (var.tag.decode-group
+    (filter (lambda (row) (= top (var.tag.top row))) rows)
+    middle bottom))
+
+$(defun var.tag.decode (groups middle bottom)
+  (let* ((rows (var.tag.filter var.tag.decode-row? groups))
+         (tops (var.tag.unique (map var.tag.top rows) nil)))
+    (apply append (map
+      (lambda (top) (var.tag.decode-top top rows middle bottom))
+      tops))))
+
+macro Enumerator $var.tag.ids() => {
+  $(var.tag.map var.tag.id-row var.tag.row-groups)...
+}
+
+macro Expression $var.tag.info() => ($(var.tag.info var.tag.row-groups))
+
+macro Expression $var.tag.symbolset() => (
+  $(var.tag.symbolset var.tag.row-groups)
+)
+
+macro Expression $var.tag.descriptor.count() => (
+  $(var.tag.descriptor.count var.tag.row-groups)
+)
+
+macro Expression $var.tag.numeric() => ($(var.tag.numeric var.tag.row-groups))
+
+macro Expression $var.tag.numeric.symbolset() => (
+  $(var.tag.numeric-symbolset var.tag.row-groups)
+)
+
+macro Statement $var.tag.decode(Expr $middle, Expr $bottom) => {
+  $(var.tag.decode var.tag.row-groups $middle $bottom)...
+}

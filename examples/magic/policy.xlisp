@@ -1,0 +1,9 @@
+(defun request-value (name request)
+  (cadr (assoc name request)))
+
+(defun decide (request) (let*
+  ((role (request-value 'role request))
+   (requested (request-value 'requested request))
+   (limit (role-limit role))
+   (allowed (clamp requested 0 limit)))
+  `(,(if (= allowed requested) "allow" "limited") ,allowed)))

@@ -1,0 +1,7 @@
+dynamic=42 language=x2c
+build/42/fast
+values=3 name=x2c
+beta=2
+doubled=(2 4 6 8)
+match=ready 42
+lisp=(x2c has lisp)

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/pointer-unrelated-argument.x:9:3: type: cannot convert (* "Rec") to ("List")
+    List items = List.append(&rec, NULL);
+    ^^^^
+  note: the pointer types are unrelated: cast the expression to say so on purpose
+
+limit: too many errors, stopping
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-unit-malformed-preproc.x:7:1: parse: syntax cannot be constructed at this position
+  $malformed();
+  ^
+
+limit: too many errors, stopping
+

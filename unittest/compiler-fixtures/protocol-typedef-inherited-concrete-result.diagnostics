@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/protocol-typedef-inherited-concrete-result.x:9:1: protocol: 'List_map' has a signature incompatible with Mappable(Domain) member 'map'
+  protocol Mappable(Domain);
+  ^^^^^^^^
+  note: protocol member 'map' declared by Mappable(Domain) at unittest/compiler-fixtures/protocol-typedef-inherited-concrete-result.x:5:1 conflicting definition 'List_map': ((func (("List") ("Func"))) "List") expected: ((func (("Domain") ("Func"))) "Domain")
+
+limit: too many errors, stopping
+

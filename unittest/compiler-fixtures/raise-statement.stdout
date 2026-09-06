@@ -1,0 +1,1 @@
+collected 64 raise-probe unittest/compiler-fixtures/raise-statement.x:12:main 0:raise_empty

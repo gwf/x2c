@@ -1,0 +1,45 @@
+---
+import { inlineMarkdown } from "../lib/inline-markdown";
+
+interface Feature {
+  name: string;
+  detail: string;
+}
+
+interface Props {
+  intro: string;
+  features: Feature[];
+}
+
+const { intro, features } = Astro.props;
+const introHtml = await inlineMarkdown(intro);
+const rows = await Promise.all(
+  features.map(async (feature) => ({
+    ...feature,
+    name: await inlineMarkdown(feature.name),
+    detail: await inlineMarkdown(feature.detail)
+  }))
+);
+---
+
+<aside class="hero-feature-table" aria-labelledby="feature-table-title">
+  <h2 id="feature-table-title" set:html={introHtml} />
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Feature</th>
+        <th scope="col">What x2c adds</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((feature) => (
+          <tr>
+            <th scope="row" set:html={feature.name} />
+            <td set:html={feature.detail} />
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</aside>

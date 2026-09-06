@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-ident-repeat.x:8:1: parse: declaration 'generated_repeat' is already bound
+  $define_repeat(2);
+  ^
+  note: prior binding: 'generated_repeat'
+
+limit: too many errors, stopping
+

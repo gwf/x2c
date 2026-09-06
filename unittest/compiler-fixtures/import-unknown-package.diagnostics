@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/import-unknown-package.x:4:1: driver: unknown package 'nosuch'
+  import "nosuch";
+  ^^^^^^
+  note: searched: <root>/nosuch/src/nosuch.x, <root>/nosuch/nosuch.x
+
+limit: too many errors, stopping
+

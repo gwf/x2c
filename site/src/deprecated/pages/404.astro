@@ -1,0 +1,30 @@
+---
+import "../styles/global.css";
+
+const base = import.meta.env.BASE_URL;
+const local = (path) => `${base}${path.replace(/^\/+/, "")}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#171717" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href={local("x2c-boxed-red.svg")} type="image/svg+xml" />
+    <title>Not found - x2c</title>
+  </head>
+  <body class="not-found">
+    <main>
+      <img src={local("x2c-boxed-red.svg")} width="112" height="112" alt="" />
+      <p class="kicker"><span>//</span> 404</p>
+      <h1>This path does not compile.</h1>
+      <p>Return to x2c or continue into the docs.</p>
+      <div class="actions">
+        <a class="button button-primary" href={local("")}>x2c home <span aria-hidden="true">&rarr;</span></a>
+        <a class="button button-secondary" href={local("docs/")}>read the docs <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </main>
+  </body>
+</html>

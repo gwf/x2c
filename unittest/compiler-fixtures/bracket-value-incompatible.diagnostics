@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/bracket-value-incompatible.x:8:16: type: cannot convert (struct "Point") to Var without loss
+    values[0] = p;
+                 ^
+
+limit: too many errors, stopping
+

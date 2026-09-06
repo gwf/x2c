@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/invalid-type-shutdown.x:5:32: parse: type shutdown must have signature void TYPE.shutdown(void)
+  int BadShutdown.shutdown(void) {
+                                 ^
+  note: shutdown: BadShutdown_shutdown
+
+limit: too many errors, stopping
+

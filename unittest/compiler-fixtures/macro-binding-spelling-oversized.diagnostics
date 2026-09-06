@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-binding-spelling-oversized.x:7:13: macro: x2c.binding.spelling requires a known binding
+  int value = $spelling();
+              ^
+  note: binding: (binding 4294967297l "value")
+
+limit: too many errors, stopping
+

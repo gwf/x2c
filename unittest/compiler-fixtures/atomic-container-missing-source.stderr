@@ -1,0 +1,4 @@
+<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=
+((owner "Array.updateindex") (index 0)) location=
+((file "../../lib/array.x") (line 172) (function "Array_updateindex"))
+x2c error floor: code 0xb3d24fbe0: non-returning error was not caught

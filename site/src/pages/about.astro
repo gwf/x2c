@@ -1,0 +1,33 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { inlineMarkdown } from "../lib/inline-markdown";
+import {
+  Content as AboutCopy,
+  frontmatter as about,
+} from "../content/about.md";
+
+const [titleHtml, kickerHtml] = await Promise.all([
+  inlineMarkdown(about.title),
+  inlineMarkdown(about.kicker),
+]);
+---
+
+<BaseLayout
+  title="About x2c"
+  description="Twenty years of building x2c: C, Lisp, the pleasure of programming, and the AI collaboration that helped finish it."
+>
+  <Fragment slot="header">
+    <SiteHeader />
+  </Fragment>
+  <div class="landing about-landing">
+    <article class="about-page">
+      <p class="about-eyebrow">about</p>
+      <h1 set:html={titleHtml} />
+      <p class="about-kicker" set:html={kickerHtml} />
+      <div class="about-copy"><AboutCopy /></div>
+    </article>
+  </div>
+  <SiteFooter />
+</BaseLayout>

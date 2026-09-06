@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lambda-reject-const-reference-argument.x:10:1: type: cannot convert (const int) to (& int)
+  
+  ^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+
+limit: too many errors, stopping
+

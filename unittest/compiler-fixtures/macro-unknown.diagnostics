@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-unknown.x:3:13: parse: unknown or forward-referenced macro 'later'
+  int value = $later(1);
+              ^
+
+limit: too many errors, stopping
+

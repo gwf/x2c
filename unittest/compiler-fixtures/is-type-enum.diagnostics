@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/is-type-enum.x:6:16: type: enum type (enum "Choice") cannot be tested with 'is'
+    return value is enum Choice;
+                 ^^
+  note: enum values box as the shared i32 family and retain no enum identity
+
+limit: too many errors, stopping
+

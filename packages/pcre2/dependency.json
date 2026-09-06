@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "pcre2",
+  "version": "10.48",
+  "profile": "static-8-posix-jit",
+  "sources": [
+    {
+      "name": "pcre2",
+      "url": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.48/pcre2-10.48.tar.bz2",
+      "sha256": "b6c68fdf6f3ac31388b50aa89ff0fc49c00c987c16e7b5146491d12003f2c8ed",
+      "root": "pcre2-10.48"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_pcre2}",
+      "argv": [
+        "./configure",
+        "--prefix={prefix}",
+        "--disable-shared",
+        "--enable-static",
+        "--enable-jit",
+        "--enable-pcre2-8",
+        "--disable-pcre2-16",
+        "--disable-pcre2-32",
+        "--disable-pcre2grep-libz",
+        "--disable-pcre2grep-libbz2",
+        "--disable-pcre2test-libreadline"
+      ]
+    },
+    {
+      "cwd": "{source_pcre2}",
+      "argv": ["make", "-j{jobs}"]
+    },
+    {
+      "cwd": "{source_pcre2}",
+      "argv": ["make", "install"]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/pcre2.h",
+    "{prefix}/include/pcre2posix.h",
+    "{prefix}/lib/libpcre2-8.a",
+    "{prefix}/lib/libpcre2-posix.a"
+  ]
+}

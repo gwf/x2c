@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-sequence-nonfinal.x:3:42: parse: sequence macro hole must be the final argument
+  macro Expression $call(Expr $arguments..., Expr $final) => ($final)
+                                           ^
+
+limit: too many errors, stopping
+

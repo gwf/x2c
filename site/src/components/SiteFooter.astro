@@ -1,0 +1,33 @@
+---
+interface Props {
+  home?: boolean;
+}
+
+const { home = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+const brandHref = home ? "#top" : local("");
+---
+
+<footer class="landing-footer">
+  <a href={brandHref} class="footer-brand">
+    <svg viewBox="0 0 100 100" width="18" height="18" aria-hidden="true"
+      ><g fill="none" stroke="#da291c" stroke-width="17" stroke-linecap="butt"
+        ><path d="M9 16 A34.5 34.5 0 0 1 9 84"></path><path
+          d="M91 16 A34.5 34.5 0 0 0 91 84"></path></g
+      ></svg
+    >
+    <span class="x2c-wordmark footer-wordmark">x2c</span>
+  </a>
+  <p>
+    &copy; 2025&ndash;2026 Gary William Flake &middot; <a
+      href="https://github.com/gwf/x2c/blob/main/LICENSE">Apache 2.0</a> &middot; <a
+      href="https://github.com/gwf/x2c/blob/main/TRADEMARKS.md">Trademarks</a>
+  </p>
+  <div class="footer-nav">
+    <a href={home ? "#install" : `${local("")}#install`} class="dark-link">install</a>
+    <a href={local("docs/")} class="dark-link">docs</a>
+    <a href="https://github.com/gwf/x2c" class="dark-link">source</a>
+    <a href={local("about/")} class="dark-link">about</a>
+  </div>
+</footer>

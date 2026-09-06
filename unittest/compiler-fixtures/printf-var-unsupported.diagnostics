@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/printf-var-unsupported.x:5:3: xform: cannot infer a native argument for Var at %p; use an explicit converter for this format conversion
+    printf("%p\n", value);
+    ^^^^^^
+  note: printf-family call: printf
+
+limit: too many errors, stopping
+

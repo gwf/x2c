@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/static-literal-dependency-cycle.x:3:15: cache: file-static x2c initializer dependency cycle
+  static String left = %"$right";
+                ^^^^
+  note: initializer: left initializer: right
+
+limit: too many errors, stopping
+

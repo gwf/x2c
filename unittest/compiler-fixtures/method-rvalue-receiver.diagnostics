@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/method-rvalue-receiver.x:14:24: type: method pointer receiver requires an addressable value
+    return make_rec().get();
+                         ^
+  note: bind the value to an object before calling the method
+
+limit: too many errors, stopping
+

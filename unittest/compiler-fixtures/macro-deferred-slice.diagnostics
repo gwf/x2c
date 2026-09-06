@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-deferred-slice.x:7:15: xform: type ( * int ) does not support slicing
+  int *values = $slice(values);
+                ^
+
+limit: too many errors, stopping
+

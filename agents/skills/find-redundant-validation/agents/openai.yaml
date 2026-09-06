@@ -1,0 +1,4 @@
+interface:
+  display_name: "Find Redundant Validation"
+  short_description: "Rank likely redundant x2c checks"
+  default_prompt: "Use $find-redundant-validation to find and rank likely redundant validation in these x2c files."

@@ -1,0 +1,35 @@
+// Optional algorithms and compatibility helpers for x2c Lisp.
+// Load etc/init.xlisp first.
+
+(def sort
+  (bind "List_sort" '((func (("List"))) "List")))
+(def List_sort sort)
+
+(defun range (. args)
+  (match-case args
+    ((?stop) (range 0 ?stop))
+    ((?start ?stop)
+     (if (= ?start ?stop)
+         nil
+         (cons ?start (range (+ 1 ?start) ?stop))))
+    (else (sub))))
+
+(defun fib (value)
+  (if (or (= value 0) (= value 1))
+      value
+      (+ (fib (- value 2)) (fib (- value 1)))))
+
+(defun subst (replacement target tree)
+  (if (atom? tree)
+      (if (equal? tree target) replacement tree)
+      (cons (subst replacement target (car tree))
+            (subst replacement target (cdr tree)))))
+
+(defun caaar (value) (car (car (car value))))
+(defun caadr (value) (car (car (cdr value))))
+(defun cadar (value) (car (cdr (car value))))
+(defun caddr (value) (car (cdr (cdr value))))
+(defun cdaar (value) (cdr (car (car value))))
+(defun cdadr (value) (cdr (car (cdr value))))
+(defun cddar (value) (cdr (cdr (car value))))
+(defun cdddr (value) (cdr (cdr (cdr value))))

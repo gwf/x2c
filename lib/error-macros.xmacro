@@ -1,0 +1,41 @@
+$(def error.nonreturning.causes '(
+  alloc-fail
+  size-limit
+  invariant
+  bad-state
+  init-fail
+  bad-arg
+  bad-enc
+  void-op
+  bad-types
+  bad-target
+  no-convert
+  conv-range
+  bad-op
+  div-zero
+  bad-shift
+  no-member
+  format
+  not-found
+  io-fail
+  bad-sig
+  bad-arity
+  no-symbol
+  bad-result
+  not-call
+  unbound
+  malformed
+  incomplete
+  join-fail
+))
+
+macro Expression $error.nonreturning.causes() => (
+  $(x2c._symbol-set error.nonreturning.causes)
+)
+
+macro Decorator $error.fallback(Statement $target, Expr $fallback) => {
+  {
+    $target
+    return $fallback;
+  }
+}

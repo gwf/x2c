@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-map-entry-invalid-node.x:7:19: parse: expected one Map entry
+  Map values = %{ ${$invalid_row()} };
+                    ^
+
+limit: too many errors, stopping
+

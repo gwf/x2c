@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-binding-spelling-invalid-name.x:7:15: macro: x2c.binding.spelling requires an identifier spelling
+  char *value = $spelling();
+                ^
+  note: value: "not valid"
+
+limit: too many errors, stopping
+

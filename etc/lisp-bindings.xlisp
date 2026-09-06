@@ -1,0 +1,110 @@
+// Private compile-time support for the built-in native Lisp bindings.
+(defun lisp.native.call (name . arguments)
+  (apply x2c.expr.call
+    (cons (x2c.expr.ident (x2c.ident name)) arguments)))
+
+(defun lisp.native.list-item (value) (cond
+  ((string? value)
+   (lisp.native.call "String_var" (x2c.literal.string value)))
+  ((symbol? value)
+   (lisp.native.call "Symbol_var" (x2c.literal.symbol value)))
+  ((list? value)
+   (lisp.native.call "List_var" (lisp.native.signature value)))))
+
+(defun lisp.native.signature (values)
+  (if (null? values)
+      `(expr () (cast
+        (decl ("List") (bindings (bind () ())))
+        ,(x2c.literal.int 0)))
+      (lisp.native.call "cons"
+        (lisp.native.list-item (car values))
+        (lisp.native.signature (cdr values)))))
+
+(defun lisp.native.normalize-type (type) (cond
+  ((equal? type '(signed char)) '(schar))
+  ((equal? type '(unsigned char)) '(uchar))
+  ((equal? type '(unsigned short)) '(ushort))
+  ((equal? type '(unsigned)) '(uint))
+  ((equal? type '(unsigned long)) '(ulong))
+  ((equal? type '(long long)) '(llong))
+  ((equal? type '(unsigned long long)) '(ullong))
+  (true type)))
+
+(defun lisp.native.function-signature (type) (let*
+  ((parameters (_x2c.type.parameters type))
+   (result (_x2c.type.return type)))
+  (cons `(func ,(map lisp.native.normalize-type parameters))
+        (lisp.native.normalize-type result))))
+
+(def lisp.binding.rows nil)
+(def lisp.binding.sealed nil)
+
+(defun lisp.binding.rows-for (group)
+  (filter (lambda (row) (equal? (car row) group)) lisp.binding.rows))
+
+(defun lisp.binding.record (group name function) (let*
+  ((group-name (x2c.binding.spelling group))
+   (lisp-name (_x2c.literal.string name))
+   (function-name (x2c.function.name function))
+   (type (_x2c.function.native-type function))
+   (rows (lisp.binding.rows-for group-name)))
+  (begin
+    (lisp.native.function-signature type)
+    (if (member group-name lisp.binding.sealed)
+      (x2c.diagnostic.fail
+        "native Lisp binding appears after its group was installed"
+        (list (string-append "group: " group-name)))
+      (if (not (null? (filter
+            (lambda (row) (equal? (cadr row) lisp-name)) rows)))
+          (x2c.diagnostic.fail
+            "duplicate native Lisp binding name"
+            (list (string-append "group: " group-name)
+                  (string-append "name: " lisp-name)))
+          (def lisp.binding.rows
+            (cons `(,group-name ,lisp-name ,function-name ,type)
+                  lisp.binding.rows))))
+    nil)))
+
+(defun lisp.binding.call (lisp row) (match-case row
+  ((?group ?name ?fname ?type)
+   `(stmnt ,(lisp.native.call "Lisp_bind" lisp
+      (x2c.literal.string ?name)
+      (lisp.native.call "Func_new"
+        (x2c.expr.ident (x2c.ident ?fname))
+        (lisp.native.signature
+          (lisp.native.function-signature ?type))))))))
+
+(defun lisp.binding.install (lisp group) (let*
+  ((group-name (x2c.binding.spelling group))
+   (rows (reverse (lisp.binding.rows-for group-name))))
+  (begin
+    (if (null? rows)
+      (x2c.diagnostic.fail
+        "unknown native Lisp binding group"
+        (list (string-append "group: " group-name)))
+      (if (not (member group-name lisp.binding.sealed))
+          (def lisp.binding.sealed
+            (cons group-name lisp.binding.sealed))
+          nil))
+    (map (lambda (row) (lisp.binding.call lisp row)) rows))))
+
+(defun lisp.native._target (name signature maker)
+  `(,(lisp.native.call "String_var" (x2c.literal.string name))
+    ,(lisp.native.call "Func_var" (lisp.native.call maker
+       (x2c.expr.ident (x2c.ident name))
+       (lisp.native.signature signature)))))
+
+// A row with a trailing marker binds a target that takes every argument
+// as one List, so it is built with Func_new_rest instead.
+(defun lisp.native.target (row) (match-case row
+  ((?name ?signature)
+   (lisp.native._target (str ?name) ?signature "Func_new"))
+  ((?name ?signature ?marker)
+   (lisp.native._target (str ?name) ?signature "Func_new_rest"))))
+
+(defun lisp.native.targets (rows)
+  (apply lisp.native.call
+    (cons "Map_update_n"
+      (cons (lisp.native.call "Map_new")
+        (cons (x2c.literal.int (length rows))
+          (apply append (map lisp.native.target rows)))))))

@@ -1,0 +1,49 @@
+# name|category|check|arguments|stdout|note
+foreach|showcase|run||expected/foreach.stdout|Basic List iteration.
+love/arrays|showcase|run||expected/love-arrays.stdout|Standalone love arrays gallery example.
+love/basic-literals|showcase|run||expected/static-test.stdout|Runtime collection and String literals.
+love/conversions|showcase|run||expected/type-conversion-matrix.stdout|Verified numeric and typed nonnumeric Var crossings.
+love/files|showcase|run||expected/love-files.stdout|Standalone love files gallery example.
+love/list-methods|showcase|run||expected/prototype-inheritance.stdout|Typedef method inheritance and result-type chaining.
+love/lists|showcase|run||expected/love-lists.stdout|Standalone love lists gallery example.
+love/literals|showcase|run||expected/love-literals.stdout|Standalone love literals gallery example.
+love/maps|showcase|run||expected/love-maps.stdout|Standalone love maps gallery example.
+love/methods|showcase|run||expected/love-methods.stdout|Standalone love methods gallery example.
+love/string-concatenation|showcase|run||expected/strings.stdout|String concatenation.
+love/strings|showcase|run||expected/love-strings.stdout|Standalone love strings gallery example.
+love/symbol-forms|showcase|run||expected/symbol.stdout|Symbol forms, identity, length, and Map keys.
+love/symbol-sets|showcase|run||expected/symbol-sets.stdout|Ordered Symbol set membership, dense index, and table dispatch.
+love/symbols|showcase|run||expected/love-symbols.stdout|Standalone love symbols gallery example.
+love/values|showcase|run||expected/love-values.stdout|Standalone love var gallery example.
+magic/compile-time|showcase|run||expected/magic-compile-time.stdout|Standalone magic compile-time gallery example.
+magic/decorators|showcase|run||expected/magic-decorators.stdout|Standalone magic decorators gallery example.
+magic/file-policy|showcase|run|../../../examples/magic/policy.xlisp|expected/inline-lisp.stdout|Inline Lisp policy with inferred native bindings and typed results.
+magic/imported-macros|showcase|run||expected/compile-time-macros.stdout|Imported X2C macros with a compile-time Lisp helper.
+magic/keywords|showcase|run||expected/magic-keywords.stdout|Standalone magic keywords gallery example.
+magic/lambdas|showcase|run||expected/lambdas.stdout|Expression lambdas, captured values, and inferred Var results.
+magic/macros|showcase|run||expected/magic-macros.stdout|Standalone magic macros gallery example.
+magic/operators|showcase|run||expected/magic-operators.stdout|Standalone magic operators gallery example.
+magic/protocols|showcase|run||expected/protocols.stdout|Protocol declaration, adoption, base defaults, and an override.
+magic/range-and-swap|showcase|run||expected/keyword-aliases.stdout|Local range and swap constructs implemented with macros.
+magic/runtime|showcase|run||expected/magic-runtime.stdout|Standalone magic runtime gallery example.
+magic/stacked-decorators|showcase|run||expected/decorators.stdout|Function decorators with target inspection, stacking, and defer.
+power/collection-indexing|showcase|run||expected/indexing.stdout|Ordinary and packed indexing, checked reads, and slicing.
+power/contexts|showcase|run||expected/context-lifetime.stdout|Isolated Context cleanup and cyclic result export.
+power/counting|showcase|run||expected/power-counting.stdout|Standalone power counting gallery example.
+power/exceptions|showcase|run||expected/power-exceptions.stdout|Standalone power exceptions gallery example.
+power/finance|showcase|run||expected/iter-finance.stdout|Running balances, loan payments, and compounded growth.
+power/generics|showcase|run||expected/power-generics.stdout|Standalone power generics gallery example.
+power/greet-client|showcase|run||expected/import-greet.stdout|Package import: alias-qualified names and a linked package archive.
+power/imports|optional|none||-|PCRE2 named request captures; checked with optional packages.
+power/indexing|showcase|run||expected/power-indexing.stdout|Standalone power indexing gallery example.
+power/iterators|showcase|run||expected/iter-data.stdout|Lazy selection, merging, validation, and enumeration.
+power/match|showcase|run||expected/power-match.stdout|Standalone power match gallery example.
+power/math|showcase|run||expected/iter-math.stdout|Lazy numeric filtering, pairing, folding, and products.
+power/scopes|showcase|run||expected/power-scopes.stdout|Standalone power scopes gallery example.
+power/shared-threads|showcase|run||expected/context-threads.stdout|Isolated workers, joined results, logging, and Mutex-coordinated shared state.
+power/threads|showcase|run||expected/power-threads.stdout|Standalone power threads gallery example.
+power/word-count-summary|showcase|run|../../data/docs-words.txt|expected/docs-word-count.stdout|Task-oriented file and collection tutorial.
+programs/lisp|showcase|run|--init ../../../etc/init.xlisp --selftest|expected/lisp.stdout|Bootstrapped Lisp command-line shell.
+programs/mandelbrot|showcase|run||expected/parallel-mandelbrot.stdout|Deep Mandelbrot zoom rendered on native threads.
+tours/hello-worlds|showcase|run||expected/hello-worlds.stdout|Twelve idiomatic paths to Hello, World.
+tours/language|showcase|run||expected/docs-tour.stdout|Executable fifteen-minute language tour.

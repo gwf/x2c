@@ -1,0 +1,54 @@
+Usage:
+  x2c translate [options] <input.x>...
+
+Translate each x2c input into a matching C source and header.
+
+Target options:
+  -j, --jobs <count>          Maximum parallel translation and compilation jobs
+
+Output options:
+      --out-dir <dir>         Write generated files under <dir> (required)
+      --no-deps               Do not write x2c dependency files
+      --dep-file <file>       Override the depfile path (one input only)
+      --dep-target <target>   Override the depfile target (one input only)
+      --no-phony-deps         Omit phony rules for included files
+
+Source options:
+  -I <dir>                    Add a shared x2c/C include directory
+      --x-include-dir <dir>   Add an x2c-only include directory
+      --package-dir <dir>     Add a directory of x2c packages
+      --no-cpp                Skip symbol collection and preprocessing
+      --live-symbols          Collect symbols through the host preprocessor
+      --cpp-symbols           Use CPP collection for this translation
+
+Inspection options:
+      --dump-tokens           Print source tokens and stop
+      --dump-cpp              Print host-preprocessed text and stop
+      --dump-cpp-text         Alias for --dump-cpp
+      --dump-cpp-tokens       Print host-preprocessed tokens and stop
+      --dump-ast              Print the parsed AST and stop
+      --dump-transforms       Print the transformed AST and stop
+      --dump-code             Print unformatted generated code and stop
+      --dump-symbols          Print the source symbol table and stop
+      --dump-cpp-symbols      Print the CPP symbol table and stop
+      --dump-cache            Print the compiler cache and stop
+      --dump-conformance      Print protocol conformance and stop
+      --dump-symbol-snapshot  Print a complete symbol snapshot and stop
+      --dump-header-symbols   Print the header-symbol artifact and stop
+
+General options:
+  -h, --help                  Show help and exit
+  -v, --verbose               Show commands as they are executed
+  -###                        Show commands without executing them
+  -q, --quiet                 Suppress successful progress and receipts
+      --plain                 Use stable output without terminal rendering
+      --color <auto|always|never>
+                              Control terminal color
+      --debug                 Enable compiler debug logging
+  @<file>                     Read additional arguments from a response file
+  --                          End option parsing
+
+The output directory must already exist. A normal translation requires
+--out-dir; inspection modes that stop before writing output do not.
+Shell wildcards are allowed because the shell expands them; x2c does not
+interpret wildcard characters in input operands.

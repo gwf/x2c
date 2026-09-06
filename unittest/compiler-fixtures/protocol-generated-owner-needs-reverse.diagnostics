@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-generated-owner-needs-reverse.x:28:1: protocol: Packet does not satisfy Var(Packet): member 'truth' has a T parameter, so Var(Packet) needs 'Var.packet' or 'Var.as_packet'
+  protocol Var(Packet);
+  ^^^^^^^^
+
+limit: too many errors, stopping
+

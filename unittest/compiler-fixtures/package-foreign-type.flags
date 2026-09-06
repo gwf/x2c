@@ -1,0 +1,1 @@
+--package-dir unittest/compiler-fixtures/packages -I unittest/compiler-fixtures/packages/vendored/src

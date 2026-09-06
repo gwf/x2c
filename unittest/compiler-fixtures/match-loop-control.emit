@@ -1,0 +1,59 @@
+#include "x2c.h"
+int main(void){
+  List break_inputs = _6;
+  int matched = 0,  after = 0;
+  {
+    Var item;
+    Iter _x2c_macro_iterator_0 = List_iter(break_inputs,  &(struct Iter){
+      0
+    }
+    );
+    Var _x2c_macro_item_0;
+    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+      item = _x2c_macro_item_0;
+      {
+        List value = Var_list(item);
+
+  {
+    List _x2c_match_expr =  value;
+     MatchCaptureBuffer _x2c_match_capture = { 0 };
+
+    switch (0) {
+       default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {{
+          matched ++;  break;
+        }
+        break;
+      }
+
+    }
+  }
+after ++;
+    }
+
+  }
+
+}
+List continue_inputs = _19;  int visited = 0,  accepted = 0; {
+  Var item;  Iter _x2c_macro_iterator_1 = List_iter(continue_inputs,  &(struct Iter){
+    0
+  }
+  );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
+    item = _x2c_macro_item_1; {
+      List value = Var_list(item);  visited ++;
+  {
+    List _x2c_match_expr =  value;
+     MatchCaptureBuffer _x2c_match_capture = { 0 };
+    switch (0) {
+       default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_10), &_x2c_match_capture)) {continue;  break;
+    }
+
+    }
+  }
+accepted ++;
+  }
+
+}
+}
+printf("%d %d %d %d\n",  matched,  after,  visited,  accepted);  return matched == 2 && after == 2 && visited == 3 && accepted == 1 ? 0 : 1;
+}
+

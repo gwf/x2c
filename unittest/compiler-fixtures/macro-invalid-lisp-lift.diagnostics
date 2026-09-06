@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-invalid-lisp-lift.x:3:13: macro: compile-time Lisp result cannot fill an expression slot
+  int value = $(quote unsupported);
+              ^^
+  note: value: unsupported
+
+limit: too many errors, stopping
+

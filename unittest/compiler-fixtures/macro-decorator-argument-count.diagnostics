@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-argument-count.x:10:6: parse: macro invocation has too few arguments
+  $tag()
+       ^
+
+limit: too many errors, stopping
+

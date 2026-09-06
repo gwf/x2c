@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/keyword-alias-missing-parentheses.x:11:18: parse: expected ';'
+    assign target, 42;
+                   ^^
+
+limit: too many errors, stopping
+

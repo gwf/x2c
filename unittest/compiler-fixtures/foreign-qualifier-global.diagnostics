@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/foreign-qualifier-global.x:5:3: type: cannot convert (const * const char) to (* char)
+    char *version = upstream_version;
+    ^^^^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+
+limit: too many errors, stopping
+

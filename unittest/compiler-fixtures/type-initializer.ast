@@ -1,0 +1,70 @@
+
+(preproc "#include \"x2c.x\"")
+
+(typedef (struct "InitializerFixture") 
+ (bindings (bind (binding 1 "InitializerFixture") (*))))
+
+(declare (static int) 
+ (bindings (op = (bind (binding 2 "calls") ()) (expr (int) (literal (int) "0")))))
+
+(declare (static int) 
+ (bindings (op = (bind (binding 3 "ready") ()) (expr (int) (literal (int) "0")))))
+
+(declare (static "String") 
+ (bindings 
+  (op = (bind (binding 4 "label") ()) (expr () (ident (binding 5 "NULL"))))))
+
+(function (static int) 
+ (bind (binding 6 "setup") ((fnmod (params (param (void) (bind () ())))))) 
+ (block (at 1 (return (int) (expr (int) (literal (int) "42"))))))
+
+(function (void) 
+ (bind (binding 7 "InitializerFixture_initialize") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 2 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 2 "calls"))))))) 
+  (at 3 (stmnt 
+         (expr (int) 
+          (op = (expr (int) (ident (binding 3 "ready"))) 
+           (expr (int) 
+            (call (expr ((func ((void))) int) (ident (binding 6 "setup"))) 
+             (args (expr (void) ())))))))) 
+  (at 4 (stmnt 
+         (expr ("String") 
+          (op = (expr ("String") (ident (binding 4 "label"))) 
+           (expr ("String") (cache 0))))))))
+
+(function (int) 
+ (bind (binding 8 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 5 (stmnt 
+         (expr (void) 
+          (call (expr ((func ((void))) void) 
+                 (ident (binding 7 "InitializerFixture_initialize"))) 
+           (args (expr (void) ())))))) 
+  (at 6 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 9 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d %d %s\\n\"")) 
+            (expr (int) (ident (binding 2 "calls"))) 
+            (expr (int) (ident (binding 3 "ready"))) 
+            (expr ("String") (ident (binding 4 "label")))))))) 
+  (at 7 (return (int) 
+         (expr (int) 
+          (op ? (expr (int) 
+                 (op && 
+                  (expr (int) 
+                   (op && 
+                    (expr (int) 
+                     (op == (expr (int) (ident (binding 2 "calls"))) 
+                      (expr (int) (literal (int) "1")))) 
+                    (expr (int) 
+                     (op == (expr (int) (ident (binding 3 "ready"))) 
+                      (expr (int) (literal (int) "42")))))) 
+                  (expr (int) 
+                   (call (expr ((func (("String") ("String"))) int) 
+                          (ident (binding 10 "String_equal"))) 
+                    (args (expr ("String") (ident (binding 4 "label"))) 
+                     (expr ("String") (cache 0))))))) 
+           (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

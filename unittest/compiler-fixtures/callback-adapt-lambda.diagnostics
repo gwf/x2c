@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/callback-adapt-lambda.x:6:3: type: typed callback adapter source must be a direct function
+    $x2c.callback.adapt(
+    ^
+  note: target signature: (* (func (("Var"))) "String") source signature: ((func (("Var"))) "Var") supported: a free function or Type.method designator
+
+limit: too many errors, stopping
+

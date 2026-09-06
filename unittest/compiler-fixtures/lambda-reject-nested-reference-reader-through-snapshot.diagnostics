@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lambda-reject-nested-reference-reader-through-snapshot.x:5:50: type: reference capture requires an enclosing reference capture
+    Func outer = %!() => %!() using &value => value;
+                                                   ^
+  note: binding: value
+
+limit: too many errors, stopping
+

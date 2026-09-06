@@ -1,0 +1,140 @@
+---
+interface Props {
+  home?: boolean;
+}
+
+const { home = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+const section = (name: string) => (home ? `#${name}` : `${local("")}#${name}`);
+
+const taglines = [
+  "the world's most hackable compiler",
+  "the love child of C and Lisp",
+  "C with batteries and without bullshit",
+  "it's pronounced ecstasy for a reason",
+  "a compiler for your compiler's compiler",
+];
+---
+
+<header class="landing-header">
+  <div class="landing-header-inner">
+    <div
+      class="landing-branding"
+      data-tagline-rotator
+      data-taglines={JSON.stringify(taglines)}
+    >
+      <a class="landing-brand" href={local("")} aria-label="x2c home">
+        <svg viewBox="0 0 100 100" width="22" height="22" aria-hidden="true"
+          ><g
+            fill="none"
+            stroke="#da291c"
+            stroke-width="17"
+            stroke-linecap="butt"
+            ><path d="M9 16 A34.5 34.5 0 0 1 9 84"></path><path
+              d="M91 16 A34.5 34.5 0 0 0 91 84"></path></g
+          ></svg
+        >
+        <span class="x2c-wordmark landing-wordmark">x2c</span>
+      </a>
+      <button
+        type="button"
+        data-tagline
+        class="landing-tagline"
+        aria-label="Show another tagline"
+        aria-live="polite"
+      >
+        {taglines[0]}
+      </button>
+    </div>
+    <nav class="landing-nav" aria-label="Primary navigation">
+      <div class="landing-page-nav">
+        <a href={section("love")}>love</a>
+        <a href={section("power")}>power</a>
+        <a href={section("magic")}>magic</a>
+      </div>
+      <div class="landing-site-nav">
+        <a href={section("install")}>install</a>
+        <a href={local("docs/")}>docs</a>
+        <a href="https://github.com/gwf/x2c">source</a>
+        <a href={local("about/")}>about</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const matrixDuration = 700;
+  const matrixCharacters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*+-=<>?";
+
+  for (const rotator of document.querySelectorAll<HTMLElement>(
+    "[data-tagline-rotator]",
+  )) {
+    const taglines = JSON.parse(rotator.dataset.taglines ?? "[]");
+    const tagline = rotator.querySelector<HTMLElement>("[data-tagline]")!;
+    let index = Math.floor(Math.random() * taglines.length);
+    let change = 0;
+    let visibleText = taglines[index];
+
+    const randomMatrixCharacter = () =>
+      matrixCharacters[Math.floor(Math.random() * matrixCharacters.length)];
+
+    const matrixText = (
+      fromText: string,
+      text: string,
+      currentChange: number,
+    ) => {
+      const started = performance.now();
+      const length = Math.max(fromText.length, text.length);
+      tagline.setAttribute("data-matrix", "");
+
+      const frame = (now: number) => {
+        if (currentChange !== change) return;
+
+        const progress = Math.min((now - started) / matrixDuration, 1);
+        const reveal = Math.max(0, (progress - 0.2) / 0.8);
+        const revealed = Math.floor(reveal * text.length);
+        let display = "";
+
+        for (let position = 0; position < length; position++) {
+          if (position < revealed) display += text[position];
+          else if (position < text.length && text[position] === " ")
+            display += " ";
+          else display += randomMatrixCharacter();
+        }
+        tagline.textContent = display;
+
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
+          tagline.textContent = text;
+          tagline.removeAttribute("data-matrix");
+        }
+      };
+
+      requestAnimationFrame(frame);
+    };
+
+    const show = (position: number, animate = true) => {
+      const currentChange = ++change;
+      const fromText = visibleText;
+      index = (position + taglines.length) % taglines.length;
+      visibleText = taglines[index];
+
+      if (animate) matrixText(fromText, visibleText, currentChange);
+      else {
+        tagline.textContent = visibleText;
+        tagline.removeAttribute("data-matrix");
+      }
+    };
+
+    tagline.addEventListener("click", () => {
+      const offset = 1 + Math.floor(Math.random() * (taglines.length - 1));
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      show(index + offset, !reducedMotion);
+    });
+    show(index, false);
+  }
+</script>

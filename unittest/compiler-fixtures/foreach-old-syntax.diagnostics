@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/foreach-old-syntax.x:5:18: parse: expected ';'
+    for (int value in values) (void) value;
+                   ^^
+
+limit: too many errors, stopping
+

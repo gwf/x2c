@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-deferred-free-index.x:5:1: parse: type () does not support indexing
+  )
+  ^
+
+limit: too many errors, stopping
+

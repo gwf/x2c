@@ -1,0 +1,9 @@
+macro Expression $string_len(Expr $value) => (
+  $(x2c.expr.call
+    (x2c.method.resolve (x2c.syntax.type $value) "len")
+    $value)
+)
+
+macro Expression $has_method(Type $type, Name $name) => (
+  $(if (x2c.method.resolve $type (x2c.binding.spelling $name)) 1 0)
+)

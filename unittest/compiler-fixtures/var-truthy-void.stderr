@@ -1,0 +1,4 @@
+<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=
+((owner "Var.truth")) location=
+((file "../../lib/varops.x") (line 460) (function "Var_fallback_truth"))
+x2c error floor: code 0xb3d24fbe0: non-returning error was not caught

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/callback-adapt-arity.x:10:3: type: typed callback adapter arity mismatch
+    $x2c.callback.adapt(StringCallback, pair);
+    ^
+  note: target signature: (* (func (("Var"))) "String") source signature: ((func (("String") ("String"))) "String") target has 1 parameters; source has 2
+
+limit: too many errors, stopping
+

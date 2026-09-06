@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/callback-adapt-indirect.x:12:3: type: typed callback adapter source must be a direct function
+    $x2c.callback.adapt(StringCallback, pointer);
+    ^
+  note: target signature: (* (func (("Var"))) "String") source signature: ("SourceCallback") supported: a free function or Type.method designator
+
+limit: too many errors, stopping
+

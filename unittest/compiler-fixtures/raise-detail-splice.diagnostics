@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/raise-detail-splice.x:4:21: parse: raise detail value cannot splice
+    raise %(invariant (detail @values));
+                      ^
+  note: pass one value expression
+
+limit: too many errors, stopping
+

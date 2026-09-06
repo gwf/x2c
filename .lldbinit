@@ -1,0 +1,13 @@
+# Allow project-local .lldbinit to load when sourced manually
+settings set target.load-cwd-lldbinit true
+
+# Map generated build artifacts back to the checked-in sources. lldb resolves
+# a relative replacement path against its working directory, so source this
+# file with the repository root as the working directory.
+settings set target.source-map builds/0 .
+settings append target.source-map lib ./lib
+settings append target.source-map src ./src
+settings append target.source-map include ./include
+
+# Keep breakpoints stable even when the compiler inlines helpers
+settings set target.inline-breakpoint-strategy always

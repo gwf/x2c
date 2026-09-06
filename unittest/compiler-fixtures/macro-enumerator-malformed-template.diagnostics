@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-enumerator-malformed-template.x:4:13: parse: expected ','
+    first_row second_row
+              ^^^^^^^^^^
+
+limit: too many errors, stopping
+

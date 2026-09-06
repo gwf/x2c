@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-result-field-position.x:8:3: macro: macro 'field_result' has result kind Field and cannot be invoked at block scope
+    $field_result();
+    ^
+
+limit: too many errors, stopping
+

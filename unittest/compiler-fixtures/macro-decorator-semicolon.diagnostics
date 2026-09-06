@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-decorator-semicolon.x:7:1: macro: decorator application must not end with ';'
+  $identity();
+  ^
+  note: definition: unittest/compiler-fixtures/macro-decorator-semicolon.x:3:1
+
+limit: too many errors, stopping
+

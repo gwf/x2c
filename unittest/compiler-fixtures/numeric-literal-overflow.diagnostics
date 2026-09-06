@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/numeric-literal-overflow.x:3:13: type: numeric literal is outside the supported scalar range
+  Var value = 18446744073709551616ULL;
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  note: literal: 18446744073709551616ULL
+
+limit: too many errors, stopping
+

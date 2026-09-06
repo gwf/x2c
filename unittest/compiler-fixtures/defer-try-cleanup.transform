@@ -1,0 +1,177 @@
+
+(preproc "#include \"x2c.x\"")
+
+(declare (static int) 
+ (bindings 
+  (op = (bind (binding 1 "cleanup") ()) (expr (int) (literal (int) "0")))))
+
+(function (static void) 
+ (bind (binding 2 "record_cleanup") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 1 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "cleanup")))))))))
+
+(function (static void) 
+ (bind (binding 3 "raise_from_callee") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 19 
+   (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+    (args (expr ("Var") 
+           (call (expr ((func (("Symbol"))) "Var") 
+                  (ident (binding 6 "Symbol_var"))) 
+            (args (expr ("Symbol") (literal ("Symbol") "value" value))))) 
+     (expr ("Var") 
+      (call (expr ((func ((int))) "Var") (ident (binding 32 "int_var"))) 
+       (args (expr (int) (literal (int) "17"))))))))))
+
+(function (static int) 
+ (bind (binding 5 "preserve_parameter") 
+  ((fnmod (params (param (int) (bind (binding 4 "value") ())))))) 
+ (block 
+  (at 20 
+   (try (block 
+         (at 3 (stmnt 
+                (expr (int) 
+                 (op = (expr (int) (ident (binding 4 "value"))) 
+                  (expr (int) (literal (int) "23")))))) 
+         (at 4 (raise 
+                (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+                (args)))) 
+    (catcharms 
+     ((() (expr ("List") 
+           (expr ("List") 
+            (cons (expr ("Var") 
+                   (call (expr ((func (("Symbol"))) "Var") 
+                          (ident (binding 6 "Symbol_var"))) 
+                    (args (expr ("Symbol") 
+                           (literal ("Symbol") "invariant" invariant))))) 
+             (nil)))) (block)))) ())) 
+  (at 21 (return (expr (int) (ident (binding 4 "value")))))))
+
+(function (int) 
+ (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 8 "caught") ()) (expr (int) (literal (int) "0"))) 
+          (op = (bind (binding 9 "inner_handled") ()) 
+           (expr (int) (literal (int) "0")))))) 
+  (at 24 
+   (try (block 
+         (at 23 
+          (try (block 
+                (at 22 
+                 (block 
+                  (at 8 (defer 
+                         (block 
+                          (at 9 (stmnt 
+                                 (expr (void) 
+                                  (call (expr ((func ((void))) void) 
+                                         (ident (binding 3 "raise_from_callee"))) 
+                                   (args (expr (void) ()))))))) () 
+                         (binding 34 "_x2c_defer_cleanup_0") () ()))))) 
+           (catcharms 
+            (((?value) 
+              (expr ("List") 
+               (expr ("List") 
+                (cons (expr ("Var") 
+                       (call (expr ((func (("Symbol"))) "Var") 
+                              (ident (binding 6 "Symbol_var"))) 
+                        (args (expr ("Symbol") 
+                               (literal ("Symbol") "invariant" invariant))))) 
+                 (expr ("List") 
+                  (cons (expr ("Var") 
+                         (call (expr ((func (("List"))) "Var") 
+                                (ident (binding 10 "List_var"))) 
+                          (args (expr ("List") 
+                                 (expr ("List") 
+                                  (cons (expr ("Var") 
+                                         (call (expr ((func (("Symbol"))) "Var") 
+                                                (ident (binding 6 "Symbol_var"))) 
+                                          (args (expr ("Symbol") 
+                                                 (literal ("Symbol") "value" 
+                                                  value))))) 
+                                   (expr ("List") 
+                                    (cons (expr ("Var") 
+                                           (call (expr ((func (("Symbol"))) 
+                                                        "Var") 
+                                                  (ident 
+                                                   (binding 6 "Symbol_var"))) 
+                                            (args (expr ("Symbol") 
+                                                   (literal ("Symbol") "?value" 
+                                                    ?value))))) (nil))))))))) 
+                   (nil)))))) 
+              (block 
+               (at 11 
+                (stmnt 
+                 (expr (int) 
+                  (op = (expr (int) (ident (binding 8 "caught"))) 
+                   (expr (int) 
+                    (call (expr ((func (("Var"))) (int)) 
+                           (ident (binding 12 "Var_int"))) 
+                     (args (expr ("Var") (ident (binding 11 "value")))))))))) 
+               (at 12 
+                (stmnt 
+                 (expr (int) 
+                  (op = (expr (int) (ident (binding 9 "inner_handled"))) 
+                   (expr (int) (literal (int) "1")))))) 
+               (at 13 
+                (raise 
+                 (expr ("Symbol") (literal ("Symbol") "bad-state" bad-state)) 
+                 (args))))))) ()))) 
+    (catcharms 
+     ((() (expr ("List") 
+           (expr ("List") 
+            (cons (expr ("Var") 
+                   (call (expr ((func (("Symbol"))) "Var") 
+                          (ident (binding 6 "Symbol_var"))) 
+                    (args (expr ("Symbol") 
+                           (literal ("Symbol") "bad-state" bad-state))))) 
+             (nil)))) (block)))) ())) 
+  (at 16 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 13 "parameter") ()) 
+      (expr (int) 
+       (call (expr ((func ((int))) int) (ident (binding 5 "preserve_parameter"))) 
+        (args (expr (int) (literal (int) "0"))))))))) 
+  (at 17 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 14 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d %d %d\\n\"")) 
+       (expr (int) (ident (binding 8 "caught"))) 
+       (expr (int) (ident (binding 1 "cleanup"))) 
+       (expr (int) (ident (binding 9 "inner_handled"))) 
+       (expr (int) (ident (binding 13 "parameter")))))))) 
+  (at 25 
+   (return 
+    (expr (int) 
+     (op ? (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op && 
+                 (expr (int) 
+                  (op == (expr (int) (ident (binding 8 "caught"))) 
+                   (expr (int) (literal (int) "17")))) 
+                 (expr (int) 
+                  (op == (expr (int) (ident (binding 1 "cleanup"))) 
+                   (expr (int) (literal (int) "1")))))) 
+               (expr (int) (ident (binding 9 "inner_handled"))))) 
+             (expr (int) 
+              (op == (expr (int) (ident (binding 13 "parameter"))) 
+               (expr (int) (literal (int) "23")))))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
+
+(function (static void) 
+ (bind (binding 34 "_x2c_defer_cleanup_0") 
+  ((fnmod (params (param (void) (bind (binding 33 "_x2c_defer_opaque_0") (*))))))) 
+ (block 
+  (stmnt 
+   (expr (void) 
+    (call (expr ((func ((void))) void) (ident (binding 2 "record_cleanup"))) 
+     (args (expr (void) ())))))))

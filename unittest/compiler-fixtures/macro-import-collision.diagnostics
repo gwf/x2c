@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-import-collision.xmacro:1:1: macro: imported macro 'project.collision' collides with a visible macro
+  macro Expression $project.collision($value) => ($value + 1)
+  ^^^^^
+  note: definition: unittest/compiler-fixtures/macro-import-collision.x:3:1 import: unittest/compiler-fixtures/macro-import-collision.xmacro
+
+limit: too many errors, stopping
+

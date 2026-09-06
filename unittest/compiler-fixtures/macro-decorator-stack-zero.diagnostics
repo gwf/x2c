@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-stack-zero.x:10:1: parse: expected syntax
+  $outer()
+  ^
+
+limit: too many errors, stopping
+

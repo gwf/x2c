@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-incompatible-target.x:8:22: parse: Function macro argument requires a function body
+  static int value = 42;
+                       ^
+
+limit: too many errors, stopping
+

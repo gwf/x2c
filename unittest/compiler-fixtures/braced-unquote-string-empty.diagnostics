@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/braced-unquote-string-empty.x:4:20: parse: expected atomic expression
+    return %"prefix${}suffix";
+                     ^
+  note: token: } kind: }
+
+limit: too many errors, stopping
+

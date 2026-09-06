@@ -1,0 +1,56 @@
+Usage:
+  x2c run [build-options] <input>... [-- <argument>...]
+  x2c run [build-options] [--target <name>] [-- <argument>...]
+
+Build one executable and run it. Arguments after -- are passed
+unchanged to the executable.
+
+Target options:
+      --manifest-path <file>  Use <file> instead of discovering x2c.toml
+      --target <name>         Build the named manifest target
+      --profile <name>        Apply the named manifest build profile
+  -j, --jobs <count>          Maximum parallel translation and compilation jobs
+
+Output options:
+      --output <file>         Name the executable, library, or single object
+      --build-dir <dir>       Store generated C, objects, deps, and state here
+      --save-temps[=<dir>]    Keep generated C and other intermediate files
+
+Translation options:
+  -I <dir>                    Add a shared x2c/C include directory
+      --x-include-dir <dir>   Add an x2c-only include directory
+      --c-include-dir <dir>   Add a C-only ordinary include directory
+      --c-system-dir <dir>    Add a C-only system include directory
+      --package-dir <dir>     Add a directory of x2c packages
+      --no-cpp                Skip symbol collection and preprocessing
+      --live-symbols          Collect symbols through the host preprocessor
+      --cpp-symbols           Use CPP collection for this translation
+
+C compiler options:
+      --cc <program>          Use <program> as the host C compiler
+  -O0, -O1, -O2, -O3, -Os     Set C optimization
+  -g                          Emit debug information
+  -D <name>[=<value>]         Define a C preprocessor macro
+  -U <name>                   Undefine a C preprocessor macro
+  -Xcc <arg>                  Pass one argument only to C compilation
+
+Linker options:
+  -L <dir>                    Add a library search directory
+  -l <name>                   Link library <name>
+  -Wl,<arg>[,<arg>...]        Pass comma-separated arguments to the linker
+  -Xlinker <arg>              Pass one argument to the linker
+
+General options:
+  -h, --help                  Show help and exit
+  -v, --verbose               Show commands as they are executed
+  -###                        Show commands without executing them
+  -q, --quiet                 Suppress successful progress and receipts
+      --plain                 Use stable output without terminal rendering
+      --color <auto|always|never>
+                              Control terminal color
+      --debug                 Enable compiler debug logging
+  @<file>                     Read additional arguments from a response file
+  --                          End build options and begin program arguments
+
+The selected target must be executable. After a successful build,
+x2c returns the program's exit status.

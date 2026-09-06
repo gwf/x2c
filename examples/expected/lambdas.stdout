@@ -1,0 +1,6 @@
+no-arg: 42
+bare identity: 7
+bare first: 1
+typed identity: 41
+typed first: 1
+captured: 7

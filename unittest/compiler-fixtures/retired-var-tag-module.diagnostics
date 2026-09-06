@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/retired-var-tag-module.x:7:3: type: cannot convert ("Module") to Var without loss
+    Var boxed = value;
+    ^^^
+
+limit: too many errors, stopping
+

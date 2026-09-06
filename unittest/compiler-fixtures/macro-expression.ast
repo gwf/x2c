@@ -1,0 +1,19 @@
+
+(preproc "#include \"x2c.x\"")
+
+(macrodef <macro twice>)
+
+(function (int) 
+ (bind (binding 1 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 2 (declare (int) 
+         (bindings 
+          (op = (bind (binding 2 "value") ()) (expr (int) (literal (int) "21")))))) 
+  (at 4 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 3 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
+            (expr (int) 
+             (op + (expr (int) (ident (binding 2 "value"))) 
+              (expr (int) (ident (binding 2 "value")))))))))) 
+  (at 5 (return (int) (expr (int) (literal (int) "0"))))))

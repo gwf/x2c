@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/printf-var-missing.x:5:3: xform: format conversion %d consumes a missing argument
+    printf("%d %d\n", value);
+    ^^^^^^
+  note: printf-family call: printf
+
+limit: too many errors, stopping
+

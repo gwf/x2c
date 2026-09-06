@@ -1,0 +1,416 @@
+
+(preproc "#include \"x2c.x\"")
+
+(typedef (unsigned long) (bindings (bind (binding 1 "ast_phase1_Size") ())))
+
+(typedef ("ast_phase1_Size") (bindings (bind (binding 2 "ast_phase1_Count") ())))
+
+(typedef (int) 
+ (bindings 
+  (bind (binding 3 "ast_phase1_Unary") 
+   ((fnmod (params (param (int) (bind () ()))))))))
+
+(typedef (int) 
+ (bindings 
+  (bind (binding 4 "ast_phase1_UnaryPointer") 
+   (* (fnmod (params (param (int) (bind () ()))))))))
+
+(typedef (void) 
+ (bindings 
+  (bind (binding 5 "ast_phase1_Consumer") 
+   (* (fnmod (params (param (const char) (bind () (*)))))))))
+
+(typedef 
+ (struct "ast_phase1_Pair" 
+  (fields 
+   (declare (int) 
+    (bindings (bind (binding 6 "value") ()) (bind (binding 7 "pointer") (*)))) 
+   (declare (int) 
+    (bindings 
+     (bind (binding 8 "array") ((dim (expr (int) (literal (int) "3"))))) 
+     (bind (binding 9 "array_pointer") 
+      (* (dim (expr (int) (literal (int) "3"))))))) 
+   (declare (int) 
+    (bindings 
+     (bind (binding 10 "callback") 
+      (* (fnmod (params (param (int) (bind () ())))))))))) 
+ (bindings (bind (binding 12 "ast_phase1_Pair") ())))
+
+(declare 
+ (union "ast_phase1_Number" 
+  (fields (declare (long) (bindings (bind (binding 13 "integer") ()))) 
+   (declare (double) (bindings (bind (binding 14 "floating") ()))))) 
+ (bindings (bind () ())))
+
+(declare 
+ (enum "ast_phase1_Color" 
+  ((op = (binding 16 "ast_phase1_RED") (expr (int) (literal (int) "1"))) 
+   (binding 17 "ast_phase1_BLUE"))) (bindings (bind () ())))
+
+(declare (int) 
+ (bindings 
+  (bind (binding 21 "ast_phase1_apply") 
+   ((fnmod 
+     (params 
+      (param (int) 
+       (bind (binding 19 "function") 
+        (* (fnmod (params (param (int) (bind () ()))))))) 
+      (param (int) (bind (binding 20 "value") ()))))))))
+
+(declare (int) 
+ (bindings (bind (binding 22 "ast_phase1_plain_pointer") (*)) 
+  (bind (binding 23 "ast_phase1_plain_array") 
+   ((dim (expr (int) (literal (int) "3"))))) 
+  (bind (binding 24 "ast_phase1_pointer_to_array") 
+   (* (dim (expr (int) (literal (int) "3"))))) 
+  (bind (binding 25 "ast_phase1_function_pointer") 
+   (* (fnmod (params (param (int) (bind () ()))))))))
+
+(function (static int) 
+ (bind (binding 26 "ast_phase1_zero") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block (at 33 (return (expr (int) (literal (int) "0"))))))
+
+(function (static int) 
+ (bind (binding 28 "ast_phase1_identity") 
+  ((fnmod (params (param (int) (bind (binding 27 "value") ())))))) 
+ (block (at 34 (return (expr (int) (ident (binding 27 "value")))))))
+
+(function (static int) 
+ (bind (binding 31 "ast_phase1_add") 
+  ((fnmod 
+    (params (param (int) (bind (binding 29 "lhs") ())) 
+     (param (int) (bind (binding 30 "rhs") ())))))) 
+ (block 
+  (at 35 
+   (return 
+    (expr (int) 
+     (op + (expr (int) (ident (binding 29 "lhs"))) 
+      (expr (int) (ident (binding 30 "rhs")))))))))
+
+(function (int) 
+ (bind (binding 21 "ast_phase1_apply") 
+  ((fnmod 
+    (params 
+     (param (int) 
+      (bind (binding 32 "function") 
+       (* (fnmod (params (param (int) (bind () ()))))))) 
+     (param (int) (bind (binding 33 "value") ())))))) 
+ (block 
+  (at 36 
+   (return 
+    (expr (int) 
+     (call (expr (* (func ((int))) int) (ident (binding 32 "function"))) 
+      (args (expr (int) (ident (binding 33 "value"))))))))))
+
+(function (int) 
+ (bind (binding 36 "ast_phase1_Pair_bump") 
+  ((fnmod 
+    (params (param ("ast_phase1_Pair") (bind (binding 34 "pair") ())) 
+     (param (int) (bind (binding 35 "delta") ())))))) 
+ (block 
+  (at 5 (stmnt 
+         (expr (int) 
+          (op += 
+           (expr (int) 
+            (op . (expr ("ast_phase1_Pair") (ident (binding 34 "pair"))) 
+             ("value"))) (expr (int) (ident (binding 35 "delta"))))))) 
+  (at 37 
+   (return 
+    (expr (int) 
+     (op . (expr ("ast_phase1_Pair") (ident (binding 34 "pair"))) 
+      ("value")))))))
+
+(function (int) 
+ (bind (binding 37 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 38 
+   (declare ("ast_phase1_Pair") 
+    (bindings 
+     (op = (bind (binding 38 "pair") ()) 
+      (expr ("ast_phase1_Pair") 
+       (composite 
+        (commas (dotinit ("value") (expr (int) (literal (int) "1"))) 
+         (dotinit ("pointer") (expr (int) (literal (int) "0"))) 
+         (dotinit ("array") 
+          (expr ((dim ("3")) int) 
+           (composite 
+            (commas (expr (int) (literal (int) "1")) 
+             (expr (int) (literal (int) "2")) (expr (int) (literal (int) "3")))))) 
+         (dotinit ("array_pointer") (expr (int) (literal (int) "0"))) 
+         (dotinit ("callback") 
+          (expr ((func ((int))) int) (ident (binding 28 "ast_phase1_identity"))))))))))) 
+  (at 8 (declare ("ast_phase1_Count") 
+         (bindings 
+          (op = (bind (binding 39 "count") ()) 
+           (expr (int) 
+            (call (expr ((func ((void))) int) 
+                   (ident (binding 26 "ast_phase1_zero"))) 
+             (args (expr (void) ())))))))) 
+  (at 9 (declare ("ast_phase1_UnaryPointer") 
+         (bindings 
+          (op = (bind (binding 40 "callback") ()) 
+           (expr ((func ((int))) int) (ident (binding 28 "ast_phase1_identity"))))))) 
+  (at 39 
+   (declare ("ast_phase1_Consumer") 
+    (bindings 
+     (op = (bind (binding 41 "consumer") ()) 
+      (expr (* (func ((* const char))) void) 
+       (cast (* (func ((* const char))) void) 
+        (expr () (ident (binding 42 "NULL"))))))))) 
+  (at 11 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 43 "values") ()) 
+      (expr ("List") (expr ("List") (cache 5))))))) 
+  (at 50 
+   (declare ("Var") 
+    (bindings (bind (binding 44 "left_value") ()) 
+     (bind (binding 45 "right_value") ())))) 
+  (at 51 
+   (declare ("List") 
+    (bindings 
+     (op = (bind (binding 83 "_x2c_destructure_0") ()) 
+      (expr ("List") (ident (binding 43 "values"))))))) 
+  (at 54 
+   (stmnt 
+    (expr ("Var") 
+     (op = (expr ("Var") (ident (binding 44 "left_value"))) 
+      (expr ("Var") 
+       (call (expr ((func (("List") (int))) "Var") 
+              (ident (binding 92 "List_getindex"))) 
+        (args (expr ("List") (ident (binding 83 "_x2c_destructure_0"))) 
+         (literal (int) "0")))))))) 
+  (at 55 
+   (stmnt 
+    (expr ("Var") 
+     (op = (expr ("Var") (ident (binding 45 "right_value"))) 
+      (expr ("Var") 
+       (call (expr ((func (("List") (int))) "Var") 
+              (ident (binding 92 "List_getindex"))) 
+        (args (expr ("List") (ident (binding 83 "_x2c_destructure_0"))) 
+         (literal (int) "1")))))))) 
+  (at 40 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 46 "converted") (*)) 
+      (expr (* int) 
+       (call "Var_pointer" 
+        (args (expr ("Var") (ident (binding 44 "left_value")))))))))) 
+  (at 15 
+   (stmnt 
+    (expr ("ast_phase1_Count") 
+     (op += (expr ("ast_phase1_Count") (ident (binding 39 "count"))) 
+      (expr (int) 
+       (call (expr ((func ((int) (int))) int) 
+              (ident (binding 31 "ast_phase1_add"))) 
+        (args (expr (int) 
+               (call (expr ((func ((* (func ((int))) int) (int))) int) 
+                      (ident (binding 21 "ast_phase1_apply"))) 
+                (args (expr ("ast_phase1_UnaryPointer") 
+                       (ident (binding 40 "callback"))) 
+                 (expr (int) 
+                  (call (expr ((func (("Var"))) (int)) 
+                         (ident (binding 47 "Var_int"))) 
+                   (args (expr ("Var") (ident (binding 44 "left_value"))))))))) 
+         (expr (int) 
+          (call (expr ((func (("Var"))) (int)) (ident (binding 47 "Var_int"))) 
+           (args (expr ("Var") (ident (binding 45 "right_value"))))))))))))) 
+  (at 41 
+   (block (declare ("Var") (bindings (bind (binding 48 "value") ()))) 
+    (declare ("Iter") 
+     (bindings 
+      (op = (bind (binding 49 "_x2c_macro_iterator_0") ()) 
+       (expr ("Iter") 
+        (call (expr ((func (("List") ("Iter"))) "Iter") 
+               (ident (binding 54 "List_iter"))) 
+         (args (expr ("List") (ident (binding 43 "values"))) 
+          (expr (* struct "Iter") 
+           (op & (expr (struct "Iter") 
+                  (cast (struct "Iter") 
+                   (expr () 
+                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+    (declare ("Var") (bindings (bind (binding 50 "_x2c_macro_item_0") ()))) 
+    (while 
+     (expr (int) 
+      (call (expr ((func (("Iter") (* "Var"))) int) 
+             (ident (binding 55 "Iter_try_next"))) 
+       (args (expr ("Iter") (ident (binding 49 "_x2c_macro_iterator_0"))) 
+        (expr (* "Var") 
+         (op & (expr ("Var") (ident (binding 50 "_x2c_macro_item_0")))))))) 
+     (block 
+      (stmnt 
+       (expr ("Var") 
+        (op = (expr ("Var") (ident (binding 48 "value"))) 
+         (expr ("Var") (ident (binding 50 "_x2c_macro_item_0")))))) 
+      (block 
+       (at 16 
+        (defer (block) (binding 86 "_x2c_defer_env_0") 
+         (binding 89 "_x2c_defer_cleanup_0") 
+         (((binding 39 "count") ("ast_phase1_Count") 
+           (binding 84 "_x2c_defer_capture_0")) 
+          ((binding 48 "value") ("Var") (binding 85 "_x2c_defer_capture_1"))) 
+         ((binding 39 "count"))))))))) 
+  (at 42 
+   (matchcases (expr ("List") (ident (binding 43 "values"))) 
+    (((?head *tail) (expr ("List") (expr ("List") (cache 9))) 
+      (block 
+       (at 19 
+        (stmnt 
+         (expr ("ast_phase1_Count") 
+          (op += (expr ("ast_phase1_Count") (ident (binding 39 "count"))) 
+           (expr (int) (literal (int) "1")))))))) 
+     (() (*) 
+      (block 
+       (at 20 
+        (stmnt 
+         (expr ("ast_phase1_Count") 
+          (op = (expr ("ast_phase1_Count") (ident (binding 39 "count"))) 
+           (expr (int) (literal (int) "0"))))))))))) 
+  (at 22 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 58 "caught") ()) 
+      (expr ("Var") (literal ("Var") "void")))))) 
+  (at 44 
+   (try (block 
+         (at 43 
+          (if (expr (int) 
+               (op > (expr (int) 
+                      (call (expr ("ast_phase1_UnaryPointer") 
+                             (ident (binding 40 "callback"))) 
+                       (args (expr (int) 
+                              (cast (int) 
+                               (expr ("ast_phase1_Count") 
+                                (ident (binding 39 "count")))))))) 
+                (expr (int) (literal (int) "0")))) 
+           (raise (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
+            (args (expr ("Var") 
+                   (call (expr ((func (("Symbol"))) "Var") 
+                          (ident (binding 59 "Symbol_var"))) 
+                    (args (expr ("Symbol") (literal ("Symbol") "value" value))))) 
+             (expr ("Var") (ident (binding 44 "left_value")))))))) 
+    (catcharms 
+     (((?value) 
+       (expr ("List") 
+        (expr ("List") 
+         (cons (expr ("Var") 
+                (call (expr ((func (("Symbol"))) "Var") 
+                       (ident (binding 59 "Symbol_var"))) 
+                 (args (expr ("Symbol") 
+                        (literal ("Symbol") "invariant" invariant))))) 
+          (expr ("List") 
+           (cons (expr ("Var") 
+                  (call (expr ((func (("List"))) "Var") 
+                         (ident (binding 60 "List_var"))) 
+                   (args (expr ("List") 
+                          (expr ("List") 
+                           (cons (expr ("Var") 
+                                  (call (expr ((func (("Symbol"))) "Var") 
+                                         (ident (binding 59 "Symbol_var"))) 
+                                   (args (expr ("Symbol") 
+                                          (literal ("Symbol") "value" value))))) 
+                            (expr ("List") 
+                             (cons (expr ("Var") 
+                                    (call (expr ((func (("Symbol"))) "Var") 
+                                           (ident (binding 59 "Symbol_var"))) 
+                                     (args (expr ("Symbol") 
+                                            (literal ("Symbol") "?value" ?value))))) 
+                              (nil))))))))) (nil)))))) 
+       (block 
+        (at 24 
+         (stmnt 
+          (expr ("Var") 
+           (op = (expr ("Var") (ident (binding 58 "caught"))) 
+            (expr ("Var") (ident (binding 61 "value"))))))))))) 
+    (block 
+     (at 25 
+      (stmnt 
+       (expr ("ast_phase1_Count") 
+        (postfix ++ (expr ("ast_phase1_Count") (ident (binding 39 "count")))))))))) 
+  (at 45 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 62 "lambda_value") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("Var"))) "Var") 
+              (parens 
+               (expr ((func (("Var"))) "Var") 
+                (ident (binding 91 "_x2c_lambda_0"))))) 
+        (args (expr ("Var") 
+               (call (expr ((func ((int))) "Var") (ident (binding 90 "int_var"))) 
+                (args (expr (int) (literal (int) "2")))))))))))) 
+  (at 28 
+   (stmnt 
+    (expr (int) 
+     (call (expr ((func (("ast_phase1_Pair") (int))) (int)) 
+            (ident (binding 36 "ast_phase1_Pair_bump"))) 
+      (args (expr ("ast_phase1_Pair") (ident (binding 38 "pair"))) 
+       (expr (int) 
+        (call (expr ((func (("Var"))) (int)) (ident (binding 47 "Var_int"))) 
+         (args (expr ("Var") (ident (binding 58 "caught"))))))))))) 
+  (at 46 
+   (stmnt 
+    (expr (void) (cast (void) (expr (* int) (ident (binding 46 "converted"))))))) 
+  (at 47 
+   (stmnt 
+    (expr (void) 
+     (cast (void) (expr ("ast_phase1_Consumer") (ident (binding 41 "consumer"))))))) 
+  (at 48 
+   (stmnt 
+    (expr (void) 
+     (cast (void) (expr ("Var") (ident (binding 62 "lambda_value"))))))) 
+  (at 49 (return (expr (int) (literal (int) "0"))))))
+
+(typedef 
+ (struct "_x2c_defer_env_0" 
+  (fields 
+   (declare (const void) 
+    (bindings (bind (binding 84 "_x2c_defer_capture_0") (*)))) 
+   (declare (const void) 
+    (bindings (bind (binding 85 "_x2c_defer_capture_1") (*)))))) 
+ (bindings (bind (binding 86 "_x2c_defer_env_0") ())))
+
+(function (static void) 
+ (bind (binding 89 "_x2c_defer_cleanup_0") 
+  ((fnmod (params (param (void) (bind (binding 88 "_x2c_defer_opaque_0") (*))))))) 
+ (block 
+  (declare ("_x2c_defer_env_0") 
+   (bindings 
+    (op = (bind (binding 87 "_x2c_defer_data_0") (*)) 
+     (expr (* "_x2c_defer_env_0") 
+      (cast (* "_x2c_defer_env_0") 
+       (expr (* void) (ident (binding 88 "_x2c_defer_opaque_0")))))))) 
+  (stmnt 
+   (expr ("ast_phase1_Count") 
+    (op += 
+     (expr ("ast_phase1_Count") 
+      (parens 
+       (expr ("ast_phase1_Count") 
+        (op * (expr (* volatile "ast_phase1_Count") 
+               (cast (* volatile "ast_phase1_Count") 
+                (expr (* const void) "_x2c_defer_data_0->_x2c_defer_capture_0"))))))) 
+     (expr (int) 
+      (call (expr ((func (("Var"))) (int)) (ident (binding 47 "Var_int"))) 
+       (args (expr ("Var") 
+              (parens 
+               (expr ("Var") 
+                (op * (expr (* "Var") 
+                       (cast (* "Var") 
+                        (expr (* const void) 
+                         "_x2c_defer_data_0->_x2c_defer_capture_1")))))))))))))))
+
+(function (static ("Var")) 
+ (bind (binding 91 "_x2c_lambda_0") 
+  ((fnmod (params (param ("Var") (bind (binding 63 "value") ())))))) 
+ (block 
+  (stmnt 
+   (return 
+    (expr ("Var") 
+     (call (expr ((func ((int))) "Var") (ident (binding 90 "int_var"))) 
+      (args (expr (int) 
+             (op + (expr (int) 
+                    (call (expr ((func (("Var"))) (int)) 
+                           (ident (binding 47 "Var_int"))) 
+                     (args (expr ("Var") (ident (binding 63 "value")))))) 
+              (expr (int) (literal (int) "1")))))))))))

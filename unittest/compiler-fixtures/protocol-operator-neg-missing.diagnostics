@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/protocol-operator-neg-missing.x:18:18: type: unary '-' requires a numeric type or implemented neg
+    Plain result = -value;
+                   ^
+  note: operand type: ("Plain")
+
+limit: too many errors, stopping
+

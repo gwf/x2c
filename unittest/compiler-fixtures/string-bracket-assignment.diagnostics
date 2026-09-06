@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/string-bracket-assignment.x:5:3: xform: String does not support bracket assignment
+    text[0] = 'j';
+    ^^^^
+  note: String is immutable: use the copy-producing String.withindex, or bind a char * to write a transient String.malloc buffer
+
+limit: too many errors, stopping
+

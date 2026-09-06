@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-import-open.x:3:1: macro: cannot open compile-time Lisp import
+  $(import "missing-macro-helper.xlisp")
+  ^^
+  note: path: unittest/compiler-fixtures/missing-macro-helper.xlisp
+
+limit: too many errors, stopping
+

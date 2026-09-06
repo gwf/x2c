@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-tag-non-var.x:8:25: protocol: 'tag' applies only to a Var adoption
+  protocol Marker(Marked) tag <list>;
+                          ^^^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/is-type-non-var.x:4:16: type: operator 'is' requires Var on the left
+    return value is int;
+                 ^^
+  note: operand type: (int)
+
+limit: too many errors, stopping
+

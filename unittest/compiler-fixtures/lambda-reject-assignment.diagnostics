@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lambda-reject-assignment.x:5:34: type: captured value requires 'using &name' for reference access
+    Func change = %!() => value = 2;
+                                   ^
+  note: binding: value
+
+limit: too many errors, stopping
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/raise-detail-arity.x:4:21: parse: raise detail requires exactly one value
+    raise %(invariant (owner "probe" "extra"));
+                      ^
+
+limit: too many errors, stopping
+

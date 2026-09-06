@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-missing-target-definition.x:3:1: parse: decorator requires a first target parameter
+  macro Decorator $missing() => {
+  ^^^^^
+
+limit: too many errors, stopping
+

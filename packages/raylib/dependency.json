@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "raylib",
+  "version": "6.0-dbc56a87-image-text-fixes",
+  "profile": "static-memory-image",
+  "sources": [
+    {
+      "name": "raylib",
+      "url": "https://github.com/raysan5/raylib/archive/dbc56a87da87d973a9c5baa4e7438a9d20121d28.tar.gz",
+      "sha256": "81b06ce7c19cf3b634b0271c23c361ba6ad8bf45fb8b036abbfeb4260ec1e126",
+      "root": "raylib-dbc56a87da87d973a9c5baa4e7438a9d20121d28"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "patches/image-text-security.patch",
+      "sha256": "8bd65741317333b6a6718dc034ef4ee4560fed93b1784243ab978f2bc668a3dc"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_raylib}",
+      "argv": ["patch", "-p1", "-i", "{package}/patches/image-text-security.patch"]
+    },
+    {
+      "cwd": "{source_raylib}/src",
+      "argv": [
+        "{cc}", "-c", "rcore.c", "-O2", "-Wall",
+        "-Wno-missing-braces", "-Werror=pointer-arith",
+        "-fno-strict-aliasing", "-std=c99", "-D_GNU_SOURCE",
+        "-DPLATFORM_MEMORY", "-DGRAPHICS_API_OPENGL_SOFTWARE",
+        "-DEXTERNAL_CONFIG_FLAGS", "-DSUPPORT_MODULE_RTEXTURES",
+        "-DSUPPORT_MODULE_RTEXT", "-DSUPPORT_DEFAULT_FONT",
+        "-DSUPPORT_FILEFORMAT_PNG", "-DSUPPORT_IMAGE_EXPORT",
+        "-DSUPPORT_IMAGE_GENERATION", "-DUNICODE",
+        "-I.", "-o", "{work}/rcore.o"
+      ]
+    },
+    {
+      "cwd": "{source_raylib}/src",
+      "argv": [
+        "{cc}", "-c", "rtextures.c", "-O2", "-Wall",
+        "-Wno-missing-braces", "-Werror=pointer-arith",
+        "-fno-strict-aliasing", "-std=c99", "-D_GNU_SOURCE",
+        "-DPLATFORM_MEMORY", "-DGRAPHICS_API_OPENGL_SOFTWARE",
+        "-DEXTERNAL_CONFIG_FLAGS", "-DSUPPORT_MODULE_RTEXTURES",
+        "-DSUPPORT_MODULE_RTEXT", "-DSUPPORT_DEFAULT_FONT",
+        "-DSUPPORT_FILEFORMAT_PNG", "-DSUPPORT_IMAGE_EXPORT",
+        "-DSUPPORT_IMAGE_GENERATION", "-DUNICODE",
+        "-I.", "-o", "{work}/rtextures.o"
+      ]
+    },
+    {
+      "cwd": "{source_raylib}/src",
+      "argv": [
+        "{cc}", "-c", "rtext.c", "-O2", "-Wall",
+        "-Wno-missing-braces", "-Werror=pointer-arith",
+        "-fno-strict-aliasing", "-std=c99", "-D_GNU_SOURCE",
+        "-DPLATFORM_MEMORY", "-DGRAPHICS_API_OPENGL_SOFTWARE",
+        "-DEXTERNAL_CONFIG_FLAGS", "-DSUPPORT_MODULE_RTEXTURES",
+        "-DSUPPORT_MODULE_RTEXT", "-DSUPPORT_DEFAULT_FONT",
+        "-DSUPPORT_FILEFORMAT_PNG", "-DSUPPORT_IMAGE_EXPORT",
+        "-DSUPPORT_IMAGE_GENERATION", "-DUNICODE",
+        "-I.", "-o", "{work}/rtext.o"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": [
+        "{ar}", "rcs", "{prefix}/lib/libraylib.a", "rcore.o",
+        "rtextures.o", "rtext.o"
+      ]
+    }
+  ],
+  "copies": [
+    {
+      "from": "{source_raylib}/src/raylib.h",
+      "to": "{prefix}/include/raylib.h"
+    },
+    {
+      "from": "{source_raylib}/src/raymath.h",
+      "to": "{prefix}/include/raymath.h"
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/raylib.h",
+    "{prefix}/include/raymath.h",
+    "{prefix}/lib/libraylib.a"
+  ]
+}

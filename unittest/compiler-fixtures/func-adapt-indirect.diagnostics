@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/func-adapt-indirect.x:11:3: type: native binding target must be a direct function
+    Func indirect = Func.new(chosen, %((func ((long) (long))) long));
+    ^^^^
+  note: target signature: ("FuncAdapter") source signature: (* (func ((long) (long))) long) supported: a free function or Type.method designator
+
+limit: too many errors, stopping
+

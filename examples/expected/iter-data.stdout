@@ -1,0 +1,7 @@
+unique: ( 3 1 2 4 )
+queue: ( 101 102 201 202 )
+first square over threshold: 81
+temperature alerts: 2
+temperature warning: yes
+scores valid: yes
+numbered: (( 1 parse ) ( 2 compile ) ( 3 link ))

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-sdk-reserved.x:3:1: macro: compile-time Lisp evaluation failed
+  $(def x2c.syntax.type 1)
+  ^^
+  note: form: (def x2c.syntax.type 1)
+
+limit: too many errors, stopping
+

@@ -1,0 +1,8 @@
+{
+  "region": "us-west",
+  "services": [
+    { "name": "artifact-api", "port": 8080, "healthy": true },
+    { "name": "release-worker", "port": 9100, "healthy": false },
+    { "name": "docs-site", "port": 443, "healthy": true }
+  ]
+}

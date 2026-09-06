@@ -1,0 +1,3 @@
+snapshots=2,7 first=3,3 shadow=7,8,8 final=9,10 outer=10 unused=41
+parameter snapshot=11 read=20 bump=21 outer=21
+nested=31,32

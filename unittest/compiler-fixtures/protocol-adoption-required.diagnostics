@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-adoption-required.x:35:24: type: type ("Vec") has no method hash
+    printf("%u\n", v.hash());
+                         ^
+
+limit: too many errors, stopping
+

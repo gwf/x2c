@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-fallback-result-needs-reverse.x:23:1: protocol: Item does not satisfy View(Item): member 'clone' returns T, so View(Item) needs 'View.item' or 'View.as_item'
+  protocol View(Item);
+  ^^^^^^^^
+
+limit: too many errors, stopping
+

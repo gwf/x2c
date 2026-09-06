@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/protocol-static-mixed-owner.x:47:1: protocol: member 'read' of 'StaticMixed' has mixed static and external generated ownership in StaticFirst(StaticMixed) and StaticSecond(StaticMixed)
+  static protocol StaticFirst(StaticMixed);
+  ^^^^^^
+  note: StaticFirst adoption: static StaticSecond adoption: external
+
+limit: too many errors, stopping
+

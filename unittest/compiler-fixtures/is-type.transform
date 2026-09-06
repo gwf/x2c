@@ -1,0 +1,1977 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <stdint.h>")
+
+(preproc "#include <stdio.h>")
+
+(typedef ("Var") (bindings (bind (binding 1 "Dynamic") ())))
+
+(typedef ("Dynamic") (bindings (bind (binding 2 "DynamicAgain") ())))
+
+(typedef (int) (bindings (bind (binding 3 "NativeInt") ())))
+
+(typedef ("NativeInt") (bindings (bind (binding 4 "NativeIntAlias") ())))
+
+(typedef ("NativeIntAlias") (bindings (bind (binding 5 "NativeIntPointer") (*))))
+
+(typedef ("NativeIntPointer") 
+ (bindings (bind (binding 6 "NativeIntDoublePointer") (*))))
+
+(typedef 
+ (struct "IsWidgetData" 
+  (fields (declare (int) (bindings (bind (binding 7 "value") ()))))) 
+ (bindings (bind (binding 9 "IsWidget") (*))))
+
+(typedef ("IsWidget") (bindings (bind (binding 10 "IsWidgetAlias") ())))
+
+(declare ("Var") 
+ (bindings 
+  (bind (binding 12 "IsWidget_var") 
+   ((fnmod (params (param ("IsWidget") (bind (binding 11 "widget") ()))))))))
+
+(declare ("IsWidget") 
+ (bindings 
+  (bind (binding 14 "Var_iswidget") 
+   ((fnmod (params (param ("Var") (bind (binding 13 "value") ()))))))))
+
+(declare (static int) (bindings (bind (binding 15 "calls") ())))
+
+(declare (static int) (bindings (bind (binding 16 "tag_calls") ())))
+
+(function (static "Var") 
+ (bind (binding 17 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 1 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 15 "calls"))))))) 
+  (at 41 
+   (return 
+    (expr ("Var") 
+     (call (expr ((func ((int))) "Var") (ident (binding 84 "int_var"))) 
+      (args (expr (int) (literal (int) "7")))))))))
+
+(function (static "Symbol") 
+ (bind (binding 18 "next_tag") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 3 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 16 "tag_calls"))))))) 
+  (at 42 (return (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))
+
+(function (static "Var") 
+ (bind (binding 20 "call_or_void") 
+  ((fnmod 
+    (params 
+     (param (int) 
+      (bind (binding 19 "function") 
+       (* (fnmod (params (param (void) (bind () ()))))))))))) 
+ (block 
+  (at 43 
+   (if (expr (* (func ((void))) int) (ident (binding 19 "function"))) 
+    (return 
+     (expr ("Var") 
+      (call (expr ((func ((int))) "Var") (ident (binding 84 "int_var"))) 
+       (args (expr (int) 
+              (call (expr (* (func ((void))) int) 
+                     (ident (binding 19 "function"))) (args (expr (void) ())))))))))) 
+  (at 44 (return (expr ("Var") (literal ("Var") "void"))))))
+
+(function (static int) 
+ (bind (binding 22 "symbol_shadows_type") 
+  ((fnmod (params (param ("Var") (bind (binding 21 "value") ())))))) 
+ (block 
+  (at 7 (declare ("Symbol") 
+         (bindings 
+          (op = (bind (binding 23 "NativeInt") ()) 
+           (expr ("Symbol") (literal ("Symbol") "<i32>" i32)))))) 
+  (at 45 
+   (return 
+    (expr (int) 
+     (call (expr ((func (("Var") ("Symbol"))) int) 
+            (ident (binding 24 "Var_is"))) 
+      (args (expr ("Var") (ident (binding 21 "value"))) 
+       (expr ("Symbol") (ident (binding 23 "NativeInt"))))))))))
+
+(function (static int) 
+ (bind (binding 26 "custom_visible_before_protocol") 
+  ((fnmod (params (param ("Var") (bind (binding 25 "value") ())))))) 
+ (block 
+  (at 46 
+   (return 
+    (expr (int) 
+     (call (expr ((func (("Var") ("Symbol"))) int) 
+            (ident (binding 24 "Var_is"))) 
+      (args (expr ("Var") (ident (binding 25 "value"))) 
+       (expr ("Symbol") "660840135016"))))))))
+
+(function ("Var") 
+ (bind (binding 12 "IsWidget_var") 
+  ((fnmod (params (param ("IsWidget") (bind (binding 27 "widget") ())))))) 
+ (block 
+  (at 47 
+   (return 
+    (expr ("Var") 
+     (call (expr ((func (("Symbol") (...))) "Var") 
+            (ident (binding 28 "Var_new"))) 
+      (args (expr ("Symbol") (literal ("Symbol") "<iswidget>" iswidget)) 
+       (expr ("IsWidget") (ident (binding 27 "widget"))))))))))
+
+(function ("IsWidget") 
+ (bind (binding 14 "Var_iswidget") 
+  ((fnmod (params (param ("Var") (bind (binding 29 "value") ())))))) 
+ (block 
+  (at 48 
+   (return 
+    (expr (* void) 
+     (call (expr ((func (("Var"))) (* void)) (ident (binding 30 "Var_pointer"))) 
+      (args (expr ("Var") (ident (binding 29 "value"))))))))))
+
+(adopt ("Var") ("IsWidget") external 
+ ((file "unittest/compiler-fixtures/is-type.x") 
+  (line 56) (column 1) (length 8) (position 1018)))
+
+(function (int) 
+ (bind (binding 31 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 12 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func (("String"))) void) 
+            (ident (binding 32 "x2c_register_type"))) 
+      (args (expr ("String") (cache 0))))))) 
+  (at 13 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 33 "integer") ()) (expr (int) (literal (int) "7"))) 
+     (op = (bind (binding 34 "pointer") (*)) 
+      (expr (* int) (op & (expr (int) (ident (binding 33 "integer")))))) 
+     (op = (bind (binding 35 "double_pointer") (* *)) 
+      (expr (* * int) (op & (expr (* int) (ident (binding 34 "pointer"))))))))) 
+  (at 49 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 36 "scalar") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((int))) "Var") (ident (binding 84 "int_var"))) 
+        (args (expr (int) (ident (binding 33 "integer")))))))))) 
+  (at 15 
+   (declare ("Dynamic") 
+    (bindings 
+     (op = (bind (binding 37 "alias") ()) 
+      (expr ("Var") (ident (binding 36 "scalar"))))))) 
+  (at 16 
+   (declare ("DynamicAgain") 
+    (bindings 
+     (op = (bind (binding 38 "nested_alias") ()) 
+      (expr ("Dynamic") (ident (binding 37 "alias"))))))) 
+  (at 50 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 39 "signed_byte") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "26993") 
+         (expr (signed char) 
+          (cast (signed char) 
+           (expr (int) (op - (expr (int) (literal (int) "1"))))))))))))) 
+  (at 51 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 40 "unsigned_byte") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "30065") 
+         (expr (unsigned char) 
+          (cast (unsigned char) (expr (int) (literal (int) "255"))))))))))) 
+  (at 52 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 41 "unsigned_value") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((unsigned))) "Var") 
+              (ident (binding 85 "unsigned_var"))) 
+        (args (expr (unsigned) 
+               (cast (unsigned) (expr (int) (literal (int) "7"))))))))))) 
+  (at 53 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 42 "wide_integer") ()) 
+      (expr ("Var") 
+       (call "Var_box_long_long" 
+        (args (expr (long long) 
+               (cast (long long) (expr (int) (literal (int) "7"))))))))))) 
+  (at 54 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 43 "wide_unsigned") ()) 
+      (expr ("Var") 
+       (call "Var_box_ulong_long" 
+        (args (expr (unsigned long long) 
+               (cast (unsigned long long) (expr (int) (literal (int) "7"))))))))))) 
+  (at 55 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 44 "floating") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((float))) "Var") (ident (binding 86 "float_var"))) 
+        (args (expr (float) 
+               (cast (float) (expr (double) (literal (double) "1.5"))))))))))) 
+  (at 56 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 45 "wide_floating") ()) 
+      (expr ("Var") 
+       (call "Var_box_long_double" 
+        (args (expr (long double) 
+               (cast (long double) (expr (double) (literal (double) "1.5"))))))))))) 
+  (at 57 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 46 "system_integer") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "3453797") 
+         (expr ("int32_t") (cast ("int32_t") (expr (int) (literal (int) "7"))))))))))) 
+  (at 58 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 47 "list") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("List"))) "Var") (ident (binding 75 "List_var"))) 
+        (args (expr ("List") (nil))))))))) 
+  (at 59 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 48 "string") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("String"))) "Var") (ident (binding 77 "String_var"))) 
+        (args (expr ("String") (0))))))))) 
+  (at 60 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 49 "symbol") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("Symbol"))) "Var") (ident (binding 78 "Symbol_var"))) 
+        (args (expr ("Symbol") (literal ("Symbol") "<fixture>" fixture))))))))) 
+  (at 61 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 50 "pointer_value") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "442085973") 
+         (expr (* int) (ident (binding 34 "pointer")))))))))) 
+  (at 62 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 51 "double_pointer_value") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "56587004501") 
+         (expr (* * int) (ident (binding 35 "double_pointer")))))))))) 
+  (at 63 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 52 "null_value") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "3683441") 
+         (expr (* void) (cast (* void) (expr () (ident (binding 53 "NULL")))))))))))) 
+  (at 31 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 54 "absent") ()) 
+      (expr ("Var") (literal ("Var") "void")))))) 
+  (at 32 
+   (declare ("IsWidget") 
+    (bindings 
+     (op = (bind (binding 55 "widget") ()) 
+      (expr (* void) 
+       (call (expr ((func (("size_t"))) * void) 
+              (ident (binding 56 "Scope_malloc"))) 
+        (args (expr (unsigned) 
+               (sizeof 
+                (parens (decl (struct "IsWidgetData") (bindings (bind () ()))))))))))))) 
+  (at 33 
+   (stmnt 
+    (expr (int) 
+     (op = (expr (int) 
+            (op -> (expr ("IsWidget") (ident (binding 55 "widget"))) 
+             ("value"))) (expr (int) (literal (int) "9")))))) 
+  (at 34 
+   (declare ("IsWidgetAlias") 
+    (bindings 
+     (op = (bind (binding 57 "widget_alias") ()) 
+      (expr ("IsWidget") (ident (binding 55 "widget"))))))) 
+  (at 64 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 58 "custom") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("IsWidget"))) "Var") 
+              (ident (binding 12 "IsWidget_var"))) 
+        (args (expr ("IsWidget") 
+               (expr ("IsWidgetAlias") (ident (binding 57 "widget_alias"))))))))))) 
+  (at 36 
+   (declare ("Symbol") 
+    (bindings 
+     (op = (bind (binding 59 "scalar_tag") ()) 
+      (expr ("Symbol") (literal ("Symbol") "<i32>" i32)))))) 
+  (at 37 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 60 "is") ()) (expr (int) (literal (int) "1")))))) 
+  (at 38 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 61 "ok") ()) 
+      (expr (int) 
+       (op && 
+        (expr (int) 
+         (op && 
+          (expr (int) 
+           (op && 
+            (expr (int) 
+             (op && 
+              (expr (int) 
+               (op && 
+                (expr (int) 
+                 (op && 
+                  (expr (int) 
+                   (op && 
+                    (expr (int) 
+                     (op && 
+                      (expr (int) 
+                       (op && 
+                        (expr (int) 
+                         (op && 
+                          (expr (int) 
+                           (op && 
+                            (expr (int) 
+                             (op && 
+                              (expr (int) 
+                               (op && 
+                                (expr (int) 
+                                 (op && 
+                                  (expr (int) 
+                                   (op && 
+                                    (expr (int) 
+                                     (op && 
+                                      (expr (int) 
+                                       (op && 
+                                        (expr (int) 
+                                         (op && 
+                                          (expr (int) 
+                                           (op && 
+                                            (expr (int) 
+                                             (op && 
+                                              (expr (int) 
+                                               (op && 
+                                                (expr (int) 
+                                                 (op && 
+                                                  (expr (int) 
+                                                   (op && 
+                                                    (expr (int) 
+                                                     (op && 
+                                                      (expr (int) 
+                                                       (op && 
+                                                        (expr (int) 
+                                                         (op && 
+                                                          (expr (int) 
+                                                           (op && 
+                                                            (expr (int) 
+                                                             (op && 
+                                                              (expr (int) 
+                                                               (op && 
+                                                                (expr (int) 
+                                                                 (op && 
+                                                                  (expr (int) 
+                                                                   (op && 
+                                                                    (expr (int) 
+                                                                     (op && 
+                                                                      (expr (int) 
+                                                                       (op && 
+                                                                        (expr (
+                                                                               
+                                                                               int) 
+                                                                         (op && 
+                                                                          (expr 
+                                                                           (int) 
+                                                                           (op 
+                                                                            && 
+                                                                            (
+                                                                             expr 
+                                                                             (
+                                                                              int) 
+                                                                             (op 
+                                                                              && 
+                                                                              (
+                                                                               
+                                                                               expr 
+                                                                               (
+                                                                                
+                                                                                int) 
+                                                                               (
+                                                                                
+                                                                                op 
+                                                                                
+                                                                                && 
+                                                                                (
+                                                                                 
+                                                                                 expr 
+                                                                                 (
+                                                                                  
+                                                                                  int) 
+                                                                                 (
+                                                                                  
+                                                                                  op 
+                                                                                  
+                                                                                  && 
+                                                                                  (
+                                                                                   
+                                                                                   expr 
+                                                                                   (
+                                                                                    
+                                                                                    int) 
+                                                                                   (
+                                                                                    
+                                                                                    op 
+                                                                                    
+                                                                                    && 
+                                                                                    (
+                                                                                     
+                                                                                     expr 
+                                                                                     (
+                                                                                      
+                                                                                      int) 
+                                                                                     (
+                                                                                      
+                                                                                      op 
+                                                                                      
+                                                                                      && 
+                                                                                      (
+                                                                                       
+                                                                                       expr 
+                                                                                       (
+                                                                                        
+                                                                                        int) 
+                                                                                       (
+                                                                                        
+                                                                                        op 
+                                                                                        
+                                                                                        && 
+                                                                                        (
+                                                                                         
+                                                                                         expr 
+                                                                                         (
+                                                                                          
+                                                                                          int) 
+                                                                                         (
+                                                                                          
+                                                                                          op 
+                                                                                          
+                                                                                          && 
+                                                                                          (
+                                                                                           
+                                                                                           expr 
+                                                                                           (
+                                                                                            
+                                                                                            int) 
+                                                                                           (
+                                                                                            
+                                                                                            op 
+                                                                                            
+                                                                                            && 
+                                                                                            (
+                                                                                             
+                                                                                             expr 
+                                                                                             (
+                                                                                              
+                                                                                              int) 
+                                                                                             (
+                                                                                              
+                                                                                              op 
+                                                                                              
+                                                                                              && 
+                                                                                              (
+                                                                                               
+                                                                                               expr 
+                                                                                               (
+                                                                                                
+                                                                                                int) 
+                                                                                               (
+                                                                                                
+                                                                                                op 
+                                                                                                
+                                                                                                && 
+                                                                                                (
+                                                                                                 
+                                                                                                 expr 
+                                                                                                 (
+                                                                                                  
+                                                                                                  int) 
+                                                                                                 (
+                                                                                                  
+                                                                                                  op 
+                                                                                                  
+                                                                                                  && 
+                                                                                                  (
+                                                                                                   
+                                                                                                   expr 
+                                                                                                   (
+                                                                                                    
+                                                                                                    int) 
+                                                                                                   (
+                                                                                                    
+                                                                                                    op 
+                                                                                                    
+                                                                                                    && 
+                                                                                                    (
+                                                                                                     
+                                                                                                     expr 
+                                                                                                     (
+                                                                                                      
+                                                                                                      int) 
+                                                                                                     (
+                                                                                                      
+                                                                                                      call 
+                                                                                                      (
+                                                                                                       
+                                                                                                       expr 
+                                                                                                       (
+                                                                                                        (
+                                                                                                         
+                                                                                                         func 
+                                                                                                         (
+                                                                                                          (
+                                                                                                           
+                                                                                                           "Var") 
+                                                                                                          (
+                                                                                                           
+                                                                                                           "Symbol"))) 
+                                                                                                        
+                                                                                                        int) 
+                                                                                                       (
+                                                                                                        
+                                                                                                        ident 
+                                                                                                        (
+                                                                                                         
+                                                                                                         binding 
+                                                                                                         
+                                                                                                         24 
+                                                                                                         
+                                                                                                         "Var_is"))) 
+                                                                                                      (
+                                                                                                       
+                                                                                                       args 
+                                                                                                       (
+                                                                                                        
+                                                                                                        expr 
+                                                                                                        (
+                                                                                                         
+                                                                                                         "DynamicAgain") 
+                                                                                                        (
+                                                                                                         
+                                                                                                         ident 
+                                                                                                         (
+                                                                                                          
+                                                                                                          binding 
+                                                                                                          
+                                                                                                          38 
+                                                                                                          
+                                                                                                          "nested_alias"))) 
+                                                                                                       (
+                                                                                                        
+                                                                                                        expr 
+                                                                                                        (
+                                                                                                         
+                                                                                                         "Symbol") 
+                                                                                                        
+                                                                                                        "3453797")))) 
+                                                                                                    (
+                                                                                                     
+                                                                                                     expr 
+                                                                                                     (
+                                                                                                      
+                                                                                                      int) 
+                                                                                                     (
+                                                                                                      
+                                                                                                      call 
+                                                                                                      (
+                                                                                                       
+                                                                                                       expr 
+                                                                                                       (
+                                                                                                        (
+                                                                                                         
+                                                                                                         func 
+                                                                                                         (
+                                                                                                          (
+                                                                                                           
+                                                                                                           "Var") 
+                                                                                                          (
+                                                                                                           
+                                                                                                           "Symbol"))) 
+                                                                                                        
+                                                                                                        int) 
+                                                                                                       (
+                                                                                                        
+                                                                                                        ident 
+                                                                                                        (
+                                                                                                         
+                                                                                                         binding 
+                                                                                                         
+                                                                                                         24 
+                                                                                                         
+                                                                                                         "Var_is"))) 
+                                                                                                      (
+                                                                                                       
+                                                                                                       args 
+                                                                                                       (
+                                                                                                        
+                                                                                                        expr 
+                                                                                                        (
+                                                                                                         
+                                                                                                         "Var") 
+                                                                                                        (
+                                                                                                         
+                                                                                                         ident 
+                                                                                                         (
+                                                                                                          
+                                                                                                          binding 
+                                                                                                          
+                                                                                                          36 
+                                                                                                          
+                                                                                                          "scalar"))) 
+                                                                                                       (
+                                                                                                        
+                                                                                                        expr 
+                                                                                                        (
+                                                                                                         
+                                                                                                         "Symbol") 
+                                                                                                        
+                                                                                                        "3453797")))))) 
+                                                                                                  (
+                                                                                                   
+                                                                                                   expr 
+                                                                                                   (
+                                                                                                    
+                                                                                                    int) 
+                                                                                                   (
+                                                                                                    
+                                                                                                    call 
+                                                                                                    (
+                                                                                                     
+                                                                                                     expr 
+                                                                                                     (
+                                                                                                      (
+                                                                                                       
+                                                                                                       func 
+                                                                                                       (
+                                                                                                        (
+                                                                                                         
+                                                                                                         "Var") 
+                                                                                                        (
+                                                                                                         
+                                                                                                         "Symbol"))) 
+                                                                                                      
+                                                                                                      int) 
+                                                                                                     (
+                                                                                                      
+                                                                                                      ident 
+                                                                                                      (
+                                                                                                       
+                                                                                                       binding 
+                                                                                                       
+                                                                                                       24 
+                                                                                                       
+                                                                                                       "Var_is"))) 
+                                                                                                    (
+                                                                                                     
+                                                                                                     args 
+                                                                                                     (
+                                                                                                      
+                                                                                                      expr 
+                                                                                                      (
+                                                                                                       
+                                                                                                       "Var") 
+                                                                                                      (
+                                                                                                       
+                                                                                                       ident 
+                                                                                                       (
+                                                                                                        
+                                                                                                        binding 
+                                                                                                        
+                                                                                                        36 
+                                                                                                        
+                                                                                                        "scalar"))) 
+                                                                                                     (
+                                                                                                      
+                                                                                                      expr 
+                                                                                                      (
+                                                                                                       
+                                                                                                       "Symbol") 
+                                                                                                      
+                                                                                                      "3453797")))))) 
+                                                                                                (
+                                                                                                 
+                                                                                                 expr 
+                                                                                                 (
+                                                                                                  
+                                                                                                  int) 
+                                                                                                 (
+                                                                                                  
+                                                                                                  call 
+                                                                                                  (
+                                                                                                   
+                                                                                                   expr 
+                                                                                                   (
+                                                                                                    (
+                                                                                                     
+                                                                                                     func 
+                                                                                                     (
+                                                                                                      (
+                                                                                                       
+                                                                                                       "Var") 
+                                                                                                      (
+                                                                                                       
+                                                                                                       "Symbol"))) 
+                                                                                                    
+                                                                                                    int) 
+                                                                                                   (
+                                                                                                    
+                                                                                                    ident 
+                                                                                                    (
+                                                                                                     
+                                                                                                     binding 
+                                                                                                     
+                                                                                                     24 
+                                                                                                     
+                                                                                                     "Var_is"))) 
+                                                                                                  (
+                                                                                                   
+                                                                                                   args 
+                                                                                                   (
+                                                                                                    
+                                                                                                    expr 
+                                                                                                    (
+                                                                                                     
+                                                                                                     "Var") 
+                                                                                                    (
+                                                                                                     
+                                                                                                     ident 
+                                                                                                     (
+                                                                                                      
+                                                                                                      binding 
+                                                                                                      
+                                                                                                      36 
+                                                                                                      
+                                                                                                      "scalar"))) 
+                                                                                                   (
+                                                                                                    
+                                                                                                    expr 
+                                                                                                    (
+                                                                                                     
+                                                                                                     "Symbol") 
+                                                                                                    
+                                                                                                    "3453797")))))) 
+                                                                                              (
+                                                                                               
+                                                                                               expr 
+                                                                                               (
+                                                                                                
+                                                                                                int) 
+                                                                                               (
+                                                                                                
+                                                                                                call 
+                                                                                                (
+                                                                                                 
+                                                                                                 expr 
+                                                                                                 (
+                                                                                                  (
+                                                                                                   
+                                                                                                   func 
+                                                                                                   (
+                                                                                                    (
+                                                                                                     
+                                                                                                     "Var") 
+                                                                                                    (
+                                                                                                     
+                                                                                                     "Symbol"))) 
+                                                                                                  
+                                                                                                  int) 
+                                                                                                 (
+                                                                                                  
+                                                                                                  ident 
+                                                                                                  (
+                                                                                                   
+                                                                                                   binding 
+                                                                                                   
+                                                                                                   24 
+                                                                                                   
+                                                                                                   "Var_is"))) 
+                                                                                                (
+                                                                                                 
+                                                                                                 args 
+                                                                                                 (
+                                                                                                  
+                                                                                                  expr 
+                                                                                                  (
+                                                                                                   
+                                                                                                   "Var") 
+                                                                                                  (
+                                                                                                   
+                                                                                                   ident 
+                                                                                                   (
+                                                                                                    
+                                                                                                    binding 
+                                                                                                    
+                                                                                                    36 
+                                                                                                    
+                                                                                                    "scalar"))) 
+                                                                                                 (
+                                                                                                  
+                                                                                                  expr 
+                                                                                                  (
+                                                                                                   
+                                                                                                   "Symbol") 
+                                                                                                  
+                                                                                                  "3453797")))))) 
+                                                                                            (
+                                                                                             
+                                                                                             expr 
+                                                                                             (
+                                                                                              
+                                                                                              int) 
+                                                                                             (
+                                                                                              
+                                                                                              call 
+                                                                                              (
+                                                                                               
+                                                                                               expr 
+                                                                                               (
+                                                                                                (
+                                                                                                 
+                                                                                                 func 
+                                                                                                 (
+                                                                                                  (
+                                                                                                   
+                                                                                                   "Var") 
+                                                                                                  (
+                                                                                                   
+                                                                                                   "Symbol"))) 
+                                                                                                
+                                                                                                int) 
+                                                                                               (
+                                                                                                
+                                                                                                ident 
+                                                                                                (
+                                                                                                 
+                                                                                                 binding 
+                                                                                                 
+                                                                                                 24 
+                                                                                                 
+                                                                                                 "Var_is"))) 
+                                                                                              (
+                                                                                               
+                                                                                               args 
+                                                                                               (
+                                                                                                
+                                                                                                expr 
+                                                                                                (
+                                                                                                 
+                                                                                                 "Var") 
+                                                                                                (
+                                                                                                 
+                                                                                                 ident 
+                                                                                                 (
+                                                                                                  
+                                                                                                  binding 
+                                                                                                  
+                                                                                                  39 
+                                                                                                  
+                                                                                                  "signed_byte"))) 
+                                                                                               (
+                                                                                                
+                                                                                                expr 
+                                                                                                (
+                                                                                                 
+                                                                                                 "Symbol") 
+                                                                                                
+                                                                                                "26993")))))) 
+                                                                                          (
+                                                                                           
+                                                                                           expr 
+                                                                                           (
+                                                                                            
+                                                                                            int) 
+                                                                                           (
+                                                                                            
+                                                                                            call 
+                                                                                            (
+                                                                                             
+                                                                                             expr 
+                                                                                             (
+                                                                                              (
+                                                                                               
+                                                                                               func 
+                                                                                               (
+                                                                                                (
+                                                                                                 
+                                                                                                 "Var") 
+                                                                                                (
+                                                                                                 
+                                                                                                 "Symbol"))) 
+                                                                                              
+                                                                                              int) 
+                                                                                             (
+                                                                                              
+                                                                                              ident 
+                                                                                              (
+                                                                                               
+                                                                                               binding 
+                                                                                               
+                                                                                               24 
+                                                                                               
+                                                                                               "Var_is"))) 
+                                                                                            (
+                                                                                             
+                                                                                             args 
+                                                                                             (
+                                                                                              
+                                                                                              expr 
+                                                                                              (
+                                                                                               
+                                                                                               "Var") 
+                                                                                              (
+                                                                                               
+                                                                                               ident 
+                                                                                               (
+                                                                                                
+                                                                                                binding 
+                                                                                                
+                                                                                                39 
+                                                                                                
+                                                                                                "signed_byte"))) 
+                                                                                             (
+                                                                                              
+                                                                                              expr 
+                                                                                              (
+                                                                                               
+                                                                                               "Symbol") 
+                                                                                              
+                                                                                              "26993")))))) 
+                                                                                        (
+                                                                                         
+                                                                                         expr 
+                                                                                         (
+                                                                                          
+                                                                                          int) 
+                                                                                         (
+                                                                                          
+                                                                                          op 
+                                                                                          
+                                                                                          ! 
+                                                                                          (
+                                                                                           
+                                                                                           expr 
+                                                                                           (
+                                                                                            
+                                                                                            int) 
+                                                                                           (
+                                                                                            
+                                                                                            call 
+                                                                                            (
+                                                                                             
+                                                                                             expr 
+                                                                                             (
+                                                                                              (
+                                                                                               
+                                                                                               func 
+                                                                                               (
+                                                                                                (
+                                                                                                 
+                                                                                                 "Var") 
+                                                                                                (
+                                                                                                 
+                                                                                                 "Symbol"))) 
+                                                                                              
+                                                                                              int) 
+                                                                                             (
+                                                                                              
+                                                                                              ident 
+                                                                                              (
+                                                                                               
+                                                                                               binding 
+                                                                                               
+                                                                                               24 
+                                                                                               
+                                                                                               "Var_is"))) 
+                                                                                            (
+                                                                                             
+                                                                                             args 
+                                                                                             (
+                                                                                              
+                                                                                              expr 
+                                                                                              (
+                                                                                               
+                                                                                               "Var") 
+                                                                                              (
+                                                                                               
+                                                                                               ident 
+                                                                                               (
+                                                                                                
+                                                                                                binding 
+                                                                                                
+                                                                                                39 
+                                                                                                
+                                                                                                "signed_byte"))) 
+                                                                                             (
+                                                                                              
+                                                                                              expr 
+                                                                                              (
+                                                                                               
+                                                                                               "Symbol") 
+                                                                                              
+                                                                                              "30065")))))))) 
+                                                                                      (
+                                                                                       
+                                                                                       expr 
+                                                                                       (
+                                                                                        
+                                                                                        int) 
+                                                                                       (
+                                                                                        
+                                                                                        call 
+                                                                                        (
+                                                                                         
+                                                                                         expr 
+                                                                                         (
+                                                                                          (
+                                                                                           
+                                                                                           func 
+                                                                                           (
+                                                                                            (
+                                                                                             
+                                                                                             "Var") 
+                                                                                            (
+                                                                                             
+                                                                                             "Symbol"))) 
+                                                                                          
+                                                                                          int) 
+                                                                                         (
+                                                                                          
+                                                                                          ident 
+                                                                                          (
+                                                                                           
+                                                                                           binding 
+                                                                                           
+                                                                                           24 
+                                                                                           
+                                                                                           "Var_is"))) 
+                                                                                        (
+                                                                                         
+                                                                                         args 
+                                                                                         (
+                                                                                          
+                                                                                          expr 
+                                                                                          (
+                                                                                           
+                                                                                           "Var") 
+                                                                                          (
+                                                                                           
+                                                                                           ident 
+                                                                                           (
+                                                                                            
+                                                                                            binding 
+                                                                                            
+                                                                                            40 
+                                                                                            
+                                                                                            "unsigned_byte"))) 
+                                                                                         (
+                                                                                          
+                                                                                          expr 
+                                                                                          (
+                                                                                           
+                                                                                           "Symbol") 
+                                                                                          
+                                                                                          "30065")))))) 
+                                                                                    (
+                                                                                     
+                                                                                     expr 
+                                                                                     (
+                                                                                      
+                                                                                      int) 
+                                                                                     (
+                                                                                      
+                                                                                      call 
+                                                                                      (
+                                                                                       
+                                                                                       expr 
+                                                                                       (
+                                                                                        (
+                                                                                         
+                                                                                         func 
+                                                                                         (
+                                                                                          (
+                                                                                           
+                                                                                           "Var") 
+                                                                                          (
+                                                                                           
+                                                                                           "Symbol"))) 
+                                                                                        
+                                                                                        int) 
+                                                                                       (
+                                                                                        
+                                                                                        ident 
+                                                                                        (
+                                                                                         
+                                                                                         binding 
+                                                                                         
+                                                                                         24 
+                                                                                         
+                                                                                         "Var_is"))) 
+                                                                                      (
+                                                                                       
+                                                                                       args 
+                                                                                       (
+                                                                                        
+                                                                                        expr 
+                                                                                        (
+                                                                                         
+                                                                                         "Var") 
+                                                                                        (
+                                                                                         
+                                                                                         ident 
+                                                                                         (
+                                                                                          
+                                                                                          binding 
+                                                                                          
+                                                                                          41 
+                                                                                          
+                                                                                          "unsigned_value"))) 
+                                                                                       (
+                                                                                        
+                                                                                        expr 
+                                                                                        (
+                                                                                         
+                                                                                         "Symbol") 
+                                                                                        
+                                                                                        "3847013")))))) 
+                                                                                  (
+                                                                                   
+                                                                                   expr 
+                                                                                   (
+                                                                                    
+                                                                                    int) 
+                                                                                   (
+                                                                                    
+                                                                                    op 
+                                                                                    
+                                                                                    ! 
+                                                                                    (
+                                                                                     
+                                                                                     expr 
+                                                                                     (
+                                                                                      
+                                                                                      int) 
+                                                                                     (
+                                                                                      
+                                                                                      call 
+                                                                                      (
+                                                                                       
+                                                                                       expr 
+                                                                                       (
+                                                                                        (
+                                                                                         
+                                                                                         func 
+                                                                                         (
+                                                                                          (
+                                                                                           
+                                                                                           "Var") 
+                                                                                          (
+                                                                                           
+                                                                                           "Symbol"))) 
+                                                                                        
+                                                                                        int) 
+                                                                                       (
+                                                                                        
+                                                                                        ident 
+                                                                                        (
+                                                                                         
+                                                                                         binding 
+                                                                                         
+                                                                                         24 
+                                                                                         
+                                                                                         "Var_is"))) 
+                                                                                      (
+                                                                                       
+                                                                                       args 
+                                                                                       (
+                                                                                        
+                                                                                        expr 
+                                                                                        (
+                                                                                         
+                                                                                         "Var") 
+                                                                                        (
+                                                                                         
+                                                                                         ident 
+                                                                                         (
+                                                                                          
+                                                                                          binding 
+                                                                                          
+                                                                                          41 
+                                                                                          
+                                                                                          "unsigned_value"))) 
+                                                                                       (
+                                                                                        
+                                                                                        expr 
+                                                                                        (
+                                                                                         
+                                                                                         "Symbol") 
+                                                                                        
+                                                                                        "3453797")))))))) 
+                                                                                (
+                                                                                 
+                                                                                 expr 
+                                                                                 (
+                                                                                  
+                                                                                  int) 
+                                                                                 (
+                                                                                  
+                                                                                  call 
+                                                                                  (
+                                                                                   
+                                                                                   expr 
+                                                                                   (
+                                                                                    (
+                                                                                     
+                                                                                     func 
+                                                                                     (
+                                                                                      (
+                                                                                       
+                                                                                       "Var") 
+                                                                                      (
+                                                                                       
+                                                                                       "Symbol"))) 
+                                                                                    
+                                                                                    int) 
+                                                                                   (
+                                                                                    
+                                                                                    ident 
+                                                                                    (
+                                                                                     
+                                                                                     binding 
+                                                                                     
+                                                                                     24 
+                                                                                     
+                                                                                     "Var_is"))) 
+                                                                                  (
+                                                                                   
+                                                                                   args 
+                                                                                   (
+                                                                                    
+                                                                                    expr 
+                                                                                    (
+                                                                                     
+                                                                                     "Var") 
+                                                                                    (
+                                                                                     
+                                                                                     ident 
+                                                                                     (
+                                                                                      
+                                                                                      binding 
+                                                                                      
+                                                                                      42 
+                                                                                      
+                                                                                      "wide_integer"))) 
+                                                                                   (
+                                                                                    
+                                                                                    expr 
+                                                                                    (
+                                                                                     
+                                                                                     "Symbol") 
+                                                                                    
+                                                                                    "25983886")))))) 
+                                                                              (
+                                                                               
+                                                                               expr 
+                                                                               (
+                                                                                
+                                                                                int) 
+                                                                               (
+                                                                                
+                                                                                op 
+                                                                                
+                                                                                ! 
+                                                                                (
+                                                                                 
+                                                                                 expr 
+                                                                                 (
+                                                                                  
+                                                                                  int) 
+                                                                                 (
+                                                                                  
+                                                                                  call 
+                                                                                  (
+                                                                                   
+                                                                                   expr 
+                                                                                   (
+                                                                                    (
+                                                                                     
+                                                                                     func 
+                                                                                     (
+                                                                                      (
+                                                                                       
+                                                                                       "Var") 
+                                                                                      (
+                                                                                       
+                                                                                       "Symbol"))) 
+                                                                                    
+                                                                                    int) 
+                                                                                   (
+                                                                                    
+                                                                                    ident 
+                                                                                    (
+                                                                                     
+                                                                                     binding 
+                                                                                     
+                                                                                     24 
+                                                                                     
+                                                                                     "Var_is"))) 
+                                                                                  (
+                                                                                   
+                                                                                   args 
+                                                                                   (
+                                                                                    
+                                                                                    expr 
+                                                                                    (
+                                                                                     
+                                                                                     "Var") 
+                                                                                    (
+                                                                                     
+                                                                                     ident 
+                                                                                     (
+                                                                                      
+                                                                                      binding 
+                                                                                      
+                                                                                      42 
+                                                                                      
+                                                                                      "wide_integer"))) 
+                                                                                   (
+                                                                                    
+                                                                                    expr 
+                                                                                    (
+                                                                                     
+                                                                                     "Symbol") 
+                                                                                    
+                                                                                    "818062")))))))) 
+                                                                            (
+                                                                             expr 
+                                                                             (
+                                                                              int) 
+                                                                             (
+                                                                              call 
+                                                                              (
+                                                                               
+                                                                               expr 
+                                                                               (
+                                                                                (
+                                                                                 
+                                                                                 func 
+                                                                                 (
+                                                                                  (
+                                                                                   
+                                                                                   "Var") 
+                                                                                  (
+                                                                                   
+                                                                                   "Symbol"))) 
+                                                                                
+                                                                                int) 
+                                                                               (
+                                                                                
+                                                                                ident 
+                                                                                (
+                                                                                 
+                                                                                 binding 
+                                                                                 
+                                                                                 24 
+                                                                                 
+                                                                                 "Var_is"))) 
+                                                                              (
+                                                                               
+                                                                               args 
+                                                                               (
+                                                                                
+                                                                                expr 
+                                                                                (
+                                                                                 
+                                                                                 "Var") 
+                                                                                (
+                                                                                 
+                                                                                 ident 
+                                                                                 (
+                                                                                  
+                                                                                  binding 
+                                                                                  
+                                                                                  43 
+                                                                                  
+                                                                                  "wide_unsigned"))) 
+                                                                               (
+                                                                                
+                                                                                expr 
+                                                                                (
+                                                                                 
+                                                                                 "Symbol") 
+                                                                                
+                                                                                "1435270030")))))) 
+                                                                          (expr 
+                                                                           (int) 
+                                                                           (op 
+                                                                            ! (
+                                                                               
+                                                                               expr 
+                                                                               (
+                                                                                
+                                                                                int) 
+                                                                               (
+                                                                                
+                                                                                call 
+                                                                                (
+                                                                                 
+                                                                                 expr 
+                                                                                 (
+                                                                                  (
+                                                                                   
+                                                                                   func 
+                                                                                   (
+                                                                                    (
+                                                                                     
+                                                                                     "Var") 
+                                                                                    (
+                                                                                     
+                                                                                     "Symbol"))) 
+                                                                                  
+                                                                                  int) 
+                                                                                 (
+                                                                                  
+                                                                                  ident 
+                                                                                  (
+                                                                                   
+                                                                                   binding 
+                                                                                   
+                                                                                   24 
+                                                                                   
+                                                                                   "Var_is"))) 
+                                                                                (
+                                                                                 
+                                                                                 args 
+                                                                                 (
+                                                                                  
+                                                                                  expr 
+                                                                                  (
+                                                                                   
+                                                                                   "Var") 
+                                                                                  (
+                                                                                   
+                                                                                   ident 
+                                                                                   (
+                                                                                    
+                                                                                    binding 
+                                                                                    
+                                                                                    43 
+                                                                                    
+                                                                                    "wide_unsigned"))) 
+                                                                                 (
+                                                                                  
+                                                                                  expr 
+                                                                                  (
+                                                                                   
+                                                                                   "Symbol") 
+                                                                                  
+                                                                                  "44858254")))))))) 
+                                                                        (expr (
+                                                                               
+                                                                               int) 
+                                                                         (call 
+                                                                          (expr 
+                                                                           ((
+                                                                             func 
+                                                                             ((
+                                                                               
+                                                                               "Var") 
+                                                                              (
+                                                                               
+                                                                               "Symbol"))) 
+                                                                            int) 
+                                                                           (
+                                                                            ident 
+                                                                            (
+                                                                             binding 
+                                                                             24 
+                                                                             
+                                                                             "Var_is"))) 
+                                                                          (args 
+                                                                           (expr 
+                                                                            (
+                                                                             "Var") 
+                                                                            (
+                                                                             ident 
+                                                                             (
+                                                                              binding 
+                                                                              44 
+                                                                              
+                                                                              "floating"))) 
+                                                                           (expr 
+                                                                            (
+                                                                             "Symbol") 
+                                                                            
+                                                                            "3355493")))))) 
+                                                                      (expr (int) 
+                                                                       (op ! (
+                                                                              expr 
+                                                                              (
+                                                                               
+                                                                               int) 
+                                                                              (
+                                                                               
+                                                                               call 
+                                                                               (
+                                                                                
+                                                                                expr 
+                                                                                (
+                                                                                 (
+                                                                                  
+                                                                                  func 
+                                                                                  (
+                                                                                   (
+                                                                                    
+                                                                                    "Var") 
+                                                                                   (
+                                                                                    
+                                                                                    "Symbol"))) 
+                                                                                 
+                                                                                 int) 
+                                                                                (
+                                                                                 
+                                                                                 ident 
+                                                                                 (
+                                                                                  
+                                                                                  binding 
+                                                                                  
+                                                                                  24 
+                                                                                  
+                                                                                  "Var_is"))) 
+                                                                               (
+                                                                                
+                                                                                args 
+                                                                                (
+                                                                                 
+                                                                                 expr 
+                                                                                 (
+                                                                                  
+                                                                                  "Var") 
+                                                                                 (
+                                                                                  
+                                                                                  ident 
+                                                                                  (
+                                                                                   
+                                                                                   binding 
+                                                                                   
+                                                                                   44 
+                                                                                   
+                                                                                   "floating"))) 
+                                                                                (
+                                                                                 
+                                                                                 expr 
+                                                                                 (
+                                                                                  
+                                                                                  "Symbol") 
+                                                                                 
+                                                                                 "3356265")))))))) 
+                                                                    (expr (int) 
+                                                                     (call (expr 
+                                                                            ((
+                                                                              func 
+                                                                              (
+                                                                               (
+                                                                                
+                                                                                "Var") 
+                                                                               (
+                                                                                
+                                                                                "Symbol"))) 
+                                                                             int) 
+                                                                            (
+                                                                             ident 
+                                                                             (
+                                                                              binding 
+                                                                              24 
+                                                                              
+                                                                              "Var_is"))) 
+                                                                      (args (
+                                                                             expr 
+                                                                             (
+                                                                              "Var") 
+                                                                             (
+                                                                              ident 
+                                                                              (
+                                                                               
+                                                                               binding 
+                                                                               
+                                                                               45 
+                                                                               
+                                                                               "wide_floating"))) 
+                                                                       (expr (
+                                                                              "Symbol") 
+                                                                        
+                                                                        "26071077642")))))) 
+                                                                  (expr (int) 
+                                                                   (call (expr 
+                                                                          ((func 
+                                                                            ((
+                                                                              "Var") 
+                                                                             (
+                                                                              "Symbol"))) 
+                                                                           int) 
+                                                                          (ident 
+                                                                           (
+                                                                            binding 
+                                                                            24 
+                                                                            
+                                                                            "Var_is"))) 
+                                                                    (args (expr 
+                                                                           (
+                                                                            "Var") 
+                                                                           (
+                                                                            ident 
+                                                                            (
+                                                                             binding 
+                                                                             46 
+                                                                             
+                                                                             "system_integer"))) 
+                                                                     (expr (
+                                                                            "Symbol") 
+                                                                      "3453797")))))) 
+                                                                (expr (int) 
+                                                                 (call (expr ((
+                                                                               
+                                                                               func 
+                                                                               (
+                                                                                (
+                                                                                 
+                                                                                 "Var") 
+                                                                                (
+                                                                                 
+                                                                                 "Symbol"))) 
+                                                                              
+                                                                              int) 
+                                                                        (ident 
+                                                                         (
+                                                                          binding 
+                                                                          24 
+                                                                          "Var_is"))) 
+                                                                  (args (expr (
+                                                                               
+                                                                               "Var") 
+                                                                         (ident 
+                                                                          (
+                                                                           binding 
+                                                                           47 
+                                                                           "list"))) 
+                                                                   (expr (
+                                                                          "Symbol") 
+                                                                    "806120")))))) 
+                                                              (expr (int) 
+                                                               (call (expr ((
+                                                                             func 
+                                                                             ((
+                                                                               
+                                                                               "Var") 
+                                                                              (
+                                                                               
+                                                                               "Symbol"))) 
+                                                                            int) 
+                                                                      (ident 
+                                                                       (binding 
+                                                                        24 
+                                                                        "Var_is"))) 
+                                                                (args (expr (
+                                                                             "Var") 
+                                                                       (ident 
+                                                                        (binding 
+                                                                         48 
+                                                                         "string"))) 
+                                                                 (expr ("Symbol") 
+                                                                  "1318210446")))))) 
+                                                            (expr (int) 
+                                                             (call (expr ((func 
+                                                                           ((
+                                                                             "Var") 
+                                                                            (
+                                                                             "Symbol"))) 
+                                                                          int) 
+                                                                    (ident 
+                                                                     (binding 24 
+                                                                      "Var_is"))) 
+                                                              (args (expr ("Var") 
+                                                                     (ident 
+                                                                      (binding 
+                                                                       49 
+                                                                       "symbol"))) 
+                                                               (expr ("Symbol") 
+                                                                "1328354264")))))) 
+                                                          (expr (int) 
+                                                           (op ! (expr (int) 
+                                                                  (call (expr (
+                                                                               (
+                                                                                
+                                                                                func 
+                                                                                (
+                                                                                 (
+                                                                                  
+                                                                                  "Var") 
+                                                                                 (
+                                                                                  
+                                                                                  "Symbol"))) 
+                                                                               
+                                                                               int) 
+                                                                         (ident 
+                                                                          (
+                                                                           binding 
+                                                                           24 
+                                                                           "Var_is"))) 
+                                                                   (args (expr 
+                                                                          ("Var") 
+                                                                          (ident 
+                                                                           (
+                                                                            binding 
+                                                                            36 
+                                                                            
+                                                                            "scalar"))) 
+                                                                    (expr (
+                                                                           "Symbol") 
+                                                                     "45156")))))))) 
+                                                        (expr (int) 
+                                                         (call (expr ((func ((
+                                                                              "Var") 
+                                                                             (
+                                                                              "Symbol"))) 
+                                                                      int) 
+                                                                (ident 
+                                                                 (binding 24 
+                                                                  "Var_is"))) 
+                                                          (args (expr ("Var") 
+                                                                 (ident 
+                                                                  (binding 50 
+                                                                   "pointer_value"))) 
+                                                           (expr ("Symbol") 
+                                                            "442085973")))))) 
+                                                      (expr (int) 
+                                                       (call (expr ((func ((
+                                                                            "Var") 
+                                                                           (
+                                                                            "Symbol"))) 
+                                                                    int) 
+                                                              (ident 
+                                                               (binding 24 
+                                                                "Var_is"))) 
+                                                        (args (expr ("Var") 
+                                                               (ident 
+                                                                (binding 50 
+                                                                 "pointer_value"))) 
+                                                         (expr ("Symbol") 
+                                                          "442085973")))))) 
+                                                    (expr (int) 
+                                                     (call (expr ((func (("Var") 
+                                                                         (
+                                                                          "Symbol"))) 
+                                                                  int) 
+                                                            (ident 
+                                                             (binding 24 
+                                                              "Var_is"))) 
+                                                      (args (expr ("Var") 
+                                                             (ident 
+                                                              (binding 51 
+                                                               "double_pointer_value"))) 
+                                                       (expr ("Symbol") 
+                                                        "56587004501")))))) 
+                                                  (expr (int) 
+                                                   (call (expr ((func (("Var") 
+                                                                       ("Symbol"))) 
+                                                                int) 
+                                                          (ident 
+                                                           (binding 24 "Var_is"))) 
+                                                    (args (expr ("Var") 
+                                                           (ident 
+                                                            (binding 51 
+                                                             "double_pointer_value"))) 
+                                                     (expr ("Symbol") 
+                                                      "56587004501")))))) 
+                                                (expr (int) 
+                                                 (call (expr ((func (("Var") 
+                                                                     ("Symbol"))) 
+                                                              int) 
+                                                        (ident 
+                                                         (binding 24 "Var_is"))) 
+                                                  (args (expr ("Var") 
+                                                         (ident 
+                                                          (binding 52 
+                                                           "null_value"))) 
+                                                   (expr ("Symbol") "3683441")))))) 
+                                              (expr (int) 
+                                               (op ! (expr (int) 
+                                                      (call (expr ((func (("Var"))) 
+                                                                   int) 
+                                                             (ident 
+                                                              (binding 62 
+                                                               "Var_is_void"))) 
+                                                       (args (expr ("Var") 
+                                                              (ident 
+                                                               (binding 52 
+                                                                "null_value")))))))))) 
+                                            (expr (int) 
+                                             (call (expr ((func (("Var"))) int) 
+                                                    (ident 
+                                                     (binding 62 "Var_is_void"))) 
+                                              (args (expr ("Var") 
+                                                     (ident 
+                                                      (binding 54 "absent")))))))) 
+                                          (expr (int) 
+                                           (op ! (expr (int) 
+                                                  (call (expr ((func (("Var") 
+                                                                      ("Symbol"))) 
+                                                               int) 
+                                                         (ident 
+                                                          (binding 24 "Var_is"))) 
+                                                   (args (expr ("Var") 
+                                                          (ident 
+                                                           (binding 54 "absent"))) 
+                                                    (expr ("Symbol") "3683441")))))))) 
+                                        (expr (int) 
+                                         (call (expr ((func (("Var"))) int) 
+                                                (ident 
+                                                 (binding 26 
+                                                  "custom_visible_before_protocol"))) 
+                                          (args (expr ("Var") 
+                                                 (ident (binding 58 "custom")))))))) 
+                                      (expr (int) 
+                                       (call (expr ((func (("Var") ("Symbol"))) 
+                                                    int) 
+                                              (ident (binding 24 "Var_is"))) 
+                                        (args (expr ("Var") 
+                                               (ident (binding 58 "custom"))) 
+                                         (expr ("Symbol") "660840135016")))))) 
+                                    (expr (int) 
+                                     (call (expr ((func (("Var") ("Symbol"))) 
+                                                  int) 
+                                            (ident (binding 24 "Var_is"))) 
+                                      (args (expr ("Var") 
+                                             (ident (binding 58 "custom"))) 
+                                       (expr ("Symbol") "660840135016")))))) 
+                                  (expr (int) 
+                                   (op == 
+                                    (expr (int) 
+                                     (call (expr ((func (("Var") ("Symbol"))) 
+                                                  int) 
+                                            (ident (binding 24 "Var_is"))) 
+                                      (args (expr ("Var") 
+                                             (ident (binding 36 "scalar"))) 
+                                       (expr ("Symbol") "3453797")))) 
+                                    (expr (int) (literal (int) "1")))))) 
+                                (expr (int) 
+                                 (parens 
+                                  (expr (int) 
+                                   (op || 
+                                    (expr (int) 
+                                     (call (expr ((func (("Var") ("Symbol"))) 
+                                                  int) 
+                                            (ident (binding 24 "Var_is"))) 
+                                      (args (expr ("Var") 
+                                             (ident (binding 36 "scalar"))) 
+                                       (expr ("Symbol") "3453797")))) 
+                                    (expr (int) 
+                                     (call (expr ((func (("Var") ("Symbol"))) 
+                                                  int) 
+                                            (ident (binding 24 "Var_is"))) 
+                                      (args (expr ("Var") 
+                                             (ident (binding 36 "scalar"))) 
+                                       (expr ("Symbol") "30065")))))))))) 
+                              (expr (int) 
+                               (op ! (expr (int) 
+                                      (call (expr ((func (("Var") ("Symbol"))) 
+                                                   int) 
+                                             (ident (binding 24 "Var_is"))) 
+                                       (args (expr ("Var") 
+                                              (ident (binding 36 "scalar"))) 
+                                        (expr ("Symbol") "3356265")))))))) 
+                            (expr (int) 
+                             (call (expr ((func (("Var") ("Symbol"))) int) 
+                                    (ident (binding 24 "Var_is"))) 
+                              (args (expr ("Var") 
+                                     (call (expr ((func ((void))) "Var") 
+                                            (ident (binding 17 "next_value"))) 
+                                      (args (expr (void) ())))) 
+                               (expr ("Symbol") "3453797")))))) 
+                          (expr (int) 
+                           (op == (expr (int) (ident (binding 15 "calls"))) 
+                            (expr (int) (literal (int) "1")))))) 
+                        (expr (int) 
+                         (call (expr ((func (("Var"))) int) 
+                                (ident (binding 62 "Var_is_void"))) 
+                          (args (expr ("Var") 
+                                 (call (expr ((func ((* (func ((void))) int))) 
+                                              "Var") 
+                                        (ident (binding 20 "call_or_void"))) 
+                                  (args (expr () (ident (binding 53 "NULL"))))))))))) 
+                      (expr (int) 
+                       (call (expr ((func (("Var"))) int) 
+                              (ident (binding 22 "symbol_shadows_type"))) 
+                        (args (expr ("Var") (ident (binding 36 "scalar")))))))) 
+                    (expr (int) 
+                     (call (expr ((func (("Var") ("Symbol"))) int) 
+                            (ident (binding 24 "Var_is"))) 
+                      (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                       (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))) 
+                  (expr (int) 
+                   (call (expr ((func (("Var") ("Symbol"))) int) 
+                          (ident (binding 24 "Var_is"))) 
+                    (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                     (expr ("Symbol") (ident (binding 59 "scalar_tag")))))))) 
+                (expr (int) 
+                 (call (expr ((func (("Var") ("Symbol"))) int) 
+                        (ident (binding 24 "Var_is"))) 
+                  (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                   (expr ("Symbol") 
+                    (call (expr ((func ((void))) "Symbol") 
+                           (ident (binding 18 "next_tag"))) 
+                     (args (expr (void) ()))))))))) 
+              (expr (int) 
+               (op == (expr (int) (ident (binding 16 "tag_calls"))) 
+                (expr (int) (literal (int) "1")))))) 
+            (expr (int) 
+             (op ! (expr (int) 
+                    (call (expr ((func (("Var") ("Symbol"))) int) 
+                           (ident (binding 24 "Var_is"))) 
+                     (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                      (expr ("Symbol") 
+                       (literal ("Symbol") "<not-a-type>" not-a-type))))))))) 
+          (expr (int) 
+           (call (expr ((func (("Var") ("Symbol"))) (int)) 
+                  (ident (binding 24 "Var_is"))) 
+            (args (expr ("Var") (ident (binding 36 "scalar"))) 
+             (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))) 
+        (expr (int) (ident (binding 60 "is"))))))))) 
+  (at 39 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 63 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
+       (expr (int) (ident (binding 61 "ok"))) 
+       (expr (int) (ident (binding 15 "calls"))) 
+       (expr (int) (ident (binding 16 "tag_calls")))))))) 
+  (at 65 
+   (return 
+    (expr (int) 
+     (op ? (expr (int) (ident (binding 61 "ok"))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
+
+(declare (static "VarMethods") 
+ (bindings (bind (binding 73 "_x2c__x2c_protocol_methods_0") ())))

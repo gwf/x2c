@@ -1,0 +1,827 @@
+/*  array-generics.xmacro -- fixed-width Array family generation
+
+    Copyright (c) 2026 Gary William Flake
+
+    The core family generates storage and sequence algorithms that do not
+    depend on an element's missing-value, update, boxing, or rendering
+    policy. Array and the typed families put their public behavior
+    around these private generated methods.
+
+    The typed family's bracket members are inline native indexing on a
+    concrete element pointer, without a null test, index normalization, or a
+    bounds test. An index outside the elements is undefined as it is for the
+    equivalent C pointer. `try_get` is the checked read.
+
+    Compound update is native too. A float element has no `%` and no bitwise
+    operators, so compound update is defined in separate update macros instead
+    of the typed family. Numeric families use generated C operators; C
+    promotions and conversions determine their results.
+*/
+
+/*  Generates `updateindex` and `postfixindex` for a signed integer element.
+    `$unsigned` is the same-width unsigned type used to hold raw operands and
+    results. The C operators still apply integer promotions, so this does not
+    promise narrow-width wrapping. Division and shift raise before storing
+    anything, so a failed update leaves the element as it was.
+*/
+macro Unit $array.typed.update.integer(
+  Type $array, Type $element, Type $unsigned
+) => {
+  inline $element $array.updateindex($array, int, Symbol, $element);
+  inline $element $array.postfixindex($array, int, Symbol);
+
+  /** Applies integer `op` to raw element `index` and returns the stored value.
+      The index has the unchecked C-pointer preconditions of bracket access.
+      Arithmetic follows the generated C operators, integer promotions, and
+      result conversion. A failing operation leaves the element unchanged.
+      Raises: `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
+      invalid operation.
+  */
+  inline $element $array.updateindex(
+    $array array, int index, Symbol op, $element rhs) {
+    $element *slot = (($element *) array.bytes) + index;
+    $element lhs = *slot;
+    $unsigned a = ($unsigned) lhs, b = ($unsigned) rhs, raw;
+    switch (op) {
+      case <+>: raw = a + b; break;
+      case <->: raw = a - b; break;
+      case <*>: raw = a * b; break;
+      case <&>: raw = a & b; break;
+      case <|>: raw = a | b; break;
+      case <^>: raw = a ^ b; break;
+      case </>: case <%>: {
+        if (!rhs) raise %(div-zero (op $op));
+        // the one signed pair whose quotient is not representable
+        $element floor = ($element) ~(($unsigned) -1 >> 1);
+        if (lhs == floor && rhs == -1) raw = op == </> ? ($unsigned) lhs : 0;
+        else raw = ($unsigned) (op == </> ? lhs / rhs : lhs % rhs);
+        break;
+      }
+      case <"<<">: case <">>">: {
+        int width = (int) (sizeof($element) * 8);
+        if (rhs < 0 || (long long) rhs >= width) {
+          long long count = rhs;
+          raise %(bad-shift (op $op) (count $count) (width $width));
+        }
+        raw = op == <"<<"> ? a << b : ($unsigned) (lhs >> rhs);
+        break;
+      }
+      default: raise %(bad-op (op $op));
+    }
+    return *slot = ($element) raw;
+  }
+
+  /** Applies `++` or `--` at raw `index` and returns the previous value.
+      The index has the unchecked C-pointer preconditions of bracket access.
+      Raises: `<bad-op>` for another operator. The failure does not return.
+  */
+  inline $element $array.postfixindex($array array, int index, Symbol op) {
+    $element old = array[index];
+    if (op == <++>) array.updateindex(index, <+>, 1);
+    else if (op == <-->) array.updateindex(index, <->, 1);
+    // no owner detail: a String literal here would put a lazy interning
+    // guard at the top of every increment
+    else raise %(bad-op (op $op));
+    return old;
+  }
+}
+
+/*  Generates `updateindex` and `postfixindex` for a floating element.
+    Only the four arithmetic operators are defined on a float; the rest
+    raise `<bad-types>`, matching the boxed path.
+*/
+macro Unit $array.typed.update.floating(Type $array, Type $element) => {
+  inline $element $array.updateindex($array, int, Symbol, $element);
+  inline $element $array.postfixindex($array, int, Symbol);
+
+  /** Applies a floating arithmetic `op` and returns the stored value.
+      The supported operators are `+`, `-`, `*`, and `/`; the raw index has
+      the unchecked C-pointer preconditions of bracket access.
+      Raises: `<bad-types>` for another operator, before changing the element.
+  */
+  inline $element $array.updateindex(
+    $array array, int index, Symbol op, $element rhs) {
+    $element *slot = (($element *) array.bytes) + index;
+    switch (op) {
+      case <+>: return *slot += rhs;
+      case <->: return *slot -= rhs;
+      case <*>: return *slot *= rhs;
+      case </>: return *slot /= rhs;
+    }
+    raise %(bad-types (op $op));
+  }
+
+  /** Applies `++` or `--` at raw `index` and returns the previous value.
+      The index has the unchecked C-pointer preconditions of bracket access.
+      Raises: `<bad-op>` for another operator. The failure does not return.
+  */
+  inline $element $array.postfixindex($array array, int index, Symbol op) {
+    $element old = array[index];
+    if (op == <++>) array.updateindex(index, <+>, 1);
+    else if (op == <-->) array.updateindex(index, <->, 1);
+    else raise %(bad-op (op $op));
+    return old;
+  }
+}
+
+/* Generates String concatenation for compound update. Postfix update has no
+   String operation and always raises before touching the array. */
+macro Unit $array.typed.update.string(Type $array) => {
+  inline String $array.updateindex($array, int, Symbol, String);
+  inline String $array.postfixindex($array, int, Symbol);
+
+  /** Concatenates `rhs` onto the String at raw `index` and returns the stored
+      canonical String. The index has the unchecked C-pointer preconditions of
+      bracket access. Raises: `<bad-op>` for any operation other than `+`.
+      A failure leaves the element unchanged.
+  */
+  inline String $array.updateindex(
+    $array array, int index, Symbol op, String rhs) {
+    if (op != <+>) raise %(bad-op (op $op));
+    String *slot = ((String *) array.bytes) + index;
+    String result = slot[0] + rhs;
+    return slot[0] = result;
+  }
+
+  /** Raises `<bad-op>` because String elements have no postfix operation. */
+  inline String $array.postfixindex(
+    $array array, int index, Symbol op) {
+    (void) array; (void) index;
+    raise %(bad-op (op $op));
+  }
+}
+
+macro Unit $array.core.family(Type $array, Type $element) => {
+  static int $array._core_shift($array array, $element *out) {
+    if ((void *) array == NULL || !array.length || !out) return 0;
+    size_t n = array.length;
+    $element *data = ($element *) array.bytes;
+    *out = data[0];
+    if (n > 1) memmove(data, data + 1, (n - 1) * sizeof($element));
+    array.length = n - 1;
+    return 1;
+  }
+
+  static int $array._core_insert($array array, int index, $element value) {
+    int n = (int) array.length;
+    if (index < 0) index += n + 1;
+    if (index < 0 || index > n) return 0;
+    Block_append((Block) array, &value, 1);
+    $element *data = ($element *) array.bytes;
+    if (index < n)
+      memmove(data + index + 1, data + index, (n - index) * sizeof($element));
+    data[index] = value;
+    return 1;
+  }
+
+  static int $array._core_remove($array array, int index, $element *out) {
+    if ((void *) array == NULL || !out) return 0;
+    int n = (int) array.length;
+    index = x2c_normalize_index(index, n);
+    if (index < 0) return 0;
+    $element *data = ($element *) array.bytes;
+    *out = data[index];
+    if (index < n - 1)
+      memmove(data + index, data + index + 1,
+              (n - index - 1) * sizeof($element));
+    array.length = n - 1;
+    return 1;
+  }
+
+  static $array $array._core_copy($array array) {
+    if ((void *) array == NULL) return NULL;
+    $array copy = ($array) Block_new(sizeof($element));
+    Block_append((Block) copy, array.bytes, array.length);
+    return copy;
+  }
+
+  static $array $array._core_getslice(
+    $array array, int start, int end, int step) {
+    if ((void *) array == NULL || !step) return NULL;
+    $array slice = ($array) Block_new(sizeof($element));
+    int newlen = x2c_normalize_slice(&start, &end, step, (int) array.length);
+    if (newlen <= 0) return slice;
+    if (step == 1) {
+      Block_append((Block) slice,
+        (unsigned char *) array.bytes + start * sizeof($element), newlen
+      );
+      return slice;
+    }
+    $element *data = ($element *) array.bytes;
+    if (step < 0) {
+      for (int i = start; i > end; i += step)
+        Block_append((Block) slice, data + i, 1);
+    }
+    else {
+      for (int i = start; i < end; i += step)
+        Block_append((Block) slice, data + i, 1);
+    }
+    return slice;
+  }
+
+  static inline int $array._core_normalize_bound($array array, int index) {
+    int length = (int) array.length;
+    int start = index, stop = index;
+    x2c_normalize_slice(&start, &stop, 1, length);
+    return start;
+  }
+
+  static void $array._core_setslice(
+    $array array, int start, int end, $array values) {
+    int n = (int) array.length;
+    int begin = array._core_normalize_bound(start);
+    int finish = array._core_normalize_bound(end);
+    if (finish < begin) {
+      int tmp = begin;
+      begin = finish;
+      finish = tmp;
+    }
+    int remove = finish - begin;
+    int insert = values ? (int) values.length : 0;
+    int delta = insert - remove;
+    $array source = values;
+    int copied = 0;
+    if (insert > 0 && values && values.bytes == array.bytes) {
+      source = values._core_copy();
+      copied = 1;
+    }
+    defer if (copied) Block_free((Block) source);
+    if (delta > 0) {
+      if (delta > INT_MAX - n) {
+        size_t size = (size_t) n + (size_t) delta;
+        raise %(size-limit (size $size));
+      }
+      Block_append((Block) array, NULL, delta);
+    }
+    $element *data = ($element *) array.bytes;
+    int tail = n - finish;
+    if (tail > 0 && delta != 0)
+      memmove(data + begin + insert, data + finish, tail * sizeof($element));
+    if (insert > 0 && source)
+      memcpy(data + begin, source.bytes, insert * sizeof($element));
+    if (delta < 0) array.length = n + delta;
+  }
+
+  static $array $array._core_remslice($array array, int start, int end) {
+    int n = (int) array.length;
+    int begin = array._core_normalize_bound(start);
+    int finish = array._core_normalize_bound(end);
+    if (finish < begin) {
+      int tmp = begin;
+      begin = finish;
+      finish = tmp;
+    }
+    if (begin >= finish) return ($array) Block_new(sizeof($element));
+    $array removed = array._core_getslice(begin, finish, 1);
+    $element *data = ($element *) array.bytes;
+    int tail = n - finish;
+    if (tail > 0)
+      memmove(data + begin, data + finish, tail * sizeof($element));
+    array.length = n - (finish - begin);
+    return removed;
+  }
+
+  static $array $array._core_splice(
+    $array array, int index, int remove_count, $array values) {
+    if (remove_count < 0) remove_count = 0;
+    int n = (int) array.length;
+    int start = array._core_normalize_bound(index);
+    long long target = (long long) start + remove_count;
+    if (target > INT_MAX) target = INT_MAX;
+    int end = array._core_normalize_bound((int) target);
+    $array removed = array._core_getslice(start, end, 1);
+    array._core_setslice(start, end, values);
+    return removed;
+  }
+
+  static int $array._core_find($array array, $element value) {
+    $element *data = ($element *) array.bytes;
+    int n = (int) array.length;
+    for (int i = 0; i < n; i++) if (data[i] == value) return i;
+    return -1;
+  }
+
+  static int $array._core_count($array array, $element value) {
+    $element *data = ($element *) array.bytes;
+    int n = (int) array.length, total = 0;
+    for (int i = 0; i < n; i++) if (data[i] == value) total++;
+    return total;
+  }
+
+  static $array $array._core_concat($array a, $array b) {
+    $array output = a._core_copy();
+    if (b && b.length) Block_append((Block) output, b.bytes, b.length);
+    return output;
+  }
+
+  static $array $array._core_reverse($array array) {
+    if ((void *) array == NULL || array.length < 2) return array;
+    $element *data = ($element *) array.bytes;
+    for (size_t i = 0, j = array.length - 1; i < j; i++, j--) {
+      $element tmp = data[i];
+      data[i] = data[j];
+      data[j] = tmp;
+    }
+    return array;
+  }
+
+  static int $array._core_equal($array a, $array b) {
+    if ((void *) a == (void *) b) return 1;
+    if ((void *) a == NULL || (void *) b == NULL ||
+        a.length != b.length || a.width != b.width) return 0;
+    $element *adata = ($element *) a.bytes;
+    $element *bdata = ($element *) b.bytes;
+    for (size_t i = 0; i < a.length; i++) if (adata[i] != bdata[i]) return 0;
+    return 1;
+  }
+}
+
+macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
+  Literal $owner
+) => {
+  $array $array.new(void);
+  int $array.try_get($array, int, $element *);
+  int $array.try_next($array, int *, $element *);
+  inline $element $array.getindex($array, int);
+  inline $element $array.setindex($array, int, $element);
+  $element $array.push($array, $element);
+  int $array.try_take_last($array, $element *);
+  $element $array.take_last($array);
+  $element $array.shift($array);
+  $element $array.unshift($array, $element);
+  $element $array.insert($array, int, $element);
+  $element $array.remove($array, int);
+  Self $array.copy(Self);
+  Self $array.getslice(Self, int, int, int);
+  Self $array.setslice(Self, int, int, Self);
+  Self $array.remslice(Self, int, int);
+  Self $array.splice(Self, int, int, Self);
+  int $array.find($array, $element);
+  int $array.contains($array, $element);
+  int $array.count($array, $element);
+  int $array.indexof($array, $element);
+  Self $array.concat(Self, Self);
+  Self $array.reverse(Self);
+  int $array.equal($array, $array);
+
+  /** Returns a fresh empty packed array owned by the current `Scope`.
+      Raises: `<alloc-fail>` when storage cannot be allocated.
+  */
+  $array $array.new(void) {
+    return ($array) Block_new(sizeof($element));
+  }
+
+  /** Reads normalized `index` into `out` and reports whether it exists.
+      Negative indices count from the end. A null array, null `out`, or
+      out-of-range index returns zero without writing; success returns one.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
+  */
+  int $array.try_get($array array, int index, $element *out) {
+    if ((void *) array == NULL || !out) return 0;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    index = x2c_normalize_index(index, (int) array.length);
+    if (index < 0) return 0;
+    *out = (($element *) array.bytes)[index];
+    return 1;
+  }
+
+  /** Writes the next native element, advances `cursor`, and returns one.
+      Initialize the caller-owned cursor to zero. A null argument, negative
+      cursor, exhaustion, or an array outside the integer index domain returns
+      zero without changing `cursor` or `out`. Structural mutation invalidates
+      the cursor.
+  */
+  int $array.try_next($array array, int *cursor, $element *out) {
+    if ((void *) array == NULL || !cursor || !out || *cursor < 0 ||
+        array.length > INT_MAX || *cursor >= (int) array.length) return 0;
+    *out = (($element *) array.bytes)[*cursor];
+    *cursor += 1;
+    return 1;
+  }
+
+  /** Returns the element at raw `index` with no bounds or null check.
+      Negative indices are not normalized, and an invalid index has the same
+      undefined behavior as indexing the equivalent C pointer.
+  */
+  inline $element $array.getindex($array array, int index) {
+    return (($element *) array.bytes)[index];
+  }
+
+  /** Stores and returns `value` at raw `index` with no bounds or null check.
+      Negative indices are not normalized, and an invalid index has the same
+      undefined behavior as indexing the equivalent C pointer.
+  */
+  inline $element $array.setindex($array array, int index, $element value) {
+    return (($element *) array.bytes)[index] = value;
+  }
+
+  /** Appends `value` and returns it.
+      Raises: `<bad-arg>` for a null array, `<size-limit>` at the integer index
+      limit, or `<alloc-fail>` when storage cannot grow.
+  */
+  $element $array.push($array array, $element value) {
+    if ((void *) array == NULL) _bad_operation($owner, <push>);
+    if (array.length >= INT_MAX) _size_limit($owner, array.length);
+    Block_append((Block) array, &value, 1);
+    return value;
+  }
+
+  /** Removes the last element into `out` and returns one when present.
+      A null or empty array, or null `out`, returns zero without writing or
+      changing the array.
+  */
+  int $array.try_take_last($array array, $element *out) {
+    return (void *) array != NULL && out
+      ? Block_try_pop((Block) array, out) : 0;
+  }
+
+  /** Removes and returns the last element.
+      Raises: `<bad-arg>` for a null or empty array.
+  */
+  $element $array.take_last($array array) {
+    $element value = $zero;
+    if (array.try_take_last(&value)) return value;
+    _bad_operation($owner, <take-last>);
+  }
+
+  /** Removes and returns the first element, shifting the remainder left.
+      This operation is O(n).
+      Raises: `<bad-arg>` for a null or empty array, or `<size-limit>` when the
+      length exceeds the integer index domain. These failures do not return.
+  */
+  $element $array.shift($array array) {
+    $element value = $zero;
+    if (array && array.length <= INT_MAX && array._core_shift(&value))
+      return value;
+    if (array && array.length > INT_MAX)
+      _size_limit($owner, array.length);
+    _bad_operation($owner, <shift>);
+  }
+
+  /** Inserts `value` at the front and returns it, shifting elements right.
+      This operation is O(n).
+      Raises: `<bad-arg>` for a null array, `<size-limit>` at the integer index
+      limit, or `<alloc-fail>` when storage cannot grow.
+  */
+  $element $array.unshift($array array, $element value) {
+    if ((void *) array == NULL) _bad_operation($owner, <unshift>);
+    if (array.length >= INT_MAX) _size_limit($owner, array.length);
+    array._core_insert(0, value);
+    return value;
+  }
+
+  /** Inserts `value` at normalized `index` and returns it.
+      The accepted range includes the position after the last element;
+      negative indices are normalized against that wider range.
+      Raises: `<bad-arg>` for a null array or out-of-range index,
+      `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
+      cannot grow.
+  */
+  $element $array.insert($array array, int index, $element value) {
+    if ((void *) array == NULL || array.length >= INT_MAX ||
+        !array._core_insert(index, value)) {
+      if (array && array.length >= INT_MAX)
+        _size_limit($owner, array.length);
+      size_t size = array ? array.length : 0;
+      _bad_index($owner, index, size);
+    }
+    return value;
+  }
+
+  /** Removes and returns the element at normalized `index`.
+      Negative indices count from the end; following elements shift left.
+      Raises: `<bad-arg>` for a null array or out-of-range index, or
+      `<size-limit>` when the length exceeds the integer index domain.
+  */
+  $element $array.remove($array array, int index) {
+    $element value = $zero;
+    if (array && array.length <= INT_MAX && array._core_remove(index, &value))
+      return value;
+    if (array && array.length > INT_MAX)
+      _size_limit($owner, array.length);
+    size_t size = array ? array.length : 0;
+    _bad_index($owner, index, size);
+  }
+
+  /** Returns a fresh packed copy, or NULL for a null array.
+      The result has independent mutable storage containing the same stored
+      values.
+      Raises: `<size-limit>` or `<alloc-fail>` when the copy cannot be
+      represented or allocated.
+  */
+  Self $array.copy(Self array) {
+    if ((void *) array == NULL) return NULL;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    return array._core_copy();
+  }
+
+  /** Returns a fresh packed array for normalized `[start:end:step]`.
+      Negative bounds count from the end and a negative step walks backward.
+      Raises: `<bad-arg>` for a null array or zero step, `<size-limit>` outside
+      the integer index domain, or `<alloc-fail>` on allocation failure.
+  */
+  Self $array.getslice(Self array, int start, int end, int step) {
+    if ((void *) array == NULL || !step) _bad_step($owner, step);
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    return array._core_getslice(start, end, step);
+  }
+
+  /** Replaces normalized bounds `[start:end]` and returns `array`.
+      Reversed bounds are swapped; null `values` deletes the region. Passing
+      `array` itself as `values` is supported and copies before mutation.
+      Raises: `<bad-arg>` for a null array, `<size-limit>` outside the integer
+      index domain, or `<alloc-fail>` while copying self-aliased values or
+      growing storage for the replacement. These failures leave `array`
+      unchanged.
+  */
+  Self $array.setslice(Self array, int start, int end, Self values) {
+    if ((void *) array == NULL) _bad_operation($owner, <setslice>);
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    if (values && values.length > INT_MAX)
+      _size_limit($owner, values.length);
+    array._core_setslice(start, end, values);
+    return array;
+  }
+
+  /** Removes normalized bounds `[start:end]` and returns a fresh packed array.
+      Reversed bounds are swapped, and the removed values retain their order.
+      Raises: `<bad-arg>` for a null array, `<size-limit>` outside the integer
+      index domain, or `<alloc-fail>` on allocation failure.
+  */
+  Self $array.remslice(Self array, int start, int end) {
+    if ((void *) array == NULL) _bad_operation($owner, <remslice>);
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    return array._core_remslice(start, end);
+  }
+
+  /** Replaces `remove_count` values at normalized `index` and returns them.
+      The result is a fresh packed array. A nonpositive count removes nothing;
+      null `values` performs deletion, and self-splicing is supported.
+      Raises: `<bad-arg>` for a null array, `<size-limit>` outside the integer
+      index domain, or `<alloc-fail>` on allocation failure.
+  */
+  Self $array.splice(Self array, int index, int remove_count, Self values) {
+    if ((void *) array == NULL) _bad_operation($owner, <splice>);
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    if (values && values.length > INT_MAX)
+      _size_limit($owner, values.length);
+    return array._core_splice(index, remove_count, values);
+  }
+
+  /** Returns the first index whose native element equals `value`, or -1.
+      A null array returns -1; the scan is linear and preserves source order.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
+  */
+  int $array.find($array array, $element value) {
+    if ((void *) array == NULL) return -1;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    return array._core_find(value);
+  }
+
+  /** Reports whether a native element equals `value`.
+      The scan is linear. Raises: `<size-limit>` when the length exceeds the
+      integer index domain.
+  */
+  int $array.contains($array array, $element value) {
+    return array.find(value) != -1;
+  }
+
+  /** Returns how many native elements equal `value`.
+      A null array returns zero; the scan is linear.
+      Raises: `<size-limit>` when the length exceeds the integer index domain.
+  */
+  int $array.count($array array, $element value) {
+    if ((void *) array == NULL) return 0;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    return array._core_count(value);
+  }
+
+  /** Returns the same first-match index as `$array.find`. */
+  int $array.indexof($array array, $element value) {
+    return array.find(value);
+  }
+
+  /** Returns a fresh array holding `a` followed by `b`.
+      Neither input is modified. A null `a` returns NULL, while a null `b`
+      produces an independent copy of `a`.
+      Raises: `<size-limit>` or `<alloc-fail>` when the result cannot be
+      represented or allocated.
+  */
+  Self $array.concat(Self a, Self b) {
+    if ((void *) a == NULL) return NULL;
+    if (a.length > INT_MAX) _size_limit($owner, a.length);
+    if (b && b.length > INT_MAX - a.length)
+      _size_limit($owner, b.length);
+    return a._core_concat(b);
+  }
+
+  /** Reverses `array` in place and returns that same array.
+      A null or one-element array is returned unchanged.
+  */
+  Self $array.reverse(Self array) {
+    return array._core_reverse();
+  }
+
+  /** Reports elementwise native equality.
+      Two null arrays compare equal; one null array or different lengths
+      compare unequal.
+  */
+  int $array.equal($array a, $array b) {
+    return a._core_equal(b);
+  }
+}
+
+macro Unit $array.core.observe(
+  Type $array, Type $element, Name $compare_element
+) => {
+  static int $array._core_compare($array a, $array b) {
+    if ((void *) a == (void *) b) return 0;
+    if ((void *) a == NULL) return -1;
+    if ((void *) b == NULL) return 1;
+    size_t asz = a.length, bsz = b.length;
+    size_t n = asz < bsz ? asz : bsz;
+    $element *adata = ($element *) a.bytes;
+    $element *bdata = ($element *) b.bytes;
+    for (size_t i = 0; i < n; i++) {
+      int comparison = $compare_element(adata[i], bdata[i]);
+      if (comparison) return comparison;
+    }
+    if (asz == bsz) return 0;
+    return asz < bsz ? -1 : 1;
+  }
+
+  static Buffer $array._core_write(
+    $array array, Buffer out, Symbol mode) {
+    $element *data = array ? ($element *) array.bytes : NULL;
+    size_t n = array ? array.length : 0;
+    out.write("[ ");
+    for (size_t i = 0; i < n; i++) {
+      Var element = data[i];
+      if (mode == <str>) element.write_str(out);
+      else element.write_repr(out);
+      if (i < n - 1) out.write(", ");
+    }
+    return out.write(" ]");
+  }
+}
+
+macro Unit $array.typed.observe(
+  Type $family, Type $element, Literal $owner, Name $compare_element,
+  Name $new_buffer, Name $finish_buffer
+) => {
+  $array.core.observe($family, $element, $compare_element);
+  Array $family.array($family);
+  int $family.compare($family, $family);
+  String $family.str($family);
+  String $family.repr($family);
+  Buffer $family.write_str($family, Buffer);
+  Buffer $family.write_repr($family, Buffer);
+
+  /** Returns a fresh ordinary Array containing boxed elements in source order.
+      A null input returns NULL. The typed Array and its storage are unchanged.
+      Raises: any cause from boxing or appending an element.
+  */
+  Array $family.array($family array) {
+    if ((void *) array == NULL) return NULL;
+    if (array.length > INT_MAX) _size_limit($owner, array.length);
+    Array boxed = %[], result = NULL;
+    defer if ((void *) result == NULL) Block_free((Block) boxed);
+    $element *data = ($element *) array.bytes;
+    for (size_t i = 0; i < array.length; i++) {
+      Var element = data[i];
+      Block_append((Block) boxed, &element, 1);
+    }
+    return result = boxed;
+  }
+
+  /** Compares packed Arrays lexicographically with the element family's
+      ordering. Identical handles compare equal and NULL sorts first.
+  */
+  int $family.compare($family a, $family b) {
+    return a._core_compare(b);
+  }
+
+  /** Appends the readable packed-Array representation to `out`. */
+  Buffer $family.write_repr($family array, Buffer out) {
+    return array._core_write(out, <repr>);
+  }
+
+  /** Appends the packed-Array display text to `out`. */
+  Buffer $family.write_str($family array, Buffer out) {
+    return array._core_write(out, <str>);
+  }
+
+  /** Returns the packed-Array display String. */
+  String $family.str($family array) {
+    Buffer out = $new_buffer();
+    array.write_str(out);
+    return $finish_buffer(out);
+  }
+
+  /** Returns the readable packed-Array representation. */
+  String $family.repr($family array) {
+    Buffer out = $new_buffer();
+    array.write_repr(out);
+    return $finish_buffer(out);
+  }
+}
+
+macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
+  Literal $tag, Name $prepare_export
+) using $next => {
+  Var $array.var($array);
+  Block $array.block($array);
+  $array Var.$unbox(Var);
+  $array Array.$unbox(Array);
+  Iter $array.iter($array, Iter);
+  static $array $array.export_context($array, Context);
+
+  /** Boxes `array` with its registered packed-array tag without copying.
+      The boxed and typed values share the same mutable object identity.
+  */
+  inline Var $array.var($array array) {
+    return Var_new($tag, array);
+  }
+
+  /** Views `array` as the same underlying `Block` storage. */
+  inline Block $array.block($array array) {
+    return (Block) array;
+  }
+
+  /** Returns the packed-array pointer carried by `value`.
+      `value` must carry this array family's registered tag; the converter
+      does not validate the tag before reading its pointer payload.
+  */
+  inline $array Var.$unbox(Var value) {
+    return ($array) Var_pointer(value);
+  }
+
+  /** Packs `values` into a fresh array in source order.
+      A null input returns NULL. Each element goes through its `Var`
+      conversion; the source is unchanged and a failing conversion or
+      allocation releases the partial result before transferring its cause.
+  */
+  $array Array.$unbox(Array values) {
+    if ((void *) values == NULL) return NULL;
+    $array packed = ($array) Block_new(sizeof($element)), result = NULL;
+    defer if ((void *) result == NULL) packed.free();
+    for (size_t i = 0; i < values.length; i++) packed.push(values[i]);
+    return result = packed;
+  }
+
+  static int $next(Iter iter, Var *out) {
+    $array array = iter.obj.$unbox();
+    int index = Var_int(iter.state);
+    $element element;
+    if (!array.try_next(&index, &element)) return 0;
+    *out = element;
+    iter.state = index;
+    return 1;
+  }
+
+  /** Initializes `dest` to lazily yield boxed elements in index order.
+      Returns `dest`, whose storage is caller-owned. The iterator borrows
+      `array` and reads its current storage on each step, so both must remain
+      live and mutation can change the remaining traversal. A null `dest`
+      returns NULL. A null array, or one longer than the integer index domain,
+      is exhausted. A boxed wide element is `Scope`-owned;
+      retaining one after a
+      pull requires its owning `Scope` to remain live.
+      Raises: any cause from boxing an element.
+  */
+  Iter $array.iter($array array, Iter dest) {
+    if ((void *) dest == NULL) return NULL;
+    return Iter_init(dest, array, $next, 0);
+  }
+
+  static $array $array.export_context($array array, Context source) {
+    if ((void *) array == NULL || !source.owns(array)) return array;
+    $array staged = $prepare_export(array, source), committed = NULL;
+    defer if ((void *) staged != NULL && (void *) committed == NULL)
+      staged.free();
+    Scope *destination = source.export_destination();
+    if ((void *) staged == NULL) {
+      array.block().move_to(destination);
+      return array;
+    }
+
+    staged.block().move_to(destination);
+    source.move_allocation(array);
+    Bytes old_bytes = array.bytes;
+    size_t old_length = array.length, old_cap = array.cap;
+    array.bytes = staged.bytes;
+    array.length = staged.length;
+    array.cap = staged.cap;
+    *((Block *) ((unsigned char *) array.bytes - sizeof(Block))) = array;
+    staged.bytes = old_bytes;
+    staged.length = old_length;
+    staged.cap = old_cap;
+    staged.free();
+    committed = array;
+    return array;
+  }
+
+  protocol Block($array);
+  protocol Iter($array);
+  protocol Var($array) tag $tag;
+}

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-expression-body.x:3:43: parse: braced macro body requires Statement, Block, Field, Entry, Enumerator, Unit, or non-Expression Decorator result
+  macro Decorator $invalid(Expr $target) => {
+                                            ^
+
+limit: too many errors, stopping
+

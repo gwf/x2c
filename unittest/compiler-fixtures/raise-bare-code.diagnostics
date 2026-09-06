@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/raise-bare-code.x:4:11: parse: raise code must be a bare Symbol
+    raise %(<invariant>);
+            ^^^^^^^^^^^
+  note: use raise %(code (key value)...);
+
+limit: too many errors, stopping
+

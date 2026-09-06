@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/delegate-field-cycle.x:16:23: type: delegation cycle resolving DelegateCycleLeft.missing
+    return value.missing();
+                        ^
+  note: delegate path: DelegateCycleLeft.right.left
+
+limit: too many errors, stopping
+

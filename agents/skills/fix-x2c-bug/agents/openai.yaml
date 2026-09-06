@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix x2c Bug"
+  short_description: "Reproduce, fix small, pin with one test"
+  default_prompt: "Use $fix-x2c-bug to reproduce this x2c defect, make the smallest fix, and pin it with one regression test."

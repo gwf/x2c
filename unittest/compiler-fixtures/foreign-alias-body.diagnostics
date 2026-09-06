@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/foreign-alias-body.x:4:1: parse: foreign alias declaration cannot have a body
+  $x2c.foreign.alias(abs)
+  ^
+
+limit: too many errors, stopping
+

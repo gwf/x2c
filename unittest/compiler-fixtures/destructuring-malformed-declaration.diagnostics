@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/destructuring-malformed-declaration.x:5:10: parse: expected identifier in destructuring declaration
+    Var (a,) = values;
+           ^
+  note: destructuring targets must be simple identifiers
+
+limit: too many errors, stopping
+

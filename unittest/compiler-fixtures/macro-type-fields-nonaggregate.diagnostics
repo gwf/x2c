@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-type-fields-nonaggregate.x:7:1: macro: x2c.type.fields requires a struct or union Type
+  $inspect(int);
+  ^
+  note: value: (int)
+
+limit: too many errors, stopping
+

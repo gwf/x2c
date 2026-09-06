@@ -1,0 +1,43 @@
+// x2c compile-time Lisp SDK
+(defun x2c.invocation.file ()
+  (cadr (assoc 'file (x2c._invocation.location))))
+(defun x2c.invocation.line ()
+  (cadr (assoc 'line (x2c._invocation.location))))
+(defun x2c.invocation.column ()
+  (cadr (assoc 'column (x2c._invocation.location))))
+(defun x2c._fail (message value) (x2c.diagnostic.fail
+  message (list (string-append "value: " (repr value)))))
+
+(defun x2c.literal.string (value) (if (string? value)
+  `(expr ("String") (segments
+    (segexp (expr ("String") (literal ("String") ,value)))))
+  (x2c._fail "x2c.literal.string requires a String" value)))
+(defun x2c.literal.int (value) (if (number? value)
+  `(expr (int) (literal (int) ,(str value)))
+  (x2c._fail "x2c.literal.int requires a number" value)))
+(defun x2c.literal.symbol (value) (if (symbol? value)
+  `(expr ("Symbol") (literal ("Symbol") ,(str value) ,value))
+  (x2c._fail "x2c.literal.symbol requires a Symbol" value)))
+(defun x2c.source.text (syntax) (x2c._source.text syntax))
+(defun x2c.embed.text (path) (x2c._embed.text path))
+
+// Expression construction. Every operand is itself an expression AST.
+(defun x2c.expr.ident (name) `(expr () (ident ,name)))
+(defun x2c.expr.index (base subscript)
+  `(expr () (index ,base ,subscript)))
+(defun x2c.expr.field (receiver name) (let
+  ((checked (x2c.ident name)))
+  `(expr () (op . ,receiver (,(cadr checked))))))
+(defun x2c.expr.call (callee . arguments)
+  `(expr () (call ,callee (args ,@arguments))))
+(defun x2c.expr.composite (items)
+  `(expr () (composite (commas ,@items))))
+
+(defun x2c._params (value)
+  (if (eq? (car value) 'params) (cdr value) value))
+(defun x2c._arg (parameter)
+  `(expr () (ident ,(cadr (car (cddr parameter))))))
+(defun x2c.parameters.arguments (value) (let ((items (x2c._params value)))
+  (if (match items '((param (void) (bind () ?mods))))
+      nil
+      (map x2c._arg items))))

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/import-method-ambiguous.x:6:19: type: method 'Var.vec' is provided by multiple imported packages
+    return value.vec();
+                    ^
+  note: package: 'geo' package: 'other'
+
+limit: too many errors, stopping
+

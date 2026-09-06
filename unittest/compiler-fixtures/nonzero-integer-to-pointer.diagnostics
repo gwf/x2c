@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/nonzero-integer-to-pointer.x:7:3: type: cannot convert the integer 42 to pointer type ("List")
+    match (42) {
+    ^^^^^
+  note: only a zero integer constant expression converts to a pointer
+
+limit: too many errors, stopping
+

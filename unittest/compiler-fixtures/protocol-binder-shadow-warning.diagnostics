@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/protocol-binder-shadow-warning.x:7:18: warning: protocol binder 'Widget' shadows a visible type name
+  protocol Measure(Widget) {
+                   ^^^^^^
+  note: hint: a bodyless `protocol BASE(Widget);` declares an adoption; a body introduces a fresh type variable
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/keyword-alias-import-missing.xmacro:1:21: parse: unknown or forward-referenced macro 'fixture.private.missing'
+  keyword unavailable $fixture.private.missing;
+                      ^
+
+limit: too many errors, stopping
+

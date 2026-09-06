@@ -1,0 +1,5 @@
+simple: demo
+quoted: ->
+same: yes
+seven-bit: Token@! (7)
+map: localhost:8080

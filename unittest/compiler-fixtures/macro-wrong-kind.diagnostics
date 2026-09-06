@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-wrong-kind.x:6:13: macro: macro 'drop' cannot be invoked in an expression
+  int value = $drop();
+              ^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-tag-non-symbol.x:7:22: protocol: Var adoption tag must be a Symbol literal
+  protocol Var(Tagged) tag 17;
+                       ^^^
+
+limit: too many errors, stopping
+

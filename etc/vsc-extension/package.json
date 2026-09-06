@@ -1,0 +1,94 @@
+{
+  "name": "x2c-syntax",
+  "displayName": "x2c Language Support",
+  "description": "Syntax highlighting and language configuration for x2c source files.",
+  "version": "0.1.23",
+  "publisher": "x2c-lang",
+  "author": {
+    "name": "Gary William Flake"
+  },
+  "license": "SEE LICENSE IN LICENSE.md",
+  "preview": true,
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "x2c",
+    "c",
+    "programming language",
+    "syntax highlighting"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gwf/x2c.git",
+    "directory": "etc/vsc-extension"
+  },
+  "homepage": "https://x2c-lang.dev",
+  "bugs": {
+    "url": "https://github.com/gwf/x2c/issues"
+  },
+  "qna": false,
+  "pricing": "Free",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "x2c",
+        "aliases": [
+          "x2c",
+          "X2C"
+        ],
+        "extensions": [
+          ".xc",
+          ".xh",
+          ".x2c",
+          ".x",
+          ".xmacro"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "x2c-lisp",
+        "aliases": [
+          "x2c Lisp",
+          "X2C Lisp"
+        ],
+        "extensions": [
+          ".xlisp"
+        ],
+        "configuration": "./lisp-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "x2c",
+        "scopeName": "source.x2c",
+        "path": "./syntaxes/x2c.tmLanguage.json"
+      },
+      {
+        "language": "x2c-lisp",
+        "scopeName": "source.x2c.lisp",
+        "path": "./syntaxes/x2c-lisp.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "vsce package",
+    "test": "node --test test/language-configuration.test.js && vscode-tmgrammar-test 'test/**/*.test.x' 'test/**/*.test.xlisp'"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "3.9.2",
+    "vscode-tmgrammar-test": "0.1.3"
+  },
+  "icon": "images/icon.png"
+}

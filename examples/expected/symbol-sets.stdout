@@ -1,0 +1,13 @@
+contains yellow: 1
+contains purple: 0
+index of red: 2
+index of purple: -1
+first light: green
+last light: red
+light: green
+light: yellow
+light: red
+red -> stop
+green -> go
+red -> stop
+yellow -> slow

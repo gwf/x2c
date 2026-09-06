@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-public-lisp-siblings.x:11:1: type: method name has no concrete owner
+  $sneak()
+  ^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,268 @@
+
+(preproc "#include \"x2c.x\"")
+
+(typedef ("String") 
+ (bindings 
+  (bind (binding 1 "StringCallback") 
+   (* (fnmod (params (param ("Var") (bind () ()))))))))
+
+(typedef (int) 
+ (bindings 
+  (bind (binding 2 "CompareCallback") 
+   (* (fnmod (params (param ("Var") (bind () ())) (param ("Var") (bind () ()))))))))
+
+(typedef ("Iter") 
+ (bindings 
+  (bind (binding 3 "IterCallback") 
+   (* (fnmod (params (param ("Var") (bind () ())) (param ("Iter") (bind () ()))))))))
+
+(typedef 
+ (struct "Callbacks" 
+  (fields (declare ("StringCallback") (bindings (bind (binding 4 "owner") ()))) 
+   (declare ("StringCallback") (bindings (bind (binding 5 "free") ()))) 
+   (declare ("CompareCallback") 
+    (bindings (bind (binding 6 "symbol_compare") ()))) 
+   (declare ("CompareCallback") (bindings (bind (binding 7 "file_equal") ()))) 
+   (declare ("IterCallback") (bindings (bind (binding 8 "iter") ()))))) 
+ (bindings (bind (binding 10 "Callbacks") ())))
+
+(function (static "String") 
+ (bind (binding 12 "echo") 
+  ((fnmod (params (param ("String") (bind (binding 11 "value") ())))))) 
+ (block (at 21 (return (expr ("String") (ident (binding 11 "value")))))))
+
+(declare (static "Callbacks") 
+ (bindings 
+  (op = (bind (binding 13 "callbacks") ((dim))) 
+   (expr ((dim) "Callbacks") 
+    (composite 
+     (commas 
+      (expr ("Callbacks") 
+       (composite 
+        (commas 
+         (dotinit ("owner") 
+          (expr ("StringCallback") (ident (binding 56 "_x2c_callback_adapt_0")))) 
+         (dotinit ("free") 
+          (expr ("StringCallback") (ident (binding 59 "_x2c_callback_adapt_1")))) 
+         (dotinit ("symbol_compare") 
+          (expr ("CompareCallback") (ident (binding 61 "_x2c_callback_adapt_2")))) 
+         (dotinit ("file_equal") 
+          (expr ("CompareCallback") (ident (binding 64 "_x2c_callback_adapt_3")))) 
+         (dotinit ("iter") 
+          (expr ("IterCallback") (ident (binding 68 "_x2c_callback_adapt_4")))))))))))))
+
+(declare (static "StringCallback") 
+ (bindings 
+  (op = (bind (binding 18 "duplicate") ()) 
+   (expr ("StringCallback") (ident (binding 56 "_x2c_callback_adapt_0"))))))
+
+(function (int) 
+ (bind (binding 19 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 8 (stmnt 
+         (expr (void) 
+          (call (expr ((func ((void))) void) (ident (binding 20 "Scope_retain"))) 
+           (args (expr (void) ())))))) 
+  (at 9 (declare ("String") 
+         (bindings 
+          (op = (bind (binding 21 "text") ()) (expr ("String") (cache 0)))))) 
+  (at 22 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 22 "boxed_text") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("String"))) "Var") (ident (binding 49 "String_var"))) 
+        (args (expr ("String") (ident (binding 21 "text"))))))) 
+     (op = (bind (binding 23 "alpha") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("Symbol"))) "Var") (ident (binding 50 "Symbol_var"))) 
+        (args (expr ("Symbol") (literal ("Symbol") "<alpha>" alpha)))))) 
+     (op = (bind (binding 24 "beta") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("Symbol"))) "Var") (ident (binding 50 "Symbol_var"))) 
+        (args (expr ("Symbol") (literal ("Symbol") "<beta>" beta)))))) 
+     (op = (bind (binding 25 "raw_null") ()) 
+      (expr ("Var") 
+       (cast ("Var") 
+        (expr () (composite (commas (expr (int) (literal (int) "0"))))))))))) 
+  (at 23 
+   (declare ("Array") 
+    (bindings (op = (bind (binding 26 "values") ()) (expr ("Array") (varray)))))) 
+  (at 24 
+   (stmnt 
+    (expr ("Var") 
+     (call (expr ((func (("Array") ("Var"))) ("Var")) 
+            (ident (binding 27 "Array_push"))) 
+      (args (expr ("Array") (ident (binding 26 "values"))) 
+       (expr ("Var") 
+        (call (expr ((func ((int))) "Var") (ident (binding 72 "int_var"))) 
+         (args (expr (int) (literal (int) "42")))))))))) 
+  (at 25 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 28 "boxed_values") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("Array"))) "Var") (ident (binding 41 "Array_var"))) 
+        (args (expr ("Array") (ident (binding 26 "values")))))))))) 
+  (at 14 (declare (struct "Iter") (bindings (bind (binding 29 "storage") ())))) 
+  (at 15 
+   (declare ("Iter") 
+    (bindings 
+     (op = (bind (binding 30 "iter") ()) 
+      (expr ("Iter") 
+       (call (expr ("IterCallback") 
+              (op . (expr ("Callbacks") 
+                     (index 
+                      (expr ((dim) "Callbacks") (ident (binding 13 "callbacks"))) 
+                      (expr (int) (literal (int) "0")))) ("iter"))) 
+        (args (expr ("Var") (ident (binding 28 "boxed_values"))) 
+         (expr (* struct "Iter") 
+          (op & (expr (struct "Iter") (ident (binding 29 "storage")))))))))))) 
+  (at 16 (declare ("Var") (bindings (bind (binding 31 "item") ())))) 
+  (at 17 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 32 "advanced") ()) 
+      (expr (int) 
+       (call (expr ((func (("Iter") (* "Var"))) (int)) 
+              (ident (binding 33 "Iter_try_next"))) 
+        (args (expr ("Iter") (ident (binding 30 "iter"))) 
+         (expr (* "Var") (op & (expr ("Var") (ident (binding 31 "item")))))))))))) 
+  (at 18 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 34 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %s %s %d %d %d\\n\"")) 
+       (expr (int) 
+        (op == 
+         (expr ("StringCallback") 
+          (op . (expr ("Callbacks") 
+                 (index 
+                  (expr ((dim) "Callbacks") (ident (binding 13 "callbacks"))) 
+                  (expr (int) (literal (int) "0")))) ("owner"))) 
+         (expr ("StringCallback") (ident (binding 18 "duplicate"))))) 
+       (expr ("String") 
+        (call (expr ("StringCallback") 
+               (op . (expr ("Callbacks") 
+                      (index 
+                       (expr ((dim) "Callbacks") 
+                        (ident (binding 13 "callbacks"))) 
+                       (expr (int) (literal (int) "0")))) ("owner"))) 
+         (args (expr ("Var") (ident (binding 22 "boxed_text")))))) 
+       (expr ("String") 
+        (call (expr ("StringCallback") 
+               (op . (expr ("Callbacks") 
+                      (index 
+                       (expr ((dim) "Callbacks") 
+                        (ident (binding 13 "callbacks"))) 
+                       (expr (int) (literal (int) "0")))) ("free"))) 
+         (args (expr ("Var") (ident (binding 22 "boxed_text")))))) 
+       (expr (int) 
+        (call (expr ("CompareCallback") 
+               (op . (expr ("Callbacks") 
+                      (index 
+                       (expr ((dim) "Callbacks") 
+                        (ident (binding 13 "callbacks"))) 
+                       (expr (int) (literal (int) "0")))) ("symbol_compare"))) 
+         (args (expr ("Var") (ident (binding 23 "alpha"))) 
+          (expr ("Var") (ident (binding 24 "beta")))))) 
+       (expr (int) 
+        (call (expr ("CompareCallback") 
+               (op . (expr ("Callbacks") 
+                      (index 
+                       (expr ((dim) "Callbacks") 
+                        (ident (binding 13 "callbacks"))) 
+                       (expr (int) (literal (int) "0")))) ("file_equal"))) 
+         (args (expr ("Var") (ident (binding 25 "raw_null"))) 
+          (expr ("Var") (ident (binding 25 "raw_null")))))) 
+       (expr (int) 
+        (op ? (expr (int) (ident (binding 32 "advanced"))) 
+         (expr (int) 
+          (call (expr ((func (("Var"))) (int)) (ident (binding 35 "Var_int"))) 
+           (args (expr ("Var") (ident (binding 31 "item")))))) 
+         (expr (int) (op - (expr (int) (literal (int) "1"))))))))))) 
+  (at 19 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func ((void))) void) (ident (binding 36 "Scope_release"))) 
+      (args (expr (void) ())))))) 
+  (at 26 (return (expr (int) (literal (int) "0"))))))
+
+(function (static ("String")) 
+ (bind (binding 56 "_x2c_callback_adapt_0") 
+  ((fnmod (params (param ("Var") (bind (binding 57 "a0") ())))))) 
+ (block 
+  (stmnt 
+   (return 
+    (expr ("String") 
+     (call (expr ((func (("String"))) "String") 
+            (ident (binding 14 "String_str"))) 
+      (args (expr ("String") 
+             (call (expr ((func (("Var"))) "String") 
+                    (ident (binding 58 "Var_string"))) 
+              (args (expr ("Var") (ident (binding 57 "a0")))))))))))))
+
+(function (static ("String")) 
+ (bind (binding 59 "_x2c_callback_adapt_1") 
+  ((fnmod (params (param ("Var") (bind (binding 60 "a0") ())))))) 
+ (block 
+  (stmnt 
+   (return 
+    (expr ("String") 
+     (call (expr ((func (("String"))) "String") (ident (binding 12 "echo"))) 
+      (args (expr ("String") 
+             (call (expr ((func (("Var"))) "String") 
+                    (ident (binding 58 "Var_string"))) 
+              (args (expr ("Var") (ident (binding 60 "a0")))))))))))))
+
+(function (static (int)) 
+ (bind (binding 61 "_x2c_callback_adapt_2") 
+  ((fnmod 
+    (params (param ("Var") (bind (binding 62 "a0") ())) 
+     (param ("Var") (bind (binding 63 "a1") ())))))) 
+ (block 
+  (stmnt 
+   (return 
+    (expr (int) 
+     (call (expr ((func (("Symbol") ("Symbol"))) int) 
+            (ident (binding 15 "Symbol_compare"))) 
+      (args (expr ("Symbol") 
+             (call "Var_symbol" (args (expr ("Var") (ident (binding 62 "a0")))))) 
+       (expr ("Symbol") 
+        (call "Var_symbol" (args (expr ("Var") (ident (binding 63 "a1")))))))))))))
+
+(function (static (int)) 
+ (bind (binding 64 "_x2c_callback_adapt_3") 
+  ((fnmod 
+    (params (param ("Var") (bind (binding 65 "a0") ())) 
+     (param ("Var") (bind (binding 66 "a1") ())))))) 
+ (block 
+  (stmnt 
+   (return 
+    (expr (int) 
+     (call (expr ((func (("File") ("File"))) int) 
+            (ident (binding 16 "File_equal"))) 
+      (args (expr ("File") 
+             (call (expr ((func (("Var"))) "File") 
+                    (ident (binding 67 "Var_file"))) 
+              (args (expr ("Var") (ident (binding 65 "a0")))))) 
+       (expr ("File") 
+        (call (expr ((func (("Var"))) "File") (ident (binding 67 "Var_file"))) 
+         (args (expr ("Var") (ident (binding 66 "a1")))))))))))))
+
+(function (static ("Iter")) 
+ (bind (binding 68 "_x2c_callback_adapt_4") 
+  ((fnmod 
+    (params (param ("Var") (bind (binding 69 "a0") ())) 
+     (param ("Iter") (bind (binding 70 "a1") ())))))) 
+ (block 
+  (stmnt 
+   (return 
+    (expr ("Iter") 
+     (call (expr ((func (("Array") ("Iter"))) "Iter") 
+            (ident (binding 17 "Array_iter"))) 
+      (args (expr ("Array") 
+             (call (expr ((func (("Var"))) "Array") 
+                    (ident (binding 71 "Var_array"))) 
+              (args (expr ("Var") (ident (binding 69 "a0")))))) 
+       (expr ("Iter") (ident (binding 70 "a1"))))))))))

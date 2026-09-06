@@ -1,0 +1,13 @@
+macro Expression $fixture.private.first(Expr $value) => ($value + 1)
+
+macro Expression $fixture.private.second(Expr $value) => ($value + 2)
+
+macro Decorator $fixture.private.scope(Block $target) => {
+  {
+    $target
+  }
+}
+
+keyword imported_value $fixture.private.first;
+keyword imported_value $fixture.private.second;
+keyword private_scope $fixture.private.scope;

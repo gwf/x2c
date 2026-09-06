@@ -1,0 +1,31 @@
+Usage:
+  x2c <command> [options]
+
+x2c translates x2c source to C and can optionally compile and link the
+result with the host C toolchain.
+
+Commands:
+
+  translate   Translate .x files to .c and .h files
+  build       Translate, compile, and optionally link a target
+  run         Build an executable and run it
+  bootstrap   Install a native x2c from a APE binary
+  help        Show help for x2c or one command
+
+Global options:
+  -h, --help                  Show help and exit
+  -V, --version               Show the x2c version and exit
+  -v, --verbose               Show commands as they are executed
+  -###                        Show commands without executing them
+  -q, --quiet                 Suppress successful progress and receipts
+      --plain                 Use stable output without terminal rendering
+      --color <auto|always|never>
+                              Control terminal color
+      --debug                 Enable compiler debug logging
+
+Input syntax:
+
+  @<file>                     Read additional arguments from a response file
+  --                          End option parsing
+
+Run 'x2c help <command>' or 'x2c <command> --help' for command help.

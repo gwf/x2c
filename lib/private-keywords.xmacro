@@ -1,0 +1,5 @@
+macro Decorator $private.loop(Block $body) => {
+  while (1) $body
+}
+
+keyword loop $private.loop;

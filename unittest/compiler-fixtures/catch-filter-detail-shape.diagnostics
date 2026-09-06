@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/catch-filter-detail-shape.x:5:22: parse: catch filter detail must be '*' or '(key pattern)'
+    catch %(alloc-fail bytes): {}
+                       ^^^^^
+  note: wrap keyed detail patterns in parentheses
+
+limit: too many errors, stopping
+

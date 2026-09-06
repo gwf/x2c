@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lambda-reject-prefix-update.x:5:32: type: captured value requires 'using &name' for reference access
+    Func change = %!() => ++value;
+                                 ^
+  note: binding: value
+
+limit: too many errors, stopping
+

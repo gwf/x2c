@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lisp-bind-premature-group.x:12:1: macro: native Lisp binding appears after its group was installed
+  $lisp.binding(sample, "late")
+  ^
+  note: group: sample
+
+limit: too many errors, stopping
+

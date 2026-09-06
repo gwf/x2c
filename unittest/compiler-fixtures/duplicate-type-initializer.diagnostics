@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/duplicate-type-initializer.x:9:41: parse: translation unit has more than one type initializer
+  void SecondInitializer.initialize(void) {
+                                          ^
+  note: initializer: SecondInitializer_initialize
+
+limit: too many errors, stopping
+

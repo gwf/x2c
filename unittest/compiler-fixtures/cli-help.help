@@ -1,0 +1,5 @@
+Usage:
+  x2c help [command]
+
+Show top-level help, or help for translate, build, run, or
+bootstrap.

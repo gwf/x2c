@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/foreign-alias-variadic.x:4:1: parse: foreign alias cannot be variadic
+  $x2c.foreign.alias(printf)
+  ^
+
+limit: too many errors, stopping
+

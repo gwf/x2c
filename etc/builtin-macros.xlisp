@@ -1,0 +1,167 @@
+// Private implementation of the built-in foreach macro.
+(defun x2c._foreach.atom-type? (type)
+  (and (list? type) (= (length type) 1)
+       (or (string? (car type)) (symbol? (car type)))))
+
+(defun x2c._foreach.expr (type binding)
+  `(expr ,type (ident ,binding)))
+
+(defun x2c._foreach.address (value)
+  `(expr () (op & ,value)))
+
+(defun x2c._foreach.declare (type binding initializer)
+  `(declare ,type (bindings
+    ,(if initializer
+         `(op = (bind ,binding ()) ,initializer)
+         `(bind ,binding ())))))
+
+(defun x2c._foreach.assign (target value)
+  `(stmnt (expr () (op = ,target ,value))))
+
+(defun x2c._foreach.cursor-spec (collection-type) (if
+  (not (x2c._foreach.atom-type? collection-type)) nil
+  (let* ((owner (str (car collection-type)))
+         (function (_x2c.foreach.function-reference
+           (string-append owner "_try_next"))))
+    (if (not function) nil
+      (let* ((type (x2c.syntax.type function))
+             (parameters (_x2c.type.parameters type))
+             (cursor-parameter (if (cdr parameters)
+               (cadr parameters) nil))
+             (outputs (if (cdr parameters) (cddr parameters) nil)))
+        (if (and (equal? (_x2c.type.return type) '(int))
+                 (equal? (car parameters) collection-type)
+                 (_x2c.type.pointer? cursor-parameter)
+                 (_x2c.type.integral?
+                   (_x2c.type.element cursor-parameter))
+                 outputs
+                 (null? (filter
+                   (lambda (output) (not
+                     (and (_x2c.type.pointer? output)
+                          (x2c._foreach.atom-type?
+                            (_x2c.type.element output)))))
+                   outputs)))
+            (list function (_x2c.type.element cursor-parameter)
+              (map _x2c.type.element outputs))
+            nil))))))
+
+(defun x2c._foreach.output-record (type)
+  (list type (_x2c.foreach.ident-unique "cursor_output")))
+
+(defun x2c._foreach.output-declaration (record)
+  (x2c._foreach.declare (car record) (cadr record) nil))
+
+(defun x2c._foreach.output-expression (record)
+  (x2c._foreach.expr (car record) (cadr record)))
+
+(defun x2c._foreach.output-address (record)
+  (x2c._foreach.address
+    (x2c._foreach.output-expression record)))
+
+(defun x2c._foreach.cursor-assignments (targets outputs)
+  (if (= (length targets) 1)
+      (list (x2c._foreach.assign (car targets) (last outputs)))
+      (list
+        (x2c._foreach.assign (car targets) (car outputs))
+        (x2c._foreach.assign (cadr targets) (cadr outputs)))))
+
+(defun x2c._foreach.cursor-loop
+  (declaration collection body targets collection-type spec
+   object cursor)
+  (let* ((function (car spec)) (cursor-type (cadr spec))
+         (outputs (map x2c._foreach.output-record (car (cddr spec))))
+         (object-expression
+           (x2c._foreach.expr collection-type object))
+         (cursor-expression (x2c._foreach.expr cursor-type cursor))
+         (values (map x2c._foreach.output-expression outputs))
+         (condition (apply x2c.expr.call
+           (append (list function object-expression
+                         (x2c._foreach.address cursor-expression))
+                   (map x2c._foreach.output-address outputs))))
+         (assignments
+           (x2c._foreach.cursor-assignments targets values))
+         (loop-body (cons 'block (append assignments (list body)))))
+    (list (cons 'block (append
+      (list declaration
+            (x2c._foreach.declare collection-type object collection)
+            (x2c._foreach.declare cursor-type cursor
+              (x2c.literal.int 0)))
+      (map x2c._foreach.output-declaration outputs)
+      (list `(while ,condition ,loop-body)))))))
+
+(defun x2c._foreach.pair-assignments (targets item pair)
+  (let ((pair-expression (x2c._foreach.expr '("List") pair)))
+    (list
+      (x2c._foreach.declare '("List") pair nil)
+      (x2c._foreach.assign pair-expression item)
+      (x2c._foreach.assign (car targets)
+        (x2c.expr.index pair-expression (x2c.literal.int 0)))
+      (x2c._foreach.assign (cadr targets)
+        (x2c.expr.index pair-expression (x2c.literal.int 1))))))
+
+(defun x2c._foreach.iter-call (function collection)
+  `(expr ("Iter") (call ,function (args ,collection))))
+
+(defun x2c._foreach.general-loop
+  (declaration collection body targets collection-type
+   iterator item pair converter)
+  (let* ((owner (if (x2c._foreach.atom-type? collection-type)
+                    (str (car collection-type)) nil))
+         (enumerate (if (and (= (length targets) 2) owner
+                             (not (equal? collection-type '("Iter"))))
+           (_x2c.foreach.function-reference
+             (string-append owner "_enumerate")) nil))
+         (constructor (if enumerate enumerate converter))
+         (iterator-expression
+           (x2c._foreach.expr '("Iter") iterator))
+         (item-expression (x2c._foreach.expr '("Var") item))
+         (initializer (_x2c.foreach.complete-iter-chain
+           (if constructor
+               (x2c._foreach.iter-call constructor collection)
+               collection)))
+         (next (_x2c.foreach.function-reference "Iter_try_next"))
+         (condition (x2c.expr.call next iterator-expression
+           (x2c._foreach.address item-expression)))
+         (assignments (if (= (length targets) 1)
+           (list (x2c._foreach.assign (car targets) item-expression))
+           (x2c._foreach.pair-assignments targets item-expression pair)))
+         (loop-body (cons 'block (append assignments (list body)))))
+    (list `(block
+      ,declaration
+      ,(x2c._foreach.declare '("Iter") iterator initializer)
+      ,(x2c._foreach.declare '("Var") item nil)
+      (while ,condition ,loop-body)))))
+
+(defun x2c._foreach.expand
+  (declaration collection body iterator item pair object cursor)
+  (let* ((targets
+           (_x2c.foreach.declaration-bindings declaration))
+         (collection-type (x2c.syntax.type collection))
+         (direct (equal? collection-type '("Iter")))
+         (converter (cond
+           (direct nil)
+           ((equal? collection-type '("Var"))
+            (_x2c.foreach.function-reference "Var_iter"))
+           (true (_x2c.foreach.protocol-member
+             collection-type '("Iter") "iter"))))
+         (spec (if direct nil
+           (x2c._foreach.cursor-spec collection-type))))
+    (cond
+      ((not (member (length targets) '(1 2)))
+       (x2c.diagnostic.fail
+         "foreach requires one binding or a two-name destructuring declaration"
+         nil))
+      ((and (not direct) (not converter))
+       (x2c.diagnostic.fail
+         (string-append "type " (repr collection-type)
+                        " is not iterable")
+         (list
+           "declare an Iter protocol adoption or iterate an Iter directly")))
+      ((and spec (or (= (length targets) 1)
+                     (>= (length (car (cddr spec))) 2)))
+       (x2c._foreach.cursor-loop
+         declaration collection body targets collection-type spec
+         object cursor))
+      (true (x2c._foreach.general-loop
+        declaration collection body targets collection-type
+        iterator item pair converter)))))

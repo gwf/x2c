@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lambda-reject-pointer-rebinding.x:5:42: type: captured value requires 'using &name' for reference access
+    Func change = %!() => pointer = &second;
+                                           ^
+  note: binding: pointer
+
+limit: too many errors, stopping
+

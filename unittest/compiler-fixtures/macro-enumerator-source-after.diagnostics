@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-enumerator-source-after.x:12:3: parse: enumerator 'LATER_SOURCE_ENUM' is already bound in this scope
+    LATER_SOURCE_ENUM
+    ^^^^^^^^^^^^^^^^^
+  note: prior binding: 'LATER_SOURCE_ENUM'
+
+limit: too many errors, stopping
+

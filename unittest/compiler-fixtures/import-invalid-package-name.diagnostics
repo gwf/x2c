@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/import-invalid-package-name.x:4:8: parse: package name must be a C identifier
+  import "../escape";
+         ^^^^^^^^^^^
+
+limit: too many errors, stopping
+

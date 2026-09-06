@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-result-expression-position.x:6:3: macro: macro 'expression_result' has result kind Expression and cannot be invoked at field scope
+    $expression_result();
+    ^
+
+limit: too many errors, stopping
+

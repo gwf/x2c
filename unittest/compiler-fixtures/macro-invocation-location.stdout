@@ -1,0 +1,3 @@
+unittest/compiler-fixtures/macro-invocation-location.x:13:16
+unittest/compiler-fixtures/macro-invocation-location.x:14:16
+unittest/compiler-fixtures/macro-invocation-location.x:15:15

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-illegal-ellipsis.x:3:39: parse: singular macro hole 'value' cannot be spliced
+  macro Expression $illegal($value) => ($value...)
+                                        ^
+
+limit: too many errors, stopping
+

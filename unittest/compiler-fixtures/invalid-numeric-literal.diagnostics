@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/invalid-numeric-literal.x:2:10: parse: unexpected end of file
+    return 0x;
+           ^
+
+limit: too many errors, stopping
+

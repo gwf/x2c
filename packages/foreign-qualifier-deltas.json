@@ -1,0 +1,1261 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-07-31",
+  "scope": "Direct imported function-result and direct record-field qualifier loss only. Parameter qualifiers and top-level global qualifiers are outside the row schema. BLIS has 8 known top-level const-global losses, recorded in its checker note.",
+  "comparison": "Exact configured Clang qualType spelling versus the x2c semantic symbol-table Type; const remains significant.",
+  "clients": [
+    {
+      "id": "pcre2",
+      "name": "PCRE2",
+      "version": "10.47",
+      "collector": {
+        "mode": "default/raw --dump-symbols",
+        "header": "packages/pcre2/src/pcre2-8.h -> pcre2.h",
+        "profile": "PCRE2_CODE_UNIT_WIDTH=8; exact 10.47 header"
+      },
+      "function_result_deltas": {
+        "count": 2,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "pcre2_maketables_8",
+            "const uint8_t *(pcre2_general_context_8 *)",
+            "const uint8_t *",
+            "const uint8_t *",
+            "(( func (( * pcre2_general_context_8 ))) * uint8_t )"
+          ],
+          [
+            "pcre2_get_mark_8",
+            "PCRE2_SPTR8 (pcre2_match_data_8 *)",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "(( func (( * pcre2_match_data_8 ))) PCRE2_SPTR8 )"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 6,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "pcre2_callout_block_8",
+            "callout_string",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "( PCRE2_SPTR8 )"
+          ],
+          [
+            "pcre2_callout_block_8",
+            "mark",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "( PCRE2_SPTR8 )"
+          ],
+          [
+            "pcre2_callout_block_8",
+            "subject",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "( PCRE2_SPTR8 )"
+          ],
+          [
+            "pcre2_callout_enumerate_block_8",
+            "callout_string",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "( PCRE2_SPTR8 )"
+          ],
+          [
+            "pcre2_substitute_callout_block_8",
+            "input",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "( PCRE2_SPTR8 )"
+          ],
+          [
+            "pcre2_substitute_callout_block_8",
+            "output",
+            "PCRE2_SPTR8",
+            "const PCRE2_UCHAR8 *",
+            "( PCRE2_SPTR8 )"
+          ]
+        ]
+      },
+      "measurement": {
+        "status": "recorded snapshot",
+        "note": "regenerate from pinned source before relying on these rows"
+      }
+    },
+    {
+      "id": "yyjson",
+      "name": "yyjson",
+      "version": "0.12.0",
+      "collector": {
+        "mode": "default/raw --dump-symbols",
+        "header": "packages/yyjson/src/yyjson-0.12.h -> yyjson.h",
+        "profile": "default reader, incremental reader, writer, and utils enabled"
+      },
+      "function_result_deltas": {
+        "count": 8,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "yyjson_get_raw",
+            "const char *(yyjson_val *)",
+            "const char *",
+            "const char *",
+            "(( func (( * yyjson_val ))) * char )"
+          ],
+          [
+            "yyjson_get_str",
+            "const char *(yyjson_val *)",
+            "const char *",
+            "const char *",
+            "(( func (( * yyjson_val ))) * char )"
+          ],
+          [
+            "yyjson_get_type_desc",
+            "const char *(yyjson_val *)",
+            "const char *",
+            "const char *",
+            "(( func (( * yyjson_val ))) * char )"
+          ],
+          [
+            "yyjson_mut_get_raw",
+            "const char *(yyjson_mut_val *)",
+            "const char *",
+            "const char *",
+            "(( func (( * yyjson_mut_val ))) * char )"
+          ],
+          [
+            "yyjson_mut_get_str",
+            "const char *(yyjson_mut_val *)",
+            "const char *",
+            "const char *",
+            "(( func (( * yyjson_mut_val ))) * char )"
+          ],
+          [
+            "yyjson_mut_get_type_desc",
+            "const char *(yyjson_mut_val *)",
+            "const char *",
+            "const char *",
+            "(( func (( * yyjson_mut_val ))) * char )"
+          ],
+          [
+            "yyjson_mut_read_number",
+            "const char *(const char *, yyjson_mut_val *, yyjson_read_flag, const yyjson_alc *, yyjson_read_err *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ) ( * yyjson_mut_val ) ( yyjson_read_flag ) ( * const yyjson_alc ) ( * yyjson_read_err ))) * char )"
+          ],
+          [
+            "yyjson_read_number",
+            "const char *(const char *, yyjson_val *, yyjson_read_flag, const yyjson_alc *, yyjson_read_err *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ) ( * yyjson_val ) ( yyjson_read_flag ) ( * const yyjson_alc ) ( * yyjson_read_err ))) * char )"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 5,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "yyjson_patch_err",
+            "msg",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "yyjson_ptr_err",
+            "msg",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "yyjson_read_err",
+            "msg",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "yyjson_val_uni",
+            "str",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "yyjson_write_err",
+            "msg",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ]
+        ]
+      },
+      "measurement": {
+        "status": "recorded snapshot",
+        "note": "regenerate from pinned source before relying on these rows"
+      }
+    },
+    {
+      "id": "termbox2",
+      "name": "termbox2",
+      "version": "2.5.0",
+      "collector": {
+        "mode": "default/raw --dump-symbols",
+        "header": "packages/termbox2/src/termbox2.x -> termbox2.h",
+        "profile": "TB_LIB_OPTS; ATTR_W=64; EGC enabled; PRINTF_BUF=4096; READ_BUF=64"
+      },
+      "function_result_deltas": {
+        "count": 2,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "tb_strerror",
+            "const char *(int)",
+            "const char *",
+            "const char *",
+            "(( func (( int ))) * char )"
+          ],
+          [
+            "tb_version",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "(( func (( void ))) * char )"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 0,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": []
+      },
+      "measurement": {
+        "status": "recorded snapshot",
+        "note": "regenerate from pinned source before relying on these rows"
+      }
+    },
+    {
+      "id": "raylib",
+      "name": "raylib",
+      "version": "6.0",
+      "collector": {
+        "mode": "--cpp-symbols --dump-symbols",
+        "header": "packages/raylib/src/raylib.x -> raylib.h",
+        "profile": "commit dbc56a87; macOS desktop GLFW; OpenGL 3.3; static"
+      },
+      "function_result_deltas": {
+        "count": 15,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "CodepointToUTF8",
+            "const char *(int, int *)",
+            "const char *",
+            "const char *",
+            "(( func (( int ) ( * int ))) * char )"
+          ],
+          [
+            "GetApplicationDirectory",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "(( func (( void ))) * char )"
+          ],
+          [
+            "GetClipboardText",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "(( func (( void ))) * char )"
+          ],
+          [
+            "GetDirectoryPath",
+            "const char *(const char *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ))) * char )"
+          ],
+          [
+            "GetFileExtension",
+            "const char *(const char *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ))) * char )"
+          ],
+          [
+            "GetFileName",
+            "const char *(const char *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ))) * char )"
+          ],
+          [
+            "GetFileNameWithoutExt",
+            "const char *(const char *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ))) * char )"
+          ],
+          [
+            "GetGamepadName",
+            "const char *(int)",
+            "const char *",
+            "const char *",
+            "(( func (( int ))) * char )"
+          ],
+          [
+            "GetKeyName",
+            "const char *(int)",
+            "const char *",
+            "const char *",
+            "(( func (( int ))) * char )"
+          ],
+          [
+            "GetMonitorName",
+            "const char *(int)",
+            "const char *",
+            "const char *",
+            "(( func (( int ))) * char )"
+          ],
+          [
+            "GetPrevDirectoryPath",
+            "const char *(const char *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ))) * char )"
+          ],
+          [
+            "GetWorkingDirectory",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "(( func (( void ))) * char )"
+          ],
+          [
+            "TextFormat",
+            "const char *(const char *, ...)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ) ( ... ))) * char )"
+          ],
+          [
+            "TextRemoveSpaces",
+            "const char *(const char *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ))) * char )"
+          ],
+          [
+            "TextSubtext",
+            "const char *(const char *, int, int)",
+            "const char *",
+            "const char *",
+            "(( func (( * const char ) ( int ) ( int ))) * char )"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 0,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": []
+      },
+      "measurement": {
+        "status": "recorded snapshot",
+        "note": "regenerate from pinned source before relying on these rows"
+      }
+    },
+    {
+      "id": "libcurl",
+      "name": "libcurl",
+      "version": "8.19.0",
+      "collector": {
+        "mode": "--cpp-symbols --dump-symbols",
+        "header": "packages/libcurl/src/curl-819.h -> curl/curl.h",
+        "profile": "macOS arm64 static; HTTP/HTTPS/WS/WSS; OpenSSL 3.6.2"
+      },
+      "function_result_deltas": {
+        "count": 8,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "curl_easy_option_by_id",
+            "const struct curl_easyoption *(CURLoption)",
+            "const struct curl_easyoption *",
+            "const struct curl_easyoption *",
+            "(( func (( CURLoption ))) * struct curl_easyoption )"
+          ],
+          [
+            "curl_easy_option_by_name",
+            "const struct curl_easyoption *(const char *)",
+            "const struct curl_easyoption *",
+            "const struct curl_easyoption *",
+            "(( func (( * const char ))) * struct curl_easyoption )"
+          ],
+          [
+            "curl_easy_option_next",
+            "const struct curl_easyoption *(const struct curl_easyoption *)",
+            "const struct curl_easyoption *",
+            "const struct curl_easyoption *",
+            "(( func (( * const struct curl_easyoption ))) * struct curl_easyoption )"
+          ],
+          [
+            "curl_easy_strerror",
+            "const char *(CURLcode)",
+            "const char *",
+            "const char *",
+            "(( func (( CURLcode ))) * char )"
+          ],
+          [
+            "curl_multi_strerror",
+            "const char *(CURLMcode)",
+            "const char *",
+            "const char *",
+            "(( func (( CURLMcode ))) * char )"
+          ],
+          [
+            "curl_share_strerror",
+            "const char *(CURLSHcode)",
+            "const char *",
+            "const char *",
+            "(( func (( CURLSHcode ))) * char )"
+          ],
+          [
+            "curl_url_strerror",
+            "const char *(CURLUcode)",
+            "const char *",
+            "const char *",
+            "(( func (( CURLUcode ))) * char )"
+          ],
+          [
+            "curl_ws_meta",
+            "const struct curl_ws_frame *(CURL *)",
+            "const struct curl_ws_frame *",
+            "const struct curl_ws_frame *",
+            "(( func (( * CURL ))) * struct curl_ws_frame )"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 22,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "curl_easyoption",
+            "name",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_forms",
+            "value",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_khkey",
+            "key",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_ssl_backend",
+            "name",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "ares",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "brotli_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "cainfo",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "capath",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "feature_names",
+            "const char *const *",
+            "const char *const *",
+            "( * * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "gsasl_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "host",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "hyper_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "libidn",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "libssh_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "libz_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "nghttp2_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "protocols",
+            "const char *const *",
+            "const char *const *",
+            "( * * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "quic_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "rtmp_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "ssl_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "curl_version_info_data",
+            "zstd_version",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ]
+        ]
+      },
+      "measurement": {
+        "status": "recorded snapshot",
+        "note": "regenerate from pinned source before relying on these rows"
+      }
+    },
+    {
+      "id": "libuv",
+      "name": "libuv",
+      "version": "1.52.1",
+      "collector": {
+        "mode": "--cpp-symbols --dump-symbols",
+        "header": "packages/libuv/src/uv-152.h -> uv.h",
+        "profile": "macOS arm64 static"
+      },
+      "function_result_deltas": {
+        "count": 7,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "uv_dlerror",
+            "const char *(const uv_lib_t *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const uv_lib_t ))) * char )"
+          ],
+          [
+            "uv_err_name",
+            "const char *(int)",
+            "const char *",
+            "const char *",
+            "(( func (( int ))) * char )"
+          ],
+          [
+            "uv_fs_get_path",
+            "const char *(const uv_fs_t *)",
+            "const char *",
+            "const char *",
+            "(( func (( * const uv_fs_t ))) * char )"
+          ],
+          [
+            "uv_handle_type_name",
+            "const char *(uv_handle_type)",
+            "const char *",
+            "const char *",
+            "(( func (( uv_handle_type ))) * char )"
+          ],
+          [
+            "uv_req_type_name",
+            "const char *(uv_req_type)",
+            "const char *",
+            "const char *",
+            "(( func (( uv_req_type ))) * char )"
+          ],
+          [
+            "uv_strerror",
+            "const char *(int)",
+            "const char *",
+            "const char *",
+            "(( func (( int ))) * char )"
+          ],
+          [
+            "uv_version_string",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "(( func (( void ))) * char )"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 7,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "uv_cpu_info_s",
+            "model",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "uv_dirent_s",
+            "name",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "uv_fs_s",
+            "new_path",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "uv_fs_s",
+            "path",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "uv_pipe_s",
+            "pipe_fname",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "uv_process_options_s",
+            "cwd",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ],
+          [
+            "uv_process_options_s",
+            "file",
+            "const char *",
+            "const char *",
+            "( * char )"
+          ]
+        ]
+      },
+      "measurement": {
+        "status": "recorded snapshot",
+        "note": "regenerate from pinned source before relying on these rows"
+      }
+    },
+    {
+      "id": "blis",
+      "name": "BLIS",
+      "version": "2.1",
+      "collector": {
+        "mode": "two CPP-backed views: --dump-cpp-symbols and --cpp-symbols --dump-symbols",
+        "header": "packages/blis/src/blis-21.h -> configured blis.h umbrella",
+        "profile": "macOS arm64 firestorm; static; single-threaded; BLAS/CBLAS disabled"
+      },
+      "function_result_deltas": {
+        "count": 50,
+        "columns": [
+          "name",
+          "upstream_signature",
+          "upstream_result_spelling",
+          "upstream_result_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "bli_arch_string",
+            "const char *(arch_t)",
+            "const char *",
+            "const char *",
+            "((func ((arch_t))) * char)"
+          ],
+          [
+            "bli_auxinfo_next_a",
+            "const void *(const auxinfo_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const auxinfo_t))) * void)"
+          ],
+          [
+            "bli_auxinfo_next_b",
+            "const void *(const auxinfo_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const auxinfo_t))) * void)"
+          ],
+          [
+            "bli_auxinfo_params",
+            "const void *(const auxinfo_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const auxinfo_t))) * void)"
+          ],
+          [
+            "bli_cntx_get_blksz",
+            "const blksz_t *(kerid_t, const cntx_t *)",
+            "const blksz_t *",
+            "const blksz_t *",
+            "((func ((kerid_t) (* const cntx_t))) * blksz_t)"
+          ],
+          [
+            "bli_cntx_get_bmult",
+            "const blksz_t *(kerid_t, const cntx_t *)",
+            "const blksz_t *",
+            "const blksz_t *",
+            "((func ((kerid_t) (* const cntx_t))) * blksz_t)"
+          ],
+          [
+            "bli_cntx_get_ukr2s",
+            "const func2_t *(kerid_t, const cntx_t *)",
+            "const func2_t *",
+            "const func2_t *",
+            "((func ((kerid_t) (* const cntx_t))) * func2_t)"
+          ],
+          [
+            "bli_cntx_get_ukr_prefs",
+            "const mbool_t *(kerid_t, const cntx_t *)",
+            "const mbool_t *",
+            "const mbool_t *",
+            "((func ((kerid_t) (* const cntx_t))) * mbool_t)"
+          ],
+          [
+            "bli_cntx_get_ukrs",
+            "const func_t *(kerid_t, const cntx_t *)",
+            "const func_t *",
+            "const func_t *",
+            "((func ((kerid_t) (* const cntx_t))) * func_t)"
+          ],
+          [
+            "bli_dt_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_error_string_for_code",
+            "const char *(gint_t)",
+            "const char *",
+            "const char *",
+            "((func ((gint_t))) * char)"
+          ],
+          [
+            "bli_gemm_cntl_packa_params",
+            "const void *(gemm_cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* gemm_cntl_t))) * void)"
+          ],
+          [
+            "bli_gemm_cntl_packb_params",
+            "const void *(gemm_cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* gemm_cntl_t))) * void)"
+          ],
+          [
+            "bli_gemm_cntl_params",
+            "const void *(gemm_cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* gemm_cntl_t))) * void)"
+          ],
+          [
+            "bli_gemm_var_cntl_params",
+            "const void *(const cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const cntl_t))) * void)"
+          ],
+          [
+            "bli_gemm_var_cntl_real_params",
+            "const void *(const cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const cntl_t))) * void)"
+          ],
+          [
+            "bli_gks_l3_ukr_impl_string",
+            "const char *(ukr_t, ind_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((ukr_t) (ind_t) (num_t))) * char)"
+          ],
+          [
+            "bli_gks_lookup_id",
+            "const cntx_t *(arch_t)",
+            "const cntx_t *",
+            "const cntx_t *",
+            "((func ((arch_t))) * cntx_t)"
+          ],
+          [
+            "bli_gks_query_cntx",
+            "const cntx_t *(void)",
+            "const cntx_t *",
+            "const cntx_t *",
+            "((func ((void))) * cntx_t)"
+          ],
+          [
+            "bli_gks_query_cntx_impl",
+            "const cntx_t *(void)",
+            "const cntx_t *",
+            "const cntx_t *",
+            "((func ((void))) * cntx_t)"
+          ],
+          [
+            "bli_gks_query_cntx_noinit",
+            "const cntx_t *(void)",
+            "const cntx_t *",
+            "const cntx_t *",
+            "((func ((void))) * cntx_t)"
+          ],
+          [
+            "bli_ind_get_impl_string",
+            "const char *(ind_t)",
+            "const char *",
+            "const char *",
+            "((func ((ind_t))) * char)"
+          ],
+          [
+            "bli_ind_oper_get_avail_impl_string",
+            "const char *(opid_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((opid_t) (num_t))) * char)"
+          ],
+          [
+            "bli_info_get_gemm_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_gemm_ukr_impl_string",
+            "const char *(ind_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((ind_t) (num_t))) * char)"
+          ],
+          [
+            "bli_info_get_gemmt_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_gemmtrsm_l_ukr_impl_string",
+            "const char *(ind_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((ind_t) (num_t))) * char)"
+          ],
+          [
+            "bli_info_get_gemmtrsm_u_ukr_impl_string",
+            "const char *(ind_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((ind_t) (num_t))) * char)"
+          ],
+          [
+            "bli_info_get_hemm_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_her2k_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_herk_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_int_type_size_str",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "((func ((void))) * char)"
+          ],
+          [
+            "bli_info_get_symm_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_syr2k_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_syrk_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_trmm3_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_trmm_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_trsm_impl_string",
+            "const char *(num_t)",
+            "const char *",
+            "const char *",
+            "((func ((num_t))) * char)"
+          ],
+          [
+            "bli_info_get_trsm_l_ukr_impl_string",
+            "const char *(ind_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((ind_t) (num_t))) * char)"
+          ],
+          [
+            "bli_info_get_trsm_u_ukr_impl_string",
+            "const char *(ind_t, num_t)",
+            "const char *",
+            "const char *",
+            "((func ((ind_t) (num_t))) * char)"
+          ],
+          [
+            "bli_info_get_version_str",
+            "const char *(void)",
+            "const char *",
+            "const char *",
+            "((func ((void))) * char)"
+          ],
+          [
+            "bli_obj_buffer_for_const",
+            "const void *(num_t, const obj_t *)",
+            "const void *",
+            "const void *",
+            "((func ((num_t) (* const obj_t))) * void)"
+          ],
+          [
+            "bli_packm_cntl_variant_params",
+            "const void *(const cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const cntl_t))) * void)"
+          ],
+          [
+            "bli_packm_def_cntl_ukr_params",
+            "const void *(const cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const cntl_t))) * void)"
+          ],
+          [
+            "bli_thread_get_thread_impl_str",
+            "const char *(timpl_t)",
+            "const char *",
+            "const char *",
+            "((func ((timpl_t))) * char)"
+          ],
+          [
+            "bli_trsm_cntl_packa_params",
+            "const void *(trsm_cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* trsm_cntl_t))) * void)"
+          ],
+          [
+            "bli_trsm_cntl_packb_params",
+            "const void *(trsm_cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* trsm_cntl_t))) * void)"
+          ],
+          [
+            "bli_trsm_cntl_params",
+            "const void *(trsm_cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* trsm_cntl_t))) * void)"
+          ],
+          [
+            "bli_trsm_var_cntl_params",
+            "const void *(const cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const cntl_t))) * void)"
+          ],
+          [
+            "bli_trsm_var_cntl_real_params",
+            "const void *(const cntl_t *)",
+            "const void *",
+            "const void *",
+            "((func ((* const cntl_t))) * void)"
+          ]
+        ]
+      },
+      "direct_field_deltas": {
+        "count": 9,
+        "columns": [
+          "record",
+          "field",
+          "upstream_type_spelling",
+          "upstream_type_desugared",
+          "x2c_observed_type"
+        ],
+        "rows": [
+          [
+            "auxinfo_s",
+            "a_next",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ],
+          [
+            "auxinfo_s",
+            "b_next",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ],
+          [
+            "auxinfo_s",
+            "params",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ],
+          [
+            "gemm_var_cntl_s",
+            "params",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ],
+          [
+            "gemm_var_cntl_s",
+            "real_params",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ],
+          [
+            "getopt_s",
+            "nextchar",
+            "const char *",
+            "const char *",
+            "(* char)"
+          ],
+          [
+            "getopt_s",
+            "optarg",
+            "const char *",
+            "const char *",
+            "(* char)"
+          ],
+          [
+            "packm_cntl_s",
+            "params",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ],
+          [
+            "packm_def_cntl_s",
+            "params",
+            "const void *",
+            "const void *",
+            "(* void)"
+          ]
+        ]
+      },
+      "checker": {
+        "path": null,
+        "enforces_function_result_deltas": true,
+        "enforces_direct_field_deltas": true,
+        "note": "exact sets enforced: 2936 functions/50 result deltas, 1631 typedefs/0, 191 fields/9; also 8/8 top-level const globals"
+      }
+    }
+  ]
+}

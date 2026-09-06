@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/foreign-alias-indirect.x:4:1: parse: foreign alias native target must be a direct identifier
+  $x2c.foreign.alias(&abs)
+  ^
+
+limit: too many errors, stopping
+

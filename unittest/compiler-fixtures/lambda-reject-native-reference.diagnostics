@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lambda-reject-native-reference.x:7:41: type: captured value requires 'using &name' for reference access
+    Func change = %!() => increment(value);
+                                          ^
+  note: binding: value
+
+limit: too many errors, stopping
+

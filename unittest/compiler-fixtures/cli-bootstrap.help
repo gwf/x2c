@@ -1,0 +1,25 @@
+Usage:
+  x2c bootstrap --prefix <dir> [options]
+
+Extract the source distribution carried by this APE and use the host
+C compiler and archiver to install a native x2c under <dir>.
+
+Output options:
+      --prefix <dir>          Install native x2c and sources under <dir>
+
+C compiler options:
+      --cc <program>          Use <program> as the host C compiler
+      --ar <program>          Use <program> as the static-library archiver
+  -O0, -O1, -O2, -O3, -Os     Set C optimization
+
+General options:
+  -h, --help                  Show help and exit
+  -v, --verbose               Show commands as they are executed
+  -q, --quiet                 Suppress successful progress and receipts
+      --plain                 Use stable output without terminal rendering
+      --color <auto|always|never>
+                              Control terminal color
+  @<file>                     Read additional arguments from a response file
+
+The seed supplies x2c sources and headers. A GCC- or Clang-compatible
+C compiler and a compatible archiver must be installed.

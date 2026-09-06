@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/raise-invalid-array.x:4:3: type: raise detail type ("Array") is not immutable
+    raise %(invariant (value $value));
+    ^^^^^
+  note: use a numeric value, enum, Symbol, Atom, String, List, or Var
+
+limit: too many errors, stopping
+

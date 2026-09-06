@@ -1,0 +1,4 @@
+selected: 10 + 16 = 26
+(total 26 items (10 16))
+original: ( 3 5 8 ); extended: ( 2 3 5 8 )
+((first 10) (rest 16))

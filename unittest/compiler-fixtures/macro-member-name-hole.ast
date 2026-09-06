@@ -1,0 +1,55 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <stdio.h>")
+
+(typedef 
+ (struct "MacroMemberName" 
+  (fields (declare (int) (bindings (bind (binding 1 "value") ()))))) 
+ (bindings (bind (binding 3 "MacroMemberName") ())))
+
+(macrodef <macro read_member>)
+
+(macrodef <macro read_pointer_member>)
+
+(function (int) 
+ (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 3 (declare ("MacroMemberName") 
+         (bindings 
+          (op = (bind (binding 5 "record") ()) 
+           (expr () 
+            (composite 
+             (commas (dotinit ("value") (expr (int) (literal (int) "42"))))))) 
+          (op = (bind (binding 6 "pointer") (*)) 
+           (expr (* "MacroMemberName") 
+            (op & (expr ("MacroMemberName") (ident (binding 5 "record"))))))))) 
+  (at 5 (declare (int) 
+         (bindings 
+          (op = (bind (binding 7 "direct") ()) 
+           (expr (int) 
+            (op . (expr ("MacroMemberName") (ident (binding 5 "record"))) 
+             ("value"))))))) 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 8 "indirect") ()) 
+           (expr (int) 
+            (op -> (expr (* "MacroMemberName") (ident (binding 6 "pointer"))) 
+             ("value"))))))) 
+  (at 8 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 9 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
+            (expr (int) (ident (binding 7 "direct"))) 
+            (expr (int) (ident (binding 8 "indirect")))))))) 
+  (at 9 (return (int) 
+         (expr (int) 
+          (op ? (expr (int) 
+                 (op && 
+                  (expr (int) 
+                   (op == (expr (int) (ident (binding 7 "direct"))) 
+                    (expr (int) (literal (int) "42")))) 
+                  (expr (int) 
+                   (op == (expr (int) (ident (binding 8 "indirect"))) 
+                    (expr (int) (literal (int) "42")))))) 
+           (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

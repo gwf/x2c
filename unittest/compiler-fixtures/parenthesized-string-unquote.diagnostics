@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/parenthesized-string-unquote.x:6:24: parse: expected identifier after '$'
+    String rejected = %"$(value)";
+                         ^^^^^^^
+  note: use '${...}' to insert an expression
+
+limit: too many errors, stopping
+

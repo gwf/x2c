@@ -1,0 +1,4 @@
+<elapsed> error/err-report start_time="<wall-time>" code=<bad-enc> detail=
+((owner "Var.new") (target fixture)) location=
+((file "../../lib/var.x") (line 573) (function "_new_custom_pointer"))
+x2c error floor: code 0x1049f2b86: non-returning error was not caught

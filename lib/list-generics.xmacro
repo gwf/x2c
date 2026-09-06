@@ -1,0 +1,96 @@
+/*  list-generics.xmacro -- typed views over canonical List cells
+
+    Copyright (c) 2026 Gary William Flake
+
+    A typed list is a List. Its cells are interned cons cells whose car
+    always carries one known Var tag, so the interning pool, hashing,
+    equality, printing, and comparison are List's own and need no generated
+    code. `List.hash` reads the raw car bits and the cdr pointer;
+    `List.equal` compares them; neither consults the tag.
+
+    Receiver-relative List methods retain the typed spelling for operations
+    that never inspect an element. The typed family supplies the operations
+    that do. It reads and writes the car through the cheap encoding for its
+    tag instead of `Var.new` and `Var.integer`.
+
+    The typed family does not adopt `protocol Var`. A typed list inherits
+    `List.var`, so boxing and native Func checks already use `<list>`. An
+    `as List` adoption would only declare Var participation; it would not add
+    typed bracket indexing. Widen to List for operations whose Var callbacks
+    can replace elements.
+*/
+
+macro Unit $list.typed.family(Type $list, Type $element,
+  Name $encode, Name $decode, Literal $tag, Name $lower,
+  Expr $zero, Literal $owner
+) => {
+  $element $list.car($list);
+  $list $list.cons($element, $list);
+  $element $list.last($list);
+  int $list.index($list, $element);
+  $list List.$lower(List);
+  $list Var.$lower(Var);
+
+  /* `car` of nil is void, whose bits are all ones, so the guard decides the
+     answer instead of avoiding a null read. Reading a nil car as $zero
+     follows the runtime's silent-reader convention: an empty list
+     terminates a loop and is not a caller error. */
+  /** Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
+      A nonempty `xs` must retain the `$list` element-tag invariant.
+  */
+  inline $element $list.car($list xs) {
+    return xs ? $decode(((List) xs).car) : $zero;
+  }
+
+  /** Returns the canonical `$list` formed by prepending `value` to `tail`.
+      The immutable tail is shared. The result follows the lifetime of its
+      owning canonical `List` pool, which may be an ancestor of the current
+      pool when an existing cell is reused.
+
+      Raises: `<alloc-fail>` or `<size-limit>` while installing a new
+      canonical cell.
+  */
+  inline $list $list.cons($element value, $list tail) {
+    return ($list) cons($encode(value), (List) tail);
+  }
+
+  /** Returns the final `$element` in nonempty `xs` after an O(n) walk. */
+  $element $list.last($list xs)  { return $decode(List.last((List) xs)); }
+  /** Returns the first zero-based index of `value`, or -1 when absent. */
+  int $list.index($list xs, $element value) {
+    return List.index((List) xs, $encode(value));
+  }
+
+  /* Zero copy. Typed-ness here is a predicate over an immutable value, not
+     a storage layout. Cells are interned and never mutated, so a chain that
+     validates once cannot later hold another element. ArrayInt has to copy:
+     its source Array has a different element width and is mutable. */
+  /** Validates `xs` as `$list` and returns the identical canonical chain.
+      Nil is valid. Every nonempty cell must carry `$tag`; another tag raises
+      `<no-convert>` with its zero-based index. Validation is O(n), does not
+      copy or mutate cells, and preserves their existing `List`-pool lifetime.
+
+      Raises: `<no-convert>` for the first foreign element. */
+  $list List.$lower(List xs) {
+    int index = 0;
+    for (List cur = xs; cur; cur = cur.cdr()) {
+      if (cur.car is not $tag)
+        _no_convert($owner, index, cur.car.tag());
+      index++;
+    }
+    return ($list) xs;
+  }
+
+  /* Without this the compiler resolves the typedef to a pointer and emits a
+     bare `Var_pointer`, so any Var would become a typed list. */
+  /** Extracts and validates `value` as `$list` without copying its cells.
+      A `Var` without the `<list>` tag becomes `nil`. A `List`
+      payload follows the
+      same element validation, identity, and lifetime rules as `List.$lower`.
+
+      Raises: `<no-convert>` for the first foreign element. */
+  $list Var.$lower(Var value) {
+    List xs = value.list();
+    return xs.$lower();
+  }
+}

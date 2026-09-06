@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-postfix-missing-method.x:13:10: type: type ("MacroMissingMethod") has no method missing
+    return $macro_call_missing(value);
+           ^
+
+limit: too many errors, stopping
+

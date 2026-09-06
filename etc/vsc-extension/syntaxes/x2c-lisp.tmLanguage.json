@@ -1,0 +1,9 @@
+{
+  "name": "X2C Lisp",
+  "scopeName": "source.x2c.lisp",
+  "patterns": [
+    {
+      "include": "source.x2c#x2c_lisp_content"
+    }
+  ]
+}

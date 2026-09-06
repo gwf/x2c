@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/catch-filter-default-order.x:6:9: parse: catch default arm must be last
+    catch %(alloc-fail): {}
+          ^^
+  note: move catch: after every filtered arm
+
+limit: too many errors, stopping
+

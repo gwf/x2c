@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-statement-position-multiple.x:10:5: parse: expected one statement
+      $multiple()
+      ^
+
+limit: too many errors, stopping
+

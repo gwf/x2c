@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/keyword-alias-fixed-name.x:7:9: parse: keyword alias requires an identifier
+  keyword if $fixture.identity;
+          ^^
+
+limit: too many errors, stopping
+

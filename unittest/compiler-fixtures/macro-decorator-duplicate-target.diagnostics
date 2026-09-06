@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-duplicate-target.x:5:10: parse: duplicate macro hole 'target'
+  ) using $target => {
+           ^^^^^^
+
+limit: too many errors, stopping
+

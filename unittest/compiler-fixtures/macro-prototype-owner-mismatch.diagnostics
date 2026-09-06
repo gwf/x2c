@@ -1,0 +1,9 @@
+unittest/compiler-fixtures/macro-prototype-owner-mismatch.x:16:1: type: definition 'Left_Right_value' does not match prior prototype
+  
+  ^
+  note: prototype: (function-contract ((func ((int))) int) ((func ((int))) int) 
+ extern ("Left_Right" "value")) definition: (function-contract ((func ((int))) int) ((func ((int))) int) 
+ extern ("Left" "Right_value"))
+
+limit: too many errors, stopping
+

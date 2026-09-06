@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/diagnostic-width.x:1:18: parse: expected ';', '{', or '=>'
+  int broken(void) unexpected
+                   ^^^^^^^^^^
+  note: token: unexpected symbol: ident
+
+limit: too many errors, stopping
+

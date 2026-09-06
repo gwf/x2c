@@ -1,0 +1,270 @@
+// x2c Lisp standard environment
+
+(def nil ())
+(def true 'true)
+(def false nil)
+
+// Native value and list boundary
+
+(def car
+  (bind "Var_car" '((func (("Var"))) "Var")))
+(def cdr
+  (bind "Var_cdr" '((func (("Var"))) "List")))
+(def cons
+  (bind "Var_cons" '((func (("Var") ("List"))) "List")))
+(def atom?
+  (bind "lisp_atom" '((func (("Var"))) "Var")))
+(def pair?
+  (bind "lisp_pair" '((func (("Var"))) "Var")))
+(def list?
+  (bind "lisp_list" '((func (("Var"))) "Var")))
+(def eq?
+  (bind "lisp_eq" '((func (("Var") ("Var"))) "Var")))
+(def type
+  (bind "lisp_type" '((func (("Var"))) "Symbol")))
+(def number?
+  (bind "lisp_number" '((func (("Var"))) "Var")))
+(def string?
+  (bind "lisp_string" '((func (("Var"))) "Var")))
+(def symbol?
+  (bind "lisp_symbol" '((func (("Var"))) "Var")))
+(def procedure?
+  (bind "lisp_procedure" '((func (("Var"))) "Var")))
+(def reverse
+  (bind "List_reverse" '((func (("List"))) "List")))
+(def length
+  (bind "List_len" '((func (("List"))) int)))
+(def _match
+  (bind "List_match" '((func (("List") ("Var"))) "List")))
+(def match-replace
+  (bind "lisp_match_replace"
+    '((func (("List") ("Var") ("Var"))) "Var")))
+(def search
+  (bind "List_search" '((func (("List") ("Var"))) "List")))
+(def _search-replace
+  (bind "List_search_replace"
+    '((func (("List") ("Var") ("Var"))) "List")))
+
+// Native number and text boundary
+
+(def _add
+  (bind "lisp_add" '((func (("Var") ("Var"))) "Var")))
+(def _binary
+  (bind "Var_binary"
+    '((func (("Var") ("Symbol") ("Var"))) "Var")))
+(def _compare
+  (bind "lisp_compare" '((func (("Var") ("Var"))) "Var")))
+(def str
+  (bind "lisp_str" '((func (("Var"))) "Var")))
+(def repr
+  (bind "lisp_repr" '((func (("Var"))) "Var")))
+(def string-length
+  (bind "String_len" '((func (("String"))) int)))
+(def _string-append
+  (bind "lisp_string_append"
+    '((func (("String") ("String"))) "Var")))
+(def substring
+  (bind "lisp_substring"
+    '((func (("String") (int) (int))) "Var")))
+(def string-downcase
+  (bind "lisp_string_downcase"
+    '((func (("String"))) "Var")))
+
+// Definition and control vocabulary
+
+(def defmacro
+  (macro (name params body)
+    `(def ,name (macro ,params ,body))))
+
+(defmacro defun (name params body)
+  `(def ,name (lambda ,params ,body)))
+
+(defmacro if (test ontrue onfalse)
+  `(cond (,test ,ontrue) (true ,onfalse)))
+
+(defun list (. values) values)
+(defun not (value) (if value false true))
+(defun null? (value) (eq? value nil))
+(def equal? eq?)
+
+(defmacro and (. forms)
+  (if (null? forms)
+      true
+      (if (null? (cdr forms))
+          (car forms)
+          `(if ,(car forms) (and ,@(cdr forms)) false))))
+
+(defmacro or (. forms)
+  (if (null? forms)
+      false
+      (if (null? (cdr forms))
+          (car forms)
+          `((lambda (_or_value)
+              (if _or_value _or_value (or ,@(cdr forms))))
+            ,(car forms)))))
+
+(defun _last (values)
+  (if (null? values)
+      nil
+      (if (null? (cdr values))
+          (car values)
+          (_last (cdr values)))))
+
+(defun begin (. values) (_last values))
+
+// Lists and higher-order calls
+
+(defun map (procedure values)
+  (if (null? values)
+      nil
+      (cons (procedure (car values))
+            (map procedure (cdr values)))))
+
+(defun filter (predicate values)
+  (if (null? values)
+      nil
+      (if (predicate (car values))
+          (cons (car values) (filter predicate (cdr values)))
+          (filter predicate (cdr values)))))
+
+(defun foldl (procedure initial values)
+  (if (null? values)
+      initial
+      (foldl procedure
+             (procedure initial (car values))
+             (cdr values))))
+
+(defun member (value values)
+  (if (null? values)
+      nil
+      (if (equal? value (car values))
+          values
+          (member value (cdr values)))))
+
+(defun assoc (key pairs)
+  (if (null? pairs)
+      nil
+      (if (and (pair? (car pairs))
+               (equal? key (car (car pairs))))
+          (car pairs)
+          (assoc key (cdr pairs)))))
+
+(defun _append2 (left right)
+  (if (null? left)
+      right
+      (cons (car left) (_append2 (cdr left) right))))
+
+(defun _append_lists (lists)
+  (if (null? lists)
+      nil
+      (if (null? (cdr lists))
+          (car lists)
+          (_append2 (car lists) (_append_lists (cdr lists))))))
+
+(defun append (. lists) (_append_lists lists))
+
+// Numeric operators
+
+(defun sub (a b) (_binary a '- b))
+(defun mul (a b) (_binary a '* b))
+(defun div (a b) (_binary a '/ b))
+(defun mod (a b) (_binary a '% b))
+
+// These nine are variadic, and a variadic lambda cannot be prepared, so
+// written in Lisp they would pull every arithmetic call in a compiled
+// body back onto the evaluator.
+
+(def + (bind "lisp_plus" '((func (("List"))) "Var")))
+(def - (bind "lisp_minus" '((func (("List"))) "Var")))
+(def * (bind "lisp_times" '((func (("List"))) "Var")))
+(def / (bind "lisp_divide" '((func (("List"))) "Var")))
+
+(def % mod)
+
+(def = (bind "lisp_eq_chain" '((func (("List"))) "Var")))
+(def < (bind "lisp_lt_chain" '((func (("List"))) "Var")))
+(def <= (bind "lisp_le_chain" '((func (("List"))) "Var")))
+(def > (bind "lisp_gt_chain" '((func (("List"))) "Var")))
+(def >= (bind "lisp_ge_chain" '((func (("List"))) "Var")))
+
+// Text and local binding
+
+(defun string-append (. strings) (foldl _string-append "" strings))
+
+(defmacro let (bindings body)
+  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))
+
+(defmacro let* (bindings body)
+  (if (null? bindings)
+      body
+      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))
+
+// The four useful two-level selectors
+
+(defun caar (value) (car (car value)))
+(defun cadr (value) (car (cdr value)))
+(defun cdar (value) (cdr (car value)))
+(defun cddr (value) (cdr (cdr value)))
+
+// Pattern matching
+
+// A pattern describes a List shape, so anything else simply fails to
+// match rather than reaching List_match with a subject it cannot take.
+(defun match (subject pattern)
+  (if (list? subject) (_match subject pattern) nil))
+
+// Reads one binder out of the alist match returns.
+(defun bound (bindings binder) (cadr (assoc binder bindings)))
+
+// The whole subject is a subtree too, and _search-replace loses a scalar
+// result there because List.search_replace returns a List.
+(defun search-replace (subject pattern template)
+  (if (match subject pattern)
+      (match-replace subject pattern template)
+      (_search-replace subject pattern template)))
+
+// A binder is a symbol spelled '?name' or '*name', which is the same rule
+// the reader and the matcher use. A bare '?' or '*' is a wildcard and
+// names nothing.
+(defun binder? (value)
+  (and (symbol? value)
+       (member (substring (str value) 0 1) '("?" "*"))
+       (> (string-length (str value)) 1)))
+
+(defun _binders (pattern)
+  (cond ((list? pattern)
+         (foldl (lambda (found part) (append found (_binders part)))
+                nil pattern))
+        ((binder? pattern) (list pattern))
+        (true nil)))
+
+(defun _binder-lets (source binders)
+  (map (lambda (binder)
+         (list binder (list 'bound source (list 'quote binder))))
+       binders))
+
+// Tries each clause's pattern against subject in order and evaluates the
+// first body whose pattern matches, with that pattern's binders in scope.
+// A final (else body) clause runs when nothing matched.
+(defmacro match-case (subject . clauses)
+  (foldl
+    (lambda (rest clause)
+      (if (equal? (car clause) 'else) (cadr clause)
+        `(let ((_match-case-subject ,subject))
+           (let ((_match-case-bindings
+                   (match _match-case-subject ',(car clause))))
+             (cond (_match-case-bindings
+                     (let ,(_binder-lets '_match-case-bindings
+                                         (_binders (car clause)))
+                       ,(cadr clause)))
+                   (true ,rest))))))
+    nil
+    (reverse clauses)))
+
+// Small compatibility aliases
+
+(def add _add)
+(def last _last)
+(def len length)
+(def reduce foldl)
+(def lower string-downcase)

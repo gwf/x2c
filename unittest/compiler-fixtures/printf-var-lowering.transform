@@ -1,0 +1,254 @@
+
+(preproc "#include \"x2c.x\"")
+
+(typedef ("Var") (bindings (bind (binding 1 "Dynamic") ())))
+
+(typedef ("Dynamic") (bindings (bind (binding 2 "DynamicAlias") ())))
+
+(function (int) 
+ (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 18 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 4 "key") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((int))) "Var") (ident (binding 48 "int_var"))) 
+        (args (expr (int) (literal (int) "23"))))))))) 
+  (at 19 
+   (declare ("Dynamic") 
+    (bindings 
+     (op = (bind (binding 5 "val") ()) 
+      (expr ("Var") 
+       (call "Var_new" 
+        (args (expr ("Symbol") "3356265") 
+         (expr (double) (literal (double) "3.14"))))))))) 
+  (at 20 
+   (declare ("DynamicAlias") 
+    (bindings 
+     (op = (bind (binding 6 "answer") ()) 
+      (expr ("Var") 
+       (call (expr ((func (("String"))) "Var") (ident (binding 41 "String_var"))) 
+        (args (expr ("String") (cache 0))))))))) 
+  (at 21 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 7 "width") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((int))) "Var") (ident (binding 48 "int_var"))) 
+        (args (expr (int) (literal (int) "6")))))) 
+     (op = (bind (binding 8 "precision") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((int))) "Var") (ident (binding 48 "int_var"))) 
+        (args (expr (int) (literal (int) "1")))))) 
+     (op = (bind (binding 9 "letter") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((char))) "Var") (ident (binding 49 "char_var"))) 
+        (args (expr (char) (literal (char) "\'A\'")))))) 
+     (op = (bind (binding 10 "whole") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((int))) "Var") (ident (binding 48 "int_var"))) 
+        (args (expr (int) (literal (int) "7"))))))))) 
+  (at 5 (declare (char) 
+         (bindings 
+          (bind (binding 11 "first") ((dim (expr (int) (literal (int) "80"))))) 
+          (bind (binding 12 "second") ((dim (expr (int) (literal (int) "80"))))) 
+          (bind (binding 13 "third") ((dim (expr (int) (literal (int) "80")))))))) 
+  (at 22 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 14 "printf"))) 
+      (args (expr (* char) 
+             (literal (* char) "\"printf:(%d:%.2lf)=%s native=%d %%\\n\"")) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "3453797"))))))) 
+       (expr (double) 
+        (call "Var_floating" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Dynamic") (ident (binding 5 "val"))) 
+                  (expr ("Symbol") "3356265"))))))) 
+       (expr ("String") 
+        (call "Var_str" 
+         (args (expr ("DynamicAlias") (ident (binding 6 "answer")))))) 
+       (expr (int) (literal (int) "9"))))))) 
+  (at 23 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 15 "fprintf"))) 
+      (args (expr () (ident (binding 16 "stdout"))) 
+       (expr (* char) (literal (* char) "\"fprintf:%hhd/%hu\\n\"")) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "3453797"))))))) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "3453797")))))))))))) 
+  (at 24 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 17 "sprintf"))) 
+      (args (expr ((dim ("80")) char) (ident (binding 11 "first"))) 
+       (expr (* char) (literal (* char) "\"sprintf:%lld/%s\"")) 
+       (expr (long long) 
+        (call "Var_long_long" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "25983886"))))))) 
+       (expr ("String") 
+        (call "Var_str" 
+         (args (expr ("DynamicAlias") (ident (binding 6 "answer"))))))))))) 
+  (at 25 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 18 "snprintf"))) 
+      (args (expr ((dim ("80")) char) (ident (binding 12 "second"))) 
+       (expr (unsigned) 
+        (sizeof (expr ((dim ("80")) char) (ident (binding 12 "second"))))) 
+       (expr (* char) (literal (* char) "\"snprintf:%#x/%*.*f\"")) 
+       (expr (unsigned) 
+        (call "Var_uint" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "3847013"))))))) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 7 "width"))) 
+                  (expr ("Symbol") "3453797"))))))) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 8 "precision"))) 
+                  (expr ("Symbol") "3453797"))))))) 
+       (expr (double) 
+        (call "Var_floating" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 10 "whole"))) 
+                  (expr ("Symbol") "3356265")))))))))))) 
+  (at 26 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 18 "snprintf"))) 
+      (args (expr ((dim ("80")) char) (ident (binding 13 "third"))) 
+       (expr (unsigned) 
+        (sizeof (expr ((dim ("80")) char) (ident (binding 13 "third"))))) 
+       (expr (* char) (literal (* char) "\"native:%zu/%p var=%d\"")) 
+       (expr (unsigned) 
+        (sizeof (expr ((dim ("80")) char) (ident (binding 13 "third"))))) 
+       (expr (* void) (cast (* void) (expr () (ident (binding 19 "NULL"))))) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "3453797")))))))))))) 
+  (at 27 
+   (declare ("String") 
+    (bindings 
+     (op = (bind (binding 20 "string") ()) 
+      (expr ("String") 
+       (call (expr ((func (("String") (...))) ("String")) 
+              (ident (binding 21 "String_printf"))) 
+        (args (expr ("String") (cache 1)) 
+         (expr (int) 
+          (call "Var_int" 
+           (args (expr ("Var") 
+                  (call "Var_convert" 
+                   (args (expr ("Var") (ident (binding 4 "key"))) 
+                    (expr ("Symbol") "3453797"))))))) 
+         (expr (int) 
+          (call "Var_int" 
+           (args (expr ("Var") 
+                  (call "Var_convert" 
+                   (args (expr ("Var") (ident (binding 4 "key"))) 
+                    (expr ("Symbol") "3453797"))))))) 
+         (expr (long double) 
+          (call "Var_long_double" 
+           (args (expr ("Var") 
+                  (call "Var_convert" 
+                   (args (expr ("Dynamic") (ident (binding 5 "val"))) 
+                    (expr ("Symbol") "26071077642"))))))) 
+         (expr ("String") 
+          (call "Var_str" 
+           (args (expr ("DynamicAlias") (ident (binding 6 "answer"))))))))))))) 
+  (at 28 
+   (stmnt 
+    (expr (int) 
+     (call (expr ((func (("File") (* const char) (...))) (int)) 
+            (ident (binding 23 "File_printf"))) 
+      (args (expr ("File") (ident (binding 22 "Stdout"))) 
+       (expr (* char) (literal (* char) "\"file:%c/%u\\n\"")) 
+       (expr (int) 
+        (call "Var_int" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 9 "letter"))) 
+                  (expr ("Symbol") "3453797"))))))) 
+       (expr (unsigned) 
+        (call "Var_uint" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "3847013")))))))))))) 
+  (at 13 
+   (declare ("Buffer") 
+    (bindings 
+     (op = (bind (binding 24 "buffer") ()) 
+      (expr ("Buffer") 
+       (call (expr ((func (("size_t"))) "Buffer") 
+              (ident (binding 25 "Buffer_new"))) 
+        (args (expr (int) (literal (int) "0"))))))))) 
+  (at 29 
+   (stmnt 
+    (expr ("Buffer") 
+     (call (expr ((func (("Buffer") (* const char) (...))) ("Buffer")) 
+            (ident (binding 26 "Buffer_printf"))) 
+      (args (expr ("Buffer") (ident (binding 24 "buffer"))) 
+       (expr (* char) (literal (* char) "\"buffer:%ld/%g\"")) 
+       (expr (long) 
+        (call "Var_long" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
+                  (expr ("Symbol") "818062"))))))) 
+       (expr (double) 
+        (call "Var_floating" 
+         (args (expr ("Var") 
+                (call "Var_convert" 
+                 (args (expr ("Dynamic") (ident (binding 5 "val"))) 
+                  (expr ("Symbol") "3356265")))))))))))) 
+  (at 15 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 14 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%s\\n%s\\n%s\\n%s\\n\"")) 
+       (expr ((dim ("80")) char) (ident (binding 11 "first"))) 
+       (expr ((dim ("80")) char) (ident (binding 12 "second"))) 
+       (expr ("String") (ident (binding 20 "string"))) 
+       (expr ("String") 
+        (call (expr ((func (("Buffer"))) ("String")) 
+               (ident (binding 27 "Buffer_str"))) 
+         (args (expr ("Buffer") (ident (binding 24 "buffer"))))))))))) 
+  (at 16 
+   (stmnt 
+    (expr (void) 
+     (call (expr ((func (("Buffer"))) (void)) 
+            (ident (binding 28 "Buffer_free"))) 
+      (args (expr ("Buffer") (ident (binding 24 "buffer")))))))) 
+  (at 30 (return (expr (int) (literal (int) "0"))))))

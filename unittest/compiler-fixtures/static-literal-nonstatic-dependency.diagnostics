@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/static-literal-nonstatic-dependency.x:4:15: parse: file-static x2c initializer depends on non-static 'root'
+  static String path = %"$root/child";
+                ^^^^
+  note: initializer: path
+
+limit: too many errors, stopping
+

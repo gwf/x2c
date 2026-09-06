@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/keyword-alias-unknown.x:3:17: parse: unknown or forward-referenced macro 'fixture.unknown'
+  keyword missing $fixture.unknown;
+                  ^
+
+limit: too many errors, stopping
+

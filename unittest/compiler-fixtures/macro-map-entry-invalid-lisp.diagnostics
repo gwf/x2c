@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-map-entry-invalid-lisp.x:7:19: parse: expected syntax
+  Map values = %{ ${$invalid_rows()} };
+                    ^
+
+limit: too many errors, stopping
+

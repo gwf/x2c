@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/import-unknown-member.x:10:33: parse: package 'geo' has no public name 'frobnicate'
+  double missing(void) { return g.frobnicate(); }
+                                  ^^^^^^^^^^
+
+limit: too many errors, stopping
+

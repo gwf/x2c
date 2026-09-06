@@ -1,0 +1,4 @@
+native=1,1,1,1,1
+wide=1,1,0,1,1 mixed=1,1,0,1
+order=1,1,1,1,1,1 strings=1
+object=1,0,1,1,1 once=1,1,1

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-representation-untagged.x:6:19: protocol: Var representation Untagged has no fixed tag
+  protocol Var(Row) as Untagged;
+                    ^^
+
+limit: too many errors, stopping
+

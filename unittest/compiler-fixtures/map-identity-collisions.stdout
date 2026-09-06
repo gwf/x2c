@@ -1,0 +1,5 @@
+registered=1,1
+array equal=1 identical=0 entries=40 sum=780
+replacement=100 mutated=100 removed=1 missing=1 remaining=39 sum=879
+map equal=1 identical=0 entries=40 sum=780
+replacement=100 mutated=100 removed=1 missing=1 remaining=39 sum=879

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-type-hole-invalid-owner.x:11:1: type: method name has no concrete owner
+  $box_pointer(MacroInvalidOwner *);
+  ^
+
+limit: too many errors, stopping
+

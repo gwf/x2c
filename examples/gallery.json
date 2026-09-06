@@ -1,0 +1,122 @@
+[
+  {
+    "slide": "love-01-var.md",
+    "example": "love/values",
+    "optional": false
+  },
+  {
+    "slide": "love-02-strings.md",
+    "example": "love/strings",
+    "optional": false
+  },
+  {
+    "slide": "love-03-symbols.md",
+    "example": "love/symbols",
+    "optional": false
+  },
+  {
+    "slide": "love-04-lists.md",
+    "example": "love/lists",
+    "optional": false
+  },
+  {
+    "slide": "love-05-arrays.md",
+    "example": "love/arrays",
+    "optional": false
+  },
+  {
+    "slide": "love-06-maps.md",
+    "example": "love/maps",
+    "optional": false
+  },
+  {
+    "slide": "love-06a-literals.md",
+    "example": "love/literals",
+    "optional": false
+  },
+  {
+    "slide": "love-07-files.md",
+    "example": "love/files",
+    "optional": false
+  },
+  {
+    "slide": "love-11-methods.md",
+    "example": "love/methods",
+    "optional": false
+  },
+  {
+    "slide": "magic-00-operators.md",
+    "example": "magic/operators",
+    "optional": false
+  },
+  {
+    "slide": "magic-01-macros.md",
+    "example": "magic/macros",
+    "optional": false
+  },
+  {
+    "slide": "magic-02-decorators.md",
+    "example": "magic/decorators",
+    "optional": false
+  },
+  {
+    "slide": "magic-03-keywords.md",
+    "example": "magic/keywords",
+    "optional": false
+  },
+  {
+    "slide": "magic-05-compile-time-lisp.md",
+    "example": "magic/compile-time",
+    "optional": false
+  },
+  {
+    "slide": "magic-06-runtime-lisp.md",
+    "example": "magic/runtime",
+    "optional": false
+  },
+  {
+    "slide": "magic-07-selfhost.md",
+    "example": "magic/selfhost.md",
+    "language": "sh"
+  },
+  {
+    "slide": "power-01-counting.md",
+    "example": "power/counting",
+    "optional": false
+  },
+  {
+    "slide": "power-04-indexing.md",
+    "example": "power/indexing",
+    "optional": false
+  },
+  {
+    "slide": "power-04-j-scopes.md",
+    "example": "power/scopes",
+    "optional": false
+  },
+  {
+    "slide": "power-04-match.md",
+    "example": "power/match",
+    "optional": false
+  },
+  {
+    "slide": "power-05-contexts-threads.md",
+    "example": "power/threads",
+    "optional": false
+  },
+  {
+    "slide": "power-06-exceptions.md",
+    "example": "power/exceptions",
+    "optional": false
+  },
+  {
+    "slide": "power-09a-generics.md",
+    "example": "power/generics",
+    "optional": false
+  },
+  {
+    "slide": "power-10-imports.md",
+    "example": "power/imports",
+    "optional": true
+  }
+]

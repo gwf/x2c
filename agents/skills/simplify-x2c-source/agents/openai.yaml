@@ -1,0 +1,4 @@
+interface:
+  display_name: "Simplify x2c Source"
+  short_description: "Delete connected over-engineering, not cleanup leftovers"
+  default_prompt: "Use $simplify-x2c-source to prototype several high-return deletions, challenge the result before final gates, and complete every accepted change."

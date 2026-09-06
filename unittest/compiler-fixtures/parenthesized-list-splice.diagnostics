@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/parenthesized-list-splice.x:6:27: parse: expected identifier after '@'
+    List rejected = %(head @(values) foot);
+                            ^
+  note: use '@{...}' to splice an expression
+
+limit: too many errors, stopping
+

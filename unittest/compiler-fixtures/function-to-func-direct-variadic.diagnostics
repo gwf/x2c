@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/function-to-func-direct-variadic.x:8:3: type: function conversion to Func cannot be variadic
+    Func function = sum;
+    ^^^^
+  note: target signature: ("Func") source signature: ((func ((int) (...))) int)
+
+limit: too many errors, stopping
+

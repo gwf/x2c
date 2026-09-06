@@ -1,0 +1,26 @@
+macro Unit $error.private.types() => {
+  typedef struct ErrorRegion {
+    Scope $(x2c.ident "values");
+    Pool $(x2c.ident "lists");
+    Pool $(x2c.ident "strings");
+  } $(x2c.ident "ErrorRegion");
+
+  typedef struct ErrorRecord {
+    struct ErrorRegion $(x2c.ident "region");
+    List $(x2c.ident "entry");
+  } $(x2c.ident "ErrorRecord");
+
+  struct ErrorHandler {
+    struct ErrorHandler *$(x2c.ident "prev");
+    ErrorHandlerFn $(x2c.ident "fn");
+    Var $(x2c.ident "data");
+    int $(x2c.ident "watermark");
+    Array $(x2c.ident "patterns");
+    Block $(x2c.ident "plans");
+    void *$(x2c.ident "target");
+    int $(x2c.ident "selected");
+    Block $(x2c.ident "capture_values");
+    Block $(x2c.ident "retained");
+    int $(x2c.ident "detached");
+  };
+}

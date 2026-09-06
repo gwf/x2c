@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/keyword-alias-wrong-position.x:10:22: parse: Function macro argument requires a function body
+  static int value = 42;
+                       ^
+
+limit: too many errors, stopping
+

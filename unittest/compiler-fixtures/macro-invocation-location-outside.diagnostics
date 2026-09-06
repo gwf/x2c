@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-invocation-location-outside.x:3:21: macro: x2c invocation location used outside macro expansion
+  static char *file = $(x2c.invocation.file);
+                      ^^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,170 @@
+---
+import { panels } from "../data/panels.js";
+
+const pad = (n: number) => String(n + 1).padStart(2, "0");
+---
+
+<section class="carousel" aria-label="What x2c looks like">
+  <div class="track">
+    {panels.map((panel, i) => (
+      <article class="panel" id={panel.id} aria-label={panel.title}>
+        <div class="narrow">
+          <p class="panel-index"><span>{pad(i)}</span> {panel.label}</p>
+          <h2>{panel.title}</h2>
+          <ul>{panel.bullets.map((line: string) => <li>{line}</li>)}</ul>
+        </div>
+        <pre class="wide"><code set:html={panel.code} /></pre>
+      </article>
+    ))}
+  </div>
+
+  <nav class="rail" aria-label="Carousel panels">
+    {panels.map((panel, i) => (
+      <a href={`#${panel.id}`}><span>{pad(i)}</span> {panel.label}</a>
+    ))}
+  </nav>
+</section>
+
+<style>
+  .carousel {
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .panel {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    scroll-margin-top: var(--header-height);
+    min-width: 0;
+    padding: clamp(38px, 4.4vw, 60px) var(--pad);
+    display: grid;
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    align-items: center;
+    gap: clamp(32px, 5vw, 68px);
+  }
+
+  .panel:nth-child(even) .narrow {
+    order: 2;
+  }
+
+  .narrow {
+    min-width: 0;
+  }
+
+  .panel-index {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  .panel-index span {
+    margin-right: 8px;
+    color: var(--red-ink);
+  }
+
+  .panel h2 {
+    margin: 0 0 22px;
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1.15;
+  }
+
+  .narrow ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .narrow li {
+    padding: 9px 0 9px 18px;
+    border-top: 1px solid var(--hairline);
+    position: relative;
+    color: var(--muted);
+    font-size: 14.5px;
+  }
+
+  .narrow li::before {
+    content: "";
+    position: absolute;
+    top: 17px;
+    left: 0;
+    width: 7px;
+    border-top: 1px solid var(--red);
+  }
+
+  .wide {
+    min-width: 0;
+    height: 340px;
+    margin: 0;
+    padding: clamp(20px, 2.4vw, 30px);
+    overflow: auto;
+    border: 1px solid #000;
+    border-top: 4px solid var(--red);
+    background: var(--code);
+    font: 400 clamp(11.5px, 1.05vw, 13.5px)/1.75 var(--font-mono);
+    tab-size: 2;
+  }
+
+  .rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    border-top: 1px solid var(--hairline);
+  }
+
+  .rail a {
+    padding: 13px 14px;
+    border-right: 1px solid var(--hairline);
+    color: var(--muted);
+    font: 500 11.5px/1.2 var(--font-mono);
+    text-align: center;
+    transition: background 130ms ease, color 130ms ease;
+  }
+
+  .rail a span {
+    color: var(--red-ink);
+  }
+
+  .rail a:last-child {
+    border-right: 0;
+  }
+
+  .rail a:hover {
+    background: var(--red);
+    color: var(--on-red);
+  }
+
+  .rail a:hover span {
+    color: var(--on-red);
+  }
+
+  @media (max-width: 820px) {
+    .panel {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+    }
+
+    .panel:nth-child(even) .narrow {
+      order: 0;
+    }
+
+    .wide {
+      height: auto;
+      max-height: 340px;
+    }
+
+    .rail {
+      grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,103 @@
+
+(preproc "#include \"x2c.x\"")
+
+(declare (int) 
+ (bindings 
+  (op = (bind (binding 1 "mixed_global_i") ()) 
+   (expr (int) (literal (int) "1")))))
+
+(declare (float) 
+ (bindings 
+  (op = (bind (binding 2 "mixed_global_x") ()) 
+   (expr (double) (literal (double) "2.5")))))
+
+(declare (char) 
+ (bindings 
+  (op = (bind (binding 3 "mixed_global_c") ()) 
+   (expr (char) (literal (char) "\'g\'")))))
+
+(typedef 
+ (struct "MixedFields" 
+  (fields (declare (int) (bindings (bind (binding 4 "i") ()))) 
+   (declare (float) (bindings (bind (binding 5 "x") ()))) 
+   (declare (char) (bindings (bind (binding 6 "c") ()))))) 
+ (bindings (bind (binding 8 "MixedFields") ())))
+
+(typedef (float) (bindings (bind (binding 9 "MixedValue") ())))
+
+(typedef ("List") (bindings (bind (binding 10 "MixedValues") ())))
+
+(function (int) 
+ (bind (binding 11 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 1 (seq (declare (int) 
+              (bindings 
+               (op = (bind (binding 12 "i") ()) (expr (int) (literal (int) "3"))))) 
+         (declare (float) 
+          (bindings 
+           (op = (bind (binding 13 "x") ()) 
+            (expr (double) (literal (double) "4.5"))))) 
+         (declare (char) 
+          (bindings 
+           (op = (bind (binding 14 "c") ()) 
+            (expr (char) (literal (char) "\'b\'"))))))) 
+  (at 2 (declare ("MixedFields") 
+         (bindings 
+          (op = (bind (binding 15 "fields") ()) 
+           (expr () 
+            (composite 
+             (commas (expr (int) (literal (int) "5")) 
+              (expr (double) (literal (double) "6.5")) 
+              (expr (char) (literal (char) "\'f\'"))))))))) 
+  (at 3 (declare (int) 
+         (bindings 
+          (op = (bind (binding 16 "ordinary") ()) 
+           (expr (int) (literal (int) "7"))) 
+          (op = (bind (binding 17 "MixedValue") ()) 
+           (expr (int) (literal (int) "8")))))) 
+  (at 6 (block 
+         (at 4 (seq (declare (int) 
+                     (bindings 
+                      (op = (bind (binding 18 "count") ()) 
+                       (expr (int) (literal (int) "9"))))) 
+                (declare ("MixedValues") 
+                 (bindings 
+                  (op = (bind (binding 19 "values") ()) 
+                   (expr ("List") (expr ("List") (cache 1)))))))) 
+         (at 5 (stmnt 
+                (expr () 
+                 (call (expr () (ident (binding 20 "printf"))) 
+                  (args (expr (* char) (literal (* char) "\"%d %ld\\n\"")) 
+                   (expr (int) (ident (binding 18 "count"))) 
+                   (expr (long) 
+                    (call (expr ((func (("Var"))) (long)) 
+                           (ident (binding 22 "Var_integer"))) 
+                     (args (expr ("Var") 
+                            (call (expr ((func (("List"))) ("Var")) 
+                                   (ident (binding 21 "List_car"))) 
+                             (args (expr ("MixedValues") 
+                                    (ident (binding 19 "values")))))))))))))))) 
+  (at 7 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 23 "printf"))) 
+           (args (expr (* char) 
+                  (literal (* char) "\"%d %.1f %c %d %.1f %c %d %.1f %c %d\\n\"")) 
+            (expr (int) (ident (binding 1 "mixed_global_i"))) 
+            (expr (float) (ident (binding 2 "mixed_global_x"))) 
+            (expr (char) (ident (binding 3 "mixed_global_c"))) 
+            (expr (int) (ident (binding 12 "i"))) 
+            (expr (float) (ident (binding 13 "x"))) 
+            (expr (char) (ident (binding 14 "c"))) 
+            (expr (int) 
+             (op . (expr ("MixedFields") (ident (binding 15 "fields"))) 
+              ("i"))) 
+            (expr (float) 
+             (op . (expr ("MixedFields") (ident (binding 15 "fields"))) 
+              ("x"))) 
+            (expr (char) 
+             (op . (expr ("MixedFields") (ident (binding 15 "fields"))) 
+              ("c"))) 
+            (expr (int) 
+             (op + (expr (int) (ident (binding 16 "ordinary"))) 
+              (expr (int) (ident (binding 17 "MixedValue")))))))))) 
+  (at 8 (return (int) (expr (int) (literal (int) "0"))))))

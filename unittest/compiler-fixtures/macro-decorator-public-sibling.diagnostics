@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-public-sibling.x:8:1: type: method name has no concrete owner
+  $add_public()
+  ^
+
+limit: too many errors, stopping
+

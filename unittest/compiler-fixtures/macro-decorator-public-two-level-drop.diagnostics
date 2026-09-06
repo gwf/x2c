@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-decorator-public-two-level-drop.x:14:1: parse: expected syntax
+  $drop()
+  ^
+
+limit: too many errors, stopping
+

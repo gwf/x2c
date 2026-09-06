@@ -1,0 +1,47 @@
+# Advisory and manual only. This workflow is an optional Linux/clang signal;
+# it is not part of the local development, build, PR, or commit process. It
+# must never be configured as a required status check. `make check` and
+# `make precommit` are the offline gates that matter.
+name: check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CC: clang
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: Select Clang host preprocessor
+        run: |
+          mkdir -p "$RUNNER_TEMP/x2c-clang"
+          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+      - name: Build trusted stage zero
+        run: make build-safe
+      - name: Run complete non-mutating gate
+        run: make check
+
+  sanitizer-leaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang
+      - name: Select Clang host preprocessor
+        run: |
+          mkdir -p "$RUNNER_TEMP/x2c-clang"
+          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+      - name: Build trusted stage zero
+        run: make build-safe
+      - name: Run leak-enabled sanitizer gate
+        run: X2C_DETECT_LEAKS=1 make verify-sanitize

@@ -1,0 +1,40 @@
+
+(preproc "#include \"x2c.x\"")
+
+(macrodef <macro define_increment>)
+
+(declare (int) 
+ (bindings 
+  (bind (binding 2 "generated_increment") 
+   ((fnmod (params (param (int) (bind (binding 1 "value") ()))))))))
+
+(function (int) 
+ (bind (binding 2 "generated_increment") 
+  ((fnmod (params (param (int) (bind (binding 3 "value") ())))))) 
+ (block 
+  (at 2 (if (expr (int) 
+             (op < (expr (int) (ident (binding 3 "value"))) 
+              (expr (int) (literal (int) "0")))) 
+         (raise (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg)) 
+          (args (expr ("Symbol") (literal ("Symbol") "owner" owner)) 
+           (expr ("String") 
+            (segments 
+             (segexp 
+              (expr ("String") (literal ("String") "generated_increment"))))))))) 
+  (at 2 (return (int) 
+         (expr (int) 
+          (op + (expr (int) (ident (binding 3 "value"))) 
+           (expr (int) (literal (int) "1"))))))))
+
+(function (int) 
+ (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 3 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 5 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
+            (expr (int) 
+             (call (expr ((func ((int))) int) 
+                    (ident (binding 2 "generated_increment"))) 
+              (args (expr (int) (literal (int) "41")))))))))) 
+  (at 4 (return (int) (expr (int) (literal (int) "0"))))))

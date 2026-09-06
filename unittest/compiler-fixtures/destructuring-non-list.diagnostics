@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/destructuring-non-list.x:6:3: type: destructuring requires a List source
+    (target) = value;
+    ^
+
+limit: too many errors, stopping
+

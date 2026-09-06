@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/retired-var-tag-defer.x:7:3: type: cannot convert ("Defer") to Var without loss
+    Var boxed = value;
+    ^^^
+
+limit: too many errors, stopping
+

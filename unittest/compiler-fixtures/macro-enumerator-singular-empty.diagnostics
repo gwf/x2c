@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-enumerator-singular-empty.x:9:3: parse: syntax cannot be constructed at this position
+    $bad()
+    ^
+
+limit: too many errors, stopping
+

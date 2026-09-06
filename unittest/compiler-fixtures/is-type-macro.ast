@@ -1,0 +1,86 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <stdio.h>")
+
+(macrodef <macro is_type>)
+
+(macrodef <macro is_tag>)
+
+(macrodef <macro is_not_type>)
+
+(macrodef <macro is_not_tag>)
+
+(macrodef <macro is_pointer>)
+
+(function (int) 
+ (bind (binding 1 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 6 (declare (int) 
+         (bindings 
+          (op = (bind (binding 2 "number") ()) (expr (int) (literal (int) "1"))) 
+          (op = (bind (binding 3 "pointer") (*)) 
+           (expr (* int) (op & (expr (int) (ident (binding 2 "number"))))))))) 
+  (at 7 (declare ("Var") 
+         (bindings 
+          (op = (bind (binding 4 "scalar") ()) 
+           (expr (int) (ident (binding 2 "number")))) 
+          (op = (bind (binding 5 "pointer_value") ()) 
+           (expr (* int) (ident (binding 3 "pointer"))))))) 
+  (at 14 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 6 "ok") ()) 
+      (expr (int) 
+       (op && 
+        (expr (int) 
+         (op && 
+          (expr (int) 
+           (op && 
+            (expr (int) 
+             (op && 
+              (expr (int) 
+               (op && 
+                (expr (int) 
+                 (call (expr ((func (("Var") ("Symbol"))) int) 
+                        (ident (binding 7 "Var_is"))) 
+                  (args (expr ("Var") (ident (binding 4 "scalar"))) 
+                   (expr ("Symbol") "3453797")))) 
+                (expr (int) 
+                 (call (expr ((func (("Var") ("Symbol"))) int) 
+                        (ident (binding 7 "Var_is"))) 
+                  (args (expr ("Var") (ident (binding 4 "scalar"))) 
+                   (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))) 
+              (expr (int) 
+               (op ! (expr (int) 
+                      (call (expr ((func (("Var") ("Symbol"))) int) 
+                             (ident (binding 7 "Var_is"))) 
+                       (args (expr ("Var") (ident (binding 4 "scalar"))) 
+                        (expr ("Symbol") "3356265")))))))) 
+            (expr (int) 
+             (op ! (expr (int) 
+                    (call (expr ((func (("Var") ("Symbol"))) int) 
+                           (ident (binding 7 "Var_is"))) 
+                     (args (expr ("Var") (ident (binding 4 "scalar"))) 
+                      (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))))) 
+          (expr (int) 
+           (call (expr ((func (("Var") ("Symbol"))) int) 
+                  (ident (binding 7 "Var_is"))) 
+            (args (expr ("Var") (ident (binding 5 "pointer_value"))) 
+             (expr ("Symbol") "442085973")))))) 
+        (expr (int) 
+         (call (expr ((func (("Var") ("Symbol"))) int) 
+                (ident (binding 7 "Var_is"))) 
+          (args (expr ("Var") (ident (binding 5 "pointer_value"))) 
+           (expr ("Symbol") "442085973")))))))))) 
+  (at 15 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 8 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
+       (expr (int) (ident (binding 6 "ok")))))))) 
+  (at 16 
+   (return (int) 
+    (expr (int) 
+     (op ? (expr (int) (ident (binding 6 "ok"))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

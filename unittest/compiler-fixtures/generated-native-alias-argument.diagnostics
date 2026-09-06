@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/generated-native-alias-argument.x:4:3: type: cannot convert the integer 42 to pointer type ("File")
+    File.close(42);
+    ^^^^
+  note: only a zero integer constant expression converts to a pointer
+
+limit: too many errors, stopping
+

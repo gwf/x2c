@@ -1,0 +1,267 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <limits.h>")
+
+(typedef (unsigned long) (bindings (bind (binding 1 "ulong_alias") ())))
+
+(typedef (unsigned) (bindings (bind (binding 2 "uint_alias") ())))
+
+(function (static "ulong_alias") 
+ (bind (binding 5 "add_alias") 
+  ((fnmod 
+    (params (param ("ulong_alias") (bind (binding 3 "left") ())) 
+     (param ("uint_alias") (bind (binding 4 "right") ())))))) 
+ (block 
+  (at 16 
+   (return 
+    (expr (unsigned long) 
+     (op + (expr ("ulong_alias") (ident (binding 3 "left"))) 
+      (expr ("uint_alias") (ident (binding 4 "right")))))))))
+
+(function (static long double) 
+ (bind (binding 8 "add_long_double") 
+  ((fnmod 
+    (params (param (long double) (bind (binding 6 "left") ())) 
+     (param (int) (bind (binding 7 "right") ())))))) 
+ (block 
+  (at 17 
+   (return 
+    (expr (long double) 
+     (op + (expr (long double) (ident (binding 6 "left"))) 
+      (expr (int) (ident (binding 7 "right")))))))))
+
+(function (static unsigned long long) 
+ (bind (binding 11 "add_unsigned") 
+  ((fnmod 
+    (params (param (unsigned long long) (bind (binding 9 "left") ())) 
+     (param (long) (bind (binding 10 "right") ())))))) 
+ (block 
+  (at 18 
+   (return 
+    (expr (unsigned long long) 
+     (op + (expr (unsigned long long) (ident (binding 9 "left"))) 
+      (expr (long) (ident (binding 10 "right")))))))))
+
+(function (static int) 
+ (bind (binding 14 "add_promoted") 
+  ((fnmod 
+    (params (param (unsigned char) (bind (binding 12 "left") ())) 
+     (param (signed char) (bind (binding 13 "right") ())))))) 
+ (block 
+  (at 19 
+   (return 
+    (expr (int) 
+     (op + (expr (unsigned char) (ident (binding 12 "left"))) 
+      (expr (signed char) (ident (binding 13 "right")))))))))
+
+(function (static "ulong_alias") 
+ (bind (binding 16 "unbox_alias") 
+  ((fnmod (params (param ("Var") (bind (binding 15 "value") ())))))) 
+ (block 
+  (at 20 
+   (return 
+    (expr ("ulong_alias") 
+     (call "Var_ulong" 
+      (args (expr ("Var") 
+             (call "Var_convert" 
+              (args (expr ("Var") (ident (binding 15 "value"))) 
+               (expr ("Symbol") "44858254")))))))))))
+
+(function (int) 
+ (bind (binding 17 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 21 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 18 "vlong") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((long))) "Var") (ident (binding 54 "long_var"))) 
+        (args (expr (long) (literal (long) "11L"))))))))) 
+  (at 22 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 19 "vhex") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((unsigned))) "Var") 
+              (ident (binding 55 "unsigned_var"))) 
+        (args (expr (unsigned) (literal (unsigned) "0xffffffff"))))))))) 
+  (at 23 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 20 "vdecimal") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((long))) "Var") (ident (binding 54 "long_var"))) 
+        (args (expr (long) (literal (long) "4294967295"))))))))) 
+  (at 24 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 21 "vull") ()) 
+      (expr ("Var") 
+       (call "Var_box_ulong_long" 
+        (args (expr (unsigned long long) 
+               (literal (unsigned long long) "18446744073709551615ULL"))))))))) 
+  (at 25 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 22 "vfloat") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((float))) "Var") (ident (binding 56 "float_var"))) 
+        (args (expr (float) (literal (float) "1.25f"))))))))) 
+  (at 26 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 23 "vlong_double") ()) 
+      (expr ("Var") 
+       (call "Var_box_long_double" 
+        (args (expr (long double) (literal (long double) "1.5L"))))))))) 
+  (at 27 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 24 "valias") ()) 
+      (expr ("Var") 
+       (call "Var_box_ulong" 
+        (args (expr ("ulong_alias") 
+               (cast ("ulong_alias") (expr (int) (literal (int) "17"))))))))))) 
+  (at 13 
+   (declare ("ulong_alias") 
+    (bindings 
+     (op = (bind (binding 25 "alias_value") ()) 
+      (expr ("ulong_alias") 
+       (call (expr ((func (("Var"))) "ulong_alias") 
+              (ident (binding 16 "unbox_alias"))) 
+        (args (expr ("Var") (ident (binding 24 "valias")))))))))) 
+  (at 14 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 26 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d %d %d %d %d %d\\n\"")) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (call (expr ((func (("Var") ("Symbol"))) int) 
+                 (ident (binding 27 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 18 "vlong"))) 
+            (expr ("Symbol") (literal ("Symbol") "<long>" long))))) 
+         (expr (int) 
+          (op == 
+           (expr (long) 
+            (call (expr ((func (("Var"))) (long)) 
+                   (ident (binding 28 "Var_long"))) 
+             (args (expr ("Var") (ident (binding 18 "vlong")))))) 
+           (expr (long) (literal (long) "11L")))))) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (call (expr ((func (("Var") ("Symbol"))) int) 
+                 (ident (binding 27 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 19 "vhex"))) 
+            (expr ("Symbol") (literal ("Symbol") "<u32>" u32))))) 
+         (expr (int) 
+          (op == 
+           (expr ("uint") 
+            (call (expr ((func (("Var"))) ("uint")) 
+                   (ident (binding 29 "Var_uint"))) 
+             (args (expr ("Var") (ident (binding 19 "vhex")))))) 
+           (expr () (ident (binding 30 "UINT_MAX"))))))) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (call (expr ((func (("Var") ("Symbol"))) int) 
+                 (ident (binding 27 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 20 "vdecimal"))) 
+            (expr ("Symbol") (literal ("Symbol") "<long>" long))))) 
+         (expr (int) 
+          (op == 
+           (expr (long) 
+            (call (expr ((func (("Var"))) (long)) 
+                   (ident (binding 28 "Var_long"))) 
+             (args (expr ("Var") (ident (binding 20 "vdecimal")))))) 
+           (expr (long) (literal (long) "4294967295L")))))) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (call (expr ((func (("Var") ("Symbol"))) int) 
+                 (ident (binding 27 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 21 "vull"))) 
+            (expr ("Symbol") (literal ("Symbol") "<ullong>" ullong))))) 
+         (expr (int) 
+          (op == 
+           (expr (unsigned long long) 
+            (call (expr ((func (("Var"))) (unsigned long long)) 
+                   (ident (binding 31 "Var_ulong_long"))) 
+             (args (expr ("Var") (ident (binding 21 "vull")))))) 
+           (expr (unsigned long long) 
+            (literal (unsigned long long) "18446744073709551615ULL")))))) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (call (expr ((func (("Var") ("Symbol"))) int) 
+                 (ident (binding 27 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 22 "vfloat"))) 
+            (expr ("Symbol") (literal ("Symbol") "<f32>" f32))))) 
+         (expr (int) 
+          (op == 
+           (expr (double) 
+            (call (expr ((func (("Var"))) (double)) 
+                   (ident (binding 32 "Var_floating"))) 
+             (args (expr ("Var") (ident (binding 22 "vfloat")))))) 
+           (expr (double) (literal (double) "1.25")))))) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (call (expr ((func (("Var") ("Symbol"))) int) 
+                 (ident (binding 27 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 23 "vlong_double"))) 
+            (expr ("Symbol") (literal ("Symbol") "<ldouble>" ldouble))))) 
+         (expr (int) 
+          (op == 
+           (expr (long double) 
+            (call (expr ((func (("Var"))) (long double)) 
+                   (ident (binding 33 "Var_long_double"))) 
+             (args (expr ("Var") (ident (binding 23 "vlong_double")))))) 
+           (expr (long double) (literal (long double) "1.5L")))))) 
+       (expr (int) 
+        (op && 
+         (expr (int) 
+          (op && 
+           (expr (int) 
+            (op && 
+             (expr (int) 
+              (op == 
+               (expr ("ulong_alias") 
+                (call (expr ((func (("ulong_alias") ("uint_alias"))) 
+                             "ulong_alias") (ident (binding 5 "add_alias"))) 
+                 (args (expr ("ulong_alias") (ident (binding 25 "alias_value"))) 
+                  (expr (unsigned) (literal (unsigned) "2U"))))) 
+               (expr (unsigned long) (literal (unsigned long) "19UL")))) 
+             (expr (int) 
+              (op == 
+               (expr (long double) 
+                (call (expr ((func ((long double) (int))) long double) 
+                       (ident (binding 8 "add_long_double"))) 
+                 (args (expr (long double) (literal (long double) "2.5L")) 
+                  (expr (int) (literal (int) "2"))))) 
+               (expr (long double) (literal (long double) "4.5L")))))) 
+           (expr (int) 
+            (op == 
+             (expr (unsigned long long) 
+              (call (expr ((func ((unsigned long long) (long))) 
+                           unsigned long long) 
+                     (ident (binding 11 "add_unsigned"))) 
+               (args (expr () 
+                      (op - (expr () (ident (binding 34 "ULLONG_MAX"))) 
+                       (expr (int) (literal (int) "2")))) 
+                (expr (long) (literal (long) "1L"))))) 
+             (expr () 
+              (op - (expr () (ident (binding 34 "ULLONG_MAX"))) 
+               (expr (int) (literal (int) "1")))))))) 
+         (expr (int) 
+          (op == 
+           (expr (int) 
+            (call (expr ((func ((unsigned char) (signed char))) int) 
+                   (ident (binding 14 "add_promoted"))) 
+             (args (expr (int) (literal (int) "250")) 
+              (expr (int) (op - (expr (int) (literal (int) "2"))))))) 
+           (expr (int) (literal (int) "248"))))))))))) 
+  (at 28 (return (expr (int) (literal (int) "0"))))))

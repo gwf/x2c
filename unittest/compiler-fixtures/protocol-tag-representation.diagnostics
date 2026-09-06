@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-tag-representation.x:7:27: protocol: a Var adoption cannot use both 'as' and 'tag'
+  protocol Var(Row) as List tag <row>;
+                            ^^^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,4 @@
+Map m: { <baz>: 3, <foo>: 1, <bar>: 2 }
+List l: (a b c)
+Array a: [ "hello", "world", 42 ]
+String s: "this is a string"

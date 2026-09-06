@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-adoption-unresolvable.x:17:1: protocol: Widget does not satisfy Var(Widget): member 'str' has a T parameter, so Var(Widget) needs 'Var.widget' or 'Var.as_widget'
+  protocol Var(Widget);
+  ^^^^^^^^
+
+limit: too many errors, stopping
+

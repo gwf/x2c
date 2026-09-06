@@ -1,0 +1,7 @@
+printf:(23:3.14)=hello native=9 %
+fprintf:23/23
+file:A/23
+sprintf:23/hello
+snprintf:0x17/   7.0
+string:23/23/3.140000/hello
+buffer:23/3.14

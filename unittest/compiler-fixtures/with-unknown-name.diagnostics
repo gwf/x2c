@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/with-unknown-name.x:4:24: parse: package 'geo' has no public name 'NoSuchType'
+  import "geo" with Vec, NoSuchType;
+                         ^^^^^^^^^^
+
+limit: too many errors, stopping
+

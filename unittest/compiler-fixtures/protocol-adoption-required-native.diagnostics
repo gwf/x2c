@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-adoption-required-native.x:11:17: type: type ("Handle") has no method dispose
+    handle.dispose();
+                  ^
+
+limit: too many errors, stopping
+

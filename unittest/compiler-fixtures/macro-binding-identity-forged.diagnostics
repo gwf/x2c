@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-binding-identity-forged.x:7:13: type: identifier has an unknown binding identity
+  int value = $forged();
+              ^
+  note: binding: (binding 999 "missing")
+
+limit: too many errors, stopping
+

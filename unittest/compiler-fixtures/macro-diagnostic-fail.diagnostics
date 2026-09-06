@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-diagnostic-fail.x:8:13: macro: chosen compile-time failure
+  int value = $reject(1);
+              ^
+  note: first note second note
+
+limit: too many errors, stopping
+

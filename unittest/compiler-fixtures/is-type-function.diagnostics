@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/is-type-function.x:4:16: type: function type cannot be used after operator 'is'
+    return value is (int (int));
+                 ^^
+  note: function types have no supported Var tag
+
+limit: too many errors, stopping
+

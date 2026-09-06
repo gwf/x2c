@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/with-collision.x:6:26: parse: package name 'Grid' collides with a declared name
+  import "geo" with Vec as Grid;
+                           ^^^^
+
+limit: too many errors, stopping
+

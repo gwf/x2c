@@ -1,0 +1,25 @@
+macro Decorator $x2c.foreign.alias(
+  Unit $declaration,
+  Expr $native
+) => {
+  $(list (list 'falias $declaration $native))...
+}
+
+macro Expression $x2c.callback.adapt(
+  Expr $target,
+  Expr $source
+) => (
+  $(list 'expr nil (list 'tadapt $target $source))
+)
+
+macro Decorator $x2c.foreach(
+  Block $body,
+  Decl $declaration,
+  Expr $collection
+) using $iterator, $item, $pair, $object, $cursor => {
+  $(x2c._foreach.expand
+    $declaration $collection $body
+    $iterator $item $pair $object $cursor)...
+}
+
+keyword foreach $x2c.foreach;

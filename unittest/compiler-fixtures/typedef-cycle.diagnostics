@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/typedef-cycle.x:3:18: type: typedef chain too deep (possible cycle) resolving ("B")
+  int main(void) { B x = 0; return 0; }
+                   ^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/delegate-field-unnamed.x:4:33: parse: delegate field requires a name
+    delegate struct { int value; };
+                                  ^
+
+limit: too many errors, stopping
+

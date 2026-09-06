@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-result-block-position.x:6:13: macro: macro 'block_result' cannot be invoked in an expression
+  int value = $block_result();
+              ^
+
+limit: too many errors, stopping
+

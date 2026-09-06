@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-prototype-duplicate.x:12:1: type: function 'generated_increment' is already defined in this scope
+  
+  ^
+  note: prior definition: 'generated_increment'
+
+limit: too many errors, stopping
+

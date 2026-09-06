@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/method-const-receiver.x:11:14: type: cannot convert (* const "ConstReceiverRec") to (* "ConstReceiverRec")
+    rec.bump(4);
+               ^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+
+limit: too many errors, stopping
+

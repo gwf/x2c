@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/braced-unquote-missing.x:6:1: parse: unexpected end of file
+  
+  ^
+
+limit: too many errors, stopping
+

@@ -1,0 +1,61 @@
+#!/usr/bin/expect -f
+
+#  Run one termbox2 test program under a deterministic pseudo-terminal. A
+#  test asks for terminal input by printing a READY line; the raw suite
+#  prints none and simply runs. A test that announces READY cursor must also
+#  put the terminal's show-and-move sequence on the wire, which is the only
+#  place cursor motion is observable.
+
+set program [lindex $argv 0]
+log_user 1
+set transcript [open builds/[file tail $program].transcript w]
+fconfigure $transcript -translation binary -encoding binary
+log_file -open $transcript
+set timeout 10
+set env(TERM) xterm-256color
+set env(LC_ALL) C.UTF-8
+set env(LC_CTYPE) C.UTF-8
+
+spawn -noecho sh -c "stty rows 12 columns 72; exec $program"
+fconfigure $spawn_id -translation binary -encoding binary
+set terminal_path $spawn_out(slave,name)
+
+set want_cursor 0
+set saw_cursor 0
+set saw_summary 0
+
+expect {
+  "READY keys" {
+    send -raw [binary format H* cebb1b78]
+    exp_continue
+  }
+  "READY resize" {
+    exec stty -f $terminal_path rows 16 columns 84
+    exp_continue
+  }
+  "READY mouse" {
+    send -- "\033\[<0;13;5M"
+    exp_continue
+  }
+  "READY cursor" {
+    set want_cursor 1
+    exp_continue
+  }
+  -ex "\033\[?12l\033\[?25h\033\[5;10H" {
+    set saw_cursor 1
+    exp_continue
+  }
+  -re {Summary: [0-9]+ passed, 0 failed} {
+    set saw_summary 1
+    exp_continue
+  }
+  eof {}
+  timeout { exit 1 }
+}
+
+set result [wait]
+if {!$saw_summary} { exit 1 }
+if {$want_cursor && !$saw_cursor} { exit 1 }
+if {[lindex $result 2] != 0 || [lindex $result 3] != 0} { exit 1 }
+log_file
+exit 0

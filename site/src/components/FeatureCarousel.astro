@@ -1,0 +1,94 @@
+---
+// One tabbed carousel, built from the Markdown files in src/content/slides.
+//
+// A slide is split into its two panels at the end of its first code block: the
+// code goes left, everything after it goes right. A slide with no code (the
+// descent) uses a `---` rule as the separator instead. A slide file is
+// frontmatter, a fenced sample, and two paragraphs.
+
+interface Props {
+  name: string;
+  label: string;
+  tone: "dark" | "light";
+  slides: any[];
+}
+
+const { name, label, tone, slides } = Astro.props;
+
+// A code block belongs to the left panel; a rule only marks where to cut.
+const SEPARATORS = [
+  { token: "</pre>", keep: true },
+  { token: "<hr", keep: false }
+];
+
+const split = (html: string) => {
+  for (const { token, keep } of SEPARATORS) {
+    const at = html.indexOf(token);
+    if (at === -1) continue;
+    const end = keep ? at + token.length : at;
+    const resume = html.indexOf(">", at + token.length) + 1;
+    return { left: html.slice(0, end), right: html.slice(keep ? end : resume) };
+  }
+  return { left: "", right: html };
+};
+
+const panels = await Promise.all(
+  slides.map(async (slide) => ({
+    ...slide.frontmatter,
+    ...split(await slide.compiledContent())
+  }))
+);
+
+const count = String(panels.length).padStart(2, "0");
+---
+
+<div class={`feature-carousel feature-carousel-${tone}`} data-carousel>
+  <div class={`carousel-toolbar${tone === "dark" ? " carousel-toolbar-dark" : ""}`}>
+    <div role="tablist" aria-label={label} class="carousel-tabs">
+      {
+        panels.map((panel, position) => (
+          <button
+            type="button"
+            role="tab"
+            data-carousel-tab
+            aria-selected={position === 0 ? "true" : "false"}
+            tabindex={position === 0 ? 0 : -1}
+          >
+            {panel.tab}
+          </button>
+        ))
+      }
+    </div>
+    <div class="carousel-controls">
+      <span
+        data-carousel-count
+        class={`carousel-count${tone === "dark" ? " carousel-count-dark" : ""}`}
+        >01 / {count}</span
+      >
+      <button type="button" data-carousel-prev aria-label="previous" class="carousel-arrow"
+        >←</button
+      >
+      <button type="button" data-carousel-next aria-label="next" class="carousel-arrow"
+        >→</button
+      >
+    </div>
+  </div>
+  <div class="carousel-viewport">
+    <div data-carousel-track class="carousel-track">
+      {
+        panels.map((panel) => (
+          <div class="carousel-slide">
+            <div
+              class={panel.panel === "steps" ? "descent-diagram" : "feature-code"}
+              set:html={panel.left}
+            />
+            <div class="feature-copy">
+              {panel.title && <h3>{panel.title}</h3>}
+              <Fragment set:html={panel.right} />
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</div>

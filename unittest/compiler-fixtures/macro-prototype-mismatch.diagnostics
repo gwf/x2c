@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-prototype-mismatch.x:11:1: type: definition 'generated_increment' does not match prior prototype
+  
+  ^
+  note: prototype: (function-contract ((func ((long))) long) ((func ((long))) long) extern ()) definition: (function-contract ((func ((int))) int) ((func ((int))) int) extern ())
+
+limit: too many errors, stopping
+

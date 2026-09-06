@@ -1,0 +1,5 @@
+2026-08-01T13:42:08Z|INFO|gateway|health probe recovered in 18 ms
+2026-08-01T13:43:11Z|WARN|catalog|cache miss for café menu: café
+2026-08-01T13:44:37Z|ERROR|auth|token verification failed for user Björn
+2026-08-01T13:45:19Z|CRITICAL|payments|Tokyo queue stalled: 東京 🧯
+2026-08-01T13:46:02Z|INFO|worker|retry completed for release index

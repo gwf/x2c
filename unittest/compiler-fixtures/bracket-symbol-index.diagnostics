@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/bracket-symbol-index.x:7:29: type: Symbol cannot be used as an integer bracket index
+    int unsafe = packed[<key>];
+                              ^
+
+limit: too many errors, stopping
+

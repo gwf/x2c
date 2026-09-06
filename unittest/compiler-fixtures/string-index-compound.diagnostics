@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/string-index-compound.x:5:3: xform: type ("String") does not support indexed increment or decrement
+    value[0]++;
+    ^^^^^
+
+limit: too many errors, stopping
+

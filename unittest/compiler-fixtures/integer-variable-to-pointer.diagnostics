@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/integer-variable-to-pointer.x:12:3: type: cannot convert the integer n to pointer type ("List")
+    List x = n;
+    ^^^^
+  note: only a zero integer constant expression converts to a pointer
+
+limit: too many errors, stopping
+

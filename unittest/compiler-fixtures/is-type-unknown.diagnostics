@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/is-type-unknown.x:4:16: type: type ("UnknownType") has no supported Var tag for operator 'is'
+    return value is UnknownType;
+                 ^^
+
+limit: too many errors, stopping
+

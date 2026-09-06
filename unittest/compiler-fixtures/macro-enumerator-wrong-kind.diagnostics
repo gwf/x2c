@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-enumerator-wrong-kind.x:8:3: macro: macro 'not_an_enumerator' has result kind Statement and cannot be invoked at an enum body
+    $not_an_enumerator()
+    ^
+
+limit: too many errors, stopping
+

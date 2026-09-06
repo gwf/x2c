@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/bracket-index-incompatible.x:8:3: type: cannot convert (struct "Point") to Var without loss
+    Var hit = scores[p];
+    ^^^
+
+limit: too many errors, stopping
+

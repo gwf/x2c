@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/match-binder-not-definite.x:6:5: type: match binder is not definitely assigned
+      case %(!or (tag ?value) (tag none)):
+      ^^^^
+  note: binder: ?value bind it in every alternative and never under !not
+
+limit: too many errors, stopping
+

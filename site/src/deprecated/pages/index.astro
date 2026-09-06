@@ -1,0 +1,296 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Carousel from "../components/Carousel.astro";
+
+const base = import.meta.env.BASE_URL;
+const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+
+const features = [
+  ["dynamic values", "Var carries its runtime kind", "dynamic-values"],
+  ["collection literals", "List, Array, Map, and String have literal forms", "lists-arrays-and-maps"],
+  ["protocols", "adoption generates C members, not vtables", "protocols"],
+  ["typed macros", "parameters are parsed types and expressions", "macros"],
+  ["decorators", "transform the expression or item that follows", "macros"],
+  ["compile-time Lisp", "compute the source when a template is not enough", "macros"],
+  ["iteration", "files, strings, collections, and your types", "iteration-and-lambdas"],
+  ["lambdas", "one expression, adapted to a C function pointer", "iteration-and-lambdas"],
+  ["structural matching", "match the shape and bind only what you need", "match-errors-and-defer"],
+  ["errors that transfer", "raise a cause, catch it by pattern", "match-errors-and-defer"],
+  ["scoped cleanup", "defer runs on return and on error transfer", "match-errors-and-defer"],
+  ["lifetime by scope", "one boundary around the working set", "scope"],
+  ["the build driver", "stop at C, or finish the native build", "the-driver"],
+  ["embedded Lisp", "a host-owned session that hands values back", "the-lisp-runtime"],
+  ["native binding", "the compiler derives it from the C type", "the-lisp-runtime"],
+  ["threads", "isolated runtime state, shared C memory", "the-lisp-runtime"],
+];
+---
+
+<BaseLayout
+  title="x2c - C with batteries, without bullshit"
+  description="A self-hosting C superset that compiles to C. Simple, powerful, hackable: collections, matching, iteration, scoped cleanup, typed macros, and an embedded Lisp, on top of C's types, layouts, headers, libraries, and toolchain."
+>
+  <section class="hero page-grid">
+    <div class="hero-copy">
+      <p class="kicker"><span>//</span> a self-hosting c superset</p>
+      <h1>C with batteries. Without bullshit.</h1>
+      <p class="hero-deck">
+        You get strings, lists, maps, pattern matching, iteration, scoped
+        cleanup, typed macros, and an embedded Lisp. You keep C&rsquo;s types,
+        layouts, headers, libraries, ABI, and every tool you already own.
+        Nobody asked for another C. You might like this one anyway.
+      </p>
+      <ul class="claims">
+        <li><b>Simple.</b> Simple things are simple, which in C they are not.</li>
+        <li><b>Powerful.</b> Hard things get stated once, and plainly.</li>
+        <li><b>Hackable.</b> The compiler and its runtime are 48,000 readable lines.</li>
+      </ul>
+      <div class="actions">
+        <a class="button button-primary" href={local("install/")}>install and run <span aria-hidden="true">&rarr;</span></a>
+        <a class="button button-secondary" href={local("intro/")}>fifteen-minute intro <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+    <div class="hero-sample">
+      <p>words.x</p>
+      <pre><code><span class="kw">static void</span> print_words(<span class="type">String</span> path) &#123;
+  <span class="type">File</span> input = File.open(path, <span class="str">"r"</span>);
+  <span class="kw">defer</span> input.close();
+
+  <span class="kw">for</span> (<span class="type">String</span> line <span class="kw">in</span> input)
+    <span class="kw">for</span> (<span class="type">String</span> word <span class="kw">in</span> line.words())
+      printf(<span class="str">"%s\n"</span>, word);
+&#125;</code></pre>
+    </div>
+  </section>
+
+  <Carousel />
+
+  <section class="story-section" id="simple">
+    <header class="section-intro page-grid">
+      <p class="kicker"><span>//</span> simple</p>
+      <div>
+        <h2>Simple things are simple.</h2>
+        <p>Read a file, normalize each row, total a column, print a report. In C that is a header hunt, a growable buffer, a hash table, a tokenizer, and a cleanup path. Here it is the program.</p>
+      </div>
+    </header>
+
+    <div class="story-grid two-up">
+      <div class="story-example">
+        <pre class="story-code"><code><span class="kw">static void</span> summarize_sales(<span class="type">String</span> path) &#123;
+  <span class="type">File</span> input = path.open(<span class="str">"r"</span>);
+  <span class="kw">if</span> (!input) <span class="kw">return</span>;
+  <span class="kw">defer</span> input.close();
+  <span class="type">Map</span> totals = <span class="sigil">%&#123;&#125;</span>;
+
+  <span class="kw">for</span> (<span class="type">String</span> line <span class="kw">in</span> input) &#123;
+    <span class="type">List</span> row = line.strip(NULL)
+      .squeeze(<span class="str">" "</span>).split(<span class="str">" "</span>);
+    <span class="kw">if</span> (row.len() != <span class="num">2</span>) <span class="kw">continue</span>;
+    <span class="type">String</span> (item, units) = row;
+    <span class="kw">if</span> (!units.is_digit()) <span class="kw">continue</span>;
+    totals[item.lower()] += units.long();
+  &#125;
+
+  <span class="kw">for</span> (<span class="type">List</span> row <span class="kw">in</span> totals)
+    printf(<span class="str">"%-16s %8ld\n"</span>, row[<span class="num">0</span>], row[<span class="num">1</span>]);
+&#125;</code></pre>
+        <p class="example-result"><span>output</span> apples 20 &middot; pears 12</p>
+      </div>
+
+      <div class="text-callout">
+        <h3>Nothing here stopped being C.</h3>
+        <p><code>String</code>, <code>List</code>, and <code>Map</code> are ordinary C types with methods selected from the static type of the receiver. <code>defer</code> attaches cleanup to the block, so an early <code>return</code> cannot skip it. Bracket assignment on a Map is the mutation, and iteration is a protocol the Map adopts.</p>
+        <p>Write the same function in C when C says it better. The two link together, because there is only one kind of object file.</p>
+        <a href={local("intro/#lists-arrays-and-maps")}>collections in the intro <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="story-section story-section-tinted" id="powerful">
+    <header class="section-intro page-grid">
+      <p class="kicker"><span>//</span> powerful</p>
+      <div>
+        <h2>Hard things get stated once, and plainly.</h2>
+        <p>Generic type families with no erasure. Macros whose parameters are parsed types. Protocol adoption that emits a C member instead of a vtable. Each of these is a subproject in C and a declaration here.</p>
+      </div>
+    </header>
+
+    <div class="story-grid two-up">
+      <div class="story-example">
+        <p class="example-result"><span>one definition</span> two native C type families</p>
+        <pre class="story-code"><code><span class="kw">macro Unit</span> <span class="sigil">$value.family</span>(
+  <span class="kw">Type</span> $box, <span class="kw">Type</span> $item
+) =&gt; &#123;
+  $item $box.get($box box) &#123;
+    <span class="kw">return</span> box.value;
+  &#125;
+&#125;
+
+<span class="sigil">$value.family</span>(IntValue, <span class="type">int</span>);
+<span class="sigil">$value.family</span>(DoubleValue, <span class="type">double</span>);</code></pre>
+      </div>
+
+      <div class="story-example">
+        <p class="example-result"><span>one declaration</span> a generated static adapter</p>
+        <pre class="story-code"><code><span class="kw">protocol</span> Reading(T) &#123;
+  <span class="type">int</span> T.value(T);
+&#125;
+
+Reading Gauge.reading(<span class="type">Gauge</span> gauge) &#123;
+  <span class="kw">return</span> gauge.reading;
+&#125;
+
+<span class="kw">protocol</span> Reading(Gauge);
+
+<span class="comment">// gauge.value() now resolves</span></code></pre>
+      </div>
+    </div>
+
+    <div class="text-callout">
+      <h3>Macro parameters are parsed types and expressions, not tokens you hope line up.</h3>
+      <p>A macro runs after parsing and type analysis, so it can generate distinct native types rather than one erased representation. A decorator transforms the expression or source item that immediately follows it, which is how tracing, validation, and foreign binding become reusable source transformations instead of copied boilerplate.</p>
+      <a href={local("intro/#macros")}>macros in the intro <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
+
+  <section class="story-section" id="hackable">
+    <header class="section-intro page-grid">
+      <p class="kicker"><span>//</span> hackable</p>
+      <div>
+        <h2>A C that understands Lisp, and a Lisp that understands C.</h2>
+        <p>Compile-time Lisp writes source while translating. Runtime Lisp decides policy while running. Both speak the same value vocabulary as the C around them, and the compiler that does it is small enough to read on a weekend.</p>
+      </div>
+    </header>
+
+    <div class="story-grid three-up">
+      <div class="text-callout">
+        <h3>Extend the language without touching the compiler.</h3>
+        <p>Macros, decorators, and compile-time Lisp cover most of what would otherwise be a compiler patch. <code>$(x2c.ident "STATUS_READY")</code> computes an identifier while translating; a decorator rewrites the function under it.</p>
+      </div>
+      <div class="text-callout">
+        <h3>Or touch the compiler.</h3>
+        <p>All of it is written in x2c. The compiler is 27 modules, and with its runtime it fits in forty-eight thousand lines. You can add a keyword to the language before lunch &mdash; clone it, point an agent at it, find out.</p>
+      </div>
+      <div class="text-callout">
+        <h3>You can always see what it did.</h3>
+        <p>The output is C you can read, for the toolchain you already use. It compiles itself four times and compares the generated C and headers each time. That is not rigor. I do not trust me.</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="button button-secondary" href={local("docs/internals/architecture.html")}>compiler architecture <span aria-hidden="true">&rarr;</span></a>
+      <a class="button button-secondary" href={local("benchmarks/")}>benchmarks <span aria-hidden="true">&rarr;</span></a>
+      <a class="button button-secondary" href="https://github.com/gwf/x2c">read the source <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
+
+  <section class="story-section" id="features">
+    <header class="section-intro page-grid">
+      <p class="kicker"><span>//</span> what you get</p>
+      <div>
+        <h2>All of it opt-in.</h2>
+        <p>Ordinary C declarations, headers, calls, layouts, and linking keep working whether you use any of this or none of it.</p>
+      </div>
+    </header>
+
+    <ul class="feature-index">
+      {features.map(([name, note, anchor]) => (
+        <li>
+          <a href={local(`intro/#${anchor}`)}>{name}</a>
+          <span>{note}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="proof page-grid" id="start">
+    <p class="kicker"><span>//</span> start</p>
+    <div>
+      <h2>Install it and run something.</h2>
+      <p>One portable file, or a source checkout that needs a C compiler and <code>make</code> and nothing else. x2c links no library outside libc and libm.</p>
+      <div class="actions">
+        <a class="button button-primary" href={local("install/")}>install x2c <span aria-hidden="true">&rarr;</span></a>
+        <a class="button button-dark" href={local("intro/")}>fifteen-minute intro <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .claims {
+    max-width: 54ch;
+    margin: 26px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .claims li {
+    padding: 10px 0 10px 18px;
+    border-top: 1px solid var(--hairline);
+    position: relative;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .claims li::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 8px;
+    border-top: 1px solid var(--red);
+  }
+
+  .claims b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .story-section > .actions {
+    margin-top: 34px;
+  }
+
+  .story-section .text-callout > a {
+    display: inline-block;
+    margin-top: 14px;
+    font: 500 13px/1 var(--font-mono);
+  }
+
+  .feature-index {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    column-gap: clamp(24px, 4vw, 56px);
+  }
+
+  .feature-index li {
+    padding: 13px 0;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .feature-index a {
+    flex: 0 0 42%;
+    font: 500 13.5px/1.3 var(--font-mono);
+  }
+
+  .feature-index span {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 540px) {
+    .feature-index li {
+      display: block;
+    }
+
+    .feature-index span {
+      display: block;
+      margin-top: 4px;
+    }
+  }
+</style>

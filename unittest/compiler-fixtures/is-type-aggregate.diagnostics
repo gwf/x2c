@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/is-type-aggregate.x:6:16: type: type ("UnregisteredType") has no supported Var tag for operator 'is'
+    return value is UnregisteredType;
+                 ^^
+
+limit: too many errors, stopping
+

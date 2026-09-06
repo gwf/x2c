@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title="Not found — x2c"
+  description="This x2c page does not exist."
+  robots="noindex"
+  canonical={false}
+>
+  <section class="not-found">
+    <div class="not-found-card">
+      <p>404</p>
+      <h1>This path does not compile.</h1>
+      <p>The page moved, the link is wrong, or the compiler got there first.</p>
+      <a href={base}>return to x2c&nbsp; →</a>
+    </div>
+  </section>
+</BaseLayout>

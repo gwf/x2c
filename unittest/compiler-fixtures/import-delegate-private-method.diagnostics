@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/import-delegate-private-method.x:4:22: type: type ("delegatebox__Box") has no method hidden
+    return value.hidden();
+                       ^
+
+limit: too many errors, stopping
+

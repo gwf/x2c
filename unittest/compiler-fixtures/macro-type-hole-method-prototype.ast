@@ -1,0 +1,33 @@
+
+(preproc "#include \"x2c.x\"")
+
+(typedef (int) (bindings (bind (binding 1 "Box") ())))
+
+(macrodef <macro box>)
+
+(declare ("Var") 
+ (bindings 
+  (bind (binding 3 "Box_var") ((fnmod (params (param ("Box") (bind () ()))))))))
+
+(function (inline "Var") 
+ (bind (binding 3 "Box_var") 
+  ((fnmod (params (param ("Box") (bind (binding 4 "value") ())))))) 
+ (block 
+  (at 2 (return ("Var") 
+         (expr ("Var") 
+          (call (expr ((func (("Symbol") (...))) "Var") 
+                 (ident (binding 2 "Var_new"))) 
+           (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
+            (expr ("Box") (ident (binding 4 "value"))))))))))
+
+(function (int) 
+ (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 3 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 6 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d\\n\"")) 
+            (expr ("Var") 
+             (call (expr ((func (("Box"))) "Var") (ident (binding 3 "Box_var"))) 
+              (args (expr (int) (literal (int) "42")))))))))) 
+  (at 4 (return (int) (expr (int) (literal (int) "0"))))))

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-source-text-derived.x:8:13: macro: x2c.source.text requires complete captured syntax
+  int value = $derived(1 + 2);
+              ^
+
+limit: too many errors, stopping
+

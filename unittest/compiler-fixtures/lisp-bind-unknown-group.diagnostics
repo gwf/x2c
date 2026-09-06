@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/lisp-bind-unknown-group.x:4:3: macro: unknown native Lisp binding group
+    $lisp.install(lisp, missing);
+    ^
+  note: group: missing
+
+limit: too many errors, stopping
+

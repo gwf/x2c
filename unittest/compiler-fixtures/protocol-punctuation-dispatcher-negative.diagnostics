@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-punctuation-dispatcher-negative.x:20:38: type: type ("uchar") has no method truth
+    int byte_zero_dot = byte_zero.truth();
+                                       ^
+
+limit: too many errors, stopping
+

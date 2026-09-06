@@ -1,0 +1,9 @@
+raw: [1 2 30 3] ptr[1]=2
+arr get: 10 50 call=30
+arr after setindex: [ 10, 200, 30, 300, 500 ]
+packed: second=25 last-ok=1 checked=25 missing=0
+words: second=beta last=gamma call=alpha
+text chars: first=s last=z third=h
+slices: all=[ 10, 200, 30, 300, 500 ] prefix=[ 10, 200, 30 ] suffix=[ 30, 300, 500 ] middle=[ 200, 30, 300 ] stride=[ 10, 30, 500 ] back=[ 500, 300, 30, 200 ]
+slices (implicit): step=[ 200, 30, 300 ] bounds=[ 10, 30, 500 ] full_rev=[ 500, 300, 30, 200, 10 ]
+text slices: all="sphinx of black quartz" prefix="sphinx" suffix="of black quartz" stride="si  a az" reverse="ztrauq kcalb fo xnihps"

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-adoption-unknown-type.x:3:14: protocol: adoption participant 'Nonexistent' does not name a declared type
+  protocol Var(Nonexistent);
+               ^^^^^^^^^^^
+
+limit: too many errors, stopping
+

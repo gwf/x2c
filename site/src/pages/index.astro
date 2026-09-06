@@ -1,0 +1,326 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import FeatureCarousel from "../components/FeatureCarousel.astro";
+import FeatureTable from "../components/FeatureTable.astro";
+import { inlineMarkdown } from "../lib/inline-markdown";
+import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
+import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
+import {
+  Content as PowerCopy,
+  frontmatter as power,
+} from "../content/power.md";
+import {
+  Content as MagicCopy,
+  frontmatter as magic,
+} from "../content/magic.md";
+import {
+  compiledContent as installCode,
+  frontmatter as install,
+} from "../content/install.md";
+
+const base = import.meta.env.BASE_URL;
+const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+
+// Slides are ordered by two-digit filename prefixes, so love-01-var.md
+// precedes love-02-strings.md. Renaming a file reorders the carousel.
+const files = import.meta.glob("../content/slides/*.md", { eager: true });
+const slides = Object.keys(files)
+  .sort()
+  .map((path) => files[path] as any);
+const inSection = (name: string) =>
+  slides.filter((slide) => slide.frontmatter.section === name);
+const [titleHtml, kickerHtml] = await Promise.all([
+  inlineMarkdown(home.title),
+  inlineMarkdown(home.kicker),
+]);
+---
+
+<BaseLayout
+  title="x2c — love, power, magic"
+  description="The love child of C and Lisp with superpowers. Keep C's types, layouts, headers, libraries, ABI, and tools; lose the boilerplate."
+>
+  <Fragment slot="header">
+    <SiteHeader home />
+  </Fragment>
+  <div class="landing">
+    <section id="top" class="landing-hero">
+      <header class="hero-heading">
+        <h1 set:html={titleHtml} />
+        <p set:html={kickerHtml} />
+      </header>
+      <FeatureTable intro={home.featureIntro} features={home.features} />
+      <div class="hero-prose">
+        <HomeCopy />
+      </div>
+    </section>
+  </div>
+
+  <section id="love" class="dark-section">
+    <div class="section-shell">
+      <div class="section-feature-grid">
+        <header class="section-heading">
+          <h2>{love.title}</h2>
+          <div class="section-overview"><LoveCopy /></div>
+        </header>
+        <FeatureCarousel
+          name="love"
+          label="Love examples"
+          tone="dark"
+          slides={inSection("love")}
+        />
+        <p class="section-exit">
+          Explore the essentials:{" "}
+          <a href={local("docs/guide/values.html")}>values</a>,{" "}
+          <a href={local("docs/guide/symbols.html")}>symbols</a>,{" "}
+          <a href={local("docs/guide/collections.html")}>collections and literals</a>,{" "}
+          <a href={local("docs/library/overview.html#read-or-write-a-file")}>files</a>,{" "}
+          and{" "}
+          <a href={local("docs/reference/language.html#c-foundation")}>methods</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="power" class="light-section">
+    <div class="section-shell">
+      <div class="section-feature-grid">
+        <header class="section-heading">
+          <h2>{power.title}</h2>
+          <div class="section-overview"><PowerCopy /></div>
+        </header>
+        <FeatureCarousel
+          name="power"
+          label="Power examples"
+          tone="dark"
+          slides={inSection("power")}
+        />
+        <p class="section-exit">
+          Put the pieces together:{" "}
+          <a href={local("docs/guide/collections.html")}>collections</a>,{" "}
+          <a href={local("docs/guide/iteration.html")}>iteration</a>,{" "}
+          <a href={local("docs/guide/memory.html")}>scopes</a>,{" "}
+          <a href={local("docs/guide/match.html")}>match</a>,{" "}
+          <a href={local("docs/guide/contexts-and-threads.html")}>threads</a>,{" "}
+          <a href={local("docs/guide/exceptions.html")}>exceptions</a>,{" "}
+          and{" "}
+          <a href={local("docs/guide/packages.html")}>packages</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="magic" class="dark-section">
+    <div class="section-shell">
+      <div class="section-feature-grid">
+        <header class="section-heading">
+          <h2>{magic.title}</h2>
+          <div class="section-overview"><MagicCopy /></div>
+        </header>
+        <FeatureCarousel
+          name="magic"
+          label="Magic examples"
+          tone="dark"
+          slides={inSection("magic")}
+        />
+        <p class="section-exit">
+          Explore the language itself:{" "}
+          <a href={local("docs/guide/protocols.html")}>protocols</a>,{" "}
+          <a href={local("docs/guide/macros.html")}>macros and compile-time Lisp</a>,{" "}
+          <a href={local("docs/library/overview.html#embed-lisp")}>runtime Lisp</a>,{" "}
+          <a href={local("docs/internals/building.html")}>self-hosting</a>,{" "}
+          <a href={local("docs/reference/cli.html")}>compiler inspection</a>,{" "}
+          and{" "}
+          <a href={local("docs/internals/architecture.html")}>architecture</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="light-section">
+    <div class="deal-grid">
+      <div class="deal-copy">
+        <small>install</small>
+        <h2>Run your first x2c program.</h2>
+        <p>
+          Clone the repository, build the compiler from its checked-in C,
+          and run one of the included examples. The compiler handles
+          translation, native compilation, and execution.
+        </p>
+        <p>
+          See the <a href={local("docs/internals/building.html")}>build
+          instructions</a> for the self-hosting process, or use the{" "}
+          <a href={local("docs/reference/cli.html#bootstrap-a-native-installation")}
+            >portable executable to create a native installation</a>.
+        </p>
+      </div>
+      <figure class="install-window">
+        <figcaption>{install.caption}</figcaption>
+        <div class="install-code" set:html={await installCode()} />
+      </figure>
+    </div>
+  </section>
+
+  <section id="source" class="dark-section numbers-section">
+    <div class="docs-shell">
+      <div class="docs-grid">
+        <header class="docs-copy">
+          <small>keep exploring</small>
+          <h2>Go further.</h2>
+          <p>
+            <a href={local("docs/")}>Read the docs</a> to learn the language
+            and look up its library. <a href="https://github.com/gwf/x2c"
+              >Browse the source</a> to see how it works or make it your own.
+          </p>
+          <p class="repository-counts">
+            Repository counts from <code>make stats</code>.
+          </p>
+        </header>
+        <div class="docs-cards number-stats">
+          <div class="docs-card stat-card">
+            <small>compiler</small>
+            <strong>22,551 / 2,766</strong>
+            <p>code / comment lines in the compiler source.</p>
+          </div>
+          <div class="docs-card stat-card">
+            <small>library</small>
+            <strong>15,643 / 6,715</strong>
+            <p>code / comment lines in the library source.</p>
+          </div>
+          <div class="docs-card stat-card">
+            <small>tests</small>
+            <strong>730</strong>
+            <p>unit tests.</p>
+          </div>
+          <div class="docs-card stat-card">
+            <small>fixtures</small>
+            <strong>555</strong>
+            <p>compiler fixtures.</p>
+          </div>
+          <div class="docs-card stat-card">
+            <small>examples</small>
+            <strong>32</strong>
+            <p>showcase examples.</p>
+          </div>
+          <div class="docs-card stat-card">
+            <small>integrations</small>
+            <strong>7</strong>
+            <p>
+              C libraries available as importable x2c packages.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <SiteFooter home />
+</BaseLayout>
+
+<script is:inline>
+  const header = document.querySelector(".landing-header");
+  const updateHeaderHeight = () => document.documentElement.style.setProperty(
+    "--landing-header-height", `${header.getBoundingClientRect().height}px`);
+  new ResizeObserver(updateHeaderHeight).observe(header);
+  updateHeaderHeight();
+
+  for (const carousel of document.querySelectorAll("[data-carousel]")) {
+    const track = carousel.querySelector("[data-carousel-track]");
+    const tabs = [...carousel.querySelectorAll("[data-carousel-tab]")];
+    const tablist = carousel.querySelector(".carousel-tabs");
+    const slides = [...track.children];
+    const count = carousel.querySelector("[data-carousel-count]");
+    const label = carousel.querySelector("[data-carousel-label]");
+    const name = carousel.closest("section").id;
+    let index = 0;
+    let pointerStart = null;
+    let initialized = false;
+
+    count.setAttribute("aria-live", "polite");
+    tabs.forEach((tab, position) => {
+      tab.id = `${name}-tab-${position + 1}`;
+      tab.setAttribute("aria-controls", `${name}-panel-${position + 1}`);
+    });
+    slides.forEach((slide, position) => {
+      slide.id = `${name}-panel-${position + 1}`;
+      if (tabs[position]) {
+        slide.setAttribute("role", "tabpanel");
+        slide.setAttribute("aria-labelledby", `${name}-tab-${position + 1}`);
+      }
+    });
+
+    const show = (next, focus = false) => {
+      index = (next + slides.length) % slides.length;
+      track.style.transform = `translateX(-${index * 100}%)`;
+      count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      if (label) label.textContent = slides[index].dataset.carouselLabel;
+
+      for (const [position, tab] of tabs.entries()) {
+        const selected = position === index;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      }
+
+      for (const [position, slide] of slides.entries()) {
+        const selected = position === index;
+        slide.setAttribute("aria-hidden", String(!selected));
+        slide.toggleAttribute("inert", !selected);
+      }
+
+      if (initialized)
+        tabs[index].scrollIntoView({ block: "nearest", inline: "nearest" });
+      if (focus) tabs[index].focus();
+    };
+
+    const move = (event, focus = false) => {
+      if (event.key === "ArrowRight") show(index + 1, focus);
+      else if (event.key === "ArrowLeft") show(index - 1, focus);
+      else if (event.key === "Home") show(0, focus);
+      else if (event.key === "End") show(slides.length - 1, focus);
+      else return;
+      event.preventDefault();
+    };
+
+    tabs.forEach((tab, position) => {
+      tab.addEventListener("click", () => show(position));
+      tab.addEventListener("keydown", (event) => move(event, true));
+    });
+    if (!tabs.length)
+      carousel.addEventListener("keydown", (event) => move(event));
+
+    carousel
+      .querySelector("[data-carousel-prev]")
+      .addEventListener("click", () => show(index - 1));
+    carousel
+      .querySelector("[data-carousel-next]")
+      .addEventListener("click", () => show(index + 1));
+
+    track.parentElement.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse") pointerStart = event.clientX;
+    });
+    track.parentElement.addEventListener("pointerup", (event) => {
+      if (pointerStart === null) return;
+      const distance = event.clientX - pointerStart;
+      pointerStart = null;
+      if (Math.abs(distance) > 48) show(index + (distance < 0 ? 1 : -1));
+    });
+    track.parentElement.addEventListener("pointercancel", () => {
+      pointerStart = null;
+    });
+
+    show(0);
+    initialized = true;
+    carousel.setAttribute("data-carousel-ready", "");
+
+    const updateTabFades = () => {
+      tablist.toggleAttribute("data-hidden-left", tablist.scrollLeft > 1);
+      tablist.toggleAttribute("data-hidden-right",
+        tablist.scrollWidth - tablist.clientWidth - tablist.scrollLeft > 1);
+    };
+    tablist.addEventListener("scroll", updateTabFades, { passive: true });
+    new ResizeObserver(updateTabFades).observe(tablist);
+    document.fonts.ready.then(updateTabFades);
+    updateTabFades();
+  }
+</script>

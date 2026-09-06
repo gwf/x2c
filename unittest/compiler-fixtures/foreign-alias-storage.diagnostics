@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/foreign-alias-storage.x:4:1: parse: foreign alias has invalid storage class
+  $x2c.foreign.alias(abs)
+  ^
+  note: allowed storage: static or inline
+
+limit: too many errors, stopping
+

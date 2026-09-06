@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-pattern-failure.x:6:27: parse: expected atomic expression
+  int value = $literal_only(input);
+                            ^^^^^
+  note: token: input kind: ident
+
+limit: too many errors, stopping
+

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan x2c Change"
+  short_description: "Decide one PR-sized design, proved by a probe"
+  default_prompt: "Use $plan-x2c-change to design this x2c change, prove it with a probe, scope it to one pull request, and stop for approval."

@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/symbol-set-dynamic.x:4:13: parse: symbol-set entries must be literal Symbols
+    return %<<$value>>;
+              ^
+  note: use %<<foo bar>>
+
+limit: too many errors, stopping
+

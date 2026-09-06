@@ -1,0 +1,59 @@
+# Visibility of each runtime module in the generated library reference.
+#
+# path|visibility|note
+#
+#   api       user-callable; gets a full generated page of signatures.
+#   contract  described by docs/src/library/overview.md; no user-callable
+#             surface of its own.
+#   optional  shipped but not in the implicit prelude; listed with the note
+#             that says how to include it.
+#   internal  runtime-internal; listed with its reason and nothing else.
+#
+# Every lib/*.x file needs exactly one row. tools/gen-api-reference.py fails
+# rather than guessing, so a new module cannot be silently dropped from the
+# reference. lib/x2c.x is excluded: lib/Makefile generates it.
+lib/array.x|api|
+lib/atom.x|api|
+lib/block.x|api|
+lib/buffer.x|api|
+lib/cmath.x|internal|C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
+lib/common.x|api|
+lib/context.x|api|
+lib/dispatch.x|api|
+lib/error.x|api|
+lib/error_init.x|internal|Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
+lib/exception.x|api|
+lib/file.x|api|
+lib/func.x|api|
+lib/iter.x|api|
+lib/lib.x|api|
+lib/lisp-machine.x|internal|Private compile-time Lisp wordcode decoder.
+lib/lisp.x|api|
+lib/list.x|api|
+lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
+lib/logger.x|api|
+lib/machine.x|internal|Shared `Match` and Lisp wordcode, builder, and execution-state definitions.
+lib/map.x|api|
+lib/match-machine.x|internal|Private `Match` wordcode decoder.
+lib/match.x|api|
+lib/match-recursive.x|optional|Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
+lib/mutex.x|api|
+lib/pool.x|internal|Nested interning pools that back canonical `String` and `List` identity.
+lib/protocols.x|internal|The built-in `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
+lib/scan.x|internal|Allocation-free character scanners used by the tokenizer.
+lib/scope.x|api|
+lib/split.x|api|
+lib/string-classify.x|api|
+lib/string-number.x|api|
+lib/string.x|api|
+lib/symbol.x|api|
+lib/symbolset.x|api|
+lib/thread-state.x|internal|Native pthread-key storage for per-thread runtime state.
+lib/thread.x|api|
+lib/tokenizer.x|internal|Token stream used by the compiler and the Lisp reader.
+lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
+lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
+lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
+lib/var.x|api|
+lib/varconvert.x|api|
+lib/varops.x|api|

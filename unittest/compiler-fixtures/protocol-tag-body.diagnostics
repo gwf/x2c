@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/protocol-tag-body.x:3:1: protocol: 'tag' applies only to a concrete protocol adoption
+  protocol Var(T) tag <list> {
+  ^^^^^^^^
+
+limit: too many errors, stopping
+

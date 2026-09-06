@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/foreign-alias-multiple.x:4:1: parse: foreign alias target must be one direct function declaration
+  $x2c.foreign.alias(abs)
+  ^
+
+limit: too many errors, stopping
+

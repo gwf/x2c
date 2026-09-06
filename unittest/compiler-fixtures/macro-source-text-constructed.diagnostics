@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-source-text-constructed.x:7:16: macro: x2c.source.text requires complete captured syntax
+  String value = $constructed();
+                 ^
+  note: value: (expr (int) (literal (int) "1"))
+
+limit: too many errors, stopping
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/empty-parameter-list.x:1:10: parse: empty parameter list; use (void)
+  int main() { return 0; }
+           ^
+
+limit: too many errors, stopping
+

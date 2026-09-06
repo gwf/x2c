@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/goto-cleanup-sibling-rejected.x:11:5: emit: goto cannot enter or cross a protected cleanup region
+      goto left;
+      ^^^^
+  note: jump only within the same region or outward
+
+limit: too many errors, stopping
+

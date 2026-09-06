@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/with-missing-body.x:5:13: parse: with requires a braced body
+    with value;
+              ^
+
+limit: too many errors, stopping
+

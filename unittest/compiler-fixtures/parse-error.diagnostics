@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/parse-error.x:3:1: parse: expected ';'
+  }
+  ^
+
+limit: too many errors, stopping
+

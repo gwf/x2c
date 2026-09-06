@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/callback-adapt-unknown.x:4:3: macro: typed callback adapter target must be a typedef name
+    $x2c.callback.adapt(MissingCallback, String.str);
+    ^
+
+limit: too many errors, stopping
+

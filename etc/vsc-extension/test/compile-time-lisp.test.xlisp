@@ -1,0 +1,29 @@
+// SYNTAX TEST "source.x2c.lisp" "standalone compile-time Lisp"
+
+(define value 42)
+// <- punctuation.section.list.begin.lisp.x2c
+//            ^^ constant.numeric.lisp.x2c
+(outer (inner "a ) string" /* ) */))
+//     ^ punctuation.section.list.begin.lisp.x2c
+//            ^^^^^^^^^^^^ string.quoted.double.lisp.x2c
+'symbol
+// <- punctuation.definition.quote.lisp.x2c
+`(template ,value ,@values '$hole <1>)
+// <- punctuation.definition.quasiquote.lisp.x2c
+//         ^ punctuation.definition.unquote.lisp.x2c
+//                ^^ punctuation.definition.unquote-splicing.lisp.x2c
+//                         ^ punctuation.definition.quote.lisp.x2c
+//                          ^ punctuation.definition.macro.sigil.x2c
+//                                ^^^ constant.other.symbol.lisp.x2c
+(outer `(inner ,value))
+//     ^ punctuation.definition.quasiquote.lisp.x2c
+(import "helpers.xlisp")
+//      ^^^^^^^^^^^^^^^ string.quoted.double.lisp.x2c
+(nested $hole "quoted ( text" // )
+// <- punctuation.section.list.begin.lisp.x2c
+//      ^ punctuation.definition.macro.sigil.x2c
+  (still-nested))
+${outside}
+// <- - punctuation.definition.interpolation.expression.begin.x2c
+@{outside}
+// <- - punctuation.definition.interpolation.list.expression.begin.x2c

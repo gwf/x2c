@@ -1,0 +1,11 @@
+macro Expression $embed.definition() => (
+  $(x2c.literal.string (x2c.embed.text "macro-embed-text-data.txt"))
+)
+
+macro Expression $embed.caller(Literal $path) => (
+  $(x2c.literal.string (x2c.embed.text $path))
+)
+
+macro Expression $embed.empty() => (
+  $(x2c.literal.string (x2c.embed.text "macro-embed-text-empty.txt"))
+)

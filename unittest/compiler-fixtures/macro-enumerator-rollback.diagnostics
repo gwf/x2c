@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/macro-enumerator-rollback.x:9:3: parse: enumerator 'ROLLBACK_ENUM' is already bound in this scope
+    $duplicate_enumerator()
+    ^
+  note: prior binding: 'ROLLBACK_ENUM'
+
+limit: too many errors, stopping
+

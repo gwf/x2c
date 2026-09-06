@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/macro-protocol-representation-non-var.x:10:27: protocol: 'as' applies only to a Var adoption
+    protocol Marker(Marked) as int;
+                            ^^
+
+limit: too many errors, stopping
+

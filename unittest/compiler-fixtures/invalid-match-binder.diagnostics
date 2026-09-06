@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/invalid-match-binder.x:6:17: parse: invalid match binder name
+      case %(node ?bad-name):
+                  ^^^^^^^^^
+  note: binder-name: ?bad-name
+
+limit: too many errors, stopping
+

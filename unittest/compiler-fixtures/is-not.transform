@@ -1,0 +1,151 @@
+
+(preproc "#include \"x2c.x\"")
+
+(preproc "#include <stdio.h>")
+
+(declare (static int) (bindings (bind (binding 1 "value_calls") ())))
+
+(declare (static int) (bindings (bind (binding 2 "tag_calls") ())))
+
+(function (static "Var") 
+ (bind (binding 3 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 1 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
+  (at 11 
+   (return 
+    (expr ("Var") 
+     (call (expr ((func ((int))) "Var") (ident (binding 34 "int_var"))) 
+      (args (expr (int) (literal (int) "7")))))))))
+
+(function (static "Symbol") 
+ (bind (binding 4 "next_other_tag") 
+  ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 3 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 2 "tag_calls"))))))) 
+  (at 12 (return (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))
+
+(function (int) 
+ (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 13 
+   (declare ("Var") 
+    (bindings 
+     (op = (bind (binding 6 "value") ()) 
+      (expr ("Var") 
+       (call (expr ((func ((int))) "Var") (ident (binding 34 "int_var"))) 
+        (args (expr (int) (literal (int) "7")))))) 
+     (op = (bind (binding 7 "absent") ()) 
+      (expr ("Var") (literal ("Var") "void")))))) 
+  (at 6 (declare ("Symbol") 
+         (bindings 
+          (op = (bind (binding 8 "other_tag") ()) 
+           (expr ("Symbol") (literal ("Symbol") "<f64>" f64)))))) 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 9 "is") ()) (expr (int) (literal (int) "1"))) 
+          (op = (bind (binding 10 "not") ()) (expr (int) (literal (int) "1")))))) 
+  (at 8 (declare (int) 
+         (bindings 
+          (op = (bind (binding 11 "ok") ()) 
+           (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op && 
+                 (expr (int) 
+                  (op && 
+                   (expr (int) 
+                    (op && 
+                     (expr (int) 
+                      (op && 
+                       (expr (int) 
+                        (op && 
+                         (expr (int) 
+                          (op && 
+                           (expr (int) 
+                            (op && 
+                             (expr (int) 
+                              (op && 
+                               (expr (int) 
+                                (op ! (expr (int) 
+                                       (call (expr ((func (("Var") ("Symbol"))) 
+                                                    int) 
+                                              (ident (binding 12 "Var_is"))) 
+                                        (args (expr ("Var") 
+                                               (call (expr ((func ((void))) 
+                                                            "Var") 
+                                                      (ident 
+                                                       (binding 3 "next_value"))) 
+                                                (args (expr (void) ())))) 
+                                         (expr ("Symbol") "3356265")))))) 
+                               (expr (int) 
+                                (op == 
+                                 (expr (int) (ident (binding 1 "value_calls"))) 
+                                 (expr (int) (literal (int) "1")))))) 
+                             (expr (int) 
+                              (op ! (expr (int) 
+                                     (call (expr ((func (("Var") ("Symbol"))) 
+                                                  int) 
+                                            (ident (binding 12 "Var_is"))) 
+                                      (args (expr ("Var") 
+                                             (ident (binding 6 "value"))) 
+                                       (expr ("Symbol") 
+                                        (literal ("Symbol") "<f64>" f64))))))))) 
+                           (expr (int) 
+                            (op ! (expr (int) 
+                                   (call (expr ((func (("Var") ("Symbol"))) int) 
+                                          (ident (binding 12 "Var_is"))) 
+                                    (args (expr ("Var") 
+                                           (ident (binding 6 "value"))) 
+                                     (expr ("Symbol") 
+                                      (ident (binding 8 "other_tag")))))))))) 
+                         (expr (int) 
+                          (op ! (expr (int) 
+                                 (call (expr ((func (("Var") ("Symbol"))) int) 
+                                        (ident (binding 12 "Var_is"))) 
+                                  (args (expr ("Var") 
+                                         (ident (binding 6 "value"))) 
+                                   (expr ("Symbol") 
+                                    (call (expr ((func ((void))) "Symbol") 
+                                           (ident (binding 4 "next_other_tag"))) 
+                                     (args (expr (void) ()))))))))))) 
+                       (expr (int) 
+                        (op == (expr (int) (ident (binding 2 "tag_calls"))) 
+                         (expr (int) (literal (int) "1")))))) 
+                     (expr (int) 
+                      (op ! (expr (int) 
+                             (call (expr ((func (("Var"))) int) 
+                                    (ident (binding 13 "Var_is_void"))) 
+                              (args (expr ("Var") (ident (binding 6 "value")))))))))) 
+                   (expr (int) 
+                    (op ! (expr (int) 
+                           (call (expr ((func (("Var") ("Symbol"))) int) 
+                                  (ident (binding 12 "Var_is"))) 
+                            (args (expr ("Var") (ident (binding 7 "absent"))) 
+                             (expr ("Symbol") "3453797")))))))) 
+                 (expr (int) 
+                  (op == 
+                   (expr (int) 
+                    (op ! (expr (int) 
+                           (call (expr ((func (("Var") ("Symbol"))) int) 
+                                  (ident (binding 12 "Var_is"))) 
+                            (args (expr ("Var") (ident (binding 6 "value"))) 
+                             (expr ("Symbol") "3356265")))))) 
+                   (expr (int) (literal (int) "1")))))) 
+               (expr (int) (ident (binding 9 "is"))))) 
+             (expr (int) (ident (binding 10 "not"))))))))) 
+  (at 9 (stmnt 
+         (expr () 
+          (call (expr () (ident (binding 14 "printf"))) 
+           (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
+            (expr (int) (ident (binding 11 "ok"))) 
+            (expr (int) (ident (binding 1 "value_calls"))) 
+            (expr (int) (ident (binding 2 "tag_calls")))))))) 
+  (at 14 
+   (return 
+    (expr (int) 
+     (op ? (expr (int) (ident (binding 11 "ok"))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

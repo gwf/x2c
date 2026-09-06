@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/invalid-type-initializer.x:5:37: parse: type initializer must have signature void TYPE.initialize(void)
+  int BadInitializer.initialize(void) {
+                                      ^
+  note: initializer: BadInitializer_initialize
+
+limit: too many errors, stopping
+

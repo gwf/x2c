@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/retired-var-tag-clock.x:7:3: type: cannot convert ("Clock") to Var without loss
+    Var boxed = value;
+    ^^^
+
+limit: too many errors, stopping
+

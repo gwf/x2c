@@ -1,0 +1,16 @@
+return-body
+return-defer
+return-finally
+catch-defer
+catch-finally
+break-defer
+break-finally
+break-defer
+break-finally
+goto-defer
+goto-finally
+inner-defer
+inner-finally
+outer-defer
+outer-finally
+2 3 2 5 8
