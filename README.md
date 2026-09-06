@@ -72,27 +72,28 @@ To keep an executable:
 
 Use `--output foreach` if you want to choose its name.
 
-To build and check the curated examples, then run two of them from the
+To build and check all curated examples, then try the Lisp shell from the
 repository root:
 
 ```sh
 make examples
-./examples/build/foreach/foreach
 ./examples/build/programs-lisp/lisp
 ```
 
 The last command opens the interactive Lisp shell; press Ctrl-D to exit.
 
-For an animated Game of Life in your terminal, build and run the optional
-termbox2 example:
+To build and check all optional packages and their examples, then try an
+animated Game of Life from the repository root:
 
 ```sh
-make -C packages/termbox2 run-life-interactive
+make packages-check
+./packages/termbox2/builds/game-of-life
 ```
 
-This prepares the dependency and builds the game as needed. Each cell starts
-alive with 50% probability. Press any key to quit. Other optional package
-examples have their own [build instructions](packages/README.md).
+The package check prepares dependencies as needed and runs their tests and
+examples. Game of Life starts each cell alive with 50% probability; press any
+key to quit. To build just one package instead, follow its
+[build instructions](packages/README.md).
 
 For help:
 
