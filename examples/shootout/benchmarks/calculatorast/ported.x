@@ -14,24 +14,23 @@ typedef enum { NUMBER, VARIABLE, ASSIGN, BINARY } Kind;
 typedef enum { ADD, SUBTRACT, MULTIPLY, DIVIDE } Operator;
 
 static SymbolSet _operators = %<<<+> <-> <*> </>>>;
-static SymbolSet _variables = %<<a b>>;
 
 typedef struct Node *Node;
 struct Node {
-  Kind kind; Operator op; long value; int slot; Node left, right;
+  Kind kind; Operator op; int value; int slot; Node left, right;
 };
 
 static Node Node.compile(List source) {
   Node node = Scope.calloc(1, sizeof(struct Node));
   match (source) {
-    case %(number ?value): node.value = value.long();
+    case %(number ?value): node.value = value.int();
     case %(variable ?name): {
       node.kind = VARIABLE;
-      node.slot = _variables.index(name);
+      node.slot = name === <a> ? 0 : 1;
     }
     case %(assign ?name ?expression): {
       node.kind = ASSIGN;
-      node.slot = _variables.index(name);
+      node.slot = name === <a> ? 0 : 1;
       node.right = Node.compile(expression);
     }
     case %(binary ?op ?left ?right): {
@@ -44,12 +43,12 @@ static Node Node.compile(List source) {
   return node;
 }
 
-static long Node.eval(Node node, long *variables) {
+static int Node.eval(Node node, int *variables) {
   if (node.kind == NUMBER) return node.value;
   if (node.kind == VARIABLE) return variables[node.slot];
   if (node.kind == ASSIGN)
     return variables[node.slot] = node.right.eval(variables);
-  long a = node.left.eval(variables), b = node.right.eval(variables);
+  int a = node.left.eval(variables), b = node.right.eval(variables);
   switch (node.op) {
     case ADD: return a + b;
     case SUBTRACT: return a - b;
@@ -72,7 +71,7 @@ int main(int argc, char **argv) {
   uint64_t checksum = 0;
   int runs = atoi(argv[1]);
   for (int run = 0; run < runs; run++) {
-    long variables[2] = {0};
+    int variables[2] = {0};
     for (int i = 0; i < 3; i++) checksum += program[i].eval(variables);
   }
   printf("%llu\n", (unsigned long long) checksum);
