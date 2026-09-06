@@ -978,6 +978,20 @@ Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) {
   return head;
 }
 
+/** Returns the head of a flat Symbol-and-captures pattern, or zero.
+    The analyzed binder list contains each definite name once, in order.
+*/
+Symbol Compiler.match_pattern_flat_head(
+  Compiler compiler, List pattern, List binders) {
+  Symbol head = compiler.match_pattern_head_symbol(pattern);
+  if (!head) return 0;
+  List value = _match_pattern_value(compiler, pattern);
+  if (!value.cdr().equal(binders)) return 0;
+  foreach (Var binder, binders)
+    if (!binder.is_atom_binder() || binder == <?>) return 0;
+  return head;
+}
+
 /** Returns definite binders from a typed `Match` pattern AST.
 
     When `possible` is non-null, stores every binder appearing on any path.

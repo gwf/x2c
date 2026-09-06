@@ -473,7 +473,40 @@ static void match_dynamic_head_arm_keeps_priority(void) {
 }
 
 
+static int _flat_pair(List input, Var *left, Var *right) {
+  match (input) {
+    case %(flat ?a ?b): {
+      *left = a;
+      *right = b;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static void match_flat_capture_agrees_with_runtime(void) {
+  $test.scoped();
+  Var head = <flat>;
+  Var payloads[4] = {(List) NULL, 0, 7, %(nested)};
+  for (int length = 0; length < 5; length++)
+    for (int value = 0; value < 4; value++) {
+      List input = NULL;
+      for (int i = length - 1; i >= 0; i--)
+        input = cons(i ? payloads[(value + i - 1) % 4] : head, input);
+      Var actual[2], expected[2];
+      MatchCaptureBuffer capture = {.values = expected, .capacity = 2};
+      int matched = _flat_pair(input, &actual[0], &actual[1]);
+      int reference = x2c_match_try_capture(input, %(flat ?a ?b), &capture);
+      EXPECT_INT_EQ(matched, reference);
+      if (matched) {
+        EXPECT_TRUE(actual[0].u64 == expected[0].u64);
+        EXPECT_TRUE(actual[1].u64 == expected[1].u64);
+      }
+    }
+}
+
 void match_stmt_suite(void) {
+  $test.run(match_flat_capture_agrees_with_runtime);
   $test.run(match_binds_values);
   $test.run(match_star_binder);
   $test.run(match_default_clause);

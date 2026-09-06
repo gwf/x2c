@@ -226,39 +226,47 @@ static int _gensym(Var value){
     List _x2c_match_expr =  list;
      Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-       case 481205850: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_15), &_x2c_match_capture)) {Var id = _x2c_match_values[0];  if(Var_is_integer(id)) maximum = Var_integer(id);  break;
-}
-default: break;
+       case 481205850: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937242824282ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var id = _x2c_match_values[0];  if(Var_is_integer(id)) maximum = Var_integer(id);  break; } } default: break;
     }
   }
 {
-  Var item;  Iter _x2c_macro_iterator_2 = List_iter(list,  &(struct Iter){
-    0
-  }
-  );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
-    item = _x2c_macro_item_2; {
-      int found = _gensym(item);  if(found > maximum) maximum = found;
+    Var item;  Iter _x2c_macro_iterator_2 = List_iter(list,  &(struct Iter){
+      0
+    }
+    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
+      item = _x2c_macro_item_2; {
+        int found = _gensym(item);  if(found > maximum) maximum = found;
+      }
+
     }
 
   }
-
-}
-return maximum;
+  return maximum;
 }
 
 Map symbol_snapshot_load(String path,  Map * fn_defs,  int * gensym){
   if(! _init_guard_) _file_init_();  if(fn_defs) * fn_defs = NULL;  if(gensym) * gensym = 0;  File input = String_open(path,  "r");  Lisp lisp = Lisp_new_bare();  Map volatile symbols = NULL; {
     ExceptionFrame  _x2c_exception_frame_0;  volatile int  _x2c_cleanup_guard_0  = 1;  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
       _x2c_cleanup_guard_0  = 1; {
-        String source = File_string(input);  unsigned cursor = 0;  Var document =((void) 0, Void),  trailing =((void) 0, Void);  Symbol volatile status = Lisp_read(lisp,  source,  & cursor,  & document);  if(status != 46228810 || ! Var_is(document,  806120)){
-          static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/snapshot.x",.function =  "symbol_snapshot_load",.line =  128};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 2, Symbol_var(1051920),  String_var(path),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("invalid snapshot header")),  NULL))));  __builtin_unreachable();
+        String source = File_string(input);  unsigned cursor = 0;  Var document =((void) 0, Void),  trailing =((void) 0, Void);
+        Symbol volatile status = Lisp_read(lisp,  source,  & cursor,  & document);
+        if(status != 46228810 || ! Var_is(document,  806120)){
+          static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/snapshot.x",.function =  "symbol_snapshot_load",.line =  128};
+          x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 2, Symbol_var(1051920),  String_var(path),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("invalid snapshot header")),  NULL))));
+          __builtin_unreachable();
         }
-        List form = Var_list(document);  List volatile entries = NULL;
+        List form = Var_list(document);
+        List volatile entries = NULL;
+
   {
     List _x2c_match_expr =  form;
-     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+     Var _x2c_match_values[1];
+        MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+
     switch (Var_symbol(car(_x2c_match_expr))) {
-       case 1335836754920: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) {Var captured = _x2c_match_values[0];  entries = Var_list(captured);  break;
+       case 1335836754920: ;
+        static MatchCaptureSite _x2c_match_site_1;
+        if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) {Var captured = _x2c_match_values[0];  entries = Var_list(captured);  break;
       }
       default: ; {
         static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../src/snapshot.x",.function =  "symbol_snapshot_load",.line =  132};  x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 2, Symbol_var(1051920),  String_var(path),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("invalid snapshot header")),  NULL))));  __builtin_unreachable();
@@ -267,9 +275,11 @@ Map symbol_snapshot_load(String path,  Map * fn_defs,  int * gensym){
     }
   }
 status = Lisp_read(lisp,  source,  & cursor,  & trailing);  if(status != 11212){
-        static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../src/snapshot.x",.function =  "symbol_snapshot_load",.line =  139};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 2, Symbol_var(1051920),  String_var(path),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("trailing snapshot form")),  NULL))));  __builtin_unreachable();
+        static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../src/snapshot.x",.function =  "symbol_snapshot_load",.line =  139};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 2, Symbol_var(1051920),  String_var(path),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("trailing snapshot form")),  NULL))));
+        __builtin_unreachable();
       }
-      Map imported = Map_new();  symbols = Map_new();
+      Map imported = Map_new();
+      symbols = Map_new();
       {
         Var volatile entry;
         Iter _x2c_macro_iterator_3 = List_iter(entries,  &(struct Iter){
@@ -307,7 +317,7 @@ status = Lisp_read(lisp,  source,  & cursor,  & trailing);  if(status != 11212){
             MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
 
     switch (0) {
-       default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0];  Map_setindex(imported,  spelling,  int_var(1));  break;
+       default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0];  Map_setindex(imported,  spelling,  int_var(1));  break;
           }
 
     }
