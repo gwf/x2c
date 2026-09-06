@@ -35,6 +35,13 @@ without a full recalibration.
 
 ## Build and run one program
 
+After building x2c, run this once from the repository root so the compiler
+is available in subdirectories:
+
+```sh
+export PATH="$PWD:$PATH"
+```
+
 Each `main.x` and `ported.x` carries its own recipe as a header comment. The
 references have none, because their bytes are pinned. From inside a benchmark
 directory, using the `local` profile arguments that `benchmarks.json` records
@@ -43,8 +50,7 @@ for that benchmark:
 ```sh
 cc -O2 -DNDEBUG main.c -lm -o /tmp/bench-c && /tmp/bench-c <args>
 python3 main.py <args>
-../../../../builds/0/x2c build -O2 -DNDEBUG --output /tmp/bench-x main.x
-/tmp/bench-x <args>
+x2c run -O2 -DNDEBUG main.x -- <args>
 ```
 
 ## Run and update

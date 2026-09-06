@@ -5,10 +5,12 @@ examples from the landing page. Each gallery program contains the website's
 code, including its normally hidden setup and assertions. The correspondence
 is listed in [gallery.json](gallery.json).
 
-From the repository root:
+After building x2c, add the repository root to PATH for this shell. Start
+from the repository root:
 
 ```sh
-./builds/0/x2c run examples/foreach.x
+export PATH="$PWD:$PATH"
+x2c run examples/foreach.x
 make examples
 ```
 
@@ -42,7 +44,7 @@ The example runner copies the matching directory under [data](data/) into
 its build directory. To run Counting directly from the repository root:
 
 ```sh
-./builds/0/x2c build --output /tmp/x2c-counting examples/power/counting.x
+x2c build --output /tmp/x2c-counting examples/power/counting.x
 (cd examples/data/power-counting && /tmp/x2c-counting)
 ```
 
@@ -77,8 +79,8 @@ from the gallery examples.
   [an external Lisp policy](magic/file-policy.x).
 
 ```sh
-./builds/0/x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt
-./builds/0/x2c run examples/magic/file-policy.x -- examples/magic/policy.xlisp
+x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt
+x2c run examples/magic/file-policy.x -- examples/magic/policy.xlisp
 ```
 
 The [Greet example](power/greet-client.x) imports the small teaching package in
@@ -86,7 +88,7 @@ The [Greet example](power/greet-client.x) imports the small teaching package in
 and applies [greet-client.flags](power/greet-client.flags).
 
 The [package examples](packages/README.md) cover creating and using packages,
-with shortcuts to all seven adapters' own examples. The
+with links to all seven adapters' build and run instructions. The
 [HTTP and JSON example](packages/http-json-releases/) combines libcurl and
 yyjson. Its optional check needs prepared dependencies:
 
@@ -96,13 +98,13 @@ make -C examples/packages/http-json-releases test
 
 ## Larger programs and tours
 
-[programs/lisp.x](programs/lisp.x) is an interactive Lisp shell. After
-`make examples`, run it from the repository root:
+[programs/lisp.x](programs/lisp.x) is an interactive Lisp shell. Run it from
+the repository root:
 
 ```sh
-./examples/build/programs-lisp/lisp
-./examples/build/programs-lisp/lisp -e '(def id (lambda (x) x)) (id 42)'
-./examples/build/programs-lisp/lisp program.xlisp
+x2c run examples/programs/lisp.x
+x2c run examples/programs/lisp.x -- -e '(def id (lambda (x) x)) (id 42)'
+x2c run examples/programs/lisp.x -- program.xlisp
 ```
 
 It loads `etc/init.xlisp` by default; `--init FILE` or `X2C_LISP_INIT` selects
