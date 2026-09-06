@@ -3,7 +3,7 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
-## 0.1.23 (unreleased preview)
+## 0.1.23 - 2026-09-06 (Preview)
 
 ### Added
 

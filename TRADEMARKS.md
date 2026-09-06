@@ -40,5 +40,5 @@ release or use confusingly similar branding.
 ## Permission and questions
 
 Direct trademark permission requests and questions to Gary William Flake
-at [trademark@x2c-lang.dev](mailto:trademark@x2c-lang.dev). Describe
+at [trademark@flake.org](mailto:trademark@flake.org). Describe
 the proposed use and include a link or example of the branding where possible.
