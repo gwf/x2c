@@ -150,9 +150,13 @@ const [titleHtml, kickerHtml] = await Promise.all([
         </p>
         <p>
           See the <a href={local("docs/internals/building.html")}>build
-          instructions</a> for the self-hosting process, or use the{" "}
-          <a href={local("docs/reference/cli.html#bootstrap-a-native-installation")}
-            >portable executable to create a native installation</a>.
+          instructions</a> for the self-hosting process.
+        </p>
+        <p>
+          The <a href={local("docs/reference/cli.html#bootstrap-a-native-installation")}
+            >Cosmopolitan executable</a> is an experiment for fun only. It
+          bootstraps a minimal compiler and runtime, with no examples, book,
+          or optional packages. It is no substitute for the full repository.
         </p>
       </div>
       <figure class="install-window">

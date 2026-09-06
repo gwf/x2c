@@ -1,7 +1,11 @@
-# Cosmopolitan release seed
+# Cosmopolitan bootstrap experiment
 
-One command builds `dist/x2c.com`, an optional portable compiler with
-bundled source:
+This experiment is for fun only. It provides a minimal compiler bootstrap,
+not a substitute for the full repository. Its bundled source is enough to
+rebuild the compiler and runtime, but includes no examples, book, or optional
+packages. Use the full repository for normal development.
+
+One command builds `dist/x2c.com`, the portable compiler with bundled source:
 
 ```sh
 make ape-build

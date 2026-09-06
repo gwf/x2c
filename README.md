@@ -77,7 +77,10 @@ never rewrite expectations or bootstrap sources.
 Use `builds/0/x2c` as the current development compiler. `bin/x2c` is the
 bootstrap compiler unless stage 0 has intentionally been installed.
 
-To build the optional cross-platform, source-bearing release file:
+The Cosmopolitan executable is an experiment for fun only: a minimal
+compiler bootstrap, not a substitute for the full repository. It omits the
+examples, book, and optional packages. Use the full repository for normal
+development. To build the experiment:
 
 ```sh
 make ape-build
