@@ -11,26 +11,42 @@ maintained third-party adapter.
 
 ## Package examples
 
-The following directories are relative symbolic links to the examples kept
-beside each adapter. They provide another way to browse the same source;
-there are no copied examples. Build and run them through the package's own
-Makefile, using the commands in its README.
+Third-party examples live beside their adapters under the repository's
+`packages/` directory. Follow the links below to their source and build
+instructions.
 
 | Examples | Purpose | Package instructions |
 | --- | --- | --- |
-| [pcre2](pcre2/) | Regular expressions and named captures | [PCRE2](../../packages/pcre2/README.md) |
-| [yyjson](yyjson/) | JSON parsing and writing | [yyjson](../../packages/yyjson/README.md) |
-| [libcurl](libcurl/) | HTTP requests and transfers | [libcurl](../../packages/libcurl/README.md) |
-| [termbox2](termbox2/) | Interactive terminal applications | [termbox2](../../packages/termbox2/README.md) |
-| [blis](blis/) | Matrix and vector computations | [BLIS](../../packages/blis/README.md) |
-| [libuv](libuv/) | Event loops, processes, and networking | [libuv](../../packages/libuv/README.md) |
-| [raylib](raylib/) | Images, charts, and optional windows | [raylib](../../packages/raylib/README.md) |
+| [pcre2](../../packages/pcre2/examples/) | Regular expressions and named captures | [PCRE2](../../packages/pcre2/README.md) |
+| [yyjson](../../packages/yyjson/examples/) | JSON parsing and writing | [yyjson](../../packages/yyjson/README.md) |
+| [libcurl](../../packages/libcurl/examples/) | HTTP requests and transfers | [libcurl](../../packages/libcurl/README.md) |
+| [termbox2](../../packages/termbox2/examples/) | Interactive terminal applications | [termbox2](../../packages/termbox2/README.md) |
+| [blis](../../packages/blis/examples/) | Matrix and vector computations | [BLIS](../../packages/blis/README.md) |
+| [libuv](../../packages/libuv/examples/) | Event loops, processes, and networking | [libuv](../../packages/libuv/README.md) |
+| [raylib](../../packages/raylib/examples/) | Images, charts, and optional windows | [raylib](../../packages/raylib/README.md) |
 
-These adapters need optional native dependencies. Their examples remain in
-`make packages-check`, outside ordinary `make examples`. From the repository
-root, for example:
+## Build and run
+
+From this directory (`examples/packages`), enter the real package directory.
+For example, to play Game of Life:
 
 ```sh
-make -C packages/pcre2 run
-make -C examples/packages/http-json-releases test
+cd ../../packages/termbox2
+make run-life-interactive
 ```
+
+This builds the dependency, adapter, and application as needed, then runs the
+game in your terminal. Press any key to quit. Use the package Makefile rather
+than running its source directly with `x2c run`: the Makefile supplies the
+package search paths, native headers, and link settings.
+
+From the repository root, the same command is:
+
+```sh
+make -C packages/termbox2 run-life-interactive
+```
+
+Each package README lists its example commands. The first build may download
+its pinned native dependency; later builds reuse the shared cache. These
+examples are checked by the optional `make packages-check`, outside ordinary
+`make examples`.
