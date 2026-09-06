@@ -32,13 +32,13 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
-      - name: Install mdBook 0.4.52
+      - name: Install mdBook 0.5.4
         env:
-          MDBOOK_SHA256: c0b903f01dd8f4edc644372ad2b80b1fdddd12552d37b6a098657cbd8eddd768
+          MDBOOK_SHA256: 3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7
         run: |
           archive="$RUNNER_TEMP/mdbook.tar.gz"
           curl -fsSL \
-            https://github.com/rust-lang/mdBook/releases/download/v0.4.52/mdbook-v0.4.52-x86_64-unknown-linux-gnu.tar.gz \
+            https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-unknown-linux-gnu.tar.gz \
             -o "$archive"
           echo "$MDBOOK_SHA256  $archive" | sha256sum --check
           tar -xzf "$archive" -C "$RUNNER_TEMP"
