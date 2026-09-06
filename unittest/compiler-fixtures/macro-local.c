@@ -20,7 +20,7 @@ Var String_var(String);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static int select(int value);
+static int fixture_select(int value);
 
 static int local_macros(int base);
 
@@ -32,12 +32,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new("answer");
 }
 
-static int select(int value){
+static int fixture_select(int value){
   return 1000 + value;
 }
 
 static int local_macros(int base){
-  int before = select(1);
+  int before = fixture_select(1);
   int first = 0,  explicit_global = 0,  explicit_call = 0;
   int call_site = 0,  nested = 0,  restored = 0,  replaced = 0;
   int assigned = 0,  assigned_again = 0,  generated_value = 0;
@@ -47,7 +47,7 @@ static int local_macros(int base){
     int offset = 2;
     first = base + offset + 3 + 1;
     explicit_global = 2000 + 4;
-    explicit_call =(select)(5);
+    explicit_call =(fixture_select)(5);
     {
       int _x2c_binding_shadow_0 = 100;
       call_site = base + offset + _x2c_binding_shadow_0 + 1;
@@ -83,7 +83,7 @@ static int local_macros(int base){
     entry_value = Var_int(Map_getindex(entries,  String_var(_0)));
     decorated =(local.kept != 0);
   }
-  int after = select(2);
+  int after = fixture_select(2);
   printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",  before,  first,  explicit_global,  explicit_call,  call_site,  nested,  restored,  replaced,  assigned,  assigned_again,  generated_value,  generated_inline,  repeated,  field_value,  enum_value,  entry_value,  decorated,  after);
   return before != 1001 || first != 16 || explicit_global != 2004 || explicit_call != 1005 || call_site != 113 || nested != 116 || restored != 20 || replaced != 19 || assigned != 18 || assigned_again != 19 || generated_value != 22 || generated_inline != 23 || repeated != 2 || field_value != 7 || enum_value != 4 || entry_value != 42 || decorated != 1 || after != 1002;
 }

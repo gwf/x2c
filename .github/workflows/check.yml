@@ -6,6 +6,11 @@ name: check
 
 on:
   workflow_dispatch:
+    inputs:
+      release_validation:
+        description: Also run installation, examples, and fresh package validation
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -45,3 +50,7 @@ jobs:
         run: make build-safe
       - name: Run leak-enabled sanitizer gate
         run: X2C_DETECT_LEAKS=1 make verify-sanitize
+
+  release-validation:
+    if: inputs.release_validation
+    uses: ./.github/workflows/release-validation.yml

@@ -2,14 +2,14 @@
 
 $(defun local-bias () 1)
 
-static int select(int value) {
+static int fixture_select(int value) {
   return 1000 + value;
 }
 
-macro Expression $select(Expr $value) => (2000 + $value)
+macro Expression $fixture_select(Expr $value) => (2000 + $value)
 
 static int local_macros(int base) {
-  int before = select(1);
+  int before = fixture_select(1);
   int first = 0, explicit_global = 0, explicit_call = 0;
   int call_site = 0, nested = 0, restored = 0, replaced = 0;
   int assigned = 0, assigned_again = 0, generated_value = 0;
@@ -19,7 +19,7 @@ static int local_macros(int base) {
   {
     int offset = 2;
 
-    macro Expression select(Expr $value) => (
+    macro Expression fixture_select(Expr $value) => (
       base + offset + $value + $(local-bias)
     )
 
@@ -64,24 +64,24 @@ static int local_macros(int base) {
       $key: $value
     }
 
-    first = select(3);
-    explicit_global = $select(4);
-    explicit_call = (select)(5);
+    first = fixture_select(3);
+    explicit_global = $fixture_select(4);
+    explicit_call = (fixture_select)(5);
     {
       int offset = 100;
-      call_site = select(offset);
+      call_site = fixture_select(offset);
 
-      macro Expression select(Expr $value) => (
+      macro Expression fixture_select(Expr $value) => (
         base + offset + $value
       )
 
-      nested = select(6);
+      nested = fixture_select(6);
     }
-    restored = select(7);
+    restored = fixture_select(7);
 
-    macro Expression select(Expr $value) => (base + $value)
+    macro Expression fixture_select(Expr $value) => (base + $value)
 
-    replaced = select(9);
+    replaced = fixture_select(9);
     assign(assigned, 8);
     assign(assigned_again, 9);
     define_generated();
@@ -104,7 +104,7 @@ static int local_macros(int base) {
     decorated = nonzero local.kept;
   }
 
-  int after = select(2);
+  int after = fixture_select(2);
   printf(
     "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
     before, first, explicit_global, explicit_call, call_site, nested,
