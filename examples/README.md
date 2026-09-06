@@ -46,14 +46,18 @@ and checks the curated examples, leaving executables under `examples/build/`.
 - [Imports](power/imports.x): use PCRE2 to extract named request fields.
   This example needs optional package dependencies and is checked separately.
 
-Files, Counting, and Exceptions read fixtures from their current directory.
-The example runner copies the matching directory under [data](data/) into
-its build directory. To run Counting directly from the repository root:
+`make examples` puts Counting and its sample input together. From the
+repository root, run it like this:
 
 ```sh
-x2c build --output /tmp/x2c-counting examples/power/counting.x
-(cd examples/data/power-counting && /tmp/x2c-counting)
+cd examples/build/power-counting
+./counting
+cd ../../..
 ```
+
+The last command returns to the repository root. Files and Exceptions also
+read sample input from their current directory; `make examples` supplies
+those files beside each executable.
 
 ## Magic: extend and evaluate the language
 
