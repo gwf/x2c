@@ -63,7 +63,11 @@ done
 test_sources=("$generated_tests"/test-*.c)
 for source in "${test_sources[@]}"; do
   name=$(basename "$source" .c)
-  "$cc" "${sanitizer_flags[@]}" -c "$source" \
+  test_flags=()
+  if [[ $(uname -s) == Linux && "$name" == test-logger ]]; then
+    test_flags+=(-D_GNU_SOURCE)
+  fi
+  "$cc" "${sanitizer_flags[@]}" "${test_flags[@]}" -c "$source" \
     -o "$test_objects/$name.o"
 done
 
