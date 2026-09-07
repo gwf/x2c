@@ -349,6 +349,101 @@ def _entry_complete(context: dict) -> bool:
   return True
 
 
+def _missing_command(command: str, missing: dict[str, str],
+                     package: str) -> bool:
+  argv = shlex.split(command)
+  if not argv or not shutil.which(argv[0]):
+    missing[command or "(empty command)"] = package
+    return True
+  return False
+
+
+def _native_missing(manifest: dict) -> dict[str, str]:
+  missing: dict[str, str] = {}
+  packages = {"make": "make", "patch": "patch", "sh": "bash"}
+  for step in manifest.get("steps", []):
+    command = step["argv"][0]
+    if not command.startswith(("./", "{")):
+      _missing_command(shlex.quote(command), missing,
+                       packages.get(command, command))
+  name = manifest["name"]
+  if name == "libuv":
+    for variable, default, package in (
+      ("ACLOCAL", "aclocal", "automake"),
+      ("AUTOCONF", "autoconf", "autoconf"),
+      ("AUTOMAKE", "automake", "automake"),
+      ("LIBTOOLIZE", "glibtoolize" if sys.platform == "darwin"
+       else "libtoolize", "libtool"),
+      ("M4", "m4", "m4"),
+    ):
+      _missing_command(shlex.quote(os.environ.get(variable) or default),
+                       missing, package)
+  if name == "blis":
+    _missing_command("bash", missing, "bash")
+    _missing_command("perl", missing, "perl")
+    _missing_command(os.environ.get("PYTHON") or "python3", missing,
+                     "python3")
+  if any(source["name"] == "openssl" for source in manifest["sources"]):
+    if not _missing_command("perl", missing, "perl"):
+      for module in ("FindBin", "IPC::Cmd"):
+        result = subprocess.run(
+          ["perl", "-M" + module, "-e", "1"],
+          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        if result.returncode:
+          missing["Perl module " + module] = "perl-" + module.replace("::", "-")
+  return missing
+
+
+def _missing_message(missing: dict[str, str]) -> str:
+  return ("missing build prerequisites: " + ", ".join(missing) +
+          "\nFedora: sudo dnf install " +
+          " ".join(sorted(set(missing.values()))) +
+          "\nFor overridden commands, install or correct the selected tool.")
+
+
+def _preflight(names: list[str]) -> int:
+  root = Path(__file__).resolve().parent.parent
+  available = sorted(path.parent.name for path in root.glob("*/dependency.json"))
+  if not names:
+    names = available
+  missing: dict[str, str] = {}
+  archiver = os.environ.get("X2C_AR")
+  if archiver and not shutil.which(archiver):
+    missing[archiver] = "binutils"
+  for name in names:
+    if name not in available:
+      raise DependencyError(f"unknown package: {name}")
+    if name != "raylib":
+      _missing_command("shasum", missing, "perl-Digest-SHA")
+    if name == "blis":
+      for command, package in (("jq", "jq"), ("nm", "binutils"),
+                               ("ar", "binutils")):
+        _missing_command(command, missing, package)
+    variable = "CURL_PREFIX" if name == "libcurl" else name.upper() + "_PREFIX"
+    if os.environ.get(variable):
+      continue
+    path = root / name / "dependency.json"
+    linux = path.with_name("dependency-linux.json")
+    if sys.platform == "linux" and linux.is_file():
+      path = linux
+    manifest, _ = _load_manifest(path)
+    cannot_inspect = False
+    for command, package in (("git", "git"),
+                             (os.environ.get("CC", "cc"), "gcc"),
+                             (os.environ.get("AR", "ar"), "binutils")):
+      cannot_inspect |= _missing_command(command, missing, package)
+    if not cannot_inspect and _entry_complete(_context(path)):
+      continue
+    missing.update(_native_missing(manifest))
+  print("Terminal validation uses Expect; package builds do not require it.")
+  if missing:
+    print(_missing_message(missing), file=sys.stderr)
+    return 1
+  print("Package build prerequisites are available.")
+  return 0
+
+
 def _prepare(context: dict) -> str:
   cache = context["cache"]
   cache.mkdir(parents=True, exist_ok=True)
@@ -360,6 +455,9 @@ def _prepare(context: dict) -> str:
     fcntl.flock(lock, fcntl.LOCK_EX)
     if _entry_complete(context):
       return "reused"
+    missing = _native_missing(context["manifest"])
+    if missing:
+      raise DependencyError(_missing_message(missing))
 
     entry_parent = context["entry"].parent
     entry_parent.mkdir(parents=True, exist_ok=True)
@@ -472,6 +570,9 @@ def _parser() -> argparse.ArgumentParser:
     command = subparsers.add_parser(name)
     command.add_argument("manifest", type=Path)
 
+  preflight = subparsers.add_parser("preflight")
+  preflight.add_argument("packages", nargs="*")
+
   path = subparsers.add_parser("path")
   path.add_argument("manifest", type=Path)
   path.add_argument(
@@ -483,6 +584,8 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
   arguments = _parser().parse_args()
+  if arguments.command == "preflight":
+    return _preflight(arguments.packages)
   context = _context(arguments.manifest.resolve())
   if arguments.command == "path":
     print(_path(context, arguments.kind, arguments.source))

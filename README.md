@@ -90,6 +90,9 @@ make packages
 ./packages/termbox2/builds/game-of-life
 ```
 
+`make packages` reports missing build prerequisites before compiling. Run
+`make configure-packages` to get that report separately.
+
 The first build prepares pinned dependencies and builds the example
 executables without running tests or requiring Expect. Game of Life starts
 each cell alive with 50% probability; press any key to quit. To build just one

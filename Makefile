@@ -31,7 +31,8 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-match-cache bm-lisp-auto
 SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
 APE_TARGETS = ape-toolchain ape-build ape-verify
-CONFIG_TARGETS = config-debug config-optimize config-show clean-all
+CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
+	config-show clean-all
 COMPAT_TARGETS = default x2c safely install bootstrap rebootstrap \
 	cosmopolitan-toolchain cosmopolitan-ape cosmopolitan-verify \
 	test selftest stresstest unittest sanitizer-unittest \
@@ -64,7 +65,7 @@ STAGE0_X2C ?= ./builds/0/x2c
 SYMBOL_CHANGE_MARKER = builds/.symbol-snapshot-changed
 STATS_COLOR ?= auto
 
-bootstrap-ready:
+bootstrap-ready: configure
 	@if [ ! -f $(BOOTSTRAP_SENTINEL) ]; then \
 		echo "[bootstrap] Missing $(BOOTSTRAP_SENTINEL); running " \
 			"'make build-safe' first..."; \
@@ -72,12 +73,18 @@ bootstrap-ready:
 	fi
 
 ##@ Getting started
+configure:						## Report core build prerequisites
+	@./configure
+
+configure-packages:					## Report package build prerequisites
+	@./configure --packages
+
 build: bootstrap-ready					## Build the runtime and compiler
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
 	$(MAKE) stage0-settle
 
-build-safe:						## Conservatively rebuild the compiler
+build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C bootstrap clean
 	$(MAKE) bootstrap-build
 	$(MAKE) -C builds clean
@@ -111,7 +118,8 @@ verify: build						## Build and run unit test suites
 examples: build						## Check curated examples
 	$(MAKE) -C examples check
 
-packages: build						## Build packages and examples
+packages: configure-packages				## Build packages and examples
+	$(MAKE) build
 	$(MAKE) -C packages/pcre2 build short-example example lisp-example
 	$(MAKE) -C packages/yyjson build short-example example lisp-example
 	$(MAKE) -C packages/libcurl build short-example example lisp-example
