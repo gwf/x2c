@@ -27,24 +27,27 @@ instructions.
 
 ## Build and run
 
-From this directory (`examples/packages`), enter the real package directory.
-For example, to play Game of Life:
+From the repository root, build all packages and their examples, then play
+Game of Life:
 
 ```sh
-cd ../../packages/termbox2
-make run-life-interactive
+make packages
+./packages/termbox2/builds/game-of-life
 ```
 
-This builds the dependency, adapter, and application as needed, then runs the
-game in your terminal. Press any key to quit. Use the package Makefile rather
-than running its source directly with `x2c run`: the Makefile supplies the
-package search paths, native headers, and link settings.
+This builds x2c, the dependencies, adapters, and example executables without
+running tests or requiring Expect. The second command runs the game in your
+terminal; press any key to quit.
 
-From the repository root, the same command is:
+To build and play only Game of Life after building x2c:
 
 ```sh
 make -C packages/termbox2 run-life-interactive
 ```
+
+Use the package Makefile rather than running its source directly with
+`x2c run`: it supplies the package search paths, native headers, and link
+settings.
 
 Each package README lists its example commands. The first build may download
 its pinned native dependency; later builds reuse the shared cache. These
