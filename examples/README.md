@@ -66,6 +66,7 @@ sum of squares: 91
 - [Keywords](magic/keywords.x): release a mutex when an exception leaves a block.
 - [Compile-time Lisp](magic/compile-time.x): generate two arrays from one table.
 - [Runtime Lisp](magic/runtime.x): evaluate two policies using a native binding.
+- [Agreement](magic/ways-to-agree.x): build the same List six different ways.
 - [Self-hosting](magic/selfhost.md): rebuild the compiler and inspect its syntax.
 
 ## Further examples
@@ -85,9 +86,8 @@ from the gallery examples.
 - Language extensions: [protocol defaults](magic/protocols.x),
   [lambdas](magic/lambdas.x), [imported macros](magic/imported-macros.x),
   [stacked decorators](magic/stacked-decorators.x),
-  [range and swap keywords](magic/range-and-swap.x),
-  [an external Lisp policy](magic/file-policy.x), and
-  [six ways to build the same List](magic/ways-to-agree.x).
+  [range and swap keywords](magic/range-and-swap.x), and
+  [an external Lisp policy](magic/file-policy.x).
 
 ```sh
 x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt

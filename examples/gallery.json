@@ -75,6 +75,11 @@
     "optional": false
   },
   {
+    "slide": "magic-06a-ways-to-agree.md",
+    "example": "magic/ways-to-agree",
+    "optional": false
+  },
+  {
     "slide": "magic-07-selfhost.md",
     "example": "magic/selfhost.md",
     "language": "sh"
