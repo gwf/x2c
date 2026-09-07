@@ -33,8 +33,8 @@ accordingly instead of relying on runtime errors.
 
 ### 1.3 Pointer Access
 
-Use `.` for both struct and pointer member access; `->` remains accepted
-for legacy code but prefer the dot form. The universal dot notation also
+Use `.` for both struct and pointer member access. C pointer member access
+with `->` is also accepted. The universal dot notation also
 covers method calls, so avoid naming struct fields the same as type
 methods to prevent ambiguity.
 

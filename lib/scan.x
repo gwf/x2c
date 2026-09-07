@@ -8,13 +8,12 @@
     `Error`;
     that failure does not return.
 
-    One forward-only typed scanner does all numeric scanning. Compatibility
-    entry points retain their existing signatures without inspecting bytes
-    before the supplied pointer. C literals use C escape widths and reject
-    raw newlines; x2c percent strings and quoted symbols retain byte-oriented
-    escapes and multiline behavior. Line comments and complete preprocessor
-    lines may end at either newline or NUL, and a present newline is not part
-    of the returned token.
+    One forward-only typed scanner does all numeric scanning. Its entry points
+    never inspect bytes before the supplied pointer. C literals use C escape
+    widths and reject raw newlines; x2c percent strings and quoted symbols
+    retain byte-oriented escapes and multiline behavior. Line comments and
+    complete preprocessor lines may end at either newline or NUL, and a present
+    newline is not part of the returned token.
 
     Inputs are borrowed only for a call and are never mutated. Except for the
     explicitly bounded helpers, they are NUL-terminated; every length is a byte
@@ -365,7 +364,7 @@ malformed: if (status) *status = <malformed>;
   return -1;
 }
 
-/* Used by C character literals and legacy string callers. */
+/* Decodes one escape for C character literals and string scanners. */
 static int _c_escape_sequence(char *s) => _c_escape_sequence_status(s, NULL);
 
 /* Returns a C String literal's complete byte count, or -1 on malformed or

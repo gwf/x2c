@@ -7,8 +7,7 @@
     arguments for lambdas and natives, raw arguments for macros and
     special forms, macro expansion evaluated once in the caller's
     environment, globals able to shadow reserved forms, `nil` as the only
-    false value, and by-value capture of free locals using the V1
-    body-flattening rule.
+    false value, and by-value capture of free locals through body flattening.
 
     Identifiers use canonical `Atom`s: compact x2c `Symbol`s when their
     spelling

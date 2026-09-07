@@ -72,7 +72,7 @@ API_TIERS = ("primary", "advanced", "compatibility", "internal")
 TIER_HEADINGS = {
     "primary": "Primary API",
     "advanced": "Advanced and interop API",
-    "compatibility": "Compatibility API",
+    "compatibility": "Convenience API",
     "internal": "Runtime-internal callables",
 }
 PRIMARY_EVIDENCE = {

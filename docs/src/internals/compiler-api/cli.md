@@ -75,5 +75,5 @@ Source: `src/cli.x:17`
 
 ## Design notes
 
-Response expansion, command selection, option validation, migration
-diagnostics, and help rendering all produce or read the typed CliRequest.
+Response expansion, command selection, option validation, diagnostics,
+and help rendering all produce or read the typed CliRequest.

@@ -261,7 +261,7 @@
     nil
     (reverse clauses)))
 
-// Small compatibility aliases
+// Short aliases for common operations
 
 (def add _add)
 (def last _last)

@@ -168,10 +168,9 @@ as its literal spelling, and the runtime operator suite checks `!or`, `!not`,
 operators literally so the compiler can determine which named binders are
 available to the arm body.
 
-The older `?binder?`, `*binder?`, and `!op?` spellings are reserved in their
-historical `!is` operand positions. They parse, but they
-are not named binders and they do not execute a predicate. Use the `(!is ...)`
-forms above.
+The `?binder?`, `*binder?`, and `!op?` spellings are reserved in `!is`
+operand positions. They are not named binders and do not execute a predicate.
+Use the `(!is ...)` forms above.
 
 ## Where binders live
 
@@ -294,11 +293,12 @@ printf("%s\n", tree.search_replace(%(item ?id),
                                     %(entry ?id)).str());
 ```
 
-Prefer the `try_` forms. The older `match`, `match_replace`, and `search`
-adapters cannot distinguish "matched with no bindings" from "did not match",
-because both come back as a null or empty `List`. `search` returns its results
-in reverse visitation order, so do not read the list as a document order. [The
-standard library overview](../library/overview.md) has the full API list.
+The `try_` forms report success separately from their results. `match` returns
+bindings, `%(())` for a binder-free success, or `nil` on a miss.
+`match_replace` returns the original input on a miss and `nil` for a successful
+scalar replacement. `search` returns its results in reverse visitation order,
+so do not read the list as document order. [The standard library
+overview](../library/overview.md) has the full API list.
 
 ## Match for shape, traversal for search
 
@@ -345,8 +345,8 @@ x2c diagnostic before generating C.
 
 **Source guard operators must be literal.** Runtime-built patterns may
 interpolate an interned operator `Symbol`, but a source arm needs a literal
-operator so definite binder assignment can be checked. The legacy `?binder?`
-family remains reserved and is not a working predicate.
+operator so definite binder assignment can be checked. The `?binder?` family
+is reserved and is not a working predicate.
 
 The [generated Match reference](../library/modules/match.md) lists the runtime
 operations by API tier.

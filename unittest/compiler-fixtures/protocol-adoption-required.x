@@ -5,13 +5,10 @@ typedef struct Vec {
   int y;
 } *Vec;
 
-/* A complete Var conversion pair AND a protocol member implementation --
-   everything the old inference path needed to confer Var membership on
-   Vec.  Participation is now DECLARED, not inferred: without a
-   `protocol Var(Vec);` adoption row Vec does not participate, so a
-   base-default protocol member (resolved through the conformance table)
-   is not available on Vec and the dot call fails with the ordinary
-   no-method error. */
+/* A Var conversion pair and a protocol member implementation do not confer
+   Var membership on Vec. Without a `protocol Var(Vec);` adoption row, Vec
+   does not participate; a base-default protocol member is unavailable and
+   the dot call fails with the ordinary no-method error. */
 
 Var Vec.var(Vec v) {
   return Var.new(<vec>, v);

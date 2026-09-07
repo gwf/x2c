@@ -1,7 +1,6 @@
 # X2C Documentation Drift Report
 
-> Status: active (2026-07-19) - canonical entry points, examples, contracts,
-> diagnostics, architecture, debugging, and organization are reconciled.
+> Status: reference - documentation checks and authoritative entry points.
 
 ## Mechanically checked surface
 
@@ -35,119 +34,12 @@ module catalog, this report, the canonical diagnostics guide, and six book
 chapters: architecture, the CLI reference, the language reference, idioms, the
 implementation map, and the library overview.
 
-The Array/Map empty-value correction is now consistent across the philosophy,
-quick start, development guide, language reference, and library guide. Each
-describes empty mutable containers as allocated objects and reserves raw null
-container pointers for internal absence or pending initialization, not empty
-values. The mutable-empty compiler fixture owns the executable boundary.
-
-The exception guides now agree that generated `try` owns optimized
-`sigsetjmp(env, 0)`/`siglongjmp` state preservation. The compiler fixture
-harness applies
-the active build flags to native artifacts, keeping that documentation tied to
-optimized executable evidence.
-
-Initialization is now described through one type-owned lifecycle method per
-translation unit. Exact fixtures own the generated guard, cache ordering,
-signature rejection, duplicate-owner rejection, and legacy `@init` error; the
-examples surface contains a checked runnable showcase. Non-static functions
-own lazy entry; static helpers trust that boundary instead of repeating its
-guard. Plain-C Scope probes separately prove pre-aggregator entry,
-uninitialized shutdown, and the terminal state after a repeated initializer
-call.
-
-The architecture and code-organization guides now name the
-consolidated compiler, current runtime owners, real build stages, and current
-benchmark/test surfaces. The debugging guide already matched the verified
-diagnostic and failure-capture workflow. Obsolete split-module maps and the
-unsupported `V=1` workflow have been removed.
-
-The preprocessor contract now agrees across architecture, language,
-debugging, philosophy, and fixture-status surfaces. Host preprocessing is an
-argv-safe, status-bearing discovery pass; the original positioned token stream
-owns full parsing, diagnostics, and emission. Checked process probes cover
-hostile paths and exact failure status, while compiler fixtures cover missing
-includes and directive retention inside compound statements.
-
-The scalar contract now agrees across philosophy, language routing, the
-reference, the generated module catalog, and continuation status. One Type
-owner supplies declaration normalization, literal source families, arithmetic
-properties, and Var tags. Exact fixtures prove valid alternate spellings,
-invalid combinations, overflow diagnostics, generated boxing, scalar typedef
-crossings, and native behavior. VarOps now separately owns complete cross-tag
-numeric conversion without broadening nonnumeric conversion.
-
-The AST-construction guide now distinguishes parsed and transformed shapes.
-Array and Map literal documentation follows the implemented owner boundary:
-parsing preserves raw source-ordered children, transformation owns `Var`
-crossings, and downstream cache/emission code consumes the normalized order.
-The literal/cache fixture proves both phase representations and runtime order.
-
-Index/slice guidance is tied to an exact five-artifact fixture. It
-distinguishes native indexing from collection helpers, proves raw Map keys at
-parse time and transform-owned boxing, and checks single evaluation through
-runtime counters. The former redundant collection-assignment expression
-wrapper is gone without changing generated C or runtime behavior.
-
-Var comparison guidance now distinguishes value equality, representation
-identity, and total ordering at both source and runtime boundaries. One exact
-fixture proves all eight operators, native controls, both mixed operand
-directions, wide-box equality versus identity, object identity/order, and
-single evaluation. A second exact fixture proves that direct and chained
-file-scope aliases of `Var` use the same boxing, extraction, call, return, and
-comparison crossings while preserving their source declarations. The language
-reference and implementation map also state the corresponding scope rule:
-typedef declarations inside compound statements are rejected.
-
-Var numeric guidance now agrees across the philosophy, quick start, language
-reference, idioms, library guide, generated catalog, test status, and
-continuation record. `lib/var.x` owns structural validation and exact integer
-comparison mechanics; `lib/varconvert.x` owns all 15 numeric conversion
-families and failure policy; `lib/common.x` declares the shared Symbol outcome
-ABI; `lib/varops.x` owns binary arithmetic, truthiness, and typed compound
-updates; dispatch retains comparison policy. Integer lanes never use a
-floating intermediary. Exact runtime and compiler fixtures prove promotion,
-narrowing, every native conversion target, wide precision, short-circuit
-behavior, typed adapter selection, single lvalue evaluation, failure
-atomicity, and fail-fast `void` truthiness. Five exact diagnostics reject a
-statically nonnumeric operand, dynamic unary arithmetic, and helper-backed,
-enum, and bit-field compound targets. The `numeric-string-interpolation`
-showcase checks numeric-to-String interpolation against exact expected
-output.
-
 ## Executable examples surface
 
-`examples/manifest.txt` classifies all 39 example sources: 27 showcase, 7
-probe, 3 external-input, and 2 legacy. `make examples` currently runs the 30
-sources marked `check=run` (25 of them against exact expected output; the
-other 5 declare `-` and must exit zero printing nothing) and build-checks the
-three external-input programs. Probes and legacy sources remain visible in the
-manifest but do not claim supported behavior.
-
-The first audit of the former 11-file documentation-example directory was
-wrong. It treated the absence of `main` as proof that a teaching module was
-unusable and reported that none of the sources was usable. In fact, the Symbol
-module translated and compiled correctly, while the interpolation and
-conversion modules also compiled and exposed current defects when called.
-Deleting the directory without first preserving that evidence was a mistake.
-
-The directory remains retired because it mixed valid modules with stale APIs,
-placeholders, incorrect syntax, and broad unsupported claims. Its useful
-evidence is now preserved in the manifest surface:
-
-| Former source | Disposition |
-| --- | --- |
-| `symbol-literals.x` | Incorporated into the checked Symbol showcase. |
-| `string-interpolation.x` | Replaced by the checked interpolation showcase. |
-| `type-conversions.x` | Replaced by the checked conversion-matrix showcase. |
-| `init-decorator.x` | Replaced by the checked type-initializer showcase. |
-| `foreach.x` | Retired; checked foreach example and fixture own the feature. |
-| `percent-literals.x` | Retired; used unsupported insertion positions. |
-| `lambda-map.x` | Retired; existing lambda evidence owns it. |
-| `defer-cleanup.x` | Retired; defer tests own the feature; APIs were stale. |
-| `pattern-matching.x` | Retired; its binder API was invented. |
-| `base-types-interop.x` | Retired; universal nonnumeric claims were false. |
-| `idioms-showcase.x` | Retired; splice failure was extracted. |
+`examples/manifest.txt` records each example's role, validation mode, and
+expected output. `make examples` runs or build-checks the entries selected by
+that manifest. An example excluded from those checks does not establish
+supported behavior merely by appearing in the repository.
 
 ## Current authoritative entry points
 

@@ -542,8 +542,8 @@ static void list_intern_preserves_map_identity(void) {
   EXPECT_TRUE(m1.var() !== m2.var());
   EXPECT_INT_EQ(m1.var().compare(m2.var()), 0);
 
-  // Previously, list interning could collapse these to the same list due to
-  // deep list hashing/equality, which was incorrect for mutable elements.
+  // List interning preserves distinct identities for mutable elements,
+  // even when their contents compare equal.
   EXPECT_TRUE(l1 !== l2);
   EXPECT_TRUE(car(l1) === m1);
   EXPECT_TRUE(car(l2) === m2);

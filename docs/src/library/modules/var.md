@@ -56,7 +56,7 @@ This tests one family. A `Var` holding an `unsigned char` answers 0 for
 `<i32>` even though both are integers. When any integer will do, ask
 `Var.is_integer`, or compare `Var.kind`.
 As with `Var.tag`, validate externally constructed bits first: an invalid
-encoding uses the historical `<f64>` fallback.
+encoding uses the `<f64>` fallback.
 
 Source: `lib/var.x:284`
 

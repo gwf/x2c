@@ -1172,9 +1172,8 @@ boundary the compiler cannot prove. Common legitimate sites include dynamic
 tag inspection, variadic or macro boundaries, raw C ABI code, and direct
 tests of the conversion owner.
 
-Do not preserve an explicit converter merely because older source needed it.
-Confirm that the current compiler supports the exact source type, target type,
-and context, then use the implicit crossing.
+Prefer an implicit conversion wherever the compiler supports the exact source
+type, target type, and context.
 
 The same rule applies to String literals. Use an ordinary C `"..."` literal
 when a String or Var target requests its promotion, including Array elements
@@ -1291,8 +1290,7 @@ the private-private design visible at the adoption site.
 A protocol adoption must supply a real shared operation, default, or typed
 crossing. Do not add a protocol whose generated methods only convert the
 receiver to an existing view and call that view's methods. Call the conversion
-and method directly; the removed `MatchPrepared` protocol is the repository's
-current example.
+and method directly.
 
 ### Prefer receiver chains
 

@@ -182,7 +182,7 @@ The generated [module reference](../library/modules/index.md) separates:
 
 - primary operations for ordinary programs;
 - advanced storage, ABI, embedding, and diagnostics APIs;
-- compatibility adapters with a preferred replacement;
+- convenience adapters with a preferred operation;
 - runtime-internal callables documented only for source readers.
 
 Start with primary APIs; use the others when you need their specific behavior.

@@ -35,9 +35,8 @@ from x2c_reply import WORD_LIMIT, measure, text_of
 DEFAULT_CLAUDE_ROOT = "~/.claude/projects"
 DEFAULT_CODEX_ROOT = "~/.codex/sessions"
 
-# Targets renamed in "clean up build infrastructure" (#154, 2026-07-30). Agents
-# kept using the old spellings from habit; the ratio measures the drift for
-# any future rename.
+# Map build aliases to the documented targets to measure which spellings
+# agents use.
 ALIASES = {
     "x2c": "build", "safely": "build-safe", "unittest": "verify",
     "stresstest": "stage-3", "selftest": "stage-2", "test": "stage-1",

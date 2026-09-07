@@ -294,7 +294,7 @@ These failures leave text and line state unchanged.
 
 Source: `lib/buffer.x:224`
 
-## Compatibility API
+## Convenience API
 
 | Function | Summary |
 | --- | --- |
@@ -308,8 +308,8 @@ Source: `lib/buffer.x:224`
 `char Buffer.get(Buffer buf, ptrdiff_t index)`
 
 Returns the byte at `index`, or NUL when `index` is out of range.
-This adapter is retained for source and ABI compatibility. For new
-code, prefer `Buffer.try_get`.
+Prefer `Buffer.try_get` to distinguish an out-of-range index from a NUL
+byte.
 
 Source: `lib/buffer.x:305`
 

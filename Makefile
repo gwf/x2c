@@ -152,8 +152,8 @@ check-after-precommit:
 	$(MAKE) hdr-check
 	$(MAKE) proof-artifact-atomicity
 	$(MAKE) verify
-# Examples are mid-rework for the release; their gates are re-enabled when that
-# settles (Gary, 2026-09-01). Run `make examples doc-examples` manually.
+# Example checks are optional (Gary, 2026-09-01).
+# Run `make examples doc-examples` manually.
 #	$(MAKE) examples
 	$(MAKE) proof-raw-symbols
 	$(MAKE) doc-check
@@ -366,9 +366,8 @@ RUNTIME_BENCHMARKS = bm-scan bm-string bm-list bm-block-buffer bm-scope \
 bm-all: $(RUNTIME_BENCHMARKS)				## Run the current runtime timings
 
 # Shared benchmark steps: translate + compile one focused benchmark
-# ($(1) = source stem, $(2) = compile flags -- kept per-target so the
-# historical flag choices are preserved exactly), and the 5-sample run
-# loop shared by the timing targets.
+# ($(1) = source stem, $(2) = target-specific compile flags), and the
+# 5-sample run loop shared by the timing targets.
 define RUN_X2C_BENCHMARK
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
@@ -510,7 +509,7 @@ clean-all: clean					## Also remove bootstrap objects
 	$(MAKE) -C bootstrap clean
 
 ###############################################################################
-# Undocumented compatibility aliases for the previous interface.
+# Additional aliases for build, test, and documentation targets.
 default x2c: build
 safely: build-safe
 install: build-install

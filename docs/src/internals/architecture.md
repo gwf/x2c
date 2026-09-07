@@ -202,8 +202,9 @@ by real path, so include cycles terminate. Across a batch, `src/main.x` keeps
 per-header contributions in `etc/header-symbols.xlisp`, a cache validated
 against the snapshot's content hash, so repeated headers are not re-collected.
 
-`--cpp-symbols` and `--live-symbols` switch to the original path, where the
-toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a child process.
+`--cpp-symbols` and `--live-symbols` discover symbols through the host C
+preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
+child process.
 Paths stay separate argv elements, and stdout, stderr, and the real child
 status come back independently. A second `Compiler` shallow-parses that
 output instead.

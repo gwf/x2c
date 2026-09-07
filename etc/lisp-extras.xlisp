@@ -1,4 +1,4 @@
-// Optional algorithms and compatibility helpers for x2c Lisp.
+// Optional algorithms and aliases for x2c Lisp.
 // Load etc/init.xlisp first.
 
 (def sort

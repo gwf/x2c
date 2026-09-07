@@ -31,7 +31,7 @@ Returns whether the active source-collection artifact has indexed rows.
 Translation depfiles use this result because every unit translated while
 the artifact is active depends on it, even if the unit reads no row.
 
-Source: `src/collect.x:867`
+Source: `src/collect.x:866`
 
 #### header_symbols_begin_generated
 
@@ -61,7 +61,7 @@ the artifact header; compatibility also requires the current symbol
 snapshot hash. Raw rows remain indexed until fetched, rejected, or replaced
 by a later open; materialized rows move to the process-wide cache.
 
-Source: `src/collect.x:827`
+Source: `src/collect.x:826`
 
 #### header_symbols_write
 
@@ -73,7 +73,7 @@ generated-name base, and the current symbol-snapshot hash. Entries with an
 out-of-root part or dependency are omitted. Returns nonzero when `output`
 has no error and leaves it open.
 
-Source: `src/collect.x:744`
+Source: `src/collect.x:743`
 
 ### `Compiler`
 
@@ -92,7 +92,7 @@ importing compiler. Cold collection and in-memory replay also merge
 recorded function definitions; persisted artifact entries carry no
 function-definition list. `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:680`
+Source: `src/collect.x:679`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -108,7 +108,7 @@ function definitions, macro state, and the generated-name count. Keyword
 alias maps and seen-name state are file-local and restored when each file
 walk ends.
 
-Source: `src/collect.x:532`
+Source: `src/collect.x:531`
 
 <a id="Compiler.record_generated_header_symbol"></a>
 #### Compiler.record_generated_header_symbol
@@ -120,7 +120,7 @@ The operation has no effect until generated-symbol recording is enabled.
 The compiler's current file must already have a collected contribution;
 the cache retains `signature`.
 
-Source: `src/collect.x:414`
+Source: `src/collect.x:413`
 
 ## Design notes
 

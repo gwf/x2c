@@ -42,36 +42,12 @@ real when it deletes parallel semantic construction. A no-op rebinding pass
 that leaves the producer's binding, typing, conversion, and placement work in
 place is another traversal, not consolidation.
 
-The method below grew from the `hamburg-v3` rewrite, prepared in commits
-`6d7766fa` and `97cf8dd9` and merged as `e1dcfa1c` through PR #467. PR #516
-then established the same model vertically for macro construction.
-
 The code fragments below are illustrative excerpts, not standalone programs.
 
-The authored changes covered `src/emit.x`, `src/expressions.x`,
-`src/macros.x`, and `src/transform.x`. They replaced positional AST decoding,
-recursive cons-cell walking, and small tag-dispatch helpers with structural
-patterns, named captures, ordinary collection iteration, and literal AST
-templates. The authored source became 58 lines smaller even though many
-previously compressed positional expressions were expanded into named cases.
+## Read the node as syntax
 
-## The fact that unlocked the rewrite
-
-An x2c AST is not fundamentally a `List`. It is an instance of a grammar
-production whose storage happens to be a `List`.
-
-The old code approached a node as storage:
-
-1. check that the value is a List;
-2. read `car()` to discover the tag;
-3. check `len()`;
-4. read `cadr()`, `caddr()`, or a longer `cdr()` chain;
-5. convert the extracted `Var` values;
-6. repeat some of those checks in a helper;
-7. construct the result with `cons()` because the implementation is already
-   thinking in cons cells.
-
-The successful code approached the same node as syntax:
+An x2c AST is an instance of a grammar production stored as a `List`.
+Describe that production directly:
 
 ```x2c
 match (ast) {
@@ -81,26 +57,18 @@ match (ast) {
 }
 ```
 
-That change of model mattered more than any individual syntax substitution.
-Once the grammar production was visible, the field names, legal alternatives,
-arity, and output shape could all be written in one place. The code stopped
-needing a second, procedural description of the AST layout.
-
-The other decisive fact was that structural recognition and semantic
-decisions do not have to be combined. A pattern can establish that a node is
-an `(expr TYPE VALUE)` while the case body still asks whether `TYPE` is a Var
-type, whether an operator has a protocol member, or whether a captured binding
-is automatic. Earlier attempts treated the remaining semantic question as a
-reason to keep the entire manual structural walk. It is not. `match` owns the
-shape; ordinary code inside the case owns the semantics.
+The pattern states field names, legal alternatives, arity, and output shape
+in one place. Structural recognition and semantic decisions remain separate:
+a pattern can establish that a node is an `(expr TYPE VALUE)` while the case
+body asks whether `TYPE` is a Var type, whether an operator has a protocol
+member, or whether a captured binding is automatic. `match` owns the shape;
+ordinary code inside the case owns the semantics.
 
 ## The compiler is a recursive-descent parser
 
-The parallel protocol, expression, and lambda rewrites exposed a missing part
-of the original guidance. Agents could replace selectors with `match` and
-still retain head-only dispatch, pass the full node onward, or monolithically
-interpret several productions. `match` is the syntax; recursive descent is
-the design that makes it useful.
+Replacing selectors with `match` can still leave head-only dispatch,
+full-node forwarding, or several productions interpreted in one function.
+`match` is the syntax; recursive descent is the design that makes it useful.
 
 Do not read "parser" narrowly as only the code that turns source tokens into
 the first AST. The compiler continues to interpret a grammar at every later
@@ -151,7 +119,7 @@ A practical test for every recursive call or helper call is: **what
 uncertainty did this call's caller eliminate?** If the callee must recognize
 the same head or recover the same fields, the descent has not advanced.
 
-## What I needed to know before changing the code
+## What to establish before changing the code
 
 ### 1. Which component had already established the shape
 
@@ -171,16 +139,13 @@ tracking or a parallel validator to distinguish those producers. The complete
 language rule is in `docs/src/reference/language.md` under "Macro-visible
 syntax".
 
-This did not mean deleting every semantic error. It meant deleting or avoiding
-consumer-side shape validation that merely repeated the producer. A missing
-pattern can fall through to the existing compiler path. It does not need a new
-catch-all diagnostic merely because a manual checker used to have one.
+Keep semantic errors that enforce deliberate language behavior. Avoid shape
+validation that repeats the producer. An unmatched pattern can fall through
+to the existing compiler path without a dedicated catch-all diagnostic.
 
 ### 2. Enough of the pattern language to describe the real grammar
 
-Simple `case %(tag ?field)` patterns were not enough. The broad rewrite became
-possible because the source matcher can express the structures that the old
-code was manually probing:
+The source matcher can express nested structure and alternatives directly:
 
 - `*items` captures the remaining sequence;
 - `(!or a b c)` expresses tag alternatives;
@@ -246,8 +211,8 @@ algorithm. It does not belong merely because AST nodes use List storage.
 ### 5. Match captures do not remove semantic ordering requirements
 
 The pattern can bind all children at once, but transformations and emission
-may still have side effects or required source order. In `Emitter.emit`, the
-successful rewrite assigns emitted operands to named locals in order before
+may still have side effects or required source order. `Emitter._emit` assigns
+emitted operands to named locals in order before
 building the returned token literal. It does not hide several emitter calls
 inside a compact expression and assume their evaluation order is harmless.
 
@@ -266,33 +231,31 @@ inside the matching case.
 
 ### 6. x2c's implicit conversions, including their limits
 
-The final cleanup removed six `.var()` calls introduced by the first rewrite.
 A function returning `Var`, a `Var` assignment, or an `Array.push` argument
 already supplies the target type. A returned List or String should normally be
 written in its natural type and boxed by that context.
 
-Two details required generated-C inspection:
+Inspect generated C for these two cases:
 
 1. The conditional operator resolves the types of its two branches before the
    surrounding target conversion. A `List` branch and a `Var` branch therefore
    cannot always be written as one ternary without explicit boxing. The right
-   answer was direct branch control flow, not restoring `.var()`.
-2. Removing `child.list()` from a known-List branch caused the generic
-   Var-to-pointer conversion to win and generated `Var_pointer(child)` rather
-   than `Var_list(child)`. Restoring `.list()` preserved the intended checked
-   extraction while leaving the result's List-to-Var boxing implicit.
+   answer is direct branch control flow when it avoids explicit boxing.
+2. A known-List branch still needs `child.list()` when an implicit crossing
+   selects the generic `Var_pointer(child)` instead of `Var_list(child)`.
+   Keep the checked extraction explicit and the result's List-to-Var boxing
+   implicit.
 
 The rule is not "remove every converter." It is "let a real target type request
 the conversion, and inspect generated C when aliases or mixed expressions can
 change which converter wins."
 
-## The successful conversion patterns
+## Structural patterns
 
 ### Turn positional recognizers into grammar cases
 
-`_direct_identifier` and `_addressed_identifier` in `src/emit.x` previously
-checked the head tag and then selected `cadr()` or `caddr()` differently for
-each tag. They now state the accepted grammar directly:
+`_direct_identifier` and `_addressed_identifier` in `src/emit.x` state the
+accepted grammar directly:
 
 ```x2c
 match (ast) {
@@ -304,14 +267,12 @@ match (ast) {
 }
 ```
 
-The useful review question is now "are these the accepted lvalue shells?" The
-old review question was "does each selector still point at the intended list
-position after all preceding guards?"
+Review whether these are the accepted lvalue shells and whether each captured
+field has the meaning its consumer expects.
 
 ### Match the node, then keep semantic probes in the case
 
-`_transform_operator` in `src/transform.x` did not become a giant pattern that
-tried to encode type resolution and protocol behavior. It matches the operator
+`_operator` in `src/transform.x` matches the operator
 and typed-expression forms, names `operator`, `lhs`, `rhs`, `argument`, and
 `argument_type`, and then performs the existing semantic resolution inside
 those cases.
@@ -322,9 +283,7 @@ destructuring is not a prerequisite for semantic logic.
 
 ### Replace runtime match results and `assoc` with source captures
 
-The defer capture functions previously called `ast.match(...)`, received a
-binding association List, and immediately recovered `type` and `binding` with
-`assoc`. Source `match` now binds those values directly in the branch:
+Source `match` binds defer capture values directly in the branch:
 
 ```x2c
 match (ast)
@@ -339,9 +298,7 @@ searching an association List.
 
 ### Separate recursive traversal from structural recognition
 
-Several old walkers recursively processed `car(ast)` and `cdr(ast)`, mixing
-"what kind of node is this?" with "visit every nested value." The successful
-form is:
+Recognize special node forms separately from visiting their children:
 
 ```x2c
 match (ast)
@@ -360,31 +317,21 @@ code whose real purpose is recognizing and rewriting syntax.
 
 ### Collapse helper families into the grammar dispatcher
 
-The largest improvement came from treating `Emitter.emit` as the declarative
-owner of many AST productions. Small helpers such as `emit_cast`, `emit_call`,
-`emit_index`, `emit_if`, `emit_while`, and `emit_return` existed largely to
-decode one tag's positional fields. Their cases now live together in the
-source `match`, while helpers remain only where they own substantial behavior.
+`Emitter._emit` states its AST productions in a source `match`. Its helpers
+own substantial behavior, such as `Emitter._var_collection`, which emits both
+Array and Map literals with the target name supplied by its caller.
 
-This made the emitted grammar visible in one place and deleted the repeated
-"dispatch by tag, then decode by positions" layer. It also exposed genuine
-shared behavior: Array and Map literals could share `emit_var_collection`
-because the only semantic difference was their target name.
+The dispatcher owns the current grammar choice. A case that reaches another
+grammar rule calls a function for that rule with the named captures. Helpers
+that only repeat positional decoding add no behavior; helpers with real
+recursive-descent or semantic work should receive narrower arguments.
 
-This is not an instruction to make one giant function own every lower grammar
-rule. The dispatcher should own the current choice. A case that reaches a new
-grammar rule should call a function for that rule with the named captures,
-not with the original AST. Helpers disappeared from `Emitter.emit` when they
-only repeated its positional decoding; a helper with real recursive-descent or
-semantic work should remain and receive narrower arguments.
-
-The important unit was the function family, not one selector. Replacing one
-`caddr()` at a time would have preserved the tangle of helpers and missed the
-main simplification.
+Review the connected function family so that repeated decoding across callers
+and callees is visible.
 
 ### Use template replacements for pure AST projections
 
-The macro SDK function helpers were especially clear examples:
+The macro SDK function helpers express these projections:
 
 - function name: match the function declarator and capture its binding;
 - function type: replace the function form with the declaration form;
@@ -392,15 +339,12 @@ The macro SDK function helpers were especially clear examples:
   its bound parameter sequence;
 - function body: replace `(function ... (block *body))` with `(*body)`.
 
-These operations are mappings between visible templates. Writing them as
-selector chains concealed both the input and output. `match_replace` made each
-mapping nearly identical to its grammatical description.
+These operations are mappings between visible templates. `match_replace`
+exposes both the input and output in the grammatical description.
 
-## What I had to be prepared to delete
+## What to delete
 
-The code would not have become substantially better if the matcher had merely
-been added beside the old machinery. The rewrite required willingness to
-delete:
+When a structural pattern subsumes their work, delete:
 
 - tag, length, and nested-List checks already implied by the pattern and its
   producer;
@@ -409,18 +353,12 @@ delete:
 - recursive `car`/`cdr` walkers when `foreach` expressed the traversal;
 - status and fallback paths that treated an impossible internal shape as
   ordinary absence;
-- the emitted binding-identity validator and its validator-only forged-input
-  fixture;
 - `cons()` construction used only to spell fixed AST shapes;
 - explicit `.var()` calls already selected by return, assignment, or argument
   types.
 
-It was also necessary to accept that the connected source would be temporarily
-unbuildable while the dispatcher signatures, helper deletions, call sites, and
-templates were being changed together. That intermediate state was not
-evidence that the direction was wrong. Running the full repository gate at
-each such point would have forced the work back toward tiny local edits and
-made the family-level rewrite practically impossible.
+Change dispatcher signatures, helper calls, and templates together. Run focused
+checks when the connected edit is buildable, then the final publication gate.
 
 ## The failure modes other agents need to avoid
 
@@ -500,11 +438,10 @@ point.
 
 ### Do not use broad validation as an editing loop
 
-The productive loop was source reasoning, one coherent family rewrite,
-generated-C inspection where conversion or evaluation order was subtle, and
-focused fixtures. The independent review happened before the single final
-`make agent-pr-check`. Broad gates were proof of the finished tree, not a
-substitute for understanding each edit.
+Use source reasoning, one coherent family rewrite, generated-C inspection
+where conversion or evaluation order is subtle, and focused fixtures. Review
+the authored diff before `tools/gate-state.py ensure agent-pr-check`. Broad
+gates prove the finished tree; each edit still needs to be understood.
 
 ## A repeatable method for broader work
 
@@ -622,14 +559,9 @@ For new code, the desired order is:
 8. rely on target-typed conversions unless generated C proves an explicit
    crossing is needed.
 
-## Performance observation
+## Performance
 
-Gary's first stress test of this branch was at least 10% faster. That result
-has not been isolated or reproduced as part of this document, so it is an
-observation rather than a claimed benchmark result. It is nevertheless
-consistent with one concrete mechanism in the rewrite: source match captures
-are lowered into direct capture storage, while the replaced `List.match` plus
-`assoc` paths constructed a binding association List and searched it for
-values. The larger gains may also come from simpler traversal and dispatch.
-Future performance work should measure those mechanisms separately without
-making performance proof a prerequisite for the source improvement.
+Source match captures lower into direct capture storage. `List.match` followed
+by `assoc` constructs a binding association List and searches it for values.
+Measure matching, traversal, and dispatch separately when investigating a
+performance change.

@@ -122,7 +122,7 @@ edit it by hand. `.xmacro` files beside the modules own shared macro
 definitions (ledgers, adapters, result-flow forms); each is imported by the
 modules that consume it and is a module kind of its own, not a header.
 
-Status-bearing operations should own recoverable failure. Compatibility
+Status-bearing operations should own recoverable failure. Convenience
 adapters may fail fast, but they should delegate rather than duplicate the
 owner's mutation logic. Canonical values should be established once by their
 constructor or interning boundary.
@@ -175,7 +175,3 @@ These are contract limits, not suggestions. Do not add a downstream workaround
 or describe a feature as complete without moving the owning implementation and
 its proof together. A parser branch does not prove runtime support, and a
 runtime helper does not make syntax supported.
-
-This procedure previously lived in the implementation map. It moved here when
-that document became a chapter of the user-facing book, which explains how the
-compiler works rather than instructing contributors.

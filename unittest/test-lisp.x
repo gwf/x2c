@@ -817,11 +817,9 @@ static void lisp_deep_recursion_survives_stack(void) {
   Lisp.destroy(lisp);
 }
 
-/* The nine variadic operators moved out of `etc/init.xlisp` and into
-   natives, because a variadic lambda cannot be prepared and pulled every
-   arithmetic call in a compiled body back onto the evaluator. The
-   definitions they replaced are the oracle; keep them here and compare
-   answer for answer, raised code included. */
+/* The nine variadic arithmetic operators are native so compiled calls
+   avoid evaluator dispatch for variadic lambdas. These Lisp definitions
+   provide a reference implementation; compare every result and raised code. */
 static void _same(Lisp lisp, const char *fresh, const char *old) {
   Symbol left = _raised_code(lisp, fresh), right = _raised_code(lisp, old);
   EXPECT_INT_EQ((int) left, (int) right);

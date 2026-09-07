@@ -201,8 +201,8 @@ int main(void) {
   }
   result("map-try-next", now_ns() - start, (long) width * repeats);
 
-  // The cost of the pair `Map.enumerate` yields, which the destructuring
-  // foreach above no longer builds.
+  // The cost of the pair `Map.enumerate` yields; the destructuring
+  // foreach above uses separate key and value outputs.
   start = now_ns();
   for (int r = 0; r < repeats; r++) {
     unsigned cursor = 0;

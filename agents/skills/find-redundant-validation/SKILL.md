@@ -38,7 +38,7 @@ Source `match` does not make a function trustworthy. It may be the clearest
 recognition code in the function while adjacent `is <list>`, tag, arity, or
 `try_*parts` guards still distrust the same compiler-produced value.
 
-Use the older `--frameworks` mode when the specific question is whether a
+Use `--frameworks` when the specific question is whether a
 connected validator-named diagnostic subsystem exists. It groups those
 functions by authored lines; it is not the starting point for producer-side
 trust work.

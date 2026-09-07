@@ -300,8 +300,8 @@ cmp -s "$BUILD/macro-stability/before.names" \
 
 # Case 9: the macro and Lisp files a header reads are prerequisites of every
 # unit that includes it, not only of the first unit to parse it.  A batch
-# replays the second unit's copy of the header out of the cache, and that
-# replay used to drop the header's own imports from the depfile.
+# replays the second unit's copy of the header out of the cache and must
+# include the header's own imports in the depfile.
 mkdir -p "$BUILD/imports/src" "$BUILD/imports/out"
 cat >"$BUILD/imports/src/probe.xmacro" <<'EOF'
 $(def probe.step 3)

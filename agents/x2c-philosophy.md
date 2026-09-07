@@ -88,7 +88,7 @@ captures a value; by itself it does not establish that value's type.
 | Source/generated expression resolution and declaration publication | verified | `Compiler.resolve_expression`; shared declaration helpers in `src/parse.x` | `macro-source-parity` and macro fixture corpus |
 | Error protocol | verified | `Error`, plain `raise`, filtered `catch`; private record regions and handler watermarks own lifetime | Error/exception suites, compiler fixtures, allocation/floor/fatal probes, self-host convergence |
 | Allocation and size failure | verified | `Scope`, `Pool`, `Error`, and literal-raise emission | Error/exception suites, Scope and Error fatal probes, compiler fixtures |
-| Lisp read/eval failures | verified | `Lisp.read`, evaluator, V2 `Func` Type boundary | Lisp/Func suites |
+| Lisp read/eval failures | verified | `Lisp.read`, evaluator, `Func` Type boundary | Lisp/Func suites |
 | Serialized List syntax | verified | shared Atom/String/List spelling | Atom/Lisp cross-syntax and full snapshot probes |
 | Compiler runtime symbols | verified | versioned Lisp snapshot plus live oracle | snapshot probes and compiler fixtures |
 | Protocol adapter visibility | verified | least-public protocol dependency closure; descriptor registration remains process-wide | protocol fixtures, normal/live owner-consumer probes, self-host convergence |
@@ -183,8 +183,8 @@ cache-or-recursive route.
 Filtered catch copies committed capture values into the selected Error
 record's private region before transfer. The retained handler region therefore
 owns indexed values across `siglongjmp`; generated code does not rely on
-automatic capture storage after the jump. Lazy legacy binding publication is
-an adapter over that retained positional state.
+automatic capture storage after the jump. Lazy association-List publication
+uses that retained positional state.
 
 ### Lists and identity
 
@@ -313,7 +313,7 @@ ordinary-value requirement.
 
 Non-empty Array and Map literals use counted bulk owners. Each dynamic value
 therefore reaches `Array.push` or `Map.set`, which rejects `void`; it cannot be
-mistaken for the terminator of a compatibility varargs adapter. Raw Null
+mistaken for the terminator of a varargs adapter. Raw Null
 remains legal collection data.
 
 Automatic source-to-`Var` conversion is lossless for the source/tag pairs in
@@ -494,8 +494,8 @@ from a `Var` output, runtime combinators consume that status, and generated
 `foreach` tests it before converting the payload. A callback that reports
 success with a `void` output violates the iterator contract. Exhaustion is
 represented by clearing the iterator callback, and an unsupported or null
-callback is safely exhausted. `Iter.next` remains a compatibility adapter
-whose exhausted result is `void`.
+callback is safely exhausted. `Iter.next` delegates to `Iter.try_next` and
+returns `void` on exhaustion.
 Integer ranges are inclusive and direction-sensitive; construction rejects a
 zero step, and endpoint progression terminates before signed overflow.
 Combinators preserve the same status owner: lazy transforms, including
@@ -510,9 +510,8 @@ outputs. Map storage rejects `void` keys and values, and map literals use a
 counted bulk owner so a dynamic `void` pair cannot be mistaken for a terminal
 sentinel. `Map.try_next` traverses occupied slots with separate status, key,
 and value outputs, including a raw `(Null, Null)` entry. Structural mutation
-invalidates outstanding traversal state. `Map.get` and `Map.del` remain
-compatibility surfaces with their older sentinel or nullable result
-contracts.
+invalidates outstanding traversal state. `Map.get` and `Map.del` return `void`
+when the key is absent.
 
 `x2c_try_register_descriptor` reports whether descriptor registration
 succeeded. `x2c_register_type` and `x2c_register_descriptor` are the ordinary
@@ -710,9 +709,7 @@ A translation unit owns initialization through one
 signature; generation owns the once-only guard, literal initialization, and
 calls at non-static function boundaries. Static helpers trust that boundary or
 the initializer body, which runs only after the guard is set, and do not repeat
-the same check. The method body owns the visible runtime assignments. Legacy
-`@init` is rejected rather than retained as a second way to express the same
-contract.
+the same check. The method body owns the visible runtime assignments.
 
 ### Type-owned shutdown
 
@@ -805,8 +802,8 @@ the raw Scope leak report.
 The bit-level distinction between zero-like empties and all-ones `void` is
 verified, as is its exclusion from collection and iterator value domains.
 Status-bearing iterator and Map APIs separate the most common exhaustion and
-absence cases from payload values. Compatibility APIs and other public
-boundaries still vary in whether `void` means missing, exhausted, or invalid;
+absence cases from payload values. Public APIs vary in whether `void` means
+missing, exhausted, or invalid;
 each must document that terminal meaning. This is the open **Missing and
 exhaustion API use** row in the ledger above.
 
@@ -845,7 +842,7 @@ not of the memory-bracket contract.
   context are supported.  Do not manually unbox merely to reproduce a proven
   conversion, and do not assume an unsupported conversion exists.
 - Prefer current source forms such as `value is not Type`, receiver methods,
-  literals, and direct patterns over older equivalent scaffolding.
+  literals, and direct patterns when they express the operation directly.
 - Prefer `match`, `match_replace`, foreach, and List/Iter folds when they state
   the transformation directly.
 - Use explicit traversal when order, state, ownership, or performance makes it
