@@ -9,11 +9,13 @@ rx.Regexp request = rx.Regexp.compile(
 defer request.free();
 
 // Sample requests include lines the pattern will ignore.
-String text = %"GET /docs
+String text = %"\
+GET /docs
 POST /build
 -- idle --
 DELETE /cache
-GET missing-slash";
+GET missing-slash
+";
 
 int matches = 0;
 foreach (String line, text.lines()) {
