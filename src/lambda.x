@@ -978,8 +978,8 @@ static void _record_region_binding(
 
 /* Collect only bindings owned by this callable region. Nested lambdas are
    separate regions even though their capture expressions execute here.
-   Every function body pays this walk, so it keeps the manual worklist: a
-   Func visit callback's dynamic call per node cost ~6% of self-translation.
+   Keep the manual worklist: a Func visit callback's dynamic call per node
+   cost ~6% of self-translation.
    Pending sibling suffixes wait on `resume` to stay off the C stack. */
 static void _collect_region_bindings(
   Compiler compiler, List ast, Map owned, Array order) {
@@ -1243,9 +1243,9 @@ static List _prepare_nested_lambda_regions(
            : %(expr $type (lambda (params @entries) $prepared));
     }
   }
-  if (!ast_contains_head(ast, <lambda>)) return ast;
   return Ast.rewrite_children(
-    ast, %!(List child) => _prepare_nested_lambda_regions(compiler, child));
+    ast, %!(List child) => ast_contains_head(child, <lambda>)
+      ? _prepare_nested_lambda_regions(compiler, child) : child);
 }
 
 static List _parameter_setup(
@@ -1282,6 +1282,7 @@ static List _prepend_setup(List body, List setup) {
    initializer order. Snapshot rows retain their separate binding identities. */
 static List _prepare_lambda_region(
   Compiler compiler, List entries, List body) {
+  if (!ast_contains_head(body, <lambda>)) return body;
   body = _prepare_nested_lambda_regions(compiler, body);
   Map owned = %{};
   Array order = %[];

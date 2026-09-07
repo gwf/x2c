@@ -591,15 +591,22 @@ Type Type.base_type(Type type) {
   return NULL;
 }
 
+static int _omit_specifier(Symbol first, int keep_qualifiers) =>
+  (first.is_storage_class() ||
+   (!keep_qualifiers && first.is_type_qualifier()) || first.is_inline()) &&
+  first != <typedef>;
+
 static Type _canonical(Type type, int keep_qualifiers) {
+  List rest = type;
+  while (rest && (rest.car() is not <symbol> ||
+                 !_omit_specifier(rest.car(), keep_qualifiers)))
+    rest = rest.cdr();
+  if (!rest) return type;
   Array result = %[];
   foreach (Var head, type) {
     if (head is <symbol>) {
       Symbol first = head;
-      if ((first.is_storage_class() ||
-          (!keep_qualifiers && first.is_type_qualifier()) ||
-          first.is_inline()) && first != <typedef>)
-        continue;
+      if (_omit_specifier(first, keep_qualifiers)) continue;
     }
     result.push(head);
   }

@@ -50,7 +50,7 @@ for source in "$REPO_ROOT"/bootstrap/src/*.c; do
 done
 "$COSMOCC" -Os -o "$WORK/x2c.com" "$@" "$WORK/libx2c.a" -lm
 
-for source in "$REPO_ROOT"/src/*.x; do
+for source in "$REPO_ROOT"/src/*.x "$REPO_ROOT"/src/*.xmacro; do
   cp "$source" "$WORK/payload/x2c/src/$(basename "$source")"
 done
 for source in "$REPO_ROOT"/lib/*.x "$REPO_ROOT"/lib/*.xmacro \

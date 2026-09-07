@@ -133,6 +133,29 @@
 
 ## Outstanding Items
 
+- A statement macro containing `NULL` can emit an undeclared
+  `_x2c_binding_shadow_0` in a captured dynamic Func call with a nonaddressable
+  argument. This reproduces on compiler `24c3f8d`; the AST rewrite macro
+  avoids it with `(Array) 0`. Save this as `/tmp/macro-null/probe.x`:
+
+  ```x2c
+  macro Statement $invoke(Name $child, Expr $call) => {
+    Array scratch = NULL;
+    $child = %(x);
+    $call;
+  }
+  int main(void) {
+    Var child;
+    Func fn = %!(List value) => value;
+    $invoke(child, fn(child.list()));
+    return 0;
+  }
+  ```
+
+  Run `builds/0/x2c translate -q --out-dir /tmp/macro-null
+  /tmp/macro-null/probe.x`, then `cc -iquote builds/0/lib -c
+  /tmp/macro-null/probe.c -o /tmp/macro-null/probe.o`. Translation succeeds;
+  native compilation fails at `FuncArg_reference(_x2c_binding_shadow_0, ...)`.
 - String direct-name coverage gaps are `contains_digit`, `lfind`, `lstrip`,
   `new_fill`, `quote`, `rstrip`, and `unquote`, plus lifecycle and dispatch
   adapters already exercised indirectly.

@@ -1,0 +1,20 @@
+macro Statement $ast.rewrite_children(
+  Expr $input, Name $child, Expr $replacement) => {
+  List original = $input;
+  // NULL here can capture the name in an expanded Func call.
+  Array rewritten = (Array) 0;
+  for (List cursor = original; cursor; cursor = cursor.cdr()) {
+    Var item = cursor.car(), value = item;
+    if (item is <list>) {
+      $child = item;
+      value = $replacement;
+    }
+    if (!(void *) rewritten && value != item) {
+      rewritten = %[];
+      for (List prefix = original; prefix != cursor; prefix = prefix.cdr())
+        rewritten.push(prefix.car());
+    }
+    if ((void *) rewritten) rewritten.push(value);
+  }
+  return (void *) rewritten ? rewritten.list_free() : original;
+}

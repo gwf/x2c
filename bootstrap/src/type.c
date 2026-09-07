@@ -135,6 +135,8 @@ static Type _integer_literal_type(unsigned long long value,  int decimal,  int i
 
 static Map _typetags_table(void);
 
+static int _omit_specifier(Symbol first,  int keep_qualifiers);
+
 static Type _canonical(Type type,  int keep_qualifiers);
 
 static unsigned _qualifiers(Type * cursor);
@@ -999,7 +1001,14 @@ Type Type_base_type(Type type){
   return NULL;
 }
 
+static int _omit_specifier(Symbol first,  int keep_qualifiers){
+  return(Symbol_is_storage_class(first) ||(! keep_qualifiers && Symbol_is_type_qualifier(first)) || Symbol_is_inline(first)) && first != 44661285196;
+}
+
 static Type _canonical(Type type,  int keep_qualifiers){
+  List rest = Type_list(type);
+  while(List_truth(rest) &&(! Var_is(List_car(rest),  1328354264) || ! _omit_specifier(Var_symbol(List_car(rest)),  keep_qualifiers))) rest = List_cdr(rest);
+  if(! List_truth(rest)) return type;
   Array result = Array_new();
   {
     Var head;
@@ -1013,7 +1022,7 @@ static Type _canonical(Type type,  int keep_qualifiers){
       {
         if(Var_is(head,  1328354264)){
           Symbol first = Var_symbol(head);
-          if((Symbol_is_storage_class(first) ||(! keep_qualifiers && Symbol_is_type_qualifier(first)) || Symbol_is_inline(first)) && first != 44661285196) continue;
+          if(_omit_specifier(first,  keep_qualifiers)) continue;
         }
         Array_push(result,  head);
       }
