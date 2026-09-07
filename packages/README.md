@@ -189,7 +189,7 @@ make -C packages/yyjson test
 ```
 
 Set `X2C_DEPS_DIR` to share another cache location across clones. A package's
-old narrow prefix variable, such as `PCRE2_PREFIX`, can still point at an
+package-specific prefix variable, such as `PCRE2_PREFIX`, can point at an
 external installation for diagnosis. `make clean` removes only local package
 outputs; it never removes the shared cache.
 

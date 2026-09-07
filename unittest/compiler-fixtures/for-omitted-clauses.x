@@ -2,9 +2,7 @@
 
 /* C lets a for statement omit any of its three clauses.  Each clause is
    parsed by peeking for its terminator and letting one expect consume it,
-   so all eight combinations reach the same generated shape.  Omitting the
-   init or the increment used to consume the terminator twice and the next
-   clause was then parsed at the wrong token. */
+   so all eight combinations reach the same generated shape. */
 
 static int all_omitted(void) {
   int n = 0;

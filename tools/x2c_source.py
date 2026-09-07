@@ -942,7 +942,7 @@ def public_declarations_for_path(
 
 
 def public_functions(text: str) -> tuple[str, ...]:
-    """Names only, preserving the catalog's historical output exactly."""
+    """Function names in source order."""
     return tuple(d.name for d in definitions(text))
 
 

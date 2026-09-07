@@ -180,7 +180,7 @@ static VarDecoded _decode_builtin(TagId id, Var value) {
 }
 
 /* `var-tags.xmacro` generates the built-in decoder. Reserved encodings report
-   invalid structure and keep the historical f64 tag and kind. */
+   invalid structure and use the f64 tag and kind. */
 static VarDecoded _decode(Var value) {
   unsigned top = _top_bits(value), mid = _middle_bits(value);
   unsigned btm = _bottom_bits(value);
@@ -279,7 +279,7 @@ Symbol Var.tag(Var v) {
     `<i32>` even though both are integers. When any integer will do, ask
     `Var.is_integer`, or compare `Var.kind`.
     As with `Var.tag`, validate externally constructed bits first: an invalid
-    encoding uses the historical `<f64>` fallback.
+    encoding uses the `<f64>` fallback.
 */
 int Var.is(Var var, Symbol tag) => var.tag() == tag;
 

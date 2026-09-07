@@ -71,7 +71,7 @@ Two lanes measure it:
 algorithm for 32-bit keys and values. It keeps eight-byte hash/index slots,
 separate eight-byte records, dynamic probe-sequence lengths, Robin Hood
 displacement, back-shift deletion, and record-index reuse. It remains the
-split-layout specimen even though production Map now uses parallel hash and
+split-layout specimen even though production Map uses parallel hash and
 entry arrays. Its 0.75 load factor matches production Map and khashl.
 It replaces `Var`, `Scope`, `Bytes`, and dynamic updates with
 `malloc`/`realloc`/`free` and direct typed value pointers. It does not include

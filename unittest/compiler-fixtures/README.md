@@ -40,7 +40,7 @@ elapsed time becomes `<elapsed>` and the first-event `start_time` value becomes
 `<wall-time>`. Logger's unit suite tests those clock fields; compiler fixtures
 check every other diagnostic byte and the exact exit status.
 The type-initializer fixtures check lifecycle-hook generation and the exact
-diagnostics for invalid or legacy forms.
+diagnostics for unsupported forms.
 
 Symbol fixtures keep the checked artifact focused by selecting entry headers
 that contain the literal text in `<name>.symbol-filter`. The matching entry's

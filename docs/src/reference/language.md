@@ -27,8 +27,8 @@ itself and terminates cycles without it.
 
 Every ordinary `.x` translation unit implicitly loads the `x2c.x` standard
 runtime prelude. The compiler also emits `#include "x2c.h"` in its generated
-header. The old explicit `#include "x2c.x"` spelling remains accepted, but it
-does not change the semantic environment or generated runtime dependency.
+header. An explicit `#include "x2c.x"` is also accepted; it does not change
+the semantic environment or generated runtime dependency.
 
 Optional modules shipped with x2c are outside that prelude. They require an
 explicit source include, such as `#include "typed-array.x"`. Third-party code
@@ -1470,7 +1470,7 @@ preserve their type tag when boxed. `Array`s and `Map`s instead require
 allocated objects even when empty; boxing a null pointer with either value tag
 is an invariant violation. `void` is the all-ones terminal/tombstone value used
 by APIs for exhaustion or absence. Status-bearing `Iter` and `Map` APIs
-separate success from payload bits, while their compatibility adapters still
+separate success from payload bits. `Iter.next`, `Map.get`, and `Map.del`
 use `void` for exhaustion or absence. Malformed representations, including null
 wide boxes and null `Array` or `Map` values, are rejected. Every accepted
 nonnull pointer must name a live object established by its constructor.
@@ -1983,7 +1983,7 @@ type when that conversion exists. [Iteration](../guide/iteration.md) covers
 the loop forms and the `Iter` protocol in tutorial order.
 
 Foreach uses `Iter.try_next`. Successful payloads exclude `void`,
-which remains the terminal sentinel returned by the compatibility `next` API.
+which is the terminal sentinel returned by `Iter.next`.
 A boxed `Var` without a registered iterator adapter produces an
 already-exhausted iterator. A receiver with a statically known type and no
 visible exact or inherited `Iter` conformance is rejected as not iterable.
@@ -2003,9 +2003,9 @@ paths. A sigil-leading `Atom` with any other suffix is a malformed pattern:
 recursive matching fails, `MatchPlan` reports `binder-name`, and compiled
 `match` syntax reports a positioned diagnostic.
 
-`Match` operators and predicate names remain compact `Symbol`s. The legacy
+`Match` operators and predicate names are compact `Symbol`s. The
 `?binder?`, `*binder?`, and `!op?` spellings are reserved control vocabulary
-only in their established predicate operand positions; they are not named
+only in their `!is` predicate operand positions; they are not named
 binders. Nested `List` patterns, literal comparison, default selection, and the
 `!not`, `!or`, `!and`, `!set`, `!quote`, and `!is` forms are supported. `break`
 exits the `match`; `continue` targets an enclosing loop.
@@ -2100,7 +2100,7 @@ need only literal caching retain a private synthetic initializer.
 Other initialization statements and runtime-valued static assignments belong in
 the method body. Eligible file-static percent literals use the generated
 sequence described under [Values and literals](#values-and-literals). Top-level
-decorators, including legacy `@init`, are rejected.
+decorators are rejected.
 
 ### Type-owned shutdown
 

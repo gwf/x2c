@@ -311,7 +311,7 @@ static int _layout_builder_add(MatchLayoutBuilder *builder, Atom binder) {
 }
 
 /* Validate and collect the raw pattern in one lexical preorder walk. !quote
-   is opaque. Legacy compact matcher predicates are control vocabulary only
+   is opaque. Compact matcher predicates are control vocabulary only
    as the final operand of !is. The compiler's dynamic-value marker retains
    binders in its literal children without treating the marker as data. */
 static void _layout_collect(MatchLayoutBuilder *builder, Var pattern) {
@@ -601,7 +601,7 @@ int List.try_match(List input, Var pat, List *out_bindings) => out_bindings &&
          _plan_cache().try_match(input, pat, out_bindings);
 
 /** Returns bindings when `input` matches `pat`, or `nil` on a miss.
-    A binder-free success returns the nonnull `%(())` compatibility sentinel
+    A binder-free success returns the nonnull `%(())` sentinel
     with no associations. Binding order and failures follow `List.try_match`.
 */
 List List.match(List input, Var pat) {

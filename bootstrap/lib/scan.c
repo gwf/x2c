@@ -103,7 +103,7 @@ int scan_white_space(char * s){
 
 int scan_line_comment(char * s){
   if(! s || s[0] != '/' || s[1] != '/'){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/scan.x",.function =  "scan_line_comment",.line =  113};
+    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/scan.x",.function =  "scan_line_comment",.line =  112};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("scan_line_comment")),  NULL))));
     __builtin_unreachable();
   }
@@ -117,7 +117,7 @@ int scan_line_comment(char * s){
 
 int scan_block_comment_status(char * s,  Symbol * status){
   if(! s || s[0] != '/' || s[1] != '*'){
-    static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/scan.x",.function =  "scan_block_comment_status",.line =  127};
+    static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/scan.x",.function =  "scan_block_comment_status",.line =  126};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("scan_block_comment_status")),  NULL))));
     __builtin_unreachable();
   }
@@ -137,7 +137,7 @@ int scan_block_comment(char * s){
 
 int scan_identifier(char * s){
   if(! s ||(! scan_ascii_alpha((unsigned char) s[0]) && s[0] != '_')){
-    static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/scan.x",.function =  "scan_identifier",.line =  145};
+    static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/scan.x",.function =  "scan_identifier",.line =  144};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("scan_identifier")),  NULL))));
     __builtin_unreachable();
   }

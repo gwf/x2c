@@ -214,9 +214,8 @@ static void _cache_dependencies(Map dependencies, Map additions) {
 }
 
 /* An explicit runtime include matters only when the module contributes a
-   declaration outside the standard snapshot. This preserves the historical
-   no-op treatment of standard runtime includes while allowing optional x2c
-   modules to be loaded from the same header artifact. */
+   declaration outside the standard snapshot. Standard runtime includes are
+   no-ops; optional x2c modules load from the same header artifact. */
 static int _entry_adds_symbols_visit(
   Compiler compiler, List entry, Map globs, Map visited) {
   foreach (Var part, entry.car().list()) {

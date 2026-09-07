@@ -1004,7 +1004,7 @@ ada -> 36
 That is the table's order, and it moves when the hash changes. Sort what you
 print when the order matters.
 
-`Map.get`, `Map.del`, and the bracket forms are compatibility wrappers over
+`Map.get`, `Map.del`, and the bracket forms are wrappers over
 these calls. `Map.set` and bracket writes are fail-fast and reject a `void`
 key or value.
 

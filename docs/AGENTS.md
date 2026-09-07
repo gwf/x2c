@@ -38,18 +38,18 @@ and `etc/header-symbols.xlisp`. Never hand-edit either; run `make doc-generate`.
 `docs/src/library/overview.md` is the exception - it is authored prose and the
 chapter's entry page, and the generator only owns its table-of-contents line.
 
-The generator's `--check-path <path>` mode audits the planned provisional
-compiler API, optional-library API, and public-type surfaces without adding
-incomplete pages to the book. It reads future-public callables and types from
-source and cross-checks their names and callable signatures against
+The generator's `--check-path <path>` mode audits compiler API, optional-library
+API, and public-type surfaces without adding pages to the book. It reads
+public callables and types from source and cross-checks their names and callable
+signatures against
 `etc/header-symbols.xlisp`.
 
-When final activation lands, the generator will also own
-`docs/src/internals/compiler-api/`, its `# Compiler API (provisional)` section
+The generator also owns `docs/src/internals/compiler-api/`, its
+`# Compiler API (provisional)` section
 in `docs/src/SUMMARY.md`, and full pages for optional library modules. The
 provisional label means those pages describe current compiler behavior without
-promising compatibility. From that activation onward, never hand-edit those
-pages or their table-of-contents entries.
+promising API stability. Never hand-edit those pages or their table-of-contents
+entries.
 
 Prose on generated pages comes from doc comments in `src/*.x`, `lib/*.x`, and
 the generic templates that own published definitions:
@@ -77,9 +77,10 @@ the generic templates that own published definitions:
 - Published callables default to the primary tier. The compact
   `docs/library-api-tiers.txt` ledger owns advanced, compatibility, and
   internal exceptions; it rejects duplicate and stale names. Source-level
-  `API:` paragraphs are errors. Compatibility prose still names the preferred
-  operation. Internal callables remain discoverable for source readers but
-  are not supported user API; the generated internal-tier heading explains
+  `API:` paragraphs are errors. The `compatibility` tier is presented as
+  Convenience API; its prose names the preferred operation. Internal callables
+  remain discoverable for source readers but are not supported user API; the
+  generated internal-tier heading explains
   that once rather than repeating it beside every function.
 - `Raises:` and `See:` begin recognized sections whether or not an empty line
   precedes them. Every `See:` target must be a real public `Type.method`; an
@@ -93,9 +94,8 @@ the generic templates that own published definitions:
 - Generated signature lines may exceed 79 columns; the 79-column rule applies to
   prose you write, not to a declarator the compiler dictates.
 - The path-scoped audit requires doc comments for published callables and
-  types in optional library modules; final activation publishes their
-  reference pages. A doc comment on a function in a `contract` or `internal`
-  module (see
-  `docs/library-manifest.txt`) is an error, not a silent omission. Every
+  types in optional library modules. A doc comment on a function in a
+  `contract` or `internal` module (see `docs/library-manifest.txt`) is an error,
+  not a silent omission. Every
   `lib/*.x` needs a row there, so a new module fails `make doc-generate` until
   it is classified.

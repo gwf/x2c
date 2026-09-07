@@ -223,7 +223,7 @@ inline-lisp example
 - Runtime owner: `lib/map.x`
 - Literal boundary: `src/emit.x` emits counted `Map.update_n` construction
 - Generic routing: `lib/dispatch.x`
-- Compatibility: `Map.get` and `Map.del`
+- Value-returning wrappers: `Map.get` and `Map.del`
 - Cursor contract: structural mutation invalidates outstanding traversal state
 - Tests: `Map` and `Iter` suites plus the `void`-sentinel and raw `Null`
   coverage

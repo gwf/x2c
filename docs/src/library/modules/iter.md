@@ -564,7 +564,7 @@ allocating.
 
 Source: `lib/iter.x:713`
 
-## Compatibility API
+## Convenience API
 
 | Function | Summary |
 | --- | --- |

@@ -1014,9 +1014,8 @@ static void var_dense_custom_dispatch(void) {
   a.write_repr(streamed);
   EXPECT_STR_EQ(streamed.str_free(), "custom-stream-repr");
 
-  // A descriptor with only str still renders through write_str: the
-  // String is written through rather than streamed, which is the
-  // compatibility path every existing custom descriptor relies on.
+  // A descriptor with only str renders through write_str by writing the
+  // returned String.
   Buffer str_fallback = Buffer.new(0);
   a.write_str(str_fallback);
   EXPECT_STR_EQ(str_fallback.str_free(), "custom-str");
@@ -1176,7 +1175,7 @@ static void var_dense_dispatch_capacity(void) {
 /* Streaming must produce exactly what str produces, for every built-in shape
    and for nesting, or adopting write_str inside a renderer changes output.
    Buffer and Block are Var protocol participants that define str but no
-   write_str, so they also prove the compatibility fallback on a real type
+   write_str, so they also prove the String fallback on a real type
    rather than only on a synthetic descriptor. */
 static void var_write_str_matches_str(void) {
   Buffer payload = Buffer.new(0);
@@ -1258,7 +1257,7 @@ static void var_empty_container_display_forms(void) {
   EXPECT_STR_EQ(%{}.repr(), "{  }");
   EXPECT_STR_EQ(%[].str(), "[  ]");
   EXPECT_STR_EQ(%().str(), "()");
-  // A null Array renders instead of crashing, which the old str could not do.
+  // A null Array renders without dereferencing its storage.
   EXPECT_STR_EQ(((Array) NULL).str(), "[  ]");
 }
 

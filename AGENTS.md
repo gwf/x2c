@@ -232,13 +232,13 @@ enough to have cost graded work on premises that were false.
 - If the proof fails, preserve the changes and complete failure log, stop
   before push, and report the failing command. Never patch generated
   bootstrap files to make the proof pass.
-- Publishing to a feature branch, `dev`, or `main` follows ordinary task
+- Publishing to a feature branch or `main` follows ordinary task
   authorization. The repository has no additional human-only branch rule.
 
 ## Agent PR and Merge Requirements
 
 - Before an agent pushes code for a PR, opens or updates a code PR, or merges
-  code into `dev`, run `tools/gate-state.py ensure agent-pr-check` on the
+  code into `main`, run `tools/gate-state.py ensure agent-pr-check` on the
   resulting final tree. It reuses valid evidence or runs the existing
   `agent-pr-check` target, which performs `precommit` and the extended checks
   without rebuilding the self-hosting stages twice.
@@ -260,28 +260,28 @@ enough to have cost graded work on premises that were false.
 
 ## Agent PR Push
 
-- For a PR, `dev` is the base branch, not the push destination. Push the
+- For a PR, `main` is the base branch, not the push destination. Push the
   current workspace branch to the same-named remote branch with an explicit
   refspec:
 
   ```sh
   branch="$(git branch --show-current)"
   git push -u origin "HEAD:refs/heads/$branch"
-  gh pr create --draft --base dev --head "$branch"
-  gh pr view --json baseRefName --jq .baseRefName   # must print dev
+  gh pr create --draft --base main --head "$branch"
+  gh pr view --json baseRefName --jq .baseRefName   # must print main
   ```
 
 - Never base a PR on another workspace branch. A squash merge of that base
   replaces its history, so the stacked PR reports merged while its change never
-  reaches `dev`; this has silently dropped landed work twice. When two branches
-  change the same files, rebase onto `dev` and resolve the conflict, or wait
+  reaches `main`. When two branches change the same files, rebase onto `main`
+  and resolve the conflict, or wait
   for the other to land. The base check above is the whole guard: a content
   comparison after the merge is not, because later commits legitimately touch
   the same files.
 - Do not use a source-only push such as `git push`, `git push origin <branch>`,
   or `git push -u origin <branch>` for PR publication. A workspace branch may
-  still track `origin/dev`, causing those commands to update `dev`.
-- Publishing directly to `dev` requires separate explicit authorization.
+  still track `origin/main`, causing those commands to update `main`.
+- Publishing directly to `main` requires separate explicit authorization.
 
 ## Process Ceiling
 

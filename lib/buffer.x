@@ -299,8 +299,8 @@ int Buffer.try_get(Buffer buf, ptrdiff_t index, char *out) {
 }
 
 /** Returns the byte at `index`, or NUL when `index` is out of range.
-    This adapter is retained for source and ABI compatibility. For new
-    code, prefer `Buffer.try_get`.
+    Prefer `Buffer.try_get` to distinguish an out-of-range index from a NUL
+    byte.
 */
 char Buffer.get(Buffer buf, ptrdiff_t index) {
   char out;

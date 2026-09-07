@@ -58,9 +58,8 @@ def content_hash(rel: str) -> str:
 
     This must be git's own blob hash and not a plain digest of the bytes,
     because `tree_content` reads the index blob hash for every unmodified
-    tracked file. Two hash functions over the same bytes disagree, so staging a
-    file used to change its recorded hash and report a stale gate even though
-    nothing had been edited.
+    tracked file. Using the same hash makes the result independent of whether
+    a file is staged.
     """
     try:
         data = (ROOT / rel).read_bytes()

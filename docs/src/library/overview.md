@@ -8,7 +8,8 @@ The reference has four tiers:
 
 - **Primary** - what most programs use.
 - **Advanced** - storage, ABI, embedding, representation, and diagnostics.
-- **Compatibility** - older interfaces, with their preferred replacements.
+- **Convenience** - adapters with alternative result forms or names; their
+  descriptions identify the preferred operations.
 - **Internal** - functions used within the runtime, documented for source
   readers.
 
@@ -313,4 +314,4 @@ int limit;
 
 The [module reference](modules/index.md) is generated from runtime source and
 compiler-verified signatures. Begin with the primary tier. Use an advanced or
-compatibility entry when its documented behavior is what you need.
+convenience entry when its documented behavior is what you need.

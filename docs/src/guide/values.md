@@ -260,7 +260,7 @@ Test it with `Var.is_void`, or use the status-bearing API and never hold a
 `void`.
 
 The representation of `void` and its exclusion from collections and iterators
-are consistent. Its meaning in a particular older API can vary: missing,
+are consistent. Its meaning in a particular API can vary: missing,
 exhausted, or invalid. Read that API's description before interpreting the
 result.
 

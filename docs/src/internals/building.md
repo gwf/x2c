@@ -75,11 +75,10 @@ It never emits the legal but noncanonical `<"name">` spelling; adding the
 percent prefix is the only list-syntax difference. The loader reads exactly
 one form and does not evaluate snapshot content.
 
-Native `Func` bindings use canonical V2 function `Type` `List`s, for example
+Native `Func` bindings use canonical function `Type` `List`s, for example
 `((func (("String"))) "String")`. Structural words are lowercase `Symbol`s,
 identifier names are exact `String`s, and a nullary function uses the single
-parameter `Type` `(void)`. The older `FUNC` / `(class Name)` grammar is
-rejected.
+parameter `Type` `(void)`.
 
 ## Contributor checks
 
@@ -89,7 +88,7 @@ PCRE2 import example. Prepare that optional package first with
 prepared dependency includes. It does not fetch dependencies itself.
 
 For testing, style, debugging, and artifact-refresh instructions, start with
-[`agents/README.md`](https://github.com/gwf/x2c/blob/dev/agents/README.md).
+[`agents/README.md`](https://github.com/gwf/x2c/blob/main/agents/README.md).
 
 See [Compiler Architecture](architecture.md) for the translation phases and
 the [Implementation Map](implementation-map.md) for feature ownership.

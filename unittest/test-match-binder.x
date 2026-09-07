@@ -2,7 +2,7 @@
 #include "test-support.x"
 
 // Regression test for the pattern compiler: `?ident` must bind the
-// underlying string (the historical bug bound it as a List).
+// underlying string.
 
 static void matcher_should_bind_ident_var(void) {
   Var stmt = %(stmnt

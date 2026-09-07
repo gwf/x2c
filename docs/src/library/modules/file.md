@@ -33,7 +33,7 @@ failure.
 
 **Raises:** `<io-fail>` on a source read or destination write failure.
 
-Source: `lib/file.x:465`
+Source: `lib/file.x:464`
 
 <a id="File.getw"></a>
 #### File.getw
@@ -65,7 +65,7 @@ exhausted.
 causes as `File.readline`; none return to the pull, and a transfer releases
 the iterator's line storage.
 
-Source: `lib/file.x:551`
+Source: `lib/file.x:548`
 
 <a id="File.open"></a>
 #### File.open
@@ -94,7 +94,7 @@ read failure transfers instead, leaving its partial bytes in `dest`.
 **Raises:** `<io-fail>` on a stream read error, or the cause reported by
 `Block.append` when the destination cannot grow.
 
-Source: `lib/file.x:434`
+Source: `lib/file.x:433`
 
 <a id="File.readline_into"></a>
 #### File.readline_into
@@ -111,7 +111,7 @@ its partial bytes in `dest`.
 **Raises:** `<io-fail>` on a stream read error, or `<size-limit>` or
 `<alloc-fail>` when the destination cannot grow.
 
-Source: `lib/file.x:404`
+Source: `lib/file.x:403`
 
 <a id="File.write_all"></a>
 #### File.write_all
@@ -126,7 +126,7 @@ leave a prefix already written.
 **Raises:** `<io-fail>` on a short or failed write, which does not return
 here.
 
-Source: `lib/file.x:452`
+Source: `lib/file.x:451`
 
 ### `String`
 
@@ -179,7 +179,7 @@ Source: `lib/file.x:234`
 
 Reports whether `x` and `y` are the same native stream handle.
 
-Source: `lib/file.x:566`
+Source: `lib/file.x:563`
 
 <a id="File.fdopen"></a>
 #### File.fdopen
@@ -212,7 +212,7 @@ Source: `lib/file.x:297`
 
 Returns a handle-identity hash consistent with `File.equal`.
 
-Source: `lib/file.x:563`
+Source: `lib/file.x:560`
 
 <a id="File.popen"></a>
 #### File.popen
@@ -296,7 +296,7 @@ Source: `lib/file.x:285`
 
 Returns a readable handle and descriptor representation without reading.
 
-Source: `lib/file.x:569`
+Source: `lib/file.x:566`
 
 <a id="File.scanf"></a>
 #### File.scanf
@@ -348,7 +348,7 @@ canonical result under the pool-chain lifetime described above or NULL
 when empty, and transfers the same causes. A null handle returns its
 pointer representation without reading.
 
-Source: `lib/file.x:580`
+Source: `lib/file.x:577`
 
 <a id="File.string"></a>
 #### File.string
@@ -363,7 +363,7 @@ no bytes remain.
 contain an embedded NUL, `<size-limit>` when the `String` cannot be
 represented, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/file.x:502`
+Source: `lib/file.x:499`
 
 <a id="File.string_close"></a>
 #### File.string_close
@@ -403,9 +403,9 @@ Source: `lib/file.x:336`
 
 Appends the readable pointer representation of `file` to `out`.
 
-Source: `lib/file.x:583`
+Source: `lib/file.x:580`
 
-## Compatibility API
+## Convenience API
 
 | Function | Summary |
 | --- | --- |
@@ -421,8 +421,7 @@ Source: `lib/file.x:583`
 
 Reads up to `size` bytes into a canonical `String`.
 Reading starts at the current stream position and returns NULL when no
-bytes are read. This adapter is retained for source and ABI compatibility.
-For new code, prefer `File.read_into`.
+bytes are read. Prefer `File.read_into` for raw bytes and explicit status.
 
 **Raises:** `<bad-arg>` for a negative `size`, `<size-limit>` when the
 requested `String` cannot be represented, `<bad-arg>` when the bytes
@@ -430,7 +429,7 @@ contain
 an embedded NUL, `<io-fail>` on a stream read error, or `<alloc-fail>`
 while constructing the result.
 
-Source: `lib/file.x:382`
+Source: `lib/file.x:381`
 
 <a id="File.readline"></a>
 #### File.readline
@@ -439,16 +438,14 @@ Source: `lib/file.x:382`
 
 Reads one raw line into a canonical `String`.
 Includes the newline when present. Clean EOF and `FILE_READ_ERROR` both map
-to NULL; use the status-bearing forms when that distinction matters. This
-adapter is retained for source and ABI compatibility. For new code, prefer
-`File.readline_into` or `File.iter` when raw status and bytes should remain
-separate.
+to NULL. Prefer `File.readline_into` or `File.iter` when raw status and
+bytes should remain separate.
 
 **Raises:** `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
 are not valid `String` text, `<size-limit>` when the line cannot be
 represented, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/file.x:485`
+Source: `lib/file.x:482`
 
 ## Runtime-internal callables
 
@@ -469,7 +466,7 @@ for source readers but are not supported as user API.
 Publishes the process's borrowed standard streams as `File` globals.
 The globals do not take ownership or arrange cleanup of the native streams.
 
-Source: `lib/file.x:591`
+Source: `lib/file.x:588`
 
 ## Public types
 

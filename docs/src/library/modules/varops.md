@@ -19,7 +19,7 @@ Boxed `Var` operators, updates, and truthiness.
 | [`Var.postfix`](#Var.postfix) | Applies dynamic postfix `++` or `--` and returns the prior value. |
 | [`Var.sub`](#Var.sub) | Subtracts dynamic values through numeric or registered `sub` behavior. |
 | [`Var.truth`](#Var.truth) | Returns dynamic truthiness through registered dispatch or built-in rules. |
-| [`Var.truthy`](#Var.truthy) | Returns `value.truth()` under the compatibility spelling `truthy`. |
+| [`Var.truthy`](#Var.truthy) | Returns `value.truth()`. |
 | [`Var.update`](#Var.update) | Applies a failure-atomic dynamic compound update and returns the new value. |
 
 ### `Var`
@@ -174,7 +174,7 @@ Source: `lib/varops.x:492`
 
 `int Var.truthy(Var value)`
 
-Returns `value.truth()` under the compatibility spelling `truthy`.
+Returns `value.truth()`.
 
 Source: `lib/varops.x:500`
 

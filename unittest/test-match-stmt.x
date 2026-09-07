@@ -382,8 +382,8 @@ static void match_long_atom_binders_compile(void) {
   match (input) {
     case %(node (!is (?LongPredicateValue) ?binder?)): matched = 1;
   }
-  /* The legacy predicate remains parser control vocabulary in its existing
-     !is operand position; its execution contract is still deferred. */
+  /* The compact predicate is parser control vocabulary in the final
+     !is operand position; its execution contract is deferred. */
   EXPECT_INT_EQ(matched, 0);
 }
 
@@ -401,9 +401,8 @@ static void match_dynamic_patterns_do_not_retain_one_value(void) {
 }
 
 
-/* A String literal in head position used to make the compiler treat the
-   whole pattern as dynamic, so every named binder in the arm was reported
-   as not definitely assigned and the arm would not compile. */
+/* A String literal in head position is static pattern data; named binders
+   in the arm receive values from the corresponding input elements. */
 static void match_string_literal_head_binds(void) {
   $test.scoped();
   List input = %( "x2c.ident" "spelling" 7 );

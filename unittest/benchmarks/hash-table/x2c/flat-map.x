@@ -9,11 +9,11 @@
     maximum load factor, Scope ownership, and Bytes storage, so their measured
     difference is the layout.
 
-    Merging the arrays removes the record array, the free-record pool, and
-    the dependent record load that a hash match used to pay. Two bucket
-    widths are generated from one body: 12 bytes packs 5.3 buckets into a
-    64-byte line and straddles it, while 16 bytes fits exactly four and
-    never straddles, at a third more memory.
+    Combined buckets place the hash beside its entry, so a match reaches the
+    entry without a dependent record lookup. Two bucket widths are generated
+    from one body: 12 bytes packs 5.3 buckets into a 64-byte line and straddles
+    it, while 16 bytes fits exactly four and never straddles, at a third more
+    memory.
 
     They are specimens, not runtime code: nothing in lib/ or src/ includes
     this file.

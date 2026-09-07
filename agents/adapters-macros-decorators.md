@@ -92,13 +92,10 @@ alias-typed temporary solely to trigger conversion. For a hot callback,
 inspect generated C and run the existing benchmark to confirm that the
 converter reduces to the original pointer load.
 
-`MatchPlan` in `lib/match.x` is the reusable executor. A private
-`MatchPrepared` protocol once sat on top of it, but its two adoptions generated
-twelve functions whose only work was to convert the receiver and call one of
-the six existing executor methods. The 2026-08-02 cleanup deleted the
-protocol, both adoptions, and the pointer-only `MatchLeaseRef` alias. The cache
-now retains the `MatchPlan` itself instead of unpacking it into another view;
-generated `match.c` has one executor and one ownership path.
+`MatchPlan` in `lib/match.x` is the reusable executor. The cache retains the
+plan itself, and callers use its executor methods directly. A protocol whose
+only work is to convert the receiver and forward those methods would add
+functions without sharing an implementation.
 
 Least-public protocol generation remains useful when a relationship supplies
 a real default or typed crossing. It is not a reason to generate forwarding
@@ -110,13 +107,10 @@ For a protocol and participant that are both private, use
 inferred, but the explicit spelling makes the fully private relationship
 clear at the declaration.
 
-The same survey rejected both attempts to remove Type's List-forwarding
-family. Typedef/prototype inheritance routed eight operations through the
-`Var` fallbacks and dropped `contains` and `getindex`. An explicit
-`List(Type)` protocol generated the ten forwarding methods and stayed within
-the translation-time budget, but indexing still could not consume that
-separate protocol contract. The handwritten inline family remains the one
-complete static and boxed contract.
+Type's handwritten inline List methods supply its complete static and boxed
+behavior, including `contains` and `getindex`. A replacement must preserve
+both ordinary calls and indexing; forwarding methods alone do not establish
+that the compiler's indexing path can consume a separate protocol.
 
 Prefer an explicit adapter when the source and target contracts genuinely
 differ. Hiding that translation in a large macro makes the boundary harder to
@@ -149,13 +143,13 @@ Current proven shapes include:
 - Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
   mechanical name-to-registration conversion.
 - One ledger in `lib/var.x` with mechanical projections imported from
-  `lib/var-tags.xmacro`. One row owns facts formerly copied into an enum,
-  table, and switches.
+  `lib/var-tags.xmacro`. One row supplies the enum, table, and switch
+  projections.
 
 `lib/map-generics.xmacro` also shows how to remove fake adapters without
 discarding real ones. Its generated families call ordinary `Scope`, `Bytes`,
 and `Block` operations through exact `x2c.ident` references; passing those
-operations through one wrapper per consumer added no policy or conversion.
+operations through one wrapper per consumer would add no policy or conversion.
 The Map boxing and pair-building adapters remain because their declared types
 are required at the `Var` crossings. A failed direct spelling is evidence
 about that one call, not a reason to preserve the whole forwarding layer.
@@ -173,10 +167,9 @@ Keep a macro only when:
 - hot-path performance is unchanged or measured and accepted.
 
 Line reduction is the normal test, but not the only possible win. The Var tag
-ledger is valuable because it replaced several drift-prone copies of 109 rows
-with one owner, even though the ledger and projection helpers did not reduce
-the total production line count. Record such an ownership win honestly; do
-not report it as a line-count win.
+ledger is valuable because several projections consume the same rows. Count
+the ledger and projection helpers when comparing total production line count.
+Record such an ownership win honestly; do not report it as a line-count win.
 
 ### Use a ledger only for repeated facts
 
@@ -189,11 +182,9 @@ substantial xmacro may keep AST projection mechanics out of the runtime
 source, as `lib/var-tags.xmacro` does. When two modules must read the same rows
 the xmacro holds them instead, because a `$(def)` does not cross an `#include`:
 `lib/var.x` and `lib/varconvert.x` both read the tag ledger, so it is in
-`lib/var-tags.xmacro`. Three rows do not justify that file:
-the retired
-`lib/machine-program.xmacro` drove one three-row table through five macros
-used once each, and the frozen program's byte layout became legible again
-once `lib/machine.x` spelled out its aligns, offsets, and copies directly.
+`lib/var-tags.xmacro`. A single three-row table does not justify five one-use
+macros: direct aligns,
+offsets, and copies keep a frozen program's byte layout visible.
 A one-use data-only xmacro adds a file boundary without sharing an
 implementation;
 `lib/lisp.x` therefore declares its native target rows directly. Its local
@@ -321,54 +312,21 @@ were measured. Record its authored-line cost, diagnostics, generated C,
 performance, and the source shape that failed. Do not turn that result into a
 permanent rule against the family.
 
-The macro adoption history contains two concrete warnings. The first native
-update and List selector forms were rejected, then later compiler support made
-them clear net reductions. The old AST schema macro remains a bad
-implementation because it saved six net lines while adding a 117-line
-Lisp/AST generator, chunking, a row ceiling, and a stage-0 failure. The direct
-schema table and lookup switch it targeted were later deleted with the generic
-AST validator. Preserve the old measurement; deletion does not make that
-generator a better trade.
-
 Archived plans are execution logs, not a source of new restrictions. Follow
 current `AGENTS.md`, this guide, and active plans. An archived `do not reopen`
 or `no other candidate` statement is historical unless current guidance
 repeats its exact technical reason.
 
-### Current result-flow and ledger evidence
+### Result flow and shared helpers
 
-Status: measured in production source on 2026-08-04.
+`$error.fallback` is defined for user-defined resumable causes; a shared cause
+must not use it because shared causes never return to the raise.
 
-`$var.require.value(name, operation)` owns 5 adjacent Var
-declaration/void-check pairs in `lib/varops.x`. After its definition and
-import it removes authored lines at every site and preserves focused
-generated C and error-site locations. Two similar forms shrank to nothing as
-the causes they guarded became non-returning: `$elaborate.require(operation)`
-owned 36 plain compiler status checks until #173 removed both the checks and
-the macro, and the `$error.fallback(value)` statement decorator owned 222
-immediate handled `raise`/fallback-return pairs until the non-returning-error
-campaign removed every production use. `$error.fallback` remains defined for
-user-defined resumable causes; a shared cause must not use it.
-
-Not every copied table survived the same measurement. A Var descriptor
-projection generated the right sorted 31-row table but cost 34 lines and 66
-lines of Lisp/AST machinery, including a group-filter workaround for a VM
-recursion crash, so it was reverted. The generic AST schema and its distant
-lookup switch were deleted instead of generated; the known AST generator
-remains longer and more opaque than the source it was meant to replace. These
-are exact implementation results. They do not reject a future concise
-multi-output table surface.
-
-Ordinary code can also win the comparison. Directly calling `build.x`'s static
-filesystem helpers translated but failed at the C link boundary. A unit macro
-that emitted both helper bodies then failed re-elaboration because a generated
-array local lost its common type. The retained form gives the two definitions
-private `_build_mkdirs` and `_build_remove_tree` names, declares them privately
-in `bootstrap.x`, and saves 37 authored lines without widening the public
-header. The Lisp evaluator's 12 canonical names did benefit from one local C
-table because each row now owns spelling, destination, and optional special ID.
-Use macros, compile-time Lisp, or ordinary helpers according to which form
-leaves the facts easiest to inspect.
+The filesystem helpers `_build_mkdirs` and `_build_remove_tree` in
+`src/build.x` also serve `src/bootstrap.x`. The Lisp evaluator's local target
+rows in `lib/lisp.x` produce the native-target Map. Use macros, compile-time
+Lisp, or ordinary helpers according to which form leaves the facts easiest
+to inspect.
 
 ### Whole-test retained Scope
 
@@ -438,7 +396,7 @@ publication.
 Economics: one authored implementation now serves ordinary `Array` and all six
 packed families; the generated C remains specialized and uses native element
 pointers until Iter or Var transport is requested.
-Proof: the unchanged Array suite checks compatibility,
+Proof: the Array suite checks ordinary Array behavior,
 `unittest/test-typed-array.x` exercises every family and the added sequence
 operations, and the `array-generator-family` compiler fixtures compare normal
 and live symbol collection on a seventh internal family.
@@ -464,17 +422,14 @@ key and value operations. Iter and Var publication is a separate opt-in
 expansion, so a family that never boxes pays nothing for it.
 Economics: `lib/map.x` lost roughly 300 authored lines while gaining three
 typed families; the generated C stays specialized on their record fields.
-Proof: the unchanged Map suite checks compatibility,
+Proof: the Map suite checks ordinary Map behavior,
 `unittest/test-typed-map.x` covers all three shipped families including
 expand unwinding, and the `map-generator-family` compiler fixtures compare
 normal and live symbol collection on an internal family that also exercises
 the publication stage.
-The 2026-08-03 follow-up removed the allocation, `Scope`, and `Bytes`
-forwarders from every consumer. The generator now names those existing
-operations directly with `x2c.ident`; its core invocation lost eleven name
-holes. Publication also lost its pointer and iterator-initializer holes. Map
-boxing and pair construction remain explicit because removing them produced
-unresolved `Var` conversions, so they still perform real typed work.
+The generator names allocation, `Scope`, and `Bytes` operations directly with
+`x2c.ident`. Map boxing and pair construction stay explicit because their
+typed signatures select the required `Var` conversions.
 Limits or counterexample: key hashing, equality, value validity, record
 layout, boxing, and error policy remain visible inputs. Those are actual
 family differences, not leftover forwarding code.
@@ -542,10 +497,9 @@ and landing it exposed and fixed two compiler defects (base-default binding
 scope, base-typedef membership).
 Proof: `make verify` plus the base-default probe asserting the consumer's C
 calls the bound function directly, not through a runtime lookup.
-Limits or counterexample: unlike the removed `MatchPrepared` protocol, these
-base defaults own the shared operation instead of forwarding through an
-already-existing executor view. Explicit adoption now prevents accidental
-conformance; the [Protocols chapter](../docs/src/guide/protocols.md) owns
+Limits or counterexample: these base defaults own the shared operation.
+Explicit adoption prevents accidental conformance; the
+[Protocols chapter](../docs/src/guide/protocols.md) owns
 generated-member selection and conflicts. Converter names such as `Var.block`
 and `Var.as_iter` should express their API meaning, not act as conformance
 switches.

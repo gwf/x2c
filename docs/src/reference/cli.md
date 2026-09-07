@@ -31,13 +31,6 @@ stems, and output paths before translating the first unit. Inputs must be
 regular `.x` files; two inputs with the same basename would collide in the
 flat output directory and are rejected.
 
-The no-command form and the x2c `-o` option were removed:
-
-```text
-old: x2c -o out source.x
-new: x2c translate --out-dir out source.x
-```
-
 `--out-dir` is only the generated-C directory. Native artifacts use
 `build --output` or `run --output`.
 
@@ -149,7 +142,7 @@ archive, headers, sources, symbol inputs, licenses, and a toolchain record.
 Bootstrap selects tools in the same order as ordinary builds: `--cc`, `X2C_CC`,
 `CC`, then `cc`; and `--ar`, `X2C_AR`, `AR`, then `ar`. It uses `-O2` unless
 another supported optimization is explicit. The installed compiler and runtime
-are native to the host and no longer depend on Cosmopolitan. For every C
+are native to the host and do not depend on Cosmopolitan. For every C
 compilation it runs, x2c selects signed plain `char`. The runtime requires an
 eight-bit signed `char`, even on hosts whose C compiler defaults to unsigned
 plain `char`. Compile-time Lisp bindings keep working in the native result.

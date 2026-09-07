@@ -154,7 +154,7 @@ You read an iterator two ways:
 
 - `iter.try_next(&out)` is the preferred form. It returns success separately
   from the payload, and writes `out` only when it returns nonzero.
-- `iter.next()` is a compatibility adapter that returns the element directly
+- `iter.next()` returns the element directly
   and `void` at exhaustion. It is unambiguous because no iterator may yield
   `void` as an element.
 

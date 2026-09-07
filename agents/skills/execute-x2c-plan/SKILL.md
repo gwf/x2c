@@ -112,7 +112,7 @@ publishing, and report the failing command.
 ## Publish
 
 Follow the root `AGENTS.md` "Agent PR Push" exactly. The workspace branch is
-the push destination and `dev` is only the base.
+the push destination and `main` is only the base.
 
 ## Report
 

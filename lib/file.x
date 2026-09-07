@@ -371,8 +371,7 @@ int File.scanf(File file, const char *format, ...) {
 
 /** Reads up to `size` bytes into a canonical `String`.
     Reading starts at the current stream position and returns NULL when no
-    bytes are read. This adapter is retained for source and ABI compatibility.
-    For new code, prefer `File.read_into`.
+    bytes are read. Prefer `File.read_into` for raw bytes and explicit status.
     Raises: `<bad-arg>` for a negative `size`, `<size-limit>` when the
     requested `String` cannot be represented, `<bad-arg>` when the bytes
     contain
@@ -474,10 +473,8 @@ int File.copy_to(File source, File output, size_t *copied) {
 
 /** Reads one raw line into a canonical `String`.
     Includes the newline when present. Clean EOF and `FILE_READ_ERROR` both map
-    to NULL; use the status-bearing forms when that distinction matters. This
-    adapter is retained for source and ABI compatibility. For new code, prefer
-    `File.readline_into` or `File.iter` when raw status and bytes should remain
-    separate.
+    to NULL. Prefer `File.readline_into` or `File.iter` when raw status and
+    bytes should remain separate.
     Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
     are not valid `String` text, `<size-limit>` when the line cannot be
     represented, or `<alloc-fail>` while constructing the result.

@@ -542,7 +542,7 @@ appended.
 
 Source: `lib/map.x:646`
 
-## Compatibility API
+## Convenience API
 
 | Function | Summary |
 | --- | --- |

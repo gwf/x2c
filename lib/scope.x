@@ -32,8 +32,8 @@ typedef struct ScopeAlloc {
 } *ScopeAlloc;
 
 /** Handle for a region and any retained regions linked below it.
-    The layout remains public for compatibility, but only `Scope` operations
-    create or mutate valid allocation and region links.
+    The layout is public; only `Scope` operations create or mutate valid
+    allocation and region links.
 */
 typedef struct Scope {
   ScopeAlloc first;

@@ -163,7 +163,7 @@ which owns the structured parse error and syntax hint.
 - `unittest/compiler-fixtures/diagnostic-width.x` fixes filename, one-based
   line and column, token-width carets, notes, limit notice, and exit status.
 - The `parenthesized-{list-unquote,string-unquote,list-splice}` fixtures prove
-  removed `$()` and `@()` literal forms exit 1 with positioned parse
+  unsupported `$()` and `@()` literal forms exit 1 with positioned parse
   diagnostics, without an assertion or signal. The braced malformed fixtures
   cover empty, missing, and mismatched delimiters.
 

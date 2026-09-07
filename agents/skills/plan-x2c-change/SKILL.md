@@ -59,7 +59,7 @@ session, without asking a question. Size each unit so that one pull request
 carries one coherent, reviewable change with its own proof.
 
 Splitting work into more pull requests is nearly free. Batching several into
-one session is not: it produces rebases against a moving `dev`, resets, and
+one session is not: it produces rebases against a moving `main`, resets, and
 force-pushes. When a design needs several units, write them as a sequence in
 one plan, each with its own boundary and its own status, and expect each to
 be executed in its own session.

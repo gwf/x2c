@@ -185,7 +185,7 @@ Source: `lib/match.x:128`
 `List List.match(List input, Var pat)`
 
 Returns bindings when `input` matches `pat`, or `nil` on a miss.
-A binder-free success returns the nonnull `%(())` compatibility sentinel
+A binder-free success returns the nonnull `%(())` sentinel
 with no associations. Binding order and failures follow `List.try_match`.
 
 Source: `lib/match.x:607`
