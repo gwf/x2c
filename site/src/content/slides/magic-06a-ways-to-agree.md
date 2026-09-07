@@ -5,46 +5,30 @@ tab: agreement
 
 ```x2c
 ~#include <assert.h>
-
-macro Expression $squares() => (%(1 4 9))
-
+// Compile-time Lisp builds one cons expression at a time.
+$(defun cons-expr (n tail)
+  `(expr ("List") (cons ,(x2c.literal.int n) ,tail)))
 ~int main(void) {
-  // An ordinary macro expands to the List literal.
-  List expanded = $squares();
+List early = $(cons-expr 1 (cons-expr 4 (cons-expr 9 '(nil))));
 
-  // Compile-time Lisp returns the syntax for a List.
-  List early = $(quote
-    (expr ("List") (cons (expr (int) (literal (int) "1"))
-      (expr ("List") (cons (expr (int) (literal (int) "4"))
-        (expr ("List") (cons (expr (int) (literal (int) "9"))
-          (nil))))))));
+// Spell out the same List.
+List obvious = %(1 4 9);
 
-  // Sometimes you already know the answer.
-  List obvious = %(1 4 9);
+// Build its cells directly.
+List handmade = cons(1, cons(4, cons(9, NULL)));
 
-  // Build the three cells directly.
-  List handmade = cons(1, cons(4, cons(9, NULL)));
+// Runtime Lisp evaluates a quoted List.
+Lisp lisp = Lisp.new(); defer lisp.destroy();
+List late = lisp.eval(%('(1 4 9)));
 
-  // Insert ordinary variables into a List literal.
-  int a = 1, b = 4, c = 9;
-  List inserted = %($a $b $c);
-
-  // Runtime Lisp returns the quoted List itself.
-  Lisp lisp = Lisp.new(); defer lisp.destroy();
-  List late = lisp.eval(%('(1 4 9)));
-
-~  List ways = %($expanded $early $obvious $handmade $inserted $late);
-~  foreach (List left, ways)
-~    foreach (List right, ways) assert(left == right);
-  puts(%"$early: Six different ways to agree.");
-~  return 0;
+~List ways = %($early $obvious $handmade $late);
+~foreach (List left, ways)
+~  foreach (List right, ways) assert(left == right);
+puts(%"$early: Four different ways to agree.");
+~return 0;
 ~}
 ```
 
-Six ways to make the same `List`: an expression macro, compile-time Lisp,
-a literal, `cons` calls, inserted variables, and runtime Lisp. The macro
-expands to source syntax; compile-time Lisp returns that syntax explicitly.
-Runtime Lisp evaluates a quoted list.
-
-Each produces `(1 4 9)`. The program compares every result with every other
-and prints "Six different ways to agree."
+Compile-time syntax, a literal, direct `cons` calls, and runtime Lisp all
+produce `(1 4 9)`. The Lisp helper builds each `cons` expression; the compiler
+supplies `x2c.literal.int` for its number. Every result compares equal.
