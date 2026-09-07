@@ -1,9 +1,8 @@
 """Measure the replies agents send Gary for retrospective harness metrics.
 
 `tools/harness-metrics.py` keeps the historical 100-word measure so results
-remain comparable with the 2026-08-05 baseline. The interactive Stop hook uses
-a separate, higher wall-of-text threshold; this measurement is not a writing
-target.
+remain comparable with the 2026-08-05 baseline. This measurement is not a
+writing target.
 
 Fenced and inline code are dropped before measuring. A snippet or a handoff
 prompt Gary asked for is not a wall of text, and penalizing it by length
@@ -12,7 +11,6 @@ would only lead agents to paraphrase code in prose.
 
 from __future__ import annotations
 
-import json
 import re
 
 # Historical reporting threshold. Do not present it to an agent as a target.
@@ -55,14 +53,3 @@ def text_of(record: dict) -> str | None:
     parts = [p.get("text", "") for p in content
              if isinstance(p, dict) and p.get("type") == "text"]
     return "\n".join(parts).strip()
-
-
-def final_reply(path: str) -> str:
-    """The last thing the assistant said with no tool call after it."""
-    with open(path, encoding="utf-8", errors="replace") as handle:
-        records = [json.loads(line) for line in handle if line.strip()]
-    for record in reversed(records):
-        text = text_of(record)
-        if text is not None:
-            return text
-    return ""

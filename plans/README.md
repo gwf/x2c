@@ -15,10 +15,18 @@ data stay in `etc/`; ephemeral per-workspace state goes in `.context/`.
   its outcome. Archived workflow restrictions record the authorization that
   applied at the time; current work follows the root `AGENTS.md`.
 
-Use a phased structure, each phase carrying `Status: complete (date)` when it lands,
-with measured baselines recorded in the plan itself (e.g. test counts before
-and after). A plan that is finished says so inline — nobody should have to
-diff the tree to learn a plan's fate.
+Keep a plan concise and decision-complete: the requested behavior, important
+choices, implementation, relevant validation, and delivery should be clear to
+another engineer. Use phases only when the work needs separately delivered
+changes. Record measurements when they decide the design or verify its result,
+rather than requiring a count for every task. Update status when work lands.
+
+A planning-only request ends with the plan. An implementation request allows
+routine missing details and the design review to be completed during the work.
+Ask about unresolved consequential choices, such as public semantics or
+compatibility beyond the request, rather than stopping for missing paperwork.
+Delivery follows the root `AGENTS.md`; a plan need not imply a PR or another
+session.
 
 An archived rejection records the exact implementation, compiler capability,
 and evidence measured at that time. It does not create a permanent rule against
@@ -47,7 +55,7 @@ guarantee or machinery whose only benefit is earlier or more specific failure.
 Tests, fixtures, performance work, and green gates may prove a design; they do
 not justify keeping the machinery they exercise.
 
-Each planned pull request also ends implementation with a source review before
+Each planned change also ends implementation with a source review before
 the publication proof. That review inspects the completed authored diff for
 the same trusted facts, deletion and reuse opportunities, unnecessary
 machinery, and idiomatic x2c choices, and fixes what it finds. It is not a new

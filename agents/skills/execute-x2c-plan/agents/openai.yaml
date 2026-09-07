@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute x2c Plan"
-  short_description: "Implement and publish one decided change"
-  default_prompt: "Use $execute-x2c-plan to implement this decided x2c change, prove the final tree once, and publish it."
+  short_description: "Implement and deliver a decided change"
+  default_prompt: "Use $execute-x2c-plan to implement this decided x2c change, verify its behavior, and complete delivery under the repository instructions."

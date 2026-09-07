@@ -10,102 +10,44 @@ description: >-
 
 # Fix an x2c bug
 
-Reproduce the defect, find its cause, make the smallest change that removes
-the symptom, and pin it with one test. The repair is usually a few lines. Keep
-everything around the repair that small too.
+Reproduce the defect, repair its cause, and verify the behavior the user sees.
+An investigation-only request ends with the cause and recommended repair.
 
-## Reproduce before anything else
+## Reproduce and trace
 
-Reproduce the defect at current `HEAD` before editing anything. If it does not
-reproduce, say so and stop. Do not fix a bug you cannot demonstrate.
+Read the relevant source, tests, and instructions. Reproduce at current `HEAD`
+before editing, including findings from reviews or other agents. Reduce the
+input to a useful deterministic example in `/tmp`; inspect its output,
+diagnostic, exit status, or generated C as appropriate. If it does not
+reproduce, investigate the relevant environment or version difference and
+report the uncertainty instead of claiming a repair.
 
-This applies with full force to a defect you inherited. A finding from a
-review, a catalog, a plan row, or another agent is a claim, not a fact, and
-findings produced without running the compiler are frequently wrong. A
-severity label does not make a claim true. Reproducing costs a few tool calls;
-building on a false premise has cost this project hours and shipped
-regressions.
+Use [the debugging guide](../../x2c-debugging-guide.md) for pipeline dumps,
+progressive testing, module guidance, and crash investigation. Test suggested
+causes with focused probes. Use an isolated clean checkout to distinguish a
+pre-existing defect while preserving worktree edits.
 
-Reduce the reproduction until it is small and deterministic. Write it under
-`/tmp`, translate it, and read the observable result: the generated C, the
-diagnostic, the exit status, the printed output. An external oracle is worth
-finding when one exists, such as compiling the generated C with `cc` and
-reading its warnings.
+For parser, AST, or transform work, consult
+[the Match guide](../../replacing-manual-ast-walks-with-match.md). Reuse the
+existing production and canonical AST operations.
 
-## Find the cause with the compiler's own instruments
+## Repair and verify
 
-`agents/x2c-debugging-guide.md` owns this. Read it. It lists the dump flags
-that short-circuit the pipeline, the progressive-testing pattern, and the
-common pitfalls with their owning modules.
+Fix the cause with the smallest coherent change that preserves surrounding
+behavior. Follow necessary work across modules; keep unrelated cleanup
+separate. Apply root compatibility and validation rules.
 
-When the defect is in a parser production, AST consumer, or transform, also
-read `agents/replacing-manual-ast-walks-with-match.md` before editing. Reuse
-the owning recursive-descent production and canonical AST patterns instead of
-adding another token scan or positional walk.
+Add regression coverage for the observable defect in the existing suites or
+fixtures. Demonstrate that the reproduction and relevant regression checks
+fail against the unfixed code and pass with the repair. Use enough cases to
+cover distinct affected behavior; test count and patch size are not targets.
+Prefer actual diagnostics and runtime behavior when those are what failed;
+inspect generated C or ABI details when they are the relevant behavior.
 
-Prefer measurement over theory. Bisect the input rather than reasoning about
-it; `git stash` with a pristine rebuild proves whether a defect is
-pre-existing; `git show <sha>~1:<file>` shows what a shape looked like before.
-Use `lldb` when the failure is a crash or a stack question.
+Remove temporary instrumentation. Review and fix the completed authored diff,
+then follow root validation and publication instructions. Routine authorized
+repairs deliver to `main`; requested PRs retain review.
 
-When a hypothesis is cheap to test, test it before building on it. Do not
-implement a design that assumes an untested cause. Treat a suggested cause,
-including one from the user, as a hypothesis to measure rather than a
-conclusion to act on; state plainly when measurement contradicts it.
-
-If the user asked only for investigation or diagnosis, stop here. Report the
-reproduced cause, consequence, and recommended repair without editing the
-worktree. Continue only when the user authorized a fix.
-
-## Make the smallest fix
-
-Fix the cause, at its owner, with the smallest change that makes the symptom
-go away. Show the before-and-after receipt: the same reproduction, the old
-observable result, the new one.
-
-Do not bundle unrelated cleanup, and do not widen the fix to cover shapes you
-have not seen fail.
-
-## Pin the fix with a check you have seen fail
-
-Add one test that covers the observable defect, in the existing suite or as a
-compiler fixture. Then take the fix away and run it. A check you have only
-ever seen pass proves nothing, because a check that never reaches the failing
-path looks exactly like a check that passes.
-
-This governs everything you treat as evidence, not only a committed test. If a
-probe, an assertion, a comparison, or a throwaway script is the reason you
-believe the repair works, run it once against the unfixed code and watch it
-fail before you trust it. A check written after the fix, from the same
-understanding that produced the fix, confirms that understanding whether or
-not it was right.
-
-Test what the user sees. A `.stdout` fixture that captures the wrong behavior
-is the right pin. Pinning generated C, gensym numbering, or internal structure
-adds a file that must be rebaselined by every future change and proves less.
-
-## Keep the repair small around the edges
-
-The fixes in this repository are small and sound. What inflates is everything
-surrounding them. Specifically, do not:
-
-- write a plan document, a phase structure, or a task ledger for a repair;
-- dispatch a subagent for a change you can make yourself, or fan out review
-  agents over a defect you have already root-caused;
-- build a permanent gate, probe script, Make target, or CLI flag out of one
-  episode, and never wire one into `precommit`, `check`, or `agent-pr-check`;
-- add defensive checks, back-pointers, or cleanup branches beyond the cause;
-- leave diagnostic instrumentation in the tree. Instrument in `/tmp` or behind
-  a temporary edit and revert it. Never relabel temporary instrumentation as a
-  feature to justify keeping it.
-
-The root `AGENTS.md` "Process Ceiling" governs anything recurring. A defect is
-not authorization to add process.
-
-## Report
-
-Report a defect the way you would want one reported: what is broken, what
-you recommend, and a request to proceed. Do not bury it in a menu of options
-and do not present it as an emergency. For a fix, Gary gets the cause in one
-sentence and the fix in one sentence; the receipt and the regression test
-with its red-then-green result go in the pull request body.
+For an investigation, report the reproduced cause, consequence, and proposed
+repair without edits. For a completed fix, report the changed behavior and the
+before/after verification. Name any unreproduced or unresolved behavior.

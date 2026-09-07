@@ -12,30 +12,48 @@ mkdir -p debug
 make build-safe >debug/bootstrap.log 2>&1
 ```
 
-For ordinary development:
+Use `make build` when a source change needs a current compiler. It uses
+`stage0-settle`: refresh the symbol snapshot when its inputs changed, rebuild
+stage 0, and confirm that the rebuilt compiler agrees. Use a focused compiler
+invocation or test to answer the question being worked on. The root
+[Verify and deliver](../AGENTS.md#verify-and-deliver) section owns final
+validation and publication; the commands below are a reference, not another
+required sequence.
 
-```sh
-make build
-make verify
-make stage-3
-```
+| Command | Purpose |
+| --- | --- |
+| `make verify` | Unit suites, compiler fixtures, and focused probes. |
+| `make stage-3` | Build through the third self-hosted stage. |
+| `make stage-diff-all` | Compare generated C/H file sets and bytes across stages. |
+| `make check` | Standalone extended non-mutating checks. |
+| `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
+| `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
+| `make sym-check` | Check the deterministic compiler symbol snapshot. |
+| `make sym-refresh` | Refresh symbols, verify regeneration, and display the diff. |
+| `make sym-update` | Accept an intentional, reviewed symbol change. |
+| `make proof-conformance` | Optional snapshot/live protocol conformance comparison. |
+| `make examples` | Check the curated executable examples manifest. |
+| `make examples-update` | Accept intentional, reviewed example-output changes. |
+| `make doc-examples` | Compile the book's code examples; optional. |
+| `make packages-check` | Check packages with their prepared dependency cache; outside `check`. |
+| `make artifact-refresh` | Refresh symbols and bootstrap; does not establish publication readiness. |
+| `make sanity-check` | Refresh bootstrap, rebuild stage 0, and build through stage 3 without checks. |
 
-Batch connected work and run broad checks once on the integrated result. Use a
-focused test or compiler invocation while editing only when it answers an
-immediate question. Save complete failures under `debug/`.
+`make precommit` checks symbols, refreshes header symbols and bootstrap,
+rebuilds stage 0 safely, builds through stage 2, and compares stages 0, 1,
+and 2. `agent-pr-check` runs it and the remaining extended checks. Stage 2
+establishes self-host convergence; the fourth build is available on demand.
 
-`make build` uses `stage0-settle`: it refreshes the symbol snapshot only when
-its inputs changed, rebuilds stage 0, and confirms that the rebuilt compiler
-agrees. `make sym-refresh` intentionally refreshes and displays the symbol
-artifact diff. `make sanity-check` is the recovery path that refreshes
-bootstrap, rebuilds stage 0, and builds through stage 3 without running checks
-or stage comparisons.
+Source changes can leave `stage-diff-0` red until bootstrap is regenerated:
+it compares checked-in bootstrap C/H with stage 0 output. The publication
+command owns that refresh; inspect its generated diff. Use the individual
+self-host stage comparisons when a staged language transition needs evidence
+before an explicit bootstrap refresh.
 
-Use `make check` for the standalone extended non-mutating suite. Agents use
-`tools/gate-state.py ensure agent-pr-check` before publishing code; it reuses
-a valid result or runs the existing precommit proof and remaining extended
-checks without building the self-hosting stages twice. The root `AGENTS.md`
-has the exact publication rule.
+Use `x2c translate --dump-conformance <units>` for a per-unit conformance
+table. Run package checks when compiler or runtime changes can affect package
+clients. Examples, book examples, and packages remain optional checks; choose
+them for relevant work. Save full failure output under `debug/`.
 
 Use `builds/0/x2c` for current development behavior. `bin/x2c` is the
 bootstrap compiler unless stage 0 was intentionally installed.
@@ -87,7 +105,8 @@ manifest, including the deterministic Lisp showcase.
 
 - Percent literals and lambdas: `src/literals.x`.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
-  source macro: `src/macros.x` and `etc/compiler-sdk.xlisp`.
+  source macro: `etc/builtin-macros.xmacro` and `etc/builtin-macros.xlisp`,
+  loaded by `src/macros.x`.
 - Type initialization: `src/parse.x`, `src/generate.x`, and `src/cache.x`.
 - Type conversion: `src/type.x`, `src/expressions.x`, `src/transform.x`,
   `lib/varconvert.x`, and `lib/varops.x`.

@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 TOOLS = Path(__file__).resolve().parent
@@ -27,7 +28,6 @@ def load(name: str, path: Path):
 
 METRICS = load("harness_metrics", TOOLS / "harness-metrics.py")
 FAILURE = load("agent_failure", TOOLS / "agent-failure.py")
-REPLY = load("reply_check", TOOLS / "reply-check.py")
 
 
 def write_jsonl(path: Path, records: list[dict]) -> None:
@@ -167,6 +167,49 @@ class HarnessMetricsTests(unittest.TestCase):
 
 
 class IncidentTests(unittest.TestCase):
+    def make_repository(self, root: Path) -> None:
+        def git(*args):
+            subprocess.run(
+                ["git", *args], cwd=root, check=True, capture_output=True,
+                text=True,
+            )
+
+        git("init", "-b", "main")
+        git("config", "user.name", "Harness Test")
+        git("config", "user.email", "harness@example.invalid")
+        (root / "baseline.txt").write_text("baseline\n", encoding="utf-8")
+        git("add", "baseline.txt")
+        git("-c", "commit.gpgsign=false", "commit", "-m", "baseline")
+        git("update-ref", "refs/remotes/origin/main", "HEAD")
+        (root / "change.txt").write_text("change\n", encoding="utf-8")
+        git("add", "change.txt")
+        git("-c", "commit.gpgsign=false", "commit", "-m", "workspace change")
+
+    def test_existing_workspace_compares_against_main(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.make_repository(Path(directory))
+            result = FAILURE.git_state(directory)
+
+        diff = result.split("$ git diff --stat origin/main...HEAD\n")[1]
+        diff = diff.split("$ git stash list")[0]
+        self.assertIn("change.txt", diff)
+        self.assertIn("1 file changed, 1 insertion(+)", diff)
+
+    def test_missing_workspace_reads_main_from_shared_clone(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            missing = root / "workspaces" / "deleted"
+            with patch.dict(FAILURE.os.environ, {
+                "CONDUCTOR_ROOT_PATH": directory,
+                "CONDUCTOR_WORKSPACE_PATH": str(missing.with_name("current")),
+            }):
+                result = FAILURE.git_state(str(missing))
+
+        self.assertIn("log --oneline -20 origin/main\n", result)
+        self.assertIn("baseline", result)
+        self.assertNotIn("workspace change", result)
+
     def test_index_append_is_idempotent(self):
         row = "| 2026-08-09 | diligence | report | `12345678` | `/tmp/x` | open |"
         with tempfile.TemporaryDirectory() as directory:
@@ -179,10 +222,6 @@ class IncidentTests(unittest.TestCase):
             self.assertTrue(FAILURE.append_index(str(index), row))
             self.assertFalse(FAILURE.append_index(str(index), row))
             self.assertEqual(index.read_text().count(row), 1)
-
-    def test_reply_hook_is_only_a_wall_of_text_backstop(self):
-        self.assertEqual(REPLY.complaint("word " * 250), "")
-        self.assertIn("251 words", REPLY.complaint("word " * 251))
 
 
 if __name__ == "__main__":

@@ -87,7 +87,7 @@ every downstream consumer, the relevant Error or compiler-stage behavior, and
 the commit that added the check. Ask what observable result would change if
 the check disappeared.
 
-Delete the check only when the existing path still:
+Recommend deletion only when the existing path still:
 
 - preserves every valid program's generated output and runtime behavior;
 - rejects invalid input before it can become silently wrong output, corrupt
@@ -110,9 +110,11 @@ an invalid program or value.
 Trust the value published by each compiler stage. The scanner establishes
 token boundaries and spelling, the tokenizer establishes token class, parsing
 and macro binding establish canonical AST shapes, and transforms establish
-their output shapes. Validate arbitrary source bytes, Lisp values, files, and
-serialized data where they enter; do not repeat the same validation after that
-code has published its internal value.
+their output shapes. Use the ordinary consuming operation to handle source
+bytes, Lisp values, files, and serialized data. Once it establishes an internal
+fact, its consumers can rely on it. Canonical AST Lists are accepted by
+structure, as
+documented in `docs/src/reference/language.md` under "Macro-visible syntax".
 
 When code inspects one static List or AST shape with `car`, `cdr`, `len`, and
 type tests, first decide whether failure needs its own behavior:
@@ -129,8 +131,9 @@ catch-all match arm solely to preserve its diagnostic.
 
 ## Hand off an authorized deletion
 
-This skill only discovers candidates. For an authorized campaign, use
-`simplify-x2c-source` to remove the whole connected slice: helper functions,
+Completion is a read-only report of source-checked candidates, the behavior
+that makes them redundant, and any unresolved uncertainty. For an authorized
+campaign, use `simplify-x2c-source` to remove the whole connected slice: helpers,
 state, repeated checks, dedicated diagnostics, validator-only fixtures,
 comments, symbols, and generated artifacts. Keep direct tests of valid
 behavior and of any retained public failure rule.

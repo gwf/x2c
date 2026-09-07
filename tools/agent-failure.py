@@ -230,10 +230,10 @@ def gone(workspace: str, reason: str) -> str:
     shared = root and os.path.exists(os.path.join(root, ".git"))
     if not sibling or not shared:
         return f"{reason}; no shared repository to fall back to.\n"
-    log = run(["git", "log", "--oneline", "-20", "origin/dev"], root)
+    log = run(["git", "log", "--oneline", "-20", "origin/main"], root)
     return (f"{reason}. The commits are in the shared clone; this is that "
             f"repository, not the tree the session ran in.\n\n"
-            f"$ git -C {root} log --oneline -20 origin/dev\n{log}\n")
+            f"$ git -C {root} log --oneline -20 origin/main\n{log}\n")
 
 
 def git_state(workspace: str) -> str:
@@ -246,7 +246,7 @@ def git_state(workspace: str) -> str:
         ["git", "rev-parse", "HEAD"],
         ["git", "status", "--porcelain"],
         ["git", "log", "--oneline", "-10"],
-        ["git", "diff", "--stat", "origin/dev...HEAD"],
+        ["git", "diff", "--stat", "origin/main...HEAD"],
         ["git", "stash", "list"],
     ]
     parts = []

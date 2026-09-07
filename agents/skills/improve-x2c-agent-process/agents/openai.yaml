@@ -1,4 +1,4 @@
 interface:
   display_name: "Improve x2c Agent Process"
-  short_description: "Make a material agent-workflow improvement"
-  default_prompt: "Use $improve-x2c-agent-process to materially improve the x2c agent process from actual session evidence, keeping the reported problem in control through implementation and validation."
+  short_description: "Review or improve the agent workflow"
+  default_prompt: "Use $improve-x2c-agent-process for this dedicated review or improvement of x2c agent guidance and tools, grounding the work in the current workflow and completing the requested deliverable."

@@ -1,34 +1,23 @@
-# AGENTS - The x2c book (`docs/`)
+# The x2c book (`docs/`)
 
-> Scope: applies to files under `docs/` only.
+Use the [agent directory](../agents/README.md) for task routing and the
+[root instructions](../AGENTS.md) for publication validation.
 
-Read the root `AGENTS.md` first. Open only the section of
-`agents/x2c-philosophy.md` relevant to the work. Notes specific to this tree:
+`docs/` is the published mdBook for people learning and using x2c, and the
+authority for language and library semantics. Keep repository workflow in
+`agents/`, linking to this book when it needs those semantics.
 
-- `docs/` is written for **humans learning or using x2c** - a published mdBook,
-  not agent instructions. Repository workflow, contract ledgers, and build lore
-  belong in `agents/`.
-- This tree is the single authority for language and library semantics. Pages in
-  `agents/` link here rather than restating them; keep it that way.
-- Chapters must be reachable from `docs/src/SUMMARY.md`. `create-missing` is
-  off in `book.toml`, so a `SUMMARY.md` entry without a file is a build error
-  rather than a silently generated placeholder. Do not add a chapter before it
-  has content - an empty page is drift with a table-of-contents entry.
-- Tag x2c samples `x2c`, not `c`. Every fenced `x2c` block is compiled by
-  `make doc-examples`, which tries it both as written (file-scope
-  declarations) and wrapped in a `main` (statements), so a fragment needs no
-  surrounding boilerplate.
-- A sample needing surrounding context should get it as hidden lines prefixed
-  with `~`: the reader sees only the essential lines, behind an expander, while
-  the compiler sees all of them. Prefer this over a sample that cannot compile.
-- A block that genuinely cannot compile must be tagged `x2c,ignore` **and** be
-  preceded by an `<!-- ignore: reason -->` comment; the gate rejects the tag
-  without a reason. Downgrading a real sample to `text` to dodge the gate is not
-  acceptable.
-- Evidence first, as everywhere: verify flags, APIs, and commands against the
-  current tree before writing them.
-- `make doc-build` renders to `docs/book/`, which is generated and untracked;
-  `make doc-serve` serves it with live reload while you edit.
+- Add chapters with content and a reachable entry in `docs/src/SUMMARY.md`.
+  `create-missing` is off in `book.toml`, so missing files fail the build.
+- Verify flags, APIs, and commands against the current tree before writing.
+- Tag x2c samples `x2c`. `make doc-examples` compiles each fence both as written
+  at file scope and wrapped in `main`, so fragments need no boilerplate.
+- Supply needed context as hidden lines prefixed with `~`. The compiler sees
+  them; readers can expand them.
+- Tag an intentionally non-compiling block `x2c,ignore` and precede it with
+  `<!-- ignore: reason -->`. Keep real x2c samples in checked x2c fences.
+- `make doc-build` renders generated, untracked `docs/book/`;
+  `make doc-serve` serves it with live reload.
 
 ## The generated API reference
 
@@ -56,7 +45,7 @@ the generic templates that own published definitions:
 
 - A doc comment opens exactly `/**` and sits immediately above a public
   definition or public type declaration with **no blank line** between. `//`
-  and plain `/*` are never doc comments, so implementation contracts stay
+  and plain `/*` are never doc comments, so implementation notes stay
   private.
 - In `src/`, non-static callables are future-public unless their names begin
   with `_` or contain `__`; public types are declared before the first
@@ -68,14 +57,14 @@ the generic templates that own published definitions:
   paragraph boundary, list, example, or other Markdown block. Sentence
   punctuation inside code spans and ellipses does not end the summary.
 - No `@param` or `@return` tags. Parameter names come from source and types come
-  from the compiler's symbol table, so a third copy would only drift.
+  from the compiler's symbol table, rather than repeated tags.
 - A source-shaped `Unit` macro may own public definitions. Put each callable's
   doc comment directly above its function template; the reference scanner
   substitutes captured invocation arguments and reports the invocation line.
   It does not evaluate compile-time Lisp or computed declaration names, and
   every expanded signature is still checked against the compiler artifact.
 - Published callables default to the primary tier. The compact
-  `docs/library-api-tiers.txt` ledger owns advanced, compatibility, and
+  `docs/library-api-tiers.txt` file owns advanced, compatibility, and
   internal exceptions; it rejects duplicate and stale names. Source-level
   `API:` paragraphs are errors. The `compatibility` tier is presented as
   Convenience API; its prose names the preferred operation. Internal callables
@@ -84,9 +73,9 @@ the generic templates that own published definitions:
   that once rather than repeating it beside every function.
 - `Raises:` and `See:` begin recognized sections whether or not an empty line
   precedes them. Every `See:` target must be a real public `Type.method`; an
-  unresolvable one fails `make doc-generate`, which is the only check that can
-  catch it, since link auditing strips fragments. Empty lines remain ordinary
-  Markdown layout and never select generator behavior.
+  unresolvable one fails `make doc-generate`, since link auditing strips
+  fragments. Empty lines remain ordinary Markdown layout and never select
+  generator behavior.
 - Examples are ordinary ` ```x2c ` fences inside the comment and are compiled by
   `make doc-examples` like any other sample, `~` hidden lines included.
 - Every signature is cross-checked against the compiler's own symbol table.

@@ -916,8 +916,8 @@ Exemplars endorse a property, not every line in a file:
 - `lib/match.x` - the self-hosting matcher, including the distinction between
   binding and typed constraints.
 - `src/statements.x` - parser code shaped like the grammar it recognizes.
-- `src/cache.x` - `_rewrite_global_static_decl` uses one strong pattern while
-  its caller performs the traversal that pattern matching does not replace.
+- `src/cache.x` - initialization rewrites match expression structure while
+  the surrounding code manages placement and cached storage.
 - `lib/symbolset.x` - a closed vocabulary compiled once into static
   perfect-hash storage; the literal owns membership, index, and order.
 - `lib/array-generics.xmacro` - one imported implementation shared by ordinary

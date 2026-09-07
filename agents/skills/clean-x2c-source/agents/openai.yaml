@@ -1,4 +1,4 @@
 interface:
   display_name: "Clean x2c Source"
-  short_description: "Compact x2c source without structural redesign"
-  default_prompt: "Use $clean-x2c-source to compact and normalize this hand-authored x2c source file while preserving behavior, public contracts, representation, generated-file boundaries, and structure. Record structural simplifications for $simplify-x2c-source instead."
+  short_description: "Clarify source while preserving behavior"
+  default_prompt: "Use $clean-x2c-source to clarify and normalize this hand-authored x2c source while preserving behavior, representation, and useful technical explanations."

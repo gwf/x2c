@@ -1,4 +1,4 @@
 interface:
   display_name: "Review x2c Repository"
-  short_description: "Find and prove what is actually wrong"
-  default_prompt: "Use $review-x2c-repo for a read-only whole-repository review. Cover the compiler, runtime, build and tooling, tests, packages and examples, documentation and site, and release readiness; reproduce each finding at current HEAD and rank the results."
+  short_description: "Review the requested scope and verify findings"
+  default_prompt: "Use $review-x2c-repo for a read-only review of the requested scope, or the whole repository when no narrower scope is named. Reproduce findings and state actual coverage."

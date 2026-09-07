@@ -12,76 +12,45 @@ description: >-
 
 # Integrate an x2c package
 
-Bring one C library to an ordinary x2c surface, or judge whether a package
-already there is finished. Read the root and package instructions first.
-`packages/AGENTS.md` owns current package status, package-local rules, and
-acceptance; this skill owns only the order of the work.
+Give one C library a useful ordinary x2c surface, or assess its completeness.
+[packages/AGENTS.md](../../../packages/AGENTS.md) owns current package status,
+examples, acceptance, and package-local rules. Use those current instructions
+rather than copying changing status into this skill.
 
-When the design is decided and recorded, hand the units to `execute-x2c-plan`
-and follow it. When the open question is about the compiler, the runtime, or
-the language rather than about this library's surface, that is
-`plan-x2c-change`.
+## Start with developer tasks
 
-## Establish what the library is for
+Identify the ordinary tasks a developer brings to this kind of library before
+judging the existing wrapper. Build the task list from the library's purpose,
+then check whether importing the package makes each task practical with x2c
+values, without vendored headers or hand-written substitutes for missing
+operations. Present an unresolved scope choice to Gary; follow an already
+approved task list directly.
 
-Follow the current status and comparison guidance in `packages/AGENTS.md`.
-Do not copy package names, acceptance counts, or changing status into this
-skill.
+Use source and upstream documentation to form hypotheses, then prove task
+reachability with actual programs. Inspect imported constants and raw options
+before adding redundant convenience methods. For read-only assessment, build
+copies under `/tmp` with the shared dependency cache. Exercise values as their
+real consumer does: Lisp must be able to inspect values returned to it.
 
-## Write the ordinary-task list before reading the client
+## Design around useful examples
 
-Ten to fifteen tasks a working developer brings to this kind of library,
-written down before you look at what the package provides. Then check each
-row: reachable through the imported surface, with x2c values, no vendored
-header, no hand-rolled loop over a lower operation.
+Follow the package instructions for a short application and a broader one;
+review the short example first. Working examples establish usability beyond
+wrapped function counts. When a useful Lisp surface exists, provide it in the
+package unit behind one public installer over ordinary Lisp values.
 
-The rows do not transfer between libraries. PCRE2's thirteen and yyjson's
-eleven share no entry. The method transfers. The list is the deliverable Gary
-approves or edits, and it is what "complete" means afterwards.
+Use `plan-x2c-change` for unresolved compiler, runtime, or language design.
+For an already decided package change, use `execute-x2c-plan` to complete the
+implementation and authorized delivery.
 
-## Prove every row by probe
+## Verify and report
 
-Never answer a row by reading. An audit of PCRE2 read the client and reported
-caseless, multiline, and anchored matching as unreachable; a twelve-line probe
-showed that `Regexp.compile` takes a raw options word and `import "pcre2"`
-carries the `PCRE2_*` constants. Four redundant methods were nearly written.
+Run `make packages-check` for package implementation or completeness work;
+a package's local test target covers less. Preserve the root rule that this
+network-dependent check remains outside recurring publication gates.
+For a narrower review, state the checks and task coverage actually examined.
 
-Copy `packages/` to `/tmp`, build there against the same shared dependency
-cache, and leave the worktree alone. Exercise every value the way its
-destination will: a value a binding hands to Lisp must be one that Lisp can
-take apart, not merely one the same path accepts back.
-
-## Let the examples decide
-
-Write the short application and the broader one before implementing, and show
-Gary the short one first. `packages/AGENTS.md` "Begin with the examples" and
-"Review the developer experience" govern. A package with no screen-sized path
-is unfinished however many upstream functions it reaches, and a passing test
-suite cannot rescue an awkward short example.
-
-## Ship the Lisp surface inside the package
-
-When the library has a useful value-oriented Lisp surface, it is in the
-package unit behind one public installer, over values Lisp already operates
-on. Bindings defined in an example reach nobody who imports the package.
-
-## Leave it gated
-
-Run `make packages-check` before reporting. A package's own `test` target does
-not cover the complete package surface. The repository-wide target remains
-optional; the root `AGENTS.md` "Process Ceiling" governs any move to make it
-mandatory.
-
-## Stop at acceptance
-
-A package's current acceptance rule and status are in `packages/AGENTS.md`.
-Present the short application and its real output, then the broader one. Do
-not change package status yourself.
-
-## Report
-
-In the self-contained reply the root `AGENTS.md` Communication section
-describes, Gary gets the current result, the task list with a verdict on every
-row, the probe output behind any row called reachable, and the short
-application first. Wrapped function counts, declaration inventories, and test
-counts are never the main result.
+Follow the current package acceptance rules; status changes remain Gary's
+decision. Present the short application's real output, the broader example,
+and evidence for each assessed task. Completion means the requested package
+work or assessment is demonstrated, with remaining limitations stated.

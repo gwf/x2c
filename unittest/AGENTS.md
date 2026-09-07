@@ -1,23 +1,24 @@
-# AGENTS - Unit Tests
+# Unit tests (`unittest/`)
 
-Root rules and the contract ledger still apply. This file adds only test-area
-guidance.
+Use the [agent directory](../agents/README.md) for task routing and the
+[root instructions](../AGENTS.md) for final validation and failure logs.
 
-## Test contract
+## Harness
 
 - Suites are `test-<feature>.x`. Tests are `static void` functions. Import
   `test-macros.xmacro` before its first use. Use `$test.scoped();` when a test
   owns one whole-function retained Scope, and `$test.run(function_name)` when
   the label is the exact function name. Keep intentionally descriptive labels
   as explicit `TestHarness_run` calls.
-  Register suites in `test-all.x` with `$test.suite(suite_name)`.
+  Register `void <name>_suite(void)` suites in `test-all.x` with
+  `$test.suite(suite_name)`.
 - Call `EXPECT_*` and `TEST_FAIL` as bare statements. Do not return status or
   thread an `ok` flag.
 - The harness fails a test on a failed assertion, zero assertions, or extra
   pushed/retained scope state. Ambient errors remain with their configured
   policy owner.
-- Register deliberate deferrals with `TestHarness_skip(name, reason)`. Never
-  hide a test by commenting out its registration.
+- Register deliberate deferrals with `TestHarness_skip(name, reason)` so
+  they remain visible in the results.
 - Guard a dependent dereference with `if (!EXPECT_X(...)) return;` only when
   continuing would be unsafe.
 
@@ -31,7 +32,7 @@ guidance.
 - Keep tests deterministic. Close files, free short-lived backing storage, and
   remove `/tmp` artifacts.
 
-## Boundaries
+## Test support
 
 - Test-only helpers stay under `unittest/`; do not add public runtime surface
   solely for a test.
@@ -50,6 +51,3 @@ guidance.
   an intentional compiler change and review every resulting diff.
 - Keep fixture programs small. Assert only the phase boundaries that the
   fixture is meant to own.
-
-Use `make verify-fixtures` for a focused compiler-fixture check. The root
-`AGENTS.md` owns final validation and failure-log commands.
