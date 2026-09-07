@@ -1,0 +1,51 @@
+#!/bin/sh
+# Check availability only; the existing build owns compilation and configuration.
+set -u
+package_check=0
+case "${1-}" in
+  --help|-h)
+    printf '%s\n' 'Usage: ./configure [--packages [package ...]]' \
+      'No arguments: core build tools. --packages: selected packages, or all.'
+    exit 0 ;;
+  --packages) package_check=1; shift ;;
+  '') ;;
+  *) printf 'unknown configure option: %s\n' "$1" >&2; exit 2 ;;
+esac
+missing=0
+check() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'missing core build tool: %s\n' "$1" >&2
+    missing=1
+  fi
+}
+check_command() {
+  set -f
+  set -- $1
+  set +f
+  if [ "$#" -eq 0 ]; then
+    printf 'missing core build tool: empty compiler or archiver command\n' >&2
+    missing=1
+  else
+    check "$1"
+  fi
+}
+check make
+check python3
+check /bin/bash
+check_command "${CC-cc}"
+check_command "${AR-ar}"
+if [ -n "${X2C_CC-}" ]; then check "$X2C_CC"; fi
+core_missing=$missing
+if [ "$package_check" -eq 1 ] && command -v python3 >/dev/null 2>&1; then
+  configure_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+  python3 "$configure_root/packages/tools/deps.py" preflight "$@" || missing=1
+fi
+if [ "$core_missing" -ne 0 ]; then
+  cat >&2 <<'HELP'
+Core build tools on Fedora: sudo dnf install gcc binutils make python3 bash
+On macOS: xcode-select --install; brew install python
+For custom CC/AR/X2C_CC values, install the selected tool or correct its path.
+HELP
+fi
+if [ "$missing" -ne 0 ]; then exit 1; fi
+printf 'Build prerequisites found.\n'

@@ -13,6 +13,7 @@ import sys
 import tarfile
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import deps
 
@@ -174,6 +175,56 @@ class DependencyCacheTests(unittest.TestCase):
     outside.parent.mkdir()
     with self.assertRaises(deps.DependencyError):
       deps._extract(self._link_archive("../../../escape"), source, outside)
+
+
+class PrerequisiteTests(unittest.TestCase):
+  def test_missing_tools_and_perl_modules_are_collected(self) -> None:
+    manifest, _ = deps._load_manifest(
+      Path(deps.__file__).parent.parent / "libcurl/dependency.json"
+    )
+    real_which = deps.shutil.which
+    with patch.object(deps.shutil, "which", side_effect=lambda command:
+                      None if command == "make" else real_which(command)), \
+         patch.object(deps.subprocess, "run", return_value=
+                      subprocess.CompletedProcess([], 1)):
+      missing = deps._native_missing(manifest)
+    self.assertEqual(set(missing), {
+      "make", "Perl module FindBin", "Perl module IPC::Cmd"
+    })
+
+  def test_cached_dependency_skips_native_requirements(self) -> None:
+    with patch.object(deps, "_context", return_value={}), \
+         patch.object(deps, "_entry_complete", return_value=True), \
+         patch.object(deps, "_native_missing") as native, \
+         patch.object(deps.shutil, "which", return_value="/tool"), \
+         patch.dict(os.environ, {"CURL_PREFIX": ""}), \
+         patch("sys.stdout", new_callable=io.StringIO):
+      self.assertEqual(deps._preflight(["libcurl"]), 0)
+      native.assert_not_called()
+
+  def test_prefix_override_skips_dependency_context(self) -> None:
+    with patch.object(deps, "_context") as context, \
+         patch.object(deps.shutil, "which", return_value="/tool"), \
+         patch.dict(os.environ, {"CURL_PREFIX": "/external"}), \
+         patch("sys.stdout", new_callable=io.StringIO):
+      self.assertEqual(deps._preflight(["libcurl"]), 0)
+      context.assert_not_called()
+
+  def test_x2c_archiver_is_a_literal_executable(self) -> None:
+    with patch.dict(os.environ, {"X2C_AR": "ar --invalid-argument",
+                                "TERMBOX2_PREFIX": "/external"}), \
+         patch("sys.stdout", new_callable=io.StringIO), \
+         patch("sys.stderr", new_callable=io.StringIO) as errors:
+      self.assertEqual(deps._preflight(["termbox2"]), 1)
+      self.assertIn("ar --invalid-argument", errors.getvalue())
+
+  def test_autotools_overrides_replace_defaults(self) -> None:
+    manifest = {"name": "libuv", "sources": [], "steps": []}
+    with patch.dict(os.environ, {"AUTOCONF": "/custom/autoconf"}), \
+         patch.object(deps.shutil, "which", side_effect=lambda command:
+                      None if command == "/custom/autoconf" else "/tool"):
+      self.assertEqual(deps._native_missing(manifest),
+                       {"/custom/autoconf": "autoconf"})
 
 
 if __name__ == "__main__":

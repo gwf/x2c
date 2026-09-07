@@ -32,6 +32,32 @@ Existing dependency hash and profile verification remains part of preparing
 usable packages. The standard raylib examples use its headless profile;
 a desktop window remains an explicit `make -C packages/raylib run-interactive`.
 
+To report prerequisites without building or downloading anything:
+
+```sh
+./configure --packages
+```
+
+`make configure-packages` runs the same report; `make packages` runs it
+before building x2c or native dependencies. To check only Game of Life's
+package, use `./configure --packages termbox2`.
+
+The report lists missing commands together and gives Fedora installation
+commands. Core compilation needs a C compiler, `ar`, Make, Python 3, and Bash.
+Package builds additionally check their own profile tools, such as `shasum`
+and BLIS's `jq`. Preparation tools are required only when the selected native
+dependency is not already cached and no native prefix override was supplied.
+For example, a fresh OpenSSL build needs Perl's `FindBin` and `IPC::Cmd`
+modules; fresh libuv needs Autotools. Dependency preparation also checks these
+requirements before downloading sources when invoked directly.
+
+On macOS, install the Xcode command-line tools and use Homebrew for missing
+Python, Autotools, or `jq`. On Fedora, the report names the packages to install;
+`perl-Digest-SHA` supplies `shasum`, `perl-FindBin` supplies `FindBin`, and
+`perl-IPC-Cmd` supplies `IPC::Cmd`. The report checks availability rather than
+compiling capability probes; native configure scripts retain platform checks.
+Terminal validation requires Expect, but build-only reports do not require it.
+
 To build just Game of Life after building x2c:
 
 ```sh

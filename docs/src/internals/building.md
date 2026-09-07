@@ -4,9 +4,29 @@ Language users can skip this chapter. It describes how the self-hosting
 repository builds itself and what a contributor is expected to rebuild.
 
 A source checkout needs a GCC- or Clang-compatible C compiler, `ar`,
-GNU Make, and Python 3. Python runs repository build tooling; it is not a
-dependency of installed x2c programs or the portable executable's native
+GNU Make, Python 3, and `/bin/bash`. Python runs repository build tooling; it
+is not a dependency of installed x2c programs or the portable executable's native
 bootstrap command.
+
+## Check build prerequisites
+
+From the repository root:
+
+```sh
+./configure
+```
+
+This reports missing core build tools together, with installation guidance.
+It checks the selected `CC` and `AR`, and `X2C_CC` when set. It does not
+compile anything or write a configuration file. `make configure` runs the
+same report. `make build` and `make build-safe` run it automatically before
+bootstrap work or cleaning.
+
+For optional packages, use `./configure --packages`, or name only the ones
+you intend to build, such as `./configure --packages termbox2`. See the
+[package instructions](../../../packages/README.md) for native dependencies.
+These reports check command availability and required OpenSSL Perl modules;
+upstream configure scripts and compilers still check platform support.
 
 ## Why a bootstrap exists
 

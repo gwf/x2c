@@ -6,10 +6,9 @@ endif
 
 DEPENDENCY_MANIFEST ?= dependency.json
 DEPS_TOOL ?= python3 $(ROOT)/packages/tools/deps.py
+ifeq ($($(DEPENDENCY_PREFIX_VAR)),)
 DEPENDENCY_CACHE_PREFIX := $(shell \
 	$(DEPS_TOOL) path $(DEPENDENCY_MANIFEST) prefix)
-
-ifeq ($($(DEPENDENCY_PREFIX_VAR)),)
 $(eval $(DEPENDENCY_PREFIX_VAR) := $(DEPENDENCY_CACHE_PREFIX))
 DEPENDENCY_PREREQUISITE := prepare
 else
