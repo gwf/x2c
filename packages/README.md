@@ -19,17 +19,33 @@ PCRE2 and yyjson have completed API review. The other five remain
 experimental and their interfaces may change. Internal review records are
 kept in [the package instructions](AGENTS.md).
 
-For example, from the repository root after building x2c:
+From the repository root, build x2c, all packages, and their standard example
+executables without running tests:
 
 ```sh
-make -C packages/pcre2 run
+make packages
+./packages/termbox2/builds/game-of-life
 ```
 
-The first build fetches and prepares pinned dependencies. `make packages-check`
-runs the optional package tests and examples; it is separate from the normal
-compiler checks. See [using packages](../docs/src/guide/packages.md) for imports
-and [wrapping C libraries](../docs/src/guide/wrapping-c-libraries.md) for
-writing an adapter.
+The first build fetches and prepares pinned dependencies in the shared cache.
+Existing dependency hash and profile verification remains part of preparing
+usable packages. The standard raylib examples use its headless profile;
+a desktop window remains an explicit `make -C packages/raylib run-interactive`.
+
+To build just Game of Life after building x2c:
+
+```sh
+make -C packages/termbox2 short-example
+./packages/termbox2/builds/game-of-life
+```
+
+`make packages-check` runs the optional package tests and example checks;
+it is separate from normal compiler checks. Its terminal checks require
+Expect. Expect is not needed to build packages or run Game of Life
+interactively. See
+[using packages](../docs/src/guide/packages.md) for imports and
+[wrapping C libraries](../docs/src/guide/wrapping-c-libraries.md) for writing
+an adapter.
 
 ## The applications
 

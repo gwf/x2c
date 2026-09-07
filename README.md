@@ -82,17 +82,18 @@ make examples
 
 The last command opens the interactive Lisp shell; press Ctrl-D to exit.
 
-To build and check all optional packages and their examples, then try an
+To build all optional packages and their examples, then try an
 animated Game of Life from the repository root:
 
 ```sh
-make packages-check
+make packages
 ./packages/termbox2/builds/game-of-life
 ```
 
-The package check prepares dependencies as needed and runs their tests and
-examples. Game of Life starts each cell alive with 50% probability; press any
-key to quit. To build just one package instead, follow its
+The first build prepares pinned dependencies and builds the example
+executables without running tests or requiring Expect. Game of Life starts
+each cell alive with 50% probability; press any key to quit. To build just one
+package instead, follow its
 [build instructions](packages/README.md).
 
 For help:

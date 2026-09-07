@@ -73,6 +73,17 @@ input mode admits it. Mouse events need `TB_INPUT_MOUSE` in the input mode.
 
 ## Examples
 
+From the repository root, build the packages and play Game of Life:
+
+```sh
+make packages
+./packages/termbox2/builds/game-of-life
+```
+
+This builds the example without running tests or requiring Expect. To build
+and play only Game of Life after building x2c, use
+`make -C packages/termbox2 run-life-interactive`.
+
 `examples/game-of-life.x` is the short application (`make short-example`). It
 runs toroidal Life over the terminal's own cells: two ordinary
 x2c Arrays hold the generations, modular Array indexes give the wraparound,

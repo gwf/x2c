@@ -13,7 +13,7 @@ include etc/build-config.mk
 CORE_TARGETS = build build-safe verify examples check precommit \
 	agent-pr-check sanity-check clean help stats
 BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
-	stage-1 stage-2 stage-3
+	stage-1 stage-2 stage-3 packages
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
 	build-recovery packages-check
@@ -110,6 +110,16 @@ verify: build						## Build and run unit test suites
 
 examples: build						## Check curated examples
 	$(MAKE) -C examples check
+
+packages: build						## Build packages and examples
+	$(MAKE) -C packages/pcre2 build short-example example lisp-example
+	$(MAKE) -C packages/yyjson build short-example example lisp-example
+	$(MAKE) -C packages/libcurl build short-example example lisp-example
+	$(MAKE) -C examples/packages/http-json-releases build
+	$(MAKE) -C packages/termbox2 build short-example example
+	$(MAKE) -C packages/blis build short-example example
+	$(MAKE) -C packages/libuv build short-example example
+	$(MAKE) -C packages/raylib build short-example example builds/live-chart
 
 # Optional: the completed packages need a prepared dependency cache, so this
 # stays out of check and precommit. Run it after a compiler or runtime change
