@@ -27,6 +27,8 @@ chmod +x "$BUILD/dump-driver"
 
 cat >"$BUILD/Test.mk" <<EOF
 include $ROOT/Makefile
+configure:
+	@:
 bootstrap-ready:
 	@:
 build:

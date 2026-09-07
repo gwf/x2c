@@ -1,4 +1,4 @@
-> Status: active
+> Status: complete
 > Approved for publication; follow-up to the build-only package command.
 
 # Build prerequisites
@@ -33,7 +33,7 @@ Text::Template, or Expect for any build-only operation.
    no-prefix-override branch.
 3. Document the interface and its limits. Exercise aggregate failures,
    overrides, cached dependencies, missing Perl modules, and normal macOS
-   builds. Fedora execution is explicitly waived. Keep checks/precommit
+   builds. Validate Ubuntu and Fedora containers as well. Keep checks/precommit
    targets unchanged and add no recurring test suite.
 4. Review and fix the authored diff for duplicate work, unnecessary checks,
    and consistency before final validation. Run final publication checks and publish into main.
@@ -45,7 +45,11 @@ Three configure tests and eleven dependency tests pass. An actual invocation
 with a restricted PATH and a Perl wrapper reported both missing shasum and
 FindBin, supplied the two Fedora package names, and created no cache. A
 parallel Make probe with missing CC and AR stopped build, build-safe, and
-packages before compilation or cleaning. Fedora execution was waived.
+packages before compilation or cleaning. Ubuntu 24.04 and Fedora 44 ARM64 containers passed all fourteen focused
+tests, fresh package prerequisite reporting, a bootstrap build, and the
+termbox2 build. Both bare images reported missing tools before installation.
+The artifact-atomicity fixture now stubs configure alongside its existing
+build stubs; the full macOS publication suite passes with that adjustment.
 
 ## Plan review
 
