@@ -85,8 +85,9 @@ from the gallery examples.
 - Language extensions: [protocol defaults](magic/protocols.x),
   [lambdas](magic/lambdas.x), [imported macros](magic/imported-macros.x),
   [stacked decorators](magic/stacked-decorators.x),
-  [range and swap keywords](magic/range-and-swap.x), and
-  [an external Lisp policy](magic/file-policy.x).
+  [range and swap keywords](magic/range-and-swap.x),
+  [an external Lisp policy](magic/file-policy.x), and
+  [six ways to build the same List](magic/ways-to-agree.x).
 
 ```sh
 x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt
