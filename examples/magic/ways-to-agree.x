@@ -1,9 +1,10 @@
 #include <assert.h>
-// Compile-time Lisp builds one cons expression at a time.
-$(defun cons-expr (n tail)
-  `(expr ("List") (cons ,(x2c.literal.int n) ,tail)))
+// Wrap one expression node; keep the cons cells explicit.
+$(defun node (type body) `(expr (,type) ,body))
 int main(void) {
-List early = $(cons-expr 1 (cons-expr 4 (cons-expr 9 '(nil))));
+List early = $(node "List" `(cons ,(x2c.literal.int 1)
+  ,(node "List" `(cons ,(x2c.literal.int 4)
+    ,(node "List" `(cons ,(x2c.literal.int 9) (nil)))))));
 
 // Spell out the same List.
 List obvious = %(1 4 9);

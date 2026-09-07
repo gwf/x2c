@@ -5,11 +5,12 @@ tab: agreement
 
 ```x2c
 ~#include <assert.h>
-// Compile-time Lisp builds one cons expression at a time.
-$(defun cons-expr (n tail)
-  `(expr ("List") (cons ,(x2c.literal.int n) ,tail)))
+// Wrap one expression node; keep the cons cells explicit.
+$(defun node (type body) `(expr (,type) ,body))
 ~int main(void) {
-List early = $(cons-expr 1 (cons-expr 4 (cons-expr 9 '(nil))));
+List early = $(node "List" `(cons ,(x2c.literal.int 1)
+  ,(node "List" `(cons ,(x2c.literal.int 4)
+    ,(node "List" `(cons ,(x2c.literal.int 9) (nil)))))));
 
 // Spell out the same List.
 List obvious = %(1 4 9);
@@ -30,5 +31,5 @@ puts(%"$early: Four different ways to agree.");
 ```
 
 Compile-time syntax, a literal, direct `cons` calls, and runtime Lisp all
-produce `(1 4 9)`. The Lisp helper builds each `cons` expression; the compiler
-supplies `x2c.literal.int` for its number. Every result compares equal.
+produce `(1 4 9)`. The helper wraps one expression node; the `cons` cells
+stay explicit. Every result compares equal.
