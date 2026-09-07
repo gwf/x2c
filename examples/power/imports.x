@@ -9,16 +9,14 @@ rx.Regexp request = rx.Regexp.compile(
 defer request.free();
 
 // Sample requests include lines the pattern will ignore.
-List lines = %(
-  "GET /docs"
-  "POST /build"
-  "-- idle --"
-  "DELETE /cache"
-  "GET missing-slash"
-);
+String text = %"GET /docs
+POST /build
+-- idle --
+DELETE /cache
+GET missing-slash";
 
 int matches = 0;
-foreach (String line, lines) {
+foreach (String line, text.lines()) {
   rx.RegexpMatch found = request.match(line);
   if (found)
   {

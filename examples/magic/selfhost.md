@@ -14,8 +14,8 @@ make rebootstrap       # Refresh the checked-in bootstrap C.
 make stage-diff-all    # Compare generated C and headers.
 
 # Inspect parsed syntax and the compiler's transformations.
-./builds/0/x2c translate --dump-ast examples/foreach.x
-./builds/0/x2c translate --dump-transforms examples/foreach.x
+./x2c translate --dump-ast examples/foreach.x
+./x2c translate --dump-transforms examples/foreach.x
 
 # For fun: build the experimental portable bootstrap.
 make ape-build
