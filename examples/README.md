@@ -66,6 +66,7 @@ sum of squares: 91
 - [Keywords](magic/keywords.x): release a mutex when an exception leaves a block.
 - [Compile-time Lisp](magic/compile-time.x): generate two arrays from one table.
 - [Runtime Lisp](magic/runtime.x): evaluate two policies using a native binding.
+- [Agreement](magic/ways-to-agree.x): build the same List four different ways.
 - [Self-hosting](magic/selfhost.md): rebuild the compiler and inspect its syntax.
 
 ## Further examples
