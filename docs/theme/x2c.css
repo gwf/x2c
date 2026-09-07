@@ -12,7 +12,7 @@
   --sans-font: Archivo, Helvetica, Arial, sans-serif;
   --mono-font: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   --code-font-size: 0.86em;
-  --menu-bar-height: 68px;
+  --menu-bar-height: 110px;
   --content-max-width: 720px;
   --page-padding: 24px;
 }
@@ -298,48 +298,27 @@ hr {
   border-top: 1px solid var(--hairline);
 }
 
-/* Header: the landing page header, spanning sidebar and page. */
+/* Book controls leave the shared website layout unchanged. */
 .x2c-header {
   position: fixed;
   z-index: 200;
   inset-inline: 0;
-  top: 0;
-  height: var(--menu-bar-height);
-  border-top: 4px solid var(--x2c-red);
-  border-bottom: 1px solid var(--hairline);
-  background: var(--header-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-sizing: border-box;
 }
 
-.x2c-header-inner {
+.x2c-book-tools {
   display: flex;
-  flex-wrap: wrap;
-  height: 100%;
-  padding-inline: 18px 28px;
-  align-items: center;
-  align-content: center;
-  gap: 14px;
-}
-
-.x2c-header-text {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  align-items: baseline;
-  gap: 14px;
+  padding: 4px 20px;
+  border-top: 1px solid var(--hairline);
+  justify-content: space-between;
 }
 
 .x2c-header-tools {
   display: flex;
-  align-self: center;
   align-items: center;
   gap: 6px;
 }
 
 .x2c-header-tools-right {
-  margin-left: 18px;
   position: relative;
 }
 
@@ -367,83 +346,6 @@ hr {
   line-height: 1;
 }
 
-.x2c-header .x2c-brand {
-  position: relative;
-  display: inline-block;
-  padding-left: 33px;
-  color: var(--fg);
-  text-decoration: none;
-}
-
-.x2c-brand svg {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  display: block;
-  transform: translateY(-50%);
-}
-
-.x2c-wordmark {
-  display: inline-block;
-  font: 700 0.82em/1 var(--mono-font);
-  font-style: normal;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-
-.x2c-brand .x2c-wordmark {
-  font-size: 19px;
-}
-
-.x2c-section {
-  margin-right: auto;
-  margin-left: -2px;
-  text-align: left;
-  cursor: pointer;
-  color: var(--nav-muted);
-  font: 500 12.5px/1 var(--mono-font);
-  letter-spacing: 0.01em;
-  text-transform: lowercase;
-  white-space: nowrap;
-}
-
-.x2c-nav,
-.x2c-nav-page,
-.x2c-nav-site {
-  display: flex;
-  align-items: center;
-  font: 500 12.5px/1 var(--mono-font);
-  letter-spacing: 0.01em;
-}
-
-.x2c-nav-page,
-.x2c-nav-site {
-  gap: clamp(14px, 2.4vw, 30px);
-}
-
-.x2c-nav a {
-  color: var(--fg);
-  text-decoration: none;
-}
-
-.x2c-nav-site {
-  margin-left: clamp(16px, 2.6vw, 32px);
-  padding-left: clamp(16px, 2.6vw, 32px);
-  border-left: 1px solid var(--hairline);
-}
-
-.x2c-nav-site > a {
-  color: var(--nav-muted);
-}
-
-.x2c-nav-page > a {
-  color: var(--x2c-red);
-}
-
-.x2c-nav a:hover {
-  color: var(--links);
-}
-
 .theme-popup {
   left: auto;
   right: 0;
@@ -457,70 +359,26 @@ hr {
   font: inherit;
 }
 
-@media only screen and (max-width: 1100px) {
-  :root {
-    --menu-bar-height: 90px;
+@media (min-width: 1280px) {
+  .x2c-book-tools {
+    padding: 0;
+    border: 0;
   }
 
-  .x2c-header-inner {
-    flex-wrap: wrap;
-    align-content: center;
-    gap: 8px 11px;
-    padding-inline: 20px;
-  }
-
-  .x2c-header-text {
-    display: contents;
+  .x2c-header-tools {
+    position: absolute;
+    top: 16px;
+    left: 8px;
+    gap: 0;
   }
 
   .x2c-header-tools-right {
-    margin-left: auto;
+    right: 8px;
+    left: auto;
   }
 
-  .x2c-nav {
-    order: 5;
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-@media only screen and (max-width: 700px) {
-  .x2c-nav,
-  .x2c-nav-page,
-  .x2c-nav-site {
-    font-size: 11.5px;
-  }
-
-  .x2c-nav-page,
-  .x2c-nav-site {
-    gap: 14px;
-  }
-
-  .x2c-nav-site {
-    margin-left: 16px;
-    padding-left: 16px;
-  }
-
-  .x2c-section {
-    display: none;
-  }
-}
-
-@media only screen and (max-width: 480px) {
-  .x2c-nav,
-  .x2c-nav-page,
-  .x2c-nav-site {
-    font-size: 10.5px;
-  }
-
-  .x2c-nav-page,
-  .x2c-nav-site {
-    gap: 10px;
-  }
-
-  .x2c-nav-site {
-    margin-left: 10px;
-    padding-left: 10px;
+  .x2c-header .icon-button {
+    width: 24px;
   }
 }
 
