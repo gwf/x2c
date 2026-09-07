@@ -715,6 +715,14 @@ hr {
   color: var(--links);
 }
 
+.x2c-footer {
+  margin: 2em auto;
+  color: var(--nav-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
 ::selection {
   background: var(--x2c-red-text);
   color: var(--x2c-paper);
