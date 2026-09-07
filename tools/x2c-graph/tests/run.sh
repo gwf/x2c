@@ -445,10 +445,24 @@ grep -q \
 cleanup_tail='(function "cleanup_tail" static (calls (tail 1) '
 cleanup_tail="$cleanup_tail(non-tail 0)) (blockers cleanup)"
 grep -q "$cleanup_tail" "$tmp/tail-calls-line"
-if grep -q 'non_tail_only' "$tmp/tail-calls-line"; then
-  echo "tail-calls reported a function without a tail self-call" >&2
-  exit 1
-fi
+grep -q \
+  '(function "conditional_tail" static (calls (tail 1) (non-tail 0))' \
+  "$tmp/tail-calls-line"
+grep -q \
+  '(function "nested_conditional_tail" static (calls (tail 2) (non-tail 0))' \
+  "$tmp/tail-calls-line"
+grep -q \
+  '(function "conditional_mixed" static (calls (tail 1) (non-tail 2))' \
+  "$tmp/tail-calls-line"
+conditional_cleanup='(function "conditional_cleanup" static (calls (tail 1) '
+conditional_cleanup="$conditional_cleanup(non-tail 0)) (blockers cleanup)"
+grep -q "$conditional_cleanup" "$tmp/tail-calls-line"
+for name in non_tail_only conditional_condition_only conditional_non_tail; do
+  if grep -q "\"$name\"" "$tmp/tail-calls-line"; then
+    echo "tail-calls reported a function without a tail self-call" >&2
+    exit 1
+  fi
+done
 
 $tool loop-allocations "$fixtures/loop-allocations.x" "$fixtures/calls.x" \
   >"$tmp/loop-allocations"
