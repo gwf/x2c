@@ -5,31 +5,34 @@ tab: agreement
 
 ```x2c
 ~#include <assert.h>
-// Wrap one expression node; keep the cons cells explicit.
-$(defun node (type body) `(expr (,type) ,body))
 ~int main(void) {
-List early = $(node "List" `(cons ,(x2c.literal.int 1)
-  ,(node "List" `(cons ,(x2c.literal.int 4)
-    ,(node "List" `(cons ,(x2c.literal.int 9) (nil)))))));
+// Compile-time Lisp can return an actual AST node.
+List comptime = $(let ((cons-expr (lambda (n tail)
+  `(expr ("List") (cons ,(x2c.literal.int n) ,tail)))))
+  (cons-expr 1 (cons-expr 4 (cons-expr 9 '(nil)))));
 
-// Spell out the same List.
-List obvious = %(1 4 9);
+// A literal compiles to a form similar to the cons cells below.
+List literal = %(1 4 9);
 
-// Build its cells directly.
-List handmade = cons(1, cons(4, cons(9, NULL)));
+// Explicit construction reveals the underlying C functions.
+List constructed = cons(int_var(1),
+  cons(int_var(4), cons(int_var(9), NULL)));
 
-// Runtime Lisp evaluates a quoted List.
+// Runtime Lisp will build it on the fly.
 Lisp lisp = Lisp.new(); defer lisp.destroy();
-List late = lisp.eval(%('(1 4 9)));
+List runtime = lisp.eval(%(list (* 1 1) (* 2 2) (* 3 3)));
 
-~List ways = %($early $obvious $handmade $late);
+~List ways = %($comptime $literal $constructed $runtime);
 ~foreach (List left, ways)
 ~  foreach (List right, ways) assert(left == right);
-puts(%"$early: Four different ways to agree.");
+assert(comptime == literal && literal == constructed &&
+       constructed == runtime);
+puts("All four lists are equal.");
 ~return 0;
 ~}
 ```
 
-Compile-time syntax, a literal, direct `cons` calls, and runtime Lisp all
-produce `(1 4 9)`. The helper wraps one expression node; the `cons` cells
-stay explicit. Every result compares equal.
+Compile-time Lisp, a literal, and direct `cons` calls build `(1 4 9)`.
+Runtime Lisp calculates the squares to produce the same List.
+All four results compare equal in constant time because they resolve to the
+exact same object.
