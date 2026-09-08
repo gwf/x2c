@@ -21,11 +21,9 @@ whole program to a new object model.
 | a native worker with isolated x2c state | `Thread` and `Mutex` |
 | cleanup on every exit path | `defer` |
 | structured failure across frames | `raise` / `try` / filtered `catch` |
-| a native executable or library | `x2c build` |
-| a multi-target source graph | `x2c.toml` |
 | an interface shared by concrete types | `protocol` and adoption |
 | methods forwarded to a contained value | a `delegate` field |
-| repeated declarations or expressions | a compile-time macro or decorator |
+| repeated declarations or expressions | a compile-time `macro` or `Decorator` |
 
 ## What x2c adds
 

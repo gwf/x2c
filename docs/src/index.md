@@ -12,15 +12,36 @@ short introduction and installation instructions, follow the links above.
 
 Start with C types and calls, then add what the program needs:
 
-- `Var` holds dynamic values; `String`, `List`, `Array`, and `Map` hold text
-  and collections. `Func` and `Lisp` let programs call and evaluate code.
-- `Iter` traverses values, and `Match` takes structured data apart. `Scope`
-  manages allocation lifetimes; `Context` and `Thread` isolate runtime state;
-  `Error` records and propagates failures.
-- `translate` produces C for an existing build. `build`, `run`, and
-  `bootstrap` also handle native compilation and execution.
-- `protocol`s adapt concrete types to explicitly adopted interfaces. Macros
-  generate parsed, typed source at compile time.
+- `Var` holds values and pointers with runtime type information, alongside
+  ordinary static types.
+- `String` provides immutable text with interpolation. Immutable `List`
+  values share structure and support mapping, filtering, and folding;
+  mutable `Array` and `Map` containers grow automatically and store `Var`s.
+- `Symbol` provides compact named values without declaring an enum;
+  `SymbolSet` gives those names an explicit order and indexing.
+- `Iter` composes traversal operations, and `foreach` visits collections,
+  `File` contents, and `Slice` sequences.
+- `protocol` defines interfaces that concrete types explicitly adopt.
+  Namespaced methods, inherited typedef methods, delegation, and static or
+  dynamic dispatch let types share behavior while retaining C layouts.
+- `Func` holds callable functions and capturing lambdas. Expression-bodied
+  functions, dot methods, and call chains keep composed operations brief.
+- `Scope` and `Context` manage allocation lifetimes and isolated runtime
+  state without garbage collection. Pools give immutable values nested
+  lifetimes.
+- `match` selects the first matching case for structured `List` data and
+  exposes named captures as local variables.
+- `Thread` runs work on native threads and returns results through `join`;
+  `Mutex` coordinates access to shared mutable data.
+- `Error` carries structured failures. `try`, `catch`, and `raise` handle
+  them; `finally` and `defer` run cleanup when control leaves a block.
+- `macro` generates hygienic, parsed, typed source at compile time. `Type`
+  holes specialize code for concrete types, including typed collections.
+  `Decorator` macros transform the expression or source item that follows.
+- `import` brings packages into a local namespace, including wrapped C
+  libraries and their x2c and Lisp bindings.
+- `Lisp` evaluates code inside a running program; compile-time Lisp uses the
+  same interpreter to compute values and generate syntax during translation.
 
 Using one feature does not require converting the rest of the program to a
 new object model.
