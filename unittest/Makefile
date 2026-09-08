@@ -130,4 +130,3 @@ $(BUILD)/test-all.o: $(BUILD)/test-support.h
 COMPILER_OBJECTS = ../builds/0/src/ast.o ../builds/0/src/diagnostics.o \
 	../builds/0/src/report.o
 test-all: $(COMPILER_OBJECTS)
-LDLIBS += -lm

@@ -57,7 +57,6 @@ _x2c_defer_env_1;
 
 
 
-#include "diagnostics.h"
 #include "utils.h"
 #include "parse.h"
 #include "protocol.h"

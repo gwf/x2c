@@ -296,19 +296,19 @@ static void cleanup_chain_unlinks_before_callback(void) {
 }
 
 
-static void _cleanup_chain_deep(int *order) {
+static void _cleanup_chain_deep(volatile int *order) {
   defer *order = *order * 10 + 3;
   raise %(invariant);
 }
 
 
-static void _cleanup_chain_middle(int *order) {
+static void _cleanup_chain_middle(volatile int *order) {
   defer *order = *order * 10 + 2;
   _cleanup_chain_deep(order);
 }
 
 
-static void _cleanup_chain_outer(int *order) {
+static void _cleanup_chain_outer(volatile int *order) {
   defer *order = *order * 10 + 1;
   _cleanup_chain_middle(order);
 }
@@ -346,7 +346,7 @@ static void cleanup_chain_reads_latest_value_before_jump(void) {
 }
 
 
-static void _cleanup_chain_mixed_frames(int *order) {
+static void _cleanup_chain_mixed_frames(volatile int *order) {
   defer *order = *order * 10 + 3;
   try {
     defer *order = *order * 10 + 1;
@@ -444,7 +444,7 @@ static void nonreturning_filtered_catch_does_not_resume(void) {
 }
 
 
-static void _filtered_raise_callee(int *order) {
+static void _filtered_raise_callee(volatile int *order) {
   defer *order = *order * 10 + 1;
   raise %(alloc-fail);
 }

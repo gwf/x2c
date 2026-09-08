@@ -99,6 +99,8 @@ typedef struct Compiler {
   Array origins, int origin;
 } *Compiler;
 
+#include "diagnostics.x"
+
 /* Lambda captures store non-reference values as Var, so traversal callbacks
    that carry the compiler need this raw pointer crossing. The pointee and its
    lifetime stay with the caller. */
@@ -109,8 +111,6 @@ Var Compiler.var(Compiler compiler) => (Var) { .p64 = compiler };
 Compiler Var.compiler(Var value) => value.p64;
 
 protocol Var(Compiler);
-
-#include "diagnostics.x"
 #pragma private
 
 List Compiler.lift_func_expression(Compiler compiler, List expression);

@@ -620,7 +620,7 @@ Source: `src/compiler.x:713`
 
 Boxes the compiler's pointer; the caller keeps the compiler.
 
-Source: `src/compiler.x:106`
+Source: `src/compiler.x:108`
 
 ### `Map`
 
@@ -1130,7 +1130,7 @@ Source: `src/compiler.x:1179`
 
 Recovers the compiler pointer boxed by `Compiler.var`.
 
-Source: `src/compiler.x:109`
+Source: `src/compiler.x:111`
 
 ## Public types
 

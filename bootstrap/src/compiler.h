@@ -70,6 +70,7 @@ typedef struct Compiler{
 }
 * Compiler;
 
+#include "diagnostics.h"
 Var Compiler_var(Compiler compiler);
 
 Compiler Var_compiler(Var value);

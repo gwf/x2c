@@ -64,7 +64,7 @@ static void ast_rewrite_preserves_nil_replacements(void) {
 }
 
 static void ast_rewrite_passes_child_values(void) {
-  volatile int caught = 0;
+  int caught = 0;
   try Ast.rewrite_children(%(head (child)), %!(List &child) => child);
   catch %(bad-types *): caught = 1;
   EXPECT_TRUE(caught);
