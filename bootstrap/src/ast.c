@@ -89,9 +89,11 @@ Iter List_iter(List,  Iter);
 
 int Iter_try_next(Iter,  Var *);
 
-List x2c_func_reference_type(Func,  unsigned,  unsigned);
-
 int List_truth(List);
+
+List List_cdr(List);
+
+List x2c_func_reference_type(Func,  unsigned,  unsigned);
 
 FuncArg FuncArg_reference(const void *,  List);
 
@@ -101,7 +103,7 @@ Var Func_apply(Func,  unsigned,  const FuncArg *);
 
 int Var_equal(Var,  Var);
 
-void Array_free(Array);
+int List_equal(List,  List);
 
 List Array_list_free(Array);
 
@@ -114,6 +116,8 @@ int SymbolSet_contains(SymbolSet,  Symbol);
 int String_equal(String,  String);
 
 Var List_last(List);
+
+void Array_free(Array);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -329,38 +333,28 @@ int ast_contains_head(Var value,  Symbol kind){
 
 Ast Ast_rewrite_children(Ast ast,  Func per_child){
   if(! _init_guard_) _file_init_();
-  Array rewritten = Array_new();
-  int changed = 0;
-  {
-    Var child;
-    Iter _x2c_macro_iterator_1 = List_iter(ast,  &(struct Iter){
-      0
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
+  Var child;
+  List _x2c_macro_original_0 = ast;
+  Array _x2c_macro_rewritten_0 =(Array) 0;
+  for(List _x2c_macro_cursor_1 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_1);  _x2c_macro_cursor_1 = List_cdr(_x2c_macro_cursor_1)){
+    Var _x2c_macro_item_1 = List_car(_x2c_macro_cursor_1),  _x2c_macro_value_0 = _x2c_macro_item_1;
+    if(Var_is(_x2c_macro_item_1,  806120)){
       child = _x2c_macro_item_1;
-      {
-        Var value = child;
-        if(Var_is(child,  806120)) value =({
-          Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0,  1,  0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL,  _20);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0,  1, (FuncArg[]){
-            _x2c_func_argument_0
-          }
-          );
+      _x2c_macro_value_0 =({
+        Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0,  1,  0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL,  _20);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0,  1, (FuncArg[]){
+          _x2c_func_argument_0
         }
         );
-        changed |= ! Var_equal(value,  child);
-        Array_push(rewritten,  value);
       }
-
+      );
     }
-
+    if(!(void *) _x2c_macro_rewritten_0 && ! Var_equal(_x2c_macro_value_0,  _x2c_macro_item_1)){
+      _x2c_macro_rewritten_0 = Array_new();
+      for(List _x2c_macro_prefix_0 = _x2c_macro_original_0;  ! List_equal(_x2c_macro_prefix_0,  _x2c_macro_cursor_1);  _x2c_macro_prefix_0 = List_cdr(_x2c_macro_prefix_0)) Array_push(_x2c_macro_rewritten_0,  List_car(_x2c_macro_prefix_0));
+    }
+    if((void *) _x2c_macro_rewritten_0) Array_push(_x2c_macro_rewritten_0,  _x2c_macro_value_0);
   }
-  if(! changed){
-    Array_free(rewritten);
-    return ast;
-  }
-  return Array_list_free(rewritten);
+  return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
 
 static Ast _unwrap_origin(Ast node){
@@ -423,10 +417,10 @@ static int _contains_return(Ast node){
     if(Var_equal(head,  Symbol_var(1219800220))) return 1;  if(Var_equal(head,  Symbol_var(458361162716))) return 0;
   }
   {
-    Var head;  Iter _x2c_macro_iterator_2 = List_iter(node,  &(struct Iter){
+    Var head;  Iter _x2c_macro_iterator_1 = List_iter(node,  &(struct Iter){
       0
     }
-    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
+    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_2)){
       head = _x2c_macro_item_2;  if(Var_is(head,  806120) && _contains_return(Var_pointer(head))) return 1;
     }
 

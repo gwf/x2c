@@ -208,9 +208,10 @@ same state, or that they can safely be combined.
 
 `tail-calls` reports exact self-calls in return position, their source
 locations, other non-tail self-calls in the same function, and explicit
-`defer` or `try` cleanup. Before rewriting a reported function, inspect its
-generated C for argument evaluation, automatic storage, and cleanup, and
-check the host compiler's optimization.
+`defer` or `try` cleanup. Either result arm of a returned `?:` expression
+preserves tail position; its condition does not. Before rewriting a reported
+function, inspect its generated C for argument evaluation, automatic storage,
+and cleanup, and check the host compiler's optimization.
 
 `loop-allocations` ranks source expressions that allocate List/String pool or
 Scope-backed storage inside parsed loops. It groups macro-expanded allocation

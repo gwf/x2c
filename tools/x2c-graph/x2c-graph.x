@@ -231,6 +231,18 @@ static void _collect_tail_calls(
       );
       return;
     }
+    case %(op (!quote ?) ?condition ?ontrue ?onfalse): {
+      _collect_tail_calls(
+        compiler, condition, self, path, origin, 0,
+        counts, blockers, sites
+      );
+      foreach (Var arm, %($ontrue $onfalse))
+        _collect_tail_calls(
+          compiler, arm, self, path, origin, tail,
+          counts, blockers, sites
+        );
+      return;
+    }
     case %(defer *): blockers[<cleanup>] = 1;
     case %(try *): blockers[<cleanup>] = 1;
     case %(call

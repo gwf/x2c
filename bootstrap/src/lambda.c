@@ -1838,7 +1838,7 @@ break;
 default: break;
     }
   }
-if(! ast_contains_head(List_var(ast),  808259842)) return ast;  return Ast_rewrite_children(ast, ({
+return Ast_rewrite_children(ast, ({
   Var _x2c_lambda_capture_value_2 = Compiler_var(compiler);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
     _x2c_lambda_capture_value_2
   }
@@ -1880,7 +1880,7 @@ return body;
 }
 
 static List _prepare_lambda_region(Compiler compiler,  List entries,  List body){
-  body = _prepare_nested_lambda_regions(compiler,  body);  Map owned = Map_new();  Array order = Array_new(); {
+  if(! ast_contains_head(List_var(body),  808259842)) return body;  body = _prepare_nested_lambda_regions(compiler,  body);  Map owned = Map_new();  Array order = Array_new(); {
     List entry;  Iter _x2c_macro_iterator_11 = List_iter(entries,  &(struct Iter){
       0
     }
@@ -2151,7 +2151,7 @@ static Var _x2c_lambda_1(Func _x2c_lambda_closure_0,  const FuncArg * _x2c_lambd
 }
 
 static Var _x2c_lambda_2(Func _x2c_lambda_closure_1,  const FuncArg * _x2c_lambda_argv_1){
-  List child = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1,  _x2c_lambda_argv_1,  0,  806120));  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return List_var(_prepare_nested_lambda_regions(Var_compiler(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_2),  child)); ;
+  List child = Var_list(x2c_func_value_argument(_x2c_lambda_closure_1,  _x2c_lambda_argv_1,  0,  806120));  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  return List_var(ast_contains_head(List_var(child),  808259842) ? _prepare_nested_lambda_regions(Var_compiler(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_2),  child) : child); ;
 }
 
 static Var _x2c_lambda_3(Func _x2c_lambda_closure_2,  const FuncArg * _x2c_lambda_argv_2){

@@ -79,7 +79,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 Null, and synthesized declarations enter the early queue. Non-lambda
 expressions pass through.
 
-Source: `src/lambda.x:1641`
+Source: `src/lambda.x:1642`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -122,7 +122,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/lambda.x:1323`
+Source: `src/lambda.x:1324`
 
 ## Design notes
 

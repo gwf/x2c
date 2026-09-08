@@ -26,6 +26,7 @@ typedef enum AstPos {
 #pragma private
 
 $(import "../lib/error-macros.xmacro")
+$(import "../src/ast-rewrite.xmacro")
 #include "symbolset.x"
 
 /* A binding node couples source spelling to a positive compiler-issued
@@ -108,23 +109,12 @@ int ast_contains_head(Var value, Symbol kind) {
 
 /** Applies `per_child` to each `List` child of `ast` and returns the node
     rebuilt from the results; non-list children pass through. When no child
-    changed, the scratch storage is freed and `ast` itself returns, so the
+    changed, no scratch storage is allocated and `ast` itself returns, so the
     fixed-point transform driver can compare unchanged-node identity.
 */
 Ast Ast.rewrite_children(Ast ast, Func per_child) {
-  Array rewritten = %[];
-  int changed = 0;
-  foreach (Var child, ast) {
-    Var value = child;
-    if (child is <list>) value = per_child(child.list());
-    changed |= value != child;
-    rewritten.push(value);
-  }
-  if (!changed) {
-    rewritten.free();
-    return ast;
-  }
-  return rewritten.list_free();
+  Var child;
+  $ast.rewrite_children(ast, child, per_child(child.list()));
 }
 
 static Ast _unwrap_origin(Ast node) {

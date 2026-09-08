@@ -14,6 +14,8 @@ $(import "../lib/error-macros.xmacro")
 #include "compiler.x"
 #pragma private
 
+$(import "../src/ast-rewrite.xmacro")
+
 #include <stdio.h>
 
 #include "ast.x"
@@ -1578,13 +1580,8 @@ static Ast _sequence(Compiler compiler, Ast ast) {
 }
 
 static Ast _children(Compiler compiler, Ast ast) {
-  Array transformed = %[];
-  foreach (Var child, ast) {
-    if (child is <list>)
-      transformed.push(_node(compiler, child.list()));
-    else transformed.push(child);
-  }
-  return transformed.list_free();
+  List child;
+  $ast.rewrite_children(ast, child, _node(compiler, child));
 }
 
 /* The dispatcher tail _op_chain applies to its base and rewritten nodes,
