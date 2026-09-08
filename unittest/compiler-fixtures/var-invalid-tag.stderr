@@ -1,4 +1,4 @@
 <elapsed> error/err-report start_time="<wall-time>" code=<bad-target> detail=
 ((owner "Var.new") (target invalid)) location=
-((file "../../lib/var.x") (line 645) (function "Var_new"))
+((file "../../lib/var.x") (line 641) (function "Var_new"))
 x2c error floor: code 0x824fd0323968: non-returning error was not caught

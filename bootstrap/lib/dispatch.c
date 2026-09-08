@@ -884,6 +884,13 @@ int Var_equal(Var a,  Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64) return 1;
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  int row = x2c_var_descriptor_index(a);
+  if(row >= 0 && row < count){
+    if(x2c_var_descriptor_index(b) != row) return 0;
+    VarDescriptor * descriptor = & builtin_descriptors[row];
+    return descriptor -> value_dispatch && descriptor -> methods.equal ? descriptor -> methods.equal(a,  b) : 0;
+  }
   Symbol tag = Var_tag(a),  btag = Var_tag(b);
   if(tag == btag){
     if(Var_is_wide(a)) return Var_wide_equal(a,  b);
@@ -970,14 +977,14 @@ int Var_fallback_compare(Var a,  Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64){
     if(a.u64 == VAR_VOID_BITS){
-      static const X2CErrorSite  _x2c_error_site_14  = {.file =  "../../lib/dispatch.x",.function =  "Var_fallback_compare",.line =  776};
+      static const X2CErrorSite  _x2c_error_site_14  = {.file =  "../../lib/dispatch.x",.function =  "Var_fallback_compare",.line =  786};
       x2c_error_raise_n(& _x2c_error_site_14, 48270474208, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.compare")),  NULL))));
       __builtin_unreachable();
     }
     return 0;
   }
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite  _x2c_error_site_15  = {.file =  "../../lib/dispatch.x",.function =  "Var_fallback_compare",.line =  779};
+    static const X2CErrorSite  _x2c_error_site_15  = {.file =  "../../lib/dispatch.x",.function =  "Var_fallback_compare",.line =  789};
     x2c_error_raise_n(& _x2c_error_site_15, 48270474208, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.compare")),  NULL))));
     __builtin_unreachable();
   }
@@ -995,14 +1002,14 @@ int Var_compare(Var a,  Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64){
     if(a.u64 == VAR_VOID_BITS){
-      static const X2CErrorSite  _x2c_error_site_16  = {.file =  "../../lib/dispatch.x",.function =  "Var_compare",.line =  797};
+      static const X2CErrorSite  _x2c_error_site_16  = {.file =  "../../lib/dispatch.x",.function =  "Var_compare",.line =  807};
       x2c_error_raise_n(& _x2c_error_site_16, 48270474208, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.compare")),  NULL))));
       __builtin_unreachable();
     }
     return 0;
   }
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite  _x2c_error_site_17  = {.file =  "../../lib/dispatch.x",.function =  "Var_compare",.line =  800};
+    static const X2CErrorSite  _x2c_error_site_17  = {.file =  "../../lib/dispatch.x",.function =  "Var_compare",.line =  810};
     x2c_error_raise_n(& _x2c_error_site_17, 48270474208, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.compare")),  NULL))));
     __builtin_unreachable();
   }
@@ -1026,7 +1033,7 @@ int Var_compare(Var a,  Var b){
 Iter Var_fallback_iter(Var x,  Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite  _x2c_error_site_18  = {.file =  "../../lib/dispatch.x",.function =  "Var_fallback_iter",.line =  827};
+    static const X2CErrorSite  _x2c_error_site_18  = {.file =  "../../lib/dispatch.x",.function =  "Var_fallback_iter",.line =  837};
     x2c_error_raise_n(& _x2c_error_site_18, 48270474208, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.iter")),  NULL))));
     __builtin_unreachable();
   }
@@ -1043,7 +1050,7 @@ Iter Var_fallback_iter(Var x,  Iter dest){
 Iter Var_iter(Var x,  Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite  _x2c_error_site_19  = {.file =  "../../lib/dispatch.x",.function =  "Var_iter",.line =  837};
+    static const X2CErrorSite  _x2c_error_site_19  = {.file =  "../../lib/dispatch.x",.function =  "Var_iter",.line =  847};
     x2c_error_raise_n(& _x2c_error_site_19, 48270474208, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.iter")),  NULL))));
     __builtin_unreachable();
   }

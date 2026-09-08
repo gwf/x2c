@@ -169,6 +169,7 @@ X2CErrorSite;
 #define VAR_I32_PREFIX 0x8002000600000000ul
 #define VAR_U32_PREFIX 0x8002000500000000ul
 #define VAR_F32_PREFIX 0x8002000700000000ul
+#define VAR_LIST_PREFIX 0x0009000000000004ul
 #define VAR_STRING_PREFIX 0x000B000000000001ul
 #define VAR_SYMBOL_OFFSET 0x8004000000000000ul
 #define VAR_NAN_BITS   0x8003000100000000ul
@@ -691,7 +692,10 @@ static inline Var Bytes_var(Bytes x){
 }
 
 static inline Var List_var(List x){
-  return Var_new(806120,  x);
+  return(Var){
+    .u64 =(unsigned long) x | VAR_LIST_PREFIX
+  }
+  ;
 }
 
 static inline Var File_var(File x){
@@ -703,11 +707,17 @@ static inline Var Map_var(Map x){
 }
 
 static inline Var String_var(String x){
-  return Var_new(1318210446,  x);
+  return(Var){
+    .u64 =(unsigned long) x | VAR_STRING_PREFIX
+  }
+  ;
 }
 
 static inline Var Symbol_var(Symbol x){
-  return Var_new(1328354264,  x);
+  return x <(1ul << 51) ?(Var){
+    .u64 = x + VAR_SYMBOL_OFFSET
+  }
+  : Var_new(1328354264,  x);
 }
 
 static inline Var Iter_var(Iter x){

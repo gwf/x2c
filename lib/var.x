@@ -378,11 +378,7 @@ Var Var.null(void) {
     every exhausted `List.cdr` yields this one value, so an identity test on
     the bits is a valid emptiness test.
 */
-int Var.is_nil(Var v) {
-  unsigned long bits = (unsigned long) taginfo[_list_].top << 48;
-  bits |= taginfo[_list_].bottom;
-  return v.u64 == bits;
-}
+int Var.is_nil(Var v) => v.u64 == VAR_LIST_PREFIX;
 
 static Var _new_floating(TagId id, double d) {
   Var v;

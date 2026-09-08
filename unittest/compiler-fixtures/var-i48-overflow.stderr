@@ -1,4 +1,4 @@
 <elapsed> error/err-report start_time="<wall-time>" code=<conv-range> detail=
 ((owner "Var.new") (target i48)) location=
-((file "../../lib/var.x") (line 597) (function "_new_integer"))
+((file "../../lib/var.x") (line 593) (function "_new_integer"))
 x2c error floor: code 0xdeeb7e4171ca: non-returning error was not caught

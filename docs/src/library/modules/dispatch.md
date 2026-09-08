@@ -48,7 +48,7 @@ Compares without consulting a runtime descriptor.
 
 **Raises:** `<void-op>` when either operand is `void`.
 
-Source: `lib/dispatch.x:774`
+Source: `lib/dispatch.x:784`
 
 <a id="Var.fallback_equal"></a>
 #### Var.fallback_equal
@@ -80,7 +80,7 @@ Returns a non-dispatch iterator over `Var`.
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
 
-Source: `lib/dispatch.x:826`
+Source: `lib/dispatch.x:836`
 
 <a id="Var.fallback_repr"></a>
 #### Var.fallback_repr
@@ -142,7 +142,7 @@ Returns an iterator over `Var`.
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
 
-Source: `lib/dispatch.x:836`
+Source: `lib/dispatch.x:846`
 
 <a id="Var.postfixindex"></a>
 #### Var.postfixindex
@@ -318,7 +318,7 @@ Compares `a` and `b` by runtime value group and registered ordering.
 
 **Raises:** `<void-op>` when either operand is `void`.
 
-Source: `lib/dispatch.x:795`
+Source: `lib/dispatch.x:805`
 
 <a id="Var.dispatch_truth"></a>
 #### Var.dispatch_truth
@@ -377,7 +377,7 @@ Source: `lib/dispatch.x:582`
 
 Reports whether `a` and `b` have identical `Var` bits.
 
-Source: `lib/dispatch.x:691`
+Source: `lib/dispatch.x:701`
 
 <a id="Var.str"></a>
 #### Var.str
@@ -484,7 +484,7 @@ Calls the registered `Context` exporter for `value` when one exists.
 Returns nonzero when the descriptor registers an exporter, and writes its
 result to `out`. `Context` handles built-in value families directly.
 
-Source: `lib/dispatch.x:849`
+Source: `lib/dispatch.x:859`
 
 ## Design notes
 

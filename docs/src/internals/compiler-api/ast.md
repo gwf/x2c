@@ -82,7 +82,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:174`
+Source: `src/ast.x:175`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -94,7 +94,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:115`
+Source: `src/ast.x:116`
 
 ### `Symbol`
 

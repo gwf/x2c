@@ -677,6 +677,16 @@ unsigned Var.hash(Var v) {
 int Var.equal(Var a, Var b) {
   if (a.u64 == b.u64) return 1;
   if (a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
+  /* Built-in object and Symbol rows identify the tag, so equal rows are
+     equal tags and the row selects the descriptor without a second decode. */
+  int count = sizeof(builtin_descriptors) / sizeof(builtin_descriptors[0]);
+  int row = x2c_var_descriptor_index(a);
+  if (row >= 0 && row < count) {
+    if (x2c_var_descriptor_index(b) != row) return 0;
+    VarDescriptor *descriptor = &builtin_descriptors[row];
+    return descriptor.value_dispatch && descriptor.methods.equal
+         ? descriptor.methods.equal(a, b) : 0;
+  }
   Symbol tag = a.tag(), btag = b.tag();
   if (tag == btag) {
     if (a.is_wide()) return a.wide_equal(b);

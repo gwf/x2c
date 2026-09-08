@@ -194,6 +194,7 @@ typedef struct X2CErrorSite {
 #define VAR_I32_PREFIX 0x8002000600000000ul
 #define VAR_U32_PREFIX 0x8002000500000000ul
 #define VAR_F32_PREFIX 0x8002000700000000ul
+#define VAR_LIST_PREFIX 0x0009000000000004ul
 #define VAR_STRING_PREFIX 0x000B000000000001ul
 #define VAR_SYMBOL_OFFSET 0x8004000000000000ul
 #define VAR_NAN_BITS   0x8003000100000000ul
@@ -508,15 +509,18 @@ inline Var    Buffer.var(Buffer x)       => Var.new(<buffer>, x);
 /** Boxes a `Bytes` value as `Var`. */
 inline Var    Bytes.var(Bytes x)         => Var.new(<bytes>, x);
 /** Boxes a `List` value as `Var`. */
-inline Var    List.var(List x)           => Var.new(<list>, x);
+inline Var    List.var(List x)           =>
+  (Var) { .u64 = (unsigned long) x | VAR_LIST_PREFIX };
 /** Boxes a `File` value as `Var`. */
 inline Var    File.var(File x)           => Var.new(<file>, x);
 /** Boxes a `Map` value as `Var`. */
 inline Var    Map.var(Map x)             => Var.new(<map>, x);
 /** Boxes a `String` value as `Var`. */
-inline Var    String.var(String x)       => Var.new(<string>, x);
+inline Var    String.var(String x)       =>
+  (Var) { .u64 = (unsigned long) x | VAR_STRING_PREFIX };
 /** Boxes a `Symbol` value as `Var`. */
-inline Var    Symbol.var(Symbol x)       => Var.new(<symbol>, x);
+inline Var    Symbol.var(Symbol x)       => x < (1ul << 51)
+  ? (Var) { .u64 = x + VAR_SYMBOL_OFFSET } : Var.new(<symbol>, x);
 /** Boxes an `Iter` value as `Var`. */
 inline Var    Iter.var(Iter x)           => Var.new(<iter>, x);
 

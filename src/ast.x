@@ -101,8 +101,9 @@ int ast_contains_head(Var value, Symbol kind) {
     Var current = pending.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
-    if (node.car() == kind) return 1;
-    foreach (Var child, node) pending.push(child);
+    if (node.car() === kind) return 1;
+    for (List cursor = node; cursor; cursor = cursor.cdr)
+      pending.push(cursor.car);
   }
   return 0;
 }

@@ -85,10 +85,6 @@ List Var_list(Var);
 
 Var List_car(List);
 
-Iter List_iter(List,  Iter);
-
-int Iter_try_next(Iter,  Var *);
-
 int List_truth(List);
 
 List List_cdr(List);
@@ -114,6 +110,10 @@ Var List_cadr(List);
 int SymbolSet_contains(SymbolSet,  Symbol);
 
 int String_equal(String,  String);
+
+Iter List_iter(List,  Iter);
+
+int Iter_try_next(Iter,  Var *);
 
 Var List_last(List);
 
@@ -282,7 +282,7 @@ int ast_contains_head(Var value,  Symbol kind){
       Var current = Array_take_last(pending);
       if(! Var_is(current,  806120) || Var_is_nil(current)) continue;
       List node = Var_list(current);
-      if(Var_equal(List_car(node),  Symbol_var(kind))){
+      if(Var_same(List_car(node),  Symbol_var(kind))){
         int _x2c_return_value_0 = 1;
         {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
@@ -294,20 +294,7 @@ int ast_contains_head(Var value,  Symbol kind){
 
 }
       }
-      {
-        Var child;
-        Iter _x2c_macro_iterator_0 = List_iter(node,  &(struct Iter){
-          0
-        }
-        );
-        Var _x2c_macro_item_0;
-        while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
-          child = _x2c_macro_item_0;
-          Array_push(pending,  child);
-        }
-
-      }
-
+      for(List cursor = node;  List_truth(cursor);  cursor = cursor -> cdr) Array_push(pending,  cursor -> car);
     }
     {
       int _x2c_return_value_1 = 0;
@@ -336,10 +323,10 @@ Ast Ast_rewrite_children(Ast ast,  Func per_child){
   Var child;
   List _x2c_macro_original_0 = ast;
   Array _x2c_macro_rewritten_0 =(Array) 0;
-  for(List _x2c_macro_cursor_1 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_1);  _x2c_macro_cursor_1 = List_cdr(_x2c_macro_cursor_1)){
-    Var _x2c_macro_item_1 = List_car(_x2c_macro_cursor_1),  _x2c_macro_value_0 = _x2c_macro_item_1;
-    if(Var_is(_x2c_macro_item_1,  806120)){
-      child = _x2c_macro_item_1;
+  for(List _x2c_macro_cursor_0 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_0);  _x2c_macro_cursor_0 = List_cdr(_x2c_macro_cursor_0)){
+    Var _x2c_macro_item_0 = List_car(_x2c_macro_cursor_0),  _x2c_macro_value_0 = _x2c_macro_item_0;
+    if(Var_is(_x2c_macro_item_0,  806120)){
+      child = _x2c_macro_item_0;
       _x2c_macro_value_0 =({
         Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0,  1,  0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL,  _20);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0,  1, (FuncArg[]){
           _x2c_func_argument_0
@@ -348,9 +335,9 @@ Ast Ast_rewrite_children(Ast ast,  Func per_child){
       }
       );
     }
-    if(!(void *) _x2c_macro_rewritten_0 && ! Var_equal(_x2c_macro_value_0,  _x2c_macro_item_1)){
+    if(!(void *) _x2c_macro_rewritten_0 && ! Var_equal(_x2c_macro_value_0,  _x2c_macro_item_0)){
       _x2c_macro_rewritten_0 = Array_new();
-      for(List _x2c_macro_prefix_0 = _x2c_macro_original_0;  ! List_equal(_x2c_macro_prefix_0,  _x2c_macro_cursor_1);  _x2c_macro_prefix_0 = List_cdr(_x2c_macro_prefix_0)) Array_push(_x2c_macro_rewritten_0,  List_car(_x2c_macro_prefix_0));
+      for(List _x2c_macro_prefix_0 = _x2c_macro_original_0;  ! List_equal(_x2c_macro_prefix_0,  _x2c_macro_cursor_0);  _x2c_macro_prefix_0 = List_cdr(_x2c_macro_prefix_0)) Array_push(_x2c_macro_rewritten_0,  List_car(_x2c_macro_prefix_0));
     }
     if((void *) _x2c_macro_rewritten_0) Array_push(_x2c_macro_rewritten_0,  _x2c_macro_value_0);
   }
@@ -417,11 +404,11 @@ static int _contains_return(Ast node){
     if(Var_equal(head,  Symbol_var(1219800220))) return 1;  if(Var_equal(head,  Symbol_var(458361162716))) return 0;
   }
   {
-    Var head;  Iter _x2c_macro_iterator_1 = List_iter(node,  &(struct Iter){
+    Var head;  Iter _x2c_macro_iterator_0 = List_iter(node,  &(struct Iter){
       0
     }
-    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_2)){
-      head = _x2c_macro_item_2;  if(Var_is(head,  806120) && _contains_return(Var_pointer(head))) return 1;
+    );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_1)){
+      head = _x2c_macro_item_1;  if(Var_is(head,  806120) && _contains_return(Var_pointer(head))) return 1;
     }
 
   }

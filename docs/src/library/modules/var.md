@@ -202,7 +202,7 @@ when a wide box cannot be allocated, and `<bad-enc>` when a box address
 cannot be represented or a custom object pointer is not 8-byte
 aligned.
 
-Source: `lib/var.x:642`
+Source: `lib/var.x:638`
 
 <a id="Var.null"></a>
 #### Var.null
@@ -272,7 +272,7 @@ printf("equal=%d same=%d tag=%s\n", five == also, five === also,
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:470`
+Source: `lib/var.x:466`
 
 <a id="Var.box_long_double"></a>
 #### Var.box_long_double
@@ -289,7 +289,7 @@ extra precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:522`
+Source: `lib/var.x:518`
 
 <a id="Var.box_long_long"></a>
 #### Var.box_long_long
@@ -302,7 +302,7 @@ Boxes a native signed long-long value without losing precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:496`
+Source: `lib/var.x:492`
 
 <a id="Var.box_ulong"></a>
 #### Var.box_ulong
@@ -319,7 +319,7 @@ bit pattern; `Var.wide_equal` requires matching tags. Read it back with
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:485`
+Source: `lib/var.x:481`
 
 <a id="Var.box_ulong_long"></a>
 #### Var.box_ulong_long
@@ -332,7 +332,7 @@ Boxes a native unsigned long-long value without losing precision.
 when its address cannot be represented in a `Var`. Before `Error`
 initialization, allocation failure uses the raw fatal floor.
 
-Source: `lib/var.x:507`
+Source: `lib/var.x:503`
 
 <a id="Var.encoding_valid"></a>
 #### Var.encoding_valid
@@ -364,7 +364,7 @@ the scalar-named readers such as `Var.double` do this for you.
 
 An unhandled tag yields 0.0.
 
-Source: `lib/var.x:707`
+Source: `lib/var.x:703`
 
 <a id="Var.integer"></a>
 #### Var.integer
@@ -393,7 +393,7 @@ printf("small=%ld text=%ld\n", small.integer(), text.integer());
 
 An unhandled tag yields 0.
 
-Source: `lib/var.x:752`
+Source: `lib/var.x:748`
 
 <a id="Var.integer_compare"></a>
 #### Var.integer_compare
@@ -410,7 +410,7 @@ Both arguments are assumed to be integer-kinded. Another value is decoded
 by `Var.integer`, which reads it as 0. Confirm with `Var.is_integer` when
 the kinds are not known.
 
-Source: `lib/var.x:932`
+Source: `lib/var.x:928`
 
 <a id="Var.integer_floating_compare"></a>
 #### Var.integer_floating_compare
@@ -427,7 +427,7 @@ never equal to an integer.
 integer. NaN is not ordered and reports -1. Test the tag for `<nan>`
 first if that distinction matters.
 
-Source: `lib/var.x:960`
+Source: `lib/var.x:956`
 
 <a id="Var.kind"></a>
 #### Var.kind
@@ -468,7 +468,7 @@ floating tag, `<f64>` included, yields 0.0 here instead of being widened.
 
 A tag mismatch yields 0.0.
 
-Source: `lib/var.x:824`
+Source: `lib/var.x:820`
 
 <a id="Var.long_long_value"></a>
 #### Var.long_long_value
@@ -477,7 +477,7 @@ Source: `lib/var.x:824`
 
 Returns an `<llong>` box's signed payload, or 0 for another tag.
 
-Source: `lib/var.x:810`
+Source: `lib/var.x:806`
 
 <a id="Var.long_value"></a>
 #### Var.long_value
@@ -491,7 +491,7 @@ use this one when the tag is known and the payload must survive intact.
 
 A tag mismatch yields 0.
 
-Source: `lib/var.x:795`
+Source: `lib/var.x:791`
 
 <a id="Var.parse"></a>
 #### Var.parse
@@ -527,7 +527,7 @@ printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
 **Raises:** `<alloc-fail>` while constructing `String` or quoted-`Symbol`
 output.
 
-Source: `lib/var.x:1061`
+Source: `lib/var.x:1057`
 
 <a id="Var.pointer"></a>
 #### Var.pointer
@@ -551,7 +551,7 @@ also accepts some reserved pointer-shaped bit patterns. Validate external
 bits with `Var.encoding_valid`, then confirm the family with `Var.tag` or
 `Var.is` before trusting the result.
 
-Source: `lib/var.x:1015`
+Source: `lib/var.x:1011`
 
 <a id="Var.register_object_tag"></a>
 #### Var.register_object_tag
@@ -597,7 +597,7 @@ Source: `lib/var.x:270`
 
 Returns a `<ullong>` box's unsigned payload, or 0 for another tag.
 
-Source: `lib/var.x:814`
+Source: `lib/var.x:810`
 
 <a id="Var.ulong_value"></a>
 #### Var.ulong_value
@@ -613,7 +613,7 @@ doubt.
 
 A tag mismatch yields 0.
 
-Source: `lib/var.x:806`
+Source: `lib/var.x:802`
 
 <a id="Var.wide_compare"></a>
 #### Var.wide_compare
@@ -630,7 +630,7 @@ order deterministically.
 argument that is not a wide box. Check the tags first, or use the
 relational operators, which reach the runtime's full ordering.
 
-Source: `lib/var.x:984`
+Source: `lib/var.x:980`
 
 <a id="Var.wide_equal"></a>
 #### Var.wide_equal
@@ -649,7 +649,7 @@ that is not a wide box and a pair whose tags differ. For a general
 equality test use `==`, which reaches `Var.equal` and covers every
 family.
 
-Source: `lib/var.x:867`
+Source: `lib/var.x:863`
 
 <a id="Var.wide_hash"></a>
 #### Var.wide_hash
@@ -658,7 +658,7 @@ Source: `lib/var.x:867`
 
 Returns a supported wide scalar box's content hash, or 0 otherwise.
 
-Source: `lib/var.x:834`
+Source: `lib/var.x:830`
 
 ## Runtime-internal callables
 
@@ -686,7 +686,7 @@ The clone compares equal but not identical to `value`. Returns `void` when
 **Raises:** `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>`
 if its address cannot be represented in a `Var`.
 
-Source: `lib/var.x:534`
+Source: `lib/var.x:530`
 
 <a id="Var.custom_descriptor_index"></a>
 #### Var.custom_descriptor_index
@@ -711,7 +711,7 @@ For a wide value, raises `<bad-arg>` when `scope` is NULL, or
 Ownership
 is unchanged on failure.
 
-Source: `lib/var.x:559`
+Source: `lib/var.x:555`
 
 <a id="Var.wide_owner"></a>
 #### Var.wide_owner
@@ -720,7 +720,7 @@ Source: `lib/var.x:559`
 
 Returns the `Scope` owning a live wide numeric box, or NULL otherwise.
 
-Source: `lib/var.x:566`
+Source: `lib/var.x:562`
 
 ## Design notes
 
