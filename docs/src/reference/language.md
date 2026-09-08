@@ -21,9 +21,9 @@ starts with `#pragma once` and also carries a conventional include guard, so
 
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host
 preprocessor over raw `.x` include graphs. A module used with those modes needs
-a source-level `#pragma once` only when its own `.x` includes form a cycle. The
-compiler's and runtime's modules do. Ordinary translation resolves includes
-itself and terminates cycles without it.
+a source-level `#pragma once` only when its own `.x` includes form a cycle.
+Ordinary translation resolves includes itself and terminates cycles without
+it.
 
 Every ordinary `.x` translation unit implicitly loads the `x2c.x` standard
 runtime prelude. The compiler also emits `#include "x2c.h"` in its generated

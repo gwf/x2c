@@ -8,9 +8,9 @@ hand is where the rule fails in practice, so this answers it exactly instead.
     tools/gate-state.py ensure agent-pr-check
 
 `check` prints `valid` only when every tracked and untracked non-ignored file
-is byte-identical to the tree that passed, on the same commit and the same
-host compiler. Anything else is `stale`, and it names what moved. It exits 0
-for valid and 1 for stale, so a shell can branch on it.
+has the same content, type, and executable permissions as the tree that passed,
+with the same host compiler. Anything else is `stale`, and it names what moved.
+It exits 0 for valid and 1 for stale, so a shell can branch on it.
 
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
 corresponding Make target with live output and records the resulting tree only
@@ -24,7 +24,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import pathlib
+import stat
 import subprocess
 import sys
 
@@ -35,7 +37,7 @@ GATES = {"agent-pr-check", "doc-check"}
 
 def git(*args: str) -> str:
     out = subprocess.run(
-        ["git", *args], cwd=ROOT, capture_output=True, text=True, check=False
+        ["git", *args], cwd=ROOT, capture_output=True, text=True, check=True
     )
     return out.stdout
 
@@ -48,12 +50,12 @@ def compiler_identity() -> str:
     return out.stdout.splitlines()[0] if out.stdout else "unknown"
 
 
-# Bump when the digest's meaning changes, so older records report unknown
-# instead of comparing two things that were never comparable.
-FORMAT = 3
+# Version 4 adds file type and executable permissions. Old records cannot be
+# upgraded: they never captured those facts and must be validated once again.
+FORMAT = 4
 
 
-def content_hash(rel: str) -> str:
+def content_hash(rel: str, mode: int) -> str:
     """Git's blob hash for a path's current bytes.
 
     This must be git's own blob hash and not a plain digest of the bytes,
@@ -61,10 +63,9 @@ def content_hash(rel: str) -> str:
     tracked file. Using the same hash makes the result independent of whether
     a file is staged.
     """
-    try:
-        data = (ROOT / rel).read_bytes()
-    except OSError:
-        return "absent"
+    path = ROOT / rel
+    data = (os.fsencode(os.readlink(path)) if stat.S_ISLNK(mode)
+            else path.read_bytes())
     header = f"blob {len(data)}".encode() + b"\0"
     return hashlib.sha1(header + data).hexdigest()[:16]
 
@@ -80,24 +81,35 @@ def tree_content() -> dict[str, str]:
     `HEAD` points at or on what happens to be staged. That is deliberate.
     `AGENTS.md` says a commit, review, push, or elapsed time does not
     invalidate green evidence, and nothing in this build reads git state, so
-    identical bytes mean an identical build no matter where those bytes are
-    recorded. Ignored paths are excluded, so scratch under `debug/` is
-    correctly irrelevant.
+    identical files mean an identical build no matter where they are recorded.
+    Ignored paths are excluded, so scratch under `debug/` is irrelevant.
 
     Tracked files use the index blob hash, which costs no file reads. Only
     paths whose working tree differs from the index, plus untracked ones, are
-    hashed directly.
+    hashed directly. Metadata comes from lstat even when Git ignores mode
+    changes. Missing paths are omitted before and after staging their deletion.
     """
-    entries: dict[str, str] = {}
+    index: dict[str, str] = {}
     for record in zsplit(git("ls-files", "-s", "-z")):
         meta, _, path = record.partition("\t")
         fields = meta.split()
         if path and len(fields) >= 2:
-            entries[path] = fields[1][:16]
-    for path in zsplit(git("diff", "--name-only", "-z")):
-        entries[path] = content_hash(path)
-    for path in zsplit(git("ls-files", "--others", "--exclude-standard", "-z")):
-        entries[path] = content_hash(path)
+            index[path] = fields[1][:16]
+    changed = set(zsplit(git("diff", "--name-only", "-z")))
+    untracked = zsplit(git("ls-files", "--others", "--exclude-standard", "-z"))
+    entries: dict[str, str] = {}
+    for path in index.keys() | set(untracked):
+        try:
+            mode = (ROOT / path).lstat().st_mode
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        if stat.S_ISDIR(mode):
+            continue
+        if not (stat.S_ISREG(mode) or stat.S_ISLNK(mode)):
+            raise ValueError(f"unsupported file type: {path}")
+        blob = (index[path] if path in index and path not in changed
+                else content_hash(path, mode))
+        entries[path] = f"{stat.S_IFMT(mode):o}:{mode & 0o111:o}:{blob}"
     return entries
 
 
@@ -205,11 +217,17 @@ def main() -> int:
     ens = sub.add_parser("ensure", help="reuse or run and record a publication gate")
     ens.add_argument("gate", choices=sorted(GATES))
     args = parser.parse_args()
-    if args.command == "record":
-        return cmd_record(args.gate)
-    if args.command == "check":
-        return cmd_check(args.gate)
-    return cmd_ensure(args.gate)
+    try:
+        if args.command == "record":
+            return cmd_record(args.gate)
+        if args.command == "check":
+            return cmd_check(args.gate)
+        return cmd_ensure(args.gate)
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        detail = (error.stderr.strip() if isinstance(
+            error, subprocess.CalledProcessError) else str(error))
+        print(f"cannot inspect current tree: {detail}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

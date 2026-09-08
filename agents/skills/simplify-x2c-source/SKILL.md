@@ -43,8 +43,9 @@ public requirement.
 For AST work, consult
 [the Match guide](../../replacing-manual-ast-walks-with-match.md)
 and trace forms into existing binding, typing, placement, transformation, and
-emission. Use `x2c-graph flows` or `x2c-graph compare` to investigate unclear
-parsed-source paths; reachability differences require source review.
+emission. The optional [source graph commands](../../../tools/x2c-graph/README.md)
+`flows` and `compare` investigate unclear parsed-source paths; reachability
+differences require source review, and missing paths do not establish safety.
 
 Prefer deletion, direct use of existing code, then one shared operation.
 Compile-time generation helps when it replaces real implementations sharing

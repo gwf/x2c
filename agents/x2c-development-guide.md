@@ -65,8 +65,9 @@ positions. Therefore:
 - Object-like constant `#define`s remain valid where C requires an integer
   constant expression. `static const` cannot replace them in every context,
   and 64-bit constants such as `VAR_NULL_BITS` are not portable enumerators.
-- Quote-includes must form an acyclic graph resolved from the including file,
-  then `.`, `src/`, `lib/`, the `-I` chain, and `include/`.
+- Ordinary include collection terminates cycles. Raw `.x` include cycles used
+  with `--cpp-symbols` or `--live-symbols` need source guards, as described in
+  [source files and pragmas](../docs/src/reference/language.md#source-files-and-pragmas).
 - The compiler never reads system headers. Declare compiler-visible types in
   `.x` source or the runtime library.
 

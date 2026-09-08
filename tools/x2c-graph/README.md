@@ -2,14 +2,56 @@
 
 This tool uses the current stage-0 x2c compiler as a library. Its local build
 archives the compiler objects except `main.o` as `builds/libx2c-dev.a`; it does
-not install or expose a supported compiler library.
+not install or expose a supported compiler library. It is optional: `make`
+first builds the current compiler, so reuse the executable for repeated
+queries until its inputs change.
 
-From this directory, build the tool and inspect the compiler and runtime sources:
+From this directory, build the tool:
 
 ```sh
 make
-make run
 ```
+
+The optional `make run` target builds the tool and runs the Makefile's example
+queries over the compiler and runtime sources.
+
+## Investigate a change
+
+From `tools/x2c-graph`, after `make`:
+
+```sh
+# Find parsed callers and callees before changing syntax binding.
+builds/x2c-graph focus Compiler_bind_syntax x2c/src/*.x
+grep -n 'bind_syntax' x2c/src/*.x
+
+# Inspect returned allocation before removing an apparent copy.
+builds/x2c-graph allocation-returns String_split_n x2c/lib/split.x
+
+# Find repeated full walks that may merit source inspection.
+builds/x2c-graph walks x2c/src/*.x
+```
+
+The local `x2c` symlink points to the repository root. Commands use emitted
+names (`String_split_n` for `String.split_n`); supply the relevant source
+files to resolve calls across units. Rerun commands for current counts;
+archived reports describe older trees. Inspect reported sites before removing
+walks or allocations; absent results do not establish safety.
+Text-search hits can be definitions, declarations, or comments as well as
+calls; a hit absent from graph edges does not establish an unresolved call.
+
+To resolve allocation flows across all hand-authored compiler and runtime
+units, this shell example excludes the generated `lib/x2c.x` prelude and keeps
+one filename per argument (including in zsh):
+
+```sh
+set -- x2c/src/*.x
+for unit in x2c/lib/*.x; do
+  [ "$unit" = x2c/lib/x2c.x ] || set -- "$@" "$unit"
+done
+builds/x2c-graph flows String_split_n List_iter "$@"
+```
+
+## Commands and results
 
 The executable accepts explicit x2c source files and optional include paths:
 
@@ -201,10 +243,11 @@ remains a compact summary.
 Member paths must be rooted in one binding and contain only `.` or `->`;
 calls, indexing, explicit dereference, casts, conditionals, and mutation
 expressions are excluded. Paths are displayed compactly with dots even when
-x2c lowers dot access on a pointer-like receiver to `->`. The result can
-expose repeated full walks over one AST or collection, but it does not claim
-that the value was unchanged between calls, that the walkers preserve the
-same state, or that they can safely be combined.
+x2c lowers dot access on a pointer-like receiver to `->`. These restrictions
+apply to argument expressions. Two full walkers called as
+`first(value); value = replacement; second(value);` can still produce a
+candidate. Inspect changes between calls and each walker's state before
+deciding whether they can safely be combined.
 
 `tail-calls` reports exact self-calls in return position, their source
 locations, other non-tail self-calls in the same function, and explicit
@@ -216,8 +259,8 @@ and cleanup, and check the host compiler's optimization.
 `loop-allocations` ranks source expressions that allocate List/String pool or
 Scope-backed storage inside parsed loops. It groups macro-expanded allocation
 nodes at one source location while preserving their counts. It also follows
-project helpers whose every return path definitely produces one fresh value
-of one ownership kind; those rows count resolved calls, not allocations made
+project helpers whose every return path uses allocation operations of one
+ownership kind; those rows count resolved calls, not allocations made
 inside the helper. Static helpers remain local to their input and a public
 helper must resolve uniquely across the supplied files.
 
@@ -232,15 +275,16 @@ allocations outside loops.
 These are syntactic facts for investigation, not proof that work is
 unnecessary or that an isolated `Context` is safe. Assignment and argument
 use do not establish escape behavior, and a helper summary does not reveal
-its internal allocation count. Values that cross a Context still need an
-explicit copy or export.
+its internal allocation count. A value whose storage would be released with
+the Context needs a copy or export to survive it; values already owned outside
+that Context do not. Check the actual owner and lifetime in source.
 
-`lifetime-escapes` reports a definite dangling return from an explicit
-`Scope` or `Context`. It follows direct local aliases, accepts storage moved
+`lifetime-escapes` reports returns that can dangle after an explicit
+`Scope` or `Context` ends. It follows direct local aliases, accepts storage moved
 with `Scope.move`, and accepts the value returned by `Context.export`. An
 ignored export does not establish a safe result. It also follows project
-helpers whose every return path definitely produces fresh storage in the
-caller's current Scope or canonical-value pool. Static helpers remain local
+helpers whose every return path uses allocation operations for the caller's
+current Scope or canonical-value pool. Static helpers remain local
 to their input; a public helper resolves across inputs only when its emitted
 name has one definition.
 
@@ -250,18 +294,20 @@ or calls without an exact return summary. Mixed return paths, recursive calls
 without an allocation base, and implicit conversions between runtime types
 remain unresolved. Values passed to unknown or indirect calls also become
 unresolved instead of producing a finding. A missing report does not establish
-that the code is safe.
+that the code is safe. A reported pooled return may reuse an ancestor's
+canonical value, so even a `dangling-return` finding needs source verification.
 
 `allocation-returns` reports return expressions in functions with the exact
-emitted `NAME` that directly allocate in the caller's current Scope or
+emitted `NAME` that call allocation operations for the caller's current Scope or
 canonical-value pool. Each row names the allocation operation, ownership
 kind, and source location. This is the check to run before deleting an
 apparently redundant copy: replacing a reported `cons`, `Array.list_free`, or
 String constructor with an existing value can change which Context owns the
 result even when the values are structurally equal. The command does not
 infer indirect helper returns or say that the allocation is necessary; it
-exposes the ownership change that a candidate rewrite must preserve or
-disprove.
+identifies operations whose removal may change ownership.
+Pooled operations may reuse canonical values; the report does not
+prove fresh cells or the actual owner of a particular returned value.
 
 `flows` asks where the value returned by one exact function reaches an
 argument of another exact function. It follows direct consumption, local

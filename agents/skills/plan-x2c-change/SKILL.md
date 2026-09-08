@@ -1,18 +1,19 @@
 ---
 name: plan-x2c-change
 description: >-
-  Decide and record the design for one x2c change before implementation
-  starts. Use when a request names a goal but not a design, when a question
-  about the current design needs an answer backed by a probe, or when work
-  must be scoped into pull requests. Do not use to carry out a plan whose
-  decisions are already recorded; use execute-x2c-plan for that.
+  Answer questions about current x2c behavior with source and probes, or
+  decide and record a change before implementation starts. Use when a
+  request asks how the current design works, names a goal but not a design,
+  or needs work scoped into pull requests. A behavior question needs an
+  answer, not a change plan. For an already-decided implementation, use
+  execute-x2c-plan.
 ---
 
 # Plan an x2c change
 
-Decide one coherent change using current source, working examples, and focused
-evidence. A planning or design-review request produces a recommendation and a
-plan; it does not authorize implementation.
+Answer the question or decide one coherent change using current source,
+working examples, and focused evidence. Investigation and planning do not
+authorize implementation.
 
 ## Establish the result
 
@@ -20,6 +21,11 @@ Read the request and its named documents, relevant source and tests, and the
 book pages that specify the behavior. State the observable result and what
 must remain compatible. If the existing implementation already meets the
 request, demonstrate that and report it.
+
+For a question about current behavior, finish with the answer, source or
+probe evidence, and any remaining uncertainty. Do not invent a change or
+write a durable plan merely because answering requires investigation. The
+plan section below applies when proposing a change.
 
 Resolve discoverable questions from the repository. Ask about consequential
 choices the request leaves open, such as public behavior or caller
@@ -36,9 +42,10 @@ revise the design or recommend stopping.
 For AST work, use
 [the Match guide](../../replacing-manual-ast-walks-with-match.md)
 to identify the canonical input, structural pattern or template, and ordinary
-operation that binds, types, places, or emits it. `x2c-graph flows` and
-`x2c-graph compare` can establish parsed-source paths; they do not establish
-semantic equivalence or the absence of runtime paths.
+operation that binds, types, places, or emits it. The optional
+[source graph commands](../../../tools/x2c-graph/README.md) `flows` and
+`compare` can establish parsed-source paths; they do not establish semantic
+equivalence or the absence of runtime paths.
 
 Compare proposed machinery with deletion, reuse, and composition of existing
 x2c features. Trace proposed checks to the code that establishes the relevant

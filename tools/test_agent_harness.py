@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import collections
 import importlib.util
 import json
 from pathlib import Path
@@ -97,47 +96,93 @@ class HarnessMetricsTests(unittest.TestCase):
             result = METRICS.codex_session(str(path), None, None, "x2c")
 
         self.assertEqual(result["session"], "12345678")
-        self.assertEqual(result["counts"]["broad_gates"], 3)
-        self.assertEqual(result["counts"]["broad_gates_redundant"], 1)
+        self.assertEqual(result["counts"]["make_gate_requests"], 3)
+        self.assertEqual(result["counts"]["ensure_gate_requests"], 0)
+        self.assertNotIn("broad_gates_redundant", result["counts"])
         self.assertEqual(result["counts"]["source_edits"], 1)
         self.assertEqual(result["counts"]["push_refspec"], 1)
         self.assertEqual(result["counts"]["skill_project"], 1)
         self.assertEqual(result["skills"], {"fix-x2c-bug": 1})
         self.assertEqual(result["counts"]["replies_furniture"], 1)
 
-    def test_gate_ensure_counts_the_target_and_redundant_invocations(self):
+    def scan_commands(self, agent, commands):
+        if agent == "codex":
+            records = [codex_records()[0]]
+            records.extend({
+                "type": "response_item",
+                "payload": {
+                    "type": "function_call",
+                    "arguments": json.dumps({"cmd": command}),
+                },
+            } for command in commands)
+        else:
+            records = [{
+                "type": "assistant",
+                "message": {"content": [{
+                    "type": "tool_use", "name": "Bash",
+                    "input": {"command": command},
+                }]},
+            } for command in commands]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "transcript.jsonl"
+            write_jsonl(path, records)
+            if agent == "codex":
+                return METRICS.codex_session(str(path), None, None, "x2c")
+            return METRICS.scan_session(str(path), None, None)
+
+    def test_ensure_requests_are_not_make_requests(self):
         command = "tools/gate-state.py ensure agent-pr-check"
-        self.assertEqual(list(METRICS.make_targets(command)), ["agent-pr-check"])
-        self.assertEqual(
-            list(METRICS.make_targets(f'pgrep -f "worker; {command}"')),
-            [],
-        )
-        self.assertEqual(
-            list(METRICS.make_targets(f"time {command}")),
-            ["agent-pr-check"],
-        )
-        self.assertEqual(
-            list(METRICS.make_targets(
-                "make check && tools/gate-state.py ensure doc-check "
-                "&& make stage-3"
-            )),
-            ["check", "doc-check", "stage-3"],
-        )
+        for agent in ("claude", "codex"):
+            with self.subTest(agent=agent):
+                result = self.scan_commands(agent, [command, command])
+                counts = result["counts"]
+                self.assertEqual(counts["ensure_gate_requests"], 2)
+                self.assertEqual(counts["make_gate_requests"], 0)
+                self.assertEqual(counts.get("make_canonical", 0), 0)
+                self.assertEqual(result["targets"], {"agent-pr-check": 2})
+                summary = METRICS.summarize([result])
+                self.assertNotIn("broad_gates", summary["counts"])
+                self.assertNotIn("broad_gates_redundant", summary["counts"])
+                self.assertNotIn(
+                    "broad_gates_redundant", summary["rates_percent"]
+                )
 
-        stat = collections.Counter()
-        targets = collections.Counter()
-        edits_since_gate = {}
-        changes = METRICS.count_command(
-            command, stat, targets, edits_since_gate, 0
-        )
-        METRICS.count_command(
-            command, stat, targets, edits_since_gate, changes
-        )
+    def test_make_and_ensure_requests_keep_targets_and_aliases(self):
+        commands = [
+            "make check && ./tools/gate-state.py ensure doc-check "
+            "&& make stage-3",
+            "time tools/gate-state.py ensure agent-pr-check",
+            "make doc-check && make safely && make build",
+            "echo \"don't count this; make check\" && make verify-sanitize",
+        ]
+        for agent in ("claude", "codex"):
+            with self.subTest(agent=agent):
+                result = self.scan_commands(agent, commands)
+                counts = result["counts"]
+                self.assertEqual(counts["ensure_gate_requests"], 2)
+                self.assertEqual(counts["make_gate_requests"], 5)
+                self.assertEqual(counts["make_canonical"], 5)
+                self.assertEqual(counts["make_alias"], 1)
+                self.assertEqual(result["targets"], {
+                    "check": 1, "doc-check": 2, "stage-3": 1,
+                    "agent-pr-check": 1, "safely": 1, "build": 1,
+                    "verify-sanitize": 1,
+                })
 
-        self.assertEqual(targets["agent-pr-check"], 2)
-        self.assertEqual(stat["make_canonical"], 2)
-        self.assertEqual(stat["broad_gates"], 2)
-        self.assertEqual(stat["broad_gates_redundant"], 1)
+    def test_quoted_commands_are_not_requests(self):
+        commands = [
+            'pgrep -f "worker; tools/gate-state.py ensure agent-pr-check"',
+            "echo 'next; make agent-pr-check'",
+            'printf "%s\\n" "make check; make stage-3"',
+            'echo "tools/gate-state.py ensure doc-check"',
+            r'echo "say \"; make check; tools/gate-state.py ensure doc-check"',
+        ]
+        for agent in ("claude", "codex"):
+            with self.subTest(agent=agent):
+                result = self.scan_commands(agent, commands)
+                self.assertEqual(result["targets"], {})
+                self.assertEqual(result["counts"]["make_gate_requests"], 0)
+                self.assertEqual(result["counts"]["ensure_gate_requests"], 0)
 
     def test_documented_by_day_command_runs_for_codex(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -147,20 +192,24 @@ class HarnessMetricsTests(unittest.TestCase):
                 "rollout-2026-08-09T12.jsonl"
             )
             write_jsonl(transcript, codex_records())
+            command = [
+                sys.executable,
+                str(TOOLS / "harness-metrics.py"),
+                "--agent", "codex",
+                "--codex-root", str(root / "codex"),
+                "--match", "x2c",
+                "--by-day",
+            ]
             done = subprocess.run(
-                [
-                    sys.executable,
-                    str(TOOLS / "harness-metrics.py"),
-                    "--agent", "codex",
-                    "--codex-root", str(root / "codex"),
-                    "--match", "x2c",
-                    "--by-day",
-                    "--json",
-                ],
-                capture_output=True,
-                text=True,
-                check=True,
+                [*command, "--json"], capture_output=True,
+                text=True, check=True,
             )
+            displayed = subprocess.run(
+                command, capture_output=True, text=True, check=True,
+            )
+        self.assertIn("make_gates=3", displayed.stdout)
+        self.assertIn("ensure_gates=0", displayed.stdout)
+        self.assertNotIn("redundant", displayed.stdout)
         report = json.loads(done.stdout)
         self.assertEqual(report["sessions"], 1)
         self.assertEqual(list(report["by_day"]), ["2026-08-09"])

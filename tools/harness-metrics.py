@@ -2,10 +2,17 @@
 """Summarize how agent sessions actually behaved, from local transcripts.
 
 This reads Claude Code and Codex session transcripts on this machine and
-reports what agents did: which skills they invoked, which build targets they
-ran, how often they repeated an expensive gate without an intervening edit,
-and how much they undid their own work. It writes only aggregate counts, never
-transcript text.
+reports observed skills, build requests, edits, and rework commands. It writes
+only aggregate counts, never transcript text. Requests do not establish that
+a build executed or succeeded, or that a repeated request wasted work.
+
+make_gate_requests counts explicit Make requests for publication gates,
+broad checks, safe builds, and stage comparisons listed in GATE_TARGETS.
+ensure_gate_requests counts gate-state ensure requests, which may reuse cached
+evidence. Both contribute to per-session targets; only Make requests contribute
+to make_alias and make_canonical. These fields replace broad_gates and remove
+broad_gates_redundant and its percentage. Regenerate historical reports with
+this version before comparing them.
 
 The point is to make a harness change measurable. Record a summary before
 changing instructions or skills, change them, then record another and compare.
@@ -54,12 +61,11 @@ ALIASES = {
     "shootout": "shoot-run", "install": "build-install",
 }
 
-# Gates expensive enough that repeating one without an intervening edit is
-# pure waste. AGENTS.md requires naming the change that invalidated the last
-# green result before rerunning any of these.
-BROAD_GATES = {
-    "precommit", "check", "agent-pr-check", "stage-3", "stresstest",
-    "build-safe", "safely", "stage-diff-all", "verify-sanitize",
+# Canonical Make targets grouped as gate requests; this includes doc-check
+# so both publication gates can be compared with their ensure requests.
+GATE_TARGETS = {
+    "precommit", "check", "agent-pr-check", "doc-check", "stage-3",
+    "build-safe", "stage-diff-all", "verify-sanitize",
 }
 
 PROJECT_SKILLS = {
@@ -88,13 +94,6 @@ ENSURE = re.compile(
     + r"(?:\./)?tools/gate-state\.py\s+ensure\s+"
     r"(agent-pr-check|doc-check)\b"
 )
-# Events other than a source edit that invalidate a green gate result, so a
-# rerun after one of them is proof, not waste.
-INVALIDATES = re.compile(
-    r"\b(?:bootstrap-refresh|artifact-refresh|sym-update|hdr-sync"
-    r"|examples-update|verify-fixtures-update)\b"
-    r"|\bgit (?:rebase|pull|merge|cherry-pick)\b"
-)
 PUSH_REFSPEC = re.compile(r"git push\s+.*(HEAD:refs/heads/|:refs/heads/)")
 PUSH_PLAIN = re.compile(r"git push(?!\s+.*refs/heads/)")
 REWORK = {
@@ -108,6 +107,7 @@ CODEX_COMMAND = re.compile(
     r'(?:"cmd"|\bcmd)\s*:\s*("(?:\\.|[^"\\])*")'
 )
 SKILL_PATH = re.compile(r"([A-Za-z0-9_-]+)/SKILL\.md")
+QUOTED_WORD = re.compile(r'''\\.|'[^']*'|"(?:\\.|[^"\\])*"''')
 
 
 def blocks(record):
@@ -116,16 +116,10 @@ def blocks(record):
     return content if isinstance(content, list) else []
 
 
-def make_targets(command: str):
-    """The targets a command invokes, skipping any inside a quoted word."""
-    matches = sorted(
-        [*MAKE.finditer(command), *ENSURE.finditer(command)],
-        key=lambda match: match.start(),
-    )
-    for match in matches:
-        before = command[: match.start()]
-        if before.count('"') % 2 or before.count("'") % 2:
-            continue
+def command_targets(command: str, pattern):
+    """The requested targets, skipping matches inside a quoted word."""
+    unquoted = QUOTED_WORD.sub('""', command)
+    for match in pattern.finditer(unquoted):
         yield match.group(1)
 
 
@@ -138,18 +132,16 @@ def codex_commands(source: str):
             continue
 
 
-def count_command(command, stat, targets, edits_since_gate, changes):
-    if INVALIDATES.search(command):
-        changes += 1
-    for target in make_targets(command):
+def count_command(command, stat, targets):
+    for target in command_targets(command, MAKE):
         targets[target] += 1
         key = "alias" if target in ALIASES else "canonical"
         stat[f"make_{key}"] += 1
-        if target in BROAD_GATES:
-            stat["broad_gates"] += 1
-            if edits_since_gate.get(target) == changes:
-                stat["broad_gates_redundant"] += 1
-            edits_since_gate[target] = changes
+        if ALIASES.get(target, target) in GATE_TARGETS:
+            stat["make_gate_requests"] += 1
+    for target in command_targets(command, ENSURE):
+        targets[target] += 1
+        stat["ensure_gate_requests"] += 1
     if PUSH_REFSPEC.search(command):
         stat["push_refspec"] += 1
     elif PUSH_PLAIN.search(command):
@@ -157,7 +149,6 @@ def count_command(command, stat, targets, edits_since_gate, changes):
     for label, pattern in REWORK.items():
         if pattern.search(command):
             stat[f"rework_{label}"] += 1
-    return changes
 
 
 def add_reply(reply: str, stat, words) -> None:
@@ -172,12 +163,10 @@ def add_reply(reply: str, stat, words) -> None:
 
 def codex_session(path: str, since: str | None, until: str | None,
                   project_match: str) -> dict | None:
-    stat = collections.Counter()
+    stat = collections.Counter(make_gate_requests=0, ensure_gate_requests=0)
     skills = collections.Counter()
     targets = collections.Counter()
     days = set()
-    edits_since_gate: dict[str, int] = {}
-    changes = 0
     words: list[int] = []
     workspace = ""
     session_id = ""
@@ -232,7 +221,6 @@ def codex_session(path: str, since: str | None, until: str | None,
                             SOURCE_EDIT.search(str(changed_path))
                             for changed_path in changed
                         ):
-                            changes += 1
                             stat["source_edits"] += 1
                 elif (kind == "sub_agent_activity"
                       and payload.get("kind") == "started"):
@@ -248,9 +236,7 @@ def codex_session(path: str, since: str | None, until: str | None,
                 payload.get("input") or payload.get("arguments") or ""
             )
             for command in codex_commands(source):
-                changes = count_command(
-                    command, stat, targets, edits_since_gate, changes
-                )
+                count_command(command, stat, targets)
                 for skill in dict.fromkeys(SKILL_PATH.findall(command)):
                     skills[skill] += 1
                     key = (
@@ -276,14 +262,10 @@ def codex_session(path: str, since: str | None, until: str | None,
 
 
 def scan_session(path: str, since: str | None, until: str | None) -> dict | None:
-    stat = collections.Counter()
+    stat = collections.Counter(make_gate_requests=0, ensure_gate_requests=0)
     skills = collections.Counter()
     targets = collections.Counter()
     days = set()
-    # A broad gate is redundant when nothing invalidated its last green result
-    # since the previous run of that same gate in this session.
-    edits_since_gate: dict[str, int] = {}
-    changes = 0
     # A reply is turn-final when no further assistant record follows it, so
     # each candidate is held until the next record settles the question.
     pending: str | None = None
@@ -335,7 +317,6 @@ def scan_session(path: str, since: str | None, until: str | None) -> dict | None
                 if name in ("Edit", "Write", "NotebookEdit"):
                     stat["edits"] += 1
                     if SOURCE_EDIT.search(str(data.get("file_path", ""))):
-                        changes += 1
                         stat["source_edits"] += 1
                 elif name == "Agent":
                     stat["subagents"] += 1
@@ -346,9 +327,7 @@ def scan_session(path: str, since: str | None, until: str | None) -> dict | None
                     stat[key] += 1
                 elif name == "Bash":
                     command = str(data.get("command", ""))
-                    changes = count_command(
-                        command, stat, targets, edits_since_gate, changes
-                    )
+                    count_command(command, stat, targets)
 
     settle()
 
@@ -367,7 +346,7 @@ def scan_session(path: str, since: str | None, until: str | None) -> dict | None
 
 
 def summarize(sessions: list[dict]) -> dict:
-    total = collections.Counter()
+    total = collections.Counter(make_gate_requests=0, ensure_gate_requests=0)
     skills = collections.Counter()
     words: list[int] = []
     for session in sessions:
@@ -390,9 +369,6 @@ def summarize(sessions: list[dict]) -> dict:
         },
         "rates_percent": {
             "make_alias": ratio("make_alias", ("make_alias", "make_canonical")),
-            "broad_gates_redundant": ratio(
-                "broad_gates_redundant", ("broad_gates",)
-            ),
             "push_plain": ratio("push_plain", ("push_plain", "push_refspec")),
             "skill_project": ratio(
                 "skill_project", ("skill_project", "skill_other")
@@ -523,7 +499,8 @@ def main() -> int:
             rates = value["rates_percent"]
             print(
                 f"  {day} {value['sessions']:4} sessions "
-                f"gates={rates['broad_gates_redundant']}% "
+                f"make_gates={value['counts']['make_gate_requests']} "
+                f"ensure_gates={value['counts']['ensure_gate_requests']} "
                 f"push={rates['push_plain']}% "
                 f"skills={rates['skill_project']}%"
             )
