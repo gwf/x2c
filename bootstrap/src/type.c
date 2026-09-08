@@ -45,11 +45,11 @@ List Var_list(Var);
 
 Var Symbol_var(Symbol);
 
-Var List_var(List);
-
 List List_map(List,  Func);
 
 Var List_cadr(List);
+
+Var List_var(List);
 
 Iter List_iter(List,  Iter);
 
@@ -113,7 +113,7 @@ Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
 
 static Type _declarator_parts(Type type,  List * modifiers);
 
-static List _modifier_declaration_ast(Var value);
+static Var _modifier_declaration_ast(Var value);
 
 static int Symbol__is_number_type(Symbol sym);
 
@@ -175,13 +175,12 @@ static Type _declarator_parts(Type type,  List * modifiers){
   return List_type(List_append(qualifiers,  Type_list(base)));
 }
 
-static List _modifier_declaration_ast(Var value){
-  if(! Var_is(value,  806120)) return cons(value,  NULL);
+static Var _modifier_declaration_ast(Var value){
+  if(! Var_is(value,  806120)) return value;
   List modifier = Var_list(value);
-  if(! List_truth(modifier) || ! Var_equal(List_car(modifier),  Symbol_var(437126))) return cons(List_var(modifier),  NULL);
+  if(! List_truth(modifier) || ! Var_equal(List_car(modifier),  Symbol_var(437126))) return value;
   List parameters = List_map(Var_list(List_cadr(modifier)),  _x2c_func_handle_0);
-  List result = cons(_0,  cons(List_var(cons(_1,  List_append(parameters,  NULL))),  NULL));
-  return cons(List_var(result),  NULL);
+  return List_var(cons(_0,  cons(List_var(cons(_1,  List_append(parameters,  NULL))),  NULL)));
 }
 
 List Type_declaration_parts(Type type){
@@ -198,11 +197,7 @@ List Type_declaration_parts(Type type){
     Var _x2c_macro_item_0;
     while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
       item = _x2c_macro_item_0;
-      {
-        List converted = _modifier_declaration_ast(item);
-        Array_push(syntax,  List_car(converted));
-      }
-
+      Array_push(syntax,  _modifier_declaration_ast(item));
     }
 
   }
@@ -332,7 +327,6 @@ int Type_is_bitfield(Type type){
 
 Type Type_scalar(Type type){
   if(! _init_guard_) Type_initialize();
-  type = _canonical(type,  0);
   int sign = 0,  sign_count = 0,  shorts = 0,  longs = 0,  ints = 0,  chars = 0;
   int floats = 0,  doubles = 0,  voids = 0,  count = 0;
   {
@@ -346,8 +340,10 @@ Type Type_scalar(Type type){
       value = _x2c_macro_item_1;
       {
         if(! Var_is(value,  1328354264)) return NULL;
+        Symbol symbol = Var_symbol(value);
+        if(_omit_specifier(symbol,  0)) continue;
         count ++;
-        switch(Var_symbol(value)){
+        switch(symbol){
           case 1294430536 : sign = - 1;
           sign_count ++;
           break;

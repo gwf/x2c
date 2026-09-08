@@ -1,7 +1,8 @@
 # Improve agent onboarding without adding process
 
 > Status: blocked - implemented locally; behavioral acceptance is unmet.
-> 2026-09-08. No publication; this plan remains active for the remaining work.
+> 2026-09-08. Gary subsequently requested a draft PR for review; delivery to
+> main remains blocked, and this plan stays active for the remaining work.
 > Baseline: `11fd2fb`. Frozen evaluation inputs and raw evidence remain outside
 > tracked source; `.context/onboarding-repair/` locates local verification.
 
@@ -80,8 +81,10 @@ Review and fix the completed authored diff and finish behavioral evaluation
 before final publication validation. Fetch and integrate origin/main, inspect
 generated changes, run git diff --check, and ensure agent-pr-check on the final
 tree. Keep Make targets/sequencing unchanged and run focused tooling tests
-explicitly. Deliver directly with `git push origin HEAD:refs/heads/main`.
-Archive this plan with outcomes, measured costs, and remaining limitations.
+explicitly. Gary subsequently requested a draft PR: push the workspace branch
+to the same-named remote branch and use main as the base. Leave it available
+for review. Archive this plan with outcomes, measured costs, and remaining
+limitations when acceptance is met.
 
 ## Plan review
 
@@ -147,7 +150,7 @@ These changes do not turn failed trials into passes.
 
 The next work is to resolve the remaining semantic failures and repeat the
 semantic/analysis cases on the final authored tree after Claude is available.
-Do not publish or archive this plan as completed while acceptance is unmet.
+Do not merge or archive this plan as completed while acceptance is unmet.
 A decision to relax that acceptance belongs to Gary. The existing code gate
 still validates local implementation; its current record and full log live in
 `debug/gate-state.json` and `debug/onboarding-final-gate.log`.

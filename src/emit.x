@@ -46,7 +46,7 @@ typedef struct Emitter {
 
 static List Emitter._commas(Emitter emitter, List lst) {
   (void) emitter;
-  if (lst.len() <= 1) return lst;
+  if (!lst.cdr()) return lst;
   Array result = %[];
   int first = 1;
   foreach (Var item, lst) {
@@ -235,7 +235,7 @@ static String _cleanup_label_spelling(Var value) {
   if (direct) return direct;
   if (value is not <list>) return NULL;
   List label = value;
-  return label && label.len() == 1 && label.car() is <string>
+  return label && !label.cdr() && label.car() is <string>
        ? label.car().string() : NULL;
 }
 

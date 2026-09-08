@@ -54,8 +54,6 @@ Var String_var(String);
 
 Symbol Var_tag(Var);
 
-int Var_is(Var,  Symbol);
-
 String String_printf(String, ...);
 
 void * Var_pointer(Var);
@@ -444,14 +442,14 @@ int x2c_try_register_tagged_descriptor(Symbol tag,  String name,  VarMethods met
 String Var_pointer_string(Var v){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_tag(v);
-  if(Var_is(v,  3683441)) return String_printf(_0, (long) Var_pointer(v));
+  if(tag == 3683441) return String_printf(_0, (long) Var_pointer(v));
   return String_printf(_1,  Symbol_str(tag), (long) Var_pointer(v));
 }
 
 Buffer Var_write_pointer_repr(Var v,  Buffer out){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_tag(v);
-  if(Var_is(v,  3683441)) return Buffer_printf(out,  "<0x%012lX>", (long) Var_pointer(v));
+  if(tag == 3683441) return Buffer_printf(out,  "<0x%012lX>", (long) Var_pointer(v));
   char name[32] ={
     0
   }

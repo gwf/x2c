@@ -44,14 +44,13 @@ static Type _declarator_parts(Type type, List *modifiers) {
   return qualifiers.append(base);
 }
 
-static List _modifier_declaration_ast(Var value) {
-  if (value is not <list>) return %($value);
+static Var _modifier_declaration_ast(Var value) {
+  if (value is not <list>) return value;
   List modifier = value;
-  if (!modifier || modifier.car() != <func>) return %($modifier);
+  if (!modifier || modifier.car() != <func>) return value;
   List parameters = modifier.cadr().list().map(
     %!(Type parameter) => parameter.parameter_ast(NULL));
-  List result = %(fnmod (params @parameters));
-  return %($result);
+  return %(fnmod (params @parameters));
 }
 
 /** Returns `(base modifiers)` for reconstructing a declaration of `type`.
@@ -61,10 +60,8 @@ static List _modifier_declaration_ast(Var value) {
 List Type.declaration_parts(Type type) {
   List modifiers = NULL;
   Type base = _declarator_parts(type, &modifiers), Array syntax = %[];
-  foreach (Var item, modifiers) {
-    List converted = _modifier_declaration_ast(item);
-    syntax.push(converted.car());
-  }
+  foreach (Var item, modifiers)
+    syntax.push(_modifier_declaration_ast(item));
   List result = %($base (@{syntax.list_free()}));
   return result;
 }
@@ -199,13 +196,14 @@ int Type.is_bitfield(Type type) => _declarator_kind(type) == <bitfield>;
     affect the result.
 */
 Type Type.scalar(Type type) {
-  type = _canonical(type, 0);
   int sign = 0, sign_count = 0, shorts = 0, longs = 0, ints = 0, chars = 0;
   int floats = 0, doubles = 0, voids = 0, count = 0;
   foreach (Var value, type) {
     if (value is not <symbol>) return NULL;
+    Symbol symbol = value;
+    if (_omit_specifier(symbol, 0)) continue;
     count++;
-    switch (value.symbol()) {
+    switch (symbol) {
       case <signed>:   sign = -1; sign_count++; break;
       case <unsigned>: sign = 1;  sign_count++; break;
       case <short>:    shorts++;  break;
