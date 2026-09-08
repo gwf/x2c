@@ -29,7 +29,7 @@ static uint64_t _mix(uint64_t value);
 
 static uint32_t _g(SymbolSet set,  uint32_t vertex);
 
-static size_t _order_offset(SymbolSet x);
+static size_t _order_offset(SymbolSet x,  uint32_t span);
 
 static int _next(Iter iter,  Var * out);
 
@@ -66,8 +66,7 @@ static uint32_t _g(SymbolSet set,  uint32_t vertex){
   return _u32(set,  offset);
 }
 
-static size_t _order_offset(SymbolSet x){
-  uint32_t span = _u32(x,  8) + 1;
+static size_t _order_offset(SymbolSet x,  uint32_t span){
   return SYMBOL_SET_HEADER_SIZE +(size_t) span * 3 * _byte(x,  0);
 }
 
@@ -84,7 +83,7 @@ int SymbolSet_index(SymbolSet x,  Symbol symbol){
   uint64_t hash = _mix((uint64_t) symbol ^ seed);
   uint32_t index = _g(x, (uint32_t) hash & mask) ^ _g(x,  span +((uint32_t)(hash >> 21) & mask)) ^ _g(x,  span * 2 +((uint32_t)(hash >> 42) & mask));
   if(index >= count) return - 1;
-  Symbol stored =(Symbol) _u64(x,  _order_offset(x) +(size_t) index * sizeof(Symbol));
+  Symbol stored =(Symbol) _u64(x,  _order_offset(x,  span) +(size_t) index * sizeof(Symbol));
   return stored == symbol ?(int) index : - 1;
 }
 
@@ -96,7 +95,7 @@ Symbol SymbolSet_getindex(SymbolSet x,  int index){
   int count =(int) SymbolSet_len(x);
   index = x2c_normalize_index(index,  count);
   if(index < 0) return 0;
-  return(Symbol) _u64(x,  _order_offset(x) +(size_t) index * sizeof(Symbol));
+  return(Symbol) _u64(x,  _order_offset(x,  _u32(x,  8) + 1) +(size_t) index * sizeof(Symbol));
 }
 
 static int _next(Iter iter,  Var * out){

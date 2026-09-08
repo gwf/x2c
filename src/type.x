@@ -17,6 +17,7 @@
 typedef List Type;
 
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -794,12 +795,8 @@ int Type.is_threaded(Type type) => !!type.match(%(* threaded *));
 static List _from_ast(List ast, List context);
 
 static List _from_ast_items(List items, List context) {
-  Array result = %[];
-  foreach (Var item, items) {
-    if (item is <list>) result.push(_from_ast(item, context));
-    else result.push(item);
-  }
-  return result.list_free();
+  List child;
+  $ast.rewrite_children(items, child, _from_ast(child, context));
 }
 
 static List _from_ast(List ast, List context) {

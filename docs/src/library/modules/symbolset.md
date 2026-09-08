@@ -24,7 +24,7 @@ Immutable ordered sets of compact `Symbol`s.
 
 Reports whether `symbol` belongs to `set`.
 
-Source: `lib/symbolset.x:100`
+Source: `lib/symbolset.x:99`
 
 <a id="SymbolSet.getindex"></a>
 #### SymbolSet.getindex
@@ -36,7 +36,7 @@ Negative indices count from the end. Zero is also a valid empty `Symbol`,
 so
 use `SymbolSet.len` when an out-of-range result must be distinguished.
 
-Source: `lib/symbolset.x:107`
+Source: `lib/symbolset.x:106`
 
 <a id="SymbolSet.index"></a>
 #### SymbolSet.index
@@ -47,7 +47,7 @@ Returns `symbol`'s source-order index, or -1 when it is absent.
 A null or empty set returns -1. The ordered table verifies the hash
 candidate, so a nonmember collision is not reported as membership.
 
-Source: `lib/symbolset.x:83`
+Source: `lib/symbolset.x:82`
 
 <a id="SymbolSet.iter"></a>
 #### SymbolSet.iter
@@ -59,7 +59,7 @@ The caller owns `dest`, which must remain valid through every pull. The
 iterator borrows the generated set storage and allocates nothing. A null
 `dest` returns NULL; a null set produces an empty iterator.
 
-Source: `lib/symbolset.x:128`
+Source: `lib/symbolset.x:127`
 
 <a id="SymbolSet.len"></a>
 #### SymbolSet.len
@@ -68,7 +68,7 @@ Source: `lib/symbolset.x:128`
 
 Returns the number of `Symbol`s in `set`, or zero for a null set.
 
-Source: `lib/symbolset.x:77`
+Source: `lib/symbolset.x:76`
 
 ## Design notes
 

@@ -101,6 +101,10 @@ int List_len(List);
 
 Var car(List);
 
+int Var_equal(Var,  Var);
+
+int List_equal(List,  List);
+
 List List_flatten(List);
 
 int Array_truth(Array);
@@ -1213,25 +1217,22 @@ int Type_is_threaded(Type type){
 }
 
 static List _from_ast_items(List items,  List context){
-  Array result = Array_new();
-  {
-    Var item;
-    Iter _x2c_macro_iterator_3 = List_iter(items,  &(struct Iter){
-      0
+  List child;
+  List _x2c_macro_original_0 = items;
+  Array _x2c_macro_rewritten_0 =(Array) 0;
+  for(List _x2c_macro_cursor_3 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_3);  _x2c_macro_cursor_3 = List_cdr(_x2c_macro_cursor_3)){
+    Var _x2c_macro_item_3 = List_car(_x2c_macro_cursor_3),  _x2c_macro_value_0 = _x2c_macro_item_3;
+    if(Var_is(_x2c_macro_item_3,  806120)){
+      child = Var_list(_x2c_macro_item_3);
+      _x2c_macro_value_0 = List_var(_from_ast(child,  context));
     }
-    );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
-      item = _x2c_macro_item_3;
-      {
-        if(Var_is(item,  806120)) Array_push(result,  List_var(_from_ast(Var_list(item),  context)));
-        else Array_push(result,  item);
-      }
-
+    if(!(void *) _x2c_macro_rewritten_0 && ! Var_equal(_x2c_macro_value_0,  _x2c_macro_item_3)){
+      _x2c_macro_rewritten_0 = Array_new();
+      for(List _x2c_macro_prefix_0 = _x2c_macro_original_0;  ! List_equal(_x2c_macro_prefix_0,  _x2c_macro_cursor_3);  _x2c_macro_prefix_0 = List_cdr(_x2c_macro_prefix_0)) Array_push(_x2c_macro_rewritten_0,  List_car(_x2c_macro_prefix_0));
     }
-
+    if((void *) _x2c_macro_rewritten_0) Array_push(_x2c_macro_rewritten_0,  _x2c_macro_value_0);
   }
-  return Array_list_free(result);
+  return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
 
 static List _from_ast(List ast,  List context){

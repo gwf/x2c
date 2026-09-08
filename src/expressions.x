@@ -708,7 +708,8 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       }
       case %(ident ?): return 1;
     }
-    foreach (Var child, syntax) pending.push(child);
+    foreach (Var child, syntax)
+      if (child is <list>) pending.push(child);
   }
   return 0;
 }
@@ -815,12 +816,6 @@ static List Compiler._binary_op_type(
   (Var lhs_tag, Type ltype) = lhs;
   (Var rhs_tag, Type rtype) = rhs;
   (void) lhs_tag; (void) rhs_tag;
-  Symbol derived = 0;
-  List resolved = _resolve_protocol_operator(compiler, op, lhs, rhs, &derived);
-  if (resolved) {
-    Type signature = resolved.cadr();
-    return derived ? %(int) : signature.cdr();
-  }
   if (op == <in>) return NULL;
   if (compiler.sym.is_var_type(ltype) ||
       compiler.sym.is_var_type(rtype)) {
