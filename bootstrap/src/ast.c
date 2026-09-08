@@ -294,7 +294,7 @@ int ast_contains_head(Var value,  Symbol kind){
 
 }
       }
-      for(List cursor = node;  List_truth(cursor);  cursor = cursor -> cdr) Array_push(pending,  cursor -> car);
+      for(List cursor = node;  List_truth(cursor);  cursor = cursor -> cdr) if(Var_is(cursor -> car,  806120)) Array_push(pending,  cursor -> car);
     }
     {
       int _x2c_return_value_1 = 0;
