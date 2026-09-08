@@ -176,14 +176,14 @@ int x2c_try_register_tagged_descriptor(
 /** Formats the fallback display `String` for a pointer-bearing `Var`. */
 String Var.pointer_string(Var v) {
   Symbol tag = v.tag();
-  if (v is <p48>) return %"<0x%012lX>".printf((long) v.pointer());
+  if (tag == <p48>) return %"<0x%012lX>".printf((long) v.pointer());
   return %"<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
 }
 
 /** Writes the fallback readable form of a pointer-bearing `Var`. */
 Buffer Var.write_pointer_repr(Var v, Buffer out) {
   Symbol tag = v.tag();
-  if (v is <p48>) return out.printf("<0x%012lX>", (long) v.pointer());
+  if (tag == <p48>) return out.printf("<0x%012lX>", (long) v.pointer());
   char name[32] = { 0 };
   tag.decode(name);
   return out.printf("<%s: 0x%012lX>", name, (long) v.pointer());

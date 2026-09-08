@@ -2167,8 +2167,14 @@ static List Compiler__binary_op_type(Compiler compiler,  Symbol op,  List lhs,  
     }
 
   }
-  Type lscalar = Sym_resolve_numeric_type(compiler -> sym,  ltype);  Type rscalar = Sym_resolve_numeric_type(compiler -> sym,  rtype);  switch(op){
-    case 31993 : case 9805 : case 15739 : case 8571 : case 2014587 : case 1097083 : case 121 : case 125 : case 15483 : case 15995 : return _31;  case 15481 : case 15997 : return Type_list(List_truth(Type_list(lscalar)) ? Type_promote(lscalar) : NULL);  case 95 : case 75 : return Type_list(Type_widest(lscalar,  rscalar));  case 249 : case 77 : case 54 : case 189 : return Type_list(Type_widest(lscalar,  rscalar));  case 56 : case 62 : return _binary_op_type_addsub(compiler,  op,  lhs,  rhs);  default: return _binary_op_type_fallback(lhs,  rhs);
+  switch(op){
+    case 31993 : case 9805 : case 15739 : case 8571 : case 2014587 : case 1097083 : case 121 : case 125 : case 15483 : case 15995 : return _31;  case 15481 : case 15997 :{
+      Type lscalar = Sym_resolve_numeric_type(compiler -> sym,  ltype);  return Type_list(List_truth(Type_list(lscalar)) ? Type_promote(lscalar) : NULL);
+    }
+    case 95 : case 75 : case 249 : case 77 : case 54 : case 189 :{
+      Type lscalar = Sym_resolve_numeric_type(compiler -> sym,  ltype);  Type rscalar = Sym_resolve_numeric_type(compiler -> sym,  rtype);  return Type_list(Type_widest(lscalar,  rscalar));
+    }
+    case 56 : case 62 : return _binary_op_type_addsub(compiler,  op,  lhs,  rhs);  default: return _binary_op_type_fallback(lhs,  rhs);
   }
 
 }

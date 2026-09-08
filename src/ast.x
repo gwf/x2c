@@ -103,7 +103,7 @@ int ast_contains_head(Var value, Symbol kind) {
     List node = current;
     if (node.car() === kind) return 1;
     for (List cursor = node; cursor; cursor = cursor.cdr)
-      pending.push(cursor.car);
+      if (cursor.car is <list>) pending.push(cursor.car);
   }
   return 0;
 }

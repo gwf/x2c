@@ -80,7 +80,9 @@ Var Symbol_var(Symbol);
 
 Var List_var(List);
 
-int List_len(List);
+int List_truth(List);
+
+List List_cdr(List);
 
 Iter List_iter(List,  Iter);
 
@@ -97,8 +99,6 @@ Type List_type(List);
 List Var_list(Var);
 
 Var List_cadr(List);
-
-int List_truth(List);
 
 Var car(List);
 
@@ -117,8 +117,6 @@ int Type_is_array(Type);
 String binding_identity_spelling(List);
 
 Var List_car(List);
-
-List List_cdr(List);
 
 Var List_getindex(List,  int);
 
@@ -199,6 +197,8 @@ String String_add(String,  String);
 String long_str(long);
 
 String int_str(int);
+
+int List_len(List);
 
 List Type_declaration_ast(Type,  List);
 
@@ -1014,7 +1014,7 @@ __attribute__((constructor)) static void _file_init_(void){
 
 static List Emitter__commas(Emitter emitter,  List lst){
   (void) emitter;
-  if(List_len(lst) <= 1) return lst;
+  if(! List_truth(List_cdr(lst))) return lst;
   Array result = Array_new();
   int first = 1;
   {
@@ -1213,7 +1213,7 @@ static List Emitter__declare(Emitter emitter,  List ast,  List context){
 }
 
 static String _cleanup_label_spelling(Var value){
-  String direct = _direct_identifier(value);  if(String_truth(direct)) return direct;  if(! Var_is(value,  806120)) return NULL;  List label = Var_list(value);  return List_truth(label) && List_len(label) == 1 && Var_is(List_car(label),  1318210446) ? Var_string(List_car(label)) : NULL;
+  String direct = _direct_identifier(value);  if(String_truth(direct)) return direct;  if(! Var_is(value,  806120)) return NULL;  List label = Var_list(value);  return List_truth(label) && ! List_truth(List_cdr(label)) && Var_is(List_car(label),  1318210446) ? Var_string(List_car(label)) : NULL;
 }
 
 static void Emitter__collect_function_state(Emitter e,  List ast,  List path,  int in_try){

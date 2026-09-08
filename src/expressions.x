@@ -827,18 +827,22 @@ static List Compiler._binary_op_type(
       default: return %("Var");
     }
   }
-  Type lscalar = compiler.sym.resolve_numeric_type(ltype);
-  Type rscalar = compiler.sym.resolve_numeric_type(rtype);
   switch (op) {
     case <||>:   case <&&>:
     case <==>:   case <!=>:  case <===>:  case <!==>:
     case <"<">:  case <">">: case <"<=">: case <">=">:
       return %(int);
-    case <"<<">: case <">>">: return lscalar ? lscalar.promote() : NULL;
-    case </>:    case <%>: return lscalar.widest(rscalar);
+    case <"<<">: case <">>">: {
+      Type lscalar = compiler.sym.resolve_numeric_type(ltype);
+      return lscalar ? lscalar.promote() : NULL;
+    }
+    case </>:    case <%>:
     case <"|">:  case <&>:   case <*>:
-    case <^>:
+    case <^>: {
+      Type lscalar = compiler.sym.resolve_numeric_type(ltype);
+      Type rscalar = compiler.sym.resolve_numeric_type(rtype);
       return lscalar.widest(rscalar);
+    }
     case <+>:    case <->:
       return _binary_op_type_addsub(compiler, op, lhs, rhs);
     default: return _binary_op_type_fallback(lhs, rhs);
