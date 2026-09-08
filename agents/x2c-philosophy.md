@@ -394,18 +394,20 @@ floating point. `Var.integer_floating_compare` supplies exact mixed
 integer/floating comparison to `Var.compare`, while dispatch retains
 total-order policy.
 
-`Var.truthy` rejects `void` and invalid encodings. Numeric and Symbol zero,
-Null and null pointers, canonical empty String/List, and empty
-Array/Map/Block/Bytes/Buffer values are false. NaN, infinities, nonzero values,
-nonempty containers, and other nonnull objects are true. A nonnull Iter is true
-without probing exhaustion or producer state.
+`Var.truthy` raises `<void-op>` for `void` and `<bad-enc>` for invalid encodings.
+Numeric and Symbol zero, Null and null pointers, canonical empty String/List,
+and empty Array/Map/Block/Bytes/Buffer values are false. NaN, infinities,
+nonzero values, nonempty containers, and other nonnull objects are true. A
+nonnull Iter is true without probing exhaustion or producer state.
 
-`convert`, `binary`, `truthy`, and `update` raise once at the detecting owner;
-their abort-default causes preserve fail-fast behavior unless a caller
-installs recovery policy. Compiler compound lowering evaluates the lvalue once,
-selects a typed native update adapter from its resolved storage type, and
-stores only after successful operation and conversion. Plain `char` and
-`signed char` use distinct adapters even though both box as `<i8>`. Direct Var
+`convert`, `binary`, `truthy`, and `update` raise once at the detecting owner.
+Their shared causes transfer to a matching filtered `catch` or terminate;
+they never resume the raising operation. See
+[Errors and Cleanup](../docs/src/guide/exceptions.md#catching-by-cause).
+Compiler compound lowering evaluates the lvalue once, selects a typed native
+update adapter from its resolved storage type, and stores only after successful
+operation and conversion. Plain `char` and `signed char` use distinct adapters
+even though both box as `<i8>`. Direct Var
 prefix/postfix increment and decrement use the same update owner. Native
 String `+=` concatenates first and rebinds only after success. Native C-only
 operations and short-circuit control flow remain native; enum and bitfield

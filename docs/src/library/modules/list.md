@@ -104,10 +104,10 @@ Source: `lib/list.x:555`
 `List Array.list_free(Array arr)`
 
 Returns `arr.list()` and frees `arr`.
-The conversion is `Array.list`, so the result copies the elements into
-fresh cells rather than adopting the `Array`'s storage. `arr` is released
-on
-success and when the conversion transfers an `Error`.
+The conversion uses `Array.list`, so the result is canonical and may
+share existing cells, including cells owned by an ancestor pool.
+It does not adopt the `Array`'s storage. `arr` is released on success
+and when the conversion transfers an `Error`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 

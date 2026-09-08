@@ -3,10 +3,13 @@
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import io
 import json
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -137,6 +140,184 @@ class ExistingCommandTests(unittest.TestCase):
         ):
             self.assertEqual(GATE_STATE.cmd_record("custom-gate"), 0)
             self.assertEqual(GATE_STATE.cmd_check("custom-gate"), 0)
+
+
+class TreeTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="x2c-gate-test-")
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        stack = contextlib.ExitStack()
+        self.addCleanup(stack.close)
+        stack.enter_context(mock.patch.object(GATE_STATE, "ROOT", self.root))
+        stack.enter_context(mock.patch.object(
+            GATE_STATE, "STATE", self.root / "debug/gate-state.json"
+        ))
+        stack.enter_context(mock.patch("sys.stdout", new_callable=io.StringIO))
+        self.git("init", "-q")
+        self.git("config", "user.name", "Gate Test")
+        self.git("config", "user.email", "gate@example.invalid")
+        self.git("config", "core.filemode", "true")
+        self.git("config", "core.autocrlf", "false")
+        (self.root / ".gitignore").write_text("debug/\n")
+        (self.root / "input").write_text("one\n")
+        (self.root / "run.sh").write_text("#!/bin/sh\nexit 0\n")
+        (self.root / "run.sh").chmod(0o755)
+        (self.root / "link").symlink_to("input")
+        self.commit()
+
+    def git(self, *args):
+        return subprocess.run(
+            ["git", *args], cwd=self.root, check=True, capture_output=True,
+            text=True,
+        ).stdout
+
+    def commit(self):
+        self.git("add", "-A")
+        self.git("-c", "commit.gpgsign=false", "commit", "-qm", "snapshot")
+
+    def record(self):
+        self.assertEqual(GATE_STATE.cmd_record("doc-check"), 0)
+
+    def valid(self):
+        self.assertEqual(GATE_STATE.cmd_check("doc-check"), 0)
+
+    def stale(self):
+        self.assertEqual(GATE_STATE.cmd_check("doc-check"), 1)
+
+    def test_content_changes_and_staging_or_commit_without_changes(self):
+        self.record()
+        (self.root / "input").write_text("two\n")
+        self.stale()
+        self.record()
+        self.git("add", "input")
+        self.valid()
+        self.commit()
+        self.valid()
+
+    def test_executable_changes_even_when_git_ignores_filemode(self):
+        self.record()
+        path = self.root / "run.sh"
+        path.chmod(0o644)
+        self.stale()
+        self.record()
+        self.git("add", "run.sh")
+        self.valid()
+        self.git("config", "core.filemode", "false")
+        path.chmod(0o755)
+        self.stale()
+
+    def test_symlink_target_bytes_and_type_are_distinct(self):
+        (self.root / "other").write_text("one\n")
+        self.commit()
+        self.record()
+        link = self.root / "link"
+        link.unlink()
+        link.symlink_to("other")
+        self.stale()
+        self.record()
+        self.git("add", "link")
+        self.valid()
+        link.unlink()
+        link.write_text("other")
+        self.stale()
+        self.record()
+        self.git("add", "link")
+        self.valid()
+
+    def test_dangling_symlinks_survive_staging_and_target_creation(self):
+        path = self.root / "dangling"
+        path.symlink_to("debug/missing")
+        self.record()
+        self.git("add", "dangling")
+        self.valid()
+        (self.root / "debug/missing").write_text("ignored target\n")
+        self.valid()
+        path.unlink()
+        path.symlink_to("debug/different")
+        self.stale()
+
+    def test_deletions_and_new_files_survive_staging(self):
+        self.record()
+        (self.root / "input").unlink()
+        self.stale()
+        self.record()
+        self.git("add", "-A")
+        self.valid()
+        self.commit()
+        self.valid()
+        (self.root / "new").write_text("new\n")
+        self.stale()
+        self.record()
+        self.git("add", "new")
+        self.valid()
+
+    def test_ignored_files_do_not_invalidate(self):
+        self.record()
+        (self.root / "debug/log").write_text("output\n")
+        self.valid()
+
+    def test_old_records_are_unknown(self):
+        self.record()
+        records = GATE_STATE.load()
+        records["doc-check"]["version"] = GATE_STATE.FORMAT - 1
+        GATE_STATE.save(records)
+        self.stale()
+
+    def test_clean_files_reuse_index_content_hashes(self):
+        with mock.patch.object(
+            GATE_STATE, "content_hash", wraps=GATE_STATE.content_hash
+        ) as content_hash:
+            GATE_STATE.digest()
+        content_hash.assert_not_called()
+
+    def install_cli(self):
+        (self.root / "tools").mkdir()
+        script = self.root / "tools/gate-state.py"
+        shutil.copy2(TOOLS / "gate-state.py", script)
+        return script
+
+    def test_failed_git_inventory_cannot_record_or_reuse(self):
+        script = self.install_cli()
+        self.record()
+        before = GATE_STATE.STATE.read_bytes()
+        (self.root / ".git").rename(self.root / ".git-unavailable")
+        for command in ("check", "record", "ensure"):
+            with self.subTest(command=command):
+                result = subprocess.run(
+                    [sys.executable, str(script), command, "doc-check"],
+                    capture_output=True, text=True,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertNotIn("valid -", result.stdout)
+                self.assertEqual(GATE_STATE.STATE.read_bytes(), before)
+
+    def test_ensure_runs_make_only_when_needed_and_never_records_failure(self):
+        script = self.install_cli()
+        (self.root / "Makefile").write_text(
+            "doc-check:\n"
+            "\t@mkdir -p debug\n"
+            "\t@cat input >> debug/executions\n"
+            "\t@test ! -e fail\n"
+        )
+        self.commit()
+        def ensure():
+            return subprocess.run(
+                [sys.executable, str(script), "ensure", "doc-check"],
+                capture_output=True, text=True,
+            )
+        self.assertEqual(ensure().returncode, 0)
+        self.assertEqual(ensure().returncode, 0)
+        runs = self.root / "debug/executions"
+        self.assertEqual(runs.read_text(), "one\n")
+        (self.root / "run.sh").chmod(0o644)
+        self.assertEqual(ensure().returncode, 0)
+        self.assertEqual(runs.read_text(), "one\none\n")
+        before = GATE_STATE.STATE.read_bytes()
+        (self.root / "fail").touch()
+        self.assertNotEqual(ensure().returncode, 0)
+        self.assertEqual(GATE_STATE.STATE.read_bytes(), before)
+        self.stale()
 
 
 if __name__ == "__main__":

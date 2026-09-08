@@ -336,7 +336,7 @@ int Var.is_object(Var v)    => v.kind() == <object>;
     `Array` or stored in a `Map`. Equality and identity still inspect it. Two
     sentinels compare equal and identical, while one sentinel and one
     ordinary value compare unequal. Truthiness, hashing, ordering, conversion,
-    and iteration still terminate on a `void` operand.
+    and iteration on `void` raise to a matching catch or terminate.
 
     `Null` is the all-zero `Var`: legal collection data and false in a
     condition. A `void` result may mean missing, exhausted, or invalid;

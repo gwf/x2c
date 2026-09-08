@@ -23,8 +23,8 @@ are needed rather than maintaining another copy.
 
 ## Select the task skill
 
-- [plan-x2c-change](skills/plan-x2c-change/SKILL.md) - decide a design and
-  resolve consequential choices before implementation.
+- [plan-x2c-change](skills/plan-x2c-change/SKILL.md) - answer a question about
+  current behavior, or decide a design before implementation.
 - [execute-x2c-plan](skills/execute-x2c-plan/SKILL.md) - implement, verify, and
   deliver an already-decided change.
 - [fix-x2c-bug](skills/fix-x2c-bug/SKILL.md) - reproduce a defect, repair its
@@ -62,6 +62,9 @@ Skills have one canonical copy in `agents/skills/`, exposed through
   [debugging](x2c-debugging-guide.md) - build details and compiler instruments.
 - [AST patterns](replacing-manual-ast-walks-with-match.md) - shared canonical
   syntax, Match, templates, and ordinary compiler operations.
+- [Source graph](../tools/x2c-graph/README.md#investigate-a-change) - optional
+  commands for callers, allocation returns, repeated walks, and source paths;
+  verify findings in source before changing behavior.
 - [Adapters, macros, and decorators](adapters-macros-decorators.md) - when
   generation and shared implementations make source clearer.
 - [Logger and diagnostics](logger-and-diagnostics-guide.md) - delivery,

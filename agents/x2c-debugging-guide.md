@@ -1,7 +1,7 @@
 # X2C Debugging Guide
 
 Practical techniques for diagnosing compiler issues, understanding AST shape,
-and validating runtime behaviour.
+and validating runtime behaviour. The AST fragments below are illustrative.
 
 ---
 
@@ -9,20 +9,22 @@ and validating runtime behaviour.
 
 ### 1.1 Var, Symbol, List Basics
 
-```c
-// WRONG: car() returns a Var, so direct symbol comparison fails
-if (node.car() == <declare>)
-  ...;
+`car()` returns a `Var`, which supports direct comparison with a `Symbol`.
+For example, `src/generate.x` tests `declaration.car() == <declare>`.
 
-// CORRECT
-if (node.car().symbol() == <declare>)
-  ...;
+```x2c
+#include "list-selectors.x"
+
+int main(void) {
+  List node = %(declare 1 2 3);
+  return !(node.car() == <declare> && node.cadddr() == 3);
+}
 ```
 
-Use list helpers from `lib/list.x`:
-- `list.car()`, `list.cdr()`
-- `list.cadr()`, `list.caddr()`, `list.cadddr()`
-- No `second()`, `third()`, etc.
+The prelude provides `car`, `cdr`, `caar`, `cadr`, `cddr`, and `caddr`.
+Include [list-selectors.x](../docs/src/library/modules/list-selectors.md) for
+the other compound selectors, such as `cadddr` above. There are no `second()`
+or `third()` methods.
 
 ### 1.2 Symbol Limits
 
@@ -42,24 +44,32 @@ methods to prevent ambiguity.
 
 ## 2. CLI Diagnostics
 
-`src/cli.x` owns the option table; these switches short-circuit the
-pipeline:
+`src/cli.x` owns the option table. These `translate` inspection switches print
+their selected result and stop:
 
 - `--dump-tokens` / `--dump-cpp-tokens` — inspect lexer output
 - `--dump-ast` / `--dump-transforms` — observe initial and transformed ASTs
-- `--dump-cache` — view literal cache entries emitted by `src/cache.x`
+- `--dump-cache` — inspect the compiler cache after parsing
 - `--dump-code` — print the unformatted C token stream
 - `--dump-symbols` / `--dump-cpp-symbols` — inspect compiler symbol tables
 - `--dump-cpp` / `--dump-cpp-text` — show preprocessor output
-- `--debug` — mirror compiler debug logging to standard error
-- `--no-cpp` — skip the host preprocessor
 
-Use a dedicated output directory when iterating:
+`--debug` enables compiler debug logging to standard error; `--no-cpp` skips
+symbol collection and preprocessing. Neither option stops translation.
+See [compiler options](../docs/src/reference/cli.md) for the full list and
+[Logger and diagnostics](logger-and-diagnostics-guide.md) for logging behavior.
+
+Compare the transformed AST with emitted C in a dedicated output directory:
 
 ```sh
 mkdir -p /tmp/x2c-debug
+./builds/0/x2c translate --dump-transforms /tmp/test.x \
+  > /tmp/x2c-debug/test.transforms
 ./builds/0/x2c translate --out-dir /tmp/x2c-debug /tmp/test.x
 ```
+
+`test.transforms` contains the transformed AST. Ordinary translation writes
+formatted generated C to `/tmp/x2c-debug/test.c` and its header to `test.h`.
 
 Compiler diagnostics report one-based lines and columns and underline the
 offending token's first-line width. The CLI records one ordinary error by
@@ -95,10 +105,9 @@ as an ordinary filesystem/include problem, not escaped as command text.
    [Replacing manual AST walks with `match`](replacing-manual-ast-walks-with-match.md)
    explains how structural captures, semantic probes, traversal, and output
    templates compose in compiler code.
-3. Use `--dump-transforms` after editing `src/transform.x` or a related
-   lowering module to confirm the expected rewrite occurred. The
-   match/loop-control fixture checks exact transformed output as well as
-   emission and native behavior.
+3. After lowering edits, use the paired commands above to inspect the rewrite
+   and emitted C. The match/loop-control fixture checks exact transformed
+   output as well as emission and native behavior.
 
 ---
 
@@ -127,8 +136,8 @@ as an ordinary filesystem/include problem, not escaped as command text.
 3. Add one feature at a time (operators, decorators, foreach) until failure.
 4. Redirect complete stdout and stderr from failing invocations into `debug/`
    (`debug/dump-ast.log`, `debug/build-x2c.log`).
-5. When compiler behaviour changes, finish with `make verify` and
-   `make stage-3`.
+5. Follow the [root verification and delivery instructions](../AGENTS.md#verify-and-deliver)
+   for the completed change.
 
 ---
 

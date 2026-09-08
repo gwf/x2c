@@ -253,11 +253,11 @@ null=1 void=0 truthy=0 len=2
 ```
 
 Conditions are where the distinction matters. `Null` is false. `void` is
-**not** false. It is outside the value domain, so a truthiness test on
-`void` fails fast and terminates the program instead of taking the else
-branch. Do not write `if (maybe_missing)` on a value that might be `void`.
-Test it with `Var.is_void`, or use the status-bearing API and never hold a
-`void`.
+**not** false. A truthiness test on `void` raises `<void-op>` instead of taking
+the else branch. A [matching filtered `catch`](exceptions.md#catching-by-cause)
+receives that error; without one, the default abort terminates the program.
+Do not write `if (maybe_missing)` on a value that might be `void`. Test it
+with `Var.is_void`, or use the status-bearing API and never hold a `void`.
 
 The representation of `void` and its exclusion from collections and iterators
 are consistent. Its meaning in a particular API can vary: missing,
