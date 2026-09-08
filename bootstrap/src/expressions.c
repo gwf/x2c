@@ -2089,7 +2089,7 @@ break;
     0
   }
   );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
-    child = _x2c_macro_item_7;  Array_push(pending,  child);
+    child = _x2c_macro_item_7;  if(Var_is(child,  806120)) Array_push(pending,  child);
   }
 
 }
@@ -2161,10 +2161,7 @@ static List _binary_op_type_fallback(List lhs,  List rhs){
 }
 
 static List Compiler__binary_op_type(Compiler compiler,  Symbol op,  List lhs,  List rhs){
-  List _x2c_destructure_12 = lhs;  Var lhs_tag = List_getindex(_x2c_destructure_12,  0);  Type ltype = Var_type(List_getindex(_x2c_destructure_12,  1));  List _x2c_destructure_13 = rhs;  Var rhs_tag = List_getindex(_x2c_destructure_13,  0);  Type rtype = Var_type(List_getindex(_x2c_destructure_13,  1)); (void) lhs_tag; (void) rhs_tag;  Symbol derived = 0;  List resolved = _resolve_protocol_operator(compiler,  op,  lhs,  rhs,  & derived);  if(List_truth(resolved)){
-    Type signature = Var_type(List_cadr(resolved));  return derived ? _31 : List_cdr(signature);
-  }
-  if(op == 604) return NULL;  if(Sym_is_var_type(compiler -> sym,  ltype) || Sym_is_var_type(compiler -> sym,  rtype)){
+  List _x2c_destructure_12 = lhs;  Var lhs_tag = List_getindex(_x2c_destructure_12,  0);  Type ltype = Var_type(List_getindex(_x2c_destructure_12,  1));  List _x2c_destructure_13 = rhs;  Var rhs_tag = List_getindex(_x2c_destructure_13,  0);  Type rtype = Var_type(List_getindex(_x2c_destructure_13,  1)); (void) lhs_tag; (void) rhs_tag;  if(op == 604) return NULL;  if(Sym_is_var_type(compiler -> sym,  ltype) || Sym_is_var_type(compiler -> sym,  rtype)){
     switch(op){
       case 31993 : case 9805 : case 15739 : case 8571 : case 2014587 : case 1097083 : case 121 : case 125 : case 15483 : case 15995 : return _31;  default: return _263;
     }

@@ -68,8 +68,7 @@ static uint32_t _g(SymbolSet set, uint32_t vertex) {
   return _u32(set, offset);
 }
 
-static size_t _order_offset(SymbolSet x) {
-  uint32_t span = _u32(x, 8) + 1;
+static size_t _order_offset(SymbolSet x, uint32_t span) {
   return SYMBOL_SET_HEADER_SIZE + (size_t) span * 3 * _byte(x, 0);
 }
 
@@ -92,7 +91,7 @@ int SymbolSet.index(SymbolSet x, Symbol symbol) {
     _g(x, span * 2 + ((uint32_t) (hash >> 42) & mask));
   if (index >= count) return -1;
   Symbol stored = (Symbol) _u64(
-    x, _order_offset(x) + (size_t) index * sizeof(Symbol));
+    x, _order_offset(x, span) + (size_t) index * sizeof(Symbol));
   return stored == symbol ? (int) index : -1;
 }
 
@@ -109,7 +108,7 @@ Symbol SymbolSet.getindex(SymbolSet x, int index) {
   index = x2c_normalize_index(index, count);
   if (index < 0) return 0;
   return (Symbol) _u64(
-    x, _order_offset(x) + (size_t) index * sizeof(Symbol));
+    x, _order_offset(x, _u32(x, 8) + 1) + (size_t) index * sizeof(Symbol));
 }
 
 static int _next(Iter iter, Var *out) {

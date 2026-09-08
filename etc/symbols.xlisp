@@ -2235,7 +2235,7 @@
   (("_open") ((func ((* const char) (int))) "Context"))
   (("_open_error") ((func (("Symbol") (* const char) (int))) void))
   (("_open_path") ((func ((* const char) (* const char) ("Symbol"))) "File"))
-  (("_order_offset") ((func (("SymbolSet"))) "size_t"))
+  (("_order_offset") ((func (("SymbolSet") ("uint32_t"))) "size_t"))
   (("_owns_locked") ((func (("Pool") ("Var"))) int))
   (("_owns_scope") ((func (("Context") ("Scope"))) int))
   (("_pad") ((func (("String") (int) (char) (int))) "String"))
