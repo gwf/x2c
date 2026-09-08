@@ -19,7 +19,7 @@ Start with C types and calls, then add what the program needs:
   `Error` records and propagates failures.
 - `translate` produces C for an existing build. `build`, `run`, and
   `bootstrap` also handle native compilation and execution.
-- Protocols adapt concrete types to explicitly adopted interfaces. Macros
+- `protocol`s adapt concrete types to explicitly adopted interfaces. Macros
   generate parsed, typed source at compile time.
 
 Using one feature does not require converting the rest of the program to a
