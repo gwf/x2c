@@ -1,11 +1,10 @@
-> Status: active
-> Gary approved execution with parallel workers. B1-B3 and C1-C3 shipped
-> September 9 in bb3de5b after the post-reboot publication gate passed.
-> The book, responsive layout, and feature-table correction are live.
-> P1-P3, B4/B5, C4, D1, Match, T1/T2, and source-package support shipped
-> September 9 in 49d46e8 after full validation. The frontend/editor and
-> narrow language followups are implemented and undergoing final publication
-> validation.
+> Status: done
+> The approved core plan shipped September 9, 2026. Correctness repairs landed
+> in bb3de5b, performance/build/source-tooling work in 49d46e8, and the shared
+> frontend, semantic editor, and C compatibility work in e6efc74. The book and
+> landing-page fixes shipped in dbcd4dd and d5eba54. Final publication checks
+> pass. Explicitly conditional distribution and application-driven followups
+> remain outside this completed implementation.
 
 # Correctness, performance, and developer tooling
 
@@ -557,9 +556,19 @@ The existing unit executable now links the source-view dependency, and the
 existing documentation module check uses the stable section heading instead
 of a literal module count. No validation requirement was added.
 
-The
-coordinator is completing generated-artifact review and the exact-tree gate
-before main delivery. No user decision is needed for this batch.
+The final batch shipped as e6efc74 after the exact-tree publication gate
+passed: 743 tests / 18,227 assertions, 590 compiler fixtures / 1,373 artifacts,
+110 driver probes, 425 required raw-symbol translations, self-host comparison,
+and the 107-file documentation audit. The final build has no new qualifier
+warnings. Evidence: `debug/wave3-gate-delivery.log`. The complete site/book
+build and the packaged extension were reviewed before delivery.
+
+The approved core implementation is complete. Relocatable built installation
+and native dependency bundling remain deferred by the accepted distribution
+decision. Comparator/key sorting, SQLite, and concurrent HTTP remain dependent
+on concrete application requirements. General chained-designator brace elision,
+editor completion/rename/indexing, and incremental semantic caches are outside
+this delivered scope. No current implementation is waiting on user input.
 
 ## Plan review
 
