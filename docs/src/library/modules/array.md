@@ -226,7 +226,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:777`
+Source: `lib/array.x:778`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -591,7 +591,7 @@ Source: `lib/array.x:56`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:783`
+Source: `lib/array.x:784`
 
 ## Advanced and interop API
 

@@ -117,6 +117,8 @@ String Buffer_str_free(Buffer);
 
 Array Var_array(Var);
 
+long Var_integer(Var);
+
 int Iter_truth(Iter);
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
@@ -1010,9 +1012,10 @@ String Array_repr(Array array){
 static int _next(Iter iter, Var * out){
   Array array = Var_array(iter -> obj);
   if(! Array_truth(array)) return 0;
-  int index = Var_int(Var_convert(iter -> state, 3453797)), length = _int_length(array);
+  int index =(int) Var_integer(iter -> state), length = _int_length(array);
   if(index >= length) return 0;
-  * out = Array_getindex(array, index);
+  Var * values =(Var *) array -> bytes;
+  * out = values[index];
   iter -> state = int_var(index + 1);
   return 1;
 }

@@ -751,9 +751,10 @@ String Array.repr(Array array) {
 static int _next(Iter iter, Var *out) {
   Array array = iter.obj;
   if (!array) return 0;
-  int index = iter.state, length = _int_length(array);
+  int index = (int) iter.state.integer(), length = _int_length(array);
   if (index >= length) return 0;
-  *out = array[index];
+  Var *values = (Var *) array.bytes;
+  *out = values[index];
   iter.state = index + 1;
   return 1;
 }

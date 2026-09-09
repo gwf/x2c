@@ -1,5 +1,8 @@
-> Status: active
-> Gary approved this plan with the review amendments on September 9, 2026.
+> Status: done
+> Completed September 9, 2026, with Gary's approved review amendments.
+> Deliveries: d158e7f and e4cb81e; the final Array iterator change and
+> performance evidence accompany this archived plan. Native placement defects
+> remain open as the explicitly recorded design result below.
 > Implementation starts from main at 4d5b2dd. SQLite is accepted and delivered;
 > the previous program is complete and archived. Native prefix installation
 > and movable binary bundles are newly approved distribution scope.
@@ -16,9 +19,9 @@ candidates with current evidence. Preserve the shipped language and runtime
 APIs. Do not turn the original discovery list into a deletion quota or a
 promise to implement every suggested new language or library feature.
 
-This follows [the delivered program](archive/x2c-correctness-performance-tooling.md),
-[the declaration design](x2c-declaration-discovery-design.md), and
-[the source-package proof](x2c-source-package-proof.md). Their completed work
+This follows [the delivered program](x2c-correctness-performance-tooling.md),
+[the declaration design](../x2c-declaration-discovery-design.md), and
+[the source-package proof](../x2c-source-package-proof.md). Their completed work
 is the starting point, not work to repeat.
 
 ## Established starting point
@@ -425,16 +428,18 @@ their relevant implementation work.
   site build passed; the Pages deployment succeeded.
 - Native compiler installation: implemented and relocation/DESTDIR verified;
   delivered with batch 1.
-- Compiler-integrated editor, movable bundles, and macOS dSYM: implemented;
-  focused verification is in progress before the second publication.
-- Bounded performance investigation: prepared; waits for the stable second
-  batch and a quiet measurement window.
+- Compiler-integrated editor, movable bundles, and macOS dSYM: published in
+  `e4cb81e`; focused checks and the full publication gate pass.
+- Bounded performance investigation: complete. One Array iterator candidate
+  family accepted; the final small runtime change accompanies this archive.
 - Native-initializer design: bounded prototype complete, candidate rejected.
   Macro prescanning plus an unevaluated type anchor preserves counter order
   but repeats inline tags inside the deferred function, changing type identity.
   A forward-declared typed callee exposes the mismatch. The native placement
   defects remain open; no source fix or warning suppression was accepted.
-- Final documentation/site closure and publication audit: queued.
+- Documentation and unused-site cleanup: published with batch 2. Live editor,
+  debug-symbol, installation, and bundle chapters verified after Pages
+  deployment. Every assignment has its result or explicit scoped disposition.
 
 Approval includes the opt-in macOS mapped-debug symbol-assembly cost stated
 above. Existing source-package delivery is complete; native installation and
@@ -487,3 +492,66 @@ Focused logs: `debug/editor-vscode-proof.json`,
 The unused `site/src/deprecated` tree had no active route, import, or asset
 reference and was removed. The current installation chapter now uses movable
 debug symbols rather than requiring retained object files.
+
+### Final performance result and closure
+
+The campaign used a frozen `e4cb81e` compiler/runtime with copied workloads,
+Apple clang 17.0.0, arm64 macOS, `-O2`, and no LTO. Existing Iter, Func, List,
+Var, Scope, Error, Block/Buffer, and Match workloads ran after warmup. One
+whole-compiler profile selected one Array candidate family, with two measured
+variants and seven alternating before/after pairs per variant. Temporary
+controls compared the same Array/List input traversal and native callbacks.
+No benchmark, optional check, or process requirement became a new gate.
+
+`Array._next` already owns an integer counter and has checked the current
+length. It now uses `Var.integer()` to read that established payload and
+reads the current backing array after the existing bounds check, avoiding
+conversion and duplicate indexed-access checks. It keeps the i32 counter
+representation, null handling, current length/buffer visibility, size limit,
+output write, and successor state. No layout, ABI, allocation, lifetime,
+public conversion rule, or compiler fast path changes.
+
+| Array lane | Before | After |
+| --- | ---: | ---: |
+| Explicit Iter | 22.034 ns/element | 8.324 ns/element |
+| foreach | 21.916 ns/element | 8.414 ns/element |
+| Direct traversal control | 1.276 ns/element | 1.259 ns/element |
+
+The Array lanes improve about 2.6 times. The whole Iter workload median fell
+from 0.734 to 0.703 seconds (CPU 0.731 to 0.699 seconds). The first variant,
+removing duplicate indexing alone, improved Array lanes only 3-5%; the combined
+state-reader variant supersedes it.
+
+Whole-compiler results establish no speed change. The 30-unit translation
+batch showed time drift and RSS variation; an additional bounded control used
+identical link commands/object ordering. Five measured alternating paired
+differences were -4.13%, +5.25%, +1.71%, -0.03%, and +0.44%, with both versions
+drifting together. Separate run medians are misleading here. All 60 emitted
+C/H files agree exactly; no compiler or application speedup is claimed.
+
+Other families end without speculative rewrites. Func measured about 3.6 ns
+per call versus 0.8 ns for the native control, but its arity/type and adapter
+work remains required. Var classification, Map lookup, and Match execution
+are visible profile costs; no smaller safe replacement for their shared
+structural dispatch was established. Their cost does not justify deleting
+later compiler transforms that process newly introduced syntax. Scope, Block,
+Buffer, and Error baselines did not dominate the compiler profile; ownership,
+statistics, growth, and transfer behavior remain unchanged.
+
+The accepted source matches the measured candidate. Existing Array/Iter suites
+pass 47 tests and 1,612 assertions. Copied wordfreq and CSV shootout workloads
+pass exact-output checks in both roots, with fixed inputs and three samples
+after warmup. Application runs support correctness, not a speedup claim.
+
+Evidence: `debug/perf-baseline.json`, `debug/perf-compiler.sample.txt`,
+`debug/perf-array-state-paired.json`, `debug/perf-link-control.json`,
+`debug/perf-focused.log`, and `debug/perf-shootout-{baseline,candidate}.log`.
+The full method, source reasoning, and temporary commands are recorded in
+`.context/cleanup-performance-result.md`.
+
+All implementation assignments are complete. The native-initializer design
+assignment rejected its prototype because duplicate inline tags change type
+identity; the existing file-static macro/tag defects remain open. Local-static
+first-use semantics and the other feature expansions named above remain
+explicitly deferred. This archive does not claim those defects were fixed or
+those deferred features implemented.
