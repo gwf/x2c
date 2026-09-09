@@ -27,26 +27,22 @@ whole program to a new object model.
 
 ## What x2c adds
 
-The additions fall into five groups:
+Native C types, layout, preprocessing, calls, and libraries keep their
+ordinary meaning. The language additions fall into three groups:
 
-1. **C foundation.** Native types, layout, preprocessing, calls, and libraries
-   keep their ordinary meaning.
-2. **Runtime values.** `Var`, the standard collections, and embedded Lisp
+1. **Runtime values.** `Var`, the standard collections, and embedded Lisp
    provide dynamic data and evaluation without requiring every value to be
    boxed.
-3. **Control and lifetime.** `foreach`, `match`, `Scope`, `Context`, `Thread`,
+2. **Control and lifetime.** `foreach`, `match`, `Scope`, `Context`, `Thread`,
    `defer`, and `Error` replace common code for traversal, pattern matching,
    cleanup, worker state, and error propagation.
-4. **Driver and project model.** `translate` exposes generated C; `build`,
-   `run`, project manifests, and `bootstrap` also handle native compilation
-   and execution.
-5. **Compile-time extension.** Protocols adapt types to explicitly adopted
-   interfaces. Macros and decorators generate checked source before C emission.
+3. **Compile-time extension.** `protocol` defines interfaces that concrete
+   types explicitly adopt. `macro` and `Decorator` generate checked source
+   before C emission.
 
 The source tells you when these features apply. Assigning to `Var` boxes a
-native value. `translate` leaves native compilation to an external C build.
-Protocol adoption works at compile time without creating a runtime interface
-object. Macros also run at translation time.
+native value. Protocol adoption works at compile time without creating a
+runtime interface object. Macros also run at translation time.
 
 ## Keep C where C is already clear
 
