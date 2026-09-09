@@ -81,14 +81,14 @@ int main(void){
     (box.point).z += 1;
   }
   Point _ ={
-    30,  0,  0
+    30, 0, 0
   }
   ;
   int shadow_local = 0;
   {
     (box.point).x += 1;
     Point _ ={
-      40,  0,  0
+      40, 0, 0
     }
     ;
     _.x += 2;
@@ -148,7 +148,7 @@ int main(void){
   ;
   int answer = with(41);
   (with)(1);
-  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",  box.point.x,  box.point.y,  box.point.z,  box.points[0].x,  box.points[0].y,  box.points[0].z,  box.points[1].x,  box.points[1].y,  box.points[1].z,  call_count,  index_count,  scaled,  _.x,  shadow_local,  keyword,  named.with,  answer,  with_count);
+  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", box.point.x, box.point.y, box.point.z, box.points[0].x, box.points[0].y, box.points[0].z, box.points[1].x, box.points[1].y, box.points[1].z, call_count, index_count, scaled, _.x, shadow_local, keyword, named.with, answer, with_count);
   return box.point.x == 5 && box.point.y == 4 && box.point.z == 6 && box.points[0].x == 11 && box.points[0].y == 21 && box.points[0].z == 70 && box.points[1].x == 7 && box.points[1].y == 2 && box.points[1].z == 50 && call_count == 2 && index_count == 2 && scaled == 9 && _.x == 30 && shadow_local == 42 && keyword == 99 && named.with == 7 && answer == 42 && with_count == 2 ? 0 : 1;
 }
 

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/printf-var-malformed.x:5:3: xform: incomplete format 
     ^^^^^^
   note: printf-family call: printf
 
-limit: too many errors, stopping
-

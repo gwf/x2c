@@ -8,7 +8,7 @@ int main(void){
   x2c_initialize();
   Var value = MacroDynamicOwner_var(((MacroDynamicOwner) 42));
   Var boxed = MacroDynamicOwner_box(((MacroDynamicOwner) 43));
-  printf("%d %d\n",  Var_int(value),  Var_int(boxed));
+  printf("%d %d\n", Var_int(value), Var_int(boxed));
   return Var_int(value) == 42 && Var_int(boxed) == 43 ? 0 : 1;
 }
 

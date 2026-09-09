@@ -7,11 +7,11 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List transform_array_literal(Compiler compiler,  List ast);
+List transform_array_literal(Compiler compiler, List ast);
 
-List transform_map_literal(Compiler compiler,  List ast);
+List transform_map_literal(Compiler compiler, List ast);
 
-List Compiler_transform(Compiler compiler,  List ast);
+List Compiler_transform(Compiler compiler, List ast);
 
 
 #endif /* __GUARD_0x00CB812B__ */

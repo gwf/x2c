@@ -7,7 +7,7 @@ int Var_is_null(Var);
 int main(void){
   x2c_initialize();
   Var value = Var_null();
-  printf("null=%d\n",  Var_is_null(value));
+  printf("null=%d\n", Var_is_null(value));
   return Var_is_null(value) ? 0 : 1;
 }
 

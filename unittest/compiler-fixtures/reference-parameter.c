@@ -4,17 +4,17 @@
 
 static void increment(int * value);
 
-static void swap(int * left,  int * right);
+static void swap(int * left, int * right);
 
 static void increment_twice(int * value);
 
-static void advance(Counter * counter,  int amount);
+static void advance(Counter * counter, int amount);
 
 static void increment(int * value){
   (* value) += 1;
 }
 
-static void swap(int * left,  int * right){
+static void swap(int * left, int * right){
   int temporary =(* left);
   (* left) =(* right);
   (* right) = temporary;
@@ -25,22 +25,22 @@ static void increment_twice(int * value){
   increment(&((* value)));
 }
 
-static void advance(Counter * counter,  int amount){
+static void advance(Counter * counter, int amount){
   (* counter).value += amount;
 }
 
 int main(void){
   x2c_initialize();
-  int first = 4,  second = 9;
+  int first = 4, second = 9;
   Counter counter ={
     10
   }
   ;
   increment(&(first));
-  swap(&(first),  &(second));
+  swap(&(first), &(second));
   increment_twice(&(second));
-  advance(&(counter),  7);
-  printf("%d %d %d\n",  first,  second,  counter.value);
+  advance(&(counter), 7);
+  printf("%d %d %d\n", first, second, counter.value);
   return 0;
 }
 

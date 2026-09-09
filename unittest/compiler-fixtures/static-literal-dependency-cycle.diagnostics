@@ -3,5 +3,3 @@ unittest/compiler-fixtures/static-literal-dependency-cycle.x:3:15: cache: file-s
                 ^^^^
   note: initializer: left initializer: right
 
-limit: too many errors, stopping
-

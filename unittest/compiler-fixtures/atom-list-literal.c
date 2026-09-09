@@ -2,9 +2,9 @@
 
 #include "atom-list-literal.h"
 
-static List _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9;
+static List _17, _16, _15, _14, _13, _12, _11, _10, _9;
 
-static Var _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static Var _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static List first;
 
@@ -12,24 +12,21 @@ static List second;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Lisp Lisp_new(void);
 
-Symbol Lisp_read(Lisp,  String,  unsigned *,  Var *);
+Symbol Lisp_read(Lisp, String, unsigned *, Var *);
 
 String List_repr(List);
 
-int List_equal(List,  List);
+int List_equal(List, List);
 
 void * Var_pointer(Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 void Lisp_destroy(Lisp);
 
@@ -48,15 +45,15 @@ __attribute__((constructor)) static void _file_init_(void){
   _6 = Atom_intern(String_new("1numeric-looking-long"));
   _7 = Atom_intern(String_new("comment//looking-long"));
   _8 = Symbol_var(99);
-  _9 = cons(_8,  NULL);
-  _10 = cons(_7,  _9);
-  _11 = cons(_6,  _10);
-  _12 = cons(_5,  _11);
-  _13 = cons(_4,  _12);
-  _14 = cons(_3,  _13);
-  _15 = cons(_2,  _14);
-  _16 = cons(_1,  _15);
-  _17 = cons(_0,  _16);
+  _9 = cons(_8, NULL);
+  _10 = cons(_7, _9);
+  _11 = cons(_6, _10);
+  _12 = cons(_5, _11);
+  _13 = cons(_4, _12);
+  _14 = cons(_3, _13);
+  _15 = cons(_2, _14);
+  _16 = cons(_1, _15);
+  _17 = cons(_0, _16);
   first = _17;
   second = _17;
 }
@@ -67,8 +64,8 @@ int main(void){
   Lisp lisp = Lisp_new();
   unsigned cursor = 0;
   Var read =((void) 0, Void);
-  Symbol status = Lisp_read(lisp,  List_repr(first),  & cursor,  & read);
-  printf("%d %d %s|%s|%s|%s|%s|%s|%s|%s\n",  List_equal(first,  second),  status == 46228810 && Var_pointer(read) == first,  Var_str(List_getindex(first,  0)),  Var_str(List_getindex(first,  1)),  Var_str(List_getindex(first,  2)),  Var_str(List_getindex(first,  3)),  Var_str(List_getindex(first,  4)),  Var_str(List_getindex(first,  5)),  Var_str(List_getindex(first,  6)),  Var_str(List_getindex(first,  7)));
+  Symbol status = Lisp_read(lisp, List_repr(first), & cursor, & read);
+  printf("%d %d %s|%s|%s|%s|%s|%s|%s|%s\n", List_equal(first, second), status == 46228810 && Var_pointer(read) == first, Var_str(List_getindex(first, 0)), Var_str(List_getindex(first, 1)), Var_str(List_getindex(first, 2)), Var_str(List_getindex(first, 3)), Var_str(List_getindex(first, 4)), Var_str(List_getindex(first, 5)), Var_str(List_getindex(first, 6)), Var_str(List_getindex(first, 7)));
   Lisp_destroy(lisp);
   return 0;
 }

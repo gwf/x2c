@@ -4,15 +4,15 @@
 
 #include "error.h"
 
-static List _13,  _11,  _9,  _7,  _6,  _2;
+static List _13, _11, _9, _7, _6, _2;
 
-static Var _12,  _10,  _8,  _5,  _4,  _3,  _1,  _0;
+static Var _12, _10, _8, _5, _4, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
 typedef struct MatchLayoutBuilder{
   Atom binders[MACHINE_BINDER_MAX];
-  int count,  malformed_binder,  leading_list_binder,  past_capacity;
+  int count, malformed_binder, leading_list_binder, past_capacity;
 }
 MatchLayoutBuilder;
 
@@ -26,13 +26,13 @@ typedef struct MatchWalk{
 
 typedef struct MatchLower{
   MachineBuilder b;
-  int * sites,  site_count,  site_capacity,  depth;
+  int * sites, site_count, site_capacity, depth;
 }
 * MatchLower;
 
 typedef struct MatchInlinePlan{
   int entries[64];
-  int count,  used;
+  int count, used;
 }
 MatchInlinePlan;
 
@@ -40,7 +40,7 @@ typedef struct MatchCacheEntry{
   unsigned long key;
   MatchPlan plan;
   unsigned long generation;
-  int occupied,  pin_count,  bucket_next,  lru_prev,  lru_next;
+  int occupied, pin_count, bucket_next, lru_prev, lru_next;
 }
 MatchCacheEntry;
 
@@ -48,7 +48,7 @@ struct MatchCache{
   Scope scope;
   MatchCacheEntry * entries;
   int * buckets;
-  int capacity,  bucket_count,  size,  lru_head,  lru_tail,  active_leases;
+  int capacity, bucket_count, size, lru_head, lru_tail, active_leases;
   unsigned long next_generation;
   unsigned long admitted_memo[256];
 }
@@ -76,9 +76,6 @@ static _Thread_local struct MatchThreadState match_thread;
 
 static pthread_once_t match_shutdown_once;
 
-
-
-
 #include <pthread.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -99,15 +96,15 @@ int List_truth(List);
 
 Var List_car(List);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 List Var_list(Var);
 
 List List_cdr(List);
 
-int Var_equal(Var,  Var);
+int Var_equal(Var, Var);
 
-int List_equal(List,  List);
+int List_equal(List, List);
 
 Var car(List);
 
@@ -121,45 +118,45 @@ String Var_str(Var);
 
 int String_len(String);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
 char Atom_first(Atom);
 
 int Var_is_nil(Var);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 int List_len(List);
 
-void * Scope_calloc(size_t,  size_t);
+void * Scope_calloc(size_t, size_t);
 
 void Scope_free(void *);
 
-List cons(Var,  List);
+List cons(Var, List);
 
-Var List_assoc(List,  Var);
+Var List_assoc(List, Var);
 
 int Var_is_void(Var);
 
-int MachineBuilder_emit(MachineBuilder,  int,  int,  int,  int,  int,  int);
+int MachineBuilder_emit(MachineBuilder, int, int, int, int, int, int);
 
-void * Scope_realloc(void *,  size_t);
+void * Scope_realloc(void *, size_t);
 
-void MachineBuilder_set_target(MachineBuilder,  int,  int);
+void MachineBuilder_set_target(MachineBuilder, int, int);
 
 Symbol Var_tag(Var);
 
-int MachineBuilder_constant(MachineBuilder,  Var);
+int MachineBuilder_constant(MachineBuilder, Var);
 
-int MachineBuilder_binder(MachineBuilder,  Atom);
+int MachineBuilder_binder(MachineBuilder, Atom);
 
-void MachineBuilder_patch(MachineBuilder,  int *,  int,  int);
+void MachineBuilder_patch(MachineBuilder, int *, int, int);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 List List_cddr(List);
 
@@ -179,11 +176,11 @@ void MachineBuilder_free(MachineBuilder);
 
 void MachineProgram_free(MachineProgram);
 
-void MatchMachine_begin(MatchMachine,  MachineView,  Var);
+void MatchMachine_begin(MatchMachine, MachineView, Var);
 
 void MatchMachine_run(MatchMachine);
 
-List MatchMachine_materialize_span(MatchMachine,  MachineSpan);
+List MatchMachine_materialize_span(MatchMachine, MachineSpan);
 
 void MatchMachine_finish(MatchMachine);
 
@@ -213,7 +210,7 @@ void Scope_shutdown_hook(void(*)(void));
 
 Block Block_new(size_t);
 
-void Block_push(Block,  const void *);
+void Block_push(Block, const void *);
 
 static List _normalize_elements(List elements);
 
@@ -229,157 +226,157 @@ static int _malformed_binder_atom(Var atom);
 
 static int _named_binder(Var value);
 
-static int _layout_builder_add(MatchLayoutBuilder * builder,  Atom binder);
+static int _layout_builder_add(MatchLayoutBuilder * builder, Atom binder);
 
-static void _layout_collect(MatchLayoutBuilder * builder,  Var pattern);
+static void _layout_collect(MatchLayoutBuilder * builder, Var pattern);
 
-static int _capture_bit(unsigned long bits,  int index);
+static int _capture_bit(unsigned long bits, int index);
 
-static int _layout_index(MatchCaptureLayout layout,  Atom binder);
+static int _layout_index(MatchCaptureLayout layout, Atom binder);
 
-static void _layout_analyze_sequence(MatchCaptureLayout layout,  List patterns,  unsigned long * definite,  unsigned long * possible);
+static void _layout_analyze_sequence(MatchCaptureLayout layout, List patterns, unsigned long * definite, unsigned long * possible);
 
-static void _layout_analyze_alternatives(MatchCaptureLayout layout,  List patterns,  unsigned long * definite,  unsigned long * possible);
+static void _layout_analyze_alternatives(MatchCaptureLayout layout, List patterns, unsigned long * definite, unsigned long * possible);
 
-static void _layout_analyze_pattern(MatchCaptureLayout layout,  Var pattern,  unsigned long * definite,  unsigned long * possible);
+static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsigned long * definite, unsigned long * possible);
 
-static MatchCaptureLayout _capture_layout_analyze(Var pattern,  Var * out_normalized);
+static MatchCaptureLayout _capture_layout_analyze(Var pattern, Var * out_normalized);
 
-static List _capture_layout_list(MatchCaptureLayout layout,  unsigned long included);
+static List _capture_layout_list(MatchCaptureLayout layout, unsigned long included);
 
-static int _find_fixed_anchor(List pat,  Var * anchor,  int * offset);
+static int _find_fixed_anchor(List pat, Var * anchor, int * offset);
 
-static int _pattern_contains_binder(List pat,  Var binder);
+static int _pattern_contains_binder(List pat, Var binder);
 
 static inline Symbol _canonical_type_tag(Symbol tag);
 
-static int _capture_buffer_valid(MatchCaptureLayout layout,  MatchCaptureBuffer * captures);
+static int _capture_buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
-static List _capture_publish(MatchCaptureLayout layout,  MatchCaptureBuffer * captures);
+static List _capture_publish(MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
-static Var _replace(Var input,  List bindings);
+static Var _replace(Var input, List bindings);
 
-static int _capture_lookup(MatchCaptureLayout layout,  MatchCaptureBuffer * captures,  Var binder,  Var * out);
+static int _capture_lookup(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder, Var * out);
 
-static Var _capture_replace(Var input,  MatchCaptureLayout layout,  MatchCaptureBuffer * captures);
+static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
-static Var _apply_capture_template(MatchCaptureLayout layout,  MatchCaptureBuffer * captures,  Var template);
+static Var _apply_capture_template(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var template);
 
-static int _walk_prepared(MatchWalk walk,  Var input);
+static int _walk_prepared(MatchWalk walk, Var input);
 
-static List _walk_bindings(MatchWalk walk,  Var input);
+static List _walk_bindings(MatchWalk walk, Var input);
 
-static int _walk_all_prepared(MatchWalk walk,  Var input,  int include_empty,  List * results);
+static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List * results);
 
-static int _walk_first_prepared(MatchWalk walk,  Var input,  int include_empty,  Var * out_match,  List * out_bindings);
+static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Var * out_match, List * out_bindings);
 
-static Var _walk_replace_prepared(MatchWalk walk,  Var node,  Var template,  int include_empty,  int * error);
+static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int include_empty, int * error);
 
-static int MatchLower__fail(MatchLower l,  const char * reason);
+static int MatchLower__fail(MatchLower l, const char * reason);
 
 static int MatchLower__stopped(MatchLower l);
 
-static int MatchLower__fail_site(MatchLower l,  int op,  int a,  int b,  int c,  int d);
+static int MatchLower__fail_site(MatchLower l, int op, int a, int b, int c, int d);
 
-static void MatchLower__patch_sites(MatchLower l,  int base,  int target);
+static void MatchLower__patch_sites(MatchLower l, int base, int target);
 
-static int MatchLower__compile_child(MatchLower l,  Var pattern);
+static int MatchLower__compile_child(MatchLower l, Var pattern);
 
-static int MatchLower__compile_child_segment(MatchLower l,  List pattern);
+static int MatchLower__compile_child_segment(MatchLower l, List pattern);
 
 static int _bits_unique(Var value);
 
-static int MatchLower__compile_literal(MatchLower l,  Var pattern);
+static int MatchLower__compile_literal(MatchLower l, Var pattern);
 
-static int MatchLower__finish_failure(MatchLower l,  int base);
+static int MatchLower__finish_failure(MatchLower l, int base);
 
-static int MatchLower__finish(MatchLower l,  int base);
+static int MatchLower__finish(MatchLower l, int base);
 
-static int MatchLower__emit_call(MatchLower l,  int child,  int mode,  int reg);
+static int MatchLower__emit_call(MatchLower l, int child, int mode, int reg);
 
-static int MatchLower__emit_binder(MatchLower l,  Var binder);
+static int MatchLower__emit_binder(MatchLower l, Var binder);
 
-static int MatchLower__compile_binder(MatchLower l,  Var binder);
+static int MatchLower__compile_binder(MatchLower l, Var binder);
 
-static int MatchLower__emit_leaf_value(MatchLower l,  Var pattern);
+static int MatchLower__emit_leaf_value(MatchLower l, Var pattern);
 
-static int MatchLower__collect_guard_args(MatchLower l,  List args,  Var * elements,  int * children);
+static int MatchLower__collect_guard_args(MatchLower l, List args, Var * elements, int * children);
 
-static int MatchLower__compile_call_sequence(MatchLower l,  List args);
+static int MatchLower__compile_call_sequence(MatchLower l, List args);
 
-static int MatchLower__compile_bind_and(MatchLower l,  Var binder,  int child);
+static int MatchLower__compile_bind_and(MatchLower l, Var binder, int child);
 
-static int MatchLower__compile_bind_and_leaf(MatchLower l,  Var binder,  Var leaf);
+static int MatchLower__compile_bind_and_leaf(MatchLower l, Var binder, Var leaf);
 
-static int MatchLower__compile_choice(MatchLower l,  List args);
+static int MatchLower__compile_choice(MatchLower l, List args);
 
-static int MatchLower__compile_not(MatchLower l,  List args);
+static int MatchLower__compile_not(MatchLower l, List args);
 
-static int MatchLower__compile_is(MatchLower l,  List args);
+static int MatchLower__compile_is(MatchLower l, List args);
 
-static int MatchLower__compile_guard_core(MatchLower l,  Var op,  List args);
+static int MatchLower__compile_guard_core(MatchLower l, Var op, List args);
 
-static int MatchLower__lower_final_star(MatchLower l,  int slot);
+static int MatchLower__lower_final_star(MatchLower l, int slot);
 
-static int MatchLower__lower_search_star(MatchLower l,  int slot,  int delayed,  int tail_entry,  int anchored,  Var anchor,  int anchor_offset);
+static int MatchLower__lower_search_star(MatchLower l, int slot, int delayed, int tail_entry, int anchored, Var anchor, int anchor_offset);
 
-static int _inline_descend_ok(List child,  int reg);
+static int _inline_descend_ok(List child, int reg);
 
-static int MatchLower__plan_inline_segment(MatchLower l,  List pattern,  int reg,  MatchInlinePlan * plan);
+static int MatchLower__plan_inline_segment(MatchLower l, List pattern, int reg, MatchInlinePlan * plan);
 
-static int MatchLower__emit_head_leaf(MatchLower l,  Var part,  int reg);
+static int MatchLower__emit_head_leaf(MatchLower l, Var part, int reg);
 
-static int MatchLower__emit_inline_segment(MatchLower l,  List pattern,  int reg,  MatchInlinePlan * plan);
+static int MatchLower__emit_inline_segment(MatchLower l, List pattern, int reg, MatchInlinePlan * plan);
 
-static int MatchLower__compile_segment(MatchLower l,  List pattern);
+static int MatchLower__compile_segment(MatchLower l, List pattern);
 
-static int MatchLower__compile_literal_list(MatchLower l,  List pattern);
+static int MatchLower__compile_literal_list(MatchLower l, List pattern);
 
-static int MatchLower__compile_value(MatchLower l,  Var pattern);
+static int MatchLower__compile_value(MatchLower l, Var pattern);
 
-_Noreturn static void _raise_ineligible(const char * reason,  const char * owner);
+_Noreturn static void _raise_ineligible(const char * reason, const char * owner);
 
-static int _plan_prepared(MatchPlan plan,  const char * owner);
+static int _plan_prepared(MatchPlan plan, const char * owner);
 
-static int _run_prepared_capture(MachineView view,  MatchMachine m,  Var input,  MatchCaptureBuffer * captures);
+static int _run_prepared_capture(MachineView view, MatchMachine m, Var input, MatchCaptureBuffer * captures);
 
-static int MatchPlan__run(MatchPlan plan,  MatchMachine m,  Var input,  List * out);
+static int MatchPlan__run(MatchPlan plan, MatchMachine m, Var input, List * out);
 
-static int MatchPlan__capture(MatchPlan plan,  Var input,  MatchCaptureBuffer * captures,  MachineStats * stats);
+static int MatchPlan__capture(MatchPlan plan, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
-static int MatchPlan__first(MatchPlan plan,  List input,  Var * out_match,  List * out_bindings);
+static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings);
 
-static int MatchPlan__all(MatchPlan plan,  List input,  List * out_results);
+static int MatchPlan__all(MatchPlan plan, List input, List * out_results);
 
-static int MatchPlan__replace(MatchPlan plan,  List input,  Var template,  Var * out);
+static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out);
 
-static int MatchPlan__replace_all(MatchPlan plan,  List input,  Var template,  List * out);
+static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out);
 
-static int _cache_admissible(Var value,  int depth);
+static int _cache_admissible(Var value, int depth);
 
 static unsigned long _cache_mix(unsigned long key);
 
 static int _memo_slot(unsigned long key);
 
-static int _cache_admitted(MatchCache cache,  Var pattern);
+static int _cache_admitted(MatchCache cache, Var pattern);
 
-static void _cache_unlink_lru(MatchCache cache,  int slot);
+static void _cache_unlink_lru(MatchCache cache, int slot);
 
-static void _cache_link_mru(MatchCache cache,  int slot);
+static void _cache_link_mru(MatchCache cache, int slot);
 
-static void _cache_touch(MatchCache cache,  int slot);
+static void _cache_touch(MatchCache cache, int slot);
 
-static int _cache_bucket(MatchCache cache,  unsigned long key);
+static int _cache_bucket(MatchCache cache, unsigned long key);
 
-static int _cache_find(MatchCache cache,  unsigned long key);
+static int _cache_find(MatchCache cache, unsigned long key);
 
-static void _cache_remove(MatchCache cache,  int slot);
+static void _cache_remove(MatchCache cache, int slot);
 
 static int _cache_free_slot(MatchCache cache);
 
 static int _cache_victim(MatchCache cache);
 
-static void _cache_activate(MatchCache cache,  int slot,  MatchLease * lease);
+static void _cache_activate(MatchCache cache, int slot, MatchLease * lease);
 
 static MatchCacheEntry * _lease_entry(MatchLease * lease);
 
@@ -401,9 +398,9 @@ static void _register_shutdown_once(void);
 
 static void _capture_sites_initialize(void);
 
-static void _capture_site_prepare(MatchCaptureSite * site,  Var pattern);
+static void _capture_site_prepare(MatchCaptureSite * site, Var pattern);
 
-static MatchPlan _capture_site_publish(MatchCaptureSite * site,  Var pattern);
+static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern);
 
 static MatchCache _plan_cache(void);
 
@@ -413,22 +410,22 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-int x2c_match_try_capture(List input,  Var pattern,  MatchCaptureBuffer * captures){
+int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) MatchCache_initialize();
   if(! captures) return 0;
-  return MatchCache_try_capture(_plan_cache(),  input,  pattern,  captures);
+  return MatchCache_try_capture(_plan_cache(), input, pattern, captures);
 }
 
-int x2c_match_site_try_capture(MatchCaptureSite * site,  List input,  Var pattern,  MatchCaptureBuffer * captures){
+int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) MatchCache_initialize();
   if(! site || ! captures) return 0;
-  MatchPlan plan = __atomic_load_n(& site -> plan,  __ATOMIC_ACQUIRE);
-  if(! plan) plan = _capture_site_publish(site,  pattern);
+  MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
+  if(! plan) plan = _capture_site_publish(site, pattern);
   if(! plan) return 0;
   if(plan -> status == MACHINE_MALFORMED) return 0;
   MatchCaptureLayout layout = plan -> layout;
-  if(_plan_prepared(plan,  "match") && _capture_buffer_valid(layout,  captures)){
-    int result = MatchPlan__capture(plan,  List_var(input),  captures,  NULL);
+  if(_plan_prepared(plan, "match") && _capture_buffer_valid(layout, captures)){
+    int result = MatchPlan__capture(plan, List_var(input), captures, NULL);
     return result == 1;
   }
   return 0;
@@ -436,30 +433,30 @@ int x2c_match_site_try_capture(MatchCaptureSite * site,  List input,  Var patter
 
 static List _normalize_elements(List elements){
   if(! List_truth(elements)) return NULL;
-  Var head = List_car(elements),  normalized_head = head;
-  if(Var_is(head,  806120)) normalized_head = List_var(_normalize_pattern(Var_list(head)));
-  List tail = List_cdr(elements),  normalized_tail = _normalize_elements(tail);
-  if(Var_equal(normalized_head,  head) && List_equal(normalized_tail,  tail)) return elements;
-  return cons(normalized_head,  List_append(normalized_tail,  NULL));
+  Var head = List_car(elements), normalized_head = head;
+  if(Var_is(head, 806120)) normalized_head = List_var(_normalize_pattern(Var_list(head)));
+  List tail = List_cdr(elements), normalized_tail = _normalize_elements(tail);
+  if(Var_equal(normalized_head, head) && List_equal(normalized_tail, tail)) return elements;
+  return cons(normalized_head, List_append(normalized_tail, NULL));
 }
 
 static List _normalize_pattern(List pattern){
-  if(! List_truth(pattern) || Var_equal(car(pattern),  Symbol_var(2050325770))) return pattern;
+  if(! List_truth(pattern) || Var_equal(car(pattern), Symbol_var(2050325770))) return pattern;
   List normalized = _normalize_elements(pattern);
   Var op = car(normalized);
   List args = cdr(normalized);
-  if(! Var_is_match_op(op) || Var_equal(op,  Symbol_var(2005352)) || Var_equal(op,  Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
+  if(! Var_is_match_op(op) || Var_equal(op, Symbol_var(2005352)) || Var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
   Var binder = car(args);
   if(! Var_is_binder(binder)) return normalized;
   List rest = cdr(args);
-  return cons(_0,  cons(binder,  cons(List_var(cons(op,  List_append(rest,  NULL))),  NULL)));
+  return cons(_0, cons(binder, cons(List_var(cons(op, List_append(rest, NULL))), NULL)));
 }
 
 static int _is_list_literal(List pat){
   if(! List_truth(pat)) return 1;
   Var head = car(pat);
   if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
-  if(! Var_is(head,  806120)) return _is_list_literal(cdr(pat));
+  if(! Var_is(head, 806120)) return _is_list_literal(cdr(pat));
   return _is_list_literal(Var_list(head)) && _is_list_literal(cdr(pat));
 }
 
@@ -468,13 +465,13 @@ static int _binder_kind(Var atom){
   String spelling = Var_str(atom);
   int length = String_len(spelling);
   if(! length) return 0;
-  char sigil = String_getindex(spelling,  0);
+  char sigil = String_getindex(spelling, 0);
   if(sigil != '?' && sigil != '*') return 0;
   if(length == 1) return sigil;
-  unsigned char first =(unsigned char) String_getindex(spelling,  1);
+  unsigned char first =(unsigned char) String_getindex(spelling, 1);
   if(!((first >= 'A' && first <= 'Z') ||(first >= 'a' && first <= 'z') || first == '_')) return 0;
   for(int i = 2;  i < length;  i ++){
-    unsigned char ch =(unsigned char) String_getindex(spelling,  i);
+    unsigned char ch =(unsigned char) String_getindex(spelling, i);
     if(!((ch >= 'A' && ch <= 'Z') ||(ch >= 'a' && ch <= 'z') ||(ch >= '0' && ch <= '9') || ch == '_')) return 0;
   }
   return sigil;
@@ -497,7 +494,7 @@ int Var_is_binder(Var atom){
 
 int Var_is_match_op(Var atom){
   if(! _init_guard_) MatchCache_initialize();
-  if(! Var_is(atom,  1328354264)) return 0;
+  if(! Var_is(atom, 1328354264)) return 0;
   Symbol symbol = Var_symbol(atom);
   switch(symbol){
     case 62054 : case 2005352 : case 62436 : case 1969032 : case 1995752 : case 2050325770 : return 1;
@@ -506,7 +503,7 @@ int Var_is_match_op(Var atom){
 }
 
 static int _reserved_match_predicate(Var atom){
-  return Var_is(atom,  1328354264) &&(Var_equal(atom,  Symbol_var(1997793406138)) || Var_equal(atom,  Symbol_var(1860354452666)) || Var_equal(atom,  Symbol_var(1997882)));
+  return Var_is(atom, 1328354264) &&(Var_equal(atom, Symbol_var(1997793406138)) || Var_equal(atom, Symbol_var(1860354452666)) || Var_equal(atom, Symbol_var(1997882)));
 }
 
 static int _malformed_binder_atom(Var atom){
@@ -514,63 +511,63 @@ static int _malformed_binder_atom(Var atom){
 }
 
 static int _named_binder(Var value){
-  return Var_is_binder(value) && ! Var_equal(value,  Symbol_var(58)) && ! Var_equal(value,  Symbol_var(54));
+  return Var_is_binder(value) && ! Var_equal(value, Symbol_var(58)) && ! Var_equal(value, Symbol_var(54));
 }
 
-static int _layout_builder_add(MatchLayoutBuilder * builder,  Atom binder){
+static int _layout_builder_add(MatchLayoutBuilder * builder, Atom binder){
   for(int i = 0;  i < builder -> count;  i ++) if(builder -> binders[i].u64 == binder.u64) return i;
   if(builder -> count >= MACHINE_BINDER_MAX) return - 1;
   builder -> binders[builder -> count] = binder;
   return builder -> count ++;
 }
 
-static void _layout_collect(MatchLayoutBuilder * builder,  Var pattern){
-  if(! Var_is(pattern,  806120)){
+static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
+  if(! Var_is(pattern, 806120)){
     if(_malformed_binder_atom(pattern)) builder -> malformed_binder = 1;
-    else if(_named_binder(pattern) && _layout_builder_add(builder,  pattern) < 0) builder -> past_capacity = 1;
+    else if(_named_binder(pattern) && _layout_builder_add(builder, pattern) < 0) builder -> past_capacity = 1;
     return;
   }
   if(Var_is_nil(pattern)) return;
   List list = Var_list(pattern);
   Var head = car(list);
-  if(Var_equal(head,  Symbol_var(2050325770))) return;
+  if(Var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
     List args = cdr(list);
     if(List_truth(args) && Var_is_list_binder(car(args))) builder -> leading_list_binder = 1;
   }
-  List parts = Var_equal(head,  Symbol_var(1059020478773725)) ? cdr(list) : list;
-  int predicate_form = Var_equal(head,  Symbol_var(62054));
+  List parts = Var_equal(head, Symbol_var(1059020478773725)) ? cdr(list) : list;
+  int predicate_form = Var_equal(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = cdr(at)){
     Var part = car(at);
     if(predicate_form && ! List_truth(cdr(at)) && _reserved_match_predicate(part)) continue;
-    _layout_collect(builder,  part);
+    _layout_collect(builder, part);
     if(builder -> malformed_binder) return;
   }
 
 }
 
-static int _capture_bit(unsigned long bits,  int index){
+static int _capture_bit(unsigned long bits, int index){
   return(int)((bits >> index) & 1UL);
 }
 
-static int _layout_index(MatchCaptureLayout layout,  Atom binder){
+static int _layout_index(MatchCaptureLayout layout, Atom binder){
   for(int i = 0;  i < layout -> binder_count;  i ++) if(layout -> binders[i].u64 == binder.u64) return i;
   return - 1;
 }
 
-static void _layout_analyze_sequence(MatchCaptureLayout layout,  List patterns,  unsigned long * definite,  unsigned long * possible){
+static void _layout_analyze_sequence(MatchCaptureLayout layout, List patterns, unsigned long * definite, unsigned long * possible){
   {
     Var pattern;
-    Iter _x2c_macro_iterator_0 = List_iter(patterns,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(patterns, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       pattern = _x2c_macro_item_0;
       {
-        unsigned long part_definite,  part_possible;
-        _layout_analyze_pattern(layout,  pattern,  & part_definite,  & part_possible);
+        unsigned long part_definite, part_possible;
+        _layout_analyze_pattern(layout, pattern, & part_definite, & part_possible);
         * definite |= part_definite;
         * possible |= part_possible;
       }
@@ -581,20 +578,20 @@ static void _layout_analyze_sequence(MatchCaptureLayout layout,  List patterns, 
 
 }
 
-static void _layout_analyze_alternatives(MatchCaptureLayout layout,  List patterns,  unsigned long * definite,  unsigned long * possible){
+static void _layout_analyze_alternatives(MatchCaptureLayout layout, List patterns, unsigned long * definite, unsigned long * possible){
   int first = 1;
   {
     Var pattern;
-    Iter _x2c_macro_iterator_1 = List_iter(patterns,  &(struct Iter){
+    Iter _x2c_macro_iterator_1 = List_iter(patterns, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
+    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
       pattern = _x2c_macro_item_1;
       {
-        unsigned long part_definite,  part_possible;
-        _layout_analyze_pattern(layout,  pattern,  & part_definite,  & part_possible);
+        unsigned long part_definite, part_possible;
+        _layout_analyze_pattern(layout, pattern, & part_definite, & part_possible);
         * possible |= part_possible;
         * definite = first ? part_definite : * definite & part_definite;
         first = 0;
@@ -606,70 +603,70 @@ static void _layout_analyze_alternatives(MatchCaptureLayout layout,  List patter
 
 }
 
-static void _layout_analyze_pattern(MatchCaptureLayout layout,  Var pattern,  unsigned long * definite,  unsigned long * possible){
+static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsigned long * definite, unsigned long * possible){
   * definite = 0;
   * possible = 0;
   if(_named_binder(pattern)){
-    int index = _layout_index(layout,  pattern);
+    int index = _layout_index(layout, pattern);
     assert(index >= 0);
     * definite = 1UL << index;
     * possible = * definite;
     return;
   }
-  if(! Var_is(pattern,  806120) || Var_is_nil(pattern)) return;
+  if(! Var_is(pattern, 806120) || Var_is_nil(pattern)) return;
   List list = Var_list(pattern);
   Var head = car(list);
   List args = cdr(list);
-  if(Var_equal(head,  Symbol_var(2050325770))) return;
-  if(Var_equal(head,  Symbol_var(1059020478773725))){
+  if(Var_equal(head, Symbol_var(2050325770))) return;
+  if(Var_equal(head, Symbol_var(1059020478773725))){
     unsigned long ignored = 0;
-    _layout_analyze_sequence(layout,  args,  & ignored,  possible);
+    _layout_analyze_sequence(layout, args, & ignored, possible);
     return;
   }
   if(! Var_is_match_op(head)){
-    _layout_analyze_sequence(layout,  list,  definite,  possible);
+    _layout_analyze_sequence(layout, list, definite, possible);
     return;
   }
-  if(! Var_equal(head,  Symbol_var(2005352)) && List_truth(args) && _named_binder(car(args))){
-    int index = _layout_index(layout,  car(args));
+  if(! Var_equal(head, Symbol_var(2005352)) && List_truth(args) && _named_binder(car(args))){
+    int index = _layout_index(layout, car(args));
     assert(index >= 0);
     * definite |= 1UL << index;
     * possible |= 1UL << index;
     args = cdr(args);
   }
-  if(Var_equal(head,  Symbol_var(1969032))){
-    _layout_analyze_sequence(layout,  args,  definite,  possible);
+  if(Var_equal(head, Symbol_var(1969032))){
+    _layout_analyze_sequence(layout, args, definite, possible);
     return;
   }
-  if(Var_equal(head,  Symbol_var(1995752))){
+  if(Var_equal(head, Symbol_var(1995752))){
     unsigned long ignored = 0;
-    _layout_analyze_sequence(layout,  args,  & ignored,  possible);
+    _layout_analyze_sequence(layout, args, & ignored, possible);
     * definite = 0;
     return;
   }
-  if(Var_equal(head,  Symbol_var(62436))){
-    unsigned long alt_definite = 0,  alt_possible = 0;
-    _layout_analyze_alternatives(layout,  args,  & alt_definite,  & alt_possible);
+  if(Var_equal(head, Symbol_var(62436))){
+    unsigned long alt_definite = 0, alt_possible = 0;
+    _layout_analyze_alternatives(layout, args, & alt_definite, & alt_possible);
     * definite |= alt_definite;
     * possible |= alt_possible;
     return;
   }
-  if(Var_equal(head,  Symbol_var(2005352))){
-    if(List_len(args) == 2 && _named_binder(car(args))) _layout_analyze_sequence(layout,  args,  definite,  possible);
-    else _layout_analyze_alternatives(layout,  args,  definite,  possible);
+  if(Var_equal(head, Symbol_var(2005352))){
+    if(List_len(args) == 2 && _named_binder(car(args))) _layout_analyze_sequence(layout, args, definite, possible);
+    else _layout_analyze_alternatives(layout, args, definite, possible);
   }
 
 }
 
-static MatchCaptureLayout _capture_layout_analyze(Var pattern,  Var * out_normalized){
+static MatchCaptureLayout _capture_layout_analyze(Var pattern, Var * out_normalized){
   MatchLayoutBuilder builder ={
-    Var_new(3453797,  0)
+    Var_new(3453797, 0)
   }
   ;
   MachinePrepare status = MACHINE_PREPARED;
   const char * reason = "prepared";
   Var normalized = pattern;
-  _layout_collect(& builder,  pattern);
+  _layout_collect(& builder, pattern);
   if(builder.malformed_binder){
     status = MACHINE_MALFORMED;
     reason = "binder-name";
@@ -682,24 +679,24 @@ static MatchCaptureLayout _capture_layout_analyze(Var pattern,  Var * out_normal
     status = MACHINE_MALFORMED;
     reason = "binder-capacity";
   }
-  else if(Var_is(pattern,  806120)) normalized = List_var(_normalize_pattern(Var_list(pattern)));
+  else if(Var_is(pattern, 806120)) normalized = List_var(_normalize_pattern(Var_list(pattern)));
   if(status != MACHINE_PREPARED) builder.count = 0;
   if(out_normalized) * out_normalized = normalized;
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * builder.count;
-  MatchCaptureLayout layout = Scope_calloc(1,  bytes);
+  MatchCaptureLayout layout = Scope_calloc(1, bytes);
   layout -> binders =(Atom *)((char *) layout + sizeof(struct MatchCaptureLayout));
   layout -> binder_count = builder.count;
   layout -> status = status;
   layout -> reason = reason;
   layout -> normalized = normalized;
-  if(builder.count) memcpy(layout -> binders,  builder.binders,  sizeof(Atom) * builder.count);
-  if(status == MACHINE_PREPARED && builder.count) _layout_analyze_pattern(layout,  pattern,  & layout -> definite,  & layout -> possible);
+  if(builder.count) memcpy(layout -> binders, builder.binders, sizeof(Atom) * builder.count);
+  if(status == MACHINE_PREPARED && builder.count) _layout_analyze_pattern(layout, pattern, & layout -> definite, & layout -> possible);
   return layout;
 }
 
 MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
   if(! _init_guard_) MatchCache_initialize();
-  return _capture_layout_analyze(pattern,  NULL);
+  return _capture_layout_analyze(pattern, NULL);
 }
 
 void MatchCaptureLayout_free(MatchCaptureLayout layout){
@@ -707,47 +704,47 @@ void MatchCaptureLayout_free(MatchCaptureLayout layout){
   if(layout) Scope_free(layout);
 }
 
-static List _capture_layout_list(MatchCaptureLayout layout,  unsigned long included){
+static List _capture_layout_list(MatchCaptureLayout layout, unsigned long included){
   List result = NULL;
-  for(int i = layout -> binder_count - 1;  i >= 0;  i --) if(_capture_bit(included,  i)) result = cons(layout -> binders[i],  result);
+  for(int i = layout -> binder_count - 1;  i >= 0;  i --) if(_capture_bit(included, i)) result = cons(layout -> binders[i], result);
   return result;
 }
 
 List MatchCaptureLayout_definite_list(MatchCaptureLayout layout){
   if(! _init_guard_) MatchCache_initialize();
-  return layout ? _capture_layout_list(layout,  layout -> definite) : NULL;
+  return layout ? _capture_layout_list(layout, layout -> definite) : NULL;
 }
 
 List MatchCaptureLayout_possible_list(MatchCaptureLayout layout){
   if(! _init_guard_) MatchCache_initialize();
-  return layout ? _capture_layout_list(layout,  layout -> possible) : NULL;
+  return layout ? _capture_layout_list(layout, layout -> possible) : NULL;
 }
 
-int MatchCaptureLayout_index(MatchCaptureLayout layout,  Atom binder){
+int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder){
   if(! _init_guard_) MatchCache_initialize();
-  return layout ? _layout_index(layout,  binder) : - 1;
+  return layout ? _layout_index(layout, binder) : - 1;
 }
 
-int MatchCaptureBuffer_has(MatchCaptureBuffer * captures,  int index){
+int MatchCaptureBuffer_has(MatchCaptureBuffer * captures, int index){
   if(! _init_guard_) MatchCache_initialize();
   if(! captures || index < 0 || index >= captures -> capacity || index >= MACHINE_BINDER_MAX) return 0;
-  return _capture_bit(captures -> present,  index);
+  return _capture_bit(captures -> present, index);
 }
 
-static int _find_fixed_anchor(List pat,  Var * anchor,  int * offset){
+static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
   int width = 0;
   {
     Var part;
-    Iter _x2c_macro_iterator_2 = List_iter(pat,  &(struct Iter){
+    Iter _x2c_macro_iterator_2 = List_iter(pat, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
+    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
       part = _x2c_macro_item_2;
       {
         if(Var_is_list_binder(part)) return 0;
-        if((! Var_is(part,  806120) && ! Var_is_binder(part)) ||(Var_is(part,  806120) && _is_list_literal(Var_list(part)))){
+        if((! Var_is(part, 806120) && ! Var_is_binder(part)) ||(Var_is(part, 806120) && _is_list_literal(Var_list(part)))){
           * anchor = part;
           * offset = width;
           return 1;
@@ -761,21 +758,21 @@ static int _find_fixed_anchor(List pat,  Var * anchor,  int * offset){
   return 0;
 }
 
-static int _pattern_contains_binder(List pat,  Var binder){
+static int _pattern_contains_binder(List pat, Var binder){
   {
     Var part;
-    Iter _x2c_macro_iterator_3 = List_iter(pat,  &(struct Iter){
+    Iter _x2c_macro_iterator_3 = List_iter(pat, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
+    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
       part = _x2c_macro_item_3;
       {
-        if(Var_equal(part,  binder)) return 1;
-        if(Var_is(part,  806120)){
+        if(Var_equal(part, binder)) return 1;
+        if(Var_is(part, 806120)){
           List nested = Var_list(part);
-          if(List_truth(nested) && ! Var_equal(car(nested),  Symbol_var(2050325770)) && _pattern_contains_binder(nested,  binder)) return 1;
+          if(List_truth(nested) && ! Var_equal(car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
         }
 
       }
@@ -792,192 +789,192 @@ static inline Symbol _canonical_type_tag(Symbol tag){
   return tag;
 }
 
-static int _capture_buffer_valid(MatchCaptureLayout layout,  MatchCaptureBuffer * captures){
+static int _capture_buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   if(! layout || ! captures) return 0;
   if(captures -> capacity < layout -> binder_count) return 0;
   return ! layout -> binder_count || captures -> values != NULL;
 }
 
-static List _capture_publish(MatchCaptureLayout layout,  MatchCaptureBuffer * captures){
+static List _capture_publish(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   List bindings = NULL;
   for(int i = 0;  i < layout -> binder_count;  i ++){
-    if(! _capture_bit(captures -> present,  i)) continue;
-    List pair = cons(layout -> binders[i],  cons(captures -> values[i],  NULL));
-    bindings = cons(List_var(pair),  bindings);
+    if(! _capture_bit(captures -> present, i)) continue;
+    List pair = cons(layout -> binders[i], cons(captures -> values[i], NULL));
+    bindings = cons(List_var(pair), bindings);
   }
   return bindings;
 }
 
-int List_try_match(List input,  Var pat,  List * out_bindings){
+int List_try_match(List input, Var pat, List * out_bindings){
   if(! _init_guard_) MatchCache_initialize();
-  return out_bindings && MatchCache_try_match(_plan_cache(),  input,  pat,  out_bindings);
+  return out_bindings && MatchCache_try_match(_plan_cache(), input, pat, out_bindings);
 }
 
-List List_match(List input,  Var pat){
+List List_match(List input, Var pat){
   if(! _init_guard_) MatchCache_initialize();
   List bindings;
-  if(! List_try_match(input,  pat,  & bindings)) return NULL;
+  if(! List_try_match(input, pat, & bindings)) return NULL;
   return List_truth(bindings) ? bindings : _2;
 }
 
-static Var _replace(Var input,  List bindings){
-  if(Var_is_binder(input) && !(Var_equal(input,  Symbol_var(54))) && !(Var_equal(input,  Symbol_var(58)))){
-    Var val = List_assoc(bindings,  input);
+static Var _replace(Var input, List bindings){
+  if(Var_is_binder(input) && !(Var_equal(input, Symbol_var(54))) && !(Var_equal(input, Symbol_var(58)))){
+    Var val = List_assoc(bindings, input);
     if(Var_is_void(val)) return input;
     return val;
   }
-  if(! Var_is(input,  806120)) return input;
+  if(! Var_is(input, 806120)) return input;
   List lst = Var_list(input);
   if(! List_truth(lst)) return input;
   Var head = car(lst);
   List tail = cdr(lst);
-  if(Var_equal(head,  Symbol_var(2050325770))) return car(tail);
-  int splice = Var_is_list_binder(head) && ! Var_equal(head,  Symbol_var(54)) && ! Var_equal(head,  Symbol_var(58));
-  head = _replace(head,  bindings);
-  tail = Var_list(_replace(List_var(tail),  bindings));
-  if(splice) return List_var(List_append(Var_list(head),  List_append(tail,  NULL)));
-  return List_var(cons(head,  List_append(tail,  NULL)));
+  if(Var_equal(head, Symbol_var(2050325770))) return car(tail);
+  int splice = Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58));
+  head = _replace(head, bindings);
+  tail = Var_list(_replace(List_var(tail), bindings));
+  if(splice) return List_var(List_append(Var_list(head), List_append(tail, NULL)));
+  return List_var(cons(head, List_append(tail, NULL)));
 }
 
-List List_replace(List template,  List bindings){
+List List_replace(List template, List bindings){
   if(! _init_guard_) MatchCache_initialize();
   if(! List_truth(template)) return NULL;
   if(! List_truth(bindings)) return template;
-  return Var_list(_replace(List_var(template),  bindings));
+  return Var_list(_replace(List_var(template), bindings));
 }
 
-static int _capture_lookup(MatchCaptureLayout layout,  MatchCaptureBuffer * captures,  Var binder,  Var * out){
-  int index = MatchCaptureLayout_index(layout,  binder);
-  if(index < 0 || ! _capture_bit(captures -> present,  index)) return 0;
+static int _capture_lookup(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder, Var * out){
+  int index = MatchCaptureLayout_index(layout, binder);
+  if(index < 0 || ! _capture_bit(captures -> present, index)) return 0;
   * out = captures -> values[index];
   return 1;
 }
 
-static Var _capture_replace(Var input,  MatchCaptureLayout layout,  MatchCaptureBuffer * captures){
+static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   if(_named_binder(input)){
     Var value;
-    return _capture_lookup(layout,  captures,  input,  & value) ? value : input;
+    return _capture_lookup(layout, captures, input, & value) ? value : input;
   }
-  if(! Var_is(input,  806120)) return input;
+  if(! Var_is(input, 806120)) return input;
   List list = Var_list(input);
   if(! List_truth(list)) return input;
   Var head = car(list);
   List tail = cdr(list);
-  if(Var_equal(head,  Symbol_var(2050325770))) return car(tail);
-  int splice = Var_is_list_binder(head) && ! Var_equal(head,  Symbol_var(54)) && ! Var_equal(head,  Symbol_var(58));
-  Var replaced_head = _capture_replace(head,  layout,  captures);
-  List replaced_tail = Var_list(_capture_replace(List_var(tail),  layout,  captures));
+  if(Var_equal(head, Symbol_var(2050325770))) return car(tail);
+  int splice = Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58));
+  Var replaced_head = _capture_replace(head, layout, captures);
+  List replaced_tail = Var_list(_capture_replace(List_var(tail), layout, captures));
   if(splice){
-    List spliced = Var_is(replaced_head,  806120) ? Var_list(replaced_head) : NULL;
-    return List_var(List_append(spliced,  List_append(replaced_tail,  NULL)));
+    List spliced = Var_is(replaced_head, 806120) ? Var_list(replaced_head) : NULL;
+    return List_var(List_append(spliced, List_append(replaced_tail, NULL)));
   }
-  return List_var(cons(replaced_head,  List_append(replaced_tail,  NULL)));
+  return List_var(cons(replaced_head, List_append(replaced_tail, NULL)));
 }
 
-static Var _apply_capture_template(MatchCaptureLayout layout,  MatchCaptureBuffer * captures,  Var template){
-  if(Var_is(template,  806120)) return _capture_replace(template,  layout,  captures);
+static Var _apply_capture_template(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var template){
+  if(Var_is(template, 806120)) return _capture_replace(template, layout, captures);
   if(_named_binder(template)){
     Var value =((void) 0, Void);
-    _capture_lookup(layout,  captures,  template,  & value);
+    _capture_lookup(layout, captures, template, & value);
     return value;
   }
   return template;
 }
 
-int List_try_match_replace(List input,  Var pat,  Var template,  Var * out){
+int List_try_match_replace(List input, Var pat, Var template, Var * out){
   if(! _init_guard_) MatchCache_initialize();
-  return out && MatchCache_try_match_replace(_plan_cache(),  input,  pat,  template,  out);
+  return out && MatchCache_try_match_replace(_plan_cache(), input, pat, template, out);
 }
 
-List List_match_replace(List input,  Var pat,  Var template){
+List List_match_replace(List input, Var pat, Var template){
   if(! _init_guard_) MatchCache_initialize();
   Var result;
-  if(! List_try_match_replace(input,  pat,  template,  & result)) return input;
-  return Var_is(result,  806120) ? Var_list(result) : NULL;
+  if(! List_try_match_replace(input, pat, template, & result)) return input;
+  return Var_is(result, 806120) ? Var_list(result) : NULL;
 }
 
-static int _walk_prepared(MatchWalk walk,  Var input){
-  return _run_prepared_capture(walk -> view,  walk -> m,  input,  walk -> captures);
+static int _walk_prepared(MatchWalk walk, Var input){
+  return _run_prepared_capture(walk -> view, walk -> m, input, walk -> captures);
 }
 
-static List _walk_bindings(MatchWalk walk,  Var input){
-  return cons(List_var(cons(_3,  cons(input,  NULL))),  _capture_publish(walk -> plan -> layout,  walk -> captures));
+static List _walk_bindings(MatchWalk walk, Var input){
+  return cons(List_var(cons(_3, cons(input, NULL))), _capture_publish(walk -> plan -> layout, walk -> captures));
 }
 
-static int _walk_all_prepared(MatchWalk walk,  Var input,  int include_empty,  List * results){
-  if(Var_is(input,  806120)){
+static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List * results){
+  if(Var_is(input, 806120)){
     List lst = Var_list(input);
     if(List_truth(lst)){
-      if(_walk_all_prepared(walk,  car(lst),  1,  results) < 0) return - 1;
-      if(_walk_all_prepared(walk,  List_var(cdr(lst)),  0,  results) < 0) return - 1;
+      if(_walk_all_prepared(walk, car(lst), 1, results) < 0) return - 1;
+      if(_walk_all_prepared(walk, List_var(cdr(lst)), 0, results) < 0) return - 1;
     }
     else if(! include_empty) return 0;
   }
-  int status = _walk_prepared(walk,  input);
+  int status = _walk_prepared(walk, input);
   if(status < 0) return - 1;
-  if(status == 1) * results = cons(List_var(_walk_bindings(walk,  input)),  * results);
+  if(status == 1) * results = cons(List_var(_walk_bindings(walk, input)), * results);
   return 0;
 }
 
-static int _walk_first_prepared(MatchWalk walk,  Var input,  int include_empty,  Var * out_match,  List * out_bindings){
-  if(Var_is(input,  806120)){
+static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Var * out_match, List * out_bindings){
+  if(Var_is(input, 806120)){
     List lst = Var_list(input);
     if(List_truth(lst)){
-      int found = _walk_first_prepared(walk,  car(lst),  1,  out_match,  out_bindings);
+      int found = _walk_first_prepared(walk, car(lst), 1, out_match, out_bindings);
       if(found) return found;
-      found = _walk_first_prepared(walk,  List_var(cdr(lst)),  0,  out_match,  out_bindings);
+      found = _walk_first_prepared(walk, List_var(cdr(lst)), 0, out_match, out_bindings);
       if(found) return found;
     }
     else if(! include_empty) return 0;
   }
-  int status = _walk_prepared(walk,  input);
+  int status = _walk_prepared(walk, input);
   if(status != 1) return status;
   * out_match = input;
-  * out_bindings = _capture_publish(walk -> plan -> layout,  walk -> captures);
+  * out_bindings = _capture_publish(walk -> plan -> layout, walk -> captures);
   return 1;
 }
 
-static Var _walk_replace_prepared(MatchWalk walk,  Var node,  Var template,  int include_empty,  int * error){
-  if(Var_is(node,  806120)){
+static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int include_empty, int * error){
+  if(Var_is(node, 806120)){
     List lst = Var_list(node);
     if(List_truth(lst)){
-      Var head = _walk_replace_prepared(walk,  car(lst),  template,  1,  error);
+      Var head = _walk_replace_prepared(walk, car(lst), template, 1, error);
       if(* error) return node;
-      List tail = Var_list(_walk_replace_prepared(walk,  List_var(cdr(lst)),  template,  0,  error));
+      List tail = Var_list(_walk_replace_prepared(walk, List_var(cdr(lst)), template, 0, error));
       if(* error) return node;
-      node = List_var(cons(head,  tail));
+      node = List_var(cons(head, tail));
     }
     else if(! include_empty) return node;
   }
-  int status = _walk_prepared(walk,  node);
+  int status = _walk_prepared(walk, node);
   if(status < 0){
     * error = 1;
     return node;
   }
   if(status == 0) return node;
-  return _apply_capture_template(walk -> plan -> layout,  walk -> captures,  template);
+  return _apply_capture_template(walk -> plan -> layout, walk -> captures, template);
 }
 
-List List_search(List input,  Var pat){
+List List_search(List input, Var pat){
   if(! _init_guard_) MatchCache_initialize();
   List results;
-  MatchCache_search(_plan_cache(),  input,  pat,  & results);
+  MatchCache_search(_plan_cache(), input, pat, & results);
   return results;
 }
 
-int List_try_search(List input,  Var pat,  Var * out_match,  List * out_bindings){
+int List_try_search(List input, Var pat, Var * out_match, List * out_bindings){
   if(! _init_guard_) MatchCache_initialize();
-  return out_match && out_bindings && MatchCache_try_search(_plan_cache(),  input,  pat,  out_match,  out_bindings);
+  return out_match && out_bindings && MatchCache_try_search(_plan_cache(), input, pat, out_match, out_bindings);
 }
 
-List List_search_replace(List input,  Var pat,  Var template){
+List List_search_replace(List input, Var pat, Var template){
   if(! _init_guard_) MatchCache_initialize();
   List result;
-  MatchCache_search_replace(_plan_cache(),  input,  pat,  template,  & result);
+  MatchCache_search_replace(_plan_cache(), input, pat, template, & result);
   return result;
 }
 
-static int MatchLower__fail(MatchLower l,  const char * reason){
+static int MatchLower__fail(MatchLower l, const char * reason){
   MachineBuilder b = l -> b;
   if(b -> status == MACHINE_PREPARED){
     b -> status = MACHINE_INELIGIBLE;
@@ -990,12 +987,12 @@ static int MatchLower__stopped(MatchLower l){
   return l -> b -> status != MACHINE_PREPARED;
 }
 
-static int MatchLower__fail_site(MatchLower l,  int op,  int a,  int b,  int c,  int d){
-  int site = MachineBuilder_emit(l -> b,  op,  a,  b,  c,  d,  - 1);
+static int MatchLower__fail_site(MatchLower l, int op, int a, int b, int c, int d){
+  int site = MachineBuilder_emit(l -> b, op, a, b, c, d, - 1);
   if(site < 0) return 0;
   if(l -> site_count >= l -> site_capacity){
     int capacity = l -> site_capacity ? l -> site_capacity * 2 : 64;
-    int * grown = Scope_realloc(l -> sites,  sizeof(int) * capacity);
+    int * grown = Scope_realloc(l -> sites, sizeof(int) * capacity);
     l -> sites = grown;
     l -> site_capacity = capacity;
   }
@@ -1003,23 +1000,23 @@ static int MatchLower__fail_site(MatchLower l,  int op,  int a,  int b,  int c, 
   return 1;
 }
 
-static void MatchLower__patch_sites(MatchLower l,  int base,  int target){
-  for(int i = base;  i < l -> site_count;  i ++) MachineBuilder_set_target(l -> b,  l -> sites[i],  target);
+static void MatchLower__patch_sites(MatchLower l, int base, int target){
+  for(int i = base;  i < l -> site_count;  i ++) MachineBuilder_set_target(l -> b, l -> sites[i], target);
   l -> site_count = base;
 }
 
-static int MatchLower__compile_child(MatchLower l,  Var pattern){
-  if(l -> depth + 1 >= MACHINE_FRAME_MAX - 1) return MatchLower__fail(l,  "frame-depth");
+static int MatchLower__compile_child(MatchLower l, Var pattern){
+  if(l -> depth + 1 >= MACHINE_FRAME_MAX - 1) return MatchLower__fail(l, "frame-depth");
   l -> depth ++;
-  int entry = MatchLower__compile_value(l,  pattern);
+  int entry = MatchLower__compile_value(l, pattern);
   l -> depth --;
   return entry;
 }
 
-static int MatchLower__compile_child_segment(MatchLower l,  List pattern){
-  if(l -> depth + 1 >= MACHINE_FRAME_MAX - 1) return MatchLower__fail(l,  "frame-depth");
+static int MatchLower__compile_child_segment(MatchLower l, List pattern){
+  if(l -> depth + 1 >= MACHINE_FRAME_MAX - 1) return MatchLower__fail(l, "frame-depth");
   l -> depth ++;
-  int entry = MatchLower__compile_segment(l,  pattern);
+  int entry = MatchLower__compile_segment(l, pattern);
   l -> depth --;
   return entry;
 }
@@ -1031,90 +1028,90 @@ static int _bits_unique(Var value){
   return 0;
 }
 
-static int MatchLower__compile_literal(MatchLower l,  Var pattern){
+static int MatchLower__compile_literal(MatchLower l, Var pattern){
   MachineBuilder b = l -> b;
-  int constant = MachineBuilder_constant(b,  pattern);
+  int constant = MachineBuilder_constant(b, pattern);
   if(constant < 0) return - 1;
   int mode = _bits_unique(pattern) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
   int entry = b -> length;
-  int miss = MachineBuilder_emit(b,  MW_EQ_VALUE_CONST,  constant,  0,  0,  mode,  - 1);
-  MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
-  int failure = MachineBuilder_emit(b,  MW_RET_FAILURE,  0,  0,  0,  0,  0);
+  int miss = MachineBuilder_emit(b, MW_EQ_VALUE_CONST, constant, 0, 0, mode, - 1);
+  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int failure = MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if(failure < 0) return - 1;
-  MachineBuilder_set_target(b,  miss,  failure);
+  MachineBuilder_set_target(b, miss, failure);
   return entry;
 }
 
-static int MatchLower__finish_failure(MatchLower l,  int base){
-  int failure = MachineBuilder_emit(l -> b,  MW_RET_FAILURE,  0,  0,  0,  0,  0);
+static int MatchLower__finish_failure(MatchLower l, int base){
+  int failure = MachineBuilder_emit(l -> b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if(failure < 0) return 0;
-  MatchLower__patch_sites(l,  base,  failure);
+  MatchLower__patch_sites(l, base, failure);
   return 1;
 }
 
-static int MatchLower__finish(MatchLower l,  int base){
-  MachineBuilder_emit(l -> b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
-  return MatchLower__finish_failure(l,  base);
+static int MatchLower__finish(MatchLower l, int base){
+  MachineBuilder_emit(l -> b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  return MatchLower__finish_failure(l, base);
 }
 
-static int MatchLower__emit_call(MatchLower l,  int child,  int mode,  int reg){
-  if(MachineBuilder_emit(l -> b,  MW_CALL,  child,  mode,  reg,  0,  0) < 0) return 0;
-  return MatchLower__fail_site(l,  MW_BR_FAIL,  0,  0,  0,  0);
+static int MatchLower__emit_call(MatchLower l, int child, int mode, int reg){
+  if(MachineBuilder_emit(l -> b, MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
+  return MatchLower__fail_site(l, MW_BR_FAIL, 0, 0, 0, 0);
 }
 
-static int MatchLower__emit_binder(MatchLower l,  Var binder){
-  if(Var_equal(binder,  Symbol_var(58))) return 1;
+static int MatchLower__emit_binder(MatchLower l, Var binder){
+  if(Var_equal(binder, Symbol_var(58))) return 1;
   MachineBuilder b = l -> b;
-  int slot = MachineBuilder_binder(b,  binder);
+  int slot = MachineBuilder_binder(b, binder);
   if(slot < 0) return 0;
-  int valid = MachineBuilder_emit(b,  MW_SLOT_VALID,  slot,  0,  0,  0,  - 1);
-  MachineBuilder_emit(b,  MW_SLOT_SET_VALUE,  slot,  0,  0,  0,  0);
-  int done = MachineBuilder_emit(b,  MW_JUMP,  0,  0,  0,  0,  - 1);
+  int valid = MachineBuilder_emit(b, MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(b, MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int done = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
   if(valid < 0 || done < 0) return 0;
   int compare = b -> length;
-  if(! MatchLower__fail_site(l,  MW_SLOT_EQ_VALUE,  slot,  0,  0,  0)) return 0;
-  MachineBuilder_set_target(b,  valid,  compare);
-  MachineBuilder_set_target(b,  done,  b -> length);
+  if(! MatchLower__fail_site(l, MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
+  MachineBuilder_set_target(b, valid, compare);
+  MachineBuilder_set_target(b, done, b -> length);
   return 1;
 }
 
-static int MatchLower__compile_binder(MatchLower l,  Var binder){
+static int MatchLower__compile_binder(MatchLower l, Var binder){
   int entry = l -> b -> length;
-  if(Var_equal(binder,  Symbol_var(58))){
-    MachineBuilder_emit(l -> b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
+  if(Var_equal(binder, Symbol_var(58))){
+    MachineBuilder_emit(l -> b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
     return MatchLower__stopped(l) ? - 1 : entry;
   }
   int base = l -> site_count;
-  if(! MatchLower__emit_binder(l,  binder)) return - 1;
-  return MatchLower__finish(l,  base) ? entry : - 1;
+  if(! MatchLower__emit_binder(l, binder)) return - 1;
+  return MatchLower__finish(l, base) ? entry : - 1;
 }
 
-static int MatchLower__emit_leaf_value(MatchLower l,  Var pattern){
-  if(Var_is_atom_binder(pattern)) return MatchLower__emit_binder(l,  pattern);
+static int MatchLower__emit_leaf_value(MatchLower l, Var pattern){
+  if(Var_is_atom_binder(pattern)) return MatchLower__emit_binder(l, pattern);
   MachineBuilder b = l -> b;
-  int constant = MachineBuilder_constant(b,  pattern);
+  int constant = MachineBuilder_constant(b, pattern);
   if(constant < 0) return 0;
   int mode = _bits_unique(pattern) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
-  return MatchLower__fail_site(l,  MW_EQ_VALUE_CONST,  constant,  0,  0,  mode);
+  return MatchLower__fail_site(l, MW_EQ_VALUE_CONST, constant, 0, 0, mode);
 }
 
-static int MatchLower__collect_guard_args(MatchLower l,  List args,  Var * elements,  int * children){
+static int MatchLower__collect_guard_args(MatchLower l, List args, Var * elements, int * children){
   int count = 0;
   {
     Var part;
-    Iter _x2c_macro_iterator_4 = List_iter(args,  &(struct Iter){
+    Iter _x2c_macro_iterator_4 = List_iter(args, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
+    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
       part = _x2c_macro_item_4;
       {
-        if(count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l,  "guard-width");
+        if(count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "guard-width");
         elements[count] = part;
-        if(! Var_is(part,  806120)) children[count ++] = - 1;
+        if(! Var_is(part, 806120)) children[count ++] = - 1;
         else{
-          children[count] = MatchLower__compile_child(l,  part);
+          children[count] = MatchLower__compile_child(l, part);
           if(children[count ++] < 0) return - 1;
         }
 
@@ -1126,245 +1123,245 @@ static int MatchLower__collect_guard_args(MatchLower l,  List args,  Var * eleme
   return count;
 }
 
-static int MatchLower__compile_call_sequence(MatchLower l,  List args){
+static int MatchLower__compile_call_sequence(MatchLower l, List args){
   MachineBuilder b = l -> b;
   Var elements[MATCH_SEGMENT_MAX];
   int children[MATCH_SEGMENT_MAX];
-  int count = MatchLower__collect_guard_args(l,  args,  elements,  children);
+  int count = MatchLower__collect_guard_args(l, args, elements, children);
   if(count < 0) return - 1;
-  int entry = b -> length,  base = l -> site_count;
+  int entry = b -> length, base = l -> site_count;
   for(int i = 0;  i < count;  i ++){
     if(children[i] < 0){
-      if(! MatchLower__emit_leaf_value(l,  elements[i])) return - 1;
+      if(! MatchLower__emit_leaf_value(l, elements[i])) return - 1;
       continue;
     }
-    if(! MatchLower__emit_call(l,  children[i],  MACHINE_CALL_CURRENT,  0)) return - 1;
+    if(! MatchLower__emit_call(l, children[i], MACHINE_CALL_CURRENT, 0)) return - 1;
   }
-  return MatchLower__finish(l,  base) ? entry : - 1;
+  return MatchLower__finish(l, base) ? entry : - 1;
 }
 
-static int MatchLower__compile_bind_and(MatchLower l,  Var binder,  int child){
+static int MatchLower__compile_bind_and(MatchLower l, Var binder, int child){
   MachineBuilder b = l -> b;
-  int entry = b -> length,  base = l -> site_count;
-  if(! MatchLower__emit_binder(l,  binder) || ! MatchLower__emit_call(l,  child,  MACHINE_CALL_CURRENT,  0)) return - 1;
-  return MatchLower__finish(l,  base) ? entry : - 1;
+  int entry = b -> length, base = l -> site_count;
+  if(! MatchLower__emit_binder(l, binder) || ! MatchLower__emit_call(l, child, MACHINE_CALL_CURRENT, 0)) return - 1;
+  return MatchLower__finish(l, base) ? entry : - 1;
 }
 
-static int MatchLower__compile_bind_and_leaf(MatchLower l,  Var binder,  Var leaf){
+static int MatchLower__compile_bind_and_leaf(MatchLower l, Var binder, Var leaf){
   MachineBuilder b = l -> b;
-  int entry = b -> length,  base = l -> site_count;
-  if(! MatchLower__emit_binder(l,  binder) || ! MatchLower__emit_leaf_value(l,  leaf)) return - 1;
-  return MatchLower__finish(l,  base) ? entry : - 1;
+  int entry = b -> length, base = l -> site_count;
+  if(! MatchLower__emit_binder(l, binder) || ! MatchLower__emit_leaf_value(l, leaf)) return - 1;
+  return MatchLower__finish(l, base) ? entry : - 1;
 }
 
-static int MatchLower__compile_choice(MatchLower l,  List args){
+static int MatchLower__compile_choice(MatchLower l, List args){
   MachineBuilder b = l -> b;
   Var elements[MATCH_SEGMENT_MAX];
   int children[MATCH_SEGMENT_MAX];
-  int count = MatchLower__collect_guard_args(l,  args,  elements,  children);
+  int count = MatchLower__collect_guard_args(l, args, elements, children);
   if(count < 0) return - 1;
-  int entry = b -> length,  base = l -> site_count;
+  int entry = b -> length, base = l -> site_count;
   for(int i = 0;  i < count;  i ++){
-    MatchLower__patch_sites(l,  base,  b -> length);
+    MatchLower__patch_sites(l, base, b -> length);
     if(children[i] < 0){
-      if(! MatchLower__emit_leaf_value(l,  elements[i])) return - 1;
+      if(! MatchLower__emit_leaf_value(l, elements[i])) return - 1;
     }
-    else if(! MatchLower__emit_call(l,  children[i],  MACHINE_CALL_CURRENT,  0)) return - 1;
-    if(MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0) < 0) return - 1;
+    else if(! MatchLower__emit_call(l, children[i], MACHINE_CALL_CURRENT, 0)) return - 1;
+    if(MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return - 1;
   }
-  int failure = MachineBuilder_emit(b,  MW_RET_FAILURE,  0,  0,  0,  0,  0);
+  int failure = MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if(failure < 0) return - 1;
-  MatchLower__patch_sites(l,  base,  failure);
+  MatchLower__patch_sites(l, base, failure);
   return entry;
 }
 
-static int MatchLower__compile_not(MatchLower l,  List args){
+static int MatchLower__compile_not(MatchLower l, List args){
   MachineBuilder b = l -> b;
   Var elements[MATCH_SEGMENT_MAX];
   int children[MATCH_SEGMENT_MAX];
-  int count = MatchLower__collect_guard_args(l,  args,  elements,  children);
+  int count = MatchLower__collect_guard_args(l, args, elements, children);
   if(count < 0) return - 1;
-  int entry = b -> length,  base = l -> site_count;
-  MachineBuilder_emit(b,  MW_MARK,  0,  0,  0,  0,  0);
-  int successes[MATCH_SEGMENT_MAX],  success_count = 0;
+  int entry = b -> length, base = l -> site_count;
+  MachineBuilder_emit(b, MW_MARK, 0, 0, 0, 0, 0);
+  int successes[MATCH_SEGMENT_MAX], success_count = 0;
   for(int i = 0;  i < count;  i ++){
-    MatchLower__patch_sites(l,  base,  b -> length);
+    MatchLower__patch_sites(l, base, b -> length);
     if(children[i] < 0){
-      if(! MatchLower__emit_leaf_value(l,  elements[i])) return - 1;
+      if(! MatchLower__emit_leaf_value(l, elements[i])) return - 1;
     }
-    else if(! MatchLower__emit_call(l,  children[i],  MACHINE_CALL_CURRENT,  0)) return - 1;
-    successes[success_count ++] = MachineBuilder_emit(b,  MW_JUMP,  0,  0,  0,  0,  - 1);
+    else if(! MatchLower__emit_call(l, children[i], MACHINE_CALL_CURRENT, 0)) return - 1;
+    successes[success_count ++] = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
     if(successes[success_count - 1] < 0) return - 1;
   }
   int all_failed = b -> length;
-  MatchLower__patch_sites(l,  base,  all_failed);
-  MachineBuilder_emit(b,  MW_ROLLBACK,  0,  MACHINE_ROLLBACK_RESTORE,  0,  0,  0);
-  MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
+  MatchLower__patch_sites(l, base, all_failed);
+  MachineBuilder_emit(b, MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
+  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   int rejected = b -> length;
-  MachineBuilder_patch(b,  successes,  success_count,  rejected);
-  MachineBuilder_emit(b,  MW_ROLLBACK,  0,  MACHINE_ROLLBACK_RESTORE,  0,  0,  0);
-  if(MachineBuilder_emit(b,  MW_RET_FAILURE,  0,  0,  0,  0,  0) < 0) return - 1;
+  MachineBuilder_patch(b, successes, success_count, rejected);
+  MachineBuilder_emit(b, MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
+  if(MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return - 1;
   return entry;
 }
 
-static int MatchLower__compile_is(MatchLower l,  List args){
+static int MatchLower__compile_is(MatchLower l, List args){
   MachineBuilder b = l -> b;
-  int entry = b -> length,  base = l -> site_count,  kind = - 1;
-  Var kind_arg,  type_tag;
+  int entry = b -> length, base = l -> site_count, kind = - 1;
+  Var kind_arg, type_tag;
   List _x2c_destructure_0 = args;
-  kind_arg = List_getindex(_x2c_destructure_0,  0);
-  type_tag = List_getindex(_x2c_destructure_0,  1);
-  if(List_equal(args,  _7)) kind = MACHINE_KIND_ATOM_BINDER;
-  else if(List_equal(args,  _9)) kind = MACHINE_KIND_LIST_BINDER;
-  else if(List_equal(args,  _6)) kind = MACHINE_KIND_BINDER;
-  else if(List_equal(args,  _11)) kind = MACHINE_KIND_MATCH_OP;
+  kind_arg = List_getindex(_x2c_destructure_0, 0);
+  type_tag = List_getindex(_x2c_destructure_0, 1);
+  if(List_equal(args, _7)) kind = MACHINE_KIND_ATOM_BINDER;
+  else if(List_equal(args, _9)) kind = MACHINE_KIND_LIST_BINDER;
+  else if(List_equal(args, _6)) kind = MACHINE_KIND_BINDER;
+  else if(List_equal(args, _11)) kind = MACHINE_KIND_MATCH_OP;
   if(kind >= 0){
-    if(! MatchLower__fail_site(l,  MW_MATCH_KIND,  0,  kind,  0,  0)) return - 1;
+    if(! MatchLower__fail_site(l, MW_MATCH_KIND, 0, kind, 0, 0)) return - 1;
   }
-  else if(List_equal(args,  _13)){
-    int constant = MachineBuilder_constant(b,  Symbol_var(806120));
+  else if(List_equal(args, _13)){
+    int constant = MachineBuilder_constant(b, Symbol_var(806120));
     if(constant < 0) return - 1;
-    int hit = MachineBuilder_emit(b,  MW_TAG,  constant,  0,  0,  0,  - 1);
-    int is_list = MachineBuilder_emit(b,  MW_JUMP,  0,  0,  0,  0,  - 1);
+    int hit = MachineBuilder_emit(b, MW_TAG, constant, 0, 0, 0, - 1);
+    int is_list = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
     if(hit < 0 || is_list < 0) return - 1;
     int success = b -> length;
-    MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
-    int failure = MachineBuilder_emit(b,  MW_RET_FAILURE,  0,  0,  0,  0,  0);
+    MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    int failure = MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
     if(failure < 0) return - 1;
-    MachineBuilder_set_target(b,  hit,  success);
-    MachineBuilder_set_target(b,  is_list,  failure);
+    MachineBuilder_set_target(b, hit, success);
+    MachineBuilder_set_target(b, is_list, failure);
     return entry;
   }
-  else if(List_truth(args) && Var_equal(kind_arg,  Symbol_var(1362954)) && List_truth(cdr(args)) && ! List_truth(List_cddr(args))){
-    Symbol tag = Var_is(type_tag,  1328354264) ? Var_symbol(type_tag) : 0;
+  else if(List_truth(args) && Var_equal(kind_arg, Symbol_var(1362954)) && List_truth(cdr(args)) && ! List_truth(List_cddr(args))){
+    Symbol tag = Var_is(type_tag, 1328354264) ? Var_symbol(type_tag) : 0;
     tag = _canonical_type_tag(tag);
     if(! tag){
-      if(MachineBuilder_emit(b,  MW_RET_FAILURE,  0,  0,  0,  0,  0) < 0) return - 1;
+      if(MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return - 1;
       return entry;
     }
-    int constant = MachineBuilder_constant(b,  Symbol_var(tag));
-    if(constant < 0 || ! MatchLower__fail_site(l,  MW_TAG,  constant,  0,  0,  0)) return - 1;
+    int constant = MachineBuilder_constant(b, Symbol_var(tag));
+    if(constant < 0 || ! MatchLower__fail_site(l, MW_TAG, constant, 0, 0, 0)) return - 1;
   }
   else{
-    if(MachineBuilder_emit(b,  MW_RET_FAILURE,  0,  0,  0,  0,  0) < 0) return - 1;
+    if(MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return - 1;
     return entry;
   }
-  return MatchLower__finish(l,  base) ? entry : - 1;
+  return MatchLower__finish(l, base) ? entry : - 1;
 }
 
-static int MatchLower__compile_guard_core(MatchLower l,  Var op,  List args){
-  if(Var_equal(op,  Symbol_var(62436))) return MatchLower__compile_choice(l,  args);
-  if(Var_equal(op,  Symbol_var(1995752))) return MatchLower__compile_not(l,  args);
-  if(Var_equal(op,  Symbol_var(62054))) return MatchLower__compile_is(l,  args);
-  if(Var_equal(op,  Symbol_var(2005352))){
+static int MatchLower__compile_guard_core(MatchLower l, Var op, List args){
+  if(Var_equal(op, Symbol_var(62436))) return MatchLower__compile_choice(l, args);
+  if(Var_equal(op, Symbol_var(1995752))) return MatchLower__compile_not(l, args);
+  if(Var_equal(op, Symbol_var(62054))) return MatchLower__compile_is(l, args);
+  if(Var_equal(op, Symbol_var(2005352))){
     if(List_truth(args) && List_truth(cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(car(args))){
-      Var binder,  test;
+      Var binder, test;
       List _x2c_destructure_1 = args;
-      binder = List_getindex(_x2c_destructure_1,  0);
-      test = List_getindex(_x2c_destructure_1,  1);
-      if(! Var_is(test,  806120)) return MatchLower__compile_bind_and_leaf(l,  binder,  test);
-      int child = MatchLower__compile_child(l,  test);
+      binder = List_getindex(_x2c_destructure_1, 0);
+      test = List_getindex(_x2c_destructure_1, 1);
+      if(! Var_is(test, 806120)) return MatchLower__compile_bind_and_leaf(l, binder, test);
+      int child = MatchLower__compile_child(l, test);
       if(child < 0) return - 1;
-      return MatchLower__compile_bind_and(l,  binder,  child);
+      return MatchLower__compile_bind_and(l, binder, child);
     }
-    return MatchLower__compile_choice(l,  args);
+    return MatchLower__compile_choice(l, args);
   }
-  if(Var_equal(op,  Symbol_var(1969032))) return MatchLower__compile_call_sequence(l,  args);
-  if(! List_truth(args) || List_truth(cdr(args))) return MatchLower__fail(l,  "quote-arity");
-  return MatchLower__compile_literal(l,  car(args));
+  if(Var_equal(op, Symbol_var(1969032))) return MatchLower__compile_call_sequence(l, args);
+  if(! List_truth(args) || List_truth(cdr(args))) return MatchLower__fail(l, "quote-arity");
+  return MatchLower__compile_literal(l, car(args));
 }
 
-static int MatchLower__lower_final_star(MatchLower l,  int slot){
+static int MatchLower__lower_final_star(MatchLower l, int slot){
   MachineBuilder b = l -> b;
   int entry = b -> length;
   if(slot < 0){
-    if(MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0) < 0) return - 1;
+    if(MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return - 1;
     return entry;
   }
-  int valid = MachineBuilder_emit(b,  MW_SLOT_VALID,  slot,  0,  0,  0,  - 1);
-  MachineBuilder_emit(b,  MW_CURSOR_VALUE,  0,  1,  0,  0,  0);
-  MachineBuilder_emit(b,  MW_SLOT_SET_VALUE,  slot,  0,  0,  0,  0);
-  int fresh = MachineBuilder_emit(b,  MW_JUMP,  0,  0,  0,  0,  - 1);
+  int valid = MachineBuilder_emit(b, MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(b, MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
+  MachineBuilder_emit(b, MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int fresh = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
   if(valid < 0 || fresh < 0) return - 1;
   int existing = b -> length;
-  int is_span = MachineBuilder_emit(b,  MW_SLOT_IS_SPAN,  slot,  0,  0,  0,  - 1);
-  MachineBuilder_emit(b,  MW_CURSOR_VALUE,  0,  0,  0,  0,  0);
-  if(! MatchLower__fail_site(l,  MW_SLOT_EQ_VALUE,  slot,  0,  0,  0)) return - 1;
-  int value_done = MachineBuilder_emit(b,  MW_JUMP,  0,  0,  0,  0,  - 1);
+  int is_span = MachineBuilder_emit(b, MW_SLOT_IS_SPAN, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(b, MW_CURSOR_VALUE, 0, 0, 0, 0, 0);
+  if(! MatchLower__fail_site(l, MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return - 1;
+  int value_done = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
   if(is_span < 0 || value_done < 0) return - 1;
   int compare_span = b -> length;
-  if(! MatchLower__fail_site(l,  MW_SLOT_EQ_FINAL_IDENTITY,  slot,  0,  1,  0)) return - 1;
-  MachineBuilder_emit(b,  MW_CURSOR_VALUE,  0,  1,  0,  0,  0);
-  MachineBuilder_emit(b,  MW_SLOT_SET_VALUE,  slot,  1,  0,  0,  0);
+  if(! MatchLower__fail_site(l, MW_SLOT_EQ_FINAL_IDENTITY, slot, 0, 1, 0)) return - 1;
+  MachineBuilder_emit(b, MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
+  MachineBuilder_emit(b, MW_SLOT_SET_VALUE, slot, 1, 0, 0, 0);
   int success = b -> length;
-  if(MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0) < 0) return - 1;
-  MachineBuilder_set_target(b,  valid,  existing);
-  MachineBuilder_set_target(b,  is_span,  compare_span);
-  MachineBuilder_set_target(b,  fresh,  success);
-  MachineBuilder_set_target(b,  value_done,  success);
+  if(MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return - 1;
+  MachineBuilder_set_target(b, valid, existing);
+  MachineBuilder_set_target(b, is_span, compare_span);
+  MachineBuilder_set_target(b, fresh, success);
+  MachineBuilder_set_target(b, value_done, success);
   return entry;
 }
 
-static int MatchLower__lower_search_star(MatchLower l,  int slot,  int delayed,  int tail_entry,  int anchored,  Var anchor,  int anchor_offset){
+static int MatchLower__lower_search_star(MatchLower l, int slot, int delayed, int tail_entry, int anchored, Var anchor, int anchor_offset){
   MachineBuilder b = l -> b;
-  int anchor_constant = anchored ? MachineBuilder_constant(b,  anchor) : - 1;
+  int anchor_constant = anchored ? MachineBuilder_constant(b, anchor) : - 1;
   if(anchored && anchor_constant < 0) return - 1;
   int mode = anchored && ! _bits_unique(anchor) ? MACHINE_COMPARE_EQUAL : MACHINE_COMPARE_BITS;
-  MachineBuilder_emit(b,  MW_MARK,  0,  0,  0,  0,  0);
-  MachineBuilder_emit(b,  MW_MOVE,  1,  0,  0,  0,  0);
+  MachineBuilder_emit(b, MW_MARK, 0, 0, 0, 0, 0);
+  MachineBuilder_emit(b, MW_MOVE, 1, 0, 0, 0, 0);
   if(anchored){
-    MachineBuilder_emit(b,  MW_MOVE,  2,  1,  0,  0,  0);
-    MachineBuilder_emit(b,  MW_OFFSET,  2,  anchor_offset,  0,  0,  0);
+    MachineBuilder_emit(b, MW_MOVE, 2, 1, 0, 0, 0);
+    MachineBuilder_emit(b, MW_OFFSET, 2, anchor_offset, 0, 0, 0);
   }
-  else MachineBuilder_emit(b,  MW_SET_ACTIVE,  0,  1,  0,  0,  0);
+  else MachineBuilder_emit(b, MW_SET_ACTIVE, 0, 1, 0, 0, 0);
   int loop = b -> length;
-  int emitted = anchored ? MatchLower__fail_site(l,  MW_SCAN,  1,  2,  anchor_constant,  mode) : MatchLower__fail_site(l,  MW_REQUIRE_ACTIVE,  0,  0,  0,  0);
+  int emitted = anchored ? MatchLower__fail_site(l, MW_SCAN, 1, 2, anchor_constant, mode) : MatchLower__fail_site(l, MW_REQUIRE_ACTIVE, 0, 0, 0, 0);
   if(! emitted) return - 1;
   int valid = - 1;
-  if(slot >= 0) valid = MachineBuilder_emit(b,  MW_SLOT_VALID,  slot,  0,  0,  0,  - 1);
-  if(slot >= 0 && ! delayed) MachineBuilder_emit(b,  MW_SLOT_SET_SPAN,  slot,  0,  1,  0,  0);
-  MachineBuilder_emit(b,  MW_CALL,  tail_entry,  MACHINE_CALL_CURSOR,  1,  0,  0);
-  int fresh_failed = MachineBuilder_emit(b,  MW_BR_FAIL,  0,  0,  0,  0,  - 1);
+  if(slot >= 0) valid = MachineBuilder_emit(b, MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  if(slot >= 0 && ! delayed) MachineBuilder_emit(b, MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
+  MachineBuilder_emit(b, MW_CALL, tail_entry, MACHINE_CALL_CURSOR, 1, 0, 0);
+  int fresh_failed = MachineBuilder_emit(b, MW_BR_FAIL, 0, 0, 0, 0, - 1);
   if(fresh_failed < 0) return - 1;
-  if(slot >= 0 && delayed) MachineBuilder_emit(b,  MW_SLOT_SET_SPAN,  slot,  0,  1,  0,  0);
-  MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
-  int mismatch = - 1,  existing_failed = - 1;
+  if(slot >= 0 && delayed) MachineBuilder_emit(b, MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
+  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int mismatch = - 1, existing_failed = - 1;
   if(slot >= 0){
     int compare = b -> length;
-    mismatch = MachineBuilder_emit(b,  MW_SLOT_EQ_PREFIX,  slot,  0,  1,  0,  - 1);
-    MachineBuilder_emit(b,  MW_CALL,  tail_entry,  MACHINE_CALL_CURSOR,  1,  0,  0);
-    existing_failed = MachineBuilder_emit(b,  MW_BR_FAIL,  0,  0,  0,  0,  - 1);
+    mismatch = MachineBuilder_emit(b, MW_SLOT_EQ_PREFIX, slot, 0, 1, 0, - 1);
+    MachineBuilder_emit(b, MW_CALL, tail_entry, MACHINE_CALL_CURSOR, 1, 0, 0);
+    existing_failed = MachineBuilder_emit(b, MW_BR_FAIL, 0, 0, 0, 0, - 1);
     if(mismatch < 0 || existing_failed < 0) return - 1;
-    MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
-    MachineBuilder_set_target(b,  valid,  compare);
+    MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    MachineBuilder_set_target(b, valid, compare);
   }
   int retry = b -> length;
-  MachineBuilder_set_target(b,  mismatch,  retry);
-  MachineBuilder_set_target(b,  fresh_failed,  retry);
-  MachineBuilder_set_target(b,  existing_failed,  retry);
-  MachineBuilder_emit(b,  MW_ROLLBACK,  0,  MACHINE_ROLLBACK_RETRY,  0,  0,  0);
+  MachineBuilder_set_target(b, mismatch, retry);
+  MachineBuilder_set_target(b, fresh_failed, retry);
+  MachineBuilder_set_target(b, existing_failed, retry);
+  MachineBuilder_emit(b, MW_ROLLBACK, 0, MACHINE_ROLLBACK_RETRY, 0, 0, 0);
   if(anchored){
-    MachineBuilder_emit(b,  MW_ADVANCE,  1,  0,  0,  0,  0);
-    MachineBuilder_emit(b,  MW_ADVANCE,  2,  0,  0,  0,  0);
+    MachineBuilder_emit(b, MW_ADVANCE, 1, 0, 0, 0, 0);
+    MachineBuilder_emit(b, MW_ADVANCE, 2, 0, 0, 0, 0);
   }
-  else MachineBuilder_emit(b,  MW_ADVANCE_OPTIONAL,  1,  0,  0,  0,  0);
-  if(MachineBuilder_emit(b,  MW_JUMP,  0,  0,  0,  0,  loop) < 0) return - 1;
+  else MachineBuilder_emit(b, MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
+  if(MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, loop) < 0) return - 1;
   return MatchLower__stopped(l) ? - 1 : 0;
 }
 
-static int _inline_descend_ok(List child,  int reg){
+static int _inline_descend_ok(List child, int reg){
   if(reg + 1 >= MACHINE_CURSOR_REGS) return 0;
   if(! List_truth(child)) return 0;
   if(Var_is_match_op(car(child))) return 0;
   if(_is_list_literal(child)) return 0;
   {
     Var part;
-    Iter _x2c_macro_iterator_5 = List_iter(child,  &(struct Iter){
+    Iter _x2c_macro_iterator_5 = List_iter(child, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
+    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
       part = _x2c_macro_item_5;
       if(Var_is_list_binder(part)) return 0;
     }
@@ -1373,25 +1370,25 @@ static int _inline_descend_ok(List child,  int reg){
   return 1;
 }
 
-static int MatchLower__plan_inline_segment(MatchLower l,  List pattern,  int reg,  MatchInlinePlan * plan){
+static int MatchLower__plan_inline_segment(MatchLower l, List pattern, int reg, MatchInlinePlan * plan){
   {
     Var part;
-    Iter _x2c_macro_iterator_6 = List_iter(pattern,  &(struct Iter){
+    Iter _x2c_macro_iterator_6 = List_iter(pattern, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
+    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
       part = _x2c_macro_item_6;
       {
-        if(! Var_is(part,  806120)) continue;
+        if(! Var_is(part, 806120)) continue;
         List child = Var_list(part);
-        if(_inline_descend_ok(child,  reg)){
-          if(! MatchLower__plan_inline_segment(l,  child,  reg + 1,  plan)) return 0;
+        if(_inline_descend_ok(child, reg)){
+          if(! MatchLower__plan_inline_segment(l, child, reg + 1, plan)) return 0;
           continue;
         }
-        if(plan -> count >= MATCH_INLINE_MAX) return MatchLower__fail(l,  "segment-width") + 1;
-        plan -> entries[plan -> count] = MatchLower__compile_child(l,  part);
+        if(plan -> count >= MATCH_INLINE_MAX) return MatchLower__fail(l, "segment-width") + 1;
+        plan -> entries[plan -> count] = MatchLower__compile_child(l, part);
         if(plan -> entries[plan -> count ++] < 0) return 0;
       }
 
@@ -1401,58 +1398,58 @@ static int MatchLower__plan_inline_segment(MatchLower l,  List pattern,  int reg
   return 1;
 }
 
-static int MatchLower__emit_head_leaf(MatchLower l,  Var part,  int reg){
+static int MatchLower__emit_head_leaf(MatchLower l, Var part, int reg){
   MachineBuilder b = l -> b;
-  if(Var_equal(part,  Symbol_var(58))) return MatchLower__fail_site(l,  MW_SKIP_HEAD,  0,  reg,  0,  0);
+  if(Var_equal(part, Symbol_var(58))) return MatchLower__fail_site(l, MW_SKIP_HEAD, 0, reg, 0, 0);
   if(Var_is_atom_binder(part)){
-    int slot = MachineBuilder_binder(b,  part);
+    int slot = MachineBuilder_binder(b, part);
     if(slot < 0) return 0;
-    return MatchLower__fail_site(l,  MW_BIND_HEAD,  slot,  reg,  0,  0);
+    return MatchLower__fail_site(l, MW_BIND_HEAD, slot, reg, 0, 0);
   }
-  int constant = MachineBuilder_constant(b,  part);
+  int constant = MachineBuilder_constant(b, part);
   if(constant < 0) return 0;
   int mode = _bits_unique(part) ? MACHINE_COMPARE_BITS : MACHINE_COMPARE_EQUAL;
-  return MatchLower__fail_site(l,  MW_EQ_HEAD_CONST,  constant,  reg,  0,  mode);
+  return MatchLower__fail_site(l, MW_EQ_HEAD_CONST, constant, reg, 0, mode);
 }
 
-static int MatchLower__emit_inline_segment(MatchLower l,  List pattern,  int reg,  MatchInlinePlan * plan){
+static int MatchLower__emit_inline_segment(MatchLower l, List pattern, int reg, MatchInlinePlan * plan){
   MachineBuilder b = l -> b;
   {
     Var part;
-    Iter _x2c_macro_iterator_7 = List_iter(pattern,  &(struct Iter){
+    Iter _x2c_macro_iterator_7 = List_iter(pattern, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
+    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
       part = _x2c_macro_item_7;
       {
-        if(! Var_is(part,  806120)){
-          if(! MatchLower__emit_head_leaf(l,  part,  reg)) return - 1;
+        if(! Var_is(part, 806120)){
+          if(! MatchLower__emit_head_leaf(l, part, reg)) return - 1;
           continue;
         }
         List child = Var_list(part);
-        if(_inline_descend_ok(child,  reg)){
-          if(! MatchLower__fail_site(l,  MW_DESCEND,  0,  reg,  reg + 1,  0)) return - 1;
-          if(MatchLower__emit_inline_segment(l,  child,  reg + 1,  plan) < 0) return - 1;
-          if(MachineBuilder_emit(b,  MW_ADVANCE,  reg,  0,  0,  0,  0) < 0) return - 1;
+        if(_inline_descend_ok(child, reg)){
+          if(! MatchLower__fail_site(l, MW_DESCEND, 0, reg, reg + 1, 0)) return - 1;
+          if(MatchLower__emit_inline_segment(l, child, reg + 1, plan) < 0) return - 1;
+          if(MachineBuilder_emit(b, MW_ADVANCE, reg, 0, 0, 0, 0) < 0) return - 1;
           continue;
         }
         assert(plan -> used < plan -> count);
         int child_entry = plan -> entries[plan -> used ++];
-        if(! MatchLower__fail_site(l,  MW_NONNIL,  reg,  0,  0,  0)) return - 1;
-        if(! MatchLower__emit_call(l,  child_entry,  MACHINE_CALL_HEAD,  reg)) return - 1;
-        if(MachineBuilder_emit(b,  MW_ADVANCE,  reg,  0,  0,  0,  0) < 0) return - 1;
+        if(! MatchLower__fail_site(l, MW_NONNIL, reg, 0, 0, 0)) return - 1;
+        if(! MatchLower__emit_call(l, child_entry, MACHINE_CALL_HEAD, reg)) return - 1;
+        if(MachineBuilder_emit(b, MW_ADVANCE, reg, 0, 0, 0, 0) < 0) return - 1;
       }
 
     }
 
   }
-  if(! MatchLower__fail_site(l,  MW_NIL,  reg,  0,  0,  0)) return - 1;
+  if(! MatchLower__fail_site(l, MW_NIL, reg, 0, 0, 0)) return - 1;
   return 0;
 }
 
-static int MatchLower__compile_segment(MatchLower l,  List pattern){
+static int MatchLower__compile_segment(MatchLower l, List pattern){
   MachineBuilder b = l -> b;
   Var elements[MATCH_SEGMENT_MAX];
   int children[MATCH_SEGMENT_MAX];
@@ -1462,101 +1459,101 @@ static int MatchLower__compile_segment(MatchLower l,  List pattern){
   int child_count = 0;
   List at = pattern;
   while(List_truth(at) && ! Var_is_list_binder(car(at))){
-    if(child_count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l,  "segment-width");
+    if(child_count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "segment-width");
     Var part = car(at);
     elements[child_count] = part;
-    if(! Var_is(part,  806120)) children[child_count ++] = - 1;
-    else if(_inline_descend_ok(Var_list(part),  0)){
-      if(! MatchLower__plan_inline_segment(l,  Var_list(part),  1,  & plan)) return - 1;
+    if(! Var_is(part, 806120)) children[child_count ++] = - 1;
+    else if(_inline_descend_ok(Var_list(part), 0)){
+      if(! MatchLower__plan_inline_segment(l, Var_list(part), 1, & plan)) return - 1;
       children[child_count ++] = - 2;
     }
     else{
-      children[child_count] = MatchLower__compile_child(l,  part);
+      children[child_count] = MatchLower__compile_child(l, part);
       if(children[child_count ++] < 0) return - 1;
     }
     at = cdr(at);
   }
   Var star_binder;
   List tail = NULL;
-  int star_slot = - 1,  delayed = 0,  tail_entry = - 1,  anchored = 0;
+  int star_slot = - 1, delayed = 0, tail_entry = - 1, anchored = 0;
   Var anchor =((void) 0, Void);
   int anchor_offset = 0;
   if(List_truth(at)){
     star_binder = car(at);
     tail = cdr(at);
-    if(! Var_equal(star_binder,  Symbol_var(54))){
-      star_slot = MachineBuilder_binder(b,  star_binder);
+    if(! Var_equal(star_binder, Symbol_var(54))){
+      star_slot = MachineBuilder_binder(b, star_binder);
       if(star_slot < 0) return - 1;
-      delayed = List_truth(tail) && ! _pattern_contains_binder(tail,  star_binder);
+      delayed = List_truth(tail) && ! _pattern_contains_binder(tail, star_binder);
     }
     if(List_truth(tail)){
-      tail_entry = MatchLower__compile_child_segment(l,  tail);
+      tail_entry = MatchLower__compile_child_segment(l, tail);
       if(tail_entry < 0) return - 1;
-      anchored = _find_fixed_anchor(tail,  & anchor,  & anchor_offset);
+      anchored = _find_fixed_anchor(tail, & anchor, & anchor_offset);
     }
 
   }
-  int entry = b -> length,  base = l -> site_count;
-  if(! MatchLower__fail_site(l,  MW_INPUT_LIST,  0,  0,  0,  0)) return - 1;
+  int entry = b -> length, base = l -> site_count;
+  if(! MatchLower__fail_site(l, MW_INPUT_LIST, 0, 0, 0, 0)) return - 1;
   for(int i = 0;  i < child_count;  i ++){
     if(children[i] == - 1){
-      if(! MatchLower__emit_head_leaf(l,  elements[i],  0)) return - 1;
+      if(! MatchLower__emit_head_leaf(l, elements[i], 0)) return - 1;
       continue;
     }
     if(children[i] == - 2){
-      if(! MatchLower__fail_site(l,  MW_DESCEND,  0,  0,  1,  0)) return - 1;
-      if(MatchLower__emit_inline_segment(l,  Var_list(elements[i]),  1,  & plan) < 0) return - 1;
-      if(MachineBuilder_emit(b,  MW_ADVANCE,  0,  0,  0,  0,  0) < 0) return - 1;
+      if(! MatchLower__fail_site(l, MW_DESCEND, 0, 0, 1, 0)) return - 1;
+      if(MatchLower__emit_inline_segment(l, Var_list(elements[i]), 1, & plan) < 0) return - 1;
+      if(MachineBuilder_emit(b, MW_ADVANCE, 0, 0, 0, 0, 0) < 0) return - 1;
       continue;
     }
-    if(! MatchLower__fail_site(l,  MW_NONNIL,  0,  0,  0,  0)) return - 1;
-    if(! MatchLower__emit_call(l,  children[i],  MACHINE_CALL_HEAD,  0)) return - 1;
-    if(MachineBuilder_emit(b,  MW_ADVANCE,  0,  0,  0,  0,  0) < 0) return - 1;
+    if(! MatchLower__fail_site(l, MW_NONNIL, 0, 0, 0, 0)) return - 1;
+    if(! MatchLower__emit_call(l, children[i], MACHINE_CALL_HEAD, 0)) return - 1;
+    if(MachineBuilder_emit(b, MW_ADVANCE, 0, 0, 0, 0, 0) < 0) return - 1;
   }
   if(! List_truth(at)){
-    if(! MatchLower__fail_site(l,  MW_NIL,  0,  0,  0,  0)) return - 1;
-    MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
+    if(! MatchLower__fail_site(l, MW_NIL, 0, 0, 0, 0)) return - 1;
+    MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   }
   else if(! List_truth(tail)){
-    if(MatchLower__lower_final_star(l,  star_slot) < 0) return - 1;
+    if(MatchLower__lower_final_star(l, star_slot) < 0) return - 1;
   }
-  else if(MatchLower__lower_search_star(l,  star_slot,  delayed,  tail_entry,  anchored,  anchor,  anchor_offset) < 0) return - 1;
-  return MatchLower__finish_failure(l,  base) ? entry : - 1;
+  else if(MatchLower__lower_search_star(l, star_slot, delayed, tail_entry, anchored, anchor, anchor_offset) < 0) return - 1;
+  return MatchLower__finish_failure(l, base) ? entry : - 1;
 }
 
-static int MatchLower__compile_literal_list(MatchLower l,  List pattern){
+static int MatchLower__compile_literal_list(MatchLower l, List pattern){
   MachineBuilder b = l -> b;
-  int constant = MachineBuilder_constant(b,  List_var(pattern));
+  int constant = MachineBuilder_constant(b, List_var(pattern));
   if(constant < 0) return - 1;
-  int entry = b -> length,  miss = MachineBuilder_emit(b,  MW_EQ_VALUE_BITS,  constant,  0,  0,  0,  - 1);
-  MachineBuilder_emit(b,  MW_RET_SUCCESS,  0,  0,  0,  0,  0);
-  int segment = MatchLower__compile_segment(l,  pattern);
+  int entry = b -> length, miss = MachineBuilder_emit(b, MW_EQ_VALUE_BITS, constant, 0, 0, 0, - 1);
+  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int segment = MatchLower__compile_segment(l, pattern);
   if(segment < 0) return - 1;
-  MachineBuilder_set_target(b,  miss,  segment);
+  MachineBuilder_set_target(b, miss, segment);
   return entry;
 }
 
-static int MatchLower__compile_value(MatchLower l,  Var pattern){
-  if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(l,  pattern);
-  if(! Var_is(pattern,  806120)) return MatchLower__compile_literal(l,  pattern);
+static int MatchLower__compile_value(MatchLower l, Var pattern){
+  if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(l, pattern);
+  if(! Var_is(pattern, 806120)) return MatchLower__compile_literal(l, pattern);
   List list = Var_list(pattern);
-  if(List_truth(list) && Var_is_match_op(car(list))) return MatchLower__compile_guard_core(l,  car(list),  cdr(list));
-  if(List_truth(list) && _is_list_literal(list)) return MatchLower__compile_literal_list(l,  list);
-  return MatchLower__compile_segment(l,  list);
+  if(List_truth(list) && Var_is_match_op(car(list))) return MatchLower__compile_guard_core(l, car(list), cdr(list));
+  if(List_truth(list) && _is_list_literal(list)) return MatchLower__compile_literal_list(l, list);
+  return MatchLower__compile_segment(l, list);
 }
 
-_Noreturn static void _raise_ineligible(const char * reason,  const char * owner){
-  String fence = String_new(reason),  site = String_new(owner);
+_Noreturn static void _raise_ineligible(const char * reason, const char * owner){
+  String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/match.x",.function =  "_raise_ineligible",.line =  1478};
-    x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636),  String_var(site),  Symbol_var(12939466),  String_var(fence));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1478};
+    x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
 
 }
 
-static int _plan_prepared(MatchPlan plan,  const char * owner){
-  if(plan && plan -> status == MACHINE_INELIGIBLE) _raise_ineligible(plan -> reason,  owner);
+static int _plan_prepared(MatchPlan plan, const char * owner){
+  if(plan && plan -> status == MACHINE_INELIGIBLE) _raise_ineligible(plan -> reason, owner);
   return plan && plan -> status == MACHINE_PREPARED;
 }
 
@@ -1565,7 +1562,7 @@ MatchPlan MatchPlan_prepare(Var pattern){
   MatchPlan plan = Scope_malloc(sizeof(struct MatchPlan));
   plan -> program = NULL;
   Var normalized;
-  plan -> layout = _capture_layout_analyze(pattern,  & normalized);
+  plan -> layout = _capture_layout_analyze(pattern, & normalized);
   if(plan -> layout -> status != MACHINE_PREPARED){
     plan -> status = plan -> layout -> status;
     plan -> reason = plan -> layout -> reason;
@@ -1581,10 +1578,10 @@ MatchPlan MatchPlan_prepare(Var pattern){
     lower -> site_capacity = 0;
     lower -> depth = 1;
     for(int i = 0;  i < plan -> layout -> binder_count;  i ++){
-      int slot = MachineBuilder_binder((lower -> b),  plan -> layout -> binders[i]);
+      int slot = MachineBuilder_binder((lower -> b), plan -> layout -> binders[i]);
       if(slot != i) break;
     }
-    (lower -> b) -> root =(lower -> b) -> status == MACHINE_PREPARED ? MatchLower__compile_value(lower,  pattern) : - 1;
+    (lower -> b) -> root =(lower -> b) -> status == MACHINE_PREPARED ? MatchLower__compile_value(lower, pattern) : - 1;
     if((lower -> b) -> root < 0 &&(lower -> b) -> status == MACHINE_PREPARED){
       (lower -> b) -> status = MACHINE_INELIGIBLE;
       (lower -> b) -> reason = "lowering";
@@ -1606,9 +1603,9 @@ void MatchPlan_free(MatchPlan plan){
   Scope_free(plan);
 }
 
-static int _run_prepared_capture(MachineView view,  MatchMachine m,  Var input,  MatchCaptureBuffer * captures){
+static int _run_prepared_capture(MachineView view, MatchMachine m, Var input, MatchCaptureBuffer * captures){
   if(! captures || captures -> capacity < view.binder_count ||(view.binder_count && ! captures -> values)) return - 1;
-  MatchMachine_begin(m,  view,  input);
+  MatchMachine_begin(m, view, input);
   MatchMachine_run(m);
   int result = - 1;
   if(m -> status == 982){
@@ -1618,13 +1615,13 @@ static int _run_prepared_capture(MachineView view,  MatchMachine m,  Var input, 
       MachineSlot * slot = & m -> slots[i];
       if(slot -> kind == MACHINE_SLOT_INVALID) continue;
       values[i] = slot -> value;
-      if(slot -> kind == MACHINE_SLOT_SPAN) values[i] = List_var(MatchMachine_materialize_span(m,  slot -> span));
+      if(slot -> kind == MACHINE_SLOT_SPAN) values[i] = List_var(MatchMachine_materialize_span(m, slot -> span));
       if(m -> status == 11703268) break;
       present |= 1UL << i;
     }
     if(m -> status == 982){
       captures -> present = present;
-      for(int i = 0;  i < view.binder_count;  i ++) if(_capture_bit(present,  i)) captures -> values[i] = values[i];
+      for(int i = 0;  i < view.binder_count;  i ++) if(_capture_bit(present, i)) captures -> values[i] = values[i];
       result = 1;
     }
 
@@ -1634,74 +1631,74 @@ static int _run_prepared_capture(MachineView view,  MatchMachine m,  Var input, 
   return result;
 }
 
-static int MatchPlan__run(MatchPlan plan,  MatchMachine m,  Var input,  List * out){
+static int MatchPlan__run(MatchPlan plan, MatchMachine m, Var input, List * out){
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures ={
-    values,  0,  MACHINE_BINDER_MAX
+    values, 0, MACHINE_BINDER_MAX
   }
   ;
-  int result = _run_prepared_capture(MachineProgram_view(plan -> program),  m,  input,  & captures);
-  if(result == 1) * out = _capture_publish(plan -> layout,  & captures);
+  int result = _run_prepared_capture(MachineProgram_view(plan -> program), m, input, & captures);
+  if(result == 1) * out = _capture_publish(plan -> layout, & captures);
   return result;
 }
 
-static int MatchPlan__capture(MatchPlan plan,  Var input,  MatchCaptureBuffer * captures,  MachineStats * stats){
+static int MatchPlan__capture(MatchPlan plan, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
   struct MatchMachine _x2c_macro_storage_0;
   MatchMachine machine = & _x2c_macro_storage_0;
   MatchMachine_open(machine);
   machine -> stats = stats;
-  int result = _run_prepared_capture(MachineProgram_view(plan -> program),  machine,  input,  captures);
+  int result = _run_prepared_capture(MachineProgram_view(plan -> program), machine, input, captures);
   MatchMachine_dispose(machine);
   return result;
 }
 
-int MatchPlan_execute_capture(MatchPlan plan,  Var input,  MatchCaptureBuffer * captures,  MachineStats * stats){
+int MatchPlan_execute_capture(MatchPlan plan, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
   if(! _init_guard_) MatchCache_initialize();
-  if(! _plan_prepared(plan,  "MatchPlan.execute_capture") || ! _capture_buffer_valid(plan -> layout,  captures)) return - 1;
-  return MatchPlan__capture(plan,  input,  captures,  stats);
+  if(! _plan_prepared(plan, "MatchPlan.execute_capture") || ! _capture_buffer_valid(plan -> layout, captures)) return - 1;
+  return MatchPlan__capture(plan, input, captures, stats);
 }
 
-int MatchPlan_try_capture(MatchPlan plan,  List input,  MatchCaptureBuffer * captures){
+int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures){
   if(! _init_guard_) MatchCache_initialize();
-  return MatchPlan_execute_capture(plan,  List_var(input),  captures,  NULL);
+  return MatchPlan_execute_capture(plan, List_var(input), captures, NULL);
 }
 
-int MatchPlan_execute(MatchPlan plan,  Var input,  List * out_bindings,  MachineStats * stats){
+int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats){
   if(! _init_guard_) MatchCache_initialize();
-  if(! _plan_prepared(plan,  "MatchPlan.execute") || ! out_bindings) return - 1;
+  if(! _plan_prepared(plan, "MatchPlan.execute") || ! out_bindings) return - 1;
   struct MatchMachine _x2c_macro_storage_1;
   MatchMachine machine = & _x2c_macro_storage_1;
   MatchMachine_open(machine);
   machine -> stats = stats;
   List bindings;
-  int result = MatchPlan__run(plan,  machine,  input,  & bindings);
+  int result = MatchPlan__run(plan, machine, input, & bindings);
   MatchMachine_dispose(machine);
   if(result == 1) * out_bindings = bindings;
   return result;
 }
 
-int MatchPlan_try_match(MatchPlan plan,  List input,  List * out_bindings){
+int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
   if(! _init_guard_) MatchCache_initialize();
-  return MatchPlan_execute(plan,  List_var(input),  out_bindings,  NULL);
+  return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
 }
 
-static int MatchPlan__first(MatchPlan plan,  List input,  Var * out_match,  List * out_bindings){
+static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
   struct MatchMachine _x2c_macro_storage_2;
   MatchMachine machine = & _x2c_macro_storage_2;
   MatchMachine_open(machine);
   machine -> stats = NULL;
   Var _x2c_macro_values_0[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_0 ={
-    _x2c_macro_values_0,  0,  MACHINE_BINDER_MAX
+    _x2c_macro_values_0, 0, MACHINE_BINDER_MAX
   }
   ;
   struct MatchWalk walk ={
-    plan,  MachineProgram_view((plan) -> program),  & _x2c_macro_captures_0,  machine
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, machine
   }
   ;
   Var matched;
   List bindings;
-  int result = _walk_first_prepared(& walk,  List_var(input),  1,  & matched,  & bindings);
+  int result = _walk_first_prepared(& walk, List_var(input), 1, & matched, & bindings);
   MatchMachine_dispose(machine);
   if(result == 1){
     * out_match = matched;
@@ -1710,106 +1707,106 @@ static int MatchPlan__first(MatchPlan plan,  List input,  Var * out_match,  List
   return result;
 }
 
-int MatchPlan_try_search(MatchPlan plan,  List input,  Var * out_match,  List * out_bindings){
+int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings){
   if(! _init_guard_) MatchCache_initialize();
-  if(! _plan_prepared(plan,  "MatchPlan.try_search") || ! out_match || ! out_bindings) return - 1;
-  return MatchPlan__first(plan,  input,  out_match,  out_bindings);
+  if(! _plan_prepared(plan, "MatchPlan.try_search") || ! out_match || ! out_bindings) return - 1;
+  return MatchPlan__first(plan, input, out_match, out_bindings);
 }
 
-static int MatchPlan__all(MatchPlan plan,  List input,  List * out_results){
+static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
   struct MatchMachine _x2c_macro_storage_3;
   MatchMachine machine = & _x2c_macro_storage_3;
   MatchMachine_open(machine);
   machine -> stats = NULL;
   Var _x2c_macro_values_1[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_1 ={
-    _x2c_macro_values_1,  0,  MACHINE_BINDER_MAX
+    _x2c_macro_values_1, 0, MACHINE_BINDER_MAX
   }
   ;
   struct MatchWalk walk ={
-    plan,  MachineProgram_view((plan) -> program),  & _x2c_macro_captures_1,  machine
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, machine
   }
   ;
   List results = NULL;
-  int status = _walk_all_prepared(& walk,  List_var(input),  1,  & results);
+  int status = _walk_all_prepared(& walk, List_var(input), 1, & results);
   MatchMachine_dispose(machine);
   if(status < 0) return - 1;
   * out_results = results;
   return 1;
 }
 
-int MatchPlan_search(MatchPlan plan,  List input,  List * out_results){
+int MatchPlan_search(MatchPlan plan, List input, List * out_results){
   if(! _init_guard_) MatchCache_initialize();
-  if(! _plan_prepared(plan,  "MatchPlan.search") || ! out_results) return - 1;
-  return MatchPlan__all(plan,  input,  out_results);
+  if(! _plan_prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
+  return MatchPlan__all(plan, input, out_results);
 }
 
-static int MatchPlan__replace(MatchPlan plan,  List input,  Var template,  Var * out){
+static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out){
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures ={
-    values,  0,  MACHINE_BINDER_MAX
+    values, 0, MACHINE_BINDER_MAX
   }
   ;
-  int result = MatchPlan__capture(plan,  List_var(input),  & captures,  NULL);
+  int result = MatchPlan__capture(plan, List_var(input), & captures, NULL);
   if(result != 1) return result;
-  * out = _apply_capture_template(plan -> layout,  & captures,  template);
+  * out = _apply_capture_template(plan -> layout, & captures, template);
   return 1;
 }
 
-int MatchPlan_try_match_replace(MatchPlan plan,  List input,  Var template,  Var * out){
+int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out){
   if(! _init_guard_) MatchCache_initialize();
-  if(! _plan_prepared(plan,  "MatchPlan.try_match_replace") || ! out) return - 1;
-  return MatchPlan__replace(plan,  input,  template,  out);
+  if(! _plan_prepared(plan, "MatchPlan.try_match_replace") || ! out) return - 1;
+  return MatchPlan__replace(plan, input, template, out);
 }
 
-static int MatchPlan__replace_all(MatchPlan plan,  List input,  Var template,  List * out){
+static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out){
   struct MatchMachine _x2c_macro_storage_4;
   MatchMachine machine = & _x2c_macro_storage_4;
   MatchMachine_open(machine);
   machine -> stats = NULL;
   Var _x2c_macro_values_2[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_2 ={
-    _x2c_macro_values_2,  0,  MACHINE_BINDER_MAX
+    _x2c_macro_values_2, 0, MACHINE_BINDER_MAX
   }
   ;
   struct MatchWalk walk ={
-    plan,  MachineProgram_view((plan) -> program),  & _x2c_macro_captures_2,  machine
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, machine
   }
   ;
   int error = 0;
-  Var result = _walk_replace_prepared(& walk,  List_var(input),  template,  1,  & error);
+  Var result = _walk_replace_prepared(& walk, List_var(input), template, 1, & error);
   MatchMachine_dispose(machine);
   if(error) return - 1;
   * out = Var_list(result);
   return 1;
 }
 
-int MatchPlan_search_replace(MatchPlan plan,  List input,  Var template,  List * out){
+int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out){
   if(! _init_guard_) MatchCache_initialize();
-  if(! _plan_prepared(plan,  "MatchPlan.search_replace") || ! out) return - 1;
-  return MatchPlan__replace_all(plan,  input,  template,  out);
+  if(! _plan_prepared(plan, "MatchPlan.search_replace") || ! out) return - 1;
+  return MatchPlan__replace_all(plan, input, template, out);
 }
 
-static int _cache_admissible(Var value,  int depth){
+static int _cache_admissible(Var value, int depth){
   if(depth >= 128) return 0;
   Symbol kind = Var_kind(value);
   switch(kind){
     case 1328354264 : return 1;
     case 35386204516 : case 39939274535114 : return 0;
     case 1011493096 :{
-      if(Var_is(value,  826970)) return 1;
-      if(Var_is(value,  1318210446)) return String_is_permanent(Var_str(value));
-      if(! Var_is(value,  806120)) return 0;
+      if(Var_is(value, 826970)) return 1;
+      if(Var_is(value, 1318210446)) return String_is_permanent(Var_str(value));
+      if(! Var_is(value, 806120)) return 0;
       {
         Var part;
-        Iter _x2c_macro_iterator_8 = List_iter((List) Var_pointer(value),  &(struct Iter){
+        Iter _x2c_macro_iterator_8 = List_iter((List) Var_pointer(value), &(struct Iter){
           int_var(0)
         }
         );
         Var _x2c_macro_item_8;
-        while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
+        while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
           part = _x2c_macro_item_8;
-          if(! _cache_admissible(part,  depth + 1)) return 0;
+          if(! _cache_admissible(part, depth + 1)) return 0;
         }
 
       }
@@ -1817,7 +1814,7 @@ static int _cache_admissible(Var value,  int depth){
     }
 
   }
-  return ! Var_is(value,  818062) && ! Var_is(value,  44858254) && ! Var_is(value,  25983886) && ! Var_is(value,  1435270030) && ! Var_is(value,  26071077642);
+  return ! Var_is(value, 818062) && ! Var_is(value, 44858254) && ! Var_is(value, 25983886) && ! Var_is(value, 1435270030) && ! Var_is(value, 26071077642);
 }
 
 static unsigned long _cache_mix(unsigned long key){
@@ -1832,12 +1829,12 @@ static int _memo_slot(unsigned long key){
   return(int)((key * 0x9e3779b97f4a7c15UL >> 48) &(MATCH_ADMITTED_MEMO - 1));
 }
 
-static int _cache_admitted(MatchCache cache,  Var pattern){
+static int _cache_admitted(MatchCache cache, Var pattern){
   unsigned long key = pattern.u64;
   if(! key) return 0;
   int slot = _memo_slot(key);
   if(cache -> admitted_memo[slot] == key) return 1;
-  if(! _cache_admissible(pattern,  0)) return 0;
+  if(! _cache_admissible(pattern, 0)) return 0;
   cache -> admitted_memo[slot] = key;
   return 1;
 }
@@ -1845,23 +1842,23 @@ static int _cache_admitted(MatchCache cache,  Var pattern){
 MatchCache MatchCache_new(int capacity){
   if(! _init_guard_) MatchCache_initialize();
   if(capacity <= 0){
-    static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/match.x",.function =  "MatchCache_new",.line =  1854};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchCache.new")),  NULL))),  Symbol_var(209381969202),  int_var(capacity));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 1854};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
   if(capacity >(INT_MAX - 1) / 2){
-    static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/match.x",.function =  "MatchCache_new",.line =  1856};
-    x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchCache.new")),  NULL))),  Symbol_var(209381969202),  int_var(capacity));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 1856};
+    x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
   Scope owner = Scope_new_named("Match plan cache");
   Scope_push(& owner);
-  MatchCache cache = Scope_calloc(1,  sizeof(struct MatchCache));
+  MatchCache cache = Scope_calloc(1, sizeof(struct MatchCache));
   cache -> scope = owner;
   cache -> capacity = capacity;
   cache -> bucket_count = capacity * 2 + 1;
   cache -> lru_head = cache -> lru_tail = - 1;
-  cache -> entries = Scope_calloc(capacity,  sizeof(MatchCacheEntry));
+  cache -> entries = Scope_calloc(capacity, sizeof(MatchCacheEntry));
   cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
   for(int i = 0;  i < capacity;  i ++){
     cache -> entries[i].bucket_next = - 1;
@@ -1873,7 +1870,7 @@ MatchCache MatchCache_new(int capacity){
   return cache;
 }
 
-static void _cache_unlink_lru(MatchCache cache,  int slot){
+static void _cache_unlink_lru(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
   if(entry -> lru_prev >= 0) cache -> entries[entry -> lru_prev].lru_next = entry -> lru_next;
   else cache -> lru_head = entry -> lru_next;
@@ -1882,7 +1879,7 @@ static void _cache_unlink_lru(MatchCache cache,  int slot){
   entry -> lru_prev = entry -> lru_next = - 1;
 }
 
-static void _cache_link_mru(MatchCache cache,  int slot){
+static void _cache_link_mru(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
   entry -> lru_prev = - 1;
   entry -> lru_next = cache -> lru_head;
@@ -1891,30 +1888,30 @@ static void _cache_link_mru(MatchCache cache,  int slot){
   cache -> lru_head = slot;
 }
 
-static void _cache_touch(MatchCache cache,  int slot){
+static void _cache_touch(MatchCache cache, int slot){
   if(cache -> lru_head == slot) return;
-  _cache_unlink_lru(cache,  slot);
-  _cache_link_mru(cache,  slot);
+  _cache_unlink_lru(cache, slot);
+  _cache_link_mru(cache, slot);
 }
 
-static int _cache_bucket(MatchCache cache,  unsigned long key){
+static int _cache_bucket(MatchCache cache, unsigned long key){
   return(int)(_cache_mix(key) %(unsigned long) cache -> bucket_count);
 }
 
-static int _cache_find(MatchCache cache,  unsigned long key){
-  for(int slot = cache -> buckets[_cache_bucket(cache,  key)];  slot >= 0;  slot = cache -> entries[slot].bucket_next) if(cache -> entries[slot].occupied && cache -> entries[slot].key == key) return slot;
+static int _cache_find(MatchCache cache, unsigned long key){
+  for(int slot = cache -> buckets[_cache_bucket(cache, key)];  slot >= 0;  slot = cache -> entries[slot].bucket_next) if(cache -> entries[slot].occupied && cache -> entries[slot].key == key) return slot;
   return - 1;
 }
 
-static void _cache_remove(MatchCache cache,  int slot){
+static void _cache_remove(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
   assert(entry -> occupied && ! entry -> pin_count);
-  int * link = & cache -> buckets[_cache_bucket(cache,  entry -> key)];
+  int * link = & cache -> buckets[_cache_bucket(cache, entry -> key)];
   while(* link >= 0 && * link != slot) link = & cache -> entries[* link].bucket_next;
   assert(* link == slot);
   * link = entry -> bucket_next;
   entry -> bucket_next = - 1;
-  _cache_unlink_lru(cache,  slot);
+  _cache_unlink_lru(cache, slot);
   MatchPlan_free(entry -> plan);
   entry -> plan = NULL;
   entry -> occupied = 0;
@@ -1931,7 +1928,7 @@ static int _cache_victim(MatchCache cache){
   return - 1;
 }
 
-static void _cache_activate(MatchCache cache,  int slot,  MatchLease * lease){
+static void _cache_activate(MatchCache cache, int slot, MatchLease * lease){
   MatchCacheEntry * entry = & cache -> entries[slot];
   lease -> cache = cache;
   lease -> generation = entry -> generation;
@@ -1941,16 +1938,16 @@ static void _cache_activate(MatchCache cache,  int slot,  MatchLease * lease){
   entry -> pin_count ++;
 }
 
-int MatchCache_acquire(MatchCache m,  Var pattern,  MatchLease * lease){
+int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease){
   if(! _init_guard_) MatchCache_initialize();
-  memset(lease,  0,  sizeof(MatchLease));
+  memset(lease, 0, sizeof(MatchLease));
   lease -> slot = - 1;
-  if(! _cache_admitted(m,  pattern)){
+  if(! _cache_admitted(m, pattern)){
     MatchPlan plan = MatchPlan_prepare(pattern);
     if(plan -> status == MACHINE_INELIGIBLE){
       const char * reason = plan -> reason;
       MatchPlan_free(plan);
-      _raise_ineligible(reason,  "MatchCache.acquire");
+      _raise_ineligible(reason, "MatchCache.acquire");
     }
     lease -> cache = m;
     lease -> transient_plan = plan;
@@ -1959,10 +1956,10 @@ int MatchCache_acquire(MatchCache m,  Var pattern,  MatchLease * lease){
     return plan -> status;
   }
   unsigned long key = pattern.u64;
-  int slot = _cache_find(m,  key);
+  int slot = _cache_find(m, key);
   if(slot >= 0){
-    _cache_touch(m,  slot);
-    _cache_activate(m,  slot,  lease);
+    _cache_touch(m, slot);
+    _cache_activate(m, slot, lease);
     return m -> entries[slot].plan -> status;
   }
   slot = m -> size < m -> capacity ? _cache_free_slot(m) : _cache_victim(m);
@@ -1975,7 +1972,7 @@ int MatchCache_acquire(MatchCache m,  Var pattern,  MatchLease * lease){
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -1993,8 +1990,8 @@ int MatchCache_acquire(MatchCache m,  Var pattern,  MatchLease * lease){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
   }
-  if(fenced) _raise_ineligible(fenced,  "MatchCache.acquire");
-  if(m -> entries[slot].occupied) _cache_remove(m,  slot);
+  if(fenced) _raise_ineligible(fenced, "MatchCache.acquire");
+  if(m -> entries[slot].occupied) _cache_remove(m, slot);
   MatchCacheEntry * entry = & m -> entries[slot];
   entry -> key = key;
   entry -> plan = plan;
@@ -2002,12 +1999,12 @@ int MatchCache_acquire(MatchCache m,  Var pattern,  MatchLease * lease){
   entry -> occupied = 1;
   entry -> generation = ++ m -> next_generation;
   if(! entry -> generation) entry -> generation = ++ m -> next_generation;
-  int bucket = _cache_bucket(m,  key);
+  int bucket = _cache_bucket(m, key);
   entry -> bucket_next = m -> buckets[bucket];
   m -> buckets[bucket] = slot;
-  _cache_link_mru(m,  slot);
+  _cache_link_mru(m, slot);
   m -> size ++;
-  _cache_activate(m,  slot,  lease);
+  _cache_activate(m, slot, lease);
   return entry -> plan -> status;
 }
 
@@ -2031,15 +2028,15 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) MatchCache_initialize();
   if(! lease){
-    static const X2CErrorSite  _x2c_error_site_3  = {.file =  "../../lib/match.x",.function =  "MatchLease_release",.line =  2048};
-    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchLease.release")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2048};
+    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite  _x2c_error_site_4  = {.file =  "../../lib/match.x",.function =  "MatchLease_release",.line =  2052};
-      x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchLease.release")),  NULL))));
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2052};
+      x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
     MatchPlan_free(lease -> transient_plan);
@@ -2050,8 +2047,8 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite  _x2c_error_site_5  = {.file =  "../../lib/match.x",.function =  "MatchLease_release",.line =  2062};
-    x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchLease.release")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2062};
+    x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   lease -> cache -> active_leases --;
@@ -2063,8 +2060,8 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) MatchCache_initialize();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite  _x2c_error_site_6  = {.file =  "../../lib/match.x",.function =  "MatchCache_dispose",.line =  2078};
-    x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchCache.dispose")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2078};
+    x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
   for(int i = 0;  i < cache -> capacity;  i ++){
@@ -2074,76 +2071,76 @@ void MatchCache_dispose(MatchCache cache){
   Scope_destroy(cache -> scope);
 }
 
-int MatchCache_try_capture(MatchCache cache,  List input,  Var pattern,  MatchCaptureBuffer * captures){
+int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) MatchCache_initialize();
   MatchLease _x2c_macro_storage_5;
   MatchLease * lease = & _x2c_macro_storage_5;
-  int status = MatchCache_acquire(cache,  pattern,  lease);
+  int status = MatchCache_acquire(cache, pattern, lease);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) result = MatchPlan_try_capture(plan,  input,  captures);
+  if(status == MACHINE_PREPARED) result = MatchPlan_try_capture(plan, input, captures);
   MatchLease_release(lease);
   return result == 1;
 }
 
-int MatchCache_try_match(MatchCache cache,  List input,  Var pattern,  List * out_bindings){
+int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings){
   if(! _init_guard_) MatchCache_initialize();
   MatchLease _x2c_macro_storage_6;
   MatchLease * lease = & _x2c_macro_storage_6;
-  int status = MatchCache_acquire(cache,  pattern,  lease);
+  int status = MatchCache_acquire(cache, pattern, lease);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) result = MatchPlan_try_match(plan,  input,  out_bindings);
+  if(status == MACHINE_PREPARED) result = MatchPlan_try_match(plan, input, out_bindings);
   MatchLease_release(lease);
   return result == 1;
 }
 
-int MatchCache_try_search(MatchCache cache,  List input,  Var pattern,  Var * out_match,  List * out_bindings){
+int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings){
   if(! _init_guard_) MatchCache_initialize();
   MatchLease _x2c_macro_storage_7;
   MatchLease * lease = & _x2c_macro_storage_7;
-  int status = MatchCache_acquire(cache,  pattern,  lease);
+  int status = MatchCache_acquire(cache, pattern, lease);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) result = MatchPlan_try_search(plan,  input,  out_match,  out_bindings);
+  if(status == MACHINE_PREPARED) result = MatchPlan_try_search(plan, input, out_match, out_bindings);
   MatchLease_release(lease);
   return result == 1;
 }
 
-int MatchCache_search(MatchCache cache,  List input,  Var pattern,  List * out_results){
+int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results){
   if(! _init_guard_) MatchCache_initialize();
   MatchLease _x2c_macro_storage_8;
   MatchLease * lease = & _x2c_macro_storage_8;
-  int status = MatchCache_acquire(cache,  pattern,  lease);
+  int status = MatchCache_acquire(cache, pattern, lease);
   List results = NULL;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) MatchPlan_search(plan,  input,  & results);
+  if(status == MACHINE_PREPARED) MatchPlan_search(plan, input, & results);
   MatchLease_release(lease);
   * out_results = results;
   return results != NULL;
 }
 
-int MatchCache_try_match_replace(MatchCache cache,  List input,  Var pattern,  Var template,  Var * out){
+int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out){
   if(! _init_guard_) MatchCache_initialize();
   MatchLease _x2c_macro_storage_9;
   MatchLease * lease = & _x2c_macro_storage_9;
-  int status = MatchCache_acquire(cache,  pattern,  lease);
+  int status = MatchCache_acquire(cache, pattern, lease);
   int result = 0;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) result = MatchPlan_try_match_replace(plan,  input,  template,  out);
+  if(status == MACHINE_PREPARED) result = MatchPlan_try_match_replace(plan, input, template, out);
   MatchLease_release(lease);
   return result == 1;
 }
 
-int MatchCache_search_replace(MatchCache cache,  List input,  Var pattern,  Var template,  List * out){
+int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out){
   if(! _init_guard_) MatchCache_initialize();
   MatchLease _x2c_macro_storage_10;
   MatchLease * lease = & _x2c_macro_storage_10;
-  int status = MatchCache_acquire(cache,  pattern,  lease);
+  int status = MatchCache_acquire(cache, pattern, lease);
   int answered = status != MACHINE_PREPARED;
   List result = input;
   MatchPlan plan = _lease_plan(lease);
-  if(status == MACHINE_PREPARED) answered = MatchPlan_search_replace(plan,  input,  template,  & result) >= 0;
+  if(status == MACHINE_PREPARED) answered = MatchPlan_search_replace(plan, input, template, & result) >= 0;
   MatchLease_release(lease);
   * out = result;
   return status == MACHINE_PREPARED && answered;
@@ -2151,7 +2148,7 @@ int MatchCache_search_replace(MatchCache cache,  List input,  Var pattern,  Var 
 
 static void _site_lock(void){
   if(pthread_mutex_lock(& match_site_mutex)){
-    fprintf(stderr,  "Match: could not lock source site\n");
+    fprintf(stderr, "Match: could not lock source site\n");
     abort();
   }
 
@@ -2159,7 +2156,7 @@ static void _site_lock(void){
 
 static void _site_unlock(void){
   if(pthread_mutex_unlock(& match_site_mutex)){
-    fprintf(stderr,  "Match: could not unlock source site\n");
+    fprintf(stderr, "Match: could not unlock source site\n");
     abort();
   }
 
@@ -2211,8 +2208,8 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite  _x2c_error_site_7  = {.file =  "../../lib/match.x",.function =  "MatchCache_context_close",.line =  2297};
-    x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("MatchCache.context_close")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2297};
+    x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
   if(state -> cache) MatchCache_dispose(state -> cache);
@@ -2233,22 +2230,22 @@ void MatchCache_initialize(void){
   _init_guard_ = 1;
   _0 = Symbol_var(2005352);
   _1 = List_var(NULL);
-  _2 = cons(_1,  NULL);
+  _2 = cons(_1, NULL);
   _3 = Symbol_var(54);
   _4 = Symbol_var(45156);
   _5 = Symbol_var(154018148);
-  _6 = cons(_5,  NULL);
-  _7 = cons(_4,  _6);
+  _6 = cons(_5, NULL);
+  _7 = cons(_4, _6);
   _8 = Symbol_var(806120);
-  _9 = cons(_8,  _6);
+  _9 = cons(_8, _6);
   _10 = Symbol_var(992);
-  _11 = cons(_10,  NULL);
+  _11 = cons(_10, NULL);
   _12 = Symbol_var(107482);
-  _13 = cons(_12,  NULL);
+  _13 = cons(_12, NULL);
   match_site_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
   match_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT;
-  if(pthread_once(& match_shutdown_once,  _register_shutdown_once)){
-    fprintf(stderr,  "Match: could not register shutdown\n");
+  if(pthread_once(& match_shutdown_once, _register_shutdown_once)){
+    fprintf(stderr, "Match: could not register shutdown\n");
     abort();
   }
 
@@ -2263,7 +2260,7 @@ static void _capture_sites_initialize(void){
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -2279,8 +2276,8 @@ static void _capture_sites_initialize(void){
   MatchCache_initialize();
 }
 
-static void _capture_site_prepare(MatchCaptureSite * site,  Var pattern){
-  if(! _cache_admissible(pattern,  0)) return;
+static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
+  if(! _cache_admissible(pattern, 0)) return;
   _capture_sites_initialize();
   MatchPlan plan = NULL;
   {
@@ -2289,12 +2286,12 @@ static void _capture_site_prepare(MatchCaptureSite * site,  Var pattern){
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
       plan = MatchPlan_prepare(pattern);
-      Block_push(match_capture_sites,  & site);
+      Block_push(match_capture_sites, & site);
     }
 
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
@@ -2303,12 +2300,12 @@ static void _capture_site_prepare(MatchCaptureSite * site,  Var pattern){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
 }
   }
-  __atomic_store_n(& site -> plan,  plan,  __ATOMIC_RELEASE);
+  __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
 }
 
-static MatchPlan _capture_site_publish(MatchCaptureSite * site,  Var pattern){
+static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern){
   _site_lock();
-  if(! site -> plan) _capture_site_prepare(site,  pattern);
+  if(! site -> plan) _capture_site_prepare(site, pattern);
   MatchPlan plan = site -> plan;
   _site_unlock();
   return plan;

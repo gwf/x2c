@@ -8,13 +8,13 @@
 #include "machine.h"
 void MatchMachine_open(MatchMachine m);
 
-void MatchMachine_begin(MatchMachine m,  MachineView program,  Var input);
+void MatchMachine_begin(MatchMachine m, MachineView program, Var input);
 
 int MatchMachine_step(MatchMachine m);
 
 void MatchMachine_run(MatchMachine m);
 
-List MatchMachine_materialize_span(MatchMachine m,  MachineSpan span);
+List MatchMachine_materialize_span(MatchMachine m, MachineSpan span);
 
 void MatchMachine_finish(MatchMachine m);
 

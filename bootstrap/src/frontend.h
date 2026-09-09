@@ -21,10 +21,10 @@ typedef struct Frontend{
 
 typedef struct ParsedUnit{
   Context context;
-  Compiler compiler,  preprocessor;
-  Map globals,  snapshot_statics;
+  Compiler compiler, preprocessor;
+  Map globals, snapshot_statics;
   List ast;
-  String preprocessor_output,  preprocessor_errors;
+  String preprocessor_output, preprocessor_errors;
   int source_lines;
 }
 ParsedUnit;
@@ -35,13 +35,13 @@ Frontend Frontend_new(CliRequest request);
 
 int Frontend_write_header_symbols(File output);
 
-int Frontend_start(Frontend frontend,  String filename,  ParsedUnit * unit);
+int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);
 
-int ParsedUnit_collect(ParsedUnit * unit,  Frontend frontend);
+int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
 
 int ParsedUnit_parse(ParsedUnit * unit);
 
-int Frontend_open(Frontend frontend,  String filename,  ParsedUnit * unit);
+int Frontend_open(Frontend frontend, String filename, ParsedUnit * unit);
 
 void ParsedUnit_close(ParsedUnit * unit);
 

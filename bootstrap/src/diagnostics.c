@@ -4,22 +4,20 @@
 
 #include "error.h"
 
-static List _65,  _63,  _62,  _60,  _58,  _51,  _50,  _49,  _48,  _46,  _44,  _43,  _40,  _38,  _37,  _28,  _27,  _26,  _25,  _24,  _23,  _16,  _15,  _14,  _12,  _11,  _10;
+static List _65, _63, _62, _60, _58, _51, _50, _49, _48, _46, _44, _43, _40, _38, _37, _28, _27, _26, _25, _24, _23, _16, _15, _14, _12, _11, _10;
 
-static String _66,  _56,  _54,  _53,  _52,  _35,  _34,  _4;
+static String _66, _56, _54, _53, _52, _35, _34, _4;
 
-static Var _64,  _61,  _59,  _57,  _55,  _47,  _45,  _42,  _41,  _39,  _36,  _33,  _32,  _31,  _30,  _29,  _22,  _21,  _20,  _19,  _18,  _17,  _13,  _9,  _8,  _7,  _6,  _5,  _3,  _2,  _1,  _0;
+static Var _64, _61, _59, _57, _55, _47, _45, _42, _41, _39, _36, _33, _32, _31, _30, _29, _22, _21, _20, _19, _18, _17, _13, _9, _8, _7, _6, _5, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 static Func _x2c_func_handle_0;
 
-
-
 #include "report.h"
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
@@ -27,7 +25,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-Func Func_new(FuncAdapter,  List);
+Func Func_new(FuncAdapter, List);
 
 void * Scope_malloc(size_t);
 
@@ -37,19 +35,19 @@ size_t Array_len(Array);
 
 List Array_list(Array);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 int List_truth(List);
 
-List List_filter(List,  Func);
+List List_filter(List, Func);
 
-String String_join(String,  List);
+String String_join(String, List);
 
-Var List_assoc(List,  Var);
+Var List_assoc(List, Var);
 
 String Var_string(Var);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 List Var_list(Var);
 
@@ -59,49 +57,49 @@ int Var_int(Var);
 
 String Symbol_str(Symbol);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
 long Var_integer(Var);
 
 int String_truth(String);
 
-int String_startswith(String,  String);
+int String_startswith(String, String);
 
 String SourceView_path(String);
 
 int String_len(String);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
 void report_suspend(void);
 
-int Map_try_next(Map,  unsigned *,  Var *,  Var *);
+int Map_try_next(Map, unsigned *, Var *, Var *);
 
 String Var_repr(Var);
 
-Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static void _emit_entry(Diagnostics diag,  List entry);
+static void _emit_entry(Diagnostics diag, List entry);
 
-static List _build_entry(Symbol code,  String message,  List location,  List notes);
+static List _build_entry(Symbol code, String message, List location, List notes);
 
 static void _publish_limit_notice(Diagnostics diag);
 
-static void Diagnostics__warn(Diagnostics diag,  Symbol code,  String message,  List location,  List notes);
+static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes);
 
 static void _emit_note_summaries(List notes);
 
-static List _compiler_location(Compiler compiler,  Token token);
+static List _compiler_location(Compiler compiler, Token token);
 
-static void Compiler__show_source_context(Compiler compiler,  List location);
+static void Compiler__show_source_context(Compiler compiler, List location);
 
-static void _pprint(char * text,  int len);
+static void _pprint(char * text, int len);
 
 static Var _x2c_lambda_0(Var entry);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -117,25 +115,25 @@ __attribute__((constructor)) static void _file_init_(void){
   _7 = Symbol_var(62436);
   _8 = Symbol_var(1309427914);
   _9 = Symbol_var(50756762);
-  _10 = cons(_9,  NULL);
-  _11 = cons(_8,  _10);
-  _12 = cons(_7,  _11);
+  _10 = cons(_9, NULL);
+  _11 = cons(_8, _10);
+  _12 = cons(_7, _11);
   _13 = List_var(_12);
-  _14 = cons(_13,  NULL);
-  _15 = cons(_6,  _14);
-  _16 = cons(_5,  _15);
+  _14 = cons(_13, NULL);
+  _15 = cons(_6, _14);
+  _16 = cons(_5, _15);
   _17 = Symbol_var(1307939018);
   _18 = Symbol_var(61229834);
   _19 = Symbol_var(61623178);
   _20 = Symbol_var(62510639964);
   _21 = Symbol_var(63093751056);
   _22 = Symbol_var(64904693566428);
-  _23 = cons(_22,  NULL);
-  _24 = cons(_21,  _23);
-  _25 = cons(_20,  _24);
-  _26 = cons(_19,  _25);
-  _27 = cons(_18,  _26);
-  _28 = cons(_17,  _27);
+  _23 = cons(_22, NULL);
+  _24 = cons(_21, _23);
+  _25 = cons(_20, _24);
+  _26 = cons(_19, _25);
+  _27 = cons(_18, _26);
+  _28 = cons(_17, _27);
   _29 = Symbol_var(412426);
   _30 = Symbol_var(805770);
   _31 = Symbol_var(233614172);
@@ -144,44 +142,44 @@ __attribute__((constructor)) static void _file_init_(void){
   _34 = String_new("<");
   _35 = String_new("<stdin>");
   _36 = int_var(1);
-  _37 = cons(_36,  NULL);
-  _38 = cons(_30,  _37);
+  _37 = cons(_36, NULL);
+  _38 = cons(_30, _37);
   _39 = List_var(_38);
-  _40 = cons(_31,  _37);
+  _40 = cons(_31, _37);
   _41 = List_var(_40);
   _42 = int_var(0);
-  _43 = cons(_42,  NULL);
-  _44 = cons(_32,  _43);
+  _43 = cons(_42, NULL);
+  _44 = cons(_32, _43);
   _45 = List_var(_44);
-  _46 = cons(_33,  _43);
+  _46 = cons(_33, _43);
   _47 = List_var(_46);
-  _48 = cons(_47,  NULL);
-  _49 = cons(_45,  _48);
-  _50 = cons(_41,  _49);
-  _51 = cons(_39,  _50);
+  _48 = cons(_47, NULL);
+  _49 = cons(_45, _48);
+  _50 = cons(_41, _49);
+  _51 = cons(_39, _50);
   _52 = String_new("compiler error");
   _53 = String_new("compiler warning");
   _54 = String_new("too many errors, stopping");
   _55 = Symbol_var(437126);
   _56 = String_new("Var");
   _57 = String_var(_56);
-  _58 = cons(_57,  NULL);
+  _58 = cons(_57, NULL);
   _59 = List_var(_58);
-  _60 = cons(_59,  NULL);
+  _60 = cons(_59, NULL);
   _61 = List_var(_60);
-  _62 = cons(_61,  NULL);
-  _63 = cons(_55,  _62);
+  _62 = cons(_61, NULL);
+  _63 = cons(_55, _62);
   _64 = List_var(_63);
-  _65 = cons(_64,  _58);
+  _65 = cons(_64, _58);
   _66 = String_new("<input>");
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _65);
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _65);
 }
 
-static void _emit_entry(Diagnostics diag,  List entry){
-  if(diag -> emit) diag -> emit(diag -> owner,  entry);
+static void _emit_entry(Diagnostics diag, List entry){
+  if(diag -> emit) diag -> emit(diag -> owner, entry);
 }
 
-Diagnostics Diagnostics_new(DiagnosticEmitter emit,  void * owner,  int limit){
+Diagnostics Diagnostics_new(DiagnosticEmitter emit, void * owner, int limit){
   if(! _init_guard_) _file_init_();
   Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
   diag -> entries = Array_new();
@@ -200,7 +198,7 @@ void Diagnostics_reset(Diagnostics diag){
   diag -> limit_notified = 0;
 }
 
-void Diagnostics_set_emitter(Diagnostics diag,  DiagnosticEmitter emit,  void * owner){
+void Diagnostics_set_emitter(Diagnostics diag, DiagnosticEmitter emit, void * owner){
   if(! _init_guard_) _file_init_();
   diag -> emit = emit;
   diag -> owner = owner;
@@ -223,19 +221,20 @@ int Diagnostics_reached_limit(Diagnostics diag){
   return diag -> count >= diag -> limit;
 }
 
-static List _build_entry(Symbol code,  String message,  List location,  List notes){
+static List _build_entry(Symbol code, String message, List location, List notes){
   Symbol effective_code = code ? code : 306819428;
-  return cons(List_var(cons(_0,  cons(Symbol_var(effective_code),  NULL))),  cons(List_var(cons(_1,  cons(String_var(message),  NULL))),  cons(List_var(cons(_2,  cons(List_var(location),  NULL))),  cons(List_var(cons(_3,  cons(List_var(notes),  NULL))),  NULL))));
+  return cons(List_var(cons(_0, cons(Symbol_var(effective_code), NULL))), cons(List_var(cons(_1, cons(String_var(message), NULL))), cons(List_var(cons(_2, cons(List_var(location), NULL))), cons(List_var(cons(_3, cons(List_var(notes), NULL))), NULL))));
 }
 
 static void _publish_limit_notice(Diagnostics diag){
+  if(diag -> limit == 1) return;
   String note = _54;
-  List entry = _build_entry(25782888,  note,  NULL,  NULL);
-  Array_push(diag -> entries,  List_var(entry));
-  _emit_entry(diag,  entry);
+  List entry = _build_entry(25782888, note, NULL, NULL);
+  Array_push(diag -> entries, List_var(entry));
+  _emit_entry(diag, entry);
 }
 
-void Diagnostics_report(Diagnostics diag,  Symbol code,  String message,  List location,  List notes){
+void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes){
   if(! _init_guard_) _file_init_();
   if(diag -> limit > 0 && diag -> count >= diag -> limit){
     if(! diag -> limit_notified){
@@ -244,10 +243,10 @@ void Diagnostics_report(Diagnostics diag,  Symbol code,  String message,  List l
     }
     return;
   }
-  List entry = _build_entry(code,  message,  location,  notes);
-  Array_push(diag -> entries,  List_var(entry));
+  List entry = _build_entry(code, message, location, notes);
+  Array_push(diag -> entries, List_var(entry));
   diag -> count += 1;
-  _emit_entry(diag,  entry);
+  _emit_entry(diag, entry);
   if(diag -> limit > 0 && diag -> count >= diag -> limit && ! diag -> limit_notified){
     diag -> limit_notified = 1;
     _publish_limit_notice(diag);
@@ -255,56 +254,56 @@ void Diagnostics_report(Diagnostics diag,  Symbol code,  String message,  List l
 
 }
 
-static void Diagnostics__warn(Diagnostics diag,  Symbol code,  String message,  List location,  List notes){
-  List entry = _build_entry(code,  message,  location,  notes);
-  Array_push(diag -> entries,  List_var(entry));
-  _emit_entry(diag,  entry);
+static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes){
+  List entry = _build_entry(code, message, location, notes);
+  Array_push(diag -> entries, List_var(entry));
+  _emit_entry(diag, entry);
 }
 
 static void _emit_note_summaries(List notes){
   if(! List_truth(notes)) return;
-  List strings = List_filter(notes,  _x2c_func_handle_0);
+  List strings = List_filter(notes, _x2c_func_handle_0);
   if(! List_truth(strings)) return;
-  fprintf(stderr,  "  note: %s\n",  String_join(_4,  strings));
+  fprintf(stderr, "  note: %s\n", String_join(_4, strings));
 }
 
-void Compiler_print_diagnostic(Compiler compiler,  List entry){
+void Compiler_print_diagnostic(Compiler compiler, List entry){
   if(! _init_guard_) _file_init_();
   if(! List_truth(entry)) return;
   Var v;
-  Symbol code = Var_symbol(List_assoc(entry,  Symbol_var(227594)));
-  String message = Var_string(List_assoc(entry,  Symbol_var(28293925322)));
-  v = List_assoc(entry,  Symbol_var(857050729436));
-  List location = Var_is(v,  806120) ? Var_list(v) : NULL;
-  v = List_assoc(entry,  Symbol_var(30384486));
-  List notes = Var_is(v,  806120) ? Var_list(v) : NULL;
+  Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
+  String message = Var_string(List_assoc(entry, Symbol_var(28293925322)));
+  v = List_assoc(entry, Symbol_var(857050729436));
+  List location = Var_is(v, 806120) ? Var_list(v) : NULL;
+  v = List_assoc(entry, Symbol_var(30384486));
+  List notes = Var_is(v, 806120) ? Var_list(v) : NULL;
   if(List_truth(location)){
     String text = _66;
-    v = List_assoc(location,  Symbol_var(412426));
-    if(! Var_is_void(v) && Var_is(v,  1318210446)) text = Var_string(v);
-    int line = Var_int(List_assoc(location,  Symbol_var(805770)));
-    int column = Var_int(List_assoc(location,  Symbol_var(233614172)));
-    fprintf(stderr,  "%s:%d:%d: %s: %s\n",  text,  line,  column,  Symbol_str(code),  message);
-    Compiler__show_source_context(compiler,  location);
+    v = List_assoc(location, Symbol_var(412426));
+    if(! Var_is_void(v) && Var_is(v, 1318210446)) text = Var_string(v);
+    int line = Var_int(List_assoc(location, Symbol_var(805770)));
+    int column = Var_int(List_assoc(location, Symbol_var(233614172)));
+    fprintf(stderr, "%s:%d:%d: %s: %s\n", text, line, column, Symbol_str(code), message);
+    Compiler__show_source_context(compiler, location);
   }
-  else fprintf(stderr,  "%s: %s\n",  Symbol_str(code),  message);
+  else fprintf(stderr, "%s: %s\n", Symbol_str(code), message);
   _emit_note_summaries(notes);
-  fprintf(stderr,  "\n");
+  fprintf(stderr, "\n");
   fflush(stderr);
 }
 
-List Compiler_origin_location(Compiler compiler,  int occurrence){
+List Compiler_origin_location(Compiler compiler, int occurrence){
   if(! _init_guard_) _file_init_();
   while(occurrence > 0 && occurrence <=(int) Array_len(compiler -> origins)){
-    List origin = Var_list(Array_getindex(compiler -> origins,  occurrence - 1));
+    List origin = Var_list(Array_getindex(compiler -> origins, occurrence - 1));
 
   {
-    List _x2c_match_expr =  origin;
-     Var _x2c_match_values[5];
+    List _x2c_match_expr = origin;
+    Var _x2c_match_values[5];
     MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
 
     switch (Var_symbol(car(_x2c_match_expr))) {
-       case 15767198343496: ;
+      case 15767198343496: ;
     static MatchCaptureSite _x2c_match_site_0;
     if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_16), &_x2c_match_capture)) {Var parent = _x2c_match_values[0]; {
       occurrence = Var_integer(parent);  continue;
@@ -316,7 +315,7 @@ List Compiler_origin_location(Compiler compiler,  int occurrence){
   Var column = _x2c_match_values[2];
   Var length = _x2c_match_values[3];
   Var position = _x2c_match_values[4];
-  return cons(List_var(cons(_29,  cons(file,  NULL))),  cons(List_var(cons(_30,  cons(line,  NULL))),  cons(List_var(cons(_31,  cons(column,  NULL))),  cons(List_var(cons(_32,  cons(length,  NULL))),  cons(List_var(cons(_33,  cons(position,  NULL))),  NULL)))));
+  return cons(List_var(cons(_29, cons(file, NULL))), cons(List_var(cons(_30, cons(line, NULL))), cons(List_var(cons(_31, cons(column, NULL))), cons(List_var(cons(_32, cons(length, NULL))), cons(List_var(cons(_33, cons(position, NULL))), NULL)))));
   break; } } default: break;
 
     }
@@ -326,68 +325,68 @@ __builtin_unreachable();
 return NULL;
 }
 
-String Compiler_display_path(Compiler compiler,  String path){
+String Compiler_display_path(Compiler compiler, String path){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(path) || String_startswith(path,  _34)) return path;
+  if(! String_truth(path) || String_startswith(path, _34)) return path;
   if(compiler -> source_facts) return SourceView_path(path);
   String root = compiler -> root_dir;
-  if(String_truth(root) && String_truth(path) && String_startswith(path,  root) && String_len(path) > String_len(root) && String_getindex(path,  String_len(root)) == '/') return String_getslice(path,  String_len(root) + 1,  -2147483648,  1);
+  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, -2147483648, 1);
   return path;
 }
 
-List Compiler_token_location(Compiler compiler,  Token token){
+List Compiler_token_location(Compiler compiler, Token token){
   if(! _init_guard_) _file_init_();
   String file = String_truth(compiler -> filename) ? compiler -> filename : _35;
-  if(compiler -> source_facts) file = Compiler_display_path(compiler,  file);
+  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);
   if(! token) token = compiler -> token;
-  if(! token) return cons(List_var(cons(_29,  cons(String_var(file),  NULL))),  _51);
-  file = Compiler_display_path(compiler,  file);
-  return cons(List_var(cons(_29,  cons(String_var(file),  NULL))),  cons(List_var(cons(_30,  cons(int_var(token -> line),  NULL))),  cons(List_var(cons(_31,  cons(int_var(token -> col),  NULL))),  cons(List_var(cons(_32,  cons(int_var(token -> len),  NULL))),  cons(List_var(cons(_33,  cons(int_var(token -> pos),  NULL))),  NULL)))));
+  if(! token) return cons(List_var(cons(_29, cons(String_var(file), NULL))), _51);
+  file = Compiler_display_path(compiler, file);
+  return cons(List_var(cons(_29, cons(String_var(file), NULL))), cons(List_var(cons(_30, cons(int_var(token -> line), NULL))), cons(List_var(cons(_31, cons(int_var(token -> col), NULL))), cons(List_var(cons(_32, cons(int_var(token -> len), NULL))), cons(List_var(cons(_33, cons(int_var(token -> pos), NULL))), NULL)))));
 }
 
-static List _compiler_location(Compiler compiler,  Token token){
+static List _compiler_location(Compiler compiler, Token token){
   if(! token && compiler -> origin){
-    List location = Compiler_origin_location(compiler,  compiler -> origin);
+    List location = Compiler_origin_location(compiler, compiler -> origin);
     if(List_truth(location)) return location;
   }
-  return Compiler_token_location(compiler,  token);
+  return Compiler_token_location(compiler, token);
 }
 
-_Noreturn void Compiler_report_error(Compiler compiler,  Symbol code,  String message,  Token token,  List notes){
+_Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
   message = String_truth(message) ? message : _52;
-  List loc = _compiler_location(compiler,  token);
-  Diagnostics_report(diag,  code,  message,  loc,  notes);
+  List loc = _compiler_location(compiler, token);
+  Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/diagnostics.x",.function =  "Compiler_report_error",.line =  293};
-    x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570),  Symbol_var(code));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 295};
+    x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
   exit(1);
 }
 
-void Compiler_report_warning(Compiler compiler,  Symbol code,  String message,  Token token,  List notes){
+void Compiler_report_warning(Compiler compiler, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
   message = String_truth(message) ? message : _53;
-  List loc = _compiler_location(compiler,  token);
-  Diagnostics__warn(diag,  code ? code : 49497918350,  message,  loc,  notes);
+  List loc = _compiler_location(compiler, token);
+  Diagnostics__warn(diag, code ? code : 49497918350, message, loc, notes);
 }
 
-static void Compiler__show_source_context(Compiler compiler,  List location){
+static void Compiler__show_source_context(Compiler compiler, List location){
   if(! List_truth(location) || ! String_truth(compiler -> text)) return;
-  Var line_var = List_assoc(location,  Symbol_var(805770));
-  Var col_var = List_assoc(location,  Symbol_var(233614172));
-  Var len_var = List_assoc(location,  Symbol_var(816725264));
+  Var line_var = List_assoc(location, Symbol_var(805770));
+  Var col_var = List_assoc(location, Symbol_var(233614172));
+  Var len_var = List_assoc(location, Symbol_var(816725264));
   int line = Var_is_void(line_var) ? 0 : Var_int(line_var);
   int column = Var_is_void(col_var) ? 0 : Var_int(col_var);
   int length = Var_is_void(len_var) ? 1 : Var_int(len_var);
   char * text = compiler -> text;
   int current_line = 1;
-  char * line_start = text,  * line_end = text;
+  char * line_start = text, * line_end = text;
   if(line <= 1) while(* line_end && * line_end != '\n') line_end ++;
   else{
     for(char * p = text;  * p;  p ++){
@@ -406,16 +405,16 @@ static void Compiler__show_source_context(Compiler compiler,  List location){
 
   }
   if(current_line == line){
-    int line_len = line_end - line_start,  start = column > 0 ? column - 1 : 0;
+    int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
     if(start > line_len) start = line_len;
     int width = length > 0 ? length : 1;
     if(start < line_len && width > line_len - start) width = line_len - start;
     if(width < 1) width = 1;
-    fprintf(stderr,  "  %.*s\n",  line_len,  line_start);
-    fprintf(stderr,  "  ");
-    for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ',  stderr);
-    for(int i = 0;  i < width;  i ++) putc('^',  stderr);
-    fprintf(stderr,  "\n");
+    fprintf(stderr, "  %.*s\n", line_len, line_start);
+    fprintf(stderr, "  ");
+    for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
+    for(int i = 0;  i < width;  i ++) putc('^', stderr);
+    fprintf(stderr, "\n");
   }
 
 }
@@ -430,17 +429,17 @@ List Compiler_diagnostics(Compiler compiler){
   return Diagnostics_entries(compiler -> diagnostics);
 }
 
-static void _pprint(char * text,  int len){
+static void _pprint(char * text, int len){
   for(int i = 0;  i < len;  i ++){
     char c = text[i];
     switch(c){
-      case '\n' : fputs("\u2424",  stdout);
+      case '\n' : fputs("\u2424", stdout);
       break;
-      case '\r' : fputs("\u240D",  stdout);
+      case '\r' : fputs("\u240D", stdout);
       break;
-      case '\t' : fputs("\u2409",  stdout);
+      case '\t' : fputs("\u2409", stdout);
       break;
-      case ' ' : fputs("\u2420",  stdout);
+      case ' ' : fputs("\u2420", stdout);
       break;
       default: putchar(c);
       break;
@@ -454,25 +453,25 @@ void Compiler_dump_tokens(Compiler compiler){
   if(! _init_guard_) _file_init_();
   Token tokens = compiler -> tokenizer -> tokens;
   for(Token token = tokens;  token -> type != 11212;  token ++){
-    printf("(%4d, %-3d)\t%-20s",  token -> line,  token -> col,  Symbol_str(token -> type));
-    _pprint(token -> text,  token -> len);
+    printf("(%4d, %-3d)\t%-20s", token -> line, token -> col, Symbol_str(token -> type));
+    _pprint(token -> text, token -> len);
     putchar('\n');
   }
 
 }
 
-void Compiler_dump_symbol_table(Compiler compiler,  Map map){
+void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_();
   {
-    Var key,  value;
+    Var key, value;
     Map _x2c_macro_object_0 = map;
     unsigned _x2c_macro_cursor_0 = 0;
     Var _x2c_macro_cursor_output_0;
     Var _x2c_macro_cursor_output_1;
-    while(Map_try_next(_x2c_macro_object_0,  & _x2c_macro_cursor_0,  & _x2c_macro_cursor_output_0,  & _x2c_macro_cursor_output_1)){
+    while(Map_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
       key = _x2c_macro_cursor_output_0;
       value = _x2c_macro_cursor_output_1;
-      printf("%s ==>\n%s\n",  Var_str(key),  Var_str(value));
+      printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
   }
@@ -482,15 +481,15 @@ void Compiler_dump_symbol_table(Compiler compiler,  Map map){
 void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_();
   {
-    Var key,  value;
+    Var key, value;
     Map _x2c_macro_object_1 = compiler -> key_ids;
     unsigned _x2c_macro_cursor_1 = 0;
     Var _x2c_macro_cursor_output_2;
     Var _x2c_macro_cursor_output_3;
-    while(Map_try_next(_x2c_macro_object_1,  & _x2c_macro_cursor_1,  & _x2c_macro_cursor_output_2,  & _x2c_macro_cursor_output_3)){
+    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_2, & _x2c_macro_cursor_output_3)){
       key = _x2c_macro_cursor_output_2;
       value = _x2c_macro_cursor_output_3;
-      printf("%s\t==>\t%s\n",  Var_repr(value),  Var_repr(key));
+      printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
   }
@@ -498,12 +497,12 @@ void Compiler_dump_cache(Compiler compiler){
 }
 
 static Var _x2c_lambda_0(Var entry){
-  return int_var(Var_is(entry,  1318210446));
+  return int_var(Var_is(entry, 1318210446));
   ;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  0,  45156);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
   ;
 }

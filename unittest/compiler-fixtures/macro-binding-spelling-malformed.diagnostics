@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-binding-spelling-malformed.x:7:15: macro: x2c.b
                 ^
   note: value: (binding "malformed")
 
-limit: too many errors, stopping
-

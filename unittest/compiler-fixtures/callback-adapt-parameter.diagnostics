@@ -3,5 +3,3 @@ unittest/compiler-fixtures/callback-adapt-parameter.x:10:3: type: typed callback
     ^
   note: target signature: (* (func ((int))) "String") source signature: ((func (("String"))) "String") parameter 1: (int) cannot adapt to ("String")
 
-limit: too many errors, stopping
-

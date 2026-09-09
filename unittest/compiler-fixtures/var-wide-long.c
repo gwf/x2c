@@ -4,11 +4,11 @@
 
 Var long_var(long);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 static Var box_value(long value);
 
@@ -19,7 +19,7 @@ static Var box_value(long value){
 }
 
 static long unbox_value(Var value){
-  return Var_long(Var_convert(value,  818062));
+  return Var_long(Var_convert(value, 818062));
 }
 
 int main(void){
@@ -27,9 +27,9 @@ int main(void){
   long value = LONG_MAX;
   Var boxed = box_value(value);
   Array values = Array_new();
-  Array_push(values,  long_var(value));
-  long from_array = Var_long(Var_convert(Array_getindex(values,  0),  818062));
-  printf("%d %d %ld\n",  Var_is(boxed,  818062),  unbox_value(boxed) == value,  from_array);
+  Array_push(values, long_var(value));
+  long from_array = Var_long(Var_convert(Array_getindex(values, 0), 818062));
+  printf("%d %d %ld\n", Var_is(boxed, 818062), unbox_value(boxed) == value, from_array);
   return from_array != value;
 }
 

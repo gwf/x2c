@@ -2,35 +2,33 @@
 
 #include "typedef-method-inheritance.h"
 
-static List _26,  _24,  _23,  _21,  _19,  _8,  _7,  _4,  _3;
+static List _26, _24, _23, _21, _19, _8, _7, _4, _3;
 
-static String _17,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _0;
+static String _17, _15, _14, _13, _12, _11, _10, _9, _0;
 
-static Var _25,  _22,  _20,  _18,  _16,  _6,  _5,  _2,  _1;
+static Var _25, _22, _20, _18, _16, _6, _5, _2, _1;
 
 static int _init_guard_ = 0;
 
 static Func _x2c_func_handle_0;
 
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var String_var(String);
 
 Var List_var(List);
 
-Func Func_new(FuncAdapter,  List);
+Func Func_new(FuncAdapter, List);
 
 List List_cdr(List);
 
-List List_append(List,  List);
+List List_append(List, List);
 
 int List_truth(List);
 
-List List_map(List,  Func);
+List List_map(List, Func);
 
 String List_repr(List);
 
@@ -38,13 +36,13 @@ String Var_repr(Var);
 
 Var List_car(List);
 
-Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 __attribute__((constructor)) static void _file_init_(void);
 
 static Var _mapped_string(Var value);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -53,12 +51,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = String_new("mapped");
   _1 = Symbol_var(31626);
   _2 = Symbol_var(42462);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
   _5 = Symbol_var(42504522);
   _6 = Symbol_var(425316);
-  _7 = cons(_6,  NULL);
-  _8 = cons(_5,  _7);
+  _7 = cons(_6, NULL);
+  _8 = cons(_5, _7);
   _9 = String_new("base-root");
   _10 = String_new("bad");
   _11 = String_new("base-shadow");
@@ -69,15 +67,15 @@ __attribute__((constructor)) static void _file_init_(void){
   _16 = Symbol_var(437126);
   _17 = String_new("Var");
   _18 = String_var(_17);
-  _19 = cons(_18,  NULL);
+  _19 = cons(_18, NULL);
   _20 = List_var(_19);
-  _21 = cons(_20,  NULL);
+  _21 = cons(_20, NULL);
   _22 = List_var(_21);
-  _23 = cons(_22,  NULL);
-  _24 = cons(_16,  _23);
+  _23 = cons(_22, NULL);
+  _24 = cons(_16, _23);
   _25 = List_var(_24);
-  _26 = cons(_25,  _19);
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _26);
+  _26 = cons(_25, _19);
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _26);
 }
 
 method_inherit_Base method_inherit_Base_rest(method_inherit_Base value){
@@ -85,9 +83,9 @@ method_inherit_Base method_inherit_Base_rest(method_inherit_Base value){
   return List_cdr(value);
 }
 
-method_inherit_Base method_inherit_Base_merge(method_inherit_Base left,  method_inherit_Base right){
+method_inherit_Base method_inherit_Base_merge(method_inherit_Base left, method_inherit_Base right){
   if(! _init_guard_) _file_init_();
-  return List_append(left,  right);
+  return List_append(left, right);
 }
 
 method_inherit_Base method_inherit_Base_decorated(method_inherit_Base value){
@@ -95,7 +93,7 @@ method_inherit_Base method_inherit_Base_decorated(method_inherit_Base value){
   return List_cdr(value);
 }
 
-const method_self_Record * method_self_Record_choose(const method_self_Record * value,  const method_self_Record * other){
+const method_self_Record * method_self_Record_choose(const method_self_Record * value, const method_self_Record * other){
   if(! _init_guard_) _file_init_();
   return value -> value >= other -> value ? value : other;
 }
@@ -146,36 +144,36 @@ int main(void){
   method_inherit_Leaf leaf = _4;
   method_inherit_Override override = _8;
   method_inherit_Leaf tail = method_inherit_Base_rest(leaf);
-  method_inherit_Leaf merged = method_inherit_Base_merge(leaf,  tail);
+  method_inherit_Leaf merged = method_inherit_Base_merge(leaf, tail);
   method_inherit_Leaf decorated = method_inherit_Base_decorated(leaf);
   method_inherit_Base direct = method_inherit_Base_rest(leaf);
-  List mapped = List_map(leaf,  _x2c_func_handle_0);
+  List mapped = List_map(leaf, _x2c_func_handle_0);
   method_self_RecordLeaf low ={
     2
   }
-  ,  high ={
+  , high ={
     7
   }
   ;
-  const method_self_RecordLeaf * chosen = method_self_Record_choose(&(low),  & high);
-  printf("%s\n",  method_inherit_Leaf_own(leaf));
-  printf("%s\n",  method_inherit_Mid_level(leaf));
-  printf("%s\n",  method_inherit_Base_root(leaf));
-  printf("%s\n",  method_inherit_Base_shadow(leaf));
-  printf("%s\n",  method_inherit_Override_level(override));
-  printf("%s\n",  List_repr(leaf));
-  printf("%s\n",  List_repr(List_cdr(leaf)));
-  printf("%s\n",  Var_repr(List_car(leaf)));
-  printf("%s %s %s\n",  method_inherit_Leaf_own(tail),  List_repr(merged),  List_repr(direct));
-  printf("%s\n",  method_inherit_Leaf_own(decorated));
-  printf("%s\n",  List_repr(mapped));
-  printf("%s\n",  List_repr(method_inherit_Override_rest(override)));
-  printf("%d\n",  chosen -> value);
+  const method_self_RecordLeaf * chosen = method_self_Record_choose(&(low), & high);
+  printf("%s\n", method_inherit_Leaf_own(leaf));
+  printf("%s\n", method_inherit_Mid_level(leaf));
+  printf("%s\n", method_inherit_Base_root(leaf));
+  printf("%s\n", method_inherit_Base_shadow(leaf));
+  printf("%s\n", method_inherit_Override_level(override));
+  printf("%s\n", List_repr(leaf));
+  printf("%s\n", List_repr(List_cdr(leaf)));
+  printf("%s\n", Var_repr(List_car(leaf)));
+  printf("%s %s %s\n", method_inherit_Leaf_own(tail), List_repr(merged), List_repr(direct));
+  printf("%s\n", method_inherit_Leaf_own(decorated));
+  printf("%s\n", List_repr(mapped));
+  printf("%s\n", List_repr(method_inherit_Override_rest(override)));
+  printf("%d\n", chosen -> value);
   return 0;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  0,  45156);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _mapped_string(a0);
   ;
 }

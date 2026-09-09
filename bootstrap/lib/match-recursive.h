@@ -6,19 +6,19 @@
 #define __GUARD_0x52578F0A__
 
 #include "x2c.h"
-int match_recursive_try_capture(MatchCaptureLayout layout,  Var input,  MatchCaptureBuffer * captures);
+int match_recursive_try_capture(MatchCaptureLayout layout, Var input, MatchCaptureBuffer * captures);
 
-int match_recursive_try_value(Var input,  Var pattern,  List * out_bindings);
+int match_recursive_try_value(Var input, Var pattern, List * out_bindings);
 
-int match_recursive_try_match(List input,  Var pattern,  List * out_bindings);
+int match_recursive_try_match(List input, Var pattern, List * out_bindings);
 
-int match_recursive_try_match_replace(List input,  Var pattern,  Var template,  Var * out);
+int match_recursive_try_match_replace(List input, Var pattern, Var template, Var * out);
 
-List match_recursive_search(List input,  Var pattern);
+List match_recursive_search(List input, Var pattern);
 
-int match_recursive_try_search(List input,  Var pattern,  Var * out_match,  List * out_bindings);
+int match_recursive_try_search(List input, Var pattern, Var * out_match, List * out_bindings);
 
-List match_recursive_search_replace(List input,  Var pattern,  Var template);
+List match_recursive_search_replace(List input, Var pattern, Var template);
 
 
 #endif /* __GUARD_0x52578F0A__ */

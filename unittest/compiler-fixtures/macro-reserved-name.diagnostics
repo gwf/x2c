@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-reserved-name.x:3:1: parse: macro name 'x2c.int
   ^^^^^
   note: x2c.* is reserved for compiler facilities
 
-limit: too many errors, stopping
-

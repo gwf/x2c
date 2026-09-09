@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-protocol-representation-non-var.x:10:27: protoc
     protocol Marker(Marked) as int;
                             ^^
 
-limit: too many errors, stopping
-

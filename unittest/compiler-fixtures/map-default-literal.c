@@ -2,13 +2,9 @@
 
 #include "map-default-literal.h"
 
-static String _2,  _1,  _0;
+static String _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 Var int_var(int);
 
@@ -18,7 +14,7 @@ Block Bytes_block(Bytes);
 
 String Var_string(Var);
 
-Var Map_getindex(Map,  Var);
+Var Map_getindex(Map, Var);
 
 long Var_integer(Var);
 
@@ -36,10 +32,10 @@ __attribute__((constructor)) static void _file_init_(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Map values = Map_update_n(Map_new(),  2,  int_var(1),  String_var(_0),  String_var(_1),  int_var(4));
-  Map first = Map_new(),  second = Map_new();
+  Map values = Map_update_n(Map_new(), 2, int_var(1), String_var(_0), String_var(_1), int_var(4));
+  Map first = Map_new(), second = Map_new();
   size_t width = Bytes_block(values -> entries) -> width;
-  printf("%zu %d %s %ld %d\n",  width,  width == 2 * sizeof(Var),  Var_string(Map_getindex(values,  int_var(1))),  Var_integer(Map_getindex(values,  String_var(_2))),  first != second);
+  printf("%zu %d %s %ld %d\n", width, width == 2 * sizeof(Var), Var_string(Map_getindex(values, int_var(1))), Var_integer(Map_getindex(values, String_var(_2))), first != second);
   return 0;
 }
 

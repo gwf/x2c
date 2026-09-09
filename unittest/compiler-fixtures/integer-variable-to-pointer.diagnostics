@@ -3,5 +3,3 @@ unittest/compiler-fixtures/integer-variable-to-pointer.x:12:3: type: cannot conv
     ^^^^
   note: only a zero integer constant expression converts to a pointer
 
-limit: too many errors, stopping
-

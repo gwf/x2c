@@ -3,5 +3,3 @@ unittest/compiler-fixtures/delegate-field-ambiguity.x:25:20: type: method 'Ambig
                      ^
   note: delegate path: AmbiguousOwner.direct.read -> AmbiguousDirect_read delegate path: AmbiguousOwner.link.terminal.read -> AmbiguousTerminal_read
 
-limit: too many errors, stopping
-

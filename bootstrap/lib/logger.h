@@ -14,30 +14,30 @@ typedef struct LogEvent{
   unsigned long sequence;
   long long wall_time_us;
   long long elapsed_us;
-  Symbol level,  category;
+  Symbol level, category;
   List fields;
 }
 LogEvent;
 
-typedef void(* LogEmitter)(Logger logger,  const LogEvent * event,  Var data);
+typedef void(* LogEmitter)(Logger logger, const LogEvent * event, Var data);
 
-typedef void(* LogFlusher)(Logger logger,  Var data);
+typedef void(* LogFlusher)(Logger logger, Var data);
 
 int Logger_level_priority(Symbol level);
 
 Symbol Logger_min_level(Logger logger);
 
-int Logger_set_min_level(Logger logger,  Symbol level);
+int Logger_set_min_level(Logger logger, Symbol level);
 
 int Logger_sink_count(Logger logger);
 
-int Logger_should_log(Logger logger,  Symbol level,  Symbol category);
+int Logger_should_log(Logger logger, Symbol level, Symbol category);
 
-int log_should_log(Symbol level,  Symbol category);
+int log_should_log(Symbol level, Symbol category);
 
-LogSink Logger_add_sink(Logger logger,  LogEmitter emit,  LogFlusher flush,  Var data);
+LogSink Logger_add_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var data);
 
-int Logger_remove_sink(Logger logger,  LogSink sink);
+int Logger_remove_sink(Logger logger, LogSink sink);
 
 void Logger_clear_sinks(Logger logger);
 
@@ -45,47 +45,47 @@ void Logger_flush(Logger logger);
 
 LogSink Logger_add_stderr_sink(Logger logger);
 
-LogSink Logger_add_file_sink(Logger logger,  File file);
+LogSink Logger_add_file_sink(Logger logger, File file);
 
-LogSink Logger_add_memory_sink(Logger logger,  List * destination);
+LogSink Logger_add_memory_sink(Logger logger, List * destination);
 
 Logger Logger_new(Symbol min_level);
 
 void Logger_free(Logger logger);
 
-void Logger_log(Logger logger,  Symbol level,  Symbol category,  List fields);
+void Logger_log(Logger logger, Symbol level, Symbol category, List fields);
 
-void Logger_trace(Logger logger,  Symbol category,  List fields);
+void Logger_trace(Logger logger, Symbol category, List fields);
 
-void Logger_debug(Logger logger,  Symbol category,  List fields);
+void Logger_debug(Logger logger, Symbol category, List fields);
 
-void Logger_info(Logger logger,  Symbol category,  List fields);
+void Logger_info(Logger logger, Symbol category, List fields);
 
-void Logger_warn(Logger logger,  Symbol category,  List fields);
+void Logger_warn(Logger logger, Symbol category, List fields);
 
-void Logger_error(Logger logger,  Symbol category,  List fields);
+void Logger_error(Logger logger, Symbol category, List fields);
 
-void Logger_fatal(Logger logger,  Symbol category,  List fields);
+void Logger_fatal(Logger logger, Symbol category, List fields);
 
 Logger log_set_global_logger(Logger logger);
 
 Logger log_get_global_logger(void);
 
-void log_event(Symbol level,  Symbol category,  List fields);
+void log_event(Symbol level, Symbol category, List fields);
 
-void log_trace(Symbol category,  List fields);
+void log_trace(Symbol category, List fields);
 
-void log_debug(Symbol category,  List fields);
+void log_debug(Symbol category, List fields);
 
-void log_info(Symbol category,  List fields);
+void log_info(Symbol category, List fields);
 
-void log_warn(Symbol category,  List fields);
+void log_warn(Symbol category, List fields);
 
-void log_error(Symbol category,  List fields);
+void log_error(Symbol category, List fields);
 
-void log_fatal(Symbol category,  List fields);
+void log_fatal(Symbol category, List fields);
 
-Symbol Logger_error_handler(List errors,  Var data);
+Symbol Logger_error_handler(List errors, Var data);
 
 void Logger_shutdown(void);
 

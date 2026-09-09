@@ -4,13 +4,9 @@
 
 #include "error.h"
 
-static Var _3,  _2,  _1,  _0;
+static Var _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 #include <assert.h>
 #include <string.h>
@@ -18,27 +14,27 @@ static int _init_guard_ = 0;
 #include "lisp.h"
 Var Symbol_var(Symbol);
 
-int Lisp_resolve(void *,  Var,  Var *);
+int Lisp_resolve(void *, Var, Var *);
 
 Var List_var(List);
 
-int Lisp_program(Var,  MachineView *,  int *,  Var *);
+int Lisp_program(Var, MachineView *, int *, Var *);
 
 Var int_var(int);
 
-void Lisp_enter(void *,  Var,  const Var *,  int);
+void Lisp_enter(void *, Var, const Var *, int);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
-Var Lisp_apply_values(void *,  Var,  const Var *,  int);
+Var Lisp_apply_values(void *, Var, const Var *, int);
 
 FuncArg FuncArg_value(Var);
 
-Var Func_apply(Func,  unsigned,  const FuncArg *);
+Var Func_apply(Func, unsigned, const FuncArg *);
 
 void * Var_pointer(Var);
 
-void Lisp_retarget(void *,  Var,  const Var *,  int);
+void Lisp_retarget(void *, Var, const Var *, int);
 
 void Lisp_leave(void *);
 
@@ -46,35 +42,35 @@ Var String_var(String);
 
 int Var_is_nil(Var);
 
-int Lisp_precall(void *,  Var,  List,  Var *);
+int Lisp_precall(void *, Var, List, Var *);
 
 List Var_list(Var);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Symbol Var_kind(Var);
 
-List List_append(List,  List);
+List List_append(List, List);
 
 int Var_is_void(Var);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static void LispMachine__error_value(LispMachine m,  Var error);
+static void LispMachine__error_value(LispMachine m, Var error);
 
-static void LispMachine__error(LispMachine m,  Symbol error);
+static void LispMachine__error(LispMachine m, Symbol error);
 
 static int LispMachine__push_frame(LispMachine m);
 
 static void LispMachine__pop_frame(LispMachine m);
 
-static int LispMachine__push_value(LispMachine m,  Var value);
+static int LispMachine__push_value(LispMachine m, Var value);
 
-static void LispMachine__load(LispMachine m,  const MachineWord * w);
+static void LispMachine__load(LispMachine m, const MachineWord * w);
 
-static void LispMachine__call(LispMachine m,  int argc);
+static void LispMachine__call(LispMachine m, int argc);
 
-static void LispMachine__tail_call(LispMachine m,  int argc);
+static void LispMachine__tail_call(LispMachine m, int argc);
 
 static void LispMachine__return(LispMachine m);
 
@@ -89,7 +85,7 @@ __attribute__((constructor)) static void _file_init_(void){
 }
 
 void LispMachine_open(LispMachine m){
-  memset(& m -> program,  0,  sizeof(MachineView));
+  memset(& m -> program, 0, sizeof(MachineView));
   m -> pc = 0;
   m -> status = 598794;
   m -> running = 0;
@@ -104,7 +100,7 @@ void LispMachine_open(LispMachine m){
   m -> stats = NULL;
 }
 
-static void LispMachine__error_value(LispMachine m,  Var error){
+static void LispMachine__error_value(LispMachine m, Var error){
   m -> fp = 0;
   for(int i = 0;  i < m -> value_count;  i ++) m -> values[i] =(Var){
     .u64 = 0
@@ -123,13 +119,13 @@ static void LispMachine__error_value(LispMachine m,  Var error){
   m -> running = 0;
 }
 
-static void LispMachine__error(LispMachine m,  Symbol error){
-  LispMachine__error_value(m,  Symbol_var(error));
+static void LispMachine__error(LispMachine m, Symbol error){
+  LispMachine__error_value(m, Symbol_var(error));
 }
 
 static int LispMachine__push_frame(LispMachine m){
   if(m -> fp + 1 >= MACHINE_FRAME_MAX){
-    LispMachine__error(m,  14434122557552);
+    LispMachine__error(m, 14434122557552);
     return 0;
   }
   LispFrame * frame = & m -> frames[m -> fp ++];
@@ -160,22 +156,22 @@ static void LispMachine__pop_frame(LispMachine m){
   m -> value = frame -> caller_value;
 }
 
-static int LispMachine__push_value(LispMachine m,  Var value){
+static int LispMachine__push_value(LispMachine m, Var value){
   if(m -> value_count >= MACHINE_VALUE_MAX){
-    LispMachine__error(m,  48474422732912);
+    LispMachine__error(m, 48474422732912);
     return 0;
   }
   m -> values[m -> value_count ++] = value;
   return 1;
 }
 
-static void LispMachine__load(LispMachine m,  const MachineWord * w){
+static void LispMachine__load(LispMachine m, const MachineWord * w){
   const Var * consts = m -> program.consts;
   Var value;
   if(w -> op == MW_LLOCAL){
     int slot = m -> local_base + w -> a;
     if(w -> a < 0 || slot >= m -> local_count){
-      LispMachine__error(m,  4477462452312);
+      LispMachine__error(m, 4477462452312);
       return;
     }
     value = m -> locals[slot];
@@ -183,9 +179,9 @@ static void LispMachine__load(LispMachine m,  const MachineWord * w){
   }
   else if(w -> op == MW_LGLOBAL){
     Var name = consts[w -> a];
-    if(! Lisp_resolve(m -> lisp_context,  name,  & value)){
+    if(! Lisp_resolve(m -> lisp_context, name, & value)){
       Symbol code = 46041901960;
-      LispMachine__error_value(m,  List_var(cons(Symbol_var(code),  cons(List_var(cons(_0,  cons(name,  NULL))),  NULL))));
+      LispMachine__error_value(m, List_var(cons(Symbol_var(code), cons(List_var(cons(_0, cons(name, NULL))), NULL))));
       return;
     }
     if(m -> stats) m -> stats -> global_loads ++;
@@ -194,24 +190,24 @@ static void LispMachine__load(LispMachine m,  const MachineWord * w){
     value = consts[w -> a];
     if(m -> stats && w -> op == MW_LCAPTURE) m -> stats -> capture_loads ++;
   }
-  LispMachine__push_value(m,  value);
+  LispMachine__push_value(m, value);
 }
 
-static void LispMachine__call(LispMachine m,  int argc){
+static void LispMachine__call(LispMachine m, int argc){
   int callable_at = m -> value_count - argc - 1;
   if(argc < 0 || callable_at < m -> operand_base){
-    LispMachine__error(m,  214157780846806);
+    LispMachine__error(m, 214157780846806);
     return;
   }
   Var callable = m -> values[callable_at];
   MachineView view;
   int params = 0;
   Var body =((void) 0, Void);
-  int prepared = Lisp_program(callable,  & view,  & params,  & body);
+  int prepared = Lisp_program(callable, & view, & params, & body);
   if(prepared){
     if(argc != params){
       Symbol code = 4477439593778;
-      LispMachine__error_value(m,  List_var(cons(Symbol_var(code),  cons(List_var(cons(_1,  cons(int_var(params),  NULL))),  cons(List_var(cons(_2,  cons(int_var(argc),  NULL))),  cons(List_var(cons(_3,  cons(body,  NULL))),  NULL))))));
+      LispMachine__error_value(m, List_var(cons(Symbol_var(code), cons(List_var(cons(_1, cons(int_var(params), NULL))), cons(List_var(cons(_2, cons(int_var(argc), NULL))), cons(List_var(cons(_3, cons(body, NULL))), NULL))))));
       return;
     }
     int old_locals = m -> local_count;
@@ -227,7 +223,7 @@ static void LispMachine__call(LispMachine m,  int argc){
       m -> operand_base = callable_at;
       m -> local_base = old_locals;
       m -> local_count = old_locals + argc;
-      Lisp_enter(m -> lisp_context,  callable,  m -> locals + old_locals,  argc);
+      Lisp_enter(m -> lisp_context, callable, m -> locals + old_locals, argc);
       m -> program = view;
       m -> pc = view.root;
       if(m -> stats) m -> stats -> prepared_calls ++;
@@ -235,17 +231,17 @@ static void LispMachine__call(LispMachine m,  int argc){
     }
 
   }
-  else if(! Var_is(callable,  437126)){
+  else if(! Var_is(callable, 437126)){
     Symbol code = 995692317464;
-    LispMachine__error_value(m,  List_var(cons(Symbol_var(code),  cons(List_var(cons(_3,  cons(callable,  NULL))),  NULL))));
+    LispMachine__error_value(m, List_var(cons(Symbol_var(code), cons(List_var(cons(_3, cons(callable, NULL))), NULL))));
     return;
   }
   Var result;
-  if(prepared) result = Lisp_apply_values(m -> lisp_context,  callable,  m -> values + callable_at + 1,  argc);
+  if(prepared) result = Lisp_apply_values(m -> lisp_context, callable, m -> values + callable_at + 1, argc);
   else{
     FuncArg arguments[MACHINE_VALUE_MAX];
     for(int i = 0;  i < argc;  i ++) arguments[i] = FuncArg_value(m -> values[callable_at + 1 + i]);
-    result = Func_apply(((Func) Var_pointer(callable)),  argc,  arguments);
+    result = Func_apply(((Func) Var_pointer(callable)), argc, arguments);
     if(m -> stats) m -> stats -> native_calls ++;
   }
   for(int i = callable_at;  i < m -> value_count;  i ++) m -> values[i] =(Var){
@@ -253,21 +249,21 @@ static void LispMachine__call(LispMachine m,  int argc){
   }
   ;
   m -> value_count = callable_at;
-  LispMachine__push_value(m,  result);
+  LispMachine__push_value(m, result);
 }
 
-static void LispMachine__tail_call(LispMachine m,  int argc){
+static void LispMachine__tail_call(LispMachine m, int argc){
   int callable_at = m -> value_count - argc - 1;
   if(argc < 0 || callable_at < m -> operand_base){
-    LispMachine__error(m,  214157780846806);
+    LispMachine__error(m, 214157780846806);
     return;
   }
   Var callable = m -> values[callable_at];
   MachineView view;
   int params = 0;
   Var body =((void) 0, Void);
-  if(! Lisp_program(callable,  & view,  & params,  & body) || view.code != m -> program.code || argc != params){
-    LispMachine__call(m,  argc);
+  if(! Lisp_program(callable, & view, & params, & body) || view.code != m -> program.code || argc != params){
+    LispMachine__call(m, argc);
     return;
   }
   for(int i = 0;  i < argc;  i ++) m -> locals[m -> local_base + i] = m -> values[callable_at + 1 + i];
@@ -277,14 +273,14 @@ static void LispMachine__tail_call(LispMachine m,  int argc){
   ;
   m -> value_count = m -> operand_base;
   m -> local_count = m -> local_base + argc;
-  Lisp_retarget(m -> lisp_context,  callable,  m -> locals + m -> local_base,  argc);
+  Lisp_retarget(m -> lisp_context, callable, m -> locals + m -> local_base, argc);
   m -> pc = m -> program.root;
   if(m -> stats) m -> stats -> prepared_calls ++;
 }
 
 static void LispMachine__return(LispMachine m){
   if(m -> value_count <= m -> operand_base){
-    LispMachine__error(m,  31884909456168);
+    LispMachine__error(m, 31884909456168);
     return;
   }
   Var result = m -> values[m -> value_count - 1];
@@ -309,17 +305,17 @@ static void LispMachine__return(LispMachine m){
   }
   Lisp_leave(m -> lisp_context);
   LispMachine__pop_frame(m);
-  LispMachine__push_value(m,  result);
+  LispMachine__push_value(m, result);
 }
 
-void LispMachine_begin(LispMachine m,  MachineView program,  void * lisp_context,  const Var * args,  int argc){
+void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, const Var * args, int argc){
   if(m -> running || m -> fp || m -> value_count || m -> local_count){
-    LispMachine__error(m,  995692716810);
+    LispMachine__error(m, 995692716810);
     return;
   }
   if(argc < 0 || argc > MACHINE_LOCAL_MAX){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/lisp-machine.x",.function =  "LispMachine_begin",.line =  270};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477439593778, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("LispMachine.begin")),  NULL))),  Symbol_var(74754136),  int_var(argc));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_begin",.line = 270};
+    x2c_error_raise_n(& _x2c_error_site_0, 4477439593778, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.begin")), NULL))), Symbol_var(74754136), int_var(argc));
     __builtin_unreachable();
   }
   m -> program = program;
@@ -349,11 +345,11 @@ int LispMachine_step(LispMachine m){
   switch(w -> op){
     case MW_JUMP : m -> pc = w -> target;
     break;
-    case MW_LCONST : case MW_LLOCAL : case MW_LCAPTURE : case MW_LGLOBAL : LispMachine__load(m,  w);
+    case MW_LCONST : case MW_LLOCAL : case MW_LCAPTURE : case MW_LGLOBAL : LispMachine__load(m, w);
     break;
     case MW_LBR_NIL :{
       if(m -> value_count <= m -> operand_base){
-        LispMachine__error(m,  1020311368764296);
+        LispMachine__error(m, 1020311368764296);
         break;
       }
       Var condition = m -> values[m -> value_count - 1];
@@ -370,45 +366,45 @@ int LispMachine_step(LispMachine m){
     }
     case MW_LPRECALL :{
       if(m -> value_count <= m -> operand_base){
-        LispMachine__error(m,  1020311368764296);
+        LispMachine__error(m, 1020311368764296);
         break;
       }
-      Var callable = m -> values[m -> value_count - 1],  result =((void) 0, Void);
-      if(! Lisp_precall(m -> lisp_context,  callable,  Var_list(p -> consts[w -> a]),  & result)) break;
+      Var callable = m -> values[m -> value_count - 1], result =((void) 0, Void);
+      if(! Lisp_precall(m -> lisp_context, callable, Var_list(p -> consts[w -> a]), & result)) break;
       m -> values[m -> value_count - 1] = result;
       m -> pc = w -> target;
       break;
     }
-    case MW_LCALL : LispMachine__call(m,  w -> b);
+    case MW_LCALL : LispMachine__call(m, w -> b);
     break;
-    case MW_LTAILCALL : LispMachine__tail_call(m,  w -> b);
+    case MW_LTAILCALL : LispMachine__tail_call(m, w -> b);
     break;
     case MW_LQQ_WRAP :{
       if(m -> value_count <= m -> operand_base){
-        LispMachine__error(m,  1020311368764296);
+        LispMachine__error(m, 1020311368764296);
         break;
       }
       Var value = m -> values[m -> value_count - 1];
-      m -> values[m -> value_count - 1] = List_var(cons(value,  NULL));
+      m -> values[m -> value_count - 1] = List_var(cons(value, NULL));
       break;
     }
     case MW_LQQ_APPEND :{
       if(m -> value_count - m -> operand_base < 2){
-        LispMachine__error(m,  1020311368764296);
+        LispMachine__error(m, 1020311368764296);
         break;
       }
       Var left = m -> values[m -> value_count - 2];
       Var right = m -> values[m -> value_count - 1];
-      if(! Var_is(left,  806120)){
-        Symbol code = 4477479911782,  actual = Var_kind(left);
-        LispMachine__error_value(m,  List_var(cons(Symbol_var(code),  cons(List_var(cons(_2,  cons(Symbol_var(actual),  NULL))),  NULL))));
+      if(! Var_is(left, 806120)){
+        Symbol code = 4477479911782, actual = Var_kind(left);
+        LispMachine__error_value(m, List_var(cons(Symbol_var(code), cons(List_var(cons(_2, cons(Symbol_var(actual), NULL))), NULL))));
         break;
       }
-      if(! Var_is(right,  806120)){
-        LispMachine__error(m,  1242558331357784);
+      if(! Var_is(right, 806120)){
+        LispMachine__error(m, 1242558331357784);
         break;
       }
-      List a = Var_list(left),  b = Var_list(right),  result = List_append(a,  b);
+      List a = Var_list(left), b = Var_list(right), result = List_append(a, b);
       m -> values[m -> value_count - 2] = List_var(result);
       m -> values[-- m -> value_count] =(Var){
         .u64 = 0
@@ -417,7 +413,7 @@ int LispMachine_step(LispMachine m){
       break;
     }
     case MW_LDROP : if(m -> value_count <= m -> operand_base){
-      LispMachine__error(m,  1020311368764296);
+      LispMachine__error(m, 1020311368764296);
       break;
     }
     m -> values[-- m -> value_count] =(Var){
@@ -427,7 +423,7 @@ int LispMachine_step(LispMachine m){
     break;
     case MW_LRETURN : LispMachine__return(m);
     break;
-    default: LispMachine__error(m,  139921423496);
+    default: LispMachine__error(m, 139921423496);
   }
   return m -> running;
 }
@@ -442,8 +438,8 @@ void LispMachine_run(LispMachine m){
 
 void LispMachine_finish(LispMachine m){
   if(m -> running){
-    static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/lisp-machine.x",.function =  "LispMachine_finish",.line =  402};
-    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("LispMachine.finish")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 402};
+    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.finish")), NULL))));
     __builtin_unreachable();
   }
   for(int i = 0;  i < m -> value_count;  i ++) m -> values[i] =(Var){
@@ -464,7 +460,7 @@ void LispMachine_finish(LispMachine m){
   m -> value =((void) 0, Void);
   m -> error =((void) 0, Void);
   m -> status = 598794;
-  memset(& m -> program,  0,  sizeof(MachineView));
+  memset(& m -> program, 0, sizeof(MachineView));
   m -> running = 0;
 }
 

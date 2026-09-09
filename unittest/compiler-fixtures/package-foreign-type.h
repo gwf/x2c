@@ -13,7 +13,7 @@ double vendored__Span_width(Span span);
 
 SpanKind vendored__Span_kind(Span span);
 
-Span vendored__Span_add(Span a,  Span b);
+Span vendored__Span_add(Span a, Span b);
 
 vendored__Reading vendored__Reading_new(Span span);
 

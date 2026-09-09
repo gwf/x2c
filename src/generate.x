@@ -11,6 +11,7 @@
 #pragma private
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,29 +34,62 @@ static void _report_output_error(
   compiler.report_error(<emit>, message, compiler.token, notes);
 }
 
-static void _write_output(Compiler compiler, String fname, String content) {
-  File fp = Stdout;
-  if (fname) {
-    try fp = fname.open("w");
-    catch %(not-found * (errno ?error) *):
-      _report_output_error(
-        compiler, fname, "failed to open output file", error.integer());
-    catch %(io-fail * (errno ?error) *):
-      _report_output_error(
-        compiler, fname, "failed to open output file", error.integer());
+// Close both siblings before publishing either. A rename commits one complete
+// file; the pair is not a transaction. Clean up before reporting: diagnostics
+// may exit the process instead of unwinding the caller's cleanup stack.
+static void _write_outputs(
+  Compiler compiler, String paths[2], String contents[2]) {
+  String temporaries[2] = { NULL, NULL };
+  String message = NULL, fname = NULL;
+  int error = 0;
+  for (int i = 0; i < 2; i++) {
+    fname = paths[i];
+    File output = Stdout;
+    if (fname) {
+      String directory = x2c_path_dir(fname);
+      int fd, serial = 0;
+      do {
+        temporaries[i] = %"$directory/.x2c-output.%ld.%d".printf(
+          (long) getpid(), serial++);
+        fd = open(temporaries[i], O_CREAT | O_EXCL | O_WRONLY, 0666);
+      } while (fd < 0 && errno == EEXIST);
+      if (fd < 0) {
+        error = errno;
+        temporaries[i] = NULL;
+        message = "failed to open output file";
+        break;
+      }
+      output = fdopen(fd, "w");
+      if (!output) {
+        error = errno;
+        close(fd);
+        message = "failed to open output file";
+        break;
+      }
+    }
+    if (output.puts(contents[i]) == EOF) {
+      error = errno;
+      message = "failed to write generated file";
+    }
+    if (output != Stdout && output.close() != 0 && !message) {
+      error = errno;
+      message = "failed to close generated file";
+    }
+    if (message) break;
   }
-  if (fp.puts(content) == EOF) {
-    int error = errno;
-    _report_output_error(
-      compiler, fname,
-      "failed to write generated file", error);
+  if (!message) {
+    for (int i = 0; i < 2; i++) {
+      fname = paths[i];
+      if (fname && rename(temporaries[i], fname)) {
+        error = errno;
+        message = "failed to replace generated file";
+        break;
+      }
+    }
   }
-  if (fp != Stdout && fp.close() != 0) {
-    int error = errno;
-    _report_output_error(
-      compiler, fname,
-      "failed to close generated file", error);
-  }
+  for (int i = 0; i < 2; i++)
+    if (temporaries[i]) unlink(temporaries[i]);
+  if (message) _report_output_error(compiler, fname, message, error);
 }
 
 // init staging
@@ -683,9 +717,10 @@ static List _modify_main(Compiler compiler, List source) {
     partitions the AST, materializes caches and once-only initialization,
     performs the generation-phase source transform, and writes or replaces
     `<dir>/<source-stem>.h` and `.c`. It appends generated bindings and
-    initialization work to the compiler and is not idempotent. The header is
-    written before the source, so an output failure may leave the header
-    replaced; failures are reported as `emit` diagnostics.
+    initialization work to the compiler and is not idempotent. Both files
+    are closed before individual renames replace their destinations; failure
+    can leave only the header replaced, but never a partial file. Failures
+    are reported as `emit` diagnostics.
 */
 void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
@@ -716,6 +751,9 @@ void generate_code(Compiler c, List ast, String dir) {
   String basename =
     %"${dir.rstrip(%"/")}/${x2c_path_stem(c.filename)}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
-  _write_output(c, hfile, c.code_pretty_string(header, hfile));
-  _write_output(c, cfile, c.code_pretty_string(source, cfile));
+  String header_text = c.code_pretty_string(header, hfile);
+  String source_text = c.code_pretty_string(source, cfile);
+  String paths[2] = { hfile, cfile };
+  String contents[2] = { header_text, source_text };
+  _write_outputs(c, paths, contents);
 }

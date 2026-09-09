@@ -2,5 +2,3 @@ unittest/compiler-fixtures/foreign-alias-self.x:3:1: parse: foreign alias cannot
   $x2c.foreign.alias(alias_self)
   ^
 
-limit: too many errors, stopping
-

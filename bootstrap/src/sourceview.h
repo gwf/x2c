@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 typedef struct SourceView{
-  Map overlays,  dirty_paths;
+  Map overlays, dirty_paths;
 }
 * SourceView;
 
@@ -15,15 +15,15 @@ SourceView SourceView_new(void);
 
 String SourceView_path(String path);
 
-void SourceView_set(SourceView sources,  String path,  String text,  int changed);
+void SourceView_set(SourceView sources, String path, String text, int changed);
 
-int SourceView_is_changed(SourceView sources,  String path);
+int SourceView_is_changed(SourceView sources, String path);
 
-int SourceView_exists(SourceView sources,  String path);
+int SourceView_exists(SourceView sources, String path);
 
-int SourceView_read(SourceView sources,  String path,  String volatile * text);
+int SourceView_read(SourceView sources, String path, String volatile * text);
 
-String SourceView_content_hash(SourceView sources,  String path);
+String SourceView_content_hash(SourceView sources, String path);
 
 
 #endif /* __GUARD_0x118AEF35__ */

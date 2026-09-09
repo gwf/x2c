@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-type-fields-incomplete.x:9:1: macro: x2c.type.f
   ^
   note: value: (struct "IncompleteRecord")
 
-limit: too many errors, stopping
-

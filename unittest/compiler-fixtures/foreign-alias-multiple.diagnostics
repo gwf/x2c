@@ -2,5 +2,3 @@ unittest/compiler-fixtures/foreign-alias-multiple.x:4:1: parse: foreign alias ta
   $x2c.foreign.alias(abs)
   ^
 
-limit: too many errors, stopping
-

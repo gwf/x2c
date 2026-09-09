@@ -3,5 +3,3 @@ unittest/compiler-fixtures/printf-var-positional.x:5:3: xform: positional format
     ^^^^^^
   note: printf-family call: printf
 
-limit: too many errors, stopping
-

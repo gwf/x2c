@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_emit(Compiler compiler,  List ast);
+List Compiler_emit(Compiler compiler, List ast);
 
 
 #endif /* __GUARD_0x112A1548__ */

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/delegate-field-cycle.x:16:23: type: delegation cycle 
                         ^
   note: delegate path: DelegateCycleLeft.right.left
 
-limit: too many errors, stopping
-

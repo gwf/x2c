@@ -2,5 +2,3 @@ unittest/compiler-fixtures/import-delegate-private-method.x:4:22: type: type ("d
     return value.hidden();
                        ^
 
-limit: too many errors, stopping
-

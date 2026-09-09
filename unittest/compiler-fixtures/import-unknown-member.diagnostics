@@ -2,5 +2,3 @@ unittest/compiler-fixtures/import-unknown-member.x:10:33: parse: package 'geo' h
   double missing(void) { return g.frobnicate(); }
                                   ^^^^^^^^^^
 
-limit: too many errors, stopping
-

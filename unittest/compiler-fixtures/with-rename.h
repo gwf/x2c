@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "geo.h"
-double diagonal(double x,  double y);
+double diagonal(double x, double y);
 
 
 #endif /* __GUARD_0x93AEE81F__ */

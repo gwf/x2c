@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lisp-bind-unknown-group.x:4:3: macro: unknown native 
     ^
   note: group: missing
 
-limit: too many errors, stopping
-

@@ -8,19 +8,19 @@
 #include "x2c.h"
 #include "compiler.h"
 #include "type.h"
-List Compiler_complete_iter_chain(Compiler compiler,  List expression);
+List Compiler_complete_iter_chain(Compiler compiler, List expression);
 
-List Compiler_resolve_postfix_member(Compiler c,  Type receiver_type,  List field,  Symbol access,  int call_context);
+List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
 List Compiler_parse_macro_expression_target(Compiler compiler);
 
-Symbol Compiler_require_var_tag(Compiler compiler,  Type target,  Token origin);
+Symbol Compiler_require_var_tag(Compiler compiler, Type target, Token origin);
 
-List Compiler_var_tag_expression(Compiler c,  Type target,  Token origin);
+List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
 
-List Compiler_resolve_map_entry(Compiler compiler,  List input,  Token origin);
+List Compiler_resolve_map_entry(Compiler compiler, List input, Token origin);
 
-List Compiler_resolve_expression(Compiler compiler,  List input,  Token origin);
+List Compiler_resolve_expression(Compiler compiler, List input, Token origin);
 
 List Compiler_parse_variable(Compiler c);
 
@@ -34,19 +34,19 @@ List Compiler_parse_expression(Compiler compiler);
 
 List Compiler_parse_parenthesized_statement(Compiler c);
 
-List Compiler_initializer_native_types(Compiler c,  Type type);
+List Compiler_initializer_native_types(Compiler c, Type type);
 
-List Compiler_initializer_slot(Compiler c,  List target,  List path);
+List Compiler_initializer_slot(Compiler c, List target, List path);
 
-List Compiler_initializer_rows(Compiler c,  Type root,  List items,  List target);
+List Compiler_initializer_rows(Compiler c, Type root, List items, List target);
 
-List Compiler_convert_initializer(Compiler c,  List value,  Type type,  List target);
+List Compiler_convert_initializer(Compiler c, List value, Type type, List target);
 
-List Compiler_convert_compound_literal(Compiler c,  List value,  Type type,  Type native_type);
+List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type native_type);
 
-List Compiler_convert_expression(Compiler c,  List expr,  Type target);
+List Compiler_convert_expression(Compiler c, List expr, Type target);
 
-List Compiler_convert_segment_to_string(Compiler compiler,  List expr);
+List Compiler_convert_segment_to_string(Compiler compiler, List expr);
 
 
 #endif /* __GUARD_0xAA205D9A__ */

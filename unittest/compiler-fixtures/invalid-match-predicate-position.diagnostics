@@ -3,5 +3,3 @@ unittest/compiler-fixtures/invalid-match-predicate-position.x:6:17: parse: inval
                   ^^^^^^^^
   note: binder-name: ?binder?
 
-limit: too many errors, stopping
-

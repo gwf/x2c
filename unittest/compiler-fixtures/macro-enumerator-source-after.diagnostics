@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-enumerator-source-after.x:12:3: parse: enumerat
     ^^^^^^^^^^^^^^^^^
   note: prior binding: 'LATER_SOURCE_ENUM'
 
-limit: too many errors, stopping
-

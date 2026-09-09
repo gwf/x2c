@@ -2,24 +2,21 @@
 
 #include "list-destructuring.h"
 
-static List _11,  _7,  _6,  _5,  _4;
+static List _11, _7, _6, _5, _4;
 
-static Var _10,  _9,  _8,  _3,  _2,  _1,  _0;
+static Var _10, _9, _8, _3, _2, _1, _0;
 
 static int calls;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var double_var(double);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 Var char_var(char);
 
@@ -39,14 +36,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = int_var(2);
   _2 = int_var(3);
   _3 = int_var(4);
-  _4 = cons(_3,  NULL);
-  _5 = cons(_2,  _4);
-  _6 = cons(_1,  _5);
-  _7 = cons(_0,  _6);
+  _4 = cons(_3, NULL);
+  _5 = cons(_2, _4);
+  _6 = cons(_1, _5);
+  _7 = cons(_0, _6);
   _8 = int_var(5);
   _9 = double_var(6.5);
   _10 = int_var(7);
-  _11 = cons(_10,  NULL);
+  _11 = cons(_10, NULL);
   calls = 0;
 }
 
@@ -59,37 +56,37 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   int user_destructure_0 = 9;
-  Var a,  b,  c;
+  Var a, b, c;
   List _x2c_destructure_0 = values();
-  a = List_getindex(_x2c_destructure_0,  0);
-  b = List_getindex(_x2c_destructure_0,  1);
-  c = List_getindex(_x2c_destructure_0,  2);
-  int x,  y;
+  a = List_getindex(_x2c_destructure_0, 0);
+  b = List_getindex(_x2c_destructure_0, 1);
+  c = List_getindex(_x2c_destructure_0, 2);
+  int x, y;
   List _x2c_destructure_1 = values();
-  x = Var_int(Var_convert(List_getindex(_x2c_destructure_1,  0),  3453797));
-  y = Var_int(Var_convert(List_getindex(_x2c_destructure_1,  1),  3453797));
-  List _x2c_destructure_2 = cons(_8,  cons(_9,  cons(char_var('m'),  NULL)));
-  int mixed_i = Var_int(Var_convert(List_getindex(_x2c_destructure_2,  0),  3453797));
-  float mixed_x = Var_float(Var_convert(List_getindex(_x2c_destructure_2,  1),  3355493));
-  char mixed_c = Var_char(Var_convert(List_getindex(_x2c_destructure_2,  2),  26993));
-  Var first,  missing;
+  x = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));
+  y = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 1), 3453797));
+  List _x2c_destructure_2 = cons(_8, cons(_9, cons(char_var('m'), NULL)));
+  int mixed_i = Var_int(Var_convert(List_getindex(_x2c_destructure_2, 0), 3453797));
+  float mixed_x = Var_float(Var_convert(List_getindex(_x2c_destructure_2, 1), 3355493));
+  char mixed_c = Var_char(Var_convert(List_getindex(_x2c_destructure_2, 2), 26993));
+  Var first, missing;
   {
     List _x2c_destructure_3 = _11;
-    first = List_getindex(_x2c_destructure_3,  0);
-    missing = List_getindex(_x2c_destructure_3,  1);
+    first = List_getindex(_x2c_destructure_3, 0);
+    missing = List_getindex(_x2c_destructure_3, 1);
   }
   {
     List _x2c_destructure_4 = values();
-    c = List_getindex(_x2c_destructure_4,  0);
+    c = List_getindex(_x2c_destructure_4, 0);
   }
   List source = values();
   List result =({List _x2c_destructure_result_0 = source;
   List _x2c_destructure_5 = _x2c_destructure_result_0;
-  a = List_getindex(_x2c_destructure_5,  0);
-  b = List_getindex(_x2c_destructure_5,  1);
+  a = List_getindex(_x2c_destructure_5, 0);
+  b = List_getindex(_x2c_destructure_5, 1);
   _x2c_destructure_result_0;
   });
-  printf("%ld %ld %ld %d %d %d %.1f %c %ld %d %d %d\n",  Var_integer(a),  Var_integer(b),  Var_integer(c),  x,  y,  mixed_i,  mixed_x,  mixed_c,  Var_integer(first),  Var_is_void(missing),  result == source,  calls);
+  printf("%ld %ld %ld %d %d %d %.1f %c %ld %d %d %d\n", Var_integer(a), Var_integer(b), Var_integer(c), x, y, mixed_i, mixed_x, mixed_c, Var_integer(first), Var_is_void(missing), result == source, calls);
   return user_destructure_0 == 9 && calls == 4 ? 0 : 1;
 }
 

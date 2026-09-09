@@ -2,5 +2,3 @@ unittest/compiler-fixtures/foreach-macro-incompatible.x:9:3: type: cannot conver
     foreach(Pair value, values) (void) value;
     ^^^^^^^
 
-limit: too many errors, stopping
-

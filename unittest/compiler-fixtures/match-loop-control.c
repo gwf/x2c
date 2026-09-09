@@ -2,26 +2,23 @@
 
 #include "match-loop-control.h"
 
-static List _19,  _18,  _17,  _15,  _13,  _10,  _8,  _6,  _5,  _3,  _1;
+static List _19, _18, _17, _15, _13, _10, _8, _6, _5, _3, _1;
 
-static Var _16,  _14,  _12,  _11,  _9,  _7,  _4,  _2,  _0;
+static Var _16, _14, _12, _11, _9, _7, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 List Var_list(Var);
 
@@ -32,50 +29,50 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = Symbol_var(982);
-  _1 = cons(_0,  NULL);
+  _1 = cons(_0, NULL);
   _2 = List_var(_1);
-  _3 = cons(_2,  NULL);
+  _3 = cons(_2, NULL);
   _4 = List_var(_3);
-  _5 = cons(_4,  NULL);
-  _6 = cons(_4,  _5);
+  _5 = cons(_4, NULL);
+  _6 = cons(_4, _5);
   _7 = Symbol_var(1268320);
-  _8 = cons(_7,  NULL);
+  _8 = cons(_7, NULL);
   _9 = List_var(_8);
-  _10 = cons(_9,  NULL);
+  _10 = cons(_9, NULL);
   _11 = List_var(_10);
   _12 = Symbol_var(731488);
-  _13 = cons(_12,  NULL);
+  _13 = cons(_12, NULL);
   _14 = List_var(_13);
-  _15 = cons(_14,  NULL);
+  _15 = cons(_14, NULL);
   _16 = List_var(_15);
-  _17 = cons(_11,  NULL);
-  _18 = cons(_16,  _17);
-  _19 = cons(_11,  _18);
+  _17 = cons(_11, NULL);
+  _18 = cons(_16, _17);
+  _19 = cons(_11, _18);
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   List break_inputs = _6;
-  int matched = 0,  after = 0;
+  int matched = 0, after = 0;
   {
     Var item;
-    Iter _x2c_macro_iterator_0 = List_iter(break_inputs,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(break_inputs, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       item = _x2c_macro_item_0;
       {
         List value = Var_list(item);
 
   {
-    List _x2c_match_expr =  value;
-     MatchCaptureBuffer _x2c_match_capture = { 0 };
+    List _x2c_match_expr = value;
+    MatchCaptureBuffer _x2c_match_capture = { 0 };
 
     switch (0) {
-       default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {{
+      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_3), &_x2c_match_capture)) {{
           matched ++;  break;
         }
         break;
@@ -89,18 +86,18 @@ after ++;
   }
 
 }
-List continue_inputs = _19;  int visited = 0,  accepted = 0; {
-  Var item;  Iter _x2c_macro_iterator_1 = List_iter(continue_inputs,  &(struct Iter){
+List continue_inputs = _19;  int visited = 0, accepted = 0; {
+  Var item;  Iter _x2c_macro_iterator_1 = List_iter(continue_inputs, &(struct Iter){
     int_var(0)
   }
-  );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
+  );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
     item = _x2c_macro_item_1; {
       List value = Var_list(item);  visited ++;
   {
-    List _x2c_match_expr =  value;
-     MatchCaptureBuffer _x2c_match_capture = { 0 };
+    List _x2c_match_expr = value;
+    MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch (0) {
-       default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_10), &_x2c_match_capture)) {continue;  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_10), &_x2c_match_capture)) {continue;  break;
     }
 
     }
@@ -110,6 +107,6 @@ accepted ++;
 
 }
 }
-printf("%d %d %d %d\n",  matched,  after,  visited,  accepted);  return matched == 2 && after == 2 && visited == 3 && accepted == 1 ? 0 : 1;
+printf("%d %d %d %d\n", matched, after, visited, accepted);  return matched == 2 && after == 2 && visited == 3 && accepted == 1 ? 0 : 1;
 }
 

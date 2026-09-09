@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-embed-text-directory.x:7:16: macro: embedded te
                  ^
   note: path: unittest/compiler-fixtures/macro-embed-text-definition
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/invalid-match-binder.x:6:17: parse: invalid match bin
                   ^^^^^^^^^
   note: binder-name: ?bad-name
 
-limit: too many errors, stopping
-

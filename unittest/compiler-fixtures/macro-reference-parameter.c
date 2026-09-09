@@ -2,24 +2,24 @@
 
 #include "macro-reference-parameter.h"
 
-static void add(int * value,  int amount);
+static void add(int * value, int amount);
 
 static void macro_add(int * _x2c_macro_value_0);
 
-static void add(int * value,  int amount){
+static void add(int * value, int amount){
   (* value) += amount;
 }
 
 static void macro_add(int * _x2c_macro_value_0){
   (* _x2c_macro_value_0) += 5;
-  add(&((* _x2c_macro_value_0)),  1);
+  add(&((* _x2c_macro_value_0)), 1);
 }
 
 int main(void){
   x2c_initialize();
   int value = 3;
   macro_add(&(value));
-  printf("%d\n",  value);
+  printf("%d\n", value);
   return 0;
 }
 

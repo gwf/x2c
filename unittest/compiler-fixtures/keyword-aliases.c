@@ -91,7 +91,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   KeywordRecord record ={
-    1,  2
+    1, 2
   }
   ;
   int imported = 6;
@@ -108,7 +108,7 @@ int main(void){
   if(1){
     conditional ++;
   }
-  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",  before_alias(),  first_alias(),  second_alias(),  frozen_before_redefinition(),  frozen_after_redefinition(), (2 + 1), (3 * 2),  statements,  conditional,  direct_unit,  aliased_unit,  stacked_unit,  record.direct_field,  record.aliased_field,  direct_function(),  aliased_function(),  stacked_function(),  imported);
+  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", before_alias(), first_alias(), second_alias(), frozen_before_redefinition(), frozen_after_redefinition(), (2 + 1), (3 * 2), statements, conditional, direct_unit, aliased_unit, stacked_unit, record.direct_field, record.aliased_field, direct_function(), aliased_function(), stacked_function(), imported);
   return 0;
 }
 
@@ -116,7 +116,7 @@ static void direct_captured_raise(void){
   {
     {
       if(0){
-        static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/keyword-aliases.x",.function =  "direct_captured_raise",.line =  127};
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/keyword-aliases.x",.function = "direct_captured_raise",.line = 127};
         x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
         __builtin_unreachable();
       }
@@ -131,7 +131,7 @@ static void aliased_captured_raise(void){
   {
     {
       if(0){
-        static const X2CErrorSite  _x2c_error_site_1  = {.file =  "unittest/compiler-fixtures/keyword-aliases.x",.function =  "aliased_captured_raise",.line =  134};
+        static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/keyword-aliases.x",.function = "aliased_captured_raise",.line = 134};
         x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 0);
         __builtin_unreachable();
       }

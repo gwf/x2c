@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "geo.h"
-double local_span(double x,  double y);
+double local_span(double x, double y);
 
 
 #endif /* __GUARD_0x716F98A0__ */

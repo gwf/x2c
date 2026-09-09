@@ -2,5 +2,3 @@ unittest/compiler-fixtures/typedef-cycle-member.x:3:43: type: typedef chain too 
   int main(void) { Color c = {5}; return c.r; }
                                             ^
 
-limit: too many errors, stopping
-

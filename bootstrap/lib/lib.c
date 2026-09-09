@@ -6,7 +6,7 @@ void * Scope_malloc(size_t);
 
 void Scope_free(void *);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 Var List_var(List);
 
@@ -37,7 +37,7 @@ void DisjointSet_free(DisjointSet set){
   Scope_free(set);
 }
 
-int DisjointSet_find(DisjointSet set,  int x){
+int DisjointSet_find(DisjointSet set, int x){
   int p = set -> parent[x];
   if(p == x) return x;
   while(p != set -> parent[p]){
@@ -48,8 +48,8 @@ int DisjointSet_find(DisjointSet set,  int x){
   return p;
 }
 
-void DisjointSet_union(DisjointSet set,  int a,  int b){
-  int a_root = DisjointSet_find(set,  a),  b_root = DisjointSet_find(set,  b);
+void DisjointSet_union(DisjointSet set, int a, int b){
+  int a_root = DisjointSet_find(set, a), b_root = DisjointSet_find(set, b);
   if(a_root == b_root) return;
   if(set -> size[a_root] < set -> size[b_root]){
     int t = a_root;
@@ -63,7 +63,7 @@ void DisjointSet_union(DisjointSet set,  int a,  int b){
 
 List DisjointSet_sizes(DisjointSet set){
   Array sizes = Array_new();
-  for(int i = 0,  n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes,  List_var(cons(int_var(set -> size[i]),  cons(int_var(i),  NULL))));
+  for(int i = 0, n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes, List_var(cons(int_var(set -> size[i]), cons(int_var(i), NULL))));
   List result = Array_list(Array_sort(sizes));
   Array_free(sizes);
   return result;

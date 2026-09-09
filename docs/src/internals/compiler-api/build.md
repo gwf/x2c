@@ -73,7 +73,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:843`
+Source: `src/build.x:844`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -138,7 +138,7 @@ Source: `src/build.x:743`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:800`
+Source: `src/build.x:801`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current

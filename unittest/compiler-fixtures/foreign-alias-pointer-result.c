@@ -4,7 +4,7 @@
 
 int main(void){
   x2c_initialize();
-  printf("%s %s\n",  find_char("hello",  'l'),  Text_find("hello",  "ll"));
+  printf("%s %s\n", find_char("hello", 'l'), Text_find("hello", "ll"));
   return 0;
 }
 

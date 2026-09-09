@@ -2,20 +2,17 @@
 
 #include "match-binder-methods.h"
 
-static List _12,  _11,  _10,  _7,  _6,  _5,  _4;
+static List _12, _11, _10, _7, _6, _5, _4;
 
-static Var _9,  _8,  _3,  _2,  _1,  _0;
+static Var _9, _8, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
 
 Var Symbol_var(Symbol);
 
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 int Var_int(Var);
 
@@ -31,15 +28,15 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = int_var(5);
   _2 = Symbol_var(1313368);
   _3 = Symbol_var(883850);
-  _4 = cons(_3,  NULL);
-  _5 = cons(_2,  _4);
-  _6 = cons(_1,  _5);
-  _7 = cons(_0,  _6);
+  _4 = cons(_3, NULL);
+  _5 = cons(_2, _4);
+  _6 = cons(_1, _5);
+  _7 = cons(_0, _6);
   _8 = Symbol_var(1992385866);
   _9 = Symbol_var(57814248);
-  _10 = cons(_9,  NULL);
-  _11 = cons(_8,  _10);
-  _12 = cons(_0,  _11);
+  _10 = cons(_9, NULL);
+  _11 = cons(_8, _10);
+  _12 = cons(_0, _11);
 }
 
 int main(void){
@@ -48,14 +45,14 @@ int main(void){
   List input = _7;
 
   {
-    List _x2c_match_expr =  input;
-     Var _x2c_match_values[2];
+    List _x2c_match_expr = input;
+    Var _x2c_match_values[2];
   MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
 
     switch (Var_symbol(car(_x2c_match_expr))) {
-       case 948490: ;
+      case 948490: ;
   static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_12), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  List rest = Var_list(_x2c_match_values[1]);  printf("%d %d\n",  Var_int(value),  List_len(rest));  break;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_12), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  List rest = Var_list(_x2c_match_values[1]);  printf("%d %d\n", Var_int(value), List_len(rest));  break;
 }
 default: break;
     }

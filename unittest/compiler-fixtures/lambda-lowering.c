@@ -2,11 +2,11 @@
 
 #include "lambda-lowering.h"
 
-static List _24,  _22,  _21,  _19,  _17,  _13,  _12,  _10,  _7,  _5,  _4,  _3;
+static List _24, _22, _21, _19, _17, _13, _12, _10, _7, _5, _4, _3;
 
 static String _15;
 
-static Var _23,  _20,  _18,  _16,  _14,  _11,  _9,  _8,  _6,  _2,  _1,  _0;
+static Var _23, _20, _18, _16, _14, _11, _9, _8, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -14,11 +14,9 @@ static Func _x2c_func_handle_0;
 
 static Func _x2c_func_handle_1;
 
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
@@ -26,15 +24,15 @@ Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-Func Func_new(FuncAdapter,  List);
+Func Func_new(FuncAdapter, List);
 
-List List_map(List,  Func);
+List List_map(List, Func);
 
 int Var_int(Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
-Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 List Var_list(Var);
 
@@ -42,11 +40,11 @@ __attribute__((constructor)) static void _file_init_(void);
 
 static Var _x2c_lambda_0(Var value);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static Var _x2c_lambda_1(Var value);
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1,  const FuncArg * _x2c_func_argv_1);
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -55,41 +53,41 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = int_var(1);
   _1 = int_var(2);
   _2 = int_var(3);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
-  _5 = cons(_0,  _4);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
+  _5 = cons(_0, _4);
   _6 = int_var(4);
-  _7 = cons(_6,  NULL);
+  _7 = cons(_6, NULL);
   _8 = List_var(_7);
   _9 = int_var(5);
-  _10 = cons(_9,  NULL);
+  _10 = cons(_9, NULL);
   _11 = List_var(_10);
-  _12 = cons(_11,  NULL);
-  _13 = cons(_8,  _12);
+  _12 = cons(_11, NULL);
+  _13 = cons(_8, _12);
   _14 = Symbol_var(437126);
   _15 = String_new("Var");
   _16 = String_var(_15);
-  _17 = cons(_16,  NULL);
+  _17 = cons(_16, NULL);
   _18 = List_var(_17);
-  _19 = cons(_18,  NULL);
+  _19 = cons(_18, NULL);
   _20 = List_var(_19);
-  _21 = cons(_20,  NULL);
-  _22 = cons(_14,  _21);
+  _21 = cons(_20, NULL);
+  _22 = cons(_14, _21);
   _23 = List_var(_22);
-  _24 = cons(_23,  _17);
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _24);
-  _x2c_func_handle_1 = Func_new(_x2c_func_adapt_1,  _24);
+  _24 = cons(_23, _17);
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _24);
+  _x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _24);
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   List values = _5;
-  List doubled = List_map(values,  _x2c_func_handle_0);
+  List doubled = List_map(values, _x2c_func_handle_0);
   List nested = _13;
-  List heads = List_map(nested,  _x2c_func_handle_1);
-  printf("%d %d %d\n",  Var_int(List_getindex(doubled,  0)),  Var_int(List_getindex(doubled,  1)),  Var_int(List_getindex(doubled,  2)));
-  printf("%d %d\n",  Var_int(List_getindex(heads,  0)),  Var_int(List_getindex(heads,  1)));
+  List heads = List_map(nested, _x2c_func_handle_1);
+  printf("%d %d %d\n", Var_int(List_getindex(doubled, 0)), Var_int(List_getindex(doubled, 1)), Var_int(List_getindex(doubled, 2)));
+  printf("%d %d\n", Var_int(List_getindex(heads, 0)), Var_int(List_getindex(heads, 1)));
   return 0;
 }
 
@@ -98,19 +96,19 @@ static Var _x2c_lambda_0(Var value){
   ;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  0,  45156);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return _x2c_lambda_0(a0);
   ;
 }
 
 static Var _x2c_lambda_1(Var value){
-  return List_getindex(Var_list(value),  0);
+  return List_getindex(Var_list(value), 0);
   ;
 }
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1,  const FuncArg * _x2c_func_argv_1){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_1,  _x2c_func_argv_1,  0,  45156);
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 45156);
   return _x2c_lambda_1(a0);
   ;
 }

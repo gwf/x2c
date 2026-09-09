@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-unit-illegal-break.x:7:1: parse: syntax cannot 
   $bad();
   ^
 
-limit: too many errors, stopping
-

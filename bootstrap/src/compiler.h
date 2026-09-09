@@ -14,13 +14,13 @@
 typedef struct Diagnostics * Diagnostics;
 
 typedef struct GenNames{
-  Map counters,  adapters;
+  Map counters, adapters;
   int gensym_count;
 }
 * GenNames;
 
 typedef struct SymScope{
-  Map symbols,  bindings,  enumerators,  macros;
+  Map symbols, bindings, enumerators, macros;
 }
 SymScope;
 
@@ -29,21 +29,21 @@ typedef struct Sym * Sym;
 typedef struct SymTxn * SymTxn;
 
 typedef struct Compiler{
-  String filename,  text,  root_dir;
+  String filename, text, root_dir;
   String package;
   List package_dirs;
-  Map package_roots,  package_aliases,  package_members;
+  Map package_roots, package_aliases, package_members;
   Token token;
   Tokenizer tokenizer;
-  List return_type,  include_dirs;
+  List return_type, include_dirs;
   Map deps;
-  List aggregate_type,  macro_stack;
+  List aggregate_type, macro_stack;
   Sym sym;
   SymScope params;
-  Map key_ids,  macros,  kw_aliases;
+  Map key_ids, macros, kw_aliases;
   Map kw_seen;
   Map fixed;
-  Map protocols,  conforms,  protocol_helpers;
+  Map protocols, conforms, protocol_helpers;
   Map proto_cache;
   Map adoptions;
   Map macro_holes;
@@ -51,28 +51,28 @@ typedef struct Compiler{
   List lambda_scopes;
   Array match_types;
   Map imports;
-  Map init_tokens,  static_init_deps,  fn_defs;
-  Array id_keys,  mid_inits;
-  String init_fn,  fini_fn;
-  Array early_decls,  proto_inits,  early_inits,  late_inits;
+  Map init_tokens, static_init_deps, fn_defs;
+  Array id_keys, mid_inits;
+  String init_fn, fini_fn;
+  Array early_decls, proto_inits, early_inits, late_inits;
   int prelude;
-  int runtime_inc,  runtime_hdrs,  collect_protocols,  shallow,  source_private;
-  int in_pattern,  match_is,  runtime_literals,  inline_header;
-  int builtin_defs,  in_proto,  macro_count,  recovery_depth;
+  int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int in_pattern, match_is, runtime_literals, inline_header;
+  int builtin_defs, in_proto, macro_count, recovery_depth;
   int local_macro_capture_scopes;
   String fn_name;
   Diagnostics diagnostics;
-  Array braces,  import_stack;
+  Array braces, import_stack;
   Lisp macro_lisp;
   String import_src;
   int borrowed_lisp;
   GenNames names;
   Array origins;
-  int origin,  source_map;
+  int origin, source_map;
   SourceView sources;
-  int source_facts,  source_primary;
+  int source_facts, source_primary;
   Array source_occurrences;
-  Map source_definitions,  source_declarations,  source_texts;
+  Map source_definitions, source_declarations, source_texts;
 }
 * Compiler;
 
@@ -81,105 +81,105 @@ Var Compiler_var(Compiler compiler);
 
 Compiler Var_compiler(Var value);
 
-void Map_merge_translation_dependency(Map dependencies,  String path,  Var content_hash);
+void Map_merge_translation_dependency(Map dependencies, String path, Var content_hash);
 
-void Compiler_add_translation_dependency(Compiler compiler,  String path);
+void Compiler_add_translation_dependency(Compiler compiler, String path);
 
-void Compiler_merge_translation_dependencies(Compiler compiler,  Map dependencies);
+void Compiler_merge_translation_dependencies(Compiler compiler, Map dependencies);
 
 void Compiler_free_lisp(Compiler c);
 
 void Compiler_own_diagnostics(Compiler compiler);
 
-void Compiler_borrow_diagnostics(Compiler compiler,  Compiler owner);
+void Compiler_borrow_diagnostics(Compiler compiler, Compiler owner);
 
-void Compiler_take_diagnostics(Compiler compiler,  Compiler child);
+void Compiler_take_diagnostics(Compiler compiler, Compiler child);
 
-void Compiler_close_child(Compiler compiler,  Compiler child);
+void Compiler_close_child(Compiler compiler, Compiler child);
 
 Compiler Compiler_new(void);
 
 Compiler Compiler_new_shared(Compiler owner);
 
-int Compiler_read_source(Compiler compiler,  String path,  String volatile * text);
+int Compiler_read_source(Compiler compiler, String path, String volatile * text);
 
-void Compiler_copy_source_declaration(Compiler compiler,  Map target,  Map source,  List key);
+void Compiler_copy_source_declaration(Compiler compiler, Map target, Map source, List key);
 
-void Compiler_merge_source_declarations(Compiler compiler,  Map target,  Map source);
+void Compiler_merge_source_declarations(Compiler compiler, Map target, Map source);
 
-void Compiler_record_source_declaration(Compiler compiler,  List binding,  Token first,  Token after);
+void Compiler_record_source_declaration(Compiler compiler, List binding, Token first, Token after);
 
-void Compiler_record_source_reference(Compiler compiler,  List binding,  Type type,  Token first,  Token after);
+void Compiler_record_source_reference(Compiler compiler, List binding, Type type, Token first, Token after);
 
 Map Compiler_semantic_binding_facts(Compiler compiler);
 
 Map Compiler_macro_definition_locals(Compiler compiler);
 
-String Compiler_fresh_name(Compiler compiler,  String stem);
+String Compiler_fresh_name(Compiler compiler, String stem);
 
-String Compiler_emitted_binding_name(Compiler compiler,  List binding);
+String Compiler_emitted_binding_name(Compiler compiler, List binding);
 
-void Compiler_tokenize(Compiler c,  char * text);
+void Compiler_tokenize(Compiler c, char * text);
 
-Token Compiler_skip_trivia_from(Compiler compiler,  Token token);
+Token Compiler_skip_trivia_from(Compiler compiler, Token token);
 
-Symbol Compiler_peek(Compiler compiler,  int steps);
+Symbol Compiler_peek(Compiler compiler, int steps);
 
-Symbol Compiler_expect(Compiler c,  Symbol type);
+Symbol Compiler_expect(Compiler c, Symbol type);
 
 void Compiler_next(Compiler compiler);
 
-static inline int Compiler_test(Compiler compiler,  Symbol type){
+static inline int Compiler_test(Compiler compiler, Symbol type){
   if(compiler -> token -> type != type) return 0;
   Compiler_next(compiler);
   return 1;
 }
 
-int Compiler_record_origin(Compiler c,  Token token);
+int Compiler_record_origin(Compiler c, Token token);
 
-List Compiler_anchor_origin(Compiler compiler,  List node,  Token token);
+List Compiler_anchor_origin(Compiler compiler, List node, Token token);
 
 int Compiler__at_function_arrow(Compiler compiler);
 
-void Compiler__skip_shallow_expression(Compiler compiler,  int stop_at_comma);
+void Compiler__skip_shallow_expression(Compiler compiler, int stop_at_comma);
 
-void Compiler_shallow_parse(Compiler c,  Map globals);
+void Compiler_shallow_parse(Compiler c, Map globals);
 
-void Compiler_shallow_parse_overlay(Compiler c,  Map base,  Map overlay);
+void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
 
 List Compiler_leading_preproc(Compiler compiler);
 
-void Compiler_update_source_visibility(Compiler c,  List directives);
+void Compiler_update_source_visibility(Compiler c, List directives);
 
-List Compiler_full_parse(Compiler c,  Map globs);
+List Compiler_full_parse(Compiler c, Map globs);
 
-List Compiler_cache(Compiler c,  List key);
+List Compiler_cache(Compiler c, List key);
 
-List Compiler_cache_cons_cell(Compiler compiler,  List head,  List tail);
+List Compiler_cache_cons_cell(Compiler compiler, List head, List tail);
 
-List Compiler_cache_literal_list(Compiler compiler,  List values);
+List Compiler_cache_literal_list(Compiler compiler, List values);
 
-Var Compiler_match_pattern_value(Compiler c,  Var node);
+Var Compiler_match_pattern_value(Compiler c, Var node);
 
-int Compiler_match_pattern_is_static(Compiler compiler,  List pattern);
+int Compiler_match_pattern_is_static(Compiler compiler, List pattern);
 
-Symbol Compiler_match_pattern_head_symbol(Compiler compiler,  List pattern);
+Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern);
 
-Symbol Compiler_match_pattern_flat_head(Compiler compiler,  List pattern,  List binders);
+Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders);
 
-List Compiler_match_pattern_binders(Compiler compiler,  List pattern,  List * possible);
+List Compiler_match_pattern_binders(Compiler compiler, List pattern, List * possible);
 
-void Compiler_define_match_binders(Compiler compiler,  List pattern);
+void Compiler_define_match_binders(Compiler compiler, List pattern);
 
-void Compiler_add_early(Compiler compiler,  List decl);
+void Compiler_add_early(Compiler compiler, List decl);
 
-void Compiler_add_protocol_init(Compiler compiler,  List stmt);
+void Compiler_add_protocol_init(Compiler compiler, List stmt);
 
-void Compiler_add_early_init(Compiler compiler,  List stmt);
+void Compiler_add_early_init(Compiler compiler, List stmt);
 
-void Compiler_add_mid_init(Compiler compiler,  List stmt);
+void Compiler_add_mid_init(Compiler compiler, List stmt);
 
-void Compiler_add_late_init(Compiler compiler,  List stmt);
+void Compiler_add_late_init(Compiler compiler, List stmt);
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
@@ -189,7 +189,7 @@ int SymTxn_local_macros_changed(SymTxn transaction);
 
 void SymTxn_rollback(SymTxn transaction);
 
-void Sym_reset(Sym sym,  Map globals);
+void Sym_reset(Sym sym, Map globals);
 
 Map Sym_global_symbols(Sym sym);
 
@@ -197,105 +197,105 @@ Map Sym_base_symbols(Sym sym);
 
 Map Sym_file_statics(Sym sym);
 
-void Sym_mark_static(Sym sym,  List key);
+void Sym_mark_static(Sym sym, List key);
 
 Map Sym_current_symbols(Sym sym);
 
-List Sym_current_binding(Sym sym,  List key);
+List Sym_current_binding(Sym sym, List key);
 
-Symbol Sym_enumerator_owner(Sym sym,  List key);
+Symbol Sym_enumerator_owner(Sym sym, List key);
 
-void Sym_declare_enumerator(Sym sym,  List key,  Symbol owner);
+void Sym_declare_enumerator(Sym sym, List key, Symbol owner);
 
-void Sym_define_macro(Sym sym,  Atom name,  List definition);
+void Sym_define_macro(Sym sym, Atom name, List definition);
 
 int Sym_has_local_macros(Sym sym);
 
 int Sym_scope_count(Sym sym);
 
-List Sym_lookup_macro(Sym sym,  Atom name);
+List Sym_lookup_macro(Sym sym, Atom name);
 
-void Sym_set(Sym sym,  List key,  List type);
+void Sym_set(Sym sym, List key, List type);
 
-void Sym_seed_var_tags(Sym sym,  Map symbols);
+void Sym_seed_var_tags(Sym sym, Map symbols);
 
-List Sym_define(Sym sym,  List key,  List type);
+List Sym_define(Sym sym, List key, List type);
 
-List Sym_define_global(Sym sym,  List key,  List type);
+List Sym_define_global(Sym sym, List key, List type);
 
-List Sym_get_exact(Sym sym,  List key);
+List Sym_get_exact(Sym sym, List key);
 
-List Sym_get(Sym sym,  List key);
+List Sym_get(Sym sym, List key);
 
-List Sym_lookup(Sym sym,  List key,  List * type);
+List Sym_lookup(Sym sym, List key, List * type);
 
-List Sym_reference(Sym sym,  List key,  List * type);
+List Sym_reference(Sym sym, List key, List * type);
 
-List Sym_resolve_global(Sym sym,  List key,  List * type);
+List Sym_resolve_global(Sym sym, List key, List * type);
 
-int Sym_binding_is_local(Sym sym,  List binding);
+int Sym_binding_is_local(Sym sym, List binding);
 
-int Sym_binding_is_local_before(Sym sym,  List binding,  int scope_count);
+int Sym_binding_is_local_before(Sym sym, List binding, int scope_count);
 
-List Sym_introduce(Sym sym,  String spelling);
+List Sym_introduce(Sym sym, String spelling);
 
-String Compiler_package_spelling(Compiler compiler,  String name);
+String Compiler_package_spelling(Compiler compiler, String name);
 
-void Compiler_register_package_alias(Compiler compiler,  String name,  String alias,  Token token);
+void Compiler_register_package_alias(Compiler compiler, String name, String alias, Token token);
 
-void Compiler_register_package_member(Compiler c,  String name,  String member,  String local,  Token member_token,  Token local_token);
+void Compiler_register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token);
 
-String Compiler_package_member_spelling(Compiler c,  String name);
+String Compiler_package_member_spelling(Compiler c, String name);
 
-List Compiler_imported_providers(Compiler c,  String name);
+List Compiler_imported_providers(Compiler c, String name);
 
-String Compiler_imported_spelling(Compiler compiler,  String name);
+String Compiler_imported_spelling(Compiler compiler, String name);
 
-List Sym_declare(Sym sym,  List context,  List key,  List ast);
+List Sym_declare(Sym sym, List context, List key, List ast);
 
-List Sym_bind_identity(Sym sym,  List context,  List binding,  List ast);
+List Sym_bind_identity(Sym sym, List context, List binding, List ast);
 
-Type Sym_resolve_key(Sym sym,  Type key);
+Type Sym_resolve_key(Sym sym, Type key);
 
-Type Sym_next_typedef(Sym sym,  Type type,  int * hops);
+Type Sym_next_typedef(Sym sym, Type type, int * hops);
 
-Type Sym_resolve_numeric_type(Sym sym,  Type type);
+Type Sym_resolve_numeric_type(Sym sym, Type type);
 
-Type Sym_local_type(Sym sym,  Type type);
+Type Sym_local_type(Sym sym, Type type);
 
-Var Compiler_aggregate_name(Compiler compiler,  Symbol kind,  Var name,  int definition);
+Var Compiler_aggregate_name(Compiler compiler, Symbol kind, Var name, int definition);
 
-Type Sym_normalize_declared_type(Sym sym,  Type type);
+Type Sym_normalize_declared_type(Sym sym, Type type);
 
-Symbol Sym_var_tag_for_type(Sym sym,  Type type,  Type * resolved);
+Symbol Sym_var_tag_for_type(Sym sym, Type type, Type * resolved);
 
-int Sym_is_var_type(Sym sym,  Type type);
+int Sym_is_var_type(Sym sym, Type type);
 
-int Sym_is_string_type(Sym sym,  Type type);
+int Sym_is_string_type(Sym sym, Type type);
 
-int Sym_is_array_type(Sym sym,  Type type);
+int Sym_is_array_type(Sym sym, Type type);
 
-int Sym_is_map_type(Sym sym,  Type type);
+int Sym_is_map_type(Sym sym, Type type);
 
-int Sym_is_named_value_type(Sym sym,  Type type,  String name);
+int Sym_is_named_value_type(Sym sym, Type type, String name);
 
-Type Sym_lookup_field(Sym sym,  Type type,  List field);
+Type Sym_lookup_field(Sym sym, Type type, List field);
 
-void Sym_declare_field_order(Sym sym,  Type type,  List fields);
+void Sym_declare_field_order(Sym sym, Type type, List fields);
 
-List Sym_field_order(Sym sym,  Type type);
+List Sym_field_order(Sym sym, Type type);
 
-void Sym_declare_delegate_field(Sym sym,  Type aggregate,  String name);
+void Sym_declare_delegate_field(Sym sym, Type aggregate, String name);
 
-Type Sym_delegate_aggregate(Sym sym,  Type type);
+Type Sym_delegate_aggregate(Sym sym, Type type);
 
 List Compiler_gensym(Compiler compiler);
 
-void Compiler_set_gensym(Compiler compiler,  int count);
+void Compiler_set_gensym(Compiler compiler, int count);
 
 void Sym_push_new_scope(Sym sym);
 
-void Sym_push_scope(Sym sym,  SymScope scope);
+void Sym_push_scope(Sym sym, SymScope scope);
 
 SymScope Sym_pop_scope(Sym sym);
 

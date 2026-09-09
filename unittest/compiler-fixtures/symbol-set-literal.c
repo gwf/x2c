@@ -2,38 +2,35 @@
 
 #include "symbol-set-literal.h"
 
-static List _3,  _2;
+static List _3, _2;
 
-static Var _1,  _0;
+static Var _1, _0;
 
 static SymbolSet values;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 size_t SymbolSet_len(SymbolSet);
 
-int SymbolSet_index(SymbolSet,  Symbol);
+int SymbolSet_index(SymbolSet, Symbol);
 
-Symbol SymbolSet_getindex(SymbolSet,  int);
+Symbol SymbolSet_getindex(SymbolSet, int);
 
-int SymbolSet_contains(SymbolSet,  Symbol);
+int SymbolSet_contains(SymbolSet, Symbol);
 
 int Var_is_atom(Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
-Iter SymbolSet_iter(SymbolSet,  Iter);
+Iter SymbolSet_iter(SymbolSet, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -45,8 +42,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = Symbol_var(13278);
   _1 = Symbol_var(4196);
-  _2 = cons(_1,  NULL);
-  _3 = cons(_0,  _2);
+  _2 = cons(_1, NULL);
+  _3 = cons(_0, _2);
   values =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\003\001\000\001\000\336\063\000\000\000\000\000\000\144\020\000\000\000\000\000\000\331\141\373\213\114\176\003\000\160\255\021\000\000\000\000\000";
 }
 
@@ -59,24 +56,24 @@ int main(void){
   if(! _init_guard_) _file_init_();
   SymbolSet empty =(SymbolSet) "\001\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000";
   List ordinary = _3;
-  int ordered = SymbolSet_len(values) == 4 && SymbolSet_index(values,  13278) == 0 && SymbolSet_index(values,  983292161253849) == 2 && SymbolSet_index(values,  28562377614) == - 1 && SymbolSet_getindex(values,  1) == 4196 && SymbolSet_getindex(values,  - 1) == 1158512 && SymbolSet_getindex(values,  4) == 0 && SymbolSet_getindex(values,  - 5) == 0 && SymbolSet_index(same_values(),  983292161253849) == 2;
-  int membership = SymbolSet_contains(values,  4196) && ! SymbolSet_contains(values,  28562377614) && SymbolSet_len(empty) == 0 && SymbolSet_index(empty,  13278) == - 1;
-  int atoms = Var_is_atom(List_getindex(ordinary,  0)) && Var_is_atom(List_getindex(ordinary,  1));
+  int ordered = SymbolSet_len(values) == 4 && SymbolSet_index(values, 13278) == 0 && SymbolSet_index(values, 983292161253849) == 2 && SymbolSet_index(values, 28562377614) == - 1 && SymbolSet_getindex(values, 1) == 4196 && SymbolSet_getindex(values, - 1) == 1158512 && SymbolSet_getindex(values, 4) == 0 && SymbolSet_getindex(values, - 5) == 0 && SymbolSet_index(same_values(), 983292161253849) == 2;
+  int membership = SymbolSet_contains(values, 4196) && ! SymbolSet_contains(values, 28562377614) && SymbolSet_len(empty) == 0 && SymbolSet_index(empty, 13278) == - 1;
+  int atoms = Var_is_atom(List_getindex(ordinary, 0)) && Var_is_atom(List_getindex(ordinary, 1));
   int iteration = 0;
   {
     Symbol symbol;
-    Iter _x2c_macro_iterator_0 = SymbolSet_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = SymbolSet_iter(values, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       symbol = Var_symbol(_x2c_macro_item_0);
-      iteration += SymbolSet_index(values,  symbol) + 1;
+      iteration += SymbolSet_index(values, symbol) + 1;
     }
 
   }
-  printf("%d %d %d %d\n",  ordered,  membership,  atoms,  iteration);
+  printf("%d %d %d %d\n", ordered, membership, atoms, iteration);
   return ordered && membership && atoms && iteration == 10 ? 0 : 1;
 }
 

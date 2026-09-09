@@ -123,6 +123,7 @@ static List _build_entry(
 /* The limit notice follows the report that reaches the threshold. It is
    stored and streamed like an entry but is not included in `count`. */
 static void _publish_limit_notice(Diagnostics diag) {
+  if (diag.limit == 1) return;
   String note = "too many errors, stopping";
   List entry = _build_entry(<limit>, note, NULL, NULL);
   diag.entries.push(entry);
@@ -131,9 +132,10 @@ static void _publish_limit_notice(Diagnostics diag) {
 
 /** Records and synchronously emits one diagnostic unless already limited.
     Entries retain publication order. NULL `code` becomes `<driver>`. Reaching
-    a positive limit publishes one following `<limit>` notice, and later
-    reports are ignored. Supplied message, location, and notes are shared;
-    their canonical-value pools must outlive the store and its snapshots.
+    a limit greater than one publishes a following `<limit>` notice; a limit
+    of one stops after the first error. Later reports are ignored. Supplied
+    message, location, and notes are shared; their canonical-value pools must
+    outlive the store and its snapshots.
 */
 void Diagnostics.report(
   Diagnostics diag, Symbol code, String message, List location, List notes) {

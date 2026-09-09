@@ -3,5 +3,3 @@ unittest/compiler-fixtures/duplicate-type-shutdown.x:9:36: parse: translation un
                                      ^
   note: shutdown: SecondShutdown_shutdown
 
-limit: too many errors, stopping
-

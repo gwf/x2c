@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lisp-bind-duplicate.x:8:1: macro: duplicate native Li
   ^
   note: group: sample name: same
 
-limit: too many errors, stopping
-

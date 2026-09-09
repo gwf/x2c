@@ -3,5 +3,3 @@ unittest/compiler-fixtures/catch-filter-default-order.x:6:9: parse: catch defaul
           ^^
   note: move catch: after every filtered arm
 
-limit: too many errors, stopping
-

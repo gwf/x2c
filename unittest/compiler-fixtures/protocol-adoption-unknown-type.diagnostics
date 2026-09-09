@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-adoption-unknown-type.x:3:14: protocol: adop
   protocol Var(Nonexistent);
                ^^^^^^^^^^^
 
-limit: too many errors, stopping
-

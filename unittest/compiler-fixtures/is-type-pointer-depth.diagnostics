@@ -2,5 +2,3 @@ unittest/compiler-fixtures/is-type-pointer-depth.x:4:16: type: type (* * * int) 
     return value is (int ***);
                  ^^
 
-limit: too many errors, stopping
-

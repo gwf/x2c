@@ -3,5 +3,3 @@ unittest/compiler-fixtures/is-type-rhs-var.x:5:16: type: operator 'is' requires 
                  ^^
   note: operand type: ("Var")
 
-limit: too many errors, stopping
-

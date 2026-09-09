@@ -16,7 +16,7 @@ static int add_one(int value){
 int main(void){
   x2c_initialize();
   int result = callbacks[0](41);
-  printf("%d\n",  result);
+  printf("%d\n", result);
   return result == 42 ? 0 : 1;
 }
 

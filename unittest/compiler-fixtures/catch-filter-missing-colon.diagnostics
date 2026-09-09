@@ -2,5 +2,3 @@ unittest/compiler-fixtures/catch-filter-missing-colon.x:5:23: parse: expected ':
     catch %(alloc-fail) {}
                         ^
 
-limit: too many errors, stopping
-

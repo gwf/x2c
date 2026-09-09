@@ -12,9 +12,9 @@
 typedef struct Build{
   CliRequest request;
   Toolchain toolchain;
-  String work_dir,  gen_root,  obj_root,  dep_root,  state_root,  output;
+  String work_dir, gen_root, obj_root, dep_root, state_root, output;
   int temporary;
-  Array c_sources,  gen_dirs,  native_inputs,  objects;
+  Array c_sources, gen_dirs, native_inputs, objects;
   String compile_directory;
   Array compile_commands;
   unsigned long started_at;
@@ -22,7 +22,7 @@ typedef struct Build{
   unsigned long cc_start;
   unsigned long final_at;
   unsigned long long gen_bytes;
-  int xlat_n,  xlat_done,  xlat_cached,  cc_n,  cc_done,  cc_cached,  final_cached;
+  int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached;
 }
 * Build;
 
@@ -30,19 +30,19 @@ int _build_mkdirs(String path);
 
 Build CliRequest_prepare(CliRequest c);
 
-String Build_generated_dir(Build state,  String input);
+String Build_generated_dir(Build state, String input);
 
-int Build_translation_current(Build state,  String input,  String directory);
+int Build_translation_current(Build state, String input, String directory);
 
-void Build_record_translation(Build state,  String input,  String directory);
+void Build_record_translation(Build state, String input, String directory);
 
-void Build_add_generated(Build state,  String input,  String directory);
+void Build_add_generated(Build state, String input, String directory);
 
-void Build_begin_translation(Build state,  String input);
+void Build_begin_translation(Build state, String input);
 
-void Build_end_translation(Build state,  String input,  int cached);
+void Build_end_translation(Build state, String input, int cached);
 
-int compile_commands_write(String path,  Array commands);
+int compile_commands_write(String path, Array commands);
 
 int Build_finish(Build b);
 
@@ -52,7 +52,7 @@ int Build_run_program(Build state);
 
 int _build_remove_tree(String path);
 
-void Build_cleanup(Build state,  int success);
+void Build_cleanup(Build state, int success);
 
 
 #endif /* __GUARD_0x8309C62D__ */

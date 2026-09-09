@@ -3,5 +3,3 @@ unittest/compiler-fixtures/keyword-alias-import-bare-collision.x:7:17: parse: ex
                   ^
   note: token: = kind: =
 
-limit: too many errors, stopping
-

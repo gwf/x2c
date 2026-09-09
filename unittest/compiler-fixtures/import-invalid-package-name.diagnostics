@@ -2,5 +2,3 @@ unittest/compiler-fixtures/import-invalid-package-name.x:4:8: parse: package nam
   import "../escape";
          ^^^^^^^^^^^
 
-limit: too many errors, stopping
-

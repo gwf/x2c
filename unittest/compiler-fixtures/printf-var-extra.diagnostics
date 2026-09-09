@@ -3,5 +3,3 @@ unittest/compiler-fixtures/printf-var-extra.x:5:3: xform: Var argument has no co
     ^^^^^^
   note: printf-family call: printf
 
-limit: too many errors, stopping
-

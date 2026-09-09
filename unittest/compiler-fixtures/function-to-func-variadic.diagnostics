@@ -3,5 +3,3 @@ unittest/compiler-fixtures/function-to-func-variadic.x:11:3: type: function conv
     ^^^^
   note: target signature: ("Func") source signature: (* (func ((int) (...))) int)
 
-limit: too many errors, stopping
-

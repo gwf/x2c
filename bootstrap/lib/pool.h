@@ -16,22 +16,22 @@ typedef struct Pool{
   struct Pool * up;
   pthread_mutex_t mutex;
   unsigned child_capacity;
-  size_t interned,  promoted;
-  void * blocks,  * current[10],  * promotions;
+  size_t interned, promoted;
+  void * blocks, * current[10], * promotions;
 }
 * Pool;
 
 typedef struct PoolStats{
   int depth;
-  size_t interned,  promoted,  allocation_calls,  free_calls;
-  size_t requested_bytes,  block_allocations,  block_reuses,  slot_reuses;
-  size_t backing_bytes,  active_blocks,  active_bytes,  depot_blocks,  depot_bytes;
+  size_t interned, promoted, allocation_calls, free_calls;
+  size_t requested_bytes, block_allocations, block_reuses, slot_reuses;
+  size_t backing_bytes, active_blocks, active_bytes, depot_blocks, depot_bytes;
 }
 PoolStats;
 
 void x2c_pool_thread_start(void);
 
-Pool Pool_retain_named(Pool inner,  const char * name);
+Pool Pool_retain_named(Pool inner, const char * name);
 
 Pool Pool_retain(Pool inner);
 
@@ -55,21 +55,21 @@ Pool x2c_pool_values_detach(void);
 
 int x2c_pool_values_is_permanent(Var value);
 
-Var Pool_lookup(Pool inner,  Var key);
+Var Pool_lookup(Pool inner, Var key);
 
-void Pool_insert(Pool inner,  Var object);
+void Pool_insert(Pool inner, Var object);
 
-Var Pool_intern(Pool inner,  Var object,  void * alloc);
+Var Pool_intern(Pool inner, Var object, void * alloc);
 
-void * Pool_malloc(Pool inner,  size_t size);
+void * Pool_malloc(Pool inner, size_t size);
 
-void Pool_free(Pool inner,  void * alloc);
+void Pool_free(Pool inner, void * alloc);
 
-int Pool_owns(Pool pool,  Var key);
+int Pool_owns(Pool pool, Var key);
 
-int Pool_promote(Pool inner,  Var object,  void * alloc);
+int Pool_promote(Pool inner, Var object, void * alloc);
 
-int Pool_own(Pool inner,  Var object,  void * alloc);
+int Pool_own(Pool inner, Var object, void * alloc);
 
 PoolStats Pool_stats(Pool inner);
 

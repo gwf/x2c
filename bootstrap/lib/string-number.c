@@ -15,7 +15,7 @@ static int _only_space(const char * rest){
   return ! * rest;
 }
 
-int String_try_long(String str,  long * out){
+int String_try_long(String str, long * out){
   if(! String_truth(str) || ! out) return 0;
   const char * digits = str;
   while(isspace((unsigned char) * digits)) digits ++;
@@ -29,7 +29,7 @@ int String_try_long(String str,  long * out){
     const char * number = digits + 2;
     char * stop = NULL;
     errno = 0;
-    unsigned long magnitude = strtoul(number,  & stop,  base);
+    unsigned long magnitude = strtoul(number, & stop, base);
     if(stop == number || errno == ERANGE || ! _only_space(stop)) return 0;
     unsigned long limit = negative ?(unsigned long) LONG_MAX + 1ul :(unsigned long) LONG_MAX;
     if(magnitude > limit) return 0;
@@ -38,17 +38,17 @@ int String_try_long(String str,  long * out){
   }
   char * stop = NULL;
   errno = 0;
-  long value = strtol(str,  & stop,  0);
+  long value = strtol(str, & stop, 0);
   if(stop ==(const char *) str || errno == ERANGE || ! _only_space(stop)) return 0;
   * out = value;
   return 1;
 }
 
-int String_try_double(String str,  double * out){
+int String_try_double(String str, double * out){
   if(! String_truth(str) || ! out) return 0;
   char * stop = NULL;
   errno = 0;
-  double value = strtod(str,  & stop);
+  double value = strtod(str, & stop);
   if(stop ==(const char *) str || errno == ERANGE || ! _only_space(stop)) return 0;
   * out = value;
   return 1;

@@ -8,11 +8,11 @@
 #include "x2c.h"
 #include "foreign-qualifier-upstream.h"
 #ifndef X2CCPP
-_Static_assert(_Generic(& upstream_monitor_index,  int(*)(const char *) : 1, default: 0),  "native alias aliased_index does not match upstream_monitor_index");
+_Static_assert(_Generic(& upstream_monitor_index, int(*)(const char *) : 1, default: 0), "native alias aliased_index does not match upstream_monitor_index");
 #endif
 #define aliased_index upstream_monitor_index
 #ifndef X2CCPP
-_Static_assert(_Generic(& upstream_monitor_width,  const int(*)(int) : 1, default: 0),  "native alias aliased_width does not match upstream_monitor_width");
+_Static_assert(_Generic(& upstream_monitor_width, const int(*)(int) : 1, default: 0), "native alias aliased_width does not match upstream_monitor_width");
 #endif
 #define aliased_width upstream_monitor_width
 int main(void);

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/keyword-alias-import-missing.xmacro:1:21: parse: unkn
   keyword unavailable $fixture.private.missing;
                       ^
 
-limit: too many errors, stopping
-

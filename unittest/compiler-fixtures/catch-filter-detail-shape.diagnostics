@@ -3,5 +3,3 @@ unittest/compiler-fixtures/catch-filter-detail-shape.x:5:22: parse: catch filter
                        ^^^^^
   note: wrap keyed detail patterns in parentheses
 
-limit: too many errors, stopping
-

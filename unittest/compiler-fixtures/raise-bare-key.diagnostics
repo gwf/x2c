@@ -3,5 +3,3 @@ unittest/compiler-fixtures/raise-bare-key.x:4:22: parse: raise detail key must b
                        ^^^^^^^
   note: use raise %(code (key value)...);
 
-limit: too many errors, stopping
-

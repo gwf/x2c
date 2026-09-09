@@ -2,13 +2,9 @@
 
 #include "sourceview.h"
 
-static String _4,  _3,  _2,  _1,  _0;
+static String _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 #include <limits.h>
 #include <stdio.h>
@@ -16,37 +12,37 @@ static int _init_guard_ = 0;
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-void * Scope_calloc(size_t,  size_t);
+void * Scope_calloc(size_t, size_t);
 
 String String_new(const char *);
 
-int String_startswith(String,  String);
+int String_startswith(String, String);
 
 Var String_var(String);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
-List String_split(String,  String);
+List String_split(String, String);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 String Var_string(Var);
 
 int String_truth(String);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
-int String_rfind(String,  String);
+int String_rfind(String, String);
 
-Var Map_setindex(Map,  Var,  Var);
+Var Map_setindex(Map, Var, Var);
 
-int Map_contains(Map,  Var);
+int Map_contains(Map, Var);
 
-int Map_try_get(Map,  Var,  Var *);
+int Map_try_get(Map, Var, Var *);
 
-int File_stat(File,  struct stat *);
+int File_stat(File, struct stat *);
 
 int File_close(File);
 
@@ -72,7 +68,7 @@ __attribute__((constructor)) static void _file_init_(void){
 }
 
 SourceView SourceView_new(void){
-  SourceView sources = Scope_calloc(1,  sizeof(struct SourceView));
+  SourceView sources = Scope_calloc(1, sizeof(struct SourceView));
   sources -> overlays = Map_new();
   sources -> dirty_paths = Map_new();
   return sources;
@@ -81,30 +77,30 @@ SourceView SourceView_new(void){
 String SourceView_path(String path){
   if(! _init_guard_) _file_init_();
   char buffer[PATH_MAX];
-  if(realpath(path,  buffer)) return String_new(buffer);
-  if(! String_startswith(path,  _3)){
-    if(! getcwd(buffer,  sizeof(buffer))) return path;
-    path = String_join(NULL,  cons(String_var(String_new(buffer)),  cons(String_var(_0),  cons(String_var(path),  NULL))));
+  if(realpath(path, buffer)) return String_new(buffer);
+  if(! String_startswith(path, _3)){
+    if(! getcwd(buffer, sizeof(buffer))) return path;
+    path = String_join(NULL, cons(String_var(String_new(buffer)), cons(String_var(_0), cons(String_var(path), NULL))));
   }
   String result = _3;
   {
     String part;
-    Iter _x2c_macro_iterator_0 = List_iter(String_split(path,  _3),  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(String_split(path, _3), &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       part = Var_string(_x2c_macro_item_0);
       {
-        if(! String_truth(part) || String_equal(part,  _1)) continue;
-        if(String_equal(part,  _2)){
-          int slash = String_rfind(result,  _3);
-          result = slash > 0 ? String_getslice(result,  -2147483648,  slash,  1) : "/";
+        if(! String_truth(part) || String_equal(part, _1)) continue;
+        if(String_equal(part, _2)){
+          int slash = String_rfind(result, _3);
+          result = slash > 0 ? String_getslice(result, -2147483648, slash, 1) : "/";
           continue;
         }
-        result = String_equal(result,  _3) ? String_join(NULL,  cons(String_var(_0),  cons(String_var(part),  NULL))) : String_join(NULL,  cons(String_var(result),  cons(String_var(_0),  cons(String_var(part),  NULL))));
-        if(realpath(result,  buffer)) result = String_new(buffer);
+        result = String_equal(result, _3) ? String_join(NULL, cons(String_var(_0), cons(String_var(part), NULL))) : String_join(NULL, cons(String_var(result), cons(String_var(_0), cons(String_var(part), NULL))));
+        if(realpath(result, buffer)) result = String_new(buffer);
       }
 
     }
@@ -113,61 +109,60 @@ String SourceView_path(String path){
   return result;
 }
 
-void SourceView_set(SourceView sources,  String path,  String text,  int changed){
+void SourceView_set(SourceView sources, String path, String text, int changed){
   if(! _init_guard_) _file_init_();
-  Map_setindex(sources -> overlays,  String_var(SourceView_path(path)),  String_var(text));
-  if(changed) Map_setindex(sources -> dirty_paths,  String_var(SourceView_path(path)),  int_var(1));
+  Map_setindex(sources -> overlays, String_var(SourceView_path(path)), String_var(text));
+  if(changed) Map_setindex(sources -> dirty_paths, String_var(SourceView_path(path)), int_var(1));
 }
 
-int SourceView_is_changed(SourceView sources,  String path){
+int SourceView_is_changed(SourceView sources, String path){
   if(! _init_guard_) _file_init_();
-  return sources && Map_contains(sources -> dirty_paths,  String_var(SourceView_path(path)));
+  return sources && Map_contains(sources -> dirty_paths, String_var(SourceView_path(path)));
 }
 
-int SourceView_exists(SourceView sources,  String path){
+int SourceView_exists(SourceView sources, String path){
   if(! _init_guard_) _file_init_();
-  if(sources && Map_contains(sources -> overlays,  String_var(SourceView_path(path)))) return 1;
+  if(sources && Map_contains(sources -> overlays, String_var(SourceView_path(path)))) return 1;
   struct stat info;
-  return ! access(path,  R_OK) && ! stat(path,  & info) && S_ISREG(info.st_mode);
+  return ! access(path, R_OK) && ! stat(path, & info) && S_ISREG(info.st_mode);
 }
 
-int SourceView_read(SourceView sources,  String path,  String volatile * text){
+int SourceView_read(SourceView sources, String path, String volatile * text){
   if(! _init_guard_) _file_init_();
   Var value;
-  if(sources && Map_try_get(sources -> overlays,  String_var(SourceView_path(path)),  & value)){
+  if(sources && Map_try_get(sources -> overlays, String_var(SourceView_path(path)), & value)){
     * text = Var_string(value);
     return 1;
   }
   struct stat info;
-  File file = fopen(path,  "r");
+  File file = fopen(path, "r");
   if(! file) return 0;
-  if(File_stat(file,  & info) || ! S_ISREG(info.st_mode)){
+  if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
     File_close(file);
     return 0;
   }
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+    ExceptionFrame _x2c_exception_frame_0;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) * text = File_string_close(file);
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {{
+         {{
           int _x2c_return_value_0 = 0;
           {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_error_catch_close(_x2c_error_handler_0);
+  x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
         }
@@ -177,11 +172,11 @@ int SourceView_read(SourceView sources,  String path,  String volatile * text){
     }
     else {int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
@@ -189,19 +184,19 @@ int SourceView_read(SourceView sources,  String path,  String volatile * text){
 }
 int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return 1;
 }
 
-String SourceView_content_hash(SourceView sources,  String path){
+String SourceView_content_hash(SourceView sources, String path){
   if(! _init_guard_) _file_init_();
   String text;
-  if(! SourceView_read(sources,  path,  & text)) return NULL;
-  return String_printf(_4,  String_hash(text));
+  if(! SourceView_read(sources, path, & text)) return NULL;
+  return String_printf(_4, String_hash(text));
 }
 

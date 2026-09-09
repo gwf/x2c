@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 typedef struct DisjointSet{
-  int * parent,  * size,  length,  ncmpnts;
+  int * parent, * size, length, ncmpnts;
 }
 * DisjointSet;
 
@@ -15,9 +15,9 @@ DisjointSet DisjointSet_new(int n);
 
 void DisjointSet_free(DisjointSet set);
 
-int DisjointSet_find(DisjointSet set,  int x);
+int DisjointSet_find(DisjointSet set, int x);
 
-void DisjointSet_union(DisjointSet set,  int a,  int b);
+void DisjointSet_union(DisjointSet set, int a, int b);
 
 List DisjointSet_sizes(DisjointSet set);
 

@@ -2,26 +2,23 @@
 
 #include "protocol-typedef-inherited-method.h"
 
-static List _5,  _4,  _3;
+static List _5, _4, _3;
 
-static Var _2,  _1,  _0;
+static Var _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 List List_cdr(List);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
-int List_equal(List,  List);
+int List_equal(List, List);
 
 int Var_int(Var);
 
@@ -36,9 +33,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = int_var(1);
   _1 = int_var(2);
   _2 = int_var(3);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
-  _5 = cons(_0,  _4);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
+  _5 = cons(_0, _4);
 }
 
 int main(void){
@@ -50,19 +47,19 @@ int main(void){
   int total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
-      value = Var_int(Var_convert(_x2c_macro_item_0,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+      value = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
       total += value;
     }
 
   }
-  int equal = List_equal(values,  same);
-  printf("%d %d %d\n",  total,  Var_int(List_car(tail)),  equal);
+  int equal = List_equal(values, same);
+  printf("%d %d %d\n", total, Var_int(List_car(tail)), equal);
   return total == 6 && Var_int(List_car(tail)) == 2 && equal ? 0 : 1;
 }
 

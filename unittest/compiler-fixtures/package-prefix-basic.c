@@ -23,13 +23,13 @@ Var int_var(int);
 
 Var double_var(double);
 
-Iter Iter_init(Iter,  Var,  IterNextFn,  Var);
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static int _vec_next(Iter iter,  Var * out);
+static int _vec_next(Iter iter, Var * out);
 
-static inline Iter _x2c_proto_geo__vec_iter_0(Var a0,  Iter a1);
+static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -39,13 +39,13 @@ __attribute__((constructor)) static void _file_init_(void){
     .iter = _x2c_proto_geo__vec_iter_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(492847477062,  _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("geo__vec"),  _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(492847477062, _x2c__x2c_protocol_methods_0)){
+    x2c_register_descriptor(String_new("geo__vec"), _x2c__x2c_protocol_methods_0);
   }
 
 }
 
-geo__Vec geo__Vec_new(double x,  double y){
+geo__Vec geo__Vec_new(double x, double y){
   geo__Vec v = Scope_malloc(sizeof(struct geo__VecData));
   v -> x = x;
   v -> y = y;
@@ -80,7 +80,7 @@ int geo__ChainLeaf_leaf_len(geo__ChainLeaf values){
   return List_len(values);
 }
 
-static int _vec_next(Iter iter,  Var * out){
+static int _vec_next(Iter iter, Var * out){
   int index = Var_integer(iter -> state);
   if(index >= 2) return 0;
   iter -> state = int_var(index + 1);
@@ -88,11 +88,11 @@ static int _vec_next(Iter iter,  Var * out){
   return 1;
 }
 
-Iter geo__Vec_iter(geo__Vec v,  Iter dest){
-  return Iter_init(dest,  geo__Vec_var(v),  _vec_next,  int_var(0));
+Iter geo__Vec_iter(geo__Vec v, Iter dest){
+  return Iter_init(dest, geo__Vec_var(v), _vec_next, int_var(0));
 }
 
-static inline Iter _x2c_proto_geo__vec_iter_0(Var a0,  Iter a1){
-  return geo__Vec_iter(geo__Var_vec(a0),  a1);
+static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1){
+  return geo__Vec_iter(geo__Var_vec(a0), a1);
 }
 

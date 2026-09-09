@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-expression-body.x:3:43: parse: braced
   macro Decorator $invalid(Expr $target) => {
                                             ^
 
-limit: too many errors, stopping
-

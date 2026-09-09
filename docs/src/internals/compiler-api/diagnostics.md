@@ -42,7 +42,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:361`
+Source: `src/diagnostics.x:363`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -52,7 +52,7 @@ Source: `src/diagnostics.x:361`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:238`
+Source: `src/diagnostics.x:240`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -61,7 +61,7 @@ Source: `src/diagnostics.x:238`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:397`
+Source: `src/diagnostics.x:399`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -70,7 +70,7 @@ Source: `src/diagnostics.x:397`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:392`
+Source: `src/diagnostics.x:394`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -80,7 +80,7 @@ Source: `src/diagnostics.x:392`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:382`
+Source: `src/diagnostics.x:384`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -90,7 +90,7 @@ Source: `src/diagnostics.x:382`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:355`
+Source: `src/diagnostics.x:357`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -104,7 +104,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:213`
+Source: `src/diagnostics.x:215`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -115,7 +115,7 @@ Writes one structured diagnostic entry and source context to stderr.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:181`
+Source: `src/diagnostics.x:183`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -129,7 +129,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:286`
+Source: `src/diagnostics.x:288`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -141,7 +141,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:302`
+Source: `src/diagnostics.x:304`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -157,7 +157,7 @@ are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:257`
+Source: `src/diagnostics.x:259`
 
 ### `Diagnostics`
 
@@ -211,11 +211,12 @@ Source: `src/diagnostics.x:99`
 
 Records and synchronously emits one diagnostic unless already limited.
 Entries retain publication order. NULL `code` becomes `<driver>`. Reaching
-a positive limit publishes one following `<limit>` notice, and later
-reports are ignored. Supplied message, location, and notes are shared;
-their canonical-value pools must outlive the store and its snapshots.
+a limit greater than one publishes a following `<limit>` notice; a limit
+of one stops after the first error. Later reports are ignored. Supplied
+message, location, and notes are shared; their canonical-value pools must
+outlive the store and its snapshots.
 
-Source: `src/diagnostics.x:138`
+Source: `src/diagnostics.x:140`
 
 <a id="Diagnostics.reset"></a>
 #### Diagnostics.reset

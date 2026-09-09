@@ -7,24 +7,24 @@
 
 #include "x2c.h"
 #include "common.h"
-typedef void(* DiagnosticEmitter)(void * owner,  List entry);
+typedef void(* DiagnosticEmitter)(void * owner, List entry);
 
 typedef struct Diagnostics{
   Array entries;
   DiagnosticEmitter emit;
   void * owner;
   int limit;
-  int count,  limit_notified;
+  int count, limit_notified;
 }
 * Diagnostics;
 
 #include "compiler.h"
 #include "type.h"
-Diagnostics Diagnostics_new(DiagnosticEmitter emit,  void * owner,  int limit);
+Diagnostics Diagnostics_new(DiagnosticEmitter emit, void * owner, int limit);
 
 void Diagnostics_reset(Diagnostics diag);
 
-void Diagnostics_set_emitter(Diagnostics diag,  DiagnosticEmitter emit,  void * owner);
+void Diagnostics_set_emitter(Diagnostics diag, DiagnosticEmitter emit, void * owner);
 
 List Diagnostics_entries(Diagnostics diag);
 
@@ -32,19 +32,19 @@ int Diagnostics_has_emitter(Diagnostics diag);
 
 int Diagnostics_reached_limit(Diagnostics diag);
 
-void Diagnostics_report(Diagnostics diag,  Symbol code,  String message,  List location,  List notes);
+void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes);
 
-void Compiler_print_diagnostic(Compiler compiler,  List entry);
+void Compiler_print_diagnostic(Compiler compiler, List entry);
 
-List Compiler_origin_location(Compiler compiler,  int occurrence);
+List Compiler_origin_location(Compiler compiler, int occurrence);
 
-String Compiler_display_path(Compiler compiler,  String path);
+String Compiler_display_path(Compiler compiler, String path);
 
-List Compiler_token_location(Compiler compiler,  Token token);
+List Compiler_token_location(Compiler compiler, Token token);
 
-_Noreturn void Compiler_report_error(Compiler compiler,  Symbol code,  String message,  Token token,  List notes);
+_Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes);
 
-void Compiler_report_warning(Compiler compiler,  Symbol code,  String message,  Token token,  List notes);
+void Compiler_report_warning(Compiler compiler, Symbol code, String message, Token token, List notes);
 
 int Compiler_error_count(Compiler compiler);
 
@@ -52,7 +52,7 @@ List Compiler_diagnostics(Compiler compiler);
 
 void Compiler_dump_tokens(Compiler compiler);
 
-void Compiler_dump_symbol_table(Compiler compiler,  Map map);
+void Compiler_dump_symbol_table(Compiler compiler, Map map);
 
 void Compiler_dump_cache(Compiler compiler);
 

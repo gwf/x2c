@@ -10,9 +10,9 @@ Atom Atom_promote(Atom atom);
 
 int Atom_bare_spelling(String spelling);
 
-Buffer Atom_write_str(Atom atom,  Buffer out);
+Buffer Atom_write_str(Atom atom, Buffer out);
 
-Buffer Atom_write_repr(Atom value,  Buffer out);
+Buffer Atom_write_repr(Atom value, Buffer out);
 
 int Var_is_atom(Var value);
 

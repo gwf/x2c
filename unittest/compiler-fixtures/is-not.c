@@ -8,7 +8,7 @@ static int tag_calls;
 
 Var int_var(int);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 int Var_is_void(Var);
 
@@ -28,11 +28,11 @@ static Symbol next_other_tag(void){
 
 int main(void){
   x2c_initialize();
-  Var value = int_var(7),  absent =((void) 0, Void);
+  Var value = int_var(7), absent =((void) 0, Void);
   Symbol other_tag = 3356265;
-  int is = 1,  not = 1;
-  int ok = ! Var_is(next_value(),  3356265) && value_calls == 1 && ! Var_is(value,  3356265) && ! Var_is(value,  other_tag) && ! Var_is(value,  next_other_tag()) && tag_calls == 1 && ! Var_is_void(value) && ! Var_is(absent,  3453797) && ! Var_is(value,  3356265) == 1 && is && not;
-  printf("%d %d %d\n",  ok,  value_calls,  tag_calls);
+  int is = 1, not = 1;
+  int ok = ! Var_is(next_value(), 3356265) && value_calls == 1 && ! Var_is(value, 3356265) && ! Var_is(value, other_tag) && ! Var_is(value, next_other_tag()) && tag_calls == 1 && ! Var_is_void(value) && ! Var_is(absent, 3453797) && ! Var_is(value, 3356265) == 1 && is && not;
+  printf("%d %d %d\n", ok, value_calls, tag_calls);
   return ok ? 0 : 1;
 }
 

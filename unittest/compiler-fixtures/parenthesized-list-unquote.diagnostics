@@ -3,5 +3,3 @@ unittest/compiler-fixtures/parenthesized-list-unquote.x:6:22: parse: expected id
                        ^
   note: use '${...}' to insert an expression
 
-limit: too many errors, stopping
-

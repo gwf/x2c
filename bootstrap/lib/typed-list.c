@@ -4,13 +4,9 @@
 
 #include "error.h"
 
-static String _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 Var Symbol_var(Symbol);
 
@@ -20,13 +16,13 @@ Var int_var(int);
 
 Var List_last(List);
 
-int List_index(List,  Var);
+int List_index(List, Var);
 
 int List_truth(List);
 
 List List_cdr(List);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 Symbol Var_tag(Var);
 
@@ -34,7 +30,7 @@ List Var_list(Var);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-_Noreturn static void _no_convert(String owner,  int index,  Symbol tag);
+_Noreturn static void _no_convert(String owner, int index, Symbol tag);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -49,10 +45,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _6 = String_new("ListSymbol");
 }
 
-_Noreturn static void _no_convert(String owner,  int index,  Symbol tag){
+_Noreturn static void _no_convert(String owner, int index, Symbol tag){
   {
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/typed-list.x",.function =  "_no_convert",.line =  48};
-    x2c_error_raise_n(& _x2c_error_site_0, 1020285550996648, 3, Symbol_var(32993636),  String_var(owner),  Symbol_var(19800432),  int_var(index),  Symbol_var(41038),  Symbol_var(tag));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 48};
+    x2c_error_raise_n(& _x2c_error_site_0, 1020285550996648, 3, Symbol_var(32993636), String_var(owner), Symbol_var(19800432), int_var(index), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
 
@@ -62,15 +58,15 @@ char ListChar_last(ListChar _x2c_macro_xs_0){
   return _typed_list_decode_i8(List_last((List) _x2c_macro_xs_0));
 }
 
-int ListChar_index(ListChar _x2c_macro_xs_0,  char _x2c_macro_value_0){
-  return List_index((List) _x2c_macro_xs_0,  _typed_list_encode_i8(_x2c_macro_value_0));
+int ListChar_index(ListChar _x2c_macro_xs_0, char _x2c_macro_value_0){
+  return List_index((List) _x2c_macro_xs_0, _typed_list_encode_i8(_x2c_macro_value_0));
 }
 
 ListChar List_listchar(List _x2c_macro_xs_0){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_0 = 0;
   for(List _x2c_macro_cur_0 = _x2c_macro_xs_0;  List_truth(_x2c_macro_cur_0);  _x2c_macro_cur_0 = List_cdr(_x2c_macro_cur_0)){
-    if(! Var_is(_x2c_macro_cur_0 -> car,  26993)) _no_convert(_0,  _x2c_macro_index_0,  Var_tag(_x2c_macro_cur_0 -> car));
+    if(! Var_is(_x2c_macro_cur_0 -> car, 26993)) _no_convert(_0, _x2c_macro_index_0, Var_tag(_x2c_macro_cur_0 -> car));
     _x2c_macro_index_0 ++;
   }
   return(ListChar) _x2c_macro_xs_0;
@@ -86,15 +82,15 @@ short ListShort_last(ListShort _x2c_macro_xs_1){
   return _typed_list_decode_i16(List_last((List) _x2c_macro_xs_1));
 }
 
-int ListShort_index(ListShort _x2c_macro_xs_1,  short _x2c_macro_value_1){
-  return List_index((List) _x2c_macro_xs_1,  _typed_list_encode_i16(_x2c_macro_value_1));
+int ListShort_index(ListShort _x2c_macro_xs_1, short _x2c_macro_value_1){
+  return List_index((List) _x2c_macro_xs_1, _typed_list_encode_i16(_x2c_macro_value_1));
 }
 
 ListShort List_listshort(List _x2c_macro_xs_1){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_1 = 0;
   for(List _x2c_macro_cur_1 = _x2c_macro_xs_1;  List_truth(_x2c_macro_cur_1);  _x2c_macro_cur_1 = List_cdr(_x2c_macro_cur_1)){
-    if(! Var_is(_x2c_macro_cur_1 -> car,  3453293)) _no_convert(_1,  _x2c_macro_index_1,  Var_tag(_x2c_macro_cur_1 -> car));
+    if(! Var_is(_x2c_macro_cur_1 -> car, 3453293)) _no_convert(_1, _x2c_macro_index_1, Var_tag(_x2c_macro_cur_1 -> car));
     _x2c_macro_index_1 ++;
   }
   return(ListShort) _x2c_macro_xs_1;
@@ -110,15 +106,15 @@ int ListInt_last(ListInt _x2c_macro_xs_2){
   return _typed_list_decode_i32(List_last((List) _x2c_macro_xs_2));
 }
 
-int ListInt_index(ListInt _x2c_macro_xs_2,  int _x2c_macro_value_2){
-  return List_index((List) _x2c_macro_xs_2,  _typed_list_encode_i32(_x2c_macro_value_2));
+int ListInt_index(ListInt _x2c_macro_xs_2, int _x2c_macro_value_2){
+  return List_index((List) _x2c_macro_xs_2, _typed_list_encode_i32(_x2c_macro_value_2));
 }
 
 ListInt List_listint(List _x2c_macro_xs_2){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_2 = 0;
   for(List _x2c_macro_cur_2 = _x2c_macro_xs_2;  List_truth(_x2c_macro_cur_2);  _x2c_macro_cur_2 = List_cdr(_x2c_macro_cur_2)){
-    if(! Var_is(_x2c_macro_cur_2 -> car,  3453797)) _no_convert(_2,  _x2c_macro_index_2,  Var_tag(_x2c_macro_cur_2 -> car));
+    if(! Var_is(_x2c_macro_cur_2 -> car, 3453797)) _no_convert(_2, _x2c_macro_index_2, Var_tag(_x2c_macro_cur_2 -> car));
     _x2c_macro_index_2 ++;
   }
   return(ListInt) _x2c_macro_xs_2;
@@ -134,15 +130,15 @@ float ListFloat_last(ListFloat _x2c_macro_xs_3){
   return _typed_list_decode_f32(List_last((List) _x2c_macro_xs_3));
 }
 
-int ListFloat_index(ListFloat _x2c_macro_xs_3,  float _x2c_macro_value_3){
-  return List_index((List) _x2c_macro_xs_3,  _typed_list_encode_f32(_x2c_macro_value_3));
+int ListFloat_index(ListFloat _x2c_macro_xs_3, float _x2c_macro_value_3){
+  return List_index((List) _x2c_macro_xs_3, _typed_list_encode_f32(_x2c_macro_value_3));
 }
 
 ListFloat List_listfloat(List _x2c_macro_xs_3){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_3 = 0;
   for(List _x2c_macro_cur_3 = _x2c_macro_xs_3;  List_truth(_x2c_macro_cur_3);  _x2c_macro_cur_3 = List_cdr(_x2c_macro_cur_3)){
-    if(! Var_is(_x2c_macro_cur_3 -> car,  3355493)) _no_convert(_3,  _x2c_macro_index_3,  Var_tag(_x2c_macro_cur_3 -> car));
+    if(! Var_is(_x2c_macro_cur_3 -> car, 3355493)) _no_convert(_3, _x2c_macro_index_3, Var_tag(_x2c_macro_cur_3 -> car));
     _x2c_macro_index_3 ++;
   }
   return(ListFloat) _x2c_macro_xs_3;
@@ -158,15 +154,15 @@ double ListDbl_last(ListDbl _x2c_macro_xs_4){
   return _typed_list_decode_f64(List_last((List) _x2c_macro_xs_4));
 }
 
-int ListDbl_index(ListDbl _x2c_macro_xs_4,  double _x2c_macro_value_4){
-  return List_index((List) _x2c_macro_xs_4,  _typed_list_encode_f64(_x2c_macro_value_4));
+int ListDbl_index(ListDbl _x2c_macro_xs_4, double _x2c_macro_value_4){
+  return List_index((List) _x2c_macro_xs_4, _typed_list_encode_f64(_x2c_macro_value_4));
 }
 
 ListDbl List_listdbl(List _x2c_macro_xs_4){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_4 = 0;
   for(List _x2c_macro_cur_4 = _x2c_macro_xs_4;  List_truth(_x2c_macro_cur_4);  _x2c_macro_cur_4 = List_cdr(_x2c_macro_cur_4)){
-    if(! Var_is(_x2c_macro_cur_4 -> car,  3356265)) _no_convert(_4,  _x2c_macro_index_4,  Var_tag(_x2c_macro_cur_4 -> car));
+    if(! Var_is(_x2c_macro_cur_4 -> car, 3356265)) _no_convert(_4, _x2c_macro_index_4, Var_tag(_x2c_macro_cur_4 -> car));
     _x2c_macro_index_4 ++;
   }
   return(ListDbl) _x2c_macro_xs_4;
@@ -182,15 +178,15 @@ String ListString_last(ListString _x2c_macro_xs_5){
   return _typed_list_decode_string(List_last((List) _x2c_macro_xs_5));
 }
 
-int ListString_index(ListString _x2c_macro_xs_5,  String _x2c_macro_value_5){
-  return List_index((List) _x2c_macro_xs_5,  _typed_list_encode_string(_x2c_macro_value_5));
+int ListString_index(ListString _x2c_macro_xs_5, String _x2c_macro_value_5){
+  return List_index((List) _x2c_macro_xs_5, _typed_list_encode_string(_x2c_macro_value_5));
 }
 
 ListString List_liststring(List _x2c_macro_xs_5){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_5 = 0;
   for(List _x2c_macro_cur_5 = _x2c_macro_xs_5;  List_truth(_x2c_macro_cur_5);  _x2c_macro_cur_5 = List_cdr(_x2c_macro_cur_5)){
-    if(! Var_is(_x2c_macro_cur_5 -> car,  1318210446)) _no_convert(_5,  _x2c_macro_index_5,  Var_tag(_x2c_macro_cur_5 -> car));
+    if(! Var_is(_x2c_macro_cur_5 -> car, 1318210446)) _no_convert(_5, _x2c_macro_index_5, Var_tag(_x2c_macro_cur_5 -> car));
     _x2c_macro_index_5 ++;
   }
   return(ListString) _x2c_macro_xs_5;
@@ -206,15 +202,15 @@ Symbol ListSymbol_last(ListSymbol _x2c_macro_xs_6){
   return _typed_list_decode_symbol(List_last((List) _x2c_macro_xs_6));
 }
 
-int ListSymbol_index(ListSymbol _x2c_macro_xs_6,  Symbol _x2c_macro_value_6){
-  return List_index((List) _x2c_macro_xs_6,  _typed_list_encode_symbol(_x2c_macro_value_6));
+int ListSymbol_index(ListSymbol _x2c_macro_xs_6, Symbol _x2c_macro_value_6){
+  return List_index((List) _x2c_macro_xs_6, _typed_list_encode_symbol(_x2c_macro_value_6));
 }
 
 ListSymbol List_listsymbol(List _x2c_macro_xs_6){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_6 = 0;
   for(List _x2c_macro_cur_6 = _x2c_macro_xs_6;  List_truth(_x2c_macro_cur_6);  _x2c_macro_cur_6 = List_cdr(_x2c_macro_cur_6)){
-    if(! Var_is(_x2c_macro_cur_6 -> car,  1328354264)) _no_convert(_6,  _x2c_macro_index_6,  Var_tag(_x2c_macro_cur_6 -> car));
+    if(! Var_is(_x2c_macro_cur_6 -> car, 1328354264)) _no_convert(_6, _x2c_macro_index_6, Var_tag(_x2c_macro_cur_6 -> car));
     _x2c_macro_index_6 ++;
   }
   return(ListSymbol) _x2c_macro_xs_6;

@@ -2,20 +2,17 @@
 
 #include "destructuring-expression.h"
 
-static List _3,  _2;
+static List _3, _2;
 
-static Var _1,  _0;
+static Var _1, _0;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 long Var_integer(Var);
 
@@ -27,27 +24,27 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = int_var(1);
   _1 = int_var(2);
-  _2 = cons(_1,  NULL);
-  _3 = cons(_0,  _2);
+  _2 = cons(_1, NULL);
+  _3 = cons(_0, _2);
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   Values values = _3;
-  Var a,  b,  c,  d;
+  Var a, b, c, d;
   Values result =({Values _x2c_destructure_result_0 =({Values _x2c_destructure_result_1 = values;
   List _x2c_destructure_1 = _x2c_destructure_result_1;
-  a = List_getindex(_x2c_destructure_1,  0);
-  b = List_getindex(_x2c_destructure_1,  1);
+  a = List_getindex(_x2c_destructure_1, 0);
+  b = List_getindex(_x2c_destructure_1, 1);
   _x2c_destructure_result_1;
   });
   List _x2c_destructure_0 = _x2c_destructure_result_0;
-  c = List_getindex(_x2c_destructure_0,  0);
-  d = List_getindex(_x2c_destructure_0,  1);
+  c = List_getindex(_x2c_destructure_0, 0);
+  d = List_getindex(_x2c_destructure_0, 1);
   _x2c_destructure_result_0;
   });
-  printf("%ld %ld %ld %ld %d\n",  Var_integer(a),  Var_integer(b),  Var_integer(c),  Var_integer(d),  result == values);
+  printf("%ld %ld %ld %ld %d\n", Var_integer(a), Var_integer(b), Var_integer(c), Var_integer(d), result == values);
   return result == values ? 0 : 1;
 }
 

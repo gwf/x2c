@@ -2,5 +2,3 @@ unittest/compiler-fixtures/bracket-value-incompatible.x:8:16: type: cannot conve
     values[0] = p;
                  ^
 
-limit: too many errors, stopping
-

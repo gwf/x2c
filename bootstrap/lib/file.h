@@ -10,158 +10,158 @@
 #include "common.h"
 typedef FILE * File;
 
-extern File Stdin,  Stdout,  Stderr;
+extern File Stdin, Stdout, Stderr;
 
 typedef enum FileReadStatus{
-  FILE_READ_ERROR = - 1,  FILE_READ_EOF = 0,  FILE_READ_DATA = 1
+  FILE_READ_ERROR = - 1, FILE_READ_EOF = 0, FILE_READ_DATA = 1
 }
 FileReadStatus;
 
 #ifndef X2CCPP
-_Static_assert(_Generic(& fclose,  int(*)(File) : 1, default: 0),  "native alias File_close does not match fclose");
+_Static_assert(_Generic(& fclose, int(*)(File) : 1, default: 0), "native alias File_close does not match fclose");
 #endif
 #define File_close fclose
 #ifndef X2CCPP
-_Static_assert(_Generic(& pclose,  int(*)(File) : 1, default: 0),  "native alias File_pclose does not match pclose");
+_Static_assert(_Generic(& pclose, int(*)(File) : 1, default: 0), "native alias File_pclose does not match pclose");
 #endif
 #define File_pclose pclose
 #ifndef X2CCPP
-_Static_assert(_Generic(& feof,  int(*)(File) : 1, default: 0),  "native alias File_eof does not match feof");
+_Static_assert(_Generic(& feof, int(*)(File) : 1, default: 0), "native alias File_eof does not match feof");
 #endif
 #define File_eof feof
 #ifndef X2CCPP
-_Static_assert(_Generic(& ferror,  int(*)(File) : 1, default: 0),  "native alias File_error does not match ferror");
+_Static_assert(_Generic(& ferror, int(*)(File) : 1, default: 0), "native alias File_error does not match ferror");
 #endif
 #define File_error ferror
 #ifndef X2CCPP
-_Static_assert(_Generic(& fflush,  int(*)(File) : 1, default: 0),  "native alias File_flush does not match fflush");
+_Static_assert(_Generic(& fflush, int(*)(File) : 1, default: 0), "native alias File_flush does not match fflush");
 #endif
 #define File_flush fflush
 #ifndef X2CCPP
-_Static_assert(_Generic(& fflush,  int(*)(File) : 1, default: 0),  "native alias File_purge does not match fflush");
+_Static_assert(_Generic(& fflush, int(*)(File) : 1, default: 0), "native alias File_purge does not match fflush");
 #endif
 #define File_purge fflush
 #ifndef X2CCPP
-_Static_assert(_Generic(& fgetc,  int(*)(File) : 1, default: 0),  "native alias File_getc does not match fgetc");
+_Static_assert(_Generic(& fgetc, int(*)(File) : 1, default: 0), "native alias File_getc does not match fgetc");
 #endif
 #define File_getc fgetc
 #ifndef X2CCPP
-_Static_assert(_Generic(& fileno,  int(*)(File) : 1, default: 0),  "native alias File_fileno does not match fileno");
+_Static_assert(_Generic(& fileno, int(*)(File) : 1, default: 0), "native alias File_fileno does not match fileno");
 #endif
 #define File_fileno fileno
 #ifndef X2CCPP
-_Static_assert(_Generic(& fgetpos,  int(*)(File,  fpos_t *) : 1, default: 0),  "native alias File_getpos does not match fgetpos");
+_Static_assert(_Generic(& fgetpos, int(*)(File, fpos_t *) : 1, default: 0), "native alias File_getpos does not match fgetpos");
 #endif
 #define File_getpos fgetpos
 #ifndef X2CCPP
-_Static_assert(_Generic(& fsetpos,  int(*)(File,  const fpos_t *) : 1, default: 0),  "native alias File_setpos does not match fsetpos");
+_Static_assert(_Generic(& fsetpos, int(*)(File, const fpos_t *) : 1, default: 0), "native alias File_setpos does not match fsetpos");
 #endif
 #define File_setpos fsetpos
 #ifndef X2CCPP
-_Static_assert(_Generic(& fseek,  int(*)(File,  long,  int) : 1, default: 0),  "native alias File_seek does not match fseek");
+_Static_assert(_Generic(& fseek, int(*)(File, long, int) : 1, default: 0), "native alias File_seek does not match fseek");
 #endif
 #define File_seek fseek
 #ifndef X2CCPP
-_Static_assert(_Generic(& fseeko,  int(*)(File,  off_t,  int) : 1, default: 0),  "native alias File_seeko does not match fseeko");
+_Static_assert(_Generic(& fseeko, int(*)(File, off_t, int) : 1, default: 0), "native alias File_seeko does not match fseeko");
 #endif
 #define File_seeko fseeko
 #ifndef X2CCPP
-_Static_assert(_Generic(& setvbuf,  int(*)(File,  char *,  int,  size_t) : 1, default: 0),  "native alias File_setvbuf does not match setvbuf");
+_Static_assert(_Generic(& setvbuf, int(*)(File, char *, int, size_t) : 1, default: 0), "native alias File_setvbuf does not match setvbuf");
 #endif
 #define File_setvbuf setvbuf
 #ifndef X2CCPP
-_Static_assert(_Generic(& vfprintf,  int(*)(File,  const char *,  va_list) : 1, default: 0),  "native alias File_va_printf does not match vfprintf");
+_Static_assert(_Generic(& vfprintf, int(*)(File, const char *, va_list) : 1, default: 0), "native alias File_va_printf does not match vfprintf");
 #endif
 #define File_va_printf vfprintf
 #ifndef X2CCPP
-_Static_assert(_Generic(& vfscanf,  int(*)(File,  const char *,  va_list) : 1, default: 0),  "native alias File_va_scanf does not match vfscanf");
+_Static_assert(_Generic(& vfscanf, int(*)(File, const char *, va_list) : 1, default: 0), "native alias File_va_scanf does not match vfscanf");
 #endif
 #define File_va_scanf vfscanf
 #ifndef X2CCPP
-_Static_assert(_Generic(& ftell,  long(*)(File) : 1, default: 0),  "native alias File_tell does not match ftell");
+_Static_assert(_Generic(& ftell, long(*)(File) : 1, default: 0), "native alias File_tell does not match ftell");
 #endif
 #define File_tell ftell
 #ifndef X2CCPP
-_Static_assert(_Generic(& ftello,  off_t(*)(File) : 1, default: 0),  "native alias File_tello does not match ftello");
+_Static_assert(_Generic(& ftello, off_t(*)(File) : 1, default: 0), "native alias File_tello does not match ftello");
 #endif
 #define File_tello ftello
 #ifndef X2CCPP
-_Static_assert(_Generic(& clearerr,  void(*)(File) : 1, default: 0),  "native alias File_clearerr does not match clearerr");
+_Static_assert(_Generic(& clearerr, void(*)(File) : 1, default: 0), "native alias File_clearerr does not match clearerr");
 #endif
 #define File_clearerr clearerr
 #ifndef X2CCPP
-_Static_assert(_Generic(& rewind,  void(*)(File) : 1, default: 0),  "native alias File_rewind does not match rewind");
+_Static_assert(_Generic(& rewind, void(*)(File) : 1, default: 0), "native alias File_rewind does not match rewind");
 #endif
 #define File_rewind rewind
 #ifndef X2CCPP
-_Static_assert(_Generic(& setbuf,  void(*)(File,  char *) : 1, default: 0),  "native alias File_setbuf does not match setbuf");
+_Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "native alias File_setbuf does not match setbuf");
 #endif
 #define File_setbuf setbuf
 String File_string_close(File file);
-File String_open(String fname,  const char * mode);
-File File_fdopen(int fildes,  const char * mode);
-File File_open(const char * path,  const char * mode);
-File File_popen(const char * cmd,  const char * mode);
-File File_reopen(File file,  const char * path,  const char * mode);
-static inline char * File_gets(File file,  char * str,  int size){
-  return fgets(str,  size,  file);
+File String_open(String fname, const char * mode);
+File File_fdopen(int fildes, const char * mode);
+File File_open(const char * path, const char * mode);
+File File_popen(const char * cmd, const char * mode);
+File File_reopen(File file, const char * path, const char * mode);
+static inline char * File_gets(File file, char * str, int size){
+  return fgets(str, size, file);
 }
 
-static inline int File_putc(File file,  int c){
-  return fputc(c,  file);
+static inline int File_putc(File file, int c){
+  return fputc(c, file);
 }
 
-static inline int File_puts(File file,  const char * s){
-  return fputs(s,  file);
+static inline int File_puts(File file, const char * s){
+  return fputs(s, file);
 }
 
-static inline int File_putw(File file,  int w){
-  return fwrite(& w,  sizeof(w),  1,  file) == 1 ? w : EOF;
+static inline int File_putw(File file, int w){
+  return fwrite(& w, sizeof(w), 1, file) == 1 ? w : EOF;
 }
 
 static inline int File_getw(File file){
-  int word;  return fread(& word,  sizeof(word),  1,  file) == 1 ? word : EOF;
+  int word;  return fread(& word, sizeof(word), 1, file) == 1 ? word : EOF;
 }
 
 static inline int File_setlinebuf(File file){
-  setvbuf(file,  NULL,  _IOLBF,  0);  return 0;
+  setvbuf(file, NULL, _IOLBF, 0);  return 0;
 }
 
-static inline int File_ungetc(File file,  int c){
-  return ungetc(c,  file);
+static inline int File_ungetc(File file, int c){
+  return ungetc(c, file);
 }
 
-static inline size_t File_read(File file,  void * ptr,  size_t size,  size_t nitems){
-  return fread(ptr,  size,  nitems,  file);
+static inline size_t File_read(File file, void * ptr, size_t size, size_t nitems){
+  return fread(ptr, size, nitems, file);
 }
 
-static inline size_t File_write(File file,  const void * ptr,  size_t size,  size_t nitems){
-  return fwrite(ptr,  size,  nitems,  file);
+static inline size_t File_write(File file, const void * ptr, size_t size, size_t nitems){
+  return fwrite(ptr, size, nitems, file);
 }
 
-static inline void File_setbuffer(File file,  char * buf,  int size){
-  setbuffer(file,  buf,  size);
+static inline void File_setbuffer(File file, char * buf, int size){
+  setbuffer(file, buf, size);
 }
 
-static inline int File_stat(File file,  struct stat * buf){
-  return fstat(File_fileno(file),  buf);
+static inline int File_stat(File file, struct stat * buf){
+  return fstat(File_fileno(file), buf);
 }
 
-int File_printf(File file,  const char * format, ...);
-int File_scanf(File file,  const char * format, ...);
-String File_readblock(File file,  long size);
-FileReadStatus File_readline_into(File file,  Block dest);
-FileReadStatus File_read_into(File file,  Block dest);
-int File_write_all(File file,  const void * ptr,  size_t size);
-int File_copy_to(File source,  File output,  size_t * copied);
+int File_printf(File file, const char * format, ...);
+int File_scanf(File file, const char * format, ...);
+String File_readblock(File file, long size);
+FileReadStatus File_readline_into(File file, Block dest);
+FileReadStatus File_read_into(File file, Block dest);
+int File_write_all(File file, const void * ptr, size_t size);
+int File_copy_to(File source, File output, size_t * copied);
 String File_readline(File file);
 String File_string(File file);
-Iter File_iter(File file,  Iter dest);
+Iter File_iter(File file, Iter dest);
 unsigned File_hash(File file);
-int File_equal(File x,  File y);
+int File_equal(File x, File y);
 String File_repr(File file);
 String File_str(File file);
-Buffer File_write_repr(File file,  Buffer out);
+Buffer File_write_repr(File file, Buffer out);
 void File_initialize(void);
 
 #endif /* __GUARD_0xC65C88F0__ */

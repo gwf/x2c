@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-source-text-derived.x:8:13: macro: x2c.source.t
   int value = $derived(1 + 2);
               ^
 
-limit: too many errors, stopping
-

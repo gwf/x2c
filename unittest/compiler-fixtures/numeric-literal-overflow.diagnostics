@@ -3,5 +3,3 @@ unittest/compiler-fixtures/numeric-literal-overflow.x:3:13: type: numeric litera
               ^^^^^^^^^^^^^^^^^^^^^^^
   note: literal: 18446744073709551616ULL
 
-limit: too many errors, stopping
-

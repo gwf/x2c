@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-result-unit-position.x:8:3: macro: macro 'unit_
     $unit_result();
     ^
 
-limit: too many errors, stopping
-

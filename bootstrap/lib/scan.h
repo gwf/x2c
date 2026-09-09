@@ -14,9 +14,9 @@ static inline int scan_ascii_digit(int c){
   return(unsigned)(c - '0') < 10;
 }
 
-Symbol scan_number_type(char * s,  int n);
+Symbol scan_number_type(char * s, int n);
 
-void scan_next_line_col(char * s,  int n,  int * l,  int * c);
+void scan_next_line_col(char * s, int n, int * l, int * c);
 
 int scan_preprocessor(char * s);
 
@@ -24,13 +24,13 @@ int scan_white_space(char * s);
 
 int scan_line_comment(char * s);
 
-int scan_block_comment_status(char * s,  Symbol * status);
+int scan_block_comment_status(char * s, Symbol * status);
 
 int scan_block_comment(char * s);
 
 int scan_identifier(char * s);
 
-Symbol scan_keyword_type(const char * s,  int n);
+Symbol scan_keyword_type(const char * s, int n);
 
 int scan_keyword(char * s);
 
@@ -38,7 +38,7 @@ int scan_c_operator(char * s);
 
 int scan_escape_sequence(char * s);
 
-int scan_c_string_status(char * s,  Symbol * status);
+int scan_c_string_status(char * s, Symbol * status);
 
 int scan_c_string(char * s);
 
@@ -50,19 +50,19 @@ int scan_hexponent(char * s);
 
 int scan_digital(char * s);
 
-int scan_number_typed(char * s,  Symbol * type);
+int scan_number_typed(char * s, Symbol * type);
 
 int scan_number(char * s);
 
 int scan_string_segment(char * s);
 
-int scan_atom_status(char * s,  Symbol * status);
+int scan_atom_status(char * s, Symbol * status);
 
 int scan_atom(char * s);
 
 int scan_symbol_set_atom(char * s);
 
-int scan_symbol_literal_status(char * s,  Symbol * status);
+int scan_symbol_literal_status(char * s, Symbol * status);
 
 int scan_symbol_literal(char * s);
 

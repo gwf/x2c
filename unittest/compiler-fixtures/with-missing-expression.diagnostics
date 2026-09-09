@@ -2,5 +2,3 @@ unittest/compiler-fixtures/with-missing-expression.x:4:8: parse: with requires a
     with {}
          ^
 
-limit: too many errors, stopping
-

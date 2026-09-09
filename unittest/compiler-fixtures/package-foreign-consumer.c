@@ -2,7 +2,7 @@
 
 #include "package-foreign-consumer.h"
 
-Span vendored__Span_add(Span,  Span);
+Span vendored__Span_add(Span, Span);
 
 vendored__Reading vendored__Reading_new(Span);
 
@@ -12,16 +12,16 @@ Span vendored__Reading_span(vendored__Reading);
 
 SpanKind vendored__Span_kind(Span);
 
-double span_total(double lo,  double hi){
+double span_total(double lo, double hi){
   Span first ={
-    lo,  hi
+    lo, hi
   }
   ;
   Span second ={
-    hi,  lo + hi
+    hi, lo + hi
   }
   ;
-  Span sum = vendored__Span_add(first,  second);
+  Span sum = vendored__Span_add(first, second);
   vendored__Reading reading = vendored__Reading_new(sum);
   return vendored__Span_width(vendored__Reading_span(reading)) +(double) vendored__Span_kind(sum);
 }

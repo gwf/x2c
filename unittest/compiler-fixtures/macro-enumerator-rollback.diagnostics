@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-enumerator-rollback.x:9:3: parse: enumerator 'R
     ^
   note: prior binding: 'ROLLBACK_ENUM'
 
-limit: too many errors, stopping
-

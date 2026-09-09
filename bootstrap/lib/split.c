@@ -13,9 +13,9 @@ int String_len(String);
 
 int String_truth(String);
 
-String String_new_len(const char *,  int);
+String String_new_len(const char *, int);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 Var String_var(String);
 
@@ -29,36 +29,36 @@ Var int_var(int);
 
 int Iter_truth(Iter);
 
-Iter Iter_init(Iter,  Var,  IterNextFn,  Var);
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
-static inline int _end(String str,  String sep,  int start,  int * next);
+static inline int _end(String str, String sep, int start, int * next);
 
-static inline int _line_end(String str,  int start,  int keep_ends,  int * next);
+static inline int _line_end(String str, int start, int keep_ends, int * next);
 
-static Split _new(String str,  String sep,  int(* next)(Split split,  int * cursor,  String * out));
+static Split _new(String str, String sep, int(* next)(Split split, int * cursor, String * out));
 
-static int _words_next(Split split,  int * cursor,  String * out);
+static int _words_next(Split split, int * cursor, String * out);
 
-static int _lines_next(Split split,  int * cursor,  String * out);
+static int _lines_next(Split split, int * cursor, String * out);
 
-static int _splits_next(Split split,  int * cursor,  String * out);
+static int _splits_next(Split split, int * cursor, String * out);
 
-static int _iter_next(Iter iter,  Var * out);
+static int _iter_next(Iter iter, Var * out);
 
 struct Split{
-  String str,  sep;
-  int(* next)(Split split,  int * cursor,  String * out);
+  String str, sep;
+  int(* next)(Split split, int * cursor, String * out);
 }
 ;
 
-static inline int _end(String str,  String sep,  int start,  int * next){
+static inline int _end(String str, String sep, int start, int * next){
   int length = String_len(str);
   if(! String_truth(str) || start < 0 || start > length) return - 1;
   if(! String_truth(sep)){
     * next = - 1;
     return length;
   }
-  const char * found = strstr(str + start,  sep);
+  const char * found = strstr(str + start, sep);
   if(! found){
     * next = - 1;
     return length;
@@ -68,7 +68,7 @@ static inline int _end(String str,  String sep,  int start,  int * next){
   return end;
 }
 
-static inline int _line_end(String str,  int start,  int keep_ends,  int * next){
+static inline int _line_end(String str, int start, int keep_ends, int * next){
   int length = String_len(str);
   if(! String_truth(str) || start < 0 || start >= length) return - 1;
   const char * text = str;
@@ -80,39 +80,39 @@ static inline int _line_end(String str,  int start,  int keep_ends,  int * next)
   return keep_ends ? * next : end;
 }
 
-List String_split_n(String str,  String sep,  int max_splits){
+List String_split_n(String str, String sep, int max_splits){
   if(! String_truth(str)) return NULL;
   Array results = Array_new();
-  int start = 0,  splits = 0;
+  int start = 0, splits = 0;
   while(start >= 0){
     int next = - 1;
-    int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : _end(str,  sep,  start,  & next);
-    String field = String_new_len(str + start,  end - start);
-    Array_push(results,  String_var(field));
+    int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : _end(str, sep, start, & next);
+    String field = String_new_len(str + start, end - start);
+    Array_push(results, String_var(field));
     start = next;
     splits ++;
   }
   return Array_list_free(results);
 }
 
-List String_split(String str,  String sep){
-  return String_split_n(str,  sep,  - 1);
+List String_split(String str, String sep){
+  return String_split_n(str, sep, - 1);
 }
 
-List String_split_lines(String str,  int keep_ends){
+List String_split_lines(String str, int keep_ends){
   if(! String_truth(str)) return NULL;
   Array results = Array_new();
   int start = 0;
   while(start < String_len(str)){
-    int next,  end = _line_end(str,  start,  keep_ends,  & next);
-    String field = String_new_len(str + start,  end - start);
-    Array_push(results,  String_var(field));
+    int next, end = _line_end(str, start, keep_ends, & next);
+    String field = String_new_len(str + start, end - start);
+    Array_push(results, String_var(field));
     start = next;
   }
   return Array_list_free(results);
 }
 
-static Split _new(String str,  String sep,  int(* next)(Split split,  int * cursor,  String * out)){
+static Split _new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
   Split split = Scope_malloc(sizeof(struct Split));
   split -> str = str;
   split -> sep = sep;
@@ -120,70 +120,70 @@ static Split _new(String str,  String sep,  int(* next)(Split split,  int * curs
   return split;
 }
 
-static int _words_next(Split split,  int * cursor,  String * out){
+static int _words_next(Split split, int * cursor, String * out){
   if(! split || ! String_truth(split -> str)) return 0;
   const char * p = split -> str;
-  int length = String_len(split -> str),  index = * cursor;
+  int length = String_len(split -> str), index = * cursor;
   while(index < length && isspace((unsigned char) p[index])) index ++;
   if(index >= length) return 0;
   int start = index;
   while(index < length && ! isspace((unsigned char) p[index])) index ++;
-  String field = String_new_len(p + start,  index - start);
+  String field = String_new_len(p + start, index - start);
   * out = field;
   * cursor = index;
   return 1;
 }
 
-static int _lines_next(Split split,  int * cursor,  String * out){
+static int _lines_next(Split split, int * cursor, String * out){
   if(! split || ! String_truth(split -> str)) return 0;
-  int start = * cursor,  next,  end = _line_end(split -> str,  start,  0,  & next);
+  int start = * cursor, next, end = _line_end(split -> str, start, 0, & next);
   if(end < 0) return 0;
-  String field = String_new_len(split -> str + start,  end - start);
+  String field = String_new_len(split -> str + start, end - start);
   * out = field;
   * cursor = next;
   return 1;
 }
 
-static int _splits_next(Split split,  int * cursor,  String * out){
+static int _splits_next(Split split, int * cursor, String * out){
   if(! split || ! String_truth(split -> str)) return 0;
-  int start = * cursor,  next;
-  int end = _end(split -> str,  split -> sep,  start,  & next);
+  int start = * cursor, next;
+  int end = _end(split -> str, split -> sep, start, & next);
   if(end < 0) return 0;
-  String field = String_new_len(split -> str + start,  end - start);
+  String field = String_new_len(split -> str + start, end - start);
   * out = field;
   * cursor = next;
   return 1;
 }
 
 Split String_words(String str){
-  return _new(str,  NULL,  _words_next);
+  return _new(str, NULL, _words_next);
 }
 
 Split String_lines(String str){
-  return _new(str,  NULL,  _lines_next);
+  return _new(str, NULL, _lines_next);
 }
 
-Split String_splits(String str,  String sep){
-  return _new(str,  sep,  _splits_next);
+Split String_splits(String str, String sep){
+  return _new(str, sep, _splits_next);
 }
 
-int Split_try_next(Split split,  int * cursor,  String * out){
+int Split_try_next(Split split, int * cursor, String * out){
   if(! split || ! cursor || ! out || ! split -> next) return 0;
-  return split -> next(split,  cursor,  out);
+  return split -> next(split, cursor, out);
 }
 
-static int _iter_next(Iter iter,  Var * out){
+static int _iter_next(Iter iter, Var * out){
   Split split = Var_pointer(iter -> obj);
   int cursor = Var_int(iter -> state);
   String value;
-  if(! Split_try_next(split,  & cursor,  & value)) return 0;
+  if(! Split_try_next(split, & cursor, & value)) return 0;
   iter -> state = int_var(cursor);
   * out = String_var(value);
   return 1;
 }
 
-Iter Split_iter(Split split,  Iter dest){
+Iter Split_iter(Split split, Iter dest){
   if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest,  Var_new(3683441, (void *) split),  split ? _iter_next : NULL,  int_var(0));
+  return Iter_init(dest, Var_new(3683441, (void *) split), split ? _iter_next : NULL, int_var(0));
 }
 

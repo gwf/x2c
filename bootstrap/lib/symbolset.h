@@ -9,13 +9,13 @@
 #include "protocols.h"
 size_t SymbolSet_len(SymbolSet x);
 
-int SymbolSet_index(SymbolSet x,  Symbol symbol);
+int SymbolSet_index(SymbolSet x, Symbol symbol);
 
-int SymbolSet_contains(SymbolSet x,  Symbol symbol);
+int SymbolSet_contains(SymbolSet x, Symbol symbol);
 
-Symbol SymbolSet_getindex(SymbolSet x,  int index);
+Symbol SymbolSet_getindex(SymbolSet x, int index);
 
-Iter SymbolSet_iter(SymbolSet x,  Iter dest);
+Iter SymbolSet_iter(SymbolSet x, Iter dest);
 
 
 #endif /* __GUARD_0x1117B12A__ */

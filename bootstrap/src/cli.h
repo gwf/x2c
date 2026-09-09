@@ -9,23 +9,23 @@
 #include "sourceview.h"
 typedef struct CliRequest{
   Symbol command;
-  List inputs,  run_args,  include_dirs,  package_dirs,  cpp_args;
-  List cc_args,  ld_args;
-  String out_dir,  dep_file,  dep_target,  manifest;
-  String target,  profile,  output,  build_dir,  temps_dir,  label,  state_seed;
-  String prefix,  cc,  ar,  compile_commands;
-  Symbol kind,  color_mode;
+  List inputs, run_args, include_dirs, package_dirs, cpp_args;
+  List cc_args, ld_args;
+  String out_dir, dep_file, dep_target, manifest;
+  String target, profile, output, build_dir, temps_dir, label, state_seed;
+  String prefix, cc, ar, compile_commands;
+  Symbol kind, color_mode;
   Symbol dump;
-  int jobs,  debugging,  verbose,  dry_run,  quiet,  plain,  nested,  no_deps;
-  int no_phony_deps,  compile_only,  kind_explicit,  save_temps,  no_cpp;
-  int live_symbols,  cpp_symbols,  source_map,  source_facts;
+  int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
+  int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
+  int live_symbols, cpp_symbols, source_map, source_facts;
   SourceView sources;
 }
 * CliRequest;
 
 int cli_dependency_pass_through(String s);
 
-CliRequest cli_parse(int argc,  char * * argv);
+CliRequest cli_parse(int argc, char * * argv);
 
 int CliRequest_inspects(CliRequest request);
 

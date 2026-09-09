@@ -6,7 +6,7 @@ void * Scope_malloc(size_t);
 
 static int identity(int value);
 
-static inline int StaticParticipant_read(StaticParticipant a0,  const int * a1,  int * * a2,  int a3[3],  int(* a4)(int));
+static inline int StaticParticipant_read(StaticParticipant a0, const int * a1, int * * a2, int a3[3], int(* a4)(int));
 
 StaticBase StaticParticipant_staticbase(StaticParticipant value){
   StaticBase result = Scope_malloc(sizeof(struct StaticBase));
@@ -20,7 +20,7 @@ StaticParticipant StaticBase_staticparticipant(StaticBase value){
   return result;
 }
 
-int StaticBase_read(StaticBase value,  const int * scale,  int * * output,  int values[3],  int(* callback)(int)){
+int StaticBase_read(StaticBase value, const int * scale, int * * output, int values[3], int(* callback)(int)){
   * * output = callback(value -> value * * scale + values[0]);
   return * * output;
 }
@@ -33,15 +33,15 @@ int main(void){
   x2c_initialize();
   StaticParticipant participant = Scope_malloc(sizeof(struct StaticParticipant));
   participant -> value = 3;
-  int scale = 2,  result = 0,  * output = & result,  values[3] ={
-    4,  0,  0
+  int scale = 2, result = 0, * output = & result, values[3] ={
+    4, 0, 0
   }
   ;
-  printf("%d\n",  StaticParticipant_read(participant,  & scale,  & output,  values,  identity));
+  printf("%d\n", StaticParticipant_read(participant, & scale, & output, values, identity));
   return 0;
 }
 
-static inline int StaticParticipant_read(StaticParticipant a0,  const int * a1,  int * * a2,  int a3[3],  int(* a4)(int)){
-  return StaticBase_read(StaticParticipant_staticbase(a0),  a1,  a2,  a3,  a4);
+static inline int StaticParticipant_read(StaticParticipant a0, const int * a1, int * * a2, int a3[3], int(* a4)(int)){
+  return StaticBase_read(StaticParticipant_staticbase(a0), a1, a2, a3, a4);
 }
 

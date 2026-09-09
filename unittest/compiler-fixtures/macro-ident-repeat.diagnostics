@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-ident-repeat.x:8:1: parse: declaration 'generat
   ^
   note: prior binding: 'generated_repeat'
 
-limit: too many errors, stopping
-

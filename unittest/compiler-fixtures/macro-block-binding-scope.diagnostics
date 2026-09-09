@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-block-binding-scope.x:7:22: type: type () has n
     return item.integer();
                        ^
 
-limit: too many errors, stopping
-

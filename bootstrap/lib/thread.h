@@ -6,11 +6,11 @@
 #define __GUARD_0x251C437E__
 
 #include "common.h"
-typedef Var(* ThreadFn)(const void * input,  size_t input_size);
+typedef Var(* ThreadFn)(const void * input, size_t input_size);
 
 typedef struct Thread * Thread;
 
-Thread Thread_start(ThreadFn function,  const void * input,  size_t input_size);
+Thread Thread_start(ThreadFn function, const void * input, size_t input_size);
 
 Var Thread_join(Thread t);
 

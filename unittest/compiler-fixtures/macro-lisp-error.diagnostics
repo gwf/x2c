@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-lisp-error.x:3:1: macro: compile-time Lisp eval
   ^^
   note: form: (missing.compile.time.function 1)
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-unknown.x:3:13: parse: unknown or forward-refer
   int value = $later(1);
               ^
 
-limit: too many errors, stopping
-

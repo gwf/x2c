@@ -2,7 +2,7 @@
 
 #include "var-wide-long-double.h"
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 static Var box_value(long double value);
 
@@ -13,7 +13,7 @@ static Var box_value(long double value){
 }
 
 static long double unbox_value(Var value){
-  return Var_long_double(Var_convert(value,  26071077642));
+  return Var_long_double(Var_convert(value, 26071077642));
 }
 
 int main(void){
@@ -21,7 +21,7 @@ int main(void){
   long double value = 1.25L;
   Var boxed = box_value(value);
   long double roundtrip = unbox_value(boxed);
-  printf("%d %d %.2Lf\n",  Var_is(boxed,  26071077642),  roundtrip == value,  roundtrip);
+  printf("%d %d %.2Lf\n", Var_is(boxed, 26071077642), roundtrip == value, roundtrip);
   return roundtrip != value;
 }
 

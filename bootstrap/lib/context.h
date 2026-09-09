@@ -8,11 +8,11 @@
 #include "common.h"
 void Context_initialize(void);
 
-int Context_owns(Context context,  void * allocation);
+int Context_owns(Context context, void * allocation);
 
 Scope * Context_export_destination(Context context);
 
-void Context_move_allocation(Context context,  void * allocation);
+void Context_move_allocation(Context context, void * allocation);
 
 Context Context_open(void);
 
@@ -24,11 +24,11 @@ Context Context_open_isolated_named(const char * name);
 
 Context Context_current(void);
 
-Var Context_export_nested(Context context,  Var value);
+Var Context_export_nested(Context context, Var value);
 
-Var Context_export(Context context,  Var value);
+Var Context_export(Context context, Var value);
 
-Var Context_export_scope(Scope source_scope,  Pool pool,  Var value);
+Var Context_export_scope(Scope source_scope, Pool pool, Var value);
 
 void Context_close(Context context);
 

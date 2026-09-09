@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-tag-non-var.x:8:25: protocol: 'tag' applies 
   protocol Marker(Marked) tag <list>;
                           ^^^
 
-limit: too many errors, stopping
-

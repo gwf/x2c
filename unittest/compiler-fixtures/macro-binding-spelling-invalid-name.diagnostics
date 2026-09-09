@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-binding-spelling-invalid-name.x:7:15: macro: x2
                 ^
   note: value: "not valid"
 
-limit: too many errors, stopping
-

@@ -9,7 +9,7 @@
 #include "geo.h"
 typedef Var Packed;
 
-double first_component(double x,  double y);
+double first_component(double x, double y);
 
 geo__ChainLeaf package_tail(geo__ChainLeaf values);
 

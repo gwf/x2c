@@ -3,5 +3,3 @@ unittest/compiler-fixtures/catch-filter-binder-not-definite.x:5:9: type: catch b
           ^^
   note: binder: ?value bind it in every alternative and never under !not
 
-limit: too many errors, stopping
-

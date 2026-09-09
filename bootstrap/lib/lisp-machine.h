@@ -8,7 +8,7 @@
 #include "machine.h"
 void LispMachine_open(LispMachine m);
 
-void LispMachine_begin(LispMachine m,  MachineView program,  void * lisp_context,  const Var * args,  int argc);
+void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, const Var * args, int argc);
 
 int LispMachine_step(LispMachine m);
 

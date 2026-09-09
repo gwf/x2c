@@ -2,19 +2,15 @@
 
 #include "macro-local.h"
 
-static String _1,  _0;
+static String _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 Var int_var(int);
 
 int Var_int(Var);
 
-Var Map_getindex(Map,  Var);
+Var Map_getindex(Map, Var);
 
 Var String_var(String);
 
@@ -38,11 +34,11 @@ static int fixture_select(int value){
 
 static int local_macros(int base){
   int before = fixture_select(1);
-  int first = 0,  explicit_global = 0,  explicit_call = 0;
-  int call_site = 0,  nested = 0,  restored = 0,  replaced = 0;
-  int assigned = 0,  assigned_again = 0,  generated_value = 0;
-  int generated_inline = 0,  repeated = 0,  field_value = 0,  enum_value = 0;
-  int entry_value = 0,  decorated = 0;
+  int first = 0, explicit_global = 0, explicit_call = 0;
+  int call_site = 0, nested = 0, restored = 0, replaced = 0;
+  int assigned = 0, assigned_again = 0, generated_value = 0;
+  int generated_inline = 0, repeated = 0, field_value = 0, enum_value = 0;
+  int entry_value = 0, decorated = 0;
   {
     int offset = 2;
     first = base + offset + 3 + 1;
@@ -74,17 +70,17 @@ static int local_macros(int base){
     }
     ;
     enum LocalState{
-      LOCAL_READY = 3,  LOCAL_DONE
+      LOCAL_READY = 3, LOCAL_DONE
     }
     state = LOCAL_DONE;
-    Map entries = Map_update_n(Map_new(),  1,  String_var(_1),  int_var(42));
+    Map entries = Map_update_n(Map_new(), 1, String_var(_1), int_var(42));
     field_value = local.value;
     enum_value = state;
-    entry_value = Var_int(Map_getindex(entries,  String_var(_0)));
+    entry_value = Var_int(Map_getindex(entries, String_var(_0)));
     decorated =(local.kept != 0);
   }
   int after = fixture_select(2);
-  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",  before,  first,  explicit_global,  explicit_call,  call_site,  nested,  restored,  replaced,  assigned,  assigned_again,  generated_value,  generated_inline,  repeated,  field_value,  enum_value,  entry_value,  decorated,  after);
+  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", before, first, explicit_global, explicit_call, call_site, nested, restored, replaced, assigned, assigned_again, generated_value, generated_inline, repeated, field_value, enum_value, entry_value, decorated, after);
   return before != 1001 || first != 16 || explicit_global != 2004 || explicit_call != 1005 || call_site != 113 || nested != 116 || restored != 20 || replaced != 19 || assigned != 18 || assigned_again != 19 || generated_value != 22 || generated_inline != 23 || repeated != 2 || field_value != 7 || enum_value != 4 || entry_value != 42 || decorated != 1 || after != 1002;
 }
 

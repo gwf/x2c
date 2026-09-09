@@ -2,5 +2,3 @@ unittest/compiler-fixtures/braced-unquote-mismatched.x:6:1: parse: unexpected en
   
   ^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lisp-bind-non-literal-name.x:3:1: macro: native Lisp 
   ^
   note: value: (expr (int) (literal (int) "42"))
 
-limit: too many errors, stopping
-

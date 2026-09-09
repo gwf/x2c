@@ -6,9 +6,9 @@ Var int_var(int);
 
 int main(void){
   x2c_initialize();
-  Array values = Array_update_n(Array_new(),  1,  int_var(1));
+  Array values = Array_update_n(Array_new(), 1, int_var(1));
   Var increment = int_var(2);
-  Array_updateindex(values,  0,  56,  increment);
+  Array_updateindex(values, 0, 56, increment);
   return 0;
 }
 

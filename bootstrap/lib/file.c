@@ -52,10 +52,6 @@ typedef struct _x2c_defer_env_7{
 }
 _x2c_defer_env_7;
 
-
-
-
-
 #include "string.h"
 #include "block.h"
 #include "buffer.h"
@@ -79,9 +75,9 @@ String String_intern_free(String);
 
 String String_malloc(int);
 
-void Block_reserve(Block,  size_t);
+void Block_reserve(Block, size_t);
 
-void Block_append(Block,  const void *,  size_t);
+void Block_append(Block, const void *, size_t);
 
 Block Block_new(size_t);
 
@@ -97,7 +93,7 @@ File Var_file(Var);
 
 Block Var_block(Var);
 
-Iter Iter_init(Iter,  Var,  IterNextFn,  Var);
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Var File_var(File);
 
@@ -111,35 +107,35 @@ String Var_pointer_string(Var);
 
 String String_printf(String, ...);
 
-Buffer Var_write_pointer_repr(Var,  Buffer);
+Buffer Var_write_pointer_repr(Var, Buffer);
 
-Buffer Buffer_printf(Buffer,  const char *, ...);
+Buffer Buffer_printf(Buffer, const char *, ...);
 
-_Noreturn static void _open_error(Symbol operation,  const char * path,  int error);
+_Noreturn static void _open_error(Symbol operation, const char * path, int error);
 
-_Noreturn static void _io_error(Symbol operation,  int error);
+_Noreturn static void _io_error(Symbol operation, int error);
 
 static void _check_read(File file);
 
-static File _open_path(const char * path,  const char * mode,  Symbol op);
+static File _open_path(const char * path, const char * mode, Symbol op);
 
 static int _string_allocation(size_t length);
 
-static void _validate_text(const void * bytes,  size_t length);
+static void _validate_text(const void * bytes, size_t length);
 
-static String _finish_text(String result,  size_t length);
+static String _finish_text(String result, size_t length);
 
-static String _text(const void * bytes,  size_t length);
+static String _text(const void * bytes, size_t length);
 
-static inline void _block_putc(Block block,  unsigned char value);
+static inline void _block_putc(Block block, unsigned char value);
 
-static void _write_bytes(File file,  const void * ptr,  size_t size,  size_t * written);
+static void _write_bytes(File file, const void * ptr, size_t size, size_t * written);
 
-static void _append_text(Block content,  const void * bytes,  size_t count);
+static void _append_text(Block content, const void * bytes, size_t count);
 
-static String _regular_text(File file,  size_t requested);
+static String _regular_text(File file, size_t requested);
 
-static int _next(Iter iter,  Var * out);
+static int _next(Iter iter, Var * out);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
@@ -157,30 +153,30 @@ static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
-_Noreturn static void _open_error(Symbol operation,  const char * path,  int error){
+_Noreturn static void _open_error(Symbol operation, const char * path, int error){
   if(! path){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/file.x",.function =  "_open_error",.line =  87};
-    x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140),  Symbol_var(operation),  Symbol_var(11703198),  int_var(error));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/file.x",.function = "_open_error",.line = 87};
+    x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
   String resource = String_new(path);
   if(error == ENOENT){
-    static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/file.x",.function =  "_open_error",.line =  89};
-    x2c_error_raise_n(& _x2c_error_site_1, 31862161386376, 3, Symbol_var(34096809266140),  Symbol_var(operation),  Symbol_var(1051920),  String_var(resource),  Symbol_var(11703198),  int_var(error));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/file.x",.function = "_open_error",.line = 89};
+    x2c_error_raise_n(& _x2c_error_site_1, 31862161386376, 3, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(1051920), String_var(resource), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/file.x",.function =  "_open_error",.line =  92};
-    x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140),  Symbol_var(operation),  Symbol_var(1051920),  String_var(resource),  Symbol_var(11703198),  int_var(error));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/file.x",.function = "_open_error",.line = 92};
+    x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(1051920), String_var(resource), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
 
 }
 
-_Noreturn static void _io_error(Symbol operation,  int error){
+_Noreturn static void _io_error(Symbol operation, int error){
   {
-    static const X2CErrorSite  _x2c_error_site_3  = {.file =  "../../lib/file.x",.function =  "_io_error",.line =  96};
-    x2c_error_raise_n(& _x2c_error_site_3, 20399393368, 2, Symbol_var(34096809266140),  Symbol_var(operation),  Symbol_var(11703198),  int_var(error));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/file.x",.function = "_io_error",.line = 96};
+    x2c_error_raise_n(& _x2c_error_site_3, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
 
@@ -189,92 +185,92 @@ _Noreturn static void _io_error(Symbol operation,  int error){
 static void _check_read(File file){
   if(! ferror(file)) return;
   int error = errno;
-  _io_error(1189960,  error);
+  _io_error(1189960, error);
 }
 
-static File _open_path(const char * path,  const char * mode,  Symbol op){
+static File _open_path(const char * path, const char * mode, Symbol op){
   if(! path || ! mode){
-    static const X2CErrorSite  _x2c_error_site_4  = {.file =  "../../lib/file.x",.function =  "_open_path",.line =  106};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140),  Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/file.x",.function = "_open_path",.line = 106};
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(op));
     __builtin_unreachable();
   }
-  File file = fopen(path,  mode);
+  File file = fopen(path, mode);
   if(file) return file;
   int error = errno;
-  _open_error(op,  path,  error);
+  _open_error(op, path, error);
 }
 
 static int _string_allocation(size_t length){
   if(length >= INT_MAX){
-    static const X2CErrorSite  _x2c_error_site_5  = {.file =  "../../lib/file.x",.function =  "_string_allocation",.line =  114};
-    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 1, Symbol_var(1265290),  Var_box_ulong(length));
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/file.x",.function = "_string_allocation",.line = 114};
+    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(length));
     __builtin_unreachable();
   }
   return(int) length + 1;
 }
 
-static void _validate_text(const void * bytes,  size_t length){
+static void _validate_text(const void * bytes, size_t length){
   if(! length) return;
   if(! bytes){
-    static const X2CErrorSite  _x2c_error_site_6  = {.file =  "../../lib/file.x",.function =  "_validate_text",.line =  120};
-    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("File.text")),  NULL))),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("null bytes")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 120};
+    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("null bytes")), NULL))));
     __builtin_unreachable();
   }
-  if(memchr(bytes,  '\0',  length)){
-    static const X2CErrorSite  _x2c_error_site_7  = {.file =  "../../lib/file.x",.function =  "_validate_text",.line =  121};
-    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("File.text")),  NULL))),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("embedded NUL")),  NULL))));
+  if(memchr(bytes, '\0', length)){
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 121};
+    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
     __builtin_unreachable();
   }
 
 }
 
-static String _finish_text(String result,  size_t length){
-  _validate_text(result,  length);
+static String _finish_text(String result, size_t length){
+  _validate_text(result, length);
   char * out = result;
   out[length] = '\0';
   return String_intern_free(result);
 }
 
-static String _text(const void * bytes,  size_t length){
+static String _text(const void * bytes, size_t length){
   if(! length) return NULL;
   if(! bytes){
-    static const X2CErrorSite  _x2c_error_site_8  = {.file =  "../../lib/file.x",.function =  "_text",.line =  137};
-    x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("File.text")),  NULL))),  Symbol_var(47666),  String_var(String_join(NULL,  cons(String_var(String_new("null bytes")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/file.x",.function = "_text",.line = 137};
+    x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("null bytes")), NULL))));
     __builtin_unreachable();
   }
   int allocation = _string_allocation(length);
   String result = String_malloc(allocation);
-  memcpy(result,  bytes,  length);
-  return _finish_text(result,  length);
+  memcpy(result, bytes, length);
+  return _finish_text(result, length);
 }
 
-static inline void _block_putc(Block block,  unsigned char value){
+static inline void _block_putc(Block block, unsigned char value){
   if(block -> length == SIZE_MAX){
-    static const X2CErrorSite  _x2c_error_site_9  = {.file =  "../../lib/file.x",.function =  "_block_putc",.line =  145};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/file.x",.function = "_block_putc",.line = 145};
     x2c_error_raise_n(& _x2c_error_site_9, 1358596898646632, 0);
     __builtin_unreachable();
   }
   size_t expected = block -> length + 1;
-  if(block -> length == block -> cap) Block_reserve(block,  expected);
+  if(block -> length == block -> cap) Block_reserve(block, expected);
   ((unsigned char *) block -> bytes)[block -> length] = value;
   block -> length = expected;
 }
 
-static void _write_bytes(File file,  const void * ptr,  size_t size,  size_t * written){
+static void _write_bytes(File file, const void * ptr, size_t size, size_t * written){
   const unsigned char * bytes = ptr;
   size_t volatile offset = 0;
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    volatile int  _x2c_cleanup_guard_0  = 1;
+    ExceptionFrame _x2c_exception_frame_0;
+    volatile int _x2c_cleanup_guard_0 = 1;
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      _x2c_cleanup_guard_0  = 1;
+      _x2c_cleanup_guard_0 = 1;
       {
         while(offset < size){
-          size_t count = fwrite(bytes + offset,  1,  size - offset,  file);
+          size_t count = fwrite(bytes + offset, 1, size - offset, file);
           if(! count){
             int error = errno;
-            _io_error(49433866,  error);
+            _io_error(49433866, error);
           }
           offset += count;
         }
@@ -287,11 +283,11 @@ static void _write_bytes(File file,  const void * ptr,  size_t size,  size_t * w
       if (_x2c_cleanup_guard_0 >= 0) {
         int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
         x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-         if (_x2c_cleanup_guard_0 > 0) {  if(written) * written += offset;
+        if (_x2c_cleanup_guard_0 > 0) { if(written) * written += offset;
        }
         x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
         _x2c_cleanup_guard_0 = -1;
-         x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_exception_frame_0);
 
       } __builtin_unreachable();
     }
@@ -300,57 +296,57 @@ static void _write_bytes(File file,  const void * ptr,  size_t size,  size_t * w
   if (_x2c_cleanup_guard_0 >= 0) {
         int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
         x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-         if (_x2c_cleanup_guard_0 > 0) {  if(written) * written += offset;
+        if (_x2c_cleanup_guard_0 > 0) { if(written) * written += offset;
    }
         x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
         _x2c_cleanup_guard_0 = -1;
-         x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_exception_frame_0);
 
       }
 }
 }
 
-static void _append_text(Block content,  const void * bytes,  size_t count){
+static void _append_text(Block content, const void * bytes, size_t count){
   if(count >= INT_MAX - content -> length){
     size_t size = content -> length + count;
     {
-      static const X2CErrorSite  _x2c_error_site_10  = {.file =  "../../lib/file.x",.function =  "_append_text",.line =  171};
-      x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290),  Var_box_ulong(size));
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/file.x",.function = "_append_text",.line = 171};
+      x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
 
   }
-  _validate_text(bytes,  count);
-  Block_append(content,  bytes,  count);
+  _validate_text(bytes, count);
+  Block_append(content, bytes, count);
 }
 
-static String _regular_text(File file,  size_t requested){
+static String _regular_text(File file, size_t requested){
   int allocation = _string_allocation(requested);
   String first = String_malloc(allocation);
   Block content = NULL;
   {
-   _x2c_defer_env_0 _x2c_defer_env_8 = {._x2c_defer_capture_0 =(const void *) & first, ._x2c_defer_capture_1 =(const void *) & content};
+  _x2c_defer_env_0 _x2c_defer_env_8 = {._x2c_defer_capture_0 =(const void *) & first, ._x2c_defer_capture_1 =(const void *) & content};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  & _x2c_defer_env_8
+    .env = & _x2c_defer_env_8
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    size_t count = fread(first,  1,  requested,  file);
+    size_t count = fread(first, 1, requested, file);
     _check_read(file);
     if(count < requested){
-      String result = _finish_text(first,  count);
+      String result = _finish_text(first, count);
       first = NULL;
       {
         String _x2c_return_value_0 = result;
         {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
       }
@@ -359,17 +355,17 @@ static String _regular_text(File file,  size_t requested){
     int next = fgetc(file);
     if(next == EOF){
       _check_read(file);
-      String result = _finish_text(first,  count);
+      String result = _finish_text(first, count);
       first = NULL;
       {
         String _x2c_return_value_1 = result;
         {
   int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-   return _x2c_return_value_1;
+  return _x2c_return_value_1;
 
 }
       }
@@ -377,20 +373,20 @@ static String _regular_text(File file,  size_t requested){
     }
     content = Block_new(sizeof(char));
     if(count >= INT_MAX - 1){
-      static const X2CErrorSite  _x2c_error_site_11  = {.file =  "../../lib/file.x",.function =  "_regular_text",.line =  201};
-      x2c_error_raise_n(& _x2c_error_site_11, 1358596898646632, 1, Symbol_var(1265290),  Var_box_ulong(count));
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 201};
+      x2c_error_raise_n(& _x2c_error_site_11, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(count));
       __builtin_unreachable();
     }
-    _append_text(content,  first,  count);
+    _append_text(content, first, count);
     char * head = first;
     head[count] = '\0';
     String_free(first);
     first = NULL;
     _block_putc(content, (unsigned char) next);
     unsigned char bytes[BUFSIZ];
-    while((count = fread(bytes,  1,  sizeof(bytes),  file)) > 0) _append_text(content,  bytes,  count);
+    while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _append_text(content, bytes, count);
     _check_read(file);
-    String result = _text(content -> bytes,  content -> length);
+    String result = _text(content -> bytes, content -> length);
     Block_free(content);
     content = NULL;
     {
@@ -398,10 +394,10 @@ static String _regular_text(File file,  size_t requested){
       {
   int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-   return _x2c_return_value_2;
+  return _x2c_return_value_2;
 
 }
     }
@@ -418,11 +414,11 @@ static String _regular_text(File file,  size_t requested){
 String File_string_close(File file){
   if(! _init_guard_) File_initialize();
   {
-   _x2c_defer_env_1 _x2c_defer_env_9 = {._x2c_defer_capture_2 =(const void *) & file};
+  _x2c_defer_env_1 _x2c_defer_env_9 = {._x2c_defer_capture_2 =(const void *) & file};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  & _x2c_defer_env_9
+    .env = & _x2c_defer_env_9
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -431,10 +427,10 @@ String File_string_close(File file){
       {
   int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-   return _x2c_return_value_3;
+  return _x2c_return_value_3;
 
 }
     }
@@ -448,109 +444,109 @@ String File_string_close(File file){
 }
 }
 
-File String_open(String fname,  const char * mode){
+File String_open(String fname, const char * mode){
   if(! _init_guard_) File_initialize();
-  return _open_path(fname,  mode,  1016156);
+  return _open_path(fname, mode, 1016156);
 }
 
-File File_fdopen(int fildes,  const char * mode){
+File File_fdopen(int fildes, const char * mode){
   if(! _init_guard_) File_initialize();
   if(! mode){
     Symbol operation = 412057948;
     {
-      static const X2CErrorSite  _x2c_error_site_12  = {.file =  "../../lib/file.x",.function =  "File_fdopen",.line =  246};
-      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 1, Symbol_var(34096809266140),  Symbol_var(operation));
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/file.x",.function = "File_fdopen",.line = 246};
+      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(operation));
       __builtin_unreachable();
     }
 
   }
-  File file = fdopen(fildes,  mode);
+  File file = fdopen(fildes, mode);
   if(file) return file;
   int error = errno;
-  _open_error(412057948,  NULL,  error);
+  _open_error(412057948, NULL, error);
 }
 
-File File_open(const char * path,  const char * mode){
+File File_open(const char * path, const char * mode){
   if(! _init_guard_) File_initialize();
-  return _open_path(path,  mode,  1016156);
+  return _open_path(path, mode, 1016156);
 }
 
-File File_popen(const char * cmd,  const char * mode){
+File File_popen(const char * cmd, const char * mode){
   if(! _init_guard_) File_initialize();
   if(! cmd || ! mode){
-    static const X2CErrorSite  _x2c_error_site_13  = {.file =  "../../lib/file.x",.function =  "File_popen",.line =  271};
-    x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(34096809266140),  Symbol_var(34570588));
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/file.x",.function = "File_popen",.line = 271};
+    x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(34570588));
     __builtin_unreachable();
   }
-  File file = popen(cmd,  mode);
+  File file = popen(cmd, mode);
   if(file) return file;
   int error = errno;
-  _open_error(34570588,  cmd,  error);
+  _open_error(34570588, cmd, error);
 }
 
-File File_reopen(File file,  const char * path,  const char * mode){
+File File_reopen(File file, const char * path, const char * mode){
   if(! _init_guard_) File_initialize();
   if(! file || ! path || ! mode){
-    static const X2CErrorSite  _x2c_error_site_14  = {.file =  "../../lib/file.x",.function =  "File_reopen",.line =  286};
-    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(34096809266140),  Symbol_var(1219461468));
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/file.x",.function = "File_reopen",.line = 286};
+    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(1219461468));
     __builtin_unreachable();
   }
-  File opened = freopen(path,  mode,  file);
+  File opened = freopen(path, mode, file);
   if(opened) return opened;
   int error = errno;
-  _open_error(1219461468,  path,  error);
+  _open_error(1219461468, path, error);
 }
 
-int File_printf(File file,  const char * format, ...){
+int File_printf(File file, const char * format, ...){
   if(! _init_guard_) File_initialize();
   va_list ap;
-  va_start(ap,  format);
-  int result = File_va_printf(file,  format,  ap);
+  va_start(ap, format);
+  int result = File_va_printf(file, format, ap);
   va_end(ap);
   return result;
 }
 
-int File_scanf(File file,  const char * format, ...){
+int File_scanf(File file, const char * format, ...){
   if(! _init_guard_) File_initialize();
   va_list ap;
-  va_start(ap,  format);
-  int result = File_va_scanf(file,  format,  ap);
+  va_start(ap, format);
+  int result = File_va_scanf(file, format, ap);
   va_end(ap);
   return result;
 }
 
-String File_readblock(File file,  long size){
+String File_readblock(File file, long size){
   if(! _init_guard_) File_initialize();
   if(size < 0){
-    static const X2CErrorSite  _x2c_error_site_15  = {.file =  "../../lib/file.x",.function =  "File_readblock",.line =  382};
-    x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("File.readblock")),  NULL))),  Symbol_var(1265290),  long_var(size));
+    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/file.x",.function = "File_readblock",.line = 382};
+    x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.readblock")), NULL))), Symbol_var(1265290), long_var(size));
     __builtin_unreachable();
   }
   size_t requested =(size_t) size;
   int allocation = _string_allocation(requested);
-  String result = String_malloc(allocation),  owned = result;
+  String result = String_malloc(allocation), owned = result;
   {
-   _x2c_defer_env_2 _x2c_defer_env_10 = {._x2c_defer_capture_3 =(const void *) & owned};
+  _x2c_defer_env_2 _x2c_defer_env_10 = {._x2c_defer_capture_3 =(const void *) & owned};
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
-    .env =  & _x2c_defer_env_10
+    .env = & _x2c_defer_env_10
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-    size_t count = File_read(file,  result,  1,  requested);
+    size_t count = File_read(file, result, 1, requested);
     _check_read(file);
-    String output = _finish_text(result,  count);
+    String output = _finish_text(result, count);
     owned = NULL;
     {
       String _x2c_return_value_4 = output;
       {
   int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-   return _x2c_return_value_4;
+  return _x2c_return_value_4;
 
 }
     }
@@ -564,19 +560,19 @@ String File_readblock(File file,  long size){
 }
 }
 
-FileReadStatus File_readline_into(File file,  Block dest){
+FileReadStatus File_readline_into(File file, Block dest){
   if(! _init_guard_) File_initialize();
   if(! file ||(void *) dest == NULL || dest -> width != sizeof(char)) return FILE_READ_ERROR;
   Block_clear(dest);
-  int failed,  error;
+  int failed, error;
   {
     flockfile(file);
     {
-   _x2c_defer_env_3 _x2c_defer_env_11 = {._x2c_defer_capture_4 =(const void *) & file};
+  _x2c_defer_env_3 _x2c_defer_env_11 = {._x2c_defer_capture_4 =(const void *) & file};
 
   X2CCleanup _x2c_defer_record_3 = {
     .fn = _x2c_defer_cleanup_3,
-    .env =  & _x2c_defer_env_11
+    .env = & _x2c_defer_env_11
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
@@ -595,35 +591,35 @@ FileReadStatus File_readline_into(File file,  Block dest){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
 }
   }
-  if(failed) _io_error(1189960,  error);
+  if(failed) _io_error(1189960, error);
   return dest -> length ? FILE_READ_DATA : FILE_READ_EOF;
 }
 
-FileReadStatus File_read_into(File file,  Block dest){
+FileReadStatus File_read_into(File file, Block dest){
   if(! _init_guard_) File_initialize();
   if(! file ||(void *) dest == NULL || dest -> width != sizeof(char)) return FILE_READ_ERROR;
   Block_clear(dest);
   unsigned char bytes[BUFSIZ];
   size_t count;
-  while((count = fread(bytes,  1,  sizeof(bytes),  file)) > 0) Block_append(dest,  bytes,  count);
+  while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) Block_append(dest, bytes, count);
   _check_read(file);
   return dest -> length ? FILE_READ_DATA : FILE_READ_EOF;
 }
 
-int File_write_all(File file,  const void * ptr,  size_t size){
+int File_write_all(File file, const void * ptr, size_t size){
   if(! _init_guard_) File_initialize();
   if(! file ||(! ptr && size)) return 0;
-  _write_bytes(file,  ptr,  size,  NULL);
+  _write_bytes(file, ptr, size, NULL);
   return 1;
 }
 
-int File_copy_to(File source,  File output,  size_t * copied){
+int File_copy_to(File source, File output, size_t * copied){
   if(! _init_guard_) File_initialize();
   if(copied) * copied = 0;
   if(! source || ! output) return 0;
   unsigned char bytes[BUFSIZ];
   size_t count;
-  while((count = fread(bytes,  1,  sizeof(bytes),  source)) > 0) _write_bytes(output,  bytes,  count,  copied);
+  while((count = fread(bytes, 1, sizeof(bytes), source)) > 0) _write_bytes(output, bytes, count, copied);
   _check_read(source);
   return 1;
 }
@@ -632,26 +628,26 @@ String File_readline(File file){
   if(! _init_guard_) File_initialize();
   Block line = Block_new(sizeof(char));
   {
-   _x2c_defer_env_4 _x2c_defer_env_12 = {._x2c_defer_capture_5 =(const void *) & line};
+  _x2c_defer_env_4 _x2c_defer_env_12 = {._x2c_defer_capture_5 =(const void *) & line};
 
   X2CCleanup _x2c_defer_record_4 = {
     .fn = _x2c_defer_cleanup_4,
-    .env =  & _x2c_defer_env_12
+    .env = & _x2c_defer_env_12
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
-    Block_reserve(line,  BUFSIZ);
-    FileReadStatus status = File_readline_into(file,  line);
-    String result = status == FILE_READ_DATA ? _text(line -> bytes,  line -> length) : NULL;
+    Block_reserve(line, BUFSIZ);
+    FileReadStatus status = File_readline_into(file, line);
+    String result = status == FILE_READ_DATA ? _text(line -> bytes, line -> length) : NULL;
     {
       String _x2c_return_value_5 = result;
       {
   int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
-   return _x2c_return_value_5;
+  return _x2c_return_value_5;
 
 }
     }
@@ -672,34 +668,34 @@ String File_string(File file){
   }
   ;
   off_t position = File_tello(file);
-  if(position >= 0 && File_stat(file,  & statbuf) == 0 && S_ISREG(statbuf.st_mode) && statbuf.st_size > position){
+  if(position >= 0 && File_stat(file, & statbuf) == 0 && S_ISREG(statbuf.st_mode) && statbuf.st_size > position){
     uintmax_t remaining =(uintmax_t)(statbuf.st_size - position);
     _string_allocation(remaining);
     return _regular_text(file, (size_t) remaining);
   }
   Block content = Block_new(sizeof(char));
   {
-   _x2c_defer_env_5 _x2c_defer_env_13 = {._x2c_defer_capture_6 =(const void *) & content};
+  _x2c_defer_env_5 _x2c_defer_env_13 = {._x2c_defer_capture_6 =(const void *) & content};
 
   X2CCleanup _x2c_defer_record_5 = {
     .fn = _x2c_defer_cleanup_5,
-    .env =  & _x2c_defer_env_13
+    .env = & _x2c_defer_env_13
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
     unsigned char bytes[BUFSIZ];
     size_t count;
-    while((count = fread(bytes,  1,  sizeof(bytes),  file)) > 0) _append_text(content,  bytes,  count);
+    while((count = fread(bytes, 1, sizeof(bytes), file)) > 0) _append_text(content, bytes, count);
     _check_read(file);
     {
-      String _x2c_return_value_6 = _text(content -> bytes,  content -> length);
+      String _x2c_return_value_6 = _text(content -> bytes, content -> length);
       {
   int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_5);
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
-   return _x2c_return_value_6;
+  return _x2c_return_value_6;
 
 }
     }
@@ -713,35 +709,35 @@ String File_string(File file){
 }
 }
 
-static int _next(Iter iter,  Var * out){
+static int _next(Iter iter, Var * out){
   File file = Var_file(iter -> obj);
   if(! file) return 0;
   Block line = Var_block(iter -> state);
   if((void *) line == NULL) return 0;
   int keep = 0;
   {
-   _x2c_defer_env_6 _x2c_defer_env_14 = {._x2c_defer_capture_7 =(const void *) & keep, ._x2c_defer_capture_8 =(const void *) & line, ._x2c_defer_capture_9 =(const void *) & iter};
+  _x2c_defer_env_6 _x2c_defer_env_14 = {._x2c_defer_capture_7 =(const void *) & keep, ._x2c_defer_capture_8 =(const void *) & line, ._x2c_defer_capture_9 =(const void *) & iter};
 
   X2CCleanup _x2c_defer_record_6 = {
     .fn = _x2c_defer_cleanup_6,
-    .env =  & _x2c_defer_env_14
+    .env = & _x2c_defer_env_14
   };
   x2c_cleanup_push(&_x2c_defer_record_6);
   {
-    FileReadStatus status = File_readline_into(file,  line);
+    FileReadStatus status = File_readline_into(file, line);
     if(status != FILE_READ_DATA){
       int _x2c_return_value_7 = 0;
       {
   int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_6);
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
-   return _x2c_return_value_7;
+  return _x2c_return_value_7;
 
 }
     }
-    String text = _text(line -> bytes,  line -> length);
+    String text = _text(line -> bytes, line -> length);
     * out = String_var(text);
     keep = 1;
     {
@@ -749,10 +745,10 @@ static int _next(Iter iter,  Var * out){
       {
   int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_6);
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
-   return _x2c_return_value_8;
+  return _x2c_return_value_8;
 
 }
     }
@@ -766,39 +762,39 @@ static int _next(Iter iter,  Var * out){
 }
 }
 
-Iter File_iter(File file,  Iter dest){
+Iter File_iter(File file, Iter dest){
   if(! _init_guard_) File_initialize();
   if((void *) dest == NULL) return NULL;
   if(! file) return Iter_init(dest, (Var){
     0
   }
-  ,  NULL, (Var){
+  , NULL, (Var){
     .u64 = 0
   }
   );
   Block line = Block_new(sizeof(char));
   int keep = 0;
   {
-   _x2c_defer_env_7 _x2c_defer_env_15 = {._x2c_defer_capture_10 =(const void *) & keep, ._x2c_defer_capture_11 =(const void *) & line};
+  _x2c_defer_env_7 _x2c_defer_env_15 = {._x2c_defer_capture_10 =(const void *) & keep, ._x2c_defer_capture_11 =(const void *) & line};
 
   X2CCleanup _x2c_defer_record_7 = {
     .fn = _x2c_defer_cleanup_7,
-    .env =  & _x2c_defer_env_15
+    .env = & _x2c_defer_env_15
   };
   x2c_cleanup_push(&_x2c_defer_record_7);
   {
-    Block_reserve(line,  BUFSIZ);
-    Iter_init(dest,  File_var(file),  _next,  Block_var(line));
+    Block_reserve(line, BUFSIZ);
+    Iter_init(dest, File_var(file), _next, Block_var(line));
     keep = 1;
     {
       Iter _x2c_return_value_9 = dest;
       {
   int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_7);
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
-   return _x2c_return_value_9;
+  return _x2c_return_value_9;
 
 }
     }
@@ -814,10 +810,10 @@ Iter File_iter(File file,  Iter dest){
 
 unsigned File_hash(File file){
   if(! _init_guard_) File_initialize();
-  return Var_hash(Var_new(3683441,  file));
+  return Var_hash(Var_new(3683441, file));
 }
 
-int File_equal(File x,  File y){
+int File_equal(File x, File y){
   if(! _init_guard_) File_initialize();
   return(void *) x ==(void *) y;
 }
@@ -825,7 +821,7 @@ int File_equal(File x,  File y){
 String File_repr(File file){
   if(! _init_guard_) File_initialize();
   if(! file) return Var_pointer_string(File_var(file));
-  return String_printf(_0,  file,  File_fileno(file));
+  return String_printf(_0, file, File_fileno(file));
 }
 
 String File_str(File file){
@@ -833,10 +829,10 @@ String File_str(File file){
   return file ? File_string(file) : Var_pointer_string(File_var(file));
 }
 
-Buffer File_write_repr(File file,  Buffer out){
+Buffer File_write_repr(File file, Buffer out){
   if(! _init_guard_) File_initialize();
-  if(! file) return Var_write_pointer_repr(File_var(file),  out);
-  return Buffer_printf(out,  "<File:%p, fd:%d>",  file,  File_fileno(file));
+  if(! file) return Var_write_pointer_repr(File_var(file), out);
+  return Buffer_printf(out, "<File:%p, fd:%d>", file, File_fileno(file));
 }
 
 void File_initialize(void){

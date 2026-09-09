@@ -3,5 +3,3 @@ unittest/compiler-fixtures/static-literal-nonstatic-dependency.x:4:15: parse: fi
                 ^^^^
   note: initializer: path
 
-limit: too many errors, stopping
-

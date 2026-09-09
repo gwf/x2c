@@ -64,6 +64,23 @@ printf '# first non-whitespace comment\n@%s\n' "$BUILD/inner.rsp" \
 "$X2C" @"$BUILD/outer.rsp"
 [[ -f "$BUILD/out/quoted.c" && -f "$BUILD/out/quoted.h" ]]
 
+# Attached translate options use the same values as their separate forms.
+mkdir -p "$BUILD/attached" "$BUILD/separate"
+"$X2C" translate -q -j8 "-I$ROOT/lib" --out-dir "$BUILD/attached" \
+  "$BUILD/space dir/quoted.x"
+"$X2C" translate -q -j 8 -I "$ROOT/lib" --out-dir "$BUILD/separate" \
+  "$BUILD/space dir/quoted.x"
+cmp "$BUILD/attached/quoted.c" "$BUILD/separate/quoted.c"
+cmp "$BUILD/attached/quoted.h" "$BUILD/separate/quoted.h"
+set +e
+"$X2C" translate -not-a-real-option >"$BUILD/unknown.stdout" \
+  2>"$BUILD/unknown.stderr"
+unknown_status=$?
+set -e
+[[ $unknown_status == 2 ]]
+grep -Fxq "x2c: error: unknown option '-not-a-real-option'" "$BUILD/unknown.stderr"
+! grep -Fq 'note:' "$BUILD/unknown.stderr"
+
 # An omitted output directory writes beside the invocation, not the source.
 (cd "$BUILD" && "$X2C" translate "$BUILD/space dir/quoted.x")
 cmp "$BUILD/quoted.c" "$BUILD/out/quoted.c"
@@ -461,6 +478,7 @@ run_status=$?
 set -e
 [[ $compile_only_status == 2 && $run_status == 0 ]]
 [[ $(cat "$BUILD/direct/run.stdout") == one ]]
+grep -Fq 'temporary; removed after run' "$BUILD/direct/run.stderr"
 
 cat >"$BUILD/direct/terminal.c" <<'EOF'
 #include <stdio.h>

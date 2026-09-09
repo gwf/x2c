@@ -1601,9 +1601,8 @@ static Ast _children(Compiler compiler, Ast ast) {
   $ast.rewrite_children(ast, child, _node(compiler, child));
 }
 
-/* The dispatcher tail _op_chain applies to its base and rewritten nodes,
-   mirroring _node: sequences pass through, match records and blocks reach
-   their own drivers, and everything else transforms its children. */
+/* Shared dispatcher tail for ordinary nodes and rebuilt operator chains.
+   Sequences pass through; matches and blocks use their sequence drivers. */
 static Ast _finish(Compiler compiler, Ast ast) {
   match (ast) {
     case %(seq *): return ast;
@@ -1844,17 +1843,7 @@ static Ast _node(Compiler c, Ast ast) {
     case <op>:       ast = _operator(c, ast);         break;
     case <postfix>:  ast = _postfix(c, ast);          break;
   }
-  match (ast) {
-    case %(seq *): return ast;
-    case %(matchcases ?subject ?records): {
-      List new_subject = _node(c, subject.list());
-      List new_records = _match_records(c, records);
-      return %(matchcases $new_subject $new_records);
-    }
-    case %(block *body):
-      return %(block @{_sequence(c, body)});
-  }
-  return _children(c, ast);
+  return _finish(c, ast);
 }
 
 /** Lowers a bound and typed top-level AST to the normalized form consumed by

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/import-reserved-prefix.x:6:20: parse: 'geo__mine' is 
   int geo__mine(void);
                      ^
 
-limit: too many errors, stopping
-

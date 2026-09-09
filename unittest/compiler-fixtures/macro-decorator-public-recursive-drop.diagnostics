@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-public-recursive-drop.x:10:1: parse: 
   $drop()
   ^
 
-limit: too many errors, stopping
-

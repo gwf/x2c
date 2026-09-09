@@ -11,23 +11,23 @@ typedef struct Error * Error;
 
 typedef struct ErrorHandler * ErrorHandler;
 
-typedef Symbol(* ErrorHandlerFn)(List errors,  Var data);
+typedef Symbol(* ErrorHandlerFn)(List errors, Var data);
 
-ErrorHandler x2c_error_catch_push(void * target,  unsigned arm_count, ...);
+ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...);
 
 int x2c_error_catch_selected(ErrorHandler handle);
 
-Var x2c_error_catch_capture(ErrorHandler handle,  int index);
+Var x2c_error_catch_capture(ErrorHandler handle, int index);
 
 void x2c_error_catch_detach(ErrorHandler handle);
 
 void x2c_error_catch_close(ErrorHandler handle);
 
-void x2c_error_raise(Symbol code,  List detail);
+void x2c_error_raise(Symbol code, List detail);
 
 void Error_note_rendered(void);
 
-void x2c_error_raise_n(const X2CErrorSite * site,  Symbol code,  unsigned pair_count, ...);
+void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...);
 
 int Error_handler_depth(void);
 
@@ -35,11 +35,11 @@ void * Error_handler_head(void);
 
 void * Error_unwind_head(void);
 
-void Error_restore_landing(void * saved_head,  int saved_depth);
+void Error_restore_landing(void * saved_head, int saved_depth);
 
-void Error_trim(void * saved_head,  int stack_height);
+void Error_trim(void * saved_head, int stack_height);
 
-void Error_restore(int handler_depth,  int stack_height);
+void Error_restore(int handler_depth, int stack_height);
 
 void Error_initialize_raw(void);
 
@@ -53,13 +53,13 @@ int Error_mark(void);
 
 Var Error_snapshot(Var value);
 
-Var Error_snapshot_in(Var value,  Scope * values,  Pool pool);
+Var Error_snapshot_in(Var value, Scope * values, Pool pool);
 
-List Error_since_in(int mark,  Scope * values,  Pool pool);
+List Error_since_in(int mark, Scope * values, Pool pool);
 
 List Error_since(int mark);
 
-void Error_policy_set(Symbol code,  Symbol disposition);
+void Error_policy_set(Symbol code, Symbol disposition);
 
 Symbol Error_policy_get(Symbol code);
 
@@ -67,15 +67,15 @@ int Error_bound(void);
 
 void Error_bound_set(int bound);
 
-ErrorHandler Error_push(ErrorHandlerFn fn,  Var data);
+ErrorHandler Error_push(ErrorHandlerFn fn, Var data);
 
 void Error_pop(ErrorHandler handle);
 
 void * Error_context_open(void);
 
-void Error_context_close(void * token,  int preserve_records);
+void Error_context_close(void * token, int preserve_records);
 
-Symbol Error_raise(Symbol code,  List detail);
+Symbol Error_raise(Symbol code, List detail);
 
 int Error_ready(void);
 

@@ -2,18 +2,15 @@
 
 #include "list-literal-ident-atom.h"
 
-static List _14,  _13,  _12,  _11,  _9,  _8,  _5,  _4,  _2;
+static List _14, _13, _12, _11, _9, _8, _5, _4, _2;
 
-static Var _15,  _10,  _7,  _6,  _3,  _1,  _0;
+static Var _15, _10, _7, _6, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
@@ -23,7 +20,7 @@ String String_str(String);
 
 String List_repr(List);
 
-int List_equal(List,  List);
+int List_equal(List, List);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -43,19 +40,19 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = Symbol_var(19147688);
   _1 = Symbol_var(48);
-  _2 = cons(_1,  NULL);
+  _2 = cons(_1, NULL);
   _3 = List_var(_2);
-  _4 = cons(_3,  NULL);
-  _5 = cons(_0,  _4);
+  _4 = cons(_3, NULL);
+  _5 = cons(_0, _4);
   _6 = Symbol_var(2);
   _7 = Symbol_var(50);
-  _8 = cons(_7,  NULL);
-  _9 = cons(_0,  _8);
+  _8 = cons(_7, NULL);
+  _9 = cons(_0, _8);
   _10 = List_var(_9);
-  _11 = cons(_10,  NULL);
-  _12 = cons(_6,  _11);
-  _13 = cons(_0,  NULL);
-  _14 = cons(_6,  _13);
+  _11 = cons(_10, NULL);
+  _12 = cons(_6, _11);
+  _13 = cons(_0, NULL);
+  _14 = cons(_6, _13);
   _15 = Symbol_var(7318440);
 }
 
@@ -76,13 +73,13 @@ static List bare_atom(void){
 }
 
 static List reference(int n){
-  return cons(_15,  cons(int_var(n),  NULL));
+  return cons(_15, cons(int_var(n), NULL));
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%s %s %s %s %s %d\n",  String_str(List_repr(head_atom())),  String_str(List_repr(nested_atom())),  String_str(List_repr(tail_atom())),  String_str(List_repr(bare_atom())),  String_str(List_repr(reference(7))),  List_equal(head_atom(),  head_atom()));
+  printf("%s %s %s %s %s %d\n", String_str(List_repr(head_atom())), String_str(List_repr(nested_atom())), String_str(List_repr(tail_atom())), String_str(List_repr(bare_atom())), String_str(List_repr(reference(7))), List_equal(head_atom(), head_atom()));
   return 0;
 }
 

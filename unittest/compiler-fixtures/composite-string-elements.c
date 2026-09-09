@@ -4,7 +4,7 @@
 
 static List _2;
 
-static String _9,  _8,  _7,  _6,  _5,  _4,  _3,  _0;
+static String _9, _8, _7, _6, _5, _4, _3, _0;
 
 static Var _1;
 
@@ -13,7 +13,7 @@ static Row designated;
 static Row positional;
 
 static String words[2] ={
-  0,  0
+  0, 0
 }
 ;
 
@@ -22,7 +22,7 @@ static Row rows[2] ={
     .name = 0
   }
   , {
-    0,  0
+    0, 0
   }
 
 }
@@ -32,11 +32,9 @@ List public_list;
 
 static int _init_guard_ = 0;
 
-
-
 Var String_var(String);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 int String_len(String);
 
@@ -52,7 +50,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("alpha");
   _1 = String_var(_0);
-  _2 = cons(_1,  NULL);
+  _2 = cons(_1, NULL);
   _3 = String_new("two");
   _4 = String_new("three");
   _5 = String_new("four");
@@ -65,7 +63,7 @@ __attribute__((constructor)) static void _file_init_(void){
   }
   ;
   positional =(Row){
-    _4,  1
+    _4, 1
   }
   ;
   {
@@ -78,7 +76,7 @@ __attribute__((constructor)) static void _file_init_(void){
     }
     ;
     if(1ULL < sizeof(rows) / sizeof(rows[1ULL])) rows[1ULL] =(Row){
-      _8,  2
+      _8, 2
     }
     ;
   }
@@ -97,7 +95,7 @@ int main(void){
   }
   ;
   int total = width(designated.name) + width(positional.name) + width(words[0]) + width(words[1]) + width(rows[0].name) + width(rows[1].name) + width(local.name) +(int) List_len(public_list);
-  printf("%d\n",  total);
+  printf("%d\n", total);
   return total == 30 ? 0 : 1;
 }
 

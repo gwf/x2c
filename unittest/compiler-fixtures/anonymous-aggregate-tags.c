@@ -17,7 +17,7 @@ int main(void){
   BetaStore beta;
   beta.i = 3;
   GammaKind kind = GAMMA_TWO;
-  printf("%d %d %d\n",  alpha_of(& alpha),  beta.i, (int) kind);
+  printf("%d %d %d\n", alpha_of(& alpha), beta.i, (int) kind);
   return 0;
 }
 

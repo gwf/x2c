@@ -2,15 +2,11 @@
 
 #include "string-add-lowering.h"
 
-static String _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-
-
-
-
-String String_add(String,  String);
+String String_add(String, String);
 
 void Scope_retain(void);
 
@@ -20,7 +16,7 @@ __attribute__((constructor)) static void _file_init_(void);
 
 static String suffix(void);
 
-static String _x2c_proto_string_add_update(volatile String * lhs,  Symbol op,  String rhs);
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -32,7 +28,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("raw");
   _4 = String_new("folded ");
   _5 = String_new("pair");
-  _6 = String_add(_4,  _5);
+  _6 = String_add(_4, _5);
 }
 
 static String suffix(void){
@@ -43,18 +39,18 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   Scope_retain();
-  String left = _1,  right = _2;
-  String joined = String_add(left,  right);
-  String mixed = String_add(left,  _3);
+  String left = _1, right = _2;
+  String joined = String_add(left, right);
+  String mixed = String_add(left, _3);
   String constant = _6;
-  _x2c_proto_string_add_update(&(joined),  56,  suffix());
-  printf("%s %s %s\n",  joined,  mixed,  constant);
+  _x2c_proto_string_add_update(&(joined), 56, suffix());
+  printf("%s %s %s\n", joined, mixed, constant);
   Scope_release();
   return 0;
 }
 
-static String _x2c_proto_string_add_update(volatile String * lhs,  Symbol op,  String rhs){
-  lhs[0] = String_add(lhs[0],  rhs);
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
+  lhs[0] = String_add(lhs[0], rhs);
   return lhs[0];
 }
 

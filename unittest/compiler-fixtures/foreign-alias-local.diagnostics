@@ -2,5 +2,3 @@ unittest/compiler-fixtures/foreign-alias-local.x:5:3: macro: decorator 'x2c.fore
     $x2c.foreign.alias(abs)
     ^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/destructuring-malformed-declaration.x:5:10: parse: ex
            ^
   note: destructuring targets must be simple identifiers
 
-limit: too many errors, stopping
-

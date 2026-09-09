@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-identical-recursion.x:5:14: macro: identical re
                ^
   note: definition: unittest/compiler-fixtures/macro-identical-recursion.x:3:1 input: (args (expr (int) (literal (int) "1")))
 
-limit: too many errors, stopping
-

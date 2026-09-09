@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-local-unit-decorator.x:4:3: macro: local decora
     macro Decorator decorate(Unit $target) => {
     ^^^^^
 
-limit: too many errors, stopping
-

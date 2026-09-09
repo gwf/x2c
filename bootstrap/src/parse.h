@@ -20,13 +20,13 @@ int Compiler_test_static_assert(Compiler compiler);
 
 List Compiler_parse_static_assert(Compiler compiler);
 
-List Compiler_parse_field(Compiler compiler,  List context);
+List Compiler_parse_field(Compiler compiler, List context);
 
-List Compiler_parse_fields(Compiler c,  List context);
+List Compiler_parse_fields(Compiler c, List context);
 
-List Compiler_parse_enumerator(Compiler c,  Type context);
+List Compiler_parse_enumerator(Compiler c, Type context);
 
-List Compiler_parse_enumerators(Compiler c,  List context);
+List Compiler_parse_enumerators(Compiler c, List context);
 
 Type Compiler_parse_type_name(Compiler compiler);
 
@@ -34,7 +34,7 @@ List Compiler_parse_parameter(Compiler compiler);
 
 List Compiler_parse_parameter_list(Compiler c);
 
-void Compiler_bind_template_local(Compiler compiler,  List key,  List type,  List context);
+void Compiler_bind_template_local(Compiler compiler, List key, List type, List context);
 
 int Compiler_test_declaration(Compiler compiler);
 
@@ -52,9 +52,9 @@ List Compiler_parse_import_declaration(Compiler c);
 
 List Compiler_parse_top_level(Compiler c);
 
-List Compiler_finish_foreign_alias(Compiler c,  List declaration,  List native_syntax);
+List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
 
-List Compiler_bind_syntax(Compiler compiler,  Var syntax,  AstPos context,  Type return_type);
+List Compiler_bind_syntax(Compiler compiler, Var syntax, AstPos context, Type return_type);
 
 
 #endif /* __GUARD_0x46021D32__ */

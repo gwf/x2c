@@ -2,13 +2,9 @@
 
 #include "cache-reachability.h"
 
-static String _1,  _0;
+static String _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -47,8 +43,8 @@ int disconnected(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%s\n",  transitive_cache());
-  printf("%s\n",  cycle_a(0));
+  printf("%s\n", transitive_cache());
+  printf("%s\n", cycle_a(0));
   return 0;
 }
 

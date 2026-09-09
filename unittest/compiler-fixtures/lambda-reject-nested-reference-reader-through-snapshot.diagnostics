@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-nested-reference-reader-through-snapsho
                                                    ^
   note: binding: value
 
-limit: too many errors, stopping
-

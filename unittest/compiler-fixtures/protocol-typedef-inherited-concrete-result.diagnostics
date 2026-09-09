@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-typedef-inherited-concrete-result.x:9:1: pro
   ^^^^^^^^
   note: protocol member 'map' declared by Mappable(Domain) at unittest/compiler-fixtures/protocol-typedef-inherited-concrete-result.x:5:1 conflicting definition 'List_map': ((func (("List") ("Func"))) "List") expected: ((func (("Domain") ("Func"))) "Domain")
 
-limit: too many errors, stopping
-

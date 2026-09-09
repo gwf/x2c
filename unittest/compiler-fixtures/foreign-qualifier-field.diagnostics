@@ -3,5 +3,3 @@ unittest/compiler-fixtures/foreign-qualifier-field.x:5:3: type: cannot convert (
     ^^^^
   note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
 
-limit: too many errors, stopping
-

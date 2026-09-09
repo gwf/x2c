@@ -3,5 +3,3 @@ unittest/compiler-fixtures/printf-var-unsupported-length.x:5:3: xform: cannot in
     ^^^^^^
   note: printf-family call: printf
 
-limit: too many errors, stopping
-

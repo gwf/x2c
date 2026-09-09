@@ -2,5 +2,3 @@ unittest/compiler-fixtures/retired-var-tag-module.x:7:3: type: cannot convert ("
     Var boxed = value;
     ^^^
 
-limit: too many errors, stopping
-

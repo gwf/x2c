@@ -4,26 +4,23 @@
 
 #include "error.h"
 
-static List _5,  _4,  _3;
+static List _5, _4, _3;
 
-static Var _2,  _1,  _0;
+static Var _2, _1, _0;
 
 static int order;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var Symbol_var(Symbol);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 int Var_int(Var);
 
@@ -54,9 +51,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = int_var(1);
   _1 = int_var(2);
   _2 = int_var(3);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
-  _5 = cons(_0,  _4);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
+  _5 = cons(_0, _4);
   order = 0;
 }
 
@@ -67,15 +64,15 @@ static void record_step(int value){
 static int continue_inside_try(void){
   int volatile caught = 0;
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(20800632064936),  NULL);
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+    ExceptionFrame _x2c_exception_frame_0;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
       for(int volatile i = 0;  i < 3;  i ++){
         if(i == 0) continue;
         if(i == 1){
-          static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function =  "continue_inside_try",.line =  17};
+          static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_try",.line = 17};
           x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
           __builtin_unreachable();
         }
@@ -86,10 +83,9 @@ static int continue_inside_try(void){
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {{
+         {{
           caught = 1;
         }
 
@@ -98,11 +94,11 @@ static int continue_inside_try(void){
     }
     else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
@@ -110,11 +106,11 @@ static int continue_inside_try(void){
 }
 int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return caught;
 }
@@ -125,7 +121,7 @@ static void break_inside_switch(void){
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -148,24 +144,24 @@ static void break_inside_switch(void){
 static int continue_inside_foreach(void){
   int volatile caught = 0;
   {
-    ExceptionFrame  _x2c_exception_frame_1;
-    List _x2c_catch_pattern_1 =  cons(Symbol_var(20800632064936),  NULL);
-    ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1,  List_var(_x2c_catch_pattern_1));
+    ExceptionFrame _x2c_exception_frame_1;
+    List _x2c_catch_pattern_1 = cons(Symbol_var(20800632064936), NULL);
+    ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, List_var(_x2c_catch_pattern_1));
     x2c_exception_push(& _x2c_exception_frame_1);
     if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
       {
         Var volatile item;
-        Iter _x2c_macro_iterator_0 = List_iter(_5,  &(struct Iter){
+        Iter _x2c_macro_iterator_0 = List_iter(_5, &(struct Iter){
           int_var(0)
         }
         );
         Var _x2c_macro_item_0;
-        while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+        while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
           item = _x2c_macro_item_0;
           {
             if(Var_int(item) == 1) continue;
             if(Var_int(item) == 2){
-              static const X2CErrorSite  _x2c_error_site_1  = {.file =  "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function =  "continue_inside_foreach",.line =  49};
+              static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_foreach",.line = 49};
               x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 0);
               __builtin_unreachable();
             }
@@ -180,10 +176,9 @@ static int continue_inside_foreach(void){
     else {x2c_exception_landed(& _x2c_exception_frame_1);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-        int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
         x2c_error_catch_detach(_x2c_error_handler_1);
         x2c_exception_mark_handled(&_x2c_exception_frame_1);
-        if (_x2c_catch_selected_1 == 0) {{
+         {{
           caught = 1;
         }
 
@@ -192,11 +187,11 @@ static int continue_inside_foreach(void){
     }
     else {int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_1);
+    x2c_error_catch_close(_x2c_error_handler_1);
     _x2c_error_handler_1 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-     x2c_exception_leave(& _x2c_exception_frame_1);
+    x2c_exception_leave(& _x2c_exception_frame_1);
     __builtin_unreachable();
   }
 
@@ -204,11 +199,11 @@ static int continue_inside_foreach(void){
 }
 int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_1);
+    x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-     x2c_exception_leave(& _x2c_exception_frame_1);
+    x2c_exception_leave(& _x2c_exception_frame_1);
 }
 return caught;
 }
@@ -220,7 +215,7 @@ static void loop_switch_boundaries(void){
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -228,10 +223,10 @@ static void loop_switch_boundaries(void){
         case 0 :{
   int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 3;
-   x2c_cleanup_leave(& _x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-   continue;
+  continue;
 
 } default: break;
       }
@@ -256,7 +251,7 @@ static void switch_loop_boundaries(void){
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
@@ -267,10 +262,10 @@ static void switch_loop_boundaries(void){
         {
   int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 2;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-   break;
+  break;
 
 }
       }
@@ -291,12 +286,12 @@ int main(void){
   if(! _init_guard_) _file_init_();
   int from_try = continue_inside_try();
   break_inside_switch();
-  int from_switch = order,  from_foreach = continue_inside_foreach();
+  int from_switch = order, from_foreach = continue_inside_foreach();
   loop_switch_boundaries();
   int from_loop_switch = order;
   switch_loop_boundaries();
   int from_switch_loop = order;
-  printf("%d %d %d %d %d\n",  from_try,  from_switch,  from_foreach,  from_loop_switch,  from_switch_loop);
+  printf("%d %d %d %d %d\n", from_try, from_switch, from_foreach, from_loop_switch, from_switch_loop);
   return from_try == 1 && from_switch == 132 && from_foreach == 1 && from_loop_switch == 91929 && from_switch_loop == 546 ? 0 : 1;
 }
 

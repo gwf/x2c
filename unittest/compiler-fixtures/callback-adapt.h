@@ -8,9 +8,9 @@
 #include "x2c.h"
 typedef String(* StringCallback)(Var);
 
-typedef int(* CompareCallback)(Var,  Var);
+typedef int(* CompareCallback)(Var, Var);
 
-typedef Iter(* IterCallback)(Var,  Iter);
+typedef Iter(* IterCallback)(Var, Iter);
 
 typedef struct Callbacks{
   StringCallback owner;

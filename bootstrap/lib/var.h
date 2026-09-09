@@ -27,7 +27,7 @@ int Var_register_object_tag(Symbol tag);
 
 Symbol Var_tag(Var v);
 
-int Var_is(Var var,  Symbol tag);
+int Var_is(Var var, Symbol tag);
 
 Symbol Var_kind(Var v);
 
@@ -61,7 +61,7 @@ Var Var_box_long_double(long double value);
 
 Var Var_clone_wide(Var value);
 
-Var Var_move_wide_to(Var value,  Scope * scope);
+Var Var_move_wide_to(Var value, Scope * scope);
 
 Scope Var_wide_owner(Var value);
 
@@ -83,17 +83,17 @@ long double Var_long_double_value(Var v);
 
 unsigned Var_wide_hash(Var v);
 
-int Var_wide_equal(Var a,  Var b);
+int Var_wide_equal(Var a, Var b);
 
-int Var_integer_compare(Var a,  Var b);
+int Var_integer_compare(Var a, Var b);
 
-int Var_integer_floating_compare(Var integer,  Var floating);
+int Var_integer_floating_compare(Var integer, Var floating);
 
-int Var_wide_compare(Var a,  Var b);
+int Var_wide_compare(Var a, Var b);
 
 void * Var_pointer(Var v);
 
-Var Var_parse(String str,  Symbol kind);
+Var Var_parse(String str, Symbol kind);
 
 
 #endif /* __GUARD_0x41126DC7__ */

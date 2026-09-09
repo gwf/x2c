@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-stack-multiple.x:12:1: parse: expecte
   $outer()
   ^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/function-to-func-direct-variadic.x:8:3: type: functio
     ^^^^
   note: target signature: ("Func") source signature: ((func ((int) (...))) int)
 
-limit: too many errors, stopping
-

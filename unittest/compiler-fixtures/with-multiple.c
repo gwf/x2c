@@ -2,14 +2,14 @@
 
 #include "with-multiple.h"
 
-geo__Vec geo__Vec_new(double,  double);
+geo__Vec geo__Vec_new(double, double);
 
 double geo__Vec_norm(geo__Vec);
 
 double geo__span(geo__VecPair);
 
-double outline(double x,  double y){
-  geo__Vec v = geo__Vec_new(x,  y);
+double outline(double x, double y){
+  geo__Vec v = geo__Vec_new(x, y);
   geo__VecPair pair;
   pair.a.x = x;
   pair.a.y = 0.0;

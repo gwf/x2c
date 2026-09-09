@@ -11,7 +11,7 @@
 #include "project.h"
 #include "frontend.h"
 #include "toolchain.h"
-int main(int argc,  char * * argv);
+int main(int argc, char * * argv);
 
 
 #endif /* __GUARD_0x1E27A9AE__ */

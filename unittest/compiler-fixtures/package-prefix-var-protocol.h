@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "geo.h"
-double geo__roundtrip_norm(double x,  double y);
+double geo__roundtrip_norm(double x, double y);
 
 
 #endif /* __GUARD_0x6D84C48C__ */

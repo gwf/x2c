@@ -3,5 +3,3 @@ unittest/compiler-fixtures/slice-assignment-incompatible.x:5:3: xform: slice exp
     ^^^^^^
   note: call the collection's setslice method explicitly
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-unit-bitfield.x:11:1: parse: syntax cannot be c
   $bitfield();
   ^
 
-limit: too many errors, stopping
-

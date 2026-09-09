@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-tag-representation.x:7:27: protocol: a Var a
   protocol Var(Row) as List tag <row>;
                             ^^^
 
-limit: too many errors, stopping
-

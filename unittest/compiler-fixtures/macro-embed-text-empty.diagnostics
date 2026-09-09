@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-embed-text-empty.x:7:16: macro: x2c.embed.text 
   String value = $embed.empty_path();
                  ^
 
-limit: too many errors, stopping
-

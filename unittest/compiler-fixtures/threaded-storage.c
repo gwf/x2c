@@ -19,7 +19,7 @@ static void * worker(void * unused){
   legacy = 9;
   c23 = 10;
   visible = hidden + reordered + legacy + c23;
-  printf("worker %d\n",  visible);
+  printf("worker %d\n", visible);
   return NULL;
 }
 
@@ -31,9 +31,9 @@ int main(void){
   c23 = 1;
   visible = 4;
   pthread_t thread;
-  if(pthread_create(& thread,  NULL,  worker,  NULL)) return 1;
-  if(pthread_join(thread,  NULL)) return 1;
-  printf("main %d %d %d %d %d\n",  visible,  hidden,  reordered,  legacy,  c23);
+  if(pthread_create(& thread, NULL, worker, NULL)) return 1;
+  if(pthread_join(thread, NULL)) return 1;
+  printf("main %d %d %d %d %d\n", visible, hidden, reordered, legacy, c23);
   return 0;
 }
 

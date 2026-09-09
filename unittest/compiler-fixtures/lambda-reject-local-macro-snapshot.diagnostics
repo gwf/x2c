@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-local-macro-snapshot.x:6:19: type: capt
                     ^^^^^^
   note: binding: value
 
-limit: too many errors, stopping
-

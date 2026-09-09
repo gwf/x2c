@@ -2,13 +2,9 @@
 
 #include "quoted-collections.h"
 
-static String _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 Var Array_var(Array);
 
@@ -28,17 +24,17 @@ Var double_var(double);
 
 long Var_integer(Var);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
 Array Var_array(Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
-Var Map_getindex(Map,  Var);
+Var Map_getindex(Map, Var);
 
 Map Var_map(Var);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
 String Var_str(Var);
 
@@ -82,39 +78,39 @@ static int bump(int * value){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  int count = 7,  evals = 0,  indexed[] ={
-    10,  11
+  int count = 7, evals = 0, indexed[] ={
+    10, 11
   }
   ;
   Pair pair ={
     .value = 22
   }
   ;
-  List list_nested = cons(Array_var(Array_update_n(Array_new(),  2,  Symbol_var(3313778),  int_var(count))),  cons(Map_var(Map_update_n(Map_new(),  1,  Symbol_var(26720),  int_var(count))),  NULL));
-  Array values = Array_update_n(Array_new(),  26,  Symbol_var(38078770),  Atom_intern(String_new("VeryLongIdentifierName")),  String_var(_0),  Array_var(Array_update_n(Array_new(),  2,  Symbol_var(951296328),  int_var(count))),  Map_var(Map_update_n(Map_new(),  1,  Symbol_var(740232),  Symbol_var(1562655080))),  int_var(count * 2),  long_var(-3),  char_var('q'),  Atom_intern(String_new("colon:name")),  Symbol_var(7890827244731),  Symbol_var(7890827244795),  Symbol_var(0),  Symbol_var(99),  Symbol_var(56),  double_var(1.5),  String_var(_1),  String_var(_2),  String_var(_11),  int_var(pair.value),  int_var(indexed[1]),  int_var(bump(& evals)),  Var_null(),  Var_new(3453797,  chosen),  int_var(((Pair){
+  List list_nested = cons(Array_var(Array_update_n(Array_new(), 2, Symbol_var(3313778), int_var(count))), cons(Map_var(Map_update_n(Map_new(), 1, Symbol_var(26720), int_var(count))), NULL));
+  Array values = Array_update_n(Array_new(), 26, Symbol_var(38078770), Atom_intern(String_new("VeryLongIdentifierName")), String_var(_0), Array_var(Array_update_n(Array_new(), 2, Symbol_var(951296328), int_var(count))), Map_var(Map_update_n(Map_new(), 1, Symbol_var(740232), Symbol_var(1562655080))), int_var(count * 2), long_var(-3), char_var('q'), Atom_intern(String_new("colon:name")), Symbol_var(7890827244731), Symbol_var(7890827244795), Symbol_var(0), Symbol_var(99), Symbol_var(56), double_var(1.5), String_var(_1), String_var(_2), String_var(_11), int_var(pair.value), int_var(indexed[1]), int_var(bump(& evals)), Var_null(), Var_new(3453797, chosen), int_var(((Pair){
     .value = 24
   }
-  ).value),  int_var((count,  count + 3)),  int_var(25));
-  Map config = Map_update_n(Map_new(),  6,  Symbol_var(920394),  String_var(_3),  Symbol_var(40094681930),  int_var(count),  Symbol_var(239278072136),  int_var(count + 2),  Symbol_var(951296328),  Map_var(Map_update_n(Map_new(),  1,  Symbol_var(8750352),  int_var(8))),  Symbol_var(1479321958),  Array_var(Array_update_n(Array_new(),  2,  int_var(1),  int_var(count))),  String_var(_12),  int_var(12));
-  if(Var_integer(Array_getindex(Var_array(List_getindex(list_nested,  0)),  1)) != 7 || Var_integer(Map_getindex(Var_map(List_getindex(list_nested,  1)),  Symbol_var(26720))) != 7) return 1;
-  if(! String_equal(Var_str(Array_getindex(values,  0)),  _4)) return 2;
-  if(! String_equal(Var_str(Array_getindex(values,  1)),  _5)) return 3;
-  if(! String_equal(Var_string(Array_getindex(values,  2)),  _0)) return 4;
-  if(Var_integer(Array_getindex(Var_array(Array_getindex(values,  3)),  1)) != 7) return 5;
-  if(! String_equal(Var_str(Map_getindex(Var_map(Array_getindex(values,  4)),  Symbol_var(740232))),  _6)) return 6;
-  if(Var_integer(Array_getindex(values,  5)) != 14 || Var_integer(Array_getindex(values,  6)) != - 3) return 7;
-  if(Var_char(Array_getindex(values,  7)) != 'q') return 8;
-  if(! String_equal(Var_str(Array_getindex(values,  8)),  _7) || ! String_equal(Var_str(Array_getindex(values,  9)),  _8)) return 9;
-  if(! String_equal(Var_str(Array_getindex(values,  10)),  _9) || Var_symbol(Array_getindex(values,  11)) != 0 || Var_symbol(Array_getindex(values,  12)) != 99 || Var_symbol(Array_getindex(values,  13)) != 56) return 10;
-  if(Var_floating(Array_getindex(values,  14)) != 1.5 || ! String_equal(Var_string(Array_getindex(values,  15)),  _1) || ! String_equal(Var_string(Array_getindex(values,  16)),  _2) || ! String_equal(Var_string(Array_getindex(values,  17)),  _10)) return 11;
-  if(Var_integer(Array_getindex(values,  18)) != 22 || Var_integer(Array_getindex(values,  19)) != 11 || Var_integer(Array_getindex(values,  20)) != 1 || evals != 1) return 12;
-  if(! Var_is_null(Array_getindex(values,  21)) || Var_integer(Array_getindex(values,  22)) != 23 || Var_integer(Array_getindex(values,  23)) != 24 || Var_integer(Array_getindex(values,  24)) != 10 || Var_integer(Array_getindex(values,  25)) != 25) return 13;
-  if(! String_equal(Var_string(Map_getindex(config,  Symbol_var(920394))),  _3)) return 14;
-  if(Var_integer(Map_getindex(config,  Symbol_var(40094681930))) != 7) return 15;
-  if(Var_integer(Map_getindex(config,  Symbol_var(239278072136))) != 9) return 16;
-  if(Var_integer(Map_getindex(Var_map(Map_getindex(config,  Symbol_var(951296328))),  Symbol_var(8750352))) != 8) return 17;
-  if(Var_integer(Array_getindex(Var_array(Map_getindex(config,  Symbol_var(1479321958))),  1)) != 7) return 18;
-  if(Var_integer(Map_getindex(config,  String_var(_12))) != 12) return 19;
+  ).value), int_var((count, count + 3)), int_var(25));
+  Map config = Map_update_n(Map_new(), 6, Symbol_var(920394), String_var(_3), Symbol_var(40094681930), int_var(count), Symbol_var(239278072136), int_var(count + 2), Symbol_var(951296328), Map_var(Map_update_n(Map_new(), 1, Symbol_var(8750352), int_var(8))), Symbol_var(1479321958), Array_var(Array_update_n(Array_new(), 2, int_var(1), int_var(count))), String_var(_12), int_var(12));
+  if(Var_integer(Array_getindex(Var_array(List_getindex(list_nested, 0)), 1)) != 7 || Var_integer(Map_getindex(Var_map(List_getindex(list_nested, 1)), Symbol_var(26720))) != 7) return 1;
+  if(! String_equal(Var_str(Array_getindex(values, 0)), _4)) return 2;
+  if(! String_equal(Var_str(Array_getindex(values, 1)), _5)) return 3;
+  if(! String_equal(Var_string(Array_getindex(values, 2)), _0)) return 4;
+  if(Var_integer(Array_getindex(Var_array(Array_getindex(values, 3)), 1)) != 7) return 5;
+  if(! String_equal(Var_str(Map_getindex(Var_map(Array_getindex(values, 4)), Symbol_var(740232))), _6)) return 6;
+  if(Var_integer(Array_getindex(values, 5)) != 14 || Var_integer(Array_getindex(values, 6)) != - 3) return 7;
+  if(Var_char(Array_getindex(values, 7)) != 'q') return 8;
+  if(! String_equal(Var_str(Array_getindex(values, 8)), _7) || ! String_equal(Var_str(Array_getindex(values, 9)), _8)) return 9;
+  if(! String_equal(Var_str(Array_getindex(values, 10)), _9) || Var_symbol(Array_getindex(values, 11)) != 0 || Var_symbol(Array_getindex(values, 12)) != 99 || Var_symbol(Array_getindex(values, 13)) != 56) return 10;
+  if(Var_floating(Array_getindex(values, 14)) != 1.5 || ! String_equal(Var_string(Array_getindex(values, 15)), _1) || ! String_equal(Var_string(Array_getindex(values, 16)), _2) || ! String_equal(Var_string(Array_getindex(values, 17)), _10)) return 11;
+  if(Var_integer(Array_getindex(values, 18)) != 22 || Var_integer(Array_getindex(values, 19)) != 11 || Var_integer(Array_getindex(values, 20)) != 1 || evals != 1) return 12;
+  if(! Var_is_null(Array_getindex(values, 21)) || Var_integer(Array_getindex(values, 22)) != 23 || Var_integer(Array_getindex(values, 23)) != 24 || Var_integer(Array_getindex(values, 24)) != 10 || Var_integer(Array_getindex(values, 25)) != 25) return 13;
+  if(! String_equal(Var_string(Map_getindex(config, Symbol_var(920394))), _3)) return 14;
+  if(Var_integer(Map_getindex(config, Symbol_var(40094681930))) != 7) return 15;
+  if(Var_integer(Map_getindex(config, Symbol_var(239278072136))) != 9) return 16;
+  if(Var_integer(Map_getindex(Var_map(Map_getindex(config, Symbol_var(951296328))), Symbol_var(8750352))) != 8) return 17;
+  if(Var_integer(Array_getindex(Var_array(Map_getindex(config, Symbol_var(1479321958))), 1)) != 7) return 18;
+  if(Var_integer(Map_getindex(config, String_var(_12))) != 12) return 19;
   printf("quoted collections ok\n");
   return 0;
 }

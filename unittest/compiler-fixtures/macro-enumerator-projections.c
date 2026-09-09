@@ -18,7 +18,7 @@ static int row_value(Symbol tag){
 
 int main(void){
   x2c_initialize();
-  printf("%d %d %d %d %d %d %d\n",  ROW_START,  ROW_LEDGER,  ROW_AUTO,  ROW_FORWARDED,  ROW_FOLLOWING,  row_values[0],  row_value(855710332067918));
+  printf("%d %d %d %d %d %d %d\n", ROW_START, ROW_LEDGER, ROW_AUTO, ROW_FORWARDED, ROW_FOLLOWING, row_values[0], row_value(855710332067918));
   return 0;
 }
 

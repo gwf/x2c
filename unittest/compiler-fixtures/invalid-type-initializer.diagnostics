@@ -3,5 +3,3 @@ unittest/compiler-fixtures/invalid-type-initializer.x:5:37: parse: type initiali
                                       ^
   note: initializer: BadInitializer_initialize
 
-limit: too many errors, stopping
-

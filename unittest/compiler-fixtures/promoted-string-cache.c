@@ -2,15 +2,11 @@
 
 #include "promoted-string-cache.h"
 
-static String _11,  _7,  _5;
+static String _11, _7, _5;
 
 static int dynamic_calls;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 Pool String_pool_retain_named(const char *);
 
@@ -18,15 +14,15 @@ PoolStats Pool_stats(Pool);
 
 void String_pool_release(void);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
-int List_equal(List,  List);
+int List_equal(List, List);
 
 int List_len(List);
 
 int String_len(String);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
 String Var_string(Var);
 
@@ -81,11 +77,11 @@ int main(void){
   PoolStats list_before = Pool_stats(list_pool);
   child_string = header_same();
   child_list = header_list();
-  PoolStats string_after = Pool_stats(string_pool),  list_after = Pool_stats(list_pool);
+  PoolStats string_after = Pool_stats(string_pool), list_after = Pool_stats(list_pool);
   String_pool_release();
-  printf("%d %d %d %d %d %d %d %d %d %d %s %s %s %s\n",  String_equal(header_direct(),  header_same()),  String_equal(header_dual(),  source_dual()),  String_equal(before_string,  child_string),  List_equal(before_list,  child_list),  List_len(child_list),  String_len(escaped),  String_getindex(escaped,  0), (unsigned char) String_getindex(escaped,  1),  String_getindex(escaped,  3),  String_getindex(escaped,  4),  assigned,  direct,  dynamic,  Var_string(boxed));
+  printf("%d %d %d %d %d %d %d %d %d %d %s %s %s %s\n", String_equal(header_direct(), header_same()), String_equal(header_dual(), source_dual()), String_equal(before_string, child_string), List_equal(before_list, child_list), List_len(child_list), String_len(escaped), String_getindex(escaped, 0), (unsigned char) String_getindex(escaped, 1), String_getindex(escaped, 3), String_getindex(escaped, 4), assigned, direct, dynamic, Var_string(boxed));
   printf("pool %lu %lu\n", (unsigned long)(string_after.interned - string_before.interned), (unsigned long)(list_after.interned - list_before.interned));
-  printf("calls %d parens %s nested %s\n",  dynamic_calls,  header_parens(),  Var_string(List_cadr(child_list)));
+  printf("calls %d parens %s nested %s\n", dynamic_calls, header_parens(), Var_string(List_cadr(child_list)));
   return 0;
 }
 

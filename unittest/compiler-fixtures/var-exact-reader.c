@@ -2,19 +2,17 @@
 
 #include "var-exact-reader.h"
 
-static List _5,  _4,  _3;
+static List _5, _4, _3;
 
 static String _6;
 
-static Var _2,  _1,  _0;
+static Var _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
@@ -39,9 +37,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = int_var(1);
   _1 = int_var(2);
   _2 = int_var(3);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
-  _5 = cons(_0,  _4);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
+  _5 = cons(_0, _4);
   _6 = String_new("payload");
 }
 
@@ -54,10 +52,10 @@ int main(void){
   Var text = String_var(_6);
   String exact = Var_string(text);
   List not_a_list = Var_list(text);
-  Var mapped = Map_var(Map_update_n(Map_new(),  1,  Symbol_var(22),  int_var(1)));
+  Var mapped = Map_var(Map_update_n(Map_new(), 1, Symbol_var(22), int_var(1)));
   Map map = Var_map(mapped);
   void * raw = Var_pointer(list_valued);
-  printf("wrong=%d right=%d exact=%s not_a_list=%d map=%d raw=%d\n",  wrong != NULL,  right != NULL,  exact,  not_a_list != NULL,  map != NULL,  raw != NULL);
+  printf("wrong=%d right=%d exact=%s not_a_list=%d map=%d raw=%d\n", wrong != NULL, right != NULL, exact, not_a_list != NULL, map != NULL, raw != NULL);
   return 0;
 }
 

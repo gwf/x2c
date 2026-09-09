@@ -8,21 +8,21 @@
 #include "string.h"
 typedef struct Split * Split;
 
-List String_split_n(String str,  String sep,  int max_splits);
+List String_split_n(String str, String sep, int max_splits);
 
-List String_split(String str,  String sep);
+List String_split(String str, String sep);
 
-List String_split_lines(String str,  int keep_ends);
+List String_split_lines(String str, int keep_ends);
 
 Split String_words(String str);
 
 Split String_lines(String str);
 
-Split String_splits(String str,  String sep);
+Split String_splits(String str, String sep);
 
-int Split_try_next(Split split,  int * cursor,  String * out);
+int Split_try_next(Split split, int * cursor, String * out);
 
-Iter Split_iter(Split split,  Iter dest);
+Iter Split_iter(Split split, Iter dest);
 
 
 #endif /* __GUARD_0xC0DA537A__ */

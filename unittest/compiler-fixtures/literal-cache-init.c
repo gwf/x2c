@@ -2,9 +2,9 @@
 
 #include "literal-cache-init.h"
 
-static String _3,  _1,  _0;
+static String _3, _1, _0;
 
-static Var _4,  _2;
+static Var _4, _2;
 
 static String path;
 
@@ -25,9 +25,6 @@ static Var boxed_array;
 static Var boxed_map;
 
 static int _init_guard_ = 0;
-
-
-
 
 Var Symbol_var(Symbol);
 
@@ -65,27 +62,27 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("box:");
   _4 = Symbol_var(5226824);
   root = _1;
-  path = String_join(NULL,  cons(String_var(root),  cons(String_var(_0),  NULL)));
-  values = cons(_2,  cons(String_var(root),  cons(String_var(path),  NULL)));
-  positions = Array_update_n(Array_new(),  2,  String_var(root),  String_var(path));
-  lookup = Map_update_n(Map_new(),  2,  Symbol_var(1211368),  String_var(root),  Symbol_var(1051920),  String_var(path));
-  boxed_string = String_var(String_join(NULL,  cons(String_var(_3),  cons(String_var(path),  NULL))));
-  boxed_list = List_var(cons(_4,  cons(String_var(root),  NULL)));
-  boxed_array = Array_var(Array_update_n(Array_new(),  1,  String_var(path)));
-  boxed_map = Map_var(Map_update_n(Map_new(),  1,  Symbol_var(1051920),  String_var(path)));
+  path = String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL)));
+  values = cons(_2, cons(String_var(root), cons(String_var(path), NULL)));
+  positions = Array_update_n(Array_new(), 2, String_var(root), String_var(path));
+  lookup = Map_update_n(Map_new(), 2, Symbol_var(1211368), String_var(root), Symbol_var(1051920), String_var(path));
+  boxed_string = String_var(String_join(NULL, cons(String_var(_3), cons(String_var(path), NULL))));
+  boxed_list = List_var(cons(_4, cons(String_var(root), NULL)));
+  boxed_array = Array_var(Array_update_n(Array_new(), 1, String_var(path)));
+  boxed_map = Map_var(Map_update_n(Map_new(), 1, Symbol_var(1051920), String_var(path)));
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%s\n",  path);
-  printf("%s\n",  List_repr(values));
-  printf("%s\n",  Array_repr(positions));
-  printf("%s\n",  Map_repr(lookup));
-  printf("%s\n",  Var_string(boxed_string));
-  printf("%s\n",  List_repr(Var_list(boxed_list)));
-  printf("%s\n",  Array_repr(Var_array(boxed_array)));
-  printf("%s\n",  Map_repr(Var_map(boxed_map)));
+  printf("%s\n", path);
+  printf("%s\n", List_repr(values));
+  printf("%s\n", Array_repr(positions));
+  printf("%s\n", Map_repr(lookup));
+  printf("%s\n", Var_string(boxed_string));
+  printf("%s\n", List_repr(Var_list(boxed_list)));
+  printf("%s\n", Array_repr(Var_array(boxed_array)));
+  printf("%s\n", Map_repr(Var_map(boxed_map)));
   return 0;
 }
 

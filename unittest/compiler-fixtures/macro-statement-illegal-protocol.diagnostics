@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-statement-illegal-protocol.x:8:3: parse: syntax
     $bad();
     ^
 
-limit: too many errors, stopping
-

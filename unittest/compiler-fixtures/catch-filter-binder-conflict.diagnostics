@@ -3,5 +3,3 @@ unittest/compiler-fixtures/catch-filter-binder-conflict.x:5:9: type: catch binde
           ^^
   note: binder: value use either '?' or '*' consistently
 
-limit: too many errors, stopping
-

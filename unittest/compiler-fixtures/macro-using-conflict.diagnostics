@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-using-conflict.x:3:47: parse: duplicate macro h
   macro Statement $conflict(Expr $value) using $value => {
                                                 ^^^^^
 
-limit: too many errors, stopping
-

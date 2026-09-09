@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-diagnostic-fail.x:8:13: macro: chosen compile-t
               ^
   note: first note second note
 
-limit: too many errors, stopping
-

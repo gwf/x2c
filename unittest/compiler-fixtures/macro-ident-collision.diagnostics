@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-ident-collision.x:9:1: parse: declaration 'gene
   ^
   note: prior binding: 'generated_collision'
 
-limit: too many errors, stopping
-

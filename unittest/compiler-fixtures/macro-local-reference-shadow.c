@@ -2,23 +2,23 @@
 
 #include "macro-local-reference-shadow.h"
 
-static void add(int * value,  int amount);
+static void add(int * value, int amount);
 
 static int exercise(int * value);
 
-static void add(int * value,  int amount){
+static void add(int * value, int amount){
   (* value) += amount;
 }
 
 static int exercise(int * value){
-  int captured = 0,  inner = 0;
+  int captured = 0, inner = 0;
   {
     int _x2c_binding_shadow_0 = 100;
     captured =(* value);
     (* value) = 8;
     (* value) ++;
     (* value) += 4;
-    add(&((* value)),  3);
+    add(&((* value)), 3);
     inner = _x2c_binding_shadow_0;
   }
   return captured == 4 && inner == 100 ?(* value) : - 1;
@@ -28,7 +28,7 @@ int main(void){
   x2c_initialize();
   int value = 4;
   int result = exercise(&(value));
-  printf("%d\n",  result);
+  printf("%d\n", result);
   return value != 16 || result != 16;
 }
 

@@ -73,8 +73,12 @@ static void diagnostics_reset_clears_state(void) {
 
   Diagnostics diag = Diagnostics.new(NULL, NULL, 1);
   diag.report(<once>, %"only", NULL, NULL);
+  diag.report(<ignored>, %"later", NULL, NULL);
 
   EXPECT_INT_EQ(1, diag.count);
+  EXPECT_TRUE(diag.reached_limit());
+  EXPECT_INT_EQ(diag.entries().len(), 1);
+  EXPECT_TRUE(diag.entries().car().list().assoc(<code>).symbol() == <once>);
 
   diag.reset();
   EXPECT_INT_EQ(0, diag.count);

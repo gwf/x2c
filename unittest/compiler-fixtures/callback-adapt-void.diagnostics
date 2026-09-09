@@ -3,5 +3,3 @@ unittest/compiler-fixtures/callback-adapt-void.x:10:3: type: typed callback adap
     ^
   note: target signature: (* (func (("Var"))) void) source signature: ((func (("String"))) void)
 
-limit: too many errors, stopping
-

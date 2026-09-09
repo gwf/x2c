@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-enumerator-invalid-lisp.x:8:3: parse: expected 
     $invalid_enumerator_lisp()
     ^
 
-limit: too many errors, stopping
-

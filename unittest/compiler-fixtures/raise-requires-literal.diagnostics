@@ -3,5 +3,3 @@ unittest/compiler-fixtures/raise-requires-literal.x:4:9: parse: raise requires a
           ^^^^^^^^^^^
   note: use raise %(code (key value)...);
 
-limit: too many errors, stopping
-

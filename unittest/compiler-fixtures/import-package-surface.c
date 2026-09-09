@@ -2,17 +2,17 @@
 
 #include "import-package-surface.h"
 
-geo__Vec geo__Vec_new(double,  double);
+geo__Vec geo__Vec_new(double, double);
 
 Var geo__Vec_var(geo__Vec);
 
 geo__Vec geo__Var_vec(Var);
 
-Iter geo__Vec_iter(geo__Vec,  Iter);
+Iter geo__Vec_iter(geo__Vec, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 double Var_floating(Var);
 
@@ -20,19 +20,19 @@ geo__Chain geo__Chain_rest(geo__Chain);
 
 int geo__ChainLeaf_leaf_len(geo__ChainLeaf);
 
-double first_component(double x,  double y){
-  geo__Vec v = geo__Vec_new(x,  y);
+double first_component(double x, double y){
+  geo__Vec v = geo__Vec_new(x, y);
   Packed boxed = geo__Vec_var(v);
   geo__Vec roundtrip = geo__Var_vec(boxed);
   double total = roundtrip -> x;
   {
     Var part;
-    Iter _x2c_macro_iterator_0 = geo__Vec_iter(v,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = geo__Vec_iter(v, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       part = _x2c_macro_item_0;
       total += Var_floating(part);
     }

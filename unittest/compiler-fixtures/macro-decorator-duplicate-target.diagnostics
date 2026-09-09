@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-duplicate-target.x:5:10: parse: dupli
   ) using $target => {
            ^^^^^^
 
-limit: too many errors, stopping
-

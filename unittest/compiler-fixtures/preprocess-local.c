@@ -4,7 +4,7 @@
 
 int main(void){
   x2c_initialize();
-  printf("%d\n",  FIXTURE_VALUE);
+  printf("%d\n", FIXTURE_VALUE);
   return FIXTURE_VALUE == 37 ? 0 : 1;
 }
 

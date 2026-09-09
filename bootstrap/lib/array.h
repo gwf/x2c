@@ -18,85 +18,85 @@ static inline Array Block_array(Block x){
 
 Array Array_new(void);
 
-void Array_resize(Array arr,  size_t size);
+void Array_resize(Array arr, size_t size);
 
-Array Array_update_n(Array array,  unsigned element_count, ...);
+Array Array_update_n(Array array, unsigned element_count, ...);
 
-Var Array_getindex(Array array,  int index);
+Var Array_getindex(Array array, int index);
 
-Var Array_setindex(Array array,  int index,  Var elem);
+Var Array_setindex(Array array, int index, Var elem);
 
-Var Array_updateindex(Array array,  int index,  Symbol op,  Var rhs);
+Var Array_updateindex(Array array, int index, Symbol op, Var rhs);
 
-Var Array_postfixindex(Array array,  int index,  Symbol op);
+Var Array_postfixindex(Array array, int index, Symbol op);
 
-Var Array_push(Array array,  Var elem);
+Var Array_push(Array array, Var elem);
 
 Var Array_take_last(Array array);
 
 Var Array_shift(Array array);
 
-Var Array_unshift(Array array,  Var elem);
+Var Array_unshift(Array array, Var elem);
 
-Var Array_insert(Array array,  int index,  Var elem);
+Var Array_insert(Array array, int index, Var elem);
 
-Var Array_remove(Array array,  int index);
+Var Array_remove(Array array, int index);
 
 Array Array_copy(Array array);
 
-Array Array_getslice(Array array,  int start,  int end,  int step);
+Array Array_getslice(Array array, int start, int end, int step);
 
-Array Array_setslice(Array array,  int start,  int end,  Array values);
+Array Array_setslice(Array array, int start, int end, Array values);
 
-Array Array_remslice(Array array,  int start,  int end);
+Array Array_remslice(Array array, int start, int end);
 
-Array Array_splice(Array array,  int index,  int remove_count,  Array values);
+Array Array_splice(Array array, int index, int remove_count, Array values);
 
-int Array_find(Array array,  Var value);
+int Array_find(Array array, Var value);
 
-int Array_contains(Array array,  Var value);
+int Array_contains(Array array, Var value);
 
-int Array_count(Array array,  Var value);
+int Array_count(Array array, Var value);
 
-int Array_indexof(Array array,  Var value);
+int Array_indexof(Array array, Var value);
 
-Array Array_concat(Array a,  Array b);
+Array Array_concat(Array a, Array b);
 
 Array Array_reverse(Array array);
 
-Array Array_map(Array array,  Func func);
+Array Array_map(Array array, Func func);
 
-Array Array_map2(Array a,  Array b,  Func func);
+Array Array_map2(Array a, Array b, Func func);
 
-Var Array_reduce(Array array,  Func func);
+Var Array_reduce(Array array, Func func);
 
-int Array_compare(Array a,  Array b);
+int Array_compare(Array a, Array b);
 
 Array Array_sort(Array array);
 
-Array Array_sort_with(Array array,  Func compare);
+Array Array_sort_with(Array array, Func compare);
 
-Array Array_sort_by(Array array,  Func key);
+Array Array_sort_by(Array array, Func key);
 
-void Array_heap_push(Array heap,  Var val);
+void Array_heap_push(Array heap, Var val);
 
 Var Array_heap_pop(Array heap);
 
 void Array_heapify(Array heap);
 
-String Array_join(Array array,  String separator);
+String Array_join(Array array, String separator);
 
-int Array_equal(Array a,  Array b);
+int Array_equal(Array a, Array b);
 
-Buffer Array_write_repr(Array array,  Buffer out);
+Buffer Array_write_repr(Array array, Buffer out);
 
-Buffer Array_write_str(Array array,  Buffer out);
+Buffer Array_write_str(Array array, Buffer out);
 
 String Array_str(Array array);
 
 String Array_repr(Array array);
 
-Iter Array_iter(Array x,  Iter dest);
+Iter Array_iter(Array x, Iter dest);
 
 Array Iter_array(Iter iter);
 
@@ -112,7 +112,7 @@ void Array_pop(Array a0);
 
 void Array_free(Array a0);
 
-void Array_truncate(Array a0,  size_t a1);
+void Array_truncate(Array a0, size_t a1);
 
 
 #endif /* __GUARD_0x0C64D6F9__ */

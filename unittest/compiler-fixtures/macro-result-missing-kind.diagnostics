@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-result-missing-kind.x:3:7: parse: macro definit
         ^
   note: write the result kind between 'macro' and the macro name
 
-limit: too many errors, stopping
-

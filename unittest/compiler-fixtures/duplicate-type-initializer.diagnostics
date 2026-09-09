@@ -3,5 +3,3 @@ unittest/compiler-fixtures/duplicate-type-initializer.x:9:41: parse: translation
                                           ^
   note: initializer: SecondInitializer_initialize
 
-limit: too many errors, stopping
-

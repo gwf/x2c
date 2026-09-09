@@ -2,5 +2,3 @@ unittest/compiler-fixtures/invalid-scalar-type.x:3:1: type: invalid scalar type 
   long float invalid_value;
   ^^^^
 
-limit: too many errors, stopping
-

@@ -99,46 +99,46 @@ typedef unsigned long ulong;
 
 typedef String(* VarStrFn)(Var);
 
-typedef Buffer(* VarWriteFn)(Var,  Buffer);
+typedef Buffer(* VarWriteFn)(Var, Buffer);
 
 typedef unsigned(* VarHashFn)(Var);
 
-typedef int(* VarEqualFn)(Var,  Var);
+typedef int(* VarEqualFn)(Var, Var);
 
-typedef Iter(* VarIterIntoFn)(Var,  Iter);
+typedef Iter(* VarIterIntoFn)(Var, Iter);
 
-typedef int(* VarCompareFn)(Var,  Var);
+typedef int(* VarCompareFn)(Var, Var);
 
 typedef int(* VarTruthFn)(Var);
 
-typedef int(* VarContainsFn)(Var receiver,  Var needle);
+typedef int(* VarContainsFn)(Var receiver, Var needle);
 
-typedef Var(* VarBinaryFn)(Var lhs,  Var rhs);
+typedef Var(* VarBinaryFn)(Var lhs, Var rhs);
 
 typedef Var(* VarUnaryFn)(Var value);
 
-typedef Var(* VarGetIndexFn)(Var receiver,  Var key);
+typedef Var(* VarGetIndexFn)(Var receiver, Var key);
 
-typedef Var(* VarSetIndexFn)(Var receiver,  Var key,  Var value);
+typedef Var(* VarSetIndexFn)(Var receiver, Var key, Var value);
 
-typedef Var(* VarUpdateIndexFn)(Var receiver,  Var key,  Symbol op,  Var rhs);
+typedef Var(* VarUpdateIndexFn)(Var receiver, Var key, Symbol op, Var rhs);
 
-typedef Var(* VarPostfixIndexFn)(Var receiver,  Var key,  Symbol op);
+typedef Var(* VarPostfixIndexFn)(Var receiver, Var key, Symbol op);
 
-typedef Var(* VarExportContextFn)(Var value,  Context source);
+typedef Var(* VarExportContextFn)(Var value, Context source);
 
 void Scope_shutdown_hook(void(* hook)(void));
 
 typedef struct VarMethods{
-  VarStrFn str,  repr;
+  VarStrFn str, repr;
   VarHashFn hash;
   VarEqualFn equal;
   VarCompareFn compare;
   VarTruthFn truth;
   VarIterIntoFn iter;
-  VarWriteFn write_str,  write_repr;
+  VarWriteFn write_str, write_repr;
   VarContainsFn contains;
-  VarBinaryFn add,  sub,  mul,  div,  mod;
+  VarBinaryFn add, sub, mul, div, mod;
   VarUnaryFn neg;
   VarGetIndexFn getindex;
   VarSetIndexFn setindex;
@@ -150,7 +150,7 @@ VarMethods;
 
 #include "protocols.h"
 typedef struct X2CErrorSite{
-  const char * file,  * function;
+  const char * file, * function;
   int line;
 }
 X2CErrorSite;
@@ -210,15 +210,15 @@ void x2c_descriptor_thread_start_end(int success);
 
 int x2c_descriptor_registration_frozen(void);
 
-extern _Thread_local int x2c_cleanup_exit_kind,  x2c_error_runtime_ready;
+extern _Thread_local int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
 
-extern File Stdin,  Stdout,  Stderr;
+extern File Stdin, Stdout, Stderr;
 
 extern Var Void;
 
 extern List nil;
 
-int Var_is(Var v,  Symbol tag);
+int Var_is(Var v, Symbol tag);
 
 Symbol Var_kind(Var v);
 
@@ -228,15 +228,15 @@ long Var_integer(Var v);
 
 double Var_floating(Var v);
 
-int Var_integer_compare(Var a,  Var b);
+int Var_integer_compare(Var a, Var b);
 
-int Var_integer_floating_compare(Var integer,  Var floating);
+int Var_integer_floating_compare(Var integer, Var floating);
 
 unsigned Var_wide_hash(Var v);
 
-int Var_wide_equal(Var a,  Var b);
+int Var_wide_equal(Var a, Var b);
 
-int Var_wide_compare(Var a,  Var b);
+int Var_wide_compare(Var a, Var b);
 
 long Var_long_value(Var v);
 
@@ -266,11 +266,11 @@ String Var_fallback_str(Var v);
 
 String Var_fallback_repr(Var v);
 
-Buffer Var_fallback_write_str(Var v,  Buffer out);
+Buffer Var_fallback_write_str(Var v, Buffer out);
 
-Buffer Var_write_str(Var v,  Buffer out);
+Buffer Var_write_str(Var v, Buffer out);
 
-Buffer Var_fallback_write_repr(Var v,  Buffer out);
+Buffer Var_fallback_write_repr(Var v, Buffer out);
 
 Var Var_new(Symbol tag, ...);
 
@@ -278,37 +278,37 @@ Symbol Symbol_new(const char *);
 
 String String_new(const char *);
 
-String String_join(String,  List);
+String String_join(String, List);
 
-List Var_cons(Var,  List);
+List Var_cons(Var, List);
 
-List List_cons(Var,  List);
+List List_cons(Var, List);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 String Array_str(Array);
 
 String Array_repr(Array);
 
-Buffer Array_write_str(Array,  Buffer);
+Buffer Array_write_str(Array, Buffer);
 
-Buffer Array_write_repr(Array,  Buffer);
+Buffer Array_write_repr(Array, Buffer);
 
-int Array_equal(Array,  Array);
+int Array_equal(Array, Array);
 
-int Array_compare(Array,  Array);
+int Array_compare(Array, Array);
 
-Iter Array_iter(Array,  Iter);
+Iter Array_iter(Array, Iter);
 
-int Array_contains(Array,  Var);
+int Array_contains(Array, Var);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
-Var Array_setindex(Array,  int,  Var);
+Var Array_setindex(Array, int, Var);
 
-Var Array_updateindex(Array,  int,  Symbol,  Var);
+Var Array_updateindex(Array, int, Symbol, Var);
 
-Var Array_postfixindex(Array,  int,  Symbol);
+Var Array_postfixindex(Array, int, Symbol);
 
 String Buffer_str(Buffer);
 
@@ -324,113 +324,113 @@ String File_str(File);
 
 String File_repr(File);
 
-Buffer File_write_repr(File,  Buffer);
+Buffer File_write_repr(File, Buffer);
 
 unsigned File_hash(File f);
 
-int File_equal(File,  File);
+int File_equal(File, File);
 
-Iter File_iter(File,  Iter);
+Iter File_iter(File, Iter);
 
-Iter Iter_iter(Iter,  Iter);
+Iter Iter_iter(Iter, Iter);
 
 String List_str(List);
 
 String List_repr(List);
 
-Buffer List_write_str(List,  Buffer);
+Buffer List_write_str(List, Buffer);
 
-Buffer List_write_repr(List,  Buffer);
+Buffer List_write_repr(List, Buffer);
 
 unsigned List_hash(List l);
 
-int List_equal(List,  List);
+int List_equal(List, List);
 
-int List_compare(List,  List);
+int List_compare(List, List);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
-int List_contains(List,  Var);
+int List_contains(List, Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 String Map_str(Map);
 
 String Map_repr(Map);
 
-Buffer Map_write_str(Map,  Buffer);
+Buffer Map_write_str(Map, Buffer);
 
-Buffer Map_write_repr(Map,  Buffer);
+Buffer Map_write_repr(Map, Buffer);
 
-int Map_equal(Map,  Map);
+int Map_equal(Map, Map);
 
-int Map_compare(Map,  Map);
+int Map_compare(Map, Map);
 
 int Map_truth(Map);
 
-Iter Map_iter(Map,  Iter);
+Iter Map_iter(Map, Iter);
 
-Iter Map_keys(Map,  Iter);
+Iter Map_keys(Map, Iter);
 
-Iter Map_enumerate(Map,  Iter);
+Iter Map_enumerate(Map, Iter);
 
-int Map_contains(Map,  Var);
+int Map_contains(Map, Var);
 
-Var Map_getindex(Map,  Var);
+Var Map_getindex(Map, Var);
 
-Var Map_setindex(Map,  Var,  Var);
+Var Map_setindex(Map, Var, Var);
 
-Var Map_updateindex(Map,  Var,  Symbol,  Var);
+Var Map_updateindex(Map, Var, Symbol, Var);
 
-Var Map_postfixindex(Map,  Var,  Symbol);
+Var Map_postfixindex(Map, Var, Symbol);
 
 String String_str(String);
 
 String String_repr(String);
 
-Buffer String_write_str(String,  Buffer);
+Buffer String_write_str(String, Buffer);
 
-Buffer String_write_repr(String,  Buffer);
+Buffer String_write_repr(String, Buffer);
 
 unsigned String_hash(String s);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
-int String_compare(String,  String);
+int String_compare(String, String);
 
-Iter String_iter(String,  Iter);
+Iter String_iter(String, Iter);
 
-int String_contains(String,  String);
+int String_contains(String, String);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
 String Symbol_str(Symbol);
 
 String Symbol_repr(Symbol);
 
-Buffer Symbol_write_str(Symbol,  Buffer);
+Buffer Symbol_write_str(Symbol, Buffer);
 
-Buffer Atom_write_str(Atom,  Buffer);
+Buffer Atom_write_str(Atom, Buffer);
 
-Buffer Symbol_write_repr(Symbol,  Buffer);
+Buffer Symbol_write_repr(Symbol, Buffer);
 
-int Symbol_compare(Symbol,  Symbol);
+int Symbol_compare(Symbol, Symbol);
 
 unsigned Var_hash(Var v);
 
 unsigned Var_fallback_hash(Var v);
 
-int Var_equal(Var a,  Var b);
+int Var_equal(Var a, Var b);
 
-int Var_fallback_equal(Var a,  Var b);
+int Var_fallback_equal(Var a, Var b);
 
-int Var_same(Var a,  Var b);
+int Var_same(Var a, Var b);
 
-int Var_compare(Var a,  Var b);
+int Var_compare(Var a, Var b);
 
-int Var_fallback_compare(Var a,  Var b);
+int Var_fallback_compare(Var a, Var b);
 
-Var Var_convert(Var value,  Symbol target);
+Var Var_convert(Var value, Symbol target);
 
 int Var_truth(Var value);
 
@@ -438,126 +438,126 @@ int Var_truthy(Var value);
 
 int Var_fallback_truth(Var value);
 
-Iter Var_fallback_iter(Var value,  Iter dest);
+Iter Var_fallback_iter(Var value, Iter dest);
 
-int Var_contains(Var value,  Var needle);
+int Var_contains(Var value, Var needle);
 
-Var Var_add(Var lhs,  Var rhs);
+Var Var_add(Var lhs, Var rhs);
 
-Var Var_sub(Var lhs,  Var rhs);
+Var Var_sub(Var lhs, Var rhs);
 
-Var Var_mul(Var lhs,  Var rhs);
+Var Var_mul(Var lhs, Var rhs);
 
-Var Var_div(Var lhs,  Var rhs);
+Var Var_div(Var lhs, Var rhs);
 
-Var Var_mod(Var lhs,  Var rhs);
+Var Var_mod(Var lhs, Var rhs);
 
 Var Var_neg(Var value);
 
-Var Var_getindex(Var value,  Var key);
+Var Var_getindex(Var value, Var key);
 
-Var Var_setindex(Var value,  Var key,  Var replacement);
+Var Var_setindex(Var value, Var key, Var replacement);
 
-Var Var_updateindex(Var value,  Var key,  Symbol op,  Var rhs);
+Var Var_updateindex(Var value, Var key, Symbol op, Var rhs);
 
-Var Var_postfixindex(Var value,  Var key,  Symbol op);
+Var Var_postfixindex(Var value, Var key, Symbol op);
 
-Var Var_binary(Var lhs,  Symbol op,  Var rhs);
+Var Var_binary(Var lhs, Symbol op, Var rhs);
 
-Var Var_update(Var * lhs,  Symbol op,  Var rhs);
+Var Var_update(Var * lhs, Symbol op, Var rhs);
 
-Var Var_postfix(Var * lhs,  Symbol op);
+Var Var_postfix(Var * lhs, Symbol op);
 
 #ifndef X2CCPP
-_Static_assert(_Generic(& fclose,  int(*)(File) : 1, default: 0),  "native alias File_close does not match fclose");
+_Static_assert(_Generic(& fclose, int(*)(File) : 1, default: 0), "native alias File_close does not match fclose");
 #endif
 #define File_close fclose
 #ifndef X2CCPP
-_Static_assert(_Generic(& pclose,  int(*)(File) : 1, default: 0),  "native alias File_pclose does not match pclose");
+_Static_assert(_Generic(& pclose, int(*)(File) : 1, default: 0), "native alias File_pclose does not match pclose");
 #endif
 #define File_pclose pclose
 #ifndef X2CCPP
-_Static_assert(_Generic(& feof,  int(*)(File) : 1, default: 0),  "native alias File_eof does not match feof");
+_Static_assert(_Generic(& feof, int(*)(File) : 1, default: 0), "native alias File_eof does not match feof");
 #endif
 #define File_eof feof
 #ifndef X2CCPP
-_Static_assert(_Generic(& ferror,  int(*)(File) : 1, default: 0),  "native alias File_error does not match ferror");
+_Static_assert(_Generic(& ferror, int(*)(File) : 1, default: 0), "native alias File_error does not match ferror");
 #endif
 #define File_error ferror
 #ifndef X2CCPP
-_Static_assert(_Generic(& fflush,  int(*)(File) : 1, default: 0),  "native alias File_flush does not match fflush");
+_Static_assert(_Generic(& fflush, int(*)(File) : 1, default: 0), "native alias File_flush does not match fflush");
 #endif
 #define File_flush fflush
 #ifndef X2CCPP
-_Static_assert(_Generic(& fflush,  int(*)(File) : 1, default: 0),  "native alias File_purge does not match fflush");
+_Static_assert(_Generic(& fflush, int(*)(File) : 1, default: 0), "native alias File_purge does not match fflush");
 #endif
 #define File_purge fflush
 #ifndef X2CCPP
-_Static_assert(_Generic(& fgetc,  int(*)(File) : 1, default: 0),  "native alias File_getc does not match fgetc");
+_Static_assert(_Generic(& fgetc, int(*)(File) : 1, default: 0), "native alias File_getc does not match fgetc");
 #endif
 #define File_getc fgetc
 #ifndef X2CCPP
-_Static_assert(_Generic(& fileno,  int(*)(File) : 1, default: 0),  "native alias File_fileno does not match fileno");
+_Static_assert(_Generic(& fileno, int(*)(File) : 1, default: 0), "native alias File_fileno does not match fileno");
 #endif
 #define File_fileno fileno
 #ifndef X2CCPP
-_Static_assert(_Generic(& fgetpos,  int(*)(File,  fpos_t *) : 1, default: 0),  "native alias File_getpos does not match fgetpos");
+_Static_assert(_Generic(& fgetpos, int(*)(File, fpos_t *) : 1, default: 0), "native alias File_getpos does not match fgetpos");
 #endif
 #define File_getpos fgetpos
 #ifndef X2CCPP
-_Static_assert(_Generic(& fsetpos,  int(*)(File,  const fpos_t *) : 1, default: 0),  "native alias File_setpos does not match fsetpos");
+_Static_assert(_Generic(& fsetpos, int(*)(File, const fpos_t *) : 1, default: 0), "native alias File_setpos does not match fsetpos");
 #endif
 #define File_setpos fsetpos
 #ifndef X2CCPP
-_Static_assert(_Generic(& fseek,  int(*)(File,  long,  int) : 1, default: 0),  "native alias File_seek does not match fseek");
+_Static_assert(_Generic(& fseek, int(*)(File, long, int) : 1, default: 0), "native alias File_seek does not match fseek");
 #endif
 #define File_seek fseek
 #ifndef X2CCPP
-_Static_assert(_Generic(& fseeko,  int(*)(File,  off_t,  int) : 1, default: 0),  "native alias File_seeko does not match fseeko");
+_Static_assert(_Generic(& fseeko, int(*)(File, off_t, int) : 1, default: 0), "native alias File_seeko does not match fseeko");
 #endif
 #define File_seeko fseeko
 #ifndef X2CCPP
-_Static_assert(_Generic(& setvbuf,  int(*)(File,  char *,  int,  size_t) : 1, default: 0),  "native alias File_setvbuf does not match setvbuf");
+_Static_assert(_Generic(& setvbuf, int(*)(File, char *, int, size_t) : 1, default: 0), "native alias File_setvbuf does not match setvbuf");
 #endif
 #define File_setvbuf setvbuf
 #ifndef X2CCPP
-_Static_assert(_Generic(& vfprintf,  int(*)(File,  const char *,  va_list) : 1, default: 0),  "native alias File_va_printf does not match vfprintf");
+_Static_assert(_Generic(& vfprintf, int(*)(File, const char *, va_list) : 1, default: 0), "native alias File_va_printf does not match vfprintf");
 #endif
 #define File_va_printf vfprintf
 #ifndef X2CCPP
-_Static_assert(_Generic(& vfscanf,  int(*)(File,  const char *,  va_list) : 1, default: 0),  "native alias File_va_scanf does not match vfscanf");
+_Static_assert(_Generic(& vfscanf, int(*)(File, const char *, va_list) : 1, default: 0), "native alias File_va_scanf does not match vfscanf");
 #endif
 #define File_va_scanf vfscanf
 #ifndef X2CCPP
-_Static_assert(_Generic(& ftell,  long(*)(File) : 1, default: 0),  "native alias File_tell does not match ftell");
+_Static_assert(_Generic(& ftell, long(*)(File) : 1, default: 0), "native alias File_tell does not match ftell");
 #endif
 #define File_tell ftell
 #ifndef X2CCPP
-_Static_assert(_Generic(& ftello,  off_t(*)(File) : 1, default: 0),  "native alias File_tello does not match ftello");
+_Static_assert(_Generic(& ftello, off_t(*)(File) : 1, default: 0), "native alias File_tello does not match ftello");
 #endif
 #define File_tello ftello
 #ifndef X2CCPP
-_Static_assert(_Generic(& clearerr,  void(*)(File) : 1, default: 0),  "native alias File_clearerr does not match clearerr");
+_Static_assert(_Generic(& clearerr, void(*)(File) : 1, default: 0), "native alias File_clearerr does not match clearerr");
 #endif
 #define File_clearerr clearerr
 #ifndef X2CCPP
-_Static_assert(_Generic(& rewind,  void(*)(File) : 1, default: 0),  "native alias File_rewind does not match rewind");
+_Static_assert(_Generic(& rewind, void(*)(File) : 1, default: 0), "native alias File_rewind does not match rewind");
 #endif
 #define File_rewind rewind
 #ifndef X2CCPP
-_Static_assert(_Generic(& setbuf,  void(*)(File,  char *) : 1, default: 0),  "native alias File_setbuf does not match setbuf");
+_Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "native alias File_setbuf does not match setbuf");
 #endif
 #define File_setbuf setbuf
 #ifndef X2CCPP
-_Static_assert(_Generic(& strlen,  size_t(*)(const char *) : 1, default: 0),  "native alias String_c_len does not match strlen");
+_Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
 #endif
 #define String_c_len strlen
 #ifndef X2CCPP
-_Static_assert(_Generic(& strcmp,  int(*)(const char *,  const char *) : 1, default: 0),  "native alias String_c_compare does not match strcmp");
+_Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, default: 0), "native alias String_c_compare does not match strcmp");
 #endif
 #define String_c_compare strcmp
 #ifndef X2CCPP
-_Static_assert(_Generic(& strchr,  char *(*)(const char *,  int) : 1, default: 0),  "native alias String_c_find does not match strchr");
+_Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias String_c_find does not match strchr");
 #endif
 #define String_c_find strchr
 static inline int Iter_truth(Iter iter){
@@ -580,9 +580,9 @@ static inline unsigned x2c_hash_word(unsigned long word){
   unsigned hash =(unsigned) x2c_mix64(word);  return hash ? hash : - 1;
 }
 
-static inline unsigned x2c_hash_bytes(unsigned long seed,  const void * data,  size_t width){
+static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, size_t width){
   const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  for(size_t offset = 0;  offset < width;  offset += sizeof(unsigned long)){
-    unsigned long word = 0;  size_t remaining = width - offset;  memcpy(& word,  bytes + offset,  remaining < sizeof word ? remaining : sizeof word);
+    unsigned long word = 0;  size_t remaining = width - offset;  memcpy(& word, bytes + offset, remaining < sizeof word ? remaining : sizeof word);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     word = __builtin_bswap64(word);
 #endif
@@ -592,7 +592,7 @@ static inline unsigned x2c_hash_bytes(unsigned long seed,  const void * data,  s
 }
 
 static inline int Var_is_wide(Var v){
-  unsigned top = v.u64 >> 48,  bottom = v.u64 & 0x7;  return(top == 0x0005 && bottom >= 0x5) ||(top == 0x0007 && bottom >= 0x6);
+  unsigned top = v.u64 >> 48, bottom = v.u64 & 0x7;  return(top == 0x0005 && bottom >= 0x5) ||(top == 0x0007 && bottom >= 0x6);
 }
 
 static inline unsigned Var_payload32(Var value){
@@ -600,14 +600,14 @@ static inline unsigned Var_payload32(Var value){
 }
 
 static inline float Var_decode_f32(Var value){
-  unsigned raw = Var_payload32(value);  float result;  memcpy(& result,  & raw,  sizeof result);  return result;
+  unsigned raw = Var_payload32(value);  float result;  memcpy(& result, & raw, sizeof result);  return result;
 }
 
 static inline double Var_decode_f64(Var value){
   switch(value.u64){
     case VAR_NAN_BITS : return 0.0 / 0.0;  case VAR_NEGINF_BITS : return - 1.0 / 0.0;  case VAR_POSINF_BITS : return 1.0 / 0.0;
   }
-  unsigned long raw = value.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : value.u64 - VAR_F64_SHIFT;  double result;  memcpy(& result,  & raw,  sizeof result);  return result;
+  unsigned long raw = value.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : value.u64 - VAR_F64_SHIFT;  double result;  memcpy(& result, & raw, sizeof result);  return result;
 }
 
 static inline Var Var_box_i8(char value){
@@ -653,14 +653,14 @@ static inline Var Var_box_u32(unsigned value){
 }
 
 static inline Var Var_box_f32(float value){
-  unsigned raw;  memcpy(& raw,  & value,  sizeof raw);  return(Var){
+  unsigned raw;  memcpy(& raw, & value, sizeof raw);  return(Var){
     .u64 = VAR_F32_PREFIX | raw
   }
   ;
 }
 
 static inline Var Var_box_f64(double value){
-  unsigned long raw;  memcpy(& raw,  & value,  sizeof raw);  if(value != value) return(Var){
+  unsigned long raw;  memcpy(& raw, & value, sizeof raw);  if(value != value) return(Var){
     .u64 = VAR_NAN_BITS
   }
   ;  if(value > 0 && value == 1.0 / 0.0) return(Var){
@@ -676,19 +676,19 @@ static inline Var Var_box_f64(double value){
 }
 
 static inline Var Array_var(Array x){
-  return Var_new(3313778,  x);
+  return Var_new(3313778, x);
 }
 
 static inline Var Block_var(Block x){
-  return Var_new(5011670,  x);
+  return Var_new(5011670, x);
 }
 
 static inline Var Buffer_var(Buffer x){
-  return Var_new(178663780,  x);
+  return Var_new(178663780, x);
 }
 
 static inline Var Bytes_var(Bytes x){
-  return Var_new(5874022,  x);
+  return Var_new(5874022, x);
 }
 
 static inline Var List_var(List x){
@@ -699,11 +699,11 @@ static inline Var List_var(List x){
 }
 
 static inline Var File_var(File x){
-  return Var_new(412426,  x);
+  return Var_new(412426, x);
 }
 
 static inline Var Map_var(Map x){
-  return Var_new(26720,  x);
+  return Var_new(26720, x);
 }
 
 static inline Var String_var(String x){
@@ -717,119 +717,119 @@ static inline Var Symbol_var(Symbol x){
   return x <(1ul << 51) ?(Var){
     .u64 = x + VAR_SYMBOL_OFFSET
   }
-  : Var_new(1328354264,  x);
+  : Var_new(1328354264, x);
 }
 
 static inline Var Iter_var(Iter x){
-  return Var_new(631140,  x);
+  return Var_new(631140, x);
 }
 
 static inline Var char_var(char x){
-  return Var_new(26993,  x);
+  return Var_new(26993, x);
 }
 
 static inline String char_str(char x){
-  return Var_str(Var_new(26993,  x));
+  return Var_str(Var_new(26993, x));
 }
 
 static inline String char_repr(char x){
-  return Var_repr(Var_new(26993,  x));
+  return Var_repr(Var_new(26993, x));
 }
 
 static inline Var uchar_var(uchar x){
-  return Var_new(30065,  x);
+  return Var_new(30065, x);
 }
 
 static inline String uchar_str(uchar x){
-  return Var_str(Var_new(30065,  x));
+  return Var_str(Var_new(30065, x));
 }
 
 static inline String uchar_repr(uchar x){
-  return Var_repr(Var_new(30065,  x));
+  return Var_repr(Var_new(30065, x));
 }
 
 static inline Var short_var(short x){
-  return Var_new(3453293,  x);
+  return Var_new(3453293, x);
 }
 
 static inline String short_str(short x){
-  return Var_str(Var_new(3453293,  x));
+  return Var_str(Var_new(3453293, x));
 }
 
 static inline String short_repr(short x){
-  return Var_repr(Var_new(3453293,  x));
+  return Var_repr(Var_new(3453293, x));
 }
 
 static inline Var ushort_var(ushort x){
-  return Var_new(3846509,  x);
+  return Var_new(3846509, x);
 }
 
 static inline String ushort_str(ushort x){
-  return Var_str(Var_new(3846509,  x));
+  return Var_str(Var_new(3846509, x));
 }
 
 static inline String ushort_repr(ushort x){
-  return Var_repr(Var_new(3846509,  x));
+  return Var_repr(Var_new(3846509, x));
 }
 
 static inline Var int_var(int x){
-  return Var_new(3453797,  x);
+  return Var_new(3453797, x);
 }
 
 static inline String int_str(int x){
-  return Var_str(Var_new(3453797,  x));
+  return Var_str(Var_new(3453797, x));
 }
 
 static inline String int_repr(int x){
-  return Var_repr(Var_new(3453797,  x));
+  return Var_repr(Var_new(3453797, x));
 }
 
 static inline Var uint_var(uint x){
-  return Var_new(3847013,  x);
+  return Var_new(3847013, x);
 }
 
 static inline String uint_str(uint x){
-  return Var_str(Var_new(3847013,  x));
+  return Var_str(Var_new(3847013, x));
 }
 
 static inline String uint_repr(uint x){
-  return Var_repr(Var_new(3847013,  x));
+  return Var_repr(Var_new(3847013, x));
 }
 
 static inline Var unsigned_var(unsigned x){
-  return Var_new(3847013,  x);
+  return Var_new(3847013, x);
 }
 
 static inline String unsigned_str(unsigned x){
-  return Var_str(Var_new(3847013,  x));
+  return Var_str(Var_new(3847013, x));
 }
 
 static inline String unsigned_repr(unsigned x){
-  return Var_repr(Var_new(3847013,  x));
+  return Var_repr(Var_new(3847013, x));
 }
 
 static inline Var float_var(float x){
-  return Var_new(3355493,  x);
+  return Var_new(3355493, x);
 }
 
 static inline String float_str(float x){
-  return Var_str(Var_new(3355493,  x));
+  return Var_str(Var_new(3355493, x));
 }
 
 static inline String float_repr(float x){
-  return Var_repr(Var_new(3355493,  x));
+  return Var_repr(Var_new(3355493, x));
 }
 
 static inline Var double_var(double x){
-  return Var_new(3356265,  x);
+  return Var_new(3356265, x);
 }
 
 static inline String double_str(double x){
-  return Var_str(Var_new(3356265,  x));
+  return Var_str(Var_new(3356265, x));
 }
 
 static inline String double_repr(double x){
-  return Var_repr(Var_new(3356265,  x));
+  return Var_repr(Var_new(3356265, x));
 }
 
 static inline Var long_var(long x){
@@ -885,7 +885,7 @@ static inline String Var_string(Var x){
 }
 
 static inline Symbol Var_symbol(Var x){
-  if(Var_is(x,  1328354264)) return Var_integer(x);  return 0;
+  if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
 }
 
 char Var_char(Var x);
@@ -904,7 +904,7 @@ float Var_float(Var x);
 double Var_double(Var x);
 void x2c_initialize_protocols(void);
 void x2c_initialize(void);
-int x2c_normalize_index(int index,  int length);
-int x2c_normalize_slice(int * start,  int * stop,  int step,  int length);
+int x2c_normalize_index(int index, int length);
+int x2c_normalize_slice(int * start, int * stop, int step, int length);
 
 #endif /* __GUARD_0xA962EB1F__ */

@@ -6,9 +6,9 @@ static int calls;
 
 int Var_is_void(Var);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
-int Var_equal(Var,  Var);
+int Var_equal(Var, Var);
 
 Var int_var(int);
 
@@ -26,8 +26,8 @@ int main(void){
   void * cast_pointer =(void *) pointer;
   (void) touch();
   (void) sizeof(void);
-  int ok = Var_is_void(bare) && Var_is_void(parenthesized) &&(Var_is_void(((void) 0, Void))) && !(! Var_is_void(((void) 0, Void))) && !(Var_is(((void) 0, Void),  3453797)) && ! Var_is(((void) 0, Void),  3453797) && Var_equal(((void) 0, Void), ((void) 0, Void)) && Var_same(((void) 0, Void), ((void) 0, Void)) && !(! Var_equal(((void) 0, Void), ((void) 0, Void))) && !(! Var_same(((void) 0, Void), ((void) 0, Void))) && ! Var_equal(((void) 0, Void),  int_var(1)) && ! Var_equal(int_var(1), ((void) 0, Void)) && ! Var_same(((void) 0, Void),  int_var(1)) && ! Var_same(int_var(1), ((void) 0, Void)) && !(Var_equal(((void) 0, Void),  int_var(1))) && !(Var_equal(int_var(1), ((void) 0, Void))) && !(Var_same(((void) 0, Void),  int_var(1))) && !(Var_same(int_var(1), ((void) 0, Void))) && Var_equal((((void) 0, Void)), ((void) 0, Void)) && cast_pointer == pointer && calls == 1;
-  printf("%d %d\n",  ok,  calls);
+  int ok = Var_is_void(bare) && Var_is_void(parenthesized) &&(Var_is_void(((void) 0, Void))) && !(! Var_is_void(((void) 0, Void))) && !(Var_is(((void) 0, Void), 3453797)) && ! Var_is(((void) 0, Void), 3453797) && Var_equal(((void) 0, Void), ((void) 0, Void)) && Var_same(((void) 0, Void), ((void) 0, Void)) && !(! Var_equal(((void) 0, Void), ((void) 0, Void))) && !(! Var_same(((void) 0, Void), ((void) 0, Void))) && ! Var_equal(((void) 0, Void), int_var(1)) && ! Var_equal(int_var(1), ((void) 0, Void)) && ! Var_same(((void) 0, Void), int_var(1)) && ! Var_same(int_var(1), ((void) 0, Void)) && !(Var_equal(((void) 0, Void), int_var(1))) && !(Var_equal(int_var(1), ((void) 0, Void))) && !(Var_same(((void) 0, Void), int_var(1))) && !(Var_same(int_var(1), ((void) 0, Void))) && Var_equal((((void) 0, Void)), ((void) 0, Void)) && cast_pointer == pointer && calls == 1;
+  printf("%d %d\n", ok, calls);
   return ok ? 0 : 1;
 }
 

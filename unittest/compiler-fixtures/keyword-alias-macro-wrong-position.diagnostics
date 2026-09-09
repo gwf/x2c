@@ -2,5 +2,3 @@ unittest/compiler-fixtures/keyword-alias-macro-wrong-position.x:10:3: macro: mac
     generate();
     ^^^^^^^^
 
-limit: too many errors, stopping
-

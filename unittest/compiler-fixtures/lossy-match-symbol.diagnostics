@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lossy-match-symbol.x:6:12: parse: Symbol literal does
              ^^^^^^^^^^^^^
   note: source spelling: lossy_match encoded spelling: lossy-matc
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/invalid-type-shutdown.x:5:32: parse: type shutdown mu
                                  ^
   note: shutdown: BadShutdown_shutdown
 
-limit: too many errors, stopping
-

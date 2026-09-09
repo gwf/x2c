@@ -3,5 +3,3 @@ unittest/compiler-fixtures/is-type-function.x:4:16: type: function type cannot b
                  ^^
   note: function types have no supported Var tag
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-missing-target-definition.x:3:1: pars
   macro Decorator $missing() => {
   ^^^^^
 
-limit: too many errors, stopping
-

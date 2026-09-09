@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-result-legacy-trailing.x:3:27: parse: macro res
   macro Expression $legacy(): Unit => (42)
                             ^
 
-limit: too many errors, stopping
-

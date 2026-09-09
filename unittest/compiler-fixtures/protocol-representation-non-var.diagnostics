@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-representation-non-var.x:9:25: protocol: 'as
   protocol Marker(Marked) as int;
                           ^^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-sig-conflict-report.x:44:1: protocol: 'Polar
   ^^^^^^^^
   note: protocol member 'angle' declared by Compass(Polar) at unittest/compiler-fixtures/protocol-sig-conflict-report.x:10:1 conflicting definition 'Polar_angle': ((func (("Polar") (int))) int) expected: ((func (("Polar"))) double)
 
-limit: too many errors, stopping
-

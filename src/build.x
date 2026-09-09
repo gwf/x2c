@@ -785,8 +785,9 @@ void Build.report_success(Build b) {
       report_line(<muted>, %"  Archived with ${b.toolchain.ar}");
     else report_line(<muted>, %"  Linked with ${b.toolchain.cc}");
   }
-  String retention = b.temporary ?
-                     %"temporary; removed after build" : %"retained";
+  String retention = !b.temporary ? %"retained" :
+    b.request.command == <run> ? %"temporary; removed after run" :
+                                 %"temporary; removed after build";
   report_line(<muted>, %"  Intermediates ${b.work_dir} ($retention)");
   if (!b.request.compile_only) {
     String size = report_size(report_file_bytes(b.output));

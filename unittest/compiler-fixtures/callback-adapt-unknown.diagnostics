@@ -2,5 +2,3 @@ unittest/compiler-fixtures/callback-adapt-unknown.x:4:3: macro: typed callback a
     $x2c.callback.adapt(MissingCallback, String.str);
     ^
 
-limit: too many errors, stopping
-

@@ -6,24 +6,24 @@ ArrayInt Array_arrayint(Array);
 
 Var int_var(int);
 
-int ArrayInt_try_next(ArrayInt,  int *,  int *);
+int ArrayInt_try_next(ArrayInt, int *, int *);
 
 int main(void){
   x2c_initialize();
-  ArrayInt values = Array_arrayint(Array_update_n(Array_new(),  3,  int_var(2),  int_var(4),  int_var(6)));
+  ArrayInt values = Array_arrayint(Array_update_n(Array_new(), 3, int_var(2), int_var(4), int_var(6)));
   int total = 0;
   {
     int value;
     ArrayInt _x2c_macro_object_0 = values;
     int _x2c_macro_cursor_0 = 0;
     int _x2c_macro_cursor_output_0;
-    while(ArrayInt_try_next(_x2c_macro_object_0,  & _x2c_macro_cursor_0,  & _x2c_macro_cursor_output_0)){
+    while(ArrayInt_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       value = _x2c_macro_cursor_output_0;
       total += value;
     }
 
   }
-  printf("%d\n",  total);
+  printf("%d\n", total);
   return total == 12 ? 0 : 1;
 }
 

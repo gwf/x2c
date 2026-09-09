@@ -9,7 +9,7 @@ RecursionPair recursion_pair(int);
 int main(void){
   x2c_initialize();
   RecursionPair pair = recursion_pair(4);
-  printf("%s %d\n",  red_herring,  pair.value);
+  printf("%s %d\n", red_herring, pair.value);
   return pair.value == 8 ? 0 : 1;
 }
 

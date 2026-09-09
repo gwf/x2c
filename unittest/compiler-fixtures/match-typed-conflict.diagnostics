@@ -3,5 +3,3 @@ unittest/compiler-fixtures/match-typed-conflict.x:5:43: parse: declaration 'valu
                                             ^
   note: prior binding: 'value'
 
-limit: too many errors, stopping
-

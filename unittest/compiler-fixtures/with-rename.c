@@ -2,12 +2,12 @@
 
 #include "with-rename.h"
 
-geo__Vec geo__Vec_new(double,  double);
+geo__Vec geo__Vec_new(double, double);
 
 double geo__Vec_norm(geo__Vec);
 
-double diagonal(double x,  double y){
-  geo__Vec v = geo__Vec_new(x,  y);
+double diagonal(double x, double y){
+  geo__Vec v = geo__Vec_new(x, y);
   return geo__Vec_norm(v);
 }
 

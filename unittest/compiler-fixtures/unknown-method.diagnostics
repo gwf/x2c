@@ -2,5 +2,3 @@ unittest/compiler-fixtures/unknown-method.x:5:16: type: type ("Buffer") has no m
     buffer.append("missing");
                  ^
 
-limit: too many errors, stopping
-

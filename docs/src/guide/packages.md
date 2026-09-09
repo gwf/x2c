@@ -194,11 +194,10 @@ root. Native dependency sources are fetched and verified from
 Shared support resolves beside those files, so the bundle needs no Git
 checkout. Unpack it into a directory where its sources and build outputs can
 remain together. Select an installed compiler and an explicit dependency
-cache. A normal source installation can use the absolute path to
-`builds/0/x2c` in its compiler checkout; keep that compiler's support tree in
-place. The separate prefix installer is the optional
-[APE bootstrap experiment](../reference/cli.md#bootstrap-a-native-installation).
-A package source archive does not install or bundle the compiler.
+cache. Use [the native prefix installer](installation.md) for a compiler that can
+move independently of its producer checkout. A development build can instead
+use the absolute path to `builds/0/x2c`; keep that compiler's support tree in
+place. A package source archive does not install or bundle the compiler.
 
 ```sh
 mkdir package-sources

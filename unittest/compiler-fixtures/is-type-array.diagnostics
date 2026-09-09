@@ -3,5 +3,3 @@ unittest/compiler-fixtures/is-type-array.x:4:16: type: array type cannot be used
                  ^^
   note: array types have no supported Var tag
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-prototype-duplicate.x:12:1: type: function 'gen
   ^
   note: prior definition: 'generated_increment'
 
-limit: too many errors, stopping
-

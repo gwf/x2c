@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-statement-position-empty.x:8:5: parse: expected
       $empty();
       ^
 
-limit: too many errors, stopping
-

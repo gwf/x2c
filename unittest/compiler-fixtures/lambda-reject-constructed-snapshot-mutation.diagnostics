@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-constructed-snapshot-mutation.x:9:17: t
                   ^
   note: binding: value
 
-limit: too many errors, stopping
-

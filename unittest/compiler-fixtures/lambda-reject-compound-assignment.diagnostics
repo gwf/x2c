@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-compound-assignment.x:5:35: type: captu
                                     ^
   note: binding: value
 
-limit: too many errors, stopping
-

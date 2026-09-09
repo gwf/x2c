@@ -2,9 +2,9 @@
 
 #include "is-type-package.h"
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 int package_type_is(Var value){
-  return Var_is(value,  492847477062);
+  return Var_is(value, 492847477062);
 }
 

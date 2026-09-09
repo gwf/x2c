@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_setup_cache_init(Compiler compiler,  List header,  List source,  String prefix,  String guard_name,  String initializer_name);
+List Compiler_setup_cache_init(Compiler compiler, List header, List source, String prefix, String guard_name, String initializer_name);
 
 
 #endif /* __GUARD_0x9578BA41__ */

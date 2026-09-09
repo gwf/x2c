@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lossy-symbol-set.x:3:23: parse: Symbol literal does n
                         ^^^^^^^^^
   note: source spelling: lossy_set encoded spelling: lossy-set
 
-limit: too many errors, stopping
-

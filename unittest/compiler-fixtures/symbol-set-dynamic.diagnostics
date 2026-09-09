@@ -3,5 +3,3 @@ unittest/compiler-fixtures/symbol-set-dynamic.x:4:13: parse: symbol-set entries 
               ^
   note: use %<<foo bar>>
 
-limit: too many errors, stopping
-

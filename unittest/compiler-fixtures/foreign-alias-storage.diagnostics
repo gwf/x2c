@@ -3,5 +3,3 @@ unittest/compiler-fixtures/foreign-alias-storage.x:4:1: parse: foreign alias has
   ^
   note: allowed storage: static or inline
 
-limit: too many errors, stopping
-

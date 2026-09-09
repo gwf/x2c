@@ -2,13 +2,9 @@
 
 #include "bootstrap.h"
 
-static String _19,  _18,  _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 #include <dirent.h>
 #include <errno.h>
@@ -28,9 +24,9 @@ Var String_var(String);
 
 int String_truth(String);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
 String String_new(const char *);
 
@@ -38,17 +34,17 @@ String x2c_path_dir(String);
 
 int File_close(File);
 
-int File_printf(File,  const char *, ...);
+int File_printf(File, const char *, ...);
 
 String File_string_close(File);
 
 Var Symbol_var(Symbol);
 
-int String_startswith(String,  String);
+int String_startswith(String, String);
 
-int String_endswith(String,  String);
+int String_endswith(String, String);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 String String_printf(String, ...);
 
@@ -58,7 +54,7 @@ int _build_mkdirs(String);
 
 int List_truth(List);
 
-void * Scope_calloc(size_t,  size_t);
+void * Scope_calloc(size_t, size_t);
 
 List List_reverse(List);
 
@@ -66,29 +62,29 @@ __attribute__((constructor)) static void _file_init_(void);
 
 static void _error(const char * message);
 
-static void _error_path(const char * message,  String path);
+static void _error_path(const char * message, String path);
 
 static String _absolute(String path);
 
 static int _safe_path(const char * path);
 
-static uint64_t _hash(File input,  File output,  size_t * length);
+static uint64_t _hash(File input, File output, size_t * length);
 
-static int _read_marker(String path,  String identity);
+static int _read_marker(String path, String identity);
 
-static void _write_marker(String path,  String identity);
+static void _write_marker(String path, String identity);
 
 static void _acquire(Bootstrap payload);
 
 static char * _manifest(String * identity);
 
-static int _record(char * line,  unsigned long long * hash,  size_t * size,  char path[1024]);
+static int _record(char * line, unsigned long long * hash, size_t * size, char path[1024]);
 
-static void _collect(Bootstrap payload,  String relative);
+static void _collect(Bootstrap payload, String relative);
 
-static void _extract(Bootstrap payload,  char * manifest);
+static void _extract(Bootstrap payload, char * manifest);
 
-static void _collect_existing(Bootstrap payload,  char * manifest);
+static void _collect_existing(Bootstrap payload, char * manifest);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -117,32 +113,32 @@ __attribute__((constructor)) static void _file_init_(void){
 }
 
 static void _error(const char * message){
-  x2c_driver_error(String_join(NULL,  cons(String_var(_0),  cons(String_var(String_new(message)),  NULL))));
+  x2c_driver_error(String_join(NULL, cons(String_var(_0), cons(String_var(String_new(message)), NULL))));
 }
 
-static void _error_path(const char * message,  String path){
-  x2c_driver_error(String_join(NULL,  cons(String_var(_0),  cons(String_var(String_new(message)),  cons(String_var(_1),  cons(String_var(path),  NULL))))));
+static void _error_path(const char * message, String path){
+  x2c_driver_error(String_join(NULL, cons(String_var(_0), cons(String_var(String_new(message)), cons(String_var(_1), cons(String_var(path), NULL))))));
 }
 
 static String _absolute(String path){
-  if(! String_truth(path) || ! String_getindex(path,  0)) _error("empty installation prefix");
-  if(String_equal(path,  _2)) _error("refusing root installation prefix");
+  if(! String_truth(path) || ! String_getindex(path, 0)) _error("empty installation prefix");
+  if(String_equal(path, _2)) _error("refusing root installation prefix");
   char resolved[PATH_MAX];
-  if(! access(path,  F_OK)){
-    if(! realpath(path,  resolved)) _error_path("cannot resolve installation prefix",  path);
+  if(! access(path, F_OK)){
+    if(! realpath(path, resolved)) _error_path("cannot resolve installation prefix", path);
     return String_new(resolved);
   }
   String parent = x2c_path_dir(path);
-  if(! realpath(parent,  resolved)) _error_path("installation parent does not exist",  parent);
-  const char * base = strrchr(path,  '/');
+  if(! realpath(parent, resolved)) _error_path("installation parent does not exist", parent);
+  const char * base = strrchr(path, '/');
   base = base ? base + 1 : path;
-  if(! base[0] || strcmp(base,  ".") == 0 || strcmp(base,  "..") == 0) _error_path("invalid installation prefix",  path);
-  return String_join(NULL,  cons(String_var(String_new(resolved)),  cons(String_var(_2),  cons(String_var(String_new(base)),  NULL))));
+  if(! base[0] || strcmp(base, ".") == 0 || strcmp(base, "..") == 0) _error_path("invalid installation prefix", path);
+  return String_join(NULL, cons(String_var(String_new(resolved)), cons(String_var(_2), cons(String_var(String_new(base)), NULL))));
 }
 
 static int _safe_path(const char * path){
   if(! path || ! path[0] || path[0] == '/') return 0;
-  const char * component = path,  * ch = path;
+  const char * component = path, * ch = path;
   while(1){
     if(* ch != '/' && * ch){
       ch ++;
@@ -157,16 +153,16 @@ static int _safe_path(const char * path){
   return 1;
 }
 
-static uint64_t _hash(File input,  File output,  size_t * length){
+static uint64_t _hash(File input, File output, size_t * length){
   uint64_t hash = UINT64_C(1469598103934665603);
   unsigned char bytes[16384];
-  size_t count,  total = 0;
-  while((count = fread(bytes,  1,  sizeof(bytes),  input))){
+  size_t count, total = 0;
+  while((count = fread(bytes, 1, sizeof(bytes), input))){
     for(size_t i = 0;  i < count;  i ++){
       hash ^= bytes[i];
       hash *= UINT64_C(1099511628211);
     }
-    if(output && fwrite(bytes,  1,  count,  output) != count) _error("cannot write extracted payload");
+    if(output && fwrite(bytes, 1, count, output) != count) _error("cannot write extracted payload");
     total += count;
   }
   if(ferror(input)) _error("cannot read embedded payload");
@@ -174,30 +170,30 @@ static uint64_t _hash(File input,  File output,  size_t * length){
   return hash;
 }
 
-static int _read_marker(String path,  String identity){
-  File input = fopen(path,  "r");
+static int _read_marker(String path, String identity){
+  File input = fopen(path, "r");
   if(! input) return 0;
   char line[128];
-  int matched = fgets(line,  sizeof(line),  input) != NULL;
+  int matched = fgets(line, sizeof(line), input) != NULL;
   File_close(input);
   if(! matched) return 0;
-  line[strcspn(line,  "\r\n")] = 0;
-  return String_equal(identity,  String_new(line));
+  line[strcspn(line, "\r\n")] = 0;
+  return String_equal(identity, String_new(line));
 }
 
-static void _write_marker(String path,  String identity){
-  File output = fopen(path,  "w");
-  if(! output || File_printf(output,  "%s\n",  identity) < 0 || File_close(output)) _error_path("cannot write installation marker",  path);
+static void _write_marker(String path, String identity){
+  File output = fopen(path, "w");
+  if(! output || File_printf(output, "%s\n", identity) < 0 || File_close(output)) _error_path("cannot write installation marker", path);
 }
 
 static void _acquire(Bootstrap payload){
-  payload -> lock_path = String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_3),  NULL)));
+  payload -> lock_path = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_3), NULL)));
   for(int attempt = 0;  attempt < 2;  attempt ++){
-    int fd = open(payload -> lock_path,  O_WRONLY | O_CREAT | O_EXCL,  0666);
+    int fd = open(payload -> lock_path, O_WRONLY | O_CREAT | O_EXCL, 0666);
     if(fd >= 0){
       char pid[40];
-      int length = snprintf(pid,  sizeof(pid),  "%ld\n", (long) getpid());
-      if(write(fd,  pid,  length) != length){
+      int length = snprintf(pid, sizeof(pid), "%ld\n", (long) getpid());
+      if(write(fd, pid, length) != length){
         close(fd);
         unlink(payload -> lock_path);
         _error("cannot write bootstrap lock");
@@ -205,46 +201,45 @@ static void _acquire(Bootstrap payload){
       close(fd);
       return;
     }
-    if(errno != EEXIST) _error_path("cannot create bootstrap lock",  payload -> lock_path);
-    File lock = fopen(payload -> lock_path,  "r");
+    if(errno != EEXIST) _error_path("cannot create bootstrap lock", payload -> lock_path);
+    File lock = fopen(payload -> lock_path, "r");
     long pid = 0;
     if(lock){
-      fscanf(lock,  "%ld",  & pid);
+      fscanf(lock, "%ld", & pid);
       File_close(lock);
     }
-    if(pid > 0 &&(kill((pid_t) pid,  0) == 0 || errno == EPERM)) _error_path("another bootstrap is in progress",  payload -> prefix);
-    if(unlink(payload -> lock_path) && errno != ENOENT) _error_path("cannot recover stale bootstrap lock",  payload -> lock_path);
+    if(pid > 0 &&(kill((pid_t) pid, 0) == 0 || errno == EPERM)) _error_path("another bootstrap is in progress", payload -> prefix);
+    if(unlink(payload -> lock_path) && errno != ENOENT) _error_path("cannot recover stale bootstrap lock", payload -> lock_path);
   }
   _error("cannot acquire bootstrap lock");
 }
 
 static char * _manifest(String * identity){
-  File input = fopen(BOOTSTRAP_MANIFEST,  "rb");
+  File input = fopen(BOOTSTRAP_MANIFEST, "rb");
   if(! input) _error("this executable has no embedded source payload");
   String volatile content = NULL;
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+    ExceptionFrame _x2c_exception_frame_0;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) content = File_string_close(input);
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {_error("cannot read embedded source manifest");
+         {_error("cannot read embedded source manifest");
       }
 
     }
     else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
@@ -252,120 +247,120 @@ static char * _manifest(String * identity){
 }
 int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 char * text = strdup(String_truth(content) ? content : "");
 if(! text) _error("cannot allocate source manifest");
-char * newline = strchr(text,  '\n');
+char * newline = strchr(text, '\n');
 if(! newline) _error("malformed embedded source manifest");
 * newline = 0;
 const char * prefix = "x2c-bootstrap-v1 ";
-if(strncmp(text,  prefix,  strlen(prefix)) != 0 || ! text[strlen(prefix)]) _error("unsupported embedded source manifest");
+if(strncmp(text, prefix, strlen(prefix)) != 0 || ! text[strlen(prefix)]) _error("unsupported embedded source manifest");
 * identity = String_new(text + strlen(prefix));
 * newline = '\n';
 return text;
 }
 
-static int _record(char * line,  unsigned long long * hash,  size_t * size,  char path[1024]){
+static int _record(char * line, unsigned long long * hash, size_t * size, char path[1024]){
   char extra;
-  return sscanf(line,  "%llx %zu %1023s %c",  hash,  size,  path,  & extra) == 3;
+  return sscanf(line, "%llx %zu %1023s %c", hash, size, path, & extra) == 3;
 }
 
-static void _collect(Bootstrap payload,  String relative){
-  String installed = String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_2),  cons(String_var(relative),  NULL))));
-  if(String_startswith(relative,  _17) && String_endswith(relative,  _18)) payload -> runtime_srcs = cons(String_var(installed),  payload -> runtime_srcs);
-  else if(String_startswith(relative,  _19) && String_endswith(relative,  _18)) payload -> compiler_srcs = cons(String_var(installed),  payload -> compiler_srcs);
+static void _collect(Bootstrap payload, String relative){
+  String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_2), cons(String_var(relative), NULL))));
+  if(String_startswith(relative, _17) && String_endswith(relative, _18)) payload -> runtime_srcs = cons(String_var(installed), payload -> runtime_srcs);
+  else if(String_startswith(relative, _19) && String_endswith(relative, _18)) payload -> compiler_srcs = cons(String_var(installed), payload -> compiler_srcs);
 }
 
-static void _extract(Bootstrap payload,  char * manifest){
-  String temporary = String_printf(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_4),  NULL))), (long) getpid());
-  if(access(temporary,  F_OK) == 0 && ! _build_remove_tree(temporary)) _error_path("cannot clear temporary source tree",  temporary);
-  if(! _build_mkdirs(temporary)) _error_path("cannot create temporary source tree",  temporary);
+static void _extract(Bootstrap payload, char * manifest){
+  String temporary = String_printf(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_4), NULL))), (long) getpid());
+  if(access(temporary, F_OK) == 0 && ! _build_remove_tree(temporary)) _error_path("cannot clear temporary source tree", temporary);
+  if(! _build_mkdirs(temporary)) _error_path("cannot create temporary source tree", temporary);
   char * save = NULL;
-  strtok_r(manifest,  "\n",  & save);
-  char * line = strtok_r(NULL,  "\n",  & save);
+  strtok_r(manifest, "\n", & save);
+  char * line = strtok_r(NULL, "\n", & save);
   while(line){
     unsigned long long expected_hash = 0;
     size_t expected_size = 0;
     char relative[1024];
-    if(! _record(line,  & expected_hash,  & expected_size,  relative) || ! _safe_path(relative)) _error("malformed embedded source record");
-    String source = String_join(NULL,  cons(String_var(_5),  cons(String_var(String_new(relative)),  NULL)));
-    String target = String_join(NULL,  cons(String_var(temporary),  cons(String_var(_2),  cons(String_var(String_new(relative)),  NULL))));
+    if(! _record(line, & expected_hash, & expected_size, relative) || ! _safe_path(relative)) _error("malformed embedded source record");
+    String source = String_join(NULL, cons(String_var(_5), cons(String_var(String_new(relative)), NULL)));
+    String target = String_join(NULL, cons(String_var(temporary), cons(String_var(_2), cons(String_var(String_new(relative)), NULL))));
     String parent = x2c_path_dir(target);
-    if(! _build_mkdirs(parent)) _error_path("cannot create payload directory",  parent);
-    File input = fopen(source,  "rb"),  output = fopen(target,  "wb");
-    if(! input || ! output) _error_path("cannot extract embedded source",  String_new(relative));
+    if(! _build_mkdirs(parent)) _error_path("cannot create payload directory", parent);
+    File input = fopen(source, "rb"), output = fopen(target, "wb");
+    if(! input || ! output) _error_path("cannot extract embedded source", String_new(relative));
     size_t actual_size = 0;
-    uint64_t actual_hash = _hash(input,  output,  & actual_size);
+    uint64_t actual_hash = _hash(input, output, & actual_size);
     int close_error = File_close(input) || File_close(output);
-    if(close_error || actual_size != expected_size || actual_hash !=(uint64_t) expected_hash) _error_path("embedded source failed verification",  String_new(relative));
-    _collect(payload,  String_new(relative));
-    line = strtok_r(NULL,  "\n",  & save);
+    if(close_error || actual_size != expected_size || actual_hash !=(uint64_t) expected_hash) _error_path("embedded source failed verification", String_new(relative));
+    _collect(payload, String_new(relative));
+    line = strtok_r(NULL, "\n", & save);
   }
   if(! List_truth(payload -> runtime_srcs) || ! List_truth(payload -> compiler_srcs)) _error("embedded payload has no compiler or runtime sources");
-  _write_marker(String_join(NULL,  cons(String_var(temporary),  cons(String_var(_6),  NULL))),  payload -> identity);
-  if(rename(temporary,  payload -> prefix)) _error_path("cannot publish extracted source tree",  payload -> prefix);
+  _write_marker(String_join(NULL, cons(String_var(temporary), cons(String_var(_6), NULL))), payload -> identity);
+  if(rename(temporary, payload -> prefix)) _error_path("cannot publish extracted source tree", payload -> prefix);
 }
 
-static void _collect_existing(Bootstrap payload,  char * manifest){
+static void _collect_existing(Bootstrap payload, char * manifest){
   char * save = NULL;
-  strtok_r(manifest,  "\n",  & save);
-  char * line = strtok_r(NULL,  "\n",  & save);
+  strtok_r(manifest, "\n", & save);
+  char * line = strtok_r(NULL, "\n", & save);
   while(line){
     unsigned long long hash = 0;
     size_t size = 0;
     char relative[1024];
-    if(! _record(line,  & hash,  & size,  relative) || ! _safe_path(relative)) _error("malformed embedded source record");
-    String installed = String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_2),  cons(String_var(String_new(relative)),  NULL))));
-    File input = fopen(installed,  "rb");
-    if(! input) _error_path("materialized source is missing",  installed);
+    if(! _record(line, & hash, & size, relative) || ! _safe_path(relative)) _error("malformed embedded source record");
+    String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_2), cons(String_var(String_new(relative)), NULL))));
+    File input = fopen(installed, "rb");
+    if(! input) _error_path("materialized source is missing", installed);
     size_t actual_size = 0;
-    uint64_t actual_hash = _hash(input,  NULL,  & actual_size);
+    uint64_t actual_hash = _hash(input, NULL, & actual_size);
     int close_error = File_close(input);
-    if(close_error || actual_size != size || actual_hash !=(uint64_t) hash) _error_path("materialized source failed verification",  installed);
-    _collect(payload,  String_new(relative));
-    line = strtok_r(NULL,  "\n",  & save);
+    if(close_error || actual_size != size || actual_hash !=(uint64_t) hash) _error_path("materialized source failed verification", installed);
+    _collect(payload, String_new(relative));
+    line = strtok_r(NULL, "\n", & save);
   }
 
 }
 
 Bootstrap bootstrap_materialize(CliRequest request){
   if(! _init_guard_) _file_init_();
-  Bootstrap payload = Scope_calloc(1,  sizeof(struct Bootstrap));
+  Bootstrap payload = Scope_calloc(1, sizeof(struct Bootstrap));
   payload -> prefix = _absolute(request -> prefix);
   char * manifest = _manifest(& payload -> identity);
   _acquire(payload);
-  String source_marker = String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_6),  NULL)));
-  String complete_marker = String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_7),  NULL)));
-  if(! access(payload -> prefix,  F_OK)){
-    if(! _read_marker(source_marker,  payload -> identity)){
+  String source_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_6), NULL)));
+  String complete_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL)));
+  if(! access(payload -> prefix, F_OK)){
+    if(! _read_marker(source_marker, payload -> identity)){
       bootstrap_release(payload);
-      _error_path("prefix exists but does not contain this source payload",  payload -> prefix);
+      _error_path("prefix exists but does not contain this source payload", payload -> prefix);
     }
-    _collect_existing(payload,  manifest);
+    _collect_existing(payload, manifest);
   }
-  else _extract(payload,  manifest);
+  else _extract(payload, manifest);
   payload -> runtime_srcs = List_reverse(payload -> runtime_srcs);
   payload -> compiler_srcs = List_reverse(payload -> compiler_srcs);
   free(manifest);
-  payload -> complete = _read_marker(complete_marker,  payload -> identity) && ! access(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_8),  NULL))),  X_OK) && ! access(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_9),  NULL))),  R_OK);
-  if(! _build_mkdirs(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_10),  NULL)))) || ! _build_mkdirs(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_11),  NULL))))) _error_path("cannot create installation directories",  payload -> prefix);
+  payload -> complete = _read_marker(complete_marker, payload -> identity) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL))), X_OK) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))), R_OK);
+  if(! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_10), NULL)))) || ! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_11), NULL))))) _error_path("cannot create installation directories", payload -> prefix);
   return payload;
 }
 
-CliRequest bootstrap_build_request(CliRequest command,  Bootstrap payload,  Symbol component){
+CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol component){
   if(! _init_guard_) _file_init_();
-  CliRequest request = Scope_calloc(1,  sizeof(struct CliRequest));
+  CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
   request -> command = 5589768;
   request -> kind = component == 40094681930 ? 1381098885964356 : 404971770155786;
   request -> inputs = component == 40094681930 ? payload -> runtime_srcs : payload -> compiler_srcs;
-  request -> output = component == 40094681930 ? String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_9),  NULL))) : String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_8),  NULL)));
-  request -> build_dir = component == 40094681930 ? String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_12),  NULL))) : String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_13),  NULL)));
-  request -> include_dirs = cons(String_var(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_14),  NULL)))),  NULL);
+  request -> output = component == 40094681930 ? String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))) : String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL)));
+  request -> build_dir = component == 40094681930 ? String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_12), NULL))) : String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_13), NULL)));
+  request -> include_dirs = cons(String_var(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_14), NULL)))), NULL);
   request -> cc_args = command -> cc_args;
   request -> cc = command -> cc;
   request -> ar = command -> ar;
@@ -374,14 +369,14 @@ CliRequest bootstrap_build_request(CliRequest command,  Bootstrap payload,  Symb
   return request;
 }
 
-void bootstrap_record_install(Bootstrap payload,  String cc,  String ar){
+void bootstrap_record_install(Bootstrap payload, String cc, String ar){
   if(! _init_guard_) _file_init_();
-  String directory = String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_15),  NULL)));
-  if(! _build_mkdirs(directory)) _error_path("cannot create toolchain record directory",  directory);
-  String record = String_join(NULL,  cons(String_var(directory),  cons(String_var(_16),  NULL)));
-  File output = fopen(record,  "w");
-  if(! output || File_printf(output,  "CC=%s\nAR=%s\n",  cc,  ar) < 0 || File_close(output)) _error_path("cannot write toolchain record",  record);
-  _write_marker(String_join(NULL,  cons(String_var(payload -> prefix),  cons(String_var(_7),  NULL))),  payload -> identity);
+  String directory = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_15), NULL)));
+  if(! _build_mkdirs(directory)) _error_path("cannot create toolchain record directory", directory);
+  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_16), NULL)));
+  File output = fopen(record, "w");
+  if(! output || File_printf(output, "CC=%s\nAR=%s\n", cc, ar) < 0 || File_close(output)) _error_path("cannot write toolchain record", record);
+  _write_marker(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL))), payload -> identity);
 }
 
 void bootstrap_release(Bootstrap payload){

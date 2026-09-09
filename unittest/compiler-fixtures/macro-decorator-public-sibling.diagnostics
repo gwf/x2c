@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-public-sibling.x:8:1: type: method na
   $add_public()
   ^
 
-limit: too many errors, stopping
-

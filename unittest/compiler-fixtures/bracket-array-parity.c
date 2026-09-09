@@ -4,30 +4,30 @@
 
 Var int_var(int);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
-Var Array_setindex(Array,  int,  Var);
+Var Array_setindex(Array, int, Var);
 
 int Var_int(Var);
 
 int main(void){
   x2c_initialize();
-  Array values = Array_update_n(Array_new(),  3,  int_var(10),  int_var(20),  int_var(30));
+  Array values = Array_update_n(Array_new(), 3, int_var(10), int_var(20), int_var(30));
   Var dynamic = int_var(1);
   int scalar = 2;
-  Var bracket_dynamic = Array_getindex(values,  Var_int(Var_convert(dynamic,  3453797)));
-  Var method_dynamic = Array_getindex(values,  Var_int(Var_convert(dynamic,  3453797)));
-  Var bracket_scalar = Array_getindex(values,  scalar);
-  Var method_scalar = Array_getindex(values,  scalar);
-  Var bracket_negative = Array_getindex(values,  - 1);
-  Var method_negative = Array_getindex(values,  - 1);
-  Array_setindex(values,  Var_int(Var_convert(dynamic,  3453797)),  int_var(21));
-  Array_setindex(values,  Var_int(Var_convert(dynamic,  3453797)),  int_var(Var_int(Array_getindex(values,  Var_int(Var_convert(dynamic,  3453797)))) + 1));
-  Array_setindex(values,  - 1,  int_var(40));
-  printf("%d %d\n",  Var_int(bracket_dynamic),  Var_int(method_dynamic));
-  printf("%d %d\n",  Var_int(bracket_scalar),  Var_int(method_scalar));
-  printf("%d %d\n",  Var_int(bracket_negative),  Var_int(method_negative));
-  printf("%d %d\n",  Var_int(Array_getindex(values,  1)),  Var_int(Array_getindex(values,  - 1)));
+  Var bracket_dynamic = Array_getindex(values, Var_int(Var_convert(dynamic, 3453797)));
+  Var method_dynamic = Array_getindex(values, Var_int(Var_convert(dynamic, 3453797)));
+  Var bracket_scalar = Array_getindex(values, scalar);
+  Var method_scalar = Array_getindex(values, scalar);
+  Var bracket_negative = Array_getindex(values, - 1);
+  Var method_negative = Array_getindex(values, - 1);
+  Array_setindex(values, Var_int(Var_convert(dynamic, 3453797)), int_var(21));
+  Array_setindex(values, Var_int(Var_convert(dynamic, 3453797)), int_var(Var_int(Array_getindex(values, Var_int(Var_convert(dynamic, 3453797)))) + 1));
+  Array_setindex(values, - 1, int_var(40));
+  printf("%d %d\n", Var_int(bracket_dynamic), Var_int(method_dynamic));
+  printf("%d %d\n", Var_int(bracket_scalar), Var_int(method_scalar));
+  printf("%d %d\n", Var_int(bracket_negative), Var_int(method_negative));
+  printf("%d %d\n", Var_int(Array_getindex(values, 1)), Var_int(Array_getindex(values, - 1)));
   return 0;
 }
 

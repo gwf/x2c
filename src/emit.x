@@ -683,25 +683,24 @@ static List Emitter._filtered_catch(
   Emitter emitter, List records, String frame_name, String handle_name,
   List context, List final_code, List leave_stmt, String cleanup_guard) {
   String selected_name = emitter.fresh_name("catch_selected");
-  Array arms = %[], int index = 0;
+  Array arms = %[], int index = 0, count = records.len();
   foreach (List rec, records) {
-    List (binders, pattern, body) = rec;
-    (void) pattern;
+    List binders = rec.car(), body = rec.caddr();
     List handler_body = emitter._cleanup_emit(
       final_code, leave_stmt, cleanup_guard, body, context);
     List declarations = _make_catch_binders(binders, handle_name);
-    arms.push(
-      %(
-      "if ($selected_name == $index) {"
-        @declarations
-        @handler_body
-      "}"
-    ));
+    String branch = index == count - 1 ? (index ? "else" : "") :
+                    index ? %"else if ($selected_name == $index)" :
+                            %"if ($selected_name == $index)";
+    arms.push(%("$branch {" @declarations @handler_body "}"));
     index++;
   }
   List guard = cleanup_guard ? %("$cleanup_guard = 1;") : %();
+  List selected = count > 1
+    ? %("int $selected_name = x2c_error_catch_selected($handle_name);")
+    : %();
   List result = %("{"
-    "int $selected_name = x2c_error_catch_selected($handle_name);"
+    @selected
     "x2c_error_catch_detach($handle_name);"
     "x2c_exception_mark_handled(&$frame_name);"
     @guard

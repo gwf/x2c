@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-static-abstract.x:3:1: protocol: 'static' ap
   ^^^^^^
   note: remove 'static' from the reusable protocol body
 
-limit: too many errors, stopping
-

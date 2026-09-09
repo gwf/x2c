@@ -10,11 +10,11 @@
 typedef int Alias;
 
 #ifndef X2CCPP
-_Static_assert(_Generic(& abs,  int(*)(int) : 1, default: 0),  "native alias Alias_absolute does not match abs");
+_Static_assert(_Generic(& abs, int(*)(int) : 1, default: 0), "native alias Alias_absolute does not match abs");
 #endif
 #define Alias_absolute abs
 #ifndef X2CCPP
-_Static_assert(_Generic(& abs,  int(*)(int) : 1, default: 0),  "native alias alias_absolute does not match abs");
+_Static_assert(_Generic(& abs, int(*)(int) : 1, default: 0), "native alias alias_absolute does not match abs");
 #endif
 #define alias_absolute abs
 int main(void);

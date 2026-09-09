@@ -74,21 +74,21 @@ int main(void){
   ;
   int mapped = apply_int(_x2c_lambda_adapt_0);
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(20800632064936),  NULL);
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+    ExceptionFrame _x2c_exception_frame_0;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
       {
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
         {
-          static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/generated-name-hygiene.x",.function =  "main",.line =  27};
+          static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/generated-name-hygiene.x",.function = "main",.line = 27};
           x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
           __builtin_unreachable();
         }
@@ -104,10 +104,9 @@ int main(void){
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {{
+         {{
 
         }
 
@@ -116,11 +115,11 @@ int main(void){
     }
     else {int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
@@ -128,14 +127,14 @@ int main(void){
 }
 int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 int sentinels = user_lambda_0 + user_lambda_adapt_0 + user_exception_frame_0 + user_cleanup_guard_0 + user_cleanup_prev_0 + user_cleanup_state_0;
-printf("%d %d %d\n",  mapped,  cleaned,  sentinels);
+printf("%d %d %d\n", mapped, cleaned, sentinels);
 return mapped == 2 && cleaned == 1 && sentinels == 27 ? 0 : 1;
 }
 
@@ -145,7 +144,7 @@ static Var _x2c_lambda_0(Var value){
 }
 
 static int _x2c_lambda_adapt_0(int a0){
-  return Var_int(Var_convert(_x2c_lambda_0(int_var(a0)),  3453797));
+  return Var_int(Var_convert(_x2c_lambda_0(int_var(a0)), 3453797));
   ;
 }
 

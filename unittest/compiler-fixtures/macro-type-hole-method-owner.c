@@ -8,7 +8,7 @@ int main(void){
   x2c_initialize();
   MacroBoxFirst first = 19;
   MacroBoxSecond second = 23;
-  printf("%ld %ld\n",  Var_integer(MacroBoxFirst_var(first)),  Var_integer(MacroBoxSecond_var(second)));
+  printf("%ld %ld\n", Var_integer(MacroBoxFirst_var(first)), Var_integer(MacroBoxSecond_var(second)));
   return 0;
 }
 

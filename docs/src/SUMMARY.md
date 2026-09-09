@@ -23,6 +23,7 @@
 
 - [Language Reference](reference/language.md)
 - [Compiler Options](reference/cli.md)
+- [Install a Native Compiler](guide/installation.md)
 
 # Standard library
 

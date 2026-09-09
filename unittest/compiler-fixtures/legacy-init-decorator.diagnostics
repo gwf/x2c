@@ -3,5 +3,3 @@ unittest/compiler-fixtures/legacy-init-decorator.x:3:1: parse: top-level decorat
   ^
   note: module initialization: void TYPE.initialize(void)
 
-limit: too many errors, stopping
-

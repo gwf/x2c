@@ -30,11 +30,11 @@ void Block_free(Block);
 
 void Scope_free(void *);
 
-void Block_move_to(Block,  Scope *);
+void Block_move_to(Block, Scope *);
 
-void Scope_move(void *,  Scope *);
+void Scope_move(void *, Scope *);
 
-void Block_reserve(Block,  size_t);
+void Block_reserve(Block, size_t);
 
 void Block_clear(Block);
 
@@ -44,15 +44,15 @@ Var Symbol_var(Symbol);
 
 Var int_var(int);
 
-void Block_append(Block,  const void *,  size_t);
+void Block_append(Block, const void *, size_t);
 
-void Block_append_fill(Block,  const void *,  size_t);
+void Block_append_fill(Block, const void *, size_t);
 
-void Block_truncate(Block,  size_t);
+void Block_truncate(Block, size_t);
 
-int Block_try_pop(Block,  void *);
+int Block_try_pop(Block, void *);
 
-String String_new_len(const char *,  int);
+String String_new_len(const char *, int);
 
 String String_repr(String);
 
@@ -94,15 +94,15 @@ void Buffer_free(Buffer buf){
   Scope_free(buf);
 }
 
-void Buffer_move_to(Buffer buf,  Scope * scope){
+void Buffer_move_to(Buffer buf, Scope * scope){
   if((void *) buf == NULL) return;
-  Block_move_to(buf -> content,  scope);
-  Block_move_to(buf -> indents,  scope);
-  Scope_move(buf,  scope);
+  Block_move_to(buf -> content, scope);
+  Block_move_to(buf -> indents, scope);
+  Scope_move(buf, scope);
 }
 
-Buffer Buffer_reserve(Buffer buf,  size_t minimum){
-  Block_reserve(buf -> content,  minimum);
+Buffer Buffer_reserve(Buffer buf, size_t minimum){
+  Block_reserve(buf -> content, minimum);
   return buf;
 }
 
@@ -114,21 +114,21 @@ Buffer Buffer_clear(Buffer buf){
   return buf;
 }
 
-Buffer Buffer_write_len(Buffer buf,  const char * text,  size_t length){
+Buffer Buffer_write_len(Buffer buf, const char * text, size_t length){
   if(! length) return buf;
   if(! text){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/buffer.x",.function =  "Buffer_write_len",.line =  122};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 122};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 0);
     __builtin_unreachable();
   }
   if(length == 1){
     char value = * text;
     if(! value){
-      static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/buffer.x",.function =  "Buffer_write_len",.line =  125};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(46228810),  int_var(0));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 125};
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(46228810), int_var(0));
       __builtin_unreachable();
     }
-    Block_append(buf -> content,  & value,  1);
+    Block_append(buf -> content, & value, 1);
     if(value == '\n'){
       buf -> pos = 0;
       buf -> _indent = 0;
@@ -139,19 +139,19 @@ Buffer Buffer_write_len(Buffer buf,  const char * text,  size_t length){
     }
     return buf;
   }
-  if(memchr(text,  '\0',  length)){
-    static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/buffer.x",.function =  "Buffer_write_len",.line =  137};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(46228810),  int_var(0));
+  if(memchr(text, '\0', length)){
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 137};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
-  const char * newline = memchr(text,  '\n',  length);
+  const char * newline = memchr(text, '\n', length);
   size_t line_start = SIZE_MAX;
   while(newline){
     line_start =(size_t)(newline - text) + 1;
     size_t remaining = length - line_start;
-    newline = memchr(text + line_start,  '\n',  remaining);
+    newline = memchr(text + line_start, '\n', remaining);
   }
-  size_t next_pos,  next_indent;
+  size_t next_pos, next_indent;
   if(line_start != SIZE_MAX){
     next_pos = length - line_start;
     next_indent = 0;
@@ -167,61 +167,61 @@ Buffer Buffer_write_len(Buffer buf,  const char * text,  size_t length){
     }
 
   }
-  Block_append(buf -> content,  text,  length);
+  Block_append(buf -> content, text, length);
   buf -> pos = next_pos;
   buf -> _indent = next_indent;
   return buf;
 }
 
-Buffer Buffer_write(Buffer buf,  const char * text){
+Buffer Buffer_write(Buffer buf, const char * text){
   if(! text){
-    static const X2CErrorSite  _x2c_error_site_3  = {.file =  "../../lib/buffer.x",.function =  "Buffer_write",.line =  171};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/buffer.x",.function = "Buffer_write",.line = 171};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 0);
     __builtin_unreachable();
   }
-  return Buffer_write_len(buf,  text,  strlen(text));
+  return Buffer_write_len(buf, text, strlen(text));
 }
 
-Buffer Buffer_printf(Buffer buf,  const char * format, ...){
+Buffer Buffer_printf(Buffer buf, const char * format, ...){
   char stack[160];
   va_list args;
-  va_start(args,  format);
-  int length = vsnprintf(stack,  sizeof stack,  format,  args);
+  va_start(args, format);
+  int length = vsnprintf(stack, sizeof stack, format, args);
   va_end(args);
   if(length < 0){
-    static const X2CErrorSite  _x2c_error_site_4  = {.file =  "../../lib/buffer.x",.function =  "Buffer_printf",.line =  187};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 187};
     x2c_error_raise_n(& _x2c_error_site_4, 435316840, 0);
     __builtin_unreachable();
   }
-  if((size_t) length < sizeof stack) return Buffer_write_len(buf,  stack,  length);
+  if((size_t) length < sizeof stack) return Buffer_write_len(buf, stack, length);
   char * bytes = Scope_malloc((size_t) length + 1);
   {
-   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & bytes};
+  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & bytes};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  & _x2c_defer_env_2
+    .env = & _x2c_defer_env_2
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    va_start(args,  format);
-    int written = vsnprintf(bytes, (size_t) length + 1,  format,  args);
+    va_start(args, format);
+    int written = vsnprintf(bytes, (size_t) length + 1, format, args);
     va_end(args);
     if(written < 0){
-      static const X2CErrorSite  _x2c_error_site_5  = {.file =  "../../lib/buffer.x",.function =  "Buffer_printf",.line =  194};
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 194};
       x2c_error_raise_n(& _x2c_error_site_5, 435316840, 0);
       __builtin_unreachable();
     }
-    buf = Buffer_write_len(buf,  bytes,  length);
+    buf = Buffer_write_len(buf, bytes, length);
     {
       Buffer _x2c_return_value_0 = buf;
       {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
     }
@@ -235,13 +235,13 @@ Buffer Buffer_printf(Buffer buf,  const char * format, ...){
 }
 }
 
-Buffer Buffer_write_char(Buffer buf,  char value){
+Buffer Buffer_write_char(Buffer buf, char value){
   if(! value){
-    static const X2CErrorSite  _x2c_error_site_6  = {.file =  "../../lib/buffer.x",.function =  "Buffer_write_char",.line =  205};
-    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(46228810),  int_var(0));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_write_char",.line = 205};
+    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
-  Block_append(buf -> content,  & value,  1);
+  Block_append(buf -> content, & value, 1);
   if(value == '\n'){
     buf -> pos = 0;
     buf -> _indent = 0;
@@ -253,14 +253,14 @@ Buffer Buffer_write_char(Buffer buf,  char value){
   return buf;
 }
 
-Buffer Buffer_write_repeat(Buffer buf,  char value,  size_t count){
+Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   if(! count) return buf;
   if(! value){
-    static const X2CErrorSite  _x2c_error_site_7  = {.file =  "../../lib/buffer.x",.function =  "Buffer_write_repeat",.line =  226};
-    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(46228810),  int_var(0));
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 226};
+    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
-  Block_append_fill(buf -> content,  & value,  count);
+  Block_append_fill(buf -> content, & value, count);
   if(value == '\n'){
     buf -> pos = 0;
     buf -> _indent = 0;
@@ -272,23 +272,23 @@ Buffer Buffer_write_repeat(Buffer buf,  char value,  size_t count){
   return buf;
 }
 
-Buffer Buffer_unwrite(Buffer buf,  size_t count){
+Buffer Buffer_unwrite(Buffer buf, size_t count){
   if(count > buf -> content -> length) count = buf -> content -> length;
-  Block_truncate(buf -> content,  buf -> content -> length - count);
+  Block_truncate(buf -> content, buf -> content -> length - count);
   _recompute_line_state(buf);
   return buf;
 }
 
 Buffer Buffer_pad(Buffer buf){
-  return Buffer_write_repeat(buf,  ' ',  buf -> padding);
+  return Buffer_write_repeat(buf, ' ', buf -> padding);
 }
 
 Buffer Buffer_newline(Buffer buf){
-  return Buffer_write_char(buf,  '\n');
+  return Buffer_write_char(buf, '\n');
 }
 
 Buffer Buffer_indent(Buffer buf){
-  return Buffer_write_repeat(buf,  ' ',  Buffer_tabstop(buf));
+  return Buffer_write_repeat(buf, ' ', Buffer_tabstop(buf));
 }
 
 Buffer Buffer_newline_indent(Buffer buf){
@@ -296,12 +296,12 @@ Buffer Buffer_newline_indent(Buffer buf){
 }
 
 Buffer Buffer_push(Buffer buf){
-  Block_append(buf -> indents,  & buf -> pos,  1);
+  Block_append(buf -> indents, & buf -> pos, 1);
   return buf;
 }
 
 Buffer Buffer_pop(Buffer buf){
-  if(Block_truth(buf -> indents)) Block_try_pop(buf -> indents,  NULL);
+  if(Block_truth(buf -> indents)) Block_try_pop(buf -> indents, NULL);
   return buf;
 }
 
@@ -311,7 +311,7 @@ size_t Buffer_tabstop(Buffer buf){
   return indents[buf -> indents -> length - 1];
 }
 
-int Buffer_try_get(Buffer buf,  ptrdiff_t index,  char * out){
+int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out){
   if(! Buffer_truth(buf) || ! out) return 0;
   size_t normalized;
   if(index < 0){
@@ -327,9 +327,9 @@ int Buffer_try_get(Buffer buf,  ptrdiff_t index,  char * out){
   return 1;
 }
 
-char Buffer_get(Buffer buf,  ptrdiff_t index){
+char Buffer_get(Buffer buf, ptrdiff_t index){
   char out;
-  return Buffer_try_get(buf,  index,  & out) ? out : '\0';
+  return Buffer_try_get(buf, index, & out) ? out : '\0';
 }
 
 size_t Buffer_len(Buffer buf){
@@ -342,8 +342,8 @@ String Buffer_str(Buffer buf){
     size_t length = buf -> content -> length;
     int limit = INT_MAX;
     {
-      static const X2CErrorSite  _x2c_error_site_8  = {.file =  "../../lib/buffer.x",.function =  "Buffer_str",.line =  324};
-      x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(1265290),  Var_box_ulong(length),  Symbol_var(25782888),  int_var(limit));
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 324};
+      x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(1265290), Var_box_ulong(length), Symbol_var(25782888), int_var(limit));
       __builtin_unreachable();
     }
 
@@ -353,11 +353,11 @@ String Buffer_str(Buffer buf){
 
 String Buffer_str_free(Buffer buf){
   {
-   _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & buf};
+  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & buf};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  & _x2c_defer_env_3
+    .env = & _x2c_defer_env_3
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -366,10 +366,10 @@ String Buffer_str_free(Buffer buf){
       {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-   return _x2c_return_value_1;
+  return _x2c_return_value_1;
 
 }
     }

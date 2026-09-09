@@ -32,7 +32,7 @@ line.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while materializing the result.
 
-Source: `src/format.x:97`
+Source: `src/format.x:98`
 
 ## Design notes
 

@@ -27,11 +27,12 @@ must still describe that same unit. `dir` must already exist. Generation
 partitions the AST, materializes caches and once-only initialization,
 performs the generation-phase source transform, and writes or replaces
 `<dir>/<source-stem>.h` and `.c`. It appends generated bindings and
-initialization work to the compiler and is not idempotent. The header is
-written before the source, so an output failure may leave the header
-replaced; failures are reported as `emit` diagnostics.
+initialization work to the compiler and is not idempotent. Both files
+are closed before individual renames replace their destinations; failure
+can leave only the header replaced, but never a partial file. Failures
+are reported as `emit` diagnostics.
 
-Source: `src/generate.x:690`
+Source: `src/generate.x:725`
 
 ## Design notes
 

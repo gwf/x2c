@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-source-text-constructed.x:7:16: macro: x2c.sour
                  ^
   note: value: (expr (int) (literal (int) "1"))
 
-limit: too many errors, stopping
-

@@ -788,14 +788,13 @@ static void _install_native_bindings(
   Compiler compiler, Type participant, List rows) {
   match (rows)
     case %((? native *) *): {
-      foreach (List row, rows) {
-        (String member, Symbol status, String source, Type expected,
-         Symbol default_kind, Type signature) = row;
-        (void) status; (void) source; (void) default_kind; (void) signature;
-        String generated = _member_spelling(participant, member);
-        if (!compiler.sym.get(%($generated)))
-          compiler.sym.define_global(%($generated), expected);
-      }
+      foreach (List row, rows)
+        match (row)
+          case %(?(String member) ? ? ?(Type expected) ? ?): {
+            String generated = _member_spelling(participant, member);
+            if (!compiler.sym.get(%($generated)))
+              compiler.sym.define_global(%($generated), expected);
+          }
     }
 }
 
@@ -906,76 +905,73 @@ static List _resolve_members(
   }
 
   Array resolved = %[];
-  foreach (List template, templates) {
-    (String member_name, Type template_type, String native) = template;
-    (void) native;
-    Type actual = NULL;
-    Symbol status = <no-member>, String selected = NULL;
-    String binding = _member_spelling(participant, member_name);
-    actual = _declared(compiler, binding);
-    if (!actual) {
-      String imported = compiler.imported_spelling(binding);
-      if (imported) {
-        actual = _declared(compiler, imported);
-        if (actual) binding = imported;
+  foreach (List row, templates)
+    match (row)
+      case %(?(String member_name) ?(Type template_type) ?): {
+        Type actual = NULL;
+        Symbol status = <no-member>, String selected = NULL;
+        String binding = _member_spelling(participant, member_name);
+        actual = _declared(compiler, binding);
+        if (!actual) {
+          String imported = compiler.imported_spelling(binding);
+          if (imported) {
+            actual = _declared(compiler, imported);
+            if (actual) binding = imported;
+          }
+        }
+        if (actual) selected = binding;
+        foreach (Type owner,
+                 (base != %("Var") || representation) && !actual
+                   ? _ancestry(compiler, participant).cdr() : NULL) {
+          if (owner == base) break;
+          if (base == %("Var") && owner != representation) continue;
+          actual = _method_signature(
+            compiler, owner, participant, member_name, &selected);
+          if (actual || base == %("Var")) break;
+        }
+        if (actual) {
+          Map candidate = bindings.copy();
+          if (_unify_signature(
+            template_type, actual, variables, candidate)) {
+            bindings = candidate;
+            status = <implmntd>;
+          }
+          else status = <sig-cnflct>;
+        }
+        resolved.push(
+          %($member_name $status $selected $actual none $template_type));
       }
-    }
-    if (actual) selected = binding;
-    foreach (Type owner,
-             (base != %("Var") || representation) && !actual
-               ? _ancestry(compiler, participant).cdr() : NULL) {
-      if (owner == base) break;
-      if (base == %("Var") && owner != representation) continue;
-      actual = _method_signature(
-        compiler, owner, participant, member_name, &selected);
-      if (actual || base == %("Var")) break;
-    }
-    if (actual) {
-      Map candidate = bindings.copy();
-      if (_unify_signature(
-        template_type, actual, variables, candidate)) {
-        bindings = candidate;
-        status = <implmntd>;
-      }
-      else status = <sig-cnflct>;
-    }
-    resolved.push(
-      %(
-      $member_name $status $selected $actual none $template_type
-    ));
-  }
 
   foreach (Var (name, value), defaults) bindings.setdefault(name, value);
 
   Array final = %[];
-  foreach (List row, resolved) {
-    (String member_name, Symbol status, String source, Type actual,
-     Symbol default_kind, Type template_type) = row;
-    (void) actual; (void) default_kind;
-    Type expected = _substitute_signature(
-      template_type, variables, bindings);
-    default_kind = <none>;
-    if (status == <no-member>) {
-      String base_name = _base_name(base);
-      if (base_name && base != %("Var")) {
-        String fallback = %"${base_name}_$member_name";
-        Type fallback_type = _declared(compiler, fallback);
-        Map base_bindings = bindings.copy();
-        base_bindings[binder] = base;
-        Type base_signature = _substitute_signature(
-          template_type, variables, base_bindings);
-        if (fallback_type == base_signature) {
-          status = <base-dflt>;
-          source = fallback;
-          default_kind = <ordinary>;
+  foreach (List row, resolved)
+    match (row)
+      case %(?(String member_name) ?(Symbol status) ?(String source)
+             ? ? ?(Type template_type)): {
+        Type expected = _substitute_signature(
+          template_type, variables, bindings);
+        Symbol default_kind = <none>;
+        if (status == <no-member>) {
+          String base_name = _base_name(base);
+          if (base_name && base != %("Var")) {
+            String fallback = %"${base_name}_$member_name";
+            Type fallback_type = _declared(compiler, fallback);
+            Map base_bindings = bindings.copy();
+            base_bindings[binder] = base;
+            Type base_signature = _substitute_signature(
+              template_type, variables, base_bindings);
+            if (fallback_type == base_signature) {
+              status = <base-dflt>;
+              source = fallback;
+              default_kind = <ordinary>;
+            }
+          }
         }
+        final.push(
+          %($member_name $status $source $expected $default_kind
+            $template_type));
       }
-    }
-    final.push(
-      %(
-      $member_name $status $source $expected $default_kind $template_type
-    ));
-  }
   resolved.free();
   *variables_out = variables;
   *bindings_out = bindings;
@@ -1020,21 +1016,21 @@ static List _descriptor_requirement(
 static List _ordinary_requirement(
   Compiler compiler, Type base, String binder, List rows, String forward,
   String reverse) {
-  foreach (List row, rows) {
-    (String member, Symbol status, String source, Type expected,
-     Symbol default_kind, Type template) = row;
-    (void) source; (void) expected;
-    if (status == <base-dflt> && default_kind == <ordinary>) {
-      List requirement = _conversion_requirement(
-        binder, member, template, <fallback>, forward, reverse);
-      if (requirement) return requirement;
-    }
-    if (status == <implmntd>) {
-      List requirement = _descriptor_requirement(
-        compiler, base, binder, member, template, forward, reverse);
-      if (requirement) return requirement;
-    }
-  }
+  foreach (List row, rows)
+    match (row)
+      case %(?(String member) ?(Symbol status) ? ?
+             ?(Symbol default_kind) ?(Type template)): {
+        if (status == <base-dflt> && default_kind == <ordinary>) {
+          List requirement = _conversion_requirement(
+            binder, member, template, <fallback>, forward, reverse);
+          if (requirement) return requirement;
+        }
+        if (status == <implmntd>) {
+          List requirement = _descriptor_requirement(
+            compiler, base, binder, member, template, forward, reverse);
+          if (requirement) return requirement;
+        }
+      }
   return NULL;
 }
 
@@ -1115,45 +1111,37 @@ void Compiler.install_generated_protocol_symbols(
   c.sym.reset(symbols);
   c.rebuild_protocols(symbols);
   c.resolve_protocols();
-  foreach (Var value, c.conforms) {
-    if (value is not <list>) continue;
-    List conformance = value;
-    (Symbol kind, Type base, Type participant, String forward,
-     String reverse, Map variables, Map bindings, List members) =
-      conformance;
-    (void) kind; (void) reverse; (void) variables; (void) bindings;
-    List rows = members.cdr();
-    int native = 0;
-    match (rows)
-      case %((? native *) *): native = 1;
-    if (native) {
-      if (_adoption_visibility(c, base, participant) != <external>)
-        continue;
-      foreach (List row, rows) {
-        (String member, Symbol status, String source, Type expected,
-         Symbol default_kind, Type signature) = row;
-        (void) status; (void) source; (void) expected; (void) default_kind;
-        _install_generated_protocol_symbol(
-          c, participant, member, signature);
+  foreach (Var value, c.conforms)
+    match (value)
+      case %(protocol-conformance ?(Type base) ?(Type participant)
+             ?(String forward) ? ? ? (members *rows)): {
+        int native = 0;
+        match (rows)
+          case %((? native *) *): native = 1;
+        if (native) {
+          if (_adoption_visibility(c, base, participant) != <external>)
+            continue;
+          foreach (List row, rows)
+            match (row)
+              case %(?(String member) ? ? ? ? ?(Type signature)):
+                _install_generated_protocol_symbol(
+                  c, participant, member, signature);
+          continue;
+        }
+        if (!c.fn_defs.contains(forward)) continue;
+        if (c.sym.resolve_numeric_type(participant) &&
+            participant != %("Symbol"))
+          continue;
+        foreach (List row, rows)
+          match (row)
+            case %(?(String member) base-dflt ? ? ordinary ?): {
+              List decision = _generated_owner(c, participant, member);
+              match (decision)
+                case %(owner ? ? ?signature external):
+                  _install_generated_protocol_symbol(
+                    c, participant, member, signature.list());
+            }
       }
-      continue;
-    }
-    if (!c.fn_defs.contains(forward)) continue;
-    if (c.sym.resolve_numeric_type(participant) &&
-        participant != %("Symbol"))
-      continue;
-    foreach (List row, rows) {
-      (String member, Symbol status, String source, Type expected,
-       Symbol default_kind, Type template) = row;
-      (void) source; (void) expected; (void) template;
-      if (status != <base-dflt> || default_kind != <ordinary>) continue;
-      List decision = _generated_owner(c, participant, member);
-      match (decision)
-        case %(owner ? ? ?signature external):
-          _install_generated_protocol_symbol(
-            c, participant, member, signature.list());
-    }
-  }
 }
 
 static String _definition_location(Compiler compiler, Type base) {
@@ -1166,30 +1154,31 @@ static void _report_member_sig_conflicts(
   String base_repr = _type_spelling(base);
   String participant_repr = _type_spelling(participant);
   String declaration_site = _definition_location(compiler, base);
-  foreach (List row, rows) {
-    (String member, Symbol status, String binding, Type expected,
-     Symbol default_kind, Type template) = row;
-    (void) default_kind; (void) template;
-    if (status != <sig-cnflct>) continue;
-    List dedupe = %("protocol-sig-conflict" $participant $member);
-    if (compiler.protocol_helpers.contains(dedupe)) continue;
-    compiler.protocol_helpers[dedupe] = 1;
-    Type actual = _declared(compiler, binding);
-    String owner = %"$base_repr($participant_repr)";
-    String protocol_note = %"protocol member '$member' declared by $owner";
-    if (declaration_site)
-      protocol_note = %"$protocol_note at $declaration_site";
-    String actual_repr = actual.repr();
-    String conflict_note =
-      %"conflicting definition '$binding': $actual_repr";
-    String expected_note = %"expected: ${expected.repr()}";
-    compiler.diagnostics.report(
-      <protocol>,
-      %"'$binding' has a signature incompatible with $owner member '$member'",
-      location,
-      %($protocol_note $conflict_note $expected_note)
-    );
-  }
+  foreach (List row, rows)
+    match (row)
+      case %(?(String member) ?(Symbol status) ?(String binding)
+             ?(Type expected) ? ?): {
+        if (status != <sig-cnflct>) continue;
+        List dedupe = %("protocol-sig-conflict" $participant $member);
+        if (compiler.protocol_helpers.contains(dedupe)) continue;
+        compiler.protocol_helpers[dedupe] = 1;
+        Type actual = _declared(compiler, binding);
+        String owner = %"$base_repr($participant_repr)";
+        String protocol_note = %"protocol member '$member' declared by $owner";
+        if (declaration_site)
+          protocol_note = %"$protocol_note at $declaration_site";
+        String actual_repr = actual.repr();
+        String conflict_note =
+          %"conflicting definition '$binding': $actual_repr";
+        String expected_note = %"expected: ${expected.repr()}";
+        compiler.diagnostics.report(
+          <protocol>,
+          %"'$binding' has a signature incompatible " +
+            %"with $owner member '$member'",
+          location,
+          %($protocol_note $conflict_note $expected_note)
+        );
+      }
 }
 
 static String _requirement_detail(
@@ -1300,12 +1289,11 @@ static void _resolve_declared_adoption(
     );
     return;
   }
-  (String record_kind, Type record_base, String binder,
-   List associations, List members) = record;
-  (void) record_kind; (void) record_base;
-  _resolve_protocol_record(
-    compiler, base, participant, location, binder,
-    associations.cdr(), members.cdr());
+  match (record)
+    case %(? ? ?(String binder) (associated *associations)
+           (members *members)):
+      _resolve_protocol_record(
+        compiler, base, participant, location, binder, associations, members);
 }
 
 /** Returns the resolved conformance for `participant` and `base`, if any.
@@ -1395,23 +1383,22 @@ static void _dump_conformance_row(
   printf(
     "(%s %s %s %s", kind, owned ? "owned" : "visible",
     base.repr(), participant.repr());
-  foreach (List row, rows) {
-    (String member, Symbol status, String source, Type expected,
-     Symbol default_kind, Type template) = row;
-    (void) expected; (void) default_kind; (void) template;
-    const char *name = NULL, *punctuation = "none";
-    switch (status) {
-      case <implmntd>: name = "implemented"; break;
-      case <base-dflt>: name = "base-default"; break;
-      case <sig-cnflct>: name = "sig-conflict"; break;
-      case <no-member>: name = "no-member"; break;
-      case <native>: name = "native"; break;
-    }
-    if (status == <implmntd> || status == <base-dflt> ||
-        status == <native>)
-      punctuation = "dot+punctuation";
-    _dump_conformance_member(member, name, source, punctuation);
-  }
+  foreach (List row, rows)
+    match (row)
+      case %(?(String member) ?(Symbol status) ?(String source) ? ? ?): {
+        const char *name = NULL, *punctuation = "none";
+        switch (status) {
+          case <implmntd>: name = "implemented"; break;
+          case <base-dflt>: name = "base-default"; break;
+          case <sig-cnflct>: name = "sig-conflict"; break;
+          case <no-member>: name = "no-member"; break;
+          case <native>: name = "native"; break;
+        }
+        if (status == <implmntd> || status == <base-dflt> ||
+            status == <native>)
+          punctuation = "dot+punctuation";
+        _dump_conformance_member(member, name, source, punctuation);
+      }
   printf(")\n");
 }
 
@@ -1531,28 +1518,27 @@ static List _generated_owner(
       compiler, _ordered_occurrences(compiler), participant,
       %!(Compiler &compiler, Type base, List row)
         using &result, &first_linkage, &first_storage => {
-        (String member, Symbol status, String source, Type expected,
-         Symbol default_kind, Type template) = row;
-        (void) template;
-        if (status != <base-dflt> || default_kind != <ordinary> ||
-            member != member_name)
-          return 0;
-        Symbol storage = _adoption_visibility(
-          compiler, base, participant);
-        List owner = %(owner $base $source $expected $storage);
-        candidates.push(owner);
-        if (storage == <mixed>) {
-          result = %(linkage $owner $owner);
-          return 1;
-        }
-        if (!first_linkage) {
-          first_linkage = owner;
-          first_storage = storage;
-        }
-        else if (first_storage != storage) {
-          result = %(linkage $first_linkage $owner);
-          return 1;
-        }
+        match (row)
+          case %(?(String member) base-dflt ?(String source)
+                 ?(Type expected) ordinary ?): {
+            if (member != member_name) return 0;
+            Symbol storage = _adoption_visibility(
+              compiler, base, participant);
+            List owner = %(owner $base $source $expected $storage);
+            candidates.push(owner);
+            if (storage == <mixed>) {
+              result = %(linkage $owner $owner);
+              return 1;
+            }
+            if (!first_linkage) {
+              first_linkage = owner;
+              first_storage = storage;
+            }
+            else if (first_storage != storage) {
+              result = %(linkage $first_linkage $owner);
+              return 1;
+            }
+          }
         return 0;
       });
     List owners = candidates.list_free();
@@ -1663,20 +1649,20 @@ static List _resolve_protocol_member(
     foreach (Type current, _ancestry(compiler, participant)) {
       List row = _member_row(compiler, protocols, current, member_name);
       if (!row) continue;
-      (String row_member, Symbol status, String source, Type signature,
-       Symbol default_kind, Type template) = row;
-      (void) row_member; (void) default_kind; (void) template;
-      if (status == <implmntd>) {
-        if (source == compiler.fn_name) return %();
-        List binding = compiler.sym.reference(%($source), NULL);
-        return %($binding $signature);
-      }
-      if (status == <native>) {
-        String binding_name = _member_spelling(current, member_name);
-        if (binding_name == compiler.fn_name) return %();
-        List binding = compiler.sym.reference(%($binding_name), NULL);
-        return %($binding $signature);
-      }
+      match (row)
+        case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
+          if (status == <implmntd>) {
+            if (source == compiler.fn_name) return %();
+            List binding = compiler.sym.reference(%($source), NULL);
+            return %($binding $signature);
+          }
+          if (status == <native>) {
+            String binding_name = _member_spelling(current, member_name);
+            if (binding_name == compiler.fn_name) return %();
+            List binding = compiler.sym.reference(%($binding_name), NULL);
+            return %($binding $signature);
+          }
+        }
       return %();
     }
     return %();
@@ -2049,81 +2035,81 @@ static void Compiler._generate_ordinary_protocol_adapters(
   int shares_var_tag = base == %("Var") &&
     _adoption_representation(adoption);
   Array thunks = %[];
-  foreach (List row, rows) {
-    (String member, Symbol status, String source, Type expected,
-     Symbol default_kind, Type template) = row;
-    (void) default_kind;
-    if (status == <base-dflt>) {
-      List decision = _generated_owner(c, participant, member);
-      match (decision) {
-        case %(owner ? ? ? ?storage): {
-          int make_static = storage == <static>;
-          String generated = _member_spelling(participant, member);
-          c.add_early(
-            c._generate_protocol_function(
-              generated, make_static, expected,
-              c.sym.get(%($source)), template,
-              variables, binder, source, forward, NULL)
-          );
-          if (!make_static)
-            c.record_generated_header_symbol(generated, expected);
-        }
-        case %(
-          (!set ?kind (!or linkage conflict))
-          ?first ?second *
-        ):
-          _report_generated_collision(
-            c, participant, member, kind,
-            first, second);
-      }
-      continue;
-    }
-    if (status == <no-member>) {
-      if (base != %("Var") || shares_var_tag) continue;
-      List decision = _generated_owner(c, participant, member);
-      match (decision) {
-        case %(owner ? ? ?owner_expected ?): {
-          List requirement = _descriptor_requirement(
-            c, base, binder, member, template, forward, reverse);
-          if (requirement) {
-            _report_requirement_at_adoption(
-              c, base, participant, requirement);
-            continue;
+  foreach (List row, rows)
+    match (row)
+      case %(?(String member) ?(Symbol status) ?(String source)
+             ?(Type expected) ? ?(Type template)): {
+        if (status == <base-dflt>) {
+          List decision = _generated_owner(c, participant, member);
+          match (decision) {
+            case %(owner ? ? ? ?storage): {
+              int make_static = storage == <static>;
+              String generated = _member_spelling(participant, member);
+              c.add_early(
+                c._generate_protocol_function(
+                  generated, make_static, expected,
+                  c.sym.get(%($source)), template,
+                  variables, binder, source, forward, NULL)
+              );
+              if (!make_static)
+                c.record_generated_header_symbol(generated, expected);
+            }
+            case %(
+              (!set ?kind (!or linkage conflict))
+              ?first ?second *
+            ):
+              _report_generated_collision(
+                c, participant, member, kind,
+                first, second);
           }
-          String inherited = _member_spelling(participant, member);
-          Type inherited_type = owner_expected.list();
-          c.add_early(
-            _declaration_from_signature(
-              c, inherited, inherited_type, 0)
-          );
-          if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
-            continue;
-          thunks.push(
-            c._generate_protocol_thunk(
-              participant, member, inherited_type, template,
-              variables, bindings, binder, inherited, reverse)
-          );
+          continue;
         }
-        case %(
-          (!set ?kind (!or linkage conflict))
-          ?first ?second *
-        ):
-          _report_generated_collision(
-            c, participant, member, kind,
-            first, second);
+        if (status == <no-member>) {
+          if (base != %("Var") || shares_var_tag) continue;
+          List decision = _generated_owner(c, participant, member);
+          match (decision) {
+            case %(owner ? ? ?owner_expected ?): {
+              List requirement = _descriptor_requirement(
+                c, base, binder, member, template, forward, reverse);
+              if (requirement) {
+                _report_requirement_at_adoption(
+                  c, base, participant, requirement);
+                continue;
+              }
+              String inherited = _member_spelling(participant, member);
+              Type inherited_type = owner_expected.list();
+              c.add_early(
+                _declaration_from_signature(
+                  c, inherited, inherited_type, 0)
+              );
+              if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
+                continue;
+              thunks.push(
+                c._generate_protocol_thunk(
+                  participant, member, inherited_type, template,
+                  variables, bindings, binder, inherited, reverse)
+              );
+            }
+            case %(
+              (!set ?kind (!or linkage conflict))
+              ?first ?second *
+            ):
+              _report_generated_collision(
+                c, participant, member, kind,
+                first, second);
+          }
+          continue;
+        }
+        if (status != <implmntd> || base != %("Var") || shares_var_tag)
+          continue;
+        if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
+          continue;
+        thunks.push(
+          c._generate_protocol_thunk(
+            participant, member, expected, template,
+            variables, bindings, binder, source, reverse)
+        );
       }
-      continue;
-    }
-    if (status != <implmntd> || base != %("Var") || shares_var_tag)
-      continue;
-    if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
-      continue;
-    thunks.push(
-      c._generate_protocol_thunk(
-        participant, member, expected, template,
-        variables, bindings, binder, source, reverse)
-    );
-  }
   List thunk_rows = thunks.list_free();
   if (base == %("Var") && !shares_var_tag) {
     List tag_expression = _adoption_tag(adoption);
@@ -2147,52 +2133,43 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   foreach (Var (key, value), c.conforms)
     if (value is <list>) ordered.push(%($key $value));
   ordered.sort();
-  foreach (List ordered_row, ordered) {
-    (List key, List conformance) = ordered_row;
-    (void) key;
-    (Symbol kind, Type base, Type participant, String forward,
-     String reverse, Map variables, Map bindings, List members) =
-      conformance;
-    (void) kind;
-    List rows = members.cdr();
-    int native = 0;
-    match (rows)
-      case %((? native *) *): native = 1;
-    if (native) {
-      Var stored;
-      if (!c.protocol_helpers.try_get(
-        %("source-typedef" ${participant.car()}), &stored))
-        continue;
-      (List source, int private) = stored;
-      int make_static =
-        _adoption_visibility(c, base, participant) == <static>;
-      Array aliases = %[];
-      foreach (List row, rows) {
-        (String member, Symbol status, String binding, Type expected,
-         Symbol default_kind, Type signature) = row;
-        (void) status; (void) expected; (void) default_kind;
-        aliases.push(
-          c._generate_native_alias(
-            participant, member, binding, signature, make_static)
-        );
+  foreach (List ordered_row, ordered)
+    match (ordered_row)
+      case %(? (protocol-conformance ?(Type base) ?(Type participant)
+                ?(String forward) ?(String reverse) ?(Map variables)
+                ?(Map bindings) (members *rows))): {
+        int native = 0;
+        match (rows)
+          case %((? native *) *): native = 1;
+        if (native) {
+          Var stored;
+          if (!c.protocol_helpers.try_get(
+            %("source-typedef" ${participant.car()}), &stored))
+            continue;
+          (List source, int private) = stored;
+          int make_static =
+            _adoption_visibility(c, base, participant) == <static>;
+          Array aliases = %[];
+          foreach (List row, rows)
+            match (row)
+              case %(?(String member) ? ?(String binding) ? ?
+                     ?(Type signature)):
+                aliases.push(c._generate_native_alias(
+                  participant, member, binding, signature, make_static));
+          ast = _insert_at_visibility_boundary(
+            ast, source, private, aliases.list_free(), make_static);
+          continue;
+        }
+        if (!_defines_function(c, forward)) continue;
+        if (c.sym.resolve_numeric_type(participant) &&
+            participant != %("Symbol"))
+          continue;
+        match (c._record(base))
+          case %(? ? ?(String binder) ? ?):
+            c._generate_ordinary_protocol_adapters(
+              base, participant, forward, reverse, variables, bindings,
+              binder, rows, central_initializer);
       }
-      ast = _insert_at_visibility_boundary(
-        ast, source, private, aliases.list_free(), make_static);
-      continue;
-    }
-    if (!_defines_function(c, forward)) continue;
-    if (c.sym.resolve_numeric_type(participant) &&
-        participant != %("Symbol"))
-      continue;
-    List record = c._record(base);
-    (String record_kind, Type record_base, String binder,
-     List associations, List templates) = record;
-    (void) record_kind; (void) record_base; (void) associations;
-    (void) templates;
-    c._generate_ordinary_protocol_adapters(
-      base, participant, forward, reverse, variables, bindings, binder,
-      rows, central_initializer);
-  }
   ordered.free();
   return ast;
 }

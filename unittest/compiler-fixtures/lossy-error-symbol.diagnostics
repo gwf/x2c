@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lossy-error-symbol.x:4:11: parse: Symbol literal does
             ^^^^^^^^^^^
   note: source spelling: lossy_error encoded spelling: lossy-erro
 
-limit: too many errors, stopping
-

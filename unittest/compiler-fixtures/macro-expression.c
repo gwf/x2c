@@ -5,7 +5,7 @@
 int main(void){
   x2c_initialize();
   int value = 21;
-  printf("%d\n",  value + value);
+  printf("%d\n", value + value);
   return 0;
 }
 

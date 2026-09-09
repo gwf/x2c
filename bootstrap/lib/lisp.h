@@ -10,26 +10,26 @@
 typedef struct Lisp * Lisp;
 
 typedef struct LispAutoStats{
-  long invocations,  machine_entries,  machine_errors;
-  long analyses,  published,  ineligible;
-  long guard_failures,  remembered_fallbacks;
+  long invocations, machine_entries, machine_errors;
+  long analyses, published, ineligible;
+  long guard_failures, remembered_fallbacks;
   long program_bytes;
 }
 LispAutoStats;
 
-int Lisp_program(Var callable,  MachineView * view,  int * nparam,  Var * body);
+int Lisp_program(Var callable, MachineView * view, int * nparam, Var * body);
 
-int Lisp_resolve(void * storage,  Var name,  Var * value);
+int Lisp_resolve(void * storage, Var name, Var * value);
 
-void Lisp_enter(void * storage,  Var callable,  const Var * values,  int count);
+void Lisp_enter(void * storage, Var callable, const Var * values, int count);
 
 void Lisp_leave(void * storage);
 
-void Lisp_retarget(void * storage,  Var callable,  const Var * values,  int count);
+void Lisp_retarget(void * storage, Var callable, const Var * values, int count);
 
-Var Lisp_apply_values(void * storage,  Var callable,  const Var * values,  int count);
+Var Lisp_apply_values(void * storage, Var callable, const Var * values, int count);
 
-int Lisp_precall(void * storage,  Var callable,  List raw,  Var * value);
+int Lisp_precall(void * storage, Var callable, List raw, Var * value);
 
 Lisp Lisp_new_bare(void);
 
@@ -37,11 +37,11 @@ Lisp Lisp_new(void);
 
 void Lisp_destroy(Lisp lisp);
 
-Symbol Lisp_read(Lisp lisp,  String source,  unsigned * cursor,  Var * out);
+Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
 Var lisp_atom(Var value);
 
-Var lisp_eq(Var a,  Var b);
+Var lisp_eq(Var a, Var b);
 
 Var lisp_pair(Var value);
 
@@ -55,11 +55,11 @@ Var lisp_symbol(Var value);
 
 Var lisp_procedure(Var value);
 
-Var lisp_compare(Var a,  Var b);
+Var lisp_compare(Var a, Var b);
 
 Symbol lisp_type(Var value);
 
-Var lisp_add(Var a,  Var b);
+Var lisp_add(Var a, Var b);
 
 Var lisp_plus(List values);
 
@@ -83,37 +83,37 @@ Var lisp_str(Var value);
 
 Var lisp_repr(Var value);
 
-Var lisp_string_append(String left,  String right);
+Var lisp_string_append(String left, String right);
 
-Var lisp_substring(String string,  int start,  int stop);
+Var lisp_substring(String string, int start, int stop);
 
 Var lisp_string_downcase(String string);
 
-Var lisp_match_replace(List input,  Var pat,  Var template);
+Var lisp_match_replace(List input, Var pat, Var template);
 
 Var lisp_read_file(String path);
 
-Var lisp_write_file(String path,  String text);
+Var lisp_write_file(String path, String text);
 
 LispAutoStats Lisp_auto_stats(Lisp lisp);
 
-void Lisp_auto_instrument(Lisp lisp,  MachineStats * stats);
+void Lisp_auto_instrument(Lisp lisp, MachineStats * stats);
 
-void Lisp_auto_disable(Lisp lisp,  int disabled);
+void Lisp_auto_disable(Lisp lisp, int disabled);
 
-Var Lisp_eval(Lisp lisp,  Var expression);
+Var Lisp_eval(Lisp lisp, Var expression);
 
-Var Lisp_apply(Lisp lisp,  Var callable,  List values);
+Var Lisp_apply(Lisp lisp, Var callable, List values);
 
-Var Lisp_eval_string(Lisp lisp,  String source);
+Var Lisp_eval_string(Lisp lisp, String source);
 
-Var Lisp_eval_file(Lisp lisp,  File source);
+Var Lisp_eval_file(Lisp lisp, File source);
 
-int Lisp_try_get(Lisp lisp,  String name,  Var * out);
+int Lisp_try_get(Lisp lisp, String name, Var * out);
 
-void Lisp_set_global(Lisp lisp,  String name,  Var value);
+void Lisp_set_global(Lisp lisp, String name, Var value);
 
-void Lisp_bind(Lisp lisp,  String name,  Func function);
+void Lisp_bind(Lisp lisp, String name, Func function);
 
 
 #endif /* __GUARD_0xD09CF48E__ */

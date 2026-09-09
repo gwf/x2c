@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lossy-symbol-literal.x:3:16: parse: Symbol literal do
                  ^^^^^^^^^^^^^^^
   note: source spelling: lossy_literal encoded spelling: lossy-lite
 
-limit: too many errors, stopping
-

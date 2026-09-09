@@ -2,17 +2,13 @@
 
 #include "utils.h"
 
-static String _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-static String x2c_executable_path,  x2c_root_path;
+static String x2c_executable_path, x2c_root_path;
 
-static List x2c_base_include_dirs,  x2c_repo_cpp_include_dirs;
-
-
-
-
+static List x2c_base_include_dirs, x2c_repo_cpp_include_dirs;
 
 #include <ctype.h>
 #include <errno.h>
@@ -25,21 +21,21 @@ static List x2c_base_include_dirs,  x2c_repo_cpp_include_dirs;
 #include <unistd.h>
 int String_truth(String);
 
-int String_rfind(String,  String);
+int String_rfind(String, String);
 
 String Var_string(Var);
 
 Var List_last(List);
 
-List String_split(String,  String);
+List String_split(String, String);
 
 String String_printf(String, ...);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var String_var(String);
 
-void * Scope_calloc(size_t,  size_t);
+void * Scope_calloc(size_t, size_t);
 
 int File_close(File);
 
@@ -49,11 +45,11 @@ void File_rewind(File);
 
 String File_string(File);
 
-Iter String_iter(String,  Iter);
+Iter String_iter(String, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -65,11 +61,11 @@ static void _dirname_in_place(char * path);
 
 static int _is_repo_root(const char * path);
 
-static int _resolve_with_path(const char * name,  char * out,  size_t size);
+static int _resolve_with_path(const char * name, char * out, size_t size);
 
-static int _resolve_executable_path(const char * argv0,  char * out,  size_t size);
+static int _resolve_executable_path(const char * argv0, char * out, size_t size);
 
-static int _locate_repo_root(const char * start,  char * out,  size_t size);
+static int _locate_repo_root(const char * start, char * out, size_t size);
 
 static void _prepare_repo_defaults(void);
 
@@ -105,15 +101,15 @@ void x2c_initialize_environment(const char * argv0){
     0
   }
   ;
-  if(_resolve_executable_path(argv0,  exec_path,  sizeof(exec_path))) x2c_executable_path = String_new(exec_path);
+  if(_resolve_executable_path(argv0, exec_path, sizeof(exec_path))) x2c_executable_path = String_new(exec_path);
   char root_path[PATH_MAX] ={
     0
   }
   ;
-  if(! _locate_repo_root(exec_path,  root_path,  sizeof(root_path))){
-    char * cwd = getcwd(NULL,  0);
+  if(! _locate_repo_root(exec_path, root_path, sizeof(root_path))){
+    char * cwd = getcwd(NULL, 0);
     if(cwd){
-      _locate_repo_root(cwd,  root_path,  sizeof(root_path));
+      _locate_repo_root(cwd, root_path, sizeof(root_path));
       free(cwd);
     }
 
@@ -143,16 +139,16 @@ String x2c_get_executable(void){
 
 String x2c_path_dir(String path){
   if(! _init_guard_) _file_init_();
-  int slash = String_rfind(path,  _10);
+  int slash = String_rfind(path, _10);
   if(slash < 0) return _1;
-  return slash ? String_getslice(path,  -2147483648,  slash,  1) : _2;
+  return slash ? String_getslice(path, -2147483648, slash, 1) : _2;
 }
 
 String x2c_path_stem(String path){
   if(! _init_guard_) _file_init_();
-  String base = Var_string(List_last(String_split(path,  _10)));
-  int dot = String_rfind(base,  _0);
-  return dot > 0 ? String_getslice(base,  -2147483648,  dot,  1) : base;
+  String base = Var_string(List_last(String_split(path, _10)));
+  int dot = String_rfind(base, _0);
+  return dot > 0 ? String_getslice(base, -2147483648, dot, 1) : base;
 }
 
 List x2c_default_include_dirs(void){
@@ -167,13 +163,13 @@ List x2c_cpp_include_dirs(void){
 
 _Noreturn void x2c_driver_error(const char * message){
   if(! _init_guard_) _file_init_();
-  fprintf(stderr,  "x2c: error: %s\n",  message);
+  fprintf(stderr, "x2c: error: %s\n", message);
   exit(2);
 }
 
 static int _dir_exists(const char * path){
   struct stat st;
-  return path && stat(path,  & st) == 0 && S_ISDIR(st.st_mode);
+  return path && stat(path, & st) == 0 && S_ISDIR(st.st_mode);
 }
 
 static void _strip_trailing_slash(char * path){
@@ -183,9 +179,9 @@ static void _strip_trailing_slash(char * path){
 
 static void _dirname_in_place(char * path){
   _strip_trailing_slash(path);
-  char * slash = strrchr(path,  '/');
+  char * slash = strrchr(path, '/');
   if(! slash){
-    strcpy(path,  ".");
+    strcpy(path, ".");
     return;
   }
   if(slash == path){
@@ -198,26 +194,26 @@ static void _dirname_in_place(char * path){
 static int _is_repo_root(const char * path){
   char probe[PATH_MAX];
   if(! _dir_exists(path)) return 0;
-  snprintf(probe,  sizeof(probe),  "%s/src",  path);
+  snprintf(probe, sizeof(probe), "%s/src", path);
   if(! _dir_exists(probe)) return 0;
-  snprintf(probe,  sizeof(probe),  "%s/include",  path);
+  snprintf(probe, sizeof(probe), "%s/include", path);
   if(! _dir_exists(probe)) return 0;
-  snprintf(probe,  sizeof(probe),  "%s/lib",  path);
+  snprintf(probe, sizeof(probe), "%s/lib", path);
   return _dir_exists(probe);
 }
 
-static int _resolve_with_path(const char * name,  char * out,  size_t size){
+static int _resolve_with_path(const char * name, char * out, size_t size){
   char * env = getenv("PATH");
   if(! env) return 0;
   char * paths = strdup(env);
   if(! paths) return 0;
   int found = 0;
-  for(char * dir = strtok(paths,  ":");  dir;  dir = strtok(NULL,  ":")){
+  for(char * dir = strtok(paths, ":");  dir;  dir = strtok(NULL, ":")){
     if(! dir[0]) continue;
     char candidate[PATH_MAX];
-    snprintf(candidate,  sizeof(candidate),  "%s/%s",  dir,  name);
-    if(access(candidate,  X_OK) != 0) continue;
-    if(realpath(candidate,  out)){
+    snprintf(candidate, sizeof(candidate), "%s/%s", dir, name);
+    if(access(candidate, X_OK) != 0) continue;
+    if(realpath(candidate, out)){
       found = 1;
       break;
     }
@@ -227,30 +223,30 @@ static int _resolve_with_path(const char * name,  char * out,  size_t size){
   return found;
 }
 
-static int _resolve_executable_path(const char * argv0,  char * out,  size_t size){
-  ssize_t len = readlink("/proc/self/exe",  out,  size - 1);
+static int _resolve_executable_path(const char * argv0, char * out, size_t size){
+  ssize_t len = readlink("/proc/self/exe", out, size - 1);
   if(len >= 0){
     out[len] = 0;
     return 1;
   }
-  if(argv0 && realpath(argv0,  out)) return 1;
-  if(argv0 && argv0[0] && _resolve_with_path(argv0,  out,  size)) return 1;
+  if(argv0 && realpath(argv0, out)) return 1;
+  if(argv0 && argv0[0] && _resolve_with_path(argv0, out, size)) return 1;
   return 0;
 }
 
-static int _locate_repo_root(const char * start,  char * out,  size_t size){
+static int _locate_repo_root(const char * start, char * out, size_t size){
   if(! start || ! start[0]) return 0;
   char probe[PATH_MAX];
-  strncpy(probe,  start,  sizeof(probe));
+  strncpy(probe, start, sizeof(probe));
   probe[sizeof(probe) - 1] = 0;
   if(! _dir_exists(probe)) _dirname_in_place(probe);
   while(1){
     if(_is_repo_root(probe)){
-      strncpy(out,  probe,  size);
+      strncpy(out, probe, size);
       out[size - 1] = 0;
       return 1;
     }
-    if(strcmp(probe,  "/") == 0) break;
+    if(strcmp(probe, "/") == 0) break;
     _dirname_in_place(probe);
   }
   return 0;
@@ -259,10 +255,10 @@ static int _locate_repo_root(const char * start,  char * out,  size_t size){
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
   const char * root = x2c_root_path;
-  String include_dir = String_printf(_3,  root);
-  String src_dir = String_printf(_4,  root),  lib_dir = String_printf(_5,  root);
-  x2c_base_include_dirs = cons(String_var(include_dir),  NULL);
-  x2c_repo_cpp_include_dirs = cons(String_var(src_dir),  cons(String_var(lib_dir),  NULL));
+  String include_dir = String_printf(_3, root);
+  String src_dir = String_printf(_4, root), lib_dir = String_printf(_5, root);
+  x2c_base_include_dirs = cons(String_var(include_dir), NULL);
+  x2c_repo_cpp_include_dirs = cons(String_var(src_dir), cons(String_var(lib_dir), NULL));
 }
 
 static int _cpp_status(int status){
@@ -273,16 +269,16 @@ static int _cpp_status(int status){
 
 static int _cpp_wait(pid_t pid){
   int status;
-  while(waitpid(pid,  & status,  0) < 0){
+  while(waitpid(pid, & status, 0) < 0){
     if(errno == EINTR) continue;
     return - 1;
   }
   return _cpp_status(status);
 }
 
-ChildProcess process_start(char * * argv,  int capture){
+ChildProcess process_start(char * * argv, int capture){
   if(! _init_guard_) _file_init_();
-  ChildProcess process = Scope_calloc(1,  sizeof(struct ChildProcess));
+  ChildProcess process = Scope_calloc(1, sizeof(struct ChildProcess));
   if(! argv || ! argv[0]){
     process -> pid = - 1;
     process -> start_error = _6;
@@ -304,16 +300,16 @@ ChildProcess process_start(char * * argv,  int capture){
   process -> pid = pid;
   if(pid == 0){
     if(capture){
-      int out_fd = File_fileno(process -> output),  err_fd = File_fileno(process -> errors);
-      if(dup2(out_fd,  STDOUT_FILENO) < 0 || dup2(err_fd,  STDERR_FILENO) < 0){
-        dprintf(STDERR_FILENO,  "x2c: unable to capture child output: %s\n",  strerror(errno));
+      int out_fd = File_fileno(process -> output), err_fd = File_fileno(process -> errors);
+      if(dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0){
+        dprintf(STDERR_FILENO, "x2c: unable to capture child output: %s\n", strerror(errno));
         _exit(127);
       }
       if(out_fd != STDOUT_FILENO) close(out_fd);
       if(err_fd != STDERR_FILENO) close(err_fd);
     }
-    execvp(argv[0],  argv);
-    dprintf(STDERR_FILENO,  "x2c: unable to execute %s: %s\n",  argv[0],  strerror(errno));
+    execvp(argv[0], argv);
+    dprintf(STDERR_FILENO, "x2c: unable to execute %s: %s\n", argv[0], strerror(errno));
     _exit(127);
   }
   if(pid < 0) process -> start_error = _8;
@@ -325,7 +321,7 @@ int ChildProcess_ready(ChildProcess c){
   if(c -> pid < 0 || c -> finished) return 1;
   int status;
   pid_t pid;
-  do pid = waitpid((pid_t) c -> pid,  & status,  WNOHANG);
+  do pid = waitpid((pid_t) c -> pid, & status, WNOHANG);
   while(pid < 0 && errno == EINTR);
   ;
   if(! pid) return 0;
@@ -334,7 +330,7 @@ int ChildProcess_ready(ChildProcess c){
   return 1;
 }
 
-int ChildProcess_wait(ChildProcess c,  String * output,  String * errors){
+int ChildProcess_wait(ChildProcess c, String * output, String * errors){
   if(! _init_guard_) _file_init_();
   if(output) * output = NULL;
   if(errors) * errors = NULL;
@@ -354,10 +350,10 @@ int ChildProcess_wait(ChildProcess c,  String * output,  String * errors){
   return result;
 }
 
-int process_run(char * * argv,  String * output,  String * errors){
+int process_run(char * * argv, String * output, String * errors){
   if(! _init_guard_) _file_init_();
-  ChildProcess process = process_start(argv,  1);
-  return ChildProcess_wait(process,  output,  errors);
+  ChildProcess process = process_start(argv, 1);
+  return ChildProcess_wait(process, output, errors);
 }
 
 long worker_fork(void){
@@ -383,17 +379,17 @@ String x2c_filename_hash(String filename){
   unsigned hash = 0;
   {
     char byte;
-    Iter _x2c_macro_iterator_0 = String_iter(filename,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = String_iter(filename, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
-      byte = Var_char(Var_convert(_x2c_macro_item_0,  26993));
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+      byte = Var_char(Var_convert(_x2c_macro_item_0, 26993));
       hash = hash * 31 +(unsigned char) byte;
     }
 
   }
-  return String_printf(_9,  hash);
+  return String_printf(_9, hash);
 }
 

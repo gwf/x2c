@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-ident-unknown-reference.x:7:13: type: identifie
   int value = $unknown_reference();
               ^
 
-limit: too many errors, stopping
-

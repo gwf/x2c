@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-binding-spelling-oversized.x:7:13: macro: x2c.b
               ^
   note: binding: (binding 4294967297l "value")
 
-limit: too many errors, stopping
-

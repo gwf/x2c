@@ -2,11 +2,11 @@
 
 #include "var-shared-representation.h"
 
-static List _8,  _7,  _4,  _3;
+static List _8, _7, _4, _3;
 
 static String _0;
 
-static Var _6,  _5,  _2,  _1;
+static Var _6, _5, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -21,11 +21,9 @@ typedef struct Cell{
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var Var_new(Symbol, ...);
 
@@ -43,7 +41,7 @@ void * Scope_malloc(size_t);
 
 String Var_str(Var);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -63,22 +61,22 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(1125368370158,  _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("plainrow"),  _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(1125368370158, _x2c__x2c_protocol_methods_0)){
+    x2c_register_descriptor(String_new("plainrow"), _x2c__x2c_protocol_methods_0);
   }
   _0 = String_new("row:");
   _1 = Symbol_var(31626);
   _2 = Symbol_var(42462);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
   _5 = Symbol_var(42504522);
   _6 = Symbol_var(425316);
-  _7 = cons(_6,  NULL);
-  _8 = cons(_5,  _7);
+  _7 = cons(_6, NULL);
+  _8 = cons(_5, _7);
 }
 
 static inline Var Row_var(Row value){
-  return Var_new(806120,  value);
+  return Var_new(806120, value);
 }
 
 static inline Row Var_row(Var value){
@@ -87,11 +85,11 @@ static inline Row Var_row(Var value){
 
 String Row_summary(Row value){
   if(! _init_guard_) _file_init_();
-  return String_join(NULL,  cons(String_var(_0),  cons(String_var(int_str(List_len(value))),  NULL)));
+  return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(List_len(value))), NULL)));
 }
 
 static inline Var PlainRow_var(PlainRow value){
-  return Var_new(1125368370158,  value);
+  return Var_new(1125368370158, value);
 }
 
 static inline PlainRow Var_plainrow(Var value){
@@ -99,7 +97,7 @@ static inline PlainRow Var_plainrow(Var value){
 }
 
 static inline Var Cell_var(Cell value){
-  return Var_new(3683441,  value);
+  return Var_new(3683441, value);
 }
 
 static inline Cell Var_cell(Var value){
@@ -119,7 +117,7 @@ int main(void){
   Row recovered_row = Var_row(boxed_row);
   Cell recovered_cell = Var_cell(boxed_cell);
   PlainRowChild recovered_child = Var_pointer(boxed_child);
-  printf("%s %s %d %d %d %d %d %d %d\n",  Row_summary(recovered_row),  Var_str(boxed_row),  recovered_cell -> value,  Var_is(boxed_row,  806120),  Var_is(boxed_row,  806120),  Var_is(boxed_cell,  3683441),  Var_is(boxed_cell,  3683441),  Var_is(boxed_child,  1125368370158),  List_len(recovered_child));
+  printf("%s %s %d %d %d %d %d %d %d\n", Row_summary(recovered_row), Var_str(boxed_row), recovered_cell -> value, Var_is(boxed_row, 806120), Var_is(boxed_row, 806120), Var_is(boxed_cell, 3683441), Var_is(boxed_cell, 3683441), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
   return 0;
 }
 

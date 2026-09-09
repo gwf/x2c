@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-incompatible-target.x:8:22: parse: Fu
   static int value = 42;
                        ^
 
-limit: too many errors, stopping
-

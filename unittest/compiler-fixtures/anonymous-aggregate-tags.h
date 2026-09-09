@@ -18,7 +18,7 @@ typedef union{
 BetaStore;
 
 typedef enum{
-  GAMMA_ONE,  GAMMA_TWO
+  GAMMA_ONE, GAMMA_TWO
 }
 GammaKind;
 

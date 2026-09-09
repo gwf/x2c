@@ -2,5 +2,3 @@ unittest/compiler-fixtures/empty-parameter-list.x:1:10: parse: empty parameter l
   int main() { return 0; }
            ^
 
-limit: too many errors, stopping
-

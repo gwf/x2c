@@ -2,5 +2,3 @@ unittest/compiler-fixtures/destructuring-non-list.x:6:3: type: destructuring req
     (target) = value;
     ^
 
-limit: too many errors, stopping
-

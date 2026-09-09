@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-decorator-target-kind.x:3:1: parse: decorator f
   ^^^^^
   note: expected Expression, Function, Statement, Block, Field, or Unit
 
-limit: too many errors, stopping
-

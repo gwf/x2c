@@ -3,5 +3,3 @@ unittest/compiler-fixtures/match-binder-not-definite.x:6:5: type: match binder i
       ^^^^
   note: binder: ?value bind it in every alternative and never under !not
 
-limit: too many errors, stopping
-

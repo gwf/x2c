@@ -7,7 +7,7 @@ RecursionPair recursion_pair(int);
 int main(void){
   x2c_initialize();
   RecursionPair pair = recursion_pair(21);
-  printf("%d\n",  pair.value);
+  printf("%d\n", pair.value);
   return pair.value == 42 ? 0 : 1;
 }
 

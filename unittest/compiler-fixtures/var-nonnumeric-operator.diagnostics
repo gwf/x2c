@@ -3,5 +3,3 @@ unittest/compiler-fixtures/var-nonnumeric-operator.x:6:23: xform: dynamic numeri
                         ^
   note: operator: * left type: ("Var") right type: ("String")
 
-limit: too many errors, stopping
-

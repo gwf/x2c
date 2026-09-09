@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _2,  _1,  _0;
+static String _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -52,10 +52,6 @@ typedef struct _x2c_defer_env_4{
 }
 _x2c_defer_env_4;
 
-
-
-
-
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
@@ -94,43 +90,43 @@ Pool x2c_pool_values_detach(void);
 
 int String_truth(String);
 
-int Pool_promote(Pool,  Var,  void *);
+int Pool_promote(Pool, Var, void *);
 
-int Pool_own(Pool,  Var,  void *);
+int Pool_own(Pool, Var, void *);
 
 int x2c_pool_values_is_permanent(Var);
 
-unsigned x2c_hash_bytes(unsigned long,  const void *,  size_t);
+unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
 
-Var Pool_lookup(Pool,  Var);
+Var Pool_lookup(Pool, Var);
 
-void Pool_free(Pool,  void *);
+void Pool_free(Pool, void *);
 
-void * Pool_malloc(Pool,  size_t);
+void * Pool_malloc(Pool, size_t);
 
 int Var_is_void(Var);
 
 String Var_string(Var);
 
-void Pool_insert(Pool,  Var);
+void Pool_insert(Pool, Var);
 
-Var Pool_intern(Pool,  Var,  void *);
+Var Pool_intern(Pool, Var, void *);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 Var int_var(int);
 
 List Array_list_free(Array);
 
-int x2c_normalize_index(int,  int);
+int x2c_normalize_index(int, int);
 
-int x2c_normalize_slice(int *,  int *,  int,  int);
+int x2c_normalize_slice(int *, int *, int, int);
 
 FuncArg FuncArg_value(Var);
 
 Var char_var(char);
 
-Var Func_apply(Func,  unsigned,  const FuncArg *);
+Var Func_apply(Func, unsigned, const FuncArg *);
 
 int Var_truth(Var);
 
@@ -138,57 +134,57 @@ int List_truth(List);
 
 int List_len(List);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 List List_cdr(List);
 
 Var List_car(List);
 
-Buffer Buffer_write(Buffer,  const char *);
+Buffer Buffer_write(Buffer, const char *);
 
-Buffer Buffer_write_char(Buffer,  char);
+Buffer Buffer_write_char(Buffer, char);
 
-Buffer Buffer_write_len(Buffer,  const char *,  size_t);
+Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 Symbol Symbol_new(const char *);
 
 int Iter_truth(Iter);
 
-Iter Iter_init(Iter,  Var,  IterNextFn,  Var);
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 static inline StringHeader _header(String str);
 
-static unsigned _hash_n(const char * str,  int length);
+static unsigned _hash_n(const char * str, int length);
 
-static Var _lookup_bytes(Pool pool,  const char * bytes,  int length,  unsigned hash);
+static Var _lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash);
 
 static int _is_active_canonical(String str);
 
 static void _free_unchecked(String str);
 
-static const char * _find_bytes(const char * haystack,  int haystack_len,  const char * needle,  int needle_len);
+static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len);
 
 static String _intern_owned(String string);
 
-static String _finish(String string,  int length);
+static String _finish(String string, int length);
 
-static String _from_bytes_in(Pool pool,  const char * bytes,  int length);
+static String _from_bytes_in(Pool pool, const char * bytes, int length);
 
-static String _from_bytes(const char * bytes,  int length);
+static String _from_bytes(const char * bytes, int length);
 
-static Var _apply(Func fn,  char value);
+static Var _apply(Func fn, char value);
 
-static String _pad(String str,  int width,  char fill,  int left_padding);
+static String _pad(String str, int width, char fill, int left_padding);
 
 static inline int _hex_digit(int ch);
 
-static inline int _decode_escape_char(const char * * psrc,  int * emit);
+static inline int _decode_escape_char(const char * * psrc, int * emit);
 
-static inline int _escape_byte(unsigned char ch,  char * out);
+static inline int _escape_byte(unsigned char ch, char * out);
 
-static int _next(Iter iter,  Var * out);
+static int _next(Iter iter, Var * out);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
@@ -200,12 +196,12 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-String String_new_in(Pool pool,  const char * bytes,  int length){
+String String_new_in(Pool pool, const char * bytes, int length){
   if(! _init_guard_) String_initialize();
   if(! pool || ! bytes || length <= 0) return NULL;
   size_t bounded = strnlen(bytes, (size_t) length);
   if(! bounded || bounded > INT_MAX - 1) return NULL;
-  return _from_bytes_in(pool,  bytes, (int) bounded);
+  return _from_bytes_in(pool, bytes, (int) bounded);
 }
 
 Pool String_pool_current(void){
@@ -247,8 +243,8 @@ void String_pool_release(void){
   if(! _init_guard_) String_initialize();
   Pool pool = x2c_pool_values_current();
   if(! pool -> up){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/string.x",.function =  "String_pool_release",.line =  158};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.pool_release")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_pool_release",.line = 158};
+    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pool_release")), NULL))));
     __builtin_unreachable();
   }
   x2c_pool_values_release();
@@ -258,8 +254,8 @@ Pool String_pool_detach(void){
   if(! _init_guard_) String_initialize();
   Pool pool = x2c_pool_values_current();
   if(! pool -> up){
-    static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/string.x",.function =  "String_pool_detach",.line =  171};
-    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.pool_detach")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_pool_detach",.line = 171};
+    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pool_detach")), NULL))));
     __builtin_unreachable();
   }
   return x2c_pool_values_detach();
@@ -268,14 +264,14 @@ Pool String_pool_detach(void){
 String String_promote(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
-  Pool_promote(x2c_pool_values_current(),  String_var(str),  _header(str));
+  Pool_promote(x2c_pool_values_current(), String_var(str), _header(str));
   return str;
 }
 
 int String_try_own(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return 1;
-  return Pool_own(x2c_pool_values_current(),  String_var(str),  _header(str));
+  return Pool_own(x2c_pool_values_current(), String_var(str), _header(str));
 }
 
 int String_is_permanent(String str){
@@ -288,35 +284,35 @@ static inline StringHeader _header(String str){
   return(StringHeader)((char *) str - sizeof(struct StringHeader));
 }
 
-static unsigned _hash_n(const char * str,  int length){
-  return x2c_hash_bytes(0,  str, (size_t) length);
+static unsigned _hash_n(const char * str, int length){
+  return x2c_hash_bytes(0, str, (size_t) length);
 }
 
-static Var _lookup_bytes(Pool pool,  const char * bytes,  int length,  unsigned hash){
+static Var _lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash){
   if(length > STRING_STACK_BYTES) return((void) 0, Void);
   StringQuery query;
   StringHeader header =(StringHeader) query.bytes;
   String string = query.bytes + sizeof(struct StringHeader);
   header -> length = length + 1;
   header -> hash = hash;
-  memcpy(string,  bytes,  length);
+  memcpy(string, bytes, length);
   char * out = string;
   out[length] = '\0';
-  return Pool_lookup(pool,  String_var(string));
+  return Pool_lookup(pool, String_var(string));
 }
 
 static int _is_active_canonical(String str){
-  return Var_same(Pool_lookup(x2c_pool_values_current(),  String_var(str)),  String_var(str));
+  return Var_same(Pool_lookup(x2c_pool_values_current(), String_var(str)), String_var(str));
 }
 
 static void _free_unchecked(String str){
-  if((void *) str != NULL) Pool_free(x2c_pool_values_current(),  _header(str));
+  if((void *) str != NULL) Pool_free(x2c_pool_values_current(), _header(str));
 }
 
-static const char * _find_bytes(const char * haystack,  int haystack_len,  const char * needle,  int needle_len){
+static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len){
   if(needle_len == 0) return haystack;
   if(! haystack || haystack_len < needle_len) return NULL;
-  for(int i = 0;  i <= haystack_len - needle_len;  i ++) if((unsigned char) haystack[i] ==(unsigned char) needle[0] && memcmp(haystack + i,  needle,  needle_len) == 0) return haystack + i;
+  for(int i = 0;  i <= haystack_len - needle_len;  i ++) if((unsigned char) haystack[i] ==(unsigned char) needle[0] && memcmp(haystack + i, needle, needle_len) == 0) return haystack + i;
   return NULL;
 }
 
@@ -326,7 +322,7 @@ String String_malloc(int len){
   if((size_t) len > SIZE_MAX - sizeof(struct StringHeader)) return NULL;
   size_t total_len = sizeof(struct StringHeader) +(size_t) len;
   Pool pool = x2c_pool_values_current();
-  StringHeader header = Pool_malloc(pool,  total_len);
+  StringHeader header = Pool_malloc(pool, total_len);
   header -> length = len;
   header -> hash = 0;
   return(String)((char *) header + sizeof(struct StringHeader));
@@ -339,7 +335,7 @@ void String_free(String str){
     _free_unchecked(str);
     return;
   }
-  Var existing = Pool_lookup(x2c_pool_values_current(),  String_var(str));
+  Var existing = Pool_lookup(x2c_pool_values_current(), String_var(str));
   if(! Var_is_void(existing) && Var_string(existing) == str) return;
   _free_unchecked(str);
 }
@@ -356,12 +352,12 @@ static String _intern_owned(String string){
   if(! header -> hash){
     int length = strlen(string);
     header -> length = length + 1;
-    header -> hash = _hash_n(string,  length);
+    header -> hash = _hash_n(string, length);
   }
   Pool pool = x2c_pool_values_current();
-  Var existing = Pool_lookup(pool,  String_var(string));
+  Var existing = Pool_lookup(pool, String_var(string));
   if(! Var_is_void(existing)) return Var_string(existing);
-  Pool_insert(pool,  String_var(string));
+  Pool_insert(pool, String_var(string));
   return string;
 }
 
@@ -382,47 +378,47 @@ String String_intern_free(String string){
   return result;
 }
 
-static String _finish(String string,  int length){
+static String _finish(String string, int length){
   if(length <= 0){
     _free_unchecked(string);
     return NULL;
   }
-  assert(memchr(string,  '\0',  length) == NULL);
+  assert(memchr(string, '\0', length) == NULL);
   char * out = string;
   out[length] = '\0';
   StringHeader header = _header(string);
   header -> length = length + 1;
-  header -> hash = _hash_n(string,  length);
+  header -> hash = _hash_n(string, length);
   String result = _intern_owned(string);
   if(result != string) _free_unchecked(string);
   return result;
 }
 
-static String _from_bytes_in(Pool pool,  const char * bytes,  int length){
+static String _from_bytes_in(Pool pool, const char * bytes, int length){
   if(! pool || ! bytes || length <= 0) return NULL;
-  unsigned hash = _hash_n(bytes,  length);
+  unsigned hash = _hash_n(bytes, length);
   if(length <= STRING_STACK_BYTES){
-    Var existing = _lookup_bytes(pool,  bytes,  length,  hash);
+    Var existing = _lookup_bytes(pool, bytes, length, hash);
     if(! Var_is_void(existing)) return Var_string(existing);
   }
   size_t total = sizeof(struct StringHeader) +(size_t) length + 1;
-  StringHeader header = Pool_malloc(pool,  total);
+  StringHeader header = Pool_malloc(pool, total);
   header -> length = length + 1;
   header -> hash = hash;
   String string =(String)((char *) header + sizeof(struct StringHeader));
-  memcpy(string,  bytes,  length);
+  memcpy(string, bytes, length);
   char * out = string;
   out[length] = '\0';
   if(length <= STRING_STACK_BYTES){
-    Pool_insert(pool,  String_var(string));
+    Pool_insert(pool, String_var(string));
     return string;
   }
-  Var canonical = Pool_intern(pool,  String_var(string),  header);
+  Var canonical = Pool_intern(pool, String_var(string), header);
   return Var_string(canonical);
 }
 
-static String _from_bytes(const char * bytes,  int length){
-  return _from_bytes_in(x2c_pool_values_current(),  bytes,  length);
+static String _from_bytes(const char * bytes, int length){
+  return _from_bytes_in(x2c_pool_values_current(), bytes, length);
 }
 
 String String_new(const char * str){
@@ -433,7 +429,7 @@ String String_new(const char * str){
   return _from_bytes(str, (int) length);
 }
 
-String String_new_len(const char * str,  int len){
+String String_new_len(const char * str, int len){
   if(! _init_guard_) String_initialize();
   if(! str || len <= 0) return NULL;
   size_t length = strnlen(str, (size_t) len);
@@ -441,22 +437,22 @@ String String_new_len(const char * str,  int len){
   return _from_bytes(str, (int) length);
 }
 
-String String_new_fill(char fill,  int count){
+String String_new_fill(char fill, int count){
   if(! _init_guard_) String_initialize();
   if(count <= 0) return NULL;
   if(fill == '\0'){
-    static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/string.x",.function =  "String_new_fill",.line =  478};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.new_fill")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 478};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   String string = String_malloc(count + 1);
-  memset(string,  fill,  count);
-  return _finish(string,  count);
+  memset(string, fill, count);
+  return _finish(string, count);
 }
 
-int String_find_within(String str,  String sub,  int start,  int end){
+int String_find_within(String str, String sub, int start, int end){
   if(! _init_guard_) String_initialize();
-  int n = String_len(str),  m = String_len(sub);
+  int n = String_len(str), m = String_len(sub);
   if(start < 0) start += n;
   if(end == - 1) end = n;
   else if(end < 0) end += n;
@@ -465,34 +461,34 @@ int String_find_within(String str,  String sub,  int start,  int end){
   if(start + m > end) return - 1;
   if(m == 0) return start;
   if(! String_truth(str)) return - 1;
-  const char * p = _find_bytes(str + start,  end - start,  sub,  m);
+  const char * p = _find_bytes(str + start, end - start, sub, m);
   if(! p) return - 1;
   return(int)(p - str);
 }
 
-int String_find(String str,  String sub){
+int String_find(String str, String sub){
   if(! _init_guard_) String_initialize();
-  return String_find_within(str,  sub,  0,  - 1);
+  return String_find_within(str, sub, 0, - 1);
 }
 
-int String_rfind(String str,  String sub){
+int String_rfind(String str, String sub){
   if(! _init_guard_) String_initialize();
-  int n = String_len(str),  m = String_len(sub);
+  int n = String_len(str), m = String_len(sub);
   if(m == 0) return n;
   if(! String_truth(str) || m > n) return - 1;
-  for(int i = n - m;  i >= 0;  i --) if(memcmp(str + i,  sub,  m) == 0) return i;
+  for(int i = n - m;  i >= 0;  i --) if(memcmp(str + i, sub, m) == 0) return i;
   return - 1;
 }
 
-List String_find_all(String str,  String sub,  int start,  int end){
+List String_find_all(String str, String sub, int start, int end){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! String_truth(sub)) return NULL;
   Array results = Array_new();
-  int n = String_len(sub),  pos = start;
+  int n = String_len(sub), pos = start;
   while(pos >= 0){
-    pos = String_find_within(str,  sub,  pos,  end);
+    pos = String_find_within(str, sub, pos, end);
     if(pos >= 0){
-      Array_push(results,  int_var(pos));
+      Array_push(results, int_var(pos));
       pos += n;
     }
 
@@ -501,12 +497,12 @@ List String_find_all(String str,  String sub,  int start,  int end){
   return result;
 }
 
-int String_count(String str,  String sub){
+int String_count(String str, String sub){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! String_truth(sub)) return 0;
-  int count = 0,  sub_len = String_len(sub),  pos = 0,  str_len = String_len(str);
+  int count = 0, sub_len = String_len(sub), pos = 0, str_len = String_len(str);
   while(pos <= str_len - sub_len){
-    const char * found = _find_bytes(str + pos,  str_len - pos,  sub,  sub_len);
+    const char * found = _find_bytes(str + pos, str_len - pos, sub, sub_len);
     if(! found) break;
     count ++;
     pos =(int)(found - str) + sub_len;
@@ -514,59 +510,59 @@ int String_count(String str,  String sub){
   return count;
 }
 
-int String_getindex(String str,  int index){
+int String_getindex(String str, int index){
   if(! _init_guard_) String_initialize();
-  index = x2c_normalize_index(index,  String_len(str));
+  index = x2c_normalize_index(index, String_len(str));
   if(index < 0) return - 1;
   return *(str + index);
 }
 
-int String_contains(String str,  String sub){
+int String_contains(String str, String sub){
   if(! _init_guard_) String_initialize();
   if(! String_truth(sub)) return 1;
   if(! String_truth(str)) return 0;
-  if(String_len(sub) == 1) return strchr(str,  String_getindex(sub,  0)) != NULL;
-  return String_find(str,  sub) != - 1;
+  if(String_len(sub) == 1) return strchr(str, String_getindex(sub, 0)) != NULL;
+  return String_find(str, sub) != - 1;
 }
 
-int String_startswith(String str,  String prefix){
+int String_startswith(String str, String prefix){
   if(! _init_guard_) String_initialize();
-  int str_len = String_len(str),  prefix_len = String_len(prefix);
+  int str_len = String_len(str), prefix_len = String_len(prefix);
   if(prefix_len == 0) return 1;
-  return String_truth(str) && prefix_len <= str_len && memcmp(str,  prefix,  prefix_len) == 0;
+  return String_truth(str) && prefix_len <= str_len && memcmp(str, prefix, prefix_len) == 0;
 }
 
-int String_endswith(String str,  String suffix){
+int String_endswith(String str, String suffix){
   if(! _init_guard_) String_initialize();
-  int str_len = String_len(str),  suffix_len = String_len(suffix);
+  int str_len = String_len(str), suffix_len = String_len(suffix);
   if(suffix_len == 0) return 1;
-  return String_truth(str) && suffix_len <= str_len && memcmp(str + str_len - suffix_len,  suffix,  suffix_len) == 0;
+  return String_truth(str) && suffix_len <= str_len && memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
 }
 
-String String_add(String str,  String other){
+String String_add(String str, String other){
   if(! _init_guard_) String_initialize();
   if(! String_truth(other)) return str;
   if(! String_truth(str)) return other;
-  int left_len = String_len(str),  right_len = String_len(other);
+  int left_len = String_len(str), right_len = String_len(other);
   size_t length =(size_t) left_len +(size_t) right_len;
   if(length > INT_MAX - 1){
-    static const X2CErrorSite  _x2c_error_site_3  = {.file =  "../../lib/string.x",.function =  "String_add",.line =  640};
-    x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(34096809266140),  String_var(String_join(NULL,  cons(String_var(String_new("String.add")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_add",.line = 640};
+    x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
   if(length <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES];
-    memcpy(bytes,  str,  left_len);
-    memcpy(bytes + left_len,  other,  right_len);
+    memcpy(bytes, str, left_len);
+    memcpy(bytes + left_len, other, right_len);
     return _from_bytes(bytes, (int) length);
   }
   String string = String_malloc((int) length + 1);
-  memcpy(string,  str,  left_len);
-  memcpy(string + left_len,  other,  right_len);
+  memcpy(string, str, left_len);
+  memcpy(string + left_len, other, right_len);
   return _finish(string, (int) length);
 }
 
-String String_repeat(String str,  int count){
+String String_repeat(String str, int count){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str || count <= 0) return NULL;
   if(count == 1 && _is_active_canonical(str)) return str;
@@ -576,49 +572,49 @@ String String_repeat(String str,  int count){
   String string = String_malloc((int) length + 1);
   char * dst = string;
   for(int i = 0;  i < count;  i ++){
-    memcpy(dst,  str,  n);
+    memcpy(dst, str, n);
     dst += n;
   }
   return _finish(string, (int) length);
 }
 
-String String_withindex(String str,  int index,  char value){
+String String_withindex(String str, int index, char value){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite  _x2c_error_site_4  = {.file =  "../../lib/string.x",.function =  "String_withindex",.line =  692};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.withindex")),  NULL))),  Symbol_var(19800432),  int_var(index));
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 692};
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
     __builtin_unreachable();
   }
   int n = String_len(str);
   if(index < 0) index += n;
   if(index < 0 || index >= n) return str;
-  if(String_getindex(str,  index) == value && _is_active_canonical(str)) return str;
+  if(String_getindex(str, index) == value && _is_active_canonical(str)) return str;
   String string = String_malloc(n + 1);
-  memcpy(string,  str,  n);
+  memcpy(string, str, n);
   char * out = string;
   out[index] = value;
-  return _finish(string,  n);
+  return _finish(string, n);
 }
 
-String String_getslice(String str,  int start,  int stop,  int step){
+String String_getslice(String str, int start, int stop, int step){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || step == 0) return NULL;
-  int n = String_len(str),  len = x2c_normalize_slice(& start,  & stop,  step,  n);
+  int n = String_len(str), len = x2c_normalize_slice(& start, & stop, step, n);
   if(len <= 0) return NULL;
   if(step == 1 && start == 0 && len == n && _is_active_canonical(str)) return str;
-  if(step == 1) return _from_bytes(str + start,  len);
+  if(step == 1) return _from_bytes(str + start, len);
   String string = String_malloc(len + 1);
   char * out = string;
   const char * src = str;
-  for(int i = 0,  idx = start;  i < len;  i ++,  idx += step) out[i] = src[idx];
-  return _finish(string,  len);
+  for(int i = 0, idx = start;  i < len;  i ++, idx += step) out[i] = src[idx];
+  return _finish(string, len);
 }
 
 String String_lower(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
-  int _x2c_macro_length_0 = String_len(str),  _x2c_macro_changed_0 = 0;
+  int _x2c_macro_length_0 = String_len(str), _x2c_macro_changed_0 = 0;
   String _x2c_macro_string_0 = String_malloc(_x2c_macro_length_0 + 1);
   char * _x2c_macro_out_0 = _x2c_macro_string_0;
   const char * _x2c_macro_src_0 = str;
@@ -631,13 +627,13 @@ String String_lower(String str){
     _free_unchecked(_x2c_macro_string_0);
     return str;
   }
-  return _finish(_x2c_macro_string_0,  _x2c_macro_length_0);
+  return _finish(_x2c_macro_string_0, _x2c_macro_length_0);
 }
 
 String String_upper(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
-  int _x2c_macro_length_1 = String_len(str),  _x2c_macro_changed_1 = 0;
+  int _x2c_macro_length_1 = String_len(str), _x2c_macro_changed_1 = 0;
   String _x2c_macro_string_1 = String_malloc(_x2c_macro_length_1 + 1);
   char * _x2c_macro_out_1 = _x2c_macro_string_1;
   const char * _x2c_macro_src_1 = str;
@@ -650,13 +646,13 @@ String String_upper(String str){
     _free_unchecked(_x2c_macro_string_1);
     return str;
   }
-  return _finish(_x2c_macro_string_1,  _x2c_macro_length_1);
+  return _finish(_x2c_macro_string_1, _x2c_macro_length_1);
 }
 
 String String_capitalize(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
-  int _x2c_macro_length_2 = String_len(str),  _x2c_macro_changed_2 = 0;
+  int _x2c_macro_length_2 = String_len(str), _x2c_macro_changed_2 = 0;
   String _x2c_macro_string_2 = String_malloc(_x2c_macro_length_2 + 1);
   char * _x2c_macro_out_2 = _x2c_macro_string_2;
   const char * _x2c_macro_src_2 = str;
@@ -669,62 +665,62 @@ String String_capitalize(String str){
     _free_unchecked(_x2c_macro_string_2);
     return str;
   }
-  return _finish(_x2c_macro_string_2,  _x2c_macro_length_2);
+  return _finish(_x2c_macro_string_2, _x2c_macro_length_2);
 }
 
-String String_lstrip(String str,  char * negChars){
+String String_lstrip(String str, char * negChars){
   if(! _init_guard_) String_initialize();
   if(! negChars) negChars = " \t\n\v\f\r";
-  int beg = 0,  length = String_len(str);
-  while(beg < length && strchr(negChars,  String_getindex(str,  beg))) beg ++;
+  int beg = 0, length = String_len(str);
+  while(beg < length && strchr(negChars, String_getindex(str, beg))) beg ++;
   if(beg == 0) return str;
   return String_new(str + beg);
 }
 
-String String_rstrip(String str,  char * negChars){
+String String_rstrip(String str, char * negChars){
   if(! _init_guard_) String_initialize();
   if(! negChars) negChars = " \t\n\v\f\r";
   int len = String_len(str);
-  while(len > 0 && strchr(negChars,  String_getindex(str,  len - 1))) len --;
+  while(len > 0 && strchr(negChars, String_getindex(str, len - 1))) len --;
   if(len == String_len(str)) return str;
-  return String_new_len(str,  len);
+  return String_new_len(str, len);
 }
 
-String String_strip(String str,  char * negChars){
+String String_strip(String str, char * negChars){
   if(! _init_guard_) String_initialize();
   if(! negChars) negChars = " \t\n\v\f\r";
-  int start = 0,  end = String_len(str);
-  while(start < end && strchr(negChars,  String_getindex(str,  start))) start ++;
-  while(end > start && strchr(negChars,  String_getindex(str,  end - 1))) end --;
+  int start = 0, end = String_len(str);
+  while(start < end && strchr(negChars, String_getindex(str, start))) start ++;
+  while(end > start && strchr(negChars, String_getindex(str, end - 1))) end --;
   if(start == 0 && end == String_len(str)) return str;
-  return String_new_len(str + start,  end - start);
+  return String_new_len(str + start, end - start);
 }
 
-static Var _apply(Func fn,  char value){
+static Var _apply(Func fn, char value){
   FuncArg arguments[1] ={
     FuncArg_value(char_var(value))
   }
   ;
-  return Func_apply(fn,  1,  arguments);
+  return Func_apply(fn, 1, arguments);
 }
 
-String String_filter(String str,  Func fn){
+String String_filter(String str, Func fn){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! fn || ! * str) return str;
   int _x2c_macro_length_3 = String_len(str);
   String _x2c_macro_string_3 = String_malloc(_x2c_macro_length_3 + 1);
   int _x2c_macro_done_0 = 0;
   {
-   _x2c_defer_env_0 _x2c_defer_env_5 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_done_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_string_3};
+  _x2c_defer_env_0 _x2c_defer_env_5 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_done_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_string_3};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  & _x2c_defer_env_5
+    .env = & _x2c_defer_env_5
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
     char * _x2c_macro_dst_0 = _x2c_macro_string_3;
-    for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(_apply(fn,  String_getindex(str,  i)))) * _x2c_macro_dst_0 ++ = String_getindex(str,  i);
+    for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(_apply(fn, String_getindex(str, i)))) * _x2c_macro_dst_0 ++ = String_getindex(str, i);
     String _x2c_macro_result_0 = _finish(_x2c_macro_string_3, (int)(_x2c_macro_dst_0 - _x2c_macro_string_3));
     _x2c_macro_done_0 = 1;
     {
@@ -732,10 +728,10 @@ String String_filter(String str,  Func fn){
       {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
     }
@@ -749,45 +745,45 @@ String String_filter(String str,  Func fn){
 }
 }
 
-String String_map(String str,  Func fn){
+String String_map(String str, Func fn){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! fn || ! * str) return str;
-  int n = String_len(str),  done = 0;
+  int n = String_len(str), done = 0;
   String string = String_malloc(n + 1);
   {
-   _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_2 =(const void *) & done, ._x2c_defer_capture_3 =(const void *) & string};
+  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_2 =(const void *) & done, ._x2c_defer_capture_3 =(const void *) & string};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  & _x2c_defer_env_6
+    .env = & _x2c_defer_env_6
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
     char * out = string;
     const char * src = str;
     for(int i = 0;  i < n;  i ++){
-      int ch = Var_int(Var_convert(_apply(fn,  src[i]),  3453797));
+      int ch = Var_int(Var_convert(_apply(fn, src[i]), 3453797));
       if(! ch){
         {
-          static const X2CErrorSite  _x2c_error_site_5  = {.file =  "../../lib/string.x",.function =  "String_map",.line =  882};
-          x2c_error_raise_n(& _x2c_error_site_5, 143279181245224, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.map")),  NULL))),  Symbol_var(19800432),  int_var(i));
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "String_map",.line = 882};
+          x2c_error_raise_n(& _x2c_error_site_5, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
 
       }
       out[i] = ch;
     }
-    String result = _finish(string,  n);
+    String result = _finish(string, n);
     done = 1;
     {
       String _x2c_return_value_1 = result;
       {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-   return _x2c_return_value_1;
+  return _x2c_return_value_1;
 
 }
     }
@@ -801,7 +797,7 @@ String String_map(String str,  Func fn){
 }
 }
 
-String String_keep(String str,  String chars){
+String String_keep(String str, String chars){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str)) return str;
   if(! String_truth(chars)) return NULL;
@@ -810,16 +806,16 @@ String String_keep(String str,  String chars){
   String _x2c_macro_string_4 = String_malloc(_x2c_macro_length_4 + 1);
   int _x2c_macro_done_1 = 0;
   {
-   _x2c_defer_env_2 _x2c_defer_env_7 = {._x2c_defer_capture_4 =(const void *) & _x2c_macro_done_1, ._x2c_defer_capture_5 =(const void *) & _x2c_macro_string_4};
+  _x2c_defer_env_2 _x2c_defer_env_7 = {._x2c_defer_capture_4 =(const void *) & _x2c_macro_done_1, ._x2c_defer_capture_5 =(const void *) & _x2c_macro_string_4};
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
-    .env =  & _x2c_defer_env_7
+    .env = & _x2c_defer_env_7
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
     char * _x2c_macro_dst_1 = _x2c_macro_string_4;
-    for(int i = 0;  i < _x2c_macro_length_4;  i ++) if(strchr(chars,  String_getindex(str,  i))) * _x2c_macro_dst_1 ++ = String_getindex(str,  i);
+    for(int i = 0;  i < _x2c_macro_length_4;  i ++) if(strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_1 ++ = String_getindex(str, i);
     String _x2c_macro_result_1 = _finish(_x2c_macro_string_4, (int)(_x2c_macro_dst_1 - _x2c_macro_string_4));
     _x2c_macro_done_1 = 1;
     {
@@ -827,10 +823,10 @@ String String_keep(String str,  String chars){
       {
   int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-   return _x2c_return_value_2;
+  return _x2c_return_value_2;
 
 }
     }
@@ -844,23 +840,23 @@ String String_keep(String str,  String chars){
 }
 }
 
-String String_reject(String str,  String chars){
+String String_reject(String str, String chars){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;
   int _x2c_macro_length_5 = String_len(str);
   String _x2c_macro_string_5 = String_malloc(_x2c_macro_length_5 + 1);
   int _x2c_macro_done_2 = 0;
   {
-   _x2c_defer_env_3 _x2c_defer_env_8 = {._x2c_defer_capture_6 =(const void *) & _x2c_macro_done_2, ._x2c_defer_capture_7 =(const void *) & _x2c_macro_string_5};
+  _x2c_defer_env_3 _x2c_defer_env_8 = {._x2c_defer_capture_6 =(const void *) & _x2c_macro_done_2, ._x2c_defer_capture_7 =(const void *) & _x2c_macro_string_5};
 
   X2CCleanup _x2c_defer_record_3 = {
     .fn = _x2c_defer_cleanup_3,
-    .env =  & _x2c_defer_env_8
+    .env = & _x2c_defer_env_8
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
     char * _x2c_macro_dst_2 = _x2c_macro_string_5;
-    for(int i = 0;  i < _x2c_macro_length_5;  i ++) if(! strchr(chars,  String_getindex(str,  i))) * _x2c_macro_dst_2 ++ = String_getindex(str,  i);
+    for(int i = 0;  i < _x2c_macro_length_5;  i ++) if(! strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_2 ++ = String_getindex(str, i);
     String _x2c_macro_result_2 = _finish(_x2c_macro_string_5, (int)(_x2c_macro_dst_2 - _x2c_macro_string_5));
     _x2c_macro_done_2 = 1;
     {
@@ -868,10 +864,10 @@ String String_reject(String str,  String chars){
       {
   int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_3);
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-   return _x2c_return_value_3;
+  return _x2c_return_value_3;
 
 }
     }
@@ -885,23 +881,23 @@ String String_reject(String str,  String chars){
 }
 }
 
-String String_squeeze(String str,  String chars){
+String String_squeeze(String str, String chars){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;
   int _x2c_macro_length_6 = String_len(str);
   String _x2c_macro_string_6 = String_malloc(_x2c_macro_length_6 + 1);
   int _x2c_macro_done_3 = 0;
   {
-   _x2c_defer_env_4 _x2c_defer_env_9 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_done_3, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_string_6};
+  _x2c_defer_env_4 _x2c_defer_env_9 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_done_3, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_string_6};
 
   X2CCleanup _x2c_defer_record_4 = {
     .fn = _x2c_defer_cleanup_4,
-    .env =  & _x2c_defer_env_9
+    .env = & _x2c_defer_env_9
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
     char * _x2c_macro_dst_3 = _x2c_macro_string_6;
-    for(int i = 0;  i < _x2c_macro_length_6;  i ++) if(!(i && String_getindex(str,  i) == String_getindex(str,  i - 1) && strchr(chars,  String_getindex(str,  i)))) * _x2c_macro_dst_3 ++ = String_getindex(str,  i);
+    for(int i = 0;  i < _x2c_macro_length_6;  i ++) if(!(i && String_getindex(str, i) == String_getindex(str, i - 1) && strchr(chars, String_getindex(str, i)))) * _x2c_macro_dst_3 ++ = String_getindex(str, i);
     String _x2c_macro_result_3 = _finish(_x2c_macro_string_6, (int)(_x2c_macro_dst_3 - _x2c_macro_string_6));
     _x2c_macro_done_3 = 1;
     {
@@ -909,10 +905,10 @@ String String_squeeze(String str,  String chars){
       {
   int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-   return _x2c_return_value_4;
+  return _x2c_return_value_4;
 
 }
     }
@@ -926,79 +922,79 @@ String String_squeeze(String str,  String chars){
 }
 }
 
-static String _pad(String str,  int width,  char fill,  int left_padding){
+static String _pad(String str, int width, char fill, int left_padding){
   if(fill == '\0'){
-    static const X2CErrorSite  _x2c_error_site_6  = {.file =  "../../lib/string.x",.function =  "_pad",.line =  923};
-    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.pad")),  NULL))));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 923};
+    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite  _x2c_error_site_7  = {.file =  "../../lib/string.x",.function =  "_pad",.line =  926};
-    x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("String.pad")),  NULL))),  Symbol_var(48833808),  int_var(width));
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_pad",.line = 926};
+    x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
   int padding = width - length;
   int left = left_padding < 0 ? padding / 2 : left_padding ? padding : 0;
   int right = padding - left;
   String string = String_malloc(width + 1);
-  memset(string,  fill,  left);
-  if(length) memcpy(string + left,  str,  length);
-  memset(string + left + length,  fill,  right);
-  return _finish(string,  width);
+  memset(string, fill, left);
+  if(length) memcpy(string + left, str, length);
+  memset(string + left + length, fill, right);
+  return _finish(string, width);
 }
 
-String String_pad_left(String str,  int width,  char fill){
+String String_pad_left(String str, int width, char fill){
   if(! _init_guard_) String_initialize();
-  return _pad(str,  width,  fill,  1);
+  return _pad(str, width, fill, 1);
 }
 
-String String_pad_right(String str,  int width,  char fill){
+String String_pad_right(String str, int width, char fill){
   if(! _init_guard_) String_initialize();
-  return _pad(str,  width,  fill,  0);
+  return _pad(str, width, fill, 0);
 }
 
-String String_pad_center(String str,  int width,  char fill){
+String String_pad_center(String str, int width, char fill){
   if(! _init_guard_) String_initialize();
-  return _pad(str,  width,  fill,  - 1);
+  return _pad(str, width, fill, - 1);
 }
 
-String String_remove_prefix(String str,  String prefix){
+String String_remove_prefix(String str, String prefix){
   if(! _init_guard_) String_initialize();
-  if(! String_truth(prefix) || ! String_startswith(str,  prefix)) return str;
-  return String_new_len(str + String_len(prefix),  String_len(str) - String_len(prefix));
+  if(! String_truth(prefix) || ! String_startswith(str, prefix)) return str;
+  return String_new_len(str + String_len(prefix), String_len(str) - String_len(prefix));
 }
 
-String String_remove_suffix(String str,  String suffix){
+String String_remove_suffix(String str, String suffix){
   if(! _init_guard_) String_initialize();
-  if(! String_truth(suffix) || ! String_endswith(str,  suffix)) return str;
-  return String_new_len(str,  String_len(str) - String_len(suffix));
+  if(! String_truth(suffix) || ! String_endswith(str, suffix)) return str;
+  return String_new_len(str, String_len(str) - String_len(suffix));
 }
 
-List String_partition(String str,  String sep){
-  if(! _init_guard_) String_initialize();
-  String empty = NULL;
-  if(! String_truth(sep)) return cons(String_var(str),  cons(String_var(empty),  cons(String_var(empty),  NULL)));
-  int sep_length = String_len(sep),  found = String_find(str,  sep);
-  if(found < 0) return cons(String_var(str),  cons(String_var(empty),  cons(String_var(empty),  NULL)));
-  String before = String_new_len(str,  found);
-  String after = String_new_len(str + found + sep_length,  String_len(str) - found - sep_length);
-  return cons(String_var(before),  cons(String_var(sep),  cons(String_var(after),  NULL)));
-}
-
-List String_rpartition(String str,  String sep){
+List String_partition(String str, String sep){
   if(! _init_guard_) String_initialize();
   String empty = NULL;
-  if(! String_truth(sep)) return cons(String_var(empty),  cons(String_var(empty),  cons(String_var(str),  NULL)));
-  int found = String_rfind(str,  sep);
-  if(found < 0) return cons(String_var(empty),  cons(String_var(empty),  cons(String_var(str),  NULL)));
-  String before = String_new_len(str,  found);
-  String after = String_new_len(str + found + String_len(sep),  String_len(str) - found - String_len(sep));
-  return cons(String_var(before),  cons(String_var(sep),  cons(String_var(after),  NULL)));
+  if(! String_truth(sep)) return cons(String_var(str), cons(String_var(empty), cons(String_var(empty), NULL)));
+  int sep_length = String_len(sep), found = String_find(str, sep);
+  if(found < 0) return cons(String_var(str), cons(String_var(empty), cons(String_var(empty), NULL)));
+  String before = String_new_len(str, found);
+  String after = String_new_len(str + found + sep_length, String_len(str) - found - sep_length);
+  return cons(String_var(before), cons(String_var(sep), cons(String_var(after), NULL)));
 }
 
-String String_join(String sep,  List strings){
+List String_rpartition(String str, String sep){
+  if(! _init_guard_) String_initialize();
+  String empty = NULL;
+  if(! String_truth(sep)) return cons(String_var(empty), cons(String_var(empty), cons(String_var(str), NULL)));
+  int found = String_rfind(str, sep);
+  if(found < 0) return cons(String_var(empty), cons(String_var(empty), cons(String_var(str), NULL)));
+  String before = String_new_len(str, found);
+  String after = String_new_len(str + found + String_len(sep), String_len(str) - found - String_len(sep));
+  return cons(String_var(before), cons(String_var(sep), cons(String_var(after), NULL)));
+}
+
+String String_join(String sep, List strings){
   if(! _init_guard_) String_initialize();
   if(! List_truth(strings)) return NULL;
   int n = List_len(strings);
@@ -1008,12 +1004,12 @@ String String_join(String sep,  List strings){
   size_t total =(size_t)(n - 1) *(size_t) sep_len;
   {
     String str;
-    Iter _x2c_macro_iterator_0 = List_iter(strings,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(strings, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       str = Var_string(_x2c_macro_item_0);
       {
         int length = String_len(str);
@@ -1035,11 +1031,11 @@ String String_join(String sep,  List strings){
     String str = Var_string(List_car(strs));
     if(String_truth(str)){
       int length = String_len(str);
-      memcpy(dst,  str,  length);
+      memcpy(dst, str, length);
       dst += length;
     }
     if(List_truth(List_cdr(strs)) && String_truth(sep)){
-      memcpy(dst,  sep,  sep_len);
+      memcpy(dst, sep, sep_len);
       dst += sep_len;
     }
 
@@ -1048,14 +1044,14 @@ String String_join(String sep,  List strings){
   return _from_bytes(stack_bytes, (int) total);
 }
 
-String String_replace_n(String str,  String old,  String replacement,  int max_replacements){
+String String_replace_n(String str, String old, String replacement, int max_replacements){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! String_truth(old) || ! * old || max_replacements == 0) return str;
-  if(String_equal(old,  replacement) && _is_active_canonical(str)) return str;
-  int str_len = String_len(str),  old_len = String_len(old);
-  int replacement_len = String_len(replacement),  count = 0,  pos = 0;
+  if(String_equal(old, replacement) && _is_active_canonical(str)) return str;
+  int str_len = String_len(str), old_len = String_len(old);
+  int replacement_len = String_len(replacement), count = 0, pos = 0;
   while(pos <= str_len - old_len &&(max_replacements < 0 || count < max_replacements)){
-    const char * found = _find_bytes(str + pos,  str_len - pos,  old,  old_len);
+    const char * found = _find_bytes(str + pos, str_len - pos, old, old_len);
     if(! found) break;
     count ++;
     pos =(int)(found - str) + old_len;
@@ -1071,35 +1067,35 @@ String String_replace_n(String str,  String old,  String replacement,  int max_r
   if(output_len > INT_MAX - 1) return NULL;
   String string = String_malloc((int) output_len + 1);
   char * dst = string;
-  int copied = 0,  replaced = 0;
+  int copied = 0, replaced = 0;
   while(copied <= str_len - old_len && replaced < count){
-    const char * found = _find_bytes(str + copied,  str_len - copied,  old,  old_len);
+    const char * found = _find_bytes(str + copied, str_len - copied, old, old_len);
     int prefix_len =(int)(found -(str + copied));
-    memcpy(dst,  str + copied,  prefix_len);
+    memcpy(dst, str + copied, prefix_len);
     dst += prefix_len;
     if(replacement_len){
-      memcpy(dst,  replacement,  replacement_len);
+      memcpy(dst, replacement, replacement_len);
       dst += replacement_len;
     }
     copied =(int)(found - str) + old_len;
     replaced ++;
   }
-  memcpy(dst,  str + copied,  str_len - copied);
+  memcpy(dst, str + copied, str_len - copied);
   return _finish(string, (int) output_len);
 }
 
-String String_replace(String str,  String old,  String replacement){
+String String_replace(String str, String old, String replacement){
   if(! _init_guard_) String_initialize();
-  return String_replace_n(str,  old,  replacement,  - 1);
+  return String_replace_n(str, old, replacement, - 1);
 }
 
 String String_printf(String fmt, ...){
   if(! _init_guard_) String_initialize();
   if(! String_truth(fmt) || ! * fmt) return NULL;
-  va_list args,  measure;
-  va_start(args,  fmt);
-  va_copy(measure,  args);
-  int n = vsnprintf(NULL,  0,  fmt,  measure);
+  va_list args, measure;
+  va_start(args, fmt);
+  va_copy(measure, args);
+  int n = vsnprintf(NULL, 0, fmt, measure);
   va_end(measure);
   if(n < 0){
     va_end(args);
@@ -1107,19 +1103,19 @@ String String_printf(String fmt, ...){
   }
   if(n <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES + 1];
-    int written = vsnprintf(bytes,  n + 1,  fmt,  args);
+    int written = vsnprintf(bytes, n + 1, fmt, args);
     va_end(args);
     if(written != n) return NULL;
-    return _from_bytes(bytes,  n);
+    return _from_bytes(bytes, n);
   }
   String string = String_malloc(n + 1);
-  int written = vsnprintf(string,  n + 1,  fmt,  args);
+  int written = vsnprintf(string, n + 1, fmt, args);
   va_end(args);
   if(written != n){
     _free_unchecked(string);
     return NULL;
   }
-  return _finish(string,  n);
+  return _finish(string, n);
 }
 
 static inline int _hex_digit(int ch){
@@ -1129,9 +1125,9 @@ static inline int _hex_digit(int ch){
   return - 1;
 }
 
-static inline int _decode_escape_char(const char * * psrc,  int * emit){
+static inline int _decode_escape_char(const char * * psrc, int * emit){
   const char * src = * psrc;
-  int result = 0,  esc =(unsigned char) * src ++;
+  int result = 0, esc =(unsigned char) * src ++;
   * emit = 1;
   switch(esc){
     case 'a' : result = '\a';
@@ -1159,23 +1155,23 @@ static inline int _decode_escape_char(const char * * psrc,  int * emit){
     case '$' : result = '$';
     break;
     case 'x' : case 'X' : case 'u' : case 'U' :{
-      int value = 0,  digits = 0;
+      int value = 0, digits = 0;
       while(* src && digits < 2){
         int hex = _hex_digit(* src);
         if(hex < 0) break;
         value =(value << 4) | hex;
-        src ++,  digits ++;
+        src ++, digits ++;
       }
       result = digits ? value : esc;
       break;
     }
     case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' :{
-      int value = esc - '0',  digits = 1;
+      int value = esc - '0', digits = 1;
       while(* src && digits < 3){
         char next = * src;
         if(next < '0' || next > '7') break;
         value =(value << 3) |(next - '0');
-        src ++,  digits ++;
+        src ++, digits ++;
       }
       result = value;
       break;
@@ -1190,7 +1186,7 @@ static inline int _decode_escape_char(const char * * psrc,  int * emit){
   return result;
 }
 
-static inline int _escape_byte(unsigned char ch,  char * out){
+static inline int _escape_byte(unsigned char ch, char * out){
   char escaped = 0;
   switch(ch){
     case '\n' : escaped = 'n';
@@ -1236,7 +1232,7 @@ String String_unescape(String str){
   if(! _init_guard_) String_initialize();
   int n = String_len(str);
   if(n == 0) return NULL;
-  if(! String_contains(str,  _1)) return str;
+  if(! String_contains(str, _1)) return str;
   String string = String_malloc(n + 1);
   char * dst = string;
   const char * src = str;
@@ -1245,7 +1241,7 @@ String String_unescape(String str){
       src ++;
       if(! * src) break;
       const char * cursor = src;
-      int emit,  esc = _decode_escape_char(& cursor,  & emit);
+      int emit, esc = _decode_escape_char(& cursor, & emit);
       src = cursor;
       if(emit && esc) * dst ++ = esc;
     }
@@ -1260,15 +1256,15 @@ String String_escape(String str){
   int bytes = 0;
   {
     int byte;
-    Iter _x2c_macro_iterator_1 = String_iter(str,  &(struct Iter){
+    Iter _x2c_macro_iterator_1 = String_iter(str, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
-      byte = Var_int(Var_convert(_x2c_macro_item_1,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
+      byte = Var_int(Var_convert(_x2c_macro_item_1, 3453797));
       {
-        int width = _escape_byte((unsigned char) byte,  NULL);
+        int width = _escape_byte((unsigned char) byte, NULL);
         if(bytes > INT_MAX - width - 1) return NULL;
         bytes += width;
       }
@@ -1280,18 +1276,18 @@ String String_escape(String str){
   char * dst = string;
   {
     int byte;
-    Iter _x2c_macro_iterator_2 = String_iter(str,  &(struct Iter){
+    Iter _x2c_macro_iterator_2 = String_iter(str, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
-      byte = Var_int(Var_convert(_x2c_macro_item_2,  3453797));
-      dst += _escape_byte((unsigned char) byte,  dst);
+    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
+      byte = Var_int(Var_convert(_x2c_macro_item_2, 3453797));
+      dst += _escape_byte((unsigned char) byte, dst);
     }
 
   }
-  return _finish(string,  bytes);
+  return _finish(string, bytes);
 }
 
 String String_str(String str){
@@ -1302,36 +1298,36 @@ String String_str(String str){
 String String_repr(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return _2;
-  return String_printf(_0,  String_escape(str));
+  return String_printf(_0, String_escape(str));
 }
 
-Buffer String_write_str(String str,  Buffer out){
+Buffer String_write_str(String str, Buffer out){
   if(! _init_guard_) String_initialize();
-  return String_truth(str) ? Buffer_write(out,  str) : out;
+  return String_truth(str) ? Buffer_write(out, str) : out;
 }
 
-Buffer String_write_repr(String str,  Buffer out){
+Buffer String_write_repr(String str, Buffer out){
   if(! _init_guard_) String_initialize();
-  Buffer_write_char(out,  '"');
+  Buffer_write_char(out, '"');
   {
     int byte;
-    Iter _x2c_macro_iterator_3 = String_iter(str,  &(struct Iter){
+    Iter _x2c_macro_iterator_3 = String_iter(str, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
-      byte = Var_int(Var_convert(_x2c_macro_item_3,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+      byte = Var_int(Var_convert(_x2c_macro_item_3, 3453797));
       {
         char escaped[4];
-        int width = _escape_byte((unsigned char) byte,  escaped);
-        Buffer_write_len(out,  escaped,  width);
+        int width = _escape_byte((unsigned char) byte, escaped);
+        Buffer_write_len(out, escaped, width);
       }
 
     }
 
   }
-  return Buffer_write_char(out,  '"');
+  return Buffer_write_char(out, '"');
 }
 
 int String_parse_char(String str){
@@ -1344,7 +1340,7 @@ int String_parse_char(String str){
     s ++;
     if(! * s) return - 1;
     const char * cursor = s;
-    int emit,  esc = _decode_escape_char(& cursor,  & emit);
+    int emit, esc = _decode_escape_char(& cursor, & emit);
     if(! emit) return - 1;
     value = esc;
     s = cursor;
@@ -1363,8 +1359,8 @@ String String_parse(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return NULL;
   int n = String_len(str);
-  if(String_getindex(str,  0) == '%' && String_getindex(str,  1) == '"' && String_getindex(str,  n - 1) == '"') return String_unescape(String_new_len(str + 2,  n - 3));
-  if(String_getindex(str,  0) == '"' && String_getindex(str,  n - 1) == '"') return String_unescape(String_new_len(str + 1,  n - 2));
+  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));
+  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));
   return String_unescape(str);
 }
 
@@ -1372,38 +1368,38 @@ unsigned String_hash(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return 0;
   StringHeader header = _header(str);
-  return header -> hash ? header -> hash : _hash_n(str,  strlen(str));
+  return header -> hash ? header -> hash : _hash_n(str, strlen(str));
 }
 
-int String_equal(String x,  String y){
+int String_equal(String x, String y){
   if(! _init_guard_) String_initialize();
   if((void *) x ==(void *) y) return 1;
   if(! String_truth(x) || ! String_truth(y)) return 0;
-  return strcmp(x,  y) == 0;
+  return strcmp(x, y) == 0;
 }
 
-int String_compare(String x,  String y){
+int String_compare(String x, String y){
   if(! _init_guard_) String_initialize();
   if((void *) x ==(void *) y) return 0;
   if(! String_truth(x)) return - 1;
   if(! String_truth(y)) return 1;
-  int result = strcmp(x,  y);
+  int result = strcmp(x, y);
   return(result > 0) -(result < 0);
 }
 
-static int _next(Iter iter,  Var * out){
-  int index = Var_int(Var_convert(iter -> state,  3453797));
+static int _next(Iter iter, Var * out){
+  int index = Var_int(Var_convert(iter -> state, 3453797));
   String str = Var_string(iter -> obj);
   if(index < 0 || index >= String_len(str)) return 0;
-  * out = int_var((int) String_getindex(str,  index));
+  * out = int_var((int) String_getindex(str, index));
   iter -> state = int_var(index + 1);
   return 1;
 }
 
-Iter String_iter(String x,  Iter dest){
+Iter String_iter(String x, Iter dest){
   if(! _init_guard_) String_initialize();
   if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest,  String_var(x),  _next,  int_var(0));
+  return Iter_init(dest, String_var(x), _next, int_var(0));
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

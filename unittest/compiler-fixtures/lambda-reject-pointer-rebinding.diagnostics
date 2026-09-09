@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-pointer-rebinding.x:5:42: type: capture
                                            ^
   note: binding: pointer
 
-limit: too many errors, stopping
-

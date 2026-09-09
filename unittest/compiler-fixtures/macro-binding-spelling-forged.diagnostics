@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-binding-spelling-forged.x:7:15: macro: x2c.bind
                 ^
   note: binding: (binding 999 "forged")
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-argument-count.x:10:6: parse: macro i
   $tag()
        ^
 
-limit: too many errors, stopping
-

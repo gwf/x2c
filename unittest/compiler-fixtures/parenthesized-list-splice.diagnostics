@@ -3,5 +3,3 @@ unittest/compiler-fixtures/parenthesized-list-splice.x:6:27: parse: expected ide
                             ^
   note: use '@{...}' to splice an expression
 
-limit: too many errors, stopping
-

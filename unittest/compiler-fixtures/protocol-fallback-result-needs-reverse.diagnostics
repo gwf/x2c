@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-fallback-result-needs-reverse.x:23:1: protoc
   protocol View(Item);
   ^^^^^^^^
 
-limit: too many errors, stopping
-

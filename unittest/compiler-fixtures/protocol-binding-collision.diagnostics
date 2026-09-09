@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-binding-collision.x:35:1: protocol: 'Polar_a
   ^^^^^^^^
   note: protocol member 'angle' declared by Cartesian(Polar) at unittest/compiler-fixtures/protocol-binding-collision.x:11:1 conflicting definition 'Polar_angle': ((func (("Polar"))) int) expected: ((func (("Polar"))) double)
 
-limit: too many errors, stopping
-

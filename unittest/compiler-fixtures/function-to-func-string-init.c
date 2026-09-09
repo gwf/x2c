@@ -2,11 +2,11 @@
 
 #include "function-to-func-string-init.h"
 
-static List _10,  _8,  _7,  _5,  _3;
+static List _10, _8, _7, _5, _3;
 
 static String _1;
 
-static Var _9,  _6,  _4,  _2,  _0;
+static Var _9, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -14,25 +14,23 @@ static Func lifted;
 
 static Func _x2c_func_handle_0;
 
-
-
 Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
-Func Func_new(FuncAdapter,  List);
+Func Func_new(FuncAdapter, List);
 
 String Var_string(Var);
 
-Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static String identity(String value);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static String identity(String value){
   return value;
@@ -44,20 +42,20 @@ void String_initialize(void){
   _0 = Symbol_var(437126);
   _1 = String_new("String");
   _2 = String_var(_1);
-  _3 = cons(_2,  NULL);
+  _3 = cons(_2, NULL);
   _4 = List_var(_3);
-  _5 = cons(_4,  NULL);
+  _5 = cons(_4, NULL);
   _6 = List_var(_5);
-  _7 = cons(_6,  NULL);
-  _8 = cons(_0,  _7);
+  _7 = cons(_6, NULL);
+  _8 = cons(_0, _7);
   _9 = List_var(_8);
-  _10 = cons(_9,  _3);
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _10);
+  _10 = cons(_9, _3);
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _10);
   lifted = _x2c_func_handle_0;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  0,  1318210446));
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return String_var(identity(a0));
   ;
 }

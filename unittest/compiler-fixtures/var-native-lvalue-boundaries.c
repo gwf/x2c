@@ -23,22 +23,22 @@ int main(void){
   long double extended = 1.0L;
   const int fixed = 3;
   register int local = 4;
-  x2c_var_update_i8(&(plain),  56,  increment);
-  x2c_var_update_schar(&(signed_byte),  56,  increment);
-  x2c_var_update_u8(&(byte),  56,  increment);
-  x2c_var_update_i16(&(signed_short),  56,  increment);
-  x2c_var_update_u16(&(short_value),  56,  increment);
-  x2c_var_update_i32(&(observed),  56,  increment);
-  x2c_var_update_u32(&(int_value),  56,  increment);
-  x2c_var_update_long(&(signed_long),  56,  increment);
-  x2c_var_update_ulong(&(long_value),  56,  increment);
-  x2c_var_update_long_long(&(signed_long_long),  56,  increment);
-  x2c_var_update_ulong_long(&(long_long_value),  56,  increment);
-  x2c_var_update_f32(&(single),  56,  increment);
-  x2c_var_update_f64(&(real),  56,  increment);
-  x2c_var_update_long_double(&(extended),  56,  increment);
-  x2c_var_update_i32(&(fixed),  56,  increment);
-  x2c_var_update_i32(&(local),  56,  increment);
+  x2c_var_update_i8(&(plain), 56, increment);
+  x2c_var_update_schar(&(signed_byte), 56, increment);
+  x2c_var_update_u8(&(byte), 56, increment);
+  x2c_var_update_i16(&(signed_short), 56, increment);
+  x2c_var_update_u16(&(short_value), 56, increment);
+  x2c_var_update_i32(&(observed), 56, increment);
+  x2c_var_update_u32(&(int_value), 56, increment);
+  x2c_var_update_long(&(signed_long), 56, increment);
+  x2c_var_update_ulong(&(long_value), 56, increment);
+  x2c_var_update_long_long(&(signed_long_long), 56, increment);
+  x2c_var_update_ulong_long(&(long_long_value), 56, increment);
+  x2c_var_update_f32(&(single), 56, increment);
+  x2c_var_update_f64(&(real), 56, increment);
+  x2c_var_update_long_double(&(extended), 56, increment);
+  x2c_var_update_i32(&(fixed), 56, increment);
+  x2c_var_update_i32(&(local), 56, increment);
   return observed;
 }
 

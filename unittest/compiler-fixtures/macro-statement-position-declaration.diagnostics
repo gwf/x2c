@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-statement-position-declaration.x:9:5: parse: sy
       $declaration();
       ^
 
-limit: too many errors, stopping
-

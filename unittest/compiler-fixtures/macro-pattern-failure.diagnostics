@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-pattern-failure.x:6:27: parse: expected atomic 
                             ^^^^^
   note: token: input kind: ident
 
-limit: too many errors, stopping
-

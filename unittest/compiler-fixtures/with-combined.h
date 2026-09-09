@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "geo.h"
-double outline(double x,  double y);
+double outline(double x, double y);
 
 
 #endif /* __GUARD_0xA4BD4C66__ */

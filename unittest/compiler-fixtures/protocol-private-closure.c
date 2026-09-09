@@ -33,10 +33,6 @@ typedef struct PrivateRight{
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-
-
-
-
 Var Var_new(Symbol, ...);
 
 void * Var_pointer(Var);
@@ -87,8 +83,8 @@ __attribute__((constructor)) static void _file_init_(void){
     .str = _x2c_proto_privatebox_str_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(1166148154758128,  _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("privatebox"),  _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(1166148154758128, _x2c__x2c_protocol_methods_0)){
+    x2c_register_descriptor(String_new("privatebox"), _x2c__x2c_protocol_methods_0);
   }
   _0 = String_new("private:");
 }
@@ -98,7 +94,7 @@ int PublicBase_read(PublicBase value){
 }
 
 static Var PrivateBox_var(PrivateBox value){
-  return Var_new(1166148154758128,  value);
+  return Var_new(1166148154758128, value);
 }
 
 static PrivateBox Var_privatebox(Var value){
@@ -106,7 +102,7 @@ static PrivateBox Var_privatebox(Var value){
 }
 
 static String PrivateBox_str(PrivateBox value){
-  return String_join(NULL,  cons(String_var(_0),  cons(String_var(int_str(value -> value)),  NULL)));
+  return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));
 }
 
 static PublicBase PrivateParticipant_publicbase(PrivateParticipant value){
@@ -160,7 +156,7 @@ int main(void){
   box_value -> value = 23;
   Var boxed = PrivateBox_var(box_value);
   PrivateBox restored = Var_privatebox(boxed);
-  printf("%d %d %d %s %d\n",  PrivateParticipant_read(private_value),  PublicParticipant_bump(public_value) -> value,  PrivateRight_shift(right_value) -> value,  Var_str(boxed),  restored -> value);
+  printf("%d %d %d %s %d\n", PrivateParticipant_read(private_value), PublicParticipant_bump(public_value) -> value, PrivateRight_shift(right_value) -> value, Var_str(boxed), restored -> value);
   return 0;
 }
 

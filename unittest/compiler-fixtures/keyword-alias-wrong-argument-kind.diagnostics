@@ -2,5 +2,3 @@ unittest/compiler-fixtures/keyword-alias-wrong-argument-kind.x:8:16: parse: Name
     return named(42);
                  ^^
 
-limit: too many errors, stopping
-

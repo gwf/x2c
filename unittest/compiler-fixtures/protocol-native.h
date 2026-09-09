@@ -11,7 +11,7 @@
 typedef void * Handle;
 
 #ifndef X2CCPP
-_Static_assert(_Generic(& free,  void(*)(Handle) : 1, default: 0),  "native alias Handle_release does not match free");
+_Static_assert(_Generic(& free, void(*)(Handle) : 1, default: 0), "native alias Handle_release does not match free");
 #endif
 #define Handle_release free
 int main(void);

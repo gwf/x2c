@@ -2,33 +2,31 @@
 
 #include "self-typed-list-lowering.h"
 
-static List _12,  _11,  _8,  _7,  _5,  _3;
+static List _12, _11, _8, _7, _5, _3;
 
 static String _1;
 
-static Var _10,  _9,  _6,  _4,  _2,  _0;
+static Var _10, _9, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
 static Func _x2c_func_handle_0;
 
-
-
 Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
-Func Func_new(FuncAdapter,  List);
+Func Func_new(FuncAdapter, List);
 
 int Var_truth(Var);
 
 List List_reverse(List);
 
-List List_append(List,  List);
+List List_append(List, List);
 
 List List_cdr(List);
 
@@ -62,13 +60,13 @@ List List_cddadr(List);
 
 List List_cdddar(List);
 
-List List_filter(List,  Func);
+List List_filter(List, Func);
 
 List List_flatten(List);
 
 List List_flatten_all(List);
 
-Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 Var int_var(int);
 
@@ -76,7 +74,7 @@ __attribute__((constructor)) static void _file_init_(void);
 
 static int keep(Var value);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -85,26 +83,26 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = Symbol_var(437126);
   _1 = String_new("Var");
   _2 = String_var(_1);
-  _3 = cons(_2,  NULL);
+  _3 = cons(_2, NULL);
   _4 = List_var(_3);
-  _5 = cons(_4,  NULL);
+  _5 = cons(_4, NULL);
   _6 = List_var(_5);
-  _7 = cons(_6,  NULL);
-  _8 = cons(_0,  _7);
+  _7 = cons(_6, NULL);
+  _8 = cons(_0, _7);
   _9 = List_var(_8);
   _10 = Symbol_var(19368);
-  _11 = cons(_10,  NULL);
-  _12 = cons(_9,  _11);
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _12);
+  _11 = cons(_10, NULL);
+  _12 = cons(_9, _11);
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12);
 }
 
 static int keep(Var value){
   return Var_truth(value);
 }
 
-ListInt structural(ListInt left,  ListInt right){
+ListInt structural(ListInt left, ListInt right){
   if(! _init_guard_) _file_init_();
-  return List_reverse(List_append(List_cdr(left),  right));
+  return List_reverse(List_append(List_cdr(left), right));
 }
 
 int second(ListInt values){
@@ -129,12 +127,12 @@ ListInt promoted(ListInt values){
 
 ListInt branch_tails(ListInt values){
   if(! _init_guard_) _file_init_();
-  return List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_cdar(values),  List_cdaar(values)),  List_cdadr(values)),  List_cddar(values)),  List_cdaaar(values)),  List_cdaadr(values)),  List_cdadar(values)),  List_cdaddr(values)),  List_cddaar(values)),  List_cddadr(values)),  List_cdddar(values));
+  return List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_append(List_cdar(values), List_cdaar(values)), List_cdadr(values)), List_cddar(values)), List_cdaaar(values)), List_cdaadr(values)), List_cdadar(values)), List_cdaddr(values)), List_cddaar(values)), List_cddadr(values)), List_cdddar(values));
 }
 
 ListInt filtered(ListInt values){
   if(! _init_guard_) _file_init_();
-  return List_filter(values,  _x2c_func_handle_0);
+  return List_filter(values, _x2c_func_handle_0);
 }
 
 ListInt flattened(ListInt values){
@@ -147,8 +145,8 @@ ListInt flattened_all(ListInt values){
   return List_flatten_all(values);
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  0,  45156);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
   return int_var(keep(a0));
   ;
 }

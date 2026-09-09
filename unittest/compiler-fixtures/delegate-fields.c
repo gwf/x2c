@@ -25,7 +25,7 @@ typedef struct DelegateChain{
 * DelegateChain;
 
 typedef struct DelegateChoice{
-  DelegatePart left,  right;
+  DelegatePart left, right;
 }
 DelegateChoice;
 
@@ -49,7 +49,7 @@ static DelegateChain saved_chain;
 
 static int DelegatePart_read(DelegatePart part);
 
-static void DelegatePart_bump(DelegatePart * part,  int by);
+static void DelegatePart_bump(DelegatePart * part, int by);
 
 static int DelegatePart_pointer_read(DelegatePart * part);
 
@@ -71,7 +71,7 @@ static int DelegatePart_read(DelegatePart part){
   return part.value;
 }
 
-static void DelegatePart_bump(DelegatePart * part,  int by){
+static void DelegatePart_bump(DelegatePart * part, int by){
   part -> value += by;
 }
 
@@ -158,11 +158,11 @@ int main(void){
   cycle_a -> b = cycle_b;
   cycle_b -> a = cycle_a;
   saved_chain = chain;
-  DelegatePart_bump(&(pointer -> part),  4);
+  DelegatePart_bump(&(pointer -> part), 4);
   DelegatePartLeaf same = DelegatePart_same(next_owner() -> owner -> part);
   DelegatePart concrete = DelegatePart_concrete(pointer -> part);
-  printf("%d %d %d %d %d %d %d %d %d\n",  DelegatePart_read(value.part),  DelegatePart_read(pointer -> part),  DelegatePart_pointer_read(pointer_field.part),  DelegatePart_read(chain -> owner -> part),  same.value,  concrete.value,  DelegateValueOwner_shadow(leaf),  DelegateChoice_read(choice),  DelegateCycleA_read(cycle_a));
-  printf("owner calls: %d\n",  owner_calls);
+  printf("%d %d %d %d %d %d %d %d %d\n", DelegatePart_read(value.part), DelegatePart_read(pointer -> part), DelegatePart_pointer_read(pointer_field.part), DelegatePart_read(chain -> owner -> part), same.value, concrete.value, DelegateValueOwner_shadow(leaf), DelegateChoice_read(choice), DelegateCycleA_read(cycle_a));
+  printf("owner calls: %d\n", owner_calls);
   return 0;
 }
 

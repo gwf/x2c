@@ -15,9 +15,9 @@ It exits 0 for valid and 1 for stale, so a shell can branch on it.
 
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
 corresponding Make target with live output and records the resulting tree only
-after success. `check` and `record` remain available for direct inspection and
-stamping. Records are in `debug/`, which is not tracked, so they are per-
-workspace and never travel with a commit.
+after success. `check` remains available for direct inspection.
+Records are in untracked `debug/`, so they belong to this workspace and
+never travel with a commit.
 """
 
 from __future__ import annotations
@@ -181,8 +181,8 @@ def build_configuration() -> dict:
 
 
 # Version 5 captures effective Make configuration and executable identities.
-# Older records lack those inputs and must be validated once again.
-FORMAT = 5
+# Earlier records could be stamped manually and must be validated again.
+FORMAT = 6
 
 
 def content_hash(rel: str, mode: int) -> str:
@@ -285,7 +285,7 @@ def differences(old: dict, new: dict) -> list[str] | None:
     return reasons
 
 
-def cmd_record(gate: str) -> int:
+def _record(gate: str) -> int:
     records = load()
     records[gate] = digest()
     save(records)
@@ -334,22 +334,18 @@ def cmd_ensure(gate: str) -> int:
     result = run_gate(gate)
     if result:
         return result
-    return cmd_record(gate)
+    return _record(gate)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    rec = sub.add_parser("record", help="stamp a gate as green for this tree")
-    rec.add_argument("gate")
     chk = sub.add_parser("check", help="report whether a recorded gate still holds")
     chk.add_argument("gate", nargs="?")
     ens = sub.add_parser("ensure", help="reuse or run and record a publication gate")
     ens.add_argument("gate", choices=sorted(GATES))
     args = parser.parse_args()
     try:
-        if args.command == "record":
-            return cmd_record(args.gate)
         if args.command == "check":
             return cmd_check(args.gate)
         return cmd_ensure(args.gate)

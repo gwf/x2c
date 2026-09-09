@@ -25,7 +25,8 @@ static int _is_suffix_punct(char ch) =>
 static int _need_space(String prev, String curr) {
   if (!prev || !curr) return 0;
   char p = prev[-1], c = curr[0];
-  if (c == '\n' || p == '\n') return 0;
+  if (c == '\n' || p == '\n' || c == ' ' || p == ' ' ||
+      c == '\t' || p == '\t') return 0;
   if (_is_suffix_punct(c)) return 0;
   if (_is_prefix_punct(p)) return 0;
   return 1;

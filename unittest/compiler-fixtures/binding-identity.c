@@ -17,7 +17,7 @@ binding_phase5_Value binding_phase5_shadow(binding_phase5_Value value){
   return result + value + binding_phase5_global;
 }
 
-binding_phase5_Value binding_phase5_Box_bump(binding_phase5_Box box,  binding_phase5_Value value){
+binding_phase5_Value binding_phase5_Box_bump(binding_phase5_Box box, binding_phase5_Value value){
   return box.value + value;
 }
 
@@ -30,7 +30,7 @@ int main(void){
   binding_phase5_Value value = binding_phase5_shadow(4);
   Var lambda =(_x2c_lambda_0)(int_var(5));
   if(value != 11) return 1;
-  if(binding_phase5_Box_bump(box,  2) != 5) return 2;
+  if(binding_phase5_Box_bump(box, 2) != 5) return 2;
   if(Var_int(lambda) != 6) return 3;
   return 0;
 }

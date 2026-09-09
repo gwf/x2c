@@ -8,23 +8,19 @@ static int _init_guard_ = 0;
 
 static StringCallback duplicate;
 
-
-
-
-
 void Scope_retain(void);
 
 Var String_var(String);
 
 Var Symbol_var(Symbol);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 Var int_var(int);
 
 Var Array_var(Array);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 int Var_int(Var);
 
@@ -34,13 +30,13 @@ String String_str(String);
 
 String Var_string(Var);
 
-int Symbol_compare(Symbol,  Symbol);
+int Symbol_compare(Symbol, Symbol);
 
-int File_equal(File,  File);
+int File_equal(File, File);
 
 File Var_file(Var);
 
-Iter Array_iter(Array,  Iter);
+Iter Array_iter(Array, Iter);
 
 Array Var_array(Var);
 
@@ -52,11 +48,11 @@ static String _x2c_callback_adapt_0(Var a0);
 
 static String _x2c_callback_adapt_1(Var a0);
 
-static int _x2c_callback_adapt_2(Var a0,  Var a1);
+static int _x2c_callback_adapt_2(Var a0, Var a1);
 
-static int _x2c_callback_adapt_3(Var a0,  Var a1);
+static int _x2c_callback_adapt_3(Var a0, Var a1);
 
-static Iter _x2c_callback_adapt_4(Var a0,  Iter a1);
+static Iter _x2c_callback_adapt_4(Var a0, Iter a1);
 
 static Callbacks callbacks[] ={
   {
@@ -83,18 +79,18 @@ int main(void){
   if(! _init_guard_) _file_init_();
   Scope_retain();
   String text = _0;
-  Var boxed_text = String_var(text),  alpha = Symbol_var(2916866),  beta = Symbol_var(142594),  raw_null =(Var){
+  Var boxed_text = String_var(text), alpha = Symbol_var(2916866), beta = Symbol_var(142594), raw_null =(Var){
     0
   }
   ;
   Array values = Array_new();
-  Array_push(values,  int_var(42));
+  Array_push(values, int_var(42));
   Var boxed_values = Array_var(values);
   struct Iter storage;
-  Iter iter = callbacks[0].iter(boxed_values,  & storage);
+  Iter iter = callbacks[0].iter(boxed_values, & storage);
   Var item;
-  int advanced = Iter_try_next(iter,  & item);
-  printf("%d %s %s %d %d %d\n",  callbacks[0].owner == duplicate,  callbacks[0].owner(boxed_text),  callbacks[0].free(boxed_text),  callbacks[0].symbol_compare(alpha,  beta),  callbacks[0].file_equal(raw_null,  raw_null),  advanced ? Var_int(item) : - 1);
+  int advanced = Iter_try_next(iter, & item);
+  printf("%d %s %s %d %d %d\n", callbacks[0].owner == duplicate, callbacks[0].owner(boxed_text), callbacks[0].free(boxed_text), callbacks[0].symbol_compare(alpha, beta), callbacks[0].file_equal(raw_null, raw_null), advanced ? Var_int(item) : - 1);
   Scope_release();
   return 0;
 }
@@ -109,18 +105,18 @@ static String _x2c_callback_adapt_1(Var a0){
   ;
 }
 
-static int _x2c_callback_adapt_2(Var a0,  Var a1){
-  return Symbol_compare(Var_symbol(a0),  Var_symbol(a1));
+static int _x2c_callback_adapt_2(Var a0, Var a1){
+  return Symbol_compare(Var_symbol(a0), Var_symbol(a1));
   ;
 }
 
-static int _x2c_callback_adapt_3(Var a0,  Var a1){
-  return File_equal(Var_file(a0),  Var_file(a1));
+static int _x2c_callback_adapt_3(Var a0, Var a1){
+  return File_equal(Var_file(a0), Var_file(a1));
   ;
 }
 
-static Iter _x2c_callback_adapt_4(Var a0,  Iter a1){
-  return Array_iter(Var_array(a0),  a1);
+static Iter _x2c_callback_adapt_4(Var a0, Iter a1){
+  return Array_iter(Var_array(a0), a1);
   ;
 }
 

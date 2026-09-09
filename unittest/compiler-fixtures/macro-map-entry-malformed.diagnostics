@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-map-entry-malformed.x:5:1: parse: expected ':'
   }
   ^
 
-limit: too many errors, stopping
-

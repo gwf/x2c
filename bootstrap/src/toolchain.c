@@ -2,13 +2,9 @@
 
 #include "toolchain.h"
 
-static String _23,  _22,  _21,  _20,  _19,  _18,  _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 #include <ctype.h>
 #include <errno.h>
@@ -33,27 +29,27 @@ int File_close(File);
 
 String x2c_get_root(void);
 
-int String_find(String,  String);
+int String_find(String, String);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
-void * Scope_calloc(size_t,  size_t);
+void * Scope_calloc(size_t, size_t);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 String Var_string(Var);
 
 List Array_list_free(Array);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
-Iter String_iter(String,  Iter);
+Iter String_iter(String, Iter);
 
 String Symbol_str(Symbol);
 
@@ -61,15 +57,15 @@ int List_len(List);
 
 void report_suspend(void);
 
-ChildProcess process_start(char * *,  int);
+ChildProcess process_start(char * *, int);
 
 int ChildProcess_ready(ChildProcess);
 
-int ChildProcess_wait(ChildProcess,  String *,  String *);
+int ChildProcess_wait(ChildProcess, String *, String *);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
-int process_run(char * *,  String *,  String *);
+int process_run(char * *, String *, String *);
 
 List x2c_cpp_include_dirs(void);
 
@@ -79,23 +75,23 @@ Var Symbol_var(Symbol);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static String _tool_selection(String explicit,  const char * preferred_env,  const char * fallback_env,  String installed,  const char * fallback);
+static String _tool_selection(String explicit, const char * preferred_env, const char * fallback_env, String installed, const char * fallback);
 
 static String _installed_tool(const char * name);
 
-static void _toolchain_layout(String * include_dir,  String * runtime_lib);
+static void _toolchain_layout(String * include_dir, String * runtime_lib);
 
-static void _append_list(Array output,  List values);
+static void _append_list(Array output, List values);
 
 static int _shell_safe(String argument);
 
 static void _print_argument(String argument);
 
-static void _print_action(Symbol phase,  List arguments);
+static void _print_action(Symbol phase, List arguments);
 
 static char * * _action_argv(List arguments);
 
-static void _append_includes(Array arguments,  List dirs);
+static void _append_includes(Array arguments, List dirs);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -127,7 +123,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _23 = String_new("x2c-dependencies");
 }
 
-static String _tool_selection(String explicit,  const char * preferred_env,  const char * fallback_env,  String installed,  const char * fallback){
+static String _tool_selection(String explicit, const char * preferred_env, const char * fallback_env, String installed, const char * fallback){
   if(String_truth(explicit)) return explicit;
   const char * value = getenv(preferred_env);
   if(value && * value) return String_new(value);
@@ -141,16 +137,16 @@ static String _installed_tool(const char * name){
   String executable = x2c_get_executable();
   if(! String_truth(executable)) return NULL;
   String prefix = x2c_path_dir(x2c_path_dir(executable));
-  String path = String_join(NULL,  cons(String_var(prefix),  cons(String_var(_0),  NULL)));
-  File input = fopen(path,  "r");
+  String path = String_join(NULL, cons(String_var(prefix), cons(String_var(_0), NULL)));
+  File input = fopen(path, "r");
   if(! input) return NULL;
   char line[PATH_MAX];
   String result = NULL;
   int name_length = strlen(name);
-  while(fgets(line,  sizeof(line),  input)){
-    if(strncmp(line,  name,  name_length) != 0 || line[name_length] != '=') continue;
+  while(fgets(line, sizeof(line), input)){
+    if(strncmp(line, name, name_length) != 0 || line[name_length] != '=') continue;
     char * value = line + name_length + 1;
-    value[strcspn(value,  "\r\n")] = 0;
+    value[strcspn(value, "\r\n")] = 0;
     if(* value) result = String_new(value);
     break;
   }
@@ -158,122 +154,122 @@ static String _installed_tool(const char * name){
   return result;
 }
 
-static void _toolchain_layout(String * include_dir,  String * runtime_lib){
-  String root = x2c_get_root(),  executable = x2c_get_executable();
+static void _toolchain_layout(String * include_dir, String * runtime_lib){
+  String root = x2c_get_root(), executable = x2c_get_executable();
   String marker = _1;
-  int build = String_truth(executable) ? String_find(executable,  marker) : - 1;
+  int build = String_truth(executable) ? String_find(executable, marker) : - 1;
   if(build >= 0){
     String stage_dir = x2c_path_dir(executable);
-    * include_dir = String_join(NULL,  cons(String_var(root),  cons(String_var(_2),  NULL)));
-    * runtime_lib = String_join(NULL,  cons(String_var(stage_dir),  cons(String_var(_3),  NULL)));
+    * include_dir = String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL)));
+    * runtime_lib = String_join(NULL, cons(String_var(stage_dir), cons(String_var(_3), NULL)));
     return;
   }
-  if(String_truth(root) && ! String_equal(root,  _4)){
-    * include_dir = String_join(NULL,  cons(String_var(root),  cons(String_var(_2),  NULL)));
-    String installed = String_join(NULL,  cons(String_var(root),  cons(String_var(_5),  NULL)));
-    * runtime_lib = ! access(installed,  R_OK) ? installed : String_join(NULL,  cons(String_var(root),  cons(String_var(_6),  NULL)));
+  if(String_truth(root) && ! String_equal(root, _4)){
+    * include_dir = String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL)));
+    String installed = String_join(NULL, cons(String_var(root), cons(String_var(_5), NULL)));
+    * runtime_lib = ! access(installed, R_OK) ? installed : String_join(NULL, cons(String_var(root), cons(String_var(_6), NULL)));
     return;
   }
   String bin_dir = String_truth(executable) ? x2c_path_dir(executable) : _4;
   String prefix = x2c_path_dir(bin_dir);
-  * include_dir = String_join(NULL,  cons(String_var(prefix),  cons(String_var(_2),  NULL)));
-  * runtime_lib = String_join(NULL,  cons(String_var(prefix),  cons(String_var(_5),  NULL)));
+  * include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_2), NULL)));
+  * runtime_lib = String_join(NULL, cons(String_var(prefix), cons(String_var(_5), NULL)));
 }
 
-Toolchain toolchain_new(String cc,  String ar,  List cpp_args,  List cc_args,  List ld_args,  int verbose,  int dry_run){
+Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
-  Toolchain toolchain = Scope_calloc(1,  sizeof(struct Toolchain));
-  toolchain -> cc = _tool_selection(cc,  "X2C_CC",  "CC",  _installed_tool("CC"),  "cc");
-  toolchain -> ar = _tool_selection(ar,  "X2C_AR",  "AR",  _installed_tool("AR"),  "ar");
+  Toolchain toolchain = Scope_calloc(1, sizeof(struct Toolchain));
+  toolchain -> cc = _tool_selection(cc, "X2C_CC", "CC", _installed_tool("CC"), "cc");
+  toolchain -> ar = _tool_selection(ar, "X2C_AR", "AR", _installed_tool("AR"), "ar");
   toolchain -> cpp_args = cpp_args;
   toolchain -> cc_args = cc_args;
   toolchain -> ld_args = ld_args;
   toolchain -> verbose = verbose;
   toolchain -> dry_run = dry_run;
-  _toolchain_layout(& toolchain -> include_dir,  & toolchain -> runtime_lib);
+  _toolchain_layout(& toolchain -> include_dir, & toolchain -> runtime_lib);
   return toolchain;
 }
 
-static void _append_list(Array output,  List values){
+static void _append_list(Array output, List values){
   {
     Var value;
-    Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       value = _x2c_macro_item_0;
-      Array_push(output,  value);
+      Array_push(output, value);
     }
 
   }
 
 }
 
-ToolAction Toolchain_compile_action(Toolchain toolchain,  String source,  String object,  String depfile,  List gen_dirs){
+ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String object, String depfile, List gen_dirs){
   if(! _init_guard_) _file_init_();
   Array arguments = Array_new();
-  Array_push(arguments,  String_var(toolchain -> cc));
-  Array_push(arguments,  String_var(_8));
+  Array_push(arguments, String_var(toolchain -> cc));
+  Array_push(arguments, String_var(_8));
   {
     String directory;
-    Iter _x2c_macro_iterator_1 = List_iter(gen_dirs,  &(struct Iter){
+    Iter _x2c_macro_iterator_1 = List_iter(gen_dirs, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
+    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
       directory = Var_string(_x2c_macro_item_1);
       {
-        Array_push(arguments,  String_var(_9));
-        Array_push(arguments,  String_var(directory));
+        Array_push(arguments, String_var(_9));
+        Array_push(arguments, String_var(directory));
       }
 
     }
 
   }
-  Array_push(arguments,  String_var(_9));
-  Array_push(arguments,  String_var(toolchain -> include_dir));
-  _append_list(arguments,  toolchain -> cc_args);
-  Array_push(arguments,  String_var(_10));
-  Array_push(arguments,  String_var(_11));
-  Array_push(arguments,  String_var(_12));
-  Array_push(arguments,  String_var(depfile));
-  Array_push(arguments,  String_var(_13));
-  Array_push(arguments,  String_var(object));
-  Array_push(arguments,  String_var(_14));
-  Array_push(arguments,  String_var(source));
-  Array_push(arguments,  String_var(_15));
-  Array_push(arguments,  String_var(object));
-  return tool_action_new(7477414666,  Array_list_free(arguments),  toolchain -> verbose,  toolchain -> dry_run);
+  Array_push(arguments, String_var(_9));
+  Array_push(arguments, String_var(toolchain -> include_dir));
+  _append_list(arguments, toolchain -> cc_args);
+  Array_push(arguments, String_var(_10));
+  Array_push(arguments, String_var(_11));
+  Array_push(arguments, String_var(_12));
+  Array_push(arguments, String_var(depfile));
+  Array_push(arguments, String_var(_13));
+  Array_push(arguments, String_var(object));
+  Array_push(arguments, String_var(_14));
+  Array_push(arguments, String_var(source));
+  Array_push(arguments, String_var(_15));
+  Array_push(arguments, String_var(object));
+  return tool_action_new(7477414666, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
-ToolAction Toolchain_archive_action(Toolchain toolchain,  String output,  List objects){
+ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List objects){
   if(! _init_guard_) _file_init_();
   Array arguments = Array_new();
-  Array_push(arguments,  String_var(toolchain -> ar));
-  Array_push(arguments,  String_var(_16));
-  Array_push(arguments,  String_var(output));
-  _append_list(arguments,  objects);
-  return tool_action_new(3362278794,  Array_list_free(arguments),  toolchain -> verbose,  toolchain -> dry_run);
+  Array_push(arguments, String_var(toolchain -> ar));
+  Array_push(arguments, String_var(_16));
+  Array_push(arguments, String_var(output));
+  _append_list(arguments, objects);
+  return tool_action_new(3362278794, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
-ToolAction Toolchain_link_action(Toolchain toolchain,  String output,  List inputs){
+ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs){
   if(! _init_guard_) _file_init_();
   Array arguments = Array_new();
-  Array_push(arguments,  String_var(toolchain -> cc));
-  _append_list(arguments,  inputs);
-  _append_list(arguments,  toolchain -> ld_args);
-  Array_push(arguments,  String_var(toolchain -> runtime_lib));
-  Array_push(arguments,  String_var(_17));
-  Array_push(arguments,  String_var(_15));
-  Array_push(arguments,  String_var(output));
-  return tool_action_new(805782,  Array_list_free(arguments),  toolchain -> verbose,  toolchain -> dry_run);
+  Array_push(arguments, String_var(toolchain -> cc));
+  _append_list(arguments, inputs);
+  _append_list(arguments, toolchain -> ld_args);
+  Array_push(arguments, String_var(toolchain -> runtime_lib));
+  Array_push(arguments, String_var(_17));
+  Array_push(arguments, String_var(_15));
+  Array_push(arguments, String_var(output));
+  return tool_action_new(805782, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
-ToolAction tool_action_new(Symbol phase,  List arguments,  int verbose,  int dry_run){
-  ToolAction action = Scope_calloc(1,  sizeof(struct ToolAction));
+ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run){
+  ToolAction action = Scope_calloc(1, sizeof(struct ToolAction));
   action -> phase = phase;
   action -> arguments = arguments;
   action -> verbose = verbose;
@@ -288,19 +284,19 @@ void ToolAction_as_program(ToolAction action){
 }
 
 static int _shell_safe(String argument){
-  if(! String_truth(argument) || ! String_getindex(argument,  0)) return 0;
+  if(! String_truth(argument) || ! String_getindex(argument, 0)) return 0;
   {
     char raw;
-    Iter _x2c_macro_iterator_2 = String_iter(argument,  &(struct Iter){
+    Iter _x2c_macro_iterator_2 = String_iter(argument, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
-      raw = Var_char(Var_convert(_x2c_macro_item_2,  26993));
+    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
+      raw = Var_char(Var_convert(_x2c_macro_item_2, 26993));
       {
         unsigned char ch = raw;
-        if(!(isalnum(ch) || strchr("_+-=.,/:@",  ch))) return 0;
+        if(!(isalnum(ch) || strchr("_+-=.,/:@", ch))) return 0;
       }
 
     }
@@ -311,64 +307,64 @@ static int _shell_safe(String argument){
 
 static void _print_argument(String argument){
   if(_shell_safe(argument)){
-    fputs(argument,  stderr);
+    fputs(argument, stderr);
     return;
   }
-  fputc('\'',  stderr);
+  fputc('\'', stderr);
   {
     char ch;
-    Iter _x2c_macro_iterator_3 = String_iter(argument,  &(struct Iter){
+    Iter _x2c_macro_iterator_3 = String_iter(argument, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
-      ch = Var_char(Var_convert(_x2c_macro_item_3,  26993));
+    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+      ch = Var_char(Var_convert(_x2c_macro_item_3, 26993));
       {
-        if(ch == '\'') fputs("'\\''",  stderr);
-        else fputc(ch,  stderr);
+        if(ch == '\'') fputs("'\\''", stderr);
+        else fputc(ch, stderr);
       }
 
     }
 
   }
-  fputc('\'',  stderr);
+  fputc('\'', stderr);
 }
 
-static void _print_action(Symbol phase,  List arguments){
-  fprintf(stderr,  "x2c: %s",  Symbol_str(phase));
+static void _print_action(Symbol phase, List arguments){
+  fprintf(stderr, "x2c: %s", Symbol_str(phase));
   {
     String argument;
-    Iter _x2c_macro_iterator_4 = List_iter(arguments,  &(struct Iter){
+    Iter _x2c_macro_iterator_4 = List_iter(arguments, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
+    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
       argument = Var_string(_x2c_macro_item_4);
       {
-        fputc(' ',  stderr);
+        fputc(' ', stderr);
         _print_argument(argument);
       }
 
     }
 
   }
-  fputc('\n',  stderr);
+  fputc('\n', stderr);
 }
 
 static char * * _action_argv(List arguments){
   int count = List_len(arguments);
-  char * * argv = Scope_calloc(count + 1,  sizeof(char *));
+  char * * argv = Scope_calloc(count + 1, sizeof(char *));
   int index = 0;
   {
     String argument;
-    Iter _x2c_macro_iterator_5 = List_iter(arguments,  &(struct Iter){
+    Iter _x2c_macro_iterator_5 = List_iter(arguments, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
+    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
       argument = Var_string(_x2c_macro_item_5);
       argv[index ++] = argument;
     }
@@ -380,12 +376,12 @@ static char * * _action_argv(List arguments){
 ToolRun ToolAction_start(ToolAction action){
   if(action -> verbose || action -> dry_run){
     report_suspend();
-    _print_action(action -> phase,  action -> arguments);
+    _print_action(action -> phase, action -> arguments);
   }
-  ToolRun execution = Scope_calloc(1,  sizeof(struct ToolRun));
+  ToolRun execution = Scope_calloc(1, sizeof(struct ToolRun));
   execution -> action = action;
   if(action -> dry_run) return execution;
-  execution -> process = process_start(_action_argv(action -> arguments),  ! action -> inherit_stdio);
+  execution -> process = process_start(_action_argv(action -> arguments), ! action -> inherit_stdio);
   return execution;
 }
 
@@ -398,13 +394,13 @@ int ToolRun_ready(ToolRun execution){
 int ToolRun_wait(ToolRun execution){
   ToolAction action = execution -> action;
   if(action -> dry_run) return 0;
-  String output = NULL,  errors = NULL;
+  String output = NULL, errors = NULL;
   ChildProcess process = execution -> process;
-  int status = ChildProcess_wait(process,  & output,  & errors);
+  int status = ChildProcess_wait(process, & output, & errors);
   report_suspend();
-  if(String_truth(output)) fputs(output,  stderr);
-  if(String_truth(errors)) fputs(errors,  stderr);
-  if(status && action -> report) fprintf(stderr,  "x2c: %s failed with status %d\n",  Symbol_str(action -> phase),  status);
+  if(String_truth(output)) fputs(output, stderr);
+  if(String_truth(errors)) fputs(errors, stderr);
+  if(status && action -> report) fprintf(stderr, "x2c: %s failed with status %d\n", Symbol_str(action -> phase), status);
   return status;
 }
 
@@ -412,20 +408,20 @@ int ToolAction_run(ToolAction action){
   return ToolRun_wait(ToolAction_start(action));
 }
 
-static void _append_includes(Array arguments,  List dirs){
+static void _append_includes(Array arguments, List dirs){
   {
     Var value;
-    Iter _x2c_macro_iterator_6 = List_iter(dirs,  &(struct Iter){
+    Iter _x2c_macro_iterator_6 = List_iter(dirs, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
+    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
       value = _x2c_macro_item_6;
       {
-        if(! Var_is(value,  1318210446)) continue;
-        Array_push(arguments,  String_var(_18));
-        Array_push(arguments,  value);
+        if(! Var_is(value, 1318210446)) continue;
+        Array_push(arguments, String_var(_18));
+        Array_push(arguments, value);
       }
 
     }
@@ -434,7 +430,7 @@ static void _append_includes(Array arguments,  List dirs){
 
 }
 
-int Toolchain_preprocess(Toolchain toolchain,  const char * fname,  List include_dirs,  const char * imacros,  const char * force_include,  String * output,  String * errors,  String * dependencies){
+int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_dirs, const char * imacros, const char * force_include, String * output, String * errors, String * dependencies){
   if(! _init_guard_) _file_init_();
   if(output) * output = NULL;
   if(errors) * errors = NULL;
@@ -442,14 +438,14 @@ int Toolchain_preprocess(Toolchain toolchain,  const char * fname,  List include
   if(! fname || ! output || ! errors) return - 1;
   if(! toolchain -> keep_system_includes){
     char * probe[] ={
-      toolchain -> cc,  "-E",  "-x",  "c",  "-fkeep-system-includes",  "/dev/null",  NULL
+      toolchain -> cc, "-E", "-x", "c", "-fkeep-system-includes", "/dev/null", NULL
     }
     ;
-    String probe_output = NULL,  probe_errors = NULL;
-    toolchain -> keep_system_includes = process_run(probe,  & probe_output,  & probe_errors) == 0 ? 1 : - 1;
+    String probe_output = NULL, probe_errors = NULL;
+    toolchain -> keep_system_includes = process_run(probe, & probe_output, & probe_errors) == 0 ? 1 : - 1;
   }
   char * base[] ={
-    "-E",  "-P",  "-x",  "c",  "-D__asm(x)=",  "-D__asm__(x)=",  "-D__attribute__(x)=",  "-D__format__(x)=",  "-D__printf__(x)=",  "-D__inline__=",  "-D__inline=",  "-D_Nullable=",  "-D_Nonnull=",  "-DX2CCPP",  "-D__restrict=",  "-D__extension__=",  "-Wno-unicode",  "-Wno-invalid-pp-token",  "-Wno-pragma-once-outside-header"
+    "-E", "-P", "-x", "c", "-D__asm(x)=", "-D__asm__(x)=", "-D__attribute__(x)=", "-D__format__(x)=", "-D__printf__(x)=", "-D__inline__=", "-D__inline=", "-D_Nullable=", "-D_Nonnull=", "-DX2CCPP", "-D__restrict=", "-D__extension__=", "-Wno-unicode", "-Wno-invalid-pp-token", "-Wno-pragma-once-outside-header"
   }
   ;
   List repo_dirs = x2c_cpp_include_dirs();
@@ -463,71 +459,70 @@ int Toolchain_preprocess(Toolchain toolchain,  const char * fname,  List include
     }
     close(fd);
   }
-  Array_push(arguments,  String_var(toolchain -> cc));
-  for(int i = 0;  i < sizeof(base) / sizeof(base[0]);  i ++) Array_push(arguments,  String_var(String_new(base[i])));
-  if(toolchain -> keep_system_includes > 0) Array_push(arguments,  String_var(_19));
-  Array_push(arguments,  String_var(_18));
-  Array_push(arguments,  String_var(_20));
-  _append_includes(arguments,  repo_dirs);
-  _append_includes(arguments,  include_dirs);
+  Array_push(arguments, String_var(toolchain -> cc));
+  for(int i = 0;  i < sizeof(base) / sizeof(base[0]);  i ++) Array_push(arguments, String_var(String_new(base[i])));
+  if(toolchain -> keep_system_includes > 0) Array_push(arguments, String_var(_19));
+  Array_push(arguments, String_var(_18));
+  Array_push(arguments, String_var(_20));
+  _append_includes(arguments, repo_dirs);
+  _append_includes(arguments, include_dirs);
   {
     Var argument;
-    Iter _x2c_macro_iterator_7 = List_iter(toolchain -> cpp_args,  &(struct Iter){
+    Iter _x2c_macro_iterator_7 = List_iter(toolchain -> cpp_args, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
+    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
       argument = _x2c_macro_item_7;
-      Array_push(arguments,  argument);
+      Array_push(arguments, argument);
     }
 
   }
   if(imacros){
-    Array_push(arguments,  String_var(_21));
-    Array_push(arguments,  String_var(String_new(imacros)));
+    Array_push(arguments, String_var(_21));
+    Array_push(arguments, String_var(String_new(imacros)));
   }
   if(force_include){
-    Array_push(arguments,  String_var(_22));
-    Array_push(arguments,  String_var(String_new(force_include)));
+    Array_push(arguments, String_var(_22));
+    Array_push(arguments, String_var(String_new(force_include)));
   }
   if(dependencies){
-    Array_push(arguments,  String_var(_10));
-    Array_push(arguments,  String_var(_12));
-    Array_push(arguments,  String_var(String_new(dependency_path)));
-    Array_push(arguments,  String_var(_13));
-    Array_push(arguments,  String_var(_23));
+    Array_push(arguments, String_var(_10));
+    Array_push(arguments, String_var(_12));
+    Array_push(arguments, String_var(String_new(dependency_path)));
+    Array_push(arguments, String_var(_13));
+    Array_push(arguments, String_var(_23));
   }
-  Array_push(arguments,  String_var(String_new(fname)));
+  Array_push(arguments, String_var(String_new(fname)));
   List argument_list = Array_list_free(arguments);
-  if(toolchain -> verbose) _print_action(1165861522189542,  argument_list);
-  int result = process_run(_action_argv(argument_list),  output,  errors);
+  if(toolchain -> verbose) _print_action(1165861522189542, argument_list);
+  int result = process_run(_action_argv(argument_list), output, errors);
   if(dependencies){
-    File dep = fopen(dependency_path,  "r");
+    File dep = fopen(dependency_path, "r");
     if(dep){
       {
-        ExceptionFrame  _x2c_exception_frame_0;
-        List _x2c_catch_pattern_0 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-        ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+        ExceptionFrame _x2c_exception_frame_0;
+        List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+        ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
         x2c_exception_push(& _x2c_exception_frame_0);
         if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) * dependencies = File_string_close(dep);
         else {x2c_exception_landed(& _x2c_exception_frame_0);
         {
           if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-            int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
             x2c_error_catch_detach(_x2c_error_handler_0);
             x2c_exception_mark_handled(&_x2c_exception_frame_0);
-            if (_x2c_catch_selected_0 == 0) {* dependencies = NULL;
+             {* dependencies = NULL;
           }
 
         }
         else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
         _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
         __builtin_unreachable();
       }
 
@@ -536,11 +531,11 @@ int Toolchain_preprocess(Toolchain toolchain,  const char * fname,  List include
   }
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
   _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 unlink(dependency_path);

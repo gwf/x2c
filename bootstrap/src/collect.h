@@ -11,15 +11,15 @@ void header_symbols_initialize(void);
 
 void header_symbols_begin_generated(void);
 
-void Compiler_record_generated_header_symbol(Compiler compiler,  String name,  Type signature);
+void Compiler_record_generated_header_symbol(Compiler compiler, String name, Type signature);
 
-Map Compiler_collect_symbols(Compiler c,  Map globs);
+Map Compiler_collect_symbols(Compiler c, Map globs);
 
-void Compiler_collect_package(Compiler c,  String name,  Token token);
+void Compiler_collect_package(Compiler c, String name, Token token);
 
-int header_symbols_write(File output,  int gensym_base);
+int header_symbols_write(File output, int gensym_base);
 
-int header_symbols_open(String path,  int gensym_base);
+int header_symbols_open(String path, int gensym_base);
 
 int header_symbols_active(void);
 

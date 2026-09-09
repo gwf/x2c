@@ -23,7 +23,7 @@ int main(void){
   const upstream_monitor * second = upstream_monitor_at(1);
   upstream_label_fn callback = left_label;
   String owned = String_new(first);
-  printf("%s %s %s %d %d %d %d\n",  version,  first,  second -> label,  upstream_count_labels(callback),  aliased_index(first),  aliased_width(1),  String_len(owned));
+  printf("%s %s %s %d %d %d %d\n", version, first, second -> label, upstream_count_labels(callback), aliased_index(first), aliased_width(1), String_len(owned));
   return 0;
 }
 

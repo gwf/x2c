@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-assignment.x:5:34: type: captured value
                                    ^
   note: binding: value
 
-limit: too many errors, stopping
-

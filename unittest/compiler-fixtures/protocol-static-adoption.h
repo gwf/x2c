@@ -20,7 +20,7 @@ StaticBase StaticParticipant_staticbase(StaticParticipant value);
 
 StaticParticipant StaticBase_staticparticipant(StaticBase value);
 
-int StaticBase_read(StaticBase value,  const int * scale,  int * * output,  int values[3],  int(* callback)(int));
+int StaticBase_read(StaticBase value, const int * scale, int * * output, int values[3], int(* callback)(int));
 
 int main(void);
 

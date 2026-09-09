@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-adoption-required.x:32:24: type: type ("Vec"
     printf("%u\n", v.hash());
                          ^
 
-limit: too many errors, stopping
-

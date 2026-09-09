@@ -2,7 +2,7 @@
 
 #include "atomic-container-ops.h"
 
-static String _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _7, _6, _5, _4, _3, _2, _1, _0;
 
 static Scores saved_array;
 
@@ -16,15 +16,11 @@ static int rhs_calls;
 
 static int _init_guard_ = 0;
 
-
-
-
-
 Var String_var(String);
 
 Var int_var(int);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
 Var Var_new(Symbol, ...);
 
@@ -32,7 +28,7 @@ int Var_int(Var);
 
 String Var_string(Var);
 
-String String_add(String,  String);
+String String_add(String, String);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -46,7 +42,7 @@ static Var next_key(String value);
 
 static Var next_rhs(int value);
 
-static String _x2c_proto_string_add_update(volatile String * lhs,  Symbol op,  String rhs);
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -90,42 +86,42 @@ static Var next_rhs(int value){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Scores dst_array = Array_update_n(Array_new(),  6,  int_var(10),  int_var(20),  int_var(30),  int_var(40),  int_var(50),  int_var(60)),  src_array = Array_update_n(Array_new(),  2,  int_var(2),  int_var(3));
-  Totals dst_map = Map_update_n(Map_new(),  2,  String_var(_0),  int_var(100),  String_var(_1),  int_var(200)),  src_map = Map_update_n(Map_new(),  1,  String_var(_2),  int_var(4));
+  Scores dst_array = Array_update_n(Array_new(), 6, int_var(10), int_var(20), int_var(30), int_var(40), int_var(50), int_var(60)), src_array = Array_update_n(Array_new(), 2, int_var(2), int_var(3));
+  Totals dst_map = Map_update_n(Map_new(), 2, String_var(_0), int_var(100), String_var(_1), int_var(200)), src_map = Map_update_n(Map_new(), 1, String_var(_2), int_var(4));
   saved_array = dst_array;
   saved_map = dst_map;
-  Var value = Array_updateindex(array_base(),  next_index(0),  56,  next_rhs(3));
-  Var aa = x2c_array_updateindex_from_array(array_base(),  next_index(1),  56,  src_array,  next_index(0));
-  Var am = x2c_array_updateindex_from_map(array_base(),  next_index(2),  62,  src_map,  next_key(_2));
-  Var ma = x2c_map_updateindex_from_array(map_base(),  next_key(_0),  56,  src_array,  next_index(1));
-  Var mm = x2c_map_updateindex_from_map(map_base(),  next_key(_1),  54,  src_map,  next_key(_2));
-  Var complex = Array_updateindex(array_base(),  next_index(3),  56,  Var_binary(Array_getindex(src_array,  next_index(0)),  54,  int_var(2)));
-  Var casted = Array_updateindex(array_base(),  next_index(4),  56,  Array_getindex(src_array,  next_index(1)));
-  Var same = x2c_array_updateindex_from_array(array_base(),  next_index(4),  56,  dst_array,  next_index(4));
-  Var prefix = Array_updateindex(array_base(),  next_index(5),  56,  int_var(1));
-  Var postfix = Array_postfixindex(array_base(),  next_index(5),  2046);
+  Var value = Array_updateindex(array_base(), next_index(0), 56, next_rhs(3));
+  Var aa = x2c_array_updateindex_from_array(array_base(), next_index(1), 56, src_array, next_index(0));
+  Var am = x2c_array_updateindex_from_map(array_base(), next_index(2), 62, src_map, next_key(_2));
+  Var ma = x2c_map_updateindex_from_array(map_base(), next_key(_0), 56, src_array, next_index(1));
+  Var mm = x2c_map_updateindex_from_map(map_base(), next_key(_1), 54, src_map, next_key(_2));
+  Var complex = Array_updateindex(array_base(), next_index(3), 56, Var_binary(Array_getindex(src_array, next_index(0)), 54, int_var(2)));
+  Var casted = Array_updateindex(array_base(), next_index(4), 56, Array_getindex(src_array, next_index(1)));
+  Var same = x2c_array_updateindex_from_array(array_base(), next_index(4), 56, dst_array, next_index(4));
+  Var prefix = Array_updateindex(array_base(), next_index(5), 56, int_var(1));
+  Var postfix = Array_postfixindex(array_base(), next_index(5), 2046);
   Var counter = int_var(7);
-  Var direct_prefix = Var_update(&(counter),  56,  int_var(1));
-  Var direct_postfix = Var_postfix(&(counter),  2046);
-  Var dynamic = Var_new(1318210446,  _3);
-  Var sum = Var_binary(dynamic,  56,  String_var(_6));
-  Var_update(&(dynamic),  56,  String_var(_4));
+  Var direct_prefix = Var_update(&(counter), 56, int_var(1));
+  Var direct_postfix = Var_postfix(&(counter), 2046);
+  Var dynamic = Var_new(1318210446, _3);
+  Var sum = Var_binary(dynamic, 56, String_var(_6));
+  Var_update(&(dynamic), 56, String_var(_4));
   Text text = _5;
-  _x2c_proto_string_add_update(&(text),  56,  _7);
+  _x2c_proto_string_add_update(&(text), 56, _7);
   int native[2] ={
-    1,  2
+    1, 2
   }
   ;
   native[0] += native[1];
   native[1] ++;
-  printf("values=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",  Var_int(value),  Var_int(aa),  Var_int(am),  Var_int(ma),  Var_int(mm),  Var_int(complex),  Var_int(casted),  Var_int(same),  Var_int(prefix),  Var_int(postfix));
-  printf("direct=%d,%d,%d strings=%s,%s,%s native=%d,%d\n",  Var_int(direct_prefix),  Var_int(direct_postfix),  Var_int(counter),  Var_string(sum),  Var_string(dynamic),  text,  native[0],  native[1]);
-  printf("calls=%d,%d,%d\n",  base_calls,  selector_calls,  rhs_calls);
+  printf("values=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", Var_int(value), Var_int(aa), Var_int(am), Var_int(ma), Var_int(mm), Var_int(complex), Var_int(casted), Var_int(same), Var_int(prefix), Var_int(postfix));
+  printf("direct=%d,%d,%d strings=%s,%s,%s native=%d,%d\n", Var_int(direct_prefix), Var_int(direct_postfix), Var_int(counter), Var_string(sum), Var_string(dynamic), text, native[0], native[1]);
+  printf("calls=%d,%d,%d\n", base_calls, selector_calls, rhs_calls);
   return 0;
 }
 
-static String _x2c_proto_string_add_update(volatile String * lhs,  Symbol op,  String rhs){
-  lhs[0] = String_add(lhs[0],  rhs);
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
+  lhs[0] = String_add(lhs[0], rhs);
   return lhs[0];
 }
 

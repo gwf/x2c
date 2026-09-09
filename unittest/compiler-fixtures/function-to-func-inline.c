@@ -2,18 +2,18 @@
 
 #include "function-to-func-inline.h"
 
-static List _20,  _19,  _15,  _14,  _12,  _10,  _9,  _7,  _6,  _4,  _1;
+static List _20, _19, _15, _14, _12, _10, _9, _7, _6, _4, _1;
 
 static String _17;
 
-static Var _18,  _16,  _13,  _11,  _8,  _5,  _3,  _2,  _0;
+static Var _18, _16, _13, _11, _8, _5, _3, _2, _0;
 
 static int _init_guard_ = 0;
 
 static Func _x2c_func_handle_0;
 
 typedef struct _x2c_func_pointer_context_0{
-  long(* _x2c_func_pointer_1)(long,  long);
+  long(* _x2c_func_pointer_1)(long, long);
 }
 _x2c_func_pointer_context_0;
 
@@ -24,84 +24,82 @@ typedef struct _x2c_lambda_context_0{
 }
 _x2c_lambda_context_0;
 
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var List_var(List);
 
 Var String_var(String);
 
-Func Func_new(FuncAdapter,  List);
+Func Func_new(FuncAdapter, List);
 
 long Var_integer(Var);
 
-List x2c_func_reference_type(Func,  unsigned,  unsigned);
+List x2c_func_reference_type(Func, unsigned, unsigned);
 
 int List_truth(List);
 
-FuncArg FuncArg_reference(const void *,  List);
+FuncArg FuncArg_reference(const void *, List);
 
 FuncArg FuncArg_value(Var);
 
 Var int_var(int);
 
-Var Func_apply(Func,  unsigned,  const FuncArg *);
+Var Func_apply(Func, unsigned, const FuncArg *);
 
-Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 Var long_var(long);
 
 const void * Func_context(Func);
 
-Func Func_new_context(FuncAdapter,  List,  const void *,  size_t);
+Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static long add(long left,  long right);
+static long add(long left, long right);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1,  const FuncArg * _x2c_func_argv_1);
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Var _x2c_lambda_0(long value);
 
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2,  const FuncArg * _x2c_func_argv_2);
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0,  const FuncArg * _x2c_lambda_argv_0);
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = Symbol_var(19368);
-  _1 = cons(_0,  NULL);
+  _1 = cons(_0, NULL);
   _2 = Symbol_var(437126);
   _3 = Symbol_var(818062);
-  _4 = cons(_3,  NULL);
+  _4 = cons(_3, NULL);
   _5 = List_var(_4);
-  _6 = cons(_5,  NULL);
-  _7 = cons(_5,  _6);
+  _6 = cons(_5, NULL);
+  _7 = cons(_5, _6);
   _8 = List_var(_7);
-  _9 = cons(_8,  NULL);
-  _10 = cons(_2,  _9);
+  _9 = cons(_8, NULL);
+  _10 = cons(_2, _9);
   _11 = List_var(_10);
-  _12 = cons(_11,  _4);
+  _12 = cons(_11, _4);
   _13 = List_var(_6);
-  _14 = cons(_13,  NULL);
-  _15 = cons(_2,  _14);
+  _14 = cons(_13, NULL);
+  _15 = cons(_2, _14);
   _16 = List_var(_15);
   _17 = String_new("Var");
   _18 = String_var(_17);
-  _19 = cons(_18,  NULL);
-  _20 = cons(_16,  _19);
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _12);
-  _x2c_func_handle_1 = Func_new(_x2c_func_adapt_2,  _20);
+  _19 = cons(_18, NULL);
+  _20 = cons(_16, _19);
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12);
+  _x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _20);
 }
 
-static long add(long left,  long right){
+static long add(long left, long right){
   return left + right;
 }
 
@@ -109,28 +107,28 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   if(Var_integer(({
-    Func _x2c_func_call_0 = inline_direct();  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0,  2,  0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL,  _1);  else _x2c_func_argument_0 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_0,  2,  1);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(NULL,  _1);  else _x2c_func_argument_1 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_0,  2, (FuncArg[]){
-      _x2c_func_argument_0,  _x2c_func_argument_1
+    Func _x2c_func_call_0 = inline_direct();  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 2, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_0 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_1 = x2c_func_reference_type(_x2c_func_call_0, 2, 1);  FuncArg _x2c_func_argument_1;  if(List_truth(_x2c_func_reference_type_1)) _x2c_func_argument_1 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_1 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_0, 2, (FuncArg[]){
+      _x2c_func_argument_0, _x2c_func_argument_1
     }
     );
   }
   )) != 42) return 1;
   if(Var_integer(({
-    Func _x2c_func_call_1 = inline_pointer(add);  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_1,  2,  0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(NULL,  _1);  else _x2c_func_argument_2 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_1,  2,  1);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(NULL,  _1);  else _x2c_func_argument_3 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_1,  2, (FuncArg[]){
-      _x2c_func_argument_2,  _x2c_func_argument_3
+    Func _x2c_func_call_1 = inline_pointer(add);  List _x2c_func_reference_type_2 = x2c_func_reference_type(_x2c_func_call_1, 2, 0);  FuncArg _x2c_func_argument_2;  if(List_truth(_x2c_func_reference_type_2)) _x2c_func_argument_2 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_2 = FuncArg_value(int_var(20));  List _x2c_func_reference_type_3 = x2c_func_reference_type(_x2c_func_call_1, 2, 1);  FuncArg _x2c_func_argument_3;  if(List_truth(_x2c_func_reference_type_3)) _x2c_func_argument_3 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_3 = FuncArg_value(int_var(22));  Func_apply(_x2c_func_call_1, 2, (FuncArg[]){
+      _x2c_func_argument_2, _x2c_func_argument_3
     }
     );
   }
   )) != 42) return 2;
   if(Var_integer(({
-    Func _x2c_func_call_2 = inline_noncapturing();  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_2,  1,  0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(NULL,  _1);  else _x2c_func_argument_4 = FuncArg_value(int_var(41));  Func_apply(_x2c_func_call_2,  1, (FuncArg[]){
+    Func _x2c_func_call_2 = inline_noncapturing();  List _x2c_func_reference_type_4 = x2c_func_reference_type(_x2c_func_call_2, 1, 0);  FuncArg _x2c_func_argument_4;  if(List_truth(_x2c_func_reference_type_4)) _x2c_func_argument_4 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_4 = FuncArg_value(int_var(41));  Func_apply(_x2c_func_call_2, 1, (FuncArg[]){
       _x2c_func_argument_4
     }
     );
   }
   )) != 42) return 3;
   if(Var_integer(({
-    Func _x2c_func_call_3 = inline_capturing(2);  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_3,  1,  0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(NULL,  _1);  else _x2c_func_argument_5 = FuncArg_value(int_var(40));  Func_apply(_x2c_func_call_3,  1, (FuncArg[]){
+    Func _x2c_func_call_3 = inline_capturing(2);  List _x2c_func_reference_type_5 = x2c_func_reference_type(_x2c_func_call_3, 1, 0);  FuncArg _x2c_func_argument_5;  if(List_truth(_x2c_func_reference_type_5)) _x2c_func_argument_5 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_5 = FuncArg_value(int_var(40));  Func_apply(_x2c_func_call_3, 1, (FuncArg[]){
       _x2c_func_argument_5
     }
     );
@@ -140,10 +138,10 @@ int main(void){
   return 0;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  0,  818062),  818062));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0,  _x2c_func_argv_0,  1,  818062),  818062));
-  return long_var(add(a0,  a1));
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 1, 818062), 818062));
+  return long_var(add(a0, a1));
   ;
 }
 
@@ -153,21 +151,21 @@ Func _x2c_func_get_e915dee0_0(void){
   ;
 }
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1,  const FuncArg * _x2c_func_argv_1){
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *) Func_context(_x2c_func_binding_1);
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1,  _x2c_func_argv_1,  0,  818062),  818062));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1,  _x2c_func_argv_1,  1,  818062),  818062));
-  return long_var(_x2c_func_pointer_context_1 -> _x2c_func_pointer_1(a0,  a1));
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 818062), 818062));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 1, 818062), 818062));
+  return long_var(_x2c_func_pointer_context_1 -> _x2c_func_pointer_1(a0, a1));
   ;
 }
 
-Func _x2c_func_from_pointer_e915dee0_0(long(* _x2c_func_pointer_0)(long,  long)){
+Func _x2c_func_from_pointer_e915dee0_0(long(* _x2c_func_pointer_0)(long, long)){
   if(! _init_guard_) _file_init_();
   return({
     _x2c_func_pointer_context_0 _x2c_func_pointer_context_2 ={
       _x2c_func_pointer_0
     }
-    ;  _x2c_func_pointer_context_2._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_1,  _12,  & _x2c_func_pointer_context_2,  sizeof _x2c_func_pointer_context_2) : NULL;
+    ;  _x2c_func_pointer_context_2._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_1, _12, & _x2c_func_pointer_context_2, sizeof _x2c_func_pointer_context_2) : NULL;
   }
   );
   ;
@@ -178,8 +176,8 @@ static Var _x2c_lambda_0(long value){
   ;
 }
 
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2,  const FuncArg * _x2c_func_argv_2){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_2,  _x2c_func_argv_2,  0,  818062),  818062));
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 818062), 818062));
   return _x2c_lambda_0(a0);
   ;
 }
@@ -190,10 +188,10 @@ Func _x2c_func_get_e915dee0_1(void){
   ;
 }
 
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_0,  const FuncArg * _x2c_lambda_argv_0){
-  long value = Var_long(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0,  _x2c_lambda_argv_0,  0,  818062),  818062));
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
+  long value = Var_long(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 818062), 818062));
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return long_var(value + Var_long(Var_convert(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0,  818062)));
+  return long_var(value + Var_long(Var_convert(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0, 818062)));
   ;
 }
 
@@ -203,7 +201,7 @@ Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1){
     _x2c_lambda_capture_1
   }
   ;
-  return Func_new_context(_x2c_lambda_1,  _20,  & _x2c_lambda_context_1,  sizeof _x2c_lambda_context_1);
+  return Func_new_context(_x2c_lambda_1, _20, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   ;
 }
 

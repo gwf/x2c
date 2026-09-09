@@ -9,7 +9,7 @@
 #include "iter.h"
 typedef struct Map{
   Scope * scope;
-  Bytes hashes,  entries;
+  Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
   unsigned mask;
@@ -22,55 +22,55 @@ Map Map_new(void);
 
 unsigned Map_len(Map map);
 
-int Map_try_get(Map map,  Var key,  Var * out);
+int Map_try_get(Map map, Var key, Var * out);
 
-Var Map_get(Map map,  Var key);
+Var Map_get(Map map, Var key);
 
-Var Map_getindex(Map map,  Var key);
+Var Map_getindex(Map map, Var key);
 
-Var Map_getdefault(Map map,  Var key,  Var defval);
+Var Map_getdefault(Map map, Var key, Var defval);
 
-Var Map_setdefault(Map map,  Var key,  Var defval);
+Var Map_setdefault(Map map, Var key, Var defval);
 
-int Map_contains(Map map,  Var key);
+int Map_contains(Map map, Var key);
 
-void Map_set(Map map,  Var key,  Var val);
+void Map_set(Map map, Var key, Var val);
 
-Var Map_setindex(Map map,  Var key,  Var val);
+Var Map_setindex(Map map, Var key, Var val);
 
-Var Map_updateindex(Map map,  Var key,  Symbol op,  Var rhs);
+Var Map_updateindex(Map map, Var key, Symbol op, Var rhs);
 
-Var Map_postfixindex(Map map,  Var key,  Symbol op);
+Var Map_postfixindex(Map map, Var key, Symbol op);
 
-int Map_try_del(Map map,  Var key,  Var * out);
+int Map_try_del(Map map, Var key, Var * out);
 
-Var Map_del(Map map,  Var key);
+Var Map_del(Map map, Var key);
 
-Map Map_update_n(Map map,  unsigned pair_count, ...);
+Map Map_update_n(Map map, unsigned pair_count, ...);
 
 Map Map_copy(Map map);
 
-void Map_export_to(Map map,  Context source,  VarExportContextFn export_value,  Scope * scope);
+void Map_export_to(Map map, Context source, VarExportContextFn export_value, Scope * scope);
 
-Map Map_merge(Map map,  Map other);
+Map Map_merge(Map map, Map other);
 
-int Map_try_next(Map map,  unsigned * cursor,  Var * key,  Var * val);
+int Map_try_next(Map map, unsigned * cursor, Var * key, Var * val);
 
 int Map_truth(Map map);
 
-int Map_compare(Map a,  Map b);
+int Map_compare(Map a, Map b);
 
-Iter Map_iter(Map x,  Iter dest);
+Iter Map_iter(Map x, Iter dest);
 
-Iter Map_keys(Map x,  Iter dest);
+Iter Map_keys(Map x, Iter dest);
 
-Iter Map_enumerate(Map x,  Iter dest);
+Iter Map_enumerate(Map x, Iter dest);
 
-int Map_equal(Map map1,  Map map2);
+int Map_equal(Map map1, Map map2);
 
-Buffer Map_write_repr(Map map,  Buffer out);
+Buffer Map_write_repr(Map map, Buffer out);
 
-Buffer Map_write_str(Map map,  Buffer out);
+Buffer Map_write_str(Map map, Buffer out);
 
 String Map_str(Map map);
 

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/callback-adapt-variadic.x:10:3: type: typed callback 
     ^
   note: target signature: (* (func (("Var") (...))) int) source signature: ((func (("String") (...))) int)
 
-limit: too many errors, stopping
-

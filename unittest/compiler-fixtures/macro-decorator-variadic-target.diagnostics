@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-decorator-variadic-target.x:3:1: parse: decorat
   macro Decorator $variadic(Function $target...) => {
   ^^^^^
 
-limit: too many errors, stopping
-

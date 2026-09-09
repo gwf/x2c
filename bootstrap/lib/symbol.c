@@ -10,23 +10,23 @@ static const char _symbol_alphabet[] = "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 #include "string.h"
 int String_truth(String);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
-String String_new_len(const char *,  int);
+String String_new_len(const char *, int);
 
 Buffer Buffer_new(size_t);
 
 String Buffer_str_free(Buffer);
 
-Buffer Buffer_write(Buffer,  const char *);
+Buffer Buffer_write(Buffer, const char *);
 
-Buffer Buffer_write_char(Buffer,  char);
+Buffer Buffer_write_char(Buffer, char);
 
 String String_unescape(String);
 
 static int _char_to_5bit(int c);
 
-static int _bytes_fit_5bit(const char * str,  int len);
+static int _bytes_fit_5bit(const char * str, int len);
 
 static int _char_to_5bit(int c){
   if(c >= 'a' && c <= 'z') return c - 'a' + 1;
@@ -42,15 +42,15 @@ static int _char_to_5bit(int c){
 
 }
 
-static int _bytes_fit_5bit(const char * str,  int len){
+static int _bytes_fit_5bit(const char * str, int len){
   if(! str) return 0;
   for(int i = 0;  i < len;  i ++) if(! _char_to_5bit(str[i])) return 0;
   return 1;
 }
 
-Symbol Symbol_new_len(const char * str,  int len){
+Symbol Symbol_new_len(const char * str, int len){
   if(! str || len <= 0) return 0;
-  int is_5bit = _bytes_fit_5bit(str,  len);
+  int is_5bit = _bytes_fit_5bit(str, len);
   int max_len = is_5bit ? SYMBOL_MAX_5BIT : SYMBOL_MAX_7BIT;
   if(len > max_len) len = max_len;
   uint64_t result = 0;
@@ -69,27 +69,27 @@ Symbol Symbol_new_len(const char * str,  int len){
 }
 
 Symbol Symbol_new(const char * str){
-  return Symbol_new_len(str,  strlen(str));
+  return Symbol_new_len(str, strlen(str));
 }
 
-int Symbol_try_new(String spelling,  Symbol * out){
+int Symbol_try_new(String spelling, Symbol * out){
   if(! out) return 0;
   Symbol symbol = String_truth(spelling) ? Symbol_new(spelling) : 0;
-  if(! String_equal(spelling,  Symbol_str(symbol))) return 0;
+  if(! String_equal(spelling, Symbol_str(symbol))) return 0;
   * out = symbol;
   return 1;
 }
 
 int Symbol_len(Symbol symbol){
-  int len = 0,  bits =(symbol & 1) ? 7 : 5;
+  int len = 0, bits =(symbol & 1) ? 7 : 5;
   for(symbol >>= 1;  symbol;  symbol >>= bits) len ++;
   return len;
 }
 
-void Symbol_decode(Symbol symbol,  char * dest){
+void Symbol_decode(Symbol symbol, char * dest){
   if(! dest || ! symbol) return;
   int len = Symbol_len(symbol);
-  memset(dest,  0,  SYMBOL_MAX_5BIT + 1);
+  memset(dest, 0, SYMBOL_MAX_5BIT + 1);
   if(symbol & 1){
     symbol >>= 1;
     for(int i = 0;  i < len;  i ++){
@@ -112,19 +112,19 @@ void Symbol_decode(Symbol symbol,  char * dest){
 String Symbol_str(Symbol symbol){
   char text[SYMBOL_MAX_5BIT + 1];
   if(! symbol) return NULL;
-  Symbol_decode(symbol,  text);
-  return String_new_len(text,  strlen(text));
+  Symbol_decode(symbol, text);
+  return String_new_len(text, strlen(text));
 }
 
-int Symbol_compare(Symbol a,  Symbol b){
+int Symbol_compare(Symbol a, Symbol b){
   if(a == b) return 0;
   if(! a) return b ? - 1 : 0;
   if(! b) return 1;
-  char a_text[SYMBOL_MAX_5BIT + 1],  b_text[SYMBOL_MAX_5BIT + 1];
-  Symbol_decode(a,  a_text);
-  Symbol_decode(b,  b_text);
-  int a_len = Symbol_len(a),  b_len = Symbol_len(b),  len = a_len < b_len ? a_len : b_len;
-  int comparison = memcmp(a_text,  b_text,  len);
+  char a_text[SYMBOL_MAX_5BIT + 1], b_text[SYMBOL_MAX_5BIT + 1];
+  Symbol_decode(a, a_text);
+  Symbol_decode(b, b_text);
+  int a_len = Symbol_len(a), b_len = Symbol_len(b), len = a_len < b_len ? a_len : b_len;
+  int comparison = memcmp(a_text, b_text, len);
   if(comparison) return comparison < 0 ? - 1 : 1;
   if(a_len != b_len) return a_len < b_len ? - 1 : 1;
   return a < b ? - 1 : 1;
@@ -132,39 +132,39 @@ int Symbol_compare(Symbol a,  Symbol b){
 
 String Symbol_repr(Symbol symbol){
   Buffer out = Buffer_new(0);
-  Symbol_write_repr(symbol,  out);
+  Symbol_write_repr(symbol, out);
   String result = Buffer_str_free(out);
   return result;
 }
 
-Buffer Symbol_write_str(Symbol symbol,  Buffer out){
+Buffer Symbol_write_str(Symbol symbol, Buffer out){
   if(! symbol) return out;
   char text[SYMBOL_MAX_5BIT + 1] ={
     0
   }
   ;
-  Symbol_decode(symbol,  text);
-  return Buffer_write(out,  text);
+  Symbol_decode(symbol, text);
+  return Buffer_write(out, text);
 }
 
-Buffer Symbol_write_repr(Symbol symbol,  Buffer out){
-  if(! symbol) return Buffer_write(out,  "<>");
+Buffer Symbol_write_repr(Symbol symbol, Buffer out){
+  if(! symbol) return Buffer_write(out, "<>");
   char text[SYMBOL_MAX_5BIT + 1] ={
     0
   }
   ;
-  Symbol_decode(symbol,  text);
-  Buffer_write_char(out,  '<');
-  if(!(symbol & 1)) Buffer_write(out,  text);
+  Symbol_decode(symbol, text);
+  Buffer_write_char(out, '<');
+  if(!(symbol & 1)) Buffer_write(out, text);
   else{
-    Buffer_write(out,  "\\\"");
+    Buffer_write(out, "\\\"");
     for(const char * src = text;  * src;  src ++){
-      if(* src == '\\' || * src == '"') Buffer_write_char(out,  '\\');
-      Buffer_write_char(out,  * src);
+      if(* src == '\\' || * src == '"') Buffer_write_char(out, '\\');
+      Buffer_write_char(out, * src);
     }
-    Buffer_write(out,  "\\\"");
+    Buffer_write(out, "\\\"");
   }
-  return Buffer_write_char(out,  '>');
+  return Buffer_write_char(out, '>');
 }
 
 char Symbol_first(Symbol symbol){
@@ -194,15 +194,15 @@ Symbol Symbol_parse(char * text){
   if(len <= 0){
     len = scan_atom(text);
     if(len <= 0) return 0;
-    return Symbol_new_len(text,  len);
+    return Symbol_new_len(text, len);
   }
   if(len >= 3 && text[1] == '"'){
-    String inner = String_new_len(text + 2,  len - 4);
+    String inner = String_new_len(text + 2, len - 4);
     if(! String_truth(inner)) return 0;
     String unquoted = String_unescape(inner);
     if(! String_truth(unquoted)) return 0;
     return Symbol_new(unquoted);
   }
-  return Symbol_new_len(text + 1,  len - 2);
+  return Symbol_new_len(text + 1, len - 2);
 }
 

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/raise-bare-code.x:4:11: parse: raise code must be a b
             ^^^^^^^^^^^
   note: use raise %(code (key value)...);
 
-limit: too many errors, stopping
-

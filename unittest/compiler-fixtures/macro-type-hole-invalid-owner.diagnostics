@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-type-hole-invalid-owner.x:11:1: type: method na
   $box_pointer(MacroInvalidOwner *);
   ^
 
-limit: too many errors, stopping
-

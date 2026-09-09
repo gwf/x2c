@@ -2,7 +2,7 @@
 
 #include "var-wide-unsigned-long-long.h"
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 static Var box_value(unsigned long long value);
 
@@ -13,7 +13,7 @@ static Var box_value(unsigned long long value){
 }
 
 static unsigned long long unbox_value(Var value){
-  return Var_ulong_long(Var_convert(value,  1435270030));
+  return Var_ulong_long(Var_convert(value, 1435270030));
 }
 
 int main(void){
@@ -21,7 +21,7 @@ int main(void){
   unsigned long long value = ULLONG_MAX;
   Var boxed = box_value(value);
   unsigned long long roundtrip = unbox_value(boxed);
-  printf("%d %d %llu\n",  Var_is(boxed,  1435270030),  roundtrip == value,  roundtrip);
+  printf("%d %d %llu\n", Var_is(boxed, 1435270030), roundtrip == value, roundtrip);
   return roundtrip != value;
 }
 

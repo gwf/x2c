@@ -8,31 +8,31 @@
 #include "common.h"
 typedef struct X2CVarNumericInfo{
   Symbol tag;
-  int floating,  unsigned_value,  bits,  rank;
+  int floating, unsigned_value, bits, rank;
 }
 X2CVarNumericInfo;
 
 typedef struct X2CVarNumeric{
   Symbol tag;
-  int floating,  unsigned_value,  bits,  rank;
+  int floating, unsigned_value, bits, rank;
   unsigned long long raw;
   long double floating_value;
 }
 X2CVarNumeric;
 
-Symbol Var_integer_tag(int rank,  int unsigned_value);
+Symbol Var_integer_tag(int rank, int unsigned_value);
 
 unsigned long long Var_width_mask(int bits);
 
-long long Var_signed_from_bits(unsigned long long raw,  int bits);
+long long Var_signed_from_bits(unsigned long long raw, int bits);
 
-void Var_numeric_decode(Var value,  X2CVarNumeric * out);
+void Var_numeric_decode(Var value, X2CVarNumeric * out);
 
-Var Var_integer_box(Symbol target,  unsigned long long raw);
+Var Var_integer_box(Symbol target, unsigned long long raw);
 
-int Var_numeric_info(Symbol tag,  X2CVarNumericInfo * out);
+int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
 
-Var Var_convert(Var value,  Symbol target);
+Var Var_convert(Var value, Symbol target);
 
 
 #endif /* __GUARD_0xFC215CA0__ */

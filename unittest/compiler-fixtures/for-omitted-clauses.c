@@ -83,7 +83,7 @@ static int declared_init_no_increment(void){
 
 int main(void){
   x2c_initialize();
-  printf("%d %d %d %d %d %d %d %d\n",  all_omitted(),  omitted_init(),  omitted_condition(),  omitted_increment(),  omitted_init_and_condition(),  omitted_init_and_increment(),  omitted_condition_and_increment(),  declared_init_no_increment());
+  printf("%d %d %d %d %d %d %d %d\n", all_omitted(), omitted_init(), omitted_condition(), omitted_increment(), omitted_init_and_condition(), omitted_init_and_increment(), omitted_condition_and_increment(), declared_init_no_increment());
   return 0;
 }
 

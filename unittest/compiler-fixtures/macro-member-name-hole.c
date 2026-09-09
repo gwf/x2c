@@ -7,10 +7,10 @@ int main(void){
   MacroMemberName record ={
     .value = 42
   }
-  ,  * pointer = & record;
+  , * pointer = & record;
   int direct = record.value;
   int indirect = pointer -> value;
-  printf("%d %d\n",  direct,  indirect);
+  printf("%d %d\n", direct, indirect);
   return direct == 42 && indirect == 42 ? 0 : 1;
 }
 

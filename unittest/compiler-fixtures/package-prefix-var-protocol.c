@@ -2,7 +2,7 @@
 
 #include "package-prefix-var-protocol.h"
 
-geo__Vec geo__Vec_new(double,  double);
+geo__Vec geo__Vec_new(double, double);
 
 Var geo__Vec_var(geo__Vec);
 
@@ -10,8 +10,8 @@ geo__Vec geo__Var_vec(Var);
 
 double geo__Vec_norm(geo__Vec);
 
-double geo__roundtrip_norm(double x,  double y){
-  geo__Vec v = geo__Vec_new(x,  y);
+double geo__roundtrip_norm(double x, double y){
+  geo__Vec v = geo__Vec_new(x, y);
   Var boxed = geo__Vec_var(v);
   geo__Vec back = geo__Var_vec(boxed);
   return geo__Vec_norm(back);

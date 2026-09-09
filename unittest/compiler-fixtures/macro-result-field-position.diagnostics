@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-result-field-position.x:8:3: macro: macro 'fiel
     $field_result();
     ^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/printf-var-dynamic-format.x:6:3: xform: Var arguments
     ^^^^^^
   note: printf-family call: printf
 
-limit: too many errors, stopping
-

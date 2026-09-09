@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-var-fallback-not-static.x:19:26: type: type 
     return (int) value.hash();
                            ^
 
-limit: too many errors, stopping
-

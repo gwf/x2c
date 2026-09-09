@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-invocation-location-outside.x:3:21: macro: x2c 
   static char *file = $(x2c.invocation.file);
                       ^^
 
-limit: too many errors, stopping
-

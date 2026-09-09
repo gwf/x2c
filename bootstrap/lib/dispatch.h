@@ -7,25 +7,25 @@
 
 #include "common.h"
 #include "map.h"
-int Var_dispatch_truth(Var value,  int * handled);
+int Var_dispatch_truth(Var value, int * handled);
 
-int Var_try_dispatch_binary(Var lhs,  Symbol member,  Var rhs,  Var * result);
+int Var_try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var * result);
 
-int Var_try_dispatch_unary(Var value,  Symbol member,  Var * result);
+int Var_try_dispatch_unary(Var value, Symbol member, Var * result);
 
 void x2c_register_type(String name);
 
-int x2c_register_builtin_descriptor(Symbol tag,  VarMethods methods);
+int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods);
 
-int x2c_try_register_descriptor(String name,  VarMethods methods);
+int x2c_try_register_descriptor(String name, VarMethods methods);
 
-void x2c_register_descriptor(String name,  VarMethods methods);
+void x2c_register_descriptor(String name, VarMethods methods);
 
-int x2c_try_register_tagged_descriptor(Symbol tag,  String name,  VarMethods methods);
+int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
 
 String Var_pointer_string(Var v);
 
-Buffer Var_write_pointer_repr(Var v,  Buffer out);
+Buffer Var_write_pointer_repr(Var v, Buffer out);
 
 void x2c_descriptor_thread_start_begin(void);
 
@@ -33,51 +33,51 @@ void x2c_descriptor_thread_start_end(int success);
 
 int x2c_descriptor_registration_frozen(void);
 
-int Var_contains(Var value,  Var needle);
+int Var_contains(Var value, Var needle);
 
-Var Var_getindex(Var value,  Var key);
+Var Var_getindex(Var value, Var key);
 
-Var Var_setindex(Var value,  Var key,  Var replacement);
+Var Var_setindex(Var value, Var key, Var replacement);
 
-Var Var_updateindex(Var value,  Var key,  Symbol op,  Var rhs);
+Var Var_updateindex(Var value, Var key, Symbol op, Var rhs);
 
-Var Var_postfixindex(Var value,  Var key,  Symbol op);
+Var Var_postfixindex(Var value, Var key, Symbol op);
 
 String Var_fallback_str(Var v);
 
 String Var_str(Var v);
 
-Buffer Var_fallback_write_str(Var v,  Buffer out);
+Buffer Var_fallback_write_str(Var v, Buffer out);
 
-Buffer Var_write_str(Var v,  Buffer out);
+Buffer Var_write_str(Var v, Buffer out);
 
 String Var_fallback_repr(Var v);
 
 String Var_repr(Var v);
 
-Buffer Var_fallback_write_repr(Var v,  Buffer out);
+Buffer Var_fallback_write_repr(Var v, Buffer out);
 
-Buffer Var_write_repr(Var v,  Buffer out);
+Buffer Var_write_repr(Var v, Buffer out);
 
-int Var_fallback_equal(Var a,  Var b);
+int Var_fallback_equal(Var a, Var b);
 
 unsigned Var_fallback_hash(Var v);
 
 unsigned Var_hash(Var v);
 
-int Var_equal(Var a,  Var b);
+int Var_equal(Var a, Var b);
 
-int Var_same(Var a,  Var b);
+int Var_same(Var a, Var b);
 
-int Var_fallback_compare(Var a,  Var b);
+int Var_fallback_compare(Var a, Var b);
 
-int Var_compare(Var a,  Var b);
+int Var_compare(Var a, Var b);
 
-Iter Var_fallback_iter(Var x,  Iter dest);
+Iter Var_fallback_iter(Var x, Iter dest);
 
-Iter Var_iter(Var x,  Iter dest);
+Iter Var_iter(Var x, Iter dest);
 
-int Var_try_export_context(Var value,  Context source,  Var * out);
+int Var_try_export_context(Var value, Context source, Var * out);
 
 
 #endif /* __GUARD_0x4D85CB6E__ */

@@ -6,10 +6,6 @@ static String _0;
 
 static int _init_guard_ = 0;
 
-
-
-
-
 int String_len(String);
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -25,7 +21,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   String text = _0;
-  printf("%s\n",  text);
+  printf("%s\n", text);
   return String_len(text) != 8;
 }
 

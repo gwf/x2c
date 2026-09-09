@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-enumerator-wrong-kind.x:8:3: macro: macro 'not_
     $not_an_enumerator()
     ^
 
-limit: too many errors, stopping
-

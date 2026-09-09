@@ -2,5 +2,3 @@ unittest/compiler-fixtures/var-bitfield-compound.x:10:3: xform: dynamic compound
     bits.value += increment;
     ^^^^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/destructuring-nonidentifier.x:6:23: parse: unsupporte
                         ^
   note: destructuring targets must be simple identifiers
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/string-typedef-bracket-assignment.x:13:11: parse: typ
     text[0] = 'j';
             ^
 
-limit: too many errors, stopping
-

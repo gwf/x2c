@@ -3,7 +3,7 @@
 #include "import-basic.h"
 
 #include <stdio.h>
-geo__Vec geo__Vec_new(double,  double);
+geo__Vec geo__Vec_new(double, double);
 
 double geo__Vec_norm(geo__Vec);
 
@@ -11,13 +11,13 @@ double geo__span(geo__VecPair);
 
 int main(void){
   x2c_initialize();
-  geo__Vec v = geo__Vec_new(3.0,  4.0);
+  geo__Vec v = geo__Vec_new(3.0, 4.0);
   geo__VecPair pair;
   pair.a.x = 1.0;
   pair.a.y = 0.0;
   pair.b.x = 0.0;
   pair.b.y = 2.0;
-  printf("norm=%g span=%g\n",  geo__Vec_norm(v),  geo__span(pair));
+  printf("norm=%g span=%g\n", geo__Vec_norm(v), geo__span(pair));
   return 0;
 }
 

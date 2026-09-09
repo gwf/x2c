@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-unit-malformed-preproc.x:7:1: parse: syntax can
   $malformed();
   ^
 
-limit: too many errors, stopping
-

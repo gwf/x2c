@@ -7,17 +7,17 @@
 
 #include "x2c.h"
 #include "compiler.h"
-List Compiler_finish_return_statement(Compiler compiler,  List expression);
+List Compiler_finish_return_statement(Compiler compiler, List expression);
 
-void Compiler_begin_match_arm(Compiler compiler,  List pattern,  Token start,  int binds);
+void Compiler_begin_match_arm(Compiler compiler, List pattern, Token start, int binds);
 
-void Compiler_begin_catch_arm(Compiler compiler,  List pattern,  Token start);
+void Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start);
 
 List Compiler_parse_block_item(Compiler compiler);
 
 List Compiler_parse_statement(Compiler compiler);
 
-List Compiler_parse_block_items(Compiler c,  int anchor_items);
+List Compiler_parse_block_items(Compiler c, int anchor_items);
 
 List Compiler_parse_compound_statement(Compiler compiler);
 

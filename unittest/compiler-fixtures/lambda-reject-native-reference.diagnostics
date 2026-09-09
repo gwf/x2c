@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-native-reference.x:7:41: type: captured
                                           ^
   note: binding: value
 
-limit: too many errors, stopping
-

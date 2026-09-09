@@ -4,18 +4,18 @@
 
 #include "error.h"
 
-static void bump(int * value,  int amount);
+static void bump(int * value, int amount);
 
 static int fallback_probe(int fail);
 
-static void bump(int * value,  int amount){
+static void bump(int * value, int amount){
   * value += amount;
 }
 
 static int fallback_probe(int fail){
   if(fail){
     {
-      static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/macro-statement-production.x",.function =  "fallback_probe",.line =  50};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/macro-statement-production.x",.function = "fallback_probe",.line = 50};
       x2c_error_raise_n(& _x2c_error_site_0, 425262028382176, 0);
     }
     return 23;
@@ -27,30 +27,30 @@ int main(void){
   x2c_initialize();
   int value = 0;
   if(1){
-    bump(& value,  2);
+    bump(& value, 2);
   }
   else value = 1000;
   if(0) value = 1000;
   else do{
-    bump(& value,  3);
+    bump(& value, 3);
   }
   while(0);
   int loop = 1;
   while(loop){
-    bump(& value,  5);
+    bump(& value, 5);
     loop = 0;
-    bump(& value,  7);
+    bump(& value, 7);
   }
   if(1){
     do{
-      bump(& value,  13);
+      bump(& value, 13);
       value += 11;
-      bump(& value,  17);
+      bump(& value, 17);
     }
     while(0);
   }
   else value = 1000;
-  printf("%d %d\n",  value,  fallback_probe(0));
+  printf("%d %d\n", value, fallback_probe(0));
   return 0;
 }
 

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/match-default-not-last.x:7:5: parse: match default ar
       ^^^^
   note: move default after every case arm
 
-limit: too many errors, stopping
-

@@ -7,33 +7,33 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void Compiler_record_declaration_visibility(Compiler compiler,  List declaration);
+void Compiler_record_declaration_visibility(Compiler compiler, List declaration);
 
-void Compiler_rebuild_protocols(Compiler compiler,  Map symbols);
+void Compiler_rebuild_protocols(Compiler compiler, Map symbols);
 
-List Compiler_publish_protocol_node(Compiler c,  List node,  Token participant_token,  Token representation_token);
+List Compiler_publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token);
 
 void Compiler_resolve_protocols(Compiler compiler);
 
-void Compiler_install_generated_protocol_symbols(Compiler c,  Map symbols);
+void Compiler_install_generated_protocol_symbols(Compiler c, Map symbols);
 
-List Compiler_protocol_members_for(Compiler compiler,  Type participant,  Type base);
+List Compiler_protocol_members_for(Compiler compiler, Type participant, Type base);
 
-int Compiler_protocol_rejects_direct_member(Compiler compiler,  Type participant,  String member);
+int Compiler_protocol_rejects_direct_member(Compiler compiler, Type participant, String member);
 
-Symbol Compiler_operator_member(Compiler compiler,  Symbol op);
+Symbol Compiler_operator_member(Compiler compiler, Symbol op);
 
-void Compiler_dump_conformance(Compiler compiler,  Map globs);
+void Compiler_dump_conformance(Compiler compiler, Map globs);
 
-Symbol Compiler_derived_member(Compiler compiler,  Symbol op);
+Symbol Compiler_derived_member(Compiler compiler, Symbol op);
 
-List Compiler_resolve_protocol_member(Compiler compiler,  Type participant,  String member_name);
+List Compiler_resolve_protocol_member(Compiler compiler, Type participant, String member_name);
 
-List Compiler_resolve_protocol_method(Compiler compiler,  Type participant,  String member_name);
+List Compiler_resolve_protocol_method(Compiler compiler, Type participant, String member_name);
 
-String Compiler_protocol_update_helper(Compiler c,  Type participant,  String member,  int postfix);
+String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
 
-List Compiler_generate_protocol_adapters(Compiler c,  List ast);
+List Compiler_generate_protocol_adapters(Compiler c, List ast);
 
 List Compiler_parse_protocol_declaration(Compiler c);
 

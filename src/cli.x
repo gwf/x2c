@@ -608,7 +608,7 @@ static CliOption *_find_option(
       size_t length = (size_t) (end - start);
       if (spelling_length == length && strncmp(spelling, start, length) == 0)
         return option;
-      if (command_mask != CLI_TRANSLATE && option.value && length == 2 &&
+      if (option.value && length == 2 &&
           spelling_length > 2 &&
           strncmp(spelling, start, 2) == 0) {
         *attached = spelling + 2;
@@ -781,9 +781,9 @@ static void _apply_option(
 /* translate reports the diagnostic for x2c's single-dash long-option
    spellings. */
 static void _one_dash_removed(String arg) {
+  const char *attached;
   if (strlen(arg) > 2 && arg[0] == '-' && arg[1] != '-' &&
-      strcmp(arg, "-I") != 0 && strcmp(arg, "-h") != 0 &&
-      strcmp(arg, "-v") != 0 && strcmp(arg, "-###") != 0) {
+      _find_option(%"-$arg", CLI_TRANSLATE, &attached)) {
     fprintf(
       stderr,
       "x2c: error: one-dash long option '%s' was removed\n", arg);
@@ -904,8 +904,9 @@ CliRequest cli_parse(int argc, char **argv) {
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args.cdr(), command);
   if (strcmp(first, "-o") == 0) _removed_output();
+  const char *attached;
   if (strlen(first) > 2 && first[0] == '-' && first[1] != '-' &&
-      first[1] != '#') {
+      _find_option(%"-$first", CLI_TRANSLATE, &attached)) {
     fprintf(
       stderr,
       "x2c: error: one-dash long option '%s' was removed\n", first);

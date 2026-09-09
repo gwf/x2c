@@ -3,5 +3,3 @@ unittest/compiler-fixtures/symbol-set-duplicate.x:4:17: parse: duplicate Symbol 
                   ^^^
   note: symbol: <foo>
 
-limit: too many errors, stopping
-

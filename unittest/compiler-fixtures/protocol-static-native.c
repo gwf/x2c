@@ -9,10 +9,10 @@ static unsigned native_hash(unsigned value){
 }
 
 #ifndef X2CCPP
-_Static_assert(_Generic(& native_hash,  unsigned(*)(StaticNative) : 1, default: 0),  "native alias StaticNative_hash does not match native_hash");
+_Static_assert(_Generic(& native_hash, unsigned(*)(StaticNative) : 1, default: 0), "native alias StaticNative_hash does not match native_hash");
 #endif
 #define StaticNative_hash native_hash
 int main(void){
-  x2c_initialize();  StaticNative value = 41;  printf("%u\n",  StaticNative_hash(value));  return 0;
+  x2c_initialize();  StaticNative value = 41;  printf("%u\n", StaticNative_hash(value));  return 0;
 }
 

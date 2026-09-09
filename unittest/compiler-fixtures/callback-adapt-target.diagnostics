@@ -2,5 +2,3 @@ unittest/compiler-fixtures/callback-adapt-target.x:7:3: macro: typed callback ad
     $x2c.callback.adapt(target, String.str);
     ^
 
-limit: too many errors, stopping
-

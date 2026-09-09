@@ -10,7 +10,7 @@
 #include <string.h>
 typedef struct Block{
   Bytes bytes;
-  size_t width,  length,  cap;
+  size_t width, length, cap;
 }
 * Block;
 
@@ -24,15 +24,15 @@ static inline Block Bytes_block(Bytes bytes){
   return *((Block *)(data - sizeof(Block)));
 }
 
-void Block_reserve(Block block,  size_t minimum);
+void Block_reserve(Block block, size_t minimum);
 
-static inline Bytes Bytes_reserve(Bytes bytes,  size_t minimum){
+static inline Bytes Bytes_reserve(Bytes bytes, size_t minimum){
   Block block = Bytes_block(bytes);
-  Block_reserve(block,  minimum);
+  Block_reserve(block, minimum);
   return block -> bytes;
 }
 
-static inline void Block_truncate(Block block,  size_t length){
+static inline void Block_truncate(Block block, size_t length){
   if((void *) block != NULL && length < block -> length) block -> length = length;
 }
 
@@ -40,49 +40,49 @@ static inline void Block_clear(Block block){
   if((void *) block != NULL) block -> length = 0;
 }
 
-void Block_append(Block b,  const void * source,  size_t count);
+void Block_append(Block b, const void * source, size_t count);
 
-static inline Bytes Bytes_append(Bytes bytes,  const void * source,  size_t count){
+static inline Bytes Bytes_append(Bytes bytes, const void * source, size_t count){
   Block block = Bytes_block(bytes);
-  Block_append(block,  source,  count);
+  Block_append(block, source, count);
   return block -> bytes;
 }
 
-void Block_append_fill(Block b,  const void * element,  size_t count);
+void Block_append_fill(Block b, const void * element, size_t count);
 
-static inline Bytes Bytes_append_fill(Bytes bytes,  const void * element,  size_t count){
+static inline Bytes Bytes_append_fill(Bytes bytes, const void * element, size_t count){
   Block block = Bytes_block(bytes);
-  Block_append_fill(block,  element,  count);
+  Block_append_fill(block, element, count);
   return block -> bytes;
 }
 
-static inline int Block_try_pop(Block block,  void * out){
+static inline int Block_try_pop(Block block, void * out){
   if((void *) block == NULL || ! block -> length) return 0;
   size_t index = block -> length - 1;
-  if(out) memmove(out, (unsigned char *) block -> bytes + index * block -> width,  block -> width);
+  if(out) memmove(out, (unsigned char *) block -> bytes + index * block -> width, block -> width);
   block -> length = index;
   return 1;
 }
 
-static inline int Bytes_try_pop(Bytes bytes,  void * out){
-  return Block_try_pop(Bytes_block(bytes),  out);
+static inline int Bytes_try_pop(Bytes bytes, void * out){
+  return Block_try_pop(Bytes_block(bytes), out);
 }
 
-static inline void Block_push(Block block,  const void * source){
-  Block_append(block,  source,  1);
+static inline void Block_push(Block block, const void * source){
+  Block_append(block, source, 1);
 }
 
-static inline Bytes Bytes_push(Bytes bytes,  const void * source){
-  return Bytes_append(bytes,  source,  1);
+static inline Bytes Bytes_push(Bytes bytes, const void * source){
+  return Bytes_append(bytes, source, 1);
 }
 
 static inline void Block_pop(Block block){
-  Block_try_pop(block,  NULL);
+  Block_try_pop(block, NULL);
 }
 
 void Block_free(Block block);
 
-void Block_move_to(Block block,  Scope * scope);
+void Block_move_to(Block block, Scope * scope);
 
 static inline size_t Block_len(Block block){
   return(void *) block != NULL ? block -> length : 0;
@@ -106,7 +106,7 @@ void Bytes_pop(Bytes a0);
 
 void Bytes_free(Bytes a0);
 
-void Bytes_truncate(Bytes a0,  size_t a1);
+void Bytes_truncate(Bytes a0, size_t a1);
 
 
 #endif /* __GUARD_0x36E46C2D__ */

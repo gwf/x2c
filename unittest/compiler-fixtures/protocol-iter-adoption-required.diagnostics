@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-iter-adoption-required.x:14:3: macro: type (
     ^^^^^^^
   note: declare an Iter protocol adoption or iterate an Iter directly
 
-limit: too many errors, stopping
-

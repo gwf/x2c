@@ -56,4 +56,4 @@ This target remains outside the default build and `make precommit`.
 
 `build-ape.sh` assembles the release. Call it directly with
 `COSMOCC` and `COSMOAR` to use a manually managed SDK.
-`COSMO_LICENSE_DIR`, `HOST_CC`, and `OUTPUT` are optional overrides.
+`COSMO_LICENSE_DIR` and `OUTPUT` are optional overrides.

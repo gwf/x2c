@@ -3,5 +3,3 @@ unittest/compiler-fixtures/diagnostic-width.x:1:18: parse: expected ';', '{', or
                    ^^^^^^^^^^
   note: token: unexpected symbol: ident
 
-limit: too many errors, stopping
-

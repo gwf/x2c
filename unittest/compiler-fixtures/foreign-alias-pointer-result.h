@@ -10,11 +10,11 @@
 typedef int Text;
 
 #ifndef X2CCPP
-_Static_assert(_Generic(& strchr,  char *(*)(const char *,  int) : 1, default: 0),  "native alias find_char does not match strchr");
+_Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias find_char does not match strchr");
 #endif
 #define find_char strchr
 #ifndef X2CCPP
-_Static_assert(_Generic(& strstr,  char *(*)(const char *,  const char *) : 1, default: 0),  "native alias Text_find does not match strstr");
+_Static_assert(_Generic(& strstr, char *(*)(const char *, const char *) : 1, default: 0), "native alias Text_find does not match strstr");
 #endif
 #define Text_find strstr
 int main(void);

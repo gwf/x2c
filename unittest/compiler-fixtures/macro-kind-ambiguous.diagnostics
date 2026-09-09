@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-kind-ambiguous.x:3:1: parse: macro hole 'value'
   ^^^^^
   note: annotate holes used only by compile-time Lisp
 
-limit: too many errors, stopping
-

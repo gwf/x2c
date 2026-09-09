@@ -4,5 +4,3 @@ unittest/compiler-fixtures/macro-binding-spelling-arbitrary.x:7:13: macro: x2c.b
   note: value: (expr (int) 
  (op + (expr (int) (literal (int) "40")) (expr (int) (literal (int) "2"))))
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-postfix-update.x:5:32: type: captured v
                                  ^
   note: binding: value
 
-limit: too many errors, stopping
-

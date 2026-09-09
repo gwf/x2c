@@ -2,11 +2,11 @@
 
 #include "index-slice-lowering.h"
 
-static List _7,  _6,  _5,  _4;
+static List _7, _6, _5, _4;
 
 static String _8;
 
-static Var _3,  _2,  _1,  _0;
+static Var _3, _2, _1, _0;
 
 static Array saved_array;
 
@@ -30,27 +30,25 @@ static int bound_calls;
 
 static int _init_guard_ = 0;
 
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var Symbol_var(Symbol);
 
 String String_malloc(int);
 
-Var Array_getindex(Array,  int);
+Var Array_getindex(Array, int);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
-Var Map_getindex(Map,  Var);
+Var Map_getindex(Map, Var);
 
-Var Array_setindex(Array,  int,  Var);
+Var Array_setindex(Array, int, Var);
 
-Var Map_setindex(Map,  Var,  Var);
+Var Map_setindex(Map, Var, Var);
 
 int Var_int(Var);
 
@@ -86,10 +84,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = int_var(2);
   _2 = int_var(3);
   _3 = int_var(4);
-  _4 = cons(_3,  NULL);
-  _5 = cons(_2,  _4);
-  _6 = cons(_1,  _5);
-  _7 = cons(_0,  _6);
+  _4 = cons(_3, NULL);
+  _5 = cons(_2, _4);
+  _6 = cons(_1, _5);
+  _7 = cons(_0, _6);
   _8 = String_new("abcd");
 }
 
@@ -132,28 +130,28 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   int raw[3] ={
-    1,  2,  3
+    1, 2, 3
   }
-  ,  * ptr = raw,  native_read = ptr[1];
+  , * ptr = raw, native_read = ptr[1];
   raw[2] = 9;
-  saved_array = Array_update_n(Array_new(),  4,  int_var(10),  int_var(20),  int_var(30),  int_var(40));
+  saved_array = Array_update_n(Array_new(), 4, int_var(10), int_var(20), int_var(30), int_var(40));
   List list = _7;
   String text = _8;
-  saved_map = Map_update_n(Map_new(),  1,  Symbol_var(1255752),  int_var(7));
+  saved_map = Map_update_n(Map_new(), 1, Symbol_var(1255752), int_var(7));
   saved_buffer = String_malloc(4);
-  strcpy(saved_buffer,  "abc");
-  Var array_read = Array_getindex(array_base(),  next_index(1));
-  Var list_read = List_getindex(list,  next_index(2));
-  int string_read = String_getindex(text,  next_index(3));
-  Var map_read = Map_getindex(map_base(),  Symbol_var(next_key(1255752)));
-  Array_setindex(array_base(),  next_index(2),  next_value(90));
-  Map_setindex(map_base(),  Symbol_var(next_key(97761636)),  next_value(42));
+  strcpy(saved_buffer, "abc");
+  Var array_read = Array_getindex(array_base(), next_index(1));
+  Var list_read = List_getindex(list, next_index(2));
+  int string_read = String_getindex(text, next_index(3));
+  Var map_read = Map_getindex(map_base(), Symbol_var(next_key(1255752)));
+  Array_setindex(array_base(), next_index(2), next_value(90));
+  Map_setindex(map_base(), Symbol_var(next_key(97761636)), next_value(42));
   ((char *) buffer_base())[next_index(0)] = 'z';
-  Array slice = Array_getslice(array_base(),  next_bound(0),  next_bound(4),  next_bound(2));
-  List reverse = List_getslice(list,  -2147483648,  -2147483648,  - 1);
-  String suffix = String_getslice(text,  1,  -2147483648,  1);
-  printf("native=%d,%d values=%d,%d,%c,%d writes=%d,%d,%c\n",  native_read,  raw[2],  Var_int(array_read),  Var_int(list_read),  string_read,  Var_int(map_read),  Var_int(Array_getindex(saved_array,  2)),  Var_int(Map_getindex(saved_map,  Symbol_var(97761636))),  String_getindex(saved_buffer,  0));
-  printf("slices=%s|%s|%s calls=%d,%d,%d,%d,%d,%d,%d\n",  Array_repr(slice),  List_repr(reverse),  String_repr(suffix),  array_base_calls,  map_base_calls,  buffer_base_calls,  index_calls,  key_calls,  value_calls,  bound_calls);
+  Array slice = Array_getslice(array_base(), next_bound(0), next_bound(4), next_bound(2));
+  List reverse = List_getslice(list, -2147483648, -2147483648, - 1);
+  String suffix = String_getslice(text, 1, -2147483648, 1);
+  printf("native=%d,%d values=%d,%d,%c,%d writes=%d,%d,%c\n", native_read, raw[2], Var_int(array_read), Var_int(list_read), string_read, Var_int(map_read), Var_int(Array_getindex(saved_array, 2)), Var_int(Map_getindex(saved_map, Symbol_var(97761636))), String_getindex(saved_buffer, 0));
+  printf("slices=%s|%s|%s calls=%d,%d,%d,%d,%d,%d,%d\n", Array_repr(slice), List_repr(reverse), String_repr(suffix), array_base_calls, map_base_calls, buffer_base_calls, index_calls, key_calls, value_calls, bound_calls);
   String_free(saved_buffer);
   return 0;
 }

@@ -16,23 +16,23 @@ int List_len(List);
 
 int filtered(int volatile mode){
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    volatile int  _x2c_cleanup_guard_0  = 1;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(97614135954008),  cons(Symbol_var(54),  cons(List_var(cons(Symbol_var(5874022),  cons(Symbol_var(1953475496),  NULL))),  cons(Symbol_var(54),  NULL))));
-    List _x2c_catch_pattern_1 =  cons(Symbol_var(4372499598),  cons(Symbol_var(57814248),  NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 3,  List_var(_x2c_catch_pattern_0),  List_var(_x2c_catch_pattern_1),  Symbol_var(Symbol_new("default")));
+    ExceptionFrame _x2c_exception_frame_0;
+    volatile int _x2c_cleanup_guard_0 = 1;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(97614135954008), cons(Symbol_var(54), cons(List_var(cons(Symbol_var(5874022), cons(Symbol_var(1953475496), NULL))), cons(Symbol_var(54), NULL))));
+    List _x2c_catch_pattern_1 = cons(Symbol_var(4372499598), cons(Symbol_var(57814248), NULL));
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 3, List_var(_x2c_catch_pattern_0), List_var(_x2c_catch_pattern_1), Symbol_var(Symbol_new("default")));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      _x2c_cleanup_guard_0  = 1;
+      _x2c_cleanup_guard_0 = 1;
       {
         if(mode == 1){
-          static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/catch-filter-arms.x",.function =  "filtered",.line =  5};
-          x2c_error_raise_n(& _x2c_error_site_0, 97614135954008, 1, Symbol_var(5874022),  int_var(mode));
+          static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-arms.x",.function = "filtered",.line = 5};
+          x2c_error_raise_n(& _x2c_error_site_0, 97614135954008, 1, Symbol_var(5874022), int_var(mode));
           __builtin_unreachable();
         }
         if(mode == 2){
-          static const X2CErrorSite  _x2c_error_site_1  = {.file =  "unittest/compiler-fixtures/catch-filter-arms.x",.function =  "filtered",.line =  7};
-          x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(46228810),  int_var(mode));
+          static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-arms.x",.function = "filtered",.line = 7};
+          x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(46228810), int_var(mode));
           __builtin_unreachable();
         }
 
@@ -52,7 +52,7 @@ int filtered(int volatile mode){
           {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   int _x2c_cleanup_state_0 = _x2c_cleanup_guard_0;
+  int _x2c_cleanup_state_0 = _x2c_cleanup_guard_0;
           if (_x2c_cleanup_state_0 >= 0) {_x2c_cleanup_guard_0 = 0;
           if (_x2c_cleanup_state_0 > 0) {x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
@@ -66,20 +66,20 @@ int filtered(int volatile mode){
       }
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
     }
 
   }
-  if (_x2c_catch_selected_0 == 1) {List rest = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+  else if (_x2c_catch_selected_0 == 1) {List rest = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
   {
     {
       int _x2c_return_value_1 = List_len(rest);
       {
   int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   int _x2c_cleanup_state_1 = _x2c_cleanup_guard_0;
+  int _x2c_cleanup_state_1 = _x2c_cleanup_guard_0;
       if (_x2c_cleanup_state_1 >= 0) {_x2c_cleanup_guard_0 = 0;
       if (_x2c_cleanup_state_1 > 0) {x2c_error_catch_close(_x2c_error_handler_0);
       _x2c_error_handler_0 = NULL;
@@ -93,18 +93,18 @@ int filtered(int volatile mode){
   }
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-   return _x2c_return_value_1;
+  return _x2c_return_value_1;
 
 }
 }
 }
 }
-if (_x2c_catch_selected_0 == 2) {{
+else {{
   int _x2c_return_value_2 = - 1;
   {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   int _x2c_cleanup_state_2 = _x2c_cleanup_guard_0;
+  int _x2c_cleanup_state_2 = _x2c_cleanup_guard_0;
   if (_x2c_cleanup_state_2 >= 0) {_x2c_cleanup_guard_0 = 0;
   if (_x2c_cleanup_state_2 > 0) {x2c_error_catch_close(_x2c_error_handler_0);
   _x2c_error_handler_0 = NULL;
@@ -118,7 +118,7 @@ x2c_exception_leave(& _x2c_exception_frame_0);
 }
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-   return _x2c_return_value_2;
+  return _x2c_return_value_2;
 
 }
 }
@@ -127,7 +127,7 @@ x2c_exception_leave(& _x2c_exception_frame_0);
 else {if (_x2c_cleanup_guard_0 >= 0) {
         int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
         x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-         if (_x2c_cleanup_guard_0 > 0) {  x2c_error_catch_close(_x2c_error_handler_0);
+        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 {
   mode ++;
@@ -135,7 +135,7 @@ _x2c_error_handler_0 = NULL;
  }
         x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
         _x2c_cleanup_guard_0 = -1;
-         x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_exception_frame_0);
 
       } __builtin_unreachable();
 }
@@ -144,7 +144,7 @@ _x2c_error_handler_0 = NULL;
 if (_x2c_cleanup_guard_0 >= 0) {
         int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
         x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-         if (_x2c_cleanup_guard_0 > 0) {  x2c_error_catch_close(_x2c_error_handler_0);
+        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 {
   mode ++;
@@ -152,7 +152,7 @@ _x2c_error_handler_0 = NULL;
  }
         x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
         _x2c_cleanup_guard_0 = -1;
-         x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_exception_frame_0);
 
       }
 }

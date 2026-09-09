@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-import-cycle-b.xmacro:1:1: macro: compile-time 
   ^^
   note: import: unittest/compiler-fixtures/macro-import-cycle-a.xmacro from: unittest/compiler-fixtures/macro-import-cycle-a.xmacro from: unittest/compiler-fixtures/macro-import-cycle-b.xmacro
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/import-method-ambiguous.x:6:19: type: method 'Var.vec
                     ^
   note: package: 'geo' package: 'other'
 
-limit: too many errors, stopping
-

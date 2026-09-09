@@ -11,12 +11,12 @@ typedef List Type;
 
 List Type_declaration_parts(Type type);
 
-List Type_declaration_ast(Type type,  List binding);
+List Type_declaration_ast(Type type, List binding);
 
-List Type_parameter_ast(Type type,  List binding);
+List Type_parameter_ast(Type type, List binding);
 
 static inline Type Var_type(Var x){
-  return Var_is(x,  806120) ?(Type) Var_pointer(x) :(Type) NULL;
+  return Var_is(x, 806120) ?(Type) Var_pointer(x) :(Type) NULL;
 }
 
 static inline List Type_list(Type x){
@@ -65,7 +65,7 @@ String Type_var_numeric_extractor(Type type);
 
 String Type_var_numeric_update_helper(Type type);
 
-Type Type_numeric_literal(String text,  int floating);
+Type Type_numeric_literal(String text, int floating);
 
 List Type_tag(Type type);
 
@@ -77,9 +77,9 @@ void Type_begin_unit(void);
 
 void Type_end_unit(void);
 
-void Type_register_var_tag(Type type,  String name,  String converter);
+void Type_register_var_tag(Type type, String name, String converter);
 
-void Type_register_var_adoption(Type type,  Type representation,  Symbol tag);
+void Type_register_var_adoption(Type type, Type representation, Symbol tag);
 
 String Type_var_converter(Type type);
 
@@ -93,7 +93,7 @@ Type Type_canonicalize(Type type);
 
 Type Type_declared(Type type);
 
-int Type_discards_qualifiers(Type source,  Type target);
+int Type_discards_qualifiers(Type source, Type target);
 
 int Type_is_builtin(Type type);
 
@@ -115,7 +115,7 @@ Type Type_apply(Type type);
 
 Type Type_promote(Type type);
 
-Type Type_widest(Type a,  Type b);
+Type Type_widest(Type a, Type b);
 
 int Type_is_static(Type type);
 

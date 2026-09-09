@@ -2,12 +2,12 @@
 
 #include "with-shadowed.h"
 
-geo__Vec geo__Vec_new(double,  double);
+geo__Vec geo__Vec_new(double, double);
 
 double geo__Vec_norm(geo__Vec);
 
-double local_span(double x,  double y){
-  geo__Vec v = geo__Vec_new(x,  y);
+double local_span(double x, double y){
+  geo__Vec v = geo__Vec_new(x, y);
   double span = geo__Vec_norm(v);
   return span;
 }

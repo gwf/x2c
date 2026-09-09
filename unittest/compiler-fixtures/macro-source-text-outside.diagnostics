@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-source-text-outside.x:3:1: macro: x2c.source.te
   $(x2c.source.text '(expr (int) (literal (int) "1")))
   ^^
 
-limit: too many errors, stopping
-

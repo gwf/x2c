@@ -20,11 +20,11 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 static int local_latest(void){
   int value = 7;
   {
-   _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & value};
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & value};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  & _x2c_defer_env_1
+    .env = & _x2c_defer_env_1
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -34,10 +34,10 @@ static int local_latest(void){
       {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
     }
@@ -56,7 +56,7 @@ static int global_only(void){
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -65,10 +65,10 @@ static int global_only(void){
       {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-   return _x2c_return_value_1;
+  return _x2c_return_value_1;
 
 }
     }
@@ -84,8 +84,8 @@ static int global_only(void){
 
 int main(void){
   x2c_initialize();
-  int result = local_latest(),  before = global_only();
-  printf("%d %d %d\n",  result,  before,  observed);
+  int result = local_latest(), before = global_only();
+  printf("%d %d %d\n", result, before, observed);
   return result == 42 && before == 42 && observed == 43 ? 0 : 1;
 }
 

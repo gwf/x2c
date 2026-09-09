@@ -8,10 +8,6 @@ static int _init_guard_ = 0;
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-
-
-
-
 Var Var_new(Symbol, ...);
 
 void * Var_pointer(Var);
@@ -40,14 +36,14 @@ __attribute__((constructor)) static void _file_init_(void){
     .str = _x2c_proto_staticdescriptor_str_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(1381098884181190,  _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("staticdescriptor"),  _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(1381098884181190, _x2c__x2c_protocol_methods_0)){
+    x2c_register_descriptor(String_new("staticdescriptor"), _x2c__x2c_protocol_methods_0);
   }
   _0 = String_new("private:");
 }
 
 static Var StaticDescriptor_var(StaticDescriptor value){
-  return Var_new(1381098884181190,  value);
+  return Var_new(1381098884181190, value);
 }
 
 static StaticDescriptor Var_staticdescriptor(Var value){
@@ -56,7 +52,7 @@ static StaticDescriptor Var_staticdescriptor(Var value){
 
 String StaticDescriptor_str(StaticDescriptor value){
   if(! _init_guard_) _file_init_();
-  return String_join(NULL,  cons(String_var(_0),  cons(String_var(int_str(value -> value)),  NULL)));
+  return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));
 }
 
 int main(void){
@@ -64,7 +60,7 @@ int main(void){
   StaticDescriptor value = Scope_malloc(sizeof(struct StaticDescriptor));
   value -> value = 42;
   Var boxed = StaticDescriptor_var(value);
-  printf("%s\n",  Var_str(boxed));
+  printf("%s\n", Var_str(boxed));
   return 0;
 }
 

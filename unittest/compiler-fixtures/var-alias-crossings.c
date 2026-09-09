@@ -8,9 +8,9 @@ static int take_calls;
 
 Var long_var(long);
 
-int Var_equal(Var,  Var);
+int Var_equal(Var, Var);
 
-int Var_compare(Var,  Var);
+int Var_compare(Var, Var);
 
 static DynamicAlias make_alias(long value);
 
@@ -29,19 +29,19 @@ static DynamicAlias pass_alias(Dynamic value){
 
 static long take_alias(DynamicAlias value){
   take_calls ++;
-  return Var_long(Var_convert(value,  818062));
+  return Var_long(Var_convert(value, 818062));
 }
 
 int main(void){
   x2c_initialize();
   long precise = 9007199254740993L;
   Dynamic initialized = Var_box_long(precise);
-  DynamicAlias assigned = Var_new(3453797,  0);
+  DynamicAlias assigned = Var_new(3453797, 0);
   assigned = Var_box_long(precise + 1);
-  DynamicAlias argument = pass_alias(Var_box_long(precise)),  returned = make_alias(precise);
-  long direct = Var_long(Var_convert(returned,  818062)),  through = take_alias(initialized);
-  printf("crossings=%d,%d,%d,%d,%d,%d calls=%d\n",  Var_equal(initialized,  long_var(precise)),  Var_equal(assigned,  long_var(precise + 1)),  Var_equal(argument,  long_var(precise)),  Var_equal(returned,  long_var(precise)),  direct == precise,  through == precise,  pass_calls + take_calls);
-  printf("compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\n",  Var_equal(returned,  initialized),  ! Var_equal(returned,  assigned),  Var_same(returned,  initialized),  ! Var_same(returned,  initialized),  Var_compare(returned,  assigned) < 0,  Var_compare(returned,  initialized) <= 0,  Var_compare(assigned,  returned) > 0,  Var_compare(initialized,  returned) >= 0,  Var_equal(argument,  long_var(precise)),  Var_compare(long_var(precise),  assigned) < 0);
+  DynamicAlias argument = pass_alias(Var_box_long(precise)), returned = make_alias(precise);
+  long direct = Var_long(Var_convert(returned, 818062)), through = take_alias(initialized);
+  printf("crossings=%d,%d,%d,%d,%d,%d calls=%d\n", Var_equal(initialized, long_var(precise)), Var_equal(assigned, long_var(precise + 1)), Var_equal(argument, long_var(precise)), Var_equal(returned, long_var(precise)), direct == precise, through == precise, pass_calls + take_calls);
+  printf("compare=%d,%d,%d,%d,%d,%d,%d,%d mixed=%d,%d\n", Var_equal(returned, initialized), ! Var_equal(returned, assigned), Var_same(returned, initialized), ! Var_same(returned, initialized), Var_compare(returned, assigned) < 0, Var_compare(returned, initialized) <= 0, Var_compare(assigned, returned) > 0, Var_compare(initialized, returned) >= 0, Var_equal(argument, long_var(precise)), Var_compare(long_var(precise), assigned) < 0);
   return 0;
 }
 

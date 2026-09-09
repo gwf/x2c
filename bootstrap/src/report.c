@@ -2,20 +2,16 @@
 
 #include "report.h"
 
-static String _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static struct{
-  int receipts,  transient,  color,  columns,  width;
+  int receipts, transient, color, columns, width;
   unsigned long start;
   unsigned long update;
 }
 report;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 #include <errno.h>
 #include <stdio.h>
@@ -38,7 +34,7 @@ Var String_var(String);
 
 String int_str(int);
 
-String String_add(String,  String);
+String String_add(String, String);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -50,9 +46,9 @@ static int _columns(void);
 
 static const char * _color(Symbol tone);
 
-static void _emit(const char * prefix,  int prefix_length,  const char * color,  String line,  int newline);
+static void _emit(const char * prefix, int prefix_length, const char * color, String line, int newline);
 
-static int _clear(char * line,  int capacity);
+static int _clear(char * line, int capacity);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -74,58 +70,58 @@ __attribute__((constructor)) static void _file_init_(void){
 
 unsigned long report_now_us(void){
   struct timespec now;
-  if(clock_gettime(CLOCK_MONOTONIC,  & now)) return 0;
+  if(clock_gettime(CLOCK_MONOTONIC, & now)) return 0;
   return(unsigned long) now.tv_sec * 1000000ul +(unsigned long) now.tv_nsec / 1000ul;
 }
 
 unsigned long long report_file_bytes(String path){
   struct stat info;
-  if(! String_truth(path) || stat(path,  & info) || ! S_ISREG(info.st_mode)) return 0;
+  if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
   return(unsigned long long) info.st_size;
 }
 
 String report_duration(unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  if(microseconds < 1000) return String_printf(_0,  microseconds);
-  if(microseconds < 1000000) return String_printf(_1,  microseconds / 1000.0);
-  return String_printf(_2,  microseconds / 1000000.0);
+  if(microseconds < 1000) return String_printf(_0, microseconds);
+  if(microseconds < 1000000) return String_printf(_1, microseconds / 1000.0);
+  return String_printf(_2, microseconds / 1000000.0);
 }
 
 String report_size(unsigned long long bytes){
   if(! _init_guard_) _file_init_();
-  if(bytes < 1024) return String_printf(_3,  bytes);
-  if(bytes < 1024ull * 1024ull) return String_printf(_4,  bytes / 1024.0);
-  return String_printf(_5,  bytes /(1024.0 * 1024.0));
+  if(bytes < 1024) return String_printf(_3, bytes);
+  if(bytes < 1024ull * 1024ull) return String_printf(_4, bytes / 1024.0);
+  return String_printf(_5, bytes /(1024.0 * 1024.0));
 }
 
 static int _terminal(void){
   if(! isatty(fileno(stderr))) return 0;
   const char * term = getenv("TERM");
-  return ! term || strcmp(term,  "dumb") != 0;
+  return ! term || strcmp(term, "dumb") != 0;
 }
 
 static int _make_owned(void){
   const char * level = getenv("MAKELEVEL");
   if(! level || ! * level) return 0;
   char * end = NULL;
-  long parsed = strtol(level,  & end,  10);
+  long parsed = strtol(level, & end, 10);
   return end && ! * end && parsed > 0;
 }
 
 static int _columns(void){
   struct winsize size;
-  if(ioctl(fileno(stderr),  TIOCGWINSZ,  & size) == 0 && size.ws_col > 0) return size.ws_col;
+  if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
   const char * columns = getenv("COLUMNS");
   if(columns && * columns){
     char * end = NULL;
-    long parsed = strtol(columns,  & end,  10);
+    long parsed = strtol(columns, & end, 10);
     if(end && ! * end && parsed >= 20 && parsed <= 1000) return(int) parsed;
   }
   return 80;
 }
 
-void report_configure(int quiet,  int plain,  Symbol color_mode,  int verbose,  int dry_run,  int inspecting){
-  memset(& report,  0,  sizeof(report));
+void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting){
+  memset(& report, 0, sizeof(report));
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = ! quiet && ! diagnostic;
@@ -153,7 +149,7 @@ static const char * _color(Symbol tone){
 
 }
 
-static void _emit(const char * prefix,  int prefix_length,  const char * color,  String line,  int newline){
+static void _emit(const char * prefix, int prefix_length, const char * color, String line, int newline){
   struct iovec parts[5];
   int count = 0;
   if(prefix_length){
@@ -174,13 +170,13 @@ static void _emit(const char * prefix,  int prefix_length,  const char * color, 
     parts[count].iov_base = "\n";
     parts[count ++].iov_len = 1;
   }
-  while(writev(fileno(stderr),  parts,  count) < 0 && errno == EINTR){
+  while(writev(fileno(stderr), parts, count) < 0 && errno == EINTR){
 
   }
 
 }
 
-static int _clear(char * line,  int capacity){
+static int _clear(char * line, int capacity){
   if(! report.width) return 0;
   int width = report.width;
   if(width > capacity - 2) width = capacity - 2;
@@ -194,18 +190,18 @@ static int _clear(char * line,  int capacity){
 void report_suspend(void){
   if(! report.width) return;
   char clear[1002];
-  int length = _clear(clear,  sizeof(clear));
-  _emit(clear,  length,  "",  0,  0);
+  int length = _clear(clear, sizeof(clear));
+  _emit(clear, length, "", 0, 0);
 }
 
-void report_line(Symbol tone,  String line){
+void report_line(Symbol tone, String line){
   report_suspend();
   if(! report.receipts) return;
   const char * color = _color(tone);
-  _emit(NULL,  0,  color,  line,  1);
+  _emit(NULL, 0, color, line, 1);
 }
 
-void report_progress(Symbol phase,  int done,  int total,  String detail){
+void report_progress(Symbol phase, int done, int total, String detail){
   if(! report.transient) return;
   unsigned long now = report_now_us();
   if(now - report.start < 125000ul) return;
@@ -224,7 +220,7 @@ void report_progress(Symbol phase,  int done,  int total,  String detail){
   bar[bar_width] = 0;
   char line[2048];
   String name = String_capitalize(Symbol_str(phase));
-  snprintf(line,  sizeof(line),  "%s [%s] %d/%d  %s",  name,  bar,  done,  total,  String_truth(detail) ? detail : "");
+  snprintf(line, sizeof(line), "%s [%s] %d/%d  %s", name, bar, done, total, String_truth(detail) ? detail : "");
   int limit = report.columns > 1 ? report.columns - 1 : 79;
   int length =(int) strlen(line);
   if(length > limit){
@@ -232,17 +228,17 @@ void report_progress(Symbol phase,  int done,  int total,  String detail){
     length = limit;
   }
   char clear[1002];
-  int clear_length = _clear(clear,  sizeof(clear));
+  int clear_length = _clear(clear, sizeof(clear));
   const char * color = _color(34081994);
-  _emit(clear,  clear_length,  color,  String_new(line),  0);
+  _emit(clear, clear_length, color, String_new(line), 0);
   report.width = length;
 }
 
-void report_phase(Symbol phase,  int count,  String noun,  int cached,  unsigned long microseconds){
+void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  String cache = cached == count && count ? _6 : cached ? String_join(NULL,  cons(String_var(_7),  cons(String_var(int_str(cached)),  cons(String_var(_8),  NULL)))) : 0;
+  String cache = cached == count && count ? _6 : cached ? String_join(NULL, cons(String_var(_7), cons(String_var(int_str(cached)), cons(String_var(_8), NULL)))) : 0;
   String name = String_capitalize(Symbol_str(phase));
-  String line = String_add(String_join(NULL,  cons(String_var(_9),  cons(String_var(name),  cons(String_var(_10),  cons(String_var(int_str(count)),  cons(String_var(_10),  cons(String_var(noun),  cons(String_var(_11),  NULL)))))))),  String_join(NULL,  cons(String_var(report_duration(microseconds)),  cons(String_var(cache),  NULL))));
-  report_line(28680520,  line);
+  String line = String_add(String_join(NULL, cons(String_var(_9), cons(String_var(name), cons(String_var(_10), cons(String_var(int_str(count)), cons(String_var(_10), cons(String_var(noun), cons(String_var(_11), NULL)))))))), String_join(NULL, cons(String_var(report_duration(microseconds)), cons(String_var(cache), NULL))));
+  report_line(28680520, line);
 }
 

@@ -8,12 +8,9 @@ static Var _0;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 long Var_integer(Var);
 
@@ -26,7 +23,7 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = int_var(10);
-  _1 = cons(_0,  NULL);
+  _1 = cons(_0, NULL);
 }
 
 int main(void){
@@ -36,16 +33,16 @@ int main(void){
   float x = 4.5;
   char c = 'b';
   MixedFields fields ={
-    5,  6.5,  'f'
+    5, 6.5, 'f'
   }
   ;
-  int ordinary = 7,  MixedValue = 8;
+  int ordinary = 7, MixedValue = 8;
   {
     int count = 9;
     MixedValues values = _1;
-    printf("%d %ld\n",  count,  Var_integer(List_car(values)));
+    printf("%d %ld\n", count, Var_integer(List_car(values)));
   }
-  printf("%d %.1f %c %d %.1f %c %d %.1f %c %d\n",  mixed_global_i,  mixed_global_x,  mixed_global_c,  i,  x,  c,  fields.i,  fields.x,  fields.c,  ordinary + MixedValue);
+  printf("%d %.1f %c %d %.1f %c %d %.1f %c %d\n", mixed_global_i, mixed_global_x, mixed_global_c, i, x, c, fields.i, fields.x, fields.c, ordinary + MixedValue);
   return 0;
 }
 

@@ -2,19 +2,17 @@
 
 #include "typedef-inherited-converter.h"
 
-static List _7,  _6,  _3,  _2;
+static List _7, _6, _3, _2;
 
-static String _9,  _8;
+static String _9, _8;
 
-static Var _5,  _4,  _1,  _0;
+static Var _5, _4, _1, _0;
 
 static int _init_guard_ = 0;
 
-
-
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 int List_len(List);
 
@@ -32,12 +30,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = Symbol_var(31626);
   _1 = Symbol_var(42462);
-  _2 = cons(_1,  NULL);
-  _3 = cons(_0,  _2);
+  _2 = cons(_1, NULL);
+  _3 = cons(_0, _2);
   _4 = Symbol_var(42504522);
   _5 = Symbol_var(425316);
-  _6 = cons(_5,  NULL);
-  _7 = cons(_4,  _6);
+  _6 = cons(_5, NULL);
+  _7 = cons(_4, _6);
   _8 = String_new("override");
   _9 = String_new("empty");
 }
@@ -57,10 +55,10 @@ int main(void){
   converter_inherit_Leaf values = _3;
   converter_inherit_Override overridden = _7;
   String assigned = List_str(values);
-  String interpolated = String_join(NULL,  cons(String_var(List_str(values)),  NULL));
+  String interpolated = String_join(NULL, cons(String_var(List_str(values)), NULL));
   converter_inherit_Count count = converter_inherit_Base_converter_inherit_count(values);
   String exact = converter_inherit_Override_str(overridden);
-  printf("%s | %s | %d | %s\n",  assigned,  interpolated,  count,  exact);
+  printf("%s | %s | %d | %s\n", assigned, interpolated, count, exact);
   return 0;
 }
 

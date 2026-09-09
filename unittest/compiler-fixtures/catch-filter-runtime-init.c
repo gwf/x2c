@@ -12,11 +12,7 @@ static int new_seen;
 
 static int _init_guard_ = 0;
 
-
-
-
-
-Var List_assoc(List,  Var);
+Var List_assoc(List, Var);
 
 List Var_list(Var);
 
@@ -24,7 +20,7 @@ Var List_last(List);
 
 Var Symbol_var(Symbol);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var String_var(String);
 
@@ -34,13 +30,13 @@ Var List_var(List);
 
 void Error_initialize(void);
 
-ErrorHandler Error_push(ErrorHandlerFn,  Var);
+ErrorHandler Error_push(ErrorHandlerFn, Var);
 
 void Error_pop(ErrorHandler);
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static Symbol _observe_relabel(List errors,  Var data);
+static Symbol _observe_relabel(List errors, Var data);
 
 static void _relabel_nested_pattern(void);
 
@@ -51,9 +47,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = String_new("marker");
 }
 
-static Symbol _observe_relabel(List errors,  Var data){
+static Symbol _observe_relabel(List errors, Var data){
   (void) data;
-  Symbol code = Var_symbol(List_assoc(Var_list(List_last(errors)),  Symbol_var(227594)));
+  Symbol code = Var_symbol(List_assoc(Var_list(List_last(errors)), Symbol_var(227594)));
   if(code == 33820664566756) old_seen ++;
   if(code == 31181407163364){
     new_seen ++;
@@ -64,26 +60,25 @@ static Symbol _observe_relabel(List errors,  Var data){
 
 static void _relabel_nested_pattern(void){
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(33820664566756),  cons(List_var(cons(Symbol_var(280234584),  cons(List_var(cons(Symbol_var(951296328),  cons(String_var(_0),  NULL))),  NULL))),  NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+    ExceptionFrame _x2c_exception_frame_0;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL));
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      List detail = cons(Symbol_var(951296328),  cons(String_var(String_new("marker")),  NULL));
+      List detail = cons(Symbol_var(951296328), cons(String_var(String_new("marker")), NULL));
       {
-        static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function =  "_relabel_nested_pattern",.line =  27};
-        x2c_error_raise_n(& _x2c_error_site_0, 33820664566756, 1, Symbol_var(280234584),  List_var(detail));
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 27};
+        x2c_error_raise_n(& _x2c_error_site_0, 33820664566756, 1, Symbol_var(280234584), List_var(detail));
       }
 
     }
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {{
-          static const X2CErrorSite  _x2c_error_site_1  = {.file =  "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function =  "_relabel_nested_pattern",.line =  22};
+         {{
+          static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
           x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
         }
 
@@ -92,11 +87,11 @@ static void _relabel_nested_pattern(void){
     }
     else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
@@ -104,11 +99,11 @@ static void _relabel_nested_pattern(void){
 }
 int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 

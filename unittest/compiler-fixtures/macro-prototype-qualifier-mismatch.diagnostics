@@ -4,5 +4,3 @@ unittest/compiler-fixtures/macro-prototype-qualifier-mismatch.x:11:1: type: defi
   note: prototype: (function-contract ((func ((* int))) int) 
  ((func ((* const int))) int) extern ()) definition: (function-contract ((func ((* int))) int) ((func ((* int))) int) extern ())
 
-limit: too many errors, stopping
-

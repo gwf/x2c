@@ -11,11 +11,11 @@ typedef int MacroBoxFirst;
 typedef int MacroBoxSecond;
 
 static inline Var MacroBoxFirst_var(MacroBoxFirst _x2c_macro_value_0){
-  return Var_new(3453797,  _x2c_macro_value_0);
+  return Var_new(3453797, _x2c_macro_value_0);
 }
 
 static inline Var MacroBoxSecond_var(MacroBoxSecond _x2c_macro_value_1){
-  return Var_new(3453797,  _x2c_macro_value_1);
+  return Var_new(3453797, _x2c_macro_value_1);
 }
 
 int main(void);

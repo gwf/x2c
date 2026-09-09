@@ -2,5 +2,3 @@ unittest/compiler-fixtures/is-type-aggregate.x:6:16: type: type ("UnregisteredTy
     return value is UnregisteredType;
                  ^^
 
-limit: too many errors, stopping
-

@@ -14,17 +14,17 @@ String report_duration(unsigned long microseconds);
 
 String report_size(unsigned long long bytes);
 
-void report_configure(int quiet,  int plain,  Symbol color_mode,  int verbose,  int dry_run,  int inspecting);
+void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting);
 
 int report_receipts(void);
 
 void report_suspend(void);
 
-void report_line(Symbol tone,  String line);
+void report_line(Symbol tone, String line);
 
-void report_progress(Symbol phase,  int done,  int total,  String detail);
+void report_progress(Symbol phase, int done, int total, String detail);
 
-void report_phase(Symbol phase,  int count,  String noun,  int cached,  unsigned long microseconds);
+void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds);
 
 
 #endif /* __GUARD_0x1A01A7A9__ */

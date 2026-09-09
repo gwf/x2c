@@ -3,5 +3,3 @@ unittest/compiler-fixtures/is-type-pointer-parens.x:4:16: parse: pointer type af
                  ^^
   note: write value is (T *)
 
-limit: too many errors, stopping
-

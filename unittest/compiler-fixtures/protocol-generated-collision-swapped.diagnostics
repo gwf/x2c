@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-generated-collision-swapped.x:40:1: protocol
   ^^^^^^^^
   note: FirstTruth default source: FirstTruth_truth SecondTruth default source: SecondTruth_truth
 
-limit: too many errors, stopping
-

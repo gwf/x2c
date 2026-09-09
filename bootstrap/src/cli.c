@@ -2,10 +2,10 @@
 
 #include "cli.h"
 
-static String _41,  _40,  _39,  _38,  _37,  _36,  _35,  _34,  _33,  _32,  _31,  _30,  _29,  _28,  _27,  _26,  _25,  _24,  _23,  _22,  _21,  _20,  _19,  _18,  _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 enum{
-  CLI_TOP = 1,  CLI_TRANSLATE = 2,  CLI_BUILD = 4,  CLI_RUN = 8,  CLI_BOOTSTRAP = 32
+  CLI_TOP = 1, CLI_TRANSLATE = 2, CLI_BUILD = 4, CLI_RUN = 8, CLI_BOOTSTRAP = 32
 }
 ;
 
@@ -13,7 +13,7 @@ typedef struct CliOption{
   Symbol id;
   int commands;
   Symbol group;
-  const char * spelling,  * value;
+  const char * spelling, * value;
   const char * description;
   int hidden;
 }
@@ -28,19 +28,19 @@ CliCommand;
 
 static CliCommand cli_commands[] ={
   {
-    45220543335690,  CLI_TRANSLATE,  "Translate .x files to .c and .h files"
+    45220543335690, CLI_TRANSLATE, "Translate .x files to .c and .h files"
   }
   , {
-    5589768,  CLI_BUILD,  "Translate, compile, and optionally link a target"
+    5589768, CLI_BUILD, "Translate, compile, and optionally link a target"
   }
   , {
-    38236,  CLI_RUN,  "Build an executable and run it"
+    38236, CLI_RUN, "Build an executable and run it"
   }
   , {
-    5462434287712,  CLI_BOOTSTRAP,  "Install a native x2c from a APE binary"
+    5462434287712, CLI_BOOTSTRAP, "Install a native x2c from a APE binary"
   }
   , {
-    535328,  CLI_TOP,  "Show help for x2c or one command"
+    535328, CLI_TOP, "Show help for x2c or one command"
   }
   , {
     0
@@ -51,175 +51,175 @@ static CliCommand cli_commands[] ={
 
 static CliOption cli_options[] ={
   {
-    535328,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  15397654616,  "-h, --help",  NULL,  "Show help and exit",  0
+    535328, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-h, --help", NULL, "Show help and exit", 0
   }
   , {
-    47619197916,  CLI_TOP,  495915096,  "-V, --version",  NULL,  "Show the x2c version and exit",  0
+    47619197916, CLI_TOP, 495915096, "-V, --version", NULL, "Show the x2c version and exit", 0
   }
   , {
-    47618096330,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  15397654616,  "-v, --verbose",  NULL,  "Show commands as they are executed",  0
+    47618096330, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-v, --verbose", NULL, "Show commands as they are executed", 0
   }
   , {
-    9852392796,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  15397654616,  "-###",  NULL,  "Show commands without executing them",  0
+    9852392796, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 15397654616, "-###", NULL, "Show commands without executing them", 0
   }
   , {
-    37046632,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  15397654616,  "-q, --quiet",  NULL,  "Suppress successful progress and receipts",  0
+    37046632, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
   }
   , {
-    34343516,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  15397654616,  "--plain",  NULL,  "Use stable output without terminal rendering",  0
+    34343516, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "--plain", NULL, "Use stable output without terminal rendering", 0
   }
   , {
-    7300068,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  15397654616,  "--color",  "<auto|always|never>",  "Control terminal color",  0
+    7300068, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "--color", "<auto|always|never>", "Control terminal color", 0
   }
   , {
-    8721742,  CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  15397654616,  "--debug",  NULL,  "Enable compiler debug logging",  0
+    8721742, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 15397654616, "--debug", NULL, "Enable compiler debug logging", 0
   }
   , {
-    33665524324,  CLI_TRANSLATE,  1052018024,  "--out-dir",  "<dir>",  "Write generated files under <dir> (default: .)",  0
+    33665524324, CLI_TRANSLATE, 1052018024, "--out-dir", "<dir>", "Write generated files under <dir> (default: .)", 0
   }
   , {
-    42018498656,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1052018024,  "--source-map",  NULL,  "Map generated C locations to original x2c sources",  0
+    42018498656, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1052018024, "--source-map", NULL, "Map generated C locations to original x2c sources", 0
   }
   , {
-    31136689190,  CLI_TRANSLATE,  1052018024,  "--no-deps",  NULL,  "Do not write x2c dependency files",  0
+    31136689190, CLI_TRANSLATE, 1052018024, "--no-deps", NULL, "Do not write x2c dependency files", 0
   }
   , {
-    286754491146,  CLI_TRANSLATE,  1052018024,  "--dep-file",  "<file>",  "Override the depfile path (one input only)",  0
+    286754491146, CLI_TRANSLATE, 1052018024, "--dep-file", "<file>", "Override the depfile path (one input only)", 0
   }
   , {
-    293637522078056,  CLI_TRANSLATE,  1052018024,  "--dep-target",  "<target>",  "Override the depfile target (one input only)",  0
+    293637522078056, CLI_TRANSLATE, 1052018024, "--dep-target", "<target>", "Override the depfile target (one input only)", 0
   }
   , {
-    996399414194,  CLI_TRANSLATE,  1052018024,  "--no-phony-deps",  NULL,  "Omit phony rules for included files",  0
+    996399414194, CLI_TRANSLATE, 1052018024, "--no-phony-deps", NULL, "Omit phony rules for included files", 0
   }
   , {
-    896459484392,  CLI_BUILD | CLI_RUN,  1345468776,  "--manifest-path",  "<file>",  "Use <file> instead of discovering x2c.toml",  0
+    896459484392, CLI_BUILD | CLI_RUN, 1345468776, "--manifest-path", "<file>", "Use <file> instead of discovering x2c.toml", 0
   }
   , {
-    1345468776,  CLI_BUILD | CLI_RUN,  1345468776,  "--target",  "<name>",  "Build the named manifest target",  0
+    1345468776, CLI_BUILD | CLI_RUN, 1345468776, "--target", "<name>", "Build the named manifest target", 0
   }
   , {
-    35599567626,  CLI_BUILD | CLI_RUN,  1345468776,  "--profile",  "<name>",  "Apply the named manifest build profile",  0
+    35599567626, CLI_BUILD | CLI_RUN, 1345468776, "--profile", "<name>", "Apply the named manifest build profile", 0
   }
   , {
-    740232,  CLI_BUILD,  1345468776,  "--kind",  "<kind>",  "executable or static-library",  0
+    740232, CLI_BUILD, 1345468776, "--kind", "<kind>", "executable or static-library", 0
   }
   , {
-    7477414666,  CLI_BUILD,  1345468776,  "-c, --compile-only",  NULL,  "Produce object files without linking",  0
+    7477414666, CLI_BUILD, 1345468776, "-c, --compile-only", NULL, "Produce object files without linking", 0
   }
   , {
-    686246,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1345468776,  "-j, --jobs",  "<count>",  "Maximum parallel translation and compilation jobs",  0
+    686246, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1345468776, "-j, --jobs", "<count>", "Maximum parallel translation and compilation jobs", 0
   }
   , {
-    1052018024,  CLI_BUILD | CLI_RUN,  1052018024,  "--output",  "<file>",  "Name the executable, library, or single object",  0
+    1052018024, CLI_BUILD | CLI_RUN, 1052018024, "--output", "<file>", "Name the executable, library, or single object", 0
   }
   , {
-    5861298610788,  CLI_BUILD | CLI_RUN,  1052018024,  "--build-dir",  "<dir>",  "Store generated C, objects, deps, and state here",  0
+    5861298610788, CLI_BUILD | CLI_RUN, 1052018024, "--build-dir", "<dir>", "Store generated C, objects, deps, and state here", 0
   }
   , {
-    6551812,  CLI_BUILD | CLI_RUN,  1052018024,  "--compile-commands",  "<file>",  "Write native compile commands and retain generated files",  0
+    6551812, CLI_BUILD | CLI_RUN, 1052018024, "--compile-commands", "<file>", "Write native compile commands and retain generated files", 0
   }
   , {
-    41897807850336,  CLI_BUILD | CLI_RUN,  1052018024,  "--save-temps[=<dir>]",  NULL,  "Keep generated C and other intermediate files",  0
+    41897807850336, CLI_BUILD | CLI_RUN, 1052018024, "--save-temps[=<dir>]", NULL, "Keep generated C and other intermediate files", 0
   }
   , {
-    1111831152,  CLI_BOOTSTRAP,  1052018024,  "--prefix",  "<dir>",  "Install native x2c and sources under <dir>",  0
+    1111831152, CLI_BOOTSTRAP, 1052018024, "--prefix", "<dir>", "Install native x2c and sources under <dir>", 0
   }
   , {
-    20273998090,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1307939018,  "-I",  "<dir>",  "Add a shared x2c/C include directory",  0
+    20273998090, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "-I", "<dir>", "Add a shared x2c/C include directory", 0
   }
   , {
-    54927135910154,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1307939018,  "--x-include-dir",  "<dir>",  "Add an x2c-only include directory",  0
+    54927135910154, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--x-include-dir", "<dir>", "Add an x2c-only include directory", 0
   }
   , {
-    8747647543562,  CLI_BUILD | CLI_RUN,  1307939018,  "--c-include-dir",  "<dir>",  "Add a C-only ordinary include directory",  0
+    8747647543562, CLI_BUILD | CLI_RUN, 1307939018, "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0
   }
   , {
-    274059207002,  CLI_BUILD | CLI_RUN,  1307939018,  "--c-system-dir",  "<dir>",  "Add a C-only system include directory",  0
+    274059207002, CLI_BUILD | CLI_RUN, 1307939018, "--c-system-dir", "<dir>", "Add a C-only system include directory", 0
   }
   , {
-    35114656356,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1307939018,  "--package-dir",  "<dir>",  "Add a directory of x2c packages",  0
+    35114656356, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--package-dir", "<dir>", "Add a directory of x2c packages", 0
   }
   , {
-    973020192,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1307939018,  "--no-cpp",  NULL,  "Skip symbol collection and preprocessing",  0
+    973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0
   }
   , {
-    27054400850790,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1307939018,  "--live-symbols",  NULL,  "Collect symbols through the host preprocessor",  0
+    27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--live-symbols", NULL, "Collect symbols through the host preprocessor", 0
   }
   , {
-    241658219366,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1307939018,  "--cpp-symbols",  NULL,  "Use CPP collection for this translation",  0
+    241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--cpp-symbols", NULL, "Use CPP collection for this translation", 0
   }
   , {
-    198,  CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  279515230724452,  "--cc",  "<program>",  "Use <program> as the host C compiler",  0
+    198, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 279515230724452, "--cc", "<program>", "Use <program> as the host C compiler", 0
   }
   , {
-    100,  CLI_BUILD | CLI_BOOTSTRAP,  279515230724452,  "--ar",  "<program>",  "Use <program> as the static-library archiver",  0
+    100, CLI_BUILD | CLI_BOOTSTRAP, 279515230724452, "--ar", "<program>", "Use <program> as the static-library archiver", 0
   }
   , {
-    31784,  CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,  279515230724452,  "-O0, -O1, -O2, -O3, -Os",  NULL,  "Set C optimization",  0
+    31784, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 279515230724452, "-O0, -O1, -O2, -O3, -Os", NULL, "Set C optimization", 0
   }
   , {
-    14,  CLI_BUILD | CLI_RUN,  279515230724452,  "-g",  NULL,  "Emit debug information",  0
+    14, CLI_BUILD | CLI_RUN, 279515230724452, "-g", NULL, "Emit debug information", 0
   }
   , {
-    279333770,  CLI_BUILD | CLI_RUN,  279515230724452,  "-D",  "<name>[=<value>]",  "Define a C preprocessor macro",  0
+    279333770, CLI_BUILD | CLI_RUN, 279515230724452, "-D", "<name>[=<value>]", "Define a C preprocessor macro", 0
   }
   , {
-    1473453116298,  CLI_BUILD | CLI_RUN,  279515230724452,  "-U",  "<name>",  "Undefine a C preprocessor macro",  0
+    1473453116298, CLI_BUILD | CLI_RUN, 279515230724452, "-U", "<name>", "Undefine a C preprocessor macro", 0
   }
   , {
-    49350,  CLI_BUILD | CLI_RUN,  279515230724452,  "-Xcc",  "<arg>",  "Pass one argument only to C compilation",  0
+    49350, CLI_BUILD | CLI_RUN, 279515230724452, "-Xcc", "<arg>", "Pass one argument only to C compilation", 0
   }
   , {
-    26380018276,  CLI_BUILD | CLI_RUN,  825121124,  "-L",  "<dir>",  "Add a library search directory",  0
+    26380018276, CLI_BUILD | CLI_RUN, 825121124, "-L", "<dir>", "Add a library search directory", 0
   }
   , {
-    26379160754,  CLI_BUILD | CLI_RUN,  825121124,  "-l",  "<name>",  "Link library <name>",  0
+    26379160754, CLI_BUILD | CLI_RUN, 825121124, "-l", "<name>", "Link library <name>", 0
   }
   , {
-    1496,  CLI_BUILD | CLI_RUN,  825121124,  "-Wl,<arg>[,<arg>...]",  NULL,  "Pass comma-separated arguments to the linker",  0
+    1496, CLI_BUILD | CLI_RUN, 825121124, "-Wl,<arg>[,<arg>...]", NULL, "Pass comma-separated arguments to the linker", 0
   }
   , {
-    52364728676,  CLI_BUILD | CLI_RUN,  825121124,  "-Xlinker",  "<arg>",  "Pass one argument to the linker",  0
+    52364728676, CLI_BUILD | CLI_RUN, 825121124, "-Xlinker", "<arg>", "Pass one argument to the linker", 0
   }
   , {
-    1374366630,  CLI_TRANSLATE,  665445396138972,  "--dump-tokens",  NULL,  "Print source tokens and stop",  0
+    1374366630, CLI_TRANSLATE, 665445396138972, "--dump-tokens", NULL, "Print source tokens and stop", 0
   }
   , {
-    320883072032,  CLI_TRANSLATE,  665445396138972,  "--dump-cpp",  NULL,  "Print host-preprocessed text and stop",  0
+    320883072032, CLI_TRANSLATE, 665445396138972, "--dump-cpp", NULL, "Print host-preprocessed text and stop", 0
   }
   , {
-    320883072032,  CLI_TRANSLATE,  665445396138972,  "--dump-cpp-text",  NULL,  "Alias for --dump-cpp",  0
+    320883072032, CLI_TRANSLATE, 665445396138972, "--dump-cpp-text", NULL, "Alias for --dump-cpp", 0
   }
   , {
-    247458062609318,  CLI_TRANSLATE,  665445396138972,  "--dump-cpp-tokens",  NULL,  "Print host-preprocessed tokens and stop",  0
+    247458062609318, CLI_TRANSLATE, 665445396138972, "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0
   }
   , {
-    320883068136,  CLI_TRANSLATE,  665445396138972,  "--dump-ast",  NULL,  "Print the parsed AST and stop",  0
+    320883068136, CLI_TRANSLATE, 665445396138972, "--dump-ast", NULL, "Print the parsed AST and stop", 0
   }
   , {
-    1447057375073126,  CLI_TRANSLATE,  665445396138972,  "--dump-transforms",  NULL,  "Print the transformed AST and stop",  0
+    1447057375073126, CLI_TRANSLATE, 665445396138972, "--dump-transforms", NULL, "Print the transformed AST and stop", 0
   }
   , {
-    10268258302218,  CLI_TRANSLATE,  665445396138972,  "--dump-code",  NULL,  "Print unformatted generated code and stop",  0
+    10268258302218, CLI_TRANSLATE, 665445396138972, "--dump-code", NULL, "Print unformatted generated code and stop", 0
   }
   , {
-    42507336486,  CLI_TRANSLATE,  665445396138972,  "--dump-symbols",  NULL,  "Print the source symbol table and stop",  0
+    42507336486, CLI_TRANSLATE, 665445396138972, "--dump-symbols", NULL, "Print the source symbol table and stop", 0
   }
   , {
-    10268258311770,  CLI_TRANSLATE,  665445396138972,  "--dump-cpp-symbols",  NULL,  "Print the CPP symbol table and stop",  0
+    10268258311770, CLI_TRANSLATE, 665445396138972, "--dump-cpp-symbols", NULL, "Print the CPP symbol table and stop", 0
   }
   , {
-    328584264751626,  CLI_TRANSLATE,  665445396138972,  "--dump-cache",  NULL,  "Print the compiler cache and stop",  0
+    328584264751626, CLI_TRANSLATE, 665445396138972, "--dump-cache", NULL, "Print the compiler cache and stop", 0
   }
   , {
-    7478869146,  CLI_TRANSLATE,  665445396138972,  "--dump-conformance",  NULL,  "Print protocol conformance and stop",  0
+    7478869146, CLI_TRANSLATE, 665445396138972, "--dump-conformance", NULL, "Print protocol conformance and stop", 0
   }
   , {
-    1335836754920,  CLI_TRANSLATE,  665445396138972,  "--dump-symbol-snapshot",  NULL,  "Print a complete symbol snapshot and stop",  0
+    1335836754920, CLI_TRANSLATE, 665445396138972, "--dump-symbol-snapshot", NULL, "Print a complete symbol snapshot and stop", 0
   }
   , {
-    559620016998,  CLI_TRANSLATE,  665445396138972,  "--dump-header-symbols",  NULL,  "Print the header-symbol artifact and stop",  0
+    559620016998, CLI_TRANSLATE, 665445396138972, "--dump-header-symbols", NULL, "Print the header-symbol artifact and stop", 0
   }
   , {
     0
@@ -229,10 +229,6 @@ static CliOption cli_options[] ={
 ;
 
 static int _init_guard_ = 0;
-
-
-
-
 
 #include <ctype.h>
 #include <errno.h>
@@ -250,17 +246,17 @@ Var String_var(String);
 
 void * Scope_malloc(size_t);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
 Var int_var(int);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 String Var_string(Var);
 
 Buffer Buffer_new(size_t);
 
-Buffer Buffer_write_char(Buffer,  char);
+Buffer Buffer_write_char(Buffer, char);
 
 String Buffer_str(Buffer);
 
@@ -270,13 +266,13 @@ void Buffer_free(Buffer);
 
 int String_truth(String);
 
-int String_getindex(String,  int);
+int String_getindex(String, int);
 
-Var Array_push(Array,  Var);
+Var Array_push(Array, Var);
 
 String String_new(const char *);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 void Scope_free(void *);
 
@@ -284,19 +280,19 @@ List Array_list_free(Array);
 
 Var List_car(List);
 
-int String_startswith(String,  String);
+int String_startswith(String, String);
 
-String String_remove_prefix(String,  String);
+String String_remove_prefix(String, String);
 
 List List_cdr(List);
 
 int List_truth(List);
 
-int String_contains(String,  String);
+int String_contains(String, String);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
-void * Scope_calloc(size_t,  size_t);
+void * Scope_calloc(size_t, size_t);
 
 List List_reverse(List);
 
@@ -306,15 +302,15 @@ _Noreturn static void _removed_output(void);
 
 _Noreturn static void _expected_command(const char * arg);
 
-_Noreturn static void _response_error(const char * path,  int line,  const char * message);
+_Noreturn static void _response_error(const char * path, int line, const char * message);
 
 static int _command_mask(Symbol command);
 
 static CliCommand * _command_row(const char * word);
 
-static const char * _group_title(Symbol command,  Symbol group);
+static const char * _group_title(Symbol command, Symbol group);
 
-static void _print_help_row(const char * label,  const char * description,  int indent);
+static void _print_help_row(const char * label, const char * description, int indent);
 
 static void _print_option(const CliOption * option);
 
@@ -332,33 +328,33 @@ static void _print_help(Symbol command);
 
 static void _print_version(void);
 
-static int _valid_utf8(const unsigned char * text,  size_t length);
+static int _valid_utf8(const unsigned char * text, size_t length);
 
-static char * _read_response_file(const char * path,  size_t * length);
+static char * _read_response_file(const char * path, size_t * length);
 
-static int _response_on_stack(List stack,  String path);
+static int _response_on_stack(List stack, String path);
 
-static void _tokenize_response(Array output,  String path,  const char * text,  size_t length,  List stack);
+static void _tokenize_response(Array output, String path, const char * text, size_t length, List stack);
 
-static void _expand_argument(Array output,  String argument,  List stack);
+static void _expand_argument(Array output, String argument, List stack);
 
-static List _expand_arguments(int argc,  char * * argv);
+static List _expand_arguments(int argc, char * * argv);
 
-static CliOption * _find_option(const char * spelling,  int command_mask,  const char * * attached);
+static CliOption * _find_option(const char * spelling, int command_mask, const char * * attached);
 
-static CliOption * _take_option(List * node,  int mask,  String * spelling,  String * value,  int * attached);
+static CliOption * _take_option(List * node, int mask, String * spelling, String * value, int * attached);
 
-static void _push_pair(Array arguments,  String option,  String value);
+static void _push_pair(Array arguments, String option, String value);
 
-static void _driver_kind(CliRequest request,  String value);
+static void _driver_kind(CliRequest request, String value);
 
-static void _driver_jobs(CliRequest request,  String value);
+static void _driver_jobs(CliRequest request, String value);
 
-static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  String value,  int attached,  Array x_paths,  Array cpp_args,  Array cc_args,  Array ld_args);
+static void _apply_option(CliRequest c, CliOption * option, String spelling, String value, int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args);
 
 static void _one_dash_removed(String arg);
 
-static CliRequest _parse_command(List args,  CliCommand * command);
+static CliRequest _parse_command(List args, CliCommand * command);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -390,38 +386,39 @@ __attribute__((constructor)) static void _file_init_(void){
   _23 = String_new("never");
   _24 = String_new("invalid color mode \'");
   _25 = String_new("C dependency option is driver-owned \'");
-  _26 = String_new("unexpected bootstrap operand \'");
-  _27 = String_new("unknown option \'");
-  _28 = String_new("unknown command or global option \'");
-  _29 = String_new("--color=");
-  _30 = String_new("-MMD");
-  _31 = String_new("-MP");
-  _32 = String_new("-MF");
-  _33 = String_new("-MT");
-  _34 = String_new(",-MMD");
-  _35 = String_new(",-MP");
-  _36 = String_new(",-MF");
-  _37 = String_new(",-MT");
-  _38 = String_new("-I");
-  _39 = String_new("-isystem");
-  _40 = String_new("--save-temps=");
-  _41 = String_new("-O2");
+  _26 = String_new("-");
+  _27 = String_new("unexpected bootstrap operand \'");
+  _28 = String_new("unknown option \'");
+  _29 = String_new("unknown command or global option \'");
+  _30 = String_new("--color=");
+  _31 = String_new("-MMD");
+  _32 = String_new("-MP");
+  _33 = String_new("-MF");
+  _34 = String_new("-MT");
+  _35 = String_new(",-MMD");
+  _36 = String_new(",-MP");
+  _37 = String_new(",-MF");
+  _38 = String_new(",-MT");
+  _39 = String_new("-I");
+  _40 = String_new("-isystem");
+  _41 = String_new("--save-temps=");
+  _42 = String_new("-O2");
 }
 
 _Noreturn static void _removed_output(void){
-  fputs("x2c: error: option '-o' was removed\n",  stderr);
-  fputs("note: use '--out-dir' with translate or '--output' with build and run\n",  stderr);
+  fputs("x2c: error: option '-o' was removed\n", stderr);
+  fputs("note: use '--out-dir' with translate or '--output' with build and run\n", stderr);
   exit(2);
 }
 
 _Noreturn static void _expected_command(const char * arg){
-  fprintf(stderr,  "x2c: error: expected a command before '%s'\n",  arg);
-  fprintf(stderr,  "note: use 'x2c translate --out-dir <dir> %s'\n",  arg);
+  fprintf(stderr, "x2c: error: expected a command before '%s'\n", arg);
+  fprintf(stderr, "note: use 'x2c translate --out-dir <dir> %s'\n", arg);
   exit(2);
 }
 
-_Noreturn static void _response_error(const char * path,  int line,  const char * message){
-  fprintf(stderr,  "x2c: error: response file '%s':%d: %s\n",  path,  line,  message);
+_Noreturn static void _response_error(const char * path, int line, const char * message){
+  fprintf(stderr, "x2c: error: response file '%s':%d: %s\n", path, line, message);
   exit(2);
 }
 
@@ -431,11 +428,11 @@ static int _command_mask(Symbol command){
 }
 
 static CliCommand * _command_row(const char * word){
-  for(CliCommand * row = cli_commands;  row -> name;  row ++) if(row -> mask != CLI_TOP && strcmp(word,  Symbol_str(row -> name)) == 0) return row;
+  for(CliCommand * row = cli_commands;  row -> name;  row ++) if(row -> mask != CLI_TOP && strcmp(word, Symbol_str(row -> name)) == 0) return row;
   return NULL;
 }
 
-static const char * _group_title(Symbol command,  Symbol group){
+static const char * _group_title(Symbol command, Symbol group){
   switch(group){
     case 1345468776 : return "Target options:";
     case 1052018024 : return "Output options:";
@@ -448,26 +445,26 @@ static const char * _group_title(Symbol command,  Symbol group){
   return "Global options:";
 }
 
-static void _print_help_row(const char * label,  const char * description,  int indent){
+static void _print_help_row(const char * label, const char * description, int indent){
   const int description_column = 30;
   int width = indent +(int) strlen(label);
   if(width >= description_column){
-    printf("%*s%s\n",  indent,  "",  label);
-    printf("%*s%s\n",  description_column,  "",  description);
+    printf("%*s%s\n", indent, "", label);
+    printf("%*s%s\n", description_column, "", description);
   }
   else{
-    printf("%*s%s",  indent,  "",  label);
-    printf("%*s%s\n",  description_column - width,  "",  description);
+    printf("%*s%s", indent, "", label);
+    printf("%*s%s\n", description_column - width, "", description);
   }
 
 }
 
 static void _print_option(const CliOption * option){
   char label[128];
-  if(option -> value) snprintf(label,  sizeof(label),  "%s %s",  option -> spelling,  option -> value);
-  else snprintf(label,  sizeof(label),  "%s",  option -> spelling);
+  if(option -> value) snprintf(label, sizeof(label), "%s %s", option -> spelling, option -> value);
+  else snprintf(label, sizeof(label), "%s", option -> spelling);
   int indent = label[0] == '-' && label[1] == '-' ? 6 : 2;
-  _print_help_row(label,  option -> description,  indent);
+  _print_help_row(label, option -> description, indent);
 }
 
 static void _print_options(Symbol command){
@@ -478,7 +475,7 @@ static void _print_options(Symbol command){
     return;
   }
   Symbol groups[] ={
-    495915096,  1345468776,  1052018024,  1307939018,  279515230724452,  825121124,  665445396138972,  15397654616
+    495915096, 1345468776, 1052018024, 1307939018, 279515230724452, 825121124, 665445396138972, 15397654616
   }
   ;
   for(int i = 0;  i < 8;  i ++){
@@ -486,7 +483,7 @@ static void _print_options(Symbol command){
     int found = 0;
     for(CliOption * option = cli_options;  option -> spelling;  option ++) if(! option -> hidden &&(option -> commands & mask) && option -> group == group) found = 1;
     if(! found) continue;
-    printf("\n%s\n",  _group_title(command,  group));
+    printf("\n%s\n", _group_title(command, group));
     for(CliOption * option = cli_options;  option -> spelling;  option ++) if(! option -> hidden &&(option -> commands & mask) && option -> group == group) _print_option(option);
   }
 
@@ -494,19 +491,19 @@ static void _print_options(Symbol command){
 
 static void _print_top_help(void){
   puts(_0);
-  for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n",  Symbol_str(command -> name),  command -> description);
+  for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n", Symbol_str(command -> name), command -> description);
   _print_options(0);
   puts(_1);
-  _print_help_row("@<file>",  "Read additional arguments from a response file",  2);
-  _print_help_row("--",  "End option parsing",  2);
+  _print_help_row("@<file>", "Read additional arguments from a response file", 2);
+  _print_help_row("--", "End option parsing", 2);
   puts(_2);
 }
 
 static void _print_translate_help(void){
   puts(_3);
   _print_options(45220543335690);
-  _print_help_row("@<file>",  "Read additional arguments from a response file",  2);
-  _print_help_row("--",  "End option parsing",  2);
+  _print_help_row("@<file>", "Read additional arguments from a response file", 2);
+  _print_help_row("--", "End option parsing", 2);
   puts("");
   puts(_4);
 }
@@ -515,9 +512,9 @@ static void _print_driver_help(Symbol command){
   if(command == 5589768) puts(_5);
   else puts(_6);
   _print_options(command);
-  _print_help_row("@<file>",  "Read additional arguments from a response file",  2);
-  if(command == 38236) _print_help_row("--",  "End build options and begin program arguments",  2);
-  else _print_help_row("--",  "End option parsing",  2);
+  _print_help_row("@<file>", "Read additional arguments from a response file", 2);
+  if(command == 38236) _print_help_row("--", "End build options and begin program arguments", 2);
+  else _print_help_row("--", "End option parsing", 2);
   puts("");
   if(command == 5589768) puts(_7);
   else puts(_8);
@@ -526,7 +523,7 @@ static void _print_driver_help(Symbol command){
 static void _print_bootstrap_help(void){
   puts(_9);
   _print_options(5462434287712);
-  _print_help_row("@<file>",  "Read additional arguments from a response file",  2);
+  _print_help_row("@<file>", "Read additional arguments from a response file", 2);
   puts("");
   puts(_10);
 }
@@ -543,7 +540,7 @@ static void _print_help(Symbol command){
     break;
     case 535328 : puts(_11);
     break;
-    default: x2c_driver_error(String_join(NULL,  cons(String_var(_12),  cons(String_var(Symbol_str(command)),  cons(String_var(_13),  NULL)))));
+    default: x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(Symbol_str(command)), cons(String_var(_13), NULL)))));
   }
 
 }
@@ -552,12 +549,12 @@ static void _print_version(void){
   printf("x2c 0.12.0\n");
 }
 
-static int _valid_utf8(const unsigned char * text,  size_t length){
+static int _valid_utf8(const unsigned char * text, size_t length){
   size_t i = 0;
   while(i < length){
     unsigned char c = text[i ++];
     if(c < 0x80) continue;
-    int extra = 0,  minimum = 0;
+    int extra = 0, minimum = 0;
     unsigned code = 0;
     if((c & 0xe0) == 0xc0){
       extra = 1;
@@ -586,53 +583,53 @@ static int _valid_utf8(const unsigned char * text,  size_t length){
   return 1;
 }
 
-static char * _read_response_file(const char * path,  size_t * length){
-  FILE * file = fopen(path,  "rb");
-  if(! file) _response_error(path,  1,  strerror(errno));
-  if(fseek(file,  0,  SEEK_END)){
+static char * _read_response_file(const char * path, size_t * length){
+  FILE * file = fopen(path, "rb");
+  if(! file) _response_error(path, 1, strerror(errno));
+  if(fseek(file, 0, SEEK_END)){
     int error = errno;
     fclose(file);
-    _response_error(path,  1,  strerror(error));
+    _response_error(path, 1, strerror(error));
   }
   long end = ftell(file);
-  if(end < 0 || fseek(file,  0,  SEEK_SET)){
+  if(end < 0 || fseek(file, 0, SEEK_SET)){
     int error = errno;
     fclose(file);
-    _response_error(path,  1,  strerror(error));
+    _response_error(path, 1, strerror(error));
   }
   char * text = Scope_malloc((size_t) end + 1);
-  size_t got = fread(text,  1, (size_t) end,  file);
+  size_t got = fread(text, 1, (size_t) end, file);
   int failed = ferror(file);
   fclose(file);
-  if(failed || got !=(size_t) end) _response_error(path,  1,  "could not read complete file");
+  if(failed || got !=(size_t) end) _response_error(path, 1, "could not read complete file");
   text[got] = 0;
-  if(memchr(text,  0,  got)) _response_error(path,  1,  "embedded NUL byte");
-  if(! _valid_utf8((unsigned char *) text,  got)) _response_error(path,  1,  "input is not valid UTF-8");
+  if(memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
+  if(! _valid_utf8((unsigned char *) text, got)) _response_error(path, 1, "input is not valid UTF-8");
   * length = got;
   return text;
 }
 
-static int _response_on_stack(List stack,  String path){
+static int _response_on_stack(List stack, String path){
   {
     String entry;
-    Iter _x2c_macro_iterator_0 = List_iter(stack,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(stack, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       entry = Var_string(_x2c_macro_item_0);
-      if(strcmp(entry,  path) == 0) return 1;
+      if(strcmp(entry, path) == 0) return 1;
     }
 
   }
   return 0;
 }
 
-static void _tokenize_response(Array output,  String path,  const char * text,  size_t length,  List stack){
+static void _tokenize_response(Array output, String path, const char * text, size_t length, List stack){
   Buffer token = Buffer_new(0);
-  int quote = 0,  escaped = 0,  line = 1,  have = 0;
-  int first_nonspace = 1,  comment = 0;
+  int quote = 0, escaped = 0, line = 1, have = 0;
+  int first_nonspace = 1, comment = 0;
   for(size_t i = 0;  i <= length;  i ++){
     int c = i == length ? 0 :(unsigned char) text[i];
     if(comment){
@@ -645,8 +642,8 @@ static void _tokenize_response(Array output,  String path,  const char * text,  
       continue;
     }
     if(escaped){
-      if(! c) _response_error(path,  line,  "trailing backslash");
-      Buffer_write_char(token,  c);
+      if(! c) _response_error(path, line, "trailing backslash");
+      Buffer_write_char(token, c);
       have = 1;
       escaped = 0;
       if(c == '\n') line ++;
@@ -658,10 +655,10 @@ static void _tokenize_response(Array output,  String path,  const char * text,  
       continue;
     }
     if(quote){
-      if(! c) _response_error(path,  line,  "unterminated quote");
+      if(! c) _response_error(path, line, "unterminated quote");
       if(c == quote) quote = 0;
       else{
-        Buffer_write_char(token,  c);
+        Buffer_write_char(token, c);
         have = 1;
         if(c == '\n') line ++;
       }
@@ -679,7 +676,7 @@ static void _tokenize_response(Array output,  String path,  const char * text,  
     }
     if(! c || isspace(c)){
       if(have){
-        _expand_argument(output,  Buffer_str(token),  stack);
+        _expand_argument(output, Buffer_str(token), stack);
         Buffer_clear(token);
         have = 0;
       }
@@ -692,59 +689,59 @@ static void _tokenize_response(Array output,  String path,  const char * text,  
       continue;
     }
     first_nonspace = 0;
-    Buffer_write_char(token,  c);
+    Buffer_write_char(token, c);
     have = 1;
   }
   Buffer_free(token);
 }
 
-static void _expand_argument(Array output,  String argument,  List stack){
-  if(! String_truth(argument) || String_getindex(argument,  0) != '@'){
-    Array_push(output,  String_var(argument));
+static void _expand_argument(Array output, String argument, List stack){
+  if(! String_truth(argument) || String_getindex(argument, 0) != '@'){
+    Array_push(output, String_var(argument));
     return;
   }
-  if(String_getindex(argument,  1) == '@'){
-    Array_push(output,  String_var(String_new(argument + 1)));
+  if(String_getindex(argument, 1) == '@'){
+    Array_push(output, String_var(String_new(argument + 1)));
     return;
   }
-  if(! String_getindex(argument,  1)) x2c_driver_error("empty response-file reference '@'");
+  if(! String_getindex(argument, 1)) x2c_driver_error("empty response-file reference '@'");
   String path = String_new(argument + 1);
-  char * resolved = realpath(path,  NULL);
+  char * resolved = realpath(path, NULL);
   String identity = resolved ? String_new(resolved) : path;
   if(resolved) free(resolved);
-  if(_response_on_stack(stack,  identity)){
-    fprintf(stderr,  "x2c: error: recursive response-file inclusion: %s\n",  path);
+  if(_response_on_stack(stack, identity)){
+    fprintf(stderr, "x2c: error: recursive response-file inclusion: %s\n", path);
     exit(2);
   }
   size_t length = 0;
-  char * text = _read_response_file(path,  & length);
-  _tokenize_response(output,  path,  text,  length,  cons(String_var(identity),  stack));
+  char * text = _read_response_file(path, & length);
+  _tokenize_response(output, path, text, length, cons(String_var(identity), stack));
   Scope_free(text);
 }
 
-static List _expand_arguments(int argc,  char * * argv){
+static List _expand_arguments(int argc, char * * argv){
   Array output = Array_new();
-  for(int i = 1;  i < argc;  i ++) _expand_argument(output,  String_new(argv[i]),  NULL);
+  for(int i = 1;  i < argc;  i ++) _expand_argument(output, String_new(argv[i]), NULL);
   List result = Array_list_free(output);
   return result;
 }
 
-static CliOption * _find_option(const char * spelling,  int command_mask,  const char * * attached){
+static CliOption * _find_option(const char * spelling, int command_mask, const char * * attached){
   size_t spelling_length = strlen(spelling);
   * attached = NULL;
   for(CliOption * option = cli_options;  option -> spelling;  option ++){
     if(!(option -> commands & command_mask)) continue;
     const char * start = option -> spelling;
     while(* start){
-      const char * comma = strstr(start,  ", ");
+      const char * comma = strstr(start, ", ");
       const char * end = comma ? comma : start + strlen(start);
-      const char * suffix = strchr(start,  '[');
+      const char * suffix = strchr(start, '[');
       if(suffix && suffix < end) end = suffix;
-      const char * placeholder = strchr(start,  '<');
-      if(placeholder && placeholder < end && strncmp(spelling,  start, (size_t)(placeholder - start)) == 0) return option;
+      const char * placeholder = strchr(start, '<');
+      if(placeholder && placeholder < end && strncmp(spelling, start, (size_t)(placeholder - start)) == 0) return option;
       size_t length =(size_t)(end - start);
-      if(spelling_length == length && strncmp(spelling,  start,  length) == 0) return option;
-      if(command_mask != CLI_TRANSLATE && option -> value && length == 2 && spelling_length > 2 && strncmp(spelling,  start,  2) == 0){
+      if(spelling_length == length && strncmp(spelling, start, length) == 0) return option;
+      if(option -> value && length == 2 && spelling_length > 2 && strncmp(spelling, start, 2) == 0){
         * attached = spelling + 2;
         return option;
       }
@@ -757,57 +754,57 @@ static CliOption * _find_option(const char * spelling,  int command_mask,  const
   return NULL;
 }
 
-static CliOption * _take_option(List * node,  int mask,  String * spelling,  String * value,  int * attached){
-  String arg = Var_string(List_car((* node))),  written = arg,  color = NULL;
+static CliOption * _take_option(List * node, int mask, String * spelling, String * value, int * attached){
+  String arg = Var_string(List_car((* node))), written = arg, color = NULL;
   int color_equal = 0;
-  if(String_startswith(arg,  _29)){
+  if(String_startswith(arg, _30)){
     color_equal = 1;
-    color = String_remove_prefix(arg,  _29);
+    color = String_remove_prefix(arg, _30);
     written = _14;
   }
   const char * suffix = NULL;
-  CliOption * option = _find_option(written,  mask,  & suffix);
+  CliOption * option = _find_option(written, mask, & suffix);
   if(! option) return NULL;
   if(spelling) * spelling = written;
   if(attached) * attached = suffix != NULL;
   * value = String_new(suffix);
   if(option -> value && ! String_truth(* value) && ! color_equal){
     * node = List_cdr((* node));
-    if(! List_truth(* node)) x2c_driver_error(String_join(NULL,  cons(String_var(_15),  cons(String_var(arg),  cons(String_var(_13),  NULL)))));
+    if(! List_truth(* node)) x2c_driver_error(String_join(NULL, cons(String_var(_15), cons(String_var(arg), cons(String_var(_13), NULL)))));
     * value = Var_string(List_car((* node)));
   }
   if(color_equal) * value = color;
   return option;
 }
 
-static void _push_pair(Array arguments,  String option,  String value){
-  Array_push(arguments,  String_var(option));
-  Array_push(arguments,  String_var(value));
+static void _push_pair(Array arguments, String option, String value){
+  Array_push(arguments, String_var(option));
+  Array_push(arguments, String_var(value));
 }
 
 int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
-  return String_truth(s) &&(String_startswith(s,  _30) || String_startswith(s,  _31) || String_startswith(s,  _32) || String_startswith(s,  _33) || String_contains(s,  _34) || String_contains(s,  _35) || String_contains(s,  _36) || String_contains(s,  _37));
+  return String_truth(s) &&(String_startswith(s, _31) || String_startswith(s, _32) || String_startswith(s, _33) || String_startswith(s, _34) || String_contains(s, _35) || String_contains(s, _36) || String_contains(s, _37) || String_contains(s, _38));
 }
 
-static void _driver_kind(CliRequest request,  String value){
+static void _driver_kind(CliRequest request, String value){
   request -> kind_explicit = 1;
-  if(String_equal(value,  _16)) request -> kind = 404971770155786;
-  else if(String_equal(value,  _17)) request -> kind = 1381098885964356;
-  else if(String_equal(value,  _18)) x2c_driver_error("shared-library is not supported by this compiler");
-  else x2c_driver_error(String_join(NULL,  cons(String_var(_19),  cons(String_var(value),  cons(String_var(_13),  NULL)))));
+  if(String_equal(value, _16)) request -> kind = 404971770155786;
+  else if(String_equal(value, _17)) request -> kind = 1381098885964356;
+  else if(String_equal(value, _18)) x2c_driver_error("shared-library is not supported by this compiler");
+  else x2c_driver_error(String_join(NULL, cons(String_var(_19), cons(String_var(value), cons(String_var(_13), NULL)))));
 }
 
-static void _driver_jobs(CliRequest request,  String value){
-  if(! String_truth(value) || ! String_getindex(value,  0)) x2c_driver_error("--jobs requires a positive count");
+static void _driver_jobs(CliRequest request, String value){
+  if(! String_truth(value) || ! String_getindex(value, 0)) x2c_driver_error("--jobs requires a positive count");
   char * end = NULL;
   errno = 0;
-  long jobs = strtol(value,  & end,  10);
-  if(errno || * end || jobs < 1 || jobs > INT_MAX) x2c_driver_error(String_join(NULL,  cons(String_var(_20),  cons(String_var(value),  cons(String_var(_13),  NULL)))));
+  long jobs = strtol(value, & end, 10);
+  if(errno || * end || jobs < 1 || jobs > INT_MAX) x2c_driver_error(String_join(NULL, cons(String_var(_20), cons(String_var(value), cons(String_var(_13), NULL)))));
   request -> jobs =(int) jobs;
 }
 
-static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  String value,  int attached,  Array x_paths,  Array cpp_args,  Array cc_args,  Array ld_args){
+static void _apply_option(CliRequest c, CliOption * option, String spelling, String value, int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args){
   switch(option -> id){
     case 535328 : _print_help(c -> command);
     exit(0);
@@ -820,10 +817,10 @@ static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  
     case 34343516 : c -> plain = 1;
     break;
     case 7300068 : if(! String_truth(value)) x2c_driver_error("--color requires auto, always, or never");
-    if(String_equal(value,  _21)) c -> color_mode = 109854;
-    else if(String_equal(value,  _22)) c -> color_mode = 93785702;
-    else if(String_equal(value,  _23)) c -> color_mode = 29733220;
-    else x2c_driver_error(String_join(NULL,  cons(String_var(_24),  cons(String_var(value),  cons(String_var(_13),  NULL)))));
+    if(String_equal(value, _21)) c -> color_mode = 109854;
+    else if(String_equal(value, _22)) c -> color_mode = 93785702;
+    else if(String_equal(value, _23)) c -> color_mode = 29733220;
+    else x2c_driver_error(String_join(NULL, cons(String_var(_24), cons(String_var(value), cons(String_var(_13), NULL)))));
     break;
     case 8721742 : c -> debugging = 1;
     break;
@@ -839,12 +836,12 @@ static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  
     break;
     case 996399414194 : c -> no_phony_deps = 1;
     break;
-    case 20273998090 : Array_push(x_paths,  String_var(value));
-    if(c -> command != 45220543335690) _push_pair(cc_args,  _38,  value);
+    case 20273998090 : Array_push(x_paths, String_var(value));
+    if(c -> command != 45220543335690) _push_pair(cc_args, _39, value);
     break;
-    case 54927135910154 : Array_push(x_paths,  String_var(value));
+    case 54927135910154 : Array_push(x_paths, String_var(value));
     break;
-    case 35114656356 : c -> package_dirs = cons(String_var(value),  c -> package_dirs);
+    case 35114656356 : c -> package_dirs = cons(String_var(value), c -> package_dirs);
     break;
     case 973020192 : c -> no_cpp = 1;
     break;
@@ -862,11 +859,11 @@ static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  
     break;
     case 35599567626 : c -> profile = value;
     break;
-    case 740232 : _driver_kind(c,  value);
+    case 740232 : _driver_kind(c, value);
     break;
     case 7477414666 : c -> compile_only = 1;
     break;
-    case 686246 : _driver_jobs(c,  value);
+    case 686246 : _driver_jobs(c, value);
     break;
     case 1052018024 : c -> output = value;
     break;
@@ -877,92 +874,93 @@ static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  
     break;
     case 41897807850336 : c -> save_temps = 1;
     break;
-    case 8747647543562 : _push_pair(cc_args,  _38,  value);
+    case 8747647543562 : _push_pair(cc_args, _39, value);
     break;
-    case 274059207002 : _push_pair(cc_args,  _39,  value);
+    case 274059207002 : _push_pair(cc_args, _40, value);
     break;
     case 198 : c -> cc = value;
     break;
     case 100 : c -> ar = value;
     break;
-    case 31784 : case 14 : Array_push(cc_args,  String_var(spelling));
+    case 31784 : case 14 : Array_push(cc_args, String_var(spelling));
     break;
     case 279333770 : case 1473453116298 : if(attached){
-      Array_push(cpp_args,  String_var(spelling));
-      Array_push(cc_args,  String_var(spelling));
+      Array_push(cpp_args, String_var(spelling));
+      Array_push(cc_args, String_var(spelling));
     }
     else{
-      _push_pair(cpp_args,  spelling,  value);
-      _push_pair(cc_args,  spelling,  value);
+      _push_pair(cpp_args, spelling, value);
+      _push_pair(cc_args, spelling, value);
     }
     break;
-    case 49350 : if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL,  cons(String_var(_25),  cons(String_var(value),  cons(String_var(_13),  NULL)))));
-    Array_push(cc_args,  String_var(value));
+    case 49350 : if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL, cons(String_var(_25), cons(String_var(value), cons(String_var(_13), NULL)))));
+    Array_push(cc_args, String_var(value));
     break;
-    case 26380018276 : case 26379160754 : if(attached) Array_push(ld_args,  String_var(spelling));
-    else _push_pair(ld_args,  spelling,  value);
+    case 26380018276 : case 26379160754 : if(attached) Array_push(ld_args, String_var(spelling));
+    else _push_pair(ld_args, spelling, value);
     break;
-    case 52364728676 : _push_pair(ld_args,  spelling,  value);
+    case 52364728676 : _push_pair(ld_args, spelling, value);
     break;
-    case 1496 : Array_push(ld_args,  String_var(spelling));
+    case 1496 : Array_push(ld_args, String_var(spelling));
     break;
   }
 
 }
 
 static void _one_dash_removed(String arg){
-  if(strlen(arg) > 2 && String_getindex(arg,  0) == '-' && String_getindex(arg,  1) != '-' && strcmp(arg,  "-I") != 0 && strcmp(arg,  "-h") != 0 && strcmp(arg,  "-v") != 0 && strcmp(arg,  "-###") != 0){
-    fprintf(stderr,  "x2c: error: one-dash long option '%s' was removed\n",  arg);
-    fprintf(stderr,  "note: use '--%s'\n",  arg + 1);
+  const char * attached;
+  if(strlen(arg) > 2 && String_getindex(arg, 0) == '-' && String_getindex(arg, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_26), cons(String_var(arg), NULL))), CLI_TRANSLATE, & attached)){
+    fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", arg);
+    fprintf(stderr, "note: use '--%s'\n", arg + 1);
     exit(2);
   }
 
 }
 
-static CliRequest _parse_command(List args,  CliCommand * command){
+static CliRequest _parse_command(List args, CliCommand * command){
   Symbol name = command -> name;
   int mask = command -> mask;
-  CliRequest request = Scope_calloc(1,  sizeof(struct CliRequest));
+  CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
   request -> command = name;
   request -> jobs = 1;
   if(mask &(CLI_BUILD | CLI_RUN)) request -> kind = 404971770155786;
-  Array inputs = Array_new(),  run_args = Array_new(),  x_paths = Array_new();
-  Array cpp_args = Array_new(),  cc_args = Array_new(),  ld_args = Array_new();
+  Array inputs = Array_new(), run_args = Array_new(), x_paths = Array_new();
+  Array cpp_args = Array_new(), cc_args = Array_new(), ld_args = Array_new();
   int operands = 0;
   for(List node = args;  List_truth(node);  node = List_cdr(node)){
     String arg = Var_string(List_car(node));
-    int dashed = String_truth(arg) && String_getindex(arg,  0) == '-';
-    if(mask != CLI_BOOTSTRAP && ! operands && dashed && strcmp(arg,  "--") == 0){
+    int dashed = String_truth(arg) && String_getindex(arg, 0) == '-';
+    if(mask != CLI_BOOTSTRAP && ! operands && dashed && strcmp(arg, "--") == 0){
       operands = 1;
       continue;
     }
-    if(mask == CLI_BOOTSTRAP && ! dashed) x2c_driver_error(String_join(NULL,  cons(String_var(_26),  cons(String_var(arg),  cons(String_var(_13),  NULL)))));
+    if(mask == CLI_BOOTSTRAP && ! dashed) x2c_driver_error(String_join(NULL, cons(String_var(_27), cons(String_var(arg), cons(String_var(_13), NULL)))));
     if(operands || ! dashed){
-      if(operands && name == 38236) Array_push(run_args,  String_var(arg));
-      else Array_push(inputs,  String_var(arg));
+      if(operands && name == 38236) Array_push(run_args, String_var(arg));
+      else Array_push(inputs, String_var(arg));
       continue;
     }
-    if(mask != CLI_BOOTSTRAP && strcmp(arg,  "-o") == 0) _removed_output();
-    if((mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg,  _40)){
+    if(mask != CLI_BOOTSTRAP && strcmp(arg, "-o") == 0) _removed_output();
+    if((mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _41)){
       request -> save_temps = 1;
-      request -> temps_dir = String_remove_prefix(arg,  _40);
+      request -> temps_dir = String_remove_prefix(arg, _41);
       if(! String_truth(request -> temps_dir)) x2c_driver_error("--save-temps= requires a directory");
       continue;
     }
-    String spelling = NULL,  value = NULL;
+    String spelling = NULL, value = NULL;
     int attached = 0;
-    CliOption * option = _take_option(& node,  mask,  & spelling,  & value,  & attached);
+    CliOption * option = _take_option(& node, mask, & spelling, & value, & attached);
     if(! option){
       if(mask == CLI_TRANSLATE) _one_dash_removed(arg);
-      x2c_driver_error(String_join(NULL,  cons(String_var(_27),  cons(String_var(arg),  cons(String_var(_13),  NULL)))));
+      x2c_driver_error(String_join(NULL, cons(String_var(_28), cons(String_var(arg), cons(String_var(_13), NULL)))));
     }
-    _apply_option(request,  option,  spelling,  value,  attached,  x_paths,  cpp_args,  cc_args,  ld_args);
+    _apply_option(request, option, spelling, value, attached, x_paths, cpp_args, cc_args, ld_args);
   }
   request -> inputs = Array_list_free(inputs);
   request -> run_args = Array_list_free(run_args);
   request -> include_dirs = Array_list_free(x_paths);
   request -> cpp_args = Array_list_free(cpp_args);
-  if(mask == CLI_BOOTSTRAP && ! cc_args -> length) Array_push(cc_args,  String_var(_41));
+  if(mask == CLI_BOOTSTRAP && ! cc_args -> length) Array_push(cc_args, String_var(_42));
   request -> cc_args = Array_list_free(cc_args);
   request -> ld_args = Array_list_free(ld_args);
   if(List_truth(request -> package_dirs)) request -> package_dirs = List_reverse(request -> package_dirs);
@@ -974,24 +972,24 @@ static CliRequest _parse_command(List args,  CliCommand * command){
   return request;
 }
 
-CliRequest cli_parse(int argc,  char * * argv){
+CliRequest cli_parse(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
-  List args = _expand_arguments(argc,  argv);
+  List args = _expand_arguments(argc, argv);
   if(! List_truth(args)){
     _print_help(0);
     exit(2);
   }
   String first = Var_string(List_car(args));
   if(! String_truth(first)) x2c_driver_error("expected a command, found an empty argument");
-  if(strcmp(first,  "--help") == 0 || strcmp(first,  "-h") == 0){
+  if(strcmp(first, "--help") == 0 || strcmp(first, "-h") == 0){
     _print_help(0);
     exit(0);
   }
-  if(strcmp(first,  "--version") == 0 || strcmp(first,  "-V") == 0){
+  if(strcmp(first, "--version") == 0 || strcmp(first, "-V") == 0){
     _print_version();
     exit(0);
   }
-  if(strcmp(first,  "help") == 0){
+  if(strcmp(first, "help") == 0){
     List rest = List_cdr(args);
     if(! List_truth(rest)){
       _print_help(0);
@@ -1000,21 +998,22 @@ CliRequest cli_parse(int argc,  char * * argv){
     String name = Var_string(List_car(rest));
     if(List_truth(List_cdr(rest))) x2c_driver_error("help accepts at most one command");
     CliCommand * asked = _command_row(name);
-    if(strcmp(name,  "help") == 0 || strcmp(name,  "--help") == 0 || strcmp(name,  "-h") == 0) _print_help(535328);
+    if(strcmp(name, "help") == 0 || strcmp(name, "--help") == 0 || strcmp(name, "-h") == 0) _print_help(535328);
     else if(asked) _print_help(asked -> name);
-    else x2c_driver_error(String_join(NULL,  cons(String_var(_12),  cons(String_var(name),  cons(String_var(_13),  NULL)))));
+    else x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL)))));
     exit(0);
   }
   CliCommand * command = _command_row(first);
-  if(command) return _parse_command(List_cdr(args),  command);
-  if(strcmp(first,  "-o") == 0) _removed_output();
-  if(strlen(first) > 2 && String_getindex(first,  0) == '-' && String_getindex(first,  1) != '-' && String_getindex(first,  1) != '#'){
-    fprintf(stderr,  "x2c: error: one-dash long option '%s' was removed\n",  first);
-    fprintf(stderr,  "note: use 'x2c translate --%s ...'\n",  first + 1);
+  if(command) return _parse_command(List_cdr(args), command);
+  if(strcmp(first, "-o") == 0) _removed_output();
+  const char * attached;
+  if(strlen(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_26), cons(String_var(first), NULL))), CLI_TRANSLATE, & attached)){
+    fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", first);
+    fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
     exit(2);
   }
-  if(String_getindex(first,  0) != '-') _expected_command(first);
-  x2c_driver_error(String_join(NULL,  cons(String_var(_28),  cons(String_var(first),  cons(String_var(_13),  NULL)))));
+  if(String_getindex(first, 0) != '-') _expected_command(first);
+  x2c_driver_error(String_join(NULL, cons(String_var(_29), cons(String_var(first), cons(String_var(_13), NULL)))));
 }
 
 int CliRequest_inspects(CliRequest request){

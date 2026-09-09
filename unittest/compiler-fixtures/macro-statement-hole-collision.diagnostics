@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-statement-hole-collision.x:8:8: parse: expected
     $item;
          ^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/func-adapt-indirect.x:11:3: type: native binding targ
     ^^^^
   note: target signature: ("FuncAdapter") source signature: (* (func ((long) (long))) long) supported: a free function or Type.method designator
 
-limit: too many errors, stopping
-

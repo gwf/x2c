@@ -6,19 +6,19 @@ Var int_var(int);
 
 int Var_int(Var);
 
-static int invoke(int value,  int callback(int));
+static int invoke(int value, int callback(int));
 
 static Var _x2c_lambda_0(Var value);
 
 static int _x2c_lambda_adapt_0(int a0);
 
-static int invoke(int value,  int callback(int)){
+static int invoke(int value, int callback(int)){
   return callback(value);
 }
 
 int main(void){
   x2c_initialize();
-  return invoke(41,  _x2c_lambda_adapt_0) != 42;
+  return invoke(41, _x2c_lambda_adapt_0) != 42;
 }
 
 static Var _x2c_lambda_0(Var value){
@@ -27,7 +27,7 @@ static Var _x2c_lambda_0(Var value){
 }
 
 static int _x2c_lambda_adapt_0(int a0){
-  return Var_int(Var_convert(_x2c_lambda_0(int_var(a0)),  3453797));
+  return Var_int(Var_convert(_x2c_lambda_0(int_var(a0)), 3453797));
   ;
 }
 

@@ -17,9 +17,9 @@ SpanKind vendored__Span_kind(Span span){
   return span.lo == span.hi ? SPAN_CLOSED : SPAN_OPEN;
 }
 
-Span vendored__Span_add(Span a,  Span b){
+Span vendored__Span_add(Span a, Span b){
   return(Span){
-    a.lo + b.lo,  a.hi + b.hi
+    a.lo + b.lo, a.hi + b.hi
   }
   ;
 }

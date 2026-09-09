@@ -12,13 +12,9 @@ static int _init_guard_ = 0;
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-
-
-
-
 Var int_var(int);
 
-int Var_is(Var,  Symbol);
+int Var_is(Var, Symbol);
 
 Var Var_new(Symbol, ...);
 
@@ -56,8 +52,8 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(660840135016,  _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("iswidget"),  _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(660840135016, _x2c__x2c_protocol_methods_0)){
+    x2c_register_descriptor(String_new("iswidget"), _x2c__x2c_protocol_methods_0);
   }
   _0 = String_new("iswidget");
 }
@@ -79,15 +75,15 @@ static Var call_or_void(int(* function)(void)){
 
 static int symbol_shadows_type(Var value){
   Symbol NativeInt = 3453797;
-  return Var_is(value,  NativeInt);
+  return Var_is(value, NativeInt);
 }
 
 static int custom_visible_before_protocol(Var value){
-  return Var_is(value,  660840135016);
+  return Var_is(value, 660840135016);
 }
 
 Var IsWidget_var(IsWidget widget){
-  return Var_new(660840135016,  widget);
+  return Var_new(660840135016, widget);
 }
 
 IsWidget Var_iswidget(Var value){
@@ -98,7 +94,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   x2c_register_type(_0);
-  int integer = 7,  * pointer = & integer,  * * double_pointer = & pointer;
+  int integer = 7, * pointer = & integer, * * double_pointer = & pointer;
   Var scalar = int_var(integer);
   Dynamic alias = scalar;
   DynamicAgain nested_alias = alias;
@@ -113,8 +109,8 @@ int main(void){
   Var list = List_var(NULL);
   Var string = String_var(0);
   Var symbol = Symbol_var(13540568202);
-  Var pointer_value = Var_new(442085973,  pointer);
-  Var double_pointer_value = Var_new(56587004501,  double_pointer);
+  Var pointer_value = Var_new(442085973, pointer);
+  Var double_pointer_value = Var_new(56587004501, double_pointer);
   Var null_value = Var_new(3683441, (void *) NULL);
   Var absent =((void) 0, Void);
   IsWidget widget = Scope_malloc(sizeof(struct IsWidgetData));
@@ -123,8 +119,8 @@ int main(void){
   Var custom = IsWidget_var(widget_alias);
   Symbol scalar_tag = 3453797;
   int is = 1;
-  int ok = Var_is(nested_alias,  3453797) && Var_is(scalar,  3453797) && Var_is(scalar,  3453797) && Var_is(scalar,  3453797) && Var_is(scalar,  3453797) && Var_is(signed_byte,  26993) && Var_is(signed_byte,  26993) && ! Var_is(signed_byte,  30065) && Var_is(unsigned_byte,  30065) && Var_is(unsigned_value,  3847013) && ! Var_is(unsigned_value,  3453797) && Var_is(wide_integer,  25983886) && ! Var_is(wide_integer,  818062) && Var_is(wide_unsigned,  1435270030) && ! Var_is(wide_unsigned,  44858254) && Var_is(floating,  3355493) && ! Var_is(floating,  3356265) && Var_is(wide_floating,  26071077642) && Var_is(system_integer,  3453797) && Var_is(list,  806120) && Var_is(string,  1318210446) && Var_is(symbol,  1328354264) && ! Var_is(scalar,  45156) && Var_is(pointer_value,  442085973) && Var_is(pointer_value,  442085973) && Var_is(double_pointer_value,  56587004501) && Var_is(double_pointer_value,  56587004501) && Var_is(null_value,  3683441) && ! Var_is_void(null_value) && Var_is_void(absent) && ! Var_is(absent,  3683441) && custom_visible_before_protocol(custom) && Var_is(custom,  660840135016) && Var_is(custom,  660840135016) && Var_is(scalar,  3453797) == 1 &&(Var_is(scalar,  3453797) || Var_is(scalar,  30065)) && ! Var_is(scalar,  3356265) && Var_is(next_value(),  3453797) && calls == 1 && Var_is_void(call_or_void(NULL)) && symbol_shadows_type(scalar) && Var_is(scalar,  3453797) && Var_is(scalar,  scalar_tag) && Var_is(scalar,  next_tag()) && tag_calls == 1 && ! Var_is(scalar,  1019588862331914) && Var_is(scalar,  3453797) && is;
-  printf("%d %d %d\n",  ok,  calls,  tag_calls);
+  int ok = Var_is(nested_alias, 3453797) && Var_is(scalar, 3453797) && Var_is(scalar, 3453797) && Var_is(scalar, 3453797) && Var_is(scalar, 3453797) && Var_is(signed_byte, 26993) && Var_is(signed_byte, 26993) && ! Var_is(signed_byte, 30065) && Var_is(unsigned_byte, 30065) && Var_is(unsigned_value, 3847013) && ! Var_is(unsigned_value, 3453797) && Var_is(wide_integer, 25983886) && ! Var_is(wide_integer, 818062) && Var_is(wide_unsigned, 1435270030) && ! Var_is(wide_unsigned, 44858254) && Var_is(floating, 3355493) && ! Var_is(floating, 3356265) && Var_is(wide_floating, 26071077642) && Var_is(system_integer, 3453797) && Var_is(list, 806120) && Var_is(string, 1318210446) && Var_is(symbol, 1328354264) && ! Var_is(scalar, 45156) && Var_is(pointer_value, 442085973) && Var_is(pointer_value, 442085973) && Var_is(double_pointer_value, 56587004501) && Var_is(double_pointer_value, 56587004501) && Var_is(null_value, 3683441) && ! Var_is_void(null_value) && Var_is_void(absent) && ! Var_is(absent, 3683441) && custom_visible_before_protocol(custom) && Var_is(custom, 660840135016) && Var_is(custom, 660840135016) && Var_is(scalar, 3453797) == 1 &&(Var_is(scalar, 3453797) || Var_is(scalar, 30065)) && ! Var_is(scalar, 3356265) && Var_is(next_value(), 3453797) && calls == 1 && Var_is_void(call_or_void(NULL)) && symbol_shadows_type(scalar) && Var_is(scalar, 3453797) && Var_is(scalar, scalar_tag) && Var_is(scalar, next_tag()) && tag_calls == 1 && ! Var_is(scalar, 1019588862331914) && Var_is(scalar, 3453797) && is;
+  printf("%d %d %d\n", ok, calls, tag_calls);
   return ok ? 0 : 1;
 }
 

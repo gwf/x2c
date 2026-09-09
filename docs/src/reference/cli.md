@@ -199,6 +199,11 @@ They resolve against compiler-generated targets.
 ./x2c run examples/foreach.x -- first -second input.x
 ```
 
+Use `-q` to suppress build progress and receipts while preserving program
+output. Use `--build-dir <dir>` to retain generated files and objects for
+inspection or reuse. Otherwise temporary intermediates are removed after the
+program finishes.
+
 `--` ends build options. Every later value is passed as one program argument,
 including values that begin with `-` or end in `.x`. x2c returns the program's
 exit status. `-###` prints the build and run actions without creating or

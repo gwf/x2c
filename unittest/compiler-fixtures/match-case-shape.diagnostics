@@ -3,5 +3,3 @@ unittest/compiler-fixtures/match-case-shape.x:6:5: parse: match case pattern mus
       ^^^^
   note: pattern: (expr (int) (literal (int) "42"))
 
-limit: too many errors, stopping
-

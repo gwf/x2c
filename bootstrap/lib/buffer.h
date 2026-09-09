@@ -9,8 +9,8 @@
 #include "block.h"
 #include <stddef.h>
 typedef struct Buffer{
-  Block content,  indents;
-  size_t padding,  pos,  _indent;
+  Block content, indents;
+  size_t padding, pos, _indent;
 }
 * Buffer;
 
@@ -18,23 +18,23 @@ Buffer Buffer_new(size_t padding);
 
 void Buffer_free(Buffer buf);
 
-void Buffer_move_to(Buffer buf,  Scope * scope);
+void Buffer_move_to(Buffer buf, Scope * scope);
 
-Buffer Buffer_reserve(Buffer buf,  size_t minimum);
+Buffer Buffer_reserve(Buffer buf, size_t minimum);
 
 Buffer Buffer_clear(Buffer buf);
 
-Buffer Buffer_write_len(Buffer buf,  const char * text,  size_t length);
+Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 
-Buffer Buffer_write(Buffer buf,  const char * text);
+Buffer Buffer_write(Buffer buf, const char * text);
 
-Buffer Buffer_printf(Buffer buf,  const char * format, ...);
+Buffer Buffer_printf(Buffer buf, const char * format, ...);
 
-Buffer Buffer_write_char(Buffer buf,  char value);
+Buffer Buffer_write_char(Buffer buf, char value);
 
-Buffer Buffer_write_repeat(Buffer buf,  char value,  size_t count);
+Buffer Buffer_write_repeat(Buffer buf, char value, size_t count);
 
-Buffer Buffer_unwrite(Buffer buf,  size_t count);
+Buffer Buffer_unwrite(Buffer buf, size_t count);
 
 Buffer Buffer_pad(Buffer buf);
 
@@ -50,9 +50,9 @@ Buffer Buffer_pop(Buffer buf);
 
 size_t Buffer_tabstop(Buffer buf);
 
-int Buffer_try_get(Buffer buf,  ptrdiff_t index,  char * out);
+int Buffer_try_get(Buffer buf, ptrdiff_t index, char * out);
 
-char Buffer_get(Buffer buf,  ptrdiff_t index);
+char Buffer_get(Buffer buf, ptrdiff_t index);
 
 size_t Buffer_len(Buffer buf);
 

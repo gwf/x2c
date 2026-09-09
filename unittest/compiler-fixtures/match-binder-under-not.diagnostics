@@ -3,5 +3,3 @@ unittest/compiler-fixtures/match-binder-under-not.x:5:5: type: match binder is n
       ^^^^
   note: binder: ?missing bind it in every alternative and never under !not
 
-limit: too many errors, stopping
-

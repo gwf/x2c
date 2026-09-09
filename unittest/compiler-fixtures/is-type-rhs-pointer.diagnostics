@@ -3,5 +3,3 @@ unittest/compiler-fixtures/is-type-rhs-pointer.x:6:16: type: operator 'is' requi
                  ^^
   note: operand type: (* int)
 
-limit: too many errors, stopping
-

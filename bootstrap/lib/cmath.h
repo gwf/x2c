@@ -11,7 +11,7 @@ double asin(double);
 
 double atan(double);
 
-double atan2(double,  double);
+double atan2(double, double);
 
 double cos(double);
 
@@ -47,23 +47,23 @@ double log2(double);
 
 double logb(double);
 
-double frexp(double,  int *);
+double frexp(double, int *);
 
-double ldexp(double,  int);
+double ldexp(double, int);
 
-double modf(double,  double *);
+double modf(double, double *);
 
-double scalbn(double,  int);
+double scalbn(double, int);
 
-double scalbln(double,  long);
+double scalbln(double, long);
 
 double cbrt(double);
 
 double fabs(double);
 
-double hypot(double,  double);
+double hypot(double, double);
 
-double pow(double,  double);
+double pow(double, double);
 
 double sqrt(double);
 
@@ -87,27 +87,27 @@ double round(double);
 
 double trunc(double);
 
-double fmod(double,  double);
+double fmod(double, double);
 
-double remainder(double,  double);
+double remainder(double, double);
 
-double remquo(double,  double,  int *);
+double remquo(double, double, int *);
 
-double copysign(double,  double);
+double copysign(double, double);
 
 double nan(const char *);
 
-double nextafter(double,  double);
+double nextafter(double, double);
 
-double nexttoward(double,  long double);
+double nexttoward(double, long double);
 
-double fdim(double,  double);
+double fdim(double, double);
 
-double fmax(double,  double);
+double fmax(double, double);
 
-double fmin(double,  double);
+double fmin(double, double);
 
-double fma(double,  double,  double);
+double fma(double, double, double);
 
 int ilogb(double);
 

@@ -77,14 +77,14 @@ deps:
 endif
 
 builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
-	$(X2C) translate --out-dir builds $(PACKAGE_X_FLAGS) $<
+	"$(X2C)" translate --out-dir builds $(PACKAGE_X_FLAGS) $<
 
 # A consumer resolves the package through both files, so the archive carries
 # the link line as a prerequisite; otherwise `make run` on a clean builds/
 # fails with "package is not built".
 $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
   builds/$(PACKAGE).link package-build-force | $(DEPENDENCY_PREREQUISITE)
-	$(X2C) build --kind static-library --output $@ --build-dir builds/cc \
+	"$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
 	  $(PACKAGE_C_FLAGS) $(PACKAGE_GENERATED) $(PACKAGE_NATIVE)
 
 builds/$(PACKAGE).link: Makefile | builds
@@ -93,7 +93,7 @@ builds/$(PACKAGE).link: Makefile | builds
 # --package-dir reads builds/$(PACKAGE).link, so a consumer never repeats
 # PACKAGE_LINK; passing it again links the dependency twice.
 builds/test-%: tests/test-%.x $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/$* \
+	"$(X2C)" build --output $@ --build-dir builds/$* \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) \
 	  --x-include-dir $(ROOT)/unittest \
 	  $< $(ROOT)/unittest/test-support.x

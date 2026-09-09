@@ -3,5 +3,3 @@ unittest/compiler-fixtures/is-type-non-var.x:4:16: type: operator 'is' requires 
                  ^^
   note: operand type: (int)
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-address.x:5:32: type: captured value re
                                  ^
   note: binding: value
 
-limit: too many errors, stopping
-

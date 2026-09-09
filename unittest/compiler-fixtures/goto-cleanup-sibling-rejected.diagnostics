@@ -3,5 +3,3 @@ unittest/compiler-fixtures/goto-cleanup-sibling-rejected.x:11:5: emit: goto cann
       ^^^^
   note: jump only within the same region or outward
 
-limit: too many errors, stopping
-

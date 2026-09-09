@@ -4,11 +4,11 @@
 
 #include "error.h"
 
-static List _21,  _20,  _8,  _7,  _6;
+static List _21, _20, _8, _7, _6;
 
-static String _24,  _23,  _22,  _18,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _2,  _1,  _0;
+static String _24, _23, _22, _18, _16, _15, _14, _13, _12, _11, _10, _9, _2, _1, _0;
 
-static Var _19,  _17,  _5,  _4,  _3;
+static Var _19, _17, _5, _4, _3;
 
 static int map_evaluations;
 
@@ -20,21 +20,19 @@ static int cleanups;
 
 static int _init_guard_ = 0;
 
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
 Var String_var(String);
 
 Split String_words(String);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
-int Map_try_next(Map,  unsigned *,  Var *,  Var *);
+int Map_try_next(Map, unsigned *, Var *, Var *);
 
 long Var_integer(Var);
 
@@ -42,7 +40,7 @@ int String_len(String);
 
 String Var_string(Var);
 
-Iter Map_keys(Map,  Iter);
+Iter Map_keys(Map, Iter);
 
 int Var_truth(Var);
 
@@ -50,35 +48,35 @@ int String_truth(String);
 
 Var Symbol_var(Symbol);
 
-int Split_try_next(Split,  int *,  String *);
+int Split_try_next(Split, int *, String *);
 
 Split String_lines(String);
 
-Split String_splits(String,  String);
+Split String_splits(String, String);
 
-Iter range(int,  int,  int,  Iter);
+Iter range(int, int, int, Iter);
 
-Iter Iter_zip(Iter,  Iter,  Iter);
+Iter Iter_zip(Iter, Iter, Iter);
 
 List Var_list(Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 MapIntInt MapIntInt_new(void);
 
-void MapIntInt_set(MapIntInt,  int,  int);
+void MapIntInt_set(MapIntInt, int, int);
 
-int MapIntInt_try_next(MapIntInt,  unsigned *,  int *,  int *);
+int MapIntInt_try_next(MapIntInt, unsigned *, int *, int *);
 
 MapStringString MapStringString_new(void);
 
-void MapStringString_set(MapStringString,  String,  String);
+void MapStringString_set(MapStringString, String, String);
 
-int MapStringString_try_next(MapStringString,  unsigned *,  String *,  String *);
+int MapStringString_try_next(MapStringString, unsigned *, String *, String *);
 
 int Var_is_void(Var);
 
-int String_equal(String,  String);
+int String_equal(String, String);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -104,9 +102,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = int_var(1);
   _4 = int_var(2);
   _5 = int_var(3);
-  _6 = cons(_5,  NULL);
-  _7 = cons(_4,  _6);
-  _8 = cons(_3,  _7);
+  _6 = cons(_5, NULL);
+  _7 = cons(_4, _6);
+  _8 = cons(_3, _7);
   _9 = String_new("  alpha beta  gamma ");
   _10 = String_new("one\ntwo\r\nthree\n");
   _11 = String_new("a::b:");
@@ -118,8 +116,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _17 = String_var(_0);
   _18 = String_new("bb");
   _19 = String_var(_18);
-  _20 = cons(_19,  NULL);
-  _21 = cons(_17,  _20);
+  _20 = cons(_19, NULL);
+  _21 = cons(_17, _20);
   _22 = String_new("ada");
   _23 = String_new("lovelace");
   _24 = String_new("three");
@@ -147,18 +145,18 @@ static void record_cleanup(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Map counts = Map_update_n(Map_new(),  3,  String_var(_0),  int_var(1),  String_var(_1),  int_var(2),  String_var(_2),  int_var(3));
+  Map counts = Map_update_n(Map_new(), 3, String_var(_0), int_var(1), String_var(_1), int_var(2), String_var(_2), int_var(3));
   List values = _8;
-  int existing = 0,  existing_total = 0;
+  int existing = 0, existing_total = 0;
   {
     int current;
-    Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
-      current = Var_int(Var_convert(_x2c_macro_item_0,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
+      current = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
       {
         existing = current;
         existing_total += existing;
@@ -174,7 +172,7 @@ int main(void){
     unsigned _x2c_macro_cursor_1 = 0;
     Var _x2c_macro_cursor_output_0;
     Var _x2c_macro_cursor_output_1;
-    while(Map_try_next(_x2c_macro_object_1,  & _x2c_macro_cursor_1,  & _x2c_macro_cursor_output_0,  & _x2c_macro_cursor_output_1)){
+    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
       value = _x2c_macro_cursor_output_1;
       value_total += Var_integer(value);
     }
@@ -187,8 +185,8 @@ int main(void){
     unsigned _x2c_macro_cursor_2 = 0;
     Var _x2c_macro_cursor_output_2;
     Var _x2c_macro_cursor_output_3;
-    while(Map_try_next(_x2c_macro_object_2,  & _x2c_macro_cursor_2,  & _x2c_macro_cursor_output_2,  & _x2c_macro_cursor_output_3)){
-      value = Var_int(Var_convert(_x2c_macro_cursor_output_3,  3453797));
+    while(Map_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2, & _x2c_macro_cursor_output_3)){
+      value = Var_int(Var_convert(_x2c_macro_cursor_output_3, 3453797));
       typed_total += value;
     }
 
@@ -201,7 +199,7 @@ int main(void){
     unsigned _x2c_macro_cursor_3 = 0;
     Var _x2c_macro_cursor_output_4;
     Var _x2c_macro_cursor_output_5;
-    while(Map_try_next(_x2c_macro_object_3,  & _x2c_macro_cursor_3,  & _x2c_macro_cursor_output_4,  & _x2c_macro_cursor_output_5)){
+    while(Map_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
       current = _x2c_macro_cursor_output_5;
       {
         entry = current;
@@ -211,14 +209,14 @@ int main(void){
     }
 
   }
-  int key_bytes = 0,  destructured_total = 0;
+  int key_bytes = 0, destructured_total = 0;
   {
-    Var name,  count;
+    Var name, count;
     Map _x2c_macro_object_4 = counts;
     unsigned _x2c_macro_cursor_4 = 0;
     Var _x2c_macro_cursor_output_6;
     Var _x2c_macro_cursor_output_7;
-    while(Map_try_next(_x2c_macro_object_4,  & _x2c_macro_cursor_4,  & _x2c_macro_cursor_output_6,  & _x2c_macro_cursor_output_7)){
+    while(Map_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_6, & _x2c_macro_cursor_output_7)){
       name = _x2c_macro_cursor_output_6;
       count = _x2c_macro_cursor_output_7;
       {
@@ -229,42 +227,42 @@ int main(void){
     }
 
   }
-  Map numbers = Map_update_n(Map_new(),  2,  int_var(1),  int_var(10),  int_var(2),  int_var(20));
-  int converted_total = 0,  key_total = 0;
+  Map numbers = Map_update_n(Map_new(), 2, int_var(1), int_var(10), int_var(2), int_var(20));
+  int converted_total = 0, key_total = 0;
   {
-    int key,  count;
+    int key, count;
     Map _x2c_macro_object_5 = numbers;
     unsigned _x2c_macro_cursor_5 = 0;
     Var _x2c_macro_cursor_output_8;
     Var _x2c_macro_cursor_output_9;
-    while(Map_try_next(_x2c_macro_object_5,  & _x2c_macro_cursor_5,  & _x2c_macro_cursor_output_8,  & _x2c_macro_cursor_output_9)){
-      key = Var_int(Var_convert(_x2c_macro_cursor_output_8,  3453797));
-      count = Var_int(Var_convert(_x2c_macro_cursor_output_9,  3453797));
+    while(Map_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_8, & _x2c_macro_cursor_output_9)){
+      key = Var_int(Var_convert(_x2c_macro_cursor_output_8, 3453797));
+      count = Var_int(Var_convert(_x2c_macro_cursor_output_9, 3453797));
       converted_total += key + count;
     }
 
   }
   {
     int key;
-    Iter _x2c_macro_iterator_6 = Map_keys(numbers,  &(struct Iter){
+    Iter _x2c_macro_iterator_6 = Map_keys(numbers, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
-      key = Var_int(Var_convert(_x2c_macro_item_6,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
+      key = Var_int(Var_convert(_x2c_macro_item_6, 3453797));
       key_total += key;
     }
 
   }
-  int skipped = 0,  stopped = 0;
+  int skipped = 0, stopped = 0;
   {
     Var volatile value;
     Map _x2c_macro_object_7 = counts;
     unsigned _x2c_macro_cursor_7 = 0;
     Var _x2c_macro_cursor_output_10;
     Var _x2c_macro_cursor_output_11;
-    while(Map_try_next(_x2c_macro_object_7,  & _x2c_macro_cursor_7,  & _x2c_macro_cursor_output_10,  & _x2c_macro_cursor_output_11)){
+    while(Map_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_10, & _x2c_macro_cursor_output_11)){
       value = _x2c_macro_cursor_output_11;
       {
         if(Var_integer(value) == 2) continue;
@@ -280,7 +278,7 @@ int main(void){
     unsigned _x2c_macro_cursor_8 = 0;
     Var _x2c_macro_cursor_output_12;
     Var _x2c_macro_cursor_output_13;
-    while(Map_try_next(_x2c_macro_object_8,  & _x2c_macro_cursor_8,  & _x2c_macro_cursor_output_12,  & _x2c_macro_cursor_output_13)){
+    while(Map_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_12, & _x2c_macro_cursor_output_13)){
       value = _x2c_macro_cursor_output_13;
       {
         if(Var_truth(value)) stopped ++;
@@ -298,7 +296,7 @@ int main(void){
     unsigned _x2c_macro_cursor_9 = 0;
     Var _x2c_macro_cursor_output_14;
     Var _x2c_macro_cursor_output_15;
-    while(Map_try_next(_x2c_macro_object_9,  & _x2c_macro_cursor_9,  & _x2c_macro_cursor_output_14,  & _x2c_macro_cursor_output_15)){
+    while(Map_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_14, & _x2c_macro_cursor_output_15)){
       name = _x2c_macro_cursor_output_14;
       value = _x2c_macro_cursor_output_15;
       {
@@ -306,7 +304,7 @@ int main(void){
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -330,7 +328,7 @@ int main(void){
     unsigned _x2c_macro_cursor_11 = 0;
     Var _x2c_macro_cursor_output_18;
     Var _x2c_macro_cursor_output_19;
-    while(Map_try_next(_x2c_macro_object_11,  & _x2c_macro_cursor_11,  & _x2c_macro_cursor_output_18,  & _x2c_macro_cursor_output_19)){
+    while(Map_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_18, & _x2c_macro_cursor_output_19)){
       outer = _x2c_macro_cursor_output_19;
       {
         Var inner;
@@ -338,7 +336,7 @@ int main(void){
         unsigned _x2c_macro_cursor_10 = 0;
         Var _x2c_macro_cursor_output_16;
         Var _x2c_macro_cursor_output_17;
-        while(Map_try_next(_x2c_macro_object_10,  & _x2c_macro_cursor_10,  & _x2c_macro_cursor_output_16,  & _x2c_macro_cursor_output_17)){
+        while(Map_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_16, & _x2c_macro_cursor_output_17)){
           inner = _x2c_macro_cursor_output_17;
           nested += Var_integer(outer) * Var_integer(inner);
         }
@@ -350,9 +348,9 @@ int main(void){
   }
   int volatile caught = 0;
   {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(20800632064936),  NULL);
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+    ExceptionFrame _x2c_exception_frame_0;
+    List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
       {
@@ -361,19 +359,19 @@ int main(void){
         unsigned _x2c_macro_cursor_12 = 0;
         Var _x2c_macro_cursor_output_20;
         Var _x2c_macro_cursor_output_21;
-        while(Map_try_next(_x2c_macro_object_12,  & _x2c_macro_cursor_12,  & _x2c_macro_cursor_output_20,  & _x2c_macro_cursor_output_21)){
+        while(Map_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_20, & _x2c_macro_cursor_output_21)){
           value = _x2c_macro_cursor_output_21;
           {
             {
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
               if(Var_truth(value)){
-                static const X2CErrorSite  _x2c_error_site_0  = {.file =  "unittest/compiler-fixtures/foreach-macro-lowering.x",.function =  "main",.line =  93};
+                static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 93};
                 x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
                 __builtin_unreachable();
               }
@@ -395,20 +393,19 @@ int main(void){
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {caught = 1;
+         {caught = 1;
       }
 
     }
     else {int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
@@ -416,11 +413,11 @@ int main(void){
 }
 int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
+    x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-     x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_exception_frame_0);
 }
 int word_bytes = 0;
 {
@@ -428,19 +425,19 @@ int word_bytes = 0;
   Split _x2c_macro_object_13 = String_words(_9);
   int _x2c_macro_cursor_13 = 0;
   String _x2c_macro_cursor_output_22;
-  while(Split_try_next(_x2c_macro_object_13,  & _x2c_macro_cursor_13,  & _x2c_macro_cursor_output_22)){
+  while(Split_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_22)){
     word = _x2c_macro_cursor_output_22;
     word_bytes += String_len(word);
   }
 
 }
-int line_count = 0,  line_bytes = 0;
+int line_count = 0, line_bytes = 0;
 {
   String line;
   Split _x2c_macro_object_14 = String_lines(_10);
   int _x2c_macro_cursor_14 = 0;
   String _x2c_macro_cursor_output_23;
-  while(Split_try_next(_x2c_macro_object_14,  & _x2c_macro_cursor_14,  & _x2c_macro_cursor_output_23)){
+  while(Split_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_23)){
     line = _x2c_macro_cursor_output_23;
     {
       line_count ++;
@@ -450,13 +447,13 @@ int line_count = 0,  line_bytes = 0;
   }
 
 }
-int fields = 0,  empty_fields = 0;
+int fields = 0, empty_fields = 0;
 {
   String field;
-  Split _x2c_macro_object_15 = String_splits(_11,  _12);
+  Split _x2c_macro_object_15 = String_splits(_11, _12);
   int _x2c_macro_cursor_15 = 0;
   String _x2c_macro_cursor_output_24;
-  while(Split_try_next(_x2c_macro_object_15,  & _x2c_macro_cursor_15,  & _x2c_macro_cursor_output_24)){
+  while(Split_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_24)){
     field = _x2c_macro_cursor_output_24;
     {
       fields ++;
@@ -473,7 +470,7 @@ int scanned_bytes = 0;
   Split _x2c_macro_object_16 = counted_words(_13);
   int _x2c_macro_cursor_16 = 0;
   String _x2c_macro_cursor_output_25;
-  while(Split_try_next(_x2c_macro_object_16,  & _x2c_macro_cursor_16,  & _x2c_macro_cursor_output_25)){
+  while(Split_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_25)){
     current = _x2c_macro_cursor_output_25;
     {
       word = current;
@@ -489,14 +486,14 @@ int pairs = 0;
   Split _x2c_macro_object_18 = String_words(_14);
   int _x2c_macro_cursor_18 = 0;
   String _x2c_macro_cursor_output_27;
-  while(Split_try_next(_x2c_macro_object_18,  & _x2c_macro_cursor_18,  & _x2c_macro_cursor_output_27)){
+  while(Split_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_27)){
     left = _x2c_macro_cursor_output_27;
     {
       String right;
       Split _x2c_macro_object_17 = String_words(_15);
       int _x2c_macro_cursor_17 = 0;
       String _x2c_macro_cursor_output_26;
-      while(Split_try_next(_x2c_macro_object_17,  & _x2c_macro_cursor_17,  & _x2c_macro_cursor_output_26)){
+      while(Split_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_26)){
         right = _x2c_macro_cursor_output_26;
         if(String_truth(left) && String_truth(right)) pairs ++;
       }
@@ -512,41 +509,41 @@ int boxed = 0;
   Split _x2c_macro_object_19 = String_words(_16);
   int _x2c_macro_cursor_19 = 0;
   String _x2c_macro_cursor_output_28;
-  while(Split_try_next(_x2c_macro_object_19,  & _x2c_macro_cursor_19,  & _x2c_macro_cursor_output_28)){
+  while(Split_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_28)){
     field = String_var(_x2c_macro_cursor_output_28);
     boxed += String_len(Var_string(field));
   }
 
 }
-struct Iter zip_left_storage,  zip_right_storage,  zip_storage;
-Iter zip_left = List_iter(_21,  & zip_left_storage);
-Iter zip_right = range(1,  2,  1,  & zip_right_storage);
-Iter zipped = Iter_zip(zip_left,  zip_right,  & zip_storage);
+struct Iter zip_left_storage, zip_right_storage, zip_storage;
+Iter zip_left = List_iter(_21, & zip_left_storage);
+Iter zip_right = range(1, 2, 1, & zip_right_storage);
+Iter zipped = Iter_zip(zip_left, zip_right, & zip_storage);
 int zipped_total = 0;
 {
-  Var text,  number;
+  Var text, number;
   Iter _x2c_macro_iterator_20 = zipped;
   Var _x2c_macro_item_20;
-  while(Iter_try_next(_x2c_macro_iterator_20,  & _x2c_macro_item_20)){
+  while(Iter_try_next(_x2c_macro_iterator_20, & _x2c_macro_item_20)){
     List _x2c_macro_pair_20;
     _x2c_macro_pair_20 = Var_list(_x2c_macro_item_20);
-    text = List_getindex(_x2c_macro_pair_20,  0);
-    number = List_getindex(_x2c_macro_pair_20,  1);
+    text = List_getindex(_x2c_macro_pair_20, 0);
+    number = List_getindex(_x2c_macro_pair_20, 1);
     zipped_total += String_len(Var_string(text)) * Var_integer(number);
   }
 
 }
 MapIntInt counted = MapIntInt_new();
-MapIntInt_set(counted,  1,  10);
-MapIntInt_set(counted,  2,  20);
-int native_values = 0,  native_pairs = 0;
+MapIntInt_set(counted, 1, 10);
+MapIntInt_set(counted, 2, 20);
+int native_values = 0, native_pairs = 0;
 {
   int volatile value;
   MapIntInt _x2c_macro_object_21 = counted;
   unsigned _x2c_macro_cursor_21 = 0;
   int _x2c_macro_cursor_output_29;
   int _x2c_macro_cursor_output_30;
-  while(MapIntInt_try_next(_x2c_macro_object_21,  & _x2c_macro_cursor_21,  & _x2c_macro_cursor_output_29,  & _x2c_macro_cursor_output_30)){
+  while(MapIntInt_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_29, & _x2c_macro_cursor_output_30)){
     value = _x2c_macro_cursor_output_30;
     native_values += value;
   }
@@ -559,7 +556,7 @@ int native_values = 0,  native_pairs = 0;
   unsigned _x2c_macro_cursor_22 = 0;
   int _x2c_macro_cursor_output_31;
   int _x2c_macro_cursor_output_32;
-  while(MapIntInt_try_next(_x2c_macro_object_22,  & _x2c_macro_cursor_22,  & _x2c_macro_cursor_output_31,  & _x2c_macro_cursor_output_32)){
+  while(MapIntInt_try_next(_x2c_macro_object_22, & _x2c_macro_cursor_22, & _x2c_macro_cursor_output_31, & _x2c_macro_cursor_output_32)){
     key = _x2c_macro_cursor_output_31;
     value = _x2c_macro_cursor_output_32;
     native_pairs += key * value;
@@ -567,7 +564,7 @@ int native_values = 0,  native_pairs = 0;
 
 }
 MapStringString named = MapStringString_new();
-MapStringString_set(named,  _22,  _23);
+MapStringString_set(named, _22, _23);
 int native_bytes = 0;
 {
   String volatile value;
@@ -575,16 +572,16 @@ int native_bytes = 0;
   unsigned _x2c_macro_cursor_23 = 0;
   String _x2c_macro_cursor_output_33;
   String _x2c_macro_cursor_output_34;
-  while(MapStringString_try_next(_x2c_macro_object_23,  & _x2c_macro_cursor_23,  & _x2c_macro_cursor_output_33,  & _x2c_macro_cursor_output_34)){
+  while(MapStringString_try_next(_x2c_macro_object_23, & _x2c_macro_cursor_23, & _x2c_macro_cursor_output_33, & _x2c_macro_cursor_output_34)){
     value = _x2c_macro_cursor_output_34;
     native_bytes += String_len(value);
   }
 
 }
 int volatile value = 7;
-printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",  value_total,  typed_total,  key_bytes,  destructured_total,  converted_total,  skipped,  stopped,  deferred_keys,  nested,  caught,  cleanups,  map_evaluations,  initializer_evaluations,  word_bytes,  line_count,  line_bytes,  fields,  empty_fields,  scanned_bytes,  split_evaluations);
-printf("%d %d %d %d %d %d %d %d %d %d\n",  pairs,  boxed,  zipped_total,  native_values,  native_pairs,  native_bytes,  key_total,  existing,  existing_total,  existing_map_total);
-return value_total == 6 && typed_total == 6 && key_bytes == 3 && destructured_total == 6 && converted_total == 33 && skipped == 4 && stopped == 1 && deferred_keys == 3 && nested == 36 && caught == 1 && cleanups == 4 && map_evaluations == 1 && initializer_evaluations == 1 && word_bytes == 14 && line_count == 3 && line_bytes == 11 && fields == 4 && empty_fields == 2 && scanned_bytes == 11 && split_evaluations == 1 && pairs == 6 && boxed == 2 && zipped_total == 5 && native_values == 30 && native_pairs == 50 && native_bytes == 8 && key_total == 3 && existing == 3 && existing_total == 6 && existing_map_total == 6 && ! Var_is_void(entry) && String_equal(word,  _24) && value == 7 ? 0 : 1;
+printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", value_total, typed_total, key_bytes, destructured_total, converted_total, skipped, stopped, deferred_keys, nested, caught, cleanups, map_evaluations, initializer_evaluations, word_bytes, line_count, line_bytes, fields, empty_fields, scanned_bytes, split_evaluations);
+printf("%d %d %d %d %d %d %d %d %d %d\n", pairs, boxed, zipped_total, native_values, native_pairs, native_bytes, key_total, existing, existing_total, existing_map_total);
+return value_total == 6 && typed_total == 6 && key_bytes == 3 && destructured_total == 6 && converted_total == 33 && skipped == 4 && stopped == 1 && deferred_keys == 3 && nested == 36 && caught == 1 && cleanups == 4 && map_evaluations == 1 && initializer_evaluations == 1 && word_bytes == 14 && line_count == 3 && line_bytes == 11 && fields == 4 && empty_fields == 2 && scanned_bytes == 11 && split_evaluations == 1 && pairs == 6 && boxed == 2 && zipped_total == 5 && native_values == 30 && native_pairs == 50 && native_bytes == 8 && key_total == 3 && existing == 3 && existing_total == 6 && existing_map_total == 6 && ! Var_is_void(entry) && String_equal(word, _24) && value == 7 ? 0 : 1;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

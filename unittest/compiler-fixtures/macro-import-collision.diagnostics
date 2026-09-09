@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-import-collision.xmacro:1:1: macro: imported ma
   ^^^^^
   note: definition: unittest/compiler-fixtures/macro-import-collision.x:3:1 import: unittest/compiler-fixtures/macro-import-collision.xmacro
 
-limit: too many errors, stopping
-

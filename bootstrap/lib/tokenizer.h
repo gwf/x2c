@@ -12,14 +12,14 @@ typedef struct Tokenizer{
   Array modes;
   struct Token * cursor;
   Symbol scan_status;
-  int line,  col,  pos;
+  int line, col, pos;
 }
 * Tokenizer;
 
 typedef struct Token{
   String text;
   Symbol type;
-  int line,  col,  len,  pos;
+  int line, col, len, pos;
 }
 * Token;
 
@@ -28,12 +28,12 @@ static inline Token Var_token(Var x){
 }
 
 static inline Var Token_var(Token x){
-  return Var_new(42948956,  x);
+  return Var_new(42948956, x);
 }
 
 unsigned Token_hash(Token token);
 
-int Token_equal(Token a,  Token b);
+int Token_equal(Token a, Token b);
 
 String Token_str(Token token);
 
@@ -41,13 +41,13 @@ String Token_repr(Token token);
 
 Tokenizer Tokenizer_new(char * text);
 
-Tokenizer Tokenizer_new_mode(char * text,  Symbol mode);
+Tokenizer Tokenizer_new_mode(char * text, Symbol mode);
 
-int Tokenizer_tokenize(Tokenizer t,  int len,  Symbol type);
+int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
 
 int Tokenizer_error(Tokenizer tokenizer);
 
-int Tokenizer_do_scanner(Tokenizer tokenizer,  int(* scanner)(char *),  Symbol type);
+int Tokenizer_do_scanner(Tokenizer tokenizer, int(* scanner)(char *), Symbol type);
 
 void Tokenizer_scan(Tokenizer t);
 

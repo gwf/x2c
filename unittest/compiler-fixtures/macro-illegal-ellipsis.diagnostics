@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-illegal-ellipsis.x:3:39: parse: singular macro 
   macro Expression $illegal($value) => ($value...)
                                         ^
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/keyword-alias-wrong-position.x:10:22: parse: Function
   static int value = 42;
                        ^
 
-limit: too many errors, stopping
-

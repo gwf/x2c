@@ -2,5 +2,3 @@ unittest/compiler-fixtures/foreach-keyword-collision.x:4:1: macro: built-in keyw
   keyword foreach $fixture.value;
   ^^^^^^^
 
-limit: too many errors, stopping
-

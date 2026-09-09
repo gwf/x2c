@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-type-fields-rollback.x:10:1: parse: expected sy
   $broken_fields();
   ^
 
-limit: too many errors, stopping
-

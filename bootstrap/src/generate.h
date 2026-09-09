@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void generate_code(Compiler c,  List ast,  String dir);
+void generate_code(Compiler c, List ast, String dir);
 
 
 #endif /* __GUARD_0x3F61ACEA__ */

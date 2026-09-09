@@ -512,7 +512,13 @@ clean-all: clean					## Also remove bootstrap objects
 # Additional aliases for build, test, and documentation targets.
 default x2c: build
 safely: build-safe
+ifeq ($(strip $(PREFIX)),)
 install: build-install
+else
+install: build
+	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
+	  --destdir "$(DESTDIR)"
+endif
 bootstrap: bootstrap-build
 rebootstrap: bootstrap-refresh
 cosmopolitan-toolchain: ape-toolchain

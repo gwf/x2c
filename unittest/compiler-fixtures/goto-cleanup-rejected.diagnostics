@@ -3,5 +3,3 @@ unittest/compiler-fixtures/goto-cleanup-rejected.x:4:3: emit: goto cannot enter 
     ^^^^
   note: jump only within the same region or outward
 
-limit: too many errors, stopping
-

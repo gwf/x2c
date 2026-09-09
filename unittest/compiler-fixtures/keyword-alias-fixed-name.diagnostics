@@ -2,5 +2,3 @@ unittest/compiler-fixtures/keyword-alias-fixed-name.x:7:9: parse: keyword alias 
   keyword if $fixture.identity;
           ^^
 
-limit: too many errors, stopping
-

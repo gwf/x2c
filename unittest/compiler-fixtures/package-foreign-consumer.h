@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "vendored.h"
-double span_total(double lo,  double hi);
+double span_total(double lo, double hi);
 
 
 #endif /* __GUARD_0x9A1298D0__ */

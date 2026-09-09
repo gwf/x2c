@@ -2,7 +2,7 @@
 
 #include "thread-state.h"
 
-_Thread_local int x2c_cleanup_exit_kind,  x2c_error_runtime_ready;
+_Thread_local int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
 
 void x2c_match_thread_release(void);
 

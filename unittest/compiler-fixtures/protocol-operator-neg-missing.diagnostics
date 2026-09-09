@@ -3,5 +3,3 @@ unittest/compiler-fixtures/protocol-operator-neg-missing.x:18:18: type: unary '-
                    ^
   note: operand type: ("Plain")
 
-limit: too many errors, stopping
-

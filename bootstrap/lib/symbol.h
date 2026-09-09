@@ -8,25 +8,25 @@
 #include "common.h"
 #define SYMBOL_MAX_5BIT 10
 #define SYMBOL_MAX_7BIT 7
-Symbol Symbol_new_len(const char * str,  int len);
+Symbol Symbol_new_len(const char * str, int len);
 
 Symbol Symbol_new(const char * str);
 
-int Symbol_try_new(String spelling,  Symbol * out);
+int Symbol_try_new(String spelling, Symbol * out);
 
 int Symbol_len(Symbol symbol);
 
-void Symbol_decode(Symbol symbol,  char * dest);
+void Symbol_decode(Symbol symbol, char * dest);
 
 String Symbol_str(Symbol symbol);
 
-int Symbol_compare(Symbol a,  Symbol b);
+int Symbol_compare(Symbol a, Symbol b);
 
 String Symbol_repr(Symbol symbol);
 
-Buffer Symbol_write_str(Symbol symbol,  Buffer out);
+Buffer Symbol_write_str(Symbol symbol, Buffer out);
 
-Buffer Symbol_write_repr(Symbol symbol,  Buffer out);
+Buffer Symbol_write_repr(Symbol symbol, Buffer out);
 
 char Symbol_first(Symbol symbol);
 

@@ -7,12 +7,12 @@
 
 #include "x2c.h"
 typedef struct geo__VecData{
-  double x,  y;
+  double x, y;
 }
 * geo__Vec;
 
 typedef struct geo__VecPair{
-  struct geo__VecData a,  b;
+  struct geo__VecData a, b;
 }
 geo__VecPair;
 
@@ -20,7 +20,7 @@ typedef List geo__Chain;
 
 typedef geo__Chain geo__ChainLeaf;
 
-geo__Vec geo__Vec_new(double x,  double y);
+geo__Vec geo__Vec_new(double x, double y);
 
 double geo__Vec_norm(geo__Vec v);
 
@@ -34,7 +34,7 @@ geo__Chain geo__Chain_rest(geo__Chain values);
 
 int geo__ChainLeaf_leaf_len(geo__ChainLeaf values);
 
-Iter geo__Vec_iter(geo__Vec v,  Iter dest);
+Iter geo__Vec_iter(geo__Vec v, Iter dest);
 
 
 #endif /* __GUARD_0x430933B4__ */

@@ -19,7 +19,7 @@ void Compiler_skip_macro_invocation(Compiler compiler);
 
 int Compiler_macro_invocation_needs_shallow_expansion(Compiler compiler);
 
-int Compiler_macro_starts_target_at(Compiler compiler,  AstPos position);
+int Compiler_macro_starts_target_at(Compiler compiler, AstPos position);
 
 void Compiler_skip_macro_lisp(Compiler compiler);
 
@@ -27,41 +27,41 @@ void Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
 void Compiler_parse_macro_lisp_shallow(Compiler compiler);
 
-List Compiler_lift_macro_lisp_expression(Compiler compiler,  Var value,  Token invocation);
+List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation);
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
 
-Var Compiler_evaluate_macro_slot(Compiler compiler,  Var value);
+Var Compiler_evaluate_macro_slot(Compiler compiler, Var value);
 
-List Compiler_evaluate_macro_rows(Compiler compiler,  Var value);
+List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
 
-List Compiler_macro_introduced_name(Compiler compiler,  String spelling);
+List Compiler_macro_introduced_name(Compiler compiler, String spelling);
 
 List Compiler_peek_macro_hole(Compiler compiler);
 
 int Compiler_macro_lisp_starts_declaration(Compiler compiler);
 
-List Compiler_try_parse_macro_slot(Compiler compiler,  Symbol role);
+List Compiler_try_parse_macro_slot(Compiler compiler, Symbol role);
 
 List Compiler_parse_macro_definition(Compiler c);
 
-List Compiler_publish_macro_definition_node(Compiler compiler,  List node);
+List Compiler_publish_macro_definition_node(Compiler compiler, List node);
 
 void Compiler_parse_keyword_definition(Compiler c);
 
-int Compiler_keyword_alias_starts_target_at(Compiler compiler,  AstPos position);
+int Compiler_keyword_alias_starts_target_at(Compiler compiler, AstPos position);
 
 int Compiler_keyword_alias_needs_shallow_expansion(Compiler compiler);
 
 void Compiler_skip_keyword_alias(Compiler compiler);
 
-Token Compiler_macro_invocation_site(Compiler compiler,  Var site);
+Token Compiler_macro_invocation_site(Compiler compiler, Var site);
 
-List Compiler_expand_macro_invocation_node(Compiler compiler,  Var stored,  List arguments,  Token invocation,  AstPos position);
+List Compiler_expand_macro_invocation_node(Compiler compiler, Var stored, List arguments, Token invocation, AstPos position);
 
 List Compiler_try_parse_macro_expression(Compiler c);
 
-List Compiler_try_parse_macro_target_at(Compiler compiler,  AstPos position);
+List Compiler_try_parse_macro_target_at(Compiler compiler, AstPos position);
 
 
 #endif /* __GUARD_0x28FCBFDC__ */

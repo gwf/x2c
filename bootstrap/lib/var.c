@@ -5,19 +5,19 @@
 #include "error.h"
 
 typedef enum TagId{
-  _invalid_ = - 1,  _u8_,  _i8_,  _u16_,  _i16_,  _u32_,  _i32_,  _f32_,  _u48_,  _i48_,  _p48_,  _f64_,  _long_,  _ulong_,  _llong_,  _ullong_,  _ldouble_,  _u8_p_,  _i8_p_,  _u16_p_,  _i16_p_,  _u32_p_,  _i32_p_,  _f32_p_,  _ulong_p_,  _long_p_,  _f64_p_,  _ullong_p_,  _llong_p_,  _ldouble_p_,  _p48_p_,  _u8_pp_,  _i8_pp_,  _u16_pp_,  _i16_pp_,  _u32_pp_,  _i32_pp_,  _f32_pp_,  _ulong_pp_,  _long_pp_,  _f64_pp_,  _ullong_pp_,  _llong_pp_,  _ldouble_pp_,  _array_,  _block_,  _buffer_,  _bytes_,  _context_,  _error_,  _file_,  _func_,  _iter_,  _lambda_,  _list_,  _logger_,  _map_,  _mutex_,  _pipe_,  _proc_,  _regexp_,  _rope_,  _scope_,  _slice_,  _socket_,  _stream_,  _string_,  _symbol_,  _tensor_,  _thread_,  _token_,  _var_,  _array_p_,  _block_p_,  _buffer_p_,  _bytes_p_,  _context_p_,  _error_p_,  _file_p_,  _func_p_,  _iter_p_,  _lambda_p_,  _list_p_,  _logger_p_,  _map_p_,  _mutex_p_,  _pipe_p_,  _proc_p_,  _regexp_p_,  _rope_p_,  _scope_p_,  _slice_p_,  _socket_p_,  _stream_p_,  _string_p_,  _symbol_p_,  _tensor_p_,  _thread_p_,  _token_p_,  _var_p_,  _nan_,  _neginf_,  _posinf_,  _void_,  _tag_count_
+  _invalid_ = - 1, _u8_, _i8_, _u16_, _i16_, _u32_, _i32_, _f32_, _u48_, _i48_, _p48_, _f64_, _long_, _ulong_, _llong_, _ullong_, _ldouble_, _u8_p_, _i8_p_, _u16_p_, _i16_p_, _u32_p_, _i32_p_, _f32_p_, _ulong_p_, _long_p_, _f64_p_, _ullong_p_, _llong_p_, _ldouble_p_, _p48_p_, _u8_pp_, _i8_pp_, _u16_pp_, _i16_pp_, _u32_pp_, _i32_pp_, _f32_pp_, _ulong_pp_, _long_pp_, _f64_pp_, _ullong_pp_, _llong_pp_, _ldouble_pp_, _array_, _block_, _buffer_, _bytes_, _context_, _error_, _file_, _func_, _iter_, _lambda_, _list_, _logger_, _map_, _mutex_, _pipe_, _proc_, _regexp_, _rope_, _scope_, _slice_, _socket_, _stream_, _string_, _symbol_, _tensor_, _thread_, _token_, _var_, _array_p_, _block_p_, _buffer_p_, _bytes_p_, _context_p_, _error_p_, _file_p_, _func_p_, _iter_p_, _lambda_p_, _list_p_, _logger_p_, _map_p_, _mutex_p_, _pipe_p_, _proc_p_, _regexp_p_, _rope_p_, _scope_p_, _slice_p_, _socket_p_, _stream_p_, _string_p_, _symbol_p_, _tensor_p_, _thread_p_, _token_p_, _var_p_, _nan_, _neginf_, _posinf_, _void_, _tag_count_
 }
 TagId;
 
 typedef struct VarTagInfo{
-  Symbol tag,  kind;
-  unsigned long top,  middle,  bottom;
+  Symbol tag, kind;
+  unsigned long top, middle, bottom;
 }
 VarTagInfo;
 
 typedef struct VarDecoded{
   TagId id;
-  int custom_id,  valid;
+  int custom_id, valid;
 }
 VarDecoded;
 
@@ -57,7 +57,7 @@ VarIntegerParts;
 #include "symbolset.h"
 #define VAR_CUSTOM_TAG_TOP     0x800C
 #define VAR_CUSTOM_TAG_COUNT   32
-int SymbolSet_index(SymbolSet,  Symbol);
+int SymbolSet_index(SymbolSet, Symbol);
 
 void x2c_descriptor_thread_start_begin(void);
 
@@ -73,17 +73,17 @@ void Scope_free(void *);
 
 int Var_is_wide(Var);
 
-void Scope_move(void *,  Scope *);
+void Scope_move(void *, Scope *);
 
 Scope Scope_owner(void *);
 
-unsigned x2c_hash_bytes(unsigned long,  const void *,  size_t);
+unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
 
-int String_try_long(String,  long *);
+int String_try_long(String, long *);
 
 Var int_var(int);
 
-int String_try_double(String,  double *);
+int String_try_double(String, double *);
 
 Var double_var(double);
 
@@ -109,346 +109,346 @@ static VarWideBox _wide_box(Var v);
 
 static int _custom_tag_id(Symbol tag);
 
-static int _wide_encoding_valid(Var value,  Symbol tag);
+static int _wide_encoding_valid(Var value, Symbol tag);
 
-static VarDecoded _decode_builtin(TagId id,  Var value);
+static VarDecoded _decode_builtin(TagId id, Var value);
 
 static VarDecoded _decode(Var value);
 
-static Var _new_floating(TagId id,  double d);
+static Var _new_floating(TagId id, double d);
 
-static Var _new_pointer(TagId id,  void * ptr);
+static Var _new_pointer(TagId id, void * ptr);
 
-static Var _new_wide(TagId id,  VarWideValue value);
+static Var _new_wide(TagId id, VarWideValue value);
 
-static Var _new_custom_pointer(int id,  void * ptr);
+static Var _new_custom_pointer(int id, void * ptr);
 
-static Var _new_integer(TagId id,  long value);
+static Var _new_integer(TagId id, long value);
 
-static Var _new_symbol(TagId id,  unsigned long u);
+static Var _new_symbol(TagId id, unsigned long u);
 
-static unsigned _hash_bytes(unsigned hash,  void * ptr,  int width);
+static unsigned _hash_bytes(unsigned hash, void * ptr, int width);
 
 static unsigned long long _signed_magnitude(long long value);
 
 static VarIntegerParts _integer_parts(Var v);
 
-static int _magnitude_floating_compare(unsigned long long integer,  long double floating);
+static int _magnitude_floating_compare(unsigned long long integer, long double floating);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static const VarTagInfo taginfo[] ={
   {
-    30065,  20309162340,  32770,  1,  0
+    30065, 20309162340, 32770, 1, 0
   }
   , {
-    26993,  20309162340,  32770,  2,  0
+    26993, 20309162340, 32770, 2, 0
   }
   , {
-    3846509,  20309162340,  32770,  3,  0
+    3846509, 20309162340, 32770, 3, 0
   }
   , {
-    3453293,  20309162340,  32770,  4,  0
+    3453293, 20309162340, 32770, 4, 0
   }
   , {
-    3847013,  20309162340,  32770,  5,  0
+    3847013, 20309162340, 32770, 5, 0
   }
   , {
-    3453797,  20309162340,  32770,  6,  0
+    3453797, 20309162340, 32770, 6, 0
   }
   , {
-    3355493,  439096724366,  32770,  7,  0
+    3355493, 439096724366, 32770, 7, 0
   }
   , {
-    3847281,  20309162340,  32768,  0,  0
+    3847281, 20309162340, 32768, 0, 0
   }
   , {
-    3454065,  20309162340,  32769,  0,  0
+    3454065, 20309162340, 32769, 0, 0
   }
   , {
-    3683441,  35386204516,  0,  0,  0
+    3683441, 35386204516, 0, 0, 0
   }
   , {
-    3356265,  439096724366,  0,  0,  0
+    3356265, 439096724366, 0, 0, 0
   }
   , {
-    818062,  20309162340,  5,  0,  5
+    818062, 20309162340, 5, 0, 5
   }
   , {
-    44858254,  20309162340,  5,  0,  6
+    44858254, 20309162340, 5, 0, 6
   }
   , {
-    25983886,  20309162340,  5,  0,  7
+    25983886, 20309162340, 5, 0, 7
   }
   , {
-    1435270030,  20309162340,  7,  0,  6
+    1435270030, 20309162340, 7, 0, 6
   }
   , {
-    26071077642,  439096724366,  7,  0,  7
+    26071077642, 439096724366, 7, 0, 7
   }
   , {
-    3848277,  35386204516,  1,  0,  0
+    3848277, 35386204516, 1, 0, 0
   }
   , {
-    3455061,  35386204516,  2,  0,  0
+    3455061, 35386204516, 2, 0, 0
   }
   , {
-    492353109,  35386204516,  3,  0,  0
+    492353109, 35386204516, 3, 0, 0
   }
   , {
-    442021461,  35386204516,  3,  0,  1
+    442021461, 35386204516, 3, 0, 1
   }
   , {
-    492417621,  35386204516,  4,  0,  0
+    492417621, 35386204516, 4, 0, 0
   }
   , {
-    442085973,  35386204516,  4,  0,  1
+    442085973, 35386204516, 4, 0, 1
   }
   , {
-    429503061,  35386204516,  4,  0,  2
+    429503061, 35386204516, 4, 0, 2
   }
   , {
-    1435464182,  35386204516,  4,  0,  3
+    1435464182, 35386204516, 4, 0, 3
   }
   , {
-    26178038,  35386204516,  5,  0,  0
+    26178038, 35386204516, 5, 0, 0
   }
   , {
-    429601877,  35386204516,  5,  0,  1
+    429601877, 35386204516, 5, 0, 1
   }
   , {
-    45928641014,  35386204516,  5,  0,  2
+    45928641014, 35386204516, 5, 0, 2
   }
   , {
-    831484406,  35386204516,  5,  0,  3
+    831484406, 35386204516, 5, 0, 3
   }
   , {
-    834274484598,  35386204516,  5,  0,  4
+    834274484598, 35386204516, 5, 0, 4
   }
   , {
-    471480405,  35386204516,  6,  0,  0
+    471480405, 35386204516, 6, 0, 0
   }
   , {
-    492579413,  35386204516,  6,  0,  1
+    492579413, 35386204516, 6, 0, 1
   }
   , {
-    442247765,  35386204516,  6,  0,  2
+    442247765, 35386204516, 6, 0, 2
   }
   , {
-    63021197909,  35386204516,  6,  0,  3
+    63021197909, 35386204516, 6, 0, 3
   }
   , {
-    56578746965,  35386204516,  6,  0,  4
+    56578746965, 35386204516, 6, 0, 4
   }
   , {
-    63029455445,  35386204516,  6,  0,  5
+    63029455445, 35386204516, 6, 0, 5
   }
   , {
-    56587004501,  35386204516,  6,  0,  6
+    56587004501, 35386204516, 6, 0, 6
   }
   , {
-    54976391765,  35386204516,  6,  0,  7
+    54976391765, 35386204516, 6, 0, 7
   }
   , {
-    45934853878,  35386204516,  7,  0,  0
+    45934853878, 35386204516, 7, 0, 0
   }
   , {
-    837697270,  35386204516,  7,  0,  1
+    837697270, 35386204516, 7, 0, 1
   }
   , {
-    54989040213,  35386204516,  7,  0,  2
+    54989040213, 35386204516, 7, 0, 2
   }
   , {
-    1469716512502,  35386204516,  7,  0,  3
+    1469716512502, 35386204516, 7, 0, 3
   }
   , {
-    26607501046,  35386204516,  7,  0,  4
+    26607501046, 35386204516, 7, 0, 4
   }
   , {
-    26696783507190,  35386204516,  7,  0,  5
+    26696783507190, 35386204516, 7, 0, 5
   }
   , {
-    3313778,  1011493096,  8,  0,  0
+    3313778, 1011493096, 8, 0, 0
   }
   , {
-    5011670,  1011493096,  8,  0,  1
+    5011670, 1011493096, 8, 0, 1
   }
   , {
-    178663780,  1011493096,  8,  0,  2
+    178663780, 1011493096, 8, 0, 2
   }
   , {
-    5874022,  1011493096,  8,  0,  3
+    5874022, 1011493096, 8, 0, 3
   }
   , {
-    7479766568,  1011493096,  8,  0,  5
+    7479766568, 1011493096, 8, 0, 5
   }
   , {
-    11703268,  1011493096,  8,  0,  7
+    11703268, 1011493096, 8, 0, 7
   }
   , {
-    412426,  1011493096,  9,  0,  0
+    412426, 1011493096, 9, 0, 0
   }
   , {
-    437126,  1011493096,  9,  0,  1
+    437126, 1011493096, 9, 0, 1
   }
   , {
-    631140,  1011493096,  9,  0,  2
+    631140, 1011493096, 9, 0, 2
   }
   , {
-    808259842,  1011493096,  9,  0,  3
+    808259842, 1011493096, 9, 0, 3
   }
   , {
-    806120,  1011493096,  9,  0,  4
+    806120, 1011493096, 9, 0, 4
   }
   , {
-    837237092,  1011493096,  9,  0,  5
+    837237092, 1011493096, 9, 0, 5
   }
   , {
-    26720,  1011493096,  9,  0,  6
+    26720, 1011493096, 9, 0, 6
   }
   , {
-    28680560,  1011493096,  10,  0,  0
+    28680560, 1011493096, 10, 0, 0
   }
   , {
-    1068042,  1011493096,  10,  0,  1
+    1068042, 1011493096, 10, 0, 1
   }
   , {
-    1086406,  1011493096,  10,  0,  2
+    1086406, 1011493096, 10, 0, 2
   }
   , {
-    1218915872,  1011493096,  10,  0,  3
+    1218915872, 1011493096, 10, 0, 3
   }
   , {
-    1211402,  1011493096,  10,  0,  4
+    1211402, 1011493096, 10, 0, 4
   }
   , {
-    40074250,  1011493096,  10,  0,  5
+    40074250, 1011493096, 10, 0, 5
   }
   , {
-    40650954,  1011493096,  10,  0,  6
+    40650954, 1011493096, 10, 0, 6
   }
   , {
-    1306745192,  1011493096,  10,  0,  7
+    1306745192, 1011493096, 10, 0, 7
   }
   , {
-    1318201434,  1011493096,  11,  0,  0
+    1318201434, 1011493096, 11, 0, 0
   }
   , {
-    1318210446,  1011493096,  11,  0,  1
+    1318210446, 1011493096, 11, 0, 1
   }
   , {
-    1328354264,  1328354264,  32772,  32780,  0
+    1328354264, 1328354264, 32772, 32780, 0
   }
   , {
-    1353620452,  1011493096,  11,  0,  3
+    1353620452, 1011493096, 11, 0, 3
   }
   , {
-    1360144456,  1011493096,  11,  0,  4
+    1360144456, 1011493096, 11, 0, 4
   }
   , {
-    42948956,  1011493096,  11,  0,  5
+    42948956, 1011493096, 11, 0, 5
   }
   , {
-    45156,  1011493096,  11,  0,  6
+    45156, 1011493096, 11, 0, 6
   }
   , {
-    106040950,  39939274535114,  12,  0,  0
+    106040950, 39939274535114, 12, 0, 0
   }
   , {
-    160373494,  39939274535114,  12,  0,  1
+    160373494, 39939274535114, 12, 0, 1
   }
   , {
-    5717241014,  39939274535114,  12,  0,  2
+    5717241014, 39939274535114, 12, 0, 2
   }
   , {
-    187968758,  39939274535114,  12,  0,  3
+    187968758, 39939274535114, 12, 0, 3
   }
   , {
-    239352530230,  39939274535114,  12,  0,  5
+    239352530230, 39939274535114, 12, 0, 5
   }
   , {
-    374504630,  39939274535114,  12,  0,  7
+    374504630, 39939274535114, 12, 0, 7
   }
   , {
-    13197686,  39939274535114,  13,  0,  0
+    13197686, 39939274535114, 13, 0, 0
   }
   , {
-    13988086,  39939274535114,  13,  0,  1
+    13988086, 39939274535114, 13, 0, 1
   }
   , {
-    20196534,  39939274535114,  13,  0,  2
+    20196534, 39939274535114, 13, 0, 2
   }
   , {
-    25864314998,  39939274535114,  13,  0,  3
+    25864314998, 39939274535114, 13, 0, 3
   }
   , {
-    25795894,  39939274535114,  13,  0,  4
+    25795894, 39939274535114, 13, 0, 4
   }
   , {
-    26791586998,  39939274535114,  13,  0,  5
+    26791586998, 39939274535114, 13, 0, 5
   }
   , {
-    855094,  39939274535114,  13,  0,  6
+    855094, 39939274535114, 13, 0, 6
   }
   , {
-    917777974,  39939274535114,  14,  0,  0
+    917777974, 39939274535114, 14, 0, 0
   }
   , {
-    34177398,  39939274535114,  14,  0,  1
+    34177398, 39939274535114, 14, 0, 1
   }
   , {
-    34765046,  39939274535114,  14,  0,  2
+    34765046, 39939274535114, 14, 0, 2
   }
   , {
-    39005307958,  39939274535114,  14,  0,  3
+    39005307958, 39939274535114, 14, 0, 3
   }
   , {
-    38764918,  39939274535114,  14,  0,  4
+    38764918, 39939274535114, 14, 0, 4
   }
   , {
-    1282376054,  39939274535114,  14,  0,  5
+    1282376054, 39939274535114, 14, 0, 5
   }
   , {
-    1300830582,  39939274535114,  14,  0,  6
+    1300830582, 39939274535114, 14, 0, 6
   }
   , {
-    41815846198,  39939274535114,  14,  0,  7
+    41815846198, 39939274535114, 14, 0, 7
   }
   , {
-    42182445942,  39939274535114,  15,  0,  0
+    42182445942, 39939274535114, 15, 0, 0
   }
   , {
-    42182734326,  39939274535114,  15,  0,  1
+    42182734326, 39939274535114, 15, 0, 1
   }
   , {
-    42507336502,  39939274535114,  15,  0,  2
+    42507336502, 39939274535114, 15, 0, 2
   }
   , {
-    43315854518,  39939274535114,  15,  0,  3
+    43315854518, 39939274535114, 15, 0, 3
   }
   , {
-    43524622646,  39939274535114,  15,  0,  4
+    43524622646, 39939274535114, 15, 0, 4
   }
   , {
-    1374366646,  39939274535114,  15,  0,  5
+    1374366646, 39939274535114, 15, 0, 5
   }
   , {
-    1445046,  39939274535114,  15,  0,  6
+    1445046, 39939274535114, 15, 0, 6
   }
   , {
-    28764,  439096724366,  32771,  1,  0
+    28764, 439096724366, 32771, 1, 0
   }
   , {
-    2050956,  439096724366,  32771,  2,  0
+    2050956, 439096724366, 32771, 2, 0
   }
   , {
-    1854348,  439096724366,  32771,  3,  0
+    1854348, 439096724366, 32771, 3, 0
   }
   , {
-    1473096,  1473096,  32771,  65535,  0
+    1473096, 1473096, 32771, 65535, 0
   }
   , {
-    0,  1473096,  32768,  0,  0
+    0, 1473096, 32768, 0, 0
   }
 
 }
@@ -459,7 +459,7 @@ int Var_known_tag(Symbol tag){
 }
 
 static TagId _tag2id(Symbol tag){
-  return(TagId) SymbolSet_index(tags,  tag);
+  return(TagId) SymbolSet_index(tags, tag);
 }
 
 static inline unsigned long _bitmask(unsigned n){
@@ -491,16 +491,16 @@ static int _custom_tag_id(Symbol tag){
   return - 1;
 }
 
-static int _wide_encoding_valid(Var value,  Symbol tag){
+static int _wide_encoding_valid(Var value, Symbol tag){
   VarWideBox box = _wide_box(value);
   return box && box -> tag == tag;
 }
 
-static VarDecoded _decode_builtin(TagId id,  Var value){
+static VarDecoded _decode_builtin(TagId id, Var value){
   int valid = 1;
   unsigned payload =(unsigned) value.u64;
   switch(id){
-    case _long_ : case _ulong_ : case _llong_ : case _ullong_ : case _ldouble_ : valid = _wide_encoding_valid(value,  taginfo[id].tag);
+    case _long_ : case _ulong_ : case _llong_ : case _ullong_ : case _ldouble_ : valid = _wide_encoding_valid(value, taginfo[id].tag);
     break;
     case _array_ : case _map_ : valid =(value.u64 &(_bitmask(48) - 0x7)) != 0;
     break;
@@ -513,186 +513,186 @@ static VarDecoded _decode_builtin(TagId id,  Var value){
     default: break;
   }
   return(VarDecoded){
-    id,  - 1,  valid
+    id, - 1, valid
   }
   ;
 }
 
 static VarDecoded _decode(Var value){
-  unsigned top = _top_bits(value),  mid = _middle_bits(value);
+  unsigned top = _top_bits(value), mid = _middle_bits(value);
   unsigned btm = _bottom_bits(value);
   if(value.u64 == VAR_VOID_BITS) return(VarDecoded){
-    _void_,  - 1,  1
+    _void_, - 1, 1
   }
   ;
   if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(VarDecoded){
-    _f64_,  - 1,  1
+    _f64_, - 1, 1
   }
   ;
   switch(top){
     case 32770 : switch(mid){
-      case 1 : return _decode_builtin(_u8_,  value);
-      case 2 : return _decode_builtin(_i8_,  value);
-      case 3 : return _decode_builtin(_u16_,  value);
-      case 4 : return _decode_builtin(_i16_,  value);
-      case 5 : return _decode_builtin(_u32_,  value);
-      case 6 : return _decode_builtin(_i32_,  value);
-      case 7 : return _decode_builtin(_f32_,  value);
+      case 1 : return _decode_builtin(_u8_, value);
+      case 2 : return _decode_builtin(_i8_, value);
+      case 3 : return _decode_builtin(_u16_, value);
+      case 4 : return _decode_builtin(_i16_, value);
+      case 5 : return _decode_builtin(_u32_, value);
+      case 6 : return _decode_builtin(_i32_, value);
+      case 7 : return _decode_builtin(_f32_, value);
     }
     break;
-    case 32768 : return _decode_builtin(_u48_,  value);
-    case 32769 : return _decode_builtin(_i48_,  value);
-    case 0 : return _decode_builtin(_p48_,  value);
+    case 32768 : return _decode_builtin(_u48_, value);
+    case 32769 : return _decode_builtin(_i48_, value);
+    case 0 : return _decode_builtin(_p48_, value);
     case 5 : switch(btm){
-      case 5 : return _decode_builtin(_long_,  value);
-      case 6 : return _decode_builtin(_ulong_,  value);
-      case 7 : return _decode_builtin(_llong_,  value);
-      case 0 : return _decode_builtin(_long_p_,  value);
-      case 1 : return _decode_builtin(_f64_p_,  value);
-      case 2 : return _decode_builtin(_ullong_p_,  value);
-      case 3 : return _decode_builtin(_llong_p_,  value);
-      case 4 : return _decode_builtin(_ldouble_p_,  value);
+      case 5 : return _decode_builtin(_long_, value);
+      case 6 : return _decode_builtin(_ulong_, value);
+      case 7 : return _decode_builtin(_llong_, value);
+      case 0 : return _decode_builtin(_long_p_, value);
+      case 1 : return _decode_builtin(_f64_p_, value);
+      case 2 : return _decode_builtin(_ullong_p_, value);
+      case 3 : return _decode_builtin(_llong_p_, value);
+      case 4 : return _decode_builtin(_ldouble_p_, value);
     }
     break;
     case 7 : switch(btm){
-      case 6 : return _decode_builtin(_ullong_,  value);
-      case 7 : return _decode_builtin(_ldouble_,  value);
-      case 0 : return _decode_builtin(_ulong_pp_,  value);
-      case 1 : return _decode_builtin(_long_pp_,  value);
-      case 2 : return _decode_builtin(_f64_pp_,  value);
-      case 3 : return _decode_builtin(_ullong_pp_,  value);
-      case 4 : return _decode_builtin(_llong_pp_,  value);
-      case 5 : return _decode_builtin(_ldouble_pp_,  value);
+      case 6 : return _decode_builtin(_ullong_, value);
+      case 7 : return _decode_builtin(_ldouble_, value);
+      case 0 : return _decode_builtin(_ulong_pp_, value);
+      case 1 : return _decode_builtin(_long_pp_, value);
+      case 2 : return _decode_builtin(_f64_pp_, value);
+      case 3 : return _decode_builtin(_ullong_pp_, value);
+      case 4 : return _decode_builtin(_llong_pp_, value);
+      case 5 : return _decode_builtin(_ldouble_pp_, value);
     }
     break;
-    case 1 : return _decode_builtin(_u8_p_,  value);
-    case 2 : return _decode_builtin(_i8_p_,  value);
+    case 1 : return _decode_builtin(_u8_p_, value);
+    case 2 : return _decode_builtin(_i8_p_, value);
     case 3 : switch(btm & 1){
-      case 0 : return _decode_builtin(_u16_p_,  value);
-      case 1 : return _decode_builtin(_i16_p_,  value);
+      case 0 : return _decode_builtin(_u16_p_, value);
+      case 1 : return _decode_builtin(_i16_p_, value);
     }
     break;
     case 4 : switch(btm & 3){
-      case 0 : return _decode_builtin(_u32_p_,  value);
-      case 1 : return _decode_builtin(_i32_p_,  value);
-      case 2 : return _decode_builtin(_f32_p_,  value);
-      case 3 : return _decode_builtin(_ulong_p_,  value);
+      case 0 : return _decode_builtin(_u32_p_, value);
+      case 1 : return _decode_builtin(_i32_p_, value);
+      case 2 : return _decode_builtin(_f32_p_, value);
+      case 3 : return _decode_builtin(_ulong_p_, value);
     }
     break;
     case 6 : switch(btm){
-      case 0 : return _decode_builtin(_p48_p_,  value);
-      case 1 : return _decode_builtin(_u8_pp_,  value);
-      case 2 : return _decode_builtin(_i8_pp_,  value);
-      case 3 : return _decode_builtin(_u16_pp_,  value);
-      case 4 : return _decode_builtin(_i16_pp_,  value);
-      case 5 : return _decode_builtin(_u32_pp_,  value);
-      case 6 : return _decode_builtin(_i32_pp_,  value);
-      case 7 : return _decode_builtin(_f32_pp_,  value);
+      case 0 : return _decode_builtin(_p48_p_, value);
+      case 1 : return _decode_builtin(_u8_pp_, value);
+      case 2 : return _decode_builtin(_i8_pp_, value);
+      case 3 : return _decode_builtin(_u16_pp_, value);
+      case 4 : return _decode_builtin(_i16_pp_, value);
+      case 5 : return _decode_builtin(_u32_pp_, value);
+      case 6 : return _decode_builtin(_i32_pp_, value);
+      case 7 : return _decode_builtin(_f32_pp_, value);
     }
     break;
     case 8 : switch(btm){
-      case 0 : return _decode_builtin(_array_,  value);
-      case 1 : return _decode_builtin(_block_,  value);
-      case 2 : return _decode_builtin(_buffer_,  value);
-      case 3 : return _decode_builtin(_bytes_,  value);
-      case 5 : return _decode_builtin(_context_,  value);
-      case 7 : return _decode_builtin(_error_,  value);
+      case 0 : return _decode_builtin(_array_, value);
+      case 1 : return _decode_builtin(_block_, value);
+      case 2 : return _decode_builtin(_buffer_, value);
+      case 3 : return _decode_builtin(_bytes_, value);
+      case 5 : return _decode_builtin(_context_, value);
+      case 7 : return _decode_builtin(_error_, value);
     }
     break;
     case 9 : switch(btm){
-      case 0 : return _decode_builtin(_file_,  value);
-      case 1 : return _decode_builtin(_func_,  value);
-      case 2 : return _decode_builtin(_iter_,  value);
-      case 3 : return _decode_builtin(_lambda_,  value);
-      case 4 : return _decode_builtin(_list_,  value);
-      case 5 : return _decode_builtin(_logger_,  value);
-      case 6 : return _decode_builtin(_map_,  value);
+      case 0 : return _decode_builtin(_file_, value);
+      case 1 : return _decode_builtin(_func_, value);
+      case 2 : return _decode_builtin(_iter_, value);
+      case 3 : return _decode_builtin(_lambda_, value);
+      case 4 : return _decode_builtin(_list_, value);
+      case 5 : return _decode_builtin(_logger_, value);
+      case 6 : return _decode_builtin(_map_, value);
     }
     break;
     case 10 : switch(btm){
-      case 0 : return _decode_builtin(_mutex_,  value);
-      case 1 : return _decode_builtin(_pipe_,  value);
-      case 2 : return _decode_builtin(_proc_,  value);
-      case 3 : return _decode_builtin(_regexp_,  value);
-      case 4 : return _decode_builtin(_rope_,  value);
-      case 5 : return _decode_builtin(_scope_,  value);
-      case 6 : return _decode_builtin(_slice_,  value);
-      case 7 : return _decode_builtin(_socket_,  value);
+      case 0 : return _decode_builtin(_mutex_, value);
+      case 1 : return _decode_builtin(_pipe_, value);
+      case 2 : return _decode_builtin(_proc_, value);
+      case 3 : return _decode_builtin(_regexp_, value);
+      case 4 : return _decode_builtin(_rope_, value);
+      case 5 : return _decode_builtin(_scope_, value);
+      case 6 : return _decode_builtin(_slice_, value);
+      case 7 : return _decode_builtin(_socket_, value);
     }
     break;
     case 11 : switch(btm){
-      case 0 : return _decode_builtin(_stream_,  value);
-      case 1 : return _decode_builtin(_string_,  value);
-      case 3 : return _decode_builtin(_tensor_,  value);
-      case 4 : return _decode_builtin(_thread_,  value);
-      case 5 : return _decode_builtin(_token_,  value);
-      case 6 : return _decode_builtin(_var_,  value);
+      case 0 : return _decode_builtin(_stream_, value);
+      case 1 : return _decode_builtin(_string_, value);
+      case 3 : return _decode_builtin(_tensor_, value);
+      case 4 : return _decode_builtin(_thread_, value);
+      case 5 : return _decode_builtin(_token_, value);
+      case 6 : return _decode_builtin(_var_, value);
     }
     break;
     case 12 : switch(btm){
-      case 0 : return _decode_builtin(_array_p_,  value);
-      case 1 : return _decode_builtin(_block_p_,  value);
-      case 2 : return _decode_builtin(_buffer_p_,  value);
-      case 3 : return _decode_builtin(_bytes_p_,  value);
-      case 5 : return _decode_builtin(_context_p_,  value);
-      case 7 : return _decode_builtin(_error_p_,  value);
+      case 0 : return _decode_builtin(_array_p_, value);
+      case 1 : return _decode_builtin(_block_p_, value);
+      case 2 : return _decode_builtin(_buffer_p_, value);
+      case 3 : return _decode_builtin(_bytes_p_, value);
+      case 5 : return _decode_builtin(_context_p_, value);
+      case 7 : return _decode_builtin(_error_p_, value);
     }
     break;
     case 13 : switch(btm){
-      case 0 : return _decode_builtin(_file_p_,  value);
-      case 1 : return _decode_builtin(_func_p_,  value);
-      case 2 : return _decode_builtin(_iter_p_,  value);
-      case 3 : return _decode_builtin(_lambda_p_,  value);
-      case 4 : return _decode_builtin(_list_p_,  value);
-      case 5 : return _decode_builtin(_logger_p_,  value);
-      case 6 : return _decode_builtin(_map_p_,  value);
+      case 0 : return _decode_builtin(_file_p_, value);
+      case 1 : return _decode_builtin(_func_p_, value);
+      case 2 : return _decode_builtin(_iter_p_, value);
+      case 3 : return _decode_builtin(_lambda_p_, value);
+      case 4 : return _decode_builtin(_list_p_, value);
+      case 5 : return _decode_builtin(_logger_p_, value);
+      case 6 : return _decode_builtin(_map_p_, value);
     }
     break;
     case 14 : switch(btm){
-      case 0 : return _decode_builtin(_mutex_p_,  value);
-      case 1 : return _decode_builtin(_pipe_p_,  value);
-      case 2 : return _decode_builtin(_proc_p_,  value);
-      case 3 : return _decode_builtin(_regexp_p_,  value);
-      case 4 : return _decode_builtin(_rope_p_,  value);
-      case 5 : return _decode_builtin(_scope_p_,  value);
-      case 6 : return _decode_builtin(_slice_p_,  value);
-      case 7 : return _decode_builtin(_socket_p_,  value);
+      case 0 : return _decode_builtin(_mutex_p_, value);
+      case 1 : return _decode_builtin(_pipe_p_, value);
+      case 2 : return _decode_builtin(_proc_p_, value);
+      case 3 : return _decode_builtin(_regexp_p_, value);
+      case 4 : return _decode_builtin(_rope_p_, value);
+      case 5 : return _decode_builtin(_scope_p_, value);
+      case 6 : return _decode_builtin(_slice_p_, value);
+      case 7 : return _decode_builtin(_socket_p_, value);
     }
     break;
     case 15 : switch(btm){
-      case 0 : return _decode_builtin(_stream_p_,  value);
-      case 1 : return _decode_builtin(_string_p_,  value);
-      case 2 : return _decode_builtin(_symbol_p_,  value);
-      case 3 : return _decode_builtin(_tensor_p_,  value);
-      case 4 : return _decode_builtin(_thread_p_,  value);
-      case 5 : return _decode_builtin(_token_p_,  value);
-      case 6 : return _decode_builtin(_var_p_,  value);
+      case 0 : return _decode_builtin(_stream_p_, value);
+      case 1 : return _decode_builtin(_string_p_, value);
+      case 2 : return _decode_builtin(_symbol_p_, value);
+      case 3 : return _decode_builtin(_tensor_p_, value);
+      case 4 : return _decode_builtin(_thread_p_, value);
+      case 5 : return _decode_builtin(_token_p_, value);
+      case 6 : return _decode_builtin(_var_p_, value);
     }
     break;
     case 32771 : switch(mid){
-      case 1 : return _decode_builtin(_nan_,  value);
-      case 2 : return _decode_builtin(_neginf_,  value);
-      case 3 : return _decode_builtin(_posinf_,  value);
+      case 1 : return _decode_builtin(_nan_, value);
+      case 2 : return _decode_builtin(_neginf_, value);
+      case 3 : return _decode_builtin(_posinf_, value);
     }
     break;
   }
   if(top >= 0x8004 && top <= 0x800B) return(VarDecoded){
-    _symbol_,  - 1,  1
+    _symbol_, - 1, 1
   }
   ;
   if(top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8){
     int id =(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + btm);
     return(VarDecoded){
-      _invalid_,  id,  id <(int) custom_tag_count
+      _invalid_, id, id <(int) custom_tag_count
     }
     ;
   }
   if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(VarDecoded){
-    _f64_,  - 1,  1
+    _f64_, - 1, 1
   }
   ;
   return(VarDecoded){
-    _f64_,  - 1,  0
+    _f64_, - 1, 0
   }
   ;
 }
@@ -723,13 +723,13 @@ int Var_register_object_tag(Symbol tag){
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env =  NULL
+    .env = NULL
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
     if(x2c_descriptor_registration_frozen()){
-      static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../lib/var.x",.function =  "Var_register_object_tag",.line =  243};
-      x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.register_object_tag")),  NULL))));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 243};
+      x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
       __builtin_unreachable();
     }
     if(! tag){
@@ -737,10 +737,10 @@ int Var_register_object_tag(Symbol tag){
       {
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
+  return _x2c_return_value_0;
 
 }
     }
@@ -749,10 +749,10 @@ int Var_register_object_tag(Symbol tag){
       {
   int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-   return _x2c_return_value_1;
+  return _x2c_return_value_1;
 
 }
     }
@@ -762,10 +762,10 @@ int Var_register_object_tag(Symbol tag){
       {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-   return _x2c_return_value_2;
+  return _x2c_return_value_2;
 
 }
     }
@@ -774,10 +774,10 @@ int Var_register_object_tag(Symbol tag){
       {
   int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-   return _x2c_return_value_3;
+  return _x2c_return_value_3;
 
 }
     }
@@ -787,10 +787,10 @@ int Var_register_object_tag(Symbol tag){
       {
   int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-   return _x2c_return_value_4;
+  return _x2c_return_value_4;
 
 }
     }
@@ -810,7 +810,7 @@ Symbol Var_tag(Var v){
   return taginfo[decoded.valid ? decoded.id : _f64_].tag;
 }
 
-int Var_is(Var var,  Symbol tag){
+int Var_is(Var var, Symbol tag){
   return Var_tag(var) == tag;
 }
 
@@ -858,12 +858,12 @@ int Var_is_nil(Var v){
   return v.u64 == VAR_LIST_PREFIX;
 }
 
-static Var _new_floating(TagId id,  double d){
+static Var _new_floating(TagId id, double d){
   Var v;
   if(id == _f32_){
     float f =(float) d;
     unsigned u;
-    memcpy(& u,  & f,  sizeof u);
+    memcpy(& u, & f, sizeof u);
     v.u64 = u;
     v.u64 |=(unsigned long) taginfo[id].top << 48;
     v.u64 |=(unsigned long) taginfo[id].middle << 32;
@@ -883,7 +883,7 @@ static Var _new_floating(TagId id,  double d){
     }
     else{
       unsigned long u;
-      memcpy(& u,  & d,  sizeof u);
+      memcpy(& u, & d, sizeof u);
       if(u == VAR_F64_NEG_MAX_RAW) v.u64 = VAR_F64_NEG_MAX_ESCAPE;
       else v.u64 = u + VAR_F64_SHIFT;
     }
@@ -892,7 +892,7 @@ static Var _new_floating(TagId id,  double d){
   return v;
 }
 
-static Var _new_pointer(TagId id,  void * ptr){
+static Var _new_pointer(TagId id, void * ptr){
   Var v ={
     .p64 = ptr
   }
@@ -902,7 +902,7 @@ static Var _new_pointer(TagId id,  void * ptr){
   return v;
 }
 
-static Var _new_wide(TagId id,  VarWideValue value){
+static Var _new_wide(TagId id, VarWideValue value){
   VarWideBox box = Scope_malloc(sizeof(struct VarWideBox));
   box -> tag = taginfo[id].tag;
   box -> value = value;
@@ -910,8 +910,8 @@ static Var _new_wide(TagId id,  VarWideValue value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite  _x2c_error_site_1  = {.file =  "../../lib/var.x",.function =  "_new_wide",.line =  437};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372507526, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.box")),  NULL))));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 437};
+      x2c_error_raise_n(& _x2c_error_site_1, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }
 
@@ -931,7 +931,7 @@ Var Var_box_long(long value){
   }
   ;
   wide.long_value = value;
-  return _new_wide(_long_,  wide);
+  return _new_wide(_long_, wide);
 }
 
 Var Var_box_ulong(unsigned long value){
@@ -940,7 +940,7 @@ Var Var_box_ulong(unsigned long value){
   }
   ;
   wide.ulong_value = value;
-  return _new_wide(_ulong_,  wide);
+  return _new_wide(_ulong_, wide);
 }
 
 Var Var_box_long_long(long long value){
@@ -949,7 +949,7 @@ Var Var_box_long_long(long long value){
   }
   ;
   wide.long_long_value = value;
-  return _new_wide(_llong_,  wide);
+  return _new_wide(_llong_, wide);
 }
 
 Var Var_box_ulong_long(unsigned long long value){
@@ -958,7 +958,7 @@ Var Var_box_ulong_long(unsigned long long value){
   }
   ;
   wide.ulong_long_value = value;
-  return _new_wide(_ullong_,  wide);
+  return _new_wide(_ullong_, wide);
 }
 
 Var Var_box_long_double(long double value){
@@ -967,7 +967,7 @@ Var Var_box_long_double(long double value){
   }
   ;
   wide.long_double_value = value;
-  return _new_wide(_ldouble_,  wide);
+  return _new_wide(_ldouble_, wide);
 }
 
 Var Var_clone_wide(Var value){
@@ -979,8 +979,8 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite  _x2c_error_site_2  = {.file =  "../../lib/var.x",.function =  "Var_clone_wide",.line =  538};
-      x2c_error_raise_n(& _x2c_error_site_2, 4372507526, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.clone_wide")),  NULL))));
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 538};
+      x2c_error_raise_n(& _x2c_error_site_2, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
 
@@ -991,9 +991,9 @@ Var Var_clone_wide(Var value){
   return clone;
 }
 
-Var Var_move_wide_to(Var value,  Scope * scope){
+Var Var_move_wide_to(Var value, Scope * scope){
   if(! Var_is_wide(value)) return value;
-  Scope_move(_wide_box(value),  scope);
+  Scope_move(_wide_box(value), scope);
   return value;
 }
 
@@ -1001,13 +1001,13 @@ Scope Var_wide_owner(Var value){
   return Var_is_wide(value) ? Scope_owner(_wide_box(value)) : NULL;
 }
 
-static Var _new_custom_pointer(int id,  void * ptr){
+static Var _new_custom_pointer(int id, void * ptr){
   uintptr_t raw =(uintptr_t) ptr;
   if(raw & 0x7){
     Symbol target = custom_tags[id];
     {
-      static const X2CErrorSite  _x2c_error_site_3  = {.file =  "../../lib/var.x",.function =  "_new_custom_pointer",.line =  569};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(target));
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_new_custom_pointer",.line = 569};
+      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
       __builtin_unreachable();
     }
 
@@ -1021,7 +1021,7 @@ static Var _new_custom_pointer(int id,  void * ptr){
   return v;
 }
 
-static Var _new_integer(TagId id,  long value){
+static Var _new_integer(TagId id, long value){
   unsigned bits = 0;
   int is_signed = 0;
   switch(id){
@@ -1034,8 +1034,8 @@ static Var _new_integer(TagId id,  long value){
     case _u48_ : case _i48_ : bits = 48;
     break;
     default:{
-      static const X2CErrorSite  _x2c_error_site_4  = {.file =  "../../lib/var.x",.function =  "_new_integer",.line =  585};
-      x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))));
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 585};
+      x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1043,12 +1043,12 @@ static Var _new_integer(TagId id,  long value){
   is_signed =(id == _i8_ || id == _i16_ || id == _i32_ || id == _i48_);
   unsigned long long mask =(bits == 64) ? ~ 0ull :((1ull << bits) - 1ull);
   if(is_signed){
-    long long min = -(1ll <<(bits - 1)),  max =(1ll <<(bits - 1)) - 1ll;
+    long long min = -(1ll <<(bits - 1)), max =(1ll <<(bits - 1)) - 1ll;
     if((long long) value < min ||(long long) value > max){
       Symbol target = taginfo[id].tag;
       {
-        static const X2CErrorSite  _x2c_error_site_5  = {.file =  "../../lib/var.x",.function =  "_new_integer",.line =  593};
-        x2c_error_raise_n(& _x2c_error_site_5, 245103016899018, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(target));
+        static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 593};
+        x2c_error_raise_n(& _x2c_error_site_5, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -1059,8 +1059,8 @@ static Var _new_integer(TagId id,  long value){
     if(value < 0 ||(unsigned long long) value > mask){
       Symbol target = taginfo[id].tag;
       {
-        static const X2CErrorSite  _x2c_error_site_6  = {.file =  "../../lib/var.x",.function =  "_new_integer",.line =  599};
-        x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(target));
+        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 599};
+        x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -1077,11 +1077,11 @@ static Var _new_integer(TagId id,  long value){
   return v;
 }
 
-static Var _new_symbol(TagId id,  unsigned long u){
+static Var _new_symbol(TagId id, unsigned long u){
   static unsigned long const offset = taginfo[_symbol_].top << 48;
   if(u >=(1ul << 51)){
-    static const X2CErrorSite  _x2c_error_site_7  = {.file =  "../../lib/var.x",.function =  "_new_symbol",.line =  611};
-    x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(1328354264));
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 611};
+    x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
     __builtin_unreachable();
   }
   Var v ={
@@ -1096,62 +1096,62 @@ Var Var_new(Symbol tag, ...){
   TagId id = _tag2id(tag);
   int custom_id = id == _invalid_ ? _custom_tag_id(tag) : - 1;
   if(id == _invalid_ && custom_id < 0){
-    static const X2CErrorSite  _x2c_error_site_8  = {.file =  "../../lib/var.x",.function =  "Var_new",.line =  641};
-    x2c_error_raise_n(& _x2c_error_site_8, 143279306979688, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(tag));
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "Var_new",.line = 641};
+    x2c_error_raise_n(& _x2c_error_site_8, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
     __builtin_unreachable();
   }
-  va_start(ap,  tag);
+  va_start(ap, tag);
   if(custom_id >= 0){
-    Var custom = _new_custom_pointer(custom_id,  va_arg(ap,  void *));
+    Var custom = _new_custom_pointer(custom_id, va_arg(ap, void *));
     va_end(ap);
     return custom;
   }
   Var v;
   switch(taginfo[id].kind){
     case 35386204516 : case 39939274535114 : case 1011493096 :{
-      void * pointer = va_arg(ap,  void *);
+      void * pointer = va_arg(ap, void *);
       if((id == _array_ || id == _map_) && ! pointer){
         va_end(ap);
         {
-          static const X2CErrorSite  _x2c_error_site_9  = {.file =  "../../lib/var.x",.function =  "Var_new",.line =  655};
-          x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(tag));
+          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "Var_new",.line = 655};
+          x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
           __builtin_unreachable();
         }
 
       }
-      v = _new_pointer(id,  pointer);
+      v = _new_pointer(id, pointer);
       break;
     }
-    case 439096724366 : if(tag == 26071077642) v = Var_box_long_double(va_arg(ap,  long double));
-    else v = _new_floating(id,  va_arg(ap,  double));
+    case 439096724366 : if(tag == 26071077642) v = Var_box_long_double(va_arg(ap, long double));
+    else v = _new_floating(id, va_arg(ap, double));
     break;
     case 20309162340 : switch(tag){
-      case 30065 : case 26993 : case 3846509 : case 3453293 : case 3453797 : v = _new_integer(id,  va_arg(ap,  int));
+      case 30065 : case 26993 : case 3846509 : case 3453293 : case 3453797 : v = _new_integer(id, va_arg(ap, int));
       break;
-      case 3847013 : v = _new_integer(id, (long) va_arg(ap,  unsigned));
+      case 3847013 : v = _new_integer(id, (long) va_arg(ap, unsigned));
       break;
-      case 3847281 : v = _new_integer(id, (long) va_arg(ap,  unsigned long));
+      case 3847281 : v = _new_integer(id, (long) va_arg(ap, unsigned long));
       break;
-      case 3454065 : v = _new_integer(id,  va_arg(ap,  long));
+      case 3454065 : v = _new_integer(id, va_arg(ap, long));
       break;
-      case 818062 : v = Var_box_long(va_arg(ap,  long));
+      case 818062 : v = Var_box_long(va_arg(ap, long));
       break;
-      case 44858254 : v = Var_box_ulong(va_arg(ap,  unsigned long));
+      case 44858254 : v = Var_box_ulong(va_arg(ap, unsigned long));
       break;
-      case 25983886 : v = Var_box_long_long(va_arg(ap,  long long));
+      case 25983886 : v = Var_box_long_long(va_arg(ap, long long));
       break;
-      case 1435270030 : v = Var_box_ulong_long(va_arg(ap,  unsigned long long));
+      case 1435270030 : v = Var_box_ulong_long(va_arg(ap, unsigned long long));
       break;
     }
     break;
-    case 1328354264 : v = _new_symbol(id,  va_arg(ap,  unsigned long));
+    case 1328354264 : v = _new_symbol(id, va_arg(ap, unsigned long));
     break;
     case 1473096 : v =((void) 0, Void);
     break;
     default: va_end(ap);
     {
-      static const X2CErrorSite  _x2c_error_site_10  = {.file =  "../../lib/var.x",.function =  "Var_new",.line =  683};
-      x2c_error_raise_n(& _x2c_error_site_10, 20800632064936, 2, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Var.new")),  NULL))),  Symbol_var(1345468776),  Symbol_var(tag));
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_new",.line = 683};
+      x2c_error_raise_n(& _x2c_error_site_10, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -1165,13 +1165,13 @@ double Var_floating(Var v){
     case 3355493 : case 13400168 :{
       unsigned u = v.u64 & _bitmask(32);
       float f;
-      memcpy(& f,  & u,  sizeof f);
+      memcpy(& f, & u, sizeof f);
       return f;
     }
     case 3356265 : case 301273866 :{
       unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
       double d;
-      memcpy(& d,  & u,  sizeof d);
+      memcpy(& d, & u, sizeof d);
       return d;
     }
     case 28764 : return 0.0 / 0.0;
@@ -1186,7 +1186,7 @@ long Var_integer(Var v){
   unsigned top = _top_bits(v);
   if(top == taginfo[_u48_].top) return(unsigned long)(v.u64 & _bitmask(48));
   if(top == taginfo[_i48_].top){
-    unsigned long mask = _bitmask(48),  raw = v.u64 & mask;
+    unsigned long mask = _bitmask(48), raw = v.u64 & mask;
     if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);
     return(long) raw;
   }
@@ -1221,27 +1221,27 @@ long Var_integer(Var v){
 }
 
 long Var_long_value(Var v){
-  return Var_is(v,  818062) ? _wide_box(v) -> value.long_value : 0;
+  return Var_is(v, 818062) ? _wide_box(v) -> value.long_value : 0;
 }
 
 unsigned long Var_ulong_value(Var v){
-  return Var_is(v,  44858254) ? _wide_box(v) -> value.ulong_value : 0;
+  return Var_is(v, 44858254) ? _wide_box(v) -> value.ulong_value : 0;
 }
 
 long long Var_long_long_value(Var v){
-  return Var_is(v,  25983886) ? _wide_box(v) -> value.long_long_value : 0;
+  return Var_is(v, 25983886) ? _wide_box(v) -> value.long_long_value : 0;
 }
 
 unsigned long long Var_ulong_long_value(Var v){
-  return Var_is(v,  1435270030) ? _wide_box(v) -> value.ulong_long_value : 0;
+  return Var_is(v, 1435270030) ? _wide_box(v) -> value.ulong_long_value : 0;
 }
 
 long double Var_long_double_value(Var v){
-  return Var_is(v,  26071077642) ? _wide_box(v) -> value.long_double_value : 0.0L;
+  return Var_is(v, 26071077642) ? _wide_box(v) -> value.long_double_value : 0.0L;
 }
 
-static unsigned _hash_bytes(unsigned hash,  void * ptr,  int width){
-  return x2c_hash_bytes(hash,  ptr, (size_t) width);
+static unsigned _hash_bytes(unsigned hash, void * ptr, int width){
+  return x2c_hash_bytes(hash, ptr, (size_t) width);
 }
 
 unsigned Var_wide_hash(Var v){
@@ -1250,28 +1250,28 @@ unsigned Var_wide_hash(Var v){
   Symbol tag = Var_tag(v);
   {
     switch(tag){
-      case 818062 : return _hash_bytes((unsigned) tag,  &(box -> value).long_value,  sizeof((box -> value).long_value));
-      case 44858254 : return _hash_bytes((unsigned) tag,  &(box -> value).ulong_value,  sizeof((box -> value).ulong_value));
-      case 25983886 : return _hash_bytes((unsigned) tag,  &(box -> value).long_long_value,  sizeof((box -> value).long_long_value));
-      case 1435270030 : return _hash_bytes((unsigned) tag,  &(box -> value).ulong_long_value,  sizeof((box -> value).ulong_long_value));
-      case 26071077642 : return _hash_bytes((unsigned) tag,  &(box -> value).long_double_value,  sizeof((box -> value).long_double_value));
+      case 818062 : return _hash_bytes((unsigned) tag, &(box -> value).long_value, sizeof((box -> value).long_value));
+      case 44858254 : return _hash_bytes((unsigned) tag, &(box -> value).ulong_value, sizeof((box -> value).ulong_value));
+      case 25983886 : return _hash_bytes((unsigned) tag, &(box -> value).long_long_value, sizeof((box -> value).long_long_value));
+      case 1435270030 : return _hash_bytes((unsigned) tag, &(box -> value).ulong_long_value, sizeof((box -> value).ulong_long_value));
+      case 26071077642 : return _hash_bytes((unsigned) tag, &(box -> value).long_double_value, sizeof((box -> value).long_double_value));
     }
 
   }
   return 0;
 }
 
-int Var_wide_equal(Var a,  Var b){
+int Var_wide_equal(Var a, Var b){
   if(! Var_is_wide(a) || ! Var_is_wide(b)) return 0;
   Symbol tag = Var_tag(a);
   if(tag != Var_tag(b)) return 0;
-  VarWideBox abox = _wide_box(a),  bbox = _wide_box(b);
+  VarWideBox abox = _wide_box(a), bbox = _wide_box(b);
   switch(tag){
     case 818062 : return abox -> value.long_value == bbox -> value.long_value;
     case 44858254 : return abox -> value.ulong_value == bbox -> value.ulong_value;
     case 25983886 : return abox -> value.long_long_value == bbox -> value.long_long_value;
     case 1435270030 : return abox -> value.ulong_long_value == bbox -> value.ulong_long_value;
-    case 26071077642 : return ! memcmp(& abox -> value.long_double_value,  & bbox -> value.long_double_value,  sizeof(abox -> value.long_double_value));
+    case 26071077642 : return ! memcmp(& abox -> value.long_double_value, & bbox -> value.long_double_value, sizeof(abox -> value.long_double_value));
   }
   return 0;
 }
@@ -1311,15 +1311,15 @@ static VarIntegerParts _integer_parts(Var v){
 
 }
 
-int Var_integer_compare(Var a,  Var b){
-  VarIntegerParts ap = _integer_parts(a),  bp = _integer_parts(b);
+int Var_integer_compare(Var a, Var b){
+  VarIntegerParts ap = _integer_parts(a), bp = _integer_parts(b);
   if(ap.negative != bp.negative) return ap.negative ? - 1 : 1;
   if(ap.magnitude == bp.magnitude) return 0;
   if(ap.negative) return ap.magnitude > bp.magnitude ? - 1 : 1;
   return ap.magnitude < bp.magnitude ? - 1 : 1;
 }
 
-static int _magnitude_floating_compare(unsigned long long integer,  long double floating){
+static int _magnitude_floating_compare(unsigned long long integer, long double floating){
   long double limit =(long double)(1ull << 63) * 2.0L;
   if(floating >= limit) return - 1;
   unsigned long long floating_integer =(unsigned long long) floating;
@@ -1328,33 +1328,33 @@ static int _magnitude_floating_compare(unsigned long long integer,  long double 
   return floating ==(long double) floating_integer ? 0 : - 1;
 }
 
-int Var_integer_floating_compare(Var integer,  Var floating){
+int Var_integer_floating_compare(Var integer, Var floating){
   VarIntegerParts parts = _integer_parts(integer);
-  long double value = Var_is(floating,  26071077642) ? Var_long_double_value(floating) :(long double) Var_floating(floating);
+  long double value = Var_is(floating, 26071077642) ? Var_long_double_value(floating) :(long double) Var_floating(floating);
   if(value != value || value == 1.0L / 0.0L) return - 1;
   if(value == - 1.0L / 0.0L) return 1;
   if(parts.negative){
     if(value >= 0.0L) return - 1;
-    return - _magnitude_floating_compare(parts.magnitude,  - value);
+    return - _magnitude_floating_compare(parts.magnitude, - value);
   }
   if(value < 0.0L) return 1;
-  return _magnitude_floating_compare(parts.magnitude,  value);
+  return _magnitude_floating_compare(parts.magnitude, value);
 }
 
-int Var_wide_compare(Var a,  Var b){
+int Var_wide_compare(Var a, Var b){
   if(! Var_is_wide(a) || ! Var_is_wide(b)) return 0;
   Symbol tag = Var_tag(a);
   if(tag != Var_tag(b)) return 0;
-  if(tag != 26071077642) return Var_integer_compare(a,  b);
-  long double av = Var_long_double_value(a),  bv = Var_long_double_value(b);
+  if(tag != 26071077642) return Var_integer_compare(a, b);
+  long double av = Var_long_double_value(a), bv = Var_long_double_value(b);
   if(av < bv) return - 1;
   if(av > bv) return 1;
-  int cmp = memcmp(& _wide_box(a) -> value.long_double_value,  & _wide_box(b) -> value.long_double_value,  sizeof(av));
+  int cmp = memcmp(& _wide_box(a) -> value.long_double_value, & _wide_box(b) -> value.long_double_value, sizeof(av));
   return cmp < 0 ? - 1 : cmp > 0 ? 1 : 0;
 }
 
 void * Var_pointer(Var v){
-  unsigned top = _top_bits(v),  btm = _bottom_bits(v);
+  unsigned top = _top_bits(v), btm = _bottom_bits(v);
   if(top <= 0x0002) return(void *)(v.u64 & _bitmask(48));
   if(top == 0x0003) return(void *)(v.u64 &(_bitmask(48) - 0x1));
   if(top == 0x0004) return(void *)(v.u64 &(_bitmask(48) - 0x3));
@@ -1367,16 +1367,16 @@ void * Var_pointer(Var v){
   return NULL;
 }
 
-Var Var_parse(String str,  Symbol kind){
+Var Var_parse(String str, Symbol kind){
   switch(kind){
     case 19368 :{
       long value;
-      if(! String_try_long(str,  & value) || value < INT_MIN || value > INT_MAX) return((void) 0, Void);
+      if(! String_try_long(str, & value) || value < INT_MIN || value > INT_MAX) return((void) 0, Void);
       return int_var((int) value);
     }
     case 13400168 : case 301273866 :{
       double value;
-      if(! String_try_double(str,  & value)) return((void) 0, Void);
+      if(! String_try_double(str, & value)) return((void) 0, Void);
       return double_var(value);
     }
     case 1318210446 : return String_var(String_parse(str));

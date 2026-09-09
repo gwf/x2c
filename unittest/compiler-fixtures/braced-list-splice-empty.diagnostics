@@ -3,5 +3,3 @@ unittest/compiler-fixtures/braced-list-splice-empty.x:4:21: parse: expected atom
                       ^
   note: token: } kind: }
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/pointer-unrelated-argument.x:9:3: type: cannot conver
     ^^^^
   note: the pointer types are unrelated: cast the expression to say so on purpose
 
-limit: too many errors, stopping
-

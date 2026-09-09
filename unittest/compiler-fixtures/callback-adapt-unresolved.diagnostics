@@ -3,5 +3,3 @@ unittest/compiler-fixtures/callback-adapt-unresolved.x:6:3: type: typed callback
     ^
   note: target signature: (* (func (("Var"))) "String") source signature: unresolved supported: a free function or Type.method designator
 
-limit: too many errors, stopping
-

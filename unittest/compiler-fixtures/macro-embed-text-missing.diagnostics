@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-embed-text-missing.x:7:16: macro: cannot open e
                  ^
   note: path: unittest/compiler-fixtures/missing-embed-input.txt
 
-limit: too many errors, stopping
-

@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-local-with-name.x:4:3: macro: 'with' cannot be 
     macro Statement with() => {
     ^^^^^
 
-limit: too many errors, stopping
-

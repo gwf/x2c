@@ -2,9 +2,9 @@
 
 #include "foreach-cursor-signatures.h"
 
-static List _11,  _10,  _9,  _5,  _4,  _3;
+static List _11, _10, _9, _5, _4, _3;
 
-static Var _8,  _7,  _6,  _2,  _1,  _0;
+static Var _8, _7, _6, _2, _1, _0;
 
 static int direct_one_calls;
 
@@ -14,24 +14,21 @@ static int invalid_calls;
 
 static int _init_guard_ = 0;
 
-
-
-
 Var int_var(int);
 
-List cons(Var,  List);
+List cons(Var, List);
 
-Iter List_iter(List,  Iter);
+Iter List_iter(List, Iter);
 
 int List_len(List);
 
 long Var_integer(Var);
 
-Var List_getindex(List,  int);
+Var List_getindex(List, int);
 
 void * Scope_malloc(size_t);
 
-int Iter_try_next(Iter,  Var *);
+int Iter_try_next(Iter, Var *);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -42,47 +39,47 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = int_var(1);
   _1 = int_var(2);
   _2 = int_var(3);
-  _3 = cons(_2,  NULL);
-  _4 = cons(_1,  _3);
-  _5 = cons(_0,  _4);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
+  _5 = cons(_0, _4);
   _6 = int_var(10);
   _7 = int_var(20);
   _8 = int_var(30);
-  _9 = cons(_8,  NULL);
-  _10 = cons(_7,  _9);
-  _11 = cons(_6,  _10);
+  _9 = cons(_8, NULL);
+  _10 = cons(_7, _9);
+  _11 = cons(_6, _10);
 }
 
-Iter DirectOne_iter(DirectOne bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter DirectOne_iter(DirectOne bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int DirectOne_try_next(DirectOne bag,  unsigned * cursor,  int * out){
+int DirectOne_try_next(DirectOne bag, unsigned * cursor, int * out){
   direct_one_calls ++;
   if(* cursor >= List_len(bag -> values)) return 0;
-  * out = Var_integer(List_getindex(bag -> values,  * cursor));
+  * out = Var_integer(List_getindex(bag -> values, * cursor));
   ++ * cursor;
   return 1;
 }
 
-Iter DirectTwo_iter(DirectTwo bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter DirectTwo_iter(DirectTwo bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int DirectTwo_try_next(DirectTwo bag,  unsigned * cursor,  int * key,  int * out){
+int DirectTwo_try_next(DirectTwo bag, unsigned * cursor, int * key, int * out){
   direct_two_calls ++;
   if(* cursor >= List_len(bag -> values)) return 0;
   * key = * cursor;
-  * out = Var_integer(List_getindex(bag -> values,  * cursor));
+  * out = Var_integer(List_getindex(bag -> values, * cursor));
   ++ * cursor;
   return 1;
 }
 
-Iter ValueCursor_iter(ValueCursor bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter ValueCursor_iter(ValueCursor bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int ValueCursor_try_next(ValueCursor bag,  unsigned cursor,  int * out){
+int ValueCursor_try_next(ValueCursor bag, unsigned cursor, int * out){
   (void) bag;
   (void) cursor;
   (void) out;
@@ -90,11 +87,11 @@ int ValueCursor_try_next(ValueCursor bag,  unsigned cursor,  int * out){
   return 0;
 }
 
-Iter FloatCursor_iter(FloatCursor bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter FloatCursor_iter(FloatCursor bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int FloatCursor_try_next(FloatCursor bag,  float * cursor,  int * out){
+int FloatCursor_try_next(FloatCursor bag, float * cursor, int * out){
   (void) bag;
   (void) cursor;
   (void) out;
@@ -102,11 +99,11 @@ int FloatCursor_try_next(FloatCursor bag,  float * cursor,  int * out){
   return 0;
 }
 
-Iter StringCursor_iter(StringCursor bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter StringCursor_iter(StringCursor bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int StringCursor_try_next(StringCursor bag,  String * cursor,  int * out){
+int StringCursor_try_next(StringCursor bag, String * cursor, int * out){
   (void) bag;
   (void) cursor;
   (void) out;
@@ -114,11 +111,11 @@ int StringCursor_try_next(StringCursor bag,  String * cursor,  int * out){
   return 0;
 }
 
-Iter VoidCursor_iter(VoidCursor bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter VoidCursor_iter(VoidCursor bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int VoidCursor_try_next(VoidCursor bag,  void * cursor,  int * out){
+int VoidCursor_try_next(VoidCursor bag, void * cursor, int * out){
   (void) bag;
   (void) cursor;
   (void) out;
@@ -126,11 +123,11 @@ int VoidCursor_try_next(VoidCursor bag,  void * cursor,  int * out){
   return 0;
 }
 
-Iter ValueOutput_iter(ValueOutput bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter ValueOutput_iter(ValueOutput bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-int ValueOutput_try_next(ValueOutput bag,  unsigned * cursor,  int out){
+int ValueOutput_try_next(ValueOutput bag, unsigned * cursor, int out){
   (void) bag;
   (void) cursor;
   (void) out;
@@ -138,11 +135,11 @@ int ValueOutput_try_next(ValueOutput bag,  unsigned * cursor,  int out){
   return 0;
 }
 
-Iter WrongReturn_iter(WrongReturn bag,  Iter dest){
-  return List_iter(bag -> values,  dest);
+Iter WrongReturn_iter(WrongReturn bag, Iter dest){
+  return List_iter(bag -> values, dest);
 }
 
-long WrongReturn_try_next(WrongReturn bag,  unsigned * cursor,  int * out){
+long WrongReturn_try_next(WrongReturn bag, unsigned * cursor, int * out){
   (void) bag;
   (void) cursor;
   (void) out;
@@ -161,7 +158,7 @@ int main(void){
     DirectOne _x2c_macro_object_0 = direct_one;
     unsigned _x2c_macro_cursor_0 = 0;
     int _x2c_macro_cursor_output_0;
-    while(DirectOne_try_next(_x2c_macro_object_0,  & _x2c_macro_cursor_0,  & _x2c_macro_cursor_output_0)){
+    while(DirectOne_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       value = _x2c_macro_cursor_output_0;
       one_total += value;
     }
@@ -171,12 +168,12 @@ int main(void){
   direct_two -> values = _11;
   int two_total = 0;
   {
-    int key,  value;
+    int key, value;
     DirectTwo _x2c_macro_object_1 = direct_two;
     unsigned _x2c_macro_cursor_1 = 0;
     int _x2c_macro_cursor_output_1;
     int _x2c_macro_cursor_output_2;
-    while(DirectTwo_try_next(_x2c_macro_object_1,  & _x2c_macro_cursor_1,  & _x2c_macro_cursor_output_1,  & _x2c_macro_cursor_output_2)){
+    while(DirectTwo_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
       key = _x2c_macro_cursor_output_1;
       value = _x2c_macro_cursor_output_2;
       two_total += key + value;
@@ -198,83 +195,83 @@ int main(void){
   int fallback_total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_2 = ValueCursor_iter(value_cursor,  &(struct Iter){
+    Iter _x2c_macro_iterator_2 = ValueCursor_iter(value_cursor, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
-      value = Var_int(Var_convert(_x2c_macro_item_2,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
+      value = Var_int(Var_convert(_x2c_macro_item_2, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_3 = FloatCursor_iter(float_cursor,  &(struct Iter){
+    Iter _x2c_macro_iterator_3 = FloatCursor_iter(float_cursor, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
-      value = Var_int(Var_convert(_x2c_macro_item_3,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+      value = Var_int(Var_convert(_x2c_macro_item_3, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_4 = StringCursor_iter(string_cursor,  &(struct Iter){
+    Iter _x2c_macro_iterator_4 = StringCursor_iter(string_cursor, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
-      value = Var_int(Var_convert(_x2c_macro_item_4,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
+      value = Var_int(Var_convert(_x2c_macro_item_4, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_5 = VoidCursor_iter(void_cursor,  &(struct Iter){
+    Iter _x2c_macro_iterator_5 = VoidCursor_iter(void_cursor, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
-      value = Var_int(Var_convert(_x2c_macro_item_5,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
+      value = Var_int(Var_convert(_x2c_macro_item_5, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_6 = ValueOutput_iter(value_output,  &(struct Iter){
+    Iter _x2c_macro_iterator_6 = ValueOutput_iter(value_output, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
-      value = Var_int(Var_convert(_x2c_macro_item_6,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
+      value = Var_int(Var_convert(_x2c_macro_item_6, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_7 = WrongReturn_iter(wrong_return,  &(struct Iter){
+    Iter _x2c_macro_iterator_7 = WrongReturn_iter(wrong_return, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
-      value = Var_int(Var_convert(_x2c_macro_item_7,  3453797));
+    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
+      value = Var_int(Var_convert(_x2c_macro_item_7, 3453797));
       fallback_total += value;
     }
 
   }
-  printf("%ld %d %d %d %d %d\n",  one_total,  two_total,  fallback_total,  direct_one_calls,  direct_two_calls,  invalid_calls);
+  printf("%ld %d %d %d %d %d\n", one_total, two_total, fallback_total, direct_one_calls, direct_two_calls, invalid_calls);
   return one_total == 6 && two_total == 63 && fallback_total == 36 && direct_one_calls == 4 && direct_two_calls == 4 && ! invalid_calls ? 0 : 1;
 }
 

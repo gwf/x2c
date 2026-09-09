@@ -3,5 +3,3 @@ unittest/compiler-fixtures/provenance-generated-lambda.x:6:33: xform: dynamic nu
                                   ^
   note: operator: * left type: ("Var") right type: ("String")
 
-limit: too many errors, stopping
-

@@ -6,9 +6,9 @@
 #define __GUARD_0x447E3425__
 
 #include "string.h"
-int String_try_long(String str,  long * out);
+int String_try_long(String str, long * out);
 
-int String_try_double(String str,  double * out);
+int String_try_double(String str, double * out);
 
 
 #endif /* __GUARD_0x447E3425__ */

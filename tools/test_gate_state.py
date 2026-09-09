@@ -37,7 +37,7 @@ class EnsureTests(unittest.TestCase):
         with (
             mock.patch.object(GATE_STATE, "cmd_check", return_value=0),
             mock.patch.object(GATE_STATE, "run_gate") as run_gate,
-            mock.patch.object(GATE_STATE, "cmd_record") as record,
+            mock.patch.object(GATE_STATE, "_record") as record,
         ):
             result = GATE_STATE.cmd_ensure("doc-check")
 
@@ -49,7 +49,7 @@ class EnsureTests(unittest.TestCase):
         with (
             mock.patch.object(GATE_STATE, "cmd_check", return_value=1),
             mock.patch.object(GATE_STATE, "run_gate", return_value=0) as run_gate,
-            mock.patch.object(GATE_STATE, "cmd_record", return_value=0),
+            mock.patch.object(GATE_STATE, "_record", return_value=0),
         ):
             result = GATE_STATE.cmd_ensure("agent-pr-check")
 
@@ -88,7 +88,7 @@ class EnsureTests(unittest.TestCase):
         with (
             mock.patch.object(GATE_STATE, "cmd_check") as check,
             mock.patch.object(GATE_STATE, "run_gate") as run_gate,
-            mock.patch.object(GATE_STATE, "cmd_record") as record,
+            mock.patch.object(GATE_STATE, "_record") as record,
             mock.patch("sys.stderr", new_callable=io.StringIO) as stderr,
         ):
             result = GATE_STATE.cmd_ensure("check")
@@ -103,7 +103,7 @@ class EnsureTests(unittest.TestCase):
         with (
             mock.patch.object(GATE_STATE, "cmd_check", return_value=1),
             mock.patch.object(GATE_STATE, "run_gate", return_value=7),
-            mock.patch.object(GATE_STATE, "cmd_record") as record,
+            mock.patch.object(GATE_STATE, "_record") as record,
         ):
             result = GATE_STATE.cmd_ensure("doc-check")
 
@@ -124,23 +124,14 @@ class EnsureTests(unittest.TestCase):
 
 
 class ExistingCommandTests(unittest.TestCase):
-    def test_record_and_check_still_store_and_reuse_any_named_gate(self):
-        stamp = {
-            "version": GATE_STATE.FORMAT,
-            "files": {"tracked": "1234"},
-            "configuration": {"test": "cc"},
-            "recorded_at_head": "abc",
-        }
-        with (
-            tempfile.TemporaryDirectory() as directory,
-            mock.patch.object(
-                GATE_STATE, "STATE", Path(directory) / "gate-state.json"
-            ),
-            mock.patch.object(GATE_STATE, "digest", return_value=stamp),
-            mock.patch("sys.stdout", new_callable=io.StringIO),
-        ):
-            self.assertEqual(GATE_STATE.cmd_record("custom-gate"), 0)
-            self.assertEqual(GATE_STATE.cmd_check("custom-gate"), 0)
+    def test_manual_record_command_is_not_available(self):
+        result = subprocess.run(
+            [sys.executable, str(TOOLS / "gate-state.py"),
+             "record", "agent-pr-check"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("invalid choice", result.stderr)
 
 
 class ConfigurationTests(unittest.TestCase):
@@ -352,7 +343,7 @@ class TreeTests(unittest.TestCase):
         self.git("-c", "commit.gpgsign=false", "commit", "-qm", "snapshot")
 
     def record(self):
-        self.assertEqual(GATE_STATE.cmd_record("doc-check"), 0)
+        self.assertEqual(GATE_STATE._record("doc-check"), 0)
 
     def valid(self):
         self.assertEqual(GATE_STATE.cmd_check("doc-check"), 0)

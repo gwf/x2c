@@ -3,5 +3,3 @@ unittest/compiler-fixtures/sibling-typedef-assignment.x:7:3: type: cannot conver
     ^^^^^^^^
   note: the names share one C type but not one meaning: declare the converter ArrayDbl_arrayint, or cast the expression to say so on purpose
 
-limit: too many errors, stopping
-

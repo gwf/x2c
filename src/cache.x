@@ -631,17 +631,13 @@ static List _setup_source_cache_init(
   _queue_static_initializers(c, initializers, deferred_kind);
   List (list_ids, string_ids, var_ids) = _split_ids(keys, ids);
   ids.free();
-  // Preserve the five cache spacing slots with explicit empty comment
-  // nodes rather than malformed empty sequence elements.
   Array built = %[];
   List declaration = _generate_cache_declare(list_ids, "List", c, NULL);
-  built.push(declaration ? declaration : %(comment));
+  if (declaration) built.push(declaration);
   declaration = _generate_cache_declare(string_ids, "String", c, NULL);
-  built.push(declaration ? declaration : %(comment));
+  if (declaration) built.push(declaration);
   declaration = _generate_cache_declare(var_ids, "Var", c, NULL);
-  built.push(declaration ? declaration : %(comment));
-  built.push(%(comment));
-  built.push(%(comment));
+  if (declaration) built.push(declaration);
   List declarations = built.list_free();
   return declarations.append(source);
 }

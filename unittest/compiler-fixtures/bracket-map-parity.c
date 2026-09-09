@@ -6,9 +6,9 @@ Var Symbol_var(Symbol);
 
 Var int_var(int);
 
-Var Map_getindex(Map,  Var);
+Var Map_getindex(Map, Var);
 
-Var Map_setindex(Map,  Var,  Var);
+Var Map_setindex(Map, Var, Var);
 
 int Var_int(Var);
 
@@ -16,19 +16,19 @@ int Var_is_void(Var);
 
 int main(void){
   x2c_initialize();
-  Map scores = Map_update_n(Map_new(),  2,  Symbol_var(31626),  int_var(1),  Symbol_var(42462),  int_var(2));
+  Map scores = Map_update_n(Map_new(), 2, Symbol_var(31626), int_var(1), Symbol_var(42462), int_var(2));
   Var key = Symbol_var(31626);
-  Var bracket_dynamic = Map_getindex(scores,  key);
-  Var method_dynamic = Map_getindex(scores,  key);
-  Var bracket_scalar = Map_getindex(scores,  int_var(7));
-  Var method_scalar = Map_getindex(scores,  int_var(7));
-  Map_setindex(scores,  int_var(7),  int_var(70));
-  Map_setindex(scores,  int_var(8),  int_var(80));
-  Map_setindex(scores,  key,  int_var(Var_int(Map_getindex(scores,  key)) + 10));
-  printf("%d %d\n",  Var_int(bracket_dynamic),  Var_int(method_dynamic));
-  printf("%d %d\n",  Var_is_void(bracket_scalar),  Var_is_void(method_scalar));
-  printf("%d %d\n",  Var_int(Map_getindex(scores,  int_var(7))),  Var_int(Map_getindex(scores,  int_var(8))));
-  printf("%d %d\n",  Var_int(Map_getindex(scores,  key)),  Var_int(Map_getindex(scores,  Symbol_var(42462))));
+  Var bracket_dynamic = Map_getindex(scores, key);
+  Var method_dynamic = Map_getindex(scores, key);
+  Var bracket_scalar = Map_getindex(scores, int_var(7));
+  Var method_scalar = Map_getindex(scores, int_var(7));
+  Map_setindex(scores, int_var(7), int_var(70));
+  Map_setindex(scores, int_var(8), int_var(80));
+  Map_setindex(scores, key, int_var(Var_int(Map_getindex(scores, key)) + 10));
+  printf("%d %d\n", Var_int(bracket_dynamic), Var_int(method_dynamic));
+  printf("%d %d\n", Var_is_void(bracket_scalar), Var_is_void(method_scalar));
+  printf("%d %d\n", Var_int(Map_getindex(scores, int_var(7))), Var_int(Map_getindex(scores, int_var(8))));
+  printf("%d %d\n", Var_int(Map_getindex(scores, key)), Var_int(Map_getindex(scores, Symbol_var(42462))));
   return 0;
 }
 

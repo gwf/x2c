@@ -9,13 +9,13 @@
 typedef List Ast;
 
 typedef enum AstPos{
-  AST_UNIT,  AST_BLOCK,  AST_FIELD,  AST_ENUMERATOR,  AST_MAP_ENTRY,  AST_STATEMENT,  AST_EXPRESSION
+  AST_UNIT, AST_BLOCK, AST_FIELD, AST_ENUMERATOR, AST_MAP_ENTRY, AST_STATEMENT, AST_EXPRESSION
 }
 AstPos;
 
-List binding_identity_new(int identity,  String spelling);
+List binding_identity_new(int identity, String spelling);
 
-int binding_identity_try_parts(List binding,  int * identity,  String * spelling);
+int binding_identity_try_parts(List binding, int * identity, String * spelling);
 
 String binding_identity_spelling(List binding);
 
@@ -27,15 +27,15 @@ int Symbol_is_assignment_op(Symbol op);
 
 int ast_changes_left_operand(Symbol op);
 
-int ast_contains_head(Var value,  Symbol kind);
+int ast_contains_head(Var value, Symbol kind);
 
-Ast Ast_rewrite_children(Ast ast,  Func per_child);
+Ast Ast_rewrite_children(Ast ast, Func per_child);
 
 int Ast_never_returns(Ast ast);
 
-List Ast_initializer_cases(Ast ast,  List * input);
+List Ast_initializer_cases(Ast ast, List * input);
 
-List Ast_initializer_functions(Ast ast,  List * source);
+List Ast_initializer_functions(Ast ast, List * source);
 
 
 #endif /* __GUARD_0x29A28E81__ */

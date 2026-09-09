@@ -3,5 +3,3 @@ unittest/compiler-fixtures/catch-filter-requires-literal.x:5:9: parse: catch fil
           ^
   note: use catch %(code (key pattern)...):
 
-limit: too many errors, stopping
-

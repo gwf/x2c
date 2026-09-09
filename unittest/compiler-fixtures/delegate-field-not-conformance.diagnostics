@@ -3,5 +3,3 @@ unittest/compiler-fixtures/delegate-field-not-conformance.x:21:3: macro: type ("
     ^^^^^^^
   note: declare an Iter protocol adoption or iterate an Iter directly
 
-limit: too many errors, stopping
-

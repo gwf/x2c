@@ -9,19 +9,19 @@
 #include <stdatomic.h>
 #include "common.h"
 typedef struct ScopeAlloc{
-  struct ScopeAlloc * prev,  * next;
+  struct ScopeAlloc * prev, * next;
 }
 * ScopeAlloc;
 
 typedef struct Scope{
   ScopeAlloc first;
-  struct Scope * down,  * up;
+  struct Scope * down, * up;
 }
 * Scope;
 
 typedef struct ScopeStats{
-  size_t allocation_calls,  reallocation_calls,  free_calls,  live_allocations;
-  size_t scope_creations,  scope_destructions,  live_scopes,  requested_bytes;
+  size_t allocation_calls, reallocation_calls, free_calls, live_allocations;
+  size_t scope_creations, scope_destructions, live_scopes, requested_bytes;
   size_t largest_request;
 }
 ScopeStats;
@@ -55,23 +55,23 @@ void Scope_release(void);
 
 void * Scope_malloc(size_t size);
 
-void * Scope_malloc_in(Scope * slot,  size_t size);
+void * Scope_malloc_in(Scope * slot, size_t size);
 
-void * Scope_calloc(size_t count,  size_t size);
+void * Scope_calloc(size_t count, size_t size);
 
-void * Scope_calloc_in(Scope * slot,  size_t count,  size_t size);
+void * Scope_calloc_in(Scope * slot, size_t count, size_t size);
 
-void * Scope_memdup(const void * ptr,  size_t size);
+void * Scope_memdup(const void * ptr, size_t size);
 
-void * Scope_memdup_in(Scope * slot,  const void * ptr,  size_t size);
+void * Scope_memdup_in(Scope * slot, const void * ptr, size_t size);
 
 void Scope_free(void * ptr);
 
 Scope Scope_owner(void * ptr);
 
-void Scope_move(void * ptr,  Scope * slot);
+void Scope_move(void * ptr, Scope * slot);
 
-void * Scope_realloc(void * ptr,  size_t size);
+void * Scope_realloc(void * ptr, size_t size);
 
 void Scope_shutdown(void);
 

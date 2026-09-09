@@ -3,5 +3,3 @@ unittest/compiler-fixtures/lambda-reject-nested-reference-through-snapshot.x:5:5
                                                      ^
   note: binding: value
 
-limit: too many errors, stopping
-

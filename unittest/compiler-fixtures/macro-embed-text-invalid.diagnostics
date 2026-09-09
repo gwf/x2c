@@ -3,5 +3,3 @@ unittest/compiler-fixtures/macro-embed-text-invalid.x:7:16: macro: x2c.embed.tex
                  ^
   note: value: (expr (int) (literal (int) "123"))
 
-limit: too many errors, stopping
-

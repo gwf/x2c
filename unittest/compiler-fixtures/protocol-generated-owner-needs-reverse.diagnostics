@@ -2,5 +2,3 @@ unittest/compiler-fixtures/protocol-generated-owner-needs-reverse.x:28:1: protoc
   protocol Var(Packet);
   ^^^^^^^^
 
-limit: too many errors, stopping
-

@@ -3,5 +3,3 @@ unittest/compiler-fixtures/import-unprefixed-leak.x:6:1: driver: package 'leak' 
   ^^^^^^
   note: 'leak-foreign.x' is x2c source outside the package; include it below #pragma private, or move it into 'leak/src'
 
-limit: too many errors, stopping
-

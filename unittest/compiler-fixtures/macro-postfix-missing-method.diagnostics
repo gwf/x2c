@@ -2,5 +2,3 @@ unittest/compiler-fixtures/macro-postfix-missing-method.x:13:10: type: type ("Ma
     return $macro_call_missing(value);
            ^
 
-limit: too many errors, stopping
-
