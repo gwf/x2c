@@ -11,6 +11,7 @@
 #include "bootstrap.x"
 #include "project.x"
 #include "frontend.x"
+#include "editor.x"
 #include "toolchain.x"
 #pragma private
 
@@ -549,6 +550,10 @@ static int _run_bootstrap(CliRequest command) {
 */
 int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
+  if (argc > 1 && !strcmp(argv[1], "editor")) {
+    argv[1] = argv[0];
+    return editor_request(argc - 1, argv + 1);
+  }
   CliRequest request = cli_parse(argc, argv);
   report_configure(
     request.quiet, request.plain, request.color_mode,

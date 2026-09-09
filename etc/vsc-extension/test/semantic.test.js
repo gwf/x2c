@@ -3,7 +3,7 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { SemanticService, byteOffset, textOffset, positionAt, runWorker } = require("../semantic");
+const { selectTool, findExecutable, SemanticService, byteOffset, textOffset, positionAt, runWorker } = require("../semantic");
 
 test("UTF-8 compiler spans map to UTF-16 editor positions across CRLF", () => {
   const text = "/* cafe\u0301 \ud83c\udf0d */\r\nint \u03b1 = 2;";
@@ -124,4 +124,82 @@ test("cancellation also stops descendants after their worker exits", {
   const first = await fs.readFile(heartbeat, "utf8").catch(() => "");
   await new Promise((resolve) => setTimeout(resolve, 80));
   assert.equal(await fs.readFile(heartbeat, "utf8").catch(() => ""), first);
+});
+
+function settings(values = {}, inspection = {}) {
+  return {
+    get: (key, fallback) => Object.hasOwn(values, key) ? values[key] : fallback,
+    inspect: (key) => inspection[key]
+  };
+}
+
+test("compiler selection preserves explicit legacy overrides and workspace defaults", () => {
+  const automatic = settings({}, { "semantic.workerPath": {
+    defaultValue: "x2c-editor-worker"
+  } });
+  assert.deepEqual(selectTool(automatic, "/workspace", () => true),
+    { worker: "/workspace/x2c", prefix: ["editor"] });
+  assert.deepEqual(selectTool(automatic, undefined, () => {
+    assert.fail("a standalone file does not choose its directory's executable");
+  }), { worker: "x2c", prefix: ["editor"] });
+  assert.deepEqual(selectTool(automatic, "/workspace", () => false),
+    { worker: "x2c", prefix: ["editor"] });
+  const legacy = settings({ "semantic.workerPath": "x2c-editor-worker" }, {
+    "semantic.workerPath": { defaultValue: "x2c-editor-worker",
+      workspaceValue: "x2c-editor-worker" }
+  });
+  assert.deepEqual(selectTool(legacy, "/workspace", () => true),
+    { worker: "x2c-editor-worker", prefix: [] });
+  const explicit = settings({ "semantic.compilerPath": "/missing/compiler",
+    "semantic.workerPath": "/valid/worker" });
+  assert.deepEqual(selectTool(explicit, "/workspace", () => true),
+    { worker: "/missing/compiler", prefix: ["editor"] });
+});
+
+test("compiler transport prepends editor before private metadata", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "x2c-compiler-transport-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const service = new SemanticService({ worker: "/selected/x2c", prefix: ["editor"],
+    cwd: root, args: ["build", "--target", "app"], tempRoot: root,
+    run: async (worker, args) => {
+      assert.equal(worker, "/selected/x2c");
+      assert.equal(args[0], "editor");
+      assert.deepEqual(args.slice(-4), ["--", "build", "--target", "app"]);
+      await fs.writeFile(args[1], '{"diagnostics":[]}');
+      return { code: 0 };
+    }
+  });
+  assert.deepEqual((await service.analyze("/app.x")).diagnostics, []);
+  assert.deepEqual(await fs.readdir(root), []);
+});
+
+test("executable discovery handles spaces and never treats a directory as a tool", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "x2c tool discovery "));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const tool = path.join(root, "x2c");
+  await fs.writeFile(tool, "#!/bin/sh\nexit 0\n", { mode: 0o700 });
+  assert.equal(findExecutable("x2c", "/", root), tool);
+  assert.equal(findExecutable("./x2c", root, ""), tool);
+  assert.equal(findExecutable(root, "/", ""), null);
+  assert.equal(findExecutable("./missing", root, root), null);
+});
+
+test("old compilers and malformed responses report compiler setup without fallback", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "x2c-editor-version-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  let malformed = false;
+  const service = new SemanticService({ worker: "/selected/x2c", prefix: ["editor"],
+    cwd: root, tempRoot: root, run: async (worker, args) => {
+      assert.equal(worker, "/selected/x2c");
+      if (!malformed) return { code: 2, output: "unknown command 'editor'" };
+      await fs.writeFile(args[1], "not JSON");
+      return { code: 0 };
+    }
+  });
+  const old = await service.analyze("/app.x");
+  assert.match(old.error, /unknown command 'editor'/);
+  assert.match(old.error, /semantic.compilerPath.*supports x2c editor/);
+  malformed = true;
+  assert.match((await service.analyze("/app.x")).error, /semantic.compilerPath/);
+  assert.deepEqual(await fs.readdir(root), []);
 });

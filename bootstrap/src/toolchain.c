@@ -366,7 +366,7 @@ static char * * _action_argv(List arguments){
     Var _x2c_macro_item_5;
     while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
       argument = Var_string(_x2c_macro_item_5);
-      argv[index ++] = argument;
+      argv[index ++] = String_truth(argument) ? argument : "";
     }
 
   }

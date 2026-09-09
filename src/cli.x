@@ -161,6 +161,10 @@ static CliOption cli_options[] = {
     "Link library <name>", 0 },
   { <wl>, CLI_BUILD | CLI_RUN, <linker>, "-Wl,<arg>[,<arg>...]",
     NULL, "Pass comma-separated arguments to the linker", 0 },
+  { <pthread>, CLI_BUILD | CLI_RUN, <c-compiler>, "-pthread", NULL,
+    "Enable native threading for compilation and linking", 0 },
+  { <framework>, CLI_BUILD | CLI_RUN, <linker>, "-framework", "<name>",
+    "Link a native framework on macOS", 0 },
   { <xlinker>, CLI_BUILD | CLI_RUN, <linker>, "-Xlinker", "<arg>",
     "Pass one argument to the linker", 0 },
   { <tokens>, CLI_TRANSLATE, <inspection>, "--dump-tokens",
@@ -486,7 +490,7 @@ static int _response_on_stack(List stack, String path) {
 }
 
 static void _tokenize_response(
-  Array output, String path, const char *text, size_t length, List stack) {
+  Array output, String path, const char *text, size_t length) {
   Buffer token = Buffer.new(0), int quote = 0, escaped = 0, line = 1, have = 0;
   int first_nonspace = 1, comment = 0;
   for (size_t i = 0; i <= length; i++) {
@@ -535,7 +539,7 @@ static void _tokenize_response(
     }
     if (!c || isspace(c)) {
       if (have) {
-        _expand_argument(output, token, stack);
+        output.push(token.str());
         token.clear();
         have = 0;
       }
@@ -552,6 +556,18 @@ static void _tokenize_response(
     have = 1;
   }
   token.free();
+}
+
+/** Reads response-file tokens with ordinary quoting and UTF-8 checks.
+    Returns canonical Strings without expanding `@` references. Paths and
+    arguments retain the producing pool lifetime.
+*/
+List cli_response_arguments(String path) {
+  size_t length = 0, char *text = _read_response_file(path, &length);
+  Array arguments = %[];
+  _tokenize_response(arguments, path, text, length);
+  Scope.free(text);
+  return arguments.list_free();
 }
 
 static void _expand_argument(Array output, String argument, List stack) {
@@ -574,9 +590,9 @@ static void _expand_argument(Array output, String argument, List stack) {
       "x2c: error: recursive response-file inclusion: %s\n", path);
     exit(2);
   }
-  size_t length = 0, char *text = _read_response_file(path, &length);
-  _tokenize_response(output, path, text, length, cons(identity, stack));
-  Scope.free(text);
+  List nested = cons(identity, stack);
+  foreach (String word, cli_response_arguments(path))
+    _expand_argument(output, word, nested);
 }
 
 static List _expand_arguments(int argc, char **argv) {
@@ -772,10 +788,54 @@ static void _apply_option(
     case <lib-dir>: case <library>: if (attached) ld_args.push(spelling);
       else _push_pair(ld_args, spelling, value);
       break;
+    case <pthread>: cc_args.push(spelling); ld_args.push(spelling); break;
+    case <framework>:
     case <xlinker>: _push_pair(ld_args, spelling, value);
       break;
     case <wl>: ld_args.push(spelling); break;
   }
+}
+
+/** Reads a package's native response options, expanding literal `{package}`
+    after tokenization. Only native include/define/thread options and ordered
+    archive/library/framework inputs are admitted. `cc_args` and `ld_args`
+    serve native actions; no source-preprocessing options are returned.
+*/
+CliRequest cli_package_options(String path, String package) {
+  Array words = %[];
+  foreach (String word, cli_response_arguments(path))
+    words.push(word.replace("{package}", package));
+  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  request.command = <build>;
+  Array includes = %[], cpp = %[], compile = %[], link = %[];
+  for (List node = words.list_free(); node; node = node.cdr()) {
+    String argument = node.car();
+    if (!argument) x2c_driver_error("empty package native argument");
+    if (argument[0] != '-' && argument[0] != '@' &&
+        argument.endswith(".a")) {
+      link.push(argument);
+      continue;
+    }
+    String spelling = NULL, value = NULL, int attached = 0;
+    CliOption *option = _take_option(
+      &node, CLI_BUILD, &spelling, &value, &attached);
+    if (!option)
+      x2c_driver_error(%"unsupported package native argument '$argument'");
+    switch (option.id) {
+      case <include>: case <c-include>: case <c-system>:
+      case <define>: case <undefine>: case <lib-dir>: case <library>:
+      case <pthread>: case <framework>: break;
+      default:
+        x2c_driver_error(%"unsupported package native argument '$argument'");
+    }
+    _apply_option(request, option, spelling, value, attached,
+      includes, cpp, compile, link);
+  }
+  includes.free();
+  cpp.free();
+  request.cc_args = compile.list_free();
+  request.ld_args = link.list_free();
+  return request;
 }
 
 /* translate reports the diagnostic for x2c's single-dash long-option

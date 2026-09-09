@@ -1,12 +1,13 @@
 const vscode = require("vscode");
 const path = require("path");
-const { SemanticService, byteOffset, positionAt } = require("./semantic");
+const { SemanticService, byteOffset, positionAt, selectTool, findExecutable } = require("./semantic");
 
 function activate(context) {
   const diagnostics = vscode.languages.createDiagnosticCollection("x2c");
   const output = vscode.window.createOutputChannel("x2c");
   const services = new Map();
   const errors = new Map();
+  const setupErrors = new Set();
   const timers = new Map();
   const selector = { language: "x2c", scheme: "file" };
   let runtimeNotice = false;
@@ -24,10 +25,23 @@ function activate(context) {
     if (!settings.get("semantic.enabled", true)) return null;
     const workspace = vscode.workspace.getWorkspaceFolder(document.uri);
     const cwd = workspace ? workspace.uri.fsPath : path.dirname(document.uri.fsPath);
-    const worker = settings.get("semantic.workerPath", "x2c-editor-worker");
+    const tool = selectTool(settings, workspace?.uri.fsPath);
+    const worker = findExecutable(tool.worker, cwd);
+    const setupKey = JSON.stringify([cwd, tool.worker]);
+    if (!worker) {
+      diagnostics.delete(document.uri);
+      if (!setupErrors.has(setupKey)) output.appendLine(
+        `Cannot execute '${tool.worker}'. Install x2c and set x2c.semantic.compilerPath ` +
+        "to its executable, or place x2c on PATH. Syntax highlighting remains available."
+      );
+      setupErrors.add(setupKey);
+      return null;
+    }
+    setupErrors.delete(setupKey);
     const args = settings.get("semantic.arguments", []);
-    const key = JSON.stringify([cwd, worker, args]);
-    if (!services.has(key)) services.set(key, new SemanticService({ worker, cwd, args }));
+    const key = JSON.stringify([cwd, worker, tool.prefix, args]);
+    if (!services.has(key)) services.set(key,
+      new SemanticService({ worker, prefix: tool.prefix, cwd, args }));
     const service = services.get(key);
     // Include unsaved headers, imports, and manifests, not just x2c documents.
     for (const open of vscode.workspace.textDocuments) {
@@ -57,7 +71,7 @@ function activate(context) {
       const file = document.uri.toString();
       if (result?.error) {
         const message = result.error.includes("ENOENT") ?
-          `${result.error}\nBuild tools/x2c-editor and set x2c.semantic.workerPath to its executable.` :
+          `${result.error}\nInstall x2c and set x2c.semantic.compilerPath to its executable.` :
           result.error;
         if (errors.get(file) !== message) output.appendLine(message);
         errors.set(file, message);
@@ -119,6 +133,7 @@ function activate(context) {
     for (const service of services.values()) service.dispose();
     services.clear();
     errors.clear();
+    setupErrors.clear();
     diagnostics.clear();
     for (const document of vscode.workspace.textDocuments) schedule(document);
   }

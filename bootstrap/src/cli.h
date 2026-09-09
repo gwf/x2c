@@ -23,7 +23,11 @@ typedef struct CliRequest{
 }
 * CliRequest;
 
+List cli_response_arguments(String path);
+
 int cli_dependency_pass_through(String s);
+
+CliRequest cli_package_options(String path, String package);
 
 CliRequest cli_parse(int argc, char * * argv);
 

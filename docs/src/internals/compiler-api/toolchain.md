@@ -73,7 +73,7 @@ A partial capture setup failure returns no defined status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:336`
+Source: `src/toolchain.x:337`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -88,7 +88,7 @@ waited exactly once; partial capture setup leaves a non-waitable result.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:282`
+Source: `src/toolchain.x:283`
 
 ### `ToolRun`
 
@@ -101,7 +101,7 @@ Checks whether an execution can be waited without blocking. A dry run
 is ready immediately. A completed child retains its status and captures
 until the required `ToolRun.wait` call.
 
-Source: `src/toolchain.x:299`
+Source: `src/toolchain.x:300`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -117,7 +117,7 @@ execution with partial capture setup is not valid input.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:314`
+Source: `src/toolchain.x:315`
 
 ### `Toolchain`
 
@@ -180,7 +180,7 @@ returns no defined status. This operation does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:360`
+Source: `src/toolchain.x:361`
 
 ## Public types
 

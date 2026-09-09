@@ -207,3 +207,7 @@ existing cache key includes their expected hashes. Build steps can refer to
 `{package}` for the manifest directory. Raylib uses this to apply its pinned
 image/text patch with the ordinary `patch` command. Changing a dependency
 manifest rebuilds the package and its recorded native link flags.
+
+Build movable native bundles with `make -C packages/yyjson bundle`. See the
+[package guide](../docs/src/guide/packages.md#movable-native-bundles) for
+relocation, admitted profiles, compiler compatibility, and source distributions.

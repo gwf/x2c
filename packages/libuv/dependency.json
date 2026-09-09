@@ -36,5 +36,33 @@
     "{prefix}/include/uv.h",
     "{prefix}/include/uv/version.h",
     "{prefix}/lib/libuv.a"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/uv.h",
+        "to": "native/include/uv.h"
+      },
+      {
+        "from": "{prefix}/include/uv",
+        "to": "native/include/uv"
+      },
+      {
+        "from": "{prefix}/lib/libuv.a",
+        "to": "native/lib/libuv.a"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libuv.a"
+    ],
+    "platform_args": {
+      "linux": [
+        "-ldl",
+        "-lrt",
+        "-pthread"
+      ]
+    }
+  }
 }

@@ -42,5 +42,31 @@
     "{prefix}/include/pcre2posix.h",
     "{prefix}/lib/libpcre2-8.a",
     "{prefix}/lib/libpcre2-posix.a"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/pcre2.h",
+        "to": "native/include/pcre2.h"
+      },
+      {
+        "from": "{prefix}/include/pcre2posix.h",
+        "to": "native/include/pcre2posix.h"
+      },
+      {
+        "from": "{prefix}/lib/libpcre2-posix.a",
+        "to": "native/lib/libpcre2-posix.a"
+      },
+      {
+        "from": "{prefix}/lib/libpcre2-8.a",
+        "to": "native/lib/libpcre2-8.a"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libpcre2-posix.a",
+      "{package}/native/lib/libpcre2-8.a"
+    ]
+  }
 }

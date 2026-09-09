@@ -37,7 +37,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:550`
+Source: `src/build.x:557`
 
 ### `Build`
 
@@ -48,12 +48,11 @@ Source: `src/build.x:550`
 
 Registers generated artifacts for native compilation.
 Counts the C and header bytes, appends the C source, and adds include
-directories for imported packages. Non-static-library builds also add
-package archives and link flags; an absent archive then prints a
-diagnostic and exits with status 2. Static-library builds skip those checks
-and inputs.
+directories and native compile options for imported packages. Programs
+also add ordered package archives and link flags; an absent archive prints
+a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:436`
+Source: `src/build.x:443`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -62,7 +61,7 @@ Source: `src/build.x:436`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:447`
+Source: `src/build.x:454`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -73,7 +72,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:844`
+Source: `src/build.x:882`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -83,7 +82,7 @@ Source: `src/build.x:844`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:455`
+Source: `src/build.x:462`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -94,9 +93,11 @@ Compiles registered C sources and then archives or links the final output.
 Returns zero for success and one when compilation or the final native
 action fails. Compile-only requests stop after objects. Static archives
 reuse their recorded inputs; executables always link because library
-selection and implicit linker inputs are not in the fingerprint.
+selection and implicit linker inputs are not in the fingerprint. Mapped
+macOS debug executables also produce a companion dSYM before cleanup;
+failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:677`
+Source: `src/build.x:706`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -128,7 +129,7 @@ Source: `src/build.x:350`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:743`
+Source: `src/build.x:779`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -138,7 +139,7 @@ Source: `src/build.x:743`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:801`
+Source: `src/build.x:839`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current

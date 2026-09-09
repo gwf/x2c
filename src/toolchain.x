@@ -267,7 +267,8 @@ static void _print_action(Symbol phase, List arguments) {
 static char **_action_argv(List arguments) {
   int count = arguments.len();
   char **argv = Scope.calloc(count + 1, sizeof(char *)), int index = 0;
-  foreach (String argument, arguments) argv[index++] = argument;
+  foreach (String argument, arguments)
+    argv[index++] = argument ? argument : "";
   return argv;
 }
 

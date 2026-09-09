@@ -1,11 +1,12 @@
-/*  worker.x -- one-request semantic editor adapter
+/*  editor.x -- one-request semantic editor adapter
 
     Copyright (c) 2026 Gary William Flake
 
-    Links the ordinary compiler frontend. Configuration failures may exit
-    this worker; the editor process retains the diagnostic and stays alive.
+    Uses the ordinary compiler frontend and a separate response file so
+    macro output cannot corrupt editor results. Each process owns one request.
 */
 
+#pragma once
 #include "frontend.x"
 #include "project.x"
 #include "sourceview.x"
@@ -13,6 +14,8 @@
 #include "format.x"
 #include "diagnostics.x"
 #include "utils.x"
+
+#pragma private
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -177,9 +180,13 @@ static int _changed_dependency(Compiler compiler, SourceView sources) {
   return 0;
 }
 
-int main(int argc, char **argv) {
+/** Serves one private editor request after process environment initialization.
+    Metadata precedes ordinary compiler arguments after `--`; source snapshots
+    and the JSON response use separate files. Returns zero for a written
+    response and two for a failed request or unsupported configuration.
+*/
+int editor_request(int argc, char **argv) {
   if (argc < 7) return 2;
-  x2c_initialize_environment(argv[0]);
   String response = String.new(argv[1]);
   String source = SourceView.path(String.new(argv[2]));
   String kind = String.new(argv[3]);

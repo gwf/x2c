@@ -31,5 +31,22 @@
   "receipts": [
     "{prefix}/include/blis/blis.h",
     "{prefix}/lib/libblis.a"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/blis",
+        "to": "native/include/blis"
+      },
+      {
+        "from": "{prefix}/lib/libblis.a",
+        "to": "native/lib/libblis.a"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libblis.a"
+    ]
+  }
 }

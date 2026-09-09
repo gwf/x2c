@@ -415,23 +415,30 @@ static void Build._link_packages(Build state, String input, String directory) {
     state.gen_dirs.push(builds);
     // A package may publish a vendored foreign header from its src.
     state.gen_dirs.push(%"$package/src");
-    // A library takes the package's headers; the program that links it
-    // takes the archive.
+    String name = package.split(%"/").last();
+    String response = %"$builds/$name.native.rsp";
+    CliRequest native = NULL;
+    if (!access(response, F_OK)) {
+      native = cli_package_options(response, package);
+      state.toolchain.cc_args = state.toolchain.cc_args.append(native.cc_args);
+    }
+    // Libraries take native compile options too; only programs link archives.
     if (state.request.kind == <static-lib>) continue;
-    String name = package.split(%"/").last(), archive = %"$builds/lib$name.a";
+    String archive = %"$builds/lib$name.a";
     if (access(archive, R_OK))
       x2c_driver_error(%"package '$name' is not built: $archive");
     state.native_inputs.push(archive);
-    _package_link_flags(state, name, %"$builds/$name.link");
+    if (native)
+      state.toolchain.ld_args = state.toolchain.ld_args.append(native.ld_args);
+    else _package_link_flags(state, name, %"$builds/$name.link");
   }
 }
 
 /** Registers generated artifacts for native compilation.
     Counts the C and header bytes, appends the C source, and adds include
-    directories for imported packages. Non-static-library builds also add
-    package archives and link flags; an absent archive then prints a
-    diagnostic and exits with status 2. Static-library builds skip those checks
-    and inputs.
+    directories and native compile options for imported packages. Programs
+    also add ordered package archives and link flags; an absent archive prints
+    a diagnostic and exits with status 2. Static libraries skip link inputs.
 */
 void Build.add_generated(Build state, String input, String directory) {
   String stem = x2c_path_stem(input), source = %"$directory/$stem.c";
@@ -668,11 +675,33 @@ static List _native_action_inputs(Build state) {
   return result;
 }
 
+// Native flags are ordered: an explicit -g0 can override a profile's -g.
+static int _mapped_debug(Build state) {
+#ifdef __APPLE__
+  if (!state.request.source_map || state.request.kind == <static-lib>)
+    return 0;
+  int enabled = 0;
+  foreach (String flag, state.toolchain.cc_args) {
+    if (flag == %"-g0" || flag == %"-ggdb0") enabled = 0;
+    else if (flag == %"-g" || flag == %"-g1" || flag == %"-g2" ||
+             flag == %"-g3" || flag == %"-ggdb" || flag == %"-ggdb1" ||
+             flag == %"-ggdb2" || flag == %"-ggdb3" ||
+             flag == %"-gline-tables-only" || flag == %"-gmlt" ||
+             flag.startswith("-gdwarf")) enabled = 1;
+  }
+  return enabled;
+#else
+  return 0;
+#endif
+}
+
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
     reuse their recorded inputs; executables always link because library
-    selection and implicit linker inputs are not in the fingerprint.
+    selection and implicit linker inputs are not in the fingerprint. Mapped
+    macOS debug executables also produce a companion dSYM before cleanup;
+    failed symbol assembly fails the build and preserves intermediates.
 */
 int Build.finish(Build b) {
   if (_compile_sources(b)) return 1;
@@ -714,6 +743,13 @@ int Build.finish(Build b) {
   }
   if (b.request.kind == <static-lib> && !b.request.dry_run) unlink(b.output);
   if (action.run()) return 1;
+  if (_mapped_debug(b)) {
+    String output = b.output, symbols = %"$output.dSYM";
+    ToolAction debug = tool_action_new(
+      <dsym>, %("dsymutil" $output "-o" $symbols),
+      b.request.verbose, b.request.dry_run);
+    if (debug.run()) return 1;
+  }
   report_progress(action.phase, 1, 1, b.output);
   int input_count = inputs.len();
   String noun = action.phase == <archive> ?
@@ -792,6 +828,8 @@ void Build.report_success(Build b) {
   if (!b.request.compile_only) {
     String size = report_size(report_file_bytes(b.output));
     report_line(<muted>, %"  Output ${b.output} ($size)");
+    if (_mapped_debug(b))
+      report_line(<muted>, %"  Debug symbols ${b.output}.dSYM");
   }
 }
 

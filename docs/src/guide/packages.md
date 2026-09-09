@@ -172,7 +172,8 @@ native storage and when borrowed views expire.
 
 A source distribution carries `packages/<name>/`, including `src/`,
 `dependency.json`, `LICENSES/`, its README, examples, and tests, together with
-`packages/package.mk`, `packages/dependency.mk`, and `packages/tools/deps.py`.
+`packages/package.mk`, `packages/dependency.mk`, `packages/tools/deps.py`,
+and `packages/tools/bundle.py`.
 It does not carry the ignored `deps` symlink or `builds/` output. From the
 repository root, produce a source archive with ordinary `tar`:
 
@@ -182,7 +183,7 @@ tar --exclude="packages/$package/deps" \
   --exclude="packages/$package/builds" \
   -czf "$package-source.tar.gz" \
   "packages/$package" packages/package.mk packages/dependency.mk \
-  packages/tools/deps.py
+  packages/tools/deps.py packages/tools/bundle.py
 ```
 
 The package directory includes its `Makefile`; keep any additional source
@@ -300,3 +301,109 @@ the executable examples. SQLite is verified on macOS and checked separately:
 make -C packages/sqlite prepare
 make -C packages/sqlite test run run-lisp
 ```
+
+## Movable native bundles
+
+`make bundle` builds a package and assembles its public source interfaces,
+generated headers, wrapper archive, licenses, and declared native headers and
+static libraries:
+
+```sh
+make -C packages/yyjson bundle
+mkdir native-packages
+tar -xzf packages/yyjson/builds/bundle/yyjson-native.tar.gz -C native-packages
+x2c build --package-dir native-packages app.x --output app
+```
+
+The directory `packages/yyjson/builds/bundle/yyjson` is also directly usable;
+register its parent with `--package-dir`. `BUNDLE_DIR=/path/to/output` changes
+the output parent. The directory and archive contain the same files. Move the
+whole package directory, keeping `src`, `builds`, `native`, and licenses
+together. Extracted bundle, compiler, header/archive, and consumer paths may
+contain spaces. Producing packages still follows the existing Make path
+restrictions; this does not promise arbitrary spaces in native build/cache
+paths.
+
+A bundle is static and specific to its host platform, architecture, native
+profile, and matching x2c compiler/runtime. `BUNDLE.json` records those build
+identities. Native dependency toolchain information comes from its existing
+cache receipt when available; an explicit external prefix may have no receipt.
+A bundle does not promise an ABI across compiler releases, cross-platform
+execution, shared-library relocation, or automatic dependency resolution.
+Native system libraries and frameworks remain supplied by the host. Bundling
+an experimental package does not change its API acceptance status.
+
+Bundles carry `builds/<name>.native.rsp`. The compiler reads its quoted native
+arguments, expands the literal `{package}` to the resolved package directory,
+and applies C include/define options during native compilation and ordered
+archives/system options during final linking. Arguments remain individual argv
+values even when an expanded path contains spaces. They are not shell commands
+and `@` does not expand another response file. Definitions do not change the
+preceding x2c source preprocessing. A new bundle needs a compiler supporting
+this format; older source packages continue using their existing `.link` file.
+
+Native bundle metadata covers yyjson, PCRE2, BLIS, libuv, termbox2,
+libcurl, and raylib. SQLite remains separately distributed as source in this
+release.
+Pure and mixed C/x2c packages with no external native inputs need no dependency
+manifest; their bundle carries an empty native response file. Distribute any
+other x2c package imports alongside them under the registered package root.
+
+Libcurl bundles include its pinned OpenSSL static inputs in link order. Host
+certificate configuration remains the admitted profile's system certificate
+bundle; native bundling does not introduce a certificate store.
+
+Raylib also requires its native type declarations during x2c source discovery.
+Use the existing source include option for its bundled headers:
+
+```sh
+x2c build --package-dir native-packages \
+  --x-include-dir native-packages/raylib/native/include chart.x --output chart
+```
+
+The default raylib bundle uses the headless profile. To produce its separately
+admitted macOS desktop profile, select its dependency manifest explicitly:
+
+```sh
+make -C packages/raylib clean-builds
+make -C packages/raylib bundle DEPENDENCY_MANIFEST=dependency-desktop.json
+```
+
+Prepare and validate the selected native profile before distributing it. The
+bundle target preserves existing dependency checksum, header, and license
+checks through the ordinary package build; consumer builds do not download
+missing inputs.
+
+### Declare a package's native distribution
+
+The optional `distribution` object in `dependency.json` lists selected files
+and directories with the existing `copies` shape and ordered native arguments:
+
+```json
+"distribution": {
+  "copies": [
+    {"from": "{prefix}/include/yyjson.h",
+     "to": "native/include/yyjson.h"},
+    {"from": "{prefix}/lib/libyyjson.a",
+     "to": "native/lib/libyyjson.a"}
+  ],
+  "native_args": [
+    "--c-system-dir", "{package}/native/include",
+    "{package}/native/lib/libyyjson.a"
+  ]
+}
+```
+
+Copy sources expand `{prefix}` to the prepared native prefix and `{package}`
+to the producer package. Destinations are relative to the bundle. Native
+arguments retain `{package}` for consumer-time expansion. An optional
+`platform_args` object appends arguments keyed by the producer's platform
+(`darwin` or `linux`) when a shared dependency manifest has platform-specific
+system requirements. The manifest selected by the package Makefile remains
+the native profile owner.
+
+Accepted options are native include directories (`-I`, `--c-include-dir`,
+`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, archive inputs, `-pthread`, and
+`-framework <name>`. Keep native archives in dependency order after the wrapper
+archive. Options that replace the consumer's output, command, or tools and
+unrestricted compiler/linker escape options are not package metadata.

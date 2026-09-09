@@ -10,6 +10,7 @@
 #include "bootstrap.h"
 #include "project.h"
 #include "frontend.h"
+#include "editor.h"
 #include "toolchain.h"
 int main(int argc, char * * argv);
 

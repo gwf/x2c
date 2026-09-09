@@ -3,6 +3,12 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
+## 0.3.0
+
+- Use `x2c editor` from an installed compiler for diagnostics, definitions, and
+  hover, with trusted workspace and PATH discovery.
+- Preserve explicit legacy worker settings and report missing tools once.
+
 ## 0.2.1 - Repository preview
 
 - Highlight `?(Type name)` typed Match captures using ordinary x2c type

@@ -17,5 +17,23 @@
       "to": "{prefix}/include/termbox2.h"
     }
   ],
-  "receipts": ["{prefix}/include/termbox2.h"]
+  "receipts": ["{prefix}/include/termbox2.h"],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/termbox2.h",
+        "to": "native/include/termbox2.h"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include"
+    ],
+    "platform_args": {
+      "linux": [
+        "-D",
+        "_GNU_SOURCE"
+      ]
+    }
+  }
 }

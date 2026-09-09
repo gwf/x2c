@@ -5,7 +5,8 @@ const path = require("node:path");
 const test = require("node:test");
 const { SemanticService, byteOffset } = require("../../../etc/vsc-extension/semantic");
 
-const worker = process.env.X2C_EDITOR_WORKER ||
+const prefix = process.env.X2C_EDITOR_COMPILER ? ["editor"] : [];
+const worker = process.env.X2C_EDITOR_COMPILER || process.env.X2C_EDITOR_WORKER ||
   path.resolve(__dirname, "../builds/x2c-editor-worker");
 
 async function workspace(t) {
@@ -15,7 +16,7 @@ async function workspace(t) {
 }
 
 function configured(t, root, args) {
-  const service = new SemanticService({ worker, cwd: root, args });
+  const service = new SemanticService({ worker, prefix, cwd: root, args });
   t.after(() => service.dispose());
   return service;
 }

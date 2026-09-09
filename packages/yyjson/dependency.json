@@ -33,5 +33,22 @@
   "receipts": [
     "{prefix}/include/yyjson.h",
     "{prefix}/lib/libyyjson.a"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/yyjson.h",
+        "to": "native/include/yyjson.h"
+      },
+      {
+        "from": "{prefix}/lib/libyyjson.a",
+        "to": "native/lib/libyyjson.a"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libyyjson.a"
+    ]
+  }
 }

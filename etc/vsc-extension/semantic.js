@@ -1,7 +1,42 @@
-const fs = require("fs").promises;
+const nativeFs = require("fs");
+const fs = nativeFs.promises;
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+
+// Explicit settings win over defaults, including the former worker default.
+function selectTool(settings, workspace, executable = findExecutable) {
+  const compiler = settings.get("semantic.compilerPath", "");
+  if (compiler) return { worker: compiler, prefix: ["editor"] };
+  const legacy = settings.inspect("semantic.workerPath");
+  const overridden = legacy && Object.entries(legacy).some(([key, value]) =>
+    key !== "defaultValue" && key !== "defaultLanguageValue" &&
+    key.endsWith("Value") && value !== undefined);
+  if (overridden) {
+    const worker = settings.get("semantic.workerPath", "");
+    if (worker) return { worker, prefix: [] };
+  }
+  if (workspace) {
+    const local = path.join(workspace, "x2c");
+    if (executable(local, workspace)) return { worker: local, prefix: ["editor"] };
+  }
+  return { worker: "x2c", prefix: ["editor"] };
+}
+
+function findExecutable(command, cwd, searchPath = process.env.PATH || "") {
+  const candidates = command.includes("/") || command.includes("\\")
+    ? [path.resolve(cwd, command)]
+    : searchPath.split(path.delimiter).map((directory) =>
+      path.resolve(cwd, directory, command));
+  for (const candidate of candidates) {
+    try {
+      nativeFs.accessSync(candidate, nativeFs.constants.X_OK);
+      if (nativeFs.statSync(candidate).isFile()) return candidate;
+    }
+    catch { /* Missing tools remain an editor setup result. */ }
+  }
+  return null;
+}
 
 // Compiler offsets count UTF-8 bytes; editor offsets count UTF-16 code units.
 function byteOffset(text, offset) {
@@ -65,8 +100,9 @@ function runWorker(executable, args, options, signal) {
 }
 
 class SemanticService {
-  constructor({ worker, cwd, args = [], run = runWorker, tempRoot = os.tmpdir() }) {
+  constructor({ worker, prefix = [], cwd, args = [], run = runWorker, tempRoot = os.tmpdir() }) {
     this.worker = worker;
+    this.prefix = prefix;
     this.cwd = cwd;
     this.args = args;
     this.run = run;
@@ -99,6 +135,13 @@ class SemanticService {
     this.documents.clear();
   }
 
+  failure(message) {
+    if (this.prefix[0] === "editor") message +=
+      "\nSelect or update x2c.semantic.compilerPath to a compiler that supports x2c editor. " +
+      "Check x2c.semantic.arguments if the compiler reports a configuration error.";
+    return { error: message };
+  }
+
   async analyze(filename, kind = "diagnostics", offset = 0, signal) {
     const key = `${filename}\0${kind}`;
     this.requests.get(key)?.abort();
@@ -123,18 +166,18 @@ class SemanticService {
       }
       argv.push("--", ...this.args);
       if (controller.signal.aborted) return null;
-      const execution = await this.run(this.worker, argv, { cwd: this.cwd }, controller.signal);
+      const execution = await this.run(this.worker, [...this.prefix, ...argv], { cwd: this.cwd }, controller.signal);
       if (execution.cancelled || controller.signal.aborted || revision !== this.revision) return null;
       if (execution.code !== 0) {
-        return { error: execution.output.trim() ||
-          `x2c semantic worker failed (${execution.killedBy || execution.code}).` };
+        return this.failure(execution.output.trim() ||
+          `x2c semantic worker failed (${execution.killedBy || execution.code}).`);
       }
       let encoded;
       try { encoded = await fs.readFile(response, "utf8"); }
       catch (error) {
         if (error.code !== "ENOENT") throw error;
-        return { error: execution.output.trim() ||
-          "x2c semantic worker did not produce a result." };
+        return this.failure(execution.output.trim() ||
+          "x2c semantic worker did not produce a result.");
       }
       const result = JSON.parse(encoded);
       if (controller.signal.aborted || revision !== this.revision) return null;
@@ -145,7 +188,7 @@ class SemanticService {
     }
     catch (error) {
       if (controller.signal.aborted || revision !== this.revision) return null;
-      return { error: error.message };
+      return this.failure(error.message);
     }
     finally {
       signal?.removeEventListener("abort", abort);
@@ -155,4 +198,4 @@ class SemanticService {
   }
 }
 
-module.exports = { SemanticService, byteOffset, textOffset, positionAt, runWorker };
+module.exports = { selectTool, findExecutable, SemanticService, byteOffset, textOffset, positionAt, runWorker };

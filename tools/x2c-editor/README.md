@@ -1,21 +1,22 @@
 # Semantic editor worker
 
-This optional internal tool serves the existing VS Code extension. It links
-the compiler's internal frontend; it does not define a public compiler-library
-ABI or a language-server protocol.
+The compiler owns semantic requests through private `x2c editor` dispatch.
+See the book's
+[VS Code setup and configuration](../../docs/src/reference/cli.md#vs-code-diagnostics-definitions-and-hover).
 
-Build the ordinary compiler first, then run:
+For users with an explicit legacy `x2c.semantic.workerPath`, this directory
+retains a thin compatibility launcher:
 
 ```sh
 make -C tools/x2c-editor
 make -C tools/x2c-editor test
 ```
 
-These commands consume `builds/0`; they do not rebuild the shared compiler or
-change publication gates. Set `x2c.semantic.workerPath` to the resulting
-`tools/x2c-editor/builds/x2c-editor-worker` executable. Keep it beside the
-checkout support files and rebuild it after compiler changes. The extension
-tests run with `npm ci && npm test` in `etc/vsc-extension`.
+The launcher executes the configured compiler's `editor` command and has no
+separate compiler archive or adapter build. These commands consume `builds/0`;
+they do not rebuild the shared compiler or change publication gates. `test`
+checks both direct compiler and compatibility transports. The extension tests
+run with `npm ci && npm test` in `etc/vsc-extension`.
 
 ## One request
 

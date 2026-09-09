@@ -208,5 +208,34 @@
     "{prefix}/include/raylib.h",
     "{prefix}/include/raymath.h",
     "{prefix}/lib/libraylib.a"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/raylib.h",
+        "to": "native/include/raylib.h"
+      },
+      {
+        "from": "{prefix}/include/raymath.h",
+        "to": "native/include/raymath.h"
+      },
+      {
+        "from": "{prefix}/lib/libraylib.a",
+        "to": "native/lib/libraylib.a"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libraylib.a",
+      "-framework",
+      "OpenGL",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "CoreVideo"
+    ]
+  }
 }

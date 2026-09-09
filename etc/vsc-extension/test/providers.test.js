@@ -8,6 +8,8 @@ const semantic = require("../semantic");
 test("providers preserve syntax in untrusted workspaces and use real spans when trusted", async () => {
   const registrations = {};
   const services = [];
+  const output = [];
+  let available = true;
   const noop = () => ({ dispose() {} });
   const uri = (name) => ({ scheme: "file", fsPath: name, toString: () => `file://${name}` });
   const document = { uri: uri("/project/app.x"), languageId: "x2c", version: 7,
@@ -28,7 +30,8 @@ test("providers preserve syntax in untrusted workspaces and use real spans when 
   }
   const vscode = {
     workspace: { isTrusted: false, textDocuments: [document, header],
-      getConfiguration: () => ({ get: (_name, fallback) => fallback }),
+      getConfiguration: () => ({ get: (_name, fallback) => fallback,
+        inspect: () => ({ defaultValue: "x2c-editor-worker" }) }),
       getWorkspaceFolder: () => ({ uri: uri("/project") }),
       onDidOpenTextDocument: noop, onDidChangeTextDocument: noop,
       onDidSaveTextDocument: noop, onDidCloseTextDocument: noop,
@@ -45,7 +48,7 @@ test("providers preserve syntax in untrusted workspaces and use real spans when 
         registrations.hover = { selector, provider }; return noop();
       }
     },
-    window: { createOutputChannel: () => ({ appendLine() {}, dispose() {} }) },
+    window: { createOutputChannel: () => ({ appendLine: (message) => output.push(message), dispose() {} }) },
     Range: class { constructor(line, character, endLine, endCharacter) {
       Object.assign(this, { line, character, endLine, endCharacter });
     } },
@@ -57,7 +60,8 @@ test("providers preserve syntax in untrusted workspaces and use real spans when 
   const module = { exports: {} };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "extension.js"), "utf8"), {
     module, require: (name) => name === "vscode" ? vscode : name === "./semantic" ?
-      { ...semantic, SemanticService: FakeService } : require(name),
+      { ...semantic, SemanticService: FakeService,
+        findExecutable: () => available ? "/selected/x2c" : null } : require(name),
     AbortController, setTimeout: () => 0, clearTimeout() {}
   });
   const context = { subscriptions: [] };
@@ -75,5 +79,14 @@ test("providers preserve syntax in untrusted workspaces and use real spans when 
   assert.equal(definition.uri.fsPath, header.uri.fsPath);
   assert.equal(definition.range.character, 4);
   assert.equal(definition.range.endCharacter, 8);
+  assert.equal(services[0].options.worker, "/selected/x2c");
+  assert.deepEqual(Array.from(services[0].options.prefix), ["editor"]);
+  available = false;
+  assert.equal(await hoverProvider.provideHover(document, {}), null);
+  assert.equal(await hoverProvider.provideHover(document, {}), null);
+  assert.equal(output.length, 1, "missing tool setup is reported once");
+  assert.match(output[0], /semantic.compilerPath/);
+  available = true;
+  assert.ok(await hoverProvider.provideHover(document, {}));
   for (const disposable of context.subscriptions) disposable.dispose();
 });

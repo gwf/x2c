@@ -236,6 +236,8 @@ void bootstrap_record_install(Bootstrap, String, String);
 
 void x2c_initialize_environment(const char *);
 
+int editor_request(int, char * *);
+
 CliRequest cli_parse(int, char * *);
 
 void report_configure(int, int, Symbol, int, int, int);
@@ -982,6 +984,10 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   x2c_initialize_environment(argv[0]);
+  if(argc > 1 && ! strcmp(argv[1], "editor")){
+    argv[1] = argv[0];
+    return editor_request(argc - 1, argv + 1);
+  }
   CliRequest request = cli_parse(argc, argv);
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);

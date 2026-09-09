@@ -56,12 +56,13 @@ For source debugging, opt into native debug information and original source
 locations:
 
 ```sh
-x2c build -g --source-map --build-dir .x2c-debug hello.x --output hello
+x2c build -g --source-map hello.x --output hello
 lldb ./hello
 ```
 
-Keep `.x2c-debug` while debugging so native debug information can find its
-object files.
+On macOS this also produces `hello.dSYM`. Move that companion directory
+with the executable when debugging elsewhere. Generated objects may be removed
+after the build; `--build-dir` remains available when you want to retain them.
 
 See [source mapping](../reference/cli.md) for the source-location
 contract and platform debug-artifact behavior. Source mapping changes native

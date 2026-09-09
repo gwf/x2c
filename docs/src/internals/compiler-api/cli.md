@@ -13,7 +13,9 @@ X2c command-line parsing and presentation.
 | Function | Summary |
 | --- | --- |
 | [`cli_dependency_pass_through`](#cli_dependency_pass_through) | Returns whether `argument` contains a driver-owned dependency option. |
+| [`cli_package_options`](#cli_package_options) | Reads a package's native response options, expanding literal `{package}` after tokenization. |
 | [`cli_parse`](#cli_parse) | Expands response files and parses `argv[1..]` into one validated request. |
+| [`cli_response_arguments`](#cli_response_arguments) | Reads response-file tokens with ordinary quoting and UTF-8 checks. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
 
 ### Functions
@@ -26,7 +28,18 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:664`
+Source: `src/cli.x:680`
+
+#### cli_package_options
+
+`CliRequest cli_package_options(String path, String package)`
+
+Reads a package's native response options, expanding literal `{package}`
+after tokenization. Only native include/define/thread options and ordered
+archive/library/framework inputs are admitted. `cc_args` and `ld_args`
+serve native actions; no source-preprocessing options are returned.
+
+Source: `src/cli.x:804`
 
 #### cli_parse
 
@@ -41,7 +54,17 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:871`
+Source: `src/cli.x:931`
+
+#### cli_response_arguments
+
+`List cli_response_arguments(String path)`
+
+Reads response-file tokens with ordinary quoting and UTF-8 checks.
+Returns canonical Strings without expanding `@` references. Paths and
+arguments retain the producing pool lifetime.
+
+Source: `src/cli.x:565`
 
 ### `CliRequest`
 
@@ -52,7 +75,7 @@ Source: `src/cli.x:871`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:921`
+Source: `src/cli.x:981`
 
 ## Public types
 

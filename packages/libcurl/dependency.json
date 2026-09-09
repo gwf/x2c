@@ -72,5 +72,42 @@
     "{prefix}/lib/libcrypto.a",
     "{prefix}/bin/curl-config",
     "{prefix}/bin/openssl"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/curl",
+        "to": "native/include/curl"
+      },
+      {
+        "from": "{prefix}/include/openssl",
+        "to": "native/include/openssl"
+      },
+      {
+        "from": "{prefix}/lib/libcurl.a",
+        "to": "native/lib/libcurl.a"
+      },
+      {
+        "from": "{prefix}/lib/libssl.a",
+        "to": "native/lib/libssl.a"
+      },
+      {
+        "from": "{prefix}/lib/libcrypto.a",
+        "to": "native/lib/libcrypto.a"
+      }
+    ],
+    "native_args": [
+      "--c-system-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libcurl.a",
+      "{package}/native/lib/libssl.a",
+      "{package}/native/lib/libcrypto.a",
+      "-framework",
+      "CoreFoundation",
+      "-framework",
+      "CoreServices",
+      "-framework",
+      "SystemConfiguration"
+    ]
+  }
 }

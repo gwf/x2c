@@ -78,6 +78,7 @@
   - [src/compiler.x](internals/compiler-api/compiler.md)
   - [src/deps.x](internals/compiler-api/deps.md)
   - [src/diagnostics.x](internals/compiler-api/diagnostics.md)
+  - [src/editor.x](internals/compiler-api/editor.md)
   - [src/emit.x](internals/compiler-api/emit.md)
   - [src/expressions.x](internals/compiler-api/expressions.md)
   - [src/format.x](internals/compiler-api/format.md)

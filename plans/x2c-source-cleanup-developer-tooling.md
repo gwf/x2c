@@ -420,12 +420,20 @@ their relevant implementation work.
 
 ## Execution status
 
-- Batch 1, correctness/CLI and connected cleanup: implemented; focused
-  checks pass, final publication validation follows.
+- Batch 1, correctness/CLI and connected cleanup: published in `d158e7f`.
+  The full publication gate, existing seven-package check, SQLite checks, and
+  site build passed; the Pages deployment succeeded.
 - Native compiler installation: implemented and relocation/DESTDIR verified;
   delivered with batch 1.
-- Compiler-integrated editor, movable bundles, and macOS dSYM: queued.
-- Bounded performance investigation and native-initializer design: queued.
+- Compiler-integrated editor, movable bundles, and macOS dSYM: implemented;
+  focused verification is in progress before the second publication.
+- Bounded performance investigation: prepared; waits for the stable second
+  batch and a quiet measurement window.
+- Native-initializer design: bounded prototype complete, candidate rejected.
+  Macro prescanning plus an unevaluated type anchor preserves counter order
+  but repeats inline tags inside the deferred function, changing type identity.
+  A forward-declared typed callee exposes the mismatch. The native placement
+  defects remain open; no source fix or warning suppression was accepted.
 - Final documentation/site closure and publication audit: queued.
 
 Approval includes the opt-in macOS mapped-debug symbol-assembly cost stated
@@ -449,3 +457,33 @@ producer access denied. Shared APE inventory hashes agree with the previous
 implementation. Evidence logs are `debug/followup-cli.log`,
 `debug/generated-output-final.log`, `debug/cleanup-null-selfbuild.log`,
 `debug/native-install-proof.json`, and `debug/native-install-ape-inventory.log`.
+
+### Second delivery evidence
+
+The integrated editor passes both native transports (18 tests), 12 JavaScript
+tests, both grammar fixtures, and six workflows in an actual installed VSIX
+0.3.0 in a fresh VS Code 1.136.1 profile. Missing explicit compilers never
+fall back; the setup message appears once.
+
+All seven native package bundles build and run after extraction with spaces
+in compiler, bundle, and consumer paths and producer/cache access denied.
+Pure/mixed bundles, native C headers in a static-library consumer, repeated
+imports, ordered dependencies, legacy sidecars, restricted metadata, frameworks,
+and empty run arguments also pass. Raylib retains its documented explicit
+source include option; SQLite bundling and untested platform profiles remain
+outside the verified result.
+
+Mapped debug builds at O0 and O2 produce movable dSYM companions. LLDB reaches
+original source breakpoints and backtraces and executes cleanup with old object
+access denied. Manifest debug settings, later -g0, ordinary unmapped/no-debug
+builds, and failed symbol-assembly retention pass. Standalone symbol assembly
+took about 17 ms for this small program; this is not a general debug-link cost.
+
+Focused logs: `debug/editor-vscode-proof.json`,
+`debug/editor-native-transports.log`, `debug/native-bundle-proof.json`,
+`debug/bundle-mixed-proof.json`, `debug/native-options-proof.json`, and
+`debug/dsym-proof.json`. The existing CLI suite passes all 110 probes.
+
+The unused `site/src/deprecated` tree had no active route, import, or asset
+reference and was removed. The current installation chapter now uses movable
+debug symbols rather than requiring retained object files.

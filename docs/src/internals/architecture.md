@@ -452,9 +452,11 @@ The modules under `src/` divide ownership as follows:
 - `src/emit.x` -- AST to C tokens, including cleanup lowering;
 - `src/format.x` -- C tokens to text;
 - `src/diagnostics.x` -- recorded diagnostics;
-- `src/sourceview.x` -- request-owned source overlays and logical file paths.
+- `src/sourceview.x` -- request-owned source overlays and logical file paths;
+- `src/editor.x` -- one-request diagnostics, definition, and hover transport
+  over the configured frontend and source overlays.
 
-The internal frontend is shared by the CLI and source graph tool. A
+The internal frontend is shared by the CLI, editor, and source graph tool. A
 `Frontend` borrows a configured `CliRequest`; its `ParsedUnit` retains the
 compiler, AST, diagnostics, and preprocessor output until explicit close.
 The stages are start/tokenize, collect, and parse. Failed stages return to the

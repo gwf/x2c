@@ -43,7 +43,7 @@ PACKAGE_DEPS := $(CURDIR)/deps
 PACKAGE_TESTS := $(wildcard tests/test-*.x)
 PACKAGE_TEST_PROGRAMS := $(PACKAGE_TESTS:tests/%.x=builds/%)
 
-.PHONY: all build test clean prepare deps
+.PHONY: all build test clean prepare deps bundle
 # Native action fingerprints own header, tool, and option reuse.
 .PHONY: package-build-force
 
@@ -56,6 +56,12 @@ all: test
 package-build-force:
 
 build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) builds/$(PACKAGE).link
+
+BUNDLE_DIR ?= builds/bundle
+bundle: build
+	python3 "$(PACKAGE_SUPPORT)tools/bundle.py" --package "$(PACKAGE)" \
+	  --compiler "$(X2C)" --manifest "$(DEPENDENCY_MANIFEST)" \
+	  --prefix "$(PACKAGE_PREFIX)" --output "$(BUNDLE_DIR)"
 
 ifeq ($(wildcard dependency.json),)
 prepare:

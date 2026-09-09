@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 29
+- Compiler modules: 30
 - Runtime modules: 45
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -61,7 +61,8 @@ x2c command-line parsing and presentation.
 
 Public functions:
 
-`cli_dependency_pass_through`, `cli_parse`, `CliRequest.inspects`
+`cli_response_arguments`, `cli_dependency_pass_through`, `cli_package_options`,
+`cli_parse`, `CliRequest.inspects`
 
 ### [src/collect.x](../src/collect.x)
 
@@ -143,6 +144,14 @@ Public functions:
 `Compiler.display_path`, `Compiler.token_location`, `Compiler.report_error`,
 `Compiler.report_warning`, `Compiler.error_count`, `Compiler.diagnostics`,
 `Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
+
+### [src/editor.x](../src/editor.x)
+
+one-request semantic editor adapter.
+
+Public functions:
+
+`editor_request`
 
 ### [src/emit.x](../src/emit.x)
 

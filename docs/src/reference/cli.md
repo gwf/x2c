@@ -85,6 +85,15 @@ invalidates reused translation output. Optimized builds may combine or remove
 statements, so source mapping does not guarantee exact stepping or recovery of
 optimized-away values.
 
+On macOS, mapped executable builds with effective native debug information
+also produce `<output>.dSYM` before removing temporary objects. Move that
+companion directory with the executable to retain native debug information.
+Symbol assembly adds time only to these requested debug links. Its failure
+fails the build and retains intermediates for diagnosis. A later `-Xcc -g0`
+overrides an earlier `-g`, including one selected by a project profile.
+Linux keeps its existing debug output; `--build-dir` and `--save-temps` remain
+available for retaining intermediate files on either platform.
+
 Inspection modes print an intermediate result and stop translation:
 
 ```sh
@@ -153,12 +162,50 @@ the previous file. `run` writes it before starting the program, and `-###`
 writes no database. This file describes native C compilation, not x2c syntax
 for an editor's C parser.
 
-The repository's VS Code extension has a separate optional native worker for
-x2c diagnostics, definition, and hover, including unsaved source text. Build
-and configure it using the
-[editor setup instructions](https://github.com/gwf/x2c/blob/main/tools/x2c-editor/README.md).
-It uses ordinary compiler and project options and requires a trusted local
-workspace; syntax highlighting works without the worker.
+### VS Code diagnostics, definitions, and hover
+
+Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
+from VSIX**. The extension uses the installed compiler directly; no separate
+worker build is required. Set an absolute compiler path when it is not on
+`PATH`:
+
+```json
+"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
+```
+
+Selection order is an explicit `x2c.semantic.compilerPath`, an explicit legacy
+`x2c.semantic.workerPath`, executable `./x2c` in the trusted workspace, then
+`x2c` on `PATH`. An explicit selection never silently switches to another
+compiler. A missing executable produces one setup message in the **x2c**
+Output channel, and discovery retries when you use the editor again. The
+extension does not build or install the compiler automatically.
+
+The default configuration discovers `x2c.toml` and its default target, or
+analyzes the current file directly when there is no project. Select a target
+or profile with ordinary compiler arguments:
+
+```json
+"x2c.semantic.arguments": ["build", "--target", "app", "--profile", "debug"]
+```
+
+The selected target must include the open source as an input. For a header or
+macro file outside that input list, open its owning source or configure a
+`translate` command with the needed include and package options. Unsaved
+included files still affect analysis of their owning source.
+
+Diagnostics, definition navigation, and type hover include unsaved source
+text. Each request runs in a fresh compiler process with snapshots of open
+files; editing cancels obsolete results without writing buffers to disk.
+Native CPP symbol modes cannot consume unsaved source snapshots and report
+that limitation. Macro-generated syntax may lack a physical definition or
+identifier location.
+
+Semantic execution requires a trusted local workspace because compilation can
+run macros. Untrusted and virtual workspaces retain syntax highlighting. Set
+`"x2c.semantic.enabled": false` to disable semantic execution. Completion,
+rename, workspace indexing, and general LSP support are separate features.
+The private `x2c editor` transport serves these providers; its argument and
+response formats are not a public compiler API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and

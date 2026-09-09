@@ -36,11 +36,13 @@ C compiler options:
   -D <name>[=<value>]         Define a C preprocessor macro
   -U <name>                   Undefine a C preprocessor macro
   -Xcc <arg>                  Pass one argument only to C compilation
+  -pthread                    Enable native threading for compilation and linking
 
 Linker options:
   -L <dir>                    Add a library search directory
   -l <name>                   Link library <name>
   -Wl,<arg>[,<arg>...]        Pass comma-separated arguments to the linker
+  -framework <name>           Link a native framework on macOS
   -Xlinker <arg>              Pass one argument to the linker
 
 General options:
