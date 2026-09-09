@@ -1,0 +1,107 @@
+/*  autodiff.xmacro -- dual-number families for forward-mode differentiation
+
+    Copyright (c) 2026 Gary William Flake
+
+    `$ad.dual` gives one caller-declared struct the arithmetic of a dual
+    number: `value` carries the primal and `tangent` carries its derivative
+    along one direction. Every operation is an ordinary protocol row, so a
+    dual value uses `+ - * / <` and dotted calls such as `x.sin()` directly.
+
+    The scalar type is a hole. Instantiating the family over its own result
+    makes the next order of derivative a distinct C type, so a nested
+    derivative cannot confuse its perturbation with an outer one.
+*/
+
+/** Generates the dual-number members of `$D` over the scalar type `$S`.
+
+    `$D` is a complete typedef `struct { $S value; $S tangent; }` declared
+    before the invocation. `$d` names the `Var` converters (`Var.$d`,
+    `$S.$d`) and `$tag` is the fresh Var tag. The remaining holes spell the
+    scalar primitives the family lifts: for `double` they are the C library
+    functions, and for a dual scalar they are that family's methods.
+*/
+macro Unit $ad.dual(
+  Type $D, Name $d, Literal $tag, Type $S,
+  Expr $sin, Expr $cos, Expr $exp, Expr $log, Expr $sqrt, Expr $tanh
+) => {
+  Var $D.var($D value) {
+    $D *boxed = Scope.malloc(sizeof($D));
+    *boxed = value;
+    return Var.new($tag, boxed);
+  }
+
+  $D Var.$d(Var value) => *($D *) value.pointer();
+
+  $D $S.$d($S value) {
+    $D result = { value };
+    return result;
+  }
+
+  $D $D.add($D a, $D b) {
+    $D result = { a.value + b.value, a.tangent + b.tangent };
+    return result;
+  }
+
+  $D $D.sub($D a, $D b) {
+    $D result = { a.value - b.value, a.tangent - b.tangent };
+    return result;
+  }
+
+  $D $D.mul($D a, $D b) {
+    $D result = {
+      a.value * b.value, a.tangent * b.value + a.value * b.tangent
+    };
+    return result;
+  }
+
+  $D $D.div($D a, $D b) {
+    $D result = {
+      a.value / b.value,
+      (a.tangent * b.value - a.value * b.tangent) / (b.value * b.value)
+    };
+    return result;
+  }
+
+  $D $D.neg($D a) {
+    $D result = { -a.value, -a.tangent };
+    return result;
+  }
+
+  int $D.compare($D a, $D b) =>
+    a.value < b.value ? -1 : a.value > b.value;
+
+  $D $D.sin($D a) {
+    $D result = { $sin(a.value), $cos(a.value) * a.tangent };
+    return result;
+  }
+
+  $D $D.cos($D a) {
+    $D result = { $cos(a.value), -($sin(a.value) * a.tangent) };
+    return result;
+  }
+
+  $D $D.exp($D a) {
+    $S value = $exp(a.value);
+    $D result = { value, value * a.tangent };
+    return result;
+  }
+
+  $D $D.log($D a) {
+    $D result = { $log(a.value), a.tangent / a.value };
+    return result;
+  }
+
+  $D $D.sqrt($D a) {
+    $S value = $sqrt(a.value);
+    $D result = { value, a.tangent / (value + value) };
+    return result;
+  }
+
+  $D $D.tanh($D a) {
+    $S value = $tanh(a.value);
+    $D result = { value, a.tangent - a.tangent * value * value };
+    return result;
+  }
+
+  protocol Var($D);
+}
