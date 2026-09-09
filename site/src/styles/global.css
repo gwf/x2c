@@ -447,7 +447,7 @@ main:focus {
 }
 
 .hero-feature-table th:first-child {
-  width: clamp(96px, 24%, 120px);
+  width: clamp(96px, 10vw, 120px);
   text-align: right;
 }
 
