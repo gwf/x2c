@@ -51,7 +51,7 @@ For optional parallel stage translation, use
 job limit. On the measured 16-core host this reduced clean-stage wall time
 29% with identical generated C/H and 3.8% more CPU time; the default remains
 unchanged. The B4/B5 section of
-`plans/x2c-correctness-performance-tooling.md` records the full comparison.
+`plans/archive/x2c-correctness-performance-tooling.md` records the full comparison.
 
 `make precommit` checks symbols, refreshes header symbols and bootstrap,
 rebuilds stage 0 safely, builds through stage 2, and compares stages 0, 1,

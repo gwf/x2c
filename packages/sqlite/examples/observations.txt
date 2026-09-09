@@ -1,0 +1,6 @@
+/guide 200 12000
+/reference 503 40000
+/source 200 3100000
+/guide 200 18000
+/reference 200 20000
+/source 504 900000

@@ -9,17 +9,25 @@ Package builds are currently tested on macOS.
 | --- | --- |
 | [PCRE2](pcre2/README.md) | Regular expressions, captures, and replacement |
 | [yyjson](yyjson/README.md) | JSON documents, parsing, and writing |
+| [SQLite](sqlite/README.md) | Databases, prepared parameters, and copied row Lists |
 | [libcurl](libcurl/README.md) | HTTP requests and transfers |
 | [termbox2](termbox2/README.md) | Interactive terminal applications |
 | [BLIS](blis/README.md) | Matrix and vector operations |
 | [libuv](libuv/README.md) | Event loops, processes, files, and networking |
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
 
-PCRE2 and yyjson have completed API review. The other five remain
+PCRE2, yyjson, and SQLite have completed API review. The other packages remain
 experimental and their interfaces may change. Internal review records are
 kept in [the package instructions](AGENTS.md).
 
-From the repository root, build x2c, all packages, and their standard example
+SQLite is prepared and checked separately:
+
+```sh
+make -C packages/sqlite prepare
+make -C packages/sqlite test run run-lisp
+```
+
+From the repository root, build x2c, the other seven packages, and their standard example
 executables without running tests:
 
 ```sh

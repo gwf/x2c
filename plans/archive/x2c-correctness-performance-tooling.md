@@ -1,11 +1,9 @@
-> Status: active
-> Completion audit reopened September 9, 2026. The three implementation
-> batches and site changes are delivered and validated. The additional
-> stage-translation evaluation, declaration-discovery design, stronger
-> source-package proof, optional suite selection, sorting, and bounded HTTP
-> work are delivered in 1de90da. The current batch completes initializer
-> handling and changes typed Match captures to parentheses.
-> SQLite's concrete new-package scope awaits Gary's answer.
+> Status: done
+> Completed September 9, 2026. Correctness, performance, language extensions,
+> developer tooling, source packages, and site/book improvements are delivered.
+> SQLite closes the approved scope in the commit that archives this plan; Gary
+> accepted its running applications and interface. Package checks and the
+> integrated repository publication check pass.
 
 # Correctness, performance, and developer tooling
 
@@ -615,8 +613,9 @@ they are completed in the current batch through existing initializer owners.
 Sorting and
 bounded HTTP have concrete callers and shipped with integrated proof in
 1de90da. SQLite has a concrete task list and example sketch in
-`plans/x2c-sqlite-package.md`; its new public package scope awaits Gary's
-answer under `packages/AGENTS.md`. Relocatable built installation and native
+`plans/archive/x2c-sqlite-package.md`; Gary approved its scope with "do it". The
+implementation passes package and repository checks, and Gary accepted its
+running applications and interface. Relocatable built installation and native
 dependency bundling remain deferred by the accepted distribution decision.
 Editor completion/rename/indexing and incremental semantic caches remain
 outside the accepted editor minimum.
@@ -683,8 +682,13 @@ cache schedules both affected batches. No gate or sequence was added.
   grammar tests pass, and the updated repository extension is packaged as
   0.2.1. Evidence: `.context/match-parentheses-review.md` and
   `debug/match-parentheses-vsix.log`.
-- SQLite: scope is proposed in `plans/x2c-sqlite-package.md`. It has no client
-  implementation yet and is not claimed complete or accepted.
+- SQLite: Gary approved the scope in `plans/archive/x2c-sqlite-package.md`. The
+  ordinary client, embedded Lisp interface, pinned native dependency, short
+  and persistent applications, and documentation are implemented. All 15
+  package tests pass (133 assertions), the applications run, and an external
+  consumer builds outside the repository. The existing seven-package check
+  and repository publication check pass. Gary accepted the applications and
+  interface; SQLite closes the remaining approved implementation scope.
 
 ## Plan review
 

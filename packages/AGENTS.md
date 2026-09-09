@@ -7,7 +7,7 @@ tests, or a focused probe.
 
 ## Start from applications
 
-`pcre2/` and `yyjson/` are accepted packages. Start with
+`pcre2/`, `yyjson/`, and `sqlite/` are accepted packages. Start with
 [parse-log.x](pcre2/examples/parse-log.x) for copied captures, indexing, and
 native cleanup beside acquisition, and
 [service-health.x](yyjson/examples/service-health.x) for JSON through ordinary
@@ -19,6 +19,7 @@ allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 included in `make packages-check`, but await Gary's application review.
 They are reasonable designs to extend; acceptance and package status changes
 require Gary's review of the developer experience.
+SQLite is checked separately with `make -C packages/sqlite test run run-lisp`.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C
 API for its admitted build profile. Preserve upstream types, constants,

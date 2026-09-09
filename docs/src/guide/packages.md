@@ -224,6 +224,9 @@ Library](wrapping-c-libraries.md).
 The packages include example applications that use their x2c interfaces
 without requiring public services:
 
+- `packages/sqlite/examples/observations.x` stores readings and queries slow
+  or failed responses. `observation-history.x` imports a file batch in one
+  transaction, then reopens the database and reports endpoint history.
 - `packages/libcurl/examples/page-titles.x` fetches pages concurrently with
   `CurlEasy.get_all`; `endpoint-report.x` handles each batch response or Error
   independently, then uses the ordinary single-request operations. Batch
@@ -251,4 +254,50 @@ make -C packages/termbox2 run
 make -C packages/blis run
 make -C packages/libuv run
 make -C packages/raylib verify
+```
+
+### SQLite rows and transactions
+
+The SQLite package keeps SQL visible while accepting ordinary x2c values.
+`Database.open` creates a file-backed or `":memory:"` connection. Prepare a
+statement once, bind a positional List or a Map of exact parameter names,
+and iterate copied row Lists. Rows preserve column order and duplicate names;
+`Statement.columns` returns the names separately. Free statements before
+closing their connection, with `defer` beside each acquisition.
+
+```x2c
+import "sqlite" with Database, Statement;
+
+void show_readings(String filename) {
+  Database db = Database.open(filename);
+  defer db.close();
+  Statement query = db.prepare(
+    "SELECT url, status FROM observation WHERE status >= ? ORDER BY url"
+  );
+  defer query.free();
+  query.bind(%(400));
+  foreach (List row, query)
+    printf("%s", %"${row[0]}: HTTP ${row[1]}\n");
+}
+```
+
+SQL NULL is `Var.null()`, distinct from exhausted iteration. Integers retain
+SQLite's signed 64-bit domain; oversized unsigned inputs raise `conv-range`.
+Text becomes `String`, while blobs and text containing NUL become copied
+`Bytes`. These values survive later steps and statement release within their
+ordinary x2c lifetimes. `db.transaction(%!() => { ... })` commits on success and
+rolls back on Error; nested managed transactions are rejected. SQLite's own
+code, message, and operation remain available in Error details.
+
+`SqliteLisp.install` adds query, execute, NULL, and byte-list operations to an
+embedded Lisp session. Each query or execute call opens its own connection,
+so use a database filename to retain changes between calls. Query results are
+ordinary nested Lists. The complete pinned raw SQLite API and the same native
+handles remain available for advanced operations. See
+`packages/sqlite/README.md` for ownership, the admitted native profile, and
+the executable examples. SQLite is verified on macOS and checked separately:
+
+```sh
+make -C packages/sqlite prepare
+make -C packages/sqlite test run run-lisp
 ```

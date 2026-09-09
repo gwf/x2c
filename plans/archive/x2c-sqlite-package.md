@@ -1,8 +1,8 @@
-> Status: needs author scoping
-> Proposed SQLite task list and applications for the approved package followup.
-> Existing endpoint-report supplies the observation fields; persistence is a
-> new example, not an existing application requirement. No package client has
-> been implemented or accepted yet.
+> Status: done
+> Gary approved the running applications and interface on September 9, 2026.
+> The ordinary client, embedded Lisp interface, examples, native profile, and
+> documentation are delivered by the commit that archives this plan.
+> Package checks and the integrated repository publication check pass.
 
 # SQLite through ordinary x2c values
 
@@ -27,11 +27,17 @@
    messages, and keep statement/database ownership visible. A live prepared
    statement borrows its connection; cleanup must not erase the original
    operation's failure.
-6. Provide value-oriented compile-time Lisp query/execute operations over a
+6. Provide value-oriented embedded Lisp query/execute operations over a
    database filename, SQL, parameters, and positional rows where useful.
    Returned blobs need an ordinary byte reader. Native extension loading,
    virtual tables, custom collations and callbacks stay on the complete raw
    SQLite API for this first package.
+
+The first draft called task 6 "compile-time Lisp". Source inspection shows
+that existing package installers extend explicit embedded Lisp sessions;
+they cannot install a native package into the compiler's interpreter. The
+implementation follows that existing package model. Gary approved the implemented embedded interface with the running application
+review. No native compiler-extension mechanism is introduced by this package.
 
 ## Short application sketch
 
@@ -64,18 +70,18 @@ int main(void) {
   Statement report = db.prepare(
     "SELECT url, status, us FROM observation "
     "WHERE status >= 400 OR us > ? ORDER BY us DESC"
-  ).bind(%(3000000));
+  );
   defer report.free();
+  report.bind(%(3000000));
   foreach (List row, report)
     printf("%s", %"${row[0]}: HTTP ${row[1]}, ${row[2]} us\n");
   return 0;
 }
 ```
 
-This is an API sketch, not a claimed compiling example. Binding resets the
-statement and replaces all prior bindings; execution must distinguish rows
-from completion. Final spelling will follow tested native/iterator ownership.
-Expected report: `/source: HTTP 200, 3100000 us`, followed by
+This application now compiles and runs as `examples/observations.x`. Binding
+resets the statement and replaces all prior bindings; row exhaustion remains
+distinct from a row containing SQL NULL. The observed report is: `/source: HTTP 200, 3100000 us`, followed by
 `/reference: HTTP 503, 40000 us`.
 
 ## Implementation and evidence
@@ -110,3 +116,16 @@ Checks belong at conversion/ownership boundaries: unsupported unsigned range,
 NUL text-to-String loss, stale handles and native failures. They protect real
 value loss or unsafe native access, rather than validating internal ASTs or
 rechecking established SQLite results. No new recurring test is proposed.
+
+## Current verification
+
+The short application, persistent import/report application, and embedded Lisp
+application run successfully. The 15 raw, ordinary, and Lisp tests pass with
+133 assertions. A consumer outside the repository builds and runs the short
+application using the documented package and native-header paths. Native
+profile/header checks and the existing seven-package check pass. Evidence is
+in `debug/sqlite-final-tests.log`, `debug/sqlite-acceptance.log`,
+`debug/sqlite-outside-consumer.json`, and `debug/sqlite-all-packages.log`.
+`tools/gate-state.py ensure agent-pr-check` also passes; its full log is
+`debug/sqlite-integrated-gate.log`. Gary accepted the running applications
+and interface on September 9, 2026.

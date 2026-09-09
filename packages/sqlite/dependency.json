@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "sqlite",
+  "version": "3.53.4",
+  "profile": "static-threadsafe-default",
+  "sources": [
+    {
+      "name": "sqlite",
+      "url": "https://www.sqlite.org/2026/sqlite-autoconf-3530400.tar.gz",
+      "sha256": "0e9483900e92cd5de8fd48d16bf9200145a61f7fd5be542a5ac81d8a9516eb9c",
+      "root": "sqlite-autoconf-3530400"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{work}",
+      "argv": [
+        "{cc}", "-O2", "-std=c99", "-pthread", "-DSQLITE_THREADSAFE=1",
+        "-c", "{source_sqlite}/sqlite3.c", "-o", "sqlite3.o"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": ["{ar}", "rcs", "{prefix}/lib/libsqlite3.a", "sqlite3.o"]
+    }
+  ],
+  "copies": [
+    {"from": "{source_sqlite}/sqlite3.h", "to": "{prefix}/include/sqlite3.h"},
+    {"from": "{source_sqlite}/sqlite3ext.h", "to": "{prefix}/include/sqlite3ext.h"}
+  ],
+  "receipts": [
+    "{prefix}/include/sqlite3.h",
+    "{prefix}/include/sqlite3ext.h",
+    "{prefix}/lib/libsqlite3.a"
+  ]
+}
