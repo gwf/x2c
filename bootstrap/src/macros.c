@@ -352,12 +352,6 @@ List Sym_resolve_global(Sym, List, List *);
 
 int List_equal(List, List);
 
-List Error_since(int);
-
-List List_append(List, List);
-
-int Error_mark(void);
-
 Var Lisp_eval_string(Lisp, String);
 
 Var Lisp_eval_file(Lisp, File);
@@ -453,6 +447,8 @@ Tokenizer Tokenizer_new_mode(char *, Symbol);
 void Tokenizer_scan(Tokenizer);
 
 Token Tokenizer_next(Tokenizer);
+
+List List_append(List, List);
 
 String int_str(int);
 
@@ -646,7 +642,7 @@ static Var _sdk_function_parameter(List function, String wanted);
 
 static Var _sdk_function_body(List function);
 
-static void _report_lisp_failure(Compiler compiler, Token invocation, int mark, String source);
+static void _report_lisp_failure(Compiler compiler, Token invocation, List error, String source);
 
 static Var _eval_string(Compiler compiler, String source, Token invocation);
 
@@ -1999,15 +1995,12 @@ static Var _sdk_function_body(List function){
   return List_var(List_match_replace(function, List_var(_208), List_var(_202)));
 }
 
-static void _report_lisp_failure(Compiler compiler, Token invocation, int mark, String source){
-  if(String_truth(macro_sdk_failure_message)) Compiler_report_error(compiler, 27335838, macro_sdk_failure_message, invocation, macro_sdk_failure_notes);  List errors = Error_since(mark);  String source_note = String_join(NULL, cons(String_var(_209), cons(String_var(source), NULL)));  List notes = cons(String_var(source_note), NULL);  if(List_truth(errors)){
-    String detail = Var_repr(List_last(errors));  notes = List_append(notes, cons(String_var(String_join(NULL, cons(String_var(_210), cons(String_var(detail), NULL)))), NULL));
-  }
-  Compiler_report_error(compiler, 27335838, _594, invocation, notes);
+static void _report_lisp_failure(Compiler compiler, Token invocation, List error, String source){
+  if(String_truth(macro_sdk_failure_message)) Compiler_report_error(compiler, 27335838, macro_sdk_failure_message, invocation, macro_sdk_failure_notes);  String form_note = String_join(NULL, cons(String_var(_209), cons(String_var(source), NULL))), error_note = String_join(NULL, cons(String_var(_210), cons(String_var(List_repr(error)), NULL)));  Compiler_report_error(compiler, 27335838, _594, invocation, cons(String_var(form_note), cons(String_var(error_note), NULL)));
 }
 
 static Var _eval_string(Compiler compiler, String source, Token invocation){
-  int mark = Error_mark();  Var volatile result;  Compiler previous = macro_import_compiler;  Token old_invocation = macro_import_invocation;  macro_import_compiler = compiler;  macro_import_invocation = invocation; {
+  Var volatile result;  Compiler previous = macro_import_compiler;  Token old_invocation = macro_import_invocation;  macro_import_compiler = compiler;  macro_import_invocation = invocation; {
     {
   _x2c_defer_env_1 _x2c_defer_env_21 = {._x2c_defer_capture_2 =(const void *) & previous, ._x2c_defer_capture_3 =(const void *) & old_invocation};
 
@@ -2019,7 +2012,8 @@ static Var _eval_string(Compiler compiler, String source, Token invocation){
   {
       {
         ExceptionFrame _x2c_exception_frame_0;
-        ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, Symbol_var(Symbol_new("default")));
+        List _x2c_catch_pattern_0 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
+        ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
         x2c_exception_push(& _x2c_exception_frame_0);
         if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) result = Lisp_eval_string(compiler -> macro_lisp, source);
         else {x2c_exception_landed(& _x2c_exception_frame_0);
@@ -2027,7 +2021,9 @@ static Var _eval_string(Compiler compiler, String source, Token invocation){
           if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
             x2c_error_catch_detach(_x2c_error_handler_0);
             x2c_exception_mark_handled(&_x2c_exception_frame_0);
-             {_report_lisp_failure(compiler, invocation, mark, source);
+             {Var code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
+            List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+            _report_lisp_failure(compiler, invocation, cons(code, detail), source);
           }
 
         }
@@ -2064,7 +2060,6 @@ return result;
 }
 
 static Var _eval_file(Compiler compiler, File source, Token invocation){
-  int mark = Error_mark();
   Var volatile result =((void) 0, Void);
   Compiler previous = macro_import_compiler;
   Token old_invocation = macro_import_invocation;
@@ -2082,7 +2077,8 @@ static Var _eval_file(Compiler compiler, File source, Token invocation){
   {
       {
         ExceptionFrame _x2c_exception_frame_1;
-        ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, Symbol_var(Symbol_new("default")));
+        List _x2c_catch_pattern_1 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
+        ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, List_var(_x2c_catch_pattern_1));
         x2c_exception_push(& _x2c_exception_frame_1);
         if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) result = Lisp_eval_file(compiler -> macro_lisp, source);
         else {x2c_exception_landed(& _x2c_exception_frame_1);
@@ -2090,7 +2086,9 @@ static Var _eval_file(Compiler compiler, File source, Token invocation){
           if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
             x2c_error_catch_detach(_x2c_error_handler_1);
             x2c_exception_mark_handled(&_x2c_exception_frame_1);
-             {_report_lisp_failure(compiler, invocation, mark, _595);
+             {Var code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
+            List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));
+            _report_lisp_failure(compiler, invocation, cons(code, detail), _595);
           }
 
         }
@@ -2129,7 +2127,7 @@ return result;
 static Var _lisp_import_hook(String path){
   Compiler compiler = macro_import_compiler;
   if(! compiler){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 497};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 493};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }
@@ -2324,9 +2322,9 @@ static Var _sdk_embed_text(Var requested){
   int volatile open_failed = 0;
   {
     ExceptionFrame _x2c_exception_frame_2;
-    List _x2c_catch_pattern_0 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
-    List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-    ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_push(&_x2c_exception_frame_2, 2, List_var(_x2c_catch_pattern_0), List_var(_x2c_catch_pattern_1));
+    List _x2c_catch_pattern_2 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
+    List _x2c_catch_pattern_3 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+    ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_push(&_x2c_exception_frame_2, 2, List_var(_x2c_catch_pattern_2), List_var(_x2c_catch_pattern_3));
     x2c_exception_push(& _x2c_exception_frame_2);
     if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) file = String_open(path, "r");
     else {x2c_exception_landed(& _x2c_exception_frame_2);
@@ -2375,10 +2373,10 @@ int volatile embedded_nul = 0;
 int volatile size_overflow = 0;
 {
   ExceptionFrame _x2c_exception_frame_3;
-  List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-  List _x2c_catch_pattern_3 = cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL));
-  List _x2c_catch_pattern_4 = cons(Symbol_var(1358596898646632), cons(Symbol_var(54), NULL));
-  ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_push(&_x2c_exception_frame_3, 3, List_var(_x2c_catch_pattern_2), List_var(_x2c_catch_pattern_3), List_var(_x2c_catch_pattern_4));
+  List _x2c_catch_pattern_4 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+  List _x2c_catch_pattern_5 = cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL));
+  List _x2c_catch_pattern_6 = cons(Symbol_var(1358596898646632), cons(Symbol_var(54), NULL));
+  ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_push(&_x2c_exception_frame_3, 3, List_var(_x2c_catch_pattern_4), List_var(_x2c_catch_pattern_5), List_var(_x2c_catch_pattern_6));
   x2c_exception_push(& _x2c_exception_frame_3);
   if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) result = File_string_close(file);
   else {x2c_exception_landed(& _x2c_exception_frame_3);
@@ -2433,9 +2431,9 @@ static File _open(Compiler compiler, String path, String message, Token token, L
   int volatile failed = 0;
   {
     ExceptionFrame _x2c_exception_frame_4;
-    List _x2c_catch_pattern_5 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
-    List _x2c_catch_pattern_6 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-    ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_push(&_x2c_exception_frame_4, 2, List_var(_x2c_catch_pattern_5), List_var(_x2c_catch_pattern_6));
+    List _x2c_catch_pattern_7 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
+    List _x2c_catch_pattern_8 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+    ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_push(&_x2c_exception_frame_4, 2, List_var(_x2c_catch_pattern_7), List_var(_x2c_catch_pattern_8));
     x2c_exception_push(& _x2c_exception_frame_4);
     if (!sigsetjmp(_x2c_exception_frame_4.env, 0)) source = String_open(path, "r");
     else {x2c_exception_landed(& _x2c_exception_frame_4);
