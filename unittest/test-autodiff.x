@@ -175,6 +175,86 @@ static void autodiff_tape_matches_finite_difference(void) {
   EXPECT_TRUE(fabs(y_grad - _central(_taped_in_y, 2.0)) < 1e-5);
 }
 
+$ad.reverse()
+static double _control(double x, double y, int n) {
+  double s = 0.0;
+  for (int i = 0; i < n; i++) {
+    if (i == 1) continue;
+    if (s > 40.0) break;
+    s += x * x * (double) i + fabs(y) * hypot(x, y);
+  }
+  double t = x * y + 3.0;
+  if (t > 100.0) return t * s;
+  int j = 0;
+  do {
+    s -= sin(t) / x;
+    j++;
+    if (j > 5) break;
+  } while (j < 2);
+  return s * atan2(y, x) + fmax(x, y) + fmin(x, y) * log1p(x) - cbrt(y);
+}
+
+$ad.checkpoint(4)
+static double _checkpointed(double x, double y, int n) {
+  double s = 0.0;
+  for (int i = 0; i < n; i++) {
+    if (i == 1) continue;
+    if (s > 40.0) break;
+    s += x * x * (double) i + fabs(y) * hypot(x, y);
+  }
+  double t = x * y + 3.0;
+  int j = 0;
+  do {
+    s -= sin(t) / x;
+    j++;
+    if (j > 5) break;
+  } while (j < 2);
+  return s * atan2(y, x) + fmax(x, y) + fmin(x, y) * log1p(x) - cbrt(y);
+}
+
+static double _control_in_x(double x) => _control(x, 2.0, 6);
+static double _control_in_y(double y) => _control(1.0, y, 6);
+
+static void autodiff_reverse_replays_break_continue_and_return(void) {
+  double x_grad, y_grad;
+  double value = _control_grad(1.0, 2.0, 6, &x_grad, &y_grad);
+  EXPECT_TRUE(fabs(value - _control(1.0, 2.0, 6)) < 1e-12);
+  EXPECT_TRUE(fabs(x_grad - _central(_control_in_x, 1.0)) < 1e-5);
+  EXPECT_TRUE(fabs(y_grad - _central(_control_in_y, 2.0)) < 1e-5);
+  /* The early return path. */
+  value = _control_grad(10.0, 20.0, 6, &x_grad, &y_grad);
+  EXPECT_TRUE(fabs(value - _control(10.0, 20.0, 6)) < 1e-9);
+  EXPECT_TRUE(fabs(x_grad - _central(%!(x) => _control(x, 20.0, 6), 10.0))
+              < 1e-3);
+}
+
+static void autodiff_checkpoint_agrees_with_full_recording(void) {
+  double x_grad, y_grad, x_check, y_check;
+  double value = _control_grad(1.0, 2.0, 6, &x_grad, &y_grad);
+  double replay = _checkpointed_grad(1.0, 2.0, 6, &x_check, &y_check);
+  EXPECT_TRUE(fabs(value - replay) < 1e-12);
+  EXPECT_TRUE(fabs(x_grad - x_check) < 1e-12);
+  EXPECT_TRUE(fabs(y_grad - y_check) < 1e-12);
+  /* Many blocks, one snapshot each. */
+  _control_grad(0.1, 0.2, 5000, &x_grad, &y_grad);
+  _checkpointed_grad(0.1, 0.2, 5000, &x_check, &y_check);
+  EXPECT_TRUE(fabs(x_grad - x_check) < 1e-9);
+  EXPECT_TRUE(fabs(y_grad - y_check) < 1e-9);
+}
+
+static void autodiff_dual_mixed_operands_and_pow(void) {
+  Dual x = { 3.0, 1.0 };
+  Dual a = x * 2.0, b = 2.0 - x, c = x / 4.0 + 1.5;
+  EXPECT_TRUE(_near(a.value, 6.0) && _near(a.tangent, 2.0));
+  EXPECT_TRUE(_near(b.value, -1.0) && _near(b.tangent, -1.0));
+  EXPECT_TRUE(_near(c.value, 2.25) && _near(c.tangent, 0.25));
+  EXPECT_TRUE(x > 1.0 && !(5.0 < x));
+  Dual three = 3.0;
+  Dual p = x.pow(three), q = (-x).fabs();
+  EXPECT_TRUE(_near(p.value, 27.0) && _near(p.tangent, 27.0));
+  EXPECT_TRUE(_near(q.value, 3.0) && _near(q.tangent, 1.0));
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
@@ -183,4 +263,7 @@ void autodiff_suite(void) {
   $test.run(autodiff_reverse_transform_matches_finite_difference);
   $test.run(autodiff_forward_and_reverse_agree);
   $test.run(autodiff_tape_matches_finite_difference);
+  $test.run(autodiff_reverse_replays_break_continue_and_return);
+  $test.run(autodiff_checkpoint_agrees_with_full_recording);
+  $test.run(autodiff_dual_mixed_operands_and_pow);
 }

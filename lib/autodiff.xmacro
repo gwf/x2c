@@ -109,6 +109,26 @@ macro Unit $ad.dual(
     return result;
   }
 
+  $D $D.fabs($D a) {
+    $S zero = 0.0;
+    $D result = { a.value, a.tangent };
+    if (a.value < zero) {
+      result.value = -a.value;
+      result.tangent = -a.tangent;
+    }
+    return result;
+  }
+
+  $D $D.pow($D a, $D b) {
+    $S logarithm = $log(a.value);
+    $S value = $exp(b.value * logarithm);
+    $D result = {
+      value,
+      value * (b.tangent * logarithm + b.value * a.tangent / a.value)
+    };
+    return result;
+  }
+
   protocol Var($D);
 }
 
@@ -125,6 +145,8 @@ $(defun ad._unbind (form)
         ((null? form) form)
         ((and (eq? (car form) 'binding) (= (length form) 3))
          (list (car (cddr form))))
+        ((and (eq? (car form) 'at) (= (length form) 3))
+         (ad._unbind (car (cddr form))))
         (true (map ad._unbind form))))
 
 $(defun ad._fail (message form)
@@ -180,23 +202,66 @@ $(defun ad._zip (f a b)
 
 /* Every entry names a primitive and one partial derivative per argument.
    Each partial receives the unbound argument list. */
+$(defun ad._select (test a b) `(expr () (parens (expr () (op ? ,test ,a ,b)))))
+$(defun ad._less (a b) `(expr () (op < ,a ,b)))
+$(defun ad._less-eq (a b) `(expr () (op <= ,a ,b)))
+$(defun ad._square (a) (ad._mul a a))
+$(defun ad._recip (e) (ad._div (ad._lit "1.0") e))
+$(defun ad._plus-one (e) (ad._add (ad._lit "1.0") e))
+$(defun ad._minus-one (e) (ad._sub (ad._lit "1.0") e))
+$(defun ad._sum-squares (a)
+  (ad._add (ad._square (car a)) (ad._square (cadr a))))
 $(def ad._primitives (list
   (list "sin" (lambda (a) (ad._call "cos" a)))
   (list "cos" (lambda (a) (ad._neg (ad._call "sin" a))))
-  (list "tan" (lambda (a)
-    (let ((c (ad._call "cos" a)))
-      (ad._div (ad._lit "1.0") (ad._mul c c)))))
-  (list "exp" (lambda (a) (ad._call "exp" a)))
-  (list "log" (lambda (a) (ad._div (ad._lit "1.0") (car a))))
-  (list "sqrt" (lambda (a) (ad._div (ad._lit "0.5") (ad._call "sqrt" a))))
+  (list "tan" (lambda (a) (ad._recip (ad._square (ad._call "cos" a)))))
+  (list "asin" (lambda (a)
+    (ad._recip (ad._call "sqrt" (list (ad._minus-one (ad._square (car a))))))))
+  (list "acos" (lambda (a)
+    (ad._neg (ad._recip
+      (ad._call "sqrt" (list (ad._minus-one (ad._square (car a)))))))))
+  (list "atan" (lambda (a) (ad._recip (ad._plus-one (ad._square (car a))))))
+  (list "atan2"
+    (lambda (a) (ad._div (cadr a) (ad._sum-squares a)))
+    (lambda (a) (ad._neg (ad._div (car a) (ad._sum-squares a)))))
   (list "sinh" (lambda (a) (ad._call "cosh" a)))
   (list "cosh" (lambda (a) (ad._call "sinh" a)))
-  (list "tanh" (lambda (a)
-    (let ((t (ad._call "tanh" a)))
-      (ad._sub (ad._lit "1.0") (ad._mul t t)))))
-  (list "atan" (lambda (a)
-    (ad._div (ad._lit "1.0")
-             (ad._add (ad._lit "1.0") (ad._mul (car a) (car a))))))
+  (list "tanh" (lambda (a) (ad._minus-one (ad._square (ad._call "tanh" a)))))
+  (list "asinh" (lambda (a)
+    (ad._recip (ad._call "sqrt" (list (ad._plus-one (ad._square (car a))))))))
+  (list "acosh" (lambda (a)
+    (ad._recip (ad._call "sqrt"
+      (list (ad._sub (ad._square (car a)) (ad._lit "1.0")))))))
+  (list "atanh" (lambda (a) (ad._recip (ad._minus-one (ad._square (car a))))))
+  (list "exp" (lambda (a) (ad._call "exp" a)))
+  (list "exp2" (lambda (a)
+    (ad._mul (ad._call "exp2" a) (ad._lit "0.6931471805599453"))))
+  (list "expm1" (lambda (a) (ad._call "exp" a)))
+  (list "log" (lambda (a) (ad._recip (car a))))
+  (list "log2" (lambda (a)
+    (ad._recip (ad._mul (car a) (ad._lit "0.6931471805599453")))))
+  (list "log10" (lambda (a)
+    (ad._recip (ad._mul (car a) (ad._lit "2.302585092994046")))))
+  (list "log1p" (lambda (a) (ad._recip (ad._plus-one (car a)))))
+  (list "sqrt" (lambda (a) (ad._div (ad._lit "0.5") (ad._call "sqrt" a))))
+  (list "cbrt" (lambda (a)
+    (ad._recip (ad._mul (ad._lit "3.0") (ad._square (ad._call "cbrt" a))))))
+  (list "hypot"
+    (lambda (a) (ad._div (car a) (ad._call "hypot" a)))
+    (lambda (a) (ad._div (cadr a) (ad._call "hypot" a))))
+  (list "fabs" (lambda (a)
+    (ad._select (ad._less (car a) (ad._lit "0.0"))
+                (ad._lit "-1.0") (ad._lit "1.0"))))
+  (list "fmin"
+    (lambda (a) (ad._select (ad._less-eq (car a) (cadr a))
+                            (ad._lit "1.0") (ad._lit "0.0")))
+    (lambda (a) (ad._select (ad._less (cadr a) (car a))
+                            (ad._lit "1.0") (ad._lit "0.0"))))
+  (list "fmax"
+    (lambda (a) (ad._select (ad._less-eq (cadr a) (car a))
+                            (ad._lit "1.0") (ad._lit "0.0")))
+    (lambda (a) (ad._select (ad._less (car a) (cadr a))
+                            (ad._lit "1.0") (ad._lit "0.0"))))
   (list "pow"
     (lambda (a)
       (ad._mul (cadr a)
@@ -417,14 +482,25 @@ $(defun ad.forward (fn)
 /* Reverse mode. The forward sweep runs the original statements, pushing
    each overwritten value and each control decision onto a typed array
    tape. The reverse sweep pops them back in order, so every adjoint reads
-   the values the forward sweep saw, and loops replay by their trip count.
-   Locals are hoisted to the function head because a body declared inside a
-   loop must outlive its iteration. Each item yields a pair
-   (forward-statements reverse-statements) with the latter already in
-   reverse order. */
+   the values the forward sweep saw. Locals are hoisted to the function
+   head because a body declared inside a loop must outlive its iteration.
+
+   Control flow is recorded as exit codes. Each loop iteration ends by
+   pushing 0, or the code of the `break` or `continue` that left it; each
+   `return` pushes its own code before jumping to the reverse sweep. The
+   reverse of a region reads the code and runs the reverse of exactly the
+   statements that executed, which is computed statically for every exit.
+
+   Each item yields a triple (forward reverse exits). `forward` and
+   `reverse` are statement lists, `reverse` already in reverse order for
+   an item that completed. `exits` lists (code kind pruned) for every exit
+   inside the item, where `pruned` is the reverse of the part of the item
+   that ran before that exit. A loop consumes its `break` and `continue`
+   exits; the function consumes `return`. */
 
 $(def ad._locals '())
 $(def ad._counter 0)
+$(def ad._loop-step '())
 $(defun ad._local (type name)
   (begin
     (if (assoc name ad._locals) (ad._fail "duplicate local name" name) nil)
@@ -434,6 +510,10 @@ $(defun ad._fresh (stem type)
   (begin
     (def ad._counter (+ ad._counter 1))
     (ad._local type (string-append stem (str ad._counter)))))
+$(defun ad._code ()
+  (begin
+    (def ad._counter (+ ad._counter 1))
+    (string-append (str ad._counter) ".0")))
 $(defun ad._local-type (name)
   (let ((entry (assoc name ad._locals)))
     (if entry (cadr entry)
@@ -446,10 +526,31 @@ $(defun ad._restore (name type)
   (ad._assign name
               (if (ad._double-type? type) (ad._pop)
                   (ad._cast type (ad._pop)))))
-$(defun ad._none () (list '() '()))
-$(defun ad._merge (pairs)
-  (list (ad._concat (map car pairs))
-        (ad._concat (reverse (map cadr pairs)))))
+$(defun ad._triple (fwd rev exits) (list fwd rev exits))
+$(defun ad._none () (ad._triple '() '() '()))
+$(defun ad._fwd-of (t) (car t))
+$(defun ad._rev-of (t) (cadr t))
+$(defun ad._exits-of (t) (car (cddr t)))
+$(defun ad._exit (code kind pruned) (list code kind pruned))
+$(defun ad._exit-code (x) (car x))
+$(defun ad._exit-kind (x) (cadr x))
+$(defun ad._exit-pruned (x) (car (cddr x)))
+$(defun ad._with-pruned (x pruned)
+  (ad._exit (ad._exit-code x) (ad._exit-kind x) pruned))
+
+/* Sequencing: an exit inside item i has run items 1..i-1 completely. */
+$(defun ad._sequence (triples)
+  (ad._sequence-from triples '() '() '()))
+$(defun ad._sequence-from (triples fwd rev exits)
+  (if (null? triples) (ad._triple fwd rev exits)
+    (let ((t (car triples)))
+      (ad._sequence-from (cdr triples)
+        (append fwd (ad._fwd-of t))
+        (append (ad._rev-of t) rev)
+        (append exits
+          (map (lambda (x)
+                 (ad._with-pruned x (append (ad._exit-pruned x) rev)))
+               (ad._exits-of t)))))))
 
 /* Adjoint statements for `e` scaled by `seed`. */
 $(defun ad._adjoint (e seed names)
@@ -526,7 +627,7 @@ $(defun ad._grad-slots (ptypes args)
           rest))))
 
 $(defun ad._rev-items (items names)
-  (ad._merge (map (lambda (s) (ad._rev-item s names)) items)))
+  (ad._sequence (map (lambda (s) (ad._rev-item s names)) items)))
 $(defun ad._rev-body (s names)
   (match-case s
     ((block *items) (ad._rev-items *items names))
@@ -534,13 +635,15 @@ $(defun ad._rev-body (s names)
 
 $(defun ad._rev-assign (name rhs names)
   (let ((type (ad._local-type name)) (value (ad._unbind (ad._pure rhs))))
-    (list (list (ad._push (ad._id name)) (ad._assign name value))
-          (if (and (ad._double-type? type) (member name names))
-              (append (list (ad._restore name type)
-                            (ad._assign "_ad_seed" (ad._id (ad._bar name)))
-                            (ad._assign (ad._bar name) (ad._zero)))
-                      (ad._adjoint rhs (ad._id "_ad_seed") names))
-              (list (ad._restore name type))))))
+    (ad._triple
+      (list (ad._push (ad._id name)) (ad._assign name value))
+      (if (and (ad._double-type? type) (member name names))
+          (append (list (ad._restore name type)
+                        (ad._assign "_ad_seed" (ad._id (ad._bar name)))
+                        (ad._assign (ad._bar name) (ad._zero)))
+                  (ad._adjoint rhs (ad._id "_ad_seed") names))
+          (list (ad._restore name type)))
+      '())))
 
 $(defun ad._rev-decl (type d names)
   (match-case d
@@ -552,62 +655,221 @@ $(defun ad._rev-decl (type d names)
 $(defun ad._rev-optional (s names)
   (if s (ad._rev-item s names) (ad._none)))
 
-$(defun ad._rev-loop (init c step body names)
-  (let* ((n (ad._fresh "_ad_trip" '(int)))
-         (head (ad._rev-optional init names))
-         (inner (ad._merge (list (ad._rev-body body names)
-                                 (ad._rev-optional step names))))
-         (count (ad._assign n (ad._raw '+ (ad._id n) (ad._int "1"))))
-         (uncount (ad._assign n (ad._raw '- (ad._id n) (ad._int "1")))))
-    (list (append (car head)
-                  (list (ad._assign n (ad._int "0"))
-                        `(while ,(ad._unbind (ad._pure c))
-                           (block ,@(car inner) ,count))
-                        (ad._push (ad._id n))))
-          (append (list (ad._restore n '(int))
-                        `(while (expr () (op > ,(ad._id n) ,(ad._int "0")))
-                           (block ,@(cadr inner) ,uncount)))
-                  (cadr head)))))
+/* Branches push their flag after the body so a completed `if` pops it
+   first; an exit inside a branch never pushes, and its pruned reverse
+   knows the branch statically. */
+$(defun ad._rev-if (c then else names)
+  (let ((t (ad._rev-body then names))
+        (e (if else (ad._rev-body else names) (ad._none))))
+    (ad._triple
+      (list `(if ,(ad._unbind (ad._pure c))
+               (block ,@(ad._fwd-of t) ,(ad._push (ad._lit "1.0")))
+               (block ,@(ad._fwd-of e) ,(ad._push (ad._lit "0.0")))))
+      (list `(if (expr () (op != ,(ad._pop) ,(ad._lit "0.0")))
+               (block ,@(ad._rev-of t))
+               (block ,@(ad._rev-of e))))
+      (append (ad._exits-of t) (ad._exits-of e)))))
 
-$(defun ad._rev-branch (flag pair)
-  (list `(block ,@(car pair) ,(ad._push (ad._lit flag)))
-        `(block ,@(cadr pair))))
-$(defun ad._taken () `(expr () (op != ,(ad._pop) ,(ad._lit "0.0"))))
+$(defun ad._code-is (code)
+  `(expr () (op == ,(ad._id "_ad_code") ,(ad._lit code))))
+
+/* The dispatch after popping one iteration's exit code. */
+$(defun ad._dispatch (normal exits)
+  (foldl (lambda (chain x)
+           `(if ,(ad._code-is (ad._exit-code x))
+              (block ,@(ad._exit-pruned x)) ,chain))
+         `(block ,@normal)
+         (reverse exits)))
+
+$(defun ad._loop-exit? (x)
+  (or (eq? (ad._exit-kind x) 'break) (eq? (ad._exit-kind x) 'continue)))
+
+/* A loop iteration: count, body, step, then the normal code. `continue`
+   also runs the step, so its pruned reverse begins with the step's. */
+$(defun ad._loop-parts (c body step names)
+  (let* ((saved ad._loop-step)
+         (s (begin (def ad._loop-step '()) (ad._rev-optional step names)))
+         (b (begin (def ad._loop-step (ad._fwd-of s))
+                   (ad._rev-body body names)))
+         (restored (def ad._loop-step saved))
+         (n (ad._fresh "_ad_trip" '(int)))
+         (own (filter ad._loop-exit? (ad._exits-of b)))
+         (through (filter (lambda (x) (not (ad._loop-exit? x)))
+                          (ad._exits-of b)))
+         (iteration (append (list (ad._count n '+))
+                            (ad._fwd-of b) (ad._fwd-of s)
+                            (list (ad._push (ad._lit "0.0")))))
+         (dispatch (list (ad._assign "_ad_code" (ad._pop))
+                         (ad._dispatch (append (ad._rev-of s) (ad._rev-of b))
+                           (map (lambda (x)
+                                  (if (eq? (ad._exit-kind x) 'continue)
+                                      (ad._with-pruned x
+                                        (append (ad._rev-of s)
+                                                (ad._exit-pruned x)))
+                                      x))
+                                own))
+                         (ad._count n '-))))
+    (list n iteration dispatch through (ad._unbind (ad._pure c)))))
+
+$(defun ad._count (n op)
+  (ad._assign n (ad._raw op (ad._id n) (ad._int "1"))))
+$(defun ad._items (body)
+  (match-case body ((block *items) *items) (else (list body))))
+$(defun ad._countdown (n dispatch)
+  `(while (expr () (op > ,(ad._id n) ,(ad._int "0"))) (block ,@dispatch)))
+
+$(defun ad._rev-loop (init c step body names)
+  (let* ((head (ad._rev-optional init names))
+         (parts (ad._loop-parts c body step names))
+         (n (car parts)) (iteration (cadr parts))
+         (dispatch (car (cddr parts))) (through (cadr (cddr parts)))
+         (condition (car (cddr (cddr parts))))
+         (loop (ad._triple
+                 (list (ad._assign n (ad._int "0"))
+                       `(while ,condition (block ,@iteration))
+                       (ad._push (ad._id n)))
+                 (list (ad._restore n '(int)) (ad._countdown n dispatch))
+                 (map (lambda (x)
+                        (ad._with-pruned x
+                          (append (ad._exit-pruned x)
+                                  (list (ad._count n '-)
+                                        (ad._countdown n dispatch)))))
+                      through))))
+    (ad._sequence (list head loop))))
+
+/* `do` runs its body once before testing: a flag makes it a `while`. */
+$(defun ad._rev-do (body c names)
+  (let ((first (ad._fresh "_ad_first" '(int))))
+    (ad._sequence (list
+      (ad._triple (list (ad._assign first (ad._int "1"))) '() '())
+      (ad._rev-loop nil `(expr (int) (op || (expr (int) (ident (,first))) ,c))
+                    nil `(block ,(ad._assign first (ad._int "0")) ,body)
+                    names)))))
+
+/* Checkpointed loops record nothing while running. Every `block`
+   iterations the variables the loop assigns are pushed, and the reverse
+   restores each block from its snapshot, replays it with recording, and
+   reverses the replay. Memory is one snapshot per block plus one block's
+   tape, at the cost of running the loop twice. */
+$(defun ad._assigned (form acc)
+  (cond ((not (list? form)) acc)
+        ((null? form) acc)
+        (true
+         (let ((update (if (match form '(expr ? ?)) (ad._update form) nil)))
+           (if (and update (not (member (car update) acc)))
+               (ad._assigned (cdr form) (cons (car update) acc))
+               (foldl (lambda (a x) (ad._assigned x a)) acc form))))))
+$(defun ad._declared-names (form acc)
+  (match-case form
+    ((declare ? (bindings *decls)) (append (ad._declarator-names *decls) acc))
+    ((decl ? (bindings *decls)) (append (ad._declarator-names *decls) acc))
+    (else (if (list? form)
+              (foldl (lambda (a x) (ad._declared-names x a)) acc form)
+              acc))))
+$(defun ad._declarator-names (decls)
+  (ad._concat (map (lambda (d)
+    (match-case d
+      ((op = (bind (binding ? ?n) ()) ?) (list ?n))
+      ((bind (binding ? ?n) ()) (list ?n))
+      (else '()))) decls)))
+$(defun ad._rev-loop-checkpointed (init c step body names block)
+  (let* ((head (ad._rev-optional init names))
+         (parts (ad._loop-parts c body step names))
+         (n (car parts)) (iteration (cadr parts))
+         (dispatch (car (cddr parts))) (through (cadr (cddr parts)))
+         (condition (car (cddr (cddr parts))))
+         (inner (ad._declared-names (list body step) '()))
+         (state (filter (lambda (v) (not (member v inner)))
+                        (ad._assigned (list body step) '())))
+         (total (ad._fresh "_ad_total" '(int)))
+         (blocks (ad._fresh "_ad_blocks" '(int)))
+         (remaining (ad._fresh "_ad_remaining" '(int)))
+         (replay (ad._fresh "_ad_replay" '(int)))
+         (size (ad._int block))
+         (snapshot (map (lambda (v) (ad._push (ad._id v))) state))
+         (recover (map (lambda (v) (ad._restore v (ad._local-type v)))
+                       (reverse state))))
+    (begin
+    (if through
+        (ad._fail "a checkpointed loop cannot contain return" body)
+        nil)
+    (ad._sequence (list head
+      (ad._triple
+        (list (ad._assign total (ad._int "0"))
+              (ad._assign blocks (ad._int "0"))
+              `(for () ,condition ,(if step (ad._unbind step) '())
+                 (block
+                   (if (expr () (op == (expr () (op % ,(ad._id total) ,size))
+                                    ,(ad._int "0")))
+                     (block ,@snapshot ,(ad._count blocks '+)))
+                   ,(ad._count total '+)
+                   ,@(ad._unbind (ad._items body))))
+              (ad._push (ad._id total))
+              (ad._push (ad._id blocks)))
+        (list (ad._restore blocks '(int))
+              (ad._restore total '(int))
+              `(while (expr () (op > ,(ad._id blocks) ,(ad._int "0")))
+                 (block
+                   ,@recover
+                   ,(ad._assign remaining
+                      (ad._raw '- (ad._id total)
+                        (ad._raw '* (ad._raw '- (ad._id blocks) (ad._int "1"))
+                                 size)))
+                   (if (expr () (op > ,(ad._id remaining) ,size))
+                     (block ,(ad._assign remaining size)))
+                   ,(ad._assign replay (ad._int "0"))
+                   ,(ad._assign n (ad._int "0"))
+                   (while (expr () (op < ,(ad._id replay) ,(ad._id remaining)))
+                     (block ,(ad._count replay '+) ,@iteration))
+                   ,(ad._countdown n dispatch)
+                   ,(ad._assign total
+                      (ad._raw '- (ad._id total) (ad._id remaining)))
+                   ,(ad._count blocks '-))))
+        '()))))))
+
+$(def ad._checkpoint nil)
+$(defun ad._loop (init c step body names)
+  (if ad._checkpoint
+      (ad._rev-loop-checkpointed init c step body names ad._checkpoint)
+      (ad._rev-loop init c step body names)))
 
 $(defun ad._rev-item (s names)
   (match-case s
     ((at ? ?node) (ad._rev-item ?node names))
     ((declare ?type (bindings *decls))
-     (ad._merge (map (lambda (d) (ad._rev-decl ?type d names)) *decls)))
+     (ad._sequence (map (lambda (d) (ad._rev-decl ?type d names)) *decls)))
     ((decl ?type (bindings *decls))
-     (ad._merge (map (lambda (d) (ad._rev-decl ?type d names)) *decls)))
+     (ad._sequence (map (lambda (d) (ad._rev-decl ?type d names)) *decls)))
     ((stmnt ?e)
      (let ((update (ad._update ?e)))
        (if update
            (ad._rev-assign (car update) (cadr update) names)
-           (list (list (ad._unbind (ad._pure s))) '()))))
+           (ad._triple (list (ad._unbind (ad._pure s))) '() '()))))
     ((expr ? ?) (ad._rev-item `(stmnt ,s) names))
-    ((if ?c ?then)
-     (let ((then (ad._rev-branch "1.0" (ad._rev-body ?then names))))
-       (list (list `(if ,(ad._unbind (ad._pure ?c)) ,(car then)
-                      (block ,(ad._push (ad._lit "0.0")))))
-             (list `(if ,(ad._taken) ,(cadr then))))))
-    ((if ?c ?then ?else)
-     (let ((then (ad._rev-branch "1.0" (ad._rev-body ?then names)))
-           (else (ad._rev-branch "0.0" (ad._rev-body ?else names))))
-       (list (list `(if ,(ad._unbind (ad._pure ?c)) ,(car then) ,(car else)))
-             (list `(if ,(ad._taken) ,(cadr then) ,(cadr else))))))
-    ((while ?c ?body) (ad._rev-loop nil ?c nil ?body names))
-    ((do ?body ?c)
-     (let ((once (ad._rev-body ?body names))
-           (loop (ad._rev-loop nil ?c nil ?body names)))
-       (list (append (car once) (car loop))
-             (append (cadr loop) (cadr once)))))
-    ((for ?init ?c ?step ?body) (ad._rev-loop ?init ?c ?step ?body names))
+    ((if ?c ?then) (ad._rev-if ?c ?then nil names))
+    ((if ?c ?then ?else) (ad._rev-if ?c ?then ?else names))
+    ((while ?c ?body) (ad._loop nil ?c nil ?body names))
+    ((do ?body ?c) (ad._rev-do ?body ?c names))
+    ((for ?init ?c ?step ?body) (ad._loop ?init ?c ?step ?body names))
     ((block *items) (ad._rev-items *items names))
+    ((break)
+     (let ((code (ad._code)))
+       (ad._triple (list (ad._push (ad._lit code)) s) '()
+                   (list (ad._exit code 'break '())))))
+    ((continue)
+     (let ((code (ad._code)))
+       (ad._triple (append (list (ad._push (ad._lit code)))
+                           ad._loop-step (list s))
+                   '() (list (ad._exit code 'continue '())))))
     ((return (double) ?e)
-     (list (list (ad._assign "_ad_result" (ad._unbind (ad._pure ?e))))
-           (ad._adjoint ?e (ad._lit "1.0") names)))
+     (let ((code (ad._code)))
+       (ad._triple
+         (list (ad._assign "_ad_result" (ad._unbind (ad._pure ?e)))
+               (ad._push (ad._lit code))
+               '(goto ("_ad_reverse")))
+         '()
+         (list (ad._exit code 'return
+                         (ad._adjoint ?e (ad._lit "1.0") names))))))
     ((return ? ?) (ad._fail "return must produce double" s))
     ((empty) (ad._none))
     (else (ad._fail "unsupported statement in reverse mode" s))))
@@ -634,27 +896,42 @@ $(defun ad._reverse-function (spec name params items)
   (let* ((inputs (ad._param-doubles params))
          (names (append inputs (ad._declared-doubles `(block ,@items))))
          (sweep (ad._rev-items items names))
+         (returns (filter (lambda (x) (eq? (ad._exit-kind x) 'return))
+                          (ad._exits-of sweep)))
+         (stray (filter (lambda (x) (not (eq? (ad._exit-kind x) 'return)))
+                        (ad._exits-of sweep)))
          (hoisted (filter (lambda (l)
                             (not (member (car l) (ad._param-names params))))
                           (reverse ad._locals))))
+    (begin
+    (if stray (ad._fail "break or continue outside a loop" name) nil)
+    (if (null? returns) (ad._fail "function has no return" name) nil)
     `(function ,spec
        (bind (,(ad._grad name)) ((fnmod (params ,@(ad._grad-params params)))))
        (block
          ,(ad._declare '("ArrayDbl") "_ad_tape" (ad._call "ArrayDbl_new" '()))
-         ,(ad._declare '(double) "_ad_result" nil)
-         ,(ad._declare '(double) "_ad_seed" nil)
+         ,(ad._declare '(double) "_ad_result" (ad._zero))
+         ,(ad._declare '(double) "_ad_seed" (ad._zero))
+         ,(ad._declare '(double) "_ad_code" (ad._zero))
          ,@(map (lambda (l) (ad._declare (cadr l) (car l)
                                          (ad._zero-of (cadr l))))
                 hoisted)
          ,@(map (lambda (n) (ad._declare '(double) (ad._bar n) (ad._zero)))
                 names)
-         ,@(car sweep)
-         ,@(cadr sweep)
+         ,@(ad._fwd-of sweep)
+         (label ("_ad_reverse"))
+         ,(ad._assign "_ad_code" (ad._pop))
+         ,(ad._dispatch '() returns)
          ,@(map ad._write-slot inputs)
          ,(ad._stmnt (ad._call "ArrayDbl_free" (list (ad._id "_ad_tape"))))
-         (return (double) ,(ad._id "_ad_result"))))))
+         (return (double) ,(ad._id "_ad_result")))))))
 
-$(defun ad.reverse (fn)
+$(defun ad._literal-text (form)
+  (match-case form
+    ((expr ? (literal ? ?text)) ?text)
+    (else (ad._fail "expected an integer literal" form))))
+
+$(defun ad._reverse-with (fn checkpoint)
   (if (not (list? fn)) '()
     (match-case fn
       ((function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
@@ -664,8 +941,14 @@ $(defun ad.reverse (fn)
          (def ad._reverse-siblings (cons ?name ad._reverse-siblings))
          (def ad._locals (ad._param-locals *params))
          (def ad._counter 0)
+         (def ad._loop-step '())
+         (def ad._checkpoint checkpoint)
          (list (ad._reverse-function ?spec ?name *params *items))))
       (else (ad._fail "expected a function definition" fn)))))
+
+$(defun ad.reverse (fn) (ad._reverse-with fn nil))
+$(defun ad.checkpoint (fn block)
+  (ad._reverse-with fn (if (list? block) (ad._literal-text block) nil)))
 
 /** Emits `NAME_dot` beside a `double` function: every `double` parameter `p`
     is followed by `p_dot`, and the result is the directional derivative.
@@ -682,12 +965,24 @@ macro Decorator $ad.forward(Unit $fn) => {
     are followed by one `double *p_grad` per `double` parameter, the result
     is the primal value, and each gradient slot receives d result / d p. The
     unit includes `typed-array.x` for the tape. Every local is hoisted, so
-    names must be unique within the function, and `return` must end the
-    body. Loops replay by trip count; `break` and `continue` are diagnostics.
+    names must be unique within the function. Loops, `break`, `continue`,
+    and `return` anywhere in the body replay from recorded exit codes.
 */
 macro Decorator $ad.reverse(Unit $fn) => {
   $fn
   $(ad.reverse $fn)...
+}
+
+/** Like `$ad.reverse()`, but every loop runs without recording and pushes a
+    snapshot of the variables it assigns once per `$block` iterations; the
+    reverse sweep replays each block from its snapshot with recording and
+    then reverses it. Tape memory is bounded by one block plus one snapshot
+    per block, and the loop runs twice. A checkpointed loop cannot contain
+    `return`.
+*/
+macro Decorator $ad.checkpoint(Unit $fn, Literal $block) => {
+  $fn
+  $(ad.checkpoint $fn $block)...
 }
 
 /** Emits both `NAME_dot` and `NAME_grad`. Decorators cannot stack when each

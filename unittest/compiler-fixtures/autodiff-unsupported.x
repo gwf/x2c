@@ -3,11 +3,10 @@
 $(import "autodiff.xmacro")
 
 $ad.reverse()
-static double stops_early(double x) {
+static double jumps(double x) {
   double s = 0.0;
-  for (int i = 0; i < 4; i++) {
-    if (s > 1.0) break;
-    s += x;
-  }
+  if (x > 1.0) goto done;
+  s = x * x;
+done:
   return s;
 }

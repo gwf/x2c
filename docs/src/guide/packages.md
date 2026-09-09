@@ -265,7 +265,8 @@ and iterate copied row Lists. Rows preserve column order and duplicate names;
 `Statement.columns` returns the names separately. Free statements before
 closing their connection, with `defer` beside each acquisition.
 
-```x2c
+<!-- ignore: an import needs a registered --package-dir root. -->
+```x2c,ignore
 import "sqlite" with Database, Statement;
 
 void show_readings(String filename) {

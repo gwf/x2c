@@ -268,6 +268,30 @@ one function; a guide page describing when to use which; the module page.
   `%(...)` list literals separate items with whitespace, and a bare `*`
   in a `match-case` pattern is a sequence wildcard.
 
+## Second round (2026-09-09, same day)
+
+Gary asked for the follow-ups to be finished as well:
+
+- Reverse mode records exit codes: each loop iteration pushes 0 or the
+  code of the `break`/`continue` that left it, and each `return` pushes
+  its code before jumping to the reverse sweep, so `break`, `continue`,
+  and `return` anywhere in the body replay exactly. The reverse of every
+  region is generated per exit from the statically known prefix.
+- `$ad.checkpoint(K)` runs loops without recording, snapshots the
+  variables the loop assigns every K iterations, and replays each block
+  from its snapshot during the reverse sweep; tape memory is one block
+  plus one snapshot per block. This is two-level checkpointing; a
+  checkpointed loop cannot contain `return`.
+- The primitive table covers the C99 `<math.h>` real functions with
+  closed-form derivatives, including `atan2`, `hypot`, `fabs`, `fmin`,
+  `fmax`, and `pow`; the dual family gained `fabs` and `pow`.
+- Compiler: a binary operator with one participant operand converts the
+  other through its declared converter (`src/expressions.x`); a typedef
+  after a function definition is promoted to the header when a later
+  public prototype names it (`src/generate.x`). Both have fixtures.
+- The sqlite sample in `docs/src/guide/packages.md` is tagged like its
+  siblings, so `make doc-examples` is green again.
+
 ## Plan review
 
 - **Established facts and rechecks.** The parser and binder establish

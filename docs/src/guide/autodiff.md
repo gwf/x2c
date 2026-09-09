@@ -1,11 +1,19 @@
 # Automatic Differentiation
 
-`autodiff.xmacro` differentiates ordinary `double` code three ways. Dual
-numbers carry a derivative through operators at runtime. The two decorators
-generate a sibling function at compile time from the typed AST: a tangent
-function for forward mode and a gradient function for reverse mode. The
-optional `autodiff.x` module records a runtime tape for code the decorators
-do not accept.
+`autodiff.xmacro` differentiates ordinary `double` code four ways:
+
+- **Dual numbers** carry a derivative through operators at runtime.
+- **`$ad.forward()`** generates a tangent function beside a decorated
+  function, at compile time, from the typed AST.
+- **`$ad.reverse()`** generates a gradient function the same way, recording
+  a tape during the forward sweep. **`$ad.checkpoint(K)`** is the same
+  gradient with bounded tape memory.
+- **`autodiff.x`** records a runtime tape for code whose shape the
+  decorators cannot see.
+
+All four are ordinary x2c: a macro file, an optional module, and the
+existing protocol and decorator machinery. Nothing in the compiler knows
+about derivatives.
 
 ## Dual numbers
 
@@ -28,26 +36,26 @@ static Dual2 cube(Dual2 x) => x * x * x;
 
 int main(void) {
   Dual x = { 2.0, 1.0 };
-  Dual y = x * x * x;
+  Dual y = x * x * x - 2.0 * x;
   Dual2 z = cube((Dual2) { { 2.0, 1.0 }, { 1.0, 0.0 } });
-  return y.tangent == 12.0 && z.tangent.tangent == 12.0 ? 0 : 1;
+  return y.tangent == 10.0 && z.tangent.tangent == 12.0 ? 0 : 1;
 }
 ```
 
 The holes are the struct type, the converter name, a fresh `Var` tag, the
 scalar type, and the scalar spellings of `sin`, `cos`, `exp`, `log`,
 `sqrt`, and `tanh`. Declare every struct of the family before the first
-invocation; the generated public prototypes precede any later typedef in
-the unit's header. Each instantiation adopts `protocol Var`, so `+ - * /`,
-unary `-`, comparisons, and dotted calls such as `x.sin()` resolve to the
-generated methods. `Dual two = 2.0;` and `x *= 2.0` convert through the
-generated `double.dual` converter; a binary operator does not convert its
-operands, so write the constant as a `Dual` first.
+invocation. Each instantiation adopts `protocol Var`, so `+ - * /`, unary
+`-`, comparisons, and dotted calls such as `x.sin()`, `x.fabs()`, and
+`x.pow(y)` resolve to the generated methods. A `double` beside a dual
+operand converts through the generated converter, so `2.0 * x` and
+`x > 1.0` read as they would on scalars.
 
 Each depth of nesting is a distinct C type. A derivative taken inside a
 function that is itself being differentiated uses the next type in the
 family, which is what keeps an inner perturbation from being confused with
-an outer one.
+an outer one: the type system does the bookkeeping that tagged
+perturbations do in a dynamically typed implementation.
 
 ## Forward mode by transformation
 
@@ -85,11 +93,14 @@ and `int` control flow is copied unchanged. Supported statements are
 declarations, assignment including compound assignment and increments,
 `if`, `while`, `do`, `for`, `break`, `continue`, and `return`. Supported
 expressions are literals, identifiers, parentheses, casts, `+ - * /`,
-unary `-`, the conditional operator, the primitives `sin cos tan exp log
-sqrt sinh cosh tanh atan pow`, and calls to functions decorated with
-`$ad.forward()` earlier in the same unit, which become calls to their
-`_dot` siblings. Anything else is a diagnostic at the invocation that
-names the statement or expression.
+unary `-`, the conditional operator, the primitives listed below, and
+calls to functions decorated with `$ad.forward()` earlier in the same
+unit, which become calls to their `_dot` siblings. Anything else is a
+diagnostic at the invocation that names the statement or expression.
+
+The generated function is plain scalar C. Zero and unit factors are
+folded at generation time, so `t_dot = x_dot * y + x * y_dot` is what
+appears in the output.
 
 ## Reverse mode by transformation
 
@@ -107,34 +118,105 @@ $(import "autodiff.xmacro")
 $ad.reverse()
 static double model(double x, double y, int n) {
   double s = 0.0;
-  for (int i = 1; i <= n; i++) s += x * x * (double) i;
+  for (int i = 0; i < n; i++) {
+    if (i == 1) continue;
+    if (s > 40.0) break;
+    s += x * x * (double) i;
+  }
   double t = x * y + 3.0;
-  if (t > 1.0) t *= t;
+  if (t > 100.0) return t * s;
   return sin(t) / x - 2.0 * y + s;
 }
 
 int main(void) {
   double x_grad, y_grad;
-  double value = model_grad(1.0, 2.0, 3, &x_grad, &y_grad);
-  return value < 0.0 && x_grad > 32.0 && y_grad < 0.0 ? 0 : 1;
+  double value = model_grad(1.0, 2.0, 6, &x_grad, &y_grad);
+  return value < 0.0 && x_grad > 30.0 && y_grad < 0.0 ? 0 : 1;
 }
 ```
 
-The forward sweep runs the original statements and pushes each overwritten
-value and each branch decision; the reverse sweep pops them back, so every
-adjoint reads the values the forward sweep saw, and loops replay by their
-trip count. Every local is hoisted to the function head, so names must be
-unique within the function, `return` must end the body, and `break` and
-`continue` are diagnostics. Calls to functions decorated with
-`$ad.reverse()` earlier in the unit call their `_grad` siblings.
+The forward sweep runs the original statements. Every assignment first
+pushes the value it overwrites, an `if` pushes which branch ran, and each
+loop iteration ends by pushing an exit code: zero when the body completed,
+or the code of the `break` or `continue` that left it. A `return` pushes
+its own code and jumps to the reverse sweep. The reverse sweep pops in
+mirror order, restoring each overwritten value before accumulating the
+adjoints of the assignment that produced it, so every partial derivative
+is evaluated at the values the forward sweep saw. There is no renaming
+into single-assignment form; restoring values makes it unnecessary.
 
-`$ad.both()` emits both siblings; two decorators cannot stack when each
-produces several items.
+For every exit the transformation knows statically which statements ran
+before it, and it generates the reverse of exactly that prefix. A loop's
+reverse pops the trip count and then, per iteration, the exit code that
+selects among those prefixes. Loops nest, `do` becomes a `while` with a
+first-iteration flag, and a `return` inside a loop reverses the partial
+iteration and then the completed ones. Every local is hoisted to the
+function head, so names must be unique within the function. `goto`,
+`switch`, and assignment inside a larger expression are diagnostics.
+
+Calls to functions decorated with `$ad.reverse()` earlier in the unit call
+their `_grad` siblings, which recompute the callee's primal and return its
+partials. `$ad.both()` emits both siblings; two decorators cannot stack when
+each produces several items.
+
+## Checkpointing
+
+A recorded loop stores every overwritten value for every iteration, so tape
+memory grows with the trip count. `$ad.checkpoint(K)` is `$ad.reverse()`
+with every loop run twice instead: the forward sweep runs the loop without
+recording and pushes a snapshot of the variables the loop assigns once
+every `K` iterations; the reverse sweep restores each block from its
+snapshot, replays it with recording, and reverses the replay. Tape memory
+is bounded by one block plus one snapshot per block. `break` and
+`continue` replay exactly as before; a checkpointed loop cannot contain
+`return`.
+
+```x2c
+~#include "typed-array.x"
+~#include <math.h>
+$(import "autodiff.xmacro")
+
+$ad.checkpoint(64)
+static double relax(double x, double y, int steps) {
+  double s = x;
+  for (int i = 0; i < steps; i++) s += 0.001 * (y - s) * cos(s * 0.01);
+  return s;
+}
+
+int main(void) {
+  double x_grad, y_grad;
+  double value = relax_grad(1.0, 3.0, 100000, &x_grad, &y_grad);
+  return fabs(value - 3.0) < 1e-9 && fabs(y_grad - 1.0) < 1e-9 ? 0 : 1;
+}
+```
+
+This is two-level checkpointing with a fixed block size. The
+divide-and-conquer schedule of Siskind and Pearlmutter (2018), which needs
+no block size and achieves logarithmic growth, is not implemented; a
+program whose loops outgrow a fixed block can nest the decorated function
+in a caller that is itself decorated.
+
+## Primitives
+
+Both transformations differentiate calls to these `<math.h>` functions,
+whose derivatives are closed forms in the same primitives:
+
+| Family | Functions |
+| --- | --- |
+| Trigonometric | `sin cos tan asin acos atan atan2` |
+| Hyperbolic | `sinh cosh tanh asinh acosh atanh` |
+| Exponential | `exp exp2 expm1 log log2 log10 log1p pow` |
+| Roots and norms | `sqrt cbrt hypot` |
+| Piecewise | `fabs fmin fmax` |
+
+`fabs`, `fmin`, and `fmax` differentiate as the branch that was taken;
+at a tie the derivative follows the first argument. The dual family
+provides the subset its holes name, plus `fabs` and `pow`.
 
 ## Runtime tape
 
-When the shape of the computation depends on data, include `autodiff.x`
-and record it:
+When the shape of the computation depends on data in ways the decorators
+reject, include `autodiff.x` and record it:
 
 ```x2c
 ~#include "autodiff.x"
@@ -156,8 +238,57 @@ the active `Scope`, so this is the slow path.
 
 ## Choosing
 
-Use dual numbers for a few derivatives of small functions with no build
-step beyond the macro. Use `$ad.forward()` when generated scalar C should
-be readable or when many directional derivatives are needed. Use
-`$ad.reverse()` for gradients with many inputs. Use the tape when the
+Use dual numbers for a few derivatives of small functions, or for
+higher-order derivatives through nesting. Use `$ad.forward()` when the
+generated scalar C should be readable or when the function has few inputs.
+Use `$ad.reverse()` for gradients with many inputs, and
+`$ad.checkpoint(K)` when its loops run long. Use the tape when the
 decorators reject the code.
+
+## Background
+
+Forward mode with dual numbers goes back to Wengert (1964). The
+transformation route follows the standard formulation of forward and
+reverse mode over a program's statements (Griewank and Walther, 2008);
+recording overwritten values rather than renaming into single-assignment
+form is the classic tape discipline, and the exit-code treatment of
+control flow makes the replay exact for `break`, `continue`, and early
+`return`. Two-level checkpointing is the simplest member of the family
+that Griewank (1992) made logarithmic and that Siskind and Pearlmutter
+(2018) freed from user annotation.
+
+The design of nesting by distinct types, rather than by tagging
+perturbations at runtime, follows the analysis of perturbation confusion
+by Siskind and Pearlmutter (2005) and Manzyuk et al. (2019): with a fixed
+nesting depth the type of each level is known, so the confusion cannot
+arise. The runtime tape's backpropagator closures are the object-level
+form of the reverse-mode construction in Pearlmutter and Siskind (2008).
+What that line of work adds beyond this chapter, first-class derivative
+operators applied to arbitrary closures with the overhead removed by
+program analysis, is a compiler feature rather than a macro and is not
+attempted here.
+
+- R. E. Wengert. A simple automatic derivative evaluation program.
+  *Communications of the ACM* 7(8), 1964.
+- A. Griewank. Achieving logarithmic growth of temporal and spatial
+  complexity in reverse automatic differentiation. *Optimization Methods
+  and Software* 1(1), 1992.
+- J. M. Siskind and B. A. Pearlmutter. Perturbation confusion and
+  referential transparency: correct functional implementation of
+  forward-mode AD. *Implementation and Application of Functional
+  Languages*, 2005.
+- B. A. Pearlmutter and J. M. Siskind. Reverse-mode AD in a functional
+  framework: Lambda the ultimate backpropagator. *ACM Transactions on
+  Programming Languages and Systems* 30(2), 2008.
+- A. Griewank and A. Walther. *Evaluating Derivatives: Principles and
+  Techniques of Algorithmic Differentiation*, 2nd ed. SIAM, 2008.
+- A. G. Baydin, B. A. Pearlmutter, A. A. Radul, and J. M. Siskind.
+  Automatic differentiation in machine learning: a survey. *Journal of
+  Machine Learning Research* 18, 2018.
+- J. M. Siskind and B. A. Pearlmutter. Divide-and-conquer checkpointing
+  for arbitrary programs with no user annotation. *Optimization Methods
+  and Software* 33(4-6), 2018.
+- O. Manzyuk, B. A. Pearlmutter, A. A. Radul, D. R. Rush, and
+  J. M. Siskind. Perturbation confusion in forward automatic
+  differentiation of higher-order functions. *Journal of Functional
+  Programming* 29, 2019.
