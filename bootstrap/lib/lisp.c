@@ -252,6 +252,8 @@ Var Array_push(Array,  Var);
 
 List Array_list(Array);
 
+void Array_free(Array);
+
 String String_unescape(String);
 
 String String_new_len(const char *,  int);

@@ -192,6 +192,8 @@ int String_compare(String,  String);
 
 String String_add(String,  String);
 
+void Bytes_free(Bytes);
+
 void Scope_free(void *);
 
 void * Scope_malloc(size_t);

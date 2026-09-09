@@ -38,6 +38,8 @@ Bytes Bytes_new(size_t);
 
 Var Array_getindex(Array,  int);
 
+size_t Array_len(Array);
+
 Var Array_take_last(Array);
 
 String String_new_len(const char *,  int);
@@ -53,6 +55,8 @@ int scan_ascii_alpha(int);
 int scan_identifier(char *);
 
 int scan_number_typed(char *,  Symbol *);
+
+size_t Bytes_len(Bytes);
 
 int String_equal(String,  String);
 

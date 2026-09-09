@@ -406,6 +406,26 @@ printf '%s\n' '#include <stdio.h>' 'int library_value(void);' \
   "$ROOT/builds/0/libx2c.a" -lm -o "$BUILD/direct/consumer"
 [[ $("$BUILD/direct/consumer") == 9 ]]
 
+retained="$BUILD/direct/retained-link"
+mkdir -p "$retained/first" "$retained/second"
+for value in 1 2 3; do
+  printf 'int library_value(void) { return %s; }\n' "$value" \
+    >"$retained/value.c"
+  "$host_cc" -c "$retained/value.c" -o "$retained/value.o"
+  library_dir="$retained/second"
+  if [[ $value == 3 ]]; then library_dir="$retained/first"; fi
+  "$host_ar" rcs "$library_dir/libvalue.a" "$retained/value.o"
+  "$X2C" build -v --build-dir "$retained/build" \
+    --output "$retained/app" "$BUILD/direct/consumer.c" \
+    -L "$retained/first" -L "$retained/second" -lvalue \
+    >"$retained/$value.stdout" 2>"$retained/$value.stderr"
+  [[ $("$retained/app") == "$value" ]]
+  if [[ $value != 1 ]]; then
+    grep -Fq 'x2c: up-to-date compile ' "$retained/$value.stderr"
+    grep -Fq 'x2c: link ' "$retained/$value.stderr"
+  fi
+done
+
 printf '#include "x2c.x"\nint first_item(void) { return 5; }\n' \
   >"$BUILD/direct/a/item.x"
 printf '#include "x2c.x"\nint second_item(void) { return 6; }\n' \
@@ -534,8 +554,10 @@ grep -Fq -- '-O2 -g' "$manifest/first.stderr"
 
 (cd "$manifest/nested" && "$X2C" build -v --profile release) \
   >"$manifest/noop.stdout" 2>"$manifest/noop.stderr"
-[[ $(grep -c '^x2c: up-to-date ' "$manifest/noop.stderr") == 9 ]]
+[[ $(grep -c '^x2c: up-to-date ' "$manifest/noop.stderr") == 8 ]]
 [[ $(grep -c '^x2c: compile ' "$manifest/noop.stderr") == 0 ]]
+grep -Fq 'x2c: up-to-date archive ' "$manifest/noop.stderr"
+grep -Fq 'x2c: link ' "$manifest/noop.stderr"
 
 printf '%s\n' '#include "x2c.x"' \
   'int core_value(void); int native_value(void);' 'int main(void) {' \
@@ -598,13 +620,14 @@ rm "$manifest/out/app"
   2>"$manifest/removed.stderr"
 [[ $(grep -c '^x2c: link ' "$manifest/removed.stderr") == 1 ]]
 
-final_state=$(find "$manifest/out/.x2c/app/.x2c-state" \
+final_state=$(find "$manifest/out/.x2c/core/.x2c-state" \
   -name 'final-*' -type f)
 printf 'corrupt private state\n' >"$final_state"
 (cd "$manifest/nested" && "$X2C" build -v --profile release \
   --cc "$manifest/cc-wrapper") >"$manifest/corrupt.stdout" \
   2>"$manifest/corrupt.stderr"
 [[ $(grep -c '^x2c: link ' "$manifest/corrupt.stderr") == 1 ]]
+[[ $(grep -c '^x2c: archive ' "$manifest/corrupt.stderr") == 1 ]]
 
 "$X2C" run --manifest-path "$manifest/x2c.toml" \
   --profile release -- -leading program.x \

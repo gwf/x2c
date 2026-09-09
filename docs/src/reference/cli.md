@@ -269,8 +269,10 @@ implicitly consumed.
 Commands report completed translation, C compilation, archive, and link
 phases on standard error. A final build receipt identifies the artifact,
 elapsed time, generated C and header size, host compiler and job count,
-intermediate directory, and output size. Manifest builds name each target;
-warm builds mark cached phases and the final artifact as up to date.
+intermediate directory, and output size. Manifest builds name each target.
+Warm builds mark reused translation, compilation, and static archives as up
+to date. Executables always relink so changed libraries and native linker
+inputs take effect.
 
 On a capable terminal, work lasting at least 125 ms may also use one transient
 progress line. x2c does not enter raw mode, switch screens, or read terminal

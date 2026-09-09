@@ -21,6 +21,26 @@ make examples
 The Lisp shell is interactive; press Ctrl-D to exit. `make examples` builds
 and checks the curated examples, leaving executables under `examples/build/`.
 
+Files, Counting, and Exceptions use their checked-in data by default when
+started from the repository root:
+
+```sh
+x2c run examples/love/files.x
+x2c run examples/power/counting.x
+x2c run examples/power/exceptions.x
+```
+
+Files and Counting also accept an input filename. Exceptions accepts a
+directory containing its `document.txt` and `document.bin` fixtures. Pass an
+explicit input path when running a built executable. From another directory,
+replace the executable paths below with absolute paths too:
+
+```sh
+./examples/build/love-files/files /absolute/path/to/quantities.txt
+./examples/build/power-counting/counting /absolute/path/to/words.txt
+./examples/build/power-exceptions/exceptions /absolute/path/to/fixtures
+```
+
 ## Love: values, data, and methods
 
 - [Values](love/values.x): dynamic values, operators, type inspection, and C calls.

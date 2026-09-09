@@ -38,6 +38,10 @@ Var Array_push(Array,  Var);
 
 Array Array_remslice(Array,  int,  int);
 
+void Array_free(Array);
+
+size_t Array_len(Array);
+
 int Var_is_void(Var);
 
 Var int_var(int);

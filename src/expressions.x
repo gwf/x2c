@@ -725,6 +725,16 @@ static inline int _expr_is_string_like(List expr) {
   return _type_is_string(type) || _type_is_char_pointer_like(type);
 }
 
+static int _expr_is_raw_string_literal(List expr) {
+  match (expr) {
+    case %(expr ? (parens ?inner)):
+      return _expr_is_raw_string_literal(inner);
+    case %(expr ? (literal ?type ?)):
+      return _type_is_char_pointer_like(type);
+  }
+  return 0;
+}
+
 static List _resolve_protocol_operator(
   Compiler compiler, Symbol op, List lhs, List rhs, Symbol *derived) {
   if (derived) *derived = 0;
@@ -1528,6 +1538,13 @@ static List _resolve_content(
         Type type = lhs_type;
         if (operator == <=>) rhs = c.convert_expression(rhs, type);
         return %(expr $type (op $operator $lhs $rhs));
+      }
+      if (operator == <==> || operator == <!=>) {
+        if (_type_is_string(lhs_type) && _expr_is_raw_string_literal(rhs))
+          rhs = c.convert_expression(rhs, lhs_type);
+        else if (_type_is_string(rhs_type) &&
+                 _expr_is_raw_string_literal(lhs))
+          lhs = c.convert_expression(lhs, rhs_type);
       }
       int constant_string = 0;
       if (operator == <+> &&

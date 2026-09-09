@@ -979,7 +979,7 @@ int Build_finish(Build b){
   }
   b -> final_at = report_now_us();
   report_progress(action -> phase,  0,  1,  b -> output);
-  String state_path = String_truth(b -> state_root) ? String_join(NULL,  cons(String_var(b -> state_root),  cons(String_var(_50),  cons(String_var(_key(b -> output)),  NULL)))) : NULL;
+  String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 ? String_join(NULL,  cons(String_var(b -> state_root),  cons(String_var(_50),  cons(String_var(_key(b -> output)),  NULL)))) : NULL;
   if(String_truth(state_path) && ! b -> request -> dry_run && ! access(b -> output,  R_OK)){
     int ok = 1;
     uint64_t hash = _action_fingerprint(b,  action,  NULL,  inputs,  & ok);
@@ -988,7 +988,7 @@ int Build_finish(Build b){
       b -> final_cached = 1;
       report_progress(action -> phase,  1,  1,  b -> output);
       int input_count = List_len(inputs);
-      String noun = action -> phase == 3362278794 ?(input_count == 1 ? _51 : _52) :(input_count == 1 ? _53 : _54);
+      String noun = input_count == 1 ? _51 : _52;
       report_phase(action -> phase,  input_count,  noun,  input_count,  report_now_us() - b -> final_at);
       return 0;
     }

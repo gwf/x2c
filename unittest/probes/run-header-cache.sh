@@ -85,6 +85,28 @@ cmp -s "$BUILD/batch/twin.c" "$BUILD/solo/twin.c" ||
 grep -q "List_len" "$BUILD/solo/unit.c" ||
   fail "cold walk resolved Foo to the wrong declaration"
 
+# Translating an owner replaces its artifact entry with collected source.
+# Its generated protocol callables must survive that replacement for later
+# consumers, just as they do when loaded directly from the artifact.
+cat >"$BUILD/src/array-consumer.x" <<'EOF'
+#include "array.x"
+void release(Array items) { items.free(); }
+size_t count(Array items) { return items.len(); }
+EOF
+mkdir -p "$BUILD/owner-batch" "$BUILD/owner-parallel"
+"$X2C" translate --out-dir "$BUILD/solo" "$BUILD/src/array-consumer.x"
+"$X2C" translate --out-dir "$BUILD/owner-batch" \
+  "$ROOT/lib/array.x" "$BUILD/src/array-consumer.x"
+"$X2C" translate -j 2 --out-dir "$BUILD/owner-parallel" \
+  "$ROOT/lib/array.x" "$BUILD/src/array-consumer.x"
+for extension in c h; do
+  for mode in owner-batch owner-parallel; do
+    cmp -s "$BUILD/solo/array-consumer.$extension" \
+      "$BUILD/$mode/array-consumer.$extension" ||
+      fail "generated callable declarations changed under $mode"
+  done
+done
+
 # Fake repo root: artifact paths are root-relative, so the probe gets
 # its own root with the real compiler and snapshot copied in.  Root
 # discovery climbs from the binary looking for src+include+lib.

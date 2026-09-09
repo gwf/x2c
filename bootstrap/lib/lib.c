@@ -16,6 +16,8 @@ List Array_list(Array);
 
 Array Array_sort(Array);
 
+void Array_free(Array);
+
 DisjointSet DisjointSet_new(int n){
   DisjointSet set = Scope_malloc(sizeof(struct DisjointSet));
   set -> parent = Scope_malloc(sizeof(int) * n);

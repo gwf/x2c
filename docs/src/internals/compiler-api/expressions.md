@@ -54,7 +54,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:2164`
+Source: `src/expressions.x:2181`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -73,7 +73,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:2421`
+Source: `src/expressions.x:2438`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
@@ -84,7 +84,7 @@ Parses one right-associative assignment expression.
 A parenthesized identifier list on the left becomes a destructuring
 assignment only for `=`. `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:1773`
+Source: `src/expressions.x:1790`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -95,7 +95,7 @@ Parses a binary expression and its optional conditional tail.
 The false arm recurses at conditional precedence, making `?:`
 right-associative, and `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:1753`
+Source: `src/expressions.x:1770`
 
 <a id="Compiler.parse_expression"></a>
 #### Compiler.parse_expression
@@ -106,7 +106,7 @@ Parses an assignment expression and any following comma expressions.
 A comma expression retains source order and takes the type of its final
 value. `compiler.token` stops at the first token outside the expression.
 
-Source: `src/expressions.x:1833`
+Source: `src/expressions.x:1850`
 
 <a id="Compiler.parse_macro_expression_target"></a>
 #### Compiler.parse_macro_expression_target
@@ -133,7 +133,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions.x:1856`
+Source: `src/expressions.x:1873`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -144,7 +144,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `compiler.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions.x:1780`
+Source: `src/expressions.x:1797`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -154,7 +154,7 @@ Source: `src/expressions.x:1780`
 Parses and resolves one complex identifier expression.
 Parsing starts at `compiler.token` and leaves it after the identifier.
 
-Source: `src/expressions.x:1733`
+Source: `src/expressions.x:1750`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -168,7 +168,7 @@ inputs are returned unchanged; abstract declarations use the declaration
 binder. `origin` anchors diagnostics and generated operations that must
 retain source position.
 
-Source: `src/expressions.x:1612`
+Source: `src/expressions.x:1629`
 
 <a id="Compiler.resolve_map_entry"></a>
 #### Compiler.resolve_map_entry
@@ -178,7 +178,7 @@ Source: `src/expressions.x:1612`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions.x:1596`
+Source: `src/expressions.x:1613`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member

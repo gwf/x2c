@@ -1668,6 +1668,13 @@ prefix returns the updated `Var` and postfix returns its original value. Unary
 implemented, native, or a base default. Equality, identity, and total ordering
 do not become binary-arithmetic operations.
 
+For `==` and `!=`, a C string literal opposite an operand of static type
+`String` converts to `String` before ordinary protocol comparison. This
+applies in either operand order and through parentheses around the literal.
+Other C pointer expressions, including variables, casts, and conditional
+expressions, retain their native comparison behavior. `===` and `!==` do not
+perform this literal conversion.
+
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
 `Var` operand at its original C short-circuit position.

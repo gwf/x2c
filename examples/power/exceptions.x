@@ -24,14 +24,17 @@ assert(fcntl(opened_fd, F_GETFD) == -1 && errno == EBADF);
     return "No preview: unable to read file.";
 }
 
-int main(void) {
-assert(preview("document.txt") == %"Meeting at noon.");
+int main(int argc, char **argv) {
+String directory = argc > 1 ? argv[1]
+                           : "examples/data/power-exceptions";
+assert(preview(%"$directory/document.txt") == %"Meeting at noon.");
 assert(fcntl(opened_fd, F_GETFD) == -1 && errno == EBADF);
 // document.bin contains a NUL byte, which String cannot hold.
-puts(preview("document.bin"));
+puts(preview(%"$directory/document.bin"));
 assert(fcntl(opened_fd, F_GETFD) == -1 && errno == EBADF);
-assert(preview("missing-preview-file.txt") == %"No preview: file not found.");
-assert(preview(".") == %"No preview: unable to read file.");
+assert(preview(%"$directory/missing-preview-file.txt")
+       == %"No preview: file not found.");
+assert(preview(directory) == %"No preview: unable to read file.");
 assert(fcntl(opened_fd, F_GETFD) == -1 && errno == EBADF);
 return 0;
 }

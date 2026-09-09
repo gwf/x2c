@@ -9,9 +9,11 @@ Map word_count(String path) {
   return counts;
 }
 
-int main(void) {
+int main(int argc, char **argv) {
 // words.txt: "Tea coffee tea" then "Milk coffee tea".
-Map counts = word_count("words.txt");
+String path = argc > 1 ? argv[1]
+                      : "examples/data/power-counting/words.txt";
+Map counts = word_count(path);
 
 // Put counts first, then sort the pairs from most to least.
 Array ranked = counts.enumerate()

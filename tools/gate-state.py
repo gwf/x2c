@@ -9,7 +9,8 @@ hand is where the rule fails in practice, so this answers it exactly instead.
 
 `check` prints `valid` only when every tracked and untracked non-ignored file
 has the same content, type, and executable permissions as the tree that passed,
-with the same host compiler. Anything else is `stale`, and it names what moved.
+with the same effective build configuration and tools. Anything else is
+`stale`, and it names what moved.
 It exits 0 for valid and 1 for stale, so a shell can branch on it.
 
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
@@ -26,9 +27,12 @@ import hashlib
 import json
 import os
 import pathlib
+import shlex
+import shutil
 import stat
 import subprocess
 import sys
+import uuid
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 STATE = ROOT / "debug" / "gate-state.json"
@@ -42,17 +46,143 @@ def git(*args: str) -> str:
     return out.stdout
 
 
-def compiler_identity() -> str:
-    """A gate result is only evidence about the toolchain that produced it."""
+# The root Makefile owns defaults and precedence. Child Makefiles derive their
+# flags from these inputs; their definitions are already in the file digest.
+# Search/SDK variables also affect native tools without appearing in argv.
+TOOL_ENV_VARIABLES = (
+    "PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH "
+    "GCC_EXEC_PREFIX SDKROOT DEVELOPER_DIR TOOLCHAINS MACOSX_DEPLOYMENT_TARGET "
+    "LD_LIBRARY_PATH DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH"
+).split()
+CONFIG_VARIABLES = (
+    "MAKE CC AR ARFLAGS RANLIB SHELL BUILD_MODE BUILD_LTO BUILD_CFLAGS "
+    "BUILD_LDFLAGS BUILD_JOBS CFLAGS CPPFLAGS LDFLAGS LDLIBS EXTRA_CFLAGS "
+    "FLAGS X2C_FLAGS X2CFLAGS X2C X2C_CC X2C_AR STAGE0_X2C JOBS"
+).split() + TOOL_ENV_VARIABLES
+
+
+def make_configuration() -> dict[str, str]:
+    """Read expanded values without executing any build target or recipe.
+
+    A second Makefile uses info so values never cross a shell quoting
+    boundary. Command-line overrides are included even when a child target
+    is their only consumer. The random framing lets us
+    reject unsupported multiline values instead of recording partial input.
+    """
+    marker = "x2c-gate-" + uuid.uuid4().hex
+    probe = "\n".join([
+        f"$(info {marker}:begin)",
+        *[f"$(info {marker}:{name}=$({name}))"
+          for name in [*CONFIG_VARIABLES, "MAKEFLAGS"]],
+        "$(foreach v,$(.VARIABLES),"
+        "$(if $(findstring command line,$(origin $(v))),"
+        f"$(info {marker}:override:$(v)=$($(v)))))",
+        f"$(info {marker}:end)",
+        ".PHONY: x2c-gate-inspect",
+        "x2c-gate-inspect: ;",
+    ])
     out = subprocess.run(
-        ["cc", "--version"], capture_output=True, text=True, check=False
+        ["make", "--no-print-directory", "-f", "Makefile", "-f", "-",
+         "x2c-gate-inspect"], cwd=ROOT, input=probe, capture_output=True,
+        text=True, check=True,
     )
-    return out.stdout.splitlines()[0] if out.stdout else "unknown"
+    lines = out.stdout.splitlines()
+    start = lines.index(f"{marker}:begin")
+    end = lines.index(f"{marker}:end", start + 1)
+    values = {}
+    for line in lines[start + 1:end]:
+        if not line.startswith(marker + ":") or "=" not in line:
+            raise ValueError("cannot inspect multiline Make configuration")
+        name, value = line[len(marker) + 1:].split("=", 1)
+        values[name] = value
+    flags = shlex.split(values.pop("MAKEFLAGS"))
+    modes = []
+    for flag in flags:
+        if flag == "--":
+            break
+        if (flag in {"--just-print", "--dry-run", "--recon", "--question",
+                     "--touch", "--ignore-errors"} or
+                flag.startswith(("--old-file", "--assume-old")) or
+                (not flag.startswith("--") and "=" not in flag and
+                 any(letter in flag for letter in "inqto"))):
+            raise ValueError("Make mode can skip failures or required gate work")
+        if not flag.startswith(("--jobserver-fds=", "--jobserver-auth=")):
+            modes.append(flag)
+    values["MAKEFLAGS"] = " ".join(modes)
+    return values
 
 
-# Version 4 adds file type and executable permissions. Old records cannot be
-# upgraded: they never captured those facts and must be validated once again.
-FORMAT = 4
+def tool_identity(
+    command: str, path: str, compiler: bool = False, environment: dict | None = None,
+) -> dict:
+    """Identify a single native executable; opaque wrapper commands fail closed."""
+    arguments = shlex.split(command)
+    if len(arguments) != 1:
+        raise ValueError(f"cannot inspect wrapped tool command: {command!r}")
+    name = arguments[0]
+    if "/" in name:
+        name = str(ROOT / name)
+    found = shutil.which(name, path=path)
+    if not found:
+        raise ValueError(f"cannot find build tool: {command!r}")
+    executable = pathlib.Path(found).resolve(strict=True)
+    if (sys.platform == "darwin" and executable.parent == pathlib.Path("/usr/bin")
+            and executable.name in {"cc", "clang", "gcc", "ar", "ranlib", "make"}):
+        # These are launchers for the selected developer directory. Their own
+        # bytes do not identify the compiler or archiver that a gate will use.
+        selected = subprocess.run(
+            ["/usr/bin/xcrun", "--find", executable.name], cwd=ROOT,
+            capture_output=True, text=True, check=True, env=environment,
+        )
+        if not selected.stdout.strip():
+            raise ValueError(f"cannot resolve Apple build tool: {command!r}")
+        executable = pathlib.Path(selected.stdout.strip()).resolve(strict=True)
+    data = executable.read_bytes()
+    if data.startswith(b"#!"):
+        raise ValueError(f"cannot inspect script tool wrapper: {command!r}")
+    identity = {
+        "path": str(executable),
+        "sha256": hashlib.sha256(data).hexdigest(),
+    }
+    if compiler:
+        out = subprocess.run(
+            [str(executable), "--version"], cwd=ROOT, capture_output=True,
+            text=True, check=True, env=environment,
+        )
+        if not out.stdout.strip():
+            raise ValueError(f"cannot identify compiler: {command!r}")
+        identity["version"] = out.stdout.strip()
+    return identity
+
+
+def build_configuration() -> dict:
+    values = make_configuration()
+    environment = os.environ.copy()
+    for name in TOOL_ENV_VARIABLES:
+        if values[name]:
+            environment[name] = values[name]
+        else:
+            environment.pop(name, None)
+    commands = {"MAKE": values["MAKE"], "CC": values["CC"], "AR": values["AR"]}
+    for name in ("RANLIB", "X2C", "X2C_CC", "X2C_AR", "STAGE0_X2C"):
+        if values[name]:
+            commands[name] = values[name]
+    # The default stage-0 compiler is a gate output. Its sources and bootstrap
+    # inputs belong to the tree digest; only an explicit replacement is a tool
+    # input whose contents need recording here.
+    if commands.get("STAGE0_X2C") == "./builds/0/x2c":
+        del commands["STAGE0_X2C"]
+    identities = {"make": tool_identity("make", os.environ.get("PATH", os.defpath))}
+    for name, command in commands.items():
+        identities[name] = tool_identity(
+            command, values["PATH"], name in {"CC", "X2C_CC"}, environment,
+        )
+    return {"values": values, "tools": identities}
+
+
+# Version 5 captures effective Make configuration and executable identities.
+# Older records lack those inputs and must be validated once again.
+FORMAT = 5
 
 
 def content_hash(rel: str, mode: int) -> str:
@@ -117,7 +247,7 @@ def digest() -> dict:
     return {
         "version": FORMAT,
         "files": tree_content(),
-        "compiler": compiler_identity(),
+        "configuration": build_configuration(),
         # Informational only; never compared. Recorded so a stale stamp can be
         # traced back to the commit it was taken on.
         "recorded_at_head": git("rev-parse", "HEAD").strip(),
@@ -141,8 +271,8 @@ def differences(old: dict, new: dict) -> list[str] | None:
     if old.get("version") != FORMAT:
         return None
     reasons = []
-    if old.get("compiler") != new["compiler"]:
-        reasons.append("host compiler changed")
+    if old.get("configuration") != new["configuration"]:
+        reasons.append("build configuration or tools changed")
     before, after = old.get("files", {}), new["files"]
     changed = sorted(
         name

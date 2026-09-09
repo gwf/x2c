@@ -159,6 +159,8 @@ void * Var_pointer(Var);
 
 List cdr(List);
 
+size_t Array_len(Array);
+
 Var Array_push(Array,  Var);
 
 int Iter_try_next(Iter,  Var *);
@@ -228,6 +230,8 @@ String Buffer_str_free(Buffer);
 int Iter_truth(Iter);
 
 Iter Iter_init(Iter,  Var,  IterNextFn,  Var);
+
+void Array_free(Array);
 
 void Scope_release(void);
 

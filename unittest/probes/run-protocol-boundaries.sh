@@ -152,10 +152,10 @@ grep -qx 'owned' "$BUILD/protocol-owner/stdout" ||
 "$X2C" translate --out-dir "$BUILD/protocol-basedefault" \
   "$SOURCE/protocol-basedefault-owner.x" \
   "$SOURCE/protocol-basedefault-consumer.x"
-grep -q 'double Feet_magnitude(' \
+grep -Eq '^double Feet_magnitude\([^;]*\)[[:space:]]*\{' \
   "$BUILD/protocol-basedefault/protocol-basedefault-owner.c" ||
   fail "base-default owner omitted its generated member binding"
-if grep -q 'double Feet_magnitude(' \
+if grep -Eq '^double Feet_magnitude\([^;]*\)[[:space:]]*\{' \
     "$BUILD/protocol-basedefault/protocol-basedefault-consumer.c"; then
   fail "base-default consumer defined the generated binding instead of \
 consulting the conformance table"

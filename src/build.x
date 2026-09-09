@@ -575,9 +575,10 @@ static List _native_action_inputs(Build state) {
 }
 
 /** Compiles registered C sources and then archives or links the final output.
-    Returns zero for success, including a current retained artifact, and one
-    when compilation or the final native action fails. Compile-only requests
-    stop after objects; successful retained builds update private state.
+    Returns zero for success and one when compilation or the final native
+    action fails. Compile-only requests stop after objects. Static archives
+    reuse their recorded inputs; executables always link because library
+    selection and implicit linker inputs are not in the fingerprint.
 */
 int Build.finish(Build b) {
   if (_compile_sources(b)) return 1;
@@ -596,7 +597,7 @@ int Build.finish(Build b) {
   b.final_at = report_now_us();
   report_progress(action.phase, 0, 1, b.output);
   String state_path =
-    b.state_root ?
+    b.state_root && b.request.kind == <static-lib> ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
   if (state_path && !b.request.dry_run &&
       !access(b.output, R_OK)) {
@@ -610,9 +611,7 @@ int Build.finish(Build b) {
       b.final_cached = 1;
       report_progress(action.phase, 1, 1, b.output);
       int input_count = inputs.len();
-      String noun = action.phase == <archive> ?
-                    (input_count == 1 ? %"object" : %"objects") :
-                    (input_count == 1 ? %"input" : %"inputs");
+      String noun = input_count == 1 ? %"object" : %"objects";
       report_phase(
         action.phase, input_count, noun, input_count,
         report_now_us() - b.final_at);

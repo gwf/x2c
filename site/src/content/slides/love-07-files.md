@@ -6,8 +6,9 @@ tab: files
 ```x2c
 #include <stdlib.h>
 
-~int main(void) {
-String path = "quantities.txt";
+~int main(int argc, char **argv) {
+String path = argc > 1 ? argv[1]
+                      : "examples/data/love-files/quantities.txt";
 
 // Read the whole text file and close it in one expression.
 String text = path.open("r").string_close();

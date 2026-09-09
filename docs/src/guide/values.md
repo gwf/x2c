@@ -404,22 +404,14 @@ Both directions work: a `Var` lvalue with any numeric operand, and a native
 scalar lvalue updated by a `Var`. C indexing and member access are fine,
 since those are addressable lvalues. Enum and bitfield targets are excluded.
 
-A collection index does not work. `array[i]` is a helper call, not a C
-lvalue:
-
-<!-- ignore: indexed collection values are not addressable C lvalues -->
-```x2c,ignore
-Array counts = %[1, 2, 3];
-counts[0] += 1;   /* xform: indexed collection values do not support += */
-```
-
-Read, compute, and assign through the collection instead:
+`Array` and `Map` indices support compound assignment too. The compiler uses
+the collection's update operation and evaluates the receiver, index, and
+right operand once:
 
 ```x2c
 Array counts = %[1, 2, 3];
 
-Var current = counts[0];
-counts[0] = current + 1;
+counts[0] += 1;
 
 Var shown = counts[0];
 printf("%s\n", shown);
@@ -428,6 +420,11 @@ printf("%s\n", shown);
 ```text
 2
 ```
+
+Numeric `map[key] += value` also initializes a missing key from `value`;
+other indexed updates require an existing destination. `List` and `String`
+indices cannot be updated. The [language reference](../reference/language.md)
+describes the supported operations and conversion rules.
 
 ## When Var is the wrong tool
 
@@ -473,8 +470,8 @@ int clamp(int value, int low, int high) {
 
 The numeric conversion matrix does *not* generalize to nonnumeric tags.
 `String`, `Symbol`, collection, and pointer crossings have their own typed
-readers, and asking for one of those payloads from a `Var` with a different tag
-is an error.
+readers. The exact readers for pointer-shaped runtime values return NULL when
+the tag does not match; test the tag or returned value before using it.
 
 `String` interpolation reads a value instead of demanding a tag, so it has no
 such limit. A numeric segment renders through its nearest declared `T_str`

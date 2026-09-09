@@ -884,7 +884,7 @@ static void _compile_file(CliRequest request,  String filename,  String output_d
   _stage_stats(filename,  "tokenize");
   Map snapshot_statics = NULL;
   Map globs = _preprocess_input(compiler,  filename,  & snapshot_statics);
-  if(opts -> dump == 559620016998) header_symbols_begin_generated();
+  if(! opts -> no_cpp) header_symbols_begin_generated();
   Sym_seed_var_tags(compiler -> sym,  globs);
   _stage_stats(filename,  "symbols");
   List ast = _parse_input(compiler,  globs);

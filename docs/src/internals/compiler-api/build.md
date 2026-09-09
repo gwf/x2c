@@ -58,7 +58,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:750`
+Source: `src/build.x:749`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -76,11 +76,12 @@ Source: `src/build.x:451`
 `int Build.finish(Build b)`
 
 Compiles registered C sources and then archives or links the final output.
-Returns zero for success, including a current retained artifact, and one
-when compilation or the final native action fails. Compile-only requests
-stop after objects; successful retained builds update private state.
+Returns zero for success and one when compilation or the final native
+action fails. Compile-only requests stop after objects. Static archives
+reuse their recorded inputs; executables always link because library
+selection and implicit linker inputs are not in the fingerprint.
 
-Source: `src/build.x:582`
+Source: `src/build.x:583`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -112,7 +113,7 @@ Source: `src/build.x:346`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:650`
+Source: `src/build.x:649`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -122,7 +123,7 @@ Source: `src/build.x:650`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:707`
+Source: `src/build.x:706`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current

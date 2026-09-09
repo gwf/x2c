@@ -74,6 +74,8 @@ int Var_equal(Var,  Var);
 
 int Var_is_void(Var);
 
+void Bytes_free(Bytes);
+
 void Scope_free(void *);
 
 void * Scope_malloc(size_t);

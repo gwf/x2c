@@ -376,7 +376,7 @@ static void _compile_file(
   _stage_stats(filename, "tokenize");
   Map snapshot_statics = NULL;
   Map globs = _preprocess_input(compiler, filename, &snapshot_statics);
-  if (opts.dump == <hdr-syms>) header_symbols_begin_generated();
+  if (!opts.no_cpp) header_symbols_begin_generated();
   compiler.sym.seed_var_tags(globs);
   _stage_stats(filename, "symbols");
   List ast = _parse_input(compiler, globs);

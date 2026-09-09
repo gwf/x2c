@@ -3,7 +3,7 @@ foreach|showcase|run||expected/foreach.stdout|Basic List iteration.
 love/arrays|showcase|run||expected/love-arrays.stdout|Standalone love arrays gallery example.
 love/basic-literals|showcase|run||expected/static-test.stdout|Runtime collection and String literals.
 love/conversions|showcase|run||expected/type-conversion-matrix.stdout|Verified numeric and typed nonnumeric Var crossings.
-love/files|showcase|run||expected/love-files.stdout|Standalone love files gallery example.
+love/files|showcase|run|quantities.txt|expected/love-files.stdout|Standalone love files gallery example.
 love/list-methods|showcase|run||expected/prototype-inheritance.stdout|Typedef method inheritance and result-type chaining.
 love/lists|showcase|run||expected/love-lists.stdout|Standalone love lists gallery example.
 love/literals|showcase|run||expected/love-literals.stdout|Standalone love literals gallery example.
@@ -30,8 +30,8 @@ magic/stacked-decorators|showcase|run||expected/decorators.stdout|Function decor
 magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including compile-time and runtime Lisp.
 power/collection-indexing|showcase|run||expected/indexing.stdout|Ordinary and packed indexing, checked reads, and slicing.
 power/contexts|showcase|run||expected/context-lifetime.stdout|Isolated Context cleanup and cyclic result export.
-power/counting|showcase|run||expected/power-counting.stdout|Standalone power counting gallery example.
-power/exceptions|showcase|run||expected/power-exceptions.stdout|Standalone power exceptions gallery example.
+power/counting|showcase|run|words.txt|expected/power-counting.stdout|Standalone power counting gallery example.
+power/exceptions|showcase|run|.|expected/power-exceptions.stdout|Standalone power exceptions gallery example.
 power/finance|showcase|run||expected/iter-finance.stdout|Running balances, loan payments, and compounded growth.
 power/generics|showcase|run||expected/power-generics.stdout|Standalone power generics gallery example.
 power/greet-client|showcase|run||expected/import-greet.stdout|Package import: alias-qualified names and a linked package archive.

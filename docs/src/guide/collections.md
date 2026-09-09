@@ -664,8 +664,9 @@ rejected instead of read as 4. It accepts a sign and recognizes `0x`, `0o`,
 and `0b` radix prefixes as well as C's leading-zero octal.
 `String.try_double` is the floating counterpart on the same terms.
 
-Concatenation with `+` works and produces a canonical `String`, so `==` on the
-result is a content comparison:
+Concatenation with `+` produces a canonical `String`. Comparing a `String`
+with a C string literal using `==` or `!=` promotes the literal to `String`
+and compares their contents:
 
 ```x2c
 String built = %"hello" + %", world";
@@ -675,6 +676,12 @@ printf("%s  %d\n", built, built == "hello, world");
 ```text
 hello, world  1
 ```
+
+The literal may appear on either side and may be parenthesized. A `char *`
+variable or another C pointer expression keeps native pointer comparison;
+convert it to `String` explicitly when you want content comparison. The
+identity operators `===` and `!==` also keep pointer comparison and do not
+promote literals.
 
 ### Building text
 

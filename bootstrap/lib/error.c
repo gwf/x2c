@@ -177,6 +177,8 @@ Var Map_setindex(Map,  Var,  Var);
 
 Var Map_getindex(Map,  Var);
 
+void Array_free(Array);
+
 void MatchPlan_free(MatchPlan);
 
 void Scope_free(void *);
@@ -191,11 +193,15 @@ Var List_cadr(List);
 
 Pool List_pool_retain_named(const char *);
 
+size_t Array_len(Array);
+
 Var Array_getindex(Array,  int);
 
 int MatchPlan_execute_capture(MatchPlan,  Var,  MatchCaptureBuffer *,  MachineStats *);
 
 void List_pool_release(void);
+
+int Array_truth(Array);
 
 void ExceptionFrame_unwind(void *);
 

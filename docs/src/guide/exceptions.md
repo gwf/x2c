@@ -127,6 +127,28 @@ through that `catch` arm. If they must survive the arm, copy them first with
 `Error.snapshot`. If translation is unnecessary, omit an arm and let the
 original cause continue outward.
 
+A wildcard code binder handles any cause while retaining access to its
+details. Snapshot the details inside the arm when they must survive it:
+
+```x2c
+Symbol code = 0;
+List detail = nil;
+try raise %(bad-arg (operation "load"));
+catch %(?caught *fields): {
+  code = caught;
+  detail = Error.snapshot(fields);
+}
+printf("%s %s\n", code.str(), detail.repr());
+```
+
+```text
+bad-arg ((operation "load"))
+```
+
+Put this arm after any specific filters that should handle a cause first.
+Like any matching arm, it consumes the selected errors and does not catch an
+error raised by its own body.
+
 ## Handlers and policy
 
 A filtered `catch` transfers control out of the raising call. Embedders may
