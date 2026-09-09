@@ -427,11 +427,71 @@ static void _partition_preproc(
    source; public inline definitions remain header-only. A function definition,
    static declaration, or foreign alias begins source-private output until an
    explicit public pragma changes visibility. */
+/* True when `node` spells the typedef name `name` anywhere, as a
+   single-string type atom such as `("Point")`. */
+static int _mentions_type(List node, String name) {
+  if (!node) return 0;
+  if (node.car() is <string> && !node.cdr()) return node.car() == name;
+  for (List rest = node; rest; rest = rest.cdr())
+    if (rest.car() is <list> && _mentions_type(rest.car(), name)) return 1;
+  return 0;
+}
+
+static String _typedef_name(List typedef_node) {
+  match (typedef_node) {
+    case %(typedef ? (bindings (bind (binding ? ?name) ?) *)): return name;
+    case %(typedef ? (bindings (bind (?name) ?) *)): return name;
+  }
+  return NULL;
+}
+
+/* A typedef that follows a function definition is source-private unless a
+   later header item names it; a public prototype must be able to spell its
+   parameter types. Markers hold each such typedef's position in both files
+   until the whole unit has been partitioned. */
+static List _resolve_typedef_markers(Array items, Array pending, int header) {
+  Array output = %[];
+  int count = items.len();
+  for (int i = 0; i < count; i++) {
+    Var item = items[i];
+    match (item) {
+      case %(pending ?index): {
+        int at = index.int();
+        List entry = pending[at];
+        String name = entry.car(), List node = entry.cadr();
+        int promoted = entry.caddr().int();
+        if (header) {
+          for (int j = i + 1; j < count && !promoted; j++)
+            promoted = items[j] is <list> &&
+                       _mentions_type(items[j].list(), name);
+          pending[at] = %($name $node $promoted);
+        }
+        if (promoted == header) output.push(node);
+        continue;
+      }
+    }
+    output.push(item);
+  }
+  return output.list_free();
+}
+
 static List _header_and_source(Compiler compiler, List ast) {
-  Array header = %[], source = %[], int private = 0;
+  Array header = %[], source = %[], pending = %[], int private = 0;
   foreach (Ast node, ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
+      case %(typedef ? (bindings *)): {
+        String name = private ? _typedef_name(node) : NULL;
+        if (!name) {
+          (private ? source : header).push(node);
+          continue;
+        }
+        List marker = %(pending ${pending.len()});
+        pending.push(%($name $node 0));
+        header.push(marker);
+        source.push(marker);
+        continue;
+      }
       case %(function (!set ?type (*)) ?declarator
              (!set ?body (block *))): {
         _partition_function(header, source, type, declarator, body);
@@ -469,7 +529,8 @@ static List _header_and_source(Compiler compiler, List ast) {
     }
     (private ? source : header).push(node);
   }
-  List header_list = header.list_free(), source_list = source.list_free();
+  List header_list = _resolve_typedef_markers(header, pending, 1);
+  List source_list = _resolve_typedef_markers(source, pending, 0);
   return %( $header_list $source_list );
 }
 

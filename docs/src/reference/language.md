@@ -15,7 +15,9 @@ An `.x` file combines declarations and definitions. Translation produces a
 header and a C source file.
 
 `#pragma private` marks the start of implementation-only content. Declarations
-before it may be emitted to the generated header. Every translated header
+before it may be emitted to the generated header. A function definition also
+begins source-private output, except that a typedef after it still belongs
+to the header when a later public prototype names it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 

@@ -752,19 +752,23 @@ static int _expr_is_raw_string_literal(List expr) {
   return 0;
 }
 
+/* A binary operator with one participant operand converts the other operand
+   to the participant type through its declared converter, so `x * 2.0` and
+   `2.0 - x` resolve like `x * two`. The converted operand replaces the
+   original through `lhs` and `rhs`. */
 static List _resolve_protocol_operator(
-  Compiler compiler, Symbol op, List lhs, List rhs, Symbol *derived) {
+  Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
   if (derived) *derived = 0;
-  (Var lhs_tag, Type lhs_type) = lhs;
+  (Var lhs_tag, Type lhs_type) = *lhs;
   (void) lhs_tag;
   Type participant = lhs_type, rhs_type = NULL;
   Var rhs_tag;
-  if (rhs) {
-    (rhs_tag, rhs_type) = rhs;
+  if (*rhs) {
+    (rhs_tag, rhs_type) = *rhs;
     (void) rhs_tag;
   }
   Symbol member = 0;
-  if (!rhs) {
+  if (!*rhs) {
     if (op != <->) return NULL;
     member = <neg>;
   }
@@ -773,11 +777,23 @@ static List _resolve_protocol_operator(
     member = <contains>;
   }
   else {
-    if (!participant || participant !== rhs_type) return NULL;
+    if (!participant) return NULL;
     member = compiler.operator_member(op);
     Symbol source = compiler.derived_member(op);
     if (!member) member = source;
     if (derived) *derived = source;
+    if (!member) return NULL;
+    if (participant !== rhs_type) {
+      List converted = compiler.resolve_protocol_member(participant, member)
+        ? _converter_call(compiler, *rhs, rhs_type, participant) : NULL;
+      if (converted) *rhs = converted;
+      else {
+        converted = _converter_call(compiler, *lhs, lhs_type, rhs_type);
+        if (!converted) return NULL;
+        participant = rhs_type;
+        *lhs = converted;
+      }
+    }
   }
   return participant && member
        ? compiler.resolve_protocol_member(participant, member)
@@ -787,7 +803,8 @@ static List _resolve_protocol_operator(
 static List Compiler._protocol_operator_expression(
   Compiler compiler, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
-  List resolved = _resolve_protocol_operator(compiler, op, lhs, rhs, &derived);
+  List resolved =
+    _resolve_protocol_operator(compiler, op, &lhs, &rhs, &derived);
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
