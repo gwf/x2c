@@ -211,13 +211,13 @@ Symbol Compiler_operator_member(Compiler, Symbol);
 
 Symbol Compiler_derived_member(Compiler, Symbol);
 
+int Sym_is_var_type(Sym, Type);
+
 List Compiler_resolve_protocol_member(Compiler, Type, String);
 
 Type Sym_resolve_numeric_type(Sym, Type);
 
 Type Type_widest(Type, Type);
-
-int Sym_is_var_type(Sym, Type);
 
 Type Type_promote(Type);
 
@@ -477,7 +477,7 @@ static inline int _expr_is_string_like(List expr);
 
 static int _expr_is_raw_string_literal(List expr);
 
-static List _resolve_protocol_operator(Compiler compiler, Symbol op, List lhs, List rhs, Symbol * derived);
+static List _resolve_protocol_operator(Compiler compiler, Symbol op, List * lhs, List * rhs, Symbol * derived);
 
 static List Compiler__protocol_operator_expression(Compiler compiler, Symbol op, List lhs, List rhs);
 
@@ -2651,27 +2651,33 @@ default: break;
 return 0;
 }
 
-static List _resolve_protocol_operator(Compiler compiler, Symbol op, List lhs, List rhs, Symbol * derived){
-  if(derived) * derived = 0;  List _x2c_destructure_5 = lhs;  Var lhs_tag = List_getindex(_x2c_destructure_5, 0);  Type lhs_type = Var_type(List_getindex(_x2c_destructure_5, 1)); (void) lhs_tag;  Type participant = lhs_type, rhs_type = NULL;  Var rhs_tag;  if(List_truth(rhs)){
+static List _resolve_protocol_operator(Compiler compiler, Symbol op, List * lhs, List * rhs, Symbol * derived){
+  if(derived) * derived = 0;  List _x2c_destructure_5 = * lhs;  Var lhs_tag = List_getindex(_x2c_destructure_5, 0);  Type lhs_type = Var_type(List_getindex(_x2c_destructure_5, 1)); (void) lhs_tag;  Type participant = lhs_type, rhs_type = NULL;  Var rhs_tag;  if(List_truth(* rhs)){
     {
-      List _x2c_destructure_6 = rhs;  rhs_tag = List_getindex(_x2c_destructure_6, 0);  rhs_type = Var_type(List_getindex(_x2c_destructure_6, 1));
+      List _x2c_destructure_6 = * rhs;  rhs_tag = List_getindex(_x2c_destructure_6, 0);  rhs_type = Var_type(List_getindex(_x2c_destructure_6, 1));
     }
     (void) rhs_tag;
   }
-  Symbol member = 0;  if(! List_truth(rhs)){
+  Symbol member = 0;  if(! List_truth(* rhs)){
     if(op != 62) return NULL;  member = 29006;
   }
   else if(op == 604){
     participant = rhs_type;  member = 239352236966;
   }
   else{
-    if(! List_truth(Type_list(participant)) || participant != rhs_type) return NULL;  member = Compiler_operator_member(compiler, op);  Symbol source = Compiler_derived_member(compiler, op);  if(! member) member = source;  if(derived) * derived = source;
+    if(! List_truth(Type_list(participant))) return NULL;  member = Compiler_operator_member(compiler, op);  Symbol source = Compiler_derived_member(compiler, op);  if(! member) member = source;  if(derived) * derived = source;  if(! member) return NULL;  if(participant != rhs_type){
+      if(Sym_is_var_type(compiler -> sym, participant) || Sym_is_var_type(compiler -> sym, rhs_type)) return NULL;  int lhs_member = ! ! List_truth(Compiler_resolve_protocol_member(compiler, participant, Symbol_str(member))) && Type_is_aggregate(Sym_resolve_key(compiler -> sym, participant));  int rhs_member = ! ! List_truth(Compiler_resolve_protocol_member(compiler, rhs_type, Symbol_str(member))) && Type_is_aggregate(Sym_resolve_key(compiler -> sym, rhs_type));  List converted = NULL;  if(lhs_member && ! rhs_member) converted = _converter_call(compiler, * rhs, rhs_type, participant);  if(List_truth(converted)) * rhs = converted;  else if(rhs_member && ! lhs_member){
+        converted = _converter_call(compiler, * lhs, lhs_type, rhs_type);  if(! List_truth(converted)) return NULL;  participant = rhs_type;  * lhs = converted;
+      }
+      else return NULL;
+    }
+
   }
   return List_truth(Type_list(participant)) && member ? Compiler_resolve_protocol_member(compiler, participant, Symbol_str(member)) : NULL;
 }
 
 static List Compiler__protocol_operator_expression(Compiler compiler, Symbol op, List lhs, List rhs){
-  Symbol derived = 0;  List resolved = _resolve_protocol_operator(compiler, op, lhs, rhs, & derived);  if(! List_truth(resolved)) return NULL;  List _x2c_destructure_7 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_7, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_7, 1));  Type result = List_cdr(signature);  List arguments = NULL;  if(! List_truth(rhs)) arguments = cons(_101, cons(List_var(lhs), NULL));  else if(op == 604){
+  Symbol derived = 0;  List resolved = _resolve_protocol_operator(compiler, op, & lhs, & rhs, & derived);  if(! List_truth(resolved)) return NULL;  List _x2c_destructure_7 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_7, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_7, 1));  Type result = List_cdr(signature);  List arguments = NULL;  if(! List_truth(rhs)) arguments = cons(_101, cons(List_var(lhs), NULL));  else if(op == 604){
     List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  lhs = Compiler_convert_expression(compiler, lhs, Var_type(List_cadr(parameters)));  arguments = cons(_101, cons(List_var(rhs), cons(List_var(lhs), NULL)));
   }
   else arguments = cons(_101, cons(List_var(lhs), cons(List_var(rhs), NULL)));  List call = cons(_0, cons(List_var(result), cons(List_var(cons(_70, cons(List_var(cons(_0, cons(List_var(signature), cons(List_var(cons(_88, cons(List_var(binding), NULL))), NULL)))), cons(List_var(arguments), NULL)))), NULL)));  if(! derived) return call;  if(derived == 11642968) return cons(_0, cons(_32, cons(List_var(cons(_9, cons(_277, cons(List_var(call), NULL)))), NULL)));  List zero = _42;  return cons(_0, cons(_32, cons(List_var(cons(_9, cons(Symbol_var(op), cons(List_var(call), cons(List_var(zero), NULL))))), NULL)));
