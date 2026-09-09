@@ -156,7 +156,7 @@ static int continue_inside_foreach(void){
       {
         Var volatile item;
         Iter _x2c_macro_iterator_0 = List_iter(_5,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_0;

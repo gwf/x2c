@@ -46,5 +46,7 @@ void worker_exit(int status);
 
 int worker_wait(long pid);
 
+String x2c_filename_hash(String filename);
+
 
 #endif /* __GUARD_0x6E6B8BB0__ */

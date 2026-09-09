@@ -43,6 +43,8 @@ int File_puts(File,  const char *);
 
 Iter String_iter(String,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 int File_putc(File,  int);
@@ -155,7 +157,7 @@ static int _write_word(File output,  String word){
   {
     char ch;
     Iter _x2c_macro_iterator_0 = String_iter(word,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -222,7 +224,7 @@ static int _write_contents(File output,  CliRequest request,  Compiler compiler,
   {
     Var value;
     Iter _x2c_macro_iterator_2 = Array_iter(paths,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -248,7 +250,7 @@ static int _write_contents(File output,  CliRequest request,  Compiler compiler,
     {
       Var value;
       Iter _x2c_macro_iterator_3 = Array_iter(paths,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_3;

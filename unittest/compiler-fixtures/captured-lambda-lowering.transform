@@ -139,7 +139,7 @@
                (expr (* int) 
                 (op & (expr (int) 
                        (cast (int) 
-                        (expr () 
+                        (expr (int) 
                          (composite 
                           (commas (expr (int) (ident (binding 23 "value")))))))))))) 
         (expr (size_t) (sizeof (parens (decl (int) (bindings (bind () ())))))))))))) 

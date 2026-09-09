@@ -620,14 +620,6 @@ static List _vertical_spacing(List code) {
   return result;
 }
 
-/* Hash the filename spelling, not file contents. Guards and private header
-   cache identifiers therefore remain stable across content-only edits. */
-static String _filename_hash(String filename) {
-  unsigned hash = 0;
-  foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
-  return %"%08X".printf(hash);
-}
-
 static int _has_runtime_include(List content) {
   foreach (List unit, content) {
     if (!unit) continue;
@@ -643,7 +635,7 @@ static List _include_guard(
   Compiler compiler, List content, String filename) {
   if (compiler.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
-  String guard = _filename_hash(filename), List header = _header();
+  String guard = x2c_filename_hash(filename), List header = _header();
   List guarded_code = _header_guard(content, guard);
   return %( @header @guarded_code );
 }
@@ -701,7 +693,7 @@ void generate_code(Compiler c, List ast, String dir) {
 
   List (header, source) =
     _header_and_source(c, ast);
-  String hash = _filename_hash(c.filename);
+  String hash = x2c_filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
     header, source,
     %"_x2c_hcache_${hash}_",

@@ -60,6 +60,8 @@ Var String_var(String);
 
 Iter String_iter(String,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 void Symbol_decode(Symbol,  char *);
@@ -217,7 +219,7 @@ static Symbol _exact_7bit(String spelling){
   {
     int byte;
     Iter _x2c_macro_iterator_0 = String_iter(spelling,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

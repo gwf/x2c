@@ -169,6 +169,8 @@ size_t Array_len(Array);
 
 Var Array_push(Array,  Var);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 Var Array_getindex(Array,  int);
@@ -196,8 +198,6 @@ Iter Iter_unique(Iter,  Iter);
 Symbol Var_kind(Var);
 
 long Var_integer(Var);
-
-Var int_var(int);
 
 int x2c_normalize_slice(int *,  int *,  int,  int);
 
@@ -484,7 +484,7 @@ List List_append(List a,  List b){
     {
       Var value;
       Iter _x2c_macro_iterator_0 = List_iter(a,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_0;
@@ -633,7 +633,7 @@ List List_reverse(List lst){
   {
     Var value;
     Iter _x2c_macro_iterator_1 = List_iter(lst,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -692,7 +692,7 @@ List List_map(List lst,  Func fn){
     {
       Var value;
       Iter _x2c_macro_iterator_2 = List_iter(lst,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_2;
@@ -745,7 +745,7 @@ Var List_foldl(List lst,  Var seed,  Func fn){
   {
     Var value;
     Iter _x2c_macro_iterator_3 = List_iter(cur,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -776,7 +776,7 @@ Var List_find(List lst,  Func pred){
   {
     Var value;
     Iter _x2c_macro_iterator_4 = List_iter(lst,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -802,7 +802,7 @@ int List_any(List lst,  Func pred){
   {
     Var value;
     Iter _x2c_macro_iterator_5 = List_iter(lst,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -829,7 +829,7 @@ int List_all(List lst,  Func pred){
   {
     Var value;
     Iter _x2c_macro_iterator_6 = List_iter(lst,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;
@@ -865,7 +865,7 @@ List List_sort(List lst){
     {
       Var value;
       Iter _x2c_macro_iterator_7 = List_iter(lst,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_7;
@@ -915,7 +915,7 @@ List List_sort_with(List lst,  Func compare){
     {
       Var value;
       Iter _x2c_macro_iterator_8 = List_iter(lst,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_8;
@@ -964,7 +964,7 @@ List List_sort_by(List lst,  Func key){
     {
       Var value;
       Iter _x2c_macro_iterator_9 = List_iter(lst,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_9;
@@ -1041,7 +1041,7 @@ Array List_array(List lst){
   {
     Var value;
     Iter _x2c_macro_iterator_10 = List_iter(lst,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_10;
@@ -1164,7 +1164,7 @@ static Var _sublis_node(List alist,  Var node){
     {
       Var source;
       Iter _x2c_macro_iterator_11 = List_iter(list,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_11;
@@ -1223,7 +1223,7 @@ List List_flatten(List lst){
     {
       Var head;
       Iter _x2c_macro_iterator_13 = List_iter(lst,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_13;
@@ -1235,7 +1235,7 @@ List List_flatten(List lst){
             {
               Var item;
               Iter _x2c_macro_iterator_12 = List_iter(inner,  &(struct Iter){
-                0
+                int_var(0)
               }
               );
               Var _x2c_macro_item_12;
@@ -1280,7 +1280,7 @@ static void _flatten_all_collect(Array values,  List lst){
   {
     Var head;
     Iter _x2c_macro_iterator_14 = List_iter(lst,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_14;
@@ -1365,7 +1365,7 @@ Var List_assoc(List list,  Var key){
   {
     List pair;
     Iter _x2c_macro_iterator_15 = List_iter(list,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_15;
@@ -1864,7 +1864,7 @@ List List_filter(List lst,  Func pred){
     {
       Var value;
       Iter _x2c_macro_iterator_17 = List_iter(lst,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_17;

@@ -86,9 +86,11 @@ static int _next_is_closing_brace(List rest) {
 /** Returns a canonical formatted C `String` for an emitted token `List`.
     Token order and `code` are unchanged. Braces indent by two spaces,
     semicolons break lines only outside parentheses, and preprocessor tokens
-    occupy their own lines with escaped quotes normalized. An empty `List`
-    returns the empty `String`. Emitted `src-at` markers carry existing
-    compiler origin IDs; zero restores `output_file` at its physical line.
+    occupy their own lines with escaped quotes normalized. A `c-direct`
+    marker precedes an already-emitted directive whose escapes are preserved.
+    An empty `List` returns the empty `String`. Emitted `src-at` markers carry
+    existing compiler origin IDs; zero restores `output_file` at its physical
+    line.
 
     Raises: `<size-limit>` or `<alloc-fail>` while materializing the result.
 */
@@ -120,7 +122,10 @@ char *Compiler.code_pretty_string(
       prev_token = NULL;
       continue;
     }
-    String token = _normalized_token(car(lst).str());
+    int emitted_directive = car(lst) == <c-direct>;
+    if (emitted_directive) lst = cdr(lst);
+    String token = car(lst).str();
+    if (!emitted_directive) token = _normalized_token(token);
     char last = token ? token[-1] : '\0';
 
     /* A directive writes its own newline. The emitter may follow it with a

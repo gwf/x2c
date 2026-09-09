@@ -1,10 +1,11 @@
 > Status: active
 > Completion audit reopened September 9, 2026. The three implementation
-> batches and site changes are delivered and validated, but the full plan
-> now has the stage-translation evaluation, declaration-discovery design,
-> stronger source-package proof, optional suite selection, sorting, and bounded
-> HTTP work ready for integrated validation. Initializer completion is in
-> progress. SQLite's concrete new-package scope awaits Gary's answer.
+> batches and site changes are delivered and validated. The additional
+> stage-translation evaluation, declaration-discovery design, stronger
+> source-package proof, optional suite selection, sorting, and bounded HTTP
+> work are delivered in 1de90da. The current batch completes initializer
+> handling and changes typed Match captures to parentheses.
+> SQLite's concrete new-package scope awaits Gary's answer.
 
 # Correctness, performance, and developer tooling
 
@@ -415,6 +416,12 @@ the next arm and errors propagate normally. Captures are local to the guard
 and arm body. Finish the concrete syntax and core predicate lowering against
 current source before implementation. Existing pattern guards already work.
 
+Gary subsequently selected `?(Type name)` in place of the first delivered
+`?{Type name}` spelling. Adjacent `?(` starts a typed capture; `? (` remains
+a wildcard followed by a sublist. This deliberately changes the meaning of
+the previously compact wildcard/sublist spelling while retaining the same
+type checks, local binding, and canonical pattern lowering.
+
 Comparator/key sorting, SQLite, and bounded concurrent HTTP are application-
 driven followups after current packaging is usable. Scope them from concrete
 programs rather than copying every List operation to Array. Public API
@@ -604,16 +611,30 @@ build and the packaged extension were reviewed before delivery.
 The delivered implementation is validated, but the completion audit found
 remaining work in the original approved scope. Chained designators and brace
 elision were bounded out by implementation choice, not by Gary's approval;
-they are being completed through the existing initializer owners. Sorting and
-bounded HTTP now have concrete callers and focused proof, and await integrated
-publication. SQLite has a concrete task list and example sketch in
+they are completed in the current batch through existing initializer owners.
+Sorting and
+bounded HTTP have concrete callers and shipped with integrated proof in
+1de90da. SQLite has a concrete task list and example sketch in
 `plans/x2c-sqlite-package.md`; its new public package scope awaits Gary's
 answer under `packages/AGENTS.md`. Relocatable built installation and native
 dependency bundling remain deferred by the accepted distribution decision.
 Editor completion/rename/indexing and incremental semantic caches remain
 outside the accepted editor minimum.
 
-### Completion audit work awaiting delivery
+### Completion audit delivery and remaining work
+
+September 9: 1de90da delivers the independent work below. Its exact-tree
+`agent-pr-check` passes 747 tests / 18,282 assertions, 590 compiler fixtures /
+1,373 artifacts, all 150 C/H self-host comparisons through stage 2, the native
+driver and raw-symbol checks, and the documentation audit. The libcurl tests
+and both applications also pass with this isolated delivered compiler.
+Evidence is under `debug/` in
+`completion-apis-gate-final.log` and `completion-libcurl-isolated.log`.
+
+That gate exposed a missing stage-translation dependency on
+`etc/header-symbols.xlisp`. `builds/stage.mk` now includes it in the existing
+input list: unchanged inputs schedule no translation, while changing that
+cache schedules both affected batches. No gate or sequence was added.
 
 - B4/B5: the stage translation evaluation and optional suite selection above
   are complete. Neither changes the default build or publication sequence.
@@ -645,8 +666,23 @@ outside the accepted editor minimum.
   candidate (`debug/completion-units.log`).
 - Initializers: chained designators and brace elision now use one subobject
   walk for conversion and deferred assignments. Native object sizes preserve
-  macro-dependent bounds without a second C constant evaluator. Remaining
-  compound-literal cases are in implementation; final proof is pending.
+  macro-dependent bounds without a second C constant evaluator. Local tags,
+  typedefs, anonymous aggregates, and canonical compound literals retain
+  destination conversions. Native macro inputs expand once across ambiguous
+  alternatives; typed by-value adapters preserve inline definitions and the
+  selected ordinary converter. Sixteen focused fixtures pass 42 artifacts,
+  with O0/O2 native checks for macro counters and custom conversions. The
+  existing static-initialization placement limitations are recorded in
+  `unittest/STATUS.md`. Evidence: `.context/initializer-completion-review.md`
+  and the initializer logs under `debug/`.
+- Match spelling: Gary selected `?(Type name)` before this publication.
+  Spaced `? (pattern)` retains wildcard/sublist meaning; the first delivered
+  brace spelling is removed. The type parser and canonical matcher lowering
+  are unchanged. Tokenizer and Match checks pass 87 tests / 1,035 assertions;
+  the typed fixtures cover Type macro slots and spaced sublists. The editor
+  grammar tests pass, and the updated repository extension is packaged as
+  0.2.1. Evidence: `.context/match-parentheses-review.md` and
+  `debug/match-parentheses-vsix.log`.
 - SQLite: scope is proposed in `plans/x2c-sqlite-package.md`. It has no client
   implementation yet and is not claimed complete or accepted.
 

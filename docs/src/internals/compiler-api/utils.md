@@ -20,6 +20,7 @@ System utilities for environment discovery and child processes.
 | [`x2c_cpp_include_dirs`](#x2c_cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`. |
 | [`x2c_default_include_dirs`](#x2c_default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
 | [`x2c_driver_error`](#x2c_driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
+| [`x2c_filename_hash`](#x2c_filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
 | [`x2c_get_executable`](#x2c_get_executable) | Returns the borrowed resolved executable path, or NULL when unavailable. |
 | [`x2c_get_root`](#x2c_get_root) | Returns the borrowed repository root, or NULL before it is configured. |
 | [`x2c_initialize_environment`](#x2c_initialize_environment) | Initializes compiler paths and default include `List`s once. |
@@ -115,6 +116,14 @@ Source: `src/utils.x:85`
 Prints `x2c: error: <message>` to stderr and exits with status 2.
 
 Source: `src/utils.x:93`
+
+#### x2c_filename_hash
+
+`String x2c_filename_hash(String filename)`
+
+Hashes unit filename spelling for stable generated C identifiers.
+
+Source: `src/utils.x:373`
 
 #### x2c_get_executable
 

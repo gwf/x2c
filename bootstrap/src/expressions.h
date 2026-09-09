@@ -34,6 +34,16 @@ List Compiler_parse_expression(Compiler compiler);
 
 List Compiler_parse_parenthesized_statement(Compiler c);
 
+List Compiler_initializer_native_types(Compiler c,  Type type);
+
+List Compiler_initializer_slot(Compiler c,  List target,  List path);
+
+List Compiler_initializer_rows(Compiler c,  Type root,  List items,  List target);
+
+List Compiler_convert_initializer(Compiler c,  List value,  Type type,  List target);
+
+List Compiler_convert_compound_literal(Compiler c,  List value,  Type type,  Type native_type);
+
 List Compiler_convert_expression(Compiler c,  List expr,  Type target);
 
 List Compiler_convert_segment_to_string(Compiler compiler,  List expr);

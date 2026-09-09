@@ -24,8 +24,13 @@
           (expr (* struct "Iter") 
            (op & (expr (struct "Iter") 
                   (cast (struct "Iter") 
-                   (expr () 
-                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+                   (expr (struct "Iter") 
+                    (composite 
+                     (commas 
+                      (expr ("Var") 
+                       (call (expr ((func ((int))) "Var") 
+                              (ident (binding 44 "int_var"))) 
+                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 8 "_x2c_macro_item_0") ()))) 
     (while 
      (expr (int) 
@@ -46,7 +51,7 @@
           (op = (bind (binding 6 "value") ()) 
            (expr ("List") 
             (call (expr ((func (("Var"))) "List") 
-                   (ident (binding 44 "Var_list"))) 
+                   (ident (binding 45 "Var_list"))) 
              (args (expr ("Var") (ident (binding 5 "item")))))))))) 
        (at 21 
         (matchcases (expr ("List") (ident (binding 6 "value"))) 
@@ -80,8 +85,13 @@
           (expr (* struct "Iter") 
            (op & (expr (struct "Iter") 
                   (cast (struct "Iter") 
-                   (expr () 
-                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+                   (expr (struct "Iter") 
+                    (composite 
+                     (commas 
+                      (expr ("Var") 
+                       (call (expr ((func ((int))) "Var") 
+                              (ident (binding 44 "int_var"))) 
+                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 20 "_x2c_macro_item_1") ()))) 
     (while 
      (expr (int) 
@@ -102,7 +112,7 @@
           (op = (bind (binding 18 "value") ()) 
            (expr ("List") 
             (call (expr ((func (("Var"))) "List") 
-                   (ident (binding 44 "Var_list"))) 
+                   (ident (binding 45 "Var_list"))) 
              (args (expr ("Var") (ident (binding 17 "item")))))))))) 
        (at 13 
         (stmnt 

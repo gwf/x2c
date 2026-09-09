@@ -199,7 +199,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_2 = ValueCursor_iter(value_cursor,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -212,7 +212,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_3 = FloatCursor_iter(float_cursor,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -225,7 +225,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_4 = StringCursor_iter(string_cursor,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -238,7 +238,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_5 = VoidCursor_iter(void_cursor,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -251,7 +251,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_6 = ValueOutput_iter(value_output,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;
@@ -264,7 +264,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_7 = WrongReturn_iter(wrong_return,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;

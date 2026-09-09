@@ -10,6 +10,8 @@ geo__Vec geo__Var_vec(Var);
 
 Iter geo__Vec_iter(geo__Vec,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 double Var_floating(Var);
@@ -26,7 +28,7 @@ double first_component(double x,  double y){
   {
     Var part;
     Iter _x2c_macro_iterator_0 = geo__Vec_iter(v,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

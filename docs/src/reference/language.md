@@ -431,20 +431,25 @@ ownership, boxed dispatch, native aliases, and complete examples.
 
 ### C initializers and static assertions
 
-Array initializers accept direct index designators and continue at the next
-element. Nested braces apply the same rule within each array or aggregate:
+Array and aggregate initializers accept chained index and field designators.
+Positional values continue from the designated subobject using C's ordinary
+brace-elision rules:
 
 ```x2c
 String labels[4] = {[1] = "first", "second"};
-int grid[2][3] = {{[1] = 7, 8}, {[2] = 9}};
+int grid[2][3] = {[0][1] = 7, 8, 9};
+typedef struct Record { String names[2]; Var last; } Record;
+Record record = {.names[1] = "second", "last"};
 ```
 
 Each supplied value converts to its destination element or field type. After
-`.field = value`, positional initialization resumes at the following field,
-including the ordinary conversion of C literals to `String`. Typedefs retain
-these conversions. Use explicit nested braces; chained designators with
-brace-elided continuation are not supported. The native compiler checks index
-constant expressions and bounds.
+`.names[1] = "second"` above, the next value initializes `last`, including its
+ordinary conversion to `Var`. With `.names = "first", "second", "last"`,
+brace elision fills both array elements before continuing to `last`. Explicit
+braces delimit a nested initializer. Typedefs and compound literals retain
+the ordinary destination conversions, including C literals to `String`.
+The native compiler owns index constant expressions, array dimensions, and
+bounds diagnostics.
 
 `_Static_assert(condition, "message");` is accepted at file scope, block scope,
 and within a struct or union. It emits an ordinary C static assertion and adds
@@ -2063,12 +2068,14 @@ binders under `!not` are not definitely assigned; binders under `!or` or
 membership-style `!set` must occur in every alternative; `!quote` is opaque.
 Arm binders are semantic `Var` or `List` locals and support method syntax.
 
-`?{Type name}` declares a native typed capture. Its exact `Var` tag must
+`?(Type name)` declares a native typed capture. Its exact `Var` tag must
 match the tag tested by `value is Type`; mismatches fail the pattern without
 conversion. The type applies to every unquoted occurrence of that binder in
 the arm, including `?name` and alternative branches. Repeated names retain
 their equality constraint. The shorthand lowers to existing `!is` predicates
 and ordinary local declarations; explicit `!is` captures remain `Var` locals.
+The opener `?(` is adjacent; `? (String text)` is a wildcard followed by
+a sublist pattern.
 
 An arm may place `if (expression)` before its colon. The expression runs
 after matching, with captures visible, and uses ordinary truth conversion.

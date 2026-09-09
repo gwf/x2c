@@ -70,14 +70,14 @@ __attribute__((constructor)) static void _file_init_(void){
   ;
   {
     if(0 < sizeof(words) / sizeof(words[0])) words[0] = _5;
-    if(1 < sizeof(words) / sizeof(words[1])) words[1] = _6;
+    if(1ULL < sizeof(words) / sizeof(words[1ULL])) words[1ULL] = _6;
   }
   {
     if(0 < sizeof(rows) / sizeof(rows[0])) rows[0] =(Row){
       .name = _7
     }
     ;
-    if(1 < sizeof(rows) / sizeof(rows[1])) rows[1] =(Row){
+    if(1ULL < sizeof(rows) / sizeof(rows[1ULL])) rows[1ULL] =(Row){
       _8,  2
     }
     ;

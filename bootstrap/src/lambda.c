@@ -105,6 +105,8 @@ int List_truth(List);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 List Var_list(Var);
@@ -216,8 +218,6 @@ int ast_contains_head(Var,  Symbol);
 unsigned Map_len(Map);
 
 Iter Array_iter(Array,  Iter);
-
-Var int_var(int);
 
 Var List_caddr(List);
 
@@ -938,7 +938,7 @@ static List _params_to_decl_params(List names){
   {
     Var item;
     Iter _x2c_macro_iterator_0 = List_iter(names,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -966,7 +966,7 @@ List params = Array_list_free(out);  return cons(_0,  List_append(params,  NULL)
 static int _collect_param_types(List raw_params,  List * out_types){
   Array types = Array_new();  int all_var = 1; {
     Var entry;  Iter _x2c_macro_iterator_1 = List_iter(raw_params,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
       entry = _x2c_macro_item_1; {
@@ -1022,7 +1022,7 @@ return 0;
 static int _typed_params_variadic(List params){
   {
     Var value;  Iter _x2c_macro_iterator_2 = List_iter(params,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
       value = _x2c_macro_item_2; {
@@ -1205,7 +1205,7 @@ static List _type_literal(Compiler compiler,  Type type){
 static List _func_signature_literal(Compiler compiler,  Type type){
   List params = NULL;  Type result = NULL;  _typed_function_parts(type,  & params,  & result);  Array normalized = Array_new(); {
     List parameter;  Iter _x2c_macro_iterator_3 = List_iter(params,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_3;  while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
       parameter = Var_list(_x2c_macro_item_3); {
@@ -1496,7 +1496,7 @@ return NULL;
 static List _signature(Compiler compiler,  List entries){
   Array types = Array_new(); {
     List entry;  Iter _x2c_macro_iterator_4 = List_iter(entries,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
       entry = Var_list(_x2c_macro_item_4);  Array_push(types,  List_var(_entry_type(compiler,  entry)));
@@ -1629,7 +1629,7 @@ case 35407540848: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_
 }
 case 317060127196: ;  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x2c_match_site_36, _x2c_match_expr, List_var(_312), &_x2c_match_capture)) {List targets = Var_list(_x2c_match_values[0]); {
   List target;  Iter _x2c_macro_iterator_5 = List_iter(targets,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_5;  while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
     target = Var_list(_x2c_macro_item_5);  _require_capture_lvalue(c,  target);
@@ -1651,7 +1651,7 @@ default: break;
   }
 {
   Var child;  Iter _x2c_macro_iterator_6 = List_iter(node,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
     child = _x2c_macro_item_6;  Array_push(pending,  child);
@@ -1696,7 +1696,7 @@ static void _collect_reference_captures(List ast,  Map owned,  Map candidates){
   }
 {
       Var child;  Iter _x2c_macro_iterator_7 = List_iter(node,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
         child = _x2c_macro_item_7;  Array_push(pending,  child);
@@ -1743,7 +1743,7 @@ List allocation = cons(_62,  cons(_136,  cons(List_var(cons(_64,  cons(List_var(
 static List _rewrite_lambda_declaration(Compiler compiler,  List target,  List bindings,  Map cells){
   int has_cell = 0; {
     List item;  Iter _x2c_macro_iterator_8 = List_iter(bindings,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_8;  while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
       item = Var_list(_x2c_macro_item_8); {
@@ -1766,7 +1766,7 @@ has_cell |= List_truth(binding) && Map_contains(cells,  List_var(binding));
 }
 if(! has_cell) return NULL;  Array sequence = Array_new(); {
   List item;  Iter _x2c_macro_iterator_9 = List_iter(bindings,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_9;  while(Iter_try_next(_x2c_macro_iterator_9,  & _x2c_macro_item_9)){
     item = Var_list(_x2c_macro_item_9); {
@@ -1857,7 +1857,7 @@ return Ast_rewrite_children(ast, ({
 static List _parameter_setup(Compiler compiler,  List entries,  Map cells){
   Array setup = Array_new(); {
     List entry;  Iter _x2c_macro_iterator_10 = List_iter(entries,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_10;  while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
       entry = Var_list(_x2c_macro_item_10); {
@@ -1889,7 +1889,7 @@ return body;
 static List _prepare_lambda_region(Compiler compiler,  List entries,  List body){
   if(! ast_contains_head(List_var(body),  808259842)) return body;  body = _prepare_nested_lambda_regions(compiler,  body);  Map owned = Map_new();  Array order = Array_new(); {
     List entry;  Iter _x2c_macro_iterator_11 = List_iter(entries,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_11;  while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
       entry = Var_list(_x2c_macro_item_11);  _record_region_binding(compiler,  _entry_binding(entry),  owned,  order);
@@ -1898,7 +1898,7 @@ static List _prepare_lambda_region(Compiler compiler,  List entries,  List body)
   }
   _collect_region_bindings(compiler,  body,  owned,  order);  Map candidates = Map_new();  _collect_reference_captures(body,  owned,  candidates);  if(! Map_len(candidates)) return body;  Map cells = Map_new(); {
     List binding;  Iter _x2c_macro_iterator_12 = Array_iter(order,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_12;  while(Iter_try_next(_x2c_macro_iterator_12,  & _x2c_macro_item_12)){
       binding = Var_list(_x2c_macro_item_12); {
@@ -2059,7 +2059,7 @@ static List _captured_context_call(Type type,  List context,  List adapter,  Typ
 static List _lower_captured_lambda(Compiler compiler,  List entries,  List captures,  List body){
   String lname = Compiler_fresh_name(compiler,  _530);  List lambda_binding = Sym_introduce(compiler -> sym,  lname);  List closure_binding = Sym_introduce(compiler -> sym,  Compiler_fresh_name(compiler,  _531));  List argv_binding = Sym_introduce(compiler -> sym,  Compiler_fresh_name(compiler,  _532));  String environment_name = Compiler_fresh_name(compiler,  _533);  List environment_typedef = Sym_introduce(compiler -> sym,  environment_name);  Type environment_value_type = List_type(cons(String_var(environment_name),  NULL));  Type environment_pointer_type = List_type(cons(_134,  cons(_141,  cons(String_var(environment_name),  NULL))));  List environment_local = Sym_introduce(compiler -> sym,  Compiler_fresh_name(compiler,  _534));  Map_setindex(Compiler_semantic_binding_facts(compiler),  List_var(cons(_266,  cons(List_var(environment_local),  NULL))),  int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler),  List_var(cons(_48,  cons(List_var(environment_local),  NULL))),  List_var(environment_pointer_type));  Map slots = Map_new();  Array fields = Array_new(),  field_types = Array_new();  Array capture_locals = Array_new(),  field_values = Array_new(); {
     List capture;  Iter _x2c_macro_iterator_13 = List_iter(captures,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_13;  while(Iter_try_next(_x2c_macro_iterator_13,  & _x2c_macro_item_13)){
       capture = Var_list(_x2c_macro_item_13);
@@ -2078,7 +2078,7 @@ static List _lower_captured_lambda(Compiler compiler,  List entries,  List captu
   }
   Compiler_add_early(compiler,  cons(_167,  cons(List_var(cons(_168,  cons(String_var(environment_name),  cons(List_var(cons(_169,  List_append(Array_list_free(fields),  NULL))),  NULL)))),  cons(List_var(cons(_152,  cons(List_var(cons(_6,  cons(List_var(environment_typedef),  _8))),  NULL))),  NULL))));  List value_type = NULL,  reference_type = NULL;  List value_helper = _adapter_helper(compiler,  _148,  & value_type);  List reference_helper = _adapter_helper(compiler,  _149,  & reference_type);  List context_type = NULL,  constructor_type = NULL;  List context_helper = _adapter_helper(compiler,  _170,  & context_type);  List constructor = _adapter_helper(compiler,  _195,  & constructor_type);  Type adapter_type = Sym_resolve_key(compiler -> sym,  List_type(_124));  Array locals = Array_new();  int index = 0; {
     Var entry;  Iter _x2c_macro_iterator_14 = List_iter(entries,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_14;  while(Iter_try_next(_x2c_macro_iterator_14,  & _x2c_macro_item_14)){
       entry = _x2c_macro_item_14; {
@@ -2091,7 +2091,7 @@ static List _lower_captured_lambda(Compiler compiler,  List entries,  List captu
   List context_call = cons(_62,  cons(_173,  cons(List_var(cons(_64,  cons(List_var(cons(_62,  cons(List_var(context_type),  cons(List_var(cons(_63,  cons(List_var(context_helper),  NULL))),  NULL)))),  cons(List_var(cons(_65,  cons(List_var(cons(_62,  cons(_140,  cons(List_var(cons(_63,  cons(List_var(closure_binding),  NULL))),  NULL)))),  NULL))),  NULL)))),  NULL)));  Array_push(locals,  List_var(cons(_151,  cons(List_var(cons(_141,  cons(String_var(environment_name),  NULL))),  cons(List_var(cons(_152,  cons(List_var(cons(_118,  cons(_153,  cons(List_var(cons(_6,  cons(List_var(environment_local),  _176))),  cons(List_var(cons(_62,  cons(List_var(environment_pointer_type),  cons(List_var(cons(_106,  cons(List_var(environment_pointer_type),  cons(List_var(context_call),  NULL)))),  NULL)))),  NULL))))),  NULL))),  NULL)))));  body = _lower_nested_lambdas(compiler,  body);  List rewritten = _rewrite_lambda_captures(compiler,  body,  slots,  environment_local,  environment_pointer_type);  Type fn_type = List_type(_139),  argv_type = List_type(_146);  List declaration_params = cons(_0,  cons(List_var(Type_parameter_ast(fn_type,  closure_binding)),  cons(List_var(Type_parameter_ast(argv_type,  argv_binding)),  NULL)));  Compiler_add_early(compiler,  cons(_67,  cons(_159,  cons(List_var(cons(_6,  cons(List_var(lambda_binding),  cons(List_var(cons(List_var(cons(_69,  cons(List_var(declaration_params),  NULL))),  NULL)),  NULL)))),  cons(List_var(_helper_body(compiler,  rewritten,  Array_list_free(locals))),  NULL)))));  List signature = _signature(compiler,  entries);  if(compiler -> inline_header){
     List bridge = _func_bridge_binding(compiler,  _537);  Array parameters = Array_new(),  factory_values = Array_new(); {
       Type field_type;  Iter _x2c_macro_iterator_15 = Array_iter(field_types,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_15;  while(Iter_try_next(_x2c_macro_iterator_15,  & _x2c_macro_item_15)){
         field_type = Var_type(_x2c_macro_item_15); {

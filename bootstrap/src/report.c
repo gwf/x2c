@@ -4,7 +4,7 @@
 
 static String _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
 
-struct{
+static struct{
   int receipts,  transient,  color,  columns,  width;
   unsigned long start;
   unsigned long update;

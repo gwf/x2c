@@ -3,6 +3,11 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
+## 0.2.1 - Repository preview
+
+- Highlight `?(Type name)` typed Match captures using ordinary x2c type
+  syntax. Keep spaced `? (pattern)` contents as literal sublist patterns.
+
 ## 0.2.0 - Repository preview
 
 - Add compiler diagnostics, definition navigation, and type hover through an

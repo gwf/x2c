@@ -43,6 +43,8 @@ static List _while_statement(Compiler compiler) {
 
 static List _for_statement(Compiler c) {
   List init, cond, inc, body;
+  c.sym.push_new_scope();
+  defer c.sym.pop_scope();
   c.expect(<for>);
   c.expect(
     <(>);

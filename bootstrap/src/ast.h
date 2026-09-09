@@ -33,5 +33,9 @@ Ast Ast_rewrite_children(Ast ast,  Func per_child);
 
 int Ast_never_returns(Ast ast);
 
+List Ast_initializer_cases(Ast ast,  List * input);
+
+List Ast_initializer_functions(Ast ast,  List * source);
+
 
 #endif /* __GUARD_0x29A28E81__ */

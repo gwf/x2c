@@ -17,6 +17,8 @@ Shared helpers for x2c compiler AST nodes.
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
+| [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
+| [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
 | [`Ast.rewrite_children`](#Ast.rewrite_children) | Applies `per_child` to each `List` child of `ast` and returns the node rebuilt from the results; non-list children pass through. |
 | [`Symbol.compound_assignment`](#Symbol.compound_assignment) | Returns the compound assignment for a binary operator, or zero. |
@@ -70,6 +72,25 @@ zero without changing either output.
 Source: `src/ast.x:46`
 
 ### `Ast`
+
+<a id="Ast.initializer_cases"></a>
+#### Ast.initializer_cases
+
+`List Ast.initializer_cases(Ast ast, List *input)`
+
+Returns initializer alternatives and their optional native macro input.
+
+Source: `src/ast.x:189`
+
+<a id="Ast.initializer_functions"></a>
+#### Ast.initializer_functions
+
+`List Ast.initializer_functions(Ast ast, List *source)`
+
+Returns function alternatives when every initializer arm calls one shared
+input, and stores that input expression in `source`. Other forms return NULL.
+
+Source: `src/ast.x:202`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns

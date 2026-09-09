@@ -90,7 +90,7 @@
    (declare (int) 
     (bindings 
      (op = (bind (binding 23 "raw") ((dim (expr (int) (literal (int) "3"))))) 
-      (expr ((dim (expr (int) (literal (int) "3"))) int) 
+      (expr ((dim ("3")) int) 
        (composite 
         (commas (expr (int) (literal (int) "1")) 
          (expr (int) (literal (int) "2")) (expr (int) (literal (int) "3")))))) 

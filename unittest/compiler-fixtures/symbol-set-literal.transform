@@ -212,8 +212,13 @@
           (expr (* struct "Iter") 
            (op & (expr (struct "Iter") 
                   (cast (struct "Iter") 
-                   (expr () 
-                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+                   (expr (struct "Iter") 
+                    (composite 
+                     (commas 
+                      (expr ("Var") 
+                       (call (expr ((func ((int))) "Var") 
+                              (ident (binding 44 "int_var"))) 
+                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 18 "_x2c_macro_item_0") ()))) 
     (while 
      (expr (int) 

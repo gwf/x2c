@@ -191,7 +191,10 @@ char * Compiler_code_pretty_string(Compiler compiler,  List code,  String output
       prev_token = NULL;
       continue;
     }
-    String token = _normalized_token(Var_str(car(lst)));
+    int emitted_directive = Var_equal(car(lst),  Symbol_var(273018923240));
+    if(emitted_directive) lst = cdr(lst);
+    String token = Var_str(car(lst));
+    if(! emitted_directive) token = _normalized_token(token);
     char last = String_truth(token) ? String_getindex(token,  - 1) : '\0';
     if(directive_break){
       directive_break = 0;

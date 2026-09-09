@@ -66,6 +66,8 @@ List Compiler_diagnostics(Compiler);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 void Compiler_print_diagnostic(Compiler,  List);
@@ -339,7 +341,7 @@ static void _report_diagnostics(Compiler compiler){
   {
     Var entry;
     Iter _x2c_macro_iterator_0 = List_iter(entries,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -399,7 +401,7 @@ static List _transform_ast(Compiler compiler,  List ast){
   if(opts -> dump == 1447057375073126){
     {
       List node;  Iter _x2c_macro_iterator_2 = List_iter(ast,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
         node = Var_list(_x2c_macro_item_2);  printf("\n%s\n",  _ast_inspection_repr(node));
@@ -462,7 +464,7 @@ static void _compile_file(Frontend frontend,  String filename,  String output_di
       case 320883068136 :{
         List node;
         Iter _x2c_macro_iterator_3 = List_iter(ast,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_3;
@@ -544,7 +546,7 @@ static void _preflight_translation(CliRequest c){
   {
     String input;
     Iter _x2c_macro_iterator_4 = List_iter(c -> inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -616,7 +618,7 @@ static int _translate_workers(Frontend frontend,  Array chunks,  String output_d
         {
           String input;
           Iter _x2c_macro_iterator_5 = List_iter(slice,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_5;
@@ -677,7 +679,7 @@ static int _run_translation(CliRequest c){
     {
       String input;
       Iter _x2c_macro_iterator_6 = List_iter(c -> inputs,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_6;
@@ -706,7 +708,7 @@ static int _run_translation(CliRequest c){
   {
     String input;
     Iter _x2c_macro_iterator_7 = List_iter(parallel ?(List) NULL : c -> inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;
@@ -725,7 +727,7 @@ static int _run_translation(CliRequest c){
   if(! c -> nested){
     String input;
     Iter _x2c_macro_iterator_8 = List_iter(c -> inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_8;
@@ -773,7 +775,7 @@ static int _run_build_request(CliRequest c,  Array commands){
     {
       String input;
       Iter _x2c_macro_iterator_9 = List_iter(c -> inputs,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_9;
@@ -806,7 +808,7 @@ static int _run_build_request(CliRequest c,  Array commands){
     {
       String input;
       Iter _x2c_macro_iterator_10 = List_iter(c -> inputs,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_10;
@@ -867,7 +869,7 @@ static int _run_build_request(CliRequest c,  Array commands){
     if((void *) commands != NULL){
       String entry;
       Iter _x2c_macro_iterator_11 = Array_iter(state -> compile_commands,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_11;

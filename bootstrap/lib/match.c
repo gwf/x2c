@@ -129,6 +129,8 @@ int Var_is_nil(Var);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 int List_len(List);
@@ -196,8 +198,6 @@ Symbol Var_kind(Var);
 int String_is_permanent(String);
 
 void * Var_pointer(Var);
-
-Var int_var(int);
 
 Scope Scope_new_named(const char *);
 
@@ -562,7 +562,7 @@ static void _layout_analyze_sequence(MatchCaptureLayout layout,  List patterns, 
   {
     Var pattern;
     Iter _x2c_macro_iterator_0 = List_iter(patterns,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -586,7 +586,7 @@ static void _layout_analyze_alternatives(MatchCaptureLayout layout,  List patter
   {
     Var pattern;
     Iter _x2c_macro_iterator_1 = List_iter(patterns,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -663,7 +663,7 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout,  Var pattern,  un
 
 static MatchCaptureLayout _capture_layout_analyze(Var pattern,  Var * out_normalized){
   MatchLayoutBuilder builder ={
-    0
+    Var_new(3453797,  0)
   }
   ;
   MachinePrepare status = MACHINE_PREPARED;
@@ -739,7 +739,7 @@ static int _find_fixed_anchor(List pat,  Var * anchor,  int * offset){
   {
     Var part;
     Iter _x2c_macro_iterator_2 = List_iter(pat,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -765,7 +765,7 @@ static int _pattern_contains_binder(List pat,  Var binder){
   {
     Var part;
     Iter _x2c_macro_iterator_3 = List_iter(pat,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -1103,7 +1103,7 @@ static int MatchLower__collect_guard_args(MatchLower l,  List args,  Var * eleme
   {
     Var part;
     Iter _x2c_macro_iterator_4 = List_iter(args,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -1360,7 +1360,7 @@ static int _inline_descend_ok(List child,  int reg){
   {
     Var part;
     Iter _x2c_macro_iterator_5 = List_iter(child,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -1377,7 +1377,7 @@ static int MatchLower__plan_inline_segment(MatchLower l,  List pattern,  int reg
   {
     Var part;
     Iter _x2c_macro_iterator_6 = List_iter(pattern,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;
@@ -1420,7 +1420,7 @@ static int MatchLower__emit_inline_segment(MatchLower l,  List pattern,  int reg
   {
     Var part;
     Iter _x2c_macro_iterator_7 = List_iter(pattern,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;
@@ -1803,7 +1803,7 @@ static int _cache_admissible(Var value,  int depth){
       {
         Var part;
         Iter _x2c_macro_iterator_8 = List_iter((List) Var_pointer(value),  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_8;

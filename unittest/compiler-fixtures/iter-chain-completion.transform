@@ -78,24 +78,38 @@
                                  (expr (* struct "Iter") 
                                   (op & (expr (struct "Iter") 
                                          (cast (struct "Iter") 
-                                          (expr () 
+                                          (expr (struct "Iter") 
                                            (composite 
                                             (commas 
-                                             (expr (int) (literal (int) "0")))))))))))) 
+                                             (expr ("Var") 
+                                              (call (expr ((func ((int))) "Var") 
+                                                     (ident 
+                                                      (binding 66 "int_var"))) 
+                                               (args (expr (int) 
+                                                      (literal (int) "0"))))))))))))))) 
                          (expr ("Func") 
                           (ident (binding 80 "_x2c_func_handle_1"))) 
                          (expr (* struct "Iter") 
                           (op & (expr (struct "Iter") 
                                  (cast (struct "Iter") 
-                                  (expr () 
+                                  (expr (struct "Iter") 
                                    (composite 
-                                    (commas (expr (int) (literal (int) "0")))))))))))) 
+                                    (commas 
+                                     (expr ("Var") 
+                                      (call (expr ((func ((int))) "Var") 
+                                             (ident (binding 66 "int_var"))) 
+                                       (args (expr (int) (literal (int) "0"))))))))))))))) 
                  (expr ("Func") (ident (binding 75 "_x2c_func_handle_0"))) 
                  (expr (* struct "Iter") 
                   (op & (expr (struct "Iter") 
                          (cast (struct "Iter") 
-                          (expr () 
-                           (composite (commas (expr (int) (literal (int) "0"))))))))))))))))))) 
+                          (expr (struct "Iter") 
+                           (composite 
+                            (commas 
+                             (expr ("Var") 
+                              (call (expr ((func ((int))) "Var") 
+                                     (ident (binding 66 "int_var"))) 
+                               (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
   (at 31 
    (declare ("Var") 
     (bindings 
@@ -114,9 +128,13 @@
                          (expr (* struct "Iter") 
                           (op & (expr (struct "Iter") 
                                  (cast (struct "Iter") 
-                                  (expr () 
+                                  (expr (struct "Iter") 
                                    (composite 
-                                    (commas (expr (int) (literal (int) "0")))))))))))) 
+                                    (commas 
+                                     (expr ("Var") 
+                                      (call (expr ((func ((int))) "Var") 
+                                             (ident (binding 66 "int_var"))) 
+                                       (args (expr (int) (literal (int) "0"))))))))))))))) 
                  (expr ("Iter") 
                   (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
                          (ident (binding 12 "range"))) 
@@ -126,15 +144,24 @@
                     (expr (* struct "Iter") 
                      (op & (expr (struct "Iter") 
                             (cast (struct "Iter") 
-                             (expr () 
+                             (expr (struct "Iter") 
                               (composite 
-                               (commas (expr (int) (literal (int) "0")))))))))))) 
+                               (commas 
+                                (expr ("Var") 
+                                 (call (expr ((func ((int))) "Var") 
+                                        (ident (binding 66 "int_var"))) 
+                                  (args (expr (int) (literal (int) "0"))))))))))))))) 
                  (expr ("Func") (ident (binding 86 "_x2c_func_handle_2"))) 
                  (expr (* struct "Iter") 
                   (op & (expr (struct "Iter") 
                          (cast (struct "Iter") 
-                          (expr () 
-                           (composite (commas (expr (int) (literal (int) "0"))))))))))))))))))) 
+                          (expr (struct "Iter") 
+                           (composite 
+                            (commas 
+                             (expr ("Var") 
+                              (call (expr ((func ((int))) "Var") 
+                                     (ident (binding 66 "int_var"))) 
+                               (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
   (at 10 
    (declare (int) 
     (bindings 
@@ -156,14 +183,24 @@
                   (expr (* struct "Iter") 
                    (op & (expr (struct "Iter") 
                           (cast (struct "Iter") 
-                           (expr () 
-                            (composite (commas (expr (int) (literal (int) "0")))))))))))) 
+                           (expr (struct "Iter") 
+                            (composite 
+                             (commas 
+                              (expr ("Var") 
+                               (call (expr ((func ((int))) "Var") 
+                                      (ident (binding 66 "int_var"))) 
+                                (args (expr (int) (literal (int) "0"))))))))))))))) 
           (expr ("Func") (ident (binding 80 "_x2c_func_handle_1"))) 
           (expr (* struct "Iter") 
            (op & (expr (struct "Iter") 
                   (cast (struct "Iter") 
-                   (expr () 
-                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+                   (expr (struct "Iter") 
+                    (composite 
+                     (commas 
+                      (expr ("Var") 
+                       (call (expr ((func ((int))) "Var") 
+                              (ident (binding 66 "int_var"))) 
+                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 30 "_x2c_macro_item_1") ()))) 
     (while 
      (expr (int) 
@@ -198,15 +235,24 @@
                      (expr (* struct "Iter") 
                       (op & (expr (struct "Iter") 
                              (cast (struct "Iter") 
-                              (expr () 
+                              (expr (struct "Iter") 
                                (composite 
-                                (commas (expr (int) (literal (int) "0")))))))))))) 
+                                (commas 
+                                 (expr ("Var") 
+                                  (call (expr ((func ((int))) "Var") 
+                                         (ident (binding 66 "int_var"))) 
+                                   (args (expr (int) (literal (int) "0"))))))))))))))) 
              (expr (int) (literal (int) "1")) 
              (expr (* struct "Iter") 
               (op & (expr (struct "Iter") 
                      (cast (struct "Iter") 
-                      (expr () 
-                       (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+                      (expr (struct "Iter") 
+                       (composite 
+                        (commas 
+                         (expr ("Var") 
+                          (call (expr ((func ((int))) "Var") 
+                                 (ident (binding 66 "int_var"))) 
+                           (args (expr (int) (literal (int) "0")))))))))))))))))) 
        (declare ("Var") (bindings (bind (binding 24 "_x2c_macro_item_0") ()))) 
        (while 
         (expr (int) 
@@ -258,8 +304,13 @@
                  (expr (* struct "Iter") 
                   (op & (expr (struct "Iter") 
                          (cast (struct "Iter") 
-                          (expr () 
-                           (composite (commas (expr (int) (literal (int) "0"))))))))))))))))))) 
+                          (expr (struct "Iter") 
+                           (composite 
+                            (commas 
+                             (expr ("Var") 
+                              (call (expr ((func ((int))) "Var") 
+                                     (ident (binding 66 "int_var"))) 
+                               (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
   (at 16 
    (declare (struct "Iter") 
     (bindings (bind (binding 36 "source_storage") ()) 

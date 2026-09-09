@@ -17,6 +17,7 @@
 #include "string.x"
 #include "var.x"
 #include "ast.x"
+#include "format.x"
 
 typedef enum ExitKind {
   _cleanup_exit_normal,
@@ -41,7 +42,8 @@ typedef struct Emitter {
   // records from depth zero.
   int break_stop;
   int continue_stop, List cleanup_path, Map label_paths, List volatile_names;
-  Type return_type, int origin, String fn_name;
+  Type return_type, int origin, String fn_name, List native_aliases;
+  Array native_macros;
 } *Emitter;
 
 static List Emitter._commas(Emitter emitter, List lst) {
@@ -203,7 +205,7 @@ static List Emitter._bind(Emitter emitter, Ast ast, List context) {
 
 static List Emitter._param(Emitter e, List ast, List context) {
   List (type, mods) = ast.cdr();
-  context = %( $type );
+  context = e._emit(type, NULL);
   mods = %( $mods );
   if (e.volatile_names) mods = e._preserve_bindings(mods);
   return context.append(e._emit(mods, NULL));
@@ -413,6 +415,10 @@ static List Emitter._enum(Emitter emitter, List ast, List context) {
 }
 
 static List Emitter._aggregate(Emitter emitter, List ast, List context) {
+  if (ast.type().is_aggregate_tag()) {
+    Var alias = emitter.native_aliases.assoc(ast);
+    if (alias is <list>) return emitter._emit(alias.list(), NULL);
+  }
   List tag = ast.type().tag();
   if (_is_gensym_tag(tag) && !ast.type().is_aggregate_tag()) tag = NULL;
   if (tag) tag = emitter._emit(tag, NULL);
@@ -423,6 +429,23 @@ static List Emitter._aggregate(Emitter emitter, List ast, List context) {
   if (tag && body) return %( ${car(ast)} @tag "{" @body "}");
   if (tag) return %( ${car(ast)} @tag );
   return %( ${car(ast)} "{" @body "}");
+}
+
+static List Emitter._typedef(Emitter e, List ast, List context) {
+  List code = %("typedef" @{e._emit(ast.cdr(), context)} ";");
+  foreach (List declarator, ast.caddr().cdr()) {
+    List binding = declarator.cadr();
+    Var type;
+    if (e.semantic_binding_facts().try_get(%(ntype $binding), &type))
+      e.native_aliases = cons(%($type $binding), e.native_aliases);
+  }
+  return code;
+}
+
+static List Emitter._block(Emitter e, List ast) {
+  List previous = e.native_aliases;
+  defer e.native_aliases = previous;
+  return %("{" @{e._emit(ast.cdr(), NULL)} "}");
 }
 
 static List _atom_intern(String spelling) {
@@ -1066,6 +1089,66 @@ static List Emitter._decl_stmt(Emitter e, List ast, List context) {
   return e._declare(ast, context);
 }
 
+/* Native macro arguments expand once before C sees the selected conversion.
+   Generated bodies have no source-map directives; the original argument keeps
+   its ordinary mapping at the invocation and its original storage scope. */
+static List Emitter._initializer_macro(
+  Emitter e, List input, List body, List context) {
+  Buffer parameters = Buffer.new(0);
+  foreach (List argument, input.cdr()) {
+    if (parameters.len()) parameters.write_char(',');
+    parameters.write(argument.car().str());
+  }
+  String formal = parameters.str_free();
+  String hash = x2c_filename_hash(e.compiler.filename);
+  String name = e.compiler.fresh_name(%"initializer_choice_$hash");
+  String replacement;
+  {
+    int mapped = e.compiler.source_map;
+    defer e.compiler.source_map = mapped;
+    e.compiler.source_map = 0;
+    List tokens = e._emit(body, context).flatten_all();
+    String formatted = e.compiler.code_pretty_string(tokens, NULL);
+    replacement = formatted.rstrip("\n").replace("\n", "\\\n");
+  }
+  String definition = %"#define $name($formal) $replacement";
+  e.native_macros.push(%($name $definition));
+  Array arguments = %[];
+  foreach (List argument, input.cdr()) {
+    List emitted = e._emit(argument.cadr(), context);
+    arguments.push(%("(" @emitted ")"));
+  }
+  return %($name "(" @{e._commas(arguments.list_free())} ")");
+}
+
+static List Emitter._initializer_value(
+  Emitter e, List ast, List context) {
+  List source = NULL;
+  List functions = Ast.initializer_functions(ast, &source);
+  if (functions)
+    return e._emit(%(call (expr () (initval @functions)) (args $source)),
+                   context);
+  List input = NULL;
+  List cases = Ast.initializer_cases(ast, &input);
+  if (input)
+    return e._initializer_macro(input, %(initval @cases), context);
+  List result = NULL;
+  foreach (List choice, cases.reverse()) {
+    (List condition, List path, Type type, List value) = choice;
+    if (value.match(%(expr ? (composite *))))
+      value = type ? %(expr $type (cast $type $value))
+                   : %(expr (int) (literal (int) "0"));
+    List emitted = e._emit(%($value), context);
+    if (!result || !condition) result = emitted;
+    else {
+      List test = e._emit(%($condition), context);
+      result = %("__builtin_choose_expr(" @test ","
+                  @emitted "," @result ")");
+    }
+  }
+  return result;
+}
+
 // Normalize #include directives to reference generated headers.
 static List Emitter._preproc(Emitter emitter, List ast, List context) {
   String text = ast.cadr();
@@ -1197,15 +1280,22 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       List c_message = e._emit(%($message), context);
       return %("_Static_assert(" @c_condition "," @c_message ");");
     }
+    case %(initcode ?input ?body):
+      return %(@{e._initializer_macro(input, body, context)} ";");
+    case %(initval *): return e._initializer_value(ast, context);
     case %(indexinit ?index ?value): {
       List c_index = e._emit(%($index), context);
       List c_value = e._emit(%($value), context);
-      return %("[" @c_index "] =" @c_value);
+      String assign = value.car() == <dotinit> ||
+                      value.car() == <indexinit> ? "" : " =";
+      return %("[" @c_index "]" $assign @c_value);
     }
     case %(dotinit ?field ?value): {
       List c_field = e._emit(%($field), context);
       List c_value = e._emit(%($value), context);
-      return %("." @c_field "=" @c_value);
+      String assign = value.car() == <dotinit> ||
+                      value.car() == <indexinit> ? "" : "=";
+      return %("." @c_field $assign @c_value);
     }
     case %(cast ?type ?expression): {
       List c_type = e._semantic_type(type);
@@ -1359,7 +1449,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
     case <function>:   return e._function(ast, context);
     case <param>:      return e._param(ast, context);
     case <struct>:     return e._aggregate(ast, context);
-    case <typedef>: return %("typedef" @{e._emit(cdr(ast), context)} ";");
+    case <typedef>:    return e._typedef(ast, context);
     case <union>:      return e._aggregate(ast, context);
     case <args>:       return e._args(ast, context);
     case <bindings>:
@@ -1367,7 +1457,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       return e._commas(e._emit(cdr(ast), NULL));
     case <fields>:     return e._emit(cdr(ast), NULL);
     // Expressions
-    case <block>:      return %("{" @{e._emit(cdr(ast), NULL)} "}");
+    case <block>:      return e._block(ast);
     case <parens>:     return %("(" @{e._emit(cdr(ast), NULL)} ")");
     case <sizeof>: return %("sizeof" @{e._emit(cdr(ast), context)});
     // Statements
@@ -1415,12 +1505,20 @@ List Compiler.emit(Compiler compiler, List ast) {
     .label_paths = NULL,
     .return_type = NULL,
     .origin = 0,
-    .fn_name = NULL
+    .fn_name = NULL,
+    .native_macros = %[]
   };
   Emitter emitter = &state;
   // flatten_all leaves no list element behind, so one pass is the fixed
   // point and a second call would only re-cons the whole unit to prove it.
   List code = emitter._emit(ast, NULL).flatten_all();
+  Array before = %[], after = %[];
+  foreach (List entry, state.native_macros.list_free()) {
+    (String name, String definition) = entry;
+    before.push(%(c-direct $definition));
+    after.push(%(c-direct ${%"#undef $name"}));
+  }
   state.cleanups.free();
-  return code;
+  return before.list_free().flatten_all().append(code)
+    .append(after.list_free().flatten_all());
 }

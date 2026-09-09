@@ -84,6 +84,8 @@ String SourceView_path(String);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 String Var_string(Var);
@@ -456,7 +458,7 @@ static void _configure_package(Compiler compiler,  CliRequest request,  String f
   {
     String directory;
     Iter _x2c_macro_iterator_0 = List_iter(request -> package_dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -524,7 +526,7 @@ static Map _preprocess_input(Frontend frontend,  ParsedUnit * unit){
   {
     String dependency;
     Iter _x2c_macro_iterator_1 = List_iter(translation_depfile_parse(dependency_text),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -756,7 +758,7 @@ _x2c_error_handler_5 = NULL;
 {
   Var entry;
   Iter _x2c_macro_iterator_2 = Array_iter(diagnostics -> entries,  &(struct Iter){
-    0
+    int_var(0)
   }
   );
   Var _x2c_macro_item_2;

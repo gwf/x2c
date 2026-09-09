@@ -167,8 +167,10 @@ static int Tokenizer._operator(Tokenizer t, int len) {
   Symbol mode = t._scan_mode();
   int pop = 0, token_len = len, Symbol token_type = op;
   switch (mode) {
-    case <x2c>:
+    case <x2c>: case <x2c-par>:
       switch (op) {
+        case <"(">: if (mode == <x2c-par>) push = mode; break;
+        case <")">: pop = mode == <x2c-par>; break;
         case <"{">:     push = <x2c>; break;
         case <"%{">:    push = <map>; break;
         case <"%[">:    push = <array>; break;
@@ -183,7 +185,7 @@ static int Tokenizer._operator(Tokenizer t, int len) {
       switch (op) {
         case <"(">: push = <list>; break;
         case <"${">: push = <x2c>; break;
-        case <"?{">: if (mode == <list>) push = <x2c>; break;
+        case <"?(">: if (mode == <list>) push = <x2c-par>; break;
         case <"@{">: if (mode == <list>) push = <x2c>; break;
         case <"{">: push = <map>; token_type = <"%{">; break;
         case <"[">: push = <array>; token_type = <"%[">; break;
@@ -388,7 +390,7 @@ static int Tokenizer._lisp_tokens(Tokenizer t) {
   if (collection && t._common_tokens()) return 1;
   if (collection && !strncmp(text, "void", 4) && scan_identifier(text) == 4)
     return t.tokenize(4, <void>);
-  if (list && text[0] == '?' && text[1] == '{') return t._operator(2);
+  if (list && text[0] == '?' && text[1] == '(') return t._operator(2);
   if (text[0] == '$' && !list && !collection) return t._named_reference();
   if ((list && (text[0] == '$' || text[0] == '@')) ||
       (collection && text[0] == '$'))
@@ -460,7 +462,7 @@ void Tokenizer.scan(Tokenizer t) {
   while (!t._end_of_file()) {
     Symbol mode = t._scan_mode();
     switch (mode) {
-      case <x2c>:
+      case <x2c>: case <x2c-par>:
         if (t._common_tokens()) continue;
         if (t.text[t.pos] == '$' &&
             (t._embedded_lisp() || t._named_reference()))

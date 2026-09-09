@@ -423,9 +423,11 @@ static List _declaration(Compiler compiler, List ast) {
         new_bind = binding;
         match (binding)
           case %(op = (bind ?var ?mods) ?rhs): {
-            List target_type = %(@{mods} @target);
-            List converted = compiler.convert_expression(
-              rhs, target_type);
+            Type target_type = %(declare $target
+              (bindings (bind $var $mods))).type_from_ast();
+            List native_target = %(expr $target_type (ident $var));
+            List converted = compiler.convert_initializer(
+              rhs, target_type, native_target);
             new_bind = %(
               op = (bind ${var.list()} ${mods.list()}) $converted
             );
@@ -1525,6 +1527,14 @@ static List _cast(Compiler compiler, List ast) {
                 (!set ?expression (expr ?source_type ?))): {
     List declaration = %(declare @parts);
     Type type = declaration.type_from_ast();
+    List operand = expression;
+    if (operand.match(%(expr ? (composite *)))) {
+      Type native = type;
+      match (declaration)
+        case %(declare ?base (bindings (bind ? ?mods))):
+          native = mods.list().append(base);
+      return compiler.convert_compound_literal(operand, type, native);
+    }
     int source_var = compiler.sym.is_var_type(source_type.list());
     int target_var = compiler.sym.is_var_type(type);
     int unresolved = 0;
@@ -1535,6 +1545,9 @@ static List _cast(Compiler compiler, List ast) {
       return compiler.convert_expression(expression, type);
     return %(cast $type $expression);
   }
+  match (ast)
+    case %(cast ?target (!set ?value (expr ? (composite *)))):
+      return compiler.convert_compound_literal(value, target, target);
   return ast;
 }
 

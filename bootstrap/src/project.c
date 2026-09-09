@@ -61,6 +61,8 @@ int String_getindex(String,  int);
 
 Iter String_iter(String,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 Buffer Buffer_new(size_t);
@@ -82,8 +84,6 @@ void * Scope_calloc(size_t,  size_t);
 int Map_contains(Map,  Var);
 
 Var Map_setindex(Map,  Var,  Var);
-
-Var int_var(int);
 
 List String_split_lines(String,  int);
 
@@ -307,7 +307,7 @@ static int _name_ok(String name){
   {
     char raw;
     Iter _x2c_macro_iterator_0 = String_iter(name,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -472,7 +472,7 @@ static void _parse_manifest(Project p){
   {
     String owned;
     Iter _x2c_macro_iterator_1 = List_iter(lines,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -635,7 +635,7 @@ static Array _expand_pattern(Project project,  String pattern,  const char * own
       {
         String path;
         Iter _x2c_macro_iterator_2 = Map_keys(project -> sources -> overlays,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_2;
@@ -669,7 +669,7 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   {
     String pattern;
     Iter _x2c_macro_iterator_4 = List_iter(target -> sources,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -680,7 +680,7 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
         {
           Var value;
           Iter _x2c_macro_iterator_3 = Array_iter(expanded,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_3;
@@ -700,7 +700,7 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   {
     String pattern;
     Iter _x2c_macro_iterator_6 = List_iter(target -> exclude,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;
@@ -711,7 +711,7 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
         {
           Var value;
           Iter _x2c_macro_iterator_5 = Array_iter(expanded,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_5;
@@ -731,7 +731,7 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   {
     Var value;
     Iter _x2c_macro_iterator_7 = Array_iter(sources,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;
@@ -753,7 +753,7 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   {
     Var value;
     Iter _x2c_macro_iterator_8 = Array_iter(kept,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_8;
@@ -784,7 +784,7 @@ static void _validate_target(Project project,  ProjectTarget target){
   {
     String name;
     Iter _x2c_macro_iterator_9 = List_iter(target -> dependencies,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_9;
@@ -807,7 +807,7 @@ static void _append_values(Array output,  List values){
   {
     Var value;
     Iter _x2c_macro_iterator_10 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_10;
@@ -824,7 +824,7 @@ static void _append_c_flags(Project project,  Array output,  List values){
   {
     String value;
     Iter _x2c_macro_iterator_11 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_11;
@@ -845,7 +845,7 @@ static void _append_defines(Array output,  List values){
   {
     String value;
     Iter _x2c_macro_iterator_12 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_12;
@@ -862,7 +862,7 @@ static void _append_paths(Project project,  Array output,  List values,  String 
   {
     String value;
     Iter _x2c_macro_iterator_13 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_13;
@@ -901,7 +901,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   {
     String name;
     Iter _x2c_macro_iterator_14 = List_iter(target -> dependencies,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_14;
@@ -922,7 +922,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   {
     String path;
     Iter _x2c_macro_iterator_15 = List_iter(target -> include_dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_15;
@@ -938,7 +938,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   {
     String path;
     Iter _x2c_macro_iterator_16 = List_iter(target -> package_dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_16;
@@ -963,7 +963,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
     {
       String argument;
       Iter _x2c_macro_iterator_17 = List_iter(command -> cc_args,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_17;
@@ -990,7 +990,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   {
     String library;
     Iter _x2c_macro_iterator_18 = List_iter(target -> libraries,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_18;
@@ -1022,7 +1022,7 @@ static void _plan_target(Project project,  ProjectTarget target,  CliRequest com
   {
     String dependency;
     Iter _x2c_macro_iterator_19 = List_iter(target -> dependencies,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_19;

@@ -266,7 +266,11 @@ static int Tokenizer__operator(Tokenizer t,  int len){
   int pop = 0,  token_len = len;
   Symbol token_type = op;
   switch(mode){
-    case 3945159 : switch(op){
+    case 3945159 : case 1059020479160805 : switch(op){
+      case 81 : if(mode == 1059020479160805) push = mode;
+      break;
+      case 83 : pop = mode == 1059020479160805;
+      break;
       case 247 : push = 3945159;
       break;
       case 9719 : push = 26720;
@@ -290,7 +294,7 @@ static int Tokenizer__operator(Tokenizer t,  int len){
       break;
       case 9463 : push = 3945159;
       break;
-      case 16375 : if(mode == 806120) push = 3945159;
+      case 16209 : if(mode == 806120) push = 1059020479160805;
       break;
       case 16631 : if(mode == 806120) push = 3945159;
       break;
@@ -505,7 +509,7 @@ static int Tokenizer__lisp_tokens(Tokenizer t){
   int len;
   if(collection && Tokenizer__common_tokens(t)) return 1;
   if(collection && ! strncmp(text,  "void",  4) && scan_identifier(text) == 4) return Tokenizer_tokenize(t,  4,  1473096);
-  if(list && text[0] == '?' && text[1] == '{') return Tokenizer__operator(t,  2);
+  if(list && text[0] == '?' && text[1] == '(') return Tokenizer__operator(t,  2);
   if(text[0] == '$' && ! list && ! collection) return Tokenizer__named_reference(t);
   if((list &&(text[0] == '$' || text[0] == '@')) ||(collection && text[0] == '$')) return text[1] == '{' ? Tokenizer__operator(t,  2) : Tokenizer__named_reference(t);
   switch(text[0]){
@@ -562,7 +566,7 @@ void Tokenizer_scan(Tokenizer t){
   while(! Tokenizer__end_of_file(t)){
     Symbol mode = Tokenizer__scan_mode(t);
     switch(mode){
-      case 3945159 : if(Tokenizer__common_tokens(t)) continue;
+      case 3945159 : case 1059020479160805 : if(Tokenizer__common_tokens(t)) continue;
       if(t -> text[t -> pos] == '$' &&(Tokenizer__embedded_lisp(t) || Tokenizer__named_reference(t))) continue;
       if(Tokenizer__percent_tokens(t) || Tokenizer__angle_symbol_literal(t) || Tokenizer__x2c_tokens(t)) continue;
       break;

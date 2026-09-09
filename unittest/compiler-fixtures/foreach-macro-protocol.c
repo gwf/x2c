@@ -48,7 +48,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_0 = Bag_iter(bag,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

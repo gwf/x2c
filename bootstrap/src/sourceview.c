@@ -28,6 +28,8 @@ Iter List_iter(List,  Iter);
 
 List String_split(String,  String);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 String Var_string(Var);
@@ -39,8 +41,6 @@ int String_equal(String,  String);
 int String_rfind(String,  String);
 
 Var Map_setindex(Map,  Var,  Var);
-
-Var int_var(int);
 
 int Map_contains(Map,  Var);
 
@@ -90,7 +90,7 @@ String SourceView_path(String path){
   {
     String part;
     Iter _x2c_macro_iterator_0 = List_iter(String_split(path,  _3),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

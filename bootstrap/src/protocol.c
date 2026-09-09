@@ -10,7 +10,7 @@ static Var _576,  _573,  _569,  _568,  _566,  _563,  _560,  _558,  _556,  _554, 
 
 static int _init_guard_ = 0;
 
-struct{
+static const struct{
   Symbol op,  member;
   int derived;
 }
@@ -1230,7 +1230,7 @@ static void _record_declaration_rows_visibility(Compiler compiler,  List declara
   {
     List row;
     Iter _x2c_macro_iterator_0 = List_iter(rows,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -1264,7 +1264,7 @@ void Compiler_record_declaration_visibility(Compiler compiler,  List declaration
     switch (Var_symbol(car(_x2c_match_expr))) {
        case 39266: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_21), &_x2c_match_capture)) {List rows = Var_list(_x2c_match_values[0]); {
     List row;  Iter _x2c_macro_iterator_1 = List_iter(rows,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
       row = Var_list(_x2c_macro_item_1);  Compiler_record_declaration_visibility(compiler,  row);
@@ -1450,7 +1450,7 @@ static int _has_private_native(Compiler compiler,  List templates){
   {
     List template;
     Iter _x2c_macro_iterator_3 = List_iter(templates,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -1658,7 +1658,7 @@ static int _unify_signature(Type pattern,  Type actual,  Map variables,  Map bin
 static Var _substitute(Var value,  Map variables,  Map bindings){
   String variable = _type_variable(value,  variables);  if(String_truth(variable)) return Map_getindex(bindings,  String_var(variable));  if(! Var_is(value,  806120)) return value;  Array output = Array_new(); {
     Var item;  Iter _x2c_macro_iterator_4 = List_iter(Var_list(value),  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
       item = _x2c_macro_item_4;  Array_push(output,  _substitute(item,  variables,  bindings));
@@ -1726,7 +1726,7 @@ static Type _method_signature(Compiler compiler,  Type owner,  Type participant,
 static int _contents(Var value,  String variable){
   if(Var_is(value,  1318210446)) return String_equal(Var_str(value),  variable) ? PROTOCOL_VARIABLE : 0;  if(Var_equal(value,  Symbol_var(1519197))) return PROTOCOL_VARIADIC;  if(! Var_is(value,  806120)) return 0;  int contents = 0; {
     Var item;  Iter _x2c_macro_iterator_5 = List_iter(Var_list(value),  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_5;  while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
       item = _x2c_macro_item_5;  contents |= _contents(item,  variable);
@@ -1743,7 +1743,7 @@ static int _is_exact_variable(Var value,  String variable){
 static int _is_native(List templates){
   {
     List template;  Iter _x2c_macro_iterator_6 = List_iter(templates,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
       template = Var_list(_x2c_macro_item_6);  if(String_truth(Var_str(List_caddr(template)))) return 1;
@@ -1774,7 +1774,7 @@ static void _install_native_bindings(Compiler compiler,  Type participant,  List
        default: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_261), &_x2c_match_capture)) {{
     {
       List row;  Iter _x2c_macro_iterator_7 = List_iter(rows,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
         row = Var_list(_x2c_macro_item_7); {
@@ -1802,7 +1802,7 @@ static List Compiler__resolve_native_protocol_participant(Compiler compiler,  Ty
   }
   Map variables = Map_new(),  bindings = Map_new();  Map_setindex(variables,  String_var(binder),  int_var(1));  Map_setindex(bindings,  String_var(binder),  List_var(participant)); {
     List association;  Iter _x2c_macro_iterator_8 = List_iter(associations,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_8;  while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
       association = Var_list(_x2c_macro_item_8); {
@@ -1814,7 +1814,7 @@ static List Compiler__resolve_native_protocol_participant(Compiler compiler,  Ty
   }
   Array members = Array_new(); {
     List template;  Iter _x2c_macro_iterator_9 = List_iter(templates,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_9;  while(Iter_try_next(_x2c_macro_iterator_9,  & _x2c_macro_item_9)){
       template = Var_list(_x2c_macro_item_9); {
@@ -1841,7 +1841,7 @@ static String _forward_binding(Compiler compiler,  Type base,  Type participant)
 static List _resolve_members(Compiler compiler,  Type base,  String binder,  List associations,  List templates,  Type participant,  Map * variables_out,  Map * bindings_out){
   Type representation = base == _149 ? _adoption_representation(_visible_adoption_row(compiler,  base,  participant)) : NULL;  Map variables = Map_new(),  defaults = Map_new(),  bindings = Map_new();  Map_setindex(variables,  String_var(binder),  int_var(1));  Map_setindex(bindings,  String_var(binder),  List_var(participant)); {
     List association;  Iter _x2c_macro_iterator_10 = List_iter(associations,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_10;  while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
       association = Var_list(_x2c_macro_item_10); {
@@ -1853,7 +1853,7 @@ static List _resolve_members(Compiler compiler,  Type base,  String binder,  Lis
   }
   Array resolved = Array_new(); {
     List template;  Iter _x2c_macro_iterator_12 = List_iter(templates,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_12;  while(Iter_try_next(_x2c_macro_iterator_12,  & _x2c_macro_item_12)){
       template = Var_list(_x2c_macro_item_12); {
@@ -1865,7 +1865,7 @@ static List _resolve_members(Compiler compiler,  Type base,  String binder,  Lis
         }
         if(List_truth(Type_list(actual))) selected = binding; {
           Type owner;  Iter _x2c_macro_iterator_11 = List_iter((base != _149 || List_truth(Type_list(representation))) && ! List_truth(Type_list(actual)) ? List_cdr(_ancestry(compiler,  participant)) : NULL,  &(struct Iter){
-            0
+            int_var(0)
           }
           );  Var _x2c_macro_item_11;  while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
             owner = Var_type(_x2c_macro_item_11); {
@@ -1895,7 +1895,7 @@ static List _resolve_members(Compiler compiler,  Type base,  String binder,  Lis
   }
   Array final = Array_new(); {
     List row;  Iter _x2c_macro_iterator_14 = Array_iter(resolved,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_14;  while(Iter_try_next(_x2c_macro_iterator_14,  & _x2c_macro_item_14)){
       row = Var_list(_x2c_macro_item_14); {
@@ -1920,7 +1920,7 @@ static List _resolve_members(Compiler compiler,  Type base,  String binder,  Lis
 static List _conversion_requirement(String binder,  String member,  Type template,  Symbol adapter,  String forward,  String reverse){
   int fallback = adapter == 415294949590;  List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(template)))));  Type result = List_cdr(template);  Symbol direction = fallback ? 13930794120 : 39036753098; {
     Var parameter;  Iter _x2c_macro_iterator_15 = List_iter(parameters,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_15;  while(Iter_try_next(_x2c_macro_iterator_15,  & _x2c_macro_item_15)){
       parameter = _x2c_macro_item_15; {
@@ -1946,7 +1946,7 @@ static List _descriptor_requirement(Compiler compiler,  Type base,  String binde
 static List _ordinary_requirement(Compiler compiler,  Type base,  String binder,  List rows,  String forward,  String reverse){
   {
     List row;  Iter _x2c_macro_iterator_16 = List_iter(rows,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_16;  while(Iter_try_next(_x2c_macro_iterator_16,  & _x2c_macro_item_16)){
       row = Var_list(_x2c_macro_item_16); {
@@ -2006,7 +2006,7 @@ void Compiler_install_generated_protocol_symbols(Compiler c,  Map symbols){
 if(native){
         if(_adoption_visibility(c,  base,  participant) != 396490862680) continue; {
           List row;  Iter _x2c_macro_iterator_18 = List_iter(rows,  &(struct Iter){
-            0
+            int_var(0)
           }
           );  Var _x2c_macro_item_18;  while(Iter_try_next(_x2c_macro_iterator_18,  & _x2c_macro_item_18)){
             row = Var_list(_x2c_macro_item_18); {
@@ -2020,7 +2020,7 @@ if(native){
       }
       if(! Map_contains(c -> fn_defs,  String_var(forward))) continue;  if(List_truth(Type_list(Sym_resolve_numeric_type(c -> sym,  participant))) && participant != _72) continue; {
         List row;  Iter _x2c_macro_iterator_19 = List_iter(rows,  &(struct Iter){
-          0
+          int_var(0)
         }
         );  Var _x2c_macro_item_19;  while(Iter_try_next(_x2c_macro_iterator_19,  & _x2c_macro_item_19)){
           row = Var_list(_x2c_macro_item_19); {
@@ -2053,7 +2053,7 @@ static String _definition_location(Compiler compiler,  Type base){
 static void _report_member_sig_conflicts(Compiler compiler,  Type base,  Type participant,  List rows,  List location){
   String base_repr = _type_spelling(base);  String participant_repr = _type_spelling(participant);  String declaration_site = _definition_location(compiler,  base); {
     List row;  Iter _x2c_macro_iterator_21 = List_iter(rows,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_21;  while(Iter_try_next(_x2c_macro_iterator_21,  & _x2c_macro_item_21)){
       row = Var_list(_x2c_macro_item_21); {
@@ -2162,7 +2162,7 @@ int Compiler_protocol_rejects_direct_member(Compiler compiler,  Type participant
   {
     Type ancestor;
     Iter _x2c_macro_iterator_22 = List_iter(_ancestry(compiler,  owner),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_22;
@@ -2206,7 +2206,7 @@ static void _dump_conformance_row(const char * kind,  int owned,  Type base,  Ty
   {
     List row;
     Iter _x2c_macro_iterator_23 = List_iter(rows,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_23;
@@ -2275,13 +2275,13 @@ void Compiler_dump_conformance(Compiler compiler,  Map globs){
 }
 Array_sort(names);  List protocols = _ordered_occurrences(compiler); {
   Var candidate;  Iter _x2c_macro_iterator_26 = Array_iter(names,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_26;  while(Iter_try_next(_x2c_macro_iterator_26,  & _x2c_macro_item_26)){
     candidate = _x2c_macro_item_26; {
       Type participant = List_type(cons(String_var(Var_str(candidate)),  NULL)); {
         List entry;  Iter _x2c_macro_iterator_25 = List_iter(protocols,  &(struct Iter){
-          0
+          int_var(0)
         }
         );  Var _x2c_macro_item_25;  while(Iter_try_next(_x2c_macro_iterator_25,  & _x2c_macro_item_25)){
           entry = Var_list(_x2c_macro_item_25); {
@@ -2331,13 +2331,13 @@ static List _ancestry(Compiler compiler,  Type participant){
 static void _each_adopted_row(Compiler compiler,  List protocols,  Type participant,  Func visit){
   {
     List entry;  Iter _x2c_macro_iterator_29 = List_iter(protocols,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_29;  while(Iter_try_next(_x2c_macro_iterator_29,  & _x2c_macro_item_29)){
       entry = Var_list(_x2c_macro_item_29); {
         Type base_type = Var_type(List_car(entry));  if(! Compiler__is_adopted(compiler,  base_type,  participant)) continue;  List conformance = Compiler_protocol_members_for(compiler,  participant,  base_type);  if(! List_truth(conformance)) continue; {
           List row;  Iter _x2c_macro_iterator_28 = List_iter(List_cdr(Var_list(List_last(conformance))),  &(struct Iter){
-            0
+            int_var(0)
           }
           );  Var _x2c_macro_item_28;  while(Iter_try_next(_x2c_macro_iterator_28,  & _x2c_macro_item_28)){
             row = Var_list(_x2c_macro_item_28);  if(Var_int(({
@@ -2454,7 +2454,7 @@ static List _parameter_declarations(Compiler compiler,  List types,  Array bindi
   {
     Type type;
     Iter _x2c_macro_iterator_34 = List_iter(types,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_34;
@@ -2533,7 +2533,7 @@ static List _declaration_from_signature(Compiler compiler,  String name,  Type s
   {
     Type type;
     Iter _x2c_macro_iterator_35 = List_iter(parameters,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_35;
@@ -2580,14 +2580,14 @@ return 0;
 static List _insert_at_visibility_boundary(List ast,  List declaration,  int declaration_private,  List additions,  int make_static){
   Array output = Array_new();  int eligible = 0,  inserted = 0; {
     List node;  Iter _x2c_macro_iterator_39 = List_iter(ast,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_39;  while(Iter_try_next(_x2c_macro_iterator_39,  & _x2c_macro_item_39)){
       node = Var_list(_x2c_macro_item_39); {
         int boundary = eligible && _starts_private_region(node);  if(! inserted && boundary && ! make_static){
           {
             Var added;  Iter _x2c_macro_iterator_36 = List_iter(additions,  &(struct Iter){
-              0
+              int_var(0)
             }
             );  Var _x2c_macro_item_36;  while(Iter_try_next(_x2c_macro_iterator_36,  & _x2c_macro_item_36)){
               added = _x2c_macro_item_36;  Array_push(output,  added);
@@ -2599,7 +2599,7 @@ static List _insert_at_visibility_boundary(List ast,  List declaration,  int dec
         Array_push(output,  List_var(node));  if(! inserted && boundary && make_static){
           {
             Var added;  Iter _x2c_macro_iterator_37 = List_iter(additions,  &(struct Iter){
-              0
+              int_var(0)
             }
             );  Var _x2c_macro_item_37;  while(Iter_try_next(_x2c_macro_iterator_37,  & _x2c_macro_item_37)){
               added = _x2c_macro_item_37;  Array_push(output,  added);
@@ -2610,7 +2610,7 @@ static List _insert_at_visibility_boundary(List ast,  List declaration,  int dec
         }
         if(! List_equal(node,  declaration)) continue;  eligible = 1;  if(! make_static || ! declaration_private) continue; {
           Var added;  Iter _x2c_macro_iterator_38 = List_iter(additions,  &(struct Iter){
-            0
+            int_var(0)
           }
           );  Var _x2c_macro_item_38;  while(Iter_try_next(_x2c_macro_iterator_38,  & _x2c_macro_item_38)){
             added = _x2c_macro_item_38;  Array_push(output,  added);
@@ -2625,7 +2625,7 @@ static List _insert_at_visibility_boundary(List ast,  List declaration,  int dec
   }
   if(! inserted){
     Var added;  Iter _x2c_macro_iterator_40 = List_iter(additions,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_40;  while(Iter_try_next(_x2c_macro_iterator_40,  & _x2c_macro_item_40)){
       added = _x2c_macro_item_40;  Array_push(output,  added);
@@ -2642,7 +2642,7 @@ static List _string_literal(Compiler compiler,  String value){
 static void Compiler__generate_descriptor_registration(Compiler compiler,  Type participant,  String name,  Symbol explicit_tag,  List thunks,  int central_initializer){
   String methods_name = Compiler_fresh_name(compiler,  _585);  List methods_binding = Sym_introduce(compiler -> sym,  methods_name);  Array fields = Array_new(); {
     List row;  Iter _x2c_macro_iterator_41 = List_iter(thunks,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_41;  while(Iter_try_next(_x2c_macro_iterator_41,  & _x2c_macro_item_41)){
       row = Var_list(_x2c_macro_item_41); {
@@ -2668,7 +2668,7 @@ static void _report_requirement_at_adoption(Compiler compiler,  Type base,  Type
 static List Compiler__generate_protocol_thunk(Compiler compiler,  Type participant,  String member,  Type expected,  Type template,  Map variables,  Map bindings,  String binder,  String source,  String reverse){
   Map erased = Map_copy(bindings); {
     Var variable;  Iter _x2c_macro_iterator_42 = Map_keys(variables,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_42;  while(Iter_try_next(_x2c_macro_iterator_42,  & _x2c_macro_item_42)){
       variable = _x2c_macro_item_42;  Map_setindex(erased,  variable,  List_var(_149));
@@ -2681,7 +2681,7 @@ static List Compiler__generate_protocol_thunk(Compiler compiler,  Type participa
 static void Compiler__generate_ordinary_protocol_adapters(Compiler c,  Type base,  Type participant,  String forward,  String reverse,  Map variables,  Map bindings,  String binder,  List rows,  int central_initializer){
   List adoption = _visible_adoption_row(c,  base,  participant);  int shares_var_tag = base == _149 && List_truth(Type_list(_adoption_representation(adoption)));  Array thunks = Array_new(); {
     List row;  Iter _x2c_macro_iterator_43 = List_iter(rows,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_43;  while(Iter_try_next(_x2c_macro_iterator_43,  & _x2c_macro_item_43)){
       row = Var_list(_x2c_macro_item_43); {
@@ -2742,7 +2742,7 @@ List Compiler_generate_protocol_adapters(Compiler c,  List ast){
   }
   Array_sort(ordered); {
     List ordered_row;  Iter _x2c_macro_iterator_46 = Array_iter(ordered,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_46;  while(Iter_try_next(_x2c_macro_iterator_46,  & _x2c_macro_item_46)){
       ordered_row = Var_list(_x2c_macro_item_46); {
@@ -2759,7 +2759,7 @@ List Compiler_generate_protocol_adapters(Compiler c,  List ast){
 if(native){
         Var stored;  if(! Map_try_get(c -> protocol_helpers,  List_var(cons(_3,  cons(List_car(Type_list(participant)),  NULL))),  & stored)) continue;  List _x2c_destructure_26 = Var_list(stored);  List source = Var_list(List_getindex(_x2c_destructure_26,  0));  int private = Var_int(Var_convert(List_getindex(_x2c_destructure_26,  1),  3453797));  int make_static = _adoption_visibility(c,  base,  participant) == 1317118534;  Array aliases = Array_new(); {
           List row;  Iter _x2c_macro_iterator_45 = List_iter(rows,  &(struct Iter){
-            0
+            int_var(0)
           }
           );  Var _x2c_macro_item_45;  while(Iter_try_next(_x2c_macro_iterator_45,  & _x2c_macro_item_45)){
             row = Var_list(_x2c_macro_item_45); {
@@ -2943,7 +2943,7 @@ static String _x2c_proto_string_add_update(volatile String * lhs,  Symbol op,  S
 static Var _x2c_lambda_6(Func _x2c_lambda_closure_5,  const FuncArg * _x2c_lambda_argv_5){
   struct Compiler * * compiler = x2c_func_reference_argument(_x2c_lambda_closure_5,  _x2c_lambda_argv_5,  0,  _343);  const _x2c_lambda_context_10 * _x2c_lambda_context_value_5 =(const _x2c_lambda_context_10 *) Func_context(_x2c_lambda_closure_5);  List protocols = _ordered_occurrences((* compiler));  List base_ancestry = _ancestry((* compiler),  Var_type(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_13)); {
     Type current;  Iter _x2c_macro_iterator_30 = List_iter(base_ancestry,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_30;  while(Iter_try_next(_x2c_macro_iterator_30,  & _x2c_macro_item_30)){
       current = Var_type(_x2c_macro_item_30); {
@@ -2967,13 +2967,13 @@ static Var _x2c_lambda_6(Func _x2c_lambda_closure_5,  const FuncArg * _x2c_lambd
 }
 {
   List entry;  Iter _x2c_macro_iterator_32 = List_iter(protocols,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_32;  while(Iter_try_next(_x2c_macro_iterator_32,  & _x2c_macro_item_32)){
     entry = Var_list(_x2c_macro_item_32); {
       List _x2c_destructure_19 = entry;  Type base = Var_type(List_getindex(_x2c_destructure_19,  0));  List occurrence = Var_list(List_getindex(_x2c_destructure_19,  1));  List record = Var_list(List_car(occurrence));  List declared = List_cdr(Var_list(List_last(record)));  int matches = List_equal(Type_list(base),  Type_list(Var_type(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_13)));  for(List ancestry = List_truth(base_ancestry) ? List_cdr(base_ancestry) : NULL;  ! matches && List_truth(ancestry);  ancestry = List_cdr(ancestry)) matches = List_equal(Type_list(base),  Var_list(List_car(ancestry)));  if(! matches) continue;  String base_name = _base_name(base);  if(! String_truth(base_name)) continue;  int declares_member = 0; {
         List row;  Iter _x2c_macro_iterator_31 = List_iter(declared,  &(struct Iter){
-          0
+          int_var(0)
         }
         );  Var _x2c_macro_item_31;  while(Iter_try_next(_x2c_macro_iterator_31,  & _x2c_macro_item_31)){
           row = Var_list(_x2c_macro_item_31);  if(String_equal(Var_str(List_car(row)),  Var_string(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_14))){
@@ -2991,7 +2991,7 @@ static Var _x2c_lambda_6(Func _x2c_lambda_closure_5,  const FuncArg * _x2c_lambd
 }
 {
   Type current;  Iter _x2c_macro_iterator_33 = List_iter(_ancestry((* compiler),  Var_type(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_13)),  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_33;  while(Iter_try_next(_x2c_macro_iterator_33,  & _x2c_macro_item_33)){
     current = Var_type(_x2c_macro_item_33); {

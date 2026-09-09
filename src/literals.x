@@ -59,7 +59,7 @@ static List _parse_typed_capture(Compiler compiler);
 
 static List _parse_literal_element(Compiler compiler) {
   switch (compiler.peek(0)) {
-    case <"?{">:     return _parse_typed_capture(compiler);
+    case <"?(">:     return _parse_typed_capture(compiler);
     case <"(">:      return compiler.parse_list_literal();
     case <"%\"">:    return compiler.parse_string_literal();
     case <"%[">:     return compiler.parse_array_literal();
@@ -159,11 +159,11 @@ static List _typed_capture_pattern(Compiler c, Atom binder, List tag) {
 
 static List _parse_typed_capture(Compiler c) {
   Token start = c.token;
-  c.expect(<"?{">);
+  c.expect(<"?(">);
   Type type = c.parse_type_name();
   String name = c.token.text;
   c.expect(<ident>);
-  c.expect(<"}">);
+  c.expect(<")">);
   List tag = c.var_tag_expression(type, start);
   Atom binder = Atom.intern(%"?$name");
   if ((void *) c.match_types) {

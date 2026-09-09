@@ -1239,7 +1239,7 @@ Var lisp_plus(List values){
   {
     Var value;
     Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -1267,7 +1267,7 @@ Var lisp_minus(List values){
   {
     Var value;
     Iter _x2c_macro_iterator_1 = List_iter(List_cdr(values),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -1286,7 +1286,7 @@ Var lisp_times(List values){
   {
     Var value;
     Iter _x2c_macro_iterator_2 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -1314,7 +1314,7 @@ Var lisp_divide(List values){
   {
     Var value;
     Iter _x2c_macro_iterator_3 = List_iter(List_cdr(values),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -1439,7 +1439,7 @@ static int _param_has(List params,  Var name){
   {
     Var param;
     Iter _x2c_macro_iterator_4 = List_iter(params,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -1457,7 +1457,7 @@ static void _capture(Lisp lisp,  LispEnv * env,  List params,  Var body,  Map ca
   {
     Var name;
     Iter _x2c_macro_iterator_5 = List_iter(List_flatten(Var_list(body)),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -1493,7 +1493,7 @@ static void _eval_args(Lisp lisp,  List args,  LispEnv * env,  List * out){
     {
       Var arg;
       Iter _x2c_macro_iterator_6 = List_iter(args,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_6;
@@ -1766,7 +1766,7 @@ static Var _apply_special(Lisp lisp,  int id,  List args,  LispEnv * env){
       {
         Var clause;
         Iter _x2c_macro_iterator_7 = List_iter(args,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_7;
@@ -1978,7 +1978,7 @@ static int LispLower__auto_compile_cond(LispLower l,  List clauses,  int tail){
   {
     Var clause;
     Iter _x2c_macro_iterator_8 = List_iter(clauses,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_8;
@@ -2209,7 +2209,7 @@ static int LispLower__auto_compile(LispLower l,  Var expression,  int tail){
   {
     Var arg;
     Iter _x2c_macro_iterator_9 = List_iter(List_cdr(form),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_9;
@@ -2238,7 +2238,7 @@ static int _auto_analyze(Lisp lisp,  Lambda lambda,  LispEnv * env){
   {
     Var name;
     Iter _x2c_macro_iterator_10 = List_iter(lambda -> params,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_10;
@@ -2332,7 +2332,7 @@ static int _auto_specials_ok(Lisp lisp,  LispEnv * env,  Lambda lambda){
   {
     List pair;
     Iter _x2c_macro_iterator_11 = List_iter(lambda -> auto_specials,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_11;
@@ -2424,7 +2424,7 @@ static int _auto_apply(Lisp lisp,  Lambda lambda,  List raw,  LispEnv * env,  Va
   }
   Var argv[LISP_AUTO_PARAM_MAX];  int argc = 0; {
     Var arg;  Iter _x2c_macro_iterator_12 = List_iter(raw,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_12;  while(Iter_try_next(_x2c_macro_iterator_12,  & _x2c_macro_item_12)){
       arg = _x2c_macro_item_12;  argv[argc ++] = lambda -> macro ? arg : _eval(lisp,  arg,  env);
@@ -2498,7 +2498,7 @@ static Var _apply(Lisp lisp,  Var callable,  List raw,  LispEnv * env){
   Func function =(Func) Var_pointer(callable);  int special = _special_id(lisp,  function);  if(special >= 0) return _apply_special(lisp,  special,  raw,  env);  if(List_len(raw) <= LISP_NATIVE_ARG_MAX){
     FuncArg argv[LISP_NATIVE_ARG_MAX];  unsigned argc = 0; {
       Var arg;  Iter _x2c_macro_iterator_13 = List_iter(raw,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_13;  while(Iter_try_next(_x2c_macro_iterator_13,  & _x2c_macro_item_13)){
         arg = _x2c_macro_item_13;  argv[argc ++] = FuncArg_value(_eval(lisp,  arg,  env));
@@ -2546,7 +2546,7 @@ static Var _apply_values(Lisp lisp,  Var callable,  List values,  LispEnv * env)
   {
     Var value;
     Iter _x2c_macro_iterator_14 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_14;

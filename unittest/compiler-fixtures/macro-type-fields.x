@@ -1,5 +1,7 @@
 #include "x2c.x"
 #include "macro-type-fields-include.h"
+$(import "macro-type-fields-import.xmacro")
+$imported_record();
 
 macro Field $generated_field() => {
   long $(x2c.ident "generated");
@@ -57,6 +59,7 @@ typedef union ReflectedUnion {
 $check_record(ReflectedAlias);
 $check_union(ReflectedUnion);
 $check_included(IncludedRecord);
+$check_included(struct ReflectedImported);
 
 int main(void) {
   ReflectedRecord record = { .first = 17 };

@@ -228,8 +228,13 @@
           (expr (* struct "Iter") 
            (op & (expr (struct "Iter") 
                   (cast (struct "Iter") 
-                   (expr () 
-                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+                   (expr (struct "Iter") 
+                    (composite 
+                     (commas 
+                      (expr ("Var") 
+                       (call (expr ((func ((int))) "Var") 
+                              (ident (binding 84 "int_var"))) 
+                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 50 "_x2c_macro_item_0") ()))) 
     (while 
      (expr (int) 
@@ -245,11 +250,11 @@
          (expr ("Var") (ident (binding 50 "_x2c_macro_item_0")))))) 
       (block 
        (at 16 
-        (defer (block) (binding 86 "_x2c_defer_env_0") 
-         (binding 89 "_x2c_defer_cleanup_0") 
+        (defer (block) (binding 87 "_x2c_defer_env_0") 
+         (binding 90 "_x2c_defer_cleanup_0") 
          (((binding 39 "count") ("ast_phase1_Count") 
-           (binding 84 "_x2c_defer_capture_0")) 
-          ((binding 48 "value") ("Var") (binding 85 "_x2c_defer_capture_1"))) 
+           (binding 85 "_x2c_defer_capture_0")) 
+          ((binding 48 "value") ("Var") (binding 86 "_x2c_defer_capture_1"))) 
          ((binding 39 "count"))))))))) 
   (at 42 
    (matchcases (expr ("List") (ident (binding 43 "values"))) 
@@ -338,7 +343,7 @@
                (expr ((func (("Var"))) "Var") 
                 (ident (binding 91 "_x2c_lambda_0"))))) 
         (args (expr ("Var") 
-               (call (expr ((func ((int))) "Var") (ident (binding 90 "int_var"))) 
+               (call (expr ((func ((int))) "Var") (ident (binding 84 "int_var"))) 
                 (args (expr (int) (literal (int) "2")))))))))))) 
   (at 28 
    (stmnt 
@@ -366,21 +371,21 @@
  (struct "_x2c_defer_env_0" 
   (fields 
    (declare (const void) 
-    (bindings (bind (binding 84 "_x2c_defer_capture_0") (*)))) 
+    (bindings (bind (binding 85 "_x2c_defer_capture_0") (*)))) 
    (declare (const void) 
-    (bindings (bind (binding 85 "_x2c_defer_capture_1") (*)))))) 
- (bindings (bind (binding 86 "_x2c_defer_env_0") ())))
+    (bindings (bind (binding 86 "_x2c_defer_capture_1") (*)))))) 
+ (bindings (bind (binding 87 "_x2c_defer_env_0") ())))
 
 (function (static void) 
- (bind (binding 89 "_x2c_defer_cleanup_0") 
-  ((fnmod (params (param (void) (bind (binding 88 "_x2c_defer_opaque_0") (*))))))) 
+ (bind (binding 90 "_x2c_defer_cleanup_0") 
+  ((fnmod (params (param (void) (bind (binding 89 "_x2c_defer_opaque_0") (*))))))) 
  (block 
   (declare ("_x2c_defer_env_0") 
    (bindings 
-    (op = (bind (binding 87 "_x2c_defer_data_0") (*)) 
+    (op = (bind (binding 88 "_x2c_defer_data_0") (*)) 
      (expr (* "_x2c_defer_env_0") 
       (cast (* "_x2c_defer_env_0") 
-       (expr (* void) (ident (binding 88 "_x2c_defer_opaque_0")))))))) 
+       (expr (* void) (ident (binding 89 "_x2c_defer_opaque_0")))))))) 
   (stmnt 
    (expr ("ast_phase1_Count") 
     (op += 
@@ -407,7 +412,7 @@
   (stmnt 
    (return 
     (expr ("Var") 
-     (call (expr ((func ((int))) "Var") (ident (binding 90 "int_var"))) 
+     (call (expr ((func ((int))) "Var") (ident (binding 84 "int_var"))) 
       (args (expr (int) 
              (op + (expr (int) 
                     (call (expr ((func (("Var"))) (int)) 

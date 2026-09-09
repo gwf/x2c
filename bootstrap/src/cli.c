@@ -252,6 +252,8 @@ void * Scope_malloc(size_t);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 String Var_string(Var);
@@ -614,7 +616,7 @@ static int _response_on_stack(List stack,  String path){
   {
     String entry;
     Iter _x2c_macro_iterator_0 = List_iter(stack,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

@@ -480,7 +480,7 @@ static int Map__core_try_del(Map _x2c_macro_map_0,  Var * _x2c_macro_key_1,  Var
     _x2c_macro_entries_0[_x2c_macro_index_0] = _x2c_macro_swap_entry_0;
   }
   _x2c_macro_entries_0[_x2c_macro_empty_0] =(struct MapRecord){
-    0
+    int_var(0)
   }
   ;
   return 1;

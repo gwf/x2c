@@ -184,3 +184,40 @@ int Ast.never_returns(Ast ast) {
   Ast terminal = last;
   return terminal.never_returns();
 }
+
+/** Returns initializer alternatives and their optional native macro input. */
+List Ast.initializer_cases(Ast ast, List *input) {
+  *input = NULL;
+  match (ast)
+    case %(initval (!set ?header (input *)) *cases): {
+      *input = header;
+      return cases;
+    }
+  return ast.cdr();
+}
+
+/** Returns function alternatives when every initializer arm calls one shared
+    input, and stores that input expression in `source`. Other forms return NULL.
+*/
+List Ast.initializer_functions(Ast ast, List *source) {
+  List header = NULL;
+  List cases = Ast.initializer_cases(ast, &header);
+  if (!header || header.cdr().len() != 1) return NULL;
+  List input = header.cadr();
+  List value = input.cadr();
+  List argument = %(expr ${value.cadr()} ${input.car()});
+  Array functions = %[];
+  foreach (List choice, cases) {
+    (List condition, List path, List destination, List expression) = choice;
+    match (expression) {
+      case %(expr ? (call (!set ?callee (expr ? ?)) (args ?actual))): {
+        if (actual !== argument) { functions.free(); return NULL; }
+        List function = callee;
+        functions.push(%($condition $path ${function.cadr()} $function));
+      }
+      default: { functions.free(); return NULL; }
+    }
+  }
+  *source = value;
+  return functions.list_free();
+}

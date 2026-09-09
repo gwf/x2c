@@ -31,7 +31,7 @@ initialization work to the compiler and is not idempotent. The header is
 written before the source, so an output failure may leave the header
 replaced; failures are reported as `emit` diagnostics.
 
-Source: `src/generate.x:698`
+Source: `src/generate.x:690`
 
 ## Design notes
 

@@ -143,6 +143,21 @@
 
 ## Outstanding Items
 
+- Deferred static runtime initialization retains two native-C limitations,
+  reproduced on both published `1de90da` and the initializer candidate.
+  `static Var value = (int)__COUNTER__; int next = __COUNTER__;` expands the
+  deferred occurrence later, producing `value == 1` and `next == 0`.
+  An inline tag in `static Var value =
+  (int)((struct Inline { int number; }){41}).number;` is likewise emitted
+  inside the initialization function, so a later file-scope
+  `struct Inline after = {9};` fails native compilation. Declare such tags
+  separately at file scope. These are existing deferred-initialization
+  placement issues, rather than changes introduced by chained designators.
+  A function-local `static struct` containing a `String` literal also lacks
+  correct deferred initialization: published `1de90da` compiles the raw C
+  string pointer (breaking canonical String identity); the initializer
+  candidate converts it but native C rejects the cached value as nonconstant.
+  Local static runtime-valued aggregate initialization remains unsupported.
 - A statement macro containing `NULL` can emit an undeclared
   `_x2c_binding_shadow_0` in a captured dynamic Func call with a nonaddressable
   argument. This reproduces on compiler `24c3f8d`; the AST rewrite macro

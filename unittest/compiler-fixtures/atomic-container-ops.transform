@@ -389,7 +389,7 @@
    (declare (int) 
     (bindings 
      (op = (bind (binding 39 "native") ((dim (expr (int) (literal (int) "2"))))) 
-      (expr ((dim (expr (int) (literal (int) "2"))) int) 
+      (expr ((dim ("2")) int) 
        (composite 
         (commas (expr (int) (literal (int) "1")) 
          (expr (int) (literal (int) "2"))))))))) 

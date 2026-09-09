@@ -138,6 +138,20 @@ static List _build_static_initializer_rhs(
 static List _zero_static_initializer(Compiler compiler, List value) {
   List zero = %(expr (int) (literal (int) "0"));
   match (value) {
+    case %(expr ?type (!set ?body (initval *))): {
+      List header = NULL;
+      List cases = Ast.initializer_cases(body.list(), &header);
+      Array zeroed = %[];
+      foreach (List choice, cases) {
+        (List condition, List path, Type destination, List input) = choice;
+        List zero = _zero_static_initializer(compiler, input);
+        match (zero)
+          case %(expr ?type (!set ?body (composite *))):
+            zero = _build_static_initializer_rhs(type, NULL, NULL, type, body);
+        zeroed.push(%($condition $path $destination $zero));
+      }
+      return %(expr $type (initval @{zeroed.list_free()}));
+    }
     case %(expr ?type (!set ?inner (composite *))):
       return %(expr $type ${_zero_static_initializer(compiler, inner)});
     case %(expr ?type ?): {
@@ -162,41 +176,90 @@ static List _zero_static_initializer(Compiler compiler, List value) {
    native object's actual dimensions rather than the initializer count. */
 static List _build_static_array_block(
   Compiler compiler, List target, Type array, List items) {
-  Type type = array.cdr();
-  Type resolved = compiler.sym.resolve_key(type);
   Array statements = %[];
-  List base = NULL;
-  int at = 0;
-  foreach (List value, items) {
-    match (value)
-      case %(indexinit ?index ?initializer): {
-        base = index;
-        value = initializer;
-        at = 0;
+  foreach (List row, compiler.initializer_rows(array, items, target)) {
+    (List original, List cases) = row;
+    List terminal = original, header = NULL, source = NULL;
+    while (terminal.car() == <dotinit> || terminal.car() == <indexinit>)
+      terminal = terminal.caddr();
+    List functions = NULL;
+    match (terminal)
+      case %(expr ? (!set ?body (initval *))): {
+        Ast.initializer_cases(body.list(), &header);
+        functions = Ast.initializer_functions(body.list(), &source);
       }
-    String position = %"$at";
-    List offset = %(expr (int) (literal (int) $position));
-    List index = !base ? offset : !at ? base
-      : %(expr (int) (op + $base $offset));
-    List slot = %(expr $type (index $target $index));
-    List inner = NULL, rhs = value, assignment;
-    match (value) {
-      case %(expr ? (!set ?body (composite *))): inner = body;
-      case %(!set ?body (composite *)): inner = body;
+    Array assigned = %[];
+    List applicable = NULL;
+    int unconditional = 0;
+    foreach (List choice, cases) {
+      (List condition, List path, Type type, List value) = choice;
+      if (!type) continue;
+      List slot = target, tests = NULL;
+      foreach (List frame, path.reverse()) {
+        (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
+        List parent = slot;
+        if (kind == <index>) {
+          slot = %(expr $selected (index $parent $selector));
+          List length = %(expr (unsigned)
+            (op / (expr (unsigned) (sizeof (parens $parent)))
+                  (expr (unsigned) (sizeof (parens $slot)))));
+          tests = cons(%(expr (int) (op < $selector $length)), tests);
+        }
+        else if (selector.truth())
+          slot = %(expr $selected (op . $parent ($selector)));
+      }
+      List inner = NULL, rhs = value, assignment;
+      match (value) {
+        case %(expr ? (!set ?body (composite *))): inner = body;
+        case %(!set ?body (composite *)): inner = body;
+      }
+      Type resolved = compiler.sym.resolve_key(type);
+      if (inner && resolved.is_array())
+        assignment = _build_static_array_block(
+          compiler, slot, resolved, inner.cadr().list().cdr());
+      else {
+        if (inner)
+          rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
+        if (condition) {
+          List zero = _build_static_initializer_rhs(type, NULL, NULL, type,
+            %(composite (commas (expr (int) (literal (int) "0")))));
+          rhs = %(expr $type
+            (call "__builtin_choose_expr" (args $condition $rhs $zero)));
+        }
+        assignment = %(stmnt (expr $type (op = $slot $rhs)));
+      }
+      if (condition) tests = cons(condition, tests);
+      List active = NULL;
+      foreach (List test, tests) {
+        active = active ? %(expr (int) (op && $active $test)) : test;
+        assignment = %(if $test $assignment);
+      }
+      if (!active) unconditional = 1;
+      else applicable = applicable
+        ? %(expr (int) (op || $applicable $active)) : active;
+      assigned.push(assignment);
     }
-    if (inner && resolved.is_array())
-      assignment = _build_static_array_block(
-        compiler, slot, resolved, inner.cadr().list().cdr());
-    else {
-      if (inner)
-        rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
-      assignment = %(stmnt (expr $type (op = $slot $rhs)));
+    List code = assigned.list_free();
+    if (functions && code) {
+      Type type = source.cadr();
+      List binding = compiler.sym.introduce(
+        compiler.fresh_name("initializer_value"));
+      List local = %(expr $type (ident $binding));
+      List input = header.cadr();
+      List formal = %(expr $type ${input.car()});
+      code = code.search_replace(%(!quote $formal), local);
+      List initial = source;
+      if (!unconditional) {
+        List zero = _build_static_initializer_rhs(type, NULL, NULL, type,
+          %(composite (commas (expr (int) (literal (int) "0")))));
+        initial = %(expr $type (op ? $applicable $source $zero));
+      }
+      List declaration = %(declare $type
+        (bindings (op = (bind $binding ()) $initial)));
+      code = %($declaration @code);
     }
-    List length = %(expr (unsigned)
-      (op / (expr (unsigned) (sizeof (parens $target)))
-            (expr (unsigned) (sizeof (parens $slot)))));
-    statements.push(%(if (expr (int) (op < $index $length)) $assignment));
-    at++;
+    else if (header) code = %(initcode $header $code);
+    statements.push(code);
   }
   return %(block @{statements.list_free()});
 }
@@ -219,7 +282,8 @@ static List _defer_one_binding(
       Type declared = declaration.type_from_ast().canonicalize();
       Type resolved = compiler.sym.resolve_key(declared);
       if (resolved.is_array()) {
-        if (!_contains_cache_ref(value)) return bound;
+        if (!_contains_cache_ref(value) &&
+            !ast_contains_head(value, <initval>)) return bound;
         match (value)
           case %(composite (commas *items)): {
             List target = %(expr $declared (ident $name));

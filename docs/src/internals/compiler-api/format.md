@@ -24,13 +24,15 @@ Code formatting helpers for the x2c compiler.
 Returns a canonical formatted C `String` for an emitted token `List`.
 Token order and `code` are unchanged. Braces indent by two spaces,
 semicolons break lines only outside parentheses, and preprocessor tokens
-occupy their own lines with escaped quotes normalized. An empty `List`
-returns the empty `String`. Emitted `src-at` markers carry existing
-compiler origin IDs; zero restores `output_file` at its physical line.
+occupy their own lines with escaped quotes normalized. A `c-direct`
+marker precedes an already-emitted directive whose escapes are preserved.
+An empty `List` returns the empty `String`. Emitted `src-at` markers carry
+existing compiler origin IDs; zero restores `output_file` at its physical
+line.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while materializing the result.
 
-Source: `src/format.x:95`
+Source: `src/format.x:97`
 
 ## Design notes
 

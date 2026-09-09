@@ -655,7 +655,7 @@ Array Array_map(Array array,  Func func){
     {
       Var item;
       Iter _x2c_macro_iterator_0 = Array_iter(array,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_0;

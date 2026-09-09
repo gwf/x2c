@@ -2,7 +2,7 @@
   "name": "x2c-syntax",
   "displayName": "x2c - C with batteries",
   "description": "x2c syntax highlighting, compiler diagnostics, definitions, and type hover.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "x2c-lang",
   "author": {
     "name": "Gary William Flake"

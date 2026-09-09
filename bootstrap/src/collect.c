@@ -88,6 +88,8 @@ Var Array_push(Array,  Var);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 int Var_is(Var,  Symbol);
@@ -125,8 +127,6 @@ Iter Map_keys(Map,  Iter);
 int Map_contains(Map,  Var);
 
 Var Map_setindex(Map,  Var,  Var);
-
-Var int_var(int);
 
 Var Map_getindex(Map,  Var);
 
@@ -523,7 +523,7 @@ static String _resolve_include_dirs(SourceView sources,  List extra_dirs,  Strin
   {
     Var value;
     Iter _x2c_macro_iterator_0 = List_iter(extra_dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -542,7 +542,7 @@ static String _resolve_include_dirs(SourceView sources,  List extra_dirs,  Strin
   {
     String dir;
     Iter _x2c_macro_iterator_1 = Array_iter(dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -619,7 +619,7 @@ static int _entry_adds_symbols_visit(Compiler compiler,  List entry,  Map globs,
   {
     Var part;
     Iter _x2c_macro_iterator_4 = List_iter(Var_list(List_car(entry)),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -631,7 +631,7 @@ static int _entry_adds_symbols_visit(Compiler compiler,  List entry,  Map globs,
           {
             Var key;
             Iter _x2c_macro_iterator_3 = Map_keys(additions,  &(struct Iter){
-              0
+              int_var(0)
             }
             );
             Var _x2c_macro_item_3;
@@ -672,7 +672,7 @@ static void _replay_cached(Compiler compiler,  List entry,  Map globs,  Map visi
   {
     Var definition;
     Iter _x2c_macro_iterator_5 = List_iter(definitions,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -686,7 +686,7 @@ static void _replay_cached(Compiler compiler,  List entry,  Map globs,  Map visi
   {
     Var part;
     Iter _x2c_macro_iterator_6 = List_iter(parts,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;
@@ -927,7 +927,7 @@ void Compiler_record_generated_header_symbol(Compiler compiler,  String name,  T
   {
     Var part;
     Iter _x2c_macro_iterator_7 = List_iter(parts,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;
@@ -971,7 +971,7 @@ static void _file(Compiler c,  String path,  String text,  String dir,  Map glob
   {
     String line;
     Iter _x2c_macro_iterator_8 = List_iter(lines,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_8;
@@ -1006,7 +1006,7 @@ static void _file(Compiler c,  String path,  String text,  String dir,  Map glob
   {
     Var part;
     Iter _x2c_macro_iterator_10 = List_iter(part_list,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_10;
@@ -1044,7 +1044,7 @@ static void _file(Compiler c,  String path,  String text,  String dir,  Map glob
   {
     Var definition;
     Iter _x2c_macro_iterator_11 = Map_keys(definitions,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_11;
@@ -1097,7 +1097,7 @@ static String _package_entry(Compiler compiler,  String name,  String * director
   {
     String package_dir;
     Iter _x2c_macro_iterator_12 = List_iter(compiler -> package_dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_12;
@@ -1192,7 +1192,7 @@ static void _package_contributions(Compiler compiler,  String name,  String root
   {
     Var part;
     Iter _x2c_macro_iterator_14 = List_iter(parts,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_14;
@@ -1390,7 +1390,7 @@ int header_symbols_write(File output,  int gensym_base){
   {
     Var key;
     Iter _x2c_macro_iterator_16 = Map_keys(_header_cache(),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_16;
@@ -1410,7 +1410,7 @@ int header_symbols_write(File output,  int gensym_base){
   {
     Var name;
     Iter _x2c_macro_iterator_20 = Array_iter(names,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_20;
@@ -1431,7 +1431,7 @@ int header_symbols_write(File output,  int gensym_base){
         {
           Var part;
           Iter _x2c_macro_iterator_18 = List_iter(cached_parts,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_18;
@@ -1593,7 +1593,7 @@ Scope_pop();
 {
   String line;
   Iter _x2c_macro_iterator_21 = List_iter(List_cdr(lines),  &(struct Iter){
-    0
+    int_var(0)
   }
   );
   Var _x2c_macro_item_21;
@@ -1728,7 +1728,7 @@ List stored_parts = Var_list(parts_value);
 {
   Var part;
   Iter _x2c_macro_iterator_23 = List_iter(stored_parts,  &(struct Iter){
-    0
+    int_var(0)
   }
   );
   Var _x2c_macro_item_23;
@@ -1749,7 +1749,7 @@ List stored_parts = Var_list(parts_value);
       {
         Var row;
         Iter _x2c_macro_iterator_22 = List_iter(Var_list(part),  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_22;
@@ -1784,7 +1784,7 @@ List stored_dependencies = Var_list(dependencies_value);
 {
   Var dependency;
   Iter _x2c_macro_iterator_24 = List_iter(stored_dependencies,  &(struct Iter){
-    0
+    int_var(0)
   }
   );
   Var _x2c_macro_item_24;

@@ -107,7 +107,7 @@ int main(void){
   {
     Var value;
     Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

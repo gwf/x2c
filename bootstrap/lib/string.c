@@ -1009,7 +1009,7 @@ String String_join(String sep,  List strings){
   {
     String str;
     Iter _x2c_macro_iterator_0 = List_iter(strings,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -1261,7 +1261,7 @@ String String_escape(String str){
   {
     int byte;
     Iter _x2c_macro_iterator_1 = String_iter(str,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -1281,7 +1281,7 @@ String String_escape(String str){
   {
     int byte;
     Iter _x2c_macro_iterator_2 = String_iter(str,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -1316,7 +1316,7 @@ Buffer String_write_repr(String str,  Buffer out){
   {
     int byte;
     Iter _x2c_macro_iterator_3 = String_iter(str,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;

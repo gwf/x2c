@@ -524,7 +524,7 @@ Symbol Compiler.expect(Compiler c, Symbol type) {
 static void _update_brace_stack(Compiler c, Token consumed) {
   if (!consumed) return;
   switch (consumed.type) {
-    case <"{">: case <"%{">: case <"${">: case <"@{">: case <"?{">:
+    case <"{">: case <"%{">: case <"${">: case <"@{">:
       c.braces.push(consumed);
       break;
     case <"}">:
@@ -570,7 +570,7 @@ static void _shallow_block(Compiler c) {
     if (peek == <eof>)
       c.report_error(<parse>, "unexpected end of file", c.token, NULL);
     if (peek == <"{"> || peek == <"%{"> ||
-        peek == <"${"> || peek == <"@{"> || peek == <"?{">)
+        peek == <"${"> || peek == <"@{">)
       _shallow_block(c);
     else c.next();
   }
@@ -662,13 +662,13 @@ void Compiler._skip_shallow_expression(
     if (!parens && !brackets && !braces &&
         (token == <;> || (stop_at_comma && token == <,>)))
       return;
-    if (token == <(>) parens++;
+    if (token == <(> || token == <"?(">) parens++;
     else if (token == <)> && parens) parens--;
     else if (token == <[> || token == <"%[">)
       brackets++;
     else if (token == <]> && brackets) brackets--;
     else if (token == <"{"> || token == <"%{"> ||
-             token == <"${"> || token == <"@{"> || token == <"?{">) braces++;
+             token == <"${"> || token == <"@{">) braces++;
     else if (token == <"}"> && braces) braces--;
     compiler.next();
   }
@@ -865,7 +865,7 @@ static void _sync_top_level(Compiler c) {
       break;
     }
     if (sym == <"{"> || sym == <"%{"> ||
-        sym == <"${"> || sym == <"@{"> || sym == <"?{">) {
+        sym == <"${"> || sym == <"@{">) {
       depth += 1;
       c.next();
       continue;
@@ -1464,6 +1464,10 @@ List Sym.lookup_macro(Sym sym, Atom name) {
   return NULL;
 }
 
+static int _retained_aggregate_member(List key) =>
+  !!key.match(%((!or struct union)
+    (!or (binding ? ?) (gensym ?)) ? *));
+
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym sym, List key, List type) {
   SymScope *current = _semantic_scope(sym, -1);
@@ -1471,6 +1475,8 @@ void Sym.set(Sym sym, List key, List type) {
   if (log_should_log(<debug>, <symtab>))
     log_debug(<symtab>, %( (func "Sym.set") (key $key) (val $type) ));
   scope[key] = type;
+  if (_retained_aggregate_member(key))
+    sym.binding_facts[%(aggfact $key)] = type;
 }
 
 static List _semantic_new_binding(Sym sym, List key) {
@@ -1565,6 +1571,8 @@ List Sym.get_exact(Sym sym, List key) {
     Map scope = _semantic_scope(sym, i).symbols;
     if (scope.try_get(key, &val)) return val;
   }
+  if (_retained_aggregate_member(key) &&
+      sym.binding_facts.try_get(%(aggfact $key), &val)) return val;
   return NULL;
 }
 
@@ -1854,6 +1862,9 @@ List Sym.declare(Sym sym, List context, List key, List ast) {
   if (!binding) binding = sym.define(ctxkey, (List) type);
   else {
     sym.set(ctxkey, (List) type);
+    if (type.is_aggregate_tag() &&
+        (int) sym.scopes.len() > sym.base_scopes)
+      sym.binding_facts[%(ntype $binding)] = type;
     if ((int) sym.scopes.len() > sym.base_scopes)
       sym.binding_facts[%(emitted $binding)] =
         sym.compiler.fresh_name("local_typedef");
@@ -1881,6 +1892,9 @@ List Sym.bind_identity(Sym sym, List context, List binding, List ast) {
   if (context === %(typedef)) {
     key = %($spelling);
     scope.symbols[key] = %(typedef $spelling);
+    if (annotation.is_aggregate_tag() &&
+        (int) sym.scopes.len() > sym.base_scopes)
+      sym.binding_facts[%(ntype $binding)] = annotation;
     if ((int) sym.scopes.len() > sym.base_scopes)
       sym.binding_facts[%(emitted $binding)] =
         sym.compiler.fresh_name("local_typedef");
@@ -2019,6 +2033,17 @@ static void _collect_initializer_references(
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node)
+    case %(input *arguments): {
+      foreach (List argument, arguments)
+        _collect_initializer_references(argument.cadr(), references, ordered);
+      return;
+    }
+  match (node)
+    case %(indexinit ? ?initializer): {
+      _collect_initializer_references(initializer, references, ordered);
+      return;
+    }
+  match (node)
     case %(expr (!set ?type (*))
            (ident (!set ?binding (binding ? ?)))): {
       if (!type.type().is_function()) {
@@ -2123,6 +2148,9 @@ static Type _resolve_key_helper(
     Type type = _typedef_target(sym, key);
     if (type) return _resolve_key_helper(sym, type, stop, origin, hops + 1);
   }
+  match (key) case %((!set ?kind (!or struct union))
+      (binding ? ?spelling)):
+    if (!sym.field_order(key)) return %($kind $spelling);
   return key;
 }
 
@@ -2209,6 +2237,15 @@ static Type _replace_type_base(Type type, Type base, Type replacement) {
 */
 Type Sym.local_type(Sym sym, Type type) {
   Type base = type.base_type();
+  if (base.is_aggregate_tag() && base.cadr() is <string>) {
+    for (int i = sym.scopes.len() - 1; i >= sym.base_scopes; i--) {
+      SymScope *scope = _semantic_scope(sym, i);
+      Var binding;
+      if (scope.bindings.try_get(base, &binding))
+        return _replace_type_base(type, base, %(${base.car()} $binding));
+    }
+    return type;
+  }
   if (!base.is_bare_typedef_name()) return type;
   for (int i = sym.scopes.len() - 1; i >= sym.base_scopes; i--) {
     Map symbols = _semantic_scope(sym, i).symbols;
@@ -2221,6 +2258,24 @@ Type Sym.local_type(Sym sym, Type type) {
     return _replace_type_base(type, base, target.type());
   }
   return type;
+}
+
+/** Binds a local aggregate tag before its fields, preserving native spelling.
+    A reference reuses the nearest visible tag; a definition or standalone
+    forward declaration introduces the tag in the current lexical scope.
+*/
+Var Compiler.aggregate_name(
+  Compiler compiler, Symbol kind, Var name, int definition) {
+  Sym sym = compiler.sym;
+  if (compiler.macro_holes || name is not <string> ||
+      (int) sym.scopes.len() <= sym.base_scopes) return name;
+  Type type = %($kind $name);
+  if (!definition && sym.get_exact(type))
+    return sym.local_type(type).cadr();
+  if (!definition && compiler.shallow) return name;
+  List binding = sym.current_binding(type);
+  if (!binding) binding = sym.declare(NULL, type, type);
+  return binding;
 }
 
 /* Semantic types contain no local aliases. A retained file type's spelling

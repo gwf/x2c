@@ -2,6 +2,6 @@
 
 int main(void) {
   match (%("same" "same"))
-    case %(?{String value} ?{void *value}): return 1;
+    case %(?(String value) ?(void *value)): return 1;
   return 0;
 }

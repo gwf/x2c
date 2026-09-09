@@ -31,6 +31,8 @@ Var List_getindex(List,  int);
 
 Iter SymbolSet_iter(SymbolSet,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -64,7 +66,7 @@ int main(void){
   {
     Symbol symbol;
     Iter _x2c_macro_iterator_0 = SymbolSet_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

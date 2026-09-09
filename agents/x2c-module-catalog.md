@@ -24,7 +24,7 @@ Public functions:
 `binding_identity_spelling`, `Symbol.compound_operator`,
 `Symbol.compound_assignment`, `Symbol.is_assignment_op`,
 `ast_changes_left_operand`, `ast_contains_head`, `Ast.rewrite_children`,
-`Ast.never_returns`
+`Ast.never_returns`, `Ast.initializer_cases`, `Ast.initializer_functions`
 
 ### [src/bootstrap.x](../src/bootstrap.x)
 
@@ -115,12 +115,13 @@ Public functions:
 `Compiler.register_package_member`, `Compiler.package_member_spelling`,
 `Compiler.imported_providers`, `Compiler.imported_spelling`, `Sym.declare`,
 `Sym.bind_identity`, `Sym.resolve_key`, `Sym.next_typedef`,
-`Sym.resolve_numeric_type`, `Sym.local_type`, `Sym.normalize_declared_type`,
-`Sym.var_tag_for_type`, `Sym.is_var_type`, `Sym.is_string_type`,
-`Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_named_value_type`,
-`Sym.lookup_field`, `Sym.declare_field_order`, `Sym.field_order`,
-`Sym.declare_delegate_field`, `Sym.delegate_aggregate`, `Compiler.gensym`,
-`Compiler.set_gensym`, `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
+`Sym.resolve_numeric_type`, `Sym.local_type`, `Compiler.aggregate_name`,
+`Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
+`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
+`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
+`Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
+`Compiler.gensym`, `Compiler.set_gensym`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -163,8 +164,10 @@ Public functions:
 `Compiler.resolve_expression`, `Compiler.parse_variable`,
 `Compiler.parse_conditional`, `Compiler.parse_assignment`,
 `Compiler.parse_primary`, `Compiler.parse_expression`,
-`Compiler.parse_parenthesized_statement`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`
+`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
+`Compiler.initializer_slot`, `Compiler.initializer_rows`,
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -383,7 +386,7 @@ Public functions:
 `x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`,
 `x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_driver_error`,
 `process_start`, `ChildProcess.ready`, `ChildProcess.wait`, `process_run`,
-`worker_fork`, `worker_exit`, `worker_wait`
+`worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 

@@ -207,7 +207,7 @@ Array_push(entries,  List_var(defined ? cons(key,  cons(value,  _11)) : cons(key
 }
 Array_sort(entries);  File_puts(output,  "(snapshot 3 (\n"); {
   Var entry;  Iter _x2c_macro_iterator_1 = Array_iter(entries,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
     entry = _x2c_macro_item_1; {
@@ -231,7 +231,7 @@ static int _gensym(Var value){
   }
 {
     Var item;  Iter _x2c_macro_iterator_2 = List_iter(list,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
       item = _x2c_macro_item_2; {
@@ -283,7 +283,7 @@ status = Lisp_read(lisp,  source,  & cursor,  & trailing);  if(status != 11212){
       {
         Var volatile entry;
         Iter _x2c_macro_iterator_3 = List_iter(entries,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_3;

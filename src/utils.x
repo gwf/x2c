@@ -368,3 +368,10 @@ void worker_exit(int status) {
     a wait failure returns -1. Interrupted waits are retried.
 */
 int worker_wait(long pid) => _cpp_wait((pid_t) pid);
+
+/** Hashes unit filename spelling for stable generated C identifiers. */
+String x2c_filename_hash(String filename) {
+  unsigned hash = 0;
+  foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
+  return %"%08X".printf(hash);
+}

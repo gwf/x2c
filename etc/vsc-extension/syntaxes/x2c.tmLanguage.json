@@ -3938,6 +3938,7 @@
 		},
 		"x2c_current_list_content": {
 			"patterns": [
+				{ "include": "#x2c_current_typed_capture" },
 				{ "include": "#comments" },
 				{ "include": "#x2c_current_braced_unquote" },
 				{ "include": "#x2c_current_braced_splice" },
@@ -3951,6 +3952,20 @@
 				{ "match": "\\*[A-Za-z_][A-Za-z0-9_]*", "name": "variable.other.pattern.variadic.x2c" },
 				{ "include": "#numbers" },
 				{ "include": "#x2c_current_list_atom" }
+			]
+		},
+		"x2c_current_typed_capture": {
+			"name": "meta.pattern.typed-capture.x2c",
+			"begin": "\\?\\(",
+			"beginCaptures": {
+				"0": { "name": "punctuation.definition.pattern.capture.begin.x2c" }
+			},
+			"end": "\\)",
+			"endCaptures": {
+				"0": { "name": "punctuation.definition.pattern.capture.end.x2c" }
+			},
+			"patterns": [
+				{ "include": "$self" }
 			]
 		},
 		"x2c_current_list_nested": {

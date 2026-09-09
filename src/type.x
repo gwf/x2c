@@ -146,7 +146,8 @@ int Type.is_aggregate(Type type) => !!type.match(%((!or struct union) *));
 
 /** Returns whether `type` is a body-free struct or union tag reference. */
 int Type.is_aggregate_tag(Type type) =>
-  !!type.match(%((!or struct union) (!or (!not (*)) (gensym ?))));
+  !!type.match(%((!or struct union)
+    (!or (!not (*)) (gensym ?) (binding ? ?))));
 
 static int Type._is_aggregate_body(Type type) =>
   !!type.match(%((!or struct union) (*)));
@@ -879,7 +880,10 @@ static List _from_ast(List ast, List context) {
   while (rest) {
     Var modifier = rest.car();
     if (modifier is <symbol>) {
-      if (modifier != <*> && modifier != <&> && modifier != <^>) break;
+      Symbol prefix = modifier;
+      if (prefix != <*> && prefix != <&> && prefix != <^> &&
+          !prefix.is_type_qualifier() && !prefix.is_storage_class() &&
+          !prefix.is_inline()) break;
     }
     else if (modifier is <list>) {
       Type nested = modifier;

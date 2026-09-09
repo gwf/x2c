@@ -380,7 +380,10 @@ static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members) {
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
-  compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
+  if (name is <list> && name.list().car() == <binding>)
+    compiler.sym.bind_identity(%($tag), name, %($tag $body));
+  else
+    compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) compiler.sym.declare_field_order(type, members);
   return %($tag $name $body);
 }
@@ -453,6 +456,8 @@ static List _struct_or_union(Compiler c) {
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
+  usedname = %(${c.aggregate_name(tag, usedname.car(),
+    c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List type = cons(tag, usedname), fields = NULL;
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
@@ -1055,7 +1060,6 @@ static List _declaration_group(Compiler c, int row) {
     // Bind the short aggregate tag, but retain the body on the AST node.
     match (spec) case %(?tag ?name ?body): {
       binding_type = %( @storage @quals ($tag $name) );
-      if (name is <list>) type = %($tag $body);
     }
   }
   if (_test_destructure_declaration(c))
@@ -1248,7 +1252,6 @@ List Compiler.parse_declaration_argument(Compiler c) {
     Var (aggregate, tag_or_body, body) = spec;
     binding_type = %( $aggregate $tag_or_body );
     binding_type = %( @storage @quals @binding_type );
-    if (tag_or_body is <list>) type = %( $aggregate $body );
   }
   List binding = NULL;
   if (_test_destructure_declaration(c))
@@ -1412,6 +1415,7 @@ List Compiler.parse_top_level(Compiler c) {
 static List _finish_aggregate_type(
   Compiler c, Symbol tag, Var name, List members) {
   name = c.evaluate_macro_slot(name);
+  if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
   List type = %($tag $name);
   List previous = c.aggregate_type;
   c.aggregate_type = type;
@@ -1935,6 +1939,8 @@ List Compiler.bind_syntax(
             ${_.bind_syntax(onfalse, AST_STATEMENT, _.return_type)});
       case %(for ?init ?condition ?increment ?body): {
         if (!statement_position) goto construction_error;
+        _.sym.push_new_scope();
+        defer _.sym.pop_scope();
         if (init is <list>) {
           List node = init;
           init = node.car() == <decl>

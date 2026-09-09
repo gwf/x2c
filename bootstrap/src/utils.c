@@ -2,7 +2,7 @@
 
 #include "utils.h"
 
-static String _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
 
 static int _init_guard_ = 0;
 
@@ -49,6 +49,12 @@ void File_rewind(File);
 
 String File_string(File);
 
+Iter String_iter(String,  Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter,  Var *);
+
 __attribute__((constructor)) static void _file_init_(void);
 
 static int _dir_exists(const char * path);
@@ -84,7 +90,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _6 = String_new("invalid empty process action");
   _7 = String_new("unable to create process capture files");
   _8 = String_new("unable to fork child process");
-  _9 = String_new("/");
+  _9 = String_new("%08X");
+  _10 = String_new("/");
   x2c_executable_path = NULL;
   x2c_root_path = NULL;
   x2c_base_include_dirs = NULL;
@@ -136,14 +143,14 @@ String x2c_get_executable(void){
 
 String x2c_path_dir(String path){
   if(! _init_guard_) _file_init_();
-  int slash = String_rfind(path,  _9);
+  int slash = String_rfind(path,  _10);
   if(slash < 0) return _1;
   return slash ? String_getslice(path,  -2147483648,  slash,  1) : _2;
 }
 
 String x2c_path_stem(String path){
   if(! _init_guard_) _file_init_();
-  String base = Var_string(List_last(String_split(path,  _9)));
+  String base = Var_string(List_last(String_split(path,  _10)));
   int dot = String_rfind(base,  _0);
   return dot > 0 ? String_getslice(base,  -2147483648,  dot,  1) : base;
 }
@@ -369,5 +376,24 @@ void worker_exit(int status){
 int worker_wait(long pid){
   if(! _init_guard_) _file_init_();
   return _cpp_wait((pid_t) pid);
+}
+
+String x2c_filename_hash(String filename){
+  if(! _init_guard_) _file_init_();
+  unsigned hash = 0;
+  {
+    char byte;
+    Iter _x2c_macro_iterator_0 = String_iter(filename,  &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_macro_item_0;
+    while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
+      byte = Var_char(Var_convert(_x2c_macro_item_0,  26993));
+      hash = hash * 31 +(unsigned char) byte;
+    }
+
+  }
+  return String_printf(_9,  hash);
 }
 

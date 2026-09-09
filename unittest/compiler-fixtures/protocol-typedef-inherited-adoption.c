@@ -70,7 +70,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_0 = IterParent_iter(inherited,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -83,7 +83,7 @@ int main(void){
   {
     int value;
     Iter _x2c_macro_iterator_1 = IterOverride_iter(overridden,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;

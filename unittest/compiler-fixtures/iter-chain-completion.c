@@ -118,33 +118,33 @@ int main(void){
   if(! _init_guard_) _file_init_();
   Scope_retain();
   List fluent = Iter_list(Iter_filter(Iter_map(range(1,  4,  1,  &(struct Iter){
-    0
+    int_var(0)
   }
   ),  _x2c_func_handle_1,  &(struct Iter){
-    0
+    int_var(0)
   }
   ),  _x2c_func_handle_0,  &(struct Iter){
-    0
+    int_var(0)
   }
   ));
   Var paired = Iter_sum(Iter_map2(range(1,  3,  1,  &(struct Iter){
-    0
+    int_var(0)
   }
   ),  range(10,  12,  1,  &(struct Iter){
-    0
+    int_var(0)
   }
   ),  _x2c_func_handle_2,  &(struct Iter){
-    0
+    int_var(0)
   }
   ));
   int nested = 0;
   {
     int left;
     Iter _x2c_macro_iterator_1 = Iter_map(range(1,  2,  1,  &(struct Iter){
-      0
+      int_var(0)
     }
     ),  _x2c_func_handle_1,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -153,10 +153,10 @@ int main(void){
       {
         int right;
         Iter _x2c_macro_iterator_0 = Iter_head(range(10,  11,  1,  &(struct Iter){
-          0
+          int_var(0)
         }
         ),  1,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_0;
@@ -172,7 +172,7 @@ int main(void){
   }
   struct Iter mixed_source_storage;
   List mixed = Iter_list(Iter_map(range(1,  3,  1,  & mixed_source_storage),  _x2c_func_handle_1,  &(struct Iter){
-    0
+    int_var(0)
   }
   ));
   struct Iter source_storage,  map_storage,  filter_storage;

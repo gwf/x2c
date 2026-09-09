@@ -44,6 +44,8 @@ Var List_var(List);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 int Var_is_atom_binder(Var);
@@ -209,7 +211,7 @@ static int _all(RecursiveMatchState state,  Var input,  List patterns){
   {
     Var pattern;
     Iter _x2c_macro_iterator_0 = List_iter(patterns,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -226,7 +228,7 @@ static int _any(RecursiveMatchState state,  Var input,  List patterns){
   {
     Var pattern;
     Iter _x2c_macro_iterator_1 = List_iter(patterns,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -248,7 +250,7 @@ static int _none(RecursiveMatchState state,  Var input,  List patterns){
   {
     Var pattern;
     Iter _x2c_macro_iterator_2 = List_iter(patterns,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;

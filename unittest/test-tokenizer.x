@@ -111,6 +111,26 @@ static void tokenizer_braced_literal_unquote_modes(void) {
 }
 
 
+static void tokenizer_typed_capture_parentheses(void) {
+  Tokenizer tokenizer = Tokenizer.new(
+    "%(?($T value) ?(int (*)(String) fn) ? (String text) "
+    "${call()} @{tail()}); int after;"
+  );
+  tokenizer.scan();
+  Symbol expected[] = {
+    <"%(">, <"?(">, <$>, <ident>, <ident>, <)>,
+    <"?(">, <int>, <(>, <*>, <)>, <(>, <ident>, <)>, <ident>, <)>,
+    <lit-atom>, <(>, <lit-atom>, <lit-atom>, <)>,
+    <"${">, <ident>, <(>, <)>, <"}">,
+    <"@{">, <ident>, <(>, <)>, <"}">, <)>, <;>, <int>, <ident>, <;>,
+    <eof>
+  };
+  for (int i = 0; i < sizeof(expected) / sizeof(*expected); i++)
+    EXPECT_INT_EQ(tokenizer.next().type, expected[i]);
+  EXPECT_INT_EQ(tokenizer.status(), <ok>);
+}
+
+
 static void tokenizer_list_reader_prefixes(void) {
   Tokenizer tokenizer = Tokenizer.new("%(`(a ,(b) ,@tail))");
   tokenizer.scan();
@@ -205,6 +225,7 @@ void tokenizer_suite(void) {
   $test.run(tokenizer_postfix_update_ends_operand);
   $test.run(tokenizer_parenthesized_forms_stay_in_literal_modes);
   $test.run(tokenizer_braced_literal_unquote_modes);
+  $test.run(tokenizer_typed_capture_parentheses);
   $test.run(tokenizer_list_reader_prefixes);
   $test.run(tokenizer_symbol_set_quotes_hold_the_terminator);
   $test.run(tokenizer_failed_scan_preserves_source_and_mode);

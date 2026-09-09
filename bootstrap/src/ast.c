@@ -2,11 +2,11 @@
 
 #include "ast.h"
 
-static List _72,  _71,  _69,  _68,  _67,  _65,  _64,  _63,  _61,  _60,  _57,  _56,  _55,  _53,  _52,  _46,  _45,  _44,  _42,  _41,  _40,  _39,  _34,  _30,  _29,  _28,  _26,  _25,  _24,  _20,  _19,  _18,  _13,  _12,  _11,  _9,  _8,  _7,  _6;
+static List _110,  _109,  _108,  _106,  _105,  _104,  _102,  _101,  _98,  _97,  _96,  _94,  _93,  _92,  _90,  _89,  _88,  _85,  _84,  _83,  _81,  _72,  _71,  _69,  _68,  _67,  _65,  _64,  _63,  _61,  _60,  _57,  _56,  _55,  _53,  _52,  _46,  _45,  _44,  _42,  _41,  _40,  _39,  _34,  _30,  _29,  _28,  _26,  _25,  _24,  _20,  _19,  _18,  _13,  _12,  _11,  _9,  _8,  _7,  _6;
 
 static String _76,  _75,  _74,  _73,  _32,  _16;
 
-static Var _70,  _66,  _62,  _59,  _58,  _54,  _51,  _50,  _49,  _48,  _47,  _43,  _38,  _37,  _36,  _35,  _33,  _31,  _27,  _23,  _22,  _21,  _17,  _15,  _14,  _10,  _5,  _4,  _3,  _2,  _1,  _0;
+static Var _107,  _103,  _100,  _99,  _95,  _91,  _87,  _86,  _82,  _80,  _79,  _78,  _77,  _70,  _66,  _62,  _59,  _58,  _54,  _51,  _50,  _49,  _48,  _47,  _43,  _38,  _37,  _36,  _35,  _33,  _31,  _27,  _23,  _22,  _21,  _17,  _15,  _14,  _10,  _5,  _4,  _3,  _2,  _1,  _0;
 
 static int _init_guard_ = 0;
 
@@ -117,6 +117,10 @@ int Iter_try_next(Iter,  Var *);
 
 Var List_last(List);
 
+int List_len(List);
+
+Var List_getindex(List,  int);
+
 void Array_free(Array);
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -214,6 +218,40 @@ __attribute__((constructor)) static void _file_init_(void){
   _74 = String_new("exit");
   _75 = String_new("_Exit");
   _76 = String_new("quick_exit");
+  _77 = Symbol_var(20287107160);
+  _78 = Symbol_var(2005352);
+  _79 = Symbol_var(62824456548);
+  _80 = Symbol_var(19826024);
+  _81 = cons(_80,  _60);
+  _82 = List_var(_81);
+  _83 = cons(_82,  NULL);
+  _84 = cons(_79,  _83);
+  _85 = cons(_78,  _84);
+  _86 = List_var(_85);
+  _87 = Symbol_var(1818335590);
+  _88 = cons(_87,  NULL);
+  _89 = cons(_86,  _88);
+  _90 = cons(_77,  _89);
+  _91 = Symbol_var(62481260874);
+  _92 = cons(_37,  NULL);
+  _93 = cons(_37,  _92);
+  _94 = cons(_31,  _93);
+  _95 = List_var(_94);
+  _96 = cons(_95,  NULL);
+  _97 = cons(_91,  _96);
+  _98 = cons(_78,  _97);
+  _99 = List_var(_98);
+  _100 = Symbol_var(62351779928);
+  _101 = cons(_100,  NULL);
+  _102 = cons(_59,  _101);
+  _103 = List_var(_102);
+  _104 = cons(_103,  NULL);
+  _105 = cons(_99,  _104);
+  _106 = cons(_48,  _105);
+  _107 = List_var(_106);
+  _108 = cons(_107,  NULL);
+  _109 = cons(_37,  _108);
+  _110 = cons(_31,  _109);
 }
 
 List binding_identity_new(int identity,  String spelling){
@@ -405,7 +443,7 @@ static int _contains_return(Ast node){
   }
   {
     Var head;  Iter _x2c_macro_iterator_0 = List_iter(node,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_1)){
       head = _x2c_macro_item_1;  if(Var_is(head,  806120) && _contains_return(Var_pointer(head))) return 1;
@@ -417,6 +455,57 @@ static int _contains_return(Ast node){
 
 int Ast_never_returns(Ast ast){
   if(! _init_guard_) _file_init_();  List node = _unwrap_origin(ast);  if(! List_truth(node) || ! Var_is(List_car(node),  1328354264)) return 0;  Symbol head = Var_symbol(List_car(node));  if(head == 37833930) return _raise_never_returns(node);  if(head == 41184168) return _call_never_returns(node);  if(head != 5011670 || _contains_return(node)) return 0;  Var last = List_last(node);  if(! Var_is(last,  806120)) return 0;  Ast terminal = Var_pointer(last);  return Ast_never_returns(terminal);
+}
+
+List Ast_initializer_cases(Ast ast,  List * input){
+  if(! _init_guard_) _file_init_();  * input = NULL;
+  {
+    List _x2c_match_expr =  ast;
+     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+       case 20287107160: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_90), &_x2c_match_capture)) {Var header = _x2c_match_values[0];  List cases = Var_list(_x2c_match_values[1]); {
+    * input = Var_list(header);  return cases;
+  }
+  break;
+}
+default: break;
+    }
+  }
+return List_cdr(ast);
+}
+
+List Ast_initializer_functions(Ast ast,  List * source){
+  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast,  & header);  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_31,  cons(List_cadr(value),  cons(List_car(input),  NULL)));  Array functions = Array_new(); {
+    List choice;  Iter _x2c_macro_iterator_1 = List_iter(cases,  &(struct Iter){
+      int_var(0)
+    }
+    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_2)){
+      choice = Var_list(_x2c_macro_item_2); {
+        List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0,  0));  List path = Var_list(List_getindex(_x2c_destructure_0,  1));  List destination = Var_list(List_getindex(_x2c_destructure_0,  2));  List expression = Var_list(List_getindex(_x2c_destructure_0,  3));
+  {
+    List _x2c_match_expr =  expression;
+     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+       case 377892: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_110), &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  Var actual = _x2c_match_values[1]; {
+          if(! Var_same(actual,  List_var(argument))){
+            Array_free(functions);  return NULL;
+          }
+          List function = Var_list(callee);  Array_push(functions,  List_var(cons(List_var(condition),  cons(List_var(path),  cons(List_cadr(function),  cons(List_var(function),  NULL))))));
+        }
+        break;
+      }
+      default: ; {
+        Array_free(functions);  return NULL;
+      }
+      break;
+    }
+  }
+    }
+
+  }
+
+}
+* source = value;  return Array_list_free(functions);
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

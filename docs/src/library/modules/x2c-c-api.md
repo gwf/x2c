@@ -34,6 +34,7 @@ prefix.
 | [`x2c_exception_mark_handled`](exception.md#x2c_exception_mark_handled) | `lib/exception.x` | `void x2c_exception_mark_handled(ExceptionFrame *frame)` |
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
+| `x2c_filename_hash` | `src/utils.x` | `String x2c_filename_hash(String filename)` |
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
 | [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func.x` | `List x2c_func_reference_type( Func function, unsigned argc, unsigned index)` |
 | [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func.x` | `FuncArg x2c_func_unrepresentable_argument( Func fn, unsigned i, List source)` |
@@ -79,4 +80,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 67 functions.
+Total: 68 functions.

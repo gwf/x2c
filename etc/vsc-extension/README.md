@@ -24,7 +24,7 @@ install the resulting VSIX with **Extensions: Install from VSIX**. Build and
 configure the separate worker as described below.
 
 The last published Marketplace release, **x2c - C with batteries** 0.1.23 by
-**x2c**, provides syntax highlighting. This checkout's 0.2.0 preview adds the
+**x2c**, provides syntax highlighting. This checkout's 0.2.1 preview adds the
 semantic settings described here and requires the separate worker. This
 repository change does not publish a new Marketplace release.
 

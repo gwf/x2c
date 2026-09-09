@@ -153,7 +153,7 @@ int main(void){
   {
     int current;
     Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -247,7 +247,7 @@ int main(void){
   {
     int key;
     Iter _x2c_macro_iterator_6 = Map_keys(numbers,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;

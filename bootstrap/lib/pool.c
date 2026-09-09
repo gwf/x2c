@@ -36,12 +36,66 @@ enum PoolBlockConstant{
 typedef char x2c_pool_block_header_size[(sizeof(struct PoolBlock) == 64) ? 1 : - 1];
 
 static const unsigned pool_class_sizes[POOL_CLASS_COUNT] ={
-  16,  32,  48,  64,  96,  128,  192,  256,  384,  512
+  16,  __builtin_choose_expr((1ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  32, (__typeof__(pool_class_sizes[1ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((2ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  48, (__typeof__(pool_class_sizes[2ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((3ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  64, (__typeof__(pool_class_sizes[3ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((4ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  96, (__typeof__(pool_class_sizes[4ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((5ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  128, (__typeof__(pool_class_sizes[5ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((6ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  192, (__typeof__(pool_class_sizes[6ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((7ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  256, (__typeof__(pool_class_sizes[7ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((8ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  384, (__typeof__(pool_class_sizes[8ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((9ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])),  512, (__typeof__(pool_class_sizes[9ULL])){
+    0
+  }
+  )
 }
 ;
 
 static const unsigned pool_block_sizes[POOL_CLASS_COUNT] ={
-  512,  1024,  2048,  2048,  4096,  4096,  4096,  4096,  4096,  4096
+  512,  __builtin_choose_expr((1ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  1024, (__typeof__(pool_block_sizes[1ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((2ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  2048, (__typeof__(pool_block_sizes[2ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((3ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  2048, (__typeof__(pool_block_sizes[3ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((4ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  4096, (__typeof__(pool_block_sizes[4ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((5ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  4096, (__typeof__(pool_block_sizes[5ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((6ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  4096, (__typeof__(pool_block_sizes[6ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((7ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  4096, (__typeof__(pool_block_sizes[7ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((8ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  4096, (__typeof__(pool_block_sizes[8ULL])){
+    0
+  }
+  ),  __builtin_choose_expr((9ULL) <(sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0])),  4096, (__typeof__(pool_block_sizes[9ULL])){
+    0
+  }
+  )
 }
 ;
 

@@ -84,7 +84,7 @@
      (op = (bind (binding 25 "raw_null") ()) 
       (expr ("Var") 
        (cast ("Var") 
-        (expr () (composite (commas (expr (int) (literal (int) "0"))))))))))) 
+        (expr ("Var") (composite (commas (expr (int) (literal (int) "0"))))))))))) 
   (at 23 
    (declare ("Array") 
     (bindings (op = (bind (binding 26 "values") ()) (expr ("Array") (varray)))))) 

@@ -455,7 +455,7 @@ static void _initialize_policies(void){
   {
     Symbol code;
     Iter _x2c_macro_iterator_0 = SymbolSet_iter(error_nonreturning_causes,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;

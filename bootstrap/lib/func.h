@@ -25,7 +25,7 @@ typedef Var(* FuncAdapter)(Func fn,  const FuncArg * argv);
 
 static inline FuncArg FuncArg_value(Var value){
   FuncArg argument ={
-    0
+    int_var(0)
   }
   ;
   argument.data.value = value;
@@ -34,7 +34,7 @@ static inline FuncArg FuncArg_value(Var value){
 
 static inline FuncArg FuncArg_reference(const void * reference,  List type){
   FuncArg argument ={
-    0
+    int_var(0)
   }
   ;
   argument.data.reference = reference;

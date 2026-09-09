@@ -191,7 +191,7 @@
                         (parens 
                          (expr ("Pair") 
                           (cast ("Pair") 
-                           (expr () 
+                           (expr ("Pair") 
                             (composite 
                              (commas 
                               (dotinit ("value") 

@@ -49,16 +49,18 @@ Arm order is also cost order, so put cheap, common shapes first.
 
 ### Typed captures and expression guards
 
-Write `?{Type name}` to capture a value as a native typed local. The pattern
+Write `?(Type name)` to capture a value as a native typed local. The pattern
 tests the value's `Var` tag; a different tag fails the pattern without
 converting the value. The supported types are the same as for `value is Type`.
+The `?(` opener must be adjacent; `? (String text)` remains a wildcard
+followed by a sublist pattern.
 
 ```x2c
 List reply = %(message "ready");
 match (reply) {
-  case %(message ?{String text}) if (text.len() > 3):
+  case %(message ?(String text)) if (text.len() > 3):
     printf("long message: %s\n", text.str());
-  case %(message ?{String text}):
+  case %(message ?(String text)):
     printf("short message: %s\n", text.str());
 }
 ```

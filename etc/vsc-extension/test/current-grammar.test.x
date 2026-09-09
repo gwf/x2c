@@ -434,3 +434,11 @@ Var ordinary = %{old};
 //             ^ - punctuation.definition.embedded.lisp.begin.x2c
 Var old_splice = @{old};
 //               ^ - punctuation.definition.interpolation.list.x2c
+
+List typed = %(?(String text) ? (String text));
+//             ^^ punctuation.definition.pattern.capture.begin.x2c
+//               ^^^^^^ support.type.prelude.x2c
+//                      ^^^^ meta.pattern.typed-capture.x2c
+//                            ^ constant.other.atom.x2c
+//                              ^ meta.literal.list.nested.x2c
+//                               ^^^^^^ constant.other.atom.x2c

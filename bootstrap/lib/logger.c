@@ -170,6 +170,8 @@ Buffer Buffer_write_char(Buffer,  char);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 List Var_list(Var);
@@ -990,7 +992,7 @@ static void _render_text(Buffer out,  const LogEvent * event,  int color){
   {
     List field;
     Iter _x2c_macro_iterator_0 = List_iter(event -> fields,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -1771,7 +1773,7 @@ void Logger_shutdown(void){
         {
           List entry;
           Iter _x2c_macro_iterator_1 = List_iter(pending,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_1;

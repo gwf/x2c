@@ -41,6 +41,8 @@ void * Scope_calloc(size_t,  size_t);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 Var Array_push(Array,  Var);
@@ -196,7 +198,7 @@ static void _append_list(Array output,  List values){
   {
     Var value;
     Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -217,7 +219,7 @@ ToolAction Toolchain_compile_action(Toolchain toolchain,  String source,  String
   {
     String directory;
     Iter _x2c_macro_iterator_1 = List_iter(gen_dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -290,7 +292,7 @@ static int _shell_safe(String argument){
   {
     char raw;
     Iter _x2c_macro_iterator_2 = String_iter(argument,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -316,7 +318,7 @@ static void _print_argument(String argument){
   {
     char ch;
     Iter _x2c_macro_iterator_3 = String_iter(argument,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -338,7 +340,7 @@ static void _print_action(Symbol phase,  List arguments){
   {
     String argument;
     Iter _x2c_macro_iterator_4 = List_iter(arguments,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -362,7 +364,7 @@ static char * * _action_argv(List arguments){
   {
     String argument;
     Iter _x2c_macro_iterator_5 = List_iter(arguments,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -414,7 +416,7 @@ static void _append_includes(Array arguments,  List dirs){
   {
     Var value;
     Iter _x2c_macro_iterator_6 = List_iter(dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_6;
@@ -471,7 +473,7 @@ int Toolchain_preprocess(Toolchain toolchain,  const char * fname,  List include
   {
     Var argument;
     Iter _x2c_macro_iterator_7 = List_iter(toolchain -> cpp_args,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;

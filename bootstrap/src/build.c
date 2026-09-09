@@ -44,6 +44,8 @@ int String_truth(String);
 
 Iter List_iter(List,  Iter);
 
+Var int_var(int);
+
 int Iter_try_next(Iter,  Var *);
 
 String Var_string(Var);
@@ -340,7 +342,7 @@ static uint64_t _state_list(uint64_t hash,  List values){
   {
     String value;
     Iter _x2c_macro_iterator_0 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_0;
@@ -379,7 +381,7 @@ static uint64_t _state_tool(uint64_t hash,  String tool,  int * ok){
   {
     String dir;
     Iter _x2c_macro_iterator_1 = List_iter(dirs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_1;
@@ -472,7 +474,7 @@ static uint64_t _state_dependencies(uint64_t hash,  String depfile,  int * ok){
   {
     String input;
     Iter _x2c_macro_iterator_2 = List_iter(inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_2;
@@ -540,7 +542,7 @@ Build CliRequest_prepare(CliRequest c){
   {
     String input;
     Iter _x2c_macro_iterator_3 = List_iter(c -> inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_3;
@@ -608,7 +610,7 @@ Build CliRequest_prepare(CliRequest c){
   {
     String input;
     Iter _x2c_macro_iterator_4 = List_iter(c -> inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_4;
@@ -681,7 +683,7 @@ static String _package_directory(List roots,  String path){
   {
     String candidate;
     Iter _x2c_macro_iterator_5 = List_iter(roots,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_5;
@@ -785,7 +787,7 @@ static void Build__link_packages(Build state,  String input,  String directory){
   {
     String dependency;
     Iter _x2c_macro_iterator_7 = List_iter(_state_dep_inputs(depfile),  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_7;
@@ -847,7 +849,7 @@ static uint64_t _action_fingerprint(Build state,  ToolAction action,  String dep
   else{
     String input;
     Iter _x2c_macro_iterator_8 = List_iter(inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_8;
@@ -906,7 +908,7 @@ static String _compile_command(Build state,  ToolAction action,  String source, 
   {
     String argument;
     Iter _x2c_macro_iterator_9 = List_iter(action -> arguments,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_9;
@@ -937,7 +939,7 @@ int compile_commands_write(String path,  Array commands){
   {
     String entry;
     Iter _x2c_macro_iterator_10 = Array_iter(commands,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_10;
@@ -994,7 +996,7 @@ static int _compile_sources(Build b){
   {
     Var value;
     Iter _x2c_macro_iterator_12 = Array_iter(b -> c_sources,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_12;
@@ -1011,7 +1013,7 @@ static int _compile_sources(Build b){
         {
           Var directory;
           Iter _x2c_macro_iterator_11 = Array_iter(b -> gen_dirs,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_11;
@@ -1064,7 +1066,7 @@ static List _native_action_inputs(Build state){
   {
     Var value;
     Iter _x2c_macro_iterator_13 = Array_iter(state -> objects,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_13;
@@ -1077,7 +1079,7 @@ static List _native_action_inputs(Build state){
   {
     Var value;
     Iter _x2c_macro_iterator_14 = Array_iter(state -> native_inputs,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_14;
@@ -1191,7 +1193,7 @@ int Build_run_program(Build state){
   {
     String argument;
     Iter _x2c_macro_iterator_15 = List_iter(state -> request -> run_args,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_15;

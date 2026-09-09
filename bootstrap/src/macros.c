@@ -1702,7 +1702,7 @@ static Var _sdk_declaration_bindings(List declaration){
     switch (0) {
        default: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_38), &_x2c_match_capture)) {List bindings = Var_list(_x2c_match_values[0]); {
     List binding;  Iter _x2c_macro_iterator_0 = List_iter(bindings,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_0;  while(Iter_try_next(_x2c_macro_iterator_0,  & _x2c_macro_item_0)){
       binding = Var_list(_x2c_macro_item_0);
@@ -1748,7 +1748,7 @@ static Var _sdk_function_reference(String name){
 static Var _sdk_protocol_member(List participant,  List base,  String member){
   List conformance = Compiler_protocol_members_for(macro_sdk_compiler,  List_type(participant),  List_type(base));  if(! List_truth(conformance)) return List_var(NULL); {
     List row;  Iter _x2c_macro_iterator_1 = List_iter(List_cdr(Var_list(List_last(conformance))),  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1,  & _x2c_macro_item_1)){
       row = Var_list(_x2c_macro_item_1); {
@@ -1792,7 +1792,7 @@ static Var _sdk_complete_iter_chain(List expression){
 static Var _sdk_type_fields(List value){
   if(! macro_sdk_compiler) return _sdk_reject(String_join(NULL,  cons(String_var(_72),  cons(String_var(_0),  NULL))),  NULL);  Type type = List_type(value);  type = Type_canonicalize(type);  Type resolved = Sym_resolve_key(macro_sdk_compiler -> sym,  type);  if(! List_truth(Type_list(resolved)) || ! Type_is_aggregate_tag(resolved)) return _sdk_reject(_582,  cons(String_var(String_join(NULL,  cons(String_var(_73),  cons(String_var(List_repr(value)),  NULL)))),  NULL));  List metadata = Sym_field_order(macro_sdk_compiler -> sym,  resolved);  if(! List_truth(metadata)) return _sdk_reject(_583,  cons(String_var(String_join(NULL,  cons(String_var(_73),  cons(String_var(List_repr(value)),  NULL)))),  NULL));  Array named = Array_new(); {
     List row;  Iter _x2c_macro_iterator_2 = List_iter(List_cdr(metadata),  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
       row = Var_list(_x2c_macro_item_2);  if(Var_truth(List_car(row))) Array_push(named,  List_var(row));
@@ -1861,7 +1861,7 @@ static Var _sdk_source_text(Var value){
 static Var _sdk_diagnostic_fail(String message,  List notes){
   if(! macro_sdk_compiler) return _sdk_reject(String_join(NULL,  cons(String_var(_102),  cons(String_var(_0),  NULL))),  NULL); {
     Var note;  Iter _x2c_macro_iterator_3 = List_iter(notes,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_3;  while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
       note = _x2c_macro_item_3;  if(! Var_is(note,  1318210446)) return _sdk_reject(_589,  cons(String_var(String_join(NULL,  cons(String_var(_73),  cons(String_var(Var_repr(note)),  NULL)))),  NULL));
@@ -1892,7 +1892,7 @@ static Var _sdk_method_resolve(List type_value,  String name){
        case 3097291488614: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_112), &_x2c_match_capture)) {List packages = Var_list(_x2c_match_values[0]); {
     List notes = NULL; {
       String package;  Iter _x2c_macro_iterator_4 = List_iter(packages,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
         package = Var_string(_x2c_macro_item_4);  notes = cons(String_var(String_join(NULL,  cons(String_var(_113),  cons(String_var(package),  cons(String_var(_114),  NULL))))),  notes);
@@ -1959,7 +1959,7 @@ default: ;  value = _sdk_syntax_type(syntax);  break;
   }
 Type type = Type_canonicalize(Var_type(value));  List source_parameters = _sdk_function_type_parameters(type);  Type source_result = Type_apply(type);  Array parameters = Array_new(); {
   Var parameter;  Iter _x2c_macro_iterator_5 = List_iter(source_parameters,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_5;  while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
     parameter = _x2c_macro_item_5;  Array_push(parameters,  List_var(_lisp_resolve_type(List_type(Var_list(parameter)))));
@@ -1972,7 +1972,7 @@ Type result = _lisp_resolve_type(source_result);  List resolved = cons(List_var(
 static Var _sdk_function_parameter(List function,  String wanted){
   List parameters = List_match_replace(function,  List_var(_191),  List_var(_177)); {
     List parameter;  Iter _x2c_macro_iterator_6 = List_iter(parameters,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
       parameter = Var_list(_x2c_macro_item_6); {
@@ -2631,7 +2631,7 @@ static void _import(Compiler c,  String requested,  Token invocation){
     {
       Var parent;
       Iter _x2c_macro_iterator_7 = Array_iter(c -> import_stack,  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_7;
@@ -2801,7 +2801,7 @@ return Var_is(value,  806120) && binding_identity_try_parts(Var_list(value),  NU
 static Var _sdk_symbol_set(List values){
   if(! macro_sdk_compiler) return _sdk_reject(String_join(NULL,  cons(String_var(_303),  cons(String_var(_0),  NULL))),  NULL); {
     Var value;  Iter _x2c_macro_iterator_8 = List_iter(values,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_8;  while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
       value = _x2c_macro_item_8;  if(! Var_is(value,  1328354264)) return _sdk_reject(_641,  cons(_305,  cons(String_var(Var_repr(value)),  NULL)));
@@ -2873,7 +2873,7 @@ static Var _eval_template_form(Compiler compiler,  String form,  List bindings, 
   {
     List pair;
     Iter _x2c_macro_iterator_9 = List_iter(bindings,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_9;
@@ -3075,7 +3075,7 @@ static Var _replace_definition_bindings(Var value,  Map bindings){
   {
     int changed = 0; {
       Var child;  Iter _x2c_macro_iterator_10 = List_iter(Var_list(value),  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_10;  while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
         child = _x2c_macro_item_10; {
@@ -3114,7 +3114,7 @@ static void _template_binders(Var value,  Map binders){
   }
   if(! Var_is(value,  806120)) return; {
     Var child;  Iter _x2c_macro_iterator_11 = List_iter(Var_list(value),  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_11;  while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
       child = _x2c_macro_item_11;  _template_binders(child,  binders);
@@ -3143,7 +3143,7 @@ static List _invocation_pattern(Symbol kind,  List target,  List parameters,  Li
   {
     List parameter;
     Iter _x2c_macro_iterator_12 = List_iter(parameters,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_12;
@@ -3158,7 +3158,7 @@ static List _invocation_pattern(Symbol kind,  List target,  List parameters,  Li
   {
     Var row;
     Iter _x2c_macro_iterator_13 = List_iter(fresh,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_13;
@@ -3190,7 +3190,7 @@ static List _forwarded_prefix_list(void){
   {
     String projection;
     Iter _x2c_macro_iterator_14 = List_iter(_371,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_14;
@@ -3224,7 +3224,7 @@ default: break;
   }
 if(Var_is_void(direct)) return NULL;  String spelling = Var_str(direct),  prefix = NULL; {
   String candidate;  Iter _x2c_macro_iterator_15 = List_iter(forwarded_prefixes,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_15;  while(Iter_try_next(_x2c_macro_iterator_15,  & _x2c_macro_item_15)){
     candidate = Var_string(_x2c_macro_item_15);  if(String_startswith(spelling,  candidate)){
@@ -3247,7 +3247,7 @@ static List _capture_row(Compiler compiler,  List hole,  List sources){
   if(sequence){
     Array captured_sources = Array_new(),  values = Array_new(),  construction = Array_new(); {
       Var captured;  Iter _x2c_macro_iterator_19 = List_iter(sources,  &(struct Iter){
-        0
+        int_var(0)
       }
       );  Var _x2c_macro_item_19;  while(Iter_try_next(_x2c_macro_iterator_19,  & _x2c_macro_item_19)){
         captured = _x2c_macro_item_19; {
@@ -3259,7 +3259,7 @@ static List _capture_row(Compiler compiler,  List hole,  List sources){
        case 6544469130: ;  static MatchCaptureSite _x2c_match_site_22;  if (x2c_match_site_try_capture(& _x2c_match_site_22, _x2c_match_expr, List_var(_397), &_x2c_match_capture)) {List forwarded_sources = Var_list(_x2c_match_values[0]);  List forwarded_values = Var_list(_x2c_match_values[1]);  List required = Var_list(_x2c_match_values[2]); {
             {
               Var item;  Iter _x2c_macro_iterator_16 = List_iter(forwarded_sources,  &(struct Iter){
-                0
+                int_var(0)
               }
               );  Var _x2c_macro_item_16;  while(Iter_try_next(_x2c_macro_iterator_16,  & _x2c_macro_item_16)){
                 item = _x2c_macro_item_16;  Array_push(captured_sources,  item);
@@ -3268,7 +3268,7 @@ static List _capture_row(Compiler compiler,  List hole,  List sources){
             }
             {
               Var item;  Iter _x2c_macro_iterator_17 = List_iter(forwarded_values,  &(struct Iter){
-                0
+                int_var(0)
               }
               );  Var _x2c_macro_item_17;  while(Iter_try_next(_x2c_macro_iterator_17,  & _x2c_macro_item_17)){
                 item = _x2c_macro_item_17;  Array_push(values,  item);
@@ -3277,7 +3277,7 @@ static List _capture_row(Compiler compiler,  List hole,  List sources){
             }
             {
               Var item;  Iter _x2c_macro_iterator_18 = List_iter(required,  &(struct Iter){
-                0
+                int_var(0)
               }
               );  Var _x2c_macro_item_18;  while(Iter_try_next(_x2c_macro_iterator_18,  & _x2c_macro_item_18)){
                 item = _x2c_macro_item_18;  Array_push(construction,  item);
@@ -3308,7 +3308,7 @@ List values = Var_is(value,  806120) ? Var_list(value) : NULL;  if(! singular) r
 static List _lisp_bindings(List bindings){
   List result = NULL; {
     List pair;  Iter _x2c_macro_iterator_20 = List_iter(bindings,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_20;  while(Iter_try_next(_x2c_macro_iterator_20,  & _x2c_macro_item_20)){
       pair = Var_list(_x2c_macro_item_20); {
@@ -3467,7 +3467,7 @@ static List _parse_body(Compiler c,  Symbol result_kind){
     {
       Var directive;
       Iter _x2c_macro_iterator_21 = List_iter(Compiler_leading_preproc(c),  &(struct Iter){
-        0
+        int_var(0)
       }
       );
       Var _x2c_macro_item_21;
@@ -3505,7 +3505,7 @@ static List _parameter_rows(Compiler compiler,  List parameters){
   {
     List parameter;
     Iter _x2c_macro_iterator_22 = List_iter(parameters,  &(struct Iter){
-      0
+      int_var(0)
     }
     );
     Var _x2c_macro_item_22;
@@ -3671,7 +3671,7 @@ List Compiler_parse_macro_definition(Compiler c){
 else if(result_kind == 9147177346020 && target_kind == 377892) replacement = cons(_3,  cons(_320,  cons(List_var(cons(_490,  cons(List_var(replacement),  NULL))),  NULL)));  List bindings;  Var expression_slot = List_var(_497);  if(List_try_match(replacement,  expression_slot,  & bindings)) replacement = List_search_replace(replacement,  List_var(_493),  Symbol_var(62431043940));  else replacement = List_search_replace(replacement,  List_var(_500),  Symbol_var(62431043940));  Map definition_bindings = Map_new();  if(List_truth(target_hole) && Var_equal(List_assoc(target_hole,  Symbol_var(740232)),  Symbol_var(1405544))){
   Var required = _replacement_binder(List_assoc(target_hole,  Symbol_var(154018148)),  _644,  1); {
     List parameter;  Iter _x2c_macro_iterator_23 = List_iter(parameters,  &(struct Iter){
-      0
+      int_var(0)
     }
     );  Var _x2c_macro_item_23;  while(Iter_try_next(_x2c_macro_iterator_23,  & _x2c_macro_item_23)){
       parameter = Var_list(_x2c_macro_item_23);  if(Var_equal(List_assoc(parameter,  Symbol_var(740232)),  Symbol_var(920394))){
@@ -3685,7 +3685,7 @@ else if(result_kind == 9147177346020 && target_kind == 377892) replacement = con
 }
 {
   Var local;  Iter _x2c_macro_iterator_24 = List_iter(local_names,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_24;  while(Iter_try_next(_x2c_macro_iterator_24,  & _x2c_macro_item_24)){
     local = _x2c_macro_item_24; {
@@ -3697,7 +3697,7 @@ else if(result_kind == 9147177346020 && target_kind == 377892) replacement = con
 }
 replacement = Var_list(_replace_definition_bindings(List_var(replacement),  definition_bindings)); {
   Var stored;  Iter _x2c_macro_iterator_25 = List_iter(parameters,  &(struct Iter){
-    0
+    int_var(0)
   }
   );  Var _x2c_macro_item_25;  while(Iter_try_next(_x2c_macro_iterator_25,  & _x2c_macro_item_25)){
     stored = _x2c_macro_item_25; {
@@ -3714,7 +3714,7 @@ Array fresh = Array_new();
 {
   Var binder;
   Iter _x2c_macro_iterator_26 = List_iter(using_holes,  &(struct Iter){
-    0
+    int_var(0)
   }
   );
   Var _x2c_macro_item_26;
@@ -3727,7 +3727,7 @@ Array fresh = Array_new();
 {
   Var local;
   Iter _x2c_macro_iterator_27 = List_iter(local_names,  &(struct Iter){
-    0
+    int_var(0)
   }
   );
   Var _x2c_macro_item_27;
@@ -3952,7 +3952,7 @@ static void _bind_name_arguments(Compiler compiler,  List definition,  List argu
       {
         String name;
         Iter _x2c_macro_iterator_28 = List_iter(values,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_28;
@@ -4039,7 +4039,7 @@ if(! List_truth(definition)) definition = Var_list(stored);  List input = argume
       {
         List active;
         Iter _x2c_macro_iterator_29 = List_iter((compiler) -> macro_stack,  &(struct Iter){
-          0
+          int_var(0)
         }
         );
         Var _x2c_macro_item_29;
@@ -4087,7 +4087,7 @@ if(! List_truth(definition)) definition = Var_list(stored);  List input = argume
           {
             List fresh;
             Iter _x2c_macro_iterator_30 = List_iter(Var_list(List_assoc(definition,  Symbol_var(13774032))),  &(struct Iter){
-              0
+              int_var(0)
             }
             );
             Var _x2c_macro_item_30;
@@ -4343,7 +4343,7 @@ static List _parse_target_definition(Compiler c,  List definition,  Token invoca
         {
           Var item;
           Iter _x2c_macro_iterator_31 = List_iter(targets,  &(struct Iter){
-            0
+            int_var(0)
           }
           );
           Var _x2c_macro_item_31;
