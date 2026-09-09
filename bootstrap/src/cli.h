@@ -6,6 +6,7 @@
 #define __GUARD_0x29BB659F__
 
 #include "x2c.h"
+#include "sourceview.h"
 typedef struct CliRequest{
   Symbol command;
   List inputs,  run_args,  include_dirs,  package_dirs,  cpp_args;
@@ -17,7 +18,8 @@ typedef struct CliRequest{
   Symbol dump;
   int jobs,  debugging,  verbose,  dry_run,  quiet,  plain,  nested,  no_deps;
   int no_phony_deps,  compile_only,  kind_explicit,  save_temps,  no_cpp;
-  int live_symbols,  cpp_symbols,  source_map;
+  int live_symbols,  cpp_symbols,  source_map,  source_facts;
+  SourceView sources;
 }
 * CliRequest;
 

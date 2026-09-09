@@ -50,7 +50,7 @@ static void _install_source(
   (void) marker.try_own();
   if (compiler.macros.contains(marker)) return;
   Compiler definitions = Compiler.new_shared(compiler);
-  defer definitions.free_lisp();
+  defer compiler.close_child(definitions);
   definitions.filename = filename;
   definitions.sym = compiler.sym;
   definitions.fn_defs = compiler.fn_defs;
@@ -244,7 +244,10 @@ static Var _sdk_type_fields(List value) {
     return _sdk_reject(
       "x2c.type.fields requires a complete struct or union Type",
       %("value: ${value.repr()}"));
-  return metadata.cdr();
+  Array named = %[];
+  foreach (List row, metadata.cdr())
+    if (row.car().truth()) named.push(row);
+  return named.list_free();
 }
 
 static Var _sdk_binding_spelling(Var syntax) {
@@ -648,6 +651,8 @@ static String _source_dir(Compiler compiler) {
 static String _source_file(Compiler compiler, String file) {
   if (!file || file.startswith("<")) return file;
   char resolved[PATH_MAX];
+  if (compiler.sources && compiler.sources.exists(file))
+    return SourceView.path(file);
   if (realpath(file, resolved)) return %"$resolved";
   if (file[0] != '/') {
     String rooted = %"${compiler.root_dir}/$file";
@@ -663,6 +668,7 @@ static String _embed_path(
     String base = _source_file(compiler, source_file);
     candidate = %"${x2c_path_dir(base)}/$requested";
   }
+  if (compiler.sources) return SourceView.path(candidate);
   char resolved[PATH_MAX];
   return realpath(candidate, resolved) ? %"$resolved" : candidate;
 }
@@ -672,9 +678,13 @@ static String _canonical_path(Compiler compiler, String path) {
   if (path && path[0] != '/')
     candidate = %"${_source_dir(compiler)}/$path";
   char resolved[PATH_MAX];
+  if (compiler.sources && compiler.sources.exists(candidate))
+    return SourceView.path(candidate);
   if (realpath(candidate, resolved)) return %"$resolved";
   if (path && path[0] != '/') {
     String system = %"${compiler.root_dir}/lib/$path";
+    if (compiler.sources && compiler.sources.exists(system))
+      return SourceView.path(system);
     if (realpath(system, resolved)) return %"$resolved";
   }
   return candidate;
@@ -719,6 +729,16 @@ static Var _sdk_embed_text(Var requested) {
     return _sdk_reject(
       "x2c.embed.text requires a non-empty path", NULL);
   String path = _embed_path(compiler, source_file, requested_path);
+  if (compiler.sources) {
+    String text;
+    if (!compiler.read_source(path, &text))
+      return _sdk_reject(
+        "cannot read embedded text",
+        %("path: ${compiler.display_path(path)}"));
+    compiler.deps.merge_translation_dependency(
+      path, %"%08x".printf(String.hash(text)));
+    return text;
+  }
   struct stat info;
   if (!stat(path, &info) && !S_ISREG(info.st_mode))
     return _sdk_reject(
@@ -788,9 +808,27 @@ static File _open(
   return source;
 }
 
+static String _read_source(
+  Compiler compiler, String path, String message, Token token, List notes) {
+  if (compiler.sources) {
+    String text;
+    if (!compiler.read_source(path, &text))
+      compiler.report_error(<macro>, message, token, notes);
+    return text;
+  }
+  return _open(compiler, path, message, token, notes).string_close();
+}
+
 static void _eval_library(
   Compiler compiler, String relative, String message) {
   String path = %"${compiler.root_dir}/$relative";
+  if (compiler.sources) {
+    String text = _read_source(
+      compiler, path, message, compiler.token, %("path:" $path));
+    compiler.add_translation_dependency(path);
+    _eval_string(compiler, text, compiler.token);
+    return;
+  }
   File source = _open(
     compiler, path, message, compiler.token, %("path:" $path));
   compiler.add_translation_dependency(path);
@@ -959,29 +997,36 @@ static void _import(
   {
     defer c.import_stack.take_last();
     if (path.endswith(".xlisp")) {
-      File source = _open(
-        c, path, "cannot open compile-time Lisp import", invocation,
-        %( "path: ${c.display_path(path)}" ));
-      defer source.close();
-      _eval_file(c, source, invocation);
+      if (c.sources) {
+        String text = _read_source(
+          c, path, "cannot open compile-time Lisp import", invocation,
+          %( "path: ${c.display_path(path)}" ));
+        _eval_string(c, text, invocation);
+      }
+      else {
+        File source = _open(
+          c, path, "cannot open compile-time Lisp import", invocation,
+          %( "path: ${c.display_path(path)}" ));
+        defer source.close();
+        _eval_file(c, source, invocation);
+      }
     }
     else if (path.endswith(".xmacro")) {
       imported_aliases = %{};
-      File source = _open(
+      String text = _read_source(
         c, path, "cannot open macro import", invocation,
         %( "path: ${c.display_path(path)}" ));
-      String text = source.string_close();
       /* The import parser borrows the caller's semantic maps and Lisp. Its
          diagnostics are returned to the caller before release; lasting
          effects enter the shared definitions, aliases, dependencies, and
          Lisp session. */
       Compiler imported = Compiler.new_shared(c);
-      defer imported.free_lisp();
+      defer c.close_child(imported);
       imported.filename = path;
-      imported.recovery_depth = c.recovery_depth;
-      imported.diagnostics = c.diagnostics;
-      imported.own_diagnostics();
-      defer c.own_diagnostics();
+      DiagnosticEmitter emitter = c.diagnostics.emit;
+      void *diagnostic_owner = c.diagnostics.owner;
+      imported.borrow_diagnostics(c);
+      defer c.diagnostics.set_emitter(emitter, diagnostic_owner);
       imported.sym = c.sym;
       imported.fn_defs = c.fn_defs;
       imported.macros = c.macros;

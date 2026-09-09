@@ -12,9 +12,21 @@ static Row designated;
 
 static Row positional;
 
-static String words[2];
+static String words[2] ={
+  0,  0
+}
+;
 
-static Row rows[2];
+static Row rows[2] ={
+  {
+    .name = 0
+  }
+  , {
+    0,  0
+  }
+
+}
+;
 
 List public_list;
 
@@ -57,15 +69,15 @@ __attribute__((constructor)) static void _file_init_(void){
   }
   ;
   {
-    words[0] = _5;
-    words[1] = _6;
+    if(0 < sizeof(words) / sizeof(words[0])) words[0] = _5;
+    if(1 < sizeof(words) / sizeof(words[1])) words[1] = _6;
   }
   {
-    rows[0] =(Row){
+    if(0 < sizeof(rows) / sizeof(rows[0])) rows[0] =(Row){
       .name = _7
     }
     ;
-    rows[1] =(Row){
+    if(1 < sizeof(rows) / sizeof(rows[1])) rows[1] =(Row){
       _8,  2
     }
     ;

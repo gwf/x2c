@@ -385,6 +385,7 @@ static List _expression_statement(Compiler compiler) {
     `(seq ...)` node containing several block items.
 */
 List Compiler.parse_block_item(Compiler compiler) {
+  if (compiler.test_static_assert()) return compiler.parse_static_assert();
   List slot = compiler.try_parse_macro_slot(<block>);
   if (slot) return slot;
   if (compiler.local_macro_form_is_definition()) {

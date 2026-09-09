@@ -9,6 +9,7 @@
 #include "build.h"
 #include "bootstrap.h"
 #include "project.h"
+#include "frontend.h"
 #include "toolchain.h"
 int main(int argc,  char * * argv);
 

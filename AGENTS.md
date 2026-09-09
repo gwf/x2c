@@ -80,13 +80,14 @@ Direct destructive operations outside the requested change need approval.
 
 ## Repo Map
 
-- `src/` - the compiler, 27 modules: `main` (dispatch) -> `cli` (CLI) ->
-  `compiler` (translation state) -> shared runtime `lib/tokenizer.x` ->
+- `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
+  `frontend` (configured source units) -> `compiler` (translation state) ->
+  shared runtime `lib/tokenizer.x` ->
   `parse`/`expressions`/`statements`/`macros`/
   `literals` -> `ast` -> `type`/`protocol` -> `transform` (+ `lambda`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `snapshot`,
-  `collect`, and `deps` in support; `project` lowers manifests to the same
-  typed request that `build` owns, `toolchain` owns native actions,
+  `collect`, `deps`, and `sourceview` in support; `project` lowers manifests
+  to the same typed request that `build` owns, `toolchain` owns native actions,
   `report` owns progress and receipts, `bootstrap` owns the APE-to-native
   transition, and `utils` owns child execution.
 - `lib/` - representative runtime modules include string, list, array, map,

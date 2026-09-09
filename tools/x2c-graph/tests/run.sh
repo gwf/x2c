@@ -562,7 +562,7 @@ if $tool loop-allocations "$fixtures/loop-allocations.x" \
   exit 1
 fi
 test ! -s "$tmp/loop-missing.out"
-grep -q 'cannot open input' "$tmp/loop-missing.err"
+grep -q 'cannot read input file' "$tmp/loop-missing.err"
 
 $tool lifetime-escapes "$fixtures/lifetime-escapes.x" \
   "$fixtures/calls.x" >"$tmp/lifetime-escapes"
@@ -777,7 +777,7 @@ if $tool flows flow_produce flow_consume "$fixtures/missing.x" \
   exit 1
 fi
 test ! -s "$tmp/flows-missing.out"
-grep -q 'cannot open input' "$tmp/flows-missing.err"
+grep -q 'cannot read input file' "$tmp/flows-missing.err"
 
 if $tool compare flow_direct flow_return_chain flow_consume -- \
      "$fixtures/malformed.x" >"$tmp/compare-bad.out" \
@@ -804,7 +804,7 @@ if $tool lifetime-escapes "$fixtures/lifetime-escapes.x" \
   exit 1
 fi
 test ! -s "$tmp/lifetime-missing.out"
-grep -q 'cannot open input' "$tmp/lifetime-missing.err"
+grep -q 'cannot read input file' "$tmp/lifetime-missing.err"
 
 if $tool allocation-returns lifetime_scope_alias \
      "$fixtures/lifetime-escapes.x" \
@@ -823,7 +823,7 @@ if $tool allocation-returns lifetime_scope_alias "$fixtures/missing.x" \
   exit 1
 fi
 test ! -s "$tmp/allocation-returns-missing.out"
-grep -q 'cannot open input' "$tmp/allocation-returns-missing.err"
+grep -q 'cannot read input file' "$tmp/allocation-returns-missing.err"
 
 if $tool graph "$fixtures/calls.x" "$fixtures/malformed.x" \
      >"$tmp/bad.out" 2>"$tmp/bad.err"; then
@@ -839,7 +839,7 @@ if $tool graph "$fixtures/missing.x" >"$tmp/missing.out" \
   exit 1
 fi
 test ! -s "$tmp/missing.out"
-grep -q 'cannot open input' "$tmp/missing.err"
+grep -q 'cannot read input file' "$tmp/missing.err"
 
 if $tool datasets "$tmp/datasets-malformed" \
      "$fixtures/dataset-src.x" "$fixtures/malformed.x" -- \
@@ -860,7 +860,7 @@ if $tool datasets "$tmp/datasets-missing" \
 fi
 test ! -e "$tmp/datasets-missing"
 test ! -s "$tmp/datasets-missing.out"
-grep -q 'cannot open input' "$tmp/datasets-missing.err"
+grep -q 'cannot read input file' "$tmp/datasets-missing.err"
 
 if $tool architecture "$fixtures/calls.x" "$fixtures/malformed.x" \
      >"$tmp/architecture-bad.out" 2>"$tmp/architecture-bad.err"; then
@@ -876,7 +876,7 @@ if $tool structure "$fixtures/calls.x" "$fixtures/missing.x" \
   exit 1
 fi
 test ! -s "$tmp/structure-missing.out"
-grep -q 'cannot open input' "$tmp/structure-missing.err"
+grep -q 'cannot read input file' "$tmp/structure-missing.err"
 
 if $tool between "$fixtures/calls.x" "$fixtures/public-target.x" \
      "$fixtures/malformed.x" >"$tmp/between-bad.out" \
@@ -894,7 +894,7 @@ if $tool between "$fixtures/calls.x" "$fixtures/public-target.x" \
   exit 1
 fi
 test ! -s "$tmp/between-missing.out"
-grep -q 'cannot open input' "$tmp/between-missing.err"
+grep -q 'cannot read input file' "$tmp/between-missing.err"
 
 if $tool focus helper "$fixtures/calls.x" "$fixtures/malformed.x" \
      >"$tmp/focus-bad.out" 2>"$tmp/focus-bad.err"; then
@@ -910,7 +910,7 @@ if $tool focus helper "$fixtures/missing.x" >"$tmp/focus-missing.out" \
   exit 1
 fi
 test ! -s "$tmp/focus-missing.out"
-grep -q 'cannot open input' "$tmp/focus-missing.err"
+grep -q 'cannot read input file' "$tmp/focus-missing.err"
 
 if $tool field FieldOwner value "$fixtures/fields-a.x" \
      "$fixtures/malformed.x" >"$tmp/field-bad.out" \
@@ -927,7 +927,7 @@ if $tool field FieldOwner value "$fixtures/missing.x" \
   exit 1
 fi
 test ! -s "$tmp/field-missing.out"
-grep -q 'cannot open input' "$tmp/field-missing.err"
+grep -q 'cannot read input file' "$tmp/field-missing.err"
 
 if $tool sites site_target "$fixtures/sites-a.x" \
      "$fixtures/malformed.x" >"$tmp/sites-bad.out" \
@@ -944,4 +944,4 @@ if $tool sites site_target "$fixtures/missing.x" \
   exit 1
 fi
 test ! -s "$tmp/sites-missing.out"
-grep -q 'cannot open input' "$tmp/sites-missing.err"
+grep -q 'cannot read input file' "$tmp/sites-missing.err"

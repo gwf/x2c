@@ -26,15 +26,15 @@ $(DEV_ARCHIVE): x2c-build | $(BUILD)
 	@$(X2C) build --plain --kind static-library --output $@ \
 		$(COMPILER_OBJECTS)
 
-$(BUILD)/x2c-graph: x2c-graph.x flows.x frontend.x lifetime.x loop-allocations.x \
+$(BUILD)/x2c-graph: x2c-graph.x flows.x lifetime.x loop-allocations.x \
 		targets.x $(DEV_ARCHIVE)
 	@$(X2C) build --plain --build-dir $(BUILD)/graph-cc \
-		--output $@ $(X_FLAGS) x2c-graph.x flows.x frontend.x lifetime.x \
+		--output $@ $(X_FLAGS) x2c-graph.x flows.x lifetime.x \
 		loop-allocations.x targets.x $(DEV_ARCHIVE)
 
-$(BUILD)/ast-parity: tests/ast-parity.x frontend.x $(DEV_ARCHIVE)
+$(BUILD)/ast-parity: tests/ast-parity.x $(DEV_ARCHIVE)
 	@$(X2C) build --plain --build-dir $(BUILD)/ast-parity-cc \
-		--output $@ $(X_FLAGS) tests/ast-parity.x frontend.x \
+		--output $@ $(X_FLAGS) tests/ast-parity.x \
 		$(DEV_ARCHIVE)
 
 run: $(BUILD)/x2c-graph

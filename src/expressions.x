@@ -135,6 +135,9 @@ static List Compiler._postfix_index_expression(
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
+  Type native = compiler.sym.resolve_key(type);
+  if (native.is_array())
+    return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
 }
 
@@ -301,6 +304,7 @@ static void _find_delegate_methods(
   List order = compiler.sym.field_order(aggregate);
   foreach (List row, order ? order.cdr() : NULL) {
     String name = row.car();
+    if (!name) continue;
     if (!compiler.sym.get(%(@aggregate delegate $name))) continue;
     List step = _delegate_step(compiler, receiver, name);
     Type field_type = step.cddr().cadr();
@@ -484,6 +488,15 @@ static List _parse_dot_init(Compiler compiler) {
   compiler.expect(<=>);
   List init = compiler.parse_assignment();
   return %( dotinit $field $init );
+}
+
+static List _parse_index_init(Compiler compiler) {
+  compiler.expect(<[>);
+  List index = compiler.parse_assignment();
+  compiler.expect(<]>);
+  compiler.expect(<=>);
+  List init = compiler.parse_assignment();
+  return %(indexinit $index $init);
 }
 
 static List _parse_va_arg(Compiler compiler) {
@@ -1470,6 +1483,10 @@ static List _resolve_content(
             values.push(
               %(dotinit $field
               ${c.resolve_expression(value, origin)}));
+          case %(indexinit ?index ?value):
+            values.push(%(indexinit
+              ${c.resolve_expression(index, origin)}
+              ${c.resolve_expression(value, origin)}));
           default: values.push(c.resolve_expression(element, origin));
         }
       return %(expr $input_type
@@ -1768,12 +1785,13 @@ static List _parse_comma_list(Compiler compiler) {
 
 static List _parse_composite_elements(Compiler compiler) {
   Array elements = %[];
-  do {
-    List element = _test_dot_init(compiler)
-                 ? _parse_dot_init(compiler)
+  while (compiler.peek(0) != <"}">) {
+    List element = _test_dot_init(compiler) ? _parse_dot_init(compiler)
+                 : compiler.peek(0) == <[> ? _parse_index_init(compiler)
                  : compiler.parse_assignment();
     elements.push(element);
-  } while (compiler.test(<,>));
+    if (!compiler.test(<,>)) break;
+  }
   return elements.list_free();
 }
 
@@ -1791,7 +1809,11 @@ static List _parse_composite(Compiler compiler) {
 List Compiler.parse_variable(Compiler c) {
   Token origin = c.token;
   List name = c.parse_complex_identifier();
+  Token after = c.token;
   List result = c.resolve_expression(%(expr () (ident $name)), origin);
+  if (c.source_facts) match (result)
+    case %(expr ?type (ident ?binding)):
+      c.record_source_reference(binding, type, origin, after);
   if (c.source_map &&
       (origin.text == %"__FILE__" || origin.text == %"__LINE__"))
     match (result) case %(expr ?type ?content):
@@ -1836,6 +1858,20 @@ static List _parse_assignment_tail(Compiler compiler, List lhs) {
 List Compiler.parse_assignment(Compiler compiler) =>
   _parse_assignment_tail(compiler, compiler.parse_conditional());
 
+/* Preserve each C token's escape boundary and the ordinary raw-string type. */
+static List _parse_c_string_literals(Compiler compiler) {
+  List first = compiler.parse_atomic_literal();
+  if (compiler.peek(0) != <lit-char*>) return first;
+  Array spellings = %[];
+  spellings.push(first.caddr().caddr());
+  while (compiler.peek(0) == <lit-char*>) {
+    spellings.push(compiler.token.text);
+    compiler.next();
+  }
+  String text = %" ".join(spellings.list_free());
+  return %(expr (* char) (literal (* char) $text));
+}
+
 /** Parses one primary expression or expression-valued macro slot.
     Dispatch starts at `compiler.token` to the selected literal, identifier,
     grouping, or macro parser and leaves the token after that primary form.
@@ -1845,6 +1881,7 @@ List Compiler.parse_primary(Compiler compiler) {
   if (slot) return slot;
   switch (compiler.peek(0)) {
     case <"$(">: return compiler.parse_macro_lisp_expression();
+    case <lit-char*>:  return _parse_c_string_literals(compiler);
     case <$>:          return compiler.try_parse_macro_expression();
     case <ident>: {
       Var candidate;
@@ -2167,42 +2204,53 @@ static List _raw_string_to_string(Compiler compiler, List expr) {
   return %(expr ("String") (call "String_new" (args $expr)));
 }
 
-/* The declared field types of an aggregate, in order. The symbol table
-   keeps a struct as its ordered field types and, separately, each field's
-   type by name; it does not keep the names in order. */
-static List _aggregate_field_types(Compiler compiler, Type target) {
-  Type key = compiler.sym.resolve_key(target);
-  if (!key || !key.is_aggregate_tag()) return NULL;
-  List declaration = compiler.sym.get(key);
-  return declaration && declaration.cadr() is <list>
-       ? declaration.cadr().list() : NULL;
+/* C positional initialization skips unnamed bit-fields, not anonymous
+   aggregate subobjects. The ordered metadata retains both kinds. */
+static List _next_initializer_field(List fields) {
+  while (fields) {
+    List row = fields.car();
+    Type type = row.cadr();
+    if (row.car().truth() || !type.is_bitfield()) break;
+    fields = fields.cdr();
+  }
+  return fields;
 }
 
 /* Each element of a composite initializer converts to the field or element
    it initializes. Without this a String field keeps the bare `char *`
    literal it was written as, and that literal carries no StringHeader, so
    String.len, String.free, and String hashing all read before the pointer.
-   A nested composite recurses through convert_expression.
-
-   C resumes positional filling after the field a designator named, and the
-   names are not in the symbol table in order, so a positional element that
-   follows a designator is left as written. */
+   A nested composite recurses through convert_expression. Named field
+   designators resume from the next initializable subobject; array indices
+   leave the destination element type unchanged. */
 static List _convert_composite(Compiler compiler, List expr, Type target) {
   List composite = expr.caddr();
-  Type element = target.car() is <list> && target.car().list().car() == <dim>
-               ? target.cdr() : NULL;
-  List fields = element ? NULL : _aggregate_field_types(compiler, target);
+  Type resolved = compiler.sym.resolve_key(target);
+  if (!resolved) resolved = target;
+  Type element = resolved.is_array() ? resolved.cdr() : NULL;
+  List fields = element ? NULL : compiler.sym.field_order(resolved);
+  if (fields) fields = fields.cdr();
   if (!element && !fields) return %(expr $target $composite);
   Array elements = %[], List at = fields;
   foreach (List node, composite.cadr().list().cdr()) {
-    List field = node.car() == <dotinit> ? node.cadr().list() : NULL;
-    List value = field ? node.caddr().list() : node, Type want = element;
-    if (field) {
-      want = compiler.sym.lookup_field(target, field);
-      at = NULL;
+    Symbol tag = 0;
+    List designator = NULL, value = node;
+    match (node)
+      case %((!set ?kind (!or dotinit indexinit)) ?key ?initializer): {
+        tag = kind;
+        designator = key;
+        value = initializer;
+      }
+    Type want = element;
+    if (tag == <dotinit>) {
+      want = compiler.sym.lookup_field(target, designator);
+      at = fields;
+      while (at && at.car().list().car() != designator.car()) at = at.cdr();
+      if (at) at = at.cdr();
     }
     else if (fields) {
-      want = at ? at.car().list() : NULL;
+      at = _next_initializer_field(at);
+      want = at ? at.car().list().cadr().list() : NULL;
       at = at.cdr();
     }
     if (!want) {
@@ -2211,8 +2259,7 @@ static List _convert_composite(Compiler compiler, List expr, Type target) {
     }
     List converted = compiler.convert_expression(value, want);
     elements.push(
-      field ? %(dotinit $field $converted).var()
-                        : converted.var());
+      tag ? %($tag $designator $converted).var() : converted.var());
   }
   return %(expr $target (composite (commas @{elements.list_free()})));
 }

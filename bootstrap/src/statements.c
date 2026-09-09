@@ -125,6 +125,10 @@ List Compiler_parse_catch_pattern_literal(Compiler);
 
 List Compiler_parse_raise_literal(Compiler);
 
+int Compiler_test_static_assert(Compiler);
+
+List Compiler_parse_static_assert(Compiler);
+
 List Compiler_try_parse_macro_slot(Compiler,  Symbol);
 
 int Compiler_local_macro_form_is_definition(Compiler);
@@ -701,6 +705,7 @@ static List _expression_statement(Compiler compiler){
 
 List Compiler_parse_block_item(Compiler compiler){
   if(! _init_guard_) _file_init_();
+  if(Compiler_test_static_assert(compiler)) return Compiler_parse_static_assert(compiler);
   List slot = Compiler_try_parse_macro_slot(compiler,  5011670);
   if(List_truth(slot)) return slot;
   if(Compiler_local_macro_form_is_definition(compiler)){

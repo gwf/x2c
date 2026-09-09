@@ -91,7 +91,8 @@ static String _canonical_path(String path) {
 }
 
 // Include targets must be readable regular files.
-static int _includable_file(String path) {
+static int _includable_file(SourceView sources, String path) {
+  if (sources) return sources.exists(path);
   struct stat info;
   if (access(path, R_OK) || stat(path, &info)) return 0;
   return S_ISREG(info.st_mode) != 0;
@@ -133,10 +134,11 @@ static String _canonical_cwd(void) {
 }
 
 static String _resolve_include_dirs(
-  List extra_dirs, String includer_dir, String target, int angle,
-  int *covered) {
+  SourceView sources, List extra_dirs, String includer_dir, String target,
+  int angle, int *covered) {
   *covered = 0;
-  if (target.startswith("/")) return _includable_file(target) ? target : NULL;
+  if (target.startswith("/"))
+    return _includable_file(sources, target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
   Array dirs = %[];
   if (!angle && includer_dir) dirs.push(_canonical_path(includer_dir));
@@ -151,7 +153,7 @@ static String _resolve_include_dirs(
   String found = NULL;
   foreach (String dir, dirs) {
     String path = %"$dir/$target";
-    if (!_includable_file(path)) continue;
+    if (!_includable_file(sources, path)) continue;
     found = path;
     *covered = dir == lib_dir || dir == include_dir;
     break;
@@ -163,7 +165,8 @@ static String _resolve_include_dirs(
 static String _resolve_include(
   Compiler compiler, String includer_dir, String target, int angle,
   int *covered) => _resolve_include_dirs(
-    compiler.include_dirs, includer_dir, target, angle, covered);
+    compiler.sources, compiler.include_dirs, includer_dir, target, angle,
+    covered);
 
 /* Process cache: canonical path ->
    `(ordered-parts gensyms hash definitions dependencies)`. A part is a
@@ -256,6 +259,7 @@ static void _replay_cached(
   foreach (Var part, parts) {
     if (part is <map>) {
       Map.merge(globs, part);
+      compiler.merge_source_declarations(globs, part);
       continue;
     }
     String dep_path = part;
@@ -284,6 +288,7 @@ static void _parse_segment(
   lines.clear();
   if (!text || !*text) return;
   Compiler shadow = Compiler.new_shared(c);
+  defer c.close_child(shadow);
   /* A package renames what it declares, not what it includes. A C header's
      types and enumerators keep their upstream spelling, so a public method
      over one of them still names a type the header defines. */
@@ -302,6 +307,7 @@ static void _parse_segment(
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
   shadow.tokenize(text);
   shadow.text = source;
+  if (c.source_facts) c.source_texts[SourceView.path(path)] = source;
   for (size_t i = 0; i < shadow.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) shadow.tokenizer.tokens)[i];
     token.line += start_line - 1;
@@ -324,8 +330,8 @@ static void _parse_segment(
   _cache_dependencies(dependencies, shadow.deps);
   c.merge_translation_dependencies(shadow.deps);
   *private = shadow.source_private;
-  shadow.free_lisp();
   Map.merge(globs, overlay);
+  c.merge_source_declarations(globs, overlay);
 }
 
 /* Append one segment's nonempty overlay before the following include and
@@ -358,7 +364,7 @@ static void _include(
   if (!path) return;
   if (covered && !path.endswith(".x")) return;
   String canonical = _canonical_path(path);
-  Var cached = _header_cache()[canonical];
+  Var cached = c.source_facts ? void : _header_cache()[canonical];
   List entry = cached is void ? _artifact_fetch(c, canonical)
                               : cached.list();
   if (covered && !c.runtime_hdrs && entry &&
@@ -375,27 +381,34 @@ static void _include(
     _replay_cached(c, entry, globs, visited);
     return;
   }
-  File file = NULL;
-  try file = path.open("r");
-  catch %(not-found *): {
-    List notes = %(
-      "stage: collect" "include: $target" "path: $path");
-    c.report_error(<driver>, "cannot read include", c.token, notes);
+  String text = NULL;
+  if (c.sources) {
+    if (!c.read_source(path, &text))
+      c.report_error(<driver>, "cannot read include", c.token,
+                     %("stage: collect" "include: $target" "path: $path"));
   }
-  catch %(io-fail *): {
-    List notes = %(
-      "stage: collect" "include: $target" "path: $path");
-    c.report_error(<driver>, %"cannot read include", c.token, notes);
+  else {
+    File file = NULL;
+    try file = path.open("r");
+    catch %(not-found *): {
+      List notes = %(
+        "stage: collect" "include: $target" "path: $path");
+      c.report_error(<driver>, "cannot read include", c.token, notes);
+    }
+    catch %(io-fail *): {
+      List notes = %(
+        "stage: collect" "include: $target" "path: $path");
+      c.report_error(<driver>, %"cannot read include", c.token, notes);
+    }
+    try text = file.string_close();
+    catch %(io-fail *): {
+      List notes = %(
+        "stage: collect" "include: $target" "path: $path");
+      c.report_error(<driver>, %"cannot read include", c.token, notes);
+    }
   }
   visited[canonical] = 1;
   parts.push(canonical);
-  String text = NULL;
-  try text = file.string_close();
-  catch %(io-fail *): {
-    List notes = %(
-      "stage: collect" "include: $target" "path: $path");
-    c.report_error(<driver>, %"cannot read include", c.token, notes);
-  }
   _file(c, canonical, text, x2c_path_dir(path), globs, visited);
 }
 
@@ -538,7 +551,12 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   if (c.runtime_hdrs && c.prelude) {
     String runtime = %"${x2c_get_root()}/lib/x2c.x";
     String runtime_canonical = _canonical_path(runtime);
-    File file = runtime.open("r"), String text = file.string_close();
+    String text = NULL;
+    if (c.sources) {
+      if (!c.read_source(runtime, &text))
+        c.report_error(<driver>, "cannot read runtime source", c.token, NULL);
+    }
+    else text = runtime.open("r").string_close();
     visited[runtime_canonical] = 1;
     _file(
       c, runtime_canonical, text, x2c_path_dir(runtime),
@@ -561,8 +579,9 @@ static String _package_entry(
   foreach (String package_dir, compiler.package_dirs) {
     String root = %"${_canonical_path(package_dir)}/$name";
     String nested = %"$root/src/$name.x";
-    String entry = _includable_file(nested) ? nested : %"$root/$name.x";
-    if (!_includable_file(entry)) continue;
+    String entry = _includable_file(compiler.sources, nested)
+                 ? nested : %"$root/$name.x";
+    if (!_includable_file(compiler.sources, entry)) continue;
     if (directory) *directory = root;
     return _canonical_path(entry);
   }
@@ -614,12 +633,14 @@ static void _package_merge(
     if (key is not <list> || key.is_nil()) continue;
     if (_package_protocol_row(key, value)) {
       merged[key] = value;
+      compiler.copy_source_declaration(merged, part, key);
       continue;
     }
     String spelling = _package_key_spelling(key);
     if (!spelling) continue;
     if (header || spelling.startswith(prefix)) {
       merged[key] = value;
+      compiler.copy_source_declaration(merged, part, key);
       continue;
     }
     if (!foreign) continue;
@@ -684,17 +705,21 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
       <driver>, %"unknown package '$name'", token,
       %( "searched: <root>/$name/src/$name.x, <root>/$name/$name.x" ));
   Compiler package = Compiler.new_shared(c);
+  defer c.close_child(package);
   package.package = name;
   package.filename = entry;
   package.include_dirs = c.include_dirs;
   Map globs = c.sym.base_symbols(), visited = %{};
   visited[entry] = 1;
-  Var cached = _header_cache()[entry];
+  Var cached = c.source_facts ? void : _header_cache()[entry];
   if (cached is void) {
     String text = NULL, int failed = 0;
-    try text = entry.open("r").string_close();
-    catch %(not-found *): failed = 1;
-    catch %(io-fail *): failed = 1;
+    if (c.sources) failed = !package.read_source(entry, &text);
+    else {
+      try text = entry.open("r").string_close();
+      catch %(not-found *): failed = 1;
+      catch %(io-fail *): failed = 1;
+    }
     if (failed)
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
@@ -703,7 +728,6 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   }
   else _replay_cached(package, cached, globs, visited);
   Map.merge(c.fn_defs, package.fn_defs);
-  package.free_lisp();
   Map merged = %{}, walked = %{};
   walked[entry] = 1;
   c.add_translation_dependency(entry);
@@ -711,7 +735,10 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
     c, name, root, entry, _header_cache()[entry],
     merged, walked, token);
   c.package_roots[name] = root;
-  foreach (Var (key, value), merged) c.sym.set(key, value);
+  foreach (Var (key, value), merged) {
+    c.sym.set(key, value);
+    c.copy_source_declaration(c.sym.current_symbols(), merged, key);
+  }
 }
 
 // persistent header artifacts
@@ -876,7 +903,7 @@ static List _artifact_reject(String relative) {
    reconstructed entry uses header_cache_scope ownership and the same ordered
    parts representation as a cold walk. */
 static List _artifact_fetch(Compiler compiler, String canonical) {
-  if ((void *) artifact_index == NULL) return NULL;
+  if (compiler.source_facts || (void *) artifact_index == NULL) return NULL;
   Var cached = _header_cache()[canonical];
   if (cached is not void) return cached;
   String relative = _root_relative(canonical);
@@ -905,11 +932,8 @@ static List _artifact_fetch(Compiler compiler, String canonical) {
     return NULL;
   artifact_loading[relative] = 1;
   String root = _canonical_root(), path = %"$root/$relative";
-  File file = fopen(path, "r");
-  if (!file) return _artifact_reject(relative);
   String text = NULL;
-  try text = file.string_close();
-  catch %(io-fail *): return _artifact_reject(relative);
+  if (!compiler.read_source(path, &text)) return _artifact_reject(relative);
   String current = %"%08x".printf(String.hash(text));
   if (!String.equal(current, expected_hash)) return _artifact_reject(relative);
   Array parts = %[], List stored_parts = parts_value;
@@ -955,10 +979,11 @@ static List _artifact_fetch(Compiler compiler, String canonical) {
       continue;
     }
     if (content_hash is not <string>) return _artifact_reject(relative);
-    File text_file = fopen(dependency_path, "r");
-    if (!text_file) return _artifact_reject(relative);
     String dependency_text = NULL;
-    try dependency_text = text_file.string_close();
+    try {
+      if (!compiler.read_source(dependency_path, &dependency_text))
+        return _artifact_reject(relative);
+    }
     catch %(io-fail *): return _artifact_reject(relative);
     catch %(bad-arg *): return _artifact_reject(relative);
     catch %(size-limit *): return _artifact_reject(relative);

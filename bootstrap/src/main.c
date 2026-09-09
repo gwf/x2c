@@ -2,33 +2,15 @@
 
 #include "main.h"
 
-static List _25,  _24,  _23,  _20,  _19;
+static List _9,  _8,  _7,  _4,  _3;
 
-static String _57,  _56,  _55,  _54,  _53,  _52,  _51,  _50,  _49,  _48,  _47,  _46,  _45,  _44,  _43,  _42,  _41,  _40,  _39,  _38,  _37,  _36,  _35,  _34,  _33,  _32,  _31,  _30,  _29,  _28,  _27,  _26,  _15,  _13,  _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _0;
+static String _34,  _33,  _32,  _31,  _30,  _29,  _28,  _27,  _26,  _25,  _24,  _23,  _22,  _21,  _20,  _19,  _18,  _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10;
 
-static Var _22,  _21,  _18,  _17,  _16,  _14,  _1;
+static Var _6,  _5,  _2,  _1,  _0;
 
 static CliRequest opts;
 
-static const SymbolSet cpp_dumps =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\000\000\001\001\002\040\034\037\266\112\000\000\000\246\053\353\321\017\341\000\000\132\236\343\303\126\011\000\000\350\103\023\006\067\001\000\000";
-
-static List include_dirs;
-
-static Toolchain host_toolchain;
-
 static int _init_guard_ = 0;
-
-static Map snapshot_globals;
-
-static Map snapshot_function_definitions;
-
-static String snapshot_error;
-
-static int snapshot_gensym,  snapshot_loaded;
-
-static int gensym_cursor;
-
-static int header_symbols_loaded;
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -62,8 +44,6 @@ _x2c_defer_env_1;
 #include "format.h"
 #include "snapshot.h"
 #include "protocol.h"
-Var String_var(String);
-
 Var Symbol_var(Symbol);
 
 List cons(Var,  List);
@@ -92,107 +72,49 @@ void Compiler_print_diagnostic(Compiler,  List);
 
 List Var_list(Var);
 
+int File_printf(File,  const char *, ...);
+
 int Map_try_next(Map,  unsigned *,  Var *,  Var *);
 
 int Map_contains(Map,  Var);
 
 Var Map_setindex(Map,  Var,  Var);
 
-void Compiler_report_error(Compiler,  Symbol,  String,  Token,  List);
-
-File String_open(String,  const char *);
-
-int File_stat(File,  struct stat *);
-
-int File_close(File);
-
-String File_string_close(File);
-
-String x2c_get_root(void);
-
-void Compiler_tokenize(Compiler,  char *);
-
-void Compiler_dump_tokens(Compiler);
-
-Map symbol_snapshot_load(String,  Map *,  int *);
-
-void Type_initialize(void);
-
-void header_symbols_initialize(void);
-
-int header_symbols_open(String,  int);
-
-Map Map_copy(Map);
-
-void Compiler_set_gensym(Compiler,  int);
-
-int SymbolSet_contains(SymbolSet,  Symbol);
-
-Map Compiler_collect_symbols(Compiler,  Map);
-
-Compiler Compiler_new_shared(Compiler);
-
-int Toolchain_preprocess(Toolchain,  const char *,  List,  const char *,  const char *,  String *,  String *,  String *);
-
-int String_truth(String);
-
-int File_printf(File,  const char *, ...);
-
-String int_str(int);
-
-List translation_depfile_parse(String);
-
-String Var_string(Var);
-
-void Compiler_add_translation_dependency(Compiler,  String);
-
-void Compiler_shallow_parse(Compiler,  Map);
-
-Map Sym_global_symbols(Sym);
-
-void Compiler_install_generated_protocol_symbols(Compiler,  Map);
-
-Map Sym_file_statics(Sym);
-
-void Compiler_dump_symbol_table(Compiler,  Map);
-
-void Compiler_free_lisp(Compiler);
+Var String_var(String);
 
 String Var_str(Var);
 
 String List_repr(List);
 
-List Compiler_full_parse(Compiler,  Map);
-
 int Compiler_error_count(Compiler);
+
+ScopeStats Scope_stats(void);
+
+int Frontend_start(Frontend,  String,  ParsedUnit *);
+
+void Compiler_own_diagnostics(Compiler);
+
+void Compiler_dump_tokens(Compiler);
+
+int ParsedUnit_collect(ParsedUnit *,  Frontend);
+
+int String_truth(String);
+
+void Compiler_dump_symbol_table(Compiler,  Map);
+
+int ParsedUnit_parse(ParsedUnit *);
 
 void Compiler_dump_cache(Compiler);
 
 Map Sym_current_symbols(Sym);
 
-ScopeStats Scope_stats(void);
-
-int List_truth(List);
-
-int String_startswith(String,  String);
-
-int String_len(String);
-
-int String_find(String,  String);
-
-int String_is_identifier(String);
-
-int String_equal(String,  String);
-
-Compiler Compiler_new(void);
-
-void header_symbols_begin_generated(void);
-
-void Sym_seed_var_tags(Sym,  Map);
-
 int Map_truth(Map);
 
 Map Map_merge(Map,  Map);
+
+Map Sym_file_statics(Sym);
+
+Map Sym_global_symbols(Sym);
 
 int symbol_snapshot_write(Map,  Map,  File);
 
@@ -210,23 +132,19 @@ int translation_depfile_write(CliRequest,  Compiler,  String,  String);
 
 int CliRequest_inspects(CliRequest);
 
+String Var_string(Var);
+
 int String_endswith(String,  String);
 
 String x2c_path_stem(String);
 
+int List_truth(List);
+
+int String_equal(String,  String);
+
 Var List_car(List);
 
 List List_cdr(List);
-
-List List_append(List,  List);
-
-List x2c_default_include_dirs(void);
-
-Toolchain toolchain_new(String,  String,  List,  List,  List,  int,  int);
-
-Context Context_open_isolated_named(const char *);
-
-void Type_begin_unit(void);
 
 size_t Array_len(Array);
 
@@ -254,17 +172,25 @@ List Array_list_free(Array);
 
 unsigned long report_now_us(void);
 
+Frontend Frontend_new(CliRequest);
+
 void Array_free(Array);
 
 unsigned long long report_file_bytes(String);
 
-int header_symbols_write(File,  int);
+int Frontend_write_header_symbols(File);
 
 String report_duration(unsigned long);
+
+String int_str(int);
 
 String report_size(unsigned long long);
 
 void * Scope_malloc(size_t);
+
+void Frontend_load_support(CliRequest);
+
+Context Context_open_isolated_named(const char *);
 
 Build CliRequest_prepare(CliRequest);
 
@@ -314,7 +240,7 @@ CliRequest cli_parse(int,  char * *);
 
 void report_configure(int,  int,  Symbol,  int,  int,  int);
 
-void Type_end_unit(void);
+void ParsedUnit_close(ParsedUnit *);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -322,41 +248,21 @@ static void _configure_logging(int debugging);
 
 static void _report_diagnostics(Compiler compiler);
 
+static void _preprocessor_errors(String text);
+
 static Map _filter_static_symbols(Map globs,  Map statics);
 
-static String _unreadable_input(Compiler compiler,  String filename,  String reason);
-
-static String _read_input_text(Compiler compiler,  String filename);
-
-static Compiler _tokenize_input(Compiler c,  String filename);
-
-static Token _first_preprocessor_token(Compiler compiler);
-
-static void _load_snapshot_once(void);
-
-static void _load_translation_support(CliRequest request);
-
-static Map _preprocess_input(Compiler c,  String filename,  Map * snapshot_statics);
-
 static String _ast_inspection_repr(List node);
-
-static List _parse_input(Compiler compiler,  Map globs);
 
 static List _transform_ast(Compiler compiler,  List ast);
 
 static void _stage_stats(String filename,  const char * stage);
 
-static void _configure_package(Compiler compiler,  String filename);
-
-static void _compile_file(CliRequest request,  String filename,  String output_dir);
+static void _compile_file(Frontend frontend,  String filename,  String output_dir);
 
 static void _preflight_translation(CliRequest c);
 
-static void _apply_cli_request(CliRequest request);
-
-static void _translate_unit(CliRequest request,  String input,  String output_dir);
-
-static int _translate_workers(CliRequest request,  Array chunks,  String output_dir,  int total);
+static int _translate_workers(Frontend frontend,  Array chunks,  String output_dir,  int total);
 
 static Array _translation_chunks(List inputs,  int total,  int jobs);
 
@@ -374,73 +280,46 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("stage: driver");
-  _1 = String_var(_0);
-  _2 = String_new("file: ");
-  _3 = String_new("reason: ");
-  _4 = String_new("/lib");
-  _5 = String_new("/x2c.x");
-  _6 = String_new("/etc/symbols.xlisp");
-  _7 = String_new("missing symbol snapshot: ");
-  _8 = String_new("cannot read symbol snapshot: ");
-  _9 = String_new("incomplete symbol snapshot: ");
-  _10 = String_new("malformed symbol snapshot: ");
-  _11 = String_new("/etc/header-symbols.xlisp");
-  _12 = String_new("/lib/x2c.x");
-  _13 = String_new("stage: preprocess");
-  _14 = String_var(_13);
-  _15 = String_new("status: ");
-  _16 = Symbol_var(895740748108);
-  _17 = Symbol_var(920394);
-  _18 = Symbol_var(61737802);
-  _19 = cons(_18,  NULL);
-  _20 = cons(_17,  _19);
-  _21 = List_var(_20);
-  _22 = Symbol_var(54);
-  _23 = cons(_22,  NULL);
-  _24 = cons(_21,  _23);
-  _25 = cons(_16,  _24);
-  _26 = String_new("(macrodef <macro ");
-  _27 = String_new(">)");
-  _28 = String_new("/");
-  _29 = String_new(".x");
-  _30 = String_new("could not start a translation worker");
-  _31 = String_new(".");
-  _32 = String_new(".c");
-  _33 = String_new(".h");
-  _34 = String_new("file");
-  _35 = String_new("files");
-  _36 = String_new("Translated ");
-  _37 = String_new(" x2c ");
-  _38 = String_new(" to ");
-  _39 = String_new(" in ");
-  _40 = String_new("C file");
-  _41 = String_new("C files");
-  _42 = String_new("header");
-  _43 = String_new("headers");
-  _44 = String_new("  Generated ");
-  _45 = String_new(" ");
-  _46 = String_new(" and ");
-  _47 = String_new(" (");
-  _48 = String_new(")");
-  _49 = String_new("runtime");
-  _50 = String_new("compiler");
-  _51 = String_new("cannot read input file");
-  _52 = String_new("cannot open");
-  _53 = String_new("not a regular file");
-  _54 = String_new("read failed");
-  _55 = String_new("failed to run C preprocessor");
-  _56 = String_new("src/");
-  _57 = String_new("/");
+  _0 = Symbol_var(895740748108);
+  _1 = Symbol_var(920394);
+  _2 = Symbol_var(61737802);
+  _3 = cons(_2,  NULL);
+  _4 = cons(_1,  _3);
+  _5 = List_var(_4);
+  _6 = Symbol_var(54);
+  _7 = cons(_6,  NULL);
+  _8 = cons(_5,  _7);
+  _9 = cons(_0,  _8);
+  _10 = String_new("(macrodef <macro ");
+  _11 = String_new(">)");
+  _12 = String_new(".x");
+  _13 = String_new("could not start a translation worker");
+  _14 = String_new(".");
+  _15 = String_new("/");
+  _16 = String_new(".c");
+  _17 = String_new(".h");
+  _18 = String_new("file");
+  _19 = String_new("files");
+  _20 = String_new("Translated ");
+  _21 = String_new(" x2c ");
+  _22 = String_new(" to ");
+  _23 = String_new(" in ");
+  _24 = String_new("C file");
+  _25 = String_new("C files");
+  _26 = String_new("header");
+  _27 = String_new("headers");
+  _28 = String_new("  Generated ");
+  _29 = String_new(" ");
+  _30 = String_new(" and ");
+  _31 = String_new(" (");
+  _32 = String_new(")");
+  _33 = String_new("runtime");
+  _34 = String_new("compiler");
   opts = NULL;
-  include_dirs = NULL;
-  host_toolchain = NULL;
 }
 
 static void _configure_logging(int debugging){
@@ -473,6 +352,10 @@ static void _report_diagnostics(Compiler compiler){
 
 }
 
+static void _preprocessor_errors(String text){
+  File_printf(Stderr,  "%s",  text);
+}
+
 static Map _filter_static_symbols(Map globs,  Map statics){
   Map result = Map_new();
   {
@@ -491,303 +374,6 @@ static Map _filter_static_symbols(Map globs,  Map statics){
   return result;
 }
 
-static String _unreadable_input(Compiler compiler,  String filename,  String reason){
-  List notes = cons(_1,  cons(String_var(String_join(NULL,  cons(String_var(_2),  cons(String_var(filename),  NULL)))),  cons(String_var(String_join(NULL,  cons(String_var(_3),  cons(String_var(reason),  NULL)))),  NULL)));
-  Compiler_report_error(compiler,  306819428,  _51,  NULL,  notes);
-}
-
-static String _read_input_text(Compiler compiler,  String filename){
-  File volatile file = NULL;
-  {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(31862161386376),  cons(Symbol_var(54),  NULL));
-    List _x2c_catch_pattern_1 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 2,  List_var(_x2c_catch_pattern_0),  List_var(_x2c_catch_pattern_1));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) file = String_open(filename,  "r");
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {{
-          String _x2c_return_value_0 = _unreadable_input(compiler,  filename,  _52);
-          {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-   x2c_error_catch_close(_x2c_error_handler_0);
-          _x2c_error_handler_0 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_0);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-   return _x2c_return_value_0;
-
-}
-        }
-
-      }
-      if (_x2c_catch_selected_0 == 1) {{
-        String _x2c_return_value_1 = _unreadable_input(compiler,  filename,  _52);
-        {
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-   x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-   return _x2c_return_value_1;
-
-}
-      }
-
-    }
-
-  }
-  else {int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
-  _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-     x2c_exception_leave(& _x2c_exception_frame_0);
-  __builtin_unreachable();
-}
-}
-}
-int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-     x2c_exception_leave(& _x2c_exception_frame_0);
-}
-struct stat info;
-if(File_stat(file,  & info) || ! S_ISREG(info.st_mode)){
-  File_close(file);
-  return _unreadable_input(compiler,  filename,  _53);
-}
-String volatile text = NULL;
-{
-  ExceptionFrame  _x2c_exception_frame_1;
-  List _x2c_catch_pattern_2 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1,  List_var(_x2c_catch_pattern_2));
-  x2c_exception_push(& _x2c_exception_frame_1);
-  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = File_string_close(file);
-  else {x2c_exception_landed(& _x2c_exception_frame_1);
-  {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-      int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
-      x2c_error_catch_detach(_x2c_error_handler_1);
-      x2c_exception_mark_handled(&_x2c_exception_frame_1);
-      if (_x2c_catch_selected_1 == 0) {{
-        String _x2c_return_value_2 = _unreadable_input(compiler,  filename,  _54);
-        {
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-   x2c_error_catch_close(_x2c_error_handler_1);
-        _x2c_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_1);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-   return _x2c_return_value_2;
-
-}
-      }
-
-    }
-
-  }
-  else {int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_1);
-  _x2c_error_handler_1 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-     x2c_exception_leave(& _x2c_exception_frame_1);
-  __builtin_unreachable();
-}
-}
-}
-int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_1);
-_x2c_error_handler_1 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-     x2c_exception_leave(& _x2c_exception_frame_1);
-}
-return text;
-}
-
-static Compiler _tokenize_input(Compiler c,  String filename){
-  c -> filename = filename;
-  char source_path[PATH_MAX],  runtime_path[PATH_MAX],  lib_path[PATH_MAX];
-  String lib = String_join(NULL,  cons(String_var(x2c_get_root()),  cons(String_var(_4),  NULL))),  runtime = String_join(NULL,  cons(String_var(lib),  cons(String_var(_5),  NULL)));
-  int source_resolved = realpath(filename,  source_path) != NULL;
-  int lib_resolved = realpath(lib,  lib_path) != NULL;
-  c -> prelude = !(source_resolved && realpath(runtime,  runtime_path) && ! strcmp(source_path,  runtime_path));
-  int lib_length = lib_resolved ? strlen(lib_path) : 0;
-  c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path,  lib_path,  lib_length) && source_path[lib_length] == '/');
-  Compiler_tokenize(c,  _read_input_text(c,  filename));
-  if(opts -> dump == 1374366630){
-    Compiler_dump_tokens(c);
-    exit(0);
-  }
-  c -> include_dirs = include_dirs;
-  return c;
-}
-
-static Token _first_preprocessor_token(Compiler compiler){
-  for(Token token = compiler -> tokenizer -> tokens;  token -> type != 11212;  token ++) if(token -> type == 35579270086) return token;
-  return compiler -> token;
-}
-
-static void _load_snapshot_once(void){
-  if(snapshot_loaded) return;
-  snapshot_loaded = 1;
-  String snapshot_path = String_join(NULL,  cons(String_var(x2c_get_root()),  cons(String_var(_6),  NULL)));
-  {
-    ExceptionFrame  _x2c_exception_frame_2;
-    List _x2c_catch_pattern_3 =  cons(Symbol_var(31862161386376),  cons(Symbol_var(54),  NULL));
-    List _x2c_catch_pattern_4 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-    List _x2c_catch_pattern_5 =  cons(Symbol_var(664344300629258),  cons(Symbol_var(54),  NULL));
-    List _x2c_catch_pattern_6 =  cons(Symbol_var(28682226919752),  cons(Symbol_var(54),  NULL));
-    ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_push(&_x2c_exception_frame_2, 4,  List_var(_x2c_catch_pattern_3),  List_var(_x2c_catch_pattern_4),  List_var(_x2c_catch_pattern_5),  List_var(_x2c_catch_pattern_6));
-    x2c_exception_push(& _x2c_exception_frame_2);
-    if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) snapshot_globals = symbol_snapshot_load(snapshot_path,  & snapshot_function_definitions,  & snapshot_gensym);
-    else {x2c_exception_landed(& _x2c_exception_frame_2);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
-        int _x2c_catch_selected_2 = x2c_error_catch_selected(_x2c_error_handler_2);
-        x2c_error_catch_detach(_x2c_error_handler_2);
-        x2c_exception_mark_handled(&_x2c_exception_frame_2);
-        if (_x2c_catch_selected_2 == 0) {snapshot_error = String_join(NULL,  cons(String_var(_7),  cons(String_var(snapshot_path),  NULL)));
-      }
-      if (_x2c_catch_selected_2 == 1) {snapshot_error = String_join(NULL,  cons(String_var(_8),  cons(String_var(snapshot_path),  NULL)));
-    }
-    if (_x2c_catch_selected_2 == 2) {snapshot_error = String_join(NULL,  cons(String_var(_9),  cons(String_var(snapshot_path),  NULL)));
-  }
-  if (_x2c_catch_selected_2 == 3) {snapshot_error = String_join(NULL,  cons(String_var(_10),  cons(String_var(snapshot_path),  NULL)));
-}
-}
-else {int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_2);
-_x2c_error_handler_2 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-     x2c_exception_leave(& _x2c_exception_frame_2);
-__builtin_unreachable();
-}
-}
-}
-int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-     x2c_error_catch_close(_x2c_error_handler_2);
-_x2c_error_handler_2 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-     x2c_exception_leave(& _x2c_exception_frame_2);
-}
-}
-
-static void _load_translation_support(CliRequest request){
-  Type_initialize();
-  header_symbols_initialize();
-  if(! request -> live_symbols && ! request -> no_cpp) _load_snapshot_once();
-  if(request -> no_cpp || request -> dump == 559620016998 || request -> live_symbols || header_symbols_loaded) return;
-  String artifact = String_join(NULL,  cons(String_var(x2c_get_root()),  cons(String_var(_11),  NULL)));
-  header_symbols_open(artifact,  snapshot_gensym);
-  header_symbols_loaded = 1;
-}
-
-static Map _preprocess_input(Compiler c,  String filename,  Map * snapshot_statics){
-  extern File Stderr;
-  if(snapshot_statics) * snapshot_statics = NULL;
-  if(opts -> no_cpp) return NULL;
-  String root = x2c_get_root();
-  int use_snapshot = ! opts -> live_symbols;
-  Map globs = NULL;
-  if(use_snapshot){
-    if((void *) snapshot_globals == NULL) Compiler_report_error(c,  306819428,  snapshot_error,  _first_preprocessor_token(c),  NULL);
-    globs = Map_copy(snapshot_globals);
-    c -> fn_defs = Map_copy(snapshot_function_definitions);
-    if(gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
-    Compiler_set_gensym(c,  gensym_cursor);
-  }
-  int use_cpp = opts -> cpp_symbols || opts -> live_symbols || SymbolSet_contains(cpp_dumps,  opts -> dump);
-  if(use_snapshot && ! use_cpp){
-    Map result = Compiler_collect_symbols(c,  globs);
-    return result;
-  }
-  Compiler cppcompiler = Compiler_new_shared(c);
-  cppcompiler -> filename = filename;
-  String text = NULL,  errors = NULL,  dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL,  cons(String_var(root),  cons(String_var(_12),  NULL))) : NULL,  imacros = runtime;
-  String force_include = NULL;
-  int status = Toolchain_preprocess(host_toolchain,  filename,  c -> include_dirs,  imacros,  force_include,  & text,  & errors,  & dependency_text);
-  if(status){
-    if(String_truth(errors)) File_printf(Stderr,  "%s",  errors);
-    List notes = cons(_14,  cons(String_var(String_join(NULL,  cons(String_var(_15),  cons(String_var(int_str(status)),  NULL)))),  NULL));
-    Compiler_report_error(c,  306819428,  _55,  _first_preprocessor_token(c),  notes);
-  }
-  if(String_truth(errors)) File_printf(Stderr,  "%s",  errors);
-  {
-    String dependency;
-    Iter _x2c_macro_iterator_2 = List_iter(translation_depfile_parse(dependency_text),  &(struct Iter){
-      0
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
-      dependency = Var_string(_x2c_macro_item_2);
-      Compiler_add_translation_dependency(c,  dependency);
-    }
-
-  }
-  if(! String_truth(text)) return NULL;
-  if(opts -> dump == 320883072032){
-    File_printf(Stderr,  "%s",  text);
-    exit(0);
-  }
-  Compiler_tokenize(cppcompiler,  text);
-  cppcompiler -> source_private = - 1;
-  cppcompiler -> collect_protocols = 0;
-  if(opts -> dump == 247458062609318){
-    Compiler_dump_tokens(cppcompiler);
-    exit(0);
-  }
-  if(opts -> live_symbols){
-    c -> runtime_hdrs = 1;
-    globs = Compiler_collect_symbols(c,  globs);
-  }
-  Map saved_counters = NULL;
-  int saved_gensym = 0;
-  if(! opts -> live_symbols){
-    saved_counters = c -> names -> counters;
-    saved_gensym = c -> names -> gensym_count;
-    c -> names -> counters = Map_copy(c -> names -> counters);
-  }
-  Compiler_shallow_parse(cppcompiler,  globs);
-  globs = Sym_global_symbols(cppcompiler -> sym);
-  if(opts -> live_symbols && ! opts -> dump) Compiler_install_generated_protocol_symbols(c,  globs);
-  if(! opts -> live_symbols){
-    c -> names -> counters = saved_counters;
-    c -> names -> gensym_count = saved_gensym;
-    globs = Compiler_collect_symbols(c,  globs);
-  }
-  if(opts -> dump == 1335836754920 && snapshot_statics) * snapshot_statics = Map_copy(Sym_file_statics(cppcompiler -> sym));
-  if(opts -> dump == 10268258311770){
-    Compiler_dump_symbol_table(cppcompiler,  globs);
-    exit(0);
-  }
-  Compiler_free_lisp(cppcompiler);
-  return globs;
-}
-
 static String _ast_inspection_repr(List node){
 
   {
@@ -798,31 +384,12 @@ static String _ast_inspection_repr(List node){
     switch (Var_symbol(car(_x2c_match_expr))) {
        case 895740748108: ;
   static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  return String_join(NULL,  cons(String_var(_26),  cons(String_var(Var_str(name)),  cons(String_var(_27),  NULL))));  break;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  return String_join(NULL,  cons(String_var(_10),  cons(String_var(Var_str(name)),  cons(String_var(_11),  NULL))));  break;
 }
 default: break;
     }
   }
 return List_repr(node);
-}
-
-static List _parse_input(Compiler compiler,  Map globs){
-  List ast = Compiler_full_parse(compiler,  globs);  if(Compiler_error_count(compiler)){
-    _report_diagnostics(compiler);  exit(1);
-  }
-  switch(opts -> dump){
-    case 328584264751626 : Compiler_dump_cache(compiler);  exit(0);  case 42507336486 : Compiler_dump_symbol_table(compiler,  Sym_current_symbols(compiler -> sym));  exit(0);  case 320883068136 :{
-      List node;  Iter _x2c_macro_iterator_3 = List_iter(ast,  &(struct Iter){
-        0
-      }
-      );  Var _x2c_macro_item_3;  while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
-        node = Var_list(_x2c_macro_item_3);  printf("\n%s\n",  _ast_inspection_repr(node));
-      }
-
-    }
-    exit(0);
-  }
-  return ast;
 }
 
 static List _transform_ast(Compiler compiler,  List ast){
@@ -831,11 +398,11 @@ static List _transform_ast(Compiler compiler,  List ast){
   }
   if(opts -> dump == 1447057375073126){
     {
-      List node;  Iter _x2c_macro_iterator_4 = List_iter(ast,  &(struct Iter){
+      List node;  Iter _x2c_macro_iterator_2 = List_iter(ast,  &(struct Iter){
         0
       }
-      );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
-        node = Var_list(_x2c_macro_item_4);  printf("\n%s\n",  _ast_inspection_repr(node));
+      );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
+        node = Var_list(_x2c_macro_item_2);  printf("\n%s\n",  _ast_inspection_repr(node));
       }
 
     }
@@ -848,84 +415,112 @@ static void _stage_stats(String filename,  const char * stage){
   if(! getenv("X2C_STAGE_STATS")) return;  struct timespec ts;  clock_gettime(CLOCK_MONOTONIC,  & ts);  unsigned long now_us =(unsigned long) ts.tv_sec * 1000000ul + ts.tv_nsec / 1000;  ScopeStats s = Scope_stats();  fprintf(stderr,  "stage-stats,%s,%s,%zu,%zu,%zu,%lu\n",  filename,  stage,  s.live_allocations,  s.allocation_calls,  s.requested_bytes,  now_us);
 }
 
-static void _configure_package(Compiler compiler,  String filename){
-  char buffer[PATH_MAX];  compiler -> package_dirs = opts -> package_dirs;  if(! List_truth(opts -> package_dirs) || ! realpath(filename,  buffer)) return;  String source = String_join(NULL,  cons(String_var(String_new(buffer)),  NULL));
+static void _compile_file(Frontend frontend,  String filename,  String output_dir){
+  CliRequest request = frontend -> request;  ParsedUnit unit;  _stage_stats(filename,  "start");  int ok = Frontend_start(frontend,  filename,  & unit); {
+   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env =  & _x2c_defer_env_2
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    String directory;
-    Iter _x2c_macro_iterator_5 = List_iter(opts -> package_dirs,  &(struct Iter){
-      0
+    Compiler compiler = unit.compiler;
+    if(! ok){
+      _report_diagnostics(compiler);
+      exit(1);
     }
-    );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
-      directory = Var_string(_x2c_macro_item_5);
-      {
-        if(! realpath(directory,  buffer)) continue;
-        String root = String_join(NULL,  cons(String_var(String_new(buffer)),  cons(String_var(_28),  NULL)));
-        if(! String_startswith(source,  root)) continue;
-        String rest = String_getslice(source,  String_len(root),  -2147483648,  1);
-        int slash = String_find(rest,  _57);
-        if(slash <= 0) continue;
-        String name = String_getslice(rest,  -2147483648,  slash,  1),  tail = String_getslice(rest,  slash + 1,  -2147483648,  1);
-        if(! String_is_identifier(name)) continue;
-        if(! String_startswith(tail,  _56) && ! String_equal(tail,  String_join(NULL,  cons(String_var(name),  cons(String_var(_29),  NULL))))) continue;
-        compiler -> package = name;
-        Map_setindex(compiler -> package_roots,  String_var(name),  String_var(String_join(NULL,  cons(String_var(root),  cons(String_var(name),  NULL)))));
-        return;
+    Compiler_own_diagnostics(compiler);
+    if(opts -> dump == 1374366630){
+      Compiler_dump_tokens(compiler);
+      exit(0);
+    }
+    _stage_stats(filename,  "tokenize");
+    ok = ParsedUnit_collect(&(unit),  frontend);
+    _report_diagnostics(compiler);
+    if(! ok) exit(1);
+    switch(opts -> dump){
+      case 320883072032 : if(String_truth(unit.preprocessor_output)) File_printf(Stderr,  "%s",  unit.preprocessor_output);
+      exit(0);
+      case 247458062609318 : if(unit.preprocessor) Compiler_dump_tokens(unit.preprocessor);
+      exit(0);
+      case 10268258311770 : if(unit.preprocessor) Compiler_dump_symbol_table(unit.preprocessor,  unit.globals);
+      exit(0);
+    }
+    _stage_stats(filename,  "symbols");
+    if(! ParsedUnit_parse(&(unit))){
+      _report_diagnostics(compiler);
+      exit(1);
+    }
+    compiler -> recovery_depth = 0;
+    List ast = unit.ast;
+    switch(opts -> dump){
+      case 328584264751626 : Compiler_dump_cache(compiler);
+      exit(0);
+      case 42507336486 : Compiler_dump_symbol_table(compiler,  Sym_current_symbols(compiler -> sym));
+      exit(0);
+      case 320883068136 :{
+        List node;
+        Iter _x2c_macro_iterator_3 = List_iter(ast,  &(struct Iter){
+          0
+        }
+        );
+        Var _x2c_macro_item_3;
+        while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
+          node = Var_list(_x2c_macro_item_3);
+          printf("\n%s\n",  _ast_inspection_repr(node));
+        }
+
       }
-
+      exit(0);
     }
+    if(opts -> dump == 1335836754920){
+      Map statics = Map_truth(unit.snapshot_statics) ? unit.snapshot_statics : Map_new();
+      Map_merge(statics,  Sym_file_statics(compiler -> sym));
+      Map snapshot = _filter_static_symbols(Sym_global_symbols(compiler -> sym),  statics);
+      if(! symbol_snapshot_write(snapshot,  compiler -> fn_defs,  Stdout)) exit(1);
+      exit(0);
+    }
+    if(opts -> dump == 7478869146){
+      printf("(unit %s)\n",  filename);
+      Compiler_dump_conformance(compiler,  unit.globals);
+      {
+  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+   x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  }
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
+   return;
 
 }
+    }
+    ast = Compiler_generate_protocol_adapters(compiler,  ast);
+    if(opts -> dump == 559620016998){
+  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+   x2c_cleanup_leave(& _x2c_defer_record_0);
 
-static void _compile_file(CliRequest request,  String filename,  String output_dir){
-  Compiler compiler = Compiler_new();
-  compiler -> source_map = request -> source_map;
-  _configure_package(compiler,  filename);
-  _stage_stats(filename,  "start");
-  _tokenize_input(compiler,  filename);
-  _stage_stats(filename,  "tokenize");
-  Map snapshot_statics = NULL;
-  Map globs = _preprocess_input(compiler,  filename,  & snapshot_statics);
-  if(! opts -> no_cpp) header_symbols_begin_generated();
-  Sym_seed_var_tags(compiler -> sym,  globs);
-  _stage_stats(filename,  "symbols");
-  List ast = _parse_input(compiler,  globs);
-  if(opts -> dump == 1335836754920){
-    Map statics = Map_truth(snapshot_statics) ? snapshot_statics : Map_new();
-    Map_merge(statics,  Sym_file_statics(compiler -> sym));
-    Map snapshot = _filter_static_symbols(Sym_global_symbols(compiler -> sym),  statics);
-    if(! symbol_snapshot_write(snapshot,  compiler -> fn_defs,  Stdout)) exit(1);
-    exit(0);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
+   return;
+
+} _stage_stats(filename,  "parse");
+    ast = _transform_ast(compiler,  ast);
+    _stage_stats(filename,  "transform");
+    if(opts -> dump == 10268258302218){
+      ast = Compiler_emit(compiler,  ast);
+      puts(Compiler_code_pretty_string(compiler,  ast,  NULL));
+      exit(0);
+    }
+    generate_code(compiler,  ast,  output_dir);
+    if(! translation_depfile_write(request,  compiler,  filename,  output_dir)) exit(1);
+    _stage_stats(filename,  "generate");
   }
-  if(opts -> dump == 7478869146){
-    printf("(unit %s)\n",  filename);
-    Compiler_dump_conformance(compiler,  globs);
-    gensym_cursor = compiler -> names -> gensym_count;
-    Compiler_free_lisp(compiler);
-    return;
-  }
-  ast = Compiler_generate_protocol_adapters(compiler,  ast);
-  if(opts -> dump == 559620016998){
-    gensym_cursor = compiler -> names -> gensym_count;
-    Compiler_free_lisp(compiler);
-    return;
-  }
-  _stage_stats(filename,  "parse");
-  ast = _transform_ast(compiler,  ast);
-  _stage_stats(filename,  "transform");
-  if(opts -> dump == 10268258302218){
-    ast = Compiler_emit(compiler,  ast);
-    puts(Compiler_code_pretty_string(compiler,  ast,  NULL));
-    exit(0);
-  }
-  generate_code(compiler,  ast,  output_dir);
-  if(! translation_depfile_write(request,  compiler,  filename,  output_dir)) exit(1);
-  _stage_stats(filename,  "generate");
-  gensym_cursor = compiler -> names -> gensym_count;
-  Compiler_free_lisp(compiler);
+
+  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_0);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
+}
 }
 
 static void _preflight_translation(CliRequest c){
@@ -948,13 +543,13 @@ static void _preflight_translation(CliRequest c){
   List stems = NULL,  stem_inputs = NULL;
   {
     String input;
-    Iter _x2c_macro_iterator_6 = List_iter(c -> inputs,  &(struct Iter){
+    Iter _x2c_macro_iterator_4 = List_iter(c -> inputs,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
-      input = Var_string(_x2c_macro_item_6);
+    Var _x2c_macro_item_4;
+    while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
+      input = Var_string(_x2c_macro_item_4);
       {
         if(! String_truth(input)){
           fputs("x2c: error: input path is empty\n",  stderr);
@@ -975,7 +570,7 @@ static void _preflight_translation(CliRequest c){
           fprintf(stderr,  "x2c: error: input is not a regular file: %s\n",  input);
           exit(2);
         }
-        if(! String_endswith(input,  _29)){
+        if(! String_endswith(input,  _12)){
           fprintf(stderr,  "x2c: error: translation input is not an .x file: %s\n",  input);
           exit(2);
         }
@@ -1005,50 +600,8 @@ static void _preflight_translation(CliRequest c){
 
 }
 
-static void _apply_cli_request(CliRequest request){
-  opts = request;
-  include_dirs = List_append(request -> include_dirs,  x2c_default_include_dirs());
-  host_toolchain = toolchain_new(request -> cc,  request -> ar,  request -> cpp_args,  request -> cc_args,  request -> ld_args,  request -> verbose,  request -> dry_run);
-}
-
-static void _translate_unit(CliRequest request,  String input,  String output_dir){
-  Context unit = Context_open_isolated_named("translation unit");
-  {
-   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env =  & _x2c_defer_env_2
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    Type_begin_unit();
-    {
-
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env =  NULL
-  };
-  x2c_cleanup_push(&_x2c_defer_record_1);
-  {
-      _compile_file(request,  input,  output_dir);
-    }
-
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
-}
-  }
-
-  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
-}
-}
-
-static int _translate_workers(CliRequest request,  Array chunks,  String output_dir,  int total){
+static int _translate_workers(Frontend frontend,  Array chunks,  String output_dir,  int total){
+  CliRequest request = frontend -> request;
   int jobs = request -> jobs,  slices = Array_len(chunks);
   if(jobs > slices) jobs = slices;
   long * running = Scope_calloc(jobs,  sizeof(long));
@@ -1062,21 +615,21 @@ static int _translate_workers(CliRequest request,  Array chunks,  String output_
       if(! pid){
         {
           String input;
-          Iter _x2c_macro_iterator_7 = List_iter(slice,  &(struct Iter){
+          Iter _x2c_macro_iterator_5 = List_iter(slice,  &(struct Iter){
             0
           }
           );
-          Var _x2c_macro_item_7;
-          while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
-            input = Var_string(_x2c_macro_item_7);
-            _translate_unit(request,  input,  output_dir);
+          Var _x2c_macro_item_5;
+          while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
+            input = Var_string(_x2c_macro_item_5);
+            _compile_file(frontend,  input,  output_dir);
           }
 
         }
         worker_exit(0);
       }
       if(pid < 0){
-        report_line(11703268,  _30);
+        report_line(11703268,  _13);
         failed ++;
         continue;
       }
@@ -1115,21 +668,21 @@ static Array _translation_chunks(List inputs,  int total,  int jobs){
 
 static int _run_translation(CliRequest c){
   unsigned long started_at = report_now_us();
-  if(! String_truth(c -> out_dir)) c -> out_dir = _31;
-  _apply_cli_request(c);
+  if(! String_truth(c -> out_dir)) c -> out_dir = _14;
+  opts = c;
   _preflight_translation(c);
   if(c -> verbose || c -> dry_run){
     fprintf(stderr,  "x2c: translate");
     fprintf(stderr,  " --out-dir %s",  c -> out_dir);
     {
       String input;
-      Iter _x2c_macro_iterator_8 = List_iter(c -> inputs,  &(struct Iter){
+      Iter _x2c_macro_iterator_6 = List_iter(c -> inputs,  &(struct Iter){
         0
       }
       );
-      Var _x2c_macro_item_8;
-      while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
-        input = Var_string(_x2c_macro_item_8);
+      Var _x2c_macro_item_6;
+      while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
+        input = Var_string(_x2c_macro_item_6);
         fprintf(stderr,  " %s",  input);
       }
 
@@ -1137,30 +690,31 @@ static int _run_translation(CliRequest c){
     fputc('\n',  stderr);
   }
   if(c -> dry_run) return 0;
-  _load_translation_support(c);
+  Frontend frontend = Frontend_new(c);
+  frontend -> preprocessor_errors = _preprocessor_errors;
   String output_dir = c -> out_dir;
   int total = List_len(c -> inputs),  completed = 0;
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
   if(parallel){
     Array chunks = _translation_chunks(c -> inputs,  total,  c -> jobs);
-    int failed = _translate_workers(c,  chunks,  output_dir,  total);
+    int failed = _translate_workers(frontend,  chunks,  output_dir,  total);
     Array_free(chunks);
     if(failed) return 1;
     completed = total;
   }
   {
     String input;
-    Iter _x2c_macro_iterator_9 = List_iter(parallel ?(List) NULL : c -> inputs,  &(struct Iter){
+    Iter _x2c_macro_iterator_7 = List_iter(parallel ?(List) NULL : c -> inputs,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_9;
-    while(Iter_try_next(_x2c_macro_iterator_9,  & _x2c_macro_item_9)){
-      input = Var_string(_x2c_macro_item_9);
+    Var _x2c_macro_item_7;
+    while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
+      input = Var_string(_x2c_macro_item_7);
       {
         if(! c -> nested) report_progress(45220543335690,  completed,  total,  input);
-        _translate_unit(c,  input,  output_dir);
+        _compile_file(frontend,  input,  output_dir);
         completed ++;
         if(! c -> nested) report_progress(45220543335690,  completed,  total,  input);
       }
@@ -1170,31 +724,31 @@ static int _run_translation(CliRequest c){
   }
   if(! c -> nested){
     String input;
-    Iter _x2c_macro_iterator_10 = List_iter(c -> inputs,  &(struct Iter){
+    Iter _x2c_macro_iterator_8 = List_iter(c -> inputs,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_10;
-    while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
-      input = Var_string(_x2c_macro_item_10);
+    Var _x2c_macro_item_8;
+    while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
+      input = Var_string(_x2c_macro_item_8);
       {
         String stem = x2c_path_stem(input);
-        gen_bytes += report_file_bytes(String_join(NULL,  cons(String_var(output_dir),  cons(String_var(_28),  cons(String_var(stem),  cons(String_var(_32),  NULL))))));
-        gen_bytes += report_file_bytes(String_join(NULL,  cons(String_var(output_dir),  cons(String_var(_28),  cons(String_var(stem),  cons(String_var(_33),  NULL))))));
+        gen_bytes += report_file_bytes(String_join(NULL,  cons(String_var(output_dir),  cons(String_var(_15),  cons(String_var(stem),  cons(String_var(_16),  NULL))))));
+        gen_bytes += report_file_bytes(String_join(NULL,  cons(String_var(output_dir),  cons(String_var(_15),  cons(String_var(stem),  cons(String_var(_17),  NULL))))));
       }
 
     }
 
   }
-  if(opts -> dump == 559620016998 && ! header_symbols_write(Stdout,  snapshot_gensym)) return 1;
+  if(opts -> dump == 559620016998 && ! Frontend_write_header_symbols(Stdout)) return 1;
   if(! c -> nested && ! CliRequest_inspects(c)){
     String duration = report_duration(report_now_us() - started_at);
-    String noun = total == 1 ? _34 : _35;
-    report_line(42217975014,  String_join(NULL,  cons(String_var(_36),  cons(String_var(int_str(total)),  cons(String_var(_37),  cons(String_var(noun),  cons(String_var(_38),  cons(String_var(output_dir),  cons(String_var(_39),  cons(String_var(duration),  NULL))))))))));
+    String noun = total == 1 ? _18 : _19;
+    report_line(42217975014,  String_join(NULL,  cons(String_var(_20),  cons(String_var(int_str(total)),  cons(String_var(_21),  cons(String_var(noun),  cons(String_var(_22),  cons(String_var(output_dir),  cons(String_var(_23),  cons(String_var(duration),  NULL))))))))));
     String size = report_size(gen_bytes);
-    String c_noun = total == 1 ? _40 : _41;
-    String h_noun = total == 1 ? _42 : _43;
-    report_line(28680520,  String_join(NULL,  cons(String_var(_44),  cons(String_var(int_str(total)),  cons(String_var(_45),  cons(String_var(c_noun),  cons(String_var(_46),  cons(String_var(int_str(total)),  cons(String_var(_45),  cons(String_var(h_noun),  cons(String_var(_47),  cons(String_var(size),  cons(String_var(_48),  NULL)))))))))))));
+    String c_noun = total == 1 ? _24 : _25;
+    String h_noun = total == 1 ? _26 : _27;
+    report_line(28680520,  String_join(NULL,  cons(String_var(_28),  cons(String_var(int_str(total)),  cons(String_var(_29),  cons(String_var(c_noun),  cons(String_var(_30),  cons(String_var(int_str(total)),  cons(String_var(_29),  cons(String_var(h_noun),  cons(String_var(_31),  cons(String_var(size),  cons(String_var(_32),  NULL)))))))))))));
   }
   return 0;
 }
@@ -1218,16 +772,16 @@ static int _run_build_request(CliRequest c,  Array commands){
   if(! c -> dry_run){
     {
       String input;
-      Iter _x2c_macro_iterator_11 = List_iter(c -> inputs,  &(struct Iter){
+      Iter _x2c_macro_iterator_9 = List_iter(c -> inputs,  &(struct Iter){
         0
       }
       );
-      Var _x2c_macro_item_11;
-      while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
-        input = Var_string(_x2c_macro_item_11);
+      Var _x2c_macro_item_9;
+      while(Iter_try_next(_x2c_macro_iterator_9,  & _x2c_macro_item_9)){
+        input = Var_string(_x2c_macro_item_9);
         {
-          if(! String_endswith(input,  _29)) continue;
-          _load_translation_support(c);
+          if(! String_endswith(input,  _12)) continue;
+          Frontend_load_support(c);
           break;
         }
 
@@ -1240,26 +794,26 @@ static int _run_build_request(CliRequest c,  Array commands){
   {
    _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & target};
 
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
     .env =  & _x2c_defer_env_3
   };
-  x2c_cleanup_push(&_x2c_defer_record_2);
+  x2c_cleanup_push(&_x2c_defer_record_1);
   {
     Build state = CliRequest_prepare(c);
     c -> cc = Var_string(Context_export(target,  String_var(c -> cc)));
     c -> ar = Var_string(Context_export(target,  String_var(c -> ar)));
     {
       String input;
-      Iter _x2c_macro_iterator_12 = List_iter(c -> inputs,  &(struct Iter){
+      Iter _x2c_macro_iterator_10 = List_iter(c -> inputs,  &(struct Iter){
         0
       }
       );
-      Var _x2c_macro_item_12;
-      while(Iter_try_next(_x2c_macro_iterator_12,  & _x2c_macro_item_12)){
-        input = Var_string(_x2c_macro_item_12);
+      Var _x2c_macro_item_10;
+      while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
+        input = Var_string(_x2c_macro_item_10);
         {
-          if(! String_endswith(input,  _29)) continue;
+          if(! String_endswith(input,  _12)) continue;
           Build_begin_translation(state,  input);
           String directory = Build_generated_dir(state,  input);
           if(Build_translation_current(state,  input,  directory)){
@@ -1271,14 +825,14 @@ static int _run_build_request(CliRequest c,  Array commands){
           if(! c -> dry_run && _run_translation(translation)){
             Build_cleanup(state,  0);
             {
-              int _x2c_return_value_3 = 1;
+              int _x2c_return_value_0 = 1;
               {
-  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+   x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
-   return _x2c_return_value_3;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
+   return _x2c_return_value_0;
 
 }
             }
@@ -1297,14 +851,14 @@ static int _run_build_request(CliRequest c,  Array commands){
     if(result){
       Build_cleanup(state,  0);
       {
-        int _x2c_return_value_4 = result;
+        int _x2c_return_value_1 = result;
         {
-  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+   x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
-   return _x2c_return_value_4;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
+   return _x2c_return_value_1;
 
 }
       }
@@ -1312,13 +866,13 @@ static int _run_build_request(CliRequest c,  Array commands){
     }
     if((void *) commands != NULL){
       String entry;
-      Iter _x2c_macro_iterator_13 = Array_iter(state -> compile_commands,  &(struct Iter){
+      Iter _x2c_macro_iterator_11 = Array_iter(state -> compile_commands,  &(struct Iter){
         0
       }
       );
-      Var _x2c_macro_item_13;
-      while(Iter_try_next(_x2c_macro_iterator_13,  & _x2c_macro_item_13)){
-        entry = Var_string(_x2c_macro_item_13);
+      Var _x2c_macro_item_11;
+      while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
+        entry = Var_string(_x2c_macro_item_11);
         Array_push(commands,  Context_export(target,  String_var(entry)));
       }
 
@@ -1326,14 +880,14 @@ static int _run_build_request(CliRequest c,  Array commands){
     if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands,  commands)){
       Build_cleanup(state,  0);
       {
-        int _x2c_return_value_5 = 1;
+        int _x2c_return_value_2 = 1;
         {
-  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+   x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
-   return _x2c_return_value_5;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
+   return _x2c_return_value_2;
 
 }
       }
@@ -1343,24 +897,24 @@ static int _run_build_request(CliRequest c,  Array commands){
     if(c -> command == 38236) result = Build_run_program(state);
     Build_cleanup(state,  1);
     {
-      int _x2c_return_value_6 = result;
+      int _x2c_return_value_3 = result;
       {
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-   x2c_cleanup_leave(& _x2c_defer_record_2);
+   x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
-   return _x2c_return_value_6;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
+   return _x2c_return_value_3;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
+  x2c_cleanup_leave(&_x2c_defer_record_1);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 
@@ -1396,8 +950,8 @@ static int _run_bootstrap(CliRequest command){
   x2c_set_root(payload -> prefix);
   _configure_logging(command -> debugging);
   CliRequest runtime_request = bootstrap_build_request(command,  payload,  40094681930);
-  runtime_request -> label = _49;
-  _load_translation_support(runtime_request);
+  runtime_request -> label = _33;
+  Frontend_load_support(runtime_request);
   Context build = Context_open_isolated_named("bootstrap build");
   int result = _run_build_request(runtime_request,  NULL);
   if(result){
@@ -1407,7 +961,7 @@ static int _run_bootstrap(CliRequest command){
     _Exit(result);
   }
   CliRequest compiler_request = bootstrap_build_request(command,  payload,  239277269348);
-  compiler_request -> label = _50;
+  compiler_request -> label = _34;
   result = _run_build_request(compiler_request,  NULL);
   if(result){
     Context_close(build);
@@ -1432,7 +986,7 @@ int main(int argc,  char * * argv){
   report_configure(request -> quiet,  request -> plain,  request -> color_mode,  request -> verbose || request -> debugging,  request -> dry_run,  CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);
   _configure_logging(request -> debugging);
-  _load_translation_support(request);
+  Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");
   int result = request -> command == 45220543335690 ? _run_translation(request) : _run_build(request);
   Context_close(command);
@@ -1444,16 +998,12 @@ int main(int argc,  char * * argv){
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  Type_end_unit();
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_1;
-  Context_close((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_0));
-}
-
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_2;
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
   Context_close((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

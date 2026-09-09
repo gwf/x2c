@@ -13,7 +13,7 @@ Structured compiler diagnostics collection.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.diagnostics`](#Compiler.diagnostics) | Returns a report-order snapshot of all collected diagnostics. |
-| [`Compiler.display_path`](#Compiler.display_path) | Returns `path` relative to the compiler root when it lies beneath it. |
+| [`Compiler.display_path`](#Compiler.display_path) | Returns a physical source path for semantic facts, otherwise a path relative to the compiler root. |
 | [`Compiler.dump_cache`](#Compiler.dump_cache) | Prints each cached numeric identifier and its key to stdout. |
 | [`Compiler.dump_symbol_table`](#Compiler.dump_symbol_table) | Prints every entry in `map` to stdout in `Map` iteration order. |
 | [`Compiler.dump_tokens`](#Compiler.dump_tokens) | Prints every non-EOF token with its position and visible content. |
@@ -42,15 +42,15 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:357`
+Source: `src/diagnostics.x:361`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
 
 `String Compiler.display_path(Compiler compiler, String path)`
 
-Returns `path` relative to the compiler root when it lies beneath it.
-Other paths, including NULL, are returned unchanged.
+Returns a physical source path for semantic facts, otherwise a path
+relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
 Source: `src/diagnostics.x:238`
 
@@ -61,7 +61,7 @@ Source: `src/diagnostics.x:238`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:393`
+Source: `src/diagnostics.x:397`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -70,7 +70,7 @@ Source: `src/diagnostics.x:393`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:388`
+Source: `src/diagnostics.x:392`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -80,7 +80,7 @@ Source: `src/diagnostics.x:388`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:378`
+Source: `src/diagnostics.x:382`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -90,7 +90,7 @@ Source: `src/diagnostics.x:378`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:351`
+Source: `src/diagnostics.x:355`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -129,7 +129,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:282`
+Source: `src/diagnostics.x:286`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -141,7 +141,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:298`
+Source: `src/diagnostics.x:302`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -150,13 +150,14 @@ Source: `src/diagnostics.x:298`
 
 Builds the diagnostic location for `token` or the current token.
 If neither exists, returns the current file at line 1, column 1, and byte
-position 0 with zero length. When a token is available, `compiler.filename`
-is made relative to the compiler root. Location cells and a derived path
+position 0 with zero length. Semantic facts use physical paths; ordinary
+token locations use `Compiler.display_path`.
+Location cells and a derived path
 are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:254`
+Source: `src/diagnostics.x:257`
 
 ### `Diagnostics`
 

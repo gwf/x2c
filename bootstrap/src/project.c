@@ -2,7 +2,7 @@
 
 #include "project.h"
 
-static String _42,  _41,  _40,  _39,  _38,  _37,  _36,  _35,  _34,  _33,  _32,  _31,  _30,  _29,  _28,  _27,  _26,  _25,  _24,  _23,  _22,  _21,  _20,  _19,  _18,  _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
+static String _43,  _42,  _41,  _40,  _39,  _38,  _37,  _36,  _35,  _34,  _33,  _32,  _31,  _30,  _29,  _28,  _27,  _26,  _25,  _24,  _23,  _22,  _21,  _20,  _19,  _18,  _17,  _16,  _15,  _14,  _13,  _12,  _11,  _10,  _9,  _8,  _7,  _6,  _5,  _4,  _3,  _2,  _1,  _0;
 
 typedef struct ProjectProfile{
   String name,  optimization;
@@ -32,6 +32,7 @@ typedef struct Project{
   String path,  root,  text,  default_target,  build_dir,  build_root;
   Map seen;
   int declared;
+  SourceView sources;
   ProjectTarget targets;
   ProjectBuild head;
   ProjectBuild tail;
@@ -106,6 +107,14 @@ List List_cdr(List);
 
 int Array_contains(Array,  Var);
 
+int SourceView_exists(SourceView,  String);
+
+Iter Map_keys(Map,  Iter);
+
+int String_startswith(String,  String);
+
+int String_len(String);
+
 size_t Array_len(Array);
 
 Array Array_sort(Array);
@@ -118,9 +127,11 @@ int String_endswith(String,  String);
 
 int cli_dependency_pass_through(String);
 
-int String_startswith(String,  String);
-
 String String_add(String,  String);
+
+String SourceView_path(String);
+
+int SourceView_read(SourceView,  String,  volatile String *);
 
 String File_string_close(File);
 
@@ -196,8 +207,6 @@ static void _append_plan(Project project,  CliRequest request);
 
 static void _plan_target(Project project,  ProjectTarget target,  CliRequest command,  ProjectTarget selected,  String build_root);
 
-static String _discover_manifest(CliRequest request);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -227,24 +236,25 @@ __attribute__((constructor)) static void _file_init_(void){
   _22 = String_new("target");
   _23 = String_new("profile");
   _24 = String_new("/");
-  _25 = String_new(".x");
-  _26 = String_new(".c");
-  _27 = String_new("-D");
-  _28 = String_new("/lib");
-  _29 = String_new(".a");
-  _30 = String_new("/.x2c/");
-  _31 = String_new("-g");
-  _32 = String_new("-");
-  _33 = String_new("-I");
-  _34 = String_new("-L");
-  _35 = String_new("-l");
-  _36 = String_new("\n");
-  _37 = String_new("target=");
-  _38 = String_new("\nprofile=");
-  _39 = String_new("/x2c.toml");
-  _40 = String_new("/.x2c-build");
-  _41 = String_new("-O");
-  _42 = String_new("-g");
+  _25 = String_new("/");
+  _26 = String_new(".x");
+  _27 = String_new(".c");
+  _28 = String_new("-D");
+  _29 = String_new("/lib");
+  _30 = String_new(".a");
+  _31 = String_new("/.x2c/");
+  _32 = String_new("-g");
+  _33 = String_new("-");
+  _34 = String_new("-I");
+  _35 = String_new("-L");
+  _36 = String_new("-l");
+  _37 = String_new("\n");
+  _38 = String_new("target=");
+  _39 = String_new("\nprofile=");
+  _40 = String_new("/x2c.toml");
+  _41 = String_new("/.x2c-build");
+  _42 = String_new("-O");
+  _43 = String_new("-g");
 }
 
 _Noreturn static void _error(Project project,  int line,  const char * message){
@@ -615,9 +625,36 @@ static Array _expand_pattern(Project project,  String pattern,  const char * own
   if(! _has_glob(pattern)){
     String path = _absolute(project,  pattern);
     struct stat info;
-    if(! stat(path,  & info) && S_ISREG(info.st_mode)) Array_push(matches,  String_var(path));
+    int present = project -> sources ? SourceView_exists(project -> sources,  path) : ! stat(path,  & info) && S_ISREG(info.st_mode);
+    if(present) Array_push(matches,  String_var(path));
   }
-  else _walk_matches(project,  project -> root,  NULL,  pattern,  matches);
+  else{
+    _walk_matches(project,  project -> root,  NULL,  pattern,  matches);
+    if(project -> sources){
+      String prefix = String_equal(project -> root,  _25) ? _24 : String_join(NULL,  cons(String_var(project -> root),  cons(String_var(_24),  NULL)));
+      {
+        String path;
+        Iter _x2c_macro_iterator_2 = Map_keys(project -> sources -> overlays,  &(struct Iter){
+          0
+        }
+        );
+        Var _x2c_macro_item_2;
+        while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
+          path = Var_string(_x2c_macro_item_2);
+          {
+            if(! String_startswith(path,  prefix)) continue;
+            if(String_truth(project -> build_root) && String_startswith(path,  String_join(NULL,  cons(String_var(project -> build_root),  cons(String_var(_24),  NULL))))) continue;
+            String relative = String_getslice(path,  String_len(prefix),  -2147483648,  1);
+            if(_glob_match(pattern,  relative) && ! Array_contains(matches,  String_var(path))) Array_push(matches,  String_var(path));
+          }
+
+        }
+
+      }
+
+    }
+
+  }
   if(! Array_len(matches)){
     fprintf(stderr,  "x2c: error: manifest '%s': unmatched %s pattern '%s'\n",  project -> path,  owner,  pattern);
     exit(2);
@@ -631,24 +668,24 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   Array sources = Array_new();
   {
     String pattern;
-    Iter _x2c_macro_iterator_3 = List_iter(target -> sources,  &(struct Iter){
+    Iter _x2c_macro_iterator_4 = List_iter(target -> sources,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
-      pattern = Var_string(_x2c_macro_item_3);
+    Var _x2c_macro_item_4;
+    while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
+      pattern = Var_string(_x2c_macro_item_4);
       {
         Array expanded = _expand_pattern(project,  pattern,  "source");
         {
           Var value;
-          Iter _x2c_macro_iterator_2 = Array_iter(expanded,  &(struct Iter){
+          Iter _x2c_macro_iterator_3 = Array_iter(expanded,  &(struct Iter){
             0
           }
           );
-          Var _x2c_macro_item_2;
-          while(Iter_try_next(_x2c_macro_iterator_2,  & _x2c_macro_item_2)){
-            value = _x2c_macro_item_2;
+          Var _x2c_macro_item_3;
+          while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_3)){
+            value = _x2c_macro_item_3;
             if(! Array_contains(sources,  value)) Array_push(sources,  value);
           }
 
@@ -662,24 +699,24 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   Array excluded = Array_new();
   {
     String pattern;
-    Iter _x2c_macro_iterator_5 = List_iter(target -> exclude,  &(struct Iter){
+    Iter _x2c_macro_iterator_6 = List_iter(target -> exclude,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
-      pattern = Var_string(_x2c_macro_item_5);
+    Var _x2c_macro_item_6;
+    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
+      pattern = Var_string(_x2c_macro_item_6);
       {
         Array expanded = _expand_pattern(project,  pattern,  "exclude");
         {
           Var value;
-          Iter _x2c_macro_iterator_4 = Array_iter(expanded,  &(struct Iter){
+          Iter _x2c_macro_iterator_5 = Array_iter(expanded,  &(struct Iter){
             0
           }
           );
-          Var _x2c_macro_item_4;
-          while(Iter_try_next(_x2c_macro_iterator_4,  & _x2c_macro_item_4)){
-            value = _x2c_macro_item_4;
+          Var _x2c_macro_item_5;
+          while(Iter_try_next(_x2c_macro_iterator_5,  & _x2c_macro_item_5)){
+            value = _x2c_macro_item_5;
             if(! Array_contains(excluded,  value)) Array_push(excluded,  value);
           }
 
@@ -693,13 +730,13 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   Array kept = Array_new();
   {
     Var value;
-    Iter _x2c_macro_iterator_6 = Array_iter(sources,  &(struct Iter){
+    Iter _x2c_macro_iterator_7 = Array_iter(sources,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6,  & _x2c_macro_item_6)){
-      value = _x2c_macro_item_6;
+    Var _x2c_macro_item_7;
+    while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
+      value = _x2c_macro_item_7;
       {
         if(Array_contains(excluded,  value)){
           if(verbose) fprintf(stderr,  "x2c: excluded %s from target %s\n",  Var_string(value),  target -> name);
@@ -715,16 +752,16 @@ static Array _target_sources(Project project,  ProjectTarget target,  int verbos
   Array_sort(kept);
   {
     Var value;
-    Iter _x2c_macro_iterator_7 = Array_iter(kept,  &(struct Iter){
+    Iter _x2c_macro_iterator_8 = Array_iter(kept,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7,  & _x2c_macro_item_7)){
-      value = _x2c_macro_item_7;
+    Var _x2c_macro_item_8;
+    while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
+      value = _x2c_macro_item_8;
       {
         String path = Var_string(value);
-        if(!(String_endswith(path,  _25) || String_endswith(path,  _26))) _error_name(project,  0,  "manifest source is not .x or .c",  path);
+        if(!(String_endswith(path,  _26) || String_endswith(path,  _27))) _error_name(project,  0,  "manifest source is not .x or .c",  path);
       }
 
     }
@@ -746,13 +783,13 @@ static void _validate_target(Project project,  ProjectTarget target){
   target -> visiting = 1;
   {
     String name;
-    Iter _x2c_macro_iterator_8 = List_iter(target -> dependencies,  &(struct Iter){
+    Iter _x2c_macro_iterator_9 = List_iter(target -> dependencies,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_8;
-    while(Iter_try_next(_x2c_macro_iterator_8,  & _x2c_macro_item_8)){
-      name = Var_string(_x2c_macro_item_8);
+    Var _x2c_macro_item_9;
+    while(Iter_try_next(_x2c_macro_iterator_9,  & _x2c_macro_item_9)){
+      name = Var_string(_x2c_macro_item_9);
       {
         ProjectTarget dependency = _target(project,  name,  0);
         if(! dependency) _error_name(project,  0,  "unknown target dependency",  name);
@@ -769,13 +806,13 @@ static void _validate_target(Project project,  ProjectTarget target){
 static void _append_values(Array output,  List values){
   {
     Var value;
-    Iter _x2c_macro_iterator_9 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_10 = List_iter(values,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_9;
-    while(Iter_try_next(_x2c_macro_iterator_9,  & _x2c_macro_item_9)){
-      value = _x2c_macro_item_9;
+    Var _x2c_macro_item_10;
+    while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
+      value = _x2c_macro_item_10;
       Array_push(output,  value);
     }
 
@@ -786,13 +823,13 @@ static void _append_values(Array output,  List values){
 static void _append_c_flags(Project project,  Array output,  List values){
   {
     String value;
-    Iter _x2c_macro_iterator_10 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_11 = List_iter(values,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_10;
-    while(Iter_try_next(_x2c_macro_iterator_10,  & _x2c_macro_item_10)){
-      value = Var_string(_x2c_macro_item_10);
+    Var _x2c_macro_item_11;
+    while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
+      value = Var_string(_x2c_macro_item_11);
       {
         if(cli_dependency_pass_through(value)) _error_name(project,  0,  "C dependency option is driver-owned",  value);
         Array_push(output,  String_var(value));
@@ -807,14 +844,14 @@ static void _append_c_flags(Project project,  Array output,  List values){
 static void _append_defines(Array output,  List values){
   {
     String value;
-    Iter _x2c_macro_iterator_11 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_12 = List_iter(values,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_11;
-    while(Iter_try_next(_x2c_macro_iterator_11,  & _x2c_macro_item_11)){
-      value = Var_string(_x2c_macro_item_11);
-      Array_push(output,  String_var(String_join(NULL,  cons(String_var(_27),  cons(String_var(value),  NULL)))));
+    Var _x2c_macro_item_12;
+    while(Iter_try_next(_x2c_macro_iterator_12,  & _x2c_macro_item_12)){
+      value = Var_string(_x2c_macro_item_12);
+      Array_push(output,  String_var(String_join(NULL,  cons(String_var(_28),  cons(String_var(value),  NULL)))));
     }
 
   }
@@ -824,13 +861,13 @@ static void _append_defines(Array output,  List values){
 static void _append_paths(Project project,  Array output,  List values,  String option){
   {
     String value;
-    Iter _x2c_macro_iterator_12 = List_iter(values,  &(struct Iter){
+    Iter _x2c_macro_iterator_13 = List_iter(values,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_12;
-    while(Iter_try_next(_x2c_macro_iterator_12,  & _x2c_macro_item_12)){
-      value = Var_string(_x2c_macro_item_12);
+    Var _x2c_macro_item_13;
+    while(Iter_try_next(_x2c_macro_iterator_13,  & _x2c_macro_item_13)){
+      value = Var_string(_x2c_macro_item_13);
       {
         Array_push(output,  String_var(option));
         Array_push(output,  String_var(_absolute(project,  value)));
@@ -844,7 +881,7 @@ static void _append_paths(Project project,  Array output,  List values,  String 
 
 static String _target_output(Project project,  ProjectTarget target,  String build_root,  Symbol kind){
   if(String_truth(target -> output)) return _absolute(project,  target -> output);
-  if(kind == 1381098885964356) return String_join(NULL,  cons(String_var(build_root),  cons(String_var(_28),  cons(String_var(target -> name),  cons(String_var(_29),  NULL)))));
+  if(kind == 1381098885964356) return String_join(NULL,  cons(String_var(build_root),  cons(String_var(_29),  cons(String_var(target -> name),  cons(String_var(_30),  NULL)))));
   return String_join(NULL,  cons(String_var(build_root),  cons(String_var(_24),  cons(String_var(target -> name),  NULL))));
 }
 
@@ -856,20 +893,20 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   request -> compile_only = 0;
   request -> kind = target == selected && command -> kind_explicit ? command -> kind : target -> kind;
   request -> output = target == selected && String_truth(command -> output) ? command -> output : _target_output(p,  target,  build_root,  request -> kind);
-  request -> build_dir = String_join(NULL,  cons(String_var(build_root),  cons(String_var(_30),  cons(String_var(target -> name),  NULL))));
+  request -> build_dir = String_join(NULL,  cons(String_var(build_root),  cons(String_var(_31),  cons(String_var(target -> name),  NULL))));
   request -> save_temps = 0;
   request -> temps_dir = NULL;
   if(request -> kind == 1381098885964356 && List_truth(target -> dependencies)) _error_name(p,  0,  "static-library target cannot contain target dependencies",  target -> name);
   Array inputs = _target_sources(p,  target,  command -> verbose);
   {
     String name;
-    Iter _x2c_macro_iterator_13 = List_iter(target -> dependencies,  &(struct Iter){
+    Iter _x2c_macro_iterator_14 = List_iter(target -> dependencies,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_13;
-    while(Iter_try_next(_x2c_macro_iterator_13,  & _x2c_macro_item_13)){
-      name = Var_string(_x2c_macro_item_13);
+    Var _x2c_macro_item_14;
+    while(Iter_try_next(_x2c_macro_iterator_14,  & _x2c_macro_item_14)){
+      name = Var_string(_x2c_macro_item_14);
       {
         ProjectTarget dependency = _target(p,  name,  0);
         if(dependency -> kind != 1381098885964356) _error_name(p,  0,  "dependency target is not a static library",  dependency -> name);
@@ -884,13 +921,13 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   _append_values(x_paths,  command -> include_dirs);
   {
     String path;
-    Iter _x2c_macro_iterator_14 = List_iter(target -> include_dirs,  &(struct Iter){
+    Iter _x2c_macro_iterator_15 = List_iter(target -> include_dirs,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_14;
-    while(Iter_try_next(_x2c_macro_iterator_14,  & _x2c_macro_item_14)){
-      path = Var_string(_x2c_macro_item_14);
+    Var _x2c_macro_item_15;
+    while(Iter_try_next(_x2c_macro_iterator_15,  & _x2c_macro_item_15)){
+      path = Var_string(_x2c_macro_item_15);
       Array_push(x_paths,  String_var(_absolute(p,  path)));
     }
 
@@ -900,13 +937,13 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   _append_values(package_paths,  command -> package_dirs);
   {
     String path;
-    Iter _x2c_macro_iterator_15 = List_iter(target -> package_dirs,  &(struct Iter){
+    Iter _x2c_macro_iterator_16 = List_iter(target -> package_dirs,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_15;
-    while(Iter_try_next(_x2c_macro_iterator_15,  & _x2c_macro_item_15)){
-      path = Var_string(_x2c_macro_item_15);
+    Var _x2c_macro_item_16;
+    while(Iter_try_next(_x2c_macro_iterator_16,  & _x2c_macro_item_16)){
+      path = Var_string(_x2c_macro_item_16);
       Array_push(package_paths,  String_var(_absolute(p,  path)));
     }
 
@@ -925,16 +962,16 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
     int has_optimization = 0,  has_debug = 0;
     {
       String argument;
-      Iter _x2c_macro_iterator_16 = List_iter(command -> cc_args,  &(struct Iter){
+      Iter _x2c_macro_iterator_17 = List_iter(command -> cc_args,  &(struct Iter){
         0
       }
       );
-      Var _x2c_macro_item_16;
-      while(Iter_try_next(_x2c_macro_iterator_16,  & _x2c_macro_item_16)){
-        argument = Var_string(_x2c_macro_item_16);
+      Var _x2c_macro_item_17;
+      while(Iter_try_next(_x2c_macro_iterator_17,  & _x2c_macro_item_17)){
+        argument = Var_string(_x2c_macro_item_17);
         {
-          if(String_truth(argument) && String_startswith(argument,  _41)) has_optimization = 1;
-          if(String_equal(argument,  _31)) has_debug = 1;
+          if(String_truth(argument) && String_startswith(argument,  _42)) has_optimization = 1;
+          if(String_equal(argument,  _32)) has_debug = 1;
         }
 
       }
@@ -942,24 +979,24 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
     }
     _append_defines(compile,  profile -> defines);
     _append_c_flags(p,  compile,  profile -> c_flags);
-    if(String_truth(profile -> optimization) && ! has_optimization) Array_push(compile,  String_var(String_join(NULL,  cons(String_var(_32),  cons(String_var(profile -> optimization),  NULL)))));
-    if(Map_contains(profile -> seen,  String_var(_19)) && profile -> debug && ! has_debug) Array_push(compile,  String_var(_42));
+    if(String_truth(profile -> optimization) && ! has_optimization) Array_push(compile,  String_var(String_join(NULL,  cons(String_var(_33),  cons(String_var(profile -> optimization),  NULL)))));
+    if(Map_contains(profile -> seen,  String_var(_19)) && profile -> debug && ! has_debug) Array_push(compile,  String_var(_43));
   }
   _append_values(compile,  command -> cc_args);
-  _append_paths(p,  compile,  target -> include_dirs,  _33);
+  _append_paths(p,  compile,  target -> include_dirs,  _34);
   request -> cc_args = Array_list_free(compile);
   Array link = Array_new();
-  _append_paths(p,  link,  target -> library_dirs,  _34);
+  _append_paths(p,  link,  target -> library_dirs,  _35);
   {
     String library;
-    Iter _x2c_macro_iterator_17 = List_iter(target -> libraries,  &(struct Iter){
+    Iter _x2c_macro_iterator_18 = List_iter(target -> libraries,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_17;
-    while(Iter_try_next(_x2c_macro_iterator_17,  & _x2c_macro_item_17)){
-      library = Var_string(_x2c_macro_item_17);
-      Array_push(link,  String_var(String_join(NULL,  cons(String_var(_35),  cons(String_var(library),  NULL)))));
+    Var _x2c_macro_item_18;
+    while(Iter_try_next(_x2c_macro_iterator_18,  & _x2c_macro_item_18)){
+      library = Var_string(_x2c_macro_item_18);
+      Array_push(link,  String_var(String_join(NULL,  cons(String_var(_36),  cons(String_var(library),  NULL)))));
     }
 
   }
@@ -968,7 +1005,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   _append_values(link,  command -> ld_args);
   request -> ld_args = Array_list_free(link);
   request -> label = target -> name;
-  request -> state_seed = String_add(String_join(NULL,  cons(String_var(p -> path),  cons(String_var(_36),  NULL))),  String_join(NULL,  cons(String_var(_37),  cons(String_var(target -> name),  cons(String_var(_38),  cons(String_var(command -> profile),  NULL))))));
+  request -> state_seed = String_add(String_join(NULL,  cons(String_var(p -> path),  cons(String_var(_37),  NULL))),  String_join(NULL,  cons(String_var(_38),  cons(String_var(target -> name),  cons(String_var(_39),  cons(String_var(command -> profile),  NULL))))));
   return request;
 }
 
@@ -984,13 +1021,13 @@ static void _plan_target(Project project,  ProjectTarget target,  CliRequest com
   if(target -> planned) return;
   {
     String dependency;
-    Iter _x2c_macro_iterator_18 = List_iter(target -> dependencies,  &(struct Iter){
+    Iter _x2c_macro_iterator_19 = List_iter(target -> dependencies,  &(struct Iter){
       0
     }
     );
-    Var _x2c_macro_item_18;
-    while(Iter_try_next(_x2c_macro_iterator_18,  & _x2c_macro_item_18)){
-      dependency = Var_string(_x2c_macro_item_18);
+    Var _x2c_macro_item_19;
+    while(Iter_try_next(_x2c_macro_iterator_19,  & _x2c_macro_item_19)){
+      dependency = Var_string(_x2c_macro_item_19);
       _plan_target(project,  _target(project,  dependency,  0),  command,  selected,  build_root);
     }
 
@@ -999,58 +1036,67 @@ static void _plan_target(Project project,  ProjectTarget target,  CliRequest com
   target -> planned = 1;
 }
 
-static String _discover_manifest(CliRequest request){
+String project_manifest(CliRequest request){
+  if(! _init_guard_) _file_init_();
   if(String_truth(request -> manifest)) return request -> manifest;
   char current[PATH_MAX];
   if(! getcwd(current,  sizeof(current))) _error(NULL,  0,  "cannot read current directory");
   while(1){
-    String candidate = String_join(NULL,  cons(String_var(String_new(current)),  cons(String_var(_39),  NULL)));
-    if(! access(candidate,  R_OK)) return candidate;
+    String candidate = String_join(NULL,  cons(String_var(String_new(current)),  cons(String_var(_40),  NULL)));
+    if(request -> sources ? SourceView_exists(request -> sources,  candidate) : ! access(candidate,  R_OK)) return candidate;
     if(strcmp(current,  "/") == 0) break;
     char * slash = strrchr(current,  '/');
     if(! slash) break;
     if(slash == current) current[1] = 0;
     else * slash = 0;
   }
-  _error(NULL,  0,  "no explicit inputs and no x2c.toml found");
+  return NULL;
 }
 
 ProjectBuild project_plan(CliRequest request){
   if(! _init_guard_) _file_init_();
   Project project = Scope_calloc(1,  sizeof(struct Project));
   project -> seen = Map_new();
-  project -> path = _discover_manifest(request);
+  project -> sources = request -> sources;
+  project -> path = project_manifest(request);
+  if(! String_truth(project -> path)) _error(NULL,  0,  "no explicit inputs and no x2c.toml found");
   char resolved[PATH_MAX];
   if(realpath(project -> path,  resolved)) project -> path = String_join(NULL,  cons(String_var(String_new(resolved)),  NULL));
-  File input = fopen(project -> path,  "r");
-  if(! input) _error(project,  0,  "cannot open manifest");
-  {
-    ExceptionFrame  _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) project -> text = File_string_close(input);
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
+  if(project -> sources){
+    project -> path = SourceView_path(project -> path);
+    if(! SourceView_read(project -> sources,  project -> path,  & project -> text)) _error(project,  0,  "cannot read manifest");
+  }
+  else{
+    File input = fopen(project -> path,  "r");
+    if(! input) _error(project,  0,  "cannot open manifest");
     {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        if (_x2c_catch_selected_0 == 0) {_error(project,  0,  "cannot read manifest");
-      }
+      ExceptionFrame  _x2c_exception_frame_0;
+      List _x2c_catch_pattern_0 =  cons(Symbol_var(20399393368),  cons(Symbol_var(54),  NULL));
+      ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1,  List_var(_x2c_catch_pattern_0));
+      x2c_exception_push(& _x2c_exception_frame_0);
+      if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) project -> text = File_string_close(input);
+      else {x2c_exception_landed(& _x2c_exception_frame_0);
+      {
+        if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+          int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
+          x2c_error_catch_detach(_x2c_error_handler_0);
+          x2c_exception_mark_handled(&_x2c_exception_frame_0);
+          if (_x2c_catch_selected_0 == 0) {_error(project,  0,  "cannot read manifest");
+        }
 
-    }
-    else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
+      }
+      else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
      x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
+      _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
      x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
+      __builtin_unreachable();
+    }
+
   }
 
-}
 }
 int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
@@ -1059,6 +1105,7 @@ _x2c_error_handler_0 = NULL;
 
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
      x2c_exception_leave(& _x2c_exception_frame_0);
+}
 }
 project -> root = x2c_path_dir(project -> path);
 _parse_manifest(project);
@@ -1078,7 +1125,7 @@ if(String_truth(build_root) && String_getindex(build_root,  0) != '/'){
   if(! getcwd(current,  sizeof(current))) _error(project,  0,  "cannot read current directory");
   build_root = String_join(NULL,  cons(String_var(String_new(current)),  cons(String_var(_24),  cons(String_var(build_root),  NULL))));
 }
-if(! String_truth(build_root)) build_root = String_truth(project -> build_dir) ? _absolute(project,  project -> build_dir) : String_join(NULL,  cons(String_var(project -> root),  cons(String_var(_40),  NULL)));
+if(! String_truth(build_root)) build_root = String_truth(project -> build_dir) ? _absolute(project,  project -> build_dir) : String_join(NULL,  cons(String_var(project -> root),  cons(String_var(_41),  NULL)));
 project -> build_root = build_root;
 _plan_target(project,  selected,  request,  selected,  build_root);
 return project -> head;

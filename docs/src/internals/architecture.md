@@ -49,10 +49,11 @@ hand. The compiler under development is `builds/0/x2c`; see
 
 ## The compiler pipeline
 
-The compiler has 27 modules under `src/`. `src/main.x` dispatches commands and
-runs the translation loop; `src/cli.x` parses the command line. Nested
-interning pools keep batch translation close to single-file peak memory. For
-each input file the translator runs one pipeline:
+The compiler lives under `src/`. `src/main.x` dispatches commands and runs the
+translation loop; `src/cli.x` parses the command line. `src/frontend.x` owns
+configured source stages and isolated unit lifetimes shared with internal
+tools. Nested interning pools keep batch translation close to single-file peak
+memory. For each input file the translator runs one pipeline:
 
 ```text
 source
@@ -198,9 +199,10 @@ chain), and overlays what it finds on the snapshot. Includes that land under
 `lib/` or `include/` are already covered by the snapshot and are skipped;
 unresolved angle includes are system headers the generated C re-includes
 anyway; unresolved quote includes are driver errors. Each file is spliced once
-by real path, so include cycles terminate. Across a batch, `src/main.x` keeps
-per-header contributions in `etc/header-symbols.xlisp`, a cache validated
-against the snapshot's content hash, so repeated headers are not re-collected.
+by real path, so include cycles terminate. Across a batch, `src/frontend.x`
+loads translation support and `src/collect.x` reuses per-header contributions
+from `etc/header-symbols.xlisp`, validated against the snapshot and source
+contents, so repeated headers are not re-collected.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C
 preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
@@ -416,10 +418,12 @@ status per fixture, so a change in any phase shows up as a diff.
 
 ## Module ownership
 
-Gathered in one place, for the 27 modules under `src/`:
+The modules under `src/` divide ownership as follows:
 
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
-  the per-file translation loop, and interning brackets;
+  the per-file translation loop, and output/exit policy;
+- `src/frontend.x` -- configured source stages, process translation support,
+  and sequential unit Context/Type lifetimes;
 - `src/project.x`, `src/build.x`, `src/toolchain.x` -- manifest membership and
   target relationships, typed native build requests and incremental state,
   and host compile/archive/link actions;
@@ -447,7 +451,39 @@ Gathered in one place, for the 27 modules under `src/`:
   include guards, and output writes;
 - `src/emit.x` -- AST to C tokens, including cleanup lowering;
 - `src/format.x` -- C tokens to text;
-- `src/diagnostics.x` -- recorded diagnostics.
+- `src/diagnostics.x` -- recorded diagnostics;
+- `src/sourceview.x` -- request-owned source overlays and logical file paths.
+
+The internal frontend is shared by the CLI and source graph tool. A
+`Frontend` borrows a configured `CliRequest`; its `ParsedUnit` retains the
+compiler, AST, diagnostics, and preprocessor output until explicit close.
+The stages are start/tokenize, collect, and parse. Failed stages return to the
+caller with readable diagnostics. Adapters choose printing and process exit;
+the default frontend collects without printing. Closing a unit releases its
+Lisp registrations, Type unit, and isolated Context before the next unit opens.
+
+Process type/header caches and generated-name state still require sequential
+units. This extraction does not establish a concurrent or stable public
+compiler-library API, nor does it contain a user macro that explicitly aborts
+or exits the process.
+
+The optional editor worker in `tools/x2c-editor/` uses the same frontend and
+project configuration. `SourceView` supplies immutable unsaved text under each
+file's canonical path; an empty overlay remains a present file. The request
+owns overlays, while a parsed unit owns disk text and semantic results.
+
+Declaration metadata follows the actual symbol-map contribution and key
+through collection and imports. The primary parser associates resolved
+bindings with physical token spans for definition and hover queries. It does
+not infer a source location for constructed syntax that has no physical token.
+Each editor request runs in a fresh process and collects source declarations
+without replaying header artifacts, which do not carry their physical spans.
+This isolates process caches and macro failures from the editor service.
+
+The VS Code adapter under `etc/vsc-extension/` converts compiler UTF-8 byte
+offsets to editor positions and discards responses after document changes or
+cancellation. It executes semantic requests only in trusted local workspaces.
+Syntax highlighting remains available independently of the native worker.
 
 ## The runtime boundary
 

@@ -22,6 +22,7 @@ Functions and types exposed by each compiler module.
 | [`src/emit.x`](emit.md) | emit C tokens from x2c ASTs. |
 | [`src/expressions.x`](expressions.md) | x2c expression parsing. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
+| [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
 | [`src/generate.x`](generate.md) | generate C headers and source files. |
 | [`src/lambda.x`](lambda.md) | lambda transformation helpers for the x2c compiler. |
 | [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |
@@ -32,6 +33,7 @@ Functions and types exposed by each compiler module.
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/snapshot.x`](snapshot.md) | deterministic compiler symbol snapshot I/O. |
+| [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |

@@ -55,6 +55,7 @@ typedef struct ProjectTarget {
 typedef struct Project {
   String path, root, text, default_target, build_dir, build_root, Map seen;
   int declared;
+  SourceView sources;
   ProjectTarget targets;
   ProjectBuild head;
   ProjectBuild tail;
@@ -459,9 +460,24 @@ static Array _expand_pattern(
   Array matches = %[];
   if (!_has_glob(pattern)) {
     String path = _absolute(project, pattern), struct stat info;
-    if (!stat(path, &info) && S_ISREG(info.st_mode)) matches.push(path);
+    int present = project.sources ? project.sources.exists(path) :
+      !stat(path, &info) && S_ISREG(info.st_mode);
+    if (present) matches.push(path);
   }
-  else _walk_matches(project, project.root, NULL, pattern, matches);
+  else {
+    _walk_matches(project, project.root, NULL, pattern, matches);
+    if (project.sources) {
+      String prefix = project.root == "/" ? %"/" : %"${project.root}/";
+      foreach (String path, project.sources.overlays.keys()) {
+        if (!path.startswith(prefix)) continue;
+        if (project.build_root &&
+            path.startswith(%"${project.build_root}/")) continue;
+        String relative = path[prefix.len():];
+        if (_glob_match(pattern, relative) && !matches.contains(path))
+          matches.push(path);
+      }
+    }
+  }
   if (!matches.len()) {
     fprintf(
       stderr, "x2c: error: manifest '%s': unmatched %s pattern '%s'\n",
@@ -687,21 +703,25 @@ static void _plan_target(
   target.planned = 1;
 }
 
-static String _discover_manifest(CliRequest request) {
+/** Returns the explicit or nearest readable project manifest, or NULL.
+    Discovery uses the same request view as project parsing.
+*/
+String project_manifest(CliRequest request) {
   if (request.manifest) return request.manifest;
   char current[PATH_MAX];
   if (!getcwd(current, sizeof(current)))
     _error(NULL, 0, "cannot read current directory");
   loop {
     String candidate = %"${String.new(current)}/x2c.toml";
-    if (!access(candidate, R_OK)) return candidate;
+    if (request.sources ? request.sources.exists(candidate) :
+        !access(candidate, R_OK)) return candidate;
     if (strcmp(current, "/") == 0) break;
     char *slash = strrchr(current, '/');
     if (!slash) break;
     if (slash == current) current[1] = 0;
     else *slash = 0;
   }
-  _error(NULL, 0, "no explicit inputs and no x2c.toml found");
+  return NULL;
 }
 
 /** Parses a project manifest and returns its selected target's build plan.
@@ -714,13 +734,23 @@ static String _discover_manifest(CliRequest request) {
 ProjectBuild project_plan(CliRequest request) {
   Project project = Scope.calloc(1, sizeof(struct Project));
   project.seen = %{};
-  project.path = _discover_manifest(request);
+  project.sources = request.sources;
+  project.path = project_manifest(request);
+  if (!project.path)
+    _error(NULL, 0, "no explicit inputs and no x2c.toml found");
   char resolved[PATH_MAX];
   if (realpath(project.path, resolved)) project.path = %"$resolved";
-  File input = fopen(project.path, "r");
-  if (!input) _error(project, 0, "cannot open manifest");
-  try project.text = input.string_close();
-  catch %(io-fail *): _error(project, 0, "cannot read manifest");
+  if (project.sources) {
+    project.path = SourceView.path(project.path);
+    if (!project.sources.read(project.path, &project.text))
+      _error(project, 0, "cannot read manifest");
+  }
+  else {
+    File input = fopen(project.path, "r");
+    if (!input) _error(project, 0, "cannot open manifest");
+    try project.text = input.string_close();
+    catch %(io-fail *): _error(project, 0, "cannot read manifest");
+  }
   project.root = x2c_path_dir(project.path);
   _parse_manifest(project);
   for (ProjectTarget target = project.targets; target; target = target.next)

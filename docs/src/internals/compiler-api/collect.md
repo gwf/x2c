@@ -31,7 +31,7 @@ Returns whether the active source-collection artifact has indexed rows.
 Translation depfiles use this result because every unit translated while
 the artifact is active depends on it, even if the unit reads no row.
 
-Source: `src/collect.x:866`
+Source: `src/collect.x:893`
 
 #### header_symbols_begin_generated
 
@@ -40,7 +40,7 @@ Source: `src/collect.x:866`
 Enables recording of generated public protocol callables.
 Recording remains enabled for subsequent translations in this process.
 
-Source: `src/collect.x:199`
+Source: `src/collect.x:202`
 
 #### header_symbols_initialize
 
@@ -48,7 +48,7 @@ Source: `src/collect.x:199`
 
 Initializes the process-wide source-collection cache.
 
-Source: `src/collect.x:192`
+Source: `src/collect.x:195`
 
 #### header_symbols_open
 
@@ -61,7 +61,7 @@ the artifact header; compatibility also requires the current symbol
 snapshot hash. Raw rows remain indexed until fetched, rejected, or replaced
 by a later open; materialized rows move to the process-wide cache.
 
-Source: `src/collect.x:826`
+Source: `src/collect.x:853`
 
 #### header_symbols_write
 
@@ -73,7 +73,7 @@ generated-name base, and the current symbol-snapshot hash. Entries with an
 out-of-root part or dependency are omitted. Returns nonzero when `output`
 has no error and leaves it open.
 
-Source: `src/collect.x:743`
+Source: `src/collect.x:770`
 
 ### `Compiler`
 
@@ -92,7 +92,7 @@ importing compiler. Cold collection and in-memory replay also merge
 recorded function definitions; persisted artifact entries carry no
 function-definition list. `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:679`
+Source: `src/collect.x:700`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -108,7 +108,7 @@ function definitions, macro state, and the generated-name count. Keyword
 alias maps and seen-name state are file-local and restored when each file
 walk ends.
 
-Source: `src/collect.x:531`
+Source: `src/collect.x:544`
 
 <a id="Compiler.record_generated_header_symbol"></a>
 #### Compiler.record_generated_header_symbol
@@ -120,7 +120,7 @@ The operation has no effect until generated-symbol recording is enabled.
 The compiler's current file must already have a collected contribution;
 the cache retains `signature`.
 
-Source: `src/collect.x:413`
+Source: `src/collect.x:426`
 
 ## Design notes
 

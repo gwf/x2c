@@ -153,6 +153,13 @@ the previous file. `run` writes it before starting the program, and `-###`
 writes no database. This file describes native C compilation, not x2c syntax
 for an editor's C parser.
 
+The repository's VS Code extension has a separate optional native worker for
+x2c diagnostics, definition, and hover, including unsaved source text. Build
+and configure it using the
+[editor setup instructions](https://github.com/gwf/x2c/blob/main/tools/x2c-editor/README.md).
+It uses ordinary compiler and project options and requires a trusted local
+workspace; syntax highlighting works without the worker.
+
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
 initialization rules.

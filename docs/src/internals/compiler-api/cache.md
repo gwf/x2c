@@ -31,7 +31,7 @@ to the compiler's early, middle, and late initialization phases; the
 operation is not idempotent. Header cache storage remains private to each
 C translation unit that includes it.
 
-Source: `src/cache.x:547`
+Source: `src/cache.x:595`
 
 ## Design notes
 

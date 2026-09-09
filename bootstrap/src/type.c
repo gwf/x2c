@@ -1248,7 +1248,22 @@ Var head = car(ast);  switch(Var_symbol(head)){
   case 150408 :{
     List ident,  mods;  List _x2c_destructure_3 = List_cdr(ast);  ident = Var_list(List_getindex(_x2c_destructure_3,  0));  mods = Var_list(List_getindex(_x2c_destructure_3,  1)); (void) ident;  mods = _from_ast(mods,  context);  List type = Type_list(Type__modify(List_type(context),  mods));  return type;
   }
-  case 1077021542 : case 157714837990 : case 421880102 : return _from_ast_items(cdr(ast),  context);  case 44661285196 :{
+  case 1077021542 : case 157714837990 : return _from_ast_items(cdr(ast),  context);  case 421880102 :{
+    Array types = Array_new(); {
+      List field;  Iter _x2c_macro_iterator_3 = List_iter(List_cdr(ast),  &(struct Iter){
+        0
+      }
+      );  Var _x2c_macro_item_4;  while(Iter_try_next(_x2c_macro_iterator_3,  & _x2c_macro_item_4)){
+        field = Var_list(_x2c_macro_item_4); {
+          List declaration = field;  while(Var_equal(List_car(declaration),  Symbol_var(104))) declaration = Var_list(List_caddr(declaration));  if(! Var_equal(List_car(declaration),  Symbol_var(272838634664))) Array_push(types,  List_var(_from_ast(field,  context)));
+        }
+
+      }
+
+    }
+    return Array_list_free(types);
+  }
+  case 44661285196 :{
     List _x2c_destructure_4 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_4,  0));  List bindings = Var_list(List_getindex(_x2c_destructure_4,  1));  List type = _from_ast(source_type,  NULL);  return _from_ast(bindings,  type);
   }
   case 13528008 :{

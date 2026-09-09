@@ -16,6 +16,7 @@ $(import "../lib/private-keywords.xmacro")
 #include "ast.x"
 #include "type.x"
 #include "logger.x"
+#include "sourceview.x"
 
 /** Names the positioned diagnostic store routed by a `Compiler`. */
 typedef struct Diagnostics *Diagnostics;
@@ -98,6 +99,11 @@ typedef struct Compiler {
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
   Array origins, int origin, source_map;
+  // The request view outlives the unit; semantic stores die with this unit.
+  SourceView sources;
+  int source_facts, source_primary;
+  Array source_occurrences;
+  Map source_definitions, source_declarations, source_texts;
 } *Compiler;
 
 #include "diagnostics.x"
@@ -227,6 +233,34 @@ void Compiler.own_diagnostics(Compiler compiler) {
   compiler.diagnostics.set_emitter(_emit_user, compiler);
 }
 
+/** Shares a caller's diagnostic stream while preserving its emission policy.
+    The caller restores the saved emitter and owner after this child finishes.
+*/
+void Compiler.borrow_diagnostics(Compiler compiler, Compiler owner) {
+  compiler.diagnostics = owner.diagnostics;
+  if (compiler.diagnostics.emit == _emit_user) compiler.own_diagnostics();
+}
+
+/** Moves collected child reports into the caller's store without re-emitting.
+    Shared stores already contain their entries. The child's separate store
+    remains configured and empty after its reports have been transferred.
+*/
+void Compiler.take_diagnostics(Compiler compiler, Compiler child) {
+  Diagnostics target = compiler.diagnostics, source = child.diagnostics;
+  if (target != source) {
+    foreach (Var entry, source.entries) target.entries.push(entry);
+    target.count += source.count;
+    target.limit_notified |= source.limit_notified;
+    source.reset();
+  }
+}
+
+/** Retains a child's final diagnostics and releases its Lisp registration. */
+void Compiler.close_child(Compiler compiler, Compiler child) {
+  compiler.take_diagnostics(child);
+  child.free_lisp();
+}
+
 /* Scope owns the Compiler, Sym, diagnostics, arrays, and maps. Every compiler
    enters the process cleanup list, so Compiler.free_lisp must unregister it
    before that Scope dies. The list is only a fallback for compilers whose
@@ -256,6 +290,13 @@ static Compiler _new(Compiler owner) {
       _.package_members = owner.package_members;
       _.names = owner.names;
       _.source_map = owner.source_map;
+      _.recovery_depth = owner.recovery_depth;
+      _.sources = owner.sources;
+      _.source_facts = owner.source_facts;
+      _.source_occurrences = owner.source_occurrences;
+      _.source_definitions = owner.source_definitions;
+      _.source_declarations = owner.source_declarations;
+      _.source_texts = owner.source_texts;
     }
     else {
       _.package_roots = %{};
@@ -280,6 +321,9 @@ static Compiler _new(Compiler owner) {
     _.collect_protocols = 1;
     _own_lisp(_);
     _.diagnostics = Diagnostics.new(_emit_user, _, 1);
+    if (owner && owner.diagnostics.emit != _emit_user)
+      _.diagnostics.set_emitter(
+        owner.diagnostics.emit, owner.diagnostics.owner);
     _.braces = %[];
     _.import_stack = %[];
     _.origins = %[];
@@ -297,6 +341,76 @@ Compiler Compiler.new_shared(Compiler owner) {
      and share the owner's package maps so an import seen in one segment is
      registered and collected exactly once for the whole unit. */
   return _new(owner);
+}
+
+/** Reads a source through the request view and retains exact response bytes. */
+int Compiler.read_source(
+  Compiler compiler, String path, String volatile *text) {
+  if (!compiler.sources.read(path, text)) return 0;
+  if (compiler.source_facts)
+    compiler.source_texts[SourceView.path(path)] = *text;
+  return 1;
+}
+
+/** Carries declaration metadata with one actual symbol contribution. */
+void Compiler.copy_source_declaration(
+  Compiler compiler, Map target, Map source, List key) {
+  if (!compiler.source_facts) return;
+  Var declaration;
+  List target_key = %($target $key);
+  if (compiler.source_declarations.try_get(%($source $key), &declaration))
+    compiler.source_declarations[target_key] = declaration;
+  else compiler.source_declarations.del(target_key);
+}
+
+/** Carries declaration metadata beside a completed symbol-map merge. */
+void Compiler.merge_source_declarations(
+  Compiler compiler, Map target, Map source) {
+  if (!compiler.source_facts) return;
+  foreach (Var key, source.keys())
+    if (key is <list>) compiler.copy_source_declaration(target, source, key);
+}
+
+static List _source_range(Compiler compiler, Token first, Token after) {
+  if (!first || !after || first >= after || compiler.macro_holes) return NULL;
+  Token last = after - 1;
+  while (last > first &&
+         (last.type == <space> || last.type == <comment> ||
+          last.type == <preproc>)) last--;
+  String path = SourceView.path(compiler.filename);
+  if (!compiler.source_texts.contains(path))
+    compiler.source_texts[path] = compiler.text;
+  return %($path ${first.pos} ${last.pos + last.len});
+}
+
+/** Records a physical declaration using the binding's actual scope and key. */
+void Compiler.record_source_declaration(
+  Compiler compiler, List binding, Token first, Token after) {
+  if (!compiler.source_facts || compiler.macro_holes) return;
+  Var value;
+  if (!compiler.semantic_binding_facts().try_get(
+      %(src-key $binding), &value)) return;
+  List source_key = value, range = _source_range(compiler, first, after);
+  if (!range) return;
+  Map symbols = source_key.car();
+  List key = source_key.cadr();
+  Type type = symbols[key];
+  List declaration = %(@range $type);
+  compiler.source_declarations[source_key] = declaration;
+  if (compiler.source_primary && !compiler.shallow) {
+    compiler.source_definitions[binding] = declaration;
+    compiler.source_occurrences.push(%(@range $binding $type));
+  }
+}
+
+/** Records a resolved reference without inventing spans for constructed ASTs. */
+void Compiler.record_source_reference(
+  Compiler compiler, List binding, Type type, Token first, Token after) {
+  if (!compiler.source_facts || !compiler.source_primary || compiler.shallow ||
+      compiler.macro_holes ||
+      !binding_identity_try_parts(binding, NULL, NULL)) return;
+  List range = _source_range(compiler, first, after);
+  if (range) compiler.source_occurrences.push(%(@range $binding $type));
 }
 
 /** Returns the current borrowed semantic-facts map indexed by binding.
@@ -494,7 +608,12 @@ List Compiler.anchor_origin(Compiler compiler, List node, Token token) {
 static int _shallow_parse_compile_time_definition(
   Compiler c, int keyword) {
   int old_depth = c.recovery_depth, failed = 0;
-  c.diagnostics.set_emitter(NULL, NULL);
+  Diagnostics diag = c.diagnostics;
+  DiagnosticEmitter emitter = diag.emit;
+  void *owner = diag.owner;
+  int entries = diag.entries.len(), count = diag.count;
+  int limited = diag.limit_notified;
+  diag.set_emitter(NULL, NULL);
   c.recovery_depth = old_depth + 1;
   try {
     if (keyword) c.parse_keyword_definition();
@@ -502,8 +621,10 @@ static int _shallow_parse_compile_time_definition(
   }
   catch %(malformed *): failed = 1;
   c.recovery_depth = old_depth;
-  c.own_diagnostics();
-  c.diagnostics.reset();
+  diag.set_emitter(emitter, owner);
+  diag.entries.resize(entries);
+  diag.count = count;
+  diag.limit_notified = limited;
   if (failed) while (c.peek(0) != <eof>) c.next();
   return !failed;
 }
@@ -601,6 +722,11 @@ static void _shallow_parse_loop(Compiler c) {
   while (c.peek(0) != <eof>) {
     c.update_source_visibility(c.leading_preproc());
     Token start = c.token;
+    if (c.test_static_assert()) {
+      c.parse_static_assert();
+      _debug_tokens(c, start, c.token);
+      continue;
+    }
     if (c.peek(0) == <"$(">) {
       c.parse_macro_lisp_shallow();
       _debug_tokens(c, start, c.token);
@@ -1108,6 +1234,8 @@ typedef struct SymTxn {
   int gensym_count, local_macro_names;
   SymScope scope;
   Map statics, binding_facts;
+  Map source_definitions;
+  int source_occurrences;
 } *SymTxn;
 
 /** Begins a reversible transaction over the current semantic scope.
@@ -1132,11 +1260,16 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   transaction.local_macro_names = c.sym.local_macro_names;
   transaction.initializer_name = c.init_fn;
   transaction.shutdown_name = c.fini_fn;
+  if (c.source_facts && c.source_primary) {
+    transaction.source_definitions = c.source_definitions.copy();
+    transaction.source_occurrences = c.source_occurrences.len();
+  }
 
   /* Macro binding is incremental. Copy only the maps that construction
      mutates so failure can discard its rows while reads still reach the
      unchanged outer scopes. */
   scope.symbols = transaction.scope.symbols.copy();
+  c.merge_source_declarations(scope.symbols, transaction.scope.symbols);
   scope.bindings = transaction.scope.bindings.copy();
   scope.enumerators = transaction.scope.enumerators.copy();
   scope.macros = (void *) transaction.scope.macros != NULL
@@ -1160,6 +1293,7 @@ void SymTxn.commit(SymTxn s) {
      holding a borrowed scope map must observe a committed expansion. */
   *scope = s.scope;
   Map.merge(scope.symbols, staged.symbols);
+  compiler.merge_source_declarations(scope.symbols, staged.symbols);
   Map.merge(scope.bindings, staged.bindings);
   Map.merge(scope.enumerators, staged.enumerators);
   if ((void *) staged.macros != NULL) {
@@ -1195,6 +1329,12 @@ void SymTxn.rollback(SymTxn transaction) {
     _.names.gensym_count = transaction.gensym_count;
     _.init_fn = transaction.initializer_name;
     _.fini_fn = transaction.shutdown_name;
+    if (_.source_facts && _.source_primary) {
+      _.source_occurrences.resize(transaction.source_occurrences);
+      foreach (Var key, _.source_definitions.keys().list())
+        _.source_definitions.del(key);
+      Map.merge(_.source_definitions, transaction.source_definitions);
+    }
     transaction.active = 0;
   }
 }
@@ -1359,6 +1499,14 @@ static List _semantic_scope_binding(Sym sym, SymScope *scope, List key) {
     Var relative;
     if (scope.symbols.try_get(%(self $spelling), &relative))
       sym.binding_facts[self_key] = relative;
+  }
+  if (sym.compiler.source_facts) {
+    List source_key = %(${scope.symbols} $key);
+    sym.binding_facts[%(src-key $binding)] = source_key;
+    Var declaration;
+    if (sym.compiler.source_primary && !sym.compiler.shallow &&
+        sym.compiler.source_declarations.try_get(source_key, &declaration))
+      sym.compiler.source_definitions[binding] = declaration;
   }
   return binding;
 }
@@ -2176,25 +2324,27 @@ Type Sym.lookup_field(Sym sym, Type type, List field) {
 
 /** Records declaration AST fields in source order after binding finishes.
 
-    `Field` types already use member keys; this adds only order and omits
-    unnamed fields.
+    `Field` types already use member keys. Unnamed rows retain their type
+    and an empty name so initializer traversal preserves anonymous subobjects.
 */
 void Sym.declare_field_order(Sym sym, Type type, List fields) {
   Array rows = %[];
   foreach (List declaration, fields) {
     while (declaration.car() == <at>) declaration = declaration.caddr();
+    if (declaration.car() == <c-assert>) continue;
     List bindings = declaration.caddr();
     foreach (List declarator, bindings.cdr()) {
       String name = binding_identity_spelling(declarator.cadr());
-      if (!name) continue;
-      Type declared = sym.get(%(@type $name));
+      Type declared = name ? sym.get(%(@type $name))
+        : %(declare ${declaration.cadr()} (bindings $declarator))
+          .type_from_ast().declared();
       rows.push(%($name $declared));
     }
   }
   sym.set(%(@type "field-order"), %(fields @{rows.list_free()}));
 }
 
-/** Returns recorded named fields in source order, or `NULL`. */
+/** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym sym, Type type) => sym.get(%(@type "field-order"));
 
 /** Marks one named aggregate field as a delegate. */

@@ -133,31 +133,69 @@ static List _build_static_initializer_rhs(
 
 // global static declaration rewrites
 
-/* An array is not assignable, so a deferred array initializer becomes one
-   indexed assignment per element instead of one whole-object assignment.
-   An element that is itself a composite reaches the compound-literal form
-   above, which a struct element does accept. */
-static List _build_static_array_block(
-  List decltype, List binding, List items) {
-  List element = %(declare $decltype (bindings (bind $binding ())));
-  Type type = element.type_from_ast();
-  if (type) type = type.canonicalize();
-  List target = %(expr $type (ident $binding)), Array statements = %[];
-  int at = 0;
-  foreach (Var item, items) {
-    String position = %"$at";
-    List index = %(expr (int) (literal (int) $position));
-    List slot = %(expr $type (index $target $index));
-    List value = item, rhs = value;
-    match (value) {
-      case %(expr ? (!set ?inner (composite *))):
-        rhs = _build_static_initializer_rhs(
-          decltype, binding, NULL, type, inner);
-      case %(!set ?inner (composite *)):
-        rhs = _build_static_initializer_rhs(
-          decltype, binding, NULL, type, inner);
+/* Preserve native initializer shape so C infers dimensions and checks
+   designators before cached values are assigned during initialization. */
+static List _zero_static_initializer(Compiler compiler, List value) {
+  List zero = %(expr (int) (literal (int) "0"));
+  match (value) {
+    case %(expr ?type (!set ?inner (composite *))):
+      return %(expr $type ${_zero_static_initializer(compiler, inner)});
+    case %(expr ?type ?): {
+      Type resolved = compiler.sym.resolve_key(type);
+      return resolved.is_aggregate()
+        ? %(expr $type (composite (commas $zero))) : zero;
     }
-    statements.push(%(stmnt (expr $type (op = $slot $rhs))));
+    case %(composite (commas *items)): {
+      Array zeroed = %[];
+      foreach (List item, items)
+        zeroed.push(_zero_static_initializer(compiler, item));
+      return %(composite (commas @{zeroed.list_free()}));
+    }
+    case %((!set ?tag (!or dotinit indexinit)) ?key ?inner):
+      return %($tag $key ${_zero_static_initializer(compiler, inner)});
+  }
+  return zero;
+}
+
+/* Reuse ordinary indexed assignments, recursing only for explicit array
+   braces. C can warn and ignore excess positional values, so writes use the
+   native object's actual dimensions rather than the initializer count. */
+static List _build_static_array_block(
+  Compiler compiler, List target, Type array, List items) {
+  Type type = array.cdr();
+  Type resolved = compiler.sym.resolve_key(type);
+  Array statements = %[];
+  List base = NULL;
+  int at = 0;
+  foreach (List value, items) {
+    match (value)
+      case %(indexinit ?index ?initializer): {
+        base = index;
+        value = initializer;
+        at = 0;
+      }
+    String position = %"$at";
+    List offset = %(expr (int) (literal (int) $position));
+    List index = !base ? offset : !at ? base
+      : %(expr (int) (op + $base $offset));
+    List slot = %(expr $type (index $target $index));
+    List inner = NULL, rhs = value, assignment;
+    match (value) {
+      case %(expr ? (!set ?body (composite *))): inner = body;
+      case %(!set ?body (composite *)): inner = body;
+    }
+    if (inner && resolved.is_array())
+      assignment = _build_static_array_block(
+        compiler, slot, resolved, inner.cadr().list().cdr());
+    else {
+      if (inner)
+        rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
+      assignment = %(stmnt (expr $type (op = $slot $rhs)));
+    }
+    List length = %(expr (unsigned)
+      (op / (expr (unsigned) (sizeof (parens $target)))
+            (expr (unsigned) (sizeof (parens $slot)))));
+    statements.push(%(if (expr (int) (op < $index $length)) $assignment));
     at++;
   }
   return %(block @{statements.list_free()});
@@ -172,20 +210,28 @@ static List _record_deferred_binding(
   return %(bind $name $mods);
 }
 
-static List _defer_one_binding(List decltype, Ast bound, Array initializers) {
+static List _defer_one_binding(
+  Compiler compiler, List decltype, Ast bound, Array initializers) {
   match (bound) {
     case %(bind *): return bound;
-    case %(op = (bind ?name (!set ?mods ((dim *) *)))
-             (expr ? (!set ?value (composite (commas *items))))): {
-      /* An array is deferred only when it has to be. A lowered literal
-         reaches it as a cache reference, and everything else a C array
-         initializer accepts is already constant. */
-      if (!_contains_cache_ref(value)) return bound;
-      List assign = _build_static_array_block(decltype, name, items);
-      return _record_deferred_binding(name, mods, assign, initializers);
-    }
-    case %(op = (bind ? (!set ?mods ((dim *) *))) ?): return bound;
     case %(op = (bind ?name ?mods) (expr ?type ?value)): {
+      List declaration = %(declare $decltype (bindings (bind $name $mods)));
+      Type declared = declaration.type_from_ast().canonicalize();
+      Type resolved = compiler.sym.resolve_key(declared);
+      if (resolved.is_array()) {
+        if (!_contains_cache_ref(value)) return bound;
+        match (value)
+          case %(composite (commas *items)): {
+            List target = %(expr $declared (ident $name));
+            List assign = _build_static_array_block(
+              compiler, target, resolved, items);
+            List binding = _record_deferred_binding(
+              name, mods, assign, initializers);
+            List zero = _zero_static_initializer(compiler, value);
+            return %(op = $binding (expr $type $zero));
+          }
+        return bound;
+      }
       List stored = _build_static_initializer_rhs(
         decltype, name, mods, type, value);
       List assign = _make_assignment_stmt(name, type, stored);
@@ -196,26 +242,27 @@ static List _defer_one_binding(List decltype, Ast bound, Array initializers) {
 }
 
 static List _defer_bindings(
-  List decltype, List bound_list, Array initializers) {
+  Compiler compiler, List decltype, List bound_list, Array initializers) {
   Array values = %[];
   foreach (Ast bound, bound_list)
-    values.push(_defer_one_binding(decltype, bound, initializers));
+    values.push(_defer_one_binding(compiler, decltype, bound, initializers));
   return %(declare $decltype (bindings @{values.list_free()}));
 }
 
 /* Lowering turns most non-const file-static initializers into calls, so they
    run in the initializer phase. Public file statics holding cache references
    defer too; otherwise nothing assigns their slots. */
-static List _rewrite_file_scope_decl(List decl, Array initializers) {
+static List _rewrite_file_scope_decl(
+  Compiler compiler, List decl, Array initializers) {
   match (decl)
     case %(declare (!set ?decltype (!and (static *) (!not (* const *))))
                    (bindings *bound_list)):
-      return _defer_bindings(decltype, bound_list, initializers);
+      return _defer_bindings(compiler, decltype, bound_list, initializers);
   if (!_contains_cache_ref(decl)) return decl;
   match (decl)
     case %(declare (!set ?decltype (!not (* const *)))
                    (bindings *bound_list)):
-      return _defer_bindings(decltype, bound_list, initializers);
+      return _defer_bindings(compiler, decltype, bound_list, initializers);
   return decl;
 }
 
@@ -304,11 +351,12 @@ static void _queue_static_initializers(
 /* Apply file-scope initializer rewrites across one generated region. Both
    regions share one initializer list, so a header definition deferred into
    the source's initializer is ordered against the file statics it reads. */
-static List _rewrite_file_scope_statics(List code, Array initializers) =>
+static List _rewrite_file_scope_statics(
+  Compiler compiler, List code, Array initializers) =>
   code.map(%!(Var item) => {
     match (item)
       case %(!set ?declaration (declare *)):
-        return _rewrite_file_scope_decl(declaration, initializers);
+        return _rewrite_file_scope_decl(compiler, declaration, initializers);
     return item;
   });
 
@@ -490,7 +538,7 @@ static List _setup_header_cache(
    dependent file-static assignments move late with it. */
 static List _setup_source_cache_init(
   Compiler c, List source, Array ids, Array initializers) {
-  source = _rewrite_file_scope_statics(source, initializers);
+  source = _rewrite_file_scope_statics(c, source, initializers);
   Array keys = c.id_keys, Symbol deferred_kind = 0;
   if (c.init_fn == %"String_initialize") deferred_kind = <string>;
   else if (c.init_fn == %"List_initialize") deferred_kind = <cons>;
@@ -548,7 +596,7 @@ List Compiler.setup_cache_init(
   Compiler compiler, List header, List source, String prefix,
   String guard_name, String initializer_name) {
   Array initializers = %[];
-  header = _rewrite_file_scope_statics(header, initializers);
+  header = _rewrite_file_scope_statics(compiler, header, initializers);
   Array header_ids = _cache_ids_in(compiler, header);
   /* A deferred header initializer is now in the source's initializer,
      so its slots belong to the source region. */

@@ -89,7 +89,7 @@ MODULE_COUNT_WORDS = {"sixteen": 16, "eighteen": 18, "twenty": 20}
 SRC_MODULE_LISTS = {
     ROOT / "AGENTS.md": ("- `src/` - the compiler", "- `lib/` -"),
     ROOT / "docs" / "src" / "internals" / "architecture.md": (
-        "Gathered in one place, for the 27 modules under `src/`:",
+        "## Module ownership",
         "## The runtime boundary",
     ),
 }

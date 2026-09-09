@@ -7,6 +7,7 @@
 */
 
 #pragma once
+#include "sourceview.x"
 
 /** Holds one compiler command and its command-specific inputs and options.
     `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:
@@ -23,7 +24,8 @@ typedef struct CliRequest {
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int live_symbols, cpp_symbols, source_map;
+  int live_symbols, cpp_symbols, source_map, source_facts;
+  SourceView sources;
 } *CliRequest;
 
 #pragma private

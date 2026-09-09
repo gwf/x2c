@@ -429,6 +429,34 @@ The normative [protocols chapter](../guide/protocols.md) specifies converter
 totality, adapter-derived conversion directions, punctuation, generated
 ownership, boxed dispatch, native aliases, and complete examples.
 
+### C initializers and static assertions
+
+Array initializers accept direct index designators and continue at the next
+element. Nested braces apply the same rule within each array or aggregate:
+
+```x2c
+String labels[4] = {[1] = "first", "second"};
+int grid[2][3] = {{[1] = 7, 8}, {[2] = 9}};
+```
+
+Each supplied value converts to its destination element or field type. After
+`.field = value`, positional initialization resumes at the following field,
+including the ordinary conversion of C literals to `String`. Typedefs retain
+these conversions. Use explicit nested braces; chained designators with
+brace-elided continuation are not supported. The native compiler checks index
+constant expressions and bounds.
+
+`_Static_assert(condition, "message");` is accepted at file scope, block scope,
+and within a struct or union. It emits an ordinary C static assertion and adds
+no field, binding, or runtime operation:
+
+```x2c
+_Static_assert(sizeof(int) >= 2, "int is at least 16 bits");
+```
+
+The native compiler evaluates the condition and rejects a false or nonconstant
+assertion. Translation and source analysis alone do not perform that check.
+
 ### Mixed declaration rows
 
 A semicolon-terminated declaration at file scope, block scope, or inside a
@@ -1352,6 +1380,12 @@ Percent strings are byte strings: they may span physical lines and their
 Ordinary C string and character literals instead follow C escape widths,
 including exactly four digits for `\\u`, eight for `\\U`, and one or more for
 `\\x`; an unescaped newline does not continue an ordinary C literal.
+
+Adjacent ordinary C string literals form one expression, including across
+comments or newlines. Their separate escape boundaries are preserved:
+`"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
+typing and converts to `String` when its context requires it. This adjacency
+rule does not combine percent strings or change quoted collection syntax.
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,

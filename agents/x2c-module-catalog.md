@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 27
+- Compiler modules: 29
 - Runtime modules: 45
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -83,7 +83,11 @@ Public functions:
 `Compiler.var`, `Var.compiler`, `Map.merge_translation_dependency`,
 `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.free_lisp`,
-`Compiler.own_diagnostics`, `Compiler.new`, `Compiler.new_shared`,
+`Compiler.own_diagnostics`, `Compiler.borrow_diagnostics`,
+`Compiler.take_diagnostics`, `Compiler.close_child`, `Compiler.new`,
+`Compiler.new_shared`, `Compiler.read_source`,
+`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
 `Compiler.semantic_binding_facts`, `Compiler.macro_definition_locals`,
 `Compiler.fresh_name`, `Compiler.emitted_binding_name`, `Compiler.tokenize`,
 `Compiler.skip_trivia_from`, `Compiler.peek`, `Compiler.expect`,
@@ -170,6 +174,16 @@ Public functions:
 
 `Compiler.code_pretty_string`
 
+### [src/frontend.x](../src/frontend.x)
+
+configured compiler sessions and sequential source units.
+
+Public functions:
+
+`Frontend.load_support`, `Frontend.new`, `Frontend.write_header_symbols`,
+`Frontend.start`, `ParsedUnit.collect`, `ParsedUnit.parse`, `Frontend.open`,
+`ParsedUnit.close`
+
 ### [src/generate.x](../src/generate.x)
 
 generate C headers and source files.
@@ -244,6 +258,7 @@ Public functions:
 
 `Compiler.package_alias_spelling`, `Compiler.parse_complex_identifier`,
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
+`Compiler.test_static_assert`, `Compiler.parse_static_assert`,
 `Compiler.parse_field`, `Compiler.parse_fields`, `Compiler.parse_enumerator`,
 `Compiler.parse_enumerators`, `Compiler.parse_type_name`,
 `Compiler.parse_parameter`, `Compiler.parse_parameter_list`,
@@ -260,7 +275,7 @@ x2c project manifests.
 
 Public functions:
 
-`project_plan`
+`project_manifest`, `project_plan`
 
 ### [src/protocol.x](../src/protocol.x)
 
@@ -294,6 +309,15 @@ deterministic compiler symbol snapshot I/O.
 Public functions:
 
 `snapshot_write_var`, `symbol_snapshot_write`, `symbol_snapshot_load`
+
+### [src/sourceview.x](../src/sourceview.x)
+
+request-owned source overlays.
+
+Public functions:
+
+`SourceView.new`, `SourceView.path`, `SourceView.set`, `SourceView.is_changed`,
+`SourceView.exists`, `SourceView.read`, `SourceView.content_hash`
 
 ### [src/statements.x](../src/statements.x)
 

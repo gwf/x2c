@@ -385,11 +385,34 @@ static List _publish_aggregate_type(
   return %($tag $name $body);
 }
 
+/** Reports whether the current identifier starts a C static assertion. */
+int Compiler.test_static_assert(Compiler compiler) =>
+  compiler.peek(0) == <ident> &&
+  compiler.token.text == %"_Static_assert";
+
+/** Parses a C assertion declaration; native C owns constant-expression checks. */
+List Compiler.parse_static_assert(Compiler compiler) {
+  if (compiler.shallow) {
+    compiler._skip_shallow_expression(0);
+    compiler.expect(<;>);
+    return %(c-assert);
+  }
+  compiler.next();
+  compiler.expect(<(>);
+  List condition = compiler.parse_assignment();
+  compiler.expect(<,>);
+  List message = compiler.parse_assignment();
+  compiler.expect(<)>);
+  compiler.expect(<;>);
+  return %(c-assert $condition $message);
+}
+
 /** Parses one field for aggregate type `context` and returns its AST.
     Ordinary fields publish their binding in the aggregate's field scope and
     consume their terminating semicolon; macro forms follow their own syntax.
 */
 List Compiler.parse_field(Compiler compiler, List context) {
+  if (compiler.test_static_assert()) return compiler.parse_static_assert();
   List slot = compiler.try_parse_macro_slot(<field>);
   if (slot) return slot;
   List macro = NULL;
@@ -646,12 +669,15 @@ static List _array_suffix(Compiler c) {
 }
 
 static List _finish_parameter(
-  Compiler compiler, List base, List declarator, List method_identity) {
+  Compiler compiler, List base, List declarator, List method_identity,
+  Token source_first, Token source_after) {
   base = _finish_type(compiler, base);
   int preserved_self = 0;
   declarator = _install_declarator_node(
     compiler, base, NULL, declarator,
     method_identity, &preserved_self);
+  compiler.record_source_declaration(
+    declarator.cadr(), source_first, source_after);
   List modifiers = NULL;
   base = _declaration_base(base, &modifiers);
   declarator = _append_declarator_modifiers(declarator, modifiers);
@@ -673,8 +699,10 @@ List Compiler.parse_parameter(Compiler compiler) {
   List qual = _type_qualifiers(compiler);
   List spec = _type_specifier(compiler), type = %( @qual @spec );
   List method = NULL;
-  List declarator = _declarator(compiler, type, NULL, &method);
-  return _finish_parameter(compiler, type, declarator, method);
+  Token first = NULL, after = NULL;
+  List declarator = _declarator(
+    compiler, type, NULL, &method, &first, &after);
+  return _finish_parameter(compiler, type, declarator, method, first, after);
 }
 
 /** Parses a nonempty comma-separated parameter `List` in source order.
@@ -737,11 +765,13 @@ static List _declarator_suffix(Compiler compiler) {
 }
 
 static List _direct_declarator(
-  Compiler c, List *method_identity) {
+  Compiler c, List *method_identity, Token *source_first,
+  Token *source_after) {
   // Parenthesized declarator: ( declarator )
   if (c.peek(0) == <(>) {
     c.next();
-    List decl = _declarator(c, NULL, NULL, method_identity);
+    List decl = _declarator(
+      c, NULL, NULL, method_identity, source_first, source_after);
     if (c.peek(0) != <)>)
       c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
     c.next();
@@ -807,8 +837,10 @@ static List _direct_declarator(
   }
   if (!c.token.text.is_identifier()) return %(bind () ());
   // Identifier or typedef name or method-sugar target
-  List ident =
-    _complex_identifier(c, method_identity);
+  Token first = c.token;
+  List ident = _complex_identifier(c, method_identity);
+  *source_first = first;
+  *source_after = c.token;
   return %(bind $ident ());
 }
 
@@ -832,10 +864,12 @@ void Compiler.bind_template_local(
 }
 
 static List _declarator(
-  Compiler compiler, List type, List context, List *method_identity_out) {
+  Compiler compiler, List type, List context, List *method_identity_out,
+  Token *source_first, Token *source_after) {
   List ptr = _pointer(compiler), method_identity = NULL;
   List (key, infix) =
-    _direct_declarator(compiler, &method_identity).cdr();
+    _direct_declarator(
+      compiler, &method_identity, source_first, source_after).cdr();
   List sfx = _declarator_suffix(compiler);
   List modifiers = %( @infix @sfx @ptr );
   List ast = modifiers.append(type);
@@ -855,10 +889,12 @@ static List _declarator_init(
   Compiler c, List type, List context) {
   Token origin = c.token;
   List method = NULL;
-  List bind = _declarator(c, type, context, &method);
+  Token first = NULL, after = NULL;
+  List bind = _declarator(c, type, context, &method, &first, &after);
   int preserved_self = 0;
   bind = _install_declarator_node(
     c, type, context, bind, method, &preserved_self);
+  c.record_source_declaration(bind.cadr(), first, after);
   int function_arrow = !c.in_proto && c._at_function_arrow() &&
     %(declare $type (bindings $bind)).type_from_ast().is_function();
   if (!c.in_proto && !function_arrow && c.test(<=>)) {
@@ -1325,6 +1361,7 @@ List Compiler.parse_import_declaration(Compiler c) {
 */
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) c.update_source_visibility(c.leading_preproc());
+  if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) {
@@ -1455,7 +1492,7 @@ static List _finish_declarator_parameters(Compiler compiler, List declarator) {
                   params.push(_finish_parameter(
                     compiler, base,
                     _finish_declarator_parameters(compiler, declarator),
-                    NULL));
+                    NULL, NULL, NULL));
                 default: params.push(parameter);
               }
             }
@@ -1706,6 +1743,14 @@ List Compiler.bind_syntax(
           bound.push(_.resolve_expression(argument, _.token));
         return %(args @{bound.list_free()});
       }
+      case %(c-assert ?condition ?message): {
+        if (context == AST_UNIT || context == AST_BLOCK ||
+            context == AST_FIELD)
+          return %(c-assert
+                   ${_.resolve_expression(condition, _.token)}
+                   ${_.resolve_expression(message, _.token)});
+        goto construction_error;
+      }
       case %(falias ?declaration ?native_syntax): {
         if (context != AST_UNIT) goto construction_error;
         declaration = _.bind_syntax(declaration, AST_UNIT, _.return_type);
@@ -1801,7 +1846,8 @@ List Compiler.bind_syntax(
             foreach (Var row, _.evaluate_macro_rows(value)) match (row) {
               case %(...): parameters.push(row);
               case %(param ?base (!set ?declarator (bind ? ?))):
-                parameters.push(_finish_parameter(_, base, declarator, NULL));
+                parameters.push(
+                  _finish_parameter(_, base, declarator, NULL, NULL, NULL));
             }
           }
         }

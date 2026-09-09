@@ -1,8 +1,8 @@
 {
   "name": "x2c-syntax",
   "displayName": "x2c - C with batteries",
-  "description": "Syntax highlighting and language configuration for x2c source files.",
-  "version": "0.1.23",
+  "description": "x2c syntax highlighting, compiler diagnostics, definitions, and type hover.",
+  "version": "0.2.0",
   "publisher": "x2c-lang",
   "author": {
     "name": "Gary William Flake"
@@ -80,15 +80,42 @@
         "scopeName": "source.x2c.lisp",
         "path": "./syntaxes/x2c-lisp.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "x2c",
+      "properties": {
+        "x2c.semantic.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable compiler diagnostics, definitions, and hover in trusted local workspaces."
+        },
+        "x2c.semantic.workerPath": {
+          "type": "string",
+          "default": "x2c-editor-worker",
+          "description": "Path to the x2c semantic worker built with the configured compiler."
+        },
+        "x2c.semantic.arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Ordinary x2c command and arguments for analysis, such as [\"build\", \"--target\", \"app\"]. Empty selects the discovered project or the current file."
+        }
+      }
+    }
   },
   "scripts": {
     "build": "vsce package",
-    "test": "node --test test/language-configuration.test.js && vscode-tmgrammar-test 'test/**/*.test.x' 'test/**/*.test.xlisp'"
+    "test": "node --test test/*.test.js && vscode-tmgrammar-test 'test/**/*.test.x' 'test/**/*.test.xlisp'"
   },
   "devDependencies": {
     "@vscode/vsce": "3.9.2",
     "vscode-tmgrammar-test": "0.1.3"
   },
-  "icon": "images/icon.png"
+  "icon": "images/icon.png",
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:x2c"
+  ]
 }

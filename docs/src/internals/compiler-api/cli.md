@@ -26,7 +26,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:662`
+Source: `src/cli.x:664`
 
 #### cli_parse
 
@@ -41,7 +41,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:869`
+Source: `src/cli.x:871`
 
 ### `CliRequest`
 
@@ -52,7 +52,7 @@ Source: `src/cli.x:869`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:918`
+Source: `src/cli.x:920`
 
 ## Public types
 
@@ -63,7 +63,7 @@ Source: `src/cli.x:918`
 <a id="CliRequest"></a>
 ### CliRequest
 
-`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, Symbol kind, color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int live_symbols, cpp_symbols, source_map; } *CliRequest`
+`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, Symbol kind, color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int live_symbols, cpp_symbols, source_map, source_facts; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
 `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:
@@ -71,7 +71,7 @@ request storage and referenced canonical values keep their producing
 `Scope`
 and pool lifetimes.
 
-Source: `src/cli.x:17`
+Source: `src/cli.x:18`
 
 ## Design notes
 

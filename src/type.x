@@ -822,8 +822,17 @@ static List _from_ast(List ast, List context) {
     // (params ?params), (bindings ?bindings), (fields ?fields)
     case <params>:
     case <bindings>:
-    case <fields>:
       return _from_ast_items(cdr(ast), context);
+    case <fields>: {
+      Array types = %[];
+      foreach (List field, ast.cdr()) {
+        List declaration = field;
+        while (declaration.car() == <at>) declaration = declaration.caddr();
+        if (declaration.car() != <c-assert>)
+          types.push(_from_ast(field, context));
+      }
+      return types.list_free();
+    }
     // (typedef ?type (bindings ?bindings))
     case <typedef>: {
       (List source_type, List bindings) = ast.cdr();

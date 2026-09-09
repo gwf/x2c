@@ -306,9 +306,10 @@ covers the runtime under `lib/`.
 
 `src/compiler.x` owns compiler state and symbol scopes. `src/diagnostics.x`
 owns structured errors. `src/utils.x` owns host-environment and process
-helpers, including the C preprocessor process boundary. `src/main.x` owns
-process initialization, the translation loop, and phase dispatch;
-`src/cli.x` owns the option table, command selection, and help rendering.
+helpers, including the C preprocessor process boundary. `src/frontend.x`
+shares configured source stages and sequential unit lifetimes with internal
+tools. `src/main.x` owns the translation loop, inspection output, and exit
+policy; `src/cli.x` owns the option table, command selection, and help rendering.
 
 Each feature entry lists the relevant parser, transforms, runtime code, and
 tests so you can follow its complete implementation.

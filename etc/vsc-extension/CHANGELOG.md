@@ -3,6 +3,17 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
+## 0.2.0 - Repository preview
+
+- Add compiler diagnostics, definition navigation, and type hover through an
+  optional repository-built semantic worker.
+- Analyze unsaved source and include snapshots in fresh processes, with
+  revision cancellation and UTF-8 to UTF-16 source-position conversion.
+- Keep semantic execution restricted to trusted local workspaces; retain
+  syntax highlighting when the worker or configuration is unavailable.
+- Reuse ordinary project and compiler options. Completion, rename, and a
+  workspace index remain outside this preview.
+
 ## 0.1.23 - 2026-09-06 (Preview)
 
 ### Added

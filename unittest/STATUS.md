@@ -28,6 +28,13 @@
   String, and Map helper lowering; proves transform-owned Map-key boxing,
   omitted/reverse bounds, and one evaluation of every side-effecting operand;
   and checks exact generated C and native results.
+- Native array typedef indexing falls back to the resolved array element type
+  after existing getindex lookup. Designated initializer coverage includes
+  String/Var aliases, named-field continuation, nested arrays, sparse inferred
+  bounds, struct/union elements, and safe discarded excess initializers.
+- Adjacent C literal coverage preserves escape boundaries and String
+  promotion. C static assertions work in file, block, aggregate-member, and
+  canonical macro forms without consuming aggregate initializer slots.
 - The Var-comparison fixture proves all eight comparison operators, native and
   mixed operands, wide value equality versus box identity, mutable object
   identity versus structural order, exact helper selection, and one evaluation

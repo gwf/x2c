@@ -10,6 +10,7 @@
 #include "build.x"
 #include "bootstrap.x"
 #include "project.x"
+#include "frontend.x"
 #include "toolchain.x"
 #pragma private
 
@@ -42,13 +43,6 @@
    fields. A nested request may instead be produced by its target Context. */
 static CliRequest opts = NULL;
 
-// The dumps whose output only the host preprocessor can supply.
-static const SymbolSet cpp_dumps =
-  %<<dump-cpp cpp-tokens dump-csym snapshot>>;
-
-// request.include_dirs plus the installed defaults
-static List include_dirs = NULL;
-static Toolchain host_toolchain = NULL;
 // logging & diagnostics
 
 /* Only --debug logs. Without it there is no sink, so log_should_log is
@@ -71,6 +65,10 @@ static void _report_diagnostics(Compiler compiler) {
   foreach (Var entry, entries) compiler.print_diagnostic(entry);
 }
 
+static void _preprocessor_errors(String text) {
+  Stderr.printf("%s", text);
+}
+
 // pipeline utilities
 
 static Map _filter_static_symbols(Map globs, Map statics) {
@@ -80,235 +78,11 @@ static Map _filter_static_symbols(Map globs, Map statics) {
   return result;
 }
 
-// pipeline stages
-
-// Report an unusable primary input as a located <driver> diagnostic.
-// report_error does not return, so the NULL is only for the reader.
-static String _unreadable_input(
-  Compiler compiler, String filename, String reason) {
-  List notes = %("stage: driver" "file: $filename" "reason: $reason");
-  compiler.report_error(<driver>, "cannot read input file", NULL, notes);
-}
-
-// Read the primary source file. fopen() opens directories on some
-// platforms and then reads nothing, so the handle is checked for a regular
-// file before its text is taken. An empty file yields the canonical empty
-// String (a NULL pointer), which the rest of the pipeline treats as an
-// empty translation unit.
-static String _read_input_text(Compiler compiler, String filename) {
-  File file = NULL;
-  try file = filename.open("r");
-  catch %(not-found *):
-    return _unreadable_input(compiler, filename, "cannot open");
-  catch %(io-fail *):
-    return _unreadable_input(compiler, filename, "cannot open");
-  struct stat info;
-  if (file.stat(&info) || !S_ISREG(info.st_mode)) {
-    file.close();
-    return _unreadable_input(compiler, filename, "not a regular file");
-  }
-  String text = NULL;
-  try text = file.string_close();
-  catch %(io-fail *):
-    return _unreadable_input(compiler, filename, "read failed");
-  // A zero-byte input is an empty translation unit. gcc and clang both
-  // accept one, and x2c already accepted its newline-only and comment-only
-  // spellings. It compiles to an empty .c/.h pair.
-  return text;
-}
-
-static Compiler _tokenize_input(Compiler c, String filename) {
-  c.filename = filename;
-  char source_path[PATH_MAX], runtime_path[PATH_MAX], lib_path[PATH_MAX];
-  String lib = %"${x2c_get_root()}/lib", runtime = %"$lib/x2c.x";
-  int source_resolved = realpath(filename, source_path) != NULL;
-  int lib_resolved = realpath(lib, lib_path) != NULL;
-  c.prelude =
-    !(source_resolved &&
-      realpath(runtime, runtime_path) &&
-      !strcmp(source_path, runtime_path));
-  int lib_length = lib_resolved ? strlen(lib_path) : 0;
-  c.runtime_inc =
-    !(source_resolved && lib_resolved &&
-      !strncmp(source_path, lib_path, lib_length) &&
-      source_path[lib_length] == '/');
-  c.tokenize(_read_input_text(c, filename));
-  if (opts.dump == <tokens>) {
-    c.dump_tokens();
-    exit(0);
-  }
-  c.include_dirs = include_dirs;
-  return c;
-}
-
-static Token _first_preprocessor_token(Compiler compiler) {
-  for (Token token = compiler.tokenizer.tokens; token.type != <eof>; token++)
-    if (token.type == <preproc>) return token;
-  return compiler.token;
-}
-
-// Process-lifetime symbol snapshot, loaded once in the root epoch so
-// every translation unit shares the interned rows.
-static Map snapshot_globals;
-static Map snapshot_function_definitions, static String snapshot_error;
-static int snapshot_gensym, snapshot_loaded;
-
-/* Generated-name counter for the whole process rather than per unit. The
-   header-contribution cache outlives a unit, and its rows embed the gensym
-   numbers allocated when the header was first walked. Restarting the counter
-   at the snapshot base for every unit let a later unit mint a number a
-   cached row already held. Two anonymous aggregates then shared one key
-   and the second won. The numbers are compiler-internal and no emission
-   path prints one, so they need only be unique. */
-static int gensym_cursor;
-static int header_symbols_loaded;
-
-// Load the symbol snapshot once; errors are reported per file because
-// diagnostics need a tokenized compiler for their anchor token.
-static void _load_snapshot_once(void) {
-  if (snapshot_loaded) return;
-  snapshot_loaded = 1;
-  String snapshot_path = %"${x2c_get_root()}/etc/symbols.xlisp";
-  try snapshot_globals = symbol_snapshot_load(
-    snapshot_path, &snapshot_function_definitions, &snapshot_gensym);
-  catch %(not-found *):
-    snapshot_error = %"missing symbol snapshot: $snapshot_path";
-  catch %(io-fail *):
-    snapshot_error = %"cannot read symbol snapshot: $snapshot_path";
-  catch %(incomplete *):
-    snapshot_error = %"incomplete symbol snapshot: $snapshot_path";
-  catch %(malformed *):
-    snapshot_error = %"malformed symbol snapshot: $snapshot_path";
-}
-
-static void _load_translation_support(CliRequest request) {
-  Type.initialize();
-  header_symbols_initialize();
-  if (!request.live_symbols && !request.no_cpp) _load_snapshot_once();
-  if (request.no_cpp || request.dump == <hdr-syms> ||
-      request.live_symbols || header_symbols_loaded)
-    return;
-  String artifact = %"${x2c_get_root()}/etc/header-symbols.xlisp";
-  header_symbols_open(artifact, snapshot_gensym);
-  header_symbols_loaded = 1;
-}
-
-// Run the C preprocessor and return collected globals for downstream stages.
-static Map _preprocess_input(
-  Compiler c, String filename, Map *snapshot_statics) {
-  extern File Stderr;
-  if (snapshot_statics) *snapshot_statics = NULL;
-  if (opts.no_cpp) return NULL;
-  String root = x2c_get_root(), int use_snapshot = !opts.live_symbols;
-  Map globs = NULL;
-  if (use_snapshot) {
-    if ((void *) snapshot_globals == NULL)
-      c.report_error(
-        <driver>, snapshot_error,
-        _first_preprocessor_token(c), NULL);
-    // One copy per translation unit. collect_symbols merges the unit's
-    // own symbols into its argument, and units must not see each other's
-    // additions.
-    globs = snapshot_globals.copy();
-    c.fn_defs = snapshot_function_definitions.copy();
-    if (gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
-    c.set_gensym(gensym_cursor);
-  }
-  int use_cpp = opts.cpp_symbols || opts.live_symbols ||
-                cpp_dumps.contains(opts.dump);
-  if (use_snapshot && !use_cpp) {
-    Map result = c.collect_symbols(globs);
-    return result;
-  }
-  Compiler cppcompiler = Compiler.new_shared(c);
-  cppcompiler.filename = filename;
-  String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL, imacros = runtime;
-  String force_include = NULL;
-  int status = host_toolchain.preprocess(
-    filename, c.include_dirs, imacros, force_include,
-    &text, &errors,
-    &dependency_text);
-  if (status) {
-    if (errors) Stderr.printf("%s", errors);
-    List notes = %("stage: preprocess" "status: $status");
-    c.report_error(
-      <driver>, "failed to run C preprocessor",
-      _first_preprocessor_token(c), notes);
-  }
-  if (errors) Stderr.printf("%s", errors);
-  foreach (String dependency, translation_depfile_parse(dependency_text))
-    c.add_translation_dependency(dependency);
-  if (!text) return NULL;
-  if (opts.dump == <dump-cpp>) {
-    Stderr.printf("%s", text);
-    exit(0);
-  }
-  cppcompiler.tokenize(text);
-  cppcompiler.source_private = -1;
-  cppcompiler.collect_protocols = 0;
-  if (opts.dump == <cpp-tokens>) {
-    cppcompiler.dump_tokens();
-    exit(0);
-  }
-  if (opts.live_symbols) {
-    c.runtime_hdrs = 1;
-    globs = c.collect_symbols(globs);
-  }
-  Map saved_counters = NULL;
-  int saved_gensym = 0;
-  if (!opts.live_symbols) {
-    saved_counters = c.names.counters;
-    saved_gensym = c.names.gensym_count;
-    c.names.counters = c.names.counters.copy();
-  }
-  cppcompiler.shallow_parse(globs);
-  globs = cppcompiler.sym.global_symbols();
-  if (opts.live_symbols && !opts.dump)
-    c.install_generated_protocol_symbols(globs);
-  if (!opts.live_symbols) {
-    /* The raw walk below sees the same source again. Do not count names from
-       both symbol passes before the full parse. */
-    c.names.counters = saved_counters;
-    c.names.gensym_count = saved_gensym;
-    globs = c.collect_symbols(globs);
-  }
-  if (opts.dump == <snapshot> && snapshot_statics)
-    *snapshot_statics =
-      cppcompiler.sym.file_statics().copy();
-  if (opts.dump == <dump-csym>) {
-    cppcompiler.dump_symbol_table(globs);
-    exit(0);
-  }
-  cppcompiler.free_lisp();
-  return globs;
-}
-
 static String _ast_inspection_repr(List node) {
   match (node)
     case %(macrodef (name ?name) *):
       return %"(macrodef <macro ${name.str()}>)";
   return node.repr();
-}
-
-static List _parse_input(Compiler compiler, Map globs) {
-  List ast = compiler.full_parse(globs);
-  if (compiler.error_count()) {
-    _report_diagnostics(compiler);
-    exit(1);
-  }
-  switch (opts.dump) {
-    case <dump-cache>:
-      compiler.dump_cache();
-      exit(0);
-    case <symbols>:
-      compiler.dump_symbol_table(compiler.sym.current_symbols());
-      exit(0);
-    case <dump-ast>:
-      foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
-      exit(0);
-  }
-  return ast;
 }
 
 static List _transform_ast(Compiler compiler, List ast) {
@@ -340,50 +114,61 @@ static void _stage_stats(String filename, const char *stage) {
     now_us);
 }
 
-/* A unit compiles in package mode only when it is one of that package's own
-   files below `<root>/<name>/src/` or the single-file `<root>/<name>/<name>.x`
-   under a registered --package-dir root. The comparison uses the canonical
-   path, so symlinked or relative spellings of one file agree; a test or
-   example elsewhere in the package directory is a consumer and reaches the
-   package through `import`. */
-static void _configure_package(Compiler compiler, String filename) {
-  char buffer[PATH_MAX];
-  compiler.package_dirs = opts.package_dirs;
-  if (!opts.package_dirs || !realpath(filename, buffer)) return;
-  String source = %"$buffer";
-  foreach (String directory, opts.package_dirs) {
-    if (!realpath(directory, buffer)) continue;
-    String root = %"$buffer/";
-    if (!source.startswith(root)) continue;
-    String rest = source[root.len():], int slash = rest.find("/");
-    if (slash <= 0) continue;
-    String name = rest[:slash], tail = rest[slash + 1:];
-    if (!name.is_identifier()) continue;
-    if (!tail.startswith("src/") && tail != %"$name.x") continue;
-    compiler.package = name;
-    compiler.package_roots[name] = %"$root$name";
-    return;
-  }
-}
-
 // Compile one translation unit through the pipeline.
 static void _compile_file(
-  CliRequest request, String filename, String output_dir) {
-  Compiler compiler = Compiler.new();
-  compiler.source_map = request.source_map;
-  _configure_package(compiler, filename);
+  Frontend frontend, String filename, String output_dir) {
+  CliRequest request = frontend.request;
+  ParsedUnit unit;
   _stage_stats(filename, "start");
-  _tokenize_input(compiler, filename);
+  int ok = frontend.start(filename, &unit);
+  defer unit.close();
+  Compiler compiler = unit.compiler;
+  if (!ok) {
+    _report_diagnostics(compiler);
+    exit(1);
+  }
+  compiler.own_diagnostics();
+  if (opts.dump == <tokens>) {
+    compiler.dump_tokens();
+    exit(0);
+  }
   _stage_stats(filename, "tokenize");
-  Map snapshot_statics = NULL;
-  Map globs = _preprocess_input(compiler, filename, &snapshot_statics);
-  if (!opts.no_cpp) header_symbols_begin_generated();
-  compiler.sym.seed_var_tags(globs);
+  ok = unit.collect(frontend);
+  _report_diagnostics(compiler);
+  if (!ok) exit(1);
+  switch (opts.dump) {
+    case <dump-cpp>:
+      if (unit.preprocessor_output)
+        Stderr.printf("%s", unit.preprocessor_output);
+      exit(0);
+    case <cpp-tokens>:
+      if (unit.preprocessor) unit.preprocessor.dump_tokens();
+      exit(0);
+    case <dump-csym>:
+      if (unit.preprocessor)
+        unit.preprocessor.dump_symbol_table(unit.globals);
+      exit(0);
+  }
   _stage_stats(filename, "symbols");
-  List ast = _parse_input(compiler, globs);
+  if (!unit.parse()) {
+    _report_diagnostics(compiler);
+    exit(1);
+  }
+  compiler.recovery_depth = 0;
+  List ast = unit.ast;
+  switch (opts.dump) {
+    case <dump-cache>:
+      compiler.dump_cache();
+      exit(0);
+    case <symbols>:
+      compiler.dump_symbol_table(compiler.sym.current_symbols());
+      exit(0);
+    case <dump-ast>:
+      foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
+      exit(0);
+  }
   if (opts.dump == <snapshot>) {
-    Map statics = snapshot_statics
-      ? snapshot_statics : %{};
+    Map statics = unit.snapshot_statics ? unit.snapshot_statics : %{};
     Map.merge(statics, compiler.sym.file_statics());
     Map snapshot = _filter_static_symbols(
       compiler.sym.global_symbols(), statics);
@@ -393,17 +178,11 @@ static void _compile_file(
   }
   if (opts.dump == <conform>) {
     printf("(unit %s)\n", filename);
-    compiler.dump_conformance(globs);
-    gensym_cursor = compiler.names.gensym_count;
-    compiler.free_lisp();
+    compiler.dump_conformance(unit.globals);
     return;
   }
   ast = compiler.generate_protocol_adapters(ast);
-  if (opts.dump == <hdr-syms>) {
-    gensym_cursor = compiler.names.gensym_count;
-    compiler.free_lisp();
-    return;
-  }
+  if (opts.dump == <hdr-syms>) return;
   _stage_stats(filename, "parse");
   ast = _transform_ast(compiler, ast);
   _stage_stats(filename, "transform");
@@ -416,8 +195,6 @@ static void _compile_file(
   if (!translation_depfile_write(request, compiler, filename, output_dir))
     exit(1);
   _stage_stats(filename, "generate");
-  gensym_cursor = compiler.names.gensym_count;
-  compiler.free_lisp();
 }
 
 static void _preflight_translation(CliRequest c) {
@@ -495,27 +272,6 @@ static void _preflight_translation(CliRequest c) {
   }
 }
 
-static void _apply_cli_request(CliRequest request) {
-  opts = request;
-  include_dirs = request.include_dirs.append(x2c_default_include_dirs());
-  host_toolchain = toolchain_new(
-    request.cc, request.ar, request.cpp_args, request.cc_args,
-    request.ld_args, request.verbose, request.dry_run);
-}
-
-// Translate one unit. Each runs inside an isolated Context: its transient
-// allocations, Strings, cons cells, Error state, and Match cache are
-// released together, so batch peak memory stays near single-file peak. Outputs
-// are on disk; nothing exports except cached header rows.
-static void _translate_unit(
-  CliRequest request, String input, String output_dir) {
-  Context unit = Context.open_isolated_named("translation unit");
-  defer unit.close();
-  Type.begin_unit();
-  defer Type.end_unit();
-  _compile_file(request, input, output_dir);
-}
-
 /* Translate `inputs` in forked workers, at most `jobs` at a time.
    A worker inherits the loaded snapshot and header artifact rather than
    reading them again, and keeps its slice of the input list to the end, so
@@ -523,7 +279,8 @@ static void _translate_unit(
    the same file. The parent reports progress as workers finish. Returns the
    number that failed. */
 static int _translate_workers(
-  CliRequest request, Array chunks, String output_dir, int total) {
+  Frontend frontend, Array chunks, String output_dir, int total) {
+  CliRequest request = frontend.request;
   int jobs = request.jobs, slices = chunks.len();
   if (jobs > slices) jobs = slices;
   // One entry per live worker: its pid and how many units it carries, so a
@@ -538,7 +295,7 @@ static int _translate_workers(
       long pid = worker_fork();
       if (!pid) {
         foreach (String input, slice)
-          _translate_unit(request, input, output_dir);
+          _compile_file(frontend, input, output_dir);
         worker_exit(0);
       }
       if (pid < 0) {
@@ -585,7 +342,7 @@ static Array _translation_chunks(List inputs, int total, int jobs) {
 static int _run_translation(CliRequest c) {
   unsigned long started_at = report_now_us();
   if (!c.out_dir) c.out_dir = %".";
-  _apply_cli_request(c);
+  opts = c;
   _preflight_translation(c);
   if (c.verbose || c.dry_run) {
     fprintf(stderr, "x2c: translate");
@@ -594,7 +351,8 @@ static int _run_translation(CliRequest c) {
     fputc('\n', stderr);
   }
   if (c.dry_run) return 0;
-  _load_translation_support(c);
+  Frontend frontend = Frontend.new(c);
+  frontend.preprocessor_errors = _preprocessor_errors;
   String output_dir = c.out_dir;
   int total = c.inputs.len(), completed = 0;
   unsigned long long gen_bytes = 0;
@@ -604,14 +362,14 @@ static int _run_translation(CliRequest c) {
                  !c.dump && !c.inspects();
   if (parallel) {
     Array chunks = _translation_chunks(c.inputs, total, c.jobs);
-    int failed = _translate_workers(c, chunks, output_dir, total);
+    int failed = _translate_workers(frontend, chunks, output_dir, total);
     chunks.free();
     if (failed) return 1;
     completed = total;
   }
   foreach (String input, parallel ? (List) NULL : c.inputs) {
     if (!c.nested) report_progress(<translate>, completed, total, input);
-    _translate_unit(c, input, output_dir);
+    _compile_file(frontend, input, output_dir);
     completed++;
     if (!c.nested) report_progress(<translate>, completed, total, input);
   }
@@ -622,7 +380,7 @@ static int _run_translation(CliRequest c) {
       gen_bytes += report_file_bytes(%"$output_dir/$stem.h");
     }
   if (opts.dump == <hdr-syms> &&
-      !header_symbols_write(Stdout, snapshot_gensym))
+      !Frontend.write_header_symbols(Stdout))
     return 1;
   if (!c.nested && !c.inspects()) {
     String duration = report_duration(report_now_us() - started_at);
@@ -660,7 +418,7 @@ static int _run_build_request(CliRequest c, Array commands) {
   if (!c.dry_run) {
     foreach (String input, c.inputs) {
       if (!input.endswith(%".x")) continue;
-      _load_translation_support(c);
+      Frontend.load_support(c);
       break;
     }
   }
@@ -752,7 +510,7 @@ static int _run_bootstrap(CliRequest command) {
   CliRequest runtime_request =
     bootstrap_build_request(command, payload, <runtime>);
   runtime_request.label = "runtime";
-  _load_translation_support(runtime_request);
+  Frontend.load_support(runtime_request);
   /* A source-bearing APE is one-shot. A nonzero status returned by either
      build closes build and lock state and flushes stdio before `_Exit`. */
   Context build = Context.open_isolated_named("bootstrap build");
@@ -800,7 +558,7 @@ int main(int argc, char **argv) {
   _configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot
      invalidate their canonical values. */
-  _load_translation_support(request);
+  Frontend.load_support(request);
   /* Reclaim command-owned Scope allocations and canonical values. */
   Context command = Context.open_isolated_named("compiler command");
   int result = request.command == <translate>

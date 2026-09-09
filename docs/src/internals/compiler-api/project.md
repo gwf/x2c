@@ -12,9 +12,19 @@ X2c project manifests.
 
 | Function | Summary |
 | --- | --- |
+| [`project_manifest`](#project_manifest) | Returns the explicit or nearest readable project manifest, or NULL. |
 | [`project_plan`](#project_plan) | Parses a project manifest and returns its selected target's build plan. |
 
 ### Functions
+
+#### project_manifest
+
+`String project_manifest(CliRequest request)`
+
+Returns the explicit or nearest readable project manifest, or NULL.
+Discovery uses the same request view as project parsing.
+
+Source: `src/project.x:709`
 
 #### project_plan
 
@@ -27,7 +37,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:714`
+Source: `src/project.x:734`
 
 ## Public types
 

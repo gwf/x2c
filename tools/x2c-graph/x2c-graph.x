@@ -1272,11 +1272,29 @@ static String _display_input(String input) {
        ? String.new(path + length + 1) : path;
 }
 
+static void _preprocessor_errors(String text) {
+  Stderr.printf("%s", text);
+}
+
+static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
+  int ok = frontend.start(filename, unit);
+  if (ok) {
+    unit->compiler.own_diagnostics();
+    ok = unit.collect(frontend) && unit.parse();
+  }
+  if (ok) return 1;
+  if (!unit->compiler.diagnostics.has_emitter())
+    foreach (Var entry, unit->compiler.diagnostics())
+      unit->compiler.print_diagnostic(entry);
+  unit.close();
+  return 0;
+}
+
 static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
   Array units = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List functions = _analyze_unit(parsed.compiler, parsed.ast);
     Symbol subtree = subtrees ? subtrees[input].symbol() : <none>;
@@ -1285,7 +1303,7 @@ static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
       (functions @functions)
     );
     record = parsed.context.export(record).list();
-    parsed.close(frontend);
+    parsed.close();
     units.push(record);
   }
   units.sort();
@@ -1297,7 +1315,7 @@ static List _parse_field_units(
   Array units = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List sites = _analyze_field_sites_unit(
       parsed.compiler, parsed.ast, path, receiver_name, field_name
@@ -1308,7 +1326,7 @@ static List _parse_field_units(
       record = parsed.context.export(record).list();
       units.push(record);
     }
-    parsed.close(frontend);
+    parsed.close();
   }
   units.sort();
   return %(
@@ -1321,13 +1339,13 @@ static List _parse_field_sites(
   Array sites = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_field_sites_unit(
       parsed.compiler, parsed.ast, path, receiver_name, field_name
     );
     records = parsed.context.export(records).list();
-    parsed.close(frontend);
+    parsed.close();
     foreach (List record, records) sites.push(record);
   }
   sites.sort();
@@ -1341,13 +1359,13 @@ static List _parse_sites(Frontend frontend, Array inputs, String wanted) {
   Array sites = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_sites_unit(
       parsed.compiler, parsed.ast, path, wanted
     );
     records = parsed.context.export(records).list();
-    parsed.close(frontend);
+    parsed.close();
     foreach (List record, records) sites.push(record);
   }
   sites.sort();
@@ -1358,13 +1376,13 @@ static List _parse_walk_units(Frontend frontend, Array inputs) {
   Array functions = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = _analyze_walk_unit(
       parsed.compiler, parsed.ast, path
     );
     records = parsed.context.export(records).list();
-    parsed.close(frontend);
+    parsed.close();
     foreach (List record, records) functions.push(record);
   }
   functions.sort();
@@ -1376,13 +1394,13 @@ static List _parse_flow_units(
   Array functions = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List records = Flow_analyze_unit(
       parsed.compiler, parsed.ast, path
     );
     records = parsed.context.export(records).list();
-    parsed.close(frontend);
+    parsed.close();
     foreach (List record, records) functions.push(record);
   }
   functions.sort();
@@ -1393,7 +1411,7 @@ static List _parse_tail_units(Frontend frontend, Array inputs) {
   Array units = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List functions = _analyze_tail_unit(
       parsed.compiler, parsed.ast, path
@@ -1403,7 +1421,7 @@ static List _parse_tail_units(Frontend frontend, Array inputs) {
       record = parsed.context.export(record).list();
       units.push(record);
     }
-    parsed.close(frontend);
+    parsed.close();
   }
   units.sort();
   return %(tail-calls (units @{units.list_free()}));
@@ -1414,13 +1432,13 @@ static List _parse_loop_allocation_units(
   Array units = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     List record = LoopAllocations.analyze_unit(
       parsed.compiler, parsed.ast, path
     );
     record = parsed.context.export(record).list();
-    parsed.close(frontend);
+    parsed.close();
     units.push(record);
   }
   units.sort();
@@ -1432,7 +1450,7 @@ static List _parse_lifetime_units(
   Array units = %[];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!frontend.open(input, &parsed)) return NULL;
+    if (!_open_input(frontend, input, &parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
     Map definitions = project_function_targets(
       parsed.compiler, parsed.ast, path
@@ -1441,7 +1459,7 @@ static List _parse_lifetime_units(
       parsed.compiler, parsed.ast, path, definitions
     );
     record = parsed.context.export(record).list();
-    parsed.close(frontend);
+    parsed.close();
     units.push(record);
   }
   units.sort();
@@ -2623,10 +2641,14 @@ int main(int argc, char **argv) {
     return 2;
   }
   inputs.sort();
+  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  request.command = <translate>;
+  request.include_dirs = include_dirs.list_free();
+  Frontend frontend = Frontend.new(request);
+  frontend.preprocessor_errors = _preprocessor_errors;
   Context command = Context.open_isolated_named("x2c graph command");
   int status = 0;
   try {
-    Frontend frontend = Frontend.new(include_dirs.list_free());
     List result = NULL;
     if (field)
       result = _parse_field_units(

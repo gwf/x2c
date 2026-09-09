@@ -10,6 +10,7 @@
 #include "ast.h"
 #include "type.h"
 #include "logger.h"
+#include "sourceview.h"
 typedef struct Diagnostics * Diagnostics;
 
 typedef struct GenNames{
@@ -68,6 +69,10 @@ typedef struct Compiler{
   GenNames names;
   Array origins;
   int origin,  source_map;
+  SourceView sources;
+  int source_facts,  source_primary;
+  Array source_occurrences;
+  Map source_definitions,  source_declarations,  source_texts;
 }
 * Compiler;
 
@@ -86,9 +91,25 @@ void Compiler_free_lisp(Compiler c);
 
 void Compiler_own_diagnostics(Compiler compiler);
 
+void Compiler_borrow_diagnostics(Compiler compiler,  Compiler owner);
+
+void Compiler_take_diagnostics(Compiler compiler,  Compiler child);
+
+void Compiler_close_child(Compiler compiler,  Compiler child);
+
 Compiler Compiler_new(void);
 
 Compiler Compiler_new_shared(Compiler owner);
+
+int Compiler_read_source(Compiler compiler,  String path,  String volatile * text);
+
+void Compiler_copy_source_declaration(Compiler compiler,  Map target,  Map source,  List key);
+
+void Compiler_merge_source_declarations(Compiler compiler,  Map target,  Map source);
+
+void Compiler_record_source_declaration(Compiler compiler,  List binding,  Token first,  Token after);
+
+void Compiler_record_source_reference(Compiler compiler,  List binding,  Type type,  Token first,  Token after);
 
 Map Compiler_semantic_binding_facts(Compiler compiler);
 

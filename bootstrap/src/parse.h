@@ -16,6 +16,10 @@ List Compiler_parse_basic_identifier(Compiler compiler);
 
 List Compiler_parse_optional_identifier(Compiler compiler);
 
+int Compiler_test_static_assert(Compiler compiler);
+
+List Compiler_parse_static_assert(Compiler compiler);
+
 List Compiler_parse_field(Compiler compiler,  List context);
 
 List Compiler_parse_fields(Compiler c,  List context);

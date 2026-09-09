@@ -2,10 +2,10 @@
 > Gary approved execution with parallel workers. B1-B3 and C1-C3 shipped
 > September 9 in bb3de5b after the post-reboot publication gate passed.
 > The book, responsive layout, and feature-table correction are live.
-> P1-P3, B4/B5, C4, D1, and Match are implemented with focused evidence;
-> T1/T2 and source-package support also pass focused checks. Final
-> integration validation and delivery remain. The
-> frontend/editor work follows this batch.
+> P1-P3, B4/B5, C4, D1, Match, T1/T2, and source-package support shipped
+> September 9 in 49d46e8 after full validation. The frontend/editor and
+> narrow language followups are implemented and undergoing final publication
+> validation.
 
 # Correctness, performance, and developer tooling
 
@@ -423,7 +423,7 @@ change was made. Evidence: `debug/post-reboot-correctness-gate-final.log`,
 `debug/post-reboot-abort.log`, and `debug/post-reboot-fatal-probes.log`.
 GitHub Pages deployment succeeded after publication.
 
-Current authored changes are not yet published:
+The second batch shipped as 49d46e8:
 
 - P1/P3: fixed compiler/runtime inputs, a warmup, and five measured runs per
   candidate give identical generated C/H. Resolving each growing binary
@@ -499,8 +499,67 @@ gate, and delivery. No pending work in this batch requires user input.
 The publication run established identical bootstrap and stages 0-2 after
 refreshing the declaration cleanup. Nine C fixture snapshots required only
 removing declarations supplied by their own headers; each removal was reviewed
-and its expectation regenerated through the fixture runner. The remaining
-publication checks are rerun on that resulting tree.
+and its expectation regenerated through the fixture runner. Full validation
+passed 743 tests / 18,227 assertions, 587 fixtures / 1,367 artifacts, 110 driver
+probes, 420 required raw-symbol translations, and the book audit. Current main's
+Code of Conduct addition was integrated and the final tree revalidated before
+publication. Site/book build also passed. Evidence:
+`debug/wave2-gate-integrated.log`, `debug/wave2-site-build.log`.
+
+The final batch implements T5's shared configured frontend and retained-error
+lifetime, T6's source spans/overlays/editor adapter, adjacent C literals,
+declaration-position `_Static_assert`, and bounded designated initializers.
+Initializer scope covers direct array designators, explicit nested braces, and
+correct conversion after a named-field designator. General chained designator
+brace elision remains outside this bounded implementation; it cannot assume a
+new C constant evaluator.
+
+- T5: 22 CLI comparisons preserve content; two symbol maps differ only in
+  iteration order. The graph suite and sequential success/failure, retained
+  warnings, emitter restoration, and Context/Type cleanup probes pass.
+  Existing persistent header-cache retention reproduces in the pre-extraction
+  graph frontend; it is separate from unit cleanup. Logs:
+  `debug/t5-cli-parity.log`, `debug/t5-lifecycle.log`,
+  `debug/t5-old-lifecycle-build.log`, `debug/t5-graph-tests.log`.
+- T6: nine native worker tests pass, including new and unsaved sources,
+  lexical definitions and hover, included-file edits, package aliases,
+  project configuration, macro failures, transaction rollback, and native CPP
+  locations. The extension passes eight transport/provider tests and both
+  grammar fixtures; the isolated source-view probe verifies empty overlays.
+  Cancellation terminates native worker descendants before
+  removing snapshots. Version 0.2.0 is packaged for repository delivery; no
+  Marketplace publication or installation was performed. Logs:
+  `debug/t6-worker-tests-final.log`, `debug/t6-extra-final.log`,
+  `debug/t6-sourceview.log`. The worker is internal and checkout-bound.
+  Removing the two transaction metadata transfers in an isolated control
+  loses an imported declaration's definition; the candidate retains its
+  exact header span (`debug/t6-control-result.log`).
+  Native CPP refuses consumed unsaved input. Included documents need an
+  explicit target input or direct configuration, and declarations skipped by
+  the compiler's existing shallow collection have no invented definition.
+- Language followups: 18 fixtures pass 47 artifacts. Adjacent literals retain
+  escape boundaries; assertions remain native C declarations. Initializers
+  preserve String/Var conversions, inferred sparse dimensions, nested braces,
+  and native rejection of invalid designators or const assignment. Deferred
+  writes stay within the native array bounds, including excess values that C
+  warns about and discards. Native array typedef indexing now works while
+  custom `getindex` retains priority. One existing C snapshot changed to the
+  reviewed zero declarations and bounded assignments. The book sample prints
+  `5 6 8 9 AB`. Evidence: `.context/narrow-language-followups-design.md`,
+  `debug/wave3-book-examples.log`.
+
+The complete site/book build passes in `debug/wave3-site-build-final.log` and
+the documentation audit covers 107 files. Native editor tests pass again
+against the final read API (`debug/t6-worker-tests-delivery.log`). Its output
+pointer retains volatile qualification required by exception-frame locals;
+all four affected native modules compile with `-Werror` in the isolated probe.
+The existing unit executable now links the source-view dependency, and the
+existing documentation module check uses the stable section heading instead
+of a literal module count. No validation requirement was added.
+
+The
+coordinator is completing generated-artifact review and the exact-tree gate
+before main delivery. No user decision is needed for this batch.
 
 ## Plan review
 

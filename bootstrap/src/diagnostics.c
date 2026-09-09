@@ -4,11 +4,11 @@
 
 #include "error.h"
 
-static List _64,  _62,  _61,  _59,  _57,  _50,  _49,  _48,  _47,  _45,  _43,  _42,  _39,  _37,  _36,  _28,  _27,  _26,  _25,  _24,  _23,  _16,  _15,  _14,  _12,  _11,  _10;
+static List _65,  _63,  _62,  _60,  _58,  _51,  _50,  _49,  _48,  _46,  _44,  _43,  _40,  _38,  _37,  _28,  _27,  _26,  _25,  _24,  _23,  _16,  _15,  _14,  _12,  _11,  _10;
 
-static String _65,  _55,  _53,  _52,  _51,  _34,  _4;
+static String _66,  _56,  _54,  _53,  _52,  _35,  _34,  _4;
 
-static Var _63,  _60,  _58,  _56,  _54,  _46,  _44,  _41,  _40,  _38,  _35,  _33,  _32,  _31,  _30,  _29,  _22,  _21,  _20,  _19,  _18,  _17,  _13,  _9,  _8,  _7,  _6,  _5,  _3,  _2,  _1,  _0;
+static Var _64,  _61,  _59,  _57,  _55,  _47,  _45,  _42,  _41,  _39,  _36,  _33,  _32,  _31,  _30,  _29,  _22,  _21,  _20,  _19,  _18,  _17,  _13,  _9,  _8,  _7,  _6,  _5,  _3,  _2,  _1,  _0;
 
 static int _init_guard_ = 0;
 
@@ -66,6 +66,8 @@ long Var_integer(Var);
 int String_truth(String);
 
 int String_startswith(String,  String);
+
+String SourceView_path(String);
 
 int String_len(String);
 
@@ -139,39 +141,40 @@ __attribute__((constructor)) static void _file_init_(void){
   _31 = Symbol_var(233614172);
   _32 = Symbol_var(816725264);
   _33 = Symbol_var(1133019155420);
-  _34 = String_new("<stdin>");
-  _35 = int_var(1);
-  _36 = cons(_35,  NULL);
-  _37 = cons(_30,  _36);
-  _38 = List_var(_37);
-  _39 = cons(_31,  _36);
-  _40 = List_var(_39);
-  _41 = int_var(0);
-  _42 = cons(_41,  NULL);
-  _43 = cons(_32,  _42);
-  _44 = List_var(_43);
-  _45 = cons(_33,  _42);
-  _46 = List_var(_45);
-  _47 = cons(_46,  NULL);
-  _48 = cons(_44,  _47);
-  _49 = cons(_40,  _48);
-  _50 = cons(_38,  _49);
-  _51 = String_new("compiler error");
-  _52 = String_new("compiler warning");
-  _53 = String_new("too many errors, stopping");
-  _54 = Symbol_var(437126);
-  _55 = String_new("Var");
-  _56 = String_var(_55);
-  _57 = cons(_56,  NULL);
-  _58 = List_var(_57);
-  _59 = cons(_58,  NULL);
-  _60 = List_var(_59);
-  _61 = cons(_60,  NULL);
-  _62 = cons(_54,  _61);
-  _63 = List_var(_62);
-  _64 = cons(_63,  _57);
-  _65 = String_new("<input>");
-  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _64);
+  _34 = String_new("<");
+  _35 = String_new("<stdin>");
+  _36 = int_var(1);
+  _37 = cons(_36,  NULL);
+  _38 = cons(_30,  _37);
+  _39 = List_var(_38);
+  _40 = cons(_31,  _37);
+  _41 = List_var(_40);
+  _42 = int_var(0);
+  _43 = cons(_42,  NULL);
+  _44 = cons(_32,  _43);
+  _45 = List_var(_44);
+  _46 = cons(_33,  _43);
+  _47 = List_var(_46);
+  _48 = cons(_47,  NULL);
+  _49 = cons(_45,  _48);
+  _50 = cons(_41,  _49);
+  _51 = cons(_39,  _50);
+  _52 = String_new("compiler error");
+  _53 = String_new("compiler warning");
+  _54 = String_new("too many errors, stopping");
+  _55 = Symbol_var(437126);
+  _56 = String_new("Var");
+  _57 = String_var(_56);
+  _58 = cons(_57,  NULL);
+  _59 = List_var(_58);
+  _60 = cons(_59,  NULL);
+  _61 = List_var(_60);
+  _62 = cons(_61,  NULL);
+  _63 = cons(_55,  _62);
+  _64 = List_var(_63);
+  _65 = cons(_64,  _58);
+  _66 = String_new("<input>");
+  _x2c_func_handle_0 = Func_new(_x2c_func_adapt_0,  _65);
 }
 
 static void _emit_entry(Diagnostics diag,  List entry){
@@ -226,7 +229,7 @@ static List _build_entry(Symbol code,  String message,  List location,  List not
 }
 
 static void _publish_limit_notice(Diagnostics diag){
-  String note = _53;
+  String note = _54;
   List entry = _build_entry(25782888,  note,  NULL,  NULL);
   Array_push(diag -> entries,  List_var(entry));
   _emit_entry(diag,  entry);
@@ -276,7 +279,7 @@ void Compiler_print_diagnostic(Compiler compiler,  List entry){
   v = List_assoc(entry,  Symbol_var(30384486));
   List notes = Var_is(v,  806120) ? Var_list(v) : NULL;
   if(List_truth(location)){
-    String text = _65;
+    String text = _66;
     v = List_assoc(location,  Symbol_var(412426));
     if(! Var_is_void(v) && Var_is(v,  1318210446)) text = Var_string(v);
     int line = Var_int(List_assoc(location,  Symbol_var(805770)));
@@ -325,6 +328,8 @@ return NULL;
 
 String Compiler_display_path(Compiler compiler,  String path){
   if(! _init_guard_) _file_init_();
+  if(! String_truth(path) || String_startswith(path,  _34)) return path;
+  if(compiler -> source_facts) return SourceView_path(path);
   String root = compiler -> root_dir;
   if(String_truth(root) && String_truth(path) && String_startswith(path,  root) && String_len(path) > String_len(root) && String_getindex(path,  String_len(root)) == '/') return String_getslice(path,  String_len(root) + 1,  -2147483648,  1);
   return path;
@@ -332,9 +337,10 @@ String Compiler_display_path(Compiler compiler,  String path){
 
 List Compiler_token_location(Compiler compiler,  Token token){
   if(! _init_guard_) _file_init_();
-  String file = String_truth(compiler -> filename) ? compiler -> filename : _34;
+  String file = String_truth(compiler -> filename) ? compiler -> filename : _35;
+  if(compiler -> source_facts) file = Compiler_display_path(compiler,  file);
   if(! token) token = compiler -> token;
-  if(! token) return cons(List_var(cons(_29,  cons(String_var(file),  NULL))),  _50);
+  if(! token) return cons(List_var(cons(_29,  cons(String_var(file),  NULL))),  _51);
   file = Compiler_display_path(compiler,  file);
   return cons(List_var(cons(_29,  cons(String_var(file),  NULL))),  cons(List_var(cons(_30,  cons(int_var(token -> line),  NULL))),  cons(List_var(cons(_31,  cons(int_var(token -> col),  NULL))),  cons(List_var(cons(_32,  cons(int_var(token -> len),  NULL))),  cons(List_var(cons(_33,  cons(int_var(token -> pos),  NULL))),  NULL)))));
 }
@@ -351,11 +357,11 @@ _Noreturn void Compiler_report_error(Compiler compiler,  Symbol code,  String me
   if(! _init_guard_) _file_init_();
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
-  message = String_truth(message) ? message : _51;
+  message = String_truth(message) ? message : _52;
   List loc = _compiler_location(compiler,  token);
   Diagnostics_report(diag,  code,  message,  loc,  notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/diagnostics.x",.function =  "Compiler_report_error",.line =  289};
+    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/diagnostics.x",.function =  "Compiler_report_error",.line =  293};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570),  Symbol_var(code));
     __builtin_unreachable();
   }
@@ -366,7 +372,7 @@ void Compiler_report_warning(Compiler compiler,  Symbol code,  String message,  
   if(! _init_guard_) _file_init_();
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
-  message = String_truth(message) ? message : _52;
+  message = String_truth(message) ? message : _53;
   List loc = _compiler_location(compiler,  token);
   Diagnostics__warn(diag,  code ? code : 49497918350,  message,  loc,  notes);
 }

@@ -1192,6 +1192,16 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       List c_tail = e._emit(%($tail), context);
       return %("List_append(" @c_head ", " @c_tail ")");
     }
+    case %(c-assert ?condition ?message): {
+      List c_condition = e._emit(%($condition), context);
+      List c_message = e._emit(%($message), context);
+      return %("_Static_assert(" @c_condition "," @c_message ");");
+    }
+    case %(indexinit ?index ?value): {
+      List c_index = e._emit(%($index), context);
+      List c_value = e._emit(%($value), context);
+      return %("[" @c_index "] =" @c_value);
+    }
     case %(dotinit ?field ?value): {
       List c_field = e._emit(%($field), context);
       List c_value = e._emit(%($value), context);

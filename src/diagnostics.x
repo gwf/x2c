@@ -232,10 +232,12 @@ List Compiler.origin_location(Compiler compiler, int occurrence) {
   return NULL;
 }
 
-/** Returns `path` relative to the compiler root when it lies beneath it.
-    Other paths, including NULL, are returned unchanged.
+/** Returns a physical source path for semantic facts, otherwise a path
+    relative to the compiler root. Pseudo paths and NULL stay unchanged.
 */
 String Compiler.display_path(Compiler compiler, String path) {
+  if (!path || path.startswith(%"<")) return path;
+  if (compiler.source_facts) return SourceView.path(path);
   String root = compiler.root_dir;
   if (root && path && path.startswith(root) &&
       path.len() > root.len() && path[root.len()] == '/')
@@ -245,14 +247,16 @@ String Compiler.display_path(Compiler compiler, String path) {
 
 /** Builds the diagnostic location for `token` or the current token.
     If neither exists, returns the current file at line 1, column 1, and byte
-    position 0 with zero length. When a token is available, `compiler.filename`
-    is made relative to the compiler root. Location cells and a derived path
+    position 0 with zero length. Semantic facts use physical paths; ordinary
+    token locations use `Compiler.display_path`.
+    Location cells and a derived path
     are canonicalized through the active pool hierarchy and retain their actual
     producing-pool lifetimes; an unchanged filename retains the compiler's
     producing-pool lifetime.
 */
 List Compiler.token_location(Compiler compiler, Token token) {
   String file = compiler.filename ? compiler.filename : %"<stdin>";
+  if (compiler.source_facts) file = compiler.display_path(file);
   // Unreadable input fails before tokenization; anchor it at the file start.
   if (!token) token = compiler.token;
   if (!token)
