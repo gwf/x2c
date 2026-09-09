@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
 """Run one executable against a deterministic package-local HTTP fixture."""
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 import json
 import subprocess
 import sys
 import threading
+import time
 
 
-class FixtureServer(HTTPServer):
+class FixtureServer(ThreadingHTTPServer):
+    daemon_threads = True
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.batch_lock = threading.Lock()
+        self.batch_ready = threading.Event()
+        self.batch_active = 0
+        self.batch_peak = 0
+        self.batch_finished = []
+
     def handle_error(self, request, client_address):
         pass
 
@@ -50,6 +61,7 @@ class Handler(BaseHTTPRequestHandler):
             "method": method,
             "type": self.headers.get("Content-Type") or "",
             "length": length,
+            "content_length": self.headers.get("Content-Length"),
             "body": body.decode("utf-8", "replace"),
         }
         self.send_fixed(
@@ -63,6 +75,37 @@ class Handler(BaseHTTPRequestHandler):
         """The (status, reason, headers, body) a GET or a HEAD receives."""
         parsed = urlparse(self.path)
         path = parsed.path
+        if path == "/batch/reset":
+            with self.server.batch_lock:
+                self.server.batch_peak = 0
+                self.server.batch_finished.clear()
+                self.server.batch_ready.clear()
+            return (200, "OK", [], b"reset")
+        if path == "/batch/stats":
+            with self.server.batch_lock:
+                body = (str(self.server.batch_peak) + " " +
+                        ",".join(self.server.batch_finished)).encode()
+            return (200, "OK", [], body)
+        if path == "/batch/delay":
+            query = parse_qs(parsed.query)
+            name = query.get("name", ["done"])[0]
+            barrier = int(query.get("barrier", ["0"])[0])
+            with self.server.batch_lock:
+                self.server.batch_active += 1
+                self.server.batch_peak = max(
+                    self.server.batch_peak, self.server.batch_active)
+                if barrier and self.server.batch_active >= barrier:
+                    self.server.batch_ready.set()
+            try:
+                if barrier:
+                    self.server.batch_ready.wait(2)
+                time.sleep(int(query.get("ms", ["0"])[0]) / 1000)
+                with self.server.batch_lock:
+                    self.server.batch_finished.append(name)
+                return (200, "OK", [], name.encode())
+            finally:
+                with self.server.batch_lock:
+                    self.server.batch_active -= 1
         pages = {
             "/guide": b"<html><title>x2c Language Guide</title></html>",
             "/reference": b"<html><title>x2c Reference</title></html>",

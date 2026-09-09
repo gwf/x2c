@@ -2002,7 +2002,7 @@ static void _collect_component(
 static List _components(List names, Map adjacency, String excluded) {
   Map allowed = %{}, seen = %{};
   foreach (String name, names) allowed[name] = 1;
-  Array ranked = %[];
+  Array groups = %[];
   foreach (String name, names) {
     if (name == excluded || seen.contains(name)) continue;
     Array members = %[];
@@ -2010,12 +2010,10 @@ static List _components(List names, Map adjacency, String excluded) {
       name, excluded, allowed, adjacency, seen, members
     );
     members.sort();
-    int size = members.len();
-    int rank_size = -size;
-    List group = %(group @{members.list_free()});
-    ranked.push(%(rank ($rank_size $name) $group));
+    groups.push(%(group @{members.list_free()}));
   }
-  return _ranked_records(ranked, INT_MAX);
+  groups.sort_by(%!(List group) => %(${1 - (int) group.len()} ${group.cadr()}));
+  return groups.list_free();
 }
 
 static List _component_sizes(List groups) {

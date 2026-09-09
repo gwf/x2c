@@ -509,6 +509,19 @@ static void list_sort_orders_values(void) {
 
 }
 
+static void list_sort_callbacks_preserve_source(void) {
+  List values = %((2 first) (1 low) (2 second));
+  List ascending = values.sort_by(%!(List row) => row.car());
+  EXPECT_TRUE(ascending == %((1 low) (2 first) (2 second)));
+  List descending = values.sort_with(
+    %!(List left, List right) => right.car().compare(left.car()));
+  EXPECT_TRUE(descending == %((2 first) (2 second) (1 low)));
+  EXPECT_TRUE(values == %((2 first) (1 low) (2 second)));
+  List empty = NULL, single = %(1);
+  EXPECT_NULL(empty.sort_by(NULL));
+  EXPECT_TRUE(single.sort_with(NULL) == single);
+}
+
 static void list_unique_removes_duplicates(void) {
   List empty = NULL;
   EXPECT_NULL(empty.unique());
@@ -611,6 +624,7 @@ void list_suite(void) {
   $test.run(list_array_conversion_boundaries);
   $test.run(list_array_list_free_consumes_the_receiver);
   $test.run(list_sort_orders_values);
+  $test.run(list_sort_callbacks_preserve_source);
   $test.run(list_unique_removes_duplicates);
   $test.run(list_intern_preserves_map_identity);
   $test.run(list_pool_lifetime_boundary);

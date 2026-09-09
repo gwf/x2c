@@ -6,7 +6,7 @@ reusable `CurlEasy` performs bounded synchronous HTTP requests and returns a
 copied `CurlResponse` with the status, ordered headers, and body.
 
 ```x2c
-import "libcurl" with CurlEasy, CurlResponse;
+import "libcurl" with CurlBatch, CurlEasy, CurlResponse;
 
 int main(void) {
   CurlEasy curl = CurlEasy.new().timeouts(1000, 3000);
@@ -48,6 +48,52 @@ request-header line for every later request on the handle. `user_agent`,
 `CurlEasy.escape(value)` and `CurlEasy.unescape(value)` percent-encode and
 decode one URL component without needing a handle at all. A decoded value
 containing NUL raises `<bad-enc>`, because the result would not be a String.
+
+## Concurrent batches
+
+`easy.get_all(urls, maximum)` performs a bounded batch of GET requests;
+`easy.request_all(method, urls, maximum)` supplies another method. Both wait
+for every transfer on the caller's thread. `maximum` must be positive;
+at most that many duplicate easy handles perform transfers at once.
+
+```x2c
+List urls = %("https://example.com/guide" "https://example.com/reference");
+CurlBatch batch = easy.get_all(urls, 2);
+defer batch.free();
+for (int i = 0; i < batch.len(); i++) {
+  try {
+    CurlResponse response = batch.response(i);
+    printf("%ld %s\n", response.response_code(), response.effective_url());
+  }
+  catch %(io-fail *detail): printf("%s\n", detail.repr());
+}
+```
+
+Results keep input order even when completion order differs. A transfer
+failure is retained independently: `batch.response(i)` re-raises its Error
+with the original cause and details, while other responses remain available.
+Batch transfer Errors name `multi_info_read` as their operation; native
+setup and multi-driver failures name the failing native call. HTTP error
+status codes are ordinary responses. The batch owns its responses;
+returned pointers and body views are borrowed until `batch.free()`. Do not
+free them separately. Freeing the original easy handle after the batch
+returns does not invalidate the results. Each body has the template's
+`max_body` limit; the batch retains all completed bodies until freed.
+
+The easy handle's configured options, including raw options set through
+`native()`, are duplicated. Borrowed option data must stay valid throughout
+the call. [`curl_easy_duphandle`](https://curl.se/libcurl/c/curl_easy_duphandle.html)
+does not copy connection, cookie, SSL-session,
+or share-handle state. The temporary pool reuses connections within a batch;
+the template's original connection is not transferred to it. Do not use or
+modify the template during the call. Its pending body is copied to every URL
+and cleared when the call ends, including on failure or an empty batch.
+
+A multi-driver error raises from the batch call after detaching and releasing
+all active native handles. Transfer callbacks use the same collectors and
+error containment as individual requests. The pinned synchronous resolver
+can still block DNS lookup; a batch is not an event loop or background worker.
+Native multi/socket APIs remain available for those integrations.
 
 ## The native handle
 
@@ -146,14 +192,20 @@ request.
 
 ## Applications
 
-`examples/page-titles.x` is the short application (`make short-example`). In
-24 lines it fetches three pages through one reused handle and prints each
-title, with no native allocation, buffer growth, status dispatch, or cleanup
-detached from its acquisition.
+`examples/page-titles.x` is the short application (`make short-example`). It
+fetches three pages concurrently, then prints each title in input order. The
+batch owns all response cleanup beside its acquisition. Its fixture output is:
+
+```text
+guide: x2c Language Guide
+reference: x2c Reference
+source: x2c Source
+```
 
 `examples/endpoint-report.x` is the broader one (`make example`). It surveys
-a service with GET and HEAD, reports each response against a latency budget,
-shows the response blocks a redirect leaves behind, handles the body-limit
+a service with a concurrent GET batch and a HEAD request, reports each
+response against a latency budget, shows the response blocks a redirect
+leaves behind, handles the body-limit
 and transport-failure paths, submits a JSON job with `POST`, reads a
 credentials-protected path, round-trips a percent-encoded search term,
 streams an artifact through an x2c callback, and downloads it straight to
@@ -183,7 +235,7 @@ remains available under upstream names, and the generated package header
 publishes it, so a consumer that only says `import "libcurl"` can call
 `curl_url_set` or `curl_version_info` directly.
 
-Uploads from a stream, multi and socket transfers, WebSockets, share
+Uploads from a stream, socket-driven transfers, WebSockets, share
 handles, cookies, TLS configuration, custom allocators, and native
 worker-thread entry stay on the raw surface, reached through
 `easy.native()` on the same handle.

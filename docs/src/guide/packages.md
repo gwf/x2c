@@ -173,11 +173,37 @@ native storage and when borrowed views expire.
 A source distribution carries `packages/<name>/`, including `src/`,
 `dependency.json`, `LICENSES/`, its README, examples, and tests, together with
 `packages/package.mk`, `packages/dependency.mk`, and `packages/tools/deps.py`.
-It does not carry the ignored `deps` symlink or `builds/` output. Shared
-support resolves beside those files, so the bundle needs no Git checkout.
-Select an installed compiler and an explicit dependency cache:
+It does not carry the ignored `deps` symlink or `builds/` output. From the
+repository root, produce a source archive with ordinary `tar`:
 
 ```sh
+package=yyjson
+tar --exclude="packages/$package/deps" \
+  --exclude="packages/$package/builds" \
+  -czf "$package-source.tar.gz" \
+  "packages/$package" packages/package.mk packages/dependency.mk \
+  packages/tools/deps.py
+```
+
+The package directory includes its `Makefile`; keep any additional source
+files or licenses that its build needs. Include other x2c packages it imports
+in the same archive, or distribute them separately under a registered package
+root. Native dependency sources are fetched and verified from
+`dependency.json` during preparation.
+
+Shared support resolves beside those files, so the bundle needs no Git
+checkout. Unpack it into a directory where its sources and build outputs can
+remain together. Select an installed compiler and an explicit dependency
+cache. A normal source installation can use the absolute path to
+`builds/0/x2c` in its compiler checkout; keep that compiler's support tree in
+place. The separate prefix installer is the optional
+[APE bootstrap experiment](../reference/cli.md#bootstrap-a-native-installation).
+A package source archive does not install or bundle the compiler.
+
+```sh
+mkdir package-sources
+tar -xzf yyjson-source.tar.gz -C package-sources
+cd package-sources
 export X2C_DEPS_DIR="$HOME/.cache/x2c-dependencies"
 make -C packages/yyjson prepare build X2C=/path/to/x2c
 ```
@@ -198,8 +224,12 @@ Library](wrapping-c-libraries.md).
 The packages include example applications that use their x2c interfaces
 without requiring public services:
 
-- `packages/libcurl/examples/endpoint-report.x` performs synchronous HTTP
-  requests against a local fixture. `examples/packages/http-json-releases/`
+- `packages/libcurl/examples/page-titles.x` fetches pages concurrently with
+  `CurlEasy.get_all`; `endpoint-report.x` handles each batch response or Error
+  independently, then uses the ordinary single-request operations. Batch
+  results keep input order and borrow their lifetime from `CurlBatch`.
+  The call stays on the caller's thread; the pinned resolver can still block
+  during DNS lookup. `examples/packages/http-json-releases/`
   composes libcurl's response bytes with yyjson parsing.
 - `packages/termbox2/examples/incident-filter.x` handles terminal input and
   rendering. Its standard run is driven through a pseudo-terminal.

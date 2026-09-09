@@ -531,6 +531,75 @@ Self Array.sort(Self array) {
   return array;
 }
 
+static int _sort_order(Func compare, Var left, Var right) {
+  FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
+  return compare.apply(2, arguments).int();
+}
+
+/** Stably sorts `array` with a borrowed synchronous comparator and returns it.
+    The callback receives two values; its result converts to `int`, with a
+    negative, zero, or positive result ordering the first before, equal to,
+    or after the second. It must give a consistent ordering and must not
+    mutate this Array. Sorting a different Array inside the callback is valid.
+    Null and fewer than two elements return unchanged without a callback.
+    Raises: allocation, `Func.apply`, conversion, or callback causes. Failure
+    leaves the original Array unchanged; temporary storage is released.
+    Callback side effects are not undone.
+*/
+Self Array.sort_with(Self array, Func compare) {
+  if (!array || array.length < 2) return array;
+  size_t count = array.length;
+  Array source = array.copy();
+  defer source.free();
+  Array target = %[];
+  defer target.free();
+  target.resize(count);
+  for (size_t width = 1; width < count; width *= 2) {
+    for (size_t base = 0; base < count; base += 2 * width) {
+      size_t middle = base + width < count ? base + width : count;
+      size_t end = base + 2 * width < count ? base + 2 * width : count;
+      size_t left = base, right = middle;
+      for (size_t index = base; index < end; index++) {
+        int take_right = right < end &&
+          (left == middle ||
+           _sort_order(compare, source[left], source[right]) > 0);
+        target[index] = take_right ? source[right++] : source[left++];
+      }
+    }
+    Array swap = source;
+    source = target;
+    target = swap;
+  }
+  memcpy(array.bytes, source.bytes, count * sizeof(Var));
+  return array;
+}
+
+/** Stably sorts `array` by keys produced once per value, returning the Array.
+    The borrowed callback runs front to back and must not mutate this Array.
+    Keys use `Var.compare`; equal keys preserve the original element order.
+    A null or empty Array invokes no callback. Sorting another Array inside
+    the callback is valid. Raises: allocation, key comparison, `Func.apply`,
+    or callback causes. Failure leaves the original Array unchanged;
+    callback side effects are not undone.
+*/
+Self Array.sort_by(Self array, Func key) {
+  if (!array || !array.length) return array;
+  Array decorated = %[];
+  defer decorated.free();
+  for (int index = 0; index < array.length; index++) {
+    Var value = array[index];
+    FuncArg arguments[1] = { FuncArg.value(value) };
+    Var order = key.apply(1, arguments);
+    decorated.push(%($order $index $value));
+  }
+  decorated.sort();
+  for (int index = 0; index < array.length; index++) {
+    List row = decorated[index];
+    array[index] = row.caddr();
+  }
+  return array;
+}
+
 // binary min-heap
 
 static void _heap_shift_up(Array heap, int i) {

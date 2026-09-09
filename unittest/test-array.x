@@ -468,6 +468,95 @@ static void array_func_rejects_invalid_callbacks_on_invocation(void) {
 }
 
 
+static void array_sort_callbacks_keep_ties_and_identity(void) {
+  $test.scoped();
+  Array values = %[];
+  values.push(%(2 first));
+  values.push(%(1 low));
+  values.push(%(2 second));
+  int calls = 0;
+  Array other = %[3, 1, 2];
+  Func key = %!(List row) using &calls, &other => {
+    calls++;
+    other.sort_with(%!(int left, int right) => right - left);
+    return row.car();
+  };
+  EXPECT_TRUE(values.sort_by(key) == values);
+  EXPECT_INT_EQ(calls, 3);
+  EXPECT_TRUE(values.list() == %((1 low) (2 first) (2 second)));
+  EXPECT_TRUE(other.list() == %(3 2 1));
+
+  Func compare = %!(List left, List right) using &other => {
+    other.sort_by(%!(int value) => value);
+    return right.car().compare(left.car());
+  };
+  EXPECT_TRUE(values.sort_with(compare) == values);
+  EXPECT_TRUE(values.list() == %((2 first) (2 second) (1 low)));
+  EXPECT_TRUE(other.list() == %(1 2 3));
+  Array empty = %[], single = %[1];
+  EXPECT_TRUE(empty.sort_by(NULL) == empty);
+  EXPECT_TRUE(single.sort_with(NULL) == single);
+}
+
+static void array_sort_callbacks_cover_merge_tails(void) {
+  $test.scoped();
+  Array values = %[];
+  for (int index = 0; index < 17; index++)
+    values.push(%(${(index * 7) % 5} $index));
+  Array by_key = values.copy();
+  by_key.sort_by(%!(List row) => row.car());
+  values.sort_with(%!(List left, List right) =>
+    left.car().compare(right.car()));
+  EXPECT_TRUE(values.list() == by_key.list());
+  for (int index = 1; index < values.len(); index++) {
+    List left = values[index - 1], right = values[index];
+    EXPECT_TRUE(left.car() <= right.car());
+    if (left.car() == right.car()) EXPECT_TRUE(left.cadr() < right.cadr());
+  }
+  int calls = 0;
+  Array single = %[3];
+  single.sort_by(%!(int value) using &calls => { calls++; return value; });
+  EXPECT_INT_EQ(calls, 1);
+  EXPECT_TRUE(single.list() == %(3));
+}
+
+static void array_sort_callback_errors_preserve_elements(void) {
+  $test.scoped();
+  Array values = %[4, 3, 2, 1];
+  int calls = 0, caught = 0;
+  Func compare = %!(Var left, Var right) using &calls => {
+    if (++calls == 2) raise %(invariant (sort callback));
+    return left.compare(right);
+  };
+  Scope active = *Scope.top();
+  int allocations = _array_scope_allocation_count(active);
+  try values.sort_with(compare);
+  catch %(invariant *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(_array_scope_allocation_count(active), allocations);
+  EXPECT_INT_EQ(calls, 2);
+  EXPECT_TRUE(values.list() == %(4 3 2 1));
+
+  calls = 0;
+  Func key = %!(Var value) using &calls => {
+    if (++calls == 3) raise %(invariant (sort key));
+    return value;
+  };
+  allocations = _array_scope_allocation_count(active);
+  try values.sort_by(key);
+  catch %(invariant *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_INT_EQ(_array_scope_allocation_count(active), allocations);
+  EXPECT_INT_EQ(calls, 3);
+  EXPECT_TRUE(values.list() == %(4 3 2 1));
+
+  Func invalid = %!(Var left, Var right) => "not an integer";
+  try values.sort_with(invalid);
+  catch %(no-convert *): caught++;
+  EXPECT_INT_EQ(caught, 3);
+  EXPECT_TRUE(values.list() == %(4 3 2 1));
+}
+
 void array_suite(void) {
   $test.run(array_empty_literal_identity);
   $test.run(array_push_pop);
@@ -485,6 +574,9 @@ void array_suite(void) {
   $test.run(array_splice_and_concat);
   $test.run(array_find_contains_count);
   $test.run(array_sort_reverse_join);
+  $test.run(array_sort_callbacks_keep_ties_and_identity);
+  $test.run(array_sort_callback_errors_preserve_elements);
+  $test.run(array_sort_callbacks_cover_merge_tails);
   $test.run(array_heap_push_pop_min_basic);
   $test.run(array_heapify_basic);
   $test.run(array_heap_ops_lists);

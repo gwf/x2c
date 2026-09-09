@@ -123,6 +123,10 @@ int List_all(List lst,  Func pred);
 
 List List_sort(List lst);
 
+List List_sort_with(List lst,  Func compare);
+
+List List_sort_by(List lst,  Func key);
+
 List Array_list(Array arr);
 
 List Array_list_free(Array arr);

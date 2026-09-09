@@ -1,4 +1,4 @@
-/*  libcurl.x -- bounded synchronous libcurl easy transfers for x2c programs.
+/*  libcurl.x -- bounded synchronous libcurl transfers for x2c programs.
 
     CurlEasy owns one reusable native easy handle and publishes it through
     `easy.native()`, so every libcurl option the ordinary methods do not
@@ -9,6 +9,7 @@
 
 typedef struct CurlEasy *CurlEasy;
 typedef struct CurlResponse *CurlResponse;
+typedef struct CurlBatch *CurlBatch;
 typedef List CurlHeader;
 typedef List CurlResponseBlock;
 typedef void (*CurlStreamFn)(Bytes, Var);
@@ -87,6 +88,32 @@ struct CurlResponse {
   int streamed;
   int released;
 };
+
+typedef struct CurlTransfer {
+  CurlEasy easy;
+  CurlBuffer body, headers;
+  CurlSink sink;
+  CurlStream stream;
+  struct curl_slist *request_headers;
+  String path;
+} CurlTransfer;
+
+typedef struct CurlBatchItem {
+  CurlResponse response;
+  Symbol cause;
+  List detail;
+} CurlBatchItem;
+
+struct CurlBatch {
+  CurlBatchItem *items;
+  int count, released;
+};
+
+typedef struct CurlSlot {
+  CurlEasy easy;
+  CurlTransfer transfer;
+  int index, attached;
+} CurlSlot;
 
 static size_t _curl_collect(
   char *data, size_t size, size_t count, void *context) {
@@ -219,7 +246,7 @@ static void _curl_add_header(struct curl_slist **list, String line) {
 
 /*  A request body belongs to one transfer, so the pending body clears here
     whether the transfer completed or raised. So does everything the transfer
-    pointed the handle at: the header list `_curl_perform` is about to free,
+    pointed the handle at: the header list the transfer frame is about to free,
     and the two callback pairs, whose contexts end with that frame. libcurl
     keeps the slist pointer without copying it and calls a write callback
     with whatever context it was last given, so leaving any of the five set
@@ -244,19 +271,19 @@ static void _curl_transfer_end(CurlEasy easy) {
 }
 
 static void _curl_buffer_failure(
-  CurlEasy easy, CurlBuffer *buffer, String channel) {
+  CurlEasy easy, CurlBuffer *buffer, String channel, String operation) {
   size_t limit = buffer.limit, attempted = buffer.attempted;
   if (buffer.failure == CURL_BUFFER_LIMIT) {
-    raise %(size-limit (library "libcurl") (operation "easy_perform")
+    raise %(size-limit (library "libcurl") (operation $operation)
             (channel $channel) (limit $limit) (attempted $attempted)
             (url ${easy.url}));
   }
   if (buffer.failure == CURL_BUFFER_ALLOC) {
     raise %(alloc-fail (library "libcurl")
-            (operation "easy_perform") (channel $channel)
+            (operation $operation) (channel $channel)
             (attempted $attempted) (url ${easy.url}));
   }
-  raise %(size-limit (library "libcurl") (operation "easy_perform")
+  raise %(size-limit (library "libcurl") (operation $operation)
           (channel $channel) (reason "callback size overflow")
           (url ${easy.url}));
 }
@@ -529,14 +556,11 @@ String CurlEasy.unescape(String value) {
   return String.new_len(plain, length);
 }
 
-/*  Every transfer runs through here. `path` and `consume` select the two
-    unbuffered sinks; otherwise the body grows in memory under the handle's
-    limit. The verb options are all reset per request, because one handle
-    performs many requests and libcurl retains what it was told.
-*/
-static CurlResponse _curl_perform(
-  CurlEasy easy, String method, String url, String path, CurlStreamFn consume,
-  Var stream_data) {
+/* The frame owns every borrowed native callback target until cleanup. Both
+   easy and multi execution use the same preparation and result conversion. */
+static void _curl_transfer_begin(
+  CurlTransfer *transfer, CurlEasy easy, String method, String url,
+  String path, CurlStreamFn consume, Var stream_data) {
   if (!easy || !easy.native || !method || !url) {
     raise %(bad-arg (library "libcurl") (operation "request"));
   }
@@ -544,9 +568,8 @@ static CurlResponse _curl_perform(
     raise %(bad-state (library "libcurl") (operation "easy_perform")
             (reason "easy handle is not reentrant"));
   }
-
   easy.performing = 1;
-  defer _curl_transfer_end(easy);
+  transfer.easy = easy;
   easy.url = url.intern();
   easy.error[0] = '\0';
   String content_type = easy.content_type;
@@ -554,20 +577,17 @@ static CurlResponse _curl_perform(
   size_t request_body_size = easy.request_body_size;
   int bodyless = !strcmp(method, "GET") || !strcmp(method, "HEAD");
 
-  CurlBuffer body = { .limit = easy.body_limit };
-  CurlBuffer headers = { .limit = 256 * 1024 };
-  defer free(body.bytes);
-  defer free(headers.bytes);
-  CurlSink sink = { .file = path ? File.open(path, "wb") : NULL };
-  defer if (sink.file) fclose(sink.file);
-  CurlStream stream = { .consume = consume, .data = stream_data };
-
-  struct curl_slist *request_headers = NULL;
-  defer curl_slist_free_all(request_headers);
+  transfer.path = path;
+  transfer.body.limit = easy.body_limit;
+  transfer.headers.limit = 256 * 1024;
+  transfer.sink.file = path ? File.open(path, "wb") : NULL;
+  transfer.stream.consume = consume;
+  transfer.stream.data = stream_data;
   for (struct curl_slist *node = easy.headers; node; node = node->next)
-    _curl_add_header(&request_headers, node->data);
+    _curl_add_header(&transfer.request_headers, node->data);
   if (content_type)
-    _curl_add_header(&request_headers, %"Content-Type: $content_type");
+    _curl_add_header(
+      &transfer.request_headers, %"Content-Type: $content_type");
 
   _curl_check(easy, %"CURLOPT_URL",
     curl_easy_setopt(easy.native, CURLOPT_URL, easy.url));
@@ -581,7 +601,7 @@ static CurlResponse _curl_perform(
   _curl_check(easy, %"CURLOPT_CUSTOMREQUEST",
     curl_easy_setopt(easy.native, CURLOPT_CUSTOMREQUEST,
                      bodyless ? NULL : (const char *) method));
-  if (request_body) {
+  if ((void *) request_body != NULL) {
     _curl_check(easy, %"CURLOPT_POSTFIELDSIZE_LARGE",
       curl_easy_setopt(easy.native, CURLOPT_POSTFIELDSIZE_LARGE,
                        (curl_off_t) request_body_size));
@@ -590,33 +610,52 @@ static CurlResponse _curl_perform(
                        (const char *) request_body));
   }
   _curl_check(easy, %"CURLOPT_HTTPHEADER",
-    curl_easy_setopt(easy.native, CURLOPT_HTTPHEADER, request_headers));
+    curl_easy_setopt(
+      easy.native, CURLOPT_HTTPHEADER, transfer.request_headers));
   _curl_check(easy, %"CURLOPT_WRITEFUNCTION",
     curl_easy_setopt(easy.native, CURLOPT_WRITEFUNCTION,
                      path ? _curl_spill : consume ? _curl_stream
                                                 : _curl_collect));
   _curl_check(easy, %"CURLOPT_WRITEDATA",
     curl_easy_setopt(easy.native, CURLOPT_WRITEDATA,
-                     path ? (void *) &sink : consume ? (void *) &stream
-                                                    : (void *) &body));
+                     path ? (void *) &transfer.sink
+                       : consume ? (void *) &transfer.stream
+                                 : (void *) &transfer.body));
   _curl_check(easy, %"CURLOPT_HEADERFUNCTION",
     curl_easy_setopt(easy.native, CURLOPT_HEADERFUNCTION, _curl_collect));
   _curl_check(easy, %"CURLOPT_HEADERDATA",
-    curl_easy_setopt(easy.native, CURLOPT_HEADERDATA, &headers));
+    curl_easy_setopt(easy.native, CURLOPT_HEADERDATA, &transfer.headers));
+}
 
-  CURLcode result = curl_easy_perform(easy.native);
-  if (body.failure) _curl_buffer_failure(easy, &body, %"body");
-  if (headers.failure) _curl_buffer_failure(easy, &headers, %"headers");
-  if (sink.failed || (sink.file && fflush(sink.file))) {
+static void _curl_transfer_close(CurlTransfer *transfer) {
+  _curl_transfer_end(transfer.easy);
+  curl_slist_free_all(transfer.request_headers);
+  free(transfer.body.bytes);
+  free(transfer.headers.bytes);
+  if (transfer.sink.file) fclose(transfer.sink.file);
+  *transfer = (CurlTransfer) { 0 };
+}
+
+static CurlResponse _curl_transfer_finish(
+  CurlTransfer *transfer, CURLcode result, String operation) {
+  CurlEasy easy = transfer.easy;
+  String path = transfer.path;
+  CurlStreamFn consume = transfer.stream.consume;
+  if (transfer.body.failure)
+    _curl_buffer_failure(easy, &transfer.body, %"body", operation);
+  if (transfer.headers.failure)
+    _curl_buffer_failure(easy, &transfer.headers, %"headers", operation);
+  if (transfer.sink.failed ||
+      (transfer.sink.file && fflush(transfer.sink.file))) {
     raise %(io-fail (library "libcurl") (operation "download")
             (reason "writing the response body failed") (path $path)
             (url ${easy.url}));
   }
-  if (stream.cause) {
-    Symbol cause = stream.cause;
-    Error.raise(cause, stream.detail);
+  if (transfer.stream.cause) {
+    Symbol cause = transfer.stream.cause;
+    Error.raise(cause, transfer.stream.detail);
   }
-  if (result != CURLE_OK) _curl_raise(easy, %"easy_perform", result);
+  if (result != CURLE_OK) _curl_raise(easy, operation, result);
 
   CurlResponse response = Scope.calloc(1, sizeof(struct CurlResponse));
   CurlResponse completed = NULL;
@@ -624,10 +663,12 @@ static CurlResponse _curl_perform(
   response.file = path ? path.intern() : NULL;
   response.streamed = consume != NULL;
   if (!path && !consume)
-    response.body = Bytes.new(1).append(body.bytes, body.length);
-  response.body_size = path ? sink.written
-                     : consume ? stream.written : body.length;
-  response.blocks = _curl_blocks(headers.bytes, headers.length);
+    response.body = Bytes.new(1).append(
+      transfer.body.bytes, transfer.body.length);
+  response.body_size = path ? transfer.sink.written
+    : consume ? transfer.stream.written : transfer.body.length;
+  response.blocks =
+    _curl_blocks(transfer.headers.bytes, transfer.headers.length);
 
   char *effective_url = NULL;
   curl_off_t elapsed = 0, uploaded = 0;
@@ -639,6 +680,17 @@ static CurlResponse _curl_perform(
   response.elapsed_us = (long) elapsed;
   response.upload_size = (long) uploaded;
   return completed = response;
+}
+
+static CurlResponse _curl_perform(
+  CurlEasy easy, String method, String url, String path, CurlStreamFn consume,
+  Var stream_data) {
+  CurlTransfer transfer = { 0 };
+  defer _curl_transfer_close(&transfer);
+  _curl_transfer_begin(
+    &transfer, easy, method, url, path, consume, stream_data);
+  return _curl_transfer_finish(
+    &transfer, curl_easy_perform(easy.native), %"easy_perform");
 }
 
 /** Performs `method` against `url` and returns the complete response.
@@ -681,6 +733,175 @@ CurlResponse CurlEasy.download(CurlEasy easy, String url, String path) {
   }
   return _curl_perform(easy, %"GET", url, path, NULL, void);
 }
+
+static CurlEasy _curl_duplicate(CurlEasy source) {
+  CurlEasy easy = Scope.calloc(1, sizeof(struct CurlEasy));
+  CurlEasy completed = NULL;
+  defer if (!completed) easy.free();
+  easy.native = curl_easy_duphandle(source.native);
+  if (!easy.native)
+    raise %(alloc-fail (library "libcurl") (operation "easy_duphandle"));
+  easy.body_limit = source.body_limit;
+  for (struct curl_slist *node = source.headers; node; node = node->next)
+    _curl_add_header(&easy.headers, node->data);
+  _curl_check(easy, %"CURLOPT_ERRORBUFFER",
+    curl_easy_setopt(easy.native, CURLOPT_ERRORBUFFER, easy.error));
+  return completed = easy;
+}
+
+static void _curl_multi_check(String operation, CURLMcode result) {
+  if (result == CURLM_OK) return;
+  raise %(io-fail (library "libcurl") (operation $operation)
+          (code ${(int) result})
+          (message ${String.new(curl_multi_strerror(result))}));
+}
+
+/** Releases every response owned by the batch. Repeated calls are harmless.
+    Response pointers returned by `response()` borrow this lifetime.
+*/
+CurlBatch CurlBatch.free(CurlBatch batch) {
+  if (!batch || batch.released) return NULL;
+  for (int i = 0; i < batch.count; i++) batch.items[i].response.free();
+  batch.released = 1;
+  return NULL;
+}
+
+static void _curl_batch_live(CurlBatch batch, String operation) {
+  if (batch && !batch.released) return;
+  raise %(bad-state (library "libcurl") (operation $operation)
+          (reason "released or null batch"));
+}
+
+/** Returns the number of input URLs, including failed transfers. */
+int CurlBatch.len(CurlBatch batch) {
+  _curl_batch_live(batch, %"batch.len");
+  return batch.count;
+}
+
+/** Borrows the response at input-order `index` until `batch.free()`.
+    A failed transfer re-raises its captured Error with the original native
+    details. HTTP status codes remain ordinary response values. The batch
+    owns returned responses; callers must not release them separately.
+*/
+CurlResponse CurlBatch.response(CurlBatch batch, int index) {
+  _curl_batch_live(batch, %"batch.response");
+  if (index < 0 || index >= batch.count)
+    raise %(bad-arg (library "libcurl") (operation "batch.response")
+            (index $index));
+  CurlBatchItem *item = &batch.items[index];
+  if (item.cause) Error.raise(item.cause, item.detail);
+  return item.response;
+}
+
+static void _curl_batch_failure(
+  CurlBatchItem *item, Symbol cause, List detail) {
+  item.cause = cause;
+  item.detail = Error.snapshot(detail);
+}
+
+/** Performs one method against all URLs, at most `maximum` transfers at once.
+    The call waits for all transfers on the caller's thread. Each handle
+    duplicates the configured easy handle's options; native borrowed option
+    data must remain valid throughout the call. Connection/cookie/session
+    state is not copied. The template handle is unavailable during the call.
+    A pending body is sent to each URL, then cleared, including on failure.
+    The returned batch owns responses in input order. Per-transfer failures
+    are retained and raised by `batch.response(index)`; a multi-driver failure
+    raises immediately after all native handles are detached and cleaned up.
+    An empty URL List returns an empty batch and consumes a pending body.
+*/
+CurlBatch CurlEasy.request_all(
+  CurlEasy easy, String method, List urls, int maximum) {
+  if (!easy || !easy.native || !method || maximum <= 0)
+    raise %(bad-arg (library "libcurl") (operation "request_all"));
+  if (easy.performing)
+    raise %(bad-state (library "libcurl") (operation "request_all")
+            (reason "easy handle is not reentrant"));
+  easy.performing = 1;
+  defer _curl_transfer_end(easy);
+  CurlBatch batch = Scope.calloc(1, sizeof(struct CurlBatch));
+  batch.count = urls.len();
+  batch.items = Scope.calloc(batch.count, sizeof(CurlBatchItem));
+  CurlBatch completed = NULL;
+  defer if (!completed) batch.free();
+  if (!batch.count) return completed = batch;
+
+  int width = maximum < batch.count ? maximum : batch.count;
+  CurlSlot *slots = Scope.calloc(width, sizeof(CurlSlot));
+  CURLM *multi = curl_multi_init();
+  if (!multi)
+    raise %(alloc-fail (library "libcurl") (operation "multi_init"));
+  defer {
+    for (int i = 0; i < width; i++) {
+      if (slots[i].attached)
+        curl_multi_remove_handle(multi, slots[i].easy.native);
+      _curl_transfer_close(&slots[i].transfer);
+      slots[i].easy.free();
+    }
+    curl_multi_cleanup(multi);
+  }
+  for (int i = 0; i < width; i++) slots[i].easy = _curl_duplicate(easy);
+
+  int next = 0, active = 0;
+  while (next < batch.count || active) {
+    for (int i = 0; i < width; i++) {
+      CurlSlot *slot = &slots[i];
+      while (!slot.attached && next < batch.count) {
+        String url = urls.car();
+        urls = urls.cdr();
+        slot.index = next++;
+        try {
+          if ((void *) easy.request_body != NULL)
+            _curl_set_body(slot.easy, easy.content_type, easy.request_body,
+              easy.request_body_size, %"request_all");
+          _curl_transfer_begin(
+            &slot.transfer, slot.easy, method, url, NULL, NULL, void);
+        }
+        catch %(?cause *detail): {
+          _curl_batch_failure(&batch.items[slot.index], cause, detail);
+          _curl_transfer_close(&slot.transfer);
+          continue;
+        }
+        _curl_multi_check(%"multi_add_handle",
+          curl_multi_add_handle(multi, slot.easy.native));
+        slot.attached = 1;
+        active++;
+      }
+    }
+    if (!active) continue;
+    int running = 0, messages = 0, finished = 0;
+    _curl_multi_check(%"multi_perform", curl_multi_perform(multi, &running));
+    CURLMsg *message;
+    while ((message = curl_multi_info_read(multi, &messages))) {
+      if (message->msg != CURLMSG_DONE) continue;
+      for (int i = 0; i < width; i++) {
+        CurlSlot *slot = &slots[i];
+        if (!slot.attached || slot.easy.native != message->easy_handle)
+          continue;
+        CURLcode result = message->data.result;
+        _curl_multi_check(%"multi_remove_handle",
+          curl_multi_remove_handle(multi, slot.easy.native));
+        slot.attached = 0;
+        active--;
+        finished = 1;
+        try batch.items[slot.index].response =
+          _curl_transfer_finish(&slot.transfer, result, %"multi_info_read");
+        catch %(?cause *detail):
+          _curl_batch_failure(&batch.items[slot.index], cause, detail);
+        _curl_transfer_close(&slot.transfer);
+        break;
+      }
+    }
+    if (active && !finished)
+      _curl_multi_check(%"multi_poll",
+        curl_multi_poll(multi, NULL, 0, 1000, NULL));
+  }
+  return completed = batch;
+}
+
+/** Performs buffered GET requests concurrently with input-order results. */
+CurlBatch CurlEasy.get_all(CurlEasy easy, List urls, int maximum) =>
+  easy.request_all(%"GET", urls, maximum);
 
 static void _curl_response_live(CurlResponse response, String operation) {
   if (response && !response.released) return;

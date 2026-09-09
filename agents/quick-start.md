@@ -39,6 +39,20 @@ required sequence.
 | `make artifact-refresh` | Refresh symbols and bootstrap; does not establish publication readiness. |
 | `make sanity-check` | Refresh bootstrap, rebuild stage 0, and build through stage 3 without checks. |
 
+For an optional focused unit run, build with `make -C unittest test-all`, then
+pass exact suite names, for example
+`(cd unittest && ./test-all string_suite lambda_suite)`. Names come from
+`unittest/test-all.x`. Selected suites keep their normal execution order;
+duplicates run once and unknown names return status 2. Without arguments the
+runner executes every suite, as the existing validation commands do.
+
+For optional parallel stage translation, use
+`make build X2C_FLAGS='-j 4'`. Native compilation retains its existing Make
+job limit. On the measured 16-core host this reduced clean-stage wall time
+29% with identical generated C/H and 3.8% more CPU time; the default remains
+unchanged. The B4/B5 section of
+`plans/x2c-correctness-performance-tooling.md` records the full comparison.
+
 `make precommit` checks symbols, refreshes header symbols and bootstrap,
 rebuilds stage 0 safely, builds through stage 2, and compares stages 0, 1,
 and 2. `agent-pr-check` runs it and the remaining extended checks. Stage 2

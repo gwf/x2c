@@ -546,6 +546,33 @@ Self List.sort(Self lst) {
   return result;
 }
 
+/** Returns a stable sorted copy using `Array.sort_with`'s callback contract.
+    The input List is unchanged. Fewer than two cells return unchanged without
+    a callback. Raises: allocation and the comparator's ordinary causes.
+*/
+Self List.sort_with(Self lst, Func compare) {
+  if (!lst || !cdr(lst)) return lst;
+  Array values = %[];
+  defer values.free();
+  foreach (Var value, lst) values.push(value);
+  values.sort_with(compare);
+  return values.list();
+}
+
+/** Returns a stable sorted copy using `Array.sort_by`'s callback contract.
+    The key runs once per element in input order; an empty List invokes none.
+    The input List is unchanged. Raises: allocation and the key's ordinary
+    causes, including failure to compare the resulting keys.
+*/
+Self List.sort_by(Self lst, Func key) {
+  if (!lst) return lst;
+  Array values = %[];
+  defer values.free();
+  foreach (Var value, lst) values.push(value);
+  values.sort_by(key);
+  return values.list();
+}
+
 /** Returns a new `List` holding the elements of `arr` in order.
     Cells are built from the end backwards through `cons`, so the result is
     canonical and shares whatever tail it already has in common with another

@@ -74,6 +74,10 @@ int Array_compare(Array a,  Array b);
 
 Array Array_sort(Array array);
 
+Array Array_sort_with(Array array,  Func compare);
+
+Array Array_sort_by(Array array,  Func key);
+
 void Array_heap_push(Array heap,  Var val);
 
 Var Array_heap_pop(Array heap);

@@ -54,9 +54,8 @@ void match_cache_suite(void);
 $(import "test-macros.xmacro")
 
 int main(int argc, char **argv) {
-  (void)argc;
-  (void)argv;
   TestHarness_begin();
+  TestHarness_select(argc - 1, argv + 1);
   $test.suite(scope_suite);
   $test.suite(context_suite);
   $test.suite(pool_suite);

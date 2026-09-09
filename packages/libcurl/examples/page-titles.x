@@ -1,6 +1,6 @@
 /*  page-titles.x -- Fetch the titles from a small collection of web pages. */
 
-import "libcurl" with CurlEasy, CurlResponse;
+import "libcurl" with CurlBatch, CurlEasy;
 
 static String page_title(String html) {
   return html.split("<title>").last().string()
@@ -15,10 +15,11 @@ int main(int argc, char **argv) {
   CurlEasy curl = CurlEasy.new().timeouts(1000, 3000);
   defer curl.free();
 
-  foreach(String page, pages) {
-    CurlResponse response = curl.get(site + page);
-    defer response.free();
-    printf("%s: %s\n", page[1:], page_title(response.text()));
-  }
+  List urls = pages.map(%!(String page) => site + page);
+  CurlBatch batch = curl.get_all(urls, 3);
+  defer batch.free();
+  for (int i = 0; i < batch.len(); i++)
+    printf("%s: %s\n", pages[i].string()[1:],
+      page_title(batch.response(i).text()));
   return 0;
 }

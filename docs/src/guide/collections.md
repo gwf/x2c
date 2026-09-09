@@ -775,6 +775,32 @@ The positional operations are `push`, `take_last`, `shift`, `unshift`,
 `contains`, and `count`; and there are `map`, `map2`, `reduce`, `sort`,
 `reverse`, `concat`, `copy`, and `join`.
 
+Use `sort_by` to order by a computed key, or `sort_with` for a comparator.
+Both preserve the input order of ties. Arrays change in place and return the
+same object; Lists return a sorted copy. The existing `sort()` still uses
+`Var.compare` and does not promise stable ties.
+
+```x2c
+Array rows = %[];
+rows.push(%(2 "first"));
+rows.push(%(1 "low"));
+rows.push(%(2 "second"));
+rows.sort_by(%!(List row) => row.car());
+// (1 "low"), (2 "first"), (2 "second")
+List descending = %(3 1 2).sort_with(
+  %!(int left, int right) => right - left);
+```
+
+`sort_by` evaluates its key once per element, front to back, and compares the
+keys with `Var.compare`. `sort_with` passes two values to its callback and
+converts the result to `int`: negative orders the first value before the
+second, zero ties, and positive orders it after. Comparators must give a
+consistent ordering. Callbacks are borrowed, run synchronously, and must not
+mutate the Array being sorted; they may sort another container. If a callback
+or comparison fails, the Array keeps its original element order. Callback
+side effects are not undone. Empty inputs call neither callback; a singleton
+calls its key once but never calls a comparator.
+
 `Array.map`, `Array.map2`, and `Array.reduce` accept the same `Func` values
 as the `List` operations and pass elements by value. `String.filter` and
 `String.map` do the same for bytes. Each byte is boxed from `char`,

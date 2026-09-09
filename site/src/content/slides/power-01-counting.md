@@ -21,17 +21,19 @@ String path = argc > 1 ? argv[1]
                       : "examples/data/power-counting/words.txt";
 Map counts = word_count(path);
 
-// Put counts first, then sort the pairs from most to least.
-Array ranked = counts.enumerate()
-  .map(%!(List pair) => pair.reverse())
-  .array().sort().reverse();
-foreach (Var (n, word), ranked)
+// Rank by count, breaking ties by word in the same descending order.
+Array ranked = counts.enumerate().array().sort_with(
+  %!(List left, List right) => {
+    int order = right[1].compare(left[1]);
+    return order ? order : right[0].compare(left[0]);
+  });
+foreach (Var (word, n), ranked)
   puts(%"$n $word");
 ~return 0;
 ~}
 ```
 
 `File` iteration, `String.lower`, and `Map` updates count words without
-manual buffers or table management. Reversing each pair to `(count word)`
-lets `Array.sort` and `Array.reverse` rank the results: 3 tea, 2 coffee,
-1 milk. Ties sort by word in reverse order.
+manual buffers or table management. `Array.sort_with` compares the counts
+in each `(word count)` pair to rank the results: 3 tea, 2 coffee, 1 milk.
+Ties sort by word in reverse order.

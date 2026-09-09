@@ -80,6 +80,8 @@ List test_match_oracle_search_replace(List input, Var pattern, Var template) {
 
 static TestStats stats;
 static const char *current_test = NULL;
+static int suite_name_count;
+static char **suite_names;
 
 static inline const char *current_test_name(void) {
   return current_test ? current_test : "(unknown)";
@@ -106,10 +108,27 @@ void TestHarness_begin(void) {
   stats.assertions = 0;
   stats.failures = 0;
   current_test = NULL;
+  suite_name_count = 0;
+  suite_names = NULL;
 }
 
-void TestSuite_begin(const char *name) {
+// Consume matched argv slots so finish can report every unknown suite.
+void TestHarness_select(int count, char **names) {
+  suite_name_count = count;
+  suite_names = names;
+}
+
+int TestSuite_begin(const char *name) {
+  int selected = suite_name_count == 0;
+  for (int i = 0; i < suite_name_count; i++) {
+    if (suite_names[i] && !strcmp(suite_names[i], name)) {
+      suite_names[i] = NULL;
+      selected = 1;
+    }
+  }
+  if (!selected) return 0;
   Stdout.printf("\nSuite %s\n", name);
+  return 1;
 }
 
 
@@ -232,9 +251,15 @@ int Test_expect_list(
 }
 
 int TestHarness_finish(void) {
+  int unknown = 0;
+  for (int i = 0; i < suite_name_count; i++) {
+    if (!suite_names[i]) continue;
+    Stderr.printf("Unknown unit suite: %s\n", suite_names[i]);
+    unknown = 1;
+  }
   Stdout.printf("\nSummary: %d passed, %d failed, %d skipped, ",
                 stats.passed, stats.failed, stats.skipped);
   Stdout.printf("%d total (%d assertions)\n",
                 stats.run + stats.skipped, stats.assertions);
-  return stats.failed ? 1 : 0;
+  return unknown ? 2 : stats.failed ? 1 : 0;
 }

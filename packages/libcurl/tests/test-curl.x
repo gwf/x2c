@@ -1,6 +1,6 @@
 /* test-curl.x -- focused tests for synchronous libcurl easy transfers. */
 
-import "libcurl" with CurlEasy, CurlHeader, CurlLisp, CurlResponse,
+import "libcurl" with CurlBatch, CurlEasy, CurlHeader, CurlLisp, CurlResponse,
   CurlResponseBlock;
 
 #include "test-support.x"
@@ -559,6 +559,166 @@ static void curl_lisp_bindings_return_values_lisp_consumes(void) {
   );
 }
 
+static void curl_concurrent_batch_preserves_input_order_and_bound(void) {
+  CurlEasy easy = test_easy();
+  defer easy.free();
+  CurlResponse reset = easy.get(fixture_url + %"/batch/reset");
+  defer reset.free();
+  List paths = %("/batch/delay?name=one&ms=20"
+                 "/batch/delay?name=two&ms=20"
+                 "/batch/delay?name=three&ms=20");
+  List urls = paths.map(%!(String path) => fixture_url + path);
+  CurlBatch serial = easy.get_all(urls, 1);
+  defer serial.free();
+  EXPECT_INT_EQ(serial.len(), 3);
+  EXPECT_STR_EQ(serial.response(0).text(), %"one");
+  EXPECT_STR_EQ(serial.response(2).text(), %"three");
+  CurlResponse serial_stats = easy.get(fixture_url + %"/batch/stats");
+  defer serial_stats.free();
+  EXPECT_STR_EQ(serial_stats.text(), %"1 one,two,three");
+
+  CurlResponse again = easy.get(fixture_url + %"/batch/reset");
+  defer again.free();
+  paths = %("/batch/delay?name=slow&ms=200&barrier=3"
+            "/batch/delay?name=fast&barrier=3"
+            "/batch/delay?name=middle&ms=50&barrier=3"
+            "/batch/delay?name=last");
+  urls = paths.map(%!(String path) => fixture_url + path);
+  CurlBatch parallel = easy.get_all(urls, 3);
+  defer parallel.free();
+  EXPECT_INT_EQ(parallel.len(), 4);
+  EXPECT_STR_EQ(parallel.response(0).text(), %"slow");
+  EXPECT_STR_EQ(parallel.response(1).text(), %"fast");
+  EXPECT_STR_EQ(parallel.response(2).text(), %"middle");
+  EXPECT_STR_EQ(parallel.response(3).text(), %"last");
+  CurlResponse parallel_stats = easy.get(fixture_url + %"/batch/stats");
+  defer parallel_stats.free();
+  EXPECT_TRUE(parallel_stats.text().startswith(%"3 fast,"));
+  EXPECT_TRUE(parallel_stats.text().endswith(%",slow"));
+}
+
+static void curl_concurrent_batch_retains_each_failure(void) {
+  CurlEasy easy = test_easy().max_body(32);
+  defer easy.free();
+  List paths = %("/ok" "/close" "/large" "/missing" "/ok");
+  CurlBatch batch = easy.get_all(
+    paths.map(%!(String path) => fixture_url + path), 2);
+  defer batch.free();
+  EXPECT_INT_EQ(batch.len(), 5);
+  EXPECT_STR_EQ(batch.response(0).text(), %"hello");
+  EXPECT_INT_EQ(batch.response(3).response_code(), 404);
+  EXPECT_STR_EQ(batch.response(4).text(), %"hello");
+  int transport = 0, limit = 0;
+  try batch.response(1);
+  catch %(io-fail *detail): {
+    transport = 1;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"multi_info_read");
+    EXPECT_INT_EQ(detail.assoc(<code>).integer(), CURLE_GOT_NOTHING);
+    EXPECT_STR_EQ(detail.assoc(<url>).string(), fixture_url + %"/close");
+  }
+  try batch.response(2);
+  catch %(size-limit *detail): {
+    limit = 1;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"multi_info_read");
+    EXPECT_INT_EQ(detail.assoc(<limit>).integer(), 32);
+    EXPECT_STR_EQ(detail.assoc(<channel>).string(), %"body");
+  }
+  EXPECT_TRUE(transport && limit);
+  CurlResponse reused = easy.get(fixture_url + %"/ok");
+  defer reused.free();
+  EXPECT_STR_EQ(reused.text(), %"hello");
+  EXPECT_STR_EQ(batch.response(0).text(), %"hello");
+}
+
+static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
+  CurlEasy easy = test_easy();
+  defer easy.free();
+  String echo = fixture_url + %"/echo";
+  CurlBatch batch = easy.body(%"text/plain", %"ping")
+    .request_all(%"POST", %($echo $echo $echo), 2);
+  defer batch.free();
+  for (int i = 0; i < batch.len(); i++) {
+    String text = batch.response(i).text();
+    EXPECT_TRUE(text.contains(%"\"method\": \"POST\""));
+    EXPECT_TRUE(text.contains(%"\"body\": \"ping\""));
+    EXPECT_INT_EQ(batch.response(i).upload_size(), 4);
+  }
+  CurlResponse reused = easy.get(echo);
+  defer reused.free();
+  EXPECT_TRUE(reused.text().contains(%"\"length\": 0"));
+  EXPECT_TRUE(reused.text().contains(%"\"method\": \"GET\""));
+
+  Bytes body = Bytes.new(1);
+  defer body.free();
+  CurlResponse single = easy.body_bytes(%"application/json", body)
+    .request(%"POST", echo);
+  defer single.free();
+  EXPECT_TRUE(single.text().contains(%"\"content_length\": \"0\""));
+  CurlResponse single_reset = easy.get(echo);
+  defer single_reset.free();
+  EXPECT_TRUE(single_reset.text().contains(%"\"content_length\": null"));
+  CurlBatch empty_body = easy.body_bytes(%"application/json", body)
+    .request_all(%"POST", %($echo $echo $echo), 2);
+  defer empty_body.free();
+  for (int i = 0; i < empty_body.len(); i++) {
+    String text = empty_body.response(i).text();
+    EXPECT_TRUE(text.contains(%"\"method\": \"POST\""));
+    EXPECT_TRUE(text.contains(%"\"type\": \"application/json\""));
+    EXPECT_TRUE(text.contains(%"\"length\": 0"));
+    EXPECT_TRUE(text.contains(%"\"content_length\": \"0\""));
+  }
+  CurlResponse reset = easy.get(echo);
+  defer reset.free();
+  EXPECT_TRUE(reset.text().contains(%"\"method\": \"GET\""));
+  EXPECT_TRUE(reset.text().contains(%"\"type\": \"\""));
+  EXPECT_TRUE(reset.text().contains(%"\"length\": 0"));
+  EXPECT_TRUE(reset.text().contains(%"\"content_length\": null"));
+
+  CURLcode set = curl_easy_setopt(easy.native(), CURLOPT_USERAGENT,
+                                  "x2c-compat-test/1");
+  EXPECT_INT_EQ(set, CURLE_OK);
+  easy.header(%"Accept: application/json");
+  String compat = fixture_url + %"/compat";
+  CurlBatch configured = easy.get_all(%($compat $compat), 2);
+  defer configured.free();
+  EXPECT_STR_EQ(configured.response(0).text(), %"matched");
+  EXPECT_STR_EQ(configured.response(1).text(), %"matched");
+}
+
+static void curl_concurrent_batch_empty_lifetime_and_timeout(void) {
+  CurlEasy easy = test_easy();
+  defer easy.free();
+  CurlBatch empty = easy.body(%"text/plain", %"not sent")
+    .get_all(NULL, 2);
+  EXPECT_INT_EQ(empty.len(), 0);
+  empty.free();
+  empty.free();
+  CurlResponse echo = easy.get(fixture_url + %"/echo");
+  defer echo.free();
+  EXPECT_TRUE(echo.text().contains(%"\"length\": 0"));
+  int stale = 0, invalid = 0;
+  try empty.response(0);
+  catch %(bad-state *): stale = 1;
+  try easy.get_all(NULL, 0);
+  catch %(bad-arg *): invalid = 1;
+  EXPECT_TRUE(stale && invalid);
+
+  easy.timeouts(100, 100);
+  String slow = fixture_url + %"/batch/delay?ms=500";
+  String ok = fixture_url + %"/ok";
+  CurlBatch batch = easy.get_all(%($slow $ok), 2);
+  defer batch.free();
+  int timeout = 0;
+  try batch.response(0);
+  catch %(io-fail *detail): {
+    timeout = 1;
+    EXPECT_INT_EQ(detail.assoc(<code>).integer(), CURLE_OPERATION_TIMEDOUT);
+  }
+  EXPECT_TRUE(timeout);
+  easy.free();
+  EXPECT_STR_EQ(batch.response(1).text(), %"hello");
+}
+
 void curl_suite(void) {
   $test.run(curl_response_values_and_header_order);
   $test.run(curl_redirect_preserves_response_blocks);
@@ -585,6 +745,10 @@ void curl_suite(void) {
   $test.run(curl_stream_delivers_chunks_without_buffering);
   $test.run(curl_stream_contains_callback_errors);
   $test.run(curl_lisp_bindings_return_values_lisp_consumes);
+  $test.run(curl_concurrent_batch_preserves_input_order_and_bound);
+  $test.run(curl_concurrent_batch_retains_each_failure);
+  $test.run(curl_concurrent_batch_broadcasts_body_and_raw_options);
+  $test.run(curl_concurrent_batch_empty_lifetime_and_timeout);
 }
 
 int main(int argc, char **argv) {

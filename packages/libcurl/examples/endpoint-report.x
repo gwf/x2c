@@ -1,6 +1,7 @@
 /*  endpoint-report.x -- Survey a service's endpoints, then fetch its file. */
 
-import "libcurl" with CurlEasy, CurlHeader, CurlResponse, CurlResponseBlock;
+import "libcurl" with CurlBatch, CurlEasy, CurlHeader, CurlResponse,
+  CurlResponseBlock;
 
 /*  A survey answers two questions per request: what came back, and did it
     come back inside the latency budget.
@@ -20,11 +21,10 @@ static void summarize(CurlResponse response) {
   printf("%s", %"  $received bytes in, $sent out, $timing\n");
 }
 
-static void survey(CurlEasy easy, String method, String path, String url) {
-  printf("%s", %"$method $path\n");
+static void survey(CurlBatch batch, int index, String path) {
+  printf("%s", %"GET $path\n");
   try {
-    CurlResponse response = easy.request(method, url);
-    defer response.free();
+    CurlResponse response = batch.response(index);
     summarize(response);
     int number = 0;
     foreach(CurlResponseBlock block, response.blocks()) {
@@ -58,10 +58,16 @@ int main(int argc, char **argv) {
     .user_agent(%"x2c-endpoint-report/1");
   defer easy.free();
 
-  foreach(String path, paths) survey(easy, %"GET", path, base + path);
+  List urls = paths.map(%!(String path) => base + path);
+  CurlBatch batch = easy.get_all(urls, 3);
+  defer batch.free();
+  for (int i = 0; i < batch.len(); i++) survey(batch, i, paths[i]);
 
   /*  A HEAD asks a large endpoint's size without moving its body. */
-  survey(easy, %"HEAD", %"/download", base + %"/download");
+  CurlResponse head = easy.request(%"HEAD", base + %"/download");
+  defer head.free();
+  printf("HEAD /download\n");
+  summarize(head);
 
   /*  Submitting a job: one body with its content type, answered in JSON.
       The reply no longer fits the survey's deliberately tiny body limit.

@@ -8,8 +8,7 @@ macro Statement $test.run(Name $function) => {
 }
 
 macro Statement $test.suite(Name $suite) => {
-  TestSuite_begin($(x2c.binding.spelling $suite));
-  $suite();
+  if (TestSuite_begin($(x2c.binding.spelling $suite))) $suite();
 }
 
 macro Expression $test.incrementing_lambda(Name $binding) => (

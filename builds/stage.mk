@@ -80,7 +80,8 @@ $(LIB_BUILD):
 # Lisp sources are inputs to the same translation, so they join the list;
 # without them a macro-only edit leaves every generated file untouched.
 X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(ROOT)/etc/symbols.xlisp \
-	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
+	$(wildcard $(ROOT)/etc/header-symbols.xlisp \
+		$(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
 		$(ROOT)/etc/builtin-macros.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \

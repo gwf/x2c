@@ -1,10 +1,10 @@
-> Status: done
-> The approved core plan shipped September 9, 2026. Correctness repairs landed
-> in bb3de5b, performance/build/source-tooling work in 49d46e8, and the shared
-> frontend, semantic editor, and C compatibility work in e6efc74. The book and
-> landing-page fixes shipped in dbcd4dd and d5eba54. Final publication checks
-> pass. Explicitly conditional distribution and application-driven followups
-> remain outside this completed implementation.
+> Status: active
+> Completion audit reopened September 9, 2026. The three implementation
+> batches and site changes are delivered and validated, but the full plan
+> now has the stage-translation evaluation, declaration-discovery design,
+> stronger source-package proof, optional suite selection, sorting, and bounded
+> HTTP work ready for integrated validation. Initializer completion is in
+> progress. SQLite's concrete new-package scope awaits Gary's answer.
 
 # Correctness, performance, and developer tooling
 
@@ -252,6 +252,14 @@ references, include order, and compile-time Lisp evaluation before replacing
 synthesized prototypes with owner-header includes. Generated spacing is a
 small optional cleanup, not justification for rewriting emission.
 
+That design is complete in `plans/x2c-declaration-discovery-design.md`.
+Forward function, imported macro/Lisp, local macro/Lisp, and include-cache
+probes support retaining selective two-stage collection and native prototypes.
+Eager Lisp evaluation would change the existing phase boundary; inferred
+owner-header insertion has no demonstrated benefit sufficient to replace the
+current contribution facts. The broader replacement is rejected on that
+evidence, rather than left as unexamined implementation work.
+
 ### B4/B5. Faster development loop
 
 After B1, let native scheduling complete any owned pending child instead of
@@ -267,6 +275,36 @@ Prove comment edits reuse compilation while effective settings invalidate it.
 Evaluate stage translation parallelism only after B3, using existing flags
 first and measuring interaction with native jobs. Focused test selection stays
 optional. No broadened readiness sequence is proposed.
+
+The runner now accepts exact suite-name arguments through the existing suite
+macro and harness owner. No arguments keep all 48 registrations in their
+existing order; duplicate names run once and unknown names return status 2.
+The full run still passes 743 tests / 18,227 assertions; reversed selection,
+duplicates, unknown-only and mixed-known/unknown runs pass focused checks.
+No Make target or publication requirement changed. Evidence:
+`debug/unit-selection-results.json`, `debug/unit-selection-build.log`.
+
+Stage evaluation is complete using a frozen copy of the current compiler,
+75 source units, support artifacts, and the unchanged stage Makefile. Three
+clean runs per combination produced these median seconds:
+
+| Translation jobs | Native jobs | Wall | User + system CPU |
+| --- | --- | --- | --- |
+| 1 | 1 | 12.683 | 12.264 |
+| 4 | 1 | 10.303 | 12.704 |
+| 1 | 16 | 3.701 | 12.564 |
+| 4 | 16 | 2.628 | 13.039 |
+
+At the host's 16 native jobs, four translation workers reduce wall time 29.0%
+for 3.8% more CPU time; the ranges are 3.676-3.714 and 2.622-2.707 seconds.
+All 12 builds produce identical C/H bytes. The resulting compiler also
+retranslates all 150 C/H artifacts identically with matching source paths.
+Use the existing opt-in `make build X2C_FLAGS='-j 4'`; native Make jobs retain
+their existing owner and defaults. One host's result does not set a new
+cross-platform default. Exact stage invocations use
+`make -f ../stage.mk -j16 X2C_FLAGS='-j 4' target` in an isolated stage directory.
+Evidence: `debug/stage-jobs.json`, `debug/stage-jobs-selfhost.log`, and
+`.context/stage-jobs.py`. This evaluation adds no gate or scheduler.
 
 ## Tooling and packages
 
@@ -563,12 +601,54 @@ and the 107-file documentation audit. The final build has no new qualifier
 warnings. Evidence: `debug/wave3-gate-delivery.log`. The complete site/book
 build and the packaged extension were reviewed before delivery.
 
-The approved core implementation is complete. Relocatable built installation
-and native dependency bundling remain deferred by the accepted distribution
-decision. Comparator/key sorting, SQLite, and concurrent HTTP remain dependent
-on concrete application requirements. General chained-designator brace elision,
-editor completion/rename/indexing, and incremental semantic caches are outside
-this delivered scope. No current implementation is waiting on user input.
+The delivered implementation is validated, but the completion audit found
+remaining work in the original approved scope. Chained designators and brace
+elision were bounded out by implementation choice, not by Gary's approval;
+they are being completed through the existing initializer owners. Sorting and
+bounded HTTP now have concrete callers and focused proof, and await integrated
+publication. SQLite has a concrete task list and example sketch in
+`plans/x2c-sqlite-package.md`; its new public package scope awaits Gary's
+answer under `packages/AGENTS.md`. Relocatable built installation and native
+dependency bundling remain deferred by the accepted distribution decision.
+Editor completion/rename/indexing and incremental semantic caches remain
+outside the accepted editor minimum.
+
+### Completion audit work awaiting delivery
+
+- B4/B5: the stage translation evaluation and optional suite selection above
+  are complete. Neither changes the default build or publication sequence.
+- D1: the broader discovery design records source and executable evidence in
+  `plans/x2c-declaration-discovery-design.md`.
+- T3: the package guide now gives the exact source-bundle production recipe.
+  `plans/x2c-source-package-proof.md` records successful pure, mixed, and native
+  dependency builds with reads of both original checkouts denied. This uses
+  an isolated native compiler fixture, not the optional APE installer.
+- Sorting: `Array.sort_with` uses stable merge sorting with borrowed `Func`
+  callbacks; `sort_by` computes each key once and preserves ties. Both commit
+  only after successful callbacks. List wrappers reuse those operations.
+  Word counting and graph component ordering exercise the APIs. The Array
+  and List suites pass 54 tests / 480 assertions, including callback failure,
+  cleanup, ties, nested sorting, and uneven merge tails. Gallery and graph
+  checks pass. Evidence: `debug/sorting-suites.log`,
+  `debug/sorting-counting-parity.log`, `debug/sorting-graph-tests.log`.
+- HTTP: libcurl batches use the existing transfer owner, a caller-selected
+  concurrency bound, input-order results, and ordinary response/error access.
+  Both applications use the batch API. Local checks cover actual concurrency,
+  completion order, errors, timeouts, empty/broadcast bodies, option inheritance,
+  and handle reuse. All 29 wrapper tests / 203 assertions, two raw tests /
+  16 assertions, applications, and Lisp checks pass. Evidence:
+  `debug/libcurl-empty-upload-final.log`. Package acceptance status is unchanged.
+  The combined compiler/runtime candidate also passes the existing
+  `make packages-check` across all seven packages, applications, and Lisp
+  adapters (`debug/completion-packages-check.log`).
+  The full unit runner passes 747 tests / 18,282 assertions on the same
+  candidate (`debug/completion-units.log`).
+- Initializers: chained designators and brace elision now use one subobject
+  walk for conversion and deferred assignments. Native object sizes preserve
+  macro-dependent bounds without a second C constant evaluator. Remaining
+  compound-literal cases are in implementation; final proof is pending.
+- SQLite: scope is proposed in `plans/x2c-sqlite-package.md`. It has no client
+  implementation yet and is not claimed complete or accepted.
 
 ## Plan review
 

@@ -2,6 +2,9 @@
 
 ## Coverage
 
+- The unit runner accepts optional exact suite-name arguments. Selection keeps
+  registration order, runs duplicate names once, and reports unknown names
+  with status 2. No arguments retain the full suite and validation behavior.
 - Compiler phase fixtures cover focused token, AST, transform, emission,
   generated-file, diagnostic, and runtime behavior.
   Filtered symbol artifacts additionally own focused semantic Type values

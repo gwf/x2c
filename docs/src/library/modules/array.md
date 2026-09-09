@@ -33,6 +33,8 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.setslice`](#Array.setslice) | Replaces the region `array[start:end]` with the elements of `values` and returns `array`. |
 | [`Array.shift`](#Array.shift) | Removes and returns the first element of `array`, or `void` if it is empty. |
 | [`Array.sort`](#Array.sort) | Sorts `array` in place in ascending order and returns that same `Array`. |
+| [`Array.sort_by`](#Array.sort_by) | Stably sorts `array` by keys produced once per value, returning the Array. |
+| [`Array.sort_with`](#Array.sort_with) | Stably sorts `array` with a borrowed synchronous comparator and returns it. |
 | [`Array.splice`](#Array.splice) | Replaces `remove_count` elements at `index` with `values` and returns what was removed. |
 | [`Array.take_last`](#Array.take_last) | Takes and returns the last element of `array`, or `void` if it is empty. |
 | [`Array.unshift`](#Array.unshift) | Inserts `elem` at the front of `array` and returns it. |
@@ -224,7 +226,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:708`
+Source: `lib/array.x:777`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -242,7 +244,7 @@ receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
 `<size-limit>` while rendering or canonicalizing the result, or a cause
 from an element's `write_str`.
 
-Source: `lib/array.x:629`
+Source: `lib/array.x:698`
 
 <a id="Array.map"></a>
 #### Array.map
@@ -459,6 +461,39 @@ reordered when a catch receives the cause.
 
 Source: `lib/array.x:528`
 
+<a id="Array.sort_by"></a>
+#### Array.sort_by
+
+`Self Array.sort_by(Self array, Func key)`
+
+Stably sorts `array` by keys produced once per value, returning the Array.
+The borrowed callback runs front to back and must not mutate this Array.
+Keys use `Var.compare`; equal keys preserve the original element order.
+A null or empty Array invokes no callback. Sorting another Array inside
+the callback is valid. Raises: allocation, key comparison, `Func.apply`,
+or callback causes. Failure leaves the original Array unchanged;
+callback side effects are not undone.
+
+Source: `lib/array.x:585`
+
+<a id="Array.sort_with"></a>
+#### Array.sort_with
+
+`Self Array.sort_with(Self array, Func compare)`
+
+Stably sorts `array` with a borrowed synchronous comparator and returns it.
+The callback receives two values; its result converts to `int`, with a
+negative, zero, or positive result ordering the first before, equal to,
+or after the second. It must give a consistent ordering and must not
+mutate this Array. Sorting a different Array inside the callback is valid.
+Null and fewer than two elements return unchanged without a callback.
+
+**Raises:** allocation, `Func.apply`, conversion, or callback causes. Failure
+leaves the original Array unchanged; temporary storage is released.
+Callback side effects are not undone.
+
+Source: `lib/array.x:549`
+
 <a id="Array.splice"></a>
 #### Array.splice
 
@@ -534,7 +569,7 @@ Appends the `Array` display text to `out`, using each element's
 `write_str`.
 `Array.str` materializes this into a `String`.
 
-Source: `lib/array.x:654`
+Source: `lib/array.x:723`
 
 ### `Block`
 
@@ -556,7 +591,7 @@ Source: `lib/array.x:56`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:714`
+Source: `lib/array.x:783`
 
 ## Advanced and interop API
 
@@ -591,7 +626,7 @@ Source: `lib/array.x:507`
 
 Returns nonzero when two `Array`s have structurally equal elements.
 
-Source: `lib/array.x:644`
+Source: `lib/array.x:713`
 
 <a id="Array.heap_pop"></a>
 #### Array.heap_pop
@@ -608,7 +643,7 @@ error. Call `Array.heapify` first if it was not built with
 **Raises:** any cause reported by element comparison while restoring the heap.
 The heap may already have removed its root when a catch receives the error.
 
-Source: `lib/array.x:595`
+Source: `lib/array.x:664`
 
 <a id="Array.heap_push"></a>
 #### Array.heap_push
@@ -640,7 +675,7 @@ cannot grow, or a cause from element comparison. A value or earlier swap
 may remain when comparison fails; pre-insertion failures leave the heap
 unchanged.
 
-Source: `lib/array.x:581`
+Source: `lib/array.x:650`
 
 <a id="Array.heapify"></a>
 #### Array.heapify
@@ -657,7 +692,7 @@ time.
 `Array.getindex` describes, or a cause from element comparison. Comparison
 failure may leave a partially rearranged `Array`.
 
-Source: `lib/array.x:614`
+Source: `lib/array.x:683`
 
 <a id="Array.remslice"></a>
 #### Array.remslice
@@ -687,7 +722,7 @@ allocating a `String`, and the two `String` forms are built on them.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/array.x:675`
+Source: `lib/array.x:744`
 
 <a id="Array.str"></a>
 #### Array.str
@@ -696,7 +731,7 @@ Source: `lib/array.x:675`
 
 Returns an `Array` display `String` using each element's `str`.
 
-Source: `lib/array.x:658`
+Source: `lib/array.x:727`
 
 <a id="Array.update_n"></a>
 #### Array.update_n
@@ -717,7 +752,7 @@ Source: `lib/array.x:93`
 
 Appends the readable `Array` representation to `out`.
 
-Source: `lib/array.x:647`
+Source: `lib/array.x:716`
 
 ## Runtime-internal callables
 
