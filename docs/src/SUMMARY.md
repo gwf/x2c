@@ -18,6 +18,7 @@
 - [Exceptions and Cleanup](guide/exceptions.md)
 - [Protocols](guide/protocols.md)
 - [Compile-time Macros](guide/macros.md)
+- [Automatic Differentiation](guide/autodiff.md)
 - [Programming Idioms](guide/idioms.md)
 
 # Language reference
@@ -33,6 +34,7 @@
   - [x2c C API](library/modules/x2c-c-api.md)
   - [lib/array.x](library/modules/array.md)
   - [lib/atom.x](library/modules/atom.md)
+  - [lib/autodiff.x](library/modules/autodiff.md)
   - [lib/block.x](library/modules/block.md)
   - [lib/buffer.x](library/modules/buffer.md)
   - [lib/common.x](library/modules/common.md)

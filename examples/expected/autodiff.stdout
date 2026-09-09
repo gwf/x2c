@@ -1,0 +1,3 @@
+dual      f=-7.521408 df/dx=19.956408
+forward   df/dx=19.956408 df/dy=2.522972
+reverse   f=-7.521408 df/dx=19.956408 df/dy=2.522972

@@ -78,6 +78,10 @@ TIER_HEADINGS = {
 PRIMARY_EVIDENCE = {
     "array": "`make verify` (`unittest/test-array.x`) and `make examples`.",
     "atom": "`make verify` (`unittest/test-atom.x`).",
+    "autodiff": (
+        "`make verify` (`unittest/test-autodiff.x`) and `make examples` "
+        "(`magic/autodiff`)."
+    ),
     "buffer": "`make verify` (`unittest/test-buffer.x`).",
     "context": "`make verify` (`unittest/test-context.x`).",
     "dispatch": "`make verify` (`unittest/test-var.x`).",

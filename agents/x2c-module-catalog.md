@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 30
-- Runtime modules: 45
+- Runtime modules: 46
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -425,6 +425,17 @@ Public functions:
 
 `Atom.promote`, `Atom.bare_spelling`, `Atom.write_str`, `Atom.write_repr`,
 `Var.is_atom`, `Atom.str`, `Atom.first`, `Atom.initialize`, `Atom.intern`
+
+### [lib/autodiff.x](../lib/autodiff.x)
+
+reverse-mode differentiation recorded on a runtime tape.
+
+Public functions:
+
+`AdNode.var`, `Var.adnode`, `AdTape.new`, `AdTape.input`, `AdTape.backward`,
+`AdNode.add`, `AdNode.sub`, `AdNode.mul`, `AdNode.div`, `AdNode.neg`,
+`AdNode.compare`, `AdNode.sin`, `AdNode.cos`, `AdNode.exp`, `AdNode.log`,
+`AdNode.sqrt`, `AdNode.tanh`
 
 ### [lib/block.x](../lib/block.x)
 

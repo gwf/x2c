@@ -689,3 +689,12 @@ macro Decorator $ad.reverse(Unit $fn) => {
   $fn
   $(ad.reverse $fn)...
 }
+
+/** Emits both `NAME_dot` and `NAME_grad`. Decorators cannot stack when each
+    produces several items, so this is the spelling for a function that
+    needs both derivatives.
+*/
+macro Decorator $ad.both(Unit $fn) => {
+  $fn
+  $(append (ad.forward $fn) (ad.reverse $fn))...
+}

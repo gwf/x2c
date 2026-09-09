@@ -16,6 +16,7 @@ points used by generated code, native callers, and compiler setup.
 | --- | --- |
 | [`lib/array.x`](array.md) | dynamic contiguous arrays of `Var` elements. |
 | [`lib/atom.x`](atom.md) | canonical exact names. |
+| [`lib/autodiff.x`](autodiff.md) | reverse-mode differentiation recorded on a runtime tape. |
 | [`lib/block.x`](block.md) | checked dynamic storage for fixed-width elements. |
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
 | [`lib/common.x`](common.md) | the shared `Var` union and operations used by every module. |
@@ -55,6 +56,7 @@ points used by generated code, native callers, and compiler setup.
 These modules ship with x2c but are not loaded by the standard
 prelude. Include one explicitly to use its declarations.
 
+- [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.

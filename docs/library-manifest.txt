@@ -51,6 +51,7 @@ lib/symbolset.x|api|
 lib/thread-state.x|internal|Native pthread-key storage for per-thread runtime state.
 lib/thread.x|api|
 lib/tokenizer.x|internal|Token stream used by the compiler and the Lisp reader.
+lib/autodiff.x|optional|Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.

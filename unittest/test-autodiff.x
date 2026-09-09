@@ -2,6 +2,7 @@
 
 #include "x2c.x"
 #include "typed-array.x"
+#include "autodiff.x"
 #include <math.h>
 #include "test-support.x"
 $(import "test-macros.xmacro")
@@ -147,6 +148,33 @@ static void autodiff_forward_and_reverse_agree(void) {
   EXPECT_TRUE(fabs(b_grad - _both_dot(0.5, 0.0, 1.5, 1.0)) < 1e-12);
 }
 
+static double _taped(double x0, double y0, double *x_grad, double *y_grad) {
+  AdTape tape = AdTape.new();
+  AdNode x = tape.input(x0), y = tape.input(y0);
+  AdNode s = tape.input(0.0), t = x * y + tape.input(3.0);
+  AdNode limit = tape.input(100.0);
+  while (t < limit) {
+    s = s + t.sin() / x;
+    t = t * t;
+  }
+  AdNode r = s - y.exp() + x.sqrt().log().tanh().cos() - (-x);
+  tape.backward(r);
+  if (x_grad) *x_grad = x.adjoint;
+  if (y_grad) *y_grad = y.adjoint;
+  return r.value;
+}
+
+static double _taped_in_x(double x) => _taped(x, 2.0, NULL, NULL);
+static double _taped_in_y(double y) => _taped(1.5, y, NULL, NULL);
+
+static void autodiff_tape_matches_finite_difference(void) {
+  $test.scoped();
+  double x_grad, y_grad;
+  _taped(1.5, 2.0, &x_grad, &y_grad);
+  EXPECT_TRUE(fabs(x_grad - _central(_taped_in_x, 1.5)) < 1e-5);
+  EXPECT_TRUE(fabs(y_grad - _central(_taped_in_y, 2.0)) < 1e-5);
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
@@ -154,4 +182,5 @@ void autodiff_suite(void) {
   $test.run(autodiff_forward_transform_matches_finite_difference);
   $test.run(autodiff_reverse_transform_matches_finite_difference);
   $test.run(autodiff_forward_and_reverse_agree);
+  $test.run(autodiff_tape_matches_finite_difference);
 }
