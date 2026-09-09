@@ -1,4 +1,4 @@
-PACKAGES := pcre2 yyjson termbox2 raylib libcurl libuv blis
+PACKAGES := pcre2 yyjson termbox2 raylib libcurl libuv blis cstar
 # The packages the root `make packages-check` builds and runs.
 CHECKED_PACKAGES := pcre2 yyjson libcurl termbox2 blis libuv raylib
 

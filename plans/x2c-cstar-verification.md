@@ -1,8 +1,9 @@
-> Status: active
+> Status: complete
 > Reviewed and corrected against source and upstream on 2026-09-09.
-> Milestone 1 (feasibility) executed the same day; results are recorded
-> under "Milestone 1 results". Gary accepted proceeding without a known
-> license for the closed C* core. Milestones 2-5 remain unstarted.
+> All five milestones executed the same day. Gary accepted proceeding
+> without a known license for the closed C* core. The result is
+> `packages/cstar`, an optional package outside every aggregate check;
+> results are under "Milestone 1 results" and "Milestones 2-5 results".
 
 # C* verification for x2c
 
@@ -123,16 +124,21 @@ necessary; it is not a proof of all ISO C pointer semantics.
 
 ## Surface and staging
 
-Proposed names describe new macros, not currently working APIs:
+These names were proposed here and are now the shipped surface, with two
+additions the array work needed; `packages/cstar/README.md` is authoritative:
 
 - `$cstar.verify(pre, post)` decorates a function. `pre` and `post` are
   String literals in the pinned backend's logical syntax; the shipped 0.5.7
   return-value name is `__return`.
-- `$cstar.invariant(assertion)` decorates a `while` statement.
+- `$cstar.invariant(assertion)` decorates a `while` statement, and
+  `$cstar.invariant_sl(assertion)` does so with a complete separation-logic
+  assertion instead of a pure proposition.
 - `$cstar.assert(assertion);` records an intermediate logical assertion.
-- `$cstar.proof(helper, logical_arguments...);` records a named proof helper
-  with the helper as a `Name` hole and arguments as String literals. These
-  are logical terms, never reads of live implementation variables.
+- `$cstar.proof(step, logical_arguments...);` records a proof step of the
+  session, and `$cstar.helper(name, logical_arguments...);` a helper from
+  the companion file, with the name as a `Name` hole and arguments as
+  String literals. These are logical terms, never reads of live
+  implementation variables.
 
 Use the backend's quotation/term constructors behind a small `Cstar` package
 surface; do not invent another assertion language. Resolve implementation
@@ -229,10 +235,10 @@ report.
 | Milestone | Deliverable and acceptance evidence | Effort |
 | --- | --- | --- |
 | 1. Feasibility | Pin usable C* libraries/headers; run one x2c theorem helper and scalar function through the engine; complete reports; extract/erase macro records with binding correspondence | done |
-| 2. Annotation/extraction | Function contracts, assertion/invariant/proof markers, native extractor, locations, companion proof helper interface, deterministic output, unchanged ordinary function behavior | 5-10 days |
-| 3. Scalar and pointer adapter | Declarations, arithmetic/conversions, branches, return, loads/stores and checked direct calls; bounded absolute value and pointer swap verify end to end | 10-15 days |
-| 4. Loops and useful proofs | Array clearing with a loop invariant and x2c ownership-splitting helper; reused proofs for a second bounded buffer routine | 15-25 days |
-| 5. Package delivery | Explicit verification command, isolated sessions, complete result handling, reproducible inputs, examples, dependency profile, notices, and book documentation | 5-10 days |
+| 2. Annotation/extraction | Function contracts, assertion/invariant/proof markers, native extractor, locations, companion proof helper interface, deterministic output, unchanged ordinary function behavior | done |
+| 3. Scalar and pointer adapter | Declarations, arithmetic/conversions, branches, return, loads/stores and checked direct calls; bounded absolute value and pointer swap verify end to end | done |
+| 4. Loops and useful proofs | Array clearing with a loop invariant and x2c ownership-splitting helper; reused proofs for a second bounded buffer routine | done |
+| 5. Package delivery | Explicit verification command, isolated sessions, complete result handling, reproducible inputs, examples, dependency profile, notices, and book documentation | done |
 
 Suggested ownership:
 
@@ -295,7 +301,7 @@ Acceptance behaviors observed:
 - `CSTAR_HOME` unset: `fatal error: folder path ~/.cstar/include does not
   exist`, immediate.
 
-Extraction (`packages/cstar/spike/extract/`): `$cstar.verify`,
+Extraction (a feasibility probe, since superseded by the package): `$cstar.verify`,
 `$cstar.invariant`, `$cstar.assert`, and `$cstar.proof` record into
 `cstar.records` in source order; the function decorator erases every marker
 call in Lisp, so the generated C never mentions the marker and differs from
@@ -315,10 +321,98 @@ there is no `Literal` hole kind; the marker is matched by spelling, not
 binding identity; marker positions inside a body are recoverable only if
 the record also keeps the pre-erasure body.
 
-Upstream facts corrected during the spike: there is no documented
+Upstream facts corrected during that probe: there is no documented
 default/alternative engine (a header comment names a `minise` variant built
 with `ENABLE_QCP=OFF`); the paper's `__result` is `__return` in 0.5.7; the
 examples' `cstar.toml` links `-lz3`, which only the SMT tutorial needs.
+
+## Milestones 2-5 results (2026-09-09, macOS 15 arm64, Apple clang)
+
+`packages/cstar` implements the whole surface. `make -C packages/cstar clean
+prepare build tool test run verify` is its acceptance command; it is not in
+`check`, `precommit`, `agent-pr-check`, or `CHECKED_PACKAGES`.
+
+Timings, warm server, best of five. A run is parse, render, build the proof
+program, and run it against the prover.
+
+| Run | Time |
+| --- | --- |
+| `make -C packages/cstar clean prepare build tool test run verify` | 2 min 31 s |
+| Cold `hol_light_server` start to listening | 13.7 s |
+| `make prepare` from an already downloaded archive | 12.7 s |
+| Scalar examples: abs, swap, scale | 0.41-0.43 s |
+| twice (two loops, one companion helper) | 0.51 s |
+| clear (two array loops) | 1.68 s |
+| fill (one array loop) | 1.42 s |
+| Negative: abs-unbounded, swap-unowned | 0.41 s, 0.43 s |
+| Negative: clear-offbyone, fill-falseinv | 1.22 s, 1.18 s |
+
+Two costs the array work adds to every run were measured separately.
+Linking the array proof objects costs about 0.21 s end to end (a scalar
+example is 0.19 s without them and 0.41 s with them), and the package links
+them uniformly. Building the array *theory* costs about 0.70 s more, so
+`Cstar.load_arrays` is called only when the rendered program uses an array
+step; before that split, abs cost 1.15 s.
+
+Proof text per verified function, counted as annotation lines against
+implementation lines in the example source:
+
+| Function | Annotation | Implementation |
+| --- | --- | --- |
+| abs.x `absolute` | 4 | 3 |
+| swap.x `swap` | 5 | 4 |
+| scale.x `spread` | 4 | 4 |
+| twice.x `twice` | 11 | 6 |
+| twice.x `product` | 12 | 5 (plus a 3-line companion helper) |
+| clear.x `clear_int` | 22 | 5 |
+| clear.x `clear_char` | 23 | 5 |
+| fill.x `fill_int` | 23 | 5 |
+
+The array functions each render 20 lines of proof program. Their 22-23
+annotation lines are mostly the separation-logic invariant; the reusable
+theory behind them is 141 lines of C* in
+`packages/cstar/proof/x2c_array_helpers.c`, shared by all three and by both
+element types.
+
+Acceptance behaviors observed, against "Validation and expansion decisions":
+
+- Absolute value: bounded contract passes; without the `INT_MIN` exclusion
+  one obligation remains at the `-x` return, exit 1.
+- Pointer swap: disjoint ownership passes; asking for one of the two cells
+  makes the engine refuse the second read, exit 3.
+- Array clearing: `clear_int` and `clear_char` verify, and `main` clears an
+  empty range and two nonempty ones and prints the result. `i <= n` makes
+  `fill_before_store` unable to expose a cell, and the run stops with
+  "Checked proposition(i_v < n__pre) is not an exact top-level fact",
+  exit 3. A false invariant (`1i <= i_v` where the loop starts at 0) stops
+  with "Partial Solve Failed for Partial Invariant", exit 3.
+- Reuse: `fill_int` uses the same six steps as `clear_int` with a ghost
+  value term in place of the literal; no proof-library change was needed.
+- A changed outer decorator cannot reuse a proof of the old body:
+  `tests/outer-decorator.x` is refused with exit 2.
+- Unsupported constructs stop with a source location
+  (`tests/unsupported.x`), a file with no annotations is refused, and a
+  short function inventory reports exit 3 rather than success.
+
+Not covered by the acceptance corpus: nested bindings and repeated names
+mapping to the correct logical variables were never exercised by a
+dedicated example, because no admitted example needed shadowing.
+
+Facts learned that constrain the surface:
+
+- x2c cannot define a method on a type an `import` supplies:
+  `void Cstar.step(Cstar cstar, ...)` in a consumer unit is a parse error at
+  the parameter list. The package's own proof steps are therefore methods
+  reached by `$cstar.proof`, and a user's companion helper is a plain
+  function reached by `$cstar.helper`.
+- A single-word type reaches the adapter as a bare symbol rather than a
+  one-item list wherever the parser had nothing to qualify, as in a function
+  type's result. The adapter normalizes both spellings.
+- `cstarc` resolves every `#require` against its project root, so the
+  package's own C* source is compiled with the prepared `cstar_examples`
+  tree as the working directory and its own path given absolutely. The
+  module name of an input outside the root is its stem, which fixes the
+  initializer name to `_cst_x2c_array_helpers_init`.
 
 ## Validation and expansion decisions
 

@@ -12,6 +12,7 @@
 - [Iteration](guide/iteration.md)
 - [Packages](guide/packages.md)
 - [Wrapping a C Library](guide/wrapping-c-libraries.md)
+- [Verifying Functions with C*](guide/verification.md)
 - [Scopes and Lifetime](guide/memory.md)
 - [Contexts and Threads](guide/contexts-and-threads.md)
 - [Exceptions and Cleanup](guide/exceptions.md)

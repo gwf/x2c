@@ -1,0 +1,39 @@
+Third-party terms for the cstar package
+=======================================
+
+MIT-licensed sources
+--------------------
+
+The proof libraries this package builds and links come from two MIT-licensed
+repositories, pinned by content hash in dependency.json:
+
+  cstar_examples  32d61571e20eeecd10a6ecd4f00592cb6618e524
+                  proof/, userlib/qcp/, userlib/operational/,
+                  tutorial/common.c, array/lib/
+                  LICENSES/cstar_examples-MIT.txt
+                  (sha256 1581b13c2150a8c96a82c4edc0a3a2f7b334186cfb4c86b65fb
+                          bb0c6c3cdd610)
+
+  cstar_stdlib    7e8662b8a0706b77409667aaa022346d56836453
+                  the content of cstar_examples/proof/
+                  LICENSES/cstar_stdlib-MIT.txt
+                  (sha256 11dfe4974f3ceb6ae2c83444a7d2d8acddb58572fb7bcdb07d0
+                          e15239a2c3df1)
+
+proof/x2c_array_helpers.{h,c} is this package's own C* source. It is
+written against the MIT headers above and compiled by cstarc; it copies no
+upstream code.
+
+The C* core release ships no license
+------------------------------------
+
+The pinned darwin-aarch64 v0.5.7 release
+(sha256 f8fb646d20e9f59aa36f7cd39359acbeacb0f5fdbd4a4ce465112e432bcafd7f)
+supplies cstarc, cst_clang, hol_light_server, libcstar.a, libsac.dylib, and
+the C headers. Its source is closed and the archive contains no LICENSE file
+and no stated terms.
+
+packages/LICENSE-POLICY.md rejects unclear terms by default. Gary made the
+explicit project decision on 2026-09-09 to proceed anyway, for an
+experimental package that downloads the release into a local dependency
+cache and redistributes none of it. That decision covers this package only.

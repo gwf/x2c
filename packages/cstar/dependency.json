@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "cstar",
+  "version": "0.5.7",
+  "profile": "darwin-aarch64-release-with-proof-libraries",
+  "sources": [
+    {
+      "name": "cstar",
+      "url": "https://gitee.com/cstarlang/cstar_docs/releases/download/v0.5.7/cstar_darwin-aarch64.tar.xz",
+      "sha256": "f8fb646d20e9f59aa36f7cd39359acbeacb0f5fdbd4a4ce465112e432bcafd7f",
+      "root": "cstar_v0.5.7_darwin-aarch64"
+    },
+    {
+      "name": "cstar_examples",
+      "url": "https://gitee.com/cstarlang/cstar_examples/repository/archive/32d61571e20eeecd10a6ecd4f00592cb6618e524.tar.gz",
+      "sha256": "9ed1caed1613b2c28ff8030bc095bdcca911e1b8acb6a2f737249cef0062a63e",
+      "root": "cstar_examples-32d61571e20eeecd10a6ecd4f00592cb6618e524"
+    },
+    {
+      "name": "cstar_stdlib",
+      "url": "https://gitee.com/cstarlang/cstar_stdlib/repository/archive/7e8662b8a0706b77409667aaa022346d56836453.tar.gz",
+      "sha256": "681f89059a2f9fcac699de41d98a7daa1895aeaa0edb987ee9510b7f0eefa1fe",
+      "root": "cstar_stdlib-7e8662b8a0706b77409667aaa022346d56836453"
+    }
+  ],
+  "steps": [
+    {
+      "argv": ["cp", "-R", "{source_cstar}/include/.", "{prefix}/include"]
+    },
+    {
+      "argv": ["cp", "{source_cstar}/lib/libcstar.a",
+               "{source_cstar}/lib/libsac.dylib", "{prefix}/lib"]
+    },
+    {
+      "argv": ["cp", "-R", "{source_cstar}/lib/clang", "{prefix}/lib/clang"]
+    },
+    {
+      "argv": ["cp", "{source_cstar}/bin/cstarc", "{source_cstar}/bin/cst_clang",
+               "{source_cstar}/bin/hol_light_server", "{prefix}/bin"]
+    },
+    {
+      "argv": ["mkdir", "-p", "{prefix}/share/cstar_examples/proof",
+               "{prefix}/lib/cstar-proof"]
+    },
+    {
+      "argv": ["cp", "-R", "{source_cstar_examples}/.",
+               "{prefix}/share/cstar_examples"]
+    },
+    {
+      "argv": ["cp", "-R", "{source_cstar_stdlib}/.",
+               "{prefix}/share/cstar_examples/proof"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/proof_user__lib.o",
+               "proof/proof_user.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/proof_sl__lib.o",
+               "proof/proof_sl.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/proof_backward__lib.o",
+               "proof/proof_backward.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/proof_backward_sl__lib.o",
+               "proof/proof_backward_sl.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/proof_symexec__lib.o",
+               "proof/proof_symexec.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/veriftime__lib.o",
+               "userlib/qcp/veriftime.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/common__lib.o",
+               "tutorial/common.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/operational__lib.o",
+               "userlib/operational/operational.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/list__lib.o",
+               "array/lib/list.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/array_core__lib.o",
+               "array/lib/array_core.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/index__lib.o",
+               "array/lib/index.c"]
+    },
+    {
+      "cwd": "{prefix}/share/cstar_examples",
+      "env": { "CSTAR_HOME": "{prefix}" },
+      "argv": ["{prefix}/bin/cstarc", "verify",
+               "--cl={prefix}/lib/cstar-proof/array__lib.o",
+               "array/lib/array.c"]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/symexec.h",
+    "{prefix}/include/proof_kernel.h",
+    "{prefix}/include/common.strategies",
+    "{prefix}/lib/libcstar.a",
+    "{prefix}/lib/libsac.dylib",
+    "{prefix}/bin/cstarc",
+    "{prefix}/bin/cst_clang",
+    "{prefix}/bin/hol_light_server",
+    "{prefix}/share/cstar_examples/proof/proof_user.c",
+    "{prefix}/share/cstar_examples/tutorial/common.c",
+    "{prefix}/lib/cstar-proof/proof_user__lib.o",
+    "{prefix}/lib/cstar-proof/proof_sl__lib.o",
+    "{prefix}/lib/cstar-proof/proof_backward__lib.o",
+    "{prefix}/lib/cstar-proof/proof_backward_sl__lib.o",
+    "{prefix}/lib/cstar-proof/proof_symexec__lib.o",
+    "{prefix}/lib/cstar-proof/veriftime__lib.o",
+    "{prefix}/lib/cstar-proof/common__lib.o",
+    "{prefix}/lib/cstar-proof/operational__lib.o",
+    "{prefix}/lib/cstar-proof/list__lib.o",
+    "{prefix}/lib/cstar-proof/array_core__lib.o",
+    "{prefix}/lib/cstar-proof/index__lib.o",
+    "{prefix}/lib/cstar-proof/array__lib.o"
+  ]
+}
