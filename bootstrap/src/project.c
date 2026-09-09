@@ -968,7 +968,7 @@ static CliRequest _target_request(Project p,  ProjectTarget target,  CliRequest 
   _append_values(link,  command -> ld_args);
   request -> ld_args = Array_list_free(link);
   request -> label = target -> name;
-  request -> state_seed = String_add(String_join(NULL,  cons(String_var(p -> path),  cons(String_var(_36),  cons(String_var(p -> text),  cons(String_var(_36),  NULL))))),  String_join(NULL,  cons(String_var(_37),  cons(String_var(target -> name),  cons(String_var(_38),  cons(String_var(command -> profile),  NULL))))));
+  request -> state_seed = String_add(String_join(NULL,  cons(String_var(p -> path),  cons(String_var(_36),  NULL))),  String_join(NULL,  cons(String_var(_37),  cons(String_var(target -> name),  cons(String_var(_38),  cons(String_var(command -> profile),  NULL))))));
   return request;
 }
 

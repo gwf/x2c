@@ -202,7 +202,7 @@ List Compiler_generate_protocol_adapters(Compiler,  List);
 
 List Compiler_emit(Compiler,  List);
 
-char * code_pretty_string(List);
+char * Compiler_code_pretty_string(Compiler,  List,  String);
 
 void generate_code(Compiler,  List,  String);
 
@@ -286,6 +286,10 @@ void Build_record_translation(Build,  String,  String);
 
 int Build_finish(Build);
 
+Iter Array_iter(Array,  Iter);
+
+int compile_commands_write(String,  Array);
+
 void Build_report_success(Build);
 
 int Build_run_program(Build);
@@ -360,7 +364,7 @@ static int _run_translation(CliRequest c);
 
 static CliRequest _build_translation_request(CliRequest source,  String input,  String output_dir);
 
-static int _run_build_request(CliRequest c);
+static int _run_build_request(CliRequest c,  Array commands);
 
 static int _run_build(CliRequest request);
 
@@ -878,6 +882,7 @@ static void _configure_package(Compiler compiler,  String filename){
 
 static void _compile_file(CliRequest request,  String filename,  String output_dir){
   Compiler compiler = Compiler_new();
+  compiler -> source_map = request -> source_map;
   _configure_package(compiler,  filename);
   _stage_stats(filename,  "start");
   _tokenize_input(compiler,  filename);
@@ -913,7 +918,7 @@ static void _compile_file(CliRequest request,  String filename,  String output_d
   _stage_stats(filename,  "transform");
   if(opts -> dump == 10268258302218){
     ast = Compiler_emit(compiler,  ast);
-    puts(code_pretty_string(ast));
+    puts(Compiler_code_pretty_string(compiler,  ast,  NULL));
     exit(0);
   }
   generate_code(compiler,  ast,  output_dir);
@@ -1209,7 +1214,7 @@ static CliRequest _build_translation_request(CliRequest source,  String input,  
   return request;
 }
 
-static int _run_build_request(CliRequest c){
+static int _run_build_request(CliRequest c,  Array commands){
   if(! c -> dry_run){
     {
       String input;
@@ -1305,12 +1310,24 @@ static int _run_build_request(CliRequest c){
       }
 
     }
-    Build_report_success(state);
-    if(c -> command == 38236) result = Build_run_program(state);
-    Build_cleanup(state,  1);
-    {
-      int _x2c_return_value_5 = result;
+    if((void *) commands != NULL){
+      String entry;
+      Iter _x2c_macro_iterator_13 = Array_iter(state -> compile_commands,  &(struct Iter){
+        0
+      }
+      );
+      Var _x2c_macro_item_13;
+      while(Iter_try_next(_x2c_macro_iterator_13,  & _x2c_macro_item_13)){
+        entry = Var_string(_x2c_macro_item_13);
+        Array_push(commands,  Context_export(target,  String_var(entry)));
+      }
+
+    }
+    if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands,  commands)){
+      Build_cleanup(state,  0);
       {
+        int _x2c_return_value_5 = 1;
+        {
   int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
    x2c_cleanup_leave(& _x2c_defer_record_2);
@@ -1319,30 +1336,53 @@ static int _run_build_request(CliRequest c){
    return _x2c_return_value_5;
 
 }
+      }
+
+    }
+    Build_report_success(state);
+    if(c -> command == 38236) result = Build_run_program(state);
+    Build_cleanup(state,  1);
+    {
+      int _x2c_return_value_6 = result;
+      {
+  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+   x2c_cleanup_leave(& _x2c_defer_record_2);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
+   return _x2c_return_value_6;
+
+}
     }
 
   }
 
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
 }
 }
 
 static int _run_build(CliRequest request){
+  Array commands = String_truth(request -> compile_commands) && ! request -> dry_run ? Array_new() : NULL;
   if(List_truth(request -> inputs)){
     if(String_truth(request -> manifest)){
       fputs("x2c: error: --manifest-path conflicts with explicit inputs\n",  stderr);
       exit(2);
     }
-    return _run_build_request(request);
-  }
-  ProjectBuild plan = project_plan(request);
-  for(ProjectBuild node = plan;  node;  node = node -> next){
-    int result = _run_build_request(node -> request);
+    int result = _run_build_request(request,  commands);
     if(result) return result;
   }
+  else{
+    ProjectBuild plan = project_plan(request);
+    for(ProjectBuild node = plan;  node;  node = node -> next){
+      int result = _run_build_request(node -> request,  commands);
+      if(result) return result;
+    }
+
+  }
+  if((void *) commands != NULL && request -> command != 38236 && ! compile_commands_write(request -> compile_commands,  commands)) return 1;
   return 0;
 }
 
@@ -1359,7 +1399,7 @@ static int _run_bootstrap(CliRequest command){
   runtime_request -> label = _49;
   _load_translation_support(runtime_request);
   Context build = Context_open_isolated_named("bootstrap build");
-  int result = _run_build_request(runtime_request);
+  int result = _run_build_request(runtime_request,  NULL);
   if(result){
     Context_close(build);
     bootstrap_release(payload);
@@ -1368,7 +1408,7 @@ static int _run_bootstrap(CliRequest command){
   }
   CliRequest compiler_request = bootstrap_build_request(command,  payload,  239277269348);
   compiler_request -> label = _50;
-  result = _run_build_request(compiler_request);
+  result = _run_build_request(compiler_request,  NULL);
   if(result){
     Context_close(build);
     bootstrap_release(payload);

@@ -136,9 +136,9 @@ Token Var_token(Var);
 
 Var Array_getindex(Array,  int);
 
-String Compiler_display_path(Compiler,  String);
-
 int String_truth(String);
+
+String Compiler_display_path(Compiler,  String);
 
 int List_truth(List);
 
@@ -189,8 +189,6 @@ int Compiler_macro_invocation_needs_shallow_expansion(Compiler);
 void Compiler_skip_keyword_alias(Compiler);
 
 void Compiler_skip_macro_invocation(Compiler);
-
-int Compiler_test(Compiler,  Symbol);
 
 void Compiler_install_builtin_macros(Compiler);
 
@@ -387,8 +385,6 @@ static List _cache_literal_var(Compiler compiler,  Var value);
 static List _cache_literal_list(Compiler compiler,  List values);
 
 static String _match_pattern_converter_name(Var node);
-
-static Var _match_pattern_value(Compiler c,  Var node);
 
 static int _match_pattern_value_is_static(Var value);
 
@@ -809,7 +805,7 @@ static void _shutdown_lisp(void){
 static void _own_lisp(Compiler compiler){
   LispOwner owner = malloc(sizeof(struct LispOwner));
   if(! owner){
-    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/compiler.x",.function =  "_own_lisp",.line =  180};
+    static const X2CErrorSite  _x2c_error_site_0  = {.file =  "../../src/compiler.x",.function =  "_own_lisp",.line =  181};
     x2c_error_raise_n(& _x2c_error_site_0, 97614135954008, 1, Symbol_var(32993636),  String_var(String_join(NULL,  cons(String_var(String_new("Compiler.new")),  NULL))));
     __builtin_unreachable();
   }
@@ -874,6 +870,7 @@ static Compiler _new(Compiler owner){
       (compiler) -> package_aliases = owner -> package_aliases;
       (compiler) -> package_members = owner -> package_members;
       (compiler) -> names = owner -> names;
+      (compiler) -> source_map = owner -> source_map;
     }
     else{
       (compiler) -> package_roots = Map_new();
@@ -1007,7 +1004,7 @@ Symbol Compiler_expect(Compiler c,  Symbol type){
 static void _update_brace_stack(Compiler c,  Token consumed){
   if(! consumed) return;
   switch(consumed -> type){
-    case 247 : case 9719 : case 9463 : case 16631 : Array_push(c -> braces,  Token_var(consumed));
+    case 247 : case 9719 : case 9463 : case 16631 : case 16375 : Array_push(c -> braces,  Token_var(consumed));
     break;
     case 251 : if(Array_len(c -> braces)) Array_take_last(c -> braces);
     else{
@@ -1037,7 +1034,7 @@ static void _shallow_block(Compiler c){
   Compiler_next(c);
   while((peek = Compiler_peek(c,  0)) != 251){
     if(peek == 11212) Compiler_report_error(c,  33658058,  _259,  c -> token,  NULL);
-    if(peek == 247 || peek == 9719 || peek == 9463 || peek == 16631) _shallow_block(c);
+    if(peek == 247 || peek == 9719 || peek == 9463 || peek == 16631 || peek == 16375) _shallow_block(c);
     else Compiler_next(c);
   }
   Compiler_expect(c,  251);
@@ -1046,7 +1043,8 @@ static void _shallow_block(Compiler c){
 int Compiler_record_origin(Compiler c,  Token token){
   if(! _init_guard_) _file_init_();
   if(! token) return 0;
-  String file = Compiler_display_path(c,  String_truth(c -> filename) ? c -> filename : _13);
+  String file = String_truth(c -> filename) ? c -> filename : _13;
+  if(! c -> source_map) file = Compiler_display_path(c,  file);
   Array_push(c -> origins,  List_var(cons(_14,  cons(String_var(file),  cons(int_var(token -> line),  cons(int_var(token -> col),  cons(int_var(token -> len),  cons(int_var(token -> pos),  NULL))))))));
   return Array_len(c -> origins);
 }
@@ -1141,7 +1139,7 @@ void Compiler__skip_shallow_expression(Compiler compiler,  int stop_at_comma){
     else if(token == 83 && parens) parens --;
     else if(token == 183 || token == 9655) brackets ++;
     else if(token == 187 && brackets) brackets --;
-    else if(token == 247 || token == 9719 || token == 9463 || token == 16631) braces ++;
+    else if(token == 247 || token == 9719 || token == 9463 || token == 16631 || token == 16375) braces ++;
     else if(token == 251 && braces) braces --;
     Compiler_next(compiler);
   }
@@ -1308,7 +1306,7 @@ static void _sync_top_level(Compiler c){
       Compiler_next(c);
       break;
     }
-    if(sym == 247 || sym == 9719 || sym == 9463 || sym == 16631){
+    if(sym == 247 || sym == 9719 || sym == 9463 || sym == 16631 || sym == 16375){
       depth += 1;
       Compiler_next(c);
       continue;
@@ -1574,12 +1572,12 @@ static String _match_pattern_converter_name(Var node){
   if(Var_is(node,  1318210446)) return Var_str(node);  if(! Var_is(node,  806120)) return NULL;  List matched = List_match(Var_list(node),  List_var(_98));  if(! List_truth(matched)) return NULL;  List binding = Var_list(List_assoc(matched,  Symbol_var(1997793414030)));  return binding_identity_spelling(binding);
 }
 
-static Var _match_pattern_value(Compiler c,  Var node){
-  if(! Var_is(node,  806120)) return node;  List ast = Var_list(node);  if(! List_truth(ast)) return List_var(NULL);  Var head,  second,  third;  List _x2c_destructure_0 = ast;  head = List_getindex(_x2c_destructure_0,  0);  second = List_getindex(_x2c_destructure_0,  1);  third = List_getindex(_x2c_destructure_0,  2);  if(Var_equal(head,  Symbol_var(6363658))) return _match_pattern_value(c,  Array_getindex(c -> id_keys,  Var_int(Var_convert(second,  3453797))));  if(Var_equal(head,  Symbol_var(377892))) return _match_pattern_value(c,  List_last(ast));  if(Var_equal(head,  Symbol_var(45156))) return _match_pattern_value(c,  second);  if(Var_equal(head,  Symbol_var(1318210446))) return _match_pattern_value(c,  second);  String converter = Var_equal(head,  Symbol_var(199448)) ? _match_pattern_converter_name(second) : NULL;  if(String_equal(converter,  _99) || String_equal(converter,  _100)){
-    List args = Var_list(third);  Var args_tag,  argument;  List _x2c_destructure_1 = args;  args_tag = List_getindex(_x2c_destructure_1,  0);  argument = List_getindex(_x2c_destructure_1,  1);  if(List_truth(args) && Var_equal(args_tag,  Symbol_var(102886)) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args))) return _match_pattern_value(c,  argument);
+Var Compiler_match_pattern_value(Compiler c,  Var node){
+  if(! _init_guard_) _file_init_();  if(! Var_is(node,  806120)) return node;  List ast = Var_list(node);  if(! List_truth(ast)) return List_var(NULL);  Var head,  second,  third;  List _x2c_destructure_0 = ast;  head = List_getindex(_x2c_destructure_0,  0);  second = List_getindex(_x2c_destructure_0,  1);  third = List_getindex(_x2c_destructure_0,  2);  if(Var_equal(head,  Symbol_var(6363658))) return Compiler_match_pattern_value(c,  Array_getindex(c -> id_keys,  Var_int(Var_convert(second,  3453797))));  if(Var_equal(head,  Symbol_var(377892))) return Compiler_match_pattern_value(c,  List_last(ast));  if(Var_equal(head,  Symbol_var(45156))) return Compiler_match_pattern_value(c,  second);  if(Var_equal(head,  Symbol_var(1318210446))) return Compiler_match_pattern_value(c,  second);  String converter = Var_equal(head,  Symbol_var(199448)) ? _match_pattern_converter_name(second) : NULL;  if(String_equal(converter,  _99) || String_equal(converter,  _100)){
+    List args = Var_list(third);  Var args_tag,  argument;  List _x2c_destructure_1 = args;  args_tag = List_getindex(_x2c_destructure_1,  0);  argument = List_getindex(_x2c_destructure_1,  1);  if(List_truth(args) && Var_equal(args_tag,  Symbol_var(102886)) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args))) return Compiler_match_pattern_value(c,  argument);
   }
   if(Var_equal(head,  Symbol_var(26416091224))) return List_last(ast);  if(Var_equal(head,  Symbol_var(29272))) return List_var(NULL);  if(Var_equal(head,  Symbol_var(228262))){
-    Var value = _match_pattern_value(c,  second);  Var tail = _match_pattern_value(c,  third);  if(! Var_is(tail,  806120)) return Symbol_var(1059020478773725);  return List_var(cons(value,  Var_list(tail)));
+    Var value = Compiler_match_pattern_value(c,  second);  Var tail = Compiler_match_pattern_value(c,  third);  if(! Var_is(tail,  806120)) return Symbol_var(1059020478773725);  return List_var(cons(value,  Var_list(tail)));
   }
   return Symbol_var(1059020478773725);
 }
@@ -1598,15 +1596,15 @@ static int _match_pattern_value_is_static(Var value){
 }
 
 int Compiler_match_pattern_is_static(Compiler compiler,  List pattern){
-  if(! _init_guard_) _file_init_();  return _match_pattern_value_is_static(_match_pattern_value(compiler,  List_var(pattern)));
+  if(! _init_guard_) _file_init_();  return _match_pattern_value_is_static(Compiler_match_pattern_value(compiler,  List_var(pattern)));
 }
 
 Symbol Compiler_match_pattern_head_symbol(Compiler compiler,  List pattern){
-  if(! _init_guard_) _file_init_();  Var value = _match_pattern_value(compiler,  List_var(pattern));  if(! Var_is(value,  806120)) return 0;  Var head = car(Var_list(value));  if(! Var_is(head,  1328354264) || Var_equal(head,  Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;  return Var_symbol(head);
+  if(! _init_guard_) _file_init_();  Var value = Compiler_match_pattern_value(compiler,  List_var(pattern));  if(! Var_is(value,  806120)) return 0;  Var head = car(Var_list(value));  if(! Var_is(head,  1328354264) || Var_equal(head,  Symbol_var(1059020478773725)) || Var_is_binder(head) || Var_is_match_op(head)) return 0;  return Var_symbol(head);
 }
 
 Symbol Compiler_match_pattern_flat_head(Compiler compiler,  List pattern,  List binders){
-  if(! _init_guard_) _file_init_();  Symbol head = Compiler_match_pattern_head_symbol(compiler,  pattern);  if(! head) return 0;  List value = Var_list(_match_pattern_value(compiler,  List_var(pattern)));  if(! List_equal(List_cdr(value),  binders)) return 0; {
+  if(! _init_guard_) _file_init_();  Symbol head = Compiler_match_pattern_head_symbol(compiler,  pattern);  if(! head) return 0;  List value = Var_list(Compiler_match_pattern_value(compiler,  List_var(pattern)));  if(! List_equal(List_cdr(value),  binders)) return 0; {
     Var binder;  Iter _x2c_macro_iterator_6 = List_iter(binders,  &(struct Iter){
       0
     }
@@ -1619,7 +1617,7 @@ Symbol Compiler_match_pattern_flat_head(Compiler compiler,  List pattern,  List 
 }
 
 List Compiler_match_pattern_binders(Compiler compiler,  List pattern,  List * possible){
-  if(! _init_guard_) _file_init_();  Var value = _match_pattern_value(compiler,  List_var(pattern));  MatchCaptureLayout layout = MatchCaptureLayout_analyze(value);  List definite = MatchCaptureLayout_definite_list(layout);  if(possible) * possible = MatchCaptureLayout_possible_list(layout);  MatchCaptureLayout_free(layout);  return definite;
+  if(! _init_guard_) _file_init_();  Var value = Compiler_match_pattern_value(compiler,  List_var(pattern));  MatchCaptureLayout layout = MatchCaptureLayout_analyze(value);  List definite = MatchCaptureLayout_definite_list(layout);  if(possible) * possible = MatchCaptureLayout_possible_list(layout);  MatchCaptureLayout_free(layout);  return definite;
 }
 
 void Compiler_define_match_binders(Compiler compiler,  List pattern){

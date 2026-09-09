@@ -12,25 +12,13 @@ static int _init_guard_ = 0;
 
 
 
-String header_conditional(int);
-
-String header_direct(void);
-
-List header_list(void);
-
-Var header_boxed(void);
-
 Pool String_pool_retain_named(const char *);
 
 PoolStats Pool_stats(Pool);
 
-String header_same(void);
-
 void String_pool_release(void);
 
 int String_equal(String,  String);
-
-String header_dual(void);
 
 int List_equal(List,  List);
 
@@ -41,8 +29,6 @@ int String_len(String);
 int String_getindex(String,  int);
 
 String Var_string(Var);
-
-String header_parens(void);
 
 Var List_cadr(List);
 

@@ -48,6 +48,7 @@ typedef struct Compiler{
   Map macro_holes;
   Map local_macro_captures;
   List lambda_scopes;
+  Array match_types;
   Map imports;
   Map init_tokens,  static_init_deps,  fn_defs;
   Array id_keys,  mid_inits;
@@ -66,7 +67,7 @@ typedef struct Compiler{
   int borrowed_lisp;
   GenNames names;
   Array origins;
-  int origin;
+  int origin,  source_map;
 }
 * Compiler;
 
@@ -136,6 +137,8 @@ List Compiler_cache(Compiler c,  List key);
 List Compiler_cache_cons_cell(Compiler compiler,  List head,  List tail);
 
 List Compiler_cache_literal_list(Compiler compiler,  List values);
+
+Var Compiler_match_pattern_value(Compiler c,  Var node);
 
 int Compiler_match_pattern_is_static(Compiler compiler,  List pattern);
 

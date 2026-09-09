@@ -22,9 +22,11 @@ X2c expression parsing.
 | [`Compiler.parse_parenthesized_statement`](#Compiler.parse_parenthesized_statement) | Parses a statement beginning with `(`. |
 | [`Compiler.parse_primary`](#Compiler.parse_primary) | Parses one primary expression or expression-valued macro slot. |
 | [`Compiler.parse_variable`](#Compiler.parse_variable) | Parses and resolves one complex identifier expression. |
+| [`Compiler.require_var_tag`](#Compiler.require_var_tag) | Returns the exact Var tag for a type test, rejecting types without one. |
 | [`Compiler.resolve_expression`](#Compiler.resolve_expression) | Resolves and type-annotates one expression AST in current compiler state. |
 | [`Compiler.resolve_map_entry`](#Compiler.resolve_map_entry) | Resolves the key and value of one `(map-entry key value)` AST row. |
 | [`Compiler.resolve_postfix_member`](#Compiler.resolve_postfix_member) | Resolves one field or method selection without consuming parser tokens. |
+| [`Compiler.var_tag_expression`](#Compiler.var_tag_expression) | Builds an exact tag expression, deferring macro type slots until binding. |
 
 ### `Compiler`
 
@@ -54,7 +56,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:2181`
+Source: `src/expressions.x:2227`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -73,7 +75,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:2438`
+Source: `src/expressions.x:2484`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
@@ -84,7 +86,7 @@ Parses one right-associative assignment expression.
 A parenthesized identifier list on the left becomes a destructuring
 assignment only for `=`. `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:1790`
+Source: `src/expressions.x:1836`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -95,7 +97,7 @@ Parses a binary expression and its optional conditional tail.
 The false arm recurses at conditional precedence, making `?:`
 right-associative, and `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:1770`
+Source: `src/expressions.x:1816`
 
 <a id="Compiler.parse_expression"></a>
 #### Compiler.parse_expression
@@ -106,7 +108,7 @@ Parses an assignment expression and any following comma expressions.
 A comma expression retains source order and takes the type of its final
 value. `compiler.token` stops at the first token outside the expression.
 
-Source: `src/expressions.x:1850`
+Source: `src/expressions.x:1896`
 
 <a id="Compiler.parse_macro_expression_target"></a>
 #### Compiler.parse_macro_expression_target
@@ -133,7 +135,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions.x:1873`
+Source: `src/expressions.x:1919`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -144,7 +146,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `compiler.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions.x:1797`
+Source: `src/expressions.x:1843`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -154,7 +156,17 @@ Source: `src/expressions.x:1797`
 Parses and resolves one complex identifier expression.
 Parsing starts at `compiler.token` and leaves it after the identifier.
 
-Source: `src/expressions.x:1750`
+Source: `src/expressions.x:1791`
+
+<a id="Compiler.require_var_tag"></a>
+#### Compiler.require_var_tag
+
+`Symbol Compiler.require_var_tag( Compiler compiler, Type target, Token origin)`
+
+Returns the exact Var tag for a type test, rejecting types without one.
+Enums retain no identity after boxing and cannot be tested this way.
+
+Source: `src/expressions.x:1236`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -168,7 +180,7 @@ inputs are returned unchanged; abstract declarations use the declaration
 binder. `origin` anchors diagnostics and generated operations that must
 retain source position.
 
-Source: `src/expressions.x:1629`
+Source: `src/expressions.x:1664`
 
 <a id="Compiler.resolve_map_entry"></a>
 #### Compiler.resolve_map_entry
@@ -178,7 +190,7 @@ Source: `src/expressions.x:1629`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions.x:1613`
+Source: `src/expressions.x:1648`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -193,6 +205,15 @@ row, or NULL when no member is visible. Method lookup is enabled only by
 `call_context` and records the selected binding in `compiler.sym`.
 
 Source: `src/expressions.x:200`
+
+<a id="Compiler.var_tag_expression"></a>
+#### Compiler.var_tag_expression
+
+`List Compiler.var_tag_expression(Compiler c, Type target, Token origin)`
+
+Builds an exact tag expression, deferring macro type slots until binding.
+
+Source: `src/expressions.x:1263`
 
 ## Design notes
 

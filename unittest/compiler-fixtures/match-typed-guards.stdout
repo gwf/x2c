@@ -1,0 +1,11 @@
+typed 4 2 outer
+repeated 4
+alternative 5
+nested 6
+quoted 1
+aliases 4 2
+pointer 1
+numeric 1
+dynamic 5 1
+control 2 2 3 2 1
+macros 4 7 1

@@ -5,13 +5,9 @@
 #include "error.h"
 
 #include <string.h>
-int scan_ascii_digit(int);
-
 Var Symbol_var(Symbol);
 
 Var String_var(String);
-
-int scan_ascii_alpha(int);
 
 static inline int _ascii_hex(int c);
 

@@ -4,10 +4,6 @@
 
 long Var_integer(Var);
 
-Var MacroBoxFirst_var(MacroBoxFirst);
-
-Var MacroBoxSecond_var(MacroBoxSecond);
-
 int main(void){
   x2c_initialize();
   MacroBoxFirst first = 19;

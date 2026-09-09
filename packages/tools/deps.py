@@ -43,21 +43,12 @@ def _run_output(argv: list[str], cwd: Path | None = None) -> str:
   return result.stdout.strip()
 
 
-def _repository_root(manifest_path: Path) -> Path:
-  return Path(
-    _run_output(
-      ["git", "-C", str(manifest_path.parent), "rev-parse",
-       "--show-toplevel"]
-    )
-  ).resolve()
-
-
-def _cache_root(repository: Path) -> Path:
+def _cache_root(manifest_path: Path) -> Path:
   override = os.environ.get("X2C_DEPS_DIR")
   if override:
     return Path(override).expanduser().resolve()
   common = _run_output(
-    ["git", "-C", str(repository), "rev-parse", "--path-format=absolute",
+    ["git", "-C", str(manifest_path.parent), "rev-parse", "--path-format=absolute",
      "--git-common-dir"]
   )
   return Path(common).resolve() / "x2c-integrations"
@@ -134,7 +125,6 @@ def _load_manifest(path: Path) -> tuple[dict, bytes]:
 
 def _context(path: Path) -> dict:
   manifest, raw = _load_manifest(path)
-  repository = _repository_root(path)
   compiler, compiler_identity = _compiler()
   archiver = _archiver()
   identity = {
@@ -150,7 +140,7 @@ def _context(path: Path) -> dict:
   key_hash.update(b"\0")
   key_hash.update(str(CACHE_FORMAT_VERSION).encode())
   key = key_hash.hexdigest()
-  cache = _cache_root(repository)
+  cache = _cache_root(path)
   entry = cache / "entries" / manifest["name"] / key
   object_path = cache / "objects" / manifest["name"] / key
   source_paths = {
@@ -161,7 +151,6 @@ def _context(path: Path) -> dict:
     "manifest": manifest,
     "manifest_path": path,
     "manifest_sha256": hashlib.sha256(raw).hexdigest(),
-    "repository": repository,
     "cache": cache,
     "entry": entry,
     "object": object_path,

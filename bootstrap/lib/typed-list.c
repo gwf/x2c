@@ -18,13 +18,9 @@ Var String_var(String);
 
 Var int_var(int);
 
-char _typed_list_decode_i8(Var);
-
 Var List_last(List);
 
 int List_index(List,  Var);
-
-Var _typed_list_encode_i8(char);
 
 int List_truth(List);
 
@@ -35,30 +31,6 @@ int Var_is(Var,  Symbol);
 Symbol Var_tag(Var);
 
 List Var_list(Var);
-
-short _typed_list_decode_i16(Var);
-
-Var _typed_list_encode_i16(short);
-
-int _typed_list_decode_i32(Var);
-
-Var _typed_list_encode_i32(int);
-
-float _typed_list_decode_f32(Var);
-
-Var _typed_list_encode_f32(float);
-
-double _typed_list_decode_f64(Var);
-
-Var _typed_list_encode_f64(double);
-
-String _typed_list_decode_string(Var);
-
-Var _typed_list_encode_string(String);
-
-Symbol _typed_list_decode_symbol(Var);
-
-Var _typed_list_encode_symbol(Symbol);
 
 __attribute__((constructor)) static void _file_init_(void);
 

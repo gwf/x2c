@@ -15,6 +15,8 @@ typedef struct Build{
   String work_dir,  gen_root,  obj_root,  dep_root,  state_root,  output;
   int temporary;
   Array c_sources,  gen_dirs,  native_inputs,  objects;
+  String compile_directory;
+  Array compile_commands;
   unsigned long started_at;
   unsigned long xlat_start;
   unsigned long cc_start;
@@ -39,6 +41,8 @@ void Build_add_generated(Build state,  String input,  String directory);
 void Build_begin_translation(Build state,  String input);
 
 void Build_end_translation(Build state,  String input,  int cached);
+
+int compile_commands_write(String path,  Array commands);
 
 int Build_finish(Build b);
 

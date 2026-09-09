@@ -89,19 +89,9 @@ void String_free(String);
 
 void Block_free(Block);
 
-int File_va_printf(File,  const char *,  va_list);
-
-int File_va_scanf(File,  const char *,  va_list);
-
 Var long_var(long);
 
-size_t File_read(File,  void *,  size_t,  size_t);
-
 void Block_clear(Block);
-
-off_t File_tello(File);
-
-int File_stat(File,  struct stat *);
 
 File Var_file(Var);
 
@@ -121,13 +111,9 @@ String Var_pointer_string(Var);
 
 String String_printf(String, ...);
 
-int File_fileno(File);
-
 Buffer Var_write_pointer_repr(Var,  Buffer);
 
 Buffer Buffer_printf(Buffer,  const char *, ...);
-
-int File_close(File);
 
 _Noreturn static void _open_error(Symbol operation,  const char * path,  int error);
 

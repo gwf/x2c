@@ -7,6 +7,8 @@
 
 #include "x2c.h"
 #include "compiler.h"
+List Compiler_typed_match_pattern(Compiler c,  List pattern,  List types);
+
 List Compiler_parse_list_literal(Compiler c);
 
 List Compiler_symbol_set_expression(Compiler compiler,  List values,  int * duplicate);

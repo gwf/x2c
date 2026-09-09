@@ -18,6 +18,7 @@ $(import "../lib/private-keywords.xmacro")
 */
 typedef struct ChildProcess {
   long pid;
+  int finished, status;
   File output, errors, String start_error;
 } *ChildProcess;
 
@@ -209,15 +210,19 @@ static void _prepare_repo_defaults(void) {
 
 // child processes
 
+static int _cpp_status(int status) {
+  if (WIFEXITED(status)) return WEXITSTATUS(status);
+  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
+  return -1;
+}
+
 static int _cpp_wait(pid_t pid) {
   int status;
   while (waitpid(pid, &status, 0) < 0) {
     if (errno == EINTR) continue;
     return -1;
   }
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return -1;
+  return _cpp_status(status);
 }
 
 /* After both regular temporary files open, the parent can wait before reading
@@ -276,6 +281,23 @@ ChildProcess process_start(char **argv, int capture) {
   return process;
 }
 
+/** Checks whether an owned child has finished, without blocking. Reaps only
+    this child and retains its status for `wait`, which must still be called
+    exactly once to consume captured streams. Start and wait failures are
+    ready results; partial capture setup remains invalid input to `wait`.
+*/
+int ChildProcess.ready(ChildProcess c) {
+  if (c.pid < 0 || c.finished) return 1;
+  int status;
+  pid_t pid;
+  do pid = waitpid((pid_t) c.pid, &status, WNOHANG);
+  while (pid < 0 && errno == EINTR);
+  if (!pid) return 0;
+  c.status = pid < 0 ? -1 : _cpp_status(status);
+  c.finished = 1;
+  return 1;
+}
+
 /** Waits for `process`, then reads and closes its captured streams.
     Both output pointers are required and are cleared before validation. On a
     returning call they receive canonical `String`s or the empty `String`. The
@@ -293,7 +315,8 @@ int ChildProcess.wait(ChildProcess c, String *output, String *errors) {
   if (output) *output = NULL;
   if (errors) *errors = NULL;
   if (!c || !output || !errors) return -1;
-  int result = c.pid < 0 ? -1 : _cpp_wait((pid_t) c.pid);
+  int result =
+    c.finished ? c.status : c.pid < 0 ? -1 : _cpp_wait((pid_t) c.pid);
   if (c.output) {
     c.output.rewind();
     *output = c.output.string();

@@ -862,9 +862,10 @@ List Compiler.lift_func_expression(Compiler compiler, List expression) {
 }
 
 /** Adapts a lowered noncapturing lambda helper to a typed callback.
-    `argument` must be a resolved `(expr TYPE (ident BINDING))` produced by
-    `Compiler.lower_lambda_expr`, and `expected_type` must describe a fixed,
-    nonvariadic function. Unless its parameters and result are already `Var`,
+    `argument` must be a resolved helper reference produced by
+    `Compiler.lower_lambda_expr`, optionally wrapped in parentheses.
+    `expected_type` must describe a fixed, nonvariadic function. Unless its
+    parameters and result are already `Var`,
     a queued static helper converts callback arguments to the lowered lambda's
     original parameter types before calling it, then converts its `Var` result
     to the expected return type. Already compatible or unsupported shapes pass
@@ -874,6 +875,11 @@ List Compiler.adapt_lambda_arg(
   Compiler compiler, List argument, List expected_type) {
   Type orig_type = NULL, List orig_binding = NULL;
   match (argument) {
+    case %(expr ? (parens ?inner)): {
+      List adapted = compiler.adapt_lambda_arg(inner, expected_type);
+      if (adapted == inner) return argument;
+      return %(expr $expected_type (parens $adapted));
+    }
     case %(expr ?type (ident ?binding)): {
       orig_type = type;
       orig_binding = binding;
@@ -1636,11 +1642,16 @@ static List _lower_captured_lambda(
     helper and a `Func` whose copied context stores value snapshots and typed
     reference addresses; capture expressions run once from left to right.
     Nested lambdas lower inside out, block fallthrough and bare returns produce
-    Null, and synthesized declarations enter the early queue. Non-lambda
-    expressions pass through.
+    Null, and synthesized declarations enter the early queue. Parentheses
+    remain around lowered helpers; other non-lambda expressions pass through.
 */
 List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
   match (expression) {
+    case %(expr ?type (parens ?inner)): {
+      List lowered = compiler.lower_lambda_expr(inner);
+      if (lowered == inner) return expression;
+      return %(expr $type (parens $lowered));
+    }
     case %(expr ("Func")
            (lambda (params *entries) (captures *captures) ?body)):
       return _lower_captured_lambda(compiler, entries, captures, body);

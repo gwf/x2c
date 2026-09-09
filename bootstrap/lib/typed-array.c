@@ -244,17 +244,11 @@ Buffer Var_write_repr(Var,  Buffer);
 
 Var Array_getindex(Array,  int);
 
-ArrayChar Var_arraychar(Var);
-
 int Var_int(Var);
 
 Iter Iter_init(Iter,  Var,  IterNextFn,  Var);
 
-Var ArrayChar_var(ArrayChar);
-
 int Context_owns(Context,  void *);
-
-Block ArrayChar_block(ArrayChar);
 
 Scope * Context_export_destination(Context);
 
@@ -264,45 +258,9 @@ void Context_move_allocation(Context,  void *);
 
 Var short_var(short);
 
-ArrayShort Var_arrayshort(Var);
-
-Var ArrayShort_var(ArrayShort);
-
-Block ArrayShort_block(ArrayShort);
-
-ArrayInt Var_arrayint(Var);
-
-Var ArrayInt_var(ArrayInt);
-
-Block ArrayInt_block(ArrayInt);
-
 Var long_var(long);
 
-ArrayLong Var_arraylong(Var);
-
-Var ArrayLong_var(ArrayLong);
-
-Block ArrayLong_block(ArrayLong);
-
-ArrayFloat Var_arrayfloat(Var);
-
-Var ArrayFloat_var(ArrayFloat);
-
-Block ArrayFloat_block(ArrayFloat);
-
-ArrayDbl Var_arraydbl(Var);
-
-Var ArrayDbl_var(ArrayDbl);
-
-Block ArrayDbl_block(ArrayDbl);
-
 int String_equal(String,  String);
-
-ArrayString Var_arraystring(Var);
-
-Var ArrayString_var(ArrayString);
-
-Block ArrayString_block(ArrayString);
 
 void Block_clear(Block);
 
@@ -317,62 +275,6 @@ void Block_pop(Block);
 void Block_free(Block);
 
 void Block_truncate(Block,  size_t);
-
-char ArrayChar_getindex(ArrayChar,  int);
-
-char ArrayChar_setindex(ArrayChar,  int,  char);
-
-char ArrayChar_updateindex(ArrayChar,  int,  Symbol,  char);
-
-char ArrayChar_postfixindex(ArrayChar,  int,  Symbol);
-
-double ArrayDbl_getindex(ArrayDbl,  int);
-
-double ArrayDbl_setindex(ArrayDbl,  int,  double);
-
-double ArrayDbl_updateindex(ArrayDbl,  int,  Symbol,  double);
-
-double ArrayDbl_postfixindex(ArrayDbl,  int,  Symbol);
-
-float ArrayFloat_getindex(ArrayFloat,  int);
-
-float ArrayFloat_setindex(ArrayFloat,  int,  float);
-
-float ArrayFloat_updateindex(ArrayFloat,  int,  Symbol,  float);
-
-float ArrayFloat_postfixindex(ArrayFloat,  int,  Symbol);
-
-int ArrayInt_getindex(ArrayInt,  int);
-
-int ArrayInt_setindex(ArrayInt,  int,  int);
-
-int ArrayInt_updateindex(ArrayInt,  int,  Symbol,  int);
-
-int ArrayInt_postfixindex(ArrayInt,  int,  Symbol);
-
-long ArrayLong_getindex(ArrayLong,  int);
-
-long ArrayLong_setindex(ArrayLong,  int,  long);
-
-long ArrayLong_updateindex(ArrayLong,  int,  Symbol,  long);
-
-long ArrayLong_postfixindex(ArrayLong,  int,  Symbol);
-
-short ArrayShort_getindex(ArrayShort,  int);
-
-short ArrayShort_setindex(ArrayShort,  int,  short);
-
-short ArrayShort_updateindex(ArrayShort,  int,  Symbol,  short);
-
-short ArrayShort_postfixindex(ArrayShort,  int,  Symbol);
-
-String ArrayString_getindex(ArrayString,  int);
-
-String ArrayString_setindex(ArrayString,  int,  String);
-
-String ArrayString_updateindex(ArrayString,  int,  Symbol,  String);
-
-String ArrayString_postfixindex(ArrayString,  int,  Symbol);
 
 __attribute__((constructor)) static void _file_init_(void);
 

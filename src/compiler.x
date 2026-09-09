@@ -83,6 +83,7 @@ typedef struct Compiler {
   Map macro_holes;
   Map local_macro_captures;
   List lambda_scopes;
+  Array match_types;
   // Import path -> declared alias map, or 1 when no aliases need replay.
   Map imports;
   Map init_tokens, static_init_deps, fn_defs;
@@ -96,7 +97,7 @@ typedef struct Compiler {
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
-  Array origins, int origin;
+  Array origins, int origin, source_map;
 } *Compiler;
 
 #include "diagnostics.x"
@@ -254,6 +255,7 @@ static Compiler _new(Compiler owner) {
       _.package_aliases = owner.package_aliases;
       _.package_members = owner.package_members;
       _.names = owner.names;
+      _.source_map = owner.source_map;
     }
     else {
       _.package_roots = %{};
@@ -408,7 +410,7 @@ Symbol Compiler.expect(Compiler c, Symbol type) {
 static void _update_brace_stack(Compiler c, Token consumed) {
   if (!consumed) return;
   switch (consumed.type) {
-    case <"{">: case <"%{">: case <"${">: case <"@{">:
+    case <"{">: case <"%{">: case <"${">: case <"@{">: case <"?{">:
       c.braces.push(consumed);
       break;
     case <"}">:
@@ -454,7 +456,7 @@ static void _shallow_block(Compiler c) {
     if (peek == <eof>)
       c.report_error(<parse>, "unexpected end of file", c.token, NULL);
     if (peek == <"{"> || peek == <"%{"> ||
-        peek == <"${"> || peek == <"@{">)
+        peek == <"${"> || peek == <"@{"> || peek == <"?{">)
       _shallow_block(c);
     else c.next();
   }
@@ -469,7 +471,8 @@ static void _shallow_block(Compiler c) {
 */
 int Compiler.record_origin(Compiler c, Token token) {
   if (!token) return 0;
-  String file = c.display_path(c.filename ? c.filename : %"<stdin>");
+  String file = c.filename ? c.filename : %"<stdin>";
+  if (!c.source_map) file = c.display_path(file);
   c.origins.push(
     %(source $file ${token.line} ${token.col} ${token.len} ${token.pos}));
   return c.origins.len();
@@ -544,7 +547,7 @@ void Compiler._skip_shallow_expression(
       brackets++;
     else if (token == <]> && brackets) brackets--;
     else if (token == <"{"> || token == <"%{"> ||
-             token == <"${"> || token == <"@{">) braces++;
+             token == <"${"> || token == <"@{"> || token == <"?{">) braces++;
     else if (token == <"}"> && braces) braces--;
     compiler.next();
   }
@@ -736,7 +739,7 @@ static void _sync_top_level(Compiler c) {
       break;
     }
     if (sym == <"{"> || sym == <"%{"> ||
-        sym == <"${"> || sym == <"@{">) {
+        sym == <"${"> || sym == <"@{"> || sym == <"?{">) {
       depth += 1;
       c.next();
       continue;
@@ -921,28 +924,29 @@ static String _match_pattern_converter_name(Var node) {
   return binding_identity_spelling(binding);
 }
 
-static Var _match_pattern_value(Compiler c, Var node) {
+/** Recovers a pattern value graph, using `x2c-dyn` for computed values. */
+Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (node is not <list>) return node;
   List ast = node;
   if (!ast) return %();
   Var (head, second, third) = ast;
-  if (head == <cache>) return _match_pattern_value(c, c.id_keys[second]);
-  if (head == <expr>) return _match_pattern_value(c, ast.last());
-  if (head == <var>) return _match_pattern_value(c, second);
-  if (head == <string>) return _match_pattern_value(c, second);
+  if (head == <cache>) return c.match_pattern_value(c.id_keys[second]);
+  if (head == <expr>) return c.match_pattern_value(ast.last());
+  if (head == <var>) return c.match_pattern_value(second);
+  if (head == <string>) return c.match_pattern_value(second);
   String converter = head == <call>
                    ? _match_pattern_converter_name(second) : NULL;
   if (converter == %"List_var" || converter == %"Symbol_var") {
     List args = third;
     Var (args_tag, argument) = args;
     if (args && args_tag == <args> && args.cdr() && !args.cddr())
-      return _match_pattern_value(c, argument);
+      return c.match_pattern_value(argument);
   }
   if (head == <literal>) return ast.last();
   if (head == <nil>) return %();
   if (head == <cons>) {
-    Var value = _match_pattern_value(c, second);
-    Var tail = _match_pattern_value(c, third);
+    Var value = c.match_pattern_value(second);
+    Var tail = c.match_pattern_value(third);
     if (tail is not <list>) return <x2c-dyn>;
     return cons(value, tail);
   }
@@ -960,7 +964,7 @@ static int _match_pattern_value_is_static(Var value) {
 /** Reports whether a typed `Match` pattern has a fully static value graph. */
 int Compiler.match_pattern_is_static(Compiler compiler, List pattern) =>
   _match_pattern_value_is_static(
-    _match_pattern_value(compiler, pattern));
+    compiler.match_pattern_value(pattern));
 
 /** Returns a typed `Match` pattern's fixed literal head symbol, or zero.
 
@@ -969,7 +973,7 @@ int Compiler.match_pattern_is_static(Compiler compiler, List pattern) =>
     constrains the first input element.
 */
 Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) {
-  Var value = _match_pattern_value(compiler, pattern);
+  Var value = compiler.match_pattern_value(pattern);
   if (value is not <list>) return 0;
   Var head = car(value);
   if (head is not <symbol> || head == <x2c-dyn> ||
@@ -985,7 +989,7 @@ Symbol Compiler.match_pattern_flat_head(
   Compiler compiler, List pattern, List binders) {
   Symbol head = compiler.match_pattern_head_symbol(pattern);
   if (!head) return 0;
-  List value = _match_pattern_value(compiler, pattern);
+  List value = compiler.match_pattern_value(pattern);
   if (!value.cdr().equal(binders)) return 0;
   foreach (Var binder, binders)
     if (!binder.is_atom_binder() || binder == <?>) return 0;
@@ -998,7 +1002,7 @@ Symbol Compiler.match_pattern_flat_head(
 */
 List Compiler.match_pattern_binders(
   Compiler compiler, List pattern, List *possible) {
-  Var value = _match_pattern_value(compiler, pattern);
+  Var value = compiler.match_pattern_value(pattern);
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
   List definite = layout.definite_list();
   if (possible) *possible = layout.possible_list();

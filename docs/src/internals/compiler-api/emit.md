@@ -22,6 +22,7 @@ Emit C tokens from x2c ASTs.
 `List Compiler.emit(Compiler compiler, List ast)`
 
 Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
+Source mapping adds `src-at`/ID pairs consumed by the formatter.
 `compiler` must own the AST's binding facts and origins, and continue the
 translation session's shared generated-name state. This operation does not
 bind, transform, or choose header and source placement; generation supplies
@@ -33,7 +34,7 @@ owned
 by pools active during emission; promote them before releasing those
 pools if the tokens must survive.
 
-Source: `src/emit.x:1387`
+Source: `src/emit.x:1398`
 
 ## Design notes
 

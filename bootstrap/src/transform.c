@@ -273,6 +273,8 @@ List Array_list(Array);
 
 void Compiler_add_early(Compiler,  List);
 
+Var int_var(int);
+
 int String_endswith(String,  String);
 
 String Var_string(Var);
@@ -284,8 +286,6 @@ void Diagnostics_report(Diagnostics,  Symbol,  String,  List,  List);
 int Type_is_typedef_name(Type);
 
 int Var_truth(Var);
-
-Var int_var(int);
 
 List List_append(List,  List);
 
@@ -2320,7 +2320,7 @@ static List _lower_callable_defer(Compiler c,  List body,  List finalizer){
 }
 
 static List _lower_defer_region(Compiler compiler,  List body,  List finalizer){
-  if(_defer_needs_landing(finalizer)) return cons(_547,  cons(List_var(body),  cons(_255,  cons(List_var(finalizer),  NULL))));  return _lower_callable_defer(compiler,  body,  finalizer);
+  if(compiler -> source_map && compiler -> origin) finalizer = cons(_538,  cons(int_var(compiler -> origin),  cons(List_var(finalizer),  NULL)));  if(_defer_needs_landing(finalizer)) return cons(_547,  cons(List_var(body),  cons(_255,  cons(List_var(finalizer),  NULL))));  return _lower_callable_defer(compiler,  body,  finalizer);
 }
 
 static List _rewrite_defer_list(Compiler compiler,  List stmts){
@@ -2361,7 +2361,7 @@ if(! has_defer) return stmts;  Array suffixes = Array_new(); {
      Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
        case 8728932: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936770347364ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var final_stmt = _x2c_match_values[0]; {
-      List body = cons(_257,  List_append(tail,  NULL)),  finalizer = Var_list(final_stmt);  List region = _lower_defer_region(compiler,  body,  finalizer);  result = cons(List_var(_rewrap_origin(anchored,  region)),  NULL);  tail_changed = 1;  continue;
+      List body = cons(_257,  List_append(tail,  NULL)),  finalizer = Var_list(final_stmt);  if(compiler -> source_map) finalizer = _rewrap_origin(anchored,  finalizer);  List region = _lower_defer_region(compiler,  body,  finalizer);  result = cons(List_var(_rewrap_origin(anchored,  region)),  NULL);  tail_changed = 1;  continue;
     }
     break; } } default: break;
     }

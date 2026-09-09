@@ -28,15 +28,16 @@ Lambda transformation helpers for the x2c compiler.
 `List Compiler.adapt_lambda_arg( Compiler compiler, List argument, List expected_type)`
 
 Adapts a lowered noncapturing lambda helper to a typed callback.
-`argument` must be a resolved `(expr TYPE (ident BINDING))` produced by
-`Compiler.lower_lambda_expr`, and `expected_type` must describe a fixed,
-nonvariadic function. Unless its parameters and result are already `Var`,
+`argument` must be a resolved helper reference produced by
+`Compiler.lower_lambda_expr`, optionally wrapped in parentheses.
+`expected_type` must describe a fixed, nonvariadic function. Unless its
+parameters and result are already `Var`,
 a queued static helper converts callback arguments to the lowered lambda's
 original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/lambda.x:873`
+Source: `src/lambda.x:874`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -47,7 +48,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambda.x:1047`
+Source: `src/lambda.x:1053`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -76,10 +77,10 @@ optional `captures` rows. A noncapturing lambda becomes a static
 helper and a `Func` whose copied context stores value snapshots and typed
 reference addresses; capture expressions run once from left to right.
 Nested lambdas lower inside out, block fallthrough and bare returns produce
-Null, and synthesized declarations enter the early queue. Non-lambda
-expressions pass through.
+Null, and synthesized declarations enter the early queue. Parentheses
+remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/lambda.x:1642`
+Source: `src/lambda.x:1648`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -122,7 +123,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/lambda.x:1324`
+Source: `src/lambda.x:1330`
 
 ## Design notes
 

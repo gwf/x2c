@@ -2,10 +2,6 @@
 
 #include "macro-type-hole-dynamic-method.h"
 
-Var MacroDynamicOwner_var(MacroDynamicOwner);
-
-Var MacroDynamicOwner_box(MacroDynamicOwner);
-
 int Var_int(Var);
 
 int main(void){

@@ -60,11 +60,7 @@ Var Symbol_var(Symbol);
 
 int Var_equal(Var,  Var);
 
-Array Block_array(Block);
-
 void Block_truncate(Block,  size_t);
-
-Block Array_block(Array);
 
 int Var_is_void(Var);
 

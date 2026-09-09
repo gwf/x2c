@@ -370,6 +370,7 @@ static void _configure_package(Compiler compiler, String filename) {
 static void _compile_file(
   CliRequest request, String filename, String output_dir) {
   Compiler compiler = Compiler.new();
+  compiler.source_map = request.source_map;
   _configure_package(compiler, filename);
   _stage_stats(filename, "start");
   _tokenize_input(compiler, filename);
@@ -408,7 +409,7 @@ static void _compile_file(
   _stage_stats(filename, "transform");
   if (opts.dump == <dump-code>) {
     ast = compiler.emit(ast);
-    puts(code_pretty_string(ast));
+    puts(compiler.code_pretty_string(ast, NULL));
     exit(0);
   }
   generate_code(compiler, ast, output_dir);
@@ -655,7 +656,7 @@ static CliRequest _build_translation_request(
   return request;
 }
 
-static int _run_build_request(CliRequest c) {
+static int _run_build_request(CliRequest c, Array commands) {
   if (!c.dry_run) {
     foreach (String input, c.inputs) {
       if (!input.endswith(%".x")) continue;
@@ -697,6 +698,14 @@ static int _run_build_request(CliRequest c) {
     state.cleanup(0);
     return result;
   }
+  if ((void *) commands != NULL)
+    foreach (String entry, state.compile_commands)
+      commands.push(target.export(entry));
+  if ((void *) commands != NULL && c.command == <run> &&
+      !compile_commands_write(c.compile_commands, commands)) {
+    state.cleanup(0);
+    return 1;
+  }
   state.report_success();
   if (c.command == <run>) result = state.run_program();
   state.cleanup(1);
@@ -704,6 +713,8 @@ static int _run_build_request(CliRequest c) {
 }
 
 static int _run_build(CliRequest request) {
+  Array commands =
+    request.compile_commands && !request.dry_run ? %[] : NULL;
   if (request.inputs) {
     if (request.manifest) {
       fputs(
@@ -711,13 +722,19 @@ static int _run_build(CliRequest request) {
         stderr);
       exit(2);
     }
-    return _run_build_request(request);
-  }
-  ProjectBuild plan = project_plan(request);
-  for (ProjectBuild node = plan; node; node = node.next) {
-    int result = _run_build_request(node.request);
+    int result = _run_build_request(request, commands);
     if (result) return result;
   }
+  else {
+    ProjectBuild plan = project_plan(request);
+    for (ProjectBuild node = plan; node; node = node.next) {
+      int result = _run_build_request(node.request, commands);
+      if (result) return result;
+    }
+  }
+  if ((void *) commands != NULL && request.command != <run> &&
+      !compile_commands_write(request.compile_commands, commands))
+    return 1;
   return 0;
 }
 
@@ -739,7 +756,7 @@ static int _run_bootstrap(CliRequest command) {
   /* A source-bearing APE is one-shot. A nonzero status returned by either
      build closes build and lock state and flushes stdio before `_Exit`. */
   Context build = Context.open_isolated_named("bootstrap build");
-  int result = _run_build_request(runtime_request);
+  int result = _run_build_request(runtime_request, NULL);
   if (result) {
     build.close();
     bootstrap_release(payload);
@@ -750,7 +767,7 @@ static int _run_bootstrap(CliRequest command) {
   CliRequest compiler_request =
     bootstrap_build_request(command, payload, <compiler>);
   compiler_request.label = "compiler";
-  result = _run_build_request(compiler_request);
+  result = _run_build_request(compiler_request, NULL);
   if (result) {
     build.close();
     bootstrap_release(payload);

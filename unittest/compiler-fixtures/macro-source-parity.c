@@ -39,10 +39,6 @@ GeneratedUnion;
 static int generated_global;
 
 #define GENERATED_SOURCE_FLAG 1
-int direct_inline(int);
-
-int generated_inline(int);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 __attribute__((constructor)) static void _file_init_(void){

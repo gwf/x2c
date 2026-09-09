@@ -55,8 +55,11 @@ static List _parse_variable_reference(Compiler compiler) {
   return expr;
 }
 
+static List _parse_typed_capture(Compiler compiler);
+
 static List _parse_literal_element(Compiler compiler) {
   switch (compiler.peek(0)) {
+    case <"?{">:     return _parse_typed_capture(compiler);
     case <"(">:      return compiler.parse_list_literal();
     case <"%\"">:    return compiler.parse_string_literal();
     case <"%[">:     return compiler.parse_array_literal();
@@ -143,15 +146,127 @@ static List _parse_list_reader_prefix(Compiler compiler) {
     compiler, _list_prefix_atom(compiler, spelling), tail);
 }
 
-static int _match_is_head(Compiler compiler) {
+static List _typed_capture_pattern(Compiler c, Atom binder, List tag) {
+  List elements = binder.is_atom_binder()
+                ? %(!is $binder type) : %(!is type);
+  match (tag)
+    case %(expr ("Symbol") ?): tag = c.cache(%(var $tag));
+  List tail = _build_cons_cell(c, tag, %(nil));
+  foreach (Var element, elements.reverse())
+    tail = _build_cons_cell(c, _list_prefix_atom(c, element.str()), tail);
+  return %(expr ("List") $tail);
+}
+
+static List _parse_typed_capture(Compiler c) {
+  Token start = c.token;
+  c.expect(<"?{">);
+  Type type = c.parse_type_name();
+  String name = c.token.text;
+  c.expect(<ident>);
+  c.expect(<"}">);
+  List tag = c.var_tag_expression(type, start);
+  Atom binder = Atom.intern(%"?$name");
+  if ((void *) c.match_types) {
+    List row = %($name $type);
+    int repeated = 0;
+    foreach (List previous, c.match_types) match (previous)
+      case %(?previous_name ?previous_type):
+        if (previous_name == name &&
+            c.var_tag_expression(previous_type, start) == tag &&
+            c.sym.normalize_declared_type(previous_type) ==
+            c.sym.normalize_declared_type(type)) repeated = 1;
+    if (!repeated) c.match_types.push(row);
+    return _list_prefix_atom(c, binder.str());
+  }
+  return _typed_capture_pattern(c, binder, tag);
+}
+
+static List _pattern_content(Compiler c, List node) {
+  match (node) {
+    case %(expr ? ?value): return _pattern_content(c, value);
+    case %(cache ?id): return _pattern_content(c, c.id_keys[id]);
+    case %(var ?value): return _pattern_content(c, value);
+    case %(call (expr ? (ident ?binding)) (args ?value)):
+      if (binding_identity_spelling(binding) == %"List_var")
+        return _pattern_content(c, value);
+  }
+  return node;
+}
+
+static List _typed_pattern(Compiler c, List node, Map tags) {
+  Var value = c.match_pattern_value(node), tag;
+  if (value.is_atom_binder() && tags.try_get(value, &tag))
+    return _typed_capture_pattern(c, value, tag.list());
+  List content = _pattern_content(c, node);
+  match (content) {
+    case %(cons ? ?): break;
+    default: return node;
+  }
+  Array elements = %[];
+  List tail = content;
+  loop {
+    match (tail) {
+      case %(cons ?head ?rest): {
+        elements.push(head);
+        tail = _pattern_content(c, rest);
+        continue;
+      }
+    }
+    break;
+  }
+  Var operator = c.match_pattern_value(elements[0]);
+  if (operator == <!quote>) {
+    elements.free();
+    return node;
+  }
+  int first = operator.is_match_op() ? 1 : 0;
+  List capture_tag = NULL;
+  if (first && elements.len() > 1) {
+    Var binder = c.match_pattern_value(elements[1]);
+    if (binder.is_atom_binder() &&
+        (operator != <!set> || elements.len() == 3)) {
+      if (tags.try_get(binder, &tag)) capture_tag = tag.list();
+      first++;
+    }
+  }
+  if (operator != <!is>)
+    for (int i = first; i < elements.len(); i++)
+      elements[i] = _typed_pattern(c, elements[i], tags);
+  for (int i = (int) elements.len() - 1; i >= 0; i--)
+    tail = _build_cons_cell(c, elements[i], tail);
+  elements.free();
+  List result = %(expr ("List") $tail);
+  if (capture_tag) {
+    tail = _build_cons_cell(c, result, %(nil));
+    tail = _build_cons_cell(
+      c, _typed_capture_pattern(c, void, capture_tag), tail);
+    tail = _build_cons_cell(c, _list_prefix_atom(c, "!and"), tail);
+    result = %(expr ("List") $tail);
+  }
+  return result;
+}
+
+/** Applies each typed capture's predicate to every unquoted occurrence. */
+List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
+  Map tags = %{};
+  foreach (List row, types) match (row)
+    case %(?name ?type):
+      tags[Atom.intern(%"?${name.str()}")] =
+        c.var_tag_expression(type, c.token);
+  return _typed_pattern(c, pattern, tags);
+}
+
+static Symbol _match_operator_head(Compiler compiler) {
   if (!compiler.in_pattern) return 0;
-  if (compiler.peek(0) == <lit-atom>)
-    return Atom.intern(compiler.token.text.unescape()) == <!is>;
+  if (compiler.peek(0) == <lit-atom>) {
+    Atom atom = Atom.intern(compiler.token.text.unescape());
+    return atom is <symbol> ? atom.symbol() : 0;
+  }
   if (compiler.peek(0) == <lit-symbol>) {
     Token token = compiler.token;
     String spelling = _symbol_source_spelling(token.text, 1);
     Symbol symbol = _exact_symbol_literal(compiler, token, spelling);
-    return symbol == <!is>;
+    return symbol;
   }
   return 0;
 }
@@ -187,18 +302,23 @@ List Compiler.parse_list_literal(Compiler c) {
   c.next();
   if (c.test(<)>)) return %(expr ("List") (nil));
   int old_match_is = c.match_is;
-  c.match_is = _match_is_head(c);
+  Array old_match_types = c.match_types;
+  Symbol operator = _match_operator_head(c);
+  c.match_is = operator == <!is>;
+  if (operator == <!quote>) c.match_types = NULL;
   List reader_form = runtime_literal
     ? _parse_list_reader_prefix(c)
     : NULL;
   if (reader_form && c.test(<)>)) {
     c.match_is = old_match_is;
+    c.match_types = old_match_types;
     return reader_form;
   }
   List head = reader_form ? reader_form : _parse_list_head(c);
   List tail = _parse_list_tail(c);
   c.expect(<)>);
   c.match_is = old_match_is;
+  c.match_types = old_match_types;
   return %(expr ("List") ${_build_cons_cell(c, head, tail)});
 }
 
@@ -1062,7 +1182,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
       body = c.parse_compound_statement();
     }
   }
-  else body = c.parse_expression();
+  else body = c.parse_assignment();
   List rtype = %("Var");
   List params_node = _lambda_params_node(names, typed_params, used_typed);
   List param_types = _lambda_param_types_for_signature(

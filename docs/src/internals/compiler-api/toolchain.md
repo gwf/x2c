@@ -17,6 +17,7 @@ Host preprocessing, compilation, archive, and link actions.
 | [`ToolAction.as_program`](#ToolAction.as_program) | Inherits the standard streams and suppresses the failure summary. |
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
 | [`ToolAction.start`](#ToolAction.start) | Starts the action without a shell and returns a `Scope`-owned execution. |
+| [`ToolRun.ready`](#ToolRun.ready) | Checks whether an execution can be waited without blocking. |
 | [`ToolRun.wait`](#ToolRun.wait) | Waits once for an execution, forwards its captured streams, and returns its shell-style status. |
 | [`Toolchain.archive_action`](#Toolchain.archive_action) | Builds but does not start an `ar rcs` action in object-list order. |
 | [`Toolchain.compile_action`](#Toolchain.compile_action) | Builds but does not start one C compilation action. |
@@ -72,7 +73,7 @@ A partial capture setup failure returns no defined status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:326`
+Source: `src/toolchain.x:336`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -91,6 +92,17 @@ Source: `src/toolchain.x:282`
 
 ### `ToolRun`
 
+<a id="ToolRun.ready"></a>
+#### ToolRun.ready
+
+`int ToolRun.ready(ToolRun execution)`
+
+Checks whether an execution can be waited without blocking. A dry run
+is ready immediately. A completed child retains its status and captures
+until the required `ToolRun.wait` call.
+
+Source: `src/toolchain.x:299`
+
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
 
@@ -105,7 +117,7 @@ execution with partial capture setup is not valid input.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:304`
+Source: `src/toolchain.x:314`
 
 ### `Toolchain`
 
@@ -168,7 +180,7 @@ returns no defined status. This operation does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:350`
+Source: `src/toolchain.x:360`
 
 ## Public types
 

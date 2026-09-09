@@ -290,6 +290,8 @@ static int Tokenizer__operator(Tokenizer t,  int len){
       break;
       case 9463 : push = 3945159;
       break;
+      case 16375 : if(mode == 806120) push = 3945159;
+      break;
       case 16631 : if(mode == 806120) push = 3945159;
       break;
       case 247 : push = 26720;
@@ -503,6 +505,7 @@ static int Tokenizer__lisp_tokens(Tokenizer t){
   int len;
   if(collection && Tokenizer__common_tokens(t)) return 1;
   if(collection && ! strncmp(text,  "void",  4) && scan_identifier(text) == 4) return Tokenizer_tokenize(t,  4,  1473096);
+  if(list && text[0] == '?' && text[1] == '{') return Tokenizer__operator(t,  2);
   if(text[0] == '$' && ! list && ! collection) return Tokenizer__named_reference(t);
   if((list &&(text[0] == '$' || text[0] == '@')) ||(collection && text[0] == '$')) return text[1] == '{' ? Tokenizer__operator(t,  2) : Tokenizer__named_reference(t);
   switch(text[0]){

@@ -915,18 +915,26 @@ static List Emitter._match_if(
   Array values = %[], heads = %[], int labelling = 1;
   foreach (List rec, ast) {
     List (binders, pattern_ast, body_ast) = rec;
+    List implicit_break = %("break;");
+    match (body_ast)
+      case %(guarded ?body): {
+        body_ast = body;
+        implicit_break = NULL;
+      }
     Symbol flat_head = e.match_pattern_flat_head(pattern_ast, binders);
     int static_pattern = e.match_pattern_is_static(pattern_ast);
     List pattern = e._emit(pattern_ast, context);
     List body = e._emit(body_ast, context);
     List label = _match_arm_label(e, pattern_ast, heads, &labelling);
     if (label) values.push(label);
-    if (pattern === %(*)) values.push(%($body "break;"));
+    if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (flat_head) {
       List condition = _flat_match_condition(flat_head, binders);
       List declarations = _make_local_binders(binders, "_x2c_match_values");
+      String closing = implicit_break ? "break; } }" : "} }";
       values.push(%("{ List _x2c_match_cursor;"
-        "if (" @condition ") {" @declarations @body "break; } }"));
+        "if (" @condition ") {" @declarations @body
+        $closing));
     }
     else {
       String site_name = static_pattern
@@ -947,7 +955,7 @@ static List Emitter._match_if(
           "&_x2c_match_capture)) {"
         @declarations
         @body
-        "break;"
+        @implicit_break
         "}"
       ));
     }
@@ -1161,6 +1169,8 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       e.origin = origin.integer();
       List result = e._emit(inner, context);
       e.origin = old_origin;
+      if (e.compiler.source_map)
+        return %(src-at $origin @result src-at $old_origin);
       return result;
     }
     case %(varray *elements):
@@ -1373,6 +1383,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
 }
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
+    Source mapping adds `src-at`/ID pairs consumed by the formatter.
     `compiler` must own the AST's binding facts and origins, and continue the
     translation session's shared generated-name state. This operation does not
     bind, transform, or choose header and source placement; generation supplies

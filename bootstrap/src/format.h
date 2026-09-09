@@ -6,7 +6,8 @@
 #define __GUARD_0x4FB7A5AC__
 
 #include "x2c.h"
-char * code_pretty_string(List code);
+#include "compiler.h"
+char * Compiler_code_pretty_string(Compiler compiler,  List code,  String output_file);
 
 
 #endif /* __GUARD_0x4FB7A5AC__ */

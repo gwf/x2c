@@ -8,10 +8,6 @@ const upstream_monitor * upstream_monitor_at(int);
 
 int upstream_count_labels(upstream_label_fn);
 
-int aliased_index(const char *);
-
-const int aliased_width(int);
-
 int String_len(String);
 
 static const char * left_label(int index);

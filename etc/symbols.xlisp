@@ -2226,6 +2226,7 @@
   (("_normalize_pattern") ((func (("List"))) "List"))
   (("_numeric_class") ((func (("Symbol") (long double))) int))
   (("_numeric_compare") ((func (("Var") ("Var") ("Symbol") ("Symbol") ("Symbol") ("Symbol"))) int))
+  (("_numeric_decode") ((func (("Var") ("X2CVarNumericInfo") (* "X2CVarNumeric"))) void))
   (("_numeric_f32") ((func ((* "X2CVarNumeric"))) float))
   (("_numeric_f64") ((func ((* "X2CVarNumeric"))) double))
   (("_numeric_long_double") ((func ((* "X2CVarNumeric"))) long double))

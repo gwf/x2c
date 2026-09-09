@@ -170,12 +170,23 @@ through `yyjson-0.12.h`, and a runtime Lisp session installs the package's
 group with `JsonLisp.install`. The package README states which values own
 native storage and when borrowed views expire.
 
-A source distribution carries the package directory, including `src/`,
-`dependency.json`, `LICENSES/`, its README, examples, and tests. It does not
-carry the ignored `deps` symlink or `builds/` output. The recipient runs the
-same `prepare` and `build` commands, then registers the directory containing
-the package with `--package-dir`; this reproduces the native profile and keeps
-the generated archive, public header, and link flags together.
+A source distribution carries `packages/<name>/`, including `src/`,
+`dependency.json`, `LICENSES/`, its README, examples, and tests, together with
+`packages/package.mk`, `packages/dependency.mk`, and `packages/tools/deps.py`.
+It does not carry the ignored `deps` symlink or `builds/` output. Shared
+support resolves beside those files, so the bundle needs no Git checkout.
+Select an installed compiler and an explicit dependency cache:
+
+```sh
+export X2C_DEPS_DIR="$HOME/.cache/x2c-dependencies"
+make -C packages/yyjson prepare build X2C=/path/to/x2c
+```
+
+Register the directory containing the package with `--package-dir`. Native
+compilation and archiving use the same driver actions and retained state as
+ordinary builds, keeping the generated public headers, archive, and link flags
+together. Package tests that include `unittest/test-support.x` still need that
+repository test support; it is not part of the source-package build contract.
 
 A package over a third-party C library also has to decide what to expose, who
 owns each returned value, how to preserve the library's error codes, and

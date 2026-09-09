@@ -69,8 +69,6 @@ Var Var_convert(Var,  Symbol);
 
 int Var_is_null(Var);
 
-FuncArg FuncArg_value(Var);
-
 List List_match(List,  Var);
 
 int List_len(List);

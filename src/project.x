@@ -571,8 +571,8 @@ static String _target_output(
 /* Each planned target receives a Scope-owned copy of the command request.
    Target-specific Lists are rebuilt, dependencies become archive inputs, and
    the per-target `.x2c` directory keeps artifacts and state separate. The
-   state seed contains the manifest path and complete text plus target and
-   profile, so those inputs participate in every Build fingerprint. */
+   state seed identifies the manifest, target, and profile. Effective settings
+   enter fingerprints through the lowered request and action arguments. */
 static CliRequest _target_request(
   Project p, ProjectTarget target, CliRequest command,
   ProjectTarget selected, String build_root) {
@@ -660,7 +660,7 @@ static CliRequest _target_request(
 
   request.label = target.name;
   request.state_seed =
-    %"${p.path}\n${p.text}\n" +
+    %"${p.path}\n" +
     %"target=${target.name}\nprofile=${command.profile}";
   return request;
 }

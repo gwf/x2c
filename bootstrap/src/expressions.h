@@ -14,6 +14,10 @@ List Compiler_resolve_postfix_member(Compiler c,  Type receiver_type,  List fiel
 
 List Compiler_parse_macro_expression_target(Compiler compiler);
 
+Symbol Compiler_require_var_tag(Compiler compiler,  Type target,  Token origin);
+
+List Compiler_var_tag_expression(Compiler c,  Type target,  Token origin);
+
 List Compiler_resolve_map_entry(Compiler compiler,  List input,  Token origin);
 
 List Compiler_resolve_expression(Compiler compiler,  List input,  Token origin);

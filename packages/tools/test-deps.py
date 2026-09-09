@@ -24,9 +24,6 @@ class DependencyCacheTests(unittest.TestCase):
       prefix="x2c-deps-test."
     )
     self.root = Path(self.temporary.name)
-    subprocess.run(
-      ["git", "init", "--quiet", str(self.root)], check=True
-    )
     self.cache = self.root / "cache"
     self.previous_cache = os.environ.get("X2C_DEPS_DIR")
     os.environ["X2C_DEPS_DIR"] = str(self.cache)

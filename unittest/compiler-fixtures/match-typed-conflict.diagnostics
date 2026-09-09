@@ -1,0 +1,7 @@
+unittest/compiler-fixtures/match-typed-conflict.x:5:43: parse: declaration 'value' is already bound
+      case %(?{String value} ?{void *value}): return 1;
+                                            ^
+  note: prior binding: 'value'
+
+limit: too many errors, stopping
+

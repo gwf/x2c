@@ -83,33 +83,10 @@ void Var.numeric_decode(Var value, X2CVarNumeric *out) {
     raise %(bad-enc (value $bits));
   }
   if (value is void) raise %(void-op (owner "Var.numeric_decode"));
-  X2CVarNumeric decoded = { 0 }; X2CVarNumericInfo info;
+  X2CVarNumericInfo info;
   Symbol tag = value.tag();
   if (!Var.numeric_info(tag, &info)) raise %(bad-types (source $tag));
-  with decoded {
-    tag = _.tag = info.tag;
-    _.floating = info.floating;
-    _.unsigned_value = info.unsigned_value;
-    _.bits = info.bits;
-    _.rank = info.rank;
-    switch (tag) {
-      case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
-        _.raw = Var.payload32(value) & Var.width_mask(_.bits); break;
-      case <i48>: case <u48>:
-        _.raw = value.u64 & Var.width_mask(48); break;
-      case <long>: _.raw = (unsigned long long) value.long_value();  break;
-      case <ulong>: _.raw = (unsigned long long) value.ulong_value();  break;
-      case <llong>:
-        _.raw = (unsigned long long) value.long_long_value(); break;
-      case <ullong>: _.raw = value.ulong_long_value(); break;
-      case <f32>:
-        _.floating_value = (long double) Var.decode_f32(value); break;
-      case <f64>:
-        _.floating_value = (long double) Var.decode_f64(value); break;
-      case <ldouble>: _.floating_value = value.long_double_value(); break;
-    }
-    *out = _;
-  }
+  _numeric_decode(value, info, out);
 }
 
 /** Boxes the low target-width bits of `raw` using integer `target`.
@@ -174,6 +151,37 @@ int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out) {
   if (row < 0) return 0;
   *out = numerics[row];
   return 1;
+}
+
+/* Both callers establish valid numeric encoding and family metadata before
+   payload extraction; the public decoder still owns its argument checks. */
+static void _numeric_decode(
+  Var value, X2CVarNumericInfo info, X2CVarNumeric *out) {
+  X2CVarNumeric decoded = { 0 };
+  with decoded {
+    _.tag = info.tag;
+    _.floating = info.floating;
+    _.unsigned_value = info.unsigned_value;
+    _.bits = info.bits;
+    _.rank = info.rank;
+    switch (info.tag) {
+      case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
+        _.raw = Var.payload32(value) & Var.width_mask(_.bits); break;
+      case <i48>: case <u48>:
+        _.raw = value.u64 & Var.width_mask(48); break;
+      case <long>: _.raw = (unsigned long long) value.long_value();  break;
+      case <ulong>: _.raw = (unsigned long long) value.ulong_value();  break;
+      case <llong>:
+        _.raw = (unsigned long long) value.long_long_value(); break;
+      case <ullong>: _.raw = value.ulong_long_value(); break;
+      case <f32>:
+        _.floating_value = (long double) Var.decode_f32(value); break;
+      case <f64>:
+        _.floating_value = (long double) Var.decode_f64(value); break;
+      case <ldouble>: _.floating_value = value.long_double_value(); break;
+    }
+    *out = _;
+  }
 }
 
 static long double _integer_limit(int bits) {
@@ -282,7 +290,7 @@ Var Var.convert(Var value, Symbol target) {
     raise %(no-convert (target $target) (cause $lower));
   }
   X2CVarNumeric source;
-  Var.numeric_decode(value, &source);
+  _numeric_decode(value, info, &source);
   if (!Var.numeric_info(target, &info))
     raise %(no-convert (source $source_tag) (target $target));
   return info.floating

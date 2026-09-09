@@ -34,7 +34,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/varconvert.x:265`
+Source: `lib/varconvert.x:273`
 
 ## Advanced and interop API
 
@@ -62,7 +62,7 @@ active `Scope`.
 **Raises:** `<bad-target>` for a noninteger target, or `<alloc-fail>` or
 `<bad-enc>` while boxing a wide result.
 
-Source: `lib/varconvert.x:122`
+Source: `lib/varconvert.x:99`
 
 <a id="Var.integer_tag"></a>
 #### Var.integer_tag
@@ -101,7 +101,7 @@ Writes numeric-family metadata for `tag` and returns nonzero.
 The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
 A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 
-Source: `lib/varconvert.x:170`
+Source: `lib/varconvert.x:147`
 
 <a id="Var.signed_from_bits"></a>
 #### Var.signed_from_bits

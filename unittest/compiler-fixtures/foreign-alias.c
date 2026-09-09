@@ -6,8 +6,6 @@
 _Static_assert(_Generic(& labs,  long(*)(long) : 1, default: 0),  "native alias private_absolute does not match labs");
 #endif
 #define private_absolute labs
-int Alias_absolute(int);
-int alias_absolute(int);
 int main(void){
   x2c_initialize();  int same_receiver = Alias_absolute == abs;  int same_free = alias_absolute == abs;  int same_private = private_absolute == labs;  printf("%d %d %d %d %ld\n",  same_receiver,  same_free,  same_private,  Alias_absolute(- 42),  private_absolute(- 43));  return 0;
 }

@@ -38,8 +38,6 @@ Func Func_new(FuncAdapter,  List);
 
 long Var_integer(Var);
 
-Func inline_direct(void);
-
 List x2c_func_reference_type(Func,  unsigned,  unsigned);
 
 int List_truth(List);
@@ -51,12 +49,6 @@ FuncArg FuncArg_value(Var);
 Var int_var(int);
 
 Var Func_apply(Func,  unsigned,  const FuncArg *);
-
-Func inline_pointer(InlineBinary);
-
-Func inline_noncapturing(void);
-
-Func inline_capturing(long);
 
 Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
 

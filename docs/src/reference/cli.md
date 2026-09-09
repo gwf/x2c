@@ -66,6 +66,25 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 --cpp-symbols           Use CPP collection for this translation
 ```
 
+`--source-map` adds source locations to generated C for `translate`, `build`,
+and `run`. It is off by default. Combine it with native debug information to
+set breakpoints, step through statements, and read backtraces in the original
+`.x` files:
+
+```sh
+./x2c build --source-map -g -O0 --save-temps --output /tmp/example example.x
+lldb /tmp/example
+```
+
+With source mapping enabled, C `__FILE__` and `__LINE__` refer to the original
+x2c source. Macro expansions use their invocation locations; generated cleanup
+uses its owning source construct. Compiler scaffolding without a source origin
+retains a generated-file location. `-g` alone keeps generated-C locations, and
+`--source-map` alone does not add native debug information. Changing the option
+invalidates reused translation output. Optimized builds may combine or remove
+statements, so source mapping does not guarantee exact stepping or recovery of
+optimized-away values.
+
 Inspection modes print an intermediate result and stop translation:
 
 ```sh
@@ -116,6 +135,23 @@ Without `--build-dir`, a direct build uses a private temporary directory and
 removes intermediates after success. `--save-temps` retains intermediates;
 `--save-temps=<dir>` places them in a chosen directory. With a named build
 directory, later builds can reuse unchanged results.
+
+`--compile-commands <file>` writes a native compilation database for C tools.
+It records the actual compiler argument arrays, working directory, source,
+and object output for every compilation, including reused objects. Manifest
+builds include the selected target and its dependency targets. The entries
+refer to generated C for x2c inputs, so the option also retains intermediates.
+
+```sh
+./x2c build --build-dir .x2c-build \
+  --compile-commands .x2c-build/compile_commands.json examples/foreach.x
+```
+
+The destination's parent directory must exist when the build finishes. A
+successful build replaces the database atomically; a failed build preserves
+the previous file. `run` writes it before starting the program, and `-###`
+writes no database. This file describes native C compilation, not x2c syntax
+for an editor's C parser.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
@@ -302,6 +338,8 @@ through `-Xcc`.
 Persistent direct and manifest builds use those x2c and C depfiles to decide
 what needs rebuilding. Missing artifacts and missing, corrupt, or old private
 state are cache misses rather than project errors.
+Manifest comments and whitespace do not invalidate reuse; changed effective
+settings still rebuild the affected actions.
 
 External Make builds are supported. They can call `translate --out-dir`,
 include its `.d` files, and set their own C compiler and linker flags. The

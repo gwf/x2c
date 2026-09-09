@@ -1,12 +1,11 @@
 > Status: active
-> Coordinated plan authored September 8, 2026 against 352d4d8.
-> Gary approved the plan and execution September 8, 2026. B1-B3 and C1-C3
-> are implemented and pass focused checks. The September 9 post-reboot
-> checks clear the host abort blockage. This batch delivers B1-B3 and C1-C3
-> under the required publication gate.
-> The remaining assignments are pending.
-> The first assignments are executable. Later semantic choices and research
-> outcomes are identified explicitly rather than treated as settled designs.
+> Gary approved execution with parallel workers. B1-B3 and C1-C3 shipped
+> September 9 in bb3de5b after the post-reboot publication gate passed.
+> The book, responsive layout, and feature-table correction are live.
+> P1-P3, B4/B5, C4, D1, and Match are implemented with focused evidence;
+> T1/T2 and source-package support also pass focused checks. Final
+> integration validation and delivery remain. The
+> frontend/editor work follows this batch.
 
 # Correctness, performance, and developer tooling
 
@@ -45,8 +44,10 @@ existing task skill. Planning alone does not publish product changes.
 - Wildcard catch already binds code and detail. Array indexed compound updates
   work; wrong-tag pointer-shaped reads return NULL. The values guide and old
   wildcard plan need correction.
-- The two original lambda failures are unidentified. Ordinary lambda argument
-  probes pass. Their repair remains conditional on recovering the originals.
+- Session history recovered both original lambda failures: an expression
+  lambda consumes a following argument, and parentheses prevent native
+  callback adaptation. Both reproduce in the current compiler and are repaired
+  through the existing expression parser, lambda lowering, and adapter.
 
 Current source, tests, and the book supersede the pasted proposal's old
 workspace links, counts, and performance predictions.
@@ -280,8 +281,8 @@ No new AST provenance system is needed.
 Concrete recommendation: source mapping is an explicit opt-in, off by default,
 available to build and standalone translation. With it enabled, C `__FILE__`
 and `__LINE__` refer to the original x2c source; `-g` alone does not enable it.
-Include the option in translation fingerprints. Confirm this output contract
-before editing.
+Include the option in translation fingerprints. Gary accepted this
+recommendation during the September 8 semantic discussion.
 This is a documented compiler-output choice, not just debugger presentation.
 Prove source breakpoints, ordinary stepping/backtraces, included files, macros,
 and paths with spaces. Inspect one optimized build without promising exact
@@ -338,6 +339,14 @@ Prove existing graph/CLI parity, sequential lifetime correctness, and readable
 failed-parse results without exiting an embedding caller. Keep this internal;
 no supported public compiler-library compatibility promise is introduced.
 
+The internal extraction keeps configured session and unit stages explicit:
+start/tokenize, collect, parse, and close. CLI inspection remains between
+those stages. Ordinary compiler-error recovery covers reading, tokenization,
+and collection as well as parsing; unsuccessful units keep diagnostics until
+close. Speculative parse scopes restore their previous diagnostic emitter.
+The graph adapter must close failed units too. The source review and exact
+owner boundaries are recorded in `.context/t5-frontend-boundaries.md`.
+
 The editor followup starts with diagnostics, definition, and hover. Before
 implementation, prove source spans and a request-owned unsaved-file overlay,
 effective project/package settings, and cache isolation. Use fresh worker
@@ -380,13 +389,14 @@ this plan.
 Only the dependent assignment waits for a consequential unresolved choice:
 
 - C3: Gary accepted literal-only contextual comparison; ready to implement.
-- T1: source-mapping activation and its source-location macro semantics.
+- T1: Gary accepted explicit opt-in mapping, off by default, with original
+  source-location macro semantics; `-g` remains independent.
 - Package delivery: Gary accepted source distribution for the first milestone;
   built installation and native dependency bundling remain deferred.
 - Match: the desugaring architecture and type-checking capture semantics are
   approved. Complete the bounded source design before implementation.
 
-C4 needs missing evidence, not a speculative language decision. P1 determines
+C4's original examples have been recovered and reproduced. P1 determines
 which performance candidates earn implementation. B3 begins with bounded
 diagnosis. The rest of the ready work can proceed independently.
 
@@ -404,66 +414,93 @@ diagnosis. The rest of the ready work can proceed independently.
 
 ### Current verification and next action
 
-B1 passes the existing CLI probe and library/runtime replacement checks.
-B2 passes 26 focused Python tests, including effective Make settings and
-Apple delegated-tool identity. GNU Make 4.4.1 is installed through Homebrew;
-use its `libexec/gnubin` directory at the front of PATH for this workspace.
-C1/C2 pass root/default and explicit-input runs, existing example checks,
-and the revised book snippets. C3's new fixture passes and the documented
-comparison prints 1; scalar-character and raw-pointer behavior is unchanged.
-B3 passes header-cache and preprocessor probes; runtime C/H agree in serial,
-parallel, reversed, and isolated runs, and all 46 generated runtime C files
-compile with implicit declarations treated as errors.
+The first correctness batch shipped as bb3de5b. The final exact-tree gate
+passed 743 tests / 18,227 assertions, 584 compiler fixtures / 1,361 artifacts,
+self-host comparison, native boundary probes, raw-symbol validation, and the
+book audit. The previous standalone-abort host stall cleared after reboot;
+all four formerly hanging probes exited naturally. No host configuration
+change was made. Evidence: `debug/post-reboot-correctness-gate-final.log`,
+`debug/post-reboot-abort.log`, and `debug/post-reboot-fatal-probes.log`.
+GitHub Pages deployment succeeded after publication.
 
-The first publication attempt exposed bootstrap transition output: stage 0
-had been translated by the previous bootstrap. Stages 0, 1, and 2 agreed;
-the second owning gate regenerated the seed and passed all stage comparisons.
-Generated deltas are the authored compiler edits, callable prototypes in
-eight runtime C files, source hashes in the header artifact, and the updated
-compiler API prose.
+Current authored changes are not yet published:
 
-The second `tools/gate-state.py ensure agent-pr-check` run stalled in fatal
-probes after the expected diagnostics were printed. Native processes remained
-in macOS UE (exiting) state inside `abort`/`__pthread_kill`. A standalone C
-program containing only `abort()` reproduced the hang. The gate and its child
-drivers were terminated; no successful gate was recorded and this batch has
-not been committed or published. Do not treat external termination of these
-probes as passing evidence. The host must let native aborts finish before the
-same gate can complete. Full logs are under `debug/correctness-gate*.log`,
-with the sampled native stack in `debug/varops-exit.sample`.
+- P1/P3: fixed compiler/runtime inputs, a warmup, and five measured runs per
+  candidate give identical generated C/H. Resolving each growing binary
+  subtree once reduces the 1,600-term median from 1.965s to 0.043s. Full
+  translation remains effectively unchanged (3.773s to 3.802s). Existing
+  macro, lambda, protocol, and String comparison fixtures pass. Logs:
+  `debug/p3-comparison.json`, `debug/p3-focused.log`. A separate isolated
+  Match classification candidate preserved all 148 output files but changed
+  full translation by -0.07% and a Match-heavy workload by -0.49%, within
+  noise; it was rejected. See `debug/p3-match-results.json`.
+- P2: Var conversion reuses numeric metadata already established by its
+  caller. Both candidates pass 54 tests / 5,993 assertions. Seven alternating
+  measurement pairs show 25-34% lower numeric conversion cost; identity
+  conversion is unchanged. Full-compiler profiles do not support a claim of
+  overall compiler improvement. Evidence: `debug/p2-numeric-measurements.json`
+  and `debug/p2-focused.log`.
+- B4/B5: completion-any native scheduling and semantic manifest reuse pass
+  all 97 CLI probes. Five paired native builds of 73 frozen C units reduce
+  median wall time from 2.917s to 1.896s (35%), with 1.7% more aggregate CPU.
+  Every object is byte-identical. Failure probes prove concurrency limits,
+  child-specific output, stopped launches, and complete draining. Logs:
+  `debug/b4-timing.json`, `debug/b4-b5-cli-boundary.log`.
+- C4: the original nonfinal and parenthesized lambda programs now both
+  compile and print 7. The regression includes explicit comma bodies,
+  nested parentheses, macro callbacks, and captured Func arguments.
+  Recovery evidence and exact source are in `.context/lambda-recovery.md`.
+- D1: the existing prototype collector now also recognizes declarations
+  supplied by the unit's own generated header. The header-cache probe passes
+  and separate owner/consumer compilation retains `_Noreturn` under
+  `-Werror=return-type`. Logs: `debug/d1-header-cache.log`,
+  `debug/d1-native-after.log`. Broad owner-header discovery remains deferred.
+- Match: concrete typed captures and expression guards pass mismatch,
+  alternative retry, repeated captures, aliases, dynamic patterns, cleanup,
+  errors, source macros, and canonical constructed macro probes. All 12
+  focused fixtures / 29 artifacts pass, including Type-valued macro
+  parameters resolved after ordinary substitution. Removing the shared
+  provisional template-binding call reproduces a Var method lookup failure;
+  the extracted existing owner is necessary. Logs:
+  `debug/match-focused-family-final.log`,
+  `debug/match-template-control.log`.
+- T2: actual native compile actions supply opt-in
+  `--compile-commands <file>`, including retained actions and manifest
+  dependencies. Generated C is retained; failed builds leave the previous
+  database unchanged. Exact arguments, empty graphs, retained objects,
+  manifest dependencies, dry runs, and failure preservation pass. The full
+  integrated driver suite passes all 110 probes. Logs:
+  `debug/t2-probe-after.log`, `debug/t2-cli-tail.log`,
+  `debug/wave2-cli-boundary-final.log`.
+- T1: opt-in source mapping passes native builtin-location checks, source
+  breakpoints, stepping, backtraces, includes, macros, cleanup, escaped
+  filenames, and optimized inspection. Seventeen ordinary fixtures and
+  fourteen mapped native runs pass. The combined CLI case also exposed a
+  preexisting forward-binding bug: two untyped references could invent a
+  shadow name without a declaration. Shadow renaming now requires the
+  visible declaration's existing type fact. Logs: `debug/t1-focused.log`,
+  `debug/t1-final-native.log`, `debug/t1-final-debugger.log`,
+  `debug/t1-combined-before.log`.
+- T3: explicit dependency caches no longer require a Git checkout; the
+  existing 11 dependency tests now run outside Git and pass. Shared Make
+  support resolves beside its own files. Native compilation and archiving
+  now use one driver request. An unpacked bundle builds and runs pure,
+  multi-unit, mixed C/x2c, and yyjson programs with a separate compiler
+  installation after deleting the bundle producer. Unchanged builds retain
+  archive and consumer mtimes; native-header changes rebuild the affected
+  object and archive. Logs: `debug/t3-source-bundle-driver.log`,
+  `debug/t3-warm-package.log`, `debug/t3-header-reuse.log`.
 
-September 9, after reboot: a freshly compiled standalone C abort program
-exited naturally with SIGABRT in 0.207 seconds. The four previously hanging
-fatal probes exited naturally with SIGABRT and expected diagnostics in about
-0.1 seconds each. No external termination was needed. The configured Xcode
-selection and installed GNU Make 4.4.1 are unchanged. The underlying resolved
-compiler executable alone lacks the SDK setup supplied by the normal Apple
-launcher; compiling through the configured `/usr/bin/cc` succeeds. No host
-toolchain change was made. Logs: `debug/post-reboot-abort.log` and
-`debug/post-reboot-fatal-probes.log`.
+GNU Make 4.4.1 is available through Homebrew. Put its `libexec/gnubin`
+directory first in PATH. The coordinator owns shared regeneration, authored
+and generated review, current-main integration, the exact-tree publication
+gate, and delivery. No pending work in this batch requires user input.
 
-The first post-reboot gate completed without hanging. A protocol probe
-incorrectly treated the now-present forward declaration of `Feet_magnitude`
-as a duplicate definition. The owner still owns the only definition; the
-probe now matches a function body, and the full focused protocol suite passes.
-Final gate output is retained in `debug/post-reboot-correctness-gate-final.log`;
-only a successful exact-tree gate record authorizes delivery.
-
-Independent review also found that an effective recursive `MAKE` override
-needed executable identity tracking alongside the initiating Make. B2 now
-includes that selected executable, with an inert-file regression proving
-changed bytes at the same override path invalidate evidence.
-
-Source-only designs for P3, B4/B5, and Match shorthand were completed during
-validation. They are retained in `.context/next-assignments.md`; no performance
-claim or implementation of those assignments has been made.
-
-The coordinator updates this plan with delivered commits, current evidence,
-and unresolved items as execution progresses. Every separately delivered
-change ends with authored-diff review and fixes before publication validation.
-Completion means the agreed assignments are delivered and verified, with
-explicitly deferred design work recorded; it never means all speculative
-future features must be implemented to ship a correctness fix.
+The publication run established identical bootstrap and stages 0-2 after
+refreshing the declaration cleanup. Nine C fixture snapshots required only
+removing declarations supplied by their own headers; each removal was reviewed
+and its expectation regenerated through the fixture runner. The remaining
+publication checks are rerun on that resulting tree.
 
 ## Plan review
 

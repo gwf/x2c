@@ -30,6 +30,8 @@ List Compiler_parse_parameter(Compiler compiler);
 
 List Compiler_parse_parameter_list(Compiler c);
 
+void Compiler_bind_template_local(Compiler compiler,  List key,  List type,  List context);
+
 int Compiler_test_declaration(Compiler compiler);
 
 List Compiler_parse_simple_declaration(Compiler compiler);

@@ -61,6 +61,8 @@ void report_suspend(void);
 
 ChildProcess process_start(char * *,  int);
 
+int ChildProcess_ready(ChildProcess);
+
 int ChildProcess_wait(ChildProcess,  String *,  String *);
 
 int Var_is(Var,  Symbol);
@@ -383,6 +385,12 @@ ToolRun ToolAction_start(ToolAction action){
   if(action -> dry_run) return execution;
   execution -> process = process_start(_action_argv(action -> arguments),  ! action -> inherit_stdio);
   return execution;
+}
+
+int ToolRun_ready(ToolRun execution){
+  if(execution -> action -> dry_run) return 1;
+  ChildProcess process = execution -> process;
+  return ChildProcess_ready(process);
 }
 
 int ToolRun_wait(ToolRun execution){

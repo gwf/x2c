@@ -43,9 +43,9 @@ Public functions:
 
 `_build_mkdirs`, `CliRequest.prepare`, `Build.generated_dir`,
 `Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
-`Build.begin_translation`, `Build.end_translation`, `Build.finish`,
-`Build.report_success`, `Build.run_program`, `_build_remove_tree`,
-`Build.cleanup`
+`Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
+`Build.finish`, `Build.report_success`, `Build.run_program`,
+`_build_remove_tree`, `Build.cleanup`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -93,10 +93,10 @@ Public functions:
 `Compiler.shallow_parse_overlay`, `Compiler.leading_preproc`,
 `Compiler.update_source_visibility`, `Compiler.full_parse`, `Compiler.cache`,
 `Compiler.cache_cons_cell`, `Compiler.cache_literal_list`,
-`Compiler.match_pattern_is_static`, `Compiler.match_pattern_head_symbol`,
-`Compiler.match_pattern_flat_head`, `Compiler.match_pattern_binders`,
-`Compiler.define_match_binders`, `Compiler.add_early`,
-`Compiler.add_protocol_init`, `Compiler.add_early_init`,
+`Compiler.match_pattern_value`, `Compiler.match_pattern_is_static`,
+`Compiler.match_pattern_head_symbol`, `Compiler.match_pattern_flat_head`,
+`Compiler.match_pattern_binders`, `Compiler.define_match_binders`,
+`Compiler.add_early`, `Compiler.add_protocol_init`, `Compiler.add_early_init`,
 `Compiler.add_mid_init`, `Compiler.add_late_init`,
 `Compiler.begin_semantic_transaction`, `SymTxn.commit`,
 `SymTxn.local_macros_changed`, `SymTxn.rollback`, `Sym.reset`,
@@ -154,7 +154,8 @@ x2c expression parsing.
 Public functions:
 
 `Compiler.complete_iter_chain`, `Compiler.resolve_postfix_member`,
-`Compiler.parse_macro_expression_target`, `Compiler.resolve_map_entry`,
+`Compiler.parse_macro_expression_target`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
 `Compiler.resolve_expression`, `Compiler.parse_variable`,
 `Compiler.parse_conditional`, `Compiler.parse_assignment`,
 `Compiler.parse_primary`, `Compiler.parse_expression`,
@@ -167,7 +168,7 @@ code formatting helpers for the x2c compiler.
 
 Public functions:
 
-`code_pretty_string`
+`Compiler.code_pretty_string`
 
 ### [src/generate.x](../src/generate.x)
 
@@ -194,15 +195,15 @@ x2c literal and lambda parsing.
 
 Public functions:
 
-`Compiler.parse_list_literal`, `Compiler.symbol_set_expression`,
-`Compiler.parse_symbol_set_literal`, `Compiler.parse_raise_literal`,
-`Compiler.parse_catch_pattern_literal`, `Compiler.parse_array_literal`,
-`Compiler.parse_map_entry`, `Compiler.parse_map_entries`,
-`Compiler.parse_map_literal`, `Compiler.parse_string_literal`,
-`Compiler.lambda_capture_required`, `Compiler.begin_lambda_captures`,
-`Compiler.end_lambda_captures`, `Compiler.capture_lambda_identifier`,
-`Compiler.bind_lambda_expression`, `Compiler.parse_lambda_literal`,
-`Compiler.parse_atomic_literal`
+`Compiler.typed_match_pattern`, `Compiler.parse_list_literal`,
+`Compiler.symbol_set_expression`, `Compiler.parse_symbol_set_literal`,
+`Compiler.parse_raise_literal`, `Compiler.parse_catch_pattern_literal`,
+`Compiler.parse_array_literal`, `Compiler.parse_map_entry`,
+`Compiler.parse_map_entries`, `Compiler.parse_map_literal`,
+`Compiler.parse_string_literal`, `Compiler.lambda_capture_required`,
+`Compiler.begin_lambda_captures`, `Compiler.end_lambda_captures`,
+`Compiler.capture_lambda_identifier`, `Compiler.bind_lambda_expression`,
+`Compiler.parse_lambda_literal`, `Compiler.parse_atomic_literal`
 
 ### [src/macros.x](../src/macros.x)
 
@@ -246,11 +247,12 @@ Public functions:
 `Compiler.parse_field`, `Compiler.parse_fields`, `Compiler.parse_enumerator`,
 `Compiler.parse_enumerators`, `Compiler.parse_type_name`,
 `Compiler.parse_parameter`, `Compiler.parse_parameter_list`,
-`Compiler.test_declaration`, `Compiler.parse_simple_declaration`,
-`Compiler.parse_declaration_row`, `Compiler.parse_declaration_argument`,
-`Compiler.parse_function_definition`, `Compiler.parse_function_target`,
-`Compiler.parse_import_declaration`, `Compiler.parse_top_level`,
-`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
+`Compiler.bind_template_local`, `Compiler.test_declaration`,
+`Compiler.parse_simple_declaration`, `Compiler.parse_declaration_row`,
+`Compiler.parse_declaration_argument`, `Compiler.parse_function_definition`,
+`Compiler.parse_function_target`, `Compiler.parse_import_declaration`,
+`Compiler.parse_top_level`, `Compiler.finish_foreign_alias`,
+`Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 
@@ -312,7 +314,8 @@ Public functions:
 
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.archive_action`,
 `Toolchain.link_action`, `tool_action_new`, `ToolAction.as_program`,
-`ToolAction.start`, `ToolRun.wait`, `ToolAction.run`, `Toolchain.preprocess`
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`,
+`Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 
@@ -355,8 +358,8 @@ Public functions:
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
 `x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`,
 `x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_driver_error`,
-`process_start`, `ChildProcess.wait`, `process_run`, `worker_fork`,
-`worker_exit`, `worker_wait`
+`process_start`, `ChildProcess.ready`, `ChildProcess.wait`, `process_run`,
+`worker_fork`, `worker_exit`, `worker_wait`
 
 ## Runtime modules
 

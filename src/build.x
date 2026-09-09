@@ -27,6 +27,7 @@ typedef struct Build {
   Toolchain toolchain;
   String work_dir, gen_root, obj_root, dep_root, state_root, output;
   int temporary, Array c_sources, gen_dirs, native_inputs, objects;
+  String compile_directory, Array compile_commands;
   unsigned long started_at;
   unsigned long xlat_start;
   unsigned long cc_start;
@@ -243,6 +244,7 @@ Build CliRequest.prepare(CliRequest c) {
   state.gen_dirs = %[];
   state.native_inputs = %[];
   state.objects = %[];
+  if (c.compile_commands && !c.dry_run) state.compile_commands = %[];
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
@@ -315,6 +317,8 @@ static uint64_t _translation_fingerprint(
   hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
   hash = _state_text(hash, request.live_symbols ? %"live" : %"snapshot");
   hash = _state_text(hash, request.cpp_symbols ? %"cpp-symbols" : %"raw");
+  hash = _state_text(
+    hash, request.source_map ? %"source-map" : %"generated-lines");
   String depfile = %"$directory/${x2c_path_stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);
 }
@@ -507,7 +511,97 @@ static int _finish_compile(Build state, CcJob pending) {
   return status;
 }
 
+static void _json_string(Buffer out, String text) {
+  out.write_char('"');
+  for (const unsigned char *p = (const unsigned char *) text; p && *p; p++) {
+    if (*p == '"' || *p == '\\') out.write_char('\\');
+    if (*p < 32) out.printf("\\u%04x", *p);
+    else out.write_char(*p);
+  }
+  out.write_char('"');
+}
+
+static String _compile_command(
+  Build state, ToolAction action, String source, String object) {
+  Buffer out = Buffer.new(0);
+  out.write("  {\"directory\": ");
+  _json_string(out, state.compile_directory);
+  out.write(", \"file\": ");
+  _json_string(out, source);
+  out.write(", \"output\": ");
+  _json_string(out, object);
+  out.write(", \"arguments\": [");
+  int first = 1;
+  foreach (String argument, action.arguments) {
+    if (!first) out.write(", ");
+    _json_string(out, argument);
+    first = 0;
+  }
+  out.write("]}");
+  return out.str_free();
+}
+
+/** Publishes collected native compilation entries as one JSON database.
+    `commands` holds serialized entries from each completed build target.
+    The destination's parent must exist. Writes a process-specific sibling
+    before rename; handled open, write, close, or rename failure preserves
+    the existing database, reports a diagnostic, and returns zero.
+*/
+int compile_commands_write(String path, Array commands) {
+  String temporary = %"$path.tmp.%ld".printf((long) getpid());
+  File output = fopen(temporary, "w");
+  if (!output) {
+    fprintf(
+      stderr, "x2c: error: cannot open compilation database: %s\n", path);
+    return 0;
+  }
+  int ok = output.puts("[\n") != EOF, first = 1;
+  foreach (String entry, commands) {
+    if (!first && output.puts(",\n") == EOF) ok = 0;
+    if (output.puts(entry) == EOF) ok = 0;
+    first = 0;
+  }
+  if (output.puts("\n]\n") == EOF) ok = 0;
+  if (output.close()) ok = 0;
+  if (!ok || rename(temporary, path)) {
+    unlink(temporary);
+    fprintf(
+      stderr, "x2c: error: cannot write compilation database: %s\n", path);
+    return 0;
+  }
+  report_line(<muted>, %"  Compilation database $path");
+  return 1;
+}
+
+/* Finish ready owned jobs, optionally waiting for at least one. A lone job
+   uses the ordinary blocking wait; parallel jobs retain their own statuses
+   and captures. The short idle delay bounds polling without a global child
+   signal handler or consuming another owner's child status. */
+static int _finish_compiles(
+  Build state, CcJob *running, int *count, int wait) {
+  int failed = 0;
+  for (;;) {
+    for (int i = 0; i < *count;) {
+      if ((wait && *count == 1) || running[i].execution.ready()) {
+        if (_finish_compile(state, running[i])) failed = 1;
+        (*count)--;
+        memmove(running + i, running + i + 1, (*count - i) * sizeof(CcJob));
+        wait = 0;
+      }
+      else i++;
+    }
+    if (!wait) return failed;
+    usleep(1000);
+  }
+}
+
 static int _compile_sources(Build b) {
+  if ((void *) b.compile_commands != NULL) {
+    char current[PATH_MAX];
+    if (!getcwd(current, sizeof(current)))
+      x2c_driver_error("cannot read compilation working directory");
+    b.compile_directory = String.new(current);
+  }
   CcJob *running =
     Scope.calloc(b.request.jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
@@ -528,6 +622,8 @@ static int _compile_sources(Build b) {
     ToolAction action = b.toolchain.compile_action(
       source, object, depfile, include_dirs.list_free());
     b.objects.push(object);
+    if ((void *) b.compile_commands != NULL)
+      b.compile_commands.push(_compile_command(b, action, source, object));
     String state_path =
       b.state_root ?
       %"${b.state_root}/c-${_key(source)}" : NULL;
@@ -537,24 +633,22 @@ static int _compile_sources(Build b) {
       report_progress(<compile>, b.cc_done, b.cc_n, source);
       continue;
     }
+    if (_finish_compiles(b, running, &running_count, 0)) {
+      failed = 1;
+      break;
+    }
     CcJob pending = {
       action.start(), action, source, depfile, state_path
     };
     running[running_count++] = pending;
-    if (running_count >= b.request.jobs) {
-      if (_finish_compile(b, running[0])) failed = 1;
-      running_count--;
-      if (running_count)
-        memmove(running, running + 1, running_count * sizeof(CcJob));
-      if (failed) break;
+    if (running_count >= b.request.jobs &&
+        _finish_compiles(b, running, &running_count, 1)) {
+      failed = 1;
+      break;
     }
   }
-  while (running_count) {
-    if (_finish_compile(b, running[0])) failed = 1;
-    running_count--;
-    if (running_count)
-      memmove(running, running + 1, running_count * sizeof(CcJob));
-  }
+  while (running_count)
+    if (_finish_compiles(b, running, &running_count, 1)) failed = 1;
   Scope.free(running);
   if (!failed && b.cc_n) {
     unsigned long elapsed = report_now_us() - b.cc_start;

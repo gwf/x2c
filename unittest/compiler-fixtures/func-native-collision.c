@@ -23,8 +23,6 @@ Var x2c_func_value_argument(Func,  const FuncArg *,  unsigned,  Symbol);
 
 Var long_var(long);
 
-long _is_list_literal(long);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0,  const FuncArg * _x2c_func_argv_0);

@@ -183,6 +183,7 @@ static int Tokenizer._operator(Tokenizer t, int len) {
       switch (op) {
         case <"(">: push = <list>; break;
         case <"${">: push = <x2c>; break;
+        case <"?{">: if (mode == <list>) push = <x2c>; break;
         case <"@{">: if (mode == <list>) push = <x2c>; break;
         case <"{">: push = <map>; token_type = <"%{">; break;
         case <"[">: push = <array>; token_type = <"%[">; break;
@@ -387,6 +388,7 @@ static int Tokenizer._lisp_tokens(Tokenizer t) {
   if (collection && t._common_tokens()) return 1;
   if (collection && !strncmp(text, "void", 4) && scan_identifier(text) == 4)
     return t.tokenize(4, <void>);
+  if (list && text[0] == '?' && text[1] == '{') return t._operator(2);
   if (text[0] == '$' && !list && !collection) return t._named_reference();
   if ((list && (text[0] == '$' || text[0] == '@')) ||
       (collection && text[0] == '$'))

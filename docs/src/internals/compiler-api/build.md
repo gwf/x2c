@@ -12,6 +12,7 @@ Typed native build request and artifact graph.
 
 | Function | Summary |
 | --- | --- |
+| [`compile_commands_write`](#compile_commands_write) | Publishes collected native compilation entries as one JSON database. |
 | [`Build.add_generated`](#Build.add_generated) | Registers generated artifacts for native compilation. |
 | [`Build.begin_translation`](#Build.begin_translation) | Starts translation reporting for `input` and initializes timing when unset. |
 | [`Build.cleanup`](#Build.cleanup) | Removes the temporary work tree after a successful real build. |
@@ -23,6 +24,20 @@ Typed native build request and artifact graph.
 | [`Build.run_program`](#Build.run_program) | Runs the built output with the request's arguments and returns its status. |
 | [`Build.translation_current`](#Build.translation_current) | Reports whether translated C and header artifacts match current inputs. |
 | [`CliRequest.prepare`](#CliRequest.prepare) | Validates a native build request and returns its `Scope`-owned build state. |
+
+### Functions
+
+#### compile_commands_write
+
+`int compile_commands_write(String path, Array commands)`
+
+Publishes collected native compilation entries as one JSON database.
+`commands` holds serialized entries from each completed build target.
+The destination's parent must exist. Writes a process-specific sibling
+before rename; handled open, write, close, or rename failure preserves
+the existing database, reports a diagnostic, and returns zero.
+
+Source: `src/build.x:550`
 
 ### `Build`
 
@@ -38,7 +53,7 @@ package archives and link flags; an absent archive then prints a
 diagnostic and exits with status 2. Static-library builds skip those checks
 and inputs.
 
-Source: `src/build.x:432`
+Source: `src/build.x:436`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -47,7 +62,7 @@ Source: `src/build.x:432`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:443`
+Source: `src/build.x:447`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -58,7 +73,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:749`
+Source: `src/build.x:843`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -68,7 +83,7 @@ Source: `src/build.x:749`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:451`
+Source: `src/build.x:455`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -81,7 +96,7 @@ action fails. Compile-only requests stop after objects. Static archives
 reuse their recorded inputs; executables always link because library
 selection and implicit linker inputs are not in the fingerprint.
 
-Source: `src/build.x:583`
+Source: `src/build.x:677`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -92,7 +107,7 @@ Returns and registers the generated-file directory for `input`.
 The directory is derived from the input path, created unless this is a dry
 run, and appended once to the build's generated include directories.
 
-Source: `src/build.x:299`
+Source: `src/build.x:301`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -104,7 +119,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:346`
+Source: `src/build.x:350`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -113,7 +128,7 @@ Source: `src/build.x:346`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:649`
+Source: `src/build.x:743`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -123,7 +138,7 @@ Source: `src/build.x:649`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:706`
+Source: `src/build.x:800`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -135,7 +150,7 @@ Returns zero without retained state, during a dry run, when either output
 is absent, or when any compiler, tool, option, depfile, or dependency
 fingerprint cannot be read or differs.
 
-Source: `src/build.x:327`
+Source: `src/build.x:331`
 
 ### `CliRequest`
 
@@ -150,7 +165,7 @@ to `request`, chooses output and intermediate paths, and creates artifact
 directories unless this is a dry run. Invalid inputs or setup print a
 diagnostic and exit with status 2.
 
-Source: `src/build.x:214`
+Source: `src/build.x:215`
 
 ## Public types
 
@@ -161,7 +176,7 @@ Source: `src/build.x:214`
 <a id="Build"></a>
 ### Build
 
-`typedef struct Build { CliRequest request; Toolchain toolchain; String work_dir, gen_root, obj_root, dep_root, state_root, output; int temporary, Array c_sources, gen_dirs, native_inputs, objects; unsigned long started_at; unsigned long xlat_start; unsigned long cc_start; unsigned long final_at; unsigned long long gen_bytes; int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached; } *Build`
+`typedef struct Build { CliRequest request; Toolchain toolchain; String work_dir, gen_root, obj_root, dep_root, state_root, output; int temporary, Array c_sources, gen_dirs, native_inputs, objects; String compile_directory, Array compile_commands; unsigned long started_at; unsigned long xlat_start; unsigned long cc_start; unsigned long final_at; unsigned long long gen_bytes; int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached; } *Build`
 
 Holds `Scope`-owned mutable state for one prepared native build target.
 `CliRequest.prepare` allocates the record in the current `Scope` and

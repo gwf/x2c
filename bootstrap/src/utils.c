@@ -67,6 +67,8 @@ static int _locate_repo_root(const char * start,  char * out,  size_t size);
 
 static void _prepare_repo_defaults(void);
 
+static int _cpp_status(int status);
+
 static int _cpp_wait(pid_t pid);
 
 __attribute__((constructor)) static void _file_init_(void){
@@ -256,15 +258,19 @@ static void _prepare_repo_defaults(void){
   x2c_repo_cpp_include_dirs = cons(String_var(src_dir),  cons(String_var(lib_dir),  NULL));
 }
 
+static int _cpp_status(int status){
+  if(WIFEXITED(status)) return WEXITSTATUS(status);
+  if(WIFSIGNALED(status)) return 128 + WTERMSIG(status);
+  return - 1;
+}
+
 static int _cpp_wait(pid_t pid){
   int status;
   while(waitpid(pid,  & status,  0) < 0){
     if(errno == EINTR) continue;
     return - 1;
   }
-  if(WIFEXITED(status)) return WEXITSTATUS(status);
-  if(WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return - 1;
+  return _cpp_status(status);
 }
 
 ChildProcess process_start(char * * argv,  int capture){
@@ -307,12 +313,26 @@ ChildProcess process_start(char * * argv,  int capture){
   return process;
 }
 
+int ChildProcess_ready(ChildProcess c){
+  if(! _init_guard_) _file_init_();
+  if(c -> pid < 0 || c -> finished) return 1;
+  int status;
+  pid_t pid;
+  do pid = waitpid((pid_t) c -> pid,  & status,  WNOHANG);
+  while(pid < 0 && errno == EINTR);
+  ;
+  if(! pid) return 0;
+  c -> status = pid < 0 ? - 1 : _cpp_status(status);
+  c -> finished = 1;
+  return 1;
+}
+
 int ChildProcess_wait(ChildProcess c,  String * output,  String * errors){
   if(! _init_guard_) _file_init_();
   if(output) * output = NULL;
   if(errors) * errors = NULL;
   if(! c || ! output || ! errors) return - 1;
-  int result = c -> pid < 0 ? - 1 : _cpp_wait((pid_t) c -> pid);
+  int result = c -> finished ? c -> status : c -> pid < 0 ? - 1 : _cpp_wait((pid_t) c -> pid);
   if(c -> output){
     File_rewind(c -> output);
     * output = File_string(c -> output);

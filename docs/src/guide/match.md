@@ -47,6 +47,36 @@ match (value)
 
 Arm order is also cost order, so put cheap, common shapes first.
 
+### Typed captures and expression guards
+
+Write `?{Type name}` to capture a value as a native typed local. The pattern
+tests the value's `Var` tag; a different tag fails the pattern without
+converting the value. The supported types are the same as for `value is Type`.
+
+```x2c
+List reply = %(message "ready");
+match (reply) {
+  case %(message ?{String text}) if (text.len() > 3):
+    printf("long message: %s\n", text.str());
+  case %(message ?{String text}):
+    printf("short message: %s\n", text.str());
+}
+```
+
+An optional `if (expression)` before the colon runs after the pattern
+matches, with its captures in scope. A false guard tries the next arm;
+errors propagate normally. The guard uses ordinary expression truth rules.
+
+A typed name has the same type throughout its arm, including other
+occurrences written as `?name` and occurrences in alternative patterns.
+Repeated names still require equal values. `!quote` remains opaque, and the
+existing rule that each binder must be assigned in every alternative still
+applies. Explicit `(!is ?name type string)` keeps `name` as a `Var`.
+
+The shorthand lowers to the existing `!is` pattern predicate and ordinary
+typed local declarations. An expression guard lowers to an ordinary `if`;
+both forms use the same matcher as explicit patterns.
+
 ## The pattern vocabulary
 
 Patterns are written in `List`-literal notation, which is described in

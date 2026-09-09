@@ -8,6 +8,7 @@ Target options:
 
 Output options:
       --out-dir <dir>         Write generated files under <dir> (default: .)
+      --source-map            Map generated C locations to original x2c sources
       --no-deps               Do not write x2c dependency files
       --dep-file <file>       Override the depfile path (one input only)
       --dep-target <target>   Override the depfile target (one input only)

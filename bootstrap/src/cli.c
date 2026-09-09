@@ -78,6 +78,9 @@ static CliOption cli_options[] ={
     33665524324,  CLI_TRANSLATE,  1052018024,  "--out-dir",  "<dir>",  "Write generated files under <dir> (default: .)",  0
   }
   , {
+    42018498656,  CLI_TRANSLATE | CLI_BUILD | CLI_RUN,  1052018024,  "--source-map",  NULL,  "Map generated C locations to original x2c sources",  0
+  }
+  , {
     31136689190,  CLI_TRANSLATE,  1052018024,  "--no-deps",  NULL,  "Do not write x2c dependency files",  0
   }
   , {
@@ -112,6 +115,9 @@ static CliOption cli_options[] ={
   }
   , {
     5861298610788,  CLI_BUILD | CLI_RUN,  1052018024,  "--build-dir",  "<dir>",  "Store generated C, objects, deps, and state here",  0
+  }
+  , {
+    6551812,  CLI_BUILD | CLI_RUN,  1052018024,  "--compile-commands",  "<file>",  "Write native compile commands and retain generated files",  0
   }
   , {
     41897807850336,  CLI_BUILD | CLI_RUN,  1052018024,  "--save-temps[=<dir>]",  NULL,  "Keep generated C and other intermediate files",  0
@@ -821,6 +827,8 @@ static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  
     break;
     case 33665524324 : c -> out_dir = value;
     break;
+    case 42018498656 : c -> source_map = 1;
+    break;
     case 31136689190 : c -> no_deps = 1;
     break;
     case 286754491146 : c -> dep_file = value;
@@ -861,6 +869,9 @@ static void _apply_option(CliRequest c,  CliOption * option,  String spelling,  
     case 1052018024 : c -> output = value;
     break;
     case 5861298610788 : c -> build_dir = value;
+    break;
+    case 6551812 : c -> compile_commands = value;
+    c -> save_temps = 1;
     break;
     case 41897807850336 : c -> save_temps = 1;
     break;

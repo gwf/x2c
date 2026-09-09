@@ -1821,6 +1821,10 @@ The literal forms are `%!(parameters) => expression` and
 between the parameters and `=>` captures those surrounding bindings by
 reference.
 
+An expression body parses through assignment precedence. An unparenthesized
+comma separates arguments of an enclosing call; write `(first, second)` when
+the comma expression itself is the lambda body.
+
 Current guarantees:
 
 - an expression body produces its value; a native C `void` expression runs
@@ -1860,7 +1864,8 @@ reading it.
 A noncapturing lambda remains a generated C function and can adapt to a
 supported C callback type, including `int (*)(int)`, in an initializer,
 assignment, argument, or return. A local typedef of the callback type has the
-same behavior. Where a `Func` is expected, a fixed nonvariadic function or
+same behavior. Parentheses around the lambda preserve this adaptation.
+Where a `Func` is expected, a fixed nonvariadic function or
 function-pointer value converts implicitly when the `Func` conversion supports
 its parameters and result. Value parameters and results need a lossless `Var`
 conversion, and reference
@@ -2023,6 +2028,19 @@ require literal operators so the compiler can prove binder availability. Named
 binders under `!not` are not definitely assigned; binders under `!or` or
 membership-style `!set` must occur in every alternative; `!quote` is opaque.
 Arm binders are semantic `Var` or `List` locals and support method syntax.
+
+`?{Type name}` declares a native typed capture. Its exact `Var` tag must
+match the tag tested by `value is Type`; mismatches fail the pattern without
+conversion. The type applies to every unquoted occurrence of that binder in
+the arm, including `?name` and alternative branches. Repeated names retain
+their equality constraint. The shorthand lowers to existing `!is` predicates
+and ordinary local declarations; explicit `!is` captures remain `Var` locals.
+
+An arm may place `if (expression)` before its colon. The expression runs
+after matching, with captures visible, and uses ordinary truth conversion.
+False tries the next arm; errors propagate normally. A successful guard runs
+the body once. Capture scopes and the existing `break`, `continue`, and
+cleanup rules apply to guarded arms too.
 
 ### Errors and cleanup
 

@@ -16,16 +16,6 @@ void Scope_free(void *);
 
 void Scope_move(void *,  Scope *);
 
-void Block_clear(Block);
-
-size_t Block_len(Block);
-
-size_t Block_capacity(Block);
-
-void Block_pop(Block);
-
-void Block_truncate(Block,  size_t);
-
 static int _allocation_size(size_t width,  size_t cap,  size_t * out);
 
 static int _allocation_size(size_t width,  size_t cap,  size_t * out){

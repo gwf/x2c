@@ -29,6 +29,7 @@ X2c literal and lambda parsing.
 | [`Compiler.parse_string_literal`](#Compiler.parse_string_literal) | Parses a percent `String` literal and returns its typed expression after the closing quote. |
 | [`Compiler.parse_symbol_set_literal`](#Compiler.parse_symbol_set_literal) | Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`. |
 | [`Compiler.symbol_set_expression`](#Compiler.symbol_set_expression) | Builds a typed `SymbolSet` expression from source-ordered `Symbol` values. |
+| [`Compiler.typed_match_pattern`](#Compiler.typed_match_pattern) | Applies each typed capture's predicate to every unquoted occurrence. |
 
 ### `Compiler`
 
@@ -42,7 +43,7 @@ Opens lexical capture resolution while a lambda body is parsed or bound.
 contains canonical capture rows supplied by constructed syntax. Evolving
 rows live in semantic binding facts so macro transactions restore them.
 
-Source: `src/literals.x:820`
+Source: `src/literals.x:940`
 
 <a id="Compiler.bind_lambda_expression"></a>
 #### Compiler.bind_lambda_expression
@@ -53,7 +54,7 @@ Binds a constructed lambda through the lexical capture operations used by
 source literals. Parameter declarations keep their existing declarators;
 supplied canonical capture rows retain their value or reference mode.
 
-Source: `src/literals.x:921`
+Source: `src/literals.x:1041`
 
 <a id="Compiler.capture_lambda_identifier"></a>
 #### Compiler.capture_lambda_identifier
@@ -65,7 +66,7 @@ Fresh captured bindings keep sibling snapshots independent of shared-cell
 rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
-Source: `src/literals.x:846`
+Source: `src/literals.x:966`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -74,7 +75,7 @@ Source: `src/literals.x:846`
 
 Finishes the active lambda's captures in first-use order.
 
-Source: `src/literals.x:829`
+Source: `src/literals.x:949`
 
 <a id="Compiler.lambda_capture_required"></a>
 #### Compiler.lambda_capture_required
@@ -83,7 +84,7 @@ Source: `src/literals.x:829`
 
 Reports whether the active lambda still needs to capture a binding.
 
-Source: `src/literals.x:804`
+Source: `src/literals.x:924`
 
 <a id="Compiler.parse_array_literal"></a>
 #### Compiler.parse_array_literal
@@ -93,7 +94,7 @@ Source: `src/literals.x:804`
 Parses a quoted Array literal into a typed, source-ordered `(array ...)`
 node and consumes its closing `]`.
 
-Source: `src/literals.x:520`
+Source: `src/literals.x:640`
 
 <a id="Compiler.parse_atomic_literal"></a>
 #### Compiler.parse_atomic_literal
@@ -104,7 +105,7 @@ Parses the current atomic token into a typed expression and advances once.
 Pattern and macro-hole state control binder validation and quoting, while
 shallow parsing permits provisional numeric types.
 
-Source: `src/literals.x:1096`
+Source: `src/literals.x:1216`
 
 <a id="Compiler.parse_catch_pattern_literal"></a>
 #### Compiler.parse_catch_pattern_literal
@@ -116,7 +117,7 @@ The call consumes the closing `)`. A bare code `Symbol` may be followed by
 `*` patterns or `(key pattern)` pairs; pattern and runtime-literal state is
 restored on success.
 
-Source: `src/literals.x:453`
+Source: `src/literals.x:573`
 
 <a id="Compiler.parse_lambda_literal"></a>
 #### Compiler.parse_lambda_literal
@@ -129,7 +130,7 @@ active return type, and capture rows come from `semantic_binding_facts`.
 Capturing lambdas have type `Func`; noncapturing lambdas retain a native
 function type.
 
-Source: `src/literals.x:1001`
+Source: `src/literals.x:1121`
 
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal
@@ -140,7 +141,7 @@ Parses a `List` literal beginning at `(` or `%(` and returns its typed
 expression after consuming `)`. Pattern parsing sets and restores
 `match_is`; `runtime_literals` disables stable-cell caching.
 
-Source: `src/literals.x:185`
+Source: `src/literals.x:300`
 
 <a id="Compiler.parse_map_entries"></a>
 #### Compiler.parse_map_entries
@@ -150,7 +151,7 @@ Source: `src/literals.x:185`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals.x:552`
+Source: `src/literals.x:672`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -161,7 +162,7 @@ Parses one `Map` entry without consuming its following comma or `}`.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals.x:531`
+Source: `src/literals.x:651`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal
@@ -171,7 +172,7 @@ Source: `src/literals.x:531`
 Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
 and consumes its closing `}`.
 
-Source: `src/literals.x:609`
+Source: `src/literals.x:729`
 
 <a id="Compiler.parse_raise_literal"></a>
 #### Compiler.parse_raise_literal
@@ -183,7 +184,7 @@ node and consumes its closing `)`. The code and detail keys must be bare
 `Symbol`s, each keyed detail has one value, and payload literals bypass the
 compiler cache.
 
-Source: `src/literals.x:402`
+Source: `src/literals.x:522`
 
 <a id="Compiler.parse_string_literal"></a>
 #### Compiler.parse_string_literal
@@ -195,7 +196,7 @@ expression after the
 closing quote. Static segments enter the compiler cache unless
 `runtime_literals` is set; interpolated segments remain source ordered.
 
-Source: `src/literals.x:707`
+Source: `src/literals.x:827`
 
 <a id="Compiler.parse_symbol_set_literal"></a>
 #### Compiler.parse_symbol_set_literal
@@ -207,7 +208,7 @@ Entries must be literal compact `Symbol`s; source order defines dense
 indexes
 and an equal encoded `Symbol` reports a duplicate diagnostic.
 
-Source: `src/literals.x:352`
+Source: `src/literals.x:472`
 
 <a id="Compiler.symbol_set_expression"></a>
 #### Compiler.symbol_set_expression
@@ -218,7 +219,16 @@ Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
 Stores the first duplicate index, or -1, through `duplicate`; a duplicate
 returns NULL.
 
-Source: `src/literals.x:336`
+Source: `src/literals.x:456`
+
+<a id="Compiler.typed_match_pattern"></a>
+#### Compiler.typed_match_pattern
+
+`List Compiler.typed_match_pattern(Compiler c, List pattern, List types)`
+
+Applies each typed capture's predicate to every unquoted occurrence.
+
+Source: `src/literals.x:250`
 
 ## Design notes
 

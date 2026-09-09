@@ -45,6 +45,8 @@ EOF
 cat >"$BUILD/src/unit.x" <<'EOF'
 #include "hdr.x"
 #include "anon.x"
+int cache_external(int value);
+int cache_call_external(int value) { return cache_external(value); }
 macro Statement $cache_add(Expr $target, Expr $amount)
   using $temporary => {
   int $temporary = $amount;
@@ -84,6 +86,11 @@ cmp -s "$BUILD/batch/twin.c" "$BUILD/solo/twin.c" ||
   fail "batch-first translation diverged from cold compile"
 grep -q "List_len" "$BUILD/solo/unit.c" ||
   fail "cold walk resolved Foo to the wrong declaration"
+grep -q '^int cache_external(int value);' "$BUILD/solo/unit.h" ||
+  fail "public function declaration is missing from the generated header"
+if grep -q '^int cache_external(' "$BUILD/solo/unit.c"; then
+  fail "source repeats a function declaration supplied by its own header"
+fi
 
 # Translating an owner replaces its artifact entry with collected source.
 # Its generated protocol callables must survive that replacement for later

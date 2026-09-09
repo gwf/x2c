@@ -40,6 +40,8 @@ void ToolAction_as_program(ToolAction action);
 
 ToolRun ToolAction_start(ToolAction action);
 
+int ToolRun_ready(ToolRun execution);
+
 int ToolRun_wait(ToolRun execution);
 
 int ToolAction_run(ToolAction action);

@@ -8,6 +8,7 @@
 #include "x2c.h"
 typedef struct ChildProcess{
   long pid;
+  int finished,  status;
   File output,  errors;
   String start_error;
 }
@@ -32,6 +33,8 @@ List x2c_cpp_include_dirs(void);
 _Noreturn void x2c_driver_error(const char * message);
 
 ChildProcess process_start(char * * argv,  int capture);
+
+int ChildProcess_ready(ChildProcess c);
 
 int ChildProcess_wait(ChildProcess c,  String * output,  String * errors);
 

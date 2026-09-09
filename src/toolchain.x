@@ -292,6 +292,16 @@ ToolRun ToolAction.start(ToolAction action) {
   return execution;
 }
 
+/** Checks whether an execution can be waited without blocking. A dry run
+    is ready immediately. A completed child retains its status and captures
+    until the required `ToolRun.wait` call.
+*/
+int ToolRun.ready(ToolRun execution) {
+  if (execution.action.dry_run) return 1;
+  ChildProcess process = execution.process;
+  return process.ready();
+}
+
 /** Waits once for an execution, forwards its captured streams, and returns its
     shell-style status. Signals return `128 + signal`; an invalid action, fork
     failure, or wait failure returns -1, and a dry run returns 0. Captured

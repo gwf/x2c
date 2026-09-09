@@ -508,6 +508,184 @@ PY
 grep -Fq "$ROOT/builds/0/libx2c.a" "$BUILD/direct/matched.stderr"
 [[ ! -e "$BUILD/direct/matched-dry" ]]
 
+python3 - "$X2C" "$BUILD/scheduling" <<'PY_SCHEDULING'
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+compiler, directory = sys.argv[1:]
+root = Path(directory)
+root.mkdir()
+wrapper = root / 'cc-wrapper'
+wrapper.write_text(r"""#!/usr/bin/env python3
+import fcntl
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+root = Path(os.environ['SCHEDULING_STATE'])
+name = Path(sys.argv[sys.argv.index('-c') + 1]).stem
+
+def event(kind):
+    with (root / 'events').open('a') as output:
+        fcntl.flock(output, fcntl.LOCK_EX)
+        output.write(kind + ' ' + name + '\n')
+        output.flush()
+
+event('start')
+print('stdout-' + name, flush=True)
+print('stderr-' + name, file=sys.stderr, flush=True)
+if name == 'third':
+    (root / 'third-started').touch()
+if name == 'first':
+    marker = 'second-finished' if os.environ['SCHEDULING_FAIL'] else 'third-started'
+    deadline = time.monotonic() + 5
+    while not (root / marker).exists():
+        if time.monotonic() >= deadline:
+            event('timeout')
+            sys.exit(98)
+        time.sleep(0.005)
+    if os.environ['SCHEDULING_FAIL']:
+        time.sleep(0.1)
+if name == 'second' and os.environ['SCHEDULING_FAIL']:
+    event('finish')
+    (root / 'second-finished').touch()
+    sys.exit(23)
+status = subprocess.call([os.environ['SCHEDULING_CC'], *sys.argv[1:]])
+event('finish')
+sys.exit(status)
+""")
+wrapper.chmod(0o755)
+sources = []
+for name in ('first', 'second', 'third'):
+    source = root / (name + '.c')
+    source.write_text('int ' + name + '(void) { return 0; }\n')
+    sources.append(str(source))
+for fail in (False, True):
+    state = root / ('failure' if fail else 'success')
+    state.mkdir()
+    env = dict(os.environ, SCHEDULING_STATE=str(state),
+               SCHEDULING_FAIL='1' if fail else '',
+               SCHEDULING_CC=shutil.which('cc'))
+    result = subprocess.run(
+        [compiler, 'build', '-c', '-j2', '--cc', str(wrapper),
+         '--build-dir', str(state / 'build'), *sources],
+        env=env, text=True, capture_output=True, timeout=20)
+    (state / 'stdout').write_text(result.stdout)
+    (state / 'stderr').write_text(result.stderr)
+    assert (result.returncode != 0) == fail, result.stderr
+    active = set()
+    started = set()
+    for row in (state / 'events').read_text().splitlines():
+        kind, name = row.split()
+        if kind == 'start':
+            assert name not in started
+            started.add(name)
+            active.add(name)
+            assert len(active) <= 2
+        else:
+            assert kind == 'finish', row
+            active.remove(name)
+    assert not active, 'build returned before draining its children'
+    assert started == ({'first', 'second'} if fail else
+                       {'first', 'second', 'third'})
+    for name in started:
+        assert result.stderr.count('stdout-' + name) == 1
+        assert result.stderr.count('stderr-' + name) == 1
+    if fail:
+        assert 'compile failed with status 23' in result.stderr
+PY_SCHEDULING
+
+python3 - "$X2C" "$BUILD/compile-commands" <<'PY_COMMANDS'
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+compiler, directory = sys.argv[1:]
+root = Path(directory).resolve()
+root.mkdir()
+source = root / 'native space.c'
+source.write_text('int main(void) { return 0; }\n')
+helper = root / 'helper.x'
+helper.write_text('int helper(void) { return 7; }\n')
+wrapper = root / 'compiler wrapper'
+capture = root / 'actual.jsonl'
+wrapper.write_text(r'''#!/usr/bin/env python3
+import json
+import os
+import sys
+if '-c' in sys.argv:
+    with open(os.environ['DB_CAPTURE'], 'a') as output:
+        output.write(json.dumps(sys.argv) + '\n')
+os.execv(os.environ['DB_CC'], [os.environ['DB_CC'], *sys.argv[1:]])
+''')
+wrapper.chmod(0o755)
+env = dict(os.environ, DB_CAPTURE=str(capture), DB_CC=shutil.which('cc'))
+database = root / 'compile_commands.json'
+command = [compiler, 'build', '-c', '--compile-commands', str(database),
+           '--build-dir', 'build space', '--cc', str(wrapper),
+           '-Xcc', '-DDB_TEXT="a\\\"b\\\\c"',
+           '-Xcc', '-fdebug-prefix-map=a\tb\nc"\\=mapped',
+           str(source), str(helper)]
+def run(command, name, status=0):
+    result = subprocess.run(command, cwd=root, env=env, text=True,
+                            capture_output=True, timeout=30)
+    (root / (name + '.stderr')).write_text(result.stderr)
+    assert result.returncode == status, result.stderr
+    return result
+run(command, 'first')
+first = database.read_bytes()
+rows = json.loads(first)
+actual = [json.loads(row) for row in capture.read_text().splitlines()]
+assert len(rows) == len(actual) == 2
+for row, argv in zip(rows, actual):
+    assert row['directory'] == str(root)
+    assert row['arguments'] == argv
+    assert row['file'] == argv[argv.index('-c') + 1]
+    assert row['output'] == argv[argv.index('-o') + 1]
+    assert (root / row['file']).is_file()
+    assert (root / row['output']).is_file()
+objects = [str(root / row['output']) for row in rows]
+run([compiler, 'build', '--kind', 'static-library',
+     '--compile-commands', 'empty.json', '--output', 'libempty.a', *objects],
+    'objects-only')
+assert json.loads((root / 'empty.json').read_text()) == []
+capture.unlink()
+run(command, 'warm')
+assert database.read_bytes() == first
+assert not capture.exists(), 'warm build executed a native compilation'
+run(command[:2] + ['-###'] + command[2:], 'dry')
+assert database.read_bytes() == first
+assert not capture.exists()
+source.write_text('int broken( {\n')
+run(command, 'failure', 1)
+assert database.read_bytes() == first
+assert not list(root.glob('compile_commands.json.tmp.*'))
+run_source = root / 'run.x'
+run_source.write_text('int main(void) { return 23; }\n')
+run([compiler, 'run', '--compile-commands', 'run.json', str(run_source)],
+    'run', 23)
+run_rows = json.loads((root / 'run.json').read_text())
+assert len(run_rows) == 1
+assert (root / run_rows[0]['file']).is_file()
+assert '.x2c-build' in run_rows[0]['file']
+assert (root / run_rows[0]['output']).is_file()
+blocked = root / 'db-directory'
+blocked.mkdir()
+run([compiler, 'build', '-c', '--compile-commands', str(blocked), str(helper)],
+    'write-failure', 1)
+assert blocked.is_dir()
+assert not list(root.glob('db-directory.tmp.*'))
+print('compilation database argv, cache, retention, failure, run: passed')
+PY_COMMANDS
+
 manifest="$BUILD/manifest"
 mkdir -p "$manifest/src" "$manifest/nested" "$manifest/include"
 printf 'int leaf_value(void) { return 8; }\n' >"$manifest/src/leaf.x"
@@ -540,7 +718,8 @@ printf 'int main(void) { return 99; }\n' >"$manifest/src/excluded.x"
   printf 'debug = true\n'
 } >"$manifest/x2c.toml"
 
-(cd "$manifest/nested" && "$X2C" build -v --profile release) \
+(cd "$manifest/nested" && "$X2C" build -v --profile release \
+  --compile-commands "$manifest/compile_commands.json") \
   >"$manifest/first.stdout" 2>"$manifest/first.stderr"
 [[ $("$manifest/out/app") == 10 ]]
 grep -Fq "excluded $manifest/src/excluded.x from target app" \
@@ -552,12 +731,48 @@ link_line=$(grep -n '^x2c: link ' "$manifest/first.stderr" |
 [[ $archive_line -lt $link_line ]]
 grep -Fq -- '-O2 -g' "$manifest/first.stderr"
 
-(cd "$manifest/nested" && "$X2C" build -v --profile release) \
+cp "$manifest/compile_commands.json" "$manifest/commands-first.json"
+(cd "$manifest/nested" && "$X2C" build -v --profile release \
+  --compile-commands "$manifest/compile_commands.json") \
   >"$manifest/noop.stdout" 2>"$manifest/noop.stderr"
+cmp "$manifest/commands-first.json" "$manifest/compile_commands.json"
+python3 - "$manifest" <<'PY_MANIFEST_COMMANDS'
+import json
+from pathlib import Path
+import sys
+
+root = Path(sys.argv[1])
+rows = json.loads((root / 'compile_commands.json').read_text())
+assert len(rows) == 4
+assert {Path(row['file']).stem for row in rows} == {'core', 'leaf', 'main', 'native'}
+for row in rows:
+    assert row['directory'] == str(root / 'nested')
+    assert Path(row['file']).is_file()
+    assert Path(row['output']).is_file()
+    argv = row['arguments']
+    assert argv[argv.index('-c') + 1] == row['file']
+    assert argv[argv.index('-o') + 1] == row['output']
+PY_MANIFEST_COMMANDS
 [[ $(grep -c '^x2c: up-to-date ' "$manifest/noop.stderr") == 8 ]]
 [[ $(grep -c '^x2c: compile ' "$manifest/noop.stderr") == 0 ]]
 grep -Fq 'x2c: up-to-date archive ' "$manifest/noop.stderr"
 grep -Fq 'x2c: link ' "$manifest/noop.stderr"
+
+printf '\n  # A presentation-only manifest edit.\n\n' >>"$manifest/x2c.toml"
+(cd "$manifest/nested" && "$X2C" build -v --profile release) \
+  >"$manifest/comment.stdout" 2>"$manifest/comment.stderr"
+[[ $(grep -c '^x2c: up-to-date ' "$manifest/comment.stderr") == 8 ]]
+[[ $(grep -c '^x2c: compile ' "$manifest/comment.stderr") == 0 ]]
+[[ $("$manifest/out/app") == 10 ]]
+
+printf 'defines = ["MANIFEST_PROBE=1"]\n' >>"$manifest/x2c.toml"
+(cd "$manifest/nested" && "$X2C" build -v --profile release) \
+  >"$manifest/setting.stdout" 2>"$manifest/setting.stderr"
+[[ $(grep -c '^x2c: compile ' "$manifest/setting.stderr") == 2 ]]
+grep '^x2c: compile ' "$manifest/setting.stderr" |
+  grep -Fq -- '-DMANIFEST_PROBE=1'
+grep -Fq 'x2c: up-to-date archive ' "$manifest/setting.stderr"
+[[ $("$manifest/out/app") == 10 ]]
 
 printf '%s\n' '#include "x2c.x"' \
   'int core_value(void); int native_value(void);' 'int main(void) {' \
@@ -684,4 +899,72 @@ printf 'int main(void) { return 0; }\n' >"$equivalent/main.c"
   >"$equivalent/direct.stdout" 2>"$equivalent/direct.stderr"
 cmp "$equivalent/manifest.stderr" "$equivalent/direct.stderr"
 
-echo "CLI, dependency, build, run, manifest, and state probes: 93 passed"
+# Source mapping is independent of -g and belongs to translation reuse.
+python3 - "$X2C" "$BUILD/source-map" <<'PY_SOURCE_MAP'
+from pathlib import Path
+import subprocess
+import sys
+
+compiler = sys.argv[1]
+root = Path(sys.argv[2]).resolve()
+source_dir = root / 'source "quote\\ and space'
+source_dir.mkdir(parents=True)
+source = source_dir / 'mapped.x'
+helper = source_dir / 'included.x'
+(source_dir / 'where.xmacro').write_text(
+    'macro Expression $imported_where() => (__LINE__)\n')
+source.write_text(r'''#include "x2c.x"
+#include "included.x"
+$(import "where.xmacro")
+macro Expression $where() => (__LINE__)
+int main(void) {
+  printf("source=%s:%d\n", __FILE__, __LINE__);
+  printf("multiline=%d\n",
+    __LINE__);
+  printf("macro=%d\n", $where());
+  printf("imported=%d\n",
+    $imported_where());
+  defer printf("cleanup=%d\n", __LINE__);
+  return included();
+}
+''')
+helper.write_text(r'''#include "x2c.x"
+int included(void) {
+  printf("included=%s:%d\n", __FILE__, __LINE__);
+  return 0;
+}
+''')
+
+
+def run(arguments):
+    result = subprocess.run(arguments, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr
+    return result.stdout
+
+
+command = [compiler, 'build', '--quiet', '-g', '-O0', '--build-dir',
+           str(root / 'build'), '--output', str(root / 'app'),
+           str(source), str(helper)]
+run(command)
+generated = list((root / 'build').rglob('*.c'))
+assert generated and all('#line ' not in p.read_text() for p in generated)
+mapped = command[:2] + ['--source-map'] + command[2:]
+run(mapped)
+expected = (f'source={source}:6\nmultiline=8\nmacro=9\nimported=11\n'
+            f'included={helper}:3\ncleanup=12\n')
+assert run([str(root / 'app')]) == expected
+assert all('#line ' in p.read_text() for p in generated)
+artifacts = generated + list((root / 'build').rglob('*.h'))
+stamps = [p.stat().st_mtime_ns for p in artifacts]
+run(mapped)
+assert stamps == [p.stat().st_mtime_ns for p in artifacts]
+run(command)
+assert all('#line ' not in p.read_text() for p in generated)
+output = root / 'translated'
+output.mkdir()
+run([compiler, 'translate', '--quiet', '--source-map', '--out-dir',
+     str(output), str(source)])
+assert '#line ' in (output / 'mapped.c').read_text()
+PY_SOURCE_MAP
+
+echo "CLI, dependency, build, run, manifest, and state probes: 110 passed"

@@ -182,15 +182,64 @@ void Compiler.begin_catch_arm(Compiler compiler, List pattern, Token start) {
   if (pattern) _define_pattern_binders(compiler, pattern, start, "catch");
 }
 
+static List _match_capture_declaration(
+  Compiler compiler, Type type, String name, List initializer, int temporary) {
+  List binding;
+  if (compiler.macro_holes) {
+    binding = compiler.macro_introduced_name(name);
+    initializer = compiler.resolve_expression(initializer, compiler.token);
+    compiler.bind_template_local(binding, type, NULL);
+  }
+  else binding = temporary ? compiler.sym.introduce(name)
+                           : %("x2c.ident" $name);
+  return compiler.bind_syntax(
+    %(declare $type
+      (bindings (op = (bind $binding ()) $initializer))),
+    AST_BLOCK, compiler.return_type);
+}
+
+static List _match_capture_temporaries(Compiler c, List types, Array locals) {
+  Array declarations = %[];
+  foreach (List row, types) match (row)
+    case %(?name ?type): {
+      String temporary = c.fresh_name("match_value");
+      declarations.push(_match_capture_declaration(
+        c, %("Var"), temporary, %(expr () (ident ($name))), 1));
+      locals.push(%($name $type $temporary));
+    }
+  return declarations.list_free();
+}
+
+static List _match_capture_locals(Compiler c, Array locals) {
+  Array declarations = %[];
+  foreach (List row, locals) match (row)
+    case %(?name ?type ?temporary):
+      declarations.push(_match_capture_declaration(
+        c, type, name, %(expr () (ident ($temporary))), 0));
+  return declarations.list_free();
+}
+
 static List _match_case(Compiler c) {
   Symbol peek = c.peek(0), List pattern = NULL;
+  List types = NULL;
   Token start = c.token;
   c.next();
   if (peek == <case>) {
     int previous = c.in_pattern;
-    c.in_pattern = 1;
-    pattern = c.parse_expression();
-    c.in_pattern = previous;
+    Array previous_types = c.match_types;
+    Array captures = %[];
+    {
+      defer {
+        c.match_types = previous_types;
+        c.in_pattern = previous;
+        captures.free();
+      }
+      c.in_pattern = 1;
+      c.match_types = captures;
+      pattern = c.parse_expression();
+      types = captures.list();
+    }
+    if (types) pattern = c.typed_match_pattern(pattern, types);
     match (pattern)
       case %(!not (expr ("List") *)):
         c.report_error(
@@ -199,9 +248,24 @@ static List _match_case(Compiler c) {
   }
   else if (peek == <default>)  pattern = %(*);
   else                         goto error;
-  c.expect(<:>);
   c.begin_match_arm(pattern, start, peek == <case>);
+  List temporaries = NULL, declarations = NULL;
+  if (types) {
+    Array locals = %[];
+    temporaries = _match_capture_temporaries(c, types, locals);
+    c.sym.push_new_scope();
+    declarations = _match_capture_locals(c, locals);
+    locals.free();
+  }
+  List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
+  c.expect(<:>);
   List body = c.parse_statement();
+  if (guard) body = %(if $guard (block $body (break)));
+  if (types) {
+    body = %(block @temporaries (block @declarations $body));
+    c.sym.pop_scope();
+  }
+  if (guard) body = %(guarded $body);
   c.sym.pop_scope();
   return %($pattern $body);
 error:

@@ -153,11 +153,7 @@ int Pool_own(Pool,  Var,  void *);
 
 Var Pool_lookup(Pool,  Var);
 
-Var car(List);
-
 void * Var_pointer(Var);
-
-List cdr(List);
 
 size_t Array_len(Array);
 
@@ -169,15 +165,11 @@ Var Array_getindex(Array,  int);
 
 Var unsigned_var(unsigned);
 
-List List_cdr(List);
-
 int Var_equal(Var,  Var);
 
 FuncArg FuncArg_value(Var);
 
 Var Func_apply(Func,  unsigned,  const FuncArg *);
-
-Var List_car(List);
 
 int Var_truth(Var);
 

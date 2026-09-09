@@ -812,6 +812,25 @@ static List _direct_declarator(
   return %(bind $ident ());
 }
 
+/** Installs a definition-local template binding or typedef provisionally. */
+void Compiler.bind_template_local(
+  Compiler compiler, List key, List type, List context) {
+  Var local = compiler.macro_holes && key
+            ? compiler.macro_definition_locals()[key] : void;
+  if (compiler.macro_holes && local is <string> &&
+      (!context || context === %(typedef))) {
+    List local_key = %(${local.str()});
+    Type local_type = type.type_from_ast().declared();
+    if (context === %(typedef)) {
+      compiler.sym.set(local_key, %(typedef ${local.str()}));
+      compiler.sym.set(%(typedef ${local.str()}), local_type);
+    }
+    else compiler.sym.bind_identity(
+      NULL, key,
+      %(declare (<macro-expr>) (bindings (bind $key ()))));
+  }
+}
+
 static List _declarator(
   Compiler compiler, List type, List context, List *method_identity_out) {
   List ptr = _pointer(compiler), method_identity = NULL;
@@ -823,20 +842,7 @@ static List _declarator(
   // A parenthesized declarator is assembled twice. Preserve its raw key until
   // the outer call has the base type and can establish the binding once.
   List binding = key;
-  Var local = compiler.macro_holes && key
-            ? compiler.macro_definition_locals()[key] : void;
-  if (compiler.macro_holes && local is <string> &&
-      (!context || context === %(typedef))) {
-    List local_key = %(${local.str()});
-    Type local_type = ast.type_from_ast().declared();
-    if (context === %(typedef)) {
-      compiler.sym.set(local_key, %(typedef ${local.str()}));
-      compiler.sym.set(%(typedef ${local.str()}), local_type);
-    }
-    else compiler.sym.bind_identity(
-      NULL, key,
-      %(declare (<macro-expr>) (bindings (bind $key ()))));
-  }
+  compiler.bind_template_local(key, ast, context);
   if (method_identity_out) *method_identity_out = method_identity;
   return %( bind $binding $modifiers );
 }
@@ -1939,15 +1945,24 @@ List Compiler.bind_syntax(
         if (!statement_position) goto construction_error;
         Array bound = %[];
         foreach (List row, cases.list()) {
-          _.begin_match_arm(row.car(), _.token, row.car() !== %(*));
+          List pattern = row.car();
+          int binds = pattern !== %(*);
+          if (binds) pattern = _.resolve_expression(pattern, _.token);
+          _.begin_match_arm(pattern, _.token, binds);
           {
             defer _.sym.pop_scope();
+            List body = row.cadr();
+            match (body) {
+              case %(guarded ?statements):
+                body = %(guarded ${_.bind_syntax(
+                  statements, AST_STATEMENT, _.return_type)});
+              default:
+                body = _.bind_syntax(body, AST_STATEMENT, _.return_type);
+            }
             bound.push(
               %(
-              ${row.car()}
-              ${_.bind_syntax(
-                row.cadr(), AST_STATEMENT, _.return_type
-              )}
+              $pattern
+              $body
             ));
           }
         }

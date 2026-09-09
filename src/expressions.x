@@ -688,6 +688,8 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       }
       case %(lambda ? ?): return 1;
       case %(expr (!or () (<macro-expr>)) ?): return 1;
+      case %(at m-origin ?):
+        if (compiler.source_map && !compiler.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot) *): return 1;
       case %(ident (!is ?binding type list)): {
         String spelling = binding_identity_spelling(binding);
@@ -910,7 +912,8 @@ static List _resolve_identifier(
     c.local_macro_captures[binding] = 1;
   }
   if (spelling) {
-    List visible = c.sym.lookup(%($spelling), NULL);
+    List visible_type = NULL;
+    List visible = c.sym.lookup(%($spelling), &visible_type);
     if (visible && visible != binding) {
       if (binding_facts.contains(%(local-macro-capture $binding))) {
         if (!binding_facts.contains(%(emitted $visible)))
@@ -920,7 +923,8 @@ static List _resolve_identifier(
       else if (c.sym.binding_is_local(binding) &&
                !binding_facts.contains(%(lambda-depth $binding)))
         binding = visible;
-      else if ((!type || c.sym.resolve_global(%($spelling), NULL)) &&
+      else if (visible_type &&
+               (!type || c.sym.resolve_global(%($spelling), NULL)) &&
                !binding_facts.contains(%(emitted $visible)))
         binding_facts[%(emitted $visible)] =
           c.fresh_name("binding_shadow");
@@ -1226,9 +1230,101 @@ static List _resolve_call(
     c, result_type, resolved, type, NULL, supplied, origin);
 }
 
+/** Returns the exact Var tag for a type test, rejecting types without one.
+    Enums retain no identity after boxing and cannot be tested this way.
+*/
+Symbol Compiler.require_var_tag(
+  Compiler compiler, Type target, Token origin) {
+  Type resolved = NULL;
+  Symbol vartag = compiler.sym.var_tag_for_type(target, &resolved);
+  if (resolved && resolved.is_enum()) {
+    String note =
+      "enum values box as the shared i32 family and retain no enum identity";
+    compiler.report_error(
+      <type>, %"enum type ${target.repr()} cannot be tested with 'is'",
+      origin, %($note));
+  }
+  if (!vartag)
+    compiler.report_error(
+      <type>,
+      %"type ${target.repr()} has no supported Var tag for operator 'is'",
+      origin, NULL);
+  return vartag;
+}
+
+static int _deferred_type_test(Type target) {
+  foreach (Var specifier, target)
+    match (specifier)
+      case %((!or macro-bind macro-slot) *): return 1;
+  return 0;
+}
+
+/** Builds an exact tag expression, deferring macro type slots until binding. */
+List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
+  if (_deferred_type_test(target))
+    return %(expr (<macro-expr>) (type-tag $target));
+  Symbol tag = c.require_var_tag(target, origin);
+  return %(expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag));
+}
+
+/* Operands have been resolved in the caller's current semantic scope. */
+static List Compiler._binary_expression(
+  Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
+  (Var lhs_tag, Type lhs_type) = lhs;
+  (Var rhs_tag, Type rhs_type) = rhs;
+  if (lhs_type === %(<macro-expr>) ||
+      rhs_type === %(<macro-expr>))
+    return %(expr (<macro-expr>) (op $operator $lhs $rhs));
+  if (operator.is_assignment_op()) {
+    Type type = lhs_type;
+    if (operator == <=>) rhs = c.convert_expression(rhs, type);
+    return %(expr $type (op $operator $lhs $rhs));
+  }
+  if (operator == <==> || operator == <!=>) {
+    if (_type_is_string(lhs_type) && _expr_is_raw_string_literal(rhs))
+      rhs = c.convert_expression(rhs, lhs_type);
+    else if (_type_is_string(rhs_type) &&
+             _expr_is_raw_string_literal(lhs))
+      lhs = c.convert_expression(lhs, rhs_type);
+  }
+  int constant_string = 0;
+  if (operator == <+> &&
+      _expr_is_string_like(lhs) && _expr_is_string_like(rhs)) {
+    Var matched;
+    List bindings;
+    /* Bare `%(ident *)` also matches literal data ending in <ident>. */
+    constant_string =
+      !lhs.try_search(%(ident (*)), &matched, &bindings) &&
+      !rhs.try_search(%(ident (*)), &matched, &bindings);
+    lhs = c.convert_expression(lhs, %("String"));
+    rhs = c.convert_expression(rhs, %("String"));
+  }
+  List lowered = c._protocol_operator_expression(operator, lhs, rhs);
+  if (lowered) {
+    if (!constant_string) return lowered;
+    List cached = c.cache(%(string $lowered));
+    return %(expr ("String") $cached);
+  }
+  if (operator == <in>) {
+    c.report_error(
+      <type>, "operator 'in' requires an implemented contains member",
+      origin, %("receiver type: ${rhs_type.repr()}"));
+  }
+  Type type = c._binary_op_type(operator, lhs, rhs);
+  List operation = %(op $operator $lhs $rhs);
+  if (c.sym.is_var_type(lhs_type) ||
+      c.sym.is_var_type(rhs_type))
+    operation = c.anchor_origin(operation, origin);
+  return %(expr $type $operation);
+}
+
 static List _resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
   match (content) {
+    case %(at m-origin ?inner): {
+      if (!c.source_map || c.macro_holes) return input;
+      return %(expr $input_type (at ${c.origin} $inner));
+    }
     case %(!set ?inner (expr ? ?)):
       return c.resolve_expression(inner, origin);
     case %(ident ?value):
@@ -1387,16 +1483,13 @@ static List _resolve_content(
                 ? %(<macro-expr>) : typed.type_from_ast();
       return %(expr $type (cast $declaration $operand));
     }
+    case %(type-tag ?target):
+      return c.var_tag_expression(target, origin);
     case %(is-type ?operand ?target_syntax): {
       List lhs = c.resolve_expression(operand, origin);
       Type lhs_type = lhs.cadr();
       Type target = target_syntax;
-      int deferred_target = 0;
-      foreach (Var specifier, target)
-        match (specifier)
-          case %((!or macro-bind macro-slot) *):
-            deferred_target = 1;
-      if (_deferred_receiver(lhs) || deferred_target)
+      if (_deferred_receiver(lhs) || _deferred_type_test(target))
         return %(expr (<macro-expr>) (is-type $lhs $target));
       if (!c.sym.is_var_type(lhs_type))
         c.report_error(
@@ -1406,20 +1499,7 @@ static List _resolve_content(
         List callee = _resolve_identifier(c, %"Var_is_void", NULL, origin);
         return %(expr (int) (call $callee (args $lhs)));
       }
-      Type resolved = NULL;
-      Symbol vartag = c.sym.var_tag_for_type(target, &resolved);
-      if (resolved && resolved.is_enum()) {
-        String note =
-          "enum values box as the shared i32 family and retain no enum identity";
-        c.report_error(
-          <type>, %"enum type ${target.repr()} cannot be tested with 'is'",
-          origin, %($note));
-      }
-      if (!vartag)
-        c.report_error(
-          <type>,
-          %"type ${target.repr()} has no supported Var tag for operator 'is'",
-          origin, NULL);
+      Symbol vartag = c.require_var_tag(target, origin);
       String tagsym = %"${(unsigned long) vartag}";
       List callee = _resolve_identifier(c, %"Var_is", NULL, origin);
       return %(expr (int) (call $callee (args
@@ -1529,52 +1609,7 @@ static List _resolve_content(
     case %(op ?operator ?left ?right): {
       List lhs = c.resolve_expression(left, origin);
       List rhs = c.resolve_expression(right, origin);
-      (Var lhs_tag, Type lhs_type) = lhs;
-      (Var rhs_tag, Type rhs_type) = rhs;
-      if (lhs_type === %(<macro-expr>) ||
-          rhs_type === %(<macro-expr>))
-        return %(expr (<macro-expr>) (op $operator $lhs $rhs));
-      if (operator.symbol().is_assignment_op()) {
-        Type type = lhs_type;
-        if (operator == <=>) rhs = c.convert_expression(rhs, type);
-        return %(expr $type (op $operator $lhs $rhs));
-      }
-      if (operator == <==> || operator == <!=>) {
-        if (_type_is_string(lhs_type) && _expr_is_raw_string_literal(rhs))
-          rhs = c.convert_expression(rhs, lhs_type);
-        else if (_type_is_string(rhs_type) &&
-                 _expr_is_raw_string_literal(lhs))
-          lhs = c.convert_expression(lhs, rhs_type);
-      }
-      int constant_string = 0;
-      if (operator == <+> &&
-          _expr_is_string_like(lhs) && _expr_is_string_like(rhs)) {
-        Var matched;
-        List bindings;
-        /* Bare `%(ident *)` also matches literal data ending in <ident>. */
-        constant_string =
-          !lhs.try_search(%(ident (*)), &matched, &bindings) &&
-          !rhs.try_search(%(ident (*)), &matched, &bindings);
-        lhs = c.convert_expression(lhs, %("String"));
-        rhs = c.convert_expression(rhs, %("String"));
-      }
-      List lowered = c._protocol_operator_expression(operator, lhs, rhs);
-      if (lowered) {
-        if (!constant_string) return lowered;
-        List cached = c.cache(%(string $lowered));
-        return %(expr ("String") $cached);
-      }
-      if (operator == <in>) {
-        c.report_error(
-          <type>, "operator 'in' requires an implemented contains member",
-          origin, %("receiver type: ${rhs_type.repr()}"));
-      }
-      Type type = c._binary_op_type(operator, lhs, rhs);
-      List operation = %(op $operator $lhs $rhs);
-      if (c.sym.is_var_type(lhs_type) ||
-          c.sym.is_var_type(rhs_type))
-        operation = c.anchor_origin(operation, origin);
-      return %(expr $type $operation);
+      return c._binary_expression(operator, lhs, rhs, origin);
     }
     case %(postfix ?operator ?operand): {
       operand = c.resolve_expression(operand, origin);
@@ -1644,6 +1679,7 @@ List Compiler.resolve_expression(Compiler compiler, List input, Token origin) {
    resolved as their AST nodes are built, so higher levels receive typed or
    deferred expression nodes. */
 static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
+  int first = 1;
   while (_precedence(c.peek(0)) == level ||
          (level == 7 && _is_type_operator(c))) {
     if (_is_type_operator(c)) {
@@ -1672,7 +1708,12 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
     Token origin = c.token;
     c.next();
     List rhs = _parse_binary_level(c, level + 1);
-    lhs = c.resolve_expression(%(expr () (op $op $lhs $rhs)), origin);
+    if (first) {
+      lhs = c.resolve_expression(lhs, origin);
+      first = 0;
+    }
+    rhs = c.resolve_expression(rhs, origin);
+    lhs = c._binary_expression(op, lhs, rhs, origin);
   }
   return lhs;
 }
@@ -1750,7 +1791,12 @@ static List _parse_composite(Compiler compiler) {
 List Compiler.parse_variable(Compiler c) {
   Token origin = c.token;
   List name = c.parse_complex_identifier();
-  return c.resolve_expression(%(expr () (ident $name)), origin);
+  List result = c.resolve_expression(%(expr () (ident $name)), origin);
+  if (c.source_map &&
+      (origin.text == %"__FILE__" || origin.text == %"__LINE__"))
+    match (result) case %(expr ?type ?content):
+      return %(expr $type ${c.anchor_origin(content, origin)});
+  return result;
 }
 
 static List _parse_conditional_tail(Compiler compiler, List condition) {

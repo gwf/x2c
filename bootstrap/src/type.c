@@ -25,8 +25,6 @@ static Func _x2c_func_handle_0;
 #include <stdio.h>
 int List_truth(List);
 
-List Type_list(Type);
-
 List List_cdr(List);
 
 List cons(Var,  List);
@@ -36,8 +34,6 @@ Var List_car(List);
 int Var_is(Var,  Symbol);
 
 List List_reverse(List);
-
-Type List_type(List);
 
 List List_append(List,  List);
 
@@ -62,8 +58,6 @@ List Array_list_free(Array);
 Var List_getindex(List,  int);
 
 List List_match(List,  Var);
-
-Type Var_type(Var);
 
 Symbol Var_symbol(Var);
 

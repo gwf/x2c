@@ -467,6 +467,11 @@ static void _collect_local_function_bindings(Var value, Map bindings) {
       bindings[_declaration_binding(declarator)] = 1;
       return;
     }
+    case %(declare ? (!set ?declarator (bind (binding ? ?) ?))): {
+      if (node.type_from_ast().is_function())
+        bindings[_declaration_binding(declarator)] = 1;
+      return;
+    }
     case %(declare (!set ?base (*)) (bindings *declarators)): {
       foreach (List declarator, declarators) {
         List binding = _declaration_binding(declarator);
@@ -521,10 +526,11 @@ static void _collect_external_function_prototypes(
   }
 }
 
-static List _static_prototypes(Compiler compiler, List source) {
+static List _static_prototypes(Compiler compiler, List source, List header) {
   Array declarations = %[], decls = %[], consumers = %[], prelude = %[];
   Array prototypes = %[], externals = %[], output = %[];
   Map static_functions = %{}, local_functions = %{}, external_seen = %{};
+  _collect_local_function_bindings(header, local_functions);
   _collect_local_function_bindings(source, local_functions);
   _collect_external_function_prototypes(
     compiler, source, local_functions, external_seen, externals);
@@ -702,12 +708,13 @@ void generate_code(Compiler c, List ast, String dir) {
     %"_x2c_hcache_guard_$hash",
     %"_x2c_hcache_init_$hash");
 
+  List header_declarations = header;
   header = _vertical_spacing(header);
   header = _include_guard(c, header, c.filename);
   header = c.emit(header);
 
   source = _file_init(c, source);
-  source = _static_prototypes(c, source);
+  source = _static_prototypes(c, source, header_declarations);
   source = _vertical_spacing(source);
   source = _primary_include(c, source);
   source = _modify_main(c, source);
@@ -716,6 +723,7 @@ void generate_code(Compiler c, List ast, String dir) {
 
   String basename =
     %"${dir.rstrip(%"/")}/${x2c_path_stem(c.filename)}";
-  _write_output(c, %"$basename.h", code_pretty_string(header));
-  _write_output(c, %"$basename.c", code_pretty_string(source));
+  String hfile = %"$basename.h", cfile = %"$basename.c";
+  _write_output(c, hfile, c.code_pretty_string(header, hfile));
+  _write_output(c, cfile, c.code_pretty_string(source, cfile));
 }

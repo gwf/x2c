@@ -2,10 +2,6 @@
 
 #include "foreign-alias-pointer-result.h"
 
-char * find_char(const char *,  int);
-
-char * Text_find(const char *,  const char *);
-
 int main(void){
   x2c_initialize();
   printf("%s %s\n",  find_char("hello",  'l'),  Text_find("hello",  "ll"));

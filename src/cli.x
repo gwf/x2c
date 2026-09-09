@@ -18,12 +18,12 @@ typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
   List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
-  String prefix, cc, ar, Symbol kind, color_mode;
+  String prefix, cc, ar, compile_commands, Symbol kind, color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int live_symbols, cpp_symbols;
+  int live_symbols, cpp_symbols, source_map;
 } *CliRequest;
 
 #pragma private
@@ -86,6 +86,8 @@ static CliOption cli_options[] = {
     <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0 },
+  { <src-map>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <output>, "--source-map",
+    NULL, "Map generated C locations to original x2c sources", 0 },
   { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0 },
   { <dep-file>, CLI_TRANSLATE, <output>, "--dep-file", "<file>",
@@ -110,6 +112,8 @@ static CliOption cli_options[] = {
     "Name the executable, library, or single object", 0 },
   { <build-dir>, CLI_BUILD | CLI_RUN, <output>, "--build-dir",
     "<dir>", "Store generated C, objects, deps, and state here", 0 },
+  { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
+    "<file>", "Write native compile commands and retain generated files", 0 },
   { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
     "--save-temps[=<dir>]", NULL,
     "Keep generated C and other intermediate files", 0 },
@@ -704,6 +708,7 @@ static void _apply_option(
       break;
     case <debug>: c.debugging = 1; break;
     case <out-dir>: c.out_dir = value; break;
+    case <src-map>: c.source_map = 1; break;
     case <no-deps>: c.no_deps = 1; break;
     case <dep-file>: c.dep_file = value; break;
     case <dep-target>: c.dep_target = value; break;
@@ -733,6 +738,10 @@ static void _apply_option(
     case <jobs>: _driver_jobs(c, value); break;
     case <output>: c.output = value; break;
     case <build-dir>: c.build_dir = value; break;
+    case <cc-db>:
+      c.compile_commands = value;
+      c.save_temps = 1;
+      break;
     case <save-temp>: c.save_temps = 1; break;
     case <c-include>: _push_pair(cc_args, "-I", value);
       break;
