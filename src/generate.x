@@ -446,9 +446,11 @@ static String _typedef_name(List typedef_node) {
 }
 
 /* A typedef that follows a function definition is source-private unless a
-   later header item names it; a public prototype must be able to spell its
-   parameter types. Markers hold each such typedef's position in both files
-   until the whole unit has been partitioned. */
+   later header item names it and no earlier header typedef already
+   declares that name; a public prototype must be able to spell its
+   parameter types, while an opaque forward typedef keeps a private body
+   private. Markers hold each such typedef's position in both files until
+   the whole unit has been partitioned. */
 static List _resolve_typedef_markers(Array items, Array pending, int header) {
   Array output = %[];
   int count = items.len();
@@ -461,7 +463,11 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
         String name = entry.car(), List node = entry.cadr();
         int promoted = entry.caddr().int();
         if (header) {
-          for (int j = i + 1; j < count && !promoted; j++)
+          int declared = 0;
+          for (int j = 0; j < i && !declared; j++)
+            declared = items[j] is <list> &&
+                       _typedef_name(items[j].list()) == name;
+          for (int j = i + 1; j < count && !promoted && !declared; j++)
             promoted = items[j] is <list> &&
                        _mentions_type(items[j].list(), name);
           pending[at] = %($name $node $promoted);

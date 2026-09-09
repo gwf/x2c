@@ -752,10 +752,12 @@ static int _expr_is_raw_string_literal(List expr) {
   return 0;
 }
 
-/* A binary operator with one participant operand converts the other operand
-   to the participant type through its declared converter, so `x * 2.0` and
-   `2.0 - x` resolve like `x * two`. The converted operand replaces the
-   original through `lhs` and `rhs`. */
+/* A binary operator whose one operand is a struct or union participant
+   converts the other operand to that type through its declared converter,
+   so `x * 2.0` and `2.0 - x` resolve like `x * two`. Pointer and numeric
+   participants keep native C behavior, since `text + 1` must stay pointer
+   arithmetic. The converted operand replaces the original through `lhs`
+   and `rhs`. */
 static List _resolve_protocol_operator(
   Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
   if (derived) *derived = 0;
@@ -784,15 +786,24 @@ static List _resolve_protocol_operator(
     if (derived) *derived = source;
     if (!member) return NULL;
     if (participant !== rhs_type) {
-      List converted = compiler.resolve_protocol_member(participant, member)
-        ? _converter_call(compiler, *rhs, rhs_type, participant) : NULL;
+      if (compiler.sym.is_var_type(participant) ||
+          compiler.sym.is_var_type(rhs_type))
+        return NULL;
+      int lhs_member = !!compiler.resolve_protocol_member(participant, member)
+        && compiler.sym.resolve_key(participant).is_aggregate();
+      int rhs_member = !!compiler.resolve_protocol_member(rhs_type, member)
+        && compiler.sym.resolve_key(rhs_type).is_aggregate();
+      List converted = NULL;
+      if (lhs_member && !rhs_member)
+        converted = _converter_call(compiler, *rhs, rhs_type, participant);
       if (converted) *rhs = converted;
-      else {
+      else if (rhs_member && !lhs_member) {
         converted = _converter_call(compiler, *lhs, lhs_type, rhs_type);
         if (!converted) return NULL;
         participant = rhs_type;
         *lhs = converted;
       }
+      else return NULL;
     }
   }
   return participant && member
