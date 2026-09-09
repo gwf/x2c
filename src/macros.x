@@ -439,25 +439,19 @@ static Var _sdk_function_body(List function) =>
   function.match_replace(%(function ? ? (block *body)), %(*body));
 
 static void _report_lisp_failure(
-  Compiler compiler, Token invocation, int mark, String source) {
+  Compiler compiler, Token invocation, List error, String source) {
   if (macro_sdk_failure_message)
     compiler.report_error(
       <macro>, macro_sdk_failure_message,
       invocation, macro_sdk_failure_notes);
-  List errors = Error.since(mark), String source_note = %"form: $source";
-  List notes = %($source_note);
-  if (errors) {
-    String detail = errors.last().repr();
-    notes = notes.append(%("error: $detail"));
-  }
+  String form_note = %"form: $source", error_note = %"error: ${error.repr()}";
   compiler.report_error(
     <macro>, "compile-time Lisp evaluation failed",
-    invocation, notes);
+    invocation, %($form_note $error_note));
 }
 
 static Var _eval_string(
   Compiler compiler, String source, Token invocation) {
-  int mark = Error.mark();
   Var result;
   Compiler previous = macro_import_compiler;
   Token old_invocation = macro_import_invocation;
@@ -469,13 +463,13 @@ static Var _eval_string(
       macro_import_invocation = old_invocation;
     }
     try result = compiler.macro_lisp.eval_string(source);
-    catch: _report_lisp_failure(compiler, invocation, mark, source);
+    catch %(?code *detail):
+      _report_lisp_failure(compiler, invocation, cons(code, detail), source);
   }
   return result;
 }
 
 static Var _eval_file(Compiler compiler, File source, Token invocation) {
-  int mark = Error.mark();
   Var result = void;
   Compiler previous = macro_import_compiler;
   Token old_invocation = macro_import_invocation;
@@ -487,7 +481,9 @@ static Var _eval_file(Compiler compiler, File source, Token invocation) {
       macro_import_invocation = old_invocation;
     }
     try result = compiler.macro_lisp.eval_file(source);
-    catch: _report_lisp_failure(compiler, invocation, mark, "<file>");
+    catch %(?code *detail):
+      _report_lisp_failure(
+        compiler, invocation, cons(code, detail), "<file>");
   }
   return result;
 }
