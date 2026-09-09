@@ -1,6 +1,7 @@
 /*  test-autodiff.x -- dual-number family and derivative transformations */
 
 #include "x2c.x"
+#include "typed-array.x"
 #include <math.h>
 #include "test-support.x"
 $(import "test-macros.xmacro")
@@ -56,8 +57,101 @@ static void autodiff_nested_family_gives_second_derivative(void) {
   EXPECT_TRUE(_near(result.tangent.tangent, expect));
 }
 
+$ad.forward()
+static double _fwd_helper(double a, int k) => pow(a, 2.0) * (double) k;
+
+$ad.forward()
+static double _fwd_mixed(double x, double y, int n) {
+  double s = 0.0;
+  for (int i = 1; i <= n; i++) s += _fwd_helper(x, i) / (double) i;
+  double t = x * y + 3.0;
+  if (t > 1.0) t *= t;
+  else t = -t;
+  int j = 0;
+  while (j < 2) {
+    s -= sin(t) / x;
+    j++;
+  }
+  double u = t > 4.0 ? sqrt(t) : exp(t);
+  return u + s - 2.0 * y + tanh(x) + log(x);
+}
+
+$ad.reverse()
+static double _rev_helper(double a, double b) => a * b + sin(a);
+
+$ad.reverse()
+static double _rev_mixed(double x, double y, int n) {
+  double s = 0.0;
+  for (int i = 1; i <= n; i++) s += _rev_helper(x, y) * (double) i;
+  double t = x * y + 3.0;
+  if (t > 1.0) t *= t;
+  else t = -t;
+  int j = 0;
+  do {
+    s -= sin(t) / x;
+    j++;
+  } while (j < 2);
+  double u = t > 4.0 ? sqrt(t) : exp(t);
+  return u + s - 2.0 * y + tanh(x) + log(x);
+}
+
+static double _fwd_in_x(double x) => _fwd_mixed(x, 2.0, 3);
+static double _rev_in_x(double x) => _rev_mixed(x, 2.0, 3);
+static double _rev_in_y(double y) => _rev_mixed(1.0, y, 3);
+static double _central(double (*f)(double), double at) {
+  double h = 1e-6;
+  return (f(at + h) - f(at - h)) / (2 * h);
+}
+
+static void autodiff_forward_transform_matches_finite_difference(void) {
+  double tangent = _fwd_mixed_dot(1.0, 1.0, 2.0, 0.0, 3);
+  EXPECT_TRUE(fabs(tangent - _central(_fwd_in_x, 1.0)) < 1e-5);
+  EXPECT_TRUE(fabs(_fwd_mixed_dot(1.0, 0.0, 2.0, 1.0, 3)
+                   - _central(%!(y) => _fwd_mixed(1.0, y, 3), 2.0)) < 1e-5);
+}
+
+static void autodiff_reverse_transform_matches_finite_difference(void) {
+  double x_grad, y_grad;
+  double value = _rev_mixed_grad(1.0, 2.0, 3, &x_grad, &y_grad);
+  EXPECT_TRUE(fabs(value - _rev_mixed(1.0, 2.0, 3)) < 1e-12);
+  EXPECT_TRUE(fabs(x_grad - _central(_rev_in_x, 1.0)) < 1e-5);
+  EXPECT_TRUE(fabs(y_grad - _central(_rev_in_y, 2.0)) < 1e-5);
+}
+
+$ad.forward()
+static double _both(double a, double b) {
+  double p = 1.0;
+  int k = 0;
+  while (k < 3) {
+    p *= a + b / (double) (k + 1);
+    k++;
+  }
+  return p;
+}
+
+$ad.reverse()
+static double _both_grad_source(double a, double b) {
+  double p = 1.0;
+  int k = 0;
+  while (k < 3) {
+    p *= a + b / (double) (k + 1);
+    k++;
+  }
+  return p;
+}
+
+static void autodiff_forward_and_reverse_agree(void) {
+  double a_grad, b_grad;
+  _both_grad_source_grad(0.5, 1.5, &a_grad, &b_grad);
+  EXPECT_TRUE(fabs(a_grad - _both_dot(0.5, 1.0, 1.5, 0.0)) < 1e-12);
+  EXPECT_TRUE(fabs(b_grad - _both_dot(0.5, 0.0, 1.5, 1.0)) < 1e-12);
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
   $test.run(autodiff_nested_family_gives_second_derivative);
+  $test.run(autodiff_forward_transform_matches_finite_difference);
+  $test.run(autodiff_reverse_transform_matches_finite_difference);
+  $test.run(autodiff_forward_and_reverse_agree);
 }

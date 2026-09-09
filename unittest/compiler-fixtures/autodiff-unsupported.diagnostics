@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/autodiff-unsupported.x:5:1: macro: ad: unsupported statement in reverse mode
+  $ad.reverse()
+  ^
+  note: (break)
+
