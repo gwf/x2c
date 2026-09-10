@@ -1,9 +1,12 @@
 # Adopt the first week's language and library features in src/ and lib/
 
-> Status: active
+> Status: done
 > Written 2026-09-09 in the oslo workspace from a survey of every commit on
 > `main` since the 2026-09-05 release (4235c38..2f74dec). Approved by Gary
-> the same day with Phase 0 added; implementation in progress.
+> the same day with Phase 0 added and delivered to `main` the same day as
+> the commit series 06d0787..d02e75f (four phases, artifact sync, and two
+> bootstrap refresh rounds); `agent-pr-check` green at d02e75f. The
+> exceptions recorded under Phase 2 and Phase 3 are follow-on candidates.
 
 ## Result
 
