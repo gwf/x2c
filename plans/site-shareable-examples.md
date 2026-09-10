@@ -87,7 +87,7 @@ Optional Plausible analytics are enabled only with `SITE_ANALYTICS=production`
 and `PLAUSIBLE_SCRIPT_URL` in an intended production build. Development always
 disables them. The shared loader also serves mdBook. The two custom events
 measure example selection and actions, never successful installation.
-The footer and measurement page explain enabled measurement. No external
+The measurement page explains enabled measurement. No external
 account configuration, activation, outreach, or publication is authorized.
 
 ## Validation
