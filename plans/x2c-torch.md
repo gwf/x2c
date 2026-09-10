@@ -2,13 +2,16 @@
 
 > Status: active
 > PR 1 (Scope finalizers, 490070c), PR 2 (`@`, 1316cf0), two converter
-> fixes, and `packages/torch` M0 (0ec5bb8) landed 2026-09-09. Three M0
-> defects Gary reproduced (uncaught C++ exceptions across the ABI, integers
-> rounded through double, no-grad state leaking on Error) were fixed with
-> regressions, and M1 (modules, optimizers, schedulers, checkpoints
-> verified against Python) and M2 (1193 operators generated from the
-> pinned schema, sampled bit-exact against Python) are landing together.
-> M3 (module coverage, MNIST, TorchScript inference) is next.
+> fixes, and `packages/torch` M0 (0ec5bb8) landed 2026-09-09, then M1 and
+> M2 (8fba852: defect fixes with regressions, modules, optimizers,
+> schedulers, checkpoints verified against Python, 1193 generated
+> operators sampled bit-exact) and M3 (native Conv/BatchNorm/LayerNorm/
+> Dropout/Embedding/LSTM/GRU/pooling/Sequential, x2c schedulers,
+> TorchScript inference verified against Python, MNIST at 93.2% in one
+> epoch on the published files). The matched comparison experiment in
+> `plans/x2c-torch-comparison.md` is the immediate follow-up; the "Later"
+> items below (MPS, Linux, Python-readable optimizer state,
+> autograd.Function, Lisp surface) remain open.
 
 ## Context
 

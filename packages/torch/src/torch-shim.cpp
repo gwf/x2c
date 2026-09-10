@@ -5,6 +5,7 @@
 */
 
 #include <torch/torch.h>
+#include <torch/script.h>
 #include <torch/csrc/jit/serialization/pickle.h>
 #include <torch/optim/schedulers/reduce_on_plateau_scheduler.h>
 #include <torch/optim/schedulers/step_lr.h>
@@ -335,6 +336,15 @@ namespace {
 struct ComposedModule : torch::nn::Module {
   ComposedModule() = default;
 };
+
+/* SequentialModule forwards its registered children in registration
+   order. libtorch's own Sequential holds type-erased AnyModules built
+   from a concrete forward signature, which a shared_ptr<Module> arriving
+   through a C ABI cannot supply; registration order in the module tree
+   carries the same information. */
+struct SequentialModule : torch::nn::Module {
+  SequentialModule() = default;
+};
 }
 
 struct xt_module_s {
@@ -354,6 +364,103 @@ xt_module xt_linear_new(int64_t in_features, int64_t out_features, int bias) {
 }
 xt_module xt_composed_new(void) {
   TRY(nullptr, return wrap_module(std::make_shared<ComposedModule>());)
+}
+xt_module xt_sequential_new(void) {
+  TRY(nullptr, return wrap_module(std::make_shared<SequentialModule>());)
+}
+xt_module xt_conv1d_new(int64_t in_channels, int64_t out_channels,
+                        int64_t kernel, int64_t stride, int64_t padding,
+                        int64_t dilation, int64_t groups, int bias) {
+  TRY(nullptr,
+    auto shape = torch::nn::Conv1dOptions(in_channels, out_channels, kernel)
+      .stride(stride).padding(padding).dilation(dilation).groups(groups)
+      .bias(bias != 0);
+    return wrap_module(std::make_shared<torch::nn::Conv1dImpl>(shape));)
+}
+xt_module xt_conv2d_new(int64_t in_channels, int64_t out_channels,
+                        int64_t kernel, int64_t stride, int64_t padding,
+                        int64_t dilation, int64_t groups, int bias) {
+  TRY(nullptr,
+    auto shape = torch::nn::Conv2dOptions(in_channels, out_channels, kernel)
+      .stride(stride).padding(padding).dilation(dilation).groups(groups)
+      .bias(bias != 0);
+    return wrap_module(std::make_shared<torch::nn::Conv2dImpl>(shape));)
+}
+xt_module xt_batch_norm1d_new(int64_t features, double eps, double momentum,
+                              int affine, int track_running_stats) {
+  TRY(nullptr,
+    auto shape = torch::nn::BatchNorm1dOptions(features).eps(eps)
+      .momentum(momentum).affine(affine != 0)
+      .track_running_stats(track_running_stats != 0);
+    return wrap_module(std::make_shared<torch::nn::BatchNorm1dImpl>(shape));)
+}
+xt_module xt_batch_norm2d_new(int64_t features, double eps, double momentum,
+                              int affine, int track_running_stats) {
+  TRY(nullptr,
+    auto shape = torch::nn::BatchNorm2dOptions(features).eps(eps)
+      .momentum(momentum).affine(affine != 0)
+      .track_running_stats(track_running_stats != 0);
+    return wrap_module(std::make_shared<torch::nn::BatchNorm2dImpl>(shape));)
+}
+xt_module xt_layer_norm_new(const int64_t *shape, int rank, double eps,
+                            int affine) {
+  TRY(nullptr,
+    std::vector<int64_t> normalized(shape, shape + (rank > 0 ? rank : 0));
+    auto options = torch::nn::LayerNormOptions(normalized).eps(eps)
+      .elementwise_affine(affine != 0);
+    return wrap_module(std::make_shared<torch::nn::LayerNormImpl>(options));)
+}
+xt_module xt_dropout_new(double p) {
+  TRY(nullptr,
+    return wrap_module(std::make_shared<torch::nn::DropoutImpl>(
+      torch::nn::DropoutOptions(p)));)
+}
+xt_module xt_embedding_new(int64_t num_embeddings, int64_t dim) {
+  TRY(nullptr,
+    return wrap_module(std::make_shared<torch::nn::EmbeddingImpl>(
+      torch::nn::EmbeddingOptions(num_embeddings, dim)));)
+}
+xt_module xt_lstm_new(int64_t input_size, int64_t hidden_size,
+                      int64_t layers, int batch_first) {
+  TRY(nullptr,
+    auto shape = torch::nn::LSTMOptions(input_size, hidden_size)
+      .num_layers(layers).batch_first(batch_first != 0);
+    return wrap_module(std::make_shared<torch::nn::LSTMImpl>(shape));)
+}
+xt_module xt_gru_new(int64_t input_size, int64_t hidden_size, int64_t layers,
+                     int batch_first) {
+  TRY(nullptr,
+    auto shape = torch::nn::GRUOptions(input_size, hidden_size)
+      .num_layers(layers).batch_first(batch_first != 0);
+    return wrap_module(std::make_shared<torch::nn::GRUImpl>(shape));)
+}
+xt_module xt_max_pool2d_new(int64_t kernel, int64_t stride, int64_t padding) {
+  TRY(nullptr,
+    auto shape = torch::nn::MaxPool2dOptions(kernel).stride(stride)
+      .padding(padding);
+    return wrap_module(std::make_shared<torch::nn::MaxPool2dImpl>(shape));)
+}
+xt_module xt_avg_pool2d_new(int64_t kernel, int64_t stride, int64_t padding) {
+  TRY(nullptr,
+    auto shape = torch::nn::AvgPool2dOptions(kernel).stride(stride)
+      .padding(padding);
+    return wrap_module(std::make_shared<torch::nn::AvgPool2dImpl>(shape));)
+}
+xt_module xt_flatten_new(int64_t start_dim, int64_t end_dim) {
+  TRY(nullptr,
+    auto shape = torch::nn::FlattenOptions().start_dim(start_dim)
+      .end_dim(end_dim);
+    return wrap_module(std::make_shared<torch::nn::FlattenImpl>(shape));)
+}
+xt_module xt_relu_new(void) {
+  TRY(nullptr, return wrap_module(std::make_shared<torch::nn::ReLUImpl>());)
+}
+xt_module xt_tanh_new(void) {
+  TRY(nullptr, return wrap_module(std::make_shared<torch::nn::TanhImpl>());)
+}
+xt_module xt_sigmoid_new(void) {
+  TRY(nullptr,
+    return wrap_module(std::make_shared<torch::nn::SigmoidImpl>());)
 }
 int xt_module_register_module(xt_module parent, const char *name,
                               xt_module child) {
@@ -380,14 +487,101 @@ xt_module xt_module_child(xt_module parent, const char *name) {
     }
     return wrap_module(*found);)
 }
+/* Every native forward dispatches here. A composed root has none: its
+   forward is written in x2c and never enters C++. The recurrent layers
+   produce a state as well and go through xt_rnn_forward instead. */
+static bool forward_native(const std::shared_ptr<torch::nn::Module> &m,
+                           const at::Tensor &in, at::Tensor &out) {
+  if (auto *layer = m->as<torch::nn::LinearImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::Conv1dImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::Conv2dImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::BatchNorm1dImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::BatchNorm2dImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::LayerNormImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::DropoutImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::EmbeddingImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::MaxPool2dImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::AvgPool2dImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::FlattenImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::ReLUImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::TanhImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (auto *layer = m->as<torch::nn::SigmoidImpl>()) {
+    out = layer->forward(in);
+  }
+  else if (m->as<SequentialModule>()) {
+    at::Tensor value = in;
+    for (const auto &child : m->children()) {
+      at::Tensor next;
+      if (!forward_native(child, value, next))
+        throw std::runtime_error(
+          "a sequential child has no native forward");
+      value = next;
+    }
+    out = value;
+  }
+  else {
+    return false;
+  }
+  return true;
+}
+
 xt_tensor xt_module_forward(xt_module m, xt_tensor input) {
   TRY(nullptr,
-    /* Native forwards dispatch here; a composed module's forward is
-       written in x2c and never enters C++. */
-    auto *linear = m->m->as<torch::nn::LinearImpl>();
-    if (linear) return wrap(linear->forward(input->t));
+    at::Tensor out;
+    if (forward_native(m->m, input->t, out)) return wrap(out);
     note_error("module has no native forward; compose it in x2c");
     return nullptr;)
+}
+int xt_rnn_forward(xt_module m, xt_tensor input, xt_tensor *output,
+                   xt_tensor *hidden, xt_tensor *cell) {
+  TRY(-1,
+    *output = nullptr;
+    *hidden = nullptr;
+    *cell = nullptr;
+    if (auto *layer = m->m->as<torch::nn::LSTMImpl>()) {
+      auto result = layer->forward(input->t);
+      *output = wrap(std::get<0>(result));
+      *hidden = wrap(std::get<0>(std::get<1>(result)));
+      *cell = wrap(std::get<1>(std::get<1>(result)));
+      return 0;
+    }
+    if (auto *layer = m->m->as<torch::nn::GRUImpl>()) {
+      auto result = layer->forward(input->t);
+      *output = wrap(std::get<0>(result));
+      *hidden = wrap(std::get<1>(result));
+      return 0;
+    }
+    note_error("module is not a recurrent layer");
+    return -1;)
+}
+int xt_module_child_count(xt_module m, int64_t *out) {
+  TRY(-1, *out = (int64_t) m->m->children().size();) return 0;
 }
 int xt_module_parameter_count(xt_module m, int64_t *out) {
   TRY(-1, *out = (int64_t) m->m->named_parameters(true).size();) return 0;
@@ -678,5 +872,62 @@ xt_tensor xt_pickle_tensor(xt_pickle p, int64_t index) {
   TRY(nullptr, return wrap(p->tensors[(size_t) index]);)
 }
 void xt_pickle_free(xt_pickle p) { TRY_VOID(delete p;) }
+
+/* Datasets */
+
+int xt_mnist_load(const char *root, int train, xt_tensor *images,
+                  xt_tensor *targets) {
+  TRY(-1,
+    auto mode = train ? torch::data::datasets::MNIST::Mode::kTrain
+                      : torch::data::datasets::MNIST::Mode::kTest;
+    torch::data::datasets::MNIST set(root, mode);
+    *images = wrap(set.images());
+    *targets = wrap(set.targets());)
+  return 0;
+}
+
+/* TorchScript */
+
+struct xt_jit_s { torch::jit::Module m; };
+
+xt_jit_module xt_jit_load(const char *path) {
+  TRY(nullptr, return new xt_jit_s{torch::jit::load(path)};)
+}
+int xt_jit_forward(xt_jit_module m, xt_tensor *inputs, int count,
+                   xt_tensor *outputs, int capacity, int *produced) {
+  TRY(-1,
+    std::vector<c10::IValue> arguments;
+    arguments.reserve((size_t) (count > 0 ? count : 0));
+    for (int i = 0; i < count; i++) arguments.push_back(inputs[i]->t);
+    auto result = m->m.forward(arguments);
+    std::vector<at::Tensor> values;
+    if (result.isTensor()) {
+      values.push_back(result.toTensor());
+    }
+    else if (result.isTuple()) {
+      for (const auto &element : result.toTuple()->elements()) {
+        if (!element.isTensor()) {
+          note_error("a tuple element of the result is not a tensor");
+          return -1;
+        }
+        values.push_back(element.toTensor());
+      }
+    }
+    else {
+      note_error("the result is neither a tensor nor a tuple of tensors");
+      return -1;
+    }
+    if ((int) values.size() > capacity) {
+      note_error("the result has more tensors than the caller expects");
+      return -1;
+    }
+    for (size_t i = 0; i < values.size(); i++) outputs[i] = wrap(values[i]);
+    *produced = (int) values.size();)
+  return 0;
+}
+int xt_jit_train(xt_jit_module m, int on) {
+  TRY(-1, m->m.train(on != 0);) return 0;
+}
+void xt_jit_free(xt_jit_module m) { TRY_VOID(delete m;) }
 
 }

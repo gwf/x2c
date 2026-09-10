@@ -10,6 +10,11 @@
 - Linked components: `libtorch`, `libtorch_cpu`, `libc10`, and the C++
   runtime, all dynamic, found by an rpath into the prepared prefix.
   `libomp` is loaded by `libtorch_cpu`.
+- Used from the prefix: the ATen tensor library, `torch::nn` layers,
+  `torch::optim` optimizers and its two schedules, `torch::data`'s MNIST
+  IDX reader, and `torch::jit` for pickled checkpoints and TorchScript
+  loading. All are headers and the dylibs above; no extra component is
+  linked for them.
 - License: BSD-3-Clause, reproduced in `LICENSES/PyTorch-2.10.0-BSD-3-Clause.txt`.
 - Vendored source and local patches: none. `src/torch-shim.cpp` is this
   package's C ABI over the C++ API and is compiled against the prefix.

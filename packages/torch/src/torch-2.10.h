@@ -157,6 +157,39 @@ void xt_tensor_free(xt_tensor a);
 typedef struct xt_module_s *xt_module;
 
 xt_module xt_linear_new(int64_t in_features, int64_t out_features, int bias);
+
+/* Native layers. Every constructor takes the arguments PyTorch's
+   constructor takes, in the same order, so a caller reads the same shape
+   here as in Python. Parameter and buffer names match Python's too. */
+xt_module xt_conv1d_new(int64_t in_channels, int64_t out_channels,
+                        int64_t kernel, int64_t stride, int64_t padding,
+                        int64_t dilation, int64_t groups, int bias);
+xt_module xt_conv2d_new(int64_t in_channels, int64_t out_channels,
+                        int64_t kernel, int64_t stride, int64_t padding,
+                        int64_t dilation, int64_t groups, int bias);
+xt_module xt_batch_norm1d_new(int64_t features, double eps, double momentum,
+                              int affine, int track_running_stats);
+xt_module xt_batch_norm2d_new(int64_t features, double eps, double momentum,
+                              int affine, int track_running_stats);
+xt_module xt_layer_norm_new(const int64_t *shape, int rank, double eps,
+                            int affine);
+xt_module xt_dropout_new(double p);
+xt_module xt_embedding_new(int64_t num_embeddings, int64_t dim);
+xt_module xt_lstm_new(int64_t input_size, int64_t hidden_size,
+                      int64_t layers, int batch_first);
+xt_module xt_gru_new(int64_t input_size, int64_t hidden_size, int64_t layers,
+                     int batch_first);
+xt_module xt_max_pool2d_new(int64_t kernel, int64_t stride, int64_t padding);
+xt_module xt_avg_pool2d_new(int64_t kernel, int64_t stride, int64_t padding);
+xt_module xt_flatten_new(int64_t start_dim, int64_t end_dim);
+xt_module xt_relu_new(void);
+xt_module xt_tanh_new(void);
+xt_module xt_sigmoid_new(void);
+
+/* A sequential root forwards its registered children in registration
+   order; register them with xt_module_register_module under the names
+   PyTorch would use, "0", "1", and so on. */
+xt_module xt_sequential_new(void);
 xt_module xt_composed_new(void);
 int xt_module_register_module(xt_module parent, const char *name,
                               xt_module child);
@@ -166,6 +199,12 @@ int xt_module_register_buffer(xt_module parent, const char *name,
                               xt_tensor value);
 xt_module xt_module_child(xt_module parent, const char *name);
 xt_tensor xt_module_forward(xt_module m, xt_tensor input);
+/* The recurrent layers return a sequence and their final state: an LSTM
+   writes both hidden and cell, a GRU writes hidden and leaves *cell
+   NULL. Every written handle is new. */
+int xt_rnn_forward(xt_module m, xt_tensor input, xt_tensor *output,
+                   xt_tensor *hidden, xt_tensor *cell);
+int xt_module_child_count(xt_module m, int64_t *out);
 int xt_module_parameter_count(xt_module m, int64_t *out);
 const char *xt_module_parameter_name(xt_module m, int64_t index);
 xt_tensor xt_module_parameter(xt_module m, int64_t index);
@@ -245,6 +284,30 @@ int xt_pickle_count(xt_pickle p, int64_t *out);
 const char *xt_pickle_name(xt_pickle p, int64_t index);
 xt_tensor xt_pickle_tensor(xt_pickle p, int64_t index);
 void xt_pickle_free(xt_pickle p);
+
+/* Datasets.
+
+   torch::data::datasets::MNIST reads the four IDX files under root by
+   their standard names. The images cross as one N x 1 x 28 x 28 float32
+   tensor scaled to [0, 1] and the targets as N int64 classes.
+*/
+int xt_mnist_load(const char *root, int train, xt_tensor *images,
+                  xt_tensor *targets);
+
+/* TorchScript.
+
+   x2c loads and runs a module scripted or traced in Python; it cannot
+   produce one. Inputs and outputs cross as tensors: a forward returning a
+   tuple of tensors writes each element, and *produced reports how many.
+   A result that is neither a tensor nor a tuple of tensors fails.
+*/
+typedef struct xt_jit_s *xt_jit_module;
+
+xt_jit_module xt_jit_load(const char *path);
+int xt_jit_forward(xt_jit_module m, xt_tensor *inputs, int count,
+                   xt_tensor *outputs, int capacity, int *produced);
+int xt_jit_train(xt_jit_module m, int on);
+void xt_jit_free(xt_jit_module m);
 
 #ifdef __cplusplus
 }

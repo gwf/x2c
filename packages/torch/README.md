@@ -1,7 +1,8 @@
 # torch
 
-Experimental. Tensors, autograd, modules, optimizers, schedulers, and
-checkpoints over the pinned libtorch 2.10.0, PyTorch's C++ library. The
+Experimental. Tensors, autograd, layers, optimizers, schedules,
+checkpoints, TorchScript inference, and MNIST over the pinned libtorch
+2.10.0, PyTorch's C++ library. The
 entry unit is `src/torch.x`; the C ABI it compiles over is
 `src/torch-2.10.h`, implemented by `src/torch-shim.cpp`. libtorch has no C
 API and no stable C++ ABI, so the shim is this package's only C++ and it is
@@ -26,7 +27,9 @@ make -C packages/torch prepare build test run
 ```
 
 `prepare` downloads the official 77 MB libtorch archive into the shared
-dependency cache; nothing is built. `run` builds and runs both examples.
+dependency cache; nothing is built. `run` builds and runs the two examples
+that need nothing else; `run-mnist` and `verify-jit` are the commands for
+the two that need the MNIST files and a Python-scripted model.
 
 ## Values and dtypes
 
@@ -62,17 +65,92 @@ static Tensor _forward(Module model, Tensor x) =>
   _affine(model.child("l2"), _affine(model.child("l1"), x).tanh());
 ```
 
-`Module.forward` runs a native forward where libtorch has one, such as a
-`Linear`'s; a composed root has none and raises. `parameters`, `buffers`,
-`named_parameters`, and `named_buffers` are recursive; `train`/`eval` and
-`is_training` carry the mode down the tree.
+`Module.forward` runs a native forward where libtorch has one; a composed
+root has none and raises. `parameters`, `buffers`, `named_parameters`, and
+`named_buffers` are recursive; `train`/`eval` and `is_training` carry the
+mode down the tree, so dropout and the normalizations read it. `to_dtype`
+converts parameters and buffers together.
+
+## Native layers
+
+Each constructor takes PyTorch's arguments in PyTorch's order and produces
+the parameter and buffer names Python's `state_dict()` uses;
+`make verify-python` compares them against the pinned wheel.
+
+| x2c | PyTorch |
+| --- | --- |
+| `Module.linear(in, out)` | `nn.Linear` |
+| `Module.conv1d(in, out, kernel)` | `nn.Conv1d` |
+| `Module.conv2d(in, out, kernel)` | `nn.Conv2d` |
+| `Module.batch_norm1d(features)` | `nn.BatchNorm1d` |
+| `Module.batch_norm2d(features)` | `nn.BatchNorm2d` |
+| `Module.layer_norm(shape)` | `nn.LayerNorm` |
+| `Module.dropout(p)` | `nn.Dropout` |
+| `Module.embedding(rows, dim)` | `nn.Embedding` |
+| `Module.lstm(in, hidden, layers, batch_first)` | `nn.LSTM` |
+| `Module.gru(in, hidden, layers, batch_first)` | `nn.GRU` |
+| `Module.max_pool2d(kernel)` | `nn.MaxPool2d` |
+| `Module.avg_pool2d(kernel)` | `nn.AvgPool2d` |
+| `Module.flatten()` | `nn.Flatten` |
+| `Module.relu()`, `.tanh()`, `.sigmoid()` | `nn.ReLU` and friends |
+| `Module.sequential()` | `nn.Sequential` |
+
+A plain constructor takes PyTorch's defaults, as `Module.linear` does for
+its bias. Beside each one that has more options is a `_with` form taking
+every one of them in PyTorch's order: `linear_bias(in, out, bias)`,
+`conv2d_with(in, out, kernel, stride, padding, dilation, groups, bias)`,
+`batch_norm2d_with(features, eps, momentum, affine, track_running_stats)`,
+`layer_norm_with(shape, eps, affine)`,
+`max_pool2d_with(kernel, stride, padding)`, and
+`flatten_with(start_dim, end_dim)`. `Module.push`
+names each child by its position, "0", "1", and so on, so a sequential
+model's state names match Python's, and `Module.forward` runs the children
+in order:
+
+```x2c
+Module model = Module.sequential();
+model.push(Module.conv2d(1, 8, 3));
+model.push(Module.relu());
+model.push(Module.max_pool2d(2));
+model.push(Module.flatten());
+model.push(Module.linear(8 * 13 * 13, 10));
+Tensor logits = model.forward(images);
+```
+
+The recurrent layers produce a state as well as a sequence, so they run
+through `Module.forward_state`, which returns `(output hidden)` for a GRU
+and `(output hidden cell)` for an LSTM.
+
+`Tensor.mse_loss`, `.cross_entropy` (int64 class targets), `.nll_loss`, and
+`.bce_with_logits` are the losses the hand-written unit spells; `.l1_loss`
+and `.huber_loss` come from the generated tier with the schema's own
+reduction argument, where 1 is the mean.
+
+## Optimizers and schedules
 
 `Optimizer.sgd`, `.sgd_momentum`, `.adam`, `.adamw`, `.rmsprop`, and
 `.adagrad` build over a module's parameters, and `Optimizer.over` takes a
 List of loose tensors with one of `XT_SGD .. XT_ADAGRAD`. `lr` and `set_lr`
-read and write every parameter group. `Scheduler.step_lr` and
-`Scheduler.reduce_on_plateau` are the two schedules libtorch ships; the
-first advances with `step`, the second with `step_metric`.
+read and write every parameter group.
+
+libtorch ships exactly two learning-rate schedules, `Scheduler.step_lr` and
+`Scheduler.reduce_on_plateau`; the first advances with `step`, the second
+with `step_metric`. The other three are x2c arithmetic over
+`Optimizer.lr`/`set_lr`, each writing the rate for the number of completed
+`step` calls, starting at construction with none taken:
+
+- `Scheduler.cosine(o, t_max, eta_min)` anneals along a half cosine:
+  after `t` steps the rate is
+  `eta_min + (lr - eta_min) * (1 + cos(pi * t / t_max)) / 2`, and it stays
+  at `eta_min` past `t_max`.
+- `Scheduler.linear_warmup(o, steps, base_lr)` raises the rate from
+  `base_lr / steps` to `base_lr`: `base_lr * min(1, (t + 1) / steps)`.
+- `Scheduler.multistep(o, milestones, gamma)` multiplies the rate by
+  `gamma` once for each milestone step count reached, as PyTorch's
+  `MultiStepLR` does.
+
+`Scheduler.steps` reports how many steps an x2c schedule has taken, and
+`step_metric` on one raises: it advances without a metric.
 
 ## Examples
 
@@ -99,6 +177,66 @@ trained  loss 0.024875
 reloaded loss 0.024875
 caught matmul: mat1 and mat2 shapes cannot be multiplied (3x5 and 4x8)
 ```
+
+## TorchScript inference
+
+x2c loads and runs a module Python scripted or traced; it cannot produce
+one. `JitModule.load` reads the file, `forward` takes a List of Tensor and
+returns a List of Tensor, one entry for a tensor result and one per element
+for a tuple of tensors, and `train`/`eval` set the mode. A file that is not
+TorchScript raises `<bad-state>`.
+
+`make -C packages/torch verify-jit` scripts a 2-layer MLP with fixed
+weights in the pinned Python torch, runs `examples/jit-infer.x` over a
+fixed batch, and compares every number with Python's:
+
+```text
+torch 2.10.0 at /Users/gary/Git/Bonsai-demo/.venv/bin/python
+model builds/scripted.pt
+input ( 2 4 )
+logits 0 -0.230555 0.082929 0.396414
+logits 1 -0.471286 0.402971 1.277228
+tuple results 2
+classes 2.000000 2.000000
+verify-jit: agreed on 8 values
+```
+
+## MNIST
+
+`Torch.mnist(root, train)` reads the four IDX files under `root` through
+libtorch's own reader and returns `(images targets)`: an N x 1 x 28 x 28
+float32 tensor scaled to [0, 1] and N int64 classes. The reader checks the
+published row counts, 60,000 and 10,000. Batching is x2c, a `randperm` and
+an `index_select`, because libtorch's `DataLoader` is a template over a
+compile-time dataset and cannot cross a C ABI.
+
+`examples/mnist.x` trains the sequential CNN above for one epoch with Adam
+and a cosine anneal, then reports accuracy on the test set. It takes the
+data directory as an argument or from `TORCH_MNIST`, and prints where to
+obtain the files when they are absent:
+
+```sh
+make -C packages/torch run-mnist TORCH_MNIST=/path/to/mnist
+```
+
+```text
+mnist /tmp/mnist-real  train 60000  test 10000
+batch    0  loss 2.335118  lr 0.001000
+batch  100  loss 0.508674  lr 0.000974
+batch  200  loss 0.374458  lr 0.000902
+batch  300  loss 0.326470  lr 0.000790
+batch  400  loss 0.422208  lr 0.000651
+batch  500  loss 0.274723  lr 0.000501
+batch  600  loss 0.151049  lr 0.000357
+batch  700  loss 0.305595  lr 0.000234
+batch  800  loss 0.399686  lr 0.000146
+batch  900  loss 0.337217  lr 0.000103
+test accuracy 0.9323
+```
+
+That run used the published MNIST files, one epoch in 3.8 seconds on this
+machine. The tests build their own 10,000-row synthetic IDX set instead, so
+`make test` exercises the reader without the download.
 
 ## Checkpoints
 
@@ -128,6 +266,7 @@ both sides:
 torch 2.10.0 at /Users/gary/Git/Bonsai-demo/.venv/bin/python
 trained loss                 x2c 0.59051228  python 0.59051239  relative 1.95e-07
 python weights in x2c        x2c 0.59051239  python 0.59051239  relative 8.31e-09
+module state names          10 modules, 31 names identical
 verify-python: agreed
 ```
 
@@ -190,16 +329,15 @@ depends on that prefix at run time, unlike every other x2c artifact.
 
 ## Limits
 
-- macOS arm64, CPU only.
+- macOS arm64, CPU only: no MPS or CUDA device, and no Linux build.
+- No distributed training.
 - Optimizer state saves and loads through the C++ archive only; that file
   is for resuming in x2c or C++, not for Python. Module state is
   interoperable in both directions.
-- Native modules so far are `Linear`; convolution, normalization, dropout,
-  embeddings, and recurrent layers arrive with M3. The generated operator
-  tier is a function count, not coverage: `schema/README.md` names the
-  families it leaves out. The design is in `plans/x2c-torch.md`.
+- The generated operator tier is a function count, not coverage:
+  `schema/README.md` names the families it leaves out. The design is in
+  `plans/x2c-torch.md`.
 - No `autograd.Function`: a custom node cannot be written in x2c yet.
 - `torch.compile` and TorchScript capture of x2c code are not possible:
-  they capture Python. x2c can load a TorchScript model in a later
-  milestone but cannot produce one. Agreement with Python is to float32
-  tolerance, not bit exact.
+  they capture Python. x2c runs a TorchScript model but cannot produce
+  one. Agreement with Python is to float32 tolerance, not bit exact.

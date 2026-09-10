@@ -28,7 +28,8 @@ PACKAGE_LINK := -Xlinker $(CURDIR)/$(SHIM) -Xlinker $(CURDIR)/$(OPS) \
 	-ltorch -ltorch_cpu -lc10 -lc++ -Wl,-rpath,$(TORCH_LIB)
 NATIVE := $(SHIM) $(OPS)
 
-.PHONY: example short-example run verify-python gen-ops verify-ops
+.PHONY: example short-example run run-mnist verify-python gen-ops \
+	verify-ops verify-jit
 
 build: $(NATIVE)
 
@@ -51,11 +52,19 @@ $(PACKAGE_TEST_PROGRAMS): $(NATIVE)
 
 short-example: builds/fit-line
 
-example: builds/mlp
+example: builds/mlp builds/mnist builds/jit-infer
 
+# mnist.x needs the IDX files and jit-infer.x needs a module Python
+# scripted, so `run` stays the two examples that need neither; run-mnist
+# and verify-jit are the commands for the other two.
 run: builds/fit-line builds/mlp
 	./builds/fit-line
 	./builds/mlp
+
+# TORCH_MNIST names the directory holding the four IDX files. Without it
+# the example prints where to obtain them and stops.
+run-mnist: builds/mnist
+	./builds/mnist
 
 builds/fit-line: examples/fit-line.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/fit-line-build \
@@ -65,19 +74,36 @@ builds/mlp: examples/mlp.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/mlp-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 
+builds/mnist: examples/mnist.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/mnist-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+builds/jit-infer: examples/jit-infer.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/jit-infer-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
 # The Python agreement checks are not part of `test`: they need an
 # installed CPython with the pinned torch wheel.
 TORCH_PYTHON ?= /Users/gary/Git/Bonsai-demo/.venv/bin/python
 
-verify-python: builds/checkpoint-roundtrip
+verify-python: builds/checkpoint-roundtrip builds/module-names
 	TORCH_PYTHON="$(TORCH_PYTHON)" python3 tests/verify-python.py
 
 verify-ops: builds/verify-ops
 	TORCH_PYTHON="$(TORCH_PYTHON)" python3 tests/verify-ops.py
 
+# Python scripts the model, x2c runs it, and the script compares.
+verify-jit: builds/jit-infer
+	TORCH_PYTHON="$(TORCH_PYTHON)" python3 tests/verify-jit.py
+
 builds/checkpoint-roundtrip: tests/checkpoint-roundtrip.x $(PACKAGE_ARCHIVE) \
   $(NATIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/checkpoint-roundtrip-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+builds/module-names: tests/module-names.x $(PACKAGE_ARCHIVE) \
+  $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/module-names-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 
 builds/verify-ops: tests/verify-ops.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds

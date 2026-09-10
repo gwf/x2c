@@ -247,7 +247,10 @@ without requiring public services:
 - `packages/torch/examples/fit-line.x` fits a line by gradient descent
   through libtorch autograd: `x @ w + b`, `backward`, and an in-place update
   under `Torch.no_grad`, with every operator temporary reclaimed by the
-  step's `Scope`.
+  step's `Scope`. `mlp.x` trains a composed model with Adam and reloads it
+  from a checkpoint; `mnist.x` trains a convolutional network for one epoch
+  on the MNIST files named by `TORCH_MNIST`; and `jit-infer.x` runs a
+  TorchScript model exported from Python.
 
 Run the package-local examples from the repository root:
 
@@ -258,6 +261,7 @@ make -C packages/termbox2 run
 make -C packages/blis run
 make -C packages/libuv run
 make -C packages/raylib verify
+make -C packages/torch run
 ```
 
 ### SQLite rows and transactions

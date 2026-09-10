@@ -24,7 +24,7 @@ instructions.
 | [blis](../../packages/blis/examples/) | Matrix and vector computations | [BLIS](../../packages/blis/README.md) |
 | [libuv](../../packages/libuv/examples/) | Event loops, processes, and networking | [libuv](../../packages/libuv/README.md) |
 | [raylib](../../packages/raylib/examples/) | Images, charts, and optional windows | [raylib](../../packages/raylib/README.md) |
-| [torch](../../packages/torch/examples/) | Tensors and autograd over libtorch | [torch](../../packages/torch/README.md) |
+| [torch](../../packages/torch/examples/) | Tensors, training, MNIST, and TorchScript over libtorch | [torch](../../packages/torch/README.md) |
 
 ## Build and run
 

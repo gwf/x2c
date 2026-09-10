@@ -22,6 +22,7 @@ typedef struct Tensor *Tensor;
 typedef struct Module *Module;
 typedef struct Optimizer *Optimizer;
 typedef struct Scheduler *Scheduler;
+typedef struct JitModule *JitModule;
 
 protocol Torch(T) {
   T T.add(T, T);
@@ -34,6 +35,7 @@ protocol Torch(T) {
 
 #pragma private
 
+#include <math.h>
 #include <string.h>
 
 struct Tensor {
@@ -48,8 +50,27 @@ struct Optimizer {
   xt_optim native;
 };
 
+/* A schedule libtorch ships holds a native object; the rest are
+   arithmetic over the optimizer's rate, computed from the step count. */
+#define SCHEDULE_NATIVE 0
+#define SCHEDULE_COSINE 1
+#define SCHEDULE_WARMUP 2
+#define SCHEDULE_MULTISTEP 3
+
 struct Scheduler {
   xt_scheduler native;
+  Optimizer optimizer;
+  int kind;
+  long steps;
+  double base_lr;
+  double gamma;
+  double eta_min;
+  long span;
+  List milestones;
+};
+
+struct JitModule {
+  xt_jit_module native;
 };
 
 /* A grad-mode guard lives in the scope that installed it, so the previous
@@ -83,6 +104,12 @@ static void _scheduler_drop(void *ptr) {
   Scheduler scheduler = ptr;
   if (scheduler.native) xt_scheduler_free(scheduler.native);
   scheduler.native = NULL;
+}
+
+static void _jit_drop(void *ptr) {
+  JitModule module = ptr;
+  if (module.native) xt_jit_free(module.native);
+  module.native = NULL;
 }
 
 /* A finalizer must not raise, so these two report nothing: an empty guard
@@ -133,6 +160,14 @@ static Scheduler _wrap_scheduler(xt_scheduler native, String operation) {
     Scope.malloc_finalized(sizeof(struct Scheduler), _scheduler_drop);
   scheduler.native = native;
   return scheduler;
+}
+
+static JitModule _wrap_jit(xt_jit_module native, String operation) {
+  if (!native) _torch_failed(operation);
+  JitModule module =
+    Scope.malloc_finalized(sizeof(struct JitModule), _jit_drop);
+  module.native = native;
+  return module;
 }
 
 static void _check(int status, String operation) {
@@ -608,6 +643,140 @@ Module Module.linear_bias(long in_features, long out_features, int bias) =>
 /** A root that owns named children; its forward is ordinary x2c code. */
 Module Module.composed(void) => _wrap_module(xt_composed_new(), "composed");
 
+/** A root that forwards its children in the order they were pushed, the
+    same composition as PyTorch's `nn.Sequential`. */
+Module Module.sequential(void) =>
+  _wrap_module(xt_sequential_new(), "sequential");
+
+/** Appends `child` to a sequential root under its position as a name,
+    "0", "1", and so on, as PyTorch names them, and returns it. */
+Module Module.push(Module sequence, Module child) {
+  int64_t count;
+  _check(xt_module_child_count(sequence.native, &count), "push");
+  long position = count;
+  return sequence.register(%"$position", child);
+}
+
+/** A 1-D convolution with unit stride, no padding, unit dilation, one
+    group, and a bias. */
+Module Module.conv1d(long in_channels, long out_channels, long kernel) =>
+  _wrap_module(xt_conv1d_new(in_channels, out_channels, kernel, 1, 0, 1, 1,
+                             1),
+               "conv1d");
+
+/** A 1-D convolution with every option PyTorch's constructor takes. */
+Module Module.conv1d_with(long in_channels, long out_channels, long kernel,
+                          long stride, long padding, long dilation,
+                          long groups, int bias) =>
+  _wrap_module(xt_conv1d_new(in_channels, out_channels, kernel, stride,
+                             padding, dilation, groups, bias),
+               "conv1d_with");
+
+/** A 2-D convolution with unit stride, no padding, unit dilation, one
+    group, and a bias. Input is `batch x channels x height x width`. */
+Module Module.conv2d(long in_channels, long out_channels, long kernel) =>
+  _wrap_module(xt_conv2d_new(in_channels, out_channels, kernel, 1, 0, 1, 1,
+                             1),
+               "conv2d");
+
+/** A 2-D convolution with every option PyTorch's constructor takes. */
+Module Module.conv2d_with(long in_channels, long out_channels, long kernel,
+                          long stride, long padding, long dilation,
+                          long groups, int bias) =>
+  _wrap_module(xt_conv2d_new(in_channels, out_channels, kernel, stride,
+                             padding, dilation, groups, bias),
+               "conv2d_with");
+
+/** Batch normalization over `features` channels of a 2-D or 3-D input,
+    with PyTorch's defaults and running statistics. */
+Module Module.batch_norm1d(long features) =>
+  _wrap_module(xt_batch_norm1d_new(features, 1e-5, 0.1, 1, 1),
+               "batch_norm1d");
+
+Module Module.batch_norm1d_with(long features, double eps, double momentum,
+                                int affine, int track_running_stats) =>
+  _wrap_module(xt_batch_norm1d_new(features, eps, momentum, affine,
+                                   track_running_stats),
+               "batch_norm1d_with");
+
+/** Batch normalization over `features` channels of an image batch. */
+Module Module.batch_norm2d(long features) =>
+  _wrap_module(xt_batch_norm2d_new(features, 1e-5, 0.1, 1, 1),
+               "batch_norm2d");
+
+Module Module.batch_norm2d_with(long features, double eps, double momentum,
+                                int affine, int track_running_stats) =>
+  _wrap_module(xt_batch_norm2d_new(features, eps, momentum, affine,
+                                   track_running_stats),
+               "batch_norm2d_with");
+
+/** Layer normalization over the trailing dimensions `shape` names. */
+Module Module.layer_norm(List shape) {
+  int rank;
+  int64_t *sizes = _shape(shape, &rank);
+  return _wrap_module(xt_layer_norm_new(sizes, rank, 1e-5, 1),
+                      "layer_norm");
+}
+
+Module Module.layer_norm_with(List shape, double eps, int affine) {
+  int rank;
+  int64_t *sizes = _shape(shape, &rank);
+  return _wrap_module(xt_layer_norm_new(sizes, rank, eps, affine),
+                      "layer_norm_with");
+}
+
+/** Zeroes each element with probability `p` while training and is the
+    identity in eval, as in PyTorch. */
+Module Module.dropout(double p) =>
+  _wrap_module(xt_dropout_new(p), "dropout");
+
+/** A lookup table of `num_embeddings` rows of `dim`; its input is an
+    int64 tensor of row indexes. */
+Module Module.embedding(long num_embeddings, long dim) =>
+  _wrap_module(xt_embedding_new(num_embeddings, dim), "embedding");
+
+/** An LSTM. `batch_first` puts the batch before the time step, and
+    `Module.forward_state` runs it. */
+Module Module.lstm(long input_size, long hidden_size, long layers,
+                   int batch_first) =>
+  _wrap_module(xt_lstm_new(input_size, hidden_size, layers, batch_first),
+               "lstm");
+
+/** A GRU, run the same way as an LSTM but with one state tensor. */
+Module Module.gru(long input_size, long hidden_size, long layers,
+                  int batch_first) =>
+  _wrap_module(xt_gru_new(input_size, hidden_size, layers, batch_first),
+               "gru");
+
+/** Max pooling over square windows of `kernel`, stride equal to the
+    kernel and no padding, as in PyTorch. */
+Module Module.max_pool2d(long kernel) =>
+  _wrap_module(xt_max_pool2d_new(kernel, kernel, 0), "max_pool2d");
+
+Module Module.max_pool2d_with(long kernel, long stride, long padding) =>
+  _wrap_module(xt_max_pool2d_new(kernel, stride, padding),
+               "max_pool2d_with");
+
+/** Average pooling over square windows of `kernel`. */
+Module Module.avg_pool2d(long kernel) =>
+  _wrap_module(xt_avg_pool2d_new(kernel, kernel, 0), "avg_pool2d");
+
+Module Module.avg_pool2d_with(long kernel, long stride, long padding) =>
+  _wrap_module(xt_avg_pool2d_new(kernel, stride, padding),
+               "avg_pool2d_with");
+
+/** Flattens every dimension from the first onward, keeping the batch. */
+Module Module.flatten(void) =>
+  _wrap_module(xt_flatten_new(1, -1), "flatten");
+
+Module Module.flatten_with(long start_dim, long end_dim) =>
+  _wrap_module(xt_flatten_new(start_dim, end_dim), "flatten_with");
+
+/** The activations as modules, for a sequential model. */
+Module Module.relu(void) => _wrap_module(xt_relu_new(), "relu");
+Module Module.tanh(void) => _wrap_module(xt_tanh_new(), "tanh");
+Module Module.sigmoid(void) => _wrap_module(xt_sigmoid_new(), "sigmoid");
+
 /** Registers `child` under `name` and returns it, so a declaration reads
     `Module first = model.register("l1", Module.linear(4, 8));`. */
 Module Module.register(Module parent, String name, Module child) {
@@ -642,6 +811,20 @@ Module Module.child(Module parent, String name) =>
     native forward and raises. */
 Tensor Module.forward(Module m, Tensor input) =>
   _wrap(xt_module_forward(m.native, input.native), "forward");
+
+/** Runs a recurrent layer and returns `(output hidden)` for a GRU or
+    `(output hidden cell)` for an LSTM. `Module.forward` does not run
+    these: they produce a state as well as a sequence. */
+List Module.forward_state(Module m, Tensor input) {
+  xt_tensor output = NULL, hidden = NULL, cell = NULL;
+  _check(xt_rnn_forward(m.native, input.native, &output, &hidden, &cell),
+         "forward_state");
+  Tensor sequence = _wrap(output, "forward_state");
+  Tensor state = _wrap(hidden, "forward_state");
+  if (!cell) return %($sequence $state);
+  Tensor memory = _wrap(cell, "forward_state");
+  return %($sequence $state $memory);
+}
 
 /** Every trainable parameter, including those of children, as a List of
     Tensor. */
@@ -842,13 +1025,97 @@ Scheduler Scheduler.reduce_on_plateau(Optimizer o, int mode_min,
                                            min_lr),
                   "reduce_on_plateau");
 
+/* The schedules libtorch does not ship. Its C++ library has exactly
+   StepLR and ReduceLROnPlateau, so these three are arithmetic over the
+   optimizer's rate: each computes the rate from the number of completed
+   `step` calls and writes it to every parameter group, starting at
+   construction with no step yet taken. */
+
+static double _schedule_rate(Scheduler s) {
+  double taken = s.steps;
+  if (s.kind == SCHEDULE_COSINE) {
+    double span = s.span > 0 ? (double) s.span : 1.0;
+    if (taken > span) taken = span;
+    return s.eta_min +
+      (s.base_lr - s.eta_min) * (1.0 + cos(M_PI * taken / span)) / 2.0;
+  }
+  if (s.kind == SCHEDULE_WARMUP) {
+    double span = s.span > 0 ? (double) s.span : 1.0;
+    double part = (taken + 1.0) / span;
+    return s.base_lr * (part < 1.0 ? part : 1.0);
+  }
+  double rate = s.base_lr;
+  foreach (Var milestone, s.milestones)
+    if (s.steps >= milestone.integer()) rate *= s.gamma;
+  return rate;
+}
+
+static Scheduler _schedule(Optimizer o, int kind, double base_lr) {
+  Scheduler s =
+    Scope.malloc_finalized(sizeof(struct Scheduler), _scheduler_drop);
+  s.native = NULL;
+  s.optimizer = o;
+  s.kind = kind;
+  s.steps = 0;
+  s.base_lr = base_lr;
+  s.gamma = 1.0;
+  s.eta_min = 0.0;
+  s.span = 1;
+  s.milestones = %();
+  return s;
+}
+
+/** Anneals the rate from the optimizer's current one down to `eta_min`
+    over `t_max` steps, following a half cosine. */
+Scheduler Scheduler.cosine(Optimizer o, long t_max, double eta_min) {
+  Scheduler s = _schedule(o, SCHEDULE_COSINE, o.lr());
+  s.span = t_max;
+  s.eta_min = eta_min;
+  o.set_lr(_schedule_rate(s));
+  return s;
+}
+
+/** Raises the rate linearly from `base_lr / warmup_steps` to `base_lr`
+    over `warmup_steps` steps and holds it there. */
+Scheduler Scheduler.linear_warmup(Optimizer o, long warmup_steps,
+                                  double base_lr) {
+  Scheduler s = _schedule(o, SCHEDULE_WARMUP, base_lr);
+  s.span = warmup_steps;
+  o.set_lr(_schedule_rate(s));
+  return s;
+}
+
+/** Multiplies the rate by `gamma` once for each milestone step count
+    reached, as PyTorch's MultiStepLR does. The List is held, not copied,
+    so it must outlive the schedule as the optimizer does. */
+Scheduler Scheduler.multistep(Optimizer o, List milestones, double gamma) {
+  Scheduler s = _schedule(o, SCHEDULE_MULTISTEP, o.lr());
+  s.milestones = milestones;
+  s.gamma = gamma;
+  o.set_lr(_schedule_rate(s));
+  return s;
+}
+
+/** Advances the schedule one step. */
 void Scheduler.step(Scheduler s) {
+  if (!s.native) {
+    s.steps++;
+    s.optimizer.set_lr(_schedule_rate(s));
+    return;
+  }
   _check(xt_scheduler_step(s.native), "step");
 }
 
+/** Advances a plateau schedule with the metric it watches. */
 void Scheduler.step_metric(Scheduler s, double metric) {
+  if (!s.native) raise %(bad-state (library "torch")
+                         (operation "step_metric")
+                         (reason "this schedule advances without a metric"));
   _check(xt_scheduler_step_metric(s.native, metric), "step_metric");
 }
+
+/** The number of `step` calls an x2c schedule has taken. */
+long Scheduler.steps(Scheduler s) => s.steps;
 
 xt_scheduler Scheduler.native(Scheduler s) => s.native;
 
@@ -895,6 +1162,72 @@ Map Checkpoint.load(String path) {
   return values;
 }
 
+/* Datasets.
+
+   libtorch's own DataLoader is a template over a compile-time Dataset
+   concept and cannot cross a C ABI, so batching is x2c: `Torch.randperm`
+   and `Tensor.index_select` over the two tensors a dataset returns.
+*/
+
+/** Reads the four MNIST IDX files under `root` as `(images targets)`: an
+    N x 1 x 28 x 28 float32 tensor scaled to [0, 1] and N int64 classes.
+    `train` chooses the 60,000-row training set over the 10,000-row test
+    set. A missing or malformed file raises `<bad-state>`. */
+List Torch.mnist(String root, int train) {
+  xt_tensor images = NULL, targets = NULL;
+  _check(xt_mnist_load(root, train, &images, &targets), "mnist");
+  Tensor x = _wrap(images, "mnist");
+  Tensor y = _wrap(targets, "mnist");
+  return %($x $y);
+}
+
+/* TorchScript.
+
+   x2c runs a module Python scripted or traced; it cannot produce one.
+   Inputs and results cross as tensors.
+*/
+
+/** Loads a TorchScript file saved by Python's `torch.jit.save`. A file
+    that is not TorchScript raises `<bad-state>`. */
+JitModule JitModule.load(String path) =>
+  _wrap_jit(xt_jit_load(path), "jit load");
+
+/** Runs the module's forward over a List of Tensor and returns its
+    results as a List of Tensor: one entry for a tensor result and one
+    per element for a tuple of tensors. */
+List JitModule.forward(JitModule m, List inputs) {
+  int count;
+  xt_tensor *handles = _handles(inputs, &count);
+  /* A forward returning more tensors than this reports as a failure
+     rather than a truncated List. */
+  int limit = 16;
+  xt_tensor *produced = Scope.calloc(limit, sizeof(xt_tensor));
+  int total;
+  _check(xt_jit_forward(m.native, handles, count, produced, limit, &total),
+         "jit forward");
+  List results = %();
+  for (int i = 0; i < total; i++) {
+    Tensor value = _wrap(produced[i], "jit forward");
+    results = results.append(%($value));
+  }
+  return results;
+}
+
+void JitModule.train(JitModule m) {
+  _check(xt_jit_train(m.native, 1), "jit train");
+}
+
+void JitModule.eval(JitModule m) {
+  _check(xt_jit_train(m.native, 0), "jit eval");
+}
+
+xt_jit_module JitModule.native(JitModule m) => m.native;
+
+JitModule JitModule.free(JitModule m) {
+  _jit_drop(m);
+  return NULL;
+}
+
 Var Tensor.var(Tensor t) => Var.new(<torch--ten>, t);
 Tensor Var.tensor(Var value) => (Tensor) value.pointer();
 
@@ -907,11 +1240,15 @@ Optimizer Var.optimizer(Var value) => (Optimizer) value.pointer();
 Var Scheduler.var(Scheduler s) => Var.new(<torch--sch>, s);
 Scheduler Var.scheduler(Var value) => (Scheduler) value.pointer();
 
+Var JitModule.var(JitModule m) => Var.new(<torch--jit>, m);
+JitModule Var.jit_module(Var value) => (JitModule) value.pointer();
+
 protocol Torch(Tensor);
 protocol Var(Tensor);
 protocol Var(Module);
 protocol Var(Optimizer);
 protocol Var(Scheduler);
+protocol Var(JitModule);
 
 /* The generated operator bindings are a second unit of this package; the
    include puts them in the public header an `import "torch"` reads. */
