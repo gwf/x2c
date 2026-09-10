@@ -355,12 +355,16 @@ int main(int argc, char **argv) {
   }
   const char *threads = getenv("X2C_TORCH_THREADS");
   Torch.set_num_threads(threads ? atoi(threads) : 1);
+  /* Inter-op threads are fixed before any work, so the only parallelism
+     either language uses is the intra-op pool the runner sets. */
+  Torch.set_num_interop_threads(1);
   Torch.manual_seed(0);
   Bench.begin(4096);
   Bench.record_text("language", "x2c");
   Bench.record_text("torch_version", Torch.version());
   _record_profile();
   Bench.record_int("threads", Torch.num_threads());
+  Bench.record_int("interop_threads", Torch.num_interop_threads());
 
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
   if (!strcmp(argv[1], "check")) return _check(artifacts, out);

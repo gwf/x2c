@@ -15,6 +15,7 @@
       tabular check   <artifacts> <out>
       tabular time    <artifacts> <out> <native|explicit|predictN> <updates>
       tabular memory  <artifacts> <out> <1|3|5|6> <steps>
+      tabular trace   <artifacts> <out> <native|explicit> <update>
 */
 
 import "torch" with Torch, Tensor, Module, Optimizer, Scheduler, Checkpoint;
@@ -100,8 +101,8 @@ static double _evaluate(List layers, Tensor x, Tensor y, int native) {
 /* One training step is one scope: the forward's temporaries, the graph,
    and the gradients all end with it, while the model and the optimizer
    live in the caller's scope. */
-static void _step(List layers, Optimizer adam, Tensor x, Tensor y,
-                  Tensor batches, long row, int native) {
+static double _step(List layers, Optimizer adam, Tensor x, Tensor y,
+                    Tensor batches, long row, int native, int want_loss) {
   Scope.retain();
   defer Scope.release();
   Tensor pick = batches.select(0, row);
@@ -111,17 +112,30 @@ static void _step(List layers, Optimizer adam, Tensor x, Tensor y,
                                  y.index_select(0, pick));
   error.backward();
   adam.step();
+  /* Reading the loss costs a synchronization, so a timed step never asks
+     for it and returns nothing. */
+  return want_loss ? error.item().double() : 0.0;
+}
+
+static void _train_logged(List layers, Optimizer adam, Tensor x, Tensor y,
+                          Tensor batches, int count, int offset, int native,
+                          int sample_every, int curve_every) {
+  long rows = batches.size(0);
+  for (int step = 0; step < count; step++) {
+    int want = curve_every > 0 && step % curve_every == 0;
+    double loss = _step(layers, adam, x, y, batches,
+                        (offset + step) % rows, native, want);
+    if (want) Bench.curve(step, loss);
+    if (sample_every > 0 && (step + 1) % sample_every == 0)
+      Bench.sample("step", step + 1);
+  }
 }
 
 static void _train(List layers, Optimizer adam, Tensor x, Tensor y,
                    Tensor batches, int count, int offset, int native,
                    int sample_every) {
-  long rows = batches.size(0);
-  for (int step = 0; step < count; step++) {
-    _step(layers, adam, x, y, batches, (offset + step) % rows, native);
-    if (sample_every > 0 && (step + 1) % sample_every == 0)
-      Bench.sample("step", step + 1);
-  }
+  _train_logged(layers, adam, x, y, batches, count, offset, native,
+                sample_every, 0);
 }
 
 /* The constant-mean predictor, one of the two baselines training must
@@ -195,7 +209,8 @@ static int _check(String artifacts, String out) {
   Module trained = _built(artifacts, "tabular-init.pt");
   List trained_layers = _layers(trained);
   Optimizer trainer = Optimizer.adam(trained, LR);
-  _train(trained_layers, trainer, x_train, y_train, rows, UPDATES, 0, 1, 0);
+  _train_logged(trained_layers, trainer, x_train, y_train, rows, UPDATES,
+                0, 1, 0, UPDATES / 64 > 0 ? UPDATES / 64 : 1);
   Bench.record("trained_val_mse",
                _evaluate(trained_layers, x_val, y_val, 1));
   {
@@ -329,6 +344,75 @@ static int _time(String artifacts, String out, String variant, int updates) {
   Bench.record("final_train_loss",
                _evaluate(layers, data["data.x_val"].tensor(),
                          data["data.y_val"].tensor(), native));
+  return 0;
+}
+
+/* ---- trace ----
+
+   The forward written out one ATen call at a time, so a comparison can
+   name the operation that first differs rather than only report that the
+   training drifted. `n` is the update this dumps: the parameters before
+   it, the batch, every intermediate, the loss, every gradient, and the
+   parameters after.
+*/
+
+static int _trace(String artifacts, String out, String variant, int n) {
+  Map data = _artifact(artifacts, "tabular-data.pt");
+  Map batches = _artifact(artifacts, "tabular-batches.pt");
+  Tensor x_train = data["data.x_train"].tensor();
+  Tensor y_train = data["data.y_train"].tensor();
+  Tensor rows = batches["batches"].tensor();
+  Module model = _built(artifacts, "tabular-init.pt");
+  List layers = _layers(model);
+  Optimizer adam = Optimizer.adam(model, LR);
+  int native = !strcmp(variant, "native");
+  _train(layers, adam, x_train, y_train, rows, n, 0, native, 0);
+
+  Map trace = %{};
+  foreach (List pair, model.named_parameters()) {
+    String name = pair[0].str();
+    trace[%"pre.$name"] = pair[1].tensor().clone();
+  }
+  Tensor pick = rows.select(0, n % rows.size(0));
+  Tensor input = x_train.index_select(0, pick);
+  Tensor target = y_train.index_select(0, pick);
+  trace["batch.x"] = input;
+  trace["batch.y"] = target;
+
+  adam.zero_grad();
+  Tensor h = input;
+  for (int i = 0; i < 3; i++) {
+    List parameters = layers[i].module().parameters();
+    Tensor weight = parameters[0].tensor(), bias = parameters[1].tensor();
+    Tensor product = h @ weight.t();
+    Tensor affine = product + bias;
+    char name[32];
+    snprintf(name, sizeof(name), "fwd.m%d", i + 1);
+    trace[String.new(name)] = product;
+    snprintf(name, sizeof(name), "fwd.a%d", i + 1);
+    trace[String.new(name)] = affine;
+    h = affine;
+    if (i < 2) {
+      h = affine.relu();
+      snprintf(name, sizeof(name), "fwd.r%d", i + 1);
+      trace[String.new(name)] = h;
+    }
+  }
+  Tensor error = Tensor.mse_loss(h, target);
+  trace["loss"] = error;
+  error.backward();
+  foreach (List pair, model.named_parameters()) {
+    String name = pair[0].str();
+    trace[%"grad.$name"] = pair[1].tensor().grad().clone();
+  }
+  adam.step();
+  foreach (List pair, model.named_parameters()) {
+    String name = pair[0].str();
+    trace[%"post.$name"] = pair[1].tensor().clone();
+  }
+  Checkpoint.save(trace, %"$out/tabular-x2c-trace.pt");
+  Bench.record_int("trace_update", n);
+  Bench.record("trace_loss", error.item().double());
   return 0;
 }
 
@@ -503,23 +587,30 @@ int main(int argc, char **argv) {
   Scope.retain();
   defer Scope.release();
   if (argc < 4) {
-    fprintf(stderr, "usage: tabular <check|time|memory> <artifacts> <out>"
+    fprintf(stderr, "usage: tabular <check|time|memory|trace> <artifacts>"
+                    " <out>"
                     " [variant] [count]\n");
     return 2;
   }
   const char *threads = getenv("X2C_TORCH_THREADS");
   Torch.set_num_threads(threads ? atoi(threads) : 1);
+  /* Inter-op threads are fixed before any work, so the only parallelism
+     either language uses is the intra-op pool the runner sets. */
+  Torch.set_num_interop_threads(1);
   Torch.manual_seed(0);
   Bench.begin(4096);
   Bench.record_text("language", "x2c");
   Bench.record_text("torch_version", Torch.version());
   _record_profile();
   Bench.record_int("threads", Torch.num_threads());
+  Bench.record_int("interop_threads", Torch.num_interop_threads());
 
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
   if (!strcmp(argv[1], "check")) return _check(artifacts, out);
   if (!strcmp(argv[1], "time"))
     return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
+  if (!strcmp(argv[1], "trace"))
+    return _trace(artifacts, out, String.new(argv[4]), atoi(argv[5]));
   if (!strcmp(argv[1], "memory"))
     return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
   fprintf(stderr, "tabular: no mode %s\n", argv[1]);

@@ -1,33 +1,36 @@
 # The fixed profile, one row per measured configuration.
 #
-# `count` is the fixed-profile amount for a check run and the pilot amount
-# for a timed one; run.py --updates overrides the timed counts. The
+# `count` is the fixed-profile amount for a check run and the calibrated
+# session amount for a timed one, chosen so the slower language takes
+# roughly 15 seconds per sample at one intra-op thread. The
 # authoritative numbers live in common.py PROFILE and are copied into
 # config.json beside the artifacts, which is what a program checks.
 #
 # program      mode    variant     count  note
 
 tabular        check   -            1024  128-256-128-8 ReLU, Adam 1e-3
-tabular        time    native      20000  Linear's own forward
-tabular        time    explicit    20000  enumerated-parameter forward
-tabular        time    predict1    20000  one request scope, inference mode
-tabular        time    predict32   10000  one request scope, inference mode
-tabular        time    predict256   2000  one request scope, inference mode
+tabular        time    native      60000  Linear's own forward
+tabular        time    explicit    60000  enumerated-parameter forward
+tabular        time    predict1   900000  one request scope, inference mode
+tabular        time    predict32  520000  one request scope, inference mode
+tabular        time    predict256 210000  one request scope, inference mode
+tabular        trace   explicit        n  every value of update n
 tabular        memory  1             512  steady training then inference
 tabular        memory  3               1  view and clone surviving a scope
 tabular        memory  5              50  create-train-save-load-destroy
 tabular        memory  6             512  positive control, 128 MiB cap
 
 mnist          check   -            1876  2 epochs of 938, batch 64
-mnist          time    epoch         300  images/second and peak footprint
+mnist          time    epoch        1150  images/second and peak footprint
 
 sequence       check   -             512  windows of 32 over 32 streams
-sequence       time    window8       400  truncation length sweep
-sequence       time    window32      400  the fixed profile's window
-sequence       time    window128     400  truncation length sweep
+sequence       time    window8      6800  truncation length sweep
+sequence       time    window32     6800  the fixed profile's window
+sequence       time    window128    6800  truncation length sweep
 sequence       memory  4              64  window sweep, 4-microbatch
 
 interop        check   -               1  12 pairs, exact agreement
-interop        time    chain         100  all 12 pairs
+interop        time    chain         190  all 12 pairs
 interop        memory  4             100  live set, short-scope variant
-interop-cpp    time    chain         100  the C++ control, no wrapper
+interop        attribute 65536        60  three lifetimes, one per process
+interop-cpp    time    chain          60  the C++ control, no wrapper

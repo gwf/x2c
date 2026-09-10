@@ -13,11 +13,13 @@ Protocol collection and per-unit semantic registry.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.derived_member`](#Compiler.derived_member) | Returns the protocol member used to derive a comparison operator. |
+| [`Compiler.discard_helper`](#Compiler.discard_helper) | Returns `(binding signature)` for a generated helper that calls the function `binding` of type `signature` and then discards the unnamed argument temporaries `which` selects (bit `n` for argument `n`). |
 | [`Compiler.dump_conformance`](#Compiler.dump_conformance) | Prints stable conformance rows for typedefs in `globs`. |
 | [`Compiler.generate_protocol_adapters`](#Compiler.generate_protocol_adapters) | Generates adapters and descriptor registration for resolved conformances. |
 | [`Compiler.install_generated_protocol_symbols`](#Compiler.install_generated_protocol_symbols) | Publishes generated protocol call signatures into a live symbol map. |
 | [`Compiler.operator_member`](#Compiler.operator_member) | Returns the protocol member corresponding to a direct binary operator. |
 | [`Compiler.parse_protocol_declaration`](#Compiler.parse_protocol_declaration) | Parses a protocol body or concrete adoption at the current token. |
+| [`Compiler.protocol_discard_helper`](#Compiler.protocol_discard_helper) | The `discard_helper` for `participant`'s protocol `member`. |
 | [`Compiler.protocol_members_for`](#Compiler.protocol_members_for) | Returns the resolved conformance for `participant` and `base`, if any. |
 | [`Compiler.protocol_rejects_direct_member`](#Compiler.protocol_rejects_direct_member) | Reports whether conformance supersedes an ambient direct member. |
 | [`Compiler.protocol_update_helper`](#Compiler.protocol_update_helper) | Returns a generated helper for a direct protocol-backed update. |
@@ -41,6 +43,20 @@ and unsupported operators return zero.
 
 Source: `src/protocol.x:1440`
 
+<a id="Compiler.discard_helper"></a>
+#### Compiler.discard_helper
+
+`List Compiler.discard_helper( Compiler c, List binding, Type signature, String stem, int which)`
+
+Returns `(binding signature)` for a generated helper that calls the
+function `binding` of type `signature` and then discards the unnamed
+argument temporaries `which` selects (bit `n` for argument `n`). A
+discarded argument is one the compiler produced for this call alone, so
+its `discard` member may release what it owns before the enclosing scope
+ends. Returns null when no selected argument type has a `discard` member.
+
+Source: `src/protocol.x:1773`
+
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
 
@@ -63,7 +79,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2128`
+Source: `src/protocol.x:2200`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -99,7 +115,16 @@ publishes the normalized row immediately. Macro-hole parsing returns syntax
 for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node.
 
-Source: `src/protocol.x:2262`
+Source: `src/protocol.x:2334`
+
+<a id="Compiler.protocol_discard_helper"></a>
+#### Compiler.protocol_discard_helper
+
+`List Compiler.protocol_discard_helper( Compiler c, Type participant, String member, int which)`
+
+The `discard_helper` for `participant`'s protocol `member`.
+
+Source: `src/protocol.x:1829`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for

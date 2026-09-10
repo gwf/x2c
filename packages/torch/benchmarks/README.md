@@ -22,12 +22,28 @@ sequence with no wrapper, so host cost is bounded from both sides.
 
 ```sh
 python3 packages/torch/benchmarks/run.py prepare
-python3 packages/torch/benchmarks/run.py build --lane primary
-python3 packages/torch/benchmarks/run.py check
-python3 packages/torch/benchmarks/run.py time --samples 5 --threads 1,4
-python3 packages/torch/benchmarks/run.py memory --profiles 1,3,4,5,6
-python3 packages/torch/benchmarks/run.py env
+python3 packages/torch/benchmarks/run.py build --lane primary --counters
+python3 packages/torch/benchmarks/run.py env       --run-id session
+python3 packages/torch/benchmarks/run.py check     --run-id session
+python3 packages/torch/benchmarks/run.py attribute --run-id session
+python3 packages/torch/benchmarks/run.py time      --run-id session \
+    --samples 5 --threads 1,4
+python3 packages/torch/benchmarks/run.py memory    --run-id session \
+    --profiles 1,3,4,5,6
+python3 packages/torch/benchmarks/run.py report    --run-id session
+python3 packages/torch/benchmarks/plots.py session
 ```
+
+That sequence is the whole session; `REPORT.md` and the four plots come
+out of the last two commands and read nothing but the JSON the earlier
+ones wrote. `plots.py` needs matplotlib, which the pinned torch wheel's
+interpreter does not have, so run it under an interpreter that does; it
+never imports torch.
+
+The timing counts are calibrated in `run.py` so the slower language takes
+roughly 15 seconds per sample at one intra-op thread. `--updates`
+overrides every lane at once, which is for checking the harness, not for
+a reported session.
 
 `prepare` needs the pinned wheel; `TORCH_PYTHON` names it and defaults to
 `/Users/gary/Git/Bonsai-demo/.venv/bin/python`. The MNIST lane reads the
@@ -38,6 +54,22 @@ defaults to `/tmp/mnist-real`. `prepare` records their SHA-256 in
 Datasets, binaries, and checkpoints live under
 `unittest/build/torch-comparison/`; logs and raw samples under
 `debug/torch-comparison/<run-id>/`.
+
+### The handle counters
+
+`--counters` builds the package with `-DXT_HANDLE_COUNTERS`, which turns
+on the private hooks `packages/torch/src/xt-handles.h` declares at the
+hand-written wrapper, the generator's `xg_wrap` template, the returned
+handle arrays, and every matching free. `handles.c` here supplies those
+hooks and is the only thing that can read a count back: the package has
+no inspection API for them, and an ordinary build expands both macros to
+nothing and references no symbol.
+
+The counters exist for the interop attribution, which needs live handles
+by kind rather than a single process footprint. Headline timings are
+measured in the same build, so the counter cost is inside every reported
+number rather than subtracted from it; it is two relaxed atomic adds per
+handle.
 
 ### The two build lanes
 
@@ -67,7 +99,20 @@ $work/bin/interop  time  $work/artifacts $work/out chain 100
 python3 packages/torch/benchmarks/tabular.py check $work/artifacts $work/out
 ```
 
-`X2C_TORCH_THREADS` sets the intra-op thread count on both sides.
+`X2C_TORCH_THREADS` sets the intra-op thread count on both sides. Both
+languages pin inter-op threads to 1 before any work.
+
+Two diagnostics stand outside the modes above:
+
+```sh
+python3 packages/torch/benchmarks/firstdiff.py --variant explicit
+$work/bin/interop attribute $work/artifacts $work/out 65536 60 subscope
+```
+
+`firstdiff.py` runs the paired `trace` mode over a range of updates and
+reports the first update, and the first operation within it, where the
+two implementations stop producing identical float32 values. `attribute`
+runs the interop chain under one lifetime per process.
 
 ## The output records
 
@@ -76,11 +121,19 @@ reads:
 
 - `record <name> <number>` - one measured or configured number.
 - `text <name> <value>` - the language, the torch version, the variant.
+- `curve <update> <loss>` - one learning-curve point, printed in a check
+  run only and never inside timed work.
 - `sample <label> <index> <seconds> <footprint> <footprint_peak>
   <resident> <resident_peak> <live_allocations> <live_scopes>
   <allocation_calls> <free_calls> <requested_bytes> <pool_interned>
   <pool_active> <pool_backing> <pool_depot>` - one memory observation,
   followed by a final `dropped <count>`.
+
+A counters build adds one `handles <label> <index>` line per sample
+carrying live and peak counts for each of the seven handle kinds, a
+`handlesum <kind> <created> <destroyed> <live> <peak>` line per kind at
+the end, and `counters 1` so a run of zeros is never read as "no
+handles".
 
 The Scope and pool columns are zero from Python: that layer does not
 exist there, and zero never means "empty". Samples land in an array

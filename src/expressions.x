@@ -819,6 +819,44 @@ static List _resolve_protocol_operator(
        : NULL;
 }
 
+/* A call result is an unnamed temporary the consuming operator or call may
+   discard when its callee is known to return a fresh value: a protocol
+   operator member, a converter from a number, or a discard helper. The
+   callee binding is shared by every call to that function, so the record
+   survives the re-resolution that rebuilds call nodes. */
+static void _note_fresh_callee(Compiler compiler, List binding) {
+  long identity = (long) binding;
+  compiler.protocol_helpers[%"fresh-callee $identity"] = 1;
+}
+
+static List _expression_node(List expression) {
+  if (!expression) return NULL;
+  List body = expression.cdr().cdr();
+  if (!body || !(body.car() is <list>)) return NULL;
+  List node = body.car();
+  return node;
+}
+
+static List _call_binding(List node) {
+  if (!node || node.car() != <call> || !(node.cadr() is <list>)) return NULL;
+  List callee = node.cadr(), inner = _expression_node(callee);
+  if (!inner || inner.car() != <ident> || !(inner.cadr() is <list>))
+    return NULL;
+  List binding = inner.cadr();
+  return binding;
+}
+
+static int _is_operator_temporary(Compiler compiler, List expression) {
+  List node = _expression_node(expression);
+  if (!node) return 0;
+  if (node.car() == <parens>)
+    return _is_operator_temporary(compiler, node.cadr());
+  List binding = _call_binding(node);
+  if (!binding) return 0;
+  long identity = (long) binding;
+  return compiler.protocol_helpers.contains(%"fresh-callee $identity");
+}
+
 static List Compiler._protocol_operator_expression(
   Compiler compiler, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
@@ -827,6 +865,7 @@ static List Compiler._protocol_operator_expression(
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
+  int which = 0;
   if (!rhs) arguments = %(args $lhs);
   else if (op == <in>) {
     List parameters = signature.car().list().cadr();
@@ -834,6 +873,20 @@ static List Compiler._protocol_operator_expression(
     arguments = %(args $rhs $lhs);
   }
   else arguments = %(args $lhs $rhs);
+  if (op != <in>) {
+    if (_is_operator_temporary(compiler, lhs)) which |= 1;
+    if (rhs && _is_operator_temporary(compiler, rhs)) which |= 2;
+  }
+  if (!derived && compiler.resolve_protocol_member(result, "discard"))
+    _note_fresh_callee(compiler, binding);
+  if (which) {
+    Symbol member = rhs ? compiler.operator_member(op) : <neg>;
+    if (!member) member = compiler.derived_member(op);
+    Type participant = lhs.cadr();
+    List helper = compiler.protocol_discard_helper(
+      participant, member.str(), which);
+    if (helper) (binding, signature) = helper;
+  }
   List call = %(expr $result
     (call (expr $signature (ident $binding)) $arguments));
   if (!derived) return call;
@@ -1063,6 +1116,36 @@ static List _resolve_call_arguments(
   return arguments.list_free();
 }
 
+/* A call whose receiver or argument is an unnamed operator temporary goes
+   through a helper that discards that temporary once the call returns. */
+static List _discarding_callee(
+  Compiler compiler, List callee, Type callee_type, List arguments) {
+  if (!callee_type || !(callee_type.car() is <list>) ||
+      callee_type.car().list().car() != <func>)
+    return callee;
+  List body = callee.cdr().cdr();
+  if (!body || !(body.car() is <list>)) return callee;
+  List ident = body.car();
+  if (ident.car() != <ident> || !(ident.cadr() is <list>)) return callee;
+  List binding = ident.cadr();
+  long identity = (long) binding;
+  if (compiler.protocol_helpers.contains(%"discard-helper $identity"))
+    return callee;
+  int which = 0, index = 0;
+  foreach (Var argument, arguments) {
+    if (argument is <list> && _is_operator_temporary(compiler, argument))
+      which |= 1 << index;
+    index++;
+  }
+  if (!which) return callee;
+  String stem = binding_identity_spelling(binding);
+  if (!stem) return callee;
+  List helper = compiler.discard_helper(binding, callee_type, stem, which);
+  if (!helper) return callee;
+  List (helper_binding, signature) = helper;
+  return %(expr $signature (ident $helper_binding));
+}
+
 static List _finish_call(
   Compiler compiler, Type result_type, List callee, Type callee_type,
   List receiver, List supplied, Token origin) {
@@ -1083,6 +1166,7 @@ static List _finish_call(
         result_type = %(<macro-expr>);
     }
   if (!result_type) result_type = applied;
+  callee = _discarding_callee(compiler, callee, callee_type, arguments);
   return %(expr $result_type
            (call $callee (args @arguments)));
 }
@@ -2195,6 +2279,19 @@ static List _var_exact_reader(Compiler compiler, List expr, Type target) {
   return %(expr $target (call $callee (args $expr)));
 }
 
+/* A converter's result exists only for the operator that asked for it.
+   Only a conversion from a number is known to be fresh; a converter from a
+   handle type may return storage its source still owns. */
+static List _converted_temporary(
+  Compiler compiler, List call, Type owner, Type target) {
+  if (compiler.sym.resolve_numeric_type(owner) &&
+      compiler.resolve_protocol_member(target, "discard")) {
+    List binding = _call_binding(_expression_node(call));
+    if (binding) _note_fresh_callee(compiler, binding);
+  }
+  return call;
+}
+
 static List _converter_owned_call(
   Compiler compiler, List expr, Type owner, Type target, int *declared) {
   String typename = owner.car().str(), targetedname = target.car().str();
@@ -2224,14 +2321,18 @@ static List _converter_owned_call(
         parameters && !parameters.cdr() &&
         List.equal(parameters.car(), owner) &&
         List.equal(result, target))
-      return %(expr $target (call $callee (args $argument)));
+      return _converted_temporary(
+        compiler, %(expr $target (call $callee (args $argument))), owner,
+        target);
   }
   /* The relaxed form exists so a converter may spell its parameter as a
      typedef of the source type, which the exact comparison above rejects.
      It still takes exactly one argument: matching a longer parameter list
      emitted a call with the arguments missing. */
   if (cvrtrtype.match(%((func (($typename))) ?)))
-    return %(expr $target (call $callee (args $argument)));
+    return _converted_temporary(
+      compiler, %(expr $target (call $callee (args $argument))), owner,
+      target);
   return NULL;
 }
 

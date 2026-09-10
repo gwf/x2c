@@ -301,7 +301,8 @@ Public functions:
 `Compiler.protocol_rejects_direct_member`, `Compiler.operator_member`,
 `Compiler.dump_conformance`, `Compiler.derived_member`,
 `Compiler.resolve_protocol_member`, `Compiler.resolve_protocol_method`,
-`Compiler.protocol_update_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
 `Compiler.parse_protocol_declaration`
 
 ### [src/report.x](../src/report.x)

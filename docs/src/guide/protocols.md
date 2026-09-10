@@ -306,6 +306,14 @@ Operators call the same resolved methods as dot syntax. The mappings include:
 like `*`. It has no C meaning, so using it where no `matmul` member resolves
 is a compile-time type error.
 
+A participant may also declare `void T.discard(T)`. The compiler calls it on
+an unnamed temporary it made for one operator, such as the product in
+`a * b + c` or the converted `2.0` in `2.0 * x`, immediately after the
+operator that consumes the temporary returns. A value bound to a name is
+never discarded. A handle type whose values own native storage uses this to
+release each intermediate of a long operator chain before the enclosing
+scope ends; a value type needs no such member.
+
 An implemented or native member is eligible. An ordinary base default is also
 eligible because it is an inherited member reached through a total view. An
 empty `Var` descriptor slot is not a resolved static member. If no eligible

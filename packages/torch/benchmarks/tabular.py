@@ -10,6 +10,8 @@ two without either side knowing about the other.
         <native|explicit|predict1|predict32|predict256> <updates>
     python3 packages/torch/benchmarks/tabular.py memory <artifacts> <out> \\
         <1|3|5|6> <steps>
+    python3 packages/torch/benchmarks/tabular.py trace <artifacts> <out> \\
+        <native|explicit> <update>
 """
 
 import os
@@ -66,6 +68,7 @@ def configure():
     except RuntimeError:
         # Already fixed by an earlier parallel region; report, do not fake.
         text("interop_threads_note", "already-set")
+    record("interop_threads", torch.get_num_interop_threads())
     torch.manual_seed(0)
 
 
@@ -271,6 +274,53 @@ def mode_time(artifacts, out, variant, updates):
     return 0
 
 
+def mode_trace(artifacts, out, variant, n):
+    """The forward one ATen call at a time, so a comparison can name the
+    operation that first differs. Dumps update `n`: the parameters before
+    it, the batch, every intermediate, the loss, the gradients, and the
+    parameters after."""
+    data, init, batches = load(artifacts)
+    model = build(init)
+    optimizer = optimizer_for(model)
+    forward = FORWARDS[variant]
+    train(model, optimizer, data, batches, n, forward)
+
+    trace = {}
+    for name, parameter in model.named_parameters():
+        trace[f"pre.{name}"] = parameter.detach().clone()
+    rows = batches["batches"]
+    pick = rows[n % rows.shape[0]]
+    x = data["data.x_train"].index_select(0, pick)
+    target = data["data.y_train"].index_select(0, pick)
+    trace["batch.x"] = x
+    trace["batch.y"] = target
+
+    optimizer.zero_grad()
+    h = x
+    for index, layer in enumerate((model.l1, model.l2, model.l3)):
+        parameters = list(layer.parameters())
+        product = h @ parameters[0].t()
+        affine = product + parameters[1]
+        trace[f"fwd.m{index + 1}"] = product.detach().clone()
+        trace[f"fwd.a{index + 1}"] = affine.detach().clone()
+        h = affine
+        if index < 2:
+            h = torch.relu(affine)
+            trace[f"fwd.r{index + 1}"] = h.detach().clone()
+    loss = torch.nn.functional.mse_loss(h, target)
+    trace["loss"] = loss.detach().clone()
+    loss.backward()
+    for name, parameter in model.named_parameters():
+        trace[f"grad.{name}"] = parameter.grad.detach().clone()
+    optimizer.step()
+    for name, parameter in model.named_parameters():
+        trace[f"post.{name}"] = parameter.detach().clone()
+    common.save_tensors(trace, os.path.join(out, "tabular-python-trace.pt"))
+    record("trace_update", n)
+    record("trace_loss", float(loss.detach()))
+    return 0
+
+
 def mode_memory(artifacts, out, profile, steps):
     sample("baseline", 0)
     data, init, batches = load(artifacts)
@@ -387,6 +437,8 @@ def main():
         return mode_check(artifacts, out)
     if mode == "time":
         return mode_time(artifacts, out, sys.argv[4], int(sys.argv[5]))
+    if mode == "trace":
+        return mode_trace(artifacts, out, sys.argv[4], int(sys.argv[5]))
     if mode == "memory":
         return mode_memory(artifacts, out, int(sys.argv[4]), int(sys.argv[5]))
     sys.exit(f"tabular.py: no mode {mode}")

@@ -12,6 +12,8 @@
       interop check   <artifacts> <out>
       interop time    <artifacts> <out> <chain|e<count>o<ops>> <requests>
       interop memory  <artifacts> <out> 4 <requests>
+      interop attribute <artifacts> <out> <elements> <requests>
+                        [natural|freed|subscope|all]
 */
 
 import "torch" with Torch, Tensor, Checkpoint;
@@ -110,6 +112,136 @@ static int _time(String artifacts, String out, String variant, int requests) {
   return 0;
 }
 
+/* ---- attribute ----
+
+   The same chain under three lifetimes, so the cost of keeping every
+   intermediate alive can be separated from the cost of the kernels.
+
+   `natural`  one scope per request, which is the documented idiom: every
+              intermediate lives until the request ends.
+   `freed`    one scope per request, but each step releases the value it
+              replaced with `Tensor.free`, which is the caller-side remedy
+              that keeps the single scope.
+   `subscope` one scope per operation, carrying only the running value out
+              with `Scope.move`, which is the finest granularity that
+              still produces the same result.
+
+   Each phase reports its time, the most tensor handles alive at once, and
+   the process footprint at the moment the chain completed, while the
+   scope is still open. interop.cpp times the identical sequence with no
+   wrapper at all and bounds all three from below.
+*/
+
+static uint64_t interop_peak_handles = 0;
+static uint64_t interop_peak_footprint = 0;
+
+static void _note_live(void) {
+  uint64_t live = xb_handles_live(XT_HANDLE_TENSOR);
+  if (live > interop_peak_handles) interop_peak_handles = live;
+  uint64_t bytes = xb_footprint();
+  if (bytes > interop_peak_footprint) interop_peak_footprint = bytes;
+}
+
+static double _chain_natural(Tensor x, Tensor a, Tensor b, int operations) {
+  Scope.retain();
+  defer Scope.release();
+  Torch.inference_mode();
+  Tensor y = x;
+  for (int i = 0; i < operations; i++) y = (y * a + b).relu();
+  _note_live();
+  return y.sum().item().double();
+}
+
+static double _chain_freed(Tensor x, Tensor a, Tensor b, int operations) {
+  Scope.retain();
+  defer Scope.release();
+  Torch.inference_mode();
+  Tensor y = x;
+  for (int i = 0; i < operations; i++) {
+    Tensor next = (y * a + b).relu();
+    /* The first value is the caller's input and is not ours to release. */
+    if (i > 0) (void) y.free();
+    y = next;
+  }
+  _note_live();
+  return y.sum().item().double();
+}
+
+static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
+  Scope owner = NULL;
+  Tensor y = x;
+  for (int i = 0; i < operations; i++) {
+    Scope replacement = NULL;
+    Scope.retain();
+    {
+      defer Scope.release();
+      Torch.inference_mode();
+      y = (y * a + b).relu();
+      Scope.move(y, &replacement);
+    }
+    if (owner) Scope.destroy(owner);
+    owner = replacement;
+  }
+  _note_live();
+  double total;
+  Scope.retain();
+  {
+    defer Scope.release();
+    Torch.inference_mode();
+    total = y.sum().item().double();
+  }
+  if (owner) Scope.destroy(owner);
+  return total;
+}
+
+static double _shape(int shape, Tensor x, Tensor a, Tensor b, int ops) {
+  if (shape == 0) return _chain_natural(x, a, b, ops);
+  if (shape == 1) return _chain_freed(x, a, b, ops);
+  return _chain_subscope(x, a, b, ops);
+}
+
+static int _attribute(String artifacts, String out, int elements,
+                      int requests, String shape) {
+  Map values = _artifact(artifacts, "interop-init.pt");
+  Bench.record_int("attr_elements", elements);
+  Bench.record_int("attr_requests", requests);
+  Bench.record_int("counters_enabled", xb_handles_enabled());
+  Tensor x = _input(values, "x", elements), a = _input(values, "a", elements),
+         b = _input(values, "b", elements);
+  const char *names[3] = { "natural", "freed", "subscope" };
+  for (int s = 0; s < 3; s++) {
+    if (strcmp(shape, "all") && strcmp(shape, names[s])) continue;
+    for (int o = 0; o < 3; o++) {
+      int operations = interop_operations[o];
+      for (int i = 0; i < 4; i++) (void) _shape(s, x, a, b, operations);
+      interop_peak_handles = 0;
+      interop_peak_footprint = 0;
+      double result = 0.0;
+      double start = Bench.now();
+      for (int i = 0; i < requests; i++)
+        result += _shape(s, x, a, b, operations);
+      double seconds = Bench.now() - start;
+      char name[64];
+      snprintf(name, sizeof(name), "attr_%s_o%d_seconds", names[s],
+               operations);
+      Bench.record(name, seconds);
+      snprintf(name, sizeof(name), "attr_%s_o%d_ns_per_step", names[s],
+               operations);
+      Bench.record(name, seconds * 1e9 / ((double) requests * operations));
+      snprintf(name, sizeof(name), "attr_%s_o%d_peak_handles", names[s],
+               operations);
+      Bench.record_int(name, (long) interop_peak_handles);
+      snprintf(name, sizeof(name), "attr_%s_o%d_peak_bytes", names[s],
+               operations);
+      Bench.record(name, (double) interop_peak_footprint);
+      snprintf(name, sizeof(name), "attr_%s_o%d_result", names[s],
+               operations);
+      Bench.record(name, result);
+    }
+  }
+  return 0;
+}
+
 static int _memory(String artifacts, String out, int profile, int requests) {
   if (profile != 4)
     raise %(bad-arg (reason "no such memory profile") (profile $profile));
@@ -163,11 +295,15 @@ int main(int argc, char **argv) {
   }
   const char *threads = getenv("X2C_TORCH_THREADS");
   Torch.set_num_threads(threads ? atoi(threads) : 1);
+  /* Inter-op threads are fixed before any work, so the only parallelism
+     either language uses is the intra-op pool the runner sets. */
+  Torch.set_num_interop_threads(1);
   Bench.begin(1024);
   Bench.record_text("language", "x2c");
   Bench.record_text("torch_version", Torch.version());
   Bench.record_int("cfg_artifact_version", ARTIFACT_VERSION);
   Bench.record_int("threads", Torch.num_threads());
+  Bench.record_int("interop_threads", Torch.num_interop_threads());
 
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
   if (!strcmp(argv[1], "check")) return _check(artifacts, out);
@@ -175,6 +311,9 @@ int main(int argc, char **argv) {
     return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
   if (!strcmp(argv[1], "memory"))
     return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
+  if (!strcmp(argv[1], "attribute"))
+    return _attribute(artifacts, out, atoi(argv[4]), atoi(argv[5]),
+                      argc > 6 ? String.new(argv[6]) : "all");
   fprintf(stderr, "interop: no mode %s\n", argv[1]);
   return 2;
 }

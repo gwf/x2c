@@ -31,6 +31,7 @@ protocol Torch(T) {
   T T.div(T, T);
   T T.neg(T);
   T T.matmul(T, T);
+  void T.discard(T);
 }
 
 #pragma private
@@ -635,6 +636,12 @@ int Torch.grad_enabled(void) {
   _check(xt_grad_enabled(&enabled), "grad_enabled");
   return enabled;
 }
+
+/** Releases the handle of an unnamed operator temporary. The compiler
+    calls this on a value it made for one operator, such as `a * b` inside
+    `a * b + c`, right after that operator has used it, so a chain of
+    operators keeps only its inputs and its result alive. */
+void Tensor.discard(Tensor a) { _tensor_drop(a); }
 
 /** Releases the libtorch handle now; the record's finalizer then does
     nothing. Returns NULL for the adjacent-defer form. */

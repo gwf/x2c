@@ -297,11 +297,21 @@ a sample against the pinned Python torch:
 ## Lifetimes
 
 Every record here, `Tensor`, `Module`, `Optimizer`, and `Scheduler`, is
-allocated with a `Scope` finalizer, so an operator temporary is released
-with the scope that created it. A training step is one `Scope.retain` and
-`Scope.release` pair around the forward, backward, and update; the model
-and optimizer live in the enclosing scope. `free` releases a handle early
-and returns NULL.
+allocated with a `Scope` finalizer, so a value is released with the scope
+that created it. A training step is one `Scope.retain` and `Scope.release`
+pair around the forward, backward, and update; the model and optimizer
+live in the enclosing scope. `free` releases a handle early and returns
+NULL.
+
+An unnamed operator temporary does not wait for the scope. `Tensor`
+declares the `discard` protocol member, so the compiler releases the
+product in `a * b + c`, or the converted `2.0` in `2.0 * x`, right after
+the operator that consumes it returns. A chain of operators keeps only its
+inputs and its result alive; a value bound to a name is never discarded.
+A loop variable reassigned each step therefore keeps its previous value
+until the scope ends: `y = (y * a + b).relu()` retains one tensor per
+step. Free it before the assignment when the chain is long, or give each
+step its own scope. `benchmarks/REPORT.md` measures both.
 
 `Torch.no_grad` and `Torch.inference_mode` are scoped the same way: each
 installs a guard in the active scope, and releasing that scope restores the

@@ -239,13 +239,20 @@ def agree(what, left, right, tolerance=LOSS_RTOL):
 class Result:
     """What one benchmark process printed."""
 
-    def __init__(self, records, texts, samples, dropped, stdout, seconds):
+    def __init__(self, records, texts, samples, dropped, stdout, seconds,
+                 handles=None, counters=False, curve=None):
         self.records = records
         self.texts = texts
         self.samples = samples
         self.dropped = dropped
         self.stdout = stdout
         self.seconds = seconds
+        # Native handle totals by kind, and whether this build counted at
+        # all. Python leaves both empty: it has no such layer.
+        self.handles = handles or {}
+        self.counters = counters
+        # (update, loss) pairs a check run printed, for the learning curve.
+        self.curve = curve or []
 
     def number(self, name):
         if name not in self.records:
@@ -261,8 +268,13 @@ SAMPLE_FIELDS = [
 ]
 
 
+HANDLE_KINDS = ["tensor", "module", "optimizer", "scheduler", "pickle",
+                "jit", "array"]
+
+
 def parse_output(text):
     records, texts, samples, dropped = {}, {}, [], 0
+    handles, summary, enabled, curve = {}, {}, False, []
     for line in text.splitlines():
         parts = line.split()
         if not parts:
@@ -278,9 +290,27 @@ def parse_output(text):
             for name, value in zip(SAMPLE_FIELDS[3:], values[3:]):
                 sample[name] = int(value)
             samples.append(sample)
+        elif parts[0] == "curve" and len(parts) == 3:
+            curve.append((int(parts[1]), float(parts[2])))
+        elif parts[0] == "handles" and len(parts) >= 3:
+            values = [int(v) for v in parts[3:]]
+            handles[(parts[1], int(parts[2]))] = {
+                name: {"live": values[2 * i], "peak": values[2 * i + 1]}
+                for i, name in enumerate(HANDLE_KINDS)
+                if 2 * i + 1 < len(values)}
+        elif parts[0] == "handlesum" and len(parts) == 6:
+            summary[HANDLE_KINDS[int(parts[1])]] = {
+                "created": int(parts[2]), "destroyed": int(parts[3]),
+                "live": int(parts[4]), "peak": int(parts[5])}
+        elif parts[0] == "counters" and len(parts) == 2:
+            enabled = parts[1] == "1"
         elif parts[0] == "dropped" and len(parts) == 2:
             dropped = int(parts[1])
-    return records, texts, samples, dropped
+    for sample in samples:
+        found = handles.get((sample["label"], sample["index"]))
+        if found:
+            sample["handles"] = found
+    return records, texts, samples, dropped, summary, enabled, curve
 
 
 def launch(command, environment=None, log=None, timeout=TIMEOUT):
@@ -304,9 +334,11 @@ def launch(command, environment=None, log=None, timeout=TIMEOUT):
         raise RuntimeError(
             f"{' '.join(command)} exited {finished.returncode}\n"
             f"{finished.stdout}\n{finished.stderr}")
-    records, texts, samples, dropped = parse_output(finished.stdout)
+    parsed = parse_output(finished.stdout)
+    records, texts, samples, dropped, summary, enabled, curve = parsed
     return Result(records, texts, samples, dropped,
-                  finished.stdout + finished.stderr, seconds)
+                  finished.stdout + finished.stderr, seconds,
+                  summary, enabled, curve)
 
 
 def environment_record():

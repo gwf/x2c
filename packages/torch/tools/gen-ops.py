@@ -458,6 +458,7 @@ CPP_PRELUDE = """\
 #include <vector>
 
 #include "xt_ops.h"
+#include "xt-handles.h"
 
 struct xt_tensor_s { at::Tensor t; };
 
@@ -465,7 +466,10 @@ struct xt_tensor_s { at::Tensor t; };
   try { __VA_ARGS__ } \\
   catch (const std::exception &e) { xt_note_error(e.what()); return fail; }
 
-static xt_tensor xg_wrap(at::Tensor t) { return new xt_tensor_s{std::move(t)}; }
+static xt_tensor xg_wrap(at::Tensor t) {
+  XT_HANDLE_NEW(XT_HANDLE_TENSOR);
+  return new xt_tensor_s{std::move(t)};
+}
 
 static at::Scalar xg_to_scalar(int kind, int64_t i, double d) {
   if (kind == 2) return at::Scalar(i != 0);
@@ -498,7 +502,10 @@ static ::std::vector<at::Tensor> xg_to_tensors(const xt_tensor *items,
 
 extern "C" {
 
-void xt_free_handles(xt_tensor *handles) { free(handles); }
+void xt_free_handles(xt_tensor *handles) {
+  if (handles) XT_HANDLE_DROP(XT_HANDLE_ARRAY);
+  free(handles);
+}
 """
 
 
@@ -515,6 +522,7 @@ def emit_body(op):
                  "      sizeof(xt_tensor) * (count ? count : 1));\n"
                  "    if (!handles) { xt_note_error(\"out of memory\");"
                  " return -1; }\n"
+                 "    XT_HANDLE_NEW(XT_HANDLE_ARRAY);\n"
                  "    for (size_t k = 0; k < count; k++)\n"
                  "      handles[k] = xg_wrap(result[k]);\n"
                  "    *out = handles;\n"

@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include "membytes.h"
+#include "handles.h"
 
 typedef enum Bench {
   BENCH_NAMESPACE
@@ -39,6 +40,10 @@ typedef struct BenchSample {
   size_t pool_active_bytes;
   size_t pool_backing_bytes;
   size_t pool_depot_bytes;
+  /* Native handles by XtHandleKind, live and highest ever live. A build
+     without the counters leaves these zero and `Bench.flush` says so. */
+  uint64_t handles_live[XT_HANDLE_KINDS];
+  uint64_t handles_peak[XT_HANDLE_KINDS];
 } BenchSample;
 
 #pragma private
@@ -93,6 +98,10 @@ void Bench.sample(const char *label, long index) {
   sample.pool_active_bytes = pool.active_bytes;
   sample.pool_backing_bytes = pool.backing_bytes;
   sample.pool_depot_bytes = pool.depot_bytes;
+  for (int kind = 0; kind < XT_HANDLE_KINDS; kind++) {
+    sample.handles_live[kind] = xb_handles_live(kind);
+    sample.handles_peak[kind] = xb_handles_peak(kind);
+  }
 }
 
 /** Samples that did not fit the reservation. A non-zero count invalidates
@@ -115,7 +124,19 @@ void Bench.flush(void) {
            s.live_allocations, s.live_scopes, s.allocation_calls,
            s.free_calls, s.requested_bytes, s.pool_interned,
            s.pool_active_bytes, s.pool_backing_bytes, s.pool_depot_bytes);
+    printf("handles %s %ld", s.label, s.index);
+    for (int kind = 0; kind < XT_HANDLE_KINDS; kind++)
+      printf(" %llu %llu", (unsigned long long) s.handles_live[kind],
+             (unsigned long long) s.handles_peak[kind]);
+    printf("\n");
   }
+  for (int kind = 0; kind < XT_HANDLE_KINDS; kind++)
+    printf("handlesum %d %llu %llu %llu %llu\n", kind,
+           (unsigned long long) xb_handles_created(kind),
+           (unsigned long long) xb_handles_destroyed(kind),
+           (unsigned long long) xb_handles_live(kind),
+           (unsigned long long) xb_handles_peak(kind));
+  printf("counters %d\n", xb_handles_enabled());
   printf("dropped %d\n", Bench.dropped());
 }
 
@@ -126,6 +147,12 @@ void Bench.record(const char *name, double value) {
 
 void Bench.record_int(const char *name, long value) {
   printf("record %s %ld\n", name, value);
+}
+
+/** One point of a learning curve: the update and the loss there.
+    Printed as it happens, in a check run only, never inside timed work. */
+void Bench.curve(long index, double value) {
+  printf("curve %ld %.10g\n", index, value);
 }
 
 /** One named text field, such as a variant or a library path. */

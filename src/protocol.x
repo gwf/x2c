@@ -1763,6 +1763,78 @@ String Compiler.protocol_update_helper(
   return name;
 }
 
+/** Returns `(binding signature)` for a generated helper that calls the
+    function `binding` of type `signature` and then discards the unnamed
+    argument temporaries `which` selects (bit `n` for argument `n`). A
+    discarded argument is one the compiler produced for this call alone, so
+    its `discard` member may release what it owns before the enclosing scope
+    ends. Returns null when no selected argument type has a `discard` member.
+*/
+List Compiler.discard_helper(
+  Compiler c, List binding, Type signature, String stem, int which) {
+  List key = %("discard-helper" $stem $which);
+  Var stored;
+  if (c.protocol_helpers.try_get(key, &stored)) return stored.list();
+
+  List parameters = signature.car().list().cadr();
+  Type result = signature.cdr();
+  Array declarations = %[], arguments = %[], discards = %[];
+  int index = 0;
+  foreach (Type parameter, parameters) {
+    List argument_binding = c.sym.introduce(%"a$index");
+    declarations.push(parameter.parameter_ast(argument_binding));
+    arguments.push(%(expr $parameter (ident $argument_binding)));
+    if (which & (1 << index)) {
+      List drop = c.resolve_protocol_member(parameter, "discard");
+      if (drop) {
+        List (drop_binding, drop_type) = drop;
+        discards.push(%(stmnt (expr (void)
+          (call (expr $drop_type (ident $drop_binding))
+                (args (expr $parameter (ident $argument_binding)))))));
+      }
+    }
+    index++;
+  }
+  if (!discards.len()) return NULL;
+
+  String name = %"_x2c_discard_${stem}_$which";
+  List helper_binding = c.sym.introduce(name);
+  List value_binding = c.sym.introduce("value");
+  List call = %(expr $result
+    (call (expr $signature (ident $binding))
+          (args @{arguments.list_free()})));
+  List body = List.equal(result, %(void))
+    ? %(block (stmnt $call) @{discards.list_free()} (return))
+    : %(block
+        (declare $result (bindings (op = (bind $value_binding ()) $call)))
+        @{discards.list_free()}
+        (return $result (expr $result (ident $value_binding))));
+  List function = %(
+    function (static @result)
+      (bind $helper_binding ((fnmod (params @{declarations.list_free()}))))
+      $body
+  );
+  c.add_early(function);
+  List entry = %($helper_binding $signature);
+  c.protocol_helpers[key] = entry;
+  /* A helper returns what its member returns and already discards, so a
+     re-resolved call through it is neither wrapped again nor kept. */
+  long identity = (long) helper_binding;
+  c.protocol_helpers[%"discard-helper $identity"] = 1;
+  c.protocol_helpers[%"fresh-callee $identity"] = 1;
+  return entry;
+}
+
+/** The `discard_helper` for `participant`'s protocol `member`. */
+List Compiler.protocol_discard_helper(
+  Compiler c, Type participant, String member, int which) {
+  List resolved = c.resolve_protocol_member(participant, member);
+  if (!resolved) return NULL;
+  List (binding, signature) = resolved;
+  String stem = %"${participant.car().str().lower()}_$member";
+  return c.discard_helper(binding, signature, stem, which);
+}
+
 static List _parameter_declarations(
   Compiler compiler, List types, Array bindings) {
   Array declarations = %[], int index = 0;

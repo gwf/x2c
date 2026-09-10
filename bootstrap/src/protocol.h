@@ -33,6 +33,10 @@ List Compiler_resolve_protocol_method(Compiler compiler, Type participant, Strin
 
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
 
+List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which);
+
+List Compiler_protocol_discard_helper(Compiler c, Type participant, String member, int which);
+
 List Compiler_generate_protocol_adapters(Compiler c, List ast);
 
 List Compiler_parse_protocol_declaration(Compiler c);

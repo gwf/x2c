@@ -88,11 +88,18 @@ EXPECT_NEAR(m[mask].sum().item().double(), 7.0, 1e-12);
 
 Every record here, `Tensor`, `Module`, `Optimizer`, `Scheduler`, and
 `JitModule`, owns one libtorch handle and is allocated with a `Scope`
-finalizer, so an operator temporary is released with the scope that
-created it. A training step is one `Scope.retain` and `Scope.release`
-pair around the forward, backward, and update, with the model and
-optimizer in the enclosing scope. `free` releases a handle early and
-returns NULL.
+finalizer, so a value is released with the scope that created it. A
+training step is one `Scope.retain` and `Scope.release` pair around the
+forward, backward, and update, with the model and optimizer in the
+enclosing scope. `free` releases a handle early and returns NULL.
+
+An unnamed operator temporary is released sooner. `Tensor` declares the
+`discard` member of the [protocol chapter](protocols.md), so the compiler
+releases the product in `a * b + c` right after the addition has used it,
+and a long chain of operators keeps only its inputs and its result alive.
+A value bound to a name is never discarded, so a loop variable reassigned
+each step keeps its previous value until the scope ends; free it before the
+assignment, or give each step its own scope, when such a chain is long.
 
 ## Autograd
 

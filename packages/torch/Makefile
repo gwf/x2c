@@ -12,8 +12,13 @@ TORCH_LIB := $(TORCH_PREFIX)/lib
 CXX ?= clang++
 SHIM := builds/torch-shim.o
 OPS := builds/xt_ops.o
+# PACKAGE_DIAGNOSTIC is empty in every ordinary build. The optional
+# comparison suite sets it to -DXT_HANDLE_COUNTERS to turn on the
+# handle counters src/xt-handles.h declares; see benchmarks/README.md.
+PACKAGE_DIAGNOSTIC ?=
 CXX_FLAGS := -std=c++17 -O2 -I$(TORCH_INCLUDE) \
-	-I$(TORCH_INCLUDE)/torch/csrc/api/include -Isrc -Igenerated
+	-I$(TORCH_INCLUDE)/torch/csrc/api/include -Isrc -Igenerated \
+	$(PACKAGE_DIAGNOSTIC)
 
 # libtorch is C++ with no stable C++ ABI and no C API. The shim and the
 # generated bindings are the two C++ translation units here; they are

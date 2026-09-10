@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include "torch-2.10.h"
+#include "xt-handles.h"
 
 struct xt_tensor_s { at::Tensor t; };
 
@@ -46,7 +47,10 @@ extern "C" void xt_note_error(const char *what) { note_error(what); }
   try { __VA_ARGS__ } \
   catch (const std::exception &e) { note_error(e.what()); }
 
-static xt_tensor wrap(at::Tensor t) { return new xt_tensor_s{std::move(t)}; }
+static xt_tensor wrap(at::Tensor t) {
+  XT_HANDLE_NEW(XT_HANDLE_TENSOR);
+  return new xt_tensor_s{std::move(t)};
+}
 static at::IntArrayRef dims(const int64_t *shape, int rank) {
   return at::IntArrayRef(shape, rank);
 }
@@ -328,7 +332,10 @@ int xt_inference_mode_pop(void) {
   return 0;
 }
 
-void xt_tensor_free(xt_tensor a) { TRY_VOID(delete a;) }
+void xt_tensor_free(xt_tensor a) {
+  if (a) XT_HANDLE_DROP(XT_HANDLE_TENSOR);
+  TRY_VOID(delete a;)
+}
 
 /* Modules.
 
@@ -359,6 +366,7 @@ struct xt_module_s {
 };
 
 static xt_module wrap_module(std::shared_ptr<torch::nn::Module> m) {
+  XT_HANDLE_NEW(XT_HANDLE_MODULE);
   return new xt_module_s{std::move(m), std::string()};
 }
 
@@ -621,13 +629,17 @@ int xt_module_zero_grad(xt_module m) { TRY(-1, m->m->zero_grad();) return 0; }
 int xt_module_to_dtype(xt_module m, int dtype) {
   TRY(-1, m->m->to(static_cast<at::ScalarType>(dtype));) return 0;
 }
-void xt_module_free(xt_module m) { TRY_VOID(delete m;) }
+void xt_module_free(xt_module m) {
+  if (m) XT_HANDLE_DROP(XT_HANDLE_MODULE);
+  TRY_VOID(delete m;)
+}
 
 /* Optimizers */
 
 struct xt_optim_s { std::unique_ptr<torch::optim::Optimizer> o; };
 
 static xt_optim wrap_optim(std::unique_ptr<torch::optim::Optimizer> o) {
+  XT_HANDLE_NEW(XT_HANDLE_OPTIM);
   return new xt_optim_s{std::move(o)};
 }
 
@@ -722,7 +734,10 @@ int xt_optim_load(xt_optim o, const char *path) {
     o->o->load(archive);)
   return 0;
 }
-void xt_optim_free(xt_optim o) { TRY_VOID(delete o;) }
+void xt_optim_free(xt_optim o) {
+  if (o) XT_HANDLE_DROP(XT_HANDLE_OPTIM);
+  TRY_VOID(delete o;)
+}
 
 /* Schedulers */
 
@@ -735,6 +750,7 @@ xt_scheduler xt_step_lr_new(xt_optim o, int step_size, double gamma) {
   TRY(nullptr,
     auto s = std::make_unique<torch::optim::StepLR>(
       *o->o, (unsigned) step_size, gamma);
+    XT_HANDLE_NEW(XT_HANDLE_SCHEDULER);
     return new xt_scheduler_s{std::move(s), nullptr};)
 }
 xt_scheduler xt_reduce_on_plateau_new(xt_optim o, int mode_min, double factor,
@@ -747,6 +763,7 @@ xt_scheduler xt_reduce_on_plateau_new(xt_optim o, int mode_min, double factor,
     auto s = std::make_unique<torch::optim::ReduceLROnPlateauScheduler>(
       *o->o, mode, (float) factor, patience, threshold,
       torch::optim::ReduceLROnPlateauScheduler::rel, cooldown, floor);
+    XT_HANDLE_NEW(XT_HANDLE_SCHEDULER);
     return new xt_scheduler_s{nullptr, std::move(s)};)
 }
 int xt_scheduler_step(xt_scheduler s) {
@@ -767,7 +784,10 @@ int xt_scheduler_step_metric(xt_scheduler s, double metric) {
     s->plateau->step((float) metric);)
   return 0;
 }
-void xt_scheduler_free(xt_scheduler s) { TRY_VOID(delete s;) }
+void xt_scheduler_free(xt_scheduler s) {
+  if (s) XT_HANDLE_DROP(XT_HANDLE_SCHEDULER);
+  TRY_VOID(delete s;)
+}
 
 /* Serialization */
 
@@ -857,6 +877,7 @@ xt_pickle xt_pickle_open(const char *path) {
       opened->names.push_back(entry.key().toStringRef());
       opened->tensors.push_back(entry.value().toTensor());
     }
+    XT_HANDLE_NEW(XT_HANDLE_PICKLE);
     return opened.release();)
 }
 int xt_pickle_count(xt_pickle p, int64_t *out) {
@@ -877,7 +898,10 @@ xt_tensor xt_pickle_tensor(xt_pickle p, int64_t index) {
   }
   TRY(nullptr, return wrap(p->tensors[(size_t) index]);)
 }
-void xt_pickle_free(xt_pickle p) { TRY_VOID(delete p;) }
+void xt_pickle_free(xt_pickle p) {
+  if (p) XT_HANDLE_DROP(XT_HANDLE_PICKLE);
+  TRY_VOID(delete p;)
+}
 
 /* Datasets */
 
@@ -897,7 +921,9 @@ int xt_mnist_load(const char *root, int train, xt_tensor *images,
 struct xt_jit_s { torch::jit::Module m; };
 
 xt_jit_module xt_jit_load(const char *path) {
-  TRY(nullptr, return new xt_jit_s{torch::jit::load(path)};)
+  TRY(nullptr,
+    XT_HANDLE_NEW(XT_HANDLE_JIT);
+    return new xt_jit_s{torch::jit::load(path)};)
 }
 int xt_jit_forward(xt_jit_module m, xt_tensor *inputs, int count,
                    xt_tensor *outputs, int capacity, int *produced) {
@@ -934,6 +960,9 @@ int xt_jit_forward(xt_jit_module m, xt_tensor *inputs, int count,
 int xt_jit_train(xt_jit_module m, int on) {
   TRY(-1, m->m.train(on != 0);) return 0;
 }
-void xt_jit_free(xt_jit_module m) { TRY_VOID(delete m;) }
+void xt_jit_free(xt_jit_module m) {
+  if (m) XT_HANDLE_DROP(XT_HANDLE_JIT);
+  TRY_VOID(delete m;)
+}
 
 }

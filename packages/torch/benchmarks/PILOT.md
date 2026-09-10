@@ -1,10 +1,15 @@
 # Pilot measurements
 
-Every number below was measured on 2026-09-09 in this worktree. This is a
-pilot: one fresh-process pair per timed configuration, not the plan's five
-samples. It exists to prove the harness, record the tolerances that passed
-and failed, and name the gaps found. `REPORT.md` and the plots are a later
-pass over the full session.
+Every number below was measured on 2026-09-09 in this worktree. This is
+the pilot: one fresh-process pair per timed configuration, not the plan's
+five samples. It proved the harness, recorded the tolerances that passed
+and failed, and named the gaps.
+
+**`REPORT.md` supersedes this file for results.** It comes from the full
+five-sample session, and three things it settles were open here: where
+the two float32 trajectories part, what the interop cost at 65,536
+elements is made of, and inter-op thread control. This file is kept as
+the record of what the first pass saw and how the gaps were found.
 
 ## What ran
 
@@ -72,7 +77,14 @@ predictions by 6.5e-2; after 1,876 MNIST batches the BatchNorm running
 statistics differ by up to 1.5e-1. The sequence lane, which is much
 smaller, still agrees to 1.2e-7 after 512 windows.
 
-### Open: where the float32 trajectories part
+### Settled since: where the float32 trajectories part
+
+**Resolved.** The `trace` mode and `firstdiff.py` located it exactly: the
+two Adam implementations are not the same sequence of float32 operations.
+`REPORT.md` has the attribution and the reproducer. The bisection below
+is what the pilot could see before the trace mode existed.
+
+#### What the pilot saw
 
 One update is bit-identical, yet the two trainings drift. Bisecting the
 tabular lane, the evaluated loss is bit-identical through 24 updates and
@@ -156,8 +168,12 @@ nothing leaks; the cost is retention, not a leak. A short-scope variant in
 the same run (32 blocks of 16 operations, only the running value carried
 by `Scope.move`) does the same 512 operations at 58 microseconds per step
 against the single-scope run's 75, so shorter scopes recover part but not
-all of the difference. **The remaining 3x against the C++ control is not
-yet attributed** and needs the plan's separate allocation-profiling pass.
+all of the difference. **Resolved since:** the remaining gap is retention too, and nothing is
+unattributed. `run.py attribute` runs the chain under one lifetime per
+process with the handle counters on: one scope per operation, carrying
+only the running value, holds 14 tensor handles and a flat footprint at
+every chain length and runs at parity with the C++ control. See
+`REPORT.md`.
 
 ## Memory
 
@@ -266,22 +282,21 @@ favour.
    robustness question, not a defect: yyjson raises `<bad-state>` for the
    same class of stale access. Recorded, not fixed.
 
-3. **No `set_num_interop_threads`.** The plan asks for inter-op threads
-   fixed to 1 before work where exposed. Python has
-   `torch.set_num_interop_threads`, and `at::set_num_interop_threads`
-   exists in the C++ API and is used by `interop.cpp`, but the package
-   wraps only `xt_set_num_threads`. The x2c programs therefore run with
-   libtorch's default inter-op pool. For these single-stream eager
-   workloads that pool is idle, so the control is documented as missing
-   rather than faked.
+3. **No `set_num_interop_threads`.** *Closed.* The package now publishes
+   `Torch.set_num_interop_threads` and `Torch.num_interop_threads`, and
+   every program in the suite pins the count to 1 before any work and
+   records what it got. The pilot's numbers above were measured with
+   libtorch's default inter-op pool on the x2c side; for these
+   single-stream eager workloads that pool is idle, and the session's
+   numbers in `REPORT.md` were measured with it pinned on both sides.
 
-4. **No per-type native handle counters.** The plan's C++ wrapper layer
-   wants created/destroyed/current/peak by type. `Scope.stats()` counts
-   every wrapper together, which was enough to show that owner counts
-   return to baseline in profiles 1, 4, 5, and 6, but not enough to say
-   which type retained storage. The plan's private benchmark-only
-   instrumentation at `_wrap` and the generator's `xg_wrap` template is
-   the remaining work; no result so far needed it.
+4. **No per-type native handle counters.** *Closed.* The private,
+   benchmark-only instrumentation the plan describes is now in place at
+   the hand-written wrapper, the generator's `xg_wrap` template, the
+   returned handle arrays, and every matching free, behind
+   `XT_HANDLE_COUNTERS` with the reader in a separate diagnostic object.
+   `benchmarks/README.md` describes it. It is what made the interop
+   attribution possible.
 
 5. **A composed root has no forward, so the tabular lane looks up its
    children once.** `Module.composed()` raises on `forward`, so the
@@ -293,12 +308,15 @@ favour.
 No package change was needed to run any lane, and no package source was
 edited.
 
-## Remaining
+## What the pilot left, and where it went
 
 - Five fresh-process pairs per configuration in a quiet window, with the
-  update counts calibrated to 15-30 seconds on the slower side.
-- The shipped-prefix lane, to confirm the package's own build agrees.
-- Isolating the first float32 difference in the tabular lane.
-- Attributing the interop cost at 65,536 elements beyond the live set.
-- `REPORT.md`, the learning curves, paired throughput, memory versus
-  steps, and peak versus chain and window length.
+  counts calibrated to about 15 seconds on the slower side - done, in
+  `REPORT.md`.
+- The shipped-prefix lane, to confirm the package's own build agrees -
+  done: the same `check` run passes identically on both prefixes.
+- Isolating the first float32 difference - done, and it is the optimizer.
+- Attributing the interop cost at 65,536 elements - done, and it is
+  retention.
+- `REPORT.md` and the four plots - done, from `run.py report` and
+  `plots.py`.

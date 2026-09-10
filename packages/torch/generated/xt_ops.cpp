@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "xt_ops.h"
+#include "xt-handles.h"
 
 struct xt_tensor_s { at::Tensor t; };
 
@@ -31,7 +32,10 @@ struct xt_tensor_s { at::Tensor t; };
   try { __VA_ARGS__ } \
   catch (const std::exception &e) { xt_note_error(e.what()); return fail; }
 
-static xt_tensor xg_wrap(at::Tensor t) { return new xt_tensor_s{std::move(t)}; }
+static xt_tensor xg_wrap(at::Tensor t) {
+  XT_HANDLE_NEW(XT_HANDLE_TENSOR);
+  return new xt_tensor_s{std::move(t)};
+}
 
 static at::Scalar xg_to_scalar(int kind, int64_t i, double d) {
   if (kind == 2) return at::Scalar(i != 0);
@@ -64,7 +68,10 @@ static ::std::vector<at::Tensor> xg_to_tensors(const xt_tensor *items,
 
 extern "C" {
 
-void xt_free_handles(xt_tensor *handles) { free(handles); }
+void xt_free_handles(xt_tensor *handles) {
+  if (handles) XT_HANDLE_DROP(XT_HANDLE_ARRAY);
+  free(handles);
+}
 
 /* result aliases the input's storage */
 /* set_data(Tensor(a!) self, Tensor new_data) -> () */
@@ -116,6 +123,7 @@ int64_t xt_align_tensors(const xt_tensor *tensors, int64_t tensors_n, xt_tensor 
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -604,6 +612,7 @@ int64_t xt_atleast_1d_sequence(const xt_tensor *tensors, int64_t tensors_n, xt_t
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -624,6 +633,7 @@ int64_t xt_atleast_2d_sequence(const xt_tensor *tensors, int64_t tensors_n, xt_t
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -644,6 +654,7 @@ int64_t xt_atleast_3d_sequence(const xt_tensor *tensors, int64_t tensors_n, xt_t
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -874,6 +885,7 @@ int64_t xt_broadcast_tensors(const xt_tensor *tensors, int64_t tensors_n, xt_ten
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -931,6 +943,7 @@ int64_t xt_unsafe_chunk(xt_tensor self, int64_t chunks, int64_t dim, xt_tensor *
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -945,6 +958,7 @@ int64_t xt_chunk(xt_tensor self, int64_t chunks, int64_t dim, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -959,6 +973,7 @@ int64_t xt_tensor_split_sections(xt_tensor self, int64_t sections, int64_t dim, 
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -973,6 +988,7 @@ int64_t xt_tensor_split_indices(xt_tensor self, const int64_t *indices, int64_t 
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -987,6 +1003,7 @@ int64_t xt_tensor_split_tensor_indices_or_sections(xt_tensor self, xt_tensor ten
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -1410,6 +1427,7 @@ int64_t xt_gradient_scalarint(xt_tensor self, int spacing_kind, int64_t spacing_
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -1424,6 +1442,7 @@ int64_t xt_gradient_scalararray(xt_tensor self, int spacing_kind, int64_t spacin
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -1438,6 +1457,7 @@ int64_t xt_gradient_array(xt_tensor self, const int64_t *dim, int64_t dim_n, int
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -1452,6 +1472,7 @@ int64_t xt_gradient_tensorarrayint(xt_tensor self, const xt_tensor *spacing, int
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -1466,6 +1487,7 @@ int64_t xt_gradient_tensorarray(xt_tensor self, const xt_tensor *spacing, int64_
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3486,6 +3508,7 @@ int64_t xt_unsafe_split_tensor(xt_tensor self, int64_t split_size, int64_t dim, 
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3500,6 +3523,7 @@ int64_t xt_split_tensor(xt_tensor self, int64_t split_size, int64_t dim, xt_tens
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3514,6 +3538,7 @@ int64_t xt_split_sizes(xt_tensor self, const int64_t *split_size, int64_t split_
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3528,6 +3553,7 @@ int64_t xt_unsafe_split_with_sizes(xt_tensor self, const int64_t *split_sizes, i
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3542,6 +3568,7 @@ int64_t xt_split_with_sizes(xt_tensor self, const int64_t *split_sizes, int64_t 
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3556,6 +3583,7 @@ int64_t xt_hsplit_int(xt_tensor self, int64_t sections, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3570,6 +3598,7 @@ int64_t xt_hsplit_array(xt_tensor self, const int64_t *indices, int64_t indices_
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3584,6 +3613,7 @@ int64_t xt_vsplit_int(xt_tensor self, int64_t sections, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3598,6 +3628,7 @@ int64_t xt_vsplit_array(xt_tensor self, const int64_t *indices, int64_t indices_
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3612,6 +3643,7 @@ int64_t xt_dsplit_int(xt_tensor self, int64_t sections, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -3626,6 +3658,7 @@ int64_t xt_dsplit_array(xt_tensor self, const int64_t *indices, int64_t indices_
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -4499,6 +4532,7 @@ int64_t xt_unbind_int(xt_tensor self, int64_t dim, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -4579,6 +4613,7 @@ int64_t xt_quantize_per_tensor_tensors(const xt_tensor *tensors, int64_t tensors
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -4605,6 +4640,7 @@ int64_t xt_dequantize_tensors(const xt_tensor *tensors, int64_t tensors_n, xt_te
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -4724,6 +4760,7 @@ int64_t xt_meshgrid(const xt_tensor *tensors, int64_t tensors_n, xt_tensor **out
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -4738,6 +4775,7 @@ int64_t xt_meshgrid_indexing(const xt_tensor *tensors, int64_t tensors_n, const 
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -5750,6 +5788,7 @@ int64_t xt_nonzero_numpy(xt_tensor self, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -7641,6 +7680,7 @@ int64_t xt_unflatten_dense_tensors(xt_tensor flat, const xt_tensor *tensors, int
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -7709,6 +7749,7 @@ int64_t xt_split_copy_tensor(xt_tensor self, int64_t split_size, int64_t dim, xt
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -7723,6 +7764,7 @@ int64_t xt_split_with_sizes_copy(xt_tensor self, const int64_t *split_sizes, int
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;
@@ -7809,6 +7851,7 @@ int64_t xt_unbind_copy_int(xt_tensor self, int64_t dim, xt_tensor **out) {
     xt_tensor *handles = (xt_tensor *) malloc(
       sizeof(xt_tensor) * (count ? count : 1));
     if (!handles) { xt_note_error("out of memory"); return -1; }
+    XT_HANDLE_NEW(XT_HANDLE_ARRAY);
     for (size_t k = 0; k < count; k++)
       handles[k] = xg_wrap(result[k]);
     *out = handles;

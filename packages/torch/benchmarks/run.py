@@ -10,6 +10,8 @@ application runs on its own with the same arguments this passes.
     python3 packages/torch/benchmarks/run.py check [--app <name>]
     python3 packages/torch/benchmarks/run.py time  [--samples 5] [--updates N]
     python3 packages/torch/benchmarks/run.py memory [--profiles 1,3,4,5,6]
+    python3 packages/torch/benchmarks/run.py attribute [--elements 65536]
+    python3 packages/torch/benchmarks/run.py report
     python3 packages/torch/benchmarks/run.py env
 
 `--lane primary` builds the x2c benchmark objects against the libtorch
@@ -88,7 +90,7 @@ def library_record(prefix):
     return libraries
 
 
-def build(lane):
+def build(lane, counters=False):
     common.ensure_directories()
     prefix = wheel_prefix() if lane == "primary" else package_prefix()
     include = os.path.join(prefix, "include")
@@ -102,21 +104,26 @@ def build(lane):
     # object, and the link line record no prefix in their prerequisites,
     # so a lane switch drops them; otherwise make would keep the previous
     # lane's objects and the comparison would name the wrong backend.
+    # A counters build is a different package build, so the marker
+    # carries the flag as well as the prefix.
+    wanted = prefix + (" +counters" if counters else "")
     marker = os.path.join(PACKAGE, "builds", "benchmark-lane")
     recorded = None
     if os.path.exists(marker):
         with open(marker) as handle:
             recorded = handle.read().strip()
-    if recorded != prefix:
+    if recorded != wanted:
         for name in ("torch.link", "torch-shim.o", "xt_ops.o"):
             path = os.path.join(PACKAGE, "builds", name)
             if os.path.exists(path):
                 os.remove(path)
-    subprocess.run(["make", f"TORCH_PREFIX={prefix}", "build"], cwd=PACKAGE,
-                   check=True)
+    diagnostic = "-DXT_HANDLE_COUNTERS" if counters else ""
+    subprocess.run(["make", f"TORCH_PREFIX={prefix}",
+                    f"PACKAGE_DIAGNOSTIC={diagnostic}", "build"],
+                   cwd=PACKAGE, check=True)
     os.makedirs(os.path.dirname(marker), exist_ok=True)
     with open(marker, "w") as handle:
-        handle.write(prefix + "\n")
+        handle.write(wanted + "\n")
 
     membytes = os.path.join(common.BINARIES, "libmembytes.dylib")
     subprocess.run(["clang", "-O2", "-dynamiclib",
@@ -146,6 +153,8 @@ def build(lane):
             "--package-dir", os.path.join(common.ROOT, "packages"),
             source, os.path.join(BENCH, "bench.x"),
             os.path.join(BENCH, "membytes.c"),
+            os.path.join(BENCH, "handles.c"),
+            *(["-D", "XT_HANDLE_COUNTERS"] if counters else []),
         ], check=True, cwd=common.ROOT)
         print(f"built {output}")
 
@@ -158,12 +167,13 @@ def build(lane):
             "clang++", "-std=c++17", "-O2",
             f"-I{include}",
             f"-I{os.path.join(include, 'torch/csrc/api/include')}",
-            f"-I{BENCH}", control, membytes_object,
+            f"-I{BENCH}", f"-I{os.path.join(PACKAGE, 'src')}",
+            control, membytes_object,
             "-o", output, f"-L{lib}", "-ltorch", "-ltorch_cpu", "-lc10",
             f"-Wl,-rpath,{lib}"], check=True)
         print(f"built {output}")
 
-    record = {"lane": lane, "prefix": prefix,
+    record = {"lane": lane, "prefix": prefix, "counters": counters,
               "libraries": library_record(prefix)}
     with open(os.path.join(common.BINARIES, "lane.json"), "w") as handle:
         json.dump(record, handle, indent=2, sort_keys=True)
@@ -228,6 +238,7 @@ def check(apps, threads, run):
     import torch  # noqa: F401  (only for the comparison, not the run)
 
     ok = True
+    collected = {}
     for app in apps:
         if not os.path.exists(os.path.join(common.BINARIES, app)):
             print(f"{app}: not built, skipped")
@@ -235,12 +246,21 @@ def check(apps, threads, run):
         print(f"== {app} check")
         results = both(app, "check", (), threads, run, f"check-{app}")
         x, p = results["x2c"], results["python"]
+        collected[app] = {
+            "records": {"x2c": x.records, "python": p.records},
+            "curve": {"x2c": x.curve, "python": p.curve},
+            "agreement": [],
+        }
 
         for name in sorted(set(x.records) & set(p.records)):
             if name.startswith("cfg_"):
                 continue
             relative, agreed = common.agree(name, x.number(name),
                                             p.number(name))
+            collected[app]["agreement"].append(
+                {"name": name, "x2c": x.number(name),
+                 "python": p.number(name), "relative": relative,
+                 "ok": agreed})
             mark = "ok" if agreed else "OVER"
             print(f"  {name:<24} x2c {x.number(name):.8g}  "
                   f"python {p.number(name):.8g}  rel {relative:.2e}  {mark}")
@@ -251,14 +271,27 @@ def check(apps, threads, run):
         if all(os.path.exists(path) for path in step1):
             worst, failed = report_comparison("one update, full values",
                                               *step1)
+            collected[app]["step1_worst_absolute"] = worst
+            collected[app]["step1_tensors"] = len(
+                common.compare_tensors(common.load_tensors(step1[0]),
+                                       common.load_tensors(step1[1])))
             ok = ok and not failed
         final = (common.output(f"{app}-x2c-final.pt"),
                  common.output(f"{app}-python-final.pt"))
         if all(os.path.exists(path) for path in final):
             # Long-run acceptance is task quality plus loss agreement; the
             # per-weight numbers are reported, not required to match.
-            report_comparison("after the full profile (reported, not "
-                              "required)", *final)
+            worst, failed = report_comparison(
+                "after the full profile (reported, not required)", *final)
+            collected[app]["final_worst_absolute"] = worst
+        step1_worst = collected[app].get("step1_worst_absolute")
+        if step1_worst is not None:
+            collected[app]["step1_exact"] = step1_worst == 0.0
+    path = os.path.join(log_dir(run), "check.json")
+    with open(path, "w") as handle:
+        json.dump(collected, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    print(f"results {path}")
     return 0 if ok else 1
 
 
@@ -392,9 +425,100 @@ def memory(profiles, steps, threads, run):
             print(f"  within-run peak footprint x2c/python "
                   f"{x_peak / p_peak:.2f}x")
         rows.append(row)
+    # Profiles run at different scales, so a later invocation merges into
+    # the same file by profile number instead of replacing it.
     path = os.path.join(log_dir(run), "memory.json")
+    def key(row):
+        return "%d@%d" % (row["profile"], row["steps"])
+
+    merged = {}
+    if os.path.exists(path):
+        with open(path) as handle:
+            merged = {key(row): row for row in json.load(handle)}
+    merged.update({key(row): row for row in rows})
+    order = sorted(merged, key=lambda k: (merged[k]["profile"],
+                                          merged[k]["steps"]))
     with open(path, "w") as handle:
-        json.dump(rows, handle, indent=2, sort_keys=True)
+        json.dump([merged[k] for k in order], handle, indent=2,
+                  sort_keys=True)
+        handle.write("\n")
+    print(f"raw samples {path}")
+    return 0
+
+
+# ---- attribution ----------------------------------------------------------
+
+SHAPES = ["natural", "freed", "subscope"]
+CHAIN_LENGTHS = [16, 128, 512]
+
+
+def attribute(elements, requests, threads, run):
+    """The interop chain under three lifetimes against the C++ control.
+
+    One fresh process per lifetime: run in one process, the earlier
+    shapes' allocator churn biases the later ones. Needs a counters build
+    for the handle numbers, which `run.py build --counters` produces.
+    """
+    binary = os.path.join(common.BINARIES, "interop")
+    control = os.path.join(common.BINARIES, "interop-cpp")
+    if not os.path.exists(binary):
+        print("interop: not built, skipped")
+        return 1
+    logs = log_dir(run)
+    rows, counted = {}, None
+    for shape in SHAPES:
+        result = common.launch(
+            [binary, "attribute", common.ARTIFACTS, common.OUTPUTS,
+             str(elements), str(requests), shape], environment(threads),
+            os.path.join(logs, f"attribute-{shape}.log"))
+        counted = bool(result.records.get("counters_enabled"))
+        for ops in CHAIN_LENGTHS:
+            rows[(shape, ops)] = {
+                "ns_per_step": result.number(
+                    f"attr_{shape}_o{ops}_ns_per_step"),
+                "peak_handles": int(
+                    result.number(f"attr_{shape}_o{ops}_peak_handles")),
+                "peak_bytes": result.number(f"attr_{shape}_o{ops}_peak_bytes"),
+                "result": result.number(f"attr_{shape}_o{ops}_result"),
+            }
+    control_ns = {}
+    for ops in CHAIN_LENGTHS:
+        result = common.launch(
+            [control, "time", common.ARTIFACTS, common.OUTPUTS,
+             f"e{elements}o{ops}", str(requests)], environment(threads),
+            os.path.join(logs, f"attribute-cpp-o{ops}.log"))
+        control_ns[ops] = result.number(f"ns_per_op_e{elements}_o{ops}")
+
+    if not counted:
+        print("  handle counts are zero: this is not a --counters build")
+    print(f"== interop attribution, {elements} elements, {requests} requests, "
+          f"{threads} intra-op thread(s)")
+    print(f"  {'lifetime':<10} {'ops':>4} {'ns/step':>9} {'vs c++':>7} "
+          f"{'live handles':>13} {'peak MB':>8}")
+    for shape in SHAPES:
+        for ops in CHAIN_LENGTHS:
+            row = rows[(shape, ops)]
+            row["vs_control"] = row["ns_per_step"] / control_ns[ops]
+            print(f"  {shape:<10} {ops:>4} {row['ns_per_step']:>9.0f} "
+                  f"{row['vs_control']:>6.2f}x {row['peak_handles']:>13} "
+                  f"{row['peak_bytes'] / 1e6:>8.1f}")
+    for ops in CHAIN_LENGTHS:
+        print(f"  {'c++':<10} {ops:>4} {control_ns[ops]:>9.0f} {1.0:>6.2f}x "
+              f"{'n/a':>13} {'n/a':>8}")
+    for ops in CHAIN_LENGTHS:
+        values = {rows[(shape, ops)]["result"] for shape in SHAPES}
+        print(f"  ops {ops:>3}: the three lifetimes agree exactly: "
+              f"{len(values) == 1}")
+
+    record = {"elements": elements, "requests": requests,
+              "threads": threads, "counters": counted,
+              "control_ns_per_step": control_ns,
+              "rows": [{"shape": shape, "operations": ops,
+                        **rows[(shape, ops)]}
+                       for shape in SHAPES for ops in CHAIN_LENGTHS]}
+    path = os.path.join(logs, "attribution.json")
+    with open(path, "w") as handle:
+        json.dump(record, handle, indent=2, sort_keys=True)
         handle.write("\n")
     print(f"raw samples {path}")
     return 0
@@ -425,9 +549,13 @@ def environment_report(run):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=["prepare", "build", "check", "time",
-                                         "memory", "env"])
+                                         "memory", "attribute", "report",
+                                         "env"])
     parser.add_argument("--lane", default="primary",
                         choices=["primary", "shipped"])
+    parser.add_argument("--counters", action="store_true",
+                        help="build the package with the private "
+                             "handle counters and link the reader")
     parser.add_argument("--app", action="append")
     parser.add_argument("--samples", type=int, default=5)
     parser.add_argument("--updates", type=int, default=None)
@@ -435,6 +563,8 @@ def main():
     parser.add_argument("--profiles", default="1,3,4,5,6")
     parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--run-id", default=None)
+    parser.add_argument("--elements", type=int, default=65536)
+    parser.add_argument("--requests", type=int, default=60)
     options = parser.parse_args()
 
     run = options.run_id or run_id()
@@ -445,21 +575,30 @@ def main():
         return subprocess.run([common.torch_python(),
                                os.path.join(BENCH, "prepare.py")]).returncode
     if options.mode == "build":
-        return build(options.lane) or 0
+        return build(options.lane, options.counters) or 0
     if options.mode == "check":
         return check(options.app or X_APPS, threads[0], run)
     if options.mode == "time":
-        counts = {"tabular": options.updates or 20000,
-                  "tabular.predict1": options.updates or 20000,
-                  "tabular.predict32": options.updates or 10000,
-                  "tabular.predict256": options.updates or 2000,
-                  "mnist": options.updates or 300,
-                  "sequence": options.updates or 400,
-                  "interop": options.updates or 100}
+        # Calibrated from the pilot so the slower language takes roughly
+        # 15 seconds per sample at one intra-op thread. --updates
+        # overrides every lane at once, which is for a quick harness
+        # check, not for a reported session.
+        counts = {"tabular": options.updates or 60000,
+                  "tabular.predict1": options.updates or 900000,
+                  "tabular.predict32": options.updates or 520000,
+                  "tabular.predict256": options.updates or 210000,
+                  "mnist": options.updates or 1150,
+                  "sequence": options.updates or 6800,
+                  "interop": options.updates or 190}
         return time_all(options.samples, counts, threads, run)
     if options.mode == "memory":
         profiles = [int(v) for v in options.profiles.split(",")]
         return memory(profiles, options.steps, threads[0], run)
+    if options.mode == "attribute":
+        return attribute(options.elements, options.requests, threads[0], run)
+    if options.mode == "report":
+        import report
+        return report.write(run)
     return environment_report(run)
 
 

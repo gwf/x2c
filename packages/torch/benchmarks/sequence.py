@@ -60,7 +60,9 @@ def configure():
     try:
         torch.set_num_interop_threads(1)
     except RuntimeError:
+        # Already fixed by an earlier parallel region; report, do not fake.
         text("interop_threads_note", "already-set")
+    record("interop_threads", torch.get_num_interop_threads())
     torch.manual_seed(0)
 
 
