@@ -401,8 +401,11 @@ main:focus {
 }
 
 .hero-examples a {
-  color: var(--red-text);
+  color: var(--muted-dark);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
   text-underline-offset: 4px;
+  white-space: nowrap;
 }
 
 .hero-heading p,
