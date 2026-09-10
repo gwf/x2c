@@ -6,7 +6,7 @@ export const titleTransition = {
   a: {
     background: 100,
     lines: [
-      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 30 },
+      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 10 },
       { opacity: 50, blur: 0, depth: 0, softness: 0, strength: 0 },
     ],
   },
@@ -14,7 +14,7 @@ export const titleTransition = {
     background: 100,
     lines: [
       { opacity: 50, blur: 0, depth: 0, softness: 0, strength: 0 },
-      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 30 },
+      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 10 },
     ],
   },
 };
