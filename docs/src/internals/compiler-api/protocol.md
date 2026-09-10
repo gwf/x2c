@@ -39,7 +39,7 @@ Returns the protocol member used to derive a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/protocol.x:1441`
+Source: `src/protocol.x:1440`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -51,7 +51,7 @@ Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, making the output suitable for comparing
 live and artifact symbol modes.
 
-Source: `src/protocol.x:1411`
+Source: `src/protocol.x:1410`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -63,7 +63,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2129`
+Source: `src/protocol.x:2128`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -86,7 +86,7 @@ Source: `src/protocol.x:1108`
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/protocol.x:1372`
+Source: `src/protocol.x:1371`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -99,7 +99,7 @@ publishes the normalized row immediately. Macro-hole parsing returns syntax
 for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node.
 
-Source: `src/protocol.x:2263`
+Source: `src/protocol.x:2262`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -111,7 +111,7 @@ Lookup canonicalizes the participant and may use the nearest adopted
 typedef ancestor. Native conformances install their generated bindings
 before the cached conformance row is returned.
 
-Source: `src/protocol.x:1304`
+Source: `src/protocol.x:1303`
 
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
@@ -122,7 +122,7 @@ Reports whether conformance supersedes an ambient direct member.
 The answer is cached for the canonical participant and includes the first
 visible adopted ancestor that declares the member.
 
-Source: `src/protocol.x:1328`
+Source: `src/protocol.x:1327`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -135,7 +135,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1697`
+Source: `src/protocol.x:1696`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -183,7 +183,7 @@ Returns a `(binding signature)` pair for the selected implementation or
 null when no eligible resolved member exists; positive and negative
 results are cached.
 
-Source: `src/protocol.x:1678`
+Source: `src/protocol.x:1677`
 
 <a id="Compiler.resolve_protocol_method"></a>
 #### Compiler.resolve_protocol_method
@@ -195,7 +195,7 @@ Returns a `(binding signature)` pair for the selected implementation or
 null when no eligible resolved member exists; positive and negative
 results are cached separately from operator lookup.
 
-Source: `src/protocol.x:1687`
+Source: `src/protocol.x:1686`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols

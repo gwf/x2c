@@ -80,7 +80,7 @@ Source: `src/ast.x:46`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:190`
+Source: `src/ast.x:189`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -90,7 +90,7 @@ Source: `src/ast.x:190`
 Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return NULL.
 
-Source: `src/ast.x:203`
+Source: `src/ast.x:202`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -103,7 +103,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:176`
+Source: `src/ast.x:175`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
