@@ -1702,14 +1702,12 @@ enum {
   ARCHITECTURE_BRIDGE_SECOND_GROUP = 2
 };
 
-static List _ranked_records(Array ranked, int limit) {
-  ranked.sort();
-  Array records = %[];
-  foreach (List row, ranked) {
-    if ((int) records.len() == limit) break;
-    match (row)
-      case %(rank ? ?record): records.push(record);
-  }
+/* Orders `records` by the key `key` builds for each one, keeps the first
+   `limit`, and returns them as a List. */
+static List _ranked_records(Array records, Func key, int limit) {
+  records.sort_by(key);
+  if ((int) records.len() > limit)
+    records.remslice(limit, records.len()).free();
   return records.list_free();
 }
 
@@ -1782,14 +1780,17 @@ static List _architecture_choke_points(List graph) {
                (functions $function_count))
       (calls $call_count)
     );
-    int rank_cross = -cross, rank_functions = -function_count;
-    int rank_calls = -call_count;
-    ranked.push(%(
-      rank ($rank_cross $rank_functions $rank_calls $path $name)
-      $record
-    ));
+    ranked.push(record);
   }
-  return _ranked_records(ranked, ARCHITECTURE_LIMIT);
+  return _ranked_records(ranked, %!(List record) => {
+    match (record)
+      case %(function ?path ?name ?
+             (callers (cross-units ?cross) (units ?) (functions ?count))
+             (calls ?calls)):
+        return %(${-cross.int()} ${-count.int()} ${-calls.int()}
+                 $path $name);
+    return nil;
+  }, ARCHITECTURE_LIMIT);
 }
 
 static Map _unit_edges(List graph) {
@@ -1823,18 +1824,20 @@ static List _architecture_reciprocal(List graph) {
     if (forward < ARCHITECTURE_RECIPROCAL_CALLS ||
         reverse < ARCHITECTURE_RECIPROCAL_CALLS)
       continue;
-    int lesser = forward < reverse ? forward : reverse;
-    int total = forward + reverse;
     List record = %(
       units $left $right
       (calls ($left $right $forward) ($right $left $reverse))
     );
-    int rank_lesser = -lesser, rank_total = -total;
-    ranked.push(%(
-      rank ($rank_lesser $rank_total $left $right) $record
-    ));
+    ranked.push(record);
   }
-  return _ranked_records(ranked, ARCHITECTURE_LIMIT);
+  return _ranked_records(ranked, %!(List record) => {
+    match (record)
+      case %(units ?left ?right (calls (? ? ?forward) (? ? ?reverse))): {
+        int a = forward.int(), b = reverse.int();
+        return %(${a < b ? -a : -b} ${-(a + b)} $left $right);
+      }
+    return nil;
+  }, ARCHITECTURE_LIMIT);
 }
 
 static int _architecture_count(Map counts, List key) {
@@ -1926,11 +1929,6 @@ static List _architecture_dependency_width(List graph) {
     );
     int lesser = left_width < right_width ? left_width : right_width;
     if (lesser < ARCHITECTURE_BOUNDARY_FUNCTIONS) continue;
-    int total_width = left_width + right_width;
-    int edge_count = _architecture_count(edges, %($left $right)) +
-                     _architecture_count(edges, %($right $left));
-    int call_count = _architecture_count(calls, %($left $right)) +
-                     _architecture_count(calls, %($right $left));
     List forward = _boundary_direction(
       left, right, callers, callees, edges, calls
     );
@@ -1942,15 +1940,26 @@ static List _architecture_dependency_width(List graph) {
       (functions ($left $left_width) ($right $right_width))
       (directions $forward $reverse)
     );
-    int rank_lesser = -lesser, rank_width = -total_width;
-    int rank_edges = -edge_count, rank_calls = -call_count;
-    ranked.push(%(
-      rank
-      ($rank_lesser $rank_width $rank_edges $rank_calls $left $right)
-      $record
-    ));
+    ranked.push(record);
   }
-  return _ranked_records(ranked, ARCHITECTURE_LIMIT);
+  return _ranked_records(ranked, %!(List record) => {
+    match (record)
+      case %(units ?left ?right
+             (functions (? ?left_width) (? ?right_width))
+             (directions (direction ? ? ? (edges ?forward_edges)
+                                          (calls ?forward_calls))
+                         (direction ? ? ? (edges ?reverse_edges)
+                                          (calls ?reverse_calls)))): {
+        int a = left_width.int(), b = right_width.int();
+        return %(
+          ${a < b ? -a : -b} ${-(a + b)}
+          ${-(forward_edges.int() + reverse_edges.int())}
+          ${-(forward_calls.int() + reverse_calls.int())}
+          $left $right
+        );
+      }
+    return nil;
+  }, ARCHITECTURE_LIMIT);
 }
 
 static void _add_neighbor(Map adjacency, String from, String to) {
@@ -2052,17 +2061,10 @@ static void _collect_unit_bridges(
     List groups = _bridge_groups(name, components, adjacency);
     if (!groups || !groups.cdr()) continue;
     List sizes = _component_sizes(groups);
-    int second = sizes.cadr().int();
-    if (second < ARCHITECTURE_BRIDGE_SECOND_GROUP) continue;
-    int outside = 0;
-    foreach (Var size, sizes.cdr()) outside += size.int();
-    List record = detailed
-                ? %(function $name (groups @groups))
-                : %(function $path $name (groups @sizes));
-    int rank_second = -second, rank_outside = -outside;
-    ranked.push(%(
-      rank ($rank_second $rank_outside $path $name) $record
-    ));
+    if (sizes.cadr().int() < ARCHITECTURE_BRIDGE_SECOND_GROUP) continue;
+    ranked.push(detailed
+              ? %(function $name (groups @groups))
+              : %(function $path $name (groups @sizes)));
   }
 }
 
@@ -2106,7 +2108,15 @@ static List _architecture_bridges(List graph) {
               path, names, adjacency, components, 0, ranked
             );
           }
-  return _ranked_records(ranked, ARCHITECTURE_LIMIT);
+  return _ranked_records(ranked, %!(List record) => {
+    match (record)
+      case %(function ?path ?name (groups ? *rest)): {
+        int outside = 0;
+        foreach (Var size, rest) outside += size.int();
+        return %(${-rest.car().int()} ${-outside} $path $name);
+      }
+    return nil;
+  }, ARCHITECTURE_LIMIT);
 }
 
 static List _architecture(List graph) {
@@ -2156,6 +2166,21 @@ static List _structure(List graph, String wanted) {
               _collect_unit_bridges(
                 path, names, adjacency, groups, 1, bridge_rows
               );
+              List bridges = _ranked_records(
+                bridge_rows,
+                %!(List record) => {
+                  match (record)
+                    case %(function ?name (groups ? *rest)): {
+                      int outside = 0;
+                      foreach (List group, rest)
+                        outside += (int) group.len() - 1;
+                      return %(${1 - (int) rest.car().list().len()}
+                               ${-outside} $name);
+                    }
+                  return nil;
+                },
+                INT_MAX
+              );
               isolated.sort();
               int function_count = functions.len();
               matches.push(%(
@@ -2163,9 +2188,7 @@ static List _structure(List graph, String wanted) {
                 (internal ${_unit_internal_calls(path, functions)})
                 (isolated @{isolated.list_free()})
                 (components @components)
-                (bridges @{
-                  _ranked_records(bridge_rows, INT_MAX)
-                })
+                (bridges @bridges)
               ));
             }
   return %(structure $wanted (matches @{matches.list_free()}));

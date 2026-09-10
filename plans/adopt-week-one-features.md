@@ -161,12 +161,12 @@ arms lose only their conversion calls; guards emit the same `if`.
 
 ### 3. Wildcard catch and stable sorts
 
-- `lib/func.x:182-205`: the five identical wrap-and-reraise arms become one
-  `catch %(?code *cause)` that raises `%($code (sig $sig) ... (cause
-  ${cons(code, cause)}))`. This also wraps causes outside the current five;
-  the body's purpose is to attach the argument position to any conversion
-  failure, so the wider filter is the intended behavior. Update the
-  docstring's raise list to say "the conversion's cause".
+- `lib/func.x:182-205` stays as five arms. A wildcard arm cannot re-raise
+  under the caught code: the `raise` statement requires a bare Symbol code
+  (`raise %($code ...)` is a parse error), and `Error.raise(code, detail)`
+  records no source location, which the docstring says to prefer keeping.
+  Recorded as a language follow-on: a `raise` form that takes a computed
+  code and keeps the site record.
 - `examples/programs/lisp.x:11-27`: delete the `shell-catches` Lisp macro and
   the `$shell.errors` decorator; the one arm becomes
   `catch %(?code *detail): _print_error(code, detail);`. The four bare

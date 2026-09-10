@@ -7,40 +7,15 @@ static void _print_error(Symbol code, List detail) {
   Stderr.printf("error: %s\n", error.repr());
 }
 
-// Expand one handler template for the evaluator's supported error codes.
-$(defun shell-catches (statement)
-  (let* ((parts (match statement
-            '(try ?body (catchcases (?arm ?fallback)) ?finally)))
-         (arms (map (lambda (code)
-           (search-replace (bound parts '?arm)
-             '(literal ("Symbol") ?spelling bad-arity)
-             `(literal ("Symbol") ,(str code) ,code)))
-           '(bad-arity bad-sig bad-types not-call unbound malformed
-             incomplete not-found io-fail no-symbol bad-result void-op
-             bad-arg bad-enc bad-op bad-shift bad-target conv-range
-             div-zero no-convert))))
-    `(try ,(bound parts '?body)
-       (catchcases ,(append arms (list (bound parts '?fallback))))
-       ,(bound parts '?finally))))
-
-macro Decorator $shell.errors(Statement $body) => {
-  $(shell-catches $body)
-}
-
 static int _eval_input(
   Lisp lisp, Var form, String source, int is_form, int print) {
-  $shell.errors()
   try {
     Var result = is_form ? Lisp.eval(lisp, form)
                          : Lisp.eval_string(lisp, source);
     if (print) Stdout.printf("%s\n", result.repr());
   }
-  catch %(bad-arity *detail): {
-    _print_error(<bad-arity>, detail);
-    return 0;
-  }
-  catch: {
-    Stderr.puts("error: unknown failure\n");
+  catch %(?code *detail): {
+    _print_error(code, detail);
     return 0;
   }
   return 1;
@@ -58,16 +33,8 @@ static int _eval_file(Lisp lisp, const char *path, int print) {
   try {
     return _eval_text(lisp, File.open(path, "r").string_close(), print);
   }
-  catch %(not-found *detail): {
-    _print_error(<not-found>, detail);
-    return 0;
-  }
-  catch %(io-fail *detail): {
-    _print_error(<io-fail>, detail);
-    return 0;
-  }
-  catch: {
-    Stderr.puts("error: unknown failure\n");
+  catch %(?code *detail): {
+    _print_error(code, detail);
     return 0;
   }
 }
@@ -83,13 +50,8 @@ static int _repl(Lisp lisp) {
     }
     String line = NULL;
     try line = Stdin.readline();
-    catch %(io-fail *detail): {
-      _print_error(<io-fail>, detail);
-      failed = 1;
-      break;
-    }
-    catch: {
-      Stderr.puts("error: unknown failure\n");
+    catch %(?code *detail): {
+      _print_error(code, detail);
       failed = 1;
       break;
     }
@@ -108,12 +70,8 @@ static int _repl(Lisp lisp) {
         status = Lisp.read(lisp, source, &cursor, &form);
       }
       catch %(incomplete *): status = <incomplete>;
-      catch %(malformed *detail): {
-        _print_error(<malformed>, detail);
-        status = <malformed>;
-      }
-      catch: {
-        Stderr.puts("error: unknown failure\n");
+      catch %(?code *detail): {
+        _print_error(code, detail);
         status = <malformed>;
       }
       if (status == <value>) {

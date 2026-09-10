@@ -249,7 +249,7 @@ static void _loop_add_event(
   _loop_increment(totals, %($source $kind), 1);
 }
 
-static List _loop_ranked_candidate(List key, List events) {
+static List _loop_candidate(List key, List events) {
   String unit, function;
   Symbol visibility;
   List location;
@@ -311,26 +311,29 @@ static List _loop_ranked_candidate(List key, List events) {
     (operations @{operations.list_free()})
     (loop-depth $loop_depth)
   );
-  int scoped = direct_scoped + helper_scoped;
-  int total = direct_pooled + direct_scoped +
-              helper_pooled + helper_scoped;
-  String source;
-  int line, column;
-  match (location)
-    case %(location ?location_source ?location_line ?location_column): {
-      source = location_source, line = location_line.integer();
-      column = location_column.integer();
+  return record;
+}
+
+/* Orders a candidate before another with fewer scoped allocations,
+   discarded results, helper calls, allocations, or loop nesting, and
+   breaks ties by site. */
+static List _loop_candidate_rank(List candidate) {
+  match (candidate)
+    case %(site ?unit ?function ? (location ?source ?line ?column)
+           (allocations (direct (pooled ?direct_pooled) (scoped ?scoped))
+                        (helper-calls (pooled ?helper_pooled)
+                                      (scoped ?helper_scoped)))
+           (uses ? ? ? (discarded ?discarded) ? ?)
+           (operations *) (loop-depth ?depth)): {
+      int helpers = helper_pooled.int() + helper_scoped.int();
+      int direct = direct_pooled.int() + scoped.int();
+      return %(
+        ${-(scoped.int() + helper_scoped.int())} ${-discarded.int()}
+        ${-helpers} ${-(direct + helpers)} ${-depth.int()}
+        $unit $function $source $line $column
+      );
     }
-  int helpers = helper_pooled + helper_scoped;
-  int rank_scoped = -scoped, rank_discarded = -discarded;
-  int rank_helpers = -helpers;
-  int rank_total = -total, rank_depth = -loop_depth;
-  return %(
-    rank ($rank_scoped $rank_discarded $rank_helpers
-          $rank_total $rank_depth
-          $unit $function $source $line $column)
-    $record
-  );
+  return nil;
 }
 
 List LoopAllocations.finish(List units, int limit) {
@@ -358,15 +361,11 @@ List LoopAllocations.finish(List units, int limit) {
   Array ranked = %[];
   foreach (Var (raw_key, raw_events), groups)
     ranked.push(
-      _loop_ranked_candidate(raw_key.list(), raw_events.list())
+      _loop_candidate(raw_key.list(), raw_events.list())
     );
-  ranked.sort();
-  Array candidates = %[];
-  foreach (List row, ranked) {
-    if (limit && (int) candidates.len() == limit) break;
-    match (row)
-      case %(rank ? ?candidate): candidates.push(candidate);
-  }
+  ranked.sort_by(%!(List candidate) => _loop_candidate_rank(candidate));
+  if (limit && (int) ranked.len() > limit)
+    ranked.remslice(limit, ranked.len()).free();
 
   int function_count = functions.len();
   int expression_count = groups.len();
@@ -374,7 +373,7 @@ List LoopAllocations.finish(List units, int limit) {
   int direct_scoped = _loop_count(totals, %(direct scoped));
   int helper_pooled = _loop_count(totals, %(helper pooled));
   int helper_scoped = _loop_count(totals, %(helper scoped));
-  int reported = candidates.len();
+  int reported = ranked.len();
   return %(
     loop-allocations
     (summary (functions $function_count) (expressions $expression_count)
@@ -382,6 +381,6 @@ List LoopAllocations.finish(List units, int limit) {
              (helper-calls (pooled $helper_pooled)
                            (scoped $helper_scoped))
              (reported $reported))
-    (candidates @{candidates.list_free()})
+    (candidates @{ranked.list_free()})
   );
 }
