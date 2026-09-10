@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "torch",
+  "version": "2.10.0",
+  "profile": "libtorch-macos-arm64-cpu",
+  "sources": [
+    {
+      "name": "libtorch",
+      "url": "https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.10.0.zip",
+      "sha256": "13061d97e561235d9e43c132f6dc9b08a60f487a833da53a951614a96d3e7d32",
+      "root": "libtorch"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{work}",
+      "argv": ["cp", "-R", "{source_libtorch}/include/.", "{prefix}/include"]
+    },
+    {
+      "cwd": "{work}",
+      "argv": ["cp", "-R", "{source_libtorch}/lib/.", "{prefix}/lib"]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/torch/csrc/api/include/torch/torch.h",
+    "{prefix}/lib/libtorch_cpu.dylib",
+    "{prefix}/lib/libc10.dylib"
+  ]
+}

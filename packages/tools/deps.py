@@ -19,6 +19,7 @@ import tempfile
 import time
 import urllib.parse
 import urllib.request
+import zipfile
 
 
 SCHEMA_VERSION = 1
@@ -238,16 +239,33 @@ def _link_destination(root: Path, member: tarfile.TarInfo) -> Path:
   return destination
 
 
+def _extract_zip(archive: Path, raw: Path) -> None:
+  with zipfile.ZipFile(archive) as bundle:
+    for member in bundle.infolist():
+      if member.is_dir():
+        continue
+      target = _member_destination(raw, member.filename)
+      target.parent.mkdir(parents=True, exist_ok=True)
+      with bundle.open(member) as data, target.open("wb") as output:
+        shutil.copyfileobj(data, output)
+      mode = (member.external_attr >> 16) & 0o777
+      if mode:
+        target.chmod(mode)
+
+
 def _extract(archive: Path, source: dict, destination: Path) -> None:
   raw = destination.parent / f".{source['name']}-extract"
   raw.mkdir(parents=True)
   try:
-    with tarfile.open(archive, "r:*") as bundle:
-      for member in bundle.getmembers():
-        _member_destination(raw, member.name)
-        if member.issym() or member.islnk():
-          _link_destination(raw, member)
-      bundle.extractall(raw, filter="data")
+    if zipfile.is_zipfile(archive):
+      _extract_zip(archive, raw)
+    else:
+      with tarfile.open(archive, "r:*") as bundle:
+        for member in bundle.getmembers():
+          _member_destination(raw, member.name)
+          if member.issym() or member.islnk():
+            _link_destination(raw, member)
+        bundle.extractall(raw, filter="data")
     root = raw / source["root"]
     if not root.is_dir():
       raise DependencyError(

@@ -128,6 +128,7 @@ packages: configure-packages				## Build packages and examples
 	$(MAKE) -C packages/blis build short-example example
 	$(MAKE) -C packages/libuv build short-example example
 	$(MAKE) -C packages/raylib build short-example example builds/live-chart
+	$(MAKE) -C packages/torch build short-example
 
 # Optional: the completed packages need a prepared dependency cache, so this
 # stays out of check and precommit. Run it after a compiler or runtime change
@@ -142,6 +143,7 @@ packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/blis test run
 	$(MAKE) -C packages/libuv test run
 	$(MAKE) -C packages/raylib verify
+	$(MAKE) -C packages/torch test run
 
 check: build						## Run extended non-mutating checks
 	$(MAKE) sym-check

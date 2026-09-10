@@ -16,9 +16,11 @@ Package builds are currently tested on macOS.
 | [libuv](libuv/README.md) | Event loops, processes, files, and networking |
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
 | [C*](cstar/README.md) | Function contracts and proofs checked by the C* symbolic executor |
+| [torch](torch/README.md) | Tensors and autograd over libtorch, PyTorch's C++ library |
 
 PCRE2, yyjson, and SQLite have completed API review. The other packages remain
-experimental and their interfaces may change. C* is a verification
+experimental and their interfaces may change. torch links libtorch
+dynamically, so its programs are not self-contained; its README says why. C* is a verification
 experiment: its core toolchain is closed source, it is macOS arm64 only, and
 it stays outside `make packages` and `make packages-check`. Internal review
 records are kept in [the package instructions](AGENTS.md).
