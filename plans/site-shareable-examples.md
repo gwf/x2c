@@ -1,6 +1,6 @@
 > Status: active
-> Local implementation approved. Commit locally, rebase onto origin/main,
-> and refresh the site statistics before integration. Publication remains pending.
+> Local implementation committed and rebased onto origin/main at efed52a.
+> Site statistics refreshed from make stats. Publication remains pending.
 > Started from origin/main at 1bc7e67.
 > Torch, continuous Game of Life, and the replacement Lisp tic-tac-toe example
 > are implemented for local review. All four example pages now use continuous
