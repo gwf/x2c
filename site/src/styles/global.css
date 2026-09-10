@@ -950,7 +950,7 @@ html:has(.landing-header) {
 }
 
 #packages .package-note {
-  margin: 12px 0 0;
+  margin: 12px 19px 0;
   color: var(--muted-light);
   font-size: 13px;
   line-height: 1.5;
