@@ -171,7 +171,7 @@ static void blis_operators_are_scoped_blis_operations(void) {
     BlisObject restored = sum - right;
     EXPECT_NEAR(restored.at(1, 1), 4.0, 1e-12);
 
-    BlisObject result = -(left * right + left - right);
+    BlisObject result = -(left @ right + left - right);
     EXPECT_INT_EQ(result.rows(), 2);
     EXPECT_INT_EQ(result.columns(), 2);
     EXPECT_NEAR(result.at(0, 0), -3.0, 1e-12);
@@ -185,10 +185,10 @@ static void blis_operators_are_scoped_blis_operations(void) {
   BlisObject wrong = BlisObject.copy_rows(%((1 2 3)), BLIS_DOUBLE);
   defer wrong.free();
   int shape_caught = 0;
-  try left * wrong;
+  try left @ wrong;
   catch %(bad-arg *detail): {
     shape_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"mul");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"matmul");
   }
   EXPECT_TRUE(shape_caught);
 }
@@ -384,7 +384,7 @@ static void blis_operator_temporaries_are_bounded_per_iteration(void) {
     Scope.retain();
     {
       defer Scope.release();
-      BlisObject next = matrix * rank;
+      BlisObject next = matrix @ rank;
       rank.copy_from(next);
     }
     ScopeStats current = Scope.stats();

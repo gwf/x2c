@@ -36,7 +36,7 @@ int main(void) {
     Scope.retain();
     {
       defer Scope.release();
-      BlisObject next = links * rank;
+      BlisObject next = links @ rank;
       next = next.scale(1.0 / next.dotv(ones));
       shift = (next - rank).normfv();
       rank.copy_from(next);

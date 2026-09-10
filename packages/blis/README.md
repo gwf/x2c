@@ -2,7 +2,7 @@
 
 This experimental package provides an x2c interface to the pinned BLIS 2.1
 object API. Its entry point is `src/blis.x`; it builds matrices
-and vectors from x2c values, gives `+`, `-`, `*`, and unary `-` real BLIS
+and vectors from x2c values, gives `+`, `-`, `@`, and unary `-` real BLIS
 meanings with automatic intermediate lifetimes, and reads results back into
 x2c values in bulk.
 
@@ -14,7 +14,7 @@ for (; shift > 1e-15 && round < 100; round++) {
   Scope.retain();
   {
     defer Scope.release();
-    BlisObject next = links * rank;
+    BlisObject next = links @ rank;
     next = next.scale(1.0 / next.dotv(ones));
     shift = (next - rank).normfv();
     rank.copy_from(next);
@@ -43,11 +43,13 @@ with mixed-precision `gemm`.
 
 ## Operators and lifetimes
 
-`protocol Blis(T)` maps `add`, `sub`, `mul`, and `neg` to `+`, `-`, `*`, and
-unary `-`, and the protocol crosses the package boundary, so a consumer that
-only says `import "blis"` gets the punctuation. Addition and subtraction are
-elementwise over equal shapes and storage precision; multiplication is BLIS
-matrix multiplication when the left column count equals the right row count.
+`protocol Blis(T)` maps `add`, `sub`, `matmul`, and `neg` to `+`, `-`, `@`,
+and unary `-`, and the protocol crosses the package boundary, so a consumer
+that only says `import "blis"` gets the punctuation. Addition and subtraction
+are elementwise over equal shapes and storage precision; `@` is BLIS matrix
+multiplication when the left column count equals the right row count. There
+is no `*`: BLIS has no elementwise matrix product, and `*` keeps its
+PyTorch meaning of elementwise multiplication in the torch package.
 
 An operator result is a BLIS descriptor over numerical storage the active x2c
 Scope owns. It is valid only until that Scope is released and must never be
@@ -57,7 +59,7 @@ owned object before releasing it. Explicitly constructed objects use BLIS
 allocation and the adjacent `defer object.free()` contract.
 
 Mixed storage precision and incompatible dimensions raise before an operator
-allocates or mutates a result. `*` does not invent dot-product or tensor
+allocates or mutates a result. `@` does not invent dot-product or tensor
 semantics: named `dotv`, `axpyv`, `normfv`, `scale`, and `gemm` remain
 available for vector, destination-mutating, mixed-precision, alpha/beta, and
 explicit-computation work.

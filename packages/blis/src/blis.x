@@ -15,7 +15,7 @@ typedef struct BlisObject *BlisObject;
 protocol Blis(T) {
   T T.add(T, T);
   T T.sub(T, T);
-  T T.mul(T, T);
+  T T.matmul(T, T);
   T T.neg(T);
 }
 
@@ -686,22 +686,22 @@ BlisObject BlisObject.neg(BlisObject object) {
   return object.scale(-1.0);
 }
 
-BlisObject BlisObject.mul(BlisObject left, BlisObject right) {
-  _blis_live(left, %"mul");
-  _blis_live(right, %"mul");
+BlisObject BlisObject.matmul(BlisObject left, BlisObject right) {
+  _blis_live(left, %"matmul");
+  _blis_live(right, %"matmul");
   if (left.columns() != right.rows()) {
     _blis_bad_shape(
-      %"mul", left.rows(), left.columns(),
+      %"matmul", left.rows(), left.columns(),
       right.rows(), right.columns()
     );
   }
   num_t storage = bli_obj_dt(&left.native);
   num_t right_storage = bli_obj_dt(&right.native);
   if (storage != right_storage) {
-    _blis_precision_mismatch(%"mul", storage, right_storage);
+    _blis_precision_mismatch(%"matmul", storage, right_storage);
   }
   BlisObject result = _blis_scoped(
-    storage, left.rows(), right.columns(), %"mul"
+    storage, left.rows(), right.columns(), %"matmul"
   );
   float alpha_single = 0.0f, beta_single = 0.0f;
   double alpha_wide = 0.0, beta_wide = 0.0;

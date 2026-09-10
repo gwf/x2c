@@ -1,13 +1,14 @@
 # x2c over libtorch: Scope finalizers, the `@` operator, and packages/torch
 
 > Status: active
-> PR 1 (Scope finalizers, 490070c) and PR 2 (`@`, 1316cf0) landed on `main`
-> 2026-09-09, followed by two converter fixes the package needed: mixed
-> operands convert for handle typedef participants, and a package's
-> converter resolves under its `pkg__` spelling. Gary approved the four
-> tradeoffs under PR 3 the same day. M0 of `packages/torch` (tensors,
-> autograd, `fit-line.x`, tests, pinned libtorch zip) is landing; M1 to M3
-> follow the milestones below.
+> PR 1 (Scope finalizers, 490070c), PR 2 (`@`, 1316cf0), two converter
+> fixes, and `packages/torch` M0 (0ec5bb8) landed 2026-09-09. Three M0
+> defects Gary reproduced (uncaught C++ exceptions across the ABI, integers
+> rounded through double, no-grad state leaking on Error) were fixed with
+> regressions, and M1 (modules, optimizers, schedulers, checkpoints
+> verified against Python) and M2 (1193 operators generated from the
+> pinned schema, sampled bit-exact against Python) are landing together.
+> M3 (module coverage, MNIST, TorchScript inference) is next.
 
 ## Context
 
