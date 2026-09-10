@@ -62,6 +62,7 @@ static void torch_integers_are_exact(void) {
 static void torch_errors_reach_x2c(void) {
   $test.scoped();
   int caught = 0;
+  EXPECT_TRUE(Torch.num_interop_threads() > 0);
   try { Torch.set_num_threads(0); }
   catch %(bad-state (library "torch") *): caught++;
   EXPECT_INT_EQ(caught, 1);

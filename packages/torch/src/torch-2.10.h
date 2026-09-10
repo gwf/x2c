@@ -39,6 +39,8 @@ const char *xt_version(void);
 int xt_manual_seed(int64_t seed);
 int xt_set_num_threads(int count);
 int xt_get_num_threads(int *out);
+int xt_set_num_interop_threads(int count);
+int xt_get_num_interop_threads(int *out);
 
 /* creation; shape is rank int64 sizes */
 xt_tensor xt_from_doubles(const double *data, const int64_t *shape, int rank,

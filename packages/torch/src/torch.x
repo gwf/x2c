@@ -328,6 +328,18 @@ int Torch.num_threads(void) {
   return count;
 }
 
+/** Pins the inter-op thread pool size. libtorch accepts this only before
+    the pool starts, so call it before the first parallel operation. */
+void Torch.set_num_interop_threads(int count) {
+  _check(xt_set_num_interop_threads(count), "set_num_interop_threads");
+}
+
+int Torch.num_interop_threads(void) {
+  int count;
+  _check(xt_get_num_interop_threads(&count), "num_interop_threads");
+  return count;
+}
+
 /** The pinned libtorch version string. */
 String Torch.version(void) => String.new(xt_version());
 

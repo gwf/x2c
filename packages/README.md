@@ -16,7 +16,7 @@ Package builds are currently tested on macOS.
 | [libuv](libuv/README.md) | Event loops, processes, files, and networking |
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
 | [C*](cstar/README.md) | Function contracts and proofs checked by the C* symbolic executor |
-| [torch](torch/README.md) | Tensors and autograd over libtorch, PyTorch's C++ library |
+| [torch](torch/README.md) | Tensors, autograd, modules, optimizers, checkpoints, and TorchScript over libtorch |
 
 PCRE2, yyjson, and SQLite have completed API review. The other packages remain
 experimental and their interfaces may change. torch links libtorch

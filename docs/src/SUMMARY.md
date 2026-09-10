@@ -19,6 +19,7 @@
 - [Protocols](guide/protocols.md)
 - [Compile-time Macros](guide/macros.md)
 - [Automatic Differentiation](guide/autodiff.md)
+- [Training and Inference with torch](guide/torch.md)
 - [Programming Idioms](guide/idioms.md)
 
 # Language reference

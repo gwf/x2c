@@ -288,7 +288,7 @@ generated scalar C should be readable or when the function has few inputs.
 Use `$ad.reverse()` for gradients with many inputs, and
 `$ad.checkpoint(K)` when its loops run long. Use the tape when the
 decorators reject the code. For gradients over tensors rather than
-scalars, the [torch package](packages.md) reaches libtorch's autograd
+scalars, the [torch package](torch.md) reaches libtorch's autograd
 through the same operator protocols.
 
 ## Background

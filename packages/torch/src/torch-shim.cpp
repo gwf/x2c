@@ -74,6 +74,12 @@ int xt_set_num_threads(int count) {
 int xt_get_num_threads(int *out) {
   TRY(-1, *out = at::get_num_threads();) return 0;
 }
+int xt_set_num_interop_threads(int count) {
+  TRY(-1, at::set_num_interop_threads(count);) return 0;
+}
+int xt_get_num_interop_threads(int *out) {
+  TRY(-1, *out = at::get_num_interop_threads();) return 0;
+}
 
 /* Creation */
 

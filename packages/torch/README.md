@@ -98,11 +98,16 @@ the parameter and buffer names Python's `state_dict()` uses;
 A plain constructor takes PyTorch's defaults, as `Module.linear` does for
 its bias. Beside each one that has more options is a `_with` form taking
 every one of them in PyTorch's order: `linear_bias(in, out, bias)`,
+`conv1d_with` and
 `conv2d_with(in, out, kernel, stride, padding, dilation, groups, bias)`,
+`batch_norm1d_with` and
 `batch_norm2d_with(features, eps, momentum, affine, track_running_stats)`,
 `layer_norm_with(shape, eps, affine)`,
-`max_pool2d_with(kernel, stride, padding)`, and
-`flatten_with(start_dim, end_dim)`. `Module.push`
+`max_pool2d_with` and `avg_pool2d_with(kernel, stride, padding)`, and
+`flatten_with(start_dim, end_dim)`. `Module.register_parameter` and
+`Module.register_buffer` add a tensor under a name to any module, and
+`Optimizer.adam_with` exposes Adam's betas, epsilon, weight decay, and
+amsgrad. `Module.push`
 names each child by its position, "0", "1", and so on, so a sequential
 model's state names match Python's, and `Module.forward` runs the children
 in order:
@@ -320,6 +325,28 @@ stays available through `xt_last_error_full` in the raw API. Every entry
 point in `torch-2.10.h` catches, so no C++ exception crosses the ABI: a
 function returning a handle returns NULL on failure, and one producing a
 scalar returns a status and writes its result through an out parameter.
+Argument checks the package makes itself raise `<bad-arg>` instead:
+`Tensor.item` on a tensor with more than one element, and a `Tensor.of`
+whose values do not fill its shape. The raw handle of any record is its
+`native()` accessor; `Tensor.adopt` and `Torch.check` bring a raw call's
+handle or status back under these rules.
+
+## Threads
+
+libtorch brings its own intra-op and inter-op thread pools into the
+process. `Torch.set_num_threads` pins the intra-op pool and
+`Torch.set_num_interop_threads` the inter-op pool; the latter is accepted
+only before that pool starts. `Torch.num_threads` and
+`Torch.num_interop_threads` read the current sizes.
+
+## Benchmarks
+
+`benchmarks/` holds the matched x2c and PyTorch applications from
+`plans/x2c-torch-comparison.md`: tabular regression, the MNIST CNN,
+sequence forecasting, and an interop diagnostic, with a runner for
+correctness, timing, and memory modes. They are outside every package
+target and gate; `benchmarks/README.md` gives the commands and
+`benchmarks/PILOT.md` the measured pilot.
 
 ## Not self-contained
 

@@ -47,6 +47,19 @@ int main(void) {
    `%[]`, or `%{}` that names a visible object-like `#define` receive a
    diagnostic?
 
+## The same name in an operator expression
+
+The comparison pilot hit the operator form of the same hole: with
+`#define MEAN 0.1307`, `images - MEAN` emits the C text `images - MEAN`
+and the C compiler rejects `torch__Tensor - double`. x2c never sees the
+macro's value, so the identifier has no x2c type, no converter can be
+chosen, and the expression falls through to native C. A `double` local or
+a cast, `images - (double) MEAN`, resolves the protocol row. The proposed
+diagnostic for this form is the one `@` already uses: when one operand is
+a participant with the member and the other operand's type is unknown,
+report that the operand has no x2c type and suggest a cast, instead of
+emitting C that cannot compile.
+
 ## Proposed diagnostic
 
 Report a warning (not an error; `%(build fast)` style literals are the

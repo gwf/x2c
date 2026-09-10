@@ -251,6 +251,8 @@ without requiring public services:
   from a checkpoint; `mnist.x` trains a convolutional network for one epoch
   on the MNIST files named by `TORCH_MNIST`; and `jit-infer.x` runs a
   TorchScript model exported from Python.
+  [Training and Inference with torch](torch.md) is the chapter for the
+  package.
 
 Run the package-local examples from the repository root:
 
