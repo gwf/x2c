@@ -1,6 +1,6 @@
 # BLIS client
 
-This experimental package provides an x2c interface to the pinned BLIS 2.1
+This package provides an x2c interface to the pinned BLIS 2.1
 object API. Its entry point is `src/blis.x`; it builds matrices
 and vectors from x2c values, gives `+`, `-`, `@`, and unary `-` real BLIS
 meanings with automatic intermediate lifetimes, and reads results back into

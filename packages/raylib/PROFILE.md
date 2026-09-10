@@ -39,6 +39,7 @@ Each is built with `-O2 -std=c99 -D_GNU_SOURCE -fno-strict-aliasing`,
   font.
 - `SUPPORT_FILEFORMAT_PNG`: PNG is the only image file format that loads or
   saves.
+- `SUPPORT_FILEFORMAT_TTF`: load TrueType fonts for smooth image text.
 - `SUPPORT_IMAGE_EXPORT`: `ExportImage` writes files.
 - `SUPPORT_IMAGE_GENERATION`: the `GenImage*` gradient, checker, noise, and
   cellular generators.
@@ -46,7 +47,7 @@ Each is built with `-O2 -std=c99 -D_GNU_SOURCE -fno-strict-aliasing`,
 
 Disabled by leaving the macro out: every non-PNG file format (BMP, TGA, JPG,
 GIF, PIC, PNM, PSD, QOI, DDS, PKM, KTX, PVR, ASTC, HDR), SVG rasterization,
-font file loading (TTF, BDF, FNT), image manipulation extras that are in
+other font file loading (BDF, FNT), image manipulation extras that are in
 other modules, and all of models, meshes, materials, animation, audio,
 shapes, VR, camera, gestures, gamepad, and automation events.
 
@@ -88,7 +89,8 @@ connection; the automated package checks run without a graphical login.
 
 - Profile: `static-desktop-glfw-opengl33`.
 - Compile-time: `-DPLATFORM_DESKTOP_GLFW -DGRAPHICS_API_OPENGL_33`, plus the
-  same `SUPPORT_*` set as the memory profile and `SUPPORT_MODULE_RSHAPES`.
+  memory profile's `SUPPORT_*` set except `SUPPORT_FILEFORMAT_TTF`, and
+  `SUPPORT_MODULE_RSHAPES`.
 - Modules: `rcore.c`, `rshapes.c`, `rtextures.c`, `rtext.c`, and `rglfw.c` —
   five archive members. `rmodels.c` and `raudio.c` stay uncompiled, so there
   is no 3D and no audio in the claim or the link line.

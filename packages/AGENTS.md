@@ -7,7 +7,14 @@ tests, or a focused probe.
 
 ## Start from applications
 
-`pcre2/`, `yyjson/`, and `sqlite/` are accepted packages. Start with
+Gary approved all nine library packages on 2026-09-09: `pcre2/`, `yyjson/`,
+`sqlite/`, `libcurl/`, `termbox2/`, `blis/`, `libuv/`, `raylib/`, and `torch/`. The old
+experimental or awaiting-review designations are obsolete. C* remains a
+separate experiment because of its closed-source toolchain, macOS arm64
+restriction, and verification limitations. Public descriptions should explain
+capabilities and concrete limitations, not expose internal review labels.
+
+Start with
 [parse-log.x](pcre2/examples/parse-log.x) for copied captures, indexing, and
 native cleanup beside acquisition, and
 [service-health.x](yyjson/examples/service-health.x) for JSON through ordinary
@@ -15,10 +22,7 @@ Map/Array values. Their broader applications, clients, tests, and READMEs
 show how the same integration handles substantial work while keeping native
 allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 
-`libcurl/`, `termbox2/`, `blis/`, `libuv/`, and `raylib/` are importable and
-included in `make packages-check`, but await Gary's application review.
-They are reasonable designs to extend; acceptance and package status changes
-require Gary's review of the developer experience.
+`make packages-check` includes the seven library packages other than SQLite.
 SQLite is checked separately with `make -C packages/sqlite test run run-lisp`.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C

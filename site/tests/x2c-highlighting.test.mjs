@@ -10,7 +10,7 @@ const slides = new URL("../src/content/slides/", import.meta.url);
 
 function sourceCode(name) {
   const markdown = readFileSync(new URL(name, slides), "utf8");
-  return markdown.match(/```x2c\n([\s\S]*?)\n```/)?.[1];
+  return markdown.match(/```x2c(?:,ignore)?\n([\s\S]*?)\n```/)?.[1];
 }
 
 test("uses the distinct x2c style throughout the landing galleries", async () => {
@@ -26,24 +26,31 @@ test("uses the distinct x2c style throughout the landing galleries", async () =>
     if (!code) continue;
     const result = highlighter.codeToTokens(code, {
       lang: "x2c",
-      theme: x2cDarkTheme.name
+      theme: x2cDarkTheme.name,
+      includeExplanation: true
     });
 
-    for (const [line, source] of code.split("\n").entries()) {
-      const statement = source.match(/^\s*(foreach|match|raise|catch)\b/);
-      const spelling = statement?.[1] ??
-        (!source.trimStart().startsWith("//") && source.includes("=>")
-          ? "=>"
-          : null);
-      if (!spelling) continue;
-
-      seen.add(spelling);
-      const token = result.tokens[line].find(({ content }) =>
-        content.includes(spelling)
-      );
-      const message = `${name}:${line + 1}: ${source}`;
-      assert.equal(token?.color, "#FF4FD8", message);
-      assert.equal(token?.fontStyle, 2, message);
+    for (const [line, tokens] of result.tokens.entries()) {
+      for (const token of tokens) {
+        const spellings = new Set(token.explanation?.flatMap((part) =>
+          part.scopes.flatMap(({ scopeName }) => {
+            const keyword = scopeName.match(
+              /^keyword\.control\.(foreach|match|raise|catch)\.x2c$/
+            );
+            if (keyword) return [keyword[1]];
+            return scopeName === "keyword.operator.arrow.x2c" ? ["=>"] : [];
+          })
+        ));
+        if (token.content.includes("=>") && !token.explanation?.some((part) =>
+          part.scopes.some(({ scopeName }) => /^(string|comment)\./.test(scopeName))
+        )) spellings.add("=>");
+        for (const spelling of spellings) {
+          seen.add(spelling);
+          const message = `${name}:${line + 1}: ${token.content}`;
+          assert.equal(token.color, "#FF4FD8", message);
+          assert.equal(token.fontStyle, 2, message);
+        }
+      }
     }
   }
 

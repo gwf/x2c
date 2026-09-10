@@ -18,12 +18,10 @@ Package builds are currently tested on macOS.
 | [C*](cstar/README.md) | Function contracts and proofs checked by the C* symbolic executor |
 | [torch](torch/README.md) | Tensors, autograd, modules, optimizers, checkpoints, and TorchScript over libtorch |
 
-PCRE2, yyjson, and SQLite have completed API review. The other packages remain
-experimental and their interfaces may change. torch links libtorch
-dynamically, so its programs are not self-contained; its README says why. C* is a verification
-experiment: its core toolchain is closed source, it is macOS arm64 only, and
-it stays outside `make packages` and `make packages-check`. Internal review
-records are kept in [the package instructions](AGENTS.md).
+torch links libtorch dynamically, so its programs are not self-contained;
+its README explains the required runtime libraries. C* is a verification
+experiment: its core toolchain is closed source, it is macOS arm64 only,
+and it stays outside `make packages` and `make packages-check`.
 
 SQLite is prepared and checked separately:
 

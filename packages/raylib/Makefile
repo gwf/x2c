@@ -15,7 +15,7 @@ PACKAGE_LINK := $(RAYLIB_LIBRARY) -l pthread
 
 SHORT_PNG := builds/climate-trends.png
 SHEET_PNG := builds/texture-sheet.png
-SHORT_SHA256 := 35c486296ffee0c0c466e4168c520d3be22fc3714d9eaba7db33d070d0afe1a1
+SHORT_SHA256 := 6b84cd531131f426a66df4df7bc80bf9c63f466ee3d508a62dbae25206233894
 SHEET_SHA256 := 191db3d0b232681db4aa9822863efcfd6771d03908e9c33a45087d475414a54b
 
 # The windowed profile. `make run-interactive` prepares it, rebuilds the
@@ -41,7 +41,7 @@ run: builds/climate-trends builds/texture-sheet
 # PNG signature, IHDR length and tag, then width and height big-endian.
 verify: verify-headers run test builds/live-chart
 	@test "$$(od -An -tx1 -N24 $(SHORT_PNG) | tr -d '[:space:]')" = \
-	  "89504e470d0a1a0a0000000d49484452000002d000000140"
+	  "89504e470d0a1a0a0000000d49484452000005a000000280"
 	@test "$$(od -An -tx1 -N24 $(SHEET_PNG) | tr -d '[:space:]')" = \
 	  "89504e470d0a1a0a0000000d494844520000038400000258"
 	@test "$$(shasum -a 256 $(SHORT_PNG) | cut -d' ' -f1)" = \
@@ -60,7 +60,8 @@ verify-headers: $(DEPENDENCY_PREREQUISITE)
 CHART := examples/chart.x
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-builds/climate-trends: examples/climate-trends.x $(PACKAGE_ARCHIVE) | builds
+builds/climate-trends: examples/climate-trends.x examples/fonts/Lato-Regular.ttf \
+  $(PACKAGE_ARCHIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/climate-trends-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 

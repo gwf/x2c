@@ -341,8 +341,7 @@ identities. Native dependency toolchain information comes from its existing
 cache receipt when available; an explicit external prefix may have no receipt.
 A bundle does not promise an ABI across compiler releases, cross-platform
 execution, shared-library relocation, or automatic dependency resolution.
-Native system libraries and frameworks remain supplied by the host. Bundling
-an experimental package does not change its API acceptance status.
+Native system libraries and frameworks remain supplied by the host.
 
 Bundles carry `builds/<name>.native.rsp`. The compiler reads its quoted native
 arguments, expands the literal `{package}` to the resolved package directory,

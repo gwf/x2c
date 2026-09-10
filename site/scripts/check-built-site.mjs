@@ -337,8 +337,8 @@ function checkInstallTarget(home) {
   const targetTags = [...home.matchAll(/<[a-z][^>]*>/gi)]
     .filter((match) => attributes(match[0]).get("id") === "install");
 
-  if (targetTags.length !== 1 || !/^<figure\b/i.test(targetTags[0][0])) {
-    fail("index.html: #install must identify exactly one figure");
+  if (targetTags.length !== 1 || !/^<section\b/i.test(targetTags[0][0])) {
+    fail("index.html: #install must identify exactly one section");
   }
 }
 

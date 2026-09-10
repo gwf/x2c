@@ -11,9 +11,10 @@ interface Props {
   label: string;
   tone: "dark" | "light";
   slides: any[];
+  codeLabel?: string;
 }
 
-const { name, label, tone, slides } = Astro.props;
+const { name, label, tone, slides, codeLabel } = Astro.props;
 
 // A code block belongs to the left panel; a rule only marks where to cut.
 const SEPARATORS = [
@@ -80,10 +81,32 @@ const count = String(panels.length).padStart(2, "0");
           <div class="carousel-slide">
             <div
               class={panel.panel === "steps" ? "descent-diagram" : "feature-code"}
-              set:html={panel.left}
-            />
+            >
+              {codeLabel && <small class="feature-code-label">{codeLabel}</small>}
+              <Fragment set:html={panel.left} />
+            </div>
             <div class="feature-copy">
+              {panel.status && <small class="feature-status">{panel.status}</small>}
               {panel.title && <h3>{panel.title}</h3>}
+              {panel.image && (
+                <div data-result-media>
+                <img
+                  class="feature-result-image"
+                  src={`${import.meta.env.BASE_URL}${panel.imagePoster || panel.image}`}
+                  data-animation={panel.imagePoster && `${import.meta.env.BASE_URL}${panel.image}`}
+                  data-poster={panel.imagePoster && `${import.meta.env.BASE_URL}${panel.imagePoster}`}
+                  alt={panel.imageAlt}
+                  width={panel.imageWidth}
+                  height={panel.imageHeight}
+                  loading="lazy"
+                />
+                {panel.imagePoster && (
+                  <button type="button" class="animation-toggle" hidden>
+                    Play animation
+                  </button>
+                )}
+                </div>
+              )}
               <Fragment set:html={panel.right} />
             </div>
           </div>
@@ -92,3 +115,24 @@ const count = String(panels.length).padStart(2, "0");
     </div>
   </div>
 </div>
+
+
+<script>
+  for (const media of document.querySelectorAll("[data-result-media]")) {
+    const image = media.querySelector<HTMLImageElement>("img[data-animation]");
+    const button = media.querySelector<HTMLButtonElement>("button");
+    if (!image || !button) continue;
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    const play = (active: boolean) => {
+      image.src = active ? image.dataset.animation! : image.dataset.poster!;
+      button.textContent = active ? "Pause animation" : "Play animation";
+      button.setAttribute("aria-pressed", String(active));
+    };
+    button.hidden = false;
+    play(!reducedMotion.matches);
+    button.addEventListener("click", () => {
+      play(button.getAttribute("aria-pressed") !== "true");
+    });
+    reducedMotion.addEventListener("change", () => play(!reducedMotion.matches));
+  }
+</script>

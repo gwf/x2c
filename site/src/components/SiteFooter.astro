@@ -1,4 +1,6 @@
 ---
+import ExternalLinkIcon from "./ExternalLinkIcon.astro";
+
 interface Props {
   home?: boolean;
 }
@@ -26,8 +28,9 @@ const brandHref = home ? "#top" : local("");
   </p>
   <div class="footer-nav">
     <a href={home ? "#install" : `${local("")}#install`} class="dark-link">install</a>
-    <a href={local("docs/")} class="dark-link">docs</a>
-    <a href="https://github.com/gwf/x2c" class="dark-link">source</a>
+    <a href={home ? "#packages" : `${local("")}#packages`} class="dark-link">packages</a>
     <a href={local("about/")} class="dark-link">about</a>
+    <a href={local("docs/")} class="dark-link">docs<ExternalLinkIcon /></a>
+    <a href="https://github.com/gwf/x2c" class="dark-link">source<ExternalLinkIcon /></a>
   </div>
 </footer>

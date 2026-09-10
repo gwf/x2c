@@ -1818,6 +1818,10 @@
 		"operators": {
 			"patterns": [
 				{
+					"match": "=>",
+					"name": "keyword.operator.arrow.x2c"
+				},
+				{
 					"match": "(?<![\\w$])(sizeof)(?![\\w$])",
 					"name": "keyword.operator.sizeof.x2c"
 				},
@@ -3872,10 +3876,6 @@
 				{
 					"match": "\\busing(?=\\s+\\$)",
 					"name": "keyword.other.macro.using.x2c"
-				},
-				{
-					"match": "=>",
-					"name": "keyword.operator.arrow.x2c"
 				}
 			]
 		},

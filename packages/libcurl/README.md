@@ -1,6 +1,6 @@
 # libcurl client
 
-This experimental package provides an x2c interface to the pinned libcurl
+This package provides an x2c interface to the pinned libcurl
 8.22.0 profile. Its entry point is `src/libcurl.x`; one
 reusable `CurlEasy` performs bounded synchronous HTTP requests and returns a
 copied `CurlResponse` with the status, ordered headers, and body.
