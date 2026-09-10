@@ -1,12 +1,11 @@
 # x2c over libtorch: Scope finalizers, the `@` operator, and packages/torch
 
-> Status: active
-> Approved 2026-09-09 from the research spike in the budapest workspace.
-> PR 1 (Scope finalizers) landed on `main` as 490070c. PR 2 (`@`) in
-> progress. PR 3 (packages/torch) is being re-designed around reusing
-> libtorch's nn, optim, data, and serialization through a C ABI shim and
-> generated operator bindings; the section below is the superseded first
-> draft until the evidence-based revision replaces it.
+> Status: needs author scoping
+> PR 1 (Scope finalizers) landed on `main` as 490070c and PR 2 (`@`) as
+> 1316cf0 on 2026-09-09. PR 3 was re-designed the same day around reusing
+> libtorch's nn, optim, and serialization through a C ABI shim plus
+> generated operator bindings; evidence in `.context/torch-arch/`
+> (budapest). Awaiting Gary's decision on the tradeoffs listed under PR 3.
 
 ## Context
 
@@ -27,10 +26,6 @@ libcurl, blis, raylib, libuv), and `@` is one more protocol row that BLIS can
 adopt.
 
 Decisions taken here (routine, per the standing guidance):
-- Shim is hand-written and pinned, about 80 functions; generation from the
-  torch source tree is a later milestone if the surface proves too thin.
-- nn.Module, optimizers, and data loading are written in x2c over Tensor
-  ops, not wrapped from torch::nn's template-heavy C++.
 - Dependency is the official libtorch zip, pinned in `dependency.json`,
   macOS arm64 CPU first. `TORCH_PREFIX` override follows the BLIS pattern.
 - `*` on tensors is elementwise as in PyTorch; `@` is matmul.
@@ -170,59 +165,130 @@ Follow-up after PR 2 lands (separate small PR): `packages/blis` switches `*`
 to elementwise and adds `matmul` for `@`, so `*` means the same in both
 numeric packages.
 
-## PR 3: `packages/torch`
+## PR 3: `packages/torch` (revised 2026-09-09 on bridge evidence)
 
-Layout follows `packages/AGENTS.md` and copies `packages/cstar/Makefile` for
-the native object and `packages/blis` for the prefix override:
+Principle: x2c owns the language interface and the glue; libtorch owns the
+math, the modules, the optimizers, and the serialization. Nothing that
+libtorch already implements is rewritten in x2c.
 
-- `src/torch-2.10.h`: the pinned shim header (extern "C", opaque
-  `xt_tensor`, `int64_t` shapes, `xt_last_error`). It is the raw API the
-  package publishes; there is no C upstream header to include.
-- `src/torch-shim.cpp`: the shim, compiled by a package Makefile rule with
-  `$(CXX) -std=c++17 -I$(TORCH_PREFIX)/include
-  -I$(TORCH_PREFIX)/include/torch/csrc/api/include` into
-  `builds/torch-shim.o`, added to `PACKAGE_LINK` via `-Xlinker` with
-  `-L$(TORCH_PREFIX)/lib -ltorch -ltorch_cpu -lc10 -lc++
-  -Wl,-rpath,$(TORCH_PREFIX)/lib`, and `build: builds/torch-shim.o`.
-  `x2c build` compiles only `src/*.c`, so the `.cpp` lives outside its scan.
-- `src/torch.x`: `Tensor` record allocated with `Scope.malloc_finalized`
-  whose `drop` releases the handle once; `protocol Torch(T)` rows `add sub
-  mul div neg matmul compare`; `protocol Var(Tensor)`; creation
-  (`of`, `zeros`, `ones`, `randn`, `arange`), shape/dtype queries, elementwise
-  math and activations, reductions, `matmul`, `transpose`, `reshape`,
-  `select`/`getindex`, `requires_grad`, `backward`, `grad`, `detach`,
-  `no_grad` as a scoped flag, `item`, `to_values`/`to_rows`, and `native()`.
-  Explicit `.free()` stays as the idempotent early release.
-- `src/torch.xmacro` (optional, milestone B): `$torch.module` for a struct
-  of parameters with a `forward` Func and parameter enumeration; `SGD` and
-  `Adam` in x2c over the parameter List.
-- `dependency.json`: source URL
-  `https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.10.0.zip`
-  (77 MB), sha256 recorded at pin time, `root: libtorch`, no build steps,
-  receipts `{prefix}/include/torch/torch.h` and `{prefix}/lib/libtorch_cpu.dylib`.
-  `packages/tools/deps.py` `_extract` (`:245`) opens tar only; add a
-  `zipfile` branch with the same root and path-safety checks. That is a
-  small general change to the dependency tool and lands inside this PR.
-  `dependency-linux.json` is a follow-up (cxx11 ABI zip).
-- `LICENSES/`: PyTorch BSD-3 plus the bundled third-party notices from the
-  archive.
-- Examples: short `examples/fit-line.x` (linear regression by gradient
-  descent, result more prominent than setup); broad `examples/mlp.x` (a
-  two-layer MLP with `@`, tanh, SGD written in x2c, training loop with a
-  narrow Scope so finalizers reclaim temporaries per step, and a bad-shape
-  error caught as `<bad-state>`).
-- Tests: `tests/test-torch.x` (creation, operators, autograd values against
-  hand-computed gradients, finalizer reclaim via `Scope.stats`, shape error),
-  `tests/test-raw-api.x` (the shim header directly).
-- Lisp: `TorchLisp.install` over Var-boxed tensors via `$lisp.binding`
-  groups as `packages/yyjson/src/yyjson.x:1006-1089` does; milestone B.
-- Registration: rows in root `Makefile` `packages:` (`:121-130`) and
-  `packages-check:` (`:136-144`); a table row and experimental note in
-  `packages/README.md:8-24`; `packages/tools/check-linkage.py` is not used
-  (torch links dynamically by design; say so in the README).
+### Evidence (`.context/torch-arch/`, reproduced)
 
-Milestone A is tensor plus autograd plus the short example and tests.
-Milestone B is modules, optimizers, the broad example, and the Lisp surface.
+- A shim-side `ComposedModule : torch::nn::Module` with no forward of its
+  own, whose children are `register_module`d by name, is enough for a model
+  composed outside C++: parameters enumerate with Python-identical names,
+  `torch::optim::Adam` over `parameters(true)` trains them, and the state
+  serializes. The forward `l2(tanh(l1(x)))` lives in C and never enters C++.
+- Training agreement with Python from the same init and data, Adam lr 0.05,
+  200 steps: losses identical to 8 digits at steps 0, 100, and 200; max
+  parameter divergence 5.4e-07 (float32, same kernels, unpinned reduction
+  order). Reload delta 0.
+- Checkpoint interoperability, measured: `torch::jit::pickle_save` of a
+  `Dict<string, Tensor>` reads in Python with `torch.load` (needs
+  `weights_only=False` or an allowlist of `torch.jit._pickle.restore_type_tag`);
+  Python `torch.save(dict(sd))` reads with `pickle_load`; Python's raw
+  `OrderedDict` state_dict does not; `torch::save` archives read in Python
+  only through `torch.jit.load`.
+- The wheel ships no `native_functions.yaml`; `include/ATen/ops/` has 1,818
+  public op headers (1,189 after dropping `_`-prefixed and backward ops).
+
+### Architecture
+
+Three layers, each with one owner:
+
+1. `src/torch-shim.cpp` + `src/torch-2.10.h`: the hand-written C ABI core.
+   Opaque handles `xt_tensor`, `xt_module`, `xt_optim`, `xt_scheduler`,
+   `xt_jit_module`, `xt_generator`. Thread-local last-error string; every
+   entry catches. Thread-local no-grad and inference-mode guard stacks with
+   push/pop. `ComposedModule` with `register_module`, `named_parameters`,
+   `named_buffers`, `train/eval`, `to(device)`, `zero_grad`. Constructors
+   for `Linear`, `Conv1d/2d`, `BatchNorm1d/2d`, `LayerNorm`, `Dropout`,
+   `Embedding`, `LSTM/GRU`, `Sequential`; functional losses. Optimizers
+   `SGD`, `Adam`, `AdamW`, `RMSprop`, `Adagrad`, `LBFGS` (closure via a C
+   thunk over an x2c `Func`) with param groups and per-group LR get/set;
+   `StepLR` and `ReduceLROnPlateau`. Serialization: pickle dict save/load
+   (package format), `torch::save/load` archive (C++ path), `torch::jit::load`
+   plus IValue-crossing `forward`. Tensor creation, dtype/device/shape
+   queries, `select/slice/index_select/masked_select/index_put` for indexing,
+   `data_ptr` copy in/out.
+2. `tools/gen-ops.py` + `generated/`: operator bindings generated from the
+   pinned `native_functions.yaml` at pytorch tag v2.10.0 (second pinned
+   source in `dependency.json`, verified against `ATen/ops/*.h` by
+   compiling). Copies the tch-rs conventions: `xt_<op>_<overload>` names,
+   out-param arrays for tuple results, every body caught into the
+   thread-local error, every returned handle new. Tier 1 is the ~1,189
+   non-private non-backward ops without `SymInt`, `Dimname`, or `out=`
+   overloads, roughly 1,400 to 1,900 C functions; tier 2 adds `out=`,
+   in-place, and the `linalg`/`fft`/`special` namespaces. Generated x2c
+   wrappers land in `src/torch-ops.x` as `Tensor.<op>` methods.
+3. `src/torch.x` (+ `torch.xmacro`): the language interface. `Tensor`
+   records allocated with `Scope.malloc_finalized`, so operator temporaries
+   die with their scope and a training step is one `Scope.retain/release`
+   pair; protocol rows `add sub mul div neg matmul compare getindex`
+   (`*` elementwise, `@` matmul); `Module` with named children, an x2c
+   `forward` as a `Func` or a `$torch.module` decorated struct, parameter
+   and buffer enumeration returning Lists of named tensors; `Optimizer`,
+   `Scheduler`, `Checkpoint.save/load` over the pickle-dict format; errors
+   raised through `lib/error-macros.xmacro` with the first line of the
+   torch message.
+
+Reimplemented in x2c, each justified:
+- Batching and shuffling (a dozen lines: `randperm` + `index_select`). The
+  C++ `DataLoader` is a template over a compile-time `Dataset` concept and
+  cannot cross a C ABI without a callback adapter per element type.
+- Learning-rate schedules other than `StepLR` and `ReduceLROnPlateau`, which
+  are the only two libtorch ships; the rest are arithmetic on a group's LR.
+- Nothing else. Modules, optimizers, losses, autograd, serialization, and
+  every tensor kernel are libtorch's.
+
+### Milestones and acceptance examples
+
+- M0, platform: `dependency.json` pins the official macOS arm64 CPU zip
+  (`deps.py` gains a `zipfile` branch with the tar path-safety checks);
+  Makefile rule compiles the shim with `$(CXX) -std=c++17` into `builds/`
+  and links `-ltorch -ltorch_cpu -lc10 -lc++` with an rpath; `TORCH_PREFIX`
+  override as BLIS. Tensor creation, arithmetic, reductions, autograd, and
+  `fit-line.x` (linear regression by gradient descent) with tests.
+- M1, training and checkpoints: `mlp.x` composes `Linear` children under a
+  `Module` with an x2c forward, trains with `Adam`, saves a checkpoint, and
+  `tests/verify-python.py` loads it in the pinned Python torch and reproduces
+  the loss; reload from the checkpoint; indexing (`t[i]`, `select`, `slice`,
+  `index_select`, boolean mask); dtype conversion and device query;
+  `train/eval`, `no_grad` as a scoped pair.
+- M2, generated operators: tier 1 generated from the pinned yaml, compiled,
+  and spot-tested against Python for 20 ops with shape, dtype, and error
+  cases; `sym-update`-style regeneration target documented.
+- M3, coverage: `Conv2d/BatchNorm/Dropout/Embedding`, `CrossEntropyLoss`,
+  `StepLR` plus x2c cosine and warmup schedules, `datasets::MNIST` through
+  the shim for `mnist.x`, an inference example loading a TorchScript model
+  exported from Python (`jit-infer.x`), optimizer state save/load through
+  the C++ archive, `set_num_threads`.
+- Later: MPS device (an int in `TensorOptions`, gated by a training example),
+  Linux (cxx11 ABI zip and `dependency-linux.json`), Python-readable
+  optimizer state (tensor-by-tensor), `autograd.Function` custom nodes, a
+  Lisp surface.
+
+### Explicit gaps
+
+- `torch.compile`, Dynamo, Inductor, `torch.jit.script/trace` of x2c code:
+  structurally unavailable, they capture Python. x2c loads and runs
+  TorchScript; it cannot produce it.
+- The Python ecosystem: torchvision, HuggingFace, Lightning, numpy, ONNX.
+- Bit-exact agreement with Python: float32 tolerance is the promise.
+- Checkpoint format rules Python users must follow: save `dict(sd)`, not the
+  `OrderedDict`; allowlist `restore_type_tag` for `weights_only=True`.
+
+### Tradeoffs for Gary
+
+1. Dynamic linking only: `libtorch_cpu.dylib` is 213 MB and static linking
+   needs whole-archive registration. An x2c program using torch is not
+   self-contained, unlike every other x2c artifact.
+2. One pinned torch version per release; a bump recompiles the shim and
+   regenerates tier 1. Generation adds a second pinned artifact (the yaml
+   at the matching source tag).
+3. Per-op handle allocation (one heap block per result); noise at kernel
+   sizes, visible in tight loops over tiny tensors.
+4. libtorch brings its own OpenMP thread pool into the process.
+5. Optimizer state is not Python-interoperable in M1; module state is.
 
 ## Verification
 
@@ -232,9 +298,11 @@ Milestone B is modules, optimizers, the broad example, and the Lisp surface.
   verify-fixtures-update`, review the diff, `make verify-fixtures`; `make
   sym-update && make sym-check`; `make doc-generate && make doc-check`;
   `tools/gate-state.py ensure agent-pr-check` (bootstrap regenerates).
-- PR 3: `make -C packages/torch prepare build test run`; `make
-  packages-check` after registration; both examples' real output in the
-  README; `Scope.stats()` shows zero live allocations after the training loop.
+- PR 3: `make -C packages/torch prepare build test run` per milestone;
+  `tests/verify-python.py` against the pinned Python torch for M1 and M2;
+  `make packages-check` after registration; every example's real output in
+  the README; `Scope.stats()` shows zero live allocations after a training
+  loop.
 
 ## Plan review
 
