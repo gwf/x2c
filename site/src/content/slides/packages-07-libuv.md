@@ -1,4 +1,5 @@
 ---
+slug: libuv
 section: packages
 tab: libuv
 title: Put two processes to work.

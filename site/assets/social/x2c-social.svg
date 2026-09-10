@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f4f1ec"/>
+  <rect x="830" width="370" height="630" fill="#191919"/>
+  <rect width="1200" height="12" fill="#da291c"/>
+  <g fill="none" stroke="#da291c" stroke-width="17" transform="translate(71 69) scale(.66)">
+    <path d="M9 16 A34.5 34.5 0 0 1 9 84"/>
+    <path d="M91 16 A34.5 34.5 0 0 0 91 84"/>
+  </g>
+  <text x="156" y="122" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="#191919">x2c</text>
+  <g font-family="Georgia, serif" font-size="76" fill="#191919">
+    <text x="71" y="258">C with batteries,</text>
+    <text x="71" y="342">without bullshit.</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="28" fill="#625c56">
+    <text x="75" y="421">A self-hosting language that extends C</text>
+    <text x="75" y="460">and compiles to C.</text>
+  </g>
+  <g fill="none" stroke="#ff6b57" stroke-width="40" transform="translate(915 188) scale(2)">
+    <path d="M9 16 A34.5 34.5 0 0 1 9 84"/>
+    <path d="M91 16 A34.5 34.5 0 0 0 91 84"/>
+  </g>
+  <text x="76" y="558" font-family="Menlo, monospace" font-size="21" font-weight="700" fill="#da291c">x2c-lang.dev</text>
+</svg>

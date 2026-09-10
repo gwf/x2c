@@ -1,4 +1,5 @@
 ---
+slug: libcurl
 section: packages
 tab: libcurl
 title: Three pages, one batch.

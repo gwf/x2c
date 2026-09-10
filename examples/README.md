@@ -114,6 +114,15 @@ x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt
 x2c run examples/magic/file-policy.x -- examples/magic/policy.xlisp
 ```
 
+The [tic-tac-toe game](magic/tic-tac-toe.x) runs an editable
+[Lisp opponent](magic/tic-tac-toe.xlisp). Play as X; the script chooses O's
+moves through native board queries. Reuse the executable after editing it:
+
+```sh
+x2c build --output /tmp/tic-tac-toe examples/magic/tic-tac-toe.x
+/tmp/tic-tac-toe examples/magic/tic-tac-toe.xlisp
+```
+
 The [Greet example](power/greet-client.x) imports the small teaching package in
 [packages/greet](packages/greet/). The ordinary runner builds that package
 and applies [greet-client.flags](power/greet-client.flags).

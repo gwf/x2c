@@ -1,4 +1,5 @@
 ---
+slug: lists
 section: love
 tab: lists
 ---

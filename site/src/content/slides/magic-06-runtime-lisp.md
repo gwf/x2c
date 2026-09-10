@@ -1,4 +1,5 @@
 ---
+slug: runtime-lisp
 section: magic
 tab: runtime
 ---

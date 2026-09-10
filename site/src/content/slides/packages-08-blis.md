@@ -1,4 +1,5 @@
 ---
+slug: blis
 section: packages
 tab: BLIS
 title: Rank pages with a little linear algebra.

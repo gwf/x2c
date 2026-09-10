@@ -1,4 +1,5 @@
 ---
+slug: indexing
 section: power
 tab: indexing
 ---

@@ -69,6 +69,15 @@ const taglines = [
 </header>
 
 <script>
+  const header = document.querySelector<HTMLElement>(".landing-header")!;
+  const updateHeaderHeight = () => {
+    document.documentElement.style.setProperty(
+      "--landing-header-height", `${header.getBoundingClientRect().height}px`,
+    );
+  };
+  new ResizeObserver(updateHeaderHeight).observe(header);
+  updateHeaderHeight();
+
   const matrixDuration = 700;
   const matrixCharacters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*+-=<>?";

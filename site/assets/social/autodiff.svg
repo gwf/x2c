@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f4f1ec"/>
+  <rect width="1200" height="12" fill="#da291c"/>
+  <g fill="none" stroke="#da291c" stroke-width="17" transform="translate(62 55) scale(.5)">
+    <path d="M9 16 A34.5 34.5 0 0 1 9 84"/>
+    <path d="M91 16 A34.5 34.5 0 0 0 91 84"/>
+  </g>
+  <text x="129" y="94" font-family="Arial, sans-serif" font-size="43" font-weight="700" fill="#191919">x2c</text>
+  <text x="1136" y="85" text-anchor="end" font-family="Arial, sans-serif" font-size="18" letter-spacing="2" fill="#69645e">MAGIC / AUTODIFF</text>
+  <text x="64" y="195" font-family="Georgia, serif" font-size="65" fill="#191919">Fit a growth curve.</text>
+  <text x="66" y="246" font-family="Arial, sans-serif" font-size="26" fill="#625c56">Compile-time Lisp differentiates a 4,000-step simulation loop.</text>
+  <rect x="64" y="291" width="1072" height="237" fill="#191919"/>
+  <g font-family="Menlo, monospace" font-size="24">
+    <text x="94" y="332" fill="#f8aa95">$ad.checkpoint(64)</text>
+    <text x="94" y="372" fill="#e4e0da">static double loss(double rate, double capacity) { /* ... */ }</text>
+    <text x="94" y="424" fill="#e4e0da">value = loss_grad(rate, capacity, &amp;d_rate, &amp;d_capacity);</text>
+    <text x="94" y="462" fill="#e4e0da">rate -= 1e-5 * d_rate;</text>
+    <text x="94" y="500" fill="#e4e0da">capacity -= 1e-2 * d_capacity;</text>
+  </g>
+  <text x="64" y="585" font-family="Menlo, monospace" font-size="21" font-weight="700" fill="#da291c">x2c-lang.dev</text>
+</svg>

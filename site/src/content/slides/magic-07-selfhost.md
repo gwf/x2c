@@ -1,4 +1,5 @@
 ---
+slug: self-host
 section: magic
 tab: self-host
 ---

@@ -1,4 +1,5 @@
 ---
+slug: ways-to-agree
 section: magic
 tab: agreement
 ---

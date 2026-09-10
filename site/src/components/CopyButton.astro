@@ -1,0 +1,37 @@
+---
+import "../styles/example-controls.css";
+interface Props {
+  text: string;
+  label?: string;
+  action?: "share" | "copy-run";
+}
+const { text, label = "Copy link", action = "share" } = Astro.props;
+---
+<span class="copy-control">
+  <button type="button" class="copy-button" data-copy-text={text}
+    data-copy-action={action} hidden>{label}</button>
+  <span class="copy-status" role="status"></span>
+</span>
+
+<script>
+  import { trackExampleAction } from "../lib/analytics";
+
+  if (navigator.clipboard) {
+    for (const button of document.querySelectorAll<HTMLButtonElement>(
+      "[data-copy-text]",
+    )) {
+      const status = button.parentElement!.querySelector("[role=status]")!;
+      button.hidden = false;
+      button.addEventListener("click", async () => {
+        status.textContent = "";
+        try {
+          await navigator.clipboard.writeText(button.dataset.copyText!);
+          status.textContent = "Copied.";
+          trackExampleAction(button, button.dataset.copyAction!);
+        } catch {
+          status.textContent = "Could not copy.";
+        }
+      });
+    }
+  }
+</script>

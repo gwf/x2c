@@ -1,4 +1,5 @@
 ---
+slug: strings
 section: love
 tab: strings
 ---

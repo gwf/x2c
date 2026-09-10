@@ -1,4 +1,5 @@
 ---
+slug: macros
 section: magic
 tab: macros
 ---

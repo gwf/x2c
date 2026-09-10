@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { analyticsSnippet } from "../analytics-snippet.mjs";
 
 import {
   absoluteSiteUrl,
@@ -17,6 +18,7 @@ const repositoryRoot = path.resolve(siteRoot, "..");
 const docsRoot = path.join(repositoryRoot, "docs");
 const siteOutput = path.join(siteRoot, "dist");
 const bookOutput = path.join(siteOutput, "docs");
+const analytics = analyticsSnippet();
 
 function escapeAttribute(value) {
   return value
@@ -152,6 +154,7 @@ async function finalizeBook() {
       );
     }
 
+    if (analytics) html = insertIntoHead(html, analytics, relativeFile);
     await writeFile(filename, html);
   }
 }

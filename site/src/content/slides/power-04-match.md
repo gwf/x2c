@@ -1,4 +1,5 @@
 ---
+slug: match
 section: power
 tab: match
 ---

@@ -1,4 +1,5 @@
 ---
+slug: keywords
 section: magic
 tab: keywords
 ---

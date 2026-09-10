@@ -1,4 +1,5 @@
 ---
+slug: torch
 section: packages
 tab: torch
 title: Compose a model. Train it. Save it.

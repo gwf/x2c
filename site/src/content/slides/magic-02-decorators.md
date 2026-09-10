@@ -1,4 +1,5 @@
 ---
+slug: decorators
 section: magic
 tab: decorators
 ---

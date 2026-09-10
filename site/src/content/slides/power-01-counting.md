@@ -1,4 +1,5 @@
 ---
+slug: counting
 section: power
 tab: counting
 ---

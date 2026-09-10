@@ -1,4 +1,5 @@
 ---
+slug: game-of-life
 section: packages
 tab: termbox2
 title: A little life in your terminal.

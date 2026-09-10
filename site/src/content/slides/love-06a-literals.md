@@ -1,4 +1,5 @@
 ---
+slug: literals
 section: love
 tab: literals
 ---

@@ -1,4 +1,5 @@
 ---
+slug: files
 section: love
 tab: files
 ---

@@ -1,4 +1,5 @@
 ---
+slug: autodiff
 section: magic
 tab: autodiff
 ---

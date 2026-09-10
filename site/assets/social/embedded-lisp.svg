@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#f4f1ec"/>
+<rect width="1200" height="12" fill="#da291c"/>
+<g fill="none" stroke="#da291c" stroke-width="17" transform="translate(62 55) scale(.5)">
+<path d="M9 16 A34.5 34.5 0 0 1 9 84"/><path d="M91 16 A34.5 34.5 0 0 0 91 84"/>
+</g>
+<text x="129" y="94" font-family="Arial, sans-serif" font-size="43" font-weight="700" fill="#191919">x2c</text>
+<text x="1136" y="85" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#69645e">examples / lisp</text>
+<text x="64" y="195" font-family="Georgia, serif" font-size="63" fill="#191919">Give your game a Lisp player.</text>
+<text x="66" y="246" font-family="Arial, sans-serif" font-size="26" fill="#625c56">Play tic-tac-toe. Then rewrite your opponent.</text>
+<rect x="64" y="291" width="545" height="237" fill="#191919"/>
+<g font-family="Menlo, monospace" font-size="22" fill="#e4e0da">
+<text x="88" y="346">Lisp lisp = Lisp.new();</text>
+<text x="88" y="402">$lisp.install(lisp, game);</text>
+<text x="88" y="458">square = lisp.eval(</text>
+<text x="115" y="490" fill="#f2a18b">%(choose-move));</text>
+</g>
+<image x="638" y="291" width="500" height="305" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iMzkwIiB2aWV3Qm94PSIwIDAgNjQwIDM5MCI+CjxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iMzkwIiBmaWxsPSIjMTcxNzE3Ii8+CjxnIHN0cm9rZT0iIzY0NWU1NyIgc3Ryb2tlLXdpZHRoPSIyIj4KPHBhdGggZD0iTTI4MCA0MnYyNzBtOTAtMjcwdjI3ME0xOTAgMTMyaDI3MG0tMjcwIDkwaDI3MCIvPgo8L2c+Cjx0ZXh0IHg9IjIzNSIgeT0iMTAzLjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJNZW5sbywgbW9ub3NwYWNlIiBmb250LXNpemU9IjQ4IiBmaWxsPSIjZTRlMGRhIj5YPC90ZXh0Pgo8dGV4dCB4PSIzMjUiIHk9IjEwMy44IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iTWVubG8sIG1vbm9zcGFjZSIgZm9udC1zaXplPSI0OCIgZmlsbD0iI2U0ZTBkYSI+WDwvdGV4dD4KPHRleHQgeD0iNDE1IiB5PSIxMDMuOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ik1lbmxvLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiNmMmExOGIiPk88L3RleHQ+Cjx0ZXh0IHg9IjIzNSIgeT0iMTg0LjciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJNZW5sbywgbW9ub3NwYWNlIiBmb250LXNpemU9IjIyIiBmaWxsPSIjOGI4NDdjIj40PC90ZXh0Pgo8dGV4dCB4PSIzMjUiIHk9IjE5My44IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iTWVubG8sIG1vbm9zcGFjZSIgZm9udC1zaXplPSI0OCIgZmlsbD0iI2YyYTE4YiI+TzwvdGV4dD4KPHRleHQgeD0iNDE1IiB5PSIxODQuNyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ik1lbmxvLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiM4Yjg0N2MiPjY8L3RleHQ+Cjx0ZXh0IHg9IjIzNSIgeT0iMjc0LjciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJNZW5sbywgbW9ub3NwYWNlIiBmb250LXNpemU9IjIyIiBmaWxsPSIjOGI4NDdjIj43PC90ZXh0Pgo8dGV4dCB4PSIzMjUiIHk9IjI3NC43IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iTWVubG8sIG1vbm9zcGFjZSIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzhiODQ3YyI+ODwvdGV4dD4KPHRleHQgeD0iNDE1IiB5PSIyNzQuNyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9Ik1lbmxvLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiM4Yjg0N2MiPjk8L3RleHQ+Cjx0ZXh0IHg9IjMyMCIgeT0iMzU5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iTWVubG8sIG1vbm9zcGFjZSIgZm9udC1zaXplPSIxOSIgZmlsbD0iI2U0ZTBkYSI+TGlzcCBwbGF5cyAzLiBZb3VyIG1vdmUuPC90ZXh0Pjwvc3ZnPgo="/>
+<text x="64" y="585" font-family="Menlo, monospace" font-size="21" font-weight="700" fill="#da291c">x2c-lang.dev</text>
+</svg>

@@ -1,4 +1,5 @@
 ---
+slug: scopes
 section: power
 tab: scopes
 ---

@@ -1,4 +1,5 @@
 ---
+slug: operators
 section: magic
 tab: operators
 ---

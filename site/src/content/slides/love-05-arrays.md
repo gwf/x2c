@@ -1,4 +1,5 @@
 ---
+slug: arrays
 section: love
 tab: arrays
 ---

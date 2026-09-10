@@ -1,0 +1,63 @@
+---
+import ExamplePanel from "./ExamplePanel.astro";
+
+interface Props {
+  panels: any[];
+  codeLabel: string;
+}
+
+const { panels, codeLabel } = Astro.props;
+---
+
+<div class="example-demonstration" data-walkthrough>
+  <div class="walkthrough-code">
+    {panels.map((panel, index) => <ExamplePanel slide={panel} part="code"
+      section={index} codeLabel={index ? panel.frontmatter.codeLabel : codeLabel} />)}
+  </div>
+  <div class="walkthrough-notes">
+    {panels.map((panel, index) => <ExamplePanel slide={panel} part="notes"
+      section={index} />)}
+  </div>
+</div>
+
+<script>
+  for (const walkthrough of document.querySelectorAll<HTMLElement>(
+    "[data-walkthrough]",
+  )) {
+    const notes = Array.from(walkthrough.querySelectorAll<HTMLElement>(
+      "[data-annotation-section], [data-code-line]",
+    ));
+    const wide = matchMedia("(min-width: 1101px)");
+    let pending = false;
+    const align = () => {
+      pending = false;
+      for (const note of notes) note.style.marginTop = "";
+      if (!wide.matches) return;
+      for (const note of notes) {
+        const section = note.closest<HTMLElement>("[data-annotation-section]")!;
+        const code = walkthrough.querySelector<HTMLElement>(
+          `[data-code-section="${section.dataset.annotationSection}"]`,
+        )!;
+        const anchor = note.dataset.codeLine
+          ? code.querySelectorAll("pre .line")[Number(note.dataset.codeLine) - 1]
+          : code;
+        const gap = anchor.getBoundingClientRect().top
+          - note.getBoundingClientRect().top;
+        const margin = parseFloat(getComputedStyle(note).marginTop);
+        // Normal flow keeps long notes from overlapping the next annotation.
+        note.style.marginTop = `${margin + Math.max(0, gap)}px`;
+      }
+    };
+    const schedule = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(align);
+    };
+    const observer = new ResizeObserver(schedule);
+    for (const block of walkthrough.querySelectorAll(".feature-code, .feature-copy"))
+      observer.observe(block);
+    wide.addEventListener("change", schedule);
+    document.fonts.ready.then(schedule);
+    schedule();
+  }
+</script>

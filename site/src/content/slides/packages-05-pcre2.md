@@ -1,4 +1,5 @@
 ---
+slug: pcre2
 section: packages
 tab: PCRE2
 title: Make sense of a log file.

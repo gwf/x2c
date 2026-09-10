@@ -43,6 +43,31 @@ CDN delivery after deployment.
 `site/dist/` is generated and untracked. The build renders Astro first and
 then mdBook into `site/dist/docs/`.
 
+## Optional measurement
+
+Analytics is off unless both `SITE_ANALYTICS=production` and
+`PLAUSIBLE_SCRIPT_URL` are set for the build. The latter is the personalized
+`https://plausible.io/js/pa-....js` URL from the site's Plausible installation
+settings. The Pages workflow accepts these repository variables. Leave them
+unset for ordinary local builds and previews; the development server never
+loads the tracker. The public site and book share the same loader.
+
+Before enabling measurement, create the `Example select` and `Example action`
+custom-event goals in Plausible and review the site measurement notice. The
+loader leaves automatic pageviews enabled and disables automatic outbound,
+download, and form events to avoid counting example actions twice. It does
+not enable localhost tracking or hash-based pageviews.
+
+Example selections carry `example`, `section`, and `method`; example actions
+carry `example`, `action`, and `surface`. Only authored example identities and
+action names are supplied. A successful copy is an action, not evidence of
+installation or a successful local run. Real event receipt requires a separate
+production verification after activation; local handler checks cannot prove it.
+
+Plausible documents the [installation snippet](https://plausible.io/docs/plausible-script),
+[configuration options](https://plausible.io/docs/script-extensions), and
+[custom events](https://plausible.io/docs/custom-event-goals).
+
 ## Writing the public pages
 
 Long-form landing and About prose and the code samples are in `src/content/`.

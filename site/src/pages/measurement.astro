@@ -1,0 +1,54 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { analyticsSnippet } from "../../analytics-snippet.mjs";
+
+const enabled = Boolean(analyticsSnippet(process.env, import.meta.env.DEV));
+---
+
+<BaseLayout
+  title="Site measurement - x2c"
+  description="What x2c measures about visits and example discovery."
+>
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <div class="landing about-landing">
+    <article class="about-page">
+      <p class="about-eyebrow">measurement</p>
+      <h1>What gets counted.</h1>
+      <div class="about-copy">
+        {enabled ? (
+          <p>
+            This site uses <a href="https://plausible.io/">Plausible</a>
+            to understand which pages and examples people find useful.
+          </p>
+        ) : (
+          <p>
+            Analytics is disabled in this build. The optional measurement
+            described below is not collecting visits or example actions here.
+          </p>
+        )}
+        <p>
+          When enabled, Plausible counts page visits and reports referring
+          sites, campaign links, approximate location, browser, and device type.
+          It does not use analytics cookies. See
+          <a href="https://plausible.io/data-policy">Plausible's data policy</a>
+          for how it processes visits.
+        </p>
+        <p>
+          We also count selections in the example galleries and actions such
+          as opening source or documentation, finding run instructions, and
+          successfully copying commands or a share link. These events contain
+          the example's name and section, the kind of action, and whether it
+          happened on the homepage or an example page, as applicable.
+        </p>
+        <p>
+          We do not send source code, command text, or clipboard contents.
+          Clicking a link or copying a command does not tell us whether you
+          installed x2c or ran a program successfully.
+        </p>
+      </div>
+    </article>
+  </div>
+  <SiteFooter />
+</BaseLayout>

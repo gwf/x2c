@@ -1,4 +1,5 @@
 ---
+slug: generics
 section: power
 tab: generics
 ---

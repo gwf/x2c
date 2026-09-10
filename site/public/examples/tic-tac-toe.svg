@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="390" viewBox="0 0 640 390">
+<rect width="640" height="390" fill="#171717"/>
+<g stroke="#645e57" stroke-width="2">
+<path d="M280 42v270m90-270v270M190 132h270m-270 90h270"/>
+</g>
+<text x="235" y="103.8" text-anchor="middle" font-family="Menlo, monospace" font-size="48" fill="#e4e0da">X</text>
+<text x="325" y="103.8" text-anchor="middle" font-family="Menlo, monospace" font-size="48" fill="#e4e0da">X</text>
+<text x="415" y="103.8" text-anchor="middle" font-family="Menlo, monospace" font-size="48" fill="#f2a18b">O</text>
+<text x="235" y="184.7" text-anchor="middle" font-family="Menlo, monospace" font-size="22" fill="#8b847c">4</text>
+<text x="325" y="193.8" text-anchor="middle" font-family="Menlo, monospace" font-size="48" fill="#f2a18b">O</text>
+<text x="415" y="184.7" text-anchor="middle" font-family="Menlo, monospace" font-size="22" fill="#8b847c">6</text>
+<text x="235" y="274.7" text-anchor="middle" font-family="Menlo, monospace" font-size="22" fill="#8b847c">7</text>
+<text x="325" y="274.7" text-anchor="middle" font-family="Menlo, monospace" font-size="22" fill="#8b847c">8</text>
+<text x="415" y="274.7" text-anchor="middle" font-family="Menlo, monospace" font-size="22" fill="#8b847c">9</text>
+<text x="320" y="359" text-anchor="middle" font-family="Menlo, monospace" font-size="19" fill="#e4e0da">Lisp plays 3. Your move.</text></svg>

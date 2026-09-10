@@ -1,4 +1,5 @@
 ---
+slug: threads
 section: power
 tab: threads
 ---

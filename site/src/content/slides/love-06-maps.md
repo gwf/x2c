@@ -1,4 +1,5 @@
 ---
+slug: maps
 section: love
 tab: maps
 ---

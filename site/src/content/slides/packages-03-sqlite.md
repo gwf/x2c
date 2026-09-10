@@ -1,4 +1,5 @@
 ---
+slug: sqlite
 section: packages
 tab: SQLite
 title: Find the requests that need attention.

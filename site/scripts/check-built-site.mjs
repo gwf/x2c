@@ -229,7 +229,7 @@ function expectOne(relativeFile, values, expected, label) {
   }
 }
 
-function checkMetadata(relativeFile, html) {
+async function checkMetadata(relativeFile, html) {
   const indexed = isIndexedHtmlFile(relativeFile);
   const canonicals = canonicalValues(html);
   const robots = metadataValues(html, "name", "robots");
@@ -255,7 +255,8 @@ function checkMetadata(relativeFile, html) {
   }
 
   const canonical = absoluteSiteUrl(htmlFileRoute(relativeFile));
-  const image = absoluteSiteUrl(socialImagePath);
+  const images = metadataValues(html, "property", "og:image");
+  const image = images[0];
   const title = titleValue(html);
   const descriptions = metadataValues(html, "name", "description");
 
@@ -267,12 +268,24 @@ function checkMetadata(relativeFile, html) {
     "website",
     "og:type"
   );
-  expectOne(
-    relativeFile,
-    metadataValues(html, "property", "og:image"),
-    image,
-    "og:image"
-  );
+  if (images.length !== 1 || !image) {
+    fail(`${relativeFile}: expected one nonempty og:image`);
+  } else {
+    let imageUrl;
+    try {
+      imageUrl = new URL(image);
+    } catch {
+      fail(`${relativeFile}: invalid og:image ${JSON.stringify(image)}`);
+    }
+    if (imageUrl && (imageUrl.origin !== siteOrigin ||
+        !await existingTarget(imageUrl))) {
+      fail(`${relativeFile}: og:image must resolve to a local asset`);
+    }
+  }
+  if (!relativeFile.startsWith("examples/")) {
+    expectOne(relativeFile, images, absoluteSiteUrl(socialImagePath),
+      "fallback og:image");
+  }
   expectOne(
     relativeFile,
     metadataValues(html, "property", "og:image:width"),
@@ -422,7 +435,7 @@ const indexedFiles = files.filter(isIndexedHtmlFile);
 
 for (const relativeFile of files) {
   const html = await readFile(path.join(output, relativeFile), "utf8");
-  checkMetadata(relativeFile, html);
+  await checkMetadata(relativeFile, html);
   await checkReferences(relativeFile, html);
 
   if (relativeFile.startsWith("docs/") &&

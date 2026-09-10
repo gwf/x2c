@@ -1,4 +1,5 @@
 ---
+slug: compile-time-lisp
 section: magic
 tab: compile-time
 ---

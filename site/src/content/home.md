@@ -47,7 +47,7 @@ it. Some users of x2c report heightened expressiveness, a sense of universality,
 with a touch of transcendence. Be sure to drink plenty of water.
 
 x2c is C with batteries and without the bullshit.
-It is a strict superset of C that compiles to C, keeping C's
+It extends C and compiles to C, keeping C's
 native performance, tooling, ecosystem, and portability while adding the
 conveniences of a modern language. x2c extends C's syntax with a few new
 keywords, but the real magic is in the `%` and `$` sigils, which let you write
@@ -55,7 +55,8 @@ code that combines static types, dynamic values, and compile-time computation.
 
 x2c's main features are summarized in the table on the right. Everything is
 optional and works with plain C as well. Hence, you can take existing C code and
-adopt x2c capabilities incrementally.
+adopt x2c capabilities incrementally. The [C foundation](docs/reference/language.html#c-foundation) and
+[host preprocessing notes](docs/reference/language.html#host-preprocessing) explain the boundaries.
 
 [Packages](#packages) bring SQLite, JSON, HTTP, and graphics into the same
 style of code. See what you can build with one example from each.

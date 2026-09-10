@@ -1,4 +1,5 @@
 ---
+slug: methods
 section: love
 tab: methods
 ---

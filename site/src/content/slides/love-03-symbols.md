@@ -1,4 +1,5 @@
 ---
+slug: symbols
 section: love
 tab: symbols
 ---

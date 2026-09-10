@@ -1,4 +1,5 @@
 ---
+slug: raylib
 section: packages
 tab: raylib
 title: Draw a week of weather.

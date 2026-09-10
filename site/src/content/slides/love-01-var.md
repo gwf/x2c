@@ -1,4 +1,5 @@
 ---
+slug: var
 section: love
 tab: var
 ---

@@ -1,0 +1,88 @@
+---
+interface Props {
+  slide: any;
+  codeLabel?: string;
+  part?: "code" | "notes";
+  section?: number;
+}
+
+const { slide, codeLabel, part, section } = Astro.props;
+const panel = slide.frontmatter;
+const html = await slide.compiledContent();
+
+// Keep the first code block; a rule only separates a diagram from its prose.
+const split = (html: string) => {
+  for (const { token, keep } of [
+    { token: "</pre>", keep: true },
+    { token: "<hr", keep: false },
+  ]) {
+    const at = html.indexOf(token);
+    if (at === -1) continue;
+    const end = keep ? at + token.length : at;
+    const resume = html.indexOf(">", at + token.length) + 1;
+    return { left: html.slice(0, end), right: html.slice(keep ? end : resume) };
+  }
+  return { left: "", right: html };
+};
+const { left, right } = split(html);
+const base = import.meta.env.BASE_URL;
+---
+
+{part !== "notes" && <div
+  class={panel.panel === "steps" ? "descent-diagram" : "feature-code"}
+  data-code-section={section}>
+  {codeLabel && <small class="feature-code-label">{codeLabel}</small>}
+  <Fragment set:html={left} />
+</div>}
+{part !== "code" && <div class="feature-copy" data-annotation-section={section}>
+  {panel.status && <small class="feature-status">{panel.status}</small>}
+  {panel.title && <h3>{panel.title}</h3>}
+  {panel.image && (
+    <div data-result-media>
+      <img
+        class="feature-result-image"
+        src={`${base}${panel.imagePoster || panel.image}`}
+        data-animation={panel.imagePoster && `${base}${panel.image}`}
+        data-poster={panel.imagePoster && `${base}${panel.imagePoster}`}
+        alt={panel.imageAlt}
+        width={panel.imageWidth}
+        height={panel.imageHeight}
+        loading="lazy"
+      />
+      {panel.imagePoster && (
+        <button type="button" class="animation-toggle" hidden>
+          Play animation
+        </button>
+      )}
+    </div>
+  )}
+  <Fragment set:html={right} />
+</div>}
+
+<script>
+  for (const link of document.querySelectorAll<HTMLAnchorElement>(
+    ".feature-copy a[href]",
+  )) {
+    if (link.pathname.endsWith(".x")) link.dataset.exampleAction = "source";
+    else if (link.pathname.endsWith("/README.md"))
+      link.dataset.exampleAction = "guide";
+  }
+
+  for (const media of document.querySelectorAll("[data-result-media]")) {
+    const image = media.querySelector<HTMLImageElement>("img[data-animation]");
+    const button = media.querySelector<HTMLButtonElement>("button");
+    if (!image || !button) continue;
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    const play = (active: boolean) => {
+      image.src = active ? image.dataset.animation! : image.dataset.poster!;
+      button.textContent = active ? "Pause animation" : "Play animation";
+      button.setAttribute("aria-pressed", String(active));
+    };
+    button.hidden = false;
+    play(!reducedMotion.matches);
+    button.addEventListener("click", () => {
+      play(button.getAttribute("aria-pressed") !== "true");
+    });
+    reducedMotion.addEventListener("change", () => play(!reducedMotion.matches));
+  }
+</script>

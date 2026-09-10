@@ -1,4 +1,5 @@
 ---
+slug: exceptions
 section: power
 tab: exceptions
 ---

@@ -1,10 +1,8 @@
 ---
-// One tabbed carousel, built from the Markdown files in src/content/slides.
-//
-// A slide is split into its two panels at the end of its first code block: the
-// code goes left, everything after it goes right. A slide with no code (the
-// descent) uses a `---` rule as the separator instead. A slide file is
-// frontmatter, a fenced sample, and two paragraphs.
+import ExamplePanel from "./ExamplePanel.astro";
+import CopyButton from "./CopyButton.astro";
+import { articleFor } from "../lib/examples";
+import { absoluteSiteUrl, sitePath } from "../../site-config.mjs";
 
 interface Props {
   name: string;
@@ -15,124 +13,56 @@ interface Props {
 }
 
 const { name, label, tone, slides, codeLabel } = Astro.props;
-
-// A code block belongs to the left panel; a rule only marks where to cut.
-const SEPARATORS = [
-  { token: "</pre>", keep: true },
-  { token: "<hr", keep: false }
-];
-
-const split = (html: string) => {
-  for (const { token, keep } of SEPARATORS) {
-    const at = html.indexOf(token);
-    if (at === -1) continue;
-    const end = keep ? at + token.length : at;
-    const resume = html.indexOf(">", at + token.length) + 1;
-    return { left: html.slice(0, end), right: html.slice(keep ? end : resume) };
-  }
-  return { left: "", right: html };
-};
-
-const panels = await Promise.all(
-  slides.map(async (slide) => ({
-    ...slide.frontmatter,
-    ...split(await slide.compiledContent())
-  }))
-);
-
-const count = String(panels.length).padStart(2, "0");
+const count = String(slides.length).padStart(2, "0");
 ---
 
 <div class={`feature-carousel feature-carousel-${tone}`} data-carousel>
   <div class={`carousel-toolbar${tone === "dark" ? " carousel-toolbar-dark" : ""}`}>
     <div role="tablist" aria-label={label} class="carousel-tabs">
-      {
-        panels.map((panel, position) => (
-          <button
-            type="button"
-            role="tab"
-            data-carousel-tab
-            aria-selected={position === 0 ? "true" : "false"}
-            tabindex={position === 0 ? 0 : -1}
-          >
-            {panel.tab}
-          </button>
-        ))
-      }
+      {slides.map((slide, position) => (
+        <button
+          type="button"
+          role="tab"
+          id={`example-tab-${slide.frontmatter.slug}`}
+          aria-controls={`example-${slide.frontmatter.slug}`}
+          data-carousel-tab
+          aria-selected={position === 0 ? "true" : "false"}
+          tabindex={position === 0 ? 0 : -1}
+        >{slide.frontmatter.tab}</button>
+      ))}
     </div>
     <div class="carousel-controls">
-      <span
-        data-carousel-count
+      <span data-carousel-count
         class={`carousel-count${tone === "dark" ? " carousel-count-dark" : ""}`}
-        >01 / {count}</span
-      >
-      <button type="button" data-carousel-prev aria-label="previous" class="carousel-arrow"
-        >←</button
-      >
-      <button type="button" data-carousel-next aria-label="next" class="carousel-arrow"
-        >→</button
-      >
+        >01 / {count}</span>
+      <button type="button" data-carousel-prev aria-label="previous"
+        class="carousel-arrow">&#8592;</button>
+      <button type="button" data-carousel-next aria-label="next"
+        class="carousel-arrow">&#8594;</button>
     </div>
   </div>
   <div class="carousel-viewport">
     <div data-carousel-track class="carousel-track">
-      {
-        panels.map((panel) => (
-          <div class="carousel-slide">
-            <div
-              class={panel.panel === "steps" ? "descent-diagram" : "feature-code"}
-            >
-              {codeLabel && <small class="feature-code-label">{codeLabel}</small>}
-              <Fragment set:html={panel.left} />
-            </div>
-            <div class="feature-copy">
-              {panel.status && <small class="feature-status">{panel.status}</small>}
-              {panel.title && <h3>{panel.title}</h3>}
-              {panel.image && (
-                <div data-result-media>
-                <img
-                  class="feature-result-image"
-                  src={`${import.meta.env.BASE_URL}${panel.imagePoster || panel.image}`}
-                  data-animation={panel.imagePoster && `${import.meta.env.BASE_URL}${panel.image}`}
-                  data-poster={panel.imagePoster && `${import.meta.env.BASE_URL}${panel.imagePoster}`}
-                  alt={panel.imageAlt}
-                  width={panel.imageWidth}
-                  height={panel.imageHeight}
-                  loading="lazy"
-                />
-                {panel.imagePoster && (
-                  <button type="button" class="animation-toggle" hidden>
-                    Play animation
-                  </button>
-                )}
-                </div>
+      {slides.map((slide) => {
+        const { slug } = slide.frontmatter;
+        const anchor = `#example-${slug}`;
+        const article = articleFor(slug);
+        return (
+          <div class="carousel-slide" id={`example-${slug}`}
+            role="tabpanel" aria-labelledby={`example-tab-${slug}`}
+            data-example={slug} data-section={name} data-surface="home">
+            <ExamplePanel slide={slide} codeLabel={codeLabel} />
+            <div class="example-actions">
+              <a href={anchor}>Permalink</a>
+              <CopyButton text={`${absoluteSiteUrl("/")}${anchor}`} />
+              {article && (
+                <a href={sitePath(`/examples/${article.frontmatter.slug}/`)}
+                  data-example-action="explore">Explore this example</a>
               )}
-              <Fragment set:html={panel.right} />
             </div>
           </div>
-        ))
-      }
+        );
+      })}
     </div>
   </div>
 </div>
-
-
-<script>
-  for (const media of document.querySelectorAll("[data-result-media]")) {
-    const image = media.querySelector<HTMLImageElement>("img[data-animation]");
-    const button = media.querySelector<HTMLButtonElement>("button");
-    if (!image || !button) continue;
-    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-    const play = (active: boolean) => {
-      image.src = active ? image.dataset.animation! : image.dataset.poster!;
-      button.textContent = active ? "Pause animation" : "Play animation";
-      button.setAttribute("aria-pressed", String(active));
-    };
-    button.hidden = false;
-    play(!reducedMotion.matches);
-    button.addEventListener("click", () => {
-      play(button.getAttribute("aria-pressed") !== "true");
-    });
-    reducedMotion.addEventListener("change", () => play(!reducedMotion.matches));
-  }
-</script>

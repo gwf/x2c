@@ -1,4 +1,5 @@
 ---
+slug: imports
 section: power
 tab: imports
 ---

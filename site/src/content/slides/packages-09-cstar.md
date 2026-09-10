@@ -1,4 +1,5 @@
 ---
+slug: cstar
 section: packages
 tab: C*
 title: Give a function a contract.

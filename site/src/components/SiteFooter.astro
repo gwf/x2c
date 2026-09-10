@@ -1,5 +1,6 @@
 ---
 import ExternalLinkIcon from "./ExternalLinkIcon.astro";
+import { analyticsSnippet } from "../../analytics-snippet.mjs";
 
 interface Props {
   home?: boolean;
@@ -9,6 +10,7 @@ const { home = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 const brandHref = home ? "#top" : local("");
+const analytics = analyticsSnippet(process.env, import.meta.env.DEV);
 ---
 
 <footer class="landing-footer">
@@ -30,6 +32,7 @@ const brandHref = home ? "#top" : local("");
     <a href={home ? "#install" : `${local("")}#install`} class="dark-link">install</a>
     <a href={home ? "#packages" : `${local("")}#packages`} class="dark-link">packages</a>
     <a href={local("about/")} class="dark-link">about</a>
+    {analytics && <a href={local("measurement/")} class="dark-link">measurement</a>}
     <a href={local("docs/")} class="dark-link">docs<ExternalLinkIcon /></a>
     <a href="https://github.com/gwf/x2c" class="dark-link">source<ExternalLinkIcon /></a>
   </div>

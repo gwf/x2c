@@ -1,4 +1,5 @@
 ---
+slug: yyjson
 section: packages
 tab: yyjson
 title: Turn JSON into a service report.

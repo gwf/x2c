@@ -1,10 +1,14 @@
 ---
+import { Code } from "astro:components";
+import { coreSetup, corePrerequisites } from "../content/core-setup";
+import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import FeatureCarousel from "../components/FeatureCarousel.astro";
 import FeatureTable from "../components/FeatureTable.astro";
 import HeroTitle from "../components/HeroTitle.astro";
+import { inSection } from "../lib/examples";
 import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
@@ -24,21 +28,12 @@ import {
   frontmatter as magic,
 } from "../content/magic.md";
 import {
-  compiledContent as installCode,
   frontmatter as install,
 } from "../content/install.md";
 
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 
-// Slides are ordered by two-digit filename prefixes, so love-01-var.md
-// precedes love-02-strings.md. Renaming a file reorders the carousel.
-const files = import.meta.glob("../content/slides/*.md", { eager: true });
-const slides = Object.keys(files)
-  .sort()
-  .map((path) => files[path] as any);
-const inSection = (name: string) =>
-  slides.filter((slide) => slide.frontmatter.section === name);
 const [titleHtml, kickerHtml] = await Promise.all([
   inlineMarkdown(home.title),
   inlineMarkdown(home.kicker),
@@ -57,6 +52,18 @@ const [titleHtml, kickerHtml] = await Promise.all([
       <header class="hero-heading">
         <HeroTitle html={titleHtml} />
         <p set:html={kickerHtml} />
+        <nav class="hero-examples" aria-label="Featured examples">
+          <span>Try an example:</span>
+          <a href={local("examples/torch/")} data-example="torch"
+            data-surface="hero" data-section="packages" data-example-action="explore">
+            Recognize handwritten digits</a>
+          <a href={local("examples/embedded-lisp/")} data-example="embedded-lisp"
+            data-surface="hero" data-section="magic" data-example-action="explore">
+            Embed Lisp in your program</a>
+          <a href={local("examples/game-of-life/")} data-example="game-of-life"
+            data-surface="hero" data-section="packages" data-example-action="explore">
+            Run Game of Life</a>
+        </nav>
       </header>
       <FeatureTable intro={home.featureIntro} features={home.features} />
       <div class="hero-prose">
@@ -159,6 +166,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           translation, native compilation, and execution.
         </p>
         <p>
+          {corePrerequisites}{" "}
           See the <a href={local("docs/internals/building.html")}>build
           instructions</a> for the self-hosting process.
         </p>
@@ -171,7 +179,10 @@ const [titleHtml, kickerHtml] = await Promise.all([
       </div>
       <figure class="install-window">
         <figcaption>{install.caption}</figcaption>
-        <div class="install-code" set:html={await installCode()} />
+        <div class="install-code">
+          <Code code={`${coreSetup}\n\n${install.run.trim()}`} lang="sh"
+            theme={x2cDarkTheme} />
+        </div>
       </figure>
     </div>
   </section>
@@ -270,109 +281,6 @@ const [titleHtml, kickerHtml] = await Promise.all([
   <SiteFooter home />
 </BaseLayout>
 
-<script is:inline>
-  const header = document.querySelector(".landing-header");
-  const updateHeaderHeight = () => document.documentElement.style.setProperty(
-    "--landing-header-height", `${header.getBoundingClientRect().height}px`);
-  new ResizeObserver(updateHeaderHeight).observe(header);
-  updateHeaderHeight();
-
-  for (const carousel of document.querySelectorAll("[data-carousel]")) {
-    const track = carousel.querySelector("[data-carousel-track]");
-    const tabs = [...carousel.querySelectorAll("[data-carousel-tab]")];
-    const tablist = carousel.querySelector(".carousel-tabs");
-    const slides = [...track.children];
-    const count = carousel.querySelector("[data-carousel-count]");
-    const label = carousel.querySelector("[data-carousel-label]");
-    const name = carousel.closest("section").id;
-    let index = 0;
-    let pointerStart = null;
-    let initialized = false;
-
-    count.setAttribute("aria-live", "polite");
-    tabs.forEach((tab, position) => {
-      tab.id = `${name}-tab-${position + 1}`;
-      tab.setAttribute("aria-controls", `${name}-panel-${position + 1}`);
-    });
-    slides.forEach((slide, position) => {
-      slide.id = `${name}-panel-${position + 1}`;
-      if (tabs[position]) {
-        slide.setAttribute("role", "tabpanel");
-        slide.setAttribute("aria-labelledby", `${name}-tab-${position + 1}`);
-      }
-    });
-
-    const show = (next, focus = false) => {
-      index = (next + slides.length) % slides.length;
-      track.style.transform = `translateX(-${index * 100}%)`;
-      count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
-      if (label) label.textContent = slides[index].dataset.carouselLabel;
-
-      for (const [position, tab] of tabs.entries()) {
-        const selected = position === index;
-        tab.setAttribute("aria-selected", String(selected));
-        tab.tabIndex = selected ? 0 : -1;
-      }
-
-      for (const [position, slide] of slides.entries()) {
-        const selected = position === index;
-        slide.setAttribute("aria-hidden", String(!selected));
-        slide.toggleAttribute("inert", !selected);
-      }
-
-      if (initialized)
-        tabs[index].scrollIntoView({ block: "nearest", inline: "nearest" });
-      if (focus) tabs[index].focus();
-    };
-
-    const move = (event, focus = false) => {
-      if (event.key === "ArrowRight") show(index + 1, focus);
-      else if (event.key === "ArrowLeft") show(index - 1, focus);
-      else if (event.key === "Home") show(0, focus);
-      else if (event.key === "End") show(slides.length - 1, focus);
-      else return;
-      event.preventDefault();
-    };
-
-    tabs.forEach((tab, position) => {
-      tab.addEventListener("click", () => show(position));
-      tab.addEventListener("keydown", (event) => move(event, true));
-    });
-    if (!tabs.length)
-      carousel.addEventListener("keydown", (event) => move(event));
-
-    carousel
-      .querySelector("[data-carousel-prev]")
-      .addEventListener("click", () => show(index - 1));
-    carousel
-      .querySelector("[data-carousel-next]")
-      .addEventListener("click", () => show(index + 1));
-
-    track.parentElement.addEventListener("pointerdown", (event) => {
-      if (event.pointerType !== "mouse") pointerStart = event.clientX;
-    });
-    track.parentElement.addEventListener("pointerup", (event) => {
-      if (pointerStart === null) return;
-      const distance = event.clientX - pointerStart;
-      pointerStart = null;
-      if (Math.abs(distance) > 48) show(index + (distance < 0 ? 1 : -1));
-    });
-    track.parentElement.addEventListener("pointercancel", () => {
-      pointerStart = null;
-    });
-
-    show(0);
-    initialized = true;
-    carousel.setAttribute("data-carousel-ready", "");
-
-    const updateTabFades = () => {
-      tablist.toggleAttribute("data-hidden-left", tablist.scrollLeft > 1);
-      tablist.toggleAttribute("data-hidden-right",
-        tablist.scrollWidth - tablist.clientWidth - tablist.scrollLeft > 1);
-    };
-    tablist.addEventListener("scroll", updateTabFades, { passive: true });
-    new ResizeObserver(updateTabFades).observe(tablist);
-    document.fonts.ready.then(updateTabFades);
-    updateTabFades();
-  }
+<script>
+  import "../lib/carousel";
 </script>

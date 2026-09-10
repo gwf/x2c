@@ -1,0 +1,106 @@
+---
+import { basename } from "node:path";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import ExampleWalkthrough from "../../components/ExampleWalkthrough.astro";
+import CopyButton from "../../components/CopyButton.astro";
+import CoreSetup from "../../components/CoreSetup.astro";
+import { articles, slides } from "../../lib/examples";
+import "../../styles/example-pages.css";
+
+export function getStaticPaths() {
+  return articles.map((article) => ({
+    params: { slug: article.frontmatter.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { frontmatter: page, Content } = article;
+const slide = slides.find((entry) => entry.frontmatter.slug === page.slide)!;
+const section = slide.frontmatter.section;
+const detailPanels = import.meta.glob("../../content/examples/panels/*.md", {
+  eager: true,
+});
+const panel = detailPanels[`../../content/examples/panels/${page.slug}.md`]
+  ?? slide;
+const panels = [panel, ...(page.extraPanels ?? []).map((name: string) =>
+  detailPanels[`../../content/examples/panels/${name}.md`])];
+const source = page.source;
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const sourceUrl = page.sourceDownload ? local(page.sourceDownload)
+  : `https://github.com/gwf/x2c/blob/main/${source}`;
+const outputs = import.meta.glob("../../../../examples/expected/*.stdout", {
+  query: "?raw", import: "default", eager: true,
+});
+const output = page.output ? outputs[`../../../../${page.output}`] as string : null;
+const canonicalUrl = new URL(local(`examples/${page.slug}/`), Astro.site).href;
+const current = articles.findIndex((entry) => entry.frontmatter.slug === page.slug);
+const next = articles[(current + 1) % articles.length];
+const sectionLabel = section === "packages" ? "Packages" : "Magic";
+---
+
+<BaseLayout
+  title={`${page.title} - x2c`}
+  description={page.description}
+  socialImage={`examples/${page.slug}.png`}
+  socialImageAlt={`${page.title} ${page.description}`}
+>
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <article class="example-page" data-example={page.slug}
+    data-section={section} data-surface="detail">
+    <header class="example-heading">
+      <p class="example-eyebrow">x2c / examples / a closer look</p>
+      <h1>{page.title}</h1>
+      <p class="example-premise">{page.description}</p>
+      <nav class="example-actions" aria-label="Example actions">
+        <a class="example-run-link" href="#run" data-example-action="run">
+          Run it locally <span aria-hidden="true">&darr;</span>
+        </a>
+        <a href={sourceUrl} data-example-action="source">
+          Full source
+        </a>
+        <a href={local(page.guide)} data-example-action="guide">Read the guide</a>
+        <CopyButton text={canonicalUrl} />
+      </nav>
+    </header>
+
+    <ExampleWalkthrough panels={panels}
+      codeLabel={page.codeLabel ?? "The idea in code"} />
+
+    <div class="example-reading">
+      <div class="example-prose"><Content /></div>
+      {output && (
+        <figure class="example-output">
+          <figcaption>
+            <span>{basename(source)}</span>
+            <span>Expected output</span>
+          </figcaption>
+          <pre><code>{output}</code></pre>
+        </figure>
+      )}
+
+      <section id="run" class="example-run" aria-labelledby="run-heading">
+        <p class="example-eyebrow">Your turn</p>
+        <h2 id="run-heading">Run it locally.</h2>
+        <p class="example-run-intro">
+          {page.runIntro}
+        </p>
+        <CoreSetup run={page.run} />
+      </section>
+
+      <nav class="example-next" aria-label="Keep exploring">
+        <a href={local(`#example-${page.slide}`)}>
+          <small>Back to the language tour</small>
+          <span>In {sectionLabel} <span aria-hidden="true">&uarr;</span></span>
+        </a>
+        <a href={local(`examples/${next.frontmatter.slug}/`)}>
+          <small>Next example</small>
+          <span>{next.frontmatter.title} <span aria-hidden="true">&rarr;</span></span>
+        </a>
+      </nav>
+    </div>
+  </article>
+  <SiteFooter />
+</BaseLayout>

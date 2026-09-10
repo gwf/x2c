@@ -15,6 +15,8 @@ concurrency:
 env:
   SITE_URL: ${{ vars.SITE_URL }}
   SITE_BASE: ${{ vars.SITE_BASE }}
+  SITE_ANALYTICS: ${{ vars.SITE_ANALYTICS }}
+  PLAUSIBLE_SCRIPT_URL: ${{ vars.PLAUSIBLE_SCRIPT_URL }}
 
 jobs:
   build:
