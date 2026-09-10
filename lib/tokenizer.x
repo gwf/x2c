@@ -283,12 +283,12 @@ static inline int _can_start_symbol_literal(Tokenizer tokenizer) {
   Token keyword = _significant_back(tokenizer, 0);
   int back = 1;
   if (keyword.type != <ident>) return 0;
-  if (keyword.text == %"tag") return 1;
-  if (keyword.text == %"not") {
+  if (keyword.text == "tag") return 1;
+  if (keyword.text == "not") {
     keyword = _significant_back(tokenizer, back++);
     if (!keyword || keyword.type != <ident>) return 0;
   }
-  return keyword.text == %"is" &&
+  return keyword.text == "is" &&
          _token_ends_operand(_significant_back(tokenizer, back));
 }
 

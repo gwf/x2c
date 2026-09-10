@@ -391,7 +391,7 @@ static List _publish_aggregate_type(
 /** Reports whether the current identifier starts a C static assertion. */
 int Compiler.test_static_assert(Compiler compiler) =>
   compiler.peek(0) == <ident> &&
-  compiler.token.text == %"_Static_assert";
+  compiler.token.text == "_Static_assert";
 
 /** Parses a C assertion declaration; native C owns constant-expression checks. */
 List Compiler.parse_static_assert(Compiler compiler) {
@@ -608,7 +608,7 @@ static List _type_specifier(Compiler c) {
     case <enum>:
       syntax = _enum(c); break;
     case <ident>:
-      if (c.token.text == %"Self") {
+      if (c.token.text == "Self") {
         c.next();
         syntax = %(self);
         break;
@@ -958,7 +958,7 @@ static int _test_declaration_start(Compiler c, int require_declarator) {
   c.next();
   if (alias) { c.next(); c.next(); }
   Symbol next = c.peek(0);
-  int is_operator = next == <ident> && c.token.text == %"is";
+  int is_operator = next == <ident> && c.token.text == "is";
   c.token = head;
   if (c.macro_holes && is_operator) return 0;
   if (lookup.is_typedef() && !require_declarator) return next != <.>;
@@ -1122,7 +1122,7 @@ static void _require_lifecycle_signature(
              (bind ?
                ((fnmod (params (param (void) (bind () ())))))))):
       return;
-  String message = role == %"initializer"
+  String message = role == "initializer"
                  ? "type initializer must have signature void TYPE.initialize(void)"
                  : "type shutdown must have signature void TYPE.shutdown(void)";
   compiler.report_error(

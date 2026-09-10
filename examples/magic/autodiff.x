@@ -10,9 +10,8 @@ typedef struct Dual { double value; double tangent; } Dual;
 $ad.dual(Dual, dual, <dual>, double, sin, cos, exp, log, sqrt, tanh);
 
 static Dual by_dual(Dual x, Dual y) {
-  Dual three = 3.0;
-  Dual t = x * y + three;
-  if (t > three) t = t * t;
+  Dual t = x * y + 3.0;
+  if (t > 3.0) t = t * t;
   return t.sin() / x - y.exp();
 }
 

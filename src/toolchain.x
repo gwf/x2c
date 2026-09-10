@@ -96,7 +96,7 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
     *runtime_lib = %"$stage_dir/libx2c.a";
     return;
   }
-  if (root && root != %".") {
+  if (root && root != ".") {
     *include_dir = %"$root/include";
     String installed = %"$root/lib/libx2c.a";
     *runtime_lib = !access(installed, R_OK) ?

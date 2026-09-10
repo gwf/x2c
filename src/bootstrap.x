@@ -49,7 +49,7 @@ static void _error_path(const char *message, String path) {
 
 static String _absolute(String path) {
   if (!path || !path[0]) _error("empty installation prefix");
-  if (path == %"/") _error("refusing root installation prefix");
+  if (path == "/") _error("refusing root installation prefix");
   char resolved[PATH_MAX];
   if (!access(path, F_OK)) {
     if (!realpath(path, resolved))

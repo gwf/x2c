@@ -1062,7 +1062,7 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (head == <string>) return c.match_pattern_value(second);
   String converter = head == <call>
                    ? _match_pattern_converter_name(second) : NULL;
-  if (converter == %"List_var" || converter == %"Symbol_var") {
+  if (converter == "List_var" || converter == "Symbol_var") {
     List args = third;
     Var (args_tag, argument) = args;
     if (args && args_tag == <args> && args.cdr() && !args.cddr())
@@ -1694,8 +1694,8 @@ List Sym.introduce(Sym sym, String spelling) =>
 static int _is_reserved_spelling(String s) {
   if (!s) return 0;
   if (s.startswith("_x2c_")) return 1;
-  if (s == %"_init_guard_") return 1;
-  if (s == %"_file_init_") return 1;
+  if (s == "_init_guard_") return 1;
+  if (s == "_file_init_") return 1;
   if (s.len() < 2 || s[0] != '_') return 0;
   for (int i = 1; i < s.len(); i++) if (s[i] < '0' || s[i] > '9') return 0;
   return 1;

@@ -187,7 +187,7 @@ static List _pattern_content(Compiler c, List node) {
     case %(cache ?id): return _pattern_content(c, c.id_keys[id]);
     case %(var ?value): return _pattern_content(c, value);
     case %(call (expr ? (ident ?binding)) (args ?value)):
-      if (binding_identity_spelling(binding) == %"List_var")
+      if (binding_identity_spelling(binding) == "List_var")
         return _pattern_content(c, value);
   }
   return node;
@@ -1133,7 +1133,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   c.expect(<)>);
   SymScope params = c.sym.pop_scope();
   Array references = %[], prescribed = %[];
-  if (c.peek(0) == <ident> && c.token.text == %"using") {
+  if (c.peek(0) == <ident> && c.token.text == "using") {
     c.next();
     do {
       c.expect(<&>);

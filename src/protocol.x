@@ -2279,7 +2279,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
   Type representation = NULL;
   List tag = NULL;
   Token modifier_token = NULL;
-  if (c.peek(0) == <ident> && c.token.text == %"as") {
+  if (c.peek(0) == <ident> && c.token.text == "as") {
     modifier_token = c.token;
     c.next();
     representation = c.parse_type_name().canonicalize();
@@ -2288,7 +2288,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
         <protocol>, "'as' applies only to a Var adoption",
         modifier_token, NULL);
   }
-  if (c.peek(0) == <ident> && c.token.text == %"tag") {
+  if (c.peek(0) == <ident> && c.token.text == "tag") {
     modifier_token = c.token;
     c.next();
     if (representation)

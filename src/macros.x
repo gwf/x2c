@@ -499,7 +499,7 @@ static Var _lisp_import_hook(String path) {
     This query does not consume tokens.
 */
 int Compiler.macro_form_is_definition(Compiler compiler) {
-  if (compiler.peek(0) != <ident> || compiler.token.text != %"macro") return 0;
+  if (compiler.peek(0) != <ident> || compiler.token.text != "macro") return 0;
   if (compiler.peek(1) == <$>) return 1;
   return compiler.peek(1) == <ident> && compiler.peek(2) == <$>;
 }
@@ -509,7 +509,7 @@ int Compiler.macro_form_is_definition(Compiler compiler) {
 */
 int Compiler.local_macro_form_is_definition(Compiler compiler) {
   return compiler.peek(0) == <ident> &&
-         compiler.token.text == %"macro" &&
+         compiler.token.text == "macro" &&
          compiler.peek(1) == <ident> &&
          compiler.peek(2) == <ident> &&
          compiler.peek(3) == <(>;
@@ -520,7 +520,7 @@ int Compiler.local_macro_form_is_definition(Compiler compiler) {
 */
 int Compiler.keyword_form_is_definition(Compiler compiler) =>
   compiler.peek(0) == <ident> &&
-         compiler.token.text == %"keyword" &&
+         compiler.token.text == "keyword" &&
          compiler.peek(2) == <$>;
 
 static void _skip_balanced_tokens(
@@ -954,7 +954,7 @@ static int _import_path(Compiler compiler, String *path) {
   /* The checked-in bootstrap still tokenizes `import` as an identifier, so
      both spellings of the same word open a compile-time import. */
   if ((token.type != <ident> && token.type != <import>) ||
-      token.text != %"import")
+      token.text != "import")
     return 0;
   token = compiler.skip_trivia_from(token + 1);
   if (token.type != <lit-char*>) return 0;
@@ -1996,7 +1996,7 @@ List Compiler.parse_macro_definition(Compiler c) {
       <macro>, %"local decorators cannot target $target syntax",
       start, NULL);
   }
-  if (c.peek(0) == <ident> && c.token.text == %"using") {
+  if (c.peek(0) == <ident> && c.token.text == "using") {
     c.next();
     loop {
       List hole = _parse_signature_hole(c, 1);

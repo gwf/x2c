@@ -79,9 +79,8 @@ enum PoolBlockConstant {
   POOL_BLOCK_DATA_OFFSET = 64
 };
 
-typedef char x2c_pool_block_header_size[
-  (sizeof(struct PoolBlock) == 64) ? 1 : -1
-];
+_Static_assert(sizeof(struct PoolBlock) == 64,
+               "the pool block header is 64 bytes");
 
 static const unsigned pool_class_sizes[POOL_CLASS_COUNT] = {
   16, 32, 48, 64, 96, 128, 192, 256, 384, 512

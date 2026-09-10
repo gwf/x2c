@@ -95,8 +95,8 @@ typedef struct StringHeader {
 
 /* Canonical String payloads are custom-object-safe: Scope allocations are
    max-aligned and the payload begins eight bytes after the base. */
-typedef char x2c_string_payload_alignment[
-  (sizeof(struct StringHeader) == 8) ? 1 : -1];
+_Static_assert(sizeof(struct StringHeader) == 8,
+               "the String header is 8 bytes, so payloads stay aligned");
 
 /** Returns the borrowed active `String`/`List` pool on this thread. */
 Pool String.pool_current(void) => x2c_pool_values_current();

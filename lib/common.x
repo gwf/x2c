@@ -31,37 +31,34 @@ typedef union Var {
   double f64, void *p64;
 } Var;
 
-typedef char x2c_var_abi_byte[(CHAR_BIT == 8) ? 1 : -1];
-typedef char x2c_var_abi_signed_char[
-  (CHAR_MIN == -128 && CHAR_MAX == 127) ? 1 : -1];
-typedef char x2c_var_abi_short[(sizeof(short) == 2) ? 1 : -1];
-typedef char x2c_var_abi_ushort[(sizeof(unsigned short) == 2) ? 1 : -1];
-typedef char x2c_var_abi_int[(sizeof(int) == 4) ? 1 : -1];
-typedef char x2c_var_abi_uint[(sizeof(unsigned) == 4) ? 1 : -1];
-typedef char x2c_var_abi_short_range[
-  (SHRT_MAX == 0x7fff && SHRT_MIN == -0x7fff - 1 &&
-   USHRT_MAX == 0xffffU) ? 1 : -1];
-typedef char x2c_var_abi_int_range[
-  (INT_MAX == 0x7fffffff && INT_MIN == -0x7fffffff - 1 &&
-   UINT_MAX == 0xffffffffU) ? 1 : -1];
-typedef char x2c_var_abi_float[(sizeof(float) == 4) ? 1 : -1];
-typedef char x2c_var_abi_double[(sizeof(double) == 8) ? 1 : -1];
-typedef char x2c_var_abi_ulong[(sizeof(unsigned long) == 8) ? 1 : -1];
-typedef char x2c_var_abi_long_long[(sizeof(long long) == 8) ? 1 : -1];
-typedef char x2c_var_abi_long_range[
-  (LONG_MAX == 0x7fffffffffffffffL &&
-   LONG_MIN == -0x7fffffffffffffffL - 1L &&
-   ULONG_MAX == 0xffffffffffffffffUL) ? 1 : -1];
-typedef char x2c_var_abi_long_long_range[
-  (LLONG_MAX == 0x7fffffffffffffffLL &&
-   LLONG_MIN == -0x7fffffffffffffffLL - 1LL &&
-   ULLONG_MAX == 0xffffffffffffffffULL) ? 1 : -1];
-typedef char x2c_var_abi_pointer[(sizeof(void *) == 8) ? 1 : -1];
-typedef char x2c_var_abi_storage[(sizeof(Var) == 8) ? 1 : -1];
-typedef char x2c_var_abi_float_ieee[
-  (FLT_RADIX == 2 && FLT_MANT_DIG == 24 && FLT_MAX_EXP == 128) ? 1 : -1];
-typedef char x2c_var_abi_double_ieee[
-  (DBL_MANT_DIG == 53 && DBL_MAX_EXP == 1024) ? 1 : -1];
+_Static_assert(CHAR_BIT == 8, "char is 8 bits");
+_Static_assert(CHAR_MIN == -128 && CHAR_MAX == 127, "char is signed");
+_Static_assert(sizeof(short) == 2, "short is 2 bytes");
+_Static_assert(sizeof(unsigned short) == 2, "unsigned short is 2 bytes");
+_Static_assert(sizeof(int) == 4, "int is 4 bytes");
+_Static_assert(sizeof(unsigned) == 4, "unsigned is 4 bytes");
+_Static_assert(SHRT_MAX == 0x7fff && SHRT_MIN == -0x7fff - 1 &&
+               USHRT_MAX == 0xffffU, "short is two's complement 16-bit");
+_Static_assert(INT_MAX == 0x7fffffff && INT_MIN == -0x7fffffff - 1 &&
+               UINT_MAX == 0xffffffffU, "int is two's complement 32-bit");
+_Static_assert(sizeof(float) == 4, "float is 4 bytes");
+_Static_assert(sizeof(double) == 8, "double is 8 bytes");
+_Static_assert(sizeof(unsigned long) == 8, "unsigned long is 8 bytes");
+_Static_assert(sizeof(long long) == 8, "long long is 8 bytes");
+_Static_assert(LONG_MAX == 0x7fffffffffffffffL &&
+               LONG_MIN == -0x7fffffffffffffffL - 1L &&
+               ULONG_MAX == 0xffffffffffffffffUL,
+               "long is two's complement 64-bit");
+_Static_assert(LLONG_MAX == 0x7fffffffffffffffLL &&
+               LLONG_MIN == -0x7fffffffffffffffLL - 1LL &&
+               ULLONG_MAX == 0xffffffffffffffffULL,
+               "long long is two's complement 64-bit");
+_Static_assert(sizeof(void *) == 8, "a pointer is 8 bytes");
+_Static_assert(sizeof(Var) == 8, "Var is 8 bytes");
+_Static_assert(FLT_RADIX == 2 && FLT_MANT_DIG == 24 && FLT_MAX_EXP == 128,
+               "float is IEEE 754 binary32");
+_Static_assert(DBL_MANT_DIG == 53 && DBL_MAX_EXP == 1024,
+               "double is IEEE 754 binary64");
 
 /** Data pointer into `Block`-owned raw element storage. */
 typedef void *Bytes;

@@ -191,8 +191,8 @@ static List _string_array(Project project, int line, String value) {
 }
 
 static int _bool_value(Project project, int line, String value) {
-  if (value && strcmp(value, "true") == 0) return 1;
-  if (value && strcmp(value, "false") == 0) return 0;
+  if (value && value == "true") return 1;
+  if (value && value == "false") return 0;
   _error(project, line, "expected true or false");
 }
 
@@ -232,57 +232,57 @@ static void _set_once(Project project, int line, Map seen, String key) {
 
 static void _set_project_field(
   Project project, int line, String key, String value) {
-  if (key == %"name") (void) _string_value(project, line, value);
-  else if (key == %"default-target")
+  if (key == "name") (void) _string_value(project, line, value);
+  else if (key == "default-target")
     project.default_target = _string_value(project, line, value);
-  else if (key == %"build-dir")
+  else if (key == "build-dir")
     project.build_dir = _string_value(project, line, value);
   else _error_name(project, line, "unknown project field", key);
 }
 
 static void _set_target_field(
   Project p, ProjectTarget target, int line, String key, String value) {
-  if (key == %"kind") {
+  if (key == "kind") {
     String kind = _string_value(p, line, value);
-    if (kind == %"executable") target.kind = <executable>;
-    else if (kind == %"static-library") target.kind = <static-lib>;
-    else if (kind == %"shared-library")
+    if (kind == "executable") target.kind = <executable>;
+    else if (kind == "static-library") target.kind = <static-lib>;
+    else if (kind == "shared-library")
       _error(
         p, line,
         "shared-library is not supported by this compiler");
     else _error_name(p, line, "unknown target kind", kind);
   }
-  else if (key == %"sources") target.sources = _string_array(p, line, value);
-  else if (key == %"exclude") target.exclude = _string_array(p, line, value);
-  else if (key == %"dependencies")
+  else if (key == "sources") target.sources = _string_array(p, line, value);
+  else if (key == "exclude") target.exclude = _string_array(p, line, value);
+  else if (key == "dependencies")
     target.dependencies = _string_array(p, line, value);
-  else if (key == %"include-dirs")
+  else if (key == "include-dirs")
     target.include_dirs = _string_array(p, line, value);
-  else if (key == %"package-dirs")
+  else if (key == "package-dirs")
     target.package_dirs = _string_array(p, line, value);
-  else if (key == %"defines") target.defines = _string_array(p, line, value);
-  else if (key == %"c-flags") target.c_flags = _string_array(p, line, value);
-  else if (key == %"library-dirs")
+  else if (key == "defines") target.defines = _string_array(p, line, value);
+  else if (key == "c-flags") target.c_flags = _string_array(p, line, value);
+  else if (key == "library-dirs")
     target.library_dirs = _string_array(p, line, value);
-  else if (key == %"libraries")
+  else if (key == "libraries")
     target.libraries = _string_array(p, line, value);
-  else if (key == %"link-flags")
+  else if (key == "link-flags")
     target.link_flags = _string_array(p, line, value);
-  else if (key == %"output") target.output = _string_value(p, line, value);
+  else if (key == "output") target.output = _string_value(p, line, value);
   else _error_name(p, line, "unknown target field", key);
 }
 
 static void _set_profile_field(
   Project project, ProjectProfile profile, int line, String key,
   String value) {
-  if (key == %"optimization")
+  if (key == "optimization")
     profile.optimization = _string_value(project, line, value);
-  else if (key == %"debug") profile.debug = _bool_value(project, line, value);
-  else if (key == %"defines")
+  else if (key == "debug") profile.debug = _bool_value(project, line, value);
+  else if (key == "defines")
     profile.defines = _string_array(project, line, value);
-  else if (key == %"c-flags")
+  else if (key == "c-flags")
     profile.c_flags = _string_array(project, line, value);
-  else if (key == %"link-flags")
+  else if (key == "link-flags")
     profile.link_flags = _string_array(project, line, value);
   else _error_name(project, line, "unknown profile field", key);
 }
@@ -308,7 +308,7 @@ static void _parse_manifest(Project p) {
         _error(p, line_number, "malformed section header");
       line[length - 1] = 0;
       String name = String.new(line + 1);
-      if (name == %"project") {
+      if (name == "project") {
         if (p.declared)
           _error(p, line_number, "duplicate project section");
         p.declared = 1;
@@ -327,9 +327,9 @@ static void _parse_manifest(Project p) {
         parts.cdr().cdr().cdr() ?
         parts.cdr().cdr().cdr().car().string() : NULL;
       if ((count != 2 && count != 4) ||
-          first != %"target" ||
+          first != "target" ||
           !_name_ok(second) ||
-          (count == 4 && (third != %"profile" || !_name_ok(fourth))))
+          (count == 4 && (third != "profile" || !_name_ok(fourth))))
         _error(p, line_number, "unknown manifest section");
       target = _target(p, second, 1);
       if (count == 2) {
@@ -652,7 +652,7 @@ static CliRequest _target_request(
     int has_optimization = 0, has_debug = 0;
     foreach (String argument, command.cc_args) {
       if (argument && argument.startswith("-O")) has_optimization = 1;
-      if (argument == %"-g") has_debug = 1;
+      if (argument == "-g") has_debug = 1;
     }
     _append_defines(compile, profile.defines);
     _append_c_flags(p, compile, profile.c_flags);

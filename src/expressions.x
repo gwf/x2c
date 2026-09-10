@@ -46,7 +46,7 @@ List Compiler.complete_iter_chain(Compiler compiler, List expression) {
            (expr ((func (!set ?parameters (*))) ?)
               (ident ?binding))) (args *arguments))): {
       String name = binding_identity_spelling(binding);
-      if (!_exact_iter_type(result) || name == %"Iter_unzip" ||
+      if (!_exact_iter_type(result) || name == "Iter_unzip" ||
           _iter_parameters_variadic(parameters))
         return expression;
 
@@ -643,10 +643,10 @@ static inline int _precedence(Symbol op) {
 
 static inline int _is_type_operator(Compiler compiler) =>
   compiler.peek(0) == <ident> &&
-         compiler.token.text == %"is";
+         compiler.token.text == "is";
 
 static int _is_type_selector_start(Compiler c) {
-  if (c.peek(0) == <ident> && c.token.text == %"Void") return 1;
+  if (c.peek(0) == <ident> && c.token.text == "Void") return 1;
   Token head = c.token;
   if (c.test(<(>)) {
     int declaration = c.test_declaration();
@@ -1762,7 +1762,7 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
       Token origin = c.token;
       c.next();
       int negate = c.peek(0) == <ident> &&
-                   c.token.text == %"not";
+                   c.token.text == "not";
       if (negate) c.next();
       List test;
       if (_is_type_selector_start(c)) {
@@ -1874,7 +1874,7 @@ List Compiler.parse_variable(Compiler c) {
     case %(expr ?type (ident ?binding)):
       c.record_source_reference(binding, type, origin, after);
   if (c.source_map &&
-      (origin.text == %"__FILE__" || origin.text == %"__LINE__"))
+      (origin.text == "__FILE__" || origin.text == "__LINE__"))
     match (result) case %(expr ?type ?content):
       return %(expr $type ${c.anchor_origin(content, origin)});
   return result;
@@ -1961,7 +1961,7 @@ List Compiler.parse_primary(Compiler compiler) {
       }
       List keyword = compiler.try_parse_macro_expression();
       if (keyword) return keyword;
-      if (compiler.token.text == %"va_arg") return _parse_va_arg(compiler);
+      if (compiler.token.text == "va_arg") return _parse_va_arg(compiler);
       return compiler.parse_variable();
     }
     case <"(">:       return _parse_parens(compiler);
@@ -2190,7 +2190,7 @@ static List _var_exact_reader(Compiler compiler, List expr, Type target) {
 static List _converter_owned_call(
   Compiler compiler, List expr, Type owner, Type target, int *declared) {
   String typename = owner.car().str(), targetedname = target.car().str();
-  String convfuncname = targetedname == %"String"
+  String convfuncname = targetedname == "String"
                       ? %"${typename}_str"
                       : %"${typename}_${targetedname.lower()}";
   List cvrtrtype = NULL;
@@ -3084,7 +3084,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     if (target_is_var &&
         expr.match(%(expr () (ident (binding ? ?))))) {
       List binding = expr.caddr().cadr();
-      if (binding_identity_spelling(binding) == %"NULL")
+      if (binding_identity_spelling(binding) == "NULL")
         return %(expr ("Var") (call "Var_null" (args)));
       String message = "cannot convert an unresolved expression to Var";
       c.report_error(

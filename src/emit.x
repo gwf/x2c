@@ -457,7 +457,7 @@ static List _atom_intern(String spelling) {
 
 static List Emitter._literal(Emitter emitter, List ast, List context) {
   (List type, String text, Var value) = ast.cdr();
-  if (type === %("Var") && text == %"void") return %("((void) 0, Void)");
+  if (type === %("Var") && text == "void") return %("((void) 0, Void)");
   if (type === %("String")) {
     String qq = "\"";
     text = qq + text.escape().replace("$$", "$") + qq;

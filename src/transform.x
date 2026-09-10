@@ -91,14 +91,14 @@ static const PrintfFn *_printf_family(List callee) {
 }
 
 static int _iter_immediate_consumer(String name) =>
-  name == %"Iter_try_next" || name == %"Iter_next" ||
-         name == %"Iter_list" || name == %"Iter_array" ||
-         name == %"Iter_reduce" ||
-         name == %"Iter_foldl" || name == %"Iter_any" ||
-         name == %"Iter_all" || name == %"Iter_find" ||
-         name == %"Iter_count" || name == %"Iter_sum" ||
-         name == %"Iter_product" || name == %"Iter_min" ||
-         name == %"Iter_max";
+  name == "Iter_try_next" || name == "Iter_next" ||
+         name == "Iter_list" || name == "Iter_array" ||
+         name == "Iter_reduce" ||
+         name == "Iter_foldl" || name == "Iter_any" ||
+         name == "Iter_all" || name == "Iter_find" ||
+         name == "Iter_count" || name == "Iter_sum" ||
+         name == "Iter_product" || name == "Iter_min" ||
+         name == "Iter_max";
 
 // Recover a format known at compile time. Raw C spelling is retained so
 // escaped percent bytes stay outside this first pass.
@@ -348,7 +348,7 @@ static List _typed_call(
     case %(expr ? (ident ?binding)):
       callee_name = binding_identity_spelling(binding);
   }
-  int list_varargs = callee_name == %"List_list_n";
+  int list_varargs = callee_name == "List_list_n";
   if (compiler.fn_name && _iter_immediate_consumer(callee_name) && args)
     args = cons(compiler.complete_iter_chain(args.car()), args.cdr());
   Array values = %[], int arg_index = 0;

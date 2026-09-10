@@ -682,11 +682,11 @@ static int _mapped_debug(Build state) {
     return 0;
   int enabled = 0;
   foreach (String flag, state.toolchain.cc_args) {
-    if (flag == %"-g0" || flag == %"-ggdb0") enabled = 0;
-    else if (flag == %"-g" || flag == %"-g1" || flag == %"-g2" ||
-             flag == %"-g3" || flag == %"-ggdb" || flag == %"-ggdb1" ||
-             flag == %"-ggdb2" || flag == %"-ggdb3" ||
-             flag == %"-gline-tables-only" || flag == %"-gmlt" ||
+    if (flag == "-g0" || flag == "-ggdb0") enabled = 0;
+    else if (flag == "-g" || flag == "-g1" || flag == "-g2" ||
+             flag == "-g3" || flag == "-ggdb" || flag == "-ggdb1" ||
+             flag == "-ggdb2" || flag == "-ggdb3" ||
+             flag == "-gline-tables-only" || flag == "-gmlt" ||
              flag.startswith("-gdwarf")) enabled = 1;
   }
   return enabled;

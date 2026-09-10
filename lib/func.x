@@ -75,9 +75,7 @@ struct Func {
     the call that consumes the argument.
 */
 inline FuncArg FuncArg.value(Var value) {
-  FuncArg argument = { 0 };
-  argument.data.value = value;
-  return argument;
+  return (FuncArg) { .data.value = value };
 }
 
 /** Constructs a `Func` argument borrowing a typed lvalue address.
@@ -86,10 +84,7 @@ inline FuncArg FuncArg.value(Var value) {
     the checked reference reader before calling native code.
 */
 inline FuncArg FuncArg.reference(const void *reference, List type) {
-  FuncArg argument = { 0 };
-  argument.data.reference = reference;
-  argument.reference_type = type;
-  return argument;
+  return (FuncArg) { .data.reference = reference, .reference_type = type };
 }
 
 static List _parameters(Func function) => function ? function.params : NULL;

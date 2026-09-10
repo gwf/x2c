@@ -596,8 +596,8 @@ static String _package_key_spelling(List key) {
   Var (head, spelling_value) = key;
   if (head is <string>) {
     String spelling = head.str();
-    if (key.cdr() || spelling == %"source-node") return NULL;
-    return spelling == %"source-typedef" ? NULL : spelling;
+    if (key.cdr() || spelling == "source-node") return NULL;
+    return spelling == "source-typedef" ? NULL : spelling;
   }
   if (head == <self>)
     return key.cdr() && !key.cddr() && spelling_value is <string>

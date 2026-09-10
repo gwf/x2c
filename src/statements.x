@@ -394,7 +394,7 @@ List Compiler.parse_block_item(Compiler compiler) {
     List definition = compiler.parse_macro_definition();
     return compiler.macro_holes ? definition : %(seq);
   }
-  if (compiler.peek(0) == <ident> && compiler.token.text == %"with")
+  if (compiler.peek(0) == <ident> && compiler.token.text == "with")
     return compiler.parse_statement();
   Var candidate;
   int with_expression = compiler.peek(0) == <ident> &&
@@ -434,14 +434,14 @@ List Compiler.parse_statement(Compiler compiler) {
   /* A `with` alias records its source expression, not a temporary. Its `Sym`
      scope and semantic rows exist only while the body parses, so every use
      substitutes the expression and an unused alias does not evaluate it. */
-  if (compiler.peek(0) == <ident> && compiler.token.text == %"with") {
+  if (compiler.peek(0) == <ident> && compiler.token.text == "with") {
     compiler.next();
     if ((compiler.peek(0) == <"{"> && compiler.peek(1) == <"}">) ||
         compiler.peek(0) == <;> || compiler.peek(0) == <eof>)
       compiler.report_error(
         <parse>, "with requires an expression", compiler.token, NULL);
     List expression = compiler.parse_expression(), String alias = %"_";
-    if (compiler.peek(0) == <ident> && compiler.token.text == %"as") {
+    if (compiler.peek(0) == <ident> && compiler.token.text == "as") {
       compiler.next();
       if (compiler.peek(0) != <ident>)
         compiler.report_error(

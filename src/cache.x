@@ -604,8 +604,8 @@ static List _setup_source_cache_init(
   Compiler c, List source, Array ids, Array initializers) {
   source = _rewrite_file_scope_statics(c, source, initializers);
   Array keys = c.id_keys, Symbol deferred_kind = 0;
-  if (c.init_fn == %"String_initialize") deferred_kind = <string>;
-  else if (c.init_fn == %"List_initialize") deferred_kind = <cons>;
+  if (c.init_fn == "String_initialize") deferred_kind = <string>;
+  else if (c.init_fn == "List_initialize") deferred_kind = <cons>;
   if (!ids) {
     _queue_static_initializers(c, initializers, deferred_kind);
     return source;

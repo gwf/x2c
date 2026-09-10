@@ -688,9 +688,9 @@ int cli_dependency_pass_through(String s) {
 
 static void _driver_kind(CliRequest request, String value) {
   request.kind_explicit = 1;
-  if (value == %"executable") request.kind = <executable>;
-  else if (value == %"static-library") request.kind = <static-lib>;
-  else if (value == %"shared-library")
+  if (value == "executable") request.kind = <executable>;
+  else if (value == "static-library") request.kind = <static-lib>;
+  else if (value == "shared-library")
     x2c_driver_error("shared-library is not supported by this compiler");
   else x2c_driver_error(%"unknown target kind '$value'");
 }
@@ -719,9 +719,9 @@ static void _apply_option(
     case <color>:
       if (!value)
         x2c_driver_error("--color requires auto, always, or never");
-      if (value == %"auto") c.color_mode = <auto>;
-      else if (value == %"always") c.color_mode = <always>;
-      else if (value == %"never") c.color_mode = <never>;
+      if (value == "auto") c.color_mode = <auto>;
+      else if (value == "always") c.color_mode = <always>;
+      else if (value == "never") c.color_mode = <never>;
       else x2c_driver_error(%"invalid color mode '$value'");
       break;
     case <debug>: c.debugging = 1; break;
@@ -865,7 +865,7 @@ static CliRequest _parse_command(List args, CliCommand *command) {
     /* bootstrap has no operand syntax, so `--`, `-o`, and a bare word are
        all unknown to it where the other commands accept them. */
     if (mask != CLI_BOOTSTRAP && !operands && dashed &&
-        strcmp(arg, "--") == 0) {
+        arg == "--") {
       operands = 1;
       continue;
     }
@@ -876,7 +876,7 @@ static CliRequest _parse_command(List args, CliCommand *command) {
       else inputs.push(arg);
       continue;
     }
-    if (mask != CLI_BOOTSTRAP && strcmp(arg, "-o") == 0) _removed_output();
+    if (mask != CLI_BOOTSTRAP && arg == "-o") _removed_output();
     if ((mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
       request.save_temps = 1;
       request.temps_dir = arg.remove_prefix("--save-temps=");
@@ -937,15 +937,15 @@ CliRequest cli_parse(int argc, char **argv) {
   String first = args.car();
   if (!first)
     x2c_driver_error("expected a command, found an empty argument");
-  if (strcmp(first, "--help") == 0 || strcmp(first, "-h") == 0) {
+  if (first == "--help" || first == "-h") {
     _print_help(0);
     exit(0);
   }
-  if (strcmp(first, "--version") == 0 || strcmp(first, "-V") == 0) {
+  if (first == "--version" || first == "-V") {
     _print_version();
     exit(0);
   }
-  if (strcmp(first, "help") == 0) {
+  if (first == "help") {
     List rest = args.cdr();
     if (!rest) {
       _print_help(0);
@@ -954,8 +954,7 @@ CliRequest cli_parse(int argc, char **argv) {
     String name = rest.car();
     if (rest.cdr()) x2c_driver_error("help accepts at most one command");
     CliCommand *asked = _command_row(name);
-    if (strcmp(name, "help") == 0 || strcmp(name, "--help") == 0 ||
-        strcmp(name, "-h") == 0)
+    if (name == "help" || name == "--help" || name == "-h")
       _print_help(<help>);
     else if (asked) _print_help(asked.name);
     else x2c_driver_error(%"unknown help command '$name'");
@@ -963,7 +962,7 @@ CliRequest cli_parse(int argc, char **argv) {
   }
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args.cdr(), command);
-  if (strcmp(first, "-o") == 0) _removed_output();
+  if (first == "-o") _removed_output();
   const char *attached;
   if (strlen(first) > 2 && first[0] == '-' && first[1] != '-' &&
       _find_option(%"-$first", CLI_TRANSLATE, &attached)) {

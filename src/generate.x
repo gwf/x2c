@@ -204,9 +204,9 @@ static List _prepend_init_prelude(
 }
 
 static int _is_protocol_bootstrap_function(String spelling) =>
-  spelling == %"x2c_initialize_protocols" ||
-         spelling == %"x2c_register_builtin_descriptor" ||
-         spelling == %"x2c_try_register_tagged_descriptor";
+  spelling == "x2c_initialize_protocols" ||
+         spelling == "x2c_register_builtin_descriptor" ||
+         spelling == "x2c_try_register_tagged_descriptor";
 
 static void _collect_cache_function_refs(
   Var value, int caller, Map callers, int *uses_cache) {
@@ -296,7 +296,7 @@ static List _file_init(Compiler c, List source) {
           inserted = 1;
         }
         String name = spelling;
-        if (name == %"x2c_initialize_protocols")
+        if (name == "x2c_initialize_protocols")
           function = _wrap_protocol_initializer_function(
             c, type, declarator, statements);
         else if (initializer && name == initializer)
@@ -373,7 +373,7 @@ static void _push_spaced(Array output, List code) {
 // The generator writes the header guard. Source pragmas serve only the CPP
 // compatibility path and must not duplicate the generated directive.
 static int _is_pragma_once(String content) =>
-  content.strip(" \t\r\n") == %"#pragma once";
+  content.strip(" \t\r\n") == "#pragma once";
 
 // A positioned prototype remains visible to symbol collection, but the
 // completed definition is what reaches generated C and H output.
@@ -727,7 +727,7 @@ static int _has_runtime_include(List content) {
     Var (kind, payload) = unit;
     if (kind != <preproc>) continue;
     String text = payload.string().strip(" \t\r\n");
-    if (text == %"#include \"x2c.x\"" || text == %"#include <x2c.x>") return 1;
+    if (text == "#include \"x2c.x\"" || text == "#include <x2c.x>") return 1;
   }
   return 0;
 }
@@ -762,7 +762,7 @@ static List _modify_main(Compiler compiler, List source) {
       case %(function ?rtype
              (bind (!set ?binding (*)) ?params)
              (block *vbody)):
-        if (binding_identity_spelling(binding) == %"main")
+        if (binding_identity_spelling(binding) == "main")
           return %(
             function $rtype (bind $binding $params)
             (block
