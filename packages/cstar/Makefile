@@ -53,11 +53,12 @@ $(CSTAR_HELPERS): proof/x2c_array_helpers.c proof/x2c_array_helpers.h | builds
 	  CSTAR_HOME=$(CSTAR_HOME) $(PACKAGE_DEPS)/bin/cstarc verify \
 	    --cl=$@ $(CURDIR)/proof/x2c_array_helpers.c
 
-$(DEV_ARCHIVE): | builds
+$(DEV_ARCHIVE): $(COMPILER_OBJECTS) $(X2C) Makefile | builds
 	$(X2C) build --plain --kind static-library --output $@ \
 	  $(COMPILER_OBJECTS)
 
-builds/cstar-verify: $(TOOL_SOURCES) $(DEV_ARCHIVE) | builds
+builds/cstar-verify: $(TOOL_SOURCES) $(DEV_ARCHIVE) $(X2C) \
+  $(ROOT)/builds/0/libx2c.a Makefile | builds
 	$(X2C) build --plain --build-dir builds/verify-cc --output $@ \
 	  $(TOOL_X_FLAGS) $(TOOL_SOURCES) $(DEV_ARCHIVE)
 
@@ -76,7 +77,7 @@ test: builds/cstar-verify
 
 # The prover examples. Each run starts its own hol_light_server on a free
 # port and stops it again; CSTAR_PORT reuses an already running one.
-verify: builds/cstar-verify
+verify: build builds/cstar-verify
 	$(CSTAR_VERIFY) examples/abs.x
 	$(CSTAR_VERIFY) examples/twice.x
 	$(CSTAR_VERIFY) examples/swap.x
@@ -88,3 +89,13 @@ verify: builds/cstar-verify
 	$(CSTAR_VERIFY) examples/swap-unowned.x; test $$? = 3
 	$(CSTAR_VERIFY) examples/clear-offbyone.x; test $$? = 3
 	$(CSTAR_VERIFY) examples/fill-falseinv.x; test $$? = 3
+	$(CSTAR_VERIFY) tests/parenthesized.x
+	$(CSTAR_VERIFY) tests/unbraced-invariant.x
+	$(CSTAR_VERIFY) tests/report-stale.x >builds/report-stale.out; test $$? = 1
+	grep -F 'negate: obligations remain' builds/report-stale.out
+	$(CSTAR_VERIFY) tests/report-after.x >builds/report-after.out; test $$? = 1
+	grep -F 'negate: obligations remain' builds/report-after.out
+	$(CSTAR_VERIFY) tests/report-axiom.x >builds/report-axiom.out; test $$? = 1
+	grep -E '"axioms":\[[^]]' builds/report-axiom.out
+	grep -F 'RESULT: obligations remain' builds/report-axiom.out
+	! grep -F ': verified' builds/report-axiom.out

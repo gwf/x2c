@@ -173,6 +173,7 @@ static String _expression(Adapter adapter, Var value) {
       if (!rendered) return NULL;
       List body = inner.list();
       match (body) {
+        case %(parens ?operand): return _expression(adapter, operand);
         case %(literal ?kind ?spelling):
           return _scalar_types.contains(kind)
             ? %"make_const_expr(${spelling.str()}, ${rendered})"
@@ -298,6 +299,11 @@ static void _braced(Adapter adapter, Var value) {
 }
 
 static void _declaration(Adapter adapter, Var type, List bindings) {
+  Type declared_type = type;
+  if (declared_type.is_static() || declared_type.is_extern()) {
+    _reject(adapter, %"static or extern local declaration");
+    return;
+  }
   foreach (Var declared, bindings) {
     match (declared.list()) {
       case %(op = (bind (binding ? ?spelling) ?declarator) ?initializer): {

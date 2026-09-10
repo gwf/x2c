@@ -58,12 +58,34 @@ static void emit_records_every_requested_function(void) {
   EXPECT_TRUE(emitted.find(%"_verify_product(cstar);") >= 0);
 }
 
+static void parentheses_preserve_the_grouped_expression(void) {
+  String emitted = run(
+    %"./builds/cstar-verify --emit tests/parenthesized.x", 0);
+  EXPECT_TRUE(emitted.find(
+    %"make_binary_expr(BINOP_MULTIPLY, make_binary_expr(BINOP_ADD,") >= 0);
+  EXPECT_TRUE(emitted.find(
+    %"make_return_expr(make_var_expr(\"result\", make_int_type()))") >= 0);
+}
+
+static void compiler_changes_rebuild_the_verifier(void) {
+  String planned = run(
+    %"make --no-print-directory -n tool -W ../../builds/0/src/parse.o", 0);
+  EXPECT_TRUE(planned.find(
+    %"--kind static-library --output builds/libx2c-dev.a") >= 0);
+  EXPECT_TRUE(planned.find(%"--output builds/cstar-verify") >= 0);
+  planned = run(
+    %"make --no-print-directory -n tool -W ../../builds/0/libx2c.a", 0);
+  EXPECT_TRUE(planned.find(%"--output builds/cstar-verify") >= 0);
+}
+
 static void emit_suite(void) {
   $test.run(emit_matches_the_expected_program);
   $test.run(emit_renders_the_array_examples);
   $test.run(emit_is_deterministic);
   $test.run(emit_splices_the_companion_helpers);
   $test.run(emit_records_every_requested_function);
+  $test.run(parentheses_preserve_the_grouped_expression);
+  $test.run(compiler_changes_rebuild_the_verifier);
 }
 
 int main(void) {

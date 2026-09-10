@@ -134,7 +134,9 @@ The command prints one line per requested function and exits with:
 A successful exit requires all of: every requested function was fed to the
 engine, a complete final report, and empty `verification_conditions`,
 `axioms`, and `strategies` arrays. A remaining axiom or strategy is a trust
-obligation and never becomes a pass.
+obligation and never becomes a pass. Failed runs print the final report,
+including those trust obligations. Reading `Cstar.report()` from a proof
+helper returns the current state without freezing the final verdict.
 
 ## What the subset admits
 
@@ -145,7 +147,8 @@ declarations, assignment through a name or an index, `i++` and `i--` as
 whole statements, blocks, `if`, `while`, and `return`; and direct calls to
 functions verified earlier in the same unit. The first construct outside
 that set stops the run with its source location. Nothing outside the set is
-treated as having no effect.
+treated as having no effect. Local `static` and `extern` declarations are
+refused because their persistent or external state is not modeled.
 
 The trusted base is HOL Light and its theory, the C* symbolic executor and
 proof runtime, the pinned proof libraries, the package's array proof

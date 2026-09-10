@@ -152,7 +152,9 @@ An increment inside an expression stays unsupported, because its place in the
 evaluation order is not part of the admitted subset. Structs, floating point,
 function pointers, recursion, `goto`, `break`/`continue`, allocation,
 `defer`, lambdas, Scope and Context operations, Error transfers, protocols,
-and container literals are all outside it.
+and container literals are all outside it. Local declarations with `static`
+or `extern` storage are also refused: the adapter models automatic locals,
+not persistent or externally owned state.
 
 ## Running a check
 
@@ -193,6 +195,11 @@ listens on the default port 7000.
 An empty report is not enough on its own. The generated program records each
 function's completion and refuses success when the inventory is short, which
 is what distinguishes 3 from 0.
+
+`Cstar.report()` reads the current obligations, so inspecting it from a proof
+helper does not freeze the final result. A failed run prints its final report,
+including trust obligations. A function without a local verification condition
+is not labeled verified when the run still has unresolved obligations.
 
 With a warm server a scalar example takes about 0.4 s end to end and an array
 example about 1.5 s. About 0.2 s of every run is the cost of linking the

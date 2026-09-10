@@ -241,6 +241,17 @@ static ChildProcess _server(Options options, String directory, int port) {
 
 // the report
 
+/** Selects the final report rather than any earlier snapshot a helper
+    printed. The backend renders its JSON on one line. */
+static String _final_report(String output) {
+  String marker = %"\nCSTAR REPORT: ";
+  int start = output ? output.rfind(marker) : -1;
+  if (start < 0) return NULL;
+  start += marker.len();
+  int end = output.find_within(%"\n", start, -1);
+  return end < 0 ? NULL : output[start:end];
+}
+
 /** Returns `(LINE TEXT)` for each remaining verification condition. */
 static List _conditions(String report) {
   Array found = %[];
@@ -263,9 +274,11 @@ static List _conditions(String report) {
 }
 
 /** Prints one line per requested function, and its remaining obligations.
-    A condition belongs to the last function that starts at or before it. */
-static void _classify(List functions, String file, String output) {
-  List conditions = _conditions(output);
+    A condition belongs to the last function that starts at or before it.
+    Only a clean final verdict establishes verification; the full backend
+    report preserves trust obligations that have no function location. */
+static void _classify(List functions, String file, String report, int status) {
+  List conditions = _conditions(report);
   for (List cursor = functions; cursor; cursor = cursor.cdr) {
     List function = cursor.car.list();
     int first = function.cadr().integer();
@@ -276,11 +289,14 @@ static void _classify(List functions, String file, String output) {
       if (line >= first && line < last) mine.push(condition);
     }
     Stdout.printf("%s: %s\n", function.car().str(),
-                  mine.len() ? "obligations remain" : "verified");
+                  mine.len() ? "obligations remain"
+                  : status ? "no local verification conditions" : "verified");
     foreach (List condition, mine.list_free())
       Stdout.printf("  %s:%d  %s\n", file, condition.car().integer(),
                     condition.cadr().str());
   }
+  if (status)
+    Stdout.printf("%s\nRESULT: obligations remain\n", report);
 }
 
 // the command
@@ -368,7 +384,8 @@ static int _verify(Options options, String program, List functions) {
                   output ? output : "", errors ? errors : "");
     return 3;
   }
-  if (!output || output.find(%"RESULT: ") < 0) {
+  String report = _final_report(output);
+  if (!report || output.find(%"RESULT: ") < 0) {
     Stderr.printf("%s%scstar-verify: the prover did not complete the run\n",
                   output ? output : "", errors ? errors : "");
     return 3;
@@ -378,7 +395,7 @@ static int _verify(Options options, String program, List functions) {
                   "function\n", output);
     return 3;
   }
-  _classify(functions, options.input, output);
+  _classify(functions, options.input, report, status);
   return status;
 }
 

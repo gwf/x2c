@@ -12,6 +12,7 @@ static void _verify_clear_int(Cstar cstar) {
   cstar.feed(make_block_begin(), 21, 1);
   cstar.feed(make_var_def_init("i", make_int_type(), make_const_expr(0, make_int_type())), 27, 3);
   cstar.fill_entry("int_array p__pre", "n__addr:addr", "n__pre:int", "xs:(int)list", "0i:int");
+  cstar.feed(make_block_begin(), 30, 3);
   cstar.feed(make_cst_invariant(cstar.assertion("exists i_v. " "int_array p__pre (APPEND (REPLICATE (num_of_int i_v) 0i) " "                         (list_drop (num_of_int i_v) xs)) ** " "data_at p__addr Tptr p__pre ** " "data_at n__addr Tint n__pre ** " "data_at i__addr Tint i_v ** " "fact(n__pre = &(LENGTH xs)) ** " "fact(n__pre <= 2147483647i) ** " "fact(0i <= i_v && i_v <= n__pre)"), 1), 30, 3);
   cstar.feed(make_while_condition(make_binary_expr(BINOP_LESS, make_var_expr("i", make_int_type()), make_var_expr("n", make_int_type()), make_int_type())), 30, 3);
   cstar.feed(make_block_begin(), 30, 3);
@@ -19,6 +20,7 @@ static void _verify_clear_int(Cstar cstar) {
   cstar.feed(make_assign(make_index_expr(make_var_expr("p", make_pointer_type(make_int_type())), make_var_expr("i", make_int_type()), make_int_type()), make_const_expr(0, make_int_type()), ASSIGNOP_ASSIGN), 44, 5);
   cstar.fill_after_store("Tint", "p__pre:addr", "i_v:int", "n__pre:int", "xs:(int)list", "0i:int");
   cstar.feed(make_inc_dec(make_var_expr("i", make_int_type()), INCDEC_INCREMENT_POST), 47, 5);
+  cstar.feed(make_block_end(), 47, 5);
   cstar.feed(make_block_end(), 47, 5);
   cstar.fill_exit("i_v:int", "n__pre:int", "xs:(int)list", "0i:int");
   cstar.feed(make_block_end(), 49, 3);
@@ -35,6 +37,7 @@ static void _verify_clear_char(Cstar cstar) {
   cstar.feed(make_block_begin(), 52, 1);
   cstar.feed(make_var_def_init("i", make_int_type(), make_const_expr(0, make_int_type())), 58, 3);
   cstar.fill_entry("char_array p__pre", "n__addr:addr", "n__pre:int", "xs:(int)list", "0i:int");
+  cstar.feed(make_block_begin(), 61, 3);
   cstar.feed(make_cst_invariant(cstar.assertion("exists i_v. " "char_array p__pre (APPEND (REPLICATE (num_of_int i_v) 0i) " "                          (list_drop (num_of_int i_v) xs)) ** " "data_at p__addr Tptr p__pre ** " "data_at n__addr Tint n__pre ** " "data_at i__addr Tint i_v ** " "fact(n__pre = &(LENGTH xs)) ** " "fact(n__pre <= 2147483647i) ** " "fact(0i <= i_v && i_v <= n__pre)"), 1), 61, 3);
   cstar.feed(make_while_condition(make_binary_expr(BINOP_LESS, make_var_expr("i", make_int_type()), make_var_expr("n", make_int_type()), make_int_type())), 61, 3);
   cstar.feed(make_block_begin(), 61, 3);
@@ -42,6 +45,7 @@ static void _verify_clear_char(Cstar cstar) {
   cstar.feed(make_assign(make_index_expr(make_var_expr("p", make_pointer_type(make_char_type())), make_var_expr("i", make_int_type()), make_char_type()), make_const_expr(0, make_int_type()), ASSIGNOP_ASSIGN), 75, 5);
   cstar.fill_after_store("Tchar", "p__pre:addr", "i_v:int", "n__pre:int", "xs:(int)list", "0i:int");
   cstar.feed(make_inc_dec(make_var_expr("i", make_int_type()), INCDEC_INCREMENT_POST), 78, 5);
+  cstar.feed(make_block_end(), 78, 5);
   cstar.feed(make_block_end(), 78, 5);
   cstar.fill_exit("i_v:int", "n__pre:int", "xs:(int)list", "0i:int");
   cstar.feed(make_block_end(), 80, 3);

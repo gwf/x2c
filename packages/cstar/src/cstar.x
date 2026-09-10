@@ -19,7 +19,7 @@ typedef struct Cstar *Cstar;
 struct Cstar {
   int expected, done;
   String file;
-  String report;
+  String conditions;
 };
 
 static cst_range _cstar_range(Cstar cstar, int line, int column) {
@@ -175,29 +175,44 @@ void Cstar.fill_exit(Cstar cstar, String index_var, String length_var,
   cst_exit_on_error();
 }
 
-/** Returns the session's rendered verification and trust obligations. */
+/** Returns the session's rendered verification and trust obligations.
+    The pinned printer drains verification conditions. Retain those items
+    across queries; its axiom and strategy arrays already span the session. */
 String Cstar.report(Cstar cstar) {
-  if (!cstar.report) cstar.report = cst_print_vc();
-  return cstar.report;
+  String report = cst_print_vc();
+  String prefix = %"{\"verification_conditions\":[";
+  int end = report.find(%"],\"axioms\":[");
+  if (report.find(prefix) != 0 || end < prefix.len())
+    raise %(bad-state (library "cstar") (operation "report")
+            (message "unexpected verification report"));
+  String conditions = report[prefix.len():end];
+  if (conditions.len())
+    cstar.conditions = cstar.conditions
+      ? cstar.conditions + %"," + conditions : conditions;
+  return prefix + (cstar.conditions ? cstar.conditions : %"") + report[end:];
 }
 
-/** Classifies the run: `<verified>` only when every requested function was
-    fed and no obligation remains, `<incomplete>` when the inventory is
-    short, otherwise `<obligation>`. */
-Symbol Cstar.verdict(Cstar cstar) {
+static Symbol _cstar_verdict(Cstar cstar, String report) {
   if (cstar.done != cstar.expected) return <incomplete>;
-  String report = cstar.report();
   int clean = report.find("\"verification_conditions\":[]") >= 0 &&
               report.find("\"axioms\":[]") >= 0 &&
               report.find("\"strategies\":[]") >= 0;
   return clean ? <verified> : <obligation>;
 }
 
+/** Classifies the run: `<verified>` only when every requested function was
+    fed and no obligation remains, `<incomplete>` when the inventory is
+    short, otherwise `<obligation>`. */
+Symbol Cstar.verdict(Cstar cstar) {
+  return _cstar_verdict(cstar, cstar.report());
+}
+
 /** Prints the report and the verdict, closes the session, and returns the
     program's exit code: 0 verified, 1 obligations remain, 2 incomplete. */
 int Cstar.finish(Cstar cstar) {
-  Symbol verdict = cstar.verdict();
-  Stdout.printf("%s\n", cstar.report());
+  String report = cstar.report();
+  Symbol verdict = _cstar_verdict(cstar, report);
+  Stdout.printf("\nCSTAR REPORT: %s\n", report);
   Stdout.printf("processed %d of %d functions\n", cstar.done, cstar.expected);
   Stdout.printf("RESULT: %s\n", verdict == <verified> ? "verified"
                               : verdict == <obligation> ? "obligations remain"

@@ -124,14 +124,18 @@ macro Statement $cstar.helper(Name $helper, Expr $arguments...) => {
 /** Records the invariant of the decorated loop as a proposition over program
     variables; each named variable contributes its own ownership frame. */
 macro Decorator $cstar.invariant(Statement $target, Expr $text) => {
-  cstar_marker($(cstar._record-inner 'invariant $text));
-  $target
+  {
+    cstar_marker($(cstar._record-inner 'invariant $text));
+    $target
+  }
 }
 
 /** Records the invariant of the decorated loop as a complete separation-logic
     assertion, which states its own ownership and may bind existentials. It
     cuts the state only partially, so the surrounding frame survives. */
 macro Decorator $cstar.invariant_sl(Statement $target, Expr $text) => {
-  cstar_marker($(cstar._record-inner 'invariant_sl $text));
-  $target
+  {
+    cstar_marker($(cstar._record-inner 'invariant_sl $text));
+    $target
+  }
 }

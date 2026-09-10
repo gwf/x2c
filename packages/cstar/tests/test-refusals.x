@@ -35,10 +35,20 @@ static void a_file_without_annotations_is_not_verified(void) {
   EXPECT_TRUE(reported.find(%"no cstar annotations") >= 0);
 }
 
+static void persistent_locals_are_not_automatic_storage(void) {
+  String reported = refuse(%"tests/static-local.x");
+  EXPECT_TRUE(reported.find(%"unsupported: static or extern local") >= 0);
+  EXPECT_TRUE(reported.find(%"tests/static-local.x:8") >= 0);
+  reported = refuse(%"tests/extern-local.x");
+  EXPECT_TRUE(reported.find(%"unsupported: static or extern local") >= 0);
+  EXPECT_TRUE(reported.find(%"tests/extern-local.x:10") >= 0);
+}
+
 static void refusal_suite(void) {
   $test.run(an_outer_decorator_invalidates_the_record);
   $test.run(an_unsupported_statement_names_its_location);
   $test.run(a_file_without_annotations_is_not_verified);
+  $test.run(persistent_locals_are_not_automatic_storage);
 }
 
 int main(void) {
