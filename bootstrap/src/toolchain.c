@@ -104,20 +104,20 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new(".");
   _5 = String_new("/lib/libx2c.a");
   _6 = String_new("/bootstrap/lib/libx2c.a");
-  _7 = String_new("unable to create preprocessor dependency file");
-  _8 = String_new("-fsigned-char");
-  _9 = String_new("-iquote");
-  _10 = String_new("-MMD");
-  _11 = String_new("-MP");
-  _12 = String_new("-MF");
-  _13 = String_new("-MT");
-  _14 = String_new("-c");
-  _15 = String_new("-o");
-  _16 = String_new("rcs");
-  _17 = String_new("-lm");
-  _18 = String_new("-I");
-  _19 = String_new("-fkeep-system-includes");
-  _20 = String_new(".");
+  _7 = String_new(".");
+  _8 = String_new("unable to create preprocessor dependency file");
+  _9 = String_new("-fsigned-char");
+  _10 = String_new("-iquote");
+  _11 = String_new("-MMD");
+  _12 = String_new("-MP");
+  _13 = String_new("-MF");
+  _14 = String_new("-MT");
+  _15 = String_new("-c");
+  _16 = String_new("-o");
+  _17 = String_new("rcs");
+  _18 = String_new("-lm");
+  _19 = String_new("-I");
+  _20 = String_new("-fkeep-system-includes");
   _21 = String_new("-imacros");
   _22 = String_new("-include");
   _23 = String_new("x2c-dependencies");
@@ -170,7 +170,7 @@ static void _toolchain_layout(String * include_dir, String * runtime_lib){
     * runtime_lib = ! access(installed, R_OK) ? installed : String_join(NULL, cons(String_var(root), cons(String_var(_6), NULL)));
     return;
   }
-  String bin_dir = String_truth(executable) ? x2c_path_dir(executable) : _4;
+  String bin_dir = String_truth(executable) ? x2c_path_dir(executable) : _7;
   String prefix = x2c_path_dir(bin_dir);
   * include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_2), NULL)));
   * runtime_lib = String_join(NULL, cons(String_var(prefix), cons(String_var(_5), NULL)));
@@ -211,7 +211,7 @@ ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String o
   if(! _init_guard_) _file_init_();
   Array arguments = Array_new();
   Array_push(arguments, String_var(toolchain -> cc));
-  Array_push(arguments, String_var(_8));
+  Array_push(arguments, String_var(_9));
   {
     String directory;
     Iter _x2c_macro_iterator_1 = List_iter(gen_dirs, &(struct Iter){
@@ -222,25 +222,25 @@ ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String o
     while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
       directory = Var_string(_x2c_macro_item_1);
       {
-        Array_push(arguments, String_var(_9));
+        Array_push(arguments, String_var(_10));
         Array_push(arguments, String_var(directory));
       }
 
     }
 
   }
-  Array_push(arguments, String_var(_9));
+  Array_push(arguments, String_var(_10));
   Array_push(arguments, String_var(toolchain -> include_dir));
   _append_list(arguments, toolchain -> cc_args);
-  Array_push(arguments, String_var(_10));
   Array_push(arguments, String_var(_11));
   Array_push(arguments, String_var(_12));
-  Array_push(arguments, String_var(depfile));
   Array_push(arguments, String_var(_13));
-  Array_push(arguments, String_var(object));
+  Array_push(arguments, String_var(depfile));
   Array_push(arguments, String_var(_14));
-  Array_push(arguments, String_var(source));
+  Array_push(arguments, String_var(object));
   Array_push(arguments, String_var(_15));
+  Array_push(arguments, String_var(source));
+  Array_push(arguments, String_var(_16));
   Array_push(arguments, String_var(object));
   return tool_action_new(7477414666, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
@@ -249,7 +249,7 @@ ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List obj
   if(! _init_guard_) _file_init_();
   Array arguments = Array_new();
   Array_push(arguments, String_var(toolchain -> ar));
-  Array_push(arguments, String_var(_16));
+  Array_push(arguments, String_var(_17));
   Array_push(arguments, String_var(output));
   _append_list(arguments, objects);
   return tool_action_new(3362278794, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
@@ -262,8 +262,8 @@ ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs
   _append_list(arguments, inputs);
   _append_list(arguments, toolchain -> ld_args);
   Array_push(arguments, String_var(toolchain -> runtime_lib));
-  Array_push(arguments, String_var(_17));
-  Array_push(arguments, String_var(_15));
+  Array_push(arguments, String_var(_18));
+  Array_push(arguments, String_var(_16));
   Array_push(arguments, String_var(output));
   return tool_action_new(805782, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
@@ -420,7 +420,7 @@ static void _append_includes(Array arguments, List dirs){
       value = _x2c_macro_item_6;
       {
         if(! Var_is(value, 1318210446)) continue;
-        Array_push(arguments, String_var(_18));
+        Array_push(arguments, String_var(_19));
         Array_push(arguments, value);
       }
 
@@ -454,16 +454,16 @@ int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_d
   if(dependencies){
     int fd = mkstemp(dependency_path);
     if(fd < 0){
-      * errors = _7;
+      * errors = _8;
       return - 1;
     }
     close(fd);
   }
   Array_push(arguments, String_var(toolchain -> cc));
   for(int i = 0;  i < sizeof(base) / sizeof(base[0]);  i ++) Array_push(arguments, String_var(String_new(base[i])));
-  if(toolchain -> keep_system_includes > 0) Array_push(arguments, String_var(_19));
-  Array_push(arguments, String_var(_18));
-  Array_push(arguments, String_var(_20));
+  if(toolchain -> keep_system_includes > 0) Array_push(arguments, String_var(_20));
+  Array_push(arguments, String_var(_19));
+  Array_push(arguments, String_var(_4));
   _append_includes(arguments, repo_dirs);
   _append_includes(arguments, include_dirs);
   {
@@ -488,10 +488,10 @@ int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_d
     Array_push(arguments, String_var(String_new(force_include)));
   }
   if(dependencies){
-    Array_push(arguments, String_var(_10));
-    Array_push(arguments, String_var(_12));
-    Array_push(arguments, String_var(String_new(dependency_path)));
+    Array_push(arguments, String_var(_11));
     Array_push(arguments, String_var(_13));
+    Array_push(arguments, String_var(String_new(dependency_path)));
+    Array_push(arguments, String_var(_14));
     Array_push(arguments, String_var(_23));
   }
   Array_push(arguments, String_var(String_new(fname)));

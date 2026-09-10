@@ -165,7 +165,7 @@ int Compiler_match_pattern_is_static(Compiler compiler, List pattern);
 
 Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern);
 
-Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders);
+Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags);
 
 List Compiler_match_pattern_binders(Compiler compiler, List pattern, List * possible);
 

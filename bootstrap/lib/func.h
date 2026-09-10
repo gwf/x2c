@@ -24,22 +24,17 @@ FuncArg;
 typedef Var(* FuncAdapter)(Func fn, const FuncArg * argv);
 
 static inline FuncArg FuncArg_value(Var value){
-  FuncArg argument ={
-    int_var(0)
+  return(FuncArg){
+    .data.value = value
   }
   ;
-  argument.data.value = value;
-  return argument;
 }
 
 static inline FuncArg FuncArg_reference(const void * reference, List type){
-  FuncArg argument ={
-    int_var(0)
+  return(FuncArg){
+    .data.reference = reference, .reference_type = type
   }
   ;
-  argument.data.reference = reference;
-  argument.reference_type = type;
-  return argument;
 }
 
 List x2c_func_reference_type(Func function, unsigned argc, unsigned index);

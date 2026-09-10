@@ -14,8 +14,6 @@ typedef struct StringHeader{
 }
 * StringHeader;
 
-typedef char x2c_string_payload_alignment[(sizeof(struct StringHeader) == 8) ? 1 : - 1];
-
 typedef union StringQuery{
   unsigned long align;
   char bytes[sizeof(struct StringHeader) + 257];
@@ -204,47 +202,34 @@ String String_new_in(Pool pool, const char * bytes, int length){
   return _from_bytes_in(pool, bytes, (int) bounded);
 }
 
+_Static_assert(sizeof(struct StringHeader) == 8, "the String header is 8 bytes, so payloads stay aligned");
 Pool String_pool_current(void){
-  if(! _init_guard_) String_initialize();
-  return x2c_pool_values_current();
+  if(! _init_guard_) String_initialize();  return x2c_pool_values_current();
 }
 
 void String_initialize(void){
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  x2c_pool_values_initialize();
-  _0 = String_new("\"%s\"");
-  _1 = String_new("\\");
-  _2 = String_new("\"\"");
-  Scope_shutdown_hook(String_shutdown);
+  if(_init_guard_) return;  _init_guard_ = 1;  x2c_pool_values_initialize();  _0 = String_new("\"%s\"");  _1 = String_new("\\");  _2 = String_new("\"\"");  Scope_shutdown_hook(String_shutdown);
 }
 
 void String_thread_initialize(void){
-  if(! _init_guard_) String_initialize();
-  x2c_pool_values_thread_initialize();
+  if(! _init_guard_) String_initialize();  x2c_pool_values_thread_initialize();
 }
 
 void String_shutdown(void){
-  if(! _init_guard_) String_initialize();
-  x2c_pool_values_shutdown();
+  if(! _init_guard_) String_initialize();  x2c_pool_values_shutdown();
 }
 
 Pool String_pool_retain_named(const char * name){
-  if(! _init_guard_) String_initialize();
-  return x2c_pool_values_retain_named(name);
+  if(! _init_guard_) String_initialize();  return x2c_pool_values_retain_named(name);
 }
 
 Pool String_pool_retain(void){
-  if(! _init_guard_) String_initialize();
-  return x2c_pool_values_retain();
+  if(! _init_guard_) String_initialize();  return x2c_pool_values_retain();
 }
 
 void String_pool_release(void){
-  if(! _init_guard_) String_initialize();
-  Pool pool = x2c_pool_values_current();
-  if(! pool -> up){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_pool_release",.line = 158};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pool_release")), NULL))));
+  if(! _init_guard_) String_initialize();  Pool pool = x2c_pool_values_current();  if(! pool -> up){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_pool_release",.line = 158};  x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pool_release")), NULL))));
     __builtin_unreachable();
   }
   x2c_pool_values_release();

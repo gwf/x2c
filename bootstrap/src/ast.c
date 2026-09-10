@@ -2,11 +2,11 @@
 
 #include "ast.h"
 
-static List _110, _109, _108, _106, _105, _104, _102, _101, _98, _97, _96, _94, _93, _92, _90, _89, _88, _85, _84, _83, _81, _72, _71, _69, _68, _67, _65, _64, _63, _61, _60, _57, _56, _55, _53, _52, _46, _45, _44, _42, _41, _40, _39, _34, _30, _29, _28, _26, _25, _24, _20, _19, _18, _13, _12, _11, _9, _8, _7, _6;
+static List _110, _109, _108, _106, _105, _104, _102, _101, _98, _97, _96, _94, _93, _92, _90, _89, _88, _85, _84, _83, _81, _72, _71, _69, _68, _67, _65, _64, _63, _61, _60, _57, _56, _55, _53, _52, _46, _45, _44, _42, _41, _40, _39, _34, _30, _29, _28, _26, _25, _24, _20, _19, _18, _13, _11, _10, _8;
 
 static String _76, _75, _74, _73, _32, _16;
 
-static Var _107, _103, _100, _99, _95, _91, _87, _86, _82, _80, _79, _78, _77, _70, _66, _62, _59, _58, _54, _51, _50, _49, _48, _47, _43, _38, _37, _36, _35, _33, _31, _27, _23, _22, _21, _17, _15, _14, _10, _5, _4, _3, _2, _1, _0;
+static Var _107, _103, _100, _99, _95, _91, _87, _86, _82, _80, _79, _78, _77, _70, _66, _62, _59, _58, _54, _51, _50, _49, _48, _47, _43, _38, _37, _36, _35, _33, _31, _27, _23, _22, _21, _17, _15, _14, _12, _9, _7, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -60,17 +60,17 @@ Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
-
 Var String_var(String);
 
+Var List_var(List);
+
 Var int_var(int);
+
+String Var_string(Var);
 
 int Var_is_integer(Var);
 
 long Var_integer(Var);
-
-String Var_string(Var);
 
 Var Array_push(Array, Var);
 
@@ -144,18 +144,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = Symbol_var(4928588686);
   _1 = Symbol_var(59976);
-  _2 = Symbol_var(62054);
-  _3 = Symbol_var(61737802);
-  _4 = Symbol_var(1362954);
-  _5 = Symbol_var(1318210446);
-  _6 = cons(_5, NULL);
-  _7 = cons(_4, _6);
-  _8 = cons(_3, _7);
-  _9 = cons(_2, _8);
-  _10 = List_var(_9);
-  _11 = cons(_10, NULL);
-  _12 = cons(_1, _11);
-  _13 = cons(_0, _12);
+  _2 = Symbol_var(61737802);
+  _7 = Symbol_var(1318210446);
+  _8 = cons(_7, NULL);
+  _9 = Symbol_var(1362954);
+  _10 = cons(_9, _8);
+  _11 = cons(_2, _10);
+  _12 = Symbol_var(62054);
+  _13 = cons(_12, _11);
   _14 = Symbol_var(54);
   _15 = Symbol_var(1318234344);
   _16 = String_new("List");
@@ -167,8 +163,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _22 = Symbol_var(63322012252);
   _23 = Symbol_var(806120);
   _24 = cons(_23, NULL);
-  _25 = cons(_4, _24);
-  _26 = cons(_2, _25);
+  _25 = cons(_9, _24);
+  _26 = cons(_12, _25);
   _27 = List_var(_26);
   _28 = cons(_27, NULL);
   _29 = cons(_22, _28);
@@ -271,8 +267,14 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 4928588686: ;
   static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {Var id = _x2c_match_values[0];  Var name = _x2c_match_values[1]; {
-    if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;  if(identity) * identity = Var_integer(id);  if(spelling) * spelling = Var_string(name);  return 1;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(cons(_0, cons(_1, cons(List_var(_13), NULL)))), &_x2c_match_capture)) {Var id = _x2c_match_values[0];  Var name = _x2c_match_values[1]; {
+    Var _x2c_match_value_0 = name; {
+      String name = Var_string(_x2c_match_value_0); {
+        if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;  if(identity) * identity = Var_integer(id);  if(spelling) * spelling = name;  return 1;
+      }
+
+    }
+
   }
   break;
 }
@@ -395,9 +397,12 @@ static Ast _unwrap_origin(Ast node){
       case 104: ;
     static MatchCaptureSite _x2c_match_site_1;
     if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_30), &_x2c_match_capture)) {Var origin = _x2c_match_values[0];  if(Var_is_integer(origin)){
-      node = Var_pointer(List_caddr(node));  continue;
+      {
+        node = Var_pointer(List_caddr(node));  continue;
+      }
+      break;
     }
-    break;
+
   }
   default: break;
     }

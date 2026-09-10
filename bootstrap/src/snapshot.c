@@ -4,9 +4,9 @@
 
 #include "error.h"
 
-static List _31, _30, _29, _27, _26, _25, _23, _22, _21, _15, _14, _11, _9, _7, _6, _5, _4;
+static List _31, _30, _29, _27, _26, _25, _23, _22, _21, _15, _14, _11, _9, _7, _6, _4;
 
-static Var _28, _24, _20, _19, _18, _17, _16, _13, _12, _10, _8, _3, _2, _1, _0;
+static Var _28, _24, _20, _19, _18, _17, _16, _13, _12, _10, _8, _5, _3, _0;
 
 static int _init_guard_ = 0;
 
@@ -14,9 +14,9 @@ Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var List_var(List);
-
 Var int_var(int);
+
+Var List_var(List);
 
 int Var_is(Var, Symbol);
 
@@ -48,11 +48,11 @@ int Var_is_floating(Var);
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
+String Var_string(Var);
+
 int Map_contains(Map, Var);
 
 Var String_var(String);
-
-String Var_str(Var);
 
 Var Array_push(Array, Var);
 
@@ -96,16 +96,14 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(62054);
-  _1 = Symbol_var(65112065723278);
-  _2 = Symbol_var(1362954);
+  _0 = Symbol_var(65112065723278);
   _3 = Symbol_var(1318210446);
   _4 = cons(_3, NULL);
-  _5 = cons(_2, _4);
-  _6 = cons(_1, _5);
+  _5 = Symbol_var(1362954);
+  _6 = cons(_5, _4);
   _7 = cons(_0, _6);
-  _8 = List_var(_7);
-  _9 = cons(_8, NULL);
+  _8 = Symbol_var(62054);
+  _9 = cons(_8, _7);
   _10 = Symbol_var(292902696930268);
   _11 = cons(_10, NULL);
   _12 = Symbol_var(481205850);
@@ -118,8 +116,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _19 = Symbol_var(63981097423176);
   _20 = Symbol_var(806120);
   _21 = cons(_20, NULL);
-  _22 = cons(_2, _21);
-  _23 = cons(_0, _22);
+  _22 = cons(_5, _21);
+  _23 = cons(_8, _22);
   _24 = List_var(_23);
   _25 = cons(_24, NULL);
   _26 = cons(_19, _25);
@@ -191,7 +189,13 @@ int symbol_snapshot_write(Map symbols, Map fn_defs, File output){
         MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
 
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0];  defined = List_truth(symbol_type) && _function_type(symbol_type) && Map_contains(fn_defs, String_var(Var_str(spelling)));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(cons(List_var(_9), NULL)), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0]; {
+          Var _x2c_match_value_0 = spelling; {
+            String spelling = Var_string(_x2c_match_value_0);  defined = List_truth(symbol_type) && _function_type(symbol_type) && Map_contains(fn_defs, String_var(spelling));
+          }
+
+        }
+        break;
       }
 
     }
@@ -314,7 +318,13 @@ status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
             MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
 
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_9), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0];  Map_setindex(imported, spelling, int_var(1));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(cons(List_var(_9), NULL)), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0]; {
+              Var _x2c_match_value_1 = spelling; {
+                String spelling = Var_string(_x2c_match_value_1);  Map_setindex(imported, String_var(spelling), int_var(1));
+              }
+
+            }
+            break;
           }
 
     }

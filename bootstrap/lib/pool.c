@@ -33,8 +33,6 @@ enum PoolBlockConstant{
 }
 ;
 
-typedef char x2c_pool_block_header_size[(sizeof(struct PoolBlock) == 64) ? 1 : - 1];
-
 static const unsigned pool_class_sizes[POOL_CLASS_COUNT] ={
   16, __builtin_choose_expr((1ULL) <(sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0])), 32, (__typeof__(pool_class_sizes[1ULL])){
     0
@@ -202,38 +200,23 @@ _x2c_defer_env_8;
 #include <stdlib.h>
 #include <string.h>
 #include "exception.h"
+_Static_assert(sizeof(struct PoolBlock) == 64, "the pool block header is 64 bytes");
 void Scope_shutdown_hook(void(*)(void));
-
 Scope Scope_new_named(const char *);
-
 void * Scope_malloc_in(Scope *, size_t);
-
 void Scope_push(Scope *);
-
 Map Map_new_capacity(unsigned);
-
 void Scope_pop(void);
-
 void Scope_destroy(Scope);
-
 Var Map_getindex(Map, Var);
-
 int Var_is_void(Var);
-
 Var Map_setindex(Map, Var, Var);
-
 Var Symbol_var(Symbol);
-
 Var String_var(String);
-
 unsigned Map_len(Map);
-
 Var Map_setdefault(Map, Var, Var);
-
 void Scope_free(void *);
-
 void Scope_move(void *, Scope *);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 static void _storage_lock(void);
@@ -785,7 +768,7 @@ static void _insert_locked(Pool inner, Var object){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) _file_init_();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 611};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 610};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
@@ -812,7 +795,7 @@ void Pool_insert(Pool inner, Var object){
 Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) _file_init_();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 629};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 628};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
@@ -857,7 +840,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
 void * Pool_malloc(Pool inner, size_t size){
   if(! _init_guard_) _file_init_();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 661};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 660};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
     __builtin_unreachable();
   }
@@ -885,7 +868,7 @@ void * Pool_malloc(Pool inner, size_t size){
       fresh = malloc(bytes);
       if(! fresh){
         if(x2c_error_runtime_ready){
-          static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 686};
+          static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 685};
           x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
           __builtin_unreachable();
         }
@@ -935,7 +918,7 @@ void Pool_free(Pool inner, void * alloc){
   if(! _init_guard_) _file_init_();
   if(! alloc) return;
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 706};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 705};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
     __builtin_unreachable();
   }

@@ -17,144 +17,71 @@ typedef union Var{
 }
 Var;
 
-typedef char x2c_var_abi_byte[(CHAR_BIT == 8) ? 1 : - 1];
-
-typedef char x2c_var_abi_signed_char[(CHAR_MIN == - 128 && CHAR_MAX == 127) ? 1 : - 1];
-
-typedef char x2c_var_abi_short[(sizeof(short) == 2) ? 1 : - 1];
-
-typedef char x2c_var_abi_ushort[(sizeof(unsigned short) == 2) ? 1 : - 1];
-
-typedef char x2c_var_abi_int[(sizeof(int) == 4) ? 1 : - 1];
-
-typedef char x2c_var_abi_uint[(sizeof(unsigned) == 4) ? 1 : - 1];
-
-typedef char x2c_var_abi_short_range[(SHRT_MAX == 0x7fff && SHRT_MIN == - 0x7fff - 1 && USHRT_MAX == 0xffffU) ? 1 : - 1];
-
-typedef char x2c_var_abi_int_range[(INT_MAX == 0x7fffffff && INT_MIN == - 0x7fffffff - 1 && UINT_MAX == 0xffffffffU) ? 1 : - 1];
-
-typedef char x2c_var_abi_float[(sizeof(float) == 4) ? 1 : - 1];
-
-typedef char x2c_var_abi_double[(sizeof(double) == 8) ? 1 : - 1];
-
-typedef char x2c_var_abi_ulong[(sizeof(unsigned long) == 8) ? 1 : - 1];
-
-typedef char x2c_var_abi_long_long[(sizeof(long long) == 8) ? 1 : - 1];
-
-typedef char x2c_var_abi_long_range[(LONG_MAX == 0x7fffffffffffffffL && LONG_MIN == - 0x7fffffffffffffffL - 1L && ULONG_MAX == 0xffffffffffffffffUL) ? 1 : - 1];
-
-typedef char x2c_var_abi_long_long_range[(LLONG_MAX == 0x7fffffffffffffffLL && LLONG_MIN == - 0x7fffffffffffffffLL - 1LL && ULLONG_MAX == 0xffffffffffffffffULL) ? 1 : - 1];
-
-typedef char x2c_var_abi_pointer[(sizeof(void *) == 8) ? 1 : - 1];
-
-typedef char x2c_var_abi_storage[(sizeof(Var) == 8) ? 1 : - 1];
-
-typedef char x2c_var_abi_float_ieee[(FLT_RADIX == 2 && FLT_MANT_DIG == 24 && FLT_MAX_EXP == 128) ? 1 : - 1];
-
-typedef char x2c_var_abi_double_ieee[(DBL_MANT_DIG == 53 && DBL_MAX_EXP == 1024) ? 1 : - 1];
-
+_Static_assert(CHAR_BIT == 8, "char is 8 bits");
+_Static_assert(CHAR_MIN == - 128 && CHAR_MAX == 127, "char is signed");
+_Static_assert(sizeof(short) == 2, "short is 2 bytes");
+_Static_assert(sizeof(unsigned short) == 2, "unsigned short is 2 bytes");
+_Static_assert(sizeof(int) == 4, "int is 4 bytes");
+_Static_assert(sizeof(unsigned) == 4, "unsigned is 4 bytes");
+_Static_assert(SHRT_MAX == 0x7fff && SHRT_MIN == - 0x7fff - 1 && USHRT_MAX == 0xffffU, "short is two's complement 16-bit");
+_Static_assert(INT_MAX == 0x7fffffff && INT_MIN == - 0x7fffffff - 1 && UINT_MAX == 0xffffffffU, "int is two's complement 32-bit");
+_Static_assert(sizeof(float) == 4, "float is 4 bytes");
+_Static_assert(sizeof(double) == 8, "double is 8 bytes");
+_Static_assert(sizeof(unsigned long) == 8, "unsigned long is 8 bytes");
+_Static_assert(sizeof(long long) == 8, "long long is 8 bytes");
+_Static_assert(LONG_MAX == 0x7fffffffffffffffL && LONG_MIN == - 0x7fffffffffffffffL - 1L && ULONG_MAX == 0xffffffffffffffffUL, "long is two's complement 64-bit");
+_Static_assert(LLONG_MAX == 0x7fffffffffffffffLL && LLONG_MIN == - 0x7fffffffffffffffLL - 1LL && ULLONG_MAX == 0xffffffffffffffffULL, "long long is two's complement 64-bit");
+_Static_assert(sizeof(void *) == 8, "a pointer is 8 bytes");
+_Static_assert(sizeof(Var) == 8, "Var is 8 bytes");
+_Static_assert(FLT_RADIX == 2 && FLT_MANT_DIG == 24 && FLT_MAX_EXP == 128, "float is IEEE 754 binary32");
+_Static_assert(DBL_MANT_DIG == 53 && DBL_MAX_EXP == 1024, "double is IEEE 754 binary64");
 typedef void * Bytes;
-
 typedef struct Block * Block;
-
 typedef struct Buffer * Buffer;
-
 typedef unsigned long Symbol;
-
 typedef unsigned char * SymbolSet;
-
 typedef Var Atom;
-
 typedef Block Array;
-
 typedef struct List * List;
-
 typedef struct Scope * Scope;
-
 typedef struct Map * Map;
-
 typedef struct Pool * Pool;
-
 typedef struct Context * Context;
-
 typedef struct Mutex * Mutex;
-
 typedef struct Thread * Thread;
-
 typedef struct Func * Func;
-
 typedef char * String;
-
 typedef FILE * File;
-
 typedef struct Iter * Iter;
-
 typedef unsigned char uchar;
-
 typedef unsigned short ushort;
-
 typedef unsigned uint;
-
 typedef unsigned long ulong;
-
 typedef String(* VarStrFn)(Var);
-
 typedef Buffer(* VarWriteFn)(Var, Buffer);
-
 typedef unsigned(* VarHashFn)(Var);
-
 typedef int(* VarEqualFn)(Var, Var);
-
 typedef Iter(* VarIterIntoFn)(Var, Iter);
-
 typedef int(* VarCompareFn)(Var, Var);
-
 typedef int(* VarTruthFn)(Var);
-
 typedef int(* VarContainsFn)(Var receiver, Var needle);
-
 typedef Var(* VarBinaryFn)(Var lhs, Var rhs);
-
 typedef Var(* VarUnaryFn)(Var value);
-
 typedef Var(* VarGetIndexFn)(Var receiver, Var key);
-
 typedef Var(* VarSetIndexFn)(Var receiver, Var key, Var value);
-
 typedef Var(* VarUpdateIndexFn)(Var receiver, Var key, Symbol op, Var rhs);
-
 typedef Var(* VarPostfixIndexFn)(Var receiver, Var key, Symbol op);
-
 typedef Var(* VarExportContextFn)(Var value, Context source);
-
 void Scope_shutdown_hook(void(* hook)(void));
-
 typedef struct VarMethods{
-  VarStrFn str, repr;
-  VarHashFn hash;
-  VarEqualFn equal;
-  VarCompareFn compare;
-  VarTruthFn truth;
-  VarIterIntoFn iter;
-  VarWriteFn write_str, write_repr;
-  VarContainsFn contains;
-  VarBinaryFn add, sub, mul, div, mod, matmul;
-  VarUnaryFn neg;
-  VarGetIndexFn getindex;
-  VarSetIndexFn setindex;
-  VarUpdateIndexFn updateindex;
-  VarPostfixIndexFn postfixindex;
-  VarExportContextFn export_context;
+  VarStrFn str, repr;  VarHashFn hash;  VarEqualFn equal;  VarCompareFn compare;  VarTruthFn truth;  VarIterIntoFn iter;  VarWriteFn write_str, write_repr;  VarContainsFn contains;  VarBinaryFn add, sub, mul, div, mod, matmul;  VarUnaryFn neg;  VarGetIndexFn getindex;  VarSetIndexFn setindex;  VarUpdateIndexFn updateindex;  VarPostfixIndexFn postfixindex;  VarExportContextFn export_context;
 }
 VarMethods;
-
 #include "protocols.h"
 typedef struct X2CErrorSite{
-  const char * file, * function;
-  int line;
+  const char * file, * function;  int line;
 }
 X2CErrorSite;
-
 #define X2C_CLEANUP_EXIT_NORMAL   0
 #define X2C_CLEANUP_EXIT_RETURN   1
 #define X2C_CLEANUP_EXIT_BREAK    2
@@ -179,295 +106,150 @@ X2CErrorSite;
 #define VAR_F64_NEG_MAX_RAW    0xFFEFFFFFFFFFFFFFul
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 void x2c_scope_thread_release(void);
-
 void x2c_match_thread_release(void);
-
 void x2c_thread_state_release(void);
-
 Pool x2c_pool_values_current(void);
-
 void x2c_pool_values_initialize(void);
-
 void x2c_pool_values_thread_initialize(void);
-
 void x2c_pool_values_shutdown(void);
-
 Pool x2c_pool_values_retain_named(const char * name);
-
 Pool x2c_pool_values_retain(void);
-
 void x2c_pool_values_release(void);
-
 Pool x2c_pool_values_detach(void);
-
 int x2c_pool_values_is_permanent(Var value);
-
 void x2c_pool_thread_start(void);
-
 void x2c_descriptor_thread_start_begin(void);
-
 void x2c_descriptor_thread_start_end(int success);
-
 int x2c_descriptor_registration_frozen(void);
-
 extern _Thread_local int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
-
 extern File Stdin, Stdout, Stderr;
-
 extern Var Void;
-
 extern List nil;
-
 int Var_is(Var v, Symbol tag);
-
 Symbol Var_kind(Var v);
-
 void * Var_pointer(Var var);
-
 long Var_integer(Var v);
-
 double Var_floating(Var v);
-
 int Var_integer_compare(Var a, Var b);
-
 int Var_integer_floating_compare(Var integer, Var floating);
-
 unsigned Var_wide_hash(Var v);
-
 int Var_wide_equal(Var a, Var b);
-
 int Var_wide_compare(Var a, Var b);
-
 long Var_long_value(Var v);
-
 unsigned long Var_ulong_value(Var v);
-
 long long Var_long_long_value(Var v);
-
 unsigned long long Var_ulong_long_value(Var v);
-
 long double Var_long_double_value(Var v);
-
 Var Var_box_long(long value);
-
 Var Var_box_ulong(unsigned long value);
-
 Var Var_box_long_long(long long value);
-
 Var Var_box_ulong_long(unsigned long long value);
-
 Var Var_box_long_double(long double value);
-
 String Var_str(Var v);
-
 String Var_repr(Var v);
-
 String Var_fallback_str(Var v);
-
 String Var_fallback_repr(Var v);
-
 Buffer Var_fallback_write_str(Var v, Buffer out);
-
 Buffer Var_write_str(Var v, Buffer out);
-
 Buffer Var_fallback_write_repr(Var v, Buffer out);
-
 Var Var_new(Symbol tag, ...);
-
 Symbol Symbol_new(const char *);
-
 String String_new(const char *);
-
 String String_join(String, List);
-
 List Var_cons(Var, List);
-
 List List_cons(Var, List);
-
 List cons(Var, List);
-
 String Array_str(Array);
-
 String Array_repr(Array);
-
 Buffer Array_write_str(Array, Buffer);
-
 Buffer Array_write_repr(Array, Buffer);
-
 int Array_equal(Array, Array);
-
 int Array_compare(Array, Array);
-
 Iter Array_iter(Array, Iter);
-
 int Array_contains(Array, Var);
-
 Var Array_getindex(Array, int);
-
 Var Array_setindex(Array, int, Var);
-
 Var Array_updateindex(Array, int, Symbol, Var);
-
 Var Array_postfixindex(Array, int, Symbol);
-
 String Buffer_str(Buffer);
-
 String Buffer_repr(Buffer);
-
 int Buffer_truth(Buffer);
-
 int Block_truth(Block);
-
 void Block_free(Block);
-
 String File_str(File);
-
 String File_repr(File);
-
 Buffer File_write_repr(File, Buffer);
-
 unsigned File_hash(File f);
-
 int File_equal(File, File);
-
 Iter File_iter(File, Iter);
-
 Iter Iter_iter(Iter, Iter);
-
 String List_str(List);
-
 String List_repr(List);
-
 Buffer List_write_str(List, Buffer);
-
 Buffer List_write_repr(List, Buffer);
-
 unsigned List_hash(List l);
-
 int List_equal(List, List);
-
 int List_compare(List, List);
-
 Iter List_iter(List, Iter);
-
 int List_contains(List, Var);
-
 Var List_getindex(List, int);
-
 String Map_str(Map);
-
 String Map_repr(Map);
-
 Buffer Map_write_str(Map, Buffer);
-
 Buffer Map_write_repr(Map, Buffer);
-
 int Map_equal(Map, Map);
-
 int Map_compare(Map, Map);
-
 int Map_truth(Map);
-
 Iter Map_iter(Map, Iter);
-
 Iter Map_keys(Map, Iter);
-
 Iter Map_enumerate(Map, Iter);
-
 int Map_contains(Map, Var);
-
 Var Map_getindex(Map, Var);
-
 Var Map_setindex(Map, Var, Var);
-
 Var Map_updateindex(Map, Var, Symbol, Var);
-
 Var Map_postfixindex(Map, Var, Symbol);
-
 String String_str(String);
-
 String String_repr(String);
-
 Buffer String_write_str(String, Buffer);
-
 Buffer String_write_repr(String, Buffer);
-
 unsigned String_hash(String s);
-
 int String_equal(String, String);
-
 int String_compare(String, String);
-
 Iter String_iter(String, Iter);
-
 int String_contains(String, String);
-
 int String_getindex(String, int);
-
 String Symbol_str(Symbol);
-
 String Symbol_repr(Symbol);
-
 Buffer Symbol_write_str(Symbol, Buffer);
-
 Buffer Atom_write_str(Atom, Buffer);
-
 Buffer Symbol_write_repr(Symbol, Buffer);
-
 int Symbol_compare(Symbol, Symbol);
-
 unsigned Var_hash(Var v);
-
 unsigned Var_fallback_hash(Var v);
-
 int Var_equal(Var a, Var b);
-
 int Var_fallback_equal(Var a, Var b);
-
 int Var_same(Var a, Var b);
-
 int Var_compare(Var a, Var b);
-
 int Var_fallback_compare(Var a, Var b);
-
 Var Var_convert(Var value, Symbol target);
-
 int Var_truth(Var value);
-
 int Var_truthy(Var value);
-
 int Var_fallback_truth(Var value);
-
 Iter Var_fallback_iter(Var value, Iter dest);
-
 int Var_contains(Var value, Var needle);
-
 Var Var_add(Var lhs, Var rhs);
-
 Var Var_sub(Var lhs, Var rhs);
-
 Var Var_mul(Var lhs, Var rhs);
-
 Var Var_div(Var lhs, Var rhs);
-
 Var Var_mod(Var lhs, Var rhs);
-
 Var Var_neg(Var value);
-
 Var Var_getindex(Var value, Var key);
-
 Var Var_setindex(Var value, Var key, Var replacement);
-
 Var Var_updateindex(Var value, Var key, Symbol op, Var rhs);
-
 Var Var_postfixindex(Var value, Var key, Symbol op);
-
 Var Var_binary(Var lhs, Symbol op, Var rhs);
-
 Var Var_update(Var * lhs, Symbol op, Var rhs);
-
 Var Var_postfix(Var * lhs, Symbol op);
-
 #ifndef X2CCPP
 _Static_assert(_Generic(& fclose, int(*)(File) : 1, default: 0), "native alias File_close does not match fclose");
 #endif

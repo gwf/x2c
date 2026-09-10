@@ -2,11 +2,11 @@
 
 #include "literals.h"
 
-static List _296, _294, _291, _290, _289, _282, _276, _273, _271, _270, _269, _267, _266, _264, _263, _258, _257, _255, _254, _253, _250, _248, _247, _246, _245, _244, _243, _242, _241, _239, _238, _237, _229, _228, _227, _224, _223, _222, _221, _218, _217, _216, _214, _213, _210, _208, _207, _206, _205, _204, _198, _197, _195, _193, _189, _188, _187, _185, _184, _181, _179, _178, _177, _176, _174, _169, _163, _157, _154, _151, _147, _144, _143, _142, _140, _135, _131, _130, _129, _127, _126, _124, _123, _122, _117, _112, _111, _109, _108, _107, _105, _104, _102, _100, _99, _96, _95, _94, _91, _90, _88, _87, _86, _84, _82, _81, _80, _78, _77, _74, _73, _72, _69, _68, _67, _65, _64, _60, _59, _58, _57, _54, _46, _42, _36, _32, _31, _30, _27, _20, _19, _18, _16, _15, _14, _12, _7, _6;
+static List _296, _294, _291, _290, _289, _282, _276, _273, _271, _270, _269, _267, _266, _264, _263, _258, _257, _255, _254, _250, _249, _248, _247, _244, _243, _242, _241, _239, _238, _237, _229, _228, _227, _224, _223, _222, _221, _218, _217, _216, _214, _213, _210, _208, _207, _206, _205, _204, _198, _197, _195, _193, _189, _188, _187, _185, _184, _181, _179, _178, _177, _176, _174, _169, _163, _157, _154, _151, _147, _144, _143, _142, _140, _135, _131, _130, _129, _127, _126, _124, _123, _122, _117, _112, _111, _109, _108, _107, _105, _104, _102, _100, _99, _96, _95, _94, _91, _90, _88, _87, _86, _84, _82, _81, _80, _78, _77, _74, _73, _72, _69, _68, _67, _65, _64, _60, _59, _58, _57, _54, _46, _42, _36, _32, _31, _30, _27, _20, _19, _18, _16, _15, _14, _12, _7, _6;
 
 static String _329, _328, _327, _326, _325, _324, _323, _322, _321, _320, _319, _318, _317, _316, _315, _314, _313, _312, _311, _310, _309, _308, _307, _306, _305, _304, _302, _300, _297, _287, _285, _284, _283, _281, _274, _251, _233, _167, _161, _155, _152, _149, _145, _139, _138, _136, _133, _115, _89, _61, _52, _51, _50, _49, _44, _40, _38, _37, _34, _22, _10, _3, _1, _0;
 
-static Var _303, _301, _299, _298, _295, _293, _292, _288, _286, _280, _279, _278, _277, _275, _272, _268, _265, _262, _261, _260, _259, _256, _252, _249, _240, _236, _235, _234, _232, _231, _230, _226, _225, _220, _219, _215, _212, _211, _209, _203, _202, _201, _200, _199, _196, _194, _192, _191, _190, _186, _183, _182, _180, _175, _173, _172, _171, _170, _168, _166, _165, _164, _162, _160, _159, _158, _156, _153, _150, _148, _146, _141, _137, _134, _132, _128, _125, _121, _120, _119, _118, _116, _114, _113, _110, _106, _103, _101, _98, _97, _93, _92, _85, _83, _79, _76, _75, _71, _70, _66, _63, _62, _56, _55, _53, _48, _47, _45, _43, _41, _39, _35, _33, _29, _28, _26, _25, _24, _23, _21, _17, _13, _11, _9, _8, _5, _4, _2;
+static Var _303, _301, _299, _298, _295, _293, _292, _288, _286, _280, _279, _278, _277, _275, _272, _268, _265, _262, _261, _260, _259, _256, _252, _240, _236, _235, _234, _232, _231, _230, _226, _225, _220, _219, _215, _212, _211, _209, _203, _202, _201, _200, _199, _196, _194, _192, _191, _190, _186, _183, _182, _180, _175, _173, _172, _171, _170, _168, _166, _165, _164, _162, _160, _159, _158, _156, _153, _150, _148, _146, _141, _137, _134, _132, _128, _125, _121, _120, _119, _118, _116, _114, _113, _110, _106, _103, _101, _98, _97, _93, _92, _85, _83, _79, _76, _75, _71, _70, _66, _63, _62, _56, _55, _53, _48, _47, _45, _43, _41, _39, _35, _33, _29, _28, _26, _25, _24, _23, _21, _17, _13, _11, _9, _8, _5, _4, _2;
 
 static int _init_guard_ = 0;
 
@@ -634,15 +634,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _242 = cons(_236, _241);
   _243 = cons(_212, _242);
   _244 = cons(_211, _243);
-  _245 = cons(_171, NULL);
-  _246 = cons(_56, _245);
-  _247 = cons(_97, _246);
-  _248 = cons(_55, _247);
-  _249 = List_var(_248);
-  _250 = cons(_249, NULL);
+  _247 = cons(_171, NULL);
+  _248 = cons(_56, _247);
+  _249 = cons(_97, _248);
+  _250 = cons(_55, _249);
   _251 = String_new("x2c.ident");
   _252 = String_var(_251);
-  _253 = cons(_252, _250);
   _254 = cons(_236, NULL);
   _255 = cons(_76, _254);
   _256 = Symbol_var(60951754);
@@ -1471,7 +1468,10 @@ List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type){
     List _x2c_match_expr = row;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 6544469130: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_214), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  if(Var_equal(target, List_var(binding)) || Var_equal(target, List_var(original))) prescribed = row;  break;
+      case 6544469130: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_214), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  if(Var_equal(target, List_var(binding)) || Var_equal(target, List_var(original))){
+              prescribed = row;  break;
+            }
+
           }
           default: break;
     }
@@ -1560,9 +1560,21 @@ List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, Lis
     List _x2c_match_expr = binding;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_250), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  spelling = Var_string(name);  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(cons(List_var(_250), NULL)), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
+            Var _x2c_match_value_0 = name; {
+              String name = Var_string(_x2c_match_value_0);  spelling = name;
+            }
+
+          }
+          break;
         }
-        static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(_253), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  spelling = Var_string(name);  break;
+        static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_site_try_capture(& _x2c_match_site_18, _x2c_match_expr, List_var(cons(_252, cons(List_var(_250), NULL))), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
+          Var _x2c_match_value_1 = name; {
+            String name = Var_string(_x2c_match_value_1);  spelling = name;
+          }
+
+        }
+        break;
       }
 
     }

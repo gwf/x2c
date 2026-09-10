@@ -2,11 +2,11 @@
 
 #include "lambda.h"
 
-static List _529, _527, _525, _524, _492, _490, _489, _487, _486, _484, _480, _477, _476, _475, _474, _473, _472, _471, _469, _468, _467, _466, _465, _464, _462, _461, _460, _458, _457, _455, _454, _453, _451, _450, _449, _448, _447, _445, _444, _443, _442, _441, _439, _438, _435, _434, _431, _430, _429, _427, _426, _424, _423, _422, _421, _420, _419, _418, _417, _415, _414, _413, _411, _408, _407, _406, _404, _402, _401, _399, _398, _397, _396, _394, _393, _391, _390, _388, _387, _386, _384, _383, _382, _381, _380, _378, _377, _376, _375, _372, _371, _367, _366, _364, _363, _361, _360, _359, _357, _356, _353, _352, _351, _350, _348, _347, _346, _344, _343, _341, _340, _339, _337, _335, _334, _333, _332, _330, _329, _328, _325, _323, _322, _321, _319, _318, _315, _314, _312, _311, _309, _308, _304, _303, _301, _300, _299, _297, _296, _295, _292, _291, _290, _288, _287, _285, _284, _283, _281, _279, _276, _275, _274, _272, _271, _270, _268, _267, _265, _264, _263, _260, _259, _258, _256, _255, _254, _253, _252, _250, _249, _248, _247, _244, _241, _240, _239, _238, _237, _236, _235, _233, _232, _230, _229, _228, _225, _223, _222, _220, _219, _218, _216, _215, _213, _212, _211, _210, _208, _207, _205, _200, _194, _192, _191, _187, _182, _176, _174, _172, _171, _165, _164, _163, _158, _157, _156, _154, _146, _145, _144, _139, _135, _133, _130, _127, _124, _121, _120, _117, _115, _114, _113, _111, _110, _109, _103, _100, _99, _98, _96, _95, _94, _92, _91, _90, _89, _88, _86, _85, _84, _82, _81, _80, _78, _77, _57, _55, _53, _52, _51, _50, _45, _44, _43, _39, _38, _36, _33, _31, _28, _27, _26, _24, _23, _22, _17, _16, _14, _13, _12, _10, _9, _8, _4;
+static List _529, _527, _525, _524, _492, _490, _489, _487, _486, _484, _480, _477, _476, _475, _474, _473, _472, _471, _469, _468, _467, _466, _465, _464, _462, _461, _460, _458, _457, _455, _454, _453, _451, _450, _449, _448, _447, _445, _444, _443, _442, _441, _439, _438, _435, _434, _431, _430, _429, _427, _426, _424, _423, _422, _421, _420, _419, _418, _417, _415, _414, _413, _411, _408, _407, _406, _404, _402, _401, _399, _398, _397, _396, _394, _393, _391, _390, _388, _387, _386, _384, _383, _382, _381, _380, _378, _377, _376, _375, _372, _371, _367, _366, _364, _363, _361, _360, _359, _357, _356, _353, _352, _351, _350, _348, _347, _346, _344, _343, _341, _340, _339, _337, _335, _334, _333, _332, _330, _329, _328, _325, _323, _322, _321, _319, _318, _315, _314, _312, _311, _309, _308, _304, _303, _301, _300, _299, _297, _296, _295, _292, _291, _290, _288, _287, _285, _284, _283, _281, _279, _276, _275, _274, _272, _271, _270, _268, _267, _265, _264, _263, _260, _259, _258, _256, _255, _254, _253, _252, _250, _249, _248, _247, _244, _241, _240, _239, _238, _237, _236, _235, _233, _232, _230, _229, _228, _225, _223, _222, _220, _219, _218, _216, _215, _213, _212, _211, _210, _208, _207, _205, _200, _194, _192, _191, _187, _182, _176, _174, _172, _171, _165, _164, _163, _158, _157, _156, _154, _146, _145, _144, _139, _135, _133, _130, _127, _124, _121, _120, _117, _115, _114, _113, _111, _110, _109, _103, _100, _99, _98, _96, _95, _94, _92, _91, _90, _89, _88, _86, _85, _84, _82, _81, _80, _78, _77, _57, _55, _53, _52, _50, _45, _44, _43, _39, _38, _36, _33, _31, _28, _27, _26, _24, _23, _22, _17, _16, _14, _13, _12, _10, _9, _8, _4;
 
 static String _537, _536, _535, _534, _533, _532, _531, _530, _528, _522, _521, _520, _519, _518, _517, _516, _515, _514, _513, _512, _511, _510, _509, _508, _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _482, _478, _436, _294, _203, _195, _185, _184, _180, _170, _150, _149, _148, _142, _137, _125, _122, _105, _104, _101, _61, _60, _59, _58, _29, _1;
 
-static Var _526, _523, _491, _488, _485, _483, _481, _479, _470, _463, _459, _456, _452, _446, _440, _437, _433, _432, _428, _425, _416, _412, _410, _409, _405, _403, _400, _395, _392, _389, _385, _379, _374, _373, _370, _369, _368, _365, _362, _358, _355, _354, _349, _345, _342, _338, _336, _331, _327, _326, _324, _320, _317, _316, _313, _310, _307, _306, _305, _302, _298, _293, _289, _286, _282, _280, _278, _277, _273, _269, _266, _262, _261, _257, _251, _246, _245, _243, _242, _234, _231, _227, _226, _224, _221, _217, _214, _209, _206, _204, _202, _201, _199, _198, _197, _196, _193, _190, _189, _188, _186, _183, _181, _179, _178, _177, _175, _173, _169, _168, _167, _166, _162, _161, _160, _159, _155, _153, _152, _151, _147, _143, _141, _140, _138, _136, _134, _132, _131, _129, _128, _126, _123, _119, _118, _116, _112, _108, _107, _106, _102, _97, _93, _87, _83, _79, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _56, _54, _49, _48, _47, _46, _42, _41, _40, _37, _35, _34, _32, _30, _25, _21, _20, _19, _18, _15, _11, _7, _6, _5, _3, _2, _0;
+static Var _526, _523, _491, _488, _485, _483, _481, _479, _470, _463, _459, _456, _452, _446, _440, _437, _433, _432, _428, _425, _416, _412, _410, _409, _405, _403, _400, _395, _392, _389, _385, _379, _374, _373, _370, _369, _368, _365, _362, _358, _355, _354, _349, _345, _342, _338, _336, _331, _327, _326, _324, _320, _317, _316, _313, _310, _307, _306, _305, _302, _298, _293, _289, _286, _282, _280, _278, _277, _273, _269, _266, _262, _261, _257, _251, _246, _245, _243, _242, _234, _231, _227, _226, _224, _221, _217, _214, _209, _206, _204, _202, _201, _199, _198, _197, _196, _193, _190, _189, _188, _186, _183, _181, _179, _178, _177, _175, _173, _169, _168, _167, _166, _162, _161, _160, _159, _155, _153, _152, _151, _147, _143, _141, _140, _138, _136, _134, _132, _131, _129, _128, _126, _123, _119, _118, _116, _112, _108, _107, _106, _102, _97, _93, _87, _83, _79, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _56, _54, _51, _49, _46, _42, _41, _40, _37, _35, _34, _32, _30, _25, _21, _20, _19, _18, _15, _11, _7, _6, _5, _3, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -419,16 +419,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _43 = cons(_42, NULL);
   _44 = cons(_41, _43);
   _45 = cons(_40, _44);
-  _46 = Symbol_var(62054);
-  _47 = Symbol_var(61829938);
-  _48 = Symbol_var(1362954);
+  _46 = Symbol_var(61829938);
   _49 = Symbol_var(806120);
   _50 = cons(_49, NULL);
-  _51 = cons(_48, _50);
-  _52 = cons(_47, _51);
+  _51 = Symbol_var(1362954);
+  _52 = cons(_51, _50);
   _53 = cons(_46, _52);
-  _54 = List_var(_53);
-  _55 = cons(_54, NULL);
+  _54 = Symbol_var(62054);
+  _55 = cons(_54, _53);
   _56 = Symbol_var(1519197);
   _57 = cons(_56, NULL);
   _58 = String_new("target signature: ");
@@ -999,10 +997,16 @@ static int _typed_function_parts(Type type, List * params, Type * return_type){
     List _x2c_match_expr = values;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_55), &_x2c_match_capture)) {Var only = _x2c_match_values[0]; {
-      Type parameter = Var_type(only);  if(Type_canonicalize(parameter) == _4) values = NULL;
+      default: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(cons(List_var(_55), NULL)), &_x2c_match_capture)) {Var only = _x2c_match_values[0]; {
+      Var _x2c_match_value_0 = only; {
+        Type only = Var_type(_x2c_match_value_0);  if(Type_canonicalize(only) == _4){
+          values = NULL;  break;
+        }
+
+      }
+
     }
-    break;
+
   }
 
     }
@@ -1522,7 +1526,7 @@ return 0;
 }
 
 static void _record_region_binding(Compiler compiler, List binding, Map owned, Array order){
-  if(! List_truth(binding) || Map_contains(owned, List_var(binding))) return;  Var automatic, stored_type;  Map facts = Compiler_semantic_binding_facts(compiler);  if(! Map_try_get(facts, List_var(cons(_266, cons(List_var(binding), NULL))), & automatic) || ! Map_try_get(facts, List_var(cons(_48, cons(List_var(binding), NULL))), & stored_type)) return;  Type type = Var_type(stored_type);  if(! List_truth(Type_list(type)) || Type_is_static(type)) return;  Map_setindex(owned, List_var(binding), List_var(type));  Array_push(order, List_var(binding));
+  if(! List_truth(binding) || Map_contains(owned, List_var(binding))) return;  Var automatic, stored_type;  Map facts = Compiler_semantic_binding_facts(compiler);  if(! Map_try_get(facts, List_var(cons(_266, cons(List_var(binding), NULL))), & automatic) || ! Map_try_get(facts, List_var(cons(_51, cons(List_var(binding), NULL))), & stored_type)) return;  Type type = Var_type(stored_type);  if(! List_truth(Type_list(type)) || Type_is_static(type)) return;  Map_setindex(owned, List_var(binding), List_var(type));  Array_push(order, List_var(binding));
 }
 
 static void _collect_region_bindings(Compiler compiler, List ast, Map owned, Array order){
@@ -1900,7 +1904,7 @@ static List _prepare_lambda_region(Compiler compiler, List entries, List body){
     }
     );  Var _x2c_macro_item_12;  while(Iter_try_next(_x2c_macro_iterator_12, & _x2c_macro_item_12)){
       binding = Var_list(_x2c_macro_item_12); {
-        Var stored_type;  if(! Map_try_get(candidates, List_var(binding), & stored_type)) continue;  Type type = Var_type(stored_type);  List cell = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _528));  Map_setindex(cells, List_var(binding), List_var(cons(_261, cons(List_var(cell), cons(List_var(type), NULL)))));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_266, cons(List_var(cell), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_48, cons(List_var(cell), NULL))), List_var(Type_reference(type)));
+        Var stored_type;  if(! Map_try_get(candidates, List_var(binding), & stored_type)) continue;  Type type = Var_type(stored_type);  List cell = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _528));  Map_setindex(cells, List_var(binding), List_var(cons(_261, cons(List_var(cell), cons(List_var(type), NULL)))));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_266, cons(List_var(cell), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_51, cons(List_var(cell), NULL))), List_var(Type_reference(type)));
       }
 
     }
@@ -2055,7 +2059,7 @@ static List _captured_context_call(Type type, List context, List adapter, Type a
 }
 
 static List _lower_captured_lambda(Compiler compiler, List entries, List captures, List body){
-  String lname = Compiler_fresh_name(compiler, _530);  List lambda_binding = Sym_introduce(compiler -> sym, lname);  List closure_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _531));  List argv_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _532));  String environment_name = Compiler_fresh_name(compiler, _533);  List environment_typedef = Sym_introduce(compiler -> sym, environment_name);  Type environment_value_type = List_type(cons(String_var(environment_name), NULL));  Type environment_pointer_type = List_type(cons(_134, cons(_141, cons(String_var(environment_name), NULL))));  List environment_local = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _534));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_266, cons(List_var(environment_local), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_48, cons(List_var(environment_local), NULL))), List_var(environment_pointer_type));  Map slots = Map_new();  Array fields = Array_new(), field_types = Array_new();  Array capture_locals = Array_new(), field_values = Array_new(); {
+  String lname = Compiler_fresh_name(compiler, _530);  List lambda_binding = Sym_introduce(compiler -> sym, lname);  List closure_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _531));  List argv_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _532));  String environment_name = Compiler_fresh_name(compiler, _533);  List environment_typedef = Sym_introduce(compiler -> sym, environment_name);  Type environment_value_type = List_type(cons(String_var(environment_name), NULL));  Type environment_pointer_type = List_type(cons(_134, cons(_141, cons(String_var(environment_name), NULL))));  List environment_local = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _534));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_266, cons(List_var(environment_local), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_51, cons(List_var(environment_local), NULL))), List_var(environment_pointer_type));  Map slots = Map_new();  Array fields = Array_new(), field_types = Array_new();  Array capture_locals = Array_new(), field_values = Array_new(); {
     List capture;  Iter _x2c_macro_iterator_13 = List_iter(captures, &(struct Iter){
       int_var(0)
     }

@@ -2,7 +2,7 @@
 
 #include "bootstrap.h"
 
-static String _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -93,23 +93,24 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = String_new("bootstrap: ");
   _1 = String_new(": ");
   _2 = String_new("/");
-  _3 = String_new(".bootstrap.lock");
-  _4 = String_new(".source.tmp.%ld");
-  _5 = String_new("/zip/x2c/");
-  _6 = String_new("/.x2c-source-id");
-  _7 = String_new("/.x2c-bootstrap-complete");
-  _8 = String_new("/bin/x2c");
-  _9 = String_new("/lib/libx2c.a");
-  _10 = String_new("/bin");
-  _11 = String_new("/lib");
-  _12 = String_new("/.x2c-build/runtime");
-  _13 = String_new("/.x2c-build/compiler");
-  _14 = String_new("/include");
-  _15 = String_new("/lib/x2c");
-  _16 = String_new("/toolchain");
-  _17 = String_new("lib/");
-  _18 = String_new(".x");
-  _19 = String_new("src/");
+  _3 = String_new("/");
+  _4 = String_new(".bootstrap.lock");
+  _5 = String_new(".source.tmp.%ld");
+  _6 = String_new("/zip/x2c/");
+  _7 = String_new("/.x2c-source-id");
+  _8 = String_new("/.x2c-bootstrap-complete");
+  _9 = String_new("/bin/x2c");
+  _10 = String_new("/lib/libx2c.a");
+  _11 = String_new("/bin");
+  _12 = String_new("/lib");
+  _13 = String_new("/.x2c-build/runtime");
+  _14 = String_new("/.x2c-build/compiler");
+  _15 = String_new("/include");
+  _16 = String_new("/lib/x2c");
+  _17 = String_new("/toolchain");
+  _18 = String_new("lib/");
+  _19 = String_new(".x");
+  _20 = String_new("src/");
 }
 
 static void _error(const char * message){
@@ -133,7 +134,7 @@ static String _absolute(String path){
   const char * base = strrchr(path, '/');
   base = base ? base + 1 : path;
   if(! base[0] || strcmp(base, ".") == 0 || strcmp(base, "..") == 0) _error_path("invalid installation prefix", path);
-  return String_join(NULL, cons(String_var(String_new(resolved)), cons(String_var(_2), cons(String_var(String_new(base)), NULL))));
+  return String_join(NULL, cons(String_var(String_new(resolved)), cons(String_var(_3), cons(String_var(String_new(base)), NULL))));
 }
 
 static int _safe_path(const char * path){
@@ -187,7 +188,7 @@ static void _write_marker(String path, String identity){
 }
 
 static void _acquire(Bootstrap payload){
-  payload -> lock_path = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_3), NULL)));
+  payload -> lock_path = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_4), NULL)));
   for(int attempt = 0;  attempt < 2;  attempt ++){
     int fd = open(payload -> lock_path, O_WRONLY | O_CREAT | O_EXCL, 0666);
     if(fd >= 0){
@@ -271,13 +272,13 @@ static int _record(char * line, unsigned long long * hash, size_t * size, char p
 }
 
 static void _collect(Bootstrap payload, String relative){
-  String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_2), cons(String_var(relative), NULL))));
-  if(String_startswith(relative, _17) && String_endswith(relative, _18)) payload -> runtime_srcs = cons(String_var(installed), payload -> runtime_srcs);
-  else if(String_startswith(relative, _19) && String_endswith(relative, _18)) payload -> compiler_srcs = cons(String_var(installed), payload -> compiler_srcs);
+  String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_3), cons(String_var(relative), NULL))));
+  if(String_startswith(relative, _18) && String_endswith(relative, _19)) payload -> runtime_srcs = cons(String_var(installed), payload -> runtime_srcs);
+  else if(String_startswith(relative, _20) && String_endswith(relative, _19)) payload -> compiler_srcs = cons(String_var(installed), payload -> compiler_srcs);
 }
 
 static void _extract(Bootstrap payload, char * manifest){
-  String temporary = String_printf(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_4), NULL))), (long) getpid());
+  String temporary = String_printf(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_5), NULL))), (long) getpid());
   if(access(temporary, F_OK) == 0 && ! _build_remove_tree(temporary)) _error_path("cannot clear temporary source tree", temporary);
   if(! _build_mkdirs(temporary)) _error_path("cannot create temporary source tree", temporary);
   char * save = NULL;
@@ -288,8 +289,8 @@ static void _extract(Bootstrap payload, char * manifest){
     size_t expected_size = 0;
     char relative[1024];
     if(! _record(line, & expected_hash, & expected_size, relative) || ! _safe_path(relative)) _error("malformed embedded source record");
-    String source = String_join(NULL, cons(String_var(_5), cons(String_var(String_new(relative)), NULL)));
-    String target = String_join(NULL, cons(String_var(temporary), cons(String_var(_2), cons(String_var(String_new(relative)), NULL))));
+    String source = String_join(NULL, cons(String_var(_6), cons(String_var(String_new(relative)), NULL)));
+    String target = String_join(NULL, cons(String_var(temporary), cons(String_var(_3), cons(String_var(String_new(relative)), NULL))));
     String parent = x2c_path_dir(target);
     if(! _build_mkdirs(parent)) _error_path("cannot create payload directory", parent);
     File input = fopen(source, "rb"), output = fopen(target, "wb");
@@ -302,7 +303,7 @@ static void _extract(Bootstrap payload, char * manifest){
     line = strtok_r(NULL, "\n", & save);
   }
   if(! List_truth(payload -> runtime_srcs) || ! List_truth(payload -> compiler_srcs)) _error("embedded payload has no compiler or runtime sources");
-  _write_marker(String_join(NULL, cons(String_var(temporary), cons(String_var(_6), NULL))), payload -> identity);
+  _write_marker(String_join(NULL, cons(String_var(temporary), cons(String_var(_7), NULL))), payload -> identity);
   if(rename(temporary, payload -> prefix)) _error_path("cannot publish extracted source tree", payload -> prefix);
 }
 
@@ -315,7 +316,7 @@ static void _collect_existing(Bootstrap payload, char * manifest){
     size_t size = 0;
     char relative[1024];
     if(! _record(line, & hash, & size, relative) || ! _safe_path(relative)) _error("malformed embedded source record");
-    String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_2), cons(String_var(String_new(relative)), NULL))));
+    String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_3), cons(String_var(String_new(relative)), NULL))));
     File input = fopen(installed, "rb");
     if(! input) _error_path("materialized source is missing", installed);
     size_t actual_size = 0;
@@ -334,8 +335,8 @@ Bootstrap bootstrap_materialize(CliRequest request){
   payload -> prefix = _absolute(request -> prefix);
   char * manifest = _manifest(& payload -> identity);
   _acquire(payload);
-  String source_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_6), NULL)));
-  String complete_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL)));
+  String source_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL)));
+  String complete_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL)));
   if(! access(payload -> prefix, F_OK)){
     if(! _read_marker(source_marker, payload -> identity)){
       bootstrap_release(payload);
@@ -347,8 +348,8 @@ Bootstrap bootstrap_materialize(CliRequest request){
   payload -> runtime_srcs = List_reverse(payload -> runtime_srcs);
   payload -> compiler_srcs = List_reverse(payload -> compiler_srcs);
   free(manifest);
-  payload -> complete = _read_marker(complete_marker, payload -> identity) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL))), X_OK) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))), R_OK);
-  if(! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_10), NULL)))) || ! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_11), NULL))))) _error_path("cannot create installation directories", payload -> prefix);
+  payload -> complete = _read_marker(complete_marker, payload -> identity) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))), X_OK) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_10), NULL))), R_OK);
+  if(! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_11), NULL)))) || ! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_12), NULL))))) _error_path("cannot create installation directories", payload -> prefix);
   return payload;
 }
 
@@ -358,9 +359,9 @@ CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol
   request -> command = 5589768;
   request -> kind = component == 40094681930 ? 1381098885964356 : 404971770155786;
   request -> inputs = component == 40094681930 ? payload -> runtime_srcs : payload -> compiler_srcs;
-  request -> output = component == 40094681930 ? String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))) : String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL)));
-  request -> build_dir = component == 40094681930 ? String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_12), NULL))) : String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_13), NULL)));
-  request -> include_dirs = cons(String_var(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_14), NULL)))), NULL);
+  request -> output = component == 40094681930 ? String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_10), NULL))) : String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL)));
+  request -> build_dir = component == 40094681930 ? String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_13), NULL))) : String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_14), NULL)));
+  request -> include_dirs = cons(String_var(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_15), NULL)))), NULL);
   request -> cc_args = command -> cc_args;
   request -> cc = command -> cc;
   request -> ar = command -> ar;
@@ -371,12 +372,12 @@ CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol
 
 void bootstrap_record_install(Bootstrap payload, String cc, String ar){
   if(! _init_guard_) _file_init_();
-  String directory = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_15), NULL)));
+  String directory = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_16), NULL)));
   if(! _build_mkdirs(directory)) _error_path("cannot create toolchain record directory", directory);
-  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_16), NULL)));
+  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_17), NULL)));
   File output = fopen(record, "w");
   if(! output || File_printf(output, "CC=%s\nAR=%s\n", cc, ar) < 0 || File_close(output)) _error_path("cannot write toolchain record", record);
-  _write_marker(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL))), payload -> identity);
+  _write_marker(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL))), payload -> identity);
 }
 
 void bootstrap_release(Bootstrap payload){
