@@ -1,5 +1,6 @@
 ---
 slug: embedded-lisp
+order: 2
 slide: runtime-lisp
 title: Give your game a Lisp player.
 description: Play tic-tac-toe against a Lisp strategy inside a native x2c program.

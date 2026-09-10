@@ -38,7 +38,7 @@ const output = page.output ? outputs[`../../../../${page.output}`] as string : n
 const canonicalUrl = new URL(local(`examples/${page.slug}/`), Astro.site).href;
 const current = articles.findIndex((entry) => entry.frontmatter.slug === page.slug);
 const next = articles[(current + 1) % articles.length];
-const sectionLabel = section === "packages" ? "Packages" : "Magic";
+const previous = articles[(current + articles.length - 1) % articles.length];
 ---
 
 <BaseLayout
@@ -51,7 +51,10 @@ const sectionLabel = section === "packages" ? "Packages" : "Magic";
   <article class="example-page" data-example={page.slug}
     data-section={section} data-surface="detail">
     <header class="example-heading">
-      <p class="example-eyebrow">x2c / examples / a closer look</p>
+      <p class="example-eyebrow">
+        <a href={local("#top")}>x2c / examples</a>{" / "}
+        {page.title.replace(/\.$/, "").toLowerCase()}
+      </p>
       <h1>{page.title}</h1>
       <p class="example-premise">{page.description}</p>
       <nav class="example-actions" aria-label="Example actions">
@@ -90,17 +93,18 @@ const sectionLabel = section === "packages" ? "Packages" : "Magic";
         <CoreSetup run={page.run} />
       </section>
 
-      <nav class="example-next" aria-label="Keep exploring">
-        <a href={local(`#example-${page.slide}`)}>
-          <small>Back to the language tour</small>
-          <span>In {sectionLabel} <span aria-hidden="true">&uarr;</span></span>
-        </a>
-        <a href={local(`examples/${next.frontmatter.slug}/`)}>
-          <small>Next example</small>
-          <span>{next.frontmatter.title} <span aria-hidden="true">&rarr;</span></span>
-        </a>
-      </nav>
     </div>
+
+    <nav class="example-next" aria-label="Browse examples">
+      <a href={local(`examples/${previous.frontmatter.slug}/`)} rel="prev">
+        <small>Previous example</small>
+        <span><span aria-hidden="true">&larr;</span> {previous.frontmatter.title}</span>
+      </a>
+      <a href={local(`examples/${next.frontmatter.slug}/`)} rel="next">
+        <small>Next example</small>
+        <span>{next.frontmatter.title} <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </nav>
   </article>
   <SiteFooter />
 </BaseLayout>

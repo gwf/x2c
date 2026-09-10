@@ -8,7 +8,7 @@ import SiteFooter from "../components/SiteFooter.astro";
 import FeatureCarousel from "../components/FeatureCarousel.astro";
 import FeatureTable from "../components/FeatureTable.astro";
 import HeroTitle from "../components/HeroTitle.astro";
-import { inSection } from "../lib/examples";
+import { articles, inSection, slides } from "../lib/examples";
 import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
@@ -54,15 +54,14 @@ const [titleHtml, kickerHtml] = await Promise.all([
         <p set:html={kickerHtml} />
         <nav class="hero-examples" aria-label="Featured examples">
           <span>Try an example:</span>
-          <a href={local("examples/torch/")} data-example="torch"
-            data-surface="hero" data-section="packages" data-example-action="explore">
-            Recognize handwritten digits</a>
-          <a href={local("examples/embedded-lisp/")} data-example="embedded-lisp"
-            data-surface="hero" data-section="magic" data-example-action="explore">
-            Embed Lisp in your program</a>
-          <a href={local("examples/game-of-life/")} data-example="game-of-life"
-            data-surface="hero" data-section="packages" data-example-action="explore">
-            Run Game of Life</a>
+          {articles.map(({ frontmatter: example }) => (
+            <a href={local(`examples/${example.slug}/`)}
+              data-example={example.slug} data-surface="hero"
+              data-section={slides.find(slide =>
+                slide.frontmatter.slug === example.slide)!.frontmatter.section}
+              data-example-action="explore">
+              {example.title.replace(/\.$/, "")}</a>
+          ))}
         </nav>
       </header>
       <FeatureTable intro={home.featureIntro} features={home.features} />

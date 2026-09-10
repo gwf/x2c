@@ -12,11 +12,12 @@
 ## Result and scope
 
 Every existing landing gallery example has a stable fragment and copyable link.
-The hero introduces three substantial standalone examples:
+The hero introduces four standalone examples in navigation order:
 
 - Recognize handwritten digits with the Torch package.
-- Embed Lisp as a tic-tac-toe opponent; edit its strategy without recompiling the game.
+- Give your game a Lisp player; edit its tic-tac-toe strategy without recompiling.
 - Run Game of Life, with one continuous code panel and aligned caption sections.
+- Differentiate a function and fit a growth curve.
 
 The compact autodiff example stays in Code is Magic and links to the existing
 standalone growth-fitting page. The agreement example stays in the gallery;
@@ -76,8 +77,9 @@ an actual x2c classifier run, not invented labels or a Python-trained model.
 
 ## Sharing and measurement
 
-The hero has three compact links. Gallery return links use the article's
-associated slide. The existing sitemap build discovers static routes.
+The hero and next-example links share the articles' explicit order.
+Each breadcrumb names its example. Previous and next links use that same circular order; the breadcrumb returns
+to the top of the home page. The existing sitemap build discovers static routes.
 Each detail page has its own 1200 by 630 social image with an editable SVG
 source; global metadata still has the shared image fallback.
 
@@ -101,7 +103,7 @@ account configuration, activation, outreach, or publication is authorized.
   sitemap, plus existing site Node tests. Check root and subpath builds when
   route changes affect both.
 - Inspect desktop and narrow layouts, page captions/code balance, hero links,
-  gallery deep links, copy controls and return navigation in the local browser.
+  gallery deep links, copy controls and previous/next navigation in the local browser.
 - No new mandatory gate. Code publication checks apply only if publication is
   later authorized; this batch stops at the local preview.
 

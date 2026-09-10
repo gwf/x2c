@@ -1,5 +1,6 @@
 ---
 slug: game-of-life
+order: 3
 slide: game-of-life
 title: A little life in your terminal.
 description: Conway's Game of Life, drawn in a terminal with the termbox2 package.

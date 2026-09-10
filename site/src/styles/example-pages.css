@@ -11,6 +11,7 @@
   font: 500 11px/1.5 "JetBrains Mono", monospace;
   letter-spacing: 0.035em;
 }
+.example-eyebrow a { text-decoration: underline; text-underline-offset: 3px; }
 .example-heading h1 {
   max-width: 1000px;
   margin: 0 0 20px;
@@ -126,6 +127,7 @@
   border-top: 1px solid rgba(23, 23, 23, 0.18);
 }
 .example-next a { display: flex; flex-direction: column; gap: 9px; }
+.example-next a[rel="next"] { text-align: right; align-items: end; }
 .example-next small { color: var(--muted-dark); font-size: 11px; }
 .example-next > a > span {
   font: 400 26px/1.1 "Instrument Serif", Georgia, serif;

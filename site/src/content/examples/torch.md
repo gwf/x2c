@@ -1,5 +1,6 @@
 ---
 slug: torch
+order: 1
 slide: torch
 title: Recognize handwritten digits.
 description: Train a convolutional network in x2c with the Torch package, then test it on handwriting it has never seen.

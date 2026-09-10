@@ -1,5 +1,6 @@
 ---
 slug: autodiff
+order: 4
 slide: autodiff
 title: Differentiate a function.
 description: Generate derivatives with a compile-time Lisp decorator, then use them to fit a growth curve.
