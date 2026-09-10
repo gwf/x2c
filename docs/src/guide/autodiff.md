@@ -7,7 +7,7 @@
   function, at compile time, from the typed AST.
 - **`$ad.reverse()`** generates a gradient function the same way, recording
   a tape during the forward sweep. **`$ad.checkpoint(K)`** is the same
-  gradient with bounded tape memory.
+  gradient with the tape shrunk by a factor of about `K`.
 - **`autodiff.x`** records a runtime tape for code whose shape the
   decorators cannot see.
 
@@ -52,10 +52,13 @@ operand converts through the generated converter, so `2.0 * x` and
 `x > 1.0` read as they would on scalars.
 
 Each depth of nesting is a distinct C type. A derivative taken inside a
-function that is itself being differentiated uses the next type in the
-family, which is what keeps an inner perturbation from being confused with
-an outer one: the type system does the bookkeeping that tagged
-perturbations do in a dynamically typed implementation.
+function that is itself being differentiated must use the next type in
+the family; mixing a `Dual` into a `Dual2` expression is a type error.
+That is a weaker guarantee than tagged perturbations give a dynamically
+typed implementation: the types make an inner and an outer perturbation
+distinct only when the author instantiates one type per level, and a
+nested derivative written with a single `Dual` type exhibits the classic
+perturbation confusion silently.
 
 ## Forward mode by transformation
 
@@ -107,8 +110,8 @@ appears in the output.
 `$ad.reverse()` emits `NAME_grad`. The original parameters are followed by
 one `double *p_grad` per `double` parameter; the result is the primal
 value, and each slot receives the partial derivative of that result. The
-unit includes `typed-array.x` because the generated function records a
-tape on an `ArrayDbl`:
+unit must include `typed-array.x` because the generated function records
+a tape on an `ArrayDbl`:
 
 ```x2c
 ~#include "typed-array.x"
@@ -131,7 +134,8 @@ static double model(double x, double y, int n) {
 int main(void) {
   double x_grad, y_grad;
   double value = model_grad(1.0, 2.0, 6, &x_grad, &y_grad);
-  return value < 0.0 && x_grad > 30.0 && y_grad < 0.0 ? 0 : 1;
+  return fabs(value - 9.041076) < 1e-6 && fabs(x_grad - 29.526249) < 1e-6
+      && fabs(y_grad + 1.716338) < 1e-6 ? 0 : 1;
 }
 ```
 
@@ -167,9 +171,9 @@ with every loop run twice instead: the forward sweep runs the loop without
 recording and pushes a snapshot of the variables the loop assigns once
 every `K` iterations; the reverse sweep restores each block from its
 snapshot, replays it with recording, and reverses the replay. Tape memory
-is bounded by one block plus one snapshot per block. `break` and
-`continue` replay exactly as before; a checkpointed loop cannot contain
-`return`.
+is one block's tape plus one snapshot per block, so it still grows with
+the trip count, divided by `K`. `break` and `continue` replay exactly as
+before; a checkpointed loop cannot contain `return`.
 
 ```x2c
 ~#include "typed-array.x"
@@ -190,11 +194,50 @@ int main(void) {
 }
 ```
 
+Measured on one 2,000,000-step relaxation loop (the benchmark
+`unittest/benchmarks/autodiff-checkpoint.x`, one process per variant,
+Apple M-series, `-O2`):
+
+| Variant | Peak memory | Time |
+| --- | --- | --- |
+| primal only | 1.6 MB | 0.033 s |
+| `$ad.reverse()` | 51.5 MB | 0.053 s |
+| `$ad.checkpoint(16)` | 3.6 MB | 0.068 s |
+| `$ad.checkpoint(64)` | 2.1 MB | 0.065 s |
+| `$ad.checkpoint(256)` | 1.8 MB | 0.066 s |
+| `$ad.checkpoint(1024)` | 1.7 MB | 0.065 s |
+
+Full recording stores three doubles per iteration; checkpointing pays about
+a quarter more time for running the loop twice, and its memory is
+dominated by the snapshots at small `K` and by the block tape at large
+`K`.
+
 This is two-level checkpointing with a fixed block size. The
 divide-and-conquer schedule of Siskind and Pearlmutter (2018), which needs
 no block size and achieves logarithmic growth, is not implemented; a
 program whose loops outgrow a fixed block can nest the decorated function
 in a caller that is itself decorated.
+
+## A worked example
+
+`examples/magic/autodiff-fit.x` fits the rate and capacity of a logistic
+growth model to observations. The loss integrates the model with 4,000
+Euler steps and accumulates squared residuals at ten sample times inside
+the loop, so the gradient runs through a long loop with a branch in it.
+The example prints the gradient beside a central finite difference, then
+takes gradient-descent steps:
+
+```text
+loss 4702.386283
+d/drate     -15650.816053  finite difference -15650.816049
+d/dcapacity -118.848124  finite difference -118.848118
+step 50  loss   2.373136  rate 0.9140  capacity 49.1688
+step 100  loss   0.014606  rate 0.9016  capacity 49.9274
+...
+```
+
+The parameters recover the true values 0.9 and 50 to three digits; the
+remaining loss is the Euler discretization error of the model itself.
 
 ## Primitives
 
@@ -211,7 +254,8 @@ whose derivatives are closed forms in the same primitives:
 
 `fabs`, `fmin`, and `fmax` differentiate as the branch that was taken;
 at a tie the derivative follows the first argument. The dual family
-provides the subset its holes name, plus `fabs` and `pow`.
+provides the subset its holes name, plus `fabs` and a `pow` computed as
+`exp(b log a)`, which unlike C `pow` needs a positive base.
 
 ## Runtime tape
 
@@ -247,26 +291,29 @@ decorators reject the code.
 
 ## Background
 
-Forward mode with dual numbers goes back to Wengert (1964). The
-transformation route follows the standard formulation of forward and
-reverse mode over a program's statements (Griewank and Walther, 2008);
-recording overwritten values rather than renaming into single-assignment
-form is the classic tape discipline, and the exit-code treatment of
-control flow makes the replay exact for `break`, `continue`, and early
-`return`. Two-level checkpointing is the simplest member of the family
-that Griewank (1992) made logarithmic and that Siskind and Pearlmutter
-(2018) freed from user annotation.
+Forward-mode accumulation over a program's elementary operations goes
+back to Wengert (1964); Baydin et al. (2018) survey the field and its
+vocabulary. The transformation route follows the standard formulation of
+forward and reverse mode over a program's statements (Griewank and
+Walther, 2008): recording overwritten values rather than renaming into
+single-assignment form is the classic tape discipline, and the exit-code
+treatment of control flow makes the replay exact for `break`, `continue`,
+and early `return`. Two-level checkpointing is the simplest member of the
+family that Griewank (1992) made logarithmic and that Siskind and
+Pearlmutter (2018) freed from user annotation.
 
-The design of nesting by distinct types, rather than by tagging
-perturbations at runtime, follows the analysis of perturbation confusion
-by Siskind and Pearlmutter (2005) and Manzyuk et al. (2019): with a fixed
-nesting depth the type of each level is known, so the confusion cannot
-arise. The runtime tape's backpropagator closures are the object-level
-form of the reverse-mode construction in Pearlmutter and Siskind (2008).
-What that line of work adds beyond this chapter, first-class derivative
-operators applied to arbitrary closures with the overhead removed by
-program analysis, is a compiler feature rather than a macro and is not
-attempted here.
+Perturbation confusion is the failure analyzed by Siskind and Pearlmutter
+(2005) and, for higher-order functions, by Manzyuk et al. (2019). The dual
+family here does not tag perturbations; it offers one distinct type per
+nesting level and relies on the author to use them, as described above.
+The runtime tape records closures that push adjoints to their operands,
+which is a Wengert tape with a closure in place of an opcode; it is in
+the spirit of, but not the same construction as, the backpropagators of
+Pearlmutter and Siskind (2008), which are returned functions composed
+without any tape. What that line of work adds beyond this chapter,
+first-class derivative operators applied to arbitrary closures with the
+overhead removed by program analysis, is a compiler feature rather than a
+macro and is not attempted here.
 
 - R. E. Wengert. A simple automatic derivative evaluation program.
   *Communications of the ACM* 7(8), 1964.

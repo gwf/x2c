@@ -33,7 +33,7 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
 static double walk(double x, double y, int n){
   double s = 0.0;
   for(int i = 0;  i < n;  i ++){
-    if(i == 1) continue;
+    if(i == 2) continue;
     if(s > 40.0) break;
     s += x * x *(double) i + fabs(y) * hypot(x, y);
   }
@@ -72,10 +72,10 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   _ad_trip3 = 0;
   while(i < n){
     _ad_trip3 =(_ad_trip3 + 1);
-    if(i == 1){
-      ArrayDbl_push(_ad_tape, 1.0);
+    if(i == 2){
       ArrayDbl_push(_ad_tape, i);
       i = i + 1;
+      ArrayDbl_push(_ad_tape, 1.0);
       continue;
       ArrayDbl_push(_ad_tape, 1.0);
     }
@@ -274,7 +274,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
 static double replay(double x, double y, int n){
   double s = 0.0;
   for(int i = 0;  i < n;  i ++){
-    if(i == 1) continue;
+    if(i == 2) continue;
     s += x * x *(double) i + fabs(y) * hypot(x, y);
   }
   return s * atan2(y, x);
@@ -308,7 +308,7 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
       _ad_blocks4 =(_ad_blocks4 + 1);
     }
     _ad_total3 =(_ad_total3 + 1);
-    if(i == 1) continue;
+    if(i == 2) continue;
     s += x * x *(double) i + fabs(y) * hypot(x, y);
   }
   ArrayDbl_push(_ad_tape, _ad_total3);
@@ -327,18 +327,15 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
       s = ArrayDbl_take_last(_ad_tape);
       i =(int) ArrayDbl_take_last(_ad_tape);
       _ad_remaining5 =(_ad_total3 -((_ad_blocks4 - 1) * 4));
-      if(_ad_remaining5 > 4){
-        _ad_remaining5 = 4;
-      }
       _ad_replay6 = 0;
       _ad_trip2 = 0;
       while(_ad_replay6 < _ad_remaining5){
         _ad_replay6 =(_ad_replay6 + 1);
         _ad_trip2 =(_ad_trip2 + 1);
-        if(i == 1){
-          ArrayDbl_push(_ad_tape, 1.0);
+        if(i == 2){
           ArrayDbl_push(_ad_tape, i);
           i = i + 1;
+          ArrayDbl_push(_ad_tape, 1.0);
           continue;
           ArrayDbl_push(_ad_tape, 1.0);
         }

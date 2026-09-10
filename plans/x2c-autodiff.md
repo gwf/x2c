@@ -292,6 +292,26 @@ Gary asked for the follow-ups to be finished as well:
 - The sqlite sample in `docs/src/guide/packages.md` is tagged like its
   siblings, so `make doc-examples` is green again.
 
+## Review round (2026-09-09, evening)
+
+An adversarial review (`.context/ad-review/report.md` in brisbane) ran
+every chapter sample, wrote fresh probes, and checked each citation. It
+found two silent-wrong-gradient defects, both fixed with regression
+tests: `continue` in a `for` loop with a step pushed the exit code before
+the step's saved value (every prior test used `if (i == 1) continue`,
+the one index at which the code and the value coincide), and a `double`
+declared in a `for` initializer was treated as a constant. `do` loops now
+go through checkpointing like the others, `const` locals are a reverse
+mode diagnostic, the chapter's reverse-mode sample asserts the values it
+actually produces, and three attributions in the Background section were
+softened: Wengert did not use dual numbers, distinct types only separate
+perturbation levels when the author instantiates them, and the runtime
+tape is a Wengert tape with closures rather than the construction of
+Pearlmutter and Siskind (2008). The chapter now carries a measured table
+(`unittest/benchmarks/autodiff-checkpoint.x`) and a worked example
+(`examples/magic/autodiff-fit.x`) fitting a logistic model through a
+checkpointed Euler integrator.
+
 ## Plan review
 
 - **Established facts and rechecks.** The parser and binder establish

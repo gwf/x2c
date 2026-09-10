@@ -8,7 +8,7 @@ $ad.reverse()
 static double walk(double x, double y, int n) {
   double s = 0.0;
   for (int i = 0; i < n; i++) {
-    if (i == 1) continue;
+    if (i == 2) continue;
     if (s > 40.0) break;
     s += x * x * (double) i + fabs(y) * hypot(x, y);
   }
@@ -26,7 +26,7 @@ $ad.checkpoint(4)
 static double replay(double x, double y, int n) {
   double s = 0.0;
   for (int i = 0; i < n; i++) {
-    if (i == 1) continue;
+    if (i == 2) continue;
     s += x * x * (double) i + fabs(y) * hypot(x, y);
   }
   return s * atan2(y, x);

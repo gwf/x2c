@@ -255,6 +255,36 @@ static void autodiff_dual_mixed_operands_and_pow(void) {
   EXPECT_TRUE(_near(q.value, 3.0) && _near(q.tangent, 1.0));
 }
 
+$ad.both()
+static double _stepped(double x, double y, int n) {
+  double s = 0.0;
+  for (double t = x; t < 5.0; t += 1.0) s += t * y;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < 2; j++) s += sin(x) * (double) j;
+    if (i == 2) continue;
+    s += cos(x * y) * (double) i;
+  }
+  return s;
+}
+
+static int _stepped_n = 6;
+static double _stepped_in_x(double x) => _stepped(x, 1.5, _stepped_n);
+static double _stepped_in_y(double y) => _stepped(0.7, y, _stepped_n);
+
+static void autodiff_continue_with_step_and_for_double(void) {
+  double x_grad, y_grad;
+  for (_stepped_n = 1; _stepped_n <= 6; _stepped_n++) {
+    int n = _stepped_n;
+    _stepped_grad(0.7, 1.5, n, &x_grad, &y_grad);
+    double dx = _central(_stepped_in_x, 0.7);
+    double dy = _central(_stepped_in_y, 1.5);
+    EXPECT_TRUE(fabs(x_grad - dx) < 1e-5);
+    EXPECT_TRUE(fabs(y_grad - dy) < 1e-5);
+    EXPECT_TRUE(fabs(_stepped_dot(0.7, 1.0, 1.5, 0.0, n) - dx) < 1e-5);
+    EXPECT_TRUE(fabs(_stepped_dot(0.7, 0.0, 1.5, 1.0, n) - dy) < 1e-5);
+  }
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
@@ -266,4 +296,5 @@ void autodiff_suite(void) {
   $test.run(autodiff_reverse_replays_break_continue_and_return);
   $test.run(autodiff_checkpoint_agrees_with_full_recording);
   $test.run(autodiff_dual_mixed_operands_and_pow);
+  $test.run(autodiff_continue_with_step_and_for_double);
 }

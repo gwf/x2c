@@ -119,6 +119,7 @@ macro Unit $ad.dual(
     return result;
   }
 
+  /* exp(b log a): defined for a positive base, unlike C `pow`. */
   $D $D.pow($D a, $D b) {
     $S logarithm = $log(a.value);
     $S value = $exp(b.value * logarithm);
@@ -275,14 +276,14 @@ $(def ad._reverse-siblings '())
 
 /* Differentiable names are the `double` parameters and every plain `double`
    declaration in the body. Other `double` identifiers are constants. */
+$(defun ad._double-spec? (type)
+  (or (equal? type '(double)) (equal? type '(const double))))
 $(defun ad._declared-doubles (form)
   (match-case form
-    ((declare (double) (bindings *decls))
-     (ad._concat (map (lambda (d)
-       (match-case d
-         ((op = (bind (binding ? ?n) ()) ?) (list ?n))
-         ((bind (binding ? ?n) ()) (list ?n))
-         (else '()))) *decls)))
+    ((declare ?type (bindings *decls))
+     (if (ad._double-spec? ?type) (ad._declarator-names *decls) '()))
+    ((decl ?type (bindings *decls))
+     (if (ad._double-spec? ?type) (ad._declarator-names *decls) '()))
     (else (if (list? form)
               (ad._concat (map ad._declared-doubles form))
               '()))))
@@ -435,10 +436,11 @@ $(defun ad._fwd-update (s update names)
 $(defun ad._fwd-item (s names)
   (match-case s
     ((at ? ?node) (ad._fwd-item ?node names))
-    ((declare (double) (bindings *decls))
-     (cons (ad._unbind s)
-           (ad._concat (map (lambda (d) (ad._fwd-decl d names)) *decls))))
-    ((declare ? ?) (list (ad._unbind (ad._pure s))))
+    ((declare ?type (bindings *decls))
+     (if (ad._double-spec? ?type)
+         (cons (ad._unbind s)
+               (ad._concat (map (lambda (d) (ad._fwd-decl d names)) *decls)))
+         (list (ad._unbind (ad._pure s)))))
     ((stmnt ?e) (ad._fwd-update s (ad._update ?e) names))
     ((if ?c ?then)
      (list `(if ,(ad._unbind (ad._pure ?c)) ,(ad._fwd-body ?then names))))
@@ -449,9 +451,7 @@ $(defun ad._fwd-item (s names)
      (list `(while ,(ad._unbind (ad._pure ?c)) ,(ad._fwd-body ?body names))))
     ((do ?body ?c)
      (list `(do ,(ad._fwd-body ?body names) ,(ad._unbind (ad._pure ?c)))))
-    ((for ?init ?c ?step ?body)
-     (list `(for ,(ad._unbind ?init) ,(ad._unbind (ad._pure ?c))
-              ,(ad._unbind ?step) ,(ad._fwd-body ?body names))))
+    ((for ?init ?c ?step ?body) (ad._fwd-for ?init ?c ?step ?body names))
     ((block *items) (list `(block ,@(ad._fwd-items *items names))))
     ((return (double) ?e)
      (list `(return (double) ,(ad._tangent (ad._pure ?e) names))))
@@ -460,6 +460,21 @@ $(defun ad._fwd-item (s names)
     ((break) (list s))
     ((continue) (list s))
     (else (ad._fail "unsupported statement" s))))
+
+/* A `for` that declares a double needs its tangent declared beside it, so
+   the loop becomes a block: the declarations, then a `for` without them. */
+$(defun ad._fwd-for (init c step body names)
+  (match-case init
+    ((decl ?type (bindings *decls))
+     (if (ad._double-spec? ?type)
+         (list `(block
+                  ,@(ad._fwd-item `(declare ,?type (bindings ,@*decls)) names)
+                  (for () ,(ad._unbind (ad._pure c)) ,(ad._unbind step)
+                    ,(ad._fwd-body body names))))
+         (list `(for ,(ad._unbind init) ,(ad._unbind (ad._pure c))
+                  ,(ad._unbind step) ,(ad._fwd-body body names)))))
+    (else (list `(for ,(ad._unbind init) ,(ad._unbind (ad._pure c))
+                   ,(ad._unbind step) ,(ad._fwd-body body names))))))
 
 $(defun ad._forward-function (spec name params body)
   (let ((names (append (ad._param-doubles params)
@@ -646,11 +661,15 @@ $(defun ad._rev-assign (name rhs names)
       '())))
 
 $(defun ad._rev-decl (type d names)
-  (match-case d
-    ((op = (bind (binding ? ?n) ()) ?init)
-     (begin (ad._local type ?n) (ad._rev-assign ?n ?init names)))
-    ((bind (binding ? ?n) ()) (begin (ad._local type ?n) (ad._none)))
-    (else (ad._fail "unsupported declarator" d))))
+  (begin
+    (if (and (list? type) (member 'const type))
+        (ad._fail "const locals are not supported in reverse mode" d)
+        nil)
+    (match-case d
+      ((op = (bind (binding ? ?n) ()) ?init)
+       (begin (ad._local type ?n) (ad._rev-assign ?n ?init names)))
+      ((bind (binding ? ?n) ()) (begin (ad._local type ?n) (ad._none)))
+      (else (ad._fail "unsupported declarator" d)))))
 
 $(defun ad._rev-optional (s names)
   (if s (ad._rev-item s names) (ad._none)))
@@ -742,7 +761,7 @@ $(defun ad._rev-do (body c names)
   (let ((first (ad._fresh "_ad_first" '(int))))
     (ad._sequence (list
       (ad._triple (list (ad._assign first (ad._int "1"))) '() '())
-      (ad._rev-loop nil `(expr (int) (op || (expr (int) (ident (,first))) ,c))
+      (ad._loop nil `(expr (int) (op || (expr (int) (ident (,first))) ,c))
                     nil `(block ,(ad._assign first (ad._int "0")) ,body)
                     names)))))
 
@@ -815,8 +834,6 @@ $(defun ad._rev-loop-checkpointed (init c step body names block)
                       (ad._raw '- (ad._id total)
                         (ad._raw '* (ad._raw '- (ad._id blocks) (ad._int "1"))
                                  size)))
-                   (if (expr () (op > ,(ad._id remaining) ,size))
-                     (block ,(ad._assign remaining size)))
                    ,(ad._assign replay (ad._int "0"))
                    ,(ad._assign n (ad._int "0"))
                    (while (expr () (op < ,(ad._id replay) ,(ad._id remaining)))
@@ -858,8 +875,8 @@ $(defun ad._rev-item (s names)
                    (list (ad._exit code 'break '())))))
     ((continue)
      (let ((code (ad._code)))
-       (ad._triple (append (list (ad._push (ad._lit code)))
-                           ad._loop-step (list s))
+       (ad._triple (append ad._loop-step
+                           (list (ad._push (ad._lit code)) s))
                    '() (list (ad._exit code 'continue '())))))
     ((return (double) ?e)
      (let ((code (ad._code)))
@@ -929,6 +946,7 @@ $(defun ad._reverse-function (spec name params items)
 $(defun ad._literal-text (form)
   (match-case form
     ((expr ? (literal ? ?text)) ?text)
+    ((expr (macro-expr) ?inner) (ad._literal-text ?inner))
     (else (ad._fail "expected an integer literal" form))))
 
 $(defun ad._reverse-with (fn checkpoint)
@@ -964,7 +982,7 @@ macro Decorator $ad.forward(Unit $fn) => {
 /** Emits `NAME_grad` beside a `double` function: the original parameters
     are followed by one `double *p_grad` per `double` parameter, the result
     is the primal value, and each gradient slot receives d result / d p. The
-    unit includes `typed-array.x` for the tape. Every local is hoisted, so
+    unit must include `typed-array.x` for the tape. Every local is hoisted, so
     names must be unique within the function. Loops, `break`, `continue`,
     and `return` anywhere in the body replay from recorded exit codes.
 */
