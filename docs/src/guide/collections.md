@@ -189,6 +189,12 @@ the private `<lsym>` representation otherwise. Do not write `<ready>` inside
 a `List`. `ready` produces the same compact value, and a long bare name keeps
 its full spelling.
 
+A C preprocessor macro name is a bare name too. The preprocessor never sees
+the inside of a literal, so after `#define ROWS 64` the List `%(ROWS 4)` is
+`(ROWS 4)`, and reading its first element as a number yields the `Symbol`'s
+numeric value rather than 64. Write `%($ROWS 4)` to insert the macro's
+value.
+
 Angle brackets quote text that `List` syntax would read as another kind of
 value. `1` is an integer, `<1>` is the `Symbol` `1`, and `<"a b">` quotes a
 `Symbol` containing a space. The escaped bare `Atom` spellings `\x31` and

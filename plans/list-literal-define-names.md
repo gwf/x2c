@@ -41,7 +41,8 @@ int main(void) {
 
 2. Spelling. The author meant the macro's value and wrote the macro's name
    where the literal grammar produces a Symbol. The intended spelling is
-   `%($ROWS 4)`, which unquotes the expression the preprocessor expands.
+   `%($ROWS 4)`, which unquotes the expression the preprocessor expands;
+   the collections chapter now says so under "Atom spellings inside Lists".
    This is the compiler-side question: should a bare atom inside `%()`,
    `%[]`, or `%{}` that names a visible object-like `#define` receive a
    diagnostic?
