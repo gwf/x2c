@@ -597,6 +597,11 @@ Use:
 Count the macro's definition as well as its calls: a useful macro reduces the
 total, preserves useful diagnostics, and makes each binding clear.
 
+For a complete generator built from these pieces, see [Automatic
+Differentiation](autodiff.md): a `Type`-hole family for dual numbers, and
+`Unit` decorators whose compile-time Lisp rewrites a function's typed AST
+into its derivative.
+
 For the complete hole grammar, result validation, hygiene rules, limits, and
 compiler Lisp SDK, see [Compile-time macros in the language
 reference](../reference/language.md#compile-time-macros).
