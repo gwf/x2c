@@ -837,11 +837,6 @@ List Compiler.leading_preproc(Compiler compiler) {
   return noncode;
 }
 
-/** Applies public and private pragma directives to source visibility state.
-
-    A negative visibility state disables pragma tracking for this token
-    stream.
-*/
 /* Records the name of an object-like `#define` so a bare atom spelled the
    same way inside a literal can be flagged. A function-like macro cannot be
    mistaken for data, so `#define F(x)` is skipped. */
@@ -864,6 +859,12 @@ static void _note_object_macro(Compiler c, String content) {
   c.object_macros[name] = 1;
 }
 
+/** Applies public and private pragma directives to source visibility state
+    and records each object-like `#define` name for the literal warning.
+
+    A negative visibility state disables pragma tracking for this token
+    stream; macro names are recorded regardless.
+*/
 void Compiler.update_source_visibility(Compiler c, List directives) {
   foreach (List directive, directives) {
     String content = directive.cadr();

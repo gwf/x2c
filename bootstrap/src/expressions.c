@@ -3038,8 +3038,8 @@ static List Compiler__binary_expression(Compiler c, Symbol operator, List lhs, L
     Compiler_report_error(c, 1362954, _1264, origin, cons(String_var(String_join(NULL, cons(String_var(_474), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))), NULL));
   }
   {
-    Symbol member = Compiler_operator_member(c, operator);  int lhs_known = lhs_type != NULL;  int rhs_known = rhs_type != NULL;  if(member && lhs_known != rhs_known){
-      Type participant = lhs_known ? lhs_type : rhs_type;  List other = lhs_known ? rhs : lhs;  if(List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member))) && List_truth(List_match(other, List_var(_478)))) Compiler_report_error(c, 1362954, _1265, origin, _481);
+    Symbol member = Compiler_operator_member(c, operator);  int lhs_known = lhs_type != NULL;  int rhs_known = rhs_type != NULL;  int arithmetic = member && operator != 15739 && operator != 8571;  if(arithmetic && lhs_known != rhs_known){
+      Type participant = lhs_known ? lhs_type : rhs_type;  List other = lhs_known ? rhs : lhs;  if(_converts_operands(c, participant) && List_truth(Compiler_resolve_protocol_member(c, participant, Symbol_str(member))) && List_truth(List_match(other, List_var(_478)))) Compiler_report_error(c, 1362954, _1265, origin, _481);
     }
 
   }

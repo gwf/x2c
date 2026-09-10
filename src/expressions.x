@@ -1452,10 +1452,12 @@ static List Compiler._binary_expression(
     Symbol member = c.operator_member(operator);
     int lhs_known = lhs_type != NULL;
     int rhs_known = rhs_type != NULL;
-    if (member && lhs_known != rhs_known) {
+    int arithmetic = member && operator != <==> && operator != <!=>;
+    if (arithmetic && lhs_known != rhs_known) {
       Type participant = lhs_known ? lhs_type : rhs_type;
       List other = lhs_known ? rhs : lhs;
-      if (c.resolve_protocol_member(participant, member.str()) &&
+      if (_converts_operands(c, participant) &&
+          c.resolve_protocol_member(participant, member.str()) &&
           other.match(%(expr ? (ident ?))))
         c.report_error(
           <type>, "operand has no x2c type beside a protocol participant",
