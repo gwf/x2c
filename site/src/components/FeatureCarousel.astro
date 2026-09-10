@@ -53,8 +53,8 @@ const count = String(slides.length).padStart(2, "0");
             data-example={slug} data-section={name} data-surface="home">
             <ExamplePanel slide={slide} codeLabel={codeLabel} />
             <div class="example-actions">
-              <a href={anchor}>Permalink</a>
-              <CopyButton text={`${absoluteSiteUrl("/")}${anchor}`} />
+              <CopyButton text={`${absoluteSiteUrl("/")}${anchor}`}
+                label="Copy permalink" />
               {article && (
                 <a href={sitePath(`/examples/${article.frontmatter.slug}/`)}
                   data-example-action="explore">Explore this example</a>
