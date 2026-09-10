@@ -568,10 +568,12 @@ html:has(.landing-header) {
   text-align: center;
 }
 
-.section-shell {
+.section-shell,
+.docs-shell,
+.deal-grid {
   width: min(100%, 1180px);
   margin-inline: auto;
-  padding: clamp(56px, 7vw, 96px) clamp(20px, 3.2vw, 44px);
+  padding: clamp(64px, 7.5vw, 96px) clamp(20px, 3.2vw, 44px);
 }
 
 .section-feature-grid {
@@ -604,11 +606,6 @@ html:has(.landing-header) {
 .landing-action .section-heading>h2 {
   font-size: clamp(40px, 6.1vw, 64px);
   line-height: 1;
-}
-
-.landing-action>.section-shell,
-.landing-action>.deal-grid {
-  padding-block: clamp(64px, 7.5vw, 96px);
 }
 
 .landing-action .section-overview {
@@ -1093,12 +1090,6 @@ html:has(.landing-header) {
   color: var(--muted-light);
 }
 
-.docs-shell {
-  width: min(100%, 1180px);
-  margin-inline: auto;
-  padding: clamp(48px, 6vw, 80px) clamp(20px, 3.2vw, 44px);
-}
-
 .docs-grid {
   display: grid;
   grid-template-columns:
@@ -1183,9 +1174,6 @@ a.docs-card:hover {
 
 .deal-grid {
   display: grid;
-  width: min(100%, 1180px);
-  margin-inline: auto;
-  padding: clamp(52px, 6.5vw, 88px) clamp(20px, 3.2vw, 44px);
   grid-template-columns:
     minmax(min(100%, 420px), 1fr) minmax(min(100%, 320px), 0.85fr);
   align-items: start;
