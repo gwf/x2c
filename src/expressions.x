@@ -752,12 +752,20 @@ static int _expr_is_raw_string_literal(List expr) {
   return 0;
 }
 
-/* A binary operator whose one operand is a struct or union participant
-   converts the other operand to that type through its declared converter,
-   so `x * 2.0` and `2.0 - x` resolve like `x * two`. Pointer and numeric
-   participants keep native C behavior, since `text + 1` must stay pointer
-   arithmetic. The converted operand replaces the original through `lhs`
-   and `rhs`. */
+/* A participant that converts its operator's other operand: a struct or
+   union, or a handle typedef pointing at one. Scalar pointers keep native C
+   behavior, since `text + 1` must stay pointer arithmetic. */
+static int _converts_operands(Compiler compiler, Type type) {
+  Type resolved = compiler.sym.resolve_key(type);
+  if (resolved && resolved.is_pointer())
+    resolved = compiler.sym.resolve_key(resolved.dereference());
+  return resolved && resolved.is_aggregate();
+}
+
+/* A binary operator whose one operand is a converting participant converts
+   the other operand to that type through its declared converter, so
+   `x * 2.0` and `2.0 - x` resolve like `x * two`. The converted operand
+   replaces the original through `lhs` and `rhs`. */
 static List _resolve_protocol_operator(
   Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
   if (derived) *derived = 0;
@@ -790,9 +798,9 @@ static List _resolve_protocol_operator(
           compiler.sym.is_var_type(rhs_type))
         return NULL;
       int lhs_member = !!compiler.resolve_protocol_member(participant, member)
-        && compiler.sym.resolve_key(participant).is_aggregate();
+        && _converts_operands(compiler, participant);
       int rhs_member = !!compiler.resolve_protocol_member(rhs_type, member)
-        && compiler.sym.resolve_key(rhs_type).is_aggregate();
+        && _converts_operands(compiler, rhs_type);
       List converted = NULL;
       if (lhs_member && !rhs_member)
         converted = _converter_call(compiler, *rhs, rhs_type, participant);

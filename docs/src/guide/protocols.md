@@ -311,11 +311,12 @@ eligible because it is an inherited member reached through a total view. An
 empty `Var` descriptor slot is not a resolved static member. If no eligible
 member exists, valid native C behavior still applies; otherwise the compiler
 reports the ordinary operator error. When exactly one operand of a binary
-operator is a struct or union participant with the member, the other
-operand converts to that type through its declared converter, so
-`meters + 2.0` and `10.0 - meters` resolve when `double.meters` exists.
-Pointer and numeric participants keep native C behavior for a mixed
-operand, so `text + 1` remains pointer arithmetic. The runtime uses the
+operator is a struct or union participant with the member, or a handle
+typedef pointing at one, the other operand converts to that type through
+its declared converter, so `meters + 2.0` and `10.0 - meters` resolve when
+`double.meters` exists. Scalar pointers and numeric participants keep
+native C behavior for a mixed operand, so `text + 1` remains pointer
+arithmetic. The runtime uses the
 same rows itself:
 `String.add` implements `add` for `protocol Var(String)`, so `String` `+` and
 `+=` are ordinary resolved punctuation, not compiler special cases.

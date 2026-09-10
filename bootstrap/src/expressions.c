@@ -477,6 +477,8 @@ static inline int _expr_is_string_like(List expr);
 
 static int _expr_is_raw_string_literal(List expr);
 
+static int _converts_operands(Compiler compiler, Type type);
+
 static List _resolve_protocol_operator(Compiler compiler, Symbol op, List * lhs, List * rhs, Symbol * derived);
 
 static List Compiler__protocol_operator_expression(Compiler compiler, Symbol op, List lhs, List rhs);
@@ -2641,6 +2643,10 @@ default: break;
 return 0;
 }
 
+static int _converts_operands(Compiler compiler, Type type){
+  Type resolved = Sym_resolve_key(compiler -> sym, type);  if(List_truth(Type_list(resolved)) && Type_is_pointer(resolved)) resolved = Sym_resolve_key(compiler -> sym, Type_dereference(resolved));  return List_truth(Type_list(resolved)) && Type_is_aggregate(resolved);
+}
+
 static List _resolve_protocol_operator(Compiler compiler, Symbol op, List * lhs, List * rhs, Symbol * derived){
   if(derived) * derived = 0;  List _x2c_destructure_5 = * lhs;  Var lhs_tag = List_getindex(_x2c_destructure_5, 0);  Type lhs_type = Var_type(List_getindex(_x2c_destructure_5, 1)); (void) lhs_tag;  Type participant = lhs_type, rhs_type = NULL;  Var rhs_tag;  if(List_truth(* rhs)){
     {
@@ -2656,7 +2662,7 @@ static List _resolve_protocol_operator(Compiler compiler, Symbol op, List * lhs,
   }
   else{
     if(! List_truth(Type_list(participant))) return NULL;  member = Compiler_operator_member(compiler, op);  Symbol source = Compiler_derived_member(compiler, op);  if(! member) member = source;  if(derived) * derived = source;  if(! member) return NULL;  if(participant != rhs_type){
-      if(Sym_is_var_type(compiler -> sym, participant) || Sym_is_var_type(compiler -> sym, rhs_type)) return NULL;  int lhs_member = ! ! List_truth(Compiler_resolve_protocol_member(compiler, participant, Symbol_str(member))) && Type_is_aggregate(Sym_resolve_key(compiler -> sym, participant));  int rhs_member = ! ! List_truth(Compiler_resolve_protocol_member(compiler, rhs_type, Symbol_str(member))) && Type_is_aggregate(Sym_resolve_key(compiler -> sym, rhs_type));  List converted = NULL;  if(lhs_member && ! rhs_member) converted = _converter_call(compiler, * rhs, rhs_type, participant);  if(List_truth(converted)) * rhs = converted;  else if(rhs_member && ! lhs_member){
+      if(Sym_is_var_type(compiler -> sym, participant) || Sym_is_var_type(compiler -> sym, rhs_type)) return NULL;  int lhs_member = ! ! List_truth(Compiler_resolve_protocol_member(compiler, participant, Symbol_str(member))) && _converts_operands(compiler, participant);  int rhs_member = ! ! List_truth(Compiler_resolve_protocol_member(compiler, rhs_type, Symbol_str(member))) && _converts_operands(compiler, rhs_type);  List converted = NULL;  if(lhs_member && ! rhs_member) converted = _converter_call(compiler, * rhs, rhs_type, participant);  if(List_truth(converted)) * rhs = converted;  else if(rhs_member && ! lhs_member){
         converted = _converter_call(compiler, * lhs, lhs_type, rhs_type);  if(! List_truth(converted)) return NULL;  participant = rhs_type;  * lhs = converted;
       }
       else return NULL;
