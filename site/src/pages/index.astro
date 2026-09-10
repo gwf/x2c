@@ -145,14 +145,14 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="install" class="landing-section">
+  <section id="install" class="landing-section landing-action">
     <div class="deal-grid">
       <div class="deal-copy">
         <header class="section-heading">
-          <h2>Install</h2>
+          <h2>Install x2c</h2>
         </header>
         <p>
-          <strong>Run your first x2c program.</strong>
+          <strong>Run your first x2c program.</strong>{" "}
           Clone the repository, build the compiler from its checked-in C,
           and run one of the included examples. The compiler handles
           translation, native compilation, and execution.
@@ -161,11 +161,11 @@ const [titleHtml, kickerHtml] = await Promise.all([
           See the <a href={local("docs/internals/building.html")}>build
           instructions</a> for the self-hosting process.
         </p>
-        <p>
-          The <a href={local("docs/reference/cli.html#bootstrap-a-native-installation")}
-            >Cosmopolitan executable</a> is an experiment for fun only. It
-          bootstraps a minimal compiler and runtime, with no examples, book,
-          or optional packages. It is no substitute for the full repository.
+        <p class="install-note">
+          Just experimenting? The <a
+            href={local("docs/reference/cli.html#bootstrap-a-native-installation")}
+            >Cosmopolitan executable</a> bootstraps a minimal compiler and
+          runtime for fun, without examples, the book, or packages.
         </p>
       </div>
       <figure class="install-window">
@@ -175,12 +175,9 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="packages" class="landing-section">
+  <section id="packages" class="landing-section landing-action">
     <div class="section-shell">
       <div class="package-intro">
-        <div class="install-window package-build">
-          <div class="install-code" set:html={await packageBuildCode()} />
-        </div>
         <div>
           <header class="section-heading">
             <h2>{packages.title}</h2>
@@ -191,13 +188,18 @@ const [titleHtml, kickerHtml] = await Promise.all([
               <a href="https://github.com/gwf/x2c/blob/main/packages/README.md">
                 Browse packages</a> or learn how to{" "}
               <a href={local("docs/guide/packages.html#using-one")}>import one</a>.
-              Every example links to its complete source and setup instructions.
-            </p>
-            <p class="package-note">
-              Packages need separate dependency preparation. Builds are currently
-              tested on macOS.
             </p>
           </div>
+        </div>
+        <div class="package-setup">
+          <figure class="install-window package-build">
+            <figcaption>Build and run the chart example</figcaption>
+            <div class="install-code" set:html={await packageBuildCode()} />
+          </figure>
+          <p class="package-note">
+            Packages need separate dependency preparation. Builds are currently
+            tested on macOS.
+          </p>
         </div>
       </div>
       <FeatureCarousel
@@ -217,7 +219,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           <small>keep exploring</small>
           <h2>Go further.</h2>
           <p>
-            <a href={local("about/")}>About x2c</a> tells its story.
+            <a href={local("about/")}>About x2c</a> tells its story.{" "}
             <a href={local("docs/")}>Read the docs</a> to learn the language
             and look up its library. <a href="https://github.com/gwf/x2c"
               >Browse the source</a> to see how it works or make it your own.

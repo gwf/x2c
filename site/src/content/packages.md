@@ -1,18 +1,12 @@
 ---
-title: Packages
+title: Put libraries to work
 ---
 
-Packages give libraries their own namespaces. Each package keeps its
-x2c interface separate, so third-party libraries can be used together
-without their names colliding. Build a package once, then import it by
-name, with an alias if you like.
+Packages give libraries their own namespaces, so you can use them together
+without name collisions. Build once, then import by name. Shims and adapters
+add idiomatic x2c types and methods while keeping the native API available;
+Lisp bindings and decorators can extend the language itself.
 
-Where needed, shims and adapters turn a C API into idiomatic x2c types,
-methods, and operations. The native API remains available. Packages can
-also provide Lisp bindings and decorators that extend how you use a
-library or express an idea.
-
-The examples below show one program from each package: draw a chart, build
-a terminal application, query data, parse text, fetch pages, run processes,
-calculate rankings, train a model, or verify a function's contract. Each
-pairs code with its result and links to the complete source.
+Draw a chart, build a terminal app, query data, or train a model. Explore
+one working example from each package below, with code, its result, and
+the complete source and setup instructions.

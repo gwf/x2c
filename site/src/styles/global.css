@@ -559,6 +559,20 @@ html:has(.landing-hero) {
   text-box: trim-start cap;
 }
 
+.landing-action .section-heading>h2 {
+  font-size: clamp(40px, 6.1vw, 64px);
+  line-height: 1;
+}
+
+.landing-action>.section-shell,
+.landing-action>.deal-grid {
+  padding-block: clamp(64px, 7.5vw, 96px);
+}
+
+.landing-action .section-overview {
+  margin-top: clamp(24px, 2.5vw, 32px);
+}
+
 .landing-section:nth-of-type(odd) .section-heading>h2 {
   color: var(--paper);
 }
@@ -749,15 +763,15 @@ html:has(.landing-hero) {
 
 .package-intro {
   --section-paragraph-gap: 1.1rem;
-  --package-gap: clamp(28px, 5vw, 64px);
-  display: flow-root;
-  margin-bottom: clamp(36px, 5vw, 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(24px, 4vw, 48px);
+  margin-bottom: clamp(40px, 4vw, 56px);
 }
 
 .package-intro .package-build {
-  float: right;
-  width: calc((100% - var(--package-gap)) / 2);
-  margin: 0 0 20px var(--package-gap);
+  margin: 0;
 }
 
 .package-intro .section-exit {
@@ -771,15 +785,7 @@ html:has(.landing-hero) {
 
 @media (max-width: 639px) {
   .package-intro {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .package-intro .package-build {
-    float: none;
-    order: 1;
-    width: 100%;
-    margin: 20px 0 0;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -848,7 +854,7 @@ html:has(.landing-hero) {
   margin: 18px 0;
   padding: 16px;
   overflow-x: auto;
-  background: #e9e6df !important;
+  background: #cbc7bf !important;
   color: var(--dark) !important;
   font: 12px/1.65 "JetBrains Mono", monospace;
 }
@@ -858,7 +864,7 @@ html:has(.landing-hero) {
 }
 
 #packages .feature-copy {
-  background: var(--paper);
+  background: #dedbd5;
   color: var(--dark);
 }
 
@@ -905,7 +911,10 @@ html:has(.landing-hero) {
 }
 
 #packages .package-note {
+  margin: 12px 0 0;
+  color: var(--muted-light);
   font-size: 13px;
+  line-height: 1.5;
 }
 
 /* Code samples are Markdown fences highlighted by Shiki with the x2c grammar
@@ -1034,7 +1043,7 @@ html:has(.landing-hero) {
   color: var(--paper);
 }
 
-.landing-section:nth-of-type(odd) .docs-card:hover {
+.landing-section:nth-of-type(odd) a.docs-card:hover {
   background: var(--code);
 }
 
@@ -1101,7 +1110,11 @@ html:has(.landing-hero) {
   color: var(--dark);
 }
 
-.docs-card:hover {
+a.docs-card:hover {
+  background: #fff;
+}
+
+.number-stats .stat-card {
   background: #fff;
 }
 
@@ -1138,7 +1151,7 @@ html:has(.landing-hero) {
 }
 
 .deal-copy>.section-heading {
-  margin-bottom: clamp(34px, 4vw, 48px);
+  margin-bottom: clamp(24px, 2.5vw, 32px);
 }
 
 .deal-copy>p {
@@ -1151,6 +1164,10 @@ html:has(.landing-hero) {
 
 .deal-copy>p:last-of-type {
   margin-bottom: 0;
+}
+
+.deal-copy>p.install-note {
+  font-size: 14px;
 }
 
 .landing-section:nth-of-type(even) .deal-copy>p {
