@@ -27,7 +27,7 @@ const { panels, codeLabel } = Astro.props;
     const notes = Array.from(walkthrough.querySelectorAll<HTMLElement>(
       "[data-annotation-section], [data-code-line]",
     ));
-    const wide = matchMedia("(min-width: 1101px)");
+    const wide = matchMedia("(min-width: 721px)");
     let pending = false;
     const align = () => {
       pending = false;

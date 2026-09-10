@@ -51,10 +51,10 @@ const previous = articles[(current + articles.length - 1) % articles.length];
   <article class="example-page" data-example={page.slug}
     data-section={section} data-surface="detail">
     <header class="example-heading">
-      <p class="example-eyebrow">
-        <a href={local("#top")}>x2c / examples</a>{" / "}
-        {page.title.replace(/\.$/, "").toLowerCase()}
-      </p>
+      <nav class="example-eyebrow example-breadcrumb" aria-label="Breadcrumb">
+        <a href={local("#top")}>x2c</a>{" / examples / "}
+        <span aria-current="page">{page.navTitle}</span>
+      </nav>
       <h1>{page.title}</h1>
       <p class="example-premise">{page.description}</p>
       <nav class="example-actions" aria-label="Example actions">

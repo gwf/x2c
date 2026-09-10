@@ -2,8 +2,8 @@
 title: You are X. Lisp is O.
 image: examples/tic-tac-toe.svg
 imageAlt: A tic-tac-toe position with X in squares 1 and 2, O in the center and square 3. O has blocked X's top row.
-imageWidth: 640
-imageHeight: 390
+imageWidth: 330
+imageHeight: 360
 ---
 
 <!-- ignore: native bindings, interpreter setup, and move-call excerpts. -->

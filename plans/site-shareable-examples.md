@@ -44,7 +44,8 @@ separately. Keep everything local until Gary approves publication.
    column. Its annotations share one continuous column opposite the code.
    Authored line references align notes to actual highlighted lines; normal
    document flow prevents overlap when an explanation needs more room. The
-   columns stack at narrower widths, with no positioning dependency.
+   columns remain paired above 720px, with fluid padding and type sizing.
+   Images retain compact display limits when the columns stack.
 4. The detail route shares header, footer, syntax highlighting, copy controls,
    canonical metadata, and `CoreSetup.astro`. Each page provides its own run
    introduction, command recipe, code label, source and guide links. There is
@@ -78,7 +79,7 @@ an actual x2c classifier run, not invented labels or a Python-trained model.
 ## Sharing and measurement
 
 The hero and next-example links share the articles' explicit order.
-Each breadcrumb names its example. Previous and next links use that same circular order; the breadcrumb returns
+Each neutral breadcrumb names its example; only the x2c label links home. Previous and next links use that same circular order; the breadcrumb returns
 to the top of the home page. The existing sitemap build discovers static routes.
 Each detail page has its own 1200 by 630 social image with an editable SVG
 source; global metadata still has the shared image fallback.
