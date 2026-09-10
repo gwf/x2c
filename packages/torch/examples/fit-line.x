@@ -16,19 +16,22 @@ int main(void) {
   for (int step = 0; step < 200; step++) {
     Scope.retain();
     {
+      /* Releasing this scope frees the step's tensors and restores the
+         grad mode that Torch.no_grad turned off, even if a raise crosses
+         the release. */
       defer Scope.release();
       Tensor error = Tensor.mse_loss(x @ w + b, y);
       error.backward();
-      loss = error.item();
+      loss = error.item().double();
       Torch.no_grad();
       w.add_(w.grad(), -0.02);
       b.add_(b.grad(), -0.02);
-      Torch.enable_grad();
       w.zero_grad();
       b.zero_grad();
     }
     if (step % 50 == 0) printf("step %3d  loss %.6f\n", step, loss);
   }
-  printf("w %.3f  b %.3f  loss %.2e\n", w.item(), b.item(), loss);
+  printf("w %.3f  b %.3f  loss %.2e\n", w.item().double(),
+         b.item().double(), loss);
   return 0;
 }
