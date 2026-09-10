@@ -636,7 +636,7 @@ static inline int _precedence(Symbol op) {
     case <"<<">: case <">>">:  return 8;   // shift
     case <+>:    case <->:     return 9;   // additive
     case <*>:    case </>:
-    case <%>:                  return 10;  // multiplicative
+    case <%>:    case <@>:     return 10;  // multiplicative
     default:                   return 0;   // not a binary operator
   }
 }
@@ -1352,6 +1352,14 @@ static List Compiler._binary_expression(
     c.report_error(
       <type>, "operator 'in' requires an implemented contains member",
       origin, %("receiver type: ${rhs_type.repr()}"));
+  }
+  /* `@` has no C meaning, so a static operand pair with no matmul member
+     is rejected here rather than emitted as invalid C. */
+  if (operator == <@> && !c.sym.is_var_type(lhs_type) &&
+      !c.sym.is_var_type(rhs_type)) {
+    c.report_error(
+      <type>, "operator '@' requires an implemented matmul member",
+      origin, %("left type: ${lhs_type.repr()} right type: ${rhs_type.repr()}"));
   }
   Type type = c._binary_op_type(operator, lhs, rhs);
   List operation = %(op $operator $lhs $rhs);

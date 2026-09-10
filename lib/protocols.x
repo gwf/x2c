@@ -60,6 +60,7 @@ protocol Var(T) {
   T T.mul(T, T);
   T T.div(T, T);
   T T.mod(T, T);
+  T T.matmul(T, T);
   T T.neg(T);
   Value T.getindex(T, Key);
   Value T.setindex(T, Key, Value);

@@ -41,6 +41,9 @@ static const Symbol compound_operators[][2] ={
   , {
     2047611, 15997
   }
+  , {
+    16507, 129
+  }
 
 }
 ;

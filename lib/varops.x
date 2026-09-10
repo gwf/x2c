@@ -346,6 +346,7 @@ static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value) {
     case <%>: case <&>: case <|>: case <^>:
       if (lhs.floating || rhs.floating) raise %(bad-types (op $op));
       return _integer_binary(op, lhs, rhs);
+    case <@>: raise %(bad-op (op $op));
     case <+>: case <->: case <*>: case </>: break;
   }
   if (lhs.floating || rhs.floating)
@@ -440,7 +441,7 @@ static inline int _same_tag_update(Var lhs, Var rhs) {
 
 static int _update_operator(Symbol op) {
   switch (op) {
-    case <+>: case <->: case <*>: case </>: case <%>:
+    case <+>: case <->: case <*>: case </>: case <%>: case <@>:
     case <&>: case <|>: case <^>: case <"<<">: case <">>">: return 1;
   }
   return 0;
@@ -546,6 +547,13 @@ Var Var.sub(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <sub>, <->, rhs);
 */
 Var Var.mul(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mul>, <*>, rhs);
 
+/** Multiplies matrices through a registered `matmul` behavior.
+    `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
+    protocol result keeps the ownership chosen by its callback.
+*/
+Var Var.matmul(Var lhs, Var rhs) =>
+  _protocol_arithmetic(lhs, <matmul>, <@>, rhs);
+
 /** Divides dynamic values through numeric or registered `div` behavior.
     Numeric integer zero divisors raise; floating division uses host infinity
     and NaN behavior. Other promotion, failure, and ownership follow
@@ -604,6 +612,7 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
     case <*>: return lhs.mul(rhs);
     case </>: return lhs.div(rhs);
     case <%>: return lhs.mod(rhs);
+    case <@>: return lhs.matmul(rhs);
   }
   int fast_handled;
   Var result = _fast_numeric(op, lhs, rhs, &fast_handled);

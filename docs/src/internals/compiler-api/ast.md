@@ -33,7 +33,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:91`
+Source: `src/ast.x:92`
 
 #### ast_contains_head
 
@@ -42,7 +42,7 @@ Source: `src/ast.x:91`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:96`
+Source: `src/ast.x:97`
 
 #### binding_identity_new
 
@@ -80,7 +80,7 @@ Source: `src/ast.x:46`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:189`
+Source: `src/ast.x:190`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -90,7 +90,7 @@ Source: `src/ast.x:189`
 Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return NULL.
 
-Source: `src/ast.x:202`
+Source: `src/ast.x:203`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -103,7 +103,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:175`
+Source: `src/ast.x:176`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -115,7 +115,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:116`
+Source: `src/ast.x:117`
 
 ### `Symbol`
 
@@ -126,7 +126,7 @@ Source: `src/ast.x:116`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:84`
+Source: `src/ast.x:85`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -135,7 +135,7 @@ Source: `src/ast.x:84`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:81`
+Source: `src/ast.x:82`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -144,7 +144,7 @@ Source: `src/ast.x:81`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:87`
+Source: `src/ast.x:88`
 
 ## Public types
 

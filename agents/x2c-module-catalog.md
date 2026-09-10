@@ -1124,5 +1124,5 @@ Public functions:
 `x2c_array_updateindex_from_array`, `x2c_array_updateindex_from_map`,
 `x2c_map_updateindex_from_array`, `x2c_map_updateindex_from_map`,
 `Var.fallback_truth`, `Var.truth`, `Var.truthy`, `Var.add`, `Var.sub`,
-`Var.mul`, `Var.div`, `Var.mod`, `Var.neg`, `Var.binary`, `Var.update`,
-`Var.postfix`
+`Var.mul`, `Var.matmul`, `Var.div`, `Var.mod`, `Var.neg`, `Var.binary`,
+`Var.update`, `Var.postfix`

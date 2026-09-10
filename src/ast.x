@@ -66,7 +66,8 @@ String binding_identity_spelling(List binding) {
 static const Symbol compound_operators[][2] = {
   { <+=>, <+> },   { <-=>, <-> }, { <*=>, <*> },     { </=>, </> },
   { <%=>, <%> },   { <&=>, <&> }, { <^=>, <^> },     { <|=>, <"|"> },
-  { <"<<=">, <"<<"> },            { <">>=">, <">>"> }
+  { <"<<=">, <"<<"> },            { <">>=">, <">>"> },
+  { <@=>, <@> }
 };
 
 static Symbol _compound_lookup(Symbol op, int column) {

@@ -33,7 +33,8 @@ int Var.dispatch_truth(Var value, int *handled) {
 }
 
 /** Tries one registered binary callback for `lhs`.
-    Only `<add>`, `<sub>`, `<mul>`, `<div>`, and `<mod>` select callbacks.
+    Only `<add>`, `<sub>`, `<mul>`, `<div>`, `<mod>`, and `<matmul>` select
+    callbacks.
     Returns one and writes the synchronous callback result when available;
     otherwise returns zero and leaves `result` unchanged. A null `result`
     returns zero.
@@ -50,6 +51,7 @@ int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result) {
       case <mul>: callback = _.mul; break;
       case <div>: callback = _.div; break;
       case <mod>: callback = _.mod; break;
+      case <matmul>: callback = _.matmul; break;
     }
   }
   if (!callback) return 0;

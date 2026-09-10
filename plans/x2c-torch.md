@@ -2,7 +2,11 @@
 
 > Status: active
 > Approved 2026-09-09 from the research spike in the budapest workspace.
-> PR 1 (Scope finalizers) in progress; PR 2 and PR 3 not started.
+> PR 1 (Scope finalizers) landed on `main` as 490070c. PR 2 (`@`) in
+> progress. PR 3 (packages/torch) is being re-designed around reusing
+> libtorch's nn, optim, data, and serialization through a C ABI shim and
+> generated operator bindings; the section below is the superseded first
+> draft until the evidence-based revision replaces it.
 
 ## Context
 

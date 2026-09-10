@@ -55,6 +55,8 @@ Var Var_sub(Var lhs, Var rhs);
 
 Var Var_mul(Var lhs, Var rhs);
 
+Var Var_matmul(Var lhs, Var rhs);
+
 Var Var_div(Var lhs, Var rhs);
 
 Var Var_mod(Var lhs, Var rhs);

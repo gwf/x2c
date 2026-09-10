@@ -37,7 +37,7 @@ Tests dynamic membership through the receiver's registered protocol row.
 **Raises:** `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
 receiver cannot perform membership.
 
-Source: `lib/dispatch.x:330`
+Source: `lib/dispatch.x:332`
 
 <a id="Var.fallback_compare"></a>
 #### Var.fallback_compare
@@ -48,7 +48,7 @@ Compares without consulting a runtime descriptor.
 
 **Raises:** `<void-op>` when either operand is `void`.
 
-Source: `lib/dispatch.x:784`
+Source: `lib/dispatch.x:786`
 
 <a id="Var.fallback_equal"></a>
 #### Var.fallback_equal
@@ -57,7 +57,7 @@ Source: `lib/dispatch.x:784`
 
 Applies non-dispatch equality to `a` and `b`.
 
-Source: `lib/dispatch.x:646`
+Source: `lib/dispatch.x:648`
 
 <a id="Var.fallback_hash"></a>
 #### Var.fallback_hash
@@ -68,7 +68,7 @@ Returns the non-dispatch runtime hash of `Var`.
 
 **Raises:** `<void-op>` for `void`.
 
-Source: `lib/dispatch.x:656`
+Source: `lib/dispatch.x:658`
 
 <a id="Var.fallback_iter"></a>
 #### Var.fallback_iter
@@ -80,7 +80,7 @@ Returns a non-dispatch iterator over `Var`.
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
 
-Source: `lib/dispatch.x:836`
+Source: `lib/dispatch.x:838`
 
 <a id="Var.fallback_repr"></a>
 #### Var.fallback_repr
@@ -89,7 +89,7 @@ Source: `lib/dispatch.x:836`
 
 Returns the non-dispatch readable representation of `Var`.
 
-Source: `lib/dispatch.x:571`
+Source: `lib/dispatch.x:573`
 
 <a id="Var.fallback_str"></a>
 #### Var.fallback_str
@@ -98,7 +98,7 @@ Source: `lib/dispatch.x:571`
 
 Returns the non-dispatch display `String` of `Var`.
 
-Source: `lib/dispatch.x:502`
+Source: `lib/dispatch.x:504`
 
 <a id="Var.fallback_write_repr"></a>
 #### Var.fallback_write_repr
@@ -107,7 +107,7 @@ Source: `lib/dispatch.x:502`
 
 Appends the non-dispatch representation of `Var` to a `Buffer`.
 
-Source: `lib/dispatch.x:611`
+Source: `lib/dispatch.x:613`
 
 <a id="Var.fallback_write_str"></a>
 #### Var.fallback_write_str
@@ -118,7 +118,7 @@ Appends the non-dispatch display text of `Var` to a `Buffer`.
 A primitive, pointer, or `void` renders straight into `out` instead of
 through an intermediate `String`.
 
-Source: `lib/dispatch.x:539`
+Source: `lib/dispatch.x:541`
 
 <a id="Var.getindex"></a>
 #### Var.getindex
@@ -130,7 +130,7 @@ Reads a dynamic indexed value through the receiver's protocol row.
 **Raises:** `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
 receiver cannot be indexed.
 
-Source: `lib/dispatch.x:345`
+Source: `lib/dispatch.x:347`
 
 <a id="Var.iter"></a>
 #### Var.iter
@@ -142,7 +142,7 @@ Returns an iterator over `Var`.
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
 
-Source: `lib/dispatch.x:846`
+Source: `lib/dispatch.x:848`
 
 <a id="Var.postfixindex"></a>
 #### Var.postfixindex
@@ -154,7 +154,7 @@ Applies a dynamic postfix update at `key` and returns its prior value.
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed update.
 
-Source: `lib/dispatch.x:394`
+Source: `lib/dispatch.x:396`
 
 <a id="Var.setindex"></a>
 #### Var.setindex
@@ -166,7 +166,7 @@ Stores and returns a dynamic indexed value through its protocol row.
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed assignment.
 
-Source: `lib/dispatch.x:360`
+Source: `lib/dispatch.x:362`
 
 <a id="Var.updateindex"></a>
 #### Var.updateindex
@@ -180,7 +180,7 @@ dispatch adds no thread or failure atomicity guarantee.
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed update.
 
-Source: `lib/dispatch.x:378`
+Source: `lib/dispatch.x:380`
 
 <a id="Var.write_str"></a>
 #### Var.write_str
@@ -194,7 +194,7 @@ the text but keeps existing custom descriptors working. Neither fallback
 re-enters this function, so a descriptor providing neither cannot
 recurse.
 
-Source: `lib/dispatch.x:558`
+Source: `lib/dispatch.x:560`
 
 ## Advanced and interop API
 
@@ -233,7 +233,7 @@ later dispatch or replacement.
 
 **Raises:** `<bad-state>` after descriptor registration is frozen.
 
-Source: `lib/dispatch.x:101`
+Source: `lib/dispatch.x:103`
 
 #### x2c_register_descriptor
 
@@ -250,7 +250,7 @@ the same process-wide lifetime requirements.
 Distinct full names that encode one `Symbol` through `_`/`-` folding or
 truncation abort.
 
-Source: `lib/dispatch.x:149`
+Source: `lib/dispatch.x:151`
 
 #### x2c_register_type
 
@@ -267,7 +267,7 @@ must outlive later descriptor use.
 Distinct full names that encode one `Symbol` through `_`/`-` folding or
 truncation abort.
 
-Source: `lib/dispatch.x:84`
+Source: `lib/dispatch.x:86`
 
 #### x2c_try_register_descriptor
 
@@ -287,7 +287,7 @@ callback.
 Distinct full names that encode one `Symbol` through `_`/`-` folding or
 truncation abort.
 
-Source: `lib/dispatch.x:127`
+Source: `lib/dispatch.x:129`
 
 #### x2c_try_register_tagged_descriptor
 
@@ -305,7 +305,7 @@ custom capacity, and one otherwise. Distinct names for one tag abort.
 **Raises:** `<bad-state>` after registration freezes, or `<alloc-fail>` while
 checking lowercase spelling.
 
-Source: `lib/dispatch.x:164`
+Source: `lib/dispatch.x:166`
 
 ### `Var`
 
@@ -318,7 +318,7 @@ Compares `a` and `b` by runtime value group and registered ordering.
 
 **Raises:** `<void-op>` when either operand is `void`.
 
-Source: `lib/dispatch.x:805`
+Source: `lib/dispatch.x:807`
 
 <a id="Var.dispatch_truth"></a>
 #### Var.dispatch_truth
@@ -339,7 +339,7 @@ Source: `lib/dispatch.x:26`
 
 Applies the registered equality operation for `a` and `b`.
 
-Source: `lib/dispatch.x:677`
+Source: `lib/dispatch.x:679`
 
 <a id="Var.hash"></a>
 #### Var.hash
@@ -350,7 +350,7 @@ Returns the runtime hash of `Var`.
 
 **Raises:** `<void-op>` for `void`.
 
-Source: `lib/dispatch.x:665`
+Source: `lib/dispatch.x:667`
 
 <a id="Var.pointer_string"></a>
 #### Var.pointer_string
@@ -359,7 +359,7 @@ Source: `lib/dispatch.x:665`
 
 Formats the fallback display `String` for a pointer-bearing `Var`.
 
-Source: `lib/dispatch.x:177`
+Source: `lib/dispatch.x:179`
 
 <a id="Var.repr"></a>
 #### Var.repr
@@ -368,7 +368,7 @@ Source: `lib/dispatch.x:177`
 
 Returns the readable representation of `Var`.
 
-Source: `lib/dispatch.x:582`
+Source: `lib/dispatch.x:584`
 
 <a id="Var.same"></a>
 #### Var.same
@@ -377,7 +377,7 @@ Source: `lib/dispatch.x:582`
 
 Reports whether `a` and `b` have identical `Var` bits.
 
-Source: `lib/dispatch.x:701`
+Source: `lib/dispatch.x:703`
 
 <a id="Var.str"></a>
 #### Var.str
@@ -386,7 +386,7 @@ Source: `lib/dispatch.x:701`
 
 Returns the display `String` of `Var`.
 
-Source: `lib/dispatch.x:513`
+Source: `lib/dispatch.x:515`
 
 <a id="Var.try_dispatch_binary"></a>
 #### Var.try_dispatch_binary
@@ -394,12 +394,13 @@ Source: `lib/dispatch.x:513`
 `int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result)`
 
 Tries one registered binary callback for `lhs`.
-Only `<add>`, `<sub>`, `<mul>`, `<div>`, and `<mod>` select callbacks.
+Only `<add>`, `<sub>`, `<mul>`, `<div>`, `<mod>`, and `<matmul>` select
+callbacks.
 Returns one and writes the synchronous callback result when available;
 otherwise returns zero and leaves `result` unchanged. A null `result`
 returns zero.
 
-Source: `lib/dispatch.x:41`
+Source: `lib/dispatch.x:42`
 
 <a id="Var.try_dispatch_unary"></a>
 #### Var.try_dispatch_unary
@@ -411,7 +412,7 @@ Returns one and writes the synchronous callback result when available;
 otherwise returns zero and leaves `result` unchanged. A null `result`
 returns zero.
 
-Source: `lib/dispatch.x:65`
+Source: `lib/dispatch.x:67`
 
 <a id="Var.write_pointer_repr"></a>
 #### Var.write_pointer_repr
@@ -420,7 +421,7 @@ Source: `lib/dispatch.x:65`
 
 Writes the fallback readable form of a pointer-bearing `Var`.
 
-Source: `lib/dispatch.x:184`
+Source: `lib/dispatch.x:186`
 
 <a id="Var.write_repr"></a>
 #### Var.write_repr
@@ -429,7 +430,7 @@ Source: `lib/dispatch.x:184`
 
 Appends the readable representation of `Var` to a `Buffer`.
 
-Source: `lib/dispatch.x:624`
+Source: `lib/dispatch.x:626`
 
 ## Runtime-internal callables
 
@@ -451,7 +452,7 @@ for source readers but are not supported as user API.
 
 Reports under the descriptor lock whether registration is frozen.
 
-Source: `lib/dispatch.x:278`
+Source: `lib/dispatch.x:280`
 
 #### x2c_descriptor_thread_start_begin
 
@@ -461,7 +462,7 @@ Locks descriptor registration while a native worker starts.
 The caller must pair this on the same thread with
 `x2c_descriptor_thread_start_end`.
 
-Source: `lib/dispatch.x:264`
+Source: `lib/dispatch.x:266`
 
 #### x2c_descriptor_thread_start_end
 
@@ -471,7 +472,7 @@ Ends a native worker start and unlocks descriptor registration.
 A nonzero `success` permanently freezes subsequent registration; zero
 leaves it open for another attempt.
 
-Source: `lib/dispatch.x:272`
+Source: `lib/dispatch.x:274`
 
 ### `Var`
 
@@ -484,7 +485,7 @@ Calls the registered `Context` exporter for `value` when one exists.
 Returns nonzero when the descriptor registers an exporter, and writes its
 result to `out`. `Context` handles built-in value families directly.
 
-Source: `lib/dispatch.x:859`
+Source: `lib/dispatch.x:861`
 
 ## Design notes
 

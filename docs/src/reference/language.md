@@ -1340,6 +1340,8 @@ the Lisp reader construct the same `List` data from the same text. Reader
 punctuation also ends a bare `Atom`: `%(a,b)` is `a` followed by
 `(unquote b)`. These spellings do not replace x2c's `$` and `@`: those still
 insert or splice x2c values while the `List` itself is being constructed.
+A `@` followed by whitespace, `)`, or `=` is the ordinary `@` or `@=`
+operator atom, so `%(op @ a b)` spells the same `List` the parser builds.
 
 `%<<...>>` is an immutable ordered `SymbolSet`. Bare entries are compact
 `Symbol`s rather than `Atom`s, and their source positions are their numeric
@@ -1684,8 +1686,8 @@ exhausted; the test does not probe its producer. `void` is outside the value
 domain, and a compiler-inserted `Var.truth` raises `<void-op>` for it. That
 raise does not return to the test.
 
-If either operand of `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `&`, `^`, or `|` has
-static `Var` identity and the other operand is `Var` or statically numeric,
+If either operand of `+`, `-`, `*`, `/`, `%`, `@`, `<<`, `>>`, `&`, `^`, or
+`|` has static `Var` identity and the other operand is `Var` or statically numeric,
 both operands convert to `Var` and the result is `Var`. A nonnumeric operand is
 rejected at compile time if its type is known statically, or at runtime if it
 is held in a `Var`. Native-only expressions remain native C. Integer operations
@@ -1722,8 +1724,9 @@ Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 
 ### Protocol-backed direct updates
 
-A direct participant lvalue supports `+=`, `-=`, `*=`, `/=`, or `%=` when its
-protocol-resolved `add`, `sub`, `mul`, `div`, or `mod` member has signature
+A direct participant lvalue supports `+=`, `-=`, `*=`, `/=`, `%=`, or `@=`
+when its protocol-resolved `add`, `sub`, `mul`, `div`, `mod`, or `matmul`
+member has signature
 `Participant member(Participant, RHS)`. The right operand is converted to
 `RHS`. Prefix and postfix `++`/`--` use `add` or `sub` with the integer `1`
 converted to `RHS`.

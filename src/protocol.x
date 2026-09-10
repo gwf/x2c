@@ -1352,7 +1352,8 @@ int Compiler.protocol_rejects_direct_member(
    docs/src/guide/protocols.md mirrors these rows. */
 static const struct { Symbol op, member; int derived; } operator_members[] = {
   { <+>,  <add>,   0 },  { <->,  <sub>,   0 },  { <*>,  <mul>,     0 },
-  { </>,  <div>,   0 },  { <%>,  <mod>,   0 },  { <==>, <equal>,   0 },
+  { </>,  <div>,   0 },  { <%>,  <mod>,   0 },  { <@>,  <matmul>,  0 },
+  { <==>, <equal>,   0 },
   { <!=>, <equal>, 1 },  { <"<">,  <compare>, 1 },  { <"<=">, <compare>, 1 },
   { <">">,  <compare>, 1 },  { <">=">, <compare>, 1 }
 };

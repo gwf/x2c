@@ -138,7 +138,7 @@ typedef struct VarMethods{
   VarIterIntoFn iter;
   VarWriteFn write_str, write_repr;
   VarContainsFn contains;
-  VarBinaryFn add, sub, mul, div, mod;
+  VarBinaryFn add, sub, mul, div, mod, matmul;
   VarUnaryFn neg;
   VarGetIndexFn getindex;
   VarSetIndexFn setindex;

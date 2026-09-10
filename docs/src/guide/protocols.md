@@ -292,8 +292,8 @@ Operators call the same resolved methods as dot syntax. The mappings include:
 
 | Syntax | Member |
 | --- | --- |
-| `+ - * / %` | `add sub mul div mod` |
-| direct `+= -= *= /= %=` | `add sub mul div mod` |
+| `+ - * / % @` | `add sub mul div mod matmul` |
+| direct `+= -= *= /= %= @=` | `add sub mul div mod matmul` |
 | direct prefix/postfix `++ --` | `add sub` with a converted `1` |
 | unary `-` | `neg` |
 | `== !=` | `equal` |
@@ -301,6 +301,10 @@ Operators call the same resolved methods as dot syntax. The mappings include:
 | conditions, `!`, `&&`, `||`, `?:` | `truth` |
 | `needle in value` | `contains`, with the right operand as receiver |
 | indexing and indexed mutation | `getindex`, `setindex`, `updateindex`, `postfixindex` |
+
+`@` is matrix multiplication at multiplicative precedence, left-associative
+like `*`. It has no C meaning, so using it where no `matmul` member resolves
+is a compile-time type error.
 
 An implemented or native member is eligible. An ordinary base default is also
 eligible because it is an inherited member reached through a total view. An

@@ -75,6 +75,19 @@ static void tokenizer_postfix_update_ends_operand(void) {
 }
 
 
+static void tokenizer_list_mode_bare_at_is_an_atom(void) {
+  Tokenizer tokenizer = Tokenizer.new("%(op @ a b); %(op @= a); %(@); @rest");
+  tokenizer.scan();
+  Symbol expected[] = {
+    <"%(">, <lit-atom>, <lit-atom>, <lit-atom>, <lit-atom>, <)>, <;>,
+    <"%(">, <lit-atom>, <lit-atom>, <lit-atom>, <)>, <;>,
+    <"%(">, <lit-atom>, <)>, <;>, <@>, <ident>, <eof>
+  };
+  for (int i = 0; i < 20; i++)
+    EXPECT_INT_EQ(tokenizer.next().type, expected[i]);
+  EXPECT_INT_EQ(tokenizer.status(), <ok>);
+}
+
 static void tokenizer_parenthesized_forms_stay_in_literal_modes(void) {
   Tokenizer tokenizer = Tokenizer.new(
     "%(a $(call(1)) @(tail()) c); %\"x$(call())y\""
@@ -223,6 +236,7 @@ void tokenizer_suite(void) {
   $test.run(tokenizer_status_owns_lexical_failures);
   $test.run(tokenizer_stray_close_keeps_lisp_mode);
   $test.run(tokenizer_postfix_update_ends_operand);
+  $test.run(tokenizer_list_mode_bare_at_is_an_atom);
   $test.run(tokenizer_parenthesized_forms_stay_in_literal_modes);
   $test.run(tokenizer_braced_literal_unquote_modes);
   $test.run(tokenizer_typed_capture_parentheses);

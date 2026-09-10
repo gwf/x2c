@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/protocol-operator-matmul-missing.x:9:15: type: operator '@' requires an implemented matmul member
+    Plain c = a @ b;
+                ^
+  note: left type: ("Plain") right type: ("Plain")
+

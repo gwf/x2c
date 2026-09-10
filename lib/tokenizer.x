@@ -392,6 +392,11 @@ static int Tokenizer._lisp_tokens(Tokenizer t) {
     return t.tokenize(4, <void>);
   if (list && text[0] == '?' && text[1] == '(') return t._operator(2);
   if (text[0] == '$' && !list && !collection) return t._named_reference();
+  /* A bare `@` or `@=` in a list is the operator atom, so an AST literal
+     or match pattern can spell `%(op @ a b)`; `@name` and `@{` splice. */
+  if (list && text[0] == '@' &&
+      (!text[1] || text[1] == '=' || strchr(" \t\n\v\f\r)", text[1])))
+    return t.tokenize(text[1] == '=' ? 2 : 1, <lit-atom>);
   if ((list && (text[0] == '$' || text[0] == '@')) ||
       (collection && text[0] == '$'))
     return text[1] == '{'

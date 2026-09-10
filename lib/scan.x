@@ -258,9 +258,11 @@ int scan_c_operator(char *s) {
       return (s[1] == '=') ? ((s[2] == '=') ? 3 : 2) : 1;
     case '!': // !==, !=, !
       return (s[1] == '=') ? ((s[2] == '=') ? 3 : 2) : 1;
-    // ~, ;, , :, (, ), [, ], {, }, ?, @
+    case '@': // @=, @
+      return (s[1] == '=') ? 2 : 1;
+    // ~, ;, , :, (, ), [, ], {, }, ?
     case '~': case ';': case ',': case ':': case '(': case ')':
-    case '[': case ']': case '{': case '}': case '?': case '@':
+    case '[': case ']': case '{': case '}': case '?':
       return 1;
     default: return -1;
   }
