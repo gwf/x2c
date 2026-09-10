@@ -188,7 +188,10 @@ static int64_t *_shape(List sizes, int *rank) {
   int count = sizes.len();
   int64_t *shape = Scope.calloc(count ? count : 1, sizeof(int64_t));
   int index = 0;
-  foreach (Var size, sizes) shape[index++] = size.integer();
+  foreach (Var size, sizes) {
+    long extent = size;  // converting; a Symbol or text raises
+    shape[index++] = extent;
+  }
   *rank = count;
   return shape;
 }
@@ -222,7 +225,8 @@ static void _flatten_integers(Var values, int64_t *out, int64_t *count,
   else {
     if (*count >= limit) raise %(bad-arg (library "torch")
                                  (reason "more values than the shape holds"));
-    out[(*count)++] = values.integer();
+    long exact = values;
+    out[(*count)++] = exact;
   }
 }
 
@@ -558,10 +562,14 @@ Tensor Tensor.getindex(Tensor a, Var key) {
   if (key is Tensor) return a.masked_select(key.tensor());
   if (key is <list>) {
     Tensor value = a;
-    foreach (Var index, key.list()) value = value.select(0, index.integer());
+    foreach (Var index, key.list()) {
+      long position = index;
+      value = value.select(0, position);
+    }
     return value;
   }
-  return a.select(0, key.integer());
+  long position = key;
+  return a.select(0, position);
 }
 
 /* Autograd */
@@ -1045,8 +1053,10 @@ static double _schedule_rate(Scheduler s) {
     return s.base_lr * (part < 1.0 ? part : 1.0);
   }
   double rate = s.base_lr;
-  foreach (Var milestone, s.milestones)
-    if (s.steps >= milestone.integer()) rate *= s.gamma;
+  foreach (Var milestone, s.milestones) {
+    long boundary = milestone;
+    if (s.steps >= boundary) rate *= s.gamma;
+  }
   return rate;
 }
 

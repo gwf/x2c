@@ -389,7 +389,24 @@ static void torch_errors_and_lifetimes(void) {
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
 }
 
+static void torch_shapes_reject_symbols(void) {
+  $test.scoped();
+  // A bare name inside %() is a Symbol, never a number; a shape or index
+  // built from one must raise instead of reading the Symbol's payload.
+  int caught = 0;
+  try Tensor.of(%(1 2), %(rows 2), XT_INT64);
+  catch %(no-convert *): caught++;
+  try Tensor.zeros(%(3 cols), XT_FLOAT64);
+  catch %(no-convert *): caught++;
+  Tensor t = Tensor.arange(0.0, 6.0, 1.0, XT_FLOAT64).reshape(%(2 3));
+  try t[%(first 1)];
+  catch %(no-convert *): caught++;
+  EXPECT_INT_EQ(caught, 3);
+  EXPECT_INT_EQ(t.numel(), 6);
+}
+
 void torch_suite(void) {
+  $test.run(torch_shapes_reject_symbols);
   $test.run(torch_creation_and_queries);
   $test.run(torch_integers_are_exact);
   $test.run(torch_errors_reach_x2c);
