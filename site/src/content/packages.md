@@ -2,7 +2,7 @@
 title: Packages
 ---
 
-**Packages give libraries their own namespaces.** Each package keeps its
+Packages give libraries their own namespaces. Each package keeps its
 x2c interface separate, so third-party libraries can be used together
 without their names colliding. Build a package once, then import it by
 name, with an alias if you like.
