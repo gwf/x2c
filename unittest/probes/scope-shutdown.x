@@ -5,6 +5,7 @@
 #include <sched.h>
 #include <stdatomic.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 static int hook_order[2], hook_count;
@@ -31,6 +32,18 @@ static Var live_match_worker(const void *input, size_t input_size) {
   atomic_store(state.ready, matched);
   while (atomic_load(state.ready)) sched_yield();
   return matched;
+}
+
+static void print_drop(void *ptr) {
+  (void) ptr;
+  puts("drop");
+}
+
+static Var finalizer_worker(const void *input, size_t input_size) {
+  (void) input;
+  (void) input_size;
+  Scope.malloc_finalized(8, print_drop);
+  return 1;
 }
 
 static Var completed_worker(const void *input, size_t input_size) {
@@ -142,6 +155,21 @@ int main(int argc, char **argv) {
     (void) thread;
     Scope_shutdown();
     return 1;
+  }
+
+  if (!strcmp(argv[1], "finalizer-shutdown")) {
+    Scope.malloc_finalized(8, print_drop);
+    Scope_shutdown();
+    ScopeStats stats = Scope.stats();
+    return stats.live_scopes || stats.live_allocations;
+  }
+
+  if (!strcmp(argv[1], "finalizer-thread")) {
+    Thread thread = Thread.start(finalizer_worker, NULL, 0);
+    Var result = Thread.join(thread);
+    Scope_shutdown();
+    ScopeStats stats = Scope.stats();
+    return result.int() != 1 || stats.live_scopes || stats.live_allocations;
   }
 
   if (!strcmp(argv[1], "completed-thread")) {

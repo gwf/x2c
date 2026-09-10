@@ -192,10 +192,15 @@ Feed Feed.close(Feed feed) {
 
 `Regexp.free` and `JsonDocument.free` are both shaped this way.
 
-`Scope` owns the small x2c record, never the native resource. `Scope.calloc`
-releases the `struct Feed` when its scope ends; it knows nothing about
-`feed_close`. `Scope` is not a substitute for the library's own release
-function.
+`Scope` owns the small x2c record. With `Scope.calloc` it releases the
+`struct Feed` when its scope ends and knows nothing about `feed_close`, so
+the caller must release the native resource. With `Scope.malloc_finalized`
+the record carries a finalizer that calls `feed_close` when the scope
+reclaims it, so temporaries a library creates faster than a caller can name
+them, such as the results of operator expressions, are released with the
+region. Keep the explicit `free` method either way: it clears the native
+field, so an early release leaves the finalizer nothing to do. See
+[attaching a finalizer](memory.md#attaching-a-finalizer).
 
 The caller puts the release on the line after the acquisition:
 

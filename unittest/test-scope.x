@@ -326,6 +326,106 @@ static void scope_destroy_detached_contract(void) {
   EXPECT_TRUE(_scope_rejected(_destroy_attached_lower));
 }
 
+static int drop_count;
+static void *drop_order[4];
+
+static void _count_drop(void *ptr) {
+  drop_order[drop_count < 4 ? drop_count : 3] = ptr;
+  drop_count++;
+}
+
+static Scope dying_scope;
+
+static void _scratch_drop(void *ptr) {
+  (void) ptr;
+  Scope.malloc_in(&dying_scope, 8);
+  drop_count++;
+}
+
+static void _finalize_without_drop(void) {
+  Scope.retain();
+  Scope.malloc_finalized(8, NULL);
+}
+
+static void scope_finalizer_runs_once(void) {
+  ScopeStats before = Scope.stats();
+  drop_count = 0;
+  Scope.retain();
+  char *a = Scope.malloc_finalized(16, _count_drop);
+  fill(a, "finalized");
+  EXPECT_INT_EQ(drop_count, 0);
+  Scope.release();
+  EXPECT_INT_EQ(drop_count, 1);
+  EXPECT_TRUE(drop_order[0] == a);
+
+  drop_count = 0;
+  Scope.retain();
+  char *b = Scope.malloc_finalized(16, _count_drop);
+  char *c = Scope.malloc_finalized(16, _count_drop);
+  Scope.free(b);
+  EXPECT_INT_EQ(drop_count, 1);
+  EXPECT_TRUE(Scope.realloc(c, 0) == NULL);
+  EXPECT_INT_EQ(drop_count, 2);
+  Scope.release();
+  EXPECT_INT_EQ(drop_count, 2);
+
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.free_calls, before.free_calls + 3);
+  EXPECT_TRUE(_scope_rejected(_finalize_without_drop));
+}
+
+static void scope_finalizer_order_and_move(void) {
+  ScopeStats before = Scope.stats();
+  drop_count = 0;
+  Scope from = Scope.new_named("finalize-from"), to = NULL;
+  char *a = Scope.malloc_finalized_in(&from, 8, _count_drop);
+  char *plain = Scope.malloc_in(&from, 8);
+  char *b = Scope.malloc_finalized_in(&from, 8, _count_drop);
+  char *c = Scope.malloc_finalized_in(&from, 8, _count_drop);
+  fill(plain, "plain");
+  Scope.move(b, &to);  // middle of the source list
+  Scope.move(c, &to);  // head of the source list
+  Scope.move(c, &to);  // self-move keeps the finalizer
+  Scope.destroy(from);
+  EXPECT_INT_EQ(drop_count, 1);
+  EXPECT_TRUE(drop_order[0] == a);
+  Scope.destroy(to);
+  EXPECT_INT_EQ(drop_count, 3);
+  EXPECT_TRUE(drop_order[1] == c);  // most recent block first
+  EXPECT_TRUE(drop_order[2] == b);
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
+}
+
+static void scope_finalizer_realloc_and_scratch(void) {
+  ScopeStats before = Scope.stats();
+  drop_count = 0;
+  Scope.retain();
+  Scope.malloc(8);
+  char *a = Scope.malloc_finalized(8, _count_drop);
+  Scope.malloc(8);
+  fill(a, "grow");
+  a = Scope.realloc(a, 4096);
+  EXPECT_STR_EQ(a, "grow");
+  a = Scope.realloc(a, 8);
+  EXPECT_STR_EQ(a, "grow");
+  Scope.release();
+  EXPECT_INT_EQ(drop_count, 1);
+  EXPECT_TRUE(drop_order[0] == a);
+
+  dying_scope = Scope.new_named("finalize-scratch");
+  Scope.malloc_finalized_in(&dying_scope, 8, _scratch_drop);
+  Scope.destroy(dying_scope);
+  dying_scope = NULL;
+  EXPECT_INT_EQ(drop_count, 2);
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
+  EXPECT_INT_EQ(after.reallocation_calls, before.reallocation_calls + 2);
+}
+
 $(import "test-macros.xmacro")
 
 void scope_suite(void) {
@@ -343,4 +443,7 @@ void scope_suite(void) {
   $test.run(scope_move_materializes_and_self_moves);
   $test.run(scope_stack_grows_and_restores);
   $test.run(scope_destroy_detached_contract);
+  $test.run(scope_finalizer_runs_once);
+  $test.run(scope_finalizer_order_and_move);
+  $test.run(scope_finalizer_realloc_and_scratch);
 }

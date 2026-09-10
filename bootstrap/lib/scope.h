@@ -55,7 +55,11 @@ void Scope_release(void);
 
 void * Scope_malloc(size_t size);
 
+void * Scope_malloc_finalized(size_t size, void(* drop)(void *));
+
 void * Scope_malloc_in(Scope * slot, size_t size);
+
+void * Scope_malloc_finalized_in(Scope * slot, size_t size, void(* drop)(void *));
 
 void * Scope_calloc(size_t count, size_t size);
 

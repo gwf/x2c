@@ -90,6 +90,12 @@ test ! -s "$BUILD/after.stdout"
 test "$(head -1 "$BUILD/after.stderr")" = \
   "Scope: operation attempted after shutdown"
 
+for mode in finalizer-shutdown finalizer-thread; do
+  "$PROGRAM" "$mode" >"$BUILD/$mode.stdout" 2>"$BUILD/$mode.stderr"
+  test "$(cat "$BUILD/$mode.stdout")" = "drop"
+  test ! -s "$BUILD/$mode.stderr"
+done
+
 "$PROGRAM" push-null >"$BUILD/push-null.stdout" \
   2>"$BUILD/push-null.stderr"
 test ! -s "$BUILD/push-null.stdout"
@@ -131,4 +137,4 @@ test ! -s "$BUILD/completed-thread.stdout"
 test "$(head -1 "$BUILD/completed-thread.stderr")" = \
   "Thread: 1 worker(s) still live at shutdown"
 
-echo "Scope lifecycle probes: 17 passed"
+echo "Scope lifecycle probes: 19 passed"

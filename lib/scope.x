@@ -67,6 +67,23 @@ typedef struct ScopeStats {
 #define UNTAG_POINTER(p)  ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
 #define IS_TAGGED(p)      ((uintptr_t) (p) & (uintptr_t) 1)
 
+/* A finalized allocation keeps its destructor in a prefix ahead of the
+   public header, so the header layout and payload alignment are unchanged
+   and only finalized blocks pay for the field. Bit 0 of `next` marks one;
+   every read or write of `next` goes through NEXT and SET_NEXT. */
+typedef struct ScopeFinalizer {
+  void (*drop)(void *);
+  void *pad;
+} ScopeFinalizer;
+
+#define IS_FINALIZED(a)   ((uintptr_t) (a)->next & (uintptr_t) 1)
+#define NEXT(a)           ((ScopeAlloc) UNTAG_POINTER((a)->next))
+#define SET_NEXT(a, n) \
+  ((a)->next = (ScopeAlloc) ((uintptr_t) (n) | IS_FINALIZED(a)))
+#define ALLOC_BASE(a) \
+  ((void *) ((char *) (a) - (IS_FINALIZED(a) ? sizeof(ScopeFinalizer) : 0)))
+#define ALLOC_DROP(a)     (((ScopeFinalizer *) (a))[-1].drop)
+
 typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
 } *ScopeName;
@@ -264,16 +281,23 @@ static Scope _new_scope(const char *name) {
   return scope;
 }
 
-static void *_malloc_in(Scope *slot, size_t size) {
+static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
+  size_t extra = drop ? sizeof(ScopeFinalizer) : 0;
   if (!slot) raise %(bad-arg);
-  if (size > SIZE_MAX - sizeof(struct ScopeAlloc)) {
+  if (size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra) {
     if (x2c_error_runtime_ready) raise %(size-limit);
     _raw_fatal("allocation size overflow");
   }
   if (!*slot) *slot = _new_scope(NULL);
   Scope scope = *slot;
-  ScopeAlloc alloc = _data_malloc(size + sizeof(struct ScopeAlloc));
-  alloc.next = scope.first;
+  char *base = _data_malloc(size + sizeof(struct ScopeAlloc) + extra);
+  ScopeAlloc alloc = (ScopeAlloc) (base + extra);
+  if (drop) {
+    ScopeFinalizer *finalizer = (ScopeFinalizer *) base;
+    finalizer.drop = drop;
+    alloc.next = TAG_POINTER(scope.first);
+  }
+  else alloc.next = scope.first;
   alloc.prev = TAG_POINTER(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
@@ -287,39 +311,48 @@ static void *_calloc_in(Scope *slot, size_t count, size_t size) {
     if (x2c_error_runtime_ready) raise %(size-limit);
     _raw_fatal("calloc size overflow");
   }
-  size_t total = count * size, void *ptr = _malloc_in(slot, total);
+  size_t total = count * size, void *ptr = _malloc_in(slot, total, NULL);
   if (ptr && total) memset(ptr, 0, total);
   return ptr;
 }
 
 static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
   if (!ptr || !size) return NULL;
-  void *copy = _malloc_in(slot, size);
+  void *copy = _malloc_in(slot, size, NULL);
   memcpy(copy, ptr, size);
   return copy;
 }
 
+/* The block is already unlinked, so a drop that allocates or frees other
+   storage sees a consistent list. */
+static void _release_alloc(ScopeAlloc alloc) {
+  void *base = ALLOC_BASE(alloc);
+  atomic_fetch_add(&scope_free_calls, 1);
+  if (IS_FINALIZED(alloc)) ALLOC_DROP(alloc)(ALLOC_PTR(alloc));
+  free(base);
+}
+
 static void _free_alloc(ScopeAlloc old) {
-  ScopeAlloc next = old.next, prev = old.prev;
+  ScopeAlloc next = NEXT(old), prev = old.prev;
   if (IS_TAGGED(prev)) {
     Scope scope = UNTAG_POINTER(prev);
     scope.first = next;
   }
-  else if (prev) prev.next = next;
+  else if (prev) SET_NEXT(prev, next);
   if (next) next.prev = prev;
-  atomic_fetch_add(&scope_free_calls, 1);
-  free(old);
+  _release_alloc(old);
 }
 
+/* Popping the head keeps the list valid while a finalizer runs, so scratch
+   it allocates into the dying scope is reclaimed by the same loop. */
 static void _destroy_chain(Scope scope) {
   while (scope) {
     Scope down = scope.down;
-    ScopeAlloc alloc = scope.first;
-    while (alloc) {
-      ScopeAlloc next = alloc.next;
-      atomic_fetch_add(&scope_free_calls, 1);
-      free(alloc);
-      alloc = next;
+    ScopeAlloc alloc;
+    while ((alloc = scope.first)) {
+      scope.first = NEXT(alloc);
+      if (scope.first) scope.first.prev = TAG_POINTER(scope);
+      _release_alloc(alloc);
     }
     _unregister_name(scope);
     atomic_fetch_add(&scope_destructions, 1);
@@ -349,7 +382,7 @@ void x2c_scope_thread_release(void) {
 static size_t _allocation_count(Scope scope) {
   size_t count = 0;
   for (ScopeAlloc alloc = scope ? scope.first : NULL; alloc;
-       alloc = alloc.next)
+       alloc = NEXT(alloc))
     count++;
   return count;
 }
@@ -704,7 +737,33 @@ void Scope.release(void) {
 */
 void *Scope.malloc(size_t size) {
   _require_running();
-  return _malloc_in(_thread().active, size);
+  return _malloc_in(_thread().active, size, NULL);
+}
+
+/** Allocates `size` uninitialized bytes in the active scope with a finalizer.
+    `drop` runs exactly once with the block's pointer when the block is
+    reclaimed: by `Scope.free`, by `Scope.realloc` to size zero, by the
+    release or destruction of its scope, or by thread and process shutdown.
+    The finalizer follows the block through `Scope.move` and survives
+    `Scope.realloc`, which passes `drop` the resized pointer. Blocks are
+    reclaimed most recent first, so a finalizer sees older blocks still live.
+
+    A wrapper for a native handle allocates its record this way and releases
+    the handle from `drop`; an explicit early release that clears the field
+    leaves nothing for the finalizer to do. `drop` runs on the thread that
+    reclaims the block, with the block already unlinked, so it must not free
+    or move the block itself. It must not raise. It may allocate into other
+    scopes, and into the dying scope only for scratch the same destruction
+    reclaims.
+    Raises: `<bad-arg>` when `drop` is NULL, `<size-limit>` when the size
+    would overflow the allocation header, or `<alloc-fail>` when the
+    underlying allocation fails. Before `Error` initialization they
+    terminate at the error floor.
+*/
+void *Scope.malloc_finalized(size_t size, void (*drop)(void *)) {
+  _require_running();
+  if (!drop) raise %(bad-arg);
+  return _malloc_in(_thread().active, size, drop);
 }
 
 /** Allocates `size` uninitialized bytes in the scope held by `slot`.
@@ -719,7 +778,22 @@ void *Scope.malloc(size_t size) {
 */
 void *Scope.malloc_in(Scope *slot, size_t size) {
   _require_running();
-  return _malloc_in(slot, size);
+  return _malloc_in(slot, size, NULL);
+}
+
+/** Allocates `size` bytes with finalizer `drop` in the scope held by `slot`.
+    The slot-targeted form of `Scope.malloc_finalized`, with the same lazy
+    scope creation as `Scope.malloc_in`; the active scope is left alone.
+    Raises: `<bad-arg>` when `slot` or `drop` is NULL, `<size-limit>` when
+    the size overflows, or `<alloc-fail>` when allocation fails. Before
+    `Error` initialization they terminate at the error floor.
+*/
+void *Scope.malloc_finalized_in(
+  Scope *slot, size_t size, void (*drop)(void *)
+) {
+  _require_running();
+  if (!drop) raise %(bad-arg);
+  return _malloc_in(slot, size, drop);
 }
 
 /** Allocates `count` objects of `size` bytes each, zeroed, in the active
@@ -848,14 +922,14 @@ void Scope.move(void *ptr, Scope *slot) {
   if (!slot) raise %(bad-arg);
   if (!*slot) *slot = _new_scope(NULL);
   Scope scope = *slot;
-  ScopeAlloc alloc = PTR_ALLOC(ptr), next = alloc.next, prev = alloc.prev;
+  ScopeAlloc alloc = PTR_ALLOC(ptr), next = NEXT(alloc), prev = alloc.prev;
   if (IS_TAGGED(prev)) {
     Scope owner = UNTAG_POINTER(prev);
     owner.first = next;
   }
-  else prev.next = next;
+  else SET_NEXT(prev, next);
   if (next) next.prev = prev;
-  alloc.next = scope.first;
+  SET_NEXT(alloc, scope.first);
   alloc.prev = TAG_POINTER(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
@@ -875,23 +949,26 @@ void Scope.move(void *ptr, Scope *slot) {
 */
 void *Scope.realloc(void *ptr, size_t size) {
   _require_running();
-  if (!ptr) return _malloc_in(_thread().active, size);
+  if (!ptr) return _malloc_in(_thread().active, size, NULL);
   if (!size) {
     _free_alloc(PTR_ALLOC(ptr));
     return NULL;
   }
-  if (size > SIZE_MAX - sizeof(struct ScopeAlloc)) raise %(size-limit);
-  ScopeAlloc old = PTR_ALLOC(ptr), next = old.next, prev = old.prev;
-  ScopeAlloc replacement =
-    _data_realloc(old, size + sizeof(struct ScopeAlloc));
-  replacement.next = next;
+  ScopeAlloc old = PTR_ALLOC(ptr), next = NEXT(old), prev = old.prev;
+  size_t extra = IS_FINALIZED(old) ? sizeof(ScopeFinalizer) : 0;
+  if (size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra)
+    raise %(size-limit);
+  char *base =
+    _data_realloc(ALLOC_BASE(old), size + sizeof(struct ScopeAlloc) + extra);
+  ScopeAlloc replacement = (ScopeAlloc) (base + extra);
+  SET_NEXT(replacement, next);
   replacement.prev = prev;
   if (next) next.prev = replacement;
   if (IS_TAGGED(prev)) {
     Scope scope = UNTAG_POINTER(prev);
     scope.first = replacement;
   }
-  else prev.next = replacement;
+  else SET_NEXT(prev, replacement);
   atomic_fetch_add(&scope_reallocation_calls, 1);
   _record_request(size);
   return ALLOC_PTR(replacement);

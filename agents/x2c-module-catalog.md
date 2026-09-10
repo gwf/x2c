@@ -817,9 +817,10 @@ Public functions:
 `x2c_scope_thread_release`, `Scope.initialize`, `Scope.new`, `Scope.new_named`,
 `Scope.name`, `Scope.stats`, `Scope.destroy`, `Scope.shutdown_hook`,
 `Scope.push`, `Scope.top`, `Scope.pop`, `Scope.retain`, `Scope.release`,
-`Scope.malloc`, `Scope.malloc_in`, `Scope.calloc`, `Scope.calloc_in`,
-`Scope.memdup`, `Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`,
-`Scope.realloc`, `Scope_shutdown`
+`Scope.malloc`, `Scope.malloc_finalized`, `Scope.malloc_in`,
+`Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
+`Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`, `Scope.realloc`,
+`Scope_shutdown`
 
 ### [lib/split.x](../lib/split.x)
 

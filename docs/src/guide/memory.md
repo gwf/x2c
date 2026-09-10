@@ -65,7 +65,9 @@ aborts instead of destroying the surrounding process root.
 Storage returned by these calls is managed memory. `Scope.realloc` grows or
 shrinks it in place, and `Scope.free` ends its life early without waiting
 for the release. `Scope.free` shortens a lifetime. Most storage does not
-need it, because the release frees the region.
+need it, because the release frees the region. `Scope.malloc_finalized`
+allocates storage that runs a function of your choice when it is reclaimed;
+see [attaching a finalizer](#attaching-a-finalizer).
 
 For work with a longer life, hold a scope in a variable of type `Scope` and
 allocate into it directly. `Scope.malloc_in`, `Scope.calloc_in`, and
@@ -182,6 +184,53 @@ Scope.destroy(keep);
 Use this instead of letting a pointer escape. A `String` or a `List` needs
 no move; canonical values outlive the scope that was active when they were
 built.
+
+## Attaching a finalizer
+
+A record that holds something the allocator does not know about, such as a
+handle from a C library, can release it when the record is reclaimed.
+`Scope.malloc_finalized` takes the function to run:
+
+```x2c
+~#include <stdio.h>
+~typedef struct feed_parser feed_parser;
+~static feed_parser *feed_open(void) { return (feed_parser *) 1; }
+~static void feed_close(feed_parser *parser) { (void) parser; }
+typedef struct Feed { feed_parser *native; } *Feed;
+
+static void _feed_drop(void *ptr) {
+  Feed feed = ptr;
+  if (feed.native) feed_close(feed.native);
+  feed.native = NULL;
+}
+
+Feed Feed.open(void) {
+  Feed feed = Scope.malloc_finalized(sizeof(struct Feed), _feed_drop);
+  feed.native = feed_open();
+  return feed;
+}
+~int main(void) {
+~  Scope.retain();
+~  Feed feed = Feed.open();
+~  Scope.release();
+~  return 0;
+~}
+```
+
+The finalizer runs exactly once with the record's pointer: on `Scope.free`,
+on a `Scope.realloc` to size zero, when the owning scope is released or
+destroyed, or at thread and process shutdown. It follows the record through
+`Scope.move`, and `Scope.realloc` keeps it and passes the resized pointer.
+Records are reclaimed most recent first, so a finalizer can still read older
+records in the same scope.
+
+Three rules keep this simple. The record is already unlinked when its
+finalizer runs, so the finalizer must not free or move the record itself.
+It must not raise. It may allocate into other scopes, and into the scope
+being destroyed only for scratch that the same destruction reclaims.
+
+An explicit early release still works: a wrapper that clears its native field
+in its own `free` method leaves nothing for the finalizer to do.
 
 ## `Block` and `Buffer`
 
