@@ -8,6 +8,13 @@ import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
 import {
+  Content as PackagesCopy,
+  frontmatter as packages,
+} from "../content/packages.md";
+import {
+  compiledContent as packageBuildCode,
+} from "../content/packages-build.md";
+import {
   Content as PowerCopy,
   frontmatter as power,
 } from "../content/power.md";
@@ -57,7 +64,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </section>
   </div>
 
-  <section id="love" class="dark-section">
+  <section id="love" class="landing-section">
     <div class="section-shell">
       <div class="section-feature-grid">
         <header class="section-heading">
@@ -83,7 +90,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="power" class="light-section">
+  <section id="power" class="landing-section">
     <div class="section-shell">
       <div class="section-feature-grid">
         <header class="section-heading">
@@ -111,7 +118,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="magic" class="dark-section">
+  <section id="magic" class="landing-section">
     <div class="section-shell">
       <div class="section-feature-grid">
         <header class="section-heading">
@@ -138,12 +145,14 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="install" class="light-section">
+  <section id="install" class="landing-section">
     <div class="deal-grid">
       <div class="deal-copy">
-        <small>install</small>
-        <h2>Run your first x2c program.</h2>
+        <header class="section-heading">
+          <h2>Install</h2>
+        </header>
         <p>
+          <strong>Run your first x2c program.</strong>
           Clone the repository, build the compiler from its checked-in C,
           and run one of the included examples. The compiler handles
           translation, native compilation, and execution.
@@ -166,13 +175,49 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="source" class="dark-section numbers-section">
+  <section id="packages" class="landing-section">
+    <div class="section-shell">
+      <div class="package-intro">
+        <div class="install-window package-build">
+          <div class="install-code" set:html={await packageBuildCode()} />
+        </div>
+        <div>
+          <header class="section-heading">
+            <h2>{packages.title}</h2>
+            <div class="section-overview"><PackagesCopy /></div>
+          </header>
+          <div class="section-exit">
+            <p>
+              <a href="https://github.com/gwf/x2c/blob/main/packages/README.md">
+                Browse packages</a> or learn how to{" "}
+              <a href={local("docs/guide/packages.html#using-one")}>import one</a>.
+              Every example links to its complete source and setup instructions.
+            </p>
+            <p class="package-note">
+              Packages need separate dependency preparation. Builds are currently
+              tested on macOS.
+            </p>
+          </div>
+        </div>
+      </div>
+      <FeatureCarousel
+        name="packages"
+        label="Package examples"
+        codeLabel="Source excerpt"
+        tone="dark"
+        slides={inSection("packages")}
+      />
+    </div>
+  </section>
+
+  <section id="source" class="landing-section numbers-section">
     <div class="docs-shell">
       <div class="docs-grid">
         <header class="docs-copy">
           <small>keep exploring</small>
           <h2>Go further.</h2>
           <p>
+            <a href={local("about/")}>About x2c</a> tells its story.
             <a href={local("docs/")}>Read the docs</a> to learn the language
             and look up its library. <a href="https://github.com/gwf/x2c"
               >Browse the source</a> to see how it works or make it your own.
@@ -208,10 +253,10 @@ const [titleHtml, kickerHtml] = await Promise.all([
             <p>showcase examples.</p>
           </div>
           <div class="docs-card stat-card">
-            <small>integrations</small>
-            <strong>7</strong>
+            <small>packages</small>
+            <strong><a href="#packages">Build something.</a></strong>
             <p>
-              C libraries available as importable x2c packages.
+              Explore C libraries through working x2c examples.
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 # libcurl 8.22.0 build profiles
 
-This is the pinned build profile for the experimental libcurl package. The
+This is the pinned build profile for the libcurl package. The
 curl source archive is `https://curl.se/download/curl-8.22.0.tar.xz`, SHA-256
 `f7ef3ae8a22e521f289803fe93543eb64c329b58aa73a9e224dfd915a2a5f4f7`.
 

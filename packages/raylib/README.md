@@ -1,6 +1,6 @@
 # raylib client
 
-This experimental package provides an x2c interface to raylib 6.0 built for
+This package provides an x2c interface to raylib 6.0 built for
 `PLATFORM_MEMORY`: raylib renders into main memory with no display and no
 GPU, so an `Image` is the whole product and an exported PNG is reproducible
 byte for byte. `PROFILE.md` records the admitted build.
@@ -156,10 +156,15 @@ convert, and free on every call. This package has no Lisp bindings.
 ## Examples
 
 `examples/climate-trends.x` is the self-contained short application (`make
-short-example`). It renders seven temperatures from x2c Lists into a 720x320
-PNG with lines, markers, labels, and text. Its source shows the complete
-ordinary drawing path and contains no pointer arithmetic, buffer, or status
-code.
+short-example`). It renders seven temperatures from x2c Lists into a 1440x640
+PNG with lines, markers, labels, and text. Drawing at 2160x960 before resizing
+smooths the edges while retaining enough resolution for a 720x320 display.
+The bundled [Lato Regular](examples/fonts/README.md) TrueType font is loaded
+through raylib's native `LoadFontEx` and drawn with `ImageDrawTextEx`; it is
+redistributed unmodified under the SIL Open Font License 1.1. No host font is
+needed. `InitWindow` starts only the memory renderer in this build profile,
+with no display or GPU. The font-size check rejects raylib's silent fallback
+to its default bitmap font if the TrueType font cannot load.
 
 `examples/texture-sheet.x` is the broader application (`make example`). It
 generates four procedural tiles, writes each to disk, reads them back with

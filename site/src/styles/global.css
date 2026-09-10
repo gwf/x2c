@@ -60,7 +60,7 @@ code:not(pre code) {
   letter-spacing: -0.015em;
 }
 
-.dark-section code:not(pre code),
+.landing-section:nth-of-type(odd) code:not(pre code),
 .feature-carousel-dark code:not(pre code) {
   border-color: rgba(255, 113, 90, 0.34);
   background: rgba(255, 113, 90, 0.1);
@@ -498,8 +498,7 @@ main:focus {
   font-family: "JetBrains Mono", monospace;
 }
 
-.dark-section,
-.light-section {
+.landing-section {
   scroll-margin-top: 90px;
 }
 
@@ -507,16 +506,16 @@ html:has(.landing-hero) {
   scroll-padding-top: var(--landing-header-height, 69px);
 }
 
-#love, #power, #magic, #install {
+#love, #power, #magic, #packages, #install {
   scroll-margin-top: 0;
 }
 
-.dark-section {
+.landing-section:nth-of-type(odd) {
   background: var(--dark);
   color: var(--paper);
 }
 
-.light-section {
+.landing-section:nth-of-type(even) {
   border-bottom: 1px solid rgba(23, 23, 23, 0.14);
   background: var(--paper);
 }
@@ -560,7 +559,7 @@ html:has(.landing-hero) {
   text-box: trim-start cap;
 }
 
-.dark-section .section-heading>h2 {
+.landing-section:nth-of-type(odd) .section-heading>h2 {
   color: var(--paper);
 }
 
@@ -584,8 +583,8 @@ html:has(.landing-hero) {
   margin-top: var(--section-paragraph-gap);
 }
 
-.dark-section .section-overview,
-.dark-section .section-exit {
+.landing-section:nth-of-type(odd) .section-overview,
+.landing-section:nth-of-type(odd) .section-exit {
   color: var(--muted-light);
 }
 
@@ -727,6 +726,188 @@ html:has(.landing-hero) {
   margin-bottom: 0;
 }
 
+.feature-status {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--coral);
+  font: 500 11.5px/1.4 "JetBrains Mono", monospace;
+}
+
+.feature-code-label {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--muted-light);
+  font: 500 11.5px/1.4 "JetBrains Mono", monospace;
+}
+
+.feature-result-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 18px 0;
+}
+
+.package-intro {
+  --section-paragraph-gap: 1.1rem;
+  --package-gap: clamp(28px, 5vw, 64px);
+  display: flow-root;
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+
+.package-intro .package-build {
+  float: right;
+  width: calc((100% - var(--package-gap)) / 2);
+  margin: 0 0 20px var(--package-gap);
+}
+
+.package-intro .section-exit {
+  margin-top: 24px;
+}
+
+.package-build .install-code pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 639px) {
+  .package-intro {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .package-intro .package-build {
+    float: none;
+    order: 1;
+    width: 100%;
+    margin: 20px 0 0;
+  }
+}
+
+#packages .feature-code {
+  flex: 0 0 auto;
+  padding: clamp(16px, 2vw, 24px);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+#packages .feature-code pre,
+#packages .feature-copy pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#packages .feature-copy {
+  border-top: 0;
+  border-left: 1px solid rgba(244, 241, 236, 0.18);
+}
+
+#packages .carousel-slide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--dark);
+}
+
+#packages .carousel-slide:nth-child(even) .feature-code {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+#packages .carousel-slide:nth-child(even) .feature-copy {
+  grid-column: 1;
+  grid-row: 1;
+  border-right: 1px solid rgba(244, 241, 236, 0.18);
+  border-left: 0;
+}
+
+@media (max-width: 639px) {
+  #packages .carousel-slide {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #packages .carousel-slide:nth-child(even) .feature-code,
+  #packages .carousel-slide:nth-child(even) .feature-copy {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  #packages .carousel-slide .feature-copy {
+    border: 0;
+    border-top: 1px solid rgba(244, 241, 236, 0.18);
+  }
+}
+
+#packages .feature-result-image {
+  width: auto;
+  max-width: 100%;
+  max-height: 220px;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+#packages .feature-copy pre {
+  margin: 18px 0;
+  padding: 16px;
+  overflow-x: auto;
+  background: #e9e6df !important;
+  color: var(--dark) !important;
+  font: 12px/1.65 "JetBrains Mono", monospace;
+}
+
+#packages .feature-copy pre code {
+  font: inherit;
+}
+
+#packages .feature-copy {
+  background: var(--paper);
+  color: var(--dark);
+}
+
+#packages .feature-copy h3 {
+  color: var(--dark);
+}
+
+#packages .feature-copy p {
+  color: var(--muted-dark);
+}
+
+#packages .feature-status {
+  color: var(--red-text);
+}
+
+#packages .feature-copy code:not(pre code) {
+  border-color: rgba(218, 41, 28, 0.24);
+  background: rgba(218, 41, 28, 0.07);
+  color: #9e1f16;
+}
+
+#packages .feature-copy pre span {
+  color: inherit !important;
+}
+
+.animation-toggle {
+  display: block;
+  margin: -8px auto 18px;
+  padding: 4px 8px;
+  border: 1px solid rgba(23, 23, 23, 0.2);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted-dark);
+  font: 11px/1.4 "JetBrains Mono", monospace;
+  cursor: pointer;
+}
+
+.animation-toggle[hidden] {
+  display: none;
+}
+
+#packages .section-exit>p {
+  margin: 0 0 18px;
+}
+
+#packages .package-note {
+  font-size: 13px;
+}
+
 /* Code samples are Markdown fences highlighted by Shiki with the x2c grammar
    (site/shiki-x2c.mjs), so token colours arrive inline. The panel keeps the
    padding and the background; the generated <pre> only carries the text. */
@@ -826,38 +1007,38 @@ html:has(.landing-hero) {
   font-style: italic;
 }
 
-.dark-section .docs-copy small,
-.dark-section .docs-card small {
+.landing-section:nth-of-type(odd) .docs-copy small,
+.landing-section:nth-of-type(odd) .docs-card small {
   color: var(--coral);
 }
 
-.dark-section .docs-copy a {
+.landing-section:nth-of-type(odd) .docs-copy a {
   color: var(--coral);
 }
 
-.dark-section .docs-copy a:hover {
+.landing-section:nth-of-type(odd) .docs-copy a:hover {
   color: var(--paper);
 }
 
-.dark-section .docs-copy p {
+.landing-section:nth-of-type(odd) .docs-copy p {
   color: var(--muted-light);
 }
 
-.dark-section .docs-cards {
+.landing-section:nth-of-type(odd) .docs-cards {
   border-color: rgba(244, 241, 236, 0.18);
   background: rgba(244, 241, 236, 0.18);
 }
 
-.dark-section .docs-card {
+.landing-section:nth-of-type(odd) .docs-card {
   background: var(--dark);
   color: var(--paper);
 }
 
-.dark-section .docs-card:hover {
+.landing-section:nth-of-type(odd) .docs-card:hover {
   background: var(--code);
 }
 
-.dark-section .docs-card p {
+.landing-section:nth-of-type(odd) .docs-card p {
   color: var(--muted-light);
 }
 
@@ -956,25 +1137,8 @@ html:has(.landing-hero) {
   gap: clamp(32px, 5vw, 72px);
 }
 
-.deal-copy>small {
-  display: block;
-  margin: 0 0 12px;
-  color: var(--coral);
-  font:
-    500 12px/1 "JetBrains Mono",
-    monospace;
-}
-
-.deal-copy>h2 {
-  max-width: 20ch;
-  margin: 0 0 18px;
-  color: var(--paper);
-  font:
-    400 clamp(30px, 3.4vw, 46px) / 1.08 "Instrument Serif",
-    Georgia,
-    serif;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
+.deal-copy>.section-heading {
+  margin-bottom: clamp(34px, 4vw, 48px);
 }
 
 .deal-copy>p {
@@ -989,24 +1153,16 @@ html:has(.landing-hero) {
   margin-bottom: 0;
 }
 
-.light-section .deal-copy>small {
-  color: var(--red-text);
-}
-
-.light-section .deal-copy>h2 {
-  color: var(--dark);
-}
-
-.light-section .deal-copy>p {
+.landing-section:nth-of-type(even) .deal-copy>p {
   color: var(--muted-dark);
 }
 
-.light-section .button-secondary {
+.landing-section:nth-of-type(even) .button-secondary {
   border-color: rgba(23, 23, 23, 0.35);
   color: var(--dark);
 }
 
-.light-section .button-secondary:hover {
+.landing-section:nth-of-type(even) .button-secondary:hover {
   border-color: var(--dark);
   background: var(--dark);
   color: var(--paper);

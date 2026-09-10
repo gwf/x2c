@@ -24,7 +24,7 @@ bootstrap work or cleaning.
 
 For optional packages, use `./configure --packages`, or name only the ones
 you intend to build, such as `./configure --packages termbox2`. See the
-[package instructions](../../../packages/README.md) for native dependencies.
+[package instructions](https://github.com/gwf/x2c/blob/main/packages/README.md) for native dependencies.
 These reports check command availability and required OpenSSL Perl modules;
 upstream configure scripts and compilers still check platform support.
 

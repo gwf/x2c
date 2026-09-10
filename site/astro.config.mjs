@@ -65,7 +65,7 @@ export default defineConfig({
     shikiConfig: {
       theme: x2cDarkTheme,
       langs: [x2cLang, x2cLispLang],
-      langAlias: { xlisp: "x2c-lisp" },
+      langAlias: { xlisp: "x2c-lisp", "x2c,ignore": "x2c" },
       transformers: [hiddenLines]
     }
   }

@@ -57,6 +57,9 @@ x2c's main features are summarized in the table on the right. Everything is
 optional and works with plain C as well. Hence, you can take existing C code and
 adopt x2c capabilities incrementally.
 
+[Packages](#packages) bring SQLite, JSON, HTTP, and graphics into the same
+style of code. See what you can build with one example from each.
+
 The compiler, library, and runtime are all written in x2c, with no third-party
 dependencies. You can read the source to learn the language, then change the
 language by editing the source. The [repository counts](#source) give a sense

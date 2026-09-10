@@ -117,9 +117,18 @@
 
 .landing-site-nav>a {
   color: var(--nav-muted, #6b655f);
+  white-space: nowrap;
 }
 
-@media (max-width: 980px) {
+.external-link-icon {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.3em;
+  vertical-align: -0.05em;
+}
+
+@media (max-width: 1180px) {
   .landing-header-inner {
     padding-block: 10px !important;
     flex-wrap: wrap;
@@ -169,4 +178,3 @@
     padding-left: 10px !important;
   }
 }
-

@@ -1,6 +1,6 @@
 # libuv client
 
-This experimental package provides an x2c interface to the pinned static
+This package provides an x2c interface to the pinned static
 libuv 1.52.1 profile. Its entry point is `src/libuv.x`. It
 provides one event loop for asynchronous DNS, TCP, named-pipe, UDP, and
 filesystem I/O, and process supervision: argv, working directory,

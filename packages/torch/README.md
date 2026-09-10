@@ -1,6 +1,6 @@
 # torch
 
-Experimental. Tensors, autograd, layers, optimizers, schedules,
+Tensors, autograd, layers, optimizers, schedules,
 checkpoints, TorchScript inference, and MNIST over the pinned libtorch
 2.10.0, PyTorch's C++ library. The
 entry unit is `src/torch.x`; the C ABI it compiles over is

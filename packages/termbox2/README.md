@@ -1,6 +1,6 @@
 # termbox2 client
 
-This experimental package provides an x2c interface to the pinned termbox2
+This package provides an x2c interface to the pinned termbox2
 2.5.0 64-bit-attribute, extended-grapheme profile. It is an importable package
 whose entry point is `src/termbox2.x`; one live `Termbox` owns the
 process-global terminal, drawing takes `String` text and termbox's own

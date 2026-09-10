@@ -54,7 +54,16 @@ Astro pages and components:
 - `love.md`, `power.md`, and `magic.md` hold the three section introductions;
   each single-word title is frontmatter and its overview is ordinary Markdown.
 - `install.md` is the installation code window.
-- `slides/*.md` are the Love, Power, and Magic carousel slides, one file per
+- `packages.md` introduces the package example gallery. Its slides contain
+  excerpts from `packages/*/examples/`, links to the complete programs, and
+  captured output. Refresh the excerpt and result together when its example
+  changes; package-dependent excerpts use the documented `x2c,ignore` fence.
+  Slide frontmatter may supply `status` and an `image` path relative to
+  `public/`, with `imageAlt`, `imageWidth`, and `imageHeight`. Animated GIFs
+  also supply `imagePoster` for the pause control and reduced-motion fallback.
+- `packages-build.md` supplies the shell commands beside the package
+  introduction, using the same code-window styling as installation.
+- `slides/*.md` are the Love, Power, Magic, and Packages slides, one file per
   slide, ordered by filename. Frontmatter names the `section`, the `tab`
   label, and the `title` shown below the code.
 
