@@ -1,5 +1,6 @@
 ---
 slug: torch
+navTitle: Recognize digits
 order: 1
 slide: torch
 title: Recognize handwritten digits.

@@ -1,5 +1,6 @@
 ---
 slug: embedded-lisp
+navTitle: Play against Lisp
 order: 2
 slide: runtime-lisp
 title: Give your game a Lisp player.

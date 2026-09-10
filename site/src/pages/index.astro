@@ -60,7 +60,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
               data-section={slides.find(slide =>
                 slide.frontmatter.slug === example.slide)!.frontmatter.section}
               data-example-action="explore">
-              {example.title.replace(/\.$/, "")}</a>
+              {example.navTitle}</a>
           ))}
         </nav>
       </header>

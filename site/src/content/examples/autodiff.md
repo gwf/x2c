@@ -1,5 +1,6 @@
 ---
 slug: autodiff
+navTitle: Differentiate a function
 order: 4
 slide: autodiff
 title: Differentiate a function.

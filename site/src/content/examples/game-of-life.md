@@ -1,5 +1,6 @@
 ---
 slug: game-of-life
+navTitle: Game of Life in a TTY
 order: 3
 slide: game-of-life
 title: A little life in your terminal.
