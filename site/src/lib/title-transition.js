@@ -6,30 +6,25 @@ export const titleTransition = {
   a: {
     background: 100,
     lines: [
-      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 30 },
-      { opacity: 30, blur: 0, depth: 0, softness: 0, strength: 0 },
+      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 40 },
+      { opacity: 40, blur: 0, depth: 0, softness: 0, strength: 0 },
     ],
   },
   b: {
     background: 100,
     lines: [
-      { opacity: 30, blur: 0, depth: 0, softness: 0, strength: 0 },
-      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 30 },
+      { opacity: 40, blur: 0, depth: 0, softness: 0, strength: 0 },
+      { opacity: 100, blur: 0, depth: 0, softness: 100, strength: 40 },
     ],
   },
 };
 
 export function lineStyle(state) {
-  const shadow = (y, blur, rgb, alpha) =>
-    `0 ${y * state.depth / 100}em ${blur * state.softness / 100}em ` +
-    `rgba(${rgb},${Math.min(1, alpha * state.strength / 100)})`;
-  const shadows = [
-    shadow(.008, .02, "23,23,23", .65),
-    shadow(.025, .055, "23,23,23", .4),
-    shadow(.065, .15, "23,23,23", .28),
-  ];
+  const shadow = `0 ${.025 * state.depth / 100}em ` +
+    `${.055 * state.softness / 100}em ` +
+    `rgba(23,23,23,${state.strength / 100})`;
   return `color:rgba(23,23,23,${state.opacity / 100});` +
-    `filter:blur(${state.blur / 1000}em);text-shadow:${shadows.join(",")}`;
+    `filter:blur(${state.blur / 1000}em);text-shadow:${shadow}`;
 }
 
 export function ease(t, curve) {
