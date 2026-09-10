@@ -4,6 +4,7 @@ import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import FeatureCarousel from "../components/FeatureCarousel.astro";
 import FeatureTable from "../components/FeatureTable.astro";
+import HeroTitle from "../components/HeroTitle.astro";
 import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
@@ -54,9 +55,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
   <div class="landing">
     <section id="top" class="landing-hero">
       <header class="hero-heading">
-        <h1>{titleHtml.split(/<br\s*\/?>/i).map((line) =>
-          <span class="hero-title-line" set:html={line} />
-        )}</h1>
+        <HeroTitle html={titleHtml} />
         <p set:html={kickerHtml} />
       </header>
       <FeatureTable intro={home.featureIntro} features={home.features} />

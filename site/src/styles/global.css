@@ -363,6 +363,7 @@ main:focus {
 
 .hero-heading h1 {
   margin: 0 0 24px;
+  color: var(--dark);
   font:
     400 12.541cqw / 0.92 "Instrument Serif",
     Georgia,

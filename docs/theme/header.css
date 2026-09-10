@@ -16,13 +16,15 @@
 
 .landing-header-inner {
   display: flex;
+  flex-wrap: wrap;
   width: min(100%, 1180px);
   min-height: 64px;
   margin-inline: auto;
   padding-inline: clamp(20px, 3.2vw, 44px);
+  padding-block: 10px;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 8px clamp(16px, 2.2vw, 32px);
 }
 
 .landing-branding {
@@ -93,8 +95,11 @@
 }
 
 .landing-nav {
-  --landing-nav-gap: 18px;
-  --landing-divider-space: 14px;
+  --landing-nav-gap: clamp(12px, 1.5vw, 18px);
+  --landing-divider-space: clamp(10px, 1.2vw, 14px);
+  max-width: 100%;
+  flex-wrap: wrap;
+  row-gap: 8px;
   font:
     500 12.5px/1 "JetBrains Mono",
     monospace;
@@ -127,21 +132,6 @@
   height: 0.85em;
   margin-left: 0.3em;
   vertical-align: -0.05em;
-}
-
-@media (max-width: 1180px) {
-  .landing-header-inner {
-    padding-block: 10px !important;
-    flex-wrap: wrap;
-    gap: 8px 16px !important;
-  }
-
-  .landing-nav {
-    width: 100%;
-    flex-wrap: wrap;
-    row-gap: 8px;
-    justify-content: flex-start;
-  }
 }
 
 @media (max-width: 700px) {

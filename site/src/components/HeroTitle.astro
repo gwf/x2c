@@ -1,0 +1,54 @@
+---
+import { titleTransition, lineStyle } from "../lib/title-transition.js";
+const { html } = Astro.props;
+---
+
+<h1 data-title-transition>{html.split(/<br\s*\/?>/i).map((line, i) =>
+  <span class="hero-title-line"
+    style={lineStyle(titleTransition.a.lines[i])} set:html={line} />
+)}</h1>
+
+<script>
+  import {
+    titleTransition, titleState, lineStyle, backgroundColor,
+  } from "../lib/title-transition.js";
+
+  const lines = [...document.querySelectorAll<HTMLElement>(
+    "[data-title-transition] .hero-title-line")];
+  const landing = document.querySelector<HTMLElement>(".landing")!;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let timer = 0;
+  let frame = 0;
+
+  function render(t: number) {
+    const state = titleState(t);
+    lines.forEach((line, i) => {
+      line.style.cssText = lineStyle(state.lines[i]);
+    });
+    landing.style.backgroundColor = backgroundColor(state.background);
+  }
+
+  async function schedule() {
+    await document.fonts.ready;
+    if (reducedMotion.matches) { render(1); return; }
+    timer = window.setTimeout(() => {
+      const start = performance.now();
+      function tick(now: number) {
+        const t = Math.min(1, (now - start) / titleTransition.duration);
+        render(t);
+        if (t < 1) frame = requestAnimationFrame(tick);
+      }
+      frame = requestAnimationFrame(tick);
+    }, titleTransition.delay);
+  }
+
+  reducedMotion.addEventListener("change", () => {
+    if (reducedMotion.matches) {
+      clearTimeout(timer);
+      cancelAnimationFrame(frame);
+      render(1);
+    }
+  });
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule, { once: true });
+</script>
