@@ -1,12 +1,7 @@
-> Status: active
-> Written 2026-09-09 from the feasibility spike in the brisbane workspace
-> and implemented the same day: all five phases landed on `main` as
-> `lib/autodiff.xmacro`, `lib/autodiff.x`, `unittest/test-autodiff.x`,
-> three compiler fixtures, `examples/magic/autodiff.x`, and the guide
-> chapter `docs/src/guide/autodiff.md`. The import decision resolved
-> itself: `import` already falls back to the toolchain `lib/` directory.
-> Deviations from the text below are recorded under "Implementation
-> notes".
+> Status: done
+> All phases and the follow-up examples shipped through a50dfe7; public
+> navigation shipped in 2f74dec. Archived 2026-09-10 with the follow-up
+> repairs for forward loop clauses and inactive runtime-tape adjoints.
 
 # Automatic differentiation for x2c
 

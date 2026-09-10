@@ -1,7 +1,7 @@
 # torch package: the later items
 
 > Status: needs author scoping
-> Written 2026-09-10 after `plans/x2c-torch.md` M0 to M3, the book chapter,
+> Written 2026-09-10 after `plans/archive/x2c-torch.md` M0 to M3, the book chapter,
 > and the matched comparison landed on `main`. Each item below is scoped
 > and estimated; none is started. Gary picks the order.
 

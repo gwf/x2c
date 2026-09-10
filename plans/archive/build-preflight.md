@@ -1,5 +1,6 @@
-> Status: complete
-> Approved for publication; follow-up to the build-only package command.
+> Status: done
+> Published as 526a57f (#25). Archived 2026-09-10; prerequisite reporting
+> and the build-only package command are implemented.
 
 # Build prerequisites
 

@@ -277,7 +277,10 @@ int main(void) {
 
 Every operation records a closure that propagates its adjoint to its
 operands; `AdTape.backward` seeds the result and replays the tape in
-reverse. Values box through `Var` and each operation allocates a node in
+reverse, skipping callbacks whose adjoints are zero. An unused singular
+operation therefore does not contaminate the requested gradient. Repeating
+`backward` clears the previous adjoints before seeding the new result.
+Values box through `Var` and each operation allocates a node in
 the active `Scope`, so this is the slow path.
 
 ## Choosing

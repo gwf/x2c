@@ -1,10 +1,12 @@
 # Matched x2c and PyTorch applications: correctness, memory, and performance
 
 > Status: active
-> Planning only, requested 2026-09-09. Applications and measurements have
-> not been implemented by this plan. Baseline inspected: 473e21b; the torch
-> package is still advancing. Implementation must record its actual tree.
-> Complements `plans/x2c-torch.md`; does not replace its package milestones.
+> The suite, applications, and report shipped in 9c36b76, with temporary
+> cleanup measurements in dbba113. Acceptance-check repairs followed on
+> 2026-09-10. Historical raw checkpoints were not retained in the linked
+> worktrees, so the repaired checks cannot revalidate those results here.
+> Remaining: a fresh recorded correctness run and the documented Adam
+> matching limitation. Package milestones are archived separately.
 
 ## Outcome and boundary
 

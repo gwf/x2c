@@ -10,6 +10,9 @@ else
     if [[ $argument == -c ]]; then
       phase=compile
       break
+    elif [[ $argument == -E ]]; then
+      phase=preprocess
+      break
     fi
   done
 fi

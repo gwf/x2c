@@ -22,7 +22,7 @@ Reverse-mode differentiation recorded on a runtime tape.
 | [`AdNode.sub`](#AdNode.sub) | Difference. |
 | [`AdNode.tanh`](#AdNode.tanh) | Hyperbolic tangent. |
 | [`AdNode.var`](#AdNode.var) | Boxes a node for `Var` participation. |
-| [`AdTape.backward`](#AdTape.backward) | Seeds `result` with adjoint 1 and propagates adjoints to every node recorded before it. |
+| [`AdTape.backward`](#AdTape.backward) | Seeds `result` with adjoint 1 and propagates active adjoints to its operands. |
 | [`AdTape.input`](#AdTape.input) | Records an input or constant. |
 | [`AdTape.new`](#AdTape.new) | Creates an empty tape in the active `Scope`. |
 | [`Var.adnode`](#Var.adnode) | Unboxes a node from a `Var` produced by `AdNode.var`. |
@@ -153,9 +153,9 @@ Source: `lib/autodiff.x:37`
 
 `void AdTape.backward(AdTape tape, AdNode result)`
 
-Seeds `result` with adjoint 1 and propagates adjoints to every node
-recorded before it. Earlier adjoints on the tape are cleared first, so
-repeated calls do not accumulate.
+Seeds `result` with adjoint 1 and propagates active adjoints to its
+operands. Zero adjoints do not invoke reverse callbacks. Earlier adjoints
+on the tape are cleared first, so repeated calls do not accumulate.
 
 Source: `lib/autodiff.x:67`
 

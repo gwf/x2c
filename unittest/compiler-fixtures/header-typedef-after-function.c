@@ -7,6 +7,11 @@ typedef struct Hidden{
 }
 Hidden;
 
+typedef struct Opaque{
+  int value;
+}
+* Opaque;
+
 static int hidden_size(Hidden value);
 
 int before_size(Before value){
@@ -15,6 +20,14 @@ int before_size(Before value){
 
 int after_size(After value){
   return value.value;
+}
+
+ItemPtr item_identity(ItemPtr value){
+  return value;
+}
+
+int opaque_size(Opaque value){
+  return value -> value;
 }
 
 static int hidden_size(Hidden value){
@@ -31,6 +44,14 @@ int main(void){
     3
   }
   ;
-  return after_size(after) + hidden_size(hidden) == 5 ? 0 : 1;
+  Item item ={
+    4
+  }
+  ;
+  struct Opaque opaque ={
+    5
+  }
+  ;
+  return after_size(after) + hidden_size(hidden) == 5 && item_identity(& item) -> value == 4 && opaque_size(& opaque) == 5 ? 0 : 1;
 }
 

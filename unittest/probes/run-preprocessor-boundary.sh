@@ -129,14 +129,37 @@ grep -Fq "$BUILD/bin/fake-ar" "$BUILD/ar-dry.stderr"
 
 : >"$tool_log"
 TOOL_ARGS_LOG="$tool_log" X2C_CC=wrong-cc CC=also-wrong \
-  "$X2C" build --cc "$BUILD/bin/fake-cc" \
+  "$X2C" build --cc "$BUILD/bin/fake-cc" -O2 -D NATIVE_PROBE=7 \
+  --c-include-dir "$BUILD/include second" \
   --build-dir "$BUILD/tool build" --output "$BUILD/tool output" \
   "$BUILD/tool source.c"
 [[ -e "$BUILD/tool output" ]]
 grep -Fxq "$BUILD/tool source.c" "$tool_log"
 grep -Fxq "$BUILD/tool build/obj/tool source-"*".o" "$tool_log"
-[[ $(grep -c '^BEGIN compile$' "$tool_log") == 1 ]]
-[[ $(grep -c '^BEGIN link$' "$tool_log") == 1 ]]
+python3 - "$tool_log" "$BUILD/tool source.c" <<'PY_NATIVE_PHASES'
+from pathlib import Path
+import sys
+
+log, source = sys.argv[1:]
+phases = []
+for line in Path(log).read_text().splitlines():
+    if line.startswith('BEGIN '):
+        phases.append((line[6:], []))
+    elif line.startswith('END '):
+        assert line[4:] == phases[-1][0]
+    else:
+        phases[-1][1].append(line)
+assert [name for name, _ in phases] == ['preprocess', 'compile', 'link']
+preprocess, compile, link = [args for _, args in phases]
+shared = compile[:compile.index('-MMD')]
+assert preprocess[:preprocess.index('-E')] == shared
+assert '-O2' in shared and shared[shared.index('-D') + 1] == 'NATIVE_PROBE=7'
+assert preprocess[preprocess.index('-E') + 1] == source
+assert compile[compile.index('-c') + 1] == source
+preprocessed = Path(preprocess[preprocess.index('-o') + 1])
+assert preprocessed.suffix == '.i' and not preprocessed.exists()
+assert compile[compile.index('-o') + 1] == link[0]
+PY_NATIVE_PHASES
 
 : >"$tool_log"
 TOOL_ARGS_LOG="$tool_log" \

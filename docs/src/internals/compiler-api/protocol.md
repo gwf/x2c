@@ -53,9 +53,10 @@ function `binding` of type `signature` and then discards the unnamed
 argument temporaries `which` selects (bit `n` for argument `n`). A
 discarded argument is one the compiler produced for this call alone, so
 its `discard` member may release what it owns before the enclosing scope
-ends. Returns null when no selected argument type has a `discard` member.
+ends. Returns null when no selected argument type has a `discard` member,
+or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:1773`
+Source: `src/protocol.x:1774`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -79,7 +80,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2200`
+Source: `src/protocol.x:2209`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -115,7 +116,7 @@ publishes the normalized row immediately. Macro-hole parsing returns syntax
 for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node.
 
-Source: `src/protocol.x:2334`
+Source: `src/protocol.x:2343`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -124,7 +125,7 @@ Source: `src/protocol.x:2334`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:1829`
+Source: `src/protocol.x:1838`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for

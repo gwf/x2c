@@ -1,15 +1,10 @@
 # x2c over libtorch: Scope finalizers, the `@` operator, and packages/torch
 
-> Status: active
-> All four package milestones, the book chapter, and the matched
-> comparison suite with its REPORT.md are on `main` (2026-09-09/10). The
-> compiler now discards unnamed operator and call temporaries through a
-> `discard` protocol row, which the torch package adopts; the interop chain
-> went from 0.22x to 0.44x of Python, with the residual attributed to
-> reassigned loop variables. Open: the "Later" items below (MPS, Linux,
-> Python-readable optimizer state, autograd.Function, Lisp surface) and the
-> Adam matching note in the report (libtorch's mul_/add_ versus Python's
-> lerp_).
+> Status: done
+> The four package milestones, book, and comparison suite shipped through
+> 9c36b76; temporary cleanup followed in dbba113. Archived 2026-09-10.
+> Later features are scoped in plans/x2c-torch-later.md; comparison
+> acceptance and the Adam difference remain in plans/x2c-torch-comparison.md.
 
 ## Context
 

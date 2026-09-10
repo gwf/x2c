@@ -285,6 +285,52 @@ static void autodiff_continue_with_step_and_for_double(void) {
   }
 }
 
+$ad.both()
+static double _scaled_steps(double x) {
+  double sum = 0.0;
+  for (double t = x; t < 5.0; t *= 2.0) {
+    if (t > 1.5 && t < 2.5) continue;
+    sum += t;
+  }
+  return sum;
+}
+
+$ad.forward()
+static double _assigned_steps(double x) {
+  double t = 0.0, sum = 0.0;
+  int i = 0;
+  for (t = x * x; i < 3; i++, t *= x) sum += t;
+  return sum;
+}
+
+static void autodiff_differentiates_loop_clauses(void) {
+  double gradient;
+  _scaled_steps_grad(1.0, &gradient);
+  EXPECT_TRUE(_near(gradient, 5.0));
+  EXPECT_TRUE(_near(_scaled_steps_dot(1.0, 1.0), gradient));
+  EXPECT_TRUE(_near(_scaled_steps_dot(1.0, 1.0),
+                    _central(_scaled_steps, 1.0)));
+  EXPECT_TRUE(_near(_assigned_steps_dot(1.2, 1.0),
+                    _central(_assigned_steps, 1.2)));
+}
+
+static void autodiff_tape_skips_inactive_adjoints(void) {
+  $test.scoped();
+  AdTape tape = AdTape.new();
+  AdNode x = tape.input(0.0);
+  AdNode before = x.sqrt();
+  AdNode result = x + x;
+  AdNode after = x.log();
+  tape.backward(result);
+  EXPECT_TRUE(_near(x.adjoint, 2.0));
+  EXPECT_TRUE(_near(before.adjoint, 0.0));
+  EXPECT_TRUE(_near(after.adjoint, 0.0));
+  tape.backward(before);
+  EXPECT_TRUE(isinf(x.adjoint));
+  tape.backward(result);
+  EXPECT_TRUE(_near(x.adjoint, 2.0));
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
@@ -297,4 +343,6 @@ void autodiff_suite(void) {
   $test.run(autodiff_checkpoint_agrees_with_full_recording);
   $test.run(autodiff_dual_mixed_operands_and_pow);
   $test.run(autodiff_continue_with_step_and_for_double);
+  $test.run(autodiff_differentiates_loop_clauses);
+  $test.run(autodiff_tape_skips_inactive_adjoints);
 }

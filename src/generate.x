@@ -437,11 +437,17 @@ static int _mentions_type(List node, String name) {
   return 0;
 }
 
-static String _typedef_name(List typedef_node) {
-  match (typedef_node) {
-    case %(typedef ? (bindings (bind (binding ? ?name) ?) *)): return name;
-    case %(typedef ? (bindings (bind (?name) ?) *)): return name;
-  }
+static List _typedef_names(List typedef_node) {
+  match (typedef_node)
+    case %(typedef ? (bindings *declarations)): {
+      Array names = %[];
+      foreach (List declaration, declarations)
+        match (declaration) {
+          case %(bind (binding ? ?name) ?): names.push(name);
+          case %(bind (?name) ?): names.push(name);
+        }
+      return names.list_free();
+    }
   return NULL;
 }
 
@@ -460,17 +466,19 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
       case %(pending ?index): {
         int at = index.int();
         List entry = pending[at];
-        String name = entry.car(), List node = entry.cadr();
-        int promoted = entry.caddr().int();
+        (List names, List node, int promoted) = entry;
         if (header) {
-          int declared = 0;
-          for (int j = 0; j < i && !declared; j++)
-            declared = items[j] is <list> &&
-                       _typedef_name(items[j].list()) == name;
-          for (int j = i + 1; j < count && !promoted && !declared; j++)
-            promoted = items[j] is <list> &&
-                       _mentions_type(items[j].list(), name);
-          pending[at] = %($name $node $promoted);
+          foreach (String name, names) {
+            int declared = 0;
+            for (int j = 0; j < i && !declared; j++)
+              declared = items[j] is <list> &&
+                         _typedef_names(items[j].list()).contains(name);
+            for (int j = i + 1; j < count && !promoted && !declared; j++)
+              promoted = items[j] is <list> &&
+                         _mentions_type(items[j].list(), name);
+            if (promoted) break;
+          }
+          pending[at] = %($names $node $promoted);
         }
         if (promoted == header) output.push(node);
         continue;
@@ -487,13 +495,13 @@ static List _header_and_source(Compiler compiler, List ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
       case %(typedef ? (bindings *)): {
-        String name = private ? _typedef_name(node) : NULL;
-        if (!name) {
+        List names = private ? _typedef_names(node) : NULL;
+        if (!names) {
           (private ? source : header).push(node);
           continue;
         }
         List marker = %(pending ${pending.len()});
-        pending.push(%($name $node 0));
+        pending.push(%($names $node 0));
         header.push(marker);
         source.push(marker);
         continue;

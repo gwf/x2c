@@ -22,7 +22,7 @@ Map/Array values. Their broader applications, clients, tests, and READMEs
 show how the same integration handles substantial work while keeping native
 allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 
-`make packages-check` includes the seven library packages other than SQLite.
+`make packages-check` includes the eight library packages other than SQLite.
 SQLite is checked separately with `make -C packages/sqlite test run run-lisp`.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C
@@ -185,7 +185,8 @@ The package `test` target builds only `tests/test-*.x`, so each package also
 has `run` for applications. Packages with Lisp installers add `run-lisp`;
 those without them do not. The current combined check runs all three for
 pcre2, yyjson, and libcurl, `test run` for termbox2, blis, and libuv, and
-raylib's `verify` target for headers, application, tests, and rendered PNGs.
+raylib's `verify` target for headers, application, tests, and rendered PNGs,
+and `test run` for torch.
 
 A supported release additionally supplies the small public interface,
 complete pinned raw header, importable archive and generated header, link

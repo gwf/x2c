@@ -30,6 +30,8 @@ Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List 
 
 ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String object, String depfile, List gen_dirs);
 
+ToolAction Toolchain_preprocess_action(Toolchain toolchain, String source, String output, List gen_dirs);
+
 ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List objects);
 
 ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs);

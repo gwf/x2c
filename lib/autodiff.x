@@ -60,9 +60,9 @@ static AdNode _record(AdTape tape, double value, Func back) {
 AdNode AdTape.input(AdTape tape, double value) =>
   _record(tape, value, NULL);
 
-/** Seeds `result` with adjoint 1 and propagates adjoints to every node
-    recorded before it. Earlier adjoints on the tape are cleared first, so
-    repeated calls do not accumulate.
+/** Seeds `result` with adjoint 1 and propagates active adjoints to its
+    operands. Zero adjoints do not invoke reverse callbacks. Earlier adjoints
+    on the tape are cleared first, so repeated calls do not accumulate.
 */
 void AdTape.backward(AdTape tape, AdNode result) {
   for (int i = 0; i < tape.nodes.len(); i++) {
@@ -72,7 +72,7 @@ void AdTape.backward(AdTape tape, AdNode result) {
   result.adjoint = 1.0;
   for (int i = tape.nodes.len() - 1; i >= 0; i--) {
     AdNode node = tape.nodes[i];
-    if (node.back) (node.back)();
+    if (node.adjoint != 0.0 && node.back) (node.back)();
   }
 }
 

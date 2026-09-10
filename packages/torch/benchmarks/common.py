@@ -11,6 +11,7 @@ Every application is also runnable on its own; see README.md.
 
 import hashlib
 import json
+import math
 import os
 import platform
 import subprocess
@@ -200,37 +201,51 @@ def check_artifact_version(mapping, path):
 def compare_tensors(left, right, atol=ATOL, rtol=RTOL):
     """Returns per-name (max absolute, max normalized) differences.
 
-    Normalized is the absolute difference over the larger magnitude, which
-    is the quantity the tolerances are stated against.
+    Normalized differences summarize scale; acceptance uses elementwise
+    atol + rtol * abs(right), with exact integer and metadata comparisons.
     """
     import torch
 
     findings = []
     names = sorted(set(left) | set(right))
+    if not names:
+        return [("checkpoint", float("inf"), float("inf"), "empty")]
     for name in names:
-        if name.startswith("meta."):
-            continue
         if name not in left or name not in right:
             findings.append((name, float("inf"), float("inf"), "missing"))
             continue
-        a, b = left[name].double(), right[name].double()
+        a, b = left[name], right[name]
+        if not (torch.is_tensor(a) and torch.is_tensor(b)):
+            findings.append((name, float("inf"), float("inf"), "not tensor"))
+            continue
+        if a.dtype != b.dtype:
+            findings.append((name, float("inf"), float("inf"), "dtype"))
+            continue
         if a.shape != b.shape:
             findings.append((name, float("inf"), float("inf"), "shape"))
             continue
         if not (torch.isfinite(a).all() and torch.isfinite(b).all()):
             findings.append((name, float("inf"), float("inf"), "non-finite"))
             continue
+        exact = (name.startswith("meta.") or
+                 not (a.is_floating_point() or a.is_complex()))
+        equal = torch.equal(a, b)
+        dtype = torch.complex128 if a.is_complex() else torch.float64
+        a, b = a.to(dtype), b.to(dtype)
         absolute = (a - b).abs()
         scale = torch.maximum(a.abs(), b.abs()).clamp_min(1e-30)
         worst_abs = float(absolute.max()) if a.numel() else 0.0
         worst_rel = float((absolute / scale).max()) if a.numel() else 0.0
-        verdict = "ok" if worst_abs <= atol + rtol * float(
-            b.abs().max() if b.numel() else 0.0) else "over"
+        within = equal if exact else bool(
+            (absolute <= atol + rtol * b.abs()).all())
+        verdict = "ok" if within else "different" if exact else "over"
         findings.append((name, worst_abs, worst_rel, verdict))
     return findings
 
 
 def agree(what, left, right, tolerance=LOSS_RTOL):
+    if not (math.isfinite(left) and math.isfinite(right)):
+        return float("inf"), False
     scale = max(abs(left), abs(right), 1e-12)
     relative = abs(left - right) / scale
     return relative, relative <= tolerance

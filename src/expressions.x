@@ -821,7 +821,7 @@ static List _resolve_protocol_operator(
 
 /* A call result is an unnamed temporary the consuming operator or call may
    discard when its callee is known to return a fresh value: a protocol
-   operator member, a converter from a number, or a discard helper. The
+   operator member, a converter from a number, or a wrapper of either. The
    callee binding is shared by every call to that function, so the record
    survives the re-resolution that rebuilds call nodes. */
 static void _note_fresh_callee(Compiler compiler, List binding) {

@@ -2,11 +2,11 @@
 
 #include "protocol.h"
 
-static List _737, _735, _734, _732, _731, _730, _727, _724, _722, _721, _719, _717, _715, _713, _712, _710, _700, _690, _689, _687, _686, _684, _683, _682, _680, _678, _677, _676, _675, _672, _671, _670, _668, _667, _665, _664, _663, _661, _660, _651, _650, _649, _648, _647, _646, _644, _643, _626, _625, _624, _623, _621, _620, _619, _617, _616, _615, _613, _612, _611, _610, _609, _608, _607, _606, _586, _585, _584, _582, _581, _579, _578, _574, _569, _565, _564, _561, _560, _557, _556, _555, _553, _552, _551, _545, _543, _540, _528, _527, _526, _524, _523, _522, _519, _517, _513, _512, _511, _509, _508, _507, _503, _499, _498, _489, _488, _487, _486, _470, _469, _468, _464, _456, _455, _454, _449, _448, _447, _444, _443, _439, _431, _428, _427, _420, _419, _416, _415, _370, _369, _362, _361, _360, _359, _358, _355, _354, _353, _352, _349, _348, _339, _338, _328, _325, _323, _322, _321, _320, _309, _308, _304, _303, _302, _300, _299, _298, _297, _296, _285, _284, _283, _282, _272, _271, _270, _269, _264, _259, _257, _256, _255, _254, _252, _251, _250, _248, _247, _246, _243, _242, _241, _232, _231, _227, _226, _223, _222, _219, _218, _211, _210, _201, _200, _190, _189, _188, _185, _184, _183, _182, _164, _161, _158, _157, _156, _155, _149, _137, _136, _135, _134, _133, _117, _116, _115, _113, _112, _111, _110, _106, _105, _104, _102, _101, _89, _88, _87, _86, _72, _66, _63, _61, _60, _58, _50, _49, _47, _45, _44, _43, _41, _38, _37, _36, _34, _33, _32, _26, _25, _24, _21, _20, _17, _16, _15, _14, _9, _8, _7;
+static List _737, _735, _734, _732, _731, _730, _727, _724, _722, _721, _719, _717, _715, _713, _712, _710, _700, _690, _689, _687, _686, _684, _683, _682, _680, _678, _677, _676, _675, _672, _671, _670, _668, _667, _665, _664, _663, _661, _660, _651, _650, _649, _648, _647, _646, _644, _643, _626, _625, _624, _623, _621, _620, _619, _617, _616, _615, _613, _612, _611, _610, _609, _608, _607, _606, _586, _585, _584, _582, _581, _579, _578, _574, _569, _565, _564, _561, _560, _557, _556, _555, _553, _552, _551, _546, _544, _541, _528, _527, _526, _524, _523, _522, _519, _517, _513, _512, _511, _509, _508, _507, _503, _499, _498, _489, _488, _487, _486, _470, _469, _468, _464, _456, _455, _454, _449, _448, _447, _444, _443, _439, _431, _428, _427, _420, _419, _416, _415, _370, _369, _362, _361, _360, _359, _358, _355, _354, _353, _352, _349, _348, _339, _338, _328, _325, _323, _322, _321, _320, _309, _308, _304, _303, _302, _300, _299, _298, _297, _296, _285, _284, _283, _282, _272, _271, _270, _269, _264, _259, _257, _256, _255, _254, _252, _251, _250, _248, _247, _246, _243, _242, _241, _232, _231, _227, _226, _223, _222, _219, _218, _211, _210, _201, _200, _190, _189, _188, _185, _184, _183, _182, _164, _161, _158, _157, _156, _155, _149, _137, _136, _135, _134, _133, _117, _116, _115, _113, _112, _111, _110, _106, _105, _104, _102, _101, _89, _88, _87, _86, _72, _66, _63, _61, _60, _58, _50, _49, _47, _45, _44, _43, _41, _38, _37, _36, _34, _33, _32, _26, _25, _24, _21, _20, _17, _16, _15, _14, _9, _8, _7;
 
-static String _760, _759, _758, _757, _756, _755, _754, _753, _752, _751, _750, _749, _748, _747, _746, _745, _744, _743, _742, _741, _740, _739, _738, _725, _709, _708, _707, _706, _705, _704, _703, _702, _701, _698, _697, _696, _695, _693, _691, _658, _600, _598, _596, _592, _590, _571, _567, _562, _547, _546, _542, _538, _536, _520, _505, _500, _494, _484, _483, _482, _481, _480, _479, _478, _477, _476, _475, _474, _472, _457, _452, _450, _445, _429, _411, _410, _409, _408, _407, _406, _405, _404, _403, _402, _401, _400, _399, _398, _397, _396, _395, _394, _393, _392, _391, _390, _389, _388, _387, _386, _385, _384, _383, _382, _381, _380, _379, _378, _377, _376, _375, _374, _373, _371, _306, _235, _234, _233, _151, _150, _147, _146, _145, _143, _142, _141, _140, _139, _138, _98, _95, _94, _93, _92, _91, _70, _2, _1, _0;
+static String _760, _759, _758, _757, _756, _755, _754, _753, _752, _751, _750, _749, _748, _747, _746, _745, _744, _743, _742, _741, _740, _739, _738, _725, _709, _708, _707, _706, _705, _704, _703, _702, _701, _698, _697, _696, _695, _693, _691, _658, _600, _598, _596, _592, _590, _571, _567, _562, _547, _543, _539, _538, _536, _520, _505, _500, _494, _484, _483, _482, _481, _480, _479, _478, _477, _476, _475, _474, _472, _457, _452, _450, _445, _429, _411, _410, _409, _408, _407, _406, _405, _404, _403, _402, _401, _400, _399, _398, _397, _396, _395, _394, _393, _392, _391, _390, _389, _388, _387, _386, _385, _384, _383, _382, _381, _380, _379, _378, _377, _376, _375, _374, _373, _371, _306, _235, _234, _233, _151, _150, _147, _146, _145, _143, _142, _141, _140, _139, _138, _98, _95, _94, _93, _92, _91, _70, _2, _1, _0;
 
-static Var _736, _733, _729, _728, _726, _723, _720, _718, _716, _714, _711, _699, _694, _692, _688, _685, _681, _679, _674, _673, _669, _666, _662, _659, _645, _631, _629, _627, _622, _618, _614, _599, _597, _595, _594, _593, _591, _589, _588, _587, _583, _580, _577, _576, _575, _573, _572, _570, _568, _566, _563, _559, _558, _554, _550, _549, _548, _544, _541, _539, _537, _535, _534, _533, _532, _531, _530, _529, _525, _521, _518, _516, _515, _514, _510, _506, _504, _502, _501, _497, _496, _495, _485, _473, _471, _467, _466, _465, _463, _458, _453, _451, _446, _435, _430, _418, _414, _412, _372, _364, _363, _357, _351, _350, _340, _326, _324, _312, _310, _307, _305, _301, _288, _286, _278, _276, _275, _274, _273, _262, _260, _258, _253, _249, _245, _244, _240, _239, _238, _237, _236, _228, _225, _224, _221, _220, _202, _187, _176, _163, _160, _154, _152, _148, _144, _132, _118, _114, _109, _108, _107, _103, _100, _99, _97, _96, _90, _85, _75, _74, _73, _71, _65, _64, _62, _59, _57, _52, _51, _48, _46, _42, _40, _39, _35, _31, _30, _29, _28, _27, _23, _22, _19, _18, _13, _12, _11, _10, _6, _5, _4, _3;
+static Var _736, _733, _729, _728, _726, _723, _720, _718, _716, _714, _711, _699, _694, _692, _688, _685, _681, _679, _674, _673, _669, _666, _662, _659, _645, _631, _629, _627, _622, _618, _614, _599, _597, _595, _594, _593, _591, _589, _588, _587, _583, _580, _577, _576, _575, _573, _572, _570, _568, _566, _563, _559, _558, _554, _550, _549, _548, _545, _542, _540, _537, _535, _534, _533, _532, _531, _530, _529, _525, _521, _518, _516, _515, _514, _510, _506, _504, _502, _501, _497, _496, _495, _485, _473, _471, _467, _466, _465, _463, _458, _453, _451, _446, _435, _430, _418, _414, _412, _372, _364, _363, _357, _351, _350, _340, _326, _324, _312, _310, _307, _305, _301, _288, _286, _278, _276, _275, _274, _273, _262, _260, _258, _253, _249, _245, _244, _240, _239, _238, _237, _236, _228, _225, _224, _221, _220, _202, _187, _176, _163, _160, _154, _152, _148, _144, _132, _118, _114, _109, _108, _107, _103, _100, _99, _97, _96, _90, _85, _75, _74, _73, _71, _65, _64, _62, _59, _57, _52, _51, _48, _46, _42, _40, _39, _35, _31, _30, _29, _28, _27, _23, _22, _19, _18, _13, _12, _11, _10, _6, _5, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -291,6 +291,12 @@ List Sym_introduce(Sym, String);
 List Compiler_convert_expression(Compiler, List, Type);
 
 void Compiler_add_early(Compiler, List);
+
+Type Sym_resolve_key(Sym, Type);
+
+int Type_is_pointer(Type);
+
+int Type_is_aggregate(Type);
 
 String int_str(int);
 
@@ -978,16 +984,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _535 = Symbol_var(1077021542);
   _536 = String_new("discard-helper");
   _537 = String_var(_536);
-  _538 = String_new("a");
-  _539 = Symbol_var(1473096);
-  _540 = cons(_539, NULL);
-  _541 = List_var(_540);
-  _542 = String_new("_x2c_discard_");
-  _543 = cons(_533, NULL);
-  _544 = List_var(_543);
-  _545 = cons(_544, NULL);
-  _546 = String_new("discard-helper ");
-  _547 = String_new("fresh-callee ");
+  _538 = String_new("fresh-callee ");
+  _539 = String_new("a");
+  _540 = Symbol_var(1473096);
+  _541 = cons(_540, NULL);
+  _542 = List_var(_541);
+  _543 = String_new("_x2c_discard_");
+  _544 = cons(_533, NULL);
+  _545 = List_var(_544);
+  _546 = cons(_545, NULL);
+  _547 = String_new("discard-helper ");
   _548 = Symbol_var(634145674);
   _549 = Symbol_var(245020111424476);
   _550 = Symbol_var(405555302);
@@ -2548,7 +2554,9 @@ List call = cons(_64, cons(List_var(result), cons(List_var(cons(_529, cons(List_
 }
 
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which){
-  if(! _init_guard_) _file_init_();  List key = cons(_537, cons(String_var(stem), cons(int_var(which), NULL)));  Var stored;  if(Map_try_get(c -> protocol_helpers, List_var(key), & stored)) return Var_list(stored);  List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  Type result = List_cdr(signature);  Array declarations = Array_new(), arguments = Array_new(), discards = Array_new();
+  if(! _init_guard_) _file_init_();  List key = cons(_537, cons(String_var(stem), cons(int_var(which), NULL)));  Var stored;  if(Map_try_get(c -> protocol_helpers, List_var(key), & stored)) return Var_list(stored);  List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  Type result = List_cdr(signature);  Type resolved_result = Sym_resolve_key(c -> sym, result);  long callee_identity =(long) binding;  int fresh = Map_contains(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_538), cons(String_var(long_str(callee_identity)), NULL)))));
+  if(! fresh &&(Type_is_pointer(resolved_result) || Type_is_aggregate(resolved_result))) return NULL;
+  Array declarations = Array_new(), arguments = Array_new(), discards = Array_new();
   int index = 0;
   {
     Type parameter;
@@ -2560,7 +2568,7 @@ List Compiler_discard_helper(Compiler c, List binding, Type signature, String st
     while(Iter_try_next(_x2c_macro_iterator_34, & _x2c_macro_item_34)){
       parameter = Var_type(_x2c_macro_item_34);
       {
-        List argument_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_538), cons(String_var(int_str(index)), NULL))));
+        List argument_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_539), cons(String_var(int_str(index)), NULL))));
         Array_push(declarations, List_var(Type_parameter_ast(parameter, argument_binding)));
         Array_push(arguments, List_var(cons(_64, cons(List_var(parameter), cons(List_var(cons(_501, cons(List_var(argument_binding), NULL))), NULL)))));
         if(which &(1 << index)){
@@ -2570,7 +2578,7 @@ List Compiler_discard_helper(Compiler c, List binding, Type signature, String st
             List _x2c_destructure_10 = drop;
             drop_binding = Var_list(List_getindex(_x2c_destructure_10, 0));
             drop_type = Var_list(List_getindex(_x2c_destructure_10, 1));
-            Array_push(discards, List_var(cons(_531, cons(List_var(cons(_64, cons(_541, cons(List_var(cons(_529, cons(List_var(cons(_64, cons(List_var(drop_type), cons(List_var(cons(_501, cons(List_var(drop_binding), NULL))), NULL)))), cons(List_var(cons(_530, cons(List_var(cons(_64, cons(List_var(parameter), cons(List_var(cons(_501, cons(List_var(argument_binding), NULL))), NULL)))), NULL))), NULL)))), NULL)))), NULL))));
+            Array_push(discards, List_var(cons(_531, cons(List_var(cons(_64, cons(_542, cons(List_var(cons(_529, cons(List_var(cons(_64, cons(List_var(drop_type), cons(List_var(cons(_501, cons(List_var(drop_binding), NULL))), NULL)))), cons(List_var(cons(_530, cons(List_var(cons(_64, cons(List_var(parameter), cons(List_var(cons(_501, cons(List_var(argument_binding), NULL))), NULL)))), NULL))), NULL)))), NULL)))), NULL))));
           }
 
         }
@@ -2581,18 +2589,18 @@ List Compiler_discard_helper(Compiler c, List binding, Type signature, String st
 
   }
   if(! Array_len(discards)) return NULL;
-  String name = String_join(NULL, cons(String_var(_542), cons(String_var(stem), cons(String_var(_141), cons(String_var(int_str(which)), NULL)))));
+  String name = String_join(NULL, cons(String_var(_543), cons(String_var(stem), cons(String_var(_141), cons(String_var(int_str(which)), NULL)))));
   List helper_binding = Sym_introduce(c -> sym, name);
   List value_binding = Sym_introduce(c -> sym, _745);
   List call = cons(_64, cons(List_var(result), cons(List_var(cons(_529, cons(List_var(cons(_64, cons(List_var(signature), cons(List_var(cons(_501, cons(List_var(binding), NULL))), NULL)))), cons(List_var(cons(_530, List_append(Array_list_free(arguments), NULL))), NULL)))), NULL)));
-  List body = List_equal(Type_list(result), _540) ? cons(_532, cons(List_var(cons(_531, cons(List_var(call), NULL))), List_append(Array_list_free(discards), _545))) : cons(_532, cons(List_var(cons(_31, cons(List_var(result), cons(List_var(cons(_40, cons(List_var(cons(_10, cons(_11, cons(List_var(cons(_4, cons(List_var(value_binding), _519))), cons(List_var(call), NULL))))), NULL))), NULL)))), List_append(Array_list_free(discards), cons(List_var(cons(_533, cons(List_var(result), cons(List_var(cons(_64, cons(List_var(result), cons(List_var(cons(_501, cons(List_var(value_binding), NULL))), NULL)))), NULL)))), NULL))));
+  List body = List_equal(Type_list(result), _541) ? cons(_532, cons(List_var(cons(_531, cons(List_var(call), NULL))), List_append(Array_list_free(discards), _546))) : cons(_532, cons(List_var(cons(_31, cons(List_var(result), cons(List_var(cons(_40, cons(List_var(cons(_10, cons(_11, cons(List_var(cons(_4, cons(List_var(value_binding), _519))), cons(List_var(call), NULL))))), NULL))), NULL)))), List_append(Array_list_free(discards), cons(List_var(cons(_533, cons(List_var(result), cons(List_var(cons(_64, cons(List_var(result), cons(List_var(cons(_501, cons(List_var(value_binding), NULL))), NULL)))), NULL)))), NULL))));
   List function = cons(_22, cons(List_var(cons(_187, List_append(Type_list(result), NULL))), cons(List_var(cons(_4, cons(List_var(helper_binding), cons(List_var(cons(List_var(cons(_534, cons(List_var(cons(_535, List_append(Array_list_free(declarations), NULL))), NULL))), NULL)), NULL)))), cons(List_var(body), NULL))));
   Compiler_add_early(c, function);
   List entry = cons(List_var(helper_binding), cons(List_var(signature), NULL));
   Map_setindex(c -> protocol_helpers, List_var(key), List_var(entry));
   long identity =(long) helper_binding;
-  Map_setindex(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_546), cons(String_var(long_str(identity)), NULL)))), int_var(1));
   Map_setindex(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_547), cons(String_var(long_str(identity)), NULL)))), int_var(1));
+  if(fresh) Map_setindex(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_538), cons(String_var(long_str(identity)), NULL)))), int_var(1));
   return entry;
 }
 
@@ -2621,7 +2629,7 @@ static List _parameter_declarations(Compiler compiler, List types, Array binding
     while(Iter_try_next(_x2c_macro_iterator_35, & _x2c_macro_item_35)){
       type = Var_type(_x2c_macro_item_35);
       {
-        List binding = Sym_introduce(compiler -> sym, String_join(NULL, cons(String_var(_538), cons(String_var(int_str(index)), NULL))));
+        List binding = Sym_introduce(compiler -> sym, String_join(NULL, cons(String_var(_539), cons(String_var(int_str(index)), NULL))));
         Array_push(bindings, List_var(binding));
         Array_push(declarations, List_var(Type_parameter_ast(type, binding)));
         index ++;
@@ -2812,7 +2820,7 @@ static void Compiler__generate_descriptor_registration(Compiler compiler, Type p
     }
 
   }
-  List declaration = cons(_31, cons(_575, cons(List_var(cons(_40, cons(List_var(cons(_4, cons(List_var(methods_binding), _519))), NULL))), NULL)));  List methods_type = _586;  List methods_literal = cons(_64, cons(_518, cons(List_var(cons(_587, cons(List_var(cons(_588, List_append(Array_list_free(fields), NULL))), NULL))), NULL)));  List methods_value = cons(_64, cons(_577, cons(List_var(cons(_589, cons(List_var(methods_type), cons(List_var(methods_literal), NULL)))), NULL)));  List assignment = List_truth(thunks) ? cons(_531, cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_10, cons(_11, cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), cons(List_var(methods_value), NULL))))), NULL)))), NULL)) : NULL;  Symbol tag_symbol = Type_var_tag(participant);  List early_call = cons(_64, cons(_504, cons(List_var(cons(_529, cons(_591, cons(List_var(cons(_530, cons(List_var(cons(_64, cons(_73, cons(List_var(cons(_74, cons(_73, cons(String_var(name), cons(Symbol_var(tag_symbol), NULL))))), NULL)))), cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), NULL)))), NULL)))), NULL)));  List fallback = cons(_531, cons(List_var(cons(_64, cons(_541, cons(List_var(cons(_529, cons(_593, cons(List_var(cons(_530, cons(List_var(_string_literal(compiler, name)), cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL));  List registration = cons(_594, cons(List_var(cons(_64, cons(_504, cons(List_var(cons(_10, cons(_595, cons(List_var(early_call), NULL)))), NULL)))), cons(List_var(cons(_532, cons(List_var(fallback), NULL))), NULL)));  List explicit_call = NULL;  if(explicit_tag) explicit_call = cons(_64, cons(_504, cons(List_var(cons(_529, cons(_597, cons(List_var(cons(_530, cons(List_var(cons(_64, cons(_73, cons(List_var(cons(_74, cons(_73, cons(String_var(Symbol_str(explicit_tag)), cons(Symbol_var(explicit_tag), NULL))))), NULL)))), cons(List_var(_string_literal(compiler, name)), cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), NULL))))), NULL)))), NULL)));  Compiler_add_early(compiler, declaration);  List call = explicit_tag ? explicit_call : early_call;  if(central_initializer){
+  List declaration = cons(_31, cons(_575, cons(List_var(cons(_40, cons(List_var(cons(_4, cons(List_var(methods_binding), _519))), NULL))), NULL)));  List methods_type = _586;  List methods_literal = cons(_64, cons(_518, cons(List_var(cons(_587, cons(List_var(cons(_588, List_append(Array_list_free(fields), NULL))), NULL))), NULL)));  List methods_value = cons(_64, cons(_577, cons(List_var(cons(_589, cons(List_var(methods_type), cons(List_var(methods_literal), NULL)))), NULL)));  List assignment = List_truth(thunks) ? cons(_531, cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_10, cons(_11, cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), cons(List_var(methods_value), NULL))))), NULL)))), NULL)) : NULL;  Symbol tag_symbol = Type_var_tag(participant);  List early_call = cons(_64, cons(_504, cons(List_var(cons(_529, cons(_591, cons(List_var(cons(_530, cons(List_var(cons(_64, cons(_73, cons(List_var(cons(_74, cons(_73, cons(String_var(name), cons(Symbol_var(tag_symbol), NULL))))), NULL)))), cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), NULL)))), NULL)))), NULL)));  List fallback = cons(_531, cons(List_var(cons(_64, cons(_542, cons(List_var(cons(_529, cons(_593, cons(List_var(cons(_530, cons(List_var(_string_literal(compiler, name)), cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL));  List registration = cons(_594, cons(List_var(cons(_64, cons(_504, cons(List_var(cons(_10, cons(_595, cons(List_var(early_call), NULL)))), NULL)))), cons(List_var(cons(_532, cons(List_var(fallback), NULL))), NULL)));  List explicit_call = NULL;  if(explicit_tag) explicit_call = cons(_64, cons(_504, cons(List_var(cons(_529, cons(_597, cons(List_var(cons(_530, cons(List_var(cons(_64, cons(_73, cons(List_var(cons(_74, cons(_73, cons(String_var(Symbol_str(explicit_tag)), cons(Symbol_var(explicit_tag), NULL))))), NULL)))), cons(List_var(_string_literal(compiler, name)), cons(List_var(cons(_64, cons(_577, cons(List_var(cons(_501, cons(List_var(methods_binding), NULL))), NULL)))), NULL))))), NULL)))), NULL)));  Compiler_add_early(compiler, declaration);  List call = explicit_tag ? explicit_call : early_call;  if(central_initializer){
     if(List_truth(assignment)) Compiler_add_protocol_init(compiler, assignment);  Compiler_add_protocol_init(compiler, cons(_531, cons(List_var(call), NULL)));
   }
   else{

@@ -2,6 +2,17 @@
 
 ## Coverage
 
+- Automatic-differentiation cases compare forward loop initialization and
+  step updates against finite differences, including comma clauses and
+  `continue`. Tape cases cover inactive singular operations before and after
+  the requested result and repeated reverse passes.
+- Operator cleanup fixtures preserve borrowed named handles, returned
+  temporary handles, and interior views while retaining cleanup for fresh
+  operator chains. Header promotion covers secondary typedef declarators
+  alongside opaque forward declarations.
+- Retained native-build probes cover changed include-search environments,
+  newly shadowing headers, and `__has_include` without an include, plus
+  unchanged object/archive reuse and installed prefixes below `builds`.
 - The unit runner accepts optional exact suite-name arguments. Selection keeps
   registration order, runs duplicate names once, and reports unknown names
   with status 2. No arguments retain the full suite and validation behavior.

@@ -415,6 +415,16 @@ cp "$X2C" "$BUILD/standalone/bin/x2c"
 )
 [[ -f "$BUILD/standalone/libstandalone.a" ]]
 
+# A directory named builds is not sufficient to identify a repository stage.
+mkdir -p "$BUILD/standalone/src" "$BUILD/standalone/include" \
+  "$BUILD/standalone/lib" "$BUILD/relocated/builds"
+cp "$ROOT/builds/0/libx2c.a" "$BUILD/standalone/lib/libx2c.a"
+mv "$BUILD/standalone" "$BUILD/relocated/builds/prefix"
+printf 'int main(void) { return 0; }\n' >"$BUILD/relocated/main.c"
+"$BUILD/relocated/builds/prefix/bin/x2c" build \
+  --output "$BUILD/relocated/app" "$BUILD/relocated/main.c"
+"$BUILD/relocated/app"
+
 printf '%s\n' '#include <stdio.h>' 'int library_value(void);' \
   'int main(void) {' \
   '  printf("%d\n", library_value()); return 0;' '}' \
@@ -442,6 +452,54 @@ for value in 1 2 3; do
     grep -Fq 'x2c: link ' "$retained/$value.stderr"
   fi
 done
+
+# Reuse follows the native preprocessor, including newly selected headers
+# and availability tests that do not add an included file to the depfile.
+python3 - "$X2C" "$BUILD/native-reuse" <<'PY_NATIVE_REUSE'
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+compiler, directory = sys.argv[1:]
+root = Path(directory).resolve()
+for part in ('first', 'second'):
+    (root / part).mkdir(parents=True)
+source = root / 'main.c'
+source.write_text('#include <stdio.h>\n#include <value.h>\n'
+                  'int main(void) { printf("%d\\n", VALUE); }\n')
+(root / 'second/value.h').write_text('#define VALUE 1\n')
+args = [compiler, 'build', '-v', '--build-dir', str(root / 'cache'),
+        '--output', str(root / 'app'), str(source)]
+env = dict(os.environ, CPATH=str(root / 'second'))
+def check(expected, name, reused=False):
+    result = subprocess.run(args, env=env, text=True, capture_output=True)
+    (root / (name + '.stderr')).write_text(result.stderr)
+    assert result.returncode == 0, result.stderr
+    output = subprocess.check_output([str(root / 'app')], text=True).strip()
+    assert output == str(expected), (name, output, expected)
+    assert ('up-to-date compile' in result.stderr) == reused, result.stderr
+check(1, 'initial')
+check(1, 'unchanged', True)
+(root / 'first/value.h').write_text('#define VALUE 2\n')
+env['CPATH'] = str(root / 'first')
+check(2, 'environment')
+(root / 'first/value.h').unlink()
+env.pop('CPATH')
+args += ['-Xcc', '-I' + str(root / 'first'),
+         '-Xcc', '-I' + str(root / 'second')]
+check(1, 'search')
+(root / 'first/value.h').write_text('#define VALUE 3\n')
+check(3, 'shadow')
+source.write_text('#include <stdio.h>\n'
+                  '#if __has_include("optional.h")\n#define VALUE 4\n'
+                  '#else\n#define VALUE 5\n#endif\n'
+                  'int main(void) { printf("%d\\n", VALUE); }\n')
+check(5, 'absent')
+(root / 'optional.h').touch()
+check(4, 'present')
+check(4, 'present-unchanged', True)
+PY_NATIVE_REUSE
 
 printf '#include "x2c.x"\nint first_item(void) { return 5; }\n' \
   >"$BUILD/direct/a/item.x"
@@ -545,6 +603,9 @@ import subprocess
 import sys
 import time
 
+if '-c' not in sys.argv:
+    os.execv(os.environ['SCHEDULING_CC'],
+             [os.environ['SCHEDULING_CC'], *sys.argv[1:]])
 root = Path(os.environ['SCHEDULING_STATE'])
 name = Path(sys.argv[sys.argv.index('-c') + 1]).stem
 

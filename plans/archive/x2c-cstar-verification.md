@@ -1,9 +1,7 @@
-> Status: complete
-> Reviewed and corrected against source and upstream on 2026-09-09.
-> All five milestones executed the same day. Gary accepted proceeding
-> without a known license for the closed C* core. The result is
-> `packages/cstar`, an optional package outside every aggregate check;
-> results are under "Milestone 1 results" and "Milestones 2-5 results".
+> Status: done
+> The optional verification package shipped in eb124ed and its reporting
+> and adapter repairs in 95888df. Archived 2026-09-10. Backend licensing
+> and platform limitations remain documented in the package README.
 
 # C* verification for x2c
 

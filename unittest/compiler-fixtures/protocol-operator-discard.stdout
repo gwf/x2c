@@ -1,1 +1,4 @@
-10 72 -5 3 10 12 10 8 live 11 discards 10
+10 72 -5 3 10 12 10 8 live 12 discards 9
+borrowed 6 named-discarded 0
+deep 20 discards 2
+alias 6 view 6

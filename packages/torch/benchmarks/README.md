@@ -55,6 +55,26 @@ Datasets, binaries, and checkpoints live under
 `unittest/build/torch-comparison/`; logs and raw samples under
 `debug/torch-comparison/<run-id>/`.
 
+### Checking the comparison runner
+
+`check` requires each requested binary, every check-mode result, the emitted
+x2c profile constants, and fresh first-update and final checkpoints from
+both training programs. Interop checks its complete scalar result grid and
+needs no checkpoints. A missing result is a failure, not a skipped check.
+
+Checkpoint keys, shapes, and dtypes must match. Floating values use the
+stated tolerance independently at each element; integer, boolean, and
+`meta.*` values must match exactly. First-update values must pass. Final
+floating weights may drift and are reported; final checkpoint structure,
+finite values, task quality, and the existing loss tolerance still apply.
+
+The optional runner regressions need the same torch interpreter but no
+native compilation, downloaded data, or training:
+
+```sh
+"$TORCH_PYTHON" packages/torch/benchmarks/test-comparison.py
+```
+
 ### The handle counters
 
 `--counters` builds the package with `-DXT_HANDLE_COUNTERS`, which turns

@@ -1,6 +1,6 @@
-PACKAGES := pcre2 yyjson termbox2 raylib libcurl libuv blis cstar
+PACKAGES := pcre2 yyjson termbox2 raylib libcurl libuv blis cstar torch
 # The packages the root `make packages-check` builds and runs.
-CHECKED_PACKAGES := pcre2 yyjson libcurl termbox2 blis libuv raylib
+CHECKED_PACKAGES := pcre2 yyjson libcurl termbox2 blis libuv raylib torch
 
 .PHONY: test-deps cache-path prepare-checked \
 	$(addprefix prepare-,$(PACKAGES))

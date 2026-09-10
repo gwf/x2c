@@ -373,7 +373,7 @@ depends on that prefix at run time, unlike every other x2c artifact.
   interoperable in both directions.
 - The generated operator tier is a function count, not coverage:
   `schema/README.md` names the families it leaves out. The design is in
-  `plans/x2c-torch.md`.
+  `plans/archive/x2c-torch.md`.
 - No `autograd.Function`: a custom node cannot be written in x2c yet.
 - `torch.compile` and TorchScript capture of x2c code are not possible:
   they capture Python. x2c runs a TorchScript model but cannot produce

@@ -1768,7 +1768,8 @@ String Compiler.protocol_update_helper(
     argument temporaries `which` selects (bit `n` for argument `n`). A
     discarded argument is one the compiler produced for this call alone, so
     its `discard` member may release what it owns before the enclosing scope
-    ends. Returns null when no selected argument type has a `discard` member.
+    ends. Returns null when no selected argument type has a `discard` member,
+    or an ordinary pointer or aggregate result may borrow an argument.
 */
 List Compiler.discard_helper(
   Compiler c, List binding, Type signature, String stem, int which) {
@@ -1778,6 +1779,14 @@ List Compiler.discard_helper(
 
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
+  Type resolved_result = c.sym.resolve_key(result);
+  long callee_identity = (long) binding;
+  int fresh = c.protocol_helpers.contains(%"fresh-callee $callee_identity");
+  /* An ordinary call may return its input or a view into it. Without a
+     fresh-result contract, keep that input alive in its enclosing scope. */
+  if (!fresh && (resolved_result.is_pointer() ||
+                 resolved_result.is_aggregate()))
+    return NULL;
   Array declarations = %[], arguments = %[], discards = %[];
   int index = 0;
   foreach (Type parameter, parameters) {
@@ -1817,11 +1826,11 @@ List Compiler.discard_helper(
   c.add_early(function);
   List entry = %($helper_binding $signature);
   c.protocol_helpers[key] = entry;
-  /* A helper returns what its member returns and already discards, so a
-     re-resolved call through it is neither wrapped again nor kept. */
+  /* Wrapping a call preserves its return ownership. Discarding an argument
+     does not make an arbitrary method's borrowed result fresh. */
   long identity = (long) helper_binding;
   c.protocol_helpers[%"discard-helper $identity"] = 1;
-  c.protocol_helpers[%"fresh-callee $identity"] = 1;
+  if (fresh) c.protocol_helpers[%"fresh-callee $identity"] = 1;
   return entry;
 }
 

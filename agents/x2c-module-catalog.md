@@ -349,10 +349,10 @@ Host preprocessing, compilation, archive, and link actions.
 
 Public functions:
 
-`toolchain_new`, `Toolchain.compile_action`, `Toolchain.archive_action`,
-`Toolchain.link_action`, `tool_action_new`, `ToolAction.as_program`,
-`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`,
-`Toolchain.preprocess`
+`toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
+`Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
+`ToolAction.as_program`, `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`,
+`ToolAction.run`, `Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 

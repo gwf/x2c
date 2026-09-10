@@ -185,7 +185,7 @@ void AdTape_backward(AdTape tape, AdNode result){
   result -> adjoint = 1.0;
   for(int i = Array_len(tape -> nodes) - 1;  i >= 0;  i --){
     AdNode node = Var_adnode(Array_getindex(tape -> nodes, i));
-    if(node -> back) Func_apply((node -> back), 0, NULL);
+    if(node -> adjoint != 0.0 && node -> back) Func_apply((node -> back), 0, NULL);
   }
 
 }

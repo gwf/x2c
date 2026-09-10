@@ -320,6 +320,13 @@ never discarded. A handle type whose values own native storage uses this to
 release each intermediate of a long operator chain before the enclosing
 scope ends; a value type needs no such member.
 
+A method or function returning a scalar or `void` also discards such arguments
+after the call. An ordinary call returning a pointer or aggregate may borrow
+its input, return an interior pointer, or contain a borrowed handle. Unless
+the callee is a known fresh operator or numeric converter, its temporary
+arguments remain alive in their enclosing scope. The call's result does not
+acquire fresh ownership just because one of its arguments was temporary.
+
 An implemented or native member is eligible. An ordinary base default is also
 eligible because it is an inherited member reached through a total view. An
 empty `Var` descriptor slot is not a resolved static member. If no eligible

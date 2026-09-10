@@ -30,7 +30,7 @@ make -C packages/sqlite prepare
 make -C packages/sqlite test run run-lisp
 ```
 
-From the repository root, build x2c, the other seven packages, and their standard example
+From the repository root, build x2c, the other eight library packages, and their standard example
 executables without running tests:
 
 ```sh

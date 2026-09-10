@@ -7,9 +7,22 @@ how to reproduce any line of this is [README.md](README.md), and
 [PILOT.md](PILOT.md) holds the earlier single-sample pass and the gaps it
 found.
 
-Every timed configuration passed its correctness counterpart first. There
-is no aggregate speedup in this report: the four workloads answer
-different questions and their verdicts are separate.
+The timings below include the tabular explicit lane whose long-run loss
+comparison failed. There is no aggregate speedup in this report: the four
+workloads answer different questions and their verdicts are separate.
+
+## Acceptance review, 2026-09-10
+
+These historical measurements predate the comparison-runner repair. Its
+old tensor comparison scaled tolerance by the largest tensor element,
+accepted approximate integer values, and could pass missing check outputs.
+The runner now checks elementwise tolerance, exact integer/metadata values,
+matching keys/shapes/dtypes, complete records, fresh checkpoints, and task
+quality. The raw checkpoints and session JSON named below were not present
+in the linked worktrees during this review, so these historical numbers
+have not been revalidated with the repaired runner. They are retained as
+recorded; this finding does not establish that their calculated values
+were wrong. The reported tabular explicit tolerance failure remains open.
 
 ## What ran
 

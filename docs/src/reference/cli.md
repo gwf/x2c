@@ -394,9 +394,13 @@ and the symbol artifacts that unit used. The native driver adds
 `-MMD -MP -MF -MT` per object and rejects conflicting dependency flags passed
 through `-Xcc`.
 
-Persistent direct and manifest builds use those x2c and C depfiles to decide
-what needs rebuilding. Missing artifacts and missing, corrupt, or old private
-state are cache misses rather than project errors.
+Persistent direct and manifest builds use x2c depfiles for translation reuse.
+Before reusing a native object, the selected C compiler preprocesses its source
+with the current native flags and environment. Changed header search results
+and `__has_include` conditions therefore rebuild the object; unchanged native
+input reuses it. C depfiles remain available to external build tools. Missing
+artifacts and missing, corrupt, or old private state are cache misses rather
+than project errors.
 Manifest comments and whitespace do not invalidate reuse; changed effective
 settings still rebuild the affected actions.
 

@@ -61,8 +61,9 @@ static String _key(String path) {
 /* Every incremental fingerprint starts with the state format, project or
    direct-build seed, and compiler and selected tool contents. Translation
    adds its request modes and depfile inputs; native actions add arguments and
-   either depfile inputs or direct input contents. A missing or unreadable
-   input clears `ok`, making the build stale; state writes are best effort and
+   their input contents. C compilation uses the current native preprocessor
+   output, so changed include resolution and conditional availability count.
+   A missing or unreadable input clears `ok`; state writes are best effort and
    use a temporary followed by rename. */
 static uint64_t _state_bytes(uint64_t hash, const void *bytes, size_t length) {
   const unsigned char *data = bytes;
@@ -474,33 +475,29 @@ void Build.end_translation(Build state, String input, int cached) {
 
 typedef struct CcJob {
   ToolRun execution;
-  ToolAction action;
-  String source, depfile, state_path;
+  String source, state_path;
+  uint64_t fingerprint;
 } CcJob;
 
 static uint64_t _action_fingerprint(
-  Build state, ToolAction action, String depfile, List inputs, int *ok) {
+  Build state, ToolAction action, List inputs, int *ok) {
   String tool = action.arguments ? action.arguments.car().string() : NULL;
   uint64_t hash = _state_base(state, tool, ok);
   hash = _state_text(hash, action.phase);
   hash = _state_list(hash, action.arguments);
-  if (depfile) hash = _state_dependencies(hash, depfile, ok);
-  else foreach (String input, inputs) hash = _state_file(hash, input, ok);
+  foreach (String input, inputs) hash = _state_file(hash, input, ok);
   return hash;
 }
 
-static int _compile_current(
-  Build state, ToolAction action, String source, String object, String depfile,
-  String state_path) {
-  if (!state.state_root || state.request.dry_run ||
-      access(object, R_OK))
-    return 0;
-  int ok = 1;
-  uint64_t hash = _action_fingerprint(state, action, depfile, NULL, &ok);
-  int current = ok && _state_matches(state_path, hash);
-  if (current && state.request.verbose)
-    fprintf(stderr, "x2c: up-to-date compile %s\n", source);
-  return current;
+static uint64_t _compile_fingerprint(
+  Build state, ToolAction action, String source, String preprocessed,
+  List include_dirs, int *ok) {
+  ToolAction preprocess = state.toolchain.preprocess_action(
+    source, preprocessed, include_dirs);
+  if (preprocess.run()) *ok = 0;
+  uint64_t hash = _action_fingerprint(state, action, %($preprocessed), ok);
+  unlink(preprocessed);
+  return hash;
 }
 
 static int _finish_compile(Build state, CcJob pending) {
@@ -509,12 +506,8 @@ static int _finish_compile(Build state, CcJob pending) {
     state.cc_done++;
     report_progress(<compile>, state.cc_done, state.cc_n, pending.source);
   }
-  if (!status && state.state_root) {
-    int ok = 1;
-    uint64_t hash = _action_fingerprint(
-      state, pending.action, pending.depfile, NULL, &ok);
-    if (ok) _state_write(pending.state_path, hash);
-  }
+  if (!status && state.state_root && !state.request.dry_run)
+    _state_write(pending.state_path, pending.fingerprint);
   return status;
 }
 
@@ -626,15 +619,29 @@ static int _compile_sources(Build b) {
       include_dirs.push(x2c_path_dir(source));
     foreach (Var directory, b.gen_dirs)
       if (!include_dirs.contains(directory)) include_dirs.push(directory);
+    List directories = include_dirs.list_free();
     ToolAction action = b.toolchain.compile_action(
-      source, object, depfile, include_dirs.list_free());
+      source, object, depfile, directories);
     b.objects.push(object);
     if ((void *) b.compile_commands != NULL)
       b.compile_commands.push(_compile_command(b, action, source, object));
     String state_path =
       b.state_root ?
       %"${b.state_root}/c-${_key(source)}" : NULL;
-    if (_compile_current(b, action, source, object, depfile, state_path)) {
+    uint64_t fingerprint = 0;
+    if (state_path && !b.request.dry_run) {
+      int ok = 1;
+      fingerprint = _compile_fingerprint(
+        b, action, source, %"${b.dep_root}/$key.i", directories, &ok);
+      if (!ok) {
+        failed = 1;
+        break;
+      }
+    }
+    if (state_path && !b.request.dry_run && !access(object, R_OK) &&
+        !access(depfile, R_OK) && _state_matches(state_path, fingerprint)) {
+      if (b.request.verbose)
+        fprintf(stderr, "x2c: up-to-date compile %s\n", source);
       b.cc_done++;
       b.cc_cached++;
       report_progress(<compile>, b.cc_done, b.cc_n, source);
@@ -645,7 +652,7 @@ static int _compile_sources(Build b) {
       break;
     }
     CcJob pending = {
-      action.start(), action, source, depfile, state_path
+      action.start(), source, state_path, fingerprint
     };
     running[running_count++] = pending;
     if (running_count >= b.request.jobs &&
@@ -725,7 +732,7 @@ int Build.finish(Build b) {
   if (state_path && !b.request.dry_run &&
       !access(b.output, R_OK)) {
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, NULL, inputs, &ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
     if (ok && _state_matches(state_path, hash)) {
       if (b.request.verbose)
         fprintf(
@@ -760,7 +767,7 @@ int Build.finish(Build b) {
     report_now_us() - b.final_at);
   if (state_path) {
     int ok = 1;
-    uint64_t hash = _action_fingerprint(b, action, NULL, inputs, &ok);
+    uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
     if (ok) _state_write(state_path, hash);
   }
   return 0;

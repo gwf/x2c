@@ -23,6 +23,7 @@ Host preprocessing, compilation, archive, and link actions.
 | [`Toolchain.compile_action`](#Toolchain.compile_action) | Builds but does not start one C compilation action. |
 | [`Toolchain.link_action`](#Toolchain.link_action) | Builds but does not start a host-compiler link action. |
 | [`Toolchain.preprocess`](#Toolchain.preprocess) | Runs the configured C preprocessor without a shell. |
+| [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Captures the native preprocessor view used to identify reusable objects. |
 
 ### Functions
 
@@ -35,7 +36,7 @@ The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:218`
+Source: `src/toolchain.x:238`
 
 #### toolchain_new
 
@@ -49,7 +50,7 @@ option `List`s are borrowed.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
 or its canonical layout.
 
-Source: `src/toolchain.x:121`
+Source: `src/toolchain.x:119`
 
 ### `ToolAction`
 
@@ -60,7 +61,7 @@ Source: `src/toolchain.x:121`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:231`
+Source: `src/toolchain.x:251`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -73,7 +74,7 @@ A partial capture setup failure returns no defined status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:337`
+Source: `src/toolchain.x:357`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -88,7 +89,7 @@ waited exactly once; partial capture setup leaves a non-waitable result.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:283`
+Source: `src/toolchain.x:303`
 
 ### `ToolRun`
 
@@ -101,7 +102,7 @@ Checks whether an execution can be waited without blocking. A dry run
 is ready immediately. A completed child retains its status and captures
 until the required `ToolRun.wait` call.
 
-Source: `src/toolchain.x:300`
+Source: `src/toolchain.x:320`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -117,7 +118,7 @@ execution with partial capture setup is not valid input.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:315`
+Source: `src/toolchain.x:335`
 
 ### `Toolchain`
 
@@ -132,7 +133,7 @@ membership must unlink `output` before it runs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:182`
+Source: `src/toolchain.x:202`
 
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
@@ -146,7 +147,7 @@ configured compiler arguments. The action requests dependency output at
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:149`
+Source: `src/toolchain.x:161`
 
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
@@ -159,7 +160,7 @@ runtime archive, and `-lm` follow the inputs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:199`
+Source: `src/toolchain.x:219`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
@@ -180,7 +181,20 @@ returns no defined status. This operation does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:361`
+Source: `src/toolchain.x:381`
+
+<a id="Toolchain.preprocess_action"></a>
+#### Toolchain.preprocess_action
+
+`ToolAction Toolchain.preprocess_action( Toolchain toolchain, String source, String output, List gen_dirs)`
+
+Captures the native preprocessor view used to identify reusable objects.
+Uses the compilation's native flags and include order, retaining line
+markers so source locations also belong to the identity.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
+
+Source: `src/toolchain.x:185`
 
 ## Public types
 

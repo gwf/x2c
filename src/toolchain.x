@@ -88,10 +88,8 @@ static String _installed_tool(const char *name) {
 */
 static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   String root = x2c_get_root(), executable = x2c_get_executable();
-  String marker = %"/builds/";
-  int build = executable ? executable.find(marker) : -1;
-  if (build >= 0) {
-    String stage_dir = x2c_path_dir(executable);
+  String stage_dir = executable ? x2c_path_dir(executable) : NULL;
+  if (stage_dir && x2c_path_dir(stage_dir) == %"$root/builds") {
     *include_dir = %"$root/include";
     *runtime_lib = %"$stage_dir/libx2c.a";
     return;
@@ -139,16 +137,7 @@ static void _append_list(Array output, List values) {
   foreach (Var value, values) output.push(value);
 }
 
-/** Builds but does not start one C compilation action.
-    Generated include directories precede the x2c include directory and
-    configured compiler arguments. The action requests dependency output at
-    `depfile` with `object` as its target.
-
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
-*/
-ToolAction Toolchain.compile_action(
-  Toolchain toolchain, String source, String object, String depfile,
-  List gen_dirs) {
+static Array _compile_arguments(Toolchain toolchain, List gen_dirs) {
   Array arguments = %[];
   arguments.push(toolchain.cc);
   arguments.push("-fsigned-char");
@@ -159,6 +148,20 @@ ToolAction Toolchain.compile_action(
   arguments.push("-iquote");
   arguments.push(toolchain.include_dir);
   _append_list(arguments, toolchain.cc_args);
+  return arguments;
+}
+
+/** Builds but does not start one C compilation action.
+    Generated include directories precede the x2c include directory and
+    configured compiler arguments. The action requests dependency output at
+    `depfile` with `object` as its target.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
+*/
+ToolAction Toolchain.compile_action(
+  Toolchain toolchain, String source, String object, String depfile,
+  List gen_dirs) {
+  Array arguments = _compile_arguments(toolchain, gen_dirs);
   arguments.push("-MMD");
   arguments.push("-MP");
   arguments.push("-MF");
@@ -171,6 +174,23 @@ ToolAction Toolchain.compile_action(
   arguments.push(object);
   return tool_action_new(
     <compile>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
+}
+
+/** Captures the native preprocessor view used to identify reusable objects.
+    Uses the compilation's native flags and include order, retaining line
+    markers so source locations also belong to the identity.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
+*/
+ToolAction Toolchain.preprocess_action(
+  Toolchain toolchain, String source, String output, List gen_dirs) {
+  Array arguments = _compile_arguments(toolchain, gen_dirs);
+  arguments.push("-E");
+  arguments.push(source);
+  arguments.push("-o");
+  arguments.push(output);
+  return tool_action_new(
+    <preprocess>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
 }
 
 /** Builds but does not start an `ar rcs` action in object-list order.

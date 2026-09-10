@@ -26,9 +26,9 @@ how to reproduce any line of this is [README.md](README.md), and
 [PILOT.md](PILOT.md) holds the earlier single-sample pass and the gaps it
 found.
 
-Every timed configuration passed its correctness counterpart first. There
-is no aggregate speedup in this report: the four workloads answer
-different questions and their verdicts are separate.
+Read the correctness results alongside the timings: a measured timing is
+not evidence that a configuration passed. There is no aggregate speedup in
+this report; the workloads and their verdicts are separate.
 """
 
 
@@ -237,8 +237,15 @@ def check_section(check, lines):
         if worst is None:
             continue
         count = data.get("step1_tensors", "?")
-        verdict = "bit-identical" if worst == 0.0 else "within tolerance"
+        accepted = data.get("step1_ok")
+        verdict = ("not revalidated" if accepted is None else
+                   "**failed**" if not accepted else
+                   "bit-identical" if worst == 0.0 else "within tolerance")
         lines.append(f"| {app} | {count} | {worst:.3e} | {verdict} |")
+    lines.append("")
+    for app, data in sorted(check.items()):
+        for error in data.get("errors", []):
+            lines.append(f"- **{app} failed:** {error}")
     lines.append("")
     lines.append("Task quality and the plan's `1e-3` relative loss "
                  "tolerance:\n")

@@ -4,6 +4,7 @@
    consuming operator has used them. */
 typedef struct Cell {
   double value;
+  double *storage;
   int discarded;
 } *Cell;
 
@@ -20,6 +21,8 @@ protocol Arith(T) {
 Cell Cell.new(double value) {
   Cell cell = Scope.calloc(1, sizeof(struct Cell));
   cell.value = value;
+  cell.storage = Scope.malloc(sizeof(double));
+  *cell.storage = value;
   live++;
   return cell;
 }
@@ -36,6 +39,14 @@ Cell Cell.neg(Cell a) => Cell.new(-a.value);
 
 Cell Cell.twice(Cell a) => Cell.new(a.value * 2.0);
 
+Cell Cell.choose(Cell temporary, Cell existing) => existing;
+
+Cell Cell.identity(Cell value) => value;
+
+typedef struct View { Cell value; } View;
+
+View Cell.view(Cell value) => (View) { value };
+
 static double consumed;
 
 void Cell.consume(Cell a) { consumed += a.value; }
@@ -43,6 +54,8 @@ void Cell.consume(Cell a) { consumed += a.value; }
 void Cell.discard(Cell a) {
   if (a.discarded) return;
   a.discarded = 1;
+  Scope.free(a.storage);
+  a.storage = NULL;
   live--;
   discards++;
 }
@@ -57,11 +70,20 @@ int main(void) {
   Cell scaled = 2.0 * a - 1.0;       // discards two converted doubles
   Cell named = a * b;                // a named result is kept
   Cell kept = named + c;
-  Cell called = (a * b).twice();     // a method discards its receiver
+  Cell called = (a * b).twice();     // an ordinary method may borrow its input
   Cell passed = c.add(a * b);        // and a temporary argument
   (a * c).consume();                 // a void method discards too
   printf("%g %g %g %g %g %g %g %g live %d discards %d\n",
          chain.value, both.value, negated.value, scaled.value, kept.value,
          called.value, passed.value, consumed, live, discards);
+  Cell borrowed = (a * b).choose(c) + a;
+  printf("borrowed %g named-discarded %d\n", borrowed.value, c.discarded);
+  int before = discards;
+  Cell deep = (a * b + c) * a;
+  printf("deep %g discards %d\n", deep.value, discards - before);
+  Cell alias = (a * b).identity();
+  View view = (a * b).view();
+  printf("alias %g view %g\n", alias.storage ? *alias.storage : -1.0,
+         view.value.storage ? *view.value.storage : -1.0);
   return 0;
 }

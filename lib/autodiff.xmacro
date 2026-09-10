@@ -461,6 +461,18 @@ $(defun ad._fwd-item (s names)
     ((continue) (list s))
     (else (ad._fail "unsupported statement" s))))
 
+/* Keep updates in the native loop clause so `continue` executes them too. */
+$(defun ad._fwd-clause (e names)
+  (if (null? e) e
+    (match-case e
+      ((expr ? (commas *items))
+       `(expr () (commas
+          ,@(map (lambda (item) (ad._fwd-clause item names)) *items))))
+      (else
+       (let ((updates (ad._fwd-update (ad._stmnt e) (ad._update e) names)))
+         (if (null? (cdr updates)) (cadr (car updates))
+             `(expr () (commas ,@(map cadr updates)))))))))
+
 /* A `for` that declares a double needs its tangent declared beside it, so
    the loop becomes a block: the declarations, then a `for` without them. */
 $(defun ad._fwd-for (init c step body names)
@@ -469,12 +481,15 @@ $(defun ad._fwd-for (init c step body names)
      (if (ad._double-spec? ?type)
          (list `(block
                   ,@(ad._fwd-item `(declare ,?type (bindings ,@*decls)) names)
-                  (for () ,(ad._unbind (ad._pure c)) ,(ad._unbind step)
+                  (for () ,(ad._unbind (ad._pure c))
+                    ,(ad._fwd-clause step names)
                     ,(ad._fwd-body body names))))
          (list `(for ,(ad._unbind init) ,(ad._unbind (ad._pure c))
-                  ,(ad._unbind step) ,(ad._fwd-body body names)))))
-    (else (list `(for ,(ad._unbind init) ,(ad._unbind (ad._pure c))
-                   ,(ad._unbind step) ,(ad._fwd-body body names))))))
+                  ,(ad._fwd-clause step names)
+                  ,(ad._fwd-body body names)))))
+    (else (list `(for ,(ad._fwd-clause init names)
+                   ,(ad._unbind (ad._pure c)) ,(ad._fwd-clause step names)
+                   ,(ad._fwd-body body names))))))
 
 $(defun ad._forward-function (spec name params body)
   (let ((names (append (ad._param-doubles params)

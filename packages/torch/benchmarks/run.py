@@ -219,74 +219,131 @@ def both(app, mode, arguments, threads, run, tag, x2c_first=True):
 
 # ---- check ----------------------------------------------------------------
 
-def report_comparison(name, path_a, path_b, atol=common.ATOL,
-                      rtol=common.RTOL):
-    left = common.load_tensors(path_a)
-    right = common.load_tensors(path_b)
-    findings = common.compare_tensors(left, right, atol, rtol)
-    worst = max((f[1] for f in findings), default=0.0)
-    failed = [f for f in findings if f[3] != "ok"]
-    print(f"  {name}: {len(findings)} tensors, worst absolute {worst:.3e}, "
-          f"{len(failed)} over tolerance")
-    for entry in failed[:8]:
-        print(f"    {entry[0]:<24} abs {entry[1]:.3e}  rel {entry[2]:.3e}  "
-              f"{entry[3]}")
-    return worst, failed
+# Records printed by the four check-mode producers. Generated families use
+# the same PROFILE the Python applications and artifact preparation read.
+CHECK_RECORDS = {
+    "tabular": set("probe_loss untrained_val_mse mean_val_mse trained_val_mse "
+                   "explicit_val_mse resumed_val_mse".split()) | {
+        f"predict{size}_checksum"
+        for size in common.PROFILE["tabular"]["predict_batches"]},
+    "mnist": set("data_checksum test_checksum probe_loss untrained_accuracy "
+                 "trained_accuracy reloaded_accuracy mode_after_reload".split()),
+    "sequence": set("probe_loss untrained_val_mse mean_val_mse "
+                    "last_value_val_mse trained_val_mse resumed_val_mse".split())
+                | {f"window{size}_val_mse"
+                   for size in common.PROFILE["sequence"]["window_sweep"]},
+    "interop": {f"chain_e{size}_o{ops}"
+                for size in common.PROFILE["interop"]["elements"]
+                for ops in common.PROFILE["interop"]["operations"]},
+}
+CHECK_CONFIG = {
+    "tabular": "features hidden1 hidden2 targets batch updates lr",
+    "mnist": "channels1 channels2 flat hidden batch epochs batches_per_epoch lr",
+    "sequence": "observed hidden window windows lr",
+    "interop": "",
+}
 
 
 def check(apps, threads, run):
-    import torch  # noqa: F401  (only for the comparison, not the run)
-
-    ok = True
     collected = {}
+    ok = bool(apps)
     for app in apps:
-        if not os.path.exists(os.path.join(common.BINARIES, app)):
-            print(f"{app}: not built, skipped")
-            continue
         print(f"== {app} check")
+        errors = []
+        row = collected[app] = {
+            "records": {}, "curve": {}, "agreement": [], "errors": errors,
+            "ok": False,
+        }
+        if not os.path.isfile(os.path.join(common.BINARIES, app)):
+            errors.append(f"{app}: requested binary is not built")
+            print(errors[-1])
+            ok = False
+            continue
+
+        checkpoints = [] if app == "interop" else [
+            common.output(f"{app}-{language}-{stage}.pt")
+            for stage in ("step1", "final")
+            for language in ("x2c", "python")]
+        # A previous run's files cannot satisfy this run's output contract.
+        for path in checkpoints:
+            if os.path.exists(path):
+                os.unlink(path)
         results = both(app, "check", (), threads, run, f"check-{app}")
         x, p = results["x2c"], results["python"]
-        collected[app] = {
-            "records": {"x2c": x.records, "python": p.records},
-            "curve": {"x2c": x.curve, "python": p.curve},
-            "agreement": [],
-        }
-
-        for name in sorted(set(x.records) & set(p.records)):
-            if name.startswith("cfg_"):
+        row["records"] = {name: value.records for name, value in results.items()}
+        row["curve"] = {name: value.curve for name, value in results.items()}
+        names = CHECK_RECORDS[app] | {"interop_threads"}
+        names |= {name for name in set(x.records) | set(p.records)
+                  if not name.startswith("cfg_") and name != "threads"}
+        for name in sorted(names):
+            missing = [language for language, value in results.items()
+                       if name not in value.records]
+            if missing:
+                errors.append(f"{name}: missing from {', '.join(missing)}")
                 continue
-            relative, agreed = common.agree(name, x.number(name),
-                                            p.number(name))
-            collected[app]["agreement"].append(
-                {"name": name, "x2c": x.number(name),
-                 "python": p.number(name), "relative": relative,
-                 "ok": agreed})
-            mark = "ok" if agreed else "OVER"
+            relative, agreed = common.agree(name, x.number(name), p.number(name))
+            if name in ("interop_threads", "mode_after_reload"):
+                agreed = x.number(name) == p.number(name) == 1
+            row["agreement"].append(
+                {"name": name, "x2c": x.number(name), "python": p.number(name),
+                 "relative": relative, "ok": agreed})
             print(f"  {name:<24} x2c {x.number(name):.8g}  "
-                  f"python {p.number(name):.8g}  rel {relative:.2e}  {mark}")
-            ok = ok and agreed
+                  f"python {p.number(name):.8g}  rel {relative:.2e}  "
+                  f"{'ok' if agreed else 'OVER'}")
+            if not agreed:
+                errors.append(f"{name}: values disagree")
 
-        step1 = (common.output(f"{app}-x2c-step1.pt"),
-                 common.output(f"{app}-python-step1.pt"))
-        if all(os.path.exists(path) for path in step1):
-            worst, failed = report_comparison("one update, full values",
-                                              *step1)
-            collected[app]["step1_worst_absolute"] = worst
-            collected[app]["step1_tensors"] = len(
-                common.compare_tensors(common.load_tensors(step1[0]),
-                                       common.load_tensors(step1[1])))
-            ok = ok and not failed
-        final = (common.output(f"{app}-x2c-final.pt"),
-                 common.output(f"{app}-python-final.pt"))
-        if all(os.path.exists(path) for path in final):
-            # Long-run acceptance is task quality plus loss agreement; the
-            # per-weight numbers are reported, not required to match.
-            worst, failed = report_comparison(
-                "after the full profile (reported, not required)", *final)
-            collected[app]["final_worst_absolute"] = worst
-        step1_worst = collected[app].get("step1_worst_absolute")
-        if step1_worst is not None:
-            collected[app]["step1_exact"] = step1_worst == 0.0
+        config = {f"cfg_{key}": common.PROFILE[app][key]
+                  for key in CHECK_CONFIG[app].split()}
+        config.update(cfg_artifact_version=common.ARTIFACT_VERSION,
+                      threads=threads)
+        for name, expected in config.items():
+            if x.records.get(name) != expected:
+                errors.append(f"x2c {name}: expected {expected}")
+
+        for language, result in results.items():
+            values = result.records
+            if not CHECK_RECORDS[app] <= values.keys():
+                continue
+            if app in ("tabular", "sequence"):
+                baseline = min(values["untrained_val_mse"], values["mean_val_mse"])
+                for name in ("trained_val_mse", "resumed_val_mse") + (
+                        ("explicit_val_mse",) if app == "tabular" else ()):
+                    if not 0 <= values[name] < baseline:
+                        errors.append(f"{language} {name}: did not beat baselines")
+            elif app == "mnist":
+                for name in ("trained_accuracy", "reloaded_accuracy"):
+                    if not common.PROFILE[app]["accuracy_target"] <= values[name] <= 1:
+                        errors.append(f"{language} {name}: below accuracy target")
+
+        for stage in (() if app == "interop" else ("step1", "final")):
+            paths = [common.output(f"{app}-{language}-{stage}.pt")
+                     for language in ("x2c", "python")]
+            missing = [path for path in paths if not os.path.isfile(path)]
+            if missing:
+                errors.extend(f"missing checkpoint: {path}" for path in missing)
+                continue
+            left, right = [common.load_tensors(path) for path in paths]
+            findings = common.compare_tensors(left, right)
+            worst = max(item[1] for item in findings)
+            failed = [item for item in findings if item[3] != "ok"]
+            row[f"{stage}_worst_absolute"] = worst
+            print(f"  {stage}: {len(findings)} tensors, worst absolute {worst:.3e}, "
+                  f"{len(failed)} differences")
+            if stage == "step1":
+                row["step1_tensors"] = len(findings)
+                row["step1_ok"] = not failed
+                row["step1_exact"] = not failed and worst == 0.0
+            # Final floating weight drift is reported, not an acceptance
+            # failure. Missing/changed structure and integer state still fail.
+            for name, absolute, relative, verdict in failed:
+                structural = verdict != "over"
+                if stage == "step1" or structural:
+                    errors.append(f"{stage} {name}: {verdict}")
+        for error in errors:
+            print(f"  FAIL: {error}")
+        row["ok"] = not errors
+        ok = ok and not errors
     path = os.path.join(log_dir(run), "check.json")
     with open(path, "w") as handle:
         json.dump(collected, handle, indent=2, sort_keys=True)
@@ -321,9 +378,8 @@ def summarize(samples):
 
 
 def time_lane(app, variant, count, samples, threads, run):
-    if not os.path.exists(os.path.join(common.BINARIES, app)):
-        print(f"{app}: not built, skipped")
-        return None
+    if not os.path.isfile(os.path.join(common.BINARIES, app)):
+        raise RuntimeError(f"{app}: requested binary is not built")
     x_seconds, p_seconds = [], []
     for index in range(samples):
         tag = f"time-{app}-{variant}-t{threads}-{index}"
@@ -394,9 +450,8 @@ def memory(profiles, steps, threads, run):
     rows = []
     for profile in profiles:
         app, description = MEMORY[profile]
-        if not os.path.exists(os.path.join(common.BINARIES, app)):
-            print(f"profile {profile} ({app}): not built, skipped")
-            continue
+        if not os.path.isfile(os.path.join(common.BINARIES, app)):
+            raise RuntimeError(f"profile {profile}: {app} is not built")
         print(f"== memory profile {profile}: {description} ({app})")
         results = both(app, "memory", (profile, steps), threads, run,
                        f"memory-{profile}-{app}")

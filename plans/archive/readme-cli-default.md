@@ -1,6 +1,6 @@
-> Status: active
-> Approved by Gary: simplify first-run documentation and default translation
-> output to the current directory, retaining build's existing a.out default.
+> Status: done
+> Published as 6984afa (#5). Archived 2026-09-10; first-run commands and
+> current-directory translation output are implemented.
 
 # First-run commands
 

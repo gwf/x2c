@@ -11,6 +11,8 @@ typedef struct Before{
 }
 Before;
 
+typedef struct Opaque * Opaque;
+
 int before_size(Before value);
 
 typedef struct After{
@@ -18,7 +20,16 @@ typedef struct After{
 }
 After;
 
+typedef struct Item{
+  int value;
+}
+Item, * ItemPtr;
+
 int after_size(After value);
+
+ItemPtr item_identity(ItemPtr value);
+
+int opaque_size(Opaque value);
 
 int main(void);
 
