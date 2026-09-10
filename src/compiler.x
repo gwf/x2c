@@ -1108,17 +1108,45 @@ Symbol Compiler.match_pattern_head_symbol(Compiler compiler, List pattern) {
   return head;
 }
 
+/* A typed capture element is `(!is ?name type <tag>)` with a literal tag.
+   The runtime matcher canonicalizes `varray` and `vmap`; those spellings
+   keep the runtime path rather than repeating that rule here. */
+static Symbol _flat_capture_tag(Var element, Var binder) {
+  if (element is not <list>) return 0;
+  List predicate = element;
+  if (predicate.len() != 4) return 0;
+  Var (op, named, keyword, tag) = predicate;
+  if (op != <!is> || named != binder || keyword != <type>) return 0;
+  if (tag is not <symbol> || tag == <x2c-dyn> ||
+      tag == <varray> || tag == <vmap>)
+    return 0;
+  return tag;
+}
+
 /** Returns the head of a flat Symbol-and-captures pattern, or zero.
-    The analyzed binder list contains each definite name once, in order.
+
+    Each element after the head is a unique named `?` binder or a typed
+    capture of one. When `tags` is non-null, stores one entry per binder
+    in order: the capture's tag Symbol, or integer zero when untyped.
 */
 Symbol Compiler.match_pattern_flat_head(
-  Compiler compiler, List pattern, List binders) {
+  Compiler compiler, List pattern, List binders, List *tags) {
   Symbol head = compiler.match_pattern_head_symbol(pattern);
   if (!head) return 0;
-  List value = compiler.match_pattern_value(pattern);
-  if (!value.cdr().equal(binders)) return 0;
-  foreach (Var binder, binders)
+  List elements = compiler.match_pattern_value(pattern).list().cdr();
+  Array typed = %[];
+  for (List cursor = binders; cursor && elements;
+       cursor = cdr(cursor), elements = cdr(elements)) {
+    Var binder = car(cursor), element = car(elements);
+    Symbol tag = 0;
     if (!binder.is_atom_binder() || binder == <?>) return 0;
+    if (element != binder && !(tag = _flat_capture_tag(element, binder)))
+      return 0;
+    typed.push(tag ? (Var) tag : (Var) 0);
+  }
+  if (binders.len() != typed.len() || elements) return 0;
+  if (tags) *tags = typed.list_free();
+  else typed.free();
   return head;
 }
 

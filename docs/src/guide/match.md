@@ -77,7 +77,7 @@ applies. Explicit `(!is ?name type string)` keeps `name` as a `Var`.
 
 The shorthand lowers to the existing `!is` pattern predicate and ordinary
 typed local declarations. An expression guard lowers to an ordinary `if`;
-both forms use the same matcher as explicit patterns.
+both forms match exactly as the explicit patterns do.
 
 ## The pattern vocabulary
 
@@ -258,8 +258,9 @@ find. What is *not* a node is the implicit terminal cdr of a proper `List`.
 
 A `match` statement binds captured values to arm-local variables. Captured
 values keep their ordinary [lifetime rules](memory.md). For a fixed symbol
-followed only by unique named `?` binders, the compiler emits direct checks
-and captures; other patterns use the runtime matcher with the same semantics.
+followed only by unique named `?` binders, typed or not, the compiler emits
+direct checks and captures; other patterns use the runtime matcher with the
+same semantics.
 
 ## break and continue inside an arm
 

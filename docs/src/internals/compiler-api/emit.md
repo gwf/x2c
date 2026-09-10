@@ -34,7 +34,7 @@ owned
 by pools active during emission; promote them before releasing those
 pools if the tokens must survive.
 
-Source: `src/emit.x:1497`
+Source: `src/emit.x:1503`
 
 ## Design notes
 

@@ -911,8 +911,9 @@ static List _match_arm_label(
 
 /* The pattern contains one Symbol and unique single-element captures.
    Keep the head check even under head dispatch: a failed arm falls through.
+   A typed capture tests its tag the way the `is` operator does.
 */
-static List _flat_match_condition(Symbol head, List binders) {
+static List _flat_match_condition(Symbol head, List tags) {
   Var literal = head;
   unsigned long long bits = literal.u64;
   Array condition = %[];
@@ -920,9 +921,12 @@ static List _flat_match_condition(Symbol head, List binders) {
     + %"_x2c_match_expr->car.u64 == ${bits}ULL && "
     + "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)");
   int index = 0;
-  foreach (Var binder, binders) {
-    condition.push(%"&& _x2c_match_cursor && "
-      + %"(_x2c_match_values[$index] = _x2c_match_cursor->car, "
+  foreach (Var tag, tags) {
+    condition.push("&& _x2c_match_cursor ");
+    if (tag is <symbol>)
+      condition.push(%"&& Var_is(_x2c_match_cursor->car, "
+        + %"${(unsigned long) tag.symbol()}) ");
+    condition.push(%"&& (_x2c_match_values[$index] = _x2c_match_cursor->car, "
       + "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)");
     index++;
   }
@@ -943,7 +947,9 @@ static List Emitter._match_if(
         body_ast = body;
         implicit_break = NULL;
       }
-    Symbol flat_head = e.match_pattern_flat_head(pattern_ast, binders);
+    List flat_tags = NULL;
+    Symbol flat_head =
+      e.match_pattern_flat_head(pattern_ast, binders, &flat_tags);
     int static_pattern = e.match_pattern_is_static(pattern_ast);
     List pattern = e._emit(pattern_ast, context);
     List body = e._emit(body_ast, context);
@@ -951,7 +957,7 @@ static List Emitter._match_if(
     if (label) values.push(label);
     if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (flat_head) {
-      List condition = _flat_match_condition(flat_head, binders);
+      List condition = _flat_match_condition(flat_head, flat_tags);
       List declarations = _make_local_binders(binders, "_x2c_match_values");
       String closing = implicit_break ? "break; } }" : "} }";
       values.push(%("{ List _x2c_match_cursor;"
