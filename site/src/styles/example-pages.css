@@ -89,6 +89,7 @@
 .example-page[data-example="embedded-lisp"] .feature-result-image {
   max-width: 192px;
   max-height: 210px;
+  margin-inline: auto;
 }
 .example-demonstration .animation-toggle {
   margin-bottom: 18px;
