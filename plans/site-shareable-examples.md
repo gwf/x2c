@@ -1,6 +1,7 @@
-> Status: active
+> Status: implemented
 > Local implementation committed and rebased onto origin/main at efed52a.
-> Site statistics refreshed from make stats. Publication remains pending.
+> Site statistics refreshed from make stats. Gary approved publication to main
+> after final checks on 2026-09-10.
 > Started from origin/main at 1bc7e67.
 > Torch, continuous Game of Life, and the replacement Lisp tic-tac-toe example
 > are implemented for local review. All four example pages now use continuous
@@ -25,7 +26,7 @@ its duplicate standalone page and social assets are removed.
 
 Preserve the landing page's established Love/Power/Magic framing, package
 layout, captions, code samples, and vertical spacing. New detail content lives
-separately. Keep everything local until Gary approves publication.
+separately. Local review is complete; publication to main is approved after final checks.
 
 ## Implementation
 
@@ -89,7 +90,7 @@ and `PLAUSIBLE_SCRIPT_URL` in an intended production build. Development always
 disables them. The shared loader also serves mdBook. The two custom events
 measure example selection and actions, never successful installation.
 The measurement page explains enabled measurement. No external
-account configuration, activation, outreach, or publication is authorized.
+account configuration, analytics activation, or outreach is authorized.
 
 ## Validation
 
@@ -105,8 +106,8 @@ account configuration, activation, outreach, or publication is authorized.
   route changes affect both.
 - Inspect desktop and narrow layouts, page captions/code balance, hero links,
   gallery deep links, copy controls and previous/next navigation in the local browser.
-- No new mandatory gate. Code publication checks apply only if publication is
-  later authorized; this batch stops at the local preview.
+- No new mandatory gate. Run the existing code publication gate on the final
+  tree, publish to main, and verify the Pages deployment.
 
 ## Plan review
 
@@ -121,4 +122,4 @@ No compiler, runtime or package API changes are needed. Source snippets retain
 ordinary repository code and native library operations. Square bounds are checked before native array access; occupied squares cannot
 be played. Human input and Lisp moves use the same legal-square check. No separate validator, negative fixture,
 cache or mandatory process step is introduced. The final diff review checks these same properties before
-local validation and any separately authorized publication.
+validation and the authorized publication.
