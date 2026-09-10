@@ -30,6 +30,10 @@ Var geo__Vec_var(geo__Vec v);
 
 geo__Vec geo__Var_vec(Var value);
 
+geo__Vec geo__double_vec(double scale);
+
+geo__Vec geo__Vec_mul(geo__Vec a, geo__Vec b);
+
 geo__Chain geo__Chain_rest(geo__Chain values);
 
 int geo__ChainLeaf_leaf_len(geo__ChainLeaf values);

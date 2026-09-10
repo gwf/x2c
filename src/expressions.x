@@ -2198,9 +2198,17 @@ static List _var_exact_reader(Compiler compiler, List expr, Type target) {
 static List _converter_owned_call(
   Compiler compiler, List expr, Type owner, Type target, int *declared) {
   String typename = owner.car().str(), targetedname = target.car().str();
+  /* A package type is spelled `pkg__Name`; its converter from an external
+     owner is `pkg__owner_name`, the package's own spelling of `owner.name`. */
+  String prefix = "";
+  int split = targetedname.find("__");
+  if (split > 0) {
+    prefix = targetedname[0:split + 2];
+    targetedname = targetedname[split + 2:];
+  }
   String convfuncname = targetedname == "String"
-                      ? %"${typename}_str"
-                      : %"${typename}_${targetedname.lower()}";
+                      ? %"$prefix${typename}_str"
+                      : %"$prefix${typename}_${targetedname.lower()}";
   List cvrtrtype = NULL;
   List converter_binding = compiler.sym.resolve_global(
     %($convfuncname), &cvrtrtype);

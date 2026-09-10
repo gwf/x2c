@@ -15,6 +15,8 @@ double Vec.norm(Vec v);
 double span(VecPair pair);
 Var Vec.var(Vec v);
 Vec Var.vec(Var value);
+Vec double.vec(double scale);
+Vec Vec.mul(Vec a, Vec b);
 protocol Var(Vec);
 protocol Iter(Vec);
 Self Chain.rest(Self values);
@@ -44,6 +46,11 @@ double span(VecPair pair) {
 Var Vec.var(Vec v) { return (Var) { .p64 = v }; }
 
 Vec Var.vec(Var value) { return value.p64; }
+
+// A double beside a Vec scales both components.
+Vec double.vec(double scale) { return Vec.new(scale, scale); }
+
+Vec Vec.mul(Vec a, Vec b) { return Vec.new(a.x * b.x, a.y * b.y); }
 
 Self Chain.rest(Self values) { return values.cdr(); }
 int ChainLeaf.leaf_len(ChainLeaf values) { return values.len(); }

@@ -31,12 +31,14 @@ static int _vec_next(Iter iter, Var * out);
 
 static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1);
 
+static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
   _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .iter = _x2c_proto_geo__vec_iter_0
+    .iter = _x2c_proto_geo__vec_iter_0, .mul = _x2c_proto_geo__vec_mul_0
   }
   ;
   if(! x2c_register_builtin_descriptor(492847477062, _x2c__x2c_protocol_methods_0)){
@@ -72,6 +74,14 @@ geo__Vec geo__Var_vec(Var value){
   return value.p64;
 }
 
+geo__Vec geo__double_vec(double scale){
+  return geo__Vec_new(scale, scale);
+}
+
+geo__Vec geo__Vec_mul(geo__Vec a, geo__Vec b){
+  return geo__Vec_new(a -> x * b -> x, a -> y * b -> y);
+}
+
 geo__Chain geo__Chain_rest(geo__Chain values){
   return List_cdr(values);
 }
@@ -94,5 +104,9 @@ Iter geo__Vec_iter(geo__Vec v, Iter dest){
 
 static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1){
   return geo__Vec_iter(geo__Var_vec(a0), a1);
+}
+
+static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1){
+  return geo__Vec_var(geo__Vec_mul(geo__Var_vec(a0), geo__Var_vec(a1)));
 }
 
