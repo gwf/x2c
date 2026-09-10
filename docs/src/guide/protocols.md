@@ -306,6 +306,12 @@ Operators call the same resolved methods as dot syntax. The mappings include:
 like `*`. It has no C meaning, so using it where no `matmul` member resolves
 is a compile-time type error.
 
+An operand with no x2c type, such as a preprocessor macro's name, cannot
+convert for a participant that implements the operator; `images - MEAN`
+with `#define MEAN 0.1307` is a compile-time type error rather than C the
+host compiler rejects. Cast the macro, `(double) MEAN`, or bind its value
+to a local.
+
 A participant may also declare `void T.discard(T)`. The compiler calls it on
 an unnamed temporary it made for one operator, such as the product in
 `a * b + c` or the converted `2.0` in `2.0 * x`, immediately after the

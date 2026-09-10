@@ -68,6 +68,8 @@ typedef struct Compiler {
   List aggregate_type, macro_stack, Sym sym;
   SymScope params;
   Map key_ids, macros, kw_aliases;
+  // Object-like #define names this unit has passed, for the literal warning.
+  Map object_macros;
   // Import paths already applied to this .x file's alias map.
   Map kw_seen;
   // Anchored statements whose transform returned them unchanged. The driver
@@ -274,6 +276,7 @@ static Compiler _new(Compiler owner) {
     _.macros = %{};
     _.kw_aliases = %{};
     _.kw_seen = %{};
+    _.object_macros = %{};
     _.proto_cache = %{};
     _.imports = %{};
     _.init_tokens = %{};
@@ -839,7 +842,33 @@ List Compiler.leading_preproc(Compiler compiler) {
     A negative visibility state disables pragma tracking for this token
     stream.
 */
+/* Records the name of an object-like `#define` so a bare atom spelled the
+   same way inside a literal can be flagged. A function-like macro cannot be
+   mistaken for data, so `#define F(x)` is skipped. */
+static void _note_object_macro(Compiler c, String content) {
+  char *p = content;
+  while (*p == ' ' || *p == '\t') p++;
+  if (*p != '#') return;
+  p++;
+  while (*p == ' ' || *p == '\t') p++;
+  if (strncmp(p, "define", 6) != 0) return;
+  p += 6;
+  if (*p != ' ' && *p != '\t') return;
+  while (*p == ' ' || *p == '\t') p++;
+  char *start = p;
+  while (*p == '_' || scan_ascii_alpha((unsigned char) *p) ||
+         (p > start && *p >= '0' && *p <= '9'))
+    p++;
+  if (p == start || *p == '(') return;
+  String name = String.new_len(start, p - start);
+  c.object_macros[name] = 1;
+}
+
 void Compiler.update_source_visibility(Compiler c, List directives) {
+  foreach (List directive, directives) {
+    String content = directive.cadr();
+    _note_object_macro(c, content);
+  }
   if (c.source_private < 0) return;
   foreach (List directive, directives) {
     String content = directive.cadr();

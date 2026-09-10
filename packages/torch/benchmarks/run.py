@@ -346,10 +346,12 @@ def time_lane(app, variant, count, samples, threads, run):
             "threads": threads, "x2c": x, "python": p, "ratio": ratio}
 
 
-def time_all(samples, counts, thread_counts, run):
+def time_all(samples, counts, thread_counts, run, apps=None):
     print(f"== paired timing, {samples} sample(s) per configuration")
     rows = []
     for app, variant, _unit in TIMING:
+        if apps and app not in apps:
+            continue
         for threads in thread_counts:
             count = counts.get(f"{app}.{variant}", counts.get(app, 1000))
             row = time_lane(app, variant, count, samples, threads, run)
@@ -590,7 +592,8 @@ def main():
                   "mnist": options.updates or 1150,
                   "sequence": options.updates or 6800,
                   "interop": options.updates or 190}
-        return time_all(options.samples, counts, threads, run)
+        return time_all(options.samples, counts, threads, run,
+                        options.app)
     if options.mode == "memory":
         profiles = [int(v) for v in options.profiles.split(",")]
         return memory(profiles, options.steps, threads[0], run)

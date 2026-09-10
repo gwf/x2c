@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/operator-untyped-operand.x:27:20: type: operand has no x2c type beside a protocol participant
+    Cell shifted = a - MEAN;        // MEAN has no x2c type: rejected
+                     ^
+  note: a preprocessor macro has no type here: cast it, or bind its value to a local
+

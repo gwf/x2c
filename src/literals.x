@@ -1234,6 +1234,16 @@ List Compiler.parse_atomic_literal(Compiler c) {
     case <lit-atom>: {
       String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
       _validate_match_binder_atom(c, atom);
+      /* The preprocessor never sees a literal, so a macro's name here is
+         data. The author who wanted its value must unquote it. */
+      if (c.object_macros.contains(spelling)) {
+        String unquoted = "${(long) " + spelling + "}";
+        c.report_warning(
+          <literal>,
+          %"'$spelling' is a Symbol here; unquote a typed value such as "
+            + %"$unquoted to insert the macro's value",
+          c.token, NULL);
+      }
       if (atom is <symbol>)
         literal = %(literal ("Symbol") $text ${atom.symbol()});
       else {

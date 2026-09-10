@@ -192,8 +192,12 @@ its full spelling.
 A C preprocessor macro name is a bare name too. The preprocessor never sees
 the inside of a literal, so after `#define ROWS 64` the List `%(ROWS 4)` is
 `(ROWS 4)`, and reading its first element as a number yields the `Symbol`'s
-numeric value rather than 64. Write `%($ROWS 4)` to insert the macro's
-value.
+numeric value rather than 64. Unquote a typed value, `%(${(long) ROWS} 4)`,
+to insert the macro's value; the bare `$ROWS` has no x2c type either,
+because the preprocessor's text never reaches the type checker. The
+compiler warns when a bare name in a literal matches an
+object-like `#define` it has already passed in the same unit; macros from
+included C headers are not seen and get no warning.
 
 Angle brackets quote text that `List` syntax would read as another kind of
 value. `1` is an integer, `<1>` is the `Symbol` `1`, and `<"a b">` quotes a

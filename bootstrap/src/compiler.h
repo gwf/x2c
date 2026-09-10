@@ -41,6 +41,7 @@ typedef struct Compiler{
   Sym sym;
   SymScope params;
   Map key_ids, macros, kw_aliases;
+  Map object_macros;
   Map kw_seen;
   Map fixed;
   Map protocols, conforms, protocol_helpers;

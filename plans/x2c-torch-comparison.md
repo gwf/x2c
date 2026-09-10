@@ -132,6 +132,13 @@ pilot, before collecting either language's final samples.
    decay, bias settings, zero-grad behavior, mode, and update order. Match
    Python Adam to the C++ algorithm (`foreach=False`, `fused=False` where
    supported); do not compare different optimizer implementations silently.
+   Measured 2026-09-10: those flags are not sufficient. Python's Adam
+   updates the first moment with `exp_avg.lerp_(grad, 1 - beta1)` while
+   libtorch's C++ Adam uses `exp_avg.mul_(beta1).add_(grad, 1 - beta1)`;
+   the two agree only while the moment is zero, so update 0 is bit-exact
+   and update 1 differs by one ulp. Bit-exact long runs need a Python
+   replay of the C++ form; otherwise expect ulp-level drift and judge by
+   the loss tolerance.
 3. Before long runs, compare full forward outputs, loss, parameter
    gradients, and parameters after one update. Float32 starting tolerance:
    `atol=1e-6, rtol=1e-4`; reject non-finite values. Integer metadata and

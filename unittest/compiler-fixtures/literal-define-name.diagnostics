@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/literal-define-name.x:7:18: literal: 'ROWS' is a Symbol here; unquote a typed value such as ${(long) ROWS} to insert the macro's value
+    List shape = %(ROWS 4);         // a bare macro name is a Symbol: warned
+                   ^^^^
+
