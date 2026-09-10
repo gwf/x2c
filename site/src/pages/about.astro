@@ -23,6 +23,13 @@ const [titleHtml, kickerHtml] = await Promise.all([
   </Fragment>
   <div class="landing about-landing">
     <article class="about-page">
+      <a class="about-back" href={import.meta.env.BASE_URL}>
+        <svg viewBox="0 0 20 20" width="18" height="18" fill="none"
+          stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="m8 4-6 6 6 6M2 10h16" />
+        </svg>
+        Back to home
+      </a>
       <p class="about-eyebrow">about</p>
       <h1 set:html={titleHtml} />
       <p class="about-kicker" set:html={kickerHtml} />

@@ -265,7 +265,16 @@ main:focus {
 .about-page {
   width: min(100%, 860px);
   margin-inline: auto;
-  padding: clamp(64px, 8vw, 112px) clamp(20px, 3.2vw, 44px) clamp(72px, 9vw, 128px);
+  padding: clamp(28px, 4vw, 48px) clamp(20px, 3.2vw, 44px) clamp(72px, 9vw, 128px);
+}
+
+.about-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  margin-bottom: 32px;
+  font: 500 12.5px/1.4 "JetBrains Mono", monospace;
 }
 
 .about-eyebrow {
@@ -355,11 +364,22 @@ main:focus {
 .hero-heading h1 {
   margin: 0 0 24px;
   font:
-    400 min(144px, 12.3cqw) / 0.92 "Instrument Serif",
+    400 12.541cqw / 0.92 "Instrument Serif",
     Georgia,
     serif;
   letter-spacing: -0.02em;
   text-wrap: nowrap;
+}
+
+.hero-title-line {
+  display: block;
+  width: max-content;
+  letter-spacing: -0.02em;
+}
+
+/* Fit each headline to the container using Instrument Serif's proportions. */
+.hero-title-line:first-child {
+  font-size: 13.849cqw;
 }
 
 .hero-heading p {

@@ -83,8 +83,7 @@
 }
 
 .landing-nav,
-.landing-page-nav,
-.landing-site-nav {
+.landing-nav>div {
   display: flex;
   align-items: center;
 }
@@ -94,15 +93,15 @@
 }
 
 .landing-nav {
+  --landing-nav-gap: 18px;
+  --landing-divider-space: 14px;
   font:
     500 12.5px/1 "JetBrains Mono",
     monospace;
   letter-spacing: 0.01em;
 }
 
-.landing-page-nav,
-.landing-site-nav {
-  --landing-nav-gap: clamp(14px, 2.4vw, 30px);
+.landing-nav>div {
   gap: var(--landing-nav-gap);
 }
 
@@ -110,28 +109,16 @@
   color: var(--red, var(--x2c-red));
 }
 
-.landing-site-nav {
-  margin-left: clamp(16px, 2.6vw, 32px);
-  padding-left: clamp(16px, 2.6vw, 32px);
+.landing-nav>div+div {
+  margin-left: var(--landing-divider-space);
+  padding-left: var(--landing-divider-space);
   border-left: 1px solid rgba(23, 23, 23, 0.24);
 }
 
-.landing-site-nav>a {
+.landing-site-nav>a,
+.landing-reference-nav>a {
   color: var(--nav-muted, #6b655f);
   white-space: nowrap;
-}
-
-.landing-reference-link {
-  position: relative;
-}
-
-.landing-reference-link::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(var(--landing-nav-gap) / -2);
-  border-left: 1px solid rgba(23, 23, 23, 0.24);
-  content: "";
 }
 
 .external-link-icon {
@@ -153,23 +140,15 @@
     width: 100%;
     flex-wrap: wrap;
     row-gap: 8px;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 }
 
 @media (max-width: 700px) {
   .landing-nav {
+    --landing-nav-gap: 12px;
+    --landing-divider-space: 10px;
     font-size: 11.5px !important;
-  }
-
-  .landing-page-nav,
-  .landing-site-nav {
-    --landing-nav-gap: 14px;
-  }
-
-  .landing-site-nav {
-    margin-left: 16px !important;
-    padding-left: 16px !important;
   }
 }
 
@@ -179,16 +158,17 @@
   }
 
   .landing-nav {
+    --landing-nav-gap: 10px;
     font-size: 10.5px !important;
   }
 
-  .landing-page-nav,
-  .landing-site-nav {
-    --landing-nav-gap: 10px;
+  .landing-page-nav {
+    flex-basis: 100%;
   }
 
-  .landing-site-nav {
-    margin-left: 10px !important;
-    padding-left: 10px !important;
+  .landing-nav>.landing-site-nav {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
   }
 }
