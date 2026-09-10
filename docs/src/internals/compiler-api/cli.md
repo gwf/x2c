@@ -75,7 +75,7 @@ Source: `src/cli.x:565`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:981`
+Source: `src/cli.x:980`
 
 ## Public types
 

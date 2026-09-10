@@ -1453,8 +1453,8 @@ static Type _raise_nested_invalid_type(Compiler compiler, Var node) {
       if (compiler.sym.is_var_type(type)) {
         List payload = value;
         match (payload)
-          case %(call (!is ?callee type string) ?arguments):
-            if (callee.string().endswith("_var"))
+          case %(call ?(String callee) ?arguments):
+            if (callee.endswith("_var"))
               return _raise_nested_invalid_type(compiler, arguments);
         return NULL;
       }
@@ -1509,8 +1509,8 @@ static List _nominal_getindex(Compiler compiler, Type type) {
       Sym.is_map_type(compiler.sym, type))
     return NULL;
   match (type)
-    case %((!is ?nominal type string)): {
-      String source = %"${nominal.str()}_getindex";
+    case %(?(String nominal)): {
+      String source = %"${nominal}_getindex";
       Type signature = compiler.sym.get(%($source));
       match (signature)
         case %((func ($type ?)) ?):
@@ -1631,10 +1631,9 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
   for (;;) {
     List first = NULL;
     match (ast)
-      case %(expr ? (op ? (!is ?matched type list) *)): {
-        List candidate = matched;
-        if (candidate.match(%(expr ? (op *)))) first = candidate;
-      }
+      case %(expr ? (op ? ?(List matched) *))
+        if (matched.match(%(expr ? (op *)))):
+          first = matched;
     if (!first) {
       rebuilt = _finish(compiler, ast);
       break;
@@ -1767,11 +1766,11 @@ static Ast _node(Compiler c, Ast ast) {
       Type type = matched_type.list();
       String nominal = NULL;
       match (type)
-        case %((!is ?name type string)): nominal = name;
+        case %(?(String name)): nominal = name;
       if (!nominal)
         c.report_error(
           <xform>, %"type $type does not support slicing", NULL, NULL);
-      String fnname = %"${nominal.str()}_getslice";
+      String fnname = %"${nominal}_getslice";
       if (!c.sym.get(%($fnname)))
         c.report_error(
           <xform>,
@@ -1791,8 +1790,8 @@ static Ast _node(Compiler c, Ast ast) {
     case <expr>: ast = c.lower_typed_adapter_expr(ast);
       ast = c.lower_lambda_expr(ast);
       match (ast)
-        case %(expr ? (op ? (!is ?first type list) *)):
-          if (first.list().match(%(expr ? (op *))))
+        case %(expr ? (op ? ?(List first) *))
+          if (first.match(%(expr ? (op *)))):
             return _op_chain(c, ast);
       break;
     case <array>:    ast = transform_array_literal(c, ast);     break;

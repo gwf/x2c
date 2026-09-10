@@ -74,9 +74,9 @@ int symbol_snapshot_write(Map symbols, Map fn_defs, File output) {
   foreach (Var (key, value), symbols) {
     List symbol_type = value is <list> ? value.list() : NULL, int defined = 0;
     match (key)
-      case %((!is ?spelling type string)):
+      case %(?(String spelling)):
         defined = symbol_type && _function_type(symbol_type) &&
-                  fn_defs.contains(spelling.str());
+                  fn_defs.contains(spelling);
     entries.push(defined ? %($key $value definition) : %($key $value));
   }
   entries.sort();
@@ -152,7 +152,7 @@ Map symbol_snapshot_load(String path, Map *fn_defs, int *gensym) {
       symbols[key] = value;
       if (defined)
         match (key)
-          case %((!is ?spelling type string)): imported[spelling] = 1;
+          case %(?(String spelling)): imported[spelling] = 1;
       int found = _gensym(entry);
       if (gensym && found > *gensym) *gensym = found;
     }

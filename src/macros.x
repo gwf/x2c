@@ -688,8 +688,7 @@ static String _canonical_path(Compiler compiler, String path) {
 
 static int _literal_string(Var syntax, String *value) {
   match (syntax)
-    case %(expr ? (literal ? (!is ?text type string))): {
-      String source = text;
+    case %(expr ? (literal ? ?(String source))): {
       int quoted = source.len() >= 2 && source[0] == '"' &&
         source[source.len() - 1] == '"';
       int percent_quoted = source.len() >= 3 && source[0] == '%' &&
@@ -1337,7 +1336,7 @@ Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
   if (construction is not void) {
     String exact = NULL;
     match (result)
-      case %("x2c.ident" (!is ?spelling type string)):
+      case %("x2c.ident" ?(String spelling)):
         exact = spelling;
     if (exact) result = %($construction $exact);
   }

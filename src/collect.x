@@ -436,11 +436,11 @@ void Compiler.record_generated_header_symbol(
   Map contribution = NULL;
   foreach (Var part, parts) {
     match (%($part)) {
-      case %((!is ?declarations type map)): {
+      case %(?(Map declarations)): {
         contribution = declarations;
         continue;
       }
-      case %((!is ?included_source type string)): continue;
+      case %((!is type string)): continue;
     }
     __builtin_unreachable();
   }
@@ -668,17 +668,17 @@ static void _package_contributions(
   compiler.merge_translation_dependencies(dependencies);
   foreach (Var part, parts) {
     match (%($part)) {
-      case %((!is ?declarations type map)): {
+      case %(?(Map declarations)): {
         _package_merge(
           compiler, name, root, path, declarations, merged, token);
         continue;
       }
-      case %((!is ?dependency type string)): {
-        compiler.add_translation_dependency(dependency.str());
+      case %(?(String dependency)): {
+        compiler.add_translation_dependency(dependency);
         if (visited.contains(dependency)) continue;
         visited[dependency] = 1;
         _package_contributions(
-          compiler, name, root, dependency.str(),
+          compiler, name, root, dependency,
           _header_cache()[dependency], merged, visited, token);
         continue;
       }

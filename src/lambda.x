@@ -75,10 +75,8 @@ static int _typed_function_parts(Type type, List *params, Type *return_type) {
     case %((func (*parameters)) ?return_head *return_tail): {
       List values = parameters;
       match (values)
-        case %((!is ?only type <list>)): {
-          Type parameter = only;
-          if (parameter.canonicalize() === %(void)) values = NULL;
-        }
+        case %(?(Type only)) if (only.canonicalize() === %(void)):
+          values = NULL;
       if (params) *params = values;
       if (return_type) *return_type = %($return_head @return_tail);
       return 1;

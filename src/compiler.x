@@ -1550,11 +1550,11 @@ static List _semantic_scope_binding(Sym sym, SymScope *scope, List key) {
    translation unit rather than the process-lifetime builtin table. */
 static String _declared_var_converter_owner(List key, List type) {
   match (type)
-    case %((func (((!is ?named type string)))) "Var"): {
-      String owner = named.str(), converter = %"${owner}_var";
+    case %((func ((?(String named)))) "Var"): {
+      String owner = named, converter = %"${owner}_var";
       match (key)
-        case %((!is ?spelling type string)):
-          return spelling.str() == converter ? owner : NULL;
+        case %(?(String spelling)):
+          return spelling == converter ? owner : NULL;
     }
   return NULL;
 }

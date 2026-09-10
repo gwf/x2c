@@ -508,8 +508,9 @@ static List _header_and_source(Compiler compiler, List ast) {
              (declare (!set ?type (*))
                (!set ?bindings (bindings *)))): {
         match (bindings)
-          case %(bindings (bind (!set ?binding (*)) ?)):
-            if (_is_completed_function_prototype(compiler, binding)) continue;
+          case %(bindings (bind (!set ?binding (*)) ?))
+            if (_is_completed_function_prototype(compiler, binding)):
+              continue;
         Type declaration_type = type;
         if (declaration_type.is_static()) private = 1;
         _partition_declaration(

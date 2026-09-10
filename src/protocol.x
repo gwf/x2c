@@ -132,10 +132,10 @@ static List _adoption_tag(List adoption) {
 
 static List _protocol_tag_syntax(List expression) {
   match (expression) {
-    case %(src ? (!is ?syntax type list)):
-      return _protocol_tag_syntax(syntax.list());
-    case %(expr (<macro-expr>) (!is ?syntax type list)):
-      return _protocol_tag_syntax(syntax.list());
+    case %(src ? ?(List syntax)):
+      return _protocol_tag_syntax(syntax);
+    case %(expr (<macro-expr>) ?(List syntax)):
+      return _protocol_tag_syntax(syntax);
   }
   return expression;
 }
@@ -143,8 +143,8 @@ static List _protocol_tag_syntax(List expression) {
 static Symbol _protocol_tag_value(List expression) {
   match (expression)
     case %(expr ("Symbol")
-           (literal ("Symbol") ? (!is ?tag type symbol))):
-      return tag.symbol();
+           (literal ("Symbol") ? ?(Symbol tag))):
+      return tag;
   return 0;
 }
 
@@ -282,11 +282,11 @@ void Compiler.rebuild_protocols(Compiler compiler, Map symbols) {
       case %(adopt ?base ?participant ?storage
                    (tag (!set ?tag_expression
                      (expr ("Symbol")
-                       (literal ("Symbol") ? (!is ?tag type symbol)))))
+                       (literal ("Symbol") ? ?(Symbol tag)))))
                    ?location):
         compiler._install_protocol_adoption(
           base.list(), participant.list(), storage,
-          NULL, tag.symbol(), tag_expression, location);
+          NULL, tag, tag_expression, location);
       case %(adopt ?base ?participant ?storage ?representation ?location):
         compiler._install_protocol_adoption(
           base.list(), participant.list(), storage,
@@ -517,36 +517,36 @@ List Compiler.publish_protocol_node(
     case %(protocol
            (!set ?record
              ("protocol-record"
-               (!is ?base type list) (!is ? type string)
+               ?(List base) (!is ? type string)
                (associated *) (members *)))
-           external (!is ?location type list)): {
+           external ?(List location)): {
       return c._publish_protocol_record(
-        record, base.list(), location);
+        record, base, location);
     }
     case %(adopt
-           (!is ?base type list) (!is ?participant type list)
+           ?(List base) ?(List participant)
            (!set ?storage (!or external static))
-           (!is ?location type list)):
+           ?(List location)):
       return c._publish_protocol_adoption(
-        base.list(), participant.list(), storage,
+        base, participant, storage,
         NULL, NULL, location, participant_token, representation_token);
     case %(adopt
-           ("Var") (!is ?participant type list)
+           ("Var") ?(List participant)
            (!set ?storage (!or external static))
-           (tag (!is ?tag type list))
-           (!is ?location type list)):
+           (tag ?(List tag))
+           ?(List location)):
       return c._publish_protocol_adoption(
-        %("Var"), participant.list(), storage,
-        NULL, tag.list(), location, participant_token,
+        %("Var"), participant, storage,
+        NULL, tag, location, participant_token,
         representation_token);
     case %(adopt
-           ("Var") (!is ?participant type list)
+           ("Var") ?(List participant)
            (!set ?storage (!or external static))
-           (!is ?representation type list)
-           (!is ?location type list)):
+           ?(List representation)
+           ?(List location)):
       return c._publish_protocol_adoption(
-        %("Var"), participant.list(), storage,
-        representation.list(), NULL, location, participant_token,
+        %("Var"), participant, storage,
+        representation, NULL, location, participant_token,
         representation_token);
   }
   c.report_error(
@@ -574,7 +574,7 @@ static String _type_variable(Var value, Map variables) {
   String name = NULL;
   if (value is <string>) name = value.str();
   match (value)
-    case %((!is ?only type string)): name = only.str();
+    case %(?(String only)): name = only;
   if (!name) return NULL;
   return variables.contains(name) ? name : NULL;
 }
@@ -1156,9 +1156,8 @@ static void _report_member_sig_conflicts(
   String declaration_site = _definition_location(compiler, base);
   foreach (List row, rows)
     match (row)
-      case %(?(String member) ?(Symbol status) ?(String binding)
+      case %(?(String member) sig-cnflct ?(String binding)
              ?(Type expected) ? ?): {
-        if (status != <sig-cnflct>) continue;
         List dedupe = %("protocol-sig-conflict" $participant $member);
         if (compiler.protocol_helpers.contains(dedupe)) continue;
         compiler.protocol_helpers[dedupe] = 1;
@@ -1412,7 +1411,7 @@ void Compiler.dump_conformance(Compiler compiler, Map globs) {
   Array names = %[];
   foreach (Var (key, value), globs)
     match (%($key $value))
-      case %(((!is ?name type <string>)) (typedef *)):
+      case %((?(String name)) (typedef *)):
         names.push(name);
   names.sort();
   List protocols = _ordered_occurrences(compiler);

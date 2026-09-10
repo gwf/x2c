@@ -134,6 +134,27 @@ and symbol tags), `src/macros.x:2487` (`type atom` is a category), every
 local (`src/generate.x:221, 242`, `src/cache.x:475`,
 `src/expressions.x:2130, 2304, 2345`, `src/transform.x:1253, 1299`).
 
+Found during implementation, and left as explicit `!is` spellings:
+
+- `src/protocol.x:2219` keeps `(!or (!is ?owner ...) ((!is ?owner ...)))`.
+  The runtime reads `(!or ?binder alternative)` as bind-and-match rather
+  than as two alternatives, so `%((!or ?(String owner) (?(String owner))))`
+  never matches; the typed lowering in `_typed_pattern` follows the same
+  reading. Probe: `(!or ?owner "x")` fails on `"T"` while
+  `(!or "x" ?owner)` matches. A design decision, not adoption.
+- An unused binder in a flat arm stays named (`src/parse.x:1883`
+  `?(String directive)`): the anonymous `(!is type string)` form is not a
+  flat capture and would send the arm back to the runtime matcher.
+- The shorthand's pattern List is built per evaluation for runtime-matched
+  arms (`List_var(cons(...))`) because `_typed_capture_pattern` wraps the
+  tag as a cached `(var ...)` element; the explicit `(!is ?x type string)`
+  spelling is a constant. Across `src/` the self-translate count rose from
+  1387 to 1450 such constructions. Dropping the wrap made it worse (1538)
+  and changed direct emission, so it stays; recorded as a follow-on.
+- Fixture checks need `make hdr-sync` after `src/` edits: a stale
+  `etc/header-symbols.xlisp` made 31 fixtures fail with renumbered bindings
+  and a synthesized `String_c_len` prototype.
+
 Expected self-translate diff: arms with a literal head and single-element
 captures move from `x2c_match_site_try_capture` to direct checks; other
 arms lose only their conversion calls; guards emit the same `if`.

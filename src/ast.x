@@ -45,7 +45,7 @@ List binding_identity_new(int identity, String spelling) =>
 */
 int binding_identity_try_parts(List binding, int *identity, String *spelling) {
   match (binding)
-    case %(binding ?id (!is ?name type string)): {
+    case %(binding ?id ?(String name)): {
       if (!id.is_integer() || id.integer() <= 0) return 0;
       if (identity) *identity = id.integer();
       if (spelling) *spelling = name;
@@ -122,11 +122,10 @@ Ast Ast.rewrite_children(Ast ast, Func per_child) {
 static Ast _unwrap_origin(Ast node) {
   while (node && node.car() == <at>) {
     match (node)
-      case %(at ?origin (!is type list)):
-        if (origin.is_integer()) {
-          node = node.caddr();
-          continue;
-        }
+      case %(at ?origin (!is type list)) if (origin.is_integer()): {
+        node = node.caddr();
+        continue;
+      }
     return NULL;
   }
   return node;

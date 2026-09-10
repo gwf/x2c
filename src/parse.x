@@ -123,8 +123,8 @@ static String _syntax_exact_name(Var value) {
   if (value is <string>) return value.str();
   if (value is not <list>) return NULL;
   match (value) {
-    case %((!is ?exact type string)): return exact.str();
-    case %("x2c.ident" (!is ?exact type string)): return exact.str();
+    case %(?(String exact)): return exact;
+    case %("x2c.ident" ?(String exact)): return exact;
   }
   return NULL;
 }
@@ -1531,7 +1531,7 @@ static List _install_declarator_node(
   name = compiler.evaluate_macro_slot(name);
   int exact_name = 0;
   match (name)
-    case %("x2c.ident" (!is ?exact type string)):
+    case %("x2c.ident" ?(String exact)):
       name = exact, exact_name = 1;
   List declaration = %(declare $base (bindings (bind () $mods)));
   List prior_binding = name is <list> ? name.list() : NULL;
@@ -1546,17 +1546,17 @@ static List _install_declarator_node(
     case %(((!or (!is ?owner type string)
                   (!is ?owner type symbol)
                   ((!is ?owner type string))))
-           (!is ?member type string)): {
+           ?(String member)): {
       String owner_name =
         owner is <symbol> ? owner.symbol().str() : owner.str();
-      name = %"${owner_name}_${member.str()}";
-      method = %($owner_name ${member.str()});
+      name = %"${owner_name}_$member";
+      method = %($owner_name $member);
     }
     case %((!or
               (src (source (!is ? type string) ? ?) ?)
               (construct
                 (src (source (!is ? type string) ? ?) ?)))
-           (!is ?member type string)):
+           ?(String member)):
       if (declared_type.is_static()) {
         name = member;
         exact_name = 1;
@@ -1880,7 +1880,7 @@ List Compiler.bind_syntax(
         else if (context == AST_UNIT)
           return _.publish_macro_definition_node(macro_definition);
       }
-      case %(preproc (!is ?directive type string)): {
+      case %(preproc ?(String directive)): {
         if (context != AST_UNIT && context != AST_BLOCK)
           goto construction_error;
         _.update_source_visibility(%($input));

@@ -972,8 +972,9 @@ List Compiler.capture_lambda_identifier(
         List prescribed = NULL;
         foreach (List row, supplied.list())
           match (row)
-            case %(capture ?target ? ?):
-              if (target == binding || target == original) prescribed = row;
+            case %(capture ?target ? ?)
+              if (target == binding || target == original):
+                prescribed = row;
         if (!prescribed &&
             !_lambda_binding_is_outer(c, binding, depth.integer())) continue;
         if (type.is_static()) continue;
@@ -1052,8 +1053,8 @@ List Compiler.bind_lambda_expression(
         if (!binding_identity_spelling(binding)) {
           String spelling = target is <string> ? target.str() : NULL;
           match (binding) {
-            case %((!is ?name type string)): spelling = name;
-            case %("x2c.ident" (!is ?name type string)): spelling = name;
+            case %(?(String name)): spelling = name;
+            case %("x2c.ident" ?(String name)): spelling = name;
           }
           binding = c.sym.introduce(spelling);
           aliases.push(%($binding $target_type));

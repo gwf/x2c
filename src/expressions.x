@@ -706,7 +706,7 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       case %(at m-origin ?):
         if (compiler.source_map && !compiler.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot) *): return 1;
-      case %(ident (!is ?binding type list)): {
+      case %(ident ?(List binding)): {
         String spelling = binding_identity_spelling(binding);
         int retained_parameter = compiler.semantic_binding_facts().contains(
           %(lambda-param $binding));
@@ -931,9 +931,9 @@ static List _resolve_identifier(
       binding = name;
     }
     else match (name) {
-      case %("x2c.ident" (!is ?spelling type string)): {
+      case %("x2c.ident" ?(String spelling)): {
         require_type = 1;
-        binding = c.sym.reference(%(${spelling.str()}), &type);
+        binding = c.sym.reference(%($spelling), &type);
       }
       case %((!is ? type string)):
         binding = c.sym.reference(name, &type);
@@ -1482,10 +1482,10 @@ static List _resolve_content(
       return %(expr ${source.cadr()}
                (dstrasgn (targets @{resolved.list_free()}) $source));
     }
-    case %(sizeof (parens (!is ?argument type list))):
+    case %(sizeof (parens ?(List argument))):
       return %(expr $input_type
                (sizeof (parens ${c.resolve_expression(argument, origin)})));
-    case %(sizeof (!is ?argument type list)):
+    case %(sizeof ?(List argument)):
       return %(expr $input_type
                (sizeof ${c.resolve_expression(argument, origin)}));
     case %(va-arg ?argument ?declaration):
@@ -1615,7 +1615,7 @@ static List _resolve_content(
           : %"type $receiver_type does not support indexing",
         origin, %());
     }
-    case %(call (!is ?callee type string) (args *supplied)): {
+    case %(call ?(String callee) (args *supplied)): {
       List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
       return %(expr $input_type
                (call $callee (args @arguments)));
@@ -1741,7 +1741,7 @@ List Compiler.resolve_expression(Compiler compiler, List input, Token origin) {
   match (input) {
     case %(decl *):
       return compiler.bind_syntax(input, AST_BLOCK, compiler.return_type);
-    case %(expr ?type (!is ?content type list)): {
+    case %(expr ?type ?(List content)): {
       if (type && !_expression_requires_resolution(compiler, input))
         return input;
       return _resolve_content(compiler, input, type, content, origin);
@@ -2310,7 +2310,7 @@ static int _initializer_integer(List expression, unsigned long long *value) {
   String text = NULL;
   match (expression) {
     case %(expr ? (literal ? ?spelling)): text = spelling;
-    case %((!is ?spelling type string)): text = spelling;
+    case %(?(String spelling)): text = spelling;
   }
   if (!text || text[0] < '0' || text[0] > '9') return 0;
   char *end, *digits = text;

@@ -52,7 +52,7 @@ Evaluates a macro slot and returns its syntax as a row sequence.
 `(seq ...)` contributes its children; every other result contributes one
 row.
 
-Source: `src/macros.x:1352`
+Source: `src/macros.x:1351`
 
 <a id="Compiler.evaluate_macro_slot"></a>
 #### Compiler.evaluate_macro_slot
@@ -63,7 +63,7 @@ Evaluates an active template's `(macro-slot ...)` value.
 Non-slots and slots outside an expansion are returned unchanged. A splice
 slot's `List` result is wrapped as `(seq ...)` for its syntax position.
 
-Source: `src/macros.x:1307`
+Source: `src/macros.x:1306`
 
 <a id="Compiler.expand_macro_invocation_node"></a>
 #### Compiler.expand_macro_invocation_node
@@ -76,7 +76,7 @@ supplies Lisp bindings, source location, and recursion checks; the
 definition's fresh rows allocate invocation-local names. This method does
 not begin a semantic transaction.
 
-Source: `src/macros.x:2479`
+Source: `src/macros.x:2478`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -96,7 +96,7 @@ Returns whether the current keyword alias needs shallow expansion.
 A visible invocation qualifies when its captured `Unit` definition is
 imported, or when its local template contains protocol or adoption rows.
 
-Source: `src/macros.x:2283`
+Source: `src/macros.x:2282`
 
 <a id="Compiler.keyword_alias_starts_target_at"></a>
 #### Compiler.keyword_alias_starts_target_at
@@ -108,7 +108,7 @@ An argument-taking invocation may be claimed before result-kind validation
 so target parsing can report a wrong-position diagnostic. Bare forms must
 already fit the position. This query does not consume tokens.
 
-Source: `src/macros.x:2275`
+Source: `src/macros.x:2274`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -129,7 +129,7 @@ Converts a compile-time Lisp value into a bound expression AST.
 Integers, `String`s, `Symbol`s, compiler-issued identifiers, and nonempty
 syntax `List`s are accepted; `invocation` locates an unsupported result.
 
-Source: `src/macros.x:1123`
+Source: `src/macros.x:1122`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition
@@ -160,7 +160,7 @@ Returns the definition-local binding identity for `spelling`.
 Repeated uses share one identity while the template is parsed. An active
 macro-definition locals map is required.
 
-Source: `src/macros.x:1398`
+Source: `src/macros.x:1397`
 
 <a id="Compiler.macro_invocation_needs_shallow_expansion"></a>
 #### Compiler.macro_invocation_needs_shallow_expansion
@@ -183,7 +183,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros.x:2455`
+Source: `src/macros.x:2454`
 
 <a id="Compiler.macro_lisp_starts_declaration"></a>
 #### Compiler.macro_lisp_starts_declaration
@@ -194,7 +194,7 @@ Returns whether tokens after the current Lisp form continue a declaration.
 The balanced form and following trivia are inspected without moving the
 compiler cursor.
 
-Source: `src/macros.x:1772`
+Source: `src/macros.x:1771`
 
 <a id="Compiler.macro_starts_target_at"></a>
 #### Compiler.macro_starts_target_at
@@ -216,7 +216,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon.
 
-Source: `src/macros.x:2210`
+Source: `src/macros.x:2209`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -227,7 +227,7 @@ Parses the macro definition at the current token into a `macrodef` `List`.
 A source-level definition is published immediately; a definition inside a
 template remains syntax for later binding at its expansion site.
 
-Source: `src/macros.x:1898`
+Source: `src/macros.x:1897`
 
 <a id="Compiler.parse_macro_lisp_expression"></a>
 #### Compiler.parse_macro_lisp_expression
@@ -238,7 +238,7 @@ Parses a compile-time Lisp form in an expression position.
 Macro-definition parsing records a deferred slot; ordinary parsing
 evaluates the form in the translation unit's Lisp session and lifts it.
 
-Source: `src/macros.x:1144`
+Source: `src/macros.x:1143`
 
 <a id="Compiler.parse_macro_lisp_shallow"></a>
 #### Compiler.parse_macro_lisp_shallow
@@ -249,7 +249,7 @@ Processes a top-level Lisp form during shallow collection.
 Imports run so their definitions and Lisp effects are available; every
 other form is only consumed.
 
-Source: `src/macros.x:1089`
+Source: `src/macros.x:1088`
 
 <a id="Compiler.parse_macro_lisp_top_level"></a>
 #### Compiler.parse_macro_lisp_top_level
@@ -260,7 +260,7 @@ Consumes and evaluates one top-level compile-time Lisp form.
 `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
 results are discarded in the translation unit's Lisp session.
 
-Source: `src/macros.x:1072`
+Source: `src/macros.x:1071`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -270,7 +270,7 @@ Source: `src/macros.x:1072`
 Returns the registered hole descriptor at the current `$NAME`.
 Returns NULL without consuming tokens when the spelling is not a hole.
 
-Source: `src/macros.x:1695`
+Source: `src/macros.x:1694`
 
 <a id="Compiler.publish_macro_definition_node"></a>
 #### Compiler.publish_macro_definition_node
@@ -280,7 +280,7 @@ Source: `src/macros.x:1695`
 Publishes a canonical `macrodef` in source order and returns `node`.
 A later definition with the same name affects only later invocations.
 
-Source: `src/macros.x:2168`
+Source: `src/macros.x:2167`
 
 <a id="Compiler.skip_keyword_alias"></a>
 #### Compiler.skip_keyword_alias
@@ -290,7 +290,7 @@ Source: `src/macros.x:2168`
 Consumes the current keyword alias and any required argument list.
 Its terminator or following decorator target remains current.
 
-Source: `src/macros.x:2292`
+Source: `src/macros.x:2291`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -309,7 +309,7 @@ Source: `src/macros.x:544`
 
 Consumes one balanced compile-time Lisp form without evaluating it.
 
-Source: `src/macros.x:948`
+Source: `src/macros.x:947`
 
 <a id="Compiler.try_parse_macro_expression"></a>
 #### Compiler.try_parse_macro_expression
@@ -320,7 +320,7 @@ Parses and resolves a direct or keyword-alias expression macro.
 Returns NULL without consuming an identifier that is not an applicable
 alias; a direct `$` invocation must resolve to a visible expression form.
 
-Source: `src/macros.x:2654`
+Source: `src/macros.x:2653`
 
 <a id="Compiler.try_parse_macro_slot"></a>
 #### Compiler.try_parse_macro_slot
@@ -332,7 +332,7 @@ Returns role-shaped syntax containing `(macro-bind ...)` or
 `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
 successful parsing advances the cursor.
 
-Source: `src/macros.x:1783`
+Source: `src/macros.x:1782`
 
 <a id="Compiler.try_parse_macro_target_at"></a>
 #### Compiler.try_parse_macro_target_at
@@ -344,7 +344,7 @@ Returns NULL without consuming a macro hole or inapplicable identifier;
 template parsing returns a deferred `(seq (macro-invoke ...))`, and
 ordinary parsing returns the bound expansion.
 
-Source: `src/macros.x:2801`
+Source: `src/macros.x:2800`
 
 ## Design notes
 

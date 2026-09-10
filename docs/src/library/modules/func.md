@@ -36,7 +36,7 @@ compiler-generated adapters establish both facts.
 would
 discard a qualifier. It does not return on failure.
 
-Source: `lib/func.x:225`
+Source: `lib/func.x:220`
 
 #### x2c_func_value_argument
 
@@ -54,7 +54,7 @@ a reference, and
 `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
 `<no-convert>` from a numeric conversion. The result has tag `want`.
 
-Source: `lib/func.x:167`
+Source: `lib/func.x:162`
 
 ### `Func`
 
@@ -78,7 +78,7 @@ argument, `<alloc-fail>` or `<size-limit>` while packing rest arguments,
 adapter or native target. The result has the ownership of the value the
 adapter returned.
 
-Source: `lib/func.x:365`
+Source: `lib/func.x:360`
 
 <a id="Func.context"></a>
 #### Func.context
@@ -92,7 +92,7 @@ when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func.x:346`
+Source: `lib/func.x:341`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -109,7 +109,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func.x:307`
+Source: `lib/func.x:302`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -127,7 +127,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func.x:335`
+Source: `lib/func.x:330`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -147,7 +147,7 @@ The result belongs to the current `Scope`.
 signature whose parameters are anything but one `List`, and `<alloc-fail>`
 when binding storage cannot be allocated.
 
-Source: `lib/func.x:322`
+Source: `lib/func.x:317`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -158,7 +158,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func.x:400`
+Source: `lib/func.x:395`
 
 ### `FuncArg`
 
@@ -172,7 +172,7 @@ The address and canonical `type` must remain valid through `Func.apply`;
 this constructor performs no validation. Compiler-generated adapters use
 the checked reference reader before calling native code.
 
-Source: `lib/func.x:88`
+Source: `lib/func.x:86`
 
 <a id="FuncArg.value"></a>
 #### FuncArg.value
@@ -209,7 +209,7 @@ read.
 **Raises:** `<bad-arg>` for a null `Func` or an index outside `argc`, or
 `<bad-arity>` when `argc` disagrees with a fixed signature.
 
-Source: `lib/func.x:117`
+Source: `lib/func.x:112`
 
 #### x2c_func_unrepresentable_argument
 
@@ -219,7 +219,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func.x:244`
+Source: `lib/func.x:239`
 
 ## Public types
 

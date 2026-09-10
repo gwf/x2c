@@ -37,7 +37,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/lambda.x:874`
+Source: `src/lambda.x:872`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -48,7 +48,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambda.x:1053`
+Source: `src/lambda.x:1051`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -63,7 +63,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/lambda.x:823`
+Source: `src/lambda.x:821`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -80,7 +80,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 Null, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/lambda.x:1648`
+Source: `src/lambda.x:1646`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -94,7 +94,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/lambda.x:158`
+Source: `src/lambda.x:156`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -108,7 +108,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/lambda.x:501`
+Source: `src/lambda.x:499`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -123,7 +123,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/lambda.x:1330`
+Source: `src/lambda.x:1328`
 
 ## Design notes
 
