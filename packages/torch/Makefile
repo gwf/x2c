@@ -44,13 +44,14 @@ NATIVE := $(SHIM) $(OPS)
 
 build: $(NATIVE)
 
-$(SHIM): src/torch-shim.cpp src/torch-2.10.h | builds $(DEPENDENCY_PREREQUISITE)
+$(SHIM): src/torch-shim.cpp src/torch-2.10.h src/xt-handles.h \
+    | builds $(DEPENDENCY_PREREQUISITE)
 	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
 # generated/xt_ops.cpp is an output of tools/gen-ops.py, checked in beside
 # the schema it came from; `make gen-ops` rewrites it and src/torch-ops.x.
 $(OPS): generated/xt_ops.cpp generated/xt_ops.h generated/xt_ops_support.h \
-    src/torch-2.10.h | builds $(DEPENDENCY_PREREQUISITE)
+    src/torch-2.10.h src/xt-handles.h | builds $(DEPENDENCY_PREREQUISITE)
 	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
 gen-ops:

@@ -2,8 +2,8 @@
 
 > Status: active
 > Gary authorized all five expansions on 2026-09-10. Implementation and
-> focused macOS checks, including native lifetime proof, are complete. The
-> final compiler snapshot, full Linux checks, and publication proof remain.
+> focused macOS and final Linux checks, including native lifetime proof,
+> are complete. Final repository publication proof and delivery remain.
 > This plan stays active until the final evidence and delivery are recorded.
 
 ## Outcome and compatibility
@@ -35,8 +35,7 @@ checkpoint reload. The device test also passed int64 and float32 host copies,
 model movement, an optimizer update, and float64 rejection. The bounded
 `verify-mps` probe with fallback disabled records native
 `aten::linalg_eig` as unavailable; no full generated-tier MPS claim is made.
-A CPU-only host
-registers the MPS-specific test with `TestHarness_skip`.
+A CPU-only host registers the MPS-specific test with `TestHarness_skip`.
 
 ## Linux CPU
 
@@ -46,13 +45,21 @@ archive and its verified hash. The shared dependency framework prepares it;
 the Makefile selects `.so`, libstdc++, and the prefix runtime search path.
 This measures Linux correctness, not native Linux performance.
 
-The first Linux snapshot passed Python tensor exchange, 23 generated
-operators with zero disagreement, all eight TorchScript outputs, all three
-Adam resume cases, fit-line, MLP, custom activation, and 200 Lisp training
-steps. CPU package tests reached the device suite, where an unavailable-MPS
-branch incorrectly entered a test without assertions. The authoritative test
-now registers that skip before entering the test. Repeat all Linux checks
-against the final source/compiler snapshot before closing this item.
+The final Linux snapshot passed all 14 recorded actions: package tests,
+Python tensor exchange, 23 generated operators with zero disagreement, eight
+TorchScript outputs, six Adam resume cases, custom derivative comparison,
+native lifetime checks, fit-line, MLP, custom activation, Lisp training, real
+MNIST training/reload, and an external import-only consumer. Package tests
+reported 34 passes, one unavailable-MPS skip, and 267 assertions; the separate
+MPS kernel probe also explicitly skipped. MNIST used all 60,000 training and
+10,000 test images and reached 93.23% after one CPU epoch, unchanged after
+reload. All 220 source hashes matched the host and were reverified after the
+checks. Both owned Docker containers were stopped afterward.
+
+Full commands, statuses, logs, dependency receipt, data and source hashes are
+preserved in the `linux/final-acceptance` evidence directory below. This final
+run includes the inference-mode callback and ordinary Python Adam scalar
+option repairs.
 
 ## Python-readable Adam state
 
@@ -70,9 +77,10 @@ recorded arithmetic divergence accepted. This is an Adam-only interchange
 surface; existing libtorch optimizer archives remain available separately.
 
 `verify-interchange` passed native-to-Python resume, Python-to-native resume
-with two parameter groups, and empty-state resume on macOS and the first
-Linux snapshot. Every parameter, moment, group option, and step is compared. The final
-macOS check resumes three updates and also proves malformed moment shape,
+with two parameter groups, empty-state resume, stock-default Adam state,
+integer scalar options, and a scalar Tensor learning rate on macOS and Linux.
+Every parameter, moment, group option, and step is compared. The final
+macOS and Linux checks resume three updates and also prove malformed moment shape,
 duplicate ID, negative learning rate, and fractional step are rejected
 without changing those next three updates.
 The separate benchmark runner owns the matched/stock workload measurements.
@@ -94,14 +102,17 @@ This boundary supports first-order, one-output, out-of-place functions.
 Forward input version checks reject mutation of tensors with version
 counters, including inputs not saved for backward. Inference tensors do not
 have counters; in-place mutation remains unsupported for those tensors but
-is not diagnosed by this check. Return one gradient or Null per input. Callback `Func` values and
-their captures remain borrowed and must outlive the graph on that thread.
+is not diagnosed by this check. Return one gradient or Null per input. Callback
+`Func` values and their captures remain borrowed and must outlive the graph on
+that thread.
 
 The final CPU/MPS tests passed derivative, saved-value, error containment,
 ordinary-backward rejection, nested-backward rejection, and caller-thread
 checks, including unsaved-input mutation, inactive-input gradient selection,
-and invocation from another thread (39 assertions). The custom swish MLP
-example trained from loss 3.099022 to 0.003990 in 300 steps on both CPU and MPS.
+and invocation from another thread. Inference-mode evaluation and normal-input
+mutation rejection under that guard also passed (49 assertions on macOS,
+25 on Linux). The custom swish MLP example trained from loss 3.099022 to
+0.003990 in 300 steps on both CPU and MPS.
 `verify-custom` also passed on CPU and MPS against both a Python custom
 Function and ordinary autograd for swish values and squared-loss gradients.
 
@@ -124,22 +135,18 @@ the session if that wrapper growth matters.
 The optional `verify-lifetimes` builds separate instrumented native objects
 and uses the existing handle counters. It checks per-step native cleanup,
 custom graph cleanup, and native handle return to baseline at session
-destruction. The macOS proof passed: 64 custom graphs returned native handles
-to baseline after each graph, and 128 Lisp steps retained exactly four native
+destruction. The macOS and Linux proofs passed: 64 custom graphs returned
+native handles to baseline after each graph, and 128 Lisp steps retained four native
 handles throughout. Scope allocations grew from 355 to 2159; session
 destruction returned native handles to baseline. Its counter build does not
 replace the package's ordinary objects or extend any recurring gate.
 
 ## Remaining proof and delivery
 
-- Run package tests and all optional verify/example targets against the final
-  compiler and native source snapshot, including the lifetime test.
-- Repeat the Linux snapshot after the skip fix and final source changes;
-  check an import-only consumer and native profile metadata.
 - Record the fresh matched and stock benchmark outputs separately.
-- Complete authored-source review, final repository publication proof,
-  delivery, and public documentation verification. Archive this plan with the
-  closing revision and evidence only after those pass.
+- Complete final repository publication proof, delivery, and public
+  documentation verification. Archive this plan with the closing revision
+  and evidence only after those pass.
 
 Implementation logs remain under `debug/`; the parent closure task preserves
 Linux evidence under

@@ -180,7 +180,10 @@ def memory_section(memory, lines):
         x_start, x_end, x_peak = envelope("x2c")
         _, _, p_peak = envelope("python")
         ratio = f"{x_peak / p_peak:.2f}x" if p_peak else "n/a"
-        lines.append(f"| {row['profile']} | {row['app']} | {row['steps']} | "
+        label = str(row["profile"])
+        if row["profile"] == 2:
+            label += " " + row.get("churn_lifetime", "ordinary")
+        lines.append(f"| {label} | {row['app']} | {row['steps']} | "
                      f"{x_start:.1f} | {x_end:.1f} | {x_peak:.1f} | "
                      f"{p_peak:.1f} | {ratio} |")
     lines.append("")
@@ -220,7 +223,10 @@ def memory_section(memory, lines):
         if not samples:
             continue
         first, last = samples[0], samples[-1]
-        lines.append(f"- Profile {row['profile']}, {row['steps']} steps: "
+        label = str(row["profile"])
+        if row["profile"] == 2:
+            label += " " + row.get("churn_lifetime", "ordinary")
+        lines.append(f"- Profile {label}, {row['steps']} steps: "
                      f"live Scope allocations {first['live_allocations']} to "
                      f"{last['live_allocations']}, live scopes "
                      f"{first['live_scopes']} to {last['live_scopes']}, "
@@ -228,6 +234,8 @@ def memory_section(memory, lines):
                      f"{last['pool_active_bytes']} bytes.")
     lines.append("")
     lines.append("![memory versus steps](memory-versus-steps.png)\n")
+    if any(row["profile"] == 2 for row in memory):
+        lines.append("![canonical churn](canonical-churn.png)\n")
 
 
 def attribution_section(attribution, lines):
@@ -261,7 +269,7 @@ def attribution_section(attribution, lines):
     lines.append("![peak against chain length](peak-versus-length.png)\n")
 
 
-def write(run):
+def write(run, diagnostics_run=None):
     root = common.ROOT
     directory = os.path.join(root, "debug", "torch-comparison", run)
     if not os.path.isdir(directory):
@@ -269,6 +277,13 @@ def write(run):
     lines = [TITLE, "", INTRO]
     comparison = load(directory, "comparison.json") or {}
     optimizer = comparison.get("optimizer", "historical stock")
+    diagnostics = (os.path.join(root, "debug", "torch-comparison",
+                               diagnostics_run)
+                   if diagnostics_run else directory)
+    if diagnostics_run:
+        other = load(diagnostics, "comparison.json") or {}
+        if other.get("optimizer") != optimizer:
+            raise ValueError("timing and diagnostic optimizer selections differ")
     lines.append(f"Optimizer comparison: **{optimizer}**.\n")
     if optimizer == "matched":
         lines.append("Python uses an operation-order control for libtorch Adam. "
@@ -286,8 +301,13 @@ def write(run):
             lines.append("Measurement conditions: " + conditions["note"] + "\n")
         lines.append("![learning curves](learning-curves.png)\n")
         timing_section(load(directory, "timing.json"), lines)
-        memory_section(load(directory, "memory.json"), lines)
-        attribution_section(load(directory, "attribution.json"), lines)
+        if diagnostics_run:
+            lines.append(f"Memory and attribution use the separate diagnostic "
+                         f"session `{diagnostics_run}` below. Its instrumented "
+                         f"timings are not the headline timings above.\n")
+            environment_section(load(diagnostics, "environment.json"), lines)
+        memory_section(load(diagnostics, "memory.json"), lines)
+        attribution_section(load(diagnostics, "attribution.json"), lines)
     lines.append("## Historical context\n")
     lines.append("[The earlier report](HISTORICAL-20260910.md) retains its "
                  "measurements, failures and analysis. Those observations "
@@ -295,12 +315,21 @@ def write(run):
     lines.append("## Raw data\n")
     records = "`check.json` and `environment.json`"
     if optimizer != "matched":
-        records += ", plus `timing.json`, `memory.json` and `attribution.json`"
-    lines.append(f"Every number above comes from "
+        records += ", plus `timing.json`"
+        if not diagnostics_run:
+            records += ", `memory.json` and `attribution.json`"
+    lines.append(f"Correctness and timing records come from "
                  f"`debug/torch-comparison/{run}/`: {records}, beside one log "
                  f"per launched process and the complete checkpoints.\n")
+    if diagnostics_run:
+        lines.append(f"Memory and attribution records come from "
+                     f"`debug/torch-comparison/{diagnostics_run}/`: "
+                     f"`memory.json`, `attribution.json`, and their own "
+                     f"`environment.json` and process logs.\n")
     if optimizer != "matched":
-        lines.append(f"Plots read those same files through `plots.py {run}`.\n")
+        arguments = run + (f" {diagnostics_run}" if diagnostics_run else "")
+        lines.append(f"Plots read those same files through "
+                     f"`plots.py {arguments}`.\n")
     filename = "MATCHED.md" if optimizer == "matched" else "REPORT.md"
     path = os.path.join(common.BENCHMARKS, filename)
     with open(path, "w") as handle:

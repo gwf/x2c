@@ -3,7 +3,8 @@
 > and synthesized external prototypes for this milestone. Broad eager
 > discovery and inferred owner-header insertion are rejected below; this is a
 > completed design decision, not an unassigned implementation deferral.
-> Archived 2026-09-10 as historical evidence; current guides own behavior.
+> Archived 2026-09-10 in 1316e0a as historical evidence; current guides own
+> behavior.
 
 # Declaration discovery and generated declarations
 

@@ -9,7 +9,7 @@ two without either side knowing about the other.
     python3 packages/torch/benchmarks/tabular.py time <artifacts> <out> \\
         <native|explicit|predict1|predict32|predict256> <updates>
     python3 packages/torch/benchmarks/tabular.py memory <artifacts> <out> \\
-        <1|3|5|6> <steps>
+        <1|2|3|5|6> <steps> [churn-lifetime]
     python3 packages/torch/benchmarks/tabular.py trace <artifacts> <out> \\
         <native|explicit> <update>
 """
@@ -324,7 +324,7 @@ def mode_trace(artifacts, out, variant, n):
     return 0
 
 
-def mode_memory(artifacts, out, profile, steps):
+def mode_memory(artifacts, out, profile, steps, lifetime="ordinary"):
     sample("baseline", 0)
     data, init, batches = load(artifacts)
     sample("loaded", 0)
@@ -349,6 +349,51 @@ def mode_memory(artifacts, out, profile, steps):
                 model(x_val.index_select(0, rows[index % rows.shape[0]]))
                 if (index + 1) % every == 0:
                     sample("request", index + 1)
+        sample("served", steps)
+    elif profile == 2:
+        model = build(init)
+        input = data["data.x_val"]
+        shapes = (1, 8, 32, 128)
+        hoisted = lifetime == "hoisted"
+        if hoisted:
+            stable_named = list(model.named_parameters())
+            parameters = [list(layer.parameters())
+                          for layer in (model.l1, model.l2, model.l3)]
+        text("churn_lifetime", lifetime)
+        values_sum = 0.0
+        indices_sum = named_elements = name_bytes = 0
+        every = max(1, steps // 16)
+        sample("setup", 0)
+        for step in range(-50, steps):
+            if step == 0:
+                values_sum = 0.0
+                indices_sum = named_elements = name_bytes = 0
+                sample("warm", 0)
+            with torch.inference_mode():
+                named = (stable_named if hoisted
+                         else list(model.named_parameters()))
+                named_elements += sum(value.numel() for _, value in named)
+                name_bytes += sum(len(name) for name, _ in named)
+                count = shapes[(step + 50 if step < 0 else step) % 4]
+                output = input.narrow(0, 0, count)
+                if hoisted:
+                    for index, (weight, bias) in enumerate(parameters):
+                        output = output @ weight.t() + bias
+                        if index < 2:
+                            output = torch.relu(output)
+                else:
+                    output = explicit_forward(model, output)
+                ranked = output.topk(2, dim=1, largest=True, sorted=True)
+                values_sum += float(ranked.values.sum())
+                indices_sum += int(ranked.indices.sum())
+                del named, output, ranked
+            if step >= 0 and (step + 1) % every == 0:
+                sample("request", step + 1)
+        record("churn_requests", steps)
+        record("churn_values_sum", values_sum)
+        record("churn_indices_sum", indices_sum)
+        record("churn_named_elements", named_elements)
+        record("churn_name_bytes", name_bytes)
         sample("served", steps)
     elif profile == 3:
         # A large tensor, a small survivor taken from it, and the same
@@ -443,7 +488,8 @@ def main():
     if mode == "trace":
         return mode_trace(artifacts, out, sys.argv[4], int(sys.argv[5]))
     if mode == "memory":
-        return mode_memory(artifacts, out, int(sys.argv[4]), int(sys.argv[5]))
+        return mode_memory(artifacts, out, int(sys.argv[4]), int(sys.argv[5]),
+                           sys.argv[6] if len(sys.argv) > 6 else "ordinary")
     sys.exit(f"tabular.py: no mode {mode}")
 
 

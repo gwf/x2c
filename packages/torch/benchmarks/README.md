@@ -22,23 +22,26 @@ sequence with no wrapper, so host cost is bounded from both sides.
 
 ```sh
 python3 packages/torch/benchmarks/run.py prepare
-python3 packages/torch/benchmarks/run.py build --lane primary --counters
+python3 packages/torch/benchmarks/run.py build --lane primary
 python3 packages/torch/benchmarks/run.py env       --run-id session --optimizer stock
 python3 packages/torch/benchmarks/run.py check     --run-id session
-python3 packages/torch/benchmarks/run.py attribute --run-id session
 python3 packages/torch/benchmarks/run.py time      --run-id session \
     --samples 5 --threads 1,4
-python3 packages/torch/benchmarks/run.py memory    --run-id session \
-    --profiles 1,3,4,5,6
+python3 packages/torch/benchmarks/run.py build --lane primary --counters
+python3 packages/torch/benchmarks/run.py env --run-id diagnostics --optimizer stock
+python3 packages/torch/benchmarks/run.py attribute --run-id diagnostics
+python3 packages/torch/benchmarks/run.py memory    --run-id diagnostics \
+    --profiles 1,2,3,4,5,6
 for steps in 100000 200000 400000; do
-  python3 packages/torch/benchmarks/run.py memory --run-id session \
+  python3 packages/torch/benchmarks/run.py memory --run-id diagnostics \
     --profiles 1 --steps "$steps"
 done
-python3 packages/torch/benchmarks/run.py report    --run-id session
-python3 packages/torch/benchmarks/plots.py session
+python3 packages/torch/benchmarks/run.py report --run-id session \
+    --diagnostics-run diagnostics
+python3 packages/torch/benchmarks/plots.py session diagnostics
 ```
 
-That sequence is the whole session; `REPORT.md` and the four plots come
+That sequence is the whole session; `REPORT.md` and the plots come
 out of the last two commands and read nothing but the JSON the earlier
 ones wrote. `plots.py` needs matplotlib, which the pinned torch wheel's
 interpreter does not have, so run it under an interpreter that does; it
@@ -116,11 +119,12 @@ hooks and is the only thing that can read a count back: the package has
 no inspection API for them, and an ordinary build expands both macros to
 nothing and references no symbol.
 
-The counters exist for the interop attribution, which needs live handles
-by kind rather than a single process footprint. Headline timings are
-measured in the same build, so the counter cost is inside every reported
-number rather than subtracted from it; it is two relaxed atomic adds per
-handle.
+The counters exist for memory and interop attribution, which need live
+handles by kind rather than a single process footprint. They add two relaxed
+atomic operations per handle. Headline timings use a counter-free build;
+diagnostic measurements record their own build and environment. The report's
+`--diagnostics-run` option and the plot command's second argument select that
+separate evidence without relabeling instrumented timings.
 
 ### The two build lanes
 
@@ -129,11 +133,13 @@ dylibs inside the pinned Python wheel, so both languages call the same
 backend binary and a timing difference is not a difference of
 distributions. `--lane shipped` uses the package's own prepared prefix.
 
-A lane build re-points the package's own `builds/torch-shim.o`,
-`builds/xt_ops.o`, and `builds/torch.link` through the documented
-`TORCH_PREFIX` override, and records the prefix in
-`builds/benchmark-lane`. Run `run.py build --lane shipped` to put the
-package back on its prepared prefix.
+A lane reuses the package Makefile with the documented `TORCH_PREFIX`
+override in `unittest/build/torch-comparison/lanes/`. Ordinary and counter
+builds have separate directories. Each build refreshes private copies of the
+authoritative sources; generated headers, archives, native objects, and link
+inputs stay inside the private package. The package's ordinary `builds/`
+directory is unchanged.
+`bin/lane.json` records the selected configuration and library hashes.
 
 ### Running one application directly
 
@@ -202,6 +208,7 @@ read `phys_footprint`, the ledger peak, and resident size from the same
 | # | Where | What it holds |
 | --- | --- | --- |
 | 1 | `tabular` | steady training then inference at a fixed shape |
+| 2 | `tabular` | parameter enumeration, named parameters and top-k tuples over four batch shapes |
 | 3 | `tabular` | a view and a clone surviving the scope that made them |
 | 4 | `sequence`, `interop` | graph and scope granularity, gradient accumulation |
 | 5 | `tabular` | 50 create-train-save-load-destroy cycles with injected errors |
@@ -209,6 +216,30 @@ read `phys_footprint`, the ledger peak, and resident size from the same
 
 Profile 6 exists to prove the measurement sees a known problem before any
 other result is called healthy. It is not an example of ordinary use.
+
+Profile 2's ordinary form runs the explicit parameter-enumeration forward,
+materializes `named_parameters` and generated top-k results per request, and cycles
+batch sizes 1, 8, 32 and 128. Both sides warm up 50 requests. The runner checks
+output sums, exact index sums and enumeration counts before reporting memory.
+`--churn-lifetime ordinary|pooled|hoisted` selects a fresh-process comparison.
+The ordinary form enumerates per request. The pooled form wraps each x2c
+request in a nested List pool; Python repeats its ordinary request. The hoisted
+form on both sides retains named parameters and layer parameter handles once,
+but still creates and consumes generated top-k results per request. x2c samples
+Scope and canonical-pool statistics after request cleanup at the same root
+pool depth. Variant names remain distinct in logs, merged results and reports;
+rerunning another variant preserves the ordinary evidence.
+
+```sh
+for lifetime in ordinary pooled hoisted; do
+  python3 packages/torch/benchmarks/run.py memory --run-id diagnostics \
+      --profiles 2 --steps 100000 --churn-lifetime "$lifetime"
+done
+```
+
+A nested pool bounds canonical retention in this workload. Hoisting reduces
+it but does not eliminate new top-k List identities. Neither observation
+implies a constant process footprint: native allocators retain separate caches.
 
 ## Matching
 

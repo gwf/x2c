@@ -240,8 +240,9 @@ Two rules govern the Python side:
 
 `Module.save_archive` and `load_archive` use libtorch's own archive
 instead; Python reads that only through `torch.jit.load`. Optimizer state
-saves and loads through the C++ archive only, for resuming in x2c or C++,
-not in Python.
+saves and loads through the C++ archive for resuming in x2c or C++.
+Adam additionally supports explicit Python state-dict exchange through
+`Optimizer.save_python` and `load_python`, described below.
 
 ## TorchScript inference
 

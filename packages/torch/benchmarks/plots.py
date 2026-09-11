@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Render the report's four standalone plots from one run's raw JSON.
+"""Render the report's standalone plots from the recorded raw JSON.
 
 Needs matplotlib, which the pinned torch wheel's interpreter does not
 have; run it under an interpreter that does. It reads only the JSON the
 runner wrote, never a benchmark process, so it can run any time after a
 session.
 
-    python3 packages/torch/benchmarks/plots.py <run-id>
+    python3 packages/torch/benchmarks/plots.py <run-id> [diagnostics-run-id]
 
 Writes learning-curves.png, paired-throughput.png, memory-versus-steps.png,
-and peak-versus-length.png beside REPORT.md, which refers to them.
+canonical-churn.png and peak-versus-length.png beside REPORT.md.
 """
 
 import json
@@ -129,13 +129,17 @@ def memory_versus_steps(directory, memory):
                                          "retained")]
             if not counted:
                 continue
-            cell.plot([s["index"] for s in counted],
+            positions = [s["index"] + (row["steps"] if row["profile"] == 1
+                                      and s["label"] == "request" else 0)
+                         for s in counted]
+            cell.plot(positions,
                       [s["footprint"] / 1e6 for s in counted],
                       color=colour, linewidth=1.6, marker="o",
                       markersize=2.5, label=language)
         cell.set_title(f"profile {row['profile']} ({row['app']}), "
                        f"{row['steps']} steps", loc="left", fontsize=11)
-        cell.set_xlabel("steps completed", fontsize=9)
+        cell.set_xlabel("training steps + requests" if row["profile"] == 1
+                        else "steps completed", fontsize=9)
         cell.set_ylabel("process footprint (MB)", fontsize=9)
         cell.set_ylim(bottom=0)
         cell.spines["top"].set_visible(False)
@@ -145,6 +149,42 @@ def memory_versus_steps(directory, memory):
         cell.legend(frameon=False, fontsize=9)
     figure.tight_layout()
     path = os.path.join(directory, "memory-versus-steps.png")
+    figure.savefig(path, dpi=144)
+    plt.close(figure)
+    print(f"wrote {path}")
+
+
+def canonical_churn(directory, memory):
+    rows = {}
+    for row in memory or []:
+        if row["profile"] != 2:
+            continue
+        lifetime = row.get("churn_lifetime", "ordinary")
+        if lifetime not in rows or row["steps"] > rows[lifetime]["steps"]:
+            rows[lifetime] = row
+    if not rows:
+        return
+    figure, axes = plt.subplots(1, 2, figsize=(10.5, 3.6))
+    colours = {"ordinary": PYTHON, "pooled": X2C, "hoisted": "#8a7a12"}
+    for lifetime, row in sorted(rows.items()):
+        samples = [s for s in row["x2c"]["samples"]
+                   if s["label"] == "request"]
+        for cell, key in zip(axes, ("pool_active_bytes", "footprint")):
+            cell.plot([s["index"] for s in samples],
+                      [s[key] / 1e6 for s in samples],
+                      color=colours.get(lifetime, CONTROL), label=lifetime)
+    for cell, title, ylabel in (
+            (axes[0], "Canonical storage after request cleanup", "pool MB"),
+            (axes[1], "x2c process footprint", "process MB")):
+        cell.set_title(title, loc="left", fontsize=11)
+        cell.set_xlabel("requests completed", fontsize=9)
+        cell.set_ylabel(ylabel, fontsize=9)
+        cell.spines["top"].set_visible(False)
+        cell.spines["right"].set_visible(False)
+        cell.grid(axis="y", color="#dddddd", linewidth=0.6)
+        cell.legend(frameon=False, fontsize=9)
+    figure.tight_layout()
+    path = os.path.join(directory, "canonical-churn.png")
     figure.savefig(path, dpi=144)
     plt.close(figure)
     print(f"wrote {path}")
@@ -200,6 +240,8 @@ def main():
     directory = os.path.join(root, "debug", "torch-comparison", sys.argv[1])
     if not os.path.isdir(directory):
         sys.exit(f"no run at {directory}")
+    diagnostics = (os.path.join(root, "debug", "torch-comparison", sys.argv[2])
+                   if len(sys.argv) > 2 else directory)
     # Read the raw samples from the run's log directory; write the plots
     # beside REPORT.md, which is what refers to them.
     out = os.path.dirname(os.path.abspath(__file__))
@@ -207,9 +249,10 @@ def main():
     if check:
         learning_curves(out, check)
     paired_throughput(out, load(directory, "timing.json"))
-    memory_versus_steps(out, load(directory, "memory.json"))
-    peak_versus_length(out, load(directory, "attribution.json"),
-                       load(directory, "memory.json"))
+    memory_versus_steps(out, load(diagnostics, "memory.json"))
+    canonical_churn(out, load(diagnostics, "memory.json"))
+    peak_versus_length(out, load(diagnostics, "attribution.json"),
+                       load(diagnostics, "memory.json"))
     return 0
 
 

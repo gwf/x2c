@@ -9,7 +9,7 @@ application runs on its own with the same arguments this passes.
     python3 packages/torch/benchmarks/run.py build [--lane primary|shipped]
     python3 packages/torch/benchmarks/run.py check [--app <name>]
     python3 packages/torch/benchmarks/run.py time  [--samples 5] [--updates N]
-    python3 packages/torch/benchmarks/run.py memory [--profiles 1,3,4,5,6]
+    python3 packages/torch/benchmarks/run.py memory [--profiles 1,2,3,4,5,6]
     python3 packages/torch/benchmarks/run.py attribute [--elements 65536]
     python3 packages/torch/benchmarks/run.py report
     python3 packages/torch/benchmarks/run.py env
@@ -120,28 +120,48 @@ def build(lane, counters=False):
         if not os.path.isdir(path):
             sys.exit(f"{lane} lane: {path} is not a libtorch prefix")
 
-    # The package's own targets, rebuilt against the chosen prefix through
-    # the documented override. The shim object, the generated operator
-    # object, and the link line record no prefix in their prerequisites,
-    # so a lane switch drops them; otherwise make would keep the previous
-    # lane's objects and the comparison would name the wrong backend.
-    # A counters build is a different package build, so the marker
-    # carries the flag as well as the prefix.
+    # Reuse the package Makefile in a private directory. Package discovery
+    # uses canonical paths, so source files must be actual private copies.
+    # Refresh both trees to remove obsolete inputs; copy2 retains timestamps.
+    variant = lane + ("-counters" if counters else "")
+    packages = os.path.join(common.WORK, "lanes", variant, "packages")
+    package = os.path.join(packages, "torch")
+    os.makedirs(package, exist_ok=True)
+    for name in ("package.mk", "dependency.mk", "tools"):
+        target = os.path.join(packages, name)
+        if not os.path.lexists(target):
+            os.symlink(os.path.join(common.ROOT, "packages", name), target)
+    for name in ("src", "generated"):
+        target = os.path.join(package, name)
+        if os.path.islink(target):
+            os.unlink(target)
+        elif os.path.isdir(target):
+            shutil.rmtree(target)
+        shutil.copytree(os.path.join(PACKAGE, name), target)
+    for name in ("Makefile", "dependency.json",
+                 "dependency-linux.json"):
+        target = os.path.join(package, name)
+        if not os.path.lexists(target):
+            os.symlink(os.path.join(PACKAGE, name), target)
+
+    # Make does not fingerprint the prefix or C++ flags for these three
+    # outputs. Discard only private outputs when that configuration changes.
     wanted = prefix + (" +counters" if counters else "")
-    marker = os.path.join(PACKAGE, "builds", "benchmark-lane")
+    marker = os.path.join(package, "builds", "benchmark-lane")
     recorded = None
     if os.path.exists(marker):
         with open(marker) as handle:
             recorded = handle.read().strip()
     if recorded != wanted:
         for name in ("torch.link", "torch-shim.o", "xt_ops.o"):
-            path = os.path.join(PACKAGE, "builds", name)
+            path = os.path.join(package, "builds", name)
             if os.path.exists(path):
                 os.remove(path)
     diagnostic = "-DXT_HANDLE_COUNTERS" if counters else ""
-    subprocess.run(["make", f"TORCH_PREFIX={prefix}",
+    subprocess.run(["make", f"ROOT={common.ROOT}", f"X2C={X2C}",
+                    f"TORCH_PREFIX={prefix}",
                     f"PACKAGE_DIAGNOSTIC={diagnostic}", "build"],
-                   cwd=PACKAGE, check=True)
+                   cwd=package, check=True)
     os.makedirs(os.path.dirname(marker), exist_ok=True)
     with open(marker, "w") as handle:
         handle.write(wanted + "\n")
@@ -165,13 +185,13 @@ def build(lane, counters=False):
         subprocess.run([
             X2C, "build", "--output", output, "-O2",
             "--build-dir", os.path.join(common.BINARIES, f"{app}-build"),
-            "--x-include-dir", os.path.join(PACKAGE, "src"),
-            "--x-include-dir", os.path.join(PACKAGE, "generated"),
+            "--x-include-dir", os.path.join(package, "src"),
+            "--x-include-dir", os.path.join(package, "generated"),
             "--x-include-dir", BENCH,
-            "--c-include-dir", os.path.join(PACKAGE, "src"),
-            "--c-include-dir", os.path.join(PACKAGE, "generated"),
+            "--c-include-dir", os.path.join(package, "src"),
+            "--c-include-dir", os.path.join(package, "generated"),
             "-I", BENCH,
-            "--package-dir", os.path.join(common.ROOT, "packages"),
+            "--package-dir", packages,
             source, os.path.join(BENCH, "bench.x"),
             os.path.join(BENCH, "membytes.c"),
             os.path.join(BENCH, "handles.c"),
@@ -195,6 +215,7 @@ def build(lane, counters=False):
         print(f"built {output}")
 
     record = {"lane": lane, "prefix": prefix, "counters": counters,
+              "package_build": os.path.join(package, "builds"),
               "libraries": library_record(prefix)}
     with open(os.path.join(common.BINARIES, "lane.json"), "w") as handle:
         json.dump(record, handle, indent=2, sort_keys=True)
@@ -453,6 +474,7 @@ def time_all(samples, counts, thread_counts, run, apps=None):
 
 MEMORY = {
     1: ("tabular", "steady training and inference"),
+    2: ("tabular", "canonical churn over bounded batch shapes"),
     3: ("tabular", "useful survivor"),
     4: ("sequence", "graph and scope granularity"),
     5: ("tabular", "repeated lifetime and error recovery"),
@@ -474,16 +496,35 @@ def envelope(samples, label=None):
     }
 
 
-def memory(profiles, steps, threads, run):
+def memory(profiles, steps, threads, run, churn_lifetime="ordinary"):
     rows = []
     for profile in profiles:
         app, description = MEMORY[profile]
         if not os.path.isfile(os.path.join(common.BINARIES, app)):
             raise RuntimeError(f"profile {profile}: {app} is not built")
-        print(f"== memory profile {profile}: {description} ({app})")
-        results = both(app, "memory", (profile, steps), threads, run,
-                       f"memory-{profile}-{app}-s{steps}")
+        variant = churn_lifetime if profile == 2 else None
+        label = f"{profile} {variant}" if variant else str(profile)
+        print(f"== memory profile {label}: {description} ({app})")
+        arguments = (profile, steps, variant) if variant else (profile, steps)
+        suffix = f"-{variant}" if variant else ""
+        results = both(app, "memory", arguments, threads, run,
+                       f"memory-{profile}-{app}-s{steps}{suffix}")
+        if profile == 2:
+            x, p = results["x2c"], results["python"]
+            if x.number("churn_pool_depth") != x.number("churn_final_pool_depth"):
+                raise RuntimeError("canonical churn: pool depth changed")
+            for name in ("churn_requests", "churn_indices_sum",
+                         "churn_named_elements", "churn_name_bytes"):
+                if x.number(name) != p.number(name):
+                    raise RuntimeError(f"canonical churn: {name} disagrees")
+            name = "churn_values_sum"
+            _, agreed = common.agree(name, x.number(name), p.number(name),
+                                      common.RTOL)
+            if not agreed:
+                raise RuntimeError("canonical churn: output values disagree")
         row = {"profile": profile, "app": app, "steps": steps}
+        if variant:
+            row["churn_lifetime"] = variant
         for language, result in results.items():
             if result.dropped:
                 print(f"  {language}: {result.dropped} samples did not fit "
@@ -510,11 +551,11 @@ def memory(profiles, steps, threads, run):
             print(f"  within-run peak footprint x2c/python "
                   f"{x_peak / p_peak:.2f}x")
         rows.append(row)
-    # Profiles run at different scales, so a later invocation merges into
-    # the same file by profile number instead of replacing it.
+    # Preserve each profile, scale and lifetime variant across invocations.
     path = os.path.join(log_dir(run), "memory.json")
     def key(row):
-        return "%d@%d" % (row["profile"], row["steps"])
+        variant = row.get("churn_lifetime", "ordinary")
+        return "%d@%d@%s" % (row["profile"], row["steps"], variant)
 
     merged = {}
     if os.path.exists(path):
@@ -657,9 +698,15 @@ def main():
     parser.add_argument("--samples", type=int, default=5)
     parser.add_argument("--updates", type=int, default=None)
     parser.add_argument("--threads", default="1")
-    parser.add_argument("--profiles", default="1,3,4,5,6")
+    parser.add_argument("--profiles", default="1,2,3,4,5,6")
     parser.add_argument("--steps", type=int, default=512)
+    parser.add_argument("--churn-lifetime", default="ordinary",
+                        choices=["ordinary", "pooled", "hoisted"],
+                        help="profile 2 request pool or stable-handle lifetime")
     parser.add_argument("--run-id", default=None)
+    parser.add_argument("--diagnostics-run", default=None,
+                        help="report memory and attribution from a separately "
+                             "recorded counter build")
     parser.add_argument("--optimizer", choices=["stock", "matched"],
                         help="stock PyTorch or libtorch operation-order control; "
                              "fixed for all measurements in one run-id")
@@ -703,12 +750,13 @@ def main():
                         options.app)
     if options.mode == "memory":
         profiles = [int(v) for v in options.profiles.split(",")]
-        return memory(profiles, options.steps, threads[0], run)
+        return memory(profiles, options.steps, threads[0], run,
+                      options.churn_lifetime)
     if options.mode == "attribute":
         return attribute(options.elements, options.requests, threads[0], run)
     if options.mode == "report":
         import report
-        return report.write(run)
+        return report.write(run, options.diagnostics_run)
     return environment_report(run)
 
 

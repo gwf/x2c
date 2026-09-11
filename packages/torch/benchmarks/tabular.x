@@ -14,7 +14,7 @@
 
       tabular check   <artifacts> <out>
       tabular time    <artifacts> <out> <native|explicit|predictN> <updates>
-      tabular memory  <artifacts> <out> <1|3|5|6> <steps>
+      tabular memory  <artifacts> <out> <1|2|3|5|6> <steps> [churn-lifetime]
       tabular trace   <artifacts> <out> <native|explicit> <update>
 */
 
@@ -451,6 +451,75 @@ static void _memory_steady(String artifacts, Map data, Map batches,
   Bench.sample("served", steps);
 }
 
+/* Profile 2: enumeration and tuple results over four batch shapes.
+   Sample after request Scope and optional pool cleanup at root depth. */
+static void _memory_churn(String artifacts, Map data, int steps,
+                           String lifetime) {
+  Tensor input = data["data.x_val"].tensor();
+  Module model = _built(artifacts, "tabular-init.pt");
+  List layers = _layers(model);
+  int pooled = lifetime == "pooled", hoisted = lifetime == "hoisted";
+  List named = NULL;
+  Tensor weights[3], biases[3];
+  if (hoisted) {
+    named = model.named_parameters();
+    for (int i = 0; i < 3; i++) {
+      List parameters = layers[i].module().parameters();
+      weights[i] = parameters[0].tensor();
+      biases[i] = parameters[1].tensor();
+    }
+  }
+  const int shapes[] = {1, 8, 32, 128};
+  double values_sum = 0;
+  long indices_sum = 0, named_elements = 0, name_bytes = 0;
+  int every = steps / 16 > 0 ? steps / 16 : 1;
+  Bench.sample("setup", 0);
+  Bench.record_text("churn_lifetime", lifetime);
+  Bench.record_int("churn_pool_depth", Pool.stats(List.pool_current()).depth);
+  for (int step = -WARMUP; step < steps; step++) {
+    if (step == 0) {
+      values_sum = 0;
+      indices_sum = named_elements = name_bytes = 0;
+      Bench.sample("warm", 0);
+    }
+    {
+      if (pooled) List.pool_retain();
+      defer { if (pooled) List.pool_release(); }
+      Scope.retain();
+      defer Scope.release();
+      Torch.inference_mode();
+      foreach (List pair, hoisted ? named : model.named_parameters()) {
+        Tensor parameter = pair[1].tensor();
+        named_elements += parameter.numel();
+        name_bytes += pair[0].str().len();
+      }
+      int count = shapes[(step < 0 ? step + WARMUP : step) % 4];
+      Tensor output = input.narrow(0, 0, count);
+      if (hoisted) {
+        for (int i = 0; i < 3; i++) {
+          output = output @ weights[i].t() + biases[i];
+          if (i < 2) output = output.relu();
+        }
+      }
+      else output = _forward_explicit(layers, output);
+      List ranked = output.topk(2, 1, 1, 1);
+      Tensor values = ranked[0].tensor(), indices = ranked[1].tensor();
+      values_sum += values.sum().item().double();
+      indices_sum += indices.sum().item().integer();
+    }
+    if (step >= 0 && (step + 1) % every == 0)
+      Bench.sample("request", step + 1);
+  }
+  Bench.record_int("churn_final_pool_depth",
+                   Pool.stats(List.pool_current()).depth);
+  Bench.record_int("churn_requests", steps);
+  Bench.record("churn_values_sum", values_sum);
+  Bench.record_int("churn_indices_sum", indices_sum);
+  Bench.record_int("churn_named_elements", named_elements);
+  Bench.record_int("churn_name_bytes", name_bytes);
+  Bench.sample("served", steps);
+}
+
 /* Profile 3: a useful survivor. A view keeps its whole backing storage
    alive on purpose; the cloned result does not. Scope.move carries one
    allocation, the wrapper, past the scope that created it. */
@@ -563,13 +632,15 @@ static void _memory_control(String artifacts, Map data, int steps) {
   Bench.sample("released", 0);
 }
 
-static int _memory(String artifacts, String out, int profile, int steps) {
+static int _memory(String artifacts, String out, int profile, int steps,
+                    String lifetime) {
   Bench.sample("baseline", 0);
   Map data = _artifact(artifacts, "tabular-data.pt");
   Map batches = _artifact(artifacts, "tabular-batches.pt");
   Bench.sample("loaded", 0);
   switch (profile) {
     case 1: _memory_steady(artifacts, data, batches, steps); break;
+    case 2: _memory_churn(artifacts, data, steps, lifetime); break;
     case 3: _memory_survivor(); break;
     case 5: _memory_lifetime(artifacts, out, data, batches, steps); break;
     case 6: _memory_control(artifacts, data, steps); break;
@@ -612,7 +683,8 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "trace"))
     return _trace(artifacts, out, String.new(argv[4]), atoi(argv[5]));
   if (!strcmp(argv[1], "memory"))
-    return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
+    return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]),
+                   argc > 6 ? String.new(argv[6]) : "ordinary");
   fprintf(stderr, "tabular: no mode %s\n", argv[1]);
   return 2;
 }

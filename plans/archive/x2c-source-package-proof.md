@@ -2,7 +2,8 @@
 > T3 source-package verification completed on 2026-09-09. The distributed
 > support builds packages without their producer checkout. This does not
 > establish a relocatable binary package or test the optional APE installer.
-> Archived 2026-09-10 as historical evidence; current guides own behavior.
+> Archived 2026-09-10 in 1316e0a as historical evidence; current guides own
+> behavior.
 
 # Source-package production and isolated use
 
