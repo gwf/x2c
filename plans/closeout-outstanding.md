@@ -36,11 +36,17 @@ memory profiles and lifetime attribution. The matched Adam control passes;
 stock Adam's explicit tabular loss differs by 0.223%, exceeding the original
 0.1% tolerance. That failed verdict remains the accepted limitation.
 
-Onboarding remains open. Original inputs could not be recovered; the fresh
-evaluation and affected reruns leave six of 30 required trials failing.
-Two source comments were clarified, but current owners already address the
-remaining failures. No aggregate score or repeated attempts erase them.
-See [the active evaluation plan](agent-onboarding-accuracy.md).
+Onboarding remains open. The earlier six-of-thirty cohort used flawed
+launcher settings and is historical. A corrected comparison passed 15/15
+at each effort for CLI A and 7/15, 7/15, 9/15 for CLI B. Gary then approved
+one general-guide startup hook, delivered at e3884ae, and narrowed the new
+rerun to CLI B. With the hook verified in every attempt, low and medium each
+passed 9/15; high has two passes and 13 incomplete trials after a provider
+session limit. Those 13 are missing results, not answer failures. Retry only
+the incomplete high cases after quota is available, preserving all prior
+attempts. No completed effort meets the all-pass acceptance rule. See
+[the active evaluation plan](agent-onboarding-accuracy.md) for settings,
+interpretation, costs, and the retained private evidence.
 
 Raw acceptance evidence is retained outside disposable worktrees at
 `/Users/gary/Documents/x2c-evidence/closeout-20260910/`, including failed and

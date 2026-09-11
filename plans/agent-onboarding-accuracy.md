@@ -12,8 +12,9 @@
 Make guidance accurate, publication evidence reliable, workflow selection
 proportionate, and measurements honest. Preserve canonical skills, shared
 discovery, authorization and delivery rules, and current publication targets.
-Change no compiler/runtime semantics. Add no dependencies, hooks, recurring
-gates, or mandatory reading steps.
+Change no compiler/runtime semantics. The original scope added no
+dependencies, hooks, recurring gates, or mandatory reading steps. The
+separately approved startup-guide hook is recorded below.
 
 In value order:
 
@@ -198,6 +199,11 @@ runner, transcript, or evaluation framework was added to tracked source.
 
 ## Fresh acceptance, 2026-09-10
 
+Historical result: this cohort was later found to omit project onboarding
+settings in one launcher. Its failures and costs remain evidence of those
+settings, not the current comparison. The corrected comparison is recorded
+below.
+
 The approved current-tree fallback did not meet acceptance. The bounded search
 did not recover the original inputs, so this is fresh acceptance, not a
 historical comparison or an extended-history replay. Private evidence is
@@ -255,3 +261,69 @@ or ensure requests. Raw tool events show read-only inspection throughout the
 safe cohorts. Final content and symlink manifests and the frozen prompt/rubric
 hashes match; observer-created bytecode caches were documented and removed.
 No dependency, mandatory reading, recurring gate, or tracked runner was added.
+
+## Corrected startup comparison, 2026-09-11
+
+The earlier six-of-thirty result is historical and superseded for current
+acceptance by a corrected launcher comparison. The corrected run restored
+project settings and skill discovery and held the five questions, rubric,
+three repetitions, five-minute limits, and low/medium/high efforts fixed.
+CLI A passed 15/15 at each effort; CLI B passed 7/15, 7/15, and 9/15. The
+private model and launcher records identify each CLI. This is a comparison
+of those configured workflows, not a universal model ranking.
+
+Gary then authorized one startup hook to supply the general
+`agents/README.md`, leaving task-specific skill selection to the agent.
+Commit e3884ae implements the hook; the duplicate native import was omitted,
+and the superseded proposal was closed. The full agent-pr-check passed.
+Unscored fresh-session checks established that either import alone or hook
+alone supplies the guide; hook-only checks passed at all three efforts
+without a model file-reading action. This establishes receipt, not adherence.
+No Codex-specific injection was added: its corrected prior trials already
+read the router and planning skill in all 45 sessions.
+
+The user narrowed the new scored rerun to CLI B only. It uses fresh main
+e3884ae, unchanged questions and rubric, the same model and CLI version,
+three repetitions per case and effort, five-minute limits, and at most three
+concurrent trials. The only behavioral launcher change enables project
+hooks. Each trial must record exactly one successful startup receipt with
+the complete frozen README. The unscored marker and duplicate import are
+absent from the scored snapshot. The earlier CLI A results are historical
+references, not fresh same-tree measurements.
+
+Private corrected evidence: `/Users/gary/Documents/x2c-evidence/`
+`closeout-20260910/onboarding/matched-effort-20260911/`.
+New hook evidence: the sibling `startup-hook-matched-20260911/`; startup
+preflights and publication evidence: `startup-import-20260911/`. Each run
+retains its own frozen inputs, native transcripts, source manifests, and
+scoring records. No evaluation runner or new recurring gate was added.
+
+| Effort | Corrected prior CLI B | Startup-hook CLI B |
+| --- | --- | --- |
+| Low | 7/15 | 9/15 |
+| Medium | 7/15 | 9/15 |
+| High | 9/15 | 2 pass, 13 incomplete |
+
+The client hit its session limit during high effort. The 13 unfinished
+trials are not answer failures; their partial work and quota notices remain
+recorded. Low and medium each have six failed answers under the original
+rubric. Five of those failures substitute a different decision for the
+user's public-truth choice; the others contain specific factual errors,
+often in extra explanation after a correct central answer. The report
+distinguishes core errors, peripheral claims, and ambiguous statements.
+No complete effort level meets acceptance.
+
+Every attempt received the exact guide through the hook. All 32 completed
+answers finished within five minutes; the frozen source and input hashes
+match, and raw actions show read-only investigation. Low and medium median
+times were 46.725 and 54.572 seconds. All 45 attempts report $23.476 in native
+list-price estimates; five unscored startup checks add $1.144. These are not
+billing records. Quota-rejected attempts are not efficiency evidence.
+
+The next bounded work is to retry only the 13 incomplete high cases after
+quota is available, preserving the original attempts and explicitly reusing
+the two completed high cases. The client reported a noon local reset. The
+private report and `resume-required.json` identify the pending work. Do not
+resample completed failures or archive this plan as accepted. The root
+closeout record now reflects these results instead of the stale six-of-thirty
+cohort.
