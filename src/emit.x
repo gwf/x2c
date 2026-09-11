@@ -1443,9 +1443,10 @@ static int _source_type_definition(List value) {
 static List Emitter._capture_source(
   Emitter e, List node, Array inputs, Array declarations) {
   match (node) {
-    case %(initval (!set ?input (input *)) *cases): {
+    case %((!set ?kind (!or initval initcode))
+           (!set ?input (input *)) *body): {
       List captured = e._capture_source(input, inputs, declarations);
-      return %(initval $captured @cases);
+      return %($kind $captured @body);
     }
     case %(expr ?type (!set ?content (composite *))): {
       List captured = e._capture_source(content, inputs, declarations);

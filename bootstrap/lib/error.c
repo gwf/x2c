@@ -392,7 +392,10 @@ void Symbol_decode(Symbol, char *);
 
 static void _report(Symbol code){
   char spelling[SYMBOL_MAX_5BIT + 1] ={
-    0
+    __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
+      0
+    }
+    )
   }
   ;
   Symbol_decode(code, spelling);

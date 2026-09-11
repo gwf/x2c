@@ -56,7 +56,7 @@ Source: `src/expressions.x:43`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:3166`
+Source: `src/expressions.x:3321`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -70,7 +70,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3186`
+Source: `src/expressions.x:3341`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -79,7 +79,7 @@ Source: `src/expressions.x:3186`
 
 Converts an initializer using its declared native object for array bounds.
 
-Source: `src/expressions.x:3161`
+Source: `src/expressions.x:3316`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -98,7 +98,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3443`
+Source: `src/expressions.x:3598`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -118,10 +118,11 @@ Source: `src/expressions.x:2468`
 
 Returns (original cases) rows; each case is
 (native-condition path destination value). Explicit braces start a nested
-walk, while native array expressions retain every possible continuation.
-A NULL condition is unconditional, and a NULL destination is excess.
+walk. Scalar runs map their ordinal through the native dimensions; other
+inputs retain possible cursor continuations. A NULL condition is
+unconditional, and a NULL destination is excess.
 
-Source: `src/expressions.x:2760`
+Source: `src/expressions.x:2912`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot

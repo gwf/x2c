@@ -136,7 +136,10 @@ Buffer Buffer_write(Buffer, const char *);
 Buffer Symbol_write_str(Symbol symbol, Buffer out){
   if(! symbol) return out;
   char text[SYMBOL_MAX_5BIT + 1] ={
-    0
+    __builtin_choose_expr(0ULL <(sizeof(text) /(sizeof(text[0]))), 0, (__typeof__(text[0ULL])){
+      0
+    }
+    )
   }
   ;
   Symbol_decode(symbol, text);
@@ -148,7 +151,10 @@ Buffer Buffer_write_char(Buffer, char);
 Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   if(! symbol) return Buffer_write(out, "<>");
   char text[SYMBOL_MAX_5BIT + 1] ={
-    0
+    __builtin_choose_expr(0ULL <(sizeof(text) /(sizeof(text[0]))), 0, (__typeof__(text[0ULL])){
+      0
+    }
+    )
   }
   ;
   Symbol_decode(symbol, text);

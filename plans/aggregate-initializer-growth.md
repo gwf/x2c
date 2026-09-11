@@ -1,148 +1,117 @@
 > Status: active
-> Proposal only; implementation is not authorized.
-> Investigated against delivered main `1dbf2582cc78a17098e89a11186912f18fd06d29`
-> on 2026-09-11. The measurements below use that revision's compiler.
+> Implementation authorized on 2026-09-11. The compiler repair and focused
+> acceptance pass; final publication validation and delivery are in progress.
 
 # Bound symbolic aggregate initializer growth
 
-Recommend replacing repeated cursor branching with native scalar-span
-arithmetic for a bounded class of positional initializers. This addresses a
-small source program producing megabytes of C without evaluating C macros,
-changing constant-expression semantics, or introducing a general predicate
-optimizer. Estimated effort: several focused implementation days, including
-compatibility probes and self-host validation.
+## Problem and outcome
 
-## Current evidence
+A small brace-elided initializer made the compiler carry forward every
+possible history of native array-boundary crossings. Merging destinations
+combined their histories rather than eliminating them. The original twelve
+string values in `String names[N][N]`, followed by a `Var` field, generated
+1,659,809 bytes of C and took 7.78 seconds with `#define N 4`. Literal `[4][4]`
+dimensions generated 507 bytes in 0.037 seconds.
 
-The probe initializes `struct Record { String names[N][N]; Var tail; }` with
-an unbraced sequence of `"x"` values, with native `#define N 4`. The literal
-control changes only the dimensions to `[4][4]`.
+The implemented traversal numbers the supplied scalar values and calculates
+their destinations directly. The same macro case now generates 16,703 bytes
+in 0.067 seconds. Literal output remains 507 bytes. These are local single-run
+measurements, not statistical performance claims.
 
-| Dimensions | Values | Translation seconds | Generated C bytes | `sizeof` occurrences |
-| --- | ---: | ---: | ---: | ---: |
-| literal | 12 | 0.037 | 507 | 0 |
-| native macro | 4 | 0.075 | 9,371 | 220 |
-| native macro | 8 | 0.451 | 117,543 | 3,420 |
-| native macro | 10 | 1.835 | 431,381 | 12,892 |
-| native macro | 12 | 7.397 | 1,659,809 | 50,076 |
-| native macro | 16 | timeout at 20 | no completed output | - |
+The initial proposal covered rectangular scalar-array spans. Investigation
+also reproduced growth in arrays of records containing another array and a
+scalar field. Collapsing adjacent array dimensions alone would not fix that
+case. The chosen recursive layout covers both shapes through the same code.
 
-These are single local observations, not statistical timing claims. The
-12-value macro case has only 105 `__builtin_choose_expr` occurrences: repeated
-conditions, rather than that many distinct conversions, dominate its size.
-An independent review repeated both 12-value probes with identical C sizes:
-7.512 seconds for macro dimensions and 0.036 seconds for literal dimensions.
+## Implementation and compatibility
 
-Raw source, commands, compiler hash, generated output, logs, measurements, and
-native prototypes are retained outside the worktree:
+`src/expressions.x` owns all three private operations:
+
+- `_initializer_layout` counts scalar destinations through the existing type
+  and ordered-field operations. Its temporary `(type count children)` Lists
+  pair children with ordinary initializer path frames. Arrays multiply native
+  extent by the child count; records sum their field counts.
+- `_initializer_ordinal` maps a supplied value's ordinal through that layout.
+  Division and remainder produce proper nested subscripts; record fields use
+  cumulative counts. Array elements are never enumerated or flattened through
+  pointer casts. Empty unselected subobjects use safe divisors.
+- `_initializer_scalar_rows` emits the existing condition/path/type/value
+  cases and native excess fallback. Conversion, source capture, ownership,
+  and deferred static assignment remain with their existing owners.
+
+Literal-only layouts retain their existing output. Whole aggregate values,
+explicit braces at the current level, designators, prepared initializer
+cases, unions, incomplete arrays, and character arrays initialized by whole
+strings retain the existing walker. Nested explicit braces may independently
+contain eligible scalar runs. Growth in unsupported mixed forms is not
+claimed fixed; the scope is scalar positional initializers.
+
+The native compiler still owns dimensions, constant expressions, and bounds
+errors. No C macro evaluator, public AST form, runtime storage, general
+predicate optimizer, or recurring gate was added. Invalid inputs remain
+rejected; speculative alternatives can move an incompatible-value diagnostic
+from x2c to native C.
+
+Broader destination selection exposed two existing consumer limitations.
+`_initializer_zero` now uses a bitfield's declared base type because native C
+forbids `typeof` on a bitfield. `Emitter._capture_source` handles `initcode`
+through the same capture boundary as `initval`, preventing an outer static
+initializer macro from recapturing an inner macro's generated body.
+
+## Acceptance evidence
+
+| Shape | Values | Generated C bytes | Translation seconds |
+| --- | ---: | ---: | ---: |
+| rectangular | 4 | 5,863 | 0.046 |
+| rectangular | 8 | 11,267 | 0.054 |
+| rectangular | 12 | 16,703 | 0.067 |
+| rectangular | 16 | 22,171 | 0.074 |
+| rectangular | 32 | 44,043 | 0.112 |
+| rectangular | 64 | 87,787 | 0.186 |
+| mixed records/arrays | 16 | 49,221 | 0.120 |
+| mixed records/arrays | 32 | 98,213 | 0.203 |
+| mixed records/arrays | 64 | 196,197 | 0.370 |
+
+The original rectangular sixteen-value case timed out after twenty seconds.
+The mixed sixteen-value baseline produced 906,055 bytes in roughly six
+seconds. Dimensions are four for the smaller cases and eight for 32/64.
+Both repaired series grow in proportion to the supplied values.
+
+The `initializer-ordinal` fixture checks every position in a non-square
+array, custom destination conversion, exactly-once calls, local and compound
+literal initialization, file-static initialization, static arrays of mixed
+records, nested mixed arrays, and selected/unselected bitfields. Its expected
+stdout and status pass. Eleven existing focused fixtures also pass, covering
+macro chronology and redefinition, native type identity, canonical syntax,
+designators, braces, aliases, unions, strings, and static qualifiers.
+
+Separate before/after probes retain excess-value side effects and accepted
+empty unselected arrays; invalid dimensions and initialized VLAs remain
+rejected. The publication gate first found a stale bootstrap copy of the
+runtime's character-array zero initializer. Stages zero, one, and two agree
+on all 156 generated C/H files; the normal gate is refreshing the seed.
+
+Raw sources, generated output, logs, measurements, and compatibility evidence
+are retained outside the worktree:
+`/Users/gary/Documents/x2c-evidence/aggregate-initializer-fix-20260911/`.
+Original proposal evidence remains at
 `/Users/gary/Documents/x2c-evidence/closeout-20260910/research/aggregate-initializer-growth/`.
-`results.json` records the compiler SHA-256 and the 20-second timeout.
 
-## Owner and cause
+## Plan and source review
 
-`src/expressions.x` owns the shared cursor. `Compiler.initializer_rows`
-returns `(original cases)` rows; each case is
-`(native-condition path destination value)`. Paths contain ordinary
-`(owner kind selector type following-fields)` frames.
+Existing type resolution and ordered fields establish the layout facts. The
+new traversal does not repeat binding, conversion, lifetime, or diagnostic
+validation. Its temporary tree prevents repeated type traversal and replaces
+boundary histories for eligible inputs; it does not create a second semantic
+AST. Three private operations separate layout construction, ordinal mapping,
+and row production. The generic walker remains necessary for whole-object
+and designated consumption.
 
-`_initializer_next` forks at each array boundary whose dimension is not an
-x2c integer literal. `_initializer_merge` merges equal cursor positions by
-OR-ing their conditions. `_initializer_and` and `_initializer_drop_bound`
-remove some repeated lower bounds, but merged conditions retain the histories
-that reached the same position. Subsequent branches expand those histories
-again. The native compiler knows `N`; the x2c cursor deliberately does not.
-
-`_convert_composite` consumes these rows and constructs canonical
-`(expr TYPE (initval [input] CASE...))` alternatives. `Ast.initializer_cases`
-and `Ast.initializer_functions` in `src/ast.x` expose them. `Emitter._initializer_value`
-in `src/emit.x` emits native choices; `src/cache.x` reuses the rows and paths
-for deferred static assignments. Fixing only printing would leave earlier
-cursor and conversion work expensive.
-
-The language contract is [C initializers and static assertions](../docs/src/reference/language.md#c-initializers-and-static-assertions):
-ordinary brace elision and destination conversions, with native C owning
-dimensions, constant expressions, and bounds diagnostics.
-
-## Proposed bounded change
-
-1. Add an internal scalar-span path inside `Compiler.initializer_rows`.
-   Admit an array, or a struct whose initialized fields are scalars or
-   rectangular arrays of scalar elements, when at least one array bound is
-   nonliteral. Resolve aliases and field order through the current symbol
-   operations. Keep the current literal-dimension path unchanged.
-2. Restrict this path to ordinary undesignated scalar positional inputs.
-   Explicit nested braces, designators, strings initializing character
-   arrays as a whole, incomplete arrays, unions, anonymous aggregate fields,
-   arrays of heterogeneous aggregates, and already prepared `initval` inputs
-   continue through the existing walker. Eligibility is an optimization
-   choice, never a new rejection rule.
-3. Describe each eligible field as a temporary scalar span: its existing
-   path, element type, native scalar count, and array strides. For the probe,
-   the first count is `sizeof(row.names) / sizeof(row.names[0][0])`; the
-   following `Var` field has count one. Use cumulative counts to decide which
-   span contains initializer ordinal `k`, instead of enumerating all possible
-   inner-array crossings.
-4. Produce the same canonical case rows. Conditions are native integer
-   comparisons with span starts and ends. Reconstruct proper nested array
-   selectors from the ordinal using native stride division and remainder;
-   do not cast a multidimensional array to a flat pointer. Keep a native
-   excess fallback and the original braces/designators in emitted C.
-5. Reuse `initializer_slot`, ordinary conversion and its semantic transaction,
-   native bound/index capture, `initval` emission, and static-assignment
-   generation. The temporary span list stays inside the cursor owner; no new
-   public AST form, parser path, symbol cache, or runtime storage is needed.
-
-The expected work for an eligible initializer is proportional to supplied
-values times its field spans and array rank, rather than the number of
-possible boundary histories. The implementation must retain native rejection
-of invalid/VLA dimensions and native excess behavior. In particular, probe
-zero-length native extensions and unselected alternatives before accepting
-the arithmetic lowering; avoid introducing division-by-zero diagnostics from
-synthetic selectors. Do not silently widen this proposal if an edge requires
-a different semantic model.
-
-## Feasibility and validation
-
-A native C prototype in `span-native/` uses the capacity comparison directly
-in `__builtin_choose_expr` and proper nested subscripts. At widths 1, 2, 3,
-and 4, it initializes every `String` element followed by the `Var` field,
-verifies all resulting values, and counts exactly one input call per value.
-All four programs compile and run successfully; the 17-value prototype is
-2,241 bytes. This establishes native ICE selection and scalar-span mapping
-for the motivating shape, not an implemented compiler optimization or proof
-of every fallback boundary.
-
-Implementation should first exercise that boundary in the shared cursor,
-then verify local, compound-literal, and file-static consumers. Cover a full
-array, continuation into a differently typed field, side effects, aliases,
-source-position `__COUNTER__` bounds, and the existing symbolic/designated
-initializer fixtures. Preserve diagnostics through original native syntax;
-do not add a validator merely to reject an input earlier.
-
-Repeat the saved 4/8/10/12/16-value probes, then extend the successful optimized
-shape to 32 and 64 values with suitable dimensions. Record generated size and
-translation time; require the motivating 12-value case below 50 KiB and no
-return to exponential growth in that series. This is focused acceptance
-evidence, not a recurring timing gate. Existing literal behavior and general
-fallback coverage must remain green. Review and fix the completed authored
-diff before the normal publication command; add no gate or precommit step.
-
-## Plan review
-
-- Existing type resolution, ordered fields, captured native bounds, and
-  canonical initializer rows establish the facts the new path consumes. It
-  does not revalidate bindings, speculate about macro values, or repeat
-  conversion and lifecycle rules.
-- The change removes repeated boundary-history construction for eligible
-  inputs. It reuses the current walker for other shapes and the current
-  conversion/emission consumers everywhere. One private span construction
-  operation and ordinal-to-path operation earn their place by avoiding that
-  repeated work; there is no general boolean DAG, global cache, or second
-  initializer AST. Existing fallback helpers are not claimed as deletions.
-- Match recognizes eligible canonical shapes; ordinary Lists, field lookup,
-  and expression templates produce ordinary rows and paths. This remains
-  local x2c cursor code rather than a separate optimization framework.
-- No validator or dedicated diagnostic is proposed. Compatibility probes
-  cover invalid dimensions, excess initialization, and unsupported shapes
-  only where the optimization could change native behavior or emit an unsafe
-  subobject access. There is no new mandatory negative-test category.
+Canonical List templates and existing path frames keep the change local and
+ordinary x2c. The emitter repair unifies two existing capture cases. The
+bitfield repair reuses the declared base type. No validator or dedicated
+diagnostic was introduced. The added regression protects actual destination
+values, side-effect counts, and the two reproduced invalid native outputs.
+Authored changes were reviewed before publication validation; generated
+changes are reviewed before delivery. The existing publication gate remains
+unchanged.

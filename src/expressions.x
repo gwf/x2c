@@ -2753,12 +2753,166 @@ static int _initializer_whole(Compiler c, Type type, List value) {
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
+/* Scalar positional runs have one ordinal, independent of the native array
+   boundaries. Count the type tree once instead of retaining cursor histories.
+   Children pair ordinary path frames with (type count children) layouts. */
+static List _initializer_layout(
+  Compiler c, Type type, List target, List string, int *symbolic) {
+  Type owner = c.sym.resolve_key(type);
+  List one = %(expr (unsigned long long)
+    (literal (unsigned long long) "1ULL"));
+  if (c.sym.is_var_type(type) ||
+      (!owner.is_array() && !owner.is_aggregate()))
+    return %($type $one ());
+  if (owner.is_array()) {
+    List dimension = owner.car().list().cadr();
+    if (!dimension) return NULL;
+    if (string && _initializer_string_array(c, type, string)) return NULL;
+    unsigned long long size;
+    if (!_initializer_integer(dimension, &size)) *symbolic = 1;
+    List path = _initializer_first(c, type, NULL);
+    List element = c.initializer_slot(target, path);
+    List child = _initializer_layout(c, owner.cdr(), element,
+                                     string, symbolic);
+    if (!child) return NULL;
+    List bytes = %(expr (unsigned long long) (sizeof (parens $element)));
+    List divisor = child.caddr() ? %(expr (unsigned long long)
+      (op ? $bytes $bytes $one)) : bytes;
+    List count = %(expr (unsigned long long)
+      (op / (expr (unsigned long long) (sizeof (parens $target)))
+            (expr (unsigned long long) (parens $divisor))));
+    List units = child.cadr();
+    if (units !== one)
+      count = %(expr (unsigned long long)
+        (op * (expr (unsigned long long) (parens $count))
+              (expr (unsigned long long) (parens $units))));
+    return %($type $count ((${path.car()} $child)));
+  }
+  if (owner.car() == <union>) return NULL;
+  Array children = %[];
+  List count = NULL;
+  List fields = c.sym.field_order(owner).cdr();
+  while (fields) {
+    List path = _initializer_field(owner, fields, NULL);
+    if (!path) break;
+    (Type parent, Symbol kind, Var name, Type member, List rest) =
+      path.car().list();
+    List slot = c.initializer_slot(target, path);
+    List child = _initializer_layout(c, member, slot, string, symbolic);
+    if (!child) { children.free(); return NULL; }
+    List units = child.cadr();
+    count = count ? %(expr (unsigned long long)
+      (op + (expr (unsigned long long) (parens $count))
+            (expr (unsigned long long) (parens $units)))) : units;
+    children.push(%(${path.car()} $child));
+    fields = rest;
+  }
+  if (!count) { children.free(); return NULL; }
+  return %($type $count ${children.list_free()});
+}
+
+static void _initializer_ordinal(
+  List layout, List ordinal, List path, List condition, List value,
+  Array cases) {
+  (Type type, List count, List children) = layout;
+  if (!children) {
+    cases.push(%($condition $path $type $value));
+    return;
+  }
+  List start = NULL;
+  List one = %(expr (unsigned long long)
+    (literal (unsigned long long) "1ULL"));
+  foreach (List entry, children) {
+    (List frame, List child) = entry;
+    (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
+    List units = child.cadr(), position = ordinal, active = condition;
+    if (kind == <index>) {
+      List index = ordinal;
+      position = %(expr (int) (literal (int) "0"));
+      if (units !== one) {
+        // Empty native subarrays leave these unselected selectors well-formed.
+        List divisor = %(expr (unsigned long long)
+          (op ? $units $units $one));
+        index = %(expr (unsigned long long)
+          (op / (expr (unsigned long long) (parens $ordinal))
+                (expr (unsigned long long) (parens $divisor))));
+        position = %(expr (unsigned long long)
+          (op % (expr (unsigned long long) (parens $ordinal))
+                (expr (unsigned long long) (parens $divisor))));
+      }
+      frame = %($owner index $index $selected ());
+    }
+    else {
+      if (start) {
+        position = %(expr (unsigned long long)
+          (op - (expr (unsigned long long) (parens $ordinal))
+                (expr (unsigned long long) (parens $start))));
+        if (units !== one)
+          active = _initializer_and(active, %(expr (int)
+            (op >= (expr (unsigned long long) (parens $ordinal))
+                   (expr (unsigned long long) (parens $start)))));
+      }
+      List test = units === one
+        ? %(expr (int) (op == (expr (unsigned long long) (parens $position))
+                             (expr (int) (literal (int) "0"))))
+        : %(expr (int)
+            (op < (expr (unsigned long long) (parens $position))
+                  (expr (unsigned long long) (parens $units))));
+      active = _initializer_and(active, test);
+      start = start ? %(expr (unsigned long long)
+        (op + (expr (unsigned long long) (parens $start))
+              (expr (unsigned long long) (parens $units)))) : units;
+    }
+    _initializer_ordinal(child, position, cons(frame, path), active,
+                         value, cases);
+  }
+}
+
+static List _initializer_scalar_rows(
+  Compiler c, Type root, List items, List target) {
+  int symbolic = 0;
+  List string = NULL;
+  foreach (List value, items) {
+    match (value) {
+      case %(expr ? (!or (composite *) (initval *))): return NULL;
+      case %(expr ?type ?): {
+        Type source = c.sym.resolve_key(type);
+        if (!c.sym.is_var_type(type) &&
+            (source.is_array() || source.is_aggregate())) return NULL;
+      }
+      default: return NULL;
+    }
+    if (value.match(%(expr (* char) (literal (* char) ?)))) string = value;
+  }
+  List layout = _initializer_layout(c, root, target, string, &symbolic);
+  if (!layout || !symbolic) return NULL;
+  int array = c.sym.resolve_key(root).is_array();
+  Array rows = %[];
+  unsigned long long at = 0;
+  foreach (List value, items) {
+    String spelling = %"${at++}ULL";
+    List ordinal = %(expr (unsigned long long)
+      (literal (unsigned long long) $spelling));
+    List count = layout.cadr();
+    List condition = array ? %(expr (int)
+      (op < $ordinal (expr (unsigned long long) (parens $count)))) : NULL;
+    Array cases = %[];
+    _initializer_ordinal(layout, ordinal, NULL, condition, value, cases);
+    cases.push(%(() () () $value));
+    rows.push(%($value ${cases.list_free()}));
+  }
+  return rows.list_free();
+}
+
 /** Returns (original cases) rows; each case is
     (native-condition path destination value). Explicit braces start a nested
-    walk, while native array expressions retain every possible continuation.
-    A NULL condition is unconditional, and a NULL destination is excess. */
+    walk. Scalar runs map their ordinal through the native dimensions; other
+    inputs retain possible cursor continuations. A NULL condition is
+    unconditional, and a NULL destination is excess. */
 List Compiler.initializer_rows(
   Compiler c, Type root, List items, List target) {
+  List scalar = _initializer_scalar_rows(c, root, items, target);
+  if (scalar) return scalar;
   Array rows = %[];
   List first_path = _initializer_first(c, root, NULL);
   Type resolved_root = c.sym.resolve_key(root);
@@ -2818,7 +2972,8 @@ static List _initializer_replace(List original, List value) {
 }
 
 static List _initializer_zero(Type type, List target) {
-  Type native = target ? %("__typeof__" (parens $target)) : type;
+  Type native = type.is_bitfield() ? type.base_type()
+    : target ? %("__typeof__" (parens $target)) : type;
   return %(expr $type (cast $native (expr $type
     (composite (commas (expr (int) (literal (int) "0")))))));
 }

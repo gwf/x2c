@@ -90,12 +90,18 @@ void x2c_initialize_environment(const char * argv0){
   if(! _init_guard_) _file_init_();
   if(String_truth(x2c_root_path)) return;
   char exec_path[PATH_MAX] ={
-    0
+    __builtin_choose_expr(0ULL <(sizeof(exec_path) /(sizeof(exec_path[0]))), 0, (__typeof__(exec_path[0ULL])){
+      0
+    }
+    )
   }
   ;
   if(_resolve_executable_path(argv0, exec_path, sizeof(exec_path))) x2c_executable_path = String_new(exec_path);
   char root_path[PATH_MAX] ={
-    0
+    __builtin_choose_expr(0ULL <(sizeof(root_path) /(sizeof(root_path[0]))), 0, (__typeof__(root_path[0ULL])){
+      0
+    }
+    )
   }
   ;
   if(! _locate_repo_root(exec_path, root_path, sizeof(root_path))){
