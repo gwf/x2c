@@ -3,6 +3,11 @@ slug: yyjson
 section: packages
 tab: yyjson
 title: Turn JSON into a service report.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/yyjson/examples/service-health.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -49,5 +54,3 @@ region us-west, 3 services
   docs-site:443 ok
 wrote ["release-worker"] to /tmp/unhealthy.json
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/yyjson/examples/service-health.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md)

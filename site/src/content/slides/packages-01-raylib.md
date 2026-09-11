@@ -7,6 +7,11 @@ image: packages/climate-trends.png
 imageAlt: Line chart of Seattle daily high temperatures from Monday to Sunday.
 imageWidth: 1440
 imageHeight: 640
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/raylib/examples/climate-trends.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/raylib/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -38,5 +43,3 @@ Turn seven daily temperatures into a PNG with ordinary vectors, Lists,
 and drawing methods. Each temperature becomes a point; lines join the
 points over a pale filled area, and labels mark the days and highs. The complete program
 renders this chart into memory, with no display or GPU.
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/raylib/examples/climate-trends.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/raylib/README.md)

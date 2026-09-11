@@ -4,6 +4,11 @@ section: packages
 tab: C*
 title: Give a function a contract.
 status: experimental
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/cstar/examples/abs.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/cstar/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -48,5 +53,3 @@ Verifier output:
 ```text
 absolute: verified
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/cstar/examples/abs.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/cstar/README.md)

@@ -3,6 +3,11 @@ slug: sqlite
 section: packages
 tab: SQLite
 title: Find the requests that need attention.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/sqlite/examples/observations.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/sqlite/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -48,5 +53,3 @@ Output:
 /source: HTTP 200, 3100000 us
 /reference: HTTP 503, 40000 us
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/sqlite/examples/observations.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/sqlite/README.md)

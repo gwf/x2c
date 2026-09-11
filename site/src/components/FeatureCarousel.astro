@@ -51,15 +51,18 @@ const count = String(slides.length).padStart(2, "0");
           <div class="carousel-slide" id={`example-${slug}`}
             role="tabpanel" aria-labelledby={`example-tab-${slug}`}
             data-example={slug} data-section={name} data-surface="home">
-            <ExamplePanel slide={slide} codeLabel={codeLabel} />
-            <div class="example-actions">
-              <CopyButton text={`${absoluteSiteUrl("/")}${anchor}`}
-                label="Copy permalink" />
-              {article && (
-                <a href={sitePath(`/examples/${article.frontmatter.slug}/`)}
-                  data-example-action="explore">Explore this example</a>
-              )}
-            </div>
+            <ExamplePanel slide={slide} codeLabel={codeLabel}>
+              <Fragment slot="links">
+                {article && (
+                  <a href={sitePath(`/examples/${article.frontmatter.slug}/`)}
+                    data-example-action="explore">
+                    {article.frontmatter.navTitle}
+                  </a>
+                )}
+                <CopyButton text={`${absoluteSiteUrl("/")}${anchor}`}
+                  label="Copy permalink" />
+              </Fragment>
+            </ExamplePanel>
           </div>
         );
       })}

@@ -3,6 +3,11 @@ slug: blis
 section: packages
 tab: BLIS
 title: Rank pages with a little linear algebra.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/blis/examples/page-rank.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/blis/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -51,5 +56,3 @@ converged after 53 rounds, shift 7.9e-16
   download   0.0833
   blog       0.0000
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/blis/examples/page-rank.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/blis/README.md)

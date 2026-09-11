@@ -3,6 +3,11 @@ slug: libcurl
 section: packages
 tab: libcurl
 title: Three pages, one batch.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/libcurl/examples/page-titles.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/libcurl/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -46,5 +51,3 @@ guide: x2c Language Guide
 reference: x2c Reference
 source: x2c Source
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/libcurl/examples/page-titles.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/libcurl/README.md)

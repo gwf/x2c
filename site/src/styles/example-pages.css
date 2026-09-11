@@ -33,9 +33,7 @@
   flex-wrap: wrap;
   gap: 14px 26px;
   margin-top: 26px;
-  padding: 0;
-  border: 0;
-  font-size: 13px;
+  font: 13px/1.5 "JetBrains Mono", monospace;
 }
 .example-heading .example-actions a { text-underline-offset: 4px; }
 .example-heading .example-actions a:hover { text-decoration: underline; }

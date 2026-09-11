@@ -57,6 +57,12 @@ const base = import.meta.env.BASE_URL;
     </div>
   )}
   <Fragment set:html={right} />
+  {(panel.links?.length || Astro.slots.has("links")) && (
+    <div class="caption-links">
+      {panel.links?.map((link) => <a href={link.href}>{link.label}</a>)}
+      <slot name="links" />
+    </div>
+  )}
 </div>}
 
 <script>

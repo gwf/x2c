@@ -3,6 +3,11 @@ slug: libuv
 section: packages
 tab: libuv
 title: Put two processes to work.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/libuv/examples/process-report.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/libuv/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -50,5 +55,3 @@ normalized:
 line count:        3
 exits: normalized=0 counted=0
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/libuv/examples/process-report.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/libuv/README.md)

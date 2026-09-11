@@ -3,6 +3,11 @@ slug: torch
 section: packages
 tab: torch
 title: Compose a model. Train it. Save it.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/torch/examples/mlp.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/torch/README.md
 ---
 
 <!-- ignore: adapted excerpt; the complete example requires its optional package and setup. -->
@@ -53,5 +58,3 @@ reloaded loss 0.024875
 The package uses PyTorch's libtorch on macOS arm64 with CPU or MPS tensors,
 and Linux x86_64 with CPU tensors. Programs need the prepared libtorch
 libraries at runtime.
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/torch/examples/mlp.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/torch/README.md)

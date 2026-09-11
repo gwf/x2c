@@ -8,6 +8,11 @@ imagePoster: packages/game-of-life-poster.png
 imageAlt: A twenty-second recording of green Game of Life cells evolving in a terminal.
 imageWidth: 680
 imageHeight: 426
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/termbox2/examples/game-of-life.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/termbox2/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -40,5 +45,3 @@ Conway's Game of Life fills the terminal with a changing world. The
 drawing function paints adjacent living cells in one call, then presents
 the frame. The complete program starts with random cells, advances each
 generation, handles resizing, and exits on a keypress.
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/termbox2/examples/game-of-life.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/termbox2/README.md)

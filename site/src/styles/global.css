@@ -779,6 +779,20 @@ html:has(.landing-header) {
   margin-bottom: 0;
 }
 
+.caption-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.caption-links a,
+.caption-links .copy-button {
+  color: inherit;
+}
+
 .feature-status {
   display: block;
   margin-bottom: 10px;

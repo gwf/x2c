@@ -3,6 +3,11 @@ slug: pcre2
 section: packages
 tab: PCRE2
 title: Make sense of a log file.
+links:
+  - label: Full source
+    href: https://github.com/gwf/x2c/blob/main/packages/pcre2/examples/parse-log.x
+  - label: Package guide
+    href: https://github.com/gwf/x2c/blob/main/packages/pcre2/README.md
 ---
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
@@ -48,5 +53,3 @@ First entry's output:
     user=ada
     port=22
 ```
-
-[Full example](https://github.com/gwf/x2c/blob/main/packages/pcre2/examples/parse-log.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/pcre2/README.md)
