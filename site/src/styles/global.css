@@ -789,21 +789,16 @@ html:has(.landing-header) {
 }
 
 .expanded-example a,
-.caption-links a,
-.caption-links .copy-button {
+.caption-links a {
   color: inherit;
 }
 
 .caption-links .copy-button {
-  padding: 2px 7px;
-  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, currentColor 4%, transparent);
-  text-decoration: none;
+  color: var(--muted-dark);
 }
 
-.caption-links .copy-button:hover {
-  background: color-mix(in srgb, currentColor 9%, transparent);
+.feature-carousel-dark .caption-links .copy-button {
+  color: #bdb7b0;
 }
 
 .feature-status {
@@ -939,7 +934,8 @@ html:has(.landing-header) {
   color: var(--dark);
 }
 
-#packages .feature-copy p {
+#packages .feature-copy p,
+#packages .caption-links .copy-button {
   color: var(--muted-dark);
 }
 
