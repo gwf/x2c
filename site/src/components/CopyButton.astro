@@ -9,7 +9,13 @@ const { text, label = "Copy link", action = "share" } = Astro.props;
 ---
 <span class="copy-control">
   <button type="button" class="copy-button" data-copy-text={text}
-    data-copy-action={action} hidden>{label}</button>
+    data-copy-action={action} aria-label={label} hidden>
+    <span class="copy-label">{label}</span>
+    <svg class="copy-mark" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="m3 8 3 3 7-7" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
   <span class="copy-status" role="status"></span>
 </span>
 
@@ -21,16 +27,28 @@ const { text, label = "Copy link", action = "share" } = Astro.props;
       "[data-copy-text]",
     )) {
       const status = button.parentElement!.querySelector("[role=status]")!;
+      let timer: number;
+      const reset = () => {
+        button.removeAttribute("data-copied");
+        status.textContent = "";
+        status.classList.remove("copy-error");
+      };
       button.hidden = false;
       button.addEventListener("click", async () => {
-        status.textContent = "";
+        window.clearTimeout(timer);
+        reset();
+        let duration = 1800;
         try {
           await navigator.clipboard.writeText(button.dataset.copyText!);
+          button.setAttribute("data-copied", "");
           status.textContent = "Copied.";
           trackExampleAction(button, button.dataset.copyAction!);
         } catch {
+          status.classList.add("copy-error");
           status.textContent = "Could not copy.";
+          duration = 4000;
         }
+        timer = window.setTimeout(reset, duration);
       });
     }
   }

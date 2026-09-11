@@ -783,14 +783,27 @@ html:has(.landing-header) {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 16px;
+  gap: 6px 12px;
   font-size: 15px;
   line-height: 1.6;
 }
 
+.expanded-example a,
 .caption-links a,
 .caption-links .copy-button {
   color: inherit;
+}
+
+.caption-links .copy-button {
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  text-decoration: none;
+}
+
+.caption-links .copy-button:hover {
+  background: color-mix(in srgb, currentColor 9%, transparent);
 }
 
 .feature-status {
@@ -889,7 +902,8 @@ html:has(.landing-header) {
     grid-row: auto;
   }
 
-  #packages .carousel-slide .feature-copy {
+  #packages .carousel-slide .feature-copy,
+  #packages .carousel-slide:nth-child(even) .feature-copy {
     border: 0;
     border-top: 1px solid rgba(244, 241, 236, 0.18);
   }

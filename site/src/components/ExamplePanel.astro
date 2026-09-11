@@ -4,9 +4,10 @@ interface Props {
   codeLabel?: string;
   part?: "code" | "notes";
   section?: number;
+  expanded?: { href: string; title: string };
 }
 
-const { slide, codeLabel, part, section } = Astro.props;
+const { slide, codeLabel, part, section, expanded } = Astro.props;
 const panel = slide.frontmatter;
 const html = await slide.compiledContent();
 
@@ -57,6 +58,14 @@ const base = import.meta.env.BASE_URL;
     </div>
   )}
   <Fragment set:html={right} />
+  {expanded && (
+    <p class="expanded-example">
+      See expanded example:{" "}
+      <a href={expanded.href} data-example-action="explore">
+        {expanded.title}
+      </a>
+    </p>
+  )}
   {(panel.links?.length || Astro.slots.has("links")) && (
     <div class="caption-links">
       {panel.links?.map((link) => <a href={link.href}>{link.label}</a>)}
