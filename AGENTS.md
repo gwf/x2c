@@ -12,6 +12,8 @@ the source and tests that implement the behavior. Use
 [agents/README.md](agents/README.md) to select the smallest matching skill
 and relevant references; it is the task directory for this repository.
 
+@agents/README.md
+
 Begin with a working example of the same kind of code. The
 [idioms chapter](docs/src/guide/idioms.md) explains language choices;
 `examples/manifest.txt` identifies executable examples and their checks.

@@ -48,6 +48,11 @@ attempts. No completed effort meets the all-pass acceptance rule. See
 [the active evaluation plan](agent-onboarding-accuracy.md) for settings,
 interpretation, costs, and the retained private evidence.
 
+Gary subsequently requested the original README import alongside the hook.
+That combined configuration is now installed but has no scored evaluation
+yet. Preserve the hook-only cohort and evaluate the combined configuration
+separately; its results cannot fill the earlier cohort's incomplete trials.
+
 Raw acceptance evidence is retained outside disposable worktrees at
 `/Users/gary/Documents/x2c-evidence/closeout-20260910/`, including failed and
 interrupted earlier sessions. The three completed reference/site plans are

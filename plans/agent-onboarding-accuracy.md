@@ -327,3 +327,17 @@ private report and `resume-required.json` identify the pending work. Do not
 resample completed failures or archive this plan as accepted. The root
 closeout record now reflects these results instead of the stale six-of-thirty
 cohort.
+
+## Follow-up configuration: import and hook
+
+Gary subsequently requested the original `@agents/README.md` import alongside
+the startup hook. The import is now present in root `AGENTS.md`, reached
+through the existing `CLAUDE.md` symlink. The guide and task-specific skills
+are unchanged. Earlier preflights established that each mechanism delivers
+the guide on its own; they did not establish equivalent answer behavior or
+test both mechanisms together. The combined configuration has no scored
+acceptance evidence yet because the provider session limit remains active.
+
+The results above remain results of the frozen hook-only configuration.
+Trials with both mechanisms must form a separate recorded cohort; they must
+not fill the 13 gaps in the hook-only cohort or be mixed into its score.
