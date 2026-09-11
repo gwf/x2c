@@ -39,30 +39,16 @@ model.save("mlp.pt");
 ```
 
 Register two linear layers, write the forward pass in x2c, and train
-with Adam. `backward` computes gradients through both layers; each step
-releases its temporary tensors. The saved model contains named weights
-and biases that Python can read with
-`torch.load("mlp.pt", weights_only=False)`.
+with Adam. Each step releases its temporary tensors. Save the named
+weights and biases for Python to read with `torch.load`.
 
-This excerpt assumes training tensors `x` and `y`. The complete example
-adds synthetic data, mini-batches, and a save/reload check. Its training
-and reload output:
+The complete example supplies training data and checks that reloading
+preserves the result:
 
 ```text
-step   0  loss 5.294546
-step  50  loss 0.239890
-step 100  loss 0.081145
-step 150  loss 0.035499
 trained  loss 0.024875
 reloaded loss 0.024875
 ```
 
-The package uses PyTorch's libtorch on macOS arm64 with CPU or MPS tensors,
-and Linux x86_64 with CPU tensors. Programs need the prepared libtorch
-libraries at runtime.
-
-In the measured CPU workloads, small-model training and prediction used
-less time in x2c; convolution training and tensor chains took about the same
-time as PyTorch. The chain measurements explicitly release replaced tensors
-or use a scope per iteration. See the comparison for the workloads,
-correctness results, and memory limitations.
+Uses PyTorch's libtorch: CPU or MPS on macOS arm64, CPU on Linux x86_64.
+The prepared libraries are required at runtime.
