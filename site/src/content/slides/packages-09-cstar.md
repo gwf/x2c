@@ -24,7 +24,8 @@ $cstar.verify(
 static int absolute(int x) {
   if (x >= 0) {
     return x;
-  } else {
+  }
+  else {
     return -x;
   }
 }
