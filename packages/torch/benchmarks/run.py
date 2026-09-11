@@ -246,10 +246,12 @@ def environment(threads):
             "X2C_TORCH_OUTPUTS": common.OUTPUTS}
 
 
-def both(app, mode, arguments, threads, run, tag, x2c_first=True):
+def both(app, mode, arguments, threads, run, tag, x2c_first=True,
+         x_arguments=None):
     """One paired launch, in the requested order, in fresh processes."""
     logs = log_dir(run)
-    calls = [("x2c", x2c_command(app, mode, *arguments)),
+    calls = [("x2c", x2c_command(app, mode, *(arguments if x_arguments is None
+                                            else x_arguments))),
              ("python", python_command(app, mode, *arguments))]
     if not x2c_first:
         calls.reverse()
@@ -672,6 +674,148 @@ def attribute(elements, requests, threads, run):
     return 0
 
 
+# ---- counter-free chain lifetimes -----------------------------------------
+
+CHAIN_LIFETIMES = ("natural", "freed", "subscope")
+
+
+def validate_chain_pair(results, lifetime, threads, requests=None):
+    """Require the selected native path and exact printed scalar agreement."""
+    import math
+
+    x, p = results["x2c"], results["python"]
+    if x.texts.get("lifetime") != lifetime:
+        raise ValueError("interop: wrong lifetime dispatch")
+    if x.texts.get("counters") != "off":
+        raise ValueError("interop: timing requires a counter-free binary")
+    names = CHECK_RECORDS["interop"]
+    if requests is not None:
+        names = {name.replace("chain_", "result_") for name in names}
+    for result in (x, p):
+        if result.number("interop_threads") != 1:
+            raise ValueError("interop: inter-op threads must be one")
+        if requests is not None:
+            if (result.number("requests") != requests or
+                    result.number("threads") != threads):
+                raise ValueError("interop: wrong timing configuration")
+            seconds = result.number("steady_seconds")
+            if not math.isfinite(seconds) or seconds <= 0:
+                raise ValueError("interop: invalid elapsed time")
+    if x.number("threads") != threads:
+        raise ValueError("interop: wrong native thread count")
+    for name in names:
+        left, right = x.number(name), p.number(name)
+        if not math.isfinite(left) or left != right:
+            raise ValueError(f"interop: {name} differs")
+    return {name: x.number(name) for name in sorted(names)}
+
+
+def chains(samples, requests, thread_counts, run):
+    """Repeat all three lifetimes against original Python in fresh pairs."""
+    if samples < 1 or requests < 1 or any(t < 1 for t in thread_counts):
+        raise ValueError("chain counts and thread counts must be positive")
+    directory = log_dir(run)
+    for name in ("timing.json", "correctness.json", "records.json",
+                 "provenance.json"):
+        if os.path.exists(os.path.join(directory, name)):
+            raise ValueError("chain results already exist; choose a new run-id")
+    with open(os.path.join(common.BINARIES, "lane.json")) as handle:
+        lane = json.load(handle)
+    if lane["counters"] or lane["lane"] != "primary":
+        raise ValueError("chains requires a counter-free primary build")
+    if os.path.realpath(wheel_prefix()) != os.path.realpath(lane["prefix"]):
+        raise ValueError("Python must use the same backend as the native build")
+    if library_record(lane["prefix"]) != lane["libraries"]:
+        raise ValueError("chain backend changed since the build")
+
+    def save(name, value):
+        with open(os.path.join(directory, name), "w") as handle:
+            json.dump(value, handle, indent=2)
+            handle.write("\n")
+
+    def stamp():
+        return time.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+    environment = common.environment_record()
+    paths = [os.path.join(common.BINARIES, "interop"), X2C,
+             os.path.join(lane["package_build"], "libtorch.a"),
+             os.path.join(common.ARTIFACTS, "interop-init.pt")]
+    paths += [os.path.join(BENCH, name) for name in
+              ("interop.x", "interop.py", "bench.x", "common.py", "run.py")]
+    provenance = {
+        "start": stamp(), "compiler_source_revision": environment["source_head"],
+        "processor": environment["processor"], "platform": environment["platform"],
+        "source_note": "Repository harness; source and binary hashes identify the measured build.",
+        "conditions": "Serial fresh processes; desktop activity is not isolated.",
+        "requests_per_cell": requests, "warmups_per_cell": 8,
+        "elements": common.PROFILE["interop"]["elements"],
+        "operations": common.PROFILE["interop"]["operations"],
+        "samples": samples, "threads": thread_counts, "interop_threads": 1,
+        "exclusions": [],
+        "lane": {"lane": lane["lane"], "counters": lane["counters"],
+                 "libraries": {name: {key: entry[key] for key in ("sha256", "bytes")}
+                               for name, entry in lane["libraries"].items()}},
+        "files": [{"name": os.path.basename(path), "sha256": common.sha256(path),
+                   "bytes": os.path.getsize(path)} for path in paths],
+    }
+    save("provenance.json", provenance)
+    records, checks, timings = [], [], []
+
+    def pair(mode, lifetime, threads, tag, first=True):
+        began = stamp()
+        arguments = ("chain", requests) if mode == "time" else ()
+        native = ("chain" if lifetime == "natural" else lifetime,)
+        if mode == "time":
+            native += (requests,)
+        results = both("interop", mode, arguments, threads, run, tag,
+                       first, x_arguments=native)
+        for language, result in results.items():
+            records.append({"tag": tag, "language": language, "mode": mode,
+                            "variant": lifetime, "threads": threads,
+                            "start": began, "returncode": 0,
+                            "records": result.records, "texts": result.texts})
+        save("records.json", records)
+        validate_chain_pair(results, lifetime, threads,
+                            requests if mode == "time" else None)
+        return results
+
+    for threads in thread_counts:
+        for lifetime in CHAIN_LIFETIMES:
+            result = pair("check", lifetime, threads,
+                          f"check-{lifetime}-t{threads}")
+            checks.append({"threads": threads, "variant": lifetime,
+                           "records": {name: result["x2c"].number(name)
+                                       for name in sorted(CHECK_RECORDS["interop"])},
+                           "exact": True})
+            provenance["torch_version"] = result["python"].texts["torch_version"]
+            save("correctness.json", checks)
+        for index in range(samples):
+            # Match the retained remedy session, rotating lifetime order.
+            order = ["freed", "subscope", "natural"]
+            start = index % len(order)
+            for lifetime in order[start:] + order[:start]:
+                tag = f"time-{lifetime}-t{threads}-pair{index + 1}"
+                result = pair("time", lifetime, threads, tag, index % 2 == 0)
+                row = {"variant": lifetime, "threads": threads,
+                       "pair": index + 1, "tag": tag,
+                       "order": list(result),
+                       "x2c_seconds": result["x2c"].number("steady_seconds"),
+                       "python_seconds": result["python"].number("steady_seconds"),
+                       "exact_result_count": len(CHECK_RECORDS["interop"])}
+                timings.append(row)
+                save("timing.json", timings)
+                print(f"{tag}: x2c {row['x2c_seconds']:.4f}s, "
+                      f"Python {row['python_seconds']:.4f}s; results exact",
+                      flush=True)
+    if any(common.sha256(path) != entry["sha256"]
+           for path, entry in zip(paths, provenance["files"])):
+        raise ValueError("chain source or binary changed during measurement")
+    provenance["end"] = stamp()
+    save("provenance.json", provenance)
+    print(f"Chain results: {directory}")
+    return 0
+
+
 # ---- supplemental diagnostics --------------------------------------------
 
 
@@ -779,7 +923,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=["prepare", "build", "check", "time",
                                          "memory", "attribute", "report",
-                                         "env", "diagnose", "errors", "supplement"])
+                                         "env", "diagnose", "errors", "supplement",
+                                         "chains", "remedies-report"])
     parser.add_argument("--lane", default="primary",
                         choices=["primary", "shipped"])
     parser.add_argument("--counters", action="store_true",
@@ -794,6 +939,7 @@ def main():
     parser.add_argument("--churn-lifetime", default="ordinary",
                         choices=["ordinary", "pooled", "hoisted"],
                         help="profile 2 request pool or stable-handle lifetime")
+    parser.add_argument("--results", help="retained chain results directory")
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--diagnostics-run", default=None,
                         help="report memory and attribution from a separately "
@@ -812,6 +958,11 @@ def main():
             import torch
         except ImportError:
             common.reexec_with_torch(__file__)
+
+    if options.mode == "remedies-report":
+        import report
+        return report.remedies(options.results or os.path.join(
+            BENCH, "results", "chains-20260911"))
 
     run = options.run_id or run_id()
     threads = [int(value) for value in options.threads.split(",")]
@@ -841,6 +992,8 @@ def main():
                   "interop": options.updates or 190}
         return time_all(options.samples, counts, threads, run,
                         options.app)
+    if options.mode == "chains":
+        return chains(options.samples, options.updates or 190, threads, run)
     if options.mode == "diagnose":
         return diagnose(options.app or ["tabular", "mnist", "sequence"],
                         options.steps, options.samples, threads[0], run)

@@ -89,6 +89,60 @@ Datasets, binaries, and checkpoints live under
 `unittest/build/torch-comparison/`; logs and raw samples under
 `debug/torch-comparison/<run-id>/`.
 
+### Tensor-chain lifetimes
+
+The [fresh chain results](REMEDIES.md) compare explicit release and a scope
+per iteration with original Python, retaining the original x2c loop as a
+control. The [Torch guide](../../../docs/src/guide/torch.md#performance)
+puts these measurements beside training, prediction, and memory results.
+The primary suite, corrected MNIST timings, and chain session are separate
+measurements; their reports identify their own evidence.
+
+After the ordinary `prepare` and counter-free primary `build` above:
+
+```sh
+caffeinate -is python3 packages/torch/benchmarks/run.py chains \
+    --run-id chain-session --samples 5 --threads 1,4
+python3 packages/torch/benchmarks/run.py remedies-report \
+    --results debug/torch-comparison/chain-session
+```
+
+`chains` checks all three lifetimes, then runs five fresh-process pairs per
+lifetime and thread setting. It alternates language order, rotates lifetime
+order, uses eight warmups and 190 requests in each of the 12 size/length
+cells, and compares every printed check and accumulated result exactly.
+Python always runs its original chain. The runner checks native dispatch
+and refuses a counter-enabled or non-primary build. Use a new run ID to
+preserve existing measurements. Finish builds before timing, avoid other
+CPU-heavy work, and retain the raw logs with the JSON. `caffeinate` prevents
+sleep on macOS; it is not a requirement on other systems.
+
+Both remedies already existed in the attribution benchmark. `freed`
+releases each replaced named tensor; `subscope` moves the running value
+into its own scope and destroys the prior owner on each iteration.
+Attribution still samples native handles and footprint inside the request;
+ordinary checks and timings do not sample. Direct native commands are:
+
+```sh
+work=unittest/build/torch-comparison
+$work/bin/interop check $work/artifacts $work/out freed
+$work/bin/interop time $work/artifacts $work/out freed 190
+$work/bin/interop time $work/artifacts $work/out subscope 190
+```
+
+The committed [2026-09-11 samples](results/chains-20260911/) contain the
+original timings, exact scalar checks, process result records and compact
+provenance. Regenerate the report from those files without running a
+benchmark or loading Torch:
+
+```sh
+python3 packages/torch/benchmarks/run.py remedies-report
+```
+
+The full native binaries, generated C, source archives, commands and process
+snapshots remain in the durable evidence archive identified by the report.
+The repository carries the small reproducibility records, not those binaries.
+
 ### Checking the comparison runner
 
 `check` requires each requested binary, every check-mode result, the emitted

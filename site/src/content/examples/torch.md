@@ -19,7 +19,7 @@ run: |
     curl -fL "https://ossci-datasets.s3.amazonaws.com/mnist/$name.gz" | gunzip > "data/mnist/$name"
   done
   ./packages/torch/builds/mnist data/mnist
-guide: docs/guide/packages.html
+guide: docs/guide/torch.html
 ---
 
 ## A complete training program.
@@ -41,6 +41,21 @@ provides tensors, automatic differentiation, layers, optimizers,
 checkpoints, and TorchScript inference over PyTorch's C++ library.
 Tensor operations run in libtorch. The model definition, batching, training
 loop, and evaluation here are x2c.
+
+## How it compares with PyTorch.
+
+On an Apple M4 Max CPU using the same libtorch 2.10.0 backend, the measured
+MNIST training workloads took about the same time in x2c and PyTorch.
+Small-model training and prediction used less time in x2c. Tensor chains
+were also close when each iteration explicitly released replaced tensors
+or used a scope to release them.
+
+The [performance comparison](../../docs/guide/torch.html#performance)
+includes repeated timings, correctness results, memory limitations, and
+reproduction reports. These are specific CPU workloads on one desktop;
+they do not establish a general or GPU speed advantage.
+
+## Run with the native backend.
 
 The package pins libtorch 2.10.0 for macOS arm64 and Linux x86_64. On Apple
 Silicon, set `TORCH_DEVICE=mps` to train on the GPU with float32 tensors.

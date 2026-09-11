@@ -1,0 +1,142 @@
+{
+  "start": "2026-09-11T11:57:08.763751-07:00",
+  "end": "2026-09-11T12:02:45.388254-07:00",
+  "compiler_source_revision": "3dc079e19838bcf8c8c1b8399d948189683d0aa4",
+  "requests_per_cell": 190,
+  "warmups_per_cell": 8,
+  "elements": [
+    1,
+    64,
+    4096,
+    65536
+  ],
+  "operations": [
+    16,
+    128,
+    512
+  ],
+  "samples": 5,
+  "threads": [
+    1,
+    4
+  ],
+  "exclusions": [],
+  "processor": "Apple M4 Max",
+  "platform": "macOS 15.7.9 arm64",
+  "torch_version": "2.10.0",
+  "interop_threads": 1,
+  "conditions": "Fresh processes ran serially, with alternating language order and rotating variant order. Task-owned builds finished before timing. Command-scoped sleep prevention was active. Unrelated desktop applications remained running; the host was not isolated.",
+  "source_note": "Fresh measurements of the preserved evidence-only harness and package built from 3dc079e19838bcf8c8c1b8399d948189683d0aa4. The harness selects existing loop implementations and removes live-footprint sampling from the timed bodies. These samples predate the committed benchmark runner integration.",
+  "archive": "torch-chain-remedies-20260911: original source, generated C, build command, executable, logs, process snapshots, and full provenance are retained separately.",
+  "lane": {
+    "lane": "primary",
+    "counters": false,
+    "libraries": {
+      "libc10.dylib": {
+        "bytes": 1084640,
+        "sha256": "f203c171b7a71c742ef4a84bde3af64465e545a4cc3ebfd7f245dca3ebe4e7cf"
+      },
+      "libomp.dylib": {
+        "bytes": 754912,
+        "sha256": "fe0670951c85401421f6cedc91971f28dc870bad4c1f0cfebe2b74dac421e5f0"
+      },
+      "libshm.dylib": {
+        "bytes": 83440,
+        "sha256": "3a6fc248697b8809534e74d9e5fc784b385239d8c7aeef291c3968a73609f7d2"
+      },
+      "libtorch.dylib": {
+        "bytes": 16736,
+        "sha256": "2178657b7eeffc0c0a989889ac3e2b2e3d216073b35f3a291ee89bd65c0fb406"
+      },
+      "libtorch_cpu.dylib": {
+        "bytes": 214082912,
+        "sha256": "941f3e16a8e02b23b99bd2c8693caabaf8df859bfaa293f39a5d7dd8a8f5ca6e"
+      },
+      "libtorch_global_deps.dylib": {
+        "bytes": 16744,
+        "sha256": "6ff1aedff89150170f225ce821dc9355a9d5f9c80a6cc1bb761c8d209638c2c7"
+      },
+      "libtorch_python.dylib": {
+        "bytes": 29108152,
+        "sha256": "d8a3cd6929da933d419cbe10f81f4365e021b220f286f129b4e166c037bde144"
+      }
+    }
+  },
+  "files": [
+    {
+      "name": "interop-timing",
+      "sha256": "f616ded87c00e666802d363876b562581ab2a47b7e921b3d61793e558bffebb8",
+      "bytes": 2065840
+    },
+    {
+      "name": "interop-timing.x",
+      "sha256": "0bb41e435054ea44dad147cccbf87c59b1c6dd45e6163a366dda14d0d8871625",
+      "bytes": 12600
+    },
+    {
+      "name": "build-command.json",
+      "sha256": "8a09cd949539bc84b6569285d8ed996f80d65d63c343e99b1651f7e643ba23e1",
+      "bytes": 1421
+    },
+    {
+      "name": "interop-init.pt",
+      "sha256": "7d2ca9e5c1bc8063df4b504da99042a21484cde197bf700c715bdd0b7574222a",
+      "bytes": 841115
+    },
+    {
+      "name": "libtorch.a",
+      "sha256": "b61e89d15916b1697f2479be0b394a3114eb5fa8cd8373477005a4c3b1a2c453",
+      "bytes": 677768
+    },
+    {
+      "name": "python",
+      "sha256": "42232752e8a9ce7d8109dd684e932ccacabde24a6d5672ff5f2f77293525f087",
+      "bytes": 49968
+    },
+    {
+      "name": "membytes.py",
+      "sha256": "3fece2846bc1dc9d8c257f15165f034fe581195d8485f9526a30814b941e2b76",
+      "bytes": 1123
+    },
+    {
+      "name": "interop.py",
+      "sha256": "b9733746d543c406ebd547c667965e1481b8b736128af72e8d8fc81b70820272",
+      "bytes": 4359
+    },
+    {
+      "name": "common.py",
+      "sha256": "0df1e17917d103813379733644a00712a74e3b69bf51439b87ed6cf84afac666",
+      "bytes": 13632
+    },
+    {
+      "name": "original/timing.json",
+      "sha256": "8a30dd00a966bdc96de953a0e1c911c61e2647ae8134ea5db46084789f9f47b2",
+      "bytes": 7590
+    },
+    {
+      "name": "original/correctness.json",
+      "sha256": "59aa63c8e7e83205e9112e22fdf65be8048144a9d8e5f601346f2277cc53a316",
+      "bytes": 3553
+    },
+    {
+      "name": "original/processes.json",
+      "sha256": "c39d9eb524c75f579e98c2a172cce835ce6d1429ef852f1f82a479e5b244ec48",
+      "bytes": 159015
+    },
+    {
+      "name": "original/evidence-manifest.json",
+      "sha256": "081afe877f8157b2709b2425b72a580b373211111407b631bda8c5b35e6260e0",
+      "bytes": 39800
+    },
+    {
+      "name": "original/HARNESS-AUDIT.md",
+      "sha256": "f5b7fe2c6b8360131d2df24a30a0221977a0d64f14199baff8662e2218d32be3",
+      "bytes": 2613
+    },
+    {
+      "name": "original/source.patch",
+      "sha256": "9eef8a99bc97e875697b9feae67a4676831b3f765ef35c4b1b2801466e076707",
+      "bytes": 3220
+    }
+  ]
+}

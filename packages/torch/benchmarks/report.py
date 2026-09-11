@@ -11,6 +11,7 @@ Verdicts are per workload. There is no aggregate speedup here on purpose.
 import json
 import os
 import glob
+from decimal import Decimal
 import statistics
 import sys
 
@@ -632,6 +633,192 @@ def supplement(run, timing_run=None):
         "`run.py supplement` and `plots.py --supplement` regenerate this "
         "report and its plot without replacing the primary report/plots.\n"]
     path = os.path.join(common.BENCHMARKS, "SUPPLEMENT.md")
+    with open(path, "w") as handle:
+        handle.write("\n".join(lines).rstrip() + "\n")
+    print(f"wrote {path}")
+    return 0
+
+
+def chain_evidence(directory):
+    """Read complete paired evidence before presenting timing conclusions."""
+    names = ("timing.json", "correctness.json", "provenance.json",
+             "records.json")
+    data = [load(directory, name) for name in names]
+    for name, value in zip(names, data):
+        if value is None:
+            raise ValueError(f"chain report requires {name}")
+    timing, correctness, provenance, records = data
+    if provenance["lane"]["counters"]:
+        raise ValueError("chain timing requires counter-free evidence")
+    cells = [f"e{size}_o{ops}" for size in provenance["elements"]
+             for ops in provenance["operations"]]
+    variants = ("natural", "freed", "subscope")
+    expected = {(threads, variant)
+                for threads in provenance["threads"] for variant in variants}
+    launches = {}
+    checks = {}
+    for record in records:
+        key = (record["tag"], record["language"])
+        if key in launches or record["returncode"] != 0:
+            raise ValueError(f"duplicate or failed chain process: {key}")
+        launches[key] = record
+        if record["language"] == "x2c":
+            if record["texts"].get("lifetime") != record["variant"]:
+                raise ValueError(f"chain lifetime dispatch disagrees: {key}")
+        if record["mode"] == "check":
+            checks[record["threads"], record["variant"],
+                   record["language"]] = record["records"]
+
+    def values(record, prefix):
+        result = {name: Decimal(str(value)) for name, value in record.items()
+                  if name.startswith(prefix)}
+        if set(result) != {prefix + cell for cell in cells}:
+            raise ValueError(f"incomplete chain {prefix} result grid")
+        if not all(value.is_finite() for value in result.values()):
+            raise ValueError("non-finite chain result")
+        return result
+
+    seen = set()
+    for row in correctness:
+        key = (row["threads"], row["variant"])
+        if key in seen or key not in expected or not row["exact"]:
+            raise ValueError(f"incomplete or failed chain check: {key}")
+        seen.add(key)
+        native = values(checks[key + ("x2c",)], "chain_")
+        # The archived run used one Python check per thread for all variants.
+        python = checks.get(key + ("python",))
+        if python is None:
+            python = checks[row["threads"], "natural", "python"]
+        python = values(python, "chain_")
+        if native != python or native != values(row["records"], "chain_"):
+            raise ValueError(f"chain check values disagree: {key}")
+    if seen != expected:
+        raise ValueError("chain correctness configurations are incomplete")
+
+    seen = set()
+    for row in timing:
+        key = (row["threads"], row["variant"], row["pair"])
+        if key in seen:
+            raise ValueError(f"duplicate chain timing pair: {key}")
+        seen.add(key)
+        order = ["x2c", "python"] if row["pair"] % 2 else ["python", "x2c"]
+        if row["order"] != order or row["exact_result_count"] != len(cells):
+            raise ValueError(f"chain timing order or result count: {key}")
+        pair = [launches[row["tag"], lang] for lang in ("x2c", "python")]
+        for language, record in zip(("x2c", "python"), pair):
+            measured = record["records"]
+            if (record["threads"], record["variant"]) != key[:2]:
+                raise ValueError(f"chain timing configuration: {key}")
+            if (int(measured["requests"]) != provenance["requests_per_cell"]
+                    or int(measured["threads"]) != row["threads"]
+                    or int(measured["interop_threads"]) !=
+                    provenance["interop_threads"]):
+                raise ValueError(f"chain timing workload disagrees: {key}")
+            seconds = Decimal(str(measured["steady_seconds"]))
+            if (not seconds.is_finite() or seconds <= 0 or
+                    seconds != Decimal(str(row[language + "_seconds"]))):
+                raise ValueError(f"chain timing total disagrees: {key}")
+        if values(pair[0]["records"], "result_") != values(
+                pair[1]["records"], "result_"):
+            raise ValueError(f"chain timing results disagree: {key}")
+    expected_pairs = {(threads, variant, pair)
+                      for threads, variant in expected
+                      for pair in range(1, provenance["samples"] + 1)}
+    if seen != expected_pairs:
+        raise ValueError("chain timing configurations are incomplete")
+    return timing, correctness, provenance
+
+
+def remedies(directory):
+    """Regenerate the chain report from preserved process observations."""
+    timing, correctness, provenance = chain_evidence(directory)
+    samples = provenance["samples"]
+    cells = len(provenance["elements"]) * len(provenance["operations"])
+    labels = {"freed": "Explicit release", "subscope": "Scope per iteration",
+              "natural": "Original request scope (control)"}
+    lines = ["# Tensor-chain lifetime comparison\n",
+        "The same affine-and-activation tensor chain runs through x2c and "
+        "the original PyTorch implementation. Explicit release frees the "
+        "replaced named tensor; a scope per iteration carries only the "
+        "running value onward. The original request scope remains a "
+        "separate lifetime control.\n",
+        "## What ran\n",
+        f"- Measured {provenance['start']} through {provenance['end']}.",
+        f"- {provenance['processor']}, {provenance['platform']}; PyTorch "
+        f"{provenance['torch_version']} and the same native backend libraries.",
+        f"- Compiler source `{provenance['compiler_source_revision']}`; "
+        f"lane `{provenance['lane']['lane']}`, handle counters off.",
+        f"- {provenance['source_note']}",
+        f"- {provenance['conditions']}", "",
+        "## Full-grid runtime\n",
+        f"{samples} fresh-process pairs per configuration, with language "
+        "order alternating. Median seconds and paired Python medians are "
+        "shown below; lower is faster. Spread is (maximum - minimum) / "
+        "median, not a confidence interval.\n",
+        "| Threads | x2c lifetime | x2c (s) | Spread | Python (s) | "
+        "Spread | x2c/Python |",
+        "| --- | --- | --- | --- | --- | --- | --- |"]
+    for threads in provenance["threads"]:
+        for variant, label in labels.items():
+            rows = [r for r in timing if r["threads"] == threads and
+                    r["variant"] == variant]
+            native = [r["x2c_seconds"] for r in rows]
+            python = [r["python_seconds"] for r in rows]
+            x, p = statistics.median(native), statistics.median(python)
+            xs = (max(native) - min(native)) / x
+            ps = (max(python) - min(python)) / p
+            lines.append(f"| {threads} | {label} | {x:.4f} | {xs:.1%} | "
+                         f"{p:.4f} | {ps:.1%} | {x / p:.3f}x |")
+    lines += ["", "Small median differences on an active desktop do not "
+        "establish a general ranking. Each Python value is the median of "
+        "the processes paired directly with that x2c lifetime. The original "
+        "loop and both remedies receive the same inputs and perform the "
+        "same tensor operations. These are complete request timings with "
+        "counter and footprint sampling disabled, rather than instrumented "
+        "phase costs.\n", "## Correctness and work\n",
+        f"All {len(correctness) * cells} check-mode scalar comparisons and "
+        f"all {len(timing) * cells} accumulated timing-result comparisons "
+        "agree with Python with zero tolerance. The report rechecks the "
+        "preserved process values before rendering. Both programs report "
+        "12 significant digits: this is exact equality of reported scalar "
+        "results, not bitwise equality of every tensor element.\n",
+        "The grid uses element counts " +
+        ", ".join(map(str, provenance["elements"])) + " and chain lengths " +
+        ", ".join(map(str, provenance["operations"])) + ". " +
+        f"Each cell has {provenance['warmups_per_cell']} warmup requests "
+        f"and {provenance['requests_per_cell']} measured requests "
+        f"({cells * provenance['requests_per_cell']:,} per full sweep). "
+        "Loading and warmup are outside the reported runtime; the timed "
+        f"cells are summed. Inter-op threads remain at "
+        f"{provenance['interop_threads']}.\n"]
+    exclusions = provenance["exclusions"]
+    lines.append("Excluded samples: " +
+                 (json.dumps(exclusions, sort_keys=True) if exclusions
+                  else "none; every launched timing pair is retained") +
+                 ".\n")
+    relative = os.path.relpath(os.path.abspath(directory), common.BENCHMARKS)
+    evidence = relative.replace(os.sep, "/")
+    lines += ["## Scope of the result\n",
+        "These measurements compare lifetime choices for this CPU chain. "
+        "They do not resolve the separate canonical-pool churn footprint "
+        "excess or establish general memory suitability. Native C++ remains "
+        "a separate diagnostic control in the [original report](REPORT.md), "
+        "not the Python comparison here. The original application results "
+        "and [MNIST correction](SUPPLEMENT.md) are separate measurements.\n",
+        "## Evidence and reproduction\n",
+        f"- [Every timing pair]({evidence}/timing.json), including order.",
+        f"- [Correctness comparisons]({evidence}/correctness.json).",
+        f"- [Per-process scalar records]({evidence}/records.json).",
+        f"- [Provenance and hashes]({evidence}/provenance.json).",
+        f"- {provenance.get('archive', 'Full process logs accompany the run.')}",
+        "", "Regenerate this report from the saved observations without "
+        "running benchmarks:\n", "```sh",
+        "python3 packages/torch/benchmarks/run.py remedies-report "
+        f"--results {os.path.relpath(os.path.abspath(directory), common.ROOT)}",
+        "```", "", "The [benchmark README](README.md) describes how to "
+        "collect a new run. Regeneration writes only `REMEDIES.md`; it "
+        "preserves the original reports.\n"]
+    path = os.path.join(common.BENCHMARKS, "REMEDIES.md")
     with open(path, "w") as handle:
         handle.write("\n".join(lines).rstrip() + "\n")
     print(f"wrote {path}")

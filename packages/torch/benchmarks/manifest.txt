@@ -31,6 +31,8 @@ sequence       memory  4              64  window sweep, 4-microbatch
 
 interop        check   -               1  12 pairs, exact agreement
 interop        time    chain         190  all 12 pairs
+interop        time    freed         190  release replaced named tensors
+interop        time    subscope      190  one scope per iteration
 interop        memory  4             100  live set, short-scope variant
 interop        attribute 65536        60  three lifetimes, one per process
 interop-cpp    time    chain          60  the C++ control, no wrapper

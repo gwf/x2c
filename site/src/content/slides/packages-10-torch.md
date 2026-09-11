@@ -8,6 +8,8 @@ links:
     href: https://github.com/gwf/x2c/blob/main/packages/torch/examples/mlp.x
   - label: Package guide
     href: https://github.com/gwf/x2c/blob/main/packages/torch/README.md
+  - label: Performance comparison
+    href: docs/guide/torch.html#performance
 ---
 
 <!-- ignore: adapted excerpt; the complete example requires its optional package and setup. -->
@@ -58,3 +60,9 @@ reloaded loss 0.024875
 The package uses PyTorch's libtorch on macOS arm64 with CPU or MPS tensors,
 and Linux x86_64 with CPU tensors. Programs need the prepared libtorch
 libraries at runtime.
+
+In the measured CPU workloads, small-model training and prediction used
+less time in x2c; convolution training and tensor chains took about the same
+time as PyTorch. The chain measurements explicitly release replaced tensors
+or use a scope per iteration. See the comparison for the workloads,
+correctness results, and memory limitations.

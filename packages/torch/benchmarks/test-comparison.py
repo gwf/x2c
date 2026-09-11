@@ -170,6 +170,43 @@ class CheckAcceptance(unittest.TestCase):
         self.assertNotIn("bit-identical", "\n".join(lines))
 
 
+class ChainAcceptance(unittest.TestCase):
+    def pair(self):
+        records = {name.replace("chain_", "result_"): 42.0
+                   for name in run.CHECK_RECORDS["interop"]}
+        records.update(interop_threads=1, threads=4, requests=190,
+                       steady_seconds=1.0)
+        return {lang: common.Result(dict(records),
+                    {"lifetime": "freed", "counters": "off"}, [], 0, "", 0)
+                for lang in ("x2c", "python")}
+
+    def test_requested_lifetime_and_all_printed_results(self):
+        results = self.pair()
+        self.assertEqual(len(run.validate_chain_pair(results, "freed", 4, 190)), 12)
+        results["x2c"].texts["lifetime"] = "natural"
+        with self.assertRaisesRegex(ValueError, "dispatch"):
+            run.validate_chain_pair(results, "freed", 4, 190)
+
+    def test_missing_wrong_and_instrumented_results_fail(self):
+        name = "result_e65536_o512"
+        for defect in ("missing", "different", "counter", "requests", "nonfinite"):
+            with self.subTest(defect=defect):
+                results = self.pair()
+                if defect == "missing":
+                    del results["python"].records[name]
+                elif defect == "different":
+                    results["python"].records[name] += 1e-9
+                elif defect == "counter":
+                    results["x2c"].texts["counters"] = "on"
+                elif defect == "requests":
+                    results["python"].records["requests"] = 189
+                else:
+                    for result in results.values():
+                        result.records[name] = float("inf")
+                with self.assertRaises((KeyError, ValueError)):
+                    run.validate_chain_pair(results, "freed", 4, 190)
+
+
 class SessionIdentity(unittest.TestCase):
     def test_session_cannot_mix_optimizer_comparisons(self):
         with (tempfile.TemporaryDirectory() as scratch,
