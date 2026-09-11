@@ -2,6 +2,14 @@
 
 #include "autodiff-forward.h"
 
+static double scale(double a, int k);
+
+static double scale_dot(double a, double a_dot, int k);
+
+static double model(double x, double y, int n);
+
+static double model_dot(double x, double x_dot, double y, double y_dot, int n);
+
 static double scale(double a, int k){
   return a *(double) k;
 }

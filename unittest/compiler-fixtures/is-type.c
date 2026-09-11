@@ -10,6 +10,18 @@ static int tag_calls;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var next_value(void);
+
+static Symbol next_tag(void);
+
+static Var call_or_void(int(* function)(void));
+
+static int symbol_shadows_type(Var value);
+
+static int custom_visible_before_protocol(Var value);
+
 static VarMethods _x2c__x2c_protocol_methods_0;
 
 __attribute__((constructor)) static void _file_init_(void){
@@ -111,6 +123,4 @@ int main(void){
   printf("%d %d %d\n", ok, calls, tag_calls);
   return ok ? 0 : 1;
 }
-
-static VarMethods _x2c__x2c_protocol_methods_0;
 

@@ -2,6 +2,10 @@
 
 #include "native-noreturn.h"
 
+_Noreturn static void exit_terminal(void);
+
+static int exit_caller(void);
+
 _Noreturn static void exit_terminal(void){
   exit(1);
 }

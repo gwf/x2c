@@ -4,89 +4,9 @@
 
 static String _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
-static VarMethods _x2c__x2c_protocol_methods_0;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_0;
-
 #include "exception.h"
 #include <string.h>
-unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
-
-Var String_var(String);
-
-String Symbol_str(Symbol);
-
-String int_str(int);
-
-void * Scope_malloc(size_t);
-
-Var Array_push(Array, Var);
-
-Var Symbol_var(Symbol);
-
-Bytes Bytes_new(size_t);
-
-Var Array_getindex(Array, int);
-
-size_t Array_len(Array);
-
-Var Array_take_last(Array);
-
-String String_new_len(const char *, int);
-
-Bytes Bytes_append(Bytes, const void *, size_t);
-
-void scan_next_line_col(char *, int, int *, int *);
-
-Symbol Symbol_new_len(const char *, int);
-
-int scan_ascii_alpha(int);
-
-int scan_identifier(char *);
-
-int scan_number_typed(char *, Symbol *);
-
-size_t Bytes_len(Bytes);
-
-int String_equal(String, String);
-
-int scan_symbol_literal(char *);
-
-int scan_white_space(char *);
-
-int scan_preprocessor(char *);
-
-int scan_line_comment(char *);
-
-int scan_block_comment_status(char *, Symbol *);
-
-int scan_block_comment(char *);
-
-int scan_c_character(char *);
-
-int scan_ascii_digit(int);
-
-int scan_c_string(char *);
-
-Symbol scan_keyword_type(const char *, int);
-
-int scan_c_operator(char *);
-
-int scan_string_segment(char *);
-
-int scan_symbol_set_atom(char *);
-
-int scan_c_string_status(char *, Symbol *);
-
-int scan_symbol_literal_status(char *, Symbol *);
-
-int scan_atom_status(char *, Symbol *);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -140,6 +60,14 @@ static inline unsigned _x2c_proto_token_hash_0(Var a0);
 
 static inline int _x2c_proto_token_equal_0(Var a0, Var a1);
 
+static VarMethods _x2c__x2c_protocol_methods_0;
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 __attribute__((constructor)) static void _file_init_(void){
@@ -166,6 +94,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _10 = String_new("is");
 }
 
+unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
+
 unsigned Token_hash(Token token){
   return x2c_hash_bytes(0, token, sizeof(struct Token));
 }
@@ -180,6 +110,12 @@ String Token_str(Token token){
   return token -> text;
 }
 
+Var String_var(String);
+
+String Symbol_str(Symbol);
+
+String int_str(int);
+
 String Token_repr(Token token){
   if(! _init_guard_) _file_init_();
   String head = String_join(NULL, cons(String_var(_0), cons(String_var(Token_str(token)), cons(String_var(_1), cons(String_var(Symbol_str(token -> type)), NULL)))));
@@ -191,6 +127,14 @@ String Token_repr(Token token){
 Tokenizer Tokenizer_new(char * text){
   return Tokenizer_new_mode(text, 3945159);
 }
+
+void * Scope_malloc(size_t);
+
+Var Array_push(Array, Var);
+
+Var Symbol_var(Symbol);
+
+Bytes Bytes_new(size_t);
 
 Tokenizer Tokenizer_new_mode(char * text, Symbol mode){
   Tokenizer tokenizer = Scope_malloc(sizeof(struct Tokenizer));
@@ -206,6 +150,8 @@ Tokenizer Tokenizer_new_mode(char * text, Symbol mode){
   return tokenizer;
 }
 
+Var Array_getindex(Array, int);
+
 static inline Symbol Tokenizer__scan_mode(Tokenizer tokenizer){
   return Var_symbol(Array_getindex(tokenizer -> modes, - 1));
 }
@@ -214,9 +160,19 @@ static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode){
   Array_push(tokenizer -> modes, Symbol_var(mode));
 }
 
+size_t Array_len(Array);
+
+Var Array_take_last(Array);
+
 static inline void Tokenizer__pop_mode(Tokenizer tokenizer){
   if(Array_len(tokenizer -> modes)) Array_take_last(tokenizer -> modes);
 }
+
+String String_new_len(const char *, int);
+
+Bytes Bytes_append(Bytes, const void *, size_t);
+
+void scan_next_line_col(char *, int, int *, int *);
 
 int Tokenizer_tokenize(Tokenizer t, int len, Symbol type){
   String text = String_new_len(t -> text + t -> pos, len);
@@ -255,6 +211,8 @@ static int _status_scanner(Tokenizer tokenizer, int(* scanner)(char *, Symbol *)
   if(len < 0) return _error(tokenizer, status);
   return 0;
 }
+
+Symbol Symbol_new_len(const char *, int);
 
 static int Tokenizer__operator(Tokenizer t, int len){
   Symbol op = Symbol_new_len(t -> text + t -> pos, len), push = 0;
@@ -366,6 +324,10 @@ static int Tokenizer__operator(Tokenizer t, int len){
 }
 }
 
+int scan_ascii_alpha(int);
+
+int scan_identifier(char *);
+
 static int Tokenizer__named_reference(Tokenizer tokenizer){
   char * text = tokenizer -> text + tokenizer -> pos;
   Tokenizer__operator(tokenizer, 1);
@@ -379,6 +341,8 @@ static int Tokenizer__embedded_lisp(Tokenizer tokenizer){
   return Tokenizer__operator(tokenizer, 2);
 }
 
+int scan_number_typed(char *, Symbol *);
+
 static int Tokenizer__number(Tokenizer tokenizer){
   char * text = tokenizer -> text + tokenizer -> pos;
   Symbol type;
@@ -388,6 +352,8 @@ static int Tokenizer__number(Tokenizer tokenizer){
   type =(type == 19368) ? 26417777576 : 27051797805160;
   return Tokenizer_tokenize(tokenizer, len, type);
 }
+
+size_t Bytes_len(Bytes);
 
 static Token _significant_back(Tokenizer tokenizer, int back){
   struct Token * tokens =(struct Token *) tokenizer -> tokens;
@@ -410,6 +376,8 @@ static int _token_ends_operand(Token token){
 static inline int _prev_token_ends_operand(Tokenizer tokenizer){
   return _token_ends_operand(_significant_back(tokenizer, 0));
 }
+
+int String_equal(String, String);
 
 static inline int _can_start_symbol_literal(Tokenizer tokenizer){
   if(! _prev_token_ends_operand(tokenizer)) return 1;
@@ -439,6 +407,8 @@ static int Tokenizer__percent_tokens(Tokenizer t){
   return Tokenizer__operator(t, next == '<' ? 3 : 2);
 }
 
+int scan_symbol_literal(char *);
+
 static int Tokenizer__angle_symbol_literal(Tokenizer tokenizer){
   char * text = tokenizer -> text + tokenizer -> pos;
   if(text[0] != '<' || ! _can_start_symbol_literal(tokenizer)) return 0;
@@ -447,6 +417,20 @@ static int Tokenizer__angle_symbol_literal(Tokenizer tokenizer){
   if(len < 0) return Tokenizer_error(tokenizer);
   return 0;
 }
+
+int scan_white_space(char *);
+
+int scan_preprocessor(char *);
+
+int scan_line_comment(char *);
+
+int scan_block_comment_status(char *, Symbol *);
+
+int scan_block_comment(char *);
+
+int scan_c_character(char *);
+
+int scan_ascii_digit(int);
 
 static int Tokenizer__common_tokens(Tokenizer t){
   char * text = t -> text + t -> pos;
@@ -463,6 +447,12 @@ static int Tokenizer__common_tokens(Tokenizer t){
   return 0;
 }
 
+int scan_c_string(char *);
+
+Symbol scan_keyword_type(const char *, int);
+
+int scan_c_operator(char *);
+
 static int Tokenizer__x2c_tokens(Tokenizer tokenizer){
   static const char * opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
   char * text = tokenizer -> text + tokenizer -> pos;
@@ -477,6 +467,8 @@ static int Tokenizer__x2c_tokens(Tokenizer tokenizer){
   return 0;
 }
 
+int scan_string_segment(char *);
+
 static int Tokenizer__string_tokens(Tokenizer t){
   char * text = t -> text + t -> pos;
   if(text[0] == '$') return text[1] == '{' ? Tokenizer__operator(t, 2) : Tokenizer__named_reference(t);
@@ -485,6 +477,8 @@ static int Tokenizer__string_tokens(Tokenizer t){
   if(len < 0) return Tokenizer_error(t);
   return Tokenizer_tokenize(t, len, 41153276840);
 }
+
+int scan_symbol_set_atom(char *);
 
 static int Tokenizer__symbol_set_tokens(Tokenizer t){
   char * text = t -> text + t -> pos;
@@ -497,6 +491,12 @@ static int Tokenizer__symbol_set_tokens(Tokenizer t){
   }
   return Tokenizer_do_scanner(t, scan_symbol_set_atom, 845368370138);
 }
+
+int scan_c_string_status(char *, Symbol *);
+
+int scan_symbol_literal_status(char *, Symbol *);
+
+int scan_atom_status(char *, Symbol *);
 
 static int Tokenizer__lisp_tokens(Tokenizer t){
   Symbol mode = Tokenizer__scan_mode(t);

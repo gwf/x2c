@@ -2,6 +2,12 @@
 
 #include "mutable-empty-containers.h"
 
+static int rejected(void(* action)(void));
+
+static void box_null_array(void);
+
+static void box_null_map(void);
+
 static int rejected(void(* action)(void)){
   pid_t pid = fork();
   if(pid < 0) return 0;

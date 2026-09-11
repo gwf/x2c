@@ -2,27 +2,11 @@
 
 #include "symbol.h"
 
-static const char _symbol_alphabet[] = "\0abcdefghijklmnopqrstuvwxyz*+?!-";
-
 #include <stdint.h>
 #include <string.h>
 #include "buffer.h"
 #include "string.h"
-int String_truth(String);
-
-int String_equal(String, String);
-
-String String_new_len(const char *, int);
-
-Buffer Buffer_new(size_t);
-
-String Buffer_str_free(Buffer);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Buffer_write_char(Buffer, char);
-
-String String_unescape(String);
+static const char _symbol_alphabet[] = "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 
 static int _char_to_5bit(int c);
 
@@ -72,6 +56,10 @@ Symbol Symbol_new(const char * str){
   return Symbol_new_len(str, strlen(str));
 }
 
+int String_truth(String);
+
+int String_equal(String, String);
+
 int Symbol_try_new(String spelling, Symbol * out){
   if(! out) return 0;
   Symbol symbol = String_truth(spelling) ? Symbol_new(spelling) : 0;
@@ -109,6 +97,8 @@ void Symbol_decode(Symbol symbol, char * dest){
   dest[len] = '\0';
 }
 
+String String_new_len(const char *, int);
+
 String Symbol_str(Symbol symbol){
   char text[SYMBOL_MAX_5BIT + 1];
   if(! symbol) return NULL;
@@ -130,12 +120,18 @@ int Symbol_compare(Symbol a, Symbol b){
   return a < b ? - 1 : 1;
 }
 
+Buffer Buffer_new(size_t);
+
+String Buffer_str_free(Buffer);
+
 String Symbol_repr(Symbol symbol){
   Buffer out = Buffer_new(0);
   Symbol_write_repr(symbol, out);
   String result = Buffer_str_free(out);
   return result;
 }
+
+Buffer Buffer_write(Buffer, const char *);
 
 Buffer Symbol_write_str(Symbol symbol, Buffer out){
   if(! symbol) return out;
@@ -146,6 +142,8 @@ Buffer Symbol_write_str(Symbol symbol, Buffer out){
   Symbol_decode(symbol, text);
   return Buffer_write(out, text);
 }
+
+Buffer Buffer_write_char(Buffer, char);
 
 Buffer Symbol_write_repr(Symbol symbol, Buffer out){
   if(! symbol) return Buffer_write(out, "<>");
@@ -185,6 +183,8 @@ char Symbol_last(Symbol symbol){
   if(bits == 5) return _symbol_alphabet[value & 0x1F];
   return value & 0x7F;
 }
+
+String String_unescape(String);
 
 Symbol Symbol_parse(char * text){
   int scan_symbol_literal(char * s);

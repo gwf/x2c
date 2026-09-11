@@ -20,6 +20,20 @@ static int cleanups;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Map counted_map(Map map);
+
+static Split counted_words(String text);
+
+static int initial_value(void);
+
+static void record_cleanup(void);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
 Var int_var(int);
 
 List cons(Var, List);
@@ -95,10 +109,6 @@ Iter Map_keys(Map, Iter);
 int Var_truth(Var);
 
 int String_truth(String);
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 Var Symbol_var(Symbol);
 

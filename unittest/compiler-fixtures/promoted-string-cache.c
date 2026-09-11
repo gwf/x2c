@@ -13,6 +13,12 @@ static int dynamic_calls;
 _x2c_initializer_choice_ADB89CC9_0((dynamic_calls = 0))
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static String source_dual(void);
+
+static String take_string(String value);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;

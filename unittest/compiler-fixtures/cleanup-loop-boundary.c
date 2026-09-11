@@ -17,6 +17,26 @@ static int order;
 _x2c_initializer_choice_094D6684_0((order = 0))
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static void record_step(int value);
+
+static int continue_inside_try(void);
+
+static void break_inside_switch(void);
+
+static int continue_inside_foreach(void);
+
+static void loop_switch_boundaries(void);
+
+static void switch_loop_boundaries(void);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
 Var int_var(int);
 
 List cons(Var, List);
@@ -93,8 +113,6 @@ _x2c_error_handler_0 = NULL;
 }
 return caught;
 }
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void break_inside_switch(void){
   order = 0;
@@ -195,8 +213,6 @@ _x2c_error_handler_1 = NULL;
 return caught;
 }
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 static void loop_switch_boundaries(void){
   order = 0;
   for(int i = 0;  i < 3;  i ++){
@@ -230,8 +246,6 @@ static void loop_switch_boundaries(void){
   }
 
 }
-
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 static void switch_loop_boundaries(void){
   order = 0;

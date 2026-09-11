@@ -18,6 +18,45 @@ static Var _27, _25, _22, _20, _18, _16, _13, _11, _9, _7, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var increment(Var value);
+
+static int next_byte(char value);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _17)))
+typedef struct _x2c_func_pointer_context_0{
+  Var(* _x2c_func_pointer_0)(Var);
+}
+_x2c_func_pointer_context_0;
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+typedef struct _x2c_lambda_context_0{
+  Var _x2c_lambda_capture_0;
+}
+_x2c_lambda_context_0;
+
+static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
+typedef struct _x2c_lambda_context_2{
+  Var _x2c_lambda_capture_1;
+}
+_x2c_lambda_context_2;
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
+
+static Func _x2c_func_handle_1;
+
+_x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _29)))
 Var int_var(int);
 
 List cons(Var, List);
@@ -27,10 +66,6 @@ Var Symbol_var(Symbol);
 Var String_var(String);
 
 Var List_var(List);
-
-static void _x2c_static_initialize_0(void);
-
-static void _x2c_static_initialize_1(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -80,36 +115,11 @@ static int next_byte(char value){
 
 List List_map(List, Func);
 
-static Func _x2c_func_handle_0;
-
 Array Array_map(Array, Func);
-
-typedef struct _x2c_func_pointer_context_0{
-  Var(* _x2c_func_pointer_0)(Var);
-}
-_x2c_func_pointer_context_0;
 
 Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
-
-typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
-}
-_x2c_lambda_context_0;
-
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
-
 String String_map(String, Func);
-
-typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_1;
-}
-_x2c_lambda_context_2;
-
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
-
-static Func _x2c_func_handle_1;
 
 String List_repr(List);
 
@@ -156,11 +166,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _17)))
 const void * Func_context(Func);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
@@ -190,9 +195,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_1;
-
-_x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _29)))
 #undef _x2c_initializer_choice_EC4193E6_0_expanded
 #undef _x2c_initializer_choice_EC4193E6_0
 #undef _x2c_initializer_choice_EC4193E6_1_expanded

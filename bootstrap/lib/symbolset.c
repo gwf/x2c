@@ -7,18 +7,6 @@
 #include "iter.h"
 #include "var.h"
 #define SYMBOL_SET_HEADER_SIZE 20
-int x2c_normalize_index(int, int);
-
-void * Var_pointer(Var);
-
-Var Symbol_var(Symbol);
-
-Var int_var(int);
-
-int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
 static unsigned _byte(SymbolSet set, size_t offset);
 
 static uint32_t _u32(SymbolSet set, size_t offset);
@@ -91,12 +79,20 @@ int SymbolSet_contains(SymbolSet x, Symbol symbol){
   return SymbolSet_index(x, symbol) >= 0;
 }
 
+int x2c_normalize_index(int, int);
+
 Symbol SymbolSet_getindex(SymbolSet x, int index){
   int count =(int) SymbolSet_len(x);
   index = x2c_normalize_index(index, count);
   if(index < 0) return 0;
   return(Symbol) _u64(x, _order_offset(x, _u32(x, 8) + 1) +(size_t) index * sizeof(Symbol));
 }
+
+void * Var_pointer(Var);
+
+Var Symbol_var(Symbol);
+
+Var int_var(int);
 
 static int _next(Iter iter, Var * out){
   SymbolSet x =(SymbolSet) Var_pointer(iter -> obj);
@@ -106,6 +102,10 @@ static int _next(Iter iter, Var * out){
   iter -> state = int_var(index + 1);
   return 1;
 }
+
+int Iter_truth(Iter);
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter SymbolSet_iter(SymbolSet x, Iter dest){
   if(! Iter_truth(dest)) return NULL;

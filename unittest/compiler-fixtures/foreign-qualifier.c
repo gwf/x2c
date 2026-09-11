@@ -2,6 +2,8 @@
 
 #include "foreign-qualifier.h"
 
+static const char * left_label(int index);
+
 const char * upstream_monitor_label(int);
 
 static const char * left_label(int index){

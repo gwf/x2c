@@ -2,14 +2,16 @@
 
 #include "protocol-static-native.h"
 
-static unsigned native_hash(unsigned value){
-  return value + 1;
-}
+static unsigned native_hash(unsigned value);
 
 #ifndef X2CCPP
 _Static_assert(_Generic(& native_hash, unsigned(*)(StaticNative) : 1, default: 0), "native alias StaticNative_hash does not match native_hash");
 #endif
 #define StaticNative_hash native_hash
+static unsigned native_hash(unsigned value){
+  return value + 1;
+}
+
 int main(void){
   x2c_initialize();  StaticNative value = 41;  printf("%u\n", StaticNative_hash(value));  return 0;
 }

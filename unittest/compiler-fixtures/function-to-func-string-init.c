@@ -18,15 +18,24 @@ static Var _9, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
-static String identity(String value){
-  return value;
-}
+static String identity(String value);
 
 static Func lifted;
 
 static Func _x2c_func_handle_0;
 
 _x2c_initializer_choice_AEDFDE3A_0((lifted = _x2c_func_handle_0))
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_AEDFDE3A_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _10)))
+static String identity(String value){
+  return value;
+}
+
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -34,8 +43,6 @@ Var String_var(String);
 List cons(Var, List);
 
 Var List_var(List);
-
-static void _x2c_static_initialize_1(void);
 
 void String_initialize(void){
   if(_init_guard_) return;
@@ -65,11 +72,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_AEDFDE3A_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _10)))
 #undef _x2c_initializer_choice_AEDFDE3A_0_expanded
 #undef _x2c_initializer_choice_AEDFDE3A_0
 #undef _x2c_initializer_choice_AEDFDE3A_1_expanded

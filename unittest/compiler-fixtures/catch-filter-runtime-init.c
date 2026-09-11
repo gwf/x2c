@@ -12,6 +12,12 @@ static int new_seen;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Symbol _observe_relabel(List errors, Var data);
+
+static void _relabel_nested_pattern(void);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;

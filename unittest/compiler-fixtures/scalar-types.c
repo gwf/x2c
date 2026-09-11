@@ -2,6 +2,16 @@
 
 #include "scalar-types.h"
 
+static ulong_alias add_alias(ulong_alias left, uint_alias right);
+
+static long double add_long_double(long double left, int right);
+
+static unsigned long long add_unsigned(unsigned long long left, long right);
+
+static int add_promoted(unsigned char left, signed char right);
+
+static ulong_alias unbox_alias(Var value);
+
 static ulong_alias add_alias(ulong_alias left, uint_alias right){
   return left + right;
 }

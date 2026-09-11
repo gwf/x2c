@@ -4,12 +4,25 @@
 
 #include "error.h"
 
+static int outward_defer(void);
+
+static int outward_finally(void);
+
+static int same_region(void);
+
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 static int outward_defer(void){
   int value = 0;
@@ -106,13 +119,6 @@ if (_x2c_cleanup_guard_0 >= 0) {
 }
 done : return value;
 }
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 static int same_region(void){
   int value = 0;

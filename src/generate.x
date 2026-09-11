@@ -707,11 +707,23 @@ static void _static_declarations(Var value, Map declarations) {
     _static_declarations(child, declarations);
 }
 
-/* Native directives and initializer inputs keep their source order. A
-   forward binding needs only a declaration before its first consumer, not
-   another ordering of every declaration and macro in the translation unit. */
+/* Native directives and initializer inputs keep their source order.
+   Ordinary function bodies follow the file's declarations and directives,
+   preserving their existing access to later private includes and macros.
+   Source initializer helpers stay at their capture positions. */
 static List _static_prototypes(Compiler compiler, List source, List header) {
-  Array output = %[];
+  Array output = %[], declarations = %[], functions = %[];
+  foreach (List node, source) {
+    match (node)
+      case %(function ?type ?signature ?): {
+        functions.push(node);
+        if (type.list().type().is_static())
+          declarations.push(%(declare $type $signature));
+        continue;
+      }
+    declarations.push(node);
+  }
+  source = declarations.list_free().append(functions.list_free());
   Map statics = %{}, available = %{}, seen = %{};
   _collect_declared_bindings(header, available);
   _static_declarations(source, statics);

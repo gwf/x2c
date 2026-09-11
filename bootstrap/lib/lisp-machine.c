@@ -6,53 +6,11 @@
 
 static Var _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
 #include <assert.h>
 #include <string.h>
 #include "exception.h"
 #include "lisp.h"
-Var Symbol_var(Symbol);
-
-int Lisp_resolve(void *, Var, Var *);
-
-Var List_var(List);
-
-int Lisp_program(Var, MachineView *, int *, Var *);
-
-Var int_var(int);
-
-void Lisp_enter(void *, Var, const Var *, int);
-
-int Var_is(Var, Symbol);
-
-Var Lisp_apply_values(void *, Var, const Var *, int);
-
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-void * Var_pointer(Var);
-
-void Lisp_retarget(void *, Var, const Var *, int);
-
-void Lisp_leave(void *);
-
-Var String_var(String);
-
-int Var_is_nil(Var);
-
-int Lisp_precall(void *, Var, List, Var *);
-
-List Var_list(Var);
-
-List cons(Var, List);
-
-Symbol Var_kind(Var);
-
-List List_append(List, List);
-
-int Var_is_void(Var);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -73,6 +31,8 @@ static void LispMachine__call(LispMachine m, int argc);
 static void LispMachine__tail_call(LispMachine m, int argc);
 
 static void LispMachine__return(LispMachine m);
+
+Var Symbol_var(Symbol);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -165,6 +125,10 @@ static int LispMachine__push_value(LispMachine m, Var value){
   return 1;
 }
 
+int Lisp_resolve(void *, Var, Var *);
+
+Var List_var(List);
+
 static void LispMachine__load(LispMachine m, const MachineWord * w){
   const Var * consts = m -> program.consts;
   Var value;
@@ -192,6 +156,22 @@ static void LispMachine__load(LispMachine m, const MachineWord * w){
   }
   LispMachine__push_value(m, value);
 }
+
+int Lisp_program(Var, MachineView *, int *, Var *);
+
+Var int_var(int);
+
+void Lisp_enter(void *, Var, const Var *, int);
+
+int Var_is(Var, Symbol);
+
+Var Lisp_apply_values(void *, Var, const Var *, int);
+
+FuncArg FuncArg_value(Var);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
+
+void * Var_pointer(Var);
 
 static void LispMachine__call(LispMachine m, int argc){
   int callable_at = m -> value_count - argc - 1;
@@ -252,6 +232,8 @@ static void LispMachine__call(LispMachine m, int argc){
   LispMachine__push_value(m, result);
 }
 
+void Lisp_retarget(void *, Var, const Var *, int);
+
 static void LispMachine__tail_call(LispMachine m, int argc){
   int callable_at = m -> value_count - argc - 1;
   if(argc < 0 || callable_at < m -> operand_base){
@@ -277,6 +259,8 @@ static void LispMachine__tail_call(LispMachine m, int argc){
   m -> pc = m -> program.root;
   if(m -> stats) m -> stats -> prepared_calls ++;
 }
+
+void Lisp_leave(void *);
 
 static void LispMachine__return(LispMachine m){
   if(m -> value_count <= m -> operand_base){
@@ -308,6 +292,8 @@ static void LispMachine__return(LispMachine m){
   LispMachine__push_value(m, result);
 }
 
+Var String_var(String);
+
 void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, const Var * args, int argc){
   if(m -> running || m -> fp || m -> value_count || m -> local_count){
     LispMachine__error(m, 995692716810);
@@ -336,6 +322,18 @@ void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, 
   }
 
 }
+
+int Var_is_nil(Var);
+
+int Lisp_precall(void *, Var, List, Var *);
+
+List Var_list(Var);
+
+List cons(Var, List);
+
+Symbol Var_kind(Var);
+
+List List_append(List, List);
 
 int LispMachine_step(LispMachine m){
   if(! _init_guard_) _file_init_();
@@ -463,6 +461,8 @@ void LispMachine_finish(LispMachine m){
   memset(& m -> program, 0, sizeof(MachineView));
   m -> running = 0;
 }
+
+int Var_is_void(Var);
 
 int LispMachine_clean(LispMachine m){
   if(m -> running || m -> program.code || m -> fp || m -> value_count || m -> local_count || m -> operand_base || m -> local_base || m -> lisp_context) return 0;

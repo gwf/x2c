@@ -4,15 +4,6 @@
 
 static String _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static struct{
-  int receipts, transient, color, columns, width;
-  unsigned long start;
-  unsigned long update;
-}
-report;
-
-static int _init_guard_ = 0;
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,19 +13,14 @@ static int _init_guard_ = 0;
 #include <sys/uio.h>
 #include <time.h>
 #include <unistd.h>
-int String_truth(String);
+static struct{
+  int receipts, transient, color, columns, width;
+  unsigned long start;
+  unsigned long update;
+}
+report;
 
-String String_printf(String, ...);
-
-String String_capitalize(String);
-
-String Symbol_str(Symbol);
-
-Var String_var(String);
-
-String int_str(int);
-
-String String_add(String, String);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -74,11 +60,15 @@ unsigned long report_now_us(void){
   return(unsigned long) now.tv_sec * 1000000ul +(unsigned long) now.tv_nsec / 1000ul;
 }
 
+int String_truth(String);
+
 unsigned long long report_file_bytes(String path){
   struct stat info;
   if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
   return(unsigned long long) info.st_size;
 }
+
+String String_printf(String, ...);
 
 String report_duration(unsigned long microseconds){
   if(! _init_guard_) _file_init_();
@@ -201,6 +191,10 @@ void report_line(Symbol tone, String line){
   _emit(NULL, 0, color, line, 1);
 }
 
+String String_capitalize(String);
+
+String Symbol_str(Symbol);
+
 void report_progress(Symbol phase, int done, int total, String detail){
   if(! report.transient) return;
   unsigned long now = report_now_us();
@@ -233,6 +227,12 @@ void report_progress(Symbol phase, int done, int total, String detail){
   _emit(clear, clear_length, color, String_new(line), 0);
   report.width = length;
 }
+
+Var String_var(String);
+
+String int_str(int);
+
+String String_add(String, String);
 
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();

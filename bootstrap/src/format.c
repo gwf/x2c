@@ -6,52 +6,6 @@ static String _9, _8, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-int String_truth(String);
-
-int String_getindex(String, int);
-
-String String_replace(String, String, String);
-
-int String_len(String);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-size_t Buffer_len(Buffer);
-
-char Buffer_get(Buffer, ptrdiff_t);
-
-Buffer Buffer_unwrite(Buffer, size_t);
-
-Buffer Buffer_newline(Buffer);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Var String_var(String);
-
-String int_str(int);
-
-int List_truth(List);
-
-String Var_str(Var);
-
-Var car(List);
-
-Buffer Buffer_new(size_t);
-
-List cdr(List);
-
-Var Symbol_var(Symbol);
-
-List Compiler_origin_location(Compiler, int);
-
-long Var_integer(Var);
-
-Var List_assoc(List, Var);
-
-String String_escape(String);
-
-String Buffer_str_free(Buffer);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 static int _is_prefix_punct(char ch);
@@ -99,6 +53,10 @@ static int _is_suffix_punct(char ch){
   return ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' || ch == ';' || ch == ',' || ch == '{' || ch == '}';
 }
 
+int String_truth(String);
+
+int String_getindex(String, int);
+
 static int _need_space(String prev, String curr){
   if(! String_truth(prev) || ! String_truth(curr)) return 0;
   char p = String_getindex(prev, - 1), c = String_getindex(curr, 0);
@@ -108,10 +66,14 @@ static int _need_space(String prev, String curr){
   return 1;
 }
 
+String String_replace(String, String, String);
+
 static String _normalized_token(String token){
   if(String_truth(token) && String_getindex(token, 0) == '#') return String_replace(token, _5, _6);
   return token;
 }
+
+int String_len(String);
 
 static int _token_is(String token, char ch){
   return String_truth(token) && String_len(token) == 1 && String_getindex(token, 0) == ch;
@@ -120,6 +82,8 @@ static int _token_is(String token, char ch){
 static int _is_preprocessor(String token){
   return String_truth(token) && String_getindex(token, 0) == '#';
 }
+
+Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static void _write_indent(Buffer buff, int indent){
   static const char spaces[] = "                                                                ";
@@ -132,10 +96,24 @@ static void _write_indent(Buffer buff, int indent){
 
 }
 
+size_t Buffer_len(Buffer);
+
+char Buffer_get(Buffer, ptrdiff_t);
+
+Buffer Buffer_unwrite(Buffer, size_t);
+
+Buffer Buffer_newline(Buffer);
+
 static void _write_newline(Buffer buff){
   while(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
   Buffer_newline(buff);
 }
+
+Buffer Buffer_write(Buffer, const char *);
+
+Var String_var(String);
+
+String int_str(int);
 
 static void _write_mapped_newline(Buffer buff, int source_line){
   _write_newline(buff);
@@ -157,10 +135,32 @@ static void _write_token(Buffer buff, String token, int source_line){
 
 }
 
+int List_truth(List);
+
+String Var_str(Var);
+
+Var car(List);
+
 static int _next_is_closing_brace(List rest){
   if(! List_truth(rest)) return 0;
   return _token_is(Var_str(car(rest)), '}');
 }
+
+Buffer Buffer_new(size_t);
+
+List cdr(List);
+
+Var Symbol_var(Symbol);
+
+List Compiler_origin_location(Compiler, int);
+
+long Var_integer(Var);
+
+Var List_assoc(List, Var);
+
+String String_escape(String);
+
+String Buffer_str_free(Buffer);
 
 char * Compiler_code_pretty_string(Compiler compiler, List code, String output_file){
   if(! _init_guard_) _file_init_();

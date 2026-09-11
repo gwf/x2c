@@ -2,6 +2,71 @@
 
 #include "delegate-fields.h"
 
+static int DelegatePart_read(DelegatePart part);
+
+static void DelegatePart_bump(DelegatePart * part, int by);
+
+static int DelegatePart_pointer_read(DelegatePart * part);
+
+static DelegatePart DelegatePart_same(DelegatePart part);
+
+static DelegatePart DelegatePart_concrete(DelegatePart part);
+
+static int DelegatePart_shadow(DelegatePart part);
+
+typedef struct DelegateValueOwner{
+  DelegatePart part;
+}
+DelegateValueOwner;
+
+typedef DelegateValueOwner DelegateValueOwnerLeaf;
+
+static int DelegateValueOwner_shadow(DelegateValueOwner owner);
+
+typedef struct DelegatePointerOwner{
+  DelegatePart part;
+}
+* DelegatePointerOwner;
+
+typedef struct DelegatePointerFieldOwner{
+  DelegatePart * part;
+}
+DelegatePointerFieldOwner;
+
+typedef struct DelegateChain{
+  DelegatePointerOwner owner;
+}
+* DelegateChain;
+
+typedef struct DelegateChoice{
+  DelegatePart left, right;
+}
+DelegateChoice;
+
+static int DelegateChoice_read(DelegateChoice choice);
+
+typedef struct DelegateCycleA * DelegateCycleA;
+
+typedef struct DelegateCycleB * DelegateCycleB;
+
+struct DelegateCycleA{
+  DelegateCycleB b;
+}
+;
+
+struct DelegateCycleB{
+  DelegateCycleA a;
+}
+;
+
+static int DelegateCycleA_read(DelegateCycleA value);
+
+static int owner_calls;
+
+static DelegateChain saved_chain;
+
+static DelegateChain next_owner(void);
+
 static int DelegatePart_read(DelegatePart part){
   return part.value;
 }
@@ -26,62 +91,17 @@ static int DelegatePart_shadow(DelegatePart part){
   return part.value;
 }
 
-typedef struct DelegateValueOwner{
-  DelegatePart part;
-}
-DelegateValueOwner;
-
-typedef DelegateValueOwner DelegateValueOwnerLeaf;
-
 static int DelegateValueOwner_shadow(DelegateValueOwner owner){
   return 88 + owner.part.value * 0;
 }
-
-typedef struct DelegatePointerOwner{
-  DelegatePart part;
-}
-* DelegatePointerOwner;
-
-typedef struct DelegatePointerFieldOwner{
-  DelegatePart * part;
-}
-DelegatePointerFieldOwner;
-
-typedef struct DelegateChain{
-  DelegatePointerOwner owner;
-}
-* DelegateChain;
-
-typedef struct DelegateChoice{
-  DelegatePart left, right;
-}
-DelegateChoice;
 
 static int DelegateChoice_read(DelegateChoice choice){
   return 99 + choice.left.value * 0 + choice.right.value * 0;
 }
 
-typedef struct DelegateCycleA * DelegateCycleA;
-
-typedef struct DelegateCycleB * DelegateCycleB;
-
-struct DelegateCycleA{
-  DelegateCycleB b;
-}
-;
-
-struct DelegateCycleB{
-  DelegateCycleA a;
-}
-;
-
 static int DelegateCycleA_read(DelegateCycleA value){
   return 77 +(value != NULL) * 0;
 }
-
-static int owner_calls;
-
-static DelegateChain saved_chain;
 
 static DelegateChain next_owner(void){
   owner_calls ++;

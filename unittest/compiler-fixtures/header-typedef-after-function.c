@@ -2,10 +2,6 @@
 
 #include "header-typedef-after-function.h"
 
-int before_size(Before value){
-  return value.value;
-}
-
 typedef struct Hidden{
   int value;
 }
@@ -15,6 +11,12 @@ typedef struct Opaque{
   int value;
 }
 * Opaque;
+
+static int hidden_size(Hidden value);
+
+int before_size(Before value){
+  return value.value;
+}
 
 int after_size(After value){
   return value.value;

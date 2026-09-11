@@ -6,96 +6,6 @@
 
 static int _init_guard_ = 0;
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
-}
-_x2c_defer_env_2;
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_3;
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_4;
-}
-_x2c_defer_env_4;
-
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_5;
-}
-_x2c_defer_env_5;
-
-typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_6;
-}
-_x2c_defer_env_6;
-
-typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_7;
-}
-_x2c_defer_env_7;
-
-typedef struct _x2c_defer_env_8{
-  const void * _x2c_defer_capture_8;
-}
-_x2c_defer_env_8;
-
-typedef struct _x2c_defer_env_9{
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_9;
-
-typedef struct _x2c_defer_env_10{
-  const void * _x2c_defer_capture_10;
-}
-_x2c_defer_env_10;
-
-typedef struct _x2c_defer_env_11{
-  const void * _x2c_defer_capture_11;
-}
-_x2c_defer_env_11;
-
-typedef struct _x2c_defer_env_12{
-  const void * _x2c_defer_capture_12;
-}
-_x2c_defer_env_12;
-
-typedef struct _x2c_defer_env_13{
-  const void * _x2c_defer_capture_13;
-}
-_x2c_defer_env_13;
-
-typedef struct _x2c_defer_env_14{
-  const void * _x2c_defer_capture_14;
-}
-_x2c_defer_env_14;
-
-typedef struct _x2c_defer_env_15{
-  const void * _x2c_defer_capture_15;
-}
-_x2c_defer_env_15;
-
-typedef struct _x2c_defer_env_16{
-  const void * _x2c_defer_capture_17;
-}
-_x2c_defer_env_16;
-
-typedef struct _x2c_defer_env_17{
-  const void * _x2c_defer_capture_18;
-}
-_x2c_defer_env_17;
-
 #include "symbol.h"
 #include "atom.h"
 #include "block.h"
@@ -113,134 +23,6 @@ _x2c_defer_env_17;
 #include <stdio.h>
 #include <stdarg.h>
 #include <limits.h>
-int Var_is_void(Var);
-
-void * Pool_malloc(Pool, size_t);
-
-Var Pool_intern(Pool, Var, void *);
-
-Var List_var(List);
-
-List Var_list(Var);
-
-Pool x2c_pool_values_current(void);
-
-void x2c_pool_values_initialize(void);
-
-void x2c_pool_values_thread_initialize(void);
-
-void x2c_pool_values_shutdown(void);
-
-Pool x2c_pool_values_retain_named(const char *);
-
-Pool x2c_pool_values_retain(void);
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-void x2c_pool_values_release(void);
-
-Pool x2c_pool_values_detach(void);
-
-int Var_is(Var, Symbol);
-
-String String_promote(String);
-
-String Var_string(Var);
-
-Atom Atom_promote(Atom);
-
-int List_truth(List);
-
-int Pool_promote(Pool, Var, void *);
-
-int String_try_own(String);
-
-String Var_str(Var);
-
-int Pool_own(Pool, Var, void *);
-
-Var Pool_lookup(Pool, Var);
-
-void * Var_pointer(Var);
-
-size_t Array_len(Array);
-
-Var Array_push(Array, Var);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-Var Array_getindex(Array, int);
-
-Var unsigned_var(unsigned);
-
-int Var_equal(Var, Var);
-
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-int Var_truth(Var);
-
-Array Array_sort(Array);
-
-Array Array_sort_with(Array, Func);
-
-Array Array_sort_by(Array, Func);
-
-void Scope_retain(void);
-
-Iter Iter_unique(Iter, Iter);
-
-Symbol Var_kind(Var);
-
-long Var_integer(Var);
-
-int x2c_normalize_slice(int *, int *, int, int);
-
-int Var_compare(Var, Var);
-
-Buffer Var_write_str(Var, Buffer);
-
-Buffer Atom_write_repr(Atom, Buffer);
-
-Buffer Var_write_repr(Var, Buffer);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Buffer_pad(Buffer);
-
-Buffer Buffer_push(Buffer);
-
-char Buffer_get(Buffer, ptrdiff_t);
-
-Buffer Buffer_pop(Buffer);
-
-Buffer Buffer_newline_indent(Buffer);
-
-Buffer Buffer_unwrite(Buffer, size_t);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-void Buffer_free(Buffer);
-
-size_t Buffer_tabstop(Buffer);
-
-String Buffer_str_free(Buffer);
-
-int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-void Array_free(Array);
-
-void Scope_release(void);
-
 static void _promote_node(Var node);
 
 static int _try_own_node(Var node);
@@ -271,43 +53,143 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode);
 
 static int _next(Iter iter, Var * out);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_4;
+
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_6;
+}
+_x2c_defer_env_6;
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
+
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_7;
+}
+_x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
 
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_8;
+}
+_x2c_defer_env_8;
+
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
+
+typedef struct _x2c_defer_env_9{
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_9;
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 
+typedef struct _x2c_defer_env_10{
+  const void * _x2c_defer_capture_10;
+}
+_x2c_defer_env_10;
+
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
+
+typedef struct _x2c_defer_env_11{
+  const void * _x2c_defer_capture_11;
+}
+_x2c_defer_env_11;
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 
+typedef struct _x2c_defer_env_12{
+  const void * _x2c_defer_capture_12;
+}
+_x2c_defer_env_12;
+
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
+
+typedef struct _x2c_defer_env_13{
+  const void * _x2c_defer_capture_13;
+}
+_x2c_defer_env_13;
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
 
+typedef struct _x2c_defer_env_14{
+  const void * _x2c_defer_capture_14;
+}
+_x2c_defer_env_14;
+
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
+
+typedef struct _x2c_defer_env_15{
+  const void * _x2c_defer_capture_15;
+}
+_x2c_defer_env_15;
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
 
+typedef struct _x2c_defer_env_16{
+  const void * _x2c_defer_capture_17;
+}
+_x2c_defer_env_16;
+
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 
+typedef struct _x2c_defer_env_17{
+  const void * _x2c_defer_capture_18;
+}
+_x2c_defer_env_17;
+
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
+
+int Var_is_void(Var);
+
+void * Pool_malloc(Pool, size_t);
+
+Var Pool_intern(Pool, Var, void *);
+
+Var List_var(List);
+
+List Var_list(Var);
 
 List List_cons_in(Pool pool, Var head, List tail){
   if(! _init_guard_) List_initialize();
@@ -319,10 +201,14 @@ List List_cons_in(Pool pool, Var head, List tail){
   return Var_list(canonical);
 }
 
+Pool x2c_pool_values_current(void);
+
 Pool List_pool_current(void){
   if(! _init_guard_) List_initialize();
   return x2c_pool_values_current();
 }
+
+void x2c_pool_values_initialize(void);
 
 void List_initialize(void){
   if(_init_guard_) return;
@@ -331,25 +217,39 @@ void List_initialize(void){
   Scope_shutdown_hook(List_shutdown);
 }
 
+void x2c_pool_values_thread_initialize(void);
+
 void List_thread_initialize(void){
   if(! _init_guard_) List_initialize();
   x2c_pool_values_thread_initialize();
 }
+
+void x2c_pool_values_shutdown(void);
 
 void List_shutdown(void){
   if(! _init_guard_) List_initialize();
   x2c_pool_values_shutdown();
 }
 
+Pool x2c_pool_values_retain_named(const char *);
+
 Pool List_pool_retain_named(const char * name){
   if(! _init_guard_) List_initialize();
   return x2c_pool_values_retain_named(name);
 }
 
+Pool x2c_pool_values_retain(void);
+
 Pool List_pool_retain(void){
   if(! _init_guard_) List_initialize();
   return x2c_pool_values_retain();
 }
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+void x2c_pool_values_release(void);
 
 void List_pool_release(void){
   if(! _init_guard_) List_initialize();
@@ -362,6 +262,8 @@ void List_pool_release(void){
   x2c_pool_values_release();
 }
 
+Pool x2c_pool_values_detach(void);
+
 Pool List_pool_detach(void){
   if(! _init_guard_) List_initialize();
   Pool pool = x2c_pool_values_current();
@@ -372,6 +274,18 @@ Pool List_pool_detach(void){
   }
   return x2c_pool_values_detach();
 }
+
+int Var_is(Var, Symbol);
+
+String String_promote(String);
+
+String Var_string(Var);
+
+Atom Atom_promote(Atom);
+
+int List_truth(List);
+
+int Pool_promote(Pool, Var, void *);
 
 static void _promote_node(Var node){
   if(Var_is(node, 1318210446)){
@@ -397,6 +311,12 @@ List List_promote(List lst){
   return lst;
 }
 
+int String_try_own(String);
+
+String Var_str(Var);
+
+int Pool_own(Pool, Var, void *);
+
 static int _try_own_node(Var node){
   if(Var_is(node, 1318210446)) return String_try_own(Var_string(node));
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
@@ -412,6 +332,8 @@ int List_try_own(List lst){
   if(! _init_guard_) List_initialize();
   return ! List_truth(lst) || _try_own_node(List_var(lst));
 }
+
+Var Pool_lookup(Pool, Var);
 
 List cons(Var head, List tail){
   if(! _init_guard_) List_initialize();
@@ -444,6 +366,8 @@ List Var_cons(Var head, List tail){
   return cons(head, tail);
 }
 
+void * Var_pointer(Var);
+
 Var Var_car(Var var){
   if(! _init_guard_) List_initialize();
   return car(Var_pointer(var));
@@ -454,6 +378,8 @@ List Var_cdr(Var var){
   return cdr(Var_pointer(var));
 }
 
+size_t Array_len(Array);
+
 static List _prepend_array(Array values, List tail){
   Var * data = values -> bytes;
   for(size_t i = Array_len(values);  i;  i --){
@@ -463,9 +389,15 @@ static List _prepend_array(Array values, List tail){
   return tail;
 }
 
+Var Array_push(Array, Var);
+
 static void _append_value(Array values, Var value){
   Array_push(values, value);
 }
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
 
 List List_append(List a, List b){
   if(! _init_guard_) List_initialize();
@@ -517,6 +449,8 @@ List List_append(List a, List b){
 }
 }
 
+Var Array_getindex(Array, int);
+
 static List _concat_lists(Array lists){
   List result = NULL;
   for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
@@ -525,6 +459,8 @@ static List _concat_lists(Array lists){
   }
   return result;
 }
+
+Var unsigned_var(unsigned);
 
 static List _concat_n_va(unsigned list_count, va_list ap){
   if(list_count > INT_MAX){
@@ -658,6 +594,8 @@ Var List_last(List lst){
   return car(lst);
 }
 
+int Var_equal(Var, Var);
+
 int List_index(List lst, Var key){
   if(! _init_guard_) List_initialize();
   for(int index = 0;  List_truth(lst);  lst = cdr(lst), index ++) if(Var_equal(lst -> car, key)) return index;
@@ -675,6 +613,10 @@ int List_len(List lst){
   for(List l = lst;  List_truth(l);  l = cdr(l)) len ++;
   return len;
 }
+
+FuncArg FuncArg_value(Var);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
 
 List List_map(List lst, Func fn){
   if(! _init_guard_) List_initialize();
@@ -770,6 +712,8 @@ Var List_reduce(List lst, Func fn){
   return List_foldl(List_cdr(lst), List_car(lst), fn);
 }
 
+int Var_truth(Var);
+
 Var List_find(List lst, Func pred){
   if(! _init_guard_) List_initialize();
   if(! pred) return((void) 0, Void);
@@ -849,6 +793,8 @@ int List_all(List lst, Func pred){
   return 1;
 }
 
+Array Array_sort(Array);
+
 List List_sort(List lst){
   if(! _init_guard_) List_initialize();
   if(! List_truth(lst) || ! List_truth(cdr(lst))) return lst;
@@ -899,6 +845,8 @@ List List_sort(List lst){
 }
 }
 
+Array Array_sort_with(Array, Func);
+
 List List_sort_with(List lst, Func compare){
   if(! _init_guard_) List_initialize();
   if(! List_truth(lst) || ! List_truth(cdr(lst))) return lst;
@@ -947,6 +895,8 @@ List List_sort_with(List lst, Func compare){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
 }
 }
+
+Array Array_sort_by(Array, Func);
 
 List List_sort_by(List lst, Func key){
   if(! _init_guard_) List_initialize();
@@ -1053,6 +1003,10 @@ Array List_array(List lst){
   }
   return array;
 }
+
+void Scope_retain(void);
+
+Iter Iter_unique(Iter, Iter);
 
 List List_unique(List lst){
   if(! _init_guard_) List_initialize();
@@ -1386,6 +1340,10 @@ Var List_assoc(List list, Var key){
   return((void) 0, Void);
 }
 
+Symbol Var_kind(Var);
+
+long Var_integer(Var);
+
 Var List_get(List list, Var key){
   if(! _init_guard_) List_initialize();
   if(Var_kind(key) == 20309162340) return List_getindex(list, Var_integer(key));
@@ -1498,6 +1456,8 @@ static List _collect_subseq(List list, int start, int step, int span){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_30;
 }
 }
+
+int x2c_normalize_slice(int *, int *, int, int);
 
 List List_subseq(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
@@ -1630,6 +1590,8 @@ int List_equal(List a, List b){
   return Var_same(a -> car, b -> car) && a -> cdr == b -> cdr;
 }
 
+int Var_compare(Var, Var);
+
 int List_compare(List a, List b){
   if(! _init_guard_) List_initialize();
   if((void *) a ==(void *) b) return 0;
@@ -1642,6 +1604,22 @@ int List_compare(List a, List b){
   if(List_equal(a, b)) return 0;
   return List_truth(a) ? 1 : - 1;
 }
+
+Buffer Var_write_str(Var, Buffer);
+
+Buffer Atom_write_repr(Atom, Buffer);
+
+Buffer Var_write_repr(Var, Buffer);
+
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Buffer_pad(Buffer);
+
+Buffer Buffer_push(Buffer);
+
+char Buffer_get(Buffer, ptrdiff_t);
+
+Buffer Buffer_pop(Buffer);
 
 static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
   if(! Var_is(elem, 806120)){
@@ -1663,6 +1641,18 @@ static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
   Buffer_write(buf, ")");
   Buffer_pop(buf);
 }
+
+Buffer Buffer_newline_indent(Buffer);
+
+Buffer Buffer_unwrite(Buffer, size_t);
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write_len(Buffer, const char *, size_t);
+
+void Buffer_free(Buffer);
+
+size_t Buffer_tabstop(Buffer);
 
 static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
   const int maxwidth = 80;
@@ -1705,6 +1695,8 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
   Buffer_write(buf, ")");
   Buffer_pop(buf);
 }
+
+String Buffer_str_free(Buffer);
 
 String List_str(List lst){
   if(! _init_guard_) List_initialize();
@@ -1796,6 +1788,10 @@ static int _next(Iter iter, Var * out){
   iter -> state = List_var(lst);
   return 1;
 }
+
+int Iter_truth(Iter);
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter List_iter(List lst, Iter dest){
   if(! _init_guard_) List_initialize();
@@ -1904,6 +1900,8 @@ List List_filter(List lst, Func pred){
 }
 }
 
+void Array_free(Array);
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   Array_free((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
@@ -1943,6 +1941,8 @@ static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
   Array_free((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_7));
 }
+
+void Scope_release(void);
 
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
   Scope_release();

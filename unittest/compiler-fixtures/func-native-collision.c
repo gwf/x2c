@@ -8,6 +8,10 @@ static Var _8, _5, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -31,8 +35,6 @@ __attribute__((constructor)) static void _file_init_(void){
 }
 
 Func Func_new(FuncAdapter, List);
-
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 int main(void){
   x2c_initialize();

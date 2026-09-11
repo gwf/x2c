@@ -8,175 +8,11 @@ static String _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, 
 
 static Var _98, _94, _93, _90, _87, _86, _85, _83, _81, _80, _78, _75, _72, _71, _69, _67, _65, _63, _62, _61, _57, _53, _52, _50, _48, _44, _43, _42, _40, _36, _35, _33, _32, _31, _30, _29, _28, _27, _24, _20, _18, _14, _13, _12, _10, _8, _7, _5, _4, _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-  const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
-  const void * _x2c_defer_capture_4;
-}
-_x2c_defer_env_1;
-
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_5;
-  const void * _x2c_defer_capture_6;
-  const void * _x2c_defer_capture_7;
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_2;
-
 #include "parse.h"
 #include "expressions.h"
 #include "literals.h"
 #include "macros.h"
-Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-Var String_var(String);
-
-Var List_var(List);
-
-Symbol Compiler_expect(Compiler, Symbol);
-
-List Compiler_parse_expression(Compiler);
-
-int Compiler_test(Compiler, Symbol);
-
-void Sym_push_new_scope(Sym);
-
-Symbol Compiler_peek(Compiler, int);
-
-int Compiler_test_declaration(Compiler);
-
-List Compiler_parse_simple_declaration(Compiler);
-
-List cdr(List);
-
-int List_truth(List);
-
-List Compiler_resolve_expression(Compiler, List, Token);
-
-void Compiler_next(Compiler);
-
-List Compiler_parse_optional_identifier(Compiler);
-
-List Compiler_match_pattern_binders(Compiler, List, List *);
-
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-int List_contains(List, Var);
-
-void Compiler_report_error(Compiler, Symbol, String, Token, List);
-
-String Var_str(Var);
-
-int Var_equal(Var, Var);
-
-int String_equal(String, String);
-
-void Compiler_define_match_binders(Compiler, List);
-
-int Map_truth(Map);
-
-List Compiler_macro_introduced_name(Compiler, String);
-
-void Compiler_bind_template_local(Compiler, List, List, List);
-
-List Type_list(Type);
-
-List Sym_introduce(Sym, String);
-
-List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
-
-Type List_type(List);
-
-List Var_list(Var);
-
-String Compiler_fresh_name(Compiler, String);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
-Iter Array_iter(Array, Iter);
-
-Type Var_type(Var);
-
-String Var_string(Var);
-
-List Array_list(Array);
-
-List Compiler_typed_match_pattern(Compiler, List, List);
-
-String List_repr(List);
-
-void Array_free(Array);
-
-SymScope Sym_pop_scope(Sym);
-
-List Compiler_parse_catch_pattern_literal(Compiler);
-
-List Compiler_parse_raise_literal(Compiler);
-
-int Compiler_test_static_assert(Compiler);
-
-List Compiler_parse_static_assert(Compiler);
-
-List Compiler_try_parse_macro_slot(Compiler, Symbol);
-
-int Compiler_local_macro_form_is_definition(Compiler);
-
-List Compiler_parse_macro_definition(Compiler);
-
-int Map_try_get(Map, Var, Var *);
-
-Map Compiler_semantic_binding_facts(Compiler);
-
-int List_equal(List, List);
-
-List Sym_lookup(Sym, List, List *);
-
-List Compiler_try_parse_macro_target_at(Compiler, AstPos);
-
-List Compiler_parse_declaration_row(Compiler);
-
-int Compiler_macro_starts_target_at(Compiler, AstPos);
-
-List Compiler_peek_macro_hole(Compiler);
-
-Var List_assoc(List, Var);
-
-List Compiler_try_parse_macro_expression(Compiler);
-
-List Sym_define(Sym, List, List);
-
-Var Map_setindex(Map, Var, Var);
-
-List Compiler_parse_parenthesized_statement(Compiler);
-
-List Compiler_leading_preproc(Compiler);
-
-int Compiler_keyword_alias_starts_target_at(Compiler, AstPos);
-
-Var List_car(List);
-
-List Compiler_anchor_origin(Compiler, List, Token);
-
-List List_cdr(List);
-
-Var Map_del(Map, Var);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -234,11 +70,41 @@ static List _optional_label_statement(Compiler compiler);
 
 static List _expression_statement(Compiler compiler);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_5;
+  const void * _x2c_defer_capture_6;
+  const void * _x2c_defer_capture_7;
+  const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_2;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+Var String_var(String);
+
+Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -358,6 +224,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _111 = String_new("with requires a braced body");
 }
 
+Symbol Compiler_expect(Compiler, Symbol);
+
+List Compiler_parse_expression(Compiler);
+
 static List _keyword_paren_expr(Compiler compiler, Symbol keyword){
   Compiler_expect(compiler, keyword);
   Compiler_expect(compiler, 81);
@@ -365,6 +235,8 @@ static List _keyword_paren_expr(Compiler compiler, Symbol keyword){
   Compiler_expect(compiler, 83);
   return expr;
 }
+
+int Compiler_test(Compiler, Symbol);
 
 static List _if_statement(Compiler compiler){
   List cond = _keyword_paren_expr(compiler, 588);
@@ -381,6 +253,16 @@ static List _while_statement(Compiler compiler){
   List body = Compiler_parse_statement(compiler);
   return cons(_1, cons(List_var(cond), cons(List_var(body), NULL)));
 }
+
+void Sym_push_new_scope(Sym);
+
+Symbol Compiler_peek(Compiler, int);
+
+int Compiler_test_declaration(Compiler);
+
+List Compiler_parse_simple_declaration(Compiler);
+
+List cdr(List);
 
 static List _for_statement(Compiler c){
   List init, cond, inc, body;
@@ -445,11 +327,17 @@ static List _defer_statement(Compiler compiler){
   return cons(_4, cons(List_var(body), NULL));
 }
 
+int List_truth(List);
+
+List Compiler_resolve_expression(Compiler, List, Token);
+
 List Compiler_finish_return_statement(Compiler compiler, List expression){
   if(! _init_guard_) _file_init_();
   if(! List_truth(expression)) return _6;
   return cons(_5, cons(List_var(compiler -> return_type), cons(List_var(Compiler_resolve_expression(compiler, expression, compiler -> token)), NULL)));
 }
+
+void Compiler_next(Compiler);
 
 static List _return_statement(Compiler compiler){
   Compiler_expect(compiler, 1219800220);
@@ -481,6 +369,8 @@ static List _continue_statement(Compiler compiler){
   return _11;
 }
 
+List Compiler_parse_optional_identifier(Compiler);
+
 static List _goto_statement(Compiler compiler){
   Compiler_expect(compiler, 490782);
   List label = Compiler_parse_optional_identifier(compiler);
@@ -499,6 +389,26 @@ static List _default_statement(Compiler compiler){
   Compiler_expect(compiler, 117);
   return _15;
 }
+
+List Compiler_match_pattern_binders(Compiler, List, List *);
+
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+int List_contains(List, Var);
+
+void Compiler_report_error(Compiler, Symbol, String, Token, List);
+
+String Var_str(Var);
+
+int Var_equal(Var, Var);
+
+int String_equal(String, String);
+
+void Compiler_define_match_binders(Compiler, List);
 
 static void _define_pattern_binders(Compiler compiler, List pattern, Token start, String role){
   List possible = NULL;
@@ -553,6 +463,20 @@ void Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start){
   if(List_truth(pattern)) _define_pattern_binders(compiler, pattern, start, _100);
 }
 
+int Map_truth(Map);
+
+List Compiler_macro_introduced_name(Compiler, String);
+
+void Compiler_bind_template_local(Compiler, List, List, List);
+
+List Type_list(Type);
+
+List Sym_introduce(Sym, String);
+
+List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
+
+Type List_type(List);
+
 static List _match_capture_declaration(Compiler compiler, Type type, String name, List initializer, int temporary){
   List binding;
   if(Map_truth(compiler -> macro_holes)){
@@ -563,6 +487,14 @@ static List _match_capture_declaration(Compiler compiler, Type type, String name
   else binding = temporary ? Sym_introduce(compiler -> sym, name) : cons(_27, cons(String_var(name), NULL));
   return Compiler_bind_syntax(compiler, List_var(cons(_28, cons(List_var(type), cons(List_var(cons(_29, cons(List_var(cons(_30, cons(_31, cons(List_var(cons(_32, cons(List_var(binding), _34))), cons(List_var(initializer), NULL))))), NULL))), NULL)))), AST_BLOCK, List_type(compiler -> return_type));
 }
+
+List Var_list(Var);
+
+String Compiler_fresh_name(Compiler, String);
+
+Var Array_push(Array, Var);
+
+List Array_list_free(Array);
 
 static List _match_capture_temporaries(Compiler c, List types, Array locals){
   Array declarations = Array_new();
@@ -596,6 +528,9 @@ static List _match_capture_temporaries(Compiler c, List types, Array locals){
 return Array_list_free(declarations);
 }
 
+Iter Array_iter(Array, Iter);
+Type Var_type(Var);
+String Var_string(Var);
 static List _match_capture_locals(Compiler c, Array locals){
   Array declarations = Array_new(); {
     List row;  Iter _x2c_macro_iterator_3 = Array_iter(locals, &(struct Iter){
@@ -618,6 +553,11 @@ static List _match_capture_locals(Compiler c, Array locals){
 return Array_list_free(declarations);
 }
 
+List Array_list(Array);
+List Compiler_typed_match_pattern(Compiler, List, List);
+String List_repr(List);
+void Array_free(Array);
+SymScope Sym_pop_scope(Sym);
 static List _match_case(Compiler c){
   Symbol peek = Compiler_peek(c, 0);  List pattern = NULL;  List types = NULL;  Token start = c -> token;  Compiler_next(c);  if(peek == 199882){
     int previous = c -> in_pattern;  Array previous_types = c -> match_types;  Array captures = Array_new(); {
@@ -682,6 +622,7 @@ static List _empty_statement(Compiler compiler){
   Compiler_expect(compiler, 119);  return _73;
 }
 
+List Compiler_parse_catch_pattern_literal(Compiler);
 static List _filtered_catch_arm(Compiler c, int * is_default){
   Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117)) * is_default = 1;  else{
     if(Compiler_peek(c, 0) != 9553) Compiler_report_error(c, 33658058, _105, c -> token, _76);  pattern = Compiler_parse_catch_pattern_literal(c);  Compiler_expect(c, 117);
@@ -713,6 +654,8 @@ static List _try_statement(Compiler c){
   Compiler_report_error(c, 33658058, _107, c -> token, NULL);
 }
 
+List Compiler_parse_raise_literal(Compiler);
+
 static List _raise_statement(Compiler compiler){
   Compiler_expect(compiler, 37833930);
   if(Compiler_peek(compiler, 0) != 9553) Compiler_report_error(compiler, 33658058, _108, compiler -> token, _84);
@@ -739,6 +682,28 @@ static List _expression_statement(Compiler compiler){
   return cons(_86, cons(List_var(expr), NULL));
 }
 
+int Compiler_test_static_assert(Compiler);
+
+List Compiler_parse_static_assert(Compiler);
+
+List Compiler_try_parse_macro_slot(Compiler, Symbol);
+
+int Compiler_local_macro_form_is_definition(Compiler);
+
+List Compiler_parse_macro_definition(Compiler);
+
+int Map_try_get(Map, Var, Var *);
+
+Map Compiler_semantic_binding_facts(Compiler);
+
+int List_equal(List, List);
+
+List Sym_lookup(Sym, List, List *);
+
+List Compiler_try_parse_macro_target_at(Compiler, AstPos);
+
+List Compiler_parse_declaration_row(Compiler);
+
 List Compiler_parse_block_item(Compiler compiler){
   if(! _init_guard_) _file_init_();
   if(Compiler_test_static_assert(compiler)) return Compiler_parse_static_assert(compiler);
@@ -760,6 +725,20 @@ List Compiler_parse_block_item(Compiler compiler){
   }
   return Compiler_parse_statement(compiler);
 }
+
+int Compiler_macro_starts_target_at(Compiler, AstPos);
+
+List Compiler_peek_macro_hole(Compiler);
+
+Var List_assoc(List, Var);
+
+List Compiler_try_parse_macro_expression(Compiler);
+
+List Sym_define(Sym, List, List);
+
+Var Map_setindex(Map, Var, Var);
+
+List Compiler_parse_parenthesized_statement(Compiler);
 
 List Compiler_parse_statement(Compiler compiler){
   if(! _init_guard_) _file_init_();
@@ -854,6 +833,16 @@ switch(token){
 return _expression_statement(compiler);
 }
 
+List Compiler_leading_preproc(Compiler);
+
+int Compiler_keyword_alias_starts_target_at(Compiler, AstPos);
+
+Var List_car(List);
+
+List Compiler_anchor_origin(Compiler, List, Token);
+
+List List_cdr(List);
+
 List Compiler_parse_block_items(Compiler c, int anchor_items){
   if(! _init_guard_) _file_init_();
   Array block = Array_new();
@@ -925,6 +914,8 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   }
 
 }
+
+Var Map_del(Map, Var);
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;

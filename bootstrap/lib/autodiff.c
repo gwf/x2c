@@ -10,89 +10,6 @@ static Var _10, _8, _5, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
-static VarMethods _x2c__x2c_protocol_methods_0;
-
-typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
-  Var _x2c_lambda_capture_1;
-  Var _x2c_lambda_capture_2;
-}
-_x2c_lambda_context_0;
-
-typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_3;
-  Var _x2c_lambda_capture_4;
-  Var _x2c_lambda_capture_5;
-}
-_x2c_lambda_context_2;
-
-typedef struct _x2c_lambda_context_4{
-  Var _x2c_lambda_capture_6;
-  Var _x2c_lambda_capture_7;
-  Var _x2c_lambda_capture_8;
-}
-_x2c_lambda_context_4;
-
-typedef struct _x2c_lambda_context_6{
-  Var _x2c_lambda_capture_9;
-  Var _x2c_lambda_capture_10;
-  Var _x2c_lambda_capture_11;
-}
-_x2c_lambda_context_6;
-
-typedef struct _x2c_lambda_context_8{
-  Var _x2c_lambda_capture_12;
-  Var _x2c_lambda_capture_13;
-}
-_x2c_lambda_context_8;
-
-typedef struct _x2c_lambda_context_10{
-  Var _x2c_lambda_capture_14;
-  Var _x2c_lambda_capture_15;
-  Var _x2c_lambda_capture_16;
-}
-_x2c_lambda_context_10;
-
-Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-Var List_var(List);
-
-Var String_var(String);
-
-Var Var_new(Symbol, ...);
-
-void * Var_pointer(Var);
-
-void * Scope_malloc(size_t);
-
-Var Array_push(Array, Var);
-
-size_t Array_len(Array);
-
-Var Array_getindex(Array, int);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
-Var double_var(double);
-
-double sin(double);
-
-double cos(double);
-
-double exp(double);
-
-double log(double);
-
-double sqrt(double);
-
-double tanh(double);
-
-const void * Func_context(Func);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 static AdNode _record(AdTape tape, double value, Func back);
@@ -111,17 +28,68 @@ static inline Var _x2c_proto_adnode_div_0(Var a0, Var a1);
 
 static inline Var _x2c_proto_adnode_neg_0(Var a0);
 
+static VarMethods _x2c__x2c_protocol_methods_0;
+
+typedef struct _x2c_lambda_context_0{
+  Var _x2c_lambda_capture_0;
+  Var _x2c_lambda_capture_1;
+  Var _x2c_lambda_capture_2;
+}
+_x2c_lambda_context_0;
+
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
+typedef struct _x2c_lambda_context_2{
+  Var _x2c_lambda_capture_3;
+  Var _x2c_lambda_capture_4;
+  Var _x2c_lambda_capture_5;
+}
+_x2c_lambda_context_2;
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
+typedef struct _x2c_lambda_context_4{
+  Var _x2c_lambda_capture_6;
+  Var _x2c_lambda_capture_7;
+  Var _x2c_lambda_capture_8;
+}
+_x2c_lambda_context_4;
+
 static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2);
+
+typedef struct _x2c_lambda_context_6{
+  Var _x2c_lambda_capture_9;
+  Var _x2c_lambda_capture_10;
+  Var _x2c_lambda_capture_11;
+}
+_x2c_lambda_context_6;
 
 static Var _x2c_lambda_3(Func _x2c_lambda_closure_3, const FuncArg * _x2c_lambda_argv_3);
 
+typedef struct _x2c_lambda_context_8{
+  Var _x2c_lambda_capture_12;
+  Var _x2c_lambda_capture_13;
+}
+_x2c_lambda_context_8;
+
 static Var _x2c_lambda_4(Func _x2c_lambda_closure_4, const FuncArg * _x2c_lambda_argv_4);
 
+typedef struct _x2c_lambda_context_10{
+  Var _x2c_lambda_capture_14;
+  Var _x2c_lambda_capture_15;
+  Var _x2c_lambda_capture_16;
+}
+_x2c_lambda_context_10;
+
 static Var _x2c_lambda_5(Func _x2c_lambda_closure_5, const FuncArg * _x2c_lambda_argv_5);
+
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+Var List_var(List);
+
+Var String_var(String);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -149,19 +117,27 @@ __attribute__((constructor)) static void _file_init_(void){
   _12 = cons(_8, _11);
 }
 
+Var Var_new(Symbol, ...);
+
 Var AdNode_var(AdNode node){
   return Var_new(76445962, node);
 }
 
+void * Var_pointer(Var);
+
 AdNode Var_adnode(Var value){
   return(AdNode) Var_pointer(value);
 }
+
+void * Scope_malloc(size_t);
 
 AdTape AdTape_new(void){
   AdTape tape = Scope_malloc(sizeof(struct AdTape));
   tape -> nodes = Array_new();
   return tape;
 }
+
+Var Array_push(Array, Var);
 
 static AdNode _record(AdTape tape, double value, Func back){
   AdNode node = Scope_malloc(sizeof(struct AdNode));
@@ -177,6 +153,12 @@ AdNode AdTape_input(AdTape tape, double value){
   return _record(tape, value, NULL);
 }
 
+size_t Array_len(Array);
+
+Var Array_getindex(Array, int);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
+
 void AdTape_backward(AdTape tape, AdNode result){
   for(int i = 0;  i < Array_len(tape -> nodes);  i ++){
     AdNode node = Var_adnode(Array_getindex(tape -> nodes, i));
@@ -189,6 +171,8 @@ void AdTape_backward(AdTape tape, AdNode result){
   }
 
 }
+
+Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
 AdNode AdNode_add(AdNode a, AdNode b){
   if(! _init_guard_) _file_init_();
@@ -259,6 +243,8 @@ int AdNode_compare(AdNode a, AdNode b){
   return a -> value < b -> value ? - 1 : a -> value > b -> value;
 }
 
+Var double_var(double);
+
 static AdNode _unary(AdNode a, double value, double slope){
   AdNode node = _record(a -> tape, value, NULL);
   node -> back =({
@@ -271,6 +257,10 @@ static AdNode _unary(AdNode a, double value, double slope){
   return node;
 }
 
+double sin(double);
+
+double cos(double);
+
 AdNode AdNode_sin(AdNode a){
   if(! _init_guard_) _file_init_();
   return _unary(a, sin(a -> value), cos(a -> value));
@@ -281,22 +271,30 @@ AdNode AdNode_cos(AdNode a){
   return _unary(a, cos(a -> value), - sin(a -> value));
 }
 
+double exp(double);
+
 AdNode AdNode_exp(AdNode a){
   if(! _init_guard_) _file_init_();
   double value = exp(a -> value);
   return _unary(a, value, value);
 }
 
+double log(double);
+
 AdNode AdNode_log(AdNode a){
   if(! _init_guard_) _file_init_();
   return _unary(a, log(a -> value), 1.0 / a -> value);
 }
+
+double sqrt(double);
 
 AdNode AdNode_sqrt(AdNode a){
   if(! _init_guard_) _file_init_();
   double value = sqrt(a -> value);
   return _unary(a, value, 0.5 / value);
 }
+
+double tanh(double);
 
 AdNode AdNode_tanh(AdNode a){
   if(! _init_guard_) _file_init_();
@@ -327,6 +325,8 @@ static inline Var _x2c_proto_adnode_div_0(Var a0, Var a1){
 static inline Var _x2c_proto_adnode_neg_0(Var a0){
   return AdNode_var(AdNode_neg(Var_adnode(a0)));
 }
+
+const void * Func_context(Func);
 
 static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);

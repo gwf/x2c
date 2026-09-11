@@ -4,6 +4,14 @@
 
 static String _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "buffer.h"
+#include "utils.h"
 enum{
   CLI_TOP = 1, CLI_TRANSLATE = 2, CLI_BUILD = 4, CLI_RUN = 8, CLI_BOOTSTRAP = 32
 }
@@ -236,78 +244,6 @@ static CliOption cli_options[] ={
 
 static int _init_guard_ = 0;
 
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "buffer.h"
-#include "utils.h"
-String Symbol_str(Symbol);
-
-void x2c_driver_error(const char *);
-
-Var String_var(String);
-
-void * Scope_malloc(size_t);
-
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-String Var_string(Var);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-Var Array_push(Array, Var);
-
-String Buffer_str(Buffer);
-
-Buffer Buffer_clear(Buffer);
-
-void Buffer_free(Buffer);
-
-void Scope_free(void *);
-
-List Array_list_free(Array);
-
-int String_truth(String);
-
-int String_getindex(String, int);
-
-String String_new(const char *);
-
-List cons(Var, List);
-
-Var List_car(List);
-
-int String_startswith(String, String);
-
-String String_remove_prefix(String, String);
-
-List List_cdr(List);
-
-int List_truth(List);
-
-int String_contains(String, String);
-
-int String_equal(String, String);
-
-String String_replace(String, String, String);
-
-void * Scope_calloc(size_t, size_t);
-
-int String_endswith(String, String);
-
-void Array_free(Array);
-
-List List_reverse(List);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 _Noreturn static void _removed_output(void);
@@ -449,6 +385,8 @@ static int _command_mask(Symbol command){
   return CLI_TOP;
 }
 
+String Symbol_str(Symbol);
+
 static CliCommand * _command_row(const char * word){
   for(CliCommand * row = cli_commands;  row -> name;  row ++) if(row -> mask != CLI_TOP && strcmp(word, Symbol_str(row -> name)) == 0) return row;
   return NULL;
@@ -550,6 +488,10 @@ static void _print_bootstrap_help(void){
   puts(_10);
 }
 
+void x2c_driver_error(const char *);
+
+Var String_var(String);
+
 static void _print_help(Symbol command){
   switch(command){
     case 0 : _print_top_help();
@@ -605,6 +547,8 @@ static int _valid_utf8(const unsigned char * text, size_t length){
   return 1;
 }
 
+void * Scope_malloc(size_t);
+
 static char * _read_response_file(const char * path, size_t * length){
   FILE * file = fopen(path, "rb");
   if(! file) _response_error(path, 1, strerror(errno));
@@ -631,6 +575,14 @@ static char * _read_response_file(const char * path, size_t * length){
   return text;
 }
 
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+String Var_string(Var);
+
 static int _response_on_stack(List stack, String path){
   {
     String entry;
@@ -647,6 +599,18 @@ static int _response_on_stack(List stack, String path){
   }
   return 0;
 }
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write_char(Buffer, char);
+
+Var Array_push(Array, Var);
+
+String Buffer_str(Buffer);
+
+Buffer Buffer_clear(Buffer);
+
+void Buffer_free(Buffer);
 
 static void _tokenize_response(Array output, String path, const char * text, size_t length){
   Buffer token = Buffer_new(0);
@@ -717,6 +681,10 @@ static void _tokenize_response(Array output, String path, const char * text, siz
   Buffer_free(token);
 }
 
+void Scope_free(void *);
+
+List Array_list_free(Array);
+
 List cli_response_arguments(String path){
   size_t length = 0;
   char * text = _read_response_file(path, & length);
@@ -725,6 +693,14 @@ List cli_response_arguments(String path){
   Scope_free(text);
   return Array_list_free(arguments);
 }
+
+int String_truth(String);
+
+int String_getindex(String, int);
+
+String String_new(const char *);
+
+List cons(Var, List);
 
 static void _expand_argument(Array output, String argument, List stack){
   if(! String_truth(argument) || String_getindex(argument, 0) != '@'){
@@ -796,6 +772,16 @@ static CliOption * _find_option(const char * spelling, int command_mask, const c
   return NULL;
 }
 
+Var List_car(List);
+
+int String_startswith(String, String);
+
+String String_remove_prefix(String, String);
+
+List List_cdr(List);
+
+int List_truth(List);
+
 static CliOption * _take_option(List * node, int mask, String * spelling, String * value, int * attached){
   String arg = Var_string(List_car((* node))), written = arg, color = NULL;
   int color_equal = 0;
@@ -824,10 +810,14 @@ static void _push_pair(Array arguments, String option, String value){
   Array_push(arguments, String_var(value));
 }
 
+int String_contains(String, String);
+
 int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
   return String_truth(s) &&(String_startswith(s, _39) || String_startswith(s, _40) || String_startswith(s, _41) || String_startswith(s, _42) || String_contains(s, _43) || String_contains(s, _44) || String_contains(s, _45) || String_contains(s, _46));
 }
+
+int String_equal(String, String);
 
 static void _driver_kind(CliRequest request, String value){
   request -> kind_explicit = 1;
@@ -952,6 +942,14 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
 
 }
 
+String String_replace(String, String, String);
+
+void * Scope_calloc(size_t, size_t);
+
+int String_endswith(String, String);
+
+void Array_free(Array);
+
 CliRequest cli_package_options(String path, String package){
   if(! _init_guard_) _file_init_();
   Array words = Array_new();
@@ -1004,6 +1002,8 @@ static void _one_dash_removed(String arg){
   }
 
 }
+
+List List_reverse(List);
 
 static CliRequest _parse_command(List args, CliCommand * command){
   Symbol name = command -> name;

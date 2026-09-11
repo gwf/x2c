@@ -6,6 +6,12 @@ static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static String suffix(void);
+
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
+
 String String_add(String, String);
 
 __attribute__((constructor)) static void _file_init_(void){
@@ -26,8 +32,6 @@ static String suffix(void){
 }
 
 void Scope_retain(void);
-
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
 
 void Scope_release(void);
 

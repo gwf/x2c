@@ -6,9 +6,15 @@ static String _0;
 
 static int _init_guard_ = 0;
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var StaticDescriptor_var(StaticDescriptor value);
+
+static StaticDescriptor Var_staticdescriptor(Var value);
 
 static inline String _x2c_proto_staticdescriptor_str_0(Var a0);
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -61,6 +67,4 @@ int main(void){
 static inline String _x2c_proto_staticdescriptor_str_0(Var a0){
   return StaticDescriptor_str(Var_staticdescriptor(a0));
 }
-
-static VarMethods _x2c__x2c_protocol_methods_0;
 

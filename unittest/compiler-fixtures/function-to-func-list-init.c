@@ -16,22 +16,29 @@ static Var _8, _5, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
-static long identity(long value){
-  return value;
-}
+static long identity(long value);
 
 static Func lifted;
 
 static Func _x2c_func_handle_0;
 
 _x2c_initializer_choice_76696E0D_0((lifted = _x2c_func_handle_0))
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_76696E0D_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _9)))
+static long identity(long value){
+  return value;
+}
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
 Var List_var(List);
-
-static void _x2c_static_initialize_1(void);
 
 void List_initialize(void){
   if(_init_guard_) return;
@@ -60,11 +67,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_76696E0D_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _9)))
 #undef _x2c_initializer_choice_76696E0D_0_expanded
 #undef _x2c_initializer_choice_76696E0D_0
 #undef _x2c_initializer_choice_76696E0D_1_expanded

@@ -190,6 +190,7 @@ def mode_check(artifacts, out):
     with open(os.path.join(out, "tabular-python-curve.txt"), "w") as handle:
         for step, value in curve:
             handle.write(f"{step} {value:.10g}\n")
+            print(f"curve {step} {value:.10g}")
 
     # The same training with the explicit parameter-enumeration forward.
     explicit = build(init)
@@ -472,6 +473,95 @@ def mode_memory(artifacts, out, profile, steps, lifetime="ordinary"):
     return 0
 
 
+def mode_diagnose(artifacts, out, variant, count):
+    start = time.perf_counter()
+    data, init, batches = load(artifacts)
+    record("load_seconds", time.perf_counter() - start)
+    start = time.perf_counter()
+    model = build(init)
+    optimizer = optimizer_for(model)
+    record("setup_seconds", time.perf_counter() - start)
+    forward = FORWARDS[variant]
+    train(model, optimizer, data, batches, 50, forward)
+    del model, optimizer
+    model = build(init)
+    optimizer = optimizer_for(model)
+    x, y, rows = data["data.x_train"], data["data.y_train"], batches["batches"]
+    totals = dict.fromkeys(("batch", "forward", "backward", "optimizer",
+                           "cleanup"), 0.0)
+    for i in range(count):
+        start = time.perf_counter()
+        pick = rows[i % rows.shape[0]]
+        bx, by = x.index_select(0, pick), y.index_select(0, pick)
+        optimizer.zero_grad()
+        totals["batch"] += time.perf_counter() - start
+        start = time.perf_counter()
+        output = forward(model, bx)
+        loss = torch.nn.functional.mse_loss(output, by)
+        totals["forward"] += time.perf_counter() - start
+        start = time.perf_counter()
+        loss.backward()
+        totals["backward"] += time.perf_counter() - start
+        start = time.perf_counter()
+        optimizer.step()
+        totals["optimizer"] += time.perf_counter() - start
+        if i + 1 == count:
+            final_loss = float(loss.detach())
+        start = time.perf_counter()
+        del loss, output, bx, by, pick
+        totals["cleanup"] += time.perf_counter() - start
+    record("diagnostic_steps", count)
+    record("diagnostic_loss", final_loss)
+    for name, elapsed in totals.items():
+        record(name + "_seconds", elapsed)
+    checkpoint = os.path.join(out, "tabular-python-diagnostic-model.pt")
+    state = os.path.join(out, "tabular-python-diagnostic-optimizer.pt")
+    start = time.perf_counter()
+    common.save_tensors(dict(model.state_dict()), checkpoint)
+    torch.save(optimizer.state_dict(), state)
+    record("checkpoint_save_seconds", time.perf_counter() - start)
+    start = time.perf_counter()
+    model.load_state_dict(common.load_tensors(checkpoint))
+    optimizer.load_state_dict(torch.load(state, weights_only=False))
+    record("checkpoint_load_seconds", time.perf_counter() - start)
+    record("diagnostic_val_mse", evaluate(model, data["data.x_val"],
+                                         data["data.y_val"], forward))
+    return 0
+
+
+def mode_errors(artifacts, count, unique):
+    init = common.load_tensors(os.path.join(artifacts, "tabular-init.pt"))
+    model = build(init)
+    inputs = torch.zeros(4, PROFILE["features"])
+    expected = float(model(inputs).sum().detach())
+    caught, checksum = 0, 0.0
+    sample("errors-start", 0)
+    for i in range(count):
+        try:
+            try:
+                with torch.inference_mode():
+                    model(torch.zeros(4, PROFILE["features"] + 1))
+            except RuntimeError:
+                raise ValueError(f"request {i}" if unique else "request")
+        except ValueError:
+            caught += 1
+        if not torch.is_grad_enabled():
+            raise RuntimeError("error did not restore gradient mode")
+        with torch.inference_mode():
+            value = float(model(inputs).sum())
+        if value != expected:
+            raise RuntimeError("valid request changed after error")
+        checksum += value
+        if (i + 1) % max(1, count // 16) == 0:
+            sample("error-request", i + 1)
+    sample("errors-done", count)
+    record("errors_caught", caught)
+    record("recovery_checksum", checksum)
+    record("grad_after_errors", int(torch.is_grad_enabled()))
+    flush()
+    return 0
+
+
 def main():
     if len(sys.argv) < 4:
         sys.exit(__doc__)
@@ -481,6 +571,12 @@ def main():
     text("language", "python")
     text("torch_version", torch.__version__)
     text("torch_lib", os.path.join(os.path.dirname(torch.__file__), "lib"))
+    if mode == "startup":
+        return 0
+    if mode == "diagnose":
+        return mode_diagnose(artifacts, out, sys.argv[4], int(sys.argv[5]))
+    if mode == "errors":
+        return mode_errors(artifacts, int(sys.argv[5]), sys.argv[4] == "unique")
     if mode == "check":
         return mode_check(artifacts, out)
     if mode == "time":

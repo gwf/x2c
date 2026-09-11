@@ -8,19 +8,7 @@
 
 static int _init_guard_ = 0;
 
-static void _x2c_static_initialize_0(void);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _x2c_static_initialize_0();
-}
-
-int DirectValue_read(DirectValue value){
-  if(! _init_guard_) _file_init_();
-  return value.value;
-}
+__attribute__((constructor)) static void _file_init_(void);
 
 typedef enum DirectKind{
   DIRECT_KIND = 3
@@ -37,11 +25,6 @@ typedef union DirectUnion{
   float floating;
 }
 DirectUnion;
-
-int direct_function(int value){
-  if(! _init_guard_) _file_init_();
-  return value + DIRECT_KIND;
-}
 
 #define GENERATED_SOURCE_FLAG 1
 typedef enum GeneratedKind{
@@ -63,6 +46,23 @@ GeneratedUnion;
 static int generated_global;
 
 _x2c_initializer_choice_052F45D8_0((generated_global = 4))
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_static_initialize_0();
+}
+
+int DirectValue_read(DirectValue value){
+  if(! _init_guard_) _file_init_();
+  return value.value;
+}
+
+int direct_function(int value){
+  if(! _init_guard_) _file_init_();
+  return value + DIRECT_KIND;
+}
+
 int generated_function(int _x2c_macro_value_0){
   if(! _init_guard_) _file_init_();
   return _x2c_macro_value_0 + 3;

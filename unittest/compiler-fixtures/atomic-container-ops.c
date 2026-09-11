@@ -16,6 +16,20 @@ static int rhs_calls;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Scores array_base(void);
+
+static Totals map_base(void);
+
+static int next_index(int value);
+
+static Var next_key(String value);
+
+static Var next_rhs(int value);
+
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -62,8 +76,6 @@ static Var next_rhs(int value){
 Var Array_getindex(Array, int);
 
 Var Var_new(Symbol, ...);
-
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
 
 int Var_int(Var);
 

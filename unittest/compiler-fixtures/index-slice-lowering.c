@@ -30,6 +30,22 @@ static int bound_calls;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Array array_base(void);
+
+static Map map_base(void);
+
+static String buffer_base(void);
+
+static int next_index(int index);
+
+static Symbol next_key(Symbol key);
+
+static Var next_value(int value);
+
+static int next_bound(int bound);
+
 Var int_var(int);
 
 List cons(Var, List);

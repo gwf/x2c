@@ -10,6 +10,12 @@ static Var _28, _24, _20, _19, _18, _17, _16, _13, _12, _10, _8, _5, _3, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static int _function_type(List type);
+
+static int _gensym(Var value);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -17,80 +23,6 @@ List cons(Var, List);
 Var int_var(int);
 
 Var List_var(List);
-
-int Var_is(Var, Symbol);
-
-List Var_list(Var);
-
-int File_putc(File, int);
-
-int List_truth(List);
-
-List List_cdr(List);
-
-int List_equal(List, List);
-
-Var List_car(List);
-
-String Symbol_str(Symbol);
-
-int Atom_bare_spelling(String);
-
-int File_puts(File, const char *);
-
-String Var_repr(Var);
-
-int Var_is_integer(Var);
-
-int File_printf(File, const char *, ...);
-
-int Var_is_floating(Var);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-String Var_string(Var);
-
-int Map_contains(Map, Var);
-
-Var String_var(String);
-
-Var Array_push(Array, Var);
-
-Array Array_sort(Array);
-
-Iter Array_iter(Array, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-int File_error(File);
-
-long Var_integer(Var);
-
-Iter List_iter(List, Iter);
-
-File String_open(String, const char *);
-
-Lisp Lisp_new_bare(void);
-
-String File_string(File);
-
-Symbol Lisp_read(Lisp, String, unsigned *, Var *);
-
-int List_len(List);
-
-Var List_getindex(List, int);
-
-Var Map_setindex(Map, Var, Var);
-
-int File_close(File);
-
-void Lisp_destroy(Lisp);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int _function_type(List type);
-
-static int _gensym(Var value);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -127,6 +59,34 @@ __attribute__((constructor)) static void _file_init_(void){
   _30 = cons(_17, _29);
   _31 = cons(_16, _30);
 }
+
+int Var_is(Var, Symbol);
+
+List Var_list(Var);
+
+int File_putc(File, int);
+
+int List_truth(List);
+
+List List_cdr(List);
+
+int List_equal(List, List);
+
+Var List_car(List);
+
+String Symbol_str(Symbol);
+
+int Atom_bare_spelling(String);
+
+int File_puts(File, const char *);
+
+String Var_repr(Var);
+
+int Var_is_integer(Var);
+
+int File_printf(File, const char *, ...);
+
+int Var_is_floating(Var);
 
 int snapshot_write_var(File output, Var value){
   if(Var_is(value, 806120)){
@@ -166,6 +126,24 @@ static int _function_type(List type){
   if(Var_equal(first, Symbol_var(437126)) || Var_equal(first, Symbol_var(634145674))) return 1;
   return Var_is(first, 806120) ? _function_type(Var_list(first)) : 0;
 }
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+String Var_string(Var);
+
+int Map_contains(Map, Var);
+
+Var String_var(String);
+
+Var Array_push(Array, Var);
+
+Array Array_sort(Array);
+
+Iter Array_iter(Array, Iter);
+
+int Iter_try_next(Iter, Var *);
+
+int File_error(File);
 
 int symbol_snapshot_write(Map symbols, Map fn_defs, File output){
   if(! _init_guard_) _file_init_();
@@ -221,6 +199,8 @@ Array_sort(entries);  File_puts(output, "(snapshot 3 (\n"); {
 File_puts(output, "))\n");  Array_free(entries);  return ! File_error(output);
 }
 
+long Var_integer(Var);
+Iter List_iter(List, Iter);
 static int _gensym(Var value){
   if(! Var_is(value, 806120)) return 0;  List list = Var_list(value);  int maximum = 0;
   {
@@ -245,6 +225,15 @@ static int _gensym(Var value){
   return maximum;
 }
 
+File String_open(String, const char *);
+Lisp Lisp_new_bare(void);
+String File_string(File);
+Symbol Lisp_read(Lisp, String, unsigned *, Var *);
+int List_len(List);
+Var List_getindex(List, int);
+Var Map_setindex(Map, Var, Var);
+int File_close(File);
+void Lisp_destroy(Lisp);
 Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym){
   if(! _init_guard_) _file_init_();  if(fn_defs) * fn_defs = NULL;  if(gensym) * gensym = 0;  File input = String_open(path, "r");  Lisp lisp = Lisp_new_bare();  Map volatile symbols = NULL; {
     ExceptionFrame _x2c_exception_frame_0;  volatile int _x2c_cleanup_guard_0 = 1;  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){

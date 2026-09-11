@@ -10,6 +10,29 @@ static Var _6, _5, _2, _1;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static inline Var Row_var(Row value);
+
+static inline Row Var_row(Var value);
+
+typedef List PlainRow;
+
+static inline Var PlainRow_var(PlainRow value);
+
+static inline PlainRow Var_plainrow(Var value);
+
+typedef PlainRow PlainRowChild;
+
+typedef struct Cell{
+  int value;
+}
+* Cell;
+
+static inline Var Cell_var(Cell value);
+
+static inline Cell Var_cell(Var value);
+
 static VarMethods _x2c__x2c_protocol_methods_0;
 
 Var Symbol_var(Symbol);
@@ -57,8 +80,6 @@ String Row_summary(Row value){
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(List_len(value))), NULL)));
 }
 
-typedef List PlainRow;
-
 static inline Var PlainRow_var(PlainRow value){
   return Var_new(1125368370158, value);
 }
@@ -68,13 +89,6 @@ void * Var_pointer(Var);
 static inline PlainRow Var_plainrow(Var value){
   return(PlainRow) Var_pointer(value);
 }
-
-typedef PlainRow PlainRowChild;
-
-typedef struct Cell{
-  int value;
-}
-* Cell;
 
 static inline Var Cell_var(Cell value){
   return Var_new(3683441, value);
@@ -106,6 +120,4 @@ int main(void){
   printf("%s %s %d %d %d %d %d %d %d\n", Row_summary(recovered_row), Var_str(boxed_row), recovered_cell -> value, Var_is(boxed_row, 806120), Var_is(boxed_row, 806120), Var_is(boxed_cell, 3683441), Var_is(boxed_cell, 3683441), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
   return 0;
 }
-
-static VarMethods _x2c__x2c_protocol_methods_0;
 

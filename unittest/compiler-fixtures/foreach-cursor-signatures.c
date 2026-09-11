@@ -14,6 +14,8 @@ static int invalid_calls;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
 Var int_var(int);
 
 List cons(Var, List);

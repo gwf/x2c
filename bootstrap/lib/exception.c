@@ -10,25 +10,9 @@ typedef struct ExceptionThreadState{
 
 static _Thread_local struct ExceptionThreadState exception_thread;
 
-#include "error.h"
-void * Error_handler_head(void);
-
-int Error_depth(void);
-
-int Error_count(void);
-
-void * Error_unwind_head(void);
-
-void Error_restore_landing(void *, int);
-
-void Error_trim(void *, int);
-
-int Error_handler_depth(void);
-
-void Error_restore(int, int);
-
 static ExceptionThreadState _thread(void);
 
+#include "error.h"
 static inline ExceptionFrame * _current(void);
 
 _Noreturn static void _fatal(const char * message);
@@ -55,6 +39,12 @@ void x2c_cleanup_leave(X2CCleanup * record){
   record -> fn(record -> env);
 }
 
+void * Error_handler_head(void);
+
+int Error_depth(void);
+
+int Error_count(void);
+
 void x2c_exception_push(ExceptionFrame * e){
   if(! e) return;
   ExceptionThreadState state = _thread();
@@ -77,6 +67,8 @@ void x2c_exception_push(ExceptionFrame * e){
   state -> exception_top = e;
 }
 
+void * Error_unwind_head(void);
+
 void ExceptionFrame_unwind(void * target_ptr){
   ExceptionFrame * target = target_ptr, * frame = _current();
   int found = 0;
@@ -88,6 +80,8 @@ void ExceptionFrame_unwind(void * target_ptr){
   frame -> error_landing_head = Error_unwind_head();
   siglongjmp(frame -> env, 1);
 }
+
+void Error_restore_landing(void *, int);
 
 void x2c_exception_landed(ExceptionFrame * frame){
   if(! frame) return;
@@ -106,6 +100,8 @@ int x2c_exception_is_error_target(ExceptionFrame * frame){
 void x2c_exception_mark_handled(ExceptionFrame * frame){
   if(frame) frame -> state = 17276625224;
 }
+
+void Error_trim(void *, int);
 
 void x2c_exception_leave(ExceptionFrame * frame){
   if(! frame) return;
@@ -130,6 +126,10 @@ _Noreturn static void _fatal(const char * message){
   fprintf(stderr, "Fatal: uncaught exception %s\n", message);
   exit(1);
 }
+
+int Error_handler_depth(void);
+
+void Error_restore(int, int);
 
 static void _cleanup_drain(X2CCleanup * watermark){
   ExceptionThreadState state = _thread();

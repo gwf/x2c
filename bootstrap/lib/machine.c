@@ -7,20 +7,6 @@
 #include <string.h>
 #include "scope.h"
 #include "exception.h"
-void * Scope_calloc(size_t, size_t);
-
-void Scope_free(void *);
-
-void * Scope_realloc(void *, size_t);
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-Var int_var(int);
-
-void * Scope_malloc(size_t);
-
 static int MachineBuilder__fail(MachineBuilder b, const char * reason);
 
 static int MachineBuilder__grow_code(MachineBuilder b);
@@ -35,6 +21,8 @@ static int MachineBuilder__fail(MachineBuilder b, const char * reason){
   return - 1;
 }
 
+void * Scope_calloc(size_t, size_t);
+
 MachineBuilder MachineBuilder_new(void){
   MachineBuilder b = Scope_calloc(1, sizeof(struct MachineBuilder));
   b -> status = MACHINE_PREPARED;
@@ -43,12 +31,16 @@ MachineBuilder MachineBuilder_new(void){
   return b;
 }
 
+void Scope_free(void *);
+
 void MachineBuilder_free(MachineBuilder b){
   if(! b) return;
   if(b -> code) Scope_free(b -> code);
   if(b -> consts) Scope_free(b -> consts);
   Scope_free(b);
 }
+
+void * Scope_realloc(void *, size_t);
 
 static int MachineBuilder__grow_code(MachineBuilder b){
   if(b -> length < b -> code_capacity) return 1;
@@ -98,6 +90,12 @@ int MachineBuilder_binder(MachineBuilder b, Atom binder){
   return b -> binder_count ++;
 }
 
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+Var int_var(int);
+
 void MachineBuilder_set_target(MachineBuilder b, int site, int target){
   if(target < 0 || target >= MACHINE_CODE_MAX){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 458};
@@ -138,6 +136,8 @@ MachineView MachineProgram_view(MachineProgram program){
 size_t MachineProgram_bytes(MachineProgram program){
   return _program_bytes(program -> length, program -> const_count, program -> binder_count);
 }
+
+void * Scope_malloc(size_t);
 
 MachineProgram MachineBuilder_freeze(MachineBuilder b){
   if(b -> status != MACHINE_PREPARED || b -> root < 0) return NULL;

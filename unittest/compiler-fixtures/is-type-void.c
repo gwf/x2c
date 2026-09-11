@@ -4,6 +4,8 @@
 
 static int calls;
 
+static void touch(void);
+
 static void touch(void){
   calls ++;
 }

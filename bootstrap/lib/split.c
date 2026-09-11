@@ -9,27 +9,11 @@
 #include "array.h"
 #include "iter.h"
 #include "scope.h"
-int String_len(String);
-
-int String_truth(String);
-
-String String_new_len(const char *, int);
-
-Var Array_push(Array, Var);
-
-Var String_var(String);
-
-List Array_list_free(Array);
-
-void * Scope_malloc(size_t);
-
-int Var_int(Var);
-
-Var int_var(int);
-
-int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
+struct Split{
+  String str, sep;
+  int(* next)(Split split, int * cursor, String * out);
+}
+;
 
 static inline int _end(String str, String sep, int start, int * next);
 
@@ -45,11 +29,9 @@ static int _splits_next(Split split, int * cursor, String * out);
 
 static int _iter_next(Iter iter, Var * out);
 
-struct Split{
-  String str, sep;
-  int(* next)(Split split, int * cursor, String * out);
-}
-;
+int String_len(String);
+
+int String_truth(String);
 
 static inline int _end(String str, String sep, int start, int * next){
   int length = String_len(str);
@@ -79,6 +61,14 @@ static inline int _line_end(String str, int start, int keep_ends, int * next){
   * next = end + ending;
   return keep_ends ? * next : end;
 }
+
+String String_new_len(const char *, int);
+
+Var Array_push(Array, Var);
+
+Var String_var(String);
+
+List Array_list_free(Array);
 
 List String_split_n(String str, String sep, int max_splits){
   if(! String_truth(str)) return NULL;
@@ -111,6 +101,8 @@ List String_split_lines(String str, int keep_ends){
   }
   return Array_list_free(results);
 }
+
+void * Scope_malloc(size_t);
 
 static Split _new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
   Split split = Scope_malloc(sizeof(struct Split));
@@ -172,6 +164,10 @@ int Split_try_next(Split split, int * cursor, String * out){
   return split -> next(split, cursor, out);
 }
 
+int Var_int(Var);
+
+Var int_var(int);
+
 static int _iter_next(Iter iter, Var * out){
   Split split = Var_pointer(iter -> obj);
   int cursor = Var_int(iter -> state);
@@ -181,6 +177,10 @@ static int _iter_next(Iter iter, Var * out){
   * out = String_var(value);
   return 1;
 }
+
+int Iter_truth(Iter);
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter Split_iter(Split split, Iter dest){
   if(! Iter_truth(dest)) return NULL;

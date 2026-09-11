@@ -10,6 +10,32 @@ static Var _58, _55, _52, _50, _47, _44, _42, _39, _38, _35, _33, _30, _29, _26,
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static long add(long left, long right);
+
+static Var identity(Var value);
+
+static int width(String text);
+
+static void discard(int value);
+
+static Var nothing(void);
+
+Var Var_binary(Var lhs, Symbol op, Var rhs);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
+
+static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
+
+static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
+
+static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -108,21 +134,7 @@ static Var nothing(void){
   return Var_null();
 }
 
-Var Var_binary(Var lhs, Symbol op, Var rhs);
-
 Func Func_new(FuncAdapter, List);
-
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
-
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
-
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
-
-static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
-
-static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
-
-static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
 
 int main(void){
   x2c_initialize();

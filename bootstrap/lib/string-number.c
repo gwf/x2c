@@ -6,14 +6,14 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
-int String_truth(String);
-
 static int _only_space(const char * rest);
 
 static int _only_space(const char * rest){
   while(isspace((unsigned char) * rest)) rest ++;
   return ! * rest;
 }
+
+int String_truth(String);
 
 int String_try_long(String str, long * out){
   if(! String_truth(str) || ! out) return 0;

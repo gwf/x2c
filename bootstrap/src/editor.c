@@ -4,98 +4,10 @@
 
 static String _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-Iter List_iter(List, Iter);
-
-List Compiler_diagnostics(Compiler);
-
-List Var_list(Var);
-
-Var List_assoc(List, Var);
-
-Var Symbol_var(Symbol);
-
-int Var_is(Var, Symbol);
-
-String Var_string(Var);
-
-int Var_is_void(Var);
-
-int Var_int(Var);
-
-String SourceView_path(String);
-
-Var Map_setindex(Map, Var, Var);
-
-Var String_var(String);
-
-String Symbol_str(Symbol);
-
-Iter Array_iter(Array, Iter);
-
-Var List_getindex(List, int);
-
-int String_equal(String, String);
-
-int List_truth(List);
-
-Type Var_type(Var);
-
-Var Map_getindex(Map, Var);
-
-Var List_var(List);
-
-List Type_list(Type);
-
-List Type_declaration_ast(Type, List);
-
-String String_new(const char *);
-
-char * Compiler_code_pretty_string(Compiler, List, String);
-
-List Compiler_emit(Compiler, List);
-
-Iter Map_keys(Map, Iter);
-
-int Map_try_get(Map, Var, Var *);
-
-CliRequest cli_parse(int, char * *);
-
-String project_manifest(CliRequest);
-
-int String_truth(String);
-
-ProjectBuild project_plan(CliRequest);
-
-int SourceView_is_changed(SourceView, String);
-
-SourceView SourceView_new(void);
-
-int SourceView_read(SourceView, String, volatile String *);
-
-void SourceView_set(SourceView, String, String, int);
-
-void Frontend_load_support(CliRequest);
-
-Context Context_open_isolated_named(const char *);
-
-Frontend Frontend_new(CliRequest);
-
-int Frontend_open(Frontend, String, ParsedUnit *);
-
-void ParsedUnit_close(ParsedUnit *);
-
-void Context_close(Context);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -124,6 +36,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("warning");
   _3 = String_new("error");
 }
+
+Iter String_iter(String, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
 
 static void _string(File file, String value){
   fputc('"', file);
@@ -154,6 +72,32 @@ static void _location(File file, String path, int start, int end){
   _string(file, path);
   fprintf(file, ",\"start\":%d,\"end\":%d", start, end);
 }
+
+Iter List_iter(List, Iter);
+
+List Compiler_diagnostics(Compiler);
+
+List Var_list(Var);
+
+Var List_assoc(List, Var);
+
+Var Symbol_var(Symbol);
+
+int Var_is(Var, Symbol);
+
+String Var_string(Var);
+
+int Var_is_void(Var);
+
+int Var_int(Var);
+
+String SourceView_path(String);
+
+Var Map_setindex(Map, Var, Var);
+
+Var String_var(String);
+
+String Symbol_str(Symbol);
 
 static void _diagnostics(File file, Compiler compiler, Map needed){
   int comma = 0;
@@ -196,6 +140,14 @@ static void _diagnostics(File file, Compiler compiler, Map needed){
   fputc(']', file);
 }
 
+Iter Array_iter(Array, Iter);
+
+Var List_getindex(List, int);
+
+int String_equal(String, String);
+
+int List_truth(List);
+
 static List _occurrence(Compiler compiler, String path, int offset){
   List found = NULL;
   {
@@ -219,6 +171,22 @@ static List _occurrence(Compiler compiler, String path, int offset){
   }
   return found;
 }
+
+Type Var_type(Var);
+
+Var Map_getindex(Map, Var);
+
+Var List_var(List);
+
+List Type_list(Type);
+
+List Type_declaration_ast(Type, List);
+
+String String_new(const char *);
+
+char * Compiler_code_pretty_string(Compiler, List, String);
+
+List Compiler_emit(Compiler, List);
 
 static void _query(File file, Compiler compiler, String path, String kind, int offset, Map needed){
   List row = _occurrence(compiler, path, offset);
@@ -246,6 +214,10 @@ static void _query(File file, Compiler compiler, String path, String kind, int o
   }
 
 }
+
+Iter Map_keys(Map, Iter);
+
+int Map_try_get(Map, Var, Var *);
 
 static void _sources(File file, Compiler compiler, Map needed){
   int comma = 0;
@@ -275,6 +247,16 @@ static void _sources(File file, Compiler compiler, Map needed){
   }
   fputc(']', file);
 }
+
+CliRequest cli_parse(int, char * *);
+
+String project_manifest(CliRequest);
+
+int String_truth(String);
+
+ProjectBuild project_plan(CliRequest);
+
+int SourceView_is_changed(SourceView, String);
 
 static CliRequest _configure(int argc, char * * argv, SourceView sources, String source){
   char * defaults[] ={
@@ -363,6 +345,24 @@ static int _changed_dependency(Compiler compiler, SourceView sources){
   }
   return 0;
 }
+
+SourceView SourceView_new(void);
+
+int SourceView_read(SourceView, String, volatile String *);
+
+void SourceView_set(SourceView, String, String, int);
+
+void Frontend_load_support(CliRequest);
+
+Context Context_open_isolated_named(const char *);
+
+Frontend Frontend_new(CliRequest);
+
+int Frontend_open(Frontend, String, ParsedUnit *);
+
+void ParsedUnit_close(ParsedUnit *);
+
+void Context_close(Context);
 
 int editor_request(int argc, char * * argv){
   if(! _init_guard_) _file_init_();

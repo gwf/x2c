@@ -8,26 +8,6 @@ static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-Var int_var(int);
-
-Var List_last(List);
-
-int List_index(List, Var);
-
-int List_truth(List);
-
-List List_cdr(List);
-
-int Var_is(Var, Symbol);
-
-Symbol Var_tag(Var);
-
-List Var_list(Var);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 _Noreturn static void _no_convert(String owner, int index, Symbol tag);
@@ -45,6 +25,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _6 = String_new("ListSymbol");
 }
 
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+Var int_var(int);
+
 _Noreturn static void _no_convert(String owner, int index, Symbol tag){
   {
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-list.x",.function = "_no_convert",.line = 48};
@@ -54,13 +40,25 @@ _Noreturn static void _no_convert(String owner, int index, Symbol tag){
 
 }
 
+Var List_last(List);
+
 char ListChar_last(ListChar _x2c_macro_xs_0){
   return _typed_list_decode_i8(List_last((List) _x2c_macro_xs_0));
 }
 
+int List_index(List, Var);
+
 int ListChar_index(ListChar _x2c_macro_xs_0, char _x2c_macro_value_0){
   return List_index((List) _x2c_macro_xs_0, _typed_list_encode_i8(_x2c_macro_value_0));
 }
+
+int List_truth(List);
+
+List List_cdr(List);
+
+int Var_is(Var, Symbol);
+
+Symbol Var_tag(Var);
 
 ListChar List_listchar(List _x2c_macro_xs_0){
   if(! _init_guard_) _file_init_();
@@ -71,6 +69,8 @@ ListChar List_listchar(List _x2c_macro_xs_0){
   }
   return(ListChar) _x2c_macro_xs_0;
 }
+
+List Var_list(Var);
 
 ListChar Var_listchar(Var _x2c_macro_value_0){
   if(! _init_guard_) _file_init_();

@@ -10,6 +10,7 @@
     artifacts. BatchNorm's running statistics move in train mode, so they
     are part of the comparison rather than an implementation detail.
 
+      mnist diagnose <artifacts> <out> <count>
       mnist check <artifacts> <out>
       mnist time  <artifacts> <out> epoch <batches>
 */
@@ -35,7 +36,7 @@ import "torch" with Torch, Tensor, Module, Optimizer, Checkpoint;
 #define LR 0.001
 #define MEAN 0.1307
 #define STD 0.3081
-#define WARMUP 20
+#define WARMUP 50
 
 #pragma private
 
@@ -256,13 +257,103 @@ static int _time(String artifacts, String out, String root, String variant,
   return 0;
 }
 
+/* ---- phase diagnostics ---- */
+
+static int _diagnose(String artifacts, String out, String root, int count) {
+  double start = Bench.now();
+  Map order_values = _artifact(artifacts, "mnist-batches.pt");
+  Tensor order = order_values["order"].tensor();
+  List train = _dataset(root, 1);
+  Tensor images = train[0].tensor(), targets = train[1].tensor();
+  Bench.record("load_seconds", Bench.now() - start);
+  {
+    Scope.retain();
+    defer Scope.release();
+    Module warm = _built(artifacts, "mnist-init.pt");
+    _train(warm, Optimizer.adam(warm, LR), images, targets, order, 50, 0);
+  }
+  start = Bench.now();
+  Module model = _built(artifacts, "mnist-init.pt");
+  Optimizer adam = Optimizer.adam(model, LR);
+  Bench.record("setup_seconds", Bench.now() - start);
+  long rows = images.size(0), epochs = order.size(0);
+  int per_epoch = (int) ((rows + BATCH - 1) / BATCH);
+  double batch = 0, forward = 0, backward = 0, optimizer = 0, cleanup = 0;
+  double last_loss = 0;
+  for (int index = 0; index < count; index++) {
+    start = Bench.now();
+    Scope.retain();
+    {
+      defer Scope.release();
+      int position = index % per_epoch;
+      long epoch = (index / per_epoch) % epochs;
+      long offset = (long) position * BATCH;
+      long span = rows - offset < BATCH ? rows - offset : BATCH;
+      Tensor pick = order.select(0, epoch).narrow(0, offset, span);
+      Tensor input = images.index_select(0, pick);
+      Tensor target = targets.index_select(0, pick);
+      adam.zero_grad();
+      batch += Bench.now() - start;
+      start = Bench.now();
+      Tensor loss = Tensor.cross_entropy(model.forward(input), target);
+      forward += Bench.now() - start;
+      start = Bench.now();
+      loss.backward();
+      backward += Bench.now() - start;
+      start = Bench.now();
+      adam.step();
+      optimizer += Bench.now() - start;
+      if (index + 1 == count) last_loss = loss.item().double();
+      start = Bench.now();
+    }
+    cleanup += Bench.now() - start;
+  }
+  Bench.record_int("diagnostic_steps", count);
+  Bench.record("diagnostic_loss", last_loss);
+  Bench.record("batch_seconds", batch);
+  Bench.record("forward_seconds", forward);
+  Bench.record("backward_seconds", backward);
+  Bench.record("optimizer_seconds", optimizer);
+  Bench.record("cleanup_seconds", cleanup);
+  String saved_model = %"$out/mnist-x2c-diagnostic-model.pt";
+  String saved_adam = %"$out/mnist-x2c-diagnostic-adam.pt";
+  start = Bench.now();
+  model.save(saved_model);
+  adam.save(saved_adam);
+  Bench.record("checkpoint_save_seconds", Bench.now() - start);
+  Module restored = _cnn();
+  Optimizer restored_adam = Optimizer.adam(restored, LR);
+  start = Bench.now();
+  restored.load(saved_model);
+  restored_adam.load(saved_adam);
+  Bench.record("checkpoint_load_seconds", Bench.now() - start);
+  {
+    Scope.retain();
+    defer Scope.release();
+    Torch.no_grad();
+    model.eval();
+    restored.eval();
+    Tensor input = images.narrow(0, 0, BATCH);
+    Tensor target = targets.narrow(0, 0, BATCH);
+    double original = Tensor.cross_entropy(model.forward(input), target)
+                        .item().double();
+    double reloaded = Tensor.cross_entropy(restored.forward(input), target)
+                        .item().double();
+    double difference = original - reloaded;
+    Bench.record("diagnostic_reloaded_loss", reloaded);
+    Bench.record("diagnostic_reload_difference",
+                 difference < 0 ? -difference : difference);
+  }
+  return 0;
+}
+
 #pragma public
 
 int main(int argc, char **argv) {
   Scope.retain();
   defer Scope.release();
   if (argc < 4) {
-    fprintf(stderr, "usage: mnist <check|time> <artifacts> <out>"
+    fprintf(stderr, "usage: mnist <check|time|diagnose|startup> <artifacts> <out>"
                     " [variant] [batches]\n");
     return 2;
   }
@@ -278,11 +369,14 @@ int main(int argc, char **argv) {
   _record_profile();
   Bench.record_int("threads", Torch.num_threads());
   Bench.record_int("interop_threads", Torch.num_interop_threads());
+  if (!strcmp(argv[1], "startup")) return 0;
 
   const char *root = getenv("TORCH_MNIST");
   String mnist_root = String.new(root ? root : "/tmp/mnist-real");
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
   if (!strcmp(argv[1], "check")) return _check(artifacts, out, mnist_root);
+  if (!strcmp(argv[1], "diagnose"))
+    return _diagnose(artifacts, out, mnist_root, atoi(argv[4]));
   if (!strcmp(argv[1], "time"))
     return _time(artifacts, out, mnist_root, String.new(argv[4]),
                  atoi(argv[5]));

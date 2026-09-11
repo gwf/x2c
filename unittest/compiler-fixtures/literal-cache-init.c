@@ -83,6 +83,8 @@ Var Map_var(Map);
 _x2c_initializer_choice_D1E0FCF3_8((boxed_map = Map_var(Map_update_n(Map_new(), 1, Symbol_var(1051920), String_var(path)))))
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;

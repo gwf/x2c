@@ -17,58 +17,6 @@ typedef struct RecursiveMatchState{
 
 static int _init_guard_ = 0;
 
-Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-int MatchCaptureLayout_index(MatchCaptureLayout, Atom);
-
-int Var_equal(Var, Var);
-
-int Var_is(Var, Symbol);
-
-List Var_list(Var);
-
-int List_truth(List);
-
-Var List_car(List);
-
-List List_cdr(List);
-
-int List_equal(List, List);
-
-Var List_var(List);
-
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-int Var_is_atom_binder(Var);
-
-int Var_is_list_binder(Var);
-
-int Var_is_binder(Var);
-
-int Var_is_match_op(Var);
-
-Var List_getindex(List, int);
-
-List List_cddr(List);
-
-Symbol Var_symbol(Var);
-
-int List_len(List);
-
-MatchCaptureLayout MatchCaptureLayout_analyze(Var);
-
-void MatchCaptureLayout_free(MatchCaptureLayout);
-
-List List_replace(List, List);
-
-Var List_assoc(List, Var);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 static int _bind(RecursiveMatchState state, Var binder, Var value);
@@ -105,6 +53,10 @@ static int _first(Var input, Var pattern, int include_empty, Var * out_match, Li
 
 static Var _replace_all(Var input, Var pattern, Var template, int include_empty);
 
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -122,6 +74,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _10 = Symbol_var(54);
 }
 
+int MatchCaptureLayout_index(MatchCaptureLayout, Atom);
+
+int Var_equal(Var, Var);
+
 static int _bind(RecursiveMatchState state, Var binder, Var value){
   if(Var_equal(binder, Symbol_var(58)) || Var_equal(binder, Symbol_var(54))) return 1;
   int index = MatchCaptureLayout_index(state -> layout, binder);
@@ -132,6 +88,18 @@ static int _bind(RecursiveMatchState state, Var binder, Var value){
   state -> present |= bit;
   return 1;
 }
+
+int Var_is(Var, Symbol);
+
+List Var_list(Var);
+
+int List_truth(List);
+
+Var List_car(List);
+
+List List_cdr(List);
+
+int List_equal(List, List);
 
 static int _bind_span(RecursiveMatchState r, Var binder, List input, List end, int length){
   if(Var_equal(binder, Symbol_var(54))) return 1;
@@ -162,6 +130,8 @@ static int _bind_span(RecursiveMatchState r, Var binder, List input, List end, i
   }
   return r -> spans & bit ? List_equal(expected, r -> span_end[index]) : ! List_truth(expected);
 }
+
+Var List_var(List);
 
 static int _bind_final(RecursiveMatchState state, Var binder, List input){
   if(Var_equal(binder, Symbol_var(54))) return 1;
@@ -203,6 +173,12 @@ static int _star(RecursiveMatchState state, List input, List pattern){
   }
 
 }
+
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
 
 static int _all(RecursiveMatchState state, Var input, List patterns){
   {
@@ -272,6 +248,20 @@ static Symbol _type_tag(Symbol tag){
   return tag;
 }
 
+int Var_is_atom_binder(Var);
+
+int Var_is_list_binder(Var);
+
+int Var_is_binder(Var);
+
+int Var_is_match_op(Var);
+
+Var List_getindex(List, int);
+
+List List_cddr(List);
+
+Symbol Var_symbol(Var);
+
 static int _is(Var input, List patterns){
   if(List_equal(patterns, _3)) return Var_is_atom_binder(input);
   if(List_equal(patterns, _5)) return Var_is_list_binder(input);
@@ -288,6 +278,8 @@ static int _is(Var input, List patterns){
   }
   return 0;
 }
+
+int List_len(List);
 
 static int _match(RecursiveMatchState state, Var input, Var pattern){
   if(Var_is_atom_binder(pattern)) return _bind(state, pattern, input);
@@ -352,6 +344,10 @@ static int _try_capture(MatchCaptureLayout layout, Var input, MatchCaptureBuffer
   return 1;
 }
 
+MatchCaptureLayout MatchCaptureLayout_analyze(Var);
+
+void MatchCaptureLayout_free(MatchCaptureLayout);
+
 static int _try_value(Var input, Var pattern, List * out_bindings){
   if(! out_bindings) return 0;
   MatchCaptureLayout layout = MatchCaptureLayout_analyze(pattern);
@@ -404,6 +400,10 @@ static int _first(Var input, Var pattern, int include_empty, Var * out_match, Li
   * out_match = input;
   return 1;
 }
+
+List List_replace(List, List);
+
+Var List_assoc(List, Var);
 
 static Var _replace_all(Var input, Var pattern, Var template, int include_empty){
   if(Var_is(input, 806120)){

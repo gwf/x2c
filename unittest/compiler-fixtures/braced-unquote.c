@@ -12,6 +12,10 @@ static int calls;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static int answer(int value);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);

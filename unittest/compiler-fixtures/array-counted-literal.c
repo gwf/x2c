@@ -2,6 +2,12 @@
 
 #include "array-counted-literal.h"
 
+static int rejected(void(* action)(void));
+
+static void update_void(void);
+
+static void literal_void(void);
+
 static int rejected(void(* action)(void)){
   pid_t pid = fork();
   if(pid < 0) return 0;

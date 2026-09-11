@@ -4,16 +4,6 @@
 
 #include "error.h"
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
 #include "exception.h"
 #include "scope.h"
 #include "string.h"
@@ -22,43 +12,19 @@ _x2c_defer_env_1;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void * Scope_malloc(size_t);
-
-Block Block_new(size_t);
-
-void Block_free(Block);
-
-void Scope_free(void *);
-
-void Block_move_to(Block, Scope *);
-
-void Scope_move(void *, Scope *);
-
-void Block_reserve(Block, size_t);
-
-void Block_clear(Block);
-
-int Block_truth(Block);
-
-Var Symbol_var(Symbol);
-
-Var int_var(int);
-
-void Block_append(Block, const void *, size_t);
-
-void Block_append_fill(Block, const void *, size_t);
-
-void Block_truncate(Block, size_t);
-
-int Block_try_pop(Block, void *);
-
-String String_new_len(const char *, int);
-
-String String_repr(String);
-
 static void _recompute_line_state(Buffer buf);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -77,6 +43,10 @@ static void _recompute_line_state(Buffer buf){
   while(buf -> _indent < buf -> pos && text[start + buf -> _indent] == ' ') buf -> _indent ++;
 }
 
+void * Scope_malloc(size_t);
+
+Block Block_new(size_t);
+
 Buffer Buffer_new(size_t padding){
   Buffer buf = Scope_malloc(sizeof(struct Buffer));
   buf -> content = Block_new(sizeof(char));
@@ -87,12 +57,20 @@ Buffer Buffer_new(size_t padding){
   return buf;
 }
 
+void Block_free(Block);
+
+void Scope_free(void *);
+
 void Buffer_free(Buffer buf){
   if((void *) buf == NULL) return;
   if((void *) buf -> content != NULL) Block_free(buf -> content);
   if((void *) buf -> indents != NULL) Block_free(buf -> indents);
   Scope_free(buf);
 }
+
+void Block_move_to(Block, Scope *);
+
+void Scope_move(void *, Scope *);
 
 void Buffer_move_to(Buffer buf, Scope * scope){
   if((void *) buf == NULL) return;
@@ -101,10 +79,16 @@ void Buffer_move_to(Buffer buf, Scope * scope){
   Scope_move(buf, scope);
 }
 
+void Block_reserve(Block, size_t);
+
 Buffer Buffer_reserve(Buffer buf, size_t minimum){
   Block_reserve(buf -> content, minimum);
   return buf;
 }
+
+void Block_clear(Block);
+
+int Block_truth(Block);
 
 Buffer Buffer_clear(Buffer buf){
   Block_clear(buf -> content);
@@ -113,6 +97,12 @@ Buffer Buffer_clear(Buffer buf){
   buf -> _indent = 0;
   return buf;
 }
+
+Var Symbol_var(Symbol);
+
+Var int_var(int);
+
+void Block_append(Block, const void *, size_t);
 
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length){
   if(! length) return buf;
@@ -253,6 +243,8 @@ Buffer Buffer_write_char(Buffer buf, char value){
   return buf;
 }
 
+void Block_append_fill(Block, const void *, size_t);
+
 Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   if(! count) return buf;
   if(! value){
@@ -271,6 +263,8 @@ Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   }
   return buf;
 }
+
+void Block_truncate(Block, size_t);
 
 Buffer Buffer_unwrite(Buffer buf, size_t count){
   if(count > buf -> content -> length) count = buf -> content -> length;
@@ -299,6 +293,8 @@ Buffer Buffer_push(Buffer buf){
   Block_append(buf -> indents, & buf -> pos, 1);
   return buf;
 }
+
+int Block_try_pop(Block, void *);
 
 Buffer Buffer_pop(Buffer buf){
   if(Block_truth(buf -> indents)) Block_try_pop(buf -> indents, NULL);
@@ -335,6 +331,8 @@ char Buffer_get(Buffer buf, ptrdiff_t index){
 size_t Buffer_len(Buffer buf){
   return Buffer_truth(buf) ? buf -> content -> length : 0;
 }
+
+String String_new_len(const char *, int);
 
 String Buffer_str(Buffer buf){
   if(! Buffer_truth(buf) || ! buf -> content -> length) return NULL;
@@ -382,6 +380,8 @@ String Buffer_str_free(Buffer buf){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
 }
 }
+
+String String_repr(String);
 
 String Buffer_repr(Buffer buf){
   if(! Buffer_truth(buf) || ! buf -> content -> length) return String_repr(NULL);

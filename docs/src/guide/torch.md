@@ -92,6 +92,14 @@ training step is one `Scope.retain` and `Scope.release` pair around the
 forward, backward, and update, with the model and optimizer in the
 enclosing scope. `free` releases a handle early and returns NULL.
 
+List results such as `parameters`, `named_parameters`, and generated tuples
+intern their wrapper references in the current List pool. Scope release does
+not reclaim those canonical cells. Long-running loops can bracket each
+request with `List.pool_retain` and `List.pool_release`, releasing the request
+Scope before its List pool. Keep stable parameter handles outside that
+bracket when useful. Surviving values still need their ordinary Scope and
+pool ownership; a pool bracket does not extend a Tensor wrapper's lifetime.
+
 An unnamed operator temporary is released sooner. `Tensor` declares the
 `discard` member of the [protocol chapter](protocols.md), so the compiler
 releases the product in `a * b + c` right after the addition has used it,

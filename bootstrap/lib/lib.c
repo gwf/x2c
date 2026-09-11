@@ -4,20 +4,6 @@
 
 void * Scope_malloc(size_t);
 
-void Scope_free(void *);
-
-Var Array_push(Array, Var);
-
-Var List_var(List);
-
-Var int_var(int);
-
-List Array_list(Array);
-
-Array Array_sort(Array);
-
-void Array_free(Array);
-
 DisjointSet DisjointSet_new(int n){
   DisjointSet set = Scope_malloc(sizeof(struct DisjointSet));
   set -> parent = Scope_malloc(sizeof(int) * n);
@@ -30,6 +16,8 @@ DisjointSet DisjointSet_new(int n){
   }
   return set;
 }
+
+void Scope_free(void *);
 
 void DisjointSet_free(DisjointSet set){
   Scope_free(set -> parent);
@@ -60,6 +48,18 @@ void DisjointSet_union(DisjointSet set, int a, int b){
   set -> size[a_root] += set -> size[b_root];
   set -> ncmpnts --;
 }
+
+Var Array_push(Array, Var);
+
+Var List_var(List);
+
+Var int_var(int);
+
+List Array_list(Array);
+
+Array Array_sort(Array);
+
+void Array_free(Array);
 
 List DisjointSet_sizes(DisjointSet set){
   Array sizes = Array_new();

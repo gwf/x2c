@@ -6,20 +6,6 @@ static String _111, _110, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96
 
 static Var _74, _72;
 
-static int _init_guard_ = 0;
-
-typedef struct CcJob{
-  ToolRun execution;
-  String source, state_path;
-  uint64_t fingerprint;
-}
-CcJob;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
@@ -30,145 +16,7 @@ _x2c_defer_env_0;
 #include <sys/stat.h>
 #include <unistd.h>
 #include "report.h"
-Var String_var(String);
-
-String x2c_path_stem(String);
-
-String String_printf(String, ...);
-
-unsigned String_hash(String);
-
-int String_truth(String);
-
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-String Var_string(Var);
-
-int File_close(File);
-
-List String_split(String, String);
-
-String String_new(const char *);
-
-int String_getindex(String, int);
-
-String x2c_get_executable(void);
-
-String File_string_close(File);
-
-Var Symbol_var(Symbol);
-
-List translation_depfile_parse(String);
-
-int List_truth(List);
-
-int File_printf(File, const char *, ...);
-
-void x2c_driver_error(const char *);
-
-int String_endswith(String, String);
-
-List List_cdr(List);
-
-void * Scope_calloc(size_t, size_t);
-
-Toolchain toolchain_new(String, String, List, List, List, int, int);
-
-Var List_car(List);
-
-unsigned long report_now_us(void);
-
-Var Array_push(Array, Var);
-
-int Array_contains(Array, Var);
-
-int String_startswith(String, String);
-
-int String_find(String, String);
-
-int String_len(String);
-
-Var List_last(List);
-
-int String_equal(String, String);
-
-Split String_words(String);
-
-int Split_try_next(Split, int *, String *);
-
-List List_append(List, List);
-
-List Array_list_free(Array);
-
-CliRequest cli_package_options(String, String);
-
-unsigned long long report_file_bytes(String);
-
-void report_progress(Symbol, int, int, String);
-
-void report_phase(Symbol, int, String, int, unsigned long);
-
-String Symbol_str(Symbol);
-
-ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
-
-int ToolAction_run(ToolAction);
-
-int ToolRun_wait(ToolRun);
-
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write(Buffer, const char *);
-
-String Buffer_str_free(Buffer);
-
-int File_puts(File, const char *);
-
-Iter Array_iter(Array, Iter);
-
-void report_line(Symbol, String);
-
-int ToolRun_ready(ToolRun);
-
-String x2c_path_dir(String);
-
-ToolAction Toolchain_compile_action(Toolchain, String, String, String, List);
-
-ToolRun ToolAction_start(ToolAction);
-
-void Scope_free(void *);
-
-ToolAction Toolchain_archive_action(Toolchain, String, List);
-
-ToolAction Toolchain_link_action(Toolchain, String, List);
-
-int List_len(List);
-
-ToolAction tool_action_new(Symbol, List, int, int);
-
-int report_receipts(void);
-
-String report_duration(unsigned long);
-
-String String_add(String, String);
-
-String report_size(unsigned long long);
-
-String int_str(int);
-
-void ToolAction_as_program(ToolAction);
-
-Context Context_open_isolated(void);
-
-void Context_close(Context);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -208,6 +56,13 @@ static void _package_link_flags(Build state, String name, String path);
 
 static void Build__link_packages(Build state, String input, String directory);
 
+typedef struct CcJob{
+  ToolRun execution;
+  String source, state_path;
+  uint64_t fingerprint;
+}
+CcJob;
+
 static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs, int * ok);
 
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String source, String preprocessed, List include_dirs, int * ok);
@@ -228,7 +83,14 @@ static int _mapped_debug(Build state);
 
 static int _all_cached(Build state);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+Var String_var(String);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -344,6 +206,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _111 = String_new("-gdwarf");
 }
 
+String x2c_path_stem(String);
+
+String String_printf(String, ...);
+
+unsigned String_hash(String);
+
 static String _key(String path){
   String stem = x2c_path_stem(path);
   return String_printf(String_join(NULL, cons(String_var(stem), cons(String_var(_0), NULL))), String_hash(path));
@@ -358,11 +226,21 @@ static uint64_t _state_bytes(uint64_t hash, const void * bytes, size_t length){
   return hash;
 }
 
+int String_truth(String);
+
 static uint64_t _state_text(uint64_t hash, String text){
   if(! String_truth(text)) return _state_bytes(hash, "\xff", 1);
   hash = _state_bytes(hash, text, strlen(text));
   return _state_bytes(hash, "\0", 1);
 }
+
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+String Var_string(Var);
 
 static uint64_t _state_list(uint64_t hash, List values){
   {
@@ -381,6 +259,8 @@ static uint64_t _state_list(uint64_t hash, List values){
   return _state_bytes(hash, "\xfe", 1);
 }
 
+int File_close(File);
+
 static uint64_t _state_file(uint64_t hash, String path, int * ok){
   File input = fopen(path, "rb");
   if(! input){
@@ -395,6 +275,12 @@ static uint64_t _state_file(uint64_t hash, String path, int * ok){
   File_close(input);
   return hash;
 }
+
+List String_split(String, String);
+
+String String_new(const char *);
+
+int String_getindex(String, int);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
   if(! String_truth(tool)){
@@ -425,6 +311,8 @@ static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
   return _state_text(hash, tool);
 }
 
+String x2c_get_executable(void);
+
 static uint64_t _state_base(Build state, String tool, int * ok){
   uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, _3);
@@ -433,6 +321,12 @@ static uint64_t _state_base(Build state, String tool, int * ok){
   hash = _state_tool(hash, tool, ok);
   return hash;
 }
+
+String File_string_close(File);
+
+Var Symbol_var(Symbol);
+
+List translation_depfile_parse(String);
 
 static List _state_dep_inputs(String depfile){
   File input = fopen(depfile, "r");
@@ -490,6 +384,8 @@ _x2c_error_handler_0 = NULL;
 return translation_depfile_parse(text);
 }
 
+int List_truth(List);
+
 static uint64_t _state_dependencies(uint64_t hash, String depfile, int * ok){
   List inputs = _state_dep_inputs(depfile);
   if(! List_truth(inputs)){
@@ -523,6 +419,8 @@ static int _state_matches(String path, uint64_t hash){
   return saved ==(unsigned long long) hash;
 }
 
+int File_printf(File, const char *, ...);
+
 static void _state_write(String path, uint64_t hash){
   String temporary = String_printf(String_join(NULL, cons(String_var(path), cons(String_var(_4), NULL))), (long) getpid());
   File output = fopen(temporary, "w");
@@ -546,11 +444,15 @@ int _build_mkdirs(String path){
   return mkdir(buffer, 0777) == 0 || errno == EEXIST;
 }
 
+void x2c_driver_error(const char *);
+
 static void _require_directory(String path){
   if(! _build_mkdirs(path)) x2c_driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(path), NULL))));
   struct stat info;
   if(stat(path, & info) || ! S_ISDIR(info.st_mode)) x2c_driver_error(String_join(NULL, cons(String_var(_6), cons(String_var(path), NULL))));
 }
+
+int String_endswith(String, String);
 
 static void _validate_input(String input){
   struct stat info;
@@ -559,6 +461,18 @@ static void _validate_input(String input){
   if(! S_ISREG(info.st_mode)) x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(input), NULL))));
   if(!(String_endswith(input, _10) || String_endswith(input, _11) || String_endswith(input, _12) || String_endswith(input, _13))) x2c_driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(input), NULL))));
 }
+
+List List_cdr(List);
+
+void * Scope_calloc(size_t, size_t);
+
+Toolchain toolchain_new(String, String, List, List, List, int, int);
+
+Var List_car(List);
+
+unsigned long report_now_us(void);
+
+Var Array_push(Array, Var);
 
 Build CliRequest_prepare(CliRequest c){
   if(! _init_guard_) _file_init_();
@@ -655,6 +569,8 @@ Build CliRequest_prepare(CliRequest c){
   return state;
 }
 
+int Array_contains(Array, Var);
+
 String Build_generated_dir(Build state, String input){
   if(! _init_guard_) _file_init_();
   String directory = String_join(NULL, cons(String_var(state -> gen_root), cons(String_var(_2), cons(String_var(_key(input)), NULL))));
@@ -701,6 +617,12 @@ void Build_record_translation(Build state, String input, String directory){
   if(ok) _state_write(String_join(NULL, cons(String_var(state -> state_root), cons(String_var(_38), cons(String_var(_key(input)), NULL)))), hash);
 }
 
+int String_startswith(String, String);
+
+int String_find(String, String);
+
+int String_len(String);
+
 static String _package_directory(List roots, String path){
   char buffer[PATH_MAX];
   if(! realpath(path, buffer)) return NULL;
@@ -728,6 +650,10 @@ static String _package_directory(List roots, String path){
   return NULL;
 }
 
+Var List_last(List);
+
+int String_equal(String, String);
+
 static String _package_source_directory(List roots, String path){
   char buffer[PATH_MAX];
   String directory = _package_directory(roots, path);
@@ -736,6 +662,14 @@ static String _package_source_directory(List roots, String path){
   if(String_startswith(canonical, String_join(NULL, cons(String_var(directory), cons(String_var(_39), NULL))))) return directory;
   return String_equal(canonical, String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(name), cons(String_var(_10), NULL)))))) ? directory : NULL;
 }
+
+Split String_words(String);
+
+int Split_try_next(Split, int *, String *);
+
+List List_append(List, List);
+
+List Array_list_free(Array);
 
 static void _package_link_flags(Build state, String name, String path){
   if(access(path, R_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_40), cons(String_var(name), cons(String_var(_41), cons(String_var(path), NULL))))));
@@ -803,6 +737,8 @@ Array flags = Array_new();
 toolchain -> ld_args = List_append(toolchain -> ld_args, Array_list_free(flags));
 }
 
+CliRequest cli_package_options(String, String);
+
 static void Build__link_packages(Build state, String input, String directory){
   List roots = state -> request -> package_dirs;
   if(! List_truth(roots)) return;
@@ -845,6 +781,8 @@ static void Build__link_packages(Build state, String input, String directory){
 
 }
 
+unsigned long long report_file_bytes(String);
+
 void Build_add_generated(Build state, String input, String directory){
   if(! _init_guard_) _file_init_();
   String stem = x2c_path_stem(input), source = String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(stem), cons(String_var(_11), NULL)))));
@@ -855,10 +793,14 @@ void Build_add_generated(Build state, String input, String directory){
   Build__link_packages(state, input, directory);
 }
 
+void report_progress(Symbol, int, int, String);
+
 void Build_begin_translation(Build state, String input){
   if(! state -> xlat_start) state -> xlat_start = report_now_us();
   report_progress(45220543335690, state -> xlat_done, state -> xlat_n, input);
 }
+
+void report_phase(Symbol, int, String, int, unsigned long);
 
 void Build_end_translation(Build state, String input, int cached){
   if(! _init_guard_) _file_init_();
@@ -871,6 +813,8 @@ void Build_end_translation(Build state, String input, int cached){
   }
 
 }
+
+String Symbol_str(Symbol);
 
 static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs, int * ok){
   String tool = List_truth(action -> arguments) ? Var_string(List_car(action -> arguments)) : NULL;
@@ -893,6 +837,10 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
   return hash;
 }
 
+ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
+
+int ToolAction_run(ToolAction);
+
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String source, String preprocessed, List include_dirs, int * ok){
   ToolAction preprocess = Toolchain_preprocess_action(state -> toolchain, source, preprocessed, include_dirs);
   if(ToolAction_run(preprocess)) * ok = 0;
@@ -900,6 +848,8 @@ static uint64_t _compile_fingerprint(Build state, ToolAction action, String sour
   unlink(preprocessed);
   return hash;
 }
+
+int ToolRun_wait(ToolRun);
 
 static int _finish_compile(Build state, CcJob pending){
   int status = ToolRun_wait(pending.execution);
@@ -911,6 +861,10 @@ static int _finish_compile(Build state, CcJob pending){
   return status;
 }
 
+Buffer Buffer_write_char(Buffer, char);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
 static void _json_string(Buffer out, String text){
   Buffer_write_char(out, '"');
   for(const unsigned char * p =(const unsigned char *) text;  p && * p;  p ++){
@@ -920,6 +874,12 @@ static void _json_string(Buffer out, String text){
   }
   Buffer_write_char(out, '"');
 }
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write(Buffer, const char *);
+
+String Buffer_str_free(Buffer);
 
 static String _compile_command(Build state, ToolAction action, String source, String object){
   Buffer out = Buffer_new(0);
@@ -952,6 +912,12 @@ static String _compile_command(Build state, ToolAction action, String source, St
   Buffer_write(out, "]}");
   return Buffer_str_free(out);
 }
+
+int File_puts(File, const char *);
+
+Iter Array_iter(Array, Iter);
+
+void report_line(Symbol, String);
 
 int compile_commands_write(String path, Array commands){
   if(! _init_guard_) _file_init_();
@@ -991,6 +957,8 @@ int compile_commands_write(String path, Array commands){
   return 1;
 }
 
+int ToolRun_ready(ToolRun);
+
 static int _finish_compiles(Build state, CcJob * running, int * count, int wait){
   int failed = 0;
   for(; ; ){
@@ -1008,6 +976,14 @@ static int _finish_compiles(Build state, CcJob * running, int * count, int wait)
   }
 
 }
+
+String x2c_path_dir(String);
+
+ToolAction Toolchain_compile_action(Toolchain, String, String, String, List);
+
+ToolRun ToolAction_start(ToolAction);
+
+void Scope_free(void *);
 
 static int _compile_sources(Build b){
   if((void *) b -> compile_commands != NULL){
@@ -1159,6 +1135,14 @@ static int _mapped_debug(Build state){
 
 }
 
+ToolAction Toolchain_archive_action(Toolchain, String, List);
+
+ToolAction Toolchain_link_action(Toolchain, String, List);
+
+int List_len(List);
+
+ToolAction tool_action_new(Symbol, List, int, int);
+
 int Build_finish(Build b){
   if(! _init_guard_) _file_init_();
   if(_compile_sources(b)) return 1;
@@ -1215,6 +1199,16 @@ static int _all_cached(Build state){
   return state -> xlat_n || state -> cc_n || state -> final_cached;
 }
 
+int report_receipts(void);
+
+String report_duration(unsigned long);
+
+String String_add(String, String);
+
+String report_size(unsigned long long);
+
+String int_str(int);
+
 void Build_report_success(Build b){
   if(! _init_guard_) _file_init_();
   if(! report_receipts()) return;
@@ -1257,6 +1251,8 @@ void Build_report_success(Build b){
 
 }
 
+void ToolAction_as_program(ToolAction);
+
 int Build_run_program(Build state){
   if(! _init_guard_) _file_init_();
   report_line(34081994, String_join(NULL, cons(String_var(_105), cons(String_var(state -> output), NULL))));
@@ -1279,6 +1275,8 @@ int Build_run_program(Build state){
   ToolAction_as_program(action);
   return ToolAction_run(action);
 }
+
+Context Context_open_isolated(void);
 
 int _build_remove_tree(String path){
   if(! _init_guard_) _file_init_();
@@ -1338,6 +1336,8 @@ void Build_cleanup(Build state, int success){
   }
 
 }
+
+void Context_close(Context);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

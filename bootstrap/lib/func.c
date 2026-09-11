@@ -10,6 +10,15 @@ static String _1;
 
 static Var _32, _29, _28, _25, _21, _17, _16, _15, _14, _13, _10, _9, _6, _4, _2, _0;
 
+#include "varconvert.h"
+#include "error.h"
+#include "exception.h"
+#include "match.h"
+#include "symbol.h"
+#include "scope.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 struct Func{
   List sig, params;
   FuncAdapter adapter;
@@ -21,61 +30,6 @@ struct Func{
 ;
 
 static int _init_guard_ = 0;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_0;
-
-#include "varconvert.h"
-#include "error.h"
-#include "exception.h"
-#include "match.h"
-#include "symbol.h"
-#include "scope.h"
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-List cons(Var, List);
-
-Var List_var(List);
-
-int List_truth(List);
-
-List List_cdr(List);
-
-int Var_is(Var, Symbol);
-
-Var List_car(List);
-
-List Var_list(Var);
-
-Var unsigned_var(unsigned);
-
-int List_equal(List, List);
-
-int Var_is_void(Var);
-
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
-Var Var_convert(Var, Symbol);
-
-int Var_is_null(Var);
-
-List List_match(List, Var);
-
-int List_len(List);
-
-void * Scope_calloc(size_t, size_t);
-
-Var Var_new(Symbol, ...);
-
-void Scope_free(void *);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -93,7 +47,21 @@ static void * _context(Func function);
 
 static Func _new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+List cons(Var, List);
+
+Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -139,12 +107,24 @@ static List _parameters(Func function){
   return function ? function -> params : NULL;
 }
 
+int List_truth(List);
+
+List List_cdr(List);
+
+int Var_is(Var, Symbol);
+
+Var List_car(List);
+
+List Var_list(Var);
+
 static List _parameter(Func function, unsigned index){
   if(! function || index >= function -> nparams) return NULL;
   List params = _parameters(function);
   while(List_truth(params) && index --) params = List_cdr(params);
   return List_truth(params) && Var_is(List_car(params), 806120) ? Var_list(List_car(params)) : NULL;
 }
+
+Var unsigned_var(unsigned);
 
 List x2c_func_reference_type(Func function, unsigned argc, unsigned index){
   if(! function || index >= argc){
@@ -185,11 +165,21 @@ static unsigned _type_qualifiers(List * cursor){
   return qualifiers;
 }
 
+int List_equal(List, List);
+
 static int _reference_type_accepts(List target, List source){
   unsigned target_qualifiers = _type_qualifiers(& target);
   unsigned source_qualifiers = _type_qualifiers(& source);
   return !(source_qualifiers & ~ target_qualifiers) && List_equal(target, source);
 }
+
+int Var_is_void(Var);
+
+int Var_numeric_info(Symbol, X2CVarNumericInfo *);
+
+Var Var_convert(Var, Symbol);
+
+int Var_is_null(Var);
 
 Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol want){
   List sig = fn ? fn -> sig : NULL;
@@ -357,6 +347,12 @@ static void * _context(Func function){
   return(unsigned char *) function + _context_offset();
 }
 
+List List_match(List, Var);
+
+int List_len(List);
+
+void * Scope_calloc(size_t, size_t);
+
 static Func _new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
   if(rest && ! List_truth(List_match(signature, List_var(_12)))){
     static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/func.x",.function = "_new",.line = 263};
@@ -503,9 +499,13 @@ Var Func_apply(Func f, unsigned argc, const FuncArg * argv){
   return result;
 }
 
+Var Var_new(Symbol, ...);
+
 Var Func_var(Func function){
   return Var_new(437126, function);
 }
+
+void Scope_free(void *);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;

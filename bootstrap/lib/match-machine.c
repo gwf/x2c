@@ -9,46 +9,6 @@
 #include "scope.h"
 #include "exception.h"
 #include "match.h"
-Var Symbol_var(Symbol);
-
-int Var_equal(Var, Var);
-
-int Var_is(Var, Symbol);
-
-List Var_list(Var);
-
-int List_truth(List);
-
-Var car(List);
-
-Var List_var(List);
-
-List cdr(List);
-
-int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
-
-int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
-
-int Var_is_atom_binder(Var);
-
-int Var_is_list_binder(Var);
-
-int Var_is_binder(Var);
-
-int Var_is_match_op(Var);
-
-void * Scope_realloc(void *, size_t);
-
-int List_equal(List, List);
-
-List cons(Var, List);
-
-Var String_var(String);
-
-int Var_is_void(Var);
-
-void Scope_free(void *);
-
 static List * MatchMachine__cursor(MatchMachine m, int reg);
 
 static int * MatchMachine__distance(MatchMachine m, int reg);
@@ -135,6 +95,8 @@ static void MatchMachine__error_value(MatchMachine m, Var error){
   m -> running = 0;
 }
 
+Var Symbol_var(Symbol);
+
 static void MatchMachine__error(MatchMachine m, Symbol error){
   MatchMachine__error_value(m, Symbol_var(error));
 }
@@ -177,6 +139,8 @@ static void MatchMachine__set_span(MatchMachine m, int slot, List begin, List en
   }
   MatchMachine__journal_slot(m, slot, data);
 }
+
+int Var_equal(Var, Var);
 
 static int MatchMachine__slot_value_equal(MatchMachine m, MachineSlot * slot, Var value){
   if(slot -> kind != MACHINE_SLOT_VALUE) return 0;
@@ -246,6 +210,30 @@ void MatchMachine_begin(MatchMachine m, MachineView program, Var input){
   }
 
 }
+
+int Var_is(Var, Symbol);
+
+List Var_list(Var);
+
+int List_truth(List);
+
+Var car(List);
+
+Var List_var(List);
+
+List cdr(List);
+
+int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
+
+int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
+
+int Var_is_atom_binder(Var);
+
+int Var_is_list_binder(Var);
+
+int Var_is_binder(Var);
+
+int Var_is_match_op(Var);
 
 int MatchMachine_step(MatchMachine m){
   if(! m -> running) return 0;
@@ -463,6 +451,8 @@ void MatchMachine_run(MatchMachine m){
 
 }
 
+void * Scope_realloc(void *, size_t);
+
 static void MatchMachine__ensure_scratch(MatchMachine m, int length){
   if(length <= m -> scratch_capacity) return;
   int capacity = m -> scratch_capacity ? m -> scratch_capacity : 16;
@@ -471,6 +461,10 @@ static void MatchMachine__ensure_scratch(MatchMachine m, int length){
   m -> scratch = grown;
   m -> scratch_capacity = capacity;
 }
+
+int List_equal(List, List);
+
+List cons(Var, List);
 
 List MatchMachine_materialize_span(MatchMachine m, MachineSpan span){
   if(m -> stats) m -> stats -> materialization_requests ++;
@@ -509,6 +503,8 @@ List MatchMachine_materialize_span(MatchMachine m, MachineSpan span){
   return result;
 }
 
+Var String_var(String);
+
 void MatchMachine_finish(MatchMachine m){
   if(m -> running){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 534};
@@ -532,10 +528,14 @@ void MatchMachine_finish(MatchMachine m){
   m -> running = 0;
 }
 
+int Var_is_void(Var);
+
 int MatchMachine_clean(MatchMachine m){
   if(m -> running || m -> program.code || m -> fp || m -> undo_count || m -> slot_count) return 0;
   return m -> status == 598794 && Var_is_void(m -> error);
 }
+
+void Scope_free(void *);
 
 void MatchMachine_dispose(MatchMachine m){
   if(m -> scratch) Scope_free(m -> scratch);

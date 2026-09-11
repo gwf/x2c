@@ -2,6 +2,10 @@
 
 #include "var-wide-long-double.h"
 
+static Var box_value(long double value);
+
+static long double unbox_value(Var value);
+
 static Var box_value(long double value){
   return Var_box_long_double(value);
 }

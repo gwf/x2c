@@ -11,114 +11,6 @@
 #include "map.h"
 #include <limits.h>
 #include <string.h>
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-Var Var_box_i8(char);
-
-int Var_is_void(Var);
-
-long Var_integer(Var);
-
-Var Var_box_u8(uchar);
-
-Var Var_box_i16(short);
-
-Var Var_box_u16(ushort);
-
-Var Var_box_i32_bits(unsigned);
-
-Var Var_box_u32(unsigned);
-
-Var Var_box_long(long);
-
-long Var_long_value(Var);
-
-Var Var_box_ulong(unsigned long);
-
-unsigned long Var_ulong_value(Var);
-
-Var Var_box_long_long(long long);
-
-long long Var_long_long_value(Var);
-
-Var Var_box_ulong_long(unsigned long long);
-
-unsigned long long Var_ulong_long_value(Var);
-
-Var Var_box_f32(float);
-
-float Var_decode_f32(Var);
-
-Var Var_box_f64(double);
-
-double Var_decode_f64(Var);
-
-Var Var_box_long_double(long double);
-
-long double Var_long_double_value(Var);
-
-Var Array_getindex(Array, int);
-
-Var Array_updateindex(Array, int, Symbol, Var);
-
-Var Map_getindex(Map, Var);
-
-Var Map_updateindex(Map, Var, Symbol, Var);
-
-long long Var_signed_from_bits(unsigned long long, int);
-
-unsigned long long Var_width_mask(int);
-
-Symbol Var_integer_tag(int, int);
-
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
-Var Var_integer_box(Symbol, unsigned long long);
-
-Var int_var(int);
-
-Var Var_convert(Var, Symbol);
-
-float Var_float(Var);
-
-double Var_floating(Var);
-
-void Var_numeric_decode(Var, X2CVarNumeric *);
-
-Var unsigned_var(unsigned);
-
-unsigned Var_payload32(Var);
-
-int Var_is_wide(Var);
-
-int Var_encoding_valid(Var);
-
-Symbol Var_tag(Var);
-
-Symbol Var_kind(Var);
-
-Symbol Var_symbol(Var);
-
-void * Var_pointer(Var);
-
-int Var_dispatch_truth(Var, int *);
-
-int Var_is(Var, Symbol);
-
-String String_add(String, String);
-
-String Var_string(Var);
-
-int Var_try_dispatch_binary(Var, Symbol, Var, Var *);
-
-int Var_try_dispatch_unary(Var, Symbol, Var *);
-
-int Var_equal(Var, Var);
-
-int Var_compare(Var, Var);
-
 static inline Symbol _fast_numeric_tag(Var lhs, Var rhs);
 
 static unsigned long long _raw_for_width(X2CVarNumeric * value, int bits);
@@ -146,6 +38,16 @@ static int _update_operator(Symbol op);
 static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs);
 
 static Var _native_update(Var lhs, Symbol target, Symbol op, Var rhs);
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+Var Var_box_i8(char);
+
+int Var_is_void(Var);
+
+long Var_integer(Var);
 
 char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -179,6 +81,8 @@ signed char x2c_var_update_schar(volatile signed char * lhs, Symbol op, Var rhs)
   return _x2c_macro_value_1;
 }
 
+Var Var_box_u8(uchar);
+
 uchar x2c_var_update_u8(volatile uchar * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -194,6 +98,8 @@ uchar x2c_var_update_u8(volatile uchar * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_2;
   return _x2c_macro_value_2;
 }
+
+Var Var_box_i16(short);
 
 short x2c_var_update_i16(volatile short * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -211,6 +117,8 @@ short x2c_var_update_i16(volatile short * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_3;
 }
 
+Var Var_box_u16(ushort);
+
 ushort x2c_var_update_u16(volatile ushort * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -226,6 +134,8 @@ ushort x2c_var_update_u16(volatile ushort * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_4;
   return _x2c_macro_value_4;
 }
+
+Var Var_box_i32_bits(unsigned);
 
 int x2c_var_update_i32(volatile int * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -243,6 +153,8 @@ int x2c_var_update_i32(volatile int * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_5;
 }
 
+Var Var_box_u32(unsigned);
+
 uint x2c_var_update_u32(volatile uint * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -258,6 +170,10 @@ uint x2c_var_update_u32(volatile uint * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_6;
   return _x2c_macro_value_6;
 }
+
+Var Var_box_long(long);
+
+long Var_long_value(Var);
 
 long x2c_var_update_long(volatile long * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -275,6 +191,10 @@ long x2c_var_update_long(volatile long * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_7;
 }
 
+Var Var_box_ulong(unsigned long);
+
+unsigned long Var_ulong_value(Var);
+
 ulong x2c_var_update_ulong(volatile ulong * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -290,6 +210,10 @@ ulong x2c_var_update_ulong(volatile ulong * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_8;
   return _x2c_macro_value_8;
 }
+
+Var Var_box_long_long(long long);
+
+long long Var_long_long_value(Var);
 
 long long x2c_var_update_long_long(volatile long long * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -307,6 +231,10 @@ long long x2c_var_update_long_long(volatile long long * lhs, Symbol op, Var rhs)
   return _x2c_macro_value_9;
 }
 
+Var Var_box_ulong_long(unsigned long long);
+
+unsigned long long Var_ulong_long_value(Var);
+
 unsigned long long x2c_var_update_ulong_long(volatile unsigned long long * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -322,6 +250,10 @@ unsigned long long x2c_var_update_ulong_long(volatile unsigned long long * lhs, 
   (lhs)[0] = _x2c_macro_value_10;
   return _x2c_macro_value_10;
 }
+
+Var Var_box_f32(float);
+
+float Var_decode_f32(Var);
 
 float x2c_var_update_f32(volatile float * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -339,6 +271,10 @@ float x2c_var_update_f32(volatile float * lhs, Symbol op, Var rhs){
   return _x2c_macro_value_11;
 }
 
+Var Var_box_f64(double);
+
+double Var_decode_f64(Var);
+
 double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs){
   if(! lhs){
     {
@@ -354,6 +290,10 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs){
   (lhs)[0] = _x2c_macro_value_12;
   return _x2c_macro_value_12;
 }
+
+Var Var_box_long_double(long double);
+
+long double Var_long_double_value(Var);
 
 long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs){
   if(! lhs){
@@ -371,6 +311,10 @@ long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Va
   return _x2c_macro_value_13;
 }
 
+Var Array_getindex(Array, int);
+
+Var Array_updateindex(Array, int, Symbol, Var);
+
 Var x2c_array_updateindex_from_array(Array dst, int dst_index, Symbol op, Array src, int src_index){
   if((void *) src == NULL){
     static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/varops.x",.function = "x2c_array_updateindex_from_array",.line = 99};
@@ -381,10 +325,14 @@ Var x2c_array_updateindex_from_array(Array dst, int dst_index, Symbol op, Array 
   return Array_updateindex(dst, dst_index, op, rhs);
 }
 
+Var Map_getindex(Map, Var);
+
 Var x2c_array_updateindex_from_map(Array dst, int dst_index, Symbol op, Map src, Var src_key){
   Var rhs = Map_getindex(src, src_key);
   return Array_updateindex(dst, dst_index, op, rhs);
 }
+
+Var Map_updateindex(Map, Var, Symbol, Var);
 
 Var x2c_map_updateindex_from_array(Map dst, Var dst_key, Symbol op, Array src, int src_index){
   if((void *) src == NULL){
@@ -415,6 +363,10 @@ static inline Symbol _fast_numeric_tag(Var lhs, Var rhs){
   return left_f64 && right_f64 ? 3356265 : 0;
 }
 
+long long Var_signed_from_bits(unsigned long long, int);
+
+unsigned long long Var_width_mask(int);
+
 static unsigned long long _raw_for_width(X2CVarNumeric * value, int bits){
   unsigned long long raw = value -> unsigned_value ? value -> raw :(unsigned long long) Var_signed_from_bits(value -> raw, value -> bits);
   return raw & Var_width_mask(bits);
@@ -429,6 +381,8 @@ static void _promote_integer(X2CVarNumeric * value){
   value -> rank = 3;
 }
 
+Symbol Var_integer_tag(int, int);
+
 static Symbol _integer_result_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
   _promote_integer(lhs);
   _promote_integer(rhs);
@@ -442,6 +396,10 @@ static Symbol _integer_result_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
   if(signed_value -> bits > unsigned_value -> bits) return Var_integer_tag(signed_value -> rank, 0);
   return Var_integer_tag(signed_value -> rank, 1);
 }
+
+int Var_numeric_info(Symbol, X2CVarNumericInfo *);
+
+Var Var_integer_box(Symbol, unsigned long long);
 
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   Symbol tag = _integer_result_tag(& lhs, & rhs);
@@ -504,6 +462,8 @@ static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   return Var_integer_box(tag, raw);
 }
 
+Var int_var(int);
+
 static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   _promote_integer(& lhs);
   _promote_integer(& rhs);
@@ -537,6 +497,12 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   }
   return Var_integer_box(lhs.tag, raw);
 }
+
+Var Var_convert(Var, Symbol);
+
+float Var_float(Var);
+
+double Var_floating(Var);
 
 static Var _floating_binary(Symbol op, Var lhs_value, X2CVarNumeric * lhs, Var rhs_value, X2CVarNumeric * rhs){
   Symbol tag = lhs -> floating && lhs -> rank >= rhs -> rank ? lhs -> tag : rhs -> tag;
@@ -609,6 +575,8 @@ static Var _floating_binary(Symbol op, Var lhs_value, X2CVarNumeric * lhs, Var r
   return result;
 }
 
+void Var_numeric_decode(Var, X2CVarNumeric *);
+
 static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value){
   X2CVarNumeric lhs, rhs;
   Var_numeric_decode(lhs_value, & lhs);
@@ -636,6 +604,8 @@ static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value){
   if(lhs.floating || rhs.floating) return _floating_binary(op, lhs_value, & lhs, rhs_value, & rhs);
   return _integer_binary(op, lhs, rhs);
 }
+
+Var unsigned_var(unsigned);
 
 static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value){
   unsigned raw;
@@ -687,6 +657,8 @@ static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value){
   return unsigned_value ? Var_box_u32(raw) : Var_box_i32_bits(raw);
 }
 
+unsigned Var_payload32(Var);
+
 static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int * handled){
   switch(op){
     case 56 : case 62 : case 54 : case 95 : case 75 : case 77 : case 249 : case 189 : case 15481 : case 15997 : break;
@@ -716,6 +688,8 @@ static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int * handled){
   return((void) 0, Void);
 }
 
+int Var_is_wide(Var);
+
 static inline int _same_tag_update(Var lhs, Var rhs){
   unsigned long left = lhs.u64 & 0xFFFFFFFF00000000ul;
   unsigned long right = rhs.u64 & 0xFFFFFFFF00000000ul;
@@ -731,6 +705,16 @@ static int _update_operator(Symbol op){
   }
   return 0;
 }
+
+int Var_encoding_valid(Var);
+
+Symbol Var_tag(Var);
+
+Symbol Var_kind(Var);
+
+Symbol Var_symbol(Var);
+
+void * Var_pointer(Var);
 
 int Var_fallback_truth(Var value){
   if(! Var_encoding_valid(value)){
@@ -772,6 +756,8 @@ int Var_fallback_truth(Var value){
   return ! ! truth;
 }
 
+int Var_dispatch_truth(Var, int *);
+
 int Var_truth(Var value){
   if(! Var_encoding_valid(value) || Var_is_void(value)) return Var_fallback_truth(value);
   int handled = 0, truth = Var_dispatch_truth(value, & handled);
@@ -781,6 +767,14 @@ int Var_truth(Var value){
 int Var_truthy(Var value){
   return Var_truth(value);
 }
+
+int Var_is(Var, Symbol);
+
+String String_add(String, String);
+
+String Var_string(Var);
+
+int Var_try_dispatch_binary(Var, Symbol, Var, Var *);
 
 static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   int fast_handled;
@@ -848,6 +842,8 @@ Var Var_mod(Var lhs, Var rhs){
   return _protocol_arithmetic(lhs, 27592, 75, rhs);
 }
 
+int Var_try_dispatch_unary(Var, Symbol, Var *);
+
 Var Var_neg(Var value){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
@@ -876,6 +872,10 @@ Var Var_neg(Var value){
   }
   return Var_sub(int_var(0), value);
 }
+
+int Var_equal(Var, Var);
+
+int Var_compare(Var, Var);
 
 Var Var_binary(Var lhs, Symbol op, Var rhs){
   switch(op){

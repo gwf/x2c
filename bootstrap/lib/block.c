@@ -6,16 +6,6 @@
 
 #include "exception.h"
 #include "scope.h"
-void * Scope_malloc(size_t);
-
-Var Symbol_var(Symbol);
-
-void * Scope_realloc(void *, size_t);
-
-void Scope_free(void *);
-
-void Scope_move(void *, Scope *);
-
 static int _allocation_size(size_t width, size_t cap, size_t * out);
 
 static int _allocation_size(size_t width, size_t cap, size_t * out){
@@ -23,6 +13,10 @@ static int _allocation_size(size_t width, size_t cap, size_t * out){
   * out = sizeof(Block) + width * cap;
   return 1;
 }
+
+void * Scope_malloc(size_t);
+
+Var Symbol_var(Symbol);
 
 Block Block_new(size_t width){
   if(! width){
@@ -49,6 +43,8 @@ Block Block_new(size_t width){
 Bytes Bytes_new(size_t width){
   return Block_new(width) -> bytes;
 }
+
+void * Scope_realloc(void *, size_t);
 
 void Block_reserve(Block block, size_t minimum){
   if((void *) block == NULL){
@@ -174,11 +170,15 @@ void Block_append_fill(Block b, const void * element, size_t count){
   b -> length = new_length;
 }
 
+void Scope_free(void *);
+
 void Block_free(Block block){
   if((void *) block == NULL) return;
   if((void *) block -> bytes != NULL) Scope_free((unsigned char *) block -> bytes - sizeof(Block));
   Scope_free(block);
 }
+
+void Scope_move(void *, Scope *);
 
 void Block_move_to(Block block, Scope * scope){
   if((void *) block == NULL) return;

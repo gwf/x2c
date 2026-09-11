@@ -2,6 +2,42 @@
 > Approved for implementation and delivery on 2026-09-10.
 > Baseline: 2d29fe9. Existing failures remain open until verified.
 
+## Current outcome
+
+Implementation is recorded in 1316e0a, with benchmark clock and isolation
+repairs in f9f8589 and 2b7a63c. Final publication and deployment are pending.
+The first publication gate failed during safe rebuild: ordinary function
+bodies preceded private includes/macros. A compiler placement repair and
+focused revalidation passed: the self-source rebuild and all 623 fixtures
+(1,443 artifacts), including preserved sourcepoint macro behavior. Nothing
+has been pushed. Retirement review's missing supplemental diagnostics are
+now recorded, including phase costs, error interning, corrected sequence
+lifetimes, all four interop sizes, and a counter-free MNIST timing correction
+using the required 50 warmup batches.
+Initialization passed 622 compiler fixtures (1,441 artifacts), 56 focused
+runtime tests (307 assertions), and 20 repeated static-initialization runs.
+All five Torch extensions passed focused macOS and Linux acceptance; Linux
+ran in local x86_64 Docker emulation and establishes correctness only.
+
+The final benchmark session retained 160 timing process logs across 16
+configurations, five fresh-process pairs each, with counters off and no
+recorded host sleep. A separate instrumented session retained 17 paired
+memory profiles and lifetime attribution. The matched Adam control passes;
+stock Adam's explicit tabular loss differs by 0.223%, exceeding the original
+0.1% tolerance. That failed verdict remains the accepted limitation.
+
+Onboarding remains open. Original inputs could not be recovered; the fresh
+evaluation and affected reruns leave six of 30 required trials failing.
+Two source comments were clarified, but current owners already address the
+remaining failures. No aggregate score or repeated attempts erase them.
+See [the active evaluation plan](agent-onboarding-accuracy.md).
+
+Raw acceptance evidence is retained outside disposable worktrees at
+`/Users/gary/Documents/x2c-evidence/closeout-20260910/`, including failed and
+interrupted earlier sessions. The three completed reference/site plans are
+archived; Torch plans await delivery, and this umbrella stays active with
+onboarding.
+
 # Close outstanding work
 
 ## Decisions and boundary

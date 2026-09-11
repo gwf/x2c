@@ -34,6 +34,87 @@ static Var _28, _25, _23, _21, _18, _16, _13, _11, _9, _6, _3, _2, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static long add(long left, long right);
+
+static long subtract(long left, long right);
+
+static Var increment(int * value);
+
+static Func global_add;
+
+static Func _x2c_func_handle_1;
+
+_x2c_initializer_choice_1179287B_0((global_add = _x2c_func_handle_1))
+static int pointer_evaluations;
+
+static BinaryFunction evaluated_pointer(void);
+
+static Var call(Func function, long left, long right);
+
+static Func return_direct(void);
+
+static Func return_pointer(BinaryFunction function);
+
+static Func return_noncapturing_lambda(void);
+
+static Func passthrough(Func function);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_1179287B_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _10)))
+typedef struct _x2c_func_pointer_context_0{
+  long(* _x2c_func_pointer_0)(long, long);
+}
+_x2c_func_pointer_context_0;
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
+
+static Func _x2c_func_handle_1;
+
+_x2c_initializer_choice_1179287B_2((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _10)))
+static Var _x2c_lambda_0(long value);
+
+static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
+
+static Func _x2c_func_handle_2;
+
+_x2c_initializer_choice_1179287B_3((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_3, _20)))
+static Var _x2c_lambda_1(long value);
+
+static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
+
+static Func _x2c_func_handle_3;
+
+_x2c_initializer_choice_1179287B_4((_x2c_func_handle_3 = Func_new(_x2c_func_adapt_4, _20)))
+static Var _x2c_lambda_2(long value);
+
+static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
+
+static Func _x2c_func_handle_4;
+
+_x2c_initializer_choice_1179287B_5((_x2c_func_handle_4 = Func_new(_x2c_func_adapt_5, _20)))
+typedef struct _x2c_func_pointer_context_14{
+  Var(* _x2c_func_pointer_1)(int *);
+}
+_x2c_func_pointer_context_14;
+
+static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6);
+
+typedef struct _x2c_lambda_context_0{
+  Var _x2c_lambda_capture_0;
+}
+_x2c_lambda_context_0;
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -41,18 +122,6 @@ List cons(Var, List);
 Var List_var(List);
 
 Var String_var(String);
-
-static void _x2c_static_initialize_2(void);
-
-static void _x2c_static_initialize_0(void);
-
-static void _x2c_static_initialize_1(void);
-
-static void _x2c_static_initialize_3(void);
-
-static void _x2c_static_initialize_4(void);
-
-static void _x2c_static_initialize_5(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -110,13 +179,6 @@ static Var increment(int * value){
   return int_var(++(* value));
 }
 
-static Func global_add;
-
-static Func _x2c_func_handle_1;
-
-_x2c_initializer_choice_1179287B_0((global_add = _x2c_func_handle_1))
-static int pointer_evaluations;
-
 static BinaryFunction evaluated_pointer(void){
   pointer_evaluations ++;
   return add;
@@ -148,14 +210,7 @@ static Func return_direct(void){
   return _x2c_func_handle_1;
 }
 
-typedef struct _x2c_func_pointer_context_0{
-  long(* _x2c_func_pointer_0)(long, long);
-}
-_x2c_func_pointer_context_0;
-
 Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func return_pointer(BinaryFunction function){
   return({
@@ -167,8 +222,6 @@ static Func return_pointer(BinaryFunction function){
   );
 }
 
-static Func _x2c_func_handle_2;
-
 static Func return_noncapturing_lambda(void){
   return _x2c_func_handle_2;
 }
@@ -179,27 +232,7 @@ static Func passthrough(Func function){
 
 ScopeStats Scope_stats(void);
 
-static Func _x2c_func_handle_0;
-
-static Func _x2c_func_handle_3;
-
-static Func _x2c_func_handle_4;
-
 long Var_integer(Var);
-
-typedef struct _x2c_func_pointer_context_14{
-  Var(* _x2c_func_pointer_1)(int *);
-}
-_x2c_func_pointer_context_14;
-
-static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6);
-
-typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
-}
-_x2c_lambda_context_0;
-
-static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 int main(void){
   x2c_initialize();
@@ -454,11 +487,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_1179287B_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _10)))
 const void * Func_context(Func);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
@@ -476,9 +504,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_1;
-
-_x2c_initializer_choice_1179287B_2((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _10)))
 static Var _x2c_lambda_0(long value){
   return long_var(value + 1);
   ;
@@ -490,9 +515,6 @@ static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_2;
-
-_x2c_initializer_choice_1179287B_3((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_3, _20)))
 static Var _x2c_lambda_1(long value){
   return long_var(value * 2);
   ;
@@ -504,9 +526,6 @@ static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_3;
-
-_x2c_initializer_choice_1179287B_4((_x2c_func_handle_3 = Func_new(_x2c_func_adapt_4, _20)))
 static Var _x2c_lambda_2(long value){
   return long_var(value - 1);
   ;
@@ -518,9 +537,6 @@ static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_4;
-
-_x2c_initializer_choice_1179287B_5((_x2c_func_handle_4 = Func_new(_x2c_func_adapt_5, _20)))
 void * x2c_func_reference_argument(Func, const FuncArg *, unsigned, List);
 
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){

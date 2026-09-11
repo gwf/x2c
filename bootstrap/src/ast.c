@@ -8,7 +8,10 @@ static String _76, _75, _74, _73, _32, _16;
 
 static Var _107, _103, _100, _99, _95, _91, _87, _86, _82, _80, _79, _78, _77, _70, _66, _62, _59, _58, _54, _51, _50, _49, _48, _47, _43, _38, _37, _36, _35, _33, _31, _27, _23, _22, _21, _17, _15, _14, _12, _9, _7, _2, _1, _0;
 
+#include "symbolset.h"
 static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
 
 static const Symbol compound_operators[][2] ={
   {
@@ -48,87 +51,11 @@ static const Symbol compound_operators[][2] ={
 }
 ;
 
-static const SymbolSet nonreturning_error_causes =(SymbolSet) "\001\000\000\000\034\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\021\037\000\000\023\036\033\000\000\030\025\000\014\000\016\012\000\000\000\010\027\035\000\000\004\007\000\011\000\000\007\032\017\000\000\014\004\005\000\000\000\011\002\020\017\031\016\000\130\012\346\217\307\130\000\000\150\152\211\375\242\323\004\000\250\013\111\006\353\022\000\000\012\015\164\176\022\004\000\000\130\012\346\323\344\022\000\000\216\014\237\004\001\000\000\000\206\053\237\004\001\000\000\000\340\373\044\075\013\000\000\000\146\201\231\176\022\004\000\000\150\071\062\320\117\202\000\000\250\054\326\275\361\237\003\000\312\161\101\176\353\336\000\000\340\373\044\010\000\000\000\000\236\054\372\333\104\000\000\000\250\111\150\176\022\004\000\000\144\021\255\264\377\034\000\000\150\150\362\031\000\000\000\000\210\253\317\174\372\034\000\000\130\012\346\277\004\000\000\000\116\232\237\004\001\000\000\000\062\115\062\174\022\004\000\000\330\023\055\317\377\034\000\000\050\253\263\310\117\202\000\000\030\013\343\323\347\000\000\000\210\253\117\270\012\000\000\000\110\151\362\031\026\032\000\000\012\055\014\266\067\134\002\000\130\012\346\273\364\024\000\000";
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-#include "symbolset.h"
-Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-Var String_var(String);
-
-Var List_var(List);
-
-Var int_var(int);
-
-String Var_string(Var);
-
-int Var_is_integer(Var);
-
-long Var_integer(Var);
-
-Var Array_push(Array, Var);
-
-size_t Array_len(Array);
-
-Var Array_take_last(Array);
-
-int Var_is(Var, Symbol);
-
-int Var_is_nil(Var);
-
-List Var_list(Var);
-
-Var List_car(List);
-
-int List_truth(List);
-
-List List_cdr(List);
-
-List x2c_func_reference_type(Func, unsigned, unsigned);
-
-FuncArg FuncArg_reference(const void *, List);
-
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-int Var_equal(Var, Var);
-
-int List_equal(List, List);
-
-List Array_list_free(Array);
-
-Var List_caddr(List);
-
-Var List_cadr(List);
-
-int SymbolSet_contains(SymbolSet, Symbol);
-
-int String_equal(String, String);
-
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-Var List_last(List);
-
-int List_len(List);
-
-Var List_getindex(List, int);
-
-void Array_free(Array);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 static Symbol _compound_lookup(Symbol op, int column);
 
 static Ast _unwrap_origin(Ast node);
+
+static const SymbolSet nonreturning_error_causes =(SymbolSet) "\001\000\000\000\034\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\021\037\000\000\023\036\033\000\000\030\025\000\014\000\016\012\000\000\000\010\027\035\000\000\004\007\000\011\000\000\007\032\017\000\000\014\004\005\000\000\000\011\002\020\017\031\016\000\130\012\346\217\307\130\000\000\150\152\211\375\242\323\004\000\250\013\111\006\353\022\000\000\012\015\164\176\022\004\000\000\130\012\346\323\344\022\000\000\216\014\237\004\001\000\000\000\206\053\237\004\001\000\000\000\340\373\044\075\013\000\000\000\146\201\231\176\022\004\000\000\150\071\062\320\117\202\000\000\250\054\326\275\361\237\003\000\312\161\101\176\353\336\000\000\340\373\044\010\000\000\000\000\236\054\372\333\104\000\000\000\250\111\150\176\022\004\000\000\144\021\255\264\377\034\000\000\150\150\362\031\000\000\000\000\210\253\317\174\372\034\000\000\130\012\346\277\004\000\000\000\116\232\237\004\001\000\000\000\062\115\062\174\022\004\000\000\330\023\055\317\377\034\000\000\050\253\263\310\117\202\000\000\030\013\343\323\347\000\000\000\210\253\117\270\012\000\000\000\110\151\362\031\026\032\000\000\012\055\014\266\067\134\002\000\130\012\346\273\364\024\000\000";
 
 static int _raise_never_returns(Ast node);
 
@@ -136,7 +63,20 @@ static int _call_never_returns(Ast node);
 
 static int _contains_return(Ast node);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+Var String_var(String);
+
+Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -251,10 +191,18 @@ __attribute__((constructor)) static void _file_init_(void){
   _110 = cons(_31, _109);
 }
 
+Var int_var(int);
+
 List binding_identity_new(int identity, String spelling){
   if(! _init_guard_) _file_init_();
   return cons(_0, cons(int_var(identity), cons(String_var(spelling), NULL)));
 }
+
+String Var_string(Var);
+
+int Var_is_integer(Var);
+
+long Var_integer(Var);
 
 int binding_identity_try_parts(List binding, int * identity, String * spelling){
   if(! _init_guard_) _file_init_();
@@ -318,6 +266,22 @@ int ast_changes_left_operand(Symbol op){
   return op == 1848 || op == 2046 || Symbol_is_assignment_op(op);
 }
 
+Var Array_push(Array, Var);
+
+size_t Array_len(Array);
+
+Var Array_take_last(Array);
+
+int Var_is(Var, Symbol);
+
+int Var_is_nil(Var);
+
+List Var_list(Var);
+
+Var List_car(List);
+
+int List_truth(List);
+
 int ast_contains_head(Var value, Symbol kind){
   Array pending = Array_new();
   {
@@ -370,6 +334,22 @@ int ast_contains_head(Var value, Symbol kind){
 }
 }
 
+List List_cdr(List);
+
+List x2c_func_reference_type(Func, unsigned, unsigned);
+
+FuncArg FuncArg_reference(const void *, List);
+
+FuncArg FuncArg_value(Var);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
+
+int Var_equal(Var, Var);
+
+int List_equal(List, List);
+
+List Array_list_free(Array);
+
 Ast Ast_rewrite_children(Ast ast, Func per_child){
   if(! _init_guard_) _file_init_();
   Var child;
@@ -395,6 +375,8 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
   }
   return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
+
+Var List_caddr(List);
 
 static Ast _unwrap_origin(Ast node){
   while(List_truth(node) && Var_equal(List_car(node), Symbol_var(104))){
@@ -423,6 +405,8 @@ return NULL;
 return node;
 }
 
+Var List_cadr(List);
+int SymbolSet_contains(SymbolSet, Symbol);
 static int _raise_never_returns(Ast node){
   Var code_ast = List_cadr(node);  if(! Var_is(code_ast, 806120)) return 0;
   {
@@ -437,6 +421,7 @@ default: break;
 return 0;
 }
 
+int String_equal(String, String);
 static int _call_never_returns(Ast node){
 
   {
@@ -454,6 +439,8 @@ default: break;
 return 0;
 }
 
+Iter List_iter(List, Iter);
+int Iter_try_next(Iter, Var *);
 static int _contains_return(Ast node){
   Var head = List_car(node);  if(Var_is(head, 1328354264)){
     if(Var_equal(head, Symbol_var(1219800220))) return 1;  if(Var_equal(head, Symbol_var(458361162716))) return 0;
@@ -470,6 +457,7 @@ static int _contains_return(Ast node){
   return 0;
 }
 
+Var List_last(List);
 int Ast_never_returns(Ast ast){
   if(! _init_guard_) _file_init_();  List node = _unwrap_origin(ast);  if(! List_truth(node) || ! Var_is(List_car(node), 1328354264)) return 0;  Symbol head = Var_symbol(List_car(node));  if(head == 37833930) return _raise_never_returns(node);  if(head == 41184168) return _call_never_returns(node);  if(head != 5011670 || _contains_return(node)) return 0;  Var last = List_last(node);  if(! Var_is(last, 806120)) return 0;  Ast terminal = Var_pointer(last);  return Ast_never_returns(terminal);
 }
@@ -491,6 +479,9 @@ default: break;
 return List_cdr(ast);
 }
 
+int List_len(List);
+Var List_getindex(List, int);
+void Array_free(Array);
 List Ast_initializer_functions(Ast ast, List * source){
   if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, & header);  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_31, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
     List choice;  Iter _x2c_macro_iterator_1 = List_iter(cases, &(struct Iter){

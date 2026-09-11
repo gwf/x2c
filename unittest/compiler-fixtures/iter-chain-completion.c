@@ -22,6 +22,31 @@ static Var _18, _15, _10, _9, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var double_value(Var value);
+
+static int is_even(Var value);
+
+static Var add_pair(Var left, Var right);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_DC10D477_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+static Func _x2c_func_handle_1;
+
+_x2c_initializer_choice_DC10D477_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _13)))
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
+
+static Func _x2c_func_handle_2;
+
+_x2c_initializer_choice_DC10D477_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _19)))
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -29,12 +54,6 @@ Var String_var(String);
 List cons(Var, List);
 
 Var List_var(List);
-
-static void _x2c_static_initialize_0(void);
-
-static void _x2c_static_initialize_1(void);
-
-static void _x2c_static_initialize_2(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -91,15 +110,9 @@ Iter Iter_map(Iter, Func, Iter);
 
 Iter range(int, int, int, Iter);
 
-static Func _x2c_func_handle_1;
-
-static Func _x2c_func_handle_0;
-
 Var Iter_sum(Iter);
 
 Iter Iter_map2(Iter, Iter, Func, Iter);
-
-static Func _x2c_func_handle_2;
 
 int Iter_try_next(Iter, Var *);
 
@@ -191,20 +204,12 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_DC10D477_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 45156);
   return double_value(a0);
   ;
 }
 
-static Func _x2c_func_handle_1;
-
-_x2c_initializer_choice_DC10D477_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _13)))
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 45156);
   Var a1 = x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 1, 45156);
@@ -212,9 +217,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_2;
-
-_x2c_initializer_choice_DC10D477_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _19)))
 #undef _x2c_initializer_choice_DC10D477_0_expanded
 #undef _x2c_initializer_choice_DC10D477_0
 #undef _x2c_initializer_choice_DC10D477_1_expanded

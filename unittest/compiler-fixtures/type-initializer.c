@@ -27,6 +27,8 @@ static String label;
 _x2c_initializer_choice_B3705BE9_2((label = NULL))
 static int _init_guard_ = 0;
 
+static int setup(void);
+
 static int setup(void){
   return 42;
 }

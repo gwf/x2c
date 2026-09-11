@@ -10,19 +10,9 @@ static String _0;
 
 static int _init_guard_ = 0;
 
-static void _x2c_static_initialize_0(void);
+__attribute__((constructor)) static void _file_init_(void);
 
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("typed");
-  _x2c_static_initialize_0();
-}
-
-static String echo(String value){
-  return value;
-}
+static String echo(String value);
 
 static String _x2c_callback_adapt_0(Var a0);
 
@@ -45,6 +35,28 @@ static Callbacks callbacks[] ={
 static StringCallback duplicate;
 
 _x2c_initializer_choice_C7BA8BF4_0((duplicate = _x2c_callback_adapt_0))
+static String _x2c_callback_adapt_0(Var a0);
+
+static String _x2c_callback_adapt_1(Var a0);
+
+static int _x2c_callback_adapt_2(Var a0, Var a1);
+
+static int _x2c_callback_adapt_3(Var a0, Var a1);
+
+static Iter _x2c_callback_adapt_4(Var a0, Iter a1);
+
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("typed");
+  _x2c_static_initialize_0();
+}
+
+static String echo(String value){
+  return value;
+}
+
 void Scope_retain(void);
 
 Var String_var(String);

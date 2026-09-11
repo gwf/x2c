@@ -2,6 +2,10 @@
 
 #include "var-wide-unsigned-long-long.h"
 
+static Var box_value(unsigned long long value);
+
+static unsigned long long unbox_value(Var value);
+
 static Var box_value(unsigned long long value){
   return Var_box_ulong_long(value);
 }

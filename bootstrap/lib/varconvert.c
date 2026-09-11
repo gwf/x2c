@@ -8,6 +8,17 @@ static Var _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+#include "var.h"
+#include "error.h"
+#include "list.h"
+#include "string.h"
+#include "symbol.h"
+#include "symbolset.h"
+#include <limits.h>
+#include <math.h>
+#include <string.h>
 static const SymbolSet numeric_tags =(SymbolSet) "\001\000\000\000\017\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\012\000\004\010\005\001\010\000\005\007\017\006\007\000\000\000\003\000\000\000\010\000\012\006\161\165\000\000\000\000\000\000\161\151\000\000\000\000\000\000\155\261\072\000\000\000\000\000\155\261\064\000\000\000\000\000\145\263\072\000\000\000\000\000\145\263\064\000\000\000\000\000\145\063\063\000\000\000\000\000\161\264\072\000\000\000\000\000\161\264\064\000\000\000\000\000\151\066\063\000\000\000\000\000\216\173\014\000\000\000\000\000\216\173\254\002\000\000\000\000\216\173\214\001\000\000\000\000\216\173\214\125\000\000\000\000\012\023\365\021\006\000\000\000";
 
 static const X2CVarNumericInfo numerics[] ={
@@ -60,77 +71,6 @@ static const X2CVarNumericInfo numerics[] ={
 }
 ;
 
-#include "var.h"
-#include "error.h"
-#include "list.h"
-#include "string.h"
-#include "symbol.h"
-#include "symbolset.h"
-#include <limits.h>
-#include <math.h>
-#include <string.h>
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-int Var_encoding_valid(Var);
-
-int Var_is_void(Var);
-
-Symbol Var_tag(Var);
-
-Var Var_box_i8(char);
-
-Var Var_box_u8(uchar);
-
-Var Var_box_i16(short);
-
-Var Var_box_u16(ushort);
-
-Var Var_box_i32_bits(unsigned);
-
-Var Var_box_u32(unsigned);
-
-Var Var_new(Symbol, ...);
-
-Var Var_box_long(long);
-
-Var Var_box_ulong(unsigned long);
-
-Var Var_box_long_long(long long);
-
-Var Var_box_ulong_long(unsigned long long);
-
-int SymbolSet_index(SymbolSet, Symbol);
-
-unsigned Var_payload32(Var);
-
-long Var_long_value(Var);
-
-unsigned long Var_ulong_value(Var);
-
-long long Var_long_long_value(Var);
-
-unsigned long long Var_ulong_long_value(Var);
-
-float Var_decode_f32(Var);
-
-double Var_decode_f64(Var);
-
-long double Var_long_double_value(Var);
-
-Var Var_box_f32(float);
-
-Var Var_box_f64(double);
-
-Var Var_box_long_double(long double);
-
-int Var_known_tag(Symbol);
-
-Var List_var(List);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 static void _numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out);
 
 static long double _integer_limit(int bits);
@@ -144,6 +84,8 @@ static long double _numeric_long_double(X2CVarNumeric * value);
 static Var _convert_to_integer(X2CVarNumeric * source, Symbol target, int unsigned_target, int bits);
 
 static Var _convert_to_float(X2CVarNumeric * source, Symbol target);
+
+Var Symbol_var(Symbol);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -177,6 +119,14 @@ long long Var_signed_from_bits(unsigned long long raw, int bits){
   return value;
 }
 
+Var String_var(String);
+
+int Var_encoding_valid(Var);
+
+int Var_is_void(Var);
+
+Symbol Var_tag(Var);
+
 void Var_numeric_decode(Var value, X2CVarNumeric * out){
   if(! out){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 80};
@@ -206,6 +156,28 @@ void Var_numeric_decode(Var value, X2CVarNumeric * out){
   }
   _numeric_decode(value, info, out);
 }
+
+Var Var_box_i8(char);
+
+Var Var_box_u8(uchar);
+
+Var Var_box_i16(short);
+
+Var Var_box_u16(ushort);
+
+Var Var_box_i32_bits(unsigned);
+
+Var Var_box_u32(unsigned);
+
+Var Var_new(Symbol, ...);
+
+Var Var_box_long(long);
+
+Var Var_box_ulong(unsigned long);
+
+Var Var_box_long_long(long long);
+
+Var Var_box_ulong_long(unsigned long long);
 
 Var Var_integer_box(Symbol target, unsigned long long raw){
   X2CVarNumericInfo info;
@@ -252,6 +224,8 @@ Var Var_integer_box(Symbol target, unsigned long long raw){
   return result;
 }
 
+int SymbolSet_index(SymbolSet, Symbol);
+
 int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
   if(! out) return 0;
   if(tag == 28764 || tag == 2050956 || tag == 1854348) tag = 3356265;
@@ -260,6 +234,22 @@ int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
   * out = numerics[row];
   return 1;
 }
+
+unsigned Var_payload32(Var);
+
+long Var_long_value(Var);
+
+unsigned long Var_ulong_value(Var);
+
+long long Var_long_long_value(Var);
+
+unsigned long long Var_ulong_long_value(Var);
+
+float Var_decode_f32(Var);
+
+double Var_decode_f64(Var);
+
+long double Var_long_double_value(Var);
 
 static void _numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out){
   X2CVarNumeric decoded ={
@@ -366,6 +356,12 @@ static Var _convert_to_integer(X2CVarNumeric * source, Symbol target, int unsign
   return Var_integer_box(target, raw);
 }
 
+Var Var_box_f32(float);
+
+Var Var_box_f64(double);
+
+Var Var_box_long_double(long double);
+
 static Var _convert_to_float(X2CVarNumeric * source, Symbol target){
   switch(target){
     case 3355493 : return Var_box_f32(_numeric_f32(source));
@@ -380,6 +376,10 @@ static Var _convert_to_float(X2CVarNumeric * source, Symbol target){
   }
 
 }
+
+int Var_known_tag(Symbol);
+
+Var List_var(List);
 
 Var Var_convert(Var value, Symbol target){
   if(! _init_guard_) _file_init_();

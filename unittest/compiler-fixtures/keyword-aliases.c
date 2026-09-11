@@ -18,11 +18,44 @@
 
 static int _init_guard_ = 0;
 
-static void _x2c_static_initialize_0(void);
+__attribute__((constructor)) static void _file_init_(void);
 
-static void _x2c_static_initialize_1(void);
+static int calculate(int value);
 
-static void _x2c_static_initialize_2(void);
+static int before_alias(void);
+
+static int first_alias(void);
+
+static int frozen_before_redefinition(void);
+
+static int frozen_after_redefinition(void);
+
+static int direct_unit;
+
+_x2c_initializer_choice_279F17D4_0((direct_unit = 3))
+static int aliased_unit;
+
+_x2c_initializer_choice_279F17D4_1((aliased_unit = 4))
+static int stacked_unit;
+
+_x2c_initializer_choice_279F17D4_2((stacked_unit = 5))
+typedef struct KeywordRecord{
+  int direct_field;
+  int aliased_field;
+}
+KeywordRecord;
+
+static int direct_function(void);
+
+static int aliased_function(void);
+
+static int stacked_function(void);
+
+static int second_alias(void);
+
+static void direct_captured_raise(void);
+
+static void aliased_captured_raise(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -52,21 +85,6 @@ static int frozen_before_redefinition(void){
 static int frozen_after_redefinition(void){
   return(1 + 4);
 }
-
-static int direct_unit;
-
-_x2c_initializer_choice_279F17D4_0((direct_unit = 3))
-static int aliased_unit;
-
-_x2c_initializer_choice_279F17D4_1((aliased_unit = 4))
-static int stacked_unit;
-
-_x2c_initializer_choice_279F17D4_2((stacked_unit = 5))
-typedef struct KeywordRecord{
-  int direct_field;
-  int aliased_field;
-}
-KeywordRecord;
 
 static int direct_function(void){
   return 7;

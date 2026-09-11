@@ -2,6 +2,8 @@
 
 #include "binding-identity.h"
 
+static Var _x2c_lambda_0(Var value);
+
 binding_phase5_Value binding_phase5_shadow(binding_phase5_Value value){
   binding_phase5_Value result = value;
   {
@@ -14,8 +16,6 @@ binding_phase5_Value binding_phase5_shadow(binding_phase5_Value value){
 binding_phase5_Value binding_phase5_Box_bump(binding_phase5_Box box, binding_phase5_Value value){
   return box.value + value;
 }
-
-static Var _x2c_lambda_0(Var value);
 
 Var int_var(int);
 

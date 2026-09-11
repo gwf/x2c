@@ -2,6 +2,8 @@
 
 #include "import-method-resolution.h"
 
+static int Var_vec(Var value);
+
 int Var_truthy(Var);
 
 static int Var_vec(Var value){

@@ -2,6 +2,10 @@
 
 #include "macro-reference-parameter.h"
 
+static void add(int * value, int amount);
+
+static void macro_add(int * _x2c_macro_value_0);
+
 static void add(int * value, int amount){
   (* value) += amount;
 }

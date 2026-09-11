@@ -4,6 +4,14 @@
 
 #include "error.h"
 
+static void raise_empty(void);
+
+_Noreturn static void raise_terminal(void);
+
+static void raise_after_return(int code);
+
+static void raise_caught(void);
+
 static void raise_empty(void){
   {
     static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_empty",.line = 4};

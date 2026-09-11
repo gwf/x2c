@@ -10,6 +10,10 @@ static Var _51, _46, _45, _42, _38, _36, _35, _29, _24, _18, _17, _16, _12, _9, 
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static int classify(List form);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);

@@ -5,8 +5,61 @@
 > cleanup measurements in dbba113. Acceptance-check repairs followed on
 > 2026-09-10. Historical raw checkpoints were not retained in the linked
 > worktrees, so the repaired checks cannot revalidate those results here.
-> Remaining: a fresh recorded correctness run and the documented Adam
-> matching limitation. Package milestones are archived separately.
+> Primary and supplemental acceptance are recorded; final publication
+> and deployment remain.
+> The matched Adam control passes. Stock Adam's recorded explicit tabular
+> loss divergence remains a failed tolerance and the accepted limitation.
+
+## Fresh acceptance, 2026-09-11
+
+Retirement review found missing phase/startup costs, unique-message error
+churn, all four C++ attribution sizes, and a sequence-window lifetime
+correction/plot. The separate supplemental session now records those cases:
+12 paired phase blocks, nine startup pairs, fixed/unique errors at 1,024
+and 4,096 requests, all four interop sizes, and corrected sequence sweeps.
+The sequence model/optimizer handles return to zero between windows.
+The primary measurements below retain their original source and outcomes.
+Their MNIST timing used 20 warmup batches. The separate counter-free
+correction uses the required 50 and records five fresh-process pairs at
+one and four threads. All 20 processes completed: median x2c/Python times
+are 14.1525/14.3631 seconds and 9.9758/10.2849 seconds respectively.
+The original results remain explicitly labeled. Supplemental evidence is
+under `torch-comparison/supplement` beside the primary evidence below.
+The residual process-footprint excess in pooled canonical churn remains
+unresolved; stable owner counts do not establish its allocator cause or
+general memory suitability. This is a measured limitation, not a hidden
+passing verdict or authorization for another runtime redesign.
+
+The final primary session uses the pinned 2.10.0 wheel, counter-free native
+objects, 16 timing configurations with five fresh-process pairs each, full
+first-update and final checkpoints, and separate matched/stock verdicts.
+All 160 timing process logs are retained. Command-scoped sleep prevention
+was active; no host sleep was recorded. The host was not isolated from
+unrelated desktop applications or Docker services.
+
+A separate counter-enabled session covers 17 paired memory profiles,
+including steady use and ordinary/pooled/hoisted canonical churn at
+100,000, 200,000 and 400,000 requests. Every sample log reports zero dropped
+records and every process remains below the 2 GiB cap. Native handle and
+Scope counts are stable after request cleanup; ordinary canonical storage
+grows, while per-request List pool brackets keep it fixed. Attribution
+also measures the cost of scope length and explicit early release.
+
+[REPORT.md](../packages/torch/benchmarks/REPORT.md) retains stock failures,
+per-workload timing variability, incremental memory peaks and attribution.
+[MATCHED.md](../packages/torch/benchmarks/MATCHED.md) records the separate
+passing control. No threshold was relaxed: stock explicit tabular loss has
+0.223% relative divergence against the 0.1% limit. Counter-enabled and
+sleep-affected prior timings remain historical, not headline measurements.
+
+Raw commands, environments, checkpoints, binaries, source archive and logs
+are preserved at
+`/Users/gary/Documents/x2c-evidence/closeout-20260910/torch-comparison/`.
+The `final-session` directory owns the final primary evidence.
+The separate `shipped-final` directory records the packaged-library lane:
+counter-free build, matched Adam, all four applications passing 41 agreement
+rows, complete checkpoints and binaries. It is correctness evidence only;
+headline timing uses the primary wheel lane above.
 
 ## Outcome and boundary
 

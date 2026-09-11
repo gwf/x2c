@@ -8,270 +8,6 @@ static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-static VarMethods _x2c__x2c_protocol_methods_0;
-
-static VarMethods _x2c__x2c_protocol_methods_1;
-
-static VarMethods _x2c__x2c_protocol_methods_2;
-
-static VarMethods _x2c__x2c_protocol_methods_3;
-
-static VarMethods _x2c__x2c_protocol_methods_4;
-
-static VarMethods _x2c__x2c_protocol_methods_5;
-
-static VarMethods _x2c__x2c_protocol_methods_6;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_1;
-
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_4;
-  const void * _x2c_defer_capture_5;
-}
-_x2c_defer_env_2;
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_6;
-  const void * _x2c_defer_capture_7;
-}
-_x2c_defer_env_3;
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_4;
-
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_10;
-  const void * _x2c_defer_capture_11;
-}
-_x2c_defer_env_5;
-
-typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_12;
-  const void * _x2c_defer_capture_13;
-}
-_x2c_defer_env_6;
-
-typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_14;
-  const void * _x2c_defer_capture_15;
-}
-_x2c_defer_env_7;
-
-typedef struct _x2c_defer_env_8{
-  const void * _x2c_defer_capture_16;
-  const void * _x2c_defer_capture_17;
-}
-_x2c_defer_env_8;
-
-typedef struct _x2c_defer_env_9{
-  const void * _x2c_defer_capture_18;
-  const void * _x2c_defer_capture_19;
-}
-_x2c_defer_env_9;
-
-typedef struct _x2c_defer_env_10{
-  const void * _x2c_defer_capture_20;
-  const void * _x2c_defer_capture_21;
-}
-_x2c_defer_env_10;
-
-typedef struct _x2c_defer_env_11{
-  const void * _x2c_defer_capture_22;
-  const void * _x2c_defer_capture_23;
-}
-_x2c_defer_env_11;
-
-typedef struct _x2c_defer_env_12{
-  const void * _x2c_defer_capture_24;
-  const void * _x2c_defer_capture_25;
-}
-_x2c_defer_env_12;
-
-typedef struct _x2c_defer_env_13{
-  const void * _x2c_defer_capture_26;
-  const void * _x2c_defer_capture_27;
-}
-_x2c_defer_env_13;
-
-typedef struct _x2c_defer_env_14{
-  const void * _x2c_defer_capture_28;
-  const void * _x2c_defer_capture_29;
-}
-_x2c_defer_env_14;
-
-typedef struct _x2c_defer_env_15{
-  const void * _x2c_defer_capture_30;
-  const void * _x2c_defer_capture_31;
-}
-_x2c_defer_env_15;
-
-typedef struct _x2c_defer_env_16{
-  const void * _x2c_defer_capture_32;
-  const void * _x2c_defer_capture_33;
-}
-_x2c_defer_env_16;
-
-typedef struct _x2c_defer_env_17{
-  const void * _x2c_defer_capture_34;
-  const void * _x2c_defer_capture_35;
-}
-_x2c_defer_env_17;
-
-typedef struct _x2c_defer_env_18{
-  const void * _x2c_defer_capture_36;
-  const void * _x2c_defer_capture_37;
-}
-_x2c_defer_env_18;
-
-typedef struct _x2c_defer_env_19{
-  const void * _x2c_defer_capture_38;
-  const void * _x2c_defer_capture_39;
-}
-_x2c_defer_env_19;
-
-typedef struct _x2c_defer_env_20{
-  const void * _x2c_defer_capture_40;
-  const void * _x2c_defer_capture_41;
-}
-_x2c_defer_env_20;
-
-typedef struct _x2c_defer_env_21{
-  const void * _x2c_defer_capture_42;
-  const void * _x2c_defer_capture_43;
-}
-_x2c_defer_env_21;
-
-typedef struct _x2c_defer_env_22{
-  const void * _x2c_defer_capture_44;
-  const void * _x2c_defer_capture_45;
-}
-_x2c_defer_env_22;
-
-typedef struct _x2c_defer_env_23{
-  const void * _x2c_defer_capture_46;
-  const void * _x2c_defer_capture_47;
-}
-_x2c_defer_env_23;
-
-typedef struct _x2c_defer_env_24{
-  const void * _x2c_defer_capture_48;
-  const void * _x2c_defer_capture_49;
-}
-_x2c_defer_env_24;
-
-typedef struct _x2c_defer_env_25{
-  const void * _x2c_defer_capture_50;
-  const void * _x2c_defer_capture_51;
-}
-_x2c_defer_env_25;
-
-typedef struct _x2c_defer_env_26{
-  const void * _x2c_defer_capture_52;
-  const void * _x2c_defer_capture_53;
-}
-_x2c_defer_env_26;
-
-typedef struct _x2c_defer_env_27{
-  const void * _x2c_defer_capture_54;
-  const void * _x2c_defer_capture_55;
-}
-_x2c_defer_env_27;
-
-typedef struct _x2c_defer_env_28{
-  const void * _x2c_defer_capture_56;
-  const void * _x2c_defer_capture_57;
-}
-_x2c_defer_env_28;
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-Var int_var(int);
-
-int Var_compare(Var, Var);
-
-Var float_var(float);
-
-Var double_var(double);
-
-int String_compare(String, String);
-
-Buffer Buffer_new(size_t);
-
-String Buffer_str_free(Buffer);
-
-void Block_reserve(Block, size_t);
-
-String Var_string(Var);
-
-Var Context_export_nested(Context, Var);
-
-void Block_append(Block, const void *, size_t);
-
-int x2c_normalize_index(int, int);
-
-Block Block_new(size_t);
-
-int x2c_normalize_slice(int *, int *, int, int);
-
-int Block_try_pop(Block, void *);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Var char_var(char);
-
-Buffer Var_write_str(Var, Buffer);
-
-Buffer Var_write_repr(Var, Buffer);
-
-Var Array_getindex(Array, int);
-
-int Var_int(Var);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-int Context_owns(Context, void *);
-
-Scope * Context_export_destination(Context);
-
-void Block_move_to(Block, Scope *);
-
-void Context_move_allocation(Context, void *);
-
-Var short_var(short);
-
-Var long_var(long);
-
-int String_equal(String, String);
-
-void Block_clear(Block);
-
-size_t Block_len(Block);
-
-size_t Block_capacity(Block);
-
-int Block_truth(Block);
-
-void Block_pop(Block);
-
-void Block_free(Block);
-
-void Block_truncate(Block, size_t);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 _Noreturn static void _bad_index(String owner, int index, size_t size);
@@ -568,6 +304,8 @@ static inline int _x2c_proto_arraychar_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arraychar_compare_0(Var a0, Var a1);
 
+int ArrayChar_truth(ArrayChar);
+
 static inline int _x2c_proto_arraychar_truth_0(Var a0);
 
 static inline Iter _x2c_proto_arraychar_iter_0(Var a0, Iter a1);
@@ -584,6 +322,8 @@ static inline Var _x2c_proto_arraychar_postfixindex_0(Var a0, Var a1, Symbol a2)
 
 static inline Var _x2c_proto_arraychar_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_0;
+
 static inline String _x2c_proto_arraydbl_str_0(Var a0);
 
 static inline String _x2c_proto_arraydbl_repr_0(Var a0);
@@ -595,6 +335,8 @@ static inline Buffer _x2c_proto_arraydbl_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_arraydbl_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arraydbl_compare_0(Var a0, Var a1);
+
+int ArrayDbl_truth(ArrayDbl);
 
 static inline int _x2c_proto_arraydbl_truth_0(Var a0);
 
@@ -612,6 +354,8 @@ static inline Var _x2c_proto_arraydbl_postfixindex_0(Var a0, Var a1, Symbol a2);
 
 static inline Var _x2c_proto_arraydbl_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_1;
+
 static inline String _x2c_proto_arrayfloat_str_0(Var a0);
 
 static inline String _x2c_proto_arrayfloat_repr_0(Var a0);
@@ -623,6 +367,8 @@ static inline Buffer _x2c_proto_arrayfloat_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_arrayfloat_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arrayfloat_compare_0(Var a0, Var a1);
+
+int ArrayFloat_truth(ArrayFloat);
 
 static inline int _x2c_proto_arrayfloat_truth_0(Var a0);
 
@@ -640,6 +386,8 @@ static inline Var _x2c_proto_arrayfloat_postfixindex_0(Var a0, Var a1, Symbol a2
 
 static inline Var _x2c_proto_arrayfloat_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_2;
+
 static inline String _x2c_proto_arrayint_str_0(Var a0);
 
 static inline String _x2c_proto_arrayint_repr_0(Var a0);
@@ -651,6 +399,8 @@ static inline Buffer _x2c_proto_arrayint_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_arrayint_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arrayint_compare_0(Var a0, Var a1);
+
+int ArrayInt_truth(ArrayInt);
 
 static inline int _x2c_proto_arrayint_truth_0(Var a0);
 
@@ -668,6 +418,8 @@ static inline Var _x2c_proto_arrayint_postfixindex_0(Var a0, Var a1, Symbol a2);
 
 static inline Var _x2c_proto_arrayint_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_3;
+
 static inline String _x2c_proto_arraylong_str_0(Var a0);
 
 static inline String _x2c_proto_arraylong_repr_0(Var a0);
@@ -679,6 +431,8 @@ static inline Buffer _x2c_proto_arraylong_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_arraylong_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arraylong_compare_0(Var a0, Var a1);
+
+int ArrayLong_truth(ArrayLong);
 
 static inline int _x2c_proto_arraylong_truth_0(Var a0);
 
@@ -696,6 +450,8 @@ static inline Var _x2c_proto_arraylong_postfixindex_0(Var a0, Var a1, Symbol a2)
 
 static inline Var _x2c_proto_arraylong_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_4;
+
 static inline String _x2c_proto_arrayshort_str_0(Var a0);
 
 static inline String _x2c_proto_arrayshort_repr_0(Var a0);
@@ -707,6 +463,8 @@ static inline Buffer _x2c_proto_arrayshort_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_arrayshort_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arrayshort_compare_0(Var a0, Var a1);
+
+int ArrayShort_truth(ArrayShort);
 
 static inline int _x2c_proto_arrayshort_truth_0(Var a0);
 
@@ -724,6 +482,8 @@ static inline Var _x2c_proto_arrayshort_postfixindex_0(Var a0, Var a1, Symbol a2
 
 static inline Var _x2c_proto_arrayshort_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_5;
+
 static inline String _x2c_proto_arraystring_str_0(Var a0);
 
 static inline String _x2c_proto_arraystring_repr_0(Var a0);
@@ -735,6 +495,8 @@ static inline Buffer _x2c_proto_arraystring_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_arraystring_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_arraystring_compare_0(Var a0, Var a1);
+
+int ArrayString_truth(ArrayString);
 
 static inline int _x2c_proto_arraystring_truth_0(Var a0);
 
@@ -752,77 +514,239 @@ static inline Var _x2c_proto_arraystring_postfixindex_0(Var a0, Var a1, Symbol a
 
 static inline Var _x2c_proto_arraystring_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_6;
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_4;
+  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_2;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_6;
+  const void * _x2c_defer_capture_7;
+}
+_x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_4;
+
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_11;
+}
+_x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_12;
+  const void * _x2c_defer_capture_13;
+}
+_x2c_defer_env_6;
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
+
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_14;
+  const void * _x2c_defer_capture_15;
+}
+_x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_16;
+  const void * _x2c_defer_capture_17;
+}
+_x2c_defer_env_8;
+
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
+
+typedef struct _x2c_defer_env_9{
+  const void * _x2c_defer_capture_18;
+  const void * _x2c_defer_capture_19;
+}
+_x2c_defer_env_9;
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 
+typedef struct _x2c_defer_env_10{
+  const void * _x2c_defer_capture_20;
+  const void * _x2c_defer_capture_21;
+}
+_x2c_defer_env_10;
+
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
+
+typedef struct _x2c_defer_env_11{
+  const void * _x2c_defer_capture_22;
+  const void * _x2c_defer_capture_23;
+}
+_x2c_defer_env_11;
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
 
+typedef struct _x2c_defer_env_12{
+  const void * _x2c_defer_capture_24;
+  const void * _x2c_defer_capture_25;
+}
+_x2c_defer_env_12;
+
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
+
+typedef struct _x2c_defer_env_13{
+  const void * _x2c_defer_capture_26;
+  const void * _x2c_defer_capture_27;
+}
+_x2c_defer_env_13;
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
 
+typedef struct _x2c_defer_env_14{
+  const void * _x2c_defer_capture_28;
+  const void * _x2c_defer_capture_29;
+}
+_x2c_defer_env_14;
+
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+
+typedef struct _x2c_defer_env_15{
+  const void * _x2c_defer_capture_30;
+  const void * _x2c_defer_capture_31;
+}
+_x2c_defer_env_15;
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 
+typedef struct _x2c_defer_env_16{
+  const void * _x2c_defer_capture_32;
+  const void * _x2c_defer_capture_33;
+}
+_x2c_defer_env_16;
+
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
+
+typedef struct _x2c_defer_env_17{
+  const void * _x2c_defer_capture_34;
+  const void * _x2c_defer_capture_35;
+}
+_x2c_defer_env_17;
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 
+typedef struct _x2c_defer_env_18{
+  const void * _x2c_defer_capture_36;
+  const void * _x2c_defer_capture_37;
+}
+_x2c_defer_env_18;
+
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
+
+typedef struct _x2c_defer_env_19{
+  const void * _x2c_defer_capture_38;
+  const void * _x2c_defer_capture_39;
+}
+_x2c_defer_env_19;
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
 
+typedef struct _x2c_defer_env_20{
+  const void * _x2c_defer_capture_40;
+  const void * _x2c_defer_capture_41;
+}
+_x2c_defer_env_20;
+
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
+
+typedef struct _x2c_defer_env_21{
+  const void * _x2c_defer_capture_42;
+  const void * _x2c_defer_capture_43;
+}
+_x2c_defer_env_21;
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
 
+typedef struct _x2c_defer_env_22{
+  const void * _x2c_defer_capture_44;
+  const void * _x2c_defer_capture_45;
+}
+_x2c_defer_env_22;
+
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
+
+typedef struct _x2c_defer_env_23{
+  const void * _x2c_defer_capture_46;
+  const void * _x2c_defer_capture_47;
+}
+_x2c_defer_env_23;
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
 
+typedef struct _x2c_defer_env_24{
+  const void * _x2c_defer_capture_48;
+  const void * _x2c_defer_capture_49;
+}
+_x2c_defer_env_24;
+
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
+
+typedef struct _x2c_defer_env_25{
+  const void * _x2c_defer_capture_50;
+  const void * _x2c_defer_capture_51;
+}
+_x2c_defer_env_25;
 
 static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25);
 
+typedef struct _x2c_defer_env_26{
+  const void * _x2c_defer_capture_52;
+  const void * _x2c_defer_capture_53;
+}
+_x2c_defer_env_26;
+
 static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26);
+
+typedef struct _x2c_defer_env_27{
+  const void * _x2c_defer_capture_54;
+  const void * _x2c_defer_capture_55;
+}
+_x2c_defer_env_27;
 
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
 
+typedef struct _x2c_defer_env_28{
+  const void * _x2c_defer_capture_56;
+  const void * _x2c_defer_capture_57;
+}
+_x2c_defer_env_28;
+
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
-
-int ArrayChar_truth(ArrayChar);
-
-int ArrayDbl_truth(ArrayDbl);
-
-int ArrayFloat_truth(ArrayFloat);
-
-int ArrayInt_truth(ArrayInt);
-
-int ArrayLong_truth(ArrayLong);
-
-int ArrayShort_truth(ArrayShort);
-
-int ArrayString_truth(ArrayString);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -871,6 +795,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _5 = String_new("ArrayDbl");
   _6 = String_new("ArrayString");
 }
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+Var int_var(int);
 
 _Noreturn static void _bad_index(String owner, int index, size_t size){
   {
@@ -924,21 +854,33 @@ static int _array_compare_long(long a, long b){
   return(a > b) -(a < b);
 }
 
+int Var_compare(Var, Var);
+
+Var float_var(float);
+
 static int _array_compare_float(float a, float b){
   return Var_compare(float_var(a), float_var(b));
 }
+
+Var double_var(double);
 
 static int _array_compare_double(double a, double b){
   return Var_compare(double_var(a), double_var(b));
 }
 
+int String_compare(String, String);
+
 static int _array_compare_string(String a, String b){
   return String_compare(a, b);
 }
 
+Buffer Buffer_new(size_t);
+
 static Buffer _array_new_buffer(void){
   return Buffer_new(0);
 }
+
+String Buffer_str_free(Buffer);
 
 static String _array_finish_buffer(Buffer out){
   return Buffer_str_free(out);
@@ -949,6 +891,14 @@ static Block _prepare_array_export(Block array, Context source){
   (void) source;
   return NULL;
 }
+
+void Block_reserve(Block, size_t);
+
+String Var_string(Var);
+
+Var Context_export_nested(Context, Var);
+
+void Block_append(Block, const void *, size_t);
 
 static ArrayString _prepare_string_array_export(ArrayString array, Context source){
   ArrayString staged = ArrayString_new(), result = NULL;
@@ -1010,6 +960,8 @@ static int ArrayChar__core_insert(ArrayChar _x2c_macro_array_0, int _x2c_macro_i
   return 1;
 }
 
+int x2c_normalize_index(int, int);
+
 static int ArrayChar__core_remove(ArrayChar _x2c_macro_array_0, int _x2c_macro_index_0, char * _x2c_macro_out_0){
   if((void *) _x2c_macro_array_0 == NULL || ! _x2c_macro_out_0) return 0;
   int _x2c_macro_n_0 =(int) _x2c_macro_array_0 -> length;
@@ -1022,12 +974,16 @@ static int ArrayChar__core_remove(ArrayChar _x2c_macro_array_0, int _x2c_macro_i
   return 1;
 }
 
+Block Block_new(size_t);
+
 static ArrayChar ArrayChar__core_copy(ArrayChar _x2c_macro_array_0){
   if((void *) _x2c_macro_array_0 == NULL) return NULL;
   ArrayChar _x2c_macro_copy_0 =(ArrayChar) Block_new(sizeof(char));
   Block_append((Block) _x2c_macro_copy_0, _x2c_macro_array_0 -> bytes, _x2c_macro_array_0 -> length);
   return _x2c_macro_copy_0;
 }
+
+int x2c_normalize_slice(int *, int *, int, int);
 
 static ArrayChar ArrayChar__core_getslice(ArrayChar _x2c_macro_array_0, int _x2c_macro_start_0, int _x2c_macro_end_0, int _x2c_macro_step_0){
   if((void *) _x2c_macro_array_0 == NULL || ! _x2c_macro_step_0) return NULL;
@@ -1207,6 +1163,8 @@ char ArrayChar_push(ArrayChar _x2c_macro_array_1, char _x2c_macro_value_1){
   return _x2c_macro_value_1;
 }
 
+int Block_try_pop(Block, void *);
+
 int ArrayChar_try_take_last(ArrayChar _x2c_macro_array_1, char * _x2c_macro_out_1){
   return(void *) _x2c_macro_array_1 != NULL && _x2c_macro_out_1 ? Block_try_pop((Block) _x2c_macro_array_1, _x2c_macro_out_1) : 0;
 }
@@ -1347,6 +1305,14 @@ static int ArrayChar__core_compare(ArrayChar _x2c_macro_a_3, ArrayChar _x2c_macr
   return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
 }
 
+Buffer Buffer_write(Buffer, const char *);
+
+Var char_var(char);
+
+Buffer Var_write_str(Var, Buffer);
+
+Buffer Var_write_repr(Var, Buffer);
+
 static Buffer ArrayChar__core_write(ArrayChar _x2c_macro_array_3, Buffer _x2c_macro_out_3, Symbol _x2c_macro_mode_0){
   char * _x2c_macro_data_2 = ArrayChar_truth(_x2c_macro_array_3) ?(char *) _x2c_macro_array_3 -> bytes : NULL;
   size_t _x2c_macro_n_1 = ArrayChar_truth(_x2c_macro_array_3) ? _x2c_macro_array_3 -> length : 0;
@@ -1425,6 +1391,8 @@ String ArrayChar_repr(ArrayChar _x2c_macro_array_2){
   return _array_finish_buffer(_x2c_macro_out_2);
 }
 
+Var Array_getindex(Array, int);
+
 ArrayChar Array_arraychar(Array _x2c_macro_values_2){
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_macro_values_2 == NULL) return NULL;
@@ -1461,6 +1429,8 @@ ArrayChar Array_arraychar(Array _x2c_macro_values_2){
 }
 }
 
+int Var_int(Var);
+
 static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4){
   ArrayChar _x2c_macro_array_5 = Var_arraychar(_x2c_macro_iter_0 -> obj);
   int _x2c_macro_index_3 = Var_int(_x2c_macro_iter_0 -> state);
@@ -1471,10 +1441,20 @@ static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4){
   return 1;
 }
 
+Iter Iter_init(Iter, Var, IterNextFn, Var);
+
 Iter ArrayChar_iter(ArrayChar _x2c_macro_array_5, Iter _x2c_macro_dest_0){
   if((void *) _x2c_macro_dest_0 == NULL) return NULL;
   return Iter_init(_x2c_macro_dest_0, ArrayChar_var(_x2c_macro_array_5), _x2c_macro_next_0, int_var(0));
 }
+
+int Context_owns(Context, void *);
+
+Scope * Context_export_destination(Context);
+
+void Block_move_to(Block, Scope *);
+
+void Context_move_allocation(Context, void *);
 
 static ArrayChar ArrayChar_export_context(ArrayChar _x2c_macro_array_5, Context _x2c_macro_source_1){
   if((void *) _x2c_macro_array_5 == NULL || ! Context_owns(_x2c_macro_source_1, _x2c_macro_array_5)) return _x2c_macro_array_5;
@@ -1897,6 +1877,8 @@ static int ArrayShort__core_compare(ArrayShort _x2c_macro_a_8, ArrayShort _x2c_m
   if(_x2c_macro_asz_1 == _x2c_macro_bsz_1) return 0;
   return _x2c_macro_asz_1 < _x2c_macro_bsz_1 ? - 1 : 1;
 }
+
+Var short_var(short);
 
 static Buffer ArrayShort__core_write(ArrayShort _x2c_macro_array_9, Buffer _x2c_macro_out_8, Symbol _x2c_macro_mode_1){
   short * _x2c_macro_data_5 = ArrayShort_truth(_x2c_macro_array_9) ?(short *) _x2c_macro_array_9 -> bytes : NULL;
@@ -2999,6 +2981,8 @@ static int ArrayLong__core_compare(ArrayLong _x2c_macro_a_18, ArrayLong _x2c_mac
   if(_x2c_macro_asz_3 == _x2c_macro_bsz_3) return 0;
   return _x2c_macro_asz_3 < _x2c_macro_bsz_3 ? - 1 : 1;
 }
+
+Var long_var(long);
 
 static Buffer ArrayLong__core_write(ArrayLong _x2c_macro_array_21, Buffer _x2c_macro_out_18, Symbol _x2c_macro_mode_3){
   long * _x2c_macro_data_11 = ArrayLong_truth(_x2c_macro_array_21) ?(long *) _x2c_macro_array_21 -> bytes : NULL;
@@ -4444,6 +4428,8 @@ static ArrayString ArrayString__core_splice(ArrayString _x2c_macro_array_36, int
   return _x2c_macro_removed_6;
 }
 
+int String_equal(String, String);
+
 static int ArrayString__core_find(ArrayString _x2c_macro_array_36, String _x2c_macro_value_18){
   String * _x2c_macro_data_18 =(String *) _x2c_macro_array_36 -> bytes;
   int _x2c_macro_n_12 =(int) _x2c_macro_array_36 -> length;
@@ -4846,29 +4832,43 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_macro_array_41, C
 }
 }
 
+void Block_clear(Block);
+
 void ArrayChar_clear(ArrayChar a0){
   return Block_clear(ArrayChar_block(a0));
 }
+
+size_t Block_len(Block);
 
 size_t ArrayChar_len(ArrayChar a0){
   return Block_len(ArrayChar_block(a0));
 }
 
+size_t Block_capacity(Block);
+
 size_t ArrayChar_capacity(ArrayChar a0){
   return Block_capacity(ArrayChar_block(a0));
 }
+
+int Block_truth(Block);
 
 int ArrayChar_truth(ArrayChar a0){
   return Block_truth(ArrayChar_block(a0));
 }
 
+void Block_pop(Block);
+
 void ArrayChar_pop(ArrayChar a0){
   return Block_pop(ArrayChar_block(a0));
 }
 
+void Block_free(Block);
+
 void ArrayChar_free(ArrayChar a0){
   return Block_free(ArrayChar_block(a0));
 }
+
+void Block_truncate(Block, size_t);
 
 void ArrayChar_truncate(ArrayChar a0, size_t a1){
   return Block_truncate(ArrayChar_block(a0), a1);

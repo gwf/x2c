@@ -6,6 +6,10 @@ static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static int bump(int * value);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;

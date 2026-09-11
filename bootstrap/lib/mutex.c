@@ -4,14 +4,16 @@
 
 #include "error.h"
 
+#include "scope.h"
+#include <errno.h>
+#include <pthread.h>
 struct Mutex{
   pthread_mutex_t native;
 }
 ;
 
-#include "scope.h"
-#include <errno.h>
-#include <pthread.h>
+_Noreturn static void _error(const char * operation, int error);
+
 String String_new(const char *);
 
 Var Symbol_var(Symbol);
@@ -19,12 +21,6 @@ Var Symbol_var(Symbol);
 Var String_var(String);
 
 Var int_var(int);
-
-void * Scope_malloc(size_t);
-
-void Scope_free(void *);
-
-_Noreturn static void _error(const char * operation, int error);
 
 _Noreturn static void _error(const char * operation, int error){
   String name = String_new(operation);
@@ -35,6 +31,10 @@ _Noreturn static void _error(const char * operation, int error){
   }
 
 }
+
+void * Scope_malloc(size_t);
+
+void Scope_free(void *);
 
 Mutex Mutex_new(void){
   Mutex mutex = Scope_malloc(sizeof(struct Mutex));

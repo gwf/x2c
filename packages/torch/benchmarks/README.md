@@ -262,3 +262,84 @@ Long-run per-weight equality is reported, not required: float32 training
 diverges from a one-ulp difference over thousands of updates.
 
 `PILOT.md` holds the first measurements and the gaps they exposed.
+
+## Supplemental diagnostics
+
+The optional diagnostics fill in costs that whole-request timing cannot
+attribute. They use separate run IDs and do not replace the primary timing
+records. Counter-enabled phase timings are diagnostic observations only.
+
+```sh
+python3 packages/torch/benchmarks/run.py build --lane primary --counters
+python3 packages/torch/benchmarks/run.py env --run-id supplement --optimizer matched
+python3 packages/torch/benchmarks/run.py diagnose --run-id supplement \
+    --optimizer matched --steps 512 --samples 3
+python3 packages/torch/benchmarks/run.py memory --run-id supplement \
+    --profiles 4 --steps 512
+for requests in 1024 4096; do
+  python3 packages/torch/benchmarks/run.py errors --run-id supplement \
+      --steps "$requests"
+done
+for elements in 1 64 4096 65536; do
+  python3 packages/torch/benchmarks/run.py attribute --run-id supplement \
+      --elements "$elements" --requests 60
+done
+python3 packages/torch/benchmarks/run.py supplement --run-id supplement
+python3 packages/torch/benchmarks/plots.py supplement --supplement
+```
+
+`diagnose` runs native and explicit tabular forwards, MNIST, and sequence
+training. Each uses 50 warmup steps and fresh initial training state, then
+reports batch preparation/zero-grad, forward/loss, backward, optimizer step,
+and explicit cleanup separately. The startup measurement runs the same
+application with `startup`, which exits after imports, native initialization
+and thread configuration, before loading data. Loading, setup and model plus
+optimizer checkpoint operations have their own timers. Compare load and
+setup together: initial-weight loading belongs to different existing owners
+in Python and x2c. These clocks perturb short operations. Python destruction
+inside forward/backward remains in those columns; explicit cleanup is not
+the total cost of lifetime management.
+
+`errors` repeats the same native bad shape and catches it, then raises a
+contextual request error with either fixed text or a unique request number.
+Every request checks gradient-mode restoration and a valid forward result.
+The samples distinguish native handles, Scope allocations, the shared canonical
+String/List pool, and process footprint. Canonical message growth is not a
+native tensor leak. Python does not have x2c's canonical pools.
+
+The sequence memory sweep releases each model and optimizer before the next
+window length. Its plot reports cumulative process high water through that
+ascending sweep; earlier peaks and allocator caches are still present.
+All interop sizes retain distinct logs and JSON, with Python and each x2c
+lifetime checked against the direct C++ result.
+
+[SUPPLEMENT.md](SUPPLEMENT.md) records the current supplemental results and
+the unexplained remainder of the original canonical-churn process peak.
+Stable native/Scope counts and bounded List storage do not identify the
+source of that residual or establish general memory suitability.
+
+The original MNIST timing warmed 20 batches. Its separate correction uses
+50, with the same fresh model/optimizer reset and five pairs at each thread
+count, in a counter-free build:
+
+```sh
+python3 packages/torch/benchmarks/run.py build --lane primary
+python3 packages/torch/benchmarks/run.py env --run-id supplement-mnist50 --optimizer stock
+caffeinate -is python3 packages/torch/benchmarks/run.py time \
+    --run-id supplement-mnist50 --app mnist --threads 1,4 --samples 5
+python3 packages/torch/benchmarks/run.py supplement --run-id supplement \
+    --timing-run supplement-mnist50
+```
+
+The archived Python checks saved curves but did not print curve records.
+To restore the plot from an existing check and its original retained files,
+without modifying `check.json` or training again:
+
+```sh
+python3 packages/torch/benchmarks/plots.py original-run --paired-curves /path/to/original/out
+```
+
+This records file hashes and point counts in `paired-curves-provenance.json`.
+The reconstructed tabular panel is paired; MNIST and sequence panels contain
+Python only because the original native checks recorded no curves. Their
+panel titles say so. Future Python checks emit their saved curve points too.

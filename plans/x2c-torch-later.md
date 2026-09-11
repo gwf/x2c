@@ -141,9 +141,11 @@ handles throughout. Scope allocations grew from 355 to 2159; session
 destruction returned native handles to baseline. Its counter build does not
 replace the package's ordinary objects or extend any recurring gate.
 
-## Remaining proof and delivery
+## Remaining delivery
 
-- Record the fresh matched and stock benchmark outputs separately.
+- Fresh matched and stock benchmark outputs are recorded separately in
+  `packages/torch/benchmarks/MATCHED.md` and `REPORT.md`. The control passes;
+  stock explicit tabular loss remains over tolerance as accepted.
 - Complete final repository publication proof, delivery, and public
   documentation verification. Archive this plan with the closing revision
   and evidence only after those pass.

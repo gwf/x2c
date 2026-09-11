@@ -4,6 +4,13 @@
 
 #include "error.h"
 
+#include <string.h>
+#include "symbol.h"
+#include "map.h"
+#include "scope.h"
+#include "exception.h"
+#include "string-number.h"
+#include "symbolset.h"
 typedef enum TagId{
   _invalid_ = - 1, _u8_, _i8_, _u16_, _i16_, _u32_, _i32_, _f32_, _u48_, _i48_, _p48_, _f64_, _long_, _ulong_, _llong_, _ullong_, _ldouble_, _u8_p_, _i8_p_, _u16_p_, _i16_p_, _u32_p_, _i32_p_, _f32_p_, _ulong_p_, _long_p_, _f64_p_, _ullong_p_, _llong_p_, _ldouble_p_, _p48_p_, _u8_pp_, _i8_pp_, _u16_pp_, _i16_pp_, _u32_pp_, _i32_pp_, _f32_pp_, _ulong_pp_, _long_pp_, _f64_pp_, _ullong_pp_, _llong_pp_, _ldouble_pp_, _array_, _block_, _buffer_, _bytes_, _context_, _error_, _file_, _func_, _iter_, _lambda_, _list_, _logger_, _map_, _mutex_, _pipe_, _proc_, _regexp_, _rope_, _scope_, _slice_, _socket_, _stream_, _string_, _symbol_, _tensor_, _thread_, _token_, _var_, _array_p_, _block_p_, _buffer_p_, _bytes_p_, _context_p_, _error_p_, _file_p_, _func_p_, _iter_p_, _lambda_p_, _list_p_, _logger_p_, _map_p_, _mutex_p_, _pipe_p_, _proc_p_, _regexp_p_, _rope_p_, _scope_p_, _slice_p_, _socket_p_, _stream_p_, _string_p_, _symbol_p_, _tensor_p_, _thread_p_, _token_p_, _var_p_, _nan_, _neginf_, _posinf_, _void_, _tag_count_
 }
@@ -20,122 +27,6 @@ typedef struct VarDecoded{
   int custom_id, valid;
 }
 VarDecoded;
-
-static const SymbolSet tags =(SymbolSet) "\001\000\000\000\147\000\000\000\077\000\000\000\025\174\112\177\271\171\067\236\120\000\011\000\000\000\074\143\000\000\134\000\000\000\065\106\000\116\153\104\000\073\147\000\000\111\000\000\036\122\000\006\031\040\054\000\000\000\000\047\160\000\000\063\143\000\000\126\130\000\113\000\166\046\167\000\000\000\032\112\000\000\000\000\000\000\000\151\000\042\017\000\000\000\146\000\000\117\026\044\144\000\000\000\063\000\000\000\000\002\025\000\000\000\037\177\051\102\050\102\000\027\000\015\027\021\101\033\000\000\107\133\040\003\000\037\000\000\063\014\104\000\012\000\053\031\016\000\131\112\161\116\000\000\012\000\100\000\000\027\000\041\074\003\000\000\037\000\014\036\042\136\062\000\176\052\067\000\000\000\000\000\000\036\000\135\000\000\000\130\000\006\055\062\122\017\000\134\157\136\113\000\000\010\000\000\144\000\124\153\020\000\161\165\000\000\000\000\000\000\161\151\000\000\000\000\000\000\155\261\072\000\000\000\000\000\155\261\064\000\000\000\000\000\145\263\072\000\000\000\000\000\145\263\064\000\000\000\000\000\145\063\063\000\000\000\000\000\161\264\072\000\000\000\000\000\161\264\064\000\000\000\000\000\161\064\070\000\000\000\000\000\151\066\063\000\000\000\000\000\216\173\014\000\000\000\000\000\216\173\254\002\000\000\000\000\216\173\214\001\000\000\000\000\216\173\214\125\000\000\000\000\012\023\365\021\006\000\000\000\125\270\072\000\000\000\000\000\125\270\064\000\000\000\000\000\125\266\130\035\000\000\000\000\125\266\130\032\000\000\000\000\125\262\131\035\000\000\000\000\125\262\131\032\000\000\000\000\125\262\231\031\000\000\000\000\366\161\217\125\000\000\000\000\366\161\217\001\000\000\000\000\125\064\233\031\000\000\000\000\366\161\217\261\012\000\000\000\366\161\217\061\000\000\000\000\166\141\242\076\302\000\000\000\125\070\032\034\000\000\000\000\125\052\134\035\000\000\000\000\125\052\134\032\000\000\000\000\125\052\133\254\016\000\000\000\125\052\133\054\015\000\000\000\125\052\331\254\016\000\000\000\125\052\331\054\015\000\000\000\125\052\331\314\014\000\000\000\366\076\356\261\012\000\000\000\366\076\356\061\000\000\000\000\125\052\232\315\014\000\000\000\366\076\356\061\126\001\000\000\366\076\356\061\006\000\000\000\366\056\114\324\107\030\000\000\162\220\062\000\000\000\000\000\326\170\114\000\000\000\000\000\144\061\246\012\000\000\000\000\146\241\131\000\000\000\000\000\050\056\324\275\001\000\000\000\344\223\262\000\000\000\000\000\012\113\006\000\000\000\000\000\206\253\006\000\000\000\000\000\144\241\011\000\000\000\000\000\002\021\055\060\000\000\000\000\350\114\014\000\000\000\000\000\144\071\347\061\000\000\000\000\140\150\000\000\000\000\000\000\160\241\265\001\000\000\000\000\012\114\020\000\000\000\000\000\306\223\020\000\000\000\000\000\040\056\247\110\000\000\000\000\012\174\022\000\000\000\000\000\012\174\143\002\000\000\000\000\312\110\154\002\000\000\000\000\150\131\343\115\000\000\000\000\132\050\222\116\000\000\000\000\216\113\222\116\000\000\000\000\330\023\055\117\000\000\000\000\344\233\256\120\000\000\000\000\110\050\022\121\000\000\000\000\134\131\217\002\000\000\000\000\144\260\000\000\000\000\000\000\166\016\122\006\000\000\000\000\366\032\217\011\000\000\000\000\266\054\306\124\001\000\000\000\366\054\064\013\000\000\000\000\066\305\205\272\067\000\000\000\266\174\122\026\000\000\000\000\166\141\311\000\000\000\000\000\366\160\325\000\000\000\000\000\266\054\064\001\000\000\000\000\166\040\242\005\006\000\000\000\066\235\211\001\000\000\000\000\266\054\347\074\006\000\000\000\066\014\015\000\000\000\000\000\066\056\264\066\000\000\000\000\166\201\011\002\000\000\000\000\366\170\022\002\000\000\000\000\066\304\345\024\011\000\000\000\166\201\117\002\000\000\000\000\166\201\157\114\000\000\000\000\166\031\211\115\000\000\000\000\066\055\153\274\011\000\000\000\166\013\105\322\011\000\000\000\366\161\111\322\011\000\000\000\066\173\242\345\011\000\000\000\266\174\323\025\012\000\000\000\066\011\105\042\012\000\000\000\266\053\353\121\000\000\000\000\266\014\026\000\000\000\000\000\134\160\000\000\000\000\000\000\214\113\037\000\000\000\000\000\214\113\034\000\000\000\000\000\110\172\026\000\000\000\000\000";
-
-typedef union VarWideValue{
-  long long_value;
-  unsigned long ulong_value;
-  long long long_long_value;
-  unsigned long long ulong_long_value;
-  long double long_double_value;
-}
-VarWideValue;
-
-typedef struct VarWideBox{
-  Symbol tag;
-  VarWideValue value;
-}
-* VarWideBox;
-
-static Symbol custom_tags[32];
-
-static unsigned custom_tag_count;
-
-typedef struct VarIntegerParts{
-  int negative;
-  unsigned long long magnitude;
-}
-VarIntegerParts;
-
-#include <string.h>
-#include "symbol.h"
-#include "map.h"
-#include "scope.h"
-#include "exception.h"
-#include "string-number.h"
-#include "symbolset.h"
-#define VAR_CUSTOM_TAG_TOP     0x800C
-#define VAR_CUSTOM_TAG_COUNT   32
-int SymbolSet_index(SymbolSet, Symbol);
-
-void x2c_descriptor_thread_start_begin(void);
-
-int x2c_descriptor_registration_frozen(void);
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-void * Scope_malloc(size_t);
-
-void Scope_free(void *);
-
-int Var_is_wide(Var);
-
-void Scope_move(void *, Scope *);
-
-Scope Scope_owner(void *);
-
-unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
-
-int String_try_long(String, long *);
-
-Var int_var(int);
-
-int String_try_double(String, double *);
-
-Var double_var(double);
-
-String String_parse(String);
-
-Symbol Symbol_parse(char *);
-
-int String_parse_char(String);
-
-void x2c_descriptor_thread_start_end(int);
-
-static TagId _tag2id(Symbol tag);
-
-static inline unsigned long _bitmask(unsigned n);
-
-static inline unsigned _top_bits(Var v);
-
-static inline unsigned _middle_bits(Var v);
-
-static inline unsigned _bottom_bits(Var v);
-
-static VarWideBox _wide_box(Var v);
-
-static int _custom_tag_id(Symbol tag);
-
-static int _wide_encoding_valid(Var value, Symbol tag);
-
-static VarDecoded _decode_builtin(TagId id, Var value);
-
-static VarDecoded _decode(Var value);
-
-static Var _new_floating(TagId id, double d);
-
-static Var _new_pointer(TagId id, void * ptr);
-
-static Var _new_wide(TagId id, VarWideValue value);
-
-static Var _new_custom_pointer(int id, void * ptr);
-
-static Var _new_integer(TagId id, long value);
-
-static Var _new_symbol(TagId id, unsigned long u);
-
-static unsigned _hash_bytes(unsigned hash, void * ptr, int width);
-
-static unsigned long long _signed_magnitude(long long value);
-
-static VarIntegerParts _integer_parts(Var v);
-
-static int _magnitude_floating_compare(unsigned long long integer, long double floating);
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static const VarTagInfo taginfo[] ={
   {
@@ -454,9 +345,82 @@ static const VarTagInfo taginfo[] ={
 }
 ;
 
+static const SymbolSet tags =(SymbolSet) "\001\000\000\000\147\000\000\000\077\000\000\000\025\174\112\177\271\171\067\236\120\000\011\000\000\000\074\143\000\000\134\000\000\000\065\106\000\116\153\104\000\073\147\000\000\111\000\000\036\122\000\006\031\040\054\000\000\000\000\047\160\000\000\063\143\000\000\126\130\000\113\000\166\046\167\000\000\000\032\112\000\000\000\000\000\000\000\151\000\042\017\000\000\000\146\000\000\117\026\044\144\000\000\000\063\000\000\000\000\002\025\000\000\000\037\177\051\102\050\102\000\027\000\015\027\021\101\033\000\000\107\133\040\003\000\037\000\000\063\014\104\000\012\000\053\031\016\000\131\112\161\116\000\000\012\000\100\000\000\027\000\041\074\003\000\000\037\000\014\036\042\136\062\000\176\052\067\000\000\000\000\000\000\036\000\135\000\000\000\130\000\006\055\062\122\017\000\134\157\136\113\000\000\010\000\000\144\000\124\153\020\000\161\165\000\000\000\000\000\000\161\151\000\000\000\000\000\000\155\261\072\000\000\000\000\000\155\261\064\000\000\000\000\000\145\263\072\000\000\000\000\000\145\263\064\000\000\000\000\000\145\063\063\000\000\000\000\000\161\264\072\000\000\000\000\000\161\264\064\000\000\000\000\000\161\064\070\000\000\000\000\000\151\066\063\000\000\000\000\000\216\173\014\000\000\000\000\000\216\173\254\002\000\000\000\000\216\173\214\001\000\000\000\000\216\173\214\125\000\000\000\000\012\023\365\021\006\000\000\000\125\270\072\000\000\000\000\000\125\270\064\000\000\000\000\000\125\266\130\035\000\000\000\000\125\266\130\032\000\000\000\000\125\262\131\035\000\000\000\000\125\262\131\032\000\000\000\000\125\262\231\031\000\000\000\000\366\161\217\125\000\000\000\000\366\161\217\001\000\000\000\000\125\064\233\031\000\000\000\000\366\161\217\261\012\000\000\000\366\161\217\061\000\000\000\000\166\141\242\076\302\000\000\000\125\070\032\034\000\000\000\000\125\052\134\035\000\000\000\000\125\052\134\032\000\000\000\000\125\052\133\254\016\000\000\000\125\052\133\054\015\000\000\000\125\052\331\254\016\000\000\000\125\052\331\054\015\000\000\000\125\052\331\314\014\000\000\000\366\076\356\261\012\000\000\000\366\076\356\061\000\000\000\000\125\052\232\315\014\000\000\000\366\076\356\061\126\001\000\000\366\076\356\061\006\000\000\000\366\056\114\324\107\030\000\000\162\220\062\000\000\000\000\000\326\170\114\000\000\000\000\000\144\061\246\012\000\000\000\000\146\241\131\000\000\000\000\000\050\056\324\275\001\000\000\000\344\223\262\000\000\000\000\000\012\113\006\000\000\000\000\000\206\253\006\000\000\000\000\000\144\241\011\000\000\000\000\000\002\021\055\060\000\000\000\000\350\114\014\000\000\000\000\000\144\071\347\061\000\000\000\000\140\150\000\000\000\000\000\000\160\241\265\001\000\000\000\000\012\114\020\000\000\000\000\000\306\223\020\000\000\000\000\000\040\056\247\110\000\000\000\000\012\174\022\000\000\000\000\000\012\174\143\002\000\000\000\000\312\110\154\002\000\000\000\000\150\131\343\115\000\000\000\000\132\050\222\116\000\000\000\000\216\113\222\116\000\000\000\000\330\023\055\117\000\000\000\000\344\233\256\120\000\000\000\000\110\050\022\121\000\000\000\000\134\131\217\002\000\000\000\000\144\260\000\000\000\000\000\000\166\016\122\006\000\000\000\000\366\032\217\011\000\000\000\000\266\054\306\124\001\000\000\000\366\054\064\013\000\000\000\000\066\305\205\272\067\000\000\000\266\174\122\026\000\000\000\000\166\141\311\000\000\000\000\000\366\160\325\000\000\000\000\000\266\054\064\001\000\000\000\000\166\040\242\005\006\000\000\000\066\235\211\001\000\000\000\000\266\054\347\074\006\000\000\000\066\014\015\000\000\000\000\000\066\056\264\066\000\000\000\000\166\201\011\002\000\000\000\000\366\170\022\002\000\000\000\000\066\304\345\024\011\000\000\000\166\201\117\002\000\000\000\000\166\201\157\114\000\000\000\000\166\031\211\115\000\000\000\000\066\055\153\274\011\000\000\000\166\013\105\322\011\000\000\000\366\161\111\322\011\000\000\000\066\173\242\345\011\000\000\000\266\174\323\025\012\000\000\000\066\011\105\042\012\000\000\000\266\053\353\121\000\000\000\000\266\014\026\000\000\000\000\000\134\160\000\000\000\000\000\000\214\113\037\000\000\000\000\000\214\113\034\000\000\000\000\000\110\172\026\000\000\000\000\000";
+
+static TagId _tag2id(Symbol tag);
+
+static inline unsigned long _bitmask(unsigned n);
+
+static inline unsigned _top_bits(Var v);
+
+static inline unsigned _middle_bits(Var v);
+
+static inline unsigned _bottom_bits(Var v);
+
+#define VAR_CUSTOM_TAG_TOP     0x800C
+#define VAR_CUSTOM_TAG_COUNT   32
+typedef union VarWideValue{
+  long long_value;
+  unsigned long ulong_value;
+  long long long_long_value;
+  unsigned long long ulong_long_value;
+  long double long_double_value;
+}
+VarWideValue;
+
+typedef struct VarWideBox{
+  Symbol tag;
+  VarWideValue value;
+}
+* VarWideBox;
+
+static Symbol custom_tags[32];
+
+static unsigned custom_tag_count;
+
+static VarWideBox _wide_box(Var v);
+
+static int _custom_tag_id(Symbol tag);
+
+static int _wide_encoding_valid(Var value, Symbol tag);
+
+static VarDecoded _decode_builtin(TagId id, Var value);
+
+static VarDecoded _decode(Var value);
+
+static Var _new_floating(TagId id, double d);
+
+static Var _new_pointer(TagId id, void * ptr);
+
+static Var _new_wide(TagId id, VarWideValue value);
+
+static Var _new_custom_pointer(int id, void * ptr);
+
+static Var _new_integer(TagId id, long value);
+
+static Var _new_symbol(TagId id, unsigned long u);
+
+static unsigned _hash_bytes(unsigned hash, void * ptr, int width);
+
+typedef struct VarIntegerParts{
+  int negative;
+  unsigned long long magnitude;
+}
+VarIntegerParts;
+
+static unsigned long long _signed_magnitude(long long value);
+
+static VarIntegerParts _integer_parts(Var v);
+
+static int _magnitude_floating_compare(unsigned long long integer, long double floating);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
 int Var_known_tag(Symbol tag){
   return _tag2id(tag) != _invalid_ || _custom_tag_id(tag) >= 0;
 }
+
+int SymbolSet_index(SymbolSet, Symbol);
 
 static TagId _tag2id(Symbol tag){
   return(TagId) SymbolSet_index(tags, tag);
@@ -717,6 +681,14 @@ int Var_encoding_valid(Var value){
   return _decode(value).valid;
 }
 
+void x2c_descriptor_thread_start_begin(void);
+
+int x2c_descriptor_registration_frozen(void);
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
 int Var_register_object_tag(Symbol tag){
   x2c_descriptor_thread_start_begin();
   {
@@ -902,6 +874,10 @@ static Var _new_pointer(TagId id, void * ptr){
   return v;
 }
 
+void * Scope_malloc(size_t);
+
+void Scope_free(void *);
+
 static Var _new_wide(TagId id, VarWideValue value){
   VarWideBox box = Scope_malloc(sizeof(struct VarWideBox));
   box -> tag = taginfo[id].tag;
@@ -970,6 +946,8 @@ Var Var_box_long_double(long double value){
   return _new_wide(_ldouble_, wide);
 }
 
+int Var_is_wide(Var);
+
 Var Var_clone_wide(Var value){
   if(! Var_is_wide(value)) return((void) 0, Void);
   VarWideBox source = _wide_box(value);
@@ -991,11 +969,15 @@ Var Var_clone_wide(Var value){
   return clone;
 }
 
+void Scope_move(void *, Scope *);
+
 Var Var_move_wide_to(Var value, Scope * scope){
   if(! Var_is_wide(value)) return value;
   Scope_move(_wide_box(value), scope);
   return value;
 }
+
+Scope Scope_owner(void *);
 
 Scope Var_wide_owner(Var value){
   return Var_is_wide(value) ? Scope_owner(_wide_box(value)) : NULL;
@@ -1240,6 +1222,8 @@ long double Var_long_double_value(Var v){
   return Var_is(v, 26071077642) ? _wide_box(v) -> value.long_double_value : 0.0L;
 }
 
+unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
+
 static unsigned _hash_bytes(unsigned hash, void * ptr, int width){
   return x2c_hash_bytes(hash, ptr, (size_t) width);
 }
@@ -1367,6 +1351,20 @@ void * Var_pointer(Var v){
   return NULL;
 }
 
+int String_try_long(String, long *);
+
+Var int_var(int);
+
+int String_try_double(String, double *);
+
+Var double_var(double);
+
+String String_parse(String);
+
+Symbol Symbol_parse(char *);
+
+int String_parse_char(String);
+
 Var Var_parse(String str, Symbol kind){
   switch(kind){
     case 19368 :{
@@ -1386,6 +1384,8 @@ Var Var_parse(String str, Symbol kind){
   }
 
 }
+
+void x2c_descriptor_thread_start_end(int);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   x2c_descriptor_thread_start_end(0);

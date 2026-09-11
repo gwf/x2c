@@ -4,15 +4,35 @@
 
 static String _4, _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("/");
+  _1 = String_new(".");
+  _2 = String_new("..");
+  _3 = String_new("/");
+  _4 = String_new("%08x");
+}
+
 void * Scope_calloc(size_t, size_t);
+
+SourceView SourceView_new(void){
+  SourceView sources = Scope_calloc(1, sizeof(struct SourceView));
+  sources -> overlays = Map_new();
+  sources -> dirty_paths = Map_new();
+  return sources;
+}
 
 String String_new(const char *);
 
@@ -35,44 +55,6 @@ int String_truth(String);
 int String_equal(String, String);
 
 int String_rfind(String, String);
-
-Var Map_setindex(Map, Var, Var);
-
-int Map_contains(Map, Var);
-
-int Map_try_get(Map, Var, Var *);
-
-int File_stat(File, struct stat *);
-
-int File_close(File);
-
-String File_string_close(File);
-
-Var Symbol_var(Symbol);
-
-String String_printf(String, ...);
-
-unsigned String_hash(String);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("/");
-  _1 = String_new(".");
-  _2 = String_new("..");
-  _3 = String_new("/");
-  _4 = String_new("%08x");
-}
-
-SourceView SourceView_new(void){
-  SourceView sources = Scope_calloc(1, sizeof(struct SourceView));
-  sources -> overlays = Map_new();
-  sources -> dirty_paths = Map_new();
-  return sources;
-}
 
 String SourceView_path(String path){
   if(! _init_guard_) _file_init_();
@@ -109,11 +91,15 @@ String SourceView_path(String path){
   return result;
 }
 
+Var Map_setindex(Map, Var, Var);
+
 void SourceView_set(SourceView sources, String path, String text, int changed){
   if(! _init_guard_) _file_init_();
   Map_setindex(sources -> overlays, String_var(SourceView_path(path)), String_var(text));
   if(changed) Map_setindex(sources -> dirty_paths, String_var(SourceView_path(path)), int_var(1));
 }
+
+int Map_contains(Map, Var);
 
 int SourceView_is_changed(SourceView sources, String path){
   if(! _init_guard_) _file_init_();
@@ -126,6 +112,16 @@ int SourceView_exists(SourceView sources, String path){
   struct stat info;
   return ! access(path, R_OK) && ! stat(path, & info) && S_ISREG(info.st_mode);
 }
+
+int Map_try_get(Map, Var, Var *);
+
+int File_stat(File, struct stat *);
+
+int File_close(File);
+
+String File_string_close(File);
+
+Var Symbol_var(Symbol);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
   if(! _init_guard_) _file_init_();
@@ -192,6 +188,10 @@ _x2c_error_handler_0 = NULL;
 }
 return 1;
 }
+
+String String_printf(String, ...);
+
+unsigned String_hash(String);
 
 String SourceView_content_hash(SourceView sources, String path){
   if(! _init_guard_) _file_init_();

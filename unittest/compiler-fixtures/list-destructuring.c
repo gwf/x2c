@@ -15,6 +15,10 @@ static int calls;
 _x2c_initializer_choice_C720FE3A_0((calls = 0))
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static List values(void);
+
 Var int_var(int);
 
 List cons(Var, List);

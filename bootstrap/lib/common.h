@@ -107,7 +107,16 @@ X2CErrorSite;
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 void x2c_scope_thread_release(void);
 void x2c_match_thread_release(void);
+void x2c_static_thread_release(void);
+void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);
+typedef struct X2CStatic{
+  int ready;  void * payload, * owner;  struct X2CStatic * next;
+}
+X2CStatic;
+int x2c_static_acquire(X2CStatic * guard, size_t size, size_t alignment, int per_thread);
+void x2c_static_commit(X2CStatic * guard);
+void x2c_static_abort(void * guard);
 Pool x2c_pool_values_current(void);
 void x2c_pool_values_initialize(void);
 void x2c_pool_values_thread_initialize(void);

@@ -12,6 +12,16 @@ static int rhs_calls;
 
 static int skipped_calls;
 
+static int * pick_values(int * values);
+
+static NumericBox * pick_box(NumericBox * box);
+
+static int pick_index(void);
+
+static Var counted_rhs(int value);
+
+static Var skipped_rhs(void);
+
 static int * pick_values(int * values){
   base_calls ++;
   return values;

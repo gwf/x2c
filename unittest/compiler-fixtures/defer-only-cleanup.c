@@ -4,12 +4,18 @@
 
 static int observed;
 
+static int local_latest(void);
+
+static int global_only(void);
+
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 static int local_latest(void){
   int value = 7;
@@ -44,8 +50,6 @@ static int local_latest(void){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
 }
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 static int global_only(void){
   {

@@ -4,8 +4,6 @@
 
 static String _6, _5, _4, _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
 #include "collect.h"
 #include <errno.h>
 #include <limits.h>
@@ -13,67 +11,7 @@ static int _init_guard_ = 0;
 #include <string.h>
 #include <unistd.h>
 #include "buffer.h"
-String String_new_len(const char *, int);
-
-int String_truth(String);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-size_t Buffer_len(Buffer);
-
-Var Array_push(Array, Var);
-
-Var String_var(String);
-
-String Buffer_str(Buffer);
-
-Buffer Buffer_clear(Buffer);
-
-void Buffer_free(Buffer);
-
-List Array_list_free(Array);
-
-int File_puts(File, const char *);
-
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-int File_putc(File, int);
-
-int Array_contains(Array, Var);
-
-unsigned Map_len(Map);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-String Var_string(Var);
-
-String x2c_get_root(void);
-
-int header_symbols_active(void);
-
-Array Array_sort(Array);
-
-String String_rstrip(String, char *);
-
-Iter Array_iter(Array, Iter);
-
-int String_equal(String, String);
-
-void Array_free(Array);
-
-int File_error(File);
-
-int CliRequest_inspects(CliRequest);
-
-String String_printf(String, ...);
-
-int File_close(File);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -102,11 +40,33 @@ __attribute__((constructor)) static void _file_init_(void){
   _6 = String_new(".tmp.%ld");
 }
 
+String String_new_len(const char *, int);
+
 static String _stem(String input){
   const char * base = strrchr(input, '/');
   base = base ? base + 1 : input;
   return String_new_len(base, strlen(base) - 2);
 }
+
+int String_truth(String);
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write_char(Buffer, char);
+
+size_t Buffer_len(Buffer);
+
+Var Array_push(Array, Var);
+
+Var String_var(String);
+
+String Buffer_str(Buffer);
+
+Buffer Buffer_clear(Buffer);
+
+void Buffer_free(Buffer);
+
+List Array_list_free(Array);
 
 List translation_depfile_parse(String text){
   if(! String_truth(text)) return NULL;
@@ -148,6 +108,16 @@ List translation_depfile_parse(String text){
   return result;
 }
 
+int File_puts(File, const char *);
+
+Iter String_iter(String, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+int File_putc(File, int);
+
 static int _write_word(File output, String word){
   if(! String_truth(word)) return File_puts(output, "\\ ");
   {
@@ -174,9 +144,23 @@ static int _write_word(File output, String word){
   return 1;
 }
 
+int Array_contains(Array, Var);
+
 static void _add(Array paths, String path){
   if(String_truth(path) && ! Array_contains(paths, String_var(path))) Array_push(paths, String_var(path));
 }
+
+unsigned Map_len(Map);
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+String Var_string(Var);
+
+String x2c_get_root(void);
+
+int header_symbols_active(void);
+
+Array Array_sort(Array);
 
 static Array _prerequisites(CliRequest request, Compiler compiler, String input){
   Array paths = Array_new();
@@ -203,6 +187,8 @@ static Array _prerequisites(CliRequest request, Compiler compiler, String input)
   return paths;
 }
 
+String String_rstrip(String, char *);
+
 static int _write_targets(File output, CliRequest request, String output_dir, String stem){
   if(String_truth(request -> dep_target)) return _write_word(output, request -> dep_target);
   String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, _2)), cons(String_var(_2), cons(String_var(stem), NULL))));
@@ -210,6 +196,14 @@ static int _write_targets(File output, CliRequest request, String output_dir, St
   if(File_putc(output, ' ') == EOF) return 0;
   return _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
 }
+
+Iter Array_iter(Array, Iter);
+
+int String_equal(String, String);
+
+void Array_free(Array);
+
+int File_error(File);
 
 static int _write_contents(File output, CliRequest request, Compiler compiler, String input, String output_dir, String stem){
   Array paths = _prerequisites(request, compiler, input);
@@ -270,6 +264,12 @@ static int _write_contents(File output, CliRequest request, Compiler compiler, S
   Array_free(paths);
   return ok && ! File_error(output);
 }
+
+int CliRequest_inspects(CliRequest);
+
+String String_printf(String, ...);
+
+int File_close(File);
 
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir){
   if(! _init_guard_) _file_init_();

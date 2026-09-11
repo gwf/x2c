@@ -4,8 +4,6 @@
 
 static String _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -18,45 +16,7 @@ static int _init_guard_ = 0;
 #include <sys/stat.h>
 #include <unistd.h>
 #define BOOTSTRAP_MANIFEST "/zip/x2c/.x2c-bootstrap-manifest"
-void x2c_driver_error(const char *);
-
-Var String_var(String);
-
-int String_truth(String);
-
-int String_getindex(String, int);
-
-int String_equal(String, String);
-
-String String_new(const char *);
-
-String x2c_path_dir(String);
-
-int File_close(File);
-
-int File_printf(File, const char *, ...);
-
-String File_string_close(File);
-
-Var Symbol_var(Symbol);
-
-int String_startswith(String, String);
-
-int String_endswith(String, String);
-
-List cons(Var, List);
-
-String String_printf(String, ...);
-
-int _build_remove_tree(String);
-
-int _build_mkdirs(String);
-
-int List_truth(List);
-
-void * Scope_calloc(size_t, size_t);
-
-List List_reverse(List);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -113,6 +73,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _20 = String_new("src/");
 }
 
+void x2c_driver_error(const char *);
+
+Var String_var(String);
+
 static void _error(const char * message){
   x2c_driver_error(String_join(NULL, cons(String_var(_0), cons(String_var(String_new(message)), NULL))));
 }
@@ -120,6 +84,16 @@ static void _error(const char * message){
 static void _error_path(const char * message, String path){
   x2c_driver_error(String_join(NULL, cons(String_var(_0), cons(String_var(String_new(message)), cons(String_var(_1), cons(String_var(path), NULL))))));
 }
+
+int String_truth(String);
+
+int String_getindex(String, int);
+
+int String_equal(String, String);
+
+String String_new(const char *);
+
+String x2c_path_dir(String);
 
 static String _absolute(String path){
   if(! String_truth(path) || ! String_getindex(path, 0)) _error("empty installation prefix");
@@ -171,6 +145,8 @@ static uint64_t _hash(File input, File output, size_t * length){
   return hash;
 }
 
+int File_close(File);
+
 static int _read_marker(String path, String identity){
   File input = fopen(path, "r");
   if(! input) return 0;
@@ -181,6 +157,8 @@ static int _read_marker(String path, String identity){
   line[strcspn(line, "\r\n")] = 0;
   return String_equal(identity, String_new(line));
 }
+
+int File_printf(File, const char *, ...);
 
 static void _write_marker(String path, String identity){
   File output = fopen(path, "w");
@@ -214,6 +192,10 @@ static void _acquire(Bootstrap payload){
   }
   _error("cannot acquire bootstrap lock");
 }
+
+String File_string_close(File);
+
+Var Symbol_var(Symbol);
 
 static char * _manifest(String * identity){
   File input = fopen(BOOTSTRAP_MANIFEST, "rb");
@@ -271,11 +253,25 @@ static int _record(char * line, unsigned long long * hash, size_t * size, char p
   return sscanf(line, "%llx %zu %1023s %c", hash, size, path, & extra) == 3;
 }
 
+int String_startswith(String, String);
+
+int String_endswith(String, String);
+
+List cons(Var, List);
+
 static void _collect(Bootstrap payload, String relative){
   String installed = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_3), cons(String_var(relative), NULL))));
   if(String_startswith(relative, _18) && String_endswith(relative, _19)) payload -> runtime_srcs = cons(String_var(installed), payload -> runtime_srcs);
   else if(String_startswith(relative, _20) && String_endswith(relative, _19)) payload -> compiler_srcs = cons(String_var(installed), payload -> compiler_srcs);
 }
+
+String String_printf(String, ...);
+
+int _build_remove_tree(String);
+
+int _build_mkdirs(String);
+
+int List_truth(List);
 
 static void _extract(Bootstrap payload, char * manifest){
   String temporary = String_printf(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_5), NULL))), (long) getpid());
@@ -328,6 +324,10 @@ static void _collect_existing(Bootstrap payload, char * manifest){
   }
 
 }
+
+void * Scope_calloc(size_t, size_t);
+
+List List_reverse(List);
 
 Bootstrap bootstrap_materialize(CliRequest request){
   if(! _init_guard_) _file_init_();

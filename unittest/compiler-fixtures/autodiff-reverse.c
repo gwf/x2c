@@ -2,6 +2,14 @@
 
 #include "autodiff-reverse.h"
 
+static double scale(double a, double b);
+
+static double scale_grad(double a, double b, double * a_grad, double * b_grad);
+
+static double model(double x, double y, int n);
+
+static double model_grad(double x, double y, int n, double * x_grad, double * y_grad);
+
 double exp(double);
 
 static double scale(double a, double b){

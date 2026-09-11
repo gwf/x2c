@@ -5,10 +5,6 @@
 #include "error.h"
 
 #include <string.h>
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
 static inline int _ascii_hex(int c);
 
 static inline int _token_break(int c);
@@ -96,6 +92,10 @@ int scan_white_space(char * s){
   }
   return(n > 0) ? n : - 1;
 }
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
 
 int scan_line_comment(char * s){
   if(! s || s[0] != '/' || s[1] != '/'){

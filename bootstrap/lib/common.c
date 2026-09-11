@@ -6,6 +6,18 @@
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static inline Block Array_block(Array);
+
+static inline Block Bytes_block(Bytes);
+
+static inline void Block_pop(Block);
+
+static inline void Block_truncate(Block, size_t);
+
+#include "dispatch.h"
+#include <limits.h>
 File Stdin, Stdout, Stderr;
 
 Var Void =(Var){
@@ -14,32 +26,6 @@ Var Void =(Var){
 ;
 
 List nil = NULL;
-
-static VarMethods _x2c__x2c_protocol_methods_0;
-
-static VarMethods _x2c__x2c_protocol_methods_1;
-
-static VarMethods _x2c__x2c_protocol_methods_2;
-
-static VarMethods _x2c__x2c_protocol_methods_3;
-
-static VarMethods _x2c__x2c_protocol_methods_4;
-
-static VarMethods _x2c__x2c_protocol_methods_5;
-
-static VarMethods _x2c__x2c_protocol_methods_6;
-
-static VarMethods _x2c__x2c_protocol_methods_7;
-
-static VarMethods _x2c__x2c_protocol_methods_8;
-
-static VarMethods _x2c__x2c_protocol_methods_9;
-
-#include "dispatch.h"
-#include <limits.h>
-String String_add(String, String);
-
-__attribute__((constructor)) static void _file_init_(void);
 
 static inline String _x2c_proto_array_str_0(Var a0);
 
@@ -52,6 +38,8 @@ static inline Buffer _x2c_proto_array_write_repr_0(Var a0, Buffer a1);
 static inline int _x2c_proto_array_equal_0(Var a0, Var a1);
 
 static inline int _x2c_proto_array_compare_0(Var a0, Var a1);
+
+int Array_truth(Array);
 
 static inline int _x2c_proto_array_truth_0(Var a0);
 
@@ -67,7 +55,11 @@ static inline Var _x2c_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var 
 
 static inline Var _x2c_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2);
 
+static VarMethods _x2c__x2c_protocol_methods_0;
+
 static inline int _x2c_proto_block_truth_0(Var a0);
+
+static VarMethods _x2c__x2c_protocol_methods_1;
 
 static inline String _x2c_proto_buffer_str_0(Var a0);
 
@@ -75,7 +67,13 @@ static inline String _x2c_proto_buffer_repr_0(Var a0);
 
 static inline int _x2c_proto_buffer_truth_0(Var a0);
 
+static VarMethods _x2c__x2c_protocol_methods_2;
+
+int Bytes_truth(Bytes);
+
 static inline int _x2c_proto_bytes_truth_0(Var a0);
+
+static VarMethods _x2c__x2c_protocol_methods_3;
 
 static inline String _x2c_proto_file_str_0(Var a0);
 
@@ -89,9 +87,13 @@ static inline int _x2c_proto_file_equal_0(Var a0, Var a1);
 
 static inline Iter _x2c_proto_file_iter_0(Var a0, Iter a1);
 
+static VarMethods _x2c__x2c_protocol_methods_4;
+
 static inline int _x2c_proto_iter_truth_0(Var a0);
 
 static inline Iter _x2c_proto_iter_iter_0(Var a0, Iter a1);
+
+static VarMethods _x2c__x2c_protocol_methods_5;
 
 static inline String _x2c_proto_list_str_0(Var a0);
 
@@ -114,6 +116,8 @@ static inline Iter _x2c_proto_list_iter_0(Var a0, Iter a1);
 static inline int _x2c_proto_list_contains_0(Var a0, Var a1);
 
 static inline Var _x2c_proto_list_getindex_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_6;
 
 static inline String _x2c_proto_map_str_0(Var a0);
 
@@ -141,6 +145,8 @@ static inline Var _x2c_proto_map_updateindex_0(Var a0, Var a1, Symbol a2, Var a3
 
 static inline Var _x2c_proto_map_postfixindex_0(Var a0, Var a1, Symbol a2);
 
+static VarMethods _x2c__x2c_protocol_methods_7;
+
 static inline String _x2c_proto_string_str_0(Var a0);
 
 static inline String _x2c_proto_string_repr_0(Var a0);
@@ -165,6 +171,8 @@ static inline Var _x2c_proto_string_add_0(Var a0, Var a1);
 
 static inline Var _x2c_proto_string_getindex_0(Var a0, Var a1);
 
+static VarMethods _x2c__x2c_protocol_methods_8;
+
 static inline String _x2c_proto_symbol_str_0(Var a0);
 
 static inline String _x2c_proto_symbol_repr_0(Var a0);
@@ -175,17 +183,7 @@ static inline Buffer _x2c_proto_symbol_write_repr_0(Var a0, Buffer a1);
 
 static inline int _x2c_proto_symbol_compare_0(Var a0, Var a1);
 
-static inline Block Array_block(Array);
-
-static inline Block Bytes_block(Bytes);
-
-static inline void Block_pop(Block);
-
-static inline void Block_truncate(Block, size_t);
-
-int Array_truth(Array);
-
-int Bytes_truth(Bytes);
+static VarMethods _x2c__x2c_protocol_methods_9;
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -364,7 +362,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();
   if(length < 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 830};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 851};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))), Symbol_var(816725264), int_var(length));
     __builtin_unreachable();
   }
@@ -376,7 +374,7 @@ int x2c_normalize_index(int index, int length){
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();
   if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 850};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 871};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));
     __builtin_unreachable();
   }
@@ -643,6 +641,8 @@ static inline Iter _x2c_proto_string_iter_0(Var a0, Iter a1){
 static inline int _x2c_proto_string_contains_0(Var a0, Var a1){
   return String_contains(Var_string(a0), Var_string(a1));
 }
+
+String String_add(String, String);
 
 static inline Var _x2c_proto_string_add_0(Var a0, Var a1){
   return String_var(String_add(Var_string(a0), Var_string(a1)));

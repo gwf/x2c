@@ -2,6 +2,14 @@
 
 #include "autodiff-control-flow.h"
 
+static double walk(double x, double y, int n);
+
+static double walk_grad(double x, double y, int n, double * x_grad, double * y_grad);
+
+static double replay(double x, double y, int n);
+
+static double replay_grad(double x, double y, int n, double * x_grad, double * y_grad);
+
 double fabs(double);
 
 double hypot(double, double);

@@ -18,6 +18,24 @@ static Var _23, _20, _18, _16, _14, _11, _9, _8, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var _x2c_lambda_0(Var value);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_6E559A01_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _24)))
+static Var _x2c_lambda_1(Var value);
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+static Func _x2c_func_handle_1;
+
+_x2c_initializer_choice_6E559A01_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _24)))
 Var int_var(int);
 
 List cons(Var, List);
@@ -27,10 +45,6 @@ Var List_var(List);
 Var Symbol_var(Symbol);
 
 Var String_var(String);
-
-static void _x2c_static_initialize_0(void);
-
-static void _x2c_static_initialize_1(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -67,10 +81,6 @@ __attribute__((constructor)) static void _file_init_(void){
 
 List List_map(List, Func);
 
-static Func _x2c_func_handle_0;
-
-static Func _x2c_func_handle_1;
-
 int Var_int(Var);
 
 Var List_getindex(List, int);
@@ -100,11 +110,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_6E559A01_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _24)))
 List Var_list(Var);
 
 static Var _x2c_lambda_1(Var value){
@@ -118,9 +123,6 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_1;
-
-_x2c_initializer_choice_6E559A01_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _24)))
 #undef _x2c_initializer_choice_6E559A01_0_expanded
 #undef _x2c_initializer_choice_6E559A01_0
 #undef _x2c_initializer_choice_6E559A01_1_expanded

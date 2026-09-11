@@ -632,6 +632,118 @@ static void _memory_control(String artifacts, Map data, int steps) {
   Bench.sample("released", 0);
 }
 
+/* Separate phase diagnostics deliberately put clocks between operations.
+   These totals describe this instrumented block, never headline throughput. */
+static int _diagnose(String artifacts, String out, int native, int count) {
+  double start = Bench.now();
+  Map data = _artifact(artifacts, "tabular-data.pt");
+  Map batches = _artifact(artifacts, "tabular-batches.pt");
+  Bench.record("load_seconds", Bench.now() - start);
+  start = Bench.now();
+  Module model = _built(artifacts, "tabular-init.pt");
+  List layers = _layers(model);
+  Optimizer adam = Optimizer.adam(model, LR);
+  Bench.record("setup_seconds", Bench.now() - start);
+  Tensor x = data["data.x_train"].tensor(), y = data["data.y_train"].tensor();
+  Tensor rows = batches["batches"].tensor();
+  _train(layers, adam, x, y, rows, WARMUP, 0, native, 0);
+  model.load(%"$artifacts/tabular-init.pt");
+  adam.free();
+  adam = Optimizer.adam(model, LR);
+  double batch_time = 0, forward_time = 0, backward_time = 0;
+  double optimizer_time = 0, cleanup_time = 0, loss = 0;
+  for (int i = 0; i < count; i++) {
+    Scope.retain();
+    {
+      defer Scope.release();
+      start = Bench.now();
+      Tensor pick = rows.select(0, i % rows.size(0));
+      Tensor bx = x.index_select(0, pick), by = y.index_select(0, pick);
+      adam.zero_grad();
+      batch_time += Bench.now() - start;
+      start = Bench.now();
+      Tensor error = Tensor.mse_loss(_apply(layers, bx, native), by);
+      forward_time += Bench.now() - start;
+      start = Bench.now();
+      error.backward();
+      backward_time += Bench.now() - start;
+      start = Bench.now();
+      adam.step();
+      optimizer_time += Bench.now() - start;
+      if (i + 1 == count) loss = error.item().double();
+      start = Bench.now();
+    }
+    cleanup_time += Bench.now() - start;
+  }
+  Bench.record_int("diagnostic_steps", count);
+  Bench.record("diagnostic_loss", loss);
+  Bench.record("batch_seconds", batch_time);
+  Bench.record("forward_seconds", forward_time);
+  Bench.record("backward_seconds", backward_time);
+  Bench.record("optimizer_seconds", optimizer_time);
+  Bench.record("cleanup_seconds", cleanup_time);
+  String checkpoint = %"$out/tabular-diagnostic-model.pt";
+  String state = %"$out/tabular-diagnostic-optimizer.pt";
+  start = Bench.now();
+  model.save(checkpoint);
+  adam.save(state);
+  Bench.record("checkpoint_save_seconds", Bench.now() - start);
+  start = Bench.now();
+  model.load(checkpoint);
+  adam.load(state);
+  Bench.record("checkpoint_load_seconds", Bench.now() - start);
+  Bench.record("diagnostic_val_mse", _evaluate(layers,
+    data["data.x_val"].tensor(), data["data.y_val"].tensor(), native));
+  return 0;
+}
+
+/* Contextual request errors keep the native failing work fixed. The only
+   variation is whether the request's canonical message changes. */
+static void _failed_request(List layers, int request, int unique) {
+  try {
+    Scope.retain();
+    defer Scope.release();
+    Torch.inference_mode();
+    (void) _forward(layers, Tensor.zeros(%(4 129), XT_FLOAT32));
+  }
+  catch %(bad-state (library "torch") *detail): {
+    String message = unique ? %"request $request" : "request";
+    raise %(bad-arg (reason $message));
+  }
+}
+
+static int _errors(String artifacts, int count, int unique) {
+  Module model = _built(artifacts, "tabular-init.pt");
+  List layers = _layers(model);
+  Tensor input = Tensor.zeros(%(4 128), XT_FLOAT32);
+  double expected = _forward(layers, input).sum().item().double();
+  int caught = 0, every = count / 16 > 0 ? count / 16 : 1;
+  double checksum = 0;
+  Bench.sample("errors-start", 0);
+  for (int i = 0; i < count; i++) {
+    Scope.retain();
+    {
+      defer Scope.release();
+      try { _failed_request(layers, i, unique); }
+      catch %(bad-arg *detail): { caught++; }
+      if (!Torch.grad_enabled())
+        raise %(bad-state (reason "error did not restore gradient mode"));
+      Torch.inference_mode();
+      double value = _forward(layers, input).sum().item().double();
+      if (value != expected)
+        raise %(bad-state (reason "valid request changed after error"));
+      checksum += value;
+    }
+    if ((i + 1) % every == 0) Bench.sample("error-request", i + 1);
+  }
+  Bench.sample("errors-done", count);
+  Bench.record_int("errors_caught", caught);
+  Bench.record("recovery_checksum", checksum);
+  Bench.record_int("grad_after_errors", Torch.grad_enabled());
+  Bench.flush();
+  return 0;
+}
+
 static int _memory(String artifacts, String out, int profile, int steps,
                     String lifetime) {
   Bench.sample("baseline", 0);
@@ -677,6 +789,12 @@ int main(int argc, char **argv) {
   Bench.record_int("interop_threads", Torch.num_interop_threads());
 
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
+  if (!strcmp(argv[1], "startup")) return 0;
+  if (!strcmp(argv[1], "diagnose"))
+    return _diagnose(artifacts, out, !strcmp(argv[4], "native"),
+                     atoi(argv[5]));
+  if (!strcmp(argv[1], "errors"))
+    return _errors(artifacts, atoi(argv[5]), !strcmp(argv[4], "unique"));
   if (!strcmp(argv[1], "check")) return _check(artifacts, out);
   if (!strcmp(argv[1], "time"))
     return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));

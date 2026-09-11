@@ -14,6 +14,17 @@ static Var _10, _9, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static int keep(Var value);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_7300E546_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -21,8 +32,6 @@ Var String_var(String);
 List cons(Var, List);
 
 Var List_var(List);
-
-static void _x2c_static_initialize_0(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -118,8 +127,6 @@ ListInt branch_tails(ListInt values){
 
 List List_filter(List, Func);
 
-static Func _x2c_func_handle_0;
-
 ListInt filtered(ListInt values){
   if(! _init_guard_) _file_init_();
   return List_filter(values, _x2c_func_handle_0);
@@ -149,10 +156,5 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_7300E546_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
 #undef _x2c_initializer_choice_7300E546_0_expanded
 #undef _x2c_initializer_choice_7300E546_0

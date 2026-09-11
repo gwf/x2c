@@ -8,48 +8,6 @@ static String _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-typedef struct StringHeader{
-  int length;
-  unsigned hash;
-}
-* StringHeader;
-
-typedef union StringQuery{
-  unsigned long align;
-  char bytes[sizeof(struct StringHeader) + 257];
-}
-StringQuery;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_1;
-
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_4;
-  const void * _x2c_defer_capture_5;
-}
-_x2c_defer_env_2;
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_6;
-  const void * _x2c_defer_capture_7;
-}
-_x2c_defer_env_3;
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_4;
-
 #include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
@@ -65,168 +23,96 @@ _x2c_defer_env_4;
 #include "func.h"
 #include "symbol.h"
 #include "pool.h"
-#define STRING_STACK_BYTES 256
-Pool x2c_pool_values_current(void);
-
-void x2c_pool_values_initialize(void);
-
-void x2c_pool_values_thread_initialize(void);
-
-void x2c_pool_values_shutdown(void);
-
-Pool x2c_pool_values_retain_named(const char *);
-
-Pool x2c_pool_values_retain(void);
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-void x2c_pool_values_release(void);
-
-Pool x2c_pool_values_detach(void);
-
-int String_truth(String);
-
-int Pool_promote(Pool, Var, void *);
-
-int Pool_own(Pool, Var, void *);
-
-int x2c_pool_values_is_permanent(Var);
-
-unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
-
-Var Pool_lookup(Pool, Var);
-
-void Pool_free(Pool, void *);
-
-void * Pool_malloc(Pool, size_t);
-
-int Var_is_void(Var);
-
-String Var_string(Var);
-
-void Pool_insert(Pool, Var);
-
-Var Pool_intern(Pool, Var, void *);
-
-Var Array_push(Array, Var);
-
-Var int_var(int);
-
-List Array_list_free(Array);
-
-int x2c_normalize_index(int, int);
-
-int x2c_normalize_slice(int *, int *, int, int);
-
-FuncArg FuncArg_value(Var);
-
-Var char_var(char);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-int Var_truth(Var);
-
-int List_truth(List);
-
-int List_len(List);
-
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-List List_cdr(List);
-
-Var List_car(List);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-Symbol Symbol_new(const char *);
-
-int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-static inline StringHeader _header(String str);
-
-static unsigned _hash_n(const char * str, int length);
-
-static Var _lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash);
-
-static int _is_active_canonical(String str);
-
-static void _free_unchecked(String str);
-
-static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len);
-
-static String _intern_owned(String string);
-
-static String _finish(String string, int length);
-
-static String _from_bytes_in(Pool pool, const char * bytes, int length);
-
-static String _from_bytes(const char * bytes, int length);
-
-static Var _apply(Func fn, char value);
-
-static String _pad(String str, int width, char fill, int left_padding);
-
-static inline int _hex_digit(int ch);
-
-static inline int _decode_escape_char(const char * * psrc, int * emit);
-
-static inline int _escape_byte(unsigned char ch, char * out);
-
-static int _next(Iter iter, Var * out);
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-
-String String_new_in(Pool pool, const char * bytes, int length){
-  if(! _init_guard_) String_initialize();
-  if(! pool || ! bytes || length <= 0) return NULL;
-  size_t bounded = strnlen(bytes, (size_t) length);
-  if(! bounded || bounded > INT_MAX - 1) return NULL;
-  return _from_bytes_in(pool, bytes, (int) bounded);
+typedef struct StringHeader{
+  int length;
+  unsigned hash;
 }
+* StringHeader;
 
 _Static_assert(sizeof(struct StringHeader) == 8, "the String header is 8 bytes, so payloads stay aligned");
+#define STRING_STACK_BYTES 256
+typedef union StringQuery{
+  unsigned long align;  char bytes[sizeof(struct StringHeader) + 257];
+}
+StringQuery;
+static inline StringHeader _header(String str);
+static unsigned _hash_n(const char * str, int length);
+static Var _lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash);
+static int _is_active_canonical(String str);
+static void _free_unchecked(String str);
+static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len);
+static String _intern_owned(String string);
+static String _finish(String string, int length);
+static String _from_bytes_in(Pool pool, const char * bytes, int length);
+static String _from_bytes(const char * bytes, int length);
+static Var _apply(Func fn, char value);
+static String _pad(String str, int width, char fill, int left_padding);
+static inline int _hex_digit(int ch);
+static inline int _decode_escape_char(const char * * psrc, int * emit);
+static inline int _escape_byte(unsigned char ch, char * out);
+static int _next(Iter iter, Var * out);
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_0;
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_2;  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_1;
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_4;  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_2;
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_6;  const void * _x2c_defer_capture_7;
+}
+_x2c_defer_env_3;
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_8;  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_4;
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+String String_new_in(Pool pool, const char * bytes, int length){
+  if(! _init_guard_) String_initialize();  if(! pool || ! bytes || length <= 0) return NULL;  size_t bounded = strnlen(bytes, (size_t) length);  if(! bounded || bounded > INT_MAX - 1) return NULL;  return _from_bytes_in(pool, bytes, (int) bounded);
+}
+
+Pool x2c_pool_values_current(void);
 Pool String_pool_current(void){
   if(! _init_guard_) String_initialize();  return x2c_pool_values_current();
 }
 
+void x2c_pool_values_initialize(void);
 void String_initialize(void){
   if(_init_guard_) return;  _init_guard_ = 1;  x2c_pool_values_initialize();  _0 = String_new("\"%s\"");  _1 = String_new("\\");  _2 = String_new("\"\"");  Scope_shutdown_hook(String_shutdown);
 }
 
+void x2c_pool_values_thread_initialize(void);
 void String_thread_initialize(void){
   if(! _init_guard_) String_initialize();  x2c_pool_values_thread_initialize();
 }
 
+void x2c_pool_values_shutdown(void);
 void String_shutdown(void){
   if(! _init_guard_) String_initialize();  x2c_pool_values_shutdown();
 }
 
+Pool x2c_pool_values_retain_named(const char *);
 Pool String_pool_retain_named(const char * name){
   if(! _init_guard_) String_initialize();  return x2c_pool_values_retain_named(name);
 }
 
+Pool x2c_pool_values_retain(void);
 Pool String_pool_retain(void){
   if(! _init_guard_) String_initialize();  return x2c_pool_values_retain();
 }
 
+Var Symbol_var(Symbol);
+Var String_var(String);
+void x2c_pool_values_release(void);
 void String_pool_release(void){
   if(! _init_guard_) String_initialize();  Pool pool = x2c_pool_values_current();  if(! pool -> up){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_pool_release",.line = 158};  x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pool_release")), NULL))));
@@ -234,6 +120,8 @@ void String_pool_release(void){
   }
   x2c_pool_values_release();
 }
+
+Pool x2c_pool_values_detach(void);
 
 Pool String_pool_detach(void){
   if(! _init_guard_) String_initialize();
@@ -246,6 +134,10 @@ Pool String_pool_detach(void){
   return x2c_pool_values_detach();
 }
 
+int String_truth(String);
+
+int Pool_promote(Pool, Var, void *);
+
 String String_promote(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
@@ -253,11 +145,15 @@ String String_promote(String str){
   return str;
 }
 
+int Pool_own(Pool, Var, void *);
+
 int String_try_own(String str){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return 1;
   return Pool_own(x2c_pool_values_current(), String_var(str), _header(str));
 }
+
+int x2c_pool_values_is_permanent(Var);
 
 int String_is_permanent(String str){
   if(! _init_guard_) String_initialize();
@@ -269,9 +165,13 @@ static inline StringHeader _header(String str){
   return(StringHeader)((char *) str - sizeof(struct StringHeader));
 }
 
+unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
+
 static unsigned _hash_n(const char * str, int length){
   return x2c_hash_bytes(0, str, (size_t) length);
 }
+
+Var Pool_lookup(Pool, Var);
 
 static Var _lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash){
   if(length > STRING_STACK_BYTES) return((void) 0, Void);
@@ -290,6 +190,8 @@ static int _is_active_canonical(String str){
   return Var_same(Pool_lookup(x2c_pool_values_current(), String_var(str)), String_var(str));
 }
 
+void Pool_free(Pool, void *);
+
 static void _free_unchecked(String str){
   if((void *) str != NULL) Pool_free(x2c_pool_values_current(), _header(str));
 }
@@ -300,6 +202,8 @@ static const char * _find_bytes(const char * haystack, int haystack_len, const c
   for(int i = 0;  i <= haystack_len - needle_len;  i ++) if((unsigned char) haystack[i] ==(unsigned char) needle[0] && memcmp(haystack + i, needle, needle_len) == 0) return haystack + i;
   return NULL;
 }
+
+void * Pool_malloc(Pool, size_t);
 
 String String_malloc(int len){
   if(! _init_guard_) String_initialize();
@@ -312,6 +216,10 @@ String String_malloc(int len){
   header -> hash = 0;
   return(String)((char *) header + sizeof(struct StringHeader));
 }
+
+int Var_is_void(Var);
+
+String Var_string(Var);
 
 void String_free(String str){
   if(! _init_guard_) String_initialize();
@@ -330,6 +238,8 @@ int String_len(String str){
   if(! String_truth(str)) return 0;
   return _header(str) -> length - 1;
 }
+
+void Pool_insert(Pool, Var);
 
 static String _intern_owned(String string){
   if((void *) string == NULL || ! * string) return NULL;
@@ -378,6 +288,8 @@ static String _finish(String string, int length){
   if(result != string) _free_unchecked(string);
   return result;
 }
+
+Var Pool_intern(Pool, Var, void *);
 
 static String _from_bytes_in(Pool pool, const char * bytes, int length){
   if(! pool || ! bytes || length <= 0) return NULL;
@@ -465,6 +377,12 @@ int String_rfind(String str, String sub){
   return - 1;
 }
 
+Var Array_push(Array, Var);
+
+Var int_var(int);
+
+List Array_list_free(Array);
+
 List String_find_all(String str, String sub, int start, int end){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! String_truth(sub)) return NULL;
@@ -494,6 +412,8 @@ int String_count(String str, String sub){
   }
   return count;
 }
+
+int x2c_normalize_index(int, int);
 
 int String_getindex(String str, int index){
   if(! _init_guard_) String_initialize();
@@ -581,6 +501,8 @@ String String_withindex(String str, int index, char value){
   out[index] = value;
   return _finish(string, n);
 }
+
+int x2c_normalize_slice(int *, int *, int, int);
 
 String String_getslice(String str, int start, int stop, int step){
   if(! _init_guard_) String_initialize();
@@ -681,6 +603,12 @@ String String_strip(String str, char * negChars){
   return String_new_len(str + start, end - start);
 }
 
+FuncArg FuncArg_value(Var);
+
+Var char_var(char);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
+
 static Var _apply(Func fn, char value){
   FuncArg arguments[1] ={
     FuncArg_value(char_var(value))
@@ -688,6 +616,8 @@ static Var _apply(Func fn, char value){
   ;
   return Func_apply(fn, 1, arguments);
 }
+
+int Var_truth(Var);
 
 String String_filter(String str, Func fn){
   if(! _init_guard_) String_initialize();
@@ -978,6 +908,18 @@ List String_rpartition(String str, String sep){
   String after = String_new_len(str + found + String_len(sep), String_len(str) - found - String_len(sep));
   return cons(String_var(before), cons(String_var(sep), cons(String_var(after), NULL)));
 }
+
+int List_truth(List);
+
+int List_len(List);
+
+Iter List_iter(List, Iter);
+
+int Iter_try_next(Iter, Var *);
+
+List List_cdr(List);
+
+Var List_car(List);
 
 String String_join(String sep, List strings){
   if(! _init_guard_) String_initialize();
@@ -1286,10 +1228,16 @@ String String_repr(String str){
   return String_printf(_0, String_escape(str));
 }
 
+Buffer Buffer_write(Buffer, const char *);
+
 Buffer String_write_str(String str, Buffer out){
   if(! _init_guard_) String_initialize();
   return String_truth(str) ? Buffer_write(out, str) : out;
 }
+
+Buffer Buffer_write_char(Buffer, char);
+
+Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 Buffer String_write_repr(String str, Buffer out){
   if(! _init_guard_) String_initialize();
@@ -1333,6 +1281,8 @@ int String_parse_char(String str){
   else value = * s ++;
   return(* s == '\'') ? value : - 1;
 }
+
+Symbol Symbol_new(const char *);
 
 Symbol String_symbol(String str){
   if(! _init_guard_) String_initialize();
@@ -1380,6 +1330,10 @@ static int _next(Iter iter, Var * out){
   iter -> state = int_var(index + 1);
   return 1;
 }
+
+int Iter_truth(Iter);
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter String_iter(String x, Iter dest){
   if(! _init_guard_) String_initialize();

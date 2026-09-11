@@ -7,11 +7,15 @@ typedef double geo__Magnitude;
 
 static int _init_guard_ = 0;
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+__attribute__((constructor)) static void _file_init_(void);
+
+static int _vec_next(Iter iter, Var * out);
 
 static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1);
 
 static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -105,6 +109,4 @@ static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1){
 static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1){
   return geo__Vec_var(geo__Vec_mul(geo__Var_vec(a0), geo__Var_vec(a1)));
 }
-
-static VarMethods _x2c__x2c_protocol_methods_0;
 

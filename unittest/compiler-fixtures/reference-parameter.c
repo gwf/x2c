@@ -2,6 +2,14 @@
 
 #include "reference-parameter.h"
 
+static void increment(int * value);
+
+static void swap(int * left, int * right);
+
+static void increment_twice(int * value);
+
+static void advance(Counter * counter, int amount);
+
 static void increment(int * value){
   (* value) += 1;
 }

@@ -4,6 +4,16 @@
 
 static String _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
+#include <ctype.h>
+#include <dirent.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "buffer.h"
 typedef struct ProjectProfile{
   String name, optimization;
   int debug;
@@ -40,100 +50,6 @@ typedef struct Project{
 * Project;
 
 static int _init_guard_ = 0;
-
-#include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include "buffer.h"
-int String_truth(String);
-
-int String_getindex(String, int);
-
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-String Buffer_str_free(Buffer);
-
-Var Array_push(Array, Var);
-
-Var String_var(String);
-
-List Array_list_free(Array);
-
-int String_equal(String, String);
-
-void * Scope_calloc(size_t, size_t);
-
-int Map_contains(Map, Var);
-
-Var Map_setindex(Map, Var, Var);
-
-List String_split_lines(String, int);
-
-Iter List_iter(List, Iter);
-
-String Var_string(Var);
-
-void * Scope_malloc(size_t);
-
-String String_new(const char *);
-
-List String_split(String, String);
-
-int List_len(List);
-
-Var List_car(List);
-
-int List_truth(List);
-
-List List_cdr(List);
-
-int Array_contains(Array, Var);
-
-int SourceView_exists(SourceView, String);
-
-Iter Map_keys(Map, Iter);
-
-int String_startswith(String, String);
-
-int String_len(String);
-
-size_t Array_len(Array);
-
-Array Array_sort(Array);
-
-Iter Array_iter(Array, Iter);
-
-void Array_free(Array);
-
-int String_endswith(String, String);
-
-int cli_dependency_pass_through(String);
-
-String String_add(String, String);
-
-String SourceView_path(String);
-
-int SourceView_read(SourceView, String, volatile String *);
-
-String File_string_close(File);
-
-Var Symbol_var(Symbol);
-
-String x2c_path_dir(String);
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -255,6 +171,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _45 = String_new("-O");
 }
 
+int String_truth(String);
+
 _Noreturn static void _error(Project project, int line, const char * message){
   if(project && String_truth(project -> path) && line) fprintf(stderr, "x2c: error: manifest '%s':%d: %s\n", project -> path, line, message);
   else if(project && String_truth(project -> path)) fprintf(stderr, "x2c: error: manifest '%s': %s\n", project -> path, message);
@@ -300,6 +218,14 @@ static void _strip_comment(char * line){
 
 }
 
+int String_getindex(String, int);
+
+Iter String_iter(String, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
 static int _name_ok(String name){
   if(! String_truth(name) || ! String_getindex(name, 0)) return 0;
   {
@@ -321,6 +247,12 @@ static int _name_ok(String name){
   }
   return 1;
 }
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write_char(Buffer, char);
+
+String Buffer_str_free(Buffer);
 
 static String _parse_string(Project project, int line, const char * * cursor){
   const char * ch = * cursor ? * cursor : "";
@@ -360,6 +292,12 @@ static String _string_value(Project project, int line, String value){
   return result;
 }
 
+Var Array_push(Array, Var);
+
+Var String_var(String);
+
+List Array_list_free(Array);
+
 static List _string_array(Project project, int line, String value){
   const char * cursor = String_truth(value) ? value : "";
   while(isspace((unsigned char) * cursor)) cursor ++;
@@ -386,11 +324,15 @@ static List _string_array(Project project, int line, String value){
   return result;
 }
 
+int String_equal(String, String);
+
 static int _bool_value(Project project, int line, String value){
   if(String_truth(value) && String_equal(value, _0)) return 1;
   if(String_truth(value) && String_equal(value, _1)) return 0;
   _error(project, line, "expected true or false");
 }
+
+void * Scope_calloc(size_t, size_t);
 
 static ProjectTarget _target(Project project, String name, int create){
   for(ProjectTarget target = project -> targets;  target;  target = target -> next) if(String_equal(target -> name, name)) return target;
@@ -414,6 +356,10 @@ static ProjectProfile _profile(ProjectTarget target, String name, int create){
   target -> profiles = profile;
   return profile;
 }
+
+int Map_contains(Map, Var);
+
+Var Map_setindex(Map, Var, Var);
 
 static void _set_once(Project project, int line, Map seen, String key){
   if(Map_contains(seen, String_var(key))) _error(project, line, "duplicate manifest field");
@@ -457,6 +403,26 @@ static void _set_profile_field(Project project, ProjectProfile profile, int line
   else if(String_equal(key, _18)) profile -> link_flags = _string_array(project, line, value);
   else _error_name(project, line, "unknown profile field", key);
 }
+
+List String_split_lines(String, int);
+
+Iter List_iter(List, Iter);
+
+String Var_string(Var);
+
+void * Scope_malloc(size_t);
+
+String String_new(const char *);
+
+List String_split(String, String);
+
+int List_len(List);
+
+Var List_car(List);
+
+int List_truth(List);
+
+List List_cdr(List);
 
 static void _parse_manifest(Project p){
   enum{
@@ -597,6 +563,8 @@ static int _glob_match(const char * pattern, const char * text){
   return * pattern == * text && _glob_match(pattern + 1, text + 1);
 }
 
+int Array_contains(Array, Var);
+
 static void _walk_matches(Project project, String directory, String relative, String pattern, Array matches){
   DIR * input = opendir(directory);
   if(! input) return;
@@ -617,6 +585,18 @@ static void _walk_matches(Project project, String directory, String relative, St
   }
   closedir(input);
 }
+
+int SourceView_exists(SourceView, String);
+
+Iter Map_keys(Map, Iter);
+
+int String_startswith(String, String);
+
+int String_len(String);
+
+size_t Array_len(Array);
+
+Array Array_sort(Array);
 
 static Array _expand_pattern(Project project, String pattern, const char * owner){
   Array matches = Array_new();
@@ -660,6 +640,12 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
   Array_sort(matches);
   return matches;
 }
+
+Iter Array_iter(Array, Iter);
+
+void Array_free(Array);
+
+int String_endswith(String, String);
 
 static Array _target_sources(Project project, ProjectTarget target, int verbose){
   if(! List_truth(target -> sources)) _error_name(project, 0, "target has no sources", target -> name);
@@ -818,6 +804,8 @@ static void _append_values(Array output, List values){
 
 }
 
+int cli_dependency_pass_through(String);
+
 static void _append_c_flags(Project project, Array output, List values){
   {
     String value;
@@ -882,6 +870,8 @@ static String _target_output(Project project, ProjectTarget target, String build
   if(kind == 1381098885964356) return String_join(NULL, cons(String_var(build_root), cons(String_var(_31), cons(String_var(target -> name), cons(String_var(_32), NULL)))));
   return String_join(NULL, cons(String_var(build_root), cons(String_var(_26), cons(String_var(target -> name), NULL))));
 }
+
+String String_add(String, String);
 
 static CliRequest _target_request(Project p, ProjectTarget target, CliRequest command, ProjectTarget selected, String build_root){
   CliRequest request = Scope_malloc(sizeof(struct CliRequest));
@@ -1050,6 +1040,16 @@ String project_manifest(CliRequest request){
   }
   return NULL;
 }
+
+String SourceView_path(String);
+
+int SourceView_read(SourceView, String, volatile String *);
+
+String File_string_close(File);
+
+Var Symbol_var(Symbol);
+
+String x2c_path_dir(String);
 
 ProjectBuild project_plan(CliRequest request){
   if(! _init_guard_) _file_init_();

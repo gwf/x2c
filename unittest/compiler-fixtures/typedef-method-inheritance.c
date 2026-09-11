@@ -14,6 +14,17 @@ static Var _25, _22, _20, _18, _16, _6, _5, _2, _1;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Var _mapped_string(Var value);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Func _x2c_func_handle_0;
+
+Func Func_new(FuncAdapter, List);
+
+_x2c_initializer_choice_9D320F3A_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _26)))
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -21,8 +32,6 @@ List cons(Var, List);
 Var String_var(String);
 
 Var List_var(List);
-
-static void _x2c_static_initialize_0(void);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -126,8 +135,6 @@ static Var _mapped_string(Var value){
 
 List List_map(List, Func);
 
-static Func _x2c_func_handle_0;
-
 String List_repr(List);
 
 String Var_repr(Var);
@@ -176,10 +183,5 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-static Func _x2c_func_handle_0;
-
-Func Func_new(FuncAdapter, List);
-
-_x2c_initializer_choice_9D320F3A_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _26)))
 #undef _x2c_initializer_choice_9D320F3A_0_expanded
 #undef _x2c_initializer_choice_9D320F3A_0

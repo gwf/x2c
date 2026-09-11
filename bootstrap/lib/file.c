@@ -6,52 +6,6 @@
 
 static String _0;
 
-static int _init_guard_ = 0;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_2;
-}
-_x2c_defer_env_1;
-
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_2;
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_4;
-}
-_x2c_defer_env_3;
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_5;
-}
-_x2c_defer_env_4;
-
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_6;
-}
-_x2c_defer_env_5;
-
-typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_7;
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_6;
-
-typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_10;
-  const void * _x2c_defer_capture_11;
-}
-_x2c_defer_env_7;
-
 #include "string.h"
 #include "block.h"
 #include "buffer.h"
@@ -65,51 +19,7 @@ _x2c_defer_env_7;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-Var Symbol_var(Symbol);
-
-Var int_var(int);
-
-Var String_var(String);
-
-String String_intern_free(String);
-
-String String_malloc(int);
-
-void Block_reserve(Block, size_t);
-
-void Block_append(Block, const void *, size_t);
-
-Block Block_new(size_t);
-
-void String_free(String);
-
-void Block_free(Block);
-
-Var long_var(long);
-
-void Block_clear(Block);
-
-File Var_file(Var);
-
-Block Var_block(Var);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-Var File_var(File);
-
-Var Block_var(Block);
-
-unsigned Var_hash(Var);
-
-Var Var_new(Symbol, ...);
-
-String Var_pointer_string(Var);
-
-String String_printf(String, ...);
-
-Buffer Var_write_pointer_repr(Var, Buffer);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
+static int _init_guard_ = 0;
 
 _Noreturn static void _open_error(Symbol operation, const char * path, int error);
 
@@ -137,21 +47,71 @@ static String _regular_text(File file, size_t requested);
 
 static int _next(Iter iter, Var * out);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_2;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_4;
+
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_6;
+}
+_x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_7;
+  const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_6;
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_11;
+}
+_x2c_defer_env_7;
+
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+
+Var Symbol_var(Symbol);
+
+Var int_var(int);
+
+Var String_var(String);
 
 _Noreturn static void _open_error(Symbol operation, const char * path, int error){
   if(! path){
@@ -224,12 +184,16 @@ static void _validate_text(const void * bytes, size_t length){
 
 }
 
+String String_intern_free(String);
+
 static String _finish_text(String result, size_t length){
   _validate_text(result, length);
   char * out = result;
   out[length] = '\0';
   return String_intern_free(result);
 }
+
+String String_malloc(int);
 
 static String _text(const void * bytes, size_t length){
   if(! length) return NULL;
@@ -243,6 +207,8 @@ static String _text(const void * bytes, size_t length){
   memcpy(result, bytes, length);
   return _finish_text(result, length);
 }
+
+void Block_reserve(Block, size_t);
 
 static inline void _block_putc(Block block, unsigned char value){
   if(block -> length == SIZE_MAX){
@@ -306,6 +272,8 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
 }
 }
 
+void Block_append(Block, const void *, size_t);
+
 static void _append_text(Block content, const void * bytes, size_t count){
   if(count >= INT_MAX - content -> length){
     size_t size = content -> length + count;
@@ -319,6 +287,12 @@ static void _append_text(Block content, const void * bytes, size_t count){
   _validate_text(bytes, count);
   Block_append(content, bytes, count);
 }
+
+Block Block_new(size_t);
+
+void String_free(String);
+
+void Block_free(Block);
 
 static String _regular_text(File file, size_t requested){
   int allocation = _string_allocation(requested);
@@ -515,6 +489,8 @@ int File_scanf(File file, const char * format, ...){
   return result;
 }
 
+Var long_var(long);
+
 String File_readblock(File file, long size){
   if(! _init_guard_) File_initialize();
   if(size < 0){
@@ -559,6 +535,8 @@ String File_readblock(File file, long size){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
+
+void Block_clear(Block);
 
 FileReadStatus File_readline_into(File file, Block dest){
   if(! _init_guard_) File_initialize();
@@ -709,6 +687,10 @@ String File_string(File file){
 }
 }
 
+File Var_file(Var);
+
+Block Var_block(Var);
+
 static int _next(Iter iter, Var * out){
   File file = Var_file(iter -> obj);
   if(! file) return 0;
@@ -762,6 +744,12 @@ static int _next(Iter iter, Var * out){
 }
 }
 
+Iter Iter_init(Iter, Var, IterNextFn, Var);
+
+Var File_var(File);
+
+Var Block_var(Block);
+
 Iter File_iter(File file, Iter dest){
   if(! _init_guard_) File_initialize();
   if((void *) dest == NULL) return NULL;
@@ -808,6 +796,10 @@ Iter File_iter(File file, Iter dest){
 }
 }
 
+unsigned Var_hash(Var);
+
+Var Var_new(Symbol, ...);
+
 unsigned File_hash(File file){
   if(! _init_guard_) File_initialize();
   return Var_hash(Var_new(3683441, file));
@@ -817,6 +809,10 @@ int File_equal(File x, File y){
   if(! _init_guard_) File_initialize();
   return(void *) x ==(void *) y;
 }
+
+String Var_pointer_string(Var);
+
+String String_printf(String, ...);
 
 String File_repr(File file){
   if(! _init_guard_) File_initialize();
@@ -828,6 +824,10 @@ String File_str(File file){
   if(! _init_guard_) File_initialize();
   return file ? File_string(file) : Var_pointer_string(File_var(file));
 }
+
+Buffer Var_write_pointer_repr(Var, Buffer);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer File_write_repr(File file, Buffer out){
   if(! _init_guard_) File_initialize();

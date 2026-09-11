@@ -6,6 +6,12 @@ static int pass_calls;
 
 static int take_calls;
 
+static DynamicAlias make_alias(long value);
+
+static DynamicAlias pass_alias(Dynamic value);
+
+static long take_alias(DynamicAlias value);
+
 static DynamicAlias make_alias(long value){
   return Var_box_long(value);
 }

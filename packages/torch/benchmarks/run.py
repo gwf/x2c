@@ -522,6 +522,12 @@ def memory(profiles, steps, threads, run, churn_lifetime="ordinary"):
                                       common.RTOL)
             if not agreed:
                 raise RuntimeError("canonical churn: output values disagree")
+        if profile == 4:
+            _, agreed = common.agree("accumulated_val_mse",
+                results["x2c"].number("accumulated_val_mse"),
+                results["python"].number("accumulated_val_mse"), common.RTOL)
+            if not agreed:
+                raise RuntimeError("microbatch accumulation: output disagrees")
         row = {"profile": profile, "app": app, "steps": steps}
         if variant:
             row["churn_lifetime"] = variant
@@ -596,7 +602,7 @@ def attribute(elements, requests, threads, run):
         result = common.launch(
             [binary, "attribute", common.ARTIFACTS, common.OUTPUTS,
              str(elements), str(requests), shape], environment(threads),
-            os.path.join(logs, f"attribute-{shape}.log"))
+            os.path.join(logs, f"attribute-e{elements}-{shape}.log"))
         counted = bool(result.records.get("counters_enabled"))
         for ops in CHAIN_LENGTHS:
             rows[(shape, ops)] = {
@@ -607,13 +613,26 @@ def attribute(elements, requests, threads, run):
                 "peak_bytes": result.number(f"attr_{shape}_o{ops}_peak_bytes"),
                 "result": result.number(f"attr_{shape}_o{ops}_result"),
             }
-    control_ns = {}
+    control_ns, python_ns, control_values = {}, {}, {}
     for ops in CHAIN_LENGTHS:
         result = common.launch(
             [control, "time", common.ARTIFACTS, common.OUTPUTS,
              f"e{elements}o{ops}", str(requests)], environment(threads),
-            os.path.join(logs, f"attribute-cpp-o{ops}.log"))
+            os.path.join(logs, f"attribute-e{elements}-cpp-o{ops}.log"))
         control_ns[ops] = result.number(f"ns_per_op_e{elements}_o{ops}")
+        control_values[ops] = result.number(f"result_e{elements}_o{ops}")
+        python = common.launch(python_command("interop", "time",
+                               f"e{elements}o{ops}", requests),
+                               environment(threads), os.path.join(logs,
+                               f"attribute-e{elements}-python-o{ops}.log"))
+        python_ns[ops] = python.number(f"ns_per_op_e{elements}_o{ops}")
+        values = [rows[(shape, ops)]["result"] for shape in SHAPES]
+        values.append(python.number(f"result_e{elements}_o{ops}"))
+        for value in values:
+            _, agreed = common.agree("chain_result", value,
+                                      control_values[ops], common.RTOL)
+            if not agreed:
+                raise RuntimeError(f"e{elements}o{ops}: C++ output disagrees")
 
     if not counted:
         print("  handle counts are zero: this is not a --counters build")
@@ -639,14 +658,86 @@ def attribute(elements, requests, threads, run):
     record = {"elements": elements, "requests": requests,
               "threads": threads, "counters": counted,
               "control_ns_per_step": control_ns,
+              "python_ns_per_step": python_ns,
+              "control_result": control_values,
               "rows": [{"shape": shape, "operations": ops,
                         **rows[(shape, ops)]}
                        for shape in SHAPES for ops in CHAIN_LENGTHS]}
-    path = os.path.join(logs, "attribution.json")
+    path = os.path.join(logs, f"attribution-e{elements}.json")
     with open(path, "w") as handle:
         json.dump(record, handle, indent=2, sort_keys=True)
         handle.write("\n")
+    shutil.copyfile(path, os.path.join(logs, "attribution.json"))
     print(f"raw samples {path}")
+    return 0
+
+
+# ---- supplemental diagnostics --------------------------------------------
+
+
+def diagnose(apps, steps, samples, threads, run):
+    rows, startup = [], []
+    for app in apps:
+        for repeat in range(samples):
+            results = both(app, "startup", (), threads, run,
+                           f"startup-{app}-{repeat}", repeat % 2 == 0)
+            startup.append({"app": app, "repeat": repeat,
+                            **{lang: value.seconds
+                               for lang, value in results.items()}})
+        variants = ("native", "explicit") if app == "tabular" else ("native",)
+        for variant in variants:
+            for repeat in range(samples):
+                arguments = (variant, steps) if app == "tabular" else (steps,)
+                results = both(app, "diagnose", arguments, threads, run,
+                               f"diagnose-{app}-{variant}-{repeat}",
+                               repeat % 2 == 0)
+                row = {"app": app, "variant": variant, "repeat": repeat}
+                for language, result in results.items():
+                    row[language] = result.records
+                    if result.records.get("diagnostic_reload_difference", 0) != 0:
+                        raise RuntimeError(f"{app}: checkpoint reload changed loss")
+                names = [name for name in row["x2c"]
+                         if name.startswith("diagnostic_")]
+                for name in names:
+                    _, agreed = common.agree(name, results["x2c"].number(name),
+                                              results["python"].number(name),
+                                              common.RTOL)
+                    if not agreed:
+                        raise RuntimeError(f"{app} {variant}: {name} disagrees")
+                rows.append(row)
+    path = os.path.join(log_dir(run), "diagnose.json")
+    with open(path, "w") as handle:
+        json.dump({"steps": steps, "samples": samples, "threads": threads,
+                   "startup": startup, "phases": rows}, handle, indent=2)
+        handle.write("\n")
+    print(f"phase and startup diagnostics passed: {path}")
+    return 0
+
+
+def errors(steps, threads, run):
+    rows = []
+    for variant in ("fixed", "unique"):
+        results = both("tabular", "errors", (variant, steps), threads, run,
+                       f"errors-{variant}-{steps}")
+        row = {"variant": variant, "steps": steps}
+        for language, result in results.items():
+            if result.number("errors_caught") != steps:
+                raise RuntimeError(f"{variant}: missed expected errors")
+            if result.number("grad_after_errors") != 1 or result.dropped:
+                raise RuntimeError(f"{variant}: invalid recovery or samples")
+            row[language] = {"records": result.records,
+                             "samples": result.samples}
+        _, agreed = common.agree("recovery_checksum",
+            results["x2c"].number("recovery_checksum"),
+            results["python"].number("recovery_checksum"), common.RTOL)
+        if not agreed:
+            raise RuntimeError(f"{variant}: recovered output disagrees")
+        rows.append(row)
+    path = os.path.join(log_dir(run), f"errors-{steps}.json")
+    with open(path, "w") as handle:
+        json.dump(rows, handle, indent=2)
+        handle.write("\n")
+    print(f"fixed and unique error recovery passed: {path}")
     return 0
 
 
@@ -688,7 +779,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=["prepare", "build", "check", "time",
                                          "memory", "attribute", "report",
-                                         "env"])
+                                         "env", "diagnose", "errors", "supplement"])
     parser.add_argument("--lane", default="primary",
                         choices=["primary", "shipped"])
     parser.add_argument("--counters", action="store_true",
@@ -707,6 +798,8 @@ def main():
     parser.add_argument("--diagnostics-run", default=None,
                         help="report memory and attribution from a separately "
                              "recorded counter build")
+    parser.add_argument("--timing-run", default=None,
+                        help="supplemental counter-free timing correction")
     parser.add_argument("--optimizer", choices=["stock", "matched"],
                         help="stock PyTorch or libtorch operation-order control; "
                              "fixed for all measurements in one run-id")
@@ -748,6 +841,14 @@ def main():
                   "interop": options.updates or 190}
         return time_all(options.samples, counts, threads, run,
                         options.app)
+    if options.mode == "diagnose":
+        return diagnose(options.app or ["tabular", "mnist", "sequence"],
+                        options.steps, options.samples, threads[0], run)
+    if options.mode == "errors":
+        return errors(options.steps, threads[0], run)
+    if options.mode == "supplement":
+        import report
+        return report.supplement(run, options.timing_run)
     if options.mode == "memory":
         profiles = [int(v) for v in options.profiles.split(",")]
         return memory(profiles, options.steps, threads[0], run,
@@ -756,7 +857,7 @@ def main():
         return attribute(options.elements, options.requests, threads[0], run)
     if options.mode == "report":
         import report
-        return report.write(run, options.diagnostics_run)
+        return report.write(run, options.diagnostics_run, options.timing_run)
     return environment_report(run)
 
 

@@ -15,6 +15,10 @@ static SymbolSet values;
 _x2c_initializer_choice_B4A118A9_0((values =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\003\001\000\001\000\336\063\000\000\000\000\000\000\144\020\000\000\000\000\000\000\331\141\373\213\114\176\003\000\160\255\021\000\000\000\000\000"))
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static SymbolSet same_values(void);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);

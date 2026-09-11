@@ -11,6 +11,7 @@
     exists. That is the caller obligation the memory profile measures, not
     a framework.
 
+      sequence diagnose <artifacts> <out> <count>
       sequence check   <artifacts> <out>
       sequence time    <artifacts> <out> <window8|window32|window128> <count>
       sequence memory  <artifacts> <out> 4 <windows>
@@ -324,22 +325,127 @@ static int _memory(String artifacts, String out, int profile, int count) {
 
   int sweep[3] = { 8, 32, 128 };
   for (int i = 0; i < 3; i++) {
-    Module model = _built(artifacts, "sequence-init.pt");
-    Bench.sample("window-start", sweep[i]);
-    _train(_layers(model), Optimizer.adam(model, LR), train, count, sweep[i],
-           0, 1, 0);
-    Bench.sample("window-done", sweep[i]);
+    Scope.retain();
+    {
+      defer Scope.release();
+      Module model = _built(artifacts, "sequence-init.pt");
+      Bench.sample("window-start", sweep[i]);
+      _train(_layers(model), Optimizer.adam(model, LR), train, count, sweep[i],
+             0, 1, 0);
+      Bench.sample("window-done", sweep[i]);
+    }
+    Bench.sample("window-released", sweep[i]);
   }
 
-  Module model = _built(artifacts, "sequence-init.pt");
-  List layers = _layers(model);
-  Bench.sample("accumulate-start", 4);
-  _train(layers, Optimizer.adam(model, LR), train, count, WINDOW, 0, 4, 0);
-  Bench.sample("accumulate-done", 4);
-  Tensor val = data["data.val"].tensor();
-  Bench.record("accumulated_val_mse", _score(layers, val));
+  Scope.retain();
+  {
+    defer Scope.release();
+    Module model = _built(artifacts, "sequence-init.pt");
+    List layers = _layers(model);
+    Bench.sample("accumulate-start", 4);
+    _train(layers, Optimizer.adam(model, LR), train, count, WINDOW, 0, 4, 0);
+    Bench.sample("accumulate-done", 4);
+    Tensor val = data["data.val"].tensor();
+    Bench.record("accumulated_val_mse", _score(layers, val));
+  }
+  Bench.sample("accumulate-released", 4);
   Bench.sample("final", 0);
   Bench.flush();
+  return 0;
+}
+
+/* ---- phase diagnostics ---- */
+
+static int _diagnose(String artifacts, String out, int count) {
+  double start = Bench.now();
+  Map data = _artifact(artifacts, "sequence-data.pt");
+  Tensor streams = data["data.train"].tensor();
+  Bench.record("load_seconds", Bench.now() - start);
+  {
+    Scope.retain();
+    defer Scope.release();
+    Module warm = _built(artifacts, "sequence-init.pt");
+    _train(_layers(warm), Optimizer.adam(warm, LR), streams, 50, WINDOW,
+           0, 1, 0);
+  }
+  start = Bench.now();
+  Module model = _built(artifacts, "sequence-init.pt");
+  List layers = _layers(model);
+  Optimizer adam = Optimizer.adam(model, LR);
+  Bench.record("setup_seconds", Bench.now() - start);
+  Carry carry = { NULL, NULL };
+  defer _release_carry(&carry);
+  long stream_count = streams.size(0);
+  int per_epoch = (int) ((streams.size(1) - 1) / WINDOW);
+  double batch = 0, forward = 0, backward = 0, optimizer = 0, cleanup = 0;
+  double last_loss = 0;
+  for (int index = 0; index < count; index++) {
+    start = Bench.now();
+    Scope.retain();
+    {
+      defer Scope.release();
+      int position = index % per_epoch;
+      long offset = (long) position * WINDOW;
+      if (position == 0 || !carry.state)
+        _carry(&carry, _zero_state(stream_count));
+      Tensor inputs = streams.slice(1, offset, offset + WINDOW, 1);
+      Tensor targets = streams.slice(1, offset + 1, offset + WINDOW + 1, 1);
+      adam.zero_grad();
+      batch += Bench.now() - start;
+      start = Bench.now();
+      Tensor ended = NULL;
+      Tensor loss = _window(layers, inputs, targets, carry.state, &ended);
+      forward += Bench.now() - start;
+      start = Bench.now();
+      loss.backward();
+      backward += Bench.now() - start;
+      start = Bench.now();
+      adam.step();
+      optimizer += Bench.now() - start;
+      if (index + 1 == count) last_loss = loss.item().double();
+      start = Bench.now();
+      _carry(&carry, ended.detach());
+    }
+    cleanup += Bench.now() - start;
+  }
+  start = Bench.now();
+  _release_carry(&carry);
+  cleanup += Bench.now() - start;
+  Bench.record_int("diagnostic_steps", count);
+  Bench.record("diagnostic_loss", last_loss);
+  Bench.record("batch_seconds", batch);
+  Bench.record("forward_seconds", forward);
+  Bench.record("backward_seconds", backward);
+  Bench.record("optimizer_seconds", optimizer);
+  Bench.record("cleanup_seconds", cleanup);
+  String saved_model = %"$out/sequence-x2c-diagnostic-model.pt";
+  String saved_adam = %"$out/sequence-x2c-diagnostic-adam.pt";
+  start = Bench.now();
+  model.save(saved_model);
+  adam.save(saved_adam);
+  Bench.record("checkpoint_save_seconds", Bench.now() - start);
+  Module restored = _rnn();
+  Optimizer restored_adam = Optimizer.adam(restored, LR);
+  start = Bench.now();
+  restored.load(saved_model);
+  restored_adam.load(saved_adam);
+  Bench.record("checkpoint_load_seconds", Bench.now() - start);
+  {
+    Scope.retain();
+    defer Scope.release();
+    Torch.no_grad();
+    Tensor inputs = streams.slice(1, 0, WINDOW, 1);
+    Tensor targets = streams.slice(1, 1, WINDOW + 1, 1);
+    Tensor state = _zero_state(stream_count), ended = NULL;
+    double original = _window(layers, inputs, targets, state, &ended)
+                        .item().double();
+    double reloaded = _window(_layers(restored), inputs, targets, state,
+                               &ended).item().double();
+    double difference = original - reloaded;
+    Bench.record("diagnostic_reloaded_loss", reloaded);
+    Bench.record("diagnostic_reload_difference",
+                 difference < 0 ? -difference : difference);
+  }
   return 0;
 }
 
@@ -349,7 +455,7 @@ int main(int argc, char **argv) {
   Scope.retain();
   defer Scope.release();
   if (argc < 4) {
-    fprintf(stderr, "usage: sequence <check|time|memory> <artifacts> <out>"
+    fprintf(stderr, "usage: sequence <check|time|memory|diagnose|startup> <artifacts> <out>"
                     " [variant] [count]\n");
     return 2;
   }
@@ -365,9 +471,12 @@ int main(int argc, char **argv) {
   _record_profile();
   Bench.record_int("threads", Torch.num_threads());
   Bench.record_int("interop_threads", Torch.num_interop_threads());
+  if (!strcmp(argv[1], "startup")) return 0;
 
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
   if (!strcmp(argv[1], "check")) return _check(artifacts, out);
+  if (!strcmp(argv[1], "diagnose"))
+    return _diagnose(artifacts, out, atoi(argv[4]));
   if (!strcmp(argv[1], "time"))
     return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
   if (!strcmp(argv[1], "memory"))

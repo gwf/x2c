@@ -8,242 +8,6 @@ static String _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-static VarMethods _x2c__x2c_protocol_methods_0;
-
-static VarMethods _x2c__x2c_protocol_methods_1;
-
-static VarMethods _x2c__x2c_protocol_methods_2;
-
-static VarMethods _x2c__x2c_protocol_methods_3;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_2;
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_4;
-  const void * _x2c_defer_capture_5;
-  const void * _x2c_defer_capture_6;
-}
-_x2c_defer_env_3;
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_7;
-}
-_x2c_defer_env_4;
-
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
-}
-_x2c_defer_env_5;
-
-typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_10;
-}
-_x2c_defer_env_6;
-
-typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_11;
-}
-_x2c_defer_env_7;
-
-typedef struct _x2c_defer_env_8{
-  const void * _x2c_defer_capture_12;
-  const void * _x2c_defer_capture_13;
-}
-_x2c_defer_env_8;
-
-typedef struct _x2c_defer_env_9{
-  const void * _x2c_defer_capture_14;
-  const void * _x2c_defer_capture_15;
-  const void * _x2c_defer_capture_16;
-}
-_x2c_defer_env_9;
-
-typedef struct _x2c_defer_env_10{
-  const void * _x2c_defer_capture_17;
-}
-_x2c_defer_env_10;
-
-typedef struct _x2c_defer_env_11{
-  const void * _x2c_defer_capture_18;
-  const void * _x2c_defer_capture_19;
-}
-_x2c_defer_env_11;
-
-typedef struct _x2c_defer_env_12{
-  const void * _x2c_defer_capture_20;
-}
-_x2c_defer_env_12;
-
-typedef struct _x2c_defer_env_13{
-  const void * _x2c_defer_capture_21;
-}
-_x2c_defer_env_13;
-
-typedef struct _x2c_defer_env_14{
-  const void * _x2c_defer_capture_22;
-  const void * _x2c_defer_capture_23;
-}
-_x2c_defer_env_14;
-
-typedef struct _x2c_defer_env_15{
-  const void * _x2c_defer_capture_24;
-  const void * _x2c_defer_capture_25;
-  const void * _x2c_defer_capture_26;
-}
-_x2c_defer_env_15;
-
-typedef struct _x2c_defer_env_16{
-  const void * _x2c_defer_capture_27;
-}
-_x2c_defer_env_16;
-
-typedef struct _x2c_defer_env_17{
-  const void * _x2c_defer_capture_28;
-  const void * _x2c_defer_capture_29;
-}
-_x2c_defer_env_17;
-
-typedef struct _x2c_defer_env_18{
-  const void * _x2c_defer_capture_30;
-  const void * _x2c_defer_capture_31;
-}
-_x2c_defer_env_18;
-
-typedef struct _x2c_defer_env_19{
-  const void * _x2c_defer_capture_32;
-}
-_x2c_defer_env_19;
-
-typedef struct _x2c_defer_env_20{
-  const void * _x2c_defer_capture_33;
-}
-_x2c_defer_env_20;
-
-typedef struct _x2c_defer_env_21{
-  const void * _x2c_defer_capture_34;
-  const void * _x2c_defer_capture_35;
-}
-_x2c_defer_env_21;
-
-typedef struct _x2c_defer_env_22{
-  const void * _x2c_defer_capture_36;
-  const void * _x2c_defer_capture_37;
-  const void * _x2c_defer_capture_38;
-}
-_x2c_defer_env_22;
-
-typedef struct _x2c_defer_env_23{
-  const void * _x2c_defer_capture_39;
-}
-_x2c_defer_env_23;
-
-typedef struct _x2c_defer_env_24{
-  const void * _x2c_defer_capture_40;
-  const void * _x2c_defer_capture_41;
-}
-_x2c_defer_env_24;
-
-typedef struct _x2c_defer_env_25{
-  const void * _x2c_defer_capture_42;
-  const void * _x2c_defer_capture_43;
-}
-_x2c_defer_env_25;
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-Var unsigned_var(unsigned);
-
-Var int_var(int);
-
-Var long_var(long);
-
-Var double_var(double);
-
-unsigned x2c_hash_word(unsigned long);
-
-unsigned String_hash(String);
-
-int String_equal(String, String);
-
-int Var_compare(Var, Var);
-
-int String_compare(String, String);
-
-String String_add(String, String);
-
-void Bytes_free(Bytes);
-
-void Scope_free(void *);
-
-void * Scope_malloc(size_t);
-
-Scope * Scope_top(void);
-
-Bytes Bytes_new(size_t);
-
-Bytes Bytes_append(Bytes, const void *, size_t);
-
-void Scope_move(void *, Scope *);
-
-Block Bytes_block(Bytes);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-Scope Scope_new(void);
-
-void * Scope_malloc_in(Scope *, size_t);
-
-Buffer Buffer_write(Buffer, const char *);
-
-Buffer Var_write_str(Var, Buffer);
-
-Buffer Var_write_repr(Var, Buffer);
-
-Var Map_setindex(Map, Var, Var);
-
-Buffer Buffer_new(size_t);
-
-String Buffer_str_free(Buffer);
-
-Var Var_new(Symbol, ...);
-
-void * Var_pointer(Var);
-
-Var List_var(List);
-
-List cons(Var, List);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-int Context_owns(Context, void *);
-
-Scope * Context_export_destination(Context);
-
-void Block_move_to(Block, Scope *);
-
-String Var_string(Var);
-
-Var Context_export_nested(Context, Var);
-
-void Scope_destroy(Scope);
-
 __attribute__((constructor)) static void _file_init_(void);
 
 _Noreturn static void _int_reinsert_error(unsigned capacity, int probe);
@@ -542,6 +306,8 @@ static inline Var _x2c_proto_mapintint_postfixindex_0(Var a0, Var a1, Symbol a2)
 
 static inline Var _x2c_proto_mapintint_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_0;
+
 static inline String _x2c_proto_maplongdouble_str_0(Var a0);
 
 static inline String _x2c_proto_maplongdouble_repr_0(Var a0);
@@ -569,6 +335,8 @@ static inline Var _x2c_proto_maplongdouble_updateindex_0(Var a0, Var a1, Symbol 
 static inline Var _x2c_proto_maplongdouble_postfixindex_0(Var a0, Var a1, Symbol a2);
 
 static inline Var _x2c_proto_maplongdouble_export_context_0(Var a0, Context a1);
+
+static VarMethods _x2c__x2c_protocol_methods_1;
 
 static inline String _x2c_proto_mapstringint_str_0(Var a0);
 
@@ -598,6 +366,8 @@ static inline Var _x2c_proto_mapstringint_postfixindex_0(Var a0, Var a1, Symbol 
 
 static inline Var _x2c_proto_mapstringint_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_2;
+
 static inline String _x2c_proto_mapstringstring_str_0(Var a0);
 
 static inline String _x2c_proto_mapstringstring_repr_0(Var a0);
@@ -626,55 +396,205 @@ static inline Var _x2c_proto_mapstringstring_postfixindex_0(Var a0, Var a1, Symb
 
 static inline Var _x2c_proto_mapstringstring_export_context_0(Var a0, Context a1);
 
+static VarMethods _x2c__x2c_protocol_methods_3;
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_2;
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_4;
+  const void * _x2c_defer_capture_5;
+  const void * _x2c_defer_capture_6;
+}
+_x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_7;
+}
+_x2c_defer_env_4;
+
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_10;
+}
+_x2c_defer_env_6;
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
+
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_11;
+}
+_x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_12;
+  const void * _x2c_defer_capture_13;
+}
+_x2c_defer_env_8;
+
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
+
+typedef struct _x2c_defer_env_9{
+  const void * _x2c_defer_capture_14;
+  const void * _x2c_defer_capture_15;
+  const void * _x2c_defer_capture_16;
+}
+_x2c_defer_env_9;
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 
+typedef struct _x2c_defer_env_10{
+  const void * _x2c_defer_capture_17;
+}
+_x2c_defer_env_10;
+
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
+
+typedef struct _x2c_defer_env_11{
+  const void * _x2c_defer_capture_18;
+  const void * _x2c_defer_capture_19;
+}
+_x2c_defer_env_11;
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
 
+typedef struct _x2c_defer_env_12{
+  const void * _x2c_defer_capture_20;
+}
+_x2c_defer_env_12;
+
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
+
+typedef struct _x2c_defer_env_13{
+  const void * _x2c_defer_capture_21;
+}
+_x2c_defer_env_13;
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
 
+typedef struct _x2c_defer_env_14{
+  const void * _x2c_defer_capture_22;
+  const void * _x2c_defer_capture_23;
+}
+_x2c_defer_env_14;
+
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+
+typedef struct _x2c_defer_env_15{
+  const void * _x2c_defer_capture_24;
+  const void * _x2c_defer_capture_25;
+  const void * _x2c_defer_capture_26;
+}
+_x2c_defer_env_15;
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 
+typedef struct _x2c_defer_env_16{
+  const void * _x2c_defer_capture_27;
+}
+_x2c_defer_env_16;
+
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
+
+typedef struct _x2c_defer_env_17{
+  const void * _x2c_defer_capture_28;
+  const void * _x2c_defer_capture_29;
+}
+_x2c_defer_env_17;
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 
+typedef struct _x2c_defer_env_18{
+  const void * _x2c_defer_capture_30;
+  const void * _x2c_defer_capture_31;
+}
+_x2c_defer_env_18;
+
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
+
+typedef struct _x2c_defer_env_19{
+  const void * _x2c_defer_capture_32;
+}
+_x2c_defer_env_19;
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
 
+typedef struct _x2c_defer_env_20{
+  const void * _x2c_defer_capture_33;
+}
+_x2c_defer_env_20;
+
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
+
+typedef struct _x2c_defer_env_21{
+  const void * _x2c_defer_capture_34;
+  const void * _x2c_defer_capture_35;
+}
+_x2c_defer_env_21;
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
 
+typedef struct _x2c_defer_env_22{
+  const void * _x2c_defer_capture_36;
+  const void * _x2c_defer_capture_37;
+  const void * _x2c_defer_capture_38;
+}
+_x2c_defer_env_22;
+
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
+
+typedef struct _x2c_defer_env_23{
+  const void * _x2c_defer_capture_39;
+}
+_x2c_defer_env_23;
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
 
+typedef struct _x2c_defer_env_24{
+  const void * _x2c_defer_capture_40;
+  const void * _x2c_defer_capture_41;
+}
+_x2c_defer_env_24;
+
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
+
+typedef struct _x2c_defer_env_25{
+  const void * _x2c_defer_capture_42;
+  const void * _x2c_defer_capture_43;
+}
+_x2c_defer_env_25;
 
 static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25);
 
@@ -708,6 +628,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("");
   _4 = String_new("MapStringInt");
 }
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+Var unsigned_var(unsigned);
+
+Var int_var(int);
 
 _Noreturn static void _int_reinsert_error(unsigned capacity, int probe){
   {
@@ -825,9 +753,13 @@ static Var _box_int(int value){
   return int_var(value);
 }
 
+Var long_var(long);
+
 static Var _box_long(long value){
   return long_var(value);
 }
+
+Var double_var(double);
 
 static Var _box_double(double value){
   return double_var(value);
@@ -849,6 +781,8 @@ static MapLongDouble _prepare_long_export(MapLongDouble map, Context source){
   return NULL;
 }
 
+unsigned x2c_hash_word(unsigned long);
+
 static unsigned _hash_int(int * key){
   return x2c_hash_word((unsigned) key[0]);
 }
@@ -856,6 +790,8 @@ static unsigned _hash_int(int * key){
 static unsigned _hash_long(long * key){
   return x2c_hash_word((unsigned long) key[0]);
 }
+
+unsigned String_hash(String);
 
 static unsigned _hash_string(String * key){
   unsigned hash = String_hash(key[0]);
@@ -874,6 +810,8 @@ static int _equal_double(double * a, double * b){
   return a[0] == b[0];
 }
 
+int String_equal(String, String);
+
 static int _equal_string(String * a, String * b){
   return String_equal(a[0], b[0]);
 }
@@ -886,9 +824,13 @@ static int _map_compare_long(long a, long b){
   return(a > b) -(a < b);
 }
 
+int Var_compare(Var, Var);
+
 static int _map_compare_double(double a, double b){
   return Var_compare(double_var(a), double_var(b));
 }
+
+int String_compare(String, String);
 
 static int _map_compare_string(String a, String b){
   return String_compare(a, b);
@@ -999,6 +941,8 @@ static double _update_double(volatile double * slot, Symbol op, double rhs){
   return result;
 }
 
+String String_add(String, String);
+
 static String _update_string(volatile String * slot, Symbol op, String rhs){
   if(op != 56) _bad_op(op);
   String current = slot[0], result = String_add(current, rhs);
@@ -1006,12 +950,24 @@ static String _update_string(volatile String * slot, Symbol op, String rhs){
   return result;
 }
 
+void Bytes_free(Bytes);
+
+void Scope_free(void *);
+
 static void MapIntInt__core_free(MapIntInt _x2c_macro_map_0){
   if((void *) _x2c_macro_map_0 == 0) return;
   Bytes_free(_x2c_macro_map_0 -> hashes);
   Bytes_free(_x2c_macro_map_0 -> entries);
   Scope_free(_x2c_macro_map_0);
 }
+
+void * Scope_malloc(size_t);
+
+Scope * Scope_top(void);
+
+Bytes Bytes_new(size_t);
+
+Bytes Bytes_append(Bytes, const void *, size_t);
 
 static MapIntInt MapIntInt__core_new_capacity(MapIntInt _x2c_macro_unused_0, unsigned _x2c_macro_capacity_0){
   (void) _x2c_macro_unused_0;
@@ -1083,6 +1039,10 @@ static void MapIntInt__core_reinsert(MapIntInt _x2c_macro_map_0, unsigned _x2c_m
   }
   (void) _int_reinsert_error(_x2c_macro_cap_0, _x2c_macro_psl_0);
 }
+
+void Scope_move(void *, Scope *);
+
+Block Bytes_block(Bytes);
 
 static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
   unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
@@ -1358,6 +1318,8 @@ MapIntInt MapIntInt_new(void){
   return MapIntInt__core_new_capacity(_x2c_macro_map_1, 2);
 }
 
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
 MapIntInt Map_mapintint(Map _x2c_macro_entries_1){
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_macro_entries_1 == 0) return 0;
@@ -1485,6 +1447,10 @@ static int _x2c_macro_record_compare_0(const void * _x2c_macro_ap_0, const void 
   return _x2c_macro_comparison_0 ? _x2c_macro_comparison_0 : _map_compare_int(_x2c_macro_a_2 -> val, _x2c_macro_b_2 -> val);
 }
 
+Scope Scope_new(void);
+
+void * Scope_malloc_in(Scope *, size_t);
+
 static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_2, MapIntInt _x2c_macro_b_2){
   if((void *) _x2c_macro_a_2 ==(void *) _x2c_macro_b_2) return 0;
   if((void *) _x2c_macro_a_2 == NULL) return - 1;
@@ -1557,6 +1523,12 @@ static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_2, MapIntInt _x2c_macr
 }
 }
 
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Var_write_str(Var, Buffer);
+
+Buffer Var_write_repr(Var, Buffer);
+
 static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macro_out_2, Symbol _x2c_macro_mode_0){
   Buffer_write(_x2c_macro_out_2, "{ ");
   unsigned _x2c_macro_cursor_2 = 0;
@@ -1581,6 +1553,8 @@ static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macr
   return Buffer_write(_x2c_macro_out_2, " }");
 }
 
+Var Map_setindex(Map, Var, Var);
+
 Map MapIntInt_map(MapIntInt _x2c_macro_map_3){
   if((void *) _x2c_macro_map_3 == NULL) return NULL;
   Map _x2c_macro_boxed_0 = Map_new();
@@ -1604,6 +1578,10 @@ Buffer MapIntInt_write_str(MapIntInt _x2c_macro_map_3, Buffer _x2c_macro_out_3){
   return MapIntInt__core_write(_x2c_macro_map_3, _x2c_macro_out_3, 40228);
 }
 
+Buffer Buffer_new(size_t);
+
+String Buffer_str_free(Buffer);
+
 String MapIntInt_str(MapIntInt _x2c_macro_map_3){
   Buffer _x2c_macro_out_3 = Buffer_new(0);
   MapIntInt_write_str(_x2c_macro_map_3, _x2c_macro_out_3);
@@ -1616,9 +1594,13 @@ String MapIntInt_repr(MapIntInt _x2c_macro_map_3){
   return Buffer_str_free(_x2c_macro_out_3);
 }
 
+Var Var_new(Symbol, ...);
+
 Var MapIntInt_var(MapIntInt _x2c_macro_map_4){
   return Var_new(28691016207272, _x2c_macro_map_4);
 }
+
+void * Var_pointer(Var);
 
 MapIntInt Var_mapintint(Var _x2c_macro_value_2){
   return(MapIntInt) Var_pointer(_x2c_macro_value_2);
@@ -1648,6 +1630,10 @@ static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4
   return 1;
 }
 
+Var List_var(List);
+
+List cons(Var, List);
+
 static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4){
   MapIntInt _x2c_macro_map_4 = Var_mapintint(_x2c_macro_iter_0 -> obj);
   if((void *) _x2c_macro_map_4 == 0 || ! _x2c_macro_out_4) return 0;
@@ -1660,6 +1646,8 @@ static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_
   * _x2c_macro_out_4 = List_var(cons(_x2c_macro_boxed_key_1, cons(_x2c_macro_boxed_value_1, NULL)));
   return 1;
 }
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter MapIntInt_iter(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0){
   if((void *) _x2c_macro_dest_0 == 0) return 0;
@@ -1675,6 +1663,12 @@ Iter MapIntInt_enumerate(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0){
   if((void *) _x2c_macro_dest_0 == 0) return 0;
   return Iter_init(_x2c_macro_dest_0, MapIntInt_var(_x2c_macro_map_4), _x2c_macro_enumerate_next_0, int_var(0));
 }
+
+int Context_owns(Context, void *);
+
+Scope * Context_export_destination(Context);
+
+void Block_move_to(Block, Scope *);
 
 static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x2c_macro_source_0){
   if((void *) _x2c_macro_map_4 == 0 || ! Context_owns(_x2c_macro_source_0, _x2c_macro_map_4)) return _x2c_macro_map_4;
@@ -2808,6 +2802,8 @@ MapStringString MapStringString_new(void){
   return MapStringString__core_new_capacity(_x2c_macro_map_11, 2);
 }
 
+String Var_string(Var);
+
 MapStringString Map_mapstringstring(Map _x2c_macro_entries_5){
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_macro_entries_5 == 0) return 0;
@@ -3065,6 +3061,8 @@ String MapStringString_repr(MapStringString _x2c_macro_map_13){
   MapStringString_write_repr(_x2c_macro_map_13, _x2c_macro_out_13);
   return Buffer_str_free(_x2c_macro_out_13);
 }
+
+Var Context_export_nested(Context, Var);
 
 static MapStringString _prepare_string_export(MapStringString map, Context source){
   MapStringString staged = MapStringString_new_capacity(map -> capacity);
@@ -4242,6 +4240,8 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
   if((*(int *) _x2c_defer_data_3->_x2c_defer_capture_4) && ! MapIntInt_truth((*(MapIntInt *) _x2c_defer_data_3->_x2c_defer_capture_5))) MapIntInt__core_free((*(MapIntInt *) _x2c_defer_data_3->_x2c_defer_capture_6));
 }
+
+void Scope_destroy(Scope);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;

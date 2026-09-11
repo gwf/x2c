@@ -8,6 +8,18 @@ static Var _15, _10, _7, _6, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static List head_atom(void);
+
+static List nested_atom(void);
+
+static List tail_atom(void);
+
+static List bare_atom(void);
+
+static List reference(int n);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);

@@ -34,6 +34,7 @@
 #include "scan.h"
 #include "scope.h"
 #include "split.h"
+#include "static-init.h"
 #include "string-classify.h"
 #include "string-number.h"
 #include "string.h"

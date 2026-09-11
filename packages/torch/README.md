@@ -303,6 +303,16 @@ pair around the forward, backward, and update; the model and optimizer
 live in the enclosing scope. `free` releases a handle early and returns
 NULL.
 
+List results such as `parameters`, `named_parameters`, and generated tuples
+intern their wrapper references in the current List pool. Releasing a Scope
+does not reclaim those canonical cells. Long-running loops that create these
+Lists can bracket each request with `List.pool_retain` and
+`List.pool_release`, releasing the request Scope before its List pool.
+Keep stable parameter handles outside that bracket when useful. Surviving
+values still need their ordinary Scope and pool ownership; a pool bracket
+does not extend a Tensor wrapper's lifetime. The canonical-churn measurements
+in [the comparison report](benchmarks/REPORT.md) separate these costs.
+
 An unnamed operator temporary does not wait for the scope. `Tensor`
 declares the `discard` protocol member, so the compiler releases the
 product in `a * b + c`, or the converted `2.0` in `2.0 * x`, right after

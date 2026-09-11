@@ -6,9 +6,24 @@ static String _24, _23, _22, _21, _20, _19, _18, _17, _15, _14, _13, _12, _11, _
 
 static Var _16, _7;
 
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include "collect.h"
+#include "deps.h"
+#include "snapshot.h"
+#include "utils.h"
 static const SymbolSet cpp_dumps =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\000\000\001\001\002\040\034\037\266\112\000\000\000\246\053\353\321\017\341\000\000\132\236\343\303\126\011\000\000\350\103\023\006\067\001\000\000";
 
 static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
+static int _source_lines(String text);
+
+static Token _first_preprocessor_token(Compiler compiler);
 
 static Map snapshot_globals;
 
@@ -22,145 +37,6 @@ static int gensym_cursor;
 
 static int header_symbols_loaded;
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include "collect.h"
-#include "deps.h"
-#include "snapshot.h"
-#include "utils.h"
-Var String_var(String);
-
-int String_truth(String);
-
-int String_getindex(String, int);
-
-int String_len(String);
-
-String x2c_get_root(void);
-
-Map symbol_snapshot_load(String, Map *, int *);
-
-Var Symbol_var(Symbol);
-
-void Type_initialize(void);
-
-void header_symbols_initialize(void);
-
-int header_symbols_open(String, int);
-
-void * Scope_calloc(size_t, size_t);
-
-List List_append(List, List);
-
-List x2c_default_include_dirs(void);
-
-Toolchain toolchain_new(String, String, List, List, List, int, int);
-
-int header_symbols_write(File, int);
-
-void Compiler_report_error(Compiler, Symbol, String, Token, List);
-
-int Compiler_read_source(Compiler, String, volatile String *);
-
-File String_open(String, const char *);
-
-int File_stat(File, struct stat *);
-
-int File_close(File);
-
-String File_string_close(File);
-
-void Compiler_tokenize(Compiler, char *);
-
-int List_truth(List);
-
-String SourceView_path(String);
-
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-String Var_string(Var);
-
-int String_startswith(String, String);
-
-int String_find(String, String);
-
-int String_is_identifier(String);
-
-int String_equal(String, String);
-
-Var Map_setindex(Map, Var, Var);
-
-Map Map_copy(Map);
-
-void Compiler_set_gensym(Compiler, int);
-
-int SymbolSet_contains(SymbolSet, Symbol);
-
-Map Compiler_collect_symbols(Compiler, Map);
-
-Compiler Compiler_new_shared(Compiler);
-
-int Toolchain_preprocess(Toolchain, const char *, List, const char *, const char *, String *, String *, String *);
-
-String int_str(int);
-
-List translation_depfile_parse(String);
-
-void Compiler_add_translation_dependency(Compiler, String);
-
-void Compiler_shallow_parse(Compiler, Map);
-
-Map Sym_global_symbols(Sym);
-
-void Compiler_install_generated_protocol_symbols(Compiler, Map);
-
-Map Sym_file_statics(Sym);
-
-Context Context_open_isolated_named(const char *);
-
-void Type_begin_unit(void);
-
-Compiler Compiler_new(void);
-
-void Diagnostics_set_emitter(Diagnostics, DiagnosticEmitter, void *);
-
-int Compiler_error_count(Compiler);
-
-void Compiler_take_diagnostics(Compiler, Compiler);
-
-void header_symbols_begin_generated(void);
-
-void Sym_seed_var_tags(Sym, Map);
-
-void Compiler_close_child(Compiler, Compiler);
-
-List Compiler_full_parse(Compiler, Map);
-
-Iter Array_iter(Array, Iter);
-
-Var Array_push(Array, Var);
-
-void Array_free(Array);
-
-void Compiler_free_lisp(Compiler);
-
-void Type_end_unit(void);
-
-void Context_close(Context);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int _source_lines(String text);
-
-static Token _first_preprocessor_token(Compiler compiler);
-
 static void _load_snapshot_once(void);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason);
@@ -172,6 +48,8 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 static void _configure_package(Compiler compiler, CliRequest request, String filename);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
+
+Var String_var(String);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -204,6 +82,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _24 = String_new("/");
 }
 
+int String_truth(String);
+
+int String_getindex(String, int);
+
+int String_len(String);
+
 static int _source_lines(String text){
   if(! String_truth(text)) return 0;
   int lines = String_getindex(text, String_len(text) - 1) == '\n' ? 0 : 1;
@@ -215,6 +99,12 @@ static Token _first_preprocessor_token(Compiler compiler){
   for(Token token = compiler -> tokenizer -> tokens;  token -> type != 11212;  token ++) if(token -> type == 35579270086) return token;
   return compiler -> token;
 }
+
+String x2c_get_root(void);
+
+Map symbol_snapshot_load(String, Map *, int *);
+
+Var Symbol_var(Symbol);
 
 static void _load_snapshot_once(void){
   if(snapshot_loaded) return;
@@ -265,6 +155,12 @@ _x2c_error_handler_0 = NULL;
 }
 }
 
+void Type_initialize(void);
+
+void header_symbols_initialize(void);
+
+int header_symbols_open(String, int);
+
 void Frontend_load_support(CliRequest request){
   if(! _init_guard_) _file_init_();
   Type_initialize();
@@ -276,6 +172,14 @@ void Frontend_load_support(CliRequest request){
   header_symbols_loaded = 1;
 }
 
+void * Scope_calloc(size_t, size_t);
+
+List List_append(List, List);
+
+List x2c_default_include_dirs(void);
+
+Toolchain toolchain_new(String, String, List, List, List, int, int);
+
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
   Frontend_load_support(request);
@@ -286,14 +190,28 @@ Frontend Frontend_new(CliRequest request){
   return frontend;
 }
 
+int header_symbols_write(File, int);
+
 int Frontend_write_header_symbols(File output){
   return header_symbols_write(output, snapshot_gensym);
 }
+
+void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason){
   List notes = cons(_7, cons(String_var(String_join(NULL, cons(String_var(_8), cons(String_var(filename), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_9), cons(String_var(reason), NULL)))), NULL)));
   Compiler_report_error(compiler, 306819428, _18, NULL, notes);
 }
+
+int Compiler_read_source(Compiler, String, volatile String *);
+
+File String_open(String, const char *);
+
+int File_stat(File, struct stat *);
+
+int File_close(File);
+
+String File_string_close(File);
 
 static String _read_input_text(Compiler compiler, String filename){
   if(compiler -> sources){
@@ -425,6 +343,8 @@ _x2c_error_handler_2 = NULL;
 return text;
 }
 
+void Compiler_tokenize(Compiler, char *);
+
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename){
   Compiler c = unit -> compiler;
   c -> filename = filename;
@@ -440,6 +360,28 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   Compiler_tokenize(c, text);
   c -> include_dirs = frontend -> include_dirs;
 }
+
+int List_truth(List);
+
+String SourceView_path(String);
+
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+String Var_string(Var);
+
+int String_startswith(String, String);
+
+int String_find(String, String);
+
+int String_is_identifier(String);
+
+int String_equal(String, String);
+
+Var Map_setindex(Map, Var, Var);
 
 static void _configure_package(Compiler compiler, CliRequest request, String filename){
   char buffer[PATH_MAX];
@@ -484,6 +426,32 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
   }
 
 }
+
+Map Map_copy(Map);
+
+void Compiler_set_gensym(Compiler, int);
+
+int SymbolSet_contains(SymbolSet, Symbol);
+
+Map Compiler_collect_symbols(Compiler, Map);
+
+Compiler Compiler_new_shared(Compiler);
+
+int Toolchain_preprocess(Toolchain, const char *, List, const char *, const char *, String *, String *, String *);
+
+String int_str(int);
+
+List translation_depfile_parse(String);
+
+void Compiler_add_translation_dependency(Compiler, String);
+
+void Compiler_shallow_parse(Compiler, Map);
+
+Map Sym_global_symbols(Sym);
+
+void Compiler_install_generated_protocol_symbols(Compiler, Map);
+
+Map Sym_file_statics(Sym);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Compiler c = unit -> compiler;
@@ -562,6 +530,16 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   return globs;
 }
 
+Context Context_open_isolated_named(const char *);
+
+void Type_begin_unit(void);
+
+Compiler Compiler_new(void);
+
+void Diagnostics_set_emitter(Diagnostics, DiagnosticEmitter, void *);
+
+int Compiler_error_count(Compiler);
+
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
   * unit =(ParsedUnit){
@@ -639,6 +617,14 @@ _x2c_error_handler_3 = NULL;
 return ! Compiler_error_count(compiler);
 }
 
+void Compiler_take_diagnostics(Compiler, Compiler);
+
+void header_symbols_begin_generated(void);
+
+void Sym_seed_var_tags(Sym, Map);
+
+void Compiler_close_child(Compiler, Compiler);
+
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
   if(! _init_guard_) _file_init_();
   Compiler compiler = unit -> compiler;
@@ -706,6 +692,14 @@ _x2c_error_handler_4 = NULL;
 return ! Compiler_error_count(compiler);
 }
 
+List Compiler_full_parse(Compiler, Map);
+
+Iter Array_iter(Array, Iter);
+
+Var Array_push(Array, Var);
+
+void Array_free(Array);
+
 int ParsedUnit_parse(ParsedUnit * unit){
   Compiler compiler = unit -> compiler;
   if(Compiler_error_count(compiler)) return 0;
@@ -770,6 +764,12 @@ int Frontend_open(Frontend frontend, String filename, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
   return Frontend_start(frontend, filename, unit) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
 }
+
+void Compiler_free_lisp(Compiler);
+
+void Type_end_unit(void);
+
+void Context_close(Context);
 
 void ParsedUnit_close(ParsedUnit * unit){
   if(! unit -> context) return;

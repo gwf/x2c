@@ -9,6 +9,8 @@ static StaticCallback callbacks[] ={
 }
 ;
 
+static int add_one(int value);
+
 static int add_one(int value){
   return value + 1;
 }

@@ -17,6 +17,67 @@ static int live;
 _x2c_initializer_choice_3B252372_0((live = 5))
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Func add_to(int bias);
+
+static Func combine(int left, int right);
+
+static Func nest(int first);
+
+static Func counter(int value);
+
+typedef struct _x2c_lambda_context_0{
+  Var _x2c_lambda_capture_0;
+}
+_x2c_lambda_context_0;
+
+static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
+
+typedef struct _x2c_lambda_context_2{
+  Var _x2c_lambda_capture_1;
+  Var _x2c_lambda_capture_2;
+}
+_x2c_lambda_context_2;
+
+static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
+
+typedef struct _x2c_lambda_context_4{
+  Var _x2c_lambda_capture_3;
+}
+_x2c_lambda_context_4;
+
+typedef struct _x2c_lambda_context_5{
+  Var _x2c_lambda_capture_4;
+  Var _x2c_lambda_capture_5;
+}
+_x2c_lambda_context_5;
+
+static Var _x2c_lambda_3(Func _x2c_lambda_closure_3, const FuncArg * _x2c_lambda_argv_3);
+
+static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2);
+
+typedef struct _x2c_lambda_context_8{
+  int * _x2c_lambda_capture_6;
+}
+_x2c_lambda_context_8;
+
+static Var _x2c_lambda_4(Func _x2c_lambda_closure_4, const FuncArg * _x2c_lambda_argv_4);
+
+typedef struct _x2c_lambda_context_10{
+  Var _x2c_lambda_capture_7;
+}
+_x2c_lambda_context_10;
+
+static Var _x2c_lambda_5(Func _x2c_lambda_closure_5, const FuncArg * _x2c_lambda_argv_5);
+
+typedef struct _x2c_lambda_context_12{
+  Var _x2c_lambda_capture_8;
+}
+_x2c_lambda_context_12;
+
+static Var _x2c_lambda_6(Func _x2c_lambda_closure_6, const FuncArg * _x2c_lambda_argv_6);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -56,14 +117,7 @@ __attribute__((constructor)) static void _file_init_(void){
 
 Var int_var(int);
 
-typedef struct _x2c_lambda_context_0{
-  Var _x2c_lambda_capture_0;
-}
-_x2c_lambda_context_0;
-
 Func Func_new_context(FuncAdapter, List, const void *, size_t);
-
-static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0);
 
 static Func add_to(int bias){
   return({
@@ -75,14 +129,6 @@ static Func add_to(int bias){
   );
 }
 
-typedef struct _x2c_lambda_context_2{
-  Var _x2c_lambda_capture_1;
-  Var _x2c_lambda_capture_2;
-}
-_x2c_lambda_context_2;
-
-static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
-
 static Func combine(int left, int right){
   return({
     Var _x2c_lambda_capture_value_1 = int_var(right);  Var _x2c_lambda_capture_value_2 = int_var(left);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
@@ -92,13 +138,6 @@ static Func combine(int left, int right){
   }
   );
 }
-
-typedef struct _x2c_lambda_context_4{
-  Var _x2c_lambda_capture_3;
-}
-_x2c_lambda_context_4;
-
-static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2);
 
 static Func nest(int first){
   return({
@@ -111,13 +150,6 @@ static Func nest(int first){
 }
 
 void * Scope_memdup(const void *, size_t);
-
-typedef struct _x2c_lambda_context_8{
-  int * _x2c_lambda_capture_6;
-}
-_x2c_lambda_context_8;
-
-static Var _x2c_lambda_4(Func _x2c_lambda_closure_4, const FuncArg * _x2c_lambda_argv_4);
 
 static Func counter(int value){
   int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int){
@@ -142,20 +174,6 @@ FuncArg FuncArg_reference(const void *, List);
 FuncArg FuncArg_value(Var);
 
 Var Func_apply(Func, unsigned, const FuncArg *);
-
-typedef struct _x2c_lambda_context_10{
-  Var _x2c_lambda_capture_7;
-}
-_x2c_lambda_context_10;
-
-static Var _x2c_lambda_5(Func _x2c_lambda_closure_5, const FuncArg * _x2c_lambda_argv_5);
-
-typedef struct _x2c_lambda_context_12{
-  Var _x2c_lambda_capture_8;
-}
-_x2c_lambda_context_12;
-
-static Var _x2c_lambda_6(Func _x2c_lambda_closure_6, const FuncArg * _x2c_lambda_argv_6);
 
 long Var_integer(Var);
 
@@ -234,12 +252,6 @@ static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda
   return int_var(value + Var_int(Var_convert(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1, 3453797)) + Var_int(Var_convert(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_2, 3453797)) + Var_int(Var_convert(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1, 3453797)));
   ;
 }
-
-typedef struct _x2c_lambda_context_5{
-  Var _x2c_lambda_capture_4;
-  Var _x2c_lambda_capture_5;
-}
-_x2c_lambda_context_5;
 
 static Var _x2c_lambda_3(Func _x2c_lambda_closure_3, const FuncArg * _x2c_lambda_argv_3){
   int value = Var_int(Var_convert(x2c_func_value_argument(_x2c_lambda_closure_3, _x2c_lambda_argv_3, 0, 3453797), 3453797));

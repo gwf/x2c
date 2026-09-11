@@ -6,6 +6,16 @@ static String _2, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void);
+
+static Byte increment(Byte value);
+
+static Text echo(Text value);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -25,8 +35,6 @@ static Text echo(Text value){
 
 Func Func_new(FuncAdapter, List);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
-
 List cons(Var, List);
 
 Var List_var(List);
@@ -34,8 +42,6 @@ Var List_var(List);
 Var Symbol_var(Symbol);
 
 void Lisp_bind(Lisp, String, Func);
-
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 Var String_var(String);
 

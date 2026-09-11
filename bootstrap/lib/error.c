@@ -32,41 +32,6 @@ struct ErrorHandler{
 }
 ;
 
-typedef struct ErrorContextState{
-  struct ErrorContextState * prev;
-  Map policy;
-  int bound, handler_depth;
-  int stack_height;
-}
-* ErrorContextState;
-
-typedef struct ErrorThreadState{
-  Scope scope;
-  Block stack;
-  Map policy;
-  int shutdown_done;
-  ErrorHandler handler_top, dispatch_saved;
-  int bound;
-  ErrorContextState context_top;
-  int depth, floor_only, rendered[5];
-}
-* ErrorThreadState;
-
-static _Thread_local struct ErrorThreadState error_thread;
-
-static const SymbolSet error_nonreturning_causes =(SymbolSet) "\001\000\000\000\034\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\021\037\000\000\023\036\033\000\000\030\025\000\014\000\016\012\000\000\000\010\027\035\000\000\004\007\000\011\000\000\007\032\017\000\000\014\004\005\000\000\000\011\002\020\017\031\016\000\130\012\346\217\307\130\000\000\150\152\211\375\242\323\004\000\250\013\111\006\353\022\000\000\012\015\164\176\022\004\000\000\130\012\346\323\344\022\000\000\216\014\237\004\001\000\000\000\206\053\237\004\001\000\000\000\340\373\044\075\013\000\000\000\146\201\231\176\022\004\000\000\150\071\062\320\117\202\000\000\250\054\326\275\361\237\003\000\312\161\101\176\353\336\000\000\340\373\044\010\000\000\000\000\236\054\372\333\104\000\000\000\250\111\150\176\022\004\000\000\144\021\255\264\377\034\000\000\150\150\362\031\000\000\000\000\210\253\317\174\372\034\000\000\130\012\346\277\004\000\000\000\116\232\237\004\001\000\000\000\062\115\062\174\022\004\000\000\330\023\055\317\377\034\000\000\050\253\263\310\117\202\000\000\030\013\343\323\347\000\000\000\210\253\117\270\012\000\000\000\110\151\362\031\026\032\000\000\012\055\014\266\067\134\002\000\130\012\346\273\364\024\000\000";
-
-typedef struct ErrorPair{
-  Var key;
-  Var value;
-}
-ErrorPair;
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,130 +47,36 @@ _x2c_defer_env_0;
 #include "symbol.h"
 #include "symbolset.h"
 #include "var.h"
+Atom Atom_intern(String spelling);
+
+String Atom_str(Atom atom);
+
+typedef struct ErrorContextState{
+  struct ErrorContextState * prev;
+  Map policy;
+  int bound, handler_depth;
+  int stack_height;
+}
+* ErrorContextState;
+
 #define ERROR_MAX_DEPTH 4
-void * Scope_malloc_in(Scope *, size_t);
+typedef struct ErrorThreadState{
+  Scope scope;
+  Block stack;
+  Map policy;
+  int shutdown_done;
+  ErrorHandler handler_top, dispatch_saved;
+  int bound;
+  ErrorContextState context_top;
+  int depth, floor_only, rendered[5];
+}
+* ErrorThreadState;
 
-Block Block_new(size_t);
-
-Var Array_push(Array, Var);
-
-Var Symbol_var(Symbol);
-
-MatchPlan MatchPlan_prepare(Var);
-
-void Block_push(Block, const void *);
-
-void Scope_pop(void);
-
-String String_new(const char *);
-
-Var String_var(String);
-
-Var int_var(int);
-
-int Block_truth(Block);
-
-Scope Scope_new_named(const char *);
-
-void Scope_push(Scope *);
-
-void Block_free(Block);
-
-void Scope_destroy(Scope);
-
-int SymbolSet_contains(SymbolSet, Symbol);
-
-Iter SymbolSet_iter(SymbolSet, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-void Symbol_decode(Symbol, char *);
-
-Scope * Scope_top(void);
-
-Pool Pool_release(Pool);
-
-Pool Pool_retain_named(Pool, const char *);
-
-List List_cons_in(Pool, Var, List);
-
-int Var_is_void(Var);
-
-int Var_is_null(Var);
-
-int Var_is_nil(Var);
-
-int Var_is(Var, Symbol);
-
-int Var_is_wide(Var);
-
-Var Var_clone_wide(Var);
-
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
-
-String Var_string(Var);
-
-String String_new_in(Pool, const char *, int);
-
-int String_len(String);
-
-String Var_str(Var);
-
-Var Var_new(Symbol, ...);
-
-List Var_list(Var);
-
-Var List_car(List);
-
-Var List_var(List);
-
-List List_cdr(List);
-
-void Block_pop(Block);
-
-String String_new_len(const char *, int);
-
-int String_try_own(String);
-
-List cons(Var, List);
-
-int List_try_own(List);
-
-Var Map_setindex(Map, Var, Var);
-
-Var Map_getindex(Map, Var);
-
-void Array_free(Array);
-
-void MatchPlan_free(MatchPlan);
-
-void Scope_free(void *);
-
-void * Scope_malloc(size_t);
-
-void Block_append(Block, const void *, size_t);
-
-int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
-
-Var List_cadr(List);
-
-Pool List_pool_retain_named(const char *);
-
-size_t Array_len(Array);
-
-Var Array_getindex(Array, int);
-
-int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
-
-void List_pool_release(void);
-
-int Array_truth(Array);
-
-void ExceptionFrame_unwind(void *);
+static _Thread_local struct ErrorThreadState error_thread;
 
 static ErrorThreadState _thread(void);
+
+static const SymbolSet error_nonreturning_causes =(SymbolSet) "\001\000\000\000\034\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\021\037\000\000\023\036\033\000\000\030\025\000\014\000\016\012\000\000\000\010\027\035\000\000\004\007\000\011\000\000\007\032\017\000\000\014\004\005\000\000\000\011\002\020\017\031\016\000\130\012\346\217\307\130\000\000\150\152\211\375\242\323\004\000\250\013\111\006\353\022\000\000\012\015\164\176\022\004\000\000\130\012\346\323\344\022\000\000\216\014\237\004\001\000\000\000\206\053\237\004\001\000\000\000\340\373\044\075\013\000\000\000\146\201\231\176\022\004\000\000\150\071\062\320\117\202\000\000\250\054\326\275\361\237\003\000\312\161\101\176\353\336\000\000\340\373\044\010\000\000\000\000\236\054\372\333\104\000\000\000\250\111\150\176\022\004\000\000\144\021\255\264\377\034\000\000\150\150\362\031\000\000\000\000\210\253\317\174\372\034\000\000\130\012\346\277\004\000\000\000\116\232\237\004\001\000\000\000\062\115\062\174\022\004\000\000\330\023\055\317\377\034\000\000\050\253\263\310\117\202\000\000\030\013\343\323\347\000\000\000\210\253\117\270\012\000\000\000\110\151\362\031\026\032\000\000\012\055\014\266\067\134\002\000\130\012\346\273\364\024\000\000";
 
 static int _never_returns(Symbol code);
 
@@ -243,6 +114,12 @@ static void _append_record(ErrorRecord * record);
 
 static void _record(const X2CErrorSite * site, Symbol code, List detail);
 
+typedef struct ErrorPair{
+  Var key;
+  Var value;
+}
+ErrorPair;
+
 static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, va_list args);
 
 static void _truncate(int mark);
@@ -273,11 +150,32 @@ static Symbol _raise(const X2CErrorSite * site, Symbol code, List detail);
 
 static int _chain_contains(ErrorHandler head, ErrorHandler wanted);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-Atom Atom_intern(String spelling);
+void * Scope_malloc_in(Scope *, size_t);
 
-String Atom_str(Atom atom);
+Block Block_new(size_t);
+
+Var Array_push(Array, Var);
+
+Var Symbol_var(Symbol);
+
+MatchPlan MatchPlan_prepare(Var);
+
+void Block_push(Block, const void *);
+
+void Scope_pop(void);
+
+String String_new(const char *);
+
+Var String_var(String);
+
+Var int_var(int);
 
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   if(! Error_ready() || ! target || ! arm_count) _floor(20800632064936, "could not register transferring catch");
@@ -326,6 +224,8 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
 int x2c_error_catch_selected(ErrorHandler handle){
   return handle ? handle -> selected : - 1;
 }
+
+int Block_truth(Block);
 
 Var x2c_error_catch_capture(ErrorHandler handle, int index){
   if(! handle || ! Block_truth(handle -> capture_values) || index < 0 || index >=(int) handle -> capture_values -> length) return((void) 0, Void);
@@ -410,6 +310,10 @@ void Error_restore(int handler_depth, int stack_height){
   _truncate(stack_height);
 }
 
+Scope Scope_new_named(const char *);
+
+void Scope_push(Scope *);
+
 void Error_initialize_raw(void){
   ErrorThreadState state = _thread();
   if(state -> scope || state -> shutdown_done) return;
@@ -421,6 +325,10 @@ void Error_initialize_raw(void){
   x2c_error_runtime_ready = 1;
   _initialize_policies();
 }
+
+void Block_free(Block);
+
+void Scope_destroy(Scope);
 
 void Error_shutdown_raw(void){
   ErrorThreadState state = _thread();
@@ -447,9 +355,15 @@ static ErrorThreadState _thread(void){
   return state;
 }
 
+int SymbolSet_contains(SymbolSet, Symbol);
+
 static int _never_returns(Symbol code){
   return SymbolSet_contains(error_nonreturning_causes, code);
 }
+
+Iter SymbolSet_iter(SymbolSet, Iter);
+
+int Iter_try_next(Iter, Var *);
 
 static void _initialize_policies(void){
   {
@@ -474,6 +388,8 @@ _Noreturn static void _floor(Symbol code, const char * why){
   abort();
 }
 
+void Symbol_decode(Symbol, char *);
+
 static void _report(Symbol code){
   char spelling[SYMBOL_MAX_5BIT + 1] ={
     0
@@ -497,6 +413,8 @@ static void _leave(void){
   if(state -> depth > 0) state -> depth --;
 }
 
+Scope * Scope_top(void);
+
 static int _scope_push(Symbol code, const char * message){
   ErrorThreadState state = _thread();
   if(Scope_top() == & state -> scope) return 0;
@@ -510,6 +428,8 @@ static ErrorRecord * _record_at(int index){
   return & records[index];
 }
 
+Pool Pool_release(Pool);
+
 static void _region_destroy(ErrorRegion * region){
   if(region -> lists) region -> lists = Pool_release(region -> lists);
   if(region -> strings) region -> strings = Pool_release(region -> strings);
@@ -519,6 +439,8 @@ static void _region_destroy(ErrorRegion * region){
   }
 
 }
+
+Pool Pool_retain_named(Pool, const char *);
 
 static ErrorRegion _region_new(void){
   ErrorRegion region ={
@@ -531,9 +453,45 @@ static ErrorRegion _region_new(void){
   return region;
 }
 
+List List_cons_in(Pool, Var, List);
+
 static List _cons(ErrorRegion * region, Var head, List tail){
   return List_cons_in(region -> lists, head, tail);
 }
+
+int Var_is_void(Var);
+
+int Var_is_null(Var);
+
+int Var_is_nil(Var);
+
+int Var_is(Var, Symbol);
+
+int Var_is_wide(Var);
+
+Var Var_clone_wide(Var);
+
+int Var_is_integer(Var);
+
+int Var_is_floating(Var);
+
+String Var_string(Var);
+
+String String_new_in(Pool, const char *, int);
+
+int String_len(String);
+
+String Var_str(Var);
+
+Var Var_new(Symbol, ...);
+
+List Var_list(Var);
+
+Var List_car(List);
+
+Var List_var(List);
+
+List List_cdr(List);
 
 static Var _copy_value(ErrorRegion * region, Var value){
   if(Var_is_void(value)) _floor(4477479911782, "void is not an admissible error detail");
@@ -639,6 +597,8 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
   state -> floor_only --;
 }
 
+void Block_pop(Block);
+
 static void _truncate(int mark){
   if(! Error_ready() || mark < 0) return;
   while(Error_count() > mark){
@@ -660,6 +620,14 @@ int Error_count(void){
 int Error_mark(void){
   return Error_count();
 }
+
+String String_new_len(const char *, int);
+
+int String_try_own(String);
+
+List cons(Var, List);
+
+int List_try_own(List);
 
 static Var _snapshot_value(Var v){
   if(Var_is_void(v)) _floor(4477479911782, "void is not an admissible error snapshot");
@@ -761,6 +729,8 @@ List Error_since(int mark){
   return out;
 }
 
+Var Map_setindex(Map, Var, Var);
+
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
@@ -781,6 +751,8 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(pushed) Scope_pop();
   state -> floor_only --;
 }
+
+Var Map_getindex(Map, Var);
 
 Symbol Error_policy_get(Symbol code){
   if(! Error_ready()) return 2260136;
@@ -848,6 +820,12 @@ static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth){
   return stop;
 }
 
+void Array_free(Array);
+
+void MatchPlan_free(MatchPlan);
+
+void Scope_free(void *);
+
 static void _handler_free(ErrorHandler handle){
   if(! handle) return;
   if((void *) handle -> patterns != NULL) Array_free(handle -> patterns);
@@ -872,6 +850,8 @@ void Error_pop(ErrorHandler handle){
   state -> handler_top = handle -> prev;
   _handler_free(handle);
 }
+
+void * Scope_malloc(size_t);
 
 void * Error_context_open(void){
   if(! Error_ready()) return NULL;
@@ -907,6 +887,10 @@ static void _catch_retain(ErrorHandler handle){
   if(pushed) Scope_pop();
 }
 
+void Block_append(Block, const void *, size_t);
+
+int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
+
 static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   if(! layout || ! layout -> binder_count) return;
   int pushed = _scope_push(97614135954008, "could not enter error scope for catch captures");
@@ -920,6 +904,18 @@ static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, Ma
   }
   if(pushed) Scope_pop();
 }
+
+Var List_cadr(List);
+
+Pool List_pool_retain_named(const char *);
+
+size_t Array_len(Array);
+
+Var Array_getindex(Array, int);
+
+int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
+
+void List_pool_release(void);
 
 static Symbol _catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
@@ -957,6 +953,10 @@ static Symbol _catch_match(ErrorHandler h){
   state -> floor_only --;
   return 285842436424;
 }
+
+int Array_truth(Array);
+
+void ExceptionFrame_unwind(void *);
 
 static Symbol _dispatch(Symbol effective, int raised_at, int depth){
   ErrorThreadState state = _thread();

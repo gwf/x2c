@@ -6,6 +6,10 @@ static int value_calls;
 
 static int tag_calls;
 
+static Var next_value(void);
+
+static Symbol next_other_tag(void);
+
 Var int_var(int);
 
 static Var next_value(void){

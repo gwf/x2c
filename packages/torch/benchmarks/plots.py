@@ -13,12 +13,14 @@ canonical-churn.png and peak-versus-length.png beside REPORT.md.
 """
 
 import json
+import hashlib
 import os
 import sys
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator, StrMethodFormatter
 
 X2C = "#1f5c8b"
 PYTHON = "#c2571a"
@@ -47,9 +49,9 @@ def finish(figure, axes, path, title, xlabel, ylabel):
     print(f"wrote {path}")
 
 
-def learning_curves(directory, check):
+def learning_curves(directory, check, filename="learning-curves.png"):
     curves = {app: data["curve"] for app, data in check.items()
-              if data.get("curve", {}).get("x2c")}
+              if any(data.get("curve", {}).values())}
     if not curves:
         return
     figure, axes = plt.subplots(1, len(curves), figsize=(5 * len(curves), 3.4),
@@ -63,7 +65,9 @@ def learning_curves(directory, check):
             cell.plot([p[0] for p in points], [p[1] for p in points],
                       color=colour, linewidth=1.6, label=language)
         cell.set_yscale("log")
-        cell.set_title(app, loc="left", fontsize=11)
+        present = [name for name, points in pair.items() if points]
+        title = app if len(present) > 1 else f"{app} ({present[0]} only)"
+        cell.set_title(title, loc="left", fontsize=11)
         cell.set_xlabel("update", fontsize=9)
         cell.set_ylabel("training loss", fontsize=9)
         cell.spines["top"].set_visible(False)
@@ -72,7 +76,7 @@ def learning_curves(directory, check):
         cell.set_axisbelow(True)
         cell.legend(frameon=False, fontsize=9)
     figure.tight_layout()
-    path = os.path.join(directory, "learning-curves.png")
+    path = os.path.join(directory, filename)
     figure.savefig(path, dpi=144)
     plt.close(figure)
     print(f"wrote {path}")
@@ -140,6 +144,8 @@ def memory_versus_steps(directory, memory):
                        f"{row['steps']} steps", loc="left", fontsize=11)
         cell.set_xlabel("training steps + requests" if row["profile"] == 1
                         else "steps completed", fontsize=9)
+        cell.xaxis.set_major_locator(MaxNLocator(4, integer=True))
+        cell.xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
         cell.set_ylabel("process footprint (MB)", fontsize=9)
         cell.set_ylim(bottom=0)
         cell.spines["top"].set_visible(False)
@@ -178,6 +184,8 @@ def canonical_churn(directory, memory):
             (axes[1], "x2c process footprint", "process MB")):
         cell.set_title(title, loc="left", fontsize=11)
         cell.set_xlabel("requests completed", fontsize=9)
+        cell.xaxis.set_major_locator(MaxNLocator(4, integer=True))
+        cell.xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
         cell.set_ylabel(ylabel, fontsize=9)
         cell.spines["top"].set_visible(False)
         cell.spines["right"].set_visible(False)
@@ -232,6 +240,49 @@ def peak_versus_length(directory, attribution, memory):
     print(f"wrote {path}")
 
 
+def paired_learning_curves(directory, check, curve_directory, evidence):
+    provenance = {}
+    for app, data in check.items():
+        path = os.path.join(curve_directory, f"{app}-python-curve.txt")
+        if not os.path.isfile(path):
+            continue
+        with open(path, "rb") as handle:
+            content = handle.read()
+        points = [(int(index), float(value)) for index, value in
+                  (line.split() for line in content.decode().splitlines())]
+        data.setdefault("curve", {})["python"] = points
+        provenance[app] = {"file": os.path.abspath(path),
+                           "sha256": hashlib.sha256(content).hexdigest(),
+                           "points": len(points)}
+    learning_curves(directory, check, "supplement-paired-learning.png")
+    with open(os.path.join(evidence, "paired-curves-provenance.json"), "w") as f:
+        json.dump({"check": "check.json (unchanged)", "python": provenance},
+                  f, indent=2)
+        f.write("\n")
+
+
+def window_memory(directory, memory):
+    rows = [r for r in memory or [] if r["profile"] == 4]
+    if not rows:
+        return
+    row = rows[-1]
+    figure, axes = plt.subplots(figsize=(7, 4))
+    for language, color in (("x2c", X2C), ("python", PYTHON)):
+        samples = [s for s in row[language]["samples"]
+                   if s["label"] == "window-done" or
+                   (s["label"].startswith("window") and
+                    s["label"].endswith("-done"))]
+        axes.plot([s["index"] for s in samples],
+                  [s["footprint_peak"] / 1e6 for s in samples],
+                  marker="o", color=color, label=language)
+    axes.set_xscale("log", base=2)
+    axes.set_xticks([8, 32, 128], ["8", "32", "128"])
+    axes.legend(frameon=False)
+    finish(figure, axes, os.path.join(directory, "supplement-window-memory.png"),
+           "Sequence memory: model released between window lengths",
+           "window length (ascending sweep)", "cumulative process peak (MB)")
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
@@ -240,6 +291,15 @@ def main():
     directory = os.path.join(root, "debug", "torch-comparison", sys.argv[1])
     if not os.path.isdir(directory):
         sys.exit(f"no run at {directory}")
+    if len(sys.argv) > 3 and sys.argv[2] == "--paired-curves":
+        paired_learning_curves(os.path.dirname(os.path.abspath(__file__)),
+                               load(directory, "check.json"), sys.argv[3],
+                               directory)
+        return 0
+    if len(sys.argv) > 2 and sys.argv[2] == "--supplement":
+        window_memory(os.path.dirname(os.path.abspath(__file__)),
+                      load(directory, "memory.json"))
+        return 0
     diagnostics = (os.path.join(root, "debug", "torch-comparison", sys.argv[2])
                    if len(sys.argv) > 2 else directory)
     # Read the raw samples from the run's log directory; write the plots

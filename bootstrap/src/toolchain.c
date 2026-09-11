@@ -4,8 +4,6 @@
 
 static String _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static int _init_guard_ = 0;
-
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -15,61 +13,7 @@ static int _init_guard_ = 0;
 #include <unistd.h>
 #include "report.h"
 #include "utils.h"
-int String_truth(String);
-
-String String_new(const char *);
-
-String x2c_get_executable(void);
-
-String x2c_path_dir(String);
-
-Var String_var(String);
-
-int File_close(File);
-
-String x2c_get_root(void);
-
-int String_equal(String, String);
-
-void * Scope_calloc(size_t, size_t);
-
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
-Var Array_push(Array, Var);
-
-String Var_string(Var);
-
-List Array_list_free(Array);
-
-int String_getindex(String, int);
-
-Iter String_iter(String, Iter);
-
-String Symbol_str(Symbol);
-
-int List_len(List);
-
-void report_suspend(void);
-
-ChildProcess process_start(char * *, int);
-
-int ChildProcess_ready(ChildProcess);
-
-int ChildProcess_wait(ChildProcess, String *, String *);
-
-int Var_is(Var, Symbol);
-
-int process_run(char * *, String *, String *);
-
-List x2c_cpp_include_dirs(void);
-
-String File_string_close(File);
-
-Var Symbol_var(Symbol);
+static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
@@ -124,6 +68,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _24 = String_new("x2c-dependencies");
 }
 
+int String_truth(String);
+
+String String_new(const char *);
+
 static String _tool_selection(String explicit, const char * preferred_env, const char * fallback_env, String installed, const char * fallback){
   if(String_truth(explicit)) return explicit;
   const char * value = getenv(preferred_env);
@@ -133,6 +81,14 @@ static String _tool_selection(String explicit, const char * preferred_env, const
   if(String_truth(installed)) return installed;
   return String_new(fallback);
 }
+
+String x2c_get_executable(void);
+
+String x2c_path_dir(String);
+
+Var String_var(String);
+
+int File_close(File);
 
 static String _installed_tool(const char * name){
   String executable = x2c_get_executable();
@@ -155,6 +111,10 @@ static String _installed_tool(const char * name){
   return result;
 }
 
+String x2c_get_root(void);
+
+int String_equal(String, String);
+
 static void _toolchain_layout(String * include_dir, String * runtime_lib){
   String root = x2c_get_root(), executable = x2c_get_executable();
   String stage_dir = String_truth(executable) ? x2c_path_dir(executable) : NULL;
@@ -175,6 +135,8 @@ static void _toolchain_layout(String * include_dir, String * runtime_lib){
   * runtime_lib = String_join(NULL, cons(String_var(prefix), cons(String_var(_5), NULL)));
 }
 
+void * Scope_calloc(size_t, size_t);
+
 Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
   Toolchain toolchain = Scope_calloc(1, sizeof(struct Toolchain));
@@ -188,6 +150,14 @@ Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List 
   _toolchain_layout(& toolchain -> include_dir, & toolchain -> runtime_lib);
   return toolchain;
 }
+
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+Var Array_push(Array, Var);
 
 static void _append_list(Array output, List values){
   {
@@ -205,6 +175,8 @@ static void _append_list(Array output, List values){
   }
 
 }
+
+String Var_string(Var);
 
 static Array _compile_arguments(Toolchain toolchain, List gen_dirs){
   Array arguments = Array_new();
@@ -232,6 +204,8 @@ static Array _compile_arguments(Toolchain toolchain, List gen_dirs){
   _append_list(arguments, toolchain -> cc_args);
   return arguments;
 }
+
+List Array_list_free(Array);
 
 ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String object, String depfile, List gen_dirs){
   if(! _init_guard_) _file_init_();
@@ -297,6 +271,10 @@ void ToolAction_as_program(ToolAction action){
   action -> report = 0;
 }
 
+int String_getindex(String, int);
+
+Iter String_iter(String, Iter);
+
 static int _shell_safe(String argument){
   if(! String_truth(argument) || ! String_getindex(argument, 0)) return 0;
   {
@@ -345,6 +323,8 @@ static void _print_argument(String argument){
   fputc('\'', stderr);
 }
 
+String Symbol_str(Symbol);
+
 static void _print_action(Symbol phase, List arguments){
   fprintf(stderr, "x2c: %s", Symbol_str(phase));
   {
@@ -367,6 +347,8 @@ static void _print_action(Symbol phase, List arguments){
   fputc('\n', stderr);
 }
 
+int List_len(List);
+
 static char * * _action_argv(List arguments){
   int count = List_len(arguments);
   char * * argv = Scope_calloc(count + 1, sizeof(char *));
@@ -387,6 +369,10 @@ static char * * _action_argv(List arguments){
   return argv;
 }
 
+void report_suspend(void);
+
+ChildProcess process_start(char * *, int);
+
 ToolRun ToolAction_start(ToolAction action){
   if(action -> verbose || action -> dry_run){
     report_suspend();
@@ -399,11 +385,15 @@ ToolRun ToolAction_start(ToolAction action){
   return execution;
 }
 
+int ChildProcess_ready(ChildProcess);
+
 int ToolRun_ready(ToolRun execution){
   if(execution -> action -> dry_run) return 1;
   ChildProcess process = execution -> process;
   return ChildProcess_ready(process);
 }
+
+int ChildProcess_wait(ChildProcess, String *, String *);
 
 int ToolRun_wait(ToolRun execution){
   ToolAction action = execution -> action;
@@ -421,6 +411,8 @@ int ToolRun_wait(ToolRun execution){
 int ToolAction_run(ToolAction action){
   return ToolRun_wait(ToolAction_start(action));
 }
+
+int Var_is(Var, Symbol);
 
 static void _append_includes(Array arguments, List dirs){
   {
@@ -443,6 +435,14 @@ static void _append_includes(Array arguments, List dirs){
   }
 
 }
+
+int process_run(char * *, String *, String *);
+
+List x2c_cpp_include_dirs(void);
+
+String File_string_close(File);
+
+Var Symbol_var(Symbol);
 
 int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_dirs, const char * imacros, const char * force_include, String * output, String * errors, String * dependencies){
   if(! _init_guard_) _file_init_();

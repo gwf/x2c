@@ -5,6 +5,7 @@ A tanh recurrent cell written out of three Linear applications. The plan
 forbids substituting a fused native RNN here, so this runs the same three
 affine terms per step that the x2c program runs.
 
+    python3 packages/torch/benchmarks/sequence.py diagnose <artifacts> <out> <count>
     python3 packages/torch/benchmarks/sequence.py check <artifacts> <out>
     python3 packages/torch/benchmarks/sequence.py time <artifacts> <out> \\
         <window8|window32|window128> <windows>
@@ -136,7 +137,7 @@ def train(model, optimizer, streams, count, window, offset=0, observe=None,
                                            h[rows])
                 (part / microbatches).backward()
                 pieces.append(part_h.detach())
-                value += float(part) / microbatches
+                value += float(part.detach()) / microbatches
             h = torch.cat(pieces, dim=0)
             loss = torch.tensor(value)
         optimizer.step()
@@ -212,6 +213,7 @@ def mode_check(artifacts, out):
     with open(os.path.join(out, "sequence-python-curve.txt"), "w") as handle:
         for index, value in curve:
             handle.write(f"{index} {value:.10g}\n")
+            print(f"curve {index} {value:.10g}")
 
     # Save, reload, resume, optimizer state included.
     resumed = build(init)
@@ -282,6 +284,7 @@ def mode_memory(artifacts, out, profile, count):
         train(model, optimizer, streams, count, window)
         sample(f"window{window}-done", window)
         del model, optimizer
+        sample("window-released", window)
 
     # Gradient accumulation over four microbatches, backward per
     # microbatch and one optimizer update.
@@ -291,8 +294,84 @@ def mode_memory(artifacts, out, profile, count):
     train(model, optimizer, streams, count, PROFILE["window"], microbatches=4)
     sample("accumulate-done", 4)
     record("accumulated_val_mse", score(model, data["data.val"]))
+    del model, optimizer
+    sample("accumulate-released", 4)
     sample("final", 0)
     flush()
+    return 0
+
+
+def mode_diagnose(artifacts, out, count):
+    start = time.monotonic()
+    data, init = load(artifacts)
+    streams = data["data.train"]
+    record("load_seconds", time.monotonic() - start)
+    warm = build(init)
+    train(warm, optimizer_for(warm), streams, 50, PROFILE["window"])
+    del warm
+    start = time.monotonic()
+    model = build(init)
+    optimizer = optimizer_for(model)
+    record("setup_seconds", time.monotonic() - start)
+    window = PROFILE["window"]
+    per_epoch = windows_per_epoch(streams.shape[1], window)
+    h = None
+    batch = forward = backward = optimize = cleanup = 0.0
+    last_loss = 0.0
+    for index in range(count):
+        start = time.monotonic()
+        position = index % per_epoch
+        offset = position * window
+        if position == 0 or h is None:
+            h = zero_state(model, streams.shape[0])
+        inputs = streams[:, offset:offset + window]
+        targets = streams[:, offset + 1:offset + window + 1]
+        optimizer.zero_grad()
+        batch += time.monotonic() - start
+        start = time.monotonic()
+        loss, ended = window_loss(model, inputs, targets, h)
+        forward += time.monotonic() - start
+        start = time.monotonic()
+        loss.backward()
+        backward += time.monotonic() - start
+        start = time.monotonic()
+        optimizer.step()
+        optimize += time.monotonic() - start
+        if index + 1 == count:
+            last_loss = float(loss.detach())
+        start = time.monotonic()
+        h = ended.detach()
+        del inputs, targets, loss, ended
+        cleanup += time.monotonic() - start
+    start = time.monotonic()
+    del h
+    cleanup += time.monotonic() - start
+    record("diagnostic_steps", count)
+    record("diagnostic_loss", last_loss)
+    for name, value in (("batch", batch), ("forward", forward),
+                        ("backward", backward), ("optimizer", optimize),
+                        ("cleanup", cleanup)):
+        record(name + "_seconds", value)
+    saved_model = os.path.join(out, "sequence-python-diagnostic-model.pt")
+    saved_adam = os.path.join(out, "sequence-python-diagnostic-adam.pt")
+    start = time.monotonic()
+    common.save_tensors(dict(model.state_dict()), saved_model)
+    torch.save(optimizer.state_dict(), saved_adam)
+    record("checkpoint_save_seconds", time.monotonic() - start)
+    restored = SequenceRnn(PROFILE)
+    restored_optimizer = optimizer_for(restored)
+    start = time.monotonic()
+    restored.load_state_dict(common.load_tensors(saved_model))
+    restored_optimizer.load_state_dict(
+        torch.load(saved_adam, weights_only=False))
+    record("checkpoint_load_seconds", time.monotonic() - start)
+    with torch.no_grad():
+        inputs, targets = streams[:, :window], streams[:, 1:window + 1]
+        state = zero_state(model, streams.shape[0])
+        original = float(window_loss(model, inputs, targets, state)[0])
+        reloaded = float(window_loss(restored, inputs, targets, state)[0])
+    record("diagnostic_reloaded_loss", reloaded)
+    record("diagnostic_reload_difference", abs(original - reloaded))
     return 0
 
 
@@ -304,8 +383,12 @@ def main():
     configure()
     text("language", "python")
     text("torch_version", torch.__version__)
+    if mode == "startup":
+        return 0
     if mode == "check":
         return mode_check(artifacts, out)
+    if mode == "diagnose":
+        return mode_diagnose(artifacts, out, int(sys.argv[4]))
     if mode == "time":
         return mode_time(artifacts, out, sys.argv[4], int(sys.argv[5]))
     if mode == "memory":

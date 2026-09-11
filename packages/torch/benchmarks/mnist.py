@@ -5,6 +5,7 @@ Native modules on both sides: the model is one `nn.Sequential`, which is
 what the x2c program builds with `Module.sequential`/`push`, and the child
 names match by position. No dropout, so neither side draws an RNG mask.
 
+    python3 packages/torch/benchmarks/mnist.py diagnose <artifacts> <out> <count>
     python3 packages/torch/benchmarks/mnist.py check <artifacts> <out>
     python3 packages/torch/benchmarks/mnist.py time <artifacts> <out> \\
         <epoch> <batches>
@@ -164,6 +165,7 @@ def mode_check(artifacts, out):
     with open(os.path.join(out, "mnist-python-curve.txt"), "w") as handle:
         for index, value in curve:
             handle.write(f"{index} {value:.10g}\n")
+            print(f"curve {index} {value:.10g}")
 
     # Reload must reproduce the predictions, buffers included.
     checkpoint = os.path.join(out, "mnist-python-model.pt")
@@ -186,7 +188,7 @@ def mode_time(artifacts, out, variant, batches):
     warm.train()
     warm_start = time.monotonic()
     train_batches(warm, optimizer_for(warm), images, targets, order["order"],
-                  20)
+                  50)
     record("warmup_seconds", time.monotonic() - warm_start)
 
     model = build(init)
@@ -205,6 +207,81 @@ def mode_time(artifacts, out, variant, batches):
     return 0
 
 
+def mode_diagnose(artifacts, out, count):
+    start = time.monotonic()
+    init = common.load_tensors(os.path.join(artifacts, "mnist-init.pt"))
+    common.check_artifact_version(init, "mnist-init.pt")
+    orders = common.load_tensors(os.path.join(artifacts, "mnist-batches.pt"))
+    common.check_artifact_version(orders, "mnist-batches.pt")
+    order = orders["order"]
+    images, targets = mnist_tensors(common.mnist_root(), True)
+    record("load_seconds", time.monotonic() - start)
+    warm = build(init)
+    train_batches(warm, optimizer_for(warm), images, targets, order, 50)
+    del warm
+    start = time.monotonic()
+    model = build(init)
+    optimizer = optimizer_for(model)
+    record("setup_seconds", time.monotonic() - start)
+    batch = forward = backward = optimize = cleanup = 0.0
+    last_loss = 0.0
+    size = PROFILE["batch"]
+    per_epoch = (images.shape[0] + size - 1) // size
+    for index in range(count):
+        start = time.monotonic()
+        position = index % per_epoch
+        epoch = (index // per_epoch) % order.shape[0]
+        offset = position * size
+        span = min(size, images.shape[0] - offset)
+        pick = order[epoch][offset:offset + span]
+        inputs = images.index_select(0, pick)
+        target = targets.index_select(0, pick)
+        optimizer.zero_grad()
+        batch += time.monotonic() - start
+        start = time.monotonic()
+        loss = nn.functional.cross_entropy(model(inputs), target)
+        forward += time.monotonic() - start
+        start = time.monotonic()
+        loss.backward()
+        backward += time.monotonic() - start
+        start = time.monotonic()
+        optimizer.step()
+        optimize += time.monotonic() - start
+        if index + 1 == count:
+            last_loss = float(loss.detach())
+        start = time.monotonic()
+        del pick, inputs, target, loss
+        cleanup += time.monotonic() - start
+    record("diagnostic_steps", count)
+    record("diagnostic_loss", last_loss)
+    for name, value in (("batch", batch), ("forward", forward),
+                        ("backward", backward), ("optimizer", optimize),
+                        ("cleanup", cleanup)):
+        record(name + "_seconds", value)
+    saved_model = os.path.join(out, "mnist-python-diagnostic-model.pt")
+    saved_adam = os.path.join(out, "mnist-python-diagnostic-adam.pt")
+    start = time.monotonic()
+    common.save_tensors(dict(model.state_dict()), saved_model)
+    torch.save(optimizer.state_dict(), saved_adam)
+    record("checkpoint_save_seconds", time.monotonic() - start)
+    restored = mnist_model(PROFILE)
+    restored_optimizer = optimizer_for(restored)
+    start = time.monotonic()
+    restored.load_state_dict(common.load_tensors(saved_model))
+    restored_optimizer.load_state_dict(
+        torch.load(saved_adam, weights_only=False))
+    record("checkpoint_load_seconds", time.monotonic() - start)
+    model.eval()
+    restored.eval()
+    with torch.no_grad():
+        inputs, target = images[:size], targets[:size]
+        original = float(nn.functional.cross_entropy(model(inputs), target))
+        reloaded = float(nn.functional.cross_entropy(restored(inputs), target))
+    record("diagnostic_reloaded_loss", reloaded)
+    record("diagnostic_reload_difference", abs(original - reloaded))
+    return 0
+
+
 def main():
     if len(sys.argv) < 4:
         sys.exit(__doc__)
@@ -220,8 +297,12 @@ def main():
     torch.manual_seed(0)
     text("language", "python")
     text("torch_version", torch.__version__)
+    if mode == "startup":
+        return 0
     if mode == "check":
         return mode_check(artifacts, out)
+    if mode == "diagnose":
+        return mode_diagnose(artifacts, out, int(sys.argv[4]))
     if mode == "time":
         return mode_time(artifacts, out, sys.argv[4], int(sys.argv[5]))
     sys.exit(f"mnist.py: no mode {mode}")
