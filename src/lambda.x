@@ -164,98 +164,96 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
       origin = at.integer();
     }
     case %(expr ?target (tadapt ?at (expr ?source ?))): {
-      int old_origin = c.origin;
-      c.origin = at.integer();
-      defer c.origin = old_origin;
-      Type target_type = c.sym.resolve_key(target);
-      _typed_adapter_error(
-        c,
-        "typed callback adapter source must be a direct function",
+      $let(c.origin, at.integer()) {
+        Type target_type = c.sym.resolve_key(target);
+        _typed_adapter_error(
+          c,
+          "typed callback adapter source must be a direct function",
           target_type, source,
-        %("supported: a free function or Type.method designator"));
+          %("supported: a free function or Type.method designator"));
+      }
     }
     default: return expression;
   }
-  int old_origin = c.origin;
-  c.origin = origin;
-  defer c.origin = old_origin;
-  Type target_type = c.sym.resolve_key(target_spelling);
-  if (!source_binding || !source_type || source_type.is_pointer() ||
-      !source_type.is_function()) {
-    _typed_adapter_error(
-      c,
-      "typed callback adapter source must be a direct function",
-      target_type, source_type,
-      %("supported: a free function or Type.method designator"));
-  }
-  List target_params = NULL, source_params = NULL;
-  Type target_return = NULL, source_return = NULL;
-  if (!_typed_function_parts(target_type, &target_params, &target_return)) {
-    _typed_adapter_error(
-      c, "typed callback adapter target is incomplete",
-      target_type, source_type, NULL);
-  }
-  if (!_typed_function_parts(source_type, &source_params, &source_return)) {
-    _typed_adapter_error(
-      c, "typed callback adapter source is incomplete",
-      target_type, source_type, NULL);
-  }
-  if (_typed_params_variadic(target_params) ||
-      _typed_params_variadic(source_params)) {
-    _typed_adapter_error(
-      c, "typed callback adapter cannot be variadic",
-      target_type, source_type, NULL);
-  }
-  int target_count = target_params.len(), source_count = source_params.len();
-  if (target_count != source_count) {
-    String detail =
-      %"target has %d parameters; source has %d".printf(
-        target_count, source_count);
-    _typed_adapter_error(
-      c, "typed callback adapter arity mismatch",
-      target_type, source_type, %($detail));
-  }
-  target_return = target_return.canonicalize();
-  source_return = source_return.canonicalize();
-  if (target_return === %(void) || source_return === %(void)) {
-    _typed_adapter_error(
-      c, "typed callback adapter does not support void return",
-      target_type, source_type, NULL);
-  }
-  if (target_return != source_return) {
-    _typed_adapter_error(
-      c, "typed callback adapter return type mismatch",
-      target_type, source_type, NULL);
-  }
-  int index = 0;
-  List targets = target_params, sources = source_params;
-  for (; targets;
-       targets = targets.cdr(), sources = sources.cdr(), index++) {
-      Type target_param = targets.car();
-      Type source_param = sources.car();
-    if (!_typed_adapter_parameter_allowed(c, target_param, source_param)) {
-      String detail =
-        %"parameter %d: %s cannot adapt to %s".printf(
-          index + 1, target_param.repr(), source_param.repr());
+  $let(c.origin, origin) {
+    Type target_type = c.sym.resolve_key(target_spelling);
+    if (!source_binding || !source_type || source_type.is_pointer() ||
+        !source_type.is_function()) {
       _typed_adapter_error(
-        c, "typed callback adapter parameter mismatch",
+        c,
+        "typed callback adapter source must be a direct function",
+        target_type, source_type,
+        %("supported: a free function or Type.method designator"));
+    }
+    List target_params = NULL, source_params = NULL;
+    Type target_return = NULL, source_return = NULL;
+    if (!_typed_function_parts(target_type, &target_params, &target_return)) {
+      _typed_adapter_error(
+        c, "typed callback adapter target is incomplete",
+        target_type, source_type, NULL);
+    }
+    if (!_typed_function_parts(source_type, &source_params, &source_return)) {
+      _typed_adapter_error(
+        c, "typed callback adapter source is incomplete",
+        target_type, source_type, NULL);
+    }
+    if (_typed_params_variadic(target_params) ||
+        _typed_params_variadic(source_params)) {
+      _typed_adapter_error(
+        c, "typed callback adapter cannot be variadic",
+        target_type, source_type, NULL);
+    }
+    int target_count = target_params.len(), source_count = source_params.len();
+    if (target_count != source_count) {
+      String detail =
+        %"target has %d parameters; source has %d".printf(
+          target_count, source_count);
+      _typed_adapter_error(
+        c, "typed callback adapter arity mismatch",
         target_type, source_type, %($detail));
     }
+    target_return = target_return.canonicalize();
+    source_return = source_return.canonicalize();
+    if (target_return === %(void) || source_return === %(void)) {
+      _typed_adapter_error(
+        c, "typed callback adapter does not support void return",
+        target_type, source_type, NULL);
+    }
+    if (target_return != source_return) {
+      _typed_adapter_error(
+        c, "typed callback adapter return type mismatch",
+        target_type, source_type, NULL);
+    }
+    int index = 0;
+    List targets = target_params, sources = source_params;
+    for (; targets;
+         targets = targets.cdr(), sources = sources.cdr(), index++) {
+      Type target_param = targets.car();
+      Type source_param = sources.car();
+      if (!_typed_adapter_parameter_allowed(c, target_param, source_param)) {
+        String detail =
+          %"parameter %d: %s cannot adapt to %s".printf(
+            index + 1, target_param.repr(), source_param.repr());
+        _typed_adapter_error(
+          c, "typed callback adapter parameter mismatch",
+          target_type, source_type, %($detail));
+      }
+    }
+
+    List key = %(tadapt $source_binding $target_type);
+    Var stored;
+    if (c.names.adapters.try_get(key, &stored))
+      return %(expr $target_spelling (ident $stored));
+
+    String adapter_name = c.fresh_name("callback_adapt");
+    List adapter_binding = c.sym.introduce(adapter_name);
+    List function = _callback_function(
+      c, adapter_binding, target_params, target_return,
+      source_binding, source_type, source_params);
+    c.names.adapters[key] = adapter_binding;
+    c.add_early(function);
+    return %(expr $target_spelling (ident $adapter_binding));
   }
-
-  List key = %(tadapt $source_binding $target_type);
-  Var stored;
-  if (c.names.adapters.try_get(key, &stored))
-    return %(expr $target_spelling (ident $stored));
-
-  String adapter_name = c.fresh_name("callback_adapt");
-  List adapter_binding = c.sym.introduce(adapter_name);
-  List function = _callback_function(
-    c, adapter_binding, target_params, target_return,
-    source_binding, source_type, source_params);
-  c.names.adapters[key] = adapter_binding;
-  c.add_early(function);
-  return %(expr $target_spelling (ident $adapter_binding));
 }
 
 static int _func_adapter_source(
@@ -988,8 +986,7 @@ static void _record_region_binding(
 static void _collect_region_bindings(
   Compiler compiler, List ast, Map owned, Array order) {
   if (!ast) return;
-  Array resume = %[];
-  defer resume.free();
+  Array resume = $auto(%[]);
   for (;;) {
     int pruned = 0;
     match (ast) {
@@ -1050,8 +1047,7 @@ static void _require_capture_lvalue(Compiler c, List target) {
 */
 void Compiler.check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
-  Array pending = %[];
-  defer pending.free();
+  Array pending = $auto(%[]);
   pending.push(ast);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -1083,8 +1079,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
 
 static void _collect_reference_captures(
   List ast, Map owned, Map candidates) {
-  Array pending = %[];
-  defer pending.free();
+  Array pending = $auto(%[]);
   pending.push(ast);
   while (pending.len()) {
     Var current = pending.take_last();

@@ -227,19 +227,13 @@ static List _match_case(Compiler c) {
   Token start = c.token;
   c.next();
   if (peek == <case>) {
-    int previous = c.in_pattern;
-    Array previous_types = c.match_types;
-    Array captures = %[];
     {
-      defer {
-        c.match_types = previous_types;
-        c.in_pattern = previous;
-        captures.free();
+      Array captures = $auto(%[]);
+      $let(c.in_pattern, 1)
+      $let(c.match_types, captures) {
+        pattern = c.parse_expression();
+        types = captures.list();
       }
-      c.in_pattern = 1;
-      c.match_types = captures;
-      pattern = c.parse_expression();
-      types = captures.list();
     }
     if (types) pattern = c.typed_match_pattern(pattern, types);
     match (pattern)

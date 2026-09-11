@@ -80,7 +80,7 @@ Source: `src/ast.x:46`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:189`
+Source: `src/ast.x:188`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -90,7 +90,7 @@ Source: `src/ast.x:189`
 Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return NULL.
 
-Source: `src/ast.x:202`
+Source: `src/ast.x:201`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -103,7 +103,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:175`
+Source: `src/ast.x:174`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -115,7 +115,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:117`
+Source: `src/ast.x:116`
 
 ### `Symbol`
 

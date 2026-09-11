@@ -669,8 +669,7 @@ static void _collect_forward_dependencies(
   Compiler compiler, Var value, Map locals, Map statics, Map seen,
   Array prototypes) {
   if (value is not <list> || value.is_nil()) return;
-  Array resume = %[];
-  defer resume.free();
+  Array resume = $auto(%[]);
   List node = value;
   for (;;) {
     match (node) {

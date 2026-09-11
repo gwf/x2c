@@ -508,15 +508,8 @@ static void _report_lisp_failure(
 static Var _eval_string(
   Compiler compiler, String source, Token invocation) {
   Var result;
-  Compiler previous = macro_import_compiler;
-  Token old_invocation = macro_import_invocation;
-  macro_import_compiler = compiler;
-  macro_import_invocation = invocation;
-  {
-    defer {
-      macro_import_compiler = previous;
-      macro_import_invocation = old_invocation;
-    }
+  $let(macro_import_invocation, invocation)
+  $let(macro_import_compiler, compiler) {
     try result = compiler.macro_lisp.eval_string(source);
     catch %(?code *detail):
       _report_lisp_failure(compiler, invocation, cons(code, detail), source);
@@ -1092,43 +1085,43 @@ static void _import(
       defer c.close_child(imported);
       imported.filename = path;
       imported.collect_protocols = c.collect_protocols;
-      DiagnosticEmitter emitter = c.diagnostics.emit;
-      void *diagnostic_owner = c.diagnostics.owner;
-      imported.borrow_diagnostics(c);
-      defer c.diagnostics.set_emitter(emitter, diagnostic_owner);
-      imported.sym = c.sym;
-      imported.fn_defs = c.fn_defs;
-      imported.macros = c.macros;
-      imported.kw_aliases = c.kw_aliases;
-      imported.kw_seen = c.kw_seen;
-      imported.macro_lisp = c.macro_lisp;
-      imported.borrowed_lisp = 1;
-      imported.import_src = path;
-      imported.imports = c.imports;
-      imported.import_stack = c.import_stack;
-      imported.declaration_effects = c.declaration_effects;
-      imported.tokenize(text);
-      while (imported.peek(0) != <eof>) {
-        if (imported.keyword_form_is_definition()) {
-          Token alias_token = imported.skip_trivia_from(imported.token + 1);
-          Atom alias = Atom.intern(alias_token.text);
-          imported.parse_keyword_definition();
-          imported_aliases[alias] = imported.kw_aliases[alias];
+      $let(c.diagnostics.owner, c.diagnostics.owner)
+      $let(c.diagnostics.emit, c.diagnostics.emit) {
+        imported.borrow_diagnostics(c);
+        imported.sym = c.sym;
+        imported.fn_defs = c.fn_defs;
+        imported.macros = c.macros;
+        imported.kw_aliases = c.kw_aliases;
+        imported.kw_seen = c.kw_seen;
+        imported.macro_lisp = c.macro_lisp;
+        imported.borrowed_lisp = 1;
+        imported.import_src = path;
+        imported.imports = c.imports;
+        imported.import_stack = c.import_stack;
+        imported.declaration_effects = c.declaration_effects;
+        imported.tokenize(text);
+        while (imported.peek(0) != <eof>) {
+          if (imported.keyword_form_is_definition()) {
+            Token alias_token = imported.skip_trivia_from(imported.token + 1);
+            Atom alias = Atom.intern(alias_token.text);
+            imported.parse_keyword_definition();
+            imported_aliases[alias] = imported.kw_aliases[alias];
+          }
+          else if (imported.macro_form_is_definition())
+            imported.parse_macro_definition();
+          else if (imported.peek(0) == <"$(">) {
+            if (c.collect_protocols || _import_path(imported, NULL))
+              imported.parse_macro_lisp_top_level();
+            else imported.parse_macro_lisp_shallow();
+          }
+          else
+            imported.report_error(
+              <macro>, "unexpected form in macro import",
+              imported.token, NULL);
         }
-        else if (imported.macro_form_is_definition())
-          imported.parse_macro_definition();
-        else if (imported.peek(0) == <"$(">) {
-          if (c.collect_protocols || _import_path(imported, NULL))
-            imported.parse_macro_lisp_top_level();
-          else imported.parse_macro_lisp_shallow();
-        }
-        else
-          imported.report_error(
-            <macro>, "unexpected form in macro import",
-            imported.token, NULL);
+        c.merge_translation_dependencies(imported.deps);
+        c.declaration_effects = imported.declaration_effects;
       }
-      c.merge_translation_dependencies(imported.deps);
-      c.declaration_effects = imported.declaration_effects;
     }
     else
       c.report_error(
@@ -1168,11 +1161,10 @@ void Compiler.parse_macro_lisp_top_level(Compiler compiler) {
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
 void Compiler.evaluate_declaration_effect(
   Compiler compiler, String form, Token invocation) {
-  int collection = compiler.collect_protocols;
-  compiler.collect_protocols = 1;
-  defer compiler.collect_protocols = collection;
-  _ensure_lisp(compiler);
-  _eval_string(compiler, form, invocation);
+  $let(compiler.collect_protocols, 1) {
+    _ensure_lisp(compiler);
+    _eval_string(compiler, form, invocation);
+  }
 }
 
 /** Imports immediate dependencies and queues other source Lisp effects.
@@ -1327,8 +1319,7 @@ static Var _eval_template_form(
   if (references) {
     Tokenizer tokenizer = Tokenizer.new_mode(form, <macro-lisp>);
     tokenizer.scan();
-    Buffer rewritten = Buffer.new(0);
-    defer rewritten.free();
+    Buffer rewritten = $auto(Buffer.new(0));
     int copied = 0;
     Token token = tokenizer.next();
     while (token && token.type != <eof>) {
@@ -1360,41 +1351,19 @@ static Var _eval_template_form(
     form = %"(let ((x2c.ident (lambda (name)
       (list $temporary name)))) $form)";
   }
-  Compiler previous = macro_sdk_compiler;
-  String old_src_file = macro_sdk_source_file;
-  String old_failure = macro_sdk_failure_message;
-  List old_notes = macro_sdk_failure_notes;
-  Map old_sources = macro_sdk_source_captures;
-  int old_has_references = macro_sdk_has_references;
-  macro_sdk_compiler = compiler;
-  macro_sdk_source_file = source_file;
-  macro_sdk_failure_message = NULL;
-  macro_sdk_failure_notes = NULL;
-  macro_sdk_source_captures = source_captures;
-  macro_sdk_has_references = !!references;
   Var result = void;
-  {
-    defer {
-      macro_sdk_compiler = previous;
-      macro_sdk_source_file = old_src_file;
-      macro_sdk_failure_message = old_failure;
-      macro_sdk_failure_notes = old_notes;
-      macro_sdk_source_captures = old_sources;
-      macro_sdk_has_references = old_has_references;
-    }
+  String message = NULL, List notes = NULL;
+  $let(macro_sdk_has_references, !!references)
+  $let(macro_sdk_source_captures, source_captures)
+  $let(macro_sdk_failure_notes, NULL)
+  $let(macro_sdk_failure_message, NULL)
+  $let(macro_sdk_source_file, source_file)
+  $let(macro_sdk_compiler, compiler) {
     result = _eval_string(compiler, form, invocation);
-    if (macro_sdk_failure_message) {
-      String message = macro_sdk_failure_message;
-      List notes = macro_sdk_failure_notes;
-      macro_sdk_compiler = previous;
-      macro_sdk_source_file = old_src_file;
-      macro_sdk_failure_message = old_failure;
-      macro_sdk_failure_notes = old_notes;
-      macro_sdk_source_captures = old_sources;
-      macro_sdk_has_references = old_has_references;
-      compiler.report_error(<macro>, message, invocation, notes);
-    }
+    message = macro_sdk_failure_message;
+    notes = macro_sdk_failure_notes;
   }
+  if (message) compiler.report_error(<macro>, message, invocation, notes);
   return result;
 }
 
@@ -1492,8 +1461,7 @@ static Var _replace_definition_bindings(Var value, Map bindings) {
   Var replacement;
   if (candidate && bindings.try_get(value, &replacement)) return replacement;
   if (value is not <list> || value.is_nil()) return value;
-  Array items = %[];
-  defer items.free();
+  Array items = $auto(%[]);
   int changed = 0;
   foreach (Var child, value.list()) {
     Var item = _replace_definition_bindings(child, bindings);
@@ -2628,96 +2596,89 @@ List Compiler.expand_macro_invocation_node(
                       definition.assoc(<target>) == <block>;
     if (block_scope) _.sym.push_new_scope();
     defer if (block_scope) _.sym.pop_scope();
-    Token old_token = _.token;
-    _.token = invocation;
-    defer _.token = old_token;
-    Atom name = definition.assoc(<name>);
-    foreach (List active, _.macro_stack) {
-      (List prior, List prior_input, Var bindings, Var site) = active;
-      (void) bindings, (void) site;
-      if (List.equal(prior, definition) &&
-          List.equal(prior_input, input)) {
-        String spelling = name.str();
+    $let(_.token, invocation) {
+      Atom name = definition.assoc(<name>);
+      foreach (List active, _.macro_stack) {
+        (List prior, List prior_input, Var bindings, Var site) = active;
+        (void) bindings, (void) site;
+        if (List.equal(prior, definition) &&
+            List.equal(prior_input, input)) {
+          String spelling = name.str();
+          _.report_error(
+            <macro>, %"identical recursive expansion of '$spelling'",
+            invocation,
+            %(${_definition_note(definition)}
+              "input: ${_source_unwrap(input.search_replace(
+                %(capture (source ?syntax) *), <?syntax>
+              )).repr()}")
+          );
+        }
+      }
+      if (_.macro_stack.len() >= 64) {
+        String first_note =
+          %"first expansion: ${
+            compiler.macro_stack.last().repr()
+          }";
         _.report_error(
-          <macro>, %"identical recursive expansion of '$spelling'",
+          <macro>, "macro expansion depth exceeds 64",
           invocation,
           %(${_definition_note(definition)}
-            "input: ${_source_unwrap(input.search_replace(
-              %(capture (source ?syntax) *), <?syntax>
-            )).repr()}")
+            "input: ${input.repr()}" $first_note)
         );
       }
-    }
-    if (_.macro_stack.len() >= 64) {
-      String first_note =
-        %"first expansion: ${
-          compiler.macro_stack.last().repr()
-        }";
-      _.report_error(
-        <macro>, "macro expansion depth exceeds 64",
-        invocation,
-        %(${_definition_note(definition)}
-          "input: ${input.repr()}" $first_note)
-      );
-    }
-    if (_.macro_count >= 10000)
-      _.report_error(
-        <macro>, "macro expansion count exceeds 10000",
-        invocation, NULL);
+      if (_.macro_count >= 10000)
+        _.report_error(
+          <macro>, "macro expansion count exceeds 10000",
+          invocation, NULL);
 
-    _.macro_count++;
-    List old_stack = _.macro_stack;
-    List result = NULL;
-    {
-      defer {
-        _.macro_stack = old_stack;
-      }
-      List template = definition.assoc(<template>);
-      Map introduced = %{};
-      Array fresh_values = %[];
-      List direct_bindings = NULL;
-      foreach (List fresh, definition.assoc(<fresh>).list()) {
-        Var (binder, spelling, lisp) = fresh;
-        List binding = _introduced_binding(
-          _, introduced, spelling.str());
-        if (lisp.int()) {
-          List hole = _hole(binder, <name>, 0);
-          fresh_values.push(_capture_row(_, hole, %($binding)));
+      _.macro_count++;
+      List result = NULL;
+      $let(_.macro_stack, _.macro_stack) {
+        List old_stack = _.macro_stack;
+        List template = definition.assoc(<template>);
+        Map introduced = %{};
+        Array fresh_values = %[];
+        List direct_bindings = NULL;
+        foreach (List fresh, definition.assoc(<fresh>).list()) {
+          Var (binder, spelling, lisp) = fresh;
+          List binding = _introduced_binding(
+            _, introduced, spelling.str());
+          if (lisp.int()) {
+            List hole = _hole(binder, <name>, 0);
+            fresh_values.push(_capture_row(_, hole, %($binding)));
+          }
+          else direct_bindings = cons(%($binder $binding), direct_bindings);
         }
-        else direct_bindings = cons(%($binder $binding), direct_bindings);
+        List fresh_input = fresh_values.list_free();
+        List match_input = fresh_input
+          ? input.append(%((fresh @fresh_input))) : input;
+        List replacement_bindings = match_input.match(
+          definition.assoc(<pattern>));
+        int matched = !!replacement_bindings;
+        replacement_bindings = replacement_bindings.append(direct_bindings);
+        List lisp_bindings = _lisp_bindings(replacement_bindings);
+        Var stored = definition;
+        _.macro_stack = %(
+          ($stored $input $lisp_bindings $invocation) @old_stack
+        );
+        int expansion_origin = _.record_origin(invocation);
+        Ast constructed = matched
+                        ? template.replace(replacement_bindings) : NULL;
+        if (constructed &&
+            (definition.assoc(<kind>) == <decl-unit> ||
+             definition.assoc(<target>) == <named-type>)) {
+          List rows = constructed.car() == <seq>
+                    ? constructed.cdr() : %($constructed);
+          constructed = %(declaration-bundle (rows @rows));
+        }
+        $let(_.origin, expansion_origin) {
+          result = _.bind_syntax(
+            matched ? constructed.var() : void,
+            position, _.return_type);
+        }
       }
-      List fresh_input = fresh_values.list_free();
-      List match_input = fresh_input
-        ? input.append(%((fresh @fresh_input))) : input;
-      List replacement_bindings = match_input.match(
-        definition.assoc(<pattern>));
-      int matched = !!replacement_bindings;
-      replacement_bindings = replacement_bindings.append(direct_bindings);
-      List lisp_bindings = _lisp_bindings(replacement_bindings);
-      Var stored = definition;
-      _.macro_stack = %(
-        ($stored $input $lisp_bindings $invocation) @old_stack
-      );
-      int expansion_origin = _.record_origin(invocation);
-      Ast constructed = matched
-                      ? template.replace(replacement_bindings) : NULL;
-      if (constructed &&
-          (definition.assoc(<kind>) == <decl-unit> ||
-           definition.assoc(<target>) == <named-type>)) {
-        List rows = constructed.car() == <seq>
-                  ? constructed.cdr() : %($constructed);
-        constructed = %(declaration-bundle (rows @rows));
-      }
-      int old_origin = _.origin;
-      _.origin = expansion_origin;
-      {
-        defer _.origin = old_origin;
-        result = _.bind_syntax(
-          matched ? constructed.var() : void,
-          position, _.return_type);
-      }
+      return result;
     }
-    return result;
   }
 }
 
@@ -2927,10 +2888,7 @@ static List _parse_target_definition(
       return %(seq $node);
     }
     List result = c.bind_syntax(node, position, c.return_type);
-    Token after = c.token;
-    c.token = invocation;
-    {
-      defer c.token = after;
+    $let(c.token, invocation) {
       transaction.commit();
     }
     return result;

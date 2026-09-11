@@ -421,10 +421,8 @@ static Symbol _read_tokenizer(
 }
 
 static Tokenizer _scan_lisp_tokens(String source, Scope *scope) {
-  Scope.push(scope);
   Tokenizer tokenizer = NULL;
-  {
-    defer Scope.pop();
+  $scope(scope) {
     tokenizer = Tokenizer.new_mode(source, <lisp>);
     tokenizer.scan();
   }
@@ -512,9 +510,9 @@ Symbol Lisp.read(Lisp lisp, String source, unsigned *cursor, Var *out) {
   (void) lisp;
   if (!source || !cursor) return <eof>;
   unsigned base = *cursor;
-  Scope tokens_scope = Scope.new_named("Lisp tokens"), Symbol status;
+  Symbol status;
   {
-    defer Scope.destroy(tokens_scope);
+    Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
     Tokenizer tokenizer = _scan_lisp_tokens(source + base, &tokens_scope);
     status = _read_tokenizer(tokenizer, source, base, cursor, out);
   }
@@ -895,13 +893,8 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
-  Scope frame = Scope.new_named("Lisp frame"), Map bindings = NULL;
-  defer Scope.destroy(frame);
-  {
-    Scope.push(&frame);
-    defer Scope.pop();
-    bindings = %{};
-  }
+  Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
+  $scope(&frame) { bindings = %{}; }
   LispEnv captured = {
     .bindings = lambda.captures,
     .parent = env
@@ -1030,10 +1023,9 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
   Var hook;
   if (lisp.globals.try_get(Atom.intern("_x2c.import-hook"), &hook))
     return lisp.apply(hook, %($path));
-  File source = File.open(path, "r");
   Var result;
   {
-    defer source.close();
+    File source = $auto(File.open(path, "r"));
     result = lisp.eval_file(source);
   }
   return result;
@@ -1269,9 +1261,7 @@ static int LispLower._auto_compile(LispLower l, Var expression, int tail) {
   Var expansion;
   int expanded = l._auto_expand(head, form.cdr(), &expansion);
   if (expanded < 0) return 0;
-  if (expanded) {
-    l.depth++;
-    defer l.depth--;
+  if (expanded) $let(l.depth, l.depth + 1) {
     return l._auto_compile(expansion, tail);
   }
   int name = b.constant(head);
@@ -1311,30 +1301,30 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv *env) {
     lisp.auto_stats.ineligible++;
     return lambda.auto_status;
   }
-  Scope.push(&lisp.scope);
-  defer Scope.pop();
-  MachineBuilder b = $auto(MachineBuilder.new());
-  struct LispLower storage = { lisp, env, lambda, b, NULL, 0 };
-  LispLower lower = &storage;
-  int ok = lower._auto_compile(lambda.body, 1) &&
-           b.emit(MW_LRETURN, 0, 0, 0, 0, 0) >= 0;
-  if (ok) {
-    b.root = 0;
-    lambda.auto_program = b.freeze();
-    lambda.auto_specials = lower.specials;
-    lambda.auto_status = MACHINE_PREPARED;
-  }
-  else
-    lambda.auto_status = b.status == MACHINE_PREPARED
-                       ? MACHINE_INELIGIBLE : b.status;
-  if (lambda.auto_status == MACHINE_PREPARED) {
-    lisp.auto_stats.published++;
-    lisp.auto_stats.program_bytes += (long) lambda.auto_program.bytes();
-  }
-  else
-    lisp.auto_stats.ineligible++;
+  $scope(&lisp.scope) {
+    MachineBuilder b = $auto(MachineBuilder.new());
+    struct LispLower storage = { lisp, env, lambda, b, NULL, 0 };
+    LispLower lower = &storage;
+    int ok = lower._auto_compile(lambda.body, 1) &&
+             b.emit(MW_LRETURN, 0, 0, 0, 0, 0) >= 0;
+    if (ok) {
+      b.root = 0;
+      lambda.auto_program = b.freeze();
+      lambda.auto_specials = lower.specials;
+      lambda.auto_status = MACHINE_PREPARED;
+    }
+    else
+      lambda.auto_status = b.status == MACHINE_PREPARED
+                         ? MACHINE_INELIGIBLE : b.status;
+    if (lambda.auto_status == MACHINE_PREPARED) {
+      lisp.auto_stats.published++;
+      lisp.auto_stats.program_bytes += (long) lambda.auto_program.bytes();
+    }
+    else
+      lisp.auto_stats.ineligible++;
 
-  return lambda.auto_status;
+    return lambda.auto_status;
+  }
 }
 
 /* Each note pairs a name with the callable used while compiling it.
@@ -1599,8 +1589,7 @@ Var Lisp.apply(Lisp lisp, Var callable, List values) =>
 $lisp.entry("Lisp.eval_string")
 Var Lisp.eval_string(Lisp lisp, String source) {
   if (!source) return %();
-  Scope tokens_scope = Scope.new_named("Lisp tokens");
-  defer Scope.destroy(tokens_scope);
+  Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
   Tokenizer tokenizer = _scan_lisp_tokens(source, &tokens_scope);
   unsigned cursor = 0;
   Var result = %();
@@ -1626,8 +1615,7 @@ Var Lisp.eval_string(Lisp lisp, String source) {
 */
 Var Lisp.eval_file(Lisp lisp, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
-  Block content = Block.new(sizeof(char));
-  defer content.free();
+  Block content = $auto(Block.new(sizeof(char)));
   if (source.read_into(content) == FILE_READ_EOF)
     return lisp.eval_string(NULL);
   if (content.length > INT_MAX) {

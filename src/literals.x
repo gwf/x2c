@@ -1176,10 +1176,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
 
   List body = NULL;
   if (c.test(<"{">)) {
-    Type previous_return = c.return_type;
-    c.return_type = %("Var");
-    {
-      defer c.return_type = previous_return;
+    $let(c.return_type, %("Var")) {
       body = c.parse_compound_statement();
     }
   }

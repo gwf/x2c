@@ -2360,42 +2360,43 @@ List List_cdr(List);
 int Diagnostics_reached_limit(Diagnostics);
 int Compiler_error_count(Compiler);
 List Compiler_full_parse(Compiler c, Map globs){
-  if(! _init_guard_) _file_init_();  List volatile ast = NULL;  Array_clear(c -> origins);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Diagnostics_reset(c -> diagnostics);  Compiler_resolve_protocols(c);  int old_depth = c -> recovery_depth;  c -> recovery_depth = old_depth + 1; {
-    {
-  _x2c_defer_env_7 _x2c_defer_env_16 = {._x2c_defer_capture_14 =(const void *) & c, ._x2c_defer_capture_15 =(const void *) & old_depth};
+  if(! _init_guard_) _file_init_();  List volatile ast = NULL;  Array_clear(c -> origins);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Diagnostics_reset(c -> diagnostics);  Compiler_resolve_protocols(c); {
+    int * _x2c_macro_address_5 = & c -> recovery_depth;  int _x2c_macro_previous_5 = * _x2c_macro_address_5; {
+  _x2c_defer_env_7 _x2c_defer_env_16 = {._x2c_defer_capture_14 =(const void *) & _x2c_macro_address_5, ._x2c_defer_capture_15 =(const void *) & _x2c_macro_previous_5};
   X2CCleanup _x2c_defer_record_7 = {
     .fn = _x2c_defer_cleanup_7,
     .env = & _x2c_defer_env_16
   };
   x2c_cleanup_push(&_x2c_defer_record_7);
   {
-      ast = _prepend_preproc(c, ast);  while(Compiler_peek(c, 0) != 11212){
-        {
-          ExceptionFrame _x2c_exception_frame_1;  List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), cons(Symbol_var(54), NULL)));  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, List_var(_x2c_catch_pattern_1));  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-            Token start = c -> token;  Ast volatile node = _replay_declaration_bundle(c);  if(! List_truth(node)) node = Compiler_parse_top_level(c);  if(List_truth(node) && Var_equal(List_car(node), Symbol_var(39266))){
-              {
-                List volatile item;  Iter _x2c_macro_iterator_23 = List_iter(List_cdr(node), &(struct Iter){
-                  int_var(0)
-                }
-                );  Var _x2c_macro_item_23;  while(Iter_try_next(_x2c_macro_iterator_23, & _x2c_macro_item_23)){
-                  item = Var_list(_x2c_macro_item_23); {
-                    _record_top_level_function_state(c, item);  ast = cons(List_var(item), ast);
+      * _x2c_macro_address_5 = c -> recovery_depth + 1; {
+        ast = _prepend_preproc(c, ast);  while(Compiler_peek(c, 0) != 11212){
+          {
+            ExceptionFrame _x2c_exception_frame_1;  List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), cons(Symbol_var(54), NULL)));  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, List_var(_x2c_catch_pattern_1));  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
+              Token start = c -> token;  Ast volatile node = _replay_declaration_bundle(c);  if(! List_truth(node)) node = Compiler_parse_top_level(c);  if(List_truth(node) && Var_equal(List_car(node), Symbol_var(39266))){
+                {
+                  List volatile item;  Iter _x2c_macro_iterator_23 = List_iter(List_cdr(node), &(struct Iter){
+                    int_var(0)
+                  }
+                  );  Var _x2c_macro_item_23;  while(Iter_try_next(_x2c_macro_iterator_23, & _x2c_macro_item_23)){
+                    item = Var_list(_x2c_macro_item_23); {
+                      _record_top_level_function_state(c, item);  ast = cons(List_var(item), ast);
+                    }
+
                   }
 
                 }
 
               }
-
+              else if(List_truth(node)){
+                _record_top_level_function_state(c, node);  ast = cons(List_var(node), ast);
+              }
+              ast = _prepend_preproc(c, ast);  _debug_tokens(c, start, c -> token);
             }
-            else if(List_truth(node)){
-              _record_top_level_function_state(c, node);  ast = cons(List_var(node), ast);
-            }
-            ast = _prepend_preproc(c, ast);  _debug_tokens(c, start, c -> token);
-          }
-          else {x2c_exception_landed(& _x2c_exception_frame_1); {
-            if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-              x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  {Var category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
-                (void) category;  if(Diagnostics_reached_limit(c -> diagnostics)){
+            else {x2c_exception_landed(& _x2c_exception_frame_1); {
+              if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+                x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  {Var category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
+                  (void) category;  if(Diagnostics_reached_limit(c -> diagnostics)){
   int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 2;
   x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);
@@ -2414,26 +2415,28 @@ List Compiler_full_parse(Compiler c, Map globs){
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
   continue;
 }
+                }
+
               }
 
             }
-
-          }
-          else {int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
+            else {int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
     x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
     x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();
+          }
+
         }
 
       }
-
-    }
-    int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+      int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
     x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;
     x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
     x2c_exception_leave(& _x2c_exception_frame_1);
+    }
+
   }
 
 }
@@ -3603,11 +3606,12 @@ static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
-  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7; (*(Compiler *) _x2c_defer_data_7->_x2c_defer_capture_14) -> recovery_depth =(*(int *) _x2c_defer_data_7->_x2c_defer_capture_15);
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;  *(*(int * *) _x2c_defer_data_7->_x2c_defer_capture_14) =(*(int *) _x2c_defer_data_7->_x2c_defer_capture_15);
 }
 
+void Array_cleanup(Array);
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
-  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;  Array_free((*(Array *) _x2c_defer_data_8->_x2c_defer_capture_16));
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;  Array_cleanup((*(Array *) _x2c_defer_data_8->_x2c_defer_capture_16));
 }
 
 #undef _x2c_initializer_choice_08246194_0_expanded

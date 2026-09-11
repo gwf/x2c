@@ -3015,16 +3015,19 @@ Type List_type_from_ast(List);
 int Type_is_function(Type);
 int Compiler_test(Compiler, Symbol);
 static List _parse_protocol_member(Compiler c, String participant, Map members){
-  int previous = c -> in_proto;  c -> in_proto = 1;  List declaration = NULL; {
-    {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & previous};
+  List declaration = NULL; {
+    int * _x2c_macro_address_0 = & c -> in_proto;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0};
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
     .env = & _x2c_defer_env_1
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-      declaration = Compiler_parse_simple_declaration(c);
+      * _x2c_macro_address_0 = 1; {
+        declaration = Compiler_parse_simple_declaration(c);
+      }
+
     }
 
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
@@ -3290,7 +3293,7 @@ return List_var(NULL);  return Var_null();
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0; (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> in_proto =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  *(*(int * *) _x2c_defer_data_0->_x2c_defer_capture_0) =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
 }
 
 #undef _x2c_initializer_choice_D9CA694D_0_expanded

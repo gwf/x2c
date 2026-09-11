@@ -1992,9 +1992,7 @@ int MatchCache.acquire(MatchCache m, Var pattern, MatchLease *lease) {
 
   MatchPlan plan = NULL;
   const char *fenced = NULL;
-  {  // Limit Scope.pop to plan preparation before an Error transfer.
-    Scope.push(&m.scope);
-    defer Scope.pop();
+  $scope(&m.scope) {
     plan = MatchPlan.prepare(pattern);
     if (plan.status == MACHINE_INELIGIBLE) {
       fenced = plan.reason;
@@ -2329,9 +2327,7 @@ void MatchCache.initialize(void) {
 static void _capture_sites_initialize(void) {
   if (match_capture_site_scope) return;
   match_capture_site_scope = Scope.new_named("Match source-site plans");
-  {  // Limit Scope.pop to capture-site setup before an Error transfer.
-    Scope.push(&match_capture_site_scope);
-    defer Scope.pop();
+  $scope(&match_capture_site_scope) {
     match_capture_sites = Block.new(sizeof(MatchCaptureSite *));
   }
   MatchCache.initialize();
@@ -2341,9 +2337,7 @@ static void _capture_site_prepare(MatchCaptureSite *site, Var pattern) {
   if (!_cache_admissible(pattern, 0)) return;
   _capture_sites_initialize();
   MatchPlan plan = NULL;
-  {  // Limit Scope.pop to site preparation before an Error transfer.
-    Scope.push(&match_capture_site_scope);
-    defer Scope.pop();
+  $scope(&match_capture_site_scope) {
     plan = MatchPlan.prepare(pattern);
     match_capture_sites.push(&site);
   }

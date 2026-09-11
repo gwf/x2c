@@ -2326,11 +2326,8 @@ static List _parse_associated_type(
 
 static List _parse_protocol_member(
   Compiler c, String participant, Map members) {
-  int previous = c.in_proto;
-  c.in_proto = 1;
   List declaration = NULL;
-  {
-    defer c.in_proto = previous;
+  $let(c.in_proto, 1) {
     declaration = c.parse_simple_declaration();
   }
   List binding = NULL, identity = NULL;

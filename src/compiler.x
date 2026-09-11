@@ -1355,10 +1355,7 @@ List Compiler.full_parse(Compiler c, Map globs) {
   c.source_private = 0;
   c.diagnostics.reset();
   c.resolve_protocols();
-  int old_depth = c.recovery_depth;
-  c.recovery_depth = old_depth + 1;
-  {
-    defer c.recovery_depth = old_depth;
+  $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
     while (c.peek(0) != <eof>) {
       try {
@@ -1467,8 +1464,7 @@ static List _cache_literal_var(Compiler compiler, Var value) {
 }
 
 static List _cache_literal_list(Compiler compiler, List values) {
-  Array heads = %[];
-  defer heads.free();
+  Array heads = $auto(%[]);
   foreach (Var value, values)
     heads.push(_cache_literal_var(compiler, value));
   List result = %(nil);

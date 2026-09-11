@@ -163,27 +163,6 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_4;
-}
-_x2c_defer_env_2;
-
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_5;
-}
-_x2c_defer_env_3;
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_6;
-}
-_x2c_defer_env_4;
-
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
   Var _x2c_lambda_capture_1;
@@ -231,6 +210,27 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 static Func _x2c_func_handle_1;
 
 _x2c_initializer_choice_D1454D7C_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _529)))
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_5;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_6;
+}
+_x2c_defer_env_4;
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -990,88 +990,99 @@ List Compiler_lower_typed_adapter_expr(Compiler c, List expression){
   break;
 }
 static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_100), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  Var at = _x2c_match_values[1];  Var source = _x2c_match_values[2]; {
-  int old_origin = c -> origin;  c -> origin = Var_integer(at); {
-  _x2c_defer_env_1 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & c, ._x2c_defer_capture_3 =(const void *) & old_origin};
+  {
+    int * _x2c_macro_address_0 = & c -> origin;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
+  _x2c_defer_env_0 _x2c_defer_env_5 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_previous_0};
   X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_1,
+    .fn = _x2c_defer_cleanup_0,
     .env = & _x2c_defer_env_5
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    Type target_type = Sym_resolve_key(c -> sym, Var_type(target));  _typed_adapter_error(c, _494, target_type, Var_type(source), _103);
-  }
+      * _x2c_macro_address_0 = Var_integer(at); {
+        Type target_type = Sym_resolve_key(c -> sym, Var_type(target));  _typed_adapter_error(c, _494, target_type, Var_type(source), _103);
+      }
+
+    }
 
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
+  }
+
 }
 break;
 }
 default: ;  return expression;  break;
     }
   }
-int old_origin = c -> origin;  c -> origin = origin; {
-  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & old_origin};
+{
+  int * _x2c_macro_address_1 = & c -> origin;  int _x2c_macro_previous_1 = * _x2c_macro_address_1; {
+  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_address_1, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_previous_1};
   X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_0,
+    .fn = _x2c_defer_cleanup_1,
     .env = & _x2c_defer_env_6
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-  Type target_type = Sym_resolve_key(c -> sym, target_spelling);  if(! List_truth(source_binding) || ! List_truth(Type_list(source_type)) || Type_is_pointer(source_type) || ! Type_is_function(source_type)){
-    _typed_adapter_error(c, _494, target_type, source_type, _103);
-  }
-  List target_params = NULL, source_params = NULL;  Type target_return = NULL, source_return = NULL;  if(! _typed_function_parts(target_type, & target_params, & target_return)){
-    _typed_adapter_error(c, _495, target_type, source_type, NULL);
-  }
-  if(! _typed_function_parts(source_type, & source_params, & source_return)){
-    _typed_adapter_error(c, _496, target_type, source_type, NULL);
-  }
-  if(_typed_params_variadic(target_params) || _typed_params_variadic(source_params)){
-    _typed_adapter_error(c, _497, target_type, source_type, NULL);
-  }
-  int target_count = List_len(target_params), source_count = List_len(source_params);  if(target_count != source_count){
-    String detail = String_printf(_104, target_count, source_count);  _typed_adapter_error(c, _498, target_type, source_type, cons(String_var(detail), NULL));
-  }
-  target_return = Type_canonicalize(target_return);  source_return = Type_canonicalize(source_return);  if(target_return == _4 || source_return == _4){
-    _typed_adapter_error(c, _499, target_type, source_type, NULL);
-  }
-  if(! List_equal(Type_list(target_return), Type_list(source_return))){
-    _typed_adapter_error(c, _500, target_type, source_type, NULL);
-  }
-  int index = 0;  List targets = target_params, sources = source_params;  for(;  List_truth(targets);  targets = List_cdr(targets), sources = List_cdr(sources), index ++){
-    Type target_param = Var_type(List_car(targets));  Type source_param = Var_type(List_car(sources));  if(! _typed_adapter_parameter_allowed(c, target_param, source_param)){
-      String detail = String_printf(_105, index + 1, List_repr(Type_list(target_param)), List_repr(Type_list(source_param)));  _typed_adapter_error(c, _501, target_type, source_type, cons(String_var(detail), NULL));
-    }
+    * _x2c_macro_address_1 = origin; {
+      Type target_type = Sym_resolve_key(c -> sym, target_spelling);  if(! List_truth(source_binding) || ! List_truth(Type_list(source_type)) || Type_is_pointer(source_type) || ! Type_is_function(source_type)){
+        _typed_adapter_error(c, _494, target_type, source_type, _103);
+      }
+      List target_params = NULL, source_params = NULL;  Type target_return = NULL, source_return = NULL;  if(! _typed_function_parts(target_type, & target_params, & target_return)){
+        _typed_adapter_error(c, _495, target_type, source_type, NULL);
+      }
+      if(! _typed_function_parts(source_type, & source_params, & source_return)){
+        _typed_adapter_error(c, _496, target_type, source_type, NULL);
+      }
+      if(_typed_params_variadic(target_params) || _typed_params_variadic(source_params)){
+        _typed_adapter_error(c, _497, target_type, source_type, NULL);
+      }
+      int target_count = List_len(target_params), source_count = List_len(source_params);  if(target_count != source_count){
+        String detail = String_printf(_104, target_count, source_count);  _typed_adapter_error(c, _498, target_type, source_type, cons(String_var(detail), NULL));
+      }
+      target_return = Type_canonicalize(target_return);  source_return = Type_canonicalize(source_return);  if(target_return == _4 || source_return == _4){
+        _typed_adapter_error(c, _499, target_type, source_type, NULL);
+      }
+      if(! List_equal(Type_list(target_return), Type_list(source_return))){
+        _typed_adapter_error(c, _500, target_type, source_type, NULL);
+      }
+      int index = 0;  List targets = target_params, sources = source_params;  for(;  List_truth(targets);  targets = List_cdr(targets), sources = List_cdr(sources), index ++){
+        Type target_param = Var_type(List_car(targets));  Type source_param = Var_type(List_car(sources));  if(! _typed_adapter_parameter_allowed(c, target_param, source_param)){
+          String detail = String_printf(_105, index + 1, List_repr(Type_list(target_param)), List_repr(Type_list(source_param)));  _typed_adapter_error(c, _501, target_type, source_type, cons(String_var(detail), NULL));
+        }
 
-  }
-  List key = cons(_73, cons(List_var(source_binding), cons(List_var(target_type), NULL)));  Var stored;  if(Map_try_get(c -> names -> adapters, List_var(key), & stored)){
-    List _x2c_return_value_0 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(stored, NULL))), NULL))); {
+      }
+      List key = cons(_73, cons(List_var(source_binding), cons(List_var(target_type), NULL)));  Var stored;  if(Map_try_get(c -> names -> adapters, List_var(key), & stored)){
+        List _x2c_return_value_0 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(stored, NULL))), NULL))); {
   int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
   x2c_cleanup_leave(& _x2c_defer_record_1);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
   return _x2c_return_value_0;
 }
-  }
-  String adapter_name = Compiler_fresh_name(c, _502);  List adapter_binding = Sym_introduce(c -> sym, adapter_name);  List function = _callback_function(c, adapter_binding, target_params, target_return, source_binding, source_type, source_params);  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter_binding));  Compiler_add_early(c, function); {
-    List _x2c_return_value_1 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(List_var(adapter_binding), NULL))), NULL))); {
+      }
+      String adapter_name = Compiler_fresh_name(c, _502);  List adapter_binding = Sym_introduce(c -> sym, adapter_name);  List function = _callback_function(c, adapter_binding, target_params, target_return, source_binding, source_type, source_params);  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter_binding));  Compiler_add_early(c, function); {
+        List _x2c_return_value_1 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(List_var(adapter_binding), NULL))), NULL))); {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
   x2c_cleanup_leave(& _x2c_defer_record_1);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
   return _x2c_return_value_1;
 }
-  }
+      }
 
-}
+    }
+
+  }
 
   int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
+}
 }
 }
 
@@ -2087,24 +2098,11 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0; (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> origin =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  *(*(int * *) _x2c_defer_data_0->_x2c_defer_capture_0) =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1; (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_2) -> origin =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_3);
-}
-
-void Array_free(Array);
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_free((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
-}
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  Array_free((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
-}
-
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;  Array_free((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_6));
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  *(*(int * *) _x2c_defer_data_1->_x2c_defer_capture_2) =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_3);
 }
 
 const void * Func_context(Func);
@@ -2143,6 +2141,19 @@ static Var _x2c_lambda_5(Func _x2c_lambda_closure_4, const FuncArg * _x2c_lambda
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
   List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 806120));  return List_var(_block_returns(a0)); ;
+}
+
+void Array_cleanup(Array);
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
+}
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
+}
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;  Array_cleanup((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_6));
 }
 
 #undef _x2c_initializer_choice_D1454D7C_0_expanded

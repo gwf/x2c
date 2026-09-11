@@ -991,9 +991,11 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
 }
 
+void Context_cleanup(Context);
+
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Context_close((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  Context_cleanup((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 #undef _x2c_initializer_choice_1E27A9AE_0_expanded

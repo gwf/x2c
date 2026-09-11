@@ -320,8 +320,7 @@ static void _append_value(Array values, Var value) {
 Self List.append(Self a, Self b) {
   if (!a) return b;
   if (!b) return a;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var value, a) _append_value(values, value);
   List result = _prepend_array(values, b);
   return result;
@@ -339,8 +338,7 @@ static List _concat_lists(Array lists) {
 static List _concat_n_va(unsigned list_count, va_list ap) {
   if (list_count > INT_MAX)
     raise %(size-limit (owner "List.concat_n") (count $list_count));
-  Array lists = %[];
-  defer lists.free();
+  Array lists = $auto(%[]);
   for (unsigned i = 0; i < list_count; i++)
     _append_value(lists, va_arg(ap, List));
   List result = _concat_lists(lists);
@@ -362,8 +360,7 @@ List List.concat_n(unsigned list_count, ...) {
 }
 
 static List _n_va(unsigned element_count, va_list ap) {
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   for (unsigned i = 0; i < element_count; i++) {
     Var value = va_arg(ap, Var);
     if (value is void) raise %(void-op (owner "List.list_n") (index $i));
@@ -437,8 +434,7 @@ int List.len(List lst) {
 */
 List List.map(List lst, Func fn) {
   if (!lst) return NULL;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var value, lst) {
     FuncArg arguments[1] = { FuncArg.value(value) };
     _append_value(values, fn.apply(1, arguments));
@@ -538,8 +534,7 @@ int List.all(List lst, Func pred) {
 */
 Self List.sort(Self lst) {
   if (!lst || !cdr(lst)) return lst;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var value, lst) _append_value(values, value);
   values.sort();
   List result = values;
@@ -552,8 +547,7 @@ Self List.sort(Self lst) {
 */
 Self List.sort_with(Self lst, Func compare) {
   if (!lst || !cdr(lst)) return lst;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var value, lst) values.push(value);
   values.sort_with(compare);
   return values.list();
@@ -566,8 +560,7 @@ Self List.sort_with(Self lst, Func compare) {
 */
 Self List.sort_by(Self lst, Func key) {
   if (!lst) return lst;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var value, lst) values.push(value);
   values.sort_by(key);
   return values.list();
@@ -665,8 +658,7 @@ static Var _sublis_node(List alist, Var node) {
   }
   List list = node;
   if (!list) return list;
-  Array items = %[];
-  defer items.free();
+  Array items = $auto(%[]);
   foreach (Var source, list) {
     Var item = _sublis_node(alist, source);
     _append_value(items, item);
@@ -695,8 +687,7 @@ List List.sublis(List alist, List tree) {
 */
 Self List.flatten(Self lst) {
   if (!lst) return lst;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var head, lst) {
     if (head is <list>) {
       List inner = head;
@@ -721,8 +712,7 @@ static void _flatten_all_collect(Array values, List lst) {
 */
 Self List.flatten_all(Self lst) {
   if (!lst) return lst;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   _flatten_all_collect(values, lst);
   List result = values;
   return result;
@@ -805,8 +795,7 @@ Self List.tail(Self list, unsigned count) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing that prefix.
 */
 Self List.head(Self list, unsigned count) {
-  List original = list, Array values = %[];
-  defer values.free();
+  List original = list, Array values = $auto(%[]);
   while (list && count--) {
     _append_value(values, list.car);
     list = list.cdr();
@@ -819,8 +808,7 @@ Self List.head(Self list, unsigned count) {
 static List _collect_subseq(List list, int start, int step, int span) {
   if (span <= 0) return NULL;
   for (int i = 0; list && i < start; i++) list = list.cdr();
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   while (list && span--) {
     _append_value(values, list.car);
     for (int i = 0; list && i < step; i++) list = list.cdr();
@@ -855,10 +843,8 @@ Self List.getslice(Self list, int start, int stop, int step) {
       (!list || _is_active_canonical(list))) return list;
   if (step > 0) return _collect_subseq(list, start, step, span);
   if (span <= 0) return NULL;
-  Array source = list;
-  defer source.free();
-  Array values = %[];
-  defer values.free();
+  Array source = $auto(list);
+  Array values = $auto(%[]);
   for (int i = 0; i < span; i++)
     _append_value(values, source[start + i * step]);
   List result = values;
@@ -1101,8 +1087,7 @@ Iter List.iter(List lst, Iter dest) {
     constructing the result.
 */
 List Iter.list(Iter iter) {
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var item, iter) values.push(item);
   List result = values;
   return result;
@@ -1117,8 +1102,7 @@ List Iter.list(Iter iter) {
 */
 Self List.filter(Self lst, Func pred) {
   if (!lst) return NULL;
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var value, lst) {
     FuncArg arguments[1] = { FuncArg.value(value) };
     if (pred.apply(1, arguments)) _append_value(values, value);

@@ -940,92 +940,98 @@ Map Map_copy(Map);
 List Array_list_free(Array);
 Array Array_sort(Array);
 static void _file(Compiler c, String path, String text, String dir, Map globs, Map visited){
-  Map enclosing_aliases = c -> kw_aliases, enclosing_alias_imports = c -> kw_seen;  List enclosing_effects = c -> declaration_effects;  c -> declaration_effects = NULL; {
-  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_2 =(const void *) & c, ._x2c_defer_capture_3 =(const void *) & enclosing_effects};
+  Map enclosing_aliases = c -> kw_aliases, enclosing_alias_imports = c -> kw_seen; {
+    List * _x2c_macro_address_0 = & c -> declaration_effects;  List _x2c_macro_previous_0 = * _x2c_macro_address_0; {
+  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_previous_0};
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
     .env = & _x2c_defer_env_4
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-    c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Array parts = Array_new(), segment = Array_new();
-    Scope_push(& header_cache_scope);
-    Map dependencies = Map_new();
-    Scope_pop();
-    Map definitions = Map_new();
-    int self_gensyms = 0, in_comment = 0;
-    int line_number = 1, byte_position = 0;
-    int segment_line = 1, segment_position = 0, private = 0;
-    String content_hash = String_printf(_29, String_hash(text));
-    List lines = String_split_lines(text, 1);
-    {
-      String line;
-      Iter _x2c_macro_iterator_8 = List_iter(lines, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_8;
-      while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
-        line = Var_string(_x2c_macro_item_8);
+      * _x2c_macro_address_0 = NULL; {
+        c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Array parts = Array_new(), segment = Array_new();
+        Scope_push(& header_cache_scope);
+        Map dependencies = Map_new();
+        Scope_pop();
+        Map definitions = Map_new();
+        int self_gensyms = 0, in_comment = 0;
+        int line_number = 1, byte_position = 0;
+        int segment_line = 1, segment_position = 0, private = 0;
+        String content_hash = String_printf(_29, String_hash(text));
+        List lines = String_split_lines(text, 1);
         {
-          int angle = 0;
-          String stripped = _directive_line(line, & in_comment);
-          String target = String_truth(stripped) ? _preproc_include_target(stripped, & angle) : NULL;
-          if(! String_truth(target)){
-            Array_push(segment, String_var(line));
-            line_number ++;
-            byte_position += String_len(line);
-            continue;
+          String line;
+          Iter _x2c_macro_iterator_8 = List_iter(lines, &(struct Iter){
+            int_var(0)
           }
-          self_gensyms += _flush_segment(c, path, text, segment, segment_line, segment_position, globs, parts, definitions, dependencies, & private);
-          _include(c, target, angle, dir, globs, visited, parts);
-          line_number ++;
-          byte_position += String_len(line);
-          segment_line = line_number;
-          segment_position = byte_position;
+          );
+          Var _x2c_macro_item_8;
+          while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
+            line = Var_string(_x2c_macro_item_8);
+            {
+              int angle = 0;
+              String stripped = _directive_line(line, & in_comment);
+              String target = String_truth(stripped) ? _preproc_include_target(stripped, & angle) : NULL;
+              if(! String_truth(target)){
+                Array_push(segment, String_var(line));
+                line_number ++;
+                byte_position += String_len(line);
+                continue;
+              }
+              self_gensyms += _flush_segment(c, path, text, segment, segment_line, segment_position, globs, parts, definitions, dependencies, & private);
+              _include(c, target, angle, dir, globs, visited, parts);
+              line_number ++;
+              byte_position += String_len(line);
+              segment_line = line_number;
+              segment_position = byte_position;
+            }
+
+          }
+
         }
-
-      }
-
-    }
-    self_gensyms += _flush_segment(c, path, text, segment, segment_line, segment_position, globs, parts, definitions, dependencies, & private);
-    Array_free(segment);
-    Map generated = Compiler_select_declaration_defaults(c, path, globs, parts, definitions);
-    if(Map_truth(generated) && Map_len(generated)){
-      Scope_push(& header_cache_scope);
-      Map retained = Map_copy(generated);
-      Scope_pop();
-      Array_push(parts, Map_var(retained));
-    }
-    List part_list = Array_list_free(parts);
-    _require_header_cache_owner(String_try_own(path));
-    _require_header_cache_owner(List_try_own(part_list));
-    {
-      Var part;
-      Iter _x2c_macro_iterator_10 = List_iter(part_list, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_10;
-      while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
-        part = _x2c_macro_item_10;
+        self_gensyms += _flush_segment(c, path, text, segment, segment_line, segment_position, globs, parts, definitions, dependencies, & private);
+        Array_free(segment);
+        Map generated = Compiler_select_declaration_defaults(c, path, globs, parts, definitions);
+        if(Map_truth(generated) && Map_len(generated)){
+          Scope_push(& header_cache_scope);
+          Map retained = Map_copy(generated);
+          Scope_pop();
+          Array_push(parts, Map_var(retained));
+        }
+        List part_list = Array_list_free(parts);
+        _require_header_cache_owner(String_try_own(path));
+        _require_header_cache_owner(List_try_own(part_list));
         {
-          if(! Var_is(part, 26720)) continue;
-          Map rows = Var_map(part);
-          {
-            Var key, value;
-            Map _x2c_macro_object_9 = rows;
-            unsigned _x2c_macro_cursor_9 = 0;
-            Var _x2c_macro_cursor_output_2;
-            Var _x2c_macro_cursor_output_3;
-            while(Map_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_2, & _x2c_macro_cursor_output_3)){
-              key = _x2c_macro_cursor_output_2;
-              value = _x2c_macro_cursor_output_3;
+          Var part;
+          Iter _x2c_macro_iterator_10 = List_iter(part_list, &(struct Iter){
+            int_var(0)
+          }
+          );
+          Var _x2c_macro_item_10;
+          while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
+            part = _x2c_macro_item_10;
+            {
+              if(! Var_is(part, 26720)) continue;
+              Map rows = Var_map(part);
               {
-                if(Var_is(key, 806120)) _require_header_cache_owner(List_try_own(Var_list(key)));
-                if(Var_is(key, 1318210446)) _require_header_cache_owner(String_try_own(Var_string(key)));
-                if(Var_is(value, 806120)) _require_header_cache_owner(List_try_own(Var_list(value)));
-                if(Var_is(value, 1318210446)) _require_header_cache_owner(String_try_own(Var_string(value)));
+                Var key, value;
+                Map _x2c_macro_object_9 = rows;
+                unsigned _x2c_macro_cursor_9 = 0;
+                Var _x2c_macro_cursor_output_2;
+                Var _x2c_macro_cursor_output_3;
+                while(Map_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_2, & _x2c_macro_cursor_output_3)){
+                  key = _x2c_macro_cursor_output_2;
+                  value = _x2c_macro_cursor_output_3;
+                  {
+                    if(Var_is(key, 806120)) _require_header_cache_owner(List_try_own(Var_list(key)));
+                    if(Var_is(key, 1318210446)) _require_header_cache_owner(String_try_own(Var_string(key)));
+                    if(Var_is(value, 806120)) _require_header_cache_owner(List_try_own(Var_list(value)));
+                    if(Var_is(value, 1318210446)) _require_header_cache_owner(String_try_own(Var_string(value)));
+                  }
+
+                }
+
               }
 
             }
@@ -1033,43 +1039,43 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
           }
 
         }
-
-      }
-
-    }
-    Array names = Array_new();
-    {
-      Var definition;
-      Iter _x2c_macro_iterator_11 = Map_keys(definitions, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_11;
-      while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
-        definition = _x2c_macro_item_11;
+        Array names = Array_new();
         {
-          _require_header_cache_owner(String_try_own(Var_string(definition)));
-          Array_push(names, definition);
-        }
+          Var definition;
+          Iter _x2c_macro_iterator_11 = Map_keys(definitions, &(struct Iter){
+            int_var(0)
+          }
+          );
+          Var _x2c_macro_item_11;
+          while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
+            definition = _x2c_macro_item_11;
+            {
+              _require_header_cache_owner(String_try_own(Var_string(definition)));
+              Array_push(names, definition);
+            }
 
+          }
+
+        }
+        Array_sort(names);
+        List definition_list = Array_list_free(names);
+        _require_header_cache_owner(List_try_own(definition_list));
+        List entry = cons(List_var(part_list), cons(int_var(self_gensyms), cons(String_var(content_hash), cons(List_var(definition_list), cons(Map_var(dependencies), NULL)))));
+        _require_header_cache_owner(List_try_own(entry));
+        Map_setindex(_header_cache(), String_var(path), List_var(entry));
+        c -> kw_aliases = enclosing_aliases;
+        c -> kw_seen = enclosing_alias_imports;
       }
 
     }
-    Array_sort(names);
-    List definition_list = Array_list_free(names);
-    _require_header_cache_owner(List_try_own(definition_list));
-    List entry = cons(List_var(part_list), cons(int_var(self_gensyms), cons(String_var(content_hash), cons(List_var(definition_list), cons(Map_var(dependencies), NULL)))));
-    _require_header_cache_owner(List_try_own(entry));
-    Map_setindex(_header_cache(), String_var(path), List_var(entry));
-    c -> kw_aliases = enclosing_aliases;
-    c -> kw_seen = enclosing_alias_imports;
-  }
 
   int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
+  }
+
 }
 
 Map Compiler_collect_symbols(Compiler c, Map globs){
@@ -1990,7 +1996,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_2) -> declaration_effects =(*(List *) _x2c_defer_data_1->_x2c_defer_capture_3);
+  *(*(List * *) _x2c_defer_data_1->_x2c_defer_capture_2) =(*(List *) _x2c_defer_data_1->_x2c_defer_capture_3);
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){

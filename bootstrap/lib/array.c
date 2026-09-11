@@ -120,20 +120,20 @@ static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
 typedef struct _x2c_defer_env_5{
   const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
 typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_9;
+  const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
 typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_10;
   const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_7;
@@ -833,20 +833,20 @@ Array Array_sort_with(Array array, Func compare){
   size_t count = array -> length;
   Array source = Array_copy(array);
   {
-  _x2c_defer_env_5 _x2c_defer_env_14 = {._x2c_defer_capture_8 =(const void *) & source};
+  _x2c_defer_env_7 _x2c_defer_env_14 = {._x2c_defer_capture_11 =(const void *) & source};
 
   X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_5,
+    .fn = _x2c_defer_cleanup_7,
     .env = & _x2c_defer_env_14
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
     Array target = Array_new();
     {
-  _x2c_defer_env_4 _x2c_defer_env_15 = {._x2c_defer_capture_7 =(const void *) & target};
+  _x2c_defer_env_6 _x2c_defer_env_15 = {._x2c_defer_capture_10 =(const void *) & target};
 
   X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_4,
+    .fn = _x2c_defer_cleanup_6,
     .env = & _x2c_defer_env_15
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
@@ -911,10 +911,10 @@ Array Array_sort_by(Array array, Func key){
   size_t count = array -> length;
   struct ArraySortEntry * entries = Scope_calloc(count, sizeof(struct ArraySortEntry));
   {
-  _x2c_defer_env_6 _x2c_defer_env_16 = {._x2c_defer_capture_9 =(const void *) & entries};
+  _x2c_defer_env_4 _x2c_defer_env_16 = {._x2c_defer_capture_7 =(const void *) & entries};
 
   X2CCleanup _x2c_defer_record_6 = {
-    .fn = _x2c_defer_cleanup_6,
+    .fn = _x2c_defer_cleanup_4,
     .env = & _x2c_defer_env_16
   };
   x2c_cleanup_push(&_x2c_defer_record_6);
@@ -1137,10 +1137,10 @@ Iter Array_iter(Array x, Iter dest){
 Array Iter_array(Iter iter){
   Array output = Array_new(), result = NULL;
   {
-  _x2c_defer_env_7 _x2c_defer_env_19 = {._x2c_defer_capture_10 =(const void *) & result, ._x2c_defer_capture_11 =(const void *) & output};
+  _x2c_defer_env_5 _x2c_defer_env_19 = {._x2c_defer_capture_8 =(const void *) & result, ._x2c_defer_capture_9 =(const void *) & output};
 
   X2CCleanup _x2c_defer_record_9 = {
-    .fn = _x2c_defer_cleanup_7,
+    .fn = _x2c_defer_cleanup_5,
     .env = & _x2c_defer_env_19
   };
   x2c_cleanup_push(&_x2c_defer_record_9);
@@ -1243,26 +1243,26 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_3->_x2c_defer_capture_6)));
 }
 
+void Scope_free(void *);
+
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  Array_free((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_7));
+  Scope_free((*(struct ArraySortEntry * *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Array_free((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_8));
+  if((void *)(*(Array *) _x2c_defer_data_5->_x2c_defer_capture_8) == NULL) Array_free((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_9));
 }
-
-void Scope_free(void *);
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  Scope_free((*(struct ArraySortEntry * *) _x2c_defer_data_6->_x2c_defer_capture_9));
+  Array_cleanup((*(Array *) _x2c_defer_data_6->_x2c_defer_capture_10));
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
-  if((void *)(*(Array *) _x2c_defer_data_7->_x2c_defer_capture_10) == NULL) Array_free((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_11));
+  Array_cleanup((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_11));
 }
 
 void Buffer_cleanup(Buffer);

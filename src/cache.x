@@ -477,8 +477,7 @@ static List _split_ids(Array keys, Array ids) {
    replaces one memo entry and may cause harmless extra work. */
 static int _collect_cache_ids(
   Compiler compiler, Var value, List *seen, Array ids) {
-  Array pending = %[$value];
-  defer pending.free();
+  Array pending = $auto(%[$value]);
   int count = 0;
   while (pending) {
     Var current = pending.take_last();

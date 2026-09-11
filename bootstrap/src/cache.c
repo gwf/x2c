@@ -1196,7 +1196,8 @@ List Compiler_setup_cache_init(Compiler compiler, List header, List source, Stri
   Array source_ids = _cache_ids_in(compiler, Array_list_free(scan));  if(Array_truth(header_ids)) header = _setup_header_cache(compiler, header, header_ids, prefix, guard_name, initializer_name);  source = _setup_source_cache_init(compiler, source, source_ids, initializers);  Array_free(initializers);  return cons(List_var(header), cons(List_var(source), NULL));
 }
 
+void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_free((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 

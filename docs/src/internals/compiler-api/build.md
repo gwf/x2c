@@ -72,7 +72,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:885`
+Source: `src/build.x:884`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation

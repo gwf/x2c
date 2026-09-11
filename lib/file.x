@@ -482,8 +482,7 @@ int File.copy_to(File source, File output, size_t *copied) {
     represented, or `<alloc-fail>` while constructing the result.
 */
 String File.readline(File file) {
-  Block line = Block.new(sizeof(char));
-  defer line.free();
+  Block line = $auto(Block.new(sizeof(char)));
   line.reserve(BUFSIZ);
   FileReadStatus status = file.readline_into(line);
   String result = status == FILE_READ_DATA
@@ -507,8 +506,7 @@ String File.string(File file) {
     _string_allocation(remaining);
     return _regular_text(file, (size_t) remaining);
   }
-  Block content = Block.new(sizeof(char));
-  defer content.free();
+  Block content = $auto(Block.new(sizeof(char)));
   unsigned char bytes[BUFSIZ], size_t count;
   while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
     _append_text(content, bytes, count);

@@ -587,9 +587,8 @@ static List Emitter._typedef(Emitter e, List ast, List context) {
 }
 
 static List Emitter._block(Emitter e, List ast) {
-  List previous = e.native_aliases;
-  defer e.native_aliases = previous;
-  return %("{" @{e._emit(ast.cdr(), NULL)} "}");
+  $let(e.native_aliases, e.native_aliases)
+    return %("{" @{e._emit(ast.cdr(), NULL)} "}");
 }
 
 static List _atom_intern(String spelling) {
@@ -1394,10 +1393,7 @@ static List Emitter._initializer_macro(
   String hash = x2c_filename_hash(e.compiler.filename);
   String name = e.compiler.fresh_name(%"initializer_choice_$hash");
   String replacement;
-  {
-    int mapped = e.compiler.source_map;
-    defer e.compiler.source_map = mapped;
-    e.compiler.source_map = 0;
+  $let(e.compiler.source_map, 0) {
     List tokens = e._emit(body, context).flatten_all();
     String formatted = e.compiler.code_pretty_string(tokens, NULL);
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");
@@ -1416,8 +1412,7 @@ static List Emitter._initializer_macro(
 }
 
 static int _source_type_definition(List value) {
-  Array pending = %[];
-  defer pending.free();
+  Array pending = $auto(%[]);
   pending.push(value);
   while (pending.len()) {
     List node = pending.take_last();
@@ -1589,8 +1584,7 @@ static List Emitter._op_spine(
   }
   int chained = (int) operators.len() > 1;
   List result = e._emit(%($left_item), chained ? NULL : context);
-  Array pieces = %[];
-  defer pieces.free();
+  Array pieces = $auto(%[]);
   for (int i = (int) operators.len() - 1; i >= 0; i--) {
     pieces.push(operators[i]);
     pieces.push(e._emit(%(${rights[i]}), i ? NULL : context));
@@ -1608,8 +1602,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
   if (!ast) return ast;
   Var head = car(ast);
   if (head is <list>) {
-    Array emitted = %[];
-    defer emitted.free();
+    Array emitted = $auto(%[]);
     while (ast && ast.car() is <list>) {
       emitted.push(e._emit(ast.car(), context));
       ast = ast.cdr();

@@ -861,8 +861,7 @@ int _build_remove_tree(String path) {
   while ((entry = readdir(directory))) {
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
       continue;
-    Context context = Context.open_isolated();
-    defer context.close();
+    Context context = $auto(Context.open_isolated());
     String child = %"$path/${String.new(entry->d_name)}", struct stat info;
     if (lstat(child, &info)) {
       ok = 0;

@@ -327,10 +327,9 @@ void Logger.clear_sinks(Logger logger) {
 synchronized
 void Logger.flush(Logger logger) {
   if (!logger) return;
-  logger.emission_depth++;
-  defer logger.emission_depth--;
-  for (LogSink sink = logger.first_sink; sink; sink = sink.next)
-    if (sink.flush) sink.flush(logger, sink.data);
+  $let(logger.emission_depth, logger.emission_depth + 1)
+    for (LogSink sink = logger.first_sink; sink; sink = sink.next)
+      if (sink.flush) sink.flush(logger, sink.data);
 }
 
 // time and text rendering
@@ -460,11 +459,11 @@ static void _emit_text(Logger logger, const LogEvent *event, Var data) {
   }
   Buffer *buffers = context.scratch.bytes;
   Buffer out = buffers[context.depth].clear();
-  context.depth++;
-  defer context.depth--;
-  _render_text(out, event, context.color);
-  context.file.write(out.content.bytes, 1, out.content.length);
-  if (context.flush_each) fflush(context.file);
+  $let(context.depth, context.depth + 1) {
+    _render_text(out, event, context.color);
+    context.file.write(out.content.bytes, 1, out.content.length);
+    if (context.flush_each) fflush(context.file);
+  }
 }
 
 static void _flush_text(Logger logger, Var data) {
@@ -542,11 +541,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value) {
   if (value.is_null() || value.is_nil() || value is <symbol>) return value;
   if (value.is_wide()) {
     Var copy;
-    Scope.push(&l.values);
-    {
-      defer Scope.pop();
-      copy = value.clone_wide();
-    }
+    $scope(&l.values) { copy = value.clone_wide(); }
     l.wide_values.push(&copy);
     return copy;
   }
@@ -634,9 +629,7 @@ LogSink Logger.add_memory_sink(Logger logger, List *destination) {
   context.pool = logger.pool;
   context.destination_scope = &logger.owner_scope;
   context.values = Scope.new_named("Logger memory values");
-  Scope.push(&logger.storage);
-  {
-    defer Scope.pop();
+  $scope(&logger.storage) {
     context.wide_values = Block.new(sizeof(Var));
   }
   return _new_sink(
@@ -707,11 +700,11 @@ void Logger.log(Logger logger, Symbol level, Symbol category, List fields) {
     .fields = fields
   };
   if (event.elapsed_us < 0) event.elapsed_us = 0;
-  logger.emission_depth++;
-  defer logger.emission_depth--;
-  for (LogSink sink = logger.first_sink; sink; sink = sink.next)
-    sink.emit(logger, &event, sink.data);
-  if (level == <fatal>) logger.flush();
+  $let(logger.emission_depth, logger.emission_depth + 1) {
+    for (LogSink sink = logger.first_sink; sink; sink = sink.next)
+      sink.emit(logger, &event, sink.data);
+    if (level == <fatal>) logger.flush();
+  }
 }
 
 // snapshot-visible declarations; shallow collection does not expand macros

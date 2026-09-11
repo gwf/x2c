@@ -456,9 +456,8 @@ Pool Pool.retain_named(Pool inner, const char *name) {
     _unlock(inner);
   }
   Scope scope = Scope.new_named(name), Pool pool = NULL;
-  int mutex_ready = 0, pushed = 0, finished = 0;
+  int mutex_ready = 0, finished = 0;
   defer if (!finished) {
-    if (pushed) Scope.pop();
     if (mutex_ready) pthread_mutex_destroy(&pool.mutex);
     Scope.destroy(scope);
   }
@@ -478,11 +477,8 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   pthread_mutexattr_destroy(&attributes);
   mutex_ready = 1;
   pool.scope = scope;
-  Scope.push(&pool.scope);
-  pushed = 1;
-  Map table = Map.new_capacity(capacity);
-  Scope.pop();
-  pushed = 0;
+  Map table;
+  $scope(&pool.scope) { table = Map.new_capacity(capacity); }
   pool.table = table;
   pool.up = inner;
   pool.child_capacity = 2;

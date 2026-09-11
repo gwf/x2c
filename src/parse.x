@@ -420,10 +420,7 @@ List Compiler.parse_field(Compiler compiler, List context) {
   if (slot) return slot;
   List macro = NULL;
   if (compiler.peek(0) == <$> || compiler.peek(0) == <ident>) {
-    List previous = compiler.aggregate_type;
-    compiler.aggregate_type = context;
-    {
-      defer compiler.aggregate_type = previous;
+    $let(compiler.aggregate_type, context) {
       macro = compiler.try_parse_macro_target_at(AST_FIELD);
     }
   }
@@ -517,10 +514,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
   if (slot) return slot;
   List macro = NULL;
   if (c.peek(0) == <$> || c.peek(0) == <ident>) {
-    List previous = c.aggregate_type;
-    c.aggregate_type = context;
-    {
-      defer c.aggregate_type = previous;
+    $let(c.aggregate_type, context) {
       macro = c.try_parse_macro_target_at(AST_ENUMERATOR);
     }
   }
@@ -1848,9 +1842,6 @@ List Compiler.bind_syntax(
   if (context == AST_MAP_ENTRY && input.car() != <seq> &&
       input.car() != Atom.intern("macro-invoke"))
     return compiler.resolve_map_entry(input, compiler.token);
-  Type previous = compiler.return_type;
-  compiler.return_type = return_type;
-  defer compiler.return_type = previous;
   /* Parsed templates and compile-time Lisp are the intended producers. There
      is no separate validation pass before or after expansion. The structural
      match below enforces `AstPos` and rejects unmatched shapes at
@@ -1860,7 +1851,7 @@ List Compiler.bind_syntax(
      Binding mutates the current `Sym` in visitation order. Macro invocation
      opens the surrounding `SymTxn`, allowing earlier siblings to be visible to
      later ones while preserving whole-expansion rollback on failure. */
-  with compiler {
+  $let(compiler.return_type, return_type) with compiler {
     int statement_position = context == AST_BLOCK ||
                              context == AST_STATEMENT;
     match (input) {
@@ -1890,16 +1881,16 @@ List Compiler.bind_syntax(
           _.declaration_produced = 1;
           _.run_declaration_effects();
         }
-        _.declaration_projection++;
-        defer _.declaration_projection--;
-        Array projected = %[];
-        foreach (List row, rows) {
-          List bound = _.bind_syntax(row, context, _.return_type);
-          _append_declaration_rows(projected, bound);
+        $let(_.declaration_projection, _.declaration_projection + 1) {
+          Array projected = %[];
+          foreach (List row, rows) {
+            List bound = _.bind_syntax(row, context, _.return_type);
+            _append_declaration_rows(projected, bound);
+          }
+          List result = projected.list_free();
+          return _.shallow ? %(declaration-bundle (rows @result))
+                           : %(seq @result);
         }
-        List result = projected.list_free();
-        return _.shallow ? %(declaration-bundle (rows @result))
-                         : %(seq @result);
       }
       case %(syntax-recipe ?callback ?arguments): {
         Var result = _.evaluate_declaration_recipe(callback, arguments);
@@ -1932,11 +1923,10 @@ List Compiler.bind_syntax(
                ?body ?construction): {
         if (context != AST_UNIT) goto construction_error;
         if (_.shallow) return input;
-        List saved_stack = _.macro_stack;
-        _.macro_stack = _.thaw_declaration_syntax(construction);
-        defer _.macro_stack = saved_stack;
-        return _.bind_syntax(
-          %(function $return_type $declarator $body), context, _.return_type);
+        $let(_.macro_stack, _.thaw_declaration_syntax(construction)) {
+          return _.bind_syntax(
+            %(function $return_type $declarator $body), context, _.return_type);
+        }
       }
       case %(seq *items): {
         if (context == AST_STATEMENT) {

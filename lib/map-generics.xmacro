@@ -128,11 +128,9 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     unsigned cap = map.capacity;
     if (cap > ~0u / 2) raise %(size-limit (size $cap));
     unsigned capacity = cap * 2;
-    Bytes staged_hashes = Bytes_new(sizeof($hash_cell));
-    defer Bytes_free(staged_hashes);
+    Bytes staged_hashes = $auto(Bytes_new(sizeof($hash_cell)));
     staged_hashes = Bytes_append(staged_hashes, 0, capacity);
-    Bytes staged_entries = Bytes_new(sizeof($entry));
-    defer Bytes_free(staged_entries);
+    Bytes staged_entries = $auto(Bytes_new(sizeof($entry)));
     staged_entries = Bytes_append(staged_entries, 0, capacity);
 
     /* Build both replacement arrays before touching `map`; allocation or
@@ -576,8 +574,7 @@ macro Unit $map.core.observe(
     if (asz != bsz) return asz < bsz ? -1 : 1;
     if (!asz) return 0;
 
-    Scope scratch = Scope.new();
-    defer Scope.destroy(scratch);
+    Scope scratch = $auto(Scope.new());
     $entry *arecs = Scope.malloc_in(&scratch, asz * sizeof($entry));
     $entry *brecs = Scope.malloc_in(&scratch, bsz * sizeof($entry));
     unsigned cursor = 0, index = 0;

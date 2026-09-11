@@ -95,8 +95,7 @@ int ast_changes_left_operand(Symbol op) =>
 /** Returns whether any list under `value` has `kind` as its head. The
     worklist keeps deeply nested operator chains off the C stack. */
 int ast_contains_head(Var value, Symbol kind) {
-  Array pending = %[];
-  defer pending.free();
+  Array pending = $auto(%[]);
   pending.push(value);
   while (pending.len()) {
     Var current = pending.take_last();

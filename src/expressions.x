@@ -685,8 +685,7 @@ static inline int _type_is_string(List type) => type === %("String");
 static int _expression_requires_resolution(Compiler compiler, Var value) {
   // The scan is an any-search; a worklist keeps deep operator chains from
   // costing one C frame per nesting level.
-  Array pending = %[];
-  defer pending.free();
+  Array pending = $auto(%[]);
   pending.push(value);
   while (pending.len()) {
     Var current = pending.take_last();

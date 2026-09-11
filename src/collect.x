@@ -468,81 +468,81 @@ static void _file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
   Map enclosing_aliases = c.kw_aliases, enclosing_alias_imports = c.kw_seen;
-  List enclosing_effects = c.declaration_effects;
-  c.declaration_effects = NULL;
-  defer c.declaration_effects = enclosing_effects;
-  c.kw_aliases = %{};
-  c.kw_seen = %{};
-  Array parts = %[], segment = %[];
-  Scope.push(&header_cache_scope);
-  Map dependencies = %{};
-  Scope.pop();
-  Map definitions = %{}, int self_gensyms = 0, in_comment = 0;
-  int line_number = 1, byte_position = 0;
-  int segment_line = 1, segment_position = 0, private = 0;
-  String content_hash = %"%08x".printf(String.hash(text));
-  List lines = text.split_lines(1);
-  foreach (String line, lines) {
-    int angle = 0, String stripped = _directive_line(line, &in_comment);
-    String target =
-      stripped ? _preproc_include_target(stripped, &angle) : NULL;
-    if (!target) {
-      segment.push(line);
+  $let(c.declaration_effects, NULL) {
+    c.kw_aliases = %{};
+    c.kw_seen = %{};
+    Array parts = %[], segment = %[];
+    Scope.push(&header_cache_scope);
+    Map dependencies = %{};
+    Scope.pop();
+    Map definitions = %{}, int self_gensyms = 0, in_comment = 0;
+    int line_number = 1, byte_position = 0;
+    int segment_line = 1, segment_position = 0, private = 0;
+    String content_hash = %"%08x".printf(String.hash(text));
+    List lines = text.split_lines(1);
+    foreach (String line, lines) {
+      int angle = 0, String stripped = _directive_line(line, &in_comment);
+      String target =
+        stripped ? _preproc_include_target(stripped, &angle) : NULL;
+      if (!target) {
+        segment.push(line);
+        line_number++;
+        byte_position += line.len();
+        continue;
+      }
+      self_gensyms += _flush_segment(
+        c, path, text, segment, segment_line, segment_position,
+        globs, parts, definitions, dependencies, &private);
+      _include(c, target, angle, dir, globs, visited, parts);
       line_number++;
       byte_position += line.len();
-      continue;
+      segment_line = line_number;
+      segment_position = byte_position;
     }
     self_gensyms += _flush_segment(
       c, path, text, segment, segment_line, segment_position,
       globs, parts, definitions, dependencies, &private);
-    _include(c, target, angle, dir, globs, visited, parts);
-    line_number++;
-    byte_position += line.len();
-    segment_line = line_number;
-    segment_position = byte_position;
-  }
-  self_gensyms += _flush_segment(
-    c, path, text, segment, segment_line, segment_position,
-    globs, parts, definitions, dependencies, &private);
-  segment.free();
-  Map generated = c.select_declaration_defaults(path, globs, parts, definitions);
-  if (generated && generated.len()) {
-    Scope.push(&header_cache_scope);
-    Map retained = generated.copy();
-    Scope.pop();
-    parts.push(retained);
-  }
-  List part_list = parts.list_free();
-  _require_header_cache_owner(path.try_own());
-  _require_header_cache_owner(part_list.try_own());
-  foreach (Var part, part_list) {
-    if (part is not <map>) continue;
-    Map rows = part;
-    foreach (Var (key, value), rows) {
-      if (key is <list>) _require_header_cache_owner(key.list().try_own());
-      if (key is <string>)
-        _require_header_cache_owner(key.string().try_own());
-      if (value is <list>)
-        _require_header_cache_owner(value.list().try_own());
-      if (value is <string>)
-        _require_header_cache_owner(value.string().try_own());
+    segment.free();
+    Map generated =
+      c.select_declaration_defaults(path, globs, parts, definitions);
+    if (generated && generated.len()) {
+      Scope.push(&header_cache_scope);
+      Map retained = generated.copy();
+      Scope.pop();
+      parts.push(retained);
     }
+    List part_list = parts.list_free();
+    _require_header_cache_owner(path.try_own());
+    _require_header_cache_owner(part_list.try_own());
+    foreach (Var part, part_list) {
+      if (part is not <map>) continue;
+      Map rows = part;
+      foreach (Var (key, value), rows) {
+        if (key is <list>) _require_header_cache_owner(key.list().try_own());
+        if (key is <string>)
+          _require_header_cache_owner(key.string().try_own());
+        if (value is <list>)
+          _require_header_cache_owner(value.list().try_own());
+        if (value is <string>)
+          _require_header_cache_owner(value.string().try_own());
+      }
+    }
+    Array names = %[];
+    foreach (Var definition, definitions.keys()) {
+      _require_header_cache_owner(definition.string().try_own());
+      names.push(definition);
+    }
+    names.sort();
+    List definition_list = names.list_free();
+    _require_header_cache_owner(definition_list.try_own());
+    List entry = %(
+      $part_list $self_gensyms $content_hash $definition_list $dependencies
+    );
+    _require_header_cache_owner(entry.try_own());
+    _header_cache()[path] = entry;
+    c.kw_aliases = enclosing_aliases;
+    c.kw_seen = enclosing_alias_imports;
   }
-  Array names = %[];
-  foreach (Var definition, definitions.keys()) {
-    _require_header_cache_owner(definition.string().try_own());
-    names.push(definition);
-  }
-  names.sort();
-  List definition_list = names.list_free();
-  _require_header_cache_owner(definition_list.try_own());
-  List entry = %(
-    $part_list $self_gensyms $content_hash $definition_list $dependencies
-  );
-  _require_header_cache_owner(entry.try_own());
-  _header_cache()[path] = entry;
-  c.kw_aliases = enclosing_aliases;
-  c.kw_seen = enclosing_alias_imports;
 }
 
 /** Collects the current translation unit's declarations into `globs`.

@@ -1405,8 +1405,7 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     if (has_defer) break;
   }
   if (!has_defer) return stmts;
-  Array suffixes = %[];
-  defer suffixes.free();
+  Array suffixes = $auto(%[]);
   for (List suffix = stmts; suffix; suffix = suffix.cdr())
     suffixes.push(suffix);
   List result = stmts;
@@ -1566,8 +1565,7 @@ static List _match_records(Compiler compiler, List records) {
    Children transform left to right, then reverse assembly preserves source
    order while allocating generated splice origins from right to left. */
 static Ast _sequence(Compiler compiler, Ast ast) {
-  Array transformed = %[];
-  defer transformed.free();
+  Array transformed = $auto(%[]);
   foreach (List value, ast) transformed.push(_node(compiler, value));
   Ast tail = NULL;
   for (int i = (int) transformed.len() - 1; i >= 0; i--) {
@@ -1687,11 +1685,9 @@ static Ast _node(Compiler c, Ast ast) {
       // itself. Recording that keeps the driver's later passes from
       // rebuilding the whole unit to rediscover it.
       if (c.fixed.contains(ast)) return ast;
-      int occurrence = origin.integer(), previous = c.origin;
+      int occurrence = origin.integer();
       List transformed = NULL;
-      c.origin = occurrence;
-      {
-        defer c.origin = previous;
+      $let(c.origin, occurrence) {
         transformed = _node(c, inner.list());
       }
       if (transformed == inner) {

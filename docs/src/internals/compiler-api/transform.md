@@ -50,7 +50,7 @@ state. The call drives the input and synthesized early declarations to
 identity fixed points, appends those declarations after the input units,
 and may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:1860`
+Source: `src/transform.x:1856`
 
 ## Design notes
 

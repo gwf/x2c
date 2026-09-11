@@ -1986,6 +1986,7 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease){
   {
     Scope_push(& m -> scope);
     {
+      {
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
@@ -1993,19 +1994,24 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease){
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-      plan = MatchPlan_prepare(pattern);
-      if(plan -> status == MACHINE_INELIGIBLE){
-        fenced = plan -> reason;
-        MatchPlan_free(plan);
-      }
+        {
+          plan = MatchPlan_prepare(pattern);
+          if(plan -> status == MACHINE_INELIGIBLE){
+            fenced = plan -> reason;
+            MatchPlan_free(plan);
+          }
 
-    }
+        }
+
+      }
 
   int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
+    }
+
   }
   if(fenced) _raise_ineligible(fenced, "MatchCache.acquire");
   if(m -> entries[slot].occupied) _cache_remove(m, slot);
@@ -2045,14 +2051,14 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) MatchCache_initialize();
   if(! lease){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2048};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2046};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2052};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2050};
       x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -2064,7 +2070,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2062};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2060};
     x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -2079,7 +2085,7 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) MatchCache_initialize();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2078};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2076};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -2229,7 +2235,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2297};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2295};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
@@ -2282,6 +2288,7 @@ static void _capture_sites_initialize(void){
   {
     Scope_push(& match_capture_site_scope);
     {
+      {
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
@@ -2289,14 +2296,19 @@ static void _capture_sites_initialize(void){
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-      match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
-    }
+        {
+          match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
+        }
+
+      }
 
   int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
+    }
+
   }
   MatchCache_initialize();
 }
@@ -2310,6 +2322,7 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
   {
     Scope_push(& match_capture_site_scope);
     {
+      {
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
@@ -2317,15 +2330,20 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-      plan = MatchPlan_prepare(pattern);
-      Block_push(match_capture_sites, & site);
-    }
+        {
+          plan = MatchPlan_prepare(pattern);
+          Block_push(match_capture_sites, & site);
+        }
+
+      }
 
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
 }
+    }
+
   }
   __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
 }

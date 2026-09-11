@@ -1687,16 +1687,19 @@ List Compiler_parse_lambda_literal(Compiler c){
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
     Sym_push_scope(c -> sym, params);  List body = NULL;  if(Compiler_test(c, 247)){
-      Type previous_return = List_type(c -> return_type);  c -> return_type = _36; {
-        {
-  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_8 =(const void *) & c, ._x2c_defer_capture_9 =(const void *) & previous_return};
+      {
+        List * _x2c_macro_address_0 = & c -> return_type;  List _x2c_macro_previous_0 = * _x2c_macro_address_0; {
+  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_previous_0};
   X2CCleanup _x2c_defer_record_5 = {
     .fn = _x2c_defer_cleanup_5,
     .env = & _x2c_defer_env_11
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
-          body = Compiler_parse_compound_statement(c);
+          * _x2c_macro_address_0 = _36; {
+            body = Compiler_parse_compound_statement(c);
+          }
+
         }
 
   int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
@@ -1791,6 +1794,6 @@ static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5; (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_8) -> return_type = Type_list((*(Type *) _x2c_defer_data_5->_x2c_defer_capture_9));
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;  *(*(List * *) _x2c_defer_data_5->_x2c_defer_capture_8) =(*(List *) _x2c_defer_data_5->_x2c_defer_capture_9);
 }
 

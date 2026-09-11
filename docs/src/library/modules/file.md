@@ -28,7 +28,7 @@
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/file.x:597`
+Source: `lib/file.x:595`
 
 <a id="File.copy_to"></a>
 #### File.copy_to
@@ -75,7 +75,7 @@ exhausted.
 causes as `File.readline`; none return to the pull, and a transfer releases
 the iterator's line storage.
 
-Source: `lib/file.x:550`
+Source: `lib/file.x:548`
 
 <a id="File.open"></a>
 #### File.open
@@ -189,7 +189,7 @@ Source: `lib/file.x:236`
 
 Reports whether `x` and `y` are the same native stream handle.
 
-Source: `lib/file.x:565`
+Source: `lib/file.x:563`
 
 <a id="File.fdopen"></a>
 #### File.fdopen
@@ -222,7 +222,7 @@ Source: `lib/file.x:299`
 
 Returns a handle-identity hash consistent with `File.equal`.
 
-Source: `lib/file.x:562`
+Source: `lib/file.x:560`
 
 <a id="File.popen"></a>
 #### File.popen
@@ -306,7 +306,7 @@ Source: `lib/file.x:287`
 
 Returns a readable handle and descriptor representation without reading.
 
-Source: `lib/file.x:568`
+Source: `lib/file.x:566`
 
 <a id="File.scanf"></a>
 #### File.scanf
@@ -358,7 +358,7 @@ canonical result under the pool-chain lifetime described above or NULL
 when empty, and transfers the same causes. A null handle returns its
 pointer representation without reading.
 
-Source: `lib/file.x:579`
+Source: `lib/file.x:577`
 
 <a id="File.string"></a>
 #### File.string
@@ -373,7 +373,7 @@ no bytes remain.
 contain an embedded NUL, `<size-limit>` when the `String` cannot be
 represented, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/file.x:501`
+Source: `lib/file.x:500`
 
 <a id="File.string_close"></a>
 #### File.string_close
@@ -413,7 +413,7 @@ Source: `lib/file.x:338`
 
 Appends the readable pointer representation of `file` to `out`.
 
-Source: `lib/file.x:582`
+Source: `lib/file.x:580`
 
 ## Convenience API
 
@@ -476,7 +476,7 @@ for source readers but are not supported as user API.
 Publishes the process's borrowed standard streams as `File` globals.
 The globals do not take ownership or arrange cleanup of the native streams.
 
-Source: `lib/file.x:590`
+Source: `lib/file.x:588`
 
 ## Public types
 
