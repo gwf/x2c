@@ -15,6 +15,8 @@ import subprocess
 import sys
 import tempfile
 
+from x2c_source import mask_non_code
+
 
 SIGNATURE = re.compile(
     r"(?m)^[ \t]*(?:(?:static|inline|extern|threaded)\s+)*"
@@ -58,44 +60,6 @@ def install_compiler(source, destination, requested):
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(compiler, target)
     return pathlib.Path("bin/x2c-audit")
-
-
-def source_mask(source):
-    masked = list(source)
-    i = 0
-    while i < len(source):
-        if source.startswith("//", i):
-            end = source.find("\n", i)
-            end = len(source) if end < 0 else end
-            masked[i:end] = " " * (end - i)
-            i = end
-        elif source.startswith("/*", i):
-            end = source.find("*/", i + 2)
-            end = len(source) - 2 if end < 0 else end
-            for j in range(i, end + 2):
-                if masked[j] != "\n":
-                    masked[j] = " "
-            i = end + 2
-        elif source[i] in "\"'":
-            quote = source[i]
-            i += 1
-            while i < len(source):
-                if source[i] == "\\":
-                    if masked[i] != "\n":
-                        masked[i] = " "
-                    if i + 1 < len(source) and masked[i + 1] != "\n":
-                        masked[i + 1] = " "
-                    i += 2
-                elif source[i] == quote:
-                    i += 1
-                    break
-                else:
-                    if masked[i] != "\n":
-                        masked[i] = " "
-                    i += 1
-        else:
-            i += 1
-    return "".join(masked)
 
 
 def converter_methods(files):
@@ -161,7 +125,7 @@ def audit(root, compiler, files, methods):
     for relative in files:
         path = root / relative
         source = path.read_text(errors="ignore")
-        matches = [m for m in CALL.finditer(source_mask(source))
+        matches = [m for m in CALL.finditer(mask_non_code(source))
                    if m.group(1) in methods]
         if not matches:
             continue
