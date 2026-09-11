@@ -1246,7 +1246,8 @@ a.docs-card:hover {
   color: var(--dark);
 }
 
-.landing-section:nth-of-type(even) .button-secondary:hover {
+.landing-section:nth-of-type(even) .button-secondary:hover,
+.install-actions .button-primary:hover {
   border-color: var(--dark);
   background: var(--dark);
   color: var(--paper);
