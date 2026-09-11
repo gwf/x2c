@@ -320,13 +320,12 @@ times were 46.725 and 54.572 seconds. All 45 attempts report $23.476 in native
 list-price estimates; five unscored startup checks add $1.144. These are not
 billing records. Quota-rejected attempts are not efficiency evidence.
 
-The next bounded work is to retry only the 13 incomplete high cases after
-quota is available, preserving the original attempts and explicitly reusing
-the two completed high cases. The client reported a noon local reset. The
-private report and `resume-required.json` identify the pending work. Do not
-resample completed failures or archive this plan as accepted. The root
-closeout record now reflects these results instead of the stale six-of-thirty
-cohort.
+At that point, the proposed follow-up was to retry only the 13 incomplete
+high cases after quota became available. The client reported a noon local
+reset; the private report and `resume-required.json` retain that historical
+proposal. Gary subsequently selected the combined configuration below, so
+the hook-only attempts remain frozen rather than being resumed or replaced.
+Completed failures remain recorded; this plan is not accepted.
 
 ## Follow-up configuration: import and hook
 
@@ -335,9 +334,57 @@ the startup hook. The import is now present in root `AGENTS.md`, reached
 through the existing `CLAUDE.md` symlink. The guide and task-specific skills
 are unchanged. Earlier preflights established that each mechanism delivers
 the guide on its own; they did not establish equivalent answer behavior or
-test both mechanisms together. The combined configuration has no scored
-acceptance evidence yet because the provider session limit remains active.
+test both mechanisms together. Commit 3dc079e delivered the combined
+configuration before the fresh evaluation below.
 
 The results above remain results of the frozen hook-only configuration.
 Trials with both mechanisms must form a separate recorded cohort; they must
 not fill the 13 gaps in the hook-only cohort or be mixed into its score.
+
+## Combined-configuration results, 2026-09-11
+
+After the noon reset, one bounded availability check succeeded. All 45 fresh
+CLI B trials then completed with the same verified model/version, unchanged
+questions, rubric, launcher, runner, efforts, repetitions and limits. The
+snapshot is main 3dc079e; only the root import and two historical plan updates
+differ from the hook-only snapshot. Tested source owners and guides are
+unchanged. Native records confirm the model identity, one-million-token
+context and successful full-guide hook receipt in every attempt.
+
+| Effort | Corrected original CLI B | Hook only | Import and hook |
+| --- | --- | --- | --- |
+| Low | 7/15 | 9/15 | 10/15 |
+| Medium | 7/15 | 9/15 | 8/15 |
+| High | 9/15 | 2 pass, 13 incomplete | 10/15 |
+
+The design-choice question passed 1/3 at low, 1/3 at medium and 0/3 at high.
+Seven answers replaced the user's original public-truth choice with a
+different decision. The other ten failures were narrower: contradictory
+output summaries or false additional ownership, equality or hashing claims,
+often following correct central explanations. Qualified hypotheticals and
+ambiguous wording were reviewed consistently with prior cohorts; the private
+report and per-answer reviews disclose those judgments.
+
+There were no provider failures, timeouts, forbidden actions, permission
+denials or source changes. All attempts finished within 123.311 seconds;
+low/medium/high median times were 47.839, 53.213 and 69.910 seconds. Summed
+trial time was 2,510.306 seconds across 892.637 elapsed seconds. Native
+list-price estimates total $30.972, plus $0.287 for the availability check;
+these are not billing records. All 4,144 source/symlink entries and frozen
+inputs verified. Raw actions show no historical evaluation-content exposure,
+although that content was available in tracked plans. Three trials explicitly
+read the planning skill and still failed the design-choice requirement.
+
+The completed experiment does not meet acceptance at any effort. Low gained
+one pass and medium lost one against the hook-only cohort; three repetitions
+per question do not establish a reliable causal benefit or harm. Hook-only
+high has no complete comparison score. Earlier CLI A scores remain separately
+labeled historical references, not fresh same-tree measurements.
+
+Private evidence is the sibling `import-hook-matched-20260911/` under the
+onboarding evidence directory above: `REPORT.md`, frozen protocol and source,
+all raw attempts, independent per-effort reviews, parent adjudications,
+resource records, audit results and a hash manifest. The requested rerun is
+complete; onboarding and the umbrella closeout remain active. The combined
+configuration stays installed. No further trials or guidance changes are
+started by this result.

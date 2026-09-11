@@ -42,16 +42,24 @@ at each effort for CLI A and 7/15, 7/15, 9/15 for CLI B. Gary then approved
 one general-guide startup hook, delivered at e3884ae, and narrowed the new
 rerun to CLI B. With the hook verified in every attempt, low and medium each
 passed 9/15; high has two passes and 13 incomplete trials after a provider
-session limit. Those 13 are missing results, not answer failures. Retry only
-the incomplete high cases after quota is available, preserving all prior
-attempts. No completed effort meets the all-pass acceptance rule. See
+session limit. Those 13 are missing results, not answer failures, and remain
+frozen as historical evidence. No completed effort meets the all-pass
+acceptance rule. See
 [the active evaluation plan](agent-onboarding-accuracy.md) for settings,
 interpretation, costs, and the retained private evidence.
 
 Gary subsequently requested the original README import alongside the hook.
-That combined configuration is now installed but has no scored evaluation
-yet. Preserve the hook-only cohort and evaluate the combined configuration
-separately; its results cannot fill the earlier cohort's incomplete trials.
+The combined configuration shipped at 3dc079e and its separate 45-trial
+evaluation is complete: low passed 10/15, medium 8/15 and high 10/15. Every
+attempt used the verified model and full-guide startup hook and completed
+within the limit; no source changes or forbidden actions occurred. The
+original design-choice question passed only 1/3, 1/3 and 0/3. Other failures
+often concern false extra claims after correct central explanations. These
+small score changes do not establish that the import helps or harms, and no
+effort meets acceptance. The combined setup remains installed, with no
+further trials assumed. Its results do not fill the hook-only cohort's gaps.
+The active evaluation plan links the retained `import-hook-matched-20260911/`
+report, raw results, independent reviews, resource records and hash audit.
 
 Raw acceptance evidence is retained outside disposable worktrees at
 `/Users/gary/Documents/x2c-evidence/closeout-20260910/`, including failed and
