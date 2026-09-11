@@ -15,6 +15,10 @@ All four are ordinary x2c: a macro file, an optional module, and the
 existing protocol and decorator machinery. Nothing in the compiler knows
 about derivatives.
 
+The [runtime module reference](../library/modules/autodiff.md) documents
+`AdTape` and `AdNode`. For other specialized capabilities, see
+[Advanced Topics](../library/advanced-topics.md).
+
 ## Dual numbers
 
 Declare a struct with `value` and `tangent` fields and let `$ad.dual`

@@ -1,5 +1,8 @@
 # cstar
 
+The book's [Verifying Functions with C*](../../docs/src/guide/verification.md)
+chapter explains how to use this package as an advanced topic.
+
 Experimental. Annotate selected x2c functions with contracts, loop
 invariants, intermediate assertions, and proof steps, then check them with
 `cstar-verify`, which reports the obligations that remain at their source

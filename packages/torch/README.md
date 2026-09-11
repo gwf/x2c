@@ -1,5 +1,8 @@
 # torch
 
+The book's [Training and Inference with torch](../../docs/src/guide/torch.md)
+chapter explains the package through advanced workflows.
+
 Tensors, autograd, layers, optimizers, schedules,
 checkpoints, TorchScript inference, and MNIST over the pinned libtorch
 2.10.0, PyTorch's C++ library. The

@@ -9,7 +9,9 @@ contains no proof code and links no verification runtime.
 This is an experiment over a small C-like subset of the language. It does
 not verify the runtime, callers of the annotated functions, or termination.
 Package prerequisites, the pinned C* release, and its licensing situation
-are in `packages/cstar/README.md`.
+are in the [C* package README](https://github.com/gwf/x2c/blob/main/packages/cstar/README.md).
+This optional package is one of the book's
+[Advanced Topics](../library/advanced-topics.md).
 
 ## Annotating a function
 

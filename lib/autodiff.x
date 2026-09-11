@@ -14,7 +14,10 @@
 #include "x2c.x"
 #include <math.h>
 
-/** A recording of `AdNode` operations; see the struct below. */
+/** A recording of `AdNode` operations; see the struct below.
+    The [Automatic Differentiation guide](../../guide/autodiff.md) explains
+    runtime tapes and the compile-time alternatives.
+*/
 typedef struct AdTape *AdTape;
 
 /** One recorded value: its primal, its accumulated adjoint, and the closure

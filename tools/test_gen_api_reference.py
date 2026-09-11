@@ -614,6 +614,12 @@ typedef int Undocumented;
         )
 
         self.assertIn("library/modules/typed-array.md", rendered)
+        self.assertIn("# Libraries and Packages", rendered)
+        self.assertIn("  - [Overview](library/overview.md)", rendered)
+        self.assertIn("    - [lib/array.x](library/modules/array.md)", rendered)
+        self.assertLess(rendered.index("- [Module Reference]"),
+                        rendered.index("- [Advanced Topics]"))
+        self.assertEqual(rendered.count("(guide/autodiff.md)"), 1)
         self.assertIn("# Compiler API (provisional)", rendered)
         self.assertIn("internals/compiler-api/compiler.md", rendered)
         self.assertLess(

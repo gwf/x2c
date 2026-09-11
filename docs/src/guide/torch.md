@@ -1,5 +1,9 @@
 # Training and Inference with torch
 
+For package setup and supported operations, see the
+[Torch package README](https://github.com/gwf/x2c/blob/main/packages/torch/README.md).
+This chapter belongs to [Advanced Topics](../library/advanced-topics.md).
+
 The `torch` package reaches PyTorch's C++ library, libtorch, from x2c.
 Tensors, autograd, layers, optimizers, schedules, checkpoints,
 TorchScript inference, and the MNIST reader are all libtorch's; the

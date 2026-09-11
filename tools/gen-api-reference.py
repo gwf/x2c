@@ -46,7 +46,7 @@ PAGES = ROOT / "docs" / "src" / "library" / "modules"
 COMPILER_PAGES = ROOT / "docs" / "src" / "internals" / "compiler-api"
 SUMMARY = ROOT / "docs" / "src" / "SUMMARY.md"
 COMPILER_X2C_SOURCE = ROOT / "src" / "utils.x"
-SECTION = "# Standard library"
+SECTION = "# Libraries and Packages"
 COMPILER_SECTION = "# Compiler API (provisional)"
 INTERNALS_SECTION = "# Compiler and contributor internals"
 BANNER = (
@@ -1125,18 +1125,26 @@ def render_summary(
     standard = [
         SECTION,
         "",
-        "- [Standard Library Overview](library/overview.md)",
-        "- [Module Reference](library/modules/index.md)",
-        "  - [x2c C API](library/modules/x2c-c-api.md)",
+        "- [Standard Library](library/index.md)",
+        "  - [Overview](library/overview.md)",
+        "  - [Module Reference](library/modules/index.md)",
+        "    - [x2c C API](library/modules/x2c-c-api.md)",
     ]
     for module in modules:
         if module.visibility not in ("api", "optional"):
             continue
         standard.append(
-            f"  - [{module.path}](library/modules/{module.stem}.md)"
+            f"    - [{module.path}](library/modules/{module.stem}.md)"
         )
-    standard.append("")
-    updated = _replace_summary_section(current, SECTION, standard)
+    standard.extend([
+        "- [Advanced Topics](library/advanced-topics.md)",
+        "  - [Automatic Differentiation](guide/autodiff.md)",
+        "  - [Verifying Functions with C*](guide/verification.md)",
+        "  - [Training and Inference with torch](guide/torch.md)",
+        "",
+    ])
+    heading = SECTION if SECTION in current.splitlines() else "# Standard library"
+    updated = _replace_summary_section(current, heading, standard)
     compiler_section = [
         COMPILER_SECTION,
         "",
