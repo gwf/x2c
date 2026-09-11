@@ -888,36 +888,30 @@ static List _bind_declaration_default(Compiler compiler, List syntax) {
   return compiler.bind_syntax(syntax, AST_UNIT, NULL);
 }
 
-static List _produce_declaration_rows(Compiler compiler, List rows) {
-  Array selected = %[];
+static void _produce_declaration_rows(
+  Compiler compiler, List rows, Array selected) {
   foreach (List row, rows) {
     match (row) {
       case %(declaration-pending ?callback ?arguments
                ?construction ?privacy): {
-        List saved_stack = compiler.macro_stack;
-        int saved_private = compiler.source_private;
-        compiler.macro_stack = compiler.thaw_declaration_syntax(construction);
-        compiler.source_private = privacy;
-        defer {
-          compiler.macro_stack = saved_stack;
-          compiler.source_private = saved_private;
+        $let(compiler.macro_stack,
+             compiler.thaw_declaration_syntax(construction))
+        $let(compiler.source_private, privacy) {
+          List generated = compiler.bind_syntax(
+            compiler.evaluate_declaration_recipe(callback, arguments),
+            AST_UNIT, NULL);
+          List additions = %($generated);
+          match (generated) {
+            case %(seq *children): additions = children;
+            case %(declaration-bundle (rows *children)): additions = children;
+          }
+          _produce_declaration_rows(compiler, additions, selected);
         }
-        List generated = compiler.bind_syntax(
-          compiler.evaluate_declaration_recipe(callback, arguments),
-          AST_UNIT, NULL);
-        List additions = %($generated);
-        match (generated) {
-          case %(seq *children): additions = children;
-          case %(declaration-bundle (rows *children)): additions = children;
-        }
-        foreach (List child, _produce_declaration_rows(compiler, additions))
-          selected.push(child);
         continue;
       }
     }
     selected.push(row);
   }
-  return selected.list_free();
 }
 
 static List _select_declaration_rows(Compiler compiler, List rows) {
@@ -925,27 +919,23 @@ static List _select_declaration_rows(Compiler compiler, List rows) {
   foreach (List row, rows) {
     match (row) {
       case %(declaration-default ?function ?construction ?privacy): {
-        List saved_stack = compiler.macro_stack;
-        int saved_private = compiler.source_private;
-        compiler.macro_stack = compiler.thaw_declaration_syntax(construction);
-        compiler.source_private = privacy;
-        defer {
-          compiler.macro_stack = saved_stack;
-          compiler.source_private = saved_private;
-        }
-        List syntax = function;
-        match (syntax)
-          case %(function ?return_type (bind ?name ?modifiers) ?body): {
-            name = compiler.evaluate_macro_slot(name);
-            String spelling = binding_identity_spelling(name);
-            match (name) {
-              case %(?(String literal)): spelling = literal;
-              case %("x2c.ident" ?(String literal)): spelling = literal;
+        $let(compiler.macro_stack,
+             compiler.thaw_declaration_syntax(construction))
+        $let(compiler.source_private, privacy) {
+          List syntax = function;
+          match (syntax)
+            case %(function ?return_type (bind ?name ?modifiers) ?body): {
+              name = compiler.evaluate_macro_slot(name);
+              String spelling = binding_identity_spelling(name);
+              match (name) {
+                case %(?(String literal)): spelling = literal;
+                case %("x2c.ident" ?(String literal)): spelling = literal;
+              }
+              if (spelling && compiler.sym.get(%($spelling))) continue;
+              syntax = %(function $return_type (bind $name $modifiers) $body);
             }
-            if (spelling && compiler.sym.get(%($spelling))) continue;
-            syntax = %(function $return_type (bind $name $modifiers) $body);
-          }
-        selected.push(_bind_declaration_default(compiler, syntax));
+          selected.push(_bind_declaration_default(compiler, syntax));
+        }
         continue;
       }
     }
@@ -1001,18 +991,17 @@ static List _select_declaration_forwards(
   foreach (List row, rows) {
     match (row)
       case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
-        int saved_private = compiler.source_private;
-        compiler.source_private = privacy;
-        defer compiler.source_private = saved_private;
-        List bound = _declaration_forward(
-          compiler, child, parent, member, fallback, pending);
-        if (!bound) {
-          (*remaining)++;
-          selected.push(row);
-        }
-        else {
-          pending.del(child);
-          if (bound.car() != <seq>) selected.push(bound);
+        $let(compiler.source_private, privacy) {
+          List bound = _declaration_forward(
+            compiler, child, parent, member, fallback, pending);
+          if (!bound) {
+            (*remaining)++;
+            selected.push(row);
+          }
+          else {
+            pending.del(child);
+            if (bound.car() != <seq>) selected.push(bound);
+          }
         }
         continue;
       }
@@ -1064,8 +1053,9 @@ Map Compiler.select_declaration_defaults(
         case %(declaration-source ?end
                  (declaration-bundle (rows *rows))): {
           rows = shadow.thaw_declaration_syntax(rows);
-          List produced = _produce_declaration_rows(shadow, rows);
-          sources.push(%($declarations $key $end $produced));
+          Array produced = %[];
+          _produce_declaration_rows(shadow, rows, produced);
+          sources.push(%($declarations $key $end ${produced.list_free()}));
         }
     }
   }
@@ -1077,9 +1067,9 @@ Map Compiler.select_declaration_defaults(
         case %(declaration-forward ?child *): pending[child] = 1;
     sources[index] = %($declarations $key $end $selected);
   }
-  int remaining = pending.len(), previous = remaining + 1;
-  do {
-    previous = remaining;
+  int remaining = pending.len();
+  while (remaining) {
+    int previous = remaining;
     remaining = 0;
     for (size_t index = 0; index < sources.len(); index++) {
       (Map declarations, Var key, Var end, List rows) = sources[index];
@@ -1090,7 +1080,7 @@ Map Compiler.select_declaration_defaults(
       shadow.report_error(<type>,
         "a forwarded class constructor has no completed parent constructor",
         shadow.token, NULL);
-  } while (remaining);
+  }
   foreach (List source, sources) {
     (Map declarations, Var key, Var end, List rows) = source;
     declarations[key] = shadow.freeze_declaration_syntax(

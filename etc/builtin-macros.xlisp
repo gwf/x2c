@@ -225,10 +225,10 @@
 (defun x2c._class.field-argument (field)
   (x2c._class.ref (string-append "field_" (car field))))
 (defun x2c._class.field-on (field receiver)
-  (let* ((type (cadr field)) (scalar (x2c._class.value-type type))
+  (let* ((type (cadr field))
          (value (x2c.expr.field receiver (car field))))
     (if (and (list? (car type)) (eq? (car (car type)) 'bitfield))
-      (x2c._class.cast scalar value) value)))
+      (x2c._class.cast (x2c._class.value-type type) value) value)))
 (defun x2c._class.field-value (field)
   (x2c._class.field-on field (x2c._class.ref "value")))
 (defun x2c._class.zero ()
@@ -251,9 +251,8 @@
       (x2c.diagnostic.fail
         (string-append "class " owner " requires void " owner ".init("
           owner (if heap ")" " *)")) nil))))
-(defun x2c._class.new (owner representation heap fields positional)
+(defun x2c._class.new (owner representation heap named positional)
   (let* ((type (list owner)) (value (x2c._class.ref "value"))
-         (named (filter x2c._class.named-field? fields))
          (aggregate (member (car representation) '(struct union)))
          (parameters (if aggregate
            (if positional (map x2c._class.field-parameter named) nil)
@@ -306,7 +305,7 @@
                 (x2c._class.op '& value))
             (x2c._class.ref "out")))))))
 (defun x2c._class.field-statements (owner fields)
-  (let ((out (x2c._class.ref "out")))
+  (let ((out (x2c._class.ref "out")) (final (last fields)))
     (append
       (list (x2c._class.statement
         (x2c._class.method out "write"
@@ -316,7 +315,7 @@
           (list (x2c._class.statement (x2c._class.method out "write"
             (x2c.literal.string (string-append (car field) ": "))))
             (x2c._class.field-write field))
-          (if (eq? field (last fields)) nil
+          (if (eq? field final) nil
             (list (x2c._class.statement (x2c._class.method out "write"
               (x2c.literal.string ", "))))))) fields))
       (list (x2c._class.return
@@ -432,7 +431,7 @@
                  " requires an explicit constructor")
                nil)
            (let ((fallback
-             (x2c._class.new owner representation heap fields positional)))
+             (x2c._class.new owner representation heap named positional)))
              (if alias
                `(default-forward (,owner) ,type "new" ,(cadr fallback))
                fallback)))))

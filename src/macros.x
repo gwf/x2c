@@ -1030,6 +1030,7 @@ static Var _rebind_import_definition(Compiler compiler, Var stored) {
   if (definition.car() != <macrodef>) return definition;
   Map replacements = %{};
   _import_reference_bindings(compiler, definition, replacements);
+  if (!replacements.len()) return definition;
   return _replace_definition_bindings(definition, replacements);
 }
 

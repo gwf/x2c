@@ -1163,29 +1163,32 @@ static List _managed_initializer(List syntax) {
   return NULL;
 }
 
-/** Lowers managed block declarations to declaration/defer pairs in source
-    order, preserving their installed bindings and the enclosing lifetime.
-*/
-List Compiler.finish_managed_declaration(Compiler c, List declaration) {
-  if (c.macro_holes) return declaration;
+static int _has_managed_declaration(List declaration) {
+  match (declaration) {
+    case %(seq *rows):
+      foreach (List row, rows)
+        if (_has_managed_declaration(row)) return 1;
+    case %(declare ? (bindings *declarators)):
+      foreach (List declarator, declarators)
+        match (declarator)
+          case %(op = (bind ? ?) ?value):
+            if (_managed_initializer(value)) return 1;
+  }
+  return 0;
+}
+
+static void _append_managed_declaration(
+  Compiler c, List declaration, Array output) {
   match (declaration) {
     case %(seq *rows): {
-      Array output = %[];
-      foreach (List row, rows) {
-        List bound = c.finish_managed_declaration(row);
-        match (bound) {
-          case %(seq *items):
-            foreach (List item, items) output.push(item);
-          default: output.push(bound);
-        }
-      }
-      return %(seq @{output.list_free()});
+      foreach (List row, rows)
+        _append_managed_declaration(c, row, output);
+      return;
     }
     case %(declare ?base (bindings *declarators)): {
-      Array output = NULL;
-      int index = 0, first = 0;
+      Array ordinary = %[];
+      defer ordinary.free();
       foreach (List declarator, declarators) {
-        int position = index++;
         List initializer = NULL, binding = NULL, modifiers = NULL;
         match (declarator)
           case %(op = (bind ?name ?mods) ?value): {
@@ -1193,21 +1196,24 @@ List Compiler.finish_managed_declaration(Compiler c, List declaration) {
             binding = name;
             modifiers = mods;
           }
-        if (!initializer) continue;
+        if (!initializer) {
+          ordinary.push(declarator);
+          continue;
+        }
         Type type = modifiers.append(base).type().declared();
-        if (base.list().contains(<static>) || base.list().contains(<extern>) ||
-            base.list().contains(<threaded>))
-          c.report_error(
-            <parse>, "managed initializer requires automatic local storage",
-            c.token, NULL);
+        match (base)
+          case %(* (!or static extern threaded) *):
+            c.report_error(
+              <parse>, "managed initializer requires automatic local storage",
+              c.token, NULL);
         if (!c.protocol_members_for(type, %("Cleanup")))
           c.report_error(
             <protocol>, "managed initializer requires Cleanup participation",
             c.token, %("type: ${type.repr()}"));
-        if ((void *) output == NULL) output = %[];
-        if (first < position)
-          output.push(%(declare $base
-            (bindings @{declarators[first:position]})));
+        if (ordinary.len()) {
+          output.push(%(declare $base (bindings @{ordinary.list()})));
+          ordinary.clear();
+        }
         output.push(%(declare $base
           (bindings (op = (bind $binding $modifiers) $initializer))));
         List receiver = %(expr $type (ident $binding));
@@ -1215,15 +1221,24 @@ List Compiler.finish_managed_declaration(Compiler c, List declaration) {
           %(expr () (call (expr () (op . $receiver ("cleanup")))
                           (args))), c.token);
         output.push(%(defer (stmnt $cleanup)));
-        first = index;
       }
-      if ((void *) output == NULL) return declaration;
-      if (first < index)
-        output.push(%(declare $base (bindings @{declarators[first:]})));
-      return %(seq @{output.list_free()});
+      if (ordinary.len())
+        output.push(%(declare $base (bindings @{ordinary.list()})));
+      return;
     }
   }
-  return declaration;
+  output.push(declaration);
+}
+
+/** Lowers managed block declarations to declaration/defer pairs in source
+    order, preserving their installed bindings and the enclosing lifetime.
+*/
+List Compiler.finish_managed_declaration(Compiler c, List declaration) {
+  if (c.macro_holes || !_has_managed_declaration(declaration))
+    return declaration;
+  Array output = %[];
+  _append_managed_declaration(c, declaration, output);
+  return %(seq @{output.list_free()});
 }
 
 static String _lifecycle_owner(

@@ -52,7 +52,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:1803`
+Source: `src/parse.x:1818`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -73,7 +73,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:1737`
+Source: `src/parse.x:1752`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -83,7 +83,7 @@ Source: `src/parse.x:1737`
 Lowers managed block declarations to declaration/defer pairs in source
 order, preserving their installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:1169`
+Source: `src/parse.x:1236`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -125,7 +125,7 @@ Parses one non-function, non-typedef `Decl` macro argument.
 Returns a single declaration without consuming the invocation delimiter;
 flat destructuring may omit an initializer in this position.
 
-Source: `src/parse.x:1364`
+Source: `src/parse.x:1379`
 
 <a id="Compiler.parse_declaration_row"></a>
 #### Compiler.parse_declaration_row
@@ -190,7 +190,7 @@ Parses one function declaration and its required compound body.
 The parameter bindings are active while the body is parsed, and the first
 token after the closing brace remains current.
 
-Source: `src/parse.x:1397`
+Source: `src/parse.x:1412`
 
 <a id="Compiler.parse_function_target"></a>
 #### Compiler.parse_function_target
@@ -201,7 +201,7 @@ Parses one function decorator target and returns its resulting AST.
 A compatible unit macro at the current token is expanded first; otherwise
 an ordinary function definition is required.
 
-Source: `src/parse.x:1410`
+Source: `src/parse.x:1425`
 
 <a id="Compiler.parse_import_declaration"></a>
 #### Compiler.parse_import_declaration
@@ -213,7 +213,7 @@ The alias defaults to the package name; `with` members add source-ordered
 local spellings. These spellings affect source resolution only; the package
 name in the returned AST drives the generated header include.
 
-Source: `src/parse.x:1455`
+Source: `src/parse.x:1470`
 
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
@@ -286,7 +286,7 @@ Parses one top-level form and applies its source-ordered compiler effects.
 Returns its AST, or NULL when a keyword definition or top-level Lisp form
 only updates compiler state, with the first following token current.
 
-Source: `src/parse.x:1489`
+Source: `src/parse.x:1504`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name

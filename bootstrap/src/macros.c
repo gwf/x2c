@@ -2556,8 +2556,9 @@ default: break;
 }
 }
 
+unsigned Map_len(Map);
 static Var _rebind_import_definition(Compiler compiler, Var stored){
-  if(! Var_is(stored, 806120)) return stored;  List definition = Var_list(stored);  if(! Var_equal(List_car(definition), Symbol_var(895740748108))) return List_var(definition);  Map replacements = Map_new();  _import_reference_bindings(compiler, definition, replacements);  return _replace_definition_bindings(List_var(definition), replacements);
+  if(! Var_is(stored, 806120)) return stored;  List definition = Var_list(stored);  if(! Var_equal(List_car(definition), Symbol_var(895740748108))) return List_var(definition);  Map replacements = Map_new();  _import_reference_bindings(compiler, definition, replacements);  if(! Map_len(replacements)) return List_var(definition);  return _replace_definition_bindings(List_var(definition), replacements);
 }
 
 void Compiler_add_translation_dependency(Compiler, String);
