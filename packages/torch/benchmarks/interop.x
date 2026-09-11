@@ -10,7 +10,8 @@
     not another application framework.
 
       interop check   <artifacts> <out>
-      interop time    <artifacts> <out> <chain|e<count>o<ops>> <requests>
+      interop time    <artifacts> <out>
+                      <chain|freed|subscope|e<count>o<ops>> <requests>
       interop memory  <artifacts> <out> 4 <requests>
       interop attribute <artifacts> <out> <elements> <requests>
                         [natural|freed|subscope|all]
@@ -53,12 +54,25 @@ static double _chain(Tensor x, Tensor a, Tensor b, int operations) {
 static Tensor _input(Map values, String prefix, int count) =>
   values[%"$prefix.$count"].tensor();
 
+/* Checks and timings use the same existing lifetime variants. Sampling is
+   enabled only by attribute mode, never during ordinary timing. */
+static int chain_lifetime;
+static int interop_observe;
+static double _chain_freed(Tensor, Tensor, Tensor, int);
+static double _chain_subscope(Tensor, Tensor, Tensor, int);
+
+static double _timed_chain(Tensor x, Tensor a, Tensor b, int operations) {
+  if (chain_lifetime == 1) return _chain_freed(x, a, b, operations);
+  if (chain_lifetime == 2) return _chain_subscope(x, a, b, operations);
+  return _chain(x, a, b, operations);
+}
+
 static int _check(String artifacts, String out) {
   Map values = _artifact(artifacts, "interop-init.pt");
   for (int e = 0; e < 4; e++) {
     for (int o = 0; o < 3; o++) {
       int count = interop_elements[e], operations = interop_operations[o];
-      double result = _chain(_input(values, "x", count),
+      double result = _timed_chain(_input(values, "x", count),
                              _input(values, "a", count),
                              _input(values, "b", count), operations);
       char name[48];
@@ -92,10 +106,11 @@ static int _time(String artifacts, String out, String variant, int requests) {
         continue;
       Tensor x = _input(values, "x", count), a = _input(values, "a", count),
              b = _input(values, "b", count);
-      for (int i = 0; i < 8; i++) (void) _chain(x, a, b, operations);
+      for (int i = 0; i < 8; i++) (void) _timed_chain(x, a, b, operations);
       double result = 0.0;
       double start = Bench.now();
-      for (int i = 0; i < requests; i++) result += _chain(x, a, b, operations);
+      for (int i = 0; i < requests; i++)
+        result += _timed_chain(x, a, b, operations);
       double seconds = Bench.now() - start;
       total_seconds += seconds;
       char name[48];
@@ -148,7 +163,7 @@ static double _chain_natural(Tensor x, Tensor a, Tensor b, int operations) {
   Torch.inference_mode();
   Tensor y = x;
   for (int i = 0; i < operations; i++) y = (y * a + b).relu();
-  _note_live();
+  if (interop_observe) _note_live();
   return y.sum().item().double();
 }
 
@@ -163,7 +178,7 @@ static double _chain_freed(Tensor x, Tensor a, Tensor b, int operations) {
     if (i > 0) (void) y.free();
     y = next;
   }
-  _note_live();
+  if (interop_observe) _note_live();
   return y.sum().item().double();
 }
 
@@ -182,7 +197,7 @@ static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
     if (owner) Scope.destroy(owner);
     owner = replacement;
   }
-  _note_live();
+  if (interop_observe) _note_live();
   double total;
   Scope.retain();
   {
@@ -202,6 +217,7 @@ static double _shape(int shape, Tensor x, Tensor a, Tensor b, int ops) {
 
 static int _attribute(String artifacts, String out, int elements,
                       int requests, String shape) {
+  interop_observe = 1;
   Map values = _artifact(artifacts, "interop-init.pt");
   Bench.record_int("attr_elements", elements);
   Bench.record_int("attr_requests", requests);
@@ -301,14 +317,20 @@ int main(int argc, char **argv) {
   Bench.begin(1024);
   Bench.record_text("language", "x2c");
   Bench.record_text("torch_version", Torch.version());
+  Bench.record_text("counters", xb_handles_enabled() ? "on" : "off");
   Bench.record_int("cfg_artifact_version", ARTIFACT_VERSION);
   Bench.record_int("threads", Torch.num_threads());
   Bench.record_int("interop_threads", Torch.num_interop_threads());
 
+  if (argc > 4 && !strcmp(argv[4], "freed")) chain_lifetime = 1;
+  if (argc > 4 && !strcmp(argv[4], "subscope")) chain_lifetime = 2;
+  Bench.record_text("lifetime", chain_lifetime == 1 ? "freed" :
+                    chain_lifetime == 2 ? "subscope" : "natural");
   String artifacts = String.new(argv[2]), out = String.new(argv[3]);
   if (!strcmp(argv[1], "check")) return _check(artifacts, out);
   if (!strcmp(argv[1], "time"))
-    return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
+    return _time(artifacts, out, chain_lifetime ? "chain" :
+                 String.new(argv[4]), atoi(argv[5]));
   if (!strcmp(argv[1], "memory"))
     return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
   if (!strcmp(argv[1], "attribute"))

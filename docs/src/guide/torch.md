@@ -439,6 +439,88 @@ hooks. In 128 measured Lisp steps, native handles stayed at four while Scope
 allocations grew from 355 to 2159. Session destruction returned native handles
 to baseline; 64 custom graphs also returned to baseline after each graph.
 
+## Performance
+
+x2c and PyTorch use the same libtorch backend. In the measured CPU workloads,
+x2c took less time for small-model training and prediction; convolutional
+training and tensor chains took roughly the same time. The chain results use
+explicit releases or a scope per iteration, as described under
+[Lifetimes](#lifetimes).
+
+The table gives median seconds from five fresh-process pairs on an Apple M4
+Max, using PyTorch 2.10 and the same native libraries. The one- and four-thread
+columns set the native intra-op workers; inter-op threads stay at one. Each
+row measures a different amount of work, so compare languages within a row.
+
+| Workload | x2c, 1 thread | Python, 1 | x2c, 4 threads | Python, 4 |
+| --- | --- | --- | --- | --- |
+| Tabular training, native model | 12.86 | 15.62 | 15.00 | 18.78 |
+| Tabular training, explicit operations* | 13.57 | 16.58 | 15.69 | 19.40 |
+| Prediction, batch 1 | 8.46 | 15.01 | 8.46 | 14.94 |
+| Prediction, batch 32 | 9.39 | 13.27 | 9.44 | 13.19 |
+| Prediction, batch 256 | 12.41 | 13.11 | 17.66 | 18.03 |
+| MNIST convolutional training | 14.15 | 14.36 | 9.98 | 10.28 |
+| Sequence training, window 32 | 12.09 | 15.20 | 12.10 | 15.12 |
+| Tensor chain, explicit release | 2.60 | 2.65 | 5.97 | 6.19 |
+| Tensor chain, scope per iteration | 2.70 | 2.67 | 6.10 | 6.24 |
+
+Small-model training took about 18-20% less time, batch-one prediction about
+44% less, and batch-32 prediction about 29% less. This is consistent with
+compiled control code reducing the overhead of frequent calls. Differences
+were small for larger prediction batches, MNIST, and the tensor chains;
+sample variation limits conclusions about those differences. More threads
+did not improve every workload. These results do not measure preprocessing
+or establish a general speedup.
+
+The application rows come from the [original comparison][torch-results],
+with the [50-warmup-batch correction][torch-supplement] used for MNIST. The
+chains come from the separate [fresh remedy comparison][torch-remedies].
+These reports preserve the workload counts, individual samples, and methods;
+the applications were not all rerun with the remedies.
+
+\*The stock-PyTorch comparison of explicit tabular training remains a failed
+numerical check: its validation-loss difference was 0.223%, above the 0.1%
+tolerance. The other training configurations passed their tolerances. All
+three applications passed a separate [Adam control][torch-matched] that
+follows libtorch's operation order; that control measured correctness only.
+Timing agreement does not establish numerical equivalence. The chain checks
+and accumulated timing results agree exactly as reported to 12 significant
+digits, without claiming bitwise equality of every tensor element.
+
+Separate startup and checkpoint diagnostics measured these ranges across
+the applications, in milliseconds:
+
+| Operation | x2c | Python |
+| --- | --- | --- |
+| Fresh-process startup | 108-113 | 488-504 |
+| Save checkpoint | 0.7-2.6 | 0.8-2.6 |
+| Reload checkpoint | 6.4-8.3 | 0.5-1.2 |
+
+Startup includes imports and native initialization. Checkpoint formats differ
+between languages, so these compare application paths rather than identical
+serialization kernels.
+
+Memory diagnostics measured about 151 MB for x2c versus 255 MB for Python
+after 400,000 training steps. The corrected sequence-window sweep reached a
+cumulative process peak of 131 MB versus 257 MB. Repeated temporary creation
+with a per-request List pool ended at 143 MB versus 188 MB after 400,000
+requests. Despite that lower total, the pooled run's peak growth above its
+initial footprint was 2.24 times Python's. Native handles and canonical pool
+storage stayed bounded; the remaining process-footprint excess is unexplained.
+These observations do not establish generally lower memory use.
+
+All measurements used one active desktop CPU system. They do not cover GPU
+performance, `torch.compile`, or workloads beyond these comparisons.
+
+[torch-results]:
+  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/REPORT.md
+[torch-supplement]:
+  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/SUPPLEMENT.md
+[torch-remedies]:
+  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/REMEDIES.md
+[torch-matched]:
+  https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/MATCHED.md
+
 ## Limits
 
 - macOS arm64 CPU/MPS and Linux x86_64 CPU; no CUDA profile.
