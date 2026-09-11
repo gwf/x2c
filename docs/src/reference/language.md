@@ -1309,8 +1309,9 @@ provider's exported default by defining another function with its name.
 ### Class declarations
 
 The shipped `class` keyword aliases the `$class` NamedType decorator. See
-[Classes and System Macros](../guide/system-macros.md) for construction and
-lifetime examples. A class preserves its explicit representation and ordinary
+[Classes and System Macros](../guide/system-macros.md#which-methods-does-a-class-supply)
+for the complete default-method inventory, construction, and lifetime examples.
+A class preserves its explicit representation and ordinary
 typedef ancestry. It adds replaceable methods through declaration defaults.
 An explicit `new` suppresses its generated constructor and init requirement.
 Derived classes forward the nearest applicable constructor; variadic forwarding

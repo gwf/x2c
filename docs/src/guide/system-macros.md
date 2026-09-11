@@ -23,6 +23,56 @@ with [Compile-time Macros](macros.md).
 
 ## Classes are ordinary named types
 
+Use `class` to give a named type the supporting operations you would otherwise
+write yourself: construction, conversion to and from `Var`, comparison and
+hashing, and readable output. These operations let your values work with
+generic containers and protocol-based code. You choose the representation;
+the class supplies applicable defaults, which explicit methods can replace.
+
+For example, a small value record can be constructed, used as a Map key, and
+printed without writing its constructor, converters, hash, or printer:
+
+```x2c
+class Point { int x; int y; };
+~int main(void) {
+Point point = Point.new(3, 4);
+Map labels = $auto(%{});
+labels[point] = "origin";
+printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)].str());
+~  return 0;
+~}
+```
+
+### Which methods does a class supply?
+
+For a class named `T`, the possible defaults are listed below. A new class
+means one declaring a representation, rather than an alias of an existing
+named type. Defaults depend on that representation; not every class generates
+every method.
+
+| Method | Default behavior and applicability |
+| --- | --- |
+| `T.new` | Constructs a scalar, value record, or pointer object. An alias forwards the applicable constructor of its underlying named type. Some layouts require an explicit constructor or `init`, as described below. |
+| `T.free` | Releases a new pointer class's Scope allocation early. It does not free fields recursively. |
+| `T.cleanup` | Calls the selected `free` for a new pointer class and supplies `Cleanup` participation for `$auto`. |
+| `T.var` | Converts a new class to `Var`: a scalar uses its underlying representation, a pointer boxes identity, and a value record boxes a Scope-owned copy. |
+| `Var.t` | Converts a `Var` back to the new class; for example, `Var.point` for `Point`. |
+| `T.equal`, `T.hash` | Use identity for new pointer classes and fields for supported flat value records. Other value records require compatible explicit methods. |
+| `T.str`, `T.repr` | Provide string output for new pointer and record classes. Pointer `str` shows identity; value-record `str` delegates to `repr`. Record `repr` shows fields. |
+| `T.write_str`, `T.write_repr` | Write the corresponding output into a Buffer for new pointer and record classes. |
+
+Scalar classes retain their underlying type's comparison, hashing, and output
+operations. Aliases of existing named types inherit supporting operations,
+including cleanup, rather than generating a second implementation. Explicit
+methods replace applicable defaults; the output methods can be customized
+independently, as described under [Boxing and readable output](#boxing-and-readable-output).
+
+`init` is **not generated**. Some constructors require you to supply it.
+Generated cleanup releases the object's allocation; ownership of resources
+stored in its fields requires your own cleanup code.
+
+### Choose a representation
+
 The name comes first. The remaining declaration specifies its representation:
 
 ```x2c
