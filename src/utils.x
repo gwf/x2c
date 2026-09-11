@@ -79,6 +79,25 @@ String x2c_path_stem(String path) {
   return dot > 0 ? base[:dot] : base;
 }
 
+/** Returns the package directory containing `path` below a registered root.
+    Callers establish path identity and own any package-name restrictions.
+*/
+String x2c_package_directory(String root, String path) {
+  String prefix = %"$root/";
+  if (!path.startswith(prefix)) return NULL;
+  int slash = path[prefix.len():].find("/");
+  return slash > 0 ? path[:prefix.len() + slash] : NULL;
+}
+
+/** Recognizes a package's `src/` files or its package-named legacy entry.
+    Other files under the package directory are consumers.
+*/
+int x2c_package_source(String directory, String path) {
+  if (path.startswith(%"$directory/src/")) return 1;
+  String name = directory[directory.rfind("/") + 1:];
+  return path == %"$directory/$name.x";
+}
+
 /** Returns the borrowed default include `List` containing `<root>/include`.
     Returns NULL before environment setup.
 */

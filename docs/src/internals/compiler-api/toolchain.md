@@ -165,7 +165,7 @@ Source: `src/toolchain.x:219`
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
 
-`int Toolchain.preprocess( Toolchain toolchain, const char *fname, List include_dirs, const char *imacros, const char *force_include, String *output, String *errors, String *dependencies)`
+`int Toolchain.preprocess( Toolchain toolchain, const char *fname, List include_dirs, const char *imacros, String *output, String *errors, String *dependencies)`
 
 Runs the configured C preprocessor without a shell.
 `fname`, `output`, and `errors` are required; output pointers are cleared

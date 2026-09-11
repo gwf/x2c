@@ -363,10 +363,8 @@ static String _package_directory(List roots, String path) {
   String canonical = %"$buffer";
   foreach (String candidate, roots) {
     if (!realpath(candidate, buffer)) continue;
-    String root = %"$buffer/";
-    if (!canonical.startswith(root)) continue;
-    int slash = canonical[root.len():].find("/");
-    if (slash > 0) return canonical[:root.len() + slash];
+    String directory = x2c_package_directory(%"$buffer", canonical);
+    if (directory) return directory;
   }
   return NULL;
 }
@@ -377,9 +375,7 @@ static String _package_directory(List roots, String path) {
 static String _package_source_directory(List roots, String path) {
   char buffer[PATH_MAX], String directory = _package_directory(roots, path);
   if (!directory || !realpath(path, buffer)) return NULL;
-  String canonical = %"$buffer", name = directory.split(%"/").last();
-  if (canonical.startswith(%"$directory/src/")) return directory;
-  return canonical == %"$directory/$name.x" ? directory : NULL;
+  return x2c_package_source(directory, %"$buffer") ? directory : NULL;
 }
 
 /* The one line of link flags the package needs besides its archive. Both

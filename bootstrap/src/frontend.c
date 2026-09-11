@@ -2,9 +2,9 @@
 
 #include "frontend.h"
 
-static String _24, _23, _22, _21, _20, _19, _18, _17, _15, _14, _13, _12, _11, _10, _9, _8, _6, _5, _4, _3, _2, _1, _0;
+static String _21, _20, _19, _18, _17, _16, _15, _13, _12, _11, _10, _9, _8, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _16, _7;
+static Var _14, _7;
 
 #include <limits.h>
 #include <stdio.h>
@@ -67,19 +67,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = String_new("reason: ");
   _10 = String_new("/lib");
   _11 = String_new("/x2c.x");
-  _12 = String_new("/");
-  _13 = String_new(".x");
-  _14 = String_new("/lib/x2c.x");
-  _15 = String_new("stage: preprocess");
-  _16 = String_var(_15);
-  _17 = String_new("status: ");
-  _18 = String_new("cannot read input file");
-  _19 = String_new("cannot open");
-  _20 = String_new("not a regular file");
-  _21 = String_new("read failed");
-  _22 = String_new("src/");
-  _23 = String_new("failed to run C preprocessor");
-  _24 = String_new("/");
+  _12 = String_new("/lib/x2c.x");
+  _13 = String_new("stage: preprocess");
+  _14 = String_var(_13);
+  _15 = String_new("status: ");
+  _16 = String_new("cannot read input file");
+  _17 = String_new("cannot open");
+  _18 = String_new("not a regular file");
+  _19 = String_new("read failed");
+  _20 = String_new("/");
+  _21 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -200,7 +197,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason){
   List notes = cons(_7, cons(String_var(String_join(NULL, cons(String_var(_8), cons(String_var(filename), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_9), cons(String_var(reason), NULL)))), NULL)));
-  Compiler_report_error(compiler, 306819428, _18, NULL, notes);
+  Compiler_report_error(compiler, 306819428, _16, NULL, notes);
 }
 
 int Compiler_read_source(Compiler, String, volatile String *);
@@ -216,7 +213,7 @@ String File_string_close(File);
 static String _read_input_text(Compiler compiler, String filename){
   if(compiler -> sources){
     String volatile text;
-    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _19);
+    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _17);
     return text;
   }
   File volatile file = NULL;
@@ -234,7 +231,7 @@ static String _read_input_text(Compiler compiler, String filename){
         x2c_error_catch_detach(_x2c_error_handler_1);
         x2c_exception_mark_handled(&_x2c_exception_frame_1);
         if (_x2c_catch_selected_1 == 0) {{
-          String _x2c_return_value_0 = _unreadable_input(compiler, filename, _19);
+          String _x2c_return_value_0 = _unreadable_input(compiler, filename, _17);
           {
   int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
@@ -250,7 +247,7 @@ static String _read_input_text(Compiler compiler, String filename){
 
       }
       else {{
-        String _x2c_return_value_1 = _unreadable_input(compiler, filename, _19);
+        String _x2c_return_value_1 = _unreadable_input(compiler, filename, _17);
         {
   int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
@@ -289,7 +286,7 @@ _x2c_error_handler_1 = NULL;
 struct stat info;
 if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
   File_close(file);
-  return _unreadable_input(compiler, filename, _20);
+  return _unreadable_input(compiler, filename, _18);
 }
 String volatile text = NULL;
 {
@@ -304,7 +301,7 @@ String volatile text = NULL;
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
        {{
-        String _x2c_return_value_2 = _unreadable_input(compiler, filename, _21);
+        String _x2c_return_value_2 = _unreadable_input(compiler, filename, _19);
         {
   int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
@@ -373,13 +370,13 @@ int Iter_try_next(Iter, Var *);
 
 String Var_string(Var);
 
-int String_startswith(String, String);
+String x2c_package_directory(String, String);
 
-int String_find(String, String);
+int String_rfind(String, String);
 
 int String_is_identifier(String);
 
-int String_equal(String, String);
+int x2c_package_source(String, String);
 
 Var Map_setindex(Map, Var, Var);
 
@@ -404,20 +401,18 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
       directory = Var_string(_x2c_macro_item_0);
       {
         String root;
-        if(compiler -> sources) root = String_join(NULL, cons(String_var(SourceView_path(directory)), cons(String_var(_12), NULL)));
+        if(compiler -> sources) root = SourceView_path(directory);
         else{
           if(! realpath(directory, buffer)) continue;
-          root = String_join(NULL, cons(String_var(String_new(buffer)), cons(String_var(_12), NULL)));
+          root = String_join(NULL, cons(String_var(String_new(buffer)), NULL));
         }
-        if(! String_startswith(source, root)) continue;
-        String rest = String_getslice(source, String_len(root), -2147483648, 1);
-        int slash = String_find(rest, _24);
-        if(slash <= 0) continue;
-        String name = String_getslice(rest, -2147483648, slash, 1), tail = String_getslice(rest, slash + 1, -2147483648, 1);
+        String package = x2c_package_directory(root, source);
+        if(! String_truth(package)) continue;
+        String name = String_getslice(package, String_rfind(package, _20) + 1, -2147483648, 1);
         if(! String_is_identifier(name)) continue;
-        if(! String_startswith(tail, _22) && ! String_equal(tail, String_join(NULL, cons(String_var(name), cons(String_var(_13), NULL))))) continue;
+        if(! x2c_package_source(package, source)) continue;
         compiler -> package = name;
-        Map_setindex(compiler -> package_roots, String_var(name), String_var(String_join(NULL, cons(String_var(root), cons(String_var(name), NULL)))));
+        Map_setindex(compiler -> package_roots, String_var(name), String_var(package));
         return;
       }
 
@@ -437,7 +432,7 @@ Map Compiler_collect_symbols(Compiler, Map);
 
 Compiler Compiler_new_shared(Compiler);
 
-int Toolchain_preprocess(Toolchain, const char *, List, const char *, const char *, String *, String *, String *);
+int Toolchain_preprocess(Toolchain, const char *, List, const char *, String *, String *, String *);
 
 String int_str(int);
 
@@ -477,15 +472,14 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_14), NULL))) : NULL, imacros = runtime;
-  String force_include = NULL;
-  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, force_include, & text, & errors, & dependency_text);
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_12), NULL))) : NULL, imacros = runtime;
+  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, & text, & errors, & dependency_text);
   unit -> preprocessor_output = text;
   unit -> preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
-    List notes = cons(_16, cons(String_var(String_join(NULL, cons(String_var(_17), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _23, _first_preprocessor_token(c), notes);
+    List notes = cons(_14, cons(String_var(String_join(NULL, cons(String_var(_15), cons(String_var(int_str(status)), NULL)))), NULL));
+    Compiler_report_error(c, 306819428, _21, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;

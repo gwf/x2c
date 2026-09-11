@@ -23,7 +23,5 @@ int SourceView_exists(SourceView sources, String path);
 
 int SourceView_read(SourceView sources, String path, String volatile * text);
 
-String SourceView_content_hash(SourceView sources, String path);
-
 
 #endif /* __GUARD_0x118AEF35__ */

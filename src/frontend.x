@@ -213,19 +213,18 @@ static void _configure_package(
   }
   foreach (String directory, request.package_dirs) {
     String root;
-    if (compiler.sources) root = %"${SourceView.path(directory)}/";
+    if (compiler.sources) root = SourceView.path(directory);
     else {
       if (!realpath(directory, buffer)) continue;
-      root = %"$buffer/";
+      root = %"$buffer";
     }
-    if (!source.startswith(root)) continue;
-    String rest = source[root.len():], int slash = rest.find("/");
-    if (slash <= 0) continue;
-    String name = rest[:slash], tail = rest[slash + 1:];
+    String package = x2c_package_directory(root, source);
+    if (!package) continue;
+    String name = package[package.rfind("/") + 1:];
     if (!name.is_identifier()) continue;
-    if (!tail.startswith("src/") && tail != %"$name.x") continue;
+    if (!x2c_package_source(package, source)) continue;
     compiler.package = name;
-    compiler.package_roots[name] = %"$root$name";
+    compiler.package_roots[name] = package;
     return;
   }
 }
@@ -261,11 +260,8 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   cppcompiler.filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL, imacros = runtime;
-  String force_include = NULL;
   int status = frontend.toolchain.preprocess(
-    filename, c.include_dirs, imacros, force_include,
-    &text, &errors,
-    &dependency_text);
+    filename, c.include_dirs, imacros, &text, &errors, &dependency_text);
   unit->preprocessor_output = text;
   unit->preprocessor_errors = errors;
   if (errors && frontend.preprocessor_errors)

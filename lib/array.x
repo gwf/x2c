@@ -574,6 +574,17 @@ Self Array.sort_with(Self array, Func compare) {
   return array;
 }
 
+struct ArraySortEntry {
+  Var key, value;
+  size_t index;
+};
+
+static int _sort_key_compare(const void *ap, const void *bp) {
+  const struct ArraySortEntry *a = ap, *b = bp;
+  int order = a.key.compare(b.key);
+  return order ? order : (a.index > b.index) - (a.index < b.index);
+}
+
 /** Stably sorts `array` by keys produced once per value, returning the Array.
     The borrowed callback runs front to back and must not mutate this Array.
     Keys use `Var.compare`; equal keys preserve the original element order.
@@ -584,19 +595,20 @@ Self Array.sort_with(Self array, Func compare) {
 */
 Self Array.sort_by(Self array, Func key) {
   if (!array || !array.length) return array;
-  Array decorated = %[];
-  defer decorated.free();
-  for (int index = 0; index < array.length; index++) {
+  size_t count = array.length;
+  struct ArraySortEntry *entries =
+    Scope.calloc(count, sizeof(struct ArraySortEntry));
+  defer Scope.free(entries);
+  for (size_t index = 0; index < count; index++) {
     Var value = array[index];
     FuncArg arguments[1] = { FuncArg.value(value) };
-    Var order = key.apply(1, arguments);
-    decorated.push(%($order $index $value));
+    entries[index].key = key.apply(1, arguments);
+    entries[index].value = value;
+    entries[index].index = index;
   }
-  decorated.sort();
-  for (int index = 0; index < array.length; index++) {
-    List row = decorated[index];
-    array[index] = row.caddr();
-  }
+  qsort(entries, count, sizeof(struct ArraySortEntry), _sort_key_compare);
+  for (size_t index = 0; index < count; index++)
+    array[index] = entries[index].value;
   return array;
 }
 

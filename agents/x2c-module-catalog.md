@@ -330,7 +330,7 @@ request-owned source overlays.
 Public functions:
 
 `SourceView.new`, `SourceView.path`, `SourceView.set`, `SourceView.is_changed`,
-`SourceView.exists`, `SourceView.read`, `SourceView.content_hash`
+`SourceView.exists`, `SourceView.read`
 
 ### [src/statements.x](../src/statements.x)
 
@@ -393,10 +393,10 @@ System utilities for environment discovery and child processes.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
-`x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`,
-`x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_driver_error`,
-`process_start`, `ChildProcess.ready`, `ChildProcess.wait`, `process_run`,
-`worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
+`x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`, `x2c_package_directory`,
+`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
+`x2c_driver_error`, `process_start`, `ChildProcess.ready`, `ChildProcess.wait`,
+`process_run`, `worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 

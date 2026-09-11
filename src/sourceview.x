@@ -102,10 +102,3 @@ int SourceView.read(
   catch %(io-fail *): return 0;
   return 1;
 }
-
-/** Uses the same source bytes as parsing for artifact validation. */
-String SourceView.content_hash(SourceView sources, String path) {
-  String text;
-  if (!sources.read(path, &text)) return NULL;
-  return %"%08x".printf(String.hash(text));
-}

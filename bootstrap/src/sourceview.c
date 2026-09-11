@@ -2,7 +2,7 @@
 
 #include "sourceview.h"
 
-static String _4, _3, _2, _1, _0;
+static String _3, _2, _1, _0;
 
 #include <limits.h>
 #include <stdio.h>
@@ -22,7 +22,6 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new(".");
   _2 = String_new("..");
   _3 = String_new("/");
-  _4 = String_new("%08x");
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -187,16 +186,5 @@ _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return 1;
-}
-
-String String_printf(String, ...);
-
-unsigned String_hash(String);
-
-String SourceView_content_hash(SourceView sources, String path){
-  if(! _init_guard_) _file_init_();
-  String text;
-  if(! SourceView_read(sources, path, & text)) return NULL;
-  return String_printf(_4, String_hash(text));
 }
 

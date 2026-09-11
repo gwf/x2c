@@ -66,6 +66,14 @@ static int _sort_compare(const void * ap, const void * bp);
 
 static int _sort_order(Func compare, Var left, Var right);
 
+struct ArraySortEntry{
+  Var key, value;
+  size_t index;
+}
+;
+
+static int _sort_key_compare(const void * ap, const void * bp);
+
 static void _heap_shift_up(Array heap, int i);
 
 static void _heap_shift_down(Array heap, int i);
@@ -835,17 +843,20 @@ Array Array_sort_with(Array array, Func compare){
 }
 }
 
-Var List_var(List);
+static int _sort_key_compare(const void * ap, const void * bp){
+  const struct ArraySortEntry * a = ap, * b = bp;
+  int order = Var_compare(a -> key, b -> key);
+  return order ? order :(a -> index > b -> index) -(a -> index < b -> index);
+}
 
-List Var_list(Var);
-
-Var List_caddr(List);
+void * Scope_calloc(size_t, size_t);
 
 Array Array_sort_by(Array array, Func key){
   if(! Array_truth(array) || ! array -> length) return array;
-  Array decorated = Array_new();
+  size_t count = array -> length;
+  struct ArraySortEntry * entries = Scope_calloc(count, sizeof(struct ArraySortEntry));
   {
-  _x2c_defer_env_5 _x2c_defer_env_12 = {._x2c_defer_capture_8 =(const void *) & decorated};
+  _x2c_defer_env_5 _x2c_defer_env_12 = {._x2c_defer_capture_8 =(const void *) & entries};
 
   X2CCleanup _x2c_defer_record_5 = {
     .fn = _x2c_defer_cleanup_5,
@@ -853,20 +864,18 @@ Array Array_sort_by(Array array, Func key){
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
-    for(int index = 0;  index < array -> length;  index ++){
+    for(size_t index = 0;  index < count;  index ++){
       Var value = Array_getindex(array, index);
       FuncArg arguments[1] ={
         FuncArg_value(value)
       }
       ;
-      Var order = Func_apply(key, 1, arguments);
-      Array_push(decorated, List_var(cons(order, cons(int_var(index), cons(value, NULL)))));
+      entries[index].key = Func_apply(key, 1, arguments);
+      entries[index].value = value;
+      entries[index].index = index;
     }
-    Array_sort(decorated);
-    for(int index = 0;  index < array -> length;  index ++){
-      List row = Var_list(Array_getindex(decorated, index));
-      Array_setindex(array, index, List_caddr(row));
-    }
+    qsort(entries, count, sizeof(struct ArraySortEntry), _sort_key_compare);
+    for(size_t index = 0;  index < count;  index ++) Array_setindex(array, index, entries[index].value);
     {
       Array _x2c_return_value_3 = array;
       {
@@ -1121,9 +1130,11 @@ static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   Array_free((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
+void Scope_free(void *);
+
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Array_free((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_8));
+  Scope_free((*(struct ArraySortEntry * *) _x2c_defer_data_5->_x2c_defer_capture_8));
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){

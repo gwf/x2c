@@ -26,6 +26,10 @@ String x2c_path_dir(String path);
 
 String x2c_path_stem(String path);
 
+String x2c_package_directory(String root, String path);
+
+int x2c_package_source(String directory, String path);
+
 List x2c_default_include_dirs(void);
 
 List x2c_cpp_include_dirs(void);

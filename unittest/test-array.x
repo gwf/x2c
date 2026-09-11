@@ -497,6 +497,28 @@ static void array_sort_callbacks_keep_ties_and_identity(void) {
   EXPECT_TRUE(single.sort_with(NULL) == single);
 }
 
+static void array_sort_by_releases_scratch(void) {
+  $test.scoped();
+  Pool pool = List.pool_retain();
+  defer List.pool_release();
+  Array values = %[3, 2, 1];
+  Func key = %!(int value) => value;
+  FuncArg arguments[1] = { FuncArg.value(42) };
+  key.apply(1, arguments);
+  size_t interned = pool.stats().interned;
+  Scope active = *Scope.top();
+  int allocations = _array_scope_allocation_count(active);
+  for (int batch = 0; batch < 3; batch++) {
+    for (int index = 0; index < 3; index++)
+      values[index] = batch * 10 + 3 - index;
+    values.sort_by(key);
+    EXPECT_INT_EQ(pool.stats().interned, interned);
+    EXPECT_INT_EQ(_array_scope_allocation_count(active), allocations);
+    for (int index = 0; index < 3; index++)
+      EXPECT_INT_EQ(values[index].integer(), batch * 10 + index + 1);
+  }
+}
+
 static void array_sort_callbacks_cover_merge_tails(void) {
   $test.scoped();
   Array values = %[];
@@ -575,6 +597,7 @@ void array_suite(void) {
   $test.run(array_sort_reverse_join);
   $test.run(array_sort_callbacks_keep_ties_and_identity);
   $test.run(array_sort_callback_errors_preserve_elements);
+  $test.run(array_sort_by_releases_scratch);
   $test.run(array_sort_callbacks_cover_merge_tails);
   $test.run(array_heap_push_pop_min_basic);
   $test.run(array_heapify_basic);

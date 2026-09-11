@@ -12,7 +12,6 @@ Request-owned source overlays.
 
 | Function | Summary |
 | --- | --- |
-| [`SourceView.content_hash`](#SourceView.content_hash) | Uses the same source bytes as parsing for artifact validation. |
 | [`SourceView.exists`](#SourceView.exists) | Returns readable-file presence, including unsaved new files. |
 | [`SourceView.is_changed`](#SourceView.is_changed) | Returns whether this logical file has an unsaved overlay. |
 | [`SourceView.new`](#SourceView.new) | Creates a source view in the current request lifetime. |
@@ -21,15 +20,6 @@ Request-owned source overlays.
 | [`SourceView.set`](#SourceView.set) | Stores an immutable snapshot under its logical source path. |
 
 ### `SourceView`
-
-<a id="SourceView.content_hash"></a>
-#### SourceView.content_hash
-
-`String SourceView.content_hash(SourceView sources, String path)`
-
-Uses the same source bytes as parsing for artifact validation.
-
-Source: `src/sourceview.x:107`
 
 <a id="SourceView.exists"></a>
 #### SourceView.exists

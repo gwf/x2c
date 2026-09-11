@@ -380,8 +380,7 @@ static void _append_includes(Array arguments, List dirs) {
 */
 int Toolchain.preprocess(
   Toolchain toolchain, const char *fname, List include_dirs,
-  const char *imacros, const char *force_include, String *output,
-  String *errors, String *dependencies) {
+  const char *imacros, String *output, String *errors, String *dependencies) {
   if (output) *output = NULL;
   if (errors) *errors = NULL;
   if (dependencies) *dependencies = NULL;
@@ -426,10 +425,6 @@ int Toolchain.preprocess(
   if (imacros) {
     arguments.push("-imacros");
     arguments.push(imacros);
-  }
-  if (force_include) {
-    arguments.push("-include");
-    arguments.push(force_include);
   }
   if (dependencies) {
     arguments.push("-MMD");

@@ -2,7 +2,7 @@
 
 #include "toolchain.h"
 
-static String _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <ctype.h>
 #include <errno.h>
@@ -64,8 +64,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _20 = String_new("-I");
   _21 = String_new("-fkeep-system-includes");
   _22 = String_new("-imacros");
-  _23 = String_new("-include");
-  _24 = String_new("x2c-dependencies");
+  _23 = String_new("x2c-dependencies");
 }
 
 int String_truth(String);
@@ -444,7 +443,7 @@ String File_string_close(File);
 
 Var Symbol_var(Symbol);
 
-int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_dirs, const char * imacros, const char * force_include, String * output, String * errors, String * dependencies){
+int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies){
   if(! _init_guard_) _file_init_();
   if(output) * output = NULL;
   if(errors) * errors = NULL;
@@ -497,16 +496,12 @@ int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_d
     Array_push(arguments, String_var(_22));
     Array_push(arguments, String_var(String_new(imacros)));
   }
-  if(force_include){
-    Array_push(arguments, String_var(_23));
-    Array_push(arguments, String_var(String_new(force_include)));
-  }
   if(dependencies){
     Array_push(arguments, String_var(_11));
     Array_push(arguments, String_var(_13));
     Array_push(arguments, String_var(String_new(dependency_path)));
     Array_push(arguments, String_var(_14));
-    Array_push(arguments, String_var(_24));
+    Array_push(arguments, String_var(_23));
   }
   Array_push(arguments, String_var(String_new(fname)));
   List argument_list = Array_list_free(arguments);
