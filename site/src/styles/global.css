@@ -1204,6 +1204,19 @@ a.docs-card:hover {
   gap: clamp(32px, 5vw, 72px);
 }
 
+.install-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.install-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .deal-copy>.section-heading {
   margin-bottom: clamp(24px, 2.5vw, 32px);
 }
