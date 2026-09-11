@@ -22,6 +22,7 @@ whole program to a new object model.
 | cleanup on every exit path | `defer` |
 | structured failure across frames | `raise` / `try` / filtered `catch` |
 | an interface shared by concrete types | `protocol` and adoption |
+| a named type with default construction, Var conversion, comparison, and output | `class` with representation-dependent defaults ([methods](system-macros.md#which-methods-does-a-class-supply)) |
 | methods forwarded to a contained value | a `delegate` field |
 | repeated declarations or expressions | a compile-time `macro` or `Decorator` |
 
