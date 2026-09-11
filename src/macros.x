@@ -48,7 +48,12 @@ static void _install_source(
   Compiler compiler, String text, String filename, String marker,
   int builtin) {
   (void) marker.try_own();
-  if (compiler.macros.contains(marker)) return;
+  Var installed;
+  if (compiler.macros.try_get(marker, &installed)) {
+    Map.merge(compiler.kw_aliases, installed);
+    return;
+  }
+  Map aliases = %{};
   Compiler definitions = Compiler.new_shared(compiler);
   defer compiler.close_child(definitions);
   definitions.filename = filename;
@@ -59,8 +64,12 @@ static void _install_source(
   definitions.builtin_defs = builtin;
   definitions.tokenize(text);
   while (definitions.peek(0) != <eof>) {
-    if (definitions.keyword_form_is_definition())
+    if (definitions.keyword_form_is_definition()) {
+      Token token = definitions.skip_trivia_from(definitions.token + 1);
+      Atom alias = Atom.intern(token.text);
       definitions.parse_keyword_definition();
+      aliases[alias] = definitions.kw_aliases[alias];
+    }
     else if (definitions.macro_form_is_definition())
       definitions.parse_macro_definition();
     else
@@ -68,7 +77,7 @@ static void _install_source(
         <macro>, "unexpected form in built-in macro source",
         definitions.token, NULL);
   }
-  compiler.macros[marker] = 1;
+  compiler.macros[marker] = aliases;
 }
 
 static void _install_lisp_bindings(Compiler compiler) {
@@ -228,6 +237,52 @@ static Var _sdk_type_return(List value) =>
 static Var _sdk_complete_iter_chain(List expression) {
   $_sdk_guard("private foreach iterator completion");
   return macro_sdk_compiler.complete_iter_chain(expression);
+}
+
+static Var _sdk_type_parts(List value) => value.type().declaration_parts();
+
+static Var _sdk_type_reverse_name(String base, String participant) {
+  $_sdk_guard("x2c.type.reverse-name");
+  return macro_sdk_compiler.reverse_converter_spelling(
+    base, %"", participant);
+}
+
+static Var _sdk_type_resolve(List value) {
+  $_sdk_guard("x2c.type.resolve");
+  return macro_sdk_compiler.sym.resolve_key(value.type())
+    .type_from_ast().var();
+}
+
+static Var _sdk_type_layout(List value) {
+  $_sdk_guard("x2c.type.layout");
+  Type type = macro_sdk_compiler.sym.resolve_key(value.type()).type_from_ast();
+  return macro_sdk_compiler.sym.field_order(type).cdr().var();
+}
+
+static Var _sdk_type_value(List value) {
+  $_sdk_guard("x2c.type.value?");
+  Type type = value.type().canonicalize();
+  match (type) case %((bitfield ?) *rest): type = rest;
+  foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
+    if (macro_sdk_compiler.sym.is_named_value_type(type, name)) return <true>;
+  type = macro_sdk_compiler.sym.resolve_key(type);
+  if (type.is_number()) return <true>;
+  return %();
+}
+
+static Var _sdk_type_tag_name(String name) {
+  $_sdk_guard("x2c.type.tag-name");
+  String file = _source_file(macro_sdk_compiler, macro_sdk_compiler.filename);
+  file = macro_sdk_compiler.display_path(file);
+  String identity = %"$file:$name";
+  unsigned hash = identity.hash();
+  const char *alphabet = "abcdefghijklmnopqrstuvwxyz*+?!-";
+  char encoded[9] = { 'c' };
+  for (int i = 1; i < 8; i++) {
+    encoded[i] = alphabet[hash % 31];
+    hash /= 31;
+  }
+  return Symbol.new(encoded);
 }
 
 static Var _sdk_type_fields(List value) {
@@ -469,25 +524,6 @@ static Var _eval_string(
   return result;
 }
 
-static Var _eval_file(Compiler compiler, File source, Token invocation) {
-  Var result = void;
-  Compiler previous = macro_import_compiler;
-  Token old_invocation = macro_import_invocation;
-  macro_import_compiler = compiler;
-  macro_import_invocation = invocation;
-  {
-    defer {
-      macro_import_compiler = previous;
-      macro_import_invocation = old_invocation;
-    }
-    try result = compiler.macro_lisp.eval_file(source);
-    catch %(?code *detail):
-      _report_lisp_failure(
-        compiler, invocation, cons(code, detail), "<file>");
-  }
-  return result;
-}
-
 static Var _lisp_import_hook(String path) {
   Compiler compiler = macro_import_compiler;
   if (!compiler) raise %(bad-state (operation "compile-time import"));
@@ -583,7 +619,10 @@ static List _peek_definition(Compiler c) {
 }
 
 static int _definition_needs_shallow_expansion(List definition) {
-  if (!definition || definition.assoc(<kind>) != <unit>) return 0;
+  if (!definition) return 0;
+  if (definition.assoc(<kind>) == <decl-unit> ||
+      definition.assoc(<target>) == <named-type>) return 1;
+  if (definition.assoc(<kind>) != <unit>) return 0;
   if (definition.assoc(<imported>).int()) return 1;
   List template = definition.assoc(<template>), bindings;
   Var matched;
@@ -618,7 +657,8 @@ static const MacroPos *_position(AstPos position) =>
   &macro_position_info[position];
 
 static Symbol _decorator_result_kind(Symbol target_kind) {
-  if (target_kind == <function> || target_kind == <unit>) return <unit>;
+  if (target_kind == <function> || target_kind == <unit> ||
+      target_kind == <named-type>) return <unit>;
   if (target_kind == <block>) return <block-item>;
   if (target_kind == <expr>) return <expression>;
   return target_kind;
@@ -805,30 +845,23 @@ static File _open(
 
 static String _read_source(
   Compiler compiler, String path, String message, Token token, List notes) {
+  String text;
   if (compiler.sources) {
-    String text;
     if (!compiler.read_source(path, &text))
       compiler.report_error(<macro>, message, token, notes);
-    return text;
   }
-  return _open(compiler, path, message, token, notes).string_close();
+  else text = _open(compiler, path, message, token, notes).string_close();
+  compiler.deps.merge_translation_dependency(
+    path, %"%08x".printf(String.hash(text)));
+  return text;
 }
 
 static void _eval_library(
   Compiler compiler, String relative, String message) {
   String path = %"${compiler.root_dir}/$relative";
-  if (compiler.sources) {
-    String text = _read_source(
-      compiler, path, message, compiler.token, %("path:" $path));
-    compiler.add_translation_dependency(path);
-    _eval_string(compiler, text, compiler.token);
-    return;
-  }
-  File source = _open(
+  String text = _read_source(
     compiler, path, message, compiler.token, %("path:" $path));
-  compiler.add_translation_dependency(path);
-  defer source.close();
-  _eval_file(compiler, source, compiler.token);
+  _eval_string(compiler, text, compiler.token);
 }
 
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
@@ -917,6 +950,19 @@ static void _ensure_lisp(Compiler compiler) {
             %((func (("List"))) "Var"));
     install("x2c.type.fields",
             _sdk_type_fields, %((func (("List"))) "Var"));
+    install("x2c.type.parts",
+            _sdk_type_parts, %((func (("List"))) "Var"));
+    install("x2c.type.reverse-name",
+            _sdk_type_reverse_name,
+            %((func (("String") ("String"))) "Var"));
+    install("x2c.type.resolve",
+            _sdk_type_resolve, %((func (("List"))) "Var"));
+    install("x2c.type.layout",
+            _sdk_type_layout, %((func (("List"))) "Var"));
+    install("x2c.type.value?",
+            _sdk_type_value, %((func (("List"))) "Var"));
+    install("x2c.type.tag-name",
+            _sdk_type_tag_name, %((func (("String"))) "Var"));
   }
 }
 
@@ -962,9 +1008,35 @@ static int _import_path(Compiler compiler, String *path) {
   return token.type == <)>;
 }
 
+static void _import_reference_bindings(
+  Compiler compiler, List syntax, Map replacements) {
+  match (syntax)
+    case %(expr ? (ident ?binding)): {
+      String spelling = NULL;
+      if (binding_identity_try_parts(binding, NULL, &spelling))
+        replacements[binding] = compiler.sym.reference_global(%($spelling));
+      return;
+    }
+  foreach (Var child, syntax)
+    if (child is <list>)
+      _import_reference_bindings(compiler, child, replacements);
+}
+
+/* Cached templates retain global references across symbol-table resets.
+   Bind those names in the current global scope without replaying imports. */
+static Var _rebind_import_definition(Compiler compiler, Var stored) {
+  if (stored is not <list>) return stored;
+  List definition = stored;
+  if (definition.car() != <macrodef>) return definition;
+  Map replacements = %{};
+  _import_reference_bindings(compiler, definition, replacements);
+  return _replace_definition_bindings(definition, replacements);
+}
+
 /* An import is cached only after it completes. Cached `.xmacro` aliases are
    replayed once per source alias map, while definitions and the Lisp session
-   remain shared by the translation unit. */
+   remain shared by the translation unit. CPP reads definitions and aliases;
+   imported Lisp stays pending until a declaration needs its evaluation. */
 static void _import(
   Compiler c, String requested, Token invocation) {
   _ensure_lisp(c);
@@ -972,10 +1044,16 @@ static void _import(
   c.add_translation_dependency(path);
   Var cached;
   if (c.imports.try_get(path, &cached)) {
-    if (!c.kw_seen.contains(path) && cached is <map>) {
-      Map.merge(c.kw_aliases, cached);
-      c.kw_seen[path] = 1;
-    }
+    match (cached)
+      case %(imported ?aliases ?definitions ?dependencies): {
+        c.merge_translation_dependencies(dependencies);
+        if (!c.kw_seen.contains(path)) {
+          foreach (Var (name, definition), definitions.map())
+            c.macros[name] = _rebind_import_definition(c, definition);
+          if (aliases is <map>) Map.merge(c.kw_aliases, aliases);
+          c.kw_seen[path] = 1;
+        }
+      }
     return;
   }
   if (c.import_stack.contains(path)) {
@@ -987,24 +1065,18 @@ static void _import(
       <macro>, "compile-time import cycle",
       invocation, notes.list_free());
   }
+  Map previous_definitions = c.macros.copy();
+  Map previous_dependencies = c.deps.copy();
   c.import_stack.push(path);
   Map imported_aliases = NULL;
   {
     defer c.import_stack.take_last();
     if (path.endswith(".xlisp")) {
-      if (c.sources) {
-        String text = _read_source(
-          c, path, "cannot open compile-time Lisp import", invocation,
-          %( "path: ${c.display_path(path)}" ));
-        _eval_string(c, text, invocation);
-      }
-      else {
-        File source = _open(
-          c, path, "cannot open compile-time Lisp import", invocation,
-          %( "path: ${c.display_path(path)}" ));
-        defer source.close();
-        _eval_file(c, source, invocation);
-      }
+      String text = _read_source(
+        c, path, "cannot open compile-time Lisp import", invocation,
+        %( "path: ${c.display_path(path)}" ));
+      if (c.collect_protocols) _eval_string(c, text, invocation);
+      else c.queue_declaration_effect(text, invocation, invocation);
     }
     else if (path.endswith(".xmacro")) {
       imported_aliases = %{};
@@ -1018,6 +1090,7 @@ static void _import(
       Compiler imported = Compiler.new_shared(c);
       defer c.close_child(imported);
       imported.filename = path;
+      imported.collect_protocols = c.collect_protocols;
       DiagnosticEmitter emitter = c.diagnostics.emit;
       void *diagnostic_owner = c.diagnostics.owner;
       imported.borrow_diagnostics(c);
@@ -1032,6 +1105,7 @@ static void _import(
       imported.import_src = path;
       imported.imports = c.imports;
       imported.import_stack = c.import_stack;
+      imported.declaration_effects = c.declaration_effects;
       imported.tokenize(text);
       while (imported.peek(0) != <eof>) {
         if (imported.keyword_form_is_definition()) {
@@ -1042,14 +1116,18 @@ static void _import(
         }
         else if (imported.macro_form_is_definition())
           imported.parse_macro_definition();
-        else if (imported.peek(0) == <"$(">)
-          imported.parse_macro_lisp_top_level();
+        else if (imported.peek(0) == <"$(">) {
+          if (c.collect_protocols || _import_path(imported, NULL))
+            imported.parse_macro_lisp_top_level();
+          else imported.parse_macro_lisp_shallow();
+        }
         else
           imported.report_error(
             <macro>, "unexpected form in macro import",
             imported.token, NULL);
       }
       c.merge_translation_dependencies(imported.deps);
+      c.declaration_effects = imported.declaration_effects;
     }
     else
       c.report_error(
@@ -1057,11 +1135,16 @@ static void _import(
         invocation,
         %( "path: ${c.display_path(path)}" ));
   }
-  if (imported_aliases) {
-    c.imports[path] = imported_aliases;
-    c.kw_seen[path] = 1;
-  }
-  else c.imports[path] = 1;
+  Map definitions = %{}, dependencies = %{};
+  foreach (Var (name, definition), c.macros)
+    if (previous_definitions[name] != definition)
+      definitions[name] = definition;
+  foreach (Var (dependency, hash), c.deps)
+    if (previous_dependencies[dependency] != hash)
+      dependencies[dependency] = hash;
+  Var aliases = imported_aliases ? imported_aliases.var() : %().var();
+  c.imports[path] = %(imported $aliases $definitions $dependencies);
+  c.kw_seen[path] = 1;
 }
 
 /** Consumes and evaluates one top-level compile-time Lisp form.
@@ -1081,14 +1164,27 @@ void Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   _eval_string(compiler, form, invocation);
 }
 
-/** Processes a top-level Lisp form during shallow collection.
-    Imports run so their definitions and Lisp effects are available; every
-    other form is only consumed.
-*/
+/** Evaluates a queued source Lisp form with its original diagnostic site. */
+void Compiler.evaluate_declaration_effect(
+  Compiler compiler, String form, Token invocation) {
+  int collection = compiler.collect_protocols;
+  compiler.collect_protocols = 1;
+  defer compiler.collect_protocols = collection;
+  _ensure_lisp(compiler);
+  _eval_string(compiler, form, invocation);
+}
+
+/** Imports immediate dependencies and queues other source Lisp effects.
+    Declaration projection forces preceding effects exactly once; otherwise
+    full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler compiler) {
-  if (_import_path(compiler, NULL))
+  if (_import_path(compiler, NULL)) {
     compiler.parse_macro_lisp_top_level();
-  else compiler.skip_macro_lisp();
+    return;
+  }
+  Token first = compiler.token;
+  String form = _lisp_form(compiler);
+  compiler.queue_declaration_effect(form, first, compiler.token);
 }
 
 static Var _sdk_identifier_result(Var value) {
@@ -1144,6 +1240,7 @@ List Compiler.parse_macro_lisp_expression(Compiler compiler) {
   Token invocation = compiler.token;
   String form = _lisp_form(compiler);
   if (compiler.macro_holes) return %(expr (<macro-expr>) (macro-slot 0 $form));
+  if (!compiler.collect_protocols) compiler.run_declaration_effects();
   _ensure_lisp(compiler);
   Var value = _eval_string(compiler, form, invocation);
   return compiler.lift_macro_lisp_expression(value, invocation);
@@ -1206,6 +1303,7 @@ static List _parse_lisp_slot(
 static Var _eval_template_form(
   Compiler compiler, String form, List bindings, Token invocation,
   String source_file, Var construction) {
+  if (!compiler.collect_protocols) compiler.run_declaration_effects();
   _ensure_lisp(compiler);
   /* Provenance lookup uses captured Var identity. Structural equality must
      not let constructed or selected syntax acquire a caller's source text. */
@@ -1297,6 +1395,20 @@ static Var _eval_template_form(
     }
   }
   return result;
+}
+
+/** Evaluates a declaration recipe after its owning source is collected.
+    The callback is a Lisp name and arguments are retained canonical values.
+*/
+Var Compiler.evaluate_declaration_recipe(
+  Compiler compiler, Atom callback, List arguments) {
+  Token invocation = compiler.token;
+  match (compiler.macro_stack)
+    case %((? ? ? ?token) *): invocation = token;
+  return _eval_template_form(
+    compiler, "(apply (eval $callback) $arguments)",
+    %((?callback $callback) (?arguments $arguments)),
+    invocation, compiler.filename, void);
 }
 
 /** Evaluates an active template's `(macro-slot ...)` value.
@@ -1619,6 +1731,8 @@ static List _lisp_bindings(List bindings) {
 static String _kind_spelling(Symbol kind) {
   if (kind == <block-item>) return "Statement";
   if (kind == <map-entry>) return "Entry";
+  if (kind == <named-type>) return "NamedType";
+  if (kind == <decl-unit>) return "Declaration";
   return kind.str().capitalize();
 }
 
@@ -1626,9 +1740,10 @@ static Symbol _author_kind(String spelling) {
   Symbol kind = Symbol.new(spelling);
   if (kind == <statement>) return <block>;
   if (kind == <entry>) return <map-entry>;
+  if (kind == <namedtype>) return <named-type>;
   return %(expr type decl function name
            literal param block field enumerator
-           map-entry unit).contains(kind)
+           map-entry unit named-type).contains(kind)
        ? kind : 0;
 }
 
@@ -1640,7 +1755,7 @@ static int _kind_accepts_role(Symbol kind, Symbol role) {
     (expected == <field> && kind == <decl>) ||
     (expected == <block> && kind == <decl>) ||
     (expected == <unit> &&
-     (kind == <decl> || kind == <function>));
+     (kind == <decl> || kind == <function> || kind == <named-type>));
 }
 
 static List _hole_record(Compiler compiler, Atom name) {
@@ -1847,6 +1962,7 @@ static List _parse_body(Compiler c, Symbol result_kind) {
 
 static Symbol _result_kind_token(Compiler compiler, Token token) {
   String spelling = token.text, Symbol kind = Symbol.new(spelling);
+  if (spelling.lower() == "declaration") return <decl-unit>;
   if (kind == <statement> || kind == <block>) return <block-item>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <decorator>) return kind;
@@ -1949,14 +2065,15 @@ List Compiler.parse_macro_definition(Compiler c) {
     loop {
       List hole = _parse_signature_hole(c, 0);
       if (result_kind == <decorator> && first) {
-        if (!%(expr function block field unit)
+        if (!%(expr function block field unit named-type)
                .contains(hole.assoc(<kind>)))
           c.report_error(
             <parse>,
             "decorator first parameter has invalid target kind",
             start,
             %(
-              "expected Expression, Function, Statement, Block, Field, or Unit"
+              "expected Expression, Function, Statement, Block, Field,"
+              "Unit, or NamedType"
             )
           );
         if (hole.assoc(<sequence>).int())
@@ -1984,12 +2101,14 @@ List Compiler.parse_macro_definition(Compiler c) {
       <parse>,
       "decorator requires a first target parameter",
       start, NULL);
-  if (local && result_kind == <unit>)
+  if (local && (result_kind == <unit> || result_kind == <decl-unit>))
     c.report_error(
-      <macro>, "local macros cannot have Unit results", start, NULL);
+      <macro>, %"local macros cannot have ${_kind_spelling(result_kind)} results",
+      start, NULL);
   if (local && result_kind == <decorator> &&
       (target_hole.assoc(<kind>) == <function> ||
-       target_hole.assoc(<kind>) == <unit>)) {
+       target_hole.assoc(<kind>) == <unit> ||
+       target_hole.assoc(<kind>) == <named-type>)) {
     String target = _kind_spelling(target_hole.assoc(<kind>));
     c.report_error(
       <macro>, %"local decorators cannot target $target syntax",
@@ -2298,6 +2417,21 @@ void Compiler.skip_keyword_alias(Compiler compiler) {
     _skip_balanced_tokens(compiler, <(>, <)>);
 }
 
+/** Consumes a NamedType target already projected by owning-source collection.
+    CPP scanning does not produce the declaration or parse its fields again.
+*/
+int Compiler.skip_named_type_declaration(Compiler compiler) {
+  List definition = compiler.peek(0) == <$>
+                  ? _peek_definition(compiler)
+                  : _keyword_alias_lookup(compiler);
+  if (!definition || definition.assoc(<target>) != <named-type>) return 0;
+  if (compiler.peek(0) == <$>) compiler.skip_macro_invocation();
+  else compiler.skip_keyword_alias();
+  compiler._skip_shallow_expression(0);
+  compiler.expect(<;>);
+  return 1;
+}
+
 /* `(src (source FILE BEGIN END) SYNTAX)` records one complete caller argument
    or decorator target. Constructed syntax can reproduce that List shape, so
    source access trusts only captured syntax identities registered for the
@@ -2346,6 +2480,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
   switch (kind) {
     case <expr>: return c.parse_assignment();
     case <type>: return c.parse_type_name();
+    case <named-type>: return c.parse_named_type();
     case <decl>: return c.parse_declaration_argument();
     case <function>: return c.parse_function_definition();
     case <param>: return c.parse_parameter();
@@ -2565,6 +2700,13 @@ List Compiler.expand_macro_invocation_node(
       int expansion_origin = _.record_origin(invocation);
       Ast constructed = matched
                       ? template.replace(replacement_bindings) : NULL;
+      if (constructed &&
+          (definition.assoc(<kind>) == <decl-unit> ||
+           definition.assoc(<target>) == <named-type>)) {
+        List rows = constructed.car() == <seq>
+                  ? constructed.cdr() : %($constructed);
+        constructed = %(declaration-bundle (rows @rows));
+      }
       int old_origin = _.origin;
       _.origin = expansion_origin;
       {
@@ -2688,7 +2830,8 @@ static List _parse_target_definition(
   Symbol target_kind = definition.assoc(<target>);
   const MacroPos *place = _position(position);
   if (kind != <decorator>) {
-    if (kind != place.kind) {
+    if (kind != place.kind &&
+        !(kind == <decl-unit> && position == AST_UNIT)) {
       String spelling = name.str();
       String result_kind = _kind_spelling(kind);
       String message =
@@ -2737,6 +2880,7 @@ static List _parse_target_definition(
     }
     target_start = c.token;
     if (target_kind == <function>) target = c.parse_function_target();
+    else if (target_kind == <named-type>) target = c.parse_named_type();
     else switch (position) {
       case AST_UNIT:       target = c.parse_top_level(); break;
       case AST_BLOCK:      target = c.parse_block_item(); break;

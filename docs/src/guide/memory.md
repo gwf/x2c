@@ -1,5 +1,9 @@
 # Scopes and Lifetime
 
+The [system macros](system-macros.md) provide `$scope()` for a retained
+region, `$scope(pointer)` for a temporary destination, and `$auto` for an
+explicitly owned local. Classes can also supply early `free` operations.
+
 C makes you answer one question about every allocation: who frees this?
 x2c does not take that question away. There is no garbage collector and no
 reference counting. x2c gives you a place to put the answer. A *scope* holds

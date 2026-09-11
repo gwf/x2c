@@ -36,7 +36,7 @@ $array.typed.observe(
   _new_buffer, _finish_buffer);
 $array.typed.update.integer(ProbeArrayInt, int, uint);
 $array.typed.publish(
-  ProbeArrayInt, int, probearrayint, <p48>, _prepare_probe_export);
+  ProbeArrayInt, int, probearrayint, <prbarr>, _prepare_probe_export);
 
 int main(void) {
   ProbeArrayInt values = ProbeArrayInt.new();

@@ -293,6 +293,43 @@ class HeaderSymbols:
         self._cache[path] = table
         return table
 
+    def declaration_functions(self, path: str) -> tuple[str, ...]:
+        """Selected callable recipes retained by declaration projection.
+
+        Follow only declaration ownership rows. Function bodies and captured
+        macro environments are unrelated syntax, even if they contain a
+        matching-looking List.
+        """
+        names: list[str] = []
+
+        def visit(node):
+            if not isinstance(node, list) or not node:
+                return
+            if node[0] == "declaration-source":
+                visit(node[2])
+            elif node[0] == "declaration-origin":
+                visit(node[2])
+            elif node[0] in ("declaration-bundle", "rows", "seq"):
+                for child in node[1:]:
+                    visit(child)
+            elif node[0] == "declaration-function":
+                declaration = node[1]
+                binding = declaration[2][1][1]
+                if isinstance(binding, list) and binding[0] == "binding":
+                    names.append(str(binding[2]))
+                elif isinstance(binding, list) and len(binding) == 1:
+                    names.append(str(binding[0]))
+
+        for part in self._entries[path][3]:
+            if not isinstance(part, list):
+                continue
+            for row in part:
+                if isinstance(row, list) and len(row) == 2:
+                    key, value = row
+                    if isinstance(key, list) and key and key[0] == "source-node":
+                        visit(value)
+        return tuple(dict.fromkeys(names))
+
     def functions(self, path: str) -> dict[str, FuncType]:
         """Only the func-typed rows, rendered for comparison."""
         out: dict[str, FuncType] = {}
@@ -315,6 +352,49 @@ class HeaderSymbols:
             tail = value[1:] if len(value) > 2 else value[1]
             out[name] = FuncType(render_abstract(tail), tuple(rendered))
         return out
+
+
+def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
+                             include_static: bool = False, root=ROOT):
+    """Join authored documentation to compiler-selected declaration output."""
+    from x2c_source import (
+        Definition, definitions_for_path, public_declarations_for_path,
+    )
+
+    authored = list(definitions_for_path(path, include_static))
+    classes = [item for item in public_declarations_for_path(path)
+               if item.kind == "class"]
+    if not classes:
+        return tuple(authored)
+    relative = path.resolve().relative_to(root).as_posix()
+    if relative not in symbols.paths():
+        return tuple(authored)
+    known = {item.name.replace(".", "_") for item in authored}
+    table = symbols.functions(relative)
+    for native in symbols.declaration_functions(relative):
+        if native in known or native not in table:
+            continue
+        owner = next((item for item in sorted(classes,
+                     key=lambda item: -len(item.name))
+                     if native.startswith(item.name + "_")), None)
+        if owner is None:
+            owner = next((item for item in classes
+                          if native == "Var_" + item.name.lower()), None)
+            if owner is None:
+                continue
+            name = "Var." + owner.name.lower()
+        else:
+            name = owner.name + "." + native[len(owner.name) + 1:]
+        entry = table[native]
+        parameters = ", ".join(entry.params) or "void"
+        doc = (f"Provides the class default for `{name}`.\n\n"
+               "See [Classes and system macros]"
+               "(../../guide/system-macros.md) for the default behavior.")
+        authored.append(Definition(name,
+            f"{entry.returns} {name}({parameters})", owner.line, doc))
+        known.add(native)
+    authored.sort(key=lambda item: item.line)
+    return tuple(authored)
 
 
 def load(path: pathlib.Path = ARTIFACT) -> HeaderSymbols:

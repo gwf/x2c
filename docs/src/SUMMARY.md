@@ -17,6 +17,7 @@
 - [Contexts and Threads](guide/contexts-and-threads.md)
 - [Exceptions and Cleanup](guide/exceptions.md)
 - [Protocols](guide/protocols.md)
+- [Classes and System Macros](guide/system-macros.md)
 - [Compile-time Macros](guide/macros.md)
 - [Automatic Differentiation](guide/autodiff.md)
 - [Training and Inference with torch](guide/torch.md)

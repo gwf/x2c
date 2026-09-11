@@ -1,5 +1,9 @@
 # Protocols
 
+[`Cleanup(T)`](system-macros.md#clean-up-an-initialized-local) declares
+`void T.cleanup(T)` for explicitly owned locals. Classes select their defaults
+and participate through the same protocol and method rules.
+
 A protocol declares methods that other concrete types can adopt. Its *base*
 is the type that declares those methods; a *participant* is a type that
 explicitly adopts them. The compiler selects each participant method or

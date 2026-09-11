@@ -76,5 +76,7 @@ String Map_str(Map map);
 
 String Map_repr(Map map);
 
+void Map_cleanup(Map value);
+
 
 #endif /* __GUARD_0x409392BC__ */

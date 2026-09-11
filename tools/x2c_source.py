@@ -24,7 +24,7 @@ NAME_PATTERN = re.compile(
 CONTROLS = {"if", "for", "while", "switch", "catch", "match"}
 NON_FUNCTION_PREFIXES = (
     "static ", "typedef ", "struct ", "union ", "enum ", "protocol ",
-    "macro ", "@",
+    "macro ", "class ", "@",
 )
 DOC_OPEN = "/**"
 EXACT_IDENT = re.compile(
@@ -72,10 +72,10 @@ class FunctionSpan:
 
 @dataclass(frozen=True)
 class Declaration:
-    """One public named typedef found in a source file."""
+    """One public named type found in a source file."""
 
     name: str            # declared typedef name
-    kind: str            # alias, struct, union, enum, or callback
+    kind: str            # alias, struct, union, enum, callback, or class
     signature: str       # whitespace-normalized typedef, without `;`
     line: int            # 1-indexed line of the declaration
     doc: str | None      # normalized doc-comment body, or None
@@ -399,11 +399,11 @@ def _semicolon_statement_spans(masked: str) -> tuple[tuple[int, int], ...]:
     start = 0
     aggregate = False
     for index, char in enumerate(masked):
-        if depth == 0 and parens == 0 and brackets == 0 \
-                and masked.startswith("typedef", index):
+        keyword = next((word for word in ("typedef", "class")
+                        if masked.startswith(word, index)), None)
+        if depth == 0 and parens == 0 and brackets == 0 and keyword:
             before = masked[index - 1] if index else " "
-            after = masked[index + len("typedef"):
-                           index + len("typedef") + 1]
+            after = masked[index + len(keyword):index + len(keyword) + 1]
             if not (before.isalnum() or before == "_") \
                     and not (after.isalnum() or after == "_"):
                 # Semicolon-free expression macros can sit between the
@@ -426,7 +426,7 @@ def _semicolon_statement_spans(masked: str) -> tuple[tuple[int, int], ...]:
             if depth == 0:
                 prefix = masked[start:index].lstrip()
                 aggregate = bool(re.match(
-                    r"typedef\s+(?:struct|union|enum)\b", prefix
+                    r"(?:typedef\s+(?:struct|union|enum)|class)\b", prefix
                 ))
             depth += 1
             continue
@@ -875,6 +875,9 @@ def definitions_for_path(path: pathlib.Path, include_static: bool = False
 
 def _declaration_name(signature: str) -> tuple[str, str] | None:
     """Return one typedef's name and kind from a normalized signature."""
+    named_class = re.match(r"class\s+([A-Za-z_][A-Za-z0-9_]*)\b", signature)
+    if named_class:
+        return named_class.group(1), "class"
     callback = re.search(
         r"\(\s*\*\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)\s*\(",
         signature,
@@ -910,7 +913,7 @@ def public_declarations(text: str) -> tuple[Declaration, ...]:
     found: list[Declaration] = []
     for start, semicolon in _semicolon_statement_spans(masked):
         statement = masked[start:semicolon]
-        typedef = re.search(r"\btypedef\b", statement)
+        typedef = re.search(r"\b(?:typedef|class)\b", statement)
         if not typedef:
             continue
         decl_start = start + typedef.start()
@@ -931,7 +934,21 @@ def public_declarations(text: str) -> tuple[Declaration, ...]:
             line=text.count("\n", 0, decl_start) + 1,
             doc=_doc_before(text, 0, decl_start),
         ))
-    return tuple(found)
+    # A completion supplies the documented representation of a forward name.
+    completed: list[Declaration] = []
+    class_positions: dict[str, int] = {}
+    for declaration in found:
+        if declaration.kind != "class":
+            completed.append(declaration)
+            continue
+        previous = class_positions.get(declaration.name)
+        forward = declaration.signature == f"class {declaration.name}"
+        if previous is None:
+            class_positions[declaration.name] = len(completed)
+            completed.append(declaration)
+        elif not forward:
+            completed[previous] = declaration
+    return tuple(completed)
 
 
 def public_declarations_for_path(

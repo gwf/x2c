@@ -1,5 +1,9 @@
 # Errors and Cleanup
 
+The [system macros](system-macros.md) attach ordinary defer cleanup to
+managed locals and to `$scope`, `$let`, and `$lock` bodies. Their cleanup
+follows the same control-transfer rules described here.
+
 C gives you `return`, `goto`, and `longjmp`. x2c adds structured failure
 recording and non-local transfer through `raise`, `try`, and filtered `catch`.
 `finally` and `defer` run cleanup even when a block exits early.

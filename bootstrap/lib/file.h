@@ -163,5 +163,6 @@ String File_repr(File file);
 String File_str(File file);
 Buffer File_write_repr(File file, Buffer out);
 void File_initialize(void);
+void File_cleanup(File value);
 
 #endif /* __GUARD_0xC65C88F0__ */

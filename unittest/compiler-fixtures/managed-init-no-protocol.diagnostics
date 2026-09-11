@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/managed-init-no-protocol.x:3:40: protocol: managed initializer requires Cleanup participation
+  int main(void) { int value = $auto(1); return value; }
+                                         ^^^^^^
+  note: type: (int)
+

@@ -57,6 +57,12 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned uint;
 typedef unsigned long ulong;
+typedef struct RenderPath{
+  const void * identity;  struct RenderPath * previous;
+}
+RenderPath;
+int RenderPath_enter(RenderPath * path, const void * identity);
+void RenderPath_leave(RenderPath * path);
 typedef String(* VarStrFn)(Var);
 typedef Buffer(* VarWriteFn)(Var, Buffer);
 typedef unsigned(* VarHashFn)(Var);

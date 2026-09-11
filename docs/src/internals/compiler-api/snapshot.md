@@ -23,7 +23,7 @@ Deterministic compiler symbol snapshot I/O.
 `int snapshot_write_var(File output, Var value)`
 
 Writes one value in the snapshot's restricted Lisp grammar.
-`List`s are written recursively. A `Symbol` that requires quoting or an
+`List`s are written recursively. An atom that requires quoting or an
 unsupported value returns zero; otherwise the result is one. A successful
 result establishes representability, not stream health, so the caller must
 inspect `output.error()` separately. The stream remains open.
@@ -47,7 +47,7 @@ path releases both.
 truncated Lisp form, or `<malformed>` for invalid Lisp syntax, an invalid
 snapshot shape, or trailing input.
 
-Source: `src/snapshot.x:119`
+Source: `src/snapshot.x:118`
 
 #### symbol_snapshot_write
 
@@ -59,7 +59,7 @@ Rows are sorted before emission. Function rows whose spelling occurs in
 value or stream error and one on success; failure may leave partial output.
 The input `Map`s are unchanged and the stream remains open.
 
-Source: `src/snapshot.x:72`
+Source: `src/snapshot.x:71`
 
 ## Design notes
 

@@ -162,6 +162,8 @@ int Lisp.precall(void *storage, Var callable, List raw, Var *value) {
   return 1;
 }
 
+protocol Cleanup(Lisp);
+
 #pragma private
 
 static String lisp_standard_source = $lisp._standard.source();
@@ -454,9 +456,7 @@ Lisp Lisp.new_bare(void) {
   Scope session = Scope.new_named("Lisp session"), Lisp result = NULL;
   defer if (!result) Scope.destroy(session);
   Lisp lisp = NULL;
-  { // Limit Scope.pop to allocation before an Error transfer.
-    Scope.push(&session);
-    defer Scope.pop();
+  $scope(&session) {
     lisp = Scope.calloc(1, sizeof(struct Lisp));
   }
   if (!lisp._initialize()) return NULL;
@@ -464,9 +464,7 @@ Lisp Lisp.new_bare(void) {
   memset(&lisp.auto_stats, 0, sizeof(LispAutoStats));
   lisp.auto_machine_stats = NULL;
   lisp.auto_disabled = 0;
-  { // Limit Scope.pop to global setup before an Error transfer.
-    Scope.push(&lisp.scope);
-    defer Scope.pop();
+  $scope(&lisp.scope) {
     lisp.globals = %{};
     lisp.reserved = %{};
     _install_specials(lisp);
@@ -817,8 +815,7 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
 }
 
 static void _eval_args(Lisp lisp, List args, LispEnv *env, List *out) {
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   foreach (Var arg, args) values.push(_eval(lisp, arg, env));
   *out = values;
 }
@@ -1316,8 +1313,7 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv *env) {
   }
   Scope.push(&lisp.scope);
   defer Scope.pop();
-  MachineBuilder b = MachineBuilder.new();
-  defer b.free();
+  MachineBuilder b = $auto(MachineBuilder.new());
   struct LispLower storage = { lisp, env, lambda, b, NULL, 0 };
   LispLower lower = &storage;
   int ok = lower._auto_compile(lambda.body, 1) &&
@@ -1669,10 +1665,10 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
 
   if (value is void) raise %(void-op (operation "Lisp.set_global"));
 
-  Scope.push(&lisp.scope);
-  defer Scope.pop();
-  lisp.globals[Atom.intern(name)] = value;
-  if (name.startswith("x2c.")) lisp.protect_x2c = 1;
+  $scope(&lisp.scope) {
+    lisp.globals[Atom.intern(name)] = value;
+    if (name.startswith("x2c.")) lisp.protect_x2c = 1;
+  }
 }
 
 /** Installs `function` as `name` and transfers its storage to `lisp`.
@@ -1690,3 +1686,6 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
   Scope.move(function, &lisp.scope);
   lisp.set_global(name, Func.var(function));
 }
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void Lisp.cleanup(Lisp value) { value.destroy(); }

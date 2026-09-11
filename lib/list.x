@@ -617,12 +617,12 @@ Array List.array(List lst) {
 */
 Self List.unique(Self lst) {
   if (!lst || !cdr(lst)) return lst;
-  Scope.retain();
-  defer Scope.release();
-  struct Iter iter_storage, unique_storage;
-  Iter iter = lst.iter(&iter_storage);
-  Iter unique = iter.unique(&unique_storage);
-  return unique;
+  $scope() {
+    struct Iter iter_storage, unique_storage;
+    Iter iter = lst.iter(&iter_storage);
+    Iter unique = iter.unique(&unique_storage);
+    return unique;
+  }
 }
 
 /** Combines aligned values from two `List`s with `fn`.
@@ -632,8 +632,7 @@ Self List.unique(Self lst) {
     Raises: whatever `Func.apply`, `fn`, or result canonicalization raises.
 */
 List List.zip_with(List a, List b, Func fn) {
-  Array values = %[];
-  defer values.free();
+  Array values = $auto(%[]);
   for (; a && b; a = a.cdr(), b = b.cdr()) {
     Var left = a.car, right = b.car, item;
     if (fn) {
@@ -967,6 +966,9 @@ static void _serialize_list_line(Var elem, Buffer buf, Symbol mode) {
   }
   List lst = elem;
   if (!lst) return (void) buf.write("()");
+  RenderPath path;
+  if (!path.enter(lst)) return (void) elem.write_pointer_repr(buf);
+  defer path.leave();
   buf.write("(");
   if (car(lst) is not <list>) buf.pad();
   buf.push();
@@ -1000,14 +1002,17 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode) {
     buf.write("()");
     return;
   }
-  Buffer line = Buffer.new(buf.padding);
-  _serialize_list_line(lst, line, mode);
-  if (buf.pos + line.content.length <= maxwidth) {
-    buf.write_len(line.content.bytes, line.content.length);
-    line.free();
-    return;
+  {
+    Buffer line = $auto(Buffer.new(buf.padding));
+    _serialize_list_line(lst, line, mode);
+    if (buf.pos + line.content.length <= maxwidth) {
+      buf.write_len(line.content.bytes, line.content.length);
+      return;
+    }
   }
-  line.free();
+  RenderPath path;
+  if (!path.enter(lst)) return (void) elem.write_pointer_repr(buf);
+  defer path.leave();
   if (buf.pos - buf.tabstop() > 5) buf.newline_indent();
   buf.write("(");
   if (car(lst) is not <list>) buf.pad();
@@ -1031,9 +1036,9 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String List.str(List lst) {
-  Buffer buf = Buffer.new(0);
+  Buffer buf = $auto(Buffer.new(0));
   lst.write_str(buf);
-  return buf.str_free();
+  return buf.str();
 }
 
 /** Appends the `List` display text to `out`, using each element's `write_str`.
@@ -1043,10 +1048,9 @@ String List.str(List lst) {
     to one and restores it afterward.
 */
 Buffer List.write_str(List lst, Buffer out) {
-  size_t previous = out.padding;
-  out.padding = 1;
-  defer out.padding = previous;
-  _serialize_nested_list(lst, out, <str>);
+  $let(out.padding, 1) {
+    _serialize_nested_list(lst, out, <str>);
+  }
   return out;
 }
 
@@ -1060,10 +1064,9 @@ Buffer List.write_str(List lst, Buffer out) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String List.repr(List lst) {
-  Buffer buf = Buffer.new(0);
+  Buffer buf = $auto(Buffer.new(0));
   lst.write_repr(buf);
-  String str = buf.str_free();
-  return str;
+  return buf.str();
 }
 
 /** Appends the readable representation of `List` to a `Buffer`. */

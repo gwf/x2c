@@ -408,7 +408,7 @@ List Compiler.parse_block_item(Compiler compiler) {
   if (compiler.test_declaration()) {
     List declaration = compiler.parse_declaration_row();
     compiler.expect(<;>);
-    return declaration;
+    return compiler.finish_managed_declaration(declaration);
   }
   return compiler.parse_statement();
 }

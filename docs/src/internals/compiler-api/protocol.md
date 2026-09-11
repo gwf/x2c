@@ -29,6 +29,7 @@ Protocol collection and per-unit semantic registry.
 | [`Compiler.resolve_protocol_member`](#Compiler.resolve_protocol_member) | Resolves an operator-facing protocol member for `participant`. |
 | [`Compiler.resolve_protocol_method`](#Compiler.resolve_protocol_method) | Resolves a method-facing protocol member for `participant`. |
 | [`Compiler.resolve_protocols`](#Compiler.resolve_protocols) | Resolves every visible adoption into the current conformance registry. |
+| [`Compiler.reverse_converter_spelling`](#Compiler.reverse_converter_spelling) | Returns the conventional reverse converter spelling. |
 
 ### `Compiler`
 
@@ -41,7 +42,7 @@ Returns the protocol member used to derive a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/protocol.x:1440`
+Source: `src/protocol.x:1442`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -56,7 +57,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:1774`
+Source: `src/protocol.x:1776`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -68,7 +69,7 @@ Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, making the output suitable for comparing
 live and artifact symbol modes.
 
-Source: `src/protocol.x:1410`
+Source: `src/protocol.x:1412`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -80,7 +81,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2209`
+Source: `src/protocol.x:2257`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -93,7 +94,7 @@ resolved so live collection exposes the same external native aliases and
 ordinary generated members as artifact-backed lookup. A null map is a
 no-op.
 
-Source: `src/protocol.x:1108`
+Source: `src/protocol.x:1110`
 
 <a id="Compiler.operator_member"></a>
 #### Compiler.operator_member
@@ -103,7 +104,7 @@ Source: `src/protocol.x:1108`
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/protocol.x:1371`
+Source: `src/protocol.x:1373`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -116,7 +117,7 @@ publishes the normalized row immediately. Macro-hole parsing returns syntax
 for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node.
 
-Source: `src/protocol.x:2343`
+Source: `src/protocol.x:2391`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -125,7 +126,7 @@ Source: `src/protocol.x:2343`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:1838`
+Source: `src/protocol.x:1840`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -137,7 +138,7 @@ Lookup canonicalizes the participant and may use the nearest adopted
 typedef ancestor. Native conformances install their generated bindings
 before the cached conformance row is returned.
 
-Source: `src/protocol.x:1303`
+Source: `src/protocol.x:1305`
 
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
@@ -148,7 +149,7 @@ Reports whether conformance supersedes an ambient direct member.
 The answer is cached for the canonical participant and includes the first
 visible adopted ancestor that declares the member.
 
-Source: `src/protocol.x:1327`
+Source: `src/protocol.x:1329`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -161,7 +162,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1696`
+Source: `src/protocol.x:1698`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -174,7 +175,7 @@ storage and source location. Installation invalidates cached protocol
 decisions and returns the canonical published node. Generated contexts may
 also retain that node in `Sym` for replay.
 
-Source: `src/protocol.x:513`
+Source: `src/protocol.x:515`
 
 <a id="Compiler.rebuild_protocols"></a>
 #### Compiler.rebuild_protocols
@@ -209,7 +210,7 @@ Returns a `(binding signature)` pair for the selected implementation or
 null when no eligible resolved member exists; positive and negative
 results are cached.
 
-Source: `src/protocol.x:1677`
+Source: `src/protocol.x:1679`
 
 <a id="Compiler.resolve_protocol_method"></a>
 #### Compiler.resolve_protocol_method
@@ -221,7 +222,7 @@ Returns a `(binding signature)` pair for the selected implementation or
 null when no eligible resolved member exists; positive and negative
 results are cached separately from operator lookup.
 
-Source: `src/protocol.x:1686`
+Source: `src/protocol.x:1688`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
@@ -232,7 +233,21 @@ Resolves every visible adoption into the current conformance registry.
 Resolution starts from an empty registry; diagnostics are located only for
 adoptions owned by the current translation unit.
 
-Source: `src/protocol.x:1075`
+Source: `src/protocol.x:1077`
+
+<a id="Compiler.reverse_converter_spelling"></a>
+#### Compiler.reverse_converter_spelling
+
+`String Compiler.reverse_converter_spelling( Compiler compiler, String base_name, String infix, String participant)`
+
+Returns the conventional reverse converter spelling.
+A `Base.participant` reverse converter is declared under the participant's
+source spelling, and package mode rewrites that joined name as a whole, so
+the package prefix sits at the front of the derived binding instead of
+inside it. The split is keyed on a known package because a foreign
+header may spell `__` in a type name.
+
+Source: `src/protocol.x:344`
 
 ## Design notes
 

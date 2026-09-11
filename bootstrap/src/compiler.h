@@ -37,7 +37,7 @@ typedef struct Compiler{
   Tokenizer tokenizer;
   List return_type, include_dirs;
   Map deps;
-  List aggregate_type, macro_stack;
+  List aggregate_type, macro_stack, declaration_effects;
   Sym sym;
   SymScope params;
   Map key_ids, macros, kw_aliases;
@@ -60,6 +60,7 @@ typedef struct Compiler{
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
+  int declaration_projection, declaration_produced;
   int local_macro_capture_scopes;
   String fn_name;
   Diagnostics diagnostics;
@@ -143,6 +144,16 @@ List Compiler_anchor_origin(Compiler compiler, List node, Token token);
 int Compiler__at_function_arrow(Compiler compiler);
 
 void Compiler__skip_shallow_expression(Compiler compiler, int stop_at_comma);
+
+Var Compiler_freeze_declaration_syntax(Compiler compiler, Var syntax);
+
+Var Compiler_thaw_declaration_syntax(Compiler compiler, Var syntax);
+
+void Compiler_queue_declaration_effect(Compiler compiler, String form, Token first, Token after);
+
+void Compiler_run_declaration_effects(Compiler compiler);
+
+Map Compiler_select_declaration_defaults(Compiler compiler, String path, Map symbols, Array parts, Map definitions);
 
 void Compiler_shallow_parse(Compiler c, Map globals);
 
@@ -233,6 +244,8 @@ List Sym_lookup(Sym sym, List key, List * type);
 List Sym_reference(Sym sym, List key, List * type);
 
 List Sym_resolve_global(Sym sym, List key, List * type);
+
+List Sym_reference_global(Sym sym, List key);
 
 int Sym_binding_is_local(Sym sym, List binding);
 

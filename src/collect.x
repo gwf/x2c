@@ -304,6 +304,7 @@ static void _parse_segment(
      environment, and keep any environment the first importing segment
      creates alive after that shadow is released. */
   shadow.macro_lisp = c.macro_lisp;
+  shadow.declaration_effects = c.declaration_effects;
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
   shadow.tokenize(text);
   shadow.text = source;
@@ -319,6 +320,8 @@ static void _parse_segment(
   c.kw_aliases = shadow.kw_aliases;
   c.kw_seen = shadow.kw_seen;
   c.macro_lisp = shadow.macro_lisp;
+  c.declaration_effects = shadow.declaration_effects;
+  c.declaration_produced |= shadow.declaration_produced;
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
   if (path.endswith(".x")) {
     Map.merge(c.fn_defs, shadow.fn_defs);
@@ -465,6 +468,9 @@ static void _file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
   Map enclosing_aliases = c.kw_aliases, enclosing_alias_imports = c.kw_seen;
+  List enclosing_effects = c.declaration_effects;
+  c.declaration_effects = NULL;
+  defer c.declaration_effects = enclosing_effects;
   c.kw_aliases = %{};
   c.kw_seen = %{};
   Array parts = %[], segment = %[];
@@ -499,6 +505,13 @@ static void _file(
     c, path, text, segment, segment_line, segment_position,
     globs, parts, definitions, dependencies, &private);
   segment.free();
+  Map generated = c.select_declaration_defaults(path, globs, parts, definitions);
+  if (generated && generated.len()) {
+    Scope.push(&header_cache_scope);
+    Map retained = generated.copy();
+    Scope.pop();
+    parts.push(retained);
+  }
   List part_list = parts.list_free();
   _require_header_cache_owner(path.try_own());
   _require_header_cache_owner(part_list.try_own());
@@ -614,7 +627,7 @@ static String _package_key_spelling(List key) {
 static int _package_protocol_row(List key, Var value) {
   if (key.car() != %"source-node" || value is not <list>) return 0;
   List row = value;
-  return row && %(protocol adopt).contains(row.car());
+  return row && %(protocol adopt declaration-source).contains(row.car());
 }
 
 /* The package's `name__` space is visible in the importing unit, and so does

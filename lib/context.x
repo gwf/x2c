@@ -17,6 +17,8 @@ $(import "error-macros.xmacro")
 
 #include "common.x"
 
+protocol Cleanup(Context);
+
 #pragma private
 
 #include "array.x"
@@ -209,8 +211,7 @@ static Var _export_atom(Var value, Context source) {
 
 static List _export_list(List list, Context source) {
   if (!list || (source.pool && !source.pool.owns(list))) return list;
-  Block heads = Block.new(sizeof(Var));
-  defer heads.free();
+  Block heads = $auto(Block.new(sizeof(Var)));
   List tail = list;
   while (tail && (!source.pool || source.pool.owns(tail))) {
     Var head = _export_value(tail.car, source);
@@ -365,3 +366,6 @@ void Context.close(Context context) {
   _thread().current = parent;
   Scope.free(context);
 }
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void Context.cleanup(Context value) { value.close(); }

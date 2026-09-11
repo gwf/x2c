@@ -282,10 +282,11 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   cppcompiler.source_private = -1;
   cppcompiler.collect_protocols = 0;
   if (request.dump == <cpp-tokens>) return globs;
-  if (request.live_symbols) {
-    c.runtime_hdrs = 1;
-    globs = c.collect_symbols(globs);
-  }
+  if (request.live_symbols) c.runtime_hdrs = 1;
+  globs = c.collect_symbols(globs);
+  cppcompiler.imports = c.imports;
+  cppcompiler.macro_lisp = c.macro_lisp;
+  cppcompiler.borrowed_lisp = cppcompiler.macro_lisp != NULL;
   Map saved_counters = NULL;
   int saved_gensym = 0;
   if (!request.live_symbols) {
@@ -298,11 +299,10 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   if (request.live_symbols && !request.dump)
     c.install_generated_protocol_symbols(globs);
   if (!request.live_symbols) {
-    /* The raw walk below sees the same source again. Do not count names from
-       both symbol passes before the full parse. */
+    /* Owning-source collection already counted declaration names. CPP adds
+       host declarations without counting the same source's names again. */
     c.names.counters = saved_counters;
     c.names.gensym_count = saved_gensym;
-    globs = c.collect_symbols(globs);
   }
   if (request.dump == <snapshot>)
     unit->snapshot_statics =

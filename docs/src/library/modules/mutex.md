@@ -9,6 +9,7 @@ Shared mutable-state coordination.
 
 | Function | Summary |
 | --- | --- |
+| [`Mutex.cleanup`](#Mutex.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Mutex.free`](#Mutex.free) | Destroys an unused, unlocked `Mutex` and releases its `Scope` storage. |
 | [`Mutex.lock`](#Mutex.lock) | Locks `mutex`, waiting until it becomes available. |
 | [`Mutex.new`](#Mutex.new) | Creates an unlocked `Mutex` owned by the active `Scope`. |
@@ -16,6 +17,15 @@ Shared mutable-state coordination.
 | [`Mutex.unlock`](#Mutex.unlock) | Unlocks a `Mutex` held by the calling thread. |
 
 ### `Mutex`
+
+<a id="Mutex.cleanup"></a>
+#### Mutex.cleanup
+
+`void Mutex.cleanup(Mutex value)`
+
+Ends the owned lifetime when a managed local leaves its block.
+
+Source: `lib/mutex.x:99`
 
 <a id="Mutex.free"></a>
 #### Mutex.free
@@ -29,7 +39,7 @@ intact. No thread may retain the handle or be waiting on it.
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native destruction
 fails.
 
-Source: `lib/mutex.x:89`
+Source: `lib/mutex.x:91`
 
 <a id="Mutex.lock"></a>
 #### Mutex.lock
@@ -41,7 +51,7 @@ The `Mutex` is non-recursive; the caller must not already hold it.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native locking fails.
 
-Source: `lib/mutex.x:56`
+Source: `lib/mutex.x:58`
 
 <a id="Mutex.new"></a>
 #### Mutex.new
@@ -54,7 +64,7 @@ Creates an unlocked `Mutex` owned by the active `Scope`.
 when native mutex initialization fails. An initialization failure releases
 the allocated storage.
 
-Source: `lib/mutex.x:42`
+Source: `lib/mutex.x:44`
 
 <a id="Mutex.try_lock"></a>
 #### Mutex.try_lock
@@ -66,7 +76,7 @@ Returns one when acquired or zero when busy.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` for another native failure.
 
-Source: `lib/mutex.x:66`
+Source: `lib/mutex.x:68`
 
 <a id="Mutex.unlock"></a>
 #### Mutex.unlock
@@ -77,7 +87,7 @@ Unlocks a `Mutex` held by the calling thread.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native unlocking fails.
 
-Source: `lib/mutex.x:77`
+Source: `lib/mutex.x:79`
 
 ## Public types
 

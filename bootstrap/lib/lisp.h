@@ -115,5 +115,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value);
 
 void Lisp_bind(Lisp lisp, String name, Func function);
 
+void Lisp_cleanup(Lisp value);
+
 
 #endif /* __GUARD_0xD09CF48E__ */

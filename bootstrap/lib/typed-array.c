@@ -534,219 +534,268 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_4;
-  const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
-  const void * _x2c_defer_capture_7;
 }
 _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
-  const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_4;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
 typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_9;
   const void * _x2c_defer_capture_10;
-  const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
 typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_11;
   const void * _x2c_defer_capture_12;
-  const void * _x2c_defer_capture_13;
 }
 _x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
 typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_14;
-  const void * _x2c_defer_capture_15;
+  const void * _x2c_defer_capture_13;
 }
 _x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
 typedef struct _x2c_defer_env_8{
-  const void * _x2c_defer_capture_16;
-  const void * _x2c_defer_capture_17;
+  const void * _x2c_defer_capture_14;
+  const void * _x2c_defer_capture_15;
 }
 _x2c_defer_env_8;
 
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
 
 typedef struct _x2c_defer_env_9{
-  const void * _x2c_defer_capture_18;
-  const void * _x2c_defer_capture_19;
+  const void * _x2c_defer_capture_16;
+  const void * _x2c_defer_capture_17;
 }
 _x2c_defer_env_9;
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 
 typedef struct _x2c_defer_env_10{
-  const void * _x2c_defer_capture_20;
-  const void * _x2c_defer_capture_21;
+  const void * _x2c_defer_capture_18;
+  const void * _x2c_defer_capture_19;
 }
 _x2c_defer_env_10;
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 
 typedef struct _x2c_defer_env_11{
-  const void * _x2c_defer_capture_22;
-  const void * _x2c_defer_capture_23;
+  const void * _x2c_defer_capture_20;
+  const void * _x2c_defer_capture_21;
 }
 _x2c_defer_env_11;
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
 
 typedef struct _x2c_defer_env_12{
-  const void * _x2c_defer_capture_24;
-  const void * _x2c_defer_capture_25;
+  const void * _x2c_defer_capture_22;
 }
 _x2c_defer_env_12;
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 
 typedef struct _x2c_defer_env_13{
-  const void * _x2c_defer_capture_26;
-  const void * _x2c_defer_capture_27;
+  const void * _x2c_defer_capture_23;
+  const void * _x2c_defer_capture_24;
 }
 _x2c_defer_env_13;
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
 
 typedef struct _x2c_defer_env_14{
-  const void * _x2c_defer_capture_28;
-  const void * _x2c_defer_capture_29;
+  const void * _x2c_defer_capture_25;
+  const void * _x2c_defer_capture_26;
 }
 _x2c_defer_env_14;
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
 
 typedef struct _x2c_defer_env_15{
-  const void * _x2c_defer_capture_30;
-  const void * _x2c_defer_capture_31;
+  const void * _x2c_defer_capture_27;
+  const void * _x2c_defer_capture_28;
 }
 _x2c_defer_env_15;
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 
 typedef struct _x2c_defer_env_16{
-  const void * _x2c_defer_capture_32;
-  const void * _x2c_defer_capture_33;
+  const void * _x2c_defer_capture_29;
+  const void * _x2c_defer_capture_30;
 }
 _x2c_defer_env_16;
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
 
 typedef struct _x2c_defer_env_17{
-  const void * _x2c_defer_capture_34;
-  const void * _x2c_defer_capture_35;
+  const void * _x2c_defer_capture_31;
 }
 _x2c_defer_env_17;
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 
 typedef struct _x2c_defer_env_18{
-  const void * _x2c_defer_capture_36;
-  const void * _x2c_defer_capture_37;
+  const void * _x2c_defer_capture_32;
+  const void * _x2c_defer_capture_33;
 }
 _x2c_defer_env_18;
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
 
 typedef struct _x2c_defer_env_19{
-  const void * _x2c_defer_capture_38;
-  const void * _x2c_defer_capture_39;
+  const void * _x2c_defer_capture_34;
+  const void * _x2c_defer_capture_35;
 }
 _x2c_defer_env_19;
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
 
 typedef struct _x2c_defer_env_20{
-  const void * _x2c_defer_capture_40;
-  const void * _x2c_defer_capture_41;
+  const void * _x2c_defer_capture_36;
+  const void * _x2c_defer_capture_37;
 }
 _x2c_defer_env_20;
 
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
 
 typedef struct _x2c_defer_env_21{
-  const void * _x2c_defer_capture_42;
-  const void * _x2c_defer_capture_43;
+  const void * _x2c_defer_capture_38;
+  const void * _x2c_defer_capture_39;
 }
 _x2c_defer_env_21;
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
 
 typedef struct _x2c_defer_env_22{
-  const void * _x2c_defer_capture_44;
-  const void * _x2c_defer_capture_45;
+  const void * _x2c_defer_capture_40;
 }
 _x2c_defer_env_22;
 
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
 
 typedef struct _x2c_defer_env_23{
-  const void * _x2c_defer_capture_46;
-  const void * _x2c_defer_capture_47;
+  const void * _x2c_defer_capture_41;
+  const void * _x2c_defer_capture_42;
 }
 _x2c_defer_env_23;
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
 
 typedef struct _x2c_defer_env_24{
-  const void * _x2c_defer_capture_48;
-  const void * _x2c_defer_capture_49;
+  const void * _x2c_defer_capture_43;
+  const void * _x2c_defer_capture_44;
 }
 _x2c_defer_env_24;
 
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24);
 
 typedef struct _x2c_defer_env_25{
-  const void * _x2c_defer_capture_50;
-  const void * _x2c_defer_capture_51;
+  const void * _x2c_defer_capture_45;
+  const void * _x2c_defer_capture_46;
 }
 _x2c_defer_env_25;
 
 static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25);
 
 typedef struct _x2c_defer_env_26{
-  const void * _x2c_defer_capture_52;
-  const void * _x2c_defer_capture_53;
+  const void * _x2c_defer_capture_47;
+  const void * _x2c_defer_capture_48;
 }
 _x2c_defer_env_26;
 
 static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26);
 
 typedef struct _x2c_defer_env_27{
-  const void * _x2c_defer_capture_54;
-  const void * _x2c_defer_capture_55;
+  const void * _x2c_defer_capture_49;
 }
 _x2c_defer_env_27;
 
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
 
 typedef struct _x2c_defer_env_28{
-  const void * _x2c_defer_capture_56;
-  const void * _x2c_defer_capture_57;
+  const void * _x2c_defer_capture_50;
+  const void * _x2c_defer_capture_51;
 }
 _x2c_defer_env_28;
 
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
+
+typedef struct _x2c_defer_env_29{
+  const void * _x2c_defer_capture_52;
+  const void * _x2c_defer_capture_53;
+}
+_x2c_defer_env_29;
+
+static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29);
+
+typedef struct _x2c_defer_env_30{
+  const void * _x2c_defer_capture_54;
+  const void * _x2c_defer_capture_55;
+}
+_x2c_defer_env_30;
+
+static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30);
+
+typedef struct _x2c_defer_env_31{
+  const void * _x2c_defer_capture_56;
+  const void * _x2c_defer_capture_57;
+}
+_x2c_defer_env_31;
+
+static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31);
+
+typedef struct _x2c_defer_env_32{
+  const void * _x2c_defer_capture_58;
+}
+_x2c_defer_env_32;
+
+static void _x2c_defer_cleanup_32(void * _x2c_defer_opaque_32);
+
+typedef struct _x2c_defer_env_33{
+  const void * _x2c_defer_capture_59;
+  const void * _x2c_defer_capture_60;
+}
+_x2c_defer_env_33;
+
+static void _x2c_defer_cleanup_33(void * _x2c_defer_opaque_33);
+
+typedef struct _x2c_defer_env_34{
+  const void * _x2c_defer_capture_61;
+  const void * _x2c_defer_capture_62;
+}
+_x2c_defer_env_34;
+
+static void _x2c_defer_cleanup_34(void * _x2c_defer_opaque_34);
+
+typedef struct _x2c_defer_env_35{
+  const void * _x2c_defer_capture_63;
+  const void * _x2c_defer_capture_64;
+}
+_x2c_defer_env_35;
+
+static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -756,37 +805,37 @@ __attribute__((constructor)) static void _file_init_(void){
     .str = _x2c_proto_arraychar_str_0, .repr = _x2c_proto_arraychar_repr_0, .write_str = _x2c_proto_arraychar_write_str_0, .write_repr = _x2c_proto_arraychar_write_repr_0, .equal = _x2c_proto_arraychar_equal_0, .compare = _x2c_proto_arraychar_compare_0, .truth = _x2c_proto_arraychar_truth_0, .iter = _x2c_proto_arraychar_iter_0, .contains = _x2c_proto_arraychar_contains_0, .getindex = _x2c_proto_arraychar_getindex_0, .setindex = _x2c_proto_arraychar_setindex_0, .updateindex = _x2c_proto_arraychar_updateindex_0, .postfixindex = _x2c_proto_arraychar_postfixindex_0, .export_context = _x2c_proto_arraychar_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(3474748293220, String_new("arraychar"), _x2c__x2c_protocol_methods_0);
+  x2c_register_tagged_descriptor(3474748293220, String_new("ArrayChar"), _x2c__x2c_protocol_methods_0);
   _x2c__x2c_protocol_methods_1 =(VarMethods){
     .str = _x2c_proto_arraydbl_str_0, .repr = _x2c_proto_arraydbl_repr_0, .write_str = _x2c_proto_arraydbl_write_str_0, .write_repr = _x2c_proto_arraydbl_write_repr_0, .equal = _x2c_proto_arraydbl_equal_0, .compare = _x2c_proto_arraydbl_compare_0, .truth = _x2c_proto_arraydbl_truth_0, .iter = _x2c_proto_arraydbl_iter_0, .contains = _x2c_proto_arraydbl_contains_0, .getindex = _x2c_proto_arraydbl_getindex_0, .setindex = _x2c_proto_arraydbl_setindex_0, .updateindex = _x2c_proto_arraydbl_updateindex_0, .postfixindex = _x2c_proto_arraydbl_postfixindex_0, .export_context = _x2c_proto_arraydbl_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(108585885848, String_new("arraydbl"), _x2c__x2c_protocol_methods_1);
+  x2c_register_tagged_descriptor(108585885848, String_new("ArrayDbl"), _x2c__x2c_protocol_methods_1);
   _x2c__x2c_protocol_methods_2 =(VarMethods){
     .str = _x2c_proto_arrayfloat_str_0, .repr = _x2c_proto_arrayfloat_repr_0, .write_str = _x2c_proto_arrayfloat_write_str_0, .write_repr = _x2c_proto_arrayfloat_write_repr_0, .equal = _x2c_proto_arrayfloat_equal_0, .compare = _x2c_proto_arrayfloat_compare_0, .truth = _x2c_proto_arrayfloat_truth_0, .iter = _x2c_proto_arrayfloat_iter_0, .contains = _x2c_proto_arrayfloat_contains_0, .getindex = _x2c_proto_arrayfloat_getindex_0, .setindex = _x2c_proto_arrayfloat_setindex_0, .updateindex = _x2c_proto_arrayfloat_updateindex_0, .postfixindex = _x2c_proto_arrayfloat_postfixindex_0, .export_context = _x2c_proto_arrayfloat_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(111191951964264, String_new("arrayfloat"), _x2c__x2c_protocol_methods_2);
+  x2c_register_tagged_descriptor(111191951964264, String_new("ArrayFloat"), _x2c__x2c_protocol_methods_2);
   _x2c__x2c_protocol_methods_3 =(VarMethods){
     .str = _x2c_proto_arrayint_str_0, .repr = _x2c_proto_arrayint_repr_0, .write_str = _x2c_proto_arrayint_write_str_0, .write_repr = _x2c_proto_arrayint_write_repr_0, .equal = _x2c_proto_arrayint_equal_0, .compare = _x2c_proto_arrayint_compare_0, .truth = _x2c_proto_arrayint_truth_0, .iter = _x2c_proto_arrayint_iter_0, .contains = _x2c_proto_arrayint_contains_0, .getindex = _x2c_proto_arrayint_getindex_0, .setindex = _x2c_proto_arrayint_setindex_0, .updateindex = _x2c_proto_arrayint_updateindex_0, .postfixindex = _x2c_proto_arrayint_postfixindex_0, .export_context = _x2c_proto_arrayint_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(108585896872, String_new("arrayint"), _x2c__x2c_protocol_methods_3);
+  x2c_register_tagged_descriptor(108585896872, String_new("ArrayInt"), _x2c__x2c_protocol_methods_3);
   _x2c__x2c_protocol_methods_4 =(VarMethods){
     .str = _x2c_proto_arraylong_str_0, .repr = _x2c_proto_arraylong_repr_0, .write_str = _x2c_proto_arraylong_write_str_0, .write_repr = _x2c_proto_arraylong_write_repr_0, .equal = _x2c_proto_arraylong_equal_0, .compare = _x2c_proto_arraylong_compare_0, .truth = _x2c_proto_arraylong_truth_0, .iter = _x2c_proto_arraylong_iter_0, .contains = _x2c_proto_arraylong_contains_0, .getindex = _x2c_proto_arraylong_getindex_0, .setindex = _x2c_proto_arraylong_setindex_0, .updateindex = _x2c_proto_arraylong_updateindex_0, .postfixindex = _x2c_proto_arraylong_postfixindex_0, .export_context = _x2c_proto_arraylong_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(3474748898190, String_new("arraylong"), _x2c__x2c_protocol_methods_4);
+  x2c_register_tagged_descriptor(3474748898190, String_new("ArrayLong"), _x2c__x2c_protocol_methods_4);
   _x2c__x2c_protocol_methods_5 =(VarMethods){
     .str = _x2c_proto_arrayshort_str_0, .repr = _x2c_proto_arrayshort_repr_0, .write_str = _x2c_proto_arrayshort_write_str_0, .write_repr = _x2c_proto_arrayshort_write_repr_0, .equal = _x2c_proto_arrayshort_equal_0, .compare = _x2c_proto_arrayshort_compare_0, .truth = _x2c_proto_arrayshort_truth_0, .iter = _x2c_proto_arrayshort_iter_0, .contains = _x2c_proto_arrayshort_contains_0, .getindex = _x2c_proto_arrayshort_getindex_0, .setindex = _x2c_proto_arrayshort_setindex_0, .updateindex = _x2c_proto_arrayshort_updateindex_0, .postfixindex = _x2c_proto_arrayshort_postfixindex_0, .export_context = _x2c_proto_arrayshort_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(111191978966184, String_new("arrayshort"), _x2c__x2c_protocol_methods_5);
+  x2c_register_tagged_descriptor(111191978966184, String_new("ArrayShort"), _x2c__x2c_protocol_methods_5);
   _x2c__x2c_protocol_methods_6 =(VarMethods){
     .str = _x2c_proto_arraystring_str_0, .repr = _x2c_proto_arraystring_repr_0, .write_str = _x2c_proto_arraystring_write_str_0, .write_repr = _x2c_proto_arraystring_write_repr_0, .equal = _x2c_proto_arraystring_equal_0, .compare = _x2c_proto_arraystring_compare_0, .truth = _x2c_proto_arraystring_truth_0, .iter = _x2c_proto_arraystring_iter_0, .contains = _x2c_proto_arraystring_contains_0, .getindex = _x2c_proto_arraystring_getindex_0, .setindex = _x2c_proto_arraystring_setindex_0, .updateindex = _x2c_proto_arraystring_updateindex_0, .postfixindex = _x2c_proto_arraystring_postfixindex_0, .export_context = _x2c_proto_arraystring_export_context_0
   }
   ;
-  x2c_try_register_tagged_descriptor(108585917732, String_new("arraystring"), _x2c__x2c_protocol_methods_6);
+  x2c_register_tagged_descriptor(108585917732, String_new("ArrayString"), _x2c__x2c_protocol_methods_6);
   _0 = String_new("ArrayChar");
   _1 = String_new("ArrayShort");
   _2 = String_new("ArrayInt");
@@ -903,11 +952,11 @@ void Block_append(Block, const void *, size_t);
 static ArrayString _prepare_string_array_export(ArrayString array, Context source){
   ArrayString staged = ArrayString_new(), result = NULL;
   {
-  _x2c_defer_env_0 _x2c_defer_env_29 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & staged};
+  _x2c_defer_env_0 _x2c_defer_env_36 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & staged};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_29
+    .env = & _x2c_defer_env_36
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -1030,11 +1079,11 @@ static void ArrayChar__core_setslice(ArrayChar _x2c_macro_array_0, int _x2c_macr
     _x2c_macro_copied_0 = 1;
   }
   {
-  _x2c_defer_env_1 _x2c_defer_env_30 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_copied_0, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_source_0};
+  _x2c_defer_env_1 _x2c_defer_env_37 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_copied_0, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_source_0};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_30
+    .env = & _x2c_defer_env_37
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -1305,6 +1354,10 @@ static int ArrayChar__core_compare(ArrayChar _x2c_macro_a_3, ArrayChar _x2c_macr
   return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
 }
 
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
 Buffer Buffer_write(Buffer, const char *);
 
 Var char_var(char);
@@ -1314,39 +1367,28 @@ Buffer Var_write_str(Var, Buffer);
 Buffer Var_write_repr(Var, Buffer);
 
 static Buffer ArrayChar__core_write(ArrayChar _x2c_macro_array_3, Buffer _x2c_macro_out_3, Symbol _x2c_macro_mode_0){
-  char * _x2c_macro_data_2 = ArrayChar_truth(_x2c_macro_array_3) ?(char *) _x2c_macro_array_3 -> bytes : NULL;
-  size_t _x2c_macro_n_1 = ArrayChar_truth(_x2c_macro_array_3) ? _x2c_macro_array_3 -> length : 0;
-  Buffer_write(_x2c_macro_out_3, "[ ");
-  for(size_t _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_n_1;  _x2c_macro_i_2 ++){
-    Var _x2c_macro_element_1 = char_var(_x2c_macro_data_2[_x2c_macro_i_2]);
-    if(_x2c_macro_mode_0 == 40228) Var_write_str(_x2c_macro_element_1, _x2c_macro_out_3);
-    else Var_write_repr(_x2c_macro_element_1, _x2c_macro_out_3);
-    if(_x2c_macro_i_2 < _x2c_macro_n_1 - 1) Buffer_write(_x2c_macro_out_3, ", ");
-  }
-  return Buffer_write(_x2c_macro_out_3, " ]");
-}
-
-Array ArrayChar_array(ArrayChar _x2c_macro_array_2){
-  if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_array_2 == NULL) return NULL;
-  if(_x2c_macro_array_2 -> length > INT_MAX) _size_limit(_0, _x2c_macro_array_2 -> length);
-  Array _x2c_macro_boxed_0 = Array_new(), _x2c_macro_result_0 = NULL;
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), _x2c_macro_array_3)) return Buffer_printf(_x2c_macro_out_3, "<array: 0x%012lX>", (long) _x2c_macro_array_3);
   {
-  _x2c_defer_env_2 _x2c_defer_env_31 = {._x2c_defer_capture_4 =(const void *) & _x2c_macro_result_0, ._x2c_defer_capture_5 =(const void *) & _x2c_macro_boxed_0};
+  _x2c_defer_env_2 _x2c_defer_env_38 = {._x2c_defer_capture_4 =(const void *) & _x2c_macro_path_0};
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_31
+    .env = & _x2c_defer_env_38
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-    char * _x2c_macro_data_1 =(char *) _x2c_macro_array_2 -> bytes;
-    for(size_t _x2c_macro_i_1 = 0;  _x2c_macro_i_1 < _x2c_macro_array_2 -> length;  _x2c_macro_i_1 ++){
-      Var _x2c_macro_element_0 = char_var(_x2c_macro_data_1[_x2c_macro_i_1]);
-      Block_append((Block) _x2c_macro_boxed_0, & _x2c_macro_element_0, 1);
+    char * _x2c_macro_data_2 = ArrayChar_truth(_x2c_macro_array_3) ?(char *) _x2c_macro_array_3 -> bytes : NULL;
+    size_t _x2c_macro_n_1 = ArrayChar_truth(_x2c_macro_array_3) ? _x2c_macro_array_3 -> length : 0;
+    Buffer_write(_x2c_macro_out_3, "[ ");
+    for(size_t _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_n_1;  _x2c_macro_i_2 ++){
+      Var _x2c_macro_element_1 = char_var(_x2c_macro_data_2[_x2c_macro_i_2]);
+      if(_x2c_macro_mode_0 == 40228) Var_write_str(_x2c_macro_element_1, _x2c_macro_out_3);
+      else Var_write_repr(_x2c_macro_element_1, _x2c_macro_out_3);
+      if(_x2c_macro_i_2 < _x2c_macro_n_1 - 1) Buffer_write(_x2c_macro_out_3, ", ");
     }
     {
-      Array _x2c_return_value_1 = _x2c_macro_result_0 = _x2c_macro_boxed_0;
+      Buffer _x2c_return_value_1 = Buffer_write(_x2c_macro_out_3, " ]");
       {
   int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
@@ -1364,6 +1406,47 @@ Array ArrayChar_array(ArrayChar _x2c_macro_array_2){
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
+}
+}
+
+Array ArrayChar_array(ArrayChar _x2c_macro_array_2){
+  if(! _init_guard_) _file_init_();
+  if((void *) _x2c_macro_array_2 == NULL) return NULL;
+  if(_x2c_macro_array_2 -> length > INT_MAX) _size_limit(_0, _x2c_macro_array_2 -> length);
+  Array _x2c_macro_boxed_0 = Array_new(), _x2c_macro_result_0 = NULL;
+  {
+  _x2c_defer_env_3 _x2c_defer_env_39 = {._x2c_defer_capture_5 =(const void *) & _x2c_macro_result_0, ._x2c_defer_capture_6 =(const void *) & _x2c_macro_boxed_0};
+
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_39
+  };
+  x2c_cleanup_push(&_x2c_defer_record_3);
+  {
+    char * _x2c_macro_data_1 =(char *) _x2c_macro_array_2 -> bytes;
+    for(size_t _x2c_macro_i_1 = 0;  _x2c_macro_i_1 < _x2c_macro_array_2 -> length;  _x2c_macro_i_1 ++){
+      Var _x2c_macro_element_0 = char_var(_x2c_macro_data_1[_x2c_macro_i_1]);
+      Block_append((Block) _x2c_macro_boxed_0, & _x2c_macro_element_0, 1);
+    }
+    {
+      Array _x2c_return_value_2 = _x2c_macro_result_0 = _x2c_macro_boxed_0;
+      {
+  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_3);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
+  return _x2c_return_value_2;
+
+}
+    }
+
+  }
+
+  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_3);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
 }
 }
 
@@ -1398,34 +1481,34 @@ ArrayChar Array_arraychar(Array _x2c_macro_values_2){
   if((void *) _x2c_macro_values_2 == NULL) return NULL;
   ArrayChar _x2c_macro_packed_0 =(ArrayChar) Block_new(sizeof(char)), _x2c_macro_result_1 = NULL;
   {
-  _x2c_defer_env_3 _x2c_defer_env_32 = {._x2c_defer_capture_6 =(const void *) & _x2c_macro_result_1, ._x2c_defer_capture_7 =(const void *) & _x2c_macro_packed_0};
+  _x2c_defer_env_4 _x2c_defer_env_40 = {._x2c_defer_capture_7 =(const void *) & _x2c_macro_result_1, ._x2c_defer_capture_8 =(const void *) & _x2c_macro_packed_0};
 
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_32
+  X2CCleanup _x2c_defer_record_4 = {
+    .fn = _x2c_defer_cleanup_4,
+    .env = & _x2c_defer_env_40
   };
-  x2c_cleanup_push(&_x2c_defer_record_3);
+  x2c_cleanup_push(&_x2c_defer_record_4);
   {
     for(size_t _x2c_macro_i_3 = 0;  _x2c_macro_i_3 < _x2c_macro_values_2 -> length;  _x2c_macro_i_3 ++) ArrayChar_push(_x2c_macro_packed_0, Var_char(Var_convert(Array_getindex(_x2c_macro_values_2, _x2c_macro_i_3), 26993)));
     {
-      ArrayChar _x2c_return_value_2 = _x2c_macro_result_1 = _x2c_macro_packed_0;
+      ArrayChar _x2c_return_value_3 = _x2c_macro_result_1 = _x2c_macro_packed_0;
       {
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-  return _x2c_return_value_2;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
+  return _x2c_return_value_3;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
+  x2c_cleanup_leave(&_x2c_defer_record_4);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
 }
 }
 
@@ -1460,26 +1543,26 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_macro_array_5, Context 
   if((void *) _x2c_macro_array_5 == NULL || ! Context_owns(_x2c_macro_source_1, _x2c_macro_array_5)) return _x2c_macro_array_5;
   ArrayChar _x2c_macro_staged_0 = _prepare_array_export(ArrayChar_block(_x2c_macro_array_5), _x2c_macro_source_1), _x2c_macro_committed_0 = NULL;
   {
-  _x2c_defer_env_4 _x2c_defer_env_33 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_staged_0, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_committed_0};
+  _x2c_defer_env_5 _x2c_defer_env_41 = {._x2c_defer_capture_9 =(const void *) & _x2c_macro_staged_0, ._x2c_defer_capture_10 =(const void *) & _x2c_macro_committed_0};
 
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_33
+  X2CCleanup _x2c_defer_record_5 = {
+    .fn = _x2c_defer_cleanup_5,
+    .env = & _x2c_defer_env_41
   };
-  x2c_cleanup_push(&_x2c_defer_record_4);
+  x2c_cleanup_push(&_x2c_defer_record_5);
   {
     Scope * _x2c_macro_destination_0 = Context_export_destination(_x2c_macro_source_1);
     if((void *) _x2c_macro_staged_0 == NULL){
       Block_move_to(ArrayChar_block(_x2c_macro_array_5), _x2c_macro_destination_0);
       {
-        ArrayChar _x2c_return_value_3 = _x2c_macro_array_5;
+        ArrayChar _x2c_return_value_4 = _x2c_macro_array_5;
         {
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-  return _x2c_return_value_3;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
+  return _x2c_return_value_4;
 
 }
       }
@@ -1499,24 +1582,24 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_macro_array_5, Context 
     ArrayChar_free(_x2c_macro_staged_0);
     _x2c_macro_committed_0 = _x2c_macro_array_5;
     {
-      ArrayChar _x2c_return_value_4 = _x2c_macro_array_5;
+      ArrayChar _x2c_return_value_5 = _x2c_macro_array_5;
       {
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-  return _x2c_return_value_4;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
+  return _x2c_return_value_5;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
+  x2c_cleanup_leave(&_x2c_defer_record_5);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
 }
 }
 
@@ -1605,13 +1688,13 @@ static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_6, int _x2c_ma
     _x2c_macro_copied_1 = 1;
   }
   {
-  _x2c_defer_env_5 _x2c_defer_env_34 = {._x2c_defer_capture_10 =(const void *) & _x2c_macro_copied_1, ._x2c_defer_capture_11 =(const void *) & _x2c_macro_source_2};
+  _x2c_defer_env_6 _x2c_defer_env_42 = {._x2c_defer_capture_11 =(const void *) & _x2c_macro_copied_1, ._x2c_defer_capture_12 =(const void *) & _x2c_macro_source_2};
 
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_34
+  X2CCleanup _x2c_defer_record_6 = {
+    .fn = _x2c_defer_cleanup_6,
+    .env = & _x2c_defer_env_42
   };
-  x2c_cleanup_push(&_x2c_defer_record_5);
+  x2c_cleanup_push(&_x2c_defer_record_6);
   {
     if(_x2c_macro_delta_1 > 0){
       if(_x2c_macro_delta_1 > INT_MAX - _x2c_macro_n_2){
@@ -1632,10 +1715,10 @@ static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_6, int _x2c_ma
     if(_x2c_macro_delta_1 < 0) _x2c_macro_array_6 -> length = _x2c_macro_n_2 + _x2c_macro_delta_1;
   }
 
-  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_5);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
+  x2c_cleanup_leave(&_x2c_defer_record_6);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
 }
 }
 
@@ -1881,16 +1964,46 @@ static int ArrayShort__core_compare(ArrayShort _x2c_macro_a_8, ArrayShort _x2c_m
 Var short_var(short);
 
 static Buffer ArrayShort__core_write(ArrayShort _x2c_macro_array_9, Buffer _x2c_macro_out_8, Symbol _x2c_macro_mode_1){
-  short * _x2c_macro_data_5 = ArrayShort_truth(_x2c_macro_array_9) ?(short *) _x2c_macro_array_9 -> bytes : NULL;
-  size_t _x2c_macro_n_3 = ArrayShort_truth(_x2c_macro_array_9) ? _x2c_macro_array_9 -> length : 0;
-  Buffer_write(_x2c_macro_out_8, "[ ");
-  for(size_t _x2c_macro_i_6 = 0;  _x2c_macro_i_6 < _x2c_macro_n_3;  _x2c_macro_i_6 ++){
-    Var _x2c_macro_element_4 = short_var(_x2c_macro_data_5[_x2c_macro_i_6]);
-    if(_x2c_macro_mode_1 == 40228) Var_write_str(_x2c_macro_element_4, _x2c_macro_out_8);
-    else Var_write_repr(_x2c_macro_element_4, _x2c_macro_out_8);
-    if(_x2c_macro_i_6 < _x2c_macro_n_3 - 1) Buffer_write(_x2c_macro_out_8, ", ");
+  RenderPath _x2c_macro_path_1;
+  if(! RenderPath_enter(&(_x2c_macro_path_1), _x2c_macro_array_9)) return Buffer_printf(_x2c_macro_out_8, "<array: 0x%012lX>", (long) _x2c_macro_array_9);
+  {
+  _x2c_defer_env_7 _x2c_defer_env_43 = {._x2c_defer_capture_13 =(const void *) & _x2c_macro_path_1};
+
+  X2CCleanup _x2c_defer_record_7 = {
+    .fn = _x2c_defer_cleanup_7,
+    .env = & _x2c_defer_env_43
+  };
+  x2c_cleanup_push(&_x2c_defer_record_7);
+  {
+    short * _x2c_macro_data_5 = ArrayShort_truth(_x2c_macro_array_9) ?(short *) _x2c_macro_array_9 -> bytes : NULL;
+    size_t _x2c_macro_n_3 = ArrayShort_truth(_x2c_macro_array_9) ? _x2c_macro_array_9 -> length : 0;
+    Buffer_write(_x2c_macro_out_8, "[ ");
+    for(size_t _x2c_macro_i_6 = 0;  _x2c_macro_i_6 < _x2c_macro_n_3;  _x2c_macro_i_6 ++){
+      Var _x2c_macro_element_4 = short_var(_x2c_macro_data_5[_x2c_macro_i_6]);
+      if(_x2c_macro_mode_1 == 40228) Var_write_str(_x2c_macro_element_4, _x2c_macro_out_8);
+      else Var_write_repr(_x2c_macro_element_4, _x2c_macro_out_8);
+      if(_x2c_macro_i_6 < _x2c_macro_n_3 - 1) Buffer_write(_x2c_macro_out_8, ", ");
+    }
+    {
+      Buffer _x2c_return_value_6 = Buffer_write(_x2c_macro_out_8, " ]");
+      {
+  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_7);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
+  return _x2c_return_value_6;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_8, " ]");
+
+  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_7);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
+}
 }
 
 Array ArrayShort_array(ArrayShort _x2c_macro_array_8){
@@ -1899,13 +2012,13 @@ Array ArrayShort_array(ArrayShort _x2c_macro_array_8){
   if(_x2c_macro_array_8 -> length > INT_MAX) _size_limit(_1, _x2c_macro_array_8 -> length);
   Array _x2c_macro_boxed_1 = Array_new(), _x2c_macro_result_2 = NULL;
   {
-  _x2c_defer_env_6 _x2c_defer_env_35 = {._x2c_defer_capture_12 =(const void *) & _x2c_macro_result_2, ._x2c_defer_capture_13 =(const void *) & _x2c_macro_boxed_1};
+  _x2c_defer_env_8 _x2c_defer_env_44 = {._x2c_defer_capture_14 =(const void *) & _x2c_macro_result_2, ._x2c_defer_capture_15 =(const void *) & _x2c_macro_boxed_1};
 
-  X2CCleanup _x2c_defer_record_6 = {
-    .fn = _x2c_defer_cleanup_6,
-    .env = & _x2c_defer_env_35
+  X2CCleanup _x2c_defer_record_8 = {
+    .fn = _x2c_defer_cleanup_8,
+    .env = & _x2c_defer_env_44
   };
-  x2c_cleanup_push(&_x2c_defer_record_6);
+  x2c_cleanup_push(&_x2c_defer_record_8);
   {
     short * _x2c_macro_data_4 =(short *) _x2c_macro_array_8 -> bytes;
     for(size_t _x2c_macro_i_5 = 0;  _x2c_macro_i_5 < _x2c_macro_array_8 -> length;  _x2c_macro_i_5 ++){
@@ -1913,24 +2026,24 @@ Array ArrayShort_array(ArrayShort _x2c_macro_array_8){
       Block_append((Block) _x2c_macro_boxed_1, & _x2c_macro_element_3, 1);
     }
     {
-      Array _x2c_return_value_5 = _x2c_macro_result_2 = _x2c_macro_boxed_1;
+      Array _x2c_return_value_7 = _x2c_macro_result_2 = _x2c_macro_boxed_1;
       {
-  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_6);
+  x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
-  return _x2c_return_value_5;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
+  return _x2c_return_value_7;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_6);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
+  x2c_cleanup_leave(&_x2c_defer_record_8);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
 }
 }
 
@@ -1963,34 +2076,34 @@ ArrayShort Array_arrayshort(Array _x2c_macro_values_5){
   if((void *) _x2c_macro_values_5 == NULL) return NULL;
   ArrayShort _x2c_macro_packed_1 =(ArrayShort) Block_new(sizeof(short)), _x2c_macro_result_3 = NULL;
   {
-  _x2c_defer_env_7 _x2c_defer_env_36 = {._x2c_defer_capture_14 =(const void *) & _x2c_macro_result_3, ._x2c_defer_capture_15 =(const void *) & _x2c_macro_packed_1};
+  _x2c_defer_env_9 _x2c_defer_env_45 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_result_3, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_packed_1};
 
-  X2CCleanup _x2c_defer_record_7 = {
-    .fn = _x2c_defer_cleanup_7,
-    .env = & _x2c_defer_env_36
+  X2CCleanup _x2c_defer_record_9 = {
+    .fn = _x2c_defer_cleanup_9,
+    .env = & _x2c_defer_env_45
   };
-  x2c_cleanup_push(&_x2c_defer_record_7);
+  x2c_cleanup_push(&_x2c_defer_record_9);
   {
     for(size_t _x2c_macro_i_7 = 0;  _x2c_macro_i_7 < _x2c_macro_values_5 -> length;  _x2c_macro_i_7 ++) ArrayShort_push(_x2c_macro_packed_1, Var_short(Var_convert(Array_getindex(_x2c_macro_values_5, _x2c_macro_i_7), 3453293)));
     {
-      ArrayShort _x2c_return_value_6 = _x2c_macro_result_3 = _x2c_macro_packed_1;
+      ArrayShort _x2c_return_value_8 = _x2c_macro_result_3 = _x2c_macro_packed_1;
       {
-  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
-  return _x2c_return_value_6;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
+  return _x2c_return_value_8;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_7);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
+  x2c_cleanup_leave(&_x2c_defer_record_9);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
 }
 }
 
@@ -2013,26 +2126,26 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_macro_array_11, Cont
   if((void *) _x2c_macro_array_11 == NULL || ! Context_owns(_x2c_macro_source_3, _x2c_macro_array_11)) return _x2c_macro_array_11;
   ArrayShort _x2c_macro_staged_1 = _prepare_array_export(ArrayShort_block(_x2c_macro_array_11), _x2c_macro_source_3), _x2c_macro_committed_1 = NULL;
   {
-  _x2c_defer_env_8 _x2c_defer_env_37 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_staged_1, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_committed_1};
+  _x2c_defer_env_10 _x2c_defer_env_46 = {._x2c_defer_capture_18 =(const void *) & _x2c_macro_staged_1, ._x2c_defer_capture_19 =(const void *) & _x2c_macro_committed_1};
 
-  X2CCleanup _x2c_defer_record_8 = {
-    .fn = _x2c_defer_cleanup_8,
-    .env = & _x2c_defer_env_37
+  X2CCleanup _x2c_defer_record_10 = {
+    .fn = _x2c_defer_cleanup_10,
+    .env = & _x2c_defer_env_46
   };
-  x2c_cleanup_push(&_x2c_defer_record_8);
+  x2c_cleanup_push(&_x2c_defer_record_10);
   {
     Scope * _x2c_macro_destination_1 = Context_export_destination(_x2c_macro_source_3);
     if((void *) _x2c_macro_staged_1 == NULL){
       Block_move_to(ArrayShort_block(_x2c_macro_array_11), _x2c_macro_destination_1);
       {
-        ArrayShort _x2c_return_value_7 = _x2c_macro_array_11;
+        ArrayShort _x2c_return_value_9 = _x2c_macro_array_11;
         {
-  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_8);
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
-  return _x2c_return_value_7;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
+  return _x2c_return_value_9;
 
 }
       }
@@ -2052,24 +2165,24 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_macro_array_11, Cont
     ArrayShort_free(_x2c_macro_staged_1);
     _x2c_macro_committed_1 = _x2c_macro_array_11;
     {
-      ArrayShort _x2c_return_value_8 = _x2c_macro_array_11;
+      ArrayShort _x2c_return_value_10 = _x2c_macro_array_11;
       {
-  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_20 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_8);
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
-  return _x2c_return_value_8;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_20;
+  return _x2c_return_value_10;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_21 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_8);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
+  x2c_cleanup_leave(&_x2c_defer_record_10);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_21;
 }
 }
 
@@ -2158,13 +2271,13 @@ static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_12, int _x2c_macro
     _x2c_macro_copied_2 = 1;
   }
   {
-  _x2c_defer_env_9 _x2c_defer_env_38 = {._x2c_defer_capture_18 =(const void *) & _x2c_macro_copied_2, ._x2c_defer_capture_19 =(const void *) & _x2c_macro_source_4};
+  _x2c_defer_env_11 _x2c_defer_env_47 = {._x2c_defer_capture_20 =(const void *) & _x2c_macro_copied_2, ._x2c_defer_capture_21 =(const void *) & _x2c_macro_source_4};
 
-  X2CCleanup _x2c_defer_record_9 = {
-    .fn = _x2c_defer_cleanup_9,
-    .env = & _x2c_defer_env_38
+  X2CCleanup _x2c_defer_record_11 = {
+    .fn = _x2c_defer_cleanup_11,
+    .env = & _x2c_defer_env_47
   };
-  x2c_cleanup_push(&_x2c_defer_record_9);
+  x2c_cleanup_push(&_x2c_defer_record_11);
   {
     if(_x2c_macro_delta_2 > 0){
       if(_x2c_macro_delta_2 > INT_MAX - _x2c_macro_n_4){
@@ -2185,10 +2298,10 @@ static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_12, int _x2c_macro
     if(_x2c_macro_delta_2 < 0) _x2c_macro_array_12 -> length = _x2c_macro_n_4 + _x2c_macro_delta_2;
   }
 
-  int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_22 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_9);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
+  x2c_cleanup_leave(&_x2c_defer_record_11);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_22;
 }
 }
 
@@ -2432,16 +2545,46 @@ static int ArrayInt__core_compare(ArrayInt _x2c_macro_a_13, ArrayInt _x2c_macro_
 }
 
 static Buffer ArrayInt__core_write(ArrayInt _x2c_macro_array_15, Buffer _x2c_macro_out_13, Symbol _x2c_macro_mode_2){
-  int * _x2c_macro_data_8 = ArrayInt_truth(_x2c_macro_array_15) ?(int *) _x2c_macro_array_15 -> bytes : NULL;
-  size_t _x2c_macro_n_5 = ArrayInt_truth(_x2c_macro_array_15) ? _x2c_macro_array_15 -> length : 0;
-  Buffer_write(_x2c_macro_out_13, "[ ");
-  for(size_t _x2c_macro_i_10 = 0;  _x2c_macro_i_10 < _x2c_macro_n_5;  _x2c_macro_i_10 ++){
-    Var _x2c_macro_element_7 = int_var(_x2c_macro_data_8[_x2c_macro_i_10]);
-    if(_x2c_macro_mode_2 == 40228) Var_write_str(_x2c_macro_element_7, _x2c_macro_out_13);
-    else Var_write_repr(_x2c_macro_element_7, _x2c_macro_out_13);
-    if(_x2c_macro_i_10 < _x2c_macro_n_5 - 1) Buffer_write(_x2c_macro_out_13, ", ");
+  RenderPath _x2c_macro_path_2;
+  if(! RenderPath_enter(&(_x2c_macro_path_2), _x2c_macro_array_15)) return Buffer_printf(_x2c_macro_out_13, "<array: 0x%012lX>", (long) _x2c_macro_array_15);
+  {
+  _x2c_defer_env_12 _x2c_defer_env_48 = {._x2c_defer_capture_22 =(const void *) & _x2c_macro_path_2};
+
+  X2CCleanup _x2c_defer_record_12 = {
+    .fn = _x2c_defer_cleanup_12,
+    .env = & _x2c_defer_env_48
+  };
+  x2c_cleanup_push(&_x2c_defer_record_12);
+  {
+    int * _x2c_macro_data_8 = ArrayInt_truth(_x2c_macro_array_15) ?(int *) _x2c_macro_array_15 -> bytes : NULL;
+    size_t _x2c_macro_n_5 = ArrayInt_truth(_x2c_macro_array_15) ? _x2c_macro_array_15 -> length : 0;
+    Buffer_write(_x2c_macro_out_13, "[ ");
+    for(size_t _x2c_macro_i_10 = 0;  _x2c_macro_i_10 < _x2c_macro_n_5;  _x2c_macro_i_10 ++){
+      Var _x2c_macro_element_7 = int_var(_x2c_macro_data_8[_x2c_macro_i_10]);
+      if(_x2c_macro_mode_2 == 40228) Var_write_str(_x2c_macro_element_7, _x2c_macro_out_13);
+      else Var_write_repr(_x2c_macro_element_7, _x2c_macro_out_13);
+      if(_x2c_macro_i_10 < _x2c_macro_n_5 - 1) Buffer_write(_x2c_macro_out_13, ", ");
+    }
+    {
+      Buffer _x2c_return_value_11 = Buffer_write(_x2c_macro_out_13, " ]");
+      {
+  int _x2c_cleanup_prev_23 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_12);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_23;
+  return _x2c_return_value_11;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_13, " ]");
+
+  int _x2c_cleanup_prev_24 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_12);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_24;
+}
 }
 
 Array ArrayInt_array(ArrayInt _x2c_macro_array_14){
@@ -2450,13 +2593,13 @@ Array ArrayInt_array(ArrayInt _x2c_macro_array_14){
   if(_x2c_macro_array_14 -> length > INT_MAX) _size_limit(_2, _x2c_macro_array_14 -> length);
   Array _x2c_macro_boxed_2 = Array_new(), _x2c_macro_result_4 = NULL;
   {
-  _x2c_defer_env_10 _x2c_defer_env_39 = {._x2c_defer_capture_20 =(const void *) & _x2c_macro_result_4, ._x2c_defer_capture_21 =(const void *) & _x2c_macro_boxed_2};
+  _x2c_defer_env_13 _x2c_defer_env_49 = {._x2c_defer_capture_23 =(const void *) & _x2c_macro_result_4, ._x2c_defer_capture_24 =(const void *) & _x2c_macro_boxed_2};
 
-  X2CCleanup _x2c_defer_record_10 = {
-    .fn = _x2c_defer_cleanup_10,
-    .env = & _x2c_defer_env_39
+  X2CCleanup _x2c_defer_record_13 = {
+    .fn = _x2c_defer_cleanup_13,
+    .env = & _x2c_defer_env_49
   };
-  x2c_cleanup_push(&_x2c_defer_record_10);
+  x2c_cleanup_push(&_x2c_defer_record_13);
   {
     int * _x2c_macro_data_7 =(int *) _x2c_macro_array_14 -> bytes;
     for(size_t _x2c_macro_i_9 = 0;  _x2c_macro_i_9 < _x2c_macro_array_14 -> length;  _x2c_macro_i_9 ++){
@@ -2464,24 +2607,24 @@ Array ArrayInt_array(ArrayInt _x2c_macro_array_14){
       Block_append((Block) _x2c_macro_boxed_2, & _x2c_macro_element_6, 1);
     }
     {
-      Array _x2c_return_value_9 = _x2c_macro_result_4 = _x2c_macro_boxed_2;
+      Array _x2c_return_value_12 = _x2c_macro_result_4 = _x2c_macro_boxed_2;
       {
-  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_25 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_10);
+  x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
-  return _x2c_return_value_9;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_25;
+  return _x2c_return_value_12;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_20 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_26 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_10);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_20;
+  x2c_cleanup_leave(&_x2c_defer_record_13);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_26;
 }
 }
 
@@ -2514,34 +2657,34 @@ ArrayInt Array_arrayint(Array _x2c_macro_values_8){
   if((void *) _x2c_macro_values_8 == NULL) return NULL;
   ArrayInt _x2c_macro_packed_2 =(ArrayInt) Block_new(sizeof(int)), _x2c_macro_result_5 = NULL;
   {
-  _x2c_defer_env_11 _x2c_defer_env_40 = {._x2c_defer_capture_22 =(const void *) & _x2c_macro_result_5, ._x2c_defer_capture_23 =(const void *) & _x2c_macro_packed_2};
+  _x2c_defer_env_14 _x2c_defer_env_50 = {._x2c_defer_capture_25 =(const void *) & _x2c_macro_result_5, ._x2c_defer_capture_26 =(const void *) & _x2c_macro_packed_2};
 
-  X2CCleanup _x2c_defer_record_11 = {
-    .fn = _x2c_defer_cleanup_11,
-    .env = & _x2c_defer_env_40
+  X2CCleanup _x2c_defer_record_14 = {
+    .fn = _x2c_defer_cleanup_14,
+    .env = & _x2c_defer_env_50
   };
-  x2c_cleanup_push(&_x2c_defer_record_11);
+  x2c_cleanup_push(&_x2c_defer_record_14);
   {
     for(size_t _x2c_macro_i_11 = 0;  _x2c_macro_i_11 < _x2c_macro_values_8 -> length;  _x2c_macro_i_11 ++) ArrayInt_push(_x2c_macro_packed_2, Var_int(Var_convert(Array_getindex(_x2c_macro_values_8, _x2c_macro_i_11), 3453797)));
     {
-      ArrayInt _x2c_return_value_10 = _x2c_macro_result_5 = _x2c_macro_packed_2;
+      ArrayInt _x2c_return_value_13 = _x2c_macro_result_5 = _x2c_macro_packed_2;
       {
-  int _x2c_cleanup_prev_21 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_27 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_11);
+  x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_21;
-  return _x2c_return_value_10;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_27;
+  return _x2c_return_value_13;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_22 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_28 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_11);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_22;
+  x2c_cleanup_leave(&_x2c_defer_record_14);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_28;
 }
 }
 
@@ -2564,26 +2707,26 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_macro_array_17, Context _x
   if((void *) _x2c_macro_array_17 == NULL || ! Context_owns(_x2c_macro_source_5, _x2c_macro_array_17)) return _x2c_macro_array_17;
   ArrayInt _x2c_macro_staged_2 = _prepare_array_export(ArrayInt_block(_x2c_macro_array_17), _x2c_macro_source_5), _x2c_macro_committed_2 = NULL;
   {
-  _x2c_defer_env_12 _x2c_defer_env_41 = {._x2c_defer_capture_24 =(const void *) & _x2c_macro_staged_2, ._x2c_defer_capture_25 =(const void *) & _x2c_macro_committed_2};
+  _x2c_defer_env_15 _x2c_defer_env_51 = {._x2c_defer_capture_27 =(const void *) & _x2c_macro_staged_2, ._x2c_defer_capture_28 =(const void *) & _x2c_macro_committed_2};
 
-  X2CCleanup _x2c_defer_record_12 = {
-    .fn = _x2c_defer_cleanup_12,
-    .env = & _x2c_defer_env_41
+  X2CCleanup _x2c_defer_record_15 = {
+    .fn = _x2c_defer_cleanup_15,
+    .env = & _x2c_defer_env_51
   };
-  x2c_cleanup_push(&_x2c_defer_record_12);
+  x2c_cleanup_push(&_x2c_defer_record_15);
   {
     Scope * _x2c_macro_destination_2 = Context_export_destination(_x2c_macro_source_5);
     if((void *) _x2c_macro_staged_2 == NULL){
       Block_move_to(ArrayInt_block(_x2c_macro_array_17), _x2c_macro_destination_2);
       {
-        ArrayInt _x2c_return_value_11 = _x2c_macro_array_17;
+        ArrayInt _x2c_return_value_14 = _x2c_macro_array_17;
         {
-  int _x2c_cleanup_prev_23 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_29 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_12);
+  x2c_cleanup_leave(& _x2c_defer_record_15);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_23;
-  return _x2c_return_value_11;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_29;
+  return _x2c_return_value_14;
 
 }
       }
@@ -2603,24 +2746,24 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_macro_array_17, Context _x
     ArrayInt_free(_x2c_macro_staged_2);
     _x2c_macro_committed_2 = _x2c_macro_array_17;
     {
-      ArrayInt _x2c_return_value_12 = _x2c_macro_array_17;
+      ArrayInt _x2c_return_value_15 = _x2c_macro_array_17;
       {
-  int _x2c_cleanup_prev_24 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_30 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_12);
+  x2c_cleanup_leave(& _x2c_defer_record_15);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_24;
-  return _x2c_return_value_12;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_30;
+  return _x2c_return_value_15;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_25 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_31 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_12);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_25;
+  x2c_cleanup_leave(&_x2c_defer_record_15);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_31;
 }
 }
 
@@ -2709,13 +2852,13 @@ static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_18, int _x2c_mac
     _x2c_macro_copied_3 = 1;
   }
   {
-  _x2c_defer_env_13 _x2c_defer_env_42 = {._x2c_defer_capture_26 =(const void *) & _x2c_macro_copied_3, ._x2c_defer_capture_27 =(const void *) & _x2c_macro_source_6};
+  _x2c_defer_env_16 _x2c_defer_env_52 = {._x2c_defer_capture_29 =(const void *) & _x2c_macro_copied_3, ._x2c_defer_capture_30 =(const void *) & _x2c_macro_source_6};
 
-  X2CCleanup _x2c_defer_record_13 = {
-    .fn = _x2c_defer_cleanup_13,
-    .env = & _x2c_defer_env_42
+  X2CCleanup _x2c_defer_record_16 = {
+    .fn = _x2c_defer_cleanup_16,
+    .env = & _x2c_defer_env_52
   };
-  x2c_cleanup_push(&_x2c_defer_record_13);
+  x2c_cleanup_push(&_x2c_defer_record_16);
   {
     if(_x2c_macro_delta_3 > 0){
       if(_x2c_macro_delta_3 > INT_MAX - _x2c_macro_n_6){
@@ -2736,10 +2879,10 @@ static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_18, int _x2c_mac
     if(_x2c_macro_delta_3 < 0) _x2c_macro_array_18 -> length = _x2c_macro_n_6 + _x2c_macro_delta_3;
   }
 
-  int _x2c_cleanup_prev_26 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_32 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_13);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_26;
+  x2c_cleanup_leave(&_x2c_defer_record_16);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_32;
 }
 }
 
@@ -2985,16 +3128,46 @@ static int ArrayLong__core_compare(ArrayLong _x2c_macro_a_18, ArrayLong _x2c_mac
 Var long_var(long);
 
 static Buffer ArrayLong__core_write(ArrayLong _x2c_macro_array_21, Buffer _x2c_macro_out_18, Symbol _x2c_macro_mode_3){
-  long * _x2c_macro_data_11 = ArrayLong_truth(_x2c_macro_array_21) ?(long *) _x2c_macro_array_21 -> bytes : NULL;
-  size_t _x2c_macro_n_7 = ArrayLong_truth(_x2c_macro_array_21) ? _x2c_macro_array_21 -> length : 0;
-  Buffer_write(_x2c_macro_out_18, "[ ");
-  for(size_t _x2c_macro_i_14 = 0;  _x2c_macro_i_14 < _x2c_macro_n_7;  _x2c_macro_i_14 ++){
-    Var _x2c_macro_element_10 = long_var(_x2c_macro_data_11[_x2c_macro_i_14]);
-    if(_x2c_macro_mode_3 == 40228) Var_write_str(_x2c_macro_element_10, _x2c_macro_out_18);
-    else Var_write_repr(_x2c_macro_element_10, _x2c_macro_out_18);
-    if(_x2c_macro_i_14 < _x2c_macro_n_7 - 1) Buffer_write(_x2c_macro_out_18, ", ");
+  RenderPath _x2c_macro_path_3;
+  if(! RenderPath_enter(&(_x2c_macro_path_3), _x2c_macro_array_21)) return Buffer_printf(_x2c_macro_out_18, "<array: 0x%012lX>", (long) _x2c_macro_array_21);
+  {
+  _x2c_defer_env_17 _x2c_defer_env_53 = {._x2c_defer_capture_31 =(const void *) & _x2c_macro_path_3};
+
+  X2CCleanup _x2c_defer_record_17 = {
+    .fn = _x2c_defer_cleanup_17,
+    .env = & _x2c_defer_env_53
+  };
+  x2c_cleanup_push(&_x2c_defer_record_17);
+  {
+    long * _x2c_macro_data_11 = ArrayLong_truth(_x2c_macro_array_21) ?(long *) _x2c_macro_array_21 -> bytes : NULL;
+    size_t _x2c_macro_n_7 = ArrayLong_truth(_x2c_macro_array_21) ? _x2c_macro_array_21 -> length : 0;
+    Buffer_write(_x2c_macro_out_18, "[ ");
+    for(size_t _x2c_macro_i_14 = 0;  _x2c_macro_i_14 < _x2c_macro_n_7;  _x2c_macro_i_14 ++){
+      Var _x2c_macro_element_10 = long_var(_x2c_macro_data_11[_x2c_macro_i_14]);
+      if(_x2c_macro_mode_3 == 40228) Var_write_str(_x2c_macro_element_10, _x2c_macro_out_18);
+      else Var_write_repr(_x2c_macro_element_10, _x2c_macro_out_18);
+      if(_x2c_macro_i_14 < _x2c_macro_n_7 - 1) Buffer_write(_x2c_macro_out_18, ", ");
+    }
+    {
+      Buffer _x2c_return_value_16 = Buffer_write(_x2c_macro_out_18, " ]");
+      {
+  int _x2c_cleanup_prev_33 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_17);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_33;
+  return _x2c_return_value_16;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_18, " ]");
+
+  int _x2c_cleanup_prev_34 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_17);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_34;
+}
 }
 
 Array ArrayLong_array(ArrayLong _x2c_macro_array_20){
@@ -3003,13 +3176,13 @@ Array ArrayLong_array(ArrayLong _x2c_macro_array_20){
   if(_x2c_macro_array_20 -> length > INT_MAX) _size_limit(_3, _x2c_macro_array_20 -> length);
   Array _x2c_macro_boxed_3 = Array_new(), _x2c_macro_result_6 = NULL;
   {
-  _x2c_defer_env_14 _x2c_defer_env_43 = {._x2c_defer_capture_28 =(const void *) & _x2c_macro_result_6, ._x2c_defer_capture_29 =(const void *) & _x2c_macro_boxed_3};
+  _x2c_defer_env_18 _x2c_defer_env_54 = {._x2c_defer_capture_32 =(const void *) & _x2c_macro_result_6, ._x2c_defer_capture_33 =(const void *) & _x2c_macro_boxed_3};
 
-  X2CCleanup _x2c_defer_record_14 = {
-    .fn = _x2c_defer_cleanup_14,
-    .env = & _x2c_defer_env_43
+  X2CCleanup _x2c_defer_record_18 = {
+    .fn = _x2c_defer_cleanup_18,
+    .env = & _x2c_defer_env_54
   };
-  x2c_cleanup_push(&_x2c_defer_record_14);
+  x2c_cleanup_push(&_x2c_defer_record_18);
   {
     long * _x2c_macro_data_10 =(long *) _x2c_macro_array_20 -> bytes;
     for(size_t _x2c_macro_i_13 = 0;  _x2c_macro_i_13 < _x2c_macro_array_20 -> length;  _x2c_macro_i_13 ++){
@@ -3017,24 +3190,24 @@ Array ArrayLong_array(ArrayLong _x2c_macro_array_20){
       Block_append((Block) _x2c_macro_boxed_3, & _x2c_macro_element_9, 1);
     }
     {
-      Array _x2c_return_value_13 = _x2c_macro_result_6 = _x2c_macro_boxed_3;
+      Array _x2c_return_value_17 = _x2c_macro_result_6 = _x2c_macro_boxed_3;
       {
-  int _x2c_cleanup_prev_27 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_35 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_14);
+  x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_27;
-  return _x2c_return_value_13;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_35;
+  return _x2c_return_value_17;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_28 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_36 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_14);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_28;
+  x2c_cleanup_leave(&_x2c_defer_record_18);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_36;
 }
 }
 
@@ -3067,34 +3240,34 @@ ArrayLong Array_arraylong(Array _x2c_macro_values_11){
   if((void *) _x2c_macro_values_11 == NULL) return NULL;
   ArrayLong _x2c_macro_packed_3 =(ArrayLong) Block_new(sizeof(long)), _x2c_macro_result_7 = NULL;
   {
-  _x2c_defer_env_15 _x2c_defer_env_44 = {._x2c_defer_capture_30 =(const void *) & _x2c_macro_result_7, ._x2c_defer_capture_31 =(const void *) & _x2c_macro_packed_3};
+  _x2c_defer_env_19 _x2c_defer_env_55 = {._x2c_defer_capture_34 =(const void *) & _x2c_macro_result_7, ._x2c_defer_capture_35 =(const void *) & _x2c_macro_packed_3};
 
-  X2CCleanup _x2c_defer_record_15 = {
-    .fn = _x2c_defer_cleanup_15,
-    .env = & _x2c_defer_env_44
+  X2CCleanup _x2c_defer_record_19 = {
+    .fn = _x2c_defer_cleanup_19,
+    .env = & _x2c_defer_env_55
   };
-  x2c_cleanup_push(&_x2c_defer_record_15);
+  x2c_cleanup_push(&_x2c_defer_record_19);
   {
     for(size_t _x2c_macro_i_15 = 0;  _x2c_macro_i_15 < _x2c_macro_values_11 -> length;  _x2c_macro_i_15 ++) ArrayLong_push(_x2c_macro_packed_3, Var_long(Var_convert(Array_getindex(_x2c_macro_values_11, _x2c_macro_i_15), 818062)));
     {
-      ArrayLong _x2c_return_value_14 = _x2c_macro_result_7 = _x2c_macro_packed_3;
+      ArrayLong _x2c_return_value_18 = _x2c_macro_result_7 = _x2c_macro_packed_3;
       {
-  int _x2c_cleanup_prev_29 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_37 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_15);
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_29;
-  return _x2c_return_value_14;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_37;
+  return _x2c_return_value_18;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_30 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_38 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_15);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_30;
+  x2c_cleanup_leave(&_x2c_defer_record_19);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_38;
 }
 }
 
@@ -3117,26 +3290,26 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_macro_array_23, Context
   if((void *) _x2c_macro_array_23 == NULL || ! Context_owns(_x2c_macro_source_7, _x2c_macro_array_23)) return _x2c_macro_array_23;
   ArrayLong _x2c_macro_staged_3 = _prepare_array_export(ArrayLong_block(_x2c_macro_array_23), _x2c_macro_source_7), _x2c_macro_committed_3 = NULL;
   {
-  _x2c_defer_env_16 _x2c_defer_env_45 = {._x2c_defer_capture_32 =(const void *) & _x2c_macro_staged_3, ._x2c_defer_capture_33 =(const void *) & _x2c_macro_committed_3};
+  _x2c_defer_env_20 _x2c_defer_env_56 = {._x2c_defer_capture_36 =(const void *) & _x2c_macro_staged_3, ._x2c_defer_capture_37 =(const void *) & _x2c_macro_committed_3};
 
-  X2CCleanup _x2c_defer_record_16 = {
-    .fn = _x2c_defer_cleanup_16,
-    .env = & _x2c_defer_env_45
+  X2CCleanup _x2c_defer_record_20 = {
+    .fn = _x2c_defer_cleanup_20,
+    .env = & _x2c_defer_env_56
   };
-  x2c_cleanup_push(&_x2c_defer_record_16);
+  x2c_cleanup_push(&_x2c_defer_record_20);
   {
     Scope * _x2c_macro_destination_3 = Context_export_destination(_x2c_macro_source_7);
     if((void *) _x2c_macro_staged_3 == NULL){
       Block_move_to(ArrayLong_block(_x2c_macro_array_23), _x2c_macro_destination_3);
       {
-        ArrayLong _x2c_return_value_15 = _x2c_macro_array_23;
+        ArrayLong _x2c_return_value_19 = _x2c_macro_array_23;
         {
-  int _x2c_cleanup_prev_31 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_39 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_16);
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_31;
-  return _x2c_return_value_15;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_39;
+  return _x2c_return_value_19;
 
 }
       }
@@ -3156,24 +3329,24 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_macro_array_23, Context
     ArrayLong_free(_x2c_macro_staged_3);
     _x2c_macro_committed_3 = _x2c_macro_array_23;
     {
-      ArrayLong _x2c_return_value_16 = _x2c_macro_array_23;
+      ArrayLong _x2c_return_value_20 = _x2c_macro_array_23;
       {
-  int _x2c_cleanup_prev_32 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_40 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_16);
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_32;
-  return _x2c_return_value_16;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_40;
+  return _x2c_return_value_20;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_33 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_41 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_16);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_33;
+  x2c_cleanup_leave(&_x2c_defer_record_20);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_41;
 }
 }
 
@@ -3262,13 +3435,13 @@ static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_24, int _x2c_m
     _x2c_macro_copied_4 = 1;
   }
   {
-  _x2c_defer_env_17 _x2c_defer_env_46 = {._x2c_defer_capture_34 =(const void *) & _x2c_macro_copied_4, ._x2c_defer_capture_35 =(const void *) & _x2c_macro_source_8};
+  _x2c_defer_env_21 _x2c_defer_env_57 = {._x2c_defer_capture_38 =(const void *) & _x2c_macro_copied_4, ._x2c_defer_capture_39 =(const void *) & _x2c_macro_source_8};
 
-  X2CCleanup _x2c_defer_record_17 = {
-    .fn = _x2c_defer_cleanup_17,
-    .env = & _x2c_defer_env_46
+  X2CCleanup _x2c_defer_record_21 = {
+    .fn = _x2c_defer_cleanup_21,
+    .env = & _x2c_defer_env_57
   };
-  x2c_cleanup_push(&_x2c_defer_record_17);
+  x2c_cleanup_push(&_x2c_defer_record_21);
   {
     if(_x2c_macro_delta_4 > 0){
       if(_x2c_macro_delta_4 > INT_MAX - _x2c_macro_n_8){
@@ -3289,10 +3462,10 @@ static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_24, int _x2c_m
     if(_x2c_macro_delta_4 < 0) _x2c_macro_array_24 -> length = _x2c_macro_n_8 + _x2c_macro_delta_4;
   }
 
-  int _x2c_cleanup_prev_34 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_42 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_17);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_34;
+  x2c_cleanup_leave(&_x2c_defer_record_21);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_42;
 }
 }
 
@@ -3536,16 +3709,46 @@ static int ArrayFloat__core_compare(ArrayFloat _x2c_macro_a_23, ArrayFloat _x2c_
 }
 
 static Buffer ArrayFloat__core_write(ArrayFloat _x2c_macro_array_27, Buffer _x2c_macro_out_23, Symbol _x2c_macro_mode_4){
-  float * _x2c_macro_data_14 = ArrayFloat_truth(_x2c_macro_array_27) ?(float *) _x2c_macro_array_27 -> bytes : NULL;
-  size_t _x2c_macro_n_9 = ArrayFloat_truth(_x2c_macro_array_27) ? _x2c_macro_array_27 -> length : 0;
-  Buffer_write(_x2c_macro_out_23, "[ ");
-  for(size_t _x2c_macro_i_18 = 0;  _x2c_macro_i_18 < _x2c_macro_n_9;  _x2c_macro_i_18 ++){
-    Var _x2c_macro_element_13 = float_var(_x2c_macro_data_14[_x2c_macro_i_18]);
-    if(_x2c_macro_mode_4 == 40228) Var_write_str(_x2c_macro_element_13, _x2c_macro_out_23);
-    else Var_write_repr(_x2c_macro_element_13, _x2c_macro_out_23);
-    if(_x2c_macro_i_18 < _x2c_macro_n_9 - 1) Buffer_write(_x2c_macro_out_23, ", ");
+  RenderPath _x2c_macro_path_4;
+  if(! RenderPath_enter(&(_x2c_macro_path_4), _x2c_macro_array_27)) return Buffer_printf(_x2c_macro_out_23, "<array: 0x%012lX>", (long) _x2c_macro_array_27);
+  {
+  _x2c_defer_env_22 _x2c_defer_env_58 = {._x2c_defer_capture_40 =(const void *) & _x2c_macro_path_4};
+
+  X2CCleanup _x2c_defer_record_22 = {
+    .fn = _x2c_defer_cleanup_22,
+    .env = & _x2c_defer_env_58
+  };
+  x2c_cleanup_push(&_x2c_defer_record_22);
+  {
+    float * _x2c_macro_data_14 = ArrayFloat_truth(_x2c_macro_array_27) ?(float *) _x2c_macro_array_27 -> bytes : NULL;
+    size_t _x2c_macro_n_9 = ArrayFloat_truth(_x2c_macro_array_27) ? _x2c_macro_array_27 -> length : 0;
+    Buffer_write(_x2c_macro_out_23, "[ ");
+    for(size_t _x2c_macro_i_18 = 0;  _x2c_macro_i_18 < _x2c_macro_n_9;  _x2c_macro_i_18 ++){
+      Var _x2c_macro_element_13 = float_var(_x2c_macro_data_14[_x2c_macro_i_18]);
+      if(_x2c_macro_mode_4 == 40228) Var_write_str(_x2c_macro_element_13, _x2c_macro_out_23);
+      else Var_write_repr(_x2c_macro_element_13, _x2c_macro_out_23);
+      if(_x2c_macro_i_18 < _x2c_macro_n_9 - 1) Buffer_write(_x2c_macro_out_23, ", ");
+    }
+    {
+      Buffer _x2c_return_value_21 = Buffer_write(_x2c_macro_out_23, " ]");
+      {
+  int _x2c_cleanup_prev_43 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_22);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_43;
+  return _x2c_return_value_21;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_23, " ]");
+
+  int _x2c_cleanup_prev_44 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_22);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_44;
+}
 }
 
 Array ArrayFloat_array(ArrayFloat _x2c_macro_array_26){
@@ -3554,13 +3757,13 @@ Array ArrayFloat_array(ArrayFloat _x2c_macro_array_26){
   if(_x2c_macro_array_26 -> length > INT_MAX) _size_limit(_4, _x2c_macro_array_26 -> length);
   Array _x2c_macro_boxed_4 = Array_new(), _x2c_macro_result_8 = NULL;
   {
-  _x2c_defer_env_18 _x2c_defer_env_47 = {._x2c_defer_capture_36 =(const void *) & _x2c_macro_result_8, ._x2c_defer_capture_37 =(const void *) & _x2c_macro_boxed_4};
+  _x2c_defer_env_23 _x2c_defer_env_59 = {._x2c_defer_capture_41 =(const void *) & _x2c_macro_result_8, ._x2c_defer_capture_42 =(const void *) & _x2c_macro_boxed_4};
 
-  X2CCleanup _x2c_defer_record_18 = {
-    .fn = _x2c_defer_cleanup_18,
-    .env = & _x2c_defer_env_47
+  X2CCleanup _x2c_defer_record_23 = {
+    .fn = _x2c_defer_cleanup_23,
+    .env = & _x2c_defer_env_59
   };
-  x2c_cleanup_push(&_x2c_defer_record_18);
+  x2c_cleanup_push(&_x2c_defer_record_23);
   {
     float * _x2c_macro_data_13 =(float *) _x2c_macro_array_26 -> bytes;
     for(size_t _x2c_macro_i_17 = 0;  _x2c_macro_i_17 < _x2c_macro_array_26 -> length;  _x2c_macro_i_17 ++){
@@ -3568,24 +3771,24 @@ Array ArrayFloat_array(ArrayFloat _x2c_macro_array_26){
       Block_append((Block) _x2c_macro_boxed_4, & _x2c_macro_element_12, 1);
     }
     {
-      Array _x2c_return_value_17 = _x2c_macro_result_8 = _x2c_macro_boxed_4;
+      Array _x2c_return_value_22 = _x2c_macro_result_8 = _x2c_macro_boxed_4;
       {
-  int _x2c_cleanup_prev_35 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_45 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_18);
+  x2c_cleanup_leave(& _x2c_defer_record_23);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_35;
-  return _x2c_return_value_17;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_45;
+  return _x2c_return_value_22;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_36 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_46 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_18);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_36;
+  x2c_cleanup_leave(&_x2c_defer_record_23);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_46;
 }
 }
 
@@ -3618,34 +3821,34 @@ ArrayFloat Array_arrayfloat(Array _x2c_macro_values_14){
   if((void *) _x2c_macro_values_14 == NULL) return NULL;
   ArrayFloat _x2c_macro_packed_4 =(ArrayFloat) Block_new(sizeof(float)), _x2c_macro_result_9 = NULL;
   {
-  _x2c_defer_env_19 _x2c_defer_env_48 = {._x2c_defer_capture_38 =(const void *) & _x2c_macro_result_9, ._x2c_defer_capture_39 =(const void *) & _x2c_macro_packed_4};
+  _x2c_defer_env_24 _x2c_defer_env_60 = {._x2c_defer_capture_43 =(const void *) & _x2c_macro_result_9, ._x2c_defer_capture_44 =(const void *) & _x2c_macro_packed_4};
 
-  X2CCleanup _x2c_defer_record_19 = {
-    .fn = _x2c_defer_cleanup_19,
-    .env = & _x2c_defer_env_48
+  X2CCleanup _x2c_defer_record_24 = {
+    .fn = _x2c_defer_cleanup_24,
+    .env = & _x2c_defer_env_60
   };
-  x2c_cleanup_push(&_x2c_defer_record_19);
+  x2c_cleanup_push(&_x2c_defer_record_24);
   {
     for(size_t _x2c_macro_i_19 = 0;  _x2c_macro_i_19 < _x2c_macro_values_14 -> length;  _x2c_macro_i_19 ++) ArrayFloat_push(_x2c_macro_packed_4, Var_float(Var_convert(Array_getindex(_x2c_macro_values_14, _x2c_macro_i_19), 3355493)));
     {
-      ArrayFloat _x2c_return_value_18 = _x2c_macro_result_9 = _x2c_macro_packed_4;
+      ArrayFloat _x2c_return_value_23 = _x2c_macro_result_9 = _x2c_macro_packed_4;
       {
-  int _x2c_cleanup_prev_37 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_47 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_19);
+  x2c_cleanup_leave(& _x2c_defer_record_24);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_37;
-  return _x2c_return_value_18;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_47;
+  return _x2c_return_value_23;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_38 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_48 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_19);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_38;
+  x2c_cleanup_leave(&_x2c_defer_record_24);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_48;
 }
 }
 
@@ -3668,26 +3871,26 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_macro_array_29, Cont
   if((void *) _x2c_macro_array_29 == NULL || ! Context_owns(_x2c_macro_source_9, _x2c_macro_array_29)) return _x2c_macro_array_29;
   ArrayFloat _x2c_macro_staged_4 = _prepare_array_export(ArrayFloat_block(_x2c_macro_array_29), _x2c_macro_source_9), _x2c_macro_committed_4 = NULL;
   {
-  _x2c_defer_env_20 _x2c_defer_env_49 = {._x2c_defer_capture_40 =(const void *) & _x2c_macro_staged_4, ._x2c_defer_capture_41 =(const void *) & _x2c_macro_committed_4};
+  _x2c_defer_env_25 _x2c_defer_env_61 = {._x2c_defer_capture_45 =(const void *) & _x2c_macro_staged_4, ._x2c_defer_capture_46 =(const void *) & _x2c_macro_committed_4};
 
-  X2CCleanup _x2c_defer_record_20 = {
-    .fn = _x2c_defer_cleanup_20,
-    .env = & _x2c_defer_env_49
+  X2CCleanup _x2c_defer_record_25 = {
+    .fn = _x2c_defer_cleanup_25,
+    .env = & _x2c_defer_env_61
   };
-  x2c_cleanup_push(&_x2c_defer_record_20);
+  x2c_cleanup_push(&_x2c_defer_record_25);
   {
     Scope * _x2c_macro_destination_4 = Context_export_destination(_x2c_macro_source_9);
     if((void *) _x2c_macro_staged_4 == NULL){
       Block_move_to(ArrayFloat_block(_x2c_macro_array_29), _x2c_macro_destination_4);
       {
-        ArrayFloat _x2c_return_value_19 = _x2c_macro_array_29;
+        ArrayFloat _x2c_return_value_24 = _x2c_macro_array_29;
         {
-  int _x2c_cleanup_prev_39 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_49 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_20);
+  x2c_cleanup_leave(& _x2c_defer_record_25);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_39;
-  return _x2c_return_value_19;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_49;
+  return _x2c_return_value_24;
 
 }
       }
@@ -3707,24 +3910,24 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_macro_array_29, Cont
     ArrayFloat_free(_x2c_macro_staged_4);
     _x2c_macro_committed_4 = _x2c_macro_array_29;
     {
-      ArrayFloat _x2c_return_value_20 = _x2c_macro_array_29;
+      ArrayFloat _x2c_return_value_25 = _x2c_macro_array_29;
       {
-  int _x2c_cleanup_prev_40 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_50 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_20);
+  x2c_cleanup_leave(& _x2c_defer_record_25);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_40;
-  return _x2c_return_value_20;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_50;
+  return _x2c_return_value_25;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_41 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_51 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_20);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_41;
+  x2c_cleanup_leave(&_x2c_defer_record_25);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_51;
 }
 }
 
@@ -3813,13 +4016,13 @@ static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro
     _x2c_macro_copied_5 = 1;
   }
   {
-  _x2c_defer_env_21 _x2c_defer_env_50 = {._x2c_defer_capture_42 =(const void *) & _x2c_macro_copied_5, ._x2c_defer_capture_43 =(const void *) & _x2c_macro_source_10};
+  _x2c_defer_env_26 _x2c_defer_env_62 = {._x2c_defer_capture_47 =(const void *) & _x2c_macro_copied_5, ._x2c_defer_capture_48 =(const void *) & _x2c_macro_source_10};
 
-  X2CCleanup _x2c_defer_record_21 = {
-    .fn = _x2c_defer_cleanup_21,
-    .env = & _x2c_defer_env_50
+  X2CCleanup _x2c_defer_record_26 = {
+    .fn = _x2c_defer_cleanup_26,
+    .env = & _x2c_defer_env_62
   };
-  x2c_cleanup_push(&_x2c_defer_record_21);
+  x2c_cleanup_push(&_x2c_defer_record_26);
   {
     if(_x2c_macro_delta_5 > 0){
       if(_x2c_macro_delta_5 > INT_MAX - _x2c_macro_n_10){
@@ -3840,10 +4043,10 @@ static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro
     if(_x2c_macro_delta_5 < 0) _x2c_macro_array_30 -> length = _x2c_macro_n_10 + _x2c_macro_delta_5;
   }
 
-  int _x2c_cleanup_prev_42 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_52 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_21);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_42;
+  x2c_cleanup_leave(&_x2c_defer_record_26);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_52;
 }
 }
 
@@ -4087,16 +4290,46 @@ static int ArrayDbl__core_compare(ArrayDbl _x2c_macro_a_27, ArrayDbl _x2c_macro_
 }
 
 static Buffer ArrayDbl__core_write(ArrayDbl _x2c_macro_array_33, Buffer _x2c_macro_out_28, Symbol _x2c_macro_mode_5){
-  double * _x2c_macro_data_17 = ArrayDbl_truth(_x2c_macro_array_33) ?(double *) _x2c_macro_array_33 -> bytes : NULL;
-  size_t _x2c_macro_n_11 = ArrayDbl_truth(_x2c_macro_array_33) ? _x2c_macro_array_33 -> length : 0;
-  Buffer_write(_x2c_macro_out_28, "[ ");
-  for(size_t _x2c_macro_i_22 = 0;  _x2c_macro_i_22 < _x2c_macro_n_11;  _x2c_macro_i_22 ++){
-    Var _x2c_macro_element_16 = double_var(_x2c_macro_data_17[_x2c_macro_i_22]);
-    if(_x2c_macro_mode_5 == 40228) Var_write_str(_x2c_macro_element_16, _x2c_macro_out_28);
-    else Var_write_repr(_x2c_macro_element_16, _x2c_macro_out_28);
-    if(_x2c_macro_i_22 < _x2c_macro_n_11 - 1) Buffer_write(_x2c_macro_out_28, ", ");
+  RenderPath _x2c_macro_path_5;
+  if(! RenderPath_enter(&(_x2c_macro_path_5), _x2c_macro_array_33)) return Buffer_printf(_x2c_macro_out_28, "<array: 0x%012lX>", (long) _x2c_macro_array_33);
+  {
+  _x2c_defer_env_27 _x2c_defer_env_63 = {._x2c_defer_capture_49 =(const void *) & _x2c_macro_path_5};
+
+  X2CCleanup _x2c_defer_record_27 = {
+    .fn = _x2c_defer_cleanup_27,
+    .env = & _x2c_defer_env_63
+  };
+  x2c_cleanup_push(&_x2c_defer_record_27);
+  {
+    double * _x2c_macro_data_17 = ArrayDbl_truth(_x2c_macro_array_33) ?(double *) _x2c_macro_array_33 -> bytes : NULL;
+    size_t _x2c_macro_n_11 = ArrayDbl_truth(_x2c_macro_array_33) ? _x2c_macro_array_33 -> length : 0;
+    Buffer_write(_x2c_macro_out_28, "[ ");
+    for(size_t _x2c_macro_i_22 = 0;  _x2c_macro_i_22 < _x2c_macro_n_11;  _x2c_macro_i_22 ++){
+      Var _x2c_macro_element_16 = double_var(_x2c_macro_data_17[_x2c_macro_i_22]);
+      if(_x2c_macro_mode_5 == 40228) Var_write_str(_x2c_macro_element_16, _x2c_macro_out_28);
+      else Var_write_repr(_x2c_macro_element_16, _x2c_macro_out_28);
+      if(_x2c_macro_i_22 < _x2c_macro_n_11 - 1) Buffer_write(_x2c_macro_out_28, ", ");
+    }
+    {
+      Buffer _x2c_return_value_26 = Buffer_write(_x2c_macro_out_28, " ]");
+      {
+  int _x2c_cleanup_prev_53 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_27);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_53;
+  return _x2c_return_value_26;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_28, " ]");
+
+  int _x2c_cleanup_prev_54 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_27);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_54;
+}
 }
 
 Array ArrayDbl_array(ArrayDbl _x2c_macro_array_32){
@@ -4105,13 +4338,13 @@ Array ArrayDbl_array(ArrayDbl _x2c_macro_array_32){
   if(_x2c_macro_array_32 -> length > INT_MAX) _size_limit(_5, _x2c_macro_array_32 -> length);
   Array _x2c_macro_boxed_5 = Array_new(), _x2c_macro_result_10 = NULL;
   {
-  _x2c_defer_env_22 _x2c_defer_env_51 = {._x2c_defer_capture_44 =(const void *) & _x2c_macro_result_10, ._x2c_defer_capture_45 =(const void *) & _x2c_macro_boxed_5};
+  _x2c_defer_env_28 _x2c_defer_env_64 = {._x2c_defer_capture_50 =(const void *) & _x2c_macro_result_10, ._x2c_defer_capture_51 =(const void *) & _x2c_macro_boxed_5};
 
-  X2CCleanup _x2c_defer_record_22 = {
-    .fn = _x2c_defer_cleanup_22,
-    .env = & _x2c_defer_env_51
+  X2CCleanup _x2c_defer_record_28 = {
+    .fn = _x2c_defer_cleanup_28,
+    .env = & _x2c_defer_env_64
   };
-  x2c_cleanup_push(&_x2c_defer_record_22);
+  x2c_cleanup_push(&_x2c_defer_record_28);
   {
     double * _x2c_macro_data_16 =(double *) _x2c_macro_array_32 -> bytes;
     for(size_t _x2c_macro_i_21 = 0;  _x2c_macro_i_21 < _x2c_macro_array_32 -> length;  _x2c_macro_i_21 ++){
@@ -4119,24 +4352,24 @@ Array ArrayDbl_array(ArrayDbl _x2c_macro_array_32){
       Block_append((Block) _x2c_macro_boxed_5, & _x2c_macro_element_15, 1);
     }
     {
-      Array _x2c_return_value_21 = _x2c_macro_result_10 = _x2c_macro_boxed_5;
+      Array _x2c_return_value_27 = _x2c_macro_result_10 = _x2c_macro_boxed_5;
       {
-  int _x2c_cleanup_prev_43 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_55 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_22);
+  x2c_cleanup_leave(& _x2c_defer_record_28);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_43;
-  return _x2c_return_value_21;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_55;
+  return _x2c_return_value_27;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_44 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_56 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_22);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_44;
+  x2c_cleanup_leave(&_x2c_defer_record_28);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_56;
 }
 }
 
@@ -4169,34 +4402,34 @@ ArrayDbl Array_arraydbl(Array _x2c_macro_values_17){
   if((void *) _x2c_macro_values_17 == NULL) return NULL;
   ArrayDbl _x2c_macro_packed_5 =(ArrayDbl) Block_new(sizeof(double)), _x2c_macro_result_11 = NULL;
   {
-  _x2c_defer_env_23 _x2c_defer_env_52 = {._x2c_defer_capture_46 =(const void *) & _x2c_macro_result_11, ._x2c_defer_capture_47 =(const void *) & _x2c_macro_packed_5};
+  _x2c_defer_env_29 _x2c_defer_env_65 = {._x2c_defer_capture_52 =(const void *) & _x2c_macro_result_11, ._x2c_defer_capture_53 =(const void *) & _x2c_macro_packed_5};
 
-  X2CCleanup _x2c_defer_record_23 = {
-    .fn = _x2c_defer_cleanup_23,
-    .env = & _x2c_defer_env_52
+  X2CCleanup _x2c_defer_record_29 = {
+    .fn = _x2c_defer_cleanup_29,
+    .env = & _x2c_defer_env_65
   };
-  x2c_cleanup_push(&_x2c_defer_record_23);
+  x2c_cleanup_push(&_x2c_defer_record_29);
   {
     for(size_t _x2c_macro_i_23 = 0;  _x2c_macro_i_23 < _x2c_macro_values_17 -> length;  _x2c_macro_i_23 ++) ArrayDbl_push(_x2c_macro_packed_5, Var_floating(Var_convert(Array_getindex(_x2c_macro_values_17, _x2c_macro_i_23), 3356265)));
     {
-      ArrayDbl _x2c_return_value_22 = _x2c_macro_result_11 = _x2c_macro_packed_5;
+      ArrayDbl _x2c_return_value_28 = _x2c_macro_result_11 = _x2c_macro_packed_5;
       {
-  int _x2c_cleanup_prev_45 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_57 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_23);
+  x2c_cleanup_leave(& _x2c_defer_record_29);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_45;
-  return _x2c_return_value_22;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_57;
+  return _x2c_return_value_28;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_46 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_58 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_23);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_46;
+  x2c_cleanup_leave(&_x2c_defer_record_29);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_58;
 }
 }
 
@@ -4219,26 +4452,26 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_macro_array_35, Context _x
   if((void *) _x2c_macro_array_35 == NULL || ! Context_owns(_x2c_macro_source_11, _x2c_macro_array_35)) return _x2c_macro_array_35;
   ArrayDbl _x2c_macro_staged_5 = _prepare_array_export(ArrayDbl_block(_x2c_macro_array_35), _x2c_macro_source_11), _x2c_macro_committed_5 = NULL;
   {
-  _x2c_defer_env_24 _x2c_defer_env_53 = {._x2c_defer_capture_48 =(const void *) & _x2c_macro_staged_5, ._x2c_defer_capture_49 =(const void *) & _x2c_macro_committed_5};
+  _x2c_defer_env_30 _x2c_defer_env_66 = {._x2c_defer_capture_54 =(const void *) & _x2c_macro_staged_5, ._x2c_defer_capture_55 =(const void *) & _x2c_macro_committed_5};
 
-  X2CCleanup _x2c_defer_record_24 = {
-    .fn = _x2c_defer_cleanup_24,
-    .env = & _x2c_defer_env_53
+  X2CCleanup _x2c_defer_record_30 = {
+    .fn = _x2c_defer_cleanup_30,
+    .env = & _x2c_defer_env_66
   };
-  x2c_cleanup_push(&_x2c_defer_record_24);
+  x2c_cleanup_push(&_x2c_defer_record_30);
   {
     Scope * _x2c_macro_destination_5 = Context_export_destination(_x2c_macro_source_11);
     if((void *) _x2c_macro_staged_5 == NULL){
       Block_move_to(ArrayDbl_block(_x2c_macro_array_35), _x2c_macro_destination_5);
       {
-        ArrayDbl _x2c_return_value_23 = _x2c_macro_array_35;
+        ArrayDbl _x2c_return_value_29 = _x2c_macro_array_35;
         {
-  int _x2c_cleanup_prev_47 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_59 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_24);
+  x2c_cleanup_leave(& _x2c_defer_record_30);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_47;
-  return _x2c_return_value_23;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_59;
+  return _x2c_return_value_29;
 
 }
       }
@@ -4258,24 +4491,24 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_macro_array_35, Context _x
     ArrayDbl_free(_x2c_macro_staged_5);
     _x2c_macro_committed_5 = _x2c_macro_array_35;
     {
-      ArrayDbl _x2c_return_value_24 = _x2c_macro_array_35;
+      ArrayDbl _x2c_return_value_30 = _x2c_macro_array_35;
       {
-  int _x2c_cleanup_prev_48 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_60 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_24);
+  x2c_cleanup_leave(& _x2c_defer_record_30);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_48;
-  return _x2c_return_value_24;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_60;
+  return _x2c_return_value_30;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_49 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_61 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_24);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_49;
+  x2c_cleanup_leave(&_x2c_defer_record_30);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_61;
 }
 }
 
@@ -4364,13 +4597,13 @@ static void ArrayString__core_setslice(ArrayString _x2c_macro_array_36, int _x2c
     _x2c_macro_copied_6 = 1;
   }
   {
-  _x2c_defer_env_25 _x2c_defer_env_54 = {._x2c_defer_capture_50 =(const void *) & _x2c_macro_copied_6, ._x2c_defer_capture_51 =(const void *) & _x2c_macro_source_12};
+  _x2c_defer_env_31 _x2c_defer_env_67 = {._x2c_defer_capture_56 =(const void *) & _x2c_macro_copied_6, ._x2c_defer_capture_57 =(const void *) & _x2c_macro_source_12};
 
-  X2CCleanup _x2c_defer_record_25 = {
-    .fn = _x2c_defer_cleanup_25,
-    .env = & _x2c_defer_env_54
+  X2CCleanup _x2c_defer_record_31 = {
+    .fn = _x2c_defer_cleanup_31,
+    .env = & _x2c_defer_env_67
   };
-  x2c_cleanup_push(&_x2c_defer_record_25);
+  x2c_cleanup_push(&_x2c_defer_record_31);
   {
     if(_x2c_macro_delta_6 > 0){
       if(_x2c_macro_delta_6 > INT_MAX - _x2c_macro_n_12){
@@ -4391,10 +4624,10 @@ static void ArrayString__core_setslice(ArrayString _x2c_macro_array_36, int _x2c
     if(_x2c_macro_delta_6 < 0) _x2c_macro_array_36 -> length = _x2c_macro_n_12 + _x2c_macro_delta_6;
   }
 
-  int _x2c_cleanup_prev_50 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_62 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_25);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_50;
+  x2c_cleanup_leave(&_x2c_defer_record_31);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_62;
 }
 }
 
@@ -4640,16 +4873,46 @@ static int ArrayString__core_compare(ArrayString _x2c_macro_a_31, ArrayString _x
 }
 
 static Buffer ArrayString__core_write(ArrayString _x2c_macro_array_39, Buffer _x2c_macro_out_33, Symbol _x2c_macro_mode_6){
-  String * _x2c_macro_data_20 = ArrayString_truth(_x2c_macro_array_39) ?(String *) _x2c_macro_array_39 -> bytes : NULL;
-  size_t _x2c_macro_n_13 = ArrayString_truth(_x2c_macro_array_39) ? _x2c_macro_array_39 -> length : 0;
-  Buffer_write(_x2c_macro_out_33, "[ ");
-  for(size_t _x2c_macro_i_26 = 0;  _x2c_macro_i_26 < _x2c_macro_n_13;  _x2c_macro_i_26 ++){
-    Var _x2c_macro_element_19 = String_var(_x2c_macro_data_20[_x2c_macro_i_26]);
-    if(_x2c_macro_mode_6 == 40228) Var_write_str(_x2c_macro_element_19, _x2c_macro_out_33);
-    else Var_write_repr(_x2c_macro_element_19, _x2c_macro_out_33);
-    if(_x2c_macro_i_26 < _x2c_macro_n_13 - 1) Buffer_write(_x2c_macro_out_33, ", ");
+  RenderPath _x2c_macro_path_6;
+  if(! RenderPath_enter(&(_x2c_macro_path_6), _x2c_macro_array_39)) return Buffer_printf(_x2c_macro_out_33, "<array: 0x%012lX>", (long) _x2c_macro_array_39);
+  {
+  _x2c_defer_env_32 _x2c_defer_env_68 = {._x2c_defer_capture_58 =(const void *) & _x2c_macro_path_6};
+
+  X2CCleanup _x2c_defer_record_32 = {
+    .fn = _x2c_defer_cleanup_32,
+    .env = & _x2c_defer_env_68
+  };
+  x2c_cleanup_push(&_x2c_defer_record_32);
+  {
+    String * _x2c_macro_data_20 = ArrayString_truth(_x2c_macro_array_39) ?(String *) _x2c_macro_array_39 -> bytes : NULL;
+    size_t _x2c_macro_n_13 = ArrayString_truth(_x2c_macro_array_39) ? _x2c_macro_array_39 -> length : 0;
+    Buffer_write(_x2c_macro_out_33, "[ ");
+    for(size_t _x2c_macro_i_26 = 0;  _x2c_macro_i_26 < _x2c_macro_n_13;  _x2c_macro_i_26 ++){
+      Var _x2c_macro_element_19 = String_var(_x2c_macro_data_20[_x2c_macro_i_26]);
+      if(_x2c_macro_mode_6 == 40228) Var_write_str(_x2c_macro_element_19, _x2c_macro_out_33);
+      else Var_write_repr(_x2c_macro_element_19, _x2c_macro_out_33);
+      if(_x2c_macro_i_26 < _x2c_macro_n_13 - 1) Buffer_write(_x2c_macro_out_33, ", ");
+    }
+    {
+      Buffer _x2c_return_value_31 = Buffer_write(_x2c_macro_out_33, " ]");
+      {
+  int _x2c_cleanup_prev_63 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_32);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_63;
+  return _x2c_return_value_31;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_33, " ]");
+
+  int _x2c_cleanup_prev_64 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_32);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_64;
+}
 }
 
 Array ArrayString_array(ArrayString _x2c_macro_array_38){
@@ -4658,13 +4921,13 @@ Array ArrayString_array(ArrayString _x2c_macro_array_38){
   if(_x2c_macro_array_38 -> length > INT_MAX) _size_limit(_6, _x2c_macro_array_38 -> length);
   Array _x2c_macro_boxed_6 = Array_new(), _x2c_macro_result_12 = NULL;
   {
-  _x2c_defer_env_26 _x2c_defer_env_55 = {._x2c_defer_capture_52 =(const void *) & _x2c_macro_result_12, ._x2c_defer_capture_53 =(const void *) & _x2c_macro_boxed_6};
+  _x2c_defer_env_33 _x2c_defer_env_69 = {._x2c_defer_capture_59 =(const void *) & _x2c_macro_result_12, ._x2c_defer_capture_60 =(const void *) & _x2c_macro_boxed_6};
 
-  X2CCleanup _x2c_defer_record_26 = {
-    .fn = _x2c_defer_cleanup_26,
-    .env = & _x2c_defer_env_55
+  X2CCleanup _x2c_defer_record_33 = {
+    .fn = _x2c_defer_cleanup_33,
+    .env = & _x2c_defer_env_69
   };
-  x2c_cleanup_push(&_x2c_defer_record_26);
+  x2c_cleanup_push(&_x2c_defer_record_33);
   {
     String * _x2c_macro_data_19 =(String *) _x2c_macro_array_38 -> bytes;
     for(size_t _x2c_macro_i_25 = 0;  _x2c_macro_i_25 < _x2c_macro_array_38 -> length;  _x2c_macro_i_25 ++){
@@ -4672,24 +4935,24 @@ Array ArrayString_array(ArrayString _x2c_macro_array_38){
       Block_append((Block) _x2c_macro_boxed_6, & _x2c_macro_element_18, 1);
     }
     {
-      Array _x2c_return_value_25 = _x2c_macro_result_12 = _x2c_macro_boxed_6;
+      Array _x2c_return_value_32 = _x2c_macro_result_12 = _x2c_macro_boxed_6;
       {
-  int _x2c_cleanup_prev_51 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_65 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_26);
+  x2c_cleanup_leave(& _x2c_defer_record_33);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_51;
-  return _x2c_return_value_25;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_65;
+  return _x2c_return_value_32;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_52 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_66 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_26);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_52;
+  x2c_cleanup_leave(&_x2c_defer_record_33);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_66;
 }
 }
 
@@ -4722,34 +4985,34 @@ ArrayString Array_arraystring(Array _x2c_macro_values_20){
   if((void *) _x2c_macro_values_20 == NULL) return NULL;
   ArrayString _x2c_macro_packed_6 =(ArrayString) Block_new(sizeof(String)), _x2c_macro_result_14 = NULL;
   {
-  _x2c_defer_env_27 _x2c_defer_env_56 = {._x2c_defer_capture_54 =(const void *) & _x2c_macro_result_14, ._x2c_defer_capture_55 =(const void *) & _x2c_macro_packed_6};
+  _x2c_defer_env_34 _x2c_defer_env_70 = {._x2c_defer_capture_61 =(const void *) & _x2c_macro_result_14, ._x2c_defer_capture_62 =(const void *) & _x2c_macro_packed_6};
 
-  X2CCleanup _x2c_defer_record_27 = {
-    .fn = _x2c_defer_cleanup_27,
-    .env = & _x2c_defer_env_56
+  X2CCleanup _x2c_defer_record_34 = {
+    .fn = _x2c_defer_cleanup_34,
+    .env = & _x2c_defer_env_70
   };
-  x2c_cleanup_push(&_x2c_defer_record_27);
+  x2c_cleanup_push(&_x2c_defer_record_34);
   {
     for(size_t _x2c_macro_i_27 = 0;  _x2c_macro_i_27 < _x2c_macro_values_20 -> length;  _x2c_macro_i_27 ++) ArrayString_push(_x2c_macro_packed_6, Var_string(Array_getindex(_x2c_macro_values_20, _x2c_macro_i_27)));
     {
-      ArrayString _x2c_return_value_26 = _x2c_macro_result_14 = _x2c_macro_packed_6;
+      ArrayString _x2c_return_value_33 = _x2c_macro_result_14 = _x2c_macro_packed_6;
       {
-  int _x2c_cleanup_prev_53 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_67 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_27);
+  x2c_cleanup_leave(& _x2c_defer_record_34);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_53;
-  return _x2c_return_value_26;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_67;
+  return _x2c_return_value_33;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_54 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_68 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_27);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_54;
+  x2c_cleanup_leave(&_x2c_defer_record_34);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_68;
 }
 }
 
@@ -4772,26 +5035,26 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_macro_array_41, C
   if((void *) _x2c_macro_array_41 == NULL || ! Context_owns(_x2c_macro_source_13, _x2c_macro_array_41)) return _x2c_macro_array_41;
   ArrayString _x2c_macro_staged_6 = _prepare_string_array_export(_x2c_macro_array_41, _x2c_macro_source_13), _x2c_macro_committed_6 = NULL;
   {
-  _x2c_defer_env_28 _x2c_defer_env_57 = {._x2c_defer_capture_56 =(const void *) & _x2c_macro_staged_6, ._x2c_defer_capture_57 =(const void *) & _x2c_macro_committed_6};
+  _x2c_defer_env_35 _x2c_defer_env_71 = {._x2c_defer_capture_63 =(const void *) & _x2c_macro_staged_6, ._x2c_defer_capture_64 =(const void *) & _x2c_macro_committed_6};
 
-  X2CCleanup _x2c_defer_record_28 = {
-    .fn = _x2c_defer_cleanup_28,
-    .env = & _x2c_defer_env_57
+  X2CCleanup _x2c_defer_record_35 = {
+    .fn = _x2c_defer_cleanup_35,
+    .env = & _x2c_defer_env_71
   };
-  x2c_cleanup_push(&_x2c_defer_record_28);
+  x2c_cleanup_push(&_x2c_defer_record_35);
   {
     Scope * _x2c_macro_destination_6 = Context_export_destination(_x2c_macro_source_13);
     if((void *) _x2c_macro_staged_6 == NULL){
       Block_move_to(ArrayString_block(_x2c_macro_array_41), _x2c_macro_destination_6);
       {
-        ArrayString _x2c_return_value_27 = _x2c_macro_array_41;
+        ArrayString _x2c_return_value_34 = _x2c_macro_array_41;
         {
-  int _x2c_cleanup_prev_55 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_69 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+  x2c_cleanup_leave(& _x2c_defer_record_35);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_55;
-  return _x2c_return_value_27;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_69;
+  return _x2c_return_value_34;
 
 }
       }
@@ -4811,24 +5074,24 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_macro_array_41, C
     ArrayString_free(_x2c_macro_staged_6);
     _x2c_macro_committed_6 = _x2c_macro_array_41;
     {
-      ArrayString _x2c_return_value_28 = _x2c_macro_array_41;
+      ArrayString _x2c_return_value_35 = _x2c_macro_array_41;
       {
-  int _x2c_cleanup_prev_56 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_70 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+  x2c_cleanup_leave(& _x2c_defer_record_35);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_56;
-  return _x2c_return_value_28;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_70;
+  return _x2c_return_value_35;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_57 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_71 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_28);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_57;
+  x2c_cleanup_leave(&_x2c_defer_record_35);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_71;
 }
 }
 
@@ -5444,138 +5707,175 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   if((*(int *) _x2c_defer_data_1->_x2c_defer_capture_2)) Block_free((Block)(*(ArrayChar *) _x2c_defer_data_1->_x2c_defer_capture_3));
 }
 
+void RenderPath_leave(RenderPath *);
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  if((void *)(*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_2->_x2c_defer_capture_5));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_2->_x2c_defer_capture_4)));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  if((void *)(*(ArrayChar *) _x2c_defer_data_3->_x2c_defer_capture_6) == NULL) ArrayChar_free((*(ArrayChar *) _x2c_defer_data_3->_x2c_defer_capture_7));
+  if((void *)(*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_3->_x2c_defer_capture_6));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  if((void *)(*(ArrayChar *) _x2c_defer_data_4->_x2c_defer_capture_8) != NULL &&(void *)(*(ArrayChar *) _x2c_defer_data_4->_x2c_defer_capture_9) == NULL) ArrayChar_free((*(ArrayChar *) _x2c_defer_data_4->_x2c_defer_capture_8));
+  if((void *)(*(ArrayChar *) _x2c_defer_data_4->_x2c_defer_capture_7) == NULL) ArrayChar_free((*(ArrayChar *) _x2c_defer_data_4->_x2c_defer_capture_8));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  if((*(int *) _x2c_defer_data_5->_x2c_defer_capture_10)) Block_free((Block)(*(ArrayShort *) _x2c_defer_data_5->_x2c_defer_capture_11));
+  if((void *)(*(ArrayChar *) _x2c_defer_data_5->_x2c_defer_capture_9) != NULL &&(void *)(*(ArrayChar *) _x2c_defer_data_5->_x2c_defer_capture_10) == NULL) ArrayChar_free((*(ArrayChar *) _x2c_defer_data_5->_x2c_defer_capture_9));
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  if((void *)(*(Array *) _x2c_defer_data_6->_x2c_defer_capture_12) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_6->_x2c_defer_capture_13));
+  if((*(int *) _x2c_defer_data_6->_x2c_defer_capture_11)) Block_free((Block)(*(ArrayShort *) _x2c_defer_data_6->_x2c_defer_capture_12));
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
-  if((void *)(*(ArrayShort *) _x2c_defer_data_7->_x2c_defer_capture_14) == NULL) ArrayShort_free((*(ArrayShort *) _x2c_defer_data_7->_x2c_defer_capture_15));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_7->_x2c_defer_capture_13)));
 }
 
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
   _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;
-  if((void *)(*(ArrayShort *) _x2c_defer_data_8->_x2c_defer_capture_16) != NULL &&(void *)(*(ArrayShort *) _x2c_defer_data_8->_x2c_defer_capture_17) == NULL) ArrayShort_free((*(ArrayShort *) _x2c_defer_data_8->_x2c_defer_capture_16));
+  if((void *)(*(Array *) _x2c_defer_data_8->_x2c_defer_capture_14) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_8->_x2c_defer_capture_15));
 }
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
   _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_9;
-  if((*(int *) _x2c_defer_data_9->_x2c_defer_capture_18)) Block_free((Block)(*(ArrayInt *) _x2c_defer_data_9->_x2c_defer_capture_19));
+  if((void *)(*(ArrayShort *) _x2c_defer_data_9->_x2c_defer_capture_16) == NULL) ArrayShort_free((*(ArrayShort *) _x2c_defer_data_9->_x2c_defer_capture_17));
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
   _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_10;
-  if((void *)(*(Array *) _x2c_defer_data_10->_x2c_defer_capture_20) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_10->_x2c_defer_capture_21));
+  if((void *)(*(ArrayShort *) _x2c_defer_data_10->_x2c_defer_capture_18) != NULL &&(void *)(*(ArrayShort *) _x2c_defer_data_10->_x2c_defer_capture_19) == NULL) ArrayShort_free((*(ArrayShort *) _x2c_defer_data_10->_x2c_defer_capture_18));
 }
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
   _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_11;
-  if((void *)(*(ArrayInt *) _x2c_defer_data_11->_x2c_defer_capture_22) == NULL) ArrayInt_free((*(ArrayInt *) _x2c_defer_data_11->_x2c_defer_capture_23));
+  if((*(int *) _x2c_defer_data_11->_x2c_defer_capture_20)) Block_free((Block)(*(ArrayInt *) _x2c_defer_data_11->_x2c_defer_capture_21));
 }
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
   _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_12;
-  if((void *)(*(ArrayInt *) _x2c_defer_data_12->_x2c_defer_capture_24) != NULL &&(void *)(*(ArrayInt *) _x2c_defer_data_12->_x2c_defer_capture_25) == NULL) ArrayInt_free((*(ArrayInt *) _x2c_defer_data_12->_x2c_defer_capture_24));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_12->_x2c_defer_capture_22)));
 }
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
   _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_13;
-  if((*(int *) _x2c_defer_data_13->_x2c_defer_capture_26)) Block_free((Block)(*(ArrayLong *) _x2c_defer_data_13->_x2c_defer_capture_27));
+  if((void *)(*(Array *) _x2c_defer_data_13->_x2c_defer_capture_23) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_13->_x2c_defer_capture_24));
 }
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
   _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_14;
-  if((void *)(*(Array *) _x2c_defer_data_14->_x2c_defer_capture_28) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_14->_x2c_defer_capture_29));
+  if((void *)(*(ArrayInt *) _x2c_defer_data_14->_x2c_defer_capture_25) == NULL) ArrayInt_free((*(ArrayInt *) _x2c_defer_data_14->_x2c_defer_capture_26));
 }
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
   _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_15;
-  if((void *)(*(ArrayLong *) _x2c_defer_data_15->_x2c_defer_capture_30) == NULL) ArrayLong_free((*(ArrayLong *) _x2c_defer_data_15->_x2c_defer_capture_31));
+  if((void *)(*(ArrayInt *) _x2c_defer_data_15->_x2c_defer_capture_27) != NULL &&(void *)(*(ArrayInt *) _x2c_defer_data_15->_x2c_defer_capture_28) == NULL) ArrayInt_free((*(ArrayInt *) _x2c_defer_data_15->_x2c_defer_capture_27));
 }
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
   _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_16;
-  if((void *)(*(ArrayLong *) _x2c_defer_data_16->_x2c_defer_capture_32) != NULL &&(void *)(*(ArrayLong *) _x2c_defer_data_16->_x2c_defer_capture_33) == NULL) ArrayLong_free((*(ArrayLong *) _x2c_defer_data_16->_x2c_defer_capture_32));
+  if((*(int *) _x2c_defer_data_16->_x2c_defer_capture_29)) Block_free((Block)(*(ArrayLong *) _x2c_defer_data_16->_x2c_defer_capture_30));
 }
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
   _x2c_defer_env_17 * _x2c_defer_data_17 =(_x2c_defer_env_17 *) _x2c_defer_opaque_17;
-  if((*(int *) _x2c_defer_data_17->_x2c_defer_capture_34)) Block_free((Block)(*(ArrayFloat *) _x2c_defer_data_17->_x2c_defer_capture_35));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_17->_x2c_defer_capture_31)));
 }
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18){
   _x2c_defer_env_18 * _x2c_defer_data_18 =(_x2c_defer_env_18 *) _x2c_defer_opaque_18;
-  if((void *)(*(Array *) _x2c_defer_data_18->_x2c_defer_capture_36) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_18->_x2c_defer_capture_37));
+  if((void *)(*(Array *) _x2c_defer_data_18->_x2c_defer_capture_32) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_18->_x2c_defer_capture_33));
 }
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19){
   _x2c_defer_env_19 * _x2c_defer_data_19 =(_x2c_defer_env_19 *) _x2c_defer_opaque_19;
-  if((void *)(*(ArrayFloat *) _x2c_defer_data_19->_x2c_defer_capture_38) == NULL) ArrayFloat_free((*(ArrayFloat *) _x2c_defer_data_19->_x2c_defer_capture_39));
+  if((void *)(*(ArrayLong *) _x2c_defer_data_19->_x2c_defer_capture_34) == NULL) ArrayLong_free((*(ArrayLong *) _x2c_defer_data_19->_x2c_defer_capture_35));
 }
 
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
   _x2c_defer_env_20 * _x2c_defer_data_20 =(_x2c_defer_env_20 *) _x2c_defer_opaque_20;
-  if((void *)(*(ArrayFloat *) _x2c_defer_data_20->_x2c_defer_capture_40) != NULL &&(void *)(*(ArrayFloat *) _x2c_defer_data_20->_x2c_defer_capture_41) == NULL) ArrayFloat_free((*(ArrayFloat *) _x2c_defer_data_20->_x2c_defer_capture_40));
+  if((void *)(*(ArrayLong *) _x2c_defer_data_20->_x2c_defer_capture_36) != NULL &&(void *)(*(ArrayLong *) _x2c_defer_data_20->_x2c_defer_capture_37) == NULL) ArrayLong_free((*(ArrayLong *) _x2c_defer_data_20->_x2c_defer_capture_36));
 }
 
 static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
   _x2c_defer_env_21 * _x2c_defer_data_21 =(_x2c_defer_env_21 *) _x2c_defer_opaque_21;
-  if((*(int *) _x2c_defer_data_21->_x2c_defer_capture_42)) Block_free((Block)(*(ArrayDbl *) _x2c_defer_data_21->_x2c_defer_capture_43));
+  if((*(int *) _x2c_defer_data_21->_x2c_defer_capture_38)) Block_free((Block)(*(ArrayFloat *) _x2c_defer_data_21->_x2c_defer_capture_39));
 }
 
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
   _x2c_defer_env_22 * _x2c_defer_data_22 =(_x2c_defer_env_22 *) _x2c_defer_opaque_22;
-  if((void *)(*(Array *) _x2c_defer_data_22->_x2c_defer_capture_44) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_22->_x2c_defer_capture_45));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_22->_x2c_defer_capture_40)));
 }
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
   _x2c_defer_env_23 * _x2c_defer_data_23 =(_x2c_defer_env_23 *) _x2c_defer_opaque_23;
-  if((void *)(*(ArrayDbl *) _x2c_defer_data_23->_x2c_defer_capture_46) == NULL) ArrayDbl_free((*(ArrayDbl *) _x2c_defer_data_23->_x2c_defer_capture_47));
+  if((void *)(*(Array *) _x2c_defer_data_23->_x2c_defer_capture_41) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_23->_x2c_defer_capture_42));
 }
 
 static void _x2c_defer_cleanup_24(void * _x2c_defer_opaque_24){
   _x2c_defer_env_24 * _x2c_defer_data_24 =(_x2c_defer_env_24 *) _x2c_defer_opaque_24;
-  if((void *)(*(ArrayDbl *) _x2c_defer_data_24->_x2c_defer_capture_48) != NULL &&(void *)(*(ArrayDbl *) _x2c_defer_data_24->_x2c_defer_capture_49) == NULL) ArrayDbl_free((*(ArrayDbl *) _x2c_defer_data_24->_x2c_defer_capture_48));
+  if((void *)(*(ArrayFloat *) _x2c_defer_data_24->_x2c_defer_capture_43) == NULL) ArrayFloat_free((*(ArrayFloat *) _x2c_defer_data_24->_x2c_defer_capture_44));
 }
 
 static void _x2c_defer_cleanup_25(void * _x2c_defer_opaque_25){
   _x2c_defer_env_25 * _x2c_defer_data_25 =(_x2c_defer_env_25 *) _x2c_defer_opaque_25;
-  if((*(int *) _x2c_defer_data_25->_x2c_defer_capture_50)) Block_free((Block)(*(ArrayString *) _x2c_defer_data_25->_x2c_defer_capture_51));
+  if((void *)(*(ArrayFloat *) _x2c_defer_data_25->_x2c_defer_capture_45) != NULL &&(void *)(*(ArrayFloat *) _x2c_defer_data_25->_x2c_defer_capture_46) == NULL) ArrayFloat_free((*(ArrayFloat *) _x2c_defer_data_25->_x2c_defer_capture_45));
 }
 
 static void _x2c_defer_cleanup_26(void * _x2c_defer_opaque_26){
   _x2c_defer_env_26 * _x2c_defer_data_26 =(_x2c_defer_env_26 *) _x2c_defer_opaque_26;
-  if((void *)(*(Array *) _x2c_defer_data_26->_x2c_defer_capture_52) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_26->_x2c_defer_capture_53));
+  if((*(int *) _x2c_defer_data_26->_x2c_defer_capture_47)) Block_free((Block)(*(ArrayDbl *) _x2c_defer_data_26->_x2c_defer_capture_48));
 }
 
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27){
   _x2c_defer_env_27 * _x2c_defer_data_27 =(_x2c_defer_env_27 *) _x2c_defer_opaque_27;
-  if((void *)(*(ArrayString *) _x2c_defer_data_27->_x2c_defer_capture_54) == NULL) ArrayString_free((*(ArrayString *) _x2c_defer_data_27->_x2c_defer_capture_55));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_27->_x2c_defer_capture_49)));
 }
 
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28){
   _x2c_defer_env_28 * _x2c_defer_data_28 =(_x2c_defer_env_28 *) _x2c_defer_opaque_28;
-  if((void *)(*(ArrayString *) _x2c_defer_data_28->_x2c_defer_capture_56) != NULL &&(void *)(*(ArrayString *) _x2c_defer_data_28->_x2c_defer_capture_57) == NULL) ArrayString_free((*(ArrayString *) _x2c_defer_data_28->_x2c_defer_capture_56));
+  if((void *)(*(Array *) _x2c_defer_data_28->_x2c_defer_capture_50) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_28->_x2c_defer_capture_51));
+}
+
+static void _x2c_defer_cleanup_29(void * _x2c_defer_opaque_29){
+  _x2c_defer_env_29 * _x2c_defer_data_29 =(_x2c_defer_env_29 *) _x2c_defer_opaque_29;
+  if((void *)(*(ArrayDbl *) _x2c_defer_data_29->_x2c_defer_capture_52) == NULL) ArrayDbl_free((*(ArrayDbl *) _x2c_defer_data_29->_x2c_defer_capture_53));
+}
+
+static void _x2c_defer_cleanup_30(void * _x2c_defer_opaque_30){
+  _x2c_defer_env_30 * _x2c_defer_data_30 =(_x2c_defer_env_30 *) _x2c_defer_opaque_30;
+  if((void *)(*(ArrayDbl *) _x2c_defer_data_30->_x2c_defer_capture_54) != NULL &&(void *)(*(ArrayDbl *) _x2c_defer_data_30->_x2c_defer_capture_55) == NULL) ArrayDbl_free((*(ArrayDbl *) _x2c_defer_data_30->_x2c_defer_capture_54));
+}
+
+static void _x2c_defer_cleanup_31(void * _x2c_defer_opaque_31){
+  _x2c_defer_env_31 * _x2c_defer_data_31 =(_x2c_defer_env_31 *) _x2c_defer_opaque_31;
+  if((*(int *) _x2c_defer_data_31->_x2c_defer_capture_56)) Block_free((Block)(*(ArrayString *) _x2c_defer_data_31->_x2c_defer_capture_57));
+}
+
+static void _x2c_defer_cleanup_32(void * _x2c_defer_opaque_32){
+  _x2c_defer_env_32 * _x2c_defer_data_32 =(_x2c_defer_env_32 *) _x2c_defer_opaque_32;
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_32->_x2c_defer_capture_58)));
+}
+
+static void _x2c_defer_cleanup_33(void * _x2c_defer_opaque_33){
+  _x2c_defer_env_33 * _x2c_defer_data_33 =(_x2c_defer_env_33 *) _x2c_defer_opaque_33;
+  if((void *)(*(Array *) _x2c_defer_data_33->_x2c_defer_capture_59) == NULL) Block_free((Block)(*(Array *) _x2c_defer_data_33->_x2c_defer_capture_60));
+}
+
+static void _x2c_defer_cleanup_34(void * _x2c_defer_opaque_34){
+  _x2c_defer_env_34 * _x2c_defer_data_34 =(_x2c_defer_env_34 *) _x2c_defer_opaque_34;
+  if((void *)(*(ArrayString *) _x2c_defer_data_34->_x2c_defer_capture_61) == NULL) ArrayString_free((*(ArrayString *) _x2c_defer_data_34->_x2c_defer_capture_62));
+}
+
+static void _x2c_defer_cleanup_35(void * _x2c_defer_opaque_35){
+  _x2c_defer_env_35 * _x2c_defer_data_35 =(_x2c_defer_env_35 *) _x2c_defer_opaque_35;
+  if((void *)(*(ArrayString *) _x2c_defer_data_35->_x2c_defer_capture_63) != NULL &&(void *)(*(ArrayString *) _x2c_defer_data_35->_x2c_defer_capture_64) == NULL) ArrayString_free((*(ArrayString *) _x2c_defer_data_35->_x2c_defer_capture_63));
 }
 

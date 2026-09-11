@@ -600,6 +600,10 @@ macro Unit $map.core.observe(
   }
 
   static Buffer $map._core_write($map map, Buffer out, Symbol mode) {
+    RenderPath path;
+    if (!path.enter(map))
+      return out.printf("<map: 0x%012lX>", (long) map);
+    defer path.leave();
     out.write("{ ");
     unsigned cursor = 0;
     $key key;
@@ -695,6 +699,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
   Name $prepare_export
 ) using $next, $keys_next, $enumerate_next => {
   Var $map.var($map);
+  void $map.cleanup($map);
   $map Var.$unbox(Var);
   Iter $map.iter($map, Iter);
   Iter $map.keys($map, Iter);
@@ -832,6 +837,9 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     return map;
   }
 
+  /** Releases the record and its backing Blocks, borrowing stored values. */
+  void $map.cleanup($map map) { map._core_free(); }
+  protocol Cleanup($map);
   protocol Iter($map);
   protocol Var($map) tag $tag;
 

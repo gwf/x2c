@@ -159,6 +159,13 @@ static void var_construction_and_void_dispatch_transfer(void) {
   catch %(bad-arg *): caught++;
   Symbol custom = Symbol.new("misaligned");
   EXPECT_TRUE(Var.register_object_tag(custom) >= 0);
+  VarMethods methods = {0};
+  EXPECT_TRUE(x2c_try_register_tagged_descriptor(
+    custom, %"Example.FullQualifiedClass", methods));
+  x2c_register_tagged_descriptor(
+    custom, %"Example.FullQualifiedClass", methods);
+  EXPECT_FALSE(x2c_try_register_descriptor(
+    %"Example.FullQualifiedClass", methods));
   unsigned char bytes[16], *misaligned = bytes;
   while (((uintptr_t) misaligned & 0x7) == 0) misaligned++;
   try Var.new(custom, misaligned);
@@ -1168,6 +1175,10 @@ static void var_dense_dispatch_capacity(void) {
   }
   EXPECT_TRUE(filled < 32);
   EXPECT_FALSE(x2c_try_register_descriptor(%"overflow", methods));
+  int caught = 0;
+  try x2c_register_tagged_descriptor(<overflow>, %"Overflow", methods);
+  catch %(bad-state *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
   // Tags registered before capacity keep working.
   EXPECT_TRUE(Var.new(<token>, &token_value).truthy());
 }
@@ -1280,7 +1291,75 @@ static void var_symbol_atom_stream_without_allocating(void) {
 }
 
 
+static void var_recursive_rendering(void) {
+  Array array = %[];
+  array.push(array);
+  String pointer = array.var().pointer_string();
+  EXPECT_STR_EQ(array.repr(), %"[ $pointer ]");
+  EXPECT_STR_EQ(array.str(), %"[ $pointer ]");
+  EXPECT_STR_EQ(array.var().repr(), array.repr());
+
+  Map map = %{};
+  map[1] = map;
+  pointer = map.var().pointer_string();
+  EXPECT_STR_EQ(map.repr(), %"{ 1: $pointer }");
+  EXPECT_STR_EQ(map.str(), %"{ 1: $pointer }");
+
+  array.truncate(0);
+  List list = %(1 $array);
+  array.push(list);
+  pointer = list.var().pointer_string();
+  EXPECT_STR_EQ(list.repr(), %"(1 [ $pointer ])");
+  EXPECT_STR_EQ(list.var().repr(), list.repr());
+  EXPECT_TRUE(list.str().contains(pointer));
+
+  // Leave each path before rendering the same child through another edge.
+  Array child = %[1, 2];
+  Array repeated = %[$child, $child];
+  EXPECT_STR_EQ(repeated.repr(), "[ [ 1, 2 ], [ 1, 2 ] ]");
+  List repeated_list = %($child $child);
+  EXPECT_STR_EQ(repeated_list.repr(), "([ 1, 2 ] [ 1, 2 ])");
+
+  // Exercise the multiline List writer as well as its trial line rendering.
+  Array long_cycle = %[];
+  List long_list = %("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+                    "abcdefghijklmnopqrstuvwxyz" $long_cycle);
+  long_cycle.push(long_list);
+  EXPECT_TRUE(long_list.repr().contains(long_list.var().pointer_string()));
+}
+
+static Buffer _rendering_failure(Var value, Buffer out) {
+  DispatchFixture *fixture = value.pointer();
+  if (fixture.value) raise %(render-err);
+  return out.write("ok");
+}
+
+static void var_rendering_restores_after_error(void) {
+  VarMethods methods = { .write_repr = _rendering_failure };
+  EXPECT_TRUE(x2c_try_register_descriptor(%"fixture", methods));
+  defer {
+    methods.write_repr = dispatch_fixture_write_repr;
+    x2c_register_descriptor(%"fixture", methods);
+  }
+  DispatchFixture fixture = { .value = 1 };
+  Var value = Var.new(<fixture>, &fixture);
+  Array array = %[$value];
+  Map map = %{1: $array};
+  List list = %($map);
+  Buffer out = Buffer.new(0);
+  int caught = 0;
+  try list.write_repr(out);
+  catch %(render-err): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  fixture.value = 0;
+  EXPECT_STR_EQ(list.repr(), "({ 1: [ ok ] })");
+  EXPECT_STR_EQ(array.repr(), "[ ok ]");
+  EXPECT_STR_EQ(map.repr(), "{ 1: [ ok ] }");
+  out.free();
+}
+
 void var_suite(void) {
+  $test.run(var_recursive_rendering);
   $test.run(var_write_str_matches_str);
   $test.run(var_nested_write_str_parity);
   $test.run(var_nested_list_keeps_display_padding);
@@ -1318,6 +1397,7 @@ void var_suite(void) {
   $test.run(var_clone_wide_returns_void_for_narrow_values);
   $test.run(var_streaming_repr_matches_canonical);
   $test.run(var_dense_custom_dispatch);
+  $test.run(var_rendering_restores_after_error);
   $test.run(var_protocol_builtin_dispatch_is_reachable);
   $test.run(var_dense_dispatch_capacity);
   $test.run(var_builtin_dispatch_tags_match_registration);

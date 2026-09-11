@@ -1,0 +1,3 @@
+[ Point { x: 0, y: 0 }, Point { x: 2, y: 4 }, Point { x: 4, y: 8 } ]
+[ Notebook(3 readings, scale=1) ]
+copy: 1,2; key: same point

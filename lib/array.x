@@ -34,6 +34,8 @@ $(import "private-keywords.xmacro")
 */
 typedef Block Array;
 
+protocol Cleanup(Array);
+
 #pragma private
 #include <string.h>
 #include <stdarg.h>
@@ -737,9 +739,9 @@ Buffer Array.write_str(Array array, Buffer out) =>
 
 /** Returns an `Array` display `String` using each element's `str`. */
 String Array.str(Array array) {
-  Buffer buf = Buffer.new(0);
+  Buffer buf = $auto(Buffer.new(0));
   array.write_str(buf);
-  return buf.str_free();
+  return buf.str();
 }
 
 /** Returns the readable `[ a, b, c ]` representation of `array`.
@@ -754,10 +756,9 @@ String Array.str(Array array) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String Array.repr(Array array) {
-  Buffer buf = Buffer.new(0);
+  Buffer buf = $auto(Buffer.new(0));
   array.write_repr(buf);
-  String result = buf.str_free();
-  return result;
+  return buf.str();
 }
 
 static int _next(Iter iter, Var *out) {
@@ -799,3 +800,6 @@ Array Iter.array(Iter iter) {
   foreach (Var item, iter) output.push(item);
   return result = output;
 }
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void Array.cleanup(Array value) { value.free(); }

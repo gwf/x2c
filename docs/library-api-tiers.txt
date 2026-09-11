@@ -3,17 +3,20 @@
 # Unlisted published callables default to primary.
 # path|tier|comma-separated source callables
 lib/array.x|advanced|Array.compare,Array.equal
+lib/array.x|advanced|Array.cleanup
 lib/array.x|advanced|Array.heap_pop,Array.heap_push,Array.heapify
 lib/array.x|advanced|Array.remslice,Array.repr,Array.str,Array.update_n
 lib/array.x|advanced|Array.write_repr
 lib/array.x|internal|Array.block
 lib/atom.x|advanced|Atom.first,Atom.initialize,Atom.intern,Atom.str
 lib/block.x|advanced|Block.append,Block.append_fill,Block.capacity,Block.clear
+lib/block.x|advanced|Block.cleanup,Bytes.cleanup
 lib/block.x|advanced|Block.free,Block.len,Block.new,Block.pop,Block.push,Block.reserve
 lib/block.x|advanced|Block.truncate,Block.truth,Block.try_pop,Bytes.append
 lib/block.x|advanced|Bytes.append_fill,Bytes.block
 lib/block.x|advanced|Bytes.new,Bytes.push,Bytes.reserve,Bytes.try_pop
 lib/buffer.x|advanced|Buffer.free,Buffer.indent,Buffer.newline
+lib/buffer.x|advanced|Buffer.cleanup
 lib/buffer.x|advanced|Buffer.newline_indent,Buffer.pad,Buffer.printf
 lib/buffer.x|advanced|Buffer.repr,Buffer.reserve,Buffer.str,Buffer.str_free
 lib/buffer.x|advanced|Buffer.tabstop,Buffer.unwrite,Buffer.write
@@ -37,6 +40,8 @@ lib/common.x|advanced|unsigned.str,unsigned.var,ushort.repr,ushort.str
 lib/common.x|advanced|ushort.var
 lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64
 lib/dispatch.x|advanced|Var.compare,Var.equal,Var.hash,Var.repr,Var.same
+lib/dispatch.x|advanced|RenderPath.enter,RenderPath.leave
+lib/dispatch.x|advanced|x2c_register_tagged_descriptor
 lib/dispatch.x|advanced|Var.str,Var.write_repr
 lib/error.x|advanced|Error.bound,Error.bound_set,Error.count,Error.depth
 lib/error.x|advanced|Error.mark,Error.policy_get,Error.policy_set,Error.pop
@@ -59,6 +64,7 @@ lib/lib.x|advanced|DisjointSet.find,DisjointSet.free,DisjointSet.new
 lib/lib.x|advanced|DisjointSet.num_components,DisjointSet.sizes
 lib/lib.x|advanced|DisjointSet.union
 lib/lisp.x|advanced|Lisp.auto_disable,Lisp.auto_instrument,Lisp.auto_stats
+lib/lisp.x|advanced|Lisp.cleanup
 lib/lisp.x|advanced|Lisp.destroy,Lisp.read,Lisp.set_global
 lib/lisp.x|internal|lisp_add,lisp_atom,lisp_compare,lisp_eq,lisp_list
 lib/lisp.x|internal|lisp_number,lisp_pair,lisp_procedure,lisp_read_file
@@ -107,6 +113,7 @@ lib/match.x|internal|MatchPlan.search,MatchPlan.search_replace
 lib/match.x|internal|MatchPlan.try_capture,MatchPlan.try_match
 lib/match.x|internal|MatchPlan.try_match_replace,MatchPlan.try_search
 lib/scope.x|advanced|Scope.calloc,Scope.calloc_in,Scope.destroy,Scope.free
+lib/scope.x|advanced|Scope.cleanup
 lib/scope.x|advanced|Scope.malloc,Scope.malloc_in,Scope.memdup,Scope.memdup_in
 lib/scope.x|advanced|Scope.move,Scope.name,Scope.new_named,Scope.realloc
 lib/scope.x|advanced|Scope.release,Scope.retain,Scope_shutdown,Scope.stats

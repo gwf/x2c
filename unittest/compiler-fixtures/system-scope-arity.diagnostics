@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/system-scope-arity.x:3:18: macro: $scope accepts zero or one destination
+  int main(void) { $scope(NULL, NULL) {} return 0; }
+                   ^
+

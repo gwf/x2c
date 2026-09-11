@@ -122,7 +122,7 @@ $map.core.observe(
 $map.typed.observe(ProbeMapShortLong, short, long,
   _probe_box_short, _probe_box_long);
 $map.typed.publish(
-  ProbeMapShortLong, short, long, probemapshortlong, <p48>,
+  ProbeMapShortLong, short, long, probemapshortlong, <prbmap>,
   _probe_box_short, _probe_box_long, _probe_prepare_export
 );
 
@@ -170,5 +170,5 @@ int main(void) {
     map.len(), updated, removed, update_hashes,
     native_total, native_count, iter_total, iter_count
   );
-  return boxed is <p48> ? 0 : 1;
+  return boxed is <prbmap> ? 0 : 1;
 }

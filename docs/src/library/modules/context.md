@@ -9,6 +9,7 @@ Bounded runtime state and value export.
 
 | Function | Summary |
 | --- | --- |
+| [`Context.cleanup`](#Context.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Context.close`](#Context.close) | Closes the current `Context`, reclaims unexported state, and restores parent. |
 | [`Context.current`](#Context.current) | Returns the `Context` currently active on this thread, or NULL. |
 | [`Context.export`](#Context.export) | Exports `value` into the parent of the current `Context`. |
@@ -18,6 +19,15 @@ Bounded runtime state and value export.
 | [`Context.open_named`](#Context.open_named) | Opens and makes current a named `Context` that inherits immutable values. |
 
 ### `Context`
+
+<a id="Context.cleanup"></a>
+#### Context.cleanup
+
+`void Context.cleanup(Context value)`
+
+Ends the owned lifetime when a managed local leaves its block.
+
+Source: `lib/context.x:371`
 
 <a id="Context.close"></a>
 #### Context.close
@@ -33,7 +43,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:350`
+Source: `lib/context.x:351`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -42,7 +52,7 @@ Source: `lib/context.x:350`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:175`
+Source: `lib/context.x:177`
 
 <a id="Context.export"></a>
 #### Context.export
@@ -66,7 +76,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:311`
+Source: `lib/context.x:312`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -81,7 +91,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:146`
+Source: `lib/context.x:148`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -95,7 +105,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:163`
+Source: `lib/context.x:165`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -110,7 +120,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:172`
+Source: `lib/context.x:174`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -125,7 +135,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:155`
+Source: `lib/context.x:157`
 
 ## Advanced and interop API
 
@@ -145,7 +155,7 @@ Moves one custom-exporter-owned allocation to the destination `Context`.
 A null allocation or one outside `context`'s `Scope` chain is unchanged.
 Application code exports its value with `Context.export` instead.
 
-Source: `lib/context.x:100`
+Source: `lib/context.x:102`
 
 <a id="Context.owns"></a>
 #### Context.owns
@@ -156,7 +166,7 @@ Reports whether `allocation` belongs to `context`'s `Scope` chain.
 The nonnull pointer must come from a `Scope` allocator. Registered custom
 exporters call this before moving their own storage.
 
-Source: `lib/context.x:86`
+Source: `lib/context.x:88`
 
 ## Runtime-internal callables
 
@@ -181,7 +191,7 @@ Returns the borrowed `Scope` slot that receives exports from `context`.
 The slot remains valid only while the `Context`'s destination state lives;
 a null `Context` returns NULL.
 
-Source: `lib/context.x:93`
+Source: `lib/context.x:95`
 
 <a id="Context.export_nested"></a>
 #### Context.export_nested
@@ -203,7 +213,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:192`
+Source: `lib/context.x:194`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -225,7 +235,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:332`
+Source: `lib/context.x:333`
 
 <a id="Context.initialize"></a>
 #### Context.initialize
@@ -234,7 +244,7 @@ Source: `lib/context.x:332`
 
 Registers `Context` cleanup before workers can start.
 
-Source: `lib/context.x:68`
+Source: `lib/context.x:70`
 
 ## Design notes
 

@@ -11,7 +11,29 @@ typedef struct SourceView{
 }
 * SourceView;
 
-SourceView SourceView_new(void);
+SourceView SourceView_new();
+
+void SourceView_free(SourceView value);
+
+void SourceView_cleanup(SourceView value);
+
+Var SourceView_var(SourceView value);
+
+SourceView Var_sourceview(Var value);
+
+int SourceView_equal(SourceView left, SourceView right);
+
+unsigned SourceView_hash(SourceView value);
+
+Buffer SourceView_write_str(SourceView value, Buffer out);
+
+String SourceView_str(SourceView value);
+
+Buffer SourceView_write_repr(SourceView value, Buffer out);
+
+String SourceView_repr(SourceView value);
+
+void SourceView_init(SourceView sources);
 
 String SourceView_path(String path);
 

@@ -94,6 +94,10 @@ static inline size_t Block_capacity(Block block){
   return(void *) block != NULL ? block -> cap : 0;
 }
 
+void Block_cleanup(Block value);
+
+void Bytes_cleanup(Bytes value);
+
 void Bytes_clear(Bytes a0);
 
 size_t Bytes_len(Bytes a0);

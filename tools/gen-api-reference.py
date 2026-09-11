@@ -35,7 +35,7 @@ import textwrap
 from x2c_source import definitions, definitions_for_path, module_prose, \
     module_summary, public_declarations_for_path, split_signature
 from x2c_symbols import load as load_symbols, _strip_param_name, _unqualified, \
-    normalize_type
+    normalize_type, definitions_with_symbols
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -419,8 +419,8 @@ def collect() -> tuple[Module, ...]:
     # scanner gap looks like.
     defined_anywhere: set[str] = set()
     for path in sorted(rows):
-        for definition in definitions_for_path(
-            ROOT / path, include_static=True
+        for definition in definitions_with_symbols(
+            ROOT / path, symbols, include_static=True
         ):
             defined_anywhere.add(definition.name.replace(".", "_"))
     modules: list[Module] = []
@@ -616,7 +616,7 @@ def _collect_public_surface(
     function_rows, declaration_rows = _artifact_tables(symbols, relative)
     label = f"{relative} compiler API" if compiler else f"{relative} API"
     callables = []
-    for definition in definitions_for_path(source):
+    for definition in definitions_with_symbols(source, symbols, root=root):
         if not _future_public_name(definition.name):
             if definition.doc:
                 raise Fatal(

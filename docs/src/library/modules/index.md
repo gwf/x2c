@@ -73,7 +73,7 @@ These modules implement the runtime and are not public APIs.
 - `lib/machine.x` - Shared `Match` and Lisp wordcode, builder, and execution-state definitions.
 - `lib/match-machine.x` - Private `Match` wordcode decoder.
 - `lib/pool.x` - Nested interning pools that back canonical `String` and `List` identity.
-- `lib/protocols.x` - The built-in `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
+- `lib/protocols.x` - The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
 - `lib/scan.x` - Allocation-free character scanners used by the tokenizer.
 - `lib/static-init.x` - Compiler-owned first-use static storage and initialization guards.
 - `lib/thread-state.x` - Native pthread-key storage for per-thread runtime state.

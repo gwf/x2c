@@ -50,6 +50,8 @@ typedef struct ScopeStats {
 } ScopeStats;
 
 #include <stdlib.h>
+protocol Cleanup(Scope);
+
 #pragma private
 
 #include <limits.h>
@@ -999,3 +1001,6 @@ void Scope_shutdown(void) {
   scope_state = <shutdown>;
   x2c_thread_state_release();
 }
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void Scope.cleanup(Scope value) { value.destroy(); }

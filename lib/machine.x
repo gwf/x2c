@@ -350,6 +350,8 @@ inline int MachineSlot.final_equal(
   return length == slot.span.length && expected == slot.span.end && !candidate;
 }
 
+protocol Cleanup(MachineBuilder);
+
 #pragma private
 
 #include <string.h>
@@ -534,3 +536,6 @@ MachineProgram MachineBuilder.freeze(MachineBuilder b) {
 void MachineProgram.free(MachineProgram program) {
   if (program) Scope.free(program);
 }
+
+/* Ends the owned lifetime when a managed local leaves its block. */
+void MachineBuilder.cleanup(MachineBuilder value) { value.free(); }

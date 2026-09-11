@@ -1500,6 +1500,11 @@ static List _resolve_content(
     }
     case %(!set ?inner (expr ? ?)):
       return c.resolve_expression(inner, origin);
+    case %(managed-init ?initializer): {
+      initializer = c.resolve_expression(initializer, origin);
+      Type type = initializer.list().cadr();
+      return %(expr $type (managed-init $initializer));
+    }
     case %(ident ?value):
       return _resolve_identifier(c, value, input_type, origin);
     case %(!set ?binding (binding ? ?)):
@@ -1759,7 +1764,11 @@ static List _resolve_content(
       Type type = lhs_type;
       switch (operator.symbol()) {
         case <!>: type = %(int);                 break;
-        case <*>: type = type.dereference(); break;
+        case <*>: {
+          Type pointee = type.dereference();
+          type = pointee ? pointee : c.sym.resolve_key(type).dereference();
+          break;
+        }
         case <&>: type = type.reference();   break;
         case <~>: case <+>: case <->: {
           type = c.sym.resolve_numeric_type(type);

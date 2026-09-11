@@ -18,6 +18,8 @@ $(import "error-macros.xmacro")
 */
 typedef struct Mutex *Mutex;
 
+protocol Cleanup(Mutex);
+
 #pragma private
 
 #include "scope.x"
@@ -92,3 +94,6 @@ void Mutex.free(Mutex mutex) {
   if (error) _error("pthread_mutex_destroy", error);
   Scope.free(mutex);
 }
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void Mutex.cleanup(Mutex value) { value.free(); }

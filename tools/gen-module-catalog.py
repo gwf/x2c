@@ -10,7 +10,8 @@ import sys
 import textwrap
 from dataclasses import dataclass
 
-from x2c_source import module_summary, public_functions_for_path
+from x2c_source import module_summary
+from x2c_symbols import load as load_symbols, definitions_with_symbols
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -28,6 +29,7 @@ class Module:
 
 def discover_modules() -> tuple[Module, ...]:
     modules: list[Module] = []
+    symbols = load_symbols()
     for directory in SOURCE_DIRS:
         for path in sorted(directory.glob("*.x")):
             if path in SKIP_MODULES:
@@ -36,7 +38,8 @@ def discover_modules() -> tuple[Module, ...]:
             modules.append(Module(
                 path=path.relative_to(ROOT),
                 summary=module_summary(text, path),
-                functions=public_functions_for_path(path),
+                functions=tuple(item.name for item in
+                    definitions_with_symbols(path, symbols)),
             ))
     return tuple(modules)
 

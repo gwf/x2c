@@ -23,3 +23,37 @@ macro Decorator $x2c.foreach(
 }
 
 keyword foreach $x2c.foreach;
+
+macro Decorator $scope(Block $body, Expr $destination...) => {
+  $(x2c._scope.expand $body $destination)...
+}
+
+macro Decorator $let(Block $body, Expr $place, Expr $value)
+  using $address, $previous => {
+  {
+    $(x2c.syntax.type $place) *$address = &$place;
+    $(x2c.syntax.type $place) $previous = *$address;
+    defer *$address = $previous;
+    *$address = $value;
+    $body
+  }
+}
+
+macro Decorator $lock(Block $body, Expr $mutex) using $held => {
+  {
+    $(list "Mutex") $held = $mutex;
+    $held.lock();
+    defer $held.unlock();
+    $body
+  }
+}
+
+macro Expression $auto(Expr $value) => (
+  $(list 'managed-init $value)
+)
+
+macro Decorator $class(NamedType $definition) => {
+  $(x2c._class.expand $definition)...
+}
+
+keyword class $class;

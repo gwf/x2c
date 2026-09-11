@@ -511,13 +511,25 @@ for kind in collision builtin; do
 done
 
 explicit_collision="Var descriptor: tag <sharedtag> names both"
-explicit_collision="$explicit_collision explicitcollisionone"
-explicit_collision="$explicit_collision and explicitcollisiontwo"
+explicit_collision="$explicit_collision ExplicitCollisionOne"
+explicit_collision="$explicit_collision and ExplicitCollisionTwo"
 grep -Fq "$explicit_collision" \
   "$BUILD/var-explicit-tag-collision/stderr" ||
   fail "explicit tag collision did not name both participants"
 grep -Fq 'Var descriptor: explicit tag <list> is built in' \
   "$BUILD/var-explicit-tag-builtin/stderr" ||
   fail "explicit built-in tag claim did not name the tag"
+
+private_class_build="$BUILD/class-private"
+mkdir -p "$private_class_build"
+"$X2C" translate --out-dir "$private_class_build" \
+  "$SOURCE/class-private-a.x" "$SOURCE/class-private-b.x" \
+  "$SOURCE/class-private-main.x"
+"$CC" -iquote "$ROOT/builds/0/lib" -iquote "$private_class_build" \
+  "$private_class_build/class-private-a.c" \
+  "$private_class_build/class-private-b.c" \
+  "$private_class_build/class-private-main.c" \
+  -L"$ROOT/builds/0" -lx2c -lm -o "$private_class_build/class-private"
+"$private_class_build/class-private"
 
 printf 'protocol boundary probes passed\n'

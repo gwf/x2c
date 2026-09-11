@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/class-init-missing.x:1:1: macro: class Missing requires void Missing.init(Missing)
+  class Missing struct { Array items; } *;
+  ^^^^^
+

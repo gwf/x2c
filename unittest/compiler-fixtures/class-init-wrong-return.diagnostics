@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/class-init-wrong-return.x:1:1: macro: class Wrong requires void Wrong.init(Wrong)
+  class Wrong struct { Array items; } *;
+  ^^^^^
+

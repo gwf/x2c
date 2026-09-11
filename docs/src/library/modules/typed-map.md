@@ -13,6 +13,7 @@ Typed `Map`s generated from shared storage.
 | [`Map.maplongdouble`](#Map.maplongdouble) | Packs `entries` into a fresh typed map in the current `Scope`. |
 | [`Map.mapstringint`](#Map.mapstringint) | Packs `entries` into a fresh typed map in the current `Scope`. |
 | [`Map.mapstringstring`](#Map.mapstringstring) | Packs `entries` into a fresh typed map in the current `Scope`. |
+| [`MapIntInt.cleanup`](#MapIntInt.cleanup) | Releases the record and its backing Blocks, borrowing stored values. |
 | [`MapIntInt.compare`](#MapIntInt.compare) | Compares typed Maps by size and then sorted native key/value contents. |
 | [`MapIntInt.contains`](#MapIntInt.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`MapIntInt.copy`](#MapIntInt.copy) | Returns a fresh shallow copy in the current `Scope`. |
@@ -43,6 +44,7 @@ Typed `Map`s generated from shared storage.
 | [`MapIntInt.var`](#MapIntInt.var) | Boxes `map` with its registered typed-map tag without copying it. |
 | [`MapIntInt.write_repr`](#MapIntInt.write_repr) | Appends the readable typed-Map representation in bucket order. |
 | [`MapIntInt.write_str`](#MapIntInt.write_str) | Appends the typed-Map display text in bucket order. |
+| [`MapLongDouble.cleanup`](#MapLongDouble.cleanup) | Releases the record and its backing Blocks, borrowing stored values. |
 | [`MapLongDouble.compare`](#MapLongDouble.compare) | Compares typed Maps by size and then sorted native key/value contents. |
 | [`MapLongDouble.contains`](#MapLongDouble.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`MapLongDouble.copy`](#MapLongDouble.copy) | Returns a fresh shallow copy in the current `Scope`. |
@@ -73,6 +75,7 @@ Typed `Map`s generated from shared storage.
 | [`MapLongDouble.var`](#MapLongDouble.var) | Boxes `map` with its registered typed-map tag without copying it. |
 | [`MapLongDouble.write_repr`](#MapLongDouble.write_repr) | Appends the readable typed-Map representation in bucket order. |
 | [`MapLongDouble.write_str`](#MapLongDouble.write_str) | Appends the typed-Map display text in bucket order. |
+| [`MapStringInt.cleanup`](#MapStringInt.cleanup) | Releases the record and its backing Blocks, borrowing stored values. |
 | [`MapStringInt.compare`](#MapStringInt.compare) | Compares typed Maps by size and then sorted native key/value contents. |
 | [`MapStringInt.contains`](#MapStringInt.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`MapStringInt.copy`](#MapStringInt.copy) | Returns a fresh shallow copy in the current `Scope`. |
@@ -103,6 +106,7 @@ Typed `Map`s generated from shared storage.
 | [`MapStringInt.var`](#MapStringInt.var) | Boxes `map` with its registered typed-map tag without copying it. |
 | [`MapStringInt.write_repr`](#MapStringInt.write_repr) | Appends the readable typed-Map representation in bucket order. |
 | [`MapStringInt.write_str`](#MapStringInt.write_str) | Appends the typed-Map display text in bucket order. |
+| [`MapStringString.cleanup`](#MapStringString.cleanup) | Releases the record and its backing Blocks, borrowing stored values. |
 | [`MapStringString.compare`](#MapStringString.compare) | Compares typed Maps by size and then sorted native key/value contents. |
 | [`MapStringString.contains`](#MapStringString.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`MapStringString.copy`](#MapStringString.copy) | Returns a fresh shallow copy in the current `Scope`. |
@@ -201,6 +205,15 @@ The input `Map` is unchanged.
 Source: `lib/typed-map.x:343`
 
 ### `MapIntInt`
+
+<a id="MapIntInt.cleanup"></a>
+#### MapIntInt.cleanup
+
+`void MapIntInt.cleanup(MapIntInt map)`
+
+Releases the record and its backing Blocks, borrowing stored values.
+
+Source: `lib/typed-map.x:311`
 
 <a id="MapIntInt.compare"></a>
 #### MapIntInt.compare
@@ -570,6 +583,15 @@ Source: `lib/typed-map.x:310`
 
 ### `MapLongDouble`
 
+<a id="MapLongDouble.cleanup"></a>
+#### MapLongDouble.cleanup
+
+`void MapLongDouble.cleanup(MapLongDouble map)`
+
+Releases the record and its backing Blocks, borrowing stored values.
+
+Source: `lib/typed-map.x:331`
+
 <a id="MapLongDouble.compare"></a>
 #### MapLongDouble.compare
 
@@ -938,6 +960,15 @@ Source: `lib/typed-map.x:330`
 
 ### `MapStringInt`
 
+<a id="MapStringInt.cleanup"></a>
+#### MapStringInt.cleanup
+
+`void MapStringInt.cleanup(MapStringInt map)`
+
+Releases the record and its backing Blocks, borrowing stored values.
+
+Source: `lib/typed-map.x:405`
+
 <a id="MapStringInt.compare"></a>
 #### MapStringInt.compare
 
@@ -1305,6 +1336,15 @@ Appends the typed-Map display text in bucket order.
 Source: `lib/typed-map.x:388`
 
 ### `MapStringString`
+
+<a id="MapStringString.cleanup"></a>
+#### MapStringString.cleanup
+
+`void MapStringString.cleanup(MapStringString map)`
+
+Releases the record and its backing Blocks, borrowing stored values.
+
+Source: `lib/typed-map.x:368`
 
 <a id="MapStringString.compare"></a>
 #### MapStringString.compare

@@ -633,6 +633,7 @@ These are the complete hole-kind annotations:
 | --- | --- | --- |
 | `Expr` | expression | `count + 1` |
 | `Type` | type | `FILE *` |
+| `NamedType` | name followed by a complete type definition | `Point { int x; int y; };` |
 | `Decl` | non-function declaration | `static int value` |
 | `Function` | function definition | `int f(int x) => x;` |
 | `Name` | identifier | `checksum` |
@@ -724,11 +725,13 @@ A macro has one result kind as well as argument kinds:
 | `Entry` | braced, comma-separated `key: value` rows | `Map` literal |
 | `Enumerator` | braced, comma-separated enumerators | enum body |
 | `Unit` | braced declarations and definitions | file scope |
+| `Declaration` | braced declarations with retained public signatures | file scope |
 
 The result kind is required between `macro` and the `$` name. `Statement` is
 the canonical spelling for block-item results; `Block` remains a synonym in
 result and hole positions. Parenthesized bodies require `Expression`; braced
-bodies require `Statement`, `Block`, `Field`, `Entry`, `Enumerator`, or `Unit`.
+bodies require `Statement`, `Block`, `Field`, `Entry`, `Enumerator`, `Unit`,
+or `Declaration`.
 Inside a compound statement, a `Statement` or `Block` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
@@ -845,6 +848,7 @@ singular, explicitly annotated, and one of:
 | `Statement` or `Block` | one statement or local declaration | zero or more block items |
 | `Field` | one struct or union field | zero or more fields |
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
+| `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
 
 Parameters after the target are explicit invocation arguments. `using` follows
 the complete parameter list, just as it does for other macros. A decorator
@@ -1092,6 +1096,12 @@ The compiler supplies these contextual Lisp operations:
 (x2c.function.parameter function name)
 (x2c.function.body function)
 (x2c.type.fields type)
+(x2c.type.resolve type)
+(x2c.type.layout type)
+(x2c.type.value? type)
+(x2c.type.tag-name name)
+(x2c.type.reverse-name base participant)
+(x2c.type.parts type)
 ```
 
 `x2c.syntax.type` returns the canonical semantic `Type` for supported typed
@@ -1140,6 +1150,28 @@ or union and returns its named fields in source order as `(("name"
 DECLARED_TYPE) ...)`. Unnamed fields are omitted; incomplete and non-aggregate
 `Type`s are rejected. Each declared `Type` retains pointer, array, qualifier,
 and bitfield modifiers.
+
+`x2c.type.resolve` follows the ordinary typedef chain and returns its canonical
+type representation. `x2c.type.layout` returns the ordered field records of
+that representation, including unnamed members and padding. Each record is
+`(NAME DECLARED_TYPE)`; an unnamed field has an empty name. Use `fields` for
+named-member access and `layout` when every declared field affects a decision.
+`x2c.type.parts` separates a semantic type into its declaration base and
+declarator modifiers as `(BASE MODIFIERS)`.
+
+`x2c.type.value?` recognizes numeric scalars and enums, Symbol, Var, Atom,
+String, List, and their typedef aliases. Pointer-shaped runtime handles such
+as Array are not classified as values by this operation. `x2c.type.tag-name`
+returns a round-tripping compact Symbol from the full type-name String and
+the current owning source file, relative to the compiler root when applicable.
+This keeps private types with the same spelling in different files distinct.
+Descriptor registration still checks collisions and capacity; a compact tag
+does not establish type equality.
+
+`x2c.type.reverse-name` returns the conventional reverse-converter spelling
+for base and participant name Strings, using the protocol registry's package
+naming rules. For example, base `"Var"` and a registered package participant
+`"geometry__Point"` produce `"geometry__Var_point"`.
 
 The Lisp SDK also supplies operations for literals, parameters, and
 expressions:
@@ -1229,6 +1261,99 @@ and apply their source-order effect. The compiler rejects forms that are
 malformed or invalid in that position. As with other constructed ASTs, it does
 not recursively verify annotations or check where a handwritten `List` came
 from.
+
+### Named types and declaration production
+
+`NamedType` captures `NAME TYPE;` or the forward form `NAME;`. The name comes
+first, with no equals sign. `{ FIELDS }` abbreviates a value struct;
+`struct { FIELDS } *` explicitly declares a pointer representation. Ordinary
+type and declarator grammar owns qualifiers, fields, arrays, and pointers.
+The name is reserved before its fields are parsed, and the complete definition
+supplies its representation. A forward declaration does not imply a pointer.
+Layout must be complete wherever the ordinary type rules require it.
+
+The captured form is `(named-type NAME TYPE)`, where NAME is a String and TYPE
+is the complete canonical type syntax; a forward uses an empty TYPE. This form
+is constructible by any macro or Lisp producer. Binding it publishes the same
+ordinary typedef and aggregate declarations as the captured source.
+
+A `Declaration` macro, or a `NamedType` decorator, produces declarations once
+while the owning source's public declarations are collected. Its result is
+retained for full binding; the producer is not evaluated again to obtain its
+bodies. Nested declaration producers share this rule. The source's private
+boundary and ordinary dependency invalidation apply to the retained result.
+Imported and cached declarations publish the selected signatures of their
+owning source.
+
+The canonical container is `(declaration-bundle (rows ITEM ...))`. Rows may
+include ordinary top-level syntax and these constructible forms:
+
+- `(default FUNCTION)` supplies a function candidate. An ordinary declaration
+  of that exact function in the owning source wins, including a later one.
+  Only the selected body is bound. A candidate below `#pragma private` has
+  static linkage. Two ordinary definitions still conflict.
+- `(declaration-recipe CALLBACK ARGUMENTS)` defers a Lisp producer until the
+  owning source's declarations are available. It is evaluated once, and its
+  declarations join the same bundle.
+- `(default-forward CHILD PARENT MEMBER FALLBACK)` selects an ordinary parent
+  method after signatures are collected and supplies a child forwarding
+  method. FALLBACK is an optional function candidate when no parent applies.
+- `(syntax-recipe CALLBACK ARGUMENTS)` supplies syntax when a retained body is
+  bound, allowing it to use the selected method signatures.
+
+These rows express declaration and binding positions, without authenticating
+which producer constructed them. Retained bodies also carry the usual macro
+bindings and source locations for diagnostics. A consumer cannot replace a
+provider's exported default by defining another function with its name.
+
+### Class declarations
+
+The shipped `class` keyword aliases the `$class` NamedType decorator. See
+[Classes and System Macros](../guide/system-macros.md) for construction and
+lifetime examples. A class preserves its explicit representation and ordinary
+typedef ancestry. It adds replaceable methods through declaration defaults.
+An explicit `new` suppresses its generated constructor and init requirement.
+Derived classes forward the nearest applicable constructor; variadic forwarding
+requires an explicit constructor.
+
+Flat value fields produce positional constructors in declaration order, with
+unnamed bitfield padding omitted. Non-flat or resource-containing aggregates
+require `void T.init(T *)` for a value or `void T.init(T)` for a heap pointer,
+called on zero-initialized storage. Heap defaults allocate through Scope and
+provide early `free`; they do not recursively own fields. Scalar and derived
+aliases retain their ordinary Var representation. Heap classes box identity;
+aggregate values box a Scope-owned copy and require compatible equal/hash
+operations, generated for supported value fields.
+
+`str` and `repr` are independently replaceable. Aggregate value str delegates
+to repr; heap str prints identity. Generated repr traverses printable fields
+and uses addresses for opaque pointers. Repeated identities on the active
+rendering path print their pointer form. Descriptor registration retains the
+runtime's fixed capacity and worker-start freeze rules.
+
+### Managed-initializer syntax
+
+`(managed-init EXPR)` is a constructible initializer form. `$auto(value)`
+produces it; an equivalent List built by another macro or compile-time Lisp
+has the same meaning. It may be wrapped in typed `expr` nodes and parentheses.
+Only the complete initializer of an initialized automatic declaration that is
+a compound-statement item consumes the form. The declaration keeps its type,
+binding identity, initialization conversions, and enclosing scope, followed by
+an ordinary deferred call to the type's selected `cleanup` method.
+
+The declared type must participate in `Cleanup(T)`, whose member is
+`void T.cleanup(T)`, directly or through its ordinary typedef ancestry.
+Initializers run once in source order. Each successful initializer registers
+its cleanup before the following initializer runs, including within a compound
+declaration. Cleanup observes the declared binding at exit; reassignment does
+not dispose the old value, and returning or storing an alias does not cancel
+cleanup.
+
+Static, external, or threaded storage, field initializers, for-header
+declarations, assignments, returns, call arguments, and forms nested inside
+operators are outside this enclosing-block position. These are syntax-position
+rules, independent of the producer of the AST. There is no runtime expression
+helper or expression-exit cleanup.
 
 ### Checked foreign aliases
 
@@ -1998,6 +2123,34 @@ function handles have file-static lifetime.
 
 x2c accepts C-style `if`, `switch`, `while`, `do`, classic `for`, labels,
 `goto`, `return`, `break`, and `continue` statements.
+
+### System block decorators
+
+The built-in macro pack installs `$scope`, `$let`, and `$lock` without a
+per-source import. They retain the normal runtime declaration requirements
+and macro collision policy. None has a bare keyword alias.
+
+`$scope()` retains one region around its following statement and defers
+release inside an inner block containing that statement. `$scope(pointer)`
+evaluates the Scope-pointer expression once, pushes that destination, and
+uses the same inner-block placement for a deferred pop. Pop restores the
+previous destination without destroying the selected Scope. More than one
+argument is an invocation error. A decorator around a loop creates one
+region; a decorator around its body creates one per iteration.
+
+`$let(place, value)` captures the address of the place once, saves its value,
+registers restoration, assigns the new value once, and runs its body. The
+place must be addressable and assignable, and its storage must outlive the
+body. Restoration uses the captured address even when later changes would
+cause the original expression to name different storage.
+
+`$lock(mutex)` evaluates a Mutex expression once, calls `lock`, then defers
+`unlock` around its body. A failed acquisition registers no unlock. These
+forms add ordinary blocks and defers without hidden loops; break, continue,
+return, and error transfer retain their ordinary enclosing boundaries.
+
+See [Classes and System Macros](../guide/system-macros.md) for examples and
+expansions.
 
 ### With
 

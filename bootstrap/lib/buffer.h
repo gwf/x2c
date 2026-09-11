@@ -64,5 +64,7 @@ String Buffer_repr(Buffer buf);
 
 int Buffer_truth(Buffer buffer);
 
+void Buffer_cleanup(Buffer value);
+
 
 #endif /* __GUARD_0x728E1434__ */

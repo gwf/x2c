@@ -115,18 +115,18 @@ Var String_var(String);
 
 _Noreturn static void _open_error(Symbol operation, const char * path, int error){
   if(! path){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/file.x",.function = "_open_error",.line = 87};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/file.x",.function = "_open_error",.line = 89};
     x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
   String resource = String_new(path);
   if(error == ENOENT){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/file.x",.function = "_open_error",.line = 89};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/file.x",.function = "_open_error",.line = 91};
     x2c_error_raise_n(& _x2c_error_site_1, 31862161386376, 3, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(1051920), String_var(resource), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/file.x",.function = "_open_error",.line = 92};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/file.x",.function = "_open_error",.line = 94};
     x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(1051920), String_var(resource), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -135,7 +135,7 @@ _Noreturn static void _open_error(Symbol operation, const char * path, int error
 
 _Noreturn static void _io_error(Symbol operation, int error){
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/file.x",.function = "_io_error",.line = 96};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/file.x",.function = "_io_error",.line = 98};
     x2c_error_raise_n(& _x2c_error_site_3, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -150,7 +150,7 @@ static void _check_read(File file){
 
 static File _open_path(const char * path, const char * mode, Symbol op){
   if(! path || ! mode){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/file.x",.function = "_open_path",.line = 106};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/file.x",.function = "_open_path",.line = 108};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(op));
     __builtin_unreachable();
   }
@@ -162,7 +162,7 @@ static File _open_path(const char * path, const char * mode, Symbol op){
 
 static int _string_allocation(size_t length){
   if(length >= INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/file.x",.function = "_string_allocation",.line = 114};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/file.x",.function = "_string_allocation",.line = 116};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(length));
     __builtin_unreachable();
   }
@@ -172,12 +172,12 @@ static int _string_allocation(size_t length){
 static void _validate_text(const void * bytes, size_t length){
   if(! length) return;
   if(! bytes){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 120};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 122};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("null bytes")), NULL))));
     __builtin_unreachable();
   }
   if(memchr(bytes, '\0', length)){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 121};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/file.x",.function = "_validate_text",.line = 123};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
     __builtin_unreachable();
   }
@@ -198,7 +198,7 @@ String String_malloc(int);
 static String _text(const void * bytes, size_t length){
   if(! length) return NULL;
   if(! bytes){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/file.x",.function = "_text",.line = 137};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/file.x",.function = "_text",.line = 139};
     x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.text")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("null bytes")), NULL))));
     __builtin_unreachable();
   }
@@ -212,7 +212,7 @@ void Block_reserve(Block, size_t);
 
 static inline void _block_putc(Block block, unsigned char value){
   if(block -> length == SIZE_MAX){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/file.x",.function = "_block_putc",.line = 145};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/file.x",.function = "_block_putc",.line = 147};
     x2c_error_raise_n(& _x2c_error_site_9, 1358596898646632, 0);
     __builtin_unreachable();
   }
@@ -278,7 +278,7 @@ static void _append_text(Block content, const void * bytes, size_t count){
   if(count >= INT_MAX - content -> length){
     size_t size = content -> length + count;
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/file.x",.function = "_append_text",.line = 171};
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/file.x",.function = "_append_text",.line = 173};
       x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
@@ -347,7 +347,7 @@ static String _regular_text(File file, size_t requested){
     }
     content = Block_new(sizeof(char));
     if(count >= INT_MAX - 1){
-      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 201};
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/file.x",.function = "_regular_text",.line = 203};
       x2c_error_raise_n(& _x2c_error_site_11, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(count));
       __builtin_unreachable();
     }
@@ -428,7 +428,7 @@ File File_fdopen(int fildes, const char * mode){
   if(! mode){
     Symbol operation = 412057948;
     {
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/file.x",.function = "File_fdopen",.line = 246};
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/file.x",.function = "File_fdopen",.line = 248};
       x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(operation));
       __builtin_unreachable();
     }
@@ -448,7 +448,7 @@ File File_open(const char * path, const char * mode){
 File File_popen(const char * cmd, const char * mode){
   if(! _init_guard_) File_initialize();
   if(! cmd || ! mode){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/file.x",.function = "File_popen",.line = 271};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/file.x",.function = "File_popen",.line = 273};
     x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(34570588));
     __builtin_unreachable();
   }
@@ -461,7 +461,7 @@ File File_popen(const char * cmd, const char * mode){
 File File_reopen(File file, const char * path, const char * mode){
   if(! _init_guard_) File_initialize();
   if(! file || ! path || ! mode){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/file.x",.function = "File_reopen",.line = 286};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/file.x",.function = "File_reopen",.line = 288};
     x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(34096809266140), Symbol_var(1219461468));
     __builtin_unreachable();
   }
@@ -494,7 +494,7 @@ Var long_var(long);
 String File_readblock(File file, long size){
   if(! _init_guard_) File_initialize();
   if(size < 0){
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/file.x",.function = "File_readblock",.line = 382};
+    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/file.x",.function = "File_readblock",.line = 384};
     x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("File.readblock")), NULL))), Symbol_var(1265290), long_var(size));
     __builtin_unreachable();
   }
@@ -842,6 +842,11 @@ void File_initialize(void){
   Stdin = stdin;
   Stdout = stdout;
   Stderr = stderr;
+}
+
+void File_cleanup(File value){
+  if(! _init_guard_) File_initialize();
+  (void) File_close(value);
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

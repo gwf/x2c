@@ -1,0 +1,2 @@
+macro Expression $project.global_answer() => (answer())
+macro Expression $project.native_abs(Expr $value) => (abs($value))

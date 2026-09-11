@@ -704,6 +704,8 @@ List Compiler_try_parse_macro_target_at(Compiler, AstPos);
 
 List Compiler_parse_declaration_row(Compiler);
 
+List Compiler_finish_managed_declaration(Compiler, List);
+
 List Compiler_parse_block_item(Compiler compiler){
   if(! _init_guard_) _file_init_();
   if(Compiler_test_static_assert(compiler)) return Compiler_parse_static_assert(compiler);
@@ -721,7 +723,7 @@ List Compiler_parse_block_item(Compiler compiler){
   if(Compiler_test_declaration(compiler)){
     List declaration = Compiler_parse_declaration_row(compiler);
     Compiler_expect(compiler, 119);
-    return declaration;
+    return Compiler_finish_managed_declaration(compiler, declaration);
   }
   return Compiler_parse_statement(compiler);
 }

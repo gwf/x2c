@@ -1,4 +1,4 @@
-// Private implementation of the built-in foreach macro.
+// Private implementations of the built-in system macros.
 (defun x2c._foreach.atom-type? (type)
   (and (list? type) (= (length type) 1)
        (or (string? (car type)) (symbol? (car type)))))
@@ -165,3 +165,329 @@
       (true (x2c._foreach.general-loop
         declaration collection body targets collection-type
         iterator item pair converter)))))
+
+// A separate inner block lets defer unwind before the retained destination.
+(defun x2c._scope.expand (body destinations)
+  (if (> (length destinations) 1)
+    (x2c.diagnostic.fail "$scope accepts zero or one destination" nil)
+    (let* ((push (if destinations "Scope_push" "Scope_retain"))
+           (pop (if destinations "Scope_pop" "Scope_release")))
+      `((block
+         (stmnt (expr () (call (expr () (ident ,push))
+                               (args ,@destinations))))
+         (block
+           (defer (stmnt (expr () (call (expr () (ident ,pop))
+                                       (args)))))
+           ,body))))))
+
+// Class declarations use ordinary declarators and post-collection defaults.
+(defun x2c._class.ref (name) `(expr () (ident (,name))))
+(defun x2c._class.op (operator . operands)
+  `(expr () (op ,operator ,@operands)))
+(defun x2c._class.call (name . arguments)
+  (apply x2c.expr.call (cons (x2c._class.ref name) arguments)))
+(defun x2c._class.method (receiver member . arguments)
+  (apply x2c.expr.call
+    (cons (x2c.expr.field receiver member) arguments)))
+(defun x2c._class.statement (expression) `(stmnt ,expression))
+(defun x2c._class.return (expression) `(return () ,expression))
+(defun x2c._class.size (expression)
+  `(expr (unsigned) (sizeof (parens ,expression))))
+(defun x2c._class.decl (type name initializer)
+  (let* ((parts (x2c.type.parts type))
+         (binding `(bind (,name) ,(cadr parts))))
+    `(declare ,(car parts) (bindings
+      ,(if initializer `(op = ,binding ,initializer) binding)))))
+(defun x2c._class.parameter (type name)
+  (let ((parts (x2c.type.parts type)))
+    `(param ,(car parts) (bind (,name) ,(cadr parts)))))
+(defun x2c._class.cast (type expression)
+  (let ((parts (x2c.type.parts type)))
+    `(expr ,type (cast (decl ,(car parts)
+       (bindings (bind () ,(cadr parts)))) ,expression))))
+(defun x2c._class.function (name result parameters body)
+  (let ((parts (x2c.type.parts result)))
+    `(function ,(car parts)
+       (bind (,name) ((fnmod (params ,@parameters)) ,@(cadr parts)))
+       (block ,@body))))
+(defun x2c._class.default (owner member result parameters body)
+  `(default ,(x2c._class.function
+    (string-append owner "_" member) result parameters body)))
+(defun x2c._class.value-type (type)
+  (filter (lambda (item)
+    (not (or (member item '(const volatile restrict))
+             (and (list? item) (eq? (car item) 'bitfield))))) type))
+(defun x2c._class.named-field? (field)
+  (and (string? (car field)) (> (string-length (car field)) 0)))
+(defun x2c._class.field-parameter (field)
+  (x2c._class.parameter (x2c._class.value-type (cadr field))
+    (string-append "field_" (car field))))
+(defun x2c._class.field-argument (field)
+  (x2c._class.ref (string-append "field_" (car field))))
+(defun x2c._class.field-on (field receiver)
+  (let* ((type (cadr field)) (scalar (x2c._class.value-type type))
+         (value (x2c.expr.field receiver (car field))))
+    (if (and (list? (car type)) (eq? (car (car type)) 'bitfield))
+      (x2c._class.cast scalar value) value)))
+(defun x2c._class.field-value (field)
+  (x2c._class.field-on field (x2c._class.ref "value")))
+(defun x2c._class.zero ()
+  (x2c.expr.composite (list (x2c.literal.int 0))))
+(defun x2c._class.allocate-copy (value)
+  (x2c._class.call "Scope_memdup"
+    (x2c._class.op '& value) (x2c._class.size value)))
+(defun x2c._class.initializer (owner heap)
+  (let* ((type (list owner))
+         (receiver (if heap type (cons '* type)))
+         (signature `((func (,receiver)) void))
+         (method (x2c.method.resolve type "init"))
+         (value (x2c._class.ref "value")))
+    (if (and method (equal? (x2c.syntax.type method) signature))
+      `(seq
+        ,(x2c._class.decl (cons '* signature) "initialize"
+          (x2c._class.ref (x2c.binding.spelling method)))
+        ,(x2c._class.statement (x2c._class.call "initialize"
+          (if heap value (x2c._class.op '& value)))))
+      (x2c.diagnostic.fail
+        (string-append "class " owner " requires void " owner ".init("
+          owner (if heap ")" " *)")) nil))))
+(defun x2c._class.new (owner representation heap fields positional)
+  (let* ((type (list owner)) (value (x2c._class.ref "value"))
+         (named (filter x2c._class.named-field? fields))
+         (aggregate (member (car representation) '(struct union)))
+         (parameters (if aggregate
+           (if positional (map x2c._class.field-parameter named) nil)
+           (list (x2c._class.parameter representation "initial"))))
+         (initializer (if aggregate
+           (if positional
+             (x2c.expr.composite (map x2c._class.field-argument named))
+             (x2c._class.zero))
+           (x2c._class.ref "initial"))))
+      (x2c._class.default owner "new" type parameters
+        (append
+          (list (x2c._class.decl
+            (if (and heap (not positional) aggregate) type representation)
+            "value"
+            (if (and heap (not positional) aggregate)
+              (x2c._class.call "Scope_calloc" (x2c.literal.int 1)
+                (x2c._class.size
+                  (x2c._class.op '* (x2c._class.ref "value"))))
+              initializer)))
+          (if (and aggregate (not positional))
+            (list `(syntax-recipe x2c._class.initializer (,owner ,heap))) nil)
+          (list (x2c._class.return
+            (if (and heap (or positional (not aggregate)))
+              (x2c._class.allocate-copy value) value)))))))
+(defun x2c._class.pointer-output (owner value out)
+  (x2c._class.method out "printf"
+    (x2c.literal.string (string-append "<" owner ": 0x%012lX>"))
+    (x2c._class.cast '(long) value)))
+(defun x2c._class.box (tag heap)
+  (x2c._class.call "Var_new" (x2c.literal.symbol tag)
+    (if heap (x2c._class.ref "value")
+      (x2c._class.allocate-copy (x2c._class.ref "value")))))
+(defun x2c._class.unbox (owner expression)
+  `(default ,(x2c._class.function
+    (x2c.type.reverse-name "Var" owner) (list owner)
+    (list (x2c._class.parameter '("Var") "value"))
+    (list (x2c._class.return expression)))))
+(defun x2c._class.field-write (field)
+  (let* ((value (x2c._class.field-value field))
+         (type (cadr field))
+         (writer (if (_x2c.type.pointer? type) nil
+           (x2c.method.resolve type "write_repr"))))
+    (x2c._class.statement
+      (if writer (x2c._class.method value "write_repr" (x2c._class.ref "out"))
+        (if (x2c.type.value? type)
+          (x2c._class.method (x2c._class.cast '("Var") value)
+            "write_repr" (x2c._class.ref "out"))
+          (x2c._class.pointer-output "opaque"
+            (if (_x2c.type.pointer? (x2c.type.resolve type)) value
+                (x2c._class.op '& value))
+            (x2c._class.ref "out")))))))
+(defun x2c._class.field-statements (owner fields)
+  (let ((out (x2c._class.ref "out")))
+    (append
+      (list (x2c._class.statement
+        (x2c._class.method out "write"
+          (x2c.literal.string (string-append owner " { ")))))
+      (apply append (map (lambda (field)
+        (append
+          (list (x2c._class.statement (x2c._class.method out "write"
+            (x2c.literal.string (string-append (car field) ": "))))
+            (x2c._class.field-write field))
+          (if (eq? field (last fields)) nil
+            (list (x2c._class.statement (x2c._class.method out "write"
+              (x2c.literal.string ", "))))))) fields))
+      (list (x2c._class.return
+        (x2c._class.method out "write" (x2c.literal.string " }")))))))
+(defun x2c._class.write-fields (owner fields)
+  (cons 'seq (x2c._class.field-statements owner fields)))
+(defun x2c._class.writer (owner heap fields member selected)
+  (let* ((type (list owner)) (value (x2c._class.ref "value"))
+         (out (x2c._class.ref "out"))
+         (parameters (list (x2c._class.parameter type "value")
+                           (x2c._class.parameter '("Buffer") "out"))))
+    (x2c._class.default owner (string-append "write_" member)
+      '("Buffer") parameters
+      (cond
+        (selected (list (x2c._class.return
+          (x2c._class.method out "write" (x2c._class.method value member)))))
+        ((and heap (equal? member "str"))
+          (list (x2c._class.return
+            (x2c._class.pointer-output owner value out))))
+        ((equal? member "str")
+          (list (x2c._class.return
+            (x2c._class.method value "write_repr" out))))
+        (true (append
+          (if heap
+            (list
+              `(if ,(x2c._class.op '==
+                 (x2c._class.cast '(* void) value)
+                 (x2c._class.cast '(* void) (x2c.literal.int 0)))
+                 ,(x2c._class.return
+                   (x2c._class.pointer-output owner value out)))
+              (x2c._class.decl '("RenderPath") "path" nil)
+              `(if ,(x2c._class.op '! (x2c._class.method
+                  (x2c._class.ref "path") "enter" value))
+                 ,(x2c._class.return
+                   (x2c._class.pointer-output owner value out)))
+              `(defer ,(x2c._class.statement
+                (x2c._class.method (x2c._class.ref "path") "leave")))) nil)
+          (list `(syntax-recipe x2c._class.write-fields
+                    (,owner ,fields)))))))))
+(defun x2c._class.string-method (owner member)
+  (x2c._class.default owner member '("String")
+    (list (x2c._class.parameter (list owner) "value"))
+    (list
+      (x2c._class.decl '("Buffer") "out"
+        (x2c._class.call "Buffer_new" (x2c.literal.int 0)))
+      `(defer ,(x2c._class.statement
+        (x2c._class.method (x2c._class.ref "out") "free")))
+      (x2c._class.statement (x2c._class.method
+        (x2c._class.ref "value") (string-append "write_" member)
+        (x2c._class.ref "out")))
+      (x2c._class.return
+        (x2c._class.method (x2c._class.ref "out") "str")))))
+(defun x2c._class.equal (owner heap fields)
+  (let ((left (x2c._class.ref "left")) (right (x2c._class.ref "right")))
+    (x2c._class.default owner "equal" '(int)
+      (list (x2c._class.parameter (list owner) "left")
+            (x2c._class.parameter (list owner) "right"))
+      (if heap
+        (list (x2c._class.return (x2c._class.op '==
+          (x2c._class.cast '(* void) left) (x2c._class.cast '(* void) right))))
+        (append
+          (map (lambda (field)
+            `(if ,(x2c._class.op '!
+              (x2c._class.call "Var_equal"
+                (x2c._class.cast '("Var") (x2c._class.field-on field left))
+                (x2c._class.cast '("Var") (x2c._class.field-on field right))))
+              ,(x2c._class.return (x2c.literal.int 0)))) fields)
+          (list (x2c._class.return (x2c.literal.int 1))))))))
+(defun x2c._class.hash (owner heap fields)
+  (x2c._class.default owner "hash" '(unsigned)
+    (list (x2c._class.parameter (list owner) "value"))
+    (if heap
+      (list (x2c._class.return (x2c._class.call "x2c_hash_word"
+        (x2c._class.cast '(unsigned long) (x2c._class.ref "value")))))
+      (append
+        (list (x2c._class.decl '(unsigned) "hash" (x2c.literal.int 0)))
+        (map (lambda (field)
+          (x2c._class.statement (x2c._class.op '=
+            (x2c._class.ref "hash")
+            (x2c._class.call "x2c_hash_word"
+              (x2c._class.op '^ (x2c._class.ref "hash")
+                (x2c._class.call "Var_hash"
+                  (x2c._class.cast '("Var")
+                    (x2c._class.field-value field)))))))) fields)
+        (list (x2c._class.return (x2c._class.ref "hash")))))))
+(defun x2c._class.own-method (owner member)
+  (let ((found (x2c.method.resolve (list owner) member)))
+    (if (and found (equal? (x2c.binding.spelling found)
+                           (string-append owner "_" member))) found nil)))
+(defun x2c._class.expand (capture)
+  (let ((owner (cadr capture)) (type (car (cddr capture))))
+    (if (null? type) (list capture)
+      (list capture `(declaration-recipe x2c._class.defaults
+        (,owner ,type ,(x2c._invocation.location)))))))
+(defun x2c._class.defaults (owner type location)
+  (let* ((heap (_x2c.type.pointer? type))
+         (alias (and (= (length type) 1) (string? (car type))))
+         (pointee (if heap (_x2c.type.element type) type))
+         (representation (if (x2c.type.value? pointee) pointee
+           (x2c.type.resolve pointee)))
+         (aggregate (member (car representation) '(struct union)))
+         (fields (if aggregate (x2c.type.layout representation) nil))
+         (named (filter x2c._class.named-field? fields))
+         (positional (and aggregate (eq? (car representation) 'struct)
+           (null? (filter (lambda (field)
+             (not (x2c.type.value? (cadr field)))) fields))))
+         (own-new (x2c._class.own-method owner "new"))
+         (constructor (if own-new nil
+           (if (and heap (not aggregate)
+                    (not (x2c.type.value? pointee)))
+             (x2c.diagnostic.fail
+               (string-append "class " owner
+                 " requires an explicit constructor")
+               nil)
+           (let ((fallback
+             (x2c._class.new owner representation heap fields positional)))
+             (if alias
+               `(default-forward (,owner) ,type "new" ,(cadr fallback))
+               fallback)))))
+         (value (x2c._class.ref "value"))
+         (parameter (x2c._class.parameter (list owner) "value"))
+         (tag (x2c.type.tag-name owner)))
+    (cons 'seq (append
+      (if constructor (list constructor) nil)
+      (if alias nil
+        (append
+          (if heap
+            (list
+              (x2c._class.default owner "free" '(void) (list parameter)
+                (list (x2c._class.statement
+                  (x2c._class.call "Scope_free" value))))
+              (x2c._class.default owner "cleanup" '(void) (list parameter)
+                (list (x2c._class.statement
+                  (x2c._class.method value "free"))))
+              `(adopt ("Cleanup") (,owner) external ,location)) nil)
+          (if (or aggregate heap)
+            (append
+              (list
+                (x2c._class.default owner "var" '("Var") (list parameter)
+                  (list (x2c._class.return (x2c._class.box tag heap))))
+                (x2c._class.unbox owner
+                  (let ((pointer (x2c._class.call "Var_pointer" value)))
+                    (if heap (x2c._class.cast (list owner) pointer)
+                      (x2c._class.op '*
+                        (x2c._class.cast (list '* owner) pointer))))))
+              (if (or heap positional)
+                (list (x2c._class.equal owner heap named)
+                      (x2c._class.hash owner heap named))
+                (if (and (x2c.method.resolve (list owner) "equal")
+                         (x2c.method.resolve (list owner) "hash")) nil
+                  (x2c.diagnostic.fail
+                    (string-append "value class " owner
+                      " requires compatible equal and hash methods") nil)))
+              (apply append (map (lambda (member)
+                (let* ((selected (x2c._class.own-method owner member))
+                       (writer (x2c._class.own-method owner
+                         (string-append "write_" member))))
+                  (append
+                    (if writer nil
+                      (list (x2c._class.writer
+                        owner heap named member selected)))
+                    (if selected nil
+                      (list (x2c._class.string-method owner member))))))
+                '("str" "repr")))
+              (list `(adopt ("Var") (,owner) external
+                      (tag ,(x2c.literal.symbol tag)) ,location)))
+            (list
+              (x2c._class.default owner "var" '("Var") (list parameter)
+                (list (x2c._class.return (x2c._class.cast '("Var")
+                  (x2c._class.cast representation value)))))
+              (x2c._class.unbox owner (x2c._class.cast (list owner)
+                (x2c._class.cast representation value)))
+              `(adopt ("Var") (,owner) external
+                ,representation ,location)))))))))

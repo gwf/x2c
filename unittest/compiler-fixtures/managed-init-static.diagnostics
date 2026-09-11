@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/managed-init-static.x:3:47: parse: managed initializer requires automatic local storage
+  int main(void) { static int value = $auto(1); return value; }
+                                                ^^^^^^
+

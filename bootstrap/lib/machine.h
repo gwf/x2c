@@ -237,5 +237,7 @@ MachineProgram MachineBuilder_freeze(MachineBuilder b);
 
 void MachineProgram_free(MachineProgram program);
 
+void MachineBuilder_cleanup(MachineBuilder value);
+
 
 #endif /* __GUARD_0x857C07E7__ */

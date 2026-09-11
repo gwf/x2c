@@ -44,6 +44,8 @@ typedef struct Map {
   unsigned mask;
 } *Map;
 
+protocol Cleanup(Map);
+
 #pragma private
 
 #include <stdlib.h>
@@ -667,9 +669,9 @@ Buffer Map.write_str(Map map, Buffer out) {
     a cause raised while rendering an entry.
 */
 String Map.str(Map map) {
-  Buffer buf = Buffer.new(0);
+  Buffer buf = $auto(Buffer.new(0));
   map.write_str(buf);
-  return buf.str_free();
+  return buf.str();
 }
 
 /** Returns the readable `{ key: value, ... }` representation of `map`.
@@ -687,8 +689,10 @@ String Map.str(Map map) {
     `<alloc-fail>` or `<size-limit>` while constructing the result, or a cause
     raised while rendering an entry. */
 String Map.repr(Map map) {
-  Buffer buf = Buffer.new(0);
+  Buffer buf = $auto(Buffer.new(0));
   map.write_repr(buf);
-  String result = buf.str_free();
-  return result;
+  return buf.str();
 }
+
+/** Releases this Map and both backing Blocks without freeing stored values. */
+void Map.cleanup(Map value) { value._core_free(); }

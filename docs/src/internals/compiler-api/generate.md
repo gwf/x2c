@@ -32,7 +32,7 @@ are closed before individual renames replace their destinations; failure
 can leave only the header replaced, but never a partial file. Failures
 are reported as `emit` diagnostics.
 
-Source: `src/generate.x:845`
+Source: `src/generate.x:893`
 
 ## Design notes
 

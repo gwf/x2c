@@ -346,7 +346,7 @@ static int _changed_dependency(Compiler compiler, SourceView sources){
   return 0;
 }
 
-SourceView SourceView_new(void);
+SourceView SourceView_new();
 
 int SourceView_read(SourceView, String, volatile String *);
 

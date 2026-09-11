@@ -432,6 +432,8 @@ static void _partition_preproc(
 static int _mentions_type(List node, String name) {
   if (!node) return 0;
   if (node.car() is <string> && !node.cdr()) return node.car() == name;
+  if (node.car() is <symbol> && node.car().symbol().is_type_qualifier())
+    return _mentions_type(node.cdr(), name);
   for (List rest = node; rest; rest = rest.cdr())
     if (rest.car() is <list> && _mentions_type(rest.car(), name)) return 1;
   return 0;
@@ -460,32 +462,76 @@ static List _typedef_names(List typedef_node) {
 static List _resolve_typedef_markers(Array items, Array pending, int header) {
   Array output = %[];
   int count = items.len();
-  for (int i = 0; i < count; i++) {
-    Var item = items[i];
-    match (item) {
+  if (header) for (int i = count - 1; i >= 0; i--) {
+    match (items[i])
       case %(pending ?index): {
         int at = index.int();
-        List entry = pending[at];
-        (List names, List node, int promoted) = entry;
-        if (header) {
-          foreach (String name, names) {
-            int declared = 0;
-            for (int j = 0; j < i && !declared; j++)
-              declared = items[j] is <list> &&
-                         _typedef_names(items[j].list()).contains(name);
-            for (int j = i + 1; j < count && !promoted && !declared; j++)
-              promoted = items[j] is <list> &&
-                         _mentions_type(items[j].list(), name);
-            if (promoted) break;
-          }
-          pending[at] = %($names $node $promoted);
+        (List names, List node, int promoted) = pending[at];
+        foreach (String name, names) {
+          int declared = 0;
+          for (int j = 0; j < i && !declared; j++)
+            declared = items[j] is <list> &&
+                       _typedef_names(items[j].list()).contains(name);
+          for (int j = i + 1; j < count && !promoted && !declared; j++)
+            promoted = items[j] is <list> &&
+                       _mentions_type(items[j].list(), name);
+          if (promoted) break;
         }
+        pending[at] = %($names $node $promoted);
+        if (promoted) items[i] = node;
+      }
+  }
+  foreach (Var item, items) {
+    match (item)
+      case %(pending ?index): {
+        (List names, List node, int promoted) = pending[index.int()];
+        (void) names;
         if (promoted == header) output.push(node);
         continue;
       }
-    }
     output.push(item);
   }
+  return output.list_free();
+}
+
+/* A completed aggregate typedef can supply its alias before an earlier
+   field needs it. The forward uses the final declarator, preserving pointer
+   and value identity; an incomplete by-value field remains a native error. */
+static List _aggregate_typedef_forwards(List items, List earlier) {
+  Array candidates = %[];
+  foreach (List node, items)
+    match (node)
+      case %(typedef ?base ?bindings): {
+        Type type = base, core = type.base_type();
+        match (core)
+          case %((!set ?tag (!or struct union)) ?name (fields *)): {
+            if (!name.truth()) continue;
+            List forward_type = type.list()[:type.len() - core.len()]
+                                  .append(%($tag $name));
+            List forward = %(typedef $forward_type $bindings);
+            foreach (String alias, _typedef_names(node))
+              candidates.push(%($alias $forward));
+          }
+      }
+  Map available = %{};
+  foreach (List node, earlier)
+    foreach (String name, _typedef_names(node)) available[name] = 1;
+  Array output = %[];
+  foreach (List node, items) {
+    match (node)
+      case %(typedef ?base ?):
+        foreach (List candidate, candidates) {
+          (String name, List forward) = candidate;
+          if (available.contains(name) || !_mentions_type(base, name))
+            continue;
+          output.push(forward);
+          foreach (String declared, _typedef_names(forward))
+            available[declared] = 1;
+        }
+    output.push(node);
+    foreach (String name, _typedef_names(node)) available[name] = 1;
+  }
+  candidates.free();
   return output.list_free();
 }
 
@@ -546,6 +592,8 @@ static List _header_and_source(Compiler compiler, List ast) {
   }
   List header_list = _resolve_typedef_markers(header, pending, 1);
   List source_list = _resolve_typedef_markers(source, pending, 0);
+  header_list = _aggregate_typedef_forwards(header_list, NULL);
+  source_list = _aggregate_typedef_forwards(source_list, header_list);
   return %( $header_list $source_list );
 }
 

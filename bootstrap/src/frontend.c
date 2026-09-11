@@ -501,10 +501,11 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   cppcompiler -> source_private = - 1;
   cppcompiler -> collect_protocols = 0;
   if(request -> dump == 247458062609318) return globs;
-  if(request -> live_symbols){
-    c -> runtime_hdrs = 1;
-    globs = Compiler_collect_symbols(c, globs);
-  }
+  if(request -> live_symbols) c -> runtime_hdrs = 1;
+  globs = Compiler_collect_symbols(c, globs);
+  cppcompiler -> imports = c -> imports;
+  cppcompiler -> macro_lisp = c -> macro_lisp;
+  cppcompiler -> borrowed_lisp = cppcompiler -> macro_lisp != NULL;
   Map saved_counters = NULL;
   int saved_gensym = 0;
   if(! request -> live_symbols){
@@ -518,7 +519,6 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   if(! request -> live_symbols){
     c -> names -> counters = saved_counters;
     c -> names -> gensym_count = saved_gensym;
-    globs = Compiler_collect_symbols(c, globs);
   }
   if(request -> dump == 1335836754920) unit -> snapshot_statics = Map_copy(Sym_file_statics(cppcompiler -> sym));
   return globs;

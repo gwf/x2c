@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/managed-init-nested.x:3:18: parse: managed initializer requires a complete block-local initializer
+  int main(void) { int value = 1 + $auto(2); return value; }
+                   ^^^
+

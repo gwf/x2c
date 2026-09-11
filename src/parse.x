@@ -849,6 +849,55 @@ static List _direct_declarator(
   return %(bind $ident ());
 }
 
+/** Captures a name followed by an ordinary complete type and semicolon.
+    The reserved typedef identity permits fields to refer to their enclosing
+    named type before its pointer or value representation is complete.
+*/
+List Compiler.parse_named_type(Compiler c) {
+  List slot = c.try_parse_macro_slot(<named-type>);
+  if (slot) return slot;
+  Token start = c.token;
+  String name = c.package_spelling(c.token.text);
+  c.expect(<ident>);
+  List key = %($name);
+  if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
+  if (c.test(<;>)) return %(named-type $name ());
+  List qualifiers = _type_qualifiers(c), base = NULL;
+  if (c.peek(0) == <"{"> ||
+      ((c.peek(0) == <struct> || c.peek(0) == <union>) &&
+       c.peek(1) == <"{">)) {
+    Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
+    if (c.peek(0) != <"{">) c.next();
+    c.expect(<"{">);
+    List fields = c.peek(0) == <"}">
+                ? NULL : c.parse_fields(%($tag $name));
+    c.expect(<"}">);
+    base = c.macro_holes ? %($tag $name (fields @fields))
+                        : _publish_aggregate_type(c, tag, name, fields);
+  }
+  else base = _type_specifier(c);
+  base = qualifiers.append(base);
+  List method = NULL;
+  Token first = NULL, after = NULL;
+  List declarator = _declarator(c, base, NULL, &method, &first, &after);
+  List modifiers = NULL;
+  match (declarator) {
+    case %(bind () ?captured): modifiers = captured;
+    default: c.report_error(
+      <parse>, "named type requires an abstract type after its name",
+      start, NULL);
+  }
+  c.expect(<;>);
+  Type type = %(declare $base (bindings (bind () $modifiers)))
+                .type_from_ast();
+  if (!c.macro_holes) c.sym.declare(%(typedef), key, type);
+  Type specifier = base.type().base_type();
+  if (specifier.is_aggregate_tag_body())
+    type = type.list()[:type.len() - type.base_type().len()]
+      .append(specifier);
+  return %(named-type $name $type);
+}
+
 /** Installs a definition-local template binding or typedef provisionally. */
 void Compiler.bind_template_local(
   Compiler compiler, List key, List type, List context) {
@@ -1100,6 +1149,81 @@ List Compiler.parse_declaration_row(Compiler compiler) {
   List rows = _declaration_rows(compiler);
   match (rows) case %(?only): return only;
   return %(seq @rows);
+}
+
+/* Only the complete initializer admits management. Parentheses and typed
+   expression shells preserve that position; operators do not. */
+static List _managed_initializer(List syntax) {
+  match (syntax) {
+    case %(managed-init ?value): return value;
+    case %(expr ? ?inner):
+      return _managed_initializer(inner);
+    case %(parens ?inner): return _managed_initializer(inner);
+  }
+  return NULL;
+}
+
+/** Lowers managed block declarations to declaration/defer pairs in source
+    order, preserving their installed bindings and the enclosing lifetime.
+*/
+List Compiler.finish_managed_declaration(Compiler c, List declaration) {
+  if (c.macro_holes) return declaration;
+  match (declaration) {
+    case %(seq *rows): {
+      Array output = %[];
+      foreach (List row, rows) {
+        List bound = c.finish_managed_declaration(row);
+        match (bound) {
+          case %(seq *items):
+            foreach (List item, items) output.push(item);
+          default: output.push(bound);
+        }
+      }
+      return %(seq @{output.list_free()});
+    }
+    case %(declare ?base (bindings *declarators)): {
+      Array output = NULL;
+      int index = 0, first = 0;
+      foreach (List declarator, declarators) {
+        int position = index++;
+        List initializer = NULL, binding = NULL, modifiers = NULL;
+        match (declarator)
+          case %(op = (bind ?name ?mods) ?value): {
+            initializer = _managed_initializer(value);
+            binding = name;
+            modifiers = mods;
+          }
+        if (!initializer) continue;
+        Type type = modifiers.append(base).type().declared();
+        if (base.list().contains(<static>) || base.list().contains(<extern>) ||
+            base.list().contains(<threaded>))
+          c.report_error(
+            <parse>, "managed initializer requires automatic local storage",
+            c.token, NULL);
+        if (!c.protocol_members_for(type, %("Cleanup")))
+          c.report_error(
+            <protocol>, "managed initializer requires Cleanup participation",
+            c.token, %("type: ${type.repr()}"));
+        if ((void *) output == NULL) output = %[];
+        if (first < position)
+          output.push(%(declare $base
+            (bindings @{declarators[first:position]})));
+        output.push(%(declare $base
+          (bindings (op = (bind $binding $modifiers) $initializer))));
+        List receiver = %(expr $type (ident $binding));
+        List cleanup = c.resolve_expression(
+          %(expr () (call (expr () (op . $receiver ("cleanup")))
+                          (args))), c.token);
+        output.push(%(defer (stmnt $cleanup)));
+        first = index;
+      }
+      if ((void *) output == NULL) return declaration;
+      if (first < index)
+        output.push(%(declare $base (bindings @{declarators[first:]})));
+      return %(seq @{output.list_free()});
+    }
+  }
+  return declaration;
 }
 
 static String _lifecycle_owner(
@@ -1660,6 +1784,16 @@ List Compiler.finish_foreign_alias(
     c.token, NULL);
 }
 
+static void _append_declaration_rows(Array output, List syntax) {
+  match (syntax) {
+    case %(seq *rows):
+      foreach (List row, rows) _append_declaration_rows(output, row);
+    case %(declaration-bundle (rows *rows)):
+      foreach (List row, rows) _append_declaration_rows(output, row);
+    default: output.push(syntax);
+  }
+}
+
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
     The input must evaluate to a nonempty AST `List` valid for the requested
     `AstPos`. Bindings, types, scopes, and expressions are resolved in source
@@ -1725,6 +1859,70 @@ List Compiler.bind_syntax(
         List bound = _.bind_syntax(syntax.list(), context, _.return_type);
         return bound;
       }
+      case %(named-type ?(String name) ?type): {
+        if (context != AST_UNIT) goto construction_error;
+        List key = %($name);
+        if (!_.sym.get_exact(key)) _.sym.define(key, %(typedef $name));
+        if (!type.list()) return %(seq);
+        List declaration = type.type().declaration_ast(key);
+        match (declaration)
+          case %(declare ?base ?bindings):
+            return _.bind_syntax(%(typedef $base $bindings), context, NULL);
+      }
+      case %(declaration-bundle (rows *rows)): {
+        if (context != AST_UNIT) goto construction_error;
+        if (_.shallow) {
+          _.declaration_produced = 1;
+          _.run_declaration_effects();
+        }
+        _.declaration_projection++;
+        defer _.declaration_projection--;
+        Array projected = %[];
+        foreach (List row, rows) {
+          List bound = _.bind_syntax(row, context, _.return_type);
+          _append_declaration_rows(projected, bound);
+        }
+        List result = projected.list_free();
+        return _.shallow ? %(declaration-bundle (rows @result))
+                         : %(seq @result);
+      }
+      case %(syntax-recipe ?callback ?arguments): {
+        Var result = _.evaluate_declaration_recipe(callback, arguments);
+        return _.bind_syntax(result, context, _.return_type);
+      }
+      case %(declaration-recipe ?callback ?arguments): {
+        if (context != AST_UNIT) goto construction_error;
+        if (_.shallow)
+          return %(declaration-pending $callback $arguments
+                    ${_.freeze_declaration_syntax(_.macro_stack)}
+                    ${_.source_private});
+        Var result = _.evaluate_declaration_recipe(callback, arguments);
+        return _.bind_syntax(result, context, _.return_type);
+      }
+      case %(default-forward ?child ?parent ?member *fallback): {
+        if (context != AST_UNIT) goto construction_error;
+        return %(declaration-forward $child $parent $member
+                  $fallback ${_.source_private});
+      }
+      case %(default ?function): {
+        if (context != AST_UNIT) goto construction_error;
+        if (_.shallow)
+          return %(declaration-default $function
+                    ${_.freeze_declaration_syntax(_.macro_stack)}
+                    ${_.source_private});
+        return _.bind_syntax(function, context, _.return_type);
+      }
+      case %(declaration-function
+               (declare ?return_type (bindings ?declarator))
+               ?body ?construction): {
+        if (context != AST_UNIT) goto construction_error;
+        if (_.shallow) return input;
+        List saved_stack = _.macro_stack;
+        _.macro_stack = _.thaw_declaration_syntax(construction);
+        defer _.macro_stack = saved_stack;
+        return _.bind_syntax(
+          %(function $return_type $declarator $body), context, _.return_type);
+      }
       case %(seq *items): {
         if (context == AST_STATEMENT) {
           match (items) case %(?only):
@@ -1759,6 +1957,11 @@ List Compiler.bind_syntax(
         if (context != AST_UNIT) goto construction_error;
         declaration = _.bind_syntax(declaration, AST_UNIT, _.return_type);
         return _.finish_foreign_alias(declaration, native_syntax);
+      }
+      case %(!set ?initializer (managed-init ?)): {
+        if (context == AST_EXPRESSION)
+          return _.resolve_expression(%(expr () $initializer), _.token);
+        goto construction_error;
       }
       case %(!set ?expression (expr *)):
         if (context == AST_EXPRESSION)
@@ -1797,6 +2000,8 @@ List Compiler.bind_syntax(
           List result = _finish_declaration(
             _, tag, base, output.list_free(), preserved_self);
           if (context == AST_UNIT) _.record_declaration_visibility(result);
+          if (context == AST_BLOCK && tag == <declare>)
+            return _.finish_managed_declaration(result);
           return result;
       }
       case %(dstrdecl ?base (targets *targets) ?source): {
@@ -1841,7 +2046,7 @@ List Compiler.bind_syntax(
                  ((fnmod (params *parameter_values)) *return_modifiers))
                ?body)): {
         if (context != AST_UNIT) goto construction_error;
-        if (_.shallow) return function;
+        if (_.shallow && !_.declaration_projection) return function;
         Array parameters = %[];
         _.sym.push_new_scope();
         {
@@ -1863,6 +2068,15 @@ List Compiler.bind_syntax(
         List declaration = _.bind_syntax(
           %(declare $return_type (bindings $declarator)),
           context, _.return_type);
+        if (_.shallow) {
+          match (declaration)
+            case %(declare ?type (bindings (bind ?binding ?))): {
+              _.fn_defs[binding_identity_spelling(binding)] = 1;
+              _.record_declaration_visibility(declaration);
+            }
+          return %(declaration-function $declaration $body
+                    ${_.freeze_declaration_syntax(_.macro_stack)});
+        }
         return _finish_function(_, declaration, body);
       }
       case %(!set ?node ((!or protocol adopt) *)):

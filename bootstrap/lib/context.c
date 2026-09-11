@@ -77,23 +77,23 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_4;
+  const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_4;
-  const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
+  const void * _x2c_defer_capture_7;
+  const void * _x2c_defer_capture_8;
 }
 _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_7;
-  const void * _x2c_defer_capture_8;
   const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_3;
@@ -291,10 +291,10 @@ static List _export_list(List list, Context source){
   if(! List_truth(list) ||(source -> pool && ! Pool_owns(source -> pool, List_var(list)))) return list;
   Block heads = Block_new(sizeof(Var));
   {
-  _x2c_defer_env_1 _x2c_defer_env_5 = {._x2c_defer_capture_3 =(const void *) & heads};
+  _x2c_defer_env_3 _x2c_defer_env_5 = {._x2c_defer_capture_9 =(const void *) & heads};
 
   X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
+    .fn = _x2c_defer_cleanup_3,
     .env = & _x2c_defer_env_5
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
@@ -342,10 +342,10 @@ static Var _export_array(Var value, Context source){
   Scope_move(array, source -> destination_scope);
   int exported = 0;
   {
-  _x2c_defer_env_2 _x2c_defer_env_6 = {._x2c_defer_capture_4 =(const void *) & exported, ._x2c_defer_capture_5 =(const void *) & array, ._x2c_defer_capture_6 =(const void *) & owner};
+  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_3 =(const void *) & exported, ._x2c_defer_capture_4 =(const void *) & array, ._x2c_defer_capture_5 =(const void *) & owner};
 
   X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
+    .fn = _x2c_defer_cleanup_1,
     .env = & _x2c_defer_env_6
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
@@ -387,10 +387,10 @@ static Var _export_map(Var value, Context source){
   Scope_move(map, source -> destination_scope);
   int exported = 0;
   {
-  _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_7 =(const void *) & exported, ._x2c_defer_capture_8 =(const void *) & map, ._x2c_defer_capture_9 =(const void *) & owner};
+  _x2c_defer_env_2 _x2c_defer_env_7 = {._x2c_defer_capture_6 =(const void *) & exported, ._x2c_defer_capture_7 =(const void *) & map, ._x2c_defer_capture_8 =(const void *) & owner};
 
   X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
+    .fn = _x2c_defer_cleanup_2,
     .env = & _x2c_defer_env_7
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
@@ -487,7 +487,7 @@ static Var _export_value(Var v, Context source){
   if(Var_try_export_context(v, source, & custom)) return custom;
   Symbol tag = Var_tag(v);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 292};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 293};
     x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -497,7 +497,7 @@ static Var _export_value(Var v, Context source){
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 312};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 313};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -532,7 +532,7 @@ void Scope_free(void *);
 void Context_close(Context context){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 351};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 352};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
@@ -545,6 +545,11 @@ void Context_close(Context context){
   Scope_destroy(scope);
   _thread() -> current = parent;
   Scope_free(context);
+}
+
+void Context_cleanup(Context value){
+  if(! _init_guard_) Context_initialize();
+  Context_close(value);
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
@@ -560,21 +565,21 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 }
 
-void Block_free(Block);
-
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Block_free((*(Block *) _x2c_defer_data_1->_x2c_defer_capture_3));
+  if(!(*(int *) _x2c_defer_data_1->_x2c_defer_capture_3)) Scope_move((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_4), &(*(Scope *) _x2c_defer_data_1->_x2c_defer_capture_5));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  if(!(*(int *) _x2c_defer_data_2->_x2c_defer_capture_4)) Scope_move((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_5), &(*(Scope *) _x2c_defer_data_2->_x2c_defer_capture_6));
+  if(!(*(int *) _x2c_defer_data_2->_x2c_defer_capture_6)) Scope_move((*(Map *) _x2c_defer_data_2->_x2c_defer_capture_7), &(*(Scope *) _x2c_defer_data_2->_x2c_defer_capture_8));
 }
+
+void Block_cleanup(Block);
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_7)) Scope_move((*(Map *) _x2c_defer_data_3->_x2c_defer_capture_8), &(*(Scope *) _x2c_defer_data_3->_x2c_defer_capture_9));
+  Block_cleanup((*(Block *) _x2c_defer_data_3->_x2c_defer_capture_9));
 }
 
 #undef _x2c_initializer_choice_C34B3F4F_0_expanded

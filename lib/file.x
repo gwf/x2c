@@ -66,6 +66,8 @@ typedef enum FileReadStatus {
   FILE_READ_DATA = 1
 } FileReadStatus;
 
+protocol Cleanup(File);
+
 #pragma private
 
 #include "string.x"
@@ -590,3 +592,6 @@ void File.initialize(void) {
   Stdout = stdout;
   Stderr = stderr;
 }
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void File.cleanup(File value) { (void) value.close(); }

@@ -100,6 +100,8 @@ Iter Array_iter(Array x, Iter dest);
 
 Array Iter_array(Iter iter);
 
+void Array_cleanup(Array value);
+
 void Array_clear(Array a0);
 
 size_t Array_len(Array a0);

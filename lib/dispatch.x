@@ -18,6 +18,27 @@ $(import "var-tags.xmacro")
 #include "common.x"
 #include "map.x"
 
+/** Enters an object's recursive rendering, or returns zero for a cycle.
+    Keep `path` alive and defer `path.leave()` after a successful entry.
+    Identities are compared only along this thread's active path, so repeated
+    references outside that path render independently. No allocation occurs.
+*/
+int RenderPath.enter(RenderPath *path, const void *identity) {
+  for (RenderPath *active = render_path; active; active = active.previous)
+    if (active.identity == identity) return 0;
+  path.identity = identity;
+  path.previous = render_path;
+  render_path = path;
+  return 1;
+}
+
+/** Restores the path after the most recent successful `enter` on this thread.
+    Ordinary defer unwinding also restores it when a child renderer raises.
+*/
+void RenderPath.leave(RenderPath *path) {
+  render_path = path.previous;
+}
+
 /** Tries the registered truth callback for `value`.
     A null `handled`, missing descriptor, or missing callback returns zero.
     Otherwise `handled` is set to one and the synchronous callback result is
@@ -152,7 +173,7 @@ void x2c_register_descriptor(String name, VarMethods methods) {
   x2c_try_register_descriptor(name, methods);
 }
 
-/** Reserves custom `tag` under lowercase type `name` and merges descriptor
+/** Reserves custom `tag` under full type `name` and merges descriptor
     callbacks. Unlike `x2c_try_register_descriptor`, the tag need not be the
     restricted-Symbol encoding of the name. A built-in tag is rejected so an
     explicit custom type cannot replace built-in behavior. The name and
@@ -160,8 +181,8 @@ void x2c_register_descriptor(String name, VarMethods methods) {
 
     Returns zero for an invalid name, built-in or unavailable tag, or exhausted
     custom capacity, and one otherwise. Distinct names for one tag abort.
-    Raises: `<bad-state>` after registration freezes, or `<alloc-fail>` while
-    checking lowercase spelling.
+    Explicit names retain case; ordinary inferred-tag registration still
+    requires lowercase names. Raises: `<bad-state>` after registration freezes.
 */
 int x2c_try_register_tagged_descriptor(
   Symbol tag, String name, VarMethods methods) {
@@ -173,6 +194,17 @@ int x2c_try_register_tagged_descriptor(
   if (!descriptor) return 0;
   _install_descriptor_methods(descriptor, methods);
   return 1;
+}
+
+/** Registers an explicitly tagged type or raises `<bad-state>` if no custom
+    row can be reserved. Tag/name collisions follow the existing fatal
+    descriptor diagnostic; registration still freezes at worker startup.
+*/
+void x2c_register_tagged_descriptor(
+  Symbol tag, String name, VarMethods methods) {
+  if (!x2c_try_register_tagged_descriptor(tag, name, methods))
+    raise %(bad-state (owner "x2c_register_tagged_descriptor")
+                     (tag $tag) (name $name));
 }
 
 /** Formats the fallback display `String` for a pointer-bearing `Var`. */
@@ -228,6 +260,7 @@ int x2c_var_tag_descriptor_index(Symbol tag);
    native worker startup freezes both tables so lock-free dispatch can read
    them without racing registration. */
 static VarDescriptor custom_descriptors[32] = {0};
+static threaded RenderPath *render_path;
 static pthread_mutex_t descriptor_mutex;
 static pthread_once_t descriptor_mutex_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
@@ -406,7 +439,7 @@ Var Var.postfixindex(Var value, Var key, Symbol op) {
 
 static VarDescriptor *_reserve_tagged_descriptor(
   Symbol tag, String name, int allow_builtin) {
-  if (!tag || !name || name != name.lower()) return 0;
+  if (!tag || !name) return 0;
   VarDescriptor *descriptor = allow_builtin
                             ? _builtin_descriptor_for_tag(tag) : NULL;
   if (!allow_builtin && _reserved_builtin_descriptor_for_tag(tag)) {

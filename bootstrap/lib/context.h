@@ -32,5 +32,7 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value);
 
 void Context_close(Context context);
 
+void Context_cleanup(Context value);
+
 
 #endif /* __GUARD_0xC34B3F4F__ */

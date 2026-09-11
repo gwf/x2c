@@ -18,5 +18,7 @@ void Mutex_unlock(Mutex mutex);
 
 void Mutex_free(Mutex mutex);
 
+void Mutex_cleanup(Mutex value);
+
 
 #endif /* __GUARD_0x8C6C249F__ */

@@ -74,7 +74,9 @@ int List_equal(List, List);
 
 Var List_car(List);
 
-String Symbol_str(Symbol);
+int Var_is_atom(Var);
+
+String Var_str(Var);
 
 int Atom_bare_spelling(String);
 
@@ -99,8 +101,8 @@ int snapshot_write_var(File output, Var value){
     File_putc(output, ')');
     return 1;
   }
-  if(Var_is(value, 1328354264)){
-    String text = Symbol_str(Var_symbol(value));
+  if(Var_is_atom(value)){
+    String text = Var_str(value);
     if(! Atom_bare_spelling(text)) return 0;
     File_puts(output, text);
     return 1;
@@ -241,7 +243,7 @@ Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym){
         String source = File_string(input);  unsigned cursor = 0;  Var document =((void) 0, Void), trailing =((void) 0, Void);
         Symbol volatile status = Lisp_read(lisp, source, & cursor, & document);
         if(status != 46228810 || ! Var_is(document, 806120)){
-          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 128};
+          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 127};
           x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));
           __builtin_unreachable();
         }
@@ -259,13 +261,13 @@ Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym){
         if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) {Var captured = _x2c_match_values[0];  entries = Var_list(captured);  break;
       }
       default: ; {
-        static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 132};  x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));  __builtin_unreachable();
+        static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 131};  x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));  __builtin_unreachable();
       }
       break;
     }
   }
 status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
-        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 139};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("trailing snapshot form")), NULL))));
+        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 138};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("trailing snapshot form")), NULL))));
         __builtin_unreachable();
       }
       Map imported = Map_new();
@@ -282,7 +284,7 @@ status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
           {
             List row = Var_is(entry, 806120) ? Var_list(entry) : NULL;
             if(! List_truth(row) ||(List_len(row) != 2 && List_len(row) != 3)){
-              static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 145};
+              static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 144};
               x2c_error_raise_n(& _x2c_error_site_3, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
               __builtin_unreachable();
             }
@@ -295,7 +297,7 @@ status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
             marker = List_getindex(_x2c_destructure_0, 2);
             int defined = List_len(row) == 3 && Var_equal(marker, Symbol_var(292902696930268));
             if((! defined && List_len(row) != 2) || ! Var_is(key, 806120) || ! Var_is(value, 806120)){
-              static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 149};
+              static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 148};
               x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
               __builtin_unreachable();
             }

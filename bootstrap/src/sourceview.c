@@ -2,7 +2,11 @@
 
 #include "sourceview.h"
 
-static String _3, _2, _1, _0;
+static String _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
 
 #include <limits.h>
 #include <stdio.h>
@@ -10,27 +14,240 @@ static String _3, _2, _1, _0;
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-static int _init_guard_ = 0;
+static inline String _x2c_proto_sourceview_str_0(Var a0);
 
-__attribute__((constructor)) static void _file_init_(void);
+static inline String _x2c_proto_sourceview_repr_0(Var a0);
+
+static inline Buffer _x2c_proto_sourceview_write_str_0(Var a0, Buffer a1);
+
+static inline Buffer _x2c_proto_sourceview_write_repr_0(Var a0, Buffer a1);
+
+static inline unsigned _x2c_proto_sourceview_hash_0(Var a0);
+
+static inline int _x2c_proto_sourceview_equal_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_0;
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
+  _x2c__x2c_protocol_methods_0 =(VarMethods){
+    .str = _x2c_proto_sourceview_str_0, .repr = _x2c_proto_sourceview_repr_0, .write_str = _x2c_proto_sourceview_write_str_0, .write_repr = _x2c_proto_sourceview_write_repr_0, .hash = _x2c_proto_sourceview_hash_0, .equal = _x2c_proto_sourceview_equal_0
+  }
+  ;
+  x2c_register_tagged_descriptor(261698358342, String_new("SourceView"), _x2c__x2c_protocol_methods_0);
   _0 = String_new("/");
   _1 = String_new(".");
   _2 = String_new("..");
   _3 = String_new("/");
+  _4 = String_new("<SourceView: 0x%012lX>");
+  _5 = String_new("SourceView { ");
+  _6 = String_new("overlays: ");
+  _7 = String_new(", ");
+  _8 = String_new("dirty_paths: ");
+  _9 = String_new(" }");
 }
 
 void * Scope_calloc(size_t, size_t);
 
-SourceView SourceView_new(void){
-  SourceView sources = Scope_calloc(1, sizeof(struct SourceView));
+SourceView SourceView_new(){
+  if(! _init_guard_) _file_init_();
+  SourceView value = Scope_calloc(1, sizeof(* value));
+  void(* initialize)(SourceView) = SourceView_init;
+  initialize(value);
+  return value;
+}
+
+void Scope_free(void *);
+
+void SourceView_free(SourceView value){
+  if(! _init_guard_) _file_init_();
+  Scope_free(value);
+}
+
+void SourceView_cleanup(SourceView value){
+  if(! _init_guard_) _file_init_();
+  SourceView_free(value);
+}
+
+Var Var_new(Symbol, ...);
+
+Var SourceView_var(SourceView value){
+  return Var_new(261698358342, value);
+}
+
+void * Var_pointer(Var);
+
+SourceView Var_sourceview(Var value){
+  if(! _init_guard_) _file_init_();
+  return(SourceView) Var_pointer(value);
+}
+
+int SourceView_equal(SourceView left, SourceView right){
+  return(void *) left ==(void *) right;
+}
+
+unsigned x2c_hash_word(unsigned long);
+
+unsigned SourceView_hash(SourceView value){
+  if(! _init_guard_) _file_init_();
+  return x2c_hash_word((unsigned long) value);
+}
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
+Buffer SourceView_write_str(SourceView value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  return Buffer_printf(out, _4, (long) value);
+}
+
+Buffer Buffer_new(size_t);
+
+String Buffer_str(Buffer);
+
+String SourceView_str(SourceView value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_3
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    SourceView_write_str(value, out);
+    {
+      String _x2c_return_value_0 = Buffer_str(out);
+      {
+  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
+  return _x2c_return_value_0;
+
+}
+    }
+
+  }
+
+  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_0);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
+}
+}
+
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Map_write_repr(Map, Buffer);
+
+Buffer SourceView_write_repr(SourceView value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _4, (long) value);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _4, (long) value);
+  {
+  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_1 =(const void *) & path};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_4
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    Buffer_write(out, _5);
+    Buffer_write(out, _6);
+    Map_write_repr(value -> overlays, out);
+    Buffer_write(out, _7);
+    Buffer_write(out, _8);
+    Map_write_repr(value -> dirty_paths, out);
+    {
+      Buffer _x2c_return_value_1 = Buffer_write(out, _9);
+      {
+  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_1);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
+  return _x2c_return_value_1;
+
+}
+    }
+
+  }
+
+  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_1);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
+}
+}
+
+String SourceView_repr(SourceView value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_5
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+    SourceView_write_repr(value, out);
+    {
+      String _x2c_return_value_2 = Buffer_str(out);
+      {
+  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_2);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
+  return _x2c_return_value_2;
+
+}
+    }
+
+  }
+
+  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_2);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
+}
+}
+
+void SourceView_init(SourceView sources){
   sources -> overlays = Map_new();
   sources -> dirty_paths = Map_new();
-  return sources;
 }
 
 String String_new(const char *);
@@ -148,16 +365,16 @@ int SourceView_read(SourceView sources, String path, String volatile * text){
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
          {{
-          int _x2c_return_value_0 = 0;
+          int _x2c_return_value_3 = 0;
           {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
   x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_0);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
+  return _x2c_return_value_3;
 
 }
         }
@@ -165,26 +382,69 @@ int SourceView_read(SourceView sources, String path, String volatile * text){
       }
 
     }
-    else {int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
+    else {int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
     x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
+    x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
     x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
 }
 }
-int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
+int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
     x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
+    x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
     x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return 1;
+}
+
+static inline String _x2c_proto_sourceview_str_0(Var a0){
+  return SourceView_str(Var_sourceview(a0));
+}
+
+static inline String _x2c_proto_sourceview_repr_0(Var a0){
+  return SourceView_repr(Var_sourceview(a0));
+}
+
+static inline Buffer _x2c_proto_sourceview_write_str_0(Var a0, Buffer a1){
+  return SourceView_write_str(Var_sourceview(a0), a1);
+}
+
+static inline Buffer _x2c_proto_sourceview_write_repr_0(Var a0, Buffer a1){
+  return SourceView_write_repr(Var_sourceview(a0), a1);
+}
+
+static inline unsigned _x2c_proto_sourceview_hash_0(Var a0){
+  return SourceView_hash(Var_sourceview(a0));
+}
+
+static inline int _x2c_proto_sourceview_equal_0(Var a0, Var a1){
+  return SourceView_equal(Var_sourceview(a0), Var_sourceview(a1));
+}
+
+void Buffer_free(Buffer);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+void RenderPath_leave(RenderPath *);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 

@@ -11,6 +11,11 @@
 #pragma once
 #include "common.x"
 
+/* Explicit ownership cleanup for an initialized automatic local. */
+protocol Cleanup(T) {
+  void T.cleanup(T);
+}
+
 protocol Block(T) {
   void   T.clear(T);
   size_t T.len(T);

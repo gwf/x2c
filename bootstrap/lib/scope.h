@@ -79,5 +79,7 @@ void * Scope_realloc(void * ptr, size_t size);
 
 void Scope_shutdown(void);
 
+void Scope_cleanup(Scope value);
+
 
 #endif /* __GUARD_0xAAD89034__ */

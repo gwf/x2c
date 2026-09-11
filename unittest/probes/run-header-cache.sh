@@ -368,17 +368,31 @@ cat >"$BUILD/package-import/packages/depcache/src/depcache.x" <<'EOF'
 $(import "helper.xmacro")
 $(import "helper.xlisp")
 typedef int Value;
+class CachedValue { int value; };
+#pragma private
+class HiddenValue { int value; };
 EOF
 cat >"$BUILD/package-import/src/consumer.x" <<'EOF'
 import "depcache" as dep;
 int package_dependency(dep.Value value) { return value; }
+int package_class(int value) {
+  dep.CachedValue original = dep.CachedValue.new(value);
+  Var boxed = original;
+  return dep.Var_cachedvalue(boxed).value;
+}
 EOF
 (cd "$BUILD/package-import" && "$X2C" translate \
-  --package-dir packages --out-dir out src/consumer.x)
+  --package-dir packages --out-dir out src/consumer.x \
+  packages/depcache/src/depcache.x)
 grep -q "helper.xmacro" "$BUILD/package-import/out/consumer.d" ||
   fail "a package's macro import is missing from the consumer depfile"
 grep -q "helper.xlisp" "$BUILD/package-import/out/consumer.d" ||
   fail "a package's Lisp import is missing from the consumer depfile"
+grep -q 'depcache__Var_cachedvalue' \
+  "$BUILD/package-import/out/depcache.h" ||
+  fail "package class lost its canonical reverse converter"
+! grep -q 'HiddenValue' "$BUILD/package-import/out/depcache.h" ||
+  fail "private package class escaped through generated defaults"
 
 # Case 10: aliases belong to one .x file. An included file may use its own
 # aliases to contribute symbols, the including file keeps its aliases across
@@ -545,5 +559,195 @@ EOF
 (cd "$embed_root" && ./builds/0/x2c translate --out-dir warm src/main.x)
 grep -q "warm_name" "$embed_root/warm/main.c" ||
   fail "changed embedded text did not invalidate the header artifact"
+
+# Declaration bundles retain one production across source segments and the
+# full parse. Nested producers and body-only Lisp keep their captured values;
+# late ordinary methods suppress only the matching default candidate.
+declarations="$BUILD/declaration-bundles"
+mkdir -p "$declarations/src"
+cat >"$declarations/src/effects.xlisp" <<EOF2
+(def read-file
+  (bind "lisp_read_file" '((func (("String"))) "Var")))
+(def write-file
+  (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
+(def projection-effect-path "$declarations/effects")
+(write-file "$declarations/effects"
+  (string-append (read-file "$declarations/effects") "i"))
+(def projection-count 0)
+(defun projection-name ()
+  (begin
+    (def projection-count (+ projection-count 1))
+    (write-file "$declarations/effects"
+      (string-append (read-file "$declarations/effects") "x"))
+    (x2c.ident "projected_answer")))
+(defun projection-field ()
+  (begin
+    (write-file "$declarations/effects"
+      (string-append (read-file "$declarations/effects") "f"))
+    (x2c.ident "value")))
+EOF2
+cat >"$declarations/src/producer.xmacro" <<'EOF2'
+$(import "effects.xlisp")
+$(write-file projection-effect-path
+  (string-append (read-file projection-effect-path) "m"))
+macro Field $projection.field() => { int $(projection-field); }
+macro Declaration $projection.inner(Expr $value) => {
+  int $(projection-name)(void) { return $(car (list $value)); }
+  $(quote (
+    (default (function (int) (bind ("selected_answer") ((fnmod (params))))
+      (block (return () (expr (int) (literal (int) "7"))))))
+    (default (function (int) (bind ("default_answer") ((fnmod (params))))
+      (block (return () (expr (int) (literal (int) "9"))))))
+  ))...
+}
+macro Declaration $projection.outer(Expr $value) => {
+  $projection.inner($value);
+}
+EOF2
+cat >"$declarations/src/provider.x" <<'EOF2'
+$(import "producer.xmacro")
+$(def projection-local-count 0)
+$(defun projection-local-name ()
+  (begin
+    (def projection-local-count (+ projection-local-count 1))
+    (x2c.ident "local_answer")))
+$(defun projection-late ()
+  '(function (int) (bind ("default_answer") ((fnmod (params))))
+    (block (return () (expr (int) (literal (int) "29"))))))
+$projection.outer(42);
+class ProjectedField { $projection.field(); };
+int field_value(ProjectedField value) { return value.value; }
+#include "boundary.x"
+macro Declaration $projection.local() => {
+  int $(projection-local-name)(void) { return 23; }
+}
+$projection.local();
+macro Declaration $projection.late() => {
+  $(quote ((declaration-recipe projection-late ())))...
+}
+$projection.late();
+int selected_answer(void) { return 11; }
+int imported_count(void) { return $(x2c.literal.int projection-count); }
+int local_count(void) { return $(x2c.literal.int projection-local-count); }
+EOF2
+: >"$declarations/src/boundary.x"
+cat >"$declarations/src/consumer.x" <<'EOF2'
+#include "provider.x"
+int consume(void) {
+  return projected_answer() + selected_answer() + default_answer();
+}
+EOF2
+for mode in default live cpp; do
+  mkdir -p "$declarations/$mode"
+  : >"$declarations/effects"
+  options=()
+  case "$mode" in
+    live) options+=(--live-symbols) ;;
+    cpp) options+=(--cpp-symbols) ;;
+  esac
+  "$X2C" translate "${options[@]}" --out-dir "$declarations/$mode" \
+    "$declarations/src/provider.x" "$declarations/src/consumer.x"
+  [ "$(cat "$declarations/effects")" = imxf ] ||
+    fail "declaration import, producer, or field ran twice in $mode mode"
+  for file in provider.c provider.h consumer.c consumer.h; do
+    cmp -s "$declarations/default/$file" "$declarations/$mode/$file" ||
+      fail "declaration projection differs in $mode mode: $file"
+  done
+done
+grep -q 'return 11;' "$declarations/default/provider.c" ||
+  fail "late ordinary method did not replace its default"
+! grep -q 'return 7;' "$declarations/default/provider.c" ||
+  fail "discarded declaration default was emitted"
+grep -q 'return 29;' "$declarations/default/provider.c" ||
+  fail "later declaration recipe did not replace its default"
+! grep -q 'return 9;' "$declarations/default/provider.c" ||
+  fail "default survived a later ordinary declaration recipe"
+grep -q 'return 42;' "$declarations/default/provider.c" ||
+  fail "deferred body lost its macro arguments"
+for counter in imported_count local_count; do
+  grep -A2 "^int $counter(void)" "$declarations/default/provider.c" |
+    grep -q 'return 1;' ||
+    fail "declaration replay reset or repeated compile-time source effects"
+done
+
+# Private default methods retain internal linkage, and arbitrary recipe data
+# round-trips even when its List head matches a serialization marker.
+cat >"$declarations/src/private.x" <<'EOF2'
+$(defun projection-data (data)
+  `(return () ,(x2c.literal.int
+    (if (equal? data '(declaration-void)) 17 19))))
+macro Declaration $projection.data() => {
+  $(quote ((function (int) (bind ("data_answer") ((fnmod (params))))
+    (block (syntax-recipe projection-data ((declaration-void)))))))...
+}
+$projection.data();
+#pragma private
+class Hidden { int value; };
+class HiddenAlias Hidden;
+int private_answer(void) { return HiddenAlias.new(5).value; }
+EOF2
+"$X2C" translate --out-dir "$declarations/default" \
+  "$declarations/src/private.x"
+! grep -q 'Hidden' "$declarations/default/private.h" ||
+  fail "private declaration defaults leaked their type into the header"
+grep -q 'static Hidden Hidden_new' "$declarations/default/private.c" ||
+  fail "private declaration default lost internal linkage"
+grep -q 'static HiddenAlias HiddenAlias_new' \
+  "$declarations/default/private.c" ||
+  fail "private forwarding default lost internal linkage"
+grep -q 'return 17;' "$declarations/default/private.c" ||
+  fail "retained recipe data collided with a serialization marker"
+
+# Persisted projection retains the mutable signature overlay in the header
+# cache owner. A warm consumer must see default functions without rerunning
+# the producer; changing its macro dependency invalidates that surface.
+declaration_root="$BUILD/declaration-artifact"
+mkdir -p "$declaration_root/src" "$declaration_root/etc" \
+  "$declaration_root/include" "$declaration_root/lib" \
+  "$declaration_root/builds/0" "$declaration_root/out"
+cp "$X2C" "$declaration_root/builds/0/x2c"
+cp "$ROOT/etc/symbols.xlisp" "$ROOT/etc/init.xlisp" \
+  "$ROOT/etc/compiler-sdk.xlisp" "$ROOT/etc/builtin-macros.xlisp" \
+  "$declaration_root/etc/"
+cat >"$declaration_root/src/producer.xmacro" <<'EOF2'
+$(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
+$(def write-file
+  (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
+$(write-file "effects" (string-append (read-file "effects") "x"))
+macro Declaration $projection.persist() => {
+  $(quote (
+    (default (function (int) (bind ("persisted_answer") ((fnmod (params))))
+      (block (return () (expr (int) (literal (int) "13"))))))
+  ))...
+}
+EOF2
+cat >"$declaration_root/src/provider.x" <<'EOF2'
+$(import "producer.xmacro")
+$projection.persist();
+EOF2
+cat >"$declaration_root/src/consumer.x" <<'EOF2'
+#include "provider.x"
+int consume(void) { return persisted_answer(); }
+EOF2
+: >"$declaration_root/effects"
+(cd "$declaration_root" && ./builds/0/x2c translate --dump-header-symbols \
+  src/consumer.x >etc/header-symbols.xlisp)
+[ "$(cat "$declaration_root/effects")" = x ] ||
+  fail "persisted declaration producer did not run exactly once"
+: >"$declaration_root/effects"
+(cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
+[ ! -s "$declaration_root/effects" ] ||
+  fail "warm declaration artifact reran its producer"
+sed 's/persisted_answer/changed_answer/g' \
+  "$declaration_root/src/producer.xmacro" >"$declaration_root/src/changed"
+mv "$declaration_root/src/changed" "$declaration_root/src/producer.xmacro"
+sed 's/persisted_answer/changed_answer/g' \
+  "$declaration_root/src/consumer.x" >"$declaration_root/src/changed"
+mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
+(cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
+[ "$(cat "$declaration_root/effects")" = x ] ||
+  fail "changed declaration macro did not invalidate its artifact"
+grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
+  fail "consumer retained a stale declaration signature"
 
 echo "header cache probes passed"

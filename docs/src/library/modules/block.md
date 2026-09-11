@@ -12,6 +12,7 @@ Checked dynamic storage for fixed-width elements.
 | [`Block.append`](#Block.append) | Appends `count` elements copied from `source` to `block`. |
 | [`Block.append_fill`](#Block.append_fill) | Appends repeated fixed-width elements to `block`. |
 | [`Block.capacity`](#Block.capacity) | Returns how many elements `block` can hold without growing. |
+| [`Block.cleanup`](#Block.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Block.clear`](#Block.clear) | Removes every element from `block` without releasing capacity. |
 | [`Block.free`](#Block.free) | Releases the `Block` and its backing storage, invalidating every alias. |
 | [`Block.len`](#Block.len) | Returns the number of elements stored in `block`. |
@@ -25,6 +26,7 @@ Checked dynamic storage for fixed-width elements.
 | [`Bytes.append`](#Bytes.append) | Appends `count` elements to `bytes` and returns its current base pointer. |
 | [`Bytes.append_fill`](#Bytes.append_fill) | Appends repeated elements to `bytes` and returns its current base pointer. |
 | [`Bytes.block`](#Bytes.block) | Returns the stable `Block` that owns the live `bytes` base pointer. |
+| [`Bytes.cleanup`](#Bytes.cleanup) | Releases the Block backing a managed Bytes view. |
 | [`Bytes.new`](#Bytes.new) | Allocates empty byte storage for elements of `width` bytes. |
 | [`Bytes.push`](#Bytes.push) | Appends one element and returns the possibly relocated `Bytes` base. |
 | [`Bytes.reserve`](#Bytes.reserve) | Ensures `bytes` can hold at least `minimum` elements and returns its base. |
@@ -48,7 +50,7 @@ reserved storage when growth is required; `<size-limit>` when the new
 extent cannot be represented; or `<alloc-fail>` when growth fails. These
 failures leave the `Block` unchanged.
 
-Source: `lib/block.x:145`
+Source: `lib/block.x:148`
 
 <a id="Block.append_fill"></a>
 #### Block.append_fill
@@ -68,7 +70,7 @@ element on a nonzero append; `<size-limit>` when the new extent cannot be
 represented; or `<alloc-fail>` when growth fails. These failures leave the
 `Block` unchanged.
 
-Source: `lib/block.x:212`
+Source: `lib/block.x:215`
 
 <a id="Block.capacity"></a>
 #### Block.capacity
@@ -77,7 +79,16 @@ Source: `lib/block.x:212`
 
 Returns how many elements `block` can hold without growing.
 
-Source: `lib/block.x:318`
+Source: `lib/block.x:321`
+
+<a id="Block.cleanup"></a>
+#### Block.cleanup
+
+`void Block.cleanup(Block value)`
+
+Ends the owned lifetime when a managed local leaves its block.
+
+Source: `lib/block.x:325`
 
 <a id="Block.clear"></a>
 #### Block.clear
@@ -86,7 +97,7 @@ Source: `lib/block.x:318`
 
 Removes every element from `block` without releasing capacity.
 
-Source: `lib/block.x:131`
+Source: `lib/block.x:134`
 
 <a id="Block.free"></a>
 #### Block.free
@@ -95,7 +106,7 @@ Source: `lib/block.x:131`
 
 Releases the `Block` and its backing storage, invalidating every alias.
 
-Source: `lib/block.x:287`
+Source: `lib/block.x:290`
 
 <a id="Block.len"></a>
 #### Block.len
@@ -104,7 +115,7 @@ Source: `lib/block.x:287`
 
 Returns the number of elements stored in `block`.
 
-Source: `lib/block.x:311`
+Source: `lib/block.x:314`
 
 <a id="Block.new"></a>
 #### Block.new
@@ -117,7 +128,7 @@ Allocates an empty `Block` for elements of `width` bytes.
 allocation size cannot be represented, or `<alloc-fail>` when allocation
 fails.
 
-Source: `lib/block.x:52`
+Source: `lib/block.x:55`
 
 <a id="Block.pop"></a>
 #### Block.pop
@@ -126,7 +137,7 @@ Source: `lib/block.x:52`
 
 Removes the final element of `block` when present.
 
-Source: `lib/block.x:282`
+Source: `lib/block.x:285`
 
 <a id="Block.push"></a>
 #### Block.push
@@ -135,7 +146,7 @@ Source: `lib/block.x:282`
 
 Appends one copied element; storage and failures follow `Block.append`.
 
-Source: `lib/block.x:273`
+Source: `lib/block.x:276`
 
 <a id="Block.reserve"></a>
 #### Block.reserve
@@ -150,7 +161,7 @@ The `Block` handle and contents remain stable, but growth may replace
 capacity cannot be represented, or `<alloc-fail>` when growth fails.
 These failures leave the `Block` unchanged.
 
-Source: `lib/block.x:90`
+Source: `lib/block.x:93`
 
 <a id="Block.truncate"></a>
 #### Block.truncate
@@ -159,7 +170,7 @@ Source: `lib/block.x:90`
 
 Shortens `block` to at most `length` elements.
 
-Source: `lib/block.x:126`
+Source: `lib/block.x:129`
 
 <a id="Block.truth"></a>
 #### Block.truth
@@ -168,7 +179,7 @@ Source: `lib/block.x:126`
 
 Returns nonzero when `block` contains at least one element.
 
-Source: `lib/block.x:315`
+Source: `lib/block.x:318`
 
 <a id="Block.try_pop"></a>
 #### Block.try_pop
@@ -179,7 +190,7 @@ Removes the final element of `block`, copying it to `out` when present.
 Returns zero for a null or empty `Block` and leaves `out` unchanged. A null
 `out` still removes a present element.
 
-Source: `lib/block.x:259`
+Source: `lib/block.x:262`
 
 ### `Bytes`
 
@@ -193,7 +204,7 @@ Appends `count` elements to `bytes` and returns its current base pointer.
  the same causes as `Block.append`; failure leaves the original view live
 .
 
-Source: `lib/block.x:194`
+Source: `lib/block.x:197`
 
 <a id="Bytes.append_fill"></a>
 #### Bytes.append_fill
@@ -205,7 +216,7 @@ Callers must use the return because growth may relocate storage. Raises:
 the same causes as `Block.append_fill`; failure leaves the original view
 live.
 
-Source: `lib/block.x:249`
+Source: `lib/block.x:252`
 
 <a id="Bytes.block"></a>
 #### Bytes.block
@@ -215,7 +226,16 @@ Source: `lib/block.x:249`
 Returns the stable `Block` that owns the live `bytes` base pointer.
 An interior or stale pointer is invalid; NULL returns NULL.
 
-Source: `lib/block.x:77`
+Source: `lib/block.x:80`
+
+<a id="Bytes.cleanup"></a>
+#### Bytes.cleanup
+
+`void Bytes.cleanup(Bytes value)`
+
+Releases the Block backing a managed Bytes view.
+
+Source: `lib/block.x:328`
 
 <a id="Bytes.new"></a>
 #### Bytes.new
@@ -228,7 +248,7 @@ grow it return the current `Bytes` pointer, which callers must keep.
 
 **Raises:** the same causes as `Block.new`.
 
-Source: `lib/block.x:72`
+Source: `lib/block.x:75`
 
 <a id="Bytes.push"></a>
 #### Bytes.push
@@ -237,7 +257,7 @@ Source: `lib/block.x:72`
 
 Appends one element and returns the possibly relocated `Bytes` base.
 
-Source: `lib/block.x:278`
+Source: `lib/block.x:281`
 
 <a id="Bytes.reserve"></a>
 #### Bytes.reserve
@@ -249,7 +269,7 @@ Growth may relocate storage, so callers must use the returned `Bytes` and
 discard earlier views. Raises: the same causes as `Block.reserve`; failure
 leaves the original view live.
 
-Source: `lib/block.x:119`
+Source: `lib/block.x:122`
 
 <a id="Bytes.try_pop"></a>
 #### Bytes.try_pop
@@ -258,7 +278,7 @@ Source: `lib/block.x:119`
 
 Removes the final element through `bytes` as `Block.try_pop` does.
 
-Source: `lib/block.x:270`
+Source: `lib/block.x:273`
 
 ## Runtime-internal callables
 
@@ -285,7 +305,7 @@ For a nonnull `Block`, raises `<bad-arg>` for a null destination slot, or
 `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
 ownership unchanged.
 
-Source: `lib/block.x:303`
+Source: `lib/block.x:306`
 
 ## Public types
 

@@ -25,11 +25,15 @@ void Compiler_skip_macro_lisp(Compiler compiler);
 
 void Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
+void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);
+
 void Compiler_parse_macro_lisp_shallow(Compiler compiler);
 
 List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation);
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler);
+
+Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);
 
 Var Compiler_evaluate_macro_slot(Compiler compiler, Var value);
 
@@ -54,6 +58,8 @@ int Compiler_keyword_alias_starts_target_at(Compiler compiler, AstPos position);
 int Compiler_keyword_alias_needs_shallow_expansion(Compiler compiler);
 
 void Compiler_skip_keyword_alias(Compiler compiler);
+
+int Compiler_skip_named_type_declaration(Compiler compiler);
 
 Token Compiler_macro_invocation_site(Compiler compiler, Var site);
 

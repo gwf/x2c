@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/managed-init-return.x:3:18: parse: managed initializer requires a complete block-local initializer
+  int main(void) { return $auto(1); }
+                   ^^^^^^
+

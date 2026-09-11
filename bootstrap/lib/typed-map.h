@@ -131,6 +131,8 @@ Iter MapIntInt_keys(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0);
 
 Iter MapIntInt_enumerate(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0);
 
+void MapIntInt_cleanup(MapIntInt _x2c_macro_map_4);
+
 MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_macro_capacity_3);
 
 MapLongDouble MapLongDouble_new(void);
@@ -194,6 +196,8 @@ Iter MapLongDouble_iter(MapLongDouble _x2c_macro_map_9, Iter _x2c_macro_dest_1);
 Iter MapLongDouble_keys(MapLongDouble _x2c_macro_map_9, Iter _x2c_macro_dest_1);
 
 Iter MapLongDouble_enumerate(MapLongDouble _x2c_macro_map_9, Iter _x2c_macro_dest_1);
+
+void MapLongDouble_cleanup(MapLongDouble _x2c_macro_map_9);
 
 MapStringString MapStringString_new_capacity(unsigned _x2c_macro_capacity_5);
 
@@ -259,6 +263,8 @@ Iter MapStringString_keys(MapStringString _x2c_macro_map_14, Iter _x2c_macro_des
 
 Iter MapStringString_enumerate(MapStringString _x2c_macro_map_14, Iter _x2c_macro_dest_2);
 
+void MapStringString_cleanup(MapStringString _x2c_macro_map_14);
+
 MapStringInt MapStringInt_new_capacity(unsigned _x2c_macro_capacity_7);
 
 MapStringInt MapStringInt_new(void);
@@ -322,6 +328,8 @@ Iter MapStringInt_iter(MapStringInt _x2c_macro_map_19, Iter _x2c_macro_dest_3);
 Iter MapStringInt_keys(MapStringInt _x2c_macro_map_19, Iter _x2c_macro_dest_3);
 
 Iter MapStringInt_enumerate(MapStringInt _x2c_macro_map_19, Iter _x2c_macro_dest_3);
+
+void MapStringInt_cleanup(MapStringInt _x2c_macro_map_19);
 
 
 #endif /* __GUARD_0xE8B0EF19__ */

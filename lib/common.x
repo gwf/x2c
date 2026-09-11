@@ -112,6 +112,15 @@ typedef unsigned int uint;
 /** Unsigned native long type. */
 typedef unsigned long ulong;
 
+/** Caller-owned frame in this thread's active recursive rendering path. */
+typedef struct RenderPath {
+  const void *identity;
+  struct RenderPath *previous;
+} RenderPath;
+
+int RenderPath.enter(RenderPath *path, const void *identity);
+void RenderPath.leave(RenderPath *path);
+
 /** Renders one `Var` as a display or readable `String`. */
 typedef String (*VarStrFn)(Var);
 /** Appends one `Var` rendering to a caller-owned `Buffer` and returns it. */

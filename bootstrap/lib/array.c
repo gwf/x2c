@@ -127,11 +127,32 @@ static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
 typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_9;
-  const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_6;
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
+
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_11;
+}
+_x2c_defer_env_7;
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_12;
+}
+_x2c_defer_env_8;
+
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
+
+typedef struct _x2c_defer_env_9{
+  const void * _x2c_defer_capture_13;
+}
+_x2c_defer_env_9;
+
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -235,11 +256,11 @@ static void Array__core_setslice(Array _x2c_macro_array_0, int _x2c_macro_start_
     _x2c_macro_copied_0 = 1;
   }
   {
-  _x2c_defer_env_0 _x2c_defer_env_7 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_copied_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_source_0};
+  _x2c_defer_env_0 _x2c_defer_env_10 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_copied_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_source_0};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_7
+    .env = & _x2c_defer_env_10
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -247,7 +268,7 @@ static void Array__core_setslice(Array _x2c_macro_array_0, int _x2c_macro_start_
       if(_x2c_macro_delta_0 > INT_MAX - _x2c_macro_n_0){
         size_t _x2c_macro_size_0 =(size_t) _x2c_macro_n_0 +(size_t) _x2c_macro_delta_0;
         {
-          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/array.x",.function = "Array__core_setslice",.line = 51};
+          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/array.x",.function = "Array__core_setslice",.line = 53};
           x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_0));
           __builtin_unreachable();
         }
@@ -349,7 +370,7 @@ void Block_truncate(Block, size_t);
 
 void Array_resize(Array arr, size_t size){
   if(size > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 70};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 72};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
     __builtin_unreachable();
   }
@@ -361,7 +382,7 @@ static int _int_length(Array array){
   if(array -> length > INT_MAX){
     size_t size = array -> length;
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_int_length",.line = 78};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_int_length",.line = 80};
       x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
@@ -374,7 +395,7 @@ int Var_is_void(Var);
 
 static inline void _require_array_value(Var value){
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_require_array_value",.line = 85};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_require_array_value",.line = 87};
     x2c_error_raise_n(& _x2c_error_site_3, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -418,19 +439,19 @@ Var Var_update(Var *, Symbol, Var);
 
 Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if((void *) array == NULL){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 167};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 169};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))));
     __builtin_unreachable();
   }
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 170};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 172};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))), Symbol_var(19800432), int_var(requested));
     __builtin_unreachable();
   }
   if(Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 172};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 174};
     x2c_error_raise_n(& _x2c_error_site_6, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))), Symbol_var(19800432), int_var(requested));
     __builtin_unreachable();
   }
@@ -442,14 +463,14 @@ Var Var_postfix(Var *, Symbol);
 
 Var Array_postfixindex(Array array, int index, Symbol op){
   if((void *) array == NULL){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 187};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 189};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))));
     __builtin_unreachable();
   }
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 190};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 192};
     x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))), Symbol_var(19800432), int_var(requested));
     __builtin_unreachable();
   }
@@ -462,7 +483,7 @@ Var Array_push(Array array, Var elem){
   if(array -> length >= INT_MAX){
     size_t size = array -> length;
     {
-      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/array.x",.function = "Array_push",.line = 215};
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/array.x",.function = "Array_push",.line = 217};
       x2c_error_raise_n(& _x2c_error_site_9, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
@@ -489,7 +510,7 @@ Var Array_unshift(Array array, Var elem){
   _require_array_value(elem);
   size_t n = Array_len(array);
   if(n >= INT_MAX){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/array.x",.function = "Array_unshift",.line = 257};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/array.x",.function = "Array_unshift",.line = 259};
     x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(n));
     __builtin_unreachable();
   }
@@ -502,7 +523,7 @@ Var Array_insert(Array array, int index, Var elem){
   if(index < 0) index += n + 1;
   if(index < 0 || index > n) return((void) 0, Void);
   if(n == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/array.x",.function = "Array_insert",.line = 280};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/array.x",.function = "Array_insert",.line = 282};
     x2c_error_raise_n(& _x2c_error_site_11, 1358596898646632, 1, Symbol_var(1265290), int_var(n));
     __builtin_unreachable();
   }
@@ -524,7 +545,7 @@ Array Array_copy(Array array){
 
 Array Array_getslice(Array array, int start, int end, int step){
   if(! step){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_getslice",.line = 335};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_getslice",.line = 337};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -578,7 +599,7 @@ Array Array_concat(Array a, Array b){
     if(b -> length > INT_MAX - a -> length){
       size_t size = b -> length;
       {
-        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_concat",.line = 432};
+        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_concat",.line = 434};
         x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
         __builtin_unreachable();
       }
@@ -602,11 +623,11 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 Array Array_map(Array array, Func func){
   Array output = Array_new(), result = NULL;
   {
-  _x2c_defer_env_1 _x2c_defer_env_8 = {._x2c_defer_capture_2 =(const void *) & result, ._x2c_defer_capture_3 =(const void *) & output};
+  _x2c_defer_env_1 _x2c_defer_env_11 = {._x2c_defer_capture_2 =(const void *) & result, ._x2c_defer_capture_3 =(const void *) & output};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_8
+    .env = & _x2c_defer_env_11
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -655,11 +676,11 @@ Array Array_map(Array array, Func func){
 Array Array_map2(Array a, Array b, Func func){
   Array output = Array_new(), result = NULL;
   {
-  _x2c_defer_env_2 _x2c_defer_env_9 = {._x2c_defer_capture_4 =(const void *) & result, ._x2c_defer_capture_5 =(const void *) & output};
+  _x2c_defer_env_2 _x2c_defer_env_12 = {._x2c_defer_capture_4 =(const void *) & result, ._x2c_defer_capture_5 =(const void *) & output};
 
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_9
+    .env = & _x2c_defer_env_12
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
@@ -729,6 +750,10 @@ static int Array__core_compare(Array _x2c_macro_a_1, Array _x2c_macro_b_1){
   return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
 }
 
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
 Buffer Buffer_write(Buffer, const char *);
 
 Buffer Var_write_str(Var, Buffer);
@@ -736,16 +761,46 @@ Buffer Var_write_str(Var, Buffer);
 Buffer Var_write_repr(Var, Buffer);
 
 static Buffer Array__core_write(Array _x2c_macro_array_1, Buffer _x2c_macro_out_1, Symbol _x2c_macro_mode_0){
-  Var * _x2c_macro_data_1 = Array_truth(_x2c_macro_array_1) ?(Var *) _x2c_macro_array_1 -> bytes : NULL;
-  size_t _x2c_macro_n_1 = Array_truth(_x2c_macro_array_1) ? _x2c_macro_array_1 -> length : 0;
-  Buffer_write(_x2c_macro_out_1, "[ ");
-  for(size_t _x2c_macro_i_1 = 0;  _x2c_macro_i_1 < _x2c_macro_n_1;  _x2c_macro_i_1 ++){
-    Var _x2c_macro_element_0 = _x2c_macro_data_1[_x2c_macro_i_1];
-    if(_x2c_macro_mode_0 == 40228) Var_write_str(_x2c_macro_element_0, _x2c_macro_out_1);
-    else Var_write_repr(_x2c_macro_element_0, _x2c_macro_out_1);
-    if(_x2c_macro_i_1 < _x2c_macro_n_1 - 1) Buffer_write(_x2c_macro_out_1, ", ");
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), _x2c_macro_array_1)) return Buffer_printf(_x2c_macro_out_1, "<array: 0x%012lX>", (long) _x2c_macro_array_1);
+  {
+  _x2c_defer_env_3 _x2c_defer_env_13 = {._x2c_defer_capture_6 =(const void *) & _x2c_macro_path_0};
+
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_13
+  };
+  x2c_cleanup_push(&_x2c_defer_record_3);
+  {
+    Var * _x2c_macro_data_1 = Array_truth(_x2c_macro_array_1) ?(Var *) _x2c_macro_array_1 -> bytes : NULL;
+    size_t _x2c_macro_n_1 = Array_truth(_x2c_macro_array_1) ? _x2c_macro_array_1 -> length : 0;
+    Buffer_write(_x2c_macro_out_1, "[ ");
+    for(size_t _x2c_macro_i_1 = 0;  _x2c_macro_i_1 < _x2c_macro_n_1;  _x2c_macro_i_1 ++){
+      Var _x2c_macro_element_0 = _x2c_macro_data_1[_x2c_macro_i_1];
+      if(_x2c_macro_mode_0 == 40228) Var_write_str(_x2c_macro_element_0, _x2c_macro_out_1);
+      else Var_write_repr(_x2c_macro_element_0, _x2c_macro_out_1);
+      if(_x2c_macro_i_1 < _x2c_macro_n_1 - 1) Buffer_write(_x2c_macro_out_1, ", ");
+    }
+    {
+      Buffer _x2c_return_value_2 = Buffer_write(_x2c_macro_out_1, " ]");
+      {
+  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_3);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
+  return _x2c_return_value_2;
+
+}
+    }
+
   }
-  return Buffer_write(_x2c_macro_out_1, " ]");
+
+  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_3);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
+}
 }
 
 int Array_compare(Array a, Array b){
@@ -778,23 +833,23 @@ Array Array_sort_with(Array array, Func compare){
   size_t count = array -> length;
   Array source = Array_copy(array);
   {
-  _x2c_defer_env_4 _x2c_defer_env_10 = {._x2c_defer_capture_7 =(const void *) & source};
+  _x2c_defer_env_5 _x2c_defer_env_14 = {._x2c_defer_capture_8 =(const void *) & source};
 
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_10
+  X2CCleanup _x2c_defer_record_4 = {
+    .fn = _x2c_defer_cleanup_5,
+    .env = & _x2c_defer_env_14
   };
-  x2c_cleanup_push(&_x2c_defer_record_3);
+  x2c_cleanup_push(&_x2c_defer_record_4);
   {
     Array target = Array_new();
     {
-  _x2c_defer_env_3 _x2c_defer_env_11 = {._x2c_defer_capture_6 =(const void *) & target};
+  _x2c_defer_env_4 _x2c_defer_env_15 = {._x2c_defer_capture_7 =(const void *) & target};
 
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_11
+  X2CCleanup _x2c_defer_record_5 = {
+    .fn = _x2c_defer_cleanup_4,
+    .env = & _x2c_defer_env_15
   };
-  x2c_cleanup_push(&_x2c_defer_record_4);
+  x2c_cleanup_push(&_x2c_defer_record_5);
   {
       Array_resize(target, count);
       for(size_t width = 1;  width < count;  width *= 2){
@@ -814,32 +869,32 @@ Array Array_sort_with(Array array, Func compare){
       }
       memcpy(array -> bytes, source -> bytes, count * sizeof(Var));
       {
-        Array _x2c_return_value_2 = array;
+        Array _x2c_return_value_3 = array;
         {
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_4);
-        x2c_cleanup_leave(& _x2c_defer_record_3);
+  x2c_cleanup_leave(& _x2c_defer_record_5);
+        x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-  return _x2c_return_value_2;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
+  return _x2c_return_value_3;
 
 }
       }
 
     }
 
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
+  x2c_cleanup_leave(&_x2c_defer_record_5);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
 }
   }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
+  x2c_cleanup_leave(&_x2c_defer_record_4);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
 
@@ -856,13 +911,13 @@ Array Array_sort_by(Array array, Func key){
   size_t count = array -> length;
   struct ArraySortEntry * entries = Scope_calloc(count, sizeof(struct ArraySortEntry));
   {
-  _x2c_defer_env_5 _x2c_defer_env_12 = {._x2c_defer_capture_8 =(const void *) & entries};
+  _x2c_defer_env_6 _x2c_defer_env_16 = {._x2c_defer_capture_9 =(const void *) & entries};
 
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_12
+  X2CCleanup _x2c_defer_record_6 = {
+    .fn = _x2c_defer_cleanup_6,
+    .env = & _x2c_defer_env_16
   };
-  x2c_cleanup_push(&_x2c_defer_record_5);
+  x2c_cleanup_push(&_x2c_defer_record_6);
   {
     for(size_t index = 0;  index < count;  index ++){
       Var value = Array_getindex(array, index);
@@ -877,24 +932,24 @@ Array Array_sort_by(Array array, Func key){
     qsort(entries, count, sizeof(struct ArraySortEntry), _sort_key_compare);
     for(size_t index = 0;  index < count;  index ++) Array_setindex(array, index, entries[index].value);
     {
-      Array _x2c_return_value_3 = array;
+      Array _x2c_return_value_4 = array;
       {
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_5);
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-  return _x2c_return_value_3;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
+  return _x2c_return_value_4;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_5);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
+  x2c_cleanup_leave(&_x2c_defer_record_6);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
 }
 }
 
@@ -983,17 +1038,74 @@ Buffer Array_write_str(Array array, Buffer out){
   return Array__core_write(array, out, 40228);
 }
 
+String Buffer_str(Buffer);
+
 String Array_str(Array array){
   Buffer buf = Buffer_new(0);
-  Array_write_str(array, buf);
-  return Buffer_str_free(buf);
+  {
+  _x2c_defer_env_8 _x2c_defer_env_17 = {._x2c_defer_capture_12 =(const void *) & buf};
+
+  X2CCleanup _x2c_defer_record_7 = {
+    .fn = _x2c_defer_cleanup_8,
+    .env = & _x2c_defer_env_17
+  };
+  x2c_cleanup_push(&_x2c_defer_record_7);
+  {
+    Array_write_str(array, buf);
+    {
+      String _x2c_return_value_5 = Buffer_str(buf);
+      {
+  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_7);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
+  return _x2c_return_value_5;
+
+}
+    }
+
+  }
+
+  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_7);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
+}
 }
 
 String Array_repr(Array array){
   Buffer buf = Buffer_new(0);
-  Array_write_repr(array, buf);
-  String result = Buffer_str_free(buf);
-  return result;
+  {
+  _x2c_defer_env_9 _x2c_defer_env_18 = {._x2c_defer_capture_13 =(const void *) & buf};
+
+  X2CCleanup _x2c_defer_record_8 = {
+    .fn = _x2c_defer_cleanup_9,
+    .env = & _x2c_defer_env_18
+  };
+  x2c_cleanup_push(&_x2c_defer_record_8);
+  {
+    Array_write_repr(array, buf);
+    {
+      String _x2c_return_value_6 = Buffer_str(buf);
+      {
+  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_8);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
+  return _x2c_return_value_6;
+
+}
+    }
+
+  }
+
+  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_8);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
+}
 }
 
 Array Var_array(Var);
@@ -1025,13 +1137,13 @@ Iter Array_iter(Array x, Iter dest){
 Array Iter_array(Iter iter){
   Array output = Array_new(), result = NULL;
   {
-  _x2c_defer_env_6 _x2c_defer_env_13 = {._x2c_defer_capture_9 =(const void *) & result, ._x2c_defer_capture_10 =(const void *) & output};
+  _x2c_defer_env_7 _x2c_defer_env_19 = {._x2c_defer_capture_10 =(const void *) & result, ._x2c_defer_capture_11 =(const void *) & output};
 
-  X2CCleanup _x2c_defer_record_6 = {
-    .fn = _x2c_defer_cleanup_6,
-    .env = & _x2c_defer_env_13
+  X2CCleanup _x2c_defer_record_9 = {
+    .fn = _x2c_defer_cleanup_7,
+    .env = & _x2c_defer_env_19
   };
-  x2c_cleanup_push(&_x2c_defer_record_6);
+  x2c_cleanup_push(&_x2c_defer_record_9);
   {
     {
       Var item;
@@ -1044,25 +1156,29 @@ Array Iter_array(Iter iter){
 
     }
     {
-      Array _x2c_return_value_4 = result = output;
+      Array _x2c_return_value_7 = result = output;
       {
-  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_6);
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
-  return _x2c_return_value_4;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
+  return _x2c_return_value_7;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_6);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
+  x2c_cleanup_leave(&_x2c_defer_record_9);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
 }
+}
+
+void Array_cleanup(Array value){
+  Array_free(value);
 }
 
 void Block_clear(Block);
@@ -1120,9 +1236,11 @@ static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   if((void *)(*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4) == NULL) Array_free((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_5));
 }
 
+void RenderPath_leave(RenderPath *);
+
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  Array_free((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_6));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_3->_x2c_defer_capture_6)));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
@@ -1130,15 +1248,32 @@ static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   Array_free((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
-void Scope_free(void *);
-
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Scope_free((*(struct ArraySortEntry * *) _x2c_defer_data_5->_x2c_defer_capture_8));
+  Array_free((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_8));
 }
+
+void Scope_free(void *);
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  if((void *)(*(Array *) _x2c_defer_data_6->_x2c_defer_capture_9) == NULL) Array_free((*(Array *) _x2c_defer_data_6->_x2c_defer_capture_10));
+  Scope_free((*(struct ArraySortEntry * *) _x2c_defer_data_6->_x2c_defer_capture_9));
+}
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
+  if((void *)(*(Array *) _x2c_defer_data_7->_x2c_defer_capture_10) == NULL) Array_free((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_11));
+}
+
+void Buffer_cleanup(Buffer);
+
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_8->_x2c_defer_capture_12));
+}
+
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
+  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_9;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_9->_x2c_defer_capture_13));
 }
 

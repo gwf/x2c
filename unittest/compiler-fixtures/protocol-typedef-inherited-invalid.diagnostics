@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:17:1: protocol: 'InvalidChild_iter' has a signature incompatible with Iter(InvalidChild) member 'iter'
   protocol Iter(InvalidChild);
   ^^^^^^^^
-  note: protocol member 'iter' declared by Iter(InvalidChild) at lib/protocols.x:24:1 conflicting definition 'InvalidChild_iter': ((func (("InvalidChild") (int))) int) expected: ((func (("InvalidChild") ("Iter"))) "Iter")
+  note: protocol member 'iter' declared by Iter(InvalidChild) at lib/protocols.x:29:1 conflicting definition 'InvalidChild_iter': ((func (("InvalidChild") (int))) int) expected: ((func (("InvalidChild") ("Iter"))) "Iter")
 

@@ -175,6 +175,44 @@ $family.method(second);
 
 
 class PublicDeclarationsTest(unittest.TestCase):
+    def test_projected_functions_ignore_bodies_and_discarded_candidates(self):
+        from x2c_symbols import HeaderSymbols, ARTIFACT_VERSION
+
+        function = lambda name: ["declaration-function",
+            ["declare", ["int"], ["bindings", ["bind",
+                ["binding", 4, name], []]]],
+            ["declaration-function", "unrelated body data"], []]
+        projected = ["declaration-source", 42, ["declaration-bundle",
+            ["rows", function("Point_new"),
+             ["declaration-default", function("Point_repr")]]]]
+        artifact = HeaderSymbols([["header-symbols", ARTIFACT_VERSION,
+            0, "hash", [["lib/point.x", "hash", 0,
+                [[[["source-node", ["declaration", "lib/point.x", 0]],
+                   projected]]]]]]])
+        self.assertEqual(("Point_new",),
+                         artifact.declaration_functions("lib/point.x"))
+
+    def test_class_spans_and_forward_completion(self):
+        source = """class Point;
+/** A point value. */
+class Point { int x; int y; };
+/** A linked record. */
+class Node struct { Node next; union { int n; double d; }; } *;
+class Count const unsigned long;
+class Callback int (*)(int);
+#pragma private
+class Hidden int;
+"""
+        declarations = public_declarations(source)
+        self.assertEqual(["Point", "Node", "Count", "Callback"],
+                         [item.name for item in declarations])
+        self.assertEqual(["class"] * 4,
+                         [item.kind for item in declarations])
+        self.assertEqual("A point value.", declarations[0].doc)
+        self.assertEqual(3, declarations[0].line)
+        self.assertIn("union { int n; double d; }", declarations[1].signature)
+        self.assertEqual((), definitions(source))
+
     def test_alias_uses_adjacent_doc_but_not_section_comment(self):
         source = """/** A compiler syntax tree. */
 typedef List Ast;

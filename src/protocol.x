@@ -335,16 +335,18 @@ static int _has_private_native(Compiler compiler, List templates) {
   return 0;
 }
 
-/* A `Base.participant` reverse converter is declared under the participant's
-   source spelling, and package mode rewrites that joined name as a whole, so
-   the package prefix sits at the front of the derived binding instead of
-   inside it. The split is keyed on a registered package because a foreign
-   header may spell `__` in a type name. */
-static String _reverse_spelling(
+/** Returns the conventional reverse converter spelling.
+    A `Base.participant` reverse converter is declared under the participant's
+    source spelling, and package mode rewrites that joined name as a whole, so
+    the package prefix sits at the front of the derived binding instead of
+    inside it. The split is keyed on a known package because a foreign
+    header may spell `__` in a type name. */
+String Compiler.reverse_converter_spelling(
   Compiler compiler, String base_name, String infix, String participant) {
   int split = participant.find("__");
   String package = split > 0 &&
-    compiler.package_roots.contains(participant[:split])
+    (compiler.package == participant[:split] ||
+     compiler.package_roots.contains(participant[:split]))
       ? participant[:split] : NULL;
   String bare = package ? participant[split + 2:] : participant;
   String binding = %"${base_name}_$infix${bare.lower()}";
@@ -444,10 +446,10 @@ static List Compiler._publish_protocol_adoption(
   String base_name = _base_name(base);
   String forward = base_name ? %"${spelling}_${base_name.lower()}" : NULL;
   String reverse = base_name
-    ? _reverse_spelling(c, base_name, %"", spelling)
+    ? c.reverse_converter_spelling(base_name, %"", spelling)
     : NULL;
   String alternate = base_name
-    ? _reverse_spelling(c, base_name, %"as_", spelling)
+    ? c.reverse_converter_spelling(base_name, %"as_", spelling)
     : NULL;
   Var occurrence_value;
   List occurrence = c.protocols.try_get(base, &occurrence_value)
@@ -868,11 +870,11 @@ static String _reverse_binding(
   if (!base_name || !participant.is_bare_typedef_name()) return NULL;
   String participant_name = participant.car().str();
   String conventional =
-    _reverse_spelling(compiler, base_name, %"", participant_name);
+    compiler.reverse_converter_spelling(base_name, %"", participant_name);
   Type found = _declared(compiler, conventional);
   if (_exact_conversion(found, base, participant)) return conventional;
   String alternate =
-    _reverse_spelling(compiler, base_name, %"as_", participant_name);
+    compiler.reverse_converter_spelling(base_name, %"as_", participant_name);
   found = _declared(compiler, alternate);
   if (_exact_conversion(found, base, participant)) return alternate;
   return NULL;
@@ -2057,8 +2059,8 @@ static void Compiler._generate_descriptor_registration(
   List explicit_call = NULL;
   if (explicit_tag)
     explicit_call = %(
-      expr (int)
-        (call "x2c_try_register_tagged_descriptor"
+      expr (void)
+        (call "x2c_register_tagged_descriptor"
           (args
             (expr ("Symbol")
               (literal ("Symbol") ${explicit_tag.str()} $explicit_tag))
@@ -2090,6 +2092,47 @@ static void _report_requirement_at_adoption(
     _adoption_location(row), NULL);
 }
 
+/* Copied aggregate boxes have an identity only before unboxing. Their direct
+   value printer has no stable address to guard, so the descriptor thunk owns
+   this boundary. Pointer participants guard their actual recursive writer. */
+static List _guard_value_rendering(
+  Compiler compiler, List function, String member) {
+  match (function)
+    case %(function ?result
+           (!set ?declarator
+             (bind ? ((fnmod (params
+               (param ? (bind ?boxed ?)) *remaining)) *)))
+           (block *body)): {
+      Type returns = result.type().declared();
+      List value = %(expr ("Var") (ident $boxed));
+      List fallback = NULL;
+      if (member == "str" || member == "repr")
+        fallback = %(expr ("String")
+          (call "Var_pointer_string" (args $value)));
+      else match (remaining)
+        case %((param ? (bind ?output ?))):
+          fallback = %(expr ("Buffer")
+            (call "Var_write_pointer_repr"
+              (args $value (expr ("Buffer") (ident $output)))));
+      List path = compiler.sym.introduce("render_path");
+      compiler.semantic_binding_facts()[%(automatic $path)] = 1;
+      compiler.semantic_binding_facts()[%(type $path)] = %("RenderPath");
+      List address = %(expr (* "RenderPath")
+        (op & (expr ("RenderPath") (ident $path))));
+      List enter = %(expr (int)
+        (call "RenderPath_enter" (args $address
+          (expr (* void) (call "Var_pointer" (args $value))))));
+      return %(function $result $declarator
+        (block
+          (declare ("RenderPath") (bindings (bind $path ())))
+          (if (expr (int) (op ! $enter)) (return $returns $fallback))
+          (defer (stmnt (expr (void)
+            (call "RenderPath_leave" (args $address)))))
+          @body));
+    }
+  return function;
+}
+
 static List Compiler._generate_protocol_thunk(
   Compiler compiler, Type participant, String member, Type expected,
   Type template, Map variables, Map bindings, String binder, String source,
@@ -2104,6 +2147,10 @@ static List Compiler._generate_protocol_thunk(
   List function = compiler._generate_protocol_function(
     thunk_name, 1, target, expected, template,
     variables, binder, source, reverse, &thunk_binding);
+  if ((member == "str" || member == "repr" || member == "write_str" ||
+       member == "write_repr") &&
+      compiler.sym.normalize_declared_type(participant).is_aggregate())
+    function = _guard_value_rendering(compiler, function, member);
   compiler.add_early(function);
   return %($member $thunk_binding $target);
 }
@@ -2195,7 +2242,8 @@ static void Compiler._generate_ordinary_protocol_adapters(
   if (base == %("Var") && !shares_var_tag) {
     List tag_expression = _adoption_tag(adoption);
     Symbol explicit_tag = _protocol_tag_value(tag_expression);
-    String name = participant.car().str().lower();
+    String name = participant.car().str();
+    if (!explicit_tag) name = name.lower();
     c._generate_descriptor_registration(
       participant, name, explicit_tag, thunk_rows, central_initializer);
   }

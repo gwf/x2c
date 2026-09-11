@@ -554,12 +554,34 @@ static void thread_freezes_late_descriptor_registration(void) {
   EXPECT_TRUE(tag_caught);
 }
 
+static Var _thread_render_shared(const void *input, size_t input_size) {
+  if (input_size != sizeof(Array)) return 0;
+  Array shared = *(Array *) input;
+  for (int i = 0; i < 20; i++)
+    if (shared.repr() != %"[ 1, 2 ]") return 0;
+  return 1;
+}
+
+static void thread_rendering_paths_are_independent(void) {
+  Array shared = %[1, 2];
+  RenderPath path;
+  EXPECT_TRUE(path.enter(shared));
+  defer path.leave();
+  Thread first = Thread.start(_thread_render_shared, &shared, sizeof(shared));
+  Thread second = Thread.start(_thread_render_shared, &shared, sizeof(shared));
+  EXPECT_INT_EQ(first.join().integer(), 1);
+  EXPECT_INT_EQ(second.join().integer(), 1);
+  first.free();
+  second.free();
+}
+
 $(import "test-macros.xmacro")
 
 void thread_suite(void) {
   $test.run(thread_failed_start_does_not_freeze_registration);
   $test.run(thread_input_size_overflow_is_size_limit);
   $test.run(thread_copies_input_at_maximum_alignment);
+  $test.run(thread_rendering_paths_are_independent);
   $test.run(thread_rejects_one_of_two_concurrent_joins);
   $test.run(thread_rejects_free_before_join_and_double_join);
   $test.run(thread_workers_isolate_and_join_results);

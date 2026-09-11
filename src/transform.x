@@ -1673,6 +1673,12 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
    _sequence alone splices `(seq ...)` results into a sequence. */
 static Ast _node(Compiler c, Ast ast) {
   if (!ast) return NULL;
+  match (ast)
+    case %(managed-init ?):
+      c.report_error(
+        <parse>,
+        "managed initializer requires a complete block-local initializer",
+        NULL, NULL);
   Var head = ast.car();
   if (head is not <symbol>) return _children(c, ast);
   match (ast) {

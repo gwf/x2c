@@ -12,14 +12,47 @@ Request-owned source overlays.
 
 | Function | Summary |
 | --- | --- |
+| [`SourceView.cleanup`](#SourceView.cleanup) | Provides the class default for `SourceView.cleanup`. |
+| [`SourceView.equal`](#SourceView.equal) | Provides the class default for `SourceView.equal`. |
 | [`SourceView.exists`](#SourceView.exists) | Returns readable-file presence, including unsaved new files. |
+| [`SourceView.free`](#SourceView.free) | Provides the class default for `SourceView.free`. |
+| [`SourceView.hash`](#SourceView.hash) | Provides the class default for `SourceView.hash`. |
+| [`SourceView.init`](#SourceView.init) | Initializes empty overlays in the current request lifetime. |
 | [`SourceView.is_changed`](#SourceView.is_changed) | Returns whether this logical file has an unsaved overlay. |
-| [`SourceView.new`](#SourceView.new) | Creates a source view in the current request lifetime. |
+| [`SourceView.new`](#SourceView.new) | Provides the class default for `SourceView.new`. |
 | [`SourceView.path`](#SourceView.path) | Resolves existing path components and normalizes missing final components. |
 | [`SourceView.read`](#SourceView.read) | Reads through the request overlay, falling back to a regular disk file. |
+| [`SourceView.repr`](#SourceView.repr) | Provides the class default for `SourceView.repr`. |
 | [`SourceView.set`](#SourceView.set) | Stores an immutable snapshot under its logical source path. |
+| [`SourceView.str`](#SourceView.str) | Provides the class default for `SourceView.str`. |
+| [`SourceView.var`](#SourceView.var) | Provides the class default for `SourceView.var`. |
+| [`SourceView.write_repr`](#SourceView.write_repr) | Provides the class default for `SourceView.write_repr`. |
+| [`SourceView.write_str`](#SourceView.write_str) | Provides the class default for `SourceView.write_str`. |
+| [`Var.sourceview`](#Var.sourceview) | Provides the class default for `Var.sourceview`. |
 
 ### `SourceView`
+
+<a id="SourceView.cleanup"></a>
+#### SourceView.cleanup
+
+`void SourceView.cleanup(SourceView)`
+
+Provides the class default for `SourceView.cleanup`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+<a id="SourceView.equal"></a>
+#### SourceView.equal
+
+`int SourceView.equal(SourceView, SourceView)`
+
+Provides the class default for `SourceView.equal`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
 
 <a id="SourceView.exists"></a>
 #### SourceView.exists
@@ -28,7 +61,38 @@ Request-owned source overlays.
 
 Returns readable-file presence, including unsaved new files.
 
-Source: `src/sourceview.x:76`
+Source: `src/sourceview.x:74`
+
+<a id="SourceView.free"></a>
+#### SourceView.free
+
+`void SourceView.free(SourceView)`
+
+Provides the class default for `SourceView.free`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+<a id="SourceView.hash"></a>
+#### SourceView.hash
+
+`unsigned SourceView.hash(SourceView)`
+
+Provides the class default for `SourceView.hash`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+<a id="SourceView.init"></a>
+#### SourceView.init
+
+`void SourceView.init(SourceView sources)`
+
+Initializes empty overlays in the current request lifetime.
+
+Source: `src/sourceview.x:30`
 
 <a id="SourceView.is_changed"></a>
 #### SourceView.is_changed
@@ -37,16 +101,18 @@ Source: `src/sourceview.x:76`
 
 Returns whether this logical file has an unsaved overlay.
 
-Source: `src/sourceview.x:72`
+Source: `src/sourceview.x:70`
 
 <a id="SourceView.new"></a>
 #### SourceView.new
 
 `SourceView SourceView.new(void)`
 
-Creates a source view in the current request lifetime.
+Provides the class default for `SourceView.new`.
 
-Source: `src/sourceview.x:30`
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
 
 <a id="SourceView.path"></a>
 #### SourceView.path
@@ -57,7 +123,7 @@ Resolves existing path components and normalizes missing final components.
 An unsaved new file therefore shares the identity of its real parent,
 including when that parent was reached through a symlink.
 
-Source: `src/sourceview.x:41`
+Source: `src/sourceview.x:39`
 
 <a id="SourceView.read"></a>
 #### SourceView.read
@@ -68,7 +134,18 @@ Reads through the request overlay, falling back to a regular disk file.
 The return value distinguishes an empty file from a failed read. Disk
 text belongs to the calling unit; configured snapshots remain borrowed.
 
-Source: `src/sourceview.x:87`
+Source: `src/sourceview.x:85`
+
+<a id="SourceView.repr"></a>
+#### SourceView.repr
+
+`String SourceView.repr(SourceView)`
+
+Provides the class default for `SourceView.repr`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
 
 <a id="SourceView.set"></a>
 #### SourceView.set
@@ -78,18 +155,75 @@ Source: `src/sourceview.x:87`
 Stores an immutable snapshot under its logical source path. Empty text
 is a present snapshot, not a request to fall back to the disk file.
 
-Source: `src/sourceview.x:65`
+Source: `src/sourceview.x:63`
+
+<a id="SourceView.str"></a>
+#### SourceView.str
+
+`String SourceView.str(SourceView)`
+
+Provides the class default for `SourceView.str`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+<a id="SourceView.var"></a>
+#### SourceView.var
+
+`Var SourceView.var(SourceView)`
+
+Provides the class default for `SourceView.var`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+<a id="SourceView.write_repr"></a>
+#### SourceView.write_repr
+
+`Buffer SourceView.write_repr(SourceView, Buffer)`
+
+Provides the class default for `SourceView.write_repr`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+<a id="SourceView.write_str"></a>
+#### SourceView.write_str
+
+`Buffer SourceView.write_str(SourceView, Buffer)`
+
+Provides the class default for `SourceView.write_str`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
+
+### `Var`
+
+<a id="Var.sourceview"></a>
+#### Var.sourceview
+
+`SourceView Var.sourceview(Var)`
+
+Provides the class default for `Var.sourceview`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `src/sourceview.x:16`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`SourceView`](#SourceView) | struct | Owns configured immutable overlays in the request's active Context. |
+| [`SourceView`](#SourceView) | class | Owns configured immutable overlays in the request's active Context. |
 
 <a id="SourceView"></a>
 ### SourceView
 
-`typedef struct SourceView { Map overlays, dirty_paths; } *SourceView`
+`class SourceView struct { Map overlays, dirty_paths; } *`
 
 Owns configured immutable overlays in the request's active Context.
 A frontend and its units borrow this view. Text read from disk belongs

@@ -652,6 +652,10 @@ macro Unit $array.core.observe(
 
   static Buffer $array._core_write(
     $array array, Buffer out, Symbol mode) {
+    RenderPath path;
+    if (!path.enter(array))
+      return out.printf("<array: 0x%012lX>", (long) array);
+    defer path.leave();
     $element *data = array ? ($element *) array.bytes : NULL;
     size_t n = array ? array.length : 0;
     out.write("[ ");

@@ -13,11 +13,11 @@
 #pragma once
 
 /* Snapshot values use part of the Lisp reader grammar: proper Lists, bare
-   Symbols, Strings, integers, and floating-point values. The outer form and
+   Symbols and Atoms, Strings, integers, and floating-point values. The outer form and
    rows are data; the loader never evaluates them.
 */
 /** Writes one value in the snapshot's restricted Lisp grammar.
-    `List`s are written recursively. A `Symbol` that requires quoting or an
+    `List`s are written recursively. An atom that requires quoting or an
     unsupported value returns zero; otherwise the result is one. A successful
     result establishes representability, not stream health, so the caller must
     inspect `output.error()` separately. The stream remains open.
@@ -33,10 +33,9 @@ int snapshot_write_var(File output, Var value) {
     output.putc(')');
     return 1;
   }
-  if (value is <symbol>) {
-    // lib/atom.x defines bare spelling, next to the reader rules it must
-    // mirror.
-    String text = Symbol.str(value);
+  if (value.is_atom()) {
+    // lib/atom.x owns bare spelling and the reader's Symbol/Atom choice.
+    String text = value.str();
     if (!Atom.bare_spelling(text)) return 0;
     output.puts(text);
     return 1;

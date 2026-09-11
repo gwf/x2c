@@ -33,6 +33,9 @@ typedef struct Block {
   Bytes bytes, size_t width, length, cap;
 } *Block;
 
+protocol Cleanup(Block);
+protocol Cleanup(Bytes);
+
 #pragma private
 
 #include "exception.x"
@@ -317,3 +320,9 @@ int Block.truth(Block block) => (void *) block != NULL && block.length != 0;
 /** Returns how many elements `block` can hold without growing. */
 inline size_t Block.capacity(Block block) =>
   (void *) block != NULL ? block.cap : 0;
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+void Block.cleanup(Block value) { value.free(); }
+
+/** Releases the Block backing a managed Bytes view. */
+void Bytes.cleanup(Bytes value) { value.free(); }

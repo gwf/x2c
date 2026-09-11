@@ -1,5 +1,10 @@
 # Compile-time Macros
 
+For using the shipped `class`, `$scope`, `$let`, `$lock`, and `$auto`
+facilities, see [Classes and System Macros](system-macros.md). This chapter
+explains how to author macros, including the ordinary facilities those
+definitions compose.
+
 x2c macros generate source at compile time using C-like x2c syntax. They bind
 parsed, typed source rather than preprocessor text. The compiler constructs,
 binds, and types their templates and arguments as it does ordinary source.

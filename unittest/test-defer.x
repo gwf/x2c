@@ -200,9 +200,175 @@ static void defer_break_in_nested_loop_targets_that_loop(void) {
   Scope.release();
 }
 
+static void system_scope_loop_lifetimes(void) {
+  ScopeStats before = Scope.stats();
+  $scope() for (int i = 0; i < 3; i++) {
+    Scope.malloc(1);
+    if (i == 1) continue;
+  }
+  ScopeStats whole = Scope.stats();
+  EXPECT_INT_EQ(whole.scope_creations, before.scope_creations + 1);
+  EXPECT_INT_EQ(whole.live_allocations, before.live_allocations);
+  for (int i = 0; i < 3; i++) $scope() {
+    Scope.malloc(1);
+    if (i == 1) continue;
+  }
+  ScopeStats each = Scope.stats();
+  EXPECT_INT_EQ(each.scope_creations, whole.scope_creations + 3);
+  EXPECT_INT_EQ(each.live_allocations, before.live_allocations);
+}
+
+static int _scope_return(void) {
+  $scope() { Scope.malloc(1); return 9; }
+}
+
+static void system_scope_restores_destination_and_transfer(void) {
+  Scope destination = Scope.new(), *previous = Scope.top();
+  int evaluations = 0, caught = 0;
+  $scope((evaluations++, &destination)) {
+    EXPECT_TRUE(Scope.top() == &destination);
+    Scope.malloc(3);
+  }
+  EXPECT_INT_EQ(evaluations, 1);
+  EXPECT_TRUE(Scope.top() == previous);
+  try { $scope(&destination) { raise %(invariant); } }
+  catch %(invariant): { caught = 1; }
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_TRUE(Scope.top() == previous);
+  caught = 0;
+  ScopeStats retained = Scope.stats();
+  EXPECT_INT_EQ(_scope_return(), 9);
+  try {
+    $scope() { Scope.malloc(1); raise %(invariant); }
+  }
+  catch %(invariant): { caught = 1; }
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(after.live_allocations, retained.live_allocations);
+  EXPECT_INT_EQ(after.live_scopes, retained.live_scopes);
+  Scope.destroy(destination);
+}
+
+static void system_let_captures_storage_once(void) {
+  int values[2] = { 1, 2 }, index = 0, evaluations = 0, caught = 0;
+  try {
+    $let(values[index++], (evaluations++, 7)) {
+      EXPECT_INT_EQ(values[0], 7);
+      EXPECT_INT_EQ(index, 1);
+      index = 1;
+      raise %(invariant);
+    }
+  }
+  catch %(invariant): { caught = 1; }
+  EXPECT_INT_EQ(values[0], 1);
+  EXPECT_INT_EQ(values[1], 2);
+  EXPECT_INT_EQ(evaluations, 1);
+  EXPECT_INT_EQ(caught, 1);
+}
+
+typedef int ManagedResource;
+typedef ManagedResource ManagedChild;
+protocol Cleanup(ManagedResource);
+
+void ManagedResource.cleanup(ManagedResource resource) {
+  defer_record(resource);
+}
+
+static int managed_acquisitions;
+
+static ManagedResource _managed_acquire(int value) {
+  managed_acquisitions++;
+  if (value < 0) raise %(invariant);
+  return value;
+}
+
+static void managed_local_preserves_binding_and_order(void) {
+  defer_reset();
+  managed_acquisitions = 0;
+  {
+    ManagedResource before = 0, first = $auto(_managed_acquire(1)),
+      between = 8, second = ($auto(_managed_acquire(2))), after = 9;
+    ManagedChild third = $auto(_managed_acquire(3));
+    first = 4;
+    EXPECT_INT_EQ(before, 0);
+    EXPECT_INT_EQ(between, 8);
+    EXPECT_INT_EQ(after, 9);
+    EXPECT_INT_EQ(second, 2);
+    EXPECT_INT_EQ(third, 3);
+    EXPECT_INT_EQ(defer_index, 0);
+  }
+  EXPECT_INT_EQ(managed_acquisitions, 3);
+  EXPECT_INT_EQ(defer_index, 3);
+  EXPECT_INT_EQ(defer_log[0], 3);
+  EXPECT_INT_EQ(defer_log[1], 2);
+  EXPECT_INT_EQ(defer_log[2], 4);
+}
+
+static void managed_local_cleans_before_failed_later_acquisition(void) {
+  defer_reset();
+  managed_acquisitions = 0;
+  int caught = 0;
+  try {
+    ManagedResource first = $auto(_managed_acquire(1)),
+      second = $auto(_managed_acquire(-2));
+    (void) first, (void) second;
+    TEST_FAIL("raising initializer returned");
+  }
+  catch %(invariant): { caught = 1; }
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(managed_acquisitions, 2);
+  EXPECT_INT_EQ(defer_index, 1);
+  EXPECT_INT_EQ(defer_log[0], 1);
+}
+
+macro Expression $managed_nested(Expr $value) => ($auto($value))
+
+macro Statement $managed_declaration(Name $name, Expr $value) => {
+  ManagedResource $name = $auto($value);
+}
+
+int ManagedResource.value(ManagedResource value) { return value; }
+
+static void managed_local_keeps_constructed_binding(void) {
+  defer_reset();
+  {
+    $managed_declaration(resource, 7);
+    EXPECT_INT_EQ(resource.value(), 7);
+  }
+  EXPECT_INT_EQ(defer_index, 1);
+  EXPECT_INT_EQ(defer_log[0], 7);
+}
+
+static ManagedResource _managed_return(void) {
+  ManagedResource resource = $managed_nested(_managed_acquire(5));
+  return resource;
+}
+
+static void managed_local_allows_constructed_syntax(void) {
+  defer_reset();
+  managed_acquisitions = 0;
+  {
+    ManagedResource resource = $(list 'managed-init
+      (list 'expr (list 'int) (list 'literal (list 'int) "6")));
+    EXPECT_INT_EQ(resource, 6);
+  }
+  EXPECT_INT_EQ(_managed_return(), 5);
+  EXPECT_INT_EQ(managed_acquisitions, 1);
+  EXPECT_INT_EQ(defer_index, 2);
+  EXPECT_INT_EQ(defer_log[0], 6);
+  EXPECT_INT_EQ(defer_log[1], 5);
+}
+
 $(import "test-macros.xmacro")
 
 void defer_suite(void) {
+  $test.run(system_scope_loop_lifetimes);
+  $test.run(system_scope_restores_destination_and_transfer);
+  $test.run(system_let_captures_storage_once);
+  $test.run(managed_local_preserves_binding_and_order);
+  $test.run(managed_local_cleans_before_failed_later_acquisition);
+  $test.run(managed_local_allows_constructed_syntax);
+  $test.run(managed_local_keeps_constructed_binding);
   $test.run(defer_runs_on_scope_exit);
   $test.run(defer_runs_on_return);
   $test.run(defer_evaluates_return_before_cleanup);

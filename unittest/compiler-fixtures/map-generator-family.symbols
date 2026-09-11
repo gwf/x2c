@@ -16,6 +16,7 @@
 ( ProbeMapShortLong__core_try_get ) ==> (( func (( ProbeMapShortLong ) ( * short ) ( * long ))) int )
 ( ProbeMapShortLong__core_try_next ) ==> (( func (( ProbeMapShortLong ) ( * unsigned ) ( * short ) ( * long ))) int )
 ( ProbeMapShortLong__core_write ) ==> (( func (( ProbeMapShortLong ) ( Buffer ) ( Symbol ))) Buffer )
+( ProbeMapShortLong_cleanup ) ==> (( func (( ProbeMapShortLong ))) void )
 ( ProbeMapShortLong_compare ) ==> (( func (( ProbeMapShortLong ) ( ProbeMapShortLong ))) int )
 ( ProbeMapShortLong_contains ) ==> (( func (( ProbeMapShortLong ) ( short ))) int )
 ( ProbeMapShortLong_copy ) ==> (( func (( ProbeMapShortLong ))) ProbeMapShortLong )

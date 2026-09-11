@@ -13,9 +13,9 @@
     A frontend and its units borrow this view. Text read from disk belongs
     to the reading unit, so the view never caches that shorter-lived text.
 */
-typedef struct SourceView {
+class SourceView struct {
   Map overlays, dirty_paths;
-} *SourceView;
+} *;
 
 #pragma private
 
@@ -26,12 +26,10 @@ typedef struct SourceView {
 #include <sys/stat.h>
 #include <unistd.h>
 
-/** Creates a source view in the current request lifetime. */
-SourceView SourceView.new(void) {
-  SourceView sources = Scope.calloc(1, sizeof(struct SourceView));
+/** Initializes empty overlays in the current request lifetime. */
+void SourceView.init(SourceView sources) {
   sources.overlays = %{};
   sources.dirty_paths = %{};
-  return sources;
 }
 
 /** Resolves existing path components and normalizes missing final components.

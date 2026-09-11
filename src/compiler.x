@@ -65,7 +65,7 @@ typedef struct Compiler {
   // Canonical dependency path -> content hash for compile-time text reads,
   // or 1 for dependencies whose contents are not embedded in generated C.
   Map deps;
-  List aggregate_type, macro_stack, Sym sym;
+  List aggregate_type, macro_stack, declaration_effects, Sym sym;
   SymScope params;
   Map key_ids, macros, kw_aliases;
   // Object-like #define names this unit has passed, for the literal warning.
@@ -96,6 +96,7 @@ typedef struct Compiler {
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
+  int declaration_projection, declaration_produced;
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
@@ -295,6 +296,7 @@ static Compiler _new(Compiler owner) {
       _.source_map = owner.source_map;
       _.recovery_depth = owner.recovery_depth;
       _.sources = owner.sources;
+      _.declaration_produced = owner.declaration_produced;
       _.source_facts = owner.source_facts;
       _.source_occurrences = owner.source_occurrences;
       _.source_definitions = owner.source_definitions;
@@ -697,6 +699,426 @@ static void _shallow_finish_declaration(Compiler c) {
   else c.next();
 }
 
+static String _declaration_path(Compiler compiler, String path, int thaw) {
+  if (!path || path.startswith("<")) return path;
+  if (thaw)
+    return path[0] == '/' ? path : %"${compiler.root_dir}/$path";
+  String prefix = %"${compiler.root_dir}/";
+  return path.startswith(prefix) ? path[prefix.len():] : path;
+}
+
+static List _declaration_location(
+  Compiler compiler, List location, int thaw) {
+  Array rows = %[];
+  foreach (List row, location) {
+    match (row)
+      case %(file ?path):
+        row = %(file ${_declaration_path(compiler, path, thaw)});
+    rows.push(row);
+  }
+  return rows.list_free();
+}
+
+static List _declaration_macro(Compiler compiler, List rows, int thaw) {
+  Array result = %[];
+  foreach (List row, rows) {
+    match (row) {
+      case %(file ?path):
+        row = %(file ${_declaration_path(compiler, path, thaw)});
+      case %(origin ?location):
+        row = %(origin ${_declaration_location(compiler, location, thaw)});
+      default:
+        row = thaw ? compiler.thaw_declaration_syntax(row)
+                   : compiler.freeze_declaration_syntax(row);
+    }
+    result.push(row);
+  }
+  return %(macrodef @{result.list_free()});
+}
+
+/** Retains declaration syntax across source segments and snapshot lifetimes.
+    Tokens and origin indices become portable source data; marker-shaped user
+    Lists are escaped so thawing preserves their values.
+*/
+Var Compiler.freeze_declaration_syntax(Compiler compiler, Var syntax) {
+  if (syntax is void) return %(declaration-void);
+  if (syntax is <symbol> && !syntax.symbol())
+    return %(declaration-empty-symbol);
+  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
+    return %(declaration-atom ${syntax.str()});
+  if (syntax is <token>) {
+    Token token = syntax;
+    return %(declaration-token ${token.type.str()} ${token.text}
+              ${token.line} ${token.col} ${token.len} ${token.pos});
+  }
+  if (syntax is not <list> || syntax.is_nil()) return syntax;
+  match (syntax) {
+    case %(macrodef *rows): return _declaration_macro(compiler, rows, 0);
+    case %(src (source ?path ?begin ?end) ?node):
+      return %(src (source ${_declaration_path(compiler, path, 0)} $begin $end)
+        ${compiler.freeze_declaration_syntax(node)});
+    case %(at ?(int origin) ?node): {
+      List location = compiler.origin_location(origin);
+      if (!location)
+        return %(at m-origin ${compiler.freeze_declaration_syntax(node)});
+      return %(declaration-origin
+                ${_declaration_location(compiler, location, 0)}
+                ${compiler.freeze_declaration_syntax(node)});
+    }
+  }
+  Array rows = %[];
+  foreach (Var row, syntax.list())
+    rows.push(compiler.freeze_declaration_syntax(row));
+  match (syntax)
+    case %((!or declaration-void declaration-empty-symbol declaration-atom
+                declaration-token declaration-origin declaration-list) *):
+      return %(declaration-list @{rows.list_free()});
+  return rows.list_free();
+}
+
+/** Restores a retained declaration recipe in the current parsing lifetime. */
+Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
+  if (syntax is not <list> || syntax.is_nil()) return syntax;
+  match (syntax) {
+    case %(declaration-list *rows): {
+      Array values = %[];
+      foreach (Var row, rows)
+        values.push(compiler.thaw_declaration_syntax(row));
+      return values.list_free();
+    }
+    case %(macrodef *rows): return _declaration_macro(compiler, rows, 1);
+    case %(src (source ?path ?begin ?end) ?node):
+      return %(src (source ${_declaration_path(compiler, path, 1)} $begin $end)
+        ${compiler.thaw_declaration_syntax(node)});
+    case %(declaration-void): return void;
+    case %(declaration-empty-symbol): return ((Symbol) 0).var();
+    case %(declaration-atom ?spelling): return Atom.intern(spelling);
+    case %(declaration-token ?type ?text ?line ?column ?length ?position): {
+      Token token = Scope.calloc(1, sizeof(struct Token));
+      token.type = Symbol.new(type.string());
+      token.text = text;
+      token.line = line;
+      token.col = column;
+      token.len = length;
+      token.pos = position;
+      return token;
+    }
+    case %(declaration-origin ?location ?node): {
+      List source = location;
+      compiler.origins.push(%(source ${source.assoc(<file>)}
+        ${source.assoc(<line>)} ${source.assoc(<column>)}
+        ${source.assoc(<length>)} ${source.assoc(<position>)}));
+      return %(at ${compiler.origins.len()}
+                ${compiler.thaw_declaration_syntax(node)});
+    }
+  }
+  Array rows = %[];
+  foreach (Var row, syntax.list())
+    rows.push(compiler.thaw_declaration_syntax(row));
+  return rows.list_free();
+}
+
+static List _declaration_source_key(Compiler compiler, Token token) {
+  String path = SourceView.path(compiler.filename);
+  String prefix = %"${compiler.root_dir}/";
+  if (path.startswith(prefix)) path = path[prefix.len():];
+  return %("source-node" (declaration $path ${token.pos}));
+}
+
+/** Queues a source Lisp form until declaration production needs its state.
+    Files without declaration producers keep ordinary full-parse evaluation. */
+void Compiler.queue_declaration_effect(
+  Compiler compiler, String form, Token first, Token after) {
+  List key = _declaration_source_key(compiler, first);
+  String context = compiler.import_stack.len()
+                 ? compiler.import_stack[-1].str() : compiler.filename;
+  compiler.declaration_effects = cons(
+    %($key ${after.pos} $form
+      ${compiler.freeze_declaration_syntax(first)} $context),
+    compiler.declaration_effects);
+}
+
+/** Runs pending effects for declaration production or CPP macro evaluation. */
+void Compiler.run_declaration_effects(Compiler compiler) {
+  List effects = compiler.declaration_effects.reverse();
+  compiler.declaration_effects = NULL;
+  foreach (List effect, effects) {
+    (List key, int end, String form, Var site, String context) = effect;
+    String filename = compiler.filename;
+    match (key)
+      case %("source-node" (declaration ?path ?)):
+        compiler.filename = _declaration_path(compiler, path, 1);
+    compiler.import_stack.push(context);
+    defer {
+      compiler.import_stack.take_last();
+      compiler.filename = filename;
+    }
+    Token token = compiler.thaw_declaration_syntax(site);
+    compiler.evaluate_declaration_effect(form, token);
+    if (compiler.collect_protocols)
+      compiler.sym.set(key,
+        %(declaration-source $end (declaration-bundle (rows))));
+  }
+}
+
+/* The owning source records one declaration production, including its exact
+   token span. Full parsing consumes that production instead of invoking its
+   compile-time producer again. Ordinary Unit macros retain their old path. */
+static int _retain_declaration_bundle(
+  Compiler compiler, List syntax, Token first, Token after) {
+  match (syntax) {
+    case %(seq ?only):
+      return _retain_declaration_bundle(compiler, only, first, after);
+    case %(declaration-bundle (rows *)): {
+      List frozen = compiler.freeze_declaration_syntax(syntax);
+      compiler.sym.set(_declaration_source_key(compiler, first),
+        %(declaration-source ${after.pos} $frozen));
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static List _bind_declaration_default(Compiler compiler, List syntax) {
+  if (compiler.source_private)
+    match (syntax)
+      case %(function ?type ?declarator ?body):
+        if (!type.type().is_static())
+          syntax = %(function (static @type) $declarator $body);
+  return compiler.bind_syntax(syntax, AST_UNIT, NULL);
+}
+
+static List _produce_declaration_rows(Compiler compiler, List rows) {
+  Array selected = %[];
+  foreach (List row, rows) {
+    match (row) {
+      case %(declaration-pending ?callback ?arguments
+               ?construction ?privacy): {
+        List saved_stack = compiler.macro_stack;
+        int saved_private = compiler.source_private;
+        compiler.macro_stack = compiler.thaw_declaration_syntax(construction);
+        compiler.source_private = privacy;
+        defer {
+          compiler.macro_stack = saved_stack;
+          compiler.source_private = saved_private;
+        }
+        List generated = compiler.bind_syntax(
+          compiler.evaluate_declaration_recipe(callback, arguments),
+          AST_UNIT, NULL);
+        List additions = %($generated);
+        match (generated) {
+          case %(seq *children): additions = children;
+          case %(declaration-bundle (rows *children)): additions = children;
+        }
+        foreach (List child, _produce_declaration_rows(compiler, additions))
+          selected.push(child);
+        continue;
+      }
+    }
+    selected.push(row);
+  }
+  return selected.list_free();
+}
+
+static List _select_declaration_rows(Compiler compiler, List rows) {
+  Array selected = %[];
+  foreach (List row, rows) {
+    match (row) {
+      case %(declaration-default ?function ?construction ?privacy): {
+        List saved_stack = compiler.macro_stack;
+        int saved_private = compiler.source_private;
+        compiler.macro_stack = compiler.thaw_declaration_syntax(construction);
+        compiler.source_private = privacy;
+        defer {
+          compiler.macro_stack = saved_stack;
+          compiler.source_private = saved_private;
+        }
+        List syntax = function;
+        match (syntax)
+          case %(function ?return_type (bind ?name ?modifiers) ?body): {
+            name = compiler.evaluate_macro_slot(name);
+            String spelling = binding_identity_spelling(name);
+            match (name) {
+              case %(?(String literal)): spelling = literal;
+              case %("x2c.ident" ?(String literal)): spelling = literal;
+            }
+            if (spelling && compiler.sym.get(%($spelling))) continue;
+            syntax = %(function $return_type (bind $name $modifiers) $body);
+          }
+        selected.push(_bind_declaration_default(compiler, syntax));
+        continue;
+      }
+    }
+    selected.push(row);
+  }
+  return selected.list_free();
+}
+
+static List _declaration_forward(
+  Compiler compiler, Type child, Type parent, String member,
+  List fallback, Map pending) {
+  String name = %"${child.car().str()}_$member";
+  if (compiler.sym.get(%($name))) return %(seq);
+  List method = compiler.resolve_postfix_member(parent, %($member), <.>, 1);
+  if (!method) {
+    if (pending.contains(parent)) return NULL;
+    return fallback ? _bind_declaration_default(compiler, fallback.car())
+                    : NULL;
+  }
+  List binding = NULL, Type signature = NULL;
+  match (method)
+    case %(method ?target ?type): {
+      binding = target;
+      signature = type;
+    }
+  if (!signature) return NULL;
+  List types = NULL;
+  match (signature) case %((func ?parameters) *): types = parameters;
+  Array parameters = %[], arguments = %[];
+  int index = 0;
+  foreach (Var type, types) {
+    if (type == <...>)
+      compiler.report_error(<type>,
+        %"'$name' requires an explicit variadic constructor",
+        compiler.token, NULL);
+    if (type == %(void)) continue;
+    String argument = %"argument$index";
+    index++;
+    parameters.push(%(param $type (bind ($argument) ())));
+    arguments.push(%(expr $type (ident ($argument))));
+  }
+  List call = %(expr ()
+    (call (expr $signature (ident $binding)) (args @{arguments.list_free()})));
+  List body = %(block (return () (expr () (cast $child $call))));
+  List function = %(function $child
+    (bind ($name) ((fnmod (params @{parameters.list_free()})))) $body);
+  return _bind_declaration_default(compiler, function);
+}
+
+static List _select_declaration_forwards(
+  Compiler compiler, List rows, Map pending, int *remaining) {
+  Array selected = %[];
+  foreach (List row, rows) {
+    match (row)
+      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
+        int saved_private = compiler.source_private;
+        compiler.source_private = privacy;
+        defer compiler.source_private = saved_private;
+        List bound = _declaration_forward(
+          compiler, child, parent, member, fallback, pending);
+        if (!bound) {
+          (*remaining)++;
+          selected.push(row);
+        }
+        else {
+          pending.del(child);
+          if (bound.car() != <seq>) selected.push(bound);
+        }
+        continue;
+      }
+    selected.push(row);
+  }
+  return selected.list_free();
+}
+
+/** Selects the owning file's declaration defaults after all its segments.
+    The selected signatures join ordinary declarations before protocol and
+    body binding; discarded candidates never bind their bodies. Returns added
+    signatures for the caller to retain in the header-cache lifetime.
+*/
+Map Compiler.select_declaration_defaults(
+  Compiler compiler, String path, Map symbols, Array parts,
+  Map definitions) {
+  int present = 0;
+  foreach (Var part, parts) {
+    if (part is not <map>) continue;
+    foreach (Var value, part.map())
+      match (value) case %(declaration-source *): present = 1;
+  }
+  if (!present) return NULL;
+  Compiler shadow = Compiler.new_shared(compiler);
+  defer compiler.close_child(shadow);
+  shadow.filename = path;
+  shadow.macro_lisp = compiler.macro_lisp;
+  shadow.borrowed_lisp = shadow.macro_lisp != NULL;
+  shadow.sym._reset_overlay(symbols, %{});
+  shadow.rebuild_protocols(symbols);
+  shadow.conforms = %{};
+  shadow.shallow = 1;
+  shadow.declaration_projection = 1;
+  Array sources = %[];
+  Map pending = %{};
+  foreach (Var part, parts) {
+    if (part is not <map>) continue;
+    Map declarations = part;
+    Array ordered = %[];
+    foreach (Var (key, value), declarations)
+      match (key)
+        case %("source-node" (declaration ? ?position)):
+          ordered.push(%($position $key $value));
+    ordered.sort();
+    foreach (List entry, ordered) {
+      (Var position, Var key, Var value) = entry;
+      (void) position;
+      match (value)
+        case %(declaration-source ?end
+                 (declaration-bundle (rows *rows))): {
+          rows = shadow.thaw_declaration_syntax(rows);
+          List produced = _produce_declaration_rows(shadow, rows);
+          sources.push(%($declarations $key $end $produced));
+        }
+    }
+  }
+  for (size_t index = 0; index < sources.len(); index++) {
+    (Map declarations, Var key, Var end, List rows) = sources[index];
+    List selected = _select_declaration_rows(shadow, rows);
+    foreach (List row, selected)
+      match (row)
+        case %(declaration-forward ?child *): pending[child] = 1;
+    sources[index] = %($declarations $key $end $selected);
+  }
+  int remaining = pending.len(), previous = remaining + 1;
+  do {
+    previous = remaining;
+    remaining = 0;
+    for (size_t index = 0; index < sources.len(); index++) {
+      (Map declarations, Var key, Var end, List rows) = sources[index];
+      rows = _select_declaration_forwards(shadow, rows, pending, &remaining);
+      sources[index] = %($declarations $key $end $rows);
+    }
+    if (remaining && remaining == previous)
+      shadow.report_error(<type>,
+        "a forwarded class constructor has no completed parent constructor",
+        shadow.token, NULL);
+  } while (remaining);
+  foreach (List source, sources) {
+    (Map declarations, Var key, Var end, List rows) = source;
+    declarations[key] = shadow.freeze_declaration_syntax(
+      %(declaration-source $end (declaration-bundle (rows @rows))));
+    symbols[key] = declarations[key];
+  }
+  Map additions = shadow.sym.current_symbols();
+  Map.merge(symbols, additions);
+  compiler.merge_source_declarations(symbols, additions);
+  Map.merge(compiler.fn_defs, shadow.fn_defs);
+  Map.merge(definitions, shadow.fn_defs);
+  return additions;
+}
+
+static List _replay_declaration_bundle(Compiler compiler) {
+  List source = compiler.sym.get(_declaration_source_key(
+    compiler, compiler.token));
+  match (source)
+    case %(declaration-source ?(int end) ?syntax): {
+      List thawed = compiler.thaw_declaration_syntax(syntax);
+      List result = compiler.bind_syntax(thawed, AST_UNIT, NULL);
+      while (compiler.peek(0) != <eof> && compiler.token.pos < end)
+        compiler.next();
+      return result;
+    }
+  return NULL;
+}
+
 /* Expand an imported file-scope unit macro so later invocations can use its
    private helpers and other units can see its public declarations. */
 static void _shallow_parse_unit_macro(Compiler compiler) {
@@ -706,8 +1128,11 @@ static void _shallow_parse_unit_macro(Compiler compiler) {
     _.counters = _.counters.copy();
     with compiler {
       SymTxn transaction = _.begin_semantic_transaction();
-      (void) _.parse_top_level();
+      Token first = _.token;
+      List syntax = _.parse_top_level();
+      int retained = _retain_declaration_bundle(_, syntax, first, _.token);
       transaction.commit();
+      if (retained) return;
     }
     /* The full parse expands this unit again. Keep the declarations needed
        by later shallow invocations, but do not count its generated names
@@ -755,6 +1180,11 @@ static void _shallow_parse_loop(Compiler c) {
     }
     int macro_definition = c.macro_form_is_definition();
     int keyword_alias = c.keyword_alias_starts_target_at(AST_UNIT);
+    if (!macro_definition && !c.collect_protocols &&
+        c.skip_named_type_declaration()) {
+      _debug_tokens(c, start, c.token);
+      continue;
+    }
     if (macro_definition || c.peek(0) == <$> || keyword_alias) {
       if (macro_definition)
         _shallow_parse_compile_time_definition(c, 0);
@@ -791,7 +1221,6 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
   c.macros = %{};
   c.kw_aliases = %{};
   c.kw_seen = %{};
-  c.imports = %{};
   c.import_stack.clear();
   c.sym.reset(globals);
   c.install_builtin_macros();
@@ -814,7 +1243,7 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
     c.import_stack.clear();
   }
   c.sym._reset_overlay(base, overlay);
-  if (initialize_macros) c.install_builtin_macros();
+  c.install_builtin_macros();
   _shallow_parse_loop(c);
 }
 
@@ -929,7 +1358,7 @@ List Compiler.full_parse(Compiler c, Map globs) {
   c.kw_aliases = %{};
   c.kw_seen = %{};
   c.install_builtin_macros();
-  c.imports = %{};
+  if (!c.declaration_produced) c.imports = %{};
   c.import_stack.clear();
   c.macro_count = 0;
   c.macro_stack = NULL;
@@ -944,7 +1373,8 @@ List Compiler.full_parse(Compiler c, Map globs) {
     while (c.peek(0) != <eof>) {
       try {
         Token start = c.token;
-        Ast node = c.parse_top_level();
+        Ast node = _replay_declaration_bundle(c);
+        if (!node) node = c.parse_top_level();
         if (node && node.car() == <seq>) {
           foreach (List item, node.cdr()) {
             _record_top_level_function_state(c, item);
@@ -1697,6 +2127,15 @@ List Sym.reference(Sym sym, List key, List *type) =>
 */
 List Sym.resolve_global(Sym sym, List key, List *type) =>
   _semantic_lookup(sym, key, type, sym.base_scopes - 1, 0);
+
+/** Resolves a global name or creates its forward binding in the base scope.
+    Local declarations cannot capture a retained macro's global reference.
+*/
+List Sym.reference_global(Sym sym, List key) {
+  List binding = sym.resolve_global(key, NULL);
+  return binding ? binding : _semantic_scope_binding(
+    sym, _semantic_scope(sym, sym.base_scopes - 1), key);
+}
 
 /** Reports whether `binding` belongs to a scope inside the base scopes. */
 int Sym.binding_is_local(Sym sym, List binding) =>

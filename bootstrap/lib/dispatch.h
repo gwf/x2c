@@ -7,6 +7,10 @@
 
 #include "common.h"
 #include "map.h"
+int RenderPath_enter(RenderPath * path, const void * identity);
+
+void RenderPath_leave(RenderPath * path);
+
 int Var_dispatch_truth(Var value, int * handled);
 
 int Var_try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var * result);
@@ -22,6 +26,8 @@ int x2c_try_register_descriptor(String name, VarMethods methods);
 void x2c_register_descriptor(String name, VarMethods methods);
 
 int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
+
+void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods);
 
 String Var_pointer_string(Var v);
 

@@ -29,6 +29,7 @@ magic/runtime|showcase|run||expected/magic-runtime.stdout|Standalone magic runti
 magic/stacked-decorators|showcase|run||expected/decorators.stdout|Function decorators with target inspection, stacking, and defer.
 magic/autodiff|showcase|run||expected/autodiff.stdout|Dual numbers, a forward-mode tangent, and a reverse-mode gradient of one function.
 magic/autodiff-fit|showcase|run||expected/autodiff-fit.stdout|Gradient descent through a checkpointed Euler integrator to fit a logistic model.
+magic/system-macros|showcase|run||expected/system-macros.stdout|Classes, copied value keys, explicit allocation destinations, and block cleanup.
 magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including compile-time and runtime Lisp.
 power/collection-indexing|showcase|run||expected/indexing.stdout|Ordinary and packed indexing, checked reads, and slicing.
 power/contexts|showcase|run||expected/context-lifetime.stdout|Isolated Context cleanup and cyclic result export.

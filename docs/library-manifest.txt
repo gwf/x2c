@@ -39,7 +39,7 @@ lib/match.x|api|
 lib/match-recursive.x|optional|Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 lib/mutex.x|api|
 lib/pool.x|internal|Nested interning pools that back canonical `String` and `List` identity.
-lib/protocols.x|internal|The built-in `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
+lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
 lib/scan.x|internal|Allocation-free character scanners used by the tokenizer.
 lib/scope.x|api|
 lib/split.x|api|
