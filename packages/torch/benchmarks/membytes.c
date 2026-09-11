@@ -1,4 +1,4 @@
-/*  membytes.c -- Implementation of the benchmark memory samples.
+/*  membytes.c -- Benchmark clock and memory samples.
 
     task_info is the only interface reporting the physical footprint, and
     it is cheap enough to call between training steps. A failing call
@@ -9,6 +9,13 @@
 #include <mach/mach.h>
 #include <mach/mach_init.h>
 #include <mach/task_info.h>
+#include <time.h>
+
+double xb_now(void) {
+  struct timespec ts;
+  clock_gettime(CLOCK_UPTIME_RAW, &ts);
+  return (double) ts.tv_sec + (double) ts.tv_nsec * 1e-9;
+}
 
 static int xb_vm_info(task_vm_info_data_t *info) {
   mach_msg_type_number_t count = TASK_VM_INFO_COUNT;

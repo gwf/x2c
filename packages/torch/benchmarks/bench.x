@@ -12,7 +12,6 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <time.h>
 
 #include "membytes.h"
 #include "handles.h"
@@ -55,12 +54,8 @@ static double bench_origin = 0.0;
 
 #pragma public
 
-/** Seconds on the monotonic clock. */
-double Bench.now(void) {
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  return (double) ts.tv_sec + (double) ts.tv_nsec * 1e-9;
-}
+/** Monotonic seconds excluding system sleep. */
+double Bench.now(void) => xb_now();
 
 /** Reserves room for `capacity` samples and starts the sample clock.
     Sampling beyond the reservation is dropped rather than allocating

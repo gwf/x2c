@@ -30,6 +30,10 @@ python3 packages/torch/benchmarks/run.py time      --run-id session \
     --samples 5 --threads 1,4
 python3 packages/torch/benchmarks/run.py memory    --run-id session \
     --profiles 1,3,4,5,6
+for steps in 100000 200000 400000; do
+  python3 packages/torch/benchmarks/run.py memory --run-id session \
+    --profiles 1 --steps "$steps"
+done
 python3 packages/torch/benchmarks/run.py report    --run-id session
 python3 packages/torch/benchmarks/plots.py session
 ```
@@ -64,6 +68,13 @@ The timing counts are calibrated in `run.py` so the slower language takes
 roughly 15 seconds per sample at one intra-op thread. `--updates`
 overrides every lane at once, which is for checking the harness, not for
 a reported session.
+
+On macOS, x2c and the C++ control use `xb_now` in `membytes.c`, backed by
+`clock_gettime(CLOCK_UPTIME_RAW)`. Python uses `time.perf_counter`, backed
+by `mach_absolute_time` on this platform. Both clocks measure monotonic
+elapsed time excluding system sleep; ordinary scheduling delays still count.
+`CLOCK_MONOTONIC` includes system sleep on macOS and is unsuitable for this
+comparison.
 
 `prepare` needs the pinned wheel; `TORCH_PYTHON` names it and defaults to
 `/Users/gary/Git/Bonsai-demo/.venv/bin/python`. The MNIST lane reads the

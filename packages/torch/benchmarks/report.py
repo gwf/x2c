@@ -20,9 +20,8 @@ DIRTY = " plus uncommitted changes"
 
 INTRO = """\
 Three applications and one diagnostic, the same work on both sides, run
-live in fresh processes on one machine. The plan is
-[plans/x2c-torch-comparison.md](../../../plans/x2c-torch-comparison.md);
-how to reproduce any line of this is [README.md](README.md), and
+live in fresh processes on one machine. [README.md](README.md) gives the
+method, plan, and reproduction commands;
 [PILOT.md](PILOT.md) holds the earlier single-sample pass and the gaps it
 found.
 
@@ -212,9 +211,10 @@ def memory_section(memory, lines):
                 cells += [f"{end:.1f}", rate]
             lines.append(f"| {row['steps']} | " + " | ".join(cells) + " |")
         lines.append("")
-    lines.append("Owner counts on the x2c side, start to end of each run. "
-                 "A fixed workload should return them to where it found "
-                 "them:\n")
+    lines.append("Owner counts span the measured profile, including model "
+                 "and data setup. The final sample precedes the outer Scope "
+                 "release; a start-to-end difference alone is not a leak. "
+                 "Repeated-step samples establish whether retention grows:\n")
     for row in memory:
         samples = row.get("x2c", {}).get("samples") or []
         if not samples:
@@ -281,6 +281,9 @@ def write(run):
     environment_section(load(directory, "environment.json"), lines)
     check_section(load(directory, "check.json"), lines)
     if optimizer != "matched":
+        conditions = load(directory, "host-before-timing.json")
+        if conditions:
+            lines.append("Measurement conditions: " + conditions["note"] + "\n")
         lines.append("![learning curves](learning-curves.png)\n")
         timing_section(load(directory, "timing.json"), lines)
         memory_section(load(directory, "memory.json"), lines)

@@ -12,7 +12,6 @@
 
 #include <torch/torch.h>
 
-#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,9 +29,7 @@ const std::vector<int> kOperations = {16, 128, 512};
 const int kArtifactVersion = 1;
 
 double now() {
-  using clock = std::chrono::steady_clock;
-  return std::chrono::duration<double>(clock::now().time_since_epoch())
-      .count();
+  return xb_now();
 }
 
 void record(const std::string &name, double value) {

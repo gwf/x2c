@@ -1,9 +1,9 @@
-/*  membytes.h -- Process memory sampling for the comparison benchmarks.
+/*  membytes.h -- Clock and process memory for the comparison benchmarks.
 
     macOS reports a process's real charge as its physical footprint, the
     number the memory limits and Activity Monitor's "Memory" column use.
     Resident size and the ledger's high-water mark answer different
-    questions, so all four are returned separately. Every value is bytes;
+    questions, so all four are returned separately in bytes;
     a call the kernel refuses returns 0 rather than a guess.
 
     This helper is benchmark-only. x2c links membytes.c as an ordinary C
@@ -14,6 +14,9 @@
 #define X2C_TORCH_MEMBYTES_H
 
 #include <stdint.h>
+
+/** Monotonic seconds excluding system sleep, like Python perf_counter. */
+double xb_now(void);
 
 /** Physical footprint now: the charge macOS attributes to this process. */
 uint64_t xb_footprint(void);

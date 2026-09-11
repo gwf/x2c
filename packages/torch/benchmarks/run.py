@@ -482,7 +482,7 @@ def memory(profiles, steps, threads, run):
             raise RuntimeError(f"profile {profile}: {app} is not built")
         print(f"== memory profile {profile}: {description} ({app})")
         results = both(app, "memory", (profile, steps), threads, run,
-                       f"memory-{profile}-{app}")
+                       f"memory-{profile}-{app}-s{steps}")
         row = {"profile": profile, "app": app, "steps": steps}
         for language, result in results.items():
             if result.dropped:
