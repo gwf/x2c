@@ -1,12 +1,13 @@
 # Matched x2c and PyTorch applications: correctness, memory, and performance
 
-> Status: active
+> Status: done
 > The suite, applications, and report shipped in 9c36b76, with temporary
 > cleanup measurements in dbba113. Acceptance-check repairs followed on
 > 2026-09-10. Historical raw checkpoints were not retained in the linked
 > worktrees, so the repaired checks cannot revalidate those results here.
-> Primary and supplemental acceptance are recorded; final publication
-> and deployment remain.
+> Fresh primary and supplemental acceptance delivered through 1dbf258 on
+> 2026-09-11. Final publication gate and live documentation deployment passed.
+> Archived with original failed verdicts and measured limitations preserved.
 > The matched Adam control passes. Stock Adam's recorded explicit tabular
 > loss divergence remains a failed tolerance and the accepted limitation.
 
@@ -45,9 +46,9 @@ Scope counts are stable after request cleanup; ordinary canonical storage
 grows, while per-request List pool brackets keep it fixed. Attribution
 also measures the cost of scope length and explicit early release.
 
-[REPORT.md](../packages/torch/benchmarks/REPORT.md) retains stock failures,
+[REPORT.md](../../packages/torch/benchmarks/REPORT.md) retains stock failures,
 per-workload timing variability, incremental memory peaks and attribution.
-[MATCHED.md](../packages/torch/benchmarks/MATCHED.md) records the separate
+[MATCHED.md](../../packages/torch/benchmarks/MATCHED.md) records the separate
 passing control. No threshold was relaxed: stock explicit tabular loss has
 0.223% relative divergence against the 0.1% limit. Counter-enabled and
 sleep-affected prior timings remain historical, not headline measurements.
@@ -60,6 +61,17 @@ The separate `shipped-final` directory records the packaged-library lane:
 counter-free build, matched Adam, all four applications passing 41 agreement
 rows, complete checkpoints and binaries. It is correctness evidence only;
 headline timing uses the primary wheel lane above.
+
+## Delivery receipt
+
+Delivered through 1dbf258 on 2026-09-11 after the final agent-pr-check passed.
+[Pages deployment 34605316778](https://github.com/gwf/x2c/actions/runs/34605316778)
+published that revision; the live guide, search, navigation, example and
+reference routes were verified. The
+[supplement](../../packages/torch/benchmarks/SUPPLEMENT.md) records the
+additional diagnostics and corrected MNIST timing without replacing the
+original primary artifacts. Publication and live QA receipts remain beside
+the raw measurements in the external evidence root above.
 
 ## Outcome and boundary
 

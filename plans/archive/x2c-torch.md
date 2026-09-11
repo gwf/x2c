@@ -3,8 +3,9 @@
 > Status: done
 > The four package milestones, book, and comparison suite shipped through
 > 9c36b76; temporary cleanup followed in dbba113. Archived 2026-09-10.
-> Later features are scoped in plans/x2c-torch-later.md; comparison
-> acceptance and the Adam difference remain in plans/x2c-torch-comparison.md.
+> Later extensions and comparison acceptance subsequently closed through
+> 1dbf258; see x2c-torch-later.md and x2c-torch-comparison.md in this archive.
+> The stock Adam difference remains a measured, accepted limitation.
 
 ## Context
 

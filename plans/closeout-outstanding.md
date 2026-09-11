@@ -4,20 +4,30 @@
 
 ## Current outcome
 
-Implementation is recorded in 1316e0a, with benchmark clock and isolation
-repairs in f9f8589 and 2b7a63c. Final publication and deployment are pending.
-The first publication gate failed during safe rebuild: ordinary function
-bodies preceded private includes/macros. A compiler placement repair and
-focused revalidation passed: the self-source rebuild and all 623 fixtures
-(1,443 artifacts), including preserved sourcepoint macro behavior. Nothing
-has been pushed. Retirement review's missing supplemental diagnostics are
-now recorded, including phase costs, error interning, corrected sequence
-lifetimes, all four interop sizes, and a counter-free MNIST timing correction
-using the required 50 warmup batches.
-Initialization passed 622 compiler fixtures (1,441 artifacts), 56 focused
-runtime tests (307 assertions), and 20 repeated static-initialization runs.
-All five Torch extensions passed focused macOS and Linux acceptance; Linux
+Implementation and final publication repairs are delivered to main at
+1dbf258 (2026-09-11), following 1316e0a, f9f8589 and 2b7a63c. The final
+agent-pr-check passed: 773 unit tests / 18,507 assertions, 623 compiler
+fixtures / 1,443 artifacts, 459 required raw-symbol translations, bootstrap
+and self-host comparisons, and the documentation audit. Pages deployment
+[34605316778](https://github.com/gwf/x2c/actions/runs/34605316778) succeeded
+at that exact revision. Live Torch guide search, chapter navigation,
+example, language reference and generated compiler API routes were verified.
+
+Three earlier publication failures remain in the evidence: function bodies
+preceded late private includes/macros; the reduced Scope probe lacked two
+shutdown stubs; and the generated API source line needed regeneration.
+All were repaired through their existing owners before the passing gate.
+Source-position macro behavior and generated function equivalence were
+checked after the compiler placement repair. Initialization also passed 56
+focused runtime tests (307 assertions) and 20 repeated initialization runs.
+All five Torch extensions passed focused macOS and Linux acceptance. Linux
 ran in local x86_64 Docker emulation and establishes correctness only.
+Its retained source snapshot predates the final compiler placement repair;
+the emitted package function bodies were subsequently checked for equivalence.
+
+Retirement review's supplemental diagnostics are recorded: phase/startup
+costs, error interning, corrected sequence lifetimes, all four interop sizes,
+and a counter-free MNIST timing correction with 50 warmup batches.
 
 The final benchmark session retained 160 timing process logs across 16
 configurations, five fresh-process pairs each, with counters off and no
@@ -35,8 +45,11 @@ See [the active evaluation plan](agent-onboarding-accuracy.md).
 Raw acceptance evidence is retained outside disposable worktrees at
 `/Users/gary/Documents/x2c-evidence/closeout-20260910/`, including failed and
 interrupted earlier sessions. The three completed reference/site plans are
-archived; Torch plans await delivery, and this umbrella stays active with
-onboarding.
+archived, as are the [Torch extensions](archive/x2c-torch-later.md) and
+[Torch comparison](archive/x2c-torch-comparison.md). Every original unit-test
+status item has a delivered resolution or explicit retirement in
+`unittest/STATUS.md`. This umbrella and onboarding remain active because
+onboarding acceptance still fails.
 
 # Close outstanding work
 
@@ -162,8 +175,10 @@ stays active; do not equate a running or partial check with completion.
    200,000-allocation burst, with only 2,048 bytes active. This is not a leak.
 5. Relocatable Torch application distribution through existing bundle owners.
 
-After closeout, prepare an evidence-backed proposal for item 1. Do not start
-that optimization as part of this plan.
+The separate [aggregate initializer proposal](aggregate-initializer-growth.md)
+reproduces item 1 on delivered main and records a bounded design. Its
+implementation is not authorized by this closeout; onboarding's failed
+acceptance remains independent of that research backlog.
 
 ## Plan review
 

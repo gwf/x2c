@@ -1,10 +1,10 @@
 # torch package: the later items
 
-> Status: active
-> Gary authorized all five expansions on 2026-09-10. Implementation and
-> focused macOS and final Linux checks, including native lifetime proof,
-> are complete. Final repository publication proof and delivery remain.
-> This plan stays active until the final evidence and delivery are recorded.
+> Status: done
+> All five approved extensions delivered to main through 1dbf258 on
+> 2026-09-11. macOS and Linux acceptance and the final agent-pr-check passed.
+> Public documentation deployed at that revision and verified live.
+> Archived with measured platform and lifetime limitations preserved.
 
 ## Outcome and compatibility
 
@@ -141,18 +141,28 @@ handles throughout. Scope allocations grew from 355 to 2159; session
 destruction returned native handles to baseline. Its counter build does not
 replace the package's ordinary objects or extend any recurring gate.
 
-## Remaining delivery
+## Delivery and evidence
 
-- Fresh matched and stock benchmark outputs are recorded separately in
-  `packages/torch/benchmarks/MATCHED.md` and `REPORT.md`. The control passes;
-  stock explicit tabular loss remains over tolerance as accepted.
-- Complete final repository publication proof, delivery, and public
-  documentation verification. Archive this plan with the closing revision
-  and evidence only after those pass.
+Delivered through 1dbf258 on 2026-09-11. The final repository publication
+gate passed, including 773 unit tests / 18,507 assertions and 623 compiler
+fixtures / 1,443 artifacts.
+[Pages deployment 34605316778](https://github.com/gwf/x2c/actions/runs/34605316778)
+succeeded at the same revision; live guide content, search, chapter
+navigation and the Torch example route were verified.
 
-Implementation logs remain under `debug/`; the parent closure task preserves
-Linux evidence under
-`/Users/gary/Documents/x2c-evidence/closeout-20260910/linux`.
+The [matched control](../../packages/torch/benchmarks/MATCHED.md) passes.
+The [stock report](../../packages/torch/benchmarks/REPORT.md) preserves the
+accepted failed tolerance, and the
+[supplement](../../packages/torch/benchmarks/SUPPLEMENT.md) records remaining
+phase, memory and timing evidence with their limitations.
+
+Raw evidence is retained outside disposable worktrees under
+`/Users/gary/Documents/x2c-evidence/closeout-20260910/`: `torch-review/`,
+`linux/final-acceptance/`, `torch-comparison/`, `publication/` and `site/`.
+The Linux source snapshot precedes final compiler placement and macOS
+benchmark repairs; the generated package function bodies were subsequently
+checked for equivalence. It does not establish final whole-tree hash equality
+or native Linux performance.
 
 ## Plan review
 

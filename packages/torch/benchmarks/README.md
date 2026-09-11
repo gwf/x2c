@@ -3,7 +3,7 @@
 Four paired workloads, the same work on both sides, run live. Each pair
 reads one set of artifacts, prints the same records, and is compared by a
 runner that owns no model logic. The plan is
-[plans/x2c-torch-comparison.md](../../../plans/x2c-torch-comparison.md).
+[archived here](../../../plans/archive/x2c-torch-comparison.md).
 
 This suite is optional. It is outside `test`, `check`, `packages-check`,
 `precommit`, and every publication gate, and it adds nothing to them.

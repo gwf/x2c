@@ -362,7 +362,7 @@ only before that pool starts. `Torch.num_threads` and
 ## Benchmarks
 
 `benchmarks/` holds the matched x2c and PyTorch applications from
-`plans/x2c-torch-comparison.md`: tabular regression, the MNIST CNN,
+`plans/archive/x2c-torch-comparison.md`: tabular regression, the MNIST CNN,
 sequence forecasting, and an interop diagnostic, with a runner for
 correctness, timing, and memory modes. They are outside every package
 target and gate; `benchmarks/README.md` gives the commands and

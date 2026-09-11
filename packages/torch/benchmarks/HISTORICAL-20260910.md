@@ -2,7 +2,7 @@
 
 Three applications and one diagnostic, the same work on both sides, run
 live in fresh processes on one idle machine. The plan is
-[plans/x2c-torch-comparison.md](../../../plans/x2c-torch-comparison.md);
+[archived here](../../../plans/archive/x2c-torch-comparison.md);
 how to reproduce any line of this is [README.md](README.md), and
 [PILOT.md](PILOT.md) holds the earlier single-sample pass and the gaps it
 found.
