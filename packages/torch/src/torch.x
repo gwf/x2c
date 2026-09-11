@@ -14,6 +14,10 @@ typedef enum Torch {
   TORCH_NAMESPACE
 } Torch;
 
+typedef enum TorchLisp {
+  TORCHLISP_NAMESPACE
+} TorchLisp;
+
 typedef enum Checkpoint {
   CHECKPOINT_NAMESPACE
 } Checkpoint;
@@ -23,6 +27,9 @@ typedef struct Module *Module;
 typedef struct Optimizer *Optimizer;
 typedef struct Scheduler *Scheduler;
 typedef struct JitModule *JitModule;
+
+/** Callback-only context for saving native tensors for differentiation. */
+typedef xt_autograd_context AutogradContext;
 
 protocol Torch(T) {
   T T.add(T, T);
@@ -82,6 +89,13 @@ typedef struct TorchGuard *TorchGuard;
 struct TorchGuard {
   int active;
 };
+
+typedef struct TorchCallbackError {
+  Symbol cause;
+  List detail;
+} TorchCallbackError;
+
+static threaded TorchCallbackError *callback_error;
 
 static void _tensor_drop(void *ptr) {
   Tensor tensor = ptr;
@@ -237,6 +251,25 @@ static void _expect_filled(int64_t count, int64_t total) {
 }
 
 #pragma public
+
+/** Reports whether this libtorch build can use the host's MPS device. */
+int Torch.mps_available(void) {
+  int available;
+  _check(xt_mps_available(&available), "mps_available");
+  return available;
+}
+
+/** Waits for all queued MPS kernels to finish. */
+void Torch.mps_synchronize(void) {
+  _check(xt_mps_synchronize(), "mps_synchronize");
+}
+
+/** Returns the native device name, such as "cpu" or "mps:0". */
+String Tensor.device(Tensor tensor) {
+  const char *device = xt_device(tensor.native);
+  if (!device) _torch_failed("device");
+  return String.new(device);
+}
 
 /** Copies `values`, a List of numbers or nested Lists of rows, into a new
     tensor of `shape` and `dtype`. An integer dtype collects the values as
@@ -924,6 +957,12 @@ void Module.to_dtype(Module m, int dtype) {
   _check(xt_module_to_dtype(m.native, dtype), "to_dtype");
 }
 
+/** Moves parameters and buffers to `device`. Move before constructing an
+    optimizer, which retains the parameters it was built over. */
+void Module.to_device(Module model, String device) {
+  _check(xt_module_to_device(model.native, device), "to_device");
+}
+
 /** Writes the parameters and buffers as a pickled name-to-tensor dict.
     Python reads it with `torch.load`. */
 void Module.save(Module m, String path) {
@@ -1026,12 +1065,143 @@ void Optimizer.load(Optimizer o, String path) {
   _check(xt_optim_load(o.native, path), "load");
 }
 
+/** Writes Adam state in the dictionary format Python's optimizer loads.
+    Parameter IDs follow iteration order across groups. */
+void Optimizer.save_python(Optimizer optimizer, String path) {
+  _check(xt_optim_save_python(optimizer.native, path), "save_python");
+}
+
+/** Loads Python Adam state, matching parameter IDs to this optimizer's
+    parameters in order. Replaces groups and state after parsing succeeds.
+    Numeric options import by value, including integers and scalar tensors.
+    The caller supplies the same parameter order as the saved optimizer. */
+void Optimizer.load_python(Optimizer optimizer, String path) {
+  _check(xt_optim_load_python(optimizer.native, path), "load_python");
+}
+
 xt_optim Optimizer.native(Optimizer o) => o.native;
 
 Optimizer Optimizer.free(Optimizer o) {
   _optimizer_drop(o);
   return NULL;
 }
+
+/* Custom functions borrow Funcs; the native graph owns saved tensor
+   references. The callback Context reclaims all temporary x2c state. */
+#pragma private
+
+static Var _custom_invoke(Func function, AutogradContext context, Var value) {
+  FuncArg arguments[] = { FuncArg.value(AutogradContext.var(context)),
+                          FuncArg.value(value) };
+  return function.apply(2, arguments);
+}
+
+static int _custom_call(void *pointer, xt_autograd_context native,
+    xt_tensor *inputs, int count, int forward, int outputs) {
+  Context context = NULL;
+  int failed = 0;
+  try {
+    context = Context.open_isolated();
+    Func function = pointer;
+    List values = NULL;
+    for (int i = count - 1; i >= 0; i--)
+      values = cons(_wrap(xt_tensor_alias(inputs[i]), "custom input"), values);
+    AutogradContext frame = native;
+    if (forward) {
+      Tensor result = _custom_invoke(function, frame, values);
+      _check(xt_custom_output(native, 0, result ? result.native : NULL),
+             "custom output");
+    }
+    else {
+      Tensor gradient = values[0].tensor();
+      List result = _custom_invoke(function, frame, gradient);
+      if (result.len() != outputs)
+        raise %(bad-arity (library "torch") (operation "custom backward"));
+      for (int i = 0; i < outputs; i++) {
+        Tensor tensor = result[i].is_null() ? NULL : result[i].tensor();
+        _check(xt_custom_output(native, i, tensor ? tensor.native : NULL),
+               "custom gradient");
+      }
+    }
+  }
+  catch %(?cause *detail): {
+    failed = 1;
+    callback_error->cause = cause;
+    try {
+      List snapshot = Error.snapshot(detail);
+      callback_error->detail = context ? context.export(snapshot).list() : snapshot;
+    }
+    catch %(?snapcause *): {
+      callback_error->cause = snapcause;
+      callback_error->detail = NULL;
+    }
+  }
+  if (context) context.close();
+  return failed;
+}
+
+#pragma public
+
+/** Applies one custom function. `forward(context, inputs)` returns a Tensor;
+    `backward(context, output_gradient)` returns one Tensor or Null per input.
+    Funcs and their captured referents must outlive the graph, on this thread.
+    Callbacks may not mutate inputs in place or start another backward pass.
+    Inference tensors have no version counters to diagnose input mutation.
+    Use `backward_callbacks` to differentiate the result. */
+Tensor Tensor.custom(Func forward, Func backward, List inputs) {
+  TorchCallbackError error = {0};
+  TorchCallbackError *previous = callback_error;
+  callback_error = &error;
+  defer callback_error = previous;
+  int count;
+  xt_tensor *handles = _handles(inputs, &count);
+  xt_tensor result = xt_custom(_custom_call, forward, backward, handles, count);
+  if (error.cause) Error.raise(error.cause, error.detail);
+  return _wrap(result, "custom");
+}
+
+/** Differentiates a scalar on the invoking thread, including CPU and MPS
+    custom callbacks. Restores autograd scheduling after success or failure.
+    Nested backward and higher-order differentiation are not supported. */
+void Tensor.backward_callbacks(Tensor tensor) {
+  TorchCallbackError error = {0};
+  TorchCallbackError *previous = callback_error;
+  callback_error = &error;
+  defer callback_error = previous;
+  int status = xt_backward_callbacks(tensor.native);
+  if (error.cause) Error.raise(error.cause, error.detail);
+  _check(status, "backward_callbacks");
+}
+
+/** Saves native tensor references during forward; wrappers may be released
+    after the callback. Native autograd checks subsequent in-place changes. */
+void AutogradContext.save_for_backward(AutogradContext context, List tensors) {
+  int count;
+  xt_tensor *handles = _handles(tensors, &count);
+  _check(xt_custom_save(context, handles, count), "save_for_backward");
+}
+
+/** Returns callback-owned wrappers for the saved native tensors. */
+List AutogradContext.saved_tensors(AutogradContext context) {
+  int count;
+  _check(xt_custom_saved_count(context, &count), "saved_tensors");
+  List result = NULL;
+  for (int i = count - 1; i >= 0; i--)
+    result = cons(_wrap(xt_custom_saved(context, i), "saved_tensors"), result);
+  return result;
+}
+
+/** Reports whether differentiation needs the selected input's gradient. */
+int AutogradContext.needs_input_grad(AutogradContext context, int index) {
+  int needed;
+  _check(xt_custom_needs_grad(context, index, &needed), "needs_input_grad");
+  return needed;
+}
+
+Var AutogradContext.var(AutogradContext context) =>
+  Var.new(<torch--ctx>, context);
+AutogradContext Var.autogradcontext(Var value) => value.pointer();
+protocol Var(AutogradContext) tag <torch--ctx>;
 
 /* Learning-rate schedules; a Scheduler refers to its optimizer. */
 
@@ -1278,6 +1448,160 @@ protocol Var(Module);
 protocol Var(Optimizer);
 protocol Var(Scheduler);
 protocol Var(JitModule);
+
+/* Lisp calls allocate in the existing session Scope. Releasing a native
+   handle early leaves its wrapper until session destruction. */
+#pragma private
+
+static Tensor _lisp_tensor_arg(Var value) {
+  if (value is not Tensor)
+    raise %(bad-types (library "torch") (operation "tensor argument"));
+  return value.tensor();
+}
+
+static Module _lisp_module_arg(Var value) {
+  if (value is not Module)
+    raise %(bad-types (library "torch") (operation "module argument"));
+  return value.module();
+}
+
+static Optimizer _lisp_optimizer_arg(Var value) {
+  if (value is not Optimizer)
+    raise %(bad-types (library "torch") (operation "optimizer argument"));
+  return value.optimizer();
+}
+
+$lisp.binding(torch_lisp, "torch-tensor")
+static Var _lisp_tensor(List values, List shape, int dtype) =>
+  Tensor.of(values, shape, dtype);
+
+$lisp.binding(torch_lisp, "torch-linear")
+static Var _lisp_linear(int inputs, int outputs) =>
+  Module.linear(inputs, outputs);
+
+$lisp.binding(torch_lisp, "torch-forward")
+static Var _lisp_forward(Var model, Var input) {
+  Module owner = _lisp_module_arg(model);
+  Tensor tensor = _lisp_tensor_arg(input);
+  return owner.forward(tensor);
+}
+
+$lisp.binding(torch_lisp, "torch-sgd")
+static Var _lisp_sgd(Var model, double rate) =>
+  Optimizer.sgd(_lisp_module_arg(model), rate);
+
+$lisp.binding(torch_lisp, "torch-adam")
+static Var _lisp_adam(Var model, double rate) =>
+  Optimizer.adam(_lisp_module_arg(model), rate);
+
+$lisp.binding(torch_lisp, "torch-zero-grad")
+static int _lisp_zero_grad(Var optimizer) {
+  _lisp_optimizer_arg(optimizer).zero_grad();
+  return 1;
+}
+
+$lisp.binding(torch_lisp, "torch-step")
+static int _lisp_step(Var optimizer) {
+  _lisp_optimizer_arg(optimizer).step();
+  return 1;
+}
+
+$lisp.binding(torch_lisp, "torch-backward")
+static int _lisp_backward(Var tensor) {
+  Tensor value = _lisp_tensor_arg(tensor);
+  value.backward_callbacks();
+  return 1;
+}
+
+$lisp.binding(torch_lisp, "torch-mse")
+static Var _lisp_mse(Var prediction, Var targets) {
+  Tensor left = _lisp_tensor_arg(prediction), right = _lisp_tensor_arg(targets);
+  return Tensor.mse_loss(left, right);
+}
+
+$lisp.binding(torch_lisp, "torch-add")
+static Var _lisp_add(Var a, Var b) {
+  Tensor left = _lisp_tensor_arg(a), right = _lisp_tensor_arg(b);
+  return left + right;
+}
+
+$lisp.binding(torch_lisp, "torch-mul")
+static Var _lisp_mul(Var a, Var b) {
+  Tensor left = _lisp_tensor_arg(a), right = _lisp_tensor_arg(b);
+  return left * right;
+}
+
+$lisp.binding(torch_lisp, "torch-matmul")
+static Var _lisp_matmul(Var a, Var b) {
+  Tensor left = _lisp_tensor_arg(a), right = _lisp_tensor_arg(b);
+  return left @ right;
+}
+
+$lisp.binding(torch_lisp, "torch-relu")
+static Var _lisp_relu(Var tensor) {
+  Tensor value = _lisp_tensor_arg(tensor);
+  return value.relu();
+}
+
+$lisp.binding(torch_lisp, "torch-tanh")
+static Var _lisp_tanh(Var tensor) {
+  Tensor value = _lisp_tensor_arg(tensor);
+  return value.tanh();
+}
+
+$lisp.binding(torch_lisp, "torch-item")
+static Var _lisp_item(Var tensor) {
+  Tensor value = _lisp_tensor_arg(tensor);
+  return value.item();
+}
+
+$lisp.binding(torch_lisp, "torch-shape")
+static List _lisp_shape(Var tensor) {
+  Tensor value = _lisp_tensor_arg(tensor);
+  return value.shape();
+}
+
+$lisp.binding(torch_lisp, "torch-values")
+static List _lisp_values(Var tensor) {
+  Tensor value = _lisp_tensor_arg(tensor);
+  Array values = value.to_values();
+  defer values.free();
+  return values.list();
+}
+
+$lisp.binding(torch_lisp, "torch-save")
+static int _lisp_save(Var model, String path) {
+  _lisp_module_arg(model).save(path);
+  return 1;
+}
+
+$lisp.binding(torch_lisp, "torch-load")
+static int _lisp_load(Var model, String path) {
+  _lisp_module_arg(model).load(path);
+  return 1;
+}
+
+$lisp.binding(torch_lisp, "torch-free")
+static int _lisp_free(Var value) {
+  if (value is Tensor) value.tensor().free();
+  else if (value is Module) value.module().free();
+  else if (value is Optimizer) value.optimizer().free();
+  else raise %(bad-types (library "torch") (operation "torch-free"));
+  return 1;
+}
+
+#pragma public
+
+/** Installs tensor, model and optimizer operations over ordinary Lisp values.
+    Results belong to the Lisp session. `torch-free` releases a native handle
+    early and invalidates its aliases; the wrapper remains session-owned.
+    Caller-injected values retain their original owners. */
+void TorchLisp.install(Lisp lisp) {
+  $lisp.install(lisp, torch_lisp);
+  lisp.set_global("torch-float32", (int) XT_FLOAT32);
+  lisp.set_global("torch-float64", (int) XT_FLOAT64);
+  lisp.set_global("torch-int64", (int) XT_INT64);
+}
 
 /* The generated operator bindings are a second unit of this package; the
    include puts them in the public header an `import "torch"` reads. */

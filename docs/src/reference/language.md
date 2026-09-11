@@ -1437,7 +1437,43 @@ caches run first, followed by the assignments in dependency order; a
 declaration may therefore depend on a later file-static declaration.
 Independent assignments retain source order. Every object referenced by one
 of these initializers must itself be file-static, and a dependency cycle is a
-compile-time error.
+compile-time error. Native initializer operands expand at the original source
+position: later macro definitions do not change them, `__COUNTER__` keeps
+source order, and explicit inline tags remain visible at file scope. Native
+macro invocations retain their normal stringizing and token-pasting rules.
+Tags hidden inside an opaque native macro remain subject to native C scope.
+
+A function-local `static` declaration with a runtime-valued initializer runs
+once when control first reaches it. This includes aggregates containing
+`String` or `Var` values, function calls, and values from function arguments.
+Concurrent calls wait for the initializing call to publish the whole object.
+If initialization raises an Error, a later call retries; side effects already
+performed by the initializer remain. Recursive initialization, including a
+cycle between initializing threads, raises `bad-state` rather than waiting
+forever. A `static threaded` declaration follows the same rule separately in
+each thread. Native constant initializers retain native C static storage.
+
+Runtime-initialized local objects preserve their declared type, qualifiers,
+array shape, and address across calls. Their storage lasts until process
+shutdown, or thread teardown for `threaded` objects. This storage does not
+extend the lifetime of values it refers to: an initializer allocating a Map
+inside a temporary Scope still gives that Map the ordinary Scope lifetime.
+Use an owner that outlives every use of the stored value. Failed initialization
+retains the reserved address; the next attempt starts with zeroed storage.
+Only successful initialization publishes the value, and retry does not change
+referent ownership.
+
+A `goto` or switch dispatch cannot bypass a runtime static declaration and
+enter its remaining block. Put the declaration before the switch, or put it
+inside a case's own block. A nested switch reached after initialization is
+valid.
+
+Native macro calls can be runtime initializers. A bare unknown native macro
+name, however, retains native C initializer rules: its expansion may be either
+a constant or a call, which x2c does not inspect. Use an explicit function call
+when a runtime expansion needs first-use initialization. Native macro bodies
+also cannot name a lowered local object implicitly; pass the object as a macro
+argument so its ordinary bound expression is preserved.
 
 ### Symbols
 

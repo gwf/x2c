@@ -20,12 +20,6 @@ Var int_var(int);
 
 Var List_var(List);
 
-String Var_string(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int classify(List form);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -79,6 +73,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _54 = cons(_35, NULL);
   _55 = cons(_0, _54);
 }
+
+String Var_string(Var);
 
 static int classify(List form){
 

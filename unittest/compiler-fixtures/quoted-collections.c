@@ -6,6 +6,29 @@ static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("text");
+  _1 = String_new("line one\nline two");
+  _2 = String_new("$count");
+  _3 = String_new("x2c");
+  _4 = String_new("ready");
+  _5 = String_new("VeryLongIdentifierName");
+  _6 = String_new("widget");
+  _7 = String_new("colon:name");
+  _8 = String_new("right]");
+  _9 = String_new("right}");
+  _10 = String_new("c text");
+  _11 = String_new("c text");
+  _12 = String_new("macro");
+}
+
+static int bump(int * value){
+  return ++ * value;
+}
+
 Var Array_var(Array);
 
 Var Symbol_var(Symbol);
@@ -47,33 +70,6 @@ Symbol Var_symbol(Var);
 double Var_floating(Var);
 
 int Var_is_null(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int bump(int * value);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("text");
-  _1 = String_new("line one\nline two");
-  _2 = String_new("$count");
-  _3 = String_new("x2c");
-  _4 = String_new("ready");
-  _5 = String_new("VeryLongIdentifierName");
-  _6 = String_new("widget");
-  _7 = String_new("colon:name");
-  _8 = String_new("right]");
-  _9 = String_new("right}");
-  _10 = String_new("c text");
-  _11 = String_new("c text");
-  _12 = String_new("macro");
-}
-
-static int bump(int * value){
-  return ++ * value;
-}
 
 int main(void){
   x2c_initialize();

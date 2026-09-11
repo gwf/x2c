@@ -1,12 +1,13 @@
-> Status: reference
+> Status: done
 > T3 source-package verification completed on 2026-09-09. The distributed
 > support builds packages without their producer checkout. This does not
 > establish a relocatable binary package or test the optional APE installer.
+> Archived 2026-09-10 as historical evidence; current guides own behavior.
 
 # Source-package production and isolated use
 
 The shipped production and consumption recipe is in
-[the package guide](../docs/src/guide/packages.md). It uses ordinary `tar`,
+[the package guide](../../docs/src/guide/packages.md). It uses ordinary `tar`,
 keeps package sources and support together, and delegates native compilation
 and archiving to the existing driver. It adds no packaging service or command.
 

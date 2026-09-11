@@ -6,72 +6,7 @@ static String _0;
 
 static int _init_guard_ = 0;
 
-typedef struct PrivateParticipant{
-  int value;
-}
-* PrivateParticipant;
-
-typedef struct PrivateBox{
-  int value;
-}
-* PrivateBox;
-
-typedef struct PrivateBase{
-  int value;
-}
-* PrivateBase;
-
-typedef struct PrivateLeft{
-  int value;
-}
-* PrivateLeft;
-
-typedef struct PrivateRight{
-  int value;
-}
-* PrivateRight;
-
 static VarMethods _x2c__x2c_protocol_methods_0;
-
-Var Var_new(Symbol, ...);
-
-void * Var_pointer(Var);
-
-Var String_var(String);
-
-String int_str(int);
-
-void * Scope_malloc(size_t);
-
-String Var_str(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Var PrivateBox_var(PrivateBox value);
-
-static PrivateBox Var_privatebox(Var value);
-
-static String PrivateBox_str(PrivateBox value);
-
-static PublicBase PrivateParticipant_publicbase(PrivateParticipant value);
-
-static PrivateBase PublicParticipant_privatebase(PublicParticipant value);
-
-static PublicParticipant PrivateBase_publicparticipant(PrivateBase value);
-
-static PrivateBase PrivateBase_bump(PrivateBase value);
-
-static PrivateLeft PrivateRight_privateleft(PrivateRight value);
-
-static PrivateRight PrivateLeft_privateright(PrivateLeft value);
-
-static PrivateLeft PrivateLeft_shift(PrivateLeft value);
-
-static inline PublicParticipant PublicParticipant_bump(PublicParticipant a0);
-
-static inline PrivateRight PrivateRight_shift(PrivateRight a0);
-
-static inline int PrivateParticipant_read(PrivateParticipant a0);
 
 static inline String _x2c_proto_privatebox_str_0(Var a0);
 
@@ -93,13 +28,31 @@ int PublicBase_read(PublicBase value){
   return value -> value;
 }
 
+typedef struct PrivateParticipant{
+  int value;
+}
+* PrivateParticipant;
+
+typedef struct PrivateBox{
+  int value;
+}
+* PrivateBox;
+
+Var Var_new(Symbol, ...);
+
 static Var PrivateBox_var(PrivateBox value){
   return Var_new(1166148154758128, value);
 }
 
+void * Var_pointer(Var);
+
 static PrivateBox Var_privatebox(Var value){
   return Var_pointer(value);
 }
+
+Var String_var(String);
+
+String int_str(int);
 
 static String PrivateBox_str(PrivateBox value){
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));
@@ -108,6 +61,11 @@ static String PrivateBox_str(PrivateBox value){
 static PublicBase PrivateParticipant_publicbase(PrivateParticipant value){
   return(PublicBase) value;
 }
+
+typedef struct PrivateBase{
+  int value;
+}
+* PrivateBase;
 
 static PrivateBase PublicParticipant_privatebase(PublicParticipant value){
   return(PrivateBase) value;
@@ -122,6 +80,16 @@ static PrivateBase PrivateBase_bump(PrivateBase value){
   return value;
 }
 
+typedef struct PrivateLeft{
+  int value;
+}
+* PrivateLeft;
+
+typedef struct PrivateRight{
+  int value;
+}
+* PrivateRight;
+
 static PrivateLeft PrivateRight_privateleft(PrivateRight value){
   return(PrivateLeft) value;
 }
@@ -134,6 +102,16 @@ static PrivateLeft PrivateLeft_shift(PrivateLeft value){
   value -> value += 2;
   return value;
 }
+
+void * Scope_malloc(size_t);
+
+static inline int PrivateParticipant_read(PrivateParticipant a0);
+
+static inline PublicParticipant PublicParticipant_bump(PublicParticipant a0);
+
+static inline PrivateRight PrivateRight_shift(PrivateRight a0);
+
+String Var_str(Var);
 
 int main(void){
   x2c_initialize();
@@ -175,4 +153,6 @@ static inline int PrivateParticipant_read(PrivateParticipant a0){
 static inline String _x2c_proto_privatebox_str_0(Var a0){
   return PrivateBox_str(Var_privatebox(a0));
 }
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/static-local-switch.x:6:7: emit: switch cannot bypass dynamic static initialization
+        static int value = initial();
+        ^^^^^^
+  note: place the declaration before the switch or within one case block
+

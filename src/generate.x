@@ -195,11 +195,11 @@ static inline int _has_file_init_blocks(Compiler compiler) =>
 
 static List _prepend_init_prelude(
   Compiler compiler, List result, List initGuard, List initFunc) {
+  result = cons(initGuard, result);
   if (compiler.early_decls.len())
     foreach (Var declaration, compiler.early_decls)
       result = cons(declaration, result);
   if (initFunc) result = cons(initFunc, result);
-  result = cons(initGuard, result);
   return result;
 }
 
@@ -549,75 +549,113 @@ static List _header_and_source(Compiler compiler, List ast) {
   return %( $header_list $source_list );
 }
 
-static int _declaration_references_static_function(Var value, Map bindings) {
-  if (value is <symbol>) return value == <fnmod> || value == <func>;
-  if (value is not <list> || value.is_nil()) return 0;
-  List node = value;
-  match (node)
-    case %(ident (!set ?binding (binding ? ?))):
-      if (bindings.contains(binding)) return 1;
-  foreach (Var child, node)
-    if (_declaration_references_static_function(child, bindings)) return 1;
-  return 0;
-}
-
 static List _declaration_binding(List declarator) {
   match (declarator) {
     case %(bind (!set ?binding (binding ? ?)) ?): return binding;
-    case %(op = (!set ?binding (bind (binding ? ?) ?)) ?): return binding;
+    case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): return binding;
   }
   return NULL;
 }
 
-static void _collect_local_function_bindings(Var value, Map bindings) {
+static void _collect_declared_bindings(Var value, Map bindings) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node) {
     case %(function ? (!set ?declarator (bind (binding ? ?) ?)) ?): {
-      bindings[_declaration_binding(declarator)] = 1;
+      List binding = _declaration_binding(declarator);
+      bindings[binding] = 1;
+      bindings[%(native ${binding_identity_spelling(binding)})] = 1;
       return;
     }
     case %(declare ? (!set ?declarator (bind (binding ? ?) ?))): {
-      if (node.type_from_ast().is_function())
-        bindings[_declaration_binding(declarator)] = 1;
+      if (node.type_from_ast().is_function()) {
+        List binding = _declaration_binding(declarator);
+        bindings[binding] = 1;
+        bindings[%(native ${binding_identity_spelling(binding)})] = 1;
+      }
       return;
     }
-    case %(declare (!set ?base (*)) (bindings *declarators)): {
+    case %((!or declare typedef) (!set ?base (*))
+           (bindings *declarators)): {
       foreach (List declarator, declarators) {
         List binding = _declaration_binding(declarator);
         if (!binding) continue;
-        List declaration = %(declare $base (bindings $declarator));
-        if (declaration.type_from_ast().is_function()) bindings[binding] = 1;
+        bindings[binding] = 1;
+        if (node.car() == <typedef>)
+          bindings[binding_identity_spelling(binding)] = 1;
       }
       return;
     }
   }
-  foreach (Var child, node) _collect_local_function_bindings(child, bindings);
+  foreach (Var child, node) _collect_declared_bindings(child, bindings);
 }
 
-/* One complete unit walk per generation, so it keeps the manual worklist.
-   A Func visit callback's dynamic call per node cost ~2% of
-   self-translation. Pending sibling suffixes wait on `resume` to stay off
-   the C stack. */
-static void _collect_external_function_prototypes(
-  Compiler compiler, Var value, Map locals, Map seen, Array prototypes) {
+static void _forward_declaration(
+  Compiler c, Var key, Map available, Map declarations, Map seen,
+  Array output) {
+  Var declaration;
+  if (available.contains(key) || seen.contains(key) ||
+      !declarations.try_get(key, &declaration)) return;
+  seen[key] = 1;
+  seen[declaration] = 1;
+  _collect_declared_bindings(declaration, available);
+  _collect_forward_dependencies(
+    c, declaration, available, declarations, seen, output);
+  output.push(declaration);
+}
+
+static void _forward_types(
+  Compiler c, List type, Map available, Map declarations, Map seen,
+  Array output) {
+  foreach (Var part, type) {
+    if (part is <string>)
+      _forward_declaration(c, part, available, declarations, seen, output);
+    else if (part is <list>)
+      _forward_types(c, part, available, declarations, seen, output);
+  }
+}
+
+/* Pending sibling suffixes stay off the C stack. Only declaration
+   dependencies recurse; ordinary expressions share the same worklist. */
+static void _collect_forward_dependencies(
+  Compiler compiler, Var value, Map locals, Map statics, Map seen,
+  Array prototypes) {
   if (value is not <list> || value.is_nil()) return;
   Array resume = %[];
   defer resume.free();
   List node = value;
   for (;;) {
     match (node) {
-      case %(expr ? (ident (!set ?binding (binding ? ?)))): {
+      case %(!set ?binding (binding ? ?)): {
         String spelling = binding_identity_spelling(binding);
-        Type type = NULL;
-        List global = spelling
-          ? compiler.sym.resolve_global(%($spelling), &type) : NULL;
-        if (global && List.equal(global, binding) && type.is_function() &&
-            !locals.contains(global) && !seen.contains(global)) {
-          seen[global] = 1;
-          prototypes.push(type.declaration_ast(global));
+        List native = %(native $spelling);
+        if (statics.contains(binding))
+          _forward_declaration(
+            compiler, binding, locals, statics, seen, prototypes);
+        else if (statics.contains(native))
+          _forward_declaration(
+            compiler, native, locals, statics, seen, prototypes);
+        else {
+          Type type = NULL;
+          List global = spelling
+            ? compiler.sym.resolve_global(%($spelling), &type) : NULL;
+          if (global && List.equal(global, binding) && type.is_function() &&
+              !locals.contains(global) && !seen.contains(global)) {
+            seen[global] = 1;
+            _forward_types(compiler, type, locals, statics, seen, prototypes);
+            prototypes.push(type.declaration_ast(global));
+          }
         }
       }
+      case %(vcompound ? ? ? ?name):
+        _forward_declaration(compiler, %(native $name),
+          locals, statics, seen, prototypes);
+      case %(vpostfix ? ? ?name):
+        _forward_declaration(compiler, %(native $name),
+          locals, statics, seen, prototypes);
+      case %((!or expr declare typedef function cast param) ?type *):
+        if (type is <list>)
+          _forward_types(compiler, type, locals, statics, seen, prototypes);
     }
     List rest = node;
     for (;;) {
@@ -636,61 +674,55 @@ static void _collect_external_function_prototypes(
   }
 }
 
-static List _static_prototypes(Compiler compiler, List source, List header) {
-  Array declarations = %[], decls = %[], consumers = %[], prelude = %[];
-  Array prototypes = %[], externals = %[], output = %[];
-  Map static_functions = %{}, local_functions = %{}, external_seen = %{};
-  _collect_local_function_bindings(header, local_functions);
-  _collect_local_function_bindings(source, local_functions);
-  _collect_external_function_prototypes(
-    compiler, source, local_functions, external_seen, externals);
-  int output_started = 0;
-  foreach (List node, source) {
-    match (node) {
-      case %((!or declare typedef) *): {
-        declarations.push(node);
-        continue;
+static void _static_declarations(Var value, Map declarations) {
+  if (value is not <list>) return;
+  List node = value;
+  match (node) {
+    case %(function ?type (!set ?signature (bind ?binding ?)) ?): {
+      if (type.list().type().is_static()) {
+        List declaration = %(declare $type $signature);
+        declarations[binding] = declaration;
+        declarations[%(native ${binding_identity_spelling(binding)})] =
+          declaration;
       }
-      case %(preproc ?content): {
-        String directive = content.string().strip(" \t\r\n");
-        if (directive.startswith("#include") ||
-            directive.startswith("#define")) {
-          prelude.push(node);
-          continue;
-        }
-      }
-      case %(function ?type
-             (!set ?signature (bind (!set ?binding (binding ? ?)) ?)) ?): {
-        output.push(node);
-        output_started = 1;
-        if (type.type().is_static()) {
-          static_functions[binding] = 1;
-          prototypes.push(%(declare $type $signature));
-        }
-        continue;
-      }
+      return;
     }
-    if (!output_started) prelude.push(node);
-    else output.push(node);
+    case %((!or declare typedef) ?base (bindings *bindings)): {
+      if (base.list().type().is_static() || node.car() == <typedef>)
+        foreach (List declarator, bindings) {
+          List binding = _declaration_binding(declarator);
+          if (!binding) continue;
+          match (declarator)
+            case %(op = ?target ?): declarator = target;
+          List declaration = node.car() == <typedef>
+            ? node : %(declare $base (bindings $declarator));
+          declarations[binding] = declaration;
+          if (node.car() == <typedef>)
+            declarations[binding_identity_spelling(binding)] = declaration;
+        }
+      return;
+    }
   }
-  foreach (List declaration, declarations.list_free())
-    if (declaration.car() == <declare> &&
-        _declaration_references_static_function(
-          declaration, static_functions)) consumers.push(declaration);
-    else decls.push(declaration);
-  List decl_list = decls.list_free(), consumer_list = consumers.list_free();
-  List prelude_list = prelude.list_free();
-  List external_list = externals.list_free();
-  List prototype_list = prototypes.list_free();
-  List output_list = output.list_free();
-  return %(
-    @decl_list
-    @prelude_list
-    @external_list
-    @prototype_list
-    @consumer_list
-    @output_list
-  );
+  foreach (Var child, node)
+    _static_declarations(child, declarations);
+}
+
+/* Native directives and initializer inputs keep their source order. A
+   forward binding needs only a declaration before its first consumer, not
+   another ordering of every declaration and macro in the translation unit. */
+static List _static_prototypes(Compiler compiler, List source, List header) {
+  Array output = %[];
+  Map statics = %{}, available = %{}, seen = %{};
+  _collect_declared_bindings(header, available);
+  _static_declarations(source, statics);
+  foreach (List node, source) {
+    if (node.car() == <typedef> && seen.contains(node)) continue;
+    _collect_declared_bindings(node, available);
+    _collect_forward_dependencies(
+      compiler, node, available, statics, seen, output);
+    output.push(node);
+  }
+  return output.list_free();
 }
 
 // formatting

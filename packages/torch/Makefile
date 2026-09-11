@@ -1,5 +1,11 @@
 PACKAGE := torch
 DEPENDENCY_PREFIX_VAR := TORCH_PREFIX
+ifeq ($(shell uname -s),Linux)
+DEPENDENCY_MANIFEST := dependency-linux.json
+TORCH_CXX_RUNTIME := -lstdc++
+else
+TORCH_CXX_RUNTIME := -lc++
+endif
 
 # generated/ holds the tier-1 operator bindings tools/gen-ops.py produces
 # from the pinned schema; both translation and compilation read it.
@@ -30,7 +36,7 @@ CXX_FLAGS := -std=c++17 -O2 -I$(TORCH_INCLUDE) \
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir generated
 PACKAGE_LINK := -Xlinker $(CURDIR)/$(SHIM) -Xlinker $(CURDIR)/$(OPS) \
 	-L$(TORCH_LIB) \
-	-ltorch -ltorch_cpu -lc10 -lc++ -Wl,-rpath,$(TORCH_LIB)
+	-ltorch -ltorch_cpu -lc10 $(TORCH_CXX_RUNTIME) -Wl,-rpath,$(TORCH_LIB)
 NATIVE := $(SHIM) $(OPS)
 
 .PHONY: example short-example run run-mnist verify-python gen-ops \
@@ -114,3 +120,56 @@ builds/module-names: tests/module-names.x $(PACKAGE_ARCHIVE) \
 builds/verify-ops: tests/verify-ops.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/verify-ops-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+.PHONY: verify-interchange run-mps
+
+builds/optimizer-interchange: tests/optimizer-interchange.x $(PACKAGE_ARCHIVE) \
+  $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/optimizer-interchange-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+verify-interchange: builds/optimizer-interchange
+	"$(TORCH_PYTHON)" tests/verify-interchange.py
+
+run-mps: builds/mnist
+	TORCH_DEVICE=mps ./builds/mnist
+
+.PHONY: lisp-example run-lisp run-custom
+
+builds/inline-lisp: examples/inline-lisp.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/inline-lisp-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+builds/custom-activation: examples/custom-activation.x $(PACKAGE_ARCHIVE) \
+  $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/custom-activation-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+lisp-example: builds/inline-lisp
+
+run-lisp: builds/inline-lisp
+	./builds/inline-lisp
+
+run-custom: builds/custom-activation
+	./builds/custom-activation
+
+.PHONY: verify-lifetimes
+verify-lifetimes: build
+	TORCH_PREFIX="$(TORCH_PREFIX)" X2C="$(abspath $(X2C))" \
+	  CXX="$(CXX)" CC="$(CC)" python3 tests/verify-lifetimes.py
+
+.PHONY: verify-custom
+builds/custom-parity: tests/custom-parity.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/custom-parity-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+verify-custom: builds/custom-parity
+	"$(TORCH_PYTHON)" tests/verify-custom.py
+
+.PHONY: verify-mps
+builds/mps-kernels: tests/mps-kernels.x $(PACKAGE_ARCHIVE) $(NATIVE) | builds
+	$(X2C) build --output $@ --build-dir builds/mps-kernels-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
+verify-mps: builds/mps-kernels
+	PYTORCH_ENABLE_MPS_FALLBACK=0 ./builds/mps-kernels

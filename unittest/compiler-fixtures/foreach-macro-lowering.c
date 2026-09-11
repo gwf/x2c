@@ -26,72 +26,6 @@ List cons(Var, List);
 
 Var String_var(String);
 
-Split String_words(String);
-
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-long Var_integer(Var);
-
-int String_len(String);
-
-String Var_string(Var);
-
-Iter Map_keys(Map, Iter);
-
-int Var_truth(Var);
-
-int String_truth(String);
-
-Var Symbol_var(Symbol);
-
-int Split_try_next(Split, int *, String *);
-
-Split String_lines(String);
-
-Split String_splits(String, String);
-
-Iter range(int, int, int, Iter);
-
-Iter Iter_zip(Iter, Iter, Iter);
-
-List Var_list(Var);
-
-Var List_getindex(List, int);
-
-MapIntInt MapIntInt_new(void);
-
-void MapIntInt_set(MapIntInt, int, int);
-
-int MapIntInt_try_next(MapIntInt, unsigned *, int *, int *);
-
-MapStringString MapStringString_new(void);
-
-void MapStringString_set(MapStringString, String, String);
-
-int MapStringString_try_next(MapStringString, unsigned *, String *, String *);
-
-int Var_is_void(Var);
-
-int String_equal(String, String);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Map counted_map(Map map);
-
-static Split counted_words(String text);
-
-static int initial_value(void);
-
-static void record_cleanup(void);
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -128,6 +62,8 @@ static Map counted_map(Map map){
   return map;
 }
 
+Split String_words(String);
+
 static Split counted_words(String text){
   split_evaluations ++;
   return String_words(text);
@@ -141,6 +77,60 @@ static int initial_value(void){
 static void record_cleanup(void){
   cleanups ++;
 }
+
+Iter List_iter(List, Iter);
+
+int Iter_try_next(Iter, Var *);
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+long Var_integer(Var);
+
+int String_len(String);
+
+String Var_string(Var);
+
+Iter Map_keys(Map, Iter);
+
+int Var_truth(Var);
+
+int String_truth(String);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+Var Symbol_var(Symbol);
+
+int Split_try_next(Split, int *, String *);
+
+Split String_lines(String);
+
+Split String_splits(String, String);
+
+Iter range(int, int, int, Iter);
+
+Iter Iter_zip(Iter, Iter, Iter);
+
+List Var_list(Var);
+
+Var List_getindex(List, int);
+
+MapIntInt MapIntInt_new(void);
+
+void MapIntInt_set(MapIntInt, int, int);
+
+int MapIntInt_try_next(MapIntInt, unsigned *, int *, int *);
+
+MapStringString MapStringString_new(void);
+
+void MapStringString_set(MapStringString, String, String);
+
+int MapStringString_try_next(MapStringString, unsigned *, String *, String *);
+
+int Var_is_void(Var);
+
+int String_equal(String, String);
 
 int main(void){
   x2c_initialize();

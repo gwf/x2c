@@ -20,38 +20,6 @@ Var List_var(List);
 
 Var int_var(int);
 
-Var String_var(String);
-
-String int_str(int);
-
-int Var_int(Var);
-
-Var Array_getindex(Array, int);
-
-Var Array_var(Array);
-
-Var Map_var(Map);
-
-int List_equal(List, List);
-
-int String_equal(String, String);
-
-String Var_string(Var);
-
-Var List_getindex(List, int);
-
-Var Map_getindex(Map, Var);
-
-List Var_list(Var);
-
-Array Var_array(Var);
-
-Map Var_map(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int answer(int value);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -94,6 +62,34 @@ static int answer(int value){
   calls ++;
   return value;
 }
+
+Var String_var(String);
+
+String int_str(int);
+
+int Var_int(Var);
+
+Var Array_getindex(Array, int);
+
+Var Array_var(Array);
+
+Var Map_var(Map);
+
+int List_equal(List, List);
+
+int String_equal(String, String);
+
+String Var_string(Var);
+
+Var List_getindex(List, int);
+
+Var Map_getindex(Map, Var);
+
+List Var_list(Var);
+
+Array Var_array(Var);
+
+Map Var_map(Var);
 
 int main(void){
   x2c_initialize();

@@ -18,12 +18,6 @@ Var int_var(int);
 
 List cons(Var, List);
 
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -35,6 +29,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = cons(_1, _3);
   _5 = cons(_0, _4);
 }
+
+Iter List_iter(List, Iter);
 
 Iter IterParent_iter(IterParent values, Iter dest){
   parent_calls ++;
@@ -50,6 +46,8 @@ Iter IterOverride_iter(IterOverride values, Iter dest){
   override_calls ++;
   return List_iter((List) values, dest);
 }
+
+int Iter_try_next(Iter, Var *);
 
 int main(void){
   x2c_initialize();

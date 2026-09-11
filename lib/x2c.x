@@ -28,6 +28,7 @@
 #include "scan.x"
 #include "scope.x"
 #include "split.x"
+#include "static-init.x"
 #include "string-classify.x"
 #include "string-number.x"
 #include "string.x"

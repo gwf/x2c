@@ -10,8 +10,6 @@ static _Thread_local int legacy;
 
 static _Thread_local int c23;
 
-static void * worker(void * unused);
-
 static void * worker(void * unused){
   (void) unused;
   hidden = 7;

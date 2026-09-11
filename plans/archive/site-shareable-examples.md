@@ -1,12 +1,7 @@
-> Status: implemented
-> Local implementation committed and rebased onto origin/main at efed52a.
-> Site statistics refreshed from make stats. Gary approved publication to main
-> after final checks on 2026-09-10.
-> Started from origin/main at 1bc7e67.
-> Torch, continuous Game of Life, and the replacement Lisp tic-tac-toe example
-> are implemented for local review. All four example pages now use continuous
-> code and annotation columns. The Lisp opponent runs inside a native playable game.
-> Landing-page captions and code remain exactly as pulled from main.
+> Status: done
+> Published to main at 2d29fe9 on 2026-09-10. Pages run 34529785230
+> deployed that commit successfully; the homepage, four example pages,
+> book and source downloads were verified in the delivery session.
 
 # Shareable x2c examples
 

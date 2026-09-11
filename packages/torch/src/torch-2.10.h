@@ -36,6 +36,9 @@ enum xt_dtype {
 const char *xt_last_error(void);
 const char *xt_last_error_full(void);
 const char *xt_version(void);
+int xt_mps_available(int *out);
+int xt_mps_synchronize(void);
+const char *xt_device(xt_tensor a);
 int xt_manual_seed(int64_t seed);
 int xt_set_num_threads(int count);
 int xt_get_num_threads(int *out);
@@ -147,6 +150,23 @@ int xt_inference_mode_pop(void);
 
 void xt_tensor_free(xt_tensor a);
 
+/* Custom autograd callbacks run only inside a caller-thread invocation.
+   Input handles and context are borrowed for this callback. Output setters
+   and save_for_backward copy native tensor references immediately. */
+typedef struct xt_autograd_context_s *xt_autograd_context;
+typedef int (*xt_autograd_callback)(void *function, xt_autograd_context context,
+                                    xt_tensor *inputs, int count, int forward,
+                                    int outputs);
+xt_tensor xt_tensor_alias(xt_tensor tensor);
+xt_tensor xt_custom(xt_autograd_callback callback, void *forward, void *backward,
+                    xt_tensor *inputs, int count);
+int xt_backward_callbacks(xt_tensor output);
+int xt_custom_output(xt_autograd_context context, int index, xt_tensor tensor);
+int xt_custom_save(xt_autograd_context context, xt_tensor *tensors, int count);
+int xt_custom_saved_count(xt_autograd_context context, int *count);
+xt_tensor xt_custom_saved(xt_autograd_context context, int index);
+int xt_custom_needs_grad(xt_autograd_context context, int index, int *out);
+
 /* Modules.
 
    A module handle shares ownership of one torch::nn::Module. A child
@@ -217,6 +237,7 @@ int xt_module_train(xt_module m, int on);
 int xt_module_is_training(xt_module m, int *out);
 int xt_module_zero_grad(xt_module m);
 int xt_module_to_dtype(xt_module m, int dtype);
+int xt_module_to_device(xt_module m, const char *device);
 void xt_module_free(xt_module m);
 
 /* Optimizers.
@@ -248,6 +269,8 @@ int xt_optim_lr(xt_optim o, double *out);
 int xt_optim_set_lr(xt_optim o, double lr);
 int xt_optim_save(xt_optim o, const char *path);
 int xt_optim_load(xt_optim o, const char *path);
+int xt_optim_save_python(xt_optim o, const char *path);
+int xt_optim_load_python(xt_optim o, const char *path);
 void xt_optim_free(xt_optim o);
 
 /* Learning-rate schedules; libtorch ships exactly these two, and they have

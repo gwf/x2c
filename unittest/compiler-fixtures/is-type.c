@@ -12,42 +12,6 @@ static int _init_guard_ = 0;
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-Var int_var(int);
-
-int Var_is(Var, Symbol);
-
-Var Var_new(Symbol, ...);
-
-void * Var_pointer(Var);
-
-void x2c_register_type(String);
-
-Var unsigned_var(unsigned);
-
-Var float_var(float);
-
-Var List_var(List);
-
-Var String_var(String);
-
-Var Symbol_var(Symbol);
-
-void * Scope_malloc(size_t);
-
-int Var_is_void(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Var next_value(void);
-
-static Symbol next_tag(void);
-
-static Var call_or_void(int(* function)(void));
-
-static int symbol_shadows_type(Var value);
-
-static int custom_visible_before_protocol(Var value);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -57,6 +21,8 @@ __attribute__((constructor)) static void _file_init_(void){
   }
   _0 = String_new("iswidget");
 }
+
+Var int_var(int);
 
 static Var next_value(void){
   calls ++;
@@ -73,6 +39,8 @@ static Var call_or_void(int(* function)(void)){
   return((void) 0, Void);
 }
 
+int Var_is(Var, Symbol);
+
 static int symbol_shadows_type(Var value){
   Symbol NativeInt = 3453797;
   return Var_is(value, NativeInt);
@@ -82,13 +50,33 @@ static int custom_visible_before_protocol(Var value){
   return Var_is(value, 660840135016);
 }
 
+Var Var_new(Symbol, ...);
+
 Var IsWidget_var(IsWidget widget){
   return Var_new(660840135016, widget);
 }
 
+void * Var_pointer(Var);
+
 IsWidget Var_iswidget(Var value){
   return Var_pointer(value);
 }
+
+void x2c_register_type(String);
+
+Var unsigned_var(unsigned);
+
+Var float_var(float);
+
+Var List_var(List);
+
+Var String_var(String);
+
+Var Symbol_var(Symbol);
+
+void * Scope_malloc(size_t);
+
+int Var_is_void(Var);
 
 int main(void){
   x2c_initialize();
@@ -123,4 +111,6 @@ int main(void){
   printf("%d %d %d\n", ok, calls, tag_calls);
   return ok ? 0 : 1;
 }
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 

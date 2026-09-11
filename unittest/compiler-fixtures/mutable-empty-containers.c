@@ -2,7 +2,27 @@
 
 #include "mutable-empty-containers.h"
 
+static int rejected(void(* action)(void)){
+  pid_t pid = fork();
+  if(pid < 0) return 0;
+  if(pid == 0){
+    action();
+    _exit(0);
+  }
+  int status = 0;
+  if(waitpid(pid, & status, 0) != pid) return 0;
+  return WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
+}
+
 Var Var_new(Symbol, ...);
+
+static void box_null_array(void){
+  Var_new(3313778, NULL);
+}
+
+static void box_null_map(void){
+  Var_new(26720, NULL);
+}
 
 void Scope_retain(void);
 
@@ -31,32 +51,6 @@ Array Var_array(Var);
 Map Var_map(Var);
 
 void Scope_release(void);
-
-static int rejected(void(* action)(void));
-
-static void box_null_array(void);
-
-static void box_null_map(void);
-
-static int rejected(void(* action)(void)){
-  pid_t pid = fork();
-  if(pid < 0) return 0;
-  if(pid == 0){
-    action();
-    _exit(0);
-  }
-  int status = 0;
-  if(waitpid(pid, & status, 0) != pid) return 0;
-  return WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
-}
-
-static void box_null_array(void){
-  Var_new(3313778, NULL);
-}
-
-static void box_null_map(void){
-  Var_new(26720, NULL);
-}
 
 int main(void){
   x2c_initialize();

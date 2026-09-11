@@ -4,6 +4,10 @@
 
 static int calls;
 
+static void touch(void){
+  calls ++;
+}
+
 int Var_is_void(Var);
 
 int Var_is(Var, Symbol);
@@ -11,12 +15,6 @@ int Var_is(Var, Symbol);
 int Var_equal(Var, Var);
 
 Var int_var(int);
-
-static void touch(void);
-
-static void touch(void){
-  calls ++;
-}
 
 int main(void){
   x2c_initialize();

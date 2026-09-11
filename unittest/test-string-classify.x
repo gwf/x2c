@@ -11,6 +11,8 @@ static void string_classification(void) {
   EXPECT_TRUE(%"123".is_digit());
   EXPECT_TRUE(%"a1".contains_digit());
   EXPECT_FALSE(%"abc".contains_digit());
+  EXPECT_FALSE(%"".contains_digit());
+  EXPECT_FALSE(bytes.contains_digit());
   EXPECT_TRUE(%"a1".is_alnum());
   EXPECT_TRUE(%"a_1".is_alnum_under());
   EXPECT_TRUE(%"_name1".is_identifier());

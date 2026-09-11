@@ -4,6 +4,14 @@
 
 #include "error.h"
 
+static void raise_empty(void){
+  {
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_empty",.line = 4};
+    x2c_error_raise_n(& _x2c_error_site_0, 1269496097575876, 0);
+  }
+
+}
+
 void Error_initialize(void);
 
 void Error_policy_set(Symbol, Symbol);
@@ -37,22 +45,6 @@ Var List_getindex(List, int);
 String Var_string(Var);
 
 int List_len(List);
-
-static void raise_empty(void);
-
-_Noreturn static void raise_terminal(void);
-
-static void raise_after_return(int code);
-
-static void raise_caught(void);
-
-static void raise_empty(void){
-  {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_empty",.line = 4};
-    x2c_error_raise_n(& _x2c_error_site_0, 1269496097575876, 0);
-  }
-
-}
 
 int main(void){
   x2c_initialize();

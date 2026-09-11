@@ -29,6 +29,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import statistics
 import subprocess
 import sys
@@ -54,6 +55,26 @@ def log_dir(run):
     path = os.path.join(common.LOGS, run)
     os.makedirs(path, exist_ok=True)
     return path
+
+
+def configure_session(run, optimizer=None):
+    """A session never combines different optimizer comparisons."""
+    path = os.path.join(log_dir(run), "comparison.json")
+    previous = None
+    if os.path.exists(path):
+        with open(path) as handle:
+            previous = json.load(handle)["optimizer"]
+    selected = optimizer or previous or "stock"
+    if previous and previous != selected:
+        raise ValueError(f"session {run} already uses {previous} Adam")
+    os.environ["X2C_TORCH_OPTIMIZER"] = selected
+    common.OUTPUTS = os.path.join(common.WORK, "out", run)
+    os.makedirs(common.OUTPUTS, exist_ok=True)
+    if not previous:
+        with open(path, "w") as handle:
+            json.dump({"optimizer": selected}, handle)
+            handle.write("\n")
+    return selected
 
 
 # ---- build ----------------------------------------------------------------
@@ -199,7 +220,9 @@ def python_command(app, mode, *arguments):
 
 def environment(threads):
     return {"X2C_TORCH_THREADS": str(threads),
-            "OMP_NUM_THREADS": str(threads)}
+            "OMP_NUM_THREADS": str(threads),
+            "X2C_TORCH_OPTIMIZER": os.environ.get("X2C_TORCH_OPTIMIZER", "stock"),
+            "X2C_TORCH_OUTPUTS": common.OUTPUTS}
 
 
 def both(app, mode, arguments, threads, run, tag, x2c_first=True):
@@ -253,6 +276,7 @@ def check(apps, threads, run):
         row = collected[app] = {
             "records": {}, "curve": {}, "agreement": [], "errors": errors,
             "ok": False,
+            "optimizer": os.environ.get("X2C_TORCH_OPTIMIZER", "stock"),
         }
         if not os.path.isfile(os.path.join(common.BINARIES, app)):
             errors.append(f"{app}: requested binary is not built")
@@ -324,6 +348,10 @@ def check(apps, threads, run):
                 errors.extend(f"missing checkpoint: {path}" for path in missing)
                 continue
             left, right = [common.load_tensors(path) for path in paths]
+            retained = os.path.join(log_dir(run), "checkpoints")
+            os.makedirs(retained, exist_ok=True)
+            for checkpoint in paths:
+                shutil.copy2(checkpoint, retained)
             findings = common.compare_tensors(left, right)
             worst = max(item[1] for item in findings)
             failed = [item for item in findings if item[3] != "ok"]
@@ -585,6 +613,7 @@ def attribute(elements, requests, threads, run):
 
 def environment_report(run):
     record = common.environment_record()
+    record["optimizer"] = os.environ.get("X2C_TORCH_OPTIMIZER", "stock")
     lane = os.path.join(common.BINARIES, "lane.json")
     if os.path.exists(lane):
         with open(lane) as handle:
@@ -594,6 +623,17 @@ def environment_report(run):
     record["x2c"] = subprocess.run([X2C, "--version"], capture_output=True,
                                    text=True).stdout.strip()
     record["torch_python"] = common.torch_python()
+    record["python_runtime"] = json.loads(subprocess.run(
+        [common.torch_python(), "-c",
+         "import json, sys, torch; print(json.dumps({"
+         "'executable': sys.executable, 'python': sys.version, "
+         "'torch': torch.__version__}))"],
+        capture_output=True, text=True, check=True).stdout)
+    record["binaries"] = {name: common.sha256(path)
+                          for name, path in [("compiler", X2C)] + [
+                              (app, os.path.join(common.BINARIES, app))
+                              for app in X_APPS]
+                          if os.path.isfile(path)}
     path = os.path.join(log_dir(run), "environment.json")
     with open(path, "w") as handle:
         json.dump(record, handle, indent=2, sort_keys=True, default=str)
@@ -620,13 +660,25 @@ def main():
     parser.add_argument("--profiles", default="1,3,4,5,6")
     parser.add_argument("--steps", type=int, default=512)
     parser.add_argument("--run-id", default=None)
+    parser.add_argument("--optimizer", choices=["stock", "matched"],
+                        help="stock PyTorch or libtorch operation-order control; "
+                             "fixed for all measurements in one run-id")
     parser.add_argument("--elements", type=int, default=65536)
     parser.add_argument("--requests", type=int, default=60)
     options = parser.parse_args()
 
+    if options.mode == "check":
+        try:
+            import torch
+        except ImportError:
+            common.reexec_with_torch(__file__)
+
     run = options.run_id or run_id()
     threads = [int(value) for value in options.threads.split(",")]
     common.ensure_directories()
+
+    if options.mode not in ("prepare", "build"):
+        configure_session(run, options.optimizer)
 
     if options.mode == "prepare":
         return subprocess.run([common.torch_python(),

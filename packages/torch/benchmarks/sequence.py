@@ -27,6 +27,9 @@ except ImportError:
 
 from prepare import SequenceRnn
 
+sys.path.insert(0, os.path.join(common.PACKAGE, "tests"))
+from adam_control import optimizer_for as adam_optimizer
+
 PROFILE = common.PROFILE["sequence"]
 WARMUP = 50
 
@@ -67,7 +70,7 @@ def configure():
 
 
 def optimizer_for(model):
-    return torch.optim.Adam(model.parameters(), lr=PROFILE["lr"],
+    return adam_optimizer(model.parameters(), lr=PROFILE["lr"],
                             betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0,
                             amsgrad=False, foreach=False, fused=False)
 

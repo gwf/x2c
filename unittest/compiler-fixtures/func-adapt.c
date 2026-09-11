@@ -18,46 +18,6 @@ Var List_var(List);
 
 Var String_var(String);
 
-int String_len(String);
-
-Var Var_null(void);
-
-Func Func_new(FuncAdapter, List);
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-Var long_var(long);
-
-String Var_string(Var);
-
-Var int_var(int);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static long add(long left, long right);
-
-static Var identity(Var value);
-
-static int width(String text);
-
-static void discard(int value);
-
-static Var nothing(void);
-
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
-
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
-
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
-
-static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
-
-static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
-
-static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
-
-Var Var_binary(Var lhs, Symbol op, Var rhs);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -132,6 +92,8 @@ static Var identity(Var value){
   return value;
 }
 
+int String_len(String);
+
 static int width(String text){
   return String_len(text);
 }
@@ -140,9 +102,27 @@ static void discard(int value){
   (void) value;
 }
 
+Var Var_null(void);
+
 static Var nothing(void){
   return Var_null();
 }
+
+Var Var_binary(Var lhs, Symbol op, Var rhs);
+
+Func Func_new(FuncAdapter, List);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
+
+static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
+
+static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
+
+static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
 
 int main(void){
   x2c_initialize();
@@ -157,6 +137,10 @@ int main(void){
   return ! numeric || ! passthrough || ! object || ! returns_void || ! no_parameters || ! imported || ! forwarded;
 }
 
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
+
+Var long_var(long);
+
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));
   long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 1, 818062), 818062));
@@ -169,6 +153,10 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
   return identity(a0);
   ;
 }
+
+String Var_string(Var);
+
+Var int_var(int);
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
   String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));

@@ -6,18 +6,6 @@ static int pass_calls;
 
 static int take_calls;
 
-Var long_var(long);
-
-int Var_equal(Var, Var);
-
-int Var_compare(Var, Var);
-
-static DynamicAlias make_alias(long value);
-
-static DynamicAlias pass_alias(Dynamic value);
-
-static long take_alias(DynamicAlias value);
-
 static DynamicAlias make_alias(long value){
   return Var_box_long(value);
 }
@@ -31,6 +19,12 @@ static long take_alias(DynamicAlias value){
   take_calls ++;
   return Var_long(Var_convert(value, 818062));
 }
+
+Var long_var(long);
+
+int Var_equal(Var, Var);
+
+int Var_compare(Var, Var);
 
 int main(void){
   x2c_initialize();

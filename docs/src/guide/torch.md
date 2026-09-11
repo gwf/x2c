@@ -9,10 +9,9 @@ compiles over is `src/torch-2.10.h`, and `src/torch-shim.cpp` implements
 that ABI. libtorch has no C API and no stable C++ ABI, so the shim is the
 package's only C++ and it is tied to exactly the pinned version, 2.10.0.
 
-The package is experimental, and it is not self-contained: a program
-links `libtorch_cpu.dylib` (213 MB) dynamically through an rpath into the
-prepared prefix, so it depends on that prefix at run time, unlike every
-other x2c artifact. `torch.compile` and TorchScript capture work on
+A program links the pinned libtorch shared libraries dynamically through an
+rpath into the prepared prefix, so it depends on that prefix at run time.
+`torch.compile` and TorchScript capture work on
 Python code and are not available here; x2c runs a TorchScript model but
 cannot produce one.
 
@@ -20,7 +19,7 @@ cannot produce one.
 make -C packages/torch prepare build test run
 ```
 
-`prepare` downloads the official 77 MB libtorch archive into the shared
+`prepare` downloads the pinned platform's libtorch archive into the shared
 dependency cache; `run-mnist` and `verify-jit` are the commands for the
 two examples that need the MNIST files and a Python-scripted model.
 
@@ -330,17 +329,117 @@ catch %(bad-state (library "torch") *detail): {
 }
 ```
 
+## Devices, optimizer exchange, custom gradients, and Lisp
+
+The macOS arm64 profile supports CPU and MPS. The Linux x86_64 profile
+uses the pinned CPU archive and the system C++ runtime. GPU support on Linux
+and CUDA are outside these profiles. Device names are ordinary strings;
+`Tensor.to_device(device, dtype, non_blocking, copy)` already belongs to the
+generated operator surface. `Module.to_device(device)` moves parameters and
+buffers; call it before constructing an optimizer. Existing constructors keep
+their CPU behavior. MPS tensors use float32 or a supported integer dtype;
+MPS cannot represent float64. `to_values` explicitly copies to CPU before
+reading values. `Torch.mps_available()` reports availability, and
+`Torch.mps_synchronize()` waits for queued kernels when measuring execution.
+
+```sh
+TORCH_MNIST=/path/to/mnist TORCH_EPOCHS=2 TORCH_DEVICE=mps \
+  make -C packages/torch run-mnist
+```
+
+The MNIST example defaults to one epoch. It writes a model checkpoint and
+compares held-out accuracy after reload. On the development MPS device,
+two epochs reached 95.23% and the reloaded model reached the same accuracy.
+Generated operators still depend on MPS kernel coverage. With fallback disabled,
+`make -C packages/torch verify-mps` records that `Tensor.linalg_eig` raises the
+native error because `aten::linalg_eig` is unavailable on MPS in 2.10.0.
+This is a focused limitation probe, not a claim that all generated operators
+run on MPS.
+
+`Optimizer.save_python(path)` and `load_python(path)` exchange Adam's
+`state_dict()` layout, including parameter groups, moments, exact step counts,
+and AMSGrad state. Parameter IDs match the destination's parameters by order;
+use the same parameter order when constructing both optimizers. Import parses
+all groups and states before replacing the optimizer. Numeric options import
+by value, including integers and scalar tensors. Unsupported semantic options
+such as `maximize`, `capturable`, `differentiable`, and decoupled
+weight decay are rejected. Backend execution flags become the ordinary scalar
+implementation. Existing `save`/`load` retain their C++ archive format.
+Other optimizer algorithms still use that archive format.
+
+Python reads the file with `torch.load(path, weights_only=False)` and passes
+its dictionary to `optimizer.load_state_dict`. Python model checkpoints must
+use `dict(model.state_dict())`, as described in the checkpoint section.
+`make -C packages/torch verify-interchange` checks every parameter, moment
+and option through both
+resume directions, multiple groups and an uninitialized optimizer. Its
+`LibtorchAdam` reference uses libtorch's operation order. Stock Python Adam
+remains a separately measured comparison; the package does not promise
+bit-identical long training against its different floating-point order.
+
+`Tensor.custom(forward, backward, inputs)` creates one differentiable output.
+The forward Func receives an `AutogradContext` and a List of inputs; backward
+receives that context and the output gradient, and returns one Tensor or Null
+per input. `save_for_backward`, `saved_tensors`, and `needs_input_grad` expose
+native autograd's saved values and input-gradient requirements. Saved native
+tensors outlive callback wrappers. Funcs and their captured referents remain
+borrowed and must outlive the graph on its creating thread.
+
+Use `output.backward_callbacks()` for custom graphs. It temporarily disables
+autograd's worker scheduling, executes CPU or MPS callbacks on the invoking
+thread and restores the prior scheduling state. It does not change native
+kernel thread counts. Callback Errors are caught before returning to C++ and
+re-raised after the native call returns. Initial custom functions have one
+output and first-order gradients; in-place input changes, nested custom
+callbacks, reentrant backward and higher-order differentiation are unsupported.
+Callback contexts cannot escape. Custom graphs are not serializable.
+Custom forward also runs under `Torch.inference_mode`. Inputs must still not
+be mutated; inference tensors have no version counters to diagnose mutation.
+
+`packages/torch/examples/custom-activation.x` trains a network through an
+x2c swish derivative:
+
+```sh
+make -C packages/torch run-custom
+TORCH_DEVICE=mps make -C packages/torch run-custom
+make -C packages/torch verify-custom
+```
+
+`TorchLisp.install(lisp)` installs tensor construction, arithmetic, readers,
+linear models, optimizers, training, model checkpoints and `torch-free`.
+`torch-values` returns an ordinary Lisp List; `torch-item` preserves integer
+values. Native values created during evaluation belong to the existing Lisp
+session. Caller-injected values retain their existing ownership.
+`packages/torch/examples/inline-lisp.x` builds and trains a persistent model
+through these
+ordinary operations, with no native training-loop binding.
+
+```sh
+make -C packages/torch run-lisp
+make -C packages/torch verify-lifetimes
+```
+
+`torch-free` releases native resources early and invalidates every alias of
+that object. Wrappers remain in the session Scope until `Lisp.destroy`;
+repeated evaluation therefore has measurable wrapper growth even when native
+handle counts stay flat. Release prediction and loss tensors after each
+training step. Bare no-grad or inference guards are not Lisp bindings because
+their lifetime would otherwise extend to session destruction. The optional
+lifetime check builds isolated instrumented objects using the existing handle
+hooks. In 128 measured Lisp steps, native handles stayed at four while Scope
+allocations grew from 355 to 2159. Session destruction returned native handles
+to baseline; 64 custom graphs also returned to baseline after each graph.
+
 ## Limits
 
-- macOS arm64, CPU only: no MPS or CUDA device, and no Linux build.
+- macOS arm64 CPU/MPS and Linux x86_64 CPU; no CUDA profile.
 - No distributed training.
-- Optimizer state saves and loads through the C++ archive only; that file
-  is for resuming in x2c or C++, not for Python. Module state is
-  interoperable in both directions.
+- Python optimizer interchange covers Adam; other optimizers retain the
+  C++ archive format. Module state works in both directions.
 - The generated operator tier is a function count, not coverage:
   `packages/torch/schema/README.md` names the families it leaves out. The
   design is in `plans/archive/x2c-torch.md`.
-- No `autograd.Function`: a custom node cannot be written in x2c yet.
+- Custom autograd currently supports one output and first-order gradients.
 - `torch.compile` and TorchScript capture of x2c code are not possible:
   they capture Python. x2c runs a TorchScript model but cannot produce
   one. Agreement with Python is to float32 tolerance, not bit exact.

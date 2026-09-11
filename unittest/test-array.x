@@ -70,12 +70,11 @@ static void array_empty_literal_identity(void) {
 static void array_push_pop(void) {
   $test.scoped();
   Array arr = %[];
-  Var one = 1, two = 2;
-  arr.push(one);
-  arr.push(two);
+  arr.push(1);
+  arr.push(2);
   EXPECT_INT_EQ(arr.len(), 2);
-  EXPECT_VAR_EQ(arr[0], one);
-  EXPECT_VAR_EQ(arr.take_last(), two);
+  EXPECT_INT_EQ(arr[0].int(), 1);
+  EXPECT_INT_EQ(arr.take_last().int(), 2);
   EXPECT_INT_EQ(arr.len(), 1);
 }
 

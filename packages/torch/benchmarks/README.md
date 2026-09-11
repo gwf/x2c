@@ -23,7 +23,7 @@ sequence with no wrapper, so host cost is bounded from both sides.
 ```sh
 python3 packages/torch/benchmarks/run.py prepare
 python3 packages/torch/benchmarks/run.py build --lane primary --counters
-python3 packages/torch/benchmarks/run.py env       --run-id session
+python3 packages/torch/benchmarks/run.py env       --run-id session --optimizer stock
 python3 packages/torch/benchmarks/run.py check     --run-id session
 python3 packages/torch/benchmarks/run.py attribute --run-id session
 python3 packages/torch/benchmarks/run.py time      --run-id session \
@@ -39,6 +39,26 @@ out of the last two commands and read nothing but the JSON the earlier
 ones wrote. `plots.py` needs matplotlib, which the pinned torch wheel's
 interpreter does not have, so run it under an interpreter that does; it
 never imports torch.
+
+Run the required operation-order control separately:
+
+```sh
+python3 packages/torch/benchmarks/run.py env --run-id matched --optimizer matched
+python3 packages/torch/benchmarks/run.py check --run-id matched
+python3 packages/torch/benchmarks/run.py report --run-id matched
+```
+
+This writes `MATCHED.md`. The Python control uses libtorch 2.10's Adam
+operation order; stock PyTorch remains the ordinary comparison in `REPORT.md`.
+The control must satisfy the existing tolerances. Stock Adam's measured
+floating-point divergence is reported separately, with any failed tolerance
+kept visible and a nonzero `check` exit status. Never use control timings as
+stock PyTorch timings. Each run-id fixes its optimizer selection and refuses
+a conflicting selection later; output directories are separate. Check-mode
+checkpoints are retained beside the raw logs. Preserve that evidence outside
+a disposable worktree before deleting it.
+
+`HISTORICAL-20260910.md` retains the earlier report and its evidence limits.
 
 The timing counts are calibrated in `run.py` so the slower language takes
 roughly 15 seconds per sample at one intra-op thread. `--updates`

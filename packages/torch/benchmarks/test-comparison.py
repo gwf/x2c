@@ -4,6 +4,7 @@
 import contextlib
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -90,6 +91,10 @@ class CheckAcceptance(unittest.TestCase):
 
     def test_complete_matching_run(self):
         self.assertEqual(self.check(), 0)
+        retained = self.root / "logs/test/checkpoints/tabular-x2c-step1.pt"
+        self.assertTrue(retained.is_file())
+        saved = common.load_tensors(str(retained))
+        self.assertTrue(torch.equal(saved["weight"], torch.tensor([1e6, 1.0])))
 
     def test_missing_binary(self):
         (Path(common.BINARIES) / "tabular").unlink()
@@ -163,6 +168,22 @@ class CheckAcceptance(unittest.TestCase):
                                           "step1_tensors": 1}}, lines)
         self.assertIn("not revalidated", "\n".join(lines))
         self.assertNotIn("bit-identical", "\n".join(lines))
+
+
+class SessionIdentity(unittest.TestCase):
+    def test_session_cannot_mix_optimizer_comparisons(self):
+        with (tempfile.TemporaryDirectory() as scratch,
+              patch.object(common, "WORK", scratch),
+              patch.object(common, "LOGS", str(Path(scratch) / "logs")),
+              patch.object(common, "OUTPUTS", "unused"),
+              patch.dict(os.environ)):
+            self.assertEqual(run.configure_session("control", "matched"), "matched")
+            control = common.OUTPUTS
+            self.assertEqual(run.configure_session("control"), "matched")
+            with self.assertRaises(ValueError):
+                run.configure_session("control", "stock")
+            self.assertEqual(run.configure_session("ordinary", "stock"), "stock")
+            self.assertNotEqual(control, common.OUTPUTS)
 
 
 if __name__ == "__main__":

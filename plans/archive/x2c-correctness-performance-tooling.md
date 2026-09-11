@@ -251,7 +251,7 @@ references, include order, and compile-time Lisp evaluation before replacing
 synthesized prototypes with owner-header includes. Generated spacing is a
 small optional cleanup, not justification for rewriting emission.
 
-That design is complete in `plans/x2c-declaration-discovery-design.md`.
+That design is complete in `plans/archive/x2c-declaration-discovery-design.md`.
 Forward function, imported macro/Lisp, local macro/Lisp, and include-cache
 probes support retaining selective two-stage collection and native prototypes.
 Eager Lisp evaluation would change the existing phase boundary; inferred
@@ -638,9 +638,9 @@ cache schedules both affected batches. No gate or sequence was added.
 - B4/B5: the stage translation evaluation and optional suite selection above
   are complete. Neither changes the default build or publication sequence.
 - D1: the broader discovery design records source and executable evidence in
-  `plans/x2c-declaration-discovery-design.md`.
+  `plans/archive/x2c-declaration-discovery-design.md`.
 - T3: the package guide now gives the exact source-bundle production recipe.
-  `plans/x2c-source-package-proof.md` records successful pure, mixed, and native
+  `plans/archive/x2c-source-package-proof.md` records successful pure, mixed, and native
   dependency builds with reads of both original checkouts denied. This uses
   an isolated native compiler fixture, not the optional APE installer.
 - Sorting: `Array.sort_with` uses stable merge sorting with borrowed `Func`

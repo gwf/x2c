@@ -8,14 +8,6 @@ static int tag_calls;
 
 Var int_var(int);
 
-int Var_is(Var, Symbol);
-
-int Var_is_void(Var);
-
-static Var next_value(void);
-
-static Symbol next_other_tag(void);
-
 static Var next_value(void){
   value_calls ++;
   return int_var(7);
@@ -25,6 +17,10 @@ static Symbol next_other_tag(void){
   tag_calls ++;
   return 3356265;
 }
+
+int Var_is(Var, Symbol);
+
+int Var_is_void(Var);
 
 int main(void){
   x2c_initialize();

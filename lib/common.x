@@ -204,7 +204,27 @@ typedef struct X2CErrorSite {
 
 void x2c_scope_thread_release(void);
 void x2c_match_thread_release(void);
+void x2c_static_thread_release(void);
+void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);
+
+/** Zero-initialized compiler storage for one dynamic local static.
+    The runtime owns its fields. `payload` becomes available to the winning
+    initializer before publication; an acquire returning zero observes the
+    committed value. Failed attempts retain their address until teardown.
+    Payload storage retains no referenced runtime objects.
+*/
+typedef struct X2CStatic {
+  int ready;
+  void *payload, *owner;
+  struct X2CStatic *next;
+} X2CStatic;
+
+int x2c_static_acquire(
+  X2CStatic *guard, size_t size, size_t alignment, int per_thread);
+void x2c_static_commit(X2CStatic *guard);
+void x2c_static_abort(void *guard);
+
 Pool x2c_pool_values_current(void);
 void x2c_pool_values_initialize(void);
 void x2c_pool_values_thread_initialize(void);
@@ -371,10 +391,11 @@ Var Var.postfix(Var *lhs, Symbol op);
 /** Returns nonzero when `iter` is not null. */
 inline int Iter.truth(Iter iter) => iter != NULL;
 
-/** Returns nonzero when `list` is not `nil`. */
+/** Returns nonzero when `list` is not `nil`, the null empty List. */
 inline int List.truth(List list) => list != NULL;
 
-/** Returns nonzero when `string` contains at least one byte. */
+/** Returns nonzero when `string` contains at least one byte.
+    The canonical empty String is null, with no allocated storage. */
 inline int String.truth(String string) => string != NULL && *string != '\0';
 
 /** Avalanches one 64-bit word.

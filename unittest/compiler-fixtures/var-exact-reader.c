@@ -14,6 +14,19 @@ Var int_var(int);
 
 List cons(Var, List);
 
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = int_var(1);
+  _1 = int_var(2);
+  _2 = int_var(3);
+  _3 = cons(_2, NULL);
+  _4 = cons(_1, _3);
+  _5 = cons(_0, _4);
+  _6 = String_new("payload");
+}
+
 Var List_var(List);
 
 String Var_string(Var);
@@ -27,21 +40,6 @@ Var Map_var(Map);
 Var Symbol_var(Symbol);
 
 Map Var_map(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = int_var(1);
-  _1 = int_var(2);
-  _2 = int_var(3);
-  _3 = cons(_2, NULL);
-  _4 = cons(_1, _3);
-  _5 = cons(_0, _4);
-  _6 = String_new("payload");
-}
 
 int main(void){
   x2c_initialize();

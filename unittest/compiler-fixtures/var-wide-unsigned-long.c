@@ -2,12 +2,6 @@
 
 #include "var-wide-unsigned-long.h"
 
-int Var_is(Var, Symbol);
-
-static Var box_value(unsigned long value);
-
-static unsigned long unbox_value(Var value);
-
 static Var box_value(unsigned long value){
   return Var_box_ulong(value);
 }
@@ -15,6 +9,8 @@ static Var box_value(unsigned long value){
 static unsigned long unbox_value(Var value){
   return Var_ulong(Var_convert(value, 44858254));
 }
+
+int Var_is(Var, Symbol);
 
 int main(void){
   x2c_initialize();

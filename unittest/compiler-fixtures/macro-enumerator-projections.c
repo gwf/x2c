@@ -7,8 +7,6 @@ static int row_values[] ={
 }
 ;
 
-static int row_value(Symbol tag);
-
 static int row_value(Symbol tag){
   switch(tag){
     case 855710332067918 : return 7;

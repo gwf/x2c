@@ -2,10 +2,6 @@
 
 #include "macro-local-reference-shadow.h"
 
-static void add(int * value, int amount);
-
-static int exercise(int * value);
-
 static void add(int * value, int amount){
   (* value) += amount;
 }

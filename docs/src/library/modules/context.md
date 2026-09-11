@@ -33,7 +33,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:348`
+Source: `lib/context.x:350`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -50,6 +50,8 @@ Source: `lib/context.x:175`
 `Var Context.export(Context context, Var value)`
 
 Exports `value` into the parent of the current `Context`.
+Values may belong to a retained region of that `Context`; export them
+while live, before releasing their `Scope` or closing the `Context`.
 Built-in movable families preserve identity. A custom exact-descriptor
 exporter defines its returned value, including identity. Private canonical
 immutable built-ins may change, so callers must use the returned value;
@@ -64,7 +66,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:309`
+Source: `lib/context.x:311`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -223,7 +225,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:330`
+Source: `lib/context.x:332`
 
 <a id="Context.initialize"></a>
 #### Context.initialize

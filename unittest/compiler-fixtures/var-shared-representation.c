@@ -10,52 +10,11 @@ static Var _6, _5, _2, _1;
 
 static int _init_guard_ = 0;
 
-typedef List PlainRow;
-
-typedef PlainRow PlainRowChild;
-
-typedef struct Cell{
-  int value;
-}
-* Cell;
-
 static VarMethods _x2c__x2c_protocol_methods_0;
 
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
-
-Var Var_new(Symbol, ...);
-
-List Var_list(Var);
-
-Var String_var(String);
-
-String int_str(int);
-
-int List_len(List);
-
-void * Var_pointer(Var);
-
-void * Scope_malloc(size_t);
-
-String Var_str(Var);
-
-int Var_is(Var, Symbol);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static inline Var Row_var(Row value);
-
-static inline Row Var_row(Var value);
-
-static inline Var PlainRow_var(PlainRow value);
-
-static inline PlainRow Var_plainrow(Var value);
-
-static inline Var Cell_var(Cell value);
-
-static inline Cell Var_cell(Var value);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -75,26 +34,47 @@ __attribute__((constructor)) static void _file_init_(void){
   _8 = cons(_5, _7);
 }
 
+Var Var_new(Symbol, ...);
+
 static inline Var Row_var(Row value){
   return Var_new(806120, value);
 }
 
+List Var_list(Var);
+
 static inline Row Var_row(Var value){
   return Var_list(value);
 }
+
+Var String_var(String);
+
+String int_str(int);
+
+int List_len(List);
 
 String Row_summary(Row value){
   if(! _init_guard_) _file_init_();
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(List_len(value))), NULL)));
 }
 
+typedef List PlainRow;
+
 static inline Var PlainRow_var(PlainRow value){
   return Var_new(1125368370158, value);
 }
 
+void * Var_pointer(Var);
+
 static inline PlainRow Var_plainrow(Var value){
   return(PlainRow) Var_pointer(value);
 }
+
+typedef PlainRow PlainRowChild;
+
+typedef struct Cell{
+  int value;
+}
+* Cell;
 
 static inline Var Cell_var(Cell value){
   return Var_new(3683441, value);
@@ -103,6 +83,12 @@ static inline Var Cell_var(Cell value){
 static inline Cell Var_cell(Var value){
   return Var_pointer(value);
 }
+
+void * Scope_malloc(size_t);
+
+String Var_str(Var);
+
+int Var_is(Var, Symbol);
 
 int main(void){
   x2c_initialize();
@@ -120,4 +106,6 @@ int main(void){
   printf("%s %s %d %d %d %d %d %d %d\n", Row_summary(recovered_row), Var_str(boxed_row), recovered_cell -> value, Var_is(boxed_row, 806120), Var_is(boxed_row, 806120), Var_is(boxed_cell, 3683441), Var_is(boxed_cell, 3683441), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
   return 0;
 }
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 

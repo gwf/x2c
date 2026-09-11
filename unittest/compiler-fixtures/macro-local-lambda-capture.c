@@ -2,13 +2,13 @@
 
 #include "macro-local-lambda-capture.h"
 
-Var int_var(int);
-
-long Var_integer(Var);
-
 static Var _x2c_lambda_0(int base);
 
 static Var _x2c_lambda_1(Var base);
+
+Var int_var(int);
+
+long Var_integer(Var);
 
 int main(void){
   x2c_initialize();

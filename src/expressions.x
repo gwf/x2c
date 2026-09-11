@@ -3154,7 +3154,7 @@ static List _convert_initializer(
   if (value.match(%(expr ? (composite ?))))
     return _convert_composite(
       c, value, type.canonicalize(), target, NULL, native_used);
-  return c.convert_expression(value, type);
+  return c.convert_expression(value, type.declared());
 }
 
 /** Converts an initializer using its declared native object for array bounds. */

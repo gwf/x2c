@@ -16,34 +16,6 @@ static int rhs_calls;
 
 static int _init_guard_ = 0;
 
-Var String_var(String);
-
-Var int_var(int);
-
-Var Array_getindex(Array, int);
-
-Var Var_new(Symbol, ...);
-
-int Var_int(Var);
-
-String Var_string(Var);
-
-String String_add(String, String);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Scores array_base(void);
-
-static Totals map_base(void);
-
-static int next_index(int value);
-
-static Var next_key(String value);
-
-static Var next_rhs(int value);
-
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -73,15 +45,29 @@ static int next_index(int value){
   return value;
 }
 
+Var String_var(String);
+
 static Var next_key(String value){
   selector_calls ++;
   return String_var(value);
 }
 
+Var int_var(int);
+
 static Var next_rhs(int value){
   rhs_calls ++;
   return int_var(value);
 }
+
+Var Array_getindex(Array, int);
+
+Var Var_new(Symbol, ...);
+
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
+
+int Var_int(Var);
+
+String Var_string(Var);
 
 int main(void){
   x2c_initialize();
@@ -119,6 +105,8 @@ int main(void){
   printf("calls=%d,%d,%d\n", base_calls, selector_calls, rhs_calls);
   return 0;
 }
+
+String String_add(String, String);
 
 static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
   lhs[0] = String_add(lhs[0], rhs);

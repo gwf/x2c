@@ -44,6 +44,8 @@ typedef struct Emitter {
   int continue_stop, List cleanup_path, Map label_paths, List volatile_names;
   Type return_type, int origin, String fn_name, List native_aliases;
   Array native_macros;
+  Map static_objects;
+  int static_support;
 } *Emitter;
 
 static List Emitter._commas(Emitter emitter, List lst) {
@@ -241,6 +243,136 @@ static String _cleanup_label_spelling(Var value) {
        ? label.car().string() : NULL;
 }
 
+static int _automatic_static_input(Compiler c, List binding) {
+  Var automatic, stored;
+  Map facts = c.semantic_binding_facts();
+  if (!facts.try_get(%(automatic $binding), &automatic) ||
+      !automatic.truth()) return 0;
+  if (!facts.try_get(%(type $binding), &stored)) return 1;
+  Type type = stored;
+  return !type.is_static() && !type.is_extern() && !type.is_threaded();
+}
+
+static int _runtime_static_value(Compiler c, List value, Map runtime) {
+  Array pending = %[], modes = %[];
+  defer pending.free();
+  defer modes.free();
+  pending.push(value);
+  modes.push(0);
+  while (pending.len()) {
+    List node = pending.take_last();
+    int address = modes.take_last().int();
+    if (address) {
+      match (node) {
+        case %(!or (expr ? ?inner) (parens ?inner)
+                   (op . ?inner ?)): {
+          pending.push(inner);
+          modes.push(1);
+          continue;
+        }
+        case %(ident ?binding): {
+          if (runtime.contains(binding) ||
+              _automatic_static_input(c, binding)) return 1;
+          continue;
+        }
+        case %(index (!set ?base (expr ?type ?)) ?index): {
+          pending.push(index);
+          modes.push(0);
+          pending.push(base);
+          modes.push(type.list().type().is_array());
+          continue;
+        }
+        case %(op (!quote *) ?inner): {
+          pending.push(inner);
+          modes.push(0);
+          continue;
+        }
+      }
+      return 1;
+    }
+    match (node) {
+      case %((!or cache call var array map initval) *): return 1;
+      case %(expr ?type (ident ?binding)): {
+        if (runtime.contains(binding) ||
+            _automatic_static_input(c, binding)) return 1;
+        Type native = type;
+        if (native && !native.is_enum() && !native.is_function() &&
+            !native.is_array() &&
+            (native.is_pointer() || !native.contains(<const>))) return 1;
+        continue;
+      }
+      case %(expr ? (op & ?inner)): {
+        pending.push(inner);
+        modes.push(1);
+        continue;
+      }
+      case %(expr ?type (!set ?content (index *))): {
+        Type native = type;
+        if (native.is_array()) {
+          pending.push(content);
+          modes.push(1);
+          continue;
+        }
+        if (native.is_pointer() || !native.contains(<const>)) return 1;
+      }
+      case %(expr ? (sizeof ?)): continue;
+    }
+    foreach (Var child, node)
+      if (child is <list>) {
+        pending.push(child);
+        modes.push(0);
+      }
+  }
+  return 0;
+}
+
+static int _runtime_static_declaration(
+  Compiler c, List node, Map runtime) {
+  int found = 0;
+  match (node) {
+    case %(at ? ?body): return _runtime_static_declaration(c, body, runtime);
+    case %(declare (!set ?type (*)) (bindings *bindings)):
+      if (type.list().type().is_static())
+        foreach (List binding, bindings)
+          match (binding)
+            case %(op = (bind ?name ?) ?value):
+              if (_runtime_static_value(c, value, runtime)) {
+                runtime[name] = 1;
+                found = 1;
+              }
+  }
+  return found;
+}
+
+/* A dynamic declaration protects the remainder of its block just as a
+   cleanup region does. Keeping the canonical binding makes shadowing and
+   generated syntax use the same object reference. */
+static List _static_regions(Compiler c, List ast, Map runtime) {
+  match (ast) {
+    case %((!or function localinit expr declare typedef) *): return ast;
+    case %(block *statements): {
+      Array before = %[];
+      foreach (List statement, statements) {
+        if (_runtime_static_declaration(c, statement, runtime)) {
+          List rest = statements;
+          for (int i = 0; i <= before.len(); i++) rest = rest.cdr();
+          List body = _static_regions(c, %(block @rest), runtime);
+          before.push(%(localinit $statement $body));
+          return %(block @{before.list_free()});
+        }
+        before.push(_static_regions(c, statement, runtime));
+      }
+      return %(block @{before.list_free()});
+    }
+  }
+  Array children = %[];
+  foreach (Var child, ast) {
+    if (child is <list>) children.push(_static_regions(c, child, runtime));
+    else children.push(child);
+  }
+  return children.list_free();
+}
+
 // Record label ancestry and automatic assignments inside try regions in one
 // function walk. Paths are innermost-first canonical Lists; a legal outward
 // target is therefore a suffix of the source path.
@@ -298,6 +430,13 @@ static void Emitter._collect_function_state(
         ast = NULL;
         continue;
       }
+      case <localinit>: {
+        e._collect_function_state(ast.cadr(), path, in_try);
+        List body = ast.caddr();
+        e._collect_function_state(body, cons(ast, path), in_try);
+        ast = NULL;
+        continue;
+      }
       case <defer>: {
         List body = ast.cadr(), written = ast.last();
         if (in_try) foreach (List binding, written) {
@@ -333,6 +472,8 @@ static void Emitter._collect_function_state(
 
 static List Emitter._function(Emitter e, List ast, List context) {
   List (type, bindings, body) = ast.cdr();
+  Map runtime = %{};
+  body = _static_regions(e.compiler, body, runtime);
   List declaration = %(declare $type (bindings $bindings));
   Type old_return_type = e.return_type, String old_fn = e.fn_name;
   e.return_type = cdr(declaration.type_from_ast()).type().declared();
@@ -347,6 +488,8 @@ static List Emitter._function(Emitter e, List ast, List context) {
   body = %( $body );
   List previous = e.volatile_names, Map old_labels = e.label_paths;
   List old_path = e.cleanup_path;
+  Map old_statics = e.static_objects;
+  e.static_objects = %{};
   e.label_paths = %{};
   e.cleanup_path = NULL;
   e.volatile_names = NULL;
@@ -362,6 +505,7 @@ static List Emitter._function(Emitter e, List ast, List context) {
   e.volatile_names = previous;
   e.return_type = old_return_type;
   e.fn_name = old_fn;
+  e.static_objects = old_statics;
   return %(@type @decl @body_code);
 }
 
@@ -494,6 +638,145 @@ static List Emitter._semantic_name(
   List (base, mods) = type.declaration_parts();
   List declarator = emitter._declarator(%($name), mods);
   return %(${emitter._emit(base, NULL)} @declarator);
+}
+
+static int _static_case_entry(List node) {
+  match (node) {
+    case %((!or switch function expr declare typedef) *): return 0;
+    case %((!or case default) *): return 1;
+  }
+  foreach (Var child, node)
+    if (child is <list> && _static_case_entry(child)) return 1;
+  return 0;
+}
+
+/* The native alias retains typedef and array qualifiers. Only a volatile
+   object needs bytewise volatile reads; storage has no declared type yet. */
+static List Emitter._static_copy(
+  Emitter e, String alias, String guard, List source, String object) {
+  String data = e.fresh_name("static_bytes");
+  String index = e.fresh_name("static_byte");
+  return %(
+    "if (_Generic((" $alias "*)0, volatile" $alias "*: 1, default: 0)) {"
+      "const volatile unsigned char *" $data "="
+        "(const volatile unsigned char *)" @source ";"
+      "for (size_t" $index "= 0;" $index "< sizeof(" $object ");"
+           $index "++)"
+        "((unsigned char *)" $guard ".payload)[" $index "] ="
+          $data "[" $index "];"
+    "} else memcpy(" $guard ".payload, (const void *)" @source ","
+                   "sizeof(" $object "));"
+  );
+}
+
+static List Emitter._local_static(Emitter e, List ast, List context) {
+  List declaration = ast.cadr(), body = ast.caddr();
+  while (declaration.car() == <at>) {
+    e.origin = declaration.cadr().int();
+    declaration = declaration.caddr();
+  }
+  if (_static_case_entry(body)) {
+    e.compiler.origin = e.origin;
+    String note = "place the declaration before the switch "
+                + "or within one case block";
+    e.report_error(<emit>,
+      "switch cannot bypass dynamic static initialization", NULL, %($note));
+  }
+  List (base, bindings) = declaration.cdr();
+  Type declared_base = base;
+  String base_name = e.fresh_name("static_type");
+  List base_decl = e._semantic_name(declared_base.declared(), base_name);
+  Array output = %[];
+  output.push(%("typedef" @base_decl ";"));
+  String storage = declared_base.is_threaded() ? "static _Thread_local"
+                                              : "static";
+  foreach (List binding, bindings.cdr()) {
+    List name, mods, initial = NULL;
+    match (binding) {
+      case %(op = (bind ?captured ?modifiers) ?value): {
+        name = captured;
+        mods = modifiers;
+        initial = value;
+      }
+      case %(bind ?captured ?modifiers): {
+        name = captured;
+        mods = modifiers;
+      }
+    }
+    Type type = mods.append(%($base_name));
+    String spelling = e.emitted_binding_name(name);
+    if (!initial ||
+        !_runtime_static_value(e.compiler, initial, e.static_objects)) {
+      List native = e._semantic_name(type, spelling);
+      List value = initial ? %("=" @{e._emit(initial, NULL)}) : NULL;
+      output.push(%($storage @native @value ";"));
+      continue;
+    }
+    e.static_support = 1;
+    String alias = e.fresh_name("static_object_type");
+    String pointer = e.fresh_name("static_object");
+    String guard = e.fresh_name("static_guard");
+    String cleanup = e.fresh_name("static_cleanup");
+    String temporary = e.fresh_name("static_initial");
+    int inferred = type.car() == <dim> || type.match(%((dim) *));
+    if (inferred) {
+      String probe = e.fresh_name("static_incomplete");
+      String formal = e.fresh_name("static_input");
+      List probe_decl = e._semantic_name(type.reference(), probe);
+      output.push(%(@probe_decl ";"));
+      e.static_objects[name] = probe;
+      List operand = %(expr $type (cast $type $initial));
+      List captured = %(
+        "typedef __typeof__(" $formal ")" $alias ";"
+        $storage "X2CStatic" $guard "= {0};"
+        $alias "*" $pointer ";"
+        "if (x2c_static_acquire(&" $guard ", sizeof(" $alias "),"
+            "_Alignof(" $alias "),"
+            ${declared_base.is_threaded() ? "1" : "0"} ")) {"
+          $probe "=" $guard ".payload;"
+          "X2CCleanup" $cleanup "= { .fn = x2c_static_abort,"
+                                   ".env = &" $guard "};"
+          "x2c_cleanup_push(&" $cleanup ");"
+          @{e._static_copy(alias, guard, %("&" $formal), alias)}
+          "x2c_static_commit(&" $guard ");"
+          "x2c_cleanup_leave(&" $cleanup ");"
+        "}"
+        $pointer "=" $guard ".payload;"
+      );
+      output.push(e._initializer_macro(
+        %(input ($formal $operand)), captured, context));
+      e.static_objects[name] = pointer;
+      continue;
+    }
+    List alias_decl = e._semantic_name(type, alias);
+    e.static_objects[name] = pointer;
+    List value = e._emit(initial, NULL);
+    output.push(%(
+      "typedef" @alias_decl ";"
+      "_Static_assert(__builtin_constant_p(sizeof(" $alias ")),"
+        "\"static object size must be constant\");"
+      $storage "X2CStatic" $guard "= {0};"
+      $alias "*" $pointer ";"
+      "if (x2c_static_acquire(&" $guard ", sizeof(" $alias "),"
+          "_Alignof(" $alias "),"
+          ${declared_base.is_threaded() ? "1" : "0"} ")) {"
+        $pointer "=" $guard ".payload;"
+        "X2CCleanup" $cleanup "= { .fn = x2c_static_abort,"
+                                 ".env = &" $guard "};"
+        "x2c_cleanup_push(&" $cleanup ");"
+        $alias $temporary "=" @value ";"
+        @{e._static_copy(alias, guard, %("&" $temporary), temporary)}
+        "x2c_static_commit(&" $guard ");"
+        "x2c_cleanup_leave(&" $cleanup ");"
+      "}"
+      $pointer "=" $guard ".payload;"
+    ));
+  }
+  List previous = e.cleanup_path;
+  e.cleanup_path = cons(ast, previous);
+  output.push(e._emit(body, context));
+  e.cleanup_path = previous;
+  return output.list_free();
 }
 
 /* Transform has converted every `vseqcall` operand to its parameter type.
@@ -1061,7 +1344,10 @@ static List Emitter._goto(Emitter e, Var label_ast, List context) {
       <emit>, "goto cannot enter or cross a protected cleanup region",
       NULL, %("jump only within the same region or outward"));
   }
-  return e._cleanup_wrap_goto(statement, target_depth);
+  int cleanup_depth = 0;
+  foreach (List region, target)
+    if (region.car() != <localinit>) cleanup_depth++;
+  return e._cleanup_wrap_goto(statement, cleanup_depth);
 }
 
 static List Emitter._declare_stmt(
@@ -1116,14 +1402,113 @@ static List Emitter._initializer_macro(
     String formatted = e.compiler.code_pretty_string(tokens, NULL);
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");
   }
-  String definition = %"#define $name($formal) $replacement";
-  e.native_macros.push(%($name $definition));
+  String expanded = %"${name}_expanded";
+  String definition = %"#define $expanded($formal) $replacement";
+  e.native_macros.push(%($expanded $definition));
+  e.native_macros.push(%($name
+    ${%"#define $name($formal) $expanded($formal)"}));
   Array arguments = %[];
   foreach (List argument, input.cdr()) {
     List emitted = e._emit(argument.cadr(), context);
     arguments.push(%("(" @emitted ")"));
   }
   return %($name "(" @{e._commas(arguments.list_free())} ")");
+}
+
+static int _source_type_definition(List value) {
+  Array pending = %[];
+  defer pending.free();
+  pending.push(value);
+  while (pending.len()) {
+    List node = pending.take_last();
+    match (node) {
+      case %(expr ? ?content): {
+        pending.push(content);
+        continue;
+      }
+      case %((!or struct union) ? (fields *)): return 1;
+      case %((!or struct union) (fields *)): return 1;
+      case %(enum ? (!is type list)): return 1;
+    }
+    foreach (Var child, node)
+      if (child is <list>) pending.push(child);
+  }
+  return 0;
+}
+
+/* Expand source operands before moving native tag declarations ahead of the
+   helper. An opaque call stays one operand, including its native quoting or
+   token-pasting rules; x2c does not interpret declarations hidden inside
+   it. */
+static List Emitter._capture_source(
+  Emitter e, List node, Array inputs, Array declarations) {
+  match (node) {
+    case %(initval (!set ?input (input *)) *cases): {
+      List captured = e._capture_source(input, inputs, declarations);
+      return %(initval $captured @cases);
+    }
+    case %(expr ?type (!set ?content (composite *))): {
+      List captured = e._capture_source(content, inputs, declarations);
+      return %(expr $type $captured);
+    }
+    case %(expr ?type ?content): {
+      int opaque = 0;
+      match (content)
+        case %(call (expr ?callable ?) ?): opaque = !callable.truth();
+      if (opaque || !_source_type_definition(content)) {
+        String formal = e.fresh_name("static_input");
+        inputs.push(%($formal $node));
+        return %(expr $type $formal);
+      }
+      List captured = e._capture_source(content, inputs, declarations);
+      return %(expr $type $captured);
+    }
+    case %(!or ((!or struct union) ? (fields *))
+               ((!or struct union) (fields *))
+               (enum ? (!is type list))): {
+      (Type definition, Type reference) = e.initializer_native_types(node);
+      if (node.car() == <enum>) {
+        reference = %(enum ${node.cadr()});
+        match (node)
+          case %(enum (gensym ?) ?body): {
+            String name = e.fresh_name("static_enum");
+            definition = %(enum $name $body);
+            reference = %(enum $name);
+          }
+      }
+      Array children = %[];
+      foreach (Var child, definition) {
+        if (child is <list>)
+          children.push(e._capture_source(child, inputs, declarations));
+        else children.push(child);
+      }
+      definition = children.list_free();
+      declarations.push(%(declare $definition (bindings (bind () ()))));
+      return reference;
+    }
+    case %(call ?callee ?arguments): {
+      List captured = e._capture_source(arguments, inputs, declarations);
+      return %(call $callee $captured);
+    }
+  }
+  Array children = %[];
+  foreach (Var child, node) {
+    if (child is <list>)
+      children.push(e._capture_source(child, inputs, declarations));
+    else children.push(child);
+  }
+  return children.list_free();
+}
+
+static List Emitter._source_initializer(
+  Emitter e, List function, List context) {
+  List (type, binding, body) = function.cdr();
+  Array inputs = %[], declarations = %[];
+  body = e._capture_source(body, inputs, declarations);
+  List emitted = %(@{declarations.list_free()}
+    (function $type $binding $body));
+  return e._initializer_macro(
+    %(input @{inputs.list_free()}), emitted, context);
 }
 
 static List Emitter._initializer_value(
@@ -1287,6 +1672,9 @@ static List Emitter._emit(Emitter e, List ast, List context) {
     }
     case %(initcode ?input ?body):
       return %(@{e._initializer_macro(input, body, context)} ";");
+    case %(localinit ? ?): return e._local_static(ast, context);
+    case %(sourceinit ?function):
+      return e._source_initializer(function, context);
     case %(initval *): return e._initializer_value(ast, context);
     case %(indexinit ?index ?value): {
       List c_index = e._emit(%($index), context);
@@ -1438,8 +1826,12 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       List c_name = e._emit(%($name), context);
       return %(@c_name ":");
     }
-    case %(ident ?binding):
+    case %(ident ?binding): {
+      Var pointer;
+      if (e.static_objects && e.static_objects.try_get(binding, &pointer))
+        return %("(*" $pointer ")");
       return e._emit(%($binding), context);
+    }
   }
   switch (head.symbol()) {
     // x2c-specific constructs
@@ -1518,6 +1910,8 @@ List Compiler.emit(Compiler compiler, List ast) {
   // point and a second call would only re-cons the whole unit to prove it.
   List code = emitter._emit(ast, NULL).flatten_all();
   Array before = %[], after = %[];
+  if (state.static_support)
+    before.push(%(c-direct "#include \"exception.h\"\n#include <string.h>"));
   foreach (List entry, state.native_macros.list_free()) {
     (String name, String definition) = entry;
     before.push(%(c-direct $definition));

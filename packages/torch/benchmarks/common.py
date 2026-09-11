@@ -23,7 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(PACKAGE))
 WORK = os.path.join(ROOT, "unittest", "build", "torch-comparison")
 ARTIFACTS = os.path.join(WORK, "artifacts")
 BINARIES = os.path.join(WORK, "bin")
-OUTPUTS = os.path.join(WORK, "out")
+OUTPUTS = os.environ.get("X2C_TORCH_OUTPUTS", os.path.join(WORK, "out"))
 LOGS = os.path.join(ROOT, "debug", "torch-comparison")
 
 DEFAULT_PYTHON = "/Users/gary/Git/Bonsai-demo/.venv/bin/python"

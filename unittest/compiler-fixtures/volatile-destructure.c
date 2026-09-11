@@ -12,12 +12,6 @@ Var int_var(int);
 
 List cons(Var, List);
 
-Var List_getindex(List, int);
-
-int Var_int(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -27,6 +21,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = cons(_1, NULL);
   _3 = cons(_0, _2);
 }
+
+Var List_getindex(List, int);
+
+int Var_int(Var);
 
 int main(void){
   x2c_initialize();

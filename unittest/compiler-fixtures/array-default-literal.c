@@ -6,6 +6,13 @@ static String _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("two");
+}
+
 Var int_var(int);
 
 Var String_var(String);
@@ -15,15 +22,6 @@ int Var_int(Var);
 Var Array_getindex(Array, int);
 
 String Var_string(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("two");
-}
 
 int main(void){
   x2c_initialize();

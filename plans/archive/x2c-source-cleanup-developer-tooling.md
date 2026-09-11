@@ -20,8 +20,8 @@ APIs. Do not turn the original discovery list into a deletion quota or a
 promise to implement every suggested new language or library feature.
 
 This follows [the delivered program](x2c-correctness-performance-tooling.md),
-[the declaration design](../x2c-declaration-discovery-design.md), and
-[the source-package proof](../x2c-source-package-proof.md). Their completed work
+[the declaration design](x2c-declaration-discovery-design.md), and
+[the source-package proof](x2c-source-package-proof.md). Their completed work
 is the starting point, not work to repeat.
 
 ## Established starting point

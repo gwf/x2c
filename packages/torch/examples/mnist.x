@@ -82,28 +82,47 @@ int main(int argc, char **argv) {
 
   Torch.manual_seed(0);
   Module model = _model();
+  String device = getenv("TORCH_DEVICE");
+  if (!device) device = "cpu";
+  model.to_device(device);
+  images = images.to_device(device, XT_FLOAT32, 0, 0);
+  targets = targets.to_device(device, XT_INT64, 0, 0);
+  test_images = test_images.to_device(device, XT_FLOAT32, 0, 0);
+  test_targets = test_targets.to_device(device, XT_INT64, 0, 0);
+  printf("device %s\n", images.device());
   Optimizer adam = Optimizer.adam(model, 0.001);
   /* libtorch ships StepLR and ReduceLROnPlateau; this cosine anneal is
      one of the x2c schedules over Optimizer.set_lr. */
-  Scheduler anneal = Scheduler.cosine(adam, batches, 0.0001);
+  String requested_epochs = getenv("TORCH_EPOCHS");
+  int epochs = requested_epochs ? atoi(requested_epochs) : 1;
+  if (epochs < 1) return 1;
+  Scheduler anneal = Scheduler.cosine(adam, batches * epochs, 0.0001);
 
-  Tensor order = Torch.randperm(rows);
-  for (long batch = 0; batch < batches; batch++) {
-    Scope.retain();
-    defer Scope.release();
-    Tensor pick = order.narrow(0, batch * BATCH, BATCH);
-    adam.zero_grad();
-    Tensor loss = Tensor.cross_entropy(
-      model.forward(images.index_select(0, pick)),
-      targets.index_select(0, pick));
-    loss.backward();
-    adam.step();
-    anneal.step();
-    if (batch % 100 == 0)
-      printf("batch %4ld  loss %.6f  lr %.6f\n", batch,
-             loss.item().double(), adam.lr());
+  for (int epoch = 0; epoch < epochs; epoch++) {
+    printf("epoch %d of %d\n", epoch + 1, epochs);
+    Tensor order = Torch.randperm(rows).to_device(device, XT_INT64, 0, 0);
+    for (long batch = 0; batch < batches; batch++) {
+      Scope.retain();
+      defer Scope.release();
+      Tensor pick = order.narrow(0, batch * BATCH, BATCH);
+      adam.zero_grad();
+      Tensor loss = Tensor.cross_entropy(
+        model.forward(images.index_select(0, pick)),
+        targets.index_select(0, pick));
+      loss.backward();
+      adam.step();
+      anneal.step();
+      if (batch % 100 == 0)
+        printf("batch %4ld  loss %.6f  lr %.6f\n", batch,
+               loss.item().double(), adam.lr());
+    }
   }
-  printf("test accuracy %.4f\n", _accuracy(model, test_images,
-                                           test_targets));
-  return 0;
+  double accuracy = _accuracy(model, test_images, test_targets);
+  model.save("builds/mnist-model.pt");
+  Module reloaded = _model();
+  reloaded.load("builds/mnist-model.pt");
+  reloaded.to_device(device);
+  double restored = _accuracy(reloaded, test_images, test_targets);
+  printf("test accuracy %.4f; checkpoint reload %.4f\n", accuracy, restored);
+  return accuracy == restored ? 0 : 1;
 }

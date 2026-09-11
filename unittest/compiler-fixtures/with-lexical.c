@@ -8,16 +8,6 @@ static int index_count;
 
 static int with_count;
 
-static Point * counted(Point * point);
-
-static int next_index(void);
-
-static int with(int with);
-
-static void helper(Point * point);
-
-static void contextual_as(Point * as);
-
 static Point * counted(Point * point){
   call_count ++;
   return point;

@@ -8,24 +8,6 @@ static int _init_guard_ = 0;
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-Var Var_new(Symbol, ...);
-
-void * Var_pointer(Var);
-
-Var String_var(String);
-
-String int_str(int);
-
-void * Scope_malloc(size_t);
-
-String Var_str(Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Var StaticDescriptor_var(StaticDescriptor value);
-
-static StaticDescriptor Var_staticdescriptor(Var value);
-
 static inline String _x2c_proto_staticdescriptor_str_0(Var a0);
 
 __attribute__((constructor)) static void _file_init_(void){
@@ -42,18 +24,30 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = String_new("private:");
 }
 
+Var Var_new(Symbol, ...);
+
 static Var StaticDescriptor_var(StaticDescriptor value){
   return Var_new(1381098884181190, value);
 }
+
+void * Var_pointer(Var);
 
 static StaticDescriptor Var_staticdescriptor(Var value){
   return Var_pointer(value);
 }
 
+Var String_var(String);
+
+String int_str(int);
+
 String StaticDescriptor_str(StaticDescriptor value){
   if(! _init_guard_) _file_init_();
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(value -> value)), NULL)));
 }
+
+void * Scope_malloc(size_t);
+
+String Var_str(Var);
 
 int main(void){
   x2c_initialize();
@@ -67,4 +61,6 @@ int main(void){
 static inline String _x2c_proto_staticdescriptor_str_0(Var a0){
   return StaticDescriptor_str(Var_staticdescriptor(a0));
 }
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 

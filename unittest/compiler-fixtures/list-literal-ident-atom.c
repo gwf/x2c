@@ -14,26 +14,6 @@ List cons(Var, List);
 
 Var List_var(List);
 
-Var int_var(int);
-
-String String_str(String);
-
-String List_repr(List);
-
-int List_equal(List, List);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static List head_atom(void);
-
-static List nested_atom(void);
-
-static List tail_atom(void);
-
-static List bare_atom(void);
-
-static List reference(int n);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -72,9 +52,17 @@ static List bare_atom(void){
   return _13;
 }
 
+Var int_var(int);
+
 static List reference(int n){
   return cons(_15, cons(int_var(n), NULL));
 }
+
+String String_str(String);
+
+String List_repr(List);
+
+int List_equal(List, List);
 
 int main(void){
   x2c_initialize();

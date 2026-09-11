@@ -2,8 +2,6 @@
 
 #include "protocol-static-native.h"
 
-static unsigned native_hash(unsigned value);
-
 static unsigned native_hash(unsigned value){
   return value + 1;
 }

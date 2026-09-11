@@ -12,6 +12,13 @@ static int new_seen;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("marker");
+}
+
 Var List_assoc(List, Var);
 
 List Var_list(Var);
@@ -19,33 +26,6 @@ List Var_list(Var);
 Var List_last(List);
 
 Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
-Var String_var(String);
-
-String String_new(const char *);
-
-Var List_var(List);
-
-void Error_initialize(void);
-
-ErrorHandler Error_push(ErrorHandlerFn, Var);
-
-void Error_pop(ErrorHandler);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Symbol _observe_relabel(List errors, Var data);
-
-static void _relabel_nested_pattern(void);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("marker");
-}
 
 static Symbol _observe_relabel(List errors, Var data){
   (void) data;
@@ -57,6 +37,14 @@ static Symbol _observe_relabel(List errors, Var data){
   }
   return 285842436424;
 }
+
+List cons(Var, List);
+
+Var String_var(String);
+
+String String_new(const char *);
+
+Var List_var(List);
 
 static void _relabel_nested_pattern(void){
   {
@@ -106,6 +94,12 @@ _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
+
+void Error_initialize(void);
+
+ErrorHandler Error_push(ErrorHandlerFn, Var);
+
+void Error_pop(ErrorHandler);
 
 int main(void){
   x2c_initialize();

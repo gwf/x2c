@@ -4,16 +4,6 @@
 
 Var long_var(long);
 
-Var Array_push(Array, Var);
-
-Var Array_getindex(Array, int);
-
-int Var_is(Var, Symbol);
-
-static Var box_value(long value);
-
-static long unbox_value(Var value);
-
 static Var box_value(long value){
   return long_var(value);
 }
@@ -21,6 +11,12 @@ static Var box_value(long value){
 static long unbox_value(Var value){
   return Var_long(Var_convert(value, 818062));
 }
+
+Var Array_push(Array, Var);
+
+Var Array_getindex(Array, int);
+
+int Var_is(Var, Symbol);
 
 int main(void){
   x2c_initialize();

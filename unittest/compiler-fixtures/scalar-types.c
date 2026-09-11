@@ -2,34 +2,6 @@
 
 #include "scalar-types.h"
 
-Var long_var(long);
-
-Var unsigned_var(unsigned);
-
-Var float_var(float);
-
-int Var_is(Var, Symbol);
-
-long Var_long(Var);
-
-uint Var_uint(Var);
-
-unsigned long long Var_ulong_long(Var);
-
-double Var_floating(Var);
-
-long double Var_long_double(Var);
-
-static ulong_alias add_alias(ulong_alias left, uint_alias right);
-
-static long double add_long_double(long double left, int right);
-
-static unsigned long long add_unsigned(unsigned long long left, long right);
-
-static int add_promoted(unsigned char left, signed char right);
-
-static ulong_alias unbox_alias(Var value);
-
 static ulong_alias add_alias(ulong_alias left, uint_alias right){
   return left + right;
 }
@@ -49,6 +21,24 @@ static int add_promoted(unsigned char left, signed char right){
 static ulong_alias unbox_alias(Var value){
   return Var_ulong(Var_convert(value, 44858254));
 }
+
+Var long_var(long);
+
+Var unsigned_var(unsigned);
+
+Var float_var(float);
+
+int Var_is(Var, Symbol);
+
+long Var_long(Var);
+
+uint Var_uint(Var);
+
+unsigned long long Var_ulong_long(Var);
+
+double Var_floating(Var);
+
+long double Var_long_double(Var);
 
 int main(void){
   x2c_initialize();

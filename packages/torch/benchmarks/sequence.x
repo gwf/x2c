@@ -109,7 +109,7 @@ static Tensor _window(List layers, Tensor inputs, Tensor targets, Tensor h,
   }
   *final_state = h;
   double count = steps;
-  return total / count;
+  return total / Tensor.scalar(count, XT_FLOAT32);
 }
 
 static void _train(List layers, Optimizer adam, Tensor streams, int count,

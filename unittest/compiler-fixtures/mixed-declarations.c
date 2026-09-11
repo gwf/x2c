@@ -12,12 +12,6 @@ Var int_var(int);
 
 List cons(Var, List);
 
-long Var_integer(Var);
-
-Var List_car(List);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -25,6 +19,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _0 = int_var(10);
   _1 = cons(_0, NULL);
 }
+
+long Var_integer(Var);
+
+Var List_car(List);
 
 int main(void){
   x2c_initialize();

@@ -2,8 +2,6 @@
 
 #include "anonymous-aggregate-tags.h"
 
-static int alpha_of(AlphaState * s);
-
 static int alpha_of(AlphaState * s){
   return s -> a;
 }

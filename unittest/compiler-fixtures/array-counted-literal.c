@@ -2,22 +2,6 @@
 
 #include "array-counted-literal.h"
 
-Var int_var(int);
-
-Array Array_update_n(Array, unsigned, ...);
-
-size_t Array_len(Array);
-
-int Var_is_null(Var);
-
-Var Array_getindex(Array, int);
-
-static int rejected(void(* action)(void));
-
-static void update_void(void);
-
-static void literal_void(void);
-
 static int rejected(void(* action)(void)){
   pid_t pid = fork();
   if(pid < 0) return 0;
@@ -30,6 +14,10 @@ static int rejected(void(* action)(void)){
   return WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
 }
 
+Var int_var(int);
+
+Array Array_update_n(Array, unsigned, ...);
+
 static void update_void(void){
   Var one = int_var(1), two = int_var(2);
   Array_update_n(Array_new(), 3, one, ((void) 0, Void), two);
@@ -40,6 +28,12 @@ static void literal_void(void){
   Array values = Array_update_n(Array_new(), 3, int_var(1), middle, int_var(2));
   (void) values;
 }
+
+size_t Array_len(Array);
+
+int Var_is_null(Var);
+
+Var Array_getindex(Array, int);
 
 int main(void){
   x2c_initialize();

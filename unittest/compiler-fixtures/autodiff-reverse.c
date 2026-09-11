@@ -4,6 +4,10 @@
 
 double exp(double);
 
+static double scale(double a, double b){
+  return a * b + exp(a);
+}
+
 ArrayDbl ArrayDbl_new(void);
 
 double ArrayDbl_push(ArrayDbl, double);
@@ -11,24 +15,6 @@ double ArrayDbl_push(ArrayDbl, double);
 double ArrayDbl_take_last(ArrayDbl);
 
 void ArrayDbl_free(ArrayDbl);
-
-double sin(double);
-
-double sqrt(double);
-
-double cos(double);
-
-static double scale(double a, double b);
-
-static double scale_grad(double a, double b, double * a_grad, double * b_grad);
-
-static double model(double x, double y, int n);
-
-static double model_grad(double x, double y, int n, double * x_grad, double * y_grad);
-
-static double scale(double a, double b){
-  return a * b + exp(a);
-}
 
 static double scale_grad(double a, double b, double * a_grad, double * b_grad){
   ArrayDbl _ad_tape = ArrayDbl_new();
@@ -55,6 +41,10 @@ static double scale_grad(double a, double b, double * a_grad, double * b_grad){
   return _ad_result;
 }
 
+double sin(double);
+
+double sqrt(double);
+
 static double model(double x, double y, int n){
   double s = 0.0;
   for(int i = 1;  i <= n;  i ++) s += scale(x, y) *(double) i;
@@ -68,6 +58,8 @@ static double model(double x, double y, int n){
   }
   return t > 4.0 ? sqrt(t) + s : exp(t) - s;
 }
+
+double cos(double);
 
 static double model_grad(double x, double y, int n, double * x_grad, double * y_grad){
   ArrayDbl _ad_tape = ArrayDbl_new();

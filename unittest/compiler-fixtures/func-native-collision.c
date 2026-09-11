@@ -14,16 +14,6 @@ List cons(Var, List);
 
 Var List_var(List);
 
-Func Func_new(FuncAdapter, List);
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-Var long_var(long);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -40,12 +30,20 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = cons(_8, _2);
 }
 
+Func Func_new(FuncAdapter, List);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   Func target = Func_new(_x2c_func_adapt_0, _9);
   return ! target;
 }
+
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
+
+Var long_var(long);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));

@@ -10,26 +10,6 @@ static int right_calls;
 
 static int _init_guard_ = 0;
 
-Var long_var(long);
-
-int Var_equal(Var, Var);
-
-int Var_compare(Var, Var);
-
-Var String_var(String);
-
-Var int_var(int);
-
-Array Array_copy(Array);
-
-Var Array_var(Array);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Var mark_left(Var value);
-
-static Var mark_right(Var value);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -47,6 +27,20 @@ static Var mark_right(Var value){
   right_calls ++;
   return value;
 }
+
+Var long_var(long);
+
+int Var_equal(Var, Var);
+
+int Var_compare(Var, Var);
+
+Var String_var(String);
+
+Var int_var(int);
+
+Array Array_copy(Array);
+
+Var Array_var(Array);
 
 int main(void){
   x2c_initialize();

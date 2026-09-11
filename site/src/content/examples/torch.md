@@ -9,7 +9,7 @@ source: packages/torch/examples/mnist.x
 codeLabel: Model and training loop from mnist.x
 extraPanels:
   - torch-evaluation
-runIntro: This example uses the Torch package and the MNIST dataset. The pinned package supports Apple Silicon Macs on the CPU and links dynamically to libtorch.
+runIntro: This example uses the Torch package and the MNIST dataset. It runs on Apple Silicon with CPU or MPS tensors, or Linux x86_64 with CPU tensors, and links dynamically to libtorch.
 run: |
   ./configure --packages torch
   make -C packages/torch builds/mnist
@@ -42,10 +42,11 @@ checkpoints, and TorchScript inference over PyTorch's C++ library.
 Tensor operations run in libtorch. The model definition, batching, training
 loop, and evaluation here are x2c.
 
-The current package pins libtorch 2.10.0 and supports macOS arm64 on the CPU;
-it does not yet provide CUDA, MPS, or a Linux build. Its shared libraries are
-required at runtime. The preparation step downloads the pinned library;
-the recipe below separately downloads the four MNIST files.
+The package pins libtorch 2.10.0 for macOS arm64 and Linux x86_64. On Apple
+Silicon, set `TORCH_DEVICE=mps` to train on the GPU with float32 tensors.
+CUDA is not supported. The shared libraries are required at runtime. The
+preparation step downloads the pinned library; the recipe below separately
+downloads the four MNIST files.
 
 Try adding another convolution, increasing the number of channels, or
 training for more than one pass. Compare the result on the test set rather

@@ -10,39 +10,11 @@ static Var _7, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_0;
-
 Var int_var(int);
 
 List cons(Var, List);
 
 Var Symbol_var(Symbol);
-
-Var List_getindex(List, int);
-
-int Var_int(Var);
-
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-Var List_var(List);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int ast_phase1_zero(void);
-
-static int ast_phase1_identity(int value);
-
-static int ast_phase1_add(int lhs, int rhs);
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-static Var _x2c_lambda_0(Var value);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -80,6 +52,26 @@ int ast_phase1_Pair_bump(ast_phase1_Pair pair, int delta){
   pair.value += delta;
   return pair.value;
 }
+
+Var List_getindex(List, int);
+
+int Var_int(Var);
+
+Iter List_iter(List, Iter);
+
+int Iter_try_next(Iter, Var *);
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+Var List_var(List);
+
+static Var _x2c_lambda_0(Var value);
 
 int main(void){
   x2c_initialize();

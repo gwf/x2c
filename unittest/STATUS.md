@@ -154,32 +154,40 @@
 
 ## Outstanding Items
 
-- Deferred static runtime initialization retains two native-C limitations,
-  reproduced on both published `1de90da` and the initializer candidate.
-  `static Var value = (int)__COUNTER__; int next = __COUNTER__;` expands the
-  deferred occurrence later, producing `value == 1` and `next == 0`.
-  An inline tag in `static Var value =
-  (int)((struct Inline { int number; }){41}).number;` is likewise emitted
-  inside the initialization function, so a later file-scope
-  `struct Inline after = {9};` fails native compilation. Declare such tags
-  separately at file scope. These are existing deferred-initialization
-  placement issues, rather than changes introduced by chained designators.
-  A function-local `static struct` containing a `String` literal also lacks
-  correct deferred initialization: published `1de90da` compiles the raw C
-  string pointer (breaking canonical String identity); the initializer
-  candidate converts it but native C rejects the cached value as nonconstant.
-  Local static runtime-valued aggregate initialization remains unsupported.
-- String direct-name coverage gaps are `contains_digit`, `lfind`, `lstrip`,
-  `new_fill`, `quote`, `rstrip`, and `unquote`, plus lifecycle and dispatch
-  adapters already exercised indirectly.
-- Literal/dot-notation modernization sweep of `test-array.x`,
-  `test-map.x`, `test-match-stmt.x` (verbose Var preambles -> `%[1, 2]`
-  literals); drop unneeded `Scope.retain` from interned-only suites.
-- Consider fixture helpers for the logger/diagnostics capture-sink
-  duplication.
+No outstanding static-initialization defects are recorded. Bare unknown native
+macro names retain native C initializer rules; tags hidden inside an opaque
+native macro retain native scope. Pass lowered local objects explicitly to
+native macros. The language reference describes these native boundaries.
 
-## Map expansion unwind coverage
+## Retired maintenance notes
 
-Map expansion stages a hash array and an entry array and uses `defer` for
-cleanup. There is no test hook to force an allocation failure during
-expansion. Direct unwind coverage needs an injection point in `_core_expand`.
+- Deferred static initialization fixes the three cases recorded against
+  published `1de90da`: delayed `__COUNTER__` expansion, inline tags emitted
+  inside the initializer helper, and local static aggregates containing
+  nonconstant canonical String values. `static-native-source` checks source
+  expansion order, macro redefinition, inline tag identity, and native
+  stringizing/token-pasting together. Local static fixtures check once-only
+  calls, const members and arrays, volatile reads, inferred bounds, stable
+  addresses across retry, argument values, automatic state after Error,
+  concurrent publication, thread-local storage, recursion, bounded-stack
+  expression walks, and rejected goto/switch entry. The static-init unit suite
+  additionally checks cross-thread cycles and waiter recovery, allocation
+  retry, aligned storage across Context teardown, and thread cleanup.
+- String classification already owned positive and negative `contains_digit`
+  cases. It now includes empty and high-byte inputs; the String utility cases
+  cover one-sided stripping, custom character sets, canonical unchanged and
+  empty results, and successful and zero-length fill. `lfind`, `quote`, and
+  `unquote` are obsolete names, not missing runtime operations; current search,
+  representation, and parsing owners retain their existing coverage.
+- Array, Map, and Match setup uses ordinary literals and dot notation where
+  the old Var preambles added no coverage. Explicit construction remains in
+  tests of construction and counted varargs. Interned-only Symbol parse tests
+  no longer retain Scope; mutable-container and Match tests retain the scopes
+  required by their allocation owners.
+- Logger captures structured `LogEvent` records; Diagnostics captures List
+  entries through a different emitter contract. A shared capture helper would
+  obscure those contracts, so the proposed abstraction is retired.
+- Map expansion's shared generator stages both arrays with `defer` before
+  publishing them. Allocation failure during expansion is not forcibly
+  injected. That coverage limitation does not justify adding a production
+  allocator hook or another recurring test requirement solely for this note.

@@ -3,7 +3,7 @@
 These optional packages make C libraries available through x2c types and
 methods while preserving access to their native APIs. Choose a package for
 its examples, then follow its README to prepare dependencies and run it.
-Package builds are currently tested on macOS.
+Package builds are tested on macOS. Torch also has Linux x86_64 CPU coverage.
 
 | Package | What it provides |
 | --- | --- |

@@ -12,14 +12,6 @@ Var int_var(int);
 
 List cons(Var, List);
 
-Iter List_iter(List, Iter);
-
-void * Scope_malloc(size_t);
-
-int Iter_try_next(Iter, Var *);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -32,9 +24,15 @@ __attribute__((constructor)) static void _file_init_(void){
   _5 = cons(_0, _4);
 }
 
+Iter List_iter(List, Iter);
+
 Iter Bag_iter(Bag bag, Iter dest){
   return List_iter(bag -> values, dest);
 }
+
+void * Scope_malloc(size_t);
+
+int Iter_try_next(Iter, Var *);
 
 int main(void){
   x2c_initialize();

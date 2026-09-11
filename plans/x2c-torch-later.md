@@ -1,83 +1,158 @@
 # torch package: the later items
 
-> Status: needs author scoping
-> Written 2026-09-10 after `plans/archive/x2c-torch.md` M0 to M3, the book chapter,
-> and the matched comparison landed on `main`. Each item below is scoped
-> and estimated; none is started. Gary picks the order.
+> Status: active
+> Gary authorized all five expansions on 2026-09-10. Implementation and
+> focused macOS checks, including native lifetime proof, are complete. The
+> final compiler snapshot, full Linux checks, and publication proof remain.
+> This plan stays active until the final evidence and delivery are recorded.
 
-## Outcome
+## Outcome and compatibility
 
-Five capabilities the package plan deferred, each with the design it would
-take, the effort measured against work already done in this package, and
-the acceptance example that proves it. Estimates assume one implementer
-with the package's current shim, generator, and verify targets.
+Add MPS, Linux x86_64 CPU, Python Adam state interchange, x2c custom
+first-order autograd, and ordinary Lisp training operations. Existing CPU
+calls and optimizer archive `save`/`load` retain their behavior. No recurring
+repository gate is added. The existing package checks and optional
+verification targets establish the new contracts.
 
-## 1. MPS device (1 to 2 days)
+## MPS device
 
-libtorch's device is already an `int` at the C ABI. Add `Tensor.to_device`,
-a device argument to the creation functions and `Module.to_device`,
-`Torch.mps_available`, and a `XT_MPS` constant beside the dtype constants.
-MPS has no float64, so the default dtype on that device is float32 and a
-float64 request raises `<bad-state>` from libtorch. Coverage is the real
-cost: individual ATen kernels are missing on MPS and fail at runtime, so
-the acceptance example is the MNIST CNN training on MPS end to end, with
-the test suite run once with `TORCH_DEVICE=mps` to list which generated
-ops raise. Report that list; do not paper over it.
+Reuse the generated `Tensor.to_device(String, dtype, non_blocking, copy)`;
+add `Module.to_device`, `Tensor.device`, `Torch.mps_available`, and
+`Torch.mps_synchronize`. Device strings are already the native ABI; no new
+device enum or parallel tensor movement operation is needed. Module movement
+precedes optimizer construction. MPS callers choose float32; float64 requests
+raise the native error. Host-value export first copies to CPU.
 
-## 2. Linux (1 to 2 days, needs a Linux machine)
+The MNIST example trains and evaluates on the selected device, saves its
+model, and evaluates a reloaded model. `TORCH_DEVICE=mps` and optional
+`TORCH_EPOCHS` select that application path; the default remains one CPU
+epoch. Unsupported MPS kernels raise their native errors. The shipped MPS
+applications do not require a fallback.
 
-`dependency-linux.json` pinning `libtorch-cxx11-abi-shared-with-deps`,
-`.so` names in the Makefile, `-lstdc++` for the shim, an `$ORIGIN` rpath,
-and `libgomp` instead of `libomp`. The shim and generated C++ are portable
-already. Every verify target must pass on Linux before the README claims
-it; there is no Linux box in this workspace, so the plan's platform lane
-records the absence until one exists.
+Measured on the pinned macOS arm64 runtime: actual 60,000 training and
+10,000 test images, two MPS epochs, 95.23% test accuracy and 95.23% after
+checkpoint reload. The device test also passed int64 and float32 host copies,
+model movement, an optimizer update, and float64 rejection. The bounded
+`verify-mps` probe with fallback disabled records native
+`aten::linalg_eig` as unavailable; no full generated-tier MPS claim is made.
+A CPU-only host
+registers the MPS-specific test with `TestHarness_skip`.
 
-## 3. Python-readable optimizer state (about 1 day)
+## Linux CPU
 
-Write the optimizer's state into the pickle dict in the layout
-`torch.optim.Optimizer.state_dict()` produces: `state` keyed by parameter
-index holding `step`, `exp_avg`, `exp_avg_sq` (and `max_exp_avg_sq` for
-amsgrad), and `param_groups` with the hyperparameters and the index list.
-Nested dicts of tensors, ints, and floats cross `pickle_save` today; the
-work is matching the keys exactly and the reverse load. Acceptance:
-`verify-python.py` resumes an x2c-trained Adam in Python and Python's in
-x2c, and the next update agrees to the tolerance the comparison plan set,
-allowing for the `lerp_` versus `mul_`/`add_` ulp difference already
-recorded there.
+Use the authorized local Docker lane, Ubuntu 24.04 with Clang 18, under
+x86_64 emulation. `dependency-linux.json` pins the official 2.10.0 CPU
+archive and its verified hash. The shared dependency framework prepares it;
+the Makefile selects `.so`, libstdc++, and the prefix runtime search path.
+This measures Linux correctness, not native Linux performance.
 
-## 4. `autograd.Function` from x2c (2 to 3 days, riskiest)
+The first Linux snapshot passed Python tensor exchange, 23 generated
+operators with zero disagreement, all eight TorchScript outputs, all three
+Adam resume cases, fit-line, MLP, custom activation, and 200 Lisp training
+steps. CPU package tests reached the device suite, where an unavailable-MPS
+branch incorrectly entered a test without assertions. The authoritative test
+now registers that skip before entering the test. Repeat all Linux checks
+against the final source/compiler snapshot before closing this item.
 
-libtorch's custom node is a CRTP template, `torch::autograd::Function<T>`.
-The shim defines one concrete subclass whose `forward` and `backward` call
-C function pointers with tensor arrays and a context handle; x2c supplies
-those as `Func` values through the existing func-landing thunks. Saved
-tensors live in the node's context and are released with it, so the x2c
-side must not hold them in a scope that ends first. Acceptance: an x2c
-custom activation with a hand-written backward, trained in the MLP
-example, agreeing with the same function written in Python.
+## Python-readable Adam state
 
-## 5. Lisp surface (1 to 2 days)
+`Optimizer.save_python` and `load_python` preserve the standard
+`state`/`param_groups` schema, including per-parameter step, first and second
+moments, AMSGrad maximum, group ordering, and hyperparameters. Imported
+moments move to the destination parameter's device. Parameter matching follows
+optimizer order; incompatible shapes, dtypes, group sizes, duplicate IDs, or
+unsupported Adam modes raise an Error. Parse and validate the whole imported
+state before replacing the existing optimizer groups or moments.
 
-A `$lisp.binding` group over Var-boxed tensors, modules, and optimizers,
-installed by `TorchLisp.install` as the yyjson package does. The open
-design question is lifetime: a Lisp value that holds a tensor outlives the
-scope that made it, so the bindings must either create tensors in a named
-scope the session owns or copy results out. Acceptance: `inline-lisp.x`
-composing and training the fit-line model from a Lisp session.
+Exact parity is required against the Python `LibtorchAdam` operation-order
+control. Stock Python Adam remains a separately measured comparison with its
+recorded arithmetic divergence accepted. This is an Adam-only interchange
+surface; existing libtorch optimizer archives remain available separately.
 
-## Sequencing
+`verify-interchange` passed native-to-Python resume, Python-to-native resume
+with two parameter groups, and empty-state resume on macOS and the first
+Linux snapshot. Every parameter, moment, group option, and step is compared. The final
+macOS check resumes three updates and also proves malformed moment shape,
+duplicate ID, negative learning rate, and fractional step are rejected
+without changing those next three updates.
+The separate benchmark runner owns the matched/stock workload measurements.
 
-Items 3 and 1 stand alone and are the most useful first. Item 2 waits for
-a Linux machine. Item 4 should follow item 3 so its example can checkpoint.
-Item 5 last, once the value model for tensors in Lisp is decided.
+## Custom first-order autograd
+
+`Tensor.custom(forward, backward, inputs)` supplies one output and a borrowed
+`AutogradContext`; the callbacks use ordinary `Func` values. The native graph
+owns saved tensor references. Each callback enters an isolated x2c Context,
+and errors are copied out and re-raised only after returning through C++.
+The native capsule never destroys an x2c allocation.
+
+`Tensor.backward_callbacks` temporarily disables libtorch autograd engine
+multithreading through its thread-local state. Both CPU and MPS callbacks
+execute on the invoking thread, which must be the graph's creating thread.
+The thread and invocation checks precede x2c entry. Nested backward/custom
+calls are rejected; ordinary `backward` is not the callback entry point.
+This boundary supports first-order, one-output, out-of-place functions.
+Forward input version checks reject mutation of tensors with version
+counters, including inputs not saved for backward. Inference tensors do not
+have counters; in-place mutation remains unsupported for those tensors but
+is not diagnosed by this check. Return one gradient or Null per input. Callback `Func` values and
+their captures remain borrowed and must outlive the graph on that thread.
+
+The final CPU/MPS tests passed derivative, saved-value, error containment,
+ordinary-backward rejection, nested-backward rejection, and caller-thread
+checks, including unsaved-input mutation, inactive-input gradient selection,
+and invocation from another thread (39 assertions). The custom swish MLP
+example trained from loss 3.099022 to 0.003990 in 300 steps on both CPU and MPS.
+`verify-custom` also passed on CPU and MPS against both a Python custom
+Function and ordinary autograd for swish values and squared-loss gradients.
+
+## Lisp surface and lifetime
+
+`TorchLisp.install` installs tensor creation and inspection, linear modules,
+SGD/Adam, forward, loss, backward, updates, arithmetic/activations, checkpoints,
+and explicit `torch-free`. The existing Lisp session owns boxed wrappers;
+`torch-free` releases native storage immediately but does not collect the
+wrapper. Session destruction reclaims the session. This deliberately reuses
+existing Lisp semantics and adds no garbage collector or training executor.
+
+`inline-lisp.x` defines a normal Lisp step and composes the fit-line model
+from those operations. In 200 measured steps, loss fell from 11.871755 to
+zero at displayed precision. Scope allocations grew from 386 to 4367;
+that count includes Lisp values and wrappers, not only tensors. Long-lived
+sessions should free native temporaries per step and periodically recreate
+the session if that wrapper growth matters.
+
+The optional `verify-lifetimes` builds separate instrumented native objects
+and uses the existing handle counters. It checks per-step native cleanup,
+custom graph cleanup, and native handle return to baseline at session
+destruction. The macOS proof passed: 64 custom graphs returned native handles
+to baseline after each graph, and 128 Lisp steps retained exactly four native
+handles throughout. Scope allocations grew from 355 to 2159; session
+destruction returned native handles to baseline. Its counter build does not
+replace the package's ordinary objects or extend any recurring gate.
+
+## Remaining proof and delivery
+
+- Run package tests and all optional verify/example targets against the final
+  compiler and native source snapshot, including the lifetime test.
+- Repeat the Linux snapshot after the skip fix and final source changes;
+  check an import-only consumer and native profile metadata.
+- Record the fresh matched and stock benchmark outputs separately.
+- Complete authored-source review, final repository publication proof,
+  delivery, and public documentation verification. Archive this plan with the
+  closing revision and evidence only after those pass.
+
+Implementation logs remain under `debug/`; the parent closure task preserves
+Linux evidence under
+`/Users/gary/Documents/x2c-evidence/closeout-20260910/linux`.
 
 ## Plan review
 
-- Each item reuses the shim's error boundary, the generated tier, and the
-  verify targets; none adds a second implementation of anything libtorch
-  owns.
-- The only new mechanism is the custom-node subclass in item 4, justified
-  because CRTP cannot cross a C ABI any other way.
-- Validators are the existing verify scripts extended per item; no new
-  gate. Missing MPS kernels are reported, not hidden.
+The design reuses generated tensor movement, native optimizers and pickle,
+Lisp session ownership, the existing C error boundary, and handle counters.
+The custom-node subclass is necessary to cross libtorch's C++ template API;
+the callback guard is necessary to keep x2c execution on a proven thread and
+prevent Errors crossing native frames. Imported optimizer validation protects
+external state replacement; callback shape, thread, reentrancy, and mutation
+checks protect native graph execution. Their focused negative tests exercise
+those same boundaries. No second optimizer, allocator, device representation,
+or training framework is introduced.

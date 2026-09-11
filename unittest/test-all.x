@@ -6,6 +6,7 @@ void scope_suite(void);
 void context_suite(void);
 void mutex_suite(void);
 void thread_suite(void);
+void static_init_suite(void);
 void pool_suite(void);
 void block_suite(void);
 void defer_suite(void);
@@ -108,5 +109,6 @@ int main(int argc, char **argv) {
   $test.suite(ast_suite);
   $test.suite(mutex_suite);
   $test.suite(thread_suite);
+  $test.suite(static_init_suite);
   return TestHarness_finish();
 }

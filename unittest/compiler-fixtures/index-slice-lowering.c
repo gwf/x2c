@@ -34,48 +34,6 @@ Var int_var(int);
 
 List cons(Var, List);
 
-Var Symbol_var(Symbol);
-
-String String_malloc(int);
-
-Var Array_getindex(Array, int);
-
-Var List_getindex(List, int);
-
-int String_getindex(String, int);
-
-Var Map_getindex(Map, Var);
-
-Var Array_setindex(Array, int, Var);
-
-Var Map_setindex(Map, Var, Var);
-
-int Var_int(Var);
-
-String Array_repr(Array);
-
-String List_repr(List);
-
-String String_repr(String);
-
-void String_free(String);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Array array_base(void);
-
-static Map map_base(void);
-
-static String buffer_base(void);
-
-static int next_index(int index);
-
-static Symbol next_key(Symbol key);
-
-static Var next_value(int value);
-
-static int next_bound(int bound);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -125,6 +83,32 @@ static int next_bound(int bound){
   bound_calls ++;
   return bound;
 }
+
+Var Symbol_var(Symbol);
+
+String String_malloc(int);
+
+Var Array_getindex(Array, int);
+
+Var List_getindex(List, int);
+
+int String_getindex(String, int);
+
+Var Map_getindex(Map, Var);
+
+Var Array_setindex(Array, int, Var);
+
+Var Map_setindex(Map, Var, Var);
+
+int Var_int(Var);
+
+String Array_repr(Array);
+
+String List_repr(List);
+
+String String_repr(String);
+
+void String_free(String);
 
 int main(void){
   x2c_initialize();

@@ -16,10 +16,6 @@ int Iter_try_next(Iter, Var *);
 
 double Var_floating(Var);
 
-geo__Chain geo__Chain_rest(geo__Chain);
-
-int geo__ChainLeaf_leaf_len(geo__ChainLeaf);
-
 double first_component(double x, double y){
   geo__Vec v = geo__Vec_new(x, y);
   Packed boxed = geo__Vec_var(v);
@@ -41,9 +37,13 @@ double first_component(double x, double y){
   return total;
 }
 
+geo__Chain geo__Chain_rest(geo__Chain);
+
 geo__ChainLeaf package_tail(geo__ChainLeaf values){
   return geo__Chain_rest(values);
 }
+
+int geo__ChainLeaf_leaf_len(geo__ChainLeaf);
 
 int package_tail_len(geo__ChainLeaf values){
   return geo__ChainLeaf_leaf_len(geo__Chain_rest(values));

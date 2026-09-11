@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 30
-- Runtime modules: 46
+- Runtime modules: 47
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -831,6 +831,15 @@ Public functions:
 
 `String.split_n`, `String.split`, `String.split_lines`, `String.words`,
 `String.lines`, `String.splits`, `Split.try_next`, `Split.iter`
+
+### [lib/static-init.x](../lib/static-init.x)
+
+first-use storage for dynamic local statics.
+
+Public functions:
+
+`x2c_static_acquire`, `x2c_static_commit`, `x2c_static_abort`,
+`x2c_static_thread_release`, `x2c_static_shutdown`
 
 ### [lib/string-classify.x](../lib/string-classify.x)
 

@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "torch",
+  "version": "2.10.0",
+  "profile": "libtorch-linux-x86_64-cpu-cxx11",
+  "sources": [
+    {
+      "name": "libtorch",
+      "url": "https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.10.0%2Bcpu.zip",
+      "sha256": "c5bf8efda9224a2d971b19d1ef6cf3ba6fee8ab53e69c49427db003d1d300496",
+      "root": "libtorch"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{work}",
+      "argv": [
+        "cp",
+        "-R",
+        "{source_libtorch}/include/.",
+        "{prefix}/include"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": [
+        "cp",
+        "-R",
+        "{source_libtorch}/lib/.",
+        "{prefix}/lib"
+      ]
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/torch/csrc/api/include/torch/torch.h",
+    "{prefix}/lib/libtorch_cpu.so",
+    "{prefix}/lib/libc10.so"
+  ]
+}

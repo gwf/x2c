@@ -6,6 +6,12 @@
 
 #include <torch/torch.h>
 #include <torch/script.h>
+#include <torch/mps.h>
+#include <torch/csrc/autograd/custom_function.h>
+#include <c10/core/AutogradState.h>
+#include <thread>
+#include <cmath>
+#include <unordered_set>
 #include <torch/csrc/jit/serialization/pickle.h>
 #include <torch/optim/schedulers/reduce_on_plateau_scheduler.h>
 #include <torch/optim/schedulers/step_lr.h>
@@ -27,6 +33,7 @@ static_assert((int) at::kLong == XT_INT64, "ScalarType values moved");
 static_assert((int) at::kBool == XT_BOOL, "ScalarType values moved");
 
 static thread_local std::string error_full, error_line, scratch;
+static thread_local bool custom_invocation = false, custom_callback = false;
 static thread_local std::vector<torch::NoGradGuard *> no_grad_guards;
 static thread_local std::vector<c10::InferenceMode *> inference_guards;
 
@@ -69,6 +76,15 @@ extern "C" {
 const char *xt_last_error(void) { return error_line.c_str(); }
 const char *xt_last_error_full(void) { return error_full.c_str(); }
 const char *xt_version(void) { return TORCH_VERSION; }
+int xt_mps_available(int *out) {
+  TRY(-1, *out = torch::mps::is_available();) return 0;
+}
+int xt_mps_synchronize(void) {
+  TRY(-1, torch::mps::synchronize();) return 0;
+}
+const char *xt_device(xt_tensor a) {
+  TRY(nullptr, scratch = a->t.device().str(); return scratch.c_str();)
+}
 int xt_manual_seed(int64_t seed) {
   TRY(-1, torch::manual_seed(seed);) return 0;
 }
@@ -156,14 +172,14 @@ int xt_item_int64(xt_tensor a, int64_t *out) {
 }
 int xt_copy_out_doubles(xt_tensor a, double *out, int64_t count) {
   TRY(-1,
-    auto c = a->t.detach().contiguous().to(at::kDouble);
+    auto c = a->t.detach().to(at::kCPU).contiguous().to(at::kDouble);
     int64_t n = std::min<int64_t>(count, c.numel());
     std::memcpy(out, c.data_ptr<double>(), (size_t) n * sizeof(double));)
   return 0;
 }
 int xt_copy_out_int64s(xt_tensor a, int64_t *out, int64_t count) {
   TRY(-1,
-    auto c = a->t.detach().contiguous().to(at::kLong);
+    auto c = a->t.detach().to(at::kCPU).contiguous().to(at::kLong);
     int64_t n = std::min<int64_t>(count, c.numel());
     std::memcpy(out, c.data_ptr<int64_t>(), (size_t) n * sizeof(int64_t));)
   return 0;
@@ -286,7 +302,12 @@ xt_tensor xt_to_dtype(xt_tensor a, int dtype) {
 xt_tensor xt_requires_grad_(xt_tensor a, int on) {
   TRY(nullptr, a->t.set_requires_grad(on != 0); return wrap(a->t);)
 }
-int xt_backward(xt_tensor a) { TRY(-1, a->t.backward();) return 0; }
+int xt_backward(xt_tensor a) {
+  TRY(-1,
+    TORCH_CHECK(!custom_callback, "backward inside an x2c autograd callback");
+    a->t.backward();)
+  return 0;
+}
 xt_tensor xt_grad(xt_tensor a) {
   TRY(nullptr,
     if (!a->t.grad().defined()) {
@@ -358,6 +379,138 @@ struct ComposedModule : torch::nn::Module {
 struct SequentialModule : torch::nn::Module {
   SequentialModule() = default;
 };
+}
+
+} // extern "C"
+
+struct xt_autograd_context_s {
+  torch::autograd::AutogradContext *native;
+  std::vector<at::Tensor> *outputs;
+  bool forward;
+};
+struct CustomBinding : torch::CustomClassHolder {
+  xt_autograd_callback callback;
+  void *forward, *backward;
+  std::thread::id thread;
+  CustomBinding(xt_autograd_callback callback, void *forward, void *backward)
+    : callback(callback), forward(forward), backward(backward),
+      thread(std::this_thread::get_id()) {}
+};
+struct CustomInvocation {
+  bool previous, multithreading;
+  CustomInvocation() : previous(custom_invocation), multithreading(
+      c10::AutogradState::get_tls_state().get_multithreading_enabled()) {
+    TORCH_CHECK(!custom_callback, "backward inside an x2c autograd callback");
+    custom_invocation = true;
+    c10::AutogradState::get_tls_state().set_multithreading_enabled(false);
+  }
+  ~CustomInvocation() {
+    c10::AutogradState::get_tls_state()
+      .set_multithreading_enabled(multithreading);
+    custom_invocation = previous;
+  }
+};
+struct CustomCallbackGuard {
+  bool previous = custom_callback;
+  CustomCallbackGuard() { custom_callback = true; }
+  ~CustomCallbackGuard() { custom_callback = previous; }
+};
+static std::vector<at::Tensor> custom_call(
+    CustomBinding &binding, torch::autograd::AutogradContext *context,
+    at::TensorList inputs, int outputs, bool forward) {
+  TORCH_CHECK(binding.thread == std::this_thread::get_id(),
+              "x2c autograd callback must run on its creating thread");
+  TORCH_CHECK(custom_invocation,
+              "use backward_callbacks for an x2c autograd graph");
+  std::vector<xt_tensor_s> storage;
+  storage.reserve(inputs.size());
+  for (auto &tensor : inputs) storage.push_back({tensor});
+  std::vector<xt_tensor> handles;
+  for (auto &tensor : storage) handles.push_back(&tensor);
+  std::vector<at::Tensor> result(outputs);
+  xt_autograd_context_s bridge{context, &result, forward};
+  std::vector<int64_t> versions;
+  if (forward) for (auto &input : inputs)
+    versions.push_back(input.is_inference() ? -1 : input._version());
+  int status;
+  {
+    CustomCallbackGuard guard;
+    status = binding.callback(forward ? binding.forward : binding.backward,
+                              &bridge, handles.data(), (int) handles.size(),
+                              forward ? 1 : 0, outputs);
+  }
+  if (forward) for (size_t i = 0; i < inputs.size(); i++)
+    TORCH_CHECK(versions[i] < 0 || inputs[i]._version() == versions[i],
+                "custom forward may not mutate its inputs in place");
+  TORCH_CHECK(status == 0, "x2c autograd callback raised an Error");
+  if (forward) TORCH_CHECK(result[0].defined(), "custom forward returned Null");
+  return result;
+}
+struct CustomFunction : torch::autograd::Function<CustomFunction> {
+  static at::Tensor forward(torch::autograd::AutogradContext *context,
+      c10::intrusive_ptr<CustomBinding> binding, at::TensorList inputs) {
+    context->saved_data["binding"] = c10::IValue::make_capsule(binding);
+    context->saved_data["count"] = (int64_t) inputs.size();
+    return custom_call(*binding, context, inputs, 1, true)[0];
+  }
+  static torch::autograd::variable_list backward(
+      torch::autograd::AutogradContext *context,
+      torch::autograd::variable_list gradients) {
+    auto binding = context->saved_data.at("binding").toCapsule();
+    auto result = custom_call(*static_cast<CustomBinding *>(binding.get()),
+      context, gradients, (int) context->saved_data.at("count").toInt(), false);
+    result.insert(result.begin(), at::Tensor()); // non-tensor binding argument
+    return result;
+  }
+};
+
+extern "C" {
+xt_tensor xt_tensor_alias(xt_tensor tensor) {
+  TRY(nullptr, return wrap(tensor->t);)
+}
+xt_tensor xt_custom(xt_autograd_callback callback, void *forward, void *backward,
+                    xt_tensor *inputs, int count) {
+  TRY(nullptr,
+    TORCH_CHECK(!custom_callback, "nested x2c autograd callbacks unsupported");
+    CustomInvocation invocation;
+    auto binding = c10::make_intrusive<CustomBinding>(callback, forward, backward);
+    auto tensors = gather(inputs, count);
+    return wrap(CustomFunction::apply(binding, at::TensorList(tensors)));)
+}
+int xt_backward_callbacks(xt_tensor output) {
+  TRY(-1, CustomInvocation invocation; output->t.backward();)
+  return 0;
+}
+int xt_custom_output(xt_autograd_context context, int index, xt_tensor tensor) {
+  TRY(-1,
+    TORCH_CHECK(index >= 0 && (size_t) index < context->outputs->size(),
+                "wrong number of custom autograd outputs");
+    (*context->outputs)[index] = tensor ? tensor->t : at::Tensor();)
+  return 0;
+}
+int xt_custom_save(xt_autograd_context context, xt_tensor *tensors, int count) {
+  TRY(-1,
+    TORCH_CHECK(context->forward, "save_for_backward belongs in forward");
+    context->native->save_for_backward(gather(tensors, count));)
+  return 0;
+}
+int xt_custom_saved_count(xt_autograd_context context, int *count) {
+  TRY(-1, *count = (int) context->native->get_saved_variables().size();)
+  return 0;
+}
+xt_tensor xt_custom_saved(xt_autograd_context context, int index) {
+  TRY(nullptr,
+    auto values = context->native->get_saved_variables();
+    TORCH_CHECK(index >= 0 && (size_t) index < values.size(),
+                "saved tensor index out of range");
+    return wrap(values[index]);)
+}
+int xt_custom_needs_grad(xt_autograd_context context, int index, int *out) {
+  TRY(-1,
+    TORCH_CHECK(index >= 0 && index < context->native->saved_data.at("count")
+      .toInt(), "input gradient index out of range");
+    *out = context->native->needs_input_grad((size_t) index);)
+  return 0;
 }
 
 struct xt_module_s {
@@ -629,6 +782,9 @@ int xt_module_zero_grad(xt_module m) { TRY(-1, m->m->zero_grad();) return 0; }
 int xt_module_to_dtype(xt_module m, int dtype) {
   TRY(-1, m->m->to(static_cast<at::ScalarType>(dtype));) return 0;
 }
+int xt_module_to_device(xt_module m, const char *device) {
+  TRY(-1, m->m->to(at::Device(device));) return 0;
+}
 void xt_module_free(xt_module m) {
   if (m) XT_HANDLE_DROP(XT_HANDLE_MODULE);
   TRY_VOID(delete m;)
@@ -796,9 +952,8 @@ struct xt_pickle_s {
   std::vector<at::Tensor> tensors;
 };
 
-static void write_pickle(const c10::Dict<std::string, at::Tensor> &values,
-                         const char *path) {
-  auto bytes = torch::jit::pickle_save(c10::IValue(values));
+static void write_pickle(c10::IValue values, const char *path) {
+  auto bytes = torch::jit::pickle_save(values);
   std::ofstream out(path, std::ios::binary);
   if (!out) throw std::runtime_error(std::string("cannot write ") + path);
   out.write(bytes.data(), (std::streamsize) bytes.size());
@@ -812,6 +967,157 @@ static c10::IValue read_pickle(const char *path) {
   std::vector<char> bytes((std::istreambuf_iterator<char>(in)),
                           std::istreambuf_iterator<char>());
   return torch::jit::pickle_load(bytes);
+}
+
+/* Python's parameter IDs identify positions, never native addresses. The
+   importer builds the replacement completely before changing the optimizer. */
+static torch::optim::Adam &adam(xt_optim o) {
+  auto *value = dynamic_cast<torch::optim::Adam *>(o->o.get());
+  TORCH_CHECK(value, "Python optimizer state currently supports Adam");
+  return *value;
+}
+static c10::impl::GenericDict dictionary() {
+  return c10::impl::GenericDict(c10::AnyType::get(), c10::AnyType::get());
+}
+int xt_optim_save_python(xt_optim o, const char *path) {
+  TRY(-1,
+    auto &optimizer = adam(o);
+    auto root = dictionary(), state = dictionary();
+    c10::impl::GenericList groups(c10::AnyType::get());
+    int64_t id = 0;
+    for (auto &group : optimizer.param_groups()) {
+      auto &options = static_cast<torch::optim::AdamOptions &>(group.options());
+      auto values = dictionary();
+      c10::List<int64_t> ids;
+      for (auto &parameter : group.params()) {
+        ids.push_back(id);
+        auto found = optimizer.state().find(parameter.unsafeGetTensorImpl());
+        if (found != optimizer.state().end()) {
+          auto &saved = static_cast<torch::optim::AdamParamState &>(*found->second);
+          auto fields = dictionary();
+          fields.insert("step", torch::scalar_tensor(saved.step(), at::kLong));
+          fields.insert("exp_avg", saved.exp_avg());
+          fields.insert("exp_avg_sq", saved.exp_avg_sq());
+          if (options.amsgrad())
+            fields.insert("max_exp_avg_sq", saved.max_exp_avg_sq());
+          state.insert(id, fields);
+        }
+        id++;
+      }
+      values.insert("params", ids);
+      values.insert("lr", options.lr());
+      values.insert("betas", c10::ivalue::Tuple::create(
+        {std::get<0>(options.betas()), std::get<1>(options.betas())}));
+      values.insert("eps", options.eps());
+      values.insert("weight_decay", options.weight_decay());
+      values.insert("amsgrad", options.amsgrad());
+      values.insert("maximize", false);
+      values.insert("foreach", false);
+      values.insert("capturable", false);
+      values.insert("differentiable", false);
+      values.insert("fused", false);
+      values.insert("decoupled_weight_decay", false);
+      groups.push_back(values);
+    }
+    root.insert("state", state);
+    root.insert("param_groups", groups);
+    write_pickle(root, path);)
+  return 0;
+}
+static at::Tensor moment(const c10::impl::GenericDict &fields,
+                         const char *key, const at::Tensor &parameter) {
+  auto tensor = fields.at(key).toTensor();
+  TORCH_CHECK(tensor.sizes() == parameter.sizes(),
+              "optimizer moment shape does not match parameter");
+  TORCH_CHECK(tensor.scalar_type() == parameter.scalar_type(),
+              "optimizer moment dtype does not match parameter");
+  return tensor.to(parameter.device()).clone();
+}
+static double adam_number(c10::IValue value) {
+  return value.isTensor() ? value.toTensor().item<double>()
+                          : value.toScalar().toDouble();
+}
+static int64_t adam_step(c10::IValue value) {
+  if (value.isInt()) {
+    TORCH_CHECK(value.toInt() >= 0, "invalid Adam step");
+    return value.toInt();
+  }
+  if (value.isTensor() && at::isIntegralType(value.toTensor().scalar_type(), false)) {
+    int64_t step = value.toTensor().item<int64_t>();
+    TORCH_CHECK(step >= 0, "invalid Adam step");
+    return step;
+  }
+  double step = value.isTensor() ? value.toTensor().item<double>()
+                                : value.toDouble();
+  TORCH_CHECK(std::isfinite(step) && step >= 0 &&
+              step < 9223372036854775808.0 && std::floor(step) == step,
+              "invalid Adam step");
+  return (int64_t) step;
+}
+int xt_optim_load_python(xt_optim o, const char *path) {
+  TRY(-1,
+    auto &optimizer = adam(o);
+    auto root = read_pickle(path).toGenericDict();
+    auto source = root.at("state").toGenericDict();
+    std::vector<at::Tensor> parameters;
+    for (auto &group : optimizer.param_groups())
+      parameters.insert(parameters.end(), group.params().begin(),
+                        group.params().end());
+    std::vector<torch::optim::OptimizerParamGroup> groups;
+    ska::flat_hash_map<void *,
+      std::unique_ptr<torch::optim::OptimizerParamState>> state;
+    std::unordered_set<int64_t> ids;
+    size_t index = 0;
+    for (auto item : root.at("param_groups").toListRef()) {
+      auto fields = item.toGenericDict();
+      for (auto key : {"maximize", "capturable", "differentiable",
+                       "decoupled_weight_decay"}) {
+        auto found = fields.find(key);
+        TORCH_CHECK(found == fields.end() || !found->value().toBool(),
+                    "unsupported Adam option: ", key);
+      }
+      auto betas = fields.at("betas").toTupleRef().elements();
+      TORCH_CHECK(betas.size() == 2, "Adam needs two betas");
+      auto options = std::make_unique<torch::optim::AdamOptions>(
+        adam_number(fields.at("lr")));
+      options->betas({adam_number(betas[0]), adam_number(betas[1])})
+        .eps(adam_number(fields.at("eps")))
+        .weight_decay(adam_number(fields.at("weight_decay")))
+        .amsgrad(fields.at("amsgrad").toBool());
+      TORCH_CHECK(std::isfinite(options->lr()) && options->lr() >= 0 &&
+                  std::isfinite(options->eps()) && options->eps() >= 0 &&
+                  std::isfinite(options->weight_decay()) &&
+                  options->weight_decay() >= 0 &&
+                  std::get<0>(options->betas()) >= 0 &&
+                  std::get<0>(options->betas()) < 1 &&
+                  std::get<1>(options->betas()) >= 0 &&
+                  std::get<1>(options->betas()) < 1, "invalid Adam options");
+      std::vector<at::Tensor> group_parameters;
+      for (auto entry : fields.at("params").toListRef()) {
+        int64_t id = entry.toInt();
+        TORCH_CHECK(ids.insert(id).second, "duplicate optimizer parameter ID");
+        TORCH_CHECK(index < parameters.size(), "too many optimizer parameters");
+        auto parameter = parameters[index++];
+        group_parameters.push_back(parameter);
+        auto found = source.find(id);
+        if (found == source.end()) continue;
+        auto saved = found->value().toGenericDict();
+        auto value = std::make_unique<torch::optim::AdamParamState>();
+        value->step(adam_step(saved.at("step")))
+          .exp_avg(moment(saved, "exp_avg", parameter))
+          .exp_avg_sq(moment(saved, "exp_avg_sq", parameter));
+        if (options->amsgrad()) value->max_exp_avg_sq(
+          moment(saved, "max_exp_avg_sq", parameter));
+        state[parameter.unsafeGetTensorImpl()] = std::move(value);
+      }
+      groups.emplace_back(std::move(group_parameters), std::move(options));
+    }
+    TORCH_CHECK(index == parameters.size(), "too few optimizer parameters");
+    for (const auto &entry : source)
+      TORCH_CHECK(ids.count(entry.key().toInt()), "unknown optimizer state ID");
+    optimizer.param_groups() = std::move(groups);
+    optimizer.state() = std::move(state);)
+  return 0;
 }
 
 int xt_module_save_pickle(xt_module m, const char *path) {

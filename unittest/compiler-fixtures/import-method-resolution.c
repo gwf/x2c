@@ -4,19 +4,17 @@
 
 int Var_truthy(Var);
 
-geo__Vec geo__Var_vec(Var);
-
-int other__Var_vec(Var);
-
-static int Var_vec(Var value);
-
 static int Var_vec(Var value){
   return Var_truthy(value) + 7;
 }
 
+geo__Vec geo__Var_vec(Var);
+
 geo__Vec geo_vec(Var value){
   return geo__Var_vec(value);
 }
+
+int other__Var_vec(Var);
 
 int other_vec(Var value){
   return other__Var_vec(value);

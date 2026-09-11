@@ -12,30 +12,6 @@ static int rhs_calls;
 
 static int skipped_calls;
 
-Var int_var(int);
-
-Var double_var(double);
-
-Var String_var(String);
-
-int Var_truth(Var);
-
-Var Symbol_var(Symbol);
-
-long Var_long(Var);
-
-double Var_double(Var);
-
-static int * pick_values(int * values);
-
-static NumericBox * pick_box(NumericBox * box);
-
-static int pick_index(void);
-
-static Var counted_rhs(int value);
-
-static Var skipped_rhs(void);
-
 static int * pick_values(int * values){
   base_calls ++;
   return values;
@@ -51,6 +27,8 @@ static int pick_index(void){
   return 1;
 }
 
+Var int_var(int);
+
 static Var counted_rhs(int value){
   rhs_calls ++;
   return int_var(value);
@@ -60,6 +38,18 @@ static Var skipped_rhs(void){
   skipped_calls ++;
   return int_var(1);
 }
+
+Var double_var(double);
+
+Var String_var(String);
+
+int Var_truth(Var);
+
+Var Symbol_var(Symbol);
+
+long Var_long(Var);
+
+double Var_double(Var);
 
 int main(void){
   x2c_initialize();

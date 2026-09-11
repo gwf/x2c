@@ -15,12 +15,12 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common
 
-TITLE = "# Matched x2c and PyTorch applications: results"
+TITLE = "# x2c and PyTorch applications: results"
 DIRTY = " plus uncommitted changes"
 
 INTRO = """\
 Three applications and one diagnostic, the same work on both sides, run
-live in fresh processes on one idle machine. The plan is
+live in fresh processes on one machine. The plan is
 [plans/x2c-torch-comparison.md](../../../plans/x2c-torch-comparison.md);
 how to reproduce any line of this is [README.md](README.md), and
 [PILOT.md](PILOT.md) holds the earlier single-sample pass and the gaps it
@@ -31,149 +31,6 @@ not evidence that a configuration passed. There is no aggregate speedup in
 this report; the workloads and their verdicts are separate.
 """
 
-
-FINDINGS = """\
-## Findings
-
-The sections above are generated from one session's raw JSON. This one is
-written by hand: it explains those numbers and records what the suite
-exposed.
-
-### Per-workload verdicts
-
-- **Tabular training.** x2c finishes first at both thread counts, on both
-  the native-Linear forward and the documented enumerated-parameter one.
-  The two forwards are within a few percent of each other inside each
-  language, so parameter enumeration is not what separates them.
-- **Batched prediction.** x2c's margin is largest at batch 1 and is gone
-  by batch 256, which is the expected shape: the per-request cost x2c
-  avoids is fixed, and by 256 rows the kernels dominate.
-- **MNIST.** Parity. This is the kernel-heavy case, and once convolution
-  and batch normalization own the time there is nothing left for a
-  wrapper or an interpreter to win or lose.
-- **Sequence.** x2c finishes first by about the same margin as tabular
-  training. A window is 32 small steps, so per-call cost still matters.
-- **Interop.** The headline `chain` timing is x2c's worst result in the
-  suite, and it is entirely a lifetime effect.
-
-### The interop cost is retention, not wrapper overhead
-
-The attribution table runs the identical chain three ways. Written the
-documented way, one scope per request, every intermediate stays alive
-until the request ends: at 65,536 elements and 512 operations that is
-1,549 live tensor handles and a peak footprint of 205 MB, and the chain
-runs 4.33x the C++ control. Releasing each value as it is replaced with
-`Tensor.free` recovers part of it. One scope per operation, carrying only
-the running value out with `Scope.move`, holds 14 handles and a flat
-59-66 MB at every chain length and runs at 0.92x to 1.27x the control -
-parity with C++ calling ATen directly, with no wrapper cost left to find.
-All three lifetimes produce the same result exactly.
-
-So the wrapper is not the cost. The cost is that a scope is the unit of
-release, and a long chain inside one scope holds every intermediate the
-mathematics no longer needs. Python's reference counting frees them as it
-goes and never pays it. Nothing here is unattributed.
-
-This is a caller obligation with a cheap remedy that does not change the
-result, and it is worth stating plainly in the package documentation: a
-long out-of-place chain over large tensors inside a single scope is the
-one shape where the ordinary idiom is expensive.
-
-### Adam is not the same algorithm in the two languages
-
-Both implementations produce bit-identical outputs, losses, gradients and
-parameters for one update. They part at the second, and the `trace` mode
-locates it exactly: at update 1 the batch, every forward intermediate,
-the loss and every gradient are still bit-identical, and only the
-parameters after the optimizer step differ, by 7.45e-09.
-
-`torch.optim.Adam` updates the first moment with
-`exp_avg.lerp_(grad, 1 - beta1)`; libtorch's C++ `Adam` uses
-`exp_avg.mul_(beta1).add_(grad, 1 - beta1)`. The two agree in exact
-arithmetic, and in float32 while `exp_avg` is still zero, which is why
-the first update matches and the second does not. Replaying the same
-training in Python with the `mul_`/`add_` form reproduces the x2c result
-bit for bit; the `lerp_` form does not.
-
-`foreach=False, fused=False` is therefore not enough to match the two
-optimizers, and the plan's requirement to match Python's Adam to the C++
-algorithm cannot be fully met through `torch.optim.Adam`. Nothing was
-relaxed to hide this: the long-run losses still agree within the stated
-tolerance in every lane except the tabular `explicit` one, which stands
-above as a failed tolerance.
-
-Reproducer:
-
-```sh
-python3 packages/torch/benchmarks/firstdiff.py --variant explicit \
-    --first 0 --last 4
-```
-
-### Memory
-
-Steady training and inference are flat in both languages once warm, with
-x2c's whole-process footprint a little over half Python's, mostly the
-interpreter and `libtorch_python.dylib`. Live Scope allocations and live
-scopes return to their starting values in every profile, including the
-one that injects a bad shape inside a deferred scope every 100 requests
-and then checks that ordinary work and the model's mode survive it.
-
-The positive control works: retaining forward graphs on purpose grows
-both languages to the 128 MiB payload cap and both release fully
-afterwards, so the measurement is shown to see a known problem. x2c grows
-about twice as fast per retained graph, for the same reason as interop -
-Python holds the activations the graph needs, and x2c additionally holds
-every pre-activation intermediate until the enclosing scope closes.
-
-One thing grows that need not. In the repeated
-create-train-save-load-destroy profile the canonical pool's active bytes
-rise about 64 bytes per cycle, because each cycle builds its checkpoint
-path with an interpolated String and Strings survive scope release.
-Hoisting the path out of the loop removes it. That is the cost of
-building the same String repeatedly, not a leak in the pool.
-
-### Gaps
-
-1. **A `#define` numeric constant does not resolve an operator row.**
-   `(images - MEAN) / STD` with `#define MEAN 0.1307` emits the C text
-   unchanged and fails to compile; a `double` local works. Reproducer:
-   `#define M 0.5` then
-   `Tensor y = Tensor.zeros(%(2 2), XT_FLOAT32) - M;`.
-2. **`Checkpoint.save` crashes on a released Tensor.** A `Map` outlives
-   the scope that created the Tensors it holds, so storing one, releasing
-   that scope, then saving reaches `tensors[i]->t.detach()` on a freed
-   handle instead of raising `<bad-state>`. Using a released wrapper is a
-   documented caller error, so this is robustness rather than a defect;
-   yyjson raises for the same class of stale access.
-3. **Inter-op thread control** was missing when the pilot ran and is now
-   in the package as `Torch.set_num_interop_threads`. Both languages in
-   this session pin it to 1 before any work and record what they got.
-4. **Per-type native handle counters** were missing and are now present
-   as the private, benchmark-only instrumentation `README.md` describes.
-   They are what made the interop attribution possible.
-5. **A composed root has no forward**, so the tabular lane looks its
-   three children up once and indexes a List. That is what
-   `Module.sequential` exists for and the MNIST lane uses it; the MLP
-   lane keeps the composed form the package README documents.
-"""
-
-
-PLACEHOLDER = """\
-## Operator temporaries after discard
-
-_Placeholder: to be filled in by Gary._
-
-A compiler change that discards unnamed operator temporaries immediately
-after the operator that consumes them is being measured separately. It is
-deliberately not folded into any number in this report: everything above
-was measured on the tree named under "What ran", without it.
-
-The interop attribution is the result that change bears on most directly,
-since the natural-lifetime row there is exactly the cost of keeping
-unnamed intermediates alive to the end of a request scope. This section is
-where to record what the change does to that row, and whether the
-`Tensor.free` and per-operation-scope remedies are still needed after it.
-"""
 
 
 def load(directory, name):
@@ -211,8 +68,9 @@ def environment_section(environment, lines):
         if entry:
             lines.append(f"  - `{name}` {entry['bytes']} bytes, SHA-256 "
                          f"`{entry['sha256'][:16]}`")
-    lines.append(f"- Python at `{environment.get('python_executable', '?')}`, "
-                 f"torch pinned at 2.10.0.")
+    runtime = environment.get("python_runtime", {})
+    lines.append(f"- Python at `{runtime.get('executable', '?')}`, "
+                 f"torch `{runtime.get('torch', '?')}`.")
     artifacts = environment.get("artifacts", {})
     if artifacts:
         lines.append("- Artifacts, SHA-256 prefixes: " + ", ".join(
@@ -279,7 +137,6 @@ def check_section(check, lines):
                          f"`{app}` {value:.2e}"
                          for app, value in sorted(worst_final.items())) + ".")
         lines.append("")
-    lines.append("![learning curves](learning-curves.png)\n")
 
 
 def timing_section(timing, lines):
@@ -410,24 +267,39 @@ def write(run):
     if not os.path.isdir(directory):
         sys.exit(f"no run at {directory}")
     lines = [TITLE, "", INTRO]
+    comparison = load(directory, "comparison.json") or {}
+    optimizer = comparison.get("optimizer", "historical stock")
+    lines.append(f"Optimizer comparison: **{optimizer}**.\n")
+    if optimizer == "matched":
+        lines.append("Python uses an operation-order control for libtorch Adam. "
+                     "This session records correctness only.\n")
+    else:
+        lines.append("Python uses stock PyTorch Adam. Its numerical divergence "
+                     "is reported below; failed tolerances remain failures.\n")
+        lines.append("[The matched control](MATCHED.md) reports the separate "
+                     "libtorch operation-order correctness comparison.\n")
     environment_section(load(directory, "environment.json"), lines)
     check_section(load(directory, "check.json"), lines)
-    timing_section(load(directory, "timing.json"), lines)
-    memory_section(load(directory, "memory.json"), lines)
-    attribution_section(load(directory, "attribution.json"), lines)
-    # The written analysis. Everything above is generated from a run's
-    # JSON; this is the part a person wrote, kept here so the report is
-    # one command and cannot drift from the renderer.
-    lines.append(FINDINGS + "\n")
-    lines.append(PLACEHOLDER)
+    if optimizer != "matched":
+        lines.append("![learning curves](learning-curves.png)\n")
+        timing_section(load(directory, "timing.json"), lines)
+        memory_section(load(directory, "memory.json"), lines)
+        attribution_section(load(directory, "attribution.json"), lines)
+    lines.append("## Historical context\n")
+    lines.append("[The earlier report](HISTORICAL-20260910.md) retains its "
+                 "measurements, failures and analysis. Those observations "
+                 "are not results from this session.\n")
     lines.append("## Raw data\n")
+    records = "`check.json` and `environment.json`"
+    if optimizer != "matched":
+        records += ", plus `timing.json`, `memory.json` and `attribution.json`"
     lines.append(f"Every number above comes from "
-                 f"`debug/torch-comparison/{run}/`: `check.json`, "
-                 f"`timing.json`, `memory.json`, `attribution.json`, and "
-                 f"`environment.json`, beside one log per launched process. "
-                 f"The plots are rendered from those same files by "
-                 f"`plots.py {run}`.\n")
-    path = os.path.join(common.BENCHMARKS, "REPORT.md")
+                 f"`debug/torch-comparison/{run}/`: {records}, beside one log "
+                 f"per launched process and the complete checkpoints.\n")
+    if optimizer != "matched":
+        lines.append(f"Plots read those same files through `plots.py {run}`.\n")
+    filename = "MATCHED.md" if optimizer == "matched" else "REPORT.md"
+    path = os.path.join(common.BENCHMARKS, filename)
     with open(path, "w") as handle:
         handle.write("\n".join(lines).rstrip() + "\n")
     print(f"wrote {path}")

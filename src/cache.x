@@ -335,7 +335,7 @@ static void _report_static_initializer_cycle(
   Array notes = %[], List first = NULL;
   foreach (List initializer, initializers)
     match (initializer)
-      case %(?binding ?): {
+      case %(?binding *): {
         Var status;
         if (!state.try_get(binding, &status) || status.integer() != 1)
           continue;
@@ -392,8 +392,11 @@ static void _queue_one_static_initializer(
       dependencies.free();
     }
   }
-  if (late) compiler.add_late_init(assignment);
-  else compiler.add_mid_init(assignment);
+  List helper = initializer.caddr();
+  List invocation = %(stmnt (expr (void)
+    (call (expr ((func ((void))) void) (ident $helper)) (args))));
+  if (late) compiler.add_late_init(invocation);
+  else compiler.add_mid_init(invocation);
   phases[binding] = late;
   state[binding] = 2;
 }
@@ -416,13 +419,27 @@ static void _queue_static_initializers(
    regions share one initializer list, so a header definition deferred into
    the source's initializer is ordered against the file statics it reads. */
 static List _rewrite_file_scope_statics(
-  Compiler compiler, List code, Array initializers) =>
-  code.map(%!(Var item) => {
+  Compiler compiler, List code, Array initializers) {
+  Array output = %[];
+  foreach (List item, code) {
+    int first = initializers.len();
     match (item)
       case %(!set ?declaration (declare *)):
-        return _rewrite_file_scope_decl(compiler, declaration, initializers);
-    return item;
-  });
+        item = _rewrite_file_scope_decl(compiler, declaration, initializers);
+    output.push(item);
+    for (int i = first; i < initializers.len(); i++) {
+      (List binding, List assignment) = initializers[i];
+      List helper = compiler.sym.introduce(
+        compiler.fresh_name("static_initialize"));
+      initializers[i] = %($binding $assignment $helper);
+      List function = %(function (static void)
+        (bind $helper ((fnmod (params (param (void) (bind () ()))))))
+        (block $assignment));
+      output.push(%(sourceinit $function));
+    }
+  }
+  return output.list_free();
+}
 
 // cache key processing
 
@@ -581,15 +598,19 @@ static List _setup_header_cache(
   foreach (List node, header) {
     int replaced = 0;
     node = _rewrite_header_cache_refs(c, node, prefix, &replaced);
-    match (node)
+    int captured = node.car() == <sourceinit>;
+    List function = node;
+    if (captured) function = node.cadr();
+    match (function)
       case %(function ?type ?bind (block *statements)):
         if (replaced) {
           if (!inserted) {
             foreach (Var item, prelude) output.push(item);
             inserted = 1;
           }
-          node = _patch_header_cache_function(
+          function = _patch_header_cache_function(
             type, bind, statements, guard, initializer_name);
+          node = captured ? %(sourceinit $function) : function;
         }
     output.push(node);
   }

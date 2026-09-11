@@ -2,22 +2,6 @@
 
 #include "for-omitted-clauses.h"
 
-static int all_omitted(void);
-
-static int omitted_init(void);
-
-static int omitted_condition(void);
-
-static int omitted_increment(void);
-
-static int omitted_init_and_condition(void);
-
-static int omitted_init_and_increment(void);
-
-static int omitted_condition_and_increment(void);
-
-static int declared_init_no_increment(void);
-
 static int all_omitted(void){
   int n = 0;
   for(; ; ){

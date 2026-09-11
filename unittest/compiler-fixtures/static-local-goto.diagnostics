@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/static-local-goto.x:4:3: emit: goto cannot enter or cross a protected cleanup region
+    goto later;
+    ^^^^
+  note: jump only within the same region or outward
+

@@ -14,16 +14,6 @@ Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-int List_len(List);
-
-int List_truth(List);
-
-String List_str(List);
-
-Var String_var(String);
-
-__attribute__((constructor)) static void _file_init_(void);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -40,14 +30,22 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = String_new("empty");
 }
 
+int List_len(List);
+
 converter_inherit_Count converter_inherit_Base_converter_inherit_count(converter_inherit_Base values){
   return List_len(values);
 }
+
+int List_truth(List);
 
 String converter_inherit_Override_str(converter_inherit_Override values){
   if(! _init_guard_) _file_init_();
   return List_truth(values) ? _8 : _9;
 }
+
+String List_str(List);
+
+Var String_var(String);
 
 int main(void){
   x2c_initialize();

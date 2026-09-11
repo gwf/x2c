@@ -50,7 +50,8 @@ trained  loss 0.024875
 reloaded loss 0.024875
 ```
 
-The package uses PyTorch's libtorch on macOS arm64, with CPU tensors.
-Programs need the prepared libtorch libraries at runtime.
+The package uses PyTorch's libtorch on macOS arm64 with CPU or MPS tensors,
+and Linux x86_64 with CPU tensors. Programs need the prepared libtorch
+libraries at runtime.
 
 [Full example](https://github.com/gwf/x2c/blob/main/packages/torch/examples/mlp.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/torch/README.md)

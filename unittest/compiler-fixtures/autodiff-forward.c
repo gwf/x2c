@@ -2,18 +2,6 @@
 
 #include "autodiff-forward.h"
 
-double sin(double);
-
-double cos(double);
-
-static double scale(double a, int k);
-
-static double scale_dot(double a, double a_dot, int k);
-
-static double model(double x, double y, int n);
-
-static double model_dot(double x, double x_dot, double y, double y_dot, int n);
-
 static double scale(double a, int k){
   return a *(double) k;
 }
@@ -21,6 +9,8 @@ static double scale(double a, int k){
 static double scale_dot(double a, double a_dot, int k){
   return(a_dot *(double) k);
 }
+
+double sin(double);
 
 static double model(double x, double y, int n){
   double s = 0.0;
@@ -30,6 +20,8 @@ static double model(double x, double y, int n){
   else t = - t;
   return sin(t) / x - 2.0 * y + s;
 }
+
+double cos(double);
 
 static double model_dot(double x, double x_dot, double y, double y_dot, int n){
   double s = 0.0;

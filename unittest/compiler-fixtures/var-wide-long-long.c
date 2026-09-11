@@ -2,12 +2,6 @@
 
 #include "var-wide-long-long.h"
 
-int Var_is(Var, Symbol);
-
-static Var box_value(long long value);
-
-static long long unbox_value(Var value);
-
 static Var box_value(long long value){
   return Var_box_long_long(value);
 }
@@ -15,6 +9,8 @@ static Var box_value(long long value){
 static long long unbox_value(Var value){
   return Var_long_long(Var_convert(value, 25983886));
 }
+
+int Var_is(Var, Symbol);
 
 int main(void){
   x2c_initialize();

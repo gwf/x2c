@@ -41,15 +41,13 @@ static void map_empty_literal_identity(void) {
 static void map_set_get_updates(void) {
   $test.scoped();
   Map map = %{};
-  Symbol key_a = <a>, key_b = <b>;
-  Var a_key = key_a, b_key = key_b, one = 1, two = 2, forty_two = 42;
-  map.set(a_key, one);
-  map.set(b_key, two);
+  map.set(<a>, 1);
+  map.set(<b>, 2);
   EXPECT_INT_EQ(map.len(), 2);
-  EXPECT_VAR_EQ(map.get(a_key), one);
-  EXPECT_VAR_EQ(map.get(b_key), two);
-  map.set(a_key, forty_two);
-  EXPECT_VAR_EQ(map.get(a_key), forty_two);
+  EXPECT_INT_EQ(map.get(<a>).int(), 1);
+  EXPECT_INT_EQ(map.get(<b>).int(), 2);
+  map.set(<a>, 42);
+  EXPECT_INT_EQ(map.get(<a>).int(), 42);
 }
 
 static void map_void_writes_transfer_before_mutation(void) {
@@ -73,15 +71,12 @@ static void map_void_writes_transfer_before_mutation(void) {
 
 static void map_delete_and_len(void) {
   $test.scoped();
-  Map map = %{};
-  Symbol key_a = <a>, key_b = <b>;
-  Var a_key = key_a, b_key = key_b, ten = 10, twenty = 20;
-  map.update_n(2, a_key, ten, b_key, twenty);
+  Map map = %{<a>: 10, <b>: 20};
   EXPECT_INT_EQ(map.len(), 2);
-  Var removed = map.del(a_key);
-  EXPECT_VAR_EQ(removed, ten);
+  Var removed = map.del(<a>);
+  EXPECT_INT_EQ(removed.int(), 10);
   EXPECT_INT_EQ(map.len(), 1);
-  EXPECT_TRUE(map[a_key] is void);
+  EXPECT_TRUE(map[<a>] is void);
 }
 
 static void map_update_counted_pairs(void) {

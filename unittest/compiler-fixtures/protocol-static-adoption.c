@@ -4,10 +4,6 @@
 
 void * Scope_malloc(size_t);
 
-static int identity(int value);
-
-static inline int StaticParticipant_read(StaticParticipant a0, const int * a1, int * * a2, int a3[3], int(* a4)(int));
-
 StaticBase StaticParticipant_staticbase(StaticParticipant value){
   StaticBase result = Scope_malloc(sizeof(struct StaticBase));
   result -> value = value -> value;
@@ -28,6 +24,8 @@ int StaticBase_read(StaticBase value, const int * scale, int * * output, int val
 static int identity(int value){
   return value;
 }
+
+static inline int StaticParticipant_read(StaticParticipant a0, const int * a1, int * * a2, int a3[3], int(* a4)(int));
 
 int main(void){
   x2c_initialize();

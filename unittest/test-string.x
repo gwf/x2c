@@ -408,6 +408,18 @@ static void string_transformations(void) {
   EXPECT_TRUE(%"hELLO".capitalize() == %"Hello");
   EXPECT_TRUE(%"  x  ".strip(NULL) == %"x");
   EXPECT_TRUE(%"x".strip(NULL) === %"x");
+  EXPECT_TRUE(%"  x  ".lstrip(NULL) == %"x  ");
+  EXPECT_TRUE(%"  x  ".rstrip(NULL) == %"  x");
+  EXPECT_TRUE(%"xytextyx".lstrip("xy") == %"textyx");
+  EXPECT_TRUE(%"xytextyx".rstrip("xy") == %"xytext");
+  EXPECT_TRUE(lower.lstrip(NULL) === lower);
+  EXPECT_TRUE(lower.rstrip(NULL) === lower);
+  EXPECT_NULL(%" \t".lstrip(NULL));
+  EXPECT_NULL(%" \t".rstrip(NULL));
+  EXPECT_NULL(%"".lstrip(NULL));
+  EXPECT_NULL(%"".rstrip(NULL));
+  EXPECT_TRUE(String.new_fill('x', 3) == %"xxx");
+  EXPECT_NULL(String.new_fill('x', 0));
   EXPECT_TRUE(%"a1b2".filter(_string_test_alpha) == %"ab");
   EXPECT_TRUE(%"abc".map(_string_test_next) == %"bcd");
   EXPECT_NULL(%"abc".keep(NULL));

@@ -6,30 +6,6 @@ static String _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-Func Func_new(FuncAdapter, List);
-
-List cons(Var, List);
-
-Var List_var(List);
-
-Var Symbol_var(Symbol);
-
-void Lisp_bind(Lisp, String, Func);
-
-Var String_var(String);
-
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static Byte increment(Byte value);
-
-static Text echo(Text value);
-
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
-
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -47,12 +23,30 @@ static Text echo(Text value){
   return value;
 }
 
+Func Func_new(FuncAdapter, List);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+
+List cons(Var, List);
+
+Var List_var(List);
+
+Var Symbol_var(Symbol);
+
+void Lisp_bind(Lisp, String, Func);
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+
+Var String_var(String);
+
 void install_bindings(Lisp lisp){
   if(! _init_guard_) _file_init_();
   Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(Symbol_var(44253284), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(44253284), (List) 0)));
   Lisp_bind(lisp, _0, _x2c_macro_callable_0);
   Lisp_bind(lisp, _1, Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_2), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_2), (List) 0))));
 }
+
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
   Byte a0 = Var_uchar(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 30065), 30065));

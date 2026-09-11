@@ -6,6 +6,14 @@ static String _1, _0;
 
 static int _init_guard_ = 0;
 
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = String_new("hello");
+  _1 = String_new("string:%hhd/%hu/%Lf/%s");
+}
+
 Var int_var(int);
 
 Var String_var(String);
@@ -23,16 +31,6 @@ Buffer Buffer_printf(Buffer, const char *, ...);
 String Buffer_str(Buffer);
 
 void Buffer_free(Buffer);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _0 = String_new("hello");
-  _1 = String_new("string:%hhd/%hu/%Lf/%s");
-}
 
 int main(void){
   x2c_initialize();

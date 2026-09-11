@@ -1,8 +1,9 @@
 # Improve agent onboarding without adding process
 
-> Status: blocked - implemented locally; behavioral acceptance is unmet.
-> 2026-09-08. Gary subsequently requested a draft PR for review; delivery to
-> main remains blocked, and this plan stays active for the remaining work.
+> Status: active - implementation shipped; fresh acceptance failed.
+> Implementation merged as 352d4d8 (#32). On 2026-09-10 Gary approved
+> a fresh current-tree evaluation if the original inputs are unavailable.
+> Historical failures below remain historical failures, not passing evidence.
 > Baseline: `11fd2fb`. Frozen evaluation inputs and raw evidence remain outside
 > tracked source; `.context/onboarding-repair/` locates local verification.
 
@@ -194,3 +195,63 @@ Detailed local evidence is in `.context/onboarding-evaluation.md`,
 `.context/onboarding-repair/`, and `/tmp/x2c-onboarding-value-eval/` (frozen
 inputs, manifests, native transcripts, scores, comparisons, and usage). No
 runner, transcript, or evaluation framework was added to tracked source.
+
+## Fresh acceptance, 2026-09-10
+
+The approved current-tree fallback did not meet acceptance. The bounded search
+did not recover the original inputs, so this is fresh acceptance, not a
+historical comparison or an extended-history replay. Private evidence is
+preserved outside the worktree at
+`/Users/gary/Documents/x2c-evidence/closeout-20260910/onboarding/`.
+
+The two installed CLI agents used their configured model and effort defaults,
+fixed read-only settings, unchanged prompts and rubric, three repetitions of
+each of five cases, five minutes per trial, and at most three concurrent
+trials. The source snapshot contains 4,083 files based on `2d29fe9` plus the
+authored closeout changes. Hashes, native transcripts, settings, timings,
+provider usage, scores, and temporary runners are retained with the evidence.
+CLI A and CLI B below are mapped to the installed tools in that private record.
+
+| Case | Original A | Original B | Repaired A | Repaired B |
+| --- | --- | --- | --- | --- |
+| Semantic choice | 3/3 | 0/3 | unchanged | unchanged |
+| Truth tests | 3/3 | 1/3 | 3/3 | 2/3 |
+| Canonical ownership | 3/3 | 2/3 | 3/3 | 1/3 |
+| Source-backed investigation | 3/3 | 3/3 | unchanged | unchanged |
+| Answer-only completion | 3/3 | 3/3 | unchanged | unchanged |
+
+The original safe cohort passed 24 of 30 trials. Two source-owner comments
+were clarified after observed mistakes: `List.truth` and `String.truth` now
+state the null canonical empty representations, and `Context.export` states
+that retained-region values must be exported before releasing their Scope.
+No executable behavior changed. A separate snapshot with only those comment
+changes passed 9 of 12 affected-case retries. The original release-before-
+export mistake was corrected, but other answer errors remained. No overall
+improvement is established by these small samples.
+
+Remaining failures replace the user's explicit semantic choice with an
+invented API choice, confuse length with allocated presence, contradict
+correct per-branch reasoning with an incorrect branch count, invent an Array
+alias restriction, or misidentify the pool that closes after promotion.
+Current owners already establish the correct behavior. No further guidance
+expansion or repeated sampling is justified by those mistakes. This plan
+remains open under its every-case acceptance rule.
+
+There were 48 attempts: 45 completed and three were interrupted during a
+runner-settings repair. Initial native plan mode demanded a private plan
+write, conflicting with the read-only task; two denied Write attempts and
+all setup records are preserved. Safe settings retained the read-only tool
+allowlist and removed that mode conflict. Three completed trials with
+unchanged settings were reused; setup failures were not counted as passes.
+Every completed trial finished within five minutes.
+
+The original safe cohort used 931.257 summed trial seconds and 133 tool calls
+for A, and 723.572 seconds and 206 calls for B. The twelve retries added
+701.041 seconds and 139 calls; setup-excluded attempts added 289.311 seconds.
+Native token counters remain separate because the providers define cached
+input differently. Direct Read path counts cannot be compared with shell
+inspection counts. The existing harness command classifier found zero Make
+or ensure requests. Raw tool events show read-only inspection throughout the
+safe cohorts. Final content and symlink manifests and the frozen prompt/rubric
+hashes match; observer-created bytecode caches were documented and removed.
+No dependency, mandatory reading, recurring gate, or tracked runner was added.

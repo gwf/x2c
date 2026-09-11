@@ -2,32 +2,12 @@
 
 #include "package-prefix-basic.h"
 
+#include <math.h>
 typedef double geo__Magnitude;
 
 static int _init_guard_ = 0;
 
 static VarMethods _x2c__x2c_protocol_methods_0;
-
-#include <math.h>
-void * Scope_malloc(size_t);
-
-double sqrt(double);
-
-List List_cdr(List);
-
-int List_len(List);
-
-long Var_integer(Var);
-
-Var int_var(int);
-
-Var double_var(double);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static int _vec_next(Iter iter, Var * out);
 
 static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1);
 
@@ -47,12 +27,16 @@ __attribute__((constructor)) static void _file_init_(void){
 
 }
 
+void * Scope_malloc(size_t);
+
 geo__Vec geo__Vec_new(double x, double y){
   geo__Vec v = Scope_malloc(sizeof(struct geo__VecData));
   v -> x = x;
   v -> y = y;
   return v;
 }
+
+double sqrt(double);
 
 double geo__Vec_norm(geo__Vec v){
   geo__Magnitude m = sqrt(v -> x * v -> x + v -> y * v -> y);
@@ -82,13 +66,23 @@ geo__Vec geo__Vec_mul(geo__Vec a, geo__Vec b){
   return geo__Vec_new(a -> x * b -> x, a -> y * b -> y);
 }
 
+List List_cdr(List);
+
 geo__Chain geo__Chain_rest(geo__Chain values){
   return List_cdr(values);
 }
 
+int List_len(List);
+
 int geo__ChainLeaf_leaf_len(geo__ChainLeaf values){
   return List_len(values);
 }
+
+long Var_integer(Var);
+
+Var int_var(int);
+
+Var double_var(double);
 
 static int _vec_next(Iter iter, Var * out){
   int index = Var_integer(iter -> state);
@@ -97,6 +91,8 @@ static int _vec_next(Iter iter, Var * out){
   * out = double_var(index ? geo__Var_vec(iter -> obj) -> y : geo__Var_vec(iter -> obj) -> x);
   return 1;
 }
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter geo__Vec_iter(geo__Vec v, Iter dest){
   return Iter_init(dest, geo__Vec_var(v), _vec_next, int_var(0));
@@ -109,4 +105,6 @@ static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1){
 static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1){
   return geo__Vec_var(geo__Vec_mul(geo__Var_vec(a0), geo__Var_vec(a1)));
 }
+
+static VarMethods _x2c__x2c_protocol_methods_0;
 

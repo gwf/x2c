@@ -2,24 +2,20 @@
 
 #include "lambda-adapt-direct-function.h"
 
-Var int_var(int);
-
-int Var_int(Var);
-
-static int invoke(int value, int callback(int));
-
-static Var _x2c_lambda_0(Var value);
-
-static int _x2c_lambda_adapt_0(int a0);
-
 static int invoke(int value, int callback(int)){
   return callback(value);
 }
+
+static int _x2c_lambda_adapt_0(int a0);
 
 int main(void){
   x2c_initialize();
   return invoke(41, _x2c_lambda_adapt_0) != 42;
 }
+
+Var int_var(int);
+
+int Var_int(Var);
 
 static Var _x2c_lambda_0(Var value){
   return int_var(Var_int(value) + 1);

@@ -1,8 +1,9 @@
-> Status: reference
+> Status: done
 > D1 design completed on 2026-09-09. Retain selective declaration collection
 > and synthesized external prototypes for this milestone. Broad eager
 > discovery and inferred owner-header insertion are rejected below; this is a
 > completed design decision, not an unassigned implementation deferral.
+> Archived 2026-09-10 as historical evidence; current guides own behavior.
 
 # Declaration discovery and generated declarations
 

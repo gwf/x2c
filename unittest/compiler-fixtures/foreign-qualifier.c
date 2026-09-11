@@ -4,17 +4,15 @@
 
 const char * upstream_monitor_label(int);
 
+static const char * left_label(int index){
+  return upstream_monitor_label(index);
+}
+
 const upstream_monitor * upstream_monitor_at(int);
 
 int upstream_count_labels(upstream_label_fn);
 
 int String_len(String);
-
-static const char * left_label(int index);
-
-static const char * left_label(int index){
-  return upstream_monitor_label(index);
-}
 
 int main(void){
   x2c_initialize();

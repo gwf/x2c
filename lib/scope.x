@@ -992,6 +992,7 @@ void Scope_shutdown(void) {
   _raw_free(hooks);
   hooks = NULL;
   hook_count = hook_capacity = 0;
+  x2c_static_shutdown();
   x2c_scope_thread_release();
   _report_leaks();
   _free_name_registry();

@@ -9,15 +9,13 @@ static List _runtime_match(List input, List pattern) {
 
 static void match_binds_values(void) {
   $test.scoped();
-  /* Explicit scope release to avoid implicit cleanup helpers. */
   List input = %( sum 3 4 5 );
-  Var three = 3, four = 4;
   int matched = 0;
   match (input) {
     case %( sum ?a ?b ?c ): {
       matched = 1;
-      EXPECT_VAR_EQ(a, three);
-      EXPECT_VAR_EQ(b, four);
+      EXPECT_INT_EQ(a.int(), 3);
+      EXPECT_INT_EQ(b.int(), 4);
       EXPECT_INT_EQ(c.int(), 5);
     }
   }
@@ -34,7 +32,7 @@ static void match_star_binder(void) {
         matched = 1;
         EXPECT_INT_EQ(head.int(), 1);
         EXPECT_INT_EQ(tail.len(), 3);
-        EXPECT_INT_EQ(Var_integer(List_cadr(tail)), 3);
+        EXPECT_INT_EQ(tail.cadr().integer(), 3);
       }
   }
   if (!matched) TEST_FAIL("no case matched");
@@ -56,7 +54,7 @@ static void match_prefers_first_case(void) {
   List input = %( pair 1 2 );
   int result = 0;
   match (input) {
-    case %( pair ?x ?y ): result = Var_int(x) + Var_int(y);
+    case %( pair ?x ?y ): result = x.int() + y.int();
     case %( pair 1 ?z ): result = 99;
   }
   EXPECT_INT_EQ(result, 3);
