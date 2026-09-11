@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """Emit one record of static, build-free metrics for the current tree.
 
-The record describes size and shape only. It does not decide that any number
-is good or bad, and nothing in the build or test process consumes it. Its
-purpose is to make change over time visible: run it at two commits and diff
-the records.
+The record describes size and shape only. Compare records to track changes;
+the website also consumes the concise summary when it builds.
 
 The detailed record is derived from tracked files alone, so the same commit
 always produces the same record on any machine. The concise summary measures
-the current src/, lib/, unittest/, and examples/ files.
+the current src/, lib/, etc/, unittest/, and examples/ files.
 
     tools/repo-metrics.py                 # human-readable table
     tools/repo-metrics.py --json          # one JSON object
     tools/repo-metrics.py --json > a.json # record a baseline
     tools/repo-metrics.py --summary       # concise source/test summary
+    tools/repo-metrics.py --summary-json  # the same summary for the website
 """
 
 from __future__ import annotations
@@ -37,6 +36,15 @@ TEST_SUPPORT = {"test-all.x", "test-support.x"}
 CYAN = "\033[36m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
+LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
+MACRO_PATTERNS = ("src/*.xmacro", "lib/*.xmacro", "etc/*.xmacro")
+GENERATED_LISP = {"etc/symbols.xlisp", "etc/header-symbols.xlisp"}
+SUMMARY_GROUPS = {
+    "src": "src/*.x",
+    "lib": "lib/*.x",
+    "xlisp": LISP_PATTERNS,
+    "xmacro": MACRO_PATTERNS,
+}
 
 
 class Fatal(Exception):
@@ -47,7 +55,8 @@ class Fatal(Exception):
 SOURCE_GROUPS = [
     ("compiler", "src/*.x", "module"),
     ("runtime", "lib/*.x", "module"),
-    ("macros", "lib/*.xmacro", "macro file"),
+    ("macros", MACRO_PATTERNS, "macro file"),
+    ("lisp", LISP_PATTERNS, "Lisp file"),
     ("tests", "unittest/test-*.x", "suite"),
     ("examples", "examples/**/*.x", "example"),
     ("probes", "unittest/probes/*.sh", "probe"),
@@ -81,14 +90,24 @@ def lines_of(path: pathlib.Path) -> int:
         return 0
 
 
+def source_paths(patterns, root: pathlib.Path = ROOT) -> list[pathlib.Path]:
+    if isinstance(patterns, str):
+        patterns = (patterns,)
+    return sorted({
+        path for pattern in patterns for path in root.glob(pattern)
+        if path.is_file()
+        and path.relative_to(root).as_posix() not in GENERATED_LISP
+    })
+
+
 def measure(groups, files: set[str]) -> dict:
     result = {}
     for name, pattern, _unit in groups:
-        paths = sorted(
+        paths = [
             p
-            for p in ROOT.glob(pattern)
-            if p.is_file() and str(p.relative_to(ROOT)) in files
-        )
+            for p in source_paths(pattern)
+            if str(p.relative_to(ROOT)) in files
+        ]
         result[name] = {
             "files": len(paths),
             "lines": sum(lines_of(p) for p in paths),
@@ -185,7 +204,14 @@ def parse_cloc(output: str) -> dict[str, int]:
 
 
 def cloc_lines(paths: list[pathlib.Path]) -> dict[str, int]:
-    """Count code and comments in paths with cloc's C rules."""
+    """Count nonblank code and comment-only lines using C comment syntax.
+
+    x2c Lisp shares // and /* */ comments with x2c. Generic Lisp rules
+    would treat semicolons as comments and miss these actual comments.
+    Lines containing both code and comments count as code.
+    """
+    if not paths:
+        return {"code": 0, "comments": 0}
     command = ["cloc", "--force-lang=C", "--csv", "--quiet"]
     command.extend(str(path) for path in paths)
     try:
@@ -193,7 +219,7 @@ def cloc_lines(paths: list[pathlib.Path]) -> dict[str, int]:
             command, cwd=ROOT, capture_output=True, text=True, check=False
         )
     except FileNotFoundError as error:
-        raise Fatal("cloc is required by 'make stats'") from error
+        raise Fatal("cloc is required for repository statistics") from error
     if result.returncode:
         detail = result.stderr.strip() or result.stdout.strip()
         raise Fatal(f"cloc failed: {detail or f'exit {result.returncode}'}")
@@ -233,8 +259,8 @@ def showcase_examples(root: pathlib.Path = ROOT) -> int:
 def collect_summary(root: pathlib.Path = ROOT) -> dict:
     """Collect the concise source and executable-material inventory."""
     source = {
-        name: cloc_lines(sorted((root / name).glob("*.x")))
-        for name in ("src", "lib")
+        name: cloc_lines(source_paths(patterns, root))
+        for name, patterns in SUMMARY_GROUPS.items()
     }
     return {
         "source": source,
@@ -267,15 +293,14 @@ def render_summary(record: dict, color: bool) -> str:
     """Render the concise inventory, optionally with ANSI presentation."""
     source = record["source"]
     tests = record["tests"]
-    code_total = sum(source[name]["code"] for name in ("src", "lib"))
-    comment_total = sum(
-        source[name]["comments"] for name in ("src", "lib")
-    )
+    code_total = sum(group["code"] for group in source.values())
+    comment_total = sum(group["comments"] for group in source.values())
     lines = [
         f"{_paint('Source        ', CYAN, color)}  Code  Comments",
     ]
-    for name in ("src", "lib"):
-        label = _paint(f"{name}/".ljust(14), CYAN, color)
+    for name, title in (("src", "src/"), ("lib", "lib/"),
+                        ("xlisp", "X Lisp"), ("xmacro", "X macros")):
+        label = _paint(title.ljust(14), CYAN, color)
         lines.append(
             f"{label}{source[name]['code']:8,}{source[name]['comments']:10,}"
         )
@@ -317,18 +342,25 @@ def main() -> int:
     output.add_argument(
         "--summary", action="store_true", help="emit the concise summary"
     )
+    output.add_argument(
+        "--summary-json", action="store_true",
+        help="emit the concise summary as JSON",
+    )
     parser.add_argument(
         "--color", choices=("auto", "always", "never"), default="auto",
         help="control summary colour (default: auto)",
     )
     args = parser.parse_args()
-    if args.summary:
+    if args.summary or args.summary_json:
         try:
             record = collect_summary()
         except Fatal as error:
             print(f"repository statistics: {error}", file=sys.stderr)
             return 1
-        print(render_summary(record, color_enabled(args.color)))
+        if args.summary_json:
+            print(json.dumps(record, indent=2, sort_keys=True))
+        else:
+            print(render_summary(record, color_enabled(args.color)))
         return 0
     record = collect()
     if args.json:

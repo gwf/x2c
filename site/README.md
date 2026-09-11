@@ -43,6 +43,21 @@ CDN delivery after deployment.
 `site/dist/` is generated and untracked. The build renders Astro first and
 then mdBook into `site/dist/docs/`.
 
+Landing-page repository counts are recomputed from the current source tree
+when Astro renders the page, using `tools/repo-metrics.py --summary-json`.
+Python 3 and `cloc` must be available on `PATH`, including for direct Astro
+builds and development previews. The Pages workflow installs both. The
+compiler and library cards count top-level `.x` files in `src/` and `lib/`.
+The X Lisp and X macros cards count top-level `.xlisp` and `.xmacro` files in
+`src/`, `lib/`, and `etc/`, excluding generated symbol files. Embedded Lisp
+and macros remain part of their containing file's count.
+
+Like `make stats`, these figures separate nonblank code lines from
+comment-only lines using x2c's C-style comment syntax, including in Lisp
+files. A line with both code and a comment counts as code. The detailed
+`tools/repo-metrics.py --json` inventory instead reports physical lines,
+including comments and blanks, from tracked files.
+
 ## Optional measurement
 
 Analytics is off unless both `SITE_ANALYTICS=production` and

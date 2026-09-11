@@ -49,6 +49,9 @@ jobs:
       - name: Install site dependencies
         run: npm ci --prefix site
 
+      - name: Install repository statistics dependencies
+        run: sudo apt-get update && sudo apt-get install -y python3 cloc
+
       - name: Build public site and book
         run: npm --prefix site run build
 

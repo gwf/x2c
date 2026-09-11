@@ -1,5 +1,6 @@
 ---
 import { Code } from "astro:components";
+import { execFileSync } from "node:child_process";
 import { coreSetup, corePrerequisites } from "../content/core-setup";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -33,6 +34,14 @@ import {
 
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
+const statistics = JSON.parse(execFileSync(
+  "python3", ["tools/repo-metrics.py", "--summary-json"],
+  { cwd: import.meta.env.X2C_REPOSITORY_ROOT, encoding: "utf8" }
+));
+const number = (value: number) => value.toLocaleString("en-US");
+const sourceLines = (name: string) =>
+  `${number(statistics.source[name].code)} / ` +
+  number(statistics.source[name].comments);
 
 const [titleHtml, kickerHtml] = await Promise.all([
   inlineMarkdown(home.title),
@@ -242,27 +251,37 @@ const [titleHtml, kickerHtml] = await Promise.all([
         <div class="docs-cards number-stats">
           <div class="docs-card stat-card">
             <small>compiler</small>
-            <strong>25,383 / 3,000</strong>
+            <strong>{sourceLines("src")}</strong>
             <p>code / comment lines in the compiler source.</p>
           </div>
           <div class="docs-card stat-card">
             <small>library</small>
-            <strong>15,749 / 6,813</strong>
+            <strong>{sourceLines("lib")}</strong>
             <p>code / comment lines in the library source.</p>
           </div>
           <div class="docs-card stat-card">
+            <small>X Lisp</small>
+            <strong>{sourceLines("xlisp")}</strong>
+            <p>code / comment lines in hand-written X Lisp source.</p>
+          </div>
+          <div class="docs-card stat-card">
+            <small>X macros</small>
+            <strong>{sourceLines("xmacro")}</strong>
+            <p>code / comment lines in hand-written X macro source.</p>
+          </div>
+          <div class="docs-card stat-card">
             <small>tests</small>
-            <strong>766</strong>
+            <strong>{number(statistics.tests.unit_tests)}</strong>
             <p>unit tests.</p>
           </div>
           <div class="docs-card stat-card">
             <small>fixtures</small>
-            <strong>612</strong>
+            <strong>{number(statistics.tests.compiler_fixtures)}</strong>
             <p>compiler fixtures.</p>
           </div>
           <div class="docs-card stat-card">
             <small>examples</small>
-            <strong>50</strong>
+            <strong>{number(statistics.tests.showcase_examples)}</strong>
             <p>showcase examples.</p>
           </div>
           <div class="docs-card stat-card">

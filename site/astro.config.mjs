@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import { satteri } from "@astrojs/markdown-satteri";
+import { fileURLToPath } from "node:url";
 
 import { siteBase, siteUrl } from "./site-config.mjs";
 import {
@@ -52,6 +53,11 @@ export default defineConfig({
     assets: "assets"
   },
   vite: {
+    define: {
+      "import.meta.env.X2C_REPOSITORY_ROOT": JSON.stringify(
+        fileURLToPath(new URL("..", import.meta.url))
+      )
+    },
     server: {
       proxy: docsDevProxy,
       watch: {
