@@ -167,18 +167,21 @@ stays active; do not equate a running or partial check with completion.
 
 ## Separate research backlog
 
-1. Symbolic aggregate initializer condition expansion: 12 values produced
-   1,657,820 C bytes in 6.04 seconds; literal dimensions produced 510 bytes.
+1. Symbolic aggregate initializer condition expansion: scalar positional
+   initialization was repaired separately in b39546c (2026-09-11). The
+   twelve-value acceptance case now generates 16,703 C bytes, with linear
+   growth through 64 values.
 2. Warm native build fingerprints run serially before job scheduling.
 3. Editor queries repeat analysis; reuse revision-specific semantic facts.
 4. Pool release retains transient peak backing: 54,618,112 bytes after a
    200,000-allocation burst, with only 2,048 bytes active. This is not a leak.
 5. Relocatable Torch application distribution through existing bundle owners.
 
-The separate [aggregate initializer proposal](aggregate-initializer-growth.md)
-reproduces item 1 on delivered main and records a bounded design. Its
-implementation is not authorized by this closeout; onboarding's failed
-acceptance remains independent of that research backlog.
+The [aggregate initializer completion record](archive/aggregate-initializer-growth.md)
+records item 1's separately authorized implementation, compatibility boundary,
+publication, and retained evidence. The other four opportunities remain
+future work. Onboarding acceptance remains independent and is not resolved
+by that compiler repair.
 
 ## Plan review
 

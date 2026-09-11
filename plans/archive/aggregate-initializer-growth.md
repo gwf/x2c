@@ -1,6 +1,7 @@
-> Status: active
-> Implementation authorized on 2026-09-11. The compiler repair and focused
-> acceptance pass; final publication validation and delivery are in progress.
+> Status: done
+> Implemented and delivered to main in b39546c on 2026-09-11.
+> The complete publication gate passed; public API documentation is deployed
+> and verified. Scalar positional initializer acceptance is complete.
 
 # Bound symbolic aggregate initializer growth
 
@@ -89,7 +90,19 @@ Separate before/after probes retain excess-value side effects and accepted
 empty unselected arrays; invalid dimensions and initialized VLAs remain
 rejected. The publication gate first found a stale bootstrap copy of the
 runtime's character-array zero initializer. Stages zero, one, and two agree
-on all 156 generated C/H files; the normal gate is refreshing the seed.
+on all 156 generated C/H files. After the normal seed refresh and API
+regeneration, the complete final publication gate passed: 774 unit tests /
+18,522 assertions, 624 fixtures / 1,445 artifacts, 460 required raw-symbol
+translations, and the documentation audit (113 files, 17 path-audited entry
+points). Failed attempts remain in the retained logs.
+
+Pages deployment [34624612185](https://github.com/gwf/x2c/actions/runs/34624612185)
+succeeded at b39546c. Both affected compiler API pages return HTTP 200 and
+match the generated descriptions and source references. A final independent
+measurement run compiled and executed all fifteen cases with identical C
+sizes; the twelve-value macro case took 0.065 seconds. A const aggregate
+probe also retained address identity, one initialization, and correct values.
+The authored `src/` plus `lib/` diff is +156 lines net; `lib/` is unchanged.
 
 Raw sources, generated output, logs, measurements, and compatibility evidence
 are retained outside the worktree:
@@ -113,5 +126,5 @@ bitfield repair reuses the declared base type. No validator or dedicated
 diagnostic was introduced. The added regression protects actual destination
 values, side-effect counts, and the two reproduced invalid native outputs.
 Authored changes were reviewed before publication validation; generated
-changes are reviewed before delivery. The existing publication gate remains
+changes were reviewed before delivery. The existing publication gate remains
 unchanged.
