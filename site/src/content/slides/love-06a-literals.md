@@ -12,21 +12,21 @@ Map workshop = %{
   topics: (graphics sound games),
   venue: {
     name: "The Maker House", room: "Studio 2", seats: 24,
-    address: {street: "12 Garden Lane", city: "Bristol"}
+    address: { street: "12 Garden Lane", city: "Bristol" }
   },
   hosts: [
-    {name: "Ada", role: instructor, skills: (graphics games)},
-    {name: "Sam", role: mentor, skills: (music sound)}
+    { name: "Ada", role: instructor, skills: (graphics games) },
+    { name: "Sam", role: mentor, skills: (music sound) }
   ],
-  pricing: {currency: "GBP", standard: 35.0, student: 15.0},
+  pricing: { currency: "GBP", standard: 35.0, student: 15.0 },
   bring: ["A laptop", "Headphones", "An unfinished idea"],
   sessions: [
-    {title: "Draw a world", minutes: 45,
-     project: {width: 320, height: 240, colors: 16}},
-    {title: "Make it move", minutes: 60,
-     controls: {left: a, right: d, jump: space}},
-    {title: "Add some sound", minutes: 30,
-     audio: {channels: 2, volume: 0.75, rate: 44100}}
+    { title: "Draw a world", minutes: 45,
+      project: { width: 320, height: 240, colors: 16 } },
+    { title: "Make it move", minutes: 60,
+      controls: { left: a, right: d, jump: space } },
+    { title: "Add some sound", minutes: 30,
+      audio: { channels: 2, volume: 0.75, rate: 44100 } }
   ]
 };
 ~Map venue = workshop[<venue>];
