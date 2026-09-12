@@ -677,16 +677,24 @@ static int _repl(Interp *self) {
 int main(int argc, char **argv) {
   $scope() {
     try {
+      Array args = range(0, argc - 1, 1)
+        .map(%!(int i) using &argv => String.new(argv[i])).array();
       Interp self = _interpreter();
-      if (argc == 1) return _repl(&self) ? 0 : 1;
       String source;
-      if (argc == 3 && !strcmp(argv[1], "-e")) source = argv[2];
-      else if (argc == 2 && !strcmp(argv[1], "--selftest"))
-        source = "(list (apply + '(10 20 12)) (append '(1 2) '(3 4)))";
-      else if (argc == 2) source = File.open(argv[1], "r").string_close();
-      else {
-        Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n", argv[0]);
-        return 1;
+      match (args.list()) {
+        case %(?): return _repl(&self) ? 0 : 1;
+        case %(? "-e" ?text): source = text;
+        case %(? "--selftest"):
+          source = "(list (apply + '(10 20 12)) (append '(1 2) '(3 4)))";
+        case %(? ?file): {
+          const char *path = file.str();
+          source = File.open(path ? path : "", "r").string_close();
+        }
+        default: {
+          Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n",
+                        args[0].str());
+          return 1;
+        }
       }
       Stdout.printf("%s\n", _eval_text(&self, source).repr());
       return 0;
