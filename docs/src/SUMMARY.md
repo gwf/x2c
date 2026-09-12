@@ -10,14 +10,14 @@
 - [Strings, Lists, Arrays, and Maps](guide/collections.md)
 - [Pattern Matching](guide/match.md)
 - [Iteration](guide/iteration.md)
-- [Packages](guide/packages.md)
-- [Wrapping a C Library](guide/wrapping-c-libraries.md)
 - [Scopes and Lifetime](guide/memory.md)
 - [Contexts and Threads](guide/contexts-and-threads.md)
 - [Exceptions and Cleanup](guide/exceptions.md)
 - [Protocols](guide/protocols.md)
 - [Classes and System Macros](guide/system-macros.md)
 - [Compile-time Macros](guide/macros.md)
+- [Packages](guide/packages.md)
+- [Wrapping a C Library](guide/wrapping-c-libraries.md)
 - [Programming Idioms](guide/idioms.md)
 
 # Language reference
