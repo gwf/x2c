@@ -42,8 +42,7 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
   List args = expr.cdr();
   if (fn is <lambda>) {
     Fn closure = fn.pointer();
-    if (closure.macro)
-      return self.eval(env, self.invoke(env, closure, args));
+    if (closure.macro) return self.eval(env, self.invoke(env, closure, args));
   }
   else {
     if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));
@@ -83,7 +82,7 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
     case %(eval ?form): return self.eval(NULL, self.eval(env, form));
     case %(apply ?fn ?values): {
       Var callable = self.eval(env, fn), actual = self.eval(env, values);
-      return self.apply(env, callable, _list_argument(actual, %"apply"));
+      return self.apply(env, callable, _list_argument(actual, "apply"));
     }
     case %(bind ?name ?sig): {
       Var target = self.eval(env, name), type = self.eval(env, sig);
@@ -92,7 +91,7 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
     case %(import ?form): {
       Var path = self.eval(env, form);
       Atom hook = Atom.intern("_x2c.import-hook");
-      _string_argument(path, %"import");
+      _string_argument(path, "import");
       if (self.globals.contains(hook))
         return self.apply(NULL, self.globals[hook], %($path));
       return _import_file(self, path);
@@ -105,8 +104,7 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
 static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
   if (fn is <lambda>) {
     Fn closure = fn.pointer();
-    if (closure.macro)
-      $fail(<not-call>, %"apply", <actual>, fn.kind());
+    if (closure.macro) $fail(<not-call>, %"apply", <actual>, fn.kind());
     return self.invoke(env, closure, values);
   }
   if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));
@@ -114,7 +112,7 @@ static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
     if (self.specials[fn] != <apply>.var())
       $fail(<not-call>, %"apply", <actual>, fn.kind());
     match (values) case %(?callable ?args):
-      return self.apply(env, callable, _list_argument(args, %"apply"));
+      return self.apply(env, callable, _list_argument(args, "apply"));
     return _bad_form(<apply>, values);
   }
   return _native_call(fn, values);
@@ -153,20 +151,17 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
   Map bindings = $auto(%{});
   for (List params = closure.params; params; params = params.cdr()) {
     Var (name, rest) = params;
-    if (name.is_atom() && name.str() == %".") {
-      if (!params.cdr())
-        $fail(<bad-sig>, %"apply", <value>, closure.body);
+    if (name.is_atom() && name.str() == ".") {
+      if (!params.cdr()) $fail(<bad-sig>, %"apply", <value>, closure.body);
       bindings[rest] = values;
       values = NULL;
       break;
     }
-    if (!values)
-      $fail(<bad-arity>, %"apply", <value>, closure.body);
+    if (!values) $fail(<bad-arity>, %"apply", <value>, closure.body);
     bindings[name] = values.car();
     values = values.cdr();
   }
-  if (values)
-    $fail(<bad-arity>, %"apply", <value>, closure.body);
+  if (values) $fail(<bad-arity>, %"apply", <value>, closure.body);
   // Captures take priority; uncaptured names remain visible in the caller.
   Env captured = { closure.captures, env };
   Env local = { bindings, &captured };
@@ -182,10 +177,8 @@ static Var Interp.quasiquote(Interp *self, Env *env, Var form, int depth) {
   if (head == quote)
     return cons(head, self.quasiquote(env, expr.cdr(), depth + 1));
   if (head == unquote || head == splice) {
-    if (expr.len() != 2)
-      $fail(<bad-arity>, %"quasiquote", <value>, form);
-    if (depth)
-      return cons(head, self.quasiquote(env, expr.cdr(), depth - 1));
+    if (expr.len() != 2) $fail(<bad-arity>, %"quasiquote", <value>, form);
+    if (depth) return cons(head, self.quasiquote(env, expr.cdr(), depth - 1));
     Var value = self.eval(env, argument);
     if (head == splice)
       $fail(<bad-types>, %"quasiquote-splice", <actual>, form.kind());
@@ -221,9 +214,8 @@ static String _string_argument(Var value, String op) {
 }
 
 static Var Interp.bind(Interp *self, Var name, Var sig) {
-  _string_argument(name, %"bind");
-  if (sig is not <list>)
-    $fail(<bad-sig>, %"bind", <value>, sig);
+  _string_argument(name, "bind");
+  if (sig is not <list>) $fail(<bad-sig>, %"bind", <value>, sig);
   if (self.natives.contains(name)) return self.natives[name];
   raise %(no-symbol (name $name) (sig $sig));
 }
@@ -339,16 +331,12 @@ static Var _native_call(Func native, List values) {
   return native.apply(count, args);
 }
 
-static Var _bool(int x) {
-  if (x) return <true>;
-  return %();
-}
-
 static int _is_number(Var v) {
   Symbol k = v.kind();
   return k == <integer> || k == <floating>;
 }
 
+static Var _bool(int x)      => x ? <true>.var() : %().var();
 static Var _atom(Var v)      => _bool(v is not <list> || v.is_nil());
 static Var _pair(Var v)      => _bool(v is <list> && !v.is_nil());
 static Var _list(Var v)      => _bool(v is <list>);
@@ -365,10 +353,8 @@ static Var _compare(Var a, Var b) {
   return a.compare(b);
 }
 
-static Var _add(Var a, Var b) {
-  if (a is <string> || b is <string>) return %"$a$b";
-  return a.binary(<+>, b);
-}
+static Var _add(Var a, Var b) =>
+  a is <string> || b is <string> ? %"$a$b".var() : a.binary(<+>, b);
 
 static Var _plus(List values) {
   Var seed = 0;
@@ -392,8 +378,7 @@ static Var _times(List xs)  => xs.foldl(1, %!(a, b) => a.binary(<*>, b));
 
 static Var _chain(List values, String op, int want, int expect) {
   int n = values.len();
-  if (n < 2)
-    $fail(<bad-arity>, op, <expected>, 2, <actual>, n);
+  if (n < 2) $fail(<bad-arity>, op, <expected>, 2, <actual>, n);
   Var left = values.car();
   foreach (Var right, values.cdr()) {
     int order = _compare(left, right).integer();
@@ -403,11 +388,11 @@ static Var _chain(List values, String op, int want, int expect) {
   return _bool(1);
 }
 
-static Var _eq_chain(List xs) => _chain(xs, %"=",  0, 1);
-static Var _lt_chain(List xs) => _chain(xs, %"<", -1, 1);
-static Var _le_chain(List xs) => _chain(xs, %"<=", 1, 0);
-static Var _gt_chain(List xs) => _chain(xs, %">",  1, 1);
-static Var _ge_chain(List xs) => _chain(xs, %">=", -1, 0);
+static Var _eq_chain(List xs) => _chain(xs, "=",  0, 1);
+static Var _lt_chain(List xs) => _chain(xs, "<", -1, 1);
+static Var _le_chain(List xs) => _chain(xs, "<=", 1, 0);
+static Var _gt_chain(List xs) => _chain(xs, ">",  1, 1);
+static Var _ge_chain(List xs) => _chain(xs, ">=", -1, 0);
 
 // These return Var because the native signature appears in Lisp errors.
 static Var _str(Var v)                        => v.str();
@@ -503,65 +488,50 @@ static List _stdlib = %(
   (defun null? (value) (eq? value nil))
   (def equal? eq?)
   (defmacro and (. forms)
-    (if (null? forms)
-        true
-        (if (null? (cdr forms))
-            (car forms)
+    (if (null? forms) true
+        (if (null? (cdr forms)) (car forms)
             `(if ,(car forms) (and ,@(cdr forms)) false))))
   (defmacro or (. forms)
-    (if (null? forms)
-        false
-        (if (null? (cdr forms))
-            (car forms)
+    (if (null? forms) false
+        (if (null? (cdr forms)) (car forms)
             `((lambda (_or_value)
                 (if _or_value _or_value (or ,@(cdr forms))))
               ,(car forms)))))
   (defun _last (values)
-    (if (null? values)
-        nil
-        (if (null? (cdr values))
-            (car values)
+    (if (null? values) nil
+        (if (null? (cdr values)) (car values)
             (_last (cdr values)))))
   (defun begin (. values) (_last values))
   (defun map (procedure values)
-    (if (null? values)
-        nil
+    (if (null? values) nil
         (cons (procedure (car values))
               (map procedure (cdr values)))))
   (defun filter (predicate values)
-    (if (null? values)
-        nil
+    (if (null? values) nil
         (if (predicate (car values))
             (cons (car values) (filter predicate (cdr values)))
             (filter predicate (cdr values)))))
   (defun foldl (procedure initial values)
-    (if (null? values)
-        initial
+    (if (null? values) initial
         (foldl procedure
                (procedure initial (car values))
                (cdr values))))
   (defun member (value values)
-    (if (null? values)
-        nil
-        (if (equal? value (car values))
-            values
+    (if (null? values) nil
+        (if (equal? value (car values)) values
             (member value (cdr values)))))
   (defun assoc (key pairs)
-    (if (null? pairs)
-        nil
+    (if (null? pairs) nil
         (if (and (pair? (car pairs))
                  (equal? key (car (car pairs))))
             (car pairs)
             (assoc key (cdr pairs)))))
   (defun _append2 (left right)
-    (if (null? left)
-        right
+    (if (null? left) right
         (cons (car left) (_append2 (cdr left) right))))
   (defun _append_lists (lists)
-    (if (null? lists)
-        nil
-        (if (null? (cdr lists))
-            (car lists)
+    (if (null? lists) nil
+        (if (null? (cdr lists)) (car lists)
             (_append2 (car lists) (_append_lists (cdr lists))))))
   (defun append (. lists) (_append_lists lists))
   (defun sub (a b) (_binary a '- b))
@@ -573,8 +543,7 @@ static List _stdlib = %(
   (defmacro let (bindings body)
     `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))
   (defmacro let* (bindings body)
-    (if (null? bindings)
-        body
+    (if (null? bindings) body
         `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))
   (defun caar (value) (car (car value)))
   (defun cadr (value) (car (cdr value)))
@@ -584,8 +553,7 @@ static List _stdlib = %(
     (if (list? subject) (_match subject pattern) nil))
   (defun bound (bindings binder) (cadr (assoc binder bindings)))
   (defun search-replace (subject pattern template)
-    (if (match subject pattern)
-        (match-replace subject pattern template)
+    (if (match subject pattern) (match-replace subject pattern template)
         (_search-replace subject pattern template)))
   (defun binder? (value)
     (and (symbol? value)
