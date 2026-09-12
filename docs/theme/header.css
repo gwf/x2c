@@ -132,12 +132,23 @@
   white-space: nowrap;
 }
 
-.external-link-icon {
+a:is([href^="https://" i], [href^="http://" i], [href^="//"]):not(
+  [href="https://x2c-lang.dev" i], [href^="https://x2c-lang.dev/" i],
+  [href^="https://x2c-lang.dev?" i], [href^="https://x2c-lang.dev#" i],
+  [href="http://x2c-lang.dev" i], [href^="http://x2c-lang.dev/" i],
+  [href^="http://x2c-lang.dev?" i], [href^="http://x2c-lang.dev#" i],
+  [href="//x2c-lang.dev" i], [href^="//x2c-lang.dev/" i],
+  [href^="//x2c-lang.dev?" i], [href^="//x2c-lang.dev#" i]
+)::after {
+  content: "";
   display: inline-block;
   width: 0.75em;
   height: 0.75em;
   margin-left: 0.25em;
   vertical-align: -0.05em;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5'%3E%3Cpath d='M3 13 13 3M3 3h10v10'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 @media (max-width: 700px) {
