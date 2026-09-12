@@ -58,16 +58,15 @@ static void Build__link_packages(Build state, String input, String directory);
 
 typedef struct CcJob{
   ToolRun execution;
-  String source, state_path;
+  ToolAction action;
+  String source, object, depfile, state_path, preprocessed;
   uint64_t fingerprint;
 }
 CcJob;
 
 static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs, int * ok);
 
-static uint64_t _compile_fingerprint(Build state, ToolAction action, String source, String preprocessed, List include_dirs, int * ok);
-
-static int _finish_compile(Build state, CcJob pending);
+static int _finish_compile(Build state, CcJob * pending);
 
 static void _json_string(Buffer out, String text);
 
@@ -829,28 +828,35 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
   return hash;
 }
 
-ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
-
-int ToolAction_run(ToolAction);
-
-static uint64_t _compile_fingerprint(Build state, ToolAction action, String source, String preprocessed, List include_dirs, int * ok){
-  ToolAction preprocess = Toolchain_preprocess_action(state -> toolchain, source, preprocessed, include_dirs);
-  if(ToolAction_run(preprocess)) * ok = 0;
-  uint64_t hash = _action_fingerprint(state, action, cons(String_var(preprocessed), NULL), ok);
-  unlink(preprocessed);
-  return hash;
-}
-
 int ToolRun_wait(ToolRun);
 
-static int _finish_compile(Build state, CcJob pending){
-  int status = ToolRun_wait(pending.execution);
+ToolRun ToolAction_start(ToolAction);
+
+static int _finish_compile(Build state, CcJob * pending){
+  int status = ToolRun_wait(pending -> execution);
+  if(String_truth(pending -> preprocessed)){
+    int ok = ! status;
+    String preprocessed = pending -> preprocessed;
+    if(ok) pending -> fingerprint = _action_fingerprint(state, pending -> action, cons(String_var(preprocessed), NULL), & ok);
+    unlink(pending -> preprocessed);
+    pending -> preprocessed = NULL;
+    if(! ok) return 1;
+    if(! access(pending -> object, R_OK) && ! access(pending -> depfile, R_OK) && _state_matches(pending -> state_path, pending -> fingerprint)){
+      if(state -> request -> verbose) fprintf(stderr, "x2c: up-to-date compile %s\n", pending -> source);
+      state -> cc_cached ++;
+    }
+    else{
+      pending -> execution = ToolAction_start(pending -> action);
+      return - 1;
+    }
+
+  }
+  else if(! status && String_truth(state -> state_root) && ! state -> request -> dry_run) _state_write(pending -> state_path, pending -> fingerprint);
   if(! status){
     state -> cc_done ++;
-    report_progress(7477414666, state -> cc_done, state -> cc_n, pending.source);
+    report_progress(7477414666, state -> cc_done, state -> cc_n, pending -> source);
   }
-  if(! status && String_truth(state -> state_root) && ! state -> request -> dry_run) _state_write(pending.state_path, pending.fingerprint);
-  return status;
+  return status != 0;
 }
 
 Buffer Buffer_write_char(Buffer, char);
@@ -956,7 +962,12 @@ static int _finish_compiles(Build state, CcJob * running, int * count, int wait)
   for(; ; ){
     for(int i = 0;  i < * count; ){
       if((wait && * count == 1) || ToolRun_ready(running[i].execution)){
-        if(_finish_compile(state, running[i])) failed = 1;
+        int status = _finish_compile(state, running + i);
+        if(status < 0){
+          i ++;
+          continue;
+        }
+        if(status) failed = 1;
         (* count) --;
         memmove(running + i, running + i + 1, (* count - i) * sizeof(CcJob));
         wait = 0;
@@ -975,7 +986,7 @@ String x2c_path_dir(String);
 
 ToolAction Toolchain_compile_action(Toolchain, String, String, String, List);
 
-ToolRun ToolAction_start(ToolAction);
+ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
 
 void Scope_free(void *);
 
@@ -1024,31 +1035,19 @@ static int _compile_sources(Build b){
         Array_push(b -> objects, String_var(object));
         if((void *) b -> compile_commands != NULL) Array_push(b -> compile_commands, String_var(_compile_command(b, action, source, object)));
         String state_path = String_truth(b -> state_root) ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_49), cons(String_var(_key(source)), NULL)))) : NULL;
-        uint64_t fingerprint = 0;
-        if(String_truth(state_path) && ! b -> request -> dry_run){
-          int ok = 1;
-          fingerprint = _compile_fingerprint(b, action, source, String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_2), cons(String_var(key), cons(String_var(_50), NULL))))), directories, & ok);
-          if(! ok){
-            failed = 1;
-            break;
-          }
-
-        }
-        if(String_truth(state_path) && ! b -> request -> dry_run && ! access(object, R_OK) && ! access(depfile, R_OK) && _state_matches(state_path, fingerprint)){
-          if(b -> request -> verbose) fprintf(stderr, "x2c: up-to-date compile %s\n", source);
-          b -> cc_done ++;
-          b -> cc_cached ++;
-          report_progress(7477414666, b -> cc_done, b -> cc_n, source);
-          continue;
-        }
         if(_finish_compiles(b, running, & running_count, 0)){
           failed = 1;
           break;
         }
         CcJob pending ={
-          ToolAction_start(action), source, state_path, fingerprint
+          .action = action, .source = source, .object = object, .depfile = depfile, .state_path = state_path
         }
         ;
+        if(String_truth(state_path) && ! b -> request -> dry_run){
+          pending.preprocessed = String_join(NULL, cons(String_var(b -> dep_root), cons(String_var(_2), cons(String_var(key), cons(String_var(_50), NULL)))));
+          pending.execution = ToolAction_start(Toolchain_preprocess_action(b -> toolchain, source, pending.preprocessed, directories));
+        }
+        else pending.execution = ToolAction_start(action);
         running[running_count ++] = pending;
         if(running_count >= b -> request -> jobs && _finish_compiles(b, running, & running_count, 1)){
           failed = 1;
@@ -1134,6 +1133,8 @@ ToolAction Toolchain_archive_action(Toolchain, String, List);
 ToolAction Toolchain_link_action(Toolchain, String, List);
 
 int List_len(List);
+
+int ToolAction_run(ToolAction);
 
 ToolAction tool_action_new(Symbol, List, int, int);
 

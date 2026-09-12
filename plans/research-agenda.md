@@ -1,23 +1,46 @@
 # Recommended research plans
 
-> Status: reference - proposed plan structure, 2026-09-11.
-> Gary requested investigation and recommendations, not implementation of
-> these deferred items. Each proposed filename below is a future scoped plan,
-> not an approved implementation or a newly required process.
+> Status: reference - independent work pursued on 2026-09-11.
+> Gary authorized proceeding in parallel where little further input was needed.
+> Delivery commit subject: `overlap native fingerprints and close research probes`.
 
-The [closeout](archive/closeout-outstanding.md) delivered its implementation.
-The [onboarding experiment](archive/agent-onboarding-accuracy.md) is retired
-with failed acceptance: Fable's final scores were 10/15, 8/15, and 10/15.
-Gary stopped further improvement attempts. The [two deferred questions](archive/ISSUES.md)
-and four remaining research opportunities are preserved below. Aggregate
-initializer growth was already repaired and is not part of this agenda.
+## Current outcomes
 
-Recommend five independently deliverable plans. Start with memory attribution;
-use its findings to decide whether ownership changes or pool trimming are
-worth pursuing. Build performance and editor reuse can be investigated
-independently. Scope application distribution when there is a target consumer.
-This review inspected current source and retained reports; it did not rerun
-memory/performance benchmarks or establish a speedup or new runtime defect.
+All five topics received bounded investigation. One justified an implementation:
+
+- [Native build reuse](archive/native-build-reuse.md): preprocess fingerprints
+  now use the existing bounded job scheduler. A synthetic 16-file warm build
+  fell from 0.456 to 0.167 seconds at four jobs; single-job time was unchanged.
+- [Memory retention](archive/memory-retention.md): fresh Torch probes identify
+  substantial allocator-reclaimable residency, with only 2 KB in its Pool
+  depot. A separate burst proves intentional depot retention and full reuse.
+  No Pool policy or ownership change is justified by these measurements.
+- [Temporary ownership](archive/temporary-result-ownership.md): the existing
+  fixture reproduces why returned inputs/views must survive. Preserve the
+  guard and explicit named-value lifetimes; no new freshness contract.
+- [Editor reuse](archive/editor-semantic-reuse.md): existing callers already
+  debounce diagnostics. No observed repeated-request workload justified more
+  cancellation state, and arbitrary macro inputs prevent revision-only caching.
+- [Torch relocation](archive/torch-application-distribution.md): a moved macOS
+  application with four private libraries passes CPU/checkpoint execution and
+  matches the original's 19 records and 64 curve observations. Public packaging
+  remains future scope; this probe adds no signing/platform promise.
+
+Raw evidence is retained in
+`/Users/gary/Documents/x2c-evidence/research-20260912/`. Performance experiments
+were run in coordinated quiet windows, not concurrently with agent builds.
+These outcomes supersede the initial uncertainty below without rewriting its
+historical scope. No deferred language or memory-policy change was inferred
+from the implementation authorization.
+
+The earlier [closeout](archive/closeout-outstanding.md) implementation remains
+complete. The [Fable effort](archive/agent-onboarding-accuracy.md) remains
+intentionally retired with failed acceptance and was not reopened.
+
+## Original research scopes
+
+The following records the initial five recommended boundaries. Further work
+should start from the completed outcome linked above, not repeat this scouting.
 
 ## 1. memory-retention.md
 
@@ -129,14 +152,15 @@ or release-system expansion assumed here.
 
 The old umbrella and two-question list are archived, rather than maintained
 as duplicate active checklists. Their outcomes and raw evidence references
-remain intact. The stalled onboarding effort has no successor plan. Create
-only the individual plans selected for further work; this reference is the
-recommended grouping, not five implementation commitments.
+remain intact. The stalled onboarding effort has no successor plan. The five completed investigations now have archival records above. Further
+implementation needs the evidence and scope identified by each outcome; there
+is no duplicate active checklist.
 
 These scopes reuse compiler facts, native scheduling, existing benchmark
 profiles, Pool storage ownership, and package metadata. They do not add
 consumer validation of already established facts. Freshness/invalidation and
 loader closure are unresolved contracts, not excuses to introduce parallel
-owners. No implementation, new validator, negative fixture, recurring gate,
-or mandatory process is added by this recommendation. Any selected plan must
+owners. The original recommendation added no implementation or process. The authorized
+follow-up changes only the existing native scheduler and extends an existing
+probe case; no recurring gate or new process is added. Any selected plan must
 review its resulting authored diff and use the existing publication checks.

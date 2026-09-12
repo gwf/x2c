@@ -471,7 +471,8 @@ void Build.end_translation(Build state, String input, int cached) {
 
 typedef struct CcJob {
   ToolRun execution;
-  String source, state_path;
+  ToolAction action;
+  String source, object, depfile, state_path, preprocessed;
   uint64_t fingerprint;
 } CcJob;
 
@@ -485,26 +486,36 @@ static uint64_t _action_fingerprint(
   return hash;
 }
 
-static uint64_t _compile_fingerprint(
-  Build state, ToolAction action, String source, String preprocessed,
-  List include_dirs, int *ok) {
-  ToolAction preprocess = state.toolchain.preprocess_action(
-    source, preprocessed, include_dirs);
-  if (preprocess.run()) *ok = 0;
-  uint64_t hash = _action_fingerprint(state, action, %($preprocessed), ok);
-  unlink(preprocessed);
-  return hash;
-}
-
-static int _finish_compile(Build state, CcJob pending) {
-  int status = pending.execution.wait();
+/* Returns -1 when preprocessing starts a compile in the same job slot. */
+static int _finish_compile(Build state, CcJob *pending) {
+  int status = pending->execution.wait();
+  if (pending->preprocessed) {
+    int ok = !status;
+    String preprocessed = pending->preprocessed;
+    if (ok)
+      pending->fingerprint = _action_fingerprint(
+        state, pending->action, %($preprocessed), &ok);
+    unlink(pending->preprocessed);
+    pending->preprocessed = NULL;
+    if (!ok) return 1;
+    if (!access(pending->object, R_OK) && !access(pending->depfile, R_OK) &&
+        _state_matches(pending->state_path, pending->fingerprint)) {
+      if (state.request.verbose)
+        fprintf(stderr, "x2c: up-to-date compile %s\n", pending->source);
+      state.cc_cached++;
+    }
+    else {
+      pending->execution = pending->action.start();
+      return -1;
+    }
+  }
+  else if (!status && state.state_root && !state.request.dry_run)
+    _state_write(pending->state_path, pending->fingerprint);
   if (!status) {
     state.cc_done++;
-    report_progress(<compile>, state.cc_done, state.cc_n, pending.source);
+    report_progress(<compile>, state.cc_done, state.cc_n, pending->source);
   }
-  if (!status && state.state_root && !state.request.dry_run)
-    _state_write(pending.state_path, pending.fingerprint);
-  return status;
+  return status != 0;
 }
 
 static void _json_string(Buffer out, String text) {
@@ -579,7 +590,12 @@ static int _finish_compiles(
   for (;;) {
     for (int i = 0; i < *count;) {
       if ((wait && *count == 1) || running[i].execution.ready()) {
-        if (_finish_compile(state, running[i])) failed = 1;
+        int status = _finish_compile(state, running + i);
+        if (status < 0) {
+          i++;
+          continue;
+        }
+        if (status) failed = 1;
         (*count)--;
         memmove(running + i, running + i + 1, (*count - i) * sizeof(CcJob));
         wait = 0;
@@ -624,32 +640,20 @@ static int _compile_sources(Build b) {
     String state_path =
       b.state_root ?
       %"${b.state_root}/c-${_key(source)}" : NULL;
-    uint64_t fingerprint = 0;
-    if (state_path && !b.request.dry_run) {
-      int ok = 1;
-      fingerprint = _compile_fingerprint(
-        b, action, source, %"${b.dep_root}/$key.i", directories, &ok);
-      if (!ok) {
-        failed = 1;
-        break;
-      }
-    }
-    if (state_path && !b.request.dry_run && !access(object, R_OK) &&
-        !access(depfile, R_OK) && _state_matches(state_path, fingerprint)) {
-      if (b.request.verbose)
-        fprintf(stderr, "x2c: up-to-date compile %s\n", source);
-      b.cc_done++;
-      b.cc_cached++;
-      report_progress(<compile>, b.cc_done, b.cc_n, source);
-      continue;
-    }
     if (_finish_compiles(b, running, &running_count, 0)) {
       failed = 1;
       break;
     }
     CcJob pending = {
-      action.start(), source, state_path, fingerprint
+      .action = action, .source = source, .object = object,
+      .depfile = depfile, .state_path = state_path
     };
+    if (state_path && !b.request.dry_run) {
+      pending.preprocessed = %"${b.dep_root}/$key.i";
+      pending.execution = b.toolchain.preprocess_action(
+        source, pending.preprocessed, directories).start();
+    }
+    else pending.execution = action.start();
     running[running_count++] = pending;
     if (running_count >= b.request.jobs &&
         _finish_compiles(b, running, &running_count, 1)) {

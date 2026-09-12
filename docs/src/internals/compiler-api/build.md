@@ -37,7 +37,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:546`
+Source: `src/build.x:557`
 
 ### `Build`
 
@@ -72,7 +72,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:884`
+Source: `src/build.x:888`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -97,7 +97,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:709`
+Source: `src/build.x:713`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -129,7 +129,7 @@ Source: `src/build.x:351`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:782`
+Source: `src/build.x:786`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -139,7 +139,7 @@ Source: `src/build.x:782`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:842`
+Source: `src/build.x:846`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current

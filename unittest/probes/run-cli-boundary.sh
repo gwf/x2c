@@ -466,11 +466,14 @@ root = Path(directory).resolve()
 for part in ('first', 'second'):
     (root / part).mkdir(parents=True)
 source = root / 'main.c'
+helper = root / 'helper.c'
+helper.write_text('int helper(void) { return 0; }\n')
 source.write_text('#include <stdio.h>\n#include <value.h>\n'
                   'int main(void) { printf("%d\\n", VALUE); }\n')
 (root / 'second/value.h').write_text('#define VALUE 1\n')
-args = [compiler, 'build', '-v', '--build-dir', str(root / 'cache'),
-        '--output', str(root / 'app'), str(source)]
+args = [compiler, 'build', '-v', '-j', '2',
+        '--build-dir', str(root / 'cache'),
+        '--output', str(root / 'app'), str(source), str(helper)]
 env = dict(os.environ, CPATH=str(root / 'second'))
 def check(expected, name, reused=False):
     result = subprocess.run(args, env=env, text=True, capture_output=True)
@@ -478,7 +481,8 @@ def check(expected, name, reused=False):
     assert result.returncode == 0, result.stderr
     output = subprocess.check_output([str(root / 'app')], text=True).strip()
     assert output == str(expected), (name, output, expected)
-    assert ('up-to-date compile' in result.stderr) == reused, result.stderr
+    hit = f'up-to-date compile {source}\n' in result.stderr
+    assert hit == reused, result.stderr
 check(1, 'initial')
 check(1, 'unchanged', True)
 (root / 'first/value.h').write_text('#define VALUE 2\n')
