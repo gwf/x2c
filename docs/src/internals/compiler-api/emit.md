@@ -34,12 +34,12 @@ owned
 by pools active during emission; promote them before releasing those
 pools if the tokens must survive.
 
-Source: `src/emit.x:1889`
+Source: `src/emit.x:1880`
 
 ## Design notes
 
 Translates normalized ASTs into token `List`s for downstream flattening and
 formatting. One stack-local Emitter holds cleanup guards and preserved
 automatic names, so emission is reentrant and a failed translation cannot
-contaminate later units. Cleanup lowering preserves handler order and the
-active exit kind across returns and loop exits.
+contaminate later units. Cleanup lowering preserves handler order across
+returns and loop exits.

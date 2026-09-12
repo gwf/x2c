@@ -28,16 +28,12 @@ int main(void){
       if(sigprocmask(SIG_BLOCK, & blocked, NULL)){
         int _x2c_return_value_0 = 2;
         {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          return _x2c_return_value_0;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
-
-}
       }
       {
         static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/exception-signal-mask.x",.function = "main",.line = 18};
@@ -55,16 +51,12 @@ int main(void){
           if(sigprocmask(SIG_SETMASK, NULL, & current)){
             int _x2c_return_value_1 = 2;
             {
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_0);
-            _x2c_error_handler_0 = NULL;
-            x2c_exception_leave(& _x2c_exception_frame_0);
+              x2c_error_catch_close(_x2c_error_handler_0);
+              _x2c_error_handler_0 = NULL;
+              x2c_exception_leave(& _x2c_exception_frame_0);
+              return _x2c_return_value_1;
+            }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-  return _x2c_return_value_1;
-
-}
           }
           retained = sigismember(& current, SIGUSR1) == 1;
         }
@@ -72,25 +64,14 @@ int main(void){
       }
 
     }
-    else {int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_0;
   }
 
 }
-}
-int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_cleanup_done_0 :;
+x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 if(sigprocmask(SIG_SETMASK, & original, NULL)) return 2;
 printf("%d\n", retained);

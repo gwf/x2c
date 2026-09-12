@@ -8,7 +8,6 @@ rm -rf "$BUILD"
 mkdir -p "$BUILD/etc" "$BUILD/src" "$BUILD/lib" "$BUILD/builds/0"
 cp "$ROOT/etc/header-symbols.xlisp" "$BUILD/etc/header-symbols.xlisp"
 cp "$ROOT/etc/symbols.xlisp" "$BUILD/etc/symbols.xlisp"
-cp "$ROOT/etc/symbol-source.x" "$BUILD/etc/symbol-source.x"
 cp "$ROOT/etc/help.mk" "$ROOT/etc/branch.mk" "$ROOT/etc/build-config.mk" \
   "$ROOT/etc/make-command.mk" "$BUILD/etc/"
 

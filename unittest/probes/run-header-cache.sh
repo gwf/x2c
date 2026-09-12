@@ -189,40 +189,6 @@ EOF
 grep -q '"src/uses-ext.x"' "$BUILD/ext-artifact.xlisp" &&
   fail "entry with out-of-root dep was persisted"
 
-# Case 5: unresolved targets contribute no cached symbols. An explicit
-# host preprocess still rejects directory and unreadable include targets.
-mkdir -p "$FAKE/src/dir-target.h" "$FAKE/dirout"
-cat >"$FAKE/src/uses-dir.x" <<'EOF'
-#include "dir-target.h"
-int probe_dir(void) { return 0; }
-EOF
-if (cd "$FAKE" && ./builds/0/x2c translate --cpp-symbols --out-dir dirout src/uses-dir.x) \
-    >/dev/null 2>"$BUILD/dir.err"; then
-  fail "directory include target was silently accepted"
-fi
-grep -q "failed to run C preprocessor" "$BUILD/dir.err" ||
-  fail "directory include target died without a diagnostic"
-
-if [ "$(id -u)" != 0 ]; then
-  mkdir -p "$FAKE/lockout"
-  cat >"$FAKE/src/locked.h" <<'EOF'
-typedef int LockedValue;
-EOF
-  cat >"$FAKE/src/uses-locked.x" <<'EOF'
-#include "locked.h"
-int probe_locked(LockedValue v) { return v; }
-EOF
-  chmod 000 "$FAKE/src/locked.h"
-  status=0
-  (cd "$FAKE" && ./builds/0/x2c translate --cpp-symbols --out-dir lockout src/uses-locked.x) \
-    >/dev/null 2>"$BUILD/locked.err" || status=$?
-  chmod 644 "$FAKE/src/locked.h"
-  [ "$status" != 0 ] ||
-    fail "unreadable include target was silently accepted"
-  grep -q "failed to run C preprocessor" "$BUILD/locked.err" ||
-    fail "unreadable include target died without a diagnostic"
-fi
-
 # Case 6: cross-batch gensym aliasing.  The header cache counter used
 # to restart at the snapshot base for every unit, so a later unit
 # could mint a gensym number a cached row already owned; two distinct
@@ -637,23 +603,12 @@ int consume(void) {
   return projected_answer() + selected_answer() + default_answer();
 }
 EOF2
-for mode in default live cpp; do
-  mkdir -p "$declarations/$mode"
-  : >"$declarations/effects"
-  options=()
-  case "$mode" in
-    live) options+=(--live-symbols) ;;
-    cpp) options+=(--cpp-symbols) ;;
-  esac
-  "$X2C" translate "${options[@]}" --out-dir "$declarations/$mode" \
-    "$declarations/src/provider.x" "$declarations/src/consumer.x"
-  [ "$(cat "$declarations/effects")" = imxf ] ||
-    fail "declaration import, producer, or field ran twice in $mode mode"
-  for file in provider.c provider.h consumer.c consumer.h; do
-    cmp -s "$declarations/default/$file" "$declarations/$mode/$file" ||
-      fail "declaration projection differs in $mode mode: $file"
-  done
-done
+mkdir -p "$declarations/default"
+: >"$declarations/effects"
+"$X2C" translate --out-dir "$declarations/default" \
+  "$declarations/src/provider.x" "$declarations/src/consumer.x"
+[ "$(cat "$declarations/effects")" = imxf ] ||
+  fail "declaration import, producer, or field ran twice"
 grep -q 'return 11;' "$declarations/default/provider.c" ||
   fail "late ordinary method did not replace its default"
 ! grep -q 'return 7;' "$declarations/default/provider.c" ||

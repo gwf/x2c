@@ -24,7 +24,7 @@ typedef struct CliRequest {
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int live_symbols, cpp_symbols, source_map, source_facts;
+  int source_map, source_facts;
   SourceView sources;
 } *CliRequest;
 
@@ -133,11 +133,6 @@ static CliOption cli_options[] = {
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
-  { <live-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
-    "--live-symbols", NULL,
-    "Collect symbols through the host preprocessor", 0 },
-  { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
-    "--cpp-symbols", NULL, "Use CPP collection for this translation", 0 },
   { <cc>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0 },
@@ -169,12 +164,6 @@ static CliOption cli_options[] = {
     "Pass one argument to the linker", 0 },
   { <tokens>, CLI_TRANSLATE, <inspection>, "--dump-tokens",
     NULL, "Print source tokens and stop", 0 },
-  { <dump-cpp>, CLI_TRANSLATE, <inspection>, "--dump-cpp", NULL,
-    "Print host-preprocessed text and stop", 0 },
-  { <dump-cpp>, CLI_TRANSLATE, <inspection>,
-    "--dump-cpp-text", NULL, "Alias for --dump-cpp", 0 },
-  { <cpp-tokens>, CLI_TRANSLATE, <inspection>,
-    "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0 },
   { <dump-ast>, CLI_TRANSLATE, <inspection>, "--dump-ast", NULL,
     "Print the parsed AST and stop", 0 },
   { <transforms>, CLI_TRANSLATE, <inspection>,
@@ -183,8 +172,6 @@ static CliOption cli_options[] = {
     "Print unformatted generated code and stop", 0 },
   { <symbols>, CLI_TRANSLATE, <inspection>, "--dump-symbols",
     NULL, "Print the source symbol table and stop", 0 },
-  { <dump-csym>, CLI_TRANSLATE, <inspection>,
-    "--dump-cpp-symbols", NULL, "Print the CPP symbol table and stop", 0 },
   { <dump-cache>, CLI_TRANSLATE, <inspection>, "--dump-cache", NULL,
     "Print the compiler cache and stop", 0 },
   { <conform>, CLI_TRANSLATE, <inspection>,
@@ -733,11 +720,9 @@ static void _apply_option(
       c.package_dirs = cons(value, c.package_dirs);
       break;
     case <no-cpp>: c.no_cpp = 1; break;
-    case <live-syms>: c.live_symbols = 1; break;
-    case <cpp-syms>: c.cpp_symbols = 1; break;
-    case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
-    case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
-    case <dump-cache>: case <conform>: case <snapshot>: case <hdr-syms>:
+    case <tokens>: case <dump-ast>: case <transforms>: case <dump-code>:
+    case <symbols>: case <dump-cache>: case <conform>: case <snapshot>:
+    case <hdr-syms>:
       c.dump = option.id;
       break;
     case <prefix>: c.prefix = value; break;

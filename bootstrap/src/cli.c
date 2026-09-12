@@ -152,12 +152,6 @@ static CliOption cli_options[] ={
     973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0
   }
   , {
-    27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--live-symbols", NULL, "Collect symbols through the host preprocessor", 0
-  }
-  , {
-    241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--cpp-symbols", NULL, "Use CPP collection for this translation", 0
-  }
-  , {
     198, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 279515230724452, "--cc", "<program>", "Use <program> as the host C compiler", 0
   }
   , {
@@ -200,15 +194,6 @@ static CliOption cli_options[] ={
     1374366630, CLI_TRANSLATE, 665445396138972, "--dump-tokens", NULL, "Print source tokens and stop", 0
   }
   , {
-    320883072032, CLI_TRANSLATE, 665445396138972, "--dump-cpp", NULL, "Print host-preprocessed text and stop", 0
-  }
-  , {
-    320883072032, CLI_TRANSLATE, 665445396138972, "--dump-cpp-text", NULL, "Alias for --dump-cpp", 0
-  }
-  , {
-    247458062609318, CLI_TRANSLATE, 665445396138972, "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0
-  }
-  , {
     320883068136, CLI_TRANSLATE, 665445396138972, "--dump-ast", NULL, "Print the parsed AST and stop", 0
   }
   , {
@@ -219,9 +204,6 @@ static CliOption cli_options[] ={
   }
   , {
     42507336486, CLI_TRANSLATE, 665445396138972, "--dump-symbols", NULL, "Print the source symbol table and stop", 0
-  }
-  , {
-    10268258311770, CLI_TRANSLATE, 665445396138972, "--dump-cpp-symbols", NULL, "Print the CPP symbol table and stop", 0
   }
   , {
     328584264751626, CLI_TRANSLATE, 665445396138972, "--dump-cache", NULL, "Print the compiler cache and stop", 0
@@ -879,11 +861,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     break;
     case 973020192 : c -> no_cpp = 1;
     break;
-    case 27054400850790 : c -> live_symbols = 1;
-    break;
-    case 241658219366 : c -> cpp_symbols = 1;
-    break;
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1335836754920 : case 559620016998 : c -> dump = option -> id;
+    case 1374366630 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 328584264751626 : case 7478869146 : case 1335836754920 : case 559620016998 : c -> dump = option -> id;
     break;
     case 1111831152 : c -> prefix = value;
     break;
@@ -1004,22 +982,15 @@ CliRequest cli_package_options(String path, String package){
     {
       CliRequest _x2c_return_value_0 = request;
       {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
 }
 
@@ -1138,14 +1109,10 @@ CliRequest cli_parse(int argc, char * * argv){
     if(command){
       CliRequest _x2c_return_value_1 = _parse_command(args, command);
       {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_1;
-
-}
     }
     if(String_equal(first, _30)) _removed_output();
     const char * attached;
@@ -1158,10 +1125,7 @@ CliRequest cli_parse(int argc, char * * argv){
     x2c_driver_error(String_join(NULL, cons(String_var(_37), cons(String_var(first), cons(String_var(_13), NULL)))));
   }
 
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
 }
 }
 

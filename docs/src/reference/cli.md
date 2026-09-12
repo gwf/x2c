@@ -62,8 +62,6 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 
 ```text
 --no-cpp                Skip symbol collection and preprocessing
---live-symbols          Collect symbols through the host preprocessor
---cpp-symbols           Use CPP collection for this translation
 ```
 
 `--source-map` adds source locations to generated C for `translate`, `build`,
@@ -105,10 +103,6 @@ Inspection modes print an intermediate result and stop translation:
 - `--dump-transforms` prints the transformed AST and stops.
 - `--dump-code` prints unformatted generated code and stops.
 - `--dump-symbols` prints the source symbol table and stops.
-- `--dump-cpp` prints host-preprocessed text and stops.
-- `--dump-cpp-text` is an alias for `--dump-cpp`.
-- `--dump-cpp-tokens` prints host-preprocessed tokens and stops.
-- `--dump-cpp-symbols` prints the CPP symbol table and stops.
 - `--dump-cache` prints the compiler cache and stops.
 - `--dump-conformance` prints protocol conformance and stops.
 - `--dump-symbol-snapshot` prints a complete symbol snapshot and stops.

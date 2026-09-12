@@ -360,7 +360,7 @@ Public functions:
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
 `Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
 `ToolAction.as_program`, `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`,
-`ToolAction.run`, `Toolchain.preprocess`
+`ToolAction.run`
 
 ### [src/transform.x](../src/transform.x)
 
@@ -402,9 +402,9 @@ Public functions:
 
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
 `x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`, `x2c_package_directory`,
-`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
-`x2c_driver_error`, `process_start`, `ChildProcess.ready`, `ChildProcess.wait`,
-`process_run`, `worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
+`x2c_package_source`, `x2c_default_include_dirs`, `x2c_driver_error`,
+`process_start`, `ChildProcess.ready`, `ChildProcess.wait`, `worker_fork`,
+`worker_exit`, `worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 
@@ -755,22 +755,21 @@ pattern matching and transformation utilities for lists.
 
 Public functions:
 
-`x2c_match_try_capture`, `x2c_match_site_try_capture`, `Var.is_atom_binder`,
-`Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
-`MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
-`MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
-`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`, `List.try_match`,
-`List.match`, `List.replace`, `List.try_match_replace`, `List.match_replace`,
-`List.search`, `List.try_search`, `List.search_replace`, `MatchPlan.prepare`,
+`x2c_match_try_capture`, `x2c_match_site_try_capture`,
+`x2c_match_site_try_match`, `x2c_match_site_match`,
+`x2c_match_site_try_search`, `x2c_match_site_search`,
+`x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
+`x2c_match_site_search_replace`, `Var.is_atom_binder`, `Var.is_list_binder`,
+`Var.is_binder`, `Var.is_match_op`, `MatchCaptureLayout.analyze`,
+`MatchCaptureLayout.free`, `MatchCaptureLayout.definite_list`,
+`MatchCaptureLayout.possible_list`, `MatchCaptureLayout.index`,
+`MatchCaptureBuffer.has`, `List.try_match`, `List.match`, `List.replace`,
+`List.try_match_replace`, `List.match_replace`, `List.search`,
+`List.try_search`, `List.search_replace`, `MatchPlan.prepare`,
 `MatchPlan.free`, `MatchPlan.execute_capture`, `MatchPlan.try_capture`,
 `MatchPlan.execute`, `MatchPlan.try_match`, `MatchPlan.try_search`,
 `MatchPlan.search`, `MatchPlan.try_match_replace`, `MatchPlan.search_replace`,
-`MatchCache.new`, `MatchCache.acquire`, `MatchLease.release`,
-`MatchCache.dispose`, `MatchCache.try_capture`, `MatchCache.try_match`,
-`MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
-`MatchCache.search_replace`, `x2c_match_thread_release`,
-`MatchCache.context_open`, `MatchCache.context_close`, `MatchCache.initialize`,
-`MatchCache.flush_default`
+`x2c_match_initialize`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

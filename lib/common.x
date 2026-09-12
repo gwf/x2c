@@ -186,12 +186,6 @@ typedef struct X2CErrorSite {
   const char *file, *function, int line;
 } X2CErrorSite;
 
-#define X2C_CLEANUP_EXIT_NORMAL   0
-#define X2C_CLEANUP_EXIT_RETURN   1
-#define X2C_CLEANUP_EXIT_BREAK    2
-#define X2C_CLEANUP_EXIT_CONTINUE 3
-#define X2C_CLEANUP_EXIT_GOTO     4
-
 #define VAR_NULL_BITS 0ul
 #define VAR_VOID_BITS 0xFFFFFFFFFFFFFFFFul
 #define VAR_I8_PREFIX  0x8002000200000000ul
@@ -212,7 +206,6 @@ typedef struct X2CErrorSite {
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 
 void x2c_scope_thread_release(void);
-void x2c_match_thread_release(void);
 void x2c_static_thread_release(void);
 void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);
@@ -248,9 +241,9 @@ void x2c_descriptor_thread_start_begin(void);
 void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
 
-/* Read on every cleanup and error path, including generated defer regions,
-   so they are the storage rather than an accessor over it. */
-extern threaded int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
+/* Read by Exception, Scope, and Pool on paths that run before Error is
+   initialized, so it is the storage rather than an accessor over it. */
+extern threaded int x2c_error_runtime_ready;
 
 extern File Stdin, Stdout, Stderr;
 extern Var Void;
@@ -833,7 +826,7 @@ void x2c_initialize_protocols(void) {
 void x2c_initialize(void) {
   void Atom.initialize(void), File.initialize(void);
   void List.initialize(void), Scope.initialize(void);
-  void MatchCache.initialize(void);
+  void x2c_match_initialize(void);
   void String.initialize(void), Logger_initialize(void);
   Scope Scope.new(void), *Scope.top(void);
   static int initialized = 0;
@@ -845,7 +838,7 @@ void x2c_initialize(void) {
   String.initialize();
   List.initialize();
   Atom.initialize();
-  MatchCache.initialize();
+  x2c_match_initialize();
   File.initialize();
   Logger_initialize();
 }

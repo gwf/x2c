@@ -178,7 +178,7 @@ static Array _prerequisites(CliRequest request, Compiler compiler, String input)
 
   }
   else _add(paths, input);
-  if(! request -> no_cpp && ! request -> live_symbols){
+  if(! request -> no_cpp){
     String root = x2c_get_root();
     _add(paths, String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL))));
     if(header_symbols_active()) _add(paths, String_join(NULL, cons(String_var(root), cons(String_var(_1), NULL))));

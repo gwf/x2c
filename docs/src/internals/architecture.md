@@ -204,14 +204,7 @@ loads translation support and `src/collect.x` reuses per-header contributions
 from `etc/header-symbols.xlisp`, validated against the snapshot and source
 contents, so repeated headers are not re-collected.
 
-`--cpp-symbols` and `--live-symbols` discover symbols through the host C
-preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
-child process.
-Paths stay separate argv elements, and stdout, stderr, and the real child
-status come back independently. A second `Compiler` shallow-parses that
-output instead.
-
-Either way this is a discovery pass. Shallow parsing
+This is a discovery pass. Shallow parsing
 (`Compiler.shallow_parse`) skips function bodies, and full parsing, source
 diagnostics, and emitted C all come from the original positioned token stream.
 `--no-cpp` skips symbol discovery and is a diagnostic aid for C-only source.
@@ -345,9 +338,9 @@ partition declarations and functions into header and source halves, ask
 `src/cache.x` to materialize the cache slots as file statics with an
 initializer, fold every file-level initialization block into one guarded
 `_file_init_` function, synthesize static prototypes, restore vertical
-spacing, add the unit's own header as its primary include, patch `main` when
-the unit has one, and run one more transform pass under the generation-phase
-contract.
+spacing, add the unit's own header as its primary include, and patch `main`
+when the unit has one. Generation synthesizes already-lowered nodes, so it
+runs no further transform pass.
 
 `src/cache.x` is why `_0` exists in the worked example. It owns discovery and
 materialization of cached constants between lowering and emission: immutable
@@ -383,9 +376,9 @@ cleanup guards and preserved automatic names. Emission is therefore reentrant,
 and a unit that fails cannot contaminate the next one. Cleanup lowering
 happens here instead of in the transform phase, because it depends on emission
 order. `defer` blocks, `catch` handlers, and scope exits must run in the right
-sequence and must preserve the active exit kind across returns, loop exits,
-and `Error` transfer. Preprocessor nodes are re-emitted here too, with `.x`
-include targets rewritten to the generated `.h` they correspond to.
+sequence across returns, loop exits, and `Error` transfer. Preprocessor nodes
+are re-emitted here too, with `.x` include targets rewritten to the generated
+`.h` they correspond to.
 
 ```sh
 ./builds/0/x2c translate --dump-code greet.x

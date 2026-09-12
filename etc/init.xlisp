@@ -6,69 +6,36 @@
 
 // Native value and list boundary
 
-(def car
-  (bind "Var_car" '((func (("Var"))) "Var")))
-(def cdr
-  (bind "Var_cdr" '((func (("Var"))) "List")))
-(def cons
-  (bind "Var_cons" '((func (("Var") ("List"))) "List")))
-(def atom?
-  (bind "lisp_atom" '((func (("Var"))) "Var")))
-(def pair?
-  (bind "lisp_pair" '((func (("Var"))) "Var")))
-(def list?
-  (bind "lisp_list" '((func (("Var"))) "Var")))
-(def eq?
-  (bind "lisp_eq" '((func (("Var") ("Var"))) "Var")))
-(def type
-  (bind "lisp_type" '((func (("Var"))) "Symbol")))
-(def number?
-  (bind "lisp_number" '((func (("Var"))) "Var")))
-(def string?
-  (bind "lisp_string" '((func (("Var"))) "Var")))
-(def symbol?
-  (bind "lisp_symbol" '((func (("Var"))) "Var")))
-(def procedure?
-  (bind "lisp_procedure" '((func (("Var"))) "Var")))
-(def reverse
-  (bind "List_reverse" '((func (("List"))) "List")))
-(def length
-  (bind "List_len" '((func (("List"))) int)))
-(def _match
-  (bind "List_match" '((func (("List") ("Var"))) "List")))
-(def match-replace
-  (bind "lisp_match_replace"
-    '((func (("List") ("Var") ("Var"))) "Var")))
-(def search
-  (bind "List_search" '((func (("List") ("Var"))) "List")))
-(def _search-replace
-  (bind "List_search_replace"
-    '((func (("List") ("Var") ("Var"))) "List")))
+(def car (bind "Var_car" nil))
+(def cdr (bind "Var_cdr" nil))
+(def cons (bind "Var_cons" nil))
+(def atom? (bind "lisp_atom" nil))
+(def pair? (bind "lisp_pair" nil))
+(def list? (bind "lisp_list" nil))
+(def eq? (bind "lisp_eq" nil))
+(def type (bind "lisp_type" nil))
+(def number? (bind "lisp_number" nil))
+(def string? (bind "lisp_string" nil))
+(def symbol? (bind "lisp_symbol" nil))
+(def procedure? (bind "lisp_procedure" nil))
+(def reverse (bind "List_reverse" nil))
+(def length (bind "List_len" nil))
+(def _match (bind "List_match" nil))
+(def match-replace (bind "lisp_match_replace" nil))
+(def search (bind "List_search" nil))
+(def _search-replace (bind "List_search_replace" nil))
 
 // Native number and text boundary
 
-(def _add
-  (bind "lisp_add" '((func (("Var") ("Var"))) "Var")))
-(def _binary
-  (bind "Var_binary"
-    '((func (("Var") ("Symbol") ("Var"))) "Var")))
-(def _compare
-  (bind "lisp_compare" '((func (("Var") ("Var"))) "Var")))
-(def str
-  (bind "lisp_str" '((func (("Var"))) "Var")))
-(def repr
-  (bind "lisp_repr" '((func (("Var"))) "Var")))
-(def string-length
-  (bind "String_len" '((func (("String"))) int)))
-(def _string-append
-  (bind "lisp_string_append"
-    '((func (("String") ("String"))) "Var")))
-(def substring
-  (bind "lisp_substring"
-    '((func (("String") (int) (int))) "Var")))
-(def string-downcase
-  (bind "lisp_string_downcase"
-    '((func (("String"))) "Var")))
+(def _add (bind "lisp_add" nil))
+(def _binary (bind "Var_binary" nil))
+(def _compare (bind "lisp_compare" nil))
+(def str (bind "lisp_str" nil))
+(def repr (bind "lisp_repr" nil))
+(def string-length (bind "String_len" nil))
+(def _string-append (bind "lisp_string_append" nil))
+(def substring (bind "lisp_substring" nil))
+(def string-downcase (bind "lisp_string_downcase" nil))
 
 // Definition and control vocabulary
 
@@ -174,18 +141,18 @@
 // written in Lisp they would pull every arithmetic call in a compiled
 // body back onto the evaluator.
 
-(def + (bind "lisp_plus" '((func (("List"))) "Var")))
-(def - (bind "lisp_minus" '((func (("List"))) "Var")))
-(def * (bind "lisp_times" '((func (("List"))) "Var")))
-(def / (bind "lisp_divide" '((func (("List"))) "Var")))
+(def + (bind "lisp_plus" nil))
+(def - (bind "lisp_minus" nil))
+(def * (bind "lisp_times" nil))
+(def / (bind "lisp_divide" nil))
 
 (def % mod)
 
-(def = (bind "lisp_eq_chain" '((func (("List"))) "Var")))
-(def < (bind "lisp_lt_chain" '((func (("List"))) "Var")))
-(def <= (bind "lisp_le_chain" '((func (("List"))) "Var")))
-(def > (bind "lisp_gt_chain" '((func (("List"))) "Var")))
-(def >= (bind "lisp_ge_chain" '((func (("List"))) "Var")))
+(def = (bind "lisp_eq_chain" nil))
+(def < (bind "lisp_lt_chain" nil))
+(def <= (bind "lisp_le_chain" nil))
+(def > (bind "lisp_gt_chain" nil))
+(def >= (bind "lisp_ge_chain" nil))
 
 // Text and local binding
 

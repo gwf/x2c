@@ -28,7 +28,7 @@ struct Context{
   Scope scope, * destination_scope;
   Pool pool;
   Pool destination_pool;
-  void * error_state, * match_state;
+  void * error_state;
 }
 ;
 
@@ -164,8 +164,6 @@ Pool String_pool_retain_named(const char *);
 
 void * Error_context_open(void);
 
-void * MatchCache_context_open(void);
-
 static Context _open(const char * name, int isolated){
   Context_initialize();
   Context context = Scope_calloc(1, sizeof(struct Context));
@@ -190,28 +188,20 @@ static Context _open(const char * name, int isolated){
         (context) -> destination_pool =(context) -> pool -> up;
       }
       (context) -> error_state = Error_context_open();
-      (context) -> match_state = MatchCache_context_open();
       _thread() -> current =(context);
       installed = 1;
       {
         Context _x2c_return_value_0 =(context);
         {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
-
-}
       }
 
     }
 
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
   }
 
@@ -310,22 +300,15 @@ static List _export_list(List list, Context source){
     {
       List _x2c_return_value_1 = tail;
       {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_1;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
 }
 }
 
@@ -357,22 +340,15 @@ static Var _export_array(Var value, Context source){
     {
       Var _x2c_return_value_2 = value;
       {
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-  return _x2c_return_value_2;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
 }
 
@@ -400,22 +376,15 @@ static Var _export_map(Var value, Context source){
     {
       Var _x2c_return_value_3 = value;
       {
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_3;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-  return _x2c_return_value_3;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 
@@ -487,7 +456,7 @@ static Var _export_value(Var v, Context source){
   if(Var_try_export_context(v, source, & custom)) return custom;
   Symbol tag = Var_tag(v);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 293};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 291};
     x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -497,7 +466,7 @@ static Var _export_value(Var v, Context source){
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 313};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 311};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -515,8 +484,6 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value){
   return _export_value(value, & source);
 }
 
-void MatchCache_context_close(void *);
-
 void Error_context_close(void *, int);
 
 int x2c_exception_unwinding(void);
@@ -532,11 +499,10 @@ void Scope_free(void *);
 void Context_close(Context context){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 352};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 350};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
-  MatchCache_context_close(context -> match_state);
   Error_context_close(context -> error_state, x2c_exception_unwinding());
   if(context -> pool) String_pool_release();
   Scope scope = context -> scope;
@@ -555,7 +521,6 @@ void Context_cleanup(Context value){
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)){
-    if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> match_state) MatchCache_context_close(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> match_state);
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state) Error_context_close(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state, x2c_exception_unwinding());
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> pool) String_pool_release();
     if((*(int *) _x2c_defer_data_0->_x2c_defer_capture_2)) Scope_pop();

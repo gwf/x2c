@@ -26,8 +26,6 @@ Translation options:
       --c-system-dir <dir>    Add a C-only system include directory
       --package-dir <dir>     Add a directory of x2c packages
       --no-cpp                Skip symbol collection and preprocessing
-      --live-symbols          Collect symbols through the host preprocessor
-      --cpp-symbols           Use CPP collection for this translation
 
 C compiler options:
       --cc <program>          Use <program> as the host C compiler

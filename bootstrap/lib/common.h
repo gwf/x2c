@@ -88,11 +88,6 @@ typedef struct X2CErrorSite{
   const char * file, * function;  int line;
 }
 X2CErrorSite;
-#define X2C_CLEANUP_EXIT_NORMAL   0
-#define X2C_CLEANUP_EXIT_RETURN   1
-#define X2C_CLEANUP_EXIT_BREAK    2
-#define X2C_CLEANUP_EXIT_CONTINUE 3
-#define X2C_CLEANUP_EXIT_GOTO     4
 #define VAR_NULL_BITS 0ul
 #define VAR_VOID_BITS 0xFFFFFFFFFFFFFFFFul
 #define VAR_I8_PREFIX  0x8002000200000000ul
@@ -112,7 +107,6 @@ X2CErrorSite;
 #define VAR_F64_NEG_MAX_RAW    0xFFEFFFFFFFFFFFFFul
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 void x2c_scope_thread_release(void);
-void x2c_match_thread_release(void);
 void x2c_static_thread_release(void);
 void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);
@@ -136,7 +130,7 @@ void x2c_pool_thread_start(void);
 void x2c_descriptor_thread_start_begin(void);
 void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
-extern _Thread_local int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
+extern _Thread_local int x2c_error_runtime_ready;
 extern File Stdin, Stdout, Stderr;
 extern Var Void;
 extern List nil;

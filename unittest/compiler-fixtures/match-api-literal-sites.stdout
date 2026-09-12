@@ -1,0 +1,5 @@
+2 -1 1
+(invoke f (1))
+((new 1) (new 2))
+1 0
+((kept) (drop b))

@@ -12,12 +12,12 @@
 
 #pragma private
 
-threaded int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
+threaded int x2c_error_runtime_ready;
 
 /*  Every module keeps its own per-thread state in a `threaded` object.
-    Native static storage releases first, then Match disposes its plan cache
-    before Scope destroys its owner. Context, List, String, Error, and
-    Exception own no per-thread resources here; their shutdown paths ran.
+    Native static storage releases before Scope destroys its owner. Match,
+    Context, List, String, Error, and Exception own no per-thread resources
+    here; their shutdown paths ran.
 
     Every thread that reaches this storage releases it itself: a worker at the
     end of its entry function and the process at the end of Scope shutdown.
@@ -27,6 +27,5 @@ threaded int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
 */
 void x2c_thread_state_release(void) {
   x2c_static_thread_release();
-  x2c_match_thread_release();
   x2c_scope_thread_release();
 }

@@ -246,25 +246,14 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
     }
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
-      if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-        if (_x2c_cleanup_guard_0 > 0) { if(written) * written += offset;
-       }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      } __builtin_unreachable();
+      goto _x2c_cleanup_done_0;
     }
 
   }
+  _x2c_cleanup_done_0 :;
   if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
         if (_x2c_cleanup_guard_0 > 0) { if(written) * written += offset;
    }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
         _x2c_cleanup_guard_0 = -1;
         x2c_exception_leave(& _x2c_exception_frame_0);
 
@@ -315,14 +304,10 @@ static String _regular_text(File file, size_t requested){
       {
         String _x2c_return_value_0 = result;
         {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_0;
-
-}
       }
 
     }
@@ -334,14 +319,10 @@ static String _regular_text(File file, size_t requested){
       {
         String _x2c_return_value_1 = result;
         {
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_1;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-  return _x2c_return_value_1;
-
-}
       }
 
     }
@@ -366,22 +347,15 @@ static String _regular_text(File file, size_t requested){
     {
       String _x2c_return_value_2 = result;
       {
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_2;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-  return _x2c_return_value_2;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
 }
 
@@ -399,22 +373,15 @@ String File_string_close(File file){
     {
       String _x2c_return_value_3 = File_string(file);
       {
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_3;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-  return _x2c_return_value_3;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 
@@ -517,22 +484,15 @@ String File_readblock(File file, long size){
     {
       String _x2c_return_value_4 = output;
       {
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_4;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-  return _x2c_return_value_4;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
 
@@ -563,10 +523,7 @@ FileReadStatus File_readline_into(File file, Block dest){
       error = failed ? errno : 0;
     }
 
-  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
 }
   }
   if(failed) _io_error(1189960, error);
@@ -620,22 +577,15 @@ String File_readline(File file){
     {
       String _x2c_return_value_5 = result;
       {
-  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_4);
+        x2c_cleanup_leave(& _x2c_defer_record_4);
+        return _x2c_return_value_5;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
-  return _x2c_return_value_5;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
 }
 }
 
@@ -668,22 +618,15 @@ String File_string(File file){
     {
       String _x2c_return_value_6 = _text(content -> bytes, content -> length);
       {
-  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_5);
+        x2c_cleanup_leave(& _x2c_defer_record_5);
+        return _x2c_return_value_6;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
-  return _x2c_return_value_6;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_5);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
 }
 }
 
@@ -710,14 +653,10 @@ static int _next(Iter iter, Var * out){
     if(status != FILE_READ_DATA){
       int _x2c_return_value_7 = 0;
       {
-  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_6);
+        x2c_cleanup_leave(& _x2c_defer_record_6);
+        return _x2c_return_value_7;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
-  return _x2c_return_value_7;
-
-}
     }
     String text = _text(line -> bytes, line -> length);
     * out = String_var(text);
@@ -725,22 +664,15 @@ static int _next(Iter iter, Var * out){
     {
       int _x2c_return_value_8 = 1;
       {
-  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_6);
+        x2c_cleanup_leave(& _x2c_defer_record_6);
+        return _x2c_return_value_8;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
-  return _x2c_return_value_8;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_6);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
 }
 }
 
@@ -777,22 +709,15 @@ Iter File_iter(File file, Iter dest){
     {
       Iter _x2c_return_value_9 = dest;
       {
-  int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+        x2c_cleanup_leave(& _x2c_defer_record_7);
+        return _x2c_return_value_9;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
-  return _x2c_return_value_9;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_7);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
 }
 }
 

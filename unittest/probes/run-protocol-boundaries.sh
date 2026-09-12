@@ -17,7 +17,6 @@ mkdir -p "$BUILD/tag-scope" "$BUILD/header-batch" "$BUILD/header-solo" \
   "$BUILD/protocol-basedefault-solo" \
   "$BUILD/protocol-static" \
   "$BUILD/protocol-inherited/snapshot" \
-  "$BUILD/protocol-inherited/live" \
   "$BUILD/protocol-generated-owner" \
   "$BUILD/protocol-generated-repeat" \
   "$BUILD/protocol-generated-import" \
@@ -190,9 +189,8 @@ if grep -q 'StaticFeet_magnitude' \
     "$BUILD/protocol-static/protocol-static-owner.h"; then
   fail "inferred-local adoption leaked its binding into the owner header"
 fi
-for mode in snapshot live; do
+for mode in snapshot; do
   flags=()
-  if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
   if "$X2C" translate "${flags[@]}" \
       --out-dir "$BUILD/protocol-static" \
       "$SOURCE/protocol-static-consumer.x" \
@@ -204,13 +202,8 @@ for mode in snapshot live; do
     "$BUILD/protocol-static/$mode.stderr" ||
     fail "$mode inferred-local rejection did not name the missing method"
 done
-cmp -s "$BUILD/protocol-static/snapshot.stderr" \
-  "$BUILD/protocol-static/live.stderr" ||
-  fail "inferred-local visibility depends on the symbol transport"
-
-for mode in snapshot live; do
+for mode in snapshot; do
   flags=()
-  if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
   if "$X2C" translate "${flags[@]}" \
       --out-dir "$BUILD/protocol-static" \
       "$SOURCE/protocol-static-inherited-consumer.x" \
@@ -222,17 +215,12 @@ for mode in snapshot live; do
     "$BUILD/protocol-static/inherited-$mode.stderr" ||
     fail "$mode inherited-local rejection did not name iteration"
 done
-cmp -s "$BUILD/protocol-static/inherited-snapshot.stderr" \
-  "$BUILD/protocol-static/inherited-live.stderr" ||
-  fail "inherited-local visibility depends on the symbol transport"
-
 # An unadopted descendant uses the nearest visible ancestor conformance.
 # Its same-named method does not replace the ancestor's resolved choice;
 # an exact child adoption does.
 inherited="$FIXTURES/protocol-typedef-inherited-adoption.x"
-for mode in snapshot live; do
+for mode in snapshot; do
   flags=()
-  if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
   out="$BUILD/protocol-inherited/$mode"
   "$X2C" translate "${flags[@]}" --out-dir "$out" "$inherited"
   "$CC" -iquote "$ROOT/include" \
@@ -243,10 +231,6 @@ for mode in snapshot live; do
     "$out/stdout" ||
     fail "$mode inherited protocol behavior changed"
 done
-cmp -s \
-  "$BUILD/protocol-inherited/snapshot/protocol-typedef-inherited-adoption.c" \
-  "$BUILD/protocol-inherited/live/protocol-typedef-inherited-adoption.c" ||
-  fail "inherited protocol behavior depends on the symbol transport"
 "$X2C" translate --dump-conformance "$inherited" \
   >"$BUILD/protocol-inherited/conformance"
 grep -Fq '(conformance owned ("Iter") ("IterParent")' \
@@ -264,15 +248,12 @@ if grep -Fq '(conformance owned ("Iter") ("IterDelegateOwner")' \
   fail "delegated protocol use created an outer conformance row"
 fi
 
-# Generated-member ownership must be independent of declaration order and
-# symbol transport. Each precedence case emits exactly one Packet_truth
-# definition and has the same runtime behavior; each same-kind collision is
-# rejected in both transports and names both competing protocol owners.
-for mode in snapshot live; do
+# Generated-member ownership must be independent of declaration order. Each
+# precedence case emits exactly one Packet_truth definition and has the same
+# runtime behavior; each same-kind collision is rejected and names both
+# competing protocol owners.
+for mode in snapshot; do
   flags=()
-  if [[ "$mode" == live ]]; then
-    flags=(--live-symbols)
-  fi
   for name in protocol-generated-owner-precedence \
       protocol-generated-owner-precedence-swapped; do
     out="$BUILD/protocol-generated-owner/$mode-$name"
@@ -301,21 +282,6 @@ for mode in snapshot live; do
       fail "$mode $name did not name both generated owners"
   done
 done
-for name in protocol-generated-owner-precedence \
-    protocol-generated-owner-precedence-swapped; do
-  cmp -s \
-    "$BUILD/protocol-generated-owner/snapshot-$name/$name.c" \
-    "$BUILD/protocol-generated-owner/live-$name/$name.c" ||
-    fail "$name generated C depends on the symbol transport"
-done
-for name in protocol-generated-collision \
-    protocol-generated-collision-swapped; do
-  cmp -s \
-    "$BUILD/protocol-generated-owner/snapshot-$name/stderr" \
-    "$BUILD/protocol-generated-owner/live-$name/stderr" ||
-    fail "$name collision diagnostic depends on the symbol transport"
-done
-
 # A protocol adoption emitted after its participant methods must classify
 # against those completed methods. The same generated source nodes feed the
 # conformance and symbol-snapshot inspection paths.
@@ -333,15 +299,8 @@ grep -Fq '(getindex implemented MacroArrayInt_getindex dot+punctuation)' \
   fail "generated adoption hid its native getindex method"
 "$X2C" translate --dump-symbol-snapshot "$generated" \
   >"$BUILD/generated-tag-snapshot"
-"$X2C" translate --live-symbols --dump-symbol-snapshot "$generated" \
-  >"$BUILD/generated-tag-live"
 grep -F '(adopt ("Var") ("MacroArrayInt")' \
   "$BUILD/generated-tag-snapshot" >"$BUILD/generated-tag-row-snapshot"
-grep -F '(adopt ("Var") ("MacroArrayInt")' \
-  "$BUILD/generated-tag-live" >"$BUILD/generated-tag-row-live"
-cmp -s "$BUILD/generated-tag-row-snapshot" \
-  "$BUILD/generated-tag-row-live" ||
-  fail "generated explicit tag depends on the symbol transport"
 grep -Fq '(tag (expr ("Symbol") (literal ("Symbol") "<macarray>" macarray)))' \
   "$BUILD/generated-tag-snapshot" ||
   fail "generated adoption omitted its explicit tag"
@@ -376,7 +335,7 @@ if grep -Fq 'plainrowchild' "$shared_c"; then
   fail "Var descendant gained a tag or registration"
 fi
 
-"$X2C" translate --live-symbols --dump-symbol-snapshot \
+"$X2C" translate --dump-symbol-snapshot \
   "$FIXTURES/macro-source-parity.x" >"$BUILD/generated-snapshot"
 grep -Fq '("GeneratedProtocol")' "$BUILD/generated-snapshot" ||
   fail "generated protocol was absent from the symbol snapshot"
@@ -391,11 +350,6 @@ repeat="$FIXTURES/macro-generated-protocol-repeat.x"
 repeat_build="$BUILD/protocol-generated-repeat"
 "$X2C" translate --dump-conformance "$repeat" \
   >"$repeat_build/conformance-default"
-"$X2C" translate --live-symbols --dump-conformance "$repeat" \
-  >"$repeat_build/conformance-live"
-cmp -s "$repeat_build/conformance-default" \
-  "$repeat_build/conformance-live" ||
-  fail "repeated generated conformances depend on the symbol transport"
 for participant in RepeatOne RepeatTwo; do
   grep -Fq "(conformance owned (\"Var\") (\"$participant\")" \
     "$repeat_build/conformance-default" ||
@@ -420,16 +374,8 @@ for base in RepeatProtocolA RepeatProtocolB; do
     fail "generated snapshot omitted $base declaration"
 done
 
-mkdir -p "$repeat_build/default" "$repeat_build/live"
+mkdir -p "$repeat_build/default"
 "$X2C" translate --out-dir "$repeat_build/default" "$repeat"
-"$X2C" translate --live-symbols \
-  --out-dir "$repeat_build/live" "$repeat"
-cmp -s "$repeat_build/default/macro-generated-protocol-repeat.c" \
-  "$repeat_build/live/macro-generated-protocol-repeat.c" ||
-  fail "repeated generated protocol C depends on the symbol transport"
-cmp -s "$repeat_build/default/macro-generated-protocol-repeat.h" \
-  "$repeat_build/live/macro-generated-protocol-repeat.h" ||
-  fail "repeated generated protocol header depends on the symbol transport"
 grep -Eq 'RepeatOne_contains\(a,[[:space:]]+31\)' \
   "$repeat_build/default/macro-generated-protocol-repeat.c" ||
   fail "snapshot-mode typed method syntax omitted RepeatOne"
@@ -449,13 +395,13 @@ for participant in ExportOne ExportTwo; do
     "$import_build/macro-protocol-export-consumer.c" ||
     fail "imported generated adoption omitted $participant"
 done
-"$X2C" translate --live-symbols --dump-symbol-snapshot -I "$SOURCE" \
+"$X2C" translate --dump-symbol-snapshot -I "$SOURCE" \
   "$SOURCE/macro-protocol-export-consumer.x" \
-  >"$import_build/snapshot-live"
+  >"$import_build/snapshot"
 for participant in ExportOne ExportTwo; do
   grep -Fq "(adopt (\"Var\") (\"$participant\")" \
-    "$import_build/snapshot-live" ||
-    fail "live imported snapshot omitted $participant"
+    "$import_build/snapshot" ||
+    fail "imported snapshot omitted $participant"
 done
 
 # Two type names longer than a compact Symbol encode to one tag. The second

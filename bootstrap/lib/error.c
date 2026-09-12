@@ -992,10 +992,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
           disposition = h -> fn(slice, h -> data);
         }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
       }
 

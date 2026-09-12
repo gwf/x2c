@@ -331,27 +331,14 @@ int found = _gensym(entry);  if(gensym && found > * gensym) * gensym = found;
 
 }
 else {x2c_exception_landed(& _x2c_exception_frame_0); {
-  if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-        if (_x2c_cleanup_guard_0 > 0) { {
-    File_close(input);  Lisp_destroy(lisp);
-  }
-   }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-      } __builtin_unreachable();
+  goto _x2c_cleanup_done_0;
 }
 }
-if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+_x2c_cleanup_done_0 :;  if (_x2c_cleanup_guard_0 >= 0) {
         if (_x2c_cleanup_guard_0 > 0) { {
   File_close(input);  Lisp_destroy(lisp);
 }
  }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
         _x2c_cleanup_guard_0 = -1;
         x2c_exception_leave(& _x2c_exception_frame_0);
       }

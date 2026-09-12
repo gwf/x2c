@@ -25,8 +25,6 @@ static void _sources(File file, Compiler compiler, Map needed);
 
 static CliRequest _configure(int argc, char * * argv, SourceView sources, String source);
 
-static int _changed_dependency(Compiler compiler, SourceView sources);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -256,8 +254,6 @@ int String_truth(String);
 
 ProjectBuild project_plan(CliRequest);
 
-int SourceView_is_changed(SourceView, String);
-
 static CliRequest _configure(int argc, char * * argv, SourceView sources, String source){
   char * defaults[] ={
     argv[0], "build", NULL
@@ -308,42 +304,8 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
 
   }
   request -> sources = sources;
-  if(SourceView_is_changed(sources, source) &&(request -> live_symbols || request -> cpp_symbols)){
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
-    exit(2);
-  }
   request -> source_facts = 1;
   return request;
-}
-
-static int _changed_dependency(Compiler compiler, SourceView sources){
-  {
-    Var path;
-    Iter _x2c_macro_iterator_5 = Map_keys(compiler -> deps, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      path = _x2c_macro_item_5;
-      if(SourceView_is_changed(sources, Var_string(path))) return 1;
-    }
-
-  }
-  {
-    Var path;
-    Iter _x2c_macro_iterator_6 = Map_keys(compiler -> source_texts, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
-      path = _x2c_macro_item_6;
-      if(SourceView_is_changed(sources, Var_string(path))) return 1;
-    }
-
-  }
-  return 0;
 }
 
 SourceView SourceView_new();
@@ -389,12 +351,6 @@ int editor_request(int argc, char * * argv){
   Frontend frontend = Frontend_new(request);
   ParsedUnit unit;
   int parsed = Frontend_open(frontend, source, & unit);
-  if((request -> live_symbols || request -> cpp_symbols) && _changed_dependency(unit.compiler, sources)){
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
-    ParsedUnit_close(&(unit));
-    Context_close(command);
-    return 2;
-  }
   File result = fopen(response, "w");
   if(! result){
     ParsedUnit_close(&(unit));

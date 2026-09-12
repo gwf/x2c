@@ -860,13 +860,6 @@ static void _eval_library(
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
-  macro Statement install(
-    Expr $name, Expr $function, Expr $signature
-  ) => {
-    Func callable = Func.new($function, $signature);
-    compiler.macro_lisp.set_global($name, Func.var(callable));
-  }
-
   with compiler {
     if (_.macro_lisp) return;
     _.macro_lisp = Lisp.new_bare();
@@ -879,83 +872,52 @@ static void _ensure_lisp(Compiler compiler) {
     _eval_library(
       _, "etc/builtin-macros.xlisp",
       "cannot open the built-in macro support");
-    install("_x2c.import-hook",
-            _lisp_import_hook, %((func (("String"))) "Var"));
-    install("x2c.syntax.type",
-            _sdk_syntax_type, %((func (("List"))) "Var"));
-    install("_x2c.foreach.declaration-bindings",
-            _sdk_declaration_bindings,
-            %((func (("List"))) "Var"));
-    install("x2c.binding.spelling",
-            _sdk_binding_spelling, %((func (("Var"))) "Var"));
-    install("x2c._source.text",
-            _sdk_source_text, %((func (("Var"))) "Var"));
-    install(
-      "x2c.diagnostic.fail", _sdk_diagnostic_fail,
-      %((func (("String") ("List"))) "Var")
-    );
-    install("x2c.ident",
-            _sdk_ident, %((func (("String"))) "Var"));
-    install("_x2c.foreach.ident-unique",
-            _sdk_ident_unique, %((func (("String"))) "Var"));
-    install("x2c._invocation.location",
-            _sdk_invocation_location,
-            %((func ((void))) "Var"));
-    install("x2c.method.resolve",
-            _sdk_method_resolve,
-            %((func (("List") ("String"))) "Var"));
-    install("x2c._symbol-set",
-            _sdk_symbol_set, %((func (("List"))) "Var"));
-    install("x2c._embed.text",
-            _sdk_embed_text, %((func (("Var"))) "Var"));
-    install("_x2c.literal.string",
-            _sdk_literal_string, %((func (("Var"))) "Var"));
-    install("x2c.function.name",
-            _sdk_function_name, %((func (("List"))) "Var"));
-    install("_x2c.foreach.function-reference",
-            _sdk_function_reference,
-            %((func (("String"))) "Var"));
-    install("_x2c.function.native-type",
-            _sdk_native_function_type,
-            %((func (("List"))) "Var"));
-    install("x2c.function.parameter",
-            _sdk_function_parameter,
-            %((func (("List") ("String"))) "Var"));
-    install("x2c.function.body",
-            _sdk_function_body, %((func (("List"))) "Var"));
-    install("_x2c.foreach.protocol-member",
-            _sdk_protocol_member,
-            %((func (("List") ("List") ("String"))) "Var"));
-    install("_x2c.type.integral?",
-            _sdk_type_integral,
-            %((func (("List"))) "Var"));
-    install("_x2c.type.pointer?",
-            _sdk_type_pointer, %((func (("List"))) "Var"));
-    install("_x2c.type.element",
-            _sdk_type_element, %((func (("List"))) "Var"));
-    install("_x2c.type.parameters",
-            _sdk_type_parameters,
-            %((func (("List"))) "Var"));
-    install("_x2c.type.return",
-            _sdk_type_return, %((func (("List"))) "Var"));
-    install("_x2c.foreach.complete-iter-chain",
-            _sdk_complete_iter_chain,
-            %((func (("List"))) "Var"));
-    install("x2c.type.fields",
-            _sdk_type_fields, %((func (("List"))) "Var"));
-    install("x2c.type.parts",
-            _sdk_type_parts, %((func (("List"))) "Var"));
-    install("x2c.type.reverse-name",
-            _sdk_type_reverse_name,
-            %((func (("String") ("String"))) "Var"));
-    install("x2c.type.resolve",
-            _sdk_type_resolve, %((func (("List"))) "Var"));
-    install("x2c.type.layout",
-            _sdk_type_layout, %((func (("List"))) "Var"));
-    install("x2c.type.value?",
-            _sdk_type_value, %((func (("List"))) "Var"));
-    install("x2c.type.tag-name",
-            _sdk_type_tag_name, %((func (("String"))) "Var"));
+    $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
+    $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.declaration-bindings",
+      _sdk_declaration_bindings);
+    $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
+    $lisp.bind(_.macro_lisp, "x2c._source.text", _sdk_source_text);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", _sdk_diagnostic_fail);
+    $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
+    $lisp.bind(_.macro_lisp, "_x2c.foreach.ident-unique", _sdk_ident_unique);
+    $lisp.bind(
+      _.macro_lisp, "x2c._invocation.location",
+      _sdk_invocation_location);
+    $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
+    $lisp.bind(_.macro_lisp, "x2c._symbol-set", _sdk_symbol_set);
+    $lisp.bind(_.macro_lisp, "x2c._embed.text", _sdk_embed_text);
+    $lisp.bind(_.macro_lisp, "_x2c.literal.string", _sdk_literal_string);
+    $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.function-reference",
+      _sdk_function_reference);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.function.native-type",
+      _sdk_native_function_type);
+    $lisp.bind(
+      _.macro_lisp, "x2c.function.parameter",
+      _sdk_function_parameter);
+    $lisp.bind(_.macro_lisp, "x2c.function.body", _sdk_function_body);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.protocol-member",
+      _sdk_protocol_member);
+    $lisp.bind(_.macro_lisp, "_x2c.type.integral?", _sdk_type_integral);
+    $lisp.bind(_.macro_lisp, "_x2c.type.pointer?", _sdk_type_pointer);
+    $lisp.bind(_.macro_lisp, "_x2c.type.element", _sdk_type_element);
+    $lisp.bind(_.macro_lisp, "_x2c.type.parameters", _sdk_type_parameters);
+    $lisp.bind(_.macro_lisp, "_x2c.type.return", _sdk_type_return);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.complete-iter-chain",
+      _sdk_complete_iter_chain);
+    $lisp.bind(_.macro_lisp, "x2c.type.fields", _sdk_type_fields);
+    $lisp.bind(_.macro_lisp, "x2c.type.parts", _sdk_type_parts);
+    $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", _sdk_type_reverse_name);
+    $lisp.bind(_.macro_lisp, "x2c.type.resolve", _sdk_type_resolve);
+    $lisp.bind(_.macro_lisp, "x2c.type.layout", _sdk_type_layout);
+    $lisp.bind(_.macro_lisp, "x2c.type.value?", _sdk_type_value);
+    $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
   }
 }
 

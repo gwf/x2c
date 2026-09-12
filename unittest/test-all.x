@@ -51,7 +51,6 @@ void lisp_suite(void);
 void machine_suite(void);
 void lisp_auto_suite(void);
 void match_plan_suite(void);
-void match_cache_suite(void);
 
 $(import "test-macros.xmacro")
 
@@ -80,7 +79,6 @@ int main(int argc, char **argv) {
   $test.suite(machine_suite);
   $test.suite(match_suite);
   $test.suite(match_plan_suite);
-  $test.suite(match_cache_suite);
   $test.suite(match_stmt_suite);
   $test.suite(match_logic_suite);
   $test.suite(match_binder_contract_suite);

@@ -8,13 +8,10 @@ rules remain in `agents/x2c-coding-style-guide.md`.
 Put a contract where it can be enforced completely and let downstream code
 rely on it. A module should expose a small public surface above
 `#pragma private`; its implementation and private dependencies belong below
-that boundary. Compiler and runtime modules retain `#pragma once` because
-`--cpp-symbols` and `--live-symbols` hand their raw `.x` include graph to the
-host preprocessor, and that graph is co-recursive. Nothing else needs it: the
-default path resolves includes itself and terminates cycles on its own, so
-tests, examples, packages, and user programs omit it unless their own `.x`
-includes form a cycle. Generated headers receive their own compiler-owned
-`#pragma once` automatically.
+that boundary. Include collection resolves includes itself and terminates cycles on its own,
+so tests, examples, packages, and user programs omit `#pragma once` unless
+their own `.x` includes form a cycle. Generated headers receive their own
+compiler-owned `#pragma once` automatically.
 
 ```c
 #pragma once

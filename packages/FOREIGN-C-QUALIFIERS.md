@@ -51,8 +51,12 @@ results, globals, and fields. `qualifier-void-pointer` and
 `foreign-alias-pointer-result` cover the corresponding pointer conversions
 and aliases.
 
-A header that spells its declarations with macros needs `--cpp-symbols`,
-because x2c does not expand macros.
+Symbol collection recognizes `#include` and nothing else, so it does not
+expand macros. A declaration that an upstream header spells through a macro
+is invisible to it, and the generated C then calls an undeclared name. Write
+that declaration out by hand in the package's `.x`, above `#pragma private`,
+with the upstream spelling and qualifiers; the upstream header still defines
+it, so the hand prototype only has to agree.
 
 ## Package source
 

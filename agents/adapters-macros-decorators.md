@@ -162,7 +162,6 @@ Keep a macro only when:
   mode that a reviewer needs;
 - generated names are hygienic unless an exact public spelling is deliberate;
 - diagnostics still point to useful source;
-- normal and `--live-symbols` translation agree;
 - generated C remains direct enough to inspect;
 - hot-path performance is unchanged or measured and accepted.
 

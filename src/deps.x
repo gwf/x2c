@@ -105,7 +105,7 @@ static Array _prerequisites(
   if (compiler.deps.len())
     foreach (Var (path, content_hash), compiler.deps) _add(paths, path);
   else _add(paths, input);
-  if (!request.no_cpp && !request.live_symbols) {
+  if (!request.no_cpp) {
     String root = x2c_get_root();
     _add(paths, %"$root/etc/symbols.xlisp");
     if (header_symbols_active())

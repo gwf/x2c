@@ -36,6 +36,12 @@
   (cons `(func ,(map lisp.native.normalize-type parameters))
         (lisp.native.normalize-type result))))
 
+// The declared prototype owns every native signature; name-signature reads
+// it from the compiler's symbol table so no signature is written twice.
+(defun lisp.native.name-signature (name)
+  (lisp.native.function-signature
+    (_x2c.function.native-type (_x2c.foreach.function-reference name))))
+
 (def lisp.binding.rows nil)
 (def lisp.binding.sealed nil)
 
@@ -49,7 +55,6 @@
    (type (_x2c.function.native-type function))
    (rows (lisp.binding.rows-for group-name)))
   (begin
-    (lisp.native.function-signature type)
     (if (member group-name lisp.binding.sealed)
       (x2c.diagnostic.fail
         "native Lisp binding appears after its group was installed"
@@ -88,19 +93,17 @@
           nil))
     (map (lambda (row) (lisp.binding.call lisp row)) rows))))
 
-(defun lisp.native._target (name signature maker)
+(defun lisp.native._target (name maker)
   `(,(lisp.native.call "String_var" (x2c.literal.string name))
     ,(lisp.native.call "Func_var" (lisp.native.call maker
        (x2c.expr.ident (x2c.ident name))
-       (lisp.native.signature signature)))))
+       (lisp.native.signature (lisp.native.name-signature name))))))
 
 // A row with a trailing marker binds a target that takes every argument
 // as one List, so it is built with Func_new_rest instead.
 (defun lisp.native.target (row) (match-case row
-  ((?name ?signature)
-   (lisp.native._target (str ?name) ?signature "Func_new"))
-  ((?name ?signature ?marker)
-   (lisp.native._target (str ?name) ?signature "Func_new_rest"))))
+  ((?name) (lisp.native._target (str ?name) "Func_new"))
+  ((?name ?marker) (lisp.native._target (str ?name) "Func_new_rest"))))
 
 (defun lisp.native.targets (rows)
   (apply lisp.native.call

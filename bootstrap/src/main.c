@@ -43,8 +43,6 @@ static void _configure_logging(int debugging);
 
 static void _report_diagnostics(Compiler compiler);
 
-static void _preprocessor_errors(String text);
-
 static Map _filter_static_symbols(Map globs, Map statics);
 
 static String _ast_inspection_repr(List node);
@@ -187,12 +185,6 @@ static void _report_diagnostics(Compiler compiler){
 
 }
 
-int File_printf(File, const char *, ...);
-
-static void _preprocessor_errors(String text){
-  File_printf(Stderr, "%s", text);
-}
-
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int Map_contains(Map, Var);
@@ -270,15 +262,12 @@ int Frontend_start(Frontend, String, ParsedUnit *);
 void Compiler_own_diagnostics(Compiler);
 void Compiler_dump_tokens(Compiler);
 int ParsedUnit_collect(ParsedUnit *, Frontend);
-int String_truth(String);
-void Compiler_dump_symbol_table(Compiler, Map);
 int ParsedUnit_parse(ParsedUnit *);
 void Compiler_dump_cache(Compiler);
+void Compiler_dump_symbol_table(Compiler, Map);
 Map Sym_current_symbols(Sym);
-int Map_truth(Map);
-Map Map_merge(Map, Map);
-Map Sym_file_statics(Sym);
 Map Sym_global_symbols(Sym);
+Map Sym_file_statics(Sym);
 int symbol_snapshot_write(Map, Map, File);
 void Compiler_dump_conformance(Compiler, Map);
 List Compiler_generate_protocol_adapters(Compiler, List);
@@ -310,14 +299,6 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     ok = ParsedUnit_collect(&(unit), frontend);
     _report_diagnostics(compiler);
     if(! ok) exit(1);
-    switch(opts -> dump){
-      case 320883072032 : if(String_truth(unit.preprocessor_output)) File_printf(Stderr, "%s", unit.preprocessor_output);
-      exit(0);
-      case 247458062609318 : if(unit.preprocessor) Compiler_dump_tokens(unit.preprocessor);
-      exit(0);
-      case 10268258311770 : if(unit.preprocessor) Compiler_dump_symbol_table(unit.preprocessor, unit.globals);
-      exit(0);
-    }
     _stage_stats(filename, "symbols");
     if(! ParsedUnit_parse(&(unit))){
       _report_diagnostics(compiler);
@@ -346,9 +327,7 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       exit(0);
     }
     if(opts -> dump == 1335836754920){
-      Map statics = Map_truth(unit.snapshot_statics) ? unit.snapshot_statics : Map_new();
-      Map_merge(statics, Sym_file_statics(compiler -> sym));
-      Map snapshot = _filter_static_symbols(Sym_global_symbols(compiler -> sym), statics);
+      Map snapshot = _filter_static_symbols(Sym_global_symbols(compiler -> sym), Sym_file_statics(compiler -> sym));
       if(! symbol_snapshot_write(snapshot, compiler -> fn_defs, Stdout)) exit(1);
       exit(0);
     }
@@ -356,25 +335,17 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       printf("(unit %s)\n", filename);
       Compiler_dump_conformance(compiler, unit.globals);
       {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return;
-
-}
     }
     ast = Compiler_generate_protocol_adapters(compiler, ast);
     if(opts -> dump == 559620016998){
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-  return;
-
-} _stage_stats(filename, "parse");
+      x2c_cleanup_leave(& _x2c_defer_record_0);
+      return;
+    }
+    _stage_stats(filename, "parse");
     ast = _transform_ast(compiler, ast);
     _stage_stats(filename, "transform");
     if(opts -> dump == 10268258302218){
@@ -387,16 +358,15 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     _stage_stats(filename, "generate");
   }
 
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
 }
 }
 
 int CliRequest_inspects(CliRequest);
 
 String Var_string(Var);
+
+int String_truth(String);
 
 int String_endswith(String, String);
 
@@ -618,7 +588,6 @@ static int _run_translation(CliRequest c){
   }
   if(c -> dry_run) return 0;
   Frontend frontend = Frontend_new(c);
-  frontend -> preprocessor_errors = _preprocessor_errors;
   String output_dir = c -> out_dir;
   int total = List_len(c -> inputs), completed = 0;
   unsigned long long gen_bytes = 0;
@@ -788,14 +757,10 @@ static int _run_build_request(CliRequest c, Array commands){
             {
               int _x2c_return_value_0 = 1;
               {
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+                x2c_cleanup_leave(& _x2c_defer_record_1);
+                return _x2c_return_value_0;
+              }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-  return _x2c_return_value_0;
-
-}
             }
 
           }
@@ -814,14 +779,10 @@ static int _run_build_request(CliRequest c, Array commands){
       {
         int _x2c_return_value_1 = result;
         {
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-  return _x2c_return_value_1;
-
-}
       }
 
     }
@@ -843,14 +804,10 @@ static int _run_build_request(CliRequest c, Array commands){
       {
         int _x2c_return_value_2 = 1;
         {
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_2;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-  return _x2c_return_value_2;
-
-}
       }
 
     }
@@ -860,22 +817,15 @@ static int _run_build_request(CliRequest c, Array commands){
     {
       int _x2c_return_value_3 = result;
       {
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_3;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-  return _x2c_return_value_3;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 

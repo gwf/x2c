@@ -15,10 +15,9 @@ CORE_TARGETS = build build-safe verify examples check precommit \
 BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 	stage-1 stage-2 stage-3 packages
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
-	proof-artifact-atomicity proof-raw-symbols proof-conformance \
-	build-recovery packages-check
+	proof-artifact-atomicity build-recovery packages-check
 SYMBOL_TARGETS = sym-ensure sym-check sym-update sym-refresh \
-	sym-live-build hdr-check hdr-sync artifact-refresh
+	hdr-check hdr-sync artifact-refresh
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
 DOC_TARGETS = doc-generate doc-check doc-examples doc-build doc-serve \
@@ -28,7 +27,7 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-scope bm-file bm-logger bm-iter bm-exception bm-var bm-varops \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler \
-	bm-match-cache bm-lisp-auto
+	bm-lisp-auto
 SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
 APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
@@ -40,7 +39,7 @@ COMPAT_TARGETS = default x2c safely install bootstrap rebootstrap \
 	shootout update-shootout calibrate-shootout \
 	symbol-table check-symbol-snapshot update-symbol-snapshot \
 	update-header-symbols check-header-symbols \
-	artifact-atomicity live-symbol-x2c check-raw-symbols \
+	artifact-atomicity \
 	refresh-artifacts update-examples \
 	docs check-docs check-doc-examples book book-serve \
 	benchmarks scan-benchmark string-benchmark list-benchmark \
@@ -49,7 +48,7 @@ COMPAT_TARGETS = default x2c safely install bootstrap rebootstrap \
 	map-benchmark map-standard-benchmark-smoke \
 	map-standard-benchmark-campaign map-u32-benchmark-smoke \
 	map-u32-benchmark-campaign \
-	compiler-translation-benchmark match-cache-benchmark \
+	compiler-translation-benchmark \
 	lisp-auto-benchmark diff0 diff1 diff2 diff3 diffs \
 	debug optimize show-config
 
@@ -157,7 +156,6 @@ check-after-precommit:
 # Example checks are optional (Gary, 2026-09-01).
 # Run `make examples doc-examples` manually.
 #	$(MAKE) examples
-	$(MAKE) proof-raw-symbols
 	$(MAKE) doc-check
 #	$(MAKE) doc-examples
 
@@ -236,12 +234,6 @@ proof-artifact-atomicity:				## Prove artifact updates are atomic
 build-recovery: build					## Check incremental build recovery
 	./unittest/probes/run-build-recovery.sh
 
-proof-raw-symbols: build				## Check raw symbol collection parity
-	./unittest/probes/run-raw-symbol-sweep.sh
-
-proof-conformance: build ## Compare owned conformance rows between snapshot and live symbol modes
-	./tools/check-conformance-coherence.sh
-
 ##@ Symbols and artifacts
 sym-ensure:						## Refresh stale symbols only when inputs changed
 	@python3 tools/sync-symbol-snapshot.py \
@@ -250,21 +242,17 @@ sym-ensure:						## Refresh stale symbols only when inputs changed
 
 sym-check: build					## Check the compiler symbol snapshot
 	@tmp=$$(mktemp); trap 'rm -f "$$tmp"' EXIT; \
-		$(STAGE0_X2C) translate --live-symbols --dump-symbol-snapshot \
-		etc/symbol-source.x >"$$tmp" && \
+		$(STAGE0_X2C) translate --dump-symbol-snapshot \
+		lib/x2c.x >"$$tmp" && \
 		diff -u etc/symbols.xlisp "$$tmp"
 
 sym-update: build					## Rewrite the compiler symbol snapshot
+	@python3 tools/sync-symbol-snapshot.py \
+		--compiler "$(STAGE0_X2C)" --fallback ./bin/x2c --force
 	$(MAKE) hdr-sync
 
 sym-refresh: sym-update					## Refresh and verify symbol artifacts
 	$(MAKE) sym-check
-
-sym-live-build: bootstrap-ready				## Build stage 0 from live symbols
-	$(MAKE) -C builds clean
-	$(MAKE) -C include all
-	$(MAKE) -C lib x2c.x
-	$(PARALLEL_MAKE) -C builds x2c X2C_FLAGS=--live-symbols
 
 HEADER_SYMBOL_SOURCES = $(filter-out lib/x2c.x,$(wildcard lib/*.x)) \
 	$(wildcard src/*.x)
@@ -462,8 +450,6 @@ bm-map-u32-campaign: build			## Run full runtime-free U32Map campaign
 bm-compiler: stage-1					## Measure representative translation
 	./unittest/benchmarks/run-compiler-translation.sh
 
-bm-match-cache: stage-1					## Run Match cache acceptance gates
-	./unittest/benchmarks/run-match-cache-benchmark.sh
 
 bm-lisp-auto: stage-1					## Run Lisp AUTO acceptance gate
 	./unittest/benchmarks/run-lisp-auto-benchmark.sh
@@ -542,8 +528,6 @@ update-symbol-snapshot: sym-update
 update-header-symbols: hdr-sync
 check-header-symbols: hdr-check
 artifact-atomicity: proof-artifact-atomicity
-live-symbol-x2c: sym-live-build
-check-raw-symbols: proof-raw-symbols
 refresh-artifacts: artifact-refresh
 update-examples: examples-update
 docs: doc-generate
@@ -569,7 +553,6 @@ map-standard-benchmark-campaign: bm-map-standard-campaign
 map-u32-benchmark-smoke: bm-map-u32-smoke
 map-u32-benchmark-campaign: bm-map-u32-campaign
 compiler-translation-benchmark: bm-compiler
-match-cache-benchmark: bm-match-cache
 lisp-auto-benchmark: bm-lisp-auto
 diff0: stage-diff-0
 diff1: stage-diff-1

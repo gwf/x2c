@@ -342,7 +342,7 @@ void x2c_initialize(void){
   if(! _init_guard_) _file_init_();
   void Atom_initialize(void), File_initialize(void);
   void List_initialize(void), Scope_initialize(void);
-  void MatchCache_initialize(void);
+  void x2c_match_initialize(void);
   void String_initialize(void), Logger_initialize(void);
   Scope Scope_new(void), * Scope_top(void);
   static int initialized = 0;
@@ -354,7 +354,7 @@ void x2c_initialize(void){
   String_initialize();
   List_initialize();
   Atom_initialize();
-  MatchCache_initialize();
+  x2c_match_initialize();
   File_initialize();
   Logger_initialize();
 }
@@ -362,7 +362,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();
   if(length < 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 860};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 853};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))), Symbol_var(816725264), int_var(length));
     __builtin_unreachable();
   }
@@ -374,7 +374,7 @@ int x2c_normalize_index(int index, int length){
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();
   if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 880};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 873};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));
     __builtin_unreachable();
   }

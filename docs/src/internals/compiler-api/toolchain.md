@@ -22,7 +22,6 @@ Host preprocessing, compilation, archive, and link actions.
 | [`Toolchain.archive_action`](#Toolchain.archive_action) | Builds but does not start an `ar rcs` action in object-list order. |
 | [`Toolchain.compile_action`](#Toolchain.compile_action) | Builds but does not start one C compilation action. |
 | [`Toolchain.link_action`](#Toolchain.link_action) | Builds but does not start a host-compiler link action. |
-| [`Toolchain.preprocess`](#Toolchain.preprocess) | Runs the configured C preprocessor without a shell. |
 | [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Captures the native preprocessor view used to identify reusable objects. |
 
 ### Functions
@@ -162,27 +161,6 @@ runtime archive, and `-lm` follow the inputs.
 
 Source: `src/toolchain.x:219`
 
-<a id="Toolchain.preprocess"></a>
-#### Toolchain.preprocess
-
-`int Toolchain.preprocess( Toolchain toolchain, const char *fname, List include_dirs, const char *imacros, String *output, String *errors, String *dependencies)`
-
-Runs the configured C preprocessor without a shell.
-`fname`, `output`, and `errors` are required; output pointers are cleared
-before use. Source and include paths remain distinct argv elements, and
-stdout and stderr are captured separately. When `dependencies` is present,
-its temporary depfile is read when possible and removed on returning paths,
-including a handled `<io-fail>` while reading it. A non-returning
-`<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
-Returns the shell-style child status, or -1 for invalid arguments, local
-setup failure, child start failure, or wait failure. Partial capture setup
-returns no defined status. This operation does not consult `dry_run`.
-
-**Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
-constructing arguments or reading captured text.
-
-Source: `src/toolchain.x:381`
-
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
 
@@ -231,7 +209,7 @@ Source: `src/toolchain.x:36`
 <a id="Toolchain"></a>
 ### Toolchain
 
-`typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose, dry_run, keep_system_includes; } *Toolchain`
+`typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose, dry_run; } *Toolchain`
 
 Holds resolved host tools, native layout, and borrowed option `List`s.
 The record returned by `toolchain_new` is `Scope`-owned. Its `String`s

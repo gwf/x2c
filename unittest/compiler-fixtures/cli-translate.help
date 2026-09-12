@@ -19,19 +19,13 @@ Source options:
       --x-include-dir <dir>   Add an x2c-only include directory
       --package-dir <dir>     Add a directory of x2c packages
       --no-cpp                Skip symbol collection and preprocessing
-      --live-symbols          Collect symbols through the host preprocessor
-      --cpp-symbols           Use CPP collection for this translation
 
 Inspection options:
       --dump-tokens           Print source tokens and stop
-      --dump-cpp              Print host-preprocessed text and stop
-      --dump-cpp-text         Alias for --dump-cpp
-      --dump-cpp-tokens       Print host-preprocessed tokens and stop
       --dump-ast              Print the parsed AST and stop
       --dump-transforms       Print the transformed AST and stop
       --dump-code             Print unformatted generated code and stop
       --dump-symbols          Print the source symbol table and stop
-      --dump-cpp-symbols      Print the CPP symbol table and stop
       --dump-cache            Print the compiler cache and stop
       --dump-conformance      Print protocol conformance and stop
       --dump-symbol-snapshot  Print a complete symbol snapshot and stop

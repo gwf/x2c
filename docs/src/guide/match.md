@@ -333,6 +333,14 @@ scalar replacement. `search` returns its results in reverse visitation order,
 so do not read the list as document order. [The standard library
 overview](../library/overview.md) has the full API list.
 
+Each of these operations runs a pattern program rather than the pattern value.
+When the pattern argument is a literal written at the call, the compiler gives
+that call its own program, prepared once for the life of the process. A
+pattern computed at run time -- built with `cons`, interpolated with `$`, or
+received as a parameter -- is prepared for that call alone, so a loop over a
+computed pattern pays one preparation per iteration. Hoist the literal out of
+the loop, or match on it directly, when that cost matters.
+
 ## Match for shape, traversal for search
 
 Use `match` when the data's structure determines what to do. Literal elements

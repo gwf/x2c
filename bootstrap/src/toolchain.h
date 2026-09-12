@@ -9,7 +9,7 @@
 typedef struct Toolchain{
   String cc, ar, include_dir, runtime_lib;
   List cpp_args, cc_args, ld_args;
-  int verbose, dry_run, keep_system_includes;
+  int verbose, dry_run;
 }
 * Toolchain;
 
@@ -47,8 +47,6 @@ int ToolRun_ready(ToolRun execution);
 int ToolRun_wait(ToolRun execution);
 
 int ToolAction_run(ToolAction action);
-
-int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
 
 
 #endif /* __GUARD_0x242786A8__ */

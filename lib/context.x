@@ -44,7 +44,7 @@ protocol Cleanup(Context);
    before that work is installed. */
 struct Context {
   Context parent, Scope scope, *destination_scope, Pool pool;
-  Pool destination_pool, void *error_state, *match_state;
+  Pool destination_pool, void *error_state;
 };
 
 typedef struct ContextThreadState {
@@ -111,11 +111,10 @@ static Context _open(const char *name, int isolated) {
     _.parent = _thread().current;
     _.destination_scope = Scope.top();
     int pushed = 0, installed = 0;
-    /* Publish the Context only after its Scope, optional pool, Error state,
-       and Match state are ready. A failed open closes those dependencies in
-       reverse order while the parent's destination state is still live. */
+    /* Publish the Context only after its Scope, optional pool, and Error
+       state are ready. A failed open closes those dependencies in reverse
+       order while the parent's destination state is still live. */
     defer if (!installed) {
-      if (_.match_state) MatchCache.context_close(_.match_state);
       if (_.error_state)
         Error.context_close(_.error_state, x2c_exception_unwinding());
       if (_.pool)     String.pool_release();
@@ -131,7 +130,6 @@ static Context _open(const char *name, int isolated) {
       _.destination_pool = _.pool.up;
     }
     _.error_state = Error.context_open();
-    _.match_state = MatchCache.context_open();
     _thread().current = _;
     installed = 1;
     return _;
@@ -352,11 +350,10 @@ void Context.close(Context context) {
   if (!context || _thread().current != context)
     raise %(bad-state (owner "Context.close"));
 
-  /* Match and Error teardown can still use Context-owned values. Release the
-     private canonical pool before its Scope, restore the destination Scope
-     before destroying the child, and publish the parent only after teardown
-     can no longer observe this Context. */
-  MatchCache.context_close(context.match_state);
+  /* Error teardown can still use Context-owned values. Release the private
+     canonical pool before its Scope, restore the destination Scope before
+     destroying the child, and publish the parent only after teardown can no
+     longer observe this Context. */
   Error.context_close(context.error_state, x2c_exception_unwinding());
   if (context.pool) String.pool_release();
 

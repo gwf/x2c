@@ -1005,10 +1005,7 @@ static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2
 
     }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
   }
 
@@ -1057,31 +1054,22 @@ default: ;  return expression;  break;
       }
       List key = cons(_73, cons(List_var(source_binding), cons(List_var(target_type), NULL)));  Var stored;  if(Map_try_get(c -> names -> adapters, List_var(key), & stored)){
         List _x2c_return_value_0 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(stored, NULL))), NULL))); {
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-  return _x2c_return_value_0;
-}
+          x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_0;
+        }
+
       }
       String adapter_name = Compiler_fresh_name(c, _502);  List adapter_binding = Sym_introduce(c -> sym, adapter_name);  List function = _callback_function(c, adapter_binding, target_params, target_return, source_binding, source_type, source_params);  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter_binding));  Compiler_add_early(c, function); {
         List _x2c_return_value_1 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(List_var(adapter_binding), NULL))), NULL))); {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_1;
-}
+          x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_1;
+        }
+
       }
 
     }
 
   }
 
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
 }
 }
 }
@@ -1502,12 +1490,9 @@ static void _collect_region_bindings(Compiler compiler, List ast, Map owned, Arr
 List rest = pruned ? NULL : ast;  for(; ; ){
     while(! List_truth(rest)){
       if(! Array_len(resume)){
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-  return;
-} rest = Var_list(Array_take_last(resume));
+        x2c_cleanup_leave(& _x2c_defer_record_2);  return;
+      }
+      rest = Var_list(Array_take_last(resume));
     }
     Var child = List_car(rest);  rest = List_cdr(rest);  if(Var_is(child, 806120) && ! Var_is_nil(child)){
       if(List_truth(rest)) Array_push(resume, List_var(rest));  ast = Var_list(child);  break;
@@ -1518,10 +1503,7 @@ List rest = pruned ? NULL : ast;  for(; ; ){
 }
 }
 
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
 }
 
@@ -1610,10 +1592,7 @@ default: break;
 }
 }
 
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
 }
 }
 
@@ -1657,10 +1636,7 @@ static void _collect_reference_captures(List ast, Map owned, Map candidates){
 
 }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 

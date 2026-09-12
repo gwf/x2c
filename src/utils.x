@@ -52,7 +52,6 @@ void x2c_initialize_environment(const char *argv0) {
 void x2c_set_root(String root) {
   x2c_root_path = root;
   x2c_base_include_dirs = NULL;
-  x2c_repo_cpp_include_dirs = NULL;
   _prepare_repo_defaults();
 }
 
@@ -103,11 +102,6 @@ int x2c_package_source(String directory, String path) {
 */
 List x2c_default_include_dirs(void) => x2c_base_include_dirs;
 
-/** Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
-    Returns NULL before environment setup.
-*/
-List x2c_cpp_include_dirs(void) => x2c_repo_cpp_include_dirs;
-
 /** Prints `x2c: error: <message>` to stderr and exits with status 2. */
 void x2c_driver_error(const char *message) {
   fprintf(stderr, "x2c: error: %s\n", message);
@@ -129,7 +123,7 @@ void x2c_driver_error(const char *message) {
 // module state
 
 static String x2c_executable_path = NULL, x2c_root_path = NULL;
-static List x2c_base_include_dirs = NULL, x2c_repo_cpp_include_dirs = NULL;
+static List x2c_base_include_dirs = NULL;
 
 static int _dir_exists(const char *path) {
   struct stat st;
@@ -222,9 +216,7 @@ static void _prepare_repo_defaults(void) {
   if (!x2c_root_path) return;
   const char *root = x2c_root_path;
   String include_dir = %"%s/include".printf(root);
-  String src_dir = %"%s/src".printf(root), lib_dir = %"%s/lib".printf(root);
   x2c_base_include_dirs = cons(include_dir, NULL);
-  x2c_repo_cpp_include_dirs = %( $src_dir $lib_dir );
 }
 
 // child processes
@@ -348,16 +340,6 @@ int ChildProcess.wait(ChildProcess c, String *output, String *errors) {
   }
   if (c.start_error) *errors = c.start_error;
   return result;
-}
-
-/** Starts and waits for one direct child action.
-    After capture setup succeeds, output, status, and failure behavior follow
-    `process_start` and `ChildProcess.wait`. A partial capture setup failure
-    returns no defined status; its closed field remains recorded.
-*/
-int process_run(char **argv, String *output, String *errors) {
-  ChildProcess process = process_start(argv, 1);
-  return process.wait(output, errors);
 }
 
 /** Forks a worker that continues the current program with inherited state.

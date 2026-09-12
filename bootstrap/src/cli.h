@@ -18,7 +18,7 @@ typedef struct CliRequest{
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int live_symbols, cpp_symbols, source_map, source_facts;
+  int source_map, source_facts;
   SourceView sources;
 }
 * CliRequest;

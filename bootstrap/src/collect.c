@@ -713,10 +713,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
     Compiler_merge_source_declarations(c, globs, overlay);
   }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
 }
 
@@ -801,25 +798,14 @@ static void _include(Compiler c, String target, int angle, String dir, Map globs
       }
 
     }
-    else {int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_0;
   }
 
 }
-}
-int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_cleanup_done_0 :;
+x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 {
   ExceptionFrame _x2c_exception_frame_1;
@@ -840,24 +826,13 @@ _x2c_error_handler_0 = NULL;
     }
 
   }
-  else {int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_1);
-  _x2c_error_handler_1 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-    x2c_exception_leave(& _x2c_exception_frame_1);
-  __builtin_unreachable();
+  else goto _x2c_cleanup_done_1;
 }
 }
-}
-int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_1);
+_x2c_cleanup_done_1 :;
+x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+x2c_exception_leave(& _x2c_exception_frame_1);
 }
 }
 Map_setindex(visited, String_var(canonical), int_var(1));
@@ -1069,10 +1044,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
 
     }
 
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
   }
 
@@ -1303,27 +1275,16 @@ void Compiler_collect_package(Compiler c, String name, Token token){
           }
 
         }
-        else {int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_2);
-        _x2c_error_handler_2 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-    x2c_exception_leave(& _x2c_exception_frame_2);
-        __builtin_unreachable();
+        else goto _x2c_cleanup_done_2;
       }
 
     }
-
-  }
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+    _x2c_cleanup_done_2 :;
     x2c_error_catch_close(_x2c_error_handler_2);
-  _x2c_error_handler_2 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
+    _x2c_error_handler_2 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_2);
-}
+  }
+
 }
 if(failed) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_57), cons(String_var(name), cons(String_var(_47), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(entry), NULL)))), NULL));
 _file(package, entry, text, x2c_path_dir(entry), globs, visited);
@@ -1354,10 +1315,7 @@ Map_setindex(c -> package_roots, String_var(name), String_var(root));
 }
 }
 
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
 }
 }
 
@@ -1386,40 +1344,25 @@ static String _snapshot_content_hash(void){
          {{
           String _x2c_return_value_0 = _72;
           {
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_3);
-          _x2c_error_handler_3 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_3);
+            x2c_error_catch_close(_x2c_error_handler_3);
+            _x2c_error_handler_3 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_3);
+            return _x2c_return_value_0;
+          }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
-  return _x2c_return_value_0;
-
-}
         }
 
       }
 
     }
-    else {int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_3);
-    _x2c_error_handler_3 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
-    x2c_exception_leave(& _x2c_exception_frame_3);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_3;
   }
 
 }
-}
-int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_3);
+_x2c_cleanup_done_3 :;
+x2c_error_catch_close(_x2c_error_handler_3);
 _x2c_error_handler_3 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
-    x2c_exception_leave(& _x2c_exception_frame_3);
+x2c_exception_leave(& _x2c_exception_frame_3);
 }
 return String_printf(_29, String_hash(text));
 }
@@ -1594,40 +1537,25 @@ int header_symbols_open(String path, int gensym_base){
          {{
           int _x2c_return_value_1 = 0;
           {
-  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_4);
-          _x2c_error_handler_4 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_4);
+            x2c_error_catch_close(_x2c_error_handler_4);
+            _x2c_error_handler_4 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_4);
+            return _x2c_return_value_1;
+          }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
-  return _x2c_return_value_1;
-
-}
         }
 
       }
 
     }
-    else {int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_4);
-    _x2c_error_handler_4 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
-    x2c_exception_leave(& _x2c_exception_frame_4);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_4;
   }
 
 }
-}
-int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_4);
+_x2c_cleanup_done_4 :;
+x2c_error_catch_close(_x2c_error_handler_4);
 _x2c_error_handler_4 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
-    x2c_exception_leave(& _x2c_exception_frame_4);
+x2c_exception_leave(& _x2c_exception_frame_4);
 }
 if(! String_truth(source)) return 0;
 List lines = String_split_lines(source, 0);
@@ -1722,55 +1650,36 @@ static List _artifact_fetch(Compiler compiler, String canonical){
         if (_x2c_catch_selected_5 == 0) {{
           List _x2c_return_value_2 = NULL;
           {
-  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_5);
-          _x2c_error_handler_5 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_5);
+            x2c_error_catch_close(_x2c_error_handler_5);
+            _x2c_error_handler_5 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_5);
+            return _x2c_return_value_2;
+          }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
-  return _x2c_return_value_2;
-
-}
         }
 
       }
       else {{
         List _x2c_return_value_3 = NULL;
         {
-  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_5);
-        _x2c_error_handler_5 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_5);
+          x2c_error_catch_close(_x2c_error_handler_5);
+          _x2c_error_handler_5 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_5);
+          return _x2c_return_value_3;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
-  return _x2c_return_value_3;
-
-}
       }
 
     }
 
   }
-  else {int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_5);
-  _x2c_error_handler_5 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
-    x2c_exception_leave(& _x2c_exception_frame_5);
-  __builtin_unreachable();
+  else goto _x2c_cleanup_done_5;
 }
 }
-}
-int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_5);
+_x2c_cleanup_done_5 :;
+x2c_error_catch_close(_x2c_error_handler_5);
 _x2c_error_handler_5 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
-    x2c_exception_leave(& _x2c_exception_frame_5);
+x2c_exception_leave(& _x2c_exception_frame_5);
 }
 if(status != 46228810 || ! Var_is(record, 806120)) return NULL;
 List fields = Var_list(record);
@@ -1883,16 +1792,12 @@ List stored_dependencies = Var_list(dependencies_value);
           if(! Compiler_read_source(compiler, dependency_path, & dependency_text)){
             List _x2c_return_value_4 = _artifact_reject(relative);
             {
-  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_6);
-            _x2c_error_handler_6 = NULL;
-            x2c_exception_leave(& _x2c_exception_frame_6);
+              x2c_error_catch_close(_x2c_error_handler_6);
+              _x2c_error_handler_6 = NULL;
+              x2c_exception_leave(& _x2c_exception_frame_6);
+              return _x2c_return_value_4;
+            }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
-  return _x2c_return_value_4;
-
-}
           }
 
         }
@@ -1905,72 +1810,49 @@ List stored_dependencies = Var_list(dependencies_value);
             if (_x2c_catch_selected_6 == 0) {{
               List _x2c_return_value_5 = _artifact_reject(relative);
               {
-  int _x2c_cleanup_prev_20 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_6);
-              _x2c_error_handler_6 = NULL;
-              x2c_exception_leave(& _x2c_exception_frame_6);
+                x2c_error_catch_close(_x2c_error_handler_6);
+                _x2c_error_handler_6 = NULL;
+                x2c_exception_leave(& _x2c_exception_frame_6);
+                return _x2c_return_value_5;
+              }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_20;
-  return _x2c_return_value_5;
-
-}
             }
 
           }
           else if (_x2c_catch_selected_6 == 1) {{
             List _x2c_return_value_6 = _artifact_reject(relative);
             {
-  int _x2c_cleanup_prev_21 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_6);
-            _x2c_error_handler_6 = NULL;
-            x2c_exception_leave(& _x2c_exception_frame_6);
+              x2c_error_catch_close(_x2c_error_handler_6);
+              _x2c_error_handler_6 = NULL;
+              x2c_exception_leave(& _x2c_exception_frame_6);
+              return _x2c_return_value_6;
+            }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_21;
-  return _x2c_return_value_6;
-
-}
           }
 
         }
         else {{
           List _x2c_return_value_7 = _artifact_reject(relative);
           {
-  int _x2c_cleanup_prev_22 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_error_catch_close(_x2c_error_handler_6);
-          _x2c_error_handler_6 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_6);
+            x2c_error_catch_close(_x2c_error_handler_6);
+            _x2c_error_handler_6 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_6);
+            return _x2c_return_value_7;
+          }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_22;
-  return _x2c_return_value_7;
-
-}
         }
 
       }
 
     }
-    else {int _x2c_cleanup_prev_24 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_6);
-    _x2c_error_handler_6 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_24;
-    x2c_exception_leave(& _x2c_exception_frame_6);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_6;
   }
 
 }
-}
-int _x2c_cleanup_prev_23 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_6);
+_x2c_cleanup_done_6 :;
+x2c_error_catch_close(_x2c_error_handler_6);
 _x2c_error_handler_6 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_23;
-    x2c_exception_leave(& _x2c_exception_frame_6);
+x2c_exception_leave(& _x2c_exception_frame_6);
 }
 String hash = String_printf(_29, String_hash(dependency_text));
 if(! String_equal(hash, Var_string(content_hash))) return _artifact_reject(relative);

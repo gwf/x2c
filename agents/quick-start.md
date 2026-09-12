@@ -31,7 +31,6 @@ required sequence.
 | `make sym-check` | Check the deterministic compiler symbol snapshot. |
 | `make sym-refresh` | Refresh symbols, verify regeneration, and display the diff. |
 | `make sym-update` | Accept an intentional, reviewed symbol change. |
-| `make proof-conformance` | Optional snapshot/live protocol conformance comparison. |
 | `make examples` | Check the curated executable examples manifest. |
 | `make examples-update` | Accept intentional, reviewed example-output changes. |
 | `make doc-examples` | Compile the book's code examples; optional. |

@@ -95,40 +95,22 @@ typedef struct MatchCaptureSite {
 
 #pragma public
 
-/* Cache pressure is the acquire status beyond MachinePrepare: every slot is
-   leased, so none can be recycled. */
-#define MATCH_CACHE_PRESSURE 3
-
-/* Names an explicit cache of immutable prepared Match plans.
-    A cache is not synchronized. Its caller must serialize access, keep every
-    admitted pattern value alive until disposal, and dispose it when no lease
-    remains active.
-*/
-typedef struct MatchCache *MatchCache;
-
-/* Represents one acquired use of a cached or transient Match plan.
-    A cached lease pins its entry; a transient lease owns its plan. Initialize
-    it only through `MatchCache.acquire` and call `MatchLease.release` on every
-    non-transferring path, including a pressure result.
-*/
-typedef struct MatchLease {
-  MatchCache cache;
-  MatchPlan transient_plan;
-  unsigned long generation;
-  int slot, active;
-} MatchLease;
-
-/** Matches through the active default cache into positional storage.
-    Returns 1 on success and 0 on a miss, malformed pattern, invalid buffer,
-    cache pressure, or machine error. A nonnull buffer is written atomically
-    as described by `MatchCaptureBuffer`; NULL returns 0.
+/** Matches a runtime pattern into positional storage.
+    The pattern is prepared for this call alone, so a caller that repeats one
+    pattern pays one preparation each time. Returns 1 on success and 0 on a
+    miss, malformed pattern, invalid buffer, or machine error. A nonnull
+    buffer is written atomically as described by `MatchCaptureBuffer`; NULL
+    returns 0.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing or matching.
 */
 int x2c_match_try_capture(
   List input, Var pattern, MatchCaptureBuffer *captures) {
   if (!captures) return 0;
-  return _plan_cache().try_capture(input, pattern, captures);
+  MatchPlan plan = _transient_plan(pattern, "match");
+  int result = plan.try_capture(input, captures);
+  plan.free();
+  return result == 1;
 }
 
 /* Matches through one compiler-proven static source-pattern site.
@@ -168,6 +150,94 @@ int x2c_match_site_try_capture(
   return 0;
 }
 
+/* Returns the plan this site holds, publishing it on the first call. A
+   pattern the site cannot retain, and an ineligible one, return NULL so the
+   caller falls back to the ordinary per-call route. That route has the same
+   result and names the public operation when it reports the fence. */
+static MatchPlan _site_plan(MatchCaptureSite *site, Var pattern) {
+  if (!site) return NULL;
+  MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
+  if (!plan) plan = _capture_site_publish(site, pattern);
+  return plan && plan.status != MACHINE_INELIGIBLE ? plan : NULL;
+}
+
+/** Matches through one compiler-owned site, writing bindings on success.
+    Results follow `List.try_match`.
+*/
+int x2c_match_site_try_match(
+  MatchCaptureSite *site, List input, Var pat, List *out_bindings) {
+  MatchPlan plan = _site_plan(site, pat);
+  if (!plan) return input.try_match(pat, out_bindings);
+  if (!out_bindings) return 0;
+  return plan.try_match(input, out_bindings) == 1;
+}
+
+/** Returns bindings through one compiler-owned site, or `nil` on a miss.
+    Results follow `List.match`.
+*/
+List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat) {
+  List bindings;
+  if (!x2c_match_site_try_match(site, input, pat, &bindings)) return NULL;
+  return bindings ? bindings : %(());
+}
+
+/** Searches through one compiler-owned site, writing the first match.
+    Results follow `List.try_search`.
+*/
+int x2c_match_site_try_search(
+  MatchCaptureSite *site, List input, Var pat, Var *out_match,
+  List *out_bindings) {
+  MatchPlan plan = _site_plan(site, pat);
+  if (!plan) return input.try_search(pat, out_match, out_bindings);
+  if (!out_match || !out_bindings) return 0;
+  return plan.try_search(input, out_match, out_bindings) == 1;
+}
+
+/** Returns every matching subtree through one compiler-owned site.
+    Results follow `List.search`.
+*/
+List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat) {
+  MatchPlan plan = _site_plan(site, pat);
+  if (!plan) return input.search(pat);
+  List results = NULL;
+  plan.search(input, &results);
+  return results;
+}
+
+/** `Match`-replaces through one compiler-owned site.
+    Results follow `List.try_match_replace`.
+*/
+int x2c_match_site_try_match_replace(
+  MatchCaptureSite *site, List input, Var pat, Var template, Var *out) {
+  MatchPlan plan = _site_plan(site, pat);
+  if (!plan) return input.try_match_replace(pat, template, out);
+  if (!out) return 0;
+  return plan.try_match_replace(input, template, out) == 1;
+}
+
+/** Returns the `List` replacement through one compiler-owned site.
+    Results follow `List.match_replace`.
+*/
+List x2c_match_site_match_replace(
+  MatchCaptureSite *site, List input, Var pat, Var template) {
+  Var result;
+  if (!x2c_match_site_try_match_replace(site, input, pat, template, &result))
+    return input;
+  return result is <list> ? result.list() : NULL;
+}
+
+/** Replaces every match through one compiler-owned site.
+    Results follow `List.search_replace`.
+*/
+List x2c_match_site_search_replace(
+  MatchCaptureSite *site, List input, Var pat, Var template) {
+  MatchPlan plan = _site_plan(site, pat);
+  if (!plan) return input.search_replace(pat, template);
+  List result = input;
+  plan.search_replace(input, template, &result);
+  return result;
+}
+
 #pragma private
 #include <stddef.h>
 #include <assert.h>
@@ -185,14 +255,6 @@ macro Statement $match.machine(Name $instance, Expr $stats)
   MatchMachine $instance = &$storage;
   $instance.open();
   $instance.stats = $stats;
-}
-
-macro Statement $match.lease(
-  Type $lease_type, Name $lease_ptr,
-  Name $acquire_status, Expr $cache, Expr $pattern) using $storage => {
-  $lease_type $storage;
-  $lease_type *$lease_ptr = &$storage;
-  int $acquire_status = $cache.acquire($pattern, $lease_ptr);
 }
 
 /* Based on Peter Norvig's implementation:
@@ -597,8 +659,13 @@ static List _capture_publish(
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing, materializing captures, or publishing bindings.
 */
-int List.try_match(List input, Var pat, List *out_bindings) => out_bindings &&
-         _plan_cache().try_match(input, pat, out_bindings);
+int List.try_match(List input, Var pat, List *out_bindings) {
+  if (!out_bindings) return 0;
+  MatchPlan plan = _transient_plan(pat, "List.try_match");
+  int result = plan.try_match(input, out_bindings);
+  plan.free();
+  return result == 1;
+}
 
 /** Returns bindings when `input` matches `pat`, or `nil` on a miss.
     A binder-free success returns the nonnull `%(())` sentinel
@@ -689,14 +756,18 @@ static Var _apply_capture_template(
 /** Matches `input` and writes the instantiated `template` on success.
     The output may be any `Var`, including typed `nil` or a
     scalar. Returns 0 for
-    a miss, malformed pattern, invalid output, cache pressure, or machine
-    error and leaves `out` unchanged.
+    a miss, malformed pattern, invalid output, or machine error and leaves
+    `out` unchanged.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing, materializing, or replacing.
 */
-int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
-  out &&
-         _plan_cache().try_match_replace(input, pat, template, out);
+int List.try_match_replace(List input, Var pat, Var template, Var *out) {
+  if (!out) return 0;
+  MatchPlan plan = _transient_plan(pat, "List.try_match_replace");
+  int result = plan.try_match_replace(input, template, out);
+  plan.free();
+  return result == 1;
+}
 
 /** Returns the `List` replacement when `input` matches `pat`.
     A miss returns `input` unchanged. A successful scalar replacement cannot
@@ -800,13 +871,15 @@ static Var _walk_replace_prepared(
     pairs. Traversal visits a `List`'s head, then tail, then the `List` itself;
     results are prepended and therefore returned in reverse visitation order.
     Explicit `nil` values are nodes, but a proper `List`'s terminal cdr is not.
-    A miss, malformed pattern, cache pressure, or machine error returns `nil`.
+    A miss, malformed pattern, or machine error returns `nil`.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing or constructing results.
 */
 List List.search(List input, Var pat) {
-  List results;
-  _plan_cache().search(input, pat, &results);
+  List results = NULL;
+  MatchPlan plan = _transient_plan(pat, "List.search");
+  plan.search(input, &results);
+  plan.free();
   return results;
 }
 
@@ -817,21 +890,27 @@ List List.search(List input, Var pat) {
     0 and leaves both outputs unchanged. Either null output returns 0.
     Raises: the same causes as `List.search`.
 */
-int List.try_search(List input, Var pat, Var *out_match, List *out_bindings) =>
-  out_match && out_bindings &&
-         _plan_cache().try_search(input, pat, out_match, out_bindings);
+int List.try_search(List input, Var pat, Var *out_match, List *out_bindings) {
+  if (!out_match || !out_bindings) return 0;
+  MatchPlan plan = _transient_plan(pat, "List.try_search");
+  int result = plan.try_search(input, out_match, out_bindings);
+  plan.free();
+  return result == 1;
+}
 
 /** Replaces every matching subtree in `input` from the leaves upward.
     Children are rewritten before their reconstructed containing `List` is
-    tested. A miss, malformed pattern, cache pressure, or machine error returns
-    `input` unchanged. New structure follows the module pool-chain lifetime
+    tested. A miss, malformed pattern, or machine error returns `input`
+    unchanged. New structure follows the module pool-chain lifetime
     above.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     preparing, traversing, or replacing.
 */
 List List.search_replace(List input, Var pat, Var template) {
-  List result;
-  _plan_cache().search_replace(input, pat, template, &result);
+  List result = input;
+  MatchPlan plan = _transient_plan(pat, "List.search_replace");
+  plan.search_replace(input, template, &result);
+  plan.free();
   return result;
 }
 
@@ -1757,46 +1836,16 @@ int MatchPlan.search_replace(
   return plan._replace_all(input, template, out);
 }
 
-// private Match plan identity cache
+// pattern admissibility for compiler-owned sites
 
-/* The cache owns immutable prepared programs only, never execution
-   state. Admission runs before raw-key hashing, bucket walks, and LRU
-   updates. Symbols and narrow immediates have value lifetime. Canonical Lists
-   and long Atoms are admitted by identity but are not promoted or retained;
-   the cache must therefore be disposed before any pool owning their graph is
-   released. Context closes its cache before its canonical-value pool for this
-   reason. A String is admitted only when `String.is_permanent` proves that
-   the outermost canonical pool owns it. Wide boxes, pointers, references,
-   transient Strings, and other objects are never admitted. Those patterns
-   prepare transient plans owned by their leases.
-
-   Entries are recycled by deterministic LRU; positive entries are
-   pinned while leased, so eviction can never free a program under an
-   active execution, and leases carry the entry generation so a stale
-   lease can never validate a recycled slot. Raw key zero (the
-   inadmissible null-pointer Var) is rejected before the positive-only
-   admission memo, whose direct-mapped collisions force a fresh admission
-   walk, never a false admission. */
-
-#define MATCH_ADMITTED_MEMO 256
-
-typedef struct MatchCacheEntry {
-  unsigned long key;
-  MatchPlan plan;
-  unsigned long generation;
-  int occupied, pin_count, bucket_next, lru_prev, lru_next;
-} MatchCacheEntry;
-
-struct MatchCache {
-  Scope scope;
-  MatchCacheEntry *entries;
-  int *buckets;
-  int capacity, bucket_count, size, lru_head, lru_tail, active_leases;
-  unsigned long next_generation;
-  unsigned long admitted_memo[256];
-};
-
-static int _cache_admissible(Var value, int depth) {
+/* A site retains its prepared program for the life of the process, so it may
+   only bind a pattern whose values outlive it. Symbols and narrow immediates
+   have value lifetime. Canonical Lists and long Atoms are admitted by
+   identity. A String is admitted only when `String.is_permanent` proves the
+   outermost canonical pool owns it. Wide boxes, pointers, references, and
+   transient Strings are never admitted; those patterns prepare a plan per
+   call instead. */
+static int _pattern_admissible(Var value, int depth) {
   if (depth >= 128) return 0;
   Symbol kind = value.kind();
   switch (kind) {
@@ -1808,7 +1857,7 @@ static int _cache_admissible(Var value, int depth) {
       if (value is not <list>) return 0;
       // kind and tag prove the raw payload is a List cell
       foreach (Var part, (List) value.pointer())
-        if (!_cache_admissible(part, depth + 1)) return 0;
+        if (!_pattern_admissible(part, depth + 1)) return 0;
       return 1;
     }
   }
@@ -1817,385 +1866,16 @@ static int _cache_admissible(Var value, int depth) {
          value is not <ldouble>;
 }
 
-static unsigned long _cache_mix(unsigned long key) {
-  key ^= key >> 33;
-  key *= 0xff51afd7ed558ccdUL;
-  key ^= key >> 33;
-  key *= 0xc4ceb9fe1a85ec53UL;
-  return key ^ (key >> 33);
-}
-
-/* The memo indexes through its own small fold of the raw bits so
-   admission consults no cache-table state and the table hash is
-   computed only after admission succeeds. */
-static int _memo_slot(unsigned long key) =>
-  (int) ((key * 0x9e3779b97f4a7c15UL >> 48) &
-                (MATCH_ADMITTED_MEMO - 1));
-
-static int _cache_admitted(MatchCache cache, Var pattern) {
-  unsigned long key = pattern.u64;
-  if (!key) return 0;
-  int slot = _memo_slot(key);
-  if (cache.admitted_memo[slot] == key) return 1;
-  if (!_cache_admissible(pattern, 0)) return 0;
-  cache.admitted_memo[slot] = key;
-  return 1;
-}
-
-/** Creates a `MatchCache` retaining up to `capacity` prepared patterns.
-    The returned cache owns a named `Scope` and is not synchronized. It borrows
-    admitted pattern identities, so dispose it before their owning canonical
-    pools. `MatchCache.dispose` is required after every lease is released.
-    Raises: `<bad-arg>` when capacity is not positive, `<size-limit>` when its
-    storage dimensions cannot be represented, and `<alloc-fail>` when cache
-    storage cannot be allocated.
-*/
-MatchCache MatchCache.new(int capacity) {
-  if (capacity <= 0)
-    raise %(bad-arg (owner "MatchCache.new") (capacity $capacity));
-  if (capacity > (INT_MAX - 1) / 2)
-    raise %(size-limit (owner "MatchCache.new") (capacity $capacity));
-
-  Scope owner = Scope.new_named("Match plan cache");
-  Scope.push(&owner);
-  MatchCache cache = Scope.calloc(1, sizeof(struct MatchCache));
-  cache.scope = owner;
-  cache.capacity = capacity;
-  cache.bucket_count = capacity * 2 + 1;
-  cache.lru_head = cache.lru_tail = -1;
-  cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
-  cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
-  for (int i = 0; i < capacity; i++) {
-    cache.entries[i].bucket_next = -1;
-    cache.entries[i].lru_prev = -1;
-    cache.entries[i].lru_next = -1;
+/* Prepares one plan for a single call. Every runtime pattern route uses it;
+   the caller frees the plan once its results are materialized. */
+static MatchPlan _transient_plan(Var pattern, const char *owner) {
+  MatchPlan plan = MatchPlan.prepare(pattern);
+  if (plan.status == MACHINE_INELIGIBLE) {
+    const char *reason = plan.reason;
+    plan.free();
+    _raise_ineligible(reason, owner);
   }
-  for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
-  Scope.pop();
-  return cache;
-}
-
-static void _cache_unlink_lru(MatchCache cache, int slot) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  if (entry.lru_prev >= 0)
-    cache.entries[entry.lru_prev].lru_next = entry.lru_next;
-  else cache.lru_head = entry.lru_next;
-  if (entry.lru_next >= 0)
-    cache.entries[entry.lru_next].lru_prev = entry.lru_prev;
-  else cache.lru_tail = entry.lru_prev;
-  entry.lru_prev = entry.lru_next = -1;
-}
-
-static void _cache_link_mru(MatchCache cache, int slot) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  entry.lru_prev = -1;
-  entry.lru_next = cache.lru_head;
-  if (cache.lru_head >= 0) cache.entries[cache.lru_head].lru_prev = slot;
-  else cache.lru_tail = slot;
-  cache.lru_head = slot;
-}
-
-static void _cache_touch(MatchCache cache, int slot) {
-  if (cache.lru_head == slot) return;
-  _cache_unlink_lru(cache, slot);
-  _cache_link_mru(cache, slot);
-}
-
-static int _cache_bucket(MatchCache cache, unsigned long key) =>
-  (int) (_cache_mix(key) % (unsigned long) cache.bucket_count);
-
-static int _cache_find(MatchCache cache, unsigned long key) {
-  for (int slot = cache.buckets[_cache_bucket(cache, key)]; slot >= 0;
-       slot = cache.entries[slot].bucket_next)
-    if (cache.entries[slot].occupied && cache.entries[slot].key == key)
-      return slot;
-  return -1;
-}
-
-static void _cache_remove(MatchCache cache, int slot) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  assert(entry.occupied && !entry.pin_count);
-  int *link = &cache.buckets[_cache_bucket(cache, entry.key)];
-  while (*link >= 0 && *link != slot) link = &cache.entries[*link].bucket_next;
-  assert(*link == slot);
-  *link = entry.bucket_next;
-  entry.bucket_next = -1;
-  _cache_unlink_lru(cache, slot);
-  entry.plan.free();
-  entry.plan = NULL;
-  entry.occupied = 0;
-  cache.size--;
-}
-
-static int _cache_free_slot(MatchCache cache) {
-  for (int i = 0; i < cache.capacity; i++)
-    if (!cache.entries[i].occupied) return i;
-  return -1;
-}
-
-static int _cache_victim(MatchCache cache) {
-  for (int slot = cache.lru_tail; slot >= 0;
-       slot = cache.entries[slot].lru_prev)
-    if (!cache.entries[slot].pin_count) return slot;
-  return -1;
-}
-
-static void _cache_activate(MatchCache cache, int slot, MatchLease *lease) {
-  MatchCacheEntry *entry = &cache.entries[slot];
-  lease.cache = cache;
-  lease.generation = entry.generation;
-  lease.slot = slot;
-  lease.active = 1;
-  cache.active_leases++;
-  entry.pin_count++;
-}
-
-/** Acquires a lease for a cached prepared pattern.
-    `cache` and `lease` must be nonnull. The lease is initialized on every
-    returning path. An admitted pattern reuses or creates an LRU entry; an
-    inadmissible pattern gets a transient plan owned by the lease. Returns the
-    plan's `MachinePrepare` status, or `MATCH_CACHE_PRESSURE` when every entry
-    is pinned. Release the lease after any returned status; releasing the
-    inactive pressure lease is a no-op.
-    Raises: `<size-limit>` when `pattern` exceeds a lowering limit. Such a
-    pattern compiles to no program, so it is never cached and never leased.
-    `<alloc-fail>` may also be raised while preparing or growing storage.
-*/
-int MatchCache.acquire(MatchCache m, Var pattern, MatchLease *lease) {
-  memset(lease, 0, sizeof(MatchLease));
-  lease.slot = -1;
-  if (!_cache_admitted(m, pattern)) {
-    MatchPlan plan = MatchPlan.prepare(pattern);
-    if (plan.status == MACHINE_INELIGIBLE) {
-      const char *reason = plan.reason;
-      plan.free();
-      _raise_ineligible(reason, "MatchCache.acquire");
-    }
-    lease.cache = m;
-    lease.transient_plan = plan;
-    lease.active = 1;
-    m.active_leases++;
-    return plan.status;
-  }
-
-  unsigned long key = pattern.u64;
-  int slot = _cache_find(m, key);
-  if (slot >= 0) {
-    _cache_touch(m, slot);
-    _cache_activate(m, slot, lease);
-    return m.entries[slot].plan.status;
-  }
-
-  slot = m.size < m.capacity ? _cache_free_slot(m)
-                                     : _cache_victim(m);
-  if (slot < 0) return MATCH_CACHE_PRESSURE;
-
-  MatchPlan plan = NULL;
-  const char *fenced = NULL;
-  $scope(&m.scope) {
-    plan = MatchPlan.prepare(pattern);
-    if (plan.status == MACHINE_INELIGIBLE) {
-      fenced = plan.reason;
-      plan.free();
-    }
-  }
-  // an unusable plan never reaches an entry or occupies a cache slot
-  if (fenced) _raise_ineligible(fenced, "MatchCache.acquire");
-  if (m.entries[slot].occupied) _cache_remove(m, slot);
-
-  MatchCacheEntry *entry = &m.entries[slot];
-  entry.key = key;
-  entry.plan = plan;
-  entry.pin_count = 0;
-  entry.occupied = 1;
-  entry.generation = ++m.next_generation;
-  if (!entry.generation) entry.generation = ++m.next_generation;
-  int bucket = _cache_bucket(m, key);
-  entry.bucket_next = m.buckets[bucket];
-  m.buckets[bucket] = slot;
-  _cache_link_mru(m, slot);
-  m.size++;
-  _cache_activate(m, slot, lease);
-  return entry.plan.status;
-}
-
-static MatchCacheEntry *_lease_entry(MatchLease *lease) {
-  if (!lease.active || lease.transient_plan || !lease.cache) return NULL;
-  MatchCache cache = lease.cache;
-  if (lease.slot >= 0 && lease.slot < cache.capacity) {
-    MatchCacheEntry *entry = &cache.entries[lease.slot];
-    if (entry.occupied && entry.generation == lease.generation) return entry;
-  }
-  return NULL;
-}
-
-static MatchPlan _lease_plan(MatchLease *lease) {
-  if (!lease || !lease.active) return NULL;
-  if (lease.transient_plan) return lease.transient_plan;
-  MatchCacheEntry *entry = _lease_entry(lease);
-  return entry ? entry.plan : NULL;
-}
-
-/** Releases the prepared program held by `lease`.
-    Releasing an inactive lease has no effect. A successful release destroys a
-    transient plan or unpins its cached entry and makes the lease inactive.
-    Raises: `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
-    entry state is inconsistent. The failure leaves the lease active.
-*/
-void MatchLease.release(MatchLease *lease) {
-  if (!lease) raise %(bad-arg (owner "MatchLease.release"));
-
-  if (!lease.active) return;
-  if (lease.transient_plan) {
-    if (!lease.cache || lease.cache.active_leases <= 0)
-      raise %(bad-state (owner "MatchLease.release"));
-
-    lease.transient_plan.free();
-    lease.transient_plan = NULL;
-    lease.cache.active_leases--;
-    lease.active = 0;
-    return;
-  }
-  MatchCacheEntry *entry = _lease_entry(lease);
-  if (!entry || lease.cache.active_leases <= 0 || entry.pin_count <= 0)
-    raise %(bad-state (owner "MatchLease.release"));
-
-  lease.cache.active_leases--;
-  entry.pin_count--;
-  lease.active = 0;
-}
-
-/** Destroys a `Match` cache with no active leases.
-    A null cache is ignored. Disposal frees all plans and cache storage and
-    invalidates every alias.
-    Raises: `<bad-state>` when a lease remains active. The failure leaves the
-    cache intact.
-*/
-void MatchCache.dispose(MatchCache cache) {
-  if (!cache) return;
-  if (cache.active_leases) raise %(bad-state (owner "MatchCache.dispose"));
-
-  for (int i = 0; i < cache.capacity; i++) {
-    assert(!cache.entries[i].pin_count);
-    if (cache.entries[i].occupied) cache.entries[i].plan.free();
-  }
-  Scope.destroy(cache.scope);
-}
-
-// cached consumer adapters
-
-/* Each adapter preserves its consumer's result and executes only a prepared
-   program. Malformed, cache-pressure, and machine-error cases do not match;
-   a fenced pattern raised out of `acquire` and never reaches an adapter. */
-
-/** Matches through `cache` into caller-owned positional storage.
-    Returns 1 only after atomically committing a valid buffer. A miss,
-    malformed pattern, invalid buffer, cache pressure, or machine error returns
-    0 and leaves it unchanged.
-    Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-    preparing or matching.
-*/
-int MatchCache.try_capture(
-  MatchCache cache, List input, Var pattern, MatchCaptureBuffer *captures) {
-  $match.lease(MatchLease, lease, status, cache, pattern);
-  int result = 0;
-  MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED) result = plan.try_capture(input, captures);
-  lease.release();
-  return result == 1;
-}
-
-/** Matches through `cache`, writing bindings on success.
-    `out_bindings` must be nonnull. Returns 0 and leaves it unchanged for a
-    miss, malformed pattern, cache pressure, or machine error. Successful
-    binding shape and order follow `MatchPlan.execute`.
-    Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-    preparing, materializing, or publishing.
-*/
-int MatchCache.try_match(
-  MatchCache cache, List input, Var pattern, List *out_bindings) {
-  $match.lease(MatchLease, lease, status, cache, pattern);
-  int result = 0;
-  MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED)
-    result = plan.try_match(input, out_bindings);
-  lease.release();
-  return result == 1;
-}
-
-/** Searches through `cache`, writing the first match and bindings.
-    Both outputs must be nonnull. Returns 0 and leaves them unchanged on a
-    miss, malformed pattern, cache pressure, or machine error. Traversal order
-    follows `MatchPlan.try_search`.
-    Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-    preparing or constructing bindings.
-*/
-int MatchCache.try_search(
-  MatchCache cache, List input, Var pattern, Var *out_match,
-  List *out_bindings) {
-  $match.lease(MatchLease, lease, status, cache, pattern);
-  int result = 0;
-  MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED)
-    result = plan.try_search(input, out_match, out_bindings);
-  lease.release();
-  return result == 1;
-}
-
-/** Searches through `cache`, writing every match.
-    `out_results` must be nonnull. It receives the reverse-visitation result
-    `List`, or `nil` when there are no matches, the pattern is malformed, cache
-    pressure prevents execution, or the machine fails. Returns 1 exactly when
-    that `List` is nonempty.
-    Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-    preparing or constructing results.
-*/
-int MatchCache.search(
-  MatchCache cache, List input, Var pattern, List *out_results) {
-  $match.lease(MatchLease, lease, status, cache, pattern);
-  List results = NULL;
-  MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED) plan.search(input, &results);
-  lease.release();
-  *out_results = results;
-  return results != NULL;
-}
-
-/** `Match`-replaces through `cache`, writing the replacement on success.
-    `out` must be nonnull. Returns 0 and leaves it unchanged on a miss,
-    malformed pattern, cache pressure, or machine error. The successful result
-    may be any `Var`.
-    Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-    preparing, materializing, or replacing.
-*/
-int MatchCache.try_match_replace(
-  MatchCache cache, List input, Var pattern, Var template, Var *out) {
-  $match.lease(MatchLease, lease, status, cache, pattern);
-  int result = 0;
-  MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED)
-    result = plan.try_match_replace(input, template, out);
-  lease.release();
-  return result == 1;
-}
-
-/** Replaces every match through `cache` from the leaves upward.
-    `out` must be nonnull. A completed prepared traversal returns 1 and writes
-    its result even when nothing matched. A malformed pattern, cache pressure,
-    or machine error returns 0 and writes `input` unchanged.
-    Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-    preparing, traversing, or replacing.
-*/
-int MatchCache.search_replace(
-  MatchCache cache, List input, Var pattern, Var template, List *out) {
-  $match.lease(MatchLease, lease, status, cache, pattern);
-  int answered = status != MACHINE_PREPARED, List result = input;
-  MatchPlan plan = _lease_plan(lease);
-  if (status == MACHINE_PREPARED)
-    answered = plan.search_replace(input, template, &result) >= 0;
-  lease.release();
-  *out = result;
-  return status == MACHINE_PREPARED && answered;
+  return plan;
 }
 
 // compiler-owned static source sites
@@ -2234,76 +1914,10 @@ static void _capture_sites_shutdown(void) {
   match_capture_site_scope = NULL;
 }
 
-typedef struct MatchContextState {
-  struct MatchContextState *prev, MatchCache cache;
-} *MatchContextState;
-
-typedef struct MatchThreadState {
-  MatchCache plan_cache;
-  MatchContextState context_top;
-} *MatchThreadState;
-
-static threaded struct MatchThreadState match_thread;
-
-/** Disposes this thread's default `Match` plan cache.
-    `x2c_thread_state_release`
-    calls it before `Scope` releases the `Scope` that holds that cache; a
-    thread
-    that never matched has no cache and nothing happens. All default-cache
-    leases and `Context` states must already be closed.
-    Raises: `<bad-state>` when a lease remains active.
-*/
-void x2c_match_thread_release(void) {
-  MatchThreadState state = &match_thread;
-  if (!state.plan_cache) return;
-  state.plan_cache.dispose();
-  state.plan_cache = NULL;
-}
-
-static MatchThreadState _thread(void) => &match_thread;
-
-static void _plan_cache_shutdown(void) {
-  if (!_thread().plan_cache) return;
-  _thread().plan_cache.dispose();
-  _thread().plan_cache = NULL;
-}
-
-/** Opens one `Context`-local default `Match`-cache state.
-    The returned opaque token becomes the top of a thread-local LIFO stack;
-    its cache is created only on first use. The token is allocated in the
-    active `Scope` and must be passed to `MatchCache.context_close` before that
-    `Scope` ends.
-    Raises: `<alloc-fail>` when the state cannot be allocated.
-*/
-void *MatchCache.context_open(void) {
-  MatchContextState state = Scope.malloc(sizeof(struct MatchContextState));
-  state.prev = _thread().context_top;
-  state.cache = NULL;
-  _thread().context_top = state;
-  return state;
-}
-
-/** Disposes and removes the top `Context`'s default `Match` cache.
-    A null token is ignored. Successful close restores the previous default;
-    the token storage remains owned by its `Context` `Scope`.
-    Raises: `<bad-state>` when `token` is not the top state or its cache has an
-    active lease. The failure leaves the state installed.
-*/
-void MatchCache.context_close(void *token) {
-  MatchContextState state = token;
-  if (!state) return;
-  if (_thread().context_top != state)
-    raise %(bad-state (owner "MatchCache.context_close"));
-
-  if (state.cache) state.cache.dispose();
-  _thread().context_top = state.prev;
-}
-
 static pthread_once_t match_shutdown_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
 static void _shutdown(void) {
-  _plan_cache_shutdown();
   _capture_sites_shutdown();
 }
 
@@ -2317,7 +1931,7 @@ static void _register_shutdown_once(void) {
     Raises: `<alloc-fail>` or `<size-limit>` while registering the shutdown
     hook.
 */
-void MatchCache.initialize(void) {
+void x2c_match_initialize(void) {
   if (pthread_once(&match_shutdown_once, _register_shutdown_once)) {
     fprintf(stderr, "Match: could not register shutdown\n");
     abort();
@@ -2330,11 +1944,11 @@ static void _capture_sites_initialize(void) {
   $scope(&match_capture_site_scope) {
     match_capture_sites = Block.new(sizeof(MatchCaptureSite *));
   }
-  MatchCache.initialize();
+  x2c_match_initialize();
 }
 
 static void _capture_site_prepare(MatchCaptureSite *site, Var pattern) {
-  if (!_cache_admissible(pattern, 0)) return;
+  if (!_pattern_admissible(pattern, 0)) return;
   _capture_sites_initialize();
   MatchPlan plan = NULL;
   $scope(&match_capture_site_scope) {
@@ -2349,40 +1963,8 @@ static void _capture_site_prepare(MatchCaptureSite *site, Var pattern) {
 static MatchPlan _capture_site_publish(
   MatchCaptureSite *site, Var pattern) {
   _site_lock();
+  // preparation allocates, and an allocation failure never returns here
+  defer _site_unlock();
   if (!site.plan) _capture_site_prepare(site, pattern);
-  MatchPlan plan = site.plan;
-  _site_unlock();
-  return plan;
-}
-
-// activation boundary
-
-/* The active default cache is Context-local when a Context is open and
-   otherwise thread-local. It holds immutable prepared programs only; every
-   invocation still owns its machine and capture state. */
-static MatchCache _plan_cache(void) {
-  MatchCache *slot = _thread().context_top
-                   ? &_thread().context_top.cache
-                   : &_thread().plan_cache;
-  if (!*slot) *slot = MatchCache.new(256);
-  MatchCache.initialize();
-  return *slot;
-}
-
-/* Drop every plan from the active default cache. Entries may borrow runtime
-   canonical identities, so this must precede release of a pool that owns any
-   admitted pattern. The cache rebuilds lazily afterward. */
-/** Destroys the active `Context`-local or thread-local `Match` cache.
-    A missing cache is ignored; the next `Match` recreates it lazily. Static
-    compiler capture sites are unaffected.
-    Raises: `<bad-state>` when a lease remains active. The failure leaves the
-    cache installed.
-*/
-void MatchCache.flush_default(void) {
-  MatchCache *slot = _thread().context_top
-                   ? &_thread().context_top.cache
-                   : &_thread().plan_cache;
-  if (!*slot) return;
-  (*slot).dispose();
-  *slot = NULL;
+  return site.plan;
 }

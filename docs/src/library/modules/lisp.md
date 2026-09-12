@@ -28,7 +28,7 @@ The Lisp runtime: reader, session, and evaluator.
 Returns the instantiated `template` when `input` matches `pat`.
 `List.match_replace` returns a `List`, so a template that is a bare binder
 loses a scalar result. Lisp sees the replacement itself. A miss, malformed
-pattern, cache pressure, or machine error returns `input` unchanged.
+pattern or machine error returns `input` unchanged.
 
 Source: `lib/lisp.x:733`
 
@@ -52,7 +52,7 @@ values keep their existing owners. The caller retains responsibility for
 evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp.x:1765`
+Source: `lib/lisp.x:1766`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -68,7 +68,7 @@ the pointer while the session lives. Values inside the `Func`, including
 its
 signature graph, retain their existing owners.
 
-Source: `lib/lisp.x:1857`
+Source: `lib/lisp.x:1858`
 
 <a id="Lisp.eval"></a>
 #### Lisp.eval
@@ -82,7 +82,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp.x:1750`
+Source: `lib/lisp.x:1751`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -101,7 +101,7 @@ has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp.x:1802`
+Source: `lib/lisp.x:1803`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -116,7 +116,7 @@ completed before a later reader or evaluator failure remain installed.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp.x:1776`
+Source: `lib/lisp.x:1777`
 
 <a id="Lisp.new"></a>
 #### Lisp.new
@@ -158,7 +158,7 @@ output, or an absent name returns 0 and leaves `out` unchanged. Raises
 `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
 canonicalized.
 
-Source: `lib/lisp.x:1824`
+Source: `lib/lisp.x:1825`
 
 ## Advanced and interop API
 
@@ -206,7 +206,7 @@ Forces calls through the recursive evaluator when `disabled` is nonzero.
 Re-enabling AUTO preserves published programs, thresholds, statistics, and
 the instrumentation pointer.
 
-Source: `lib/lisp.x:1647`
+Source: `lib/lisp.x:1648`
 
 <a id="Lisp.auto_instrument"></a>
 #### Lisp.auto_instrument
@@ -218,7 +218,7 @@ Selects optional detailed machine statistics for later AUTO executions.
 `stats` is borrowed, retained without initialization, and updated in place;
 it must outlive every evaluation until replaced or cleared with NULL.
 
-Source: `lib/lisp.x:1636`
+Source: `lib/lisp.x:1637`
 
 <a id="Lisp.auto_stats"></a>
 #### Lisp.auto_stats
@@ -229,7 +229,7 @@ Returns the current cumulative automatic-evaluator statistics for `lisp`.
 `lisp` must be a live session. The returned structure is a value snapshot
 and does not reset any counter.
 
-Source: `lib/lisp.x:1629`
+Source: `lib/lisp.x:1630`
 
 <a id="Lisp.cleanup"></a>
 #### Lisp.cleanup
@@ -238,7 +238,7 @@ Source: `lib/lisp.x:1629`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/lisp.x:1865`
+Source: `lib/lisp.x:1866`
 
 <a id="Lisp.destroy"></a>
 #### Lisp.destroy
@@ -365,7 +365,7 @@ may replace such a binding.
 value, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 canonicalizing or storing the binding.
 
-Source: `lib/lisp.x:1837`
+Source: `lib/lisp.x:1838`
 
 ## Runtime-internal callables
 

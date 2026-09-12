@@ -92,7 +92,7 @@ static void _shutdown(void) {
 
 static void _register_shutdown(void) {
   Context.initialize();
-  MatchCache.initialize();
+  x2c_match_initialize();
   Scope.shutdown_hook(_shutdown);
 }
 

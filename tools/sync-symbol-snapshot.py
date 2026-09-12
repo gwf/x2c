@@ -41,10 +41,7 @@ def hash_contents(digest, path: Path) -> None:
 
 
 def input_paths(root: Path) -> list[Path]:
-    paths = {
-        root / "etc" / "symbol-source.x",
-        root / "lib" / "Makefile",
-    }
+    paths = {root / "lib" / "Makefile"}
     paths.update((root / "lib").glob("*.x"))
     paths.update((root / "lib").glob("*.xmacro"))
     paths.update((root / "etc").glob("*.xmacro"))
@@ -133,9 +130,8 @@ def dump_snapshot(root: Path, compiler: Path) -> subprocess.CompletedProcess[byt
         [
             str(compiler),
             "translate",
-            "--live-symbols",
             "--dump-symbol-snapshot",
-            "etc/symbol-source.x",
+            "lib/x2c.x",
         ],
         cwd=root,
         stdout=subprocess.PIPE,
@@ -152,6 +148,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--artifact", type=Path)
     parser.add_argument("--state", type=Path)
     parser.add_argument("--changed", type=Path)
+    parser.add_argument("--force", action="store_true")
     return parser.parse_args()
 
 
@@ -179,7 +176,8 @@ def main() -> int:
         if not compiler.is_file() or not os.access(compiler, os.X_OK):
             continue
         key = fingerprint(root, compiler)
-        if current(read_state(state_path), key, artifact):
+        if not arguments.force and current(
+                read_state(state_path), key, artifact):
             changed.unlink(missing_ok=True)
             return 0
         result = dump_snapshot(root, compiler)

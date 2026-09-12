@@ -38,20 +38,13 @@ static int outward_defer(void){
   {
       value = 1;
       {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 4;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        goto done;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  goto done;
-
-}
     }
 
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
   }
   done : return value;
@@ -68,50 +61,33 @@ static int outward_finally(void){
       {
         value = 1;
         {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 4;
-  int _x2c_cleanup_state_0 = _x2c_cleanup_guard_0;
-        if (_x2c_cleanup_state_0 >= 0) {_x2c_cleanup_guard_0 = 0;
-        if (_x2c_cleanup_state_0 > 0) {{
-          value = value * 10 + 2;
-        }
+          int _x2c_cleanup_state_0 = _x2c_cleanup_guard_0;
+          if (_x2c_cleanup_state_0 >= 0) {_x2c_cleanup_guard_0 = 0;
+          if (_x2c_cleanup_state_0 > 0) {{
+            value = value * 10 + 2;
+          }
 
+        }
+        _x2c_cleanup_guard_0 = -1;
+        x2c_exception_leave(& _x2c_exception_frame_0);
       }
-      _x2c_cleanup_guard_0 = -1;
-      x2c_exception_leave(& _x2c_exception_frame_0);
+      goto done;
     }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  goto done;
-
-}
   }
 
 }
 else {x2c_exception_landed(& _x2c_exception_frame_0);
 {
-  if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-        if (_x2c_cleanup_guard_0 > 0) { {
-    value = value * 10 + 2;
-  }
-   }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      } __builtin_unreachable();
+  goto _x2c_cleanup_done_0;
 }
 }
+_x2c_cleanup_done_0 :;
 if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
         if (_x2c_cleanup_guard_0 > 0) { {
   value = value * 10 + 2;
 }
  }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
         _x2c_cleanup_guard_0 = -1;
         x2c_exception_leave(& _x2c_exception_frame_0);
 
@@ -136,10 +112,7 @@ static int same_region(void){
       if(value < 2) goto again;
     }
 
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
   }
   return value;
@@ -172,25 +145,14 @@ int main(void){
       }
 
     }
-    else {int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-    x2c_exception_leave(& _x2c_exception_frame_1);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_1;
   }
 
 }
-}
-int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_cleanup_done_1 :;
+x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+x2c_exception_leave(& _x2c_exception_frame_1);
 }
 int first = outward_defer();
 int second = outward_finally();
