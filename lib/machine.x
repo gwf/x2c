@@ -106,7 +106,9 @@ enum MachineOp {
   MW_LQQ_WRAP,
   MW_LQQ_APPEND,
   MW_LDROP,
-  MW_LRETURN
+  MW_LRETURN,
+  MW_LLAMBDA,
+  MW_LEXPAND
 };
 
 /* Selects the binder predicate applied by MW_MATCH_KIND. */

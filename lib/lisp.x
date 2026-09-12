@@ -162,6 +162,40 @@ int Lisp.precall(void *storage, Var callable, List raw, Var *value) {
   return 1;
 }
 
+/** Resolves a prepared immediate lambda in the running machine context.
+    Returns `callable` while the lambda constructor is unchanged; otherwise
+    evaluates its original literal. The caller environment stays live and is
+    borrowed by the prepared body. `storage` must name the running context,
+    and `callable` must be its prepared immediate Lambda.
+*/
+Var Lisp.immediate(void *storage, Var callable) {
+  LispMachineContext context = (LispMachineContext) storage;
+  Lisp lisp = context.lisp;
+  LispEnv *env = _machine_env(context);
+  Var constructor;
+  if (_lookup(lisp, env, lsym_lambda, &constructor) &&
+      constructor.u64 == Func.var(lisp.specials[LISP_LAMBDA]).u64)
+    return callable;
+  Lambda lambda = callable;
+  return _eval(lisp, %($lsym_lambda ${lambda.params} ${lambda.body}), env);
+}
+
+/** Checks a prepared macro expansion after preceding effects have run.
+    Returns 0 when its dependencies match. Otherwise evaluates the original
+    call into `out` and returns 1. `storage` must name the running context,
+    `site` must contain the original form and dependency pairs, and `out`
+    must be nonnull. Results retain their ordinary session or value owners.
+*/
+int Lisp.expanded(void *storage, List site, Var *out) {
+  LispMachineContext context = (LispMachineContext) storage;
+  Var (form, dependencies) = site;
+  if (_auto_bindings_ok(context.lisp, _machine_env(context), dependencies))
+    return 0;
+  context.lisp.auto_stats.guard_failures++;
+  *out = _eval(context.lisp, form, _machine_env(context));
+  return 1;
+}
+
 protocol Cleanup(Lisp);
 
 #pragma private
@@ -179,6 +213,12 @@ typedef struct LispEnv {
   const Var *values;
   int value_count, Map captures, struct LispEnv *parent;
 } LispEnv;
+
+typedef struct LispExpansion {
+  LispEnv *boundary;
+  List locals, dependencies;
+  int calls, steps;
+} LispExpansion;
 
 /* Environment records are activation-local. An ordinary activation's
    `bindings` is a temporary frame-owned Map, while the captured pseudo-frame
@@ -212,6 +252,7 @@ struct Lisp {
   LispAutoStats auto_stats;
   MachineStats *auto_machine_stats;
   LispMachineSlot machine_free;   // reusable machine slots, innermost first
+  LispExpansion *expansion;
   int machine_depth;    // machine invocations in progress on this session
   int auto_disabled;    // benchmark/test forced-evaluator arm only
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
@@ -775,20 +816,93 @@ static Func _native_target(String name) {
    last duplicate parameter wins, then local bindings precede captured values.
    Session globals precede reserved forms, so a global may shadow a special
    form without mutating the reserved Map. */
-static int _lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
+static int _local_lookup(LispEnv *env, Var name, Var *out) {
+  int found = 0, at = 0;
+  for (List p = env.params; p && at < env.value_count; p = p.cdr(), at++)
+    if (p.car() == name) {
+      *out = env.values[at];
+      found = 1;
+    }
+  return found || (env.bindings && env.bindings.try_get(name, out));
+}
+
+/* Macro parameters are known raw syntax; the caller's runtime locals are
+   not. An expansion reading one cannot be baked into a shared program. */
+static void _expansion_decline(void) {
+  raise %(bad-state (operation "Lisp AUTO expansion"));
+}
+
+static void _expansion_lookup(Lisp lisp, Var name) {
+  if (lisp.expansion && _param_has(lisp.expansion.locals, name))
+    _expansion_decline();
+}
+
+static void _expansion_note(Lisp lisp, Var name, Var value) {
+  if (!lisp.expansion) return;
+  foreach (List pair, lisp.expansion.dependencies)
+    if (pair.car() == name) return;
+  lisp.expansion.dependencies =
+    cons(%($name $value), lisp.expansion.dependencies);
+}
+
+/* Only immutable data can be shared as a prepared expansion. In particular,
+   a freshly created closure or mutable container must remain a runtime value.
+   The same bound keeps native inspection away from mutable nested values. */
+static int _expansion_value(Var value, int depth) {
+  if (value is <list>) {
+    if (depth >= LISP_AUTO_EXPAND_MAX) return 0;
+    foreach (Var part, value.list())
+      if (!_expansion_value(part, depth + 1)) return 0;
+    return 1;
+  }
+  return value.is_atom() || _is_lisp_number(value) || value is <string>;
+}
+
+/* This is an optimization boundary, not permission to call an arbitrary
+   host function. Identity admits aliases of these fixed implementations;
+   a rebound Lisp name or a newly bound native still declines. */
+static void _expansion_native(Lisp lisp, Func function) {
+  if (!lisp.expansion) return;
+  static const char *names[] = {
+    "Var_car", "Var_cdr", "Var_cons", "lisp_atom", "lisp_pair", "lisp_list",
+    "lisp_eq", "lisp_type", "lisp_number", "lisp_string", "lisp_symbol",
+    "List_reverse", "List_len", "lisp_add", "lisp_compare", "lisp_plus",
+    "lisp_minus", "lisp_times", "lisp_divide", "lisp_eq_chain",
+    "lisp_lt_chain", "lisp_le_chain", "lisp_gt_chain", "lisp_ge_chain",
+    "lisp_str", "String_len", "lisp_string_append", "lisp_substring",
+    "lisp_string_downcase"
+  };
+  for (unsigned i = 0; i < sizeof(names) / sizeof(names[0]); i++)
+    if (function == _native_target(String.new(names[i]))) return;
+  _expansion_decline();
+}
+
+static void _expansion_argument(Lisp lisp, Var value) {
+  if (lisp.expansion && !_expansion_value(value, 0))
+    _expansion_decline();
+}
+
+static int _env_lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
+  int external = 0;
   for (LispEnv *cur = env; cur; cur = cur.parent) {
-    Var found = void;
-    int at = 0;
-    for (List p = cur.params; p && at < cur.value_count; p = p.cdr(), at++)
-      if (p.car() == name) found = cur.values[at];
-    if (found is not void) {
-      *out = found;
+    if (lisp.expansion && cur == lisp.expansion.boundary) external = 1;
+    if (external) _expansion_lookup(lisp, name);
+    if (_local_lookup(cur, name, out) ||
+        (cur.captures && cur.captures.try_get(name, out))) {
+      if (external) _expansion_note(lisp, name, *out);
       return 1;
     }
-    if (cur.bindings && cur.bindings.try_get(name, out)) return 1;
-    if (cur.captures && cur.captures.try_get(name, out)) return 1;
   }
-  return lisp.globals.try_get(name, out) || lisp.reserved.try_get(name, out);
+  _expansion_lookup(lisp, name);
+  return 0;
+}
+
+static int _lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
+  if (_env_lookup(lisp, env, name, out)) return 1;
+  if (!lisp.globals.try_get(name, out) && !lisp.reserved.try_get(name, out))
+    return 0;
+  _expansion_note(lisp, name, *out);
+  return 1;
 }
 
 static int _param_has(List params, Var name) {
@@ -804,11 +918,7 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
     if (!name.is_atom() || lisp.reserved.contains(name) ||
         captures.contains(name) || _param_has(params, name))
       continue;
-    for (LispEnv *cur = env; cur; cur = cur.parent)
-      if (cur.bindings.try_get(name, &value)) {
-        captures[name] = value;
-        break;
-      }
+    if (_env_lookup(lisp, env, name, &value)) captures[name] = value;
   }
 }
 
@@ -893,6 +1003,9 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
+  LispExpansion *trace = lisp.expansion;
+  if (trace && ++trace.calls >= MACHINE_FRAME_MAX) _expansion_decline();
+  defer if (trace) trace.calls--;
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
   $scope(&frame) { bindings = %{}; }
   LispEnv captured = {
@@ -921,6 +1034,10 @@ static int _special_id(Lisp lisp, Func function) {
 }
 
 static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
+  if (lisp.expansion &&
+      (id == LISP_DEF || id == LISP_BIND || id == LISP_EVAL ||
+       id == LISP_IMPORT))
+    _expansion_decline();
   switch (id) {
     case LISP_QUOTE: {
       if (args.len() != 1) {
@@ -1055,6 +1172,7 @@ typedef struct LispLower {
   Lambda lambda;
   MachineBuilder b;
   List specials;
+  List locals;
   int depth;            // macro expansions open on this path
 } *LispLower;
 
@@ -1191,13 +1309,11 @@ static int LispLower._auto_compile_qq(
   return !list || l._auto_qq_wrap();
 }
 
-/* `if`, `and`, `or` and every user macro are Lambdas, not reserved forms,
-   and a call to one cannot be lowered. Nothing else in this runtime expands
-   a macro ahead of time, so expand the head here and compile the expansion
-   instead. Returns 1 with the expansion, 0 when the head names no macro, and
-   -1 when the lambda was rejected. */
+/* Expand only through the effect-restricted evaluator. A declined expansion
+   stays an ordinary runtime macro call; successful immutable syntax carries
+   the bindings that must still hold when the compiled expansion executes. */
 static int LispLower._auto_expand(LispLower l, Var head, List args,
-                                  Var *expansion) {
+                                  Var *expansion, List *dependencies) {
   Var value;
   if (!_lookup(l.lisp, l.env, head, &value) || value is not <lambda>) return 0;
   Lambda macro = value;
@@ -1209,12 +1325,12 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
   /* The evaluator expands only the calls it reaches, so a macro call in a
      branch that never runs fails nowhere today. Analysis reaches every
      branch; keep its failures local by rejecting rather than raising. */
-  try *expansion = _call_lambda(l.lisp, macro, args, l.env);
-  catch: {
-    l._auto_reject("macro-expansion");
-    return -1;
-  }
-  l._auto_note(head, value);
+  LispExpansion trace = { l.env, l.locals, %(( $head $value )), 0, 0 };
+  try $let(l.lisp.expansion, &trace)
+    *expansion = _call_lambda(l.lisp, macro, args, l.env);
+  catch: return 0;
+  if (!_expansion_value(*expansion, 0)) return 0;
+  *dependencies = trace.dependencies;
   return 1;
 }
 
@@ -1238,6 +1354,25 @@ static int LispLower._auto_compile(LispLower l, Var expression, int tail) {
     return l._auto_compile_constant(expression);
   List form = expression;
   Var (head, argument) = form;
+  if (head is <list>) {
+    List literal = head;
+    if (literal.len() != 3 || literal.car() != lsym_lambda ||
+        literal.cadr() is not <list>)
+      return l._auto_reject("computed-call-head");
+    if (l.depth >= LISP_AUTO_EXPAND_MAX)
+      return l._auto_reject("lambda-depth");
+    Lambda immediate = _make_lambda(l.lisp, literal.cdr(), NULL, 0);
+    int retained = 0;
+    defer if (!retained) _auto_discard(l.lisp, immediate);
+    if (_auto_analyze(l.lisp, immediate, l.env, l.depth + 1, l.locals) !=
+        MACHINE_PREPARED)
+      return l._auto_reject("immediate-body");
+    int constant = b.constant(immediate);
+    if (constant < 0 || b.emit(MW_LLAMBDA, constant, 0, 0, 0, 0) < 0)
+      return 0;
+    retained = 1;
+    return l._auto_compile_call(form.cdr(), 0);
+  }
   if (!head.is_atom()) return l._auto_reject("computed-call-head");
   if (l._auto_local_name(head)) return l._auto_reject("dynamic-call-head");
   if (head == lsym_quote) {
@@ -1259,30 +1394,63 @@ static int LispLower._auto_compile(LispLower l, Var expression, int tail) {
   if (head == lsym_import) return l._auto_reject("import-form");
   if (head == lsym_apply) return l._auto_reject("apply-form");
   Var expansion;
-  int expanded = l._auto_expand(head, form.cdr(), &expansion);
+  List dependencies;
+  int expanded = l._auto_expand(head, form.cdr(), &expansion, &dependencies);
   if (expanded < 0) return 0;
   if (expanded) $let(l.depth, l.depth + 1) {
-    return l._auto_compile(expansion, tail);
+    int guard = b.emit(MW_LEXPAND, 0, 0, 0, 0, -1);
+    if (guard < 0 || !l._auto_compile(expansion, tail)) return 0;
+    List guards = dependencies.append(l.specials);
+    int site = b.constant(%($form $guards));
+    if (site < 0) return 0;
+    b.code[guard].a = site;
+    b.set_target(guard, b.length);
+    return 1;
   }
   int name = b.constant(head);
   if (name < 0 || b.emit(MW_LGLOBAL, name, 0, 0, 0, 0) < 0) return 0;
-  int raw = b.constant(form.cdr());
+  return l._auto_compile_call(
+    form.cdr(), tail && l._auto_self_call(head));
+}
+
+static int LispLower._auto_compile_call(LispLower l, List args, int tail) {
+  MachineBuilder b = l.b;
+  int raw = b.constant(args);
   if (raw < 0) return 0;
   int precall = b.emit(MW_LPRECALL, raw, 0, 0, 0, -1);
   if (precall < 0) return 0;
   int argc = 0;
-  foreach (Var arg, form.cdr()) {
+  foreach (Var arg, args) {
     if (argc >= LISP_AUTO_PARAM_MAX) return l._auto_reject("call-arity");
     if (!l._auto_compile(arg, 0)) return 0;
     argc++;
   }
-  int op = tail && l._auto_self_call(head) ? MW_LTAILCALL : MW_LCALL;
+  int op = tail ? MW_LTAILCALL : MW_LCALL;
   if (b.emit(op, 0, argc, 0, 0, 0) < 0) return 0;
   b.set_target(precall, b.length);
   return 1;
 }
 
-static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv *env) {
+/* Only LLAMBDA constants own private callees. Other Lambda constants are
+   borrowed captures, so discarding a failed compilation must leave them. */
+static void _auto_discard_children(Lisp lisp, MachineView view) {
+  for (int i = 0; i < view.length; i++)
+    if (view.code[i].op == MW_LLAMBDA)
+      _auto_discard(lisp, view.consts[view.code[i].a]);
+}
+
+static void _auto_discard(Lisp lisp, Lambda lambda) {
+  if (lambda.auto_program) {
+    _auto_discard_children(lisp, lambda.auto_program.view());
+    lisp.auto_stats.program_bytes -= (long) lambda.auto_program.bytes();
+    lambda.auto_program.free();
+  }
+  lambda.captures.cleanup();
+  Scope.free(lambda);
+}
+
+static int _auto_analyze(
+  Lisp lisp, Lambda lambda, LispEnv *env, int depth, List locals) {
   if (lambda.auto_status >= 0) return lambda.auto_status;
   lisp.auto_stats.analyses++;
   const char *reason = NULL;
@@ -1303,7 +1471,10 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv *env) {
   }
   $scope(&lisp.scope) {
     MachineBuilder b = $auto(MachineBuilder.new());
-    struct LispLower storage = { lisp, env, lambda, b, NULL, 0 };
+    locals = lambda.params.append(locals);
+    foreach (Var (name, value), lambda.captures)
+      locals = cons(name, locals);
+    struct LispLower storage = { lisp, env, lambda, b, NULL, locals, depth };
     LispLower lower = &storage;
     int ok = lower._auto_compile(lambda.body, 1) &&
              b.emit(MW_LRETURN, 0, 0, 0, 0, 0) >= 0;
@@ -1320,8 +1491,10 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv *env) {
       lisp.auto_stats.published++;
       lisp.auto_stats.program_bytes += (long) lambda.auto_program.bytes();
     }
-    else
+    else {
+      _auto_discard_children(lisp, b.view());
       lisp.auto_stats.ineligible++;
+    }
 
     return lambda.auto_status;
   }
@@ -1330,8 +1503,8 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv *env) {
 /* Each note pairs a name with the callable used while compiling it.
    Rebinding the name invalidates the program, so the call falls back to the
    evaluator. */
-static int _auto_specials_ok(Lisp lisp, LispEnv *env, Lambda lambda) {
-  foreach (List pair, lambda.auto_specials) {
+static int _auto_bindings_ok(Lisp lisp, LispEnv *env, List bindings) {
+  foreach (List pair, bindings) {
     Var (name, expected) = pair;
     Var value;
     if (!_lookup(lisp, env, name, &value) || value.u64 != expected.u64)
@@ -1339,6 +1512,9 @@ static int _auto_specials_ok(Lisp lisp, LispEnv *env, Lambda lambda) {
   }
   return 1;
 }
+
+static int _auto_specials_ok(Lisp lisp, LispEnv *env, Lambda lambda) =>
+  _auto_bindings_ok(lisp, env, lambda.auto_specials);
 
 static void _raise_machine_error(Var error) {
   if (error is <symbol>) raise %(invariant (owner "Machine") (why $error));
@@ -1397,12 +1573,12 @@ static void _machine_slot_release(Lisp lisp, LispMachineSlot slot) {
    other effect performed. */
 static int _auto_apply(
   Lisp lisp, Lambda lambda, List raw, LispEnv *env, Var *out) {
-  if (lisp.auto_disabled) return 0;
+  if (lisp.auto_disabled || lisp.expansion) return 0;
   lisp.auto_stats.invocations++;
   if (lambda.auto_calls < 2) lambda.auto_calls++;
   if (lambda.auto_calls < 2) return 0;
   if (lambda.auto_status < 0) {
-    if (_auto_analyze(lisp, lambda, env) != MACHINE_PREPARED) return 0;
+    if (_auto_analyze(lisp, lambda, env, 0, NULL) != MACHINE_PREPARED) return 0;
   }
   else if (lambda.auto_status != MACHINE_PREPARED) {
     lisp.auto_stats.remembered_fallbacks++;
@@ -1483,12 +1659,16 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   Func function = (Func) callable.pointer();
   int special = _special_id(lisp, function);
   if (special >= 0) return _apply_special(lisp, special, raw, env);
+  _expansion_native(lisp, function);
   /* The wide path materializes a values List; the narrow one need not. */
   if (raw.len() <= LISP_NATIVE_ARG_MAX) {
     FuncArg argv[LISP_NATIVE_ARG_MAX];
     unsigned argc = 0;
-    foreach (Var arg, raw)
-      argv[argc++] = FuncArg.value(_eval(lisp, arg, env));
+    foreach (Var arg, raw) {
+      Var value = _eval(lisp, arg, env);
+      _expansion_argument(lisp, value);
+      argv[argc++] = FuncArg.value(value);
+    }
     return function.apply(argc, argv);
   }
   List values;
@@ -1519,16 +1699,22 @@ static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv *env) {
                          (want "List"));
     return _apply_values(lisp, values.car(), rest, env);
   }
+  _expansion_native(lisp, function);
   int count = values.len();
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX
                 ? narrow : Scope.malloc(count * sizeof(FuncArg));
   unsigned argc = 0;
-  foreach (Var value, values) argv[argc++] = FuncArg.value(value);
+  foreach (Var value, values) {
+    _expansion_argument(lisp, value);
+    argv[argc++] = FuncArg.value(value);
+  }
   return function.apply(argc, argv);
 }
 
 static Var _eval(Lisp lisp, Var expression, LispEnv *env) {
+  if (lisp.expansion && ++lisp.expansion.steps > MACHINE_CODE_MAX * 4)
+    _expansion_decline();
   if (expression is void) raise %(void-op (operation "eval"));
   if (expression.is_atom()) {
     Var value;

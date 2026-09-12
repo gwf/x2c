@@ -53,6 +53,7 @@ static Symbol _raised(Lisp lisp, const char *text) {
   try _ev(lisp, text);
   catch %(bad-arity *): code = <bad-arity>;
   catch %(bad-types *): code = <bad-types>;
+  catch %(bad-sig *): code = <bad-sig>;
   catch %(not-call *): code = <not-call>;
   catch %(unbound *): code = <unbound>;
   return code;
@@ -343,13 +344,11 @@ static void lisp_auto_macro_calls(void) {
   _ev(lisp, "(def use-plus-n (lambda (x) (plus-n x)))");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(use-plus-n 2)")), 3);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(use-plus-n 2)")), 3);
-  // Redefining the macro invalidates the expansion it was compiled from,
-  // so the caller answers from the evaluator instead.
+  // Redefinition invalidates this expansion at its use inside the program.
   _ev(lisp, "(def plus-n (macro (e) `(add ,e 10)))");
   LispAutoStats stale = Lisp.auto_stats(lisp);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(use-plus-n 2)")), 12);
   LispAutoStats after = Lisp.auto_stats(lisp);
-  EXPECT_INT_EQ((int) (after.machine_entries - stale.machine_entries), 0);
   EXPECT_TRUE(after.guard_failures > stale.guard_failures);
   Lisp.destroy(lisp);
 }
@@ -438,12 +437,12 @@ static void lisp_auto_macro_rebinding_guard(void) {
   EXPECT_TRUE(Lisp.auto_stats(lisp).machine_entries > 0);
 
   // Swapping the arms of `if` must reach a program compiled before the
-  // swap: the stale program would still answer 1.
+  // swap: the stale program would still answer 1. Checking at the macro
+  // call preserves effects from earlier instructions in the same call.
   _ev(lisp, "(defmacro if (c x y) `(cond (,c ,y) (true ,x)))");
   LispAutoStats warmed = Lisp.auto_stats(lisp);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick 1 2)")), 2);
   LispAutoStats blocked = Lisp.auto_stats(lisp);
-  EXPECT_INT_EQ((int) (blocked.machine_entries - warmed.machine_entries), 0);
   EXPECT_TRUE(blocked.guard_failures > warmed.guard_failures);
   Lisp.destroy(lisp);
 }
@@ -501,6 +500,303 @@ static void lisp_auto_forced_evaluator_arm(void) {
   Lisp.destroy(lisp);
 }
 
+static void lisp_auto_local_bindings(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(defun parallel (x) (let ((x 2) (y x)) y))");
+    _ev(lisp, "(defun sequential (x) (let* ((x 2) (y x)) y))");
+    _ev(lisp, "(defun shadow (x) (let ((x 2)) (let ((x 3)) x)))");
+    _ev(lisp, "(defun duplicate () ((lambda (x x) x) 2 3))");
+    for (int i = 0; i < 3; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(parallel 7)")), 7);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(sequential 7)")), 2);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(shadow 7)")), 3);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(duplicate)")), 3);
+    }
+    MachineView view;
+    int nparam;
+    Var body;
+    EXPECT_INT_EQ(Lisp.program(_ev(lisp, "parallel"),
+                              &view, &nparam, &body), !disabled);
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_local_dynamic_and_capture(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def x 1)");
+    _ev(lisp, "(defun read-x () x)");
+    _ev(lisp, "(defun make-reader () (lambda () (+ x 0)))");
+    _ev(lisp, "(defun local-read (v) (let ((x v)) (read-x)))");
+    _ev(lisp, "(defun local-maker (v) (let ((x v)) (make-reader)))");
+    for (int i = 0; i < 3; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-read 9)")), 9);
+      _ev(lisp, "(def saved (local-maker 11))");
+      _ev(lisp, "(local-maker 22)");
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(saved)")), 11);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-x)")), 1);
+    }
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_local_match_and_redefinition(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(defun pick (e) (match-case e ((tag ?v) ?v) (else 0)))");
+    _ev(lisp, "(defun local (v) (let ((x v)) x))");
+    for (int i = 0; i < 3; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick '(tag 7))")), 7);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick '(other 7))")), 0);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local 8)")), 8);
+    }
+    MachineView view;
+    int nparam;
+    Var body;
+    EXPECT_INT_EQ(Lisp.program(_ev(lisp, "pick"),
+                              &view, &nparam, &body), !disabled);
+    _ev(lisp, "(defmacro match-case (e . cases) 31)");
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(pick '(tag 7))")), 31);
+    _ev(lisp, "(defmacro let (bindings body) 41)");
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local 8)")), 41);
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_immediate_constructor_rebinding(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = _auto_session(1);
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def replacement (lambda (x) (add x 100)))");
+    _ev(lisp, "(def constructor (macro (params body) 'replacement))");
+    _ev(lisp, "(def change (lambda (flag)"
+              " (cond (flag (def lambda constructor)) (1 ()))))");
+    _ev(lisp, "(def run (lambda (flag)"
+              " ((lambda (ignored) ((lambda (x) x) (log! 7)))"
+              " (change flag))))");
+    auto_order_log[0] = 0;
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(run ())")), 7);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(run ())")), 7);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(run 1)")), 107);
+    EXPECT_STR_EQ(String.new(auto_order_log), "777");
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_immediate_effects_and_fallback(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = _auto_session(1);
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def ordered (lambda ()"
+              " ((lambda (a b) b) (log! 1) (log! 2))))");
+    _ev(lisp, "(def dotted (lambda ()"
+              " ((lambda (x . rest) x) (log! 3) (log! 4))))");
+    _ev(lisp, "(def wrong-arity (lambda ()"
+              " ((lambda (x) x) (log! 5) (log! 6))))");
+    _ev(lisp, "(def malformed (lambda () ((lambda 1 2) (log! 7))))");
+    for (int i = 0; i < 3; i++) {
+      auto_order_log[0] = 0;
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(ordered)")), 2);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(dotted)")), 3);
+      EXPECT_INT_EQ(_raised(lisp, "(wrong-arity)"), <bad-arity>);
+      EXPECT_INT_EQ(_raised(lisp, "(malformed)"), <bad-sig>);
+      EXPECT_STR_EQ(String.new(auto_order_log), "123456");
+    }
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_macro_reads_local_binding(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def y 1)");
+    _ev(lisp, "(defmacro get-y () (list 'quote y))");
+    _ev(lisp, "(defun quoted-y () (list 'quote y))");
+    _ev(lisp, "(defmacro helper-y () (quoted-y))");
+    _ev(lisp, "(defun direct (v) (let ((y v)) (get-y)))");
+    _ev(lisp, "(defun indirect (v) (let ((y v)) (helper-y)))");
+    _ev(lisp, "(defmacro captured-y ()"
+              " ((lambda () (list 'quote y))))");
+    _ev(lisp, "(defun capture-local () (let ((y 42)) (captured-y)))");
+    _ev(lisp, "(defun wrap-capture (y) (capture-local))");
+    for (int i = 0; i < 3; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(direct 7)")), 7);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(direct 8)")), 8);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(indirect 9)")), 9);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(indirect 10)")), 10);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wrap-capture 1)")), 42);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wrap-capture 2)")), 42);
+    }
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(get-y)")), 1);
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_local_macro_effects_once(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def count 0)");
+    _ev(lisp, "(def y 1)");
+    _ev(lisp, "(defmacro get-y ()"
+              " (cond ((def count (+ count 1)) (list 'quote y))))");
+    _ev(lisp, "(defun local-effect () (let ((y 42)) (get-y)))");
+    for (int i = 0; i < 4; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-effect)")), 42);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "count")), i + 1);
+    }
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_macro_native_effects(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = _auto_session(1);
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def direct (macro () (cond ((log! 1) 42))))");
+    _ev(lisp, "(def indirect (macro ()"
+              " (cond ((apply log! '(2)) 42))))");
+    _ev(lisp, "(def run (lambda ()"
+              " ((lambda (a b) b) (direct) (indirect))))");
+    for (int i = 0; i < 4; i++) {
+      auto_order_log[0] = 0;
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(run)")), 42);
+      EXPECT_STR_EQ(String.new(auto_order_log), "12");
+    }
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_macro_unchosen_effects(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = _auto_session(1);
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def effect (macro () (cond ((log! 1) 42))))");
+    _ev(lisp, "(def choose (lambda (flag)"
+              " ((lambda (x) (cond (flag (effect)) (1 x))) 7)))");
+    _ev(lisp, "(def forever (macro () (forever)))");
+    _ev(lisp, "(def skip (lambda (flag)"
+              " (cond (flag (forever)) (1 9))))");
+    auto_order_log[0] = 0;
+    for (int i = 0; i < 4; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(choose ())")), 7);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(skip ())")), 9);
+    }
+    EXPECT_INT_EQ(auto_order_log[0], 0);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(choose 1)")), 42);
+    EXPECT_STR_EQ(String.new(auto_order_log), "1");
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_macro_global_data(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def version 10)");
+    _ev(lisp, "(defmacro versioned () (list 'quote version))");
+    _ev(lisp, "(defun read-version (ignored)"
+              " (let ((x 42)) (versioned)))");
+    _ev(lisp, "(defun read-after-change () (versioned))");
+    _ev(lisp, "(defun change-version (flag)"
+              " (cond (flag (def version 30)) (1 1)))");
+    _ev(lisp, "(defun change-then-read (flag)"
+              " (cond ((change-version flag) (versioned))))");
+    for (int i = 0; i < 3; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-version ())")), 10);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-after-change)")), 10);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(change-then-read ())")), 10);
+    }
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(change-then-read 1)")), 30);
+    _ev(lisp, "(def version 10)");
+    EXPECT_INT_EQ(Var.integer(_ev(lisp,
+                  "(read-version (def version 40))")), 40);
+    _ev(lisp, "(def version 20)");
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-after-change)")), 20);
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_macro_helper_rebinding(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(defun expansion-value () 10)");
+    _ev(lisp, "(def original-helper expansion-value)");
+    _ev(lisp, "(defmacro from-helper ()"
+              " (list 'quote (expansion-value)))");
+    _ev(lisp, "(defun read-helper (ignored)"
+              " (let ((x 42)) (from-helper)))");
+    _ev(lisp, "(defun read-rebound-helper () (from-helper))");
+    _ev(lisp, "(defun change-helper (flag)"
+              " (cond (flag (def expansion-value (lambda () 30)))"
+              " (1 1)))");
+    _ev(lisp, "(defun change-then-expand (flag)"
+              " (cond ((change-helper flag) (from-helper))))");
+    for (int i = 0; i < 3; i++) {
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-helper ())")), 10);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-rebound-helper)")), 10);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(change-then-expand ())")), 10);
+    }
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(change-then-expand 1)")), 30);
+    _ev(lisp, "(def expansion-value original-helper)");
+    EXPECT_INT_EQ(Var.integer(_ev(lisp,
+                  "(read-helper (def expansion-value (lambda () 40)))")),
+                  40);
+    _ev(lisp, "(defun expansion-value () 20)");
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-rebound-helper)")), 20);
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_macro_fresh_closure(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(defmacro fresh () (list 'quote (lambda () 7)))");
+    _ev(lisp, "(defun make-fresh () (let ((x 42)) (fresh)))");
+    Var previous = _ev(lisp, "(make-fresh)");
+    for (int i = 0; i < 4; i++) {
+      Var current = _ev(lisp, "(make-fresh)");
+      EXPECT_TRUE(current != previous);
+      EXPECT_INT_EQ(Var.integer(Lisp.apply(lisp, current, %())), 7);
+      previous = current;
+    }
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_rejected_parent_releases_programs(void) {
+  Lisp lisp = Lisp.new_bare();
+  _ev(lisp, "(def rejected (lambda (flag)"
+            " (cond (flag ((lambda (x) x) 7))"
+            " (1 (lambda (y) y)))))");
+  long before = Lisp.auto_stats(lisp).program_bytes;
+  for (int i = 0; i < 3; i++)
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(rejected 1)")), 7);
+  EXPECT_INT_EQ(Lisp.auto_stats(lisp).program_bytes, before);
+  EXPECT_TRUE(Lisp.auto_stats(lisp).ineligible > 0);
+  Lisp.destroy(lisp);
+}
+
+static void lisp_auto_local_recursion_capacity(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(defun count-local (n)"
+              " (let ((saved n))"
+              " (if (= saved 0) 0 (+ 1 (count-local (- saved 1))))))");
+    for (int i = 0; i < 3; i++)
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(count-local 140)")), 140);
+    Lisp.destroy(lisp);
+  }
+}
+
 $(import "test-macros.xmacro")
 
 void lisp_auto_suite(void) {
@@ -521,4 +817,18 @@ void lisp_auto_suite(void) {
   $test.run(lisp_auto_tail_calls_stay_flat);
   $test.run(lisp_auto_tail_call_only_to_self);
   $test.run(lisp_auto_forced_evaluator_arm);
+  $test.run(lisp_auto_local_bindings);
+  $test.run(lisp_auto_local_dynamic_and_capture);
+  $test.run(lisp_auto_local_match_and_redefinition);
+  $test.run(lisp_auto_immediate_constructor_rebinding);
+  $test.run(lisp_auto_immediate_effects_and_fallback);
+  $test.run(lisp_auto_macro_reads_local_binding);
+  $test.run(lisp_auto_local_macro_effects_once);
+  $test.run(lisp_auto_macro_native_effects);
+  $test.run(lisp_auto_macro_unchosen_effects);
+  $test.run(lisp_auto_macro_global_data);
+  $test.run(lisp_auto_macro_helper_rebinding);
+  $test.run(lisp_auto_macro_fresh_closure);
+  $test.run(lisp_auto_rejected_parent_releases_programs);
+  $test.run(lisp_auto_local_recursion_capacity);
 }

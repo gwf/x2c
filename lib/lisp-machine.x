@@ -335,6 +335,19 @@ int LispMachine.step(LispMachine m) {
       break;
     }
 
+    case MW_LLAMBDA:
+      m._push_value(Lisp.immediate(m.lisp_context, p.consts[w.a]));
+      break;
+
+    case MW_LEXPAND: {
+      Var result;
+      if (Lisp.expanded(m.lisp_context, p.consts[w.a], &result)) {
+        m._push_value(result);
+        m.pc = w.target;
+      }
+      break;
+    }
+
     case MW_LCALL: m._call(w.b);
       break;
 

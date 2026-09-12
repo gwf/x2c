@@ -518,6 +518,14 @@ divisions:
 - `lib/common.x` supplies shared representation and initialization support;
 - `lib/lib.x` contains the standalone `DisjointSet` utility.
 
+Prepared Lisp programs include eligible immediate lambda applications, such
+as the local bindings produced by `let` and `match-case`. Their bodies borrow
+the live caller environment. Macro preparation permits only bounded,
+effect-free evaluation; dependency guards at each expansion site check the
+bindings after preceding calls have run. Unsupported preparation or a changed
+binding uses the ordinary evaluator, preserving macro effects and rebinding.
+Pattern matching still executes compiled Match plans on MatchMachine.
+
 `lib/x2c.x` is the generated source definition of the implicit runtime
 prelude. The generator leaves out the optional x2c system modules; they are
 built with the runtime and need an explicit source include. Runtime component

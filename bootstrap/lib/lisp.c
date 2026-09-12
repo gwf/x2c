@@ -44,6 +44,13 @@ typedef struct LispEnv{
 }
 LispEnv;
 
+typedef struct LispExpansion{
+  LispEnv * boundary;
+  List locals, dependencies;
+  int calls, steps;
+}
+LispExpansion;
+
 typedef struct LispMachineContext{
   Lisp lisp;
   LispEnv frames[MACHINE_FRAME_MAX];
@@ -66,6 +73,7 @@ struct Lisp{
   LispAutoStats auto_stats;
   MachineStats * auto_machine_stats;
   LispMachineSlot machine_free;
+  LispExpansion * expansion;
   int machine_depth;
   int auto_disabled;
   int protect_x2c;
@@ -274,6 +282,22 @@ static Var _x2c_func_adapt_38(Func _x2c_func_binding_38, const FuncArg * _x2c_fu
 _x2c_initializer_choice_D09CF48E_2((lisp_native_targets = Map_update_n(Map_new(), 39, String_var(_53), Func_var(Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_54), Func_var(Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_55), (List) 0)))), String_var(_56), Func_var(Func_new(_x2c_func_adapt_2, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_55), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_55), (List) 0)))), String_var(_57), Func_var(Func_new(_x2c_func_adapt_3, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_58), Func_var(Func_new(_x2c_func_adapt_4, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_59), Func_var(Func_new(_x2c_func_adapt_5, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_60), Func_var(Func_new(_x2c_func_adapt_6, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_61), Func_var(Func_new(_x2c_func_adapt_7, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_62), (List) 0)))), String_var(_63), Func_var(Func_new(_x2c_func_adapt_8, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_64), Func_var(Func_new(_x2c_func_adapt_9, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_65), Func_var(Func_new(_x2c_func_adapt_10, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_66), Func_var(Func_new(_x2c_func_adapt_11, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_67), Func_var(Func_new(_x2c_func_adapt_12, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_55), (List) 0)))), String_var(_68), Func_var(Func_new(_x2c_func_adapt_13, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_69), Func_var(Func_new(_x2c_func_adapt_14, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_55), (List) 0)))), String_var(_70), Func_var(Func_new(_x2c_func_adapt_15, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_71), Func_var(Func_new(_x2c_func_adapt_16, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_55), (List) 0)))), String_var(_72), Func_var(Func_new(_x2c_func_adapt_17, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_55), (List) 0)))), String_var(_73), Func_var(Func_new(_x2c_func_adapt_18, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_74), Func_var(Func_new(_x2c_func_adapt_19, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_62), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_75), Func_var(Func_new(_x2c_func_adapt_20, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), cons(List_var(cons(String_var(_48), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_76), Func_var(Func_new_rest(_x2c_func_adapt_21, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_77), Func_var(Func_new_rest(_x2c_func_adapt_22, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_78), Func_var(Func_new_rest(_x2c_func_adapt_23, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_79), Func_var(Func_new_rest(_x2c_func_adapt_24, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_80), Func_var(Func_new_rest(_x2c_func_adapt_25, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_81), Func_var(Func_new_rest(_x2c_func_adapt_26, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_82), Func_var(Func_new_rest(_x2c_func_adapt_27, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_83), Func_var(Func_new_rest(_x2c_func_adapt_28, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_84), Func_var(Func_new_rest(_x2c_func_adapt_29, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_85), Func_var(Func_new(_x2c_func_adapt_30, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_86), Func_var(Func_new(_x2c_func_adapt_31, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_48), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_87), Func_var(Func_new(_x2c_func_adapt_32, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_88), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(19368), (List) 0)))), String_var(_89), Func_var(Func_new(_x2c_func_adapt_33, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_88), (List) 0)), cons(List_var(cons(String_var(_88), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_90), Func_var(Func_new(_x2c_func_adapt_34, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_88), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), cons(List_var(cons(Symbol_var(19368), (List) 0)), (List) 0)))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_91), Func_var(Func_new(_x2c_func_adapt_35, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_88), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_92), Func_var(Func_new(_x2c_func_adapt_36, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_88), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_93), Func_var(Func_new(_x2c_func_adapt_37, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_88), (List) 0)), cons(List_var(cons(String_var(_88), (List) 0)), (List) 0))), (List) 0))), cons(String_var(_48), (List) 0)))), String_var(_94), Func_var(Func_new(_x2c_func_adapt_38, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_55), (List) 0)), (List) 0)), (List) 0))), cons(String_var(_55), (List) 0)))))))
 static Func _native_target(String name);
 
+static int _local_lookup(LispEnv * env, Var name, Var * out);
+
+_Noreturn static void _expansion_decline(void);
+
+static void _expansion_lookup(Lisp lisp, Var name);
+
+static void _expansion_note(Lisp lisp, Var name, Var value);
+
+static int _expansion_value(Var value, int depth);
+
+static void _expansion_native(Lisp lisp, Func function);
+
+static void _expansion_argument(Lisp lisp, Var value);
+
+static int _env_lookup(Lisp lisp, LispEnv * env, Var name, Var * out);
+
 static int _lookup(Lisp lisp, LispEnv * env, Var name, Var * out);
 
 static int _param_has(List params, Var name);
@@ -306,6 +330,7 @@ typedef struct LispLower{
   Lambda lambda;
   MachineBuilder b;
   List specials;
+  List locals;
   int depth;
 }
 * LispLower;
@@ -332,13 +357,21 @@ static int LispLower__auto_qq_append(LispLower l);
 
 static int LispLower__auto_compile_qq(LispLower l, Var expression, int list, int depth, int live);
 
-static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expansion);
+static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expansion, List * dependencies);
 
 static int LispLower__auto_self_call(LispLower l, Var head);
 
 static int LispLower__auto_compile(LispLower l, Var expression, int tail);
 
-static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env);
+static int LispLower__auto_compile_call(LispLower l, List args, int tail);
+
+static void _auto_discard_children(Lisp lisp, MachineView view);
+
+static void _auto_discard(Lisp lisp, Lambda lambda);
+
+static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env, int depth, List locals);
+
+static int _auto_bindings_ok(Lisp lisp, LispEnv * env, List bindings);
 
 static int _auto_specials_ok(Lisp lisp, LispEnv * env, Lambda lambda);
 
@@ -466,91 +499,115 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
-
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_4;
-  const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_2;
 
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
+
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 
-static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
-
 typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
 }
 _x2c_defer_env_3;
 
-static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
 typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_4;
 
-static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
-
-static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39);
-
-static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
-
-static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
-
-static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
-
-static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
 
 typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_9;
+  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_5;
 
-static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
+
+static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 
 typedef struct _x2c_defer_env_6{
-  const void * _x2c_defer_capture_10;
+  const void * _x2c_defer_capture_12;
 }
 _x2c_defer_env_6;
 
-static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
+static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
 
 typedef struct _x2c_defer_env_7{
-  const void * _x2c_defer_capture_11;
+  const void * _x2c_defer_capture_13;
+  const void * _x2c_defer_capture_14;
 }
 _x2c_defer_env_7;
+
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
+
+static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39);
+
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
+
+static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+
+static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16);
 
 typedef struct _x2c_defer_env_8{
-  const void * _x2c_defer_capture_12;
+  const void * _x2c_defer_capture_15;
 }
 _x2c_defer_env_8;
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17);
 
 typedef struct _x2c_defer_env_9{
-  const void * _x2c_defer_capture_13;
+  const void * _x2c_defer_capture_16;
 }
 _x2c_defer_env_9;
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18);
 
 typedef struct _x2c_defer_env_10{
-  const void * _x2c_defer_capture_14;
+  const void * _x2c_defer_capture_17;
 }
 _x2c_defer_env_10;
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19);
 
 typedef struct _x2c_defer_env_11{
-  const void * _x2c_defer_capture_15;
+  const void * _x2c_defer_capture_18;
 }
 _x2c_defer_env_11;
 
 static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20);
+
+typedef struct _x2c_defer_env_12{
+  const void * _x2c_defer_capture_19;
+}
+_x2c_defer_env_12;
+
+static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21);
+
+typedef struct _x2c_defer_env_13{
+  const void * _x2c_defer_capture_20;
+}
+_x2c_defer_env_13;
+
+static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22);
+
+typedef struct _x2c_defer_env_14{
+  const void * _x2c_defer_capture_21;
+}
+_x2c_defer_env_14;
+
+static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -737,6 +794,34 @@ int Lisp_precall(void * storage, Var callable, List raw, Var * value){
   return 1;
 }
 
+Var Lisp_immediate(void * storage, Var callable){
+  if(! _init_guard_) _file_init_();
+  LispMachineContext context =(LispMachineContext) storage;
+  Lisp lisp = context -> lisp;
+  LispEnv * env = _machine_env(context);
+  Var constructor;
+  if(_lookup(lisp, env, lsym_lambda, & constructor) && constructor.u64 == Func_var(lisp -> specials[LISP_LAMBDA]).u64) return callable;
+  Lambda lambda = Var_lambda(callable);
+  return _eval(lisp, List_var(cons(lsym_lambda, cons(List_var(lambda -> params), cons(lambda -> body, NULL)))), env);
+}
+
+Var List_getindex(List, int);
+
+List Var_list(Var);
+
+int Lisp_expanded(void * storage, List site, Var * out){
+  if(! _init_guard_) _file_init_();
+  LispMachineContext context =(LispMachineContext) storage;
+  Var form, dependencies;
+  List _x2c_destructure_0 = site;
+  form = List_getindex(_x2c_destructure_0, 0);
+  dependencies = List_getindex(_x2c_destructure_0, 1);
+  if(_auto_bindings_ok(context -> lisp, _machine_env(context), Var_list(dependencies))) return 0;
+  context -> lisp -> auto_stats.guard_failures ++;
+  * out = _eval(context -> lisp, form, _machine_env(context));
+  return 1;
+}
+
 Var Var_new(Symbol, ...);
 
 static inline Var Lambda_var(Lambda _x2c_macro_value_0){
@@ -787,7 +872,7 @@ _Noreturn static Symbol _malformed(String source, unsigned at){
   int line = 1, column = 1;
   scan_next_line_col(source, (int) at, & line, & column);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp.x",.function = "_malformed",.line = 305};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp.x",.function = "_malformed",.line = 346};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -928,7 +1013,7 @@ static Symbol _read_tokenizer(Tokenizer tokenizer, String source, unsigned base,
     int line = 1, column = 1;
     scan_next_line_col(source, (int) start, & line, & column);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp.x",.function = "_read_tokenizer",.line = 418};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp.x",.function = "_read_tokenizer",.line = 459};
       x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 3, Symbol_var(1307939018), String_var(source), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
@@ -976,7 +1061,7 @@ static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
 
 _Noreturn static Var _bad_session(String operation){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 433};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 474};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
     __builtin_unreachable();
   }
@@ -992,11 +1077,11 @@ Lisp Lisp_new_bare(void){
   Scope session = Scope_new_named("Lisp session");
   Lisp result = NULL;
   {
-  _x2c_defer_env_0 _x2c_defer_env_12 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & session};
+  _x2c_defer_env_0 _x2c_defer_env_15 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & session};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_12
+    .env = & _x2c_defer_env_15
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -1114,11 +1199,11 @@ Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
   {
     Scope tokens_scope = Scope_new_named("Lisp tokens");
     {
-  _x2c_defer_env_5 _x2c_defer_env_13 = {._x2c_defer_capture_9 =(const void *) & tokens_scope};
+  _x2c_defer_env_8 _x2c_defer_env_16 = {._x2c_defer_capture_15 =(const void *) & tokens_scope};
 
   X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_14,
-    .env = & _x2c_defer_env_13
+    .fn = _x2c_defer_cleanup_17,
+    .env = & _x2c_defer_env_16
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
@@ -1196,7 +1281,7 @@ int Var_compare(Var, Var);
 Var lisp_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(! _is_lisp_number(a) || ! _is_lisp_number(b)){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 562};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 603};
     x2c_error_raise_n(& _x2c_error_site_3, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_compare")), NULL))), Symbol_var(26746169281416), Symbol_var(Var_kind(a)), Symbol_var(1286928228633480), Symbol_var(Var_kind(b)));
     __builtin_unreachable();
   }
@@ -1253,7 +1338,7 @@ List List_cdr(List);
 Var lisp_minus(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "lisp_minus",.line = 595};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "lisp_minus",.line = 636};
     x2c_error_raise_n(& _x2c_error_site_4, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("-")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -1300,7 +1385,7 @@ Var lisp_times(List values){
 Var lisp_divide(List values){
   if(! _init_guard_) _file_init_();
   if(! List_truth(values)){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "lisp_divide",.line = 616};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "lisp_divide",.line = 657};
     x2c_error_raise_n(& _x2c_error_site_5, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("/")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
     __builtin_unreachable();
   }
@@ -1325,22 +1410,20 @@ Var lisp_divide(List values){
   return total;
 }
 
-Var List_getindex(List, int);
-
 long Var_integer(Var);
 
 static Var _chain(List values, String operation, int want, int expect){
   int actual = List_len(values);
   if(actual < 2){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "_chain",.line = 631};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "_chain",.line = 672};
     x2c_error_raise_n(& _x2c_error_site_6, 4477439593778, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
     __builtin_unreachable();
   }
   for(List p = values;  List_truth(List_cdr(p));  p = List_cdr(p)){
     Var left, right;
-    List _x2c_destructure_0 = p;
-    left = List_getindex(_x2c_destructure_0, 0);
-    right = List_getindex(_x2c_destructure_0, 1);
+    List _x2c_destructure_1 = p;
+    left = List_getindex(_x2c_destructure_1, 0);
+    right = List_getindex(_x2c_destructure_1, 1);
     int order = Var_integer(lisp_compare(left, right));
     if(expect ? order != want : order == want) return _bool(0);
   }
@@ -1444,31 +1527,115 @@ static Func _native_target(String name){
 
 int Map_truth(Map);
 
-static int _lookup(Lisp lisp, LispEnv * env, Var name, Var * out){
-  for(LispEnv * cur = env;  cur;  cur = cur -> parent){
-    Var found =((void) 0, Void);
-    int at = 0;
-    for(List p = cur -> params;  List_truth(p) && at < cur -> value_count;  p = List_cdr(p), at ++) if(Var_equal(List_car(p), name)) found = cur -> values[at];
-    if(! Var_is_void(found)){
-      * out = found;
-      return 1;
-    }
-    if(Map_truth(cur -> bindings) && Map_try_get(cur -> bindings, name, out)) return 1;
-    if(Map_truth(cur -> captures) && Map_try_get(cur -> captures, name, out)) return 1;
+static int _local_lookup(LispEnv * env, Var name, Var * out){
+  int found = 0, at = 0;
+  for(List p = env -> params;  List_truth(p) && at < env -> value_count;  p = List_cdr(p), at ++) if(Var_equal(List_car(p), name)){
+    * out = env -> values[at];
+    found = 1;
   }
-  return Map_try_get(lisp -> globals, name, out) || Map_try_get(lisp -> reserved, name, out);
+  return found ||(Map_truth(env -> bindings) && Map_try_get(env -> bindings, name, out));
 }
 
-static int _param_has(List params, Var name){
+_Noreturn static void _expansion_decline(void){
   {
-    Var param;
-    Iter _x2c_macro_iterator_4 = List_iter(params, &(struct Iter){
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "_expansion_decline",.line = 832};
+    x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp AUTO expansion")), NULL))));
+    __builtin_unreachable();
+  }
+
+}
+
+static void _expansion_lookup(Lisp lisp, Var name){
+  if(lisp -> expansion && _param_has(lisp -> expansion -> locals, name)) _expansion_decline();
+}
+
+static void _expansion_note(Lisp lisp, Var name, Var value){
+  if(! lisp -> expansion) return;
+  {
+    List pair;
+    Iter _x2c_macro_iterator_4 = List_iter(lisp -> expansion -> dependencies, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_4;
     while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-      param = _x2c_macro_item_4;
+      pair = Var_list(_x2c_macro_item_4);
+      if(Var_equal(List_car(pair), name)) return;
+    }
+
+  }
+  lisp -> expansion -> dependencies = cons(List_var(cons(name, cons(value, NULL))), lisp -> expansion -> dependencies);
+}
+
+int Var_is_atom(Var);
+
+static int _expansion_value(Var value, int depth){
+  if(Var_is(value, 806120)){
+    if(depth >= LISP_AUTO_EXPAND_MAX) return 0;
+    {
+      Var part;
+      Iter _x2c_macro_iterator_5 = List_iter(Var_list(value), &(struct Iter){
+        int_var(0)
+      }
+      );
+      Var _x2c_macro_item_5;
+      while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
+        part = _x2c_macro_item_5;
+        if(! _expansion_value(part, depth + 1)) return 0;
+      }
+
+    }
+    return 1;
+  }
+  return Var_is_atom(value) || _is_lisp_number(value) || Var_is(value, 1318210446);
+}
+
+static void _expansion_native(Lisp lisp, Func function){
+  if(! lisp -> expansion) return;
+  static const char * names[] ={
+    "Var_car", "Var_cdr", "Var_cons", "lisp_atom", "lisp_pair", "lisp_list", "lisp_eq", "lisp_type", "lisp_number", "lisp_string", "lisp_symbol", "List_reverse", "List_len", "lisp_add", "lisp_compare", "lisp_plus", "lisp_minus", "lisp_times", "lisp_divide", "lisp_eq_chain", "lisp_lt_chain", "lisp_le_chain", "lisp_gt_chain", "lisp_ge_chain", "lisp_str", "String_len", "lisp_string_append", "lisp_substring", "lisp_string_downcase"
+  }
+  ;
+  for(unsigned i = 0;  i < sizeof(names) / sizeof(names[0]);  i ++) if(function == _native_target(String_new(names[i]))) return;
+  _expansion_decline();
+}
+
+static void _expansion_argument(Lisp lisp, Var value){
+  if(lisp -> expansion && ! _expansion_value(value, 0)) _expansion_decline();
+}
+
+static int _env_lookup(Lisp lisp, LispEnv * env, Var name, Var * out){
+  int external = 0;
+  for(LispEnv * cur = env;  cur;  cur = cur -> parent){
+    if(lisp -> expansion && cur == lisp -> expansion -> boundary) external = 1;
+    if(external) _expansion_lookup(lisp, name);
+    if(_local_lookup(cur, name, out) ||(Map_truth(cur -> captures) && Map_try_get(cur -> captures, name, out))){
+      if(external) _expansion_note(lisp, name, * out);
+      return 1;
+    }
+
+  }
+  _expansion_lookup(lisp, name);
+  return 0;
+}
+
+static int _lookup(Lisp lisp, LispEnv * env, Var name, Var * out){
+  if(_env_lookup(lisp, env, name, out)) return 1;
+  if(! Map_try_get(lisp -> globals, name, out) && ! Map_try_get(lisp -> reserved, name, out)) return 0;
+  _expansion_note(lisp, name, * out);
+  return 1;
+}
+
+static int _param_has(List params, Var name){
+  {
+    Var param;
+    Iter _x2c_macro_iterator_6 = List_iter(params, &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_macro_item_6;
+    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
+      param = _x2c_macro_item_6;
       if(Var_equal(param, name)) return 1;
     }
 
@@ -1478,10 +1645,6 @@ static int _param_has(List params, Var name){
 
 List List_flatten(List);
 
-List Var_list(Var);
-
-int Var_is_atom(Var);
-
 int Map_contains(Map, Var);
 
 Var Map_setindex(Map, Var, Var);
@@ -1490,21 +1653,17 @@ static void _capture(Lisp lisp, LispEnv * env, List params, Var body, Map captur
   if(! Var_is(body, 806120)) return;
   {
     Var name;
-    Iter _x2c_macro_iterator_5 = List_iter(List_flatten(Var_list(body)), &(struct Iter){
+    Iter _x2c_macro_iterator_7 = List_iter(List_flatten(Var_list(body)), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      name = _x2c_macro_item_5;
+    Var _x2c_macro_item_7;
+    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
+      name = _x2c_macro_item_7;
       {
         Var value;
         if(! Var_is_atom(name) || Map_contains(lisp -> reserved, name) || Map_contains(captures, name) || _param_has(params, name)) continue;
-        for(LispEnv * cur = env;  cur;  cur = cur -> parent) if(Map_try_get(cur -> bindings, name, & value)){
-          Map_setindex(captures, name, value);
-          break;
-        }
-
+        if(_env_lookup(lisp, env, name, & value)) Map_setindex(captures, name, value);
       }
 
     }
@@ -1516,23 +1675,23 @@ static void _capture(Lisp lisp, LispEnv * env, List params, Var body, Map captur
 static void _eval_args(Lisp lisp, List args, LispEnv * env, List * out){
   Array values = Array_new();
   {
-  _x2c_defer_env_6 _x2c_defer_env_14 = {._x2c_defer_capture_10 =(const void *) & values};
+  _x2c_defer_env_9 _x2c_defer_env_17 = {._x2c_defer_capture_16 =(const void *) & values};
 
   X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_15,
-    .env = & _x2c_defer_env_14
+    .fn = _x2c_defer_cleanup_18,
+    .env = & _x2c_defer_env_17
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
     {
       Var arg;
-      Iter _x2c_macro_iterator_6 = List_iter(args, &(struct Iter){
+      Iter _x2c_macro_iterator_8 = List_iter(args, &(struct Iter){
         int_var(0)
       }
       );
-      Var _x2c_macro_item_6;
-      while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
-        arg = _x2c_macro_item_6;
+      Var _x2c_macro_item_8;
+      while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
+        arg = _x2c_macro_item_8;
         Array_push(values, _eval(lisp, arg, env));
       }
 
@@ -1555,9 +1714,9 @@ static Var _qq(Lisp lisp, Var expr, LispEnv * env, int list, int depth){
   if(Var_is(expr, 806120) && ! Var_is_nil(expr)){
     List form = Var_list(expr);
     Var head, argument;
-    List _x2c_destructure_1 = form;
-    head = List_getindex(_x2c_destructure_1, 0);
-    argument = List_getindex(_x2c_destructure_1, 1);
+    List _x2c_destructure_2 = form;
+    head = List_getindex(_x2c_destructure_2, 0);
+    argument = List_getindex(_x2c_destructure_2, 1);
     if(Var_equal(head, lsym_quasiquote)){
       Var tail = _qq(lisp, List_var(List_cdr(form)), env, 0, depth + 1);
       Var value = List_var(Var_cons(head, Var_list(tail)));
@@ -1565,8 +1724,8 @@ static Var _qq(Lisp lisp, Var expr, LispEnv * env, int list, int depth){
     }
     if(Var_equal(head, lsym_unquote) || Var_equal(head, lsym_splicing)){
       if(List_len(form) != 2){
-        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 831};
-        x2c_error_raise_n(& _x2c_error_site_7, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(46228810), expr);
+        static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 941};
+        x2c_error_raise_n(& _x2c_error_site_8, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(46228810), expr);
         __builtin_unreachable();
       }
       if(depth > 0){
@@ -1576,14 +1735,14 @@ static Var _qq(Lisp lisp, Var expr, LispEnv * env, int list, int depth){
       }
       Var value = _eval(lisp, argument, env);
       if(! list && Var_equal(head, lsym_splicing)){
-        static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 839};
-        x2c_error_raise_n(& _x2c_error_site_8, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(expr)));
+        static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 949};
+        x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(expr)));
         __builtin_unreachable();
       }
       if(list && Var_equal(head, lsym_unquote)) return List_var(cons(value, NULL));
       if(list && ! Var_is(value, 806120)){
-        static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 843};
-        x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(value)));
+        static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_qq",.line = 953};
+        x2c_error_raise_n(& _x2c_error_site_10, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(value)));
         __builtin_unreachable();
       }
       return value;
@@ -1602,8 +1761,8 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
   if(List_len(args) != 2 || ! Var_is(List_car(args), 806120)){
     Symbol operation = macro ? 27335838 : 808259842;
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_make_lambda",.line = 859};
-      x2c_error_raise_n(& _x2c_error_site_10, 4372535886, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(46228810), List_var(args));
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "_make_lambda",.line = 969};
+      x2c_error_raise_n(& _x2c_error_site_11, 4372535886, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(46228810), List_var(args));
       __builtin_unreachable();
     }
 
@@ -1612,17 +1771,17 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
   Var result =((void) 0, Void);
   lambda -> captures = NULL;
   {
-  _x2c_defer_env_1 _x2c_defer_env_15 = {._x2c_defer_capture_2 =(const void *) & result, ._x2c_defer_capture_3 =(const void *) & lambda};
+  _x2c_defer_env_1 _x2c_defer_env_18 = {._x2c_defer_capture_2 =(const void *) & result, ._x2c_defer_capture_3 =(const void *) & lambda};
 
   X2CCleanup _x2c_defer_record_6 = {
     .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_15
+    .env = & _x2c_defer_env_18
   };
   x2c_cleanup_push(&_x2c_defer_record_6);
   {
-    List _x2c_destructure_2 = args;
-    List params = Var_list(List_getindex(_x2c_destructure_2, 0));
-    Var body = List_getindex(_x2c_destructure_2, 1);
+    List _x2c_destructure_3 = args;
+    List params = Var_list(List_getindex(_x2c_destructure_3, 0));
+    Var body = List_getindex(_x2c_destructure_3, 1);
     lambda -> params = params;
     lambda -> body = body;
     lambda -> captures = Map_new();
@@ -1659,13 +1818,13 @@ int String_equal(String, String);
 static void _bind_params(Lambda lambda, List args, Map bindings){
   for(List p = lambda -> params;  List_truth(p);  p = List_cdr(p)){
     Var name, rest_name;
-    List _x2c_destructure_3 = p;
-    name = List_getindex(_x2c_destructure_3, 0);
-    rest_name = List_getindex(_x2c_destructure_3, 1);
+    List _x2c_destructure_4 = p;
+    name = List_getindex(_x2c_destructure_4, 0);
+    rest_name = List_getindex(_x2c_destructure_4, 1);
     if(Var_is_atom(name) && String_equal(Var_str(name), _5)){
       if(! List_truth(List_cdr(p))){
-        static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 882};
-        x2c_error_raise_n(& _x2c_error_site_11, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
+        static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 992};
+        x2c_error_raise_n(& _x2c_error_site_12, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
         __builtin_unreachable();
       }
       Var rest = List_var(args);
@@ -1673,86 +1832,105 @@ static void _bind_params(Lambda lambda, List args, Map bindings){
       return;
     }
     if(! List_truth(args)){
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 888};
-      x2c_error_raise_n(& _x2c_error_site_12, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 998};
+      x2c_error_raise_n(& _x2c_error_site_13, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
       __builtin_unreachable();
     }
     Map_setindex(bindings, name, List_car(args));
     args = List_cdr(args);
   }
   if(List_truth(args)){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 892};
-    x2c_error_raise_n(& _x2c_error_site_13, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 1002};
+    x2c_error_raise_n(& _x2c_error_site_14, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
     __builtin_unreachable();
   }
 
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv * env){
-  Scope frame = Scope_new_named("Lisp frame");
+  LispExpansion * trace = lisp -> expansion;
+  if(trace && ++ trace -> calls >= MACHINE_FRAME_MAX) _expansion_decline();
   {
-  _x2c_defer_env_7 _x2c_defer_env_16 = {._x2c_defer_capture_11 =(const void *) & frame};
+  _x2c_defer_env_2 _x2c_defer_env_19 = {._x2c_defer_capture_4 =(const void *) & trace};
 
   X2CCleanup _x2c_defer_record_7 = {
-    .fn = _x2c_defer_cleanup_16,
-    .env = & _x2c_defer_env_16
+    .fn = _x2c_defer_cleanup_5,
+    .env = & _x2c_defer_env_19
   };
   x2c_cleanup_push(&_x2c_defer_record_7);
   {
-    Map bindings = NULL;
+    Scope frame = Scope_new_named("Lisp frame");
     {
-      Scope_push(& frame);
-      {
-        {
+  _x2c_defer_env_10 _x2c_defer_env_20 = {._x2c_defer_capture_17 =(const void *) & frame};
 
   X2CCleanup _x2c_defer_record_8 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = NULL
+    .fn = _x2c_defer_cleanup_19,
+    .env = & _x2c_defer_env_20
   };
   x2c_cleanup_push(&_x2c_defer_record_8);
   {
+      Map bindings = NULL;
+      {
+        Scope_push(& frame);
+        {
           {
-            bindings = Map_new();
-          }
 
-        }
+  X2CCleanup _x2c_defer_record_9 = {
+    .fn = _x2c_defer_cleanup_6,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_9);
+  {
+            {
+              bindings = Map_new();
+            }
+
+          }
 
   int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_8);
+  x2c_cleanup_leave(&_x2c_defer_record_9);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
 }
-      }
+        }
 
-    }
-    LispEnv captured ={
-      .bindings = lambda -> captures, .parent = env
-    }
-    ;
-    LispEnv local ={
-      .bindings = bindings, .parent = & captured
-    }
-    ;
-    _bind_params(lambda, args, bindings);
-    {
-      Var _x2c_return_value_3 = _eval(lisp, lambda -> body, & local);
+      }
+      LispEnv captured ={
+        .bindings = lambda -> captures, .parent = env
+      }
+      ;
+      LispEnv local ={
+        .bindings = bindings, .parent = & captured
+      }
+      ;
+      _bind_params(lambda, args, bindings);
       {
+        Var _x2c_return_value_3 = _eval(lisp, lambda -> body, & local);
+        {
   int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+  x2c_cleanup_leave(& _x2c_defer_record_8);
+        x2c_cleanup_leave(& _x2c_defer_record_7);
 
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
   return _x2c_return_value_3;
 
 }
-    }
+      }
 
-  }
+    }
 
   int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_7);
+  x2c_cleanup_leave(&_x2c_defer_record_8);
   x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
+}
+  }
+
+  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_7);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
 }
 }
 
@@ -1775,13 +1953,14 @@ String Var_string(Var);
 File File_open(const char *, const char *);
 
 static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
+  if(lisp -> expansion &&(id == LISP_DEF || id == LISP_BIND || id == LISP_EVAL || id == LISP_IMPORT)) _expansion_decline();
   switch(id){
     case LISP_QUOTE :{
       if(List_len(args) != 1){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 928};
-          x2c_error_raise_n(& _x2c_error_site_14, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quote")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
+          static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1045};
+          x2c_error_raise_n(& _x2c_error_site_15, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quote")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
 
@@ -1790,21 +1969,21 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
     }
     case LISP_DEF :{
       Var name, expression;
-      List _x2c_destructure_4 = args;
-      name = List_getindex(_x2c_destructure_4, 0);
-      expression = List_getindex(_x2c_destructure_4, 1);
+      List _x2c_destructure_5 = args;
+      name = List_getindex(_x2c_destructure_5, 0);
+      expression = List_getindex(_x2c_destructure_5, 1);
       if(List_len(args) != 2 || ! Var_is_atom(name)){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 936};
-          x2c_error_raise_n(& _x2c_error_site_15, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
+          static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1053};
+          x2c_error_raise_n(& _x2c_error_site_16, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
           __builtin_unreachable();
         }
 
       }
       if(lisp -> protect_x2c && String_startswith(Var_str(name), _95)){
-        static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 939};
-        x2c_error_raise_n(& _x2c_error_site_16, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(920394), name);
+        static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1056};
+        x2c_error_raise_n(& _x2c_error_site_17, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(920394), name);
         __builtin_unreachable();
       }
       Var value = _eval(lisp, expression, env);
@@ -1813,39 +1992,39 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
     }
     case LISP_COND :{
       if(! List_truth(args)){
-        static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 946};
-        x2c_error_raise_n(& _x2c_error_site_17, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
+        static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1063};
+        x2c_error_raise_n(& _x2c_error_site_18, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(0));
         __builtin_unreachable();
       }
       {
         Var clause;
-        Iter _x2c_macro_iterator_7 = List_iter(args, &(struct Iter){
+        Iter _x2c_macro_iterator_9 = List_iter(args, &(struct Iter){
           int_var(0)
         }
         );
-        Var _x2c_macro_item_7;
-        while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
-          clause = _x2c_macro_item_7;
+        Var _x2c_macro_item_9;
+        while(Iter_try_next(_x2c_macro_iterator_9, & _x2c_macro_item_9)){
+          clause = _x2c_macro_item_9;
           {
             if(! Var_is(clause, 806120)){
-              static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 948};
-              x2c_error_raise_n(& _x2c_error_site_18, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(46228810), clause, Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
+              static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1065};
+              x2c_error_raise_n(& _x2c_error_site_19, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(46228810), clause, Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
               __builtin_unreachable();
             }
             List pair = Var_list(clause);
             if(List_len(pair) != 2){
               int actual = List_len(pair);
               {
-                static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 953};
-                x2c_error_raise_n(& _x2c_error_site_19, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
+                static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1070};
+                x2c_error_raise_n(& _x2c_error_site_20, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
                 __builtin_unreachable();
               }
 
             }
             Var condition_form, result_form;
-            List _x2c_destructure_5 = pair;
-            condition_form = List_getindex(_x2c_destructure_5, 0);
-            result_form = List_getindex(_x2c_destructure_5, 1);
+            List _x2c_destructure_6 = pair;
+            condition_form = List_getindex(_x2c_destructure_6, 0);
+            result_form = List_getindex(_x2c_destructure_6, 1);
             Var condition = _eval(lisp, condition_form, env);
             if(! Var_is_nil(condition)) return _eval(lisp, result_form, env);
           }
@@ -1860,8 +2039,8 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 1){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 968};
-          x2c_error_raise_n(& _x2c_error_site_20, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
+          static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1085};
+          x2c_error_raise_n(& _x2c_error_site_21, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
 
@@ -1872,8 +2051,8 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 1){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 976};
-          x2c_error_raise_n(& _x2c_error_site_21, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
+          static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1093};
+          x2c_error_raise_n(& _x2c_error_site_22, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
 
@@ -1885,34 +2064,34 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 2){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 984};
-          x2c_error_raise_n(& _x2c_error_site_22, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
+          static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1101};
+          x2c_error_raise_n(& _x2c_error_site_23, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
 
       }
       Var name_form, signature_form;
-      List _x2c_destructure_6 = args;
-      name_form = List_getindex(_x2c_destructure_6, 0);
-      signature_form = List_getindex(_x2c_destructure_6, 1);
+      List _x2c_destructure_7 = args;
+      name_form = List_getindex(_x2c_destructure_7, 0);
+      signature_form = List_getindex(_x2c_destructure_7, 1);
       Var name = _eval(lisp, name_form, env);
       Var signature = _eval(lisp, signature_form, env);
       if(! Var_is(name, 1318210446)){
-        static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 989};
-        x2c_error_raise_n(& _x2c_error_site_23, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(name)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
+        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1106};
+        x2c_error_raise_n(& _x2c_error_site_24, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(name)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
         __builtin_unreachable();
       }
       if(! Var_is(signature, 806120)){
-        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 992};
-        x2c_error_raise_n(& _x2c_error_site_24, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(46228810), signature);
+        static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1109};
+        x2c_error_raise_n(& _x2c_error_site_25, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(46228810), signature);
         __builtin_unreachable();
       }
       String native_name = Var_string(name);
       List native_signature = Var_list(signature);
       Func function = _native_target(native_name);
       if(! function){
-        static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 996};
-        x2c_error_raise_n(& _x2c_error_site_25, 31885018076120, 2, Symbol_var(920394), String_var(native_name), Symbol_var(39502), List_var(native_signature));
+        static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1113};
+        x2c_error_raise_n(& _x2c_error_site_26, 31885018076120, 2, Symbol_var(920394), String_var(native_name), Symbol_var(39502), List_var(native_signature));
         __builtin_unreachable();
       }
       return Func_var(function);
@@ -1921,21 +2100,21 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
       if(List_len(args) != 2){
         int actual = List_len(args);
         {
-          static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1003};
-          x2c_error_raise_n(& _x2c_error_site_26, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
+          static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1120};
+          x2c_error_raise_n(& _x2c_error_site_27, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
           __builtin_unreachable();
         }
 
       }
       Var callable_form, values_form;
-      List _x2c_destructure_7 = args;
-      callable_form = List_getindex(_x2c_destructure_7, 0);
-      values_form = List_getindex(_x2c_destructure_7, 1);
+      List _x2c_destructure_8 = args;
+      callable_form = List_getindex(_x2c_destructure_8, 0);
+      values_form = List_getindex(_x2c_destructure_8, 1);
       Var callable = _eval(lisp, callable_form, env);
       Var values = _eval(lisp, values_form, env);
       if(! Var_is(values, 806120)){
-        static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1008};
-        x2c_error_raise_n(& _x2c_error_site_27, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(values)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
+        static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1125};
+        x2c_error_raise_n(& _x2c_error_site_28, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(values)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
         __builtin_unreachable();
       }
       return _apply_values(lisp, callable, Var_list(values), env);
@@ -1945,16 +2124,16 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
   if(List_len(args) != 1){
     int actual = List_len(args);
     {
-      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1017};
-      x2c_error_raise_n(& _x2c_error_site_28, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("import")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
+      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1134};
+      x2c_error_raise_n(& _x2c_error_site_29, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("import")), NULL))), Symbol_var(396221456712), int_var(1), Symbol_var(74754136), int_var(actual));
       __builtin_unreachable();
     }
 
   }
   Var path = _eval(lisp, List_car(args), env);
   if(! Var_is(path, 1318210446)){
-    static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1020};
-    x2c_error_raise_n(& _x2c_error_site_29, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("import")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(path)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
+    static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "_apply_special",.line = 1137};
+    x2c_error_raise_n(& _x2c_error_site_30, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("import")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(path)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
     __builtin_unreachable();
   }
   Var hook;
@@ -1963,21 +2142,21 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
   {
     File source = File_open(Var_pointer(path), "r");
     {
-  _x2c_defer_env_8 _x2c_defer_env_17 = {._x2c_defer_capture_12 =(const void *) & source};
+  _x2c_defer_env_11 _x2c_defer_env_21 = {._x2c_defer_capture_18 =(const void *) & source};
 
-  X2CCleanup _x2c_defer_record_9 = {
-    .fn = _x2c_defer_cleanup_17,
-    .env = & _x2c_defer_env_17
+  X2CCleanup _x2c_defer_record_10 = {
+    .fn = _x2c_defer_cleanup_20,
+    .env = & _x2c_defer_env_21
   };
-  x2c_cleanup_push(&_x2c_defer_record_9);
+  x2c_cleanup_push(&_x2c_defer_record_10);
   {
       result = Lisp_eval_file(lisp, source);
     }
 
-  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_9);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
+  x2c_cleanup_leave(&_x2c_defer_record_10);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
 }
   }
   return result;
@@ -2039,21 +2218,21 @@ static int LispLower__auto_compile_cond(LispLower l, List clauses, int tail){
   int end_jumps[64], end_count = 0;
   {
     Var clause;
-    Iter _x2c_macro_iterator_8 = List_iter(clauses, &(struct Iter){
+    Iter _x2c_macro_iterator_10 = List_iter(clauses, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_8;
-    while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
-      clause = _x2c_macro_item_8;
+    Var _x2c_macro_item_10;
+    while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
+      clause = _x2c_macro_item_10;
       {
         if(! Var_is(clause, 806120) || List_len(Var_list(clause)) != 2) return LispLower__auto_reject(l, "cond-clause");
         if(end_count >= 64) return LispLower__auto_reject(l, "cond-width");
         List pair = Var_list(clause);
         Var condition, consequent;
-        List _x2c_destructure_8 = pair;
-        condition = List_getindex(_x2c_destructure_8, 0);
-        consequent = List_getindex(_x2c_destructure_8, 1);
+        List _x2c_destructure_9 = pair;
+        condition = List_getindex(_x2c_destructure_9, 0);
+        consequent = List_getindex(_x2c_destructure_9, 1);
         if(! LispLower__auto_compile(l, condition, 0)) return 0;
         int branch = MachineBuilder_emit(b, MW_LBR_NIL, 0, 0, 0, 0, - 1);
         if(branch < 0) return 0;
@@ -2101,9 +2280,9 @@ static int LispLower__auto_compile_qq(LispLower l, Var expression, int list, int
   if(Var_is(expression, 806120) && ! Var_is_nil(expression)){
     List form = Var_list(expression);
     Var head, argument;
-    List _x2c_destructure_9 = form;
-    head = List_getindex(_x2c_destructure_9, 0);
-    argument = List_getindex(_x2c_destructure_9, 1);
+    List _x2c_destructure_10 = form;
+    head = List_getindex(_x2c_destructure_10, 0);
+    argument = List_getindex(_x2c_destructure_10, 1);
     if(Var_equal(head, lsym_quasiquote)){
       if(! LispLower__auto_compile_constant(l, List_var(cons(head, NULL))) || ! LispLower__auto_compile_qq(l, List_var(List_cdr(form)), 0, depth + 1, live + 1) || ! LispLower__auto_qq_append(l)) return 0;
       return ! list || LispLower__auto_qq_wrap(l);
@@ -2125,7 +2304,7 @@ static int LispLower__auto_compile_qq(LispLower l, Var expression, int list, int
   return ! list || LispLower__auto_qq_wrap(l);
 }
 
-static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expansion){
+static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expansion, List * dependencies){
   Var value;
   if(! _lookup(l -> lisp, l -> env, head, & value) || ! Var_is(value, 808259842)) return 0;
   Lambda macro = Var_lambda(value);
@@ -2134,59 +2313,81 @@ static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expans
     LispLower__auto_reject(l, "macro-depth");
     return - 1;
   }
+  LispExpansion trace ={
+    l -> env, l -> locals, cons(List_var(cons(head, cons(value, NULL))), NULL), 0, 0
+  }
+  ;
   {
     ExceptionFrame _x2c_exception_frame_0;
     ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, Symbol_var(Symbol_new("default")));
     x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) * expansion = _call_lambda(l -> lisp, macro, args, l -> env);
+    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      LispExpansion * * _x2c_macro_address_0 = & l -> lisp -> expansion;
+      LispExpansion * _x2c_macro_previous_0 = * _x2c_macro_address_0;
+      {
+  _x2c_defer_env_3 _x2c_defer_env_22 = {._x2c_defer_capture_5 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_6 =(const void *) & _x2c_macro_previous_0};
+
+  X2CCleanup _x2c_defer_record_11 = {
+    .fn = _x2c_defer_cleanup_7,
+    .env = & _x2c_defer_env_22
+  };
+  x2c_cleanup_push(&_x2c_defer_record_11);
+  {
+        * _x2c_macro_address_0 = & trace;
+        * expansion = _call_lambda(l -> lisp, macro, args, l -> env);
+      }
+
+  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_11);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
+}
+    }
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
          {{
-          LispLower__auto_reject(l, "macro-expansion");
+          int _x2c_return_value_4 = 0;
           {
-            int _x2c_return_value_4 = - 1;
-            {
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
   x2c_error_catch_close(_x2c_error_handler_0);
-            _x2c_error_handler_0 = NULL;
-            x2c_exception_leave(& _x2c_exception_frame_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
   return _x2c_return_value_4;
 
 }
-          }
-
         }
 
       }
 
     }
-    else {int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
+    else {int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
     x2c_error_catch_close(_x2c_error_handler_0);
     _x2c_error_handler_0 = NULL;
 
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
+    x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
     x2c_exception_leave(& _x2c_exception_frame_0);
     __builtin_unreachable();
   }
 
 }
 }
-int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
+int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
     x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
     x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
+    x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
     x2c_exception_leave(& _x2c_exception_frame_0);
 }
-LispLower__auto_note(l, head, value);
+if(! _expansion_value(* expansion, 0)) return 0;
+* dependencies = trace.dependencies;
 return 1;
 }
 
@@ -2198,15 +2399,79 @@ static int LispLower__auto_self_call(LispLower l, Var head){
   return 1;
 }
 
+Var List_cadr(List);
+
 static int LispLower__auto_compile(LispLower l, Var expression, int tail){
   MachineBuilder b = l -> b;
   if(Var_is_atom(expression)) return LispLower__auto_load_name(l, expression);
   if(! Var_is(expression, 806120) || Var_is_nil(expression)) return LispLower__auto_compile_constant(l, expression);
   List form = Var_list(expression);
   Var head, argument;
-  List _x2c_destructure_10 = form;
-  head = List_getindex(_x2c_destructure_10, 0);
-  argument = List_getindex(_x2c_destructure_10, 1);
+  List _x2c_destructure_11 = form;
+  head = List_getindex(_x2c_destructure_11, 0);
+  argument = List_getindex(_x2c_destructure_11, 1);
+  if(Var_is(head, 806120)){
+    List literal = Var_list(head);
+    if(List_len(literal) != 3 || ! Var_equal(List_car(literal), lsym_lambda) || ! Var_is(List_cadr(literal), 806120)) return LispLower__auto_reject(l, "computed-call-head");
+    if(l -> depth >= LISP_AUTO_EXPAND_MAX) return LispLower__auto_reject(l, "lambda-depth");
+    Lambda immediate = Var_lambda(_make_lambda(l -> lisp, List_cdr(literal), NULL, 0));
+    int retained = 0;
+    {
+  _x2c_defer_env_4 _x2c_defer_env_23 = {._x2c_defer_capture_7 =(const void *) & retained, ._x2c_defer_capture_8 =(const void *) & l, ._x2c_defer_capture_9 =(const void *) & immediate};
+
+  X2CCleanup _x2c_defer_record_12 = {
+    .fn = _x2c_defer_cleanup_8,
+    .env = & _x2c_defer_env_23
+  };
+  x2c_cleanup_push(&_x2c_defer_record_12);
+  {
+      if(_auto_analyze(l -> lisp, immediate, l -> env, l -> depth + 1, l -> locals) != MACHINE_PREPARED){
+        int _x2c_return_value_5 = LispLower__auto_reject(l, "immediate-body");
+        {
+  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_12);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
+  return _x2c_return_value_5;
+
+}
+      }
+      int constant = MachineBuilder_constant(b, Lambda_var(immediate));
+      if(constant < 0 || MachineBuilder_emit(b, MW_LLAMBDA, constant, 0, 0, 0, 0) < 0){
+        int _x2c_return_value_6 = 0;
+        {
+  int _x2c_cleanup_prev_20 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_12);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_20;
+  return _x2c_return_value_6;
+
+}
+      }
+      retained = 1;
+      {
+        int _x2c_return_value_7 = LispLower__auto_compile_call(l, List_cdr(form), 0);
+        {
+  int _x2c_cleanup_prev_21 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_12);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_21;
+  return _x2c_return_value_7;
+
+}
+      }
+
+    }
+
+  int _x2c_cleanup_prev_22 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+  x2c_cleanup_leave(&_x2c_defer_record_12);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_22;
+}
+  }
   if(! Var_is_atom(head)) return LispLower__auto_reject(l, "computed-call-head");
   if(LispLower__auto_local_name(l, head)) return LispLower__auto_reject(l, "dynamic-call-head");
   if(Var_equal(head, lsym_quote)){
@@ -2226,31 +2491,61 @@ static int LispLower__auto_compile(LispLower l, Var expression, int tail){
   if(Var_equal(head, lsym_import)) return LispLower__auto_reject(l, "import-form");
   if(Var_equal(head, lsym_apply)) return LispLower__auto_reject(l, "apply-form");
   Var expansion;
-  int expanded = LispLower__auto_expand(l, head, List_cdr(form), & expansion);
+  List dependencies;
+  int expanded = LispLower__auto_expand(l, head, List_cdr(form), & expansion, & dependencies);
   if(expanded < 0) return 0;
   if(expanded){
-    int * _x2c_macro_address_0 = & l -> depth;
-    int _x2c_macro_previous_0 = * _x2c_macro_address_0;
+    int * _x2c_macro_address_1 = & l -> depth;
+    int _x2c_macro_previous_1 = * _x2c_macro_address_1;
     {
-  _x2c_defer_env_2 _x2c_defer_env_18 = {._x2c_defer_capture_4 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_5 =(const void *) & _x2c_macro_previous_0};
+  _x2c_defer_env_5 _x2c_defer_env_24 = {._x2c_defer_capture_10 =(const void *) & _x2c_macro_address_1, ._x2c_defer_capture_11 =(const void *) & _x2c_macro_previous_1};
 
-  X2CCleanup _x2c_defer_record_10 = {
-    .fn = _x2c_defer_cleanup_6,
-    .env = & _x2c_defer_env_18
+  X2CCleanup _x2c_defer_record_13 = {
+    .fn = _x2c_defer_cleanup_9,
+    .env = & _x2c_defer_env_24
   };
-  x2c_cleanup_push(&_x2c_defer_record_10);
+  x2c_cleanup_push(&_x2c_defer_record_13);
   {
-      * _x2c_macro_address_0 = l -> depth + 1;
+      * _x2c_macro_address_1 = l -> depth + 1;
       {
-        {
-          int _x2c_return_value_5 = LispLower__auto_compile(l, expansion, tail);
+        int guard = MachineBuilder_emit(b, MW_LEXPAND, 0, 0, 0, 0, - 1);
+        if(guard < 0 || ! LispLower__auto_compile(l, expansion, tail)){
+          int _x2c_return_value_8 = 0;
           {
-  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_23 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_10);
+  x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
-  return _x2c_return_value_5;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_23;
+  return _x2c_return_value_8;
+
+}
+        }
+        List guards = List_append(dependencies, l -> specials);
+        int site = MachineBuilder_constant(b, List_var(cons(List_var(form), cons(List_var(guards), NULL))));
+        if(site < 0){
+          int _x2c_return_value_9 = 0;
+          {
+  int _x2c_cleanup_prev_24 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_13);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_24;
+  return _x2c_return_value_9;
+
+}
+        }
+        b -> code[guard].a = site;
+        MachineBuilder_set_target(b, guard, b -> length);
+        {
+          int _x2c_return_value_10 = 1;
+          {
+  int _x2c_cleanup_prev_25 = x2c_cleanup_exit_kind;
+  x2c_cleanup_exit_kind = 1;
+  x2c_cleanup_leave(& _x2c_defer_record_13);
+
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_25;
+  return _x2c_return_value_10;
 
 }
         }
@@ -2259,28 +2554,33 @@ static int LispLower__auto_compile(LispLower l, Var expression, int tail){
 
     }
 
-  int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_26 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_10);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
+  x2c_cleanup_leave(&_x2c_defer_record_13);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_26;
 }
   }
   int name = MachineBuilder_constant(b, head);
   if(name < 0 || MachineBuilder_emit(b, MW_LGLOBAL, name, 0, 0, 0, 0) < 0) return 0;
-  int raw = MachineBuilder_constant(b, List_var(List_cdr(form)));
+  return LispLower__auto_compile_call(l, List_cdr(form), tail && LispLower__auto_self_call(l, head));
+}
+
+static int LispLower__auto_compile_call(LispLower l, List args, int tail){
+  MachineBuilder b = l -> b;
+  int raw = MachineBuilder_constant(b, List_var(args));
   if(raw < 0) return 0;
   int precall = MachineBuilder_emit(b, MW_LPRECALL, raw, 0, 0, 0, - 1);
   if(precall < 0) return 0;
   int argc = 0;
   {
     Var arg;
-    Iter _x2c_macro_iterator_9 = List_iter(List_cdr(form), &(struct Iter){
+    Iter _x2c_macro_iterator_11 = List_iter(args, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_9;
-    while(Iter_try_next(_x2c_macro_iterator_9, & _x2c_macro_item_9)){
-      arg = _x2c_macro_item_9;
+    Var _x2c_macro_item_11;
+    while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
+      arg = _x2c_macro_item_11;
       {
         if(argc >= LISP_AUTO_PARAM_MAX) return LispLower__auto_reject(l, "call-arity");
         if(! LispLower__auto_compile(l, arg, 0)) return 0;
@@ -2290,32 +2590,56 @@ static int LispLower__auto_compile(LispLower l, Var expression, int tail){
     }
 
   }
-  int op = tail && LispLower__auto_self_call(l, head) ? MW_LTAILCALL : MW_LCALL;
+  int op = tail ? MW_LTAILCALL : MW_LCALL;
   if(MachineBuilder_emit(b, op, 0, argc, 0, 0, 0) < 0) return 0;
   MachineBuilder_set_target(b, precall, b -> length);
   return 1;
 }
 
-MachineBuilder MachineBuilder_new(void);
-
-MachineProgram MachineBuilder_freeze(MachineBuilder);
+static void _auto_discard_children(Lisp lisp, MachineView view){
+  for(int i = 0;  i < view.length;  i ++) if(view.code[i].op == MW_LLAMBDA) _auto_discard(lisp, Var_lambda(view.consts[view.code[i].a]));
+}
 
 size_t MachineProgram_bytes(MachineProgram);
 
-static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env){
+void MachineProgram_free(MachineProgram);
+
+void Map_cleanup(Map);
+
+void Scope_free(void *);
+
+static void _auto_discard(Lisp lisp, Lambda lambda){
+  if(lambda -> auto_program){
+    _auto_discard_children(lisp, MachineProgram_view(lambda -> auto_program));
+    lisp -> auto_stats.program_bytes -=(long) MachineProgram_bytes(lambda -> auto_program);
+    MachineProgram_free(lambda -> auto_program);
+  }
+  Map_cleanup(lambda -> captures);
+  Scope_free(lambda);
+}
+
+MachineBuilder MachineBuilder_new(void);
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+MachineProgram MachineBuilder_freeze(MachineBuilder);
+
+MachineView MachineBuilder_view(MachineBuilder);
+
+static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env, int depth, List locals){
   if(lambda -> auto_status >= 0) return lambda -> auto_status;
   lisp -> auto_stats.analyses ++;
   const char * reason = NULL;
   int param_count = 0;
   {
     Var name;
-    Iter _x2c_macro_iterator_10 = List_iter(lambda -> params, &(struct Iter){
+    Iter _x2c_macro_iterator_12 = List_iter(lambda -> params, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_10;
-    while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
-      name = _x2c_macro_item_10;
+    Var _x2c_macro_item_12;
+    while(Iter_try_next(_x2c_macro_iterator_12, & _x2c_macro_item_12)){
+      name = _x2c_macro_item_12;
       {
         if(Var_is_atom(name) && String_equal(Var_str(name), _5)){
           reason = "rest-parameters";
@@ -2338,25 +2662,39 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env){
     {
       {
 
-  X2CCleanup _x2c_defer_record_11 = {
-    .fn = _x2c_defer_cleanup_7,
+  X2CCleanup _x2c_defer_record_14 = {
+    .fn = _x2c_defer_cleanup_10,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_11);
+  x2c_cleanup_push(&_x2c_defer_record_14);
   {
         {
           MachineBuilder b = MachineBuilder_new();
           {
-  _x2c_defer_env_9 _x2c_defer_env_19 = {._x2c_defer_capture_13 =(const void *) & b};
+  _x2c_defer_env_12 _x2c_defer_env_25 = {._x2c_defer_capture_19 =(const void *) & b};
 
-  X2CCleanup _x2c_defer_record_12 = {
-    .fn = _x2c_defer_cleanup_18,
-    .env = & _x2c_defer_env_19
+  X2CCleanup _x2c_defer_record_15 = {
+    .fn = _x2c_defer_cleanup_21,
+    .env = & _x2c_defer_env_25
   };
-  x2c_cleanup_push(&_x2c_defer_record_12);
+  x2c_cleanup_push(&_x2c_defer_record_15);
   {
+            locals = List_append(lambda -> params, locals);
+            {
+              Var name, value;
+              Map _x2c_macro_object_13 = lambda -> captures;
+              unsigned _x2c_macro_cursor_13 = 0;
+              Var _x2c_macro_cursor_output_0;
+              Var _x2c_macro_cursor_output_1;
+              while(Map_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
+                name = _x2c_macro_cursor_output_0;
+                value = _x2c_macro_cursor_output_1;
+                locals = cons(name, locals);
+              }
+
+            }
             struct LispLower storage ={
-              lisp, env, lambda, b, NULL, 0
+              lisp, env, lambda, b, NULL, locals, depth
             }
             ;
             LispLower lower = & storage;
@@ -2372,36 +2710,39 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env){
               lisp -> auto_stats.published ++;
               lisp -> auto_stats.program_bytes +=(long) MachineProgram_bytes(lambda -> auto_program);
             }
-            else lisp -> auto_stats.ineligible ++;
+            else{
+              _auto_discard_children(lisp, MachineBuilder_view(b));
+              lisp -> auto_stats.ineligible ++;
+            }
             {
-              int _x2c_return_value_6 = lambda -> auto_status;
+              int _x2c_return_value_11 = lambda -> auto_status;
               {
-  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_27 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_12);
-              x2c_cleanup_leave(& _x2c_defer_record_11);
+  x2c_cleanup_leave(& _x2c_defer_record_15);
+              x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
-  return _x2c_return_value_6;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_27;
+  return _x2c_return_value_11;
 
 }
             }
 
           }
 
-  int _x2c_cleanup_prev_20 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_28 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_12);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_20;
+  x2c_cleanup_leave(&_x2c_defer_record_15);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_28;
 }
         }
 
       }
 
-  int _x2c_cleanup_prev_21 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_29 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_11);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_21;
+  x2c_cleanup_leave(&_x2c_defer_record_14);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_29;
 }
     }
 
@@ -2409,21 +2750,21 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env){
 
 }
 
-static int _auto_specials_ok(Lisp lisp, LispEnv * env, Lambda lambda){
+static int _auto_bindings_ok(Lisp lisp, LispEnv * env, List bindings){
   {
     List pair;
-    Iter _x2c_macro_iterator_11 = List_iter(lambda -> auto_specials, &(struct Iter){
+    Iter _x2c_macro_iterator_14 = List_iter(bindings, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_11;
-    while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
-      pair = Var_list(_x2c_macro_item_11);
+    Var _x2c_macro_item_14;
+    while(Iter_try_next(_x2c_macro_iterator_14, & _x2c_macro_item_14)){
+      pair = Var_list(_x2c_macro_item_14);
       {
         Var name, expected;
-        List _x2c_destructure_11 = pair;
-        name = List_getindex(_x2c_destructure_11, 0);
-        expected = List_getindex(_x2c_destructure_11, 1);
+        List _x2c_destructure_12 = pair;
+        name = List_getindex(_x2c_destructure_12, 0);
+        expected = List_getindex(_x2c_destructure_12, 1);
         Var value;
         if(! _lookup(lisp, env, name, & value) || value.u64 != expected.u64) return 0;
       }
@@ -2434,10 +2775,14 @@ static int _auto_specials_ok(Lisp lisp, LispEnv * env, Lambda lambda){
   return 1;
 }
 
+static int _auto_specials_ok(Lisp lisp, LispEnv * env, Lambda lambda){
+  return _auto_bindings_ok(lisp, env, lambda -> auto_specials);
+}
+
 _Noreturn static void _raise_machine_error(Var error){
   if(Var_is(error, 1328354264)){
-    static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1344};
-    x2c_error_raise_n(& _x2c_error_site_30, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(47666), error);
+    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1520};
+    x2c_error_raise_n(& _x2c_error_site_31, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(47666), error);
     __builtin_unreachable();
   }
 
@@ -2450,22 +2795,22 @@ _Noreturn static void _raise_machine_error(Var error){
       case 46041901960: ;
   static MatchCaptureSite _x2c_match_site_0;
   if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_13), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
-    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1346};  x2c_error_raise_n(& _x2c_error_site_31, 46041901960, 1, Symbol_var(920394), name);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1522};  x2c_error_raise_n(& _x2c_error_site_32, 46041901960, 1, Symbol_var(920394), name);  __builtin_unreachable();
   }
   break;
 }
 case 4477439593778: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_33), &_x2c_match_capture)) {Var expected = _x2c_match_values[0];  Var actual = _x2c_match_values[1];  Var value = _x2c_match_values[2]; {
-  static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1346};  x2c_error_raise_n(& _x2c_error_site_32, 4477439593778, 3, Symbol_var(396221456712), expected, Symbol_var(74754136), actual, Symbol_var(1551181527337864), Symbol_var(Var_kind(value)));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1522};  x2c_error_raise_n(& _x2c_error_site_33, 4477439593778, 3, Symbol_var(396221456712), expected, Symbol_var(74754136), actual, Symbol_var(1551181527337864), Symbol_var(Var_kind(value)));  __builtin_unreachable();
 }
 break;
 }
 case 995692317464: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) {Var value = _x2c_match_values[0]; {
-  static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1346};  x2c_error_raise_n(& _x2c_error_site_33, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(value)));  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1522};  x2c_error_raise_n(& _x2c_error_site_34, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(value)));  __builtin_unreachable();
 }
 break;
 }
 case 4477479911782: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_38), &_x2c_match_capture)) {Var actual = _x2c_match_values[0]; {
-  static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1346};  x2c_error_raise_n(& _x2c_error_site_34, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), actual);  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1522};  x2c_error_raise_n(& _x2c_error_site_35, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), actual);  __builtin_unreachable();
 }
 break;
 }
@@ -2473,7 +2818,7 @@ default: break;
     }
   }
 {
-  static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1357};  x2c_error_raise_n(& _x2c_error_site_35, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(6401226), error);  __builtin_unreachable();
+  static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/lisp.x",.function = "_raise_machine_error",.line = 1533};  x2c_error_raise_n(& _x2c_error_site_36, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Machine")), NULL))), Symbol_var(6401226), error);  __builtin_unreachable();
 }
 }
 
@@ -2499,8 +2844,8 @@ void LispMachine_open(LispMachine);
 void LispMachine_begin(LispMachine, MachineView, void *, const Var *, int);
 void LispMachine_run(LispMachine);
 static int _auto_apply(Lisp lisp, Lambda lambda, List raw, LispEnv * env, Var * out){
-  if(lisp -> auto_disabled) return 0;  lisp -> auto_stats.invocations ++;  if(lambda -> auto_calls < 2) lambda -> auto_calls ++;  if(lambda -> auto_calls < 2) return 0;  if(lambda -> auto_status < 0){
-    if(_auto_analyze(lisp, lambda, env) != MACHINE_PREPARED) return 0;
+  if(lisp -> auto_disabled || lisp -> expansion) return 0;  lisp -> auto_stats.invocations ++;  if(lambda -> auto_calls < 2) lambda -> auto_calls ++;  if(lambda -> auto_calls < 2) return 0;  if(lambda -> auto_status < 0){
+    if(_auto_analyze(lisp, lambda, env, 0, NULL) != MACHINE_PREPARED) return 0;
   }
   else if(lambda -> auto_status != MACHINE_PREPARED){
     lisp -> auto_stats.remembered_fallbacks ++;  return 0;
@@ -2509,38 +2854,38 @@ static int _auto_apply(Lisp lisp, Lambda lambda, List raw, LispEnv * env, Var * 
     lisp -> auto_stats.guard_failures ++;  return 0;
   }
   Var argv[LISP_AUTO_PARAM_MAX];  int argc = 0; {
-    Var arg;  Iter _x2c_macro_iterator_12 = List_iter(raw, &(struct Iter){
+    Var arg;  Iter _x2c_macro_iterator_15 = List_iter(raw, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_12;  while(Iter_try_next(_x2c_macro_iterator_12, & _x2c_macro_item_12)){
-      arg = _x2c_macro_item_12;  argv[argc ++] = lambda -> macro ? arg : _eval(lisp, arg, env);
+    );  Var _x2c_macro_item_15;  while(Iter_try_next(_x2c_macro_iterator_15, & _x2c_macro_item_15)){
+      arg = _x2c_macro_item_15;  argv[argc ++] = lambda -> macro ? arg : _eval(lisp, arg, env);
     }
 
   }
   LispMachineSlot slot = _machine_slot_acquire(lisp); {
-  _x2c_defer_env_4 _x2c_defer_env_20 = {._x2c_defer_capture_7 =(const void *) & lisp, ._x2c_defer_capture_8 =(const void *) & slot};
-  X2CCleanup _x2c_defer_record_13 = {
-    .fn = _x2c_defer_cleanup_9,
-    .env = & _x2c_defer_env_20
+  _x2c_defer_env_7 _x2c_defer_env_26 = {._x2c_defer_capture_13 =(const void *) & lisp, ._x2c_defer_capture_14 =(const void *) & slot};
+  X2CCleanup _x2c_defer_record_16 = {
+    .fn = _x2c_defer_cleanup_12,
+    .env = & _x2c_defer_env_26
   };
-  x2c_cleanup_push(&_x2c_defer_record_13);
+  x2c_cleanup_push(&_x2c_defer_record_16);
   {
     LispMachine m = & slot -> machine;  LispMachineContext context = & slot -> context;  bzero(context, sizeof(struct LispMachineContext));  context -> lisp = lisp;  _machine_env_set(context -> frames, lambda, argv, argc, env);  LispMachine_open(m); {
-  _x2c_defer_env_3 _x2c_defer_env_21 = {._x2c_defer_capture_6 =(const void *) & m};
-  X2CCleanup _x2c_defer_record_14 = {
-    .fn = _x2c_defer_cleanup_8,
-    .env = & _x2c_defer_env_21
+  _x2c_defer_env_6 _x2c_defer_env_27 = {._x2c_defer_capture_12 =(const void *) & m};
+  X2CCleanup _x2c_defer_record_17 = {
+    .fn = _x2c_defer_cleanup_11,
+    .env = & _x2c_defer_env_27
   };
-  x2c_cleanup_push(&_x2c_defer_record_14);
+  x2c_cleanup_push(&_x2c_defer_record_17);
   {
       m -> stats = lisp -> auto_machine_stats;  LispMachine_begin(m, MachineProgram_view(lambda -> auto_program), context, argv, argc);  lisp -> auto_stats.machine_entries ++;  LispMachine_run(m);  if(m -> status == 982){
         Var result = m -> value;  * out = lambda -> macro ? _eval(lisp, result, env) : result; {
-          int _x2c_return_value_7 = 1; {
-  int _x2c_cleanup_prev_22 = x2c_cleanup_exit_kind;
+          int _x2c_return_value_12 = 1; {
+  int _x2c_cleanup_prev_30 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_22;
-  return _x2c_return_value_7;
+  x2c_cleanup_leave(& _x2c_defer_record_17);  x2c_cleanup_leave(& _x2c_defer_record_16);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_30;
+  return _x2c_return_value_12;
 }
         }
 
@@ -2548,17 +2893,17 @@ static int _auto_apply(Lisp lisp, Lambda lambda, List raw, LispEnv * env, Var * 
       Var error = m -> error;  lisp -> auto_stats.machine_errors ++;  _raise_machine_error(error);
     }
 
-  int _x2c_cleanup_prev_23 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_31 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_14);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_23;
+  x2c_cleanup_leave(&_x2c_defer_record_17);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_31;
 }
   }
 
-  int _x2c_cleanup_prev_24 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_32 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_13);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_24;
+  x2c_cleanup_leave(&_x2c_defer_record_16);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_32;
 }
 }
 
@@ -2581,15 +2926,18 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
     Lambda lambda = Var_lambda(callable);  Var prepared;  if(_auto_apply(lisp, lambda, raw, env, & prepared)) return prepared;  return _apply_lambda(lisp, lambda, raw, env);
   }
   if(! Var_is(callable, 437126)){
-    static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/lisp.x",.function = "_apply",.line = 1482};  x2c_error_raise_n(& _x2c_error_site_36, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/lisp.x",.function = "_apply",.line = 1658};  x2c_error_raise_n(& _x2c_error_site_37, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
-  Func function =(Func) Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0) return _apply_special(lisp, special, raw, env);  if(List_len(raw) <= LISP_NATIVE_ARG_MAX){
+  Func function =(Func) Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0) return _apply_special(lisp, special, raw, env);  _expansion_native(lisp, function);  if(List_len(raw) <= LISP_NATIVE_ARG_MAX){
     FuncArg argv[LISP_NATIVE_ARG_MAX];  unsigned argc = 0; {
-      Var arg;  Iter _x2c_macro_iterator_13 = List_iter(raw, &(struct Iter){
+      Var arg;  Iter _x2c_macro_iterator_16 = List_iter(raw, &(struct Iter){
         int_var(0)
       }
-      );  Var _x2c_macro_item_13;  while(Iter_try_next(_x2c_macro_iterator_13, & _x2c_macro_item_13)){
-        arg = _x2c_macro_item_13;  argv[argc ++] = FuncArg_value(_eval(lisp, arg, env));
+      );  Var _x2c_macro_item_16;  while(Iter_try_next(_x2c_macro_iterator_16, & _x2c_macro_item_16)){
+        arg = _x2c_macro_item_16; {
+          Var value = _eval(lisp, arg, env);  _expansion_argument(lisp, value);  argv[argc ++] = FuncArg_value(value);
+        }
+
       }
 
     }
@@ -2598,50 +2946,54 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
   List values;  _eval_args(lisp, raw, env, & values);  return _apply_values(lisp, callable, values, env);
 }
 
-Var List_cadr(List);
 static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv * env){
   if(Var_is(callable, 808259842)){
     Lambda lambda = Var_lambda(callable);  if(lambda -> macro){
-      static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1502};  x2c_error_raise_n(& _x2c_error_site_37, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1682};  x2c_error_raise_n(& _x2c_error_site_38, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
     }
     return _call_lambda(lisp, lambda, values, env);
   }
   if(! Var_is(callable, 437126)){
-    static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1506};  x2c_error_raise_n(& _x2c_error_site_38, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1686};  x2c_error_raise_n(& _x2c_error_site_39, 995692317464, 1, Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
   }
   Func function =(Func) Var_pointer(callable);  int special = _special_id(lisp, function);  if(special >= 0){
     if(special != LISP_APPLY){
-      static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1510};  x2c_error_raise_n(& _x2c_error_site_39, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1690};  x2c_error_raise_n(& _x2c_error_site_40, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));  __builtin_unreachable();
     }
     if(List_len(values) != 2){
       int actual = List_len(values); {
-        static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1514};  x2c_error_raise_n(& _x2c_error_site_40, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
+        static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1694};  x2c_error_raise_n(& _x2c_error_site_41, 4477439593778, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual));
         __builtin_unreachable();
       }
 
     }
     Var rest = List_cadr(values);
     if(! Var_is(rest, 806120)){
-      static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1517};
-      x2c_error_raise_n(& _x2c_error_site_41, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(rest)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
+      static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "_apply_values",.line = 1697};
+      x2c_error_raise_n(& _x2c_error_site_42, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(rest)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
       __builtin_unreachable();
     }
     return _apply_values(lisp, List_car(values), Var_list(rest), env);
   }
+  _expansion_native(lisp, function);
   int count = List_len(values);
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc(count * sizeof(FuncArg));
   unsigned argc = 0;
   {
     Var value;
-    Iter _x2c_macro_iterator_14 = List_iter(values, &(struct Iter){
+    Iter _x2c_macro_iterator_17 = List_iter(values, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_14;
-    while(Iter_try_next(_x2c_macro_iterator_14, & _x2c_macro_item_14)){
-      value = _x2c_macro_item_14;
-      argv[argc ++] = FuncArg_value(value);
+    Var _x2c_macro_item_17;
+    while(Iter_try_next(_x2c_macro_iterator_17, & _x2c_macro_item_17)){
+      value = _x2c_macro_item_17;
+      {
+        _expansion_argument(lisp, value);
+        argv[argc ++] = FuncArg_value(value);
+      }
+
     }
 
   }
@@ -2649,16 +3001,17 @@ static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv * env){
 }
 
 static Var _eval(Lisp lisp, Var expression, LispEnv * env){
+  if(lisp -> expansion && ++ lisp -> expansion -> steps > MACHINE_CODE_MAX * 4) _expansion_decline();
   if(Var_is_void(expression)){
-    static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 1532};
-    x2c_error_raise_n(& _x2c_error_site_42, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))));
+    static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 1718};
+    x2c_error_raise_n(& _x2c_error_site_43, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("eval")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_atom(expression)){
     Var value;
     if(! _lookup(lisp, env, expression, & value)){
-      static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 1535};
-      x2c_error_raise_n(& _x2c_error_site_43, 46041901960, 1, Symbol_var(920394), expression);
+      static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "_eval",.line = 1721};
+      x2c_error_raise_n(& _x2c_error_site_44, 46041901960, 1, Symbol_var(920394), expression);
       __builtin_unreachable();
     }
     return value;
@@ -2691,31 +3044,31 @@ Var Lisp_eval(Lisp lisp, Var expression){
   Scope_push(& lisp -> scope);
   {
 
-  X2CCleanup _x2c_defer_record_15 = {
-    .fn = _x2c_defer_cleanup_10,
+  X2CCleanup _x2c_defer_record_18 = {
+    .fn = _x2c_defer_cleanup_13,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_15);
+  x2c_cleanup_push(&_x2c_defer_record_18);
   {
     {
-      Var _x2c_return_value_8 = _eval(lisp, expression, NULL);
+      Var _x2c_return_value_13 = _eval(lisp, expression, NULL);
       {
-  int _x2c_cleanup_prev_25 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_33 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_15);
+  x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_25;
-  return _x2c_return_value_8;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_33;
+  return _x2c_return_value_13;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_26 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_34 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_15);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_26;
+  x2c_cleanup_leave(&_x2c_defer_record_18);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_34;
 }
 }
 
@@ -2725,31 +3078,31 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
   Scope_push(& lisp -> scope);
   {
 
-  X2CCleanup _x2c_defer_record_16 = {
-    .fn = _x2c_defer_cleanup_11,
+  X2CCleanup _x2c_defer_record_19 = {
+    .fn = _x2c_defer_cleanup_14,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_16);
+  x2c_cleanup_push(&_x2c_defer_record_19);
   {
     {
-      Var _x2c_return_value_9 = _apply_values(lisp, callable, values, NULL);
+      Var _x2c_return_value_14 = _apply_values(lisp, callable, values, NULL);
       {
-  int _x2c_cleanup_prev_27 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_35 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_16);
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_27;
-  return _x2c_return_value_9;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_35;
+  return _x2c_return_value_14;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_28 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_36 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_16);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_28;
+  x2c_cleanup_leave(&_x2c_defer_record_19);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_36;
 }
 }
 
@@ -2759,33 +3112,33 @@ Var Lisp_eval_string(Lisp lisp, String source){
   Scope_push(& lisp -> scope);
   {
 
-  X2CCleanup _x2c_defer_record_17 = {
-    .fn = _x2c_defer_cleanup_12,
+  X2CCleanup _x2c_defer_record_20 = {
+    .fn = _x2c_defer_cleanup_15,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_17);
+  x2c_cleanup_push(&_x2c_defer_record_20);
   {
     if(! String_truth(source)){
-      Var _x2c_return_value_10 = List_var(NULL);
+      Var _x2c_return_value_15 = List_var(NULL);
       {
-  int _x2c_cleanup_prev_29 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_37 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_17);
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_29;
-  return _x2c_return_value_10;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_37;
+  return _x2c_return_value_15;
 
 }
     }
     Scope tokens_scope = Scope_new_named("Lisp tokens");
     {
-  _x2c_defer_env_10 _x2c_defer_env_22 = {._x2c_defer_capture_14 =(const void *) & tokens_scope};
+  _x2c_defer_env_13 _x2c_defer_env_28 = {._x2c_defer_capture_20 =(const void *) & tokens_scope};
 
-  X2CCleanup _x2c_defer_record_18 = {
-    .fn = _x2c_defer_cleanup_19,
-    .env = & _x2c_defer_env_22
+  X2CCleanup _x2c_defer_record_21 = {
+    .fn = _x2c_defer_cleanup_22,
+    .env = & _x2c_defer_env_28
   };
-  x2c_cleanup_push(&_x2c_defer_record_18);
+  x2c_cleanup_push(&_x2c_defer_record_21);
   {
       Tokenizer tokenizer = _scan_lisp_tokens(source, & tokens_scope);
       unsigned cursor = 0;
@@ -2797,32 +3150,32 @@ Var Lisp_eval_string(Lisp lisp, String source){
         result = _eval(lisp, form, NULL);
       }
       {
-        Var _x2c_return_value_11 = result;
+        Var _x2c_return_value_16 = result;
         {
-  int _x2c_cleanup_prev_30 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_38 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_18);
-        x2c_cleanup_leave(& _x2c_defer_record_17);
+  x2c_cleanup_leave(& _x2c_defer_record_21);
+        x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_30;
-  return _x2c_return_value_11;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_38;
+  return _x2c_return_value_16;
 
 }
       }
 
     }
 
-  int _x2c_cleanup_prev_31 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_39 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_18);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_31;
+  x2c_cleanup_leave(&_x2c_defer_record_21);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_39;
 }
   }
 
-  int _x2c_cleanup_prev_32 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_40 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_17);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_32;
+  x2c_cleanup_leave(&_x2c_defer_record_20);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_40;
 }
 }
 
@@ -2833,29 +3186,29 @@ FileReadStatus File_read_into(File, Block);
 Var Lisp_eval_file(Lisp lisp, File source){
   if(! _init_guard_) _file_init_();
   if(! source){
-    static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1617};
-    x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))));
+    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1803};
+    x2c_error_raise_n(& _x2c_error_site_45, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))));
     __builtin_unreachable();
   }
   Block content = Block_new(sizeof(char));
   {
-  _x2c_defer_env_11 _x2c_defer_env_23 = {._x2c_defer_capture_15 =(const void *) & content};
+  _x2c_defer_env_14 _x2c_defer_env_29 = {._x2c_defer_capture_21 =(const void *) & content};
 
-  X2CCleanup _x2c_defer_record_19 = {
-    .fn = _x2c_defer_cleanup_20,
-    .env = & _x2c_defer_env_23
+  X2CCleanup _x2c_defer_record_22 = {
+    .fn = _x2c_defer_cleanup_23,
+    .env = & _x2c_defer_env_29
   };
-  x2c_cleanup_push(&_x2c_defer_record_19);
+  x2c_cleanup_push(&_x2c_defer_record_22);
   {
     if(File_read_into(source, content) == FILE_READ_EOF){
-      Var _x2c_return_value_12 = Lisp_eval_string(lisp, NULL);
+      Var _x2c_return_value_17 = Lisp_eval_string(lisp, NULL);
       {
-  int _x2c_cleanup_prev_33 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_41 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_19);
+  x2c_cleanup_leave(& _x2c_defer_record_22);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_33;
-  return _x2c_return_value_12;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_41;
+  return _x2c_return_value_17;
 
 }
     }
@@ -2863,37 +3216,37 @@ Var Lisp_eval_file(Lisp lisp, File source){
       size_t size = content -> length;
       int limit = INT_MAX;
       {
-        static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1623};
-        x2c_error_raise_n(& _x2c_error_site_45, 1358596898646632, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(1265290), Var_box_ulong(size), Symbol_var(25782888), int_var(limit));
+        static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1809};
+        x2c_error_raise_n(& _x2c_error_site_46, 1358596898646632, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(1265290), Var_box_ulong(size), Symbol_var(25782888), int_var(limit));
         __builtin_unreachable();
       }
 
     }
     if(memchr(content -> bytes, '\0', content -> length)){
-      static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1626};
-      x2c_error_raise_n(& _x2c_error_site_46, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
+      static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1812};
+      x2c_error_raise_n(& _x2c_error_site_47, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
       __builtin_unreachable();
     }
     String text = String_new_len(content -> bytes, (int) content -> length);
     {
-      Var _x2c_return_value_13 = Lisp_eval_string(lisp, text);
+      Var _x2c_return_value_18 = Lisp_eval_string(lisp, text);
       {
-  int _x2c_cleanup_prev_34 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_42 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_19);
+  x2c_cleanup_leave(& _x2c_defer_record_22);
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_34;
-  return _x2c_return_value_13;
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_42;
+  return _x2c_return_value_18;
 
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_35 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_43 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_19);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_35;
+  x2c_cleanup_leave(&_x2c_defer_record_22);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_43;
 }
 }
 
@@ -2905,13 +3258,13 @@ int Lisp_try_get(Lisp lisp, String name, Var * out){
 void Lisp_set_global(Lisp lisp, String name, Var value){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1652};
-    x2c_error_raise_n(& _x2c_error_site_47, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1838};
+    x2c_error_raise_n(& _x2c_error_site_48, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1654};
-    x2c_error_raise_n(& _x2c_error_site_48, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
+    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1840};
+    x2c_error_raise_n(& _x2c_error_site_49, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
   {
@@ -2919,11 +3272,11 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     {
       {
 
-  X2CCleanup _x2c_defer_record_20 = {
-    .fn = _x2c_defer_cleanup_13,
+  X2CCleanup _x2c_defer_record_23 = {
+    .fn = _x2c_defer_cleanup_16,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_20);
+  x2c_cleanup_push(&_x2c_defer_record_23);
   {
         {
           Map_setindex(lisp -> globals, Atom_intern(name), value);
@@ -2932,10 +3285,10 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
 
       }
 
-  int _x2c_cleanup_prev_36 = x2c_cleanup_exit_kind;
+  int _x2c_cleanup_prev_44 = x2c_cleanup_exit_kind;
   x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-  x2c_cleanup_leave(&_x2c_defer_record_20);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_36;
+  x2c_cleanup_leave(&_x2c_defer_record_23);
+  x2c_cleanup_exit_kind = _x2c_cleanup_prev_44;
 }
     }
 
@@ -2948,8 +3301,8 @@ void Scope_move(void *, Scope *);
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1672};
-    x2c_error_raise_n(& _x2c_error_site_49, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
+    static const X2CErrorSite _x2c_error_site_50 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1858};
+    x2c_error_raise_n(& _x2c_error_site_50, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
   Scope_move(function, & lisp -> scope);
@@ -3246,39 +3599,33 @@ static Var _x2c_func_adapt_38(Func _x2c_func_binding_38, const FuncArg * _x2c_fu
   ;
 }
 
-void Scope_free(void *);
-
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_4;
   if(Var_is_void((*(Var *) _x2c_defer_data_1->_x2c_defer_capture_2))) Scope_free((*(Lambda *) _x2c_defer_data_1->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  Scope_pop();
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_5;
+  if((*(LispExpansion * *) _x2c_defer_data_2->_x2c_defer_capture_4))(*(LispExpansion * *) _x2c_defer_data_2->_x2c_defer_capture_4) -> calls --;
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_6;
-  *(*(int * *) _x2c_defer_data_2->_x2c_defer_capture_4) =(*(int *) _x2c_defer_data_2->_x2c_defer_capture_5);
-}
-
-static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   Scope_pop();
 }
 
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_7;
+  *(*(LispExpansion * * *) _x2c_defer_data_3->_x2c_defer_capture_5) =(*(LispExpansion * *) _x2c_defer_data_3->_x2c_defer_capture_6);
+}
+
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_8;
-  (*(LispMachine *) _x2c_defer_data_3->_x2c_defer_capture_6) -> running = 0;
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_8;
+  if(!(*(int *) _x2c_defer_data_4->_x2c_defer_capture_7)) _auto_discard((*(LispLower *) _x2c_defer_data_4->_x2c_defer_capture_8) -> lisp, (*(Lambda *) _x2c_defer_data_4->_x2c_defer_capture_9));
 }
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_9;
-  _machine_slot_release((*(Lisp *) _x2c_defer_data_4->_x2c_defer_capture_7), (*(LispMachineSlot *) _x2c_defer_data_4->_x2c_defer_capture_8));
-}
-
-static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39){
-  return _special_stub();
-  ;
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_9;
+  *(*(int * *) _x2c_defer_data_5->_x2c_defer_capture_10) =(*(int *) _x2c_defer_data_5->_x2c_defer_capture_11);
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
@@ -3286,60 +3633,79 @@ static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
 }
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
-  Scope_pop();
+  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_11;
+  (*(LispMachine *) _x2c_defer_data_6->_x2c_defer_capture_12) -> running = 0;
 }
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
-  Scope_pop();
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_12;
+  _machine_slot_release((*(Lisp *) _x2c_defer_data_7->_x2c_defer_capture_13), (*(LispMachineSlot *) _x2c_defer_data_7->_x2c_defer_capture_14));
+}
+
+static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39){
+  return _special_stub();
+  ;
 }
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
   Scope_pop();
 }
 
+static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
+  Scope_pop();
+}
+
+static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
+  Scope_pop();
+}
+
+static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
+  Scope_pop();
+}
+
 void Scope_cleanup(Scope);
 
-static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_14;
-  Scope_cleanup((*(Scope *) _x2c_defer_data_5->_x2c_defer_capture_9));
+static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_17;
+  Scope_cleanup((*(Scope *) _x2c_defer_data_8->_x2c_defer_capture_15));
 }
 
 void Array_cleanup(Array);
 
-static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
-  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_15;
-  Array_cleanup((*(Array *) _x2c_defer_data_6->_x2c_defer_capture_10));
-}
-
-static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
-  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_16;
-  Scope_cleanup((*(Scope *) _x2c_defer_data_7->_x2c_defer_capture_11));
-}
-
-void File_cleanup(File);
-
-static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
-  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_17;
-  File_cleanup((*(File *) _x2c_defer_data_8->_x2c_defer_capture_12));
-}
-
-void MachineBuilder_cleanup(MachineBuilder);
-
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18){
   _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_18;
-  MachineBuilder_cleanup((*(MachineBuilder *) _x2c_defer_data_9->_x2c_defer_capture_13));
+  Array_cleanup((*(Array *) _x2c_defer_data_9->_x2c_defer_capture_16));
 }
 
 static void _x2c_defer_cleanup_19(void * _x2c_defer_opaque_19){
   _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_19;
-  Scope_cleanup((*(Scope *) _x2c_defer_data_10->_x2c_defer_capture_14));
+  Scope_cleanup((*(Scope *) _x2c_defer_data_10->_x2c_defer_capture_17));
+}
+
+void File_cleanup(File);
+
+static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
+  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_20;
+  File_cleanup((*(File *) _x2c_defer_data_11->_x2c_defer_capture_18));
+}
+
+void MachineBuilder_cleanup(MachineBuilder);
+
+static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
+  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_21;
+  MachineBuilder_cleanup((*(MachineBuilder *) _x2c_defer_data_12->_x2c_defer_capture_19));
+}
+
+static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
+  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_22;
+  Scope_cleanup((*(Scope *) _x2c_defer_data_13->_x2c_defer_capture_20));
 }
 
 void Block_cleanup(Block);
 
-static void _x2c_defer_cleanup_20(void * _x2c_defer_opaque_20){
-  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_20;
-  Block_cleanup((*(Block *) _x2c_defer_data_11->_x2c_defer_capture_15));
+static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
+  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_23;
+  Block_cleanup((*(Block *) _x2c_defer_data_14->_x2c_defer_capture_21));
 }
 
 #undef _x2c_initializer_choice_D09CF48E_0_expanded

@@ -329,6 +329,10 @@ int Lisp_precall(void *, Var, List, Var *);
 
 List Var_list(Var);
 
+Var Lisp_immediate(void *, Var);
+
+int Lisp_expanded(void *, List, Var *);
+
 List cons(Var, List);
 
 Symbol Var_kind(Var);
@@ -371,6 +375,16 @@ int LispMachine_step(LispMachine m){
       if(! Lisp_precall(m -> lisp_context, callable, Var_list(p -> consts[w -> a]), & result)) break;
       m -> values[m -> value_count - 1] = result;
       m -> pc = w -> target;
+      break;
+    }
+    case MW_LLAMBDA : LispMachine__push_value(m, Lisp_immediate(m -> lisp_context, p -> consts[w -> a]));
+    break;
+    case MW_LEXPAND :{
+      Var result;
+      if(Lisp_expanded(m -> lisp_context, Var_list(p -> consts[w -> a]), & result)){
+        LispMachine__push_value(m, result);
+        m -> pc = w -> target;
+      }
       break;
     }
     case MW_LCALL : LispMachine__call(m, w -> b);
@@ -436,7 +450,7 @@ void LispMachine_run(LispMachine m){
 
 void LispMachine_finish(LispMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 402};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 415};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.finish")), NULL))));
     __builtin_unreachable();
   }

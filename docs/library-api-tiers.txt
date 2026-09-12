@@ -63,6 +63,7 @@ lib/iter.x|compatibility|Iter.accumulate,Iter.next
 lib/lib.x|advanced|DisjointSet.find,DisjointSet.free,DisjointSet.new
 lib/lib.x|advanced|DisjointSet.num_components,DisjointSet.sizes
 lib/lib.x|advanced|DisjointSet.union
+lib/lisp.x|internal|Lisp.immediate,Lisp.expanded
 lib/lisp.x|advanced|Lisp.auto_disable,Lisp.auto_instrument,Lisp.auto_stats
 lib/lisp.x|advanced|Lisp.cleanup
 lib/lisp.x|advanced|Lisp.destroy,Lisp.read,Lisp.set_global
