@@ -25,27 +25,33 @@ typedef struct Interp {
   Map reserved, specials;
 } Interp;
 
+// Error fields stay at the call site; the macro supplies the operation pair.
+macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {
+  $(quasiquote (raise ,$cause
+    (args (literal ("Symbol") "operation" operation) ,$op ,@$fields)))
+}
+
 // evaluation
 
 static Var Interp.eval(Interp *self, Env *env, Var form) {
-  if (form is void) raise %(void-op (operation "eval"));
+  if (form is void) $fail(<void-op>, %"eval");
   if (form.is_atom()) return self.lookup(env, form);
   if (form is not <list> || form.is_nil()) return form;
-  List expression = form;
-  Var function = self.eval(env, expression.car());
-  List args = expression.cdr();
-  if (function is <lambda>) {
-    Fn closure = function.pointer();
+  List expr = form;
+  Var fn = self.eval(env, expr.car());
+  List args = expr.cdr();
+  if (fn is <lambda>) {
+    Fn closure = fn.pointer();
     if (closure.macro)
       return self.eval(env, self.invoke(env, closure, args));
   }
   else {
-    if (function is not <func>) raise %(not-call (actual ${function.kind()}));
-    if (self.specials.contains(function))
-      return self.special(env, self.specials[function], args);
+    if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));
+    if (self.specials.contains(fn))
+      return self.special(env, self.specials[fn], args);
   }
   List values = self.eval_args(env, args);
-  return self.apply(env, function, values);
+  return self.apply(env, fn, values);
 }
 
 static List Interp.eval_args(Interp *self, Env *env, List forms) {
@@ -54,9 +60,8 @@ static List Interp.eval_args(Interp *self, Env *env, List forms) {
   return values;
 }
 
-static Var Interp.special(Interp *self, Env *env,
-                          Symbol operation, List args) {
-  match (%($operation @args)) {
+static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
+  match (%($op @args)) {
     case %(quote ?form): return form;
     case %(quasiquote ?form): return self.quasiquote(env, form, 0);
     case %(def ?name ?form) if (name.is_atom()):
@@ -76,12 +81,12 @@ static Var Interp.special(Interp *self, Env *env,
       return %();
     }
     case %(eval ?form): return self.eval(NULL, self.eval(env, form));
-    case %(apply ?function ?values): {
-      Var callable = self.eval(env, function), actual = self.eval(env, values);
+    case %(apply ?fn ?values): {
+      Var callable = self.eval(env, fn), actual = self.eval(env, values);
       return self.apply(env, callable, _list_argument(actual, %"apply"));
     }
-    case %(bind ?name ?signature): {
-      Var target = self.eval(env, name), type = self.eval(env, signature);
+    case %(bind ?name ?sig): {
+      Var target = self.eval(env, name), type = self.eval(env, sig);
       return self.bind(target, type);
     }
     case %(import ?form): {
@@ -93,26 +98,26 @@ static Var Interp.special(Interp *self, Env *env,
       return _import_file(self, path);
     }
   }
-  return _bad_form(operation, args);
+  return _bad_form(op, args);
 }
 
 // Apply receives values; eval alone decides which expressions to evaluate.
-static Var Interp.apply(Interp *self, Env *env, Var function, List values) {
-  if (function is <lambda>) {
-    Fn closure = function.pointer();
+static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
+  if (fn is <lambda>) {
+    Fn closure = fn.pointer();
     if (closure.macro)
-      raise %(not-call (operation "apply") (actual ${function.kind()}));
+      $fail(<not-call>, %"apply", <actual>, fn.kind());
     return self.invoke(env, closure, values);
   }
-  if (function is not <func>) raise %(not-call (actual ${function.kind()}));
-  if (self.specials.contains(function)) {
-    if (self.specials[function] != <apply>.var())
-      raise %(not-call (operation "apply") (actual ${function.kind()}));
+  if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));
+  if (self.specials.contains(fn)) {
+    if (self.specials[fn] != <apply>.var())
+      $fail(<not-call>, %"apply", <actual>, fn.kind());
     match (values) case %(?callable ?args):
       return self.apply(env, callable, _list_argument(args, %"apply"));
     return _bad_form(<apply>, values);
   }
-  return _native_call(function, values);
+  return _native_call(fn, values);
 }
 
 // environments and closures
@@ -150,18 +155,18 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
     Var (name, rest) = params;
     if (name.is_atom() && name.str() == %".") {
       if (!params.cdr())
-        raise %(bad-sig (operation "apply") (value ${closure.body}));
+        $fail(<bad-sig>, %"apply", <value>, closure.body);
       bindings[rest] = values;
       values = NULL;
       break;
     }
     if (!values)
-      raise %(bad-arity (operation "apply") (value ${closure.body}));
+      $fail(<bad-arity>, %"apply", <value>, closure.body);
     bindings[name] = values.car();
     values = values.cdr();
   }
   if (values)
-    raise %(bad-arity (operation "apply") (value ${closure.body}));
+    $fail(<bad-arity>, %"apply", <value>, closure.body);
   // Captures take priority; uncaptured names remain visible in the caller.
   Env captured = { closure.captures, env };
   Env local = { bindings, &captured };
@@ -171,24 +176,23 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
 // Quasiquote returns one form; quoted_item returns its contributed elements.
 static Var Interp.quasiquote(Interp *self, Env *env, Var form, int depth) {
   if (form is not <list> || form.is_nil()) return form;
-  List expression = form;
-  Var (head, argument) = expression;
+  List expr = form;
+  Var (head, argument) = expr;
   Var (quote, unquote, splice) = %(quasiquote unquote unquote-splicing);
   if (head == quote)
-    return cons(head, self.quasiquote(env, expression.cdr(), depth + 1));
+    return cons(head, self.quasiquote(env, expr.cdr(), depth + 1));
   if (head == unquote || head == splice) {
-    if (expression.len() != 2)
-      raise %(bad-arity (operation "quasiquote") (value $form));
+    if (expr.len() != 2)
+      $fail(<bad-arity>, %"quasiquote", <value>, form);
     if (depth)
-      return cons(head, self.quasiquote(env, expression.cdr(), depth - 1));
+      return cons(head, self.quasiquote(env, expr.cdr(), depth - 1));
     Var value = self.eval(env, argument);
     if (head == splice)
-      raise %(bad-types (operation "quasiquote-splice")
-                         (actual ${form.kind()}));
+      $fail(<bad-types>, %"quasiquote-splice", <actual>, form.kind());
     return value;
   }
   List first = self.quoted_item(env, head, depth);
-  List rest = self.quasiquote(env, expression.cdr(), depth);
+  List rest = self.quasiquote(env, expr.cdr(), depth);
   return first.append(rest);
 }
 
@@ -196,8 +200,7 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
   match (form) case %(unquote-splicing ?argument) if (!depth): {
     Var value = self.eval(env, argument);
     if (value is not <list>)
-      raise %(bad-types (operation "quasiquote-splice")
-                         (actual ${value.kind()}));
+      $fail(<bad-types>, %"quasiquote-splice", <actual>, value.kind());
     return value;
   }
   return %(${self.quasiquote(env, form, depth)});
@@ -205,47 +208,41 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
 
 // Diagnostics preserve the language's errors without obscuring valid forms.
 
-static List _list_argument(Var value, String operation) {
+static List _list_argument(Var value, String op) {
   if (value is not <list>)
-    raise %(bad-types (operation $operation) (actual ${value.kind()})
-                       (want "List"));
+    $fail(<bad-types>, op, <actual>, value.kind(), <want>, %"List");
   return value;
 }
 
-static String _string_argument(Var value, String operation) {
+static String _string_argument(Var value, String op) {
   if (value is not <string>)
-    raise %(bad-types (operation $operation) (actual ${value.kind()})
-                       (want "String"));
+    $fail(<bad-types>, op, <actual>, value.kind(), <want>, %"String");
   return value;
 }
 
-static Var Interp.bind(Interp *self, Var name, Var signature) {
+static Var Interp.bind(Interp *self, Var name, Var sig) {
   _string_argument(name, %"bind");
-  if (signature is not <list>)
-    raise %(bad-sig (operation "bind") (value $signature));
+  if (sig is not <list>)
+    $fail(<bad-sig>, %"bind", <value>, sig);
   if (self.natives.contains(name)) return self.natives[name];
-  raise %(no-symbol (name $name) (sig $signature));
+  raise %(no-symbol (name $name) (sig $sig));
 }
 
 static void _bad_clause(Var clause) {
   if (clause is not <list>)
-    raise %(bad-types (operation "cond") (value $clause) (want "List"));
-  int actual = clause.list().len();
-  raise %(bad-arity (operation "cond-clause") (expected 2)
-                     (actual $actual) (value $clause));
+    $fail(<bad-types>, %"cond", <value>, clause, <want>, %"List");
+  $fail(<bad-arity>, %"cond-clause",
+        <expected>, 2, <actual>, clause.list().len(), <value>, clause);
 }
 
 static Var _bad_form(Symbol name, List args) {
   if (name == <lambda> || name == <macro>)
-    raise %(bad-sig (operation $name) (value $args));
-  int actual = args.len();
+    $fail(<bad-sig>, name, <value>, args);
+  int n = args.len();
   if (name == <def>)
-    raise %(bad-arity (operation "def") (expected 2) (actual $actual)
-                       (value $args));
-  int expected = name == <apply> || name == <bind> ? 2 : 1;
-  String operation = name.str();
-  raise %(bad-arity (operation $operation) (expected $expected)
-                     (actual $actual));
+    $fail(<bad-arity>, %"def", <expected>, 2, <actual>, n, <value>, args);
+  int want = name == <apply> || name == <bind> ? 2 : 1;
+  $fail(<bad-arity>, name.str(), <expected>, want, <actual>, n);
 }
 
 // Tokens supply spelling; recursive descent supplies Lisp's grammar.
@@ -342,38 +339,29 @@ static Var _native_call(Func native, List values) {
   return native.apply(count, args);
 }
 
-static Var _procedure(Var value) =>
-  _bool(value is <func> || value is <lambda>);
-
 static Var _bool(int x) {
   if (x) return <true>;
   return %();
 }
 
-static Var _atom(Var value) => _bool(value is not <list> || value.is_nil());
-
-static Var _eq(Var a, Var b) => _bool(a == b);
-
-static Var _pair(Var value) => _bool(value is <list> && !value.is_nil());
-
-static Var _list(Var value) => _bool(value is <list>);
-
-static int _is_number(Var value) {
-  Symbol kind = value.kind();
-  return kind == <integer> || kind == <floating>;
+static int _is_number(Var v) {
+  Symbol k = v.kind();
+  return k == <integer> || k == <floating>;
 }
 
-static Var _number(Var value) => _bool(_is_number(value));
-
-static Var _string(Var value) => _bool(value is <string>);
-
-static Var _symbol(Var value) => _bool(value.kind() == <symbol>);
+static Var _atom(Var v)      => _bool(v is not <list> || v.is_nil());
+static Var _pair(Var v)      => _bool(v is <list> && !v.is_nil());
+static Var _list(Var v)      => _bool(v is <list>);
+static Var _number(Var v)    => _bool(_is_number(v));
+static Var _string(Var v)    => _bool(v is <string>);
+static Var _symbol(Var v)    => _bool(v.kind() == <symbol>);
+static Var _procedure(Var v) => _bool(v is <func> || v is <lambda>);
+static Var _eq(Var a, Var b) => _bool(a == b);
 
 static Var _compare(Var a, Var b) {
   if (!_is_number(a) || !_is_number(b))
-    raise %(bad-types (operation "lisp_compare")
-                       (left-kind ${a.kind()})
-                       (right-kind ${b.kind()}));
+    $fail(<bad-types>, %"lisp_compare",
+          <left-kind>, a.kind(), <right-kind>, b.kind());
   return a.compare(b);
 }
 
@@ -388,29 +376,24 @@ static Var _plus(List values) {
   return values.foldl(seed, _add);
 }
 
-static Var _times(List values) =>
-  values.foldl(1, %!(a, b) => a.binary(<*>, b));
-
 // Unary subtraction negates; unary division reciprocates. Both otherwise
 // combine the first argument with each following argument, left to right.
 static Var _arithmetic(List values, Symbol op, Var identity) {
-  if (!values) {
-    String operation = op.str();
-    raise %(bad-arity (operation $operation) (expected 1) (actual 0));
-  }
+  if (!values) $fail(<bad-arity>, op.str(), <expected>, 1, <actual>, 0);
   Var result = values.car();
   if (!values.cdr()) return identity.binary(op, result);
   foreach (Var value, values.cdr()) result = result.binary(op, value);
   return result;
 }
 
-static Var _minus(List values) => _arithmetic(values, <->, 0);
-static Var _divide(List values) => _arithmetic(values, </>, 1);
+static Var _minus(List xs)  => _arithmetic(xs, <->, 0);
+static Var _divide(List xs) => _arithmetic(xs, </>, 1);
+static Var _times(List xs)  => xs.foldl(1, %!(a, b) => a.binary(<*>, b));
 
-static Var _chain(List values, String operation, int want, int expect) {
-  int actual = values.len();
-  if (actual < 2)
-    raise %(bad-arity (operation $operation) (expected 2) (actual $actual));
+static Var _chain(List values, String op, int want, int expect) {
+  int n = values.len();
+  if (n < 2)
+    $fail(<bad-arity>, op, <expected>, 2, <actual>, n);
   Var left = values.car();
   foreach (Var right, values.cdr()) {
     int order = _compare(left, right).integer();
@@ -420,24 +403,18 @@ static Var _chain(List values, String operation, int want, int expect) {
   return _bool(1);
 }
 
-static Var _eq_chain(List values) => _chain(values, %"=", 0, 1);
-
-static Var _lt_chain(List values) => _chain(values, %"<", -1, 1);
-
-static Var _le_chain(List values) => _chain(values, %"<=", 1, 0);
-
-static Var _gt_chain(List values) => _chain(values, %">", 1, 1);
-
-static Var _ge_chain(List values) => _chain(values, %">=", -1, 0);
+static Var _eq_chain(List xs) => _chain(xs, %"=",  0, 1);
+static Var _lt_chain(List xs) => _chain(xs, %"<", -1, 1);
+static Var _le_chain(List xs) => _chain(xs, %"<=", 1, 0);
+static Var _gt_chain(List xs) => _chain(xs, %">",  1, 1);
+static Var _ge_chain(List xs) => _chain(xs, %">=", -1, 0);
 
 // These return Var because the native signature appears in Lisp errors.
-static Var _str(Var value) => value.str();
-static Var _repr(Var value) => value.repr();
-static Var _string_append(String left, String right) => left + right;
-static Var _string_downcase(String string) => string.lower();
-
-static Var _substring(String string, int start, int stop) =>
-  string.getslice(start, stop, 1);
+static Var _str(Var v)                        => v.str();
+static Var _repr(Var v)                       => v.repr();
+static Var _string_append(String a, String b) => a + b;
+static Var _string_downcase(String s)         => s.lower();
+static Var _substring(String s, int a, int b) => s.getslice(a, b, 1);
 
 static Var _match_replace(List input, Var pat, Var template) {
   Var result;
@@ -455,8 +432,8 @@ static Var _write_file(String path, String text) {
 
 // Ordinary function conversion infers fixed native signatures. Rest natives
 // consume one List; this macro states that shared calling convention once.
-macro Expression $rest(Expr $function) =>
-  (Func.new_rest($function, %((func (("List"))) "Var")))
+macro Expression $rest(Expr $fn) =>
+  (Func.new_rest($fn, %((func (("List"))) "Var")))
 
 static void _install_natives(Interp *self) {
   // Lisp name, bind spelling, implementation. () leaves a native import-only.
@@ -502,15 +479,15 @@ static void _install_natives(Interp *self) {
     (()              "List_sort"            ${Func.var(List_sort)})
   );
   foreach (List row, natives) {
-    (Var name, String symbol, Func function) = row;
-    self.natives[symbol] = function;
-    if (!name.is_nil()) self.globals[name] = function;
+    (Var name, String symbol, Func fn) = row;
+    self.natives[symbol] = fn;
+    if (!name.is_nil()) self.globals[name] = fn;
   }
 }
 
 // The standard vocabulary is Lisp data, evaluated by this interpreter.
 
-static List _standard_library(void) => %(
+static List _stdlib = %(
   (def nil ())
   (def true 'true)
   (def false nil)
@@ -660,11 +637,10 @@ static Var _import_file(Interp *self, String path) {
   if (source.read_into(content) == FILE_READ_EOF) return %();
   if (content.length > INT_MAX) {
     size_t size = content.length, int limit = INT_MAX;
-    raise %(size-limit (operation "Lisp.eval_file") (size $size)
-                       (limit $limit));
+    $fail(<size-limit>, %"Lisp.eval_file", <size>, size, <limit>, limit);
   }
   if (memchr(content.bytes, '\0', content.length))
-    raise %(bad-arg (operation "Lisp.eval_file") (why "embedded NUL"));
+    $fail(<bad-arg>, %"Lisp.eval_file", <why>, %"embedded NUL");
   return _eval_text(self, String.new_len(content.bytes, (int) content.length));
 }
 
@@ -675,11 +651,11 @@ static Interp _interpreter(void) {
   _install_natives(&self);
   foreach (Var name, %(quote quasiquote cond def lambda macro eval
                        apply bind import)) {
-    Func function = Func.new(_reserved, %((func ((void))) "Var"));
-    self.reserved[name] = function;
-    self.specials[function] = name;
+    Func fn = Func.new(_reserved, %((func ((void))) "Var"));
+    self.reserved[name] = fn;
+    self.specials[fn] = name;
   }
-  foreach (Var form, _standard_library()) self.eval(NULL, form);
+  foreach (Var form, _stdlib) self.eval(NULL, form);
   return self;
 }
 

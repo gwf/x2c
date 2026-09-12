@@ -30,6 +30,9 @@ like the evaluation rule: resolve an atom, return a literal, or evaluate a
 call. The second matches the grammar directly: `(quote form)`, `(def name
 form)`, `(lambda parameters body)`, and the other special forms. A matched
 shape supplies its parts; separate error helpers describe rejected forms.
+The small `$fail` statement macro constructs the ordinary `raise` syntax from
+a cause, an operation, and the remaining field/value pairs. Each call keeps
+its diagnostic details visible and preserves their value types and order.
 
 `Interp.apply` receives values. Only `eval` decides which arguments to
 evaluate: ordinary calls evaluate left to right, while a macro receives its
@@ -72,10 +75,11 @@ facilities, not another runtime evaluator. The `lisp_*` strings are
 compatibility names; their implementations belong to this file or ordinary
 runtime modules.
 
-The quoted `_standard_library` List supplies the remaining macros and
-higher-order functions in Lisp itself. Native definitions appear only in the
-table, rather than being declared again in this List. The few text adapters
-that return `Var` preserve signatures printed in Lisp error messages.
+The static `_stdlib` List supplies the remaining macros and higher-order
+functions in Lisp itself. x2c hoists its initialization; it needs no accessor
+function. Native definitions appear only in the table, rather than being
+declared again in this List. The few text adapters that return `Var` preserve
+signatures printed in Lisp error messages.
 
 The source uses ordinary runtime collection and pattern operations, including
 `List.match` and replacement. Those operations retain their normal runtime
