@@ -51,3 +51,4 @@ programs/lisp|showcase|run|--init ../../../etc/init.xlisp --selftest|expected/li
 programs/mandelbrot|showcase|run||expected/parallel-mandelbrot.stdout|Deep Mandelbrot zoom rendered on native threads.
 tours/hello-worlds|showcase|run||expected/hello-worlds.stdout|Twelve idiomatic paths to Hello, World.
 tours/language|showcase|run||expected/docs-tour.stdout|Executable fifteen-minute language tour.
+programs/reference-lisp|showcase|run|../../../examples/data/reference-lisp/showcase.xlisp|expected/reference-lisp.stdout|Independent recursive Lisp with symbolic differentiation.

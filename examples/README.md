@@ -139,6 +139,25 @@ make -C examples/packages/http-json-releases test
 
 ## Larger programs and tours
 
+[programs/reference-lisp.x](programs/reference-lisp.x) is a self-contained
+recursive Lisp interpreter written in ordinary x2c. Its reader, closures,
+evaluator, native bindings, and standard library live in that one file.
+It runs without an initialization file:
+
+```sh
+x2c run examples/programs/reference-lisp.x -- --selftest
+x2c run examples/programs/reference-lisp.x -- \
+  examples/data/reference-lisp/showcase.xlisp
+```
+
+The [source walkthrough](../docs/src/internals/reference-lisp.md) explains
+its representation and compatibility rules. The optional comparison against
+the production Lisp is available with:
+
+```sh
+python3 examples/programs/check-reference-lisp.py --build
+```
+
 [programs/lisp.x](programs/lisp.x) is an interactive Lisp shell. Run it from
 the repository root:
 

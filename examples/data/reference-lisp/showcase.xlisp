@@ -1,0 +1,31 @@
+// Symbolic differentiation, built from macros and recursive tree matching.
+
+(defun derivative (expression variable)
+  (match-case expression
+    ((+ ?left ?right)
+      (list '+ (derivative ?left variable) (derivative ?right variable)))
+    ((* ?left ?right)
+      (list '+
+        (list '* (derivative ?left variable) ?right)
+        (list '* ?left (derivative ?right variable))))
+    (else (if (eq? expression variable) 1 0))))
+
+(defun simplify (expression)
+  (if (list? expression)
+    (let ((parts (map simplify expression)))
+      (match-case parts
+        ((+ 0 ?value) ?value)
+        ((+ ?value 0) ?value)
+        ((* 0 ?value) 0)
+        ((* ?value 0) 0)
+        ((* 1 ?value) ?value)
+        ((* ?value 1) ?value)
+        (else parts)))
+    expression))
+
+(def polynomial '(+ (* x x) (* 3 x)))
+(def slope (simplify (derivative polynomial 'x)))
+(def x 5)
+
+(list polynomial slope (eval polynomial) (eval slope)
+      (let ((offset 10)) (map (lambda (n) (+ n offset)) '(1 2 3))))
