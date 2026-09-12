@@ -120,6 +120,12 @@
   border-left: 1px solid rgba(23, 23, 23, 0.24);
 }
 
+.landing-nav>.landing-site-nav {
+  margin-left: var(--landing-nav-gap);
+  padding-left: 0;
+  border-left: 0;
+}
+
 .landing-site-nav>a,
 .landing-reference-nav>a {
   color: var(--nav-muted, #6b655f);
