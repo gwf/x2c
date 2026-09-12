@@ -28,7 +28,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:680`
+Source: `src/cli.x:673`
 
 #### cli_package_options
 
@@ -39,7 +39,7 @@ after tokenization. Only native include/define/thread options and ordered
 archive/library/framework inputs are admitted. `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:804`
+Source: `src/cli.x:797`
 
 #### cli_parse
 
@@ -54,7 +54,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:931`
+Source: `src/cli.x:924`
 
 #### cli_response_arguments
 
@@ -75,7 +75,7 @@ Source: `src/cli.x:565`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:980`
+Source: `src/cli.x:974`
 
 ## Public types
 

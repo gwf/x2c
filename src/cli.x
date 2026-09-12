@@ -595,14 +595,6 @@ static void _expand_argument(Array output, String argument, List stack) {
     _expand_argument(output, word, nested);
 }
 
-static List _expand_arguments(int argc, char **argv) {
-  Array output = %[];
-  for (int i = 1; i < argc; i++)
-    _expand_argument(output, String.new(argv[i]), NULL);
-  List result = output.list_free();
-  return result;
-}
-
 // parsing
 
 static CliOption *_find_option(
@@ -640,14 +632,15 @@ static CliOption *_find_option(
   return NULL;
 }
 
-/* Reads the option at `*node` for `mask`, advancing `*node` past a separate
+/* Reads the option at `*index` for `mask`, advancing it past a separate
    value argument. Returns NULL for an unknown spelling so each command can
    phrase its own diagnostic. The driver asks for `spelling` and `attached`
    because it forwards the argument as written to the C compiler and linker;
    translate and bootstrap pass NULL. */
 static CliOption *_take_option(
-  List *node, int mask, String *spelling, String *value, int *attached) {
-  String arg = (*node).car(), written = arg, color = NULL, int color_equal = 0;
+  Array args, int *index, int mask,
+  String *spelling, String *value, int *attached) {
+  String arg = args[*index], written = arg, color = NULL, int color_equal = 0;
   if (arg.startswith("--color=")) {
     color_equal = 1;
     color = arg.remove_prefix("--color=");
@@ -660,9 +653,9 @@ static CliOption *_take_option(
   if (attached) *attached = suffix != NULL;
   *value = suffix;
   if (option.value && !*value && !color_equal) {
-    *node = (*node).cdr();
-    if (!*node) x2c_driver_error(%"option requires a value '$arg'");
-    *value = (*node).car();
+    if (++*index == args.len())
+      x2c_driver_error(%"option requires a value '$arg'");
+    *value = args[*index];
   }
   if (color_equal) *value = color;
   return option;
@@ -802,14 +795,14 @@ static void _apply_option(
     serve native actions; no source-preprocessing options are returned.
 */
 CliRequest cli_package_options(String path, String package) {
-  Array words = %[];
+  Array words = $auto(%[]);
   foreach (String word, cli_response_arguments(path))
     words.push(word.replace("{package}", package));
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <build>;
   Array includes = %[], cpp = %[], compile = %[], link = %[];
-  for (List node = words.list_free(); node; node = node.cdr()) {
-    String argument = node.car();
+  for (int i = 0; i < words.len(); i++) {
+    String argument = words[i];
     if (!argument) x2c_driver_error("empty package native argument");
     if (argument[0] != '-' && argument[0] != '@' &&
         argument.endswith(".a")) {
@@ -818,7 +811,7 @@ CliRequest cli_package_options(String path, String package) {
     }
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option = _take_option(
-      &node, CLI_BUILD, &spelling, &value, &attached);
+      words, &i, CLI_BUILD, &spelling, &value, &attached);
     if (!option)
       x2c_driver_error(%"unsupported package native argument '$argument'");
     switch (option.id) {
@@ -852,7 +845,7 @@ static void _one_dash_removed(String arg) {
   }
 }
 
-static CliRequest _parse_command(List args, CliCommand *command) {
+static CliRequest _parse_command(Array args, CliCommand *command) {
   Symbol name = command.name, int mask = command.mask;
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = name;
@@ -860,8 +853,8 @@ static CliRequest _parse_command(List args, CliCommand *command) {
   if (mask & (CLI_BUILD | CLI_RUN)) request.kind = <executable>;
   Array inputs = %[], run_args = %[], x_paths = %[];
   Array cpp_args = %[], cc_args = %[], ld_args = %[], int operands = 0;
-  for (List node = args; node; node = node.cdr()) {
-    String arg = node.car(), int dashed = arg && arg[0] == '-';
+  for (int i = 1; i < args.len(); i++) {
+    String arg = args[i], int dashed = arg && arg[0] == '-';
     /* bootstrap has no operand syntax, so `--`, `-o`, and a bare word are
        all unknown to it where the other commands accept them. */
     if (mask != CLI_BOOTSTRAP && !operands && dashed &&
@@ -886,7 +879,7 @@ static CliRequest _parse_command(List args, CliCommand *command) {
     }
     String spelling = NULL, value = NULL, int attached = 0;
     CliOption *option =
-      _take_option(&node, mask, &spelling, &value, &attached);
+      _take_option(args, &i, mask, &spelling, &value, &attached);
     if (!option) {
       if (mask == CLI_TRANSLATE) _one_dash_removed(arg);
       x2c_driver_error(%"unknown option '$arg'");
@@ -929,12 +922,14 @@ static CliRequest _parse_command(List args, CliCommand *command) {
     constructing request values.
 */
 CliRequest cli_parse(int argc, char **argv) {
-  List args = _expand_arguments(argc, argv);
-  if (!args) {
+  Array args = $auto(%[]);
+  for (int i = 1; i < argc; i++)
+    _expand_argument(args, String.new(argv[i]), NULL);
+  if (!args.len()) {
     _print_help(0);
     exit(2);
   }
-  String first = args.car();
+  String first = args[0];
   if (!first)
     x2c_driver_error("expected a command, found an empty argument");
   if (first == "--help" || first == "-h") {
@@ -946,13 +941,12 @@ CliRequest cli_parse(int argc, char **argv) {
     exit(0);
   }
   if (first == "help") {
-    List rest = args.cdr();
-    if (!rest) {
+    if (args.len() == 1) {
       _print_help(0);
       exit(0);
     }
-    String name = rest.car();
-    if (rest.cdr()) x2c_driver_error("help accepts at most one command");
+    if (args.len() > 2) x2c_driver_error("help accepts at most one command");
+    String name = args[1];
     CliCommand *asked = _command_row(name);
     if (name == "help" || name == "--help" || name == "-h")
       _print_help(<help>);
@@ -961,7 +955,7 @@ CliRequest cli_parse(int argc, char **argv) {
     exit(0);
   }
   CliCommand *command = _command_row(first);
-  if (command) return _parse_command(args.cdr(), command);
+  if (command) return _parse_command(args, command);
   if (first == "-o") _removed_output();
   const char *attached;
   if (strlen(first) > 2 && first[0] == '-' && first[1] != '-' &&
