@@ -60,11 +60,17 @@ one value; `quoted_item` returns the elements that value contributes to its
 containing List. An active `,@` can contribute several elements. The nesting
 depth determines when an unquote becomes active.
 
-`Reader.scan` tokenizes one source batch. `Reader.next` returns successive
+`Reader.scan` tokenizes one source batch. `Reader.read` returns successive
 forms, using recursive descent for Lists and reader prefixes. End of input is
 `void`; an unfinished or malformed form raises an error at its source
 position. Token storage has its own temporary Scope, while the forms outlive
 it. The REPL retains unfinished input and resumes from that form's start.
+`Repl.read_line` handles prompts, line input, and EOF. `Repl.read_unit` calls
+it when needed, then handles tokenization and parsing. It returns one form
+or `void` when no form is ready, setting `done` at EOF. The `storage` scope owns
+the tokens between forms and is released before the source buffer changes.
+The single loop in `_repl` calls `read_unit`, passes the form to `Interp.eval`,
+and prints the result. Evaluation errors are caught per form.
 
 `_install_natives` is one table of Lisp names, `bind` spellings, and ordinary
 x2c functions. A native whose Lisp name is `()` is available through `bind`

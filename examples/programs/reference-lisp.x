@@ -474,11 +474,11 @@ static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   return reader;
 }
 
-/* Reader.next returns void at end of input. The empty List () is a valid
+/* Reader.read returns void at end of input. The empty List () is a valid
    form, so it cannot serve as the end marker. Incomplete input raises an
    error that the REPL handles by retaining the text for the next input line.
 */
-static Var Reader.next(Reader *self) {
+static Var Reader.read(Reader *self) {
   Token first = self.tokens.next();
   if (!first || first.type == <eof>) return void;
   self.start = self.base + first.pos;
@@ -822,10 +822,10 @@ static List _stdlib = %(
    File import is another source of such batches, with the same environment.
 */
 static Var _eval_text(Interp *self, String source) {
-  Scope tokens = $auto(Scope.new());
-  Reader reader = Reader.scan(source, 0, &tokens);
+  Scope storage = $auto(Scope.new());
+  Reader reader = Reader.scan(source, 0, &storage);
   Var form, result = %();
-  while ((form = reader.next()) is not void)
+  while ((form = reader.read()) is not void)
     result = self.eval(NULL, form);
   return result;
 }
@@ -874,51 +874,86 @@ static Interp _interpreter(void) {
    so sufficiently deep Lisp recursion can exhaust that stack. The production
    word machine uses a different execution strategy.
 */
+typedef struct Repl {
+  Buffer source;
+  Scope storage;
+  Reader reader;
+  unsigned cursor;
+  int failed, incomplete, interactive, done;
+} Repl;
+
+static int Repl.read_line(Repl *self) {
+  if (self.interactive) {
+    Stdout.puts(self.incomplete ? ".. " : "> ");
+    Stdout.flush();
+  }
+  String line = Stdin.readline();
+  if (!line) {
+    if (self.incomplete) {
+      Stderr.puts("error: incomplete form at end of input\n");
+      self.failed = 1;
+    }
+    self.done = 1;
+    return 0;
+  }
+  self.source.write(line);
+  return 1;
+}
+
+static Var Repl.finish_batch(Repl *self) {
+  self.storage.destroy();
+  self.storage = NULL;
+  self.reader = (Reader) {0};
+  if (!self.incomplete) {
+    self.source.clear();
+    self.cursor = 0;
+  }
+  return void;
+}
+
+/* Read one form. void means no form is ready; done distinguishes EOF from
+   incomplete input or an exhausted batch. The storage scope owns the tokens
+   until the batch is finished; parsed forms use the surrounding session.
+*/
+static Var Repl.read_unit(Repl *self) {
+  if (!self.reader.tokens && !self.read_line()) return void;
+  try {
+    if (!self.reader.tokens) {
+      self.storage = Scope.new();
+      self.incomplete = 0;
+      self.reader = Reader.scan(self.source, self.cursor, &self.storage);
+    }
+    Var form = self.reader.read();
+    if (form is not void) return form;
+  }
+  catch %(incomplete *): {
+    self.incomplete = 1;
+    self.cursor = self.reader.start;
+  }
+  catch %(?code *detail): {
+    Stderr.printf("error: %s\n", cons(code, detail).repr());
+    self.failed = 1;
+  }
+  return self.finish_batch();
+}
+
 static int _repl(Interp *self) {
   Buffer source = $auto(Buffer.new(0));
-  unsigned cursor = 0;
-  int failed = 0, incomplete = 0, interactive = isatty(Stdin.fileno());
-  while (1) {
-    if (interactive) {
-      Stdout.puts(incomplete ? ".. " : "> ");
-      Stdout.flush();
-    }
-    String line = Stdin.readline();
-    if (!line) {
-      if (incomplete) {
-        Stderr.puts("error: incomplete form at end of input\n");
-        failed = 1;
-      }
-      return !failed;
-    }
-    source.write(line);
-    Scope tokens = $auto(Scope.new());
-    Reader reader = {0};
-    incomplete = 0;
+  Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };
+  defer repl.storage.destroy();
+  while (!repl.done) {
+    Var form = repl.read_unit();
+    if (form is void) continue;
     try {
-      reader = Reader.scan(source, cursor, &tokens);
-      Var form;
-      while ((form = reader.next()) is not void) {
-        try Stdout.printf("%s\n", self.eval(NULL, form).repr());
-        catch %(?code *detail): {
-          Stderr.printf("error: %s\n", cons(code, detail).repr());
-          failed = 1;
-        }
-      }
-    }
-    catch %(incomplete *): {
-      incomplete = 1;
-      cursor = reader.start;
+      Var value = self.eval(NULL, form);
+      Stdout.printf("%s\n", value.repr());
     }
     catch %(?code *detail): {
       Stderr.printf("error: %s\n", cons(code, detail).repr());
-      failed = 1;
-    }
-    if (!incomplete) {
-      source.clear();
-      cursor = 0;
+      repl.failed = 1;
     }
   }
+  return !repl.failed;
 }
 
 /* main converts argv to x2c Strings and matches the supported argument forms.
