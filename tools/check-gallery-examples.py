@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Keep runnable gallery examples identical to the slides, including hidden lines.
+"""Check gallery examples and links to independently maintained source.
 
 Use --update after editing a slide to refresh its standalone source. Execution
-and expected output remain owned by examples/check.sh and packages-check.
+and expected output remain owned by examples/check.sh and package checks.
+Entries with `source` refer to existing programs and are never overwritten.
 """
 
 import argparse
@@ -29,12 +30,22 @@ def check(update=False):
         if name in seen:
             errors.append(f"{name}: duplicate gallery entry")
         seen.add(name)
-        if entry["example"] in examples:
+        owner = entry.get("source") or entry["example"]
+        if owner in examples:
             errors.append(f"{name}: duplicate standalone example")
-        examples.add(entry["example"])
+        examples.add(owner)
         slide = slides / name
         if not slide.is_file():
             errors.append(f"{name}: gallery source is missing")
+            continue
+        if "source" in entry:
+            target = ROOT / entry["source"]
+            if not target.is_file():
+                errors.append(f"{name}: missing source {entry['source']}")
+            link = "https://github.com/gwf/x2c/blob/main/" + entry["source"]
+            if link not in slide.read_text():
+                errors.append(f"{name}: missing source link to {entry['source']}")
+            doc.collect(slide, errors)
             continue
         language = entry.get("language", "x2c")
         if language == "sh":
@@ -71,10 +82,17 @@ def check(update=False):
     for entry in entries:
         if entry.get("language") == "sh":
             continue
-        row = rows.get(entry["example"])
+        if "source" in entry:
+            source = pathlib.PurePosixPath(entry["source"])
+            if source.parts[0] != "examples":
+                continue
+            example = str(source.relative_to("examples").with_suffix(""))
+        else:
+            example = entry["example"]
+        row = rows.get(example)
         wanted = "none" if entry.get("optional") else "run"
         if row is None or row[2] != wanted:
-            errors.append(f'{entry["example"]}: missing {wanted} manifest coverage')
+            errors.append(f'{example}: missing {wanted} manifest coverage')
     return entries, errors
 
 
@@ -86,7 +104,7 @@ def main():
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print(f"Gallery: {len(entries)} slides have synchronized examples")
+    print(f"Gallery: {len(entries)} slides have checked example mappings")
     return 0
 
 

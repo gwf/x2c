@@ -2,6 +2,9 @@
 slug: autodiff
 section: magic
 tab: autodiff
+links:
+  - label: Three-mode example
+    href: https://github.com/gwf/x2c/blob/main/examples/magic/autodiff.x
 ---
 
 ```x2c

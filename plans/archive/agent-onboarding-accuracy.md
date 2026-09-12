@@ -1,11 +1,33 @@
 # Improve agent onboarding without adding process
 
-> Status: active - implementation shipped; fresh acceptance failed.
-> Implementation merged as 352d4d8 (#32). On 2026-09-10 Gary approved
-> a fresh current-tree evaluation if the original inputs are unavailable.
-> Historical failures below remain historical failures, not passing evidence.
+> Status: retired - 2026-09-11; acceptance was not met.
+> Gary explicitly stopped the remaining Fable improvement effort after the
+> completed rerun. The delivery commit titled
+> `repair gallery coverage and retire closeout plans` archives this outcome;
+> it does not claim passing acceptance or remove delivered improvements.
+> Implementation merged as 352d4d8 (#32); startup configurations shipped as
+> e3884ae and 3dc079e. Historical failures and evidence below are preserved.
 > Baseline: `11fd2fb`. Frozen evaluation inputs and raw evidence remain outside
 > tracked source; `.context/onboarding-repair/` locates local verification.
+
+## Retirement outcome
+
+The outstanding scores refer to Fable, recorded as CLI B in the evaluation:
+five frozen onboarding questions, each repeated three times at each of low,
+medium, and high effort. The final import-and-hook configuration passed
+10/15, 8/15, and 10/15 respectively (28/45 overall). These scores measure
+answers about semantic choice, truth tests, canonical ownership, source-backed
+investigation, and answer-only completion. They are not compiler/runtime
+test results. Every trial had to pass the rubric; none of the three effort
+levels met acceptance.
+
+Implementation and the requested fresh rerun are complete. On 2026-09-11
+Gary stopped further attempts to improve Fable for now. No further sampling
+or guidance repair remains assigned by this plan. The combined configuration
+stays installed, and failed answers remain failed evidence. The sections
+below preserve the original scope, intermediate proposals, measurements,
+and limitations as historical records; their instructions to keep working
+or leave the plan active are superseded by this retirement.
 
 ## Result and implementation
 

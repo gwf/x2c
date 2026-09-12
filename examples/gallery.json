@@ -65,6 +65,10 @@
     "optional": false
   },
   {
+    "slide": "magic-04-autodiff.md",
+    "source": "examples/magic/autodiff.x"
+  },
+  {
     "slide": "magic-05-compile-time-lisp.md",
     "example": "magic/compile-time",
     "optional": false
@@ -123,5 +127,45 @@
     "slide": "power-10-imports.md",
     "example": "power/imports",
     "optional": true
+  },
+  {
+    "slide": "packages-01-raylib.md",
+    "source": "packages/raylib/examples/climate-trends.x"
+  },
+  {
+    "slide": "packages-02-termbox2.md",
+    "source": "packages/termbox2/examples/game-of-life.x"
+  },
+  {
+    "slide": "packages-03-sqlite.md",
+    "source": "packages/sqlite/examples/observations.x"
+  },
+  {
+    "slide": "packages-04-yyjson.md",
+    "source": "packages/yyjson/examples/service-health.x"
+  },
+  {
+    "slide": "packages-05-pcre2.md",
+    "source": "packages/pcre2/examples/parse-log.x"
+  },
+  {
+    "slide": "packages-06-libcurl.md",
+    "source": "packages/libcurl/examples/page-titles.x"
+  },
+  {
+    "slide": "packages-07-libuv.md",
+    "source": "packages/libuv/examples/process-report.x"
+  },
+  {
+    "slide": "packages-08-blis.md",
+    "source": "packages/blis/examples/page-rank.x"
+  },
+  {
+    "slide": "packages-09-cstar.md",
+    "source": "packages/cstar/examples/abs.x"
+  },
+  {
+    "slide": "packages-10-torch.md",
+    "source": "packages/torch/examples/mlp.x"
   }
 ]

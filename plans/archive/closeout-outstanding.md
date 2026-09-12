@@ -1,6 +1,17 @@
-> Status: active
-> Approved for implementation and delivery on 2026-09-10.
-> Baseline: 2d29fe9. Existing failures remain open until verified.
+> Status: retired - 2026-09-11.
+> Delivered implementation is preserved; onboarding acceptance failed and Gary
+> explicitly stopped that effort. Archived by the delivery commit titled
+> `repair gallery coverage and retire closeout plans`. Baseline: 2d29fe9.
+
+## Retirement
+
+The accepted compiler/runtime, Torch, and site work below was delivered.
+The remaining Fable onboarding experiment is intentionally stopped, not
+passed; see [its retirement record](agent-onboarding-accuracy.md). The two
+deferred issues and four future opportunities are preserved in the
+[recommended research agenda](../research-agenda.md). That document proposes
+new plan boundaries; it does not authorize their implementation. Historical
+active-work statements below describe the earlier outcome.
 
 ## Current outcome
 
@@ -45,7 +56,7 @@ passed 9/15; high has two passes and 13 incomplete trials after a provider
 session limit. Those 13 are missing results, not answer failures, and remain
 frozen as historical evidence. No completed effort meets the all-pass
 acceptance rule. See
-[the active evaluation plan](agent-onboarding-accuracy.md) for settings,
+[the evaluation plan](agent-onboarding-accuracy.md) for settings,
 interpretation, costs, and the retained private evidence.
 
 Gary subsequently requested the original README import alongside the hook.
@@ -58,14 +69,14 @@ often concern false extra claims after correct central explanations. These
 small score changes do not establish that the import helps or harms, and no
 effort meets acceptance. The combined setup remains installed, with no
 further trials assumed. Its results do not fill the hook-only cohort's gaps.
-The active evaluation plan links the retained `import-hook-matched-20260911/`
+The evaluation plan links the retained `import-hook-matched-20260911/`
 report, raw results, independent reviews, resource records and hash audit.
 
 Raw acceptance evidence is retained outside disposable worktrees at
 `/Users/gary/Documents/x2c-evidence/closeout-20260910/`, including failed and
 interrupted earlier sessions. The three completed reference/site plans are
-archived, as are the [Torch extensions](archive/x2c-torch-later.md) and
-[Torch comparison](archive/x2c-torch-comparison.md). Every original unit-test
+archived, as are the [Torch extensions](x2c-torch-later.md) and
+[Torch comparison](x2c-torch-comparison.md). Every original unit-test
 status item has a delivered resolution or explicit retirement in
 `unittest/STATUS.md`. This umbrella and onboarding remain active because
 onboarding acceptance still fails.
@@ -196,7 +207,7 @@ stays active; do not equate a running or partial check with completion.
    200,000-allocation burst, with only 2,048 bytes active. This is not a leak.
 5. Relocatable Torch application distribution through existing bundle owners.
 
-The [aggregate initializer completion record](archive/aggregate-initializer-growth.md)
+The [aggregate initializer completion record](aggregate-initializer-growth.md)
 records item 1's separately authorized implementation, compatibility boundary,
 publication, and retained evidence. The other four opportunities remain
 future work. Onboarding acceptance remains independent and is not resolved

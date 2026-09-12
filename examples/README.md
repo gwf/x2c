@@ -1,9 +1,10 @@
 # Examples
 
 Start with [foreach.x](foreach.x), or follow the Love, Power, and Magic
-examples from the landing page. Each gallery program contains the website's
-code, including its normally hidden setup and assertions. The correspondence
-is listed in [gallery.json](gallery.json).
+examples from the landing page. Most gallery programs contain the website's
+code, including its normally hidden setup and assertions. Autodiff and package
+slides instead link to existing, independently maintained examples. Both
+kinds of correspondence are listed in [gallery.json](gallery.json).
 
 After building x2c, add the repository root to PATH for this shell. Start
 from the repository root:
@@ -183,12 +184,20 @@ output paths are relative to this directory. An optional `<name>.flags` file
 supplies additional build options. Runtime fixtures live under
 `data/<name-with-slashes-replaced-by-hyphens>/`.
 
-The slide Markdown owns each gallery program. After editing a slide, run
+The slide Markdown owns each synchronized gallery program. After editing it, run
 `python3 tools/check-gallery-examples.py --update` to copy its complete code
 into the standalone example, then run `make examples`. The check rejects a
 missing slide mapping, missing source, or any difference, including hidden
 assertions. The self-hosting guide keeps the same shell recipe but is not
 executed by this suite because it rebuilds and installs the compiler.
+
+Registry entries with `source` name an existing repository-relative program.
+The check verifies its file and slide link without copying the slide over it.
+Autodiff's three-mode example runs through the ordinary manifest; its shorter
+loop slide also remains a runnable documentation sample. Package excerpts
+link to their package-owned examples, whose execution and external setup stay
+in each package's `run` or `verify` targets. `--update` never writes these
+independent sources.
 
 The optional PCRE2 Imports program is built, run, and compared with its
 expected output by `make -C packages/pcre2 run`, also included in
