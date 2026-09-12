@@ -646,7 +646,7 @@ static List _standard_library(void) => %(
 );
 
 static Var _eval_text(Interp *self, String source) {
-  Scope tokens = $auto(Scope.new_named("Reference tokens"));
+  Scope tokens = $auto(Scope.new());
   Reader reader = Reader.scan(source, 0, &tokens);
   Var form, result = %();
   while ((form = reader.next()) is not void)
@@ -701,7 +701,7 @@ static int _repl(Interp *self) {
       return !failed;
     }
     source.write(line);
-    Scope tokens = $auto(Scope.new_named("Reference tokens"));
+    Scope tokens = $auto(Scope.new());
     Reader reader = {0};
     incomplete = 0;
     try {
@@ -731,8 +731,7 @@ static int _repl(Interp *self) {
 }
 
 int main(int argc, char **argv) {
-  Scope session = $auto(Scope.new_named("Reference Lisp"));
-  $scope(&session) {
+  $scope() {
     try {
       Interp self = _interpreter();
       if (argc == 1) return _repl(&self) ? 0 : 1;
