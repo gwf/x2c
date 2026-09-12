@@ -133,6 +133,7 @@
 }
 
 a:is([href^="https://" i], [href^="http://" i], [href^="//"]):not(
+  .icon-button[rel="edit"],
   [href="https://x2c-lang.dev" i], [href^="https://x2c-lang.dev/" i],
   [href^="https://x2c-lang.dev?" i], [href^="https://x2c-lang.dev#" i],
   [href="http://x2c-lang.dev" i], [href^="http://x2c-lang.dev/" i],
