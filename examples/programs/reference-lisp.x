@@ -7,27 +7,27 @@
 
 #include <unistd.h>
 
-typedef struct Closure {
+typedef struct Fn {
   List params;
   Var body;
   Map captures;
   int macro;
-} *Closure;
+} *Fn;
 
-typedef struct Environment {
+typedef struct Env {
   Map bindings;
-  struct Environment *parent;
-} Environment;
+  struct Env *parent;
+} Env;
 
-typedef struct Interpreter {
+typedef struct Interp {
   Map globals, natives;
   // Reserved names map to functions; specials maps those identities back.
   Map reserved, specials;
-} Interpreter;
+} Interp;
 
 // evaluation
 
-static Var Interpreter.eval(Interpreter *self, Environment *env, Var form) {
+static Var Interp.eval(Interp *self, Env *env, Var form) {
   if (form is void) raise %(void-op (operation "eval"));
   if (form.is_atom()) return self.lookup(env, form);
   if (form is not <list> || form.is_nil()) return form;
@@ -35,29 +35,27 @@ static Var Interpreter.eval(Interpreter *self, Environment *env, Var form) {
   Var function = self.eval(env, expression.car());
   List args = expression.cdr();
   if (function is <lambda>) {
-    Closure closure = function.pointer();
+    Fn closure = function.pointer();
     if (closure.macro)
       return self.eval(env, self.invoke(env, closure, args));
   }
   else {
     if (function is not <func>) raise %(not-call (actual ${function.kind()}));
-    Var special;
-    if (self.specials.try_get(function, &special))
-      return self.special(env, special, args);
+    if (self.specials.contains(function))
+      return self.special(env, self.specials[function], args);
   }
   List values = self.eval_args(env, args);
   return self.apply(env, function, values);
 }
 
-static List Interpreter.eval_args(Interpreter *self, Environment *env,
-                                  List forms) {
+static List Interp.eval_args(Interp *self, Env *env, List forms) {
   Array values = $auto(%[]);
   foreach (Var form, forms) values.push(self.eval(env, form));
   return values;
 }
 
-static Var Interpreter.special(Interpreter *self, Environment *env,
-                               Symbol operation, List args) {
+static Var Interp.special(Interp *self, Env *env,
+                          Symbol operation, List args) {
   match (%($operation @args)) {
     case %(quote ?form): return form;
     case %(quasiquote ?form): return self.quasiquote(env, form, 0);
@@ -87,10 +85,11 @@ static Var Interpreter.special(Interpreter *self, Environment *env,
       return self.bind(target, type);
     }
     case %(import ?form): {
-      Var path = self.eval(env, form), hook;
+      Var path = self.eval(env, form);
+      Atom hook = Atom.intern("_x2c.import-hook");
       _string_argument(path, %"import");
-      if (self.globals.try_get(Atom.intern("_x2c.import-hook"), &hook))
-        return self.apply(NULL, hook, %($path));
+      if (self.globals.contains(hook))
+        return self.apply(NULL, self.globals[hook], %($path));
       return _import_file(self, path);
     }
   }
@@ -98,18 +97,16 @@ static Var Interpreter.special(Interpreter *self, Environment *env,
 }
 
 // Apply receives values; eval alone decides which expressions to evaluate.
-static Var Interpreter.apply(Interpreter *self, Environment *env,
-                             Var function, List values) {
+static Var Interp.apply(Interp *self, Env *env, Var function, List values) {
   if (function is <lambda>) {
-    Closure closure = function.pointer();
+    Fn closure = function.pointer();
     if (closure.macro)
       raise %(not-call (operation "apply") (actual ${function.kind()}));
     return self.invoke(env, closure, values);
   }
   if (function is not <func>) raise %(not-call (actual ${function.kind()}));
-  Var special;
-  if (self.specials.try_get(function, &special)) {
-    if (special != <apply>.var())
+  if (self.specials.contains(function)) {
+    if (self.specials[function] != <apply>.var())
       raise %(not-call (operation "apply") (actual ${function.kind()}));
     match (values) case %(?callable ?args):
       return self.apply(env, callable, _list_argument(args, %"apply"));
@@ -120,37 +117,34 @@ static Var Interpreter.apply(Interpreter *self, Environment *env,
 
 // environments and closures
 
-static Var Interpreter.lookup(Interpreter *self, Environment *env, Var name) {
-  Var value;
+static Var Interp.lookup(Interp *self, Env *env, Var name) {
   for (; env; env = env.parent)
-    if (env.bindings.try_get(name, &value)) return value;
-  if (self.globals.try_get(name, &value) ||
-      self.reserved.try_get(name, &value)) return value;
+    if (env.bindings.contains(name)) return env.bindings[name];
+  if (self.globals.contains(name)) return self.globals[name];
+  if (self.reserved.contains(name)) return self.reserved[name];
   raise %(unbound (name $name));
 }
 
-static Var Interpreter.closure(Interpreter *self, Environment *env,
-                               List params, Var body, int macro) {
+static Var Interp.closure(Interp *self, Env *env,
+                          List params, Var body, int macro) {
   Map captures = %{};
   // x2c Lisp captures names even inside quoted and nested List bodies.
-  if (body is <list>) foreach (Var name, List.flatten(body)) {
+  if (body is <list>) foreach (Var name, body.list().flatten()) {
     if (!name.is_atom() || self.reserved.contains(name) ||
         captures.contains(name) || params.contains(name)) continue;
-    for (Environment *local = env; local; local = local.parent) {
-      Var value;
-      if (local.bindings.try_get(name, &value)) {
-        captures[name] = value;
+    for (Env *local = env; local; local = local.parent) {
+      if (local.bindings.contains(name)) {
+        captures[name] = local.bindings[name];
         break;
       }
     }
   }
-  Closure closure = Scope.malloc(sizeof(struct Closure));
-  *closure = (struct Closure) { params, body, captures, macro };
+  Fn closure = Scope.malloc(sizeof(struct Fn));
+  *closure = (struct Fn) { params, body, captures, macro };
   return Var.new(<lambda>, closure);
 }
 
-static Var Interpreter.invoke(Interpreter *self, Environment *env,
-                              Closure closure, List values) {
+static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
   Map bindings = $auto(%{});
   for (List params = closure.params; params; params = params.cdr()) {
     Var (name, rest) = params;
@@ -169,14 +163,13 @@ static Var Interpreter.invoke(Interpreter *self, Environment *env,
   if (values)
     raise %(bad-arity (operation "apply") (value ${closure.body}));
   // Captures take priority; uncaptured names remain visible in the caller.
-  Environment captured = { closure.captures, env };
-  Environment local = { bindings, &captured };
+  Env captured = { closure.captures, env };
+  Env local = { bindings, &captured };
   return self.eval(&local, closure.body);
 }
 
 // Quasiquote returns one form; quoted_item returns its contributed elements.
-static Var Interpreter.quasiquote(Interpreter *self, Environment *env,
-                                  Var form, int depth) {
+static Var Interp.quasiquote(Interp *self, Env *env, Var form, int depth) {
   if (form is not <list> || form.is_nil()) return form;
   List expression = form;
   Var (head, argument) = expression;
@@ -199,8 +192,7 @@ static Var Interpreter.quasiquote(Interpreter *self, Environment *env,
   return first.append(rest);
 }
 
-static List Interpreter.quoted_item(Interpreter *self, Environment *env,
-                                    Var form, int depth) {
+static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
   match (form) case %(unquote-splicing ?argument) if (!depth): {
     Var value = self.eval(env, argument);
     if (value is not <list>)
@@ -227,20 +219,18 @@ static String _string_argument(Var value, String operation) {
   return value;
 }
 
-static Var Interpreter.bind(Interpreter *self, Var name, Var signature) {
+static Var Interp.bind(Interp *self, Var name, Var signature) {
   _string_argument(name, %"bind");
   if (signature is not <list>)
     raise %(bad-sig (operation "bind") (value $signature));
-  Var function;
-  if (!self.natives.try_get(name, &function))
-    raise %(no-symbol (name $name) (sig $signature));
-  return function;
+  if (self.natives.contains(name)) return self.natives[name];
+  raise %(no-symbol (name $name) (sig $signature));
 }
 
 static void _bad_clause(Var clause) {
   if (clause is not <list>)
     raise %(bad-types (operation "cond") (value $clause) (want "List"));
-  int actual = List.len(clause);
+  int actual = clause.list().len();
   raise %(bad-arity (operation "cond-clause") (expected 2)
                      (actual $actual) (value $clause));
 }
@@ -421,10 +411,11 @@ static Var _chain(List values, String operation, int want, int expect) {
   int actual = values.len();
   if (actual < 2)
     raise %(bad-arity (operation $operation) (expected 2) (actual $actual));
-  for (List p = values; p.cdr(); p = p.cdr()) {
-    Var (left, right) = p;
+  Var left = values.car();
+  foreach (Var right, values.cdr()) {
     int order = _compare(left, right).integer();
     if (expect ? order != want : order == want) return _bool(0);
+    left = right;
   }
   return _bool(1);
 }
@@ -467,7 +458,7 @@ static Var _write_file(String path, String text) {
 macro Expression $rest(Expr $function) =>
   (Func.new_rest($function, %((func (("List"))) "Var")))
 
-static void _install_natives(Interpreter *self) {
+static void _install_natives(Interp *self) {
   // Lisp name, bind spelling, implementation. () leaves a native import-only.
   List natives = %(
     (car             "Var_car"              ${Func.var(Var_car)})
@@ -654,7 +645,7 @@ static List _standard_library(void) => %(
   (def lower string-downcase)
 );
 
-static Var _eval_text(Interpreter *self, String source) {
+static Var _eval_text(Interp *self, String source) {
   Scope tokens = $auto(Scope.new_named("Reference tokens"));
   Reader reader = Reader.scan(source, 0, &tokens);
   Var form, result = %();
@@ -663,8 +654,8 @@ static Var _eval_text(Interpreter *self, String source) {
   return result;
 }
 
-static Var _import_file(Interpreter *self, String path) {
-  File source = $auto(File.open(path, "r"));
+static Var _import_file(Interp *self, String path) {
+  File source = $auto(path.open("r"));
   Block content = $auto(Block.new(sizeof(char)));
   if (source.read_into(content) == FILE_READ_EOF) return %();
   if (content.length > INT_MAX) {
@@ -679,8 +670,8 @@ static Var _import_file(Interpreter *self, String path) {
 
 static Var _reserved(void) => Var.null();
 
-static Interpreter _interpreter(void) {
-  Interpreter self = { %{}, %{}, %{}, %{} };
+static Interp _interpreter(void) {
+  Interp self = { %{}, %{}, %{}, %{} };
   _install_natives(&self);
   foreach (Var name, %(quote quasiquote cond def lambda macro eval
                        apply bind import)) {
@@ -692,7 +683,7 @@ static Interpreter _interpreter(void) {
   return self;
 }
 
-static int _repl(Interpreter *self) {
+static int _repl(Interp *self) {
   Buffer source = $auto(Buffer.new(0));
   unsigned cursor = 0;
   int failed = 0, incomplete = 0, interactive = isatty(Stdin.fileno());
@@ -743,7 +734,7 @@ int main(int argc, char **argv) {
   Scope session = $auto(Scope.new_named("Reference Lisp"));
   $scope(&session) {
     try {
-      Interpreter self = _interpreter();
+      Interp self = _interpreter();
       if (argc == 1) return _repl(&self) ? 0 : 1;
       String source;
       if (argc == 3 && !strcmp(argv[1], "-e")) source = argv[2];

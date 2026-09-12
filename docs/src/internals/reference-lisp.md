@@ -25,26 +25,32 @@ reads the file requested by the Lisp program.
 
 ## Reading the source
 
-Start with `Interpreter.eval`, then `Interpreter.special`. The first reads
+Start with `Interp.eval`, then `Interp.special`. The first reads
 like the evaluation rule: resolve an atom, return a literal, or evaluate a
 call. The second matches the grammar directly: `(quote form)`, `(def name
 form)`, `(lambda parameters body)`, and the other special forms. A matched
 shape supplies its parts; separate error helpers describe rejected forms.
 
-`Interpreter.apply` receives values. Only `eval` decides which arguments to
+`Interp.apply` receives values. Only `eval` decides which arguments to
 evaluate: ordinary calls evaluate left to right, while a macro receives its
 raw argument forms. Native argument marshalling lives with the native
 operations, so it does not interrupt the evaluator's rules.
 
-`Closure` stores parameters, a body, captured values, and whether it is a
-macro. It uses the ordinary `Var` value tag `lambda`, preserving sorting, type
-queries, and native diagnostics. The record is defined entirely here; no
+`Fn` is a closure: parameters, a body, captured values, and a macro flag. It
+uses the ordinary `Var` value tag `lambda`, preserving sorting, type queries,
+and native diagnostics. The record is defined entirely here; no
 production `Lambda` object or protocol is used.
 
-`Environment` is a stack-local link and a Map of bindings. Call bindings are
+`Env` is a stack-local link and a Map of bindings. Call bindings are
 freed when the call returns. Closure records and their capture Maps remain in
 the session Scope. Capturing copies a Var, preserving the identity and
 ownership of its referent. Ordinary String and List pools own canonical data.
+
+These private records use plain structs. Class defaults would require extra
+initialization and comparison methods for their Map fields; the evaluator
+needs neither generic record boxing nor field comparison. `foreach` handles
+element traversal. The remaining `for` loops follow environment links or keep
+the parameter tail needed to bind a dotted rest argument.
 
 Quasiquotation has two operations with distinct results: `quasiquote` returns
 one value; `quoted_item` returns the elements that value contributes to its
