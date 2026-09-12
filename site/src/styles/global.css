@@ -1233,10 +1233,6 @@ a.docs-card:hover {
   margin-bottom: 0;
 }
 
-.deal-copy>p.install-note {
-  font-size: 14px;
-}
-
 .landing-section:nth-of-type(even) .deal-copy>p {
   color: var(--muted-dark);
 }
