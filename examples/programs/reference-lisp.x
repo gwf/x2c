@@ -1,8 +1,8 @@
 /*  reference-lisp.x -- a recursive interpreter for x2c Lisp
 
-    Ordinary x2c values hold syntax and data. Closures belong to the session
-    Scope; call environments live on the C stack. Captures copy values, while
-    uncaptured names remain visible through the caller's environment.
+    Values are ordinary x2c data. Closures live in the session Scope;
+    environments live on the call stack. The evaluator below is the whole
+    execution model: read a form, resolve its head, and recurse.
 */
 
 #include <unistd.h>
@@ -20,18 +20,107 @@ typedef struct Environment {
 } Environment;
 
 typedef struct Interpreter {
-  Map globals, reserved, specials, natives;
+  Map globals, natives;
+  // Reserved names map to functions; specials maps those identities back.
+  Map reserved, specials;
 } Interpreter;
 
-static Var _procedure(Var value) {
-  return value is <func> || value is <lambda> ? <true>.var() : %().var();
+// evaluation
+
+static Var Interpreter.eval(Interpreter *self, Environment *env, Var form) {
+  if (form is void) raise %(void-op (operation "eval"));
+  if (form.is_atom()) return self.lookup(env, form);
+  if (form is not <list> || form.is_nil()) return form;
+  List expression = form;
+  Var function = self.eval(env, expression.car());
+  List args = expression.cdr();
+  if (function is <lambda>) {
+    Closure closure = function.pointer();
+    if (closure.macro)
+      return self.eval(env, self.invoke(env, closure, args));
+  }
+  else {
+    if (function is not <func>) raise %(not-call (actual ${function.kind()}));
+    Var special;
+    if (self.specials.try_get(function, &special))
+      return self.special(env, special, args);
+  }
+  List values = self.eval_args(env, args);
+  return self.apply(env, function, values);
 }
 
-static Symbol _type(Var value) {
-  return value.tag();
+static List Interpreter.eval_args(Interpreter *self, Environment *env,
+                                  List forms) {
+  Array values = $auto(%[]);
+  foreach (Var form, forms) values.push(self.eval(env, form));
+  return values;
 }
 
-static Var _lookup(Interpreter *self, Environment *env, Var name) {
+static Var Interpreter.special(Interpreter *self, Environment *env,
+                               Symbol operation, List args) {
+  match (%($operation @args)) {
+    case %(quote ?form): return form;
+    case %(quasiquote ?form): return self.quasiquote(env, form, 0);
+    case %(def ?name ?form) if (name.is_atom()):
+      return self.globals[name] = self.eval(env, form);
+    case %(lambda ?(List params) ?body):
+      return self.closure(env, params, body, 0);
+    case %(macro ?(List params) ?body):
+      return self.closure(env, params, body, 1);
+    case %(cond *clauses) if (clauses): {
+      foreach (Var clause, clauses) {
+        match (clause) {
+          case %(?test ?body):
+            if (!self.eval(env, test).is_nil()) return self.eval(env, body);
+          default: _bad_clause(clause);
+        }
+      }
+      return %();
+    }
+    case %(eval ?form): return self.eval(NULL, self.eval(env, form));
+    case %(apply ?function ?values): {
+      Var callable = self.eval(env, function), actual = self.eval(env, values);
+      return self.apply(env, callable, _list_argument(actual, %"apply"));
+    }
+    case %(bind ?name ?signature): {
+      Var target = self.eval(env, name), type = self.eval(env, signature);
+      return self.bind(target, type);
+    }
+    case %(import ?form): {
+      Var path = self.eval(env, form), hook;
+      _string_argument(path, %"import");
+      if (self.globals.try_get(Atom.intern("_x2c.import-hook"), &hook))
+        return self.apply(NULL, hook, %($path));
+      return _import_file(self, path);
+    }
+  }
+  return _bad_form(operation, args);
+}
+
+// Apply receives values; eval alone decides which expressions to evaluate.
+static Var Interpreter.apply(Interpreter *self, Environment *env,
+                             Var function, List values) {
+  if (function is <lambda>) {
+    Closure closure = function.pointer();
+    if (closure.macro)
+      raise %(not-call (operation "apply") (actual ${function.kind()}));
+    return self.invoke(env, closure, values);
+  }
+  if (function is not <func>) raise %(not-call (actual ${function.kind()}));
+  Var special;
+  if (self.specials.try_get(function, &special)) {
+    if (special != <apply>.var())
+      raise %(not-call (operation "apply") (actual ${function.kind()}));
+    match (values) case %(?callable ?args):
+      return self.apply(env, callable, _list_argument(args, %"apply"));
+    return _bad_form(<apply>, values);
+  }
+  return _native_call(function, values);
+}
+
+// environments and closures
+
+static Var Interpreter.lookup(Interpreter *self, Environment *env, Var name) {
   Var value;
   for (; env; env = env.parent)
     if (env.bindings.try_get(name, &value)) return value;
@@ -40,38 +129,28 @@ static Var _lookup(Interpreter *self, Environment *env, Var name) {
   raise %(unbound (name $name));
 }
 
-static List _arguments(Interpreter *self, Environment *env, List forms) {
-  Array values = $auto(%[]);
-  foreach (Var form, forms) values.push(_eval(self, env, form));
-  return values;
-}
-
-static Var _closure(Interpreter *self, Environment *env, List args,
-                    int macro) {
-  if (args.len() != 2 || args.car() is not <list>) {
-    Symbol operation = macro ? <macro> : <lambda>;
-    raise %(bad-sig (operation $operation) (value $args));
-  }
-  Closure closure = Scope.malloc(sizeof(struct Closure));
-  (List params, Var body) = args;
-  *closure = (struct Closure) { params, body, %{}, macro };
-  // Compatibility includes names inside quoted and nested list bodies.
+static Var Interpreter.closure(Interpreter *self, Environment *env,
+                               List params, Var body, int macro) {
+  Map captures = %{};
+  // x2c Lisp captures names even inside quoted and nested List bodies.
   if (body is <list>) foreach (Var name, List.flatten(body)) {
     if (!name.is_atom() || self.reserved.contains(name) ||
-        closure.captures.contains(name) || params.contains(name)) continue;
+        captures.contains(name) || params.contains(name)) continue;
     for (Environment *local = env; local; local = local.parent) {
       Var value;
       if (local.bindings.try_get(name, &value)) {
-        closure.captures[name] = value;
+        captures[name] = value;
         break;
       }
     }
   }
+  Closure closure = Scope.malloc(sizeof(struct Closure));
+  *closure = (struct Closure) { params, body, captures, macro };
   return Var.new(<lambda>, closure);
 }
 
-static Var _call(Interpreter *self, Environment *env, Closure closure,
-                 List values) {
+static Var Interpreter.invoke(Interpreter *self, Environment *env,
+                              Closure closure, List values) {
   Map bindings = $auto(%{});
   for (List params = closure.params; params; params = params.cdr()) {
     Var (name, rest) = params;
@@ -89,292 +168,192 @@ static Var _call(Interpreter *self, Environment *env, Closure closure,
   }
   if (values)
     raise %(bad-arity (operation "apply") (value ${closure.body}));
+  // Captures take priority; uncaptured names remain visible in the caller.
   Environment captured = { closure.captures, env };
   Environment local = { bindings, &captured };
-  return _eval(self, &local, closure.body);
+  return self.eval(&local, closure.body);
 }
 
-static void _arity(List args, int expected, String operation) {
-  int actual = args.len();
-  if (actual != expected)
-    raise %(bad-arity (operation $operation) (expected $expected)
-                       (actual $actual));
-}
-
-static Var _quasiquote(Interpreter *self, Environment *env, Var expression,
-                      int splice, int depth) {
-  if (expression is not <list> || expression.is_nil())
-    return splice ? %($expression).var() : expression;
-  List form = expression;
-  Var (head, argument) = form;
-  Var quote = Atom.intern("quasiquote"), unquote = Atom.intern("unquote");
-  Var splicing = Atom.intern("unquote-splicing");
-  if (head == quote || head == unquote || head == splicing) {
-    if (head != quote && form.len() != 2)
-      raise %(bad-arity (operation "quasiquote") (value $expression));
-    if (head == quote || depth > 0) {
-      Var tail = _quasiquote(self, env, form.cdr(), 0,
-                            depth + (head == quote ? 1 : -1));
-      Var value = head.cons(tail);
-      return splice ? %($value).var() : value;
-    }
-    Var value = _eval(self, env, argument);
-    if (!splice && head == splicing)
+// Quasiquote returns one form; quoted_item returns its contributed elements.
+static Var Interpreter.quasiquote(Interpreter *self, Environment *env,
+                                  Var form, int depth) {
+  if (form is not <list> || form.is_nil()) return form;
+  List expression = form;
+  Var (head, argument) = expression;
+  Var (quote, unquote, splice) = %(quasiquote unquote unquote-splicing);
+  if (head == quote)
+    return cons(head, self.quasiquote(env, expression.cdr(), depth + 1));
+  if (head == unquote || head == splice) {
+    if (expression.len() != 2)
+      raise %(bad-arity (operation "quasiquote") (value $form));
+    if (depth)
+      return cons(head, self.quasiquote(env, expression.cdr(), depth - 1));
+    Var value = self.eval(env, argument);
+    if (head == splice)
       raise %(bad-types (operation "quasiquote-splice")
-                         (actual ${expression.kind()}));
-    if (splice && head == unquote) return %($value);
-    if (splice && value is not <list>)
+                         (actual ${form.kind()}));
+    return value;
+  }
+  List first = self.quoted_item(env, head, depth);
+  List rest = self.quasiquote(env, expression.cdr(), depth);
+  return first.append(rest);
+}
+
+static List Interpreter.quoted_item(Interpreter *self, Environment *env,
+                                    Var form, int depth) {
+  match (form) case %(unquote-splicing ?argument) if (!depth): {
+    Var value = self.eval(env, argument);
+    if (value is not <list>)
       raise %(bad-types (operation "quasiquote-splice")
                          (actual ${value.kind()}));
     return value;
   }
-  List first = _quasiquote(self, env, head, 1, depth);
-  List rest = _quasiquote(self, env, form.cdr(), 0, depth);
-  Var value = first.append(rest);
-  return splice ? %($value).var() : value;
+  return %(${self.quasiquote(env, form, depth)});
 }
 
-static Var _special(Interpreter *self, Environment *env, Symbol operation,
-                    List args) {
-  Var (first, second) = args;
-  switch (operation) {
-    case <lambda>: case <macro>:
-      return _closure(self, env, args, operation == <macro>);
-    case <quote>:
-      _arity(args, 1, %"quote");
-      return first;
-    case <quasiquote>:
-      _arity(args, 1, %"quasiquote");
-      return _quasiquote(self, env, first, 0, 0);
-    case <def>: {
-      if (args.len() != 2 || !first.is_atom()) {
-        int actual = args.len();
-        raise %(bad-arity (operation "def") (expected 2) (actual $actual)
-                           (value $args));
-      }
-      return self.globals[first] = _eval(self, env, second);
-    }
-    case <cond>:
-      if (!args)
-        raise %(bad-arity (operation "cond") (expected 1) (actual 0));
-      foreach (Var clause, args) {
-        if (clause is not <list>)
-          raise %(bad-types (operation "cond") (value $clause) (want "List"));
-        List pair = clause;
-        if (pair.len() != 2) {
-          int actual = pair.len();
-          raise %(bad-arity (operation "cond-clause") (expected 2)
-                             (actual $actual) (value $clause));
-        }
-        Var (test, result) = pair;
-        if (!_eval(self, env, test).is_nil()) return _eval(self, env, result);
-      }
-      return %();
-    case <eval>:
-      _arity(args, 1, %"eval");
-      return _eval(self, NULL, _eval(self, env, first));
-    case <apply>: {
-      _arity(args, 2, %"apply");
-      Var callable = _eval(self, env, first);
-      Var values = _eval(self, env, second);
-      if (values is not <list>)
-        raise %(bad-types (operation "apply") (actual ${values.kind()})
-                           (want "List"));
-      return _apply(self, env, callable, values, 1);
-    }
-    case <bind>: {
-      _arity(args, 2, %"bind");
-      Var name = _eval(self, env, first);
-      Var signature = _eval(self, env, second);
-      if (name is not <string>)
-        raise %(bad-types (operation "bind") (actual ${name.kind()})
-                           (want "String"));
-      if (signature is not <list>)
-        raise %(bad-sig (operation "bind") (value $signature));
-      Var function;
-      if (!self.natives.try_get(name, &function))
-        raise %(no-symbol (name $name) (sig $signature));
-      return function;
-    }
-    case <import>: {
-      _arity(args, 1, %"import");
-      Var path = _eval(self, env, first);
-      if (path is not <string>)
-        raise %(bad-types (operation "import") (actual ${path.kind()})
-                           (want "String"));
-      Var hook;
-      if (self.globals.try_get(Atom.intern("_x2c.import-hook"), &hook))
-        return _apply(self, NULL, hook, %($path), 1);
-      return _import_file(self, path);
-    }
-  }
-  return void;
+// Diagnostics preserve the language's errors without obscuring valid forms.
+
+static List _list_argument(Var value, String operation) {
+  if (value is not <list>)
+    raise %(bad-types (operation $operation) (actual ${value.kind()})
+                       (want "List"));
+  return value;
 }
 
-// `values` distinguishes ordinary calls from Lisp's explicit apply form.
-static Var _apply(Interpreter *self, Environment *env, Var callable,
-                  List args, int values) {
-  if (callable is <lambda>) {
-    Closure closure = callable.pointer();
-    if (values && closure.macro)
-      raise %(not-call (operation "apply") (actual ${callable.kind()}));
-    List actual = values || closure.macro ? args : _arguments(self, env, args);
-    Var result = _call(self, env, closure, actual);
-    return closure.macro ? _eval(self, env, result) : result;
-  }
-  if (callable is not <func>) raise %(not-call (actual ${callable.kind()}));
-  Var special;
-  if (self.specials.try_get(callable, &special)) {
-    if (!values) return _special(self, env, special, args);
-    if (special != <apply>.var())
-      raise %(not-call (operation "apply") (actual ${callable.kind()}));
-    _arity(args, 2, %"apply");
-    Var rest = args.cadr();
-    if (rest is not <list>)
-      raise %(bad-types (operation "apply") (actual ${rest.kind()})
-                         (want "List"));
-    return _apply(self, env, args.car(), rest, 1);
-  }
-  List actual = values ? args : _arguments(self, env, args);
-  Func function = callable;
-  FuncArg *argv = Scope.malloc(actual.len() * sizeof(FuncArg));
-  defer Scope.free(argv);
-  int count = 0;
-  foreach (Var value, actual) argv[count++] = FuncArg.value(value);
-  return function.apply(count, argv);
+static String _string_argument(Var value, String operation) {
+  if (value is not <string>)
+    raise %(bad-types (operation $operation) (actual ${value.kind()})
+                       (want "String"));
+  return value;
 }
 
-static Var _eval(Interpreter *self, Environment *env, Var expression) {
-  if (expression is void) raise %(void-op (operation "eval"));
-  if (expression.is_atom()) return _lookup(self, env, expression);
-  if (expression is not <list> || expression.is_nil()) return expression;
-  List form = expression;
-  Var callable = _eval(self, env, form.car());
-  return _apply(self, env, callable, form.cdr(), 0);
+static Var Interpreter.bind(Interpreter *self, Var name, Var signature) {
+  _string_argument(name, %"bind");
+  if (signature is not <list>)
+    raise %(bad-sig (operation "bind") (value $signature));
+  Var function;
+  if (!self.natives.try_get(name, &function))
+    raise %(no-symbol (name $name) (sig $signature));
+  return function;
 }
 
-// The reader shares token spelling with x2c, but constructs its own forms.
+static void _bad_clause(Var clause) {
+  if (clause is not <list>)
+    raise %(bad-types (operation "cond") (value $clause) (want "List"));
+  int actual = List.len(clause);
+  raise %(bad-arity (operation "cond-clause") (expected 2)
+                     (actual $actual) (value $clause));
+}
 
-static Symbol _read_error(Symbol cause, String source, unsigned at) {
+static Var _bad_form(Symbol name, List args) {
+  if (name == <lambda> || name == <macro>)
+    raise %(bad-sig (operation $name) (value $args));
+  int actual = args.len();
+  if (name == <def>)
+    raise %(bad-arity (operation "def") (expected 2) (actual $actual)
+                       (value $args));
+  int expected = name == <apply> || name == <bind> ? 2 : 1;
+  String operation = name.str();
+  raise %(bad-arity (operation $operation) (expected $expected)
+                     (actual $actual));
+}
+
+// Tokens supply spelling; recursive descent supplies Lisp's grammar.
+typedef struct Reader {
+  Tokenizer tokens;
+  String source;
+  unsigned base, start;
+} Reader;
+
+static Var Reader._error(Reader *self, Symbol cause, unsigned at) {
   int line = 1, column = 1;
-  scan_next_line_col(source, (int) at, &line, &column);
+  scan_next_line_col(self.source, (int) at, &line, &column);
   if (cause == <incomplete>)
-    raise %(incomplete (source $source) (line $line) (column $column));
-  raise %(malformed (source $source) (line $line) (column $column));
+    raise %(incomplete (source ${self.source}) (line $line) (column $column));
+  raise %(malformed (source ${self.source}) (line $line) (column $column));
 }
 
-static Symbol _read_atom(Token token, String source, unsigned base,
-                         Var *out) {
-  String text = token.text;
-  switch (token.type) {
-    case <lit-char*>:
-      *out = String.new_len(text + 1, token.len - 2).unescape();
-      return <value>;
-    case <lit-int>: {
-      long value;
-      if (!String.new_len(text, token.len).try_long(&value))
-        return _read_error(<malformed>, source, base + token.pos);
-      if (value == (int) value) *out = (int) value;
-      else *out = value;
-      return <value>;
-    }
-    case <lit-float>: {
-      double value;
-      if (!String.new_len(text, token.len).try_double(&value))
-        return _read_error(<malformed>, source, base + token.pos);
-      *out = value;
-      return <value>;
-    }
-    case <lit-symbol>: {
-      String inner = text[1] == '"'
-        ? String.new_len(text + 2, token.len - 4).unescape()
-        : String.new_len(text + 1, token.len - 2);
-      if (!inner)
-        return _read_error(<malformed>, source, base + token.pos);
-      *out = Symbol.new(inner);
-      return <value>;
-    }
-    case <ident>:
-      *out = Atom.intern(text.unescape());
-      return <value>;
-  }
-  return _read_error(<malformed>, source, base + token.pos);
-}
-
-static Symbol _read_form(Tokenizer tokens, Token token, String source,
-                         unsigned base, unsigned *end, Var *out) {
-  if (!token || token.type == <eof>) return <incomplete>;
-  String prefix = NULL;
+static Var Reader._form(Reader *self, Token token) {
+  if (!token || token.type == <eof>)
+    return self._error(<incomplete>, self.start);
+  String text = token.text, prefix = NULL;
   switch (token.type) {
     case <error>:
-      if (tokens.status() == <incomplete>) return <incomplete>;
-      return _read_error(<malformed>, source, base + token.pos);
-    case <")">:
-      return _read_error(<malformed>, source, base + token.pos);
+      if (self.tokens.status() == <incomplete>)
+        return self._error(<incomplete>, self.start);
+      break;
     case <"(">: {
-      Array elements = %[];
-      defer elements.free();
+      Array elements = $auto(%[]);
       while (1) {
-        Token next = tokens.next();
-        if (!next || next.type == <eof>) return <incomplete>;
-        if (next.type == <")">) {
-          *end = next.pos + next.len;
-          *out = elements.list();
-          return <value>;
-        }
-        Var element = void;
-        Symbol status = _read_form(tokens, next, source, base, end, &element);
-        if (status != <value>) return status;
-        elements.push(element);
+        Token next = self.tokens.next();
+        if (next && next.type == <")">) return elements.list();
+        elements.push(self._form(next));
       }
     }
     case <"'">:  prefix = "quote";      break;
     case <"`">:  prefix = "quasiquote"; break;
     case <",">:  prefix = "unquote";    break;
     case <",@">: prefix = "unquote-splicing"; break;
+    case <lit-char*>:
+      return String.new_len(text + 1, token.len - 2).unescape();
+    case <lit-int>: {
+      long value;
+      if (!text.try_long(&value)) break;
+      if (value == (int) value) return (int) value;
+      return value;
+    }
+    case <lit-float>: {
+      double value;
+      if (text.try_double(&value)) return value;
+      break;
+    }
+    case <lit-symbol>: {
+      String inner = text[1] == '"'
+        ? String.new_len(text + 2, token.len - 4).unescape()
+        : String.new_len(text + 1, token.len - 2);
+      if (inner) return Symbol.new(inner);
+      break;
+    }
+    case <ident>:
+      return Atom.intern(text.unescape());
   }
   if (prefix) {
-    Var inner = void;
-    Symbol status = _read_form(
-      tokens, tokens.next(), source, base, end, &inner);
-    if (status == <value>) {
-      Var name = Atom.intern(prefix);
-      *out = %($name $inner);
-    }
-    return status;
+    Var name = Atom.intern(prefix), inner = self._form(self.tokens.next());
+    return %($name $inner);
   }
-  *end = token.pos + token.len;
-  return _read_atom(token, source, base, out);
+  return self._error(<malformed>, self.base + token.pos);
 }
 
-static Symbol _read(String source, unsigned *cursor, Var *out) {
-  if (!source || !cursor) return <eof>;
-  unsigned base = *cursor;
-  Scope token_scope = $auto(Scope.new_named("Reference tokens"));
-  Tokenizer tokens;
-  $scope(&token_scope) {
-    tokens = Tokenizer.new_mode(source + base, <lisp>);
-    tokens.scan();
+// Token storage is temporary; the forms we construct belong to the caller.
+static Reader Reader.scan(String source, unsigned base, Scope *storage) {
+  Reader reader = { .source = source, .base = base };
+  $scope(storage) {
+    reader.tokens = Tokenizer.new_mode(source ? source + base : NULL, <lisp>);
+    reader.tokens.scan();
   }
-  Token first = tokens.next();
-  if (!first || first.type == <eof>) {
-    *cursor = source.len();
-    return <eof>;
-  }
-  *cursor = base + first.pos;
-  unsigned end = 0;
-  Var value = void;
-  Symbol status = _read_form(tokens, first, source, base, &end, &value);
-  if (status == <incomplete>)
-    return _read_error(status, source, *cursor);
-  if (status == <value>) {
-    if (out) *out = value;
-    *cursor = base + end;
-  }
-  return status;
+  return reader;
 }
 
-// Native operations for the independent recursive interpreter.
+// Void marks end of input; an unfinished form raises at its starting position.
+static Var Reader.next(Reader *self) {
+  Token first = self.tokens.next();
+  if (!first || first.type == <eof>) return void;
+  self.start = self.base + first.pos;
+  return self._form(first);
+}
+
+// native operations
+
+static Var _native_call(Func native, List values) {
+  FuncArg *args = Scope.malloc(values.len() * sizeof(FuncArg));
+  defer Scope.free(args);
+  int count = 0;
+  foreach (Var value, values) args[count++] = FuncArg.value(value);
+  return native.apply(count, args);
+}
+
+static Var _procedure(Var value) =>
+  _bool(value is <func> || value is <lambda>);
 
 static Var _bool(int x) {
   if (x) return <true>;
@@ -414,39 +393,29 @@ static Var _add(Var a, Var b) {
 }
 
 static Var _plus(List values) {
-  Var total = 0;
-  if (values && values.car() is <string>) total = String.new("");
-  foreach (Var value, values) total = _add(total, value);
-  return total;
+  Var seed = 0;
+  if (values && values.car() is <string>) seed = String.new("");
+  return values.foldl(seed, _add);
 }
 
-static Var _minus(List values) {
-  if (!values) raise %(bad-arity (operation "-") (expected 1) (actual 0));
-  Var total = values.car();
-  if (!values.cdr()) {
-    Var zero = 0;
-    return zero.binary(<->, total);
+static Var _times(List values) =>
+  values.foldl(1, %!(a, b) => a.binary(<*>, b));
+
+// Unary subtraction negates; unary division reciprocates. Both otherwise
+// combine the first argument with each following argument, left to right.
+static Var _arithmetic(List values, Symbol op, Var identity) {
+  if (!values) {
+    String operation = op.str();
+    raise %(bad-arity (operation $operation) (expected 1) (actual 0));
   }
-  foreach (Var value, values.cdr()) total = total.binary(<->, value);
-  return total;
+  Var result = values.car();
+  if (!values.cdr()) return identity.binary(op, result);
+  foreach (Var value, values.cdr()) result = result.binary(op, value);
+  return result;
 }
 
-static Var _times(List values) {
-  Var total = 1;
-  foreach (Var value, values) total = total.binary(<*>, value);
-  return total;
-}
-
-static Var _divide(List values) {
-  if (!values) raise %(bad-arity (operation "/") (expected 1) (actual 0));
-  Var total = values.car();
-  if (!values.cdr()) {
-    Var one = 1;
-    return one.binary(</>, total);
-  }
-  foreach (Var value, values.cdr()) total = total.binary(</>, value);
-  return total;
-}
+static Var _minus(List values) => _arithmetic(values, <->, 0);
+static Var _divide(List values) => _arithmetic(values, </>, 1);
 
 static Var _chain(List values, String operation, int want, int expect) {
   int actual = values.len();
@@ -470,16 +439,14 @@ static Var _gt_chain(List values) => _chain(values, %">", 1, 1);
 
 static Var _ge_chain(List values) => _chain(values, %">=", -1, 0);
 
+// These return Var because the native signature appears in Lisp errors.
 static Var _str(Var value) => value.str();
-
 static Var _repr(Var value) => value.repr();
-
 static Var _string_append(String left, String right) => left + right;
+static Var _string_downcase(String string) => string.lower();
 
 static Var _substring(String string, int start, int stop) =>
   string.getslice(start, stop, 1);
-
-static Var _string_downcase(String string) => string.lower();
 
 static Var _match_replace(List input, Var pat, Var template) {
   Var result;
@@ -495,125 +462,67 @@ static Var _write_file(String path, String text) {
   return _bool(wrote && closed);
 }
 
-static Map _natives(void) {
-  return %{
-    "Var_car": ${Func.new(Var_car, %((func (("Var"))) "Var"))},
-    "Var_cdr": ${Func.new(Var_cdr, %((func (("Var"))) "List"))},
-    "Var_cons": ${Func.new(Var_cons, %((func (("Var") ("List"))) "List"))},
-    "lisp_atom": ${Func.new(_atom, %((func (("Var"))) "Var"))},
-    "lisp_pair": ${Func.new(_pair, %((func (("Var"))) "Var"))},
-    "lisp_list": ${Func.new(_list, %((func (("Var"))) "Var"))},
-    "lisp_eq": ${Func.new(_eq, %((func (("Var") ("Var"))) "Var"))},
-    "lisp_type": ${Func.new(_type, %((func (("Var"))) "Symbol"))},
-    "lisp_number": ${Func.new(_number, %((func (("Var"))) "Var"))},
-    "lisp_string": ${Func.new(_string, %((func (("Var"))) "Var"))},
-    "lisp_symbol": ${Func.new(_symbol, %((func (("Var"))) "Var"))},
-    "lisp_procedure": ${Func.new(_procedure, %((func (("Var"))) "Var"))},
-    "List_reverse": ${Func.new(List_reverse, %((func (("List"))) "List"))},
-    "List_len": ${Func.new(List_len, %((func (("List"))) int))},
-    "List_match": ${Func.new(List_match, %((func (("List") ("Var"))) "List"))},
-    "lisp_match_replace":
-      ${Func.new(_match_replace, %((func (("List") ("Var") ("Var"))) "Var"))},
-    "List_search":
-      ${Func.new(List_search, %((func (("List") ("Var"))) "List"))},
-    "List_search_replace":
-      ${Func.new(List_search_replace,
-                 %((func (("List") ("Var") ("Var"))) "List"))},
-    "lisp_add": ${Func.new(_add, %((func (("Var") ("Var"))) "Var"))},
-    "Var_binary":
-      ${Func.new(Var_binary, %((func (("Var") ("Symbol") ("Var"))) "Var"))},
-    "lisp_compare": ${Func.new(_compare, %((func (("Var") ("Var"))) "Var"))},
-    "lisp_plus": ${Func.new_rest(_plus, %((func (("List"))) "Var"))},
-    "lisp_minus": ${Func.new_rest(_minus, %((func (("List"))) "Var"))},
-    "lisp_times": ${Func.new_rest(_times, %((func (("List"))) "Var"))},
-    "lisp_divide": ${Func.new_rest(_divide, %((func (("List"))) "Var"))},
-    "lisp_eq_chain": ${Func.new_rest(_eq_chain, %((func (("List"))) "Var"))},
-    "lisp_lt_chain": ${Func.new_rest(_lt_chain, %((func (("List"))) "Var"))},
-    "lisp_le_chain": ${Func.new_rest(_le_chain, %((func (("List"))) "Var"))},
-    "lisp_gt_chain": ${Func.new_rest(_gt_chain, %((func (("List"))) "Var"))},
-    "lisp_ge_chain": ${Func.new_rest(_ge_chain, %((func (("List"))) "Var"))},
-    "lisp_str": ${Func.new(_str, %((func (("Var"))) "Var"))},
-    "lisp_repr": ${Func.new(_repr, %((func (("Var"))) "Var"))},
-    "String_len": ${Func.new(String_len, %((func (("String"))) int))},
-    "lisp_string_append":
-      ${Func.new(_string_append, %((func (("String") ("String"))) "Var"))},
-    "lisp_substring":
-      ${Func.new(_substring, %((func (("String") (int) (int))) "Var"))},
-    "lisp_string_downcase":
-      ${Func.new(_string_downcase, %((func (("String"))) "Var"))},
-    "lisp_read_file": ${Func.new(_read_file, %((func (("String"))) "Var"))},
-    "lisp_write_file":
-      ${Func.new(_write_file, %((func (("String") ("String"))) "Var"))},
-    "List_sort": ${Func.new(List_sort, %((func (("List"))) "List"))},
-  };
+// Ordinary function conversion infers fixed native signatures. Rest natives
+// consume one List; this macro states that shared calling convention once.
+macro Expression $rest(Expr $function) =>
+  (Func.new_rest($function, %((func (("List"))) "Var")))
+
+static void _install_natives(Interpreter *self) {
+  // Lisp name, bind spelling, implementation. () leaves a native import-only.
+  List natives = %(
+    (car             "Var_car"              ${Func.var(Var_car)})
+    (cdr             "Var_cdr"              ${Func.var(Var_cdr)})
+    (cons            "Var_cons"             ${Func.var(Var_cons)})
+    (atom?           "lisp_atom"            ${Func.var(_atom)})
+    (pair?           "lisp_pair"            ${Func.var(_pair)})
+    (list?           "lisp_list"            ${Func.var(_list)})
+    (eq?             "lisp_eq"              ${Func.var(_eq)})
+    (type            "lisp_type"            ${Func.var(Var_tag)})
+    (number?         "lisp_number"          ${Func.var(_number)})
+    (string?         "lisp_string"          ${Func.var(_string)})
+    (symbol?         "lisp_symbol"          ${Func.var(_symbol)})
+    (procedure?      "lisp_procedure"       ${Func.var(_procedure)})
+    (reverse         "List_reverse"         ${Func.var(List_reverse)})
+    (length          "List_len"             ${Func.var(List_len)})
+    (_match          "List_match"           ${Func.var(List_match)})
+    (match-replace   "lisp_match_replace"   ${Func.var(_match_replace)})
+    (search          "List_search"          ${Func.var(List_search)})
+    (_search-replace "List_search_replace"  ${Func.var(List_search_replace)})
+    (_add            "lisp_add"             ${Func.var(_add)})
+    (_binary         "Var_binary"           ${Func.var(Var_binary)})
+    (_compare        "lisp_compare"         ${Func.var(_compare)})
+    (+               "lisp_plus"            ${$rest(_plus)})
+    (-               "lisp_minus"           ${$rest(_minus)})
+    (*               "lisp_times"           ${$rest(_times)})
+    (/               "lisp_divide"          ${$rest(_divide)})
+    (=               "lisp_eq_chain"        ${$rest(_eq_chain)})
+    (<               "lisp_lt_chain"        ${$rest(_lt_chain)})
+    (<=              "lisp_le_chain"        ${$rest(_le_chain)})
+    (>               "lisp_gt_chain"        ${$rest(_gt_chain)})
+    (>=              "lisp_ge_chain"        ${$rest(_ge_chain)})
+    (str             "lisp_str"             ${Func.var(_str)})
+    (repr            "lisp_repr"            ${Func.var(_repr)})
+    (string-length   "String_len"           ${Func.var(String_len)})
+    (_string-append  "lisp_string_append"   ${Func.var(_string_append)})
+    (substring       "lisp_substring"       ${Func.var(_substring)})
+    (string-downcase "lisp_string_downcase" ${Func.var(_string_downcase)})
+    (()              "lisp_read_file"       ${Func.var(_read_file)})
+    (()              "lisp_write_file"      ${Func.var(_write_file)})
+    (()              "List_sort"            ${Func.var(List_sort)})
+  );
+  foreach (List row, natives) {
+    (Var name, String symbol, Func function) = row;
+    self.natives[symbol] = function;
+    if (!name.is_nil()) self.globals[name] = function;
+  }
 }
 
 // The standard vocabulary is Lisp data, evaluated by this interpreter.
 
-static List _standard(void) => %(
+static List _standard_library(void) => %(
   (def nil ())
   (def true 'true)
   (def false nil)
-  (def car
-    (bind "Var_car" '((func (("Var"))) "Var")))
-  (def cdr
-    (bind "Var_cdr" '((func (("Var"))) "List")))
-  (def cons
-    (bind "Var_cons" '((func (("Var") ("List"))) "List")))
-  (def atom?
-    (bind "lisp_atom" '((func (("Var"))) "Var")))
-  (def pair?
-    (bind "lisp_pair" '((func (("Var"))) "Var")))
-  (def list?
-    (bind "lisp_list" '((func (("Var"))) "Var")))
-  (def eq?
-    (bind "lisp_eq" '((func (("Var") ("Var"))) "Var")))
-  (def type
-    (bind "lisp_type" '((func (("Var"))) "Symbol")))
-  (def number?
-    (bind "lisp_number" '((func (("Var"))) "Var")))
-  (def string?
-    (bind "lisp_string" '((func (("Var"))) "Var")))
-  (def symbol?
-    (bind "lisp_symbol" '((func (("Var"))) "Var")))
-  (def procedure?
-    (bind "lisp_procedure" '((func (("Var"))) "Var")))
-  (def reverse
-    (bind "List_reverse" '((func (("List"))) "List")))
-  (def length
-    (bind "List_len" '((func (("List"))) int)))
-  (def _match
-    (bind "List_match" '((func (("List") ("Var"))) "List")))
-  (def match-replace
-    (bind "lisp_match_replace"
-      '((func (("List") ("Var") ("Var"))) "Var")))
-  (def search
-    (bind "List_search" '((func (("List") ("Var"))) "List")))
-  (def _search-replace
-    (bind "List_search_replace"
-      '((func (("List") ("Var") ("Var"))) "List")))
-  (def _add
-    (bind "lisp_add" '((func (("Var") ("Var"))) "Var")))
-  (def _binary
-    (bind "Var_binary"
-      '((func (("Var") ("Symbol") ("Var"))) "Var")))
-  (def _compare
-    (bind "lisp_compare" '((func (("Var") ("Var"))) "Var")))
-  (def str
-    (bind "lisp_str" '((func (("Var"))) "Var")))
-  (def repr
-    (bind "lisp_repr" '((func (("Var"))) "Var")))
-  (def string-length
-    (bind "String_len" '((func (("String"))) int)))
-  (def _string-append
-    (bind "lisp_string_append"
-      '((func (("String") ("String"))) "Var")))
-  (def substring
-    (bind "lisp_substring"
-      '((func (("String") (int) (int))) "Var")))
-  (def string-downcase
-    (bind "lisp_string_downcase"
-      '((func (("String"))) "Var")))
   (def defmacro
     (macro (name params body)
       `(def ,name (macro ,params ,body))))
@@ -691,16 +600,7 @@ static List _standard(void) => %(
   (defun mul (a b) (_binary a '* b))
   (defun div (a b) (_binary a '/ b))
   (defun mod (a b) (_binary a '% b))
-  (def + (bind "lisp_plus" '((func (("List"))) "Var")))
-  (def - (bind "lisp_minus" '((func (("List"))) "Var")))
-  (def * (bind "lisp_times" '((func (("List"))) "Var")))
-  (def / (bind "lisp_divide" '((func (("List"))) "Var")))
   (def % mod)
-  (def = (bind "lisp_eq_chain" '((func (("List"))) "Var")))
-  (def < (bind "lisp_lt_chain" '((func (("List"))) "Var")))
-  (def <= (bind "lisp_le_chain" '((func (("List"))) "Var")))
-  (def > (bind "lisp_gt_chain" '((func (("List"))) "Var")))
-  (def >= (bind "lisp_ge_chain" '((func (("List"))) "Var")))
   (defun string-append (. strings) (foldl _string-append "" strings))
   (defmacro let (bindings body)
     `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))
@@ -755,10 +655,11 @@ static List _standard(void) => %(
 );
 
 static Var _eval_text(Interpreter *self, String source) {
-  unsigned cursor = 0;
-  Var form = void, result = %();
-  while (_read(source, &cursor, &form) == <value>)
-    result = _eval(self, NULL, form);
+  Scope tokens = $auto(Scope.new_named("Reference tokens"));
+  Reader reader = Reader.scan(source, 0, &tokens);
+  Var form, result = %();
+  while ((form = reader.next()) is not void)
+    result = self.eval(NULL, form);
   return result;
 }
 
@@ -779,27 +680,16 @@ static Var _import_file(Interpreter *self, String path) {
 static Var _reserved(void) => Var.null();
 
 static Interpreter _interpreter(void) {
-  Interpreter self = { %{}, %{}, %{}, _natives() };
+  Interpreter self = { %{}, %{}, %{}, %{} };
+  _install_natives(&self);
   foreach (Var name, %(quote quasiquote cond def lambda macro eval
                        apply bind import)) {
     Func function = Func.new(_reserved, %((func ((void))) "Var"));
     self.reserved[name] = function;
     self.specials[function] = name;
   }
-  foreach (Var form, _standard()) _eval(&self, NULL, form);
+  foreach (Var form, _standard_library()) self.eval(NULL, form);
   return self;
-}
-
-static int _evaluate(Interpreter *self, String source, int print) {
-  try {
-    Var result = _eval_text(self, source);
-    if (print) Stdout.printf("%s\n", result.repr());
-    return 1;
-  }
-  catch %(?code *detail): {
-    Stderr.printf("error: %s\n", cons(code, detail).repr());
-    return 0;
-  }
 }
 
 static int _repl(Interpreter *self) {
@@ -820,31 +710,31 @@ static int _repl(Interpreter *self) {
       return !failed;
     }
     source.write(line);
-    while (1) {
-      Symbol status = <eof>;
-      Var form = void;
-      try status = _read(source, &cursor, &form);
-      catch %(incomplete *): status = <incomplete>;
-      catch %(?code *detail): {
-        Stderr.printf("error: %s\n", cons(code, detail).repr());
-        status = <malformed>;
-      }
-      if (status == <value>) {
-        try Stdout.printf("%s\n", _eval(self, NULL, form).repr());
+    Scope tokens = $auto(Scope.new_named("Reference tokens"));
+    Reader reader = {0};
+    incomplete = 0;
+    try {
+      reader = Reader.scan(source, cursor, &tokens);
+      Var form;
+      while ((form = reader.next()) is not void) {
+        try Stdout.printf("%s\n", self.eval(NULL, form).repr());
         catch %(?code *detail): {
           Stderr.printf("error: %s\n", cons(code, detail).repr());
           failed = 1;
         }
-        incomplete = 0;
-        continue;
       }
-      incomplete = status == <incomplete>;
-      if (!incomplete) {
-        if (status == <malformed>) failed = 1;
-        source.clear();
-        cursor = 0;
-      }
-      break;
+    }
+    catch %(incomplete *): {
+      incomplete = 1;
+      cursor = reader.start;
+    }
+    catch %(?code *detail): {
+      Stderr.printf("error: %s\n", cons(code, detail).repr());
+      failed = 1;
+    }
+    if (!incomplete) {
+      source.clear();
+      cursor = 0;
     }
   }
 }
@@ -855,15 +745,17 @@ int main(int argc, char **argv) {
     try {
       Interpreter self = _interpreter();
       if (argc == 1) return _repl(&self) ? 0 : 1;
-      if (argc == 3 && !strcmp(argv[1], "-e"))
-        return _evaluate(&self, String.new(argv[2]), 1) ? 0 : 1;
-      if (argc == 2 && !strcmp(argv[1], "--selftest"))
-        return _evaluate(&self,
-          "(list (apply + '(10 20 12)) (append '(1 2) '(3 4)))", 1) ? 0 : 1;
-      if (argc == 2)
-        return _evaluate(&self, File.open(argv[1], "r").string_close(), 1)
-               ? 0 : 1;
-      Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n", argv[0]);
+      String source;
+      if (argc == 3 && !strcmp(argv[1], "-e")) source = argv[2];
+      else if (argc == 2 && !strcmp(argv[1], "--selftest"))
+        source = "(list (apply + '(10 20 12)) (append '(1 2) '(3 4)))";
+      else if (argc == 2) source = File.open(argv[1], "r").string_close();
+      else {
+        Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n", argv[0]);
+        return 1;
+      }
+      Stdout.printf("%s\n", _eval_text(&self, source).repr());
+      return 0;
     }
     catch %(?code *detail):
       Stderr.printf("error: %s\n", cons(code, detail).repr());

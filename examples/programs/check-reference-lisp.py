@@ -115,6 +115,33 @@ def cases():
     for op in ("+", "-", "*", "/", "=", "<", "<=", ">", ">="):
         for args in ("", "2", "2 3", "2 3 4", "2 2 2", '2 "x"'):
             yield f"numeric-{op}-{args}", f"({op} {args})"
+    # Native signatures are visible in errors, including their return types.
+    for name, source in (
+        ("str", "(str)"),
+        ("repr", "(repr 1 2)"),
+        ("downcase", "(string-downcase 1)"),
+        ("string-append", '(_string-append "a" 1)'),
+    ):
+        yield f"native-signature-{name}", source
+    fixed_natives = (
+        "Var_car", "Var_cdr", "Var_cons", "lisp_atom", "lisp_pair",
+        "lisp_list", "lisp_eq", "lisp_type", "lisp_number", "lisp_string",
+        "lisp_symbol", "lisp_procedure", "List_reverse", "List_len",
+        "List_match", "lisp_match_replace", "List_search",
+        "List_search_replace", "lisp_add", "Var_binary", "lisp_compare",
+        "lisp_str", "lisp_repr", "String_len", "lisp_string_append",
+        "lisp_substring", "lisp_string_downcase", "lisp_read_file",
+        "lisp_write_file", "List_sort",
+    )
+    for native in fixed_natives:
+        yield f"native-arity-{native}", f'((bind "{native}" nil))'
+    for name, arguments in (
+        ("reverse", "1"), ("length", "1"), ("_match", "1 nil"),
+        ("match-replace", "1 nil nil"), ("search", "1 nil"),
+        ("_search-replace", "1 nil nil"), ("string-length", "1"),
+        ("substring", '"abc" "x" 1'),
+    ):
+        yield f"native-types-{name}", f"({name} {arguments})"
     errors = [
         "missing", "(1 2)", "(quote)", "(quote a b)", "(def)",
         "(def 1 2)", "(cond)", "(cond 1)", "(cond (true))",

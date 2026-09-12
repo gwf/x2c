@@ -25,28 +25,51 @@ reads the file requested by the Lisp program.
 
 ## Reading the source
 
-Start with `_eval`: atoms name values, scalars evaluate to themselves, and a
-nonempty List calls its evaluated head with the remaining forms. `_apply`
-distinguishes closures, special forms, and ordinary native functions. This is
-the evaluator's entire execution model.
+Start with `Interpreter.eval`, then `Interpreter.special`. The first reads
+like the evaluation rule: resolve an atom, return a literal, or evaluate a
+call. The second matches the grammar directly: `(quote form)`, `(def name
+form)`, `(lambda parameters body)`, and the other special forms. A matched
+shape supplies its parts; separate error helpers describe rejected forms.
+
+`Interpreter.apply` receives values. Only `eval` decides which arguments to
+evaluate: ordinary calls evaluate left to right, while a macro receives its
+raw argument forms. Native argument marshalling lives with the native
+operations, so it does not interrupt the evaluator's rules.
 
 `Closure` stores parameters, a body, captured values, and whether it is a
 macro. It uses the ordinary `Var` value tag `lambda`, preserving sorting, type
 queries, and native diagnostics. The record is defined entirely here; no
-production `Lambda` object or protocol is used. A macro receives raw arguments
-and returns an expansion that runs in its caller.
+production `Lambda` object or protocol is used.
 
 `Environment` is a stack-local link and a Map of bindings. Call bindings are
 freed when the call returns. Closure records and their capture Maps remain in
 the session Scope. Capturing copies a Var, preserving the identity and
 ownership of its referent. Ordinary String and List pools own canonical data.
 
-The reader uses ordinary x2c tokenization, then recursively constructs values
-and Lists. `_natives` binds ordinary operations through `Func`, which owns
-native argument conversion and arity checks. The `lisp_*` strings in this Map
-are compatibility names accepted by `bind`; their targets are independent
-functions in this source file. The quoted `_standard` List supplies macros
-and higher-order functions in Lisp itself.
+Quasiquotation has two operations with distinct results: `quasiquote` returns
+one value; `quoted_item` returns the elements that value contributes to its
+containing List. An active `,@` can contribute several elements. The nesting
+depth determines when an unquote becomes active.
+
+`Reader.scan` tokenizes one source batch. `Reader.next` returns successive
+forms, using recursive descent for Lists and reader prefixes. End of input is
+`void`; an unfinished or malformed form raises an error at its source
+position. Token storage has its own temporary Scope, while the forms outlive
+it. The REPL retains unfinished input and resumes from that form's start.
+
+`_install_natives` is one table of Lisp names, `bind` spellings, and ordinary
+x2c functions. A native whose Lisp name is `()` is available through `bind`
+without being installed globally. Function conversion supplies fixed native
+signatures; the small `$rest` macro states the shared convention for native
+functions that take every argument as a List. These are compile-time x2c
+facilities, not another runtime evaluator. The `lisp_*` strings are
+compatibility names; their implementations belong to this file or ordinary
+runtime modules.
+
+The quoted `_standard_library` List supplies the remaining macros and
+higher-order functions in Lisp itself. Native definitions appear only in the
+table, rather than being declared again in this List. The few text adapters
+that return `Var` preserve signatures printed in Lisp error messages.
 
 The source uses ordinary runtime collection and pattern operations, including
 `List.match` and replacement. Those operations retain their normal runtime
