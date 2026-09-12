@@ -139,14 +139,14 @@ make -C examples/packages/http-json-releases test
 
 ## Larger programs and tours
 
-[programs/reference-lisp.x](programs/reference-lisp.x) is a self-contained
+[programs/literate-lisp.x](programs/literate-lisp.x) is a self-contained
 recursive Lisp interpreter written in ordinary x2c. Its reader, closures,
 evaluator, native bindings, and standard library live in that one file.
 It runs without an initialization file:
 
 ```sh
-x2c run examples/programs/reference-lisp.x -- --selftest
-x2c run examples/programs/reference-lisp.x -- \
+x2c run examples/programs/literate-lisp.x -- --selftest
+x2c run examples/programs/literate-lisp.x -- \
   examples/data/reference-lisp/showcase.xlisp
 ```
 

@@ -173,7 +173,7 @@ def main():
     parser.add_argument("--build", action="store_true")
     args = parser.parse_args()
     if args.build:
-        for source, output in (("reference-lisp.x", args.reference),
+        for source, output in (("literate-lisp.x", args.reference),
                                ("lisp.x", args.oracle)):
             subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
                             output, str(ROOT / "examples/programs" / source)],

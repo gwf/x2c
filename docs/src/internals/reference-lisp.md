@@ -1,4 +1,4 @@
-# A recursive Lisp in x2c
+# Literate Lisp in x2c
 
 [The reference interpreter][source]
 implements x2c Lisp in one source file. It owns its reader, environments,
@@ -10,7 +10,7 @@ Build it from the repository root:
 
 ```sh
 ./builds/0/x2c build --output /tmp/reference-lisp \
-  examples/programs/reference-lisp.x
+  examples/programs/literate-lisp.x
 /tmp/reference-lisp --selftest
 /tmp/reference-lisp -e '(map (lambda (x) (* x x)) (list 1 2 3 4))'
 /tmp/reference-lisp examples/data/reference-lisp/showcase.xlisp
@@ -24,6 +24,12 @@ List literal, evaluated by this interpreter at startup. An explicit `import`
 reads the file requested by the Lisp program.
 
 ## Reading the source
+
+View this example at 120 columns. Top-level block comments explain Lisp;
+these comments stay within 75 columns and code within 79 columns. Terse line comments begin at
+column 81 and explain x2c syntax, conversions, and lifetime rules beside their
+uses. Notes beside the quoted standard library describe its runtime Lisp
+forms. Block comments begin at the left edge.
 
 Start with `Interp.eval`, then `Interp.special`. The first reads
 like the evaluation rule: resolve an atom, return a literal, or evaluate a
@@ -145,5 +151,24 @@ REPL recovery. It avoids printing opaque addresses and performs no output
 normalization. Run it when changing this interpreter or the production Lisp
 semantics; it is not an additional publication gate.
 
-[source]: https://github.com/gwf/x2c/blob/main/examples/programs/reference-lisp.x
+## Basic benchmarks
+
+The optional runner compares the recursive interpreter with the word-machine
+shell in `examples/programs/lisp.x`. Run it from the repository root:
+
+```sh
+python3 examples/programs/benchmark-reference-lisp.py --build
+python3 examples/programs/benchmark-reference-lisp.py --repeat 10
+python3 examples/programs/benchmark-reference-lisp.py --case fibonacci --show-source
+```
+
+The five workloads cover startup, recursive Fibonacci, map/fold operations,
+captured closures, and runtime Lisp macros. Each sample verifies an expected
+result. The runner alternates execution order and reports median milliseconds
+from fresh processes, including startup, library initialization, reading,
+word-machine compilation, evaluation, and output. These measure complete CLI
+runs; they do not isolate evaluator speed. The startup baseline is reported
+separately, without subtracting it from the other measurements.
+
+[source]: https://github.com/gwf/x2c/blob/main/examples/programs/literate-lisp.x
 [demo]: https://github.com/gwf/x2c/blob/main/examples/data/reference-lisp/showcase.xlisp
