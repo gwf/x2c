@@ -1076,7 +1076,7 @@ ada -> 36
 `Map.iter` yields values, `Map.keys` yields keys, and `Map.enumerate` yields
 two-element key/value `List`s. The one- and two-binder `foreach` forms use the
 same paths and allocate no pair `List`s. [Iteration](iteration.md) covers
-`foreach` and the `Iter` protocol.
+`foreach`, the `Iter` protocol, and the lazy combinators.
 [The language reference](../reference/language.md) specifies the
 destructuring form.
 
@@ -1291,6 +1291,6 @@ foreach(List entry, ranked) {
   API reference for each collection.
 - [The language reference](../reference/language.md) has the percent
   literal, indexing, and slicing rules.
-- [Iteration](iteration.md) for `foreach` and iterators,
+- [Iteration](iteration.md) for `foreach` and lazy pipelines,
   [Pattern Matching](match.md) for taking `List`s apart, and
   [Idioms](idioms.md) for recommended usage.
