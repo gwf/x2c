@@ -27,7 +27,6 @@ typedef struct ExceptionFrame{
   void * error_handler_head;
   void * volatile error_landing_head;
   int error_dispatch_depth;
-  int error_stack_height;
   volatile int cleanup_active;
 }
 ExceptionFrame;

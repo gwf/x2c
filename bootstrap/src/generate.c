@@ -809,8 +809,6 @@ static List _make_init_guard(List guard){
   return cons(_99, cons(_101, cons(List_var(cons(_102, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_65, cons(List_var(guard), _70))), _113)))), NULL))), NULL)));
 }
 
-size_t Array_len(Array);
-
 static inline int _has_file_init_blocks(Compiler compiler){
   return Array_len(compiler -> proto_inits) || Array_len(compiler -> early_inits) || Array_len(compiler -> late_inits) || Array_len(compiler -> mid_inits) || String_truth(compiler -> fini_fn);
 }
@@ -876,7 +874,6 @@ default: break;
 
 Var Array_push(Array, Var);
 Var Array_getindex(Array, int);
-void Array_free(Array);
 static Map _cache_reachable_function_ids(List source){
   Map callers = Map_new(), reachable = Map_new();  Array queue = Array_new(); {
     List func;  List _x2c_macro_object_1 = source;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){

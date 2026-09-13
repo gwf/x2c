@@ -838,10 +838,7 @@ Var Map_setindex(Map, Var, Var);
 Var Map_getindex(Map, Var);
 int Map_contains(Map, Var);
 int Var_is_void(Var);
-int Array_truth(Array);
-size_t Array_len(Array);
 int Var_is_null(Var);
-void Array_free(Array);
 void Compiler_add_late_init(Compiler, List);
 void Compiler_add_mid_init(Compiler, List);
 static void _queue_one_static_initializer(Compiler compiler, List binding, Map pending, Map state, Map phases, Array initializers, Symbol deferred_kind){

@@ -1883,9 +1883,7 @@ return 0;
 
 List Compiler_protocol_members_for(Compiler, Type, Type);
 String List_repr(List);
-size_t Array_len(Array);
 List Array_list(Array);
-void Array_clear(Array);
 static void _append_managed_declaration(Compiler c, List declaration, Array output){
 
   {
@@ -3349,7 +3347,6 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  *(*(List * *) _x2c_defer_data_1->_x2c_defer_capture_2) =(*(List *) _x2c_defer_data_1->_x2c_defer_capture_3);
 }
 
-void Array_free(Array);
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_free((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
 }
