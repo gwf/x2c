@@ -41,7 +41,7 @@
    marks its end. Nested Lists represent the structure of a Lisp                       +-----+-----+   |
    expression.                                                                            |           v
                                                                                         value    +-----+-----+
-   Fn stores a parameter List, a body, and captured local bindings. During                       | car | () |
+   Fn stores a parameter List, a body, and captured local bindings. During                       | car | ()  |
    a call, each parameter is bound to its corresponding argument value.                          +-----+-----+
    Captures contain copies of local values taken when the closure was
    created; these bindings remain available when its body is evaluated
@@ -85,10 +85,10 @@ macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              
 /* Evaluation: the language in three rules ----------------------------------------------------------------------------
 
    Evaluating a name returns its bound value; evaluating a literal returns                   (+ 1 (* 2 3))
-   the literal itself. A nonempty List represents a call. Its head is                         / | \
-   evaluated first, and argument handling depends on the resulting                           +  1  *
-   callable's type: ordinary function, special form, or runtime Lisp macro.                       / \
-   Only () is false; zero and the empty String are true.                                         2   3
+   the literal itself. A nonempty List represents a call. Its head is                            / | \
+   evaluated first, and argument handling depends on the resulting                              +  1  *
+   callable's type: ordinary function, special form, or runtime Lisp macro.                          / \
+   Only () is false; zero and the empty String are true.                                            2   3
 
    For (+ 1 (* 2 3)), evaluation first resolves +, then evaluates the                  (* 2 3) -> 6
    arguments to 1 and 6. Applying + to these values returns 7. The same                (+ 1 6) -> 7
@@ -194,15 +194,15 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
 
 /* Applying a value ---------------------------------------------------------------------------------------------------
 
-   eval converts expressions to values; apply invokes a callable with                   callable        values
-   values already evaluated. For example, (apply list '(a b)) returns (a                   |               |
-   b), without looking up either a or b.                                                   +-------+-------+
-                                                                                                   |
-   Applying a closure evaluates its saved body with new bindings; applying                         v
-   a native callable invokes an x2c function. Runtime Lisp macros require                        apply
-   unevaluated argument forms and subsequent evaluation of their expansion.                +-------+-------+
-   apply accepts evaluated values and rejects runtime Lisp macros. x2c                     v               v
-   compile-time macros do not enter this path.                                          closure          native
+   eval converts expressions to values; apply invokes a callable with                     callable + values
+   values already evaluated. For example, (apply list '(a b)) returns (a                          v
+   b), without looking up either a or b.                                                        apply
+                                                                                                  |
+   Applying a closure evaluates its saved body with new bindings; applying               +--------+--------+
+   a native callable invokes an x2c function. Runtime Lisp macros require                v        v        v
+   unevaluated argument forms and subsequent evaluation of their expansion.           closure   native   apply*
+   apply accepts evaluated values and rejects runtime Lisp macros. x2c
+   compile-time macros do not enter this path.                                         * invokes supplied callable
 */
 static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
   if (fn is <lambda>) {                                                         // Inspect the callable tag.
@@ -232,10 +232,10 @@ static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
                                                                                           +-------------+
      (def add-ten (let ((x 10)) (lambda (y) (+ x y))))                                    | outer frame |
      (add-ten 7)     // 17, after the let call has returned                               +------+------+
-                                                                                                 |
-   Call frames can live on the native stack. Closures and their capture                          v
-   Maps belong to the session Scope, so saved bindings outlive those calls.                   globals
-   The values they refer to keep their ordinary ownership; immutable
+                                                                                                 v
+   Call frames can live on the native stack. Closures and their capture                       globals
+   Maps belong to the session Scope, so saved bindings outlive those calls.                      v
+   The values they refer to keep their ordinary ownership; immutable                          reserved
    Strings and Lists live in canonical pools.
 */
 
@@ -308,13 +308,13 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
 /* Quotation as a language for constructing code ----------------------------------------------------------------------
 
    quote returns its argument without evaluation. Quasiquote evaluates the                 `(a ,x ,@xs)
-   comma-marked expressions within a template. Comma-at inserts the                            |    |
-   elements of a List into the surrounding List:                                         x = 7 |    | xs = (8 9)
-                                                                                               v    v
-     (let ((x 7) (xs '(8 9))) `(a ,x ,@xs))     // (a 7 8 9)                               (a  7    8 9)
+   comma-marked expressions within a template. Comma-at inserts the                             |   |
+   elements of a List into the surrounding List:                                                |   |
+                                                                                                v   v
+     (let ((x 7) (xs '(8 9))) `(a ,x ,@xs))     // (a 7 8 9)                               (a   7   8 9)
 
-   There are two result shapes here. quasiquote produces one value;                     one value   List elements
-   quoted_item produces the sequence of elements contributed by an item. An
+   There are two result shapes here. quasiquote produces one value;                    ,x: one value
+   quoted_item produces the sequence of elements contributed by an item. An            ,@xs: List elements
    ordinary item contributes one element; a splice may contribute many. The
    containing List is constructed by concatenating these item sequences.
 
@@ -355,13 +355,13 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
 
 /* Errors are part of the language's observable behavior --------------------------------------------------------------
 
-   A malformed call is different from an unbound name or a value of the                       raise
-   wrong type. These helpers construct the corresponding error causes and                       |
+   A malformed call is different from an unbound name or a value of the                         raise
+   wrong type. These helpers construct the corresponding error causes and                         v
    details. Errors are structured data that a surrounding x2c catch can                (cause (key value) ...)
-   match.                                                                                       |
-                                                                                         catch pattern
-   $fail, defined near the top, is an x2c compile-time macro that                               |
-   constructs raise syntax while compiling this x2c file. Runtime Lisp                     bound fields
+   match.                                                                                         v
+                                                                                            catch pattern
+   $fail, defined near the top, is an x2c compile-time macro that                                 v
+   constructs raise syntax while compiling this x2c file. Runtime Lisp                       bound fields
    macros in _stdlib construct Lisp forms during evaluation. The shared use
    of Lists does not imply that these two macro systems share an execution
    phase.
@@ -513,12 +513,12 @@ static Var Reader.read(Reader *self) {
 /* Native functions ---------------------------------------------------------------------------------------------------
 
    Primitive operations are implemented as x2c functions invoked through                 Lisp argument values
-   Func. Func signatures specify argument and result types. eval evaluates                        |
+   Func. Func signatures specify argument and result types. eval evaluates                        v
    the argument expressions before _native_call passes their values to                        Func.apply
-   Func.apply.                                                                                    |
-                                                                                          typed C arguments
-   Predicates translate native conditions into Lisp truth values.                                 |
-   Arithmetic and collection primitives are used by the recursive and                        C function
+   Func.apply.                                                                                    v
+                                                                                           typed C arguments
+   Predicates translate native conditions into Lisp truth values.                                 v
+   Arithmetic and collection primitives are used by the recursive and                         C function
    higher-order operations defined in Lisp below.
 */
 
@@ -685,17 +685,17 @@ static void _install_natives(Interp *self) {
 
 /* Building the rest of the language in itself ------------------------------------------------------------------------
 
-   Startup evaluates the following definitions in order. defmacro is used               native functions + core
-   to define defun and if. Recursive functions then implement map, filter,                        |
-   folds, and other collection operations.                                                   defmacro
+   Startup evaluates the following definitions in order. defmacro is used              native functions + core
+   to define defun and if. Recursive functions then implement map, filter,                        v
+   folds, and other collection operations.                                                     defmacro
                                                                                                   |
-   Runtime Lisp macros express new constructs as transformations into                      defun      if
-   existing forms. They extend the language without adding evaluator                              |
-   branches. These definitions combine the core forms with the native                    map / foldl / let / ...
-   operations registered above, including binding and collection functions.
-
-   The percent literal constructs a List containing these definitions. It
-   does not evaluate them; _interpreter evaluates each definition at
+   Runtime Lisp macros express new constructs as transformations into                       +-----+-----+
+   existing forms. They extend the language without adding evaluator                        v           v
+   branches. These definitions combine the core forms with the native                     defun         if
+   operations registered above, including binding and collection functions.                 |           |
+                                                                                            +-----+-----+
+   The percent literal constructs a List containing these definitions. It                         v
+   does not evaluate them; _interpreter evaluates each definition at                    map / foldl / let / ...
    startup.
 */
 
