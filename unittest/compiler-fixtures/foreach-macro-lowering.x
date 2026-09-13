@@ -126,9 +126,12 @@ int main(void) {
   int boxed = 0;
   foreach(Var field, %"x y".words()) boxed += field.string().len();
 
-  List zip_rows = %(("a" 1) ("bb" 2));
+  struct Iter zip_left_storage, zip_right_storage, zip_storage;
+  Iter zip_left = %("a" "bb").iter(&zip_left_storage);
+  Iter zip_right = range(1, 2, 1, &zip_right_storage);
+  Iter zipped = zip_left.zip(zip_right, &zip_storage);
   int zipped_total = 0;
-  foreach(Var (text, number), zip_rows)
+  foreach(Var (text, number), zipped)
     zipped_total += text.string().len() * number.integer();
 
   MapIntInt counted = MapIntInt.new();

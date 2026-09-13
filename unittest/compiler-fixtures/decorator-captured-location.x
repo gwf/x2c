@@ -10,23 +10,19 @@ static void decorated(void) {
   raise %(caploc);
 }
 
-static int generated, captured;
-
-static Symbol record_line(List errors, Var data) {
-  (void) data;
-  List entry = errors.last();
-  Symbol code = entry.assoc(<code>);
-  int line = entry.assoc(<location>).list().assoc(<line>).integer();
-  if (code == <genloc>) generated = line;
-  if (code == <caploc>) captured = line;
-  return <handled>;
-}
-
 int main(void) {
   Error.initialize();
-  ErrorHandler observer = Error.push(record_line, void);
+  Error.policy_set(<genloc>, <collect>);
+  Error.policy_set(<caploc>, <collect>);
+  int mark = Error.mark(), generated = 0, captured = 0;
   decorated();
-  Error.pop(observer);
+  foreach(Var item, Error.since(mark)) {
+    List entry = item;
+    Symbol code = entry.assoc(<code>);
+    int line = entry.assoc(<location>).list().assoc(<line>).integer();
+    if (code == <genloc>) generated = line;
+    if (code == <caploc>) captured = line;
+  }
   printf("%d %d\n", generated, captured);
   return 0;
 }

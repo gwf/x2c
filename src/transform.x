@@ -92,7 +92,13 @@ static const PrintfFn *_printf_family(List callee) {
 
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||
-         name == "Iter_list" || name == "Iter_array";
+         name == "Iter_list" || name == "Iter_array" ||
+         name == "Iter_reduce" ||
+         name == "Iter_foldl" || name == "Iter_any" ||
+         name == "Iter_all" || name == "Iter_find" ||
+         name == "Iter_count" || name == "Iter_sum" ||
+         name == "Iter_product" || name == "Iter_min" ||
+         name == "Iter_max";
 
 // Recover a format known at compile time. Raw C spelling is retained so
 // escaped percent bytes stay outside this first pass.
@@ -1380,6 +1386,8 @@ static List _lower_callable_defer(
 // landing-frame path for lexical transfers or unsupported capture types.
 static List _lower_defer_region(
   Compiler compiler, List body, List finalizer) {
+  if (compiler.source_map && compiler.origin)
+    finalizer = %(at ${compiler.origin} $finalizer);
   if (_defer_needs_landing(finalizer))
     return %(try $body () $finalizer);
   return _lower_callable_defer(compiler, body, finalizer);
@@ -1406,6 +1414,8 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     List head = _without_origin(anchored);
     match (head) case %(defer ?final_stmt): {
       List body = %(block @tail), finalizer = final_stmt;
+      if (compiler.source_map)
+        finalizer = _rewrap_origin(anchored, finalizer);
       List region = _lower_defer_region(compiler, body, finalizer);
       result = %( ${_rewrap_origin(anchored, region)} );
       tail_changed = 1;

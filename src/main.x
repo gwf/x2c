@@ -151,7 +151,7 @@ static void _compile_file(
   ast = _transform_ast(compiler, ast);
   if (opts.dump == <dump-code>) {
     ast = compiler.emit(ast);
-    puts(compiler.code_pretty_string(ast));
+    puts(compiler.code_pretty_string(ast, NULL));
     exit(0);
   }
   generate_code(compiler, ast, output_dir);
@@ -367,7 +367,9 @@ static CliRequest _build_translation_request(
   request.run_args = NULL;
   request.out_dir = output_dir;
   request.dep_file = NULL;
+  request.dep_target = NULL;
   request.no_deps = 0;
+  request.no_phony_deps = 0;
   request.nested = 1;
   return request;
 }

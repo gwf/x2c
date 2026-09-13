@@ -17,7 +17,7 @@ static inline ExceptionFrame * _current(void);
 
 static ExceptionFrame * _landable(void);
 
-static void _frame_trim(ExceptionFrame * frame);
+static void _frame_trim(ExceptionFrame * frame, int unwinding);
 
 _Noreturn static void _fatal(const char * message);
 
@@ -47,6 +47,8 @@ void * Error_handler_head(void);
 
 int Error_depth(void);
 
+int Error_count(void);
+
 void x2c_exception_push(ExceptionFrame * e){
   if(! e) return;
   ExceptionThreadState state = _thread();
@@ -59,11 +61,13 @@ void x2c_exception_push(ExceptionFrame * e){
     e -> error_handler_head = Error_handler_head();
     e -> error_landing_head = e -> error_handler_head;
     e -> error_dispatch_depth = Error_depth();
+    e -> error_stack_height = Error_count();
   }
   else{
     e -> error_handler_head = NULL;
     e -> error_landing_head = NULL;
     e -> error_dispatch_depth = 0;
+    e -> error_stack_height = 0;
   }
   state -> exception_top = e;
 }
@@ -75,7 +79,7 @@ void ExceptionFrame_unwind(void * target_ptr){
   int found = 0;
   for(ExceptionFrame * at = frame;  at;  at = at -> prev) if(at == target) found = 1;
   if(! frame || ! found) _fatal("invalid error unwind target");
-  for(ExceptionFrame * at = _current();  at != frame;  at = at -> prev) _frame_trim(at);
+  for(ExceptionFrame * at = _current();  at != frame;  at = at -> prev) _frame_trim(at, at -> state == 392731102235528);
   _thread() -> exception_top = frame;
   frame -> state = 392731102235528;
   frame -> unwind_target = target;
@@ -118,7 +122,7 @@ void x2c_exception_leave(ExceptionFrame * frame){
   ExceptionFrame * target = NULL;
   if(should_unwind) target = frame -> unwind_target;
   frame -> state = 797096;
-  _frame_trim(frame);
+  _frame_trim(frame, should_unwind);
   state -> exception_top = frame -> prev;
   if(should_unwind) ExceptionFrame_unwind(target);
 }
@@ -133,11 +137,11 @@ static ExceptionFrame * _landable(void){
   return at;
 }
 
-void Error_trim(void *);
+void Error_trim(void *, int);
 
-static void _frame_trim(ExceptionFrame * frame){
+static void _frame_trim(ExceptionFrame * frame, int unwinding){
   if(! x2c_error_runtime_ready) return;
-  Error_trim(frame -> error_handler_head);
+  Error_trim(frame -> error_handler_head, unwinding ? frame -> error_stack_height : Error_count());
 }
 
 _Noreturn static void _fatal(const char * message){
@@ -147,18 +151,21 @@ _Noreturn static void _fatal(const char * message){
 
 int Error_handler_depth(void);
 
-void Error_restore(int);
+void Error_restore(int, int);
 
 static void _cleanup_drain(X2CCleanup * watermark){
   ExceptionThreadState state = _thread();
   while(state -> cleanup_top != watermark){
     if(! state -> cleanup_top) _fatal("cleanup watermark not found");
-    int handler_depth = 0;
-    if(x2c_error_runtime_ready) handler_depth = Error_handler_depth();
+    int handler_depth = 0, stack_height = 0;
+    if(x2c_error_runtime_ready){
+      handler_depth = Error_handler_depth();
+      stack_height = Error_count();
+    }
     X2CCleanup * record = state -> cleanup_top;
     state -> cleanup_top = record -> prev;
     record -> fn(record -> env);
-    if(x2c_error_runtime_ready) Error_restore(handler_depth);
+    if(x2c_error_runtime_ready) Error_restore(handler_depth, stack_height);
   }
 
 }

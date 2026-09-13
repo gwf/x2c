@@ -42,7 +42,7 @@ typedef struct ExceptionFrame {
   sigjmp_buf env, volatile Symbol state;
   struct ExceptionFrame *volatile unwind_target, void *error_handler_head;
   void *volatile error_landing_head, int error_dispatch_depth;
-  volatile int cleanup_active;
+  int error_stack_height, volatile int cleanup_active;
 } ExceptionFrame;
 
 #pragma private
@@ -101,11 +101,13 @@ void x2c_exception_push(ExceptionFrame *e) {
     e.error_handler_head = Error.handler_head();
     e.error_landing_head = e.error_handler_head;
     e.error_dispatch_depth = Error.depth();
+    e.error_stack_height = Error.count();
   }
   else {
     e.error_handler_head = NULL;
     e.error_landing_head = NULL;
     e.error_dispatch_depth = 0;
+    e.error_stack_height = 0;
   }
   state.exception_top = e;
 }
@@ -128,7 +130,7 @@ void ExceptionFrame.unwind(void *target_ptr) {
   /* Abandon the frames whose finalizers raised. Each owes only the reclaim
      its leave would have done; this transfer replaces what it was carrying. */
   for (ExceptionFrame *at = _current(); at != frame; at = at.prev)
-    _frame_trim(at);
+    _frame_trim(at, at.state == <err-unwind>);
   _thread().exception_top = frame;
   frame.state = <err-unwind>;
   frame.unwind_target = target;
@@ -203,7 +205,7 @@ void x2c_exception_leave(ExceptionFrame *frame) {
   ExceptionFrame *target = NULL;
   if (should_unwind) target = frame.unwind_target;
   frame.state = <left>;
-  _frame_trim(frame);
+  _frame_trim(frame, should_unwind);
   state.exception_top = frame.prev;
   if (should_unwind) ExceptionFrame.unwind(target);
 }
@@ -223,11 +225,14 @@ static ExceptionFrame *_landable(void) {
   return at;
 }
 
-/* Reclaim handler registrations made inside the frame. The restore point
-   stays available for an abandoned transfer path. */
-static void _frame_trim(ExceptionFrame *frame) {
+/* Reclaim handler registrations made inside the frame, and keep the errors
+   collected during its normal lifetime. An unwinding frame instead restores
+   its error-stack watermark, discarding what it was carrying. The restore
+   point stays available for an abandoned transfer path. */
+static void _frame_trim(ExceptionFrame *frame, int unwinding) {
   if (!x2c_error_runtime_ready) return;
-  Error.trim(frame.error_handler_head);
+  Error.trim(frame.error_handler_head,
+             unwinding ? frame.error_stack_height : Error.count());
 }
 
 static void _fatal(const char *message) {
@@ -238,19 +243,22 @@ static void _fatal(const char *message) {
 /* Drain only records newer than the landing frame's watermark. Unlink each
    record before invoking it so a cleanup that raises cannot run twice. A
    callback may handle a nested resumable Error or alter registrations; discard
-   additions toward the pre-callback handler height before continuing the
-   original unwind. Removed state is not reconstructed. A non-returning Error
-   instead starts its own transfer. */
+   additions toward the pre-callback handler and record heights before
+   continuing the original unwind. Removed state is not reconstructed. A
+   non-returning Error instead starts its own transfer. */
 static void _cleanup_drain(X2CCleanup *watermark) {
   ExceptionThreadState state = _thread();
   while (state.cleanup_top != watermark) {
     if (!state.cleanup_top) _fatal("cleanup watermark not found");
-    int handler_depth = 0;
-    if (x2c_error_runtime_ready) handler_depth = Error.handler_depth();
+    int handler_depth = 0, stack_height = 0;
+    if (x2c_error_runtime_ready) {
+      handler_depth = Error.handler_depth();
+      stack_height = Error.count();
+    }
     X2CCleanup *record = state.cleanup_top;
     state.cleanup_top = record.prev;
     record.fn(record.env);
-    if (x2c_error_runtime_ready) Error.restore(handler_depth);
+    if (x2c_error_runtime_ready) Error.restore(handler_depth, stack_height);
   }
 }
 

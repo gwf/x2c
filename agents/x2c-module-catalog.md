@@ -538,7 +538,7 @@ Public functions:
 
 ### [lib/error.x](../lib/error.x)
 
-handler stack and error dispatch.
+handler stack and accumulated errors.
 
 Public functions:
 
@@ -548,9 +548,11 @@ Public functions:
 `Error.note_rendered`, `x2c_error_raise_n`, `Error.handler_depth`,
 `Error.handler_head`, `Error.unwind_head`, `Error.restore_landing`,
 `Error.trim`, `Error.restore`, `Error.initialize_raw`, `Error.shutdown_raw`,
-`Error.depth`, `Error.count`, `Error.snapshot`, `Error.snapshot_in`,
-`Error.policy_set`, `Error.policy_get`, `Error.push`, `Error.pop`,
-`Error.context_open`, `Error.context_close`, `Error.raise`, `Error.ready`
+`Error.depth`, `Error.count`, `Error.mark`, `Error.snapshot`,
+`Error.snapshot_in`, `Error.since_in`, `Error.since`, `Error.policy_set`,
+`Error.policy_get`, `Error.bound`, `Error.bound_set`, `Error.push`,
+`Error.pop`, `Error.context_open`, `Error.context_close`, `Error.raise`,
+`Error.ready`
 
 ### [lib/error_init.x](../lib/error_init.x)
 
@@ -602,7 +604,11 @@ single-pass pull iterators.
 
 Public functions:
 
-`Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.unique`, `Iter.iter`
+`Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.filter`, `Iter.map`,
+`Iter.zip`, `Iter.zip_with`, `Iter.map2`, `Iter.chain`, `Iter.enumerate`,
+`Iter.repeat`, `Iter.head`, `Iter.accumulate`, `Iter.scan`, `Iter.unique`,
+`Iter.unzip`, `Iter.reduce`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
+`Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`, `Iter.iter`
 
 ### [lib/lib.x](../lib/lib.x)
 

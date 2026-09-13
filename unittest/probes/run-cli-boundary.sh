@@ -286,11 +286,12 @@ rm -f "$BUILD/deps/out/root.d"
   -I "$BUILD/deps/src" "$BUILD/deps/src/root.x"
 [[ ! -e "$BUILD/deps/out/root.d" ]]
 
-"$X2C" translate --dep-file "$BUILD/deps/custom.d" \
+"$X2C" translate --no-phony-deps \
+  --dep-file "$BUILD/deps/custom.d" --dep-target "custom target" \
   --out-dir "$BUILD/deps/out" -I "$BUILD/deps/src" \
   "$BUILD/deps/src/root.x"
-grep -Fq "$BUILD/deps/out/root.c" "$BUILD/deps/custom.d"
-[[ $(wc -l <"$BUILD/deps/custom.d" | tr -d ' ') -gt 1 ]]
+grep -Fq "custom\\ target:" "$BUILD/deps/custom.d"
+[[ $(wc -l <"$BUILD/deps/custom.d" | tr -d ' ') == 1 ]]
 
 set +e
 "$X2C" translate --dep-file "$BUILD/deps/ambiguous.d" \
@@ -300,7 +301,7 @@ set +e
 multi_dep_status=$?
 set -e
 [[ $multi_dep_status == 2 ]]
-grep -Fq "requires exactly one input" "$BUILD/deps/multi.stderr"
+grep -Fq "require exactly one input" "$BUILD/deps/multi.stderr"
 
 printf 'int broken( {\n' >"$BUILD/deps/bad-src/bad.x"
 set +e
@@ -971,4 +972,72 @@ rm -rf "$equivalent/build"
   >"$equivalent/direct.stdout" 2>"$equivalent/direct.stderr"
 cmp "$equivalent/manifest.stderr" "$equivalent/direct.stderr"
 
-echo "CLI, dependency, build, run, manifest, and state probes: 97 passed"
+# Source mapping is independent of -g and belongs to translation reuse.
+python3 - "$X2C" "$BUILD/source-map" <<'PY_SOURCE_MAP'
+from pathlib import Path
+import subprocess
+import sys
+
+compiler = sys.argv[1]
+root = Path(sys.argv[2]).resolve()
+source_dir = root / 'source "quote\\ and space'
+source_dir.mkdir(parents=True)
+source = source_dir / 'mapped.x'
+helper = source_dir / 'included.x'
+(source_dir / 'where.xmacro').write_text(
+    'macro Expression $imported_where() => (__LINE__)\n')
+source.write_text(r'''#include "x2c.x"
+#include "included.x"
+$(import "where.xmacro")
+macro Expression $where() => (__LINE__)
+int main(void) {
+  printf("source=%s:%d\n", __FILE__, __LINE__);
+  printf("multiline=%d\n",
+    __LINE__);
+  printf("macro=%d\n", $where());
+  printf("imported=%d\n",
+    $imported_where());
+  defer printf("cleanup=%d\n", __LINE__);
+  return included();
+}
+''')
+helper.write_text(r'''#include "x2c.x"
+int included(void) {
+  printf("included=%s:%d\n", __FILE__, __LINE__);
+  return 0;
+}
+''')
+
+
+def run(arguments):
+    result = subprocess.run(arguments, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr
+    return result.stdout
+
+
+command = [compiler, 'build', '--quiet', '-g', '-O0', '--build-dir',
+           str(root / 'build'), '--output', str(root / 'app'),
+           str(source), str(helper)]
+run(command)
+generated = list((root / 'build').rglob('*.c'))
+assert generated and all('#line ' not in p.read_text() for p in generated)
+mapped = command[:2] + ['--source-map'] + command[2:]
+run(mapped)
+expected = (f'source={source}:6\nmultiline=8\nmacro=9\nimported=11\n'
+            f'included={helper}:3\ncleanup=12\n')
+assert run([str(root / 'app')]) == expected
+assert all('#line ' in p.read_text() for p in generated)
+artifacts = generated + list((root / 'build').rglob('*.h'))
+stamps = [p.stat().st_mtime_ns for p in artifacts]
+run(mapped)
+assert stamps == [p.stat().st_mtime_ns for p in artifacts]
+run(command)
+assert all('#line ' not in p.read_text() for p in generated)
+output = root / 'translated'
+output.mkdir()
+run([compiler, 'translate', '--quiet', '--source-map', '--out-dir',
+     str(output), str(source)])
+assert '#line ' in (output / 'mapped.c').read_text()
+PY_SOURCE_MAP
+
+echo "CLI, dependency, build, run, manifest, and state probes: 107 passed"

@@ -309,7 +309,8 @@ static uint64_t _translation_fingerprint(
   hash = _state_list(hash, request.package_dirs);
   hash = _state_list(hash, request.cpp_args);
   hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
-  hash = _state_text(hash, %"generated-lines");
+  hash = _state_text(
+    hash, request.source_map ? %"source-map" : %"generated-lines");
   String depfile = %"$directory/${x2c_path_stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);
 }
@@ -672,11 +673,33 @@ static List _native_action_inputs(Build state) {
   return result;
 }
 
+// Native flags are ordered: an explicit -g0 can override a profile's -g.
+static int _mapped_debug(Build state) {
+#ifdef __APPLE__
+  if (!state.request.source_map || state.request.kind == <static-lib>)
+    return 0;
+  int enabled = 0;
+  foreach (String flag, state.toolchain.cc_args) {
+    if (flag == "-g0" || flag == "-ggdb0") enabled = 0;
+    else if (flag == "-g" || flag == "-g1" || flag == "-g2" ||
+             flag == "-g3" || flag == "-ggdb" || flag == "-ggdb1" ||
+             flag == "-ggdb2" || flag == "-ggdb3" ||
+             flag == "-gline-tables-only" || flag == "-gmlt" ||
+             flag.startswith("-gdwarf")) enabled = 1;
+  }
+  return enabled;
+#else
+  return 0;
+#endif
+}
+
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
     reuse their recorded inputs; executables always link because library
-    selection and implicit linker inputs are not in the fingerprint.
+    selection and implicit linker inputs are not in the fingerprint. Mapped
+    macOS debug executables also produce a companion dSYM before cleanup;
+    failed symbol assembly fails the build and preserves intermediates.
 */
 int Build.finish(Build b) {
   if (_compile_sources(b)) return 1;
@@ -697,8 +720,7 @@ int Build.finish(Build b) {
   String state_path =
     b.state_root && b.request.kind == <static-lib> ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
-  if (state_path &&
-      !access(b.output, R_OK)) {
+  if (state_path && !access(b.output, R_OK)) {
     int ok = 1;
     uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
     if (ok && _state_matches(state_path, hash)) {
@@ -718,6 +740,12 @@ int Build.finish(Build b) {
   }
   if (b.request.kind == <static-lib>) unlink(b.output);
   if (action.run()) return 1;
+  if (_mapped_debug(b)) {
+    String output = b.output, symbols = %"$output.dSYM";
+    ToolAction debug = tool_action_new(
+      <dsym>, %("dsymutil" $output "-o" $symbols), b.request.verbose);
+    if (debug.run()) return 1;
+  }
   report_progress(action.phase, 1, 1, b.output);
   int input_count = inputs.len();
   String noun = action.phase == <archive> ?
@@ -796,6 +824,8 @@ void Build.report_success(Build b) {
   if (!b.request.compile_only) {
     String size = report_size(report_file_bytes(b.output));
     report_line(<muted>, %"  Output ${b.output} ($size)");
+    if (_mapped_debug(b))
+      report_line(<muted>, %"  Debug symbols ${b.output}.dSYM");
   }
 }
 

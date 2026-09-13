@@ -17,13 +17,14 @@
 */
 typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
-  List cc_args, ld_args, String out_dir, dep_file, manifest;
+  List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
   String prefix, cc, ar, compile_commands, Symbol kind, color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
   Symbol dump;
   int jobs, debugging, verbose, quiet, plain, nested, no_deps;
-  int compile_only, kind_explicit, save_temps, no_cpp, source_facts;
+  int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
+  int source_map, source_facts;
   SourceView sources;
 } *CliRequest;
 
@@ -85,10 +86,16 @@ static CliOption cli_options[] = {
     <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0 },
+  { <src-map>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <output>, "--source-map",
+    NULL, "Map generated C locations to original x2c sources", 0 },
   { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0 },
   { <dep-file>, CLI_TRANSLATE, <output>, "--dep-file", "<file>",
     "Override the depfile path (one input only)", 0 },
+  { <dep-target>, CLI_TRANSLATE, <output>, "--dep-target",
+    "<target>", "Override the depfile target (one input only)", 0 },
+  { <no-phony>, CLI_TRANSLATE, <output>,
+    "--no-phony-deps", NULL, "Omit phony rules for included files", 0 },
   { <manifest>, CLI_BUILD | CLI_RUN, <target>, "--manifest-path",
     "<file>", "Use <file> instead of discovering x2c.toml", 0 },
   { <target>, CLI_BUILD | CLI_RUN, <target>, "--target", "<name>",
@@ -696,8 +703,11 @@ static void _apply_option(
       break;
     case <debug>: c.debugging = 1; break;
     case <out-dir>: c.out_dir = value; break;
+    case <src-map>: c.source_map = 1; break;
     case <no-deps>: c.no_deps = 1; break;
     case <dep-file>: c.dep_file = value; break;
+    case <dep-target>: c.dep_target = value; break;
+    case <no-phony>: c.no_phony_deps = 1; break;
     case <include>: x_paths.push(value);
       // build and run also hand the directory to the C compiler.
       if (c.command != <translate>) _push_pair(cc_args, "-I", value);
@@ -872,9 +882,10 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     request.package_dirs = request.package_dirs.reverse();
   if (mask == CLI_TRANSLATE && !request.inputs)
     x2c_driver_error("translate requires at least one input");
-  if (request.inputs.cdr() && request.dep_file)
-    x2c_driver_error("--dep-file requires exactly one input");
-  if (request.no_deps && request.dep_file)
+  if (request.inputs.cdr() && (request.dep_file || request.dep_target))
+    x2c_driver_error("--dep-file and --dep-target require exactly one input");
+  if (request.no_deps && (request.dep_file || request.dep_target ||
+                          request.no_phony_deps))
     x2c_driver_error("--no-deps conflicts with dependency output options");
   if (request.compile_only && request.kind != <executable>)
     x2c_driver_error("--compile-only conflicts with a library target kind");
