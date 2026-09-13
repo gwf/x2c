@@ -13,19 +13,30 @@ It contains the whole interpreter; it does not include the readable version
 or delegate to x2c Lisp.
 
 [tiny-lisp.x](tiny-lisp.x) takes a different target: a minimal Turing-complete
-Lisp, without Stutter compatibility. Its seven forms are `quote`, `if`,
-`lambda`, `def`, `car`, `cdr`, and `cons`. Strings sit in a table above the
-reader and evaluator; x2c supplies native Strings, Lists, Maps, and `match`.
-The source header includes a runnable unary factorial example that computes
-4! as a list of 24 marks. Build it with
-`x2c build examples/programs/tiny-lisp.x --output /tmp/tiny-lisp` and feed
-expressions to standard input.
+Lisp, without Stutter compatibility. Its eight forms are `quote`, `if`,
+`lambda`, `def`, `car`, `cdr`, `cons`, and `eq`. Constants appear directly in
+the reader and evaluator; x2c supplies native Strings, Lists, Maps, and `match`.
+The source header points to a [runnable example](../data/tiny-lisp.slp) with
+unary arithmetic and conversion in both directions between unary lists and
+decimal digit lists. All arithmetic and conversion functions are written in
+the tiny Lisp. Build and run it with:
+
+```sh
+./builds/0/x2c build examples/programs/tiny-lisp.x --output /tmp/tiny-lisp
+/tmp/tiny-lisp < examples/data/tiny-lisp.slp
+```
+
+`(decimal (fact (unary '(4))))` returns `(2 4)`: internally, factorial still
+produces a list of 24 `t` atoms. The example also computes 12 times 3 as
+`(3 6)`. `unary` accepts nonnegative decimal digit lists, including leading
+zeros; `decimal` emits canonical digits, with `(0)` for the empty unary list.
 
 Tiny Lisp uses dynamic scope, with no captured closures. `def` binds a name
 in the current environment; calls evaluate arguments in the caller's
 environment, then copy it and bind the parameters. Only `()` is false, and
-`car` and `cdr` of `()` return `()`. Names have no numeric meaning. The reader
-supports proper lists, quote shorthand, and semicolon comments. Invalid input
+`car` and `cdr` of `()` return `()`. `eq` compares atoms and lists structurally,
+returning `t` or `()`. Names have no numeric meaning in the interpreter. The
+reader supports proper lists, quote shorthand, and semicolon comments. Invalid input
 terminates with `error` and status 1. Allocations live in the session's x2c
 pools; this version has no bounded heap or independent garbage collector.
 Unbounded lists, conditionals, and recursive calls suffice to encode a

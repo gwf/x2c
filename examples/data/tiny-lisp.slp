@@ -1,0 +1,45 @@
+; Unary arithmetic, decimal input and output, with no numeric primitives.
+; Run: /tmp/tiny-lisp < examples/data/tiny-lisp.slp
+; A number is a list of t's; decimal notation is a list of digit atoms.
+
+(def join (lambda (a b)
+  (if a (cons (car a) (join (cdr a) b)) b)))
+(def mul (lambda (a b)
+  (if a (join b (mul (cdr a) b)) ())))
+(def fact (lambda (n)
+  (if n (mul n (fact (cdr n))) '(t))))
+
+(def digits '(0 1 2 3 4 5 6 7 8 9))
+(def ten '(t t t t t t t t t t))
+
+; Tally a digit's position, then fold decimal input left to right.
+; Inputs contain digits 0 through 9; leading zeros are welcome.
+(def tally (lambda (d ds)
+  (if (eq d (car ds)) () (cons 't (tally d (cdr ds))))))
+(def read-digits (lambda (ds n)
+  (if ds
+    (read-digits (cdr ds) (join (mul ten n) (tally (car ds) digits)))
+    n)))
+(def unary (lambda (ds) (read-digits ds ())))
+
+; Increment least-significant-digit first, carrying through each 9.
+(def next-digit (lambda (d ds)
+  (if (eq d (car ds)) (car (cdr ds)) (next-digit d (cdr ds)))))
+(def bump (lambda (ds)
+  (if ds
+    (if (eq (car ds) '9)
+      (cons '0 (bump (cdr ds)))
+      (cons (next-digit (car ds) digits) (cdr ds)))
+    '(1))))
+(def count-digits (lambda (n)
+  (if n (bump (count-digits (cdr n))) '(0))))
+(def reverse-onto (lambda (xs ys)
+  (if xs (reverse-onto (cdr xs) (cons (car xs) ys)) ys)))
+(def decimal (lambda (n) (reverse-onto (count-digits n) ())))
+
+(decimal (fact (unary '(4))))                   ; (2 4)
+(decimal (mul (unary '(1 2)) (unary '(3))))      ; (3 6)
+(decimal (join (unary '(9)) (unary '(1))))       ; (1 0)
+(decimal (unary '(0 0 2 4)))                    ; (2 4)
+(decimal (unary '(0)))                         ; (0)
+(unary '(3))                                  ; (t t t)
