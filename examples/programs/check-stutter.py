@@ -109,6 +109,7 @@ def cases():
 
 
 def exact_cases():
+    yield "diagnostic-text", '50% $name "quoted" {braces} back\\slash\n'
     yield "zero-arguments", (
         "(car) (cdr) (cons) (set) (equal) (quote) (lambda) (if)\n"
     )
@@ -173,6 +174,14 @@ def main():
         b"'(t t t t)) x\n" * 100,
         ("-heap", "256")))
     if args.exact:
+        corpus.append((
+            "gc-reassigned-argument",
+            b"(set 'burn (lambda (xs) "
+            b"(if xs (cons (car xs) (burn (cdr xs))) nil)))\n" +
+            b"((lambda (x) (cons (set 'x nil) "
+            b"(burn '(t t t t t t t t)))) "
+            b"'(t t t t t t t t t t t t t t t t))\n" * 100,
+            ("-heap", "128")))
         corpus.extend((name, source.encode(), ())
                       for name, source in exact_cases())
         for value in ("0", "-1", "", "abc", "1x", "2147483648",

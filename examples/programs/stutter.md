@@ -12,6 +12,14 @@ limits, collection diagnostics, malformed-input handling, and CLI output.
 It contains the whole interpreter; it does not include the readable version
 or delegate to x2c Lisp.
 
+The minimal file deliberately uses code-golf formatting and single-letter
+names. Its `q(expression)` keyword expands to `return expression`; `$d`
+expands to `fprintf(stderr, ...)`. The cell class supplies pointer identity
+and `Var` conversions; its constructor owns the bounded heap. These are
+ordinary x2c facilities, with no Lisp evaluation in the interpreter. Source
+size is measured in raw bytes, including the copyright notice, complete CLI help,
+and diagnostics. The readable file remains the explanation of the language.
+
 The minimal version uses each atom's head as its current dynamic binding.
 Calls evaluate their actual arguments first, then save and replace bindings
 in reverse parameter order. Restoring forward preserves the first duplicate
