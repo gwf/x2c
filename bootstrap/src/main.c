@@ -42,6 +42,8 @@ static void _configure_logging(int debugging);
 
 static void _report_diagnostics(Compiler compiler);
 
+static void _preprocessor_errors(String text);
+
 static Map _filter_static_symbols(Map globs, Map statics);
 
 static String _ast_inspection_repr(List node);
@@ -176,6 +178,12 @@ static void _report_diagnostics(Compiler compiler){
 
 }
 
+int File_printf(File, const char *, ...);
+
+static void _preprocessor_errors(String text){
+  File_printf(Stderr, "%s", text);
+}
+
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int Map_contains(Map, Var);
@@ -245,12 +253,15 @@ int Frontend_start(Frontend, String, ParsedUnit *);
 void Compiler_own_diagnostics(Compiler);
 void Compiler_dump_tokens(Compiler);
 int ParsedUnit_collect(ParsedUnit *, Frontend);
+int String_truth(String);
+void Compiler_dump_symbol_table(Compiler, Map);
 int ParsedUnit_parse(ParsedUnit *);
 void Compiler_dump_cache(Compiler);
-void Compiler_dump_symbol_table(Compiler, Map);
 Map Sym_current_symbols(Sym);
-Map Sym_global_symbols(Sym);
+int Map_truth(Map);
+Map Map_merge(Map, Map);
 Map Sym_file_statics(Sym);
+Map Sym_global_symbols(Sym);
 int symbol_snapshot_write(Map, Map, File);
 void Compiler_dump_conformance(Compiler, Map);
 List Compiler_generate_protocol_adapters(Compiler, List);
@@ -281,6 +292,14 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     ok = ParsedUnit_collect(&(unit), frontend);
     _report_diagnostics(compiler);
     if(! ok) exit(1);
+    switch(opts -> dump){
+      case 320883072032 : if(String_truth(unit.preprocessor_output)) File_printf(Stderr, "%s", unit.preprocessor_output);
+      exit(0);
+      case 247458062609318 : if(unit.preprocessor) Compiler_dump_tokens(unit.preprocessor);
+      exit(0);
+      case 10268258311770 : if(unit.preprocessor) Compiler_dump_symbol_table(unit.preprocessor, unit.globals);
+      exit(0);
+    }
     if(! ParsedUnit_parse(&(unit))){
       _report_diagnostics(compiler);
       exit(1);
@@ -306,7 +325,9 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       exit(0);
     }
     if(opts -> dump == 1335836754920){
-      Map snapshot = _filter_static_symbols(Sym_global_symbols(compiler -> sym), Sym_file_statics(compiler -> sym));
+      Map statics = Map_truth(unit.snapshot_statics) ? unit.snapshot_statics : Map_new();
+      Map_merge(statics, Sym_file_statics(compiler -> sym));
+      Map snapshot = _filter_static_symbols(Sym_global_symbols(compiler -> sym), statics);
       if(! symbol_snapshot_write(snapshot, compiler -> fn_defs, Stdout)) exit(1);
       exit(0);
     }
@@ -341,8 +362,6 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
 int CliRequest_inspects(CliRequest);
 
 String Var_string(Var);
-
-int String_truth(String);
 
 int String_endswith(String, String);
 
@@ -557,6 +576,7 @@ static int _run_translation(CliRequest c){
     fputc('\n', stderr);
   }
   Frontend frontend = Frontend_new(c);
+  frontend -> preprocessor_errors = _preprocessor_errors;
   String output_dir = c -> out_dir;
   int total = List_len(c -> inputs), completed = 0;
   unsigned long long gen_bytes = 0;

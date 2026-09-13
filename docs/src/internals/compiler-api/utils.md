@@ -12,10 +12,12 @@ System utilities for environment discovery and child processes.
 
 | Function | Summary |
 | --- | --- |
+| [`process_run`](#process_run) | Starts and waits for one direct child action. |
 | [`process_start`](#process_start) | Starts a direct child action. |
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
 | [`worker_fork`](#worker_fork) | Forks a worker that continues the current program with inherited state. |
 | [`worker_wait`](#worker_wait) | Waits once for `pid` and returns its shell-style status. |
+| [`x2c_cpp_include_dirs`](#x2c_cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`. |
 | [`x2c_default_include_dirs`](#x2c_default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
 | [`x2c_driver_error`](#x2c_driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
 | [`x2c_filename_hash`](#x2c_filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
@@ -32,6 +34,17 @@ System utilities for environment discovery and child processes.
 
 ### Functions
 
+#### process_run
+
+`int process_run(char **argv, String *output, String *errors)`
+
+Starts and waits for one direct child action.
+After capture setup succeeds, output, status, and failure behavior follow
+`process_start` and `ChildProcess.wait`. A partial capture setup failure
+returns no defined status; its closed field remains recorded.
+
+Source: `src/utils.x:358`
+
 #### process_start
 
 `ChildProcess process_start(char **argv, int capture)`
@@ -45,7 +58,7 @@ with `start_error`; an `execvp` failure is a child exit with status 127.
 Capture setup failure closes any stream that opened, but a partial failure
 leaves that closed field recorded and does not produce a waitable handle.
 
-Source: `src/utils.x:253`
+Source: `src/utils.x:261`
 
 #### worker_exit
 
@@ -56,7 +69,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:362`
+Source: `src/utils.x:380`
 
 #### worker_fork
 
@@ -68,7 +81,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:351`
+Source: `src/utils.x:369`
 
 #### worker_wait
 
@@ -78,7 +91,16 @@ Waits once for `pid` and returns its shell-style status.
 Normal exit returns the worker status, a signal returns `128 + signal`, and
 a wait failure returns -1. Interrupted waits are retried.
 
-Source: `src/utils.x:371`
+Source: `src/utils.x:389`
+
+#### x2c_cpp_include_dirs
+
+`List x2c_cpp_include_dirs(void)`
+
+Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
+Returns NULL before environment setup.
+
+Source: `src/utils.x:109`
 
 #### x2c_default_include_dirs
 
@@ -87,7 +109,7 @@ Source: `src/utils.x:371`
 Returns the borrowed default include `List` containing `<root>/include`.
 Returns NULL before environment setup.
 
-Source: `src/utils.x:103`
+Source: `src/utils.x:104`
 
 #### x2c_driver_error
 
@@ -95,7 +117,7 @@ Source: `src/utils.x:103`
 
 Prints `x2c: error: <message>` to stderr and exits with status 2.
 
-Source: `src/utils.x:106`
+Source: `src/utils.x:112`
 
 #### x2c_filename_hash
 
@@ -103,7 +125,7 @@ Source: `src/utils.x:106`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:374`
+Source: `src/utils.x:392`
 
 #### x2c_get_executable
 
@@ -111,7 +133,7 @@ Source: `src/utils.x:374`
 
 Returns the borrowed resolved executable path, or NULL when unavailable.
 
-Source: `src/utils.x:62`
+Source: `src/utils.x:63`
 
 #### x2c_get_root
 
@@ -119,7 +141,7 @@ Source: `src/utils.x:62`
 
 Returns the borrowed repository root, or NULL before it is configured.
 
-Source: `src/utils.x:59`
+Source: `src/utils.x:60`
 
 #### x2c_initialize_environment
 
@@ -139,7 +161,7 @@ Source: `src/utils.x:30`
 Returns the package directory containing `path` below a registered root.
 Callers establish path identity and own any package-name restrictions.
 
-Source: `src/utils.x:84`
+Source: `src/utils.x:85`
 
 #### x2c_package_source
 
@@ -148,7 +170,7 @@ Source: `src/utils.x:84`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:94`
+Source: `src/utils.x:95`
 
 #### x2c_path_dir
 
@@ -156,7 +178,7 @@ Source: `src/utils.x:94`
 
 Returns the directory part of `path`, or "." when it has no slash.
 
-Source: `src/utils.x:65`
+Source: `src/utils.x:66`
 
 #### x2c_path_stem
 
@@ -167,7 +189,7 @@ A leading dot belongs to the name, so `.x2crc` keeps its spelling while
 `parse.x` becomes `parse`. A null or empty final component returns the
 empty `String`.
 
-Source: `src/utils.x:76`
+Source: `src/utils.x:77`
 
 #### x2c_set_root
 
@@ -191,7 +213,7 @@ this child and retains its status for `wait`, which must still be called
 exactly once to consume captured streams. Start and wait failures are
 ready results; partial capture setup remains invalid input to `wait`.
 
-Source: `src/utils.x:300`
+Source: `src/utils.x:308`
 
 <a id="ChildProcess.wait"></a>
 #### ChildProcess.wait
@@ -211,7 +233,7 @@ a valid input to this method.
 reading either capture as a `String`. A failure may leave capture streams
 open.
 
-Source: `src/utils.x:325`
+Source: `src/utils.x:333`
 
 ## Public types
 

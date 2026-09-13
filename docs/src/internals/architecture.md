@@ -204,7 +204,14 @@ loads translation support and `src/collect.x` reuses per-header contributions
 from `etc/header-symbols.xlisp`, validated against the snapshot and source
 contents, so repeated headers are not re-collected.
 
-This is a discovery pass. Shallow parsing
+`--cpp-symbols` and `--live-symbols` discover symbols through the host C
+preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
+child process.
+Paths stay separate argv elements, and stdout, stderr, and the real child
+status come back independently. A second `Compiler` shallow-parses that
+output instead.
+
+Either way this is a discovery pass. Shallow parsing
 (`Compiler.shallow_parse`) skips function bodies, and full parsing, source
 diagnostics, and emitted C all come from the original positioned token stream.
 `--no-cpp` skips symbol discovery and is a diagnostic aid for C-only source.

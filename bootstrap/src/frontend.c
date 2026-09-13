@@ -2,9 +2,9 @@
 
 #include "frontend.h"
 
-static String _16, _15, _14, _13, _12, _11, _10, _9, _8, _6, _5, _4, _3, _2, _1, _0;
+static String _21, _20, _19, _18, _17, _16, _15, _13, _12, _11, _10, _9, _8, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _7;
+static Var _14, _7;
 
 #include <limits.h>
 #include <stdio.h>
@@ -15,9 +15,13 @@ static Var _7;
 #include "deps.h"
 #include "snapshot.h"
 #include "utils.h"
+static const SymbolSet cpp_dumps =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\001\000\000\000\001\002\040\034\037\266\112\000\000\000\246\053\353\321\017\341\000\000\132\236\343\303\126\011\000\000";
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
+
+static int _raw_snapshot_dump(CliRequest request);
 
 static int _source_lines(String text);
 
@@ -45,7 +49,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 
 static void _configure_package(Compiler compiler, CliRequest request, String filename);
 
-static Map _collect_input(CliRequest request, Compiler c);
+static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
 
 Var String_var(String);
 
@@ -65,11 +69,20 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = String_new("reason: ");
   _10 = String_new("/lib");
   _11 = String_new("/x2c.x");
-  _12 = String_new("cannot read input file");
-  _13 = String_new("cannot open");
-  _14 = String_new("not a regular file");
-  _15 = String_new("read failed");
-  _16 = String_new("/");
+  _12 = String_new("/lib/x2c.x");
+  _13 = String_new("stage: preprocess");
+  _14 = String_var(_13);
+  _15 = String_new("status: ");
+  _16 = String_new("cannot read input file");
+  _17 = String_new("cannot open");
+  _18 = String_new("not a regular file");
+  _19 = String_new("read failed");
+  _20 = String_new("/");
+  _21 = String_new("failed to run C preprocessor");
+}
+
+static int _raw_snapshot_dump(CliRequest request){
+  return request -> dump == 1335836754920 && ! request -> live_symbols && ! request -> cpp_symbols;
 }
 
 int String_truth(String);
@@ -148,9 +161,9 @@ void Frontend_load_support(CliRequest request){
   if(! _init_guard_) _file_init_();
   Type_initialize();
   header_symbols_initialize();
-  if(request -> no_cpp || request -> dump == 1335836754920) return;
-  _load_snapshot_once();
-  if(request -> source_facts || request -> dump == 559620016998 || header_symbols_loaded) return;
+  int raw_snapshot = _raw_snapshot_dump(request);
+  if(! request -> live_symbols && ! request -> no_cpp && ! raw_snapshot) _load_snapshot_once();
+  if(request -> no_cpp || raw_snapshot || request -> source_facts || request -> dump == 559620016998 || request -> live_symbols || header_symbols_loaded) return;
   String artifact = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_5), NULL)));
   header_symbols_open(artifact, snapshot_gensym);
   header_symbols_loaded = 1;
@@ -184,7 +197,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason){
   List notes = cons(_7, cons(String_var(String_join(NULL, cons(String_var(_8), cons(String_var(filename), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_9), cons(String_var(reason), NULL)))), NULL)));
-  Compiler_report_error(compiler, 306819428, _12, NULL, notes);
+  Compiler_report_error(compiler, 306819428, _16, NULL, notes);
 }
 
 int Compiler_read_source(Compiler, String, volatile String *);
@@ -200,7 +213,7 @@ String File_string_close(File);
 static String _read_input_text(Compiler compiler, String filename){
   if(compiler -> sources){
     String volatile text;
-    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _13);
+    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _17);
     return text;
   }
   File volatile file = NULL;
@@ -220,7 +233,7 @@ static String _read_input_text(Compiler compiler, String filename){
       x2c_error_catch_detach(_x2c_error_handler_1);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);
       if (_x2c_catch_selected_1 == 0) {{
-        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _13);
+        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _17);
         {
           x2c_error_catch_close(_x2c_error_handler_1);
           _x2c_error_handler_1 = NULL;
@@ -232,7 +245,7 @@ static String _read_input_text(Compiler compiler, String filename){
 
     }
     else {{
-      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _13);
+      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _17);
       {
         x2c_error_catch_close(_x2c_error_handler_1);
         _x2c_error_handler_1 = NULL;
@@ -256,7 +269,7 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 struct stat info;
 if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
   File_close(file);
-  return _unreadable_input(compiler, filename, _14);
+  return _unreadable_input(compiler, filename, _18);
 }
 String volatile text = NULL;
 {
@@ -272,7 +285,7 @@ ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exc
     x2c_error_catch_detach(_x2c_error_handler_2);
     x2c_exception_mark_handled(&_x2c_exception_frame_2);
      {{
-      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _15);
+      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _19);
       {
         x2c_error_catch_close(_x2c_error_handler_2);
         _x2c_error_handler_2 = NULL;
@@ -358,7 +371,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
         }
         String package = x2c_package_directory(root, source);
         if(! String_truth(package)) continue;
-        String name = String_getslice(package, String_rfind(package, _16) + 1, -2147483648, 1);
+        String name = String_getslice(package, String_rfind(package, _20) + 1, -2147483648, 1);
         if(! String_is_identifier(name)) continue;
         if(! x2c_package_source(package, source)) continue;
         compiler -> package = name;
@@ -378,18 +391,102 @@ Map Map_copy(Map);
 
 void Compiler_set_gensym(Compiler, int);
 
-static Map _collect_input(CliRequest request, Compiler c){
+int SymbolSet_contains(SymbolSet, Symbol);
+
+Compiler Compiler_new_shared(Compiler);
+
+int Toolchain_preprocess(Toolchain, const char *, List, const char *, String *, String *, String *);
+
+String int_str(int);
+
+List translation_depfile_parse(String);
+
+void Compiler_add_translation_dependency(Compiler, String);
+
+void Compiler_shallow_parse(Compiler, Map);
+
+Map Sym_global_symbols(Sym);
+
+void Compiler_install_generated_protocol_symbols(Compiler, Map);
+
+Map Sym_file_statics(Sym);
+
+static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
+  Compiler c = unit -> compiler;
+  CliRequest request = frontend -> request;
+  String filename = c -> filename;
   if(request -> no_cpp) return NULL;
-  if(request -> dump == 1335836754920){
+  if(_raw_snapshot_dump(request)){
     c -> runtime_hdrs = 1;
     return Compiler_collect_symbols(c, NULL);
   }
-  if((void *) snapshot_globals == NULL) Compiler_report_error(c, 306819428, snapshot_error, _first_preprocessor_token(c), NULL);
-  Map globs = Map_copy(snapshot_globals);
-  c -> fn_defs = Map_copy(snapshot_function_definitions);
-  if(gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
-  Compiler_set_gensym(c, gensym_cursor);
-  return Compiler_collect_symbols(c, globs);
+  String root = x2c_get_root();
+  int use_snapshot = ! request -> live_symbols;
+  Map globs = NULL;
+  if(use_snapshot){
+    if((void *) snapshot_globals == NULL) Compiler_report_error(c, 306819428, snapshot_error, _first_preprocessor_token(c), NULL);
+    globs = Map_copy(snapshot_globals);
+    c -> fn_defs = Map_copy(snapshot_function_definitions);
+    if(gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
+    Compiler_set_gensym(c, gensym_cursor);
+  }
+  int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
+  if(use_snapshot && ! use_cpp){
+    Map result = Compiler_collect_symbols(c, globs);
+    return result;
+  }
+  Compiler cppcompiler = Compiler_new_shared(c);
+  unit -> preprocessor = cppcompiler;
+  cppcompiler -> filename = filename;
+  String text = NULL, errors = NULL, dependency_text = NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_12), NULL))) : NULL, imacros = runtime;
+  int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, & text, & errors, & dependency_text);
+  unit -> preprocessor_output = text;
+  unit -> preprocessor_errors = errors;
+  if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
+  if(status){
+    List notes = cons(_14, cons(String_var(String_join(NULL, cons(String_var(_15), cons(String_var(int_str(status)), NULL)))), NULL));
+    Compiler_report_error(c, 306819428, _21, _first_preprocessor_token(c), notes);
+  }
+  {
+    String dependency;
+    List _x2c_macro_object_1 = translation_depfile_parse(dependency_text);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      dependency = Var_string(_x2c_macro_cursor_output_1);
+      Compiler_add_translation_dependency(c, dependency);
+    }
+
+  }
+  if(! String_truth(text)) return NULL;
+  if(request -> dump == 320883072032) return globs;
+  Compiler_tokenize(cppcompiler, text);
+  cppcompiler -> source_facts = 0;
+  cppcompiler -> source_private = - 1;
+  cppcompiler -> collect_protocols = 0;
+  if(request -> dump == 247458062609318) return globs;
+  if(request -> live_symbols) c -> runtime_hdrs = 1;
+  globs = Compiler_collect_symbols(c, globs);
+  cppcompiler -> imports = c -> imports;
+  cppcompiler -> macro_lisp = c -> macro_lisp;
+  cppcompiler -> borrowed_lisp = cppcompiler -> macro_lisp != NULL;
+  Map saved_counters = NULL;
+  int saved_gensym = 0;
+  if(! request -> live_symbols){
+    saved_counters = c -> names -> counters;
+    saved_gensym = c -> names -> gensym_count;
+    c -> names -> counters = Map_copy(c -> names -> counters);
+  }
+  Compiler_shallow_parse(cppcompiler, globs);
+  globs = Sym_global_symbols(cppcompiler -> sym);
+  if(request -> live_symbols && ! request -> dump) Compiler_install_generated_protocol_symbols(c, globs);
+  if(! request -> live_symbols){
+    c -> names -> counters = saved_counters;
+    c -> names -> gensym_count = saved_gensym;
+  }
+  if(request -> dump == 1335836754920) unit -> snapshot_statics = Map_copy(Sym_file_statics(cppcompiler -> sym));
+  return globs;
 }
 
 Context Context_open_isolated_named(const char *);
@@ -464,11 +561,16 @@ x2c_exception_leave(& _x2c_exception_frame_3);
 return ! Compiler_error_count(compiler);
 }
 
+void Compiler_take_diagnostics(Compiler, Compiler);
+
 void header_symbols_begin_generated(void);
 
 void Sym_seed_var_tags(Sym, Map);
 
+void Compiler_close_child(Compiler, Compiler);
+
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
+  if(! _init_guard_) _file_init_();
   Compiler compiler = unit -> compiler;
   {
     ExceptionFrame _x2c_exception_frame_4;
@@ -479,19 +581,26 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
     _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_8);
   }
   ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)){
-    unit -> globals = _collect_input(frontend -> request, compiler);  if(! frontend -> request -> no_cpp) header_symbols_begin_generated();  Sym_seed_var_tags(compiler -> sym, unit -> globals);
+    unit -> globals = _preprocess_input(frontend, unit);  if(unit -> preprocessor) Compiler_take_diagnostics(compiler, unit -> preprocessor);  if(! frontend -> request -> no_cpp) header_symbols_begin_generated();  Sym_seed_var_tags(compiler -> sym, unit -> globals);
   }
   else {x2c_exception_landed(& _x2c_exception_frame_4); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_4)){
       x2c_error_catch_detach(_x2c_error_handler_4);
       x2c_exception_mark_handled(&_x2c_exception_frame_4);
        {{
-        int _x2c_return_value_4 = 0;
+        if(unit -> preprocessor){
+          Compiler_close_child(compiler, unit -> preprocessor);
+          unit -> preprocessor = NULL;
+        }
         {
-          x2c_error_catch_close(_x2c_error_handler_4);
-          _x2c_error_handler_4 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_4);
-          return _x2c_return_value_4;
+          int _x2c_return_value_4 = 0;
+          {
+            x2c_error_catch_close(_x2c_error_handler_4);
+            _x2c_error_handler_4 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_4);
+            return _x2c_return_value_4;
+          }
+
         }
 
       }
@@ -551,11 +660,11 @@ x2c_exception_leave(& _x2c_exception_frame_5);
 }
 {
   Var entry;
-  Array _x2c_macro_object_1 = diagnostics -> entries;
-  int _x2c_macro_cursor_1 = 0;
-  Var _x2c_macro_cursor_output_1;
-  while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-    entry = _x2c_macro_cursor_output_1;
+  Array _x2c_macro_object_2 = diagnostics -> entries;
+  int _x2c_macro_cursor_2 = 0;
+  Var _x2c_macro_cursor_output_2;
+  while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    entry = _x2c_macro_cursor_output_2;
     Array_push(collected, entry);
   }
 
@@ -580,6 +689,7 @@ void ParsedUnit_close(ParsedUnit * unit){
   if(! unit -> context) return;
   Compiler compiler = unit -> compiler;
   if(gensym_cursor < compiler -> names -> gensym_count) gensym_cursor = compiler -> names -> gensym_count;
+  if(unit -> preprocessor) Compiler_close_child(compiler, unit -> preprocessor);
   Compiler_free_lisp(compiler);
   Type_end_unit();
   Context_close(unit -> context);

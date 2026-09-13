@@ -2315,7 +2315,9 @@ List Sym.declare(Sym sym, List context, List key, List ast) {
   with sym.compiler {
     if (_.package) key = _package_declared_key(sym, context, key, ast);
     String spelling = _declared_spelling(key);
-    if (_is_reserved_spelling(spelling)) {
+    // A shallow parse reads emitted C, where generated spellings are the
+    // compiler's own output rather than a source declaration.
+    if (!_.shallow && _is_reserved_spelling(spelling)) {
       String message =
         %"'$spelling' is reserved for compiler-generated names";
       _.report_error(<parse>, message, _.token, NULL);

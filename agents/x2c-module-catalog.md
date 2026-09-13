@@ -360,7 +360,7 @@ Public functions:
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
 `Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
 `ToolAction.as_program`, `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`,
-`ToolAction.run`
+`ToolAction.run`, `Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 
@@ -402,9 +402,9 @@ Public functions:
 
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
 `x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`, `x2c_package_directory`,
-`x2c_package_source`, `x2c_default_include_dirs`, `x2c_driver_error`,
-`process_start`, `ChildProcess.ready`, `ChildProcess.wait`, `worker_fork`,
-`worker_exit`, `worker_wait`, `x2c_filename_hash`
+`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
+`x2c_driver_error`, `process_start`, `ChildProcess.ready`, `ChildProcess.wait`,
+`process_run`, `worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 
