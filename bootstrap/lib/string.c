@@ -641,22 +641,15 @@ String String_filter(String str, Func fn){
     {
       String _x2c_return_value_0 = _x2c_macro_result_0;
       {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
 }
 
@@ -693,22 +686,15 @@ String String_map(String str, Func fn){
     {
       String _x2c_return_value_1 = result;
       {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_1;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
 }
 }
 
@@ -736,22 +722,15 @@ String String_keep(String str, String chars){
     {
       String _x2c_return_value_2 = _x2c_macro_result_1;
       {
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-  return _x2c_return_value_2;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
 }
 }
 
@@ -777,22 +756,15 @@ String String_reject(String str, String chars){
     {
       String _x2c_return_value_3 = _x2c_macro_result_2;
       {
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_3;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-  return _x2c_return_value_3;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 
@@ -818,22 +790,15 @@ String String_squeeze(String str, String chars){
     {
       String _x2c_return_value_4 = _x2c_macro_result_3;
       {
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_4);
+        x2c_cleanup_leave(& _x2c_defer_record_4);
+        return _x2c_return_value_4;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-  return _x2c_return_value_4;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
 
@@ -913,9 +878,7 @@ int List_truth(List);
 
 int List_len(List);
 
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 List List_cdr(List);
 
@@ -931,13 +894,11 @@ String String_join(String sep, List strings){
   size_t total =(size_t)(n - 1) *(size_t) sep_len;
   {
     String str;
-    Iter _x2c_macro_iterator_0 = List_iter(strings, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      str = Var_string(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = strings;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      str = Var_string(_x2c_macro_cursor_output_0);
       {
         int length = String_len(str);
         if((size_t) length >(size_t)(INT_MAX - 1) - total) return NULL;
@@ -1183,13 +1144,11 @@ String String_escape(String str){
   int bytes = 0;
   {
     int byte;
-    Iter _x2c_macro_iterator_1 = String_iter(str, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      byte = Var_int(Var_convert(_x2c_macro_item_1, 3453797));
+    String _x2c_macro_object_1 = str;
+    int _x2c_macro_cursor_1 = 0;
+    int _x2c_macro_cursor_output_1;
+    while(String_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      byte = _x2c_macro_cursor_output_1;
       {
         int width = _escape_byte((unsigned char) byte, NULL);
         if(bytes > INT_MAX - width - 1) return NULL;
@@ -1203,13 +1162,11 @@ String String_escape(String str){
   char * dst = string;
   {
     int byte;
-    Iter _x2c_macro_iterator_2 = String_iter(str, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      byte = Var_int(Var_convert(_x2c_macro_item_2, 3453797));
+    String _x2c_macro_object_2 = str;
+    int _x2c_macro_cursor_2 = 0;
+    int _x2c_macro_cursor_output_2;
+    while(String_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      byte = _x2c_macro_cursor_output_2;
       dst += _escape_byte((unsigned char) byte, dst);
     }
 
@@ -1244,13 +1201,11 @@ Buffer String_write_repr(String str, Buffer out){
   Buffer_write_char(out, '"');
   {
     int byte;
-    Iter _x2c_macro_iterator_3 = String_iter(str, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-      byte = Var_int(Var_convert(_x2c_macro_item_3, 3453797));
+    String _x2c_macro_object_3 = str;
+    int _x2c_macro_cursor_3 = 0;
+    int _x2c_macro_cursor_output_3;
+    while(String_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      byte = _x2c_macro_cursor_output_3;
       {
         char escaped[4];
         int width = _escape_byte((unsigned char) byte, escaped);
@@ -1328,6 +1283,15 @@ static int _next(Iter iter, Var * out){
   if(index < 0 || index >= String_len(str)) return 0;
   * out = int_var((int) String_getindex(str, index));
   iter -> state = int_var(index + 1);
+  return 1;
+}
+
+int String_try_next(String str, int * cursor, int * out){
+  if(! _init_guard_) String_initialize();
+  if(! String_truth(str) || ! cursor || ! out || * cursor < 0) return 0;
+  if(* cursor >= String_len(str)) return 0;
+  * out =(int) String_getindex(str, * cursor);
+  * cursor += 1;
   return 1;
 }
 

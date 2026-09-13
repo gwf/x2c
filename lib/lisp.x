@@ -728,7 +728,7 @@ Var lisp_string_downcase(String string) => string.lower();
 /** Returns the instantiated `template` when `input` matches `pat`.
     `List.match_replace` returns a `List`, so a template that is a bare binder
     loses a scalar result. Lisp sees the replacement itself. A miss, malformed
-    pattern, cache pressure, or machine error returns `input` unchanged.
+    pattern or machine error returns `input` unchanged.
 */
 Var lisp_match_replace(List input, Var pat, Var template) {
   Var result;
@@ -756,48 +756,49 @@ Var lisp_write_file(String path, String text) {
   return _bool(wrote && closed);
 }
 
-// The direct targets let the compiler generate their call adapters.
+// The direct targets let the compiler generate their call adapters and
+// read each signature from the declared prototype.
 $(import "../etc/lisp-bindings.xlisp")
 $(def lisp.native.target.rows '(
-  (Var_car              ((func (("Var"))) "Var"))
-  (Var_cdr              ((func (("Var"))) "List"))
-  (Var_cons             ((func (("Var") ("List"))) "List"))
-  (lisp_atom            ((func (("Var"))) "Var"))
-  (lisp_pair            ((func (("Var"))) "Var"))
-  (lisp_list            ((func (("Var"))) "Var"))
-  (lisp_eq              ((func (("Var") ("Var"))) "Var"))
-  (lisp_type            ((func (("Var"))) "Symbol"))
-  (lisp_number          ((func (("Var"))) "Var"))
-  (lisp_string          ((func (("Var"))) "Var"))
-  (lisp_symbol          ((func (("Var"))) "Var"))
-  (lisp_procedure       ((func (("Var"))) "Var"))
-  (List_reverse         ((func (("List"))) "List"))
-  (List_len             ((func (("List"))) int))
-  (List_match           ((func (("List") ("Var"))) "List"))
-  (lisp_match_replace   ((func (("List") ("Var") ("Var"))) "Var"))
-  (List_search          ((func (("List") ("Var"))) "List"))
-  (List_search_replace  ((func (("List") ("Var") ("Var"))) "List"))
-  (lisp_add             ((func (("Var") ("Var"))) "Var"))
-  (Var_binary           ((func (("Var") ("Symbol") ("Var"))) "Var"))
-  (lisp_compare         ((func (("Var") ("Var"))) "Var"))
-  (lisp_plus            ((func (("List"))) "Var") rest)
-  (lisp_minus           ((func (("List"))) "Var") rest)
-  (lisp_times           ((func (("List"))) "Var") rest)
-  (lisp_divide          ((func (("List"))) "Var") rest)
-  (lisp_eq_chain        ((func (("List"))) "Var") rest)
-  (lisp_lt_chain        ((func (("List"))) "Var") rest)
-  (lisp_le_chain        ((func (("List"))) "Var") rest)
-  (lisp_gt_chain        ((func (("List"))) "Var") rest)
-  (lisp_ge_chain        ((func (("List"))) "Var") rest)
-  (lisp_str             ((func (("Var"))) "Var"))
-  (lisp_repr            ((func (("Var"))) "Var"))
-  (String_len           ((func (("String"))) int))
-  (lisp_string_append   ((func (("String") ("String"))) "Var"))
-  (lisp_substring       ((func (("String") (int) (int))) "Var"))
-  (lisp_string_downcase ((func (("String"))) "Var"))
-  (lisp_read_file       ((func (("String"))) "Var"))
-  (lisp_write_file      ((func (("String") ("String"))) "Var"))
-  (List_sort            ((func (("List"))) "List"))
+  (Var_car)
+  (Var_cdr)
+  (Var_cons)
+  (lisp_atom)
+  (lisp_pair)
+  (lisp_list)
+  (lisp_eq)
+  (lisp_type)
+  (lisp_number)
+  (lisp_string)
+  (lisp_symbol)
+  (lisp_procedure)
+  (List_reverse)
+  (List_len)
+  (List_match)
+  (lisp_match_replace)
+  (List_search)
+  (List_search_replace)
+  (lisp_add)
+  (Var_binary)
+  (lisp_compare)
+  (lisp_plus rest)
+  (lisp_minus rest)
+  (lisp_times rest)
+  (lisp_divide rest)
+  (lisp_eq_chain rest)
+  (lisp_lt_chain rest)
+  (lisp_le_chain rest)
+  (lisp_gt_chain rest)
+  (lisp_ge_chain rest)
+  (lisp_str)
+  (lisp_repr)
+  (String_len)
+  (lisp_string_append)
+  (lisp_substring)
+  (lisp_string_downcase)
+  (lisp_read_file)
+  (lisp_write_file)
+  (List_sort)
 ))
 
 macro Expression $lisp.native.target.map() => (

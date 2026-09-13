@@ -316,8 +316,6 @@ static uint64_t _translation_fingerprint(
   hash = _state_list(hash, request.package_dirs);
   hash = _state_list(hash, request.cpp_args);
   hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
-  hash = _state_text(hash, request.live_symbols ? %"live" : %"snapshot");
-  hash = _state_text(hash, request.cpp_symbols ? %"cpp-symbols" : %"raw");
   hash = _state_text(
     hash, request.source_map ? %"source-map" : %"generated-lines");
   String depfile = %"$directory/${x2c_path_stem(input)}.d";

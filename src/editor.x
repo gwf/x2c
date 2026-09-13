@@ -162,22 +162,8 @@ static CliRequest _configure(
     }
   }
   request.sources = sources;
-  if (sources.is_changed(source) &&
-      (request.live_symbols || request.cpp_symbols)) {
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are "
-          "not supported; syntax highlighting remains available\n", stderr);
-    exit(2);
-  }
   request.source_facts = 1;
   return request;
-}
-
-static int _changed_dependency(Compiler compiler, SourceView sources) {
-  foreach (Var path, compiler.deps.keys())
-    if (sources.is_changed(path.string())) return 1;
-  foreach (Var path, compiler.source_texts.keys())
-    if (sources.is_changed(path.string())) return 1;
-  return 0;
 }
 
 /** Serves one private editor request after process environment initialization.
@@ -211,14 +197,6 @@ int editor_request(int argc, char **argv) {
   Frontend frontend = Frontend.new(request);
   ParsedUnit unit;
   int parsed = frontend.open(source, &unit);
-  if ((request.live_symbols || request.cpp_symbols) &&
-      _changed_dependency(unit.compiler, sources)) {
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are "
-          "not supported; syntax highlighting remains available\n", stderr);
-    unit.close();
-    command.close();
-    return 2;
-  }
   File result = fopen(response, "w");
   if (!result) {
     unit.close();

@@ -9,7 +9,14 @@ Pattern matching and transformation utilities for lists.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_match_thread_release`](#x2c_match_thread_release) | Disposes this thread's default `Match` plan cache. |
+| [`x2c_match_initialize`](#x2c_match_initialize) | Registers process-wide `Match` cleanup exactly once. |
+| [`x2c_match_site_match`](#x2c_match_site_match) | Returns bindings through one compiler-owned site, or `nil` on a miss. |
+| [`x2c_match_site_match_replace`](#x2c_match_site_match_replace) | Returns the `List` replacement through one compiler-owned site. |
+| [`x2c_match_site_search`](#x2c_match_site_search) | Returns every matching subtree through one compiler-owned site. |
+| [`x2c_match_site_search_replace`](#x2c_match_site_search_replace) | Replaces every match through one compiler-owned site. |
+| [`x2c_match_site_try_match`](#x2c_match_site_try_match) | Matches through one compiler-owned site, writing bindings on success. |
+| [`x2c_match_site_try_match_replace`](#x2c_match_site_try_match_replace) | `Match`-replaces through one compiler-owned site. |
+| [`x2c_match_site_try_search`](#x2c_match_site_try_search) | Searches through one compiler-owned site, writing the first match. |
 | [`List.replace`](#List.replace) | Replaces named binders in `template` according to `bindings`. |
 | [`List.search`](#List.search) | Returns every matching subtree of `input` with its bindings. |
 | [`List.search_replace`](#List.search_replace) | Replaces every matching subtree in `input` from the leaves upward. |
@@ -19,20 +26,81 @@ Pattern matching and transformation utilities for lists.
 
 ### Functions
 
-#### x2c_match_thread_release
+#### x2c_match_initialize
 
-`void x2c_match_thread_release(void)`
+`void x2c_match_initialize(void)`
 
-Disposes this thread's default `Match` plan cache.
-`x2c_thread_state_release`
-calls it before `Scope` releases the `Scope` that holds that cache; a
-thread
-that never matched has no cache and nothing happens. All default-cache
-leases and `Context` states must already be closed.
+Registers process-wide `Match` cleanup exactly once.
+Repeated calls have no effect. Failure of the native once primitive writes
+a diagnostic and aborts the process.
 
-**Raises:** `<bad-state>` when a lease remains active.
+**Raises:** `<alloc-fail>` or `<size-limit>` while registering the shutdown
+hook.
 
-Source: `lib/match.x:2256`
+Source: `lib/match.x:1934`
+
+#### x2c_match_site_match
+
+`List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)`
+
+Returns bindings through one compiler-owned site, or `nil` on a miss.
+Results follow `List.match`.
+
+Source: `lib/match.x:178`
+
+#### x2c_match_site_match_replace
+
+`List x2c_match_site_match_replace( MatchCaptureSite *site, List input, Var pat, Var template)`
+
+Returns the `List` replacement through one compiler-owned site.
+Results follow `List.match_replace`.
+
+Source: `lib/match.x:221`
+
+#### x2c_match_site_search
+
+`List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat)`
+
+Returns every matching subtree through one compiler-owned site.
+Results follow `List.search`.
+
+Source: `lib/match.x:199`
+
+#### x2c_match_site_search_replace
+
+`List x2c_match_site_search_replace( MatchCaptureSite *site, List input, Var pat, Var template)`
+
+Replaces every match through one compiler-owned site.
+Results follow `List.search_replace`.
+
+Source: `lib/match.x:232`
+
+#### x2c_match_site_try_match
+
+`int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List *out_bindings)`
+
+Matches through one compiler-owned site, writing bindings on success.
+Results follow `List.try_match`.
+
+Source: `lib/match.x:167`
+
+#### x2c_match_site_try_match_replace
+
+`int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var *out)`
+
+`Match`-replaces through one compiler-owned site.
+Results follow `List.try_match_replace`.
+
+Source: `lib/match.x:210`
+
+#### x2c_match_site_try_search
+
+`int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var *out_match, List *out_bindings)`
+
+Searches through one compiler-owned site, writing the first match.
+Results follow `List.try_search`.
+
+Source: `lib/match.x:187`
 
 ### `List`
 
@@ -50,7 +118,7 @@ unchanged. New structure follows the module pool-chain lifetime above.
 
 **Raises:** `<alloc-fail>` while constructing replacement `List`s.
 
-Source: `lib/match.x:641`
+Source: `lib/match.x:708`
 
 <a id="List.search"></a>
 #### List.search
@@ -62,12 +130,12 @@ Each result begins with `(* matched)` followed by reverse-slot-order binder
 pairs. Traversal visits a `List`'s head, then tail, then the `List` itself;
 results are prepended and therefore returned in reverse visitation order.
 Explicit `nil` values are nodes, but a proper `List`'s terminal cdr is not.
-A miss, malformed pattern, cache pressure, or machine error returns `nil`.
+A miss, malformed pattern, or machine error returns `nil`.
 
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match.x:807`
+Source: `lib/match.x:878`
 
 <a id="List.search_replace"></a>
 #### List.search_replace
@@ -76,14 +144,14 @@ Source: `lib/match.x:807`
 
 Replaces every matching subtree in `input` from the leaves upward.
 Children are rewritten before their reconstructed containing `List` is
-tested. A miss, malformed pattern, cache pressure, or machine error returns
-`input` unchanged. New structure follows the module pool-chain lifetime
+tested. A miss, malformed pattern, or machine error returns `input`
+unchanged. New structure follows the module pool-chain lifetime
 above.
 
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match.x:832`
+Source: `lib/match.x:909`
 
 <a id="List.try_match"></a>
 #### List.try_match
@@ -98,7 +166,7 @@ match writes `nil`. A null output pointer returns 0.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing captures, or publishing bindings.
 
-Source: `lib/match.x:600`
+Source: `lib/match.x:662`
 
 <a id="List.try_match_replace"></a>
 #### List.try_match_replace
@@ -108,13 +176,13 @@ Source: `lib/match.x:600`
 Matches `input` and writes the instantiated `template` on success.
 The output may be any `Var`, including typed `nil` or a
 scalar. Returns 0 for
-a miss, malformed pattern, invalid output, cache pressure, or machine
-error and leaves `out` unchanged.
+a miss, malformed pattern, invalid output, or machine error and leaves
+`out` unchanged.
 
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match.x:697`
+Source: `lib/match.x:764`
 
 <a id="List.try_search"></a>
 #### List.try_search
@@ -129,14 +197,14 @@ returns
 
 **Raises:** the same causes as `List.search`.
 
-Source: `lib/match.x:820`
+Source: `lib/match.x:893`
 
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
 | [`x2c_match_site_try_capture`](#x2c_match_site_try_capture) | Matches through one compiler-owned static capture site. |
-| [`x2c_match_try_capture`](#x2c_match_try_capture) | Matches through the active default cache into positional storage. |
+| [`x2c_match_try_capture`](#x2c_match_try_capture) | Matches a runtime pattern into positional storage. |
 | [`List.match`](#List.match) | Returns bindings when `input` matches `pat`, or `nil` on a miss. |
 | [`List.match_replace`](#List.match_replace) | Returns the `List` replacement when `input` matches `pat`. |
 | [`Var.is_atom_binder`](#Var.is_atom_binder) | Reports whether `atom` is a valid named or anonymous `?` binder. |
@@ -161,21 +229,23 @@ patterns, misses, and machine errors return 0 without changing it.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 publishing or matching.
 
-Source: `lib/match.x:154`
+Source: `lib/match.x:136`
 
 #### x2c_match_try_capture
 
 `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)`
 
-Matches through the active default cache into positional storage.
-Returns 1 on success and 0 on a miss, malformed pattern, invalid buffer,
-cache pressure, or machine error. A nonnull buffer is written atomically
-as described by `MatchCaptureBuffer`; NULL returns 0.
+Matches a runtime pattern into positional storage.
+The pattern is prepared for this call alone, so a caller that repeats one
+pattern pays one preparation each time. Returns 1 on success and 0 on a
+miss, malformed pattern, invalid buffer, or machine error. A nonnull
+buffer is written atomically as described by `MatchCaptureBuffer`; NULL
+returns 0.
 
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or matching.
 
-Source: `lib/match.x:128`
+Source: `lib/match.x:107`
 
 ### `List`
 
@@ -188,7 +258,7 @@ Returns bindings when `input` matches `pat`, or `nil` on a miss.
 A binder-free success returns the nonnull `%(())` sentinel
 with no associations. Binding order and failures follow `List.try_match`.
 
-Source: `lib/match.x:607`
+Source: `lib/match.x:674`
 
 <a id="List.match_replace"></a>
 #### List.match_replace
@@ -201,7 +271,7 @@ inhabit the `List` result and returns `nil`. Matching and replacement
 failures
 follow `List.try_match_replace`.
 
-Source: `lib/match.x:707`
+Source: `lib/match.x:778`
 
 ### `Var`
 
@@ -214,7 +284,7 @@ Reports whether `atom` is a valid named or anonymous `?` binder.
 
 **Raises:** `<alloc-fail>` while decoding a compact `Atom`.
 
-Source: `lib/match.x:263`
+Source: `lib/match.x:325`
 
 <a id="Var.is_binder"></a>
 #### Var.is_binder
@@ -225,7 +295,7 @@ Reports whether `atom` is either valid `Match` binder form.
 
 **Raises:** `<alloc-fail>` while decoding a compact `Atom`.
 
-Source: `lib/match.x:273`
+Source: `lib/match.x:335`
 
 <a id="Var.is_list_binder"></a>
 #### Var.is_list_binder
@@ -236,7 +306,7 @@ Reports whether `atom` is a valid named or anonymous `*` binder.
 
 **Raises:** `<alloc-fail>` while decoding a compact `Atom`.
 
-Source: `lib/match.x:268`
+Source: `lib/match.x:330`
 
 <a id="Var.is_match_op"></a>
 #### Var.is_match_op
@@ -245,7 +315,7 @@ Source: `lib/match.x:268`
 
 Reports whether `atom` is a compact built-in `Match` guard operator.
 
-Source: `lib/match.x:276`
+Source: `lib/match.x:338`
 
 ## Runtime-internal callables
 
@@ -254,26 +324,12 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`MatchCache.acquire`](#MatchCache.acquire) | Acquires a lease for a cached prepared pattern. |
-| [`MatchCache.context_close`](#MatchCache.context_close) | Disposes and removes the top `Context`'s default `Match` cache. |
-| [`MatchCache.context_open`](#MatchCache.context_open) | Opens one `Context`-local default `Match`-cache state. |
-| [`MatchCache.dispose`](#MatchCache.dispose) | Destroys a `Match` cache with no active leases. |
-| [`MatchCache.flush_default`](#MatchCache.flush_default) | Destroys the active `Context`-local or thread-local `Match` cache. |
-| [`MatchCache.initialize`](#MatchCache.initialize) | Registers process-wide `Match` cleanup exactly once. |
-| [`MatchCache.new`](#MatchCache.new) | Creates a `MatchCache` retaining up to `capacity` prepared patterns. |
-| [`MatchCache.search`](#MatchCache.search) | Searches through `cache`, writing every match. |
-| [`MatchCache.search_replace`](#MatchCache.search_replace) | Replaces every match through `cache` from the leaves upward. |
-| [`MatchCache.try_capture`](#MatchCache.try_capture) | Matches through `cache` into caller-owned positional storage. |
-| [`MatchCache.try_match`](#MatchCache.try_match) | Matches through `cache`, writing bindings on success. |
-| [`MatchCache.try_match_replace`](#MatchCache.try_match_replace) | `Match`-replaces through `cache`, writing the replacement on success. |
-| [`MatchCache.try_search`](#MatchCache.try_search) | Searches through `cache`, writing the first match and bindings. |
 | [`MatchCaptureBuffer.has`](#MatchCaptureBuffer.has) | Reports whether a committed capture slot is present. |
 | [`MatchCaptureLayout.analyze`](#MatchCaptureLayout.analyze) | Analyzes one `Match` pattern into its canonical positional layout. |
 | [`MatchCaptureLayout.definite_list`](#MatchCaptureLayout.definite_list) | Returns definite binders in canonical positional order. |
 | [`MatchCaptureLayout.free`](#MatchCaptureLayout.free) | Releases one canonical `Match` capture layout. |
 | [`MatchCaptureLayout.index`](#MatchCaptureLayout.index) | Returns the canonical slot for `binder`, or -1 when it is absent. |
 | [`MatchCaptureLayout.possible_list`](#MatchCaptureLayout.possible_list) | Returns possible binders in canonical positional order. |
-| [`MatchLease.release`](#MatchLease.release) | Releases the prepared program held by `lease`. |
 | [`MatchPlan.execute`](#MatchPlan.execute) | Executes `plan` against `input` and publishes association bindings. |
 | [`MatchPlan.execute_capture`](#MatchPlan.execute_capture) | Executes a prepared plan into caller-owned positional storage. |
 | [`MatchPlan.free`](#MatchPlan.free) | Releases resources owned by `plan`. |
@@ -284,205 +340,6 @@ for source readers but are not supported as user API.
 | [`MatchPlan.try_match`](#MatchPlan.try_match) | Executes prepared `plan` against `input`, writing bindings on success. |
 | [`MatchPlan.try_match_replace`](#MatchPlan.try_match_replace) | Executes `plan` and writes the instantiated `template` on success. |
 | [`MatchPlan.try_search`](#MatchPlan.try_search) | Searches `input` with `plan`, writing the first match and bindings. |
-
-### `MatchCache`
-
-<a id="MatchCache.acquire"></a>
-#### MatchCache.acquire
-
-`int MatchCache.acquire(MatchCache m, Var pattern, MatchLease *lease)`
-
-Acquires a lease for a cached prepared pattern.
-`cache` and `lease` must be nonnull. The lease is initialized on every
-returning path. An admitted pattern reuses or creates an LRU entry; an
-inadmissible pattern gets a transient plan owned by the lease. Returns the
-plan's `MachinePrepare` status, or `MATCH_CACHE_PRESSURE` when every entry
-is pinned. Release the lease after any returned status; releasing the
-inactive pressure lease is a no-op.
-
-**Raises:** `<size-limit>` when `pattern` exceeds a lowering limit. Such a
-pattern compiles to no program, so it is never cached and never leased.
-`<alloc-fail>` may also be raised while preparing or growing storage.
-
-Source: `lib/match.x:1964`
-
-<a id="MatchCache.context_close"></a>
-#### MatchCache.context_close
-
-`void MatchCache.context_close(void *token)`
-
-Disposes and removes the top `Context`'s default `Match` cache.
-A null token is ignored. Successful close restores the previous default;
-the token storage remains owned by its `Context` `Scope`.
-
-**Raises:** `<bad-state>` when `token` is not the top state or its cache has an
-active lease. The failure leaves the state installed.
-
-Source: `lib/match.x:2292`
-
-<a id="MatchCache.context_open"></a>
-#### MatchCache.context_open
-
-`void *MatchCache.context_open(void)`
-
-Opens one `Context`-local default `Match`-cache state.
-The returned opaque token becomes the top of a thread-local LIFO stack;
-its cache is created only on first use. The token is allocated in the
-active `Scope` and must be passed to `MatchCache.context_close` before that
-`Scope` ends.
-
-**Raises:** `<alloc-fail>` when the state cannot be allocated.
-
-Source: `lib/match.x:2278`
-
-<a id="MatchCache.dispose"></a>
-#### MatchCache.dispose
-
-`void MatchCache.dispose(MatchCache cache)`
-
-Destroys a `Match` cache with no active leases.
-A null cache is ignored. Disposal frees all plans and cache storage and
-invalidates every alias.
-
-**Raises:** `<bad-state>` when a lease remains active. The failure leaves the
-cache intact.
-
-Source: `lib/match.x:2074`
-
-<a id="MatchCache.flush_default"></a>
-#### MatchCache.flush_default
-
-`void MatchCache.flush_default(void)`
-
-Destroys the active `Context`-local or thread-local `Match` cache.
-A missing cache is ignored; the next `Match` recreates it lazily. Static
-compiler capture sites are unaffected.
-
-**Raises:** `<bad-state>` when a lease remains active. The failure leaves the
-cache installed.
-
-Source: `lib/match.x:2381`
-
-<a id="MatchCache.initialize"></a>
-#### MatchCache.initialize
-
-`void MatchCache.initialize(void)`
-
-Registers process-wide `Match` cleanup exactly once.
-Repeated calls have no effect. Failure of the native once primitive writes
-a diagnostic and aborts the process.
-
-**Raises:** `<alloc-fail>` or `<size-limit>` while registering the shutdown
-hook.
-
-Source: `lib/match.x:2320`
-
-<a id="MatchCache.new"></a>
-#### MatchCache.new
-
-`MatchCache MatchCache.new(int capacity)`
-
-Creates a `MatchCache` retaining up to `capacity` prepared patterns.
-The returned cache owns a named `Scope` and is not synchronized. It borrows
-admitted pattern identities, so dispose it before their owning canonical
-pools. `MatchCache.dispose` is required after every lease is released.
-
-**Raises:** `<bad-arg>` when capacity is not positive, `<size-limit>` when its
-storage dimensions cannot be represented, and `<alloc-fail>` when cache
-storage cannot be allocated.
-
-Source: `lib/match.x:1853`
-
-<a id="MatchCache.search"></a>
-#### MatchCache.search
-
-`int MatchCache.search( MatchCache cache, List input, Var pattern, List *out_results)`
-
-Searches through `cache`, writing every match.
-`out_results` must be nonnull. It receives the reverse-visitation result
-`List`, or `nil` when there are no matches, the pattern is malformed, cache
-pressure prevents execution, or the machine fails. Returns 1 exactly when
-that `List` is nonempty.
-
-**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-preparing or constructing results.
-
-Source: `lib/match.x:2153`
-
-<a id="MatchCache.search_replace"></a>
-#### MatchCache.search_replace
-
-`int MatchCache.search_replace( MatchCache cache, List input, Var pattern, Var template, List *out)`
-
-Replaces every match through `cache` from the leaves upward.
-`out` must be nonnull. A completed prepared traversal returns 1 and writes
-its result even when nothing matched. A malformed pattern, cache pressure,
-or machine error returns 0 and writes `input` unchanged.
-
-**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-preparing, traversing, or replacing.
-
-Source: `lib/match.x:2189`
-
-<a id="MatchCache.try_capture"></a>
-#### MatchCache.try_capture
-
-`int MatchCache.try_capture( MatchCache cache, List input, Var pattern, MatchCaptureBuffer *captures)`
-
-Matches through `cache` into caller-owned positional storage.
-Returns 1 only after atomically committing a valid buffer. A miss,
-malformed pattern, invalid buffer, cache pressure, or machine error returns
-0 and leaves it unchanged.
-
-**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-preparing or matching.
-
-Source: `lib/match.x:2098`
-
-<a id="MatchCache.try_match"></a>
-#### MatchCache.try_match
-
-`int MatchCache.try_match( MatchCache cache, List input, Var pattern, List *out_bindings)`
-
-Matches through `cache`, writing bindings on success.
-`out_bindings` must be nonnull. Returns 0 and leaves it unchanged for a
-miss, malformed pattern, cache pressure, or machine error. Successful
-binding shape and order follow `MatchPlan.execute`.
-
-**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-preparing, materializing, or publishing.
-
-Source: `lib/match.x:2115`
-
-<a id="MatchCache.try_match_replace"></a>
-#### MatchCache.try_match_replace
-
-`int MatchCache.try_match_replace( MatchCache cache, List input, Var pattern, Var template, Var *out)`
-
-`Match`-replaces through `cache`, writing the replacement on success.
-`out` must be nonnull. Returns 0 and leaves it unchanged on a miss,
-malformed pattern, cache pressure, or machine error. The successful result
-may be any `Var`.
-
-**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-preparing, materializing, or replacing.
-
-Source: `lib/match.x:2171`
-
-<a id="MatchCache.try_search"></a>
-#### MatchCache.try_search
-
-`int MatchCache.try_search( MatchCache cache, List input, Var pattern, Var *out_match, List *out_bindings)`
-
-Searches through `cache`, writing the first match and bindings.
-Both outputs must be nonnull. Returns 0 and leaves them unchanged on a
-miss, malformed pattern, cache pressure, or machine error. Traversal order
-follows `MatchPlan.try_search`.
-
-**Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
-preparing or constructing bindings.
-
-Source: `lib/match.x:2133`
 
 ### `MatchCaptureBuffer`
 
@@ -495,7 +352,7 @@ Reports whether a committed capture slot is present.
 A null buffer or an index outside its capacity or `Match`'s binder limit
 returns false. Presence is independent of the captured `Var` value.
 
-Source: `lib/match.x:534`
+Source: `lib/match.x:596`
 
 ### `MatchCaptureLayout`
 
@@ -512,7 +369,7 @@ including when `status` is `MACHINE_MALFORMED`.
 
 **Raises:** `<alloc-fail>` while normalizing or allocating the layout.
 
-Source: `lib/match.x:490`
+Source: `lib/match.x:552`
 
 <a id="MatchCaptureLayout.definite_list"></a>
 #### MatchCaptureLayout.definite_list
@@ -525,7 +382,7 @@ follows the module pool-chain lifetime above.
 
 **Raises:** `<alloc-fail>` while constructing the `List`.
 
-Source: `lib/match.x:513`
+Source: `lib/match.x:575`
 
 <a id="MatchCaptureLayout.free"></a>
 #### MatchCaptureLayout.free
@@ -535,7 +392,7 @@ Source: `lib/match.x:513`
 Releases one canonical `Match` capture layout.
 A null layout is ignored; every alias is invalid afterward.
 
-Source: `lib/match.x:496`
+Source: `lib/match.x:558`
 
 <a id="MatchCaptureLayout.index"></a>
 #### MatchCaptureLayout.index
@@ -545,7 +402,7 @@ Source: `lib/match.x:496`
 Returns the canonical slot for `binder`, or -1 when it is absent.
 A null layout returns -1. Comparison uses exact `Atom` identity.
 
-Source: `lib/match.x:527`
+Source: `lib/match.x:589`
 
 <a id="MatchCaptureLayout.possible_list"></a>
 #### MatchCaptureLayout.possible_list
@@ -558,23 +415,7 @@ follows the module pool-chain lifetime above.
 
 **Raises:** `<alloc-fail>` while constructing the `List`.
 
-Source: `lib/match.x:521`
-
-### `MatchLease`
-
-<a id="MatchLease.release"></a>
-#### MatchLease.release
-
-`void MatchLease.release(MatchLease *lease)`
-
-Releases the prepared program held by `lease`.
-Releasing an inactive lease has no effect. A successful release destroys a
-transient plan or unpins its cached entry and makes the lease inactive.
-
-**Raises:** `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
-entry state is inconsistent. The failure leaves the lease active.
-
-Source: `lib/match.x:2045`
+Source: `lib/match.x:583`
 
 ### `MatchPlan`
 
@@ -593,7 +434,7 @@ and is not initialized here.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:1639`
+Source: `lib/match.x:1718`
 
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
@@ -609,7 +450,7 @@ the indicated values; all other results leave the buffer unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures.
 
-Source: `lib/match.x:1613`
+Source: `lib/match.x:1692`
 
 <a id="MatchPlan.free"></a>
 #### MatchPlan.free
@@ -620,7 +461,7 @@ Releases resources owned by `plan`.
 A null plan is ignored; the plan, layout, program, and all aliases to them
 are invalid afterward. Borrowed pattern constants are not released.
 
-Source: `lib/match.x:1543`
+Source: `lib/match.x:1622`
 
 <a id="MatchPlan.prepare"></a>
 #### MatchPlan.prepare
@@ -637,7 +478,7 @@ pattern constants, which must outlive it.
 
 **Raises:** `<alloc-fail>` while analyzing, lowering, or freezing.
 
-Source: `lib/match.x:1501`
+Source: `lib/match.x:1580`
 
 <a id="MatchPlan.search"></a>
 #### MatchPlan.search
@@ -654,7 +495,7 @@ output unchanged for an unusable plan, null output, or machine error.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 constructing results.
 
-Source: `lib/match.x:1706`
+Source: `lib/match.x:1785`
 
 <a id="MatchPlan.search_replace"></a>
 #### MatchPlan.search_replace
@@ -670,7 +511,7 @@ error. Children are replaced before their containing `List` is tested.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 traversing or replacing.
 
-Source: `lib/match.x:1754`
+Source: `lib/match.x:1833`
 
 <a id="MatchPlan.try_capture"></a>
 #### MatchPlan.try_capture
@@ -681,7 +522,7 @@ Executes a prepared `List` match into caller-owned positional storage.
 This is `MatchPlan.execute_capture` without statistics and has the same
 results, atomicity, and failures.
 
-Source: `lib/match.x:1626`
+Source: `lib/match.x:1705`
 
 <a id="MatchPlan.try_match"></a>
 #### MatchPlan.try_match
@@ -692,7 +533,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match.x:1653`
+Source: `lib/match.x:1732`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace
@@ -707,7 +548,7 @@ plan, null output, or machine error. Non-success leaves `out` unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures or replacing.
 
-Source: `lib/match.x:1728`
+Source: `lib/match.x:1807`
 
 <a id="MatchPlan.try_search"></a>
 #### MatchPlan.try_search
@@ -722,7 +563,7 @@ machine error. Unless it returns 1, both outputs remain unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:1678`
+Source: `lib/match.x:1757`
 
 ## Public types
 

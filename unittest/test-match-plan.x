@@ -470,7 +470,7 @@ static void plan_fenced_pattern_raises_at_every_entry(void) {
   MatchPlan.free(plan);
 }
 
-static void fenced_pattern_raises_through_cache_and_catch(void) {
+static void fenced_pattern_raises_at_every_consumer(void) {
   Var cached = _fenced_wide_pattern(NULL);
   List input = %(x), bindings = %(sentinel);
   int caught = 0;
@@ -507,8 +507,7 @@ static void fenced_pattern_raises_through_cache_and_catch(void) {
 
   EXPECT_INT_EQ(caught, 5);
   EXPECT_TRUE(bindings == %(sentinel));
-  // no fenced plan was cached and no lease survived the raise
-  MatchCache.flush_default();
+  // every consumer reported the fence and none returned a plan
 }
 
 // consumer parity: search, replacement - - - - - - - - - - - - - - - - - - -
@@ -831,7 +830,97 @@ static void source_site_owns_only_its_static_plan(void) {
     x2c_match_site_try_capture(&capture_site, %(ok 9), pattern, &captures), 1
   );
   EXPECT_INT_EQ(value.int(), 9);
-  MatchCache.flush_default();
+}
+
+static MatchCaptureSite match_site, try_match_site, sentinel_site;
+static MatchCaptureSite search_site, try_search_site;
+static MatchCaptureSite match_replace_site, try_match_replace_site;
+static MatchCaptureSite search_replace_site;
+
+/* Each compiler-emitted entry must answer exactly as the operation it
+   replaces, on a hit and on a miss, and must keep answering after its plan
+   is published. The per-call operation is the oracle. */
+static void source_sites_reproduce_the_runtime_operations(void) {
+  Var pattern = %(ok ?value);
+  List hit = %(ok 7), miss = %(no 7);
+  List document = %((ok 7) (ok 9));
+
+  for (int round = 0; round < 2; round++) {
+    List site_bindings = x2c_match_site_match(&match_site, hit, pattern);
+    EXPECT_LIST_EQ(site_bindings, hit.match(pattern));
+    EXPECT_NULL(x2c_match_site_match(&match_site, miss, pattern));
+
+    // a binder-free hit reports the nonnull no-bindings sentinel
+    EXPECT_LIST_EQ(
+      x2c_match_site_match(&sentinel_site, hit, %(ok 7)), %(()));
+
+    List bindings = %(untouched);
+    EXPECT_INT_EQ(
+      x2c_match_site_try_match(&try_match_site, hit, pattern, &bindings), 1);
+    EXPECT_LIST_EQ(bindings, hit.match(pattern));
+    EXPECT_INT_EQ(
+      x2c_match_site_try_match(&try_match_site, miss, pattern, &bindings), 0);
+    EXPECT_LIST_EQ(bindings, hit.match(pattern));
+
+    EXPECT_LIST_EQ(
+      x2c_match_site_search(&search_site, document, pattern),
+      document.search(pattern));
+
+    Var found = <untouched>, List found_bindings = %(untouched);
+    EXPECT_INT_EQ(
+      x2c_match_site_try_search(
+        &try_search_site, document, pattern, &found, &found_bindings), 1);
+    EXPECT_LIST_EQ(found.list(), %(ok 7));
+    EXPECT_LIST_EQ(found_bindings, hit.match(pattern));
+
+    List replaced = x2c_match_site_match_replace(
+      &match_replace_site, hit, pattern, %(got ?value));
+    EXPECT_LIST_EQ(replaced, %(got 7));
+    // a miss returns the input object itself, not a copy
+    EXPECT_PTR_EQ(
+      x2c_match_site_match_replace(
+        &match_replace_site, miss, pattern, %(got ?value)),
+      miss);
+
+    Var out = <untouched>;
+    EXPECT_INT_EQ(
+      x2c_match_site_try_match_replace(
+        &try_match_replace_site, hit, pattern, %(got ?value), &out), 1);
+    EXPECT_LIST_EQ(out.list(), %(got 7));
+    EXPECT_INT_EQ(
+      x2c_match_site_try_match_replace(
+        &try_match_replace_site, miss, pattern, %(got ?value), &out), 0);
+    EXPECT_LIST_EQ(out.list(), %(got 7));
+
+    EXPECT_LIST_EQ(
+      x2c_match_site_search_replace(
+        &search_replace_site, document, pattern, %(got ?value)),
+      %((got 7) (got 9)));
+    EXPECT_PTR_EQ(
+      x2c_match_site_search_replace(
+        &search_replace_site, %(none), pattern, %(got ?value)),
+      %(none));
+  }
+  EXPECT_TRUE(match_site.plan != NULL);
+  EXPECT_TRUE(search_replace_site.plan != NULL);
+}
+
+static MatchCaptureSite fenced_site;
+
+/* A site cannot retain an ineligible plan, so the call falls back to the
+   per-call route and that route names the public operation in the fence. */
+static void source_site_reports_a_fence_like_the_operation(void) {
+  Var fenced = _fenced_wide_pattern(NULL);
+  int caught = 0;
+  for (int round = 0; round < 2; round++) {
+    try x2c_match_site_search(&fenced_site, %(x), fenced);
+    catch %(size-limit (owner ?who) (fence ?seen)): {
+      caught++;
+      EXPECT_STR_EQ(seen.str(), "segment-width");
+      EXPECT_STR_EQ(who.str(), "List.search");
+    }
+  }
+  EXPECT_INT_EQ(caught, 2);
 }
 
 // immutability and reuse - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -887,7 +976,7 @@ void match_plan_suite(void) {
   $test.run(plan_star_supplementals);
   $test.run(plan_status_categorization);
   $test.run(plan_fenced_pattern_raises_at_every_entry);
-  $test.run(fenced_pattern_raises_through_cache_and_catch);
+  $test.run(fenced_pattern_raises_at_every_consumer);
   $test.run(plan_search_parity);
   $test.run(atom_consumers_match_the_reference);
   $test.run(plan_replace_parity);
@@ -896,6 +985,8 @@ void match_plan_suite(void) {
   $test.run(capture_layout_refuses_past_the_binder_limit);
   $test.run(capture_presence_is_separate_from_void);
   $test.run(source_site_owns_only_its_static_plan);
+  $test.run(source_sites_reproduce_the_runtime_operations);
+  $test.run(source_site_reports_a_fence_like_the_operation);
   $test.run(plan_programs_stay_immutable);
   $test.run(plan_long_atom_binder_layout);
 }

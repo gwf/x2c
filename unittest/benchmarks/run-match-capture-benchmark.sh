@@ -23,7 +23,7 @@ case "$MODE" in
     ;;
 esac
 
-"$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD" \
+"$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/benchmarks/match-capture-benchmark.x"
 "${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include" \
   -iquote "$ROOT/builds/0/src" "$BUILD/match-capture-benchmark.c" \

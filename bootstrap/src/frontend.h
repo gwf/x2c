@@ -9,22 +9,18 @@
 #include "cli.h"
 #include "compiler.h"
 #include "toolchain.h"
-typedef void(* FrontendErrorSink)(String text);
-
 typedef struct Frontend{
   CliRequest request;
   List include_dirs;
   Toolchain toolchain;
-  FrontendErrorSink preprocessor_errors;
 }
 * Frontend;
 
 typedef struct ParsedUnit{
   Context context;
-  Compiler compiler, preprocessor;
-  Map globals, snapshot_statics;
+  Compiler compiler;
+  Map globals;
   List ast;
-  String preprocessor_output, preprocessor_errors;
   int source_lines;
 }
 ParsedUnit;

@@ -163,7 +163,7 @@ Var int_var(int);
 
 void Lisp_enter(void *, Var, const Var *, int);
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 Var Lisp_apply_values(void *, Var, const Var *, int);
 
@@ -211,7 +211,7 @@ static void LispMachine__call(LispMachine m, int argc){
     }
 
   }
-  else if(! Var_is(callable, 437126)){
+  else if(! Var_is_row(callable, 9, 7, 1)){
     Symbol code = 995692317464;
     LispMachine__error_value(m, List_var(cons(Symbol_var(code), cons(List_var(cons(_3, cons(callable, NULL))), NULL))));
     return;
@@ -407,12 +407,12 @@ int LispMachine_step(LispMachine m){
       }
       Var left = m -> values[m -> value_count - 2];
       Var right = m -> values[m -> value_count - 1];
-      if(! Var_is(left, 806120)){
+      if(! Var_is_row(left, 9, 7, 4)){
         Symbol code = 4477479911782, actual = Var_kind(left);
         LispMachine__error_value(m, List_var(cons(Symbol_var(code), cons(List_var(cons(_2, cons(Symbol_var(actual), NULL))), NULL))));
         break;
       }
-      if(! Var_is(right, 806120)){
+      if(! Var_is_row(right, 9, 7, 4)){
         LispMachine__error(m, 1242558331357784);
         break;
       }

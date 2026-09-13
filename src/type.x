@@ -18,6 +18,7 @@ typedef List Type;
 
 #pragma private
 $(import "../src/ast-rewrite.xmacro")
+$(import "../lib/var-tags.xmacro")
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -479,10 +480,37 @@ static Map _typetags_table(void) {
   return typetags;
 }
 
+/* The encoding rows a statically known tag can be tested against without a
+   runtime decode, projected from the same ledger the runtime decoder uses.
+   Its keys are tag Symbols, so it outlives a translation unit. */
+static Map varrows = NULL;
+
+static Map _var_row_table(void) {
+  if ((void *) varrows != NULL) return varrows;
+  varrows = %{ ${$var.tag.constant.rows()} };
+  return varrows;
+}
+
+/** Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
+    reports whether one exists. A tag whose decoded form carries a validity
+    clause, an immediate width, or a user registration has no constant row.
+*/
+int Type.var_tag_row(
+  Symbol tag, unsigned long *top, unsigned long *mask, unsigned long *bottom) {
+  Var row = _var_row_table()[tag];
+  if (row is void) return 0;
+  List fields = row.list();
+  *top = fields.car().integer();
+  *mask = fields.cadr().integer();
+  *bottom = fields.caddr().integer();
+  return 1;
+}
+
 /** Initializes the process-lifetime scalar and fixed `Var`-tag tables. */
 void Type.initialize(void) {
   _typetags_table();
   _scalartypes_table();
+  _var_row_table();
 }
 
 /** Starts an empty set of source-declared `Var` rows for one translation

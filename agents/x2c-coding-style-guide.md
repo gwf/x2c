@@ -543,23 +543,23 @@ current reason and consequence.
 Prefer:
 
 ```x2c
-// Cache entries may point into this unit's pools. Flush them before release.
-MatchCache.flush_default();
+// The selected arm's captures are copied out, so the pattern pool can go.
+_catch_commit_captures(h, record, layout, &captures);
 List.pool_release();
-String.pool_release();
+_catch_retain(h);
 ```
 
 Avoid:
 
 ```x2c
-// Flush cache.
-MatchCache.flush_default();
+// Commit captures.
+_catch_commit_captures(h, record, layout, &captures);
 
 // Release list pool.
 List.pool_release();
 
-// Release string pool.
-String.pool_release();
+// Retain the handler.
+_catch_retain(h);
 ```
 
 For a branch, explain why the case differs:

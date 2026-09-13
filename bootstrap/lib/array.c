@@ -283,10 +283,7 @@ static void Array__core_setslice(Array _x2c_macro_array_0, int _x2c_macro_start_
     if(_x2c_macro_delta_0 < 0) _x2c_macro_array_0 -> length = _x2c_macro_n_0 + _x2c_macro_delta_0;
   }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
 }
 
@@ -614,8 +611,6 @@ Array Array_reverse(Array array){
   return Array__core_reverse(array);
 }
 
-int Iter_try_next(Iter, Var *);
-
 FuncArg FuncArg_value(Var);
 
 Var Func_apply(Func, unsigned, const FuncArg *);
@@ -633,13 +628,11 @@ Array Array_map(Array array, Func func){
   {
     {
       Var item;
-      Iter _x2c_macro_iterator_0 = Array_iter(array, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_0;
-      while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-        item = _x2c_macro_item_0;
+      Array _x2c_macro_object_0 = array;
+      int _x2c_macro_cursor_0 = 0;
+      Var _x2c_macro_cursor_output_0;
+      while(Array_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+        item = _x2c_macro_cursor_output_0;
         {
           FuncArg arguments[1] ={
             FuncArg_value(item)
@@ -654,22 +647,15 @@ Array Array_map(Array array, Func func){
     {
       Array _x2c_return_value_0 = result = output;
       {
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_0;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-  return _x2c_return_value_0;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
 }
 }
 
@@ -695,22 +681,15 @@ Array Array_map2(Array a, Array b, Func func){
     {
       Array _x2c_return_value_1 = result = output;
       {
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-  return _x2c_return_value_1;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
 }
 }
 
@@ -784,22 +763,15 @@ static Buffer Array__core_write(Array _x2c_macro_array_1, Buffer _x2c_macro_out_
     {
       Buffer _x2c_return_value_2 = Buffer_write(_x2c_macro_out_1, " ]");
       {
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_2;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-  return _x2c_return_value_2;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
 }
 }
 
@@ -871,30 +843,20 @@ Array Array_sort_with(Array array, Func compare){
       {
         Array _x2c_return_value_3 = array;
         {
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_5);
-        x2c_cleanup_leave(& _x2c_defer_record_4);
+          x2c_cleanup_leave(& _x2c_defer_record_5);
+          x2c_cleanup_leave(& _x2c_defer_record_4);
+          return _x2c_return_value_3;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-  return _x2c_return_value_3;
-
-}
       }
 
     }
 
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_5);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
 }
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
 
@@ -934,22 +896,15 @@ Array Array_sort_by(Array array, Func key){
     {
       Array _x2c_return_value_4 = array;
       {
-  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_6);
+        x2c_cleanup_leave(& _x2c_defer_record_6);
+        return _x2c_return_value_4;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
-  return _x2c_return_value_4;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_6);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
 }
 }
 
@@ -1003,7 +958,7 @@ void Array_heapify(Array heap){
 
 Buffer Buffer_new(size_t);
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 String Var_string(Var);
 
@@ -1018,7 +973,7 @@ String Array_join(Array array, String separator){
   Buffer buf = Buffer_new(0);
   for(size_t i = 0;  i < n;  i ++){
     Var elem =((Var *) array -> bytes)[i];
-    if(Var_is(elem, 1318210446)) Buffer_write(buf, Var_string(elem));
+    if(Var_is_row(elem, 11, 7, 1)) Buffer_write(buf, Var_string(elem));
     else Var_write_str(elem, buf);
     if(String_truth(separator) && i < n - 1) Buffer_write(buf, separator);
   }
@@ -1055,22 +1010,15 @@ String Array_str(Array array){
     {
       String _x2c_return_value_5 = Buffer_str(buf);
       {
-  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+        x2c_cleanup_leave(& _x2c_defer_record_7);
+        return _x2c_return_value_5;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
-  return _x2c_return_value_5;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_7);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
 }
 }
 
@@ -1089,22 +1037,15 @@ String Array_repr(Array array){
     {
       String _x2c_return_value_6 = Buffer_str(buf);
       {
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_8);
+        x2c_cleanup_leave(& _x2c_defer_record_8);
+        return _x2c_return_value_6;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
-  return _x2c_return_value_6;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_8);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
 }
 }
 
@@ -1123,6 +1064,14 @@ static int _next(Iter iter, Var * out){
   return 1;
 }
 
+int Array_try_next(Array array, int * cursor, Var * out){
+  if(! Array_truth(array) || ! cursor || ! out || * cursor < 0) return 0;
+  if(* cursor >= _int_length(array)) return 0;
+  * out =((Var *) array -> bytes)[* cursor];
+  * cursor += 1;
+  return 1;
+}
+
 int Iter_truth(Iter);
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
@@ -1133,6 +1082,8 @@ Iter Array_iter(Array x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Array_var(x), _next, int_var(0));
 }
+
+int Iter_try_next(Iter, Var *);
 
 Array Iter_array(Iter iter){
   Array output = Array_new(), result = NULL;
@@ -1158,22 +1109,15 @@ Array Iter_array(Iter iter){
     {
       Array _x2c_return_value_7 = result = output;
       {
-  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_9);
+        x2c_cleanup_leave(& _x2c_defer_record_9);
+        return _x2c_return_value_7;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
-  return _x2c_return_value_7;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_9);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
 }
 }
 

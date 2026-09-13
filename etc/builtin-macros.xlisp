@@ -21,8 +21,8 @@
 (defun x2c._foreach.cursor-spec (collection-type) (if
   (not (x2c._foreach.atom-type? collection-type)) nil
   (let* ((owner (str (car collection-type)))
-         (function (_x2c.foreach.function-reference
-           (string-append owner "_try_next"))))
+         (function (_x2c.function.reference
+                     (string-append owner "_try_next"))))
     (if (not function) nil
       (let* ((type (x2c.syntax.type function))
              (parameters (_x2c.type.parameters type))
@@ -32,8 +32,10 @@
         (if (and (equal? (_x2c.type.return type) '(int))
                  (equal? (car parameters) collection-type)
                  (_x2c.type.pointer? cursor-parameter)
-                 (_x2c.type.integral?
-                   (_x2c.type.element cursor-parameter))
+                 (or (_x2c.type.integral?
+                       (_x2c.type.element cursor-parameter))
+                     (equal? (_x2c.type.element cursor-parameter)
+                             collection-type))
                  outputs
                  (null? (filter
                    (lambda (output) (not
@@ -85,7 +87,8 @@
       (list declaration
             (x2c._foreach.declare collection-type object collection)
             (x2c._foreach.declare cursor-type cursor
-              (x2c.literal.int 0)))
+              (if (equal? cursor-type collection-type) object-expression
+                (x2c.literal.int 0))))
       (map x2c._foreach.output-declaration outputs)
       (list `(while ,condition ,loop-body)))))))
 
@@ -109,8 +112,8 @@
                     (str (car collection-type)) nil))
          (enumerate (if (and (= (length targets) 2) owner
                              (not (equal? collection-type '("Iter"))))
-           (_x2c.foreach.function-reference
-             (string-append owner "_enumerate")) nil))
+           (_x2c.function.reference (string-append owner "_enumerate"))
+           nil))
          (constructor (if enumerate enumerate converter))
          (iterator-expression
            (x2c._foreach.expr '("Iter") iterator))
@@ -119,7 +122,7 @@
            (if constructor
                (x2c._foreach.iter-call constructor collection)
                collection)))
-         (next (_x2c.foreach.function-reference "Iter_try_next"))
+         (next (_x2c.function.reference "Iter_try_next"))
          (condition (x2c.expr.call next iterator-expression
            (x2c._foreach.address item-expression)))
          (assignments (if (= (length targets) 1)
@@ -141,7 +144,7 @@
          (converter (cond
            (direct nil)
            ((equal? collection-type '("Var"))
-            (_x2c.foreach.function-reference "Var_iter"))
+            (_x2c.function.reference "Var_iter"))
            (true (_x2c.foreach.protocol-member
              collection-type '("Iter") "iter"))))
          (spec (if direct nil

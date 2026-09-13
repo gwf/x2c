@@ -155,25 +155,22 @@ test("unsaved macro import errors remain inspectable and repairable", async (t) 
   assert.deepEqual(repaired.diagnostics, []);
 });
 
-test("project errors and unsupported unsaved native preprocessing stay in the service", async (t) => {
+test("project errors stay in the service", async (t) => {
   const root = await workspace(t);
   const file = path.join(root, "main.x");
   const service = configured(t, root, ["build", "--manifest-path", path.join(root, "missing.toml")]);
   service.update(file, "int main(void) { return 0; }", 1);
   assert.match((await service.analyze(file)).error, /manifest/);
-  const cpp = configured(t, root, ["translate", "--live-symbols", file]);
-  cpp.update(file, "int main(void) { return 0; }", 1);
-  assert.match((await cpp.analyze(file)).error, /unsaved.*not supported/);
 });
 
-test("saved native CPP ignores unrelated dirty files and rejects consumed dirty includes", async (t) => {
+test("an unrelated dirty file does not disturb a saved unit", async (t) => {
   const root = await workspace(t);
   const file = path.join(root, "main.x");
   const header = path.join(root, "input.h");
   const text = '#include "input.h"\nint main(void) { return answer; }\n';
   await fs.writeFile(file, text);
   await fs.writeFile(header, "int answer;\n");
-  const service = configured(t, root, ["translate", "--live-symbols", file]);
+  const service = configured(t, root, ["translate", file]);
   service.update(file, text, 1, false);
   service.update(path.join(root, "unrelated.x"), "int unrelated;", 1);
   const saved = await service.analyze(file);
@@ -183,6 +180,4 @@ test("saved native CPP ignores unrelated dirty files and rejects consumed dirty 
   assert.equal(path.basename(definition.definition.file), "input.h");
   assert.equal(definition.definition.start, 4);
   assert.equal(definition.definition.end, 10);
-  service.update(header, "\nint answer;\n", 2);
-  assert.match((await service.analyze(file)).error, /unsaved.*not supported/);
 });

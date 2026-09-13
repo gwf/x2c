@@ -4,45 +4,11 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$ROOT/unittest/build/preprocessor-probes"
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
-SOURCE_NAME='source; touch injected-marker; true.x'
-
-rm -rf "$BUILD"
-mkdir -p "$BUILD/bin" "$BUILD/include first" "$BUILD/include second" \
-  "$BUILD/x include"
-cp "$ROOT/unittest/probes/preprocessor-source.x" "$BUILD/$SOURCE_NAME"
-ln -s "$ROOT/unittest/probes/fake-preprocessor-cc.sh" "$BUILD/bin/cc"
-
-args_log="$BUILD/args.log"
-success_stderr="$BUILD/success.stderr"
-(
-  cd "$BUILD"
-  X2C_CC="$BUILD/bin/cc" CPP_ARGS_LOG="$args_log" \
-    "$X2C" translate --dump-cpp-text \
-    -I "$BUILD/include first" -I "$BUILD/include second" \
-    --x-include-dir "$BUILD/x include" "$SOURCE_NAME" \
-    >"$BUILD/success.stdout" 2>"$success_stderr"
-)
-
-grep -Fq '#define PROBE_VALUE 37' "$success_stderr"
-grep -Fxq "$SOURCE_NAME" "$args_log"
-grep -Fxq -- '-P' "$args_log"
-grep -Fxq -- '-Wno-pragma-once-outside-header' "$args_log"
-awk -v first="$BUILD/include first" -v second="$BUILD/include second" \
-    -v xonly="$BUILD/x include" '
-  previous == "-I" && $0 == first { first_line = NR }
-  previous == "-I" && $0 == second { second_line = NR }
-  previous == "-I" && $0 == xonly { xonly_line = NR }
-  { previous = $0 }
-  END {
-    exit !(first_line && second_line && xonly_line &&
-           first_line < second_line && second_line < xonly_line)
-  }
-' "$args_log"
-[[ ! -e "$BUILD/injected-marker" ]]
-
 active="$ROOT/unittest/compiler-fixtures/preprocess-missing-include.x"
 inactive="$ROOT/unittest/compiler-fixtures/preprocess-inactive-missing-include.x"
-mkdir -p "$BUILD/active-translate" "$BUILD/active-cpp"
+rm -rf "$BUILD"
+mkdir -p "$BUILD/bin" "$BUILD/active-translate" \
+  "$BUILD/include first" "$BUILD/include second" "$BUILD/x include"
 "$X2C" translate --no-cpp --out-dir "$BUILD/active-translate" "$active" \
   >"$BUILD/active-translate.stdout" 2>"$BUILD/active-translate.stderr"
 grep -Fq '#include "missing-x2c-preprocessor-fixture.h"' \
@@ -54,35 +20,9 @@ if "$X2C" build --no-cpp --output "$BUILD/active" "$active" \
 fi
 grep -Fq 'compile failed' "$BUILD/active-build.stderr"
 grep -Fq 'missing-x2c-preprocessor-fixture.h' "$BUILD/active-build.stderr"
-if "$X2C" translate --cpp-symbols --out-dir "$BUILD/active-cpp" "$active" \
-    >"$BUILD/active-cpp.stdout" 2>"$BUILD/active-cpp.stderr"; then
-  echo "active missing include unexpectedly preprocessed" >&2
-  exit 1
-fi
-grep -Fq 'failed to run C preprocessor' "$BUILD/active-cpp.stderr"
 "$X2C" run --no-cpp "$inactive" \
   >"$BUILD/inactive.stdout" 2>"$BUILD/inactive.stderr"
 grep -Fxq 'inactive include ignored' "$BUILD/inactive.stdout"
-"$X2C" run --cpp-symbols "$inactive" \
-  >"$BUILD/inactive-cpp.stdout" 2>"$BUILD/inactive-cpp.stderr"
-grep -Fxq 'inactive include ignored' "$BUILD/inactive-cpp.stdout"
-
-set +e
-(
-  cd "$BUILD"
-  X2C_CC="$BUILD/bin/cc" CPP_ARGS_LOG="$args_log" CPP_FAIL=1 \
-    "$X2C" translate --dump-cpp-text "$SOURCE_NAME" \
-    >"$BUILD/failure.stdout" 2>"$BUILD/failure.stderr"
-)
-failure_status=$?
-set -e
-
-[[ $failure_status == 1 ]]
-grep -Fq 'deterministic preprocessor failure' "$BUILD/failure.stderr"
-grep -Fq 'driver: failed to run C preprocessor' "$BUILD/failure.stderr"
-grep -Fq 'status: 23' "$BUILD/failure.stderr"
-[[ ! -e "$BUILD/injected-marker" ]]
-
 cp "$ROOT/unittest/probes/fake-toolchain.sh" "$BUILD/bin/fake-cc"
 cp "$ROOT/unittest/probes/fake-toolchain.sh" "$BUILD/bin/fake-ar"
 chmod +x "$BUILD/bin/fake-cc" "$BUILD/bin/fake-ar"

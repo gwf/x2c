@@ -75,9 +75,7 @@ Var List_getindex(List, int);
 
 int Var_int(Var);
 
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 Var List_var(List);
 
@@ -103,13 +101,11 @@ int main(void){
   count += ast_phase1_add(ast_phase1_apply(callback, Var_int(left_value)), Var_int(right_value));
   {
     Var value;
-    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      value = _x2c_macro_item_0;
+    List _x2c_macro_object_0 = values;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      value = _x2c_macro_cursor_output_0;
       {
         {
   _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & count, ._x2c_defer_capture_1 =(const void *) & value};
@@ -123,10 +119,7 @@ int main(void){
 
         }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
       }
 
@@ -170,28 +163,14 @@ Var volatile caught =((void) 0, Void); {
     }
 
   }
-  else {if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL; {
-    count ++;
-  }
-   }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-      } __builtin_unreachable();
+  else goto _x2c_cleanup_done_0;
 }
 }
-}
-if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+_x2c_cleanup_done_0 :;  if (_x2c_cleanup_guard_0 >= 0) {
         if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL; {
   count ++;
 }
  }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
         _x2c_cleanup_guard_0 = -1;
         x2c_exception_leave(& _x2c_exception_frame_0);
       }

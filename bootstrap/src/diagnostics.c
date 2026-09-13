@@ -240,7 +240,7 @@ Var List_assoc(List, Var);
 
 String Var_string(Var);
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 List Var_list(Var);
 
@@ -257,13 +257,13 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
   Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
   String message = Var_string(List_assoc(entry, Symbol_var(28293925322)));
   v = List_assoc(entry, Symbol_var(857050729436));
-  List location = Var_is(v, 806120) ? Var_list(v) : NULL;
+  List location = Var_is_row(v, 9, 7, 4) ? Var_list(v) : NULL;
   v = List_assoc(entry, Symbol_var(30384486));
-  List notes = Var_is(v, 806120) ? Var_list(v) : NULL;
+  List notes = Var_is_row(v, 9, 7, 4) ? Var_list(v) : NULL;
   if(List_truth(location)){
     String text = _66;
     v = List_assoc(location, Symbol_var(412426));
-    if(! Var_is_void(v) && Var_is(v, 1318210446)) text = Var_string(v);
+    if(! Var_is_void(v) && Var_is_row(v, 11, 7, 1)) text = Var_string(v);
     int line = Var_int(List_assoc(location, Symbol_var(805770)));
     int column = Var_int(List_assoc(location, Symbol_var(233614172)));
     fprintf(stderr, "%s:%d:%d: %s: %s\n", text, line, column, Symbol_str(code), message);
@@ -500,7 +500,7 @@ void Compiler_dump_cache(Compiler compiler){
 }
 
 static Var _x2c_lambda_0(Var entry){
-  return int_var(Var_is(entry, 1318210446));
+  return int_var(Var_is_row(entry, 11, 7, 1));
   ;
 }
 

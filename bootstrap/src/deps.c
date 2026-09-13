@@ -110,11 +110,7 @@ List translation_depfile_parse(String text){
 
 int File_puts(File, const char *);
 
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int String_try_next(String, int *, int *);
 
 int File_putc(File, int);
 
@@ -122,13 +118,11 @@ static int _write_word(File output, String word){
   if(! String_truth(word)) return File_puts(output, "\\ ");
   {
     char ch;
-    Iter _x2c_macro_iterator_0 = String_iter(word, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      ch = Var_char(Var_convert(_x2c_macro_item_0, 26993));
+    String _x2c_macro_object_0 = word;
+    int _x2c_macro_cursor_0 = 0;
+    int _x2c_macro_cursor_output_0;
+    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      ch = _x2c_macro_cursor_output_0;
       {
         if(ch == '$'){
           if(File_puts(output, "$$") == EOF) return 0;
@@ -168,17 +162,17 @@ static Array _prerequisites(CliRequest request, Compiler compiler, String input)
     Var path, content_hash;
     Map _x2c_macro_object_1 = compiler -> deps;
     unsigned _x2c_macro_cursor_1 = 0;
-    Var _x2c_macro_cursor_output_0;
     Var _x2c_macro_cursor_output_1;
-    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
-      path = _x2c_macro_cursor_output_0;
-      content_hash = _x2c_macro_cursor_output_1;
+    Var _x2c_macro_cursor_output_2;
+    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
+      path = _x2c_macro_cursor_output_1;
+      content_hash = _x2c_macro_cursor_output_2;
       _add(paths, Var_string(path));
     }
 
   }
   else _add(paths, input);
-  if(! request -> no_cpp && ! request -> live_symbols){
+  if(! request -> no_cpp){
     String root = x2c_get_root();
     _add(paths, String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL))));
     if(header_symbols_active()) _add(paths, String_join(NULL, cons(String_var(root), cons(String_var(_1), NULL))));
@@ -197,7 +191,7 @@ static int _write_targets(File output, CliRequest request, String output_dir, St
   return _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
 }
 
-Iter Array_iter(Array, Iter);
+int Array_try_next(Array, int *, Var *);
 
 int String_equal(String, String);
 
@@ -213,13 +207,11 @@ static int _write_contents(File output, CliRequest request, Compiler compiler, S
   if(ok && File_putc(output, ':') == EOF) ok = 0;
   {
     Var value;
-    Iter _x2c_macro_iterator_2 = Array_iter(paths, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      value = _x2c_macro_item_2;
+    Array _x2c_macro_object_2 = paths;
+    int _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_3;
+    while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3)){
+      value = _x2c_macro_cursor_output_3;
       {
         if(! ok || File_putc(output, ' ') == EOF){
           ok = 0;
@@ -239,13 +231,11 @@ static int _write_contents(File output, CliRequest request, Compiler compiler, S
   if(ok && ! request -> no_phony_deps){
     {
       Var value;
-      Iter _x2c_macro_iterator_3 = Array_iter(paths, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_3;
-      while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-        value = _x2c_macro_item_3;
+      Array _x2c_macro_object_3 = paths;
+      int _x2c_macro_cursor_3 = 0;
+      Var _x2c_macro_cursor_output_4;
+      while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
+        value = _x2c_macro_cursor_output_4;
         {
           String path = Var_string(value);
           if(String_equal(path, primary)) continue;

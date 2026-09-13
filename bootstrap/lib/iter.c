@@ -109,7 +109,7 @@ Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state){
   return iter;
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 Var Symbol_var(Symbol);
 
@@ -126,7 +126,7 @@ Var List_getindex(List, int);
 Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
-  if(! Var_is(pair, 806120)){
+  if(! Var_is_row(pair, 9, 7, 4)){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 146};
     x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();

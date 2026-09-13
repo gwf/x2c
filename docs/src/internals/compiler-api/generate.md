@@ -24,15 +24,14 @@ Writes the generated C header and source for one lowered translation unit.
 `ast` must be the normalized result of `transform_ast` for this compiler;
 its filename, symbols, binding facts, cache keys, and initialization state
 must still describe that same unit. `dir` must already exist. Generation
-partitions the AST, materializes caches and once-only initialization,
-performs the generation-phase source transform, and writes or replaces
-`<dir>/<source-stem>.h` and `.c`. It appends generated bindings and
-initialization work to the compiler and is not idempotent. Both files
-are closed before individual renames replace their destinations; failure
-can leave only the header replaced, but never a partial file. Failures
-are reported as `emit` diagnostics.
+partitions the AST, materializes caches and once-only initialization, and
+writes or replaces `<dir>/<source-stem>.h` and `.c`. It appends generated
+bindings and initialization work to the compiler and is not idempotent.
+Both files are closed before individual renames replace their
+destinations; failure can leave only the header replaced, but never a
+partial file. Failures are reported as `emit` diagnostics.
 
-Source: `src/generate.x:892`
+Source: `src/generate.x:889`
 
 ## Design notes
 

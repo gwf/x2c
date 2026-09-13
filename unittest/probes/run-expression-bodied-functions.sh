@@ -49,12 +49,8 @@ if origin_count(braced) != origin_count(arrow):
 PY
 }
 
-for mode in snapshot cpp live; do
+for mode in snapshot; do
   flags=()
-  case "$mode" in
-    cpp) flags=(--cpp-symbols) ;;
-    live) flags=(--live-symbols) ;;
-  esac
   mode_build="$BUILD/$mode"
   mkdir -p "$mode_build/braced" "$mode_build/arrow"
 

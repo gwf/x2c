@@ -74,25 +74,14 @@ static int preserve_parameter(int volatile value){
       }
 
     }
-    else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
+    else goto _x2c_cleanup_done_0;
   }
 
 }
-}
-int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_cleanup_done_0 :;
+x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return value;
 }
@@ -130,10 +119,7 @@ int main(void){
               raise_from_callee();
             }
 
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
 }
           }
 
@@ -158,27 +144,16 @@ int main(void){
           }
 
         }
-        else {int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_2);
-        _x2c_error_handler_2 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-    x2c_exception_leave(& _x2c_exception_frame_2);
-        __builtin_unreachable();
+        else goto _x2c_cleanup_done_1;
       }
 
     }
-
-  }
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
+    _x2c_cleanup_done_1 :;
     x2c_error_catch_close(_x2c_error_handler_2);
-  _x2c_error_handler_2 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
+    _x2c_error_handler_2 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_2);
-}
+  }
+
 }
 else {x2c_exception_landed(& _x2c_exception_frame_1);
 {
@@ -192,24 +167,13 @@ else {x2c_exception_landed(& _x2c_exception_frame_1);
   }
 
 }
-else {int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_1);
+else goto _x2c_cleanup_done_2;
+}
+}
+_x2c_cleanup_done_2 :;
+x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-    x2c_exception_leave(& _x2c_exception_frame_1);
-__builtin_unreachable();
-}
-}
-}
-int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_1);
-_x2c_error_handler_1 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+x2c_exception_leave(& _x2c_exception_frame_1);
 }
 int parameter = preserve_parameter(0);
 printf("%d %d %d %d\n", caught, cleanup, inner_handled, parameter);

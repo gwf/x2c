@@ -3,8 +3,8 @@
     Translates normalized ASTs into token `List`s for downstream flattening and
     formatting. One stack-local Emitter holds cleanup guards and preserved
     automatic names, so emission is reentrant and a failed translation cannot
-    contaminate later units. Cleanup lowering preserves handler order and the
-    active exit kind across returns and loop exits.
+    contaminate later units. Cleanup lowering preserves handler order across
+    returns and loop exits.
 
 */
 
@@ -18,14 +18,6 @@
 #include "var.x"
 #include "ast.x"
 #include "format.x"
-
-typedef enum ExitKind {
-  _cleanup_exit_normal,
-  _cleanup_exit_return,
-  _cleanup_exit_break,
-  _cleanup_exit_continue,
-  _cleanup_exit_goto
-} ExitKind;
 
 typedef struct Cleanup {
   List final_code, leave_stmt, String guard;
@@ -781,6 +773,42 @@ static List Emitter._local_static(Emitter e, List ast, List context) {
 /* Transform has converted every `vseqcall` operand to its parameter type.
    C leaves call-argument evaluation order unspecified, so typed temporaries
    materialize these operands left-to-right before the protocol member call. */
+/* Runtime Match entry points whose second argument is the pattern. */
+static String _match_site_entry(String name) {
+  if (!name) return NULL;
+  if (name == "List_match") return "x2c_match_site_match";
+  if (name == "List_try_match") return "x2c_match_site_try_match";
+  if (name == "List_search") return "x2c_match_site_search";
+  if (name == "List_try_search") return "x2c_match_site_try_search";
+  if (name == "List_match_replace") return "x2c_match_site_match_replace";
+  if (name == "List_try_match_replace")
+    return "x2c_match_site_try_match_replace";
+  if (name == "List_search_replace") return "x2c_match_site_search_replace";
+  return NULL;
+}
+
+/* A source-literal pattern is the same value on every call, so the call gets
+   its own process-lifetime plan site and prepares once. A computed pattern
+   keeps the ordinary entry, which prepares one plan per call. Returns NULL
+   when the call is not one of those operations or its pattern is computed. */
+static List Emitter._match_site_call(
+  Emitter e, Var function, Var arguments) {
+  String entry = _match_site_entry(_direct_identifier(function));
+  if (!entry) return NULL;
+  List args = arguments;
+  match (args)
+    case %(args ? ?pattern *): {
+      if (pattern is not <list> ||
+          !e.match_pattern_is_static(pattern.list()))
+        return NULL;
+      String site = e.fresh_name("match_site");
+      List c_args = e._emit(%($arguments), NULL);
+      return %("({ static MatchCaptureSite " $site ";"
+               $entry "(&" $site "," @c_args "); })");
+    }
+  return NULL;
+}
+
 static List Emitter._sequenced_call(
   Emitter e, Var callee, List arguments, List context) {
   List c_fn = e._emit(%($callee), context);
@@ -852,7 +880,7 @@ static void _push_fragments(Array output, List fragments) {
 }
 
 static List Emitter._cleanup_wrap_exit(
-  Emitter e, List statement, ExitKind exit_kind, int stop_depth) {
+  Emitter e, List statement, int stop_depth) {
   int top = (int) e.cleanups.length;
   if (top <= stop_depth) return statement;
   Cleanup *records = e.cleanups.bytes;
@@ -877,33 +905,17 @@ static List Emitter._cleanup_wrap_exit(
     ));
   }
   List cleanup_code = cleanup.list_free();
-  String exit_literal = %"$exit_kind";
-  String prev_name = e.fresh_name("cleanup_prev");
-  return %("{
-  int $prev_name = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = $exit_literal;
-  "@cleanup_code"
-  x2c_cleanup_exit_kind = $prev_name;
-  "@statement"
-}");
+  return %("{" @cleanup_code @statement "}");
 }
 
 static List Emitter._cleanup_wrap_return(Emitter emitter, List statement) =>
-  emitter._cleanup_wrap_exit(statement, _cleanup_exit_return, 0);
+  emitter._cleanup_wrap_exit(statement, 0);
 
 static List Emitter._cleanup_wrap_break(Emitter emitter, List statement) =>
-  emitter._cleanup_wrap_exit(
-    statement, _cleanup_exit_break,
-    emitter.break_stop);
+  emitter._cleanup_wrap_exit(statement, emitter.break_stop);
 
 static List Emitter._cleanup_wrap_continue(Emitter emitter, List statement) =>
-  emitter._cleanup_wrap_exit(
-    statement, _cleanup_exit_continue,
-    emitter.continue_stop);
-
-static List Emitter._cleanup_wrap_goto(
-  Emitter emitter, List statement, int stop_depth) =>
-    emitter._cleanup_wrap_exit(statement, _cleanup_exit_goto, stop_depth);
+  emitter._cleanup_wrap_exit(statement, emitter.continue_stop);
 
 static List Emitter._cleanup_emit(
   Emitter e, List final_code, List leave_stmt, String guard, Var ast,
@@ -942,7 +954,6 @@ static List Emitter._defer(Emitter e, List ast, List context) {
 
   List leave = %("x2c_cleanup_leave(&" $cleanup_name ");");
   List body_code = e._cleanup_emit(leave, NULL, NULL, body, context);
-  String previous = e.fresh_name("cleanup_prev");
   return %("{
   "@env_setup"
   X2CCleanup $cleanup_name = {
@@ -951,10 +962,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
   };
   x2c_cleanup_push(&$cleanup_name);
   "@body_code"
-  int $previous = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&$cleanup_name);
-  x2c_cleanup_exit_kind = $previous;
 }");
 }
 
@@ -991,30 +999,17 @@ static List Emitter._filtered_catch(
   return result;
 }
 
-static List Emitter._try_trailer(
-  Emitter emitter, String cleanup_guard, List final_code, List leave_stmt) {
-  String trailer_prev = emitter.fresh_name("cleanup_prev");
-  if (cleanup_guard) {
-    List final_guard =
-      %("if ($cleanup_guard > 0) { " @final_code " }");
+static List _try_trailer(
+  String cleanup_guard, List final_code, List leave_stmt) {
+  if (cleanup_guard)
     return %(
       "if ($cleanup_guard >= 0) {
-        int $trailer_prev = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-        "@final_guard"
-        x2c_cleanup_exit_kind = $trailer_prev;
+        if ($cleanup_guard > 0) { "@final_code" }
         $cleanup_guard = -1;
         "@leave_stmt"
       }"
     );
-  }
-  return %(
-    "int $trailer_prev = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    "@final_code"
-    x2c_cleanup_exit_kind = $trailer_prev;
-    "@leave_stmt
-  );
+  return %( @final_code @leave_stmt );
 }
 
 static List Emitter._try(Emitter e, List ast, List context) {
@@ -1045,25 +1040,19 @@ static List Emitter._try(Emitter e, List ast, List context) {
     catch_block = e._filtered_catch(
       clause.cadr(), frame_name, handle_name, context,
       final_code, leave_stmt, cleanup_guard);
-  List final_trailer =
-    e._try_trailer(cleanup_guard, final_code, leave_stmt);
-  if (!catch_block) {
-    List exception_trailer =
-      e._try_trailer(cleanup_guard, final_code, leave_stmt);
-    catch_block = %("{" @exception_trailer "__builtin_unreachable();" "}");
-  }
-  else {
-    List exception_trailer =
-      e._try_trailer(cleanup_guard, final_code, leave_stmt);
-    catch_block = %("{"
+  /* The landing branch and the normal fallthrough run the same finalizer,
+     so both reach the one trailer at the end of this block. An unhandled
+     landing never returns from `x2c_exception_leave`, which continues the
+     transfer outward. */
+  String done_label = e.fresh_name("cleanup_done");
+  List final_trailer = %(
+    $done_label ":" ";" @{_try_trailer(cleanup_guard, final_code, leave_stmt)}
+  );
+  catch_block = catch_block ? %("{"
       "if (x2c_exception_is_error_target(&$frame_name))"
         @catch_block
-      "else {"
-        @exception_trailer
-        "__builtin_unreachable();"
-      "}"
-    "}");
-  }
+      "else goto $done_label;"
+    "}") : %("{" "goto $done_label;" "}");
   List pattern_decls = NULL, pattern_args = NULL;
   if (clause) {
     Array declarations = %[], arguments = %[];
@@ -1346,7 +1335,7 @@ static List Emitter._goto(Emitter e, Var label_ast, List context) {
   int cleanup_depth = 0;
   foreach (List region, target)
     if (region.car() != <localinit>) cleanup_depth++;
-  return e._cleanup_wrap_goto(statement, cleanup_depth);
+  return e._cleanup_wrap_exit(statement, cleanup_depth);
 }
 
 static List Emitter._declare_stmt(
@@ -1701,6 +1690,8 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       return %("va_arg(" @c_expr ", " @c_decl ")");
     }
     case %(call ?function ?arguments): {
+      List site_call = e._match_site_call(function, arguments);
+      if (site_call) return site_call;
       List c_fn = e._emit(%($function), NULL);
       List c_args = e._emit(%($arguments), NULL);
       return %(@c_fn "(" @c_args ")");

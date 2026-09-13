@@ -8,9 +8,8 @@
 
 void x2c_initialize_protocols(void) {}
 
-/* This probe links only Scope and thread state, without initialized Match
-   state or dynamic static storage for their shutdown hooks to release. */
-void x2c_match_thread_release(void) {}
+/* This probe links only Scope and thread state, without dynamic static
+   storage for their shutdown hooks to release. */
 void x2c_static_thread_release(void) {}
 void x2c_static_shutdown(void) {}
 

@@ -164,34 +164,18 @@ int main(void){
       }
 
     }
-    else {if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    {
-      branch ++;
-    }
-     }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      } __builtin_unreachable();
+    else goto _x2c_cleanup_done_0;
   }
 
 }
-}
+_x2c_cleanup_done_0 :;
 if (_x2c_cleanup_guard_0 >= 0) {
-        int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-        x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
         if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 {
   branch ++;
 }
  }
-        x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
         _x2c_cleanup_guard_0 = -1;
         x2c_exception_leave(& _x2c_exception_frame_0);
 

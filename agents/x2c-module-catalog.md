@@ -360,7 +360,7 @@ Public functions:
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
 `Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
 `ToolAction.as_program`, `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`,
-`ToolAction.run`, `Toolchain.preprocess`
+`ToolAction.run`
 
 ### [src/transform.x](../src/transform.x)
 
@@ -384,8 +384,8 @@ Public functions:
 `Type.is_enum_tag_body`, `Type.is_pointer`, `Type.is_array`,
 `Type.is_function`, `Type.is_bitfield`, `Type.scalar`, `Type.scalar_tag`,
 `Type.var_numeric_extractor`, `Type.var_numeric_update_helper`,
-`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.initialize`,
-`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
+`Type.initialize`, `Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
 `Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
 `Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
@@ -402,9 +402,9 @@ Public functions:
 
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
 `x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`, `x2c_package_directory`,
-`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
-`x2c_driver_error`, `process_start`, `ChildProcess.ready`, `ChildProcess.wait`,
-`process_run`, `worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
+`x2c_package_source`, `x2c_default_include_dirs`, `x2c_driver_error`,
+`process_start`, `ChildProcess.ready`, `ChildProcess.wait`, `worker_fork`,
+`worker_exit`, `worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 
@@ -423,8 +423,8 @@ Public functions:
 `Array.reverse`, `Array.map`, `Array.map2`, `Array.reduce`, `Array.compare`,
 `Array.sort`, `Array.sort_with`, `Array.sort_by`, `Array.heap_push`,
 `Array.heap_pop`, `Array.heapify`, `Array.join`, `Array.equal`,
-`Array.write_repr`, `Array.write_str`, `Array.str`, `Array.repr`, `Array.iter`,
-`Iter.array`, `Array.cleanup`
+`Array.write_repr`, `Array.write_str`, `Array.str`, `Array.repr`,
+`Array.try_next`, `Array.iter`, `Iter.array`, `Array.cleanup`
 
 ### [lib/atom.x](../lib/atom.x)
 
@@ -497,11 +497,11 @@ Public functions:
 `uint.var`, `uint.str`, `uint.repr`, `unsigned.var`, `unsigned.str`,
 `unsigned.repr`, `float.var`, `float.str`, `float.repr`, `double.var`,
 `double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`, `long.repr`,
-`Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.list`,
-`Var.as_iter`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`, `Var.uchar`,
-`Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`, `Var.long`,
-`Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`, `Var.float`,
-`Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
+`Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
+`Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`,
+`Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`,
+`Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`,
+`Var.float`, `Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
 `x2c_normalize_index`, `x2c_normalize_slice`
 
 ### [lib/context.x](../lib/context.x)
@@ -683,8 +683,8 @@ Public functions:
 `List.flatten_all`, `List.nth_cdr`, `List.getindex`, `List.assoc`, `List.get`,
 `List.tail`, `List.head`, `List.subseq`, `List.getslice`, `List.unpack_n`,
 `List.unpack_vars_n`, `List.hash`, `List.equal`, `List.compare`, `List.str`,
-`List.write_str`, `List.repr`, `List.write_repr`, `List.iter`, `Iter.list`,
-`List.filter`
+`List.write_str`, `List.repr`, `List.write_repr`, `List.try_next`, `List.iter`,
+`Iter.list`, `List.filter`
 
 ### [lib/logger.x](../lib/logger.x)
 
@@ -755,22 +755,21 @@ pattern matching and transformation utilities for lists.
 
 Public functions:
 
-`x2c_match_try_capture`, `x2c_match_site_try_capture`, `Var.is_atom_binder`,
-`Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
-`MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
-`MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
-`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`, `List.try_match`,
-`List.match`, `List.replace`, `List.try_match_replace`, `List.match_replace`,
-`List.search`, `List.try_search`, `List.search_replace`, `MatchPlan.prepare`,
+`x2c_match_try_capture`, `x2c_match_site_try_capture`,
+`x2c_match_site_try_match`, `x2c_match_site_match`,
+`x2c_match_site_try_search`, `x2c_match_site_search`,
+`x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
+`x2c_match_site_search_replace`, `Var.is_atom_binder`, `Var.is_list_binder`,
+`Var.is_binder`, `Var.is_match_op`, `MatchCaptureLayout.analyze`,
+`MatchCaptureLayout.free`, `MatchCaptureLayout.definite_list`,
+`MatchCaptureLayout.possible_list`, `MatchCaptureLayout.index`,
+`MatchCaptureBuffer.has`, `List.try_match`, `List.match`, `List.replace`,
+`List.try_match_replace`, `List.match_replace`, `List.search`,
+`List.try_search`, `List.search_replace`, `MatchPlan.prepare`,
 `MatchPlan.free`, `MatchPlan.execute_capture`, `MatchPlan.try_capture`,
 `MatchPlan.execute`, `MatchPlan.try_match`, `MatchPlan.try_search`,
 `MatchPlan.search`, `MatchPlan.try_match_replace`, `MatchPlan.search_replace`,
-`MatchCache.new`, `MatchCache.acquire`, `MatchLease.release`,
-`MatchCache.dispose`, `MatchCache.try_capture`, `MatchCache.try_match`,
-`MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
-`MatchCache.search_replace`, `x2c_match_thread_release`,
-`MatchCache.context_open`, `MatchCache.context_close`, `MatchCache.initialize`,
-`MatchCache.flush_default`
+`x2c_match_initialize`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -894,7 +893,7 @@ Public functions:
 `String.replace`, `String.printf`, `String.unescape`, `String.escape`,
 `String.str`, `String.repr`, `String.write_str`, `String.write_repr`,
 `String.parse_char`, `String.symbol`, `String.parse`, `String.hash`,
-`String.equal`, `String.compare`, `String.iter`
+`String.equal`, `String.compare`, `String.try_next`, `String.iter`
 
 ### [lib/symbol.x](../lib/symbol.x)
 

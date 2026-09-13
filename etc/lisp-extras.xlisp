@@ -1,8 +1,7 @@
 // Optional algorithms and aliases for x2c Lisp.
 // Load etc/init.xlisp first.
 
-(def sort
-  (bind "List_sort" '((func (("List"))) "List")))
+(def sort (bind "List_sort" nil))
 (def List_sort sort)
 
 (defun range (. args)

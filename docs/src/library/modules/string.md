@@ -44,6 +44,7 @@ Canonical byte strings and core text operations.
 | [`String.squeeze`](#String.squeeze) | Collapses adjacent runs of each byte listed in `chars`. |
 | [`String.startswith`](#String.startswith) | Reports whether `str` starts with `prefix`. |
 | [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `negChars` removed. |
+| [`String.try_next`](#String.try_next) | Writes the next byte, advances `cursor`, and returns one. |
 | [`String.unescape`](#String.unescape) | Decodes supported backslash escapes in `str` into a canonical `String`. |
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
 | [`String.withindex`](#String.withindex) | Returns a canonical copy of `str` with the byte at `index` set. |
@@ -237,7 +238,7 @@ foreach (char ch, %"abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1461`
+Source: `lib/string.x:1477`
 
 <a id="String.join"></a>
 #### String.join
@@ -584,6 +585,21 @@ entirely of removable bytes trims to NULL, the empty `String`, without
 raising.
 
 Source: `lib/string.x:820`
+
+<a id="String.try_next"></a>
+#### String.try_next
+
+`int String.try_next(String str, int *cursor, int *out)`
+
+Writes the next byte, advances `cursor`, and returns one.
+Initialize the caller-owned cursor to zero. A null `String`, a null
+pointer, a negative cursor, or exhaustion returns zero without changing
+`cursor` or `out`. This is byte traversal, not Unicode characters.
+
+`foreach (int byte, str)` and `foreach (char ch, str)` compile to this
+loop.
+
+Source: `lib/string.x:1454`
 
 <a id="String.unescape"></a>
 #### String.unescape

@@ -32,8 +32,6 @@ int x2c_package_source(String directory, String path);
 
 List x2c_default_include_dirs(void);
 
-List x2c_cpp_include_dirs(void);
-
 _Noreturn void x2c_driver_error(const char * message);
 
 ChildProcess process_start(char * * argv, int capture);
@@ -41,8 +39,6 @@ ChildProcess process_start(char * * argv, int capture);
 int ChildProcess_ready(ChildProcess c);
 
 int ChildProcess_wait(ChildProcess c, String * output, String * errors);
-
-int process_run(char * * argv, String * output, String * errors);
 
 long worker_fork(void);
 

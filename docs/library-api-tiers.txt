@@ -28,6 +28,7 @@ lib/common.x|advanced|String.truth,String.var,Symbol.var,Var.array,Var.block
 lib/common.x|advanced|Var.char
 lib/common.x|advanced|Var.as_iter,Var.buffer,Var.bytes,Var.double,Var.file
 lib/common.x|advanced|Var.float,Var.int,Var.is_wide,Var.list,Var.long
+lib/common.x|advanced|Var.is_row
 lib/common.x|advanced|Var.long_double,Var.long_long,Var.map
 lib/common.x|advanced|Var.short,Var.string,Var.symbol,Var.uchar,Var.uint
 lib/common.x|advanced|Var.ulong,Var.ulong_long,Var.unsigned,Var.ushort
@@ -100,15 +101,10 @@ lib/map.x|compatibility|Map.del,Map.get,Map.getindex
 lib/map.x|internal|Map.new_capacity
 lib/match.x|advanced|List.match,List.match_replace,Var.is_atom_binder
 lib/match.x|advanced|Var.is_binder,Var.is_list_binder,Var.is_match_op
-lib/match.x|internal|MatchCache.acquire,MatchCache.dispose
-lib/match.x|internal|MatchCache.flush_default,MatchCache.new,MatchCache.search
-lib/match.x|internal|MatchCache.initialize,MatchCache.search_replace
-lib/match.x|internal|MatchCache.try_capture,MatchCache.try_match
-lib/match.x|internal|MatchCache.try_match_replace,MatchCache.try_search
 lib/match.x|internal|MatchCaptureBuffer.has,MatchCaptureLayout.analyze
 lib/match.x|internal|MatchCaptureLayout.definite_list,MatchCaptureLayout.free
 lib/match.x|internal|MatchCaptureLayout.index,MatchCaptureLayout.possible_list
-lib/match.x|internal|MatchLease.release,MatchPlan.execute
+lib/match.x|internal|MatchPlan.execute
 lib/match.x|internal|MatchPlan.execute_capture,MatchPlan.free,MatchPlan.prepare
 lib/match.x|internal|MatchPlan.search,MatchPlan.search_replace
 lib/match.x|internal|MatchPlan.try_capture,MatchPlan.try_match
@@ -197,7 +193,6 @@ lib/error.x|internal|Error.snapshot_in
 lib/exception.x|internal|x2c_exception_unwinding
 lib/list.x|internal|List.thread_initialize
 lib/map.x|internal|Map.export_to
-lib/match.x|internal|MatchCache.context_close,MatchCache.context_open
 lib/scope.x|internal|Scope.owner
 lib/string.x|internal|String.thread_initialize
 lib/var.x|internal|Var.move_wide_to,Var.wide_owner

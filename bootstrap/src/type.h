@@ -16,7 +16,7 @@ List Type_declaration_ast(Type type, List binding);
 List Type_parameter_ast(Type type, List binding);
 
 static inline Type Var_type(Var x){
-  return Var_is(x, 806120) ?(Type) Var_pointer(x) :(Type) NULL;
+  return Var_is_row(x, 9, 7, 4) ?(Type) Var_pointer(x) :(Type) NULL;
 }
 
 static inline List Type_list(Type x){
@@ -70,6 +70,8 @@ Type Type_numeric_literal(String text, int floating);
 List Type_tag(Type type);
 
 List Type_body(Type type);
+
+int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom);
 
 void Type_initialize(void);
 

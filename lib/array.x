@@ -770,6 +770,22 @@ static int _next(Iter iter, Var *out) {
   return 1;
 }
 
+/** Writes the next element, advances `cursor`, and returns one.
+    Initialize the caller-owned cursor to zero. A null `Array`, a null
+    pointer, a negative cursor, or exhaustion returns zero without changing
+    `cursor` or `out`. Structural mutation invalidates an outstanding cursor.
+
+    `foreach (Var item, array)` compiles to this loop.
+    Raises: `<size-limit>` for an `Array` outside the integer index domain.
+*/
+int Array.try_next(Array array, int *cursor, Var *out) {
+  if (!array || !cursor || !out || *cursor < 0) return 0;
+  if (*cursor >= _int_length(array)) return 0;
+  *out = ((Var *) array.bytes)[*cursor];
+  *cursor += 1;
+  return 1;
+}
+
 /** Initializes `dest` as an iterator over the elements of `x`.
     The caller owns the storage: declare a `struct Iter` and pass its
     address. The return value is that same `dest`, or `NULL` when `dest` is

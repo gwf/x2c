@@ -152,12 +152,6 @@ static CliOption cli_options[] ={
     973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0
   }
   , {
-    27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--live-symbols", NULL, "Collect symbols through the host preprocessor", 0
-  }
-  , {
-    241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, "--cpp-symbols", NULL, "Use CPP collection for this translation", 0
-  }
-  , {
     198, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 279515230724452, "--cc", "<program>", "Use <program> as the host C compiler", 0
   }
   , {
@@ -200,15 +194,6 @@ static CliOption cli_options[] ={
     1374366630, CLI_TRANSLATE, 665445396138972, "--dump-tokens", NULL, "Print source tokens and stop", 0
   }
   , {
-    320883072032, CLI_TRANSLATE, 665445396138972, "--dump-cpp", NULL, "Print host-preprocessed text and stop", 0
-  }
-  , {
-    320883072032, CLI_TRANSLATE, 665445396138972, "--dump-cpp-text", NULL, "Alias for --dump-cpp", 0
-  }
-  , {
-    247458062609318, CLI_TRANSLATE, 665445396138972, "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0
-  }
-  , {
     320883068136, CLI_TRANSLATE, 665445396138972, "--dump-ast", NULL, "Print the parsed AST and stop", 0
   }
   , {
@@ -219,9 +204,6 @@ static CliOption cli_options[] ={
   }
   , {
     42507336486, CLI_TRANSLATE, 665445396138972, "--dump-symbols", NULL, "Print the source symbol table and stop", 0
-  }
-  , {
-    10268258311770, CLI_TRANSLATE, 665445396138972, "--dump-cpp-symbols", NULL, "Print the CPP symbol table and stop", 0
   }
   , {
     328584264751626, CLI_TRANSLATE, 665445396138972, "--dump-cache", NULL, "Print the compiler cache and stop", 0
@@ -286,11 +268,9 @@ static void _tokenize_response(Array output, String path, const char * text, siz
 
 static void _expand_argument(Array output, String argument, List stack);
 
-static List _expand_arguments(int argc, char * * argv);
-
 static CliOption * _find_option(const char * spelling, int command_mask, const char * * attached);
 
-static CliOption * _take_option(List * node, int mask, String * spelling, String * value, int * attached);
+static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached);
 
 static void _push_pair(Array arguments, String option, String value);
 
@@ -302,7 +282,21 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
 
 static void _one_dash_removed(String arg);
 
-static CliRequest _parse_command(List args, CliCommand * command);
+static CliRequest _parse_command(Array args, CliCommand * command);
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -575,24 +569,18 @@ static char * _read_response_file(const char * path, size_t * length){
   return text;
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
 static int _response_on_stack(List stack, String path){
   {
     String entry;
-    Iter _x2c_macro_iterator_0 = List_iter(stack, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      entry = Var_string(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = stack;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      entry = Var_string(_x2c_macro_cursor_output_0);
       if(strcmp(entry, path) == 0) return 1;
     }
 
@@ -723,25 +711,16 @@ static void _expand_argument(Array output, String argument, List stack){
   List nested = cons(String_var(identity), stack);
   {
     String word;
-    Iter _x2c_macro_iterator_1 = List_iter(cli_response_arguments(path), &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      word = Var_string(_x2c_macro_item_1);
+    List _x2c_macro_object_1 = cli_response_arguments(path);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      word = Var_string(_x2c_macro_cursor_output_1);
       _expand_argument(output, word, nested);
     }
 
   }
 
-}
-
-static List _expand_arguments(int argc, char * * argv){
-  Array output = Array_new();
-  for(int i = 1;  i < argc;  i ++) _expand_argument(output, String_new(argv[i]), NULL);
-  List result = Array_list_free(output);
-  return result;
 }
 
 static CliOption * _find_option(const char * spelling, int command_mask, const char * * attached){
@@ -772,18 +751,16 @@ static CliOption * _find_option(const char * spelling, int command_mask, const c
   return NULL;
 }
 
-Var List_car(List);
+Var Array_getindex(Array, int);
 
 int String_startswith(String, String);
 
 String String_remove_prefix(String, String);
 
-List List_cdr(List);
+size_t Array_len(Array);
 
-int List_truth(List);
-
-static CliOption * _take_option(List * node, int mask, String * spelling, String * value, int * attached){
-  String arg = Var_string(List_car((* node))), written = arg, color = NULL;
+static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached){
+  String arg = Var_string(Array_getindex(args, * index)), written = arg, color = NULL;
   int color_equal = 0;
   if(String_startswith(arg, _38)){
     color_equal = 1;
@@ -797,9 +774,8 @@ static CliOption * _take_option(List * node, int mask, String * spelling, String
   if(attached) * attached = suffix != NULL;
   * value = String_new(suffix);
   if(option -> value && ! String_truth(* value) && ! color_equal){
-    * node = List_cdr((* node));
-    if(! List_truth(* node)) x2c_driver_error(String_join(NULL, cons(String_var(_15), cons(String_var(arg), cons(String_var(_13), NULL)))));
-    * value = Var_string(List_car((* node)));
+    if(++ * index == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_15), cons(String_var(arg), cons(String_var(_13), NULL)))));
+    * value = Var_string(Array_getindex(args, * index));
   }
   if(color_equal) * value = color;
   return option;
@@ -877,11 +853,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     break;
     case 973020192 : c -> no_cpp = 1;
     break;
-    case 27054400850790 : c -> live_symbols = 1;
-    break;
-    case 241658219366 : c -> cpp_symbols = 1;
-    break;
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1335836754920 : case 559620016998 : c -> dump = option -> id;
+    case 1374366630 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 328584264751626 : case 7478869146 : case 1335836754920 : case 559620016998 : c -> dump = option -> id;
     break;
     case 1111831152 : c -> prefix = value;
     break;
@@ -954,43 +926,62 @@ CliRequest cli_package_options(String path, String package){
   if(! _init_guard_) _file_init_();
   Array words = Array_new();
   {
-    String word;
-    Iter _x2c_macro_iterator_2 = List_iter(cli_response_arguments(path), &(struct Iter){
-      int_var(0)
+  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & words};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_2
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    {
+      String word;
+      List _x2c_macro_object_2 = cli_response_arguments(path);
+      List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+      Var _x2c_macro_cursor_output_2;
+      while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+        word = Var_string(_x2c_macro_cursor_output_2);
+        Array_push(words, String_var(String_replace(word, _49, package)));
+      }
+
     }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      word = Var_string(_x2c_macro_item_2);
-      Array_push(words, String_var(String_replace(word, _49, package)));
+    CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
+    request -> command = 5589768;
+    Array includes = Array_new(), cpp = Array_new(), compile = Array_new(), link = Array_new();
+    for(int i = 0;  i < Array_len(words);  i ++){
+      String argument = Var_string(Array_getindex(words, i));
+      if(! String_truth(argument)) x2c_driver_error("empty package native argument");
+      if(String_getindex(argument, 0) != '-' && String_getindex(argument, 0) != '@' && String_endswith(argument, _50)){
+        Array_push(link, String_var(argument));
+        continue;
+      }
+      String spelling = NULL, value = NULL;
+      int attached = 0;
+      CliOption * option = _take_option(words, & i, CLI_BUILD, & spelling, & value, & attached);
+      if(! option) x2c_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(argument), cons(String_var(_13), NULL)))));
+      switch(option -> id){
+        case 20273998090 : case 8747647543562 : case 274059207002 : case 279333770 : case 1473453116298 : case 26380018276 : case 26379160754 : case 35719882824 : case 14434122038422 : break;
+        default: x2c_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(argument), cons(String_var(_13), NULL)))));
+      }
+      _apply_option(request, option, spelling, value, attached, includes, cpp, compile, link);
+    }
+    Array_free(includes);
+    Array_free(cpp);
+    request -> cc_args = Array_list_free(compile);
+    request -> ld_args = Array_list_free(link);
+    {
+      CliRequest _x2c_return_value_0 = request;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
     }
 
   }
-  CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
-  request -> command = 5589768;
-  Array includes = Array_new(), cpp = Array_new(), compile = Array_new(), link = Array_new();
-  for(List node = Array_list_free(words);  List_truth(node);  node = List_cdr(node)){
-    String argument = Var_string(List_car(node));
-    if(! String_truth(argument)) x2c_driver_error("empty package native argument");
-    if(String_getindex(argument, 0) != '-' && String_getindex(argument, 0) != '@' && String_endswith(argument, _50)){
-      Array_push(link, String_var(argument));
-      continue;
-    }
-    String spelling = NULL, value = NULL;
-    int attached = 0;
-    CliOption * option = _take_option(& node, CLI_BUILD, & spelling, & value, & attached);
-    if(! option) x2c_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(argument), cons(String_var(_13), NULL)))));
-    switch(option -> id){
-      case 20273998090 : case 8747647543562 : case 274059207002 : case 279333770 : case 1473453116298 : case 26380018276 : case 26379160754 : case 35719882824 : case 14434122038422 : break;
-      default: x2c_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(argument), cons(String_var(_13), NULL)))));
-    }
-    _apply_option(request, option, spelling, value, attached, includes, cpp, compile, link);
-  }
-  Array_free(includes);
-  Array_free(cpp);
-  request -> cc_args = Array_list_free(compile);
-  request -> ld_args = Array_list_free(link);
-  return request;
+
+  x2c_cleanup_leave(&_x2c_defer_record_0);
+}
 }
 
 static void _one_dash_removed(String arg){
@@ -1003,9 +994,13 @@ static void _one_dash_removed(String arg){
 
 }
 
+int List_truth(List);
+
 List List_reverse(List);
 
-static CliRequest _parse_command(List args, CliCommand * command){
+List List_cdr(List);
+
+static CliRequest _parse_command(Array args, CliCommand * command){
   Symbol name = command -> name;
   int mask = command -> mask;
   CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
@@ -1015,8 +1010,8 @@ static CliRequest _parse_command(List args, CliCommand * command){
   Array inputs = Array_new(), run_args = Array_new(), x_paths = Array_new();
   Array cpp_args = Array_new(), cc_args = Array_new(), ld_args = Array_new();
   int operands = 0;
-  for(List node = args;  List_truth(node);  node = List_cdr(node)){
-    String arg = Var_string(List_car(node));
+  for(int i = 1;  i < Array_len(args);  i ++){
+    String arg = Var_string(Array_getindex(args, i));
     int dashed = String_truth(arg) && String_getindex(arg, 0) == '-';
     if(mask != CLI_BOOTSTRAP && ! operands && dashed && String_equal(arg, _28)){
       operands = 1;
@@ -1037,7 +1032,7 @@ static CliRequest _parse_command(List args, CliCommand * command){
     }
     String spelling = NULL, value = NULL;
     int attached = 0;
-    CliOption * option = _take_option(& node, mask, & spelling, & value, & attached);
+    CliOption * option = _take_option(args, & i, mask, & spelling, & value, & attached);
     if(! option){
       if(mask == CLI_TRANSLATE) _one_dash_removed(arg);
       x2c_driver_error(String_join(NULL, cons(String_var(_31), cons(String_var(arg), cons(String_var(_13), NULL)))));
@@ -1062,49 +1057,81 @@ static CliRequest _parse_command(List args, CliCommand * command){
 
 CliRequest cli_parse(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
-  List args = _expand_arguments(argc, argv);
-  if(! List_truth(args)){
-    _print_help(0);
-    exit(2);
-  }
-  String first = Var_string(List_car(args));
-  if(! String_truth(first)) x2c_driver_error("expected a command, found an empty argument");
-  if(String_equal(first, _32) || String_equal(first, _33)){
-    _print_help(0);
-    exit(0);
-  }
-  if(String_equal(first, _34) || String_equal(first, _35)){
-    _print_version();
-    exit(0);
-  }
-  if(String_equal(first, _36)){
-    List rest = List_cdr(args);
-    if(! List_truth(rest)){
+  Array args = Array_new();
+  {
+  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & args};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_3
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    for(int i = 1;  i < argc;  i ++) _expand_argument(args, String_new(argv[i]), NULL);
+    if(! Array_len(args)){
+      _print_help(0);
+      exit(2);
+    }
+    String first = Var_string(Array_getindex(args, 0));
+    if(! String_truth(first)) x2c_driver_error("expected a command, found an empty argument");
+    if(String_equal(first, _32) || String_equal(first, _33)){
       _print_help(0);
       exit(0);
     }
-    String name = Var_string(List_car(rest));
-    if(List_truth(List_cdr(rest))) x2c_driver_error("help accepts at most one command");
-    CliCommand * asked = _command_row(name);
-    if(String_equal(name, _36) || String_equal(name, _32) || String_equal(name, _33)) _print_help(535328);
-    else if(asked) _print_help(asked -> name);
-    else x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL)))));
-    exit(0);
+    if(String_equal(first, _34) || String_equal(first, _35)){
+      _print_version();
+      exit(0);
+    }
+    if(String_equal(first, _36)){
+      if(Array_len(args) == 1){
+        _print_help(0);
+        exit(0);
+      }
+      if(Array_len(args) > 2) x2c_driver_error("help accepts at most one command");
+      String name = Var_string(Array_getindex(args, 1));
+      CliCommand * asked = _command_row(name);
+      if(String_equal(name, _36) || String_equal(name, _32) || String_equal(name, _33)) _print_help(535328);
+      else if(asked) _print_help(asked -> name);
+      else x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL)))));
+      exit(0);
+    }
+    CliCommand * command = _command_row(first);
+    if(command){
+      CliRequest _x2c_return_value_1 = _parse_command(args, command);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
+
+    }
+    if(String_equal(first, _30)) _removed_output();
+    const char * attached;
+    if(strlen(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_27), cons(String_var(first), NULL))), CLI_TRANSLATE, & attached)){
+      fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", first);
+      fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
+      exit(2);
+    }
+    if(String_getindex(first, 0) != '-') _expected_command(first);
+    x2c_driver_error(String_join(NULL, cons(String_var(_37), cons(String_var(first), cons(String_var(_13), NULL)))));
   }
-  CliCommand * command = _command_row(first);
-  if(command) return _parse_command(List_cdr(args), command);
-  if(String_equal(first, _30)) _removed_output();
-  const char * attached;
-  if(strlen(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_27), cons(String_var(first), NULL))), CLI_TRANSLATE, & attached)){
-    fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", first);
-    fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
-    exit(2);
-  }
-  if(String_getindex(first, 0) != '-') _expected_command(first);
-  x2c_driver_error(String_join(NULL, cons(String_var(_37), cons(String_var(first), cons(String_var(_13), NULL)))));
+
+  x2c_cleanup_leave(&_x2c_defer_record_1);
+}
 }
 
 int CliRequest_inspects(CliRequest request){
   return request -> dump != 0;
+}
+
+void Array_cleanup(Array);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

@@ -96,6 +96,8 @@ String Array_str(Array array);
 
 String Array_repr(Array array);
 
+int Array_try_next(Array array, int * cursor, Var * out);
+
 Iter Array_iter(Array x, Iter dest);
 
 Array Iter_array(Iter iter);

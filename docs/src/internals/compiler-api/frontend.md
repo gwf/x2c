@@ -18,7 +18,7 @@ Configured compiler sessions and sequential source units.
 | [`Frontend.start`](#Frontend.start) | Opens and tokenizes an isolated source unit without printing diagnostics. |
 | [`Frontend.write_header_symbols`](#Frontend.write_header_symbols) | Writes collected header symbols using the loaded snapshot's name base. |
 | [`ParsedUnit.close`](#ParsedUnit.close) | Releases the unit after its caller has inspected or exported its results. |
-| [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects symbols and retains preprocessor outputs for adapter inspection. |
+| [`ParsedUnit.collect`](#ParsedUnit.collect) | Collects the unit's symbols above the process-wide prelude environment. |
 | [`ParsedUnit.parse`](#ParsedUnit.parse) | Parses a collected unit, retaining both its AST and unsuccessful reports. |
 
 ### `Frontend`
@@ -30,7 +30,7 @@ Configured compiler sessions and sequential source units.
 
 Loads process-owned type, snapshot, and header support before units.
 
-Source: `src/frontend.x:104`
+Source: `src/frontend.x:95`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -41,7 +41,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:121`
+Source: `src/frontend.x:112`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -50,7 +50,7 @@ Source: `src/frontend.x:121`
 
 Runs the source stages. On either result, the caller must close the unit.
 
-Source: `src/frontend.x:380`
+Source: `src/frontend.x:303`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -61,7 +61,7 @@ Opens and tokenizes an isolated source unit without printing diagnostics.
 A failed unit remains open so its diagnostics can be inspected. Close it
 before opening the next unit; Type and header caches are process-global.
 
-Source: `src/frontend.x:317`
+Source: `src/frontend.x:248`
 
 <a id="Frontend.write_header_symbols"></a>
 #### Frontend.write_header_symbols
@@ -70,7 +70,7 @@ Source: `src/frontend.x:317`
 
 Writes collected header symbols using the loaded snapshot's name base.
 
-Source: `src/frontend.x:134`
+Source: `src/frontend.x:125`
 
 ### `ParsedUnit`
 
@@ -81,16 +81,16 @@ Source: `src/frontend.x:134`
 
 Releases the unit after its caller has inspected or exported its results.
 
-Source: `src/frontend.x:386`
+Source: `src/frontend.x:309`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
 
 `int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend)`
 
-Collects symbols and retains preprocessor outputs for adapter inspection.
+Collects the unit's symbols above the process-wide prelude environment.
 
-Source: `src/frontend.x:344`
+Source: `src/frontend.x:275`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -99,45 +99,34 @@ Source: `src/frontend.x:344`
 
 Parses a collected unit, retaining both its AST and unsuccessful reports.
 
-Source: `src/frontend.x:364`
+Source: `src/frontend.x:287`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Frontend`](#Frontend) | struct | Borrows a configured request and owns shared native-preprocessor setup. |
-| [`FrontendErrorSink`](#FrontendErrorSink) | callback | Receives borrowed native-preprocessor stderr synchronously during collect. |
+| [`Frontend`](#Frontend) | struct | Borrows a configured request and owns shared source setup. |
 | [`ParsedUnit`](#ParsedUnit) | struct | Owns one isolated source lifetime, including unsuccessful diagnostics. |
 
 <a id="Frontend"></a>
 ### Frontend
 
-`typedef struct Frontend { CliRequest request; List include_dirs; Toolchain toolchain; FrontendErrorSink preprocessor_errors; } *Frontend`
+`typedef struct Frontend { CliRequest request; List include_dirs; Toolchain toolchain; } *Frontend`
 
-Borrows a configured request and owns shared native-preprocessor setup.
+Borrows a configured request and owns shared source setup.
 Units open sequentially; process caches must outlive the session.
-The optional stderr sink runs synchronously; units also retain that text.
 
-Source: `src/frontend.x:21`
-
-<a id="FrontendErrorSink"></a>
-### FrontendErrorSink
-
-`typedef void (*FrontendErrorSink)(String text)`
-
-Receives borrowed native-preprocessor stderr synchronously during collect.
-
-Source: `src/frontend.x:15`
+Source: `src/frontend.x:17`
 
 <a id="ParsedUnit"></a>
 ### ParsedUnit
 
-`typedef struct ParsedUnit { Context context; Compiler compiler, preprocessor; Map globals, snapshot_statics; List ast; String preprocessor_output, preprocessor_errors; int source_lines; } ParsedUnit`
+`typedef struct ParsedUnit { Context context; Compiler compiler; Map globals; List ast; int source_lines; } ParsedUnit`
 
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.
 
-Source: `src/frontend.x:31`
+Source: `src/frontend.x:26`
 
 ## Design notes
 

@@ -220,23 +220,17 @@ static void _strip_comment(char * line){
 
 int String_getindex(String, int);
 
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int String_try_next(String, int *, int *);
 
 static int _name_ok(String name){
   if(! String_truth(name) || ! String_getindex(name, 0)) return 0;
   {
     char raw;
-    Iter _x2c_macro_iterator_0 = String_iter(name, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      raw = Var_char(Var_convert(_x2c_macro_item_0, 26993));
+    String _x2c_macro_object_0 = name;
+    int _x2c_macro_cursor_0 = 0;
+    int _x2c_macro_cursor_output_0;
+    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      raw = _x2c_macro_cursor_output_0;
       {
         unsigned char ch = raw;
         if(!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
@@ -361,6 +355,8 @@ int Map_contains(Map, Var);
 
 Var Map_setindex(Map, Var, Var);
 
+Var int_var(int);
+
 static void _set_once(Project project, int line, Map seen, String key){
   if(Map_contains(seen, String_var(key))) _error(project, line, "duplicate manifest field");
   Map_setindex(seen, String_var(key), int_var(1));
@@ -406,7 +402,7 @@ static void _set_profile_field(Project project, ProjectProfile profile, int line
 
 List String_split_lines(String, int);
 
-Iter List_iter(List, Iter);
+int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
@@ -435,13 +431,11 @@ static void _parse_manifest(Project p){
   int line_number = 0;
   {
     String owned;
-    Iter _x2c_macro_iterator_1 = List_iter(lines, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      owned = Var_string(_x2c_macro_item_1);
+    List _x2c_macro_object_1 = lines;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      owned = Var_string(_x2c_macro_cursor_output_1);
       {
         line_number ++;
         int owned_length = String_truth(owned) ? strlen(owned) : 0;
@@ -590,6 +584,8 @@ int SourceView_exists(SourceView, String);
 
 Iter Map_keys(Map, Iter);
 
+int Iter_try_next(Iter, Var *);
+
 int String_startswith(String, String);
 
 int String_len(String);
@@ -641,7 +637,7 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
   return matches;
 }
 
-Iter Array_iter(Array, Iter);
+int Array_try_next(Array, int *, Var *);
 
 void Array_free(Array);
 
@@ -652,24 +648,20 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
   Array sources = Array_new();
   {
     String pattern;
-    Iter _x2c_macro_iterator_4 = List_iter(target -> sources, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-      pattern = Var_string(_x2c_macro_item_4);
+    List _x2c_macro_object_4 = target -> sources;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_3)){
+      pattern = Var_string(_x2c_macro_cursor_output_3);
       {
         Array expanded = _expand_pattern(project, pattern, "source");
         {
           Var value;
-          Iter _x2c_macro_iterator_3 = Array_iter(expanded, &(struct Iter){
-            int_var(0)
-          }
-          );
-          Var _x2c_macro_item_3;
-          while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-            value = _x2c_macro_item_3;
+          Array _x2c_macro_object_3 = expanded;
+          int _x2c_macro_cursor_3 = 0;
+          Var _x2c_macro_cursor_output_2;
+          while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_2)){
+            value = _x2c_macro_cursor_output_2;
             if(! Array_contains(sources, value)) Array_push(sources, value);
           }
 
@@ -683,24 +675,20 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
   Array excluded = Array_new();
   {
     String pattern;
-    Iter _x2c_macro_iterator_6 = List_iter(target -> exclude, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
-      pattern = Var_string(_x2c_macro_item_6);
+    List _x2c_macro_object_6 = target -> exclude;
+    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_5)){
+      pattern = Var_string(_x2c_macro_cursor_output_5);
       {
         Array expanded = _expand_pattern(project, pattern, "exclude");
         {
           Var value;
-          Iter _x2c_macro_iterator_5 = Array_iter(expanded, &(struct Iter){
-            int_var(0)
-          }
-          );
-          Var _x2c_macro_item_5;
-          while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-            value = _x2c_macro_item_5;
+          Array _x2c_macro_object_5 = expanded;
+          int _x2c_macro_cursor_5 = 0;
+          Var _x2c_macro_cursor_output_4;
+          while(Array_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_4)){
+            value = _x2c_macro_cursor_output_4;
             if(! Array_contains(excluded, value)) Array_push(excluded, value);
           }
 
@@ -714,13 +702,11 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
   Array kept = Array_new();
   {
     Var value;
-    Iter _x2c_macro_iterator_7 = Array_iter(sources, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
-      value = _x2c_macro_item_7;
+    Array _x2c_macro_object_7 = sources;
+    int _x2c_macro_cursor_7 = 0;
+    Var _x2c_macro_cursor_output_6;
+    while(Array_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_6)){
+      value = _x2c_macro_cursor_output_6;
       {
         if(Array_contains(excluded, value)){
           if(verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", Var_string(value), target -> name);
@@ -736,13 +722,11 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
   Array_sort(kept);
   {
     Var value;
-    Iter _x2c_macro_iterator_8 = Array_iter(kept, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_8;
-    while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
-      value = _x2c_macro_item_8;
+    Array _x2c_macro_object_8 = kept;
+    int _x2c_macro_cursor_8 = 0;
+    Var _x2c_macro_cursor_output_7;
+    while(Array_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_7)){
+      value = _x2c_macro_cursor_output_7;
       {
         String path = Var_string(value);
         if(!(String_endswith(path, _28) || String_endswith(path, _29))) _error_name(project, 0, "manifest source is not .x or .c", path);
@@ -767,13 +751,11 @@ static void _validate_target(Project project, ProjectTarget target){
   target -> visiting = 1;
   {
     String name;
-    Iter _x2c_macro_iterator_9 = List_iter(target -> dependencies, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_9;
-    while(Iter_try_next(_x2c_macro_iterator_9, & _x2c_macro_item_9)){
-      name = Var_string(_x2c_macro_item_9);
+    List _x2c_macro_object_9 = target -> dependencies;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_8)){
+      name = Var_string(_x2c_macro_cursor_output_8);
       {
         ProjectTarget dependency = _target(project, name, 0);
         if(! dependency) _error_name(project, 0, "unknown target dependency", name);
@@ -790,13 +772,11 @@ static void _validate_target(Project project, ProjectTarget target){
 static void _append_values(Array output, List values){
   {
     Var value;
-    Iter _x2c_macro_iterator_10 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_10;
-    while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
-      value = _x2c_macro_item_10;
+    List _x2c_macro_object_10 = values;
+    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_9)){
+      value = _x2c_macro_cursor_output_9;
       Array_push(output, value);
     }
 
@@ -809,13 +789,11 @@ int cli_dependency_pass_through(String);
 static void _append_c_flags(Project project, Array output, List values){
   {
     String value;
-    Iter _x2c_macro_iterator_11 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_11;
-    while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
-      value = Var_string(_x2c_macro_item_11);
+    List _x2c_macro_object_11 = values;
+    List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_10)){
+      value = Var_string(_x2c_macro_cursor_output_10);
       {
         if(cli_dependency_pass_through(value)) _error_name(project, 0, "C dependency option is driver-owned", value);
         Array_push(output, String_var(value));
@@ -830,13 +808,11 @@ static void _append_c_flags(Project project, Array output, List values){
 static void _append_defines(Array output, List values){
   {
     String value;
-    Iter _x2c_macro_iterator_12 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_12;
-    while(Iter_try_next(_x2c_macro_iterator_12, & _x2c_macro_item_12)){
-      value = Var_string(_x2c_macro_item_12);
+    List _x2c_macro_object_12 = values;
+    List _x2c_macro_cursor_12 = _x2c_macro_object_12;
+    Var _x2c_macro_cursor_output_11;
+    while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_11)){
+      value = Var_string(_x2c_macro_cursor_output_11);
       Array_push(output, String_var(String_join(NULL, cons(String_var(_30), cons(String_var(value), NULL)))));
     }
 
@@ -847,13 +823,11 @@ static void _append_defines(Array output, List values){
 static void _append_paths(Project project, Array output, List values, String option){
   {
     String value;
-    Iter _x2c_macro_iterator_13 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_13;
-    while(Iter_try_next(_x2c_macro_iterator_13, & _x2c_macro_item_13)){
-      value = Var_string(_x2c_macro_item_13);
+    List _x2c_macro_object_13 = values;
+    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+    Var _x2c_macro_cursor_output_12;
+    while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_12)){
+      value = Var_string(_x2c_macro_cursor_output_12);
       {
         Array_push(output, String_var(option));
         Array_push(output, String_var(_absolute(project, value)));
@@ -888,13 +862,11 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
   Array inputs = _target_sources(p, target, command -> verbose);
   {
     String name;
-    Iter _x2c_macro_iterator_14 = List_iter(target -> dependencies, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_14;
-    while(Iter_try_next(_x2c_macro_iterator_14, & _x2c_macro_item_14)){
-      name = Var_string(_x2c_macro_item_14);
+    List _x2c_macro_object_14 = target -> dependencies;
+    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+    Var _x2c_macro_cursor_output_13;
+    while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_13)){
+      name = Var_string(_x2c_macro_cursor_output_13);
       {
         ProjectTarget dependency = _target(p, name, 0);
         if(dependency -> kind != 1381098885964356) _error_name(p, 0, "dependency target is not a static library", dependency -> name);
@@ -909,13 +881,11 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
   _append_values(x_paths, command -> include_dirs);
   {
     String path;
-    Iter _x2c_macro_iterator_15 = List_iter(target -> include_dirs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_15;
-    while(Iter_try_next(_x2c_macro_iterator_15, & _x2c_macro_item_15)){
-      path = Var_string(_x2c_macro_item_15);
+    List _x2c_macro_object_15 = target -> include_dirs;
+    List _x2c_macro_cursor_15 = _x2c_macro_object_15;
+    Var _x2c_macro_cursor_output_14;
+    while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_14)){
+      path = Var_string(_x2c_macro_cursor_output_14);
       Array_push(x_paths, String_var(_absolute(p, path)));
     }
 
@@ -925,13 +895,11 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
   _append_values(package_paths, command -> package_dirs);
   {
     String path;
-    Iter _x2c_macro_iterator_16 = List_iter(target -> package_dirs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_16;
-    while(Iter_try_next(_x2c_macro_iterator_16, & _x2c_macro_item_16)){
-      path = Var_string(_x2c_macro_item_16);
+    List _x2c_macro_object_16 = target -> package_dirs;
+    List _x2c_macro_cursor_16 = _x2c_macro_object_16;
+    Var _x2c_macro_cursor_output_15;
+    while(List_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_15)){
+      path = Var_string(_x2c_macro_cursor_output_15);
       Array_push(package_paths, String_var(_absolute(p, path)));
     }
 
@@ -950,13 +918,11 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
     int has_optimization = 0, has_debug = 0;
     {
       String argument;
-      Iter _x2c_macro_iterator_17 = List_iter(command -> cc_args, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_17;
-      while(Iter_try_next(_x2c_macro_iterator_17, & _x2c_macro_item_17)){
-        argument = Var_string(_x2c_macro_item_17);
+      List _x2c_macro_object_17 = command -> cc_args;
+      List _x2c_macro_cursor_17 = _x2c_macro_object_17;
+      Var _x2c_macro_cursor_output_16;
+      while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_16)){
+        argument = Var_string(_x2c_macro_cursor_output_16);
         {
           if(String_truth(argument) && String_startswith(argument, _45)) has_optimization = 1;
           if(String_equal(argument, _34)) has_debug = 1;
@@ -977,13 +943,11 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
   _append_paths(p, link, target -> library_dirs, _38);
   {
     String library;
-    Iter _x2c_macro_iterator_18 = List_iter(target -> libraries, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_18;
-    while(Iter_try_next(_x2c_macro_iterator_18, & _x2c_macro_item_18)){
-      library = Var_string(_x2c_macro_item_18);
+    List _x2c_macro_object_18 = target -> libraries;
+    List _x2c_macro_cursor_18 = _x2c_macro_object_18;
+    Var _x2c_macro_cursor_output_17;
+    while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_17)){
+      library = Var_string(_x2c_macro_cursor_output_17);
       Array_push(link, String_var(String_join(NULL, cons(String_var(_39), cons(String_var(library), NULL)))));
     }
 
@@ -1009,13 +973,11 @@ static void _plan_target(Project project, ProjectTarget target, CliRequest comma
   if(target -> planned) return;
   {
     String dependency;
-    Iter _x2c_macro_iterator_19 = List_iter(target -> dependencies, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_19;
-    while(Iter_try_next(_x2c_macro_iterator_19, & _x2c_macro_item_19)){
-      dependency = Var_string(_x2c_macro_item_19);
+    List _x2c_macro_object_19 = target -> dependencies;
+    List _x2c_macro_cursor_19 = _x2c_macro_object_19;
+    Var _x2c_macro_cursor_output_18;
+    while(List_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_18)){
+      dependency = Var_string(_x2c_macro_cursor_output_18);
       _plan_target(project, _target(project, dependency, 0), command, selected, build_root);
     }
 
@@ -1082,26 +1044,14 @@ ProjectBuild project_plan(CliRequest request){
         }
 
       }
-      else {int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
-      _x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
+      else goto _x2c_cleanup_done_0;
     }
 
   }
-
-}
-int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-    x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
-    x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-
-    x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+  _x2c_cleanup_done_0 :;
+  x2c_error_catch_close(_x2c_error_handler_0);
+  _x2c_error_handler_0 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 project -> root = x2c_path_dir(project -> path);

@@ -768,7 +768,7 @@ int Var_truthy(Var value){
   return Var_truth(value);
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 String String_add(String, String);
 
@@ -803,8 +803,8 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
     x2c_error_raise_n(& _x2c_error_site_37, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
-  if(op == 56 && Var_is(lhs, 1318210446) && Var_is(rhs, 1318210446)) return String_var(String_add(Var_string(lhs), Var_string(rhs)));
-  if(Var_is(lhs, 1318210446)) return _general_numeric_binary(op, lhs, rhs);
+  if(op == 56 && Var_is_row(lhs, 11, 7, 1) && Var_is_row(rhs, 11, 7, 1)) return String_var(String_add(Var_string(lhs), Var_string(rhs)));
+  if(Var_is_row(lhs, 11, 7, 1)) return _general_numeric_binary(op, lhs, rhs);
   if(Var_try_dispatch_binary(lhs, member, rhs, & result)) return result;
   if(Var_kind(lhs) == 1011493096){
     Symbol tag = Var_tag(lhs);

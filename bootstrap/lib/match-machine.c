@@ -211,7 +211,7 @@ void MatchMachine_begin(MatchMachine m, MachineView program, Var input){
 
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 List Var_list(Var);
 
@@ -226,6 +226,8 @@ List cdr(List);
 int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
 
 int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
+
+int Var_is(Var, Symbol);
 
 int Var_is_atom_binder(Var);
 
@@ -247,7 +249,7 @@ int MatchMachine_step(MatchMachine m){
     }
     case MW_EQ_VALUE_BITS : if(m -> value.u64 != p -> consts[w -> a].u64) m -> pc = w -> target;
     break;
-    case MW_INPUT_LIST : if(! Var_is(m -> value, 806120)) m -> pc = w -> target;
+    case MW_INPUT_LIST : if(! Var_is_row(m -> value, 9, 7, 4)) m -> pc = w -> target;
     else{
       * MatchMachine__cursor(m, w -> a) = Var_list(m -> value);
       * MatchMachine__distance(m, w -> a) = 0;
@@ -304,7 +306,7 @@ int MatchMachine_step(MatchMachine m){
         break;
       }
       Var head = car(at);
-      if(! Var_is(head, 806120)){
+      if(! Var_is_row(head, 9, 7, 4)){
         m -> pc = w -> target;
         break;
       }

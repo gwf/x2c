@@ -272,7 +272,7 @@ size_t Array_len(Array);
 
 Var Array_take_last(Array);
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_is_nil(Var);
 
@@ -296,41 +296,30 @@ int ast_contains_head(Var value, Symbol kind){
     Array_push(pending, value);
     while(Array_len(pending)){
       Var current = Array_take_last(pending);
-      if(! Var_is(current, 806120) || Var_is_nil(current)) continue;
+      if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;
       List node = Var_list(current);
       if(Var_same(List_car(node), Symbol_var(kind))){
         int _x2c_return_value_0 = 1;
         {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
-
-}
       }
-      for(List cursor = node;  List_truth(cursor);  cursor = cursor -> cdr) if(Var_is(cursor -> car, 806120)) Array_push(pending, cursor -> car);
+      for(List cursor = node;  List_truth(cursor);  cursor = cursor -> cdr) if(Var_is_row(cursor -> car, 9, 7, 4)) Array_push(pending, cursor -> car);
     }
     {
       int _x2c_return_value_1 = 0;
       {
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-  return _x2c_return_value_1;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
 }
 }
 
@@ -357,7 +346,7 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
   Array _x2c_macro_rewritten_0 = NULL;
   for(List _x2c_macro_cursor_0 = _x2c_macro_original_0;  List_truth(_x2c_macro_cursor_0);  _x2c_macro_cursor_0 = List_cdr(_x2c_macro_cursor_0)){
     Var _x2c_macro_item_0 = List_car(_x2c_macro_cursor_0), _x2c_macro_value_0 = _x2c_macro_item_0;
-    if(Var_is(_x2c_macro_item_0, 806120)){
+    if(Var_is_row(_x2c_macro_item_0, 9, 7, 4)){
       child = _x2c_macro_item_0;
       _x2c_macro_value_0 =({
         Func _x2c_func_call_0 = per_child;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL, _20);  else _x2c_func_argument_0 = FuncArg_value(List_var(Var_list(child)));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
@@ -408,7 +397,7 @@ return node;
 Var List_cadr(List);
 int SymbolSet_contains(SymbolSet, Symbol);
 static int _raise_never_returns(Ast node){
-  Var code_ast = List_cadr(node);  if(! Var_is(code_ast, 806120)) return 0;
+  Var code_ast = List_cadr(node);  if(! Var_is_row(code_ast, 9, 7, 4)) return 0;
   {
     List _x2c_match_expr = Var_list(code_ast);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -439,6 +428,7 @@ default: break;
 return 0;
 }
 
+int Var_is(Var, Symbol);
 Iter List_iter(List, Iter);
 int Iter_try_next(Iter, Var *);
 static int _contains_return(Ast node){
@@ -450,7 +440,7 @@ static int _contains_return(Ast node){
       int_var(0)
     }
     );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_1)){
-      head = _x2c_macro_item_1;  if(Var_is(head, 806120) && _contains_return(Var_pointer(head))) return 1;
+      head = _x2c_macro_item_1;  if(Var_is_row(head, 9, 7, 4) && _contains_return(Var_pointer(head))) return 1;
     }
 
   }
@@ -459,7 +449,7 @@ static int _contains_return(Ast node){
 
 Var List_last(List);
 int Ast_never_returns(Ast ast){
-  if(! _init_guard_) _file_init_();  List node = _unwrap_origin(ast);  if(! List_truth(node) || ! Var_is(List_car(node), 1328354264)) return 0;  Symbol head = Var_symbol(List_car(node));  if(head == 37833930) return _raise_never_returns(node);  if(head == 41184168) return _call_never_returns(node);  if(head != 5011670 || _contains_return(node)) return 0;  Var last = List_last(node);  if(! Var_is(last, 806120)) return 0;  Ast terminal = Var_pointer(last);  return Ast_never_returns(terminal);
+  if(! _init_guard_) _file_init_();  List node = _unwrap_origin(ast);  if(! List_truth(node) || ! Var_is(List_car(node), 1328354264)) return 0;  Symbol head = Var_symbol(List_car(node));  if(head == 37833930) return _raise_never_returns(node);  if(head == 41184168) return _call_never_returns(node);  if(head != 5011670 || _contains_return(node)) return 0;  Var last = List_last(node);  if(! Var_is_row(last, 9, 7, 4)) return 0;  Ast terminal = Var_pointer(last);  return Ast_never_returns(terminal);
 }
 
 List Ast_initializer_cases(Ast ast, List * input){
@@ -480,15 +470,13 @@ return List_cdr(ast);
 }
 
 int List_len(List);
+int List_try_next(List, List *, Var *);
 Var List_getindex(List, int);
 void Array_free(Array);
 List Ast_initializer_functions(Ast ast, List * source){
   if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, & header);  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_31, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
-    List choice;  Iter _x2c_macro_iterator_1 = List_iter(cases, &(struct Iter){
-      int_var(0)
-    }
-    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_2)){
-      choice = Var_list(_x2c_macro_item_2); {
+    List choice;  List _x2c_macro_object_1 = cases;  List _x2c_macro_cursor_2 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_0)){
+      choice = Var_list(_x2c_macro_cursor_output_0); {
         List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  List destination = Var_list(List_getindex(_x2c_destructure_0, 2));  List expression = Var_list(List_getindex(_x2c_destructure_0, 3));
   {
     List _x2c_match_expr = expression;

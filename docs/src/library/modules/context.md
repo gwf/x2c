@@ -27,7 +27,7 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:371`
+Source: `lib/context.x:368`
 
 <a id="Context.close"></a>
 #### Context.close
@@ -43,7 +43,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:351`
+Source: `lib/context.x:349`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -52,7 +52,7 @@ Source: `lib/context.x:351`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:177`
+Source: `lib/context.x:175`
 
 <a id="Context.export"></a>
 #### Context.export
@@ -76,7 +76,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:312`
+Source: `lib/context.x:310`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -91,7 +91,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:148`
+Source: `lib/context.x:146`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -105,7 +105,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:165`
+Source: `lib/context.x:163`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -120,7 +120,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:174`
+Source: `lib/context.x:172`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -135,7 +135,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:157`
+Source: `lib/context.x:155`
 
 ## Advanced and interop API
 
@@ -213,7 +213,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:194`
+Source: `lib/context.x:192`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -235,7 +235,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:333`
+Source: `lib/context.x:331`
 
 <a id="Context.initialize"></a>
 #### Context.initialize

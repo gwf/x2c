@@ -17,7 +17,7 @@ case "$MODE" in
     ;;
 esac
 
-"$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD" \
+"$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/probes/error-fatal.x"
 "${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include" \
   "$BUILD/error-fatal.c" -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"

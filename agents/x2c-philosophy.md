@@ -117,7 +117,7 @@ captures a value; by itself it does not establish that value's type.
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.pool_retain*`, `List.promote` | Pool suite |
 | Header-symbol cache | verified | `header_symbols_write`/`header_symbols_open` (`src/collect.x`), `etc/header-symbols.xlisp` | `hdr-check`, `run-header-cache.sh` |
-| Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, `MatchCache.flush_default()` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
+| Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts
 
@@ -176,9 +176,9 @@ positional storage. Rollback changes only that private state, and failed
 matches leave caller output untouched. A successful public API constructs an
 association List only where its signature promises one; source `match`,
 replacement internals, and generated catch-arm locals consume fixed capture
-indexes directly. Static source patterns may retain an immutable per-site
-plan in Match's shutdown-owned scope, while dynamic patterns retain the
-cache-or-recursive route.
+indexes directly. A source-literal pattern retains an immutable per-site
+plan in Match's shutdown-owned scope; a pattern computed at run time
+prepares a plan for the life of the call and frees it.
 
 Filtered catch copies committed capture values into the selected Error
 record's private region before transfer. The retained handler region therefore
@@ -571,34 +571,35 @@ located diagnostic — one check per declaration in
 `Sym.declare`, with no prescan — so generated names can never
 collide with user names. The `reserved-namespace` fixture pins the rejection
 and `generated-name-hygiene` pins that ordinary names near the convention
-still lower unchanged. Snapshot or live preprocessing seeds the same
-anonymous-type sequence. Lambda helpers, adapters, transfer frames, and
+still lower unchanged. The snapshot seeds the anonymous-type sequence. Lambda helpers, adapters, transfer frames, and
 cleanup temporaries allocate names from that session. Emission keeps cleanup
 and preserved-automatic bookkeeping in a stack-local owner, so failed or
 repeated Compiler invocations cannot contaminate later output.
 
-### Source declaration collection and host preprocessing
+### Source declaration collection
 
-`Compiler.collect_symbols` owns the default source-specific declaration path.
-It recursively splices quote-includes in source order, leaves snapshot-covered
-runtime headers as trivia, and shallow-parses the resulting raw stream without
-invoking the host C preprocessor.
+`Compiler.collect_symbols` is the single owner of source-specific declaration
+collection. It recursively splices quote-includes in source order, leaves
+snapshot-covered runtime headers as trivia, and shallow-parses the resulting
+raw stream. No host process participates: x2c resolves includes itself and
+terminates cycles by real path.
 
-The C preprocessor remains the explicit compatibility and parity oracle.
-`Toolchain.preprocess` (`src/toolchain.x`) owns that host process boundary: it passes every source
-and include path as an argv element, captures stdout and stderr separately, and
-returns the real process status. `preprocess_input` owns the compiler response:
-host stderr remains visible, failure becomes a structured driver diagnostic,
-and failed stdout is never consumed.
+The checked-in snapshot is that collector's proof. `etc/symbols.xlisp` is
+defined as a cold raw walk of `lib/x2c.x`, `make sym-check` re-derives it and
+diffs, and `make sym-ensure` rewrites it when its inputs change. A collector
+change that alters the prelude environment therefore shows up as a diff in a
+tracked file rather than as a silent divergence. The consequence to accept
+deliberately: collection recognizes `#include` and nothing else, so it does
+not expand macros and does not evaluate `#if`.
 
-Neither declaration stream replaces the user's source. The original positioned
+The declaration stream does not replace the user's source. The original positioned
 token stream owns full parsing, diagnostics, and emission. The parser,
 generator, and formatter retain source directives in order at top level and
 within compound statements, except that generation consumes its control
-pragmas and owns the generated header's `#pragma once`. The raw sweep owns
-default-path parity; process probes own hostile CPP paths and failure status;
-compiler fixtures own missing-include status and structural AST/C/runtime
-evidence.
+pragmas and owns the generated header's `#pragma once`. `make sym-check` owns
+prelude-environment identity; the symbol-snapshot and header-cache probes own
+collection ordering and replay; compiler fixtures own structural AST, C, and
+runtime evidence.
 
 ### Header-symbol cache
 
@@ -816,10 +817,11 @@ outer `String`/`List` pool retained for "header symbols" survives the whole
 batch so cached header contributions promote out of a unit's pools and stay
 live, while each translation unit runs inside its own `Scope.retain()` plus
 per-unit named `String`/`List` pools that release when the unit finishes, so
-batch peak memory stays near single-file peak. `MatchCache.flush_default()`
-runs before each unit's pools release, because plan-cache entries key on
-pattern pointers that may point into cells consed inside that unit's
-bracket. `run-header-cache.sh` verifies batch-vs-solo output parity, which
+batch peak memory stays near single-file peak. Nothing in `Match` has to be
+flushed before those pools release: a compiler-owned pattern site keeps its
+plan in `Match`'s own shutdown-owned scope, and every other pattern's plan
+dies with the call. `run-header-cache.sh` verifies batch-vs-solo output
+parity, which
 exercises this bracketing incidentally, but no probe directly asserts the
 retain/release discipline itself -- that a unit's transient allocations are
 actually reclaimed at release, or that a leak in one unit's bracket cannot

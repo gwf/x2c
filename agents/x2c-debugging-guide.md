@@ -47,12 +47,11 @@ methods to prevent ambiguity.
 `src/cli.x` owns the option table. These `translate` inspection switches print
 their selected result and stop:
 
-- `--dump-tokens` / `--dump-cpp-tokens` — inspect lexer output
+- `--dump-tokens` — inspect lexer output
 - `--dump-ast` / `--dump-transforms` — observe initial and transformed ASTs
 - `--dump-cache` — inspect the compiler cache after parsing
 - `--dump-code` — print the unformatted C token stream
-- `--dump-symbols` / `--dump-cpp-symbols` — inspect compiler symbol tables
-- `--dump-cpp` / `--dump-cpp-text` — show preprocessor output
+- `--dump-symbols` — inspect compiler symbol tables
 
 `--debug` enables compiler debug logging to standard error; `--no-cpp` skips
 symbol collection and preprocessing. Neither option stops translation.
@@ -123,7 +122,7 @@ as an ordinary filesystem/include problem, not escaped as command text.
   `cache` node.
 - Directive missing from generated C: compare `--dump-ast` and `--dump-code`.
   Directives at top level and inside compound statements should remain AST
-  nodes in source order; `--dump-cpp-text` is only the discovery stream.
+  nodes in source order.
 
 ---
 

@@ -27,6 +27,13 @@ printf("total = %d\n", total);
 
 `break` and `continue` behave as they do in a C loop.
 
+A single-binder loop over a `List`, `Array`, or `String` compiles to that
+type's `try_next` cursor: a caller-owned index or cell pointer and one call
+per element, with no `Iter` in between. Over an `Array` or a `String` it costs
+what hand-written indexing costs, and over a `List` it is faster than a
+hand-rolled `cdr` walk, which pays a `car` and a `cdr` call per cell. Prefer
+`foreach` and let the lowering choose the step.
+
 ### What you can iterate
 
 `List`, `Array`, `Map`, and `String` each provide an iterator adapter in their

@@ -15,6 +15,7 @@
 #pragma once
 
 $(import "error-macros.xmacro")
+$(import "var-tags.xmacro")
 
 #include <float.h>
 #include <limits.h>
@@ -186,12 +187,6 @@ typedef struct X2CErrorSite {
   const char *file, *function, int line;
 } X2CErrorSite;
 
-#define X2C_CLEANUP_EXIT_NORMAL   0
-#define X2C_CLEANUP_EXIT_RETURN   1
-#define X2C_CLEANUP_EXIT_BREAK    2
-#define X2C_CLEANUP_EXIT_CONTINUE 3
-#define X2C_CLEANUP_EXIT_GOTO     4
-
 #define VAR_NULL_BITS 0ul
 #define VAR_VOID_BITS 0xFFFFFFFFFFFFFFFFul
 #define VAR_I8_PREFIX  0x8002000200000000ul
@@ -212,7 +207,6 @@ typedef struct X2CErrorSite {
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 
 void x2c_scope_thread_release(void);
-void x2c_match_thread_release(void);
 void x2c_static_thread_release(void);
 void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);
@@ -248,9 +242,9 @@ void x2c_descriptor_thread_start_begin(void);
 void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
 
-/* Read on every cleanup and error path, including generated defer regions,
-   so they are the storage rather than an accessor over it. */
-extern threaded int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
+/* Read by Exception, Scope, and Pool on paths that run before Error is
+   initialized, so it is the storage rather than an accessor over it. */
+extern threaded int x2c_error_runtime_ready;
 
 extern File Stdin, Stdout, Stderr;
 extern Var Void;
@@ -607,63 +601,27 @@ inline String long.repr(long l)          => l.var().repr();
 
 // Var to builtins
 
-/** Extracts the `Array` pointer from `x`, or NULL for another tag. */
-inline Array Var.array(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x0) return NULL;
-  return (Array) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Block` pointer from `x`, or NULL for another tag. */
-inline Block Var.block(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x1) return NULL;
-  return (Block) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Buffer` pointer from `x`, or NULL for another tag. */
-inline Buffer Var.buffer(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x2) return NULL;
-  return (Buffer) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Bytes` pointer from `x`, or NULL for another tag. */
-inline Bytes Var.bytes(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x3) return NULL;
-  return (Bytes) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `file` payload after the caller establishes the matching
-    `Var` kind.
+/** Reports whether `value` occupies the encoding row at `top`/`bottom`.
+    `mask` selects the bits the decoder discriminates on within `top`'s
+    group, so a caller that already knows the row tests it with two
+    compares instead of a decode. `var-tags.xmacro` projects the rows that
+    qualify; a row whose decoded form carries a validity clause is not one
+    of them and must ask `Var.is`.
 */
-inline File Var.file(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x0) return NULL;
-  return (File) (x.u64 & 0x0000FFFFFFFFFFF8ul);
+inline int Var.is_row(
+  Var value, unsigned top, unsigned long mask, unsigned long bottom) {
+  return value.u64 >> 48 == top && (value.u64 & mask) == bottom;
 }
 
-/** Extracts the `List` pointer from `x`, or `nil` for another tag. */
-inline List Var.list(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x4) return NULL;
-  return (List) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Iter` pointer from `x`, or NULL for another tag. */
-inline Iter Var.as_iter(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x2) return NULL;
-  return (Iter) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Map` pointer from `x`, or NULL for another tag. */
-inline Map Var.map(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x6) return NULL;
-  return (Map) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `string` payload after the caller establishes the matching
-    `Var` kind.
-*/
-inline String Var.string(Var x) {
-  if (x.u64 >> 48 != 0x000B || (x.u64 & 0x7) != 0x1) return NULL;
-  return (String) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
+$var.tag.unbox(Array, array, <array>);
+$var.tag.unbox(Block, block, <block>);
+$var.tag.unbox(Buffer, buffer, <buffer>);
+$var.tag.unbox(Bytes, bytes, <bytes>);
+$var.tag.unbox(File, file, <file>);
+$var.tag.unbox(Iter, as_iter, <iter>);
+$var.tag.unbox(List, list, <list>);
+$var.tag.unbox(Map, map, <map>);
+$var.tag.unbox(String, string, <string>);
 
 /** Extracts the `symbol` payload after the caller establishes the matching
     `Var` kind.
@@ -833,7 +791,7 @@ void x2c_initialize_protocols(void) {
 void x2c_initialize(void) {
   void Atom.initialize(void), File.initialize(void);
   void List.initialize(void), Scope.initialize(void);
-  void MatchCache.initialize(void);
+  void x2c_match_initialize(void);
   void String.initialize(void), Logger_initialize(void);
   Scope Scope.new(void), *Scope.top(void);
   static int initialized = 0;
@@ -845,7 +803,7 @@ void x2c_initialize(void) {
   String.initialize();
   List.initialize();
   Atom.initialize();
-  MatchCache.initialize();
+  x2c_match_initialize();
   File.initialize();
   Logger_initialize();
 }

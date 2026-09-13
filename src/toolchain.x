@@ -16,7 +16,7 @@
 */
 typedef struct Toolchain {
   String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args;
-  int verbose, dry_run, keep_system_includes;
+  int verbose, dry_run;
 } *Toolchain;
 
 /** Describes one `Scope`-owned host-tool argv action and its reporting policy.
@@ -355,97 +355,3 @@ int ToolRun.wait(ToolRun execution) {
     `ToolAction.start` and `ToolRun.wait`.
 */
 int ToolAction.run(ToolAction action) => action.start().wait();
-
-static void _append_includes(Array arguments, List dirs) {
-  foreach (Var value, dirs) {
-    if (value is not <string>) continue;
-    arguments.push("-I");
-    arguments.push(value);
-  }
-}
-
-/** Runs the configured C preprocessor without a shell.
-    `fname`, `output`, and `errors` are required; output pointers are cleared
-    before use. Source and include paths remain distinct argv elements, and
-    stdout and stderr are captured separately. When `dependencies` is present,
-    its temporary depfile is read when possible and removed on returning paths,
-    including a handled `<io-fail>` while reading it. A non-returning
-    `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
-    Returns the shell-style child status, or -1 for invalid arguments, local
-    setup failure, child start failure, or wait failure. Partial capture setup
-    returns no defined status. This operation does not consult `dry_run`.
-
-    Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
-    constructing arguments or reading captured text.
-*/
-int Toolchain.preprocess(
-  Toolchain toolchain, const char *fname, List include_dirs,
-  const char *imacros, String *output, String *errors, String *dependencies) {
-  if (output) *output = NULL;
-  if (errors) *errors = NULL;
-  if (dependencies) *dependencies = NULL;
-  if (!fname || !output || !errors) return -1;
-  if (!toolchain.keep_system_includes) {
-    char *probe[] = {
-      toolchain.cc, "-E", "-x", "c", "-fkeep-system-includes",
-      "/dev/null", NULL
-    };
-    String probe_output = NULL, probe_errors = NULL;
-    toolchain.keep_system_includes =
-      process_run(probe, &probe_output, &probe_errors) == 0 ? 1 : -1;
-  }
-  char *base[] = {
-    "-E", "-P", "-x", "c",
-    "-D__asm(x)=", "-D__asm__(x)=", "-D__attribute__(x)=",
-    "-D__format__(x)=", "-D__printf__(x)=", "-D__inline__=",
-    "-D__inline=", "-D_Nullable=", "-D_Nonnull=", "-DX2CCPP",
-    "-D__restrict=", "-D__extension__=", "-Wno-unicode",
-    "-Wno-invalid-pp-token", "-Wno-pragma-once-outside-header"
-  };
-  List repo_dirs = x2c_cpp_include_dirs();
-  Array arguments = %[], char dependency_path[] = "/tmp/x2c-cpp-deps-XXXXXX";
-  if (dependencies) {
-    int fd = mkstemp(dependency_path);
-    if (fd < 0) {
-      *errors = "unable to create preprocessor dependency file";
-      return -1;
-    }
-    close(fd);
-  }
-  arguments.push(toolchain.cc);
-  for (int i = 0; i < sizeof(base) / sizeof(base[0]); i++)
-    arguments.push(base[i]);
-  if (toolchain.keep_system_includes > 0)
-    arguments.push("-fkeep-system-includes");
-  arguments.push("-I");
-  arguments.push(".");
-  _append_includes(arguments, repo_dirs);
-  _append_includes(arguments, include_dirs);
-  foreach (Var argument, toolchain.cpp_args) arguments.push(argument);
-  if (imacros) {
-    arguments.push("-imacros");
-    arguments.push(imacros);
-  }
-  if (dependencies) {
-    arguments.push("-MMD");
-    arguments.push("-MF");
-    arguments.push(dependency_path);
-    arguments.push("-MT");
-    arguments.push("x2c-dependencies");
-  }
-  arguments.push(fname);
-  List argument_list = arguments.list_free();
-  if (toolchain.verbose) _print_action(<preprocess>, argument_list);
-  int result = process_run(_action_argv(argument_list), output, errors);
-  /* The dependency file is consumed and its unlink attempted even after host
-     failure. The returned status tells the caller whether stdout is usable. */
-  if (dependencies) {
-    File dep = fopen(dependency_path, "r");
-    if (dep) {
-      try *dependencies = dep.string_close();
-      catch %(io-fail *): *dependencies = NULL;
-    }
-    unlink(dependency_path);
-  }
-  return result;
-}

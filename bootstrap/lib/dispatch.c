@@ -235,10 +235,7 @@ void x2c_register_type(String name){
     _reserve_descriptor(name);
   }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
 }
 
@@ -261,36 +258,25 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods){
     if(! descriptor){
       int _x2c_return_value_0 = 0;
       {
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_0;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
-  return _x2c_return_value_0;
-
-}
     }
     descriptor -> value_dispatch = 1;
     _install_descriptor_methods(descriptor, methods);
     {
       int _x2c_return_value_1 = 1;
       {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_1;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
 }
 }
 
@@ -314,35 +300,24 @@ int x2c_try_register_descriptor(String name, VarMethods methods){
     if(! descriptor){
       int _x2c_return_value_2 = 0;
       {
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
-  return _x2c_return_value_2;
-
-}
     }
     _install_descriptor_methods(descriptor, methods);
     {
       int _x2c_return_value_3 = 1;
       {
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_3;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-  return _x2c_return_value_3;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
 }
 }
 
@@ -370,35 +345,24 @@ int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods metho
     if(! descriptor){
       int _x2c_return_value_4 = 0;
       {
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_4;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
-  return _x2c_return_value_4;
-
-}
     }
     _install_descriptor_methods(descriptor, methods);
     {
       int _x2c_return_value_5 = 1;
       {
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_5;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-  return _x2c_return_value_5;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
 

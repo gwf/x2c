@@ -21,12 +21,6 @@ to the header when a later public prototype names it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
-The advanced `--cpp-symbols` and `--live-symbols` modes run the host
-preprocessor over raw `.x` include graphs. A module used with those modes needs
-a source-level `#pragma once` only when its own `.x` includes form a cycle.
-Ordinary translation resolves includes itself and terminates cycles without
-it.
-
 Every ordinary `.x` translation unit implicitly loads the `x2c.x` standard
 runtime prelude. The compiler also emits `#include "x2c.h"` in its generated
 header. An explicit `#include "x2c.x"` is also accepted; it does not change
@@ -2444,34 +2438,30 @@ A pointer to `void` is held to the same rule even though its base type differs
 from the source's, because it also passes the same address on unchanged.
 `void *` therefore does not accept a `const char *`; `const void *` does.
 
-## Host preprocessing
+## Include resolution
 
-When preprocessing is required, x2c passes the source pathname and every
-include directory to the host `cc` as separate argv elements. Spaces and shell
-metacharacters in paths are data, not command syntax. The host process receives
-the source path, so quoted includes and its diagnostics retain source-file
+x2c resolves `#include` directives itself while collecting the global
+environment. A quoted target is searched in the including file's directory,
+then `.`, `src/`, `lib/`, then the `-I` chain; each file is spliced once by
+real path, so include cycles terminate. Spaces and shell metacharacters in
+paths are data, never command syntax, and diagnostics retain source-file
 context.
 
-The active preprocessed stream is shallow-parsed only to establish the global
-environment. Full parsing, diagnostics, and emitted source still come from the
-original token stream. Directives remain AST nodes in source order at top level
-and inside compound statements, including a trailing directive before `}`.
+Included files are shallow-parsed only to establish the global environment.
+Full parsing, diagnostics, and emitted source still come from the original
+token stream. Directives remain AST nodes in source order at top level and
+inside compound statements, including a trailing directive before `}`.
 
-An include that x2c cannot resolve remains in the emitted C. Translation
-without host preprocessing can therefore succeed with an active missing
-header; native compilation rejects it. Explicit host preprocessing also
-rejects an active missing header. A missing include in an inactive branch
-such as `#if 0` does not prevent compilation.
+An include that x2c cannot resolve remains in the emitted C. Translation can
+therefore succeed with an active missing header; native compilation rejects
+it. A missing include in an inactive branch such as `#if 0` does not prevent
+compilation, because collection does not evaluate conditionals.
 
 This is not full preprocessing of x2c source: the original tokens must still
 form syntax that x2c can parse. Macro expansion that supplies grammar, or
 inactive branches containing otherwise unparseable source, can require
-adjustment even when the host C compiler accepts them.
-
-A failed host preprocess prints its captured stderr, reports a structured x2c
-driver diagnostic at the first directive, and exits nonzero. Partial host
-stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;
-`--dump-cpp-text` exposes the successful host output.
+adjustment even when the host C compiler accepts them. `--no-cpp` skips
+collection entirely and is a diagnostic aid for C-only source.
 
 ## Diagnostics
 

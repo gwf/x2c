@@ -125,13 +125,6 @@ grep -Fq "input is not valid UTF-8" "$BUILD/utf8.stderr"
 printf '#include "x2c.x"\n' >"$BUILD/a/item.x"
 printf '#include "x2c.x"\n' >"$BUILD/b/item.x"
 
-"$X2C" translate --dump-cpp "$BUILD/a/item.x" \
-  >"$BUILD/dump-cpp.stdout" 2>"$BUILD/dump-cpp.stderr"
-"$X2C" translate --dump-cpp-text "$BUILD/a/item.x" \
-  >"$BUILD/dump-cpp-text.stdout" 2>"$BUILD/dump-cpp-text.stderr"
-cmp "$BUILD/dump-cpp.stdout" "$BUILD/dump-cpp-text.stdout"
-cmp "$BUILD/dump-cpp.stderr" "$BUILD/dump-cpp-text.stderr"
-
 "$X2C" translate --color=auto --out-dir "$BUILD/out" \
   "$BUILD/a/item.x" >"$BUILD/receipt.stdout" \
   2>"$BUILD/receipt.stderr"
@@ -275,9 +268,6 @@ grep -Fq "$BUILD/deps/src/middle.x" "$BUILD/deps/out/root.d"
 grep -Fq "$BUILD/deps/src/leaf.x" "$BUILD/deps/out/root.d"
 grep -Fq "$ROOT/etc/symbols.xlisp" "$BUILD/deps/out/root.d"
 grep -Fq "$BUILD/deps/src/leaf.x:" "$BUILD/deps/out/root.d"
-"$X2C" translate --live-symbols --out-dir "$BUILD/deps/live-out" \
-  -I "$BUILD/deps/src" "$BUILD/deps/src/root.x"
-grep -Fq "$BUILD/deps/src/leaf.x" "$BUILD/deps/live-out/root.d"
 "$X2C" translate --out-dir "$BUILD/deps/repo-out" "$ROOT/src/main.x"
 grep -Fq "$ROOT/etc/header-symbols.xlisp" \
   "$BUILD/deps/repo-out/main.d"

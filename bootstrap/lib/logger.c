@@ -344,22 +344,15 @@ Symbol Logger_min_level(Logger logger){
     {
       Symbol _x2c_return_value_0 = logger ? logger -> min_level : 0;
       {
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
-  return _x2c_return_value_0;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_1 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_1;
 }
 }
 
@@ -377,35 +370,24 @@ int Logger_set_min_level(Logger logger, Symbol level){
     if(! logger || _level_priority(level) < 0){
       int _x2c_return_value_1 = 0;
       {
-  int _x2c_cleanup_prev_2 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_2;
-  return _x2c_return_value_1;
-
-}
     }
     logger -> min_level = level;
     {
       int _x2c_return_value_2 = 1;
       {
-  int _x2c_cleanup_prev_3 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_2;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_3;
-  return _x2c_return_value_2;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_4 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_1);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_4;
 }
 }
 
@@ -423,36 +405,25 @@ int Logger_sink_count(Logger logger){
     if(! logger){
       int _x2c_return_value_3 = 0;
       {
-  int _x2c_cleanup_prev_5 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_3;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_5;
-  return _x2c_return_value_3;
-
-}
     }
     int count = 0;
     for(LogSink sink = logger -> first_sink;  sink;  sink = sink -> next) count ++;
     {
       int _x2c_return_value_4 = count;
       {
-  int _x2c_cleanup_prev_6 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_4;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_6;
-  return _x2c_return_value_4;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_7 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_2);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_7;
 }
 }
 
@@ -477,22 +448,15 @@ int Logger_should_log(Logger logger, Symbol level, Symbol category){
     {
       int _x2c_return_value_5 = _should_log(logger, level, category);
       {
-  int _x2c_cleanup_prev_8 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_3);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_5;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_8;
-  return _x2c_return_value_5;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_9 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_3);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_9;
 }
 }
 
@@ -510,22 +474,15 @@ int log_should_log(Symbol level, Symbol category){
     {
       int _x2c_return_value_6 = _should_log(global_logger, level, category);
       {
-  int _x2c_cleanup_prev_10 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_4);
+        x2c_cleanup_leave(& _x2c_defer_record_4);
+        return _x2c_return_value_6;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_10;
-  return _x2c_return_value_6;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_11 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_4);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_11;
 }
 }
 
@@ -584,14 +541,10 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
     if(! logger || ! emit){
       LogSink _x2c_return_value_7 = NULL;
       {
-  int _x2c_cleanup_prev_12 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_5);
+        x2c_cleanup_leave(& _x2c_defer_record_5);
+        return _x2c_return_value_7;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_12;
-  return _x2c_return_value_7;
-
-}
     }
     LogSink sink = Scope_calloc_in(& logger -> storage, 1, sizeof(struct LogSink));
     sink -> logger = logger;
@@ -603,22 +556,15 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
     {
       LogSink _x2c_return_value_8 = result = sink;
       {
-  int _x2c_cleanup_prev_13 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_5);
+        x2c_cleanup_leave(& _x2c_defer_record_5);
+        return _x2c_return_value_8;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_13;
-  return _x2c_return_value_8;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_14 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_5);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_14;
 }
 }
 
@@ -637,22 +583,15 @@ LogSink Logger_add_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var da
     {
       LogSink _x2c_return_value_9 = _new_sink(logger, emit, flush, data, NULL);
       {
-  int _x2c_cleanup_prev_15 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_6);
+        x2c_cleanup_leave(& _x2c_defer_record_6);
+        return _x2c_return_value_9;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_15;
-  return _x2c_return_value_9;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_16 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_6);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_16;
 }
 }
 
@@ -671,36 +610,25 @@ int Logger_remove_sink(Logger logger, LogSink sink){
     if(! logger || ! sink || sink -> logger != logger || ! sink -> emit){
       int _x2c_return_value_10 = 0;
       {
-  int _x2c_cleanup_prev_17 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+        x2c_cleanup_leave(& _x2c_defer_record_7);
+        return _x2c_return_value_10;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_17;
-  return _x2c_return_value_10;
-
-}
     }
     _unlink_sink(logger, sink);
     _retire_sink(sink);
     {
       int _x2c_return_value_11 = 1;
       {
-  int _x2c_cleanup_prev_18 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+        x2c_cleanup_leave(& _x2c_defer_record_7);
+        return _x2c_return_value_11;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_18;
-  return _x2c_return_value_11;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_19 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_7);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_19;
 }
 }
 
@@ -717,14 +645,10 @@ void Logger_clear_sinks(Logger logger){
   {
     _require_quiescent(logger, _2);
     if(! logger){
-  int _x2c_cleanup_prev_20 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_8);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_20;
-  return;
-
-} LogSink sink = logger -> first_sink;
+      x2c_cleanup_leave(& _x2c_defer_record_8);
+      return;
+    }
+    LogSink sink = logger -> first_sink;
     logger -> first_sink = logger -> last_sink = NULL;
     while(sink){
       LogSink next = sink -> next;
@@ -734,10 +658,7 @@ void Logger_clear_sinks(Logger logger){
 
   }
 
-  int _x2c_cleanup_prev_21 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_8);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_21;
 }
 }
 
@@ -753,14 +674,10 @@ void Logger_flush(Logger logger){
   x2c_cleanup_push(&_x2c_defer_record_9);
   {
     if(! logger){
-  int _x2c_cleanup_prev_22 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_9);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_22;
-  return;
-
-}{
+      x2c_cleanup_leave(& _x2c_defer_record_9);
+      return;
+    }
+    {
       int * _x2c_macro_address_0 = & logger -> emission_depth;
       int _x2c_macro_previous_0 = * _x2c_macro_address_0;
       {
@@ -776,19 +693,13 @@ void Logger_flush(Logger logger){
         for(LogSink sink = logger -> first_sink;  sink;  sink = sink -> next) if(sink -> flush) sink -> flush(logger, sink -> data);
       }
 
-  int _x2c_cleanup_prev_23 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_10);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_23;
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_24 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_9);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_24;
 }
 }
 
@@ -832,12 +743,14 @@ static const char * _level_color(Symbol level){
   return _color_string;
 }
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 int Var_is(Var, Symbol);
 
 Symbol Var_kind(Var);
 
 static const char * _value_color(Var value){
-  if(Var_is(value, 1318210446)) return _color_string;
+  if(Var_is_row(value, 11, 7, 1)) return _color_string;
   if(Var_is(value, 1328354264)) return _color_symbol;
   Symbol kind = Var_kind(value);
   if(kind == 20309162340 || kind == 439096724366) return _color_literal;
@@ -848,7 +761,7 @@ Buffer Var_write_str(Var, Buffer);
 
 static Buffer _write_field_key(Buffer out, Var key){
   if(Var_is(key, 1328354264)) return _write_symbol(out, Var_symbol(key));
-  if(Var_is(key, 1318210446)) return Buffer_write(out, Var_pointer(key));
+  if(Var_is_row(key, 11, 7, 1)) return Buffer_write(out, Var_pointer(key));
   return Var_write_str(key, out);
 }
 
@@ -891,11 +804,7 @@ Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer Buffer_write_char(Buffer, char);
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
@@ -929,13 +838,11 @@ static void _render_text(Buffer out, const LogEvent * event, int color){
   }
   {
     List field;
-    Iter _x2c_macro_iterator_0 = List_iter(event -> fields, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      field = Var_list(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = event -> fields;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      field = Var_list(_x2c_macro_cursor_output_0);
       {
         if(! List_truth(field)) continue;
         Buffer_write(out, " ");
@@ -993,17 +900,11 @@ static void _emit_text(Logger logger, const LogEvent * event, Var data){
         appended = 1;
       }
 
-  int _x2c_cleanup_prev_25 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_12);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_25;
 }
     }
 
-  int _x2c_cleanup_prev_26 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_11);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_26;
 }
   }
   Buffer * buffers = context -> scratch -> bytes;
@@ -1029,10 +930,7 @@ static void _emit_text(Logger logger, const LogEvent * event, Var data){
 
     }
 
-  int _x2c_cleanup_prev_27 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_13);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_27;
 }
   }
 
@@ -1098,32 +996,22 @@ static LogSink _add_text_sink(Logger logger, File file, int color, int flush_eac
         context -> scratch = Block_new(sizeof(Buffer));
       }
 
-  int _x2c_cleanup_prev_28 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_15);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_28;
 }
     }
     handed_off = 1;
     {
       LogSink _x2c_return_value_12 = _new_sink(logger, _emit_text, _flush_text, data, _destroy_text);
       {
-  int _x2c_cleanup_prev_29 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_14);
+        x2c_cleanup_leave(& _x2c_defer_record_14);
+        return _x2c_return_value_12;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_29;
-  return _x2c_return_value_12;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_30 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_14);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_30;
 }
 }
 
@@ -1141,22 +1029,15 @@ LogSink Logger_add_stderr_sink(Logger logger){
     {
       LogSink _x2c_return_value_13 = _add_text_sink(logger, stderr, isatty(fileno(stderr)), 1);
       {
-  int _x2c_cleanup_prev_31 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_16);
+        x2c_cleanup_leave(& _x2c_defer_record_16);
+        return _x2c_return_value_13;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_31;
-  return _x2c_return_value_13;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_32 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_16);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_32;
 }
 }
 
@@ -1174,22 +1055,15 @@ LogSink Logger_add_file_sink(Logger logger, File file){
     {
       LogSink _x2c_return_value_14 = _add_text_sink(logger, file, 0, 0);
       {
-  int _x2c_cleanup_prev_33 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_17);
+        x2c_cleanup_leave(& _x2c_defer_record_17);
+        return _x2c_return_value_14;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_33;
-  return _x2c_return_value_14;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_34 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_17);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_34;
 }
 }
 
@@ -1247,10 +1121,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value){
 
         }
 
-  int _x2c_cleanup_prev_35 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_18);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_35;
 }
       }
 
@@ -1259,7 +1130,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value){
     return copy;
   }
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is(value, 1318210446)){
+  if(Var_is_row(value, 11, 7, 1)){
     if(_memory_pool_owns(l -> pool, value)) return value;
     String string = Var_string(value);
     return String_var(String_new_in(l -> pool, string, String_len(string)));
@@ -1270,7 +1141,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value){
     String copy = String_new_in(l -> pool, spelling, String_len(spelling));
     return Var_new(826970, copy);
   }
-  if(Var_is(value, 806120)){
+  if(Var_is_row(value, 9, 7, 4)){
     List list = Var_list(value);
     if(! List_truth(list) || _memory_pool_owns(l -> pool, value)) return value;
     Var head = _memory_retain_value(l, list -> car);
@@ -1330,14 +1201,10 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
     if(! logger || ! destination){
       LogSink _x2c_return_value_15 = NULL;
       {
-  int _x2c_cleanup_prev_36 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_19);
+        x2c_cleanup_leave(& _x2c_defer_record_19);
+        return _x2c_return_value_15;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_36;
-  return _x2c_return_value_15;
-
-}
     }
     LogMemorySink context = Scope_calloc_in(& logger -> storage, 1, sizeof(struct LogMemorySink));
     context -> destination = destination;
@@ -1361,10 +1228,7 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
 
         }
 
-  int _x2c_cleanup_prev_37 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_20);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_37;
 }
       }
 
@@ -1372,22 +1236,15 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
     {
       LogSink _x2c_return_value_16 = _new_sink(logger, _emit_memory, NULL, Var_new(3683441, context), _destroy_memory);
       {
-  int _x2c_cleanup_prev_38 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_19);
+        x2c_cleanup_leave(& _x2c_defer_record_19);
+        return _x2c_return_value_16;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_38;
-  return _x2c_return_value_16;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_39 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_19);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_39;
 }
 }
 
@@ -1409,14 +1266,10 @@ Logger Logger_new(Symbol min_level){
     if(_level_priority(min_level) < 0){
       Logger _x2c_return_value_17 = NULL;
       {
-  int _x2c_cleanup_prev_40 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_21);
+        x2c_cleanup_leave(& _x2c_defer_record_21);
+        return _x2c_return_value_17;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_40;
-  return _x2c_return_value_17;
-
-}
     }
     Logger logger = Scope_calloc(1, sizeof(struct Logger));
     logger -> min_level = min_level;
@@ -1426,22 +1279,15 @@ Logger Logger_new(Symbol min_level){
     {
       Logger _x2c_return_value_18 = logger;
       {
-  int _x2c_cleanup_prev_41 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_21);
+        x2c_cleanup_leave(& _x2c_defer_record_21);
+        return _x2c_return_value_18;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_41;
-  return _x2c_return_value_18;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_42 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_21);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_42;
 }
 }
 
@@ -1457,14 +1303,10 @@ void Logger_free(Logger logger){
   x2c_cleanup_push(&_x2c_defer_record_22);
   {
     if(! logger){
-  int _x2c_cleanup_prev_43 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_22);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_43;
-  return;
-
-} _require_quiescent(logger, _3);
+      x2c_cleanup_leave(& _x2c_defer_record_22);
+      return;
+    }
+    _require_quiescent(logger, _3);
     Logger_flush(logger);
     Logger_clear_sinks(logger);
     if(global_logger == logger) global_logger = NULL;
@@ -1474,10 +1316,7 @@ void Logger_free(Logger logger){
     Scope_free(logger);
   }
 
-  int _x2c_cleanup_prev_44 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_22);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_44;
 }
 }
 
@@ -1493,14 +1332,10 @@ void Logger_log(Logger logger, Symbol level, Symbol category, List fields){
   x2c_cleanup_push(&_x2c_defer_record_23);
   {
     if(! _should_log(logger, level, category)){
-  int _x2c_cleanup_prev_45 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_23);
-
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_45;
-  return;
-
-} long long wall_time, monotonic;
+      x2c_cleanup_leave(& _x2c_defer_record_23);
+      return;
+    }
+    long long wall_time, monotonic;
     _capture_time(& wall_time, & monotonic);
     if(logger -> sequence == 0) logger -> origin_monotonic_us = monotonic;
     LogEvent event ={
@@ -1528,19 +1363,13 @@ void Logger_log(Logger logger, Symbol level, Symbol category, List fields){
 
       }
 
-  int _x2c_cleanup_prev_46 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_24);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_46;
 }
     }
 
   }
 
-  int _x2c_cleanup_prev_47 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_23);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_47;
 }
 }
 
@@ -1590,22 +1419,15 @@ Logger log_set_global_logger(Logger logger){
     {
       Logger _x2c_return_value_19 = previous;
       {
-  int _x2c_cleanup_prev_48 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_25);
+        x2c_cleanup_leave(& _x2c_defer_record_25);
+        return _x2c_return_value_19;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_48;
-  return _x2c_return_value_19;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_49 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_25);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_49;
 }
 }
 
@@ -1623,22 +1445,15 @@ Logger log_get_global_logger(void){
     {
       Logger _x2c_return_value_20 = global_logger;
       {
-  int _x2c_cleanup_prev_50 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_26);
+        x2c_cleanup_leave(& _x2c_defer_record_26);
+        return _x2c_return_value_20;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_50;
-  return _x2c_return_value_20;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_51 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_26);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_51;
 }
 }
 
@@ -1656,10 +1471,7 @@ void log_event(Symbol level, Symbol category, List fields){
     Logger_log(global_logger, level, category, fields);
   }
 
-  int _x2c_cleanup_prev_52 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_27);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_52;
 }
 }
 
@@ -1717,76 +1529,53 @@ Symbol Logger_error_handler(List errors, Var data){
     if(! logger || ! List_truth(errors)){
       Symbol _x2c_return_value_21 = 285842436424;
       {
-  int _x2c_cleanup_prev_53 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+        x2c_cleanup_leave(& _x2c_defer_record_28);
+        return _x2c_return_value_21;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_53;
-  return _x2c_return_value_21;
-
-}
     }
     Var newest = List_last(errors);
-    if(! Var_is(newest, 806120)){
+    if(! Var_is_row(newest, 9, 7, 4)){
       Symbol _x2c_return_value_22 = 285842436424;
       {
-  int _x2c_cleanup_prev_54 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+        x2c_cleanup_leave(& _x2c_defer_record_28);
+        return _x2c_return_value_22;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_54;
-  return _x2c_return_value_22;
-
-}
     }
     List entry = Var_list(newest);
     Var code = List_assoc(entry, Symbol_var(227594));
     if(! Var_is(code, 1328354264)){
       Symbol _x2c_return_value_23 = 285842436424;
       {
-  int _x2c_cleanup_prev_55 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+        x2c_cleanup_leave(& _x2c_defer_record_28);
+        return _x2c_return_value_23;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_55;
-  return _x2c_return_value_23;
-
-}
     }
     Symbol policy = Error_policy_get(Var_symbol(code));
     if(policy != 2260136 && policy != 25550){
       Symbol _x2c_return_value_24 = 285842436424;
       {
-  int _x2c_cleanup_prev_56 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+        x2c_cleanup_leave(& _x2c_defer_record_28);
+        return _x2c_return_value_24;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_56;
-  return _x2c_return_value_24;
-
-}
     }
     Logger_log(logger, 11703268, 392730881588392, entry);
     Error_note_rendered();
     {
       Symbol _x2c_return_value_25 = 285842436424;
       {
-  int _x2c_cleanup_prev_57 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = 1;
-  x2c_cleanup_leave(& _x2c_defer_record_28);
+        x2c_cleanup_leave(& _x2c_defer_record_28);
+        return _x2c_return_value_25;
+      }
 
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_57;
-  return _x2c_return_value_25;
-
-}
     }
 
   }
 
-  int _x2c_cleanup_prev_58 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_28);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_58;
 }
 }
 
@@ -1816,13 +1605,11 @@ void Logger_shutdown(void){
         List pending = Error_since(logger_error_mark);
         {
           List entry;
-          Iter _x2c_macro_iterator_1 = List_iter(pending, &(struct Iter){
-            int_var(0)
-          }
-          );
-          Var _x2c_macro_item_1;
-          while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-            entry = Var_list(_x2c_macro_item_1);
+          List _x2c_macro_object_1 = pending;
+          List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+          Var _x2c_macro_cursor_output_1;
+          while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+            entry = Var_list(_x2c_macro_cursor_output_1);
             Logger_log(active, 11703268, 392730881588392, entry);
           }
 
@@ -1838,10 +1625,7 @@ void Logger_shutdown(void){
     default_logger = NULL;
   }
 
-  int _x2c_cleanup_prev_59 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_29);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_59;
 }
 }
 
@@ -1879,10 +1663,7 @@ void Logger_initialize(void){
     logger_error_handler = Error_push(Logger_error_handler, ((void) 0, Void));
   }
 
-  int _x2c_cleanup_prev_60 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_30);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_60;
 } Scope_shutdown_hook(Logger_shutdown);
 }
 

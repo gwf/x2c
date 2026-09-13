@@ -25,7 +25,7 @@ Metadata precedes ordinary compiler arguments after `--`; source snapshots
 and the JSON response use separate files. Returns zero for a written
 response and two for a failed request or unsupported configuration.
 
-Source: `src/editor.x:188`
+Source: `src/editor.x:174`
 
 ## Design notes
 

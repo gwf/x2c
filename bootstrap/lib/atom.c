@@ -194,11 +194,7 @@ void Atom_initialize(void){
   initialized = 1;
 }
 
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int String_try_next(String, int *, int *);
 
 static Symbol _exact_7bit(String spelling){
   int length = String_len(spelling);
@@ -206,13 +202,11 @@ static Symbol _exact_7bit(String spelling){
   Symbol result = 0;
   {
     int byte;
-    Iter _x2c_macro_iterator_0 = String_iter(spelling, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      byte = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
+    String _x2c_macro_object_0 = spelling;
+    int _x2c_macro_cursor_0 = 0;
+    int _x2c_macro_cursor_output_0;
+    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      byte = _x2c_macro_cursor_output_0;
       {
         unsigned char ch = byte;
         if(ch > 0x7f) return 0;

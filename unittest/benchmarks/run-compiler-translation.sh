@@ -24,7 +24,6 @@ measure() {
   local mode=$2
   local compiler="$ROOT/builds/$stage/x2c"
   local -a flags=()
-  if [[ $mode == live ]]; then flags+=(--live-symbols); fi
   local output="$BUILD/stage-$stage-$mode"
 
   rm -rf "$output"
@@ -61,8 +60,4 @@ for stage in 0 1; do
   compiler="$ROOT/builds/$stage/x2c"
   [[ -x $compiler ]] || continue
   measure "$stage" default
-  if { "$compiler" translate --help 2>&1 || true; } |
-      grep -q -- '--live-symbols'; then
-    measure "$stage" live
-  fi
 done

@@ -100,6 +100,28 @@ static void report_failure(
   Stderr.printf(" (%s:%d)\n", file, line);
 }
 
+/*  The <ctxprobe> descriptor backs the export probes in test-context.x and
+    test-thread.x. Registration freezes permanently once any suite starts a
+    worker, so it happens here, before the first suite runs, and stays
+    available whichever suites a run selects. */
+static Var _context_probe_export(Var value, Context source) {
+  ContextProbe probe = value;
+  if (probe.fail_at && probe.exports == probe.fail_at)
+    raise %(thread-exp);
+  probe.exports++;
+  probe.value = source.export_nested(probe.value);
+  source.move_allocation(probe);
+  return value;
+}
+
+/** Registers the shared `<ctxprobe>` descriptor. Returns what
+    `x2c_try_register_descriptor` returns; a repeat call selects the same row.
+*/
+int Test_register_context_probe(void) {
+  VarMethods methods = { .export_context = _context_probe_export };
+  return x2c_try_register_descriptor(%"ctxprobe", methods);
+}
+
 void TestHarness_begin(void) {
   stats.run = 0;
   stats.passed = 0;
@@ -110,6 +132,7 @@ void TestHarness_begin(void) {
   current_test = NULL;
   suite_name_count = 0;
   suite_names = NULL;
+  Test_register_context_probe();
 }
 
 // Consume matched argv slots so finish can report every unknown suite.

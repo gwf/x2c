@@ -236,14 +236,14 @@ unsigned Var_unsigned(Var x){
 long Var_long(Var x){
   if(! _init_guard_) _file_init_();
   if(Var_is(x, 818062)) return Var_long_value(x);
-  if(Var_is(x, 3454065) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return(long) Var_integer(x);
+  if(Var_is_row(x, 32769, 0, 0) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return(long) Var_integer(x);
   return Var_long_value(Var_convert(x, 818062));
 }
 
 ulong Var_ulong(Var x){
   if(! _init_guard_) _file_init_();
   if(Var_is(x, 44858254)) return Var_ulong_value(x);
-  if(Var_is(x, 3847281) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(ulong) Var_integer(x);
+  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(ulong) Var_integer(x);
   return Var_ulong_value(Var_convert(x, 44858254));
 }
 
@@ -259,7 +259,7 @@ unsigned long long Var_ulong_long(Var x){
   if(! _init_guard_) _file_init_();
   if(Var_is(x, 1435270030)) return Var_ulong_long_value(x);
   if(Var_is(x, 44858254)) return(unsigned long long) Var_ulong_value(x);
-  if(Var_is(x, 3847281) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(unsigned long long) Var_integer(x);
+  if(Var_is_row(x, 32768, 0, 0) || Var_is(x, 3847013) || Var_is(x, 3846509) || Var_is(x, 30065)) return(unsigned long long) Var_integer(x);
   return Var_ulong_long_value(Var_convert(x, 1435270030));
 }
 
@@ -342,7 +342,7 @@ void x2c_initialize(void){
   if(! _init_guard_) _file_init_();
   void Atom_initialize(void), File_initialize(void);
   void List_initialize(void), Scope_initialize(void);
-  void MatchCache_initialize(void);
+  void x2c_match_initialize(void);
   void String_initialize(void), Logger_initialize(void);
   Scope Scope_new(void), * Scope_top(void);
   static int initialized = 0;
@@ -354,7 +354,7 @@ void x2c_initialize(void){
   String_initialize();
   List_initialize();
   Atom_initialize();
-  MatchCache_initialize();
+  x2c_match_initialize();
   File_initialize();
   Logger_initialize();
 }
@@ -362,7 +362,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();
   if(length < 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 860};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 818};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))), Symbol_var(816725264), int_var(length));
     __builtin_unreachable();
   }
@@ -374,7 +374,7 @@ int x2c_normalize_index(int index, int length){
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();
   if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 880};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 838};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));
     __builtin_unreachable();
   }

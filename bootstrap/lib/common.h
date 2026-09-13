@@ -88,11 +88,6 @@ typedef struct X2CErrorSite{
   const char * file, * function;  int line;
 }
 X2CErrorSite;
-#define X2C_CLEANUP_EXIT_NORMAL   0
-#define X2C_CLEANUP_EXIT_RETURN   1
-#define X2C_CLEANUP_EXIT_BREAK    2
-#define X2C_CLEANUP_EXIT_CONTINUE 3
-#define X2C_CLEANUP_EXIT_GOTO     4
 #define VAR_NULL_BITS 0ul
 #define VAR_VOID_BITS 0xFFFFFFFFFFFFFFFFul
 #define VAR_I8_PREFIX  0x8002000200000000ul
@@ -112,7 +107,6 @@ X2CErrorSite;
 #define VAR_F64_NEG_MAX_RAW    0xFFEFFFFFFFFFFFFFul
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 void x2c_scope_thread_release(void);
-void x2c_match_thread_release(void);
 void x2c_static_thread_release(void);
 void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);
@@ -136,7 +130,7 @@ void x2c_pool_thread_start(void);
 void x2c_descriptor_thread_start_begin(void);
 void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
-extern _Thread_local int x2c_cleanup_exit_kind, x2c_error_runtime_ready;
+extern _Thread_local int x2c_error_runtime_ready;
 extern File Stdin, Stdout, Stderr;
 extern Var Void;
 extern List nil;
@@ -645,40 +639,44 @@ static inline String long_repr(long l){
   return Var_repr(long_var(l));
 }
 
-static inline Array Var_array(Var x){
-  if(x.u64 >> 48 != 0x0008 ||(x.u64 & 0x7) != 0x0) return NULL;  return(Array)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline int Var_is_row(Var value, unsigned top, unsigned long mask, unsigned long bottom){
+  return value.u64 >> 48 == top &&(value.u64 & mask) == bottom;
 }
 
-static inline Block Var_block(Var x){
-  if(x.u64 >> 48 != 0x0008 ||(x.u64 & 0x7) != 0x1) return NULL;  return(Block)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Array Var_array(Var _x2c_macro_value_0){
+  if(_x2c_macro_value_0.u64 >> 48 != 8 ||(_x2c_macro_value_0.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Buffer Var_buffer(Var x){
-  if(x.u64 >> 48 != 0x0008 ||(x.u64 & 0x7) != 0x2) return NULL;  return(Buffer)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Block Var_block(Var _x2c_macro_value_1){
+  if(_x2c_macro_value_1.u64 >> 48 != 8 ||(_x2c_macro_value_1.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_macro_value_1.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Bytes Var_bytes(Var x){
-  if(x.u64 >> 48 != 0x0008 ||(x.u64 & 0x7) != 0x3) return NULL;  return(Bytes)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Buffer Var_buffer(Var _x2c_macro_value_2){
+  if(_x2c_macro_value_2.u64 >> 48 != 8 ||(_x2c_macro_value_2.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_macro_value_2.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline File Var_file(Var x){
-  if(x.u64 >> 48 != 0x0009 ||(x.u64 & 0x7) != 0x0) return NULL;  return(File)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Bytes Var_bytes(Var _x2c_macro_value_3){
+  if(_x2c_macro_value_3.u64 >> 48 != 8 ||(_x2c_macro_value_3.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_macro_value_3.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline List Var_list(Var x){
-  if(x.u64 >> 48 != 0x0009 ||(x.u64 & 0x7) != 0x4) return NULL;  return(List)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline File Var_file(Var _x2c_macro_value_4){
+  if(_x2c_macro_value_4.u64 >> 48 != 9 ||(_x2c_macro_value_4.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_macro_value_4.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Iter Var_as_iter(Var x){
-  if(x.u64 >> 48 != 0x0009 ||(x.u64 & 0x7) != 0x2) return NULL;  return(Iter)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Iter Var_as_iter(Var _x2c_macro_value_5){
+  if(_x2c_macro_value_5.u64 >> 48 != 9 ||(_x2c_macro_value_5.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_macro_value_5.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Map Var_map(Var x){
-  if(x.u64 >> 48 != 0x0009 ||(x.u64 & 0x7) != 0x6) return NULL;  return(Map)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline List Var_list(Var _x2c_macro_value_6){
+  if(_x2c_macro_value_6.u64 >> 48 != 9 ||(_x2c_macro_value_6.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_macro_value_6.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline String Var_string(Var x){
-  if(x.u64 >> 48 != 0x000B ||(x.u64 & 0x7) != 0x1) return NULL;  return(String)(x.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Map Var_map(Var _x2c_macro_value_7){
+  if(_x2c_macro_value_7.u64 >> 48 != 9 ||(_x2c_macro_value_7.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline String Var_string(Var _x2c_macro_value_8){
+  if(_x2c_macro_value_8.u64 >> 48 != 11 ||(_x2c_macro_value_8.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
 static inline Symbol Var_symbol(Var x){

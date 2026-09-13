@@ -1,8 +1,5 @@
 // Optional path-level filesystem capability for x2c Lisp.
 // Load etc/init.xlisp first.
 
-(def read-file
-  (bind "lisp_read_file" '((func (("String"))) "Var")))
-(def write-file
-  (bind "lisp_write_file"
-    '((func (("String") ("String"))) "Var")))
+(def read-file (bind "lisp_read_file" nil))
+(def write-file (bind "lisp_write_file" nil))

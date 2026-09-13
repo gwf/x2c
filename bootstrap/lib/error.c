@@ -478,6 +478,8 @@ int Var_is_integer(Var);
 
 int Var_is_floating(Var);
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 String Var_string(Var);
 
 String String_new_in(Pool, const char *, int);
@@ -506,7 +508,7 @@ static Var _copy_value(ErrorRegion * region, Var value){
     return owned;
   }
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is(value, 1318210446)){
+  if(Var_is_row(value, 11, 7, 1)){
     String source = Var_string(value);
     String owned = String_new_in(region -> strings, source, String_len(source));
     return String_var(owned);
@@ -516,7 +518,7 @@ static Var _copy_value(ErrorRegion * region, Var value){
     String owned = String_new_in(region -> strings, source, String_len(source));
     return Var_new(826970, owned);
   }
-  if(Var_is(value, 806120)){
+  if(Var_is_row(value, 9, 7, 4)){
     List source = Var_list(value);
     Var head = _copy_value(region, List_car(source));
     List tail = Var_list(_copy_value(region, List_var(List_cdr(source))));
@@ -644,7 +646,7 @@ static Var _snapshot_value(Var v){
     return copy;
   }
   if(Var_is_integer(v) || Var_is_floating(v)) return v;
-  if(Var_is(v, 1318210446)){
+  if(Var_is_row(v, 11, 7, 1)){
     String source = Var_string(v), copy = String_new_len(source, String_len(source));
     String_try_own(copy);
     return String_var(copy);
@@ -655,7 +657,7 @@ static Var _snapshot_value(Var v){
     if(Var_is(copy, 826970)) String_try_own(Atom_str(copy));
     return copy;
   }
-  if(Var_is(v, 806120)){
+  if(Var_is_row(v, 9, 7, 4)){
     List source = Var_list(v);
     Var head = _snapshot_value(List_car(source));
     List tail = Var_list(_snapshot_value(List_var(List_cdr(source)))), copy = cons(head, tail);
@@ -992,10 +994,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
           disposition = h -> fn(slice, h -> data);
         }
 
-  int _x2c_cleanup_prev_0 = x2c_cleanup_exit_kind;
-  x2c_cleanup_exit_kind = X2C_CLEANUP_EXIT_NORMAL;
   x2c_cleanup_leave(&_x2c_defer_record_0);
-  x2c_cleanup_exit_kind = _x2c_cleanup_prev_0;
 }
       }
 

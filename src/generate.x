@@ -19,7 +19,6 @@
 
 #include "cache.x"
 #include "format.x"
-#include "transform.x"
 #include "emit.x"
 #include "utils.x"
 
@@ -193,12 +192,11 @@ static inline int _has_file_init_blocks(Compiler compiler) =>
          compiler.mid_inits.len() ||
          compiler.fini_fn;
 
+/* `Compiler.transform` owns the early-declaration queue and appends its
+   drained declarations after the unit, so the queue is empty here. */
 static List _prepend_init_prelude(
-  Compiler compiler, List result, List initGuard, List initFunc) {
+  List result, List initGuard, List initFunc) {
   result = cons(initGuard, result);
-  if (compiler.early_decls.len())
-    foreach (Var declaration, compiler.early_decls)
-      result = cons(declaration, result);
   if (initFunc) result = cons(initFunc, result);
   return result;
 }
@@ -292,7 +290,7 @@ static List _file_init(Compiler c, List source) {
                (block *statements))): {
         int function_identity = identity;
         if (!inserted) {
-          result = _prepend_init_prelude(c, result, initGuard, initFunc);
+          result = _prepend_init_prelude(result, initGuard, initFunc);
           inserted = 1;
         }
         String name = spelling;
@@ -320,7 +318,7 @@ static List _file_init(Compiler c, List source) {
      constructor is then the only thing that runs the initializers the loop
      above dropped, so it goes after the declarations it assigns. */
   if (!inserted)
-    result = _prepend_init_prelude(c, result, initGuard, initFunc);
+    result = _prepend_init_prelude(result, initGuard, initFunc);
 
   return result.reverse();
 }
@@ -881,13 +879,12 @@ static List _modify_main(Compiler compiler, List source) {
     `ast` must be the normalized result of `transform_ast` for this compiler;
     its filename, symbols, binding facts, cache keys, and initialization state
     must still describe that same unit. `dir` must already exist. Generation
-    partitions the AST, materializes caches and once-only initialization,
-    performs the generation-phase source transform, and writes or replaces
-    `<dir>/<source-stem>.h` and `.c`. It appends generated bindings and
-    initialization work to the compiler and is not idempotent. Both files
-    are closed before individual renames replace their destinations; failure
-    can leave only the header replaced, but never a partial file. Failures
-    are reported as `emit` diagnostics.
+    partitions the AST, materializes caches and once-only initialization, and
+    writes or replaces `<dir>/<source-stem>.h` and `.c`. It appends generated
+    bindings and initialization work to the compiler and is not idempotent.
+    Both files are closed before individual renames replace their
+    destinations; failure can leave only the header replaced, but never a
+    partial file. Failures are reported as `emit` diagnostics.
 */
 void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
@@ -912,7 +909,6 @@ void generate_code(Compiler c, List ast, String dir) {
   source = _vertical_spacing(source);
   source = _primary_include(c, source);
   source = _modify_main(c, source);
-  source = c.transform(source);
   source = c.emit(source);
 
   String basename =
