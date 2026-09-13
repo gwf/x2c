@@ -112,6 +112,8 @@ verify: build						## Build and run unit test suites
 	$(PARALLEL_MAKE) -C unittest test-all
 	$(PARALLEL_MAKE) -C unittest compiler-fixtures scope-probes \
 		error-probes varops-probes
+	# thread_suite alone proves suites do not rely on earlier registration.
+	(cd ./unittest && ./test-all thread_suite)
 	(cd ./unittest && ./test-all)
 
 examples: build						## Check curated examples

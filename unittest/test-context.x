@@ -5,16 +5,6 @@
 #include "test-support.x"
 #include <string.h>
 
-static Var _context_probe_export(Var value, Context source) {
-  ContextProbe probe = value;
-  if (probe.fail_at && probe.exports == probe.fail_at)
-    raise %(thread-exp);
-  probe.exports++;
-  probe.value = source.export_nested(probe.value);
-  source.move_allocation(probe);
-  return value;
-}
-
 static void context_open_close_restores_scope(void) {
   ScopeStats before = Scope.stats();
   Context context = Context.open_named("test Context");
@@ -142,8 +132,7 @@ static void context_rehashes_exported_map_keys(void) {
 }
 
 static void context_exports_registered_object(void) {
-  VarMethods methods = { .export_context = _context_probe_export };
-  EXPECT_TRUE(x2c_try_register_descriptor(%"ctxprobe", methods));
+  EXPECT_TRUE(Test_register_context_probe());
 
   Context outer = Context.open_isolated_named("custom destination");
   Context inner = Context.open_isolated_named("custom source");
