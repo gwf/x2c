@@ -1,0 +1,19 @@
+; Arithmetic needs no numeric primitive: n is a list of n copies of t.
+(set 'zero nil)
+(set 'next (lambda (n) (cons t n)))
+(set 'one (next zero))
+(set 'two (next one))
+(set 'three (next two))
+(set 'four (next three))
+
+(set 'add (lambda (a b) (if a (cons t (add (cdr a) b)) b)))
+(set 'mul (lambda (a b) (if a (add b (mul (cdr a) b)) zero)))
+(set 'fact (lambda (n) (if n (mul n (fact (cdr n))) one)))
+
+; 4! is twenty-four t atoms.
+(fact four)
+
+; The same cons operation builds symbolic results.
+(set 'map (lambda (f xs)
+  (if xs (cons (f (car xs)) (map f (cdr xs))) nil)))
+(map (lambda (x) (cons x (cons x nil))) '(red green blue))

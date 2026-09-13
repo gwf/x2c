@@ -52,3 +52,4 @@ programs/mandelbrot|showcase|run||expected/parallel-mandelbrot.stdout|Deep Mande
 tours/hello-worlds|showcase|run||expected/hello-worlds.stdout|Twelve idiomatic paths to Hello, World.
 tours/language|showcase|run||expected/docs-tour.stdout|Executable fifteen-minute language tour.
 programs/literate-lisp|showcase|run|../../../examples/data/reference-lisp/showcase.xlisp|expected/reference-lisp.stdout|Independent recursive Lisp with symbolic differentiation.
+programs/stutter|external-input|build||-|Book-compatible eight-primitive Lisp; see programs/stutter.md and optional check-stutter.py.
