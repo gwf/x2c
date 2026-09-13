@@ -77,12 +77,12 @@ typedef struct Interp {                                                         
 
 /* The x2c compile-time macro $fail adds the operation pair to raise
    syntax. The other error fields remain explicit at each call site.
+   Its template inserts captured expressions into an x2c raise statement.
+   Each captured expression occurs once in the expanded statement.
+   No Lisp evaluation is needed to write this syntax template.
 */
 macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              // Expr parameters capture syntax.
-  $(quasiquote                                                                  // Quasiquote builds the raise AST.
-    (raise ,$cause                                                              // Unquote inserts captured syntax.
-      (args (literal ("Symbol") "operation" operation)                          // AST for a Symbol literal.
-            ,$op ,@$fields)))                                                   // ,@ splices syntax at compile time.
+  raise %($cause (operation ${$op}) $fields...);                                  // Template holes and sequence splice.
 }
 
 /* Evaluation: the language in three rules ----------------------------------------------------------------------------

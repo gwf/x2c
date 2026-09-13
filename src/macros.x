@@ -1763,6 +1763,11 @@ static List _parse_hole(Compiler c, Symbol role) {
       token, NULL);
   }
   int sequence = c.test(<...>);
+  if (!sequence && role == <argument> && c.peek(0) == <lit-atom> &&
+      c.token.text == "...") {
+    c.next();
+    sequence = 1;
+  }
   if (sequence != hole.assoc(<sequence>).int()) {
     String spelling = name.str();
     String message = sequence

@@ -157,6 +157,20 @@ macro Expression $project.call(
 ~}
 ```
 
+A `raise` template can also insert expression holes for the error code and
+field keys. A sequence hole between field pairs supplies alternating key and
+value expressions, in source order:
+
+```x2c
+macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {
+  raise %($cause (operation ${$op}) $fields...);
+}
+```
+
+Here `${$op}` inserts the captured x2c expression into the literal payload.
+The holes are substituted before the ordinary raise expression binding and
+lowering; they do not evaluate Lisp code.
+
 Typed holes tell the reader whether an argument is an expression, binding,
 type, declaration, or sequence, without requiring knowledge of the AST.
 

@@ -503,6 +503,9 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
 
 static List _parse_error_symbol(
   Compiler compiler, String owner, String role, String hint) {
+  List slot = owner == "raise"
+    ? compiler.try_parse_macro_slot(<expression>) : NULL;
+  if (slot) return slot;
   Token token = compiler.token;
   if (compiler.peek(0) != <lit-atom>)
     compiler.report_error(
@@ -528,6 +531,11 @@ List Compiler.parse_raise_literal(Compiler c) {
 
   Array args = %[];
   while (c.peek(0) != <)>) {
+    List slot = c.try_parse_macro_slot(<argument>);
+    if (slot) {
+      args.push(slot);
+      continue;
+    }
     Token pair_token = c.token;
     c.expect(
       <(>);
