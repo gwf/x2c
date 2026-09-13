@@ -40,7 +40,7 @@
 // it from the compiler's symbol table so no signature is written twice.
 (defun lisp.native.name-signature (name)
   (lisp.native.function-signature
-    (_x2c.function.native-type (_x2c.foreach.function-reference name))))
+    (_x2c.function.native-type (_x2c.function.reference name))))
 
 (def lisp.binding.rows nil)
 (def lisp.binding.sealed nil)

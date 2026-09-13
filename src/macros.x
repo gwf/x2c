@@ -896,11 +896,6 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
-    /* The checked-in bootstrap still spells this name; the transition round
-       that moves every caller removes it. */
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.function-reference",
-      _sdk_function_reference);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.native-type",
       _sdk_native_function_type);

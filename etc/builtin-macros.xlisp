@@ -21,8 +21,8 @@
 (defun x2c._foreach.cursor-spec (collection-type) (if
   (not (x2c._foreach.atom-type? collection-type)) nil
   (let* ((owner (str (car collection-type)))
-         (function (_x2c.foreach.function-reference
-           (string-append owner "_try_next"))))
+         (function (_x2c.function.reference
+                     (string-append owner "_try_next"))))
     (if (not function) nil
       (let* ((type (x2c.syntax.type function))
              (parameters (_x2c.type.parameters type))
@@ -109,8 +109,8 @@
                     (str (car collection-type)) nil))
          (enumerate (if (and (= (length targets) 2) owner
                              (not (equal? collection-type '("Iter"))))
-           (_x2c.foreach.function-reference
-             (string-append owner "_enumerate")) nil))
+           (_x2c.function.reference (string-append owner "_enumerate"))
+           nil))
          (constructor (if enumerate enumerate converter))
          (iterator-expression
            (x2c._foreach.expr '("Iter") iterator))
@@ -119,7 +119,7 @@
            (if constructor
                (x2c._foreach.iter-call constructor collection)
                collection)))
-         (next (_x2c.foreach.function-reference "Iter_try_next"))
+         (next (_x2c.function.reference "Iter_try_next"))
          (condition (x2c.expr.call next iterator-expression
            (x2c._foreach.address item-expression)))
          (assignments (if (= (length targets) 1)
@@ -141,7 +141,7 @@
          (converter (cond
            (direct nil)
            ((equal? collection-type '("Var"))
-            (_x2c.foreach.function-reference "Var_iter"))
+            (_x2c.function.reference "Var_iter"))
            (true (_x2c.foreach.protocol-member
              collection-type '("Iter") "iter"))))
          (spec (if direct nil
