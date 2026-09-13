@@ -6,6 +6,23 @@ and garbage collector using ordinary x2c. It does not call x2c's Lisp reader,
 interpreter, or standard library. Compare [literate-lisp.x](literate-lisp.x)
 for a larger, different Lisp implemented independently in x2c.
 
+[stutter-min.x](stutter-min.x) is a separate, minimal implementation of the
+same interpreter. It keeps the readable version's behavior, including heap
+limits, collection diagnostics, malformed-input handling, and CLI output.
+It contains the whole interpreter; it does not include the readable version
+or delegate to x2c Lisp.
+
+The minimal version uses each atom's head as its current dynamic binding.
+Calls evaluate their actual arguments first, then save and replace bindings
+in reverse parameter order. Restoring forward preserves the first duplicate
+parameter's precedence. The existing root Array retains argument values and
+saved bindings, so environment Maps and frame traversal disappear. One
+numeric dispatch handles all eight primitives, and one selector implements
+both `car` and `cdr`. File-static state serves the executable's single session.
+
+Both versions keep iterative flat-list reading and marking; the size reduction
+does not trade away supported list length for additional native recursion.
+
 From the repository root:
 
 ```sh
@@ -70,6 +87,15 @@ cc -std=gnu89 -D__dest_os=1 -D__mac_os=2 \
 python3 examples/programs/check-stutter.py \
   --reference /tmp/stutter-original --executable /tmp/stutter \
   --book ~/Git/CBofN
+```
+
+For strict comparison of the two x2c versions, including garbage collection
+and error output (only the executable name in CLI diagnostics is normalized):
+
+```sh
+./builds/0/x2c build --output /tmp/stutter-min examples/programs/stutter-min.x
+python3 examples/programs/check-stutter.py --exact \
+  --reference /tmp/stutter --executable /tmp/stutter-min --book ~/Git/CBofN
 ```
 
 The book corpus runs `sample.slp`, `demo.slp`, and `float.slp` unchanged,
