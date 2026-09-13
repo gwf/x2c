@@ -14,7 +14,6 @@ macro Unit $error.private.types() => {
     struct ErrorHandler *$(x2c.ident "prev");
     ErrorHandlerFn $(x2c.ident "fn");
     Var $(x2c.ident "data");
-    int $(x2c.ident "watermark");
     Array $(x2c.ident "patterns");
     Block $(x2c.ident "plans");
     void *$(x2c.ident "target");

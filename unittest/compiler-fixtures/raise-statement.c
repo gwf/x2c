@@ -6,6 +6,10 @@
 
 static void raise_empty(void);
 
+static List observed;
+
+static Symbol observe_newest(List errors, Var data);
+
 _Noreturn static void raise_terminal(void);
 
 static void raise_after_return(int code);
@@ -20,11 +24,21 @@ static void raise_empty(void){
 
 }
 
+List Var_list(Var);
+
+Var Error_snapshot(Var);
+
+Var List_last(List);
+
+static Symbol observe_newest(List errors, Var data){
+  (void) data;
+  observed = Var_list(Error_snapshot(List_last(errors)));
+  return 17276625224;
+}
+
 void Error_initialize(void);
 
-void Error_policy_set(Symbol, Symbol);
-
-int Error_mark(void);
+ErrorHandler Error_push(ErrorHandlerFn, Var);
 
 Var Symbol_var(Symbol);
 
@@ -32,13 +46,9 @@ Var int_var(int);
 
 Var String_var(String);
 
-List Var_list(Var);
-
-Var List_car(List);
-
-List Error_since(int);
-
 Var List_assoc(List, Var);
+
+void Error_pop(ErrorHandler);
 
 String Symbol_str(Symbol);
 
@@ -57,28 +67,27 @@ int List_len(List);
 int main(void){
   x2c_initialize();
   Error_initialize();
-  Error_policy_set(7654447751496, 7475046632);
-  Error_policy_set(1269496097575876, 7475046632);
-  int bytes = 64, mark = Error_mark();
+  ErrorHandler observer = Error_push(observe_newest, ((void) 0, Void));
+  int bytes = 64;
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 12};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 19};
     x2c_error_raise_n(& _x2c_error_site_1, 7654447751496, 2, Symbol_var(5874022), int_var(bytes), Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("raise-probe")), NULL))));
   }
-  List entry = Var_list(List_car(Error_since(mark)));
+  List entry = observed;
   List detail = Var_list(List_assoc(entry, Symbol_var(280234584)));
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
-  int empty_mark = Error_mark();
   raise_empty();
-  List empty_entry = Var_list(List_car(Error_since(empty_mark)));
+  List empty_entry = observed;
   List empty_detail = Var_list(List_assoc(empty_entry, Symbol_var(280234584)));
   List empty_location = Var_list(List_assoc(empty_entry, Symbol_var(857050729436)));
+  Error_pop(observer);
   printf("%s %ld %s %s:%ld:%s %ld:%s\n", Symbol_str(Var_symbol(List_assoc(entry, Symbol_var(227594)))), Var_integer(List_cadr(Var_list(List_getindex(detail, 0)))), Var_string(List_cadr(Var_list(List_getindex(detail, 1)))), Var_string(List_assoc(location, Symbol_var(412426))), Var_integer(List_assoc(location, Symbol_var(805770))), Var_string(List_assoc(location, Symbol_var(458361162716))), List_len(empty_detail), Var_string(List_assoc(empty_location, Symbol_var(458361162716))));
   return 0;
 }
 
 _Noreturn static void raise_terminal(void){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_terminal",.line = 34};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_terminal",.line = 41};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -88,7 +97,7 @@ _Noreturn static void raise_terminal(void){
 static void raise_after_return(int code){
   if(! code) return;
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_after_return",.line = 39};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_after_return",.line = 46};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -103,7 +112,7 @@ static void raise_caught(void){
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
       {
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_caught",.line = 44};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_caught",.line = 51};
         x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 0);
         __builtin_unreachable();
       }

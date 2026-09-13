@@ -397,16 +397,16 @@ static void logger_error_handler_renders_only_selected_newest(void) {
   Logger previous = log_set_global_logger(logger);
   Error.initialize();
 
-  Symbol collected_code = <collected>;
-  Error.policy_set(collected_code, <collect>);
-  List collected = _logger_error_entry(collected_code);
-  EXPECT_TRUE(Logger.error_handler(%($collected), void) == <declined>);
+  Symbol quiet_code = <collected>;
+  Error.policy_set(quiet_code, <ignore>);
+  List quiet = _logger_error_entry(quiet_code);
+  EXPECT_TRUE(Logger.error_handler(%($quiet), void) == <declined>);
   EXPECT_INT_EQ(capture.count, 0);
 
   Symbol logged_code = <logged-err>;
   Error.policy_set(logged_code, <log>);
   List logged = _logger_error_entry(logged_code);
-  EXPECT_TRUE(Logger.error_handler(%($collected $logged), void) == <declined>);
+  EXPECT_TRUE(Logger.error_handler(%($quiet $logged), void) == <declined>);
   EXPECT_INT_EQ(capture.count, 1);
   EXPECT_TRUE(capture.events[0].category == <err-report>);
   EXPECT_PTR_EQ(capture.events[0].fields, logged);

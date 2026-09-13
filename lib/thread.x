@@ -131,7 +131,6 @@ static void *_run(void *argument) {
      both for the joining thread. Error and other per-thread state shut down
      last, after no worker-private value still needs them. */
   Context work = Context.open_isolated_named("Thread callback");
-  int mark = Error.mark();
   try {
     ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
     defer Error.pop(logger_handler);
@@ -143,11 +142,6 @@ static void *_run(void *argument) {
     thread.result = work.export(result);
   }
   catch: {
-    if (thread.errors is void) {
-      List errors = Error.since_in(
-        mark, &thread.result_scope, thread.result_pool);
-      thread.errors = errors;
-    }
     thread.result = void;
   }
   work.close();

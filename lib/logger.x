@@ -109,7 +109,7 @@ protocol Var(LogTextSink) as void *;
 
 static Logger global_logger = NULL, default_logger = NULL;
 static ErrorHandler logger_error_handler = NULL;
-static int logger_error_mark, static pthread_mutex_t logger_mutex;
+static pthread_mutex_t logger_mutex;
 static pthread_once_t logger_mutex_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
@@ -784,7 +784,7 @@ $logger.global(fatal, log_fatal, <fatal>);
 
 /** Offers the newest `Error` to the current global `Logger`.
     A well-formed entry with `<abort>` or `<log>` policy is rendered as an
-    `<err-report>` event; missing, malformed, `<collect>`, and `<ignore>` input
+    `<err-report>` event; missing, malformed, and `<ignore>` input
     produces no event. The borrowed input is never consumed, `data` is ignored,
     and the handler always returns `<declined>`, leaving transfer to `Error` or
     another handler.
@@ -808,29 +808,17 @@ Symbol Logger.error_handler(List errors, Var data) {
 }
 
 /** Shuts down process-wide `Logger` integration.
-    Pending root `Error`s are offered to the active `Logger` before the
-    observing
-    handler is removed. The global slot is then cleared; a custom active
-    `Logger`
-    is flushed but remains caller-owned, while the default `Logger` is flushed,
-    retired, and freed. A repeated call after shutdown is a no-op.
-    Raises: `<alloc-fail>` while opening the temporary canonical pool,
-    `<bad-state>` when default-`Logger` delivery is active, or any cause from
-    event delivery or a sink flusher. The failure may interrupt the remaining
-    cleanup.
+    The observing handler is removed and the global slot is cleared; a custom
+    active `Logger` is flushed but remains caller-owned, while the default
+    `Logger` is flushed, retired, and freed. A repeated call after shutdown is
+    a no-op.
+    Raises: `<bad-state>` when default-`Logger` delivery is active, or any
+    cause from a sink flusher. The failure may interrupt the remaining cleanup.
 */
 synchronized
 void Logger.shutdown(void) {
   Logger active = global_logger;
   if (logger_error_handler) {
-    if (active) {
-      String.pool_retain_named("Logger shutdown errors");
-      List pending = Error.since(logger_error_mark);
-      foreach (List entry, pending)
-        active.log(<error>, <err-report>, entry);
-
-      String.pool_release();
-    }
     Error.pop(logger_error_handler);
     logger_error_handler = NULL;
   }
@@ -841,11 +829,9 @@ void Logger.shutdown(void) {
 }
 
 /** Installs the process-wide info-level `Logger` and stderr sink.
-    `Error` initializes first, then this function records its handler watermark
-    and installs an observing `Error` handler. Runtime initialization calls
-    this
-    once and later shutdown hooks invoke `Logger.shutdown` before `Error` shuts
-    down.
+    `Error` initializes first, then this function installs an observing `Error`
+    handler. Runtime initialization calls this once and later shutdown hooks
+    invoke `Logger.shutdown` before `Error` shuts down.
     Raises: any cause from `Error` or `Logger` initialization.
 */
 synchronized
@@ -854,6 +840,5 @@ void Logger.initialize(void) {
   default_logger = Logger.new(<info>);
   default_logger.add_stderr_sink();
   global_logger = default_logger;
-  logger_error_mark = Error.mark();
   logger_error_handler = Error.push(Logger.error_handler, void);
 }

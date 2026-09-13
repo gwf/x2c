@@ -610,66 +610,6 @@ static void func_nested_targets_share_one_transfer(void) {
   EXPECT_INT_EQ(_side_effect, 110);
 }
 
-static void func_catch_retains_complete_error_slice(void) {
-  Symbol previous = Error.policy_get(<func-note>);
-  Error.policy_set(<func-note>, <collect>);
-  defer Error.policy_set(<func-note>, previous);
-  int mark = Error.mark();
-  Func fn = Func.new(
-    _retained_slice_native,
-    %((func (("Var"))) "Var")
-  );
-  FuncArg argv[1] = { FuncArg.value(Var.new(<i32>, 23)) };
-  ExceptionFrame frame;
-  ErrorHandler handler = x2c_error_catch_push(
-    &frame, 1, %(format (value ?value)).var()
-  );
-  x2c_exception_push(&frame);
-  if (!sigsetjmp(frame.env, 0)) {
-    Func.apply(fn, 1, argv);
-    EXPECT_TRUE(0);
-  }
-  else {
-    x2c_exception_landed(&frame);
-    EXPECT_TRUE(x2c_exception_is_error_target(&frame));
-    EXPECT_INT_EQ(x2c_error_catch_selected(handler), 0);
-    EXPECT_INT_EQ(x2c_error_catch_capture(handler, 0).integer(), 23);
-    EXPECT_INT_EQ(handler.retained.length, 2);
-    ErrorRecord *records = handler.retained.bytes;
-    List newest = records[0].entry;
-    List oldest = records[1].entry;
-    EXPECT_TRUE(newest.assoc(<code>) == <format>);
-    EXPECT_TRUE(oldest.assoc(<code>) == <func-note>);
-    EXPECT_INT_EQ(
-      newest.assoc(<detail>).list().assoc(<value>).integer(), 23
-    );
-    EXPECT_INT_EQ(
-      oldest.assoc(<detail>).list().assoc(<before>).integer(), 23
-    );
-    List newest_location = newest.assoc(<location>);
-    List oldest_location = oldest.assoc(<location>);
-    EXPECT_TRUE(
-      newest_location.assoc(<file>).string().endswith("test-func.x")
-    );
-    EXPECT_STR_EQ(
-      newest_location.assoc(<function>).string(),
-      "_retained_slice_native"
-    );
-    EXPECT_STR_EQ(
-      oldest_location.assoc(<function>).string(),
-      "_retained_slice_native"
-    );
-    EXPECT_INT_EQ(
-      newest_location.assoc(<line>).integer(),
-      oldest_location.assoc(<line>).integer() + 1
-    );
-    x2c_error_catch_detach(handler);
-    x2c_exception_mark_handled(&frame);
-  }
-  x2c_error_catch_close(handler);
-  x2c_exception_leave(&frame);
-  EXPECT_INT_EQ(Error.count(), mark);
-}
 
 static void func_var_boxes_as_func_tag(void) {
   Func fn = Func.new(_add_longs, %((func ((long) (long))) long));
@@ -712,6 +652,5 @@ void func_suite(void) {
   $test.run(func_direct_target_transfers_to_catch);
   $test.run(func_cross_file_target_transfers_to_catch);
   $test.run(func_nested_targets_share_one_transfer);
-  $test.run(func_catch_retains_complete_error_slice);
   $test.run(func_var_boxes_as_func_tag);
 }

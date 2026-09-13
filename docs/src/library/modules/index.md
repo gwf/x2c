@@ -22,7 +22,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/common.x`](common.md) | the shared `Var` union and operations used by every module. |
 | [`lib/context.x`](context.md) | bounded runtime state and value export. |
 | [`lib/dispatch.x`](dispatch.md) | typed descriptors for runtime `Var` behavior. |
-| [`lib/error.x`](error.md) | handler stack and accumulated errors. |
+| [`lib/error.x`](error.md) | handler stack and error dispatch. |
 | [`lib/exception.x`](exception.md) | transfer frames for x2c `Error` unwinding and cleanup. |
 | [`lib/file.x`](file.md) | `File` I/O operations and stream handling. |
 | [`lib/func.x`](func.md) | generic native function binding. |

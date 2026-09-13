@@ -287,8 +287,8 @@ container value.
 Successful allocation with satisfied preconditions returns initialized
 storage. Every cause in `lib/error-macros.xmacro`'s shared table may transfer
 to a matching filtered catch, but none of them return to the call that raised
-them. Error locks their policies to `<abort>` and rejects `<collect>`, `<log>`,
-or `<ignore>`; an observing handler also cannot consume one with `<handled>`.
+them. Error locks their policies to `<abort>` and rejects `<log>` and
+`<ignore>`; an observing handler also cannot consume one with `<handled>`.
 Literal raises of these causes emit `__builtin_unreachable()` after the
 runtime call.
 Downstream code therefore does not check whether a valid Scope allocation,
@@ -780,14 +780,12 @@ Each accumulated Error owns a private Scope plus List and String pools. Error
 details are immutable/value-only graphs: nil, numeric or enum values, Symbols,
 Atoms, Strings, and recursively admissible Lists. Static crossings are checked
 by the compiler and dynamic `Var` contents remain runtime-authoritative.
-Closing a handler truncates to its registration watermark and destroys every
-discarded record region; collected Errors therefore live exactly as long as
-their owning watermark. Observing slices and selected catch bindings are
-borrowed, and `Error.snapshot` is the explicit crossing into the caller's
-ordinary Scope and canonical pools. `Error.since` uses that same snapshot
-owner.
+One record exists per in-flight raise; the dispatch that created it reclaims
+it, or a selected filtered catch retains it. Observing handlers and selected
+catch bindings borrow that record, and `Error.snapshot` is the explicit
+crossing into the caller's ordinary Scope and canonical pools.
 
-Policy accepts only `<abort>`, `<log>`, `<collect>`, and `<ignore>`; an invalid
+Policy accepts only `<abort>`, `<log>`, and `<ignore>`; an invalid
 disposition raises `<bad-arg>` without mutating prior policy, while unknown
 codes remain legal and default to `<abort>`. Every cause in
 `lib/error-macros.xmacro`'s shared table is the exception to configurable

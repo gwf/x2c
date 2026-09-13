@@ -44,10 +44,9 @@ lib/dispatch.x|advanced|Var.compare,Var.equal,Var.hash,Var.repr,Var.same
 lib/dispatch.x|advanced|RenderPath.enter,RenderPath.leave
 lib/dispatch.x|advanced|x2c_register_tagged_descriptor
 lib/dispatch.x|advanced|Var.str,Var.write_repr
-lib/error.x|advanced|Error.bound,Error.bound_set,Error.count,Error.depth
-lib/error.x|advanced|Error.mark,Error.policy_get,Error.policy_set,Error.pop
-lib/error.x|advanced|Error.push,Error.raise,Error.ready,Error.since
-lib/error.x|advanced|Error.snapshot
+lib/error.x|advanced|Error.count,Error.depth,Error.policy_get
+lib/error.x|advanced|Error.policy_set,Error.pop,Error.push,Error.raise
+lib/error.x|advanced|Error.ready,Error.snapshot
 lib/file.x|advanced|File.equal,File.fdopen,File.gets,File.hash,File.popen
 lib/file.x|advanced|File.printf,File.putc,File.puts,File.putw,File.read
 lib/file.x|advanced|File.reopen,File.repr,File.scanf,File.setbuffer
@@ -189,7 +188,7 @@ lib/dispatch.x|internal|Var.try_export_context
 lib/dispatch.x|internal|x2c_descriptor_registration_frozen
 lib/dispatch.x|internal|x2c_descriptor_thread_start_begin
 lib/dispatch.x|internal|x2c_descriptor_thread_start_end
-lib/error.x|internal|Error.context_close,Error.context_open,Error.since_in
+lib/error.x|internal|Error.context_close,Error.context_open
 lib/error.x|internal|Error.snapshot_in
 lib/exception.x|internal|x2c_exception_unwinding
 lib/list.x|internal|List.thread_initialize

@@ -63,19 +63,6 @@ static void defer_evaluates_return_before_cleanup(void) {
   EXPECT_INT_EQ(defer_return_value, 0);
 }
 
-static void _defer_collect_helper(int *cleanup) {
-  defer (*cleanup)++;
-  Error.raise(<old-error>, %((where "defer return")));
-}
-
-static void defer_preserves_collected_errors(void) {
-  Error.initialize();
-  Error.policy_set(<old-error>, <collect>);
-  int mark = Error.mark(), cleanup = 0;
-  _defer_collect_helper(&cleanup);
-  EXPECT_INT_EQ(cleanup, 1);
-  EXPECT_INT_EQ(Error.count(), mark + 1);
-}
 
 static void defer_uses_lifo_order(void) {
   defer_reset();
@@ -372,7 +359,6 @@ void defer_suite(void) {
   $test.run(defer_runs_on_scope_exit);
   $test.run(defer_runs_on_return);
   $test.run(defer_evaluates_return_before_cleanup);
-  $test.run(defer_preserves_collected_errors);
   $test.run(defer_uses_lifo_order);
   $test.run(defer_runs_with_break);
   $test.run(defer_continue_preserves_enclosing_catch);

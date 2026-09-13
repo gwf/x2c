@@ -538,7 +538,7 @@ Public functions:
 
 ### [lib/error.x](../lib/error.x)
 
-handler stack and accumulated errors.
+handler stack and error dispatch.
 
 Public functions:
 
@@ -547,11 +547,9 @@ Public functions:
 `Error.note_rendered`, `x2c_error_raise_n`, `Error.handler_depth`,
 `Error.handler_head`, `Error.unwind_head`, `Error.restore_landing`,
 `Error.trim`, `Error.restore`, `Error.initialize_raw`, `Error.shutdown_raw`,
-`Error.depth`, `Error.count`, `Error.mark`, `Error.snapshot`,
-`Error.snapshot_in`, `Error.since_in`, `Error.since`, `Error.policy_set`,
-`Error.policy_get`, `Error.bound`, `Error.bound_set`, `Error.push`,
-`Error.pop`, `Error.context_open`, `Error.context_close`, `Error.raise`,
-`Error.ready`
+`Error.depth`, `Error.count`, `Error.snapshot`, `Error.snapshot_in`,
+`Error.policy_set`, `Error.policy_get`, `Error.push`, `Error.pop`,
+`Error.context_open`, `Error.context_close`, `Error.raise`, `Error.ready`
 
 ### [lib/error_init.x](../lib/error_init.x)
 

@@ -90,19 +90,6 @@ static void exception_finally_runs_on_success(void) {
   EXPECT_INT_EQ(counter, 42);
 }
 
-static void exception_normal_exit_preserves_collected_errors(void) {
-  Error.initialize();
-  Error.policy_set(<old-error>, <collect>);
-  int mark = Error.mark(), cleanup = 0;
-  try {
-    Error.raise(<old-error>, %((where "normal try")));
-  }
-  finally {
-    cleanup++;
-  }
-  EXPECT_INT_EQ(cleanup, 1);
-  EXPECT_INT_EQ(Error.count(), mark + 1);
-}
 
 static void exception_finally_runs_on_exception(void) {
   Error.initialize();
@@ -618,19 +605,6 @@ static void error_regions_do_not_capture_application_pools(void) {
 }
 
 
-static void filtered_catch_preserves_older_errors(void) {
-  Error.initialize();
-  Error.policy_set(<old-error>, <collect>);
-  int mark = Error.mark();
-  Error.raise(<old-error>, %((where "older")));
-  int before = Error.count();
-  try {
-    raise %(invariant);
-  }
-  catch %(invariant): {}
-  EXPECT_INT_EQ(before, mark + 1);
-  EXPECT_INT_EQ(Error.count(), before);
-}
 
 
 static void _filtered_catch_once(void) {
@@ -657,7 +631,6 @@ void exception_suite(void) {
   $test.run(exception_try_cleanup_on_return);
   $test.run(exception_try_cleanup_on_loop_control);
   $test.run(exception_finally_runs_on_success);
-  $test.run(exception_normal_exit_preserves_collected_errors);
   $test.run(exception_finally_runs_on_exception);
   $test.run(exception_finally_with_catch);
   $test.run(exception_nested_finally_runs_once);
@@ -682,6 +655,5 @@ void exception_suite(void) {
   $test.run(filtered_catch_binder_survives_transient_pools);
   $test.run(error_snapshot_survives_catch_and_caller_owners);
   $test.run(error_regions_do_not_capture_application_pools);
-  $test.run(filtered_catch_preserves_older_errors);
   $test.run(filtered_catch_repeated_success_does_not_leak);
 }

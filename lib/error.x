@@ -1,15 +1,14 @@
-/*  error.x -- handler stack and accumulated errors
+/*  error.x -- handler stack and error dispatch
 
     Copyright (c) 2026 Gary William Flake
 
     Raising an error records it and calls registered handlers, innermost first.
-    Each handler sees the errors raised since it was registered and decides
-    how to respond. The caller sets the policy for errors no handler accepts.
+    Each handler sees the error being raised and decides how to respond. The
+    caller sets the policy for an error no handler accepts.
 
-    Each accumulated record owns an independent `Scope` and
-    canonical `List` and
-    `String` pools. A handler watermark bounds those regions, so closing the
-    handler reclaims its complete slice without touching application pools.
+    A record owns an independent `Scope` and canonical `List` and `String`
+    pools, so its detail survives the raising frame's pools. The dispatch that
+    raised it reclaims that region, or a selected filtered catch retains it.
     Raising while the error path is itself failing uses the error floor,
     which allocates nothing.
  */
@@ -17,8 +16,6 @@
 #pragma once
 
 #include "common.x"
-
-#define ERROR_DEFAULT_BOUND 4096
 
 /** Names the structured-error runtime and its static operations.
     Programs do not construct `Error` values; automatic runtime initialization
@@ -73,7 +70,7 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
   *h = (struct ErrorHandler) {
       .prev = state.handler_top, .fn = NULL, .data = void,
-      .watermark = Error.count(), .target = target, .selected = -1,
+      .target = target, .selected = -1,
       .capture_values = NULL, .retained = NULL, .detached = 0
   };
   int pushed = _scope_push(
@@ -141,11 +138,10 @@ void x2c_error_catch_detach(ErrorHandler handle) {
 }
 
 /** Closes and invalidates a transferring-catch handle.
-    A detached handle releases its plans, captures, and retained error records.
-    An attached handle additionally removes itself and truncates records above
-    its registration watermark. Attached handles must close in stack order;
-    violating that order reaches the raw error floor. A null handle does
-    nothing.
+    The handle releases its plans, captures, and retained error record. An
+    attached handle additionally removes itself, and attached handles must
+    close in stack order; violating that order reaches the raw error floor. A
+    null handle does nothing.
 */
 void x2c_error_catch_close(ErrorHandler handle) {
   if (!handle) return;
@@ -153,7 +149,6 @@ void x2c_error_catch_close(ErrorHandler handle) {
     ErrorThreadState state = _thread();
     if (state.handler_top != handle)
       _floor(<invariant>, "transferring catch close out of order");
-    _truncate(handle.watermark);
     state.handler_top = handle.prev;
   }
   _handler_free(handle);
@@ -243,27 +238,22 @@ void Error.restore_landing(void *saved_head, int saved_depth) {
 }
 
 /** Trims `Error` state while an exception frame leaves.
-    Handlers newer than `saved_head` are reclaimed. Records at and above
-    `stack_height` are also reclaimed; pass the current height on normal frame
-    exit to preserve collected errors.
+    Handlers newer than `saved_head` are reclaimed.
 */
-void Error.trim(void *saved_head, int stack_height) {
+void Error.trim(void *saved_head) {
   ErrorHandler saved = saved_head;
   ErrorThreadState state = _thread();
-  if (_chain_contains(state.handler_top, saved))
-    _unwind_to(state, saved, 1);
-  _truncate(stack_height);
+  if (_chain_contains(state.handler_top, saved)) _unwind_to(state, saved);
 }
 
-/** Discards handler and record growth after one cleanup callback.
-    Registrations and records created by that callback are reclaimed toward
-    the saved heights before the interrupted unwind continues. State the
-    callback itself removed is not reconstructed.
+/** Discards handler growth after one cleanup callback.
+    Registrations created by that callback are reclaimed toward `handler_depth`
+    before the interrupted unwind continues. State the callback itself removed
+    is not reconstructed.
 */
-void Error.restore(int handler_depth, int stack_height) {
+void Error.restore(int handler_depth) {
   ErrorThreadState state = _thread();
-  _unwind_to(state, _handler_at_depth(state, handler_depth), 1);
-  _truncate(stack_height);
+  _unwind_to(state, _handler_at_depth(state, handler_depth));
 }
 
 /** Initializes the current thread's `Error` runtime without lifecycle
@@ -297,7 +287,7 @@ void Error.initialize_raw(void) {
 void Error.shutdown_raw(void) {
   ErrorThreadState state = _thread();
   if (state.shutdown_done) return;
-  _unwind_to(state, NULL, 1);
+  _unwind_to(state, NULL);
   _truncate(0);
   if ((void *) state.stack != NULL) {
     state.stack.free();
@@ -335,8 +325,7 @@ Atom Atom.intern(String spelling);
 String Atom.str(Atom atom);
 
 typedef struct ErrorContextState {
-  struct ErrorContextState *prev, Map policy, int bound, handler_depth;
-  int stack_height;
+  struct ErrorContextState *prev, Map policy, int handler_depth;
 } *ErrorContextState;
 
 /* The nested-handler probe reaches depth 2; two more levels are reserve for
@@ -345,18 +334,14 @@ typedef struct ErrorContextState {
 
 typedef struct ErrorThreadState {
   Scope scope, Block stack, Map policy, int shutdown_done;
-  ErrorHandler handler_top, dispatch_saved, int bound;
+  ErrorHandler handler_top, dispatch_saved;
   ErrorContextState context_top;
   int depth, floor_only, rendered[5];
 } *ErrorThreadState;
 
 static threaded struct ErrorThreadState error_thread;
 
-static ErrorThreadState _thread(void) {
-  ErrorThreadState state = &error_thread;
-  if (!state.bound) state.bound = ERROR_DEFAULT_BOUND;
-  return state;
-}
+static ErrorThreadState _thread(void) => &error_thread;
 
 /* This is the same shared cause table that drives compiler unreachable
    emission. Error locks every listed policy to abort: observing handlers may
@@ -511,8 +496,8 @@ static void _append_record(ErrorRecord *record) {
 }
 
 static void _record(const X2CErrorSite *site, Symbol code, List detail) {
-  if (Error.count() >= Error.bound())
-    _floor(code, "error stack exceeded its bound");
+  if (Error.count() >= ERROR_MAX_DEPTH)
+    _floor(code, "error records exceeded the dispatch nesting depth");
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
@@ -529,8 +514,8 @@ typedef struct ErrorPair {
 
 static void _record_n(
   const X2CErrorSite *site, Symbol code, unsigned pair_count, va_list args) {
-  if (Error.count() >= Error.bound())
-    _floor(code, "error stack exceeded its bound");
+  if (Error.count() >= ERROR_MAX_DEPTH)
+    _floor(code, "error records exceeded the dispatch nesting depth");
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
@@ -569,19 +554,15 @@ static void _truncate(int mark) {
 
 /** Returns the current nested error-dispatch depth.
     This is the nesting depth of error dispatch. `Error.count` returns the
-    number of accumulated errors.
+    number of records those raises own.
 */
 int Error.depth(void) => _thread().depth;
 
-/** Returns the number of errors currently accumulated.
-    Returns zero before `Error` initialization and after shutdown.
+/** Returns the number of `Error` records the current dispatch owns.
+    This is one per in-flight raise. It returns zero before `Error`
+    initialization, after shutdown, and outside dispatch.
 */
 int Error.count(void) => Error.ready() ? (int) _thread().stack.length : 0;
-
-/** Captures the current error-stack position.
-    Pass the result to `Error.since` to inspect only later errors.
-*/
-int Error.mark(void) => Error.count();
 
 static Var _snapshot_value(Var v) {
   if (v is void)
@@ -656,71 +637,8 @@ Var Error.snapshot_in(Var value, Scope *values, Pool pool) {
   return result;
 }
 
-/** Copies errors at and after `mark` into explicit owners, oldest first.
-    `String`s and `List`s are canonicalized through `pool`'s chain and remain
-    live
-    until their actual owning pool is released. Wide scalar boxes enter
-    `*values`, whose possibly updated `Scope` head is written back, and remain
-    live until that `Scope` is destroyed. An unavailable runtime or negative
-    mark
-    returns `nil`. `Null` owners or failures while copying reach the raw floor.
-*/
-List Error.since_in(int mark, Scope *values, Pool pool) {
-  if (!Error.ready() || mark < 0) return NULL;
-  if (!values || !pool)
-    _floor(<bad-arg>, "error snapshot requires explicit owners");
-  ErrorRegion region = {
-    .values = *values, .strings = pool, .lists = pool
-  };
-  ErrorThreadState state = _thread();
-  state.floor_only++;
-  List out = NULL;
-  for (int i = Error.count() - 1; i >= mark; i--) {
-    ErrorRecord *record = _record_at(i);
-    Var entry = _copy_value(&region, record.entry);
-    out = _cons(&region, entry, out);
-  }
-  state.floor_only--;
-  *values = region.values;
-  return out;
-}
-
-static List _view_since(ErrorRegion *region, int mark) {
-  List out = NULL;
-  for (int i = Error.count() - 1; i >= mark; i--) {
-    ErrorRecord *record = _record_at(i);
-    Var entry = _copy_value(region, record.entry);
-    out = _cons(region, entry, out);
-  }
-  return out;
-}
-
-/** Returns the accumulated errors at and after `mark`, oldest first.
-    Each entry has `code`, `detail`, and `location` fields. An invalid mark or
-    an unavailable `Error` runtime returns `nil`. The snapshot enters the
-    caller's
-    outermost `Scope` and canonical pools and remains live until those owners
-    are
-    released. Failure to materialize it reaches the non-reentrant error floor.
-*/
-List Error.since(int mark) {
-  if (!Error.ready() || mark < 0) return NULL;
-  ErrorThreadState state = _thread();
-  state.floor_only++;
-  List out = NULL;
-  for (int i = Error.count() - 1; i >= mark; i--) {
-    ErrorRecord *record = _record_at(i);
-    Var entry = _snapshot_value(record.entry);
-    out = cons(entry, out);
-  }
-  List.try_own(out);
-  state.floor_only--;
-  return out;
-}
-
 /** Sets the default disposition for `code`.
-    Supported policy values are `<abort>`, `<collect>`, `<log>`, and
-    `<ignore>`. Another value raises `<bad-arg>` and leaves the previous policy
+    Supported policy values are `<abort>`, `<log>`, and `<ignore>`. Another value raises `<bad-arg>` and leaves the previous policy
     unchanged. Shared non-returning causes accept only `<abort>`; another
     disposition raises `<bad-arg>` and leaves their policy unchanged. The call
     is a no-op while `Error` is unavailable; failure to update `Error`-owned
@@ -729,7 +647,7 @@ List Error.since(int mark) {
 void Error.policy_set(Symbol code, Symbol disposition) {
   if (!Error.ready()) return;
   if (disposition != <abort> && disposition != <log> &&
-      disposition != <collect> && disposition != <ignore>)
+      disposition != <ignore>)
     raise %(bad-arg (owner "Error.policy_set") (dispositio $disposition));
   if (_never_returns(code) && disposition != <abort>)
     raise %(bad-arg (owner "Error.policy_set") (code $code)
@@ -760,22 +678,6 @@ Symbol Error.policy_get(Symbol code) {
   return found;
 }
 
-/** Returns the maximum number of errors that may remain accumulated. */
-int Error.bound(void) {
-  ErrorThreadState state = _thread();
-  return state.context_top ? state.context_top.bound : state.bound;
-}
-
-/** Sets the accumulated-error bound when `bound` is positive.
-    A zero or negative value leaves the current bound unchanged.
-*/
-void Error.bound_set(int bound) {
-  if (bound <= 0) return;
-  ErrorThreadState state = _thread();
-  if (state.context_top) state.context_top.bound = bound;
-  else state.bound = bound;
-}
-
 /** Pushes an observing handler and returns its removal handle.
     The handler sees a borrowed view of errors raised after this registration;
     the view is valid only during the callback. Use `Error.snapshot` for any
@@ -794,7 +696,6 @@ ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
   h.prev = state.handler_top;
   h.fn = fn;
   h.data = data;
-  h.watermark = Error.count();
   h.patterns = NULL;
   h.plans = NULL;
   h.target = NULL;
@@ -814,16 +715,12 @@ static void _retained_destroy(Block retained) {
   retained.free();
 }
 
-/* Pops handlers down to `stop`, reclaiming each one. `truncate` also discards
-   the records above every popped handler's watermark; a Context closed by an
-   unwinding exception keeps those for its outer handler and is the one caller
-   that passes zero. */
-static void _unwind_to(
-  ErrorThreadState state, ErrorHandler stop, int truncate) {
+/* Pops handlers down to `stop`, reclaiming each one. Records belong to the
+   raise that is dispatching them, so a handler carries none of its own. */
+static void _unwind_to(ErrorThreadState state, ErrorHandler stop) {
   while (state.handler_top && state.handler_top != stop) {
     ErrorHandler removed = state.handler_top;
     state.handler_top = removed.prev;
-    if (truncate) _truncate(removed.watermark);
     _handler_free(removed);
   }
 }
@@ -855,11 +752,8 @@ static void _handler_free(ErrorHandler handle) {
   Scope.free(handle);
 }
 
-/** Closes the most recently pushed observing handler.
-    Closing truncates and reclaims every error above the handler's registration
-    watermark, then unregisters it. `Error`s below the watermark remain.
-    Handles
-    must be popped in stack order. An out-of-order pop reaches the
+/** Closes the most recently pushed observing handler and unregisters it.
+    Handles must be popped in stack order. An out-of-order pop reaches the
     non-reentrant error floor; a null handle does nothing.
 */
 void Error.pop(ErrorHandler handle) {
@@ -867,14 +761,13 @@ void Error.pop(ErrorHandler handle) {
   ErrorThreadState state = _thread();
   if (state.handler_top != handle)
     _floor(<invariant>, "Error.pop out of order");
-  _truncate(handle.watermark);
   state.handler_top = handle.prev;
   _handler_free(handle);
 }
 
 /** Opens the `Error` state owned by one `Context`.
-    Policy and bound changes become local overlays; handlers and accumulated
-    records are restored by `Error.context_close`. The returned opaque token is
+    Policy changes become a local overlay; handlers are restored by
+    `Error.context_close`. The returned opaque token is
     allocated in the current `Scope`, which must remain live through the
     matching
     close. An unavailable `Error` runtime returns NULL.
@@ -886,51 +779,42 @@ void *Error.context_open(void) {
   ErrorContextState state = Scope.malloc(sizeof(struct ErrorContextState));
   state.prev = thread.context_top;
   state.policy = %{};
-  state.bound = Error.bound();
   state.handler_depth = Error.handler_depth();
-  state.stack_height = Error.count();
   thread.context_top = state;
   return state;
 }
 
 /** Closes one `Context` `Error` overlay.
-    An exception unwinding out of the `Context` keeps its records for the outer
-    handler; an ordinary close discards records accumulated inside it. In both
-    cases handlers pushed inside the `Context` are reclaimed. Tokens must close
-    in nesting order; an out-of-order close reaches the raw error floor. A null
-    token does nothing and a closed token is invalid.
+    Handlers pushed inside the `Context` are reclaimed and its policy overlay
+    is discarded. Tokens must close in nesting order; an out-of-order close
+    reaches the raw error floor. A null token does nothing and a closed token
+    is invalid.
 */
-void Error.context_close(void *token, int preserve_records) {
+void Error.context_close(void *token) {
   ErrorContextState state = token;
   if (!state) return;
   ErrorThreadState thread = _thread();
   if (thread.context_top != state)
     _floor(<invariant>, "Error Context close out of order");
-  _unwind_to(
-    thread, _handler_at_depth(thread, state.handler_depth),
-    !preserve_records);
-  if (!preserve_records) _truncate(state.stack_height);
+  _unwind_to(thread, _handler_at_depth(thread, state.handler_depth));
   thread.context_top = state.prev;
 }
 
-/* Move the selected slice off the public record stack without destroying its
-   private regions. Capture values were copied into the newest record's region,
-   so the detached catch handle owns both them and the selected Error until
-   `_handler_free` destroys `retained`. Records are stored newest first here;
-   their order is immaterial because the catch exposes only captures. A second
-   transfer can select the same handle before its landing runs, as when a
-   `finally` raises while carrying an Error; the abandoned selection is
-   destroyed here because the replacement transfer owns the handle. */
+/* Move the selected record off the dispatch record stack without destroying
+   its private region. Capture values were copied into that region, so the
+   detached catch handle owns both them and the selected Error until
+   `_handler_free` destroys `retained`. A second transfer can select the same
+   handle before its landing runs, as when a `finally` raises while carrying
+   an Error; the abandoned selection is destroyed here because the replacement
+   transfer owns the handle. */
 static void _catch_retain(ErrorHandler handle) {
   int pushed = _scope_push(
-    <alloc-fail>, "could not enter error scope for retained catch records");
+    <alloc-fail>, "could not enter error scope for the retained catch record");
   _retained_destroy(handle.retained);
   handle.retained = Block.new(sizeof(ErrorRecord));
-  while (Error.count() > handle.watermark) {
-    ErrorRecord record = *_record_at(Error.count() - 1);
-    handle.retained.push(&record);
-    _thread().stack.pop();
-  }
+  ErrorRecord record = *_record_at(Error.count() - 1);
+  handle.retained.push(&record);
+  _thread().stack.pop();
   if (pushed) Scope.pop();
 }
 
@@ -952,7 +836,7 @@ static void _catch_commit_captures(
 }
 
 static Symbol _catch_match(ErrorHandler h) {
-  if (Error.count() <= h.watermark) return <declined>;
+  if (Error.count() <= 0) return <declined>;
   ErrorRecord *record = _record_at(Error.count() - 1);
   Symbol code = record.entry.car().list().cadr();
   List detail = record.entry.cadr().list().cadr();
@@ -992,10 +876,9 @@ static Symbol _catch_match(ErrorHandler h) {
 }
 
 /* Offers the newest record to each handler from innermost outward.
-    A handler runs on the live frame, before any transfer, and sees the errors
-    accrued since it was registered. `<handled>` consumes that slice and stops
-    the search. `<declined>` continues outward and leaves the errors
-    accumulated. `<fatal>` aborts. `<unwind>` is not available to an observing
+    A handler runs on the live frame, before any transfer, and sees the error
+    being raised. `<handled>` consumes it and stops the search. `<declined>`
+    continues outward. `<fatal>` aborts. `<unwind>` is not available to an observing
     registration and is a programmer error here. Hiding the current handler
     before its callback makes a nested raise begin at the next outer handler;
     the saved full chain is restored after dispatch or at a transfer landing.
@@ -1015,7 +898,8 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
         defer _region_destroy(&view);
         state.floor_only++;
         view = _region_new();
-        List slice = _view_since(&view, h.watermark);
+        ErrorRecord *newest = _record_at(Error.count() - 1);
+        List slice = _cons(&view, _copy_value(&view, newest.entry), NULL);
         state.floor_only--;
         disposition = h.fn(slice, h.data);
       }
@@ -1039,7 +923,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
       _floor(effective, "handler returned fatal");
     }
     if (disposition == <handled>) {
-      _truncate(h.watermark);
+      _truncate(raised_at);
       result = <handled>;
       break;
     }

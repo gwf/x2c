@@ -19,19 +19,14 @@ static void context_open_close_restores_scope(void) {
 }
 
 static void context_restores_error_state(void) {
-  int count = Error.count(), bound = Error.bound();
   EXPECT_TRUE(Error.policy_get(<context-no>) == <abort>);
   Context context = Context.open();
-  Error.policy_set(<context-no>, <collect>);
-  Error.bound_set(17);
+  Error.policy_set(<context-no>, <ignore>);
   Error.raise(<context-no>, %((value 7)));
-  EXPECT_TRUE(Error.policy_get(<context-no>) == <collect>);
-  EXPECT_INT_EQ(Error.bound(), 17);
-  EXPECT_INT_EQ(Error.count(), count + 1);
+  EXPECT_TRUE(Error.policy_get(<context-no>) == <ignore>);
+  EXPECT_INT_EQ(Error.count(), 0);
   context.close();
   EXPECT_TRUE(Error.policy_get(<context-no>) == <abort>);
-  EXPECT_INT_EQ(Error.bound(), bound);
-  EXPECT_INT_EQ(Error.count(), count);
 }
 
 static void context_inherited_pools_reuse_ancestor_values(void) {

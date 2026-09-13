@@ -315,15 +315,13 @@ Source: `lib/logger.x:738`
 `void Logger.initialize(void)`
 
 Installs the process-wide info-level `Logger` and stderr sink.
-`Error` initializes first, then this function records its handler watermark
-and installs an observing `Error` handler. Runtime initialization calls
-this
-once and later shutdown hooks invoke `Logger.shutdown` before `Error` shuts
-down.
+`Error` initializes first, then this function installs an observing `Error`
+handler. Runtime initialization calls this once and later shutdown hooks
+invoke `Logger.shutdown` before `Error` shuts down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:852`
+Source: `lib/logger.x:838`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority
@@ -401,19 +399,15 @@ Source: `lib/logger.x:213`
 `void Logger.shutdown(void)`
 
 Shuts down process-wide `Logger` integration.
-Pending root `Error`s are offered to the active `Logger` before the
-observing
-handler is removed. The global slot is then cleared; a custom active
-`Logger`
-is flushed but remains caller-owned, while the default `Logger` is flushed,
-retired, and freed. A repeated call after shutdown is a no-op.
+The observing handler is removed and the global slot is cleared; a custom
+active `Logger` is flushed but remains caller-owned, while the default
+`Logger` is flushed, retired, and freed. A repeated call after shutdown is
+a no-op.
 
-**Raises:** `<alloc-fail>` while opening the temporary canonical pool,
-`<bad-state>` when default-`Logger` delivery is active, or any cause from
-event delivery or a sink flusher. The failure may interrupt the remaining
-cleanup.
+**Raises:** `<bad-state>` when default-`Logger` delivery is active, or any
+cause from a sink flusher. The failure may interrupt the remaining cleanup.
 
-Source: `lib/logger.x:823`
+Source: `lib/logger.x:819`
 
 <a id="Logger.sink_count"></a>
 #### Logger.sink_count
@@ -462,7 +456,7 @@ for source readers but are not supported as user API.
 
 Offers the newest `Error` to the current global `Logger`.
 A well-formed entry with `<abort>` or `<log>` policy is rendered as an
-`<err-report>` event; missing, malformed, `<collect>`, and `<ignore>` input
+`<err-report>` event; missing, malformed, and `<ignore>` input
 produces no event. The borrowed input is never consumed, `data` is ignored,
 and the handler always returns `<declined>`, leaving transfer to `Error` or
 another handler.
