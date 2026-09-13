@@ -4,11 +4,11 @@
 
 #include "error.h"
 
-static List _21, _20, _8, _7, _6;
+static List _27, _26, _24, _23, _19, _18, _8, _7, _6;
 
-static String _24, _23, _22, _18, _16, _15, _14, _13, _12, _11, _10, _9, _2, _1, _0;
+static String _30, _29, _28, _21, _16, _15, _14, _13, _12, _11, _10, _9, _2, _1, _0;
 
-static Var _19, _17, _5, _4, _3;
+static Var _25, _22, _20, _17, _5, _4, _3;
 
 static int map_evaluations;
 
@@ -40,6 +40,8 @@ List cons(Var, List);
 
 Var String_var(String);
 
+Var List_var(List);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -62,13 +64,19 @@ __attribute__((constructor)) static void _file_init_(void){
   _15 = String_new("1 2 3");
   _16 = String_new("x y");
   _17 = String_var(_0);
-  _18 = String_new("bb");
-  _19 = String_var(_18);
-  _20 = cons(_19, NULL);
-  _21 = cons(_17, _20);
-  _22 = String_new("ada");
-  _23 = String_new("lovelace");
-  _24 = String_new("three");
+  _18 = cons(_3, NULL);
+  _19 = cons(_17, _18);
+  _20 = List_var(_19);
+  _21 = String_new("bb");
+  _22 = String_var(_21);
+  _23 = cons(_4, NULL);
+  _24 = cons(_22, _23);
+  _25 = List_var(_24);
+  _26 = cons(_25, NULL);
+  _27 = cons(_20, _26);
+  _28 = String_new("ada");
+  _29 = String_new("lovelace");
+  _30 = String_new("three");
 }
 
 static Map counted_map(Map map){
@@ -119,10 +127,6 @@ Split String_lines(String);
 Split String_splits(String, String);
 
 Iter List_iter(List, Iter);
-
-Iter range(int, int, int, Iter);
-
-Iter Iter_zip(Iter, Iter, Iter);
 
 List Var_list(Var);
 
@@ -498,14 +502,14 @@ int boxed = 0;
   }
 
 }
-struct Iter zip_left_storage, zip_right_storage, zip_storage;
-Iter zip_left = List_iter(_21, & zip_left_storage);
-Iter zip_right = range(1, 2, 1, & zip_right_storage);
-Iter zipped = Iter_zip(zip_left, zip_right, & zip_storage);
+List zip_rows = _27;
 int zipped_total = 0;
 {
   Var text, number;
-  Iter _x2c_macro_iterator_20 = zipped;
+  Iter _x2c_macro_iterator_20 = List_iter(zip_rows, &(struct Iter){
+    int_var(0)
+  }
+  );
   Var _x2c_macro_item_20;
   while(Iter_try_next(_x2c_macro_iterator_20, & _x2c_macro_item_20)){
     List _x2c_macro_pair_20;
@@ -547,7 +551,7 @@ int native_values = 0, native_pairs = 0;
 
 }
 MapStringString named = MapStringString_new();
-MapStringString_set(named, _22, _23);
+MapStringString_set(named, _28, _29);
 int native_bytes = 0;
 {
   String volatile value;
@@ -564,7 +568,7 @@ int native_bytes = 0;
 int volatile value = 7;
 printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", value_total, typed_total, key_bytes, destructured_total, converted_total, skipped, stopped, deferred_keys, nested, caught, cleanups, map_evaluations, initializer_evaluations, word_bytes, line_count, line_bytes, fields, empty_fields, scanned_bytes, split_evaluations);
 printf("%d %d %d %d %d %d %d %d %d %d\n", pairs, boxed, zipped_total, native_values, native_pairs, native_bytes, key_total, existing, existing_total, existing_map_total);
-return value_total == 6 && typed_total == 6 && key_bytes == 3 && destructured_total == 6 && converted_total == 33 && skipped == 4 && stopped == 1 && deferred_keys == 3 && nested == 36 && caught == 1 && cleanups == 4 && map_evaluations == 1 && initializer_evaluations == 1 && word_bytes == 14 && line_count == 3 && line_bytes == 11 && fields == 4 && empty_fields == 2 && scanned_bytes == 11 && split_evaluations == 1 && pairs == 6 && boxed == 2 && zipped_total == 5 && native_values == 30 && native_pairs == 50 && native_bytes == 8 && key_total == 3 && existing == 3 && existing_total == 6 && existing_map_total == 6 && ! Var_is_void(entry) && String_equal(word, _24) && value == 7 ? 0 : 1;
+return value_total == 6 && typed_total == 6 && key_bytes == 3 && destructured_total == 6 && converted_total == 33 && skipped == 4 && stopped == 1 && deferred_keys == 3 && nested == 36 && caught == 1 && cleanups == 4 && map_evaluations == 1 && initializer_evaluations == 1 && word_bytes == 14 && line_count == 3 && line_bytes == 11 && fields == 4 && empty_fields == 2 && scanned_bytes == 11 && split_evaluations == 1 && pairs == 6 && boxed == 2 && zipped_total == 5 && native_values == 30 && native_pairs == 50 && native_bytes == 8 && key_total == 3 && existing == 3 && existing_total == 6 && existing_map_total == 6 && ! Var_is_void(entry) && String_equal(word, _30) && value == 7 ? 0 : 1;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
