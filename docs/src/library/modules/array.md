@@ -37,6 +37,7 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.sort_with`](#Array.sort_with) | Stably sorts `array` with a borrowed synchronous comparator and returns it. |
 | [`Array.splice`](#Array.splice) | Replaces `remove_count` elements at `index` with `values` and returns what was removed. |
 | [`Array.take_last`](#Array.take_last) | Takes and returns the last element of `array`, or `void` if it is empty. |
+| [`Array.try_next`](#Array.try_next) | Writes the next element, advances `cursor`, and returns one. |
 | [`Array.unshift`](#Array.unshift) | Inserts `elem` at the front of `array` and returns it. |
 | [`Array.updateindex`](#Array.updateindex) | Updates one `Array` element in place. |
 | [`Array.write_str`](#Array.write_str) | Appends the `Array` display text to `out`, using each element's `write_str`. |
@@ -226,7 +227,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:789`
+Source: `lib/array.x:805`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -526,6 +527,22 @@ reallocate.
 
 Source: `lib/array.x:229`
 
+<a id="Array.try_next"></a>
+#### Array.try_next
+
+`int Array.try_next(Array array, int *cursor, Var *out)`
+
+Writes the next element, advances `cursor`, and returns one.
+Initialize the caller-owned cursor to zero. A null `Array`, a null
+pointer, a negative cursor, or exhaustion returns zero without changing
+`cursor` or `out`. Structural mutation invalidates an outstanding cursor.
+
+`foreach (Var item, array)` compiles to this loop.
+
+**Raises:** `<size-limit>` for an `Array` outside the integer index domain.
+
+Source: `lib/array.x:781`
+
 <a id="Array.unshift"></a>
 #### Array.unshift
 
@@ -591,7 +608,7 @@ Source: `lib/array.x:58`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:795`
+Source: `lib/array.x:811`
 
 ## Advanced and interop API
 
@@ -618,7 +635,7 @@ Source: `lib/array.x:795`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:803`
+Source: `lib/array.x:819`
 
 <a id="Array.compare"></a>
 #### Array.compare

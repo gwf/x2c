@@ -310,11 +310,13 @@ Pool List_pool_detach(void){
   return x2c_pool_values_detach();
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 String String_promote(String);
 
 String Var_string(Var);
+
+int Var_is(Var, Symbol);
 
 Atom Atom_promote(Atom);
 
@@ -323,7 +325,7 @@ int List_truth(List);
 int Pool_promote(Pool, Var, void *);
 
 static void _promote_node(Var node){
-  if(Var_is(node, 1318210446)){
+  if(Var_is_row(node, 11, 7, 1)){
     String_promote(Var_string(node));
     return;
   }
@@ -331,7 +333,7 @@ static void _promote_node(Var node){
     Atom_promote(node);
     return;
   }
-  if(! Var_is(node, 806120)) return;
+  if(! Var_is_row(node, 9, 7, 4)) return;
   for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
     if(! Pool_promote(x2c_pool_values_current(), List_var(cur), cur)) break;
     _promote_node(cur -> car);
@@ -353,9 +355,9 @@ String Var_str(Var);
 int Pool_own(Pool, Var, void *);
 
 static int _try_own_node(Var node){
-  if(Var_is(node, 1318210446)) return String_try_own(Var_string(node));
+  if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
-  if(! Var_is(node, 806120)) return 1;
+  if(! Var_is_row(node, 9, 7, 4)) return 1;
   for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
     if(! Pool_own(x2c_pool_values_current(), List_var(cur), cur)) return 0;
     if(! _try_own_node(cur -> car)) return 0;
@@ -430,10 +432,6 @@ static void _append_value(Array values, Var value){
   Array_push(values, value);
 }
 
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
-
 List List_append(List a, List b){
   if(! _init_guard_) List_initialize();
   if(! List_truth(a)) return b;
@@ -450,13 +448,11 @@ List List_append(List a, List b){
   {
     {
       Var value;
-      Iter _x2c_macro_iterator_0 = List_iter(a, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_0;
-      while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-        value = _x2c_macro_item_0;
+      List _x2c_macro_object_0 = a;
+      List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+      Var _x2c_macro_cursor_output_0;
+      while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+        value = _x2c_macro_cursor_output_0;
         _append_value(values, value);
       }
 
@@ -582,13 +578,11 @@ List List_reverse(List lst){
   List rev = NULL;
   {
     Var value;
-    Iter _x2c_macro_iterator_1 = List_iter(lst, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      value = _x2c_macro_item_1;
+    List _x2c_macro_object_1 = lst;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      value = _x2c_macro_cursor_output_1;
       {
         List next = cons(value, rev);
         rev = next;
@@ -647,13 +641,11 @@ List List_map(List lst, Func fn){
   {
     {
       Var value;
-      Iter _x2c_macro_iterator_2 = List_iter(lst, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_2;
-      while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-        value = _x2c_macro_item_2;
+      List _x2c_macro_object_2 = lst;
+      List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+      Var _x2c_macro_cursor_output_2;
+      while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+        value = _x2c_macro_cursor_output_2;
         {
           FuncArg arguments[1] ={
             FuncArg_value(value)
@@ -693,13 +685,11 @@ Var List_foldl(List lst, Var seed, Func fn){
   if(! fn) return acc;
   {
     Var value;
-    Iter _x2c_macro_iterator_3 = List_iter(cur, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-      value = _x2c_macro_item_3;
+    List _x2c_macro_object_3 = cur;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      value = _x2c_macro_cursor_output_3;
       {
         FuncArg arguments[2] ={
           FuncArg_value(acc), FuncArg_value(value)
@@ -726,13 +716,11 @@ Var List_find(List lst, Func pred){
   if(! pred) return((void) 0, Void);
   {
     Var value;
-    Iter _x2c_macro_iterator_4 = List_iter(lst, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-      value = _x2c_macro_item_4;
+    List _x2c_macro_object_4 = lst;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      value = _x2c_macro_cursor_output_4;
       {
         FuncArg arguments[1] ={
           FuncArg_value(value)
@@ -752,13 +740,11 @@ int List_any(List lst, Func pred){
   if(! pred) return 0;
   {
     Var value;
-    Iter _x2c_macro_iterator_5 = List_iter(lst, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      value = _x2c_macro_item_5;
+    List _x2c_macro_object_5 = lst;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      value = _x2c_macro_cursor_output_5;
       {
         FuncArg arguments[1] ={
           FuncArg_value(value)
@@ -779,13 +765,11 @@ int List_all(List lst, Func pred){
   if(! pred) return 0;
   {
     Var value;
-    Iter _x2c_macro_iterator_6 = List_iter(lst, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
-      value = _x2c_macro_item_6;
+    List _x2c_macro_object_6 = lst;
+    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+    Var _x2c_macro_cursor_output_6;
+    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+      value = _x2c_macro_cursor_output_6;
       {
         FuncArg arguments[1] ={
           FuncArg_value(value)
@@ -817,13 +801,11 @@ List List_sort(List lst){
   {
     {
       Var value;
-      Iter _x2c_macro_iterator_7 = List_iter(lst, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_7;
-      while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
-        value = _x2c_macro_item_7;
+      List _x2c_macro_object_7 = lst;
+      List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+      Var _x2c_macro_cursor_output_7;
+      while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+        value = _x2c_macro_cursor_output_7;
         _append_value(values, value);
       }
 
@@ -862,13 +844,11 @@ List List_sort_with(List lst, Func compare){
   {
     {
       Var value;
-      Iter _x2c_macro_iterator_8 = List_iter(lst, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_8;
-      while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
-        value = _x2c_macro_item_8;
+      List _x2c_macro_object_8 = lst;
+      List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+      Var _x2c_macro_cursor_output_8;
+      while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+        value = _x2c_macro_cursor_output_8;
         Array_push(values, value);
       }
 
@@ -906,13 +886,11 @@ List List_sort_by(List lst, Func key){
   {
     {
       Var value;
-      Iter _x2c_macro_iterator_9 = List_iter(lst, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_9;
-      while(Iter_try_next(_x2c_macro_iterator_9, & _x2c_macro_item_9)){
-        value = _x2c_macro_item_9;
+      List _x2c_macro_object_9 = lst;
+      List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+      Var _x2c_macro_cursor_output_9;
+      while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+        value = _x2c_macro_cursor_output_9;
         Array_push(values, value);
       }
 
@@ -969,13 +947,11 @@ Array List_array(List lst){
   Array array = Array_new();
   {
     Var value;
-    Iter _x2c_macro_iterator_10 = List_iter(lst, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_10;
-    while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
-      value = _x2c_macro_item_10;
+    List _x2c_macro_object_10 = lst;
+    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
+      value = _x2c_macro_cursor_output_10;
       _append_value(array, value);
     }
 
@@ -1073,7 +1049,7 @@ List List_map2(List a, List b, Func fn){
 }
 
 static Var _sublis_node(List alist, Var node){
-  if(! Var_is(node, 806120)){
+  if(! Var_is_row(node, 9, 7, 4)){
     Var replacement = List_assoc(alist, node);
     return Var_is_void(replacement) ? node : replacement;
   }
@@ -1091,13 +1067,11 @@ static Var _sublis_node(List alist, Var node){
   {
     {
       Var source;
-      Iter _x2c_macro_iterator_11 = List_iter(list, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_11;
-      while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
-        source = _x2c_macro_item_11;
+      List _x2c_macro_object_11 = list;
+      List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+      Var _x2c_macro_cursor_output_11;
+      while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
+        source = _x2c_macro_cursor_output_11;
         {
           Var item = _sublis_node(alist, source);
           _append_value(items, item);
@@ -1143,25 +1117,21 @@ List List_flatten(List lst){
   {
     {
       Var head;
-      Iter _x2c_macro_iterator_13 = List_iter(lst, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_13;
-      while(Iter_try_next(_x2c_macro_iterator_13, & _x2c_macro_item_13)){
-        head = _x2c_macro_item_13;
+      List _x2c_macro_object_13 = lst;
+      List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+      Var _x2c_macro_cursor_output_13;
+      while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
+        head = _x2c_macro_cursor_output_13;
         {
-          if(Var_is(head, 806120)){
+          if(Var_is_row(head, 9, 7, 4)){
             List inner = Var_list(head);
             {
               Var item;
-              Iter _x2c_macro_iterator_12 = List_iter(inner, &(struct Iter){
-                int_var(0)
-              }
-              );
-              Var _x2c_macro_item_12;
-              while(Iter_try_next(_x2c_macro_iterator_12, & _x2c_macro_item_12)){
-                item = _x2c_macro_item_12;
+              List _x2c_macro_object_12 = inner;
+              List _x2c_macro_cursor_12 = _x2c_macro_object_12;
+              Var _x2c_macro_cursor_output_12;
+              while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
+                item = _x2c_macro_cursor_output_12;
                 _append_value(values, item);
               }
 
@@ -1193,15 +1163,13 @@ List List_flatten(List lst){
 static void _flatten_all_collect(Array values, List lst){
   {
     Var head;
-    Iter _x2c_macro_iterator_14 = List_iter(lst, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_14;
-    while(Iter_try_next(_x2c_macro_iterator_14, & _x2c_macro_item_14)){
-      head = _x2c_macro_item_14;
+    List _x2c_macro_object_14 = lst;
+    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+    Var _x2c_macro_cursor_output_14;
+    while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_14)){
+      head = _x2c_macro_cursor_output_14;
       {
-        if(Var_is(head, 806120)) _flatten_all_collect(values, Var_list(head));
+        if(Var_is_row(head, 9, 7, 4)) _flatten_all_collect(values, Var_list(head));
         else _append_value(values, head);
       }
 
@@ -1271,13 +1239,11 @@ Var List_assoc(List list, Var key){
   if(! _init_guard_) List_initialize();
   {
     List pair;
-    Iter _x2c_macro_iterator_15 = List_iter(list, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_15;
-    while(Iter_try_next(_x2c_macro_iterator_15, & _x2c_macro_item_15)){
-      pair = Var_list(_x2c_macro_item_15);
+    List _x2c_macro_object_15 = list;
+    List _x2c_macro_cursor_15 = _x2c_macro_object_15;
+    Var _x2c_macro_cursor_output_15;
+    while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_15)){
+      pair = Var_list(_x2c_macro_cursor_output_15);
       {
         if(! List_truth(pair)) continue;
         Var pair_key, value;
@@ -1391,6 +1357,8 @@ static List _collect_subseq(List list, int start, int step, int span){
   x2c_cleanup_leave(&_x2c_defer_record_14);
 }
 }
+
+Var int_var(int);
 
 int x2c_normalize_slice(int *, int *, int, int);
 
@@ -1551,7 +1519,7 @@ char Buffer_get(Buffer, ptrdiff_t);
 Buffer Buffer_pop(Buffer);
 
 static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
-  if(! Var_is(elem, 806120)){
+  if(! Var_is_row(elem, 9, 7, 4)){
     if(mode == 40228) Var_write_str(elem, buf);
     else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, buf);
     else Var_write_repr(elem, buf);
@@ -1571,7 +1539,7 @@ static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
   x2c_cleanup_push(&_x2c_defer_record_17);
   {
     Buffer_write(buf, "(");
-    if(! Var_is(car(lst), 806120)) Buffer_pad(buf);
+    if(! Var_is_row(car(lst), 9, 7, 4)) Buffer_pad(buf);
     Buffer_push(buf);
     for(List l = lst;  List_truth(l);  l = cdr(l)){
       _serialize_list_line(car(l), buf, mode);
@@ -1600,7 +1568,7 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
   const int maxwidth = 80;
   if(buf -> pos >= maxwidth - 1) Buffer_newline_indent(buf);
   else if(buf -> pos - buf -> _indent > 40) Buffer_newline_indent(buf);
-  if(! Var_is(elem, 806120)){
+  if(! Var_is_row(elem, 9, 7, 4)){
     size_t before = buf -> content -> length, position = buf -> pos;
     _serialize_list_line(elem, buf, mode);
     size_t length = buf -> content -> length - before;
@@ -1656,7 +1624,7 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
   {
     if(buf -> pos - Buffer_tabstop(buf) > 5) Buffer_newline_indent(buf);
     Buffer_write(buf, "(");
-    if(! Var_is(car(lst), 806120)) Buffer_pad(buf);
+    if(! Var_is_row(car(lst), 9, 7, 4)) Buffer_pad(buf);
     Buffer_push(buf);
     for(List l = lst;  List_truth(l);  l = cdr(l)){
       _serialize_nested_list(car(l), buf, mode);
@@ -1784,6 +1752,14 @@ static int _next(Iter iter, Var * out){
   return 1;
 }
 
+int List_try_next(List lst, List * cursor, Var * out){
+  if(! _init_guard_) List_initialize();
+  if(! cursor || ! out || ! List_truth(* cursor)) return 0;
+  * out = List_car((* cursor));
+  * cursor =(* cursor) -> cdr;
+  return 1;
+}
+
 int Iter_truth(Iter);
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
@@ -1793,6 +1769,8 @@ Iter List_iter(List lst, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, List_var(lst), _next, List_var(lst));
 }
+
+int Iter_try_next(Iter, Var *);
 
 List Iter_list(Iter iter){
   if(! _init_guard_) List_initialize();
@@ -1847,13 +1825,11 @@ List List_filter(List lst, Func pred){
   {
     {
       Var value;
-      Iter _x2c_macro_iterator_17 = List_iter(lst, &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_17;
-      while(Iter_try_next(_x2c_macro_iterator_17, & _x2c_macro_item_17)){
-        value = _x2c_macro_item_17;
+      List _x2c_macro_object_17 = lst;
+      List _x2c_macro_cursor_17 = _x2c_macro_object_17;
+      Var _x2c_macro_cursor_output_16;
+      while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_16)){
+        value = _x2c_macro_cursor_output_16;
         {
           FuncArg arguments[1] ={
             FuncArg_value(value)

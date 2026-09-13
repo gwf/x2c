@@ -89,7 +89,7 @@ static int _bind(RecursiveMatchState state, Var binder, Var value){
   return 1;
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 List Var_list(Var);
 
@@ -120,7 +120,7 @@ static int _bind_span(RecursiveMatchState r, Var binder, List input, List end, i
     expected = r -> span_begin[index];
   }
   else{
-    if(! Var_is(r -> values[index], 806120)) return 0;
+    if(! Var_is_row(r -> values[index], 9, 7, 4)) return 0;
     expected = Var_list(r -> values[index]);
   }
   for(int i = 0;  i < length;  i ++){
@@ -139,7 +139,7 @@ static int _bind_final(RecursiveMatchState state, Var binder, List input){
   if(index < 0) return 0;
   unsigned long bit = 1UL << index;
   if(!(state -> present & bit)) return _bind(state, binder, List_var(input));
-  if(!(state -> spans & bit)) return Var_is(state -> values[index], 806120) && List_equal(Var_list(state -> values[index]), input);
+  if(!(state -> spans & bit)) return Var_is_row(state -> values[index], 9, 7, 4) && List_equal(Var_list(state -> values[index]), input);
   List expected = state -> span_begin[index], candidate = input;
   int length = 0;
   while(length < state -> span_length[index] && ! List_equal(expected, state -> span_end[index]) && List_truth(candidate)){
@@ -174,22 +174,16 @@ static int _star(RecursiveMatchState state, List input, List pattern){
 
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 static int _all(RecursiveMatchState state, Var input, List patterns){
   {
     Var pattern;
-    Iter _x2c_macro_iterator_0 = List_iter(patterns, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      pattern = _x2c_macro_item_0;
+    List _x2c_macro_object_0 = patterns;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      pattern = _x2c_macro_cursor_output_0;
       if(! _match(state, input, pattern)) return 0;
     }
 
@@ -200,13 +194,11 @@ static int _all(RecursiveMatchState state, Var input, List patterns){
 static int _any(RecursiveMatchState state, Var input, List patterns){
   {
     Var pattern;
-    Iter _x2c_macro_iterator_1 = List_iter(patterns, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      pattern = _x2c_macro_item_1;
+    List _x2c_macro_object_1 = patterns;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      pattern = _x2c_macro_cursor_output_1;
       {
         struct RecursiveMatchState snapshot = * state;
         if(_match(state, input, pattern)) return 1;
@@ -222,13 +214,11 @@ static int _any(RecursiveMatchState state, Var input, List patterns){
 static int _none(RecursiveMatchState state, Var input, List patterns){
   {
     Var pattern;
-    Iter _x2c_macro_iterator_2 = List_iter(patterns, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      pattern = _x2c_macro_item_2;
+    List _x2c_macro_object_2 = patterns;
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      pattern = _x2c_macro_cursor_output_2;
       {
         struct RecursiveMatchState snapshot = * state;
         int matched = _match(state, input, pattern);
@@ -260,6 +250,8 @@ Var List_getindex(List, int);
 
 List List_cddr(List);
 
+int Var_is(Var, Symbol);
+
 Symbol Var_symbol(Var);
 
 static int _is(Var input, List patterns){
@@ -267,7 +259,7 @@ static int _is(Var input, List patterns){
   if(List_equal(patterns, _5)) return Var_is_list_binder(input);
   if(List_equal(patterns, _2)) return Var_is_binder(input);
   if(List_equal(patterns, _7)) return Var_is_match_op(input);
-  if(List_equal(patterns, _9)) return ! Var_is(input, 806120);
+  if(List_equal(patterns, _9)) return ! Var_is_row(input, 9, 7, 4);
   Var kind, type;
   List _x2c_destructure_0 = patterns;
   kind = List_getindex(_x2c_destructure_0, 0);
@@ -283,8 +275,8 @@ int List_len(List);
 
 static int _match(RecursiveMatchState state, Var input, Var pattern){
   if(Var_is_atom_binder(pattern)) return _bind(state, pattern, input);
-  if(! Var_is(input, 806120) && ! Var_is(pattern, 806120)) return Var_equal(input, pattern);
-  if(! Var_is(pattern, 806120)) return 0;
+  if(! Var_is_row(input, 9, 7, 4) && ! Var_is_row(pattern, 9, 7, 4)) return Var_equal(input, pattern);
+  if(! Var_is_row(pattern, 9, 7, 4)) return 0;
   List list_pattern = Var_list(pattern);
   Var head = List_car(list_pattern);
   List tail = List_cdr(list_pattern);
@@ -300,7 +292,7 @@ static int _match(RecursiveMatchState state, Var input, Var pattern){
     }
 
   }
-  if(! Var_is(input, 806120)) return 0;
+  if(! Var_is_row(input, 9, 7, 4)) return 0;
   List input_list = Var_list(input);
   if(! List_truth(list_pattern)) return ! List_truth(input_list);
   if(Var_is_list_binder(head)) return _star(state, input_list, list_pattern);
@@ -374,7 +366,7 @@ static int _try_value(Var input, Var pattern, List * out_bindings){
 }
 
 static List _search(Var input, Var pattern, List results, int include_empty){
-  if(Var_is(input, 806120)){
+  if(Var_is_row(input, 9, 7, 4)){
     List list = Var_list(input);
     if(List_truth(list)){
       results = _search(List_car(list), pattern, results, 1);
@@ -388,7 +380,7 @@ static List _search(Var input, Var pattern, List results, int include_empty){
 }
 
 static int _first(Var input, Var pattern, int include_empty, Var * out_match, List * out_bindings){
-  if(Var_is(input, 806120)){
+  if(Var_is_row(input, 9, 7, 4)){
     List list = Var_list(input);
     if(List_truth(list)){
       if(_first(List_car(list), pattern, 1, out_match, out_bindings)) return 1;
@@ -406,7 +398,7 @@ List List_replace(List, List);
 Var List_assoc(List, Var);
 
 static Var _replace_all(Var input, Var pattern, Var template, int include_empty){
-  if(Var_is(input, 806120)){
+  if(Var_is_row(input, 9, 7, 4)){
     List list = Var_list(input);
     if(List_truth(list)){
       Var head = _replace_all(List_car(list), pattern, template, 1);
@@ -417,7 +409,7 @@ static Var _replace_all(Var input, Var pattern, Var template, int include_empty)
   }
   List bindings;
   if(! _try_value(input, pattern, & bindings)) return input;
-  if(Var_is(template, 806120)) return List_var(List_replace(Var_list(template), bindings));
+  if(Var_is_row(template, 9, 7, 4)) return List_var(List_replace(Var_list(template), bindings));
   if(Var_is_binder(template)) return List_assoc(bindings, template);
   return template;
 }
@@ -442,7 +434,7 @@ int match_recursive_try_match_replace(List input, Var pattern, Var template, Var
   if(! out) return 0;
   List bindings;
   if(! match_recursive_try_match(input, pattern, & bindings)) return 0;
-  if(Var_is(template, 806120)) * out = List_var(List_replace(Var_list(template), bindings));
+  if(Var_is_row(template, 9, 7, 4)) * out = List_var(List_replace(Var_list(template), bindings));
   else if(Var_is_binder(template)) * out = List_assoc(bindings, template);
   else * out = template;
   return 1;

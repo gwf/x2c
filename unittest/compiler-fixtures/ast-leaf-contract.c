@@ -75,9 +75,7 @@ Var List_getindex(List, int);
 
 int Var_int(Var);
 
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 Var List_var(List);
 
@@ -103,13 +101,11 @@ int main(void){
   count += ast_phase1_add(ast_phase1_apply(callback, Var_int(left_value)), Var_int(right_value));
   {
     Var value;
-    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      value = _x2c_macro_item_0;
+    List _x2c_macro_object_0 = values;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      value = _x2c_macro_cursor_output_0;
       {
         {
   _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & count, ._x2c_defer_capture_1 =(const void *) & value};

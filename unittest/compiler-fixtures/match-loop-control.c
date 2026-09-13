@@ -42,11 +42,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _19 = cons(_11, _18);
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
@@ -57,13 +53,11 @@ int main(void){
   int matched = 0, after = 0;
   {
     Var item;
-    Iter _x2c_macro_iterator_0 = List_iter(break_inputs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      item = _x2c_macro_item_0;
+    List _x2c_macro_object_0 = break_inputs;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      item = _x2c_macro_cursor_output_0;
       {
         List value = Var_list(item);
 
@@ -87,11 +81,8 @@ after ++;
 
 }
 List continue_inputs = _19;  int visited = 0, accepted = 0; {
-  Var item;  Iter _x2c_macro_iterator_1 = List_iter(continue_inputs, &(struct Iter){
-    int_var(0)
-  }
-  );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-    item = _x2c_macro_item_1; {
+  Var item;  List _x2c_macro_object_1 = continue_inputs;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    item = _x2c_macro_cursor_output_1; {
       List value = Var_list(item);  visited ++;
   {
     List _x2c_match_expr = value;

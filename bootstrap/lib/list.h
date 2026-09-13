@@ -179,6 +179,8 @@ String List_repr(List lst);
 
 Buffer List_write_repr(List lst, Buffer out);
 
+int List_try_next(List lst, List * cursor, Var * out);
+
 Iter List_iter(List lst, Iter dest);
 
 List Iter_list(Iter iter);

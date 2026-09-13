@@ -143,24 +143,18 @@ Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List 
   return toolchain;
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 Var Array_push(Array, Var);
 
 static void _append_list(Array output, List values){
   {
     Var value;
-    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      value = _x2c_macro_item_0;
+    List _x2c_macro_object_0 = values;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      value = _x2c_macro_cursor_output_0;
       Array_push(output, value);
     }
 
@@ -176,13 +170,11 @@ static Array _compile_arguments(Toolchain toolchain, List gen_dirs){
   Array_push(arguments, String_var(_8));
   {
     String directory;
-    Iter _x2c_macro_iterator_1 = List_iter(gen_dirs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      directory = Var_string(_x2c_macro_item_1);
+    List _x2c_macro_object_1 = gen_dirs;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      directory = Var_string(_x2c_macro_cursor_output_1);
       {
         Array_push(arguments, String_var(_9));
         Array_push(arguments, String_var(directory));
@@ -265,19 +257,17 @@ void ToolAction_as_program(ToolAction action){
 
 int String_getindex(String, int);
 
-Iter String_iter(String, Iter);
+int String_try_next(String, int *, int *);
 
 static int _shell_safe(String argument){
   if(! String_truth(argument) || ! String_getindex(argument, 0)) return 0;
   {
     char raw;
-    Iter _x2c_macro_iterator_2 = String_iter(argument, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      raw = Var_char(Var_convert(_x2c_macro_item_2, 26993));
+    String _x2c_macro_object_2 = argument;
+    int _x2c_macro_cursor_2 = 0;
+    int _x2c_macro_cursor_output_2;
+    while(String_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      raw = _x2c_macro_cursor_output_2;
       {
         unsigned char ch = raw;
         if(!(isalnum(ch) || strchr("_+-=.,/:@", ch))) return 0;
@@ -297,13 +287,11 @@ static void _print_argument(String argument){
   fputc('\'', stderr);
   {
     char ch;
-    Iter _x2c_macro_iterator_3 = String_iter(argument, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-      ch = Var_char(Var_convert(_x2c_macro_item_3, 26993));
+    String _x2c_macro_object_3 = argument;
+    int _x2c_macro_cursor_3 = 0;
+    int _x2c_macro_cursor_output_3;
+    while(String_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      ch = _x2c_macro_cursor_output_3;
       {
         if(ch == '\'') fputs("'\\''", stderr);
         else fputc(ch, stderr);
@@ -321,13 +309,11 @@ static void _print_action(Symbol phase, List arguments){
   fprintf(stderr, "x2c: %s", Symbol_str(phase));
   {
     String argument;
-    Iter _x2c_macro_iterator_4 = List_iter(arguments, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-      argument = Var_string(_x2c_macro_item_4);
+    List _x2c_macro_object_4 = arguments;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      argument = Var_string(_x2c_macro_cursor_output_4);
       {
         fputc(' ', stderr);
         _print_argument(argument);
@@ -347,13 +333,11 @@ static char * * _action_argv(List arguments){
   int index = 0;
   {
     String argument;
-    Iter _x2c_macro_iterator_5 = List_iter(arguments, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      argument = Var_string(_x2c_macro_item_5);
+    List _x2c_macro_object_5 = arguments;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      argument = Var_string(_x2c_macro_cursor_output_5);
       argv[index ++] = String_truth(argument) ? argument : "";
     }
 

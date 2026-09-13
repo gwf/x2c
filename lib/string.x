@@ -1443,6 +1443,22 @@ static int _next(Iter iter, Var *out) {
   return 1;
 }
 
+/** Writes the next byte, advances `cursor`, and returns one.
+    Initialize the caller-owned cursor to zero. A null `String`, a null
+    pointer, a negative cursor, or exhaustion returns zero without changing
+    `cursor` or `out`. This is byte traversal, not Unicode characters.
+
+    `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
+    loop.
+*/
+int String.try_next(String str, int *cursor, int *out) {
+  if (!str || !cursor || !out || *cursor < 0) return 0;
+  if (*cursor >= str.len()) return 0;
+  *out = (int) str[*cursor];
+  *cursor += 1;
+  return 1;
+}
+
 /** Initializes `dest` as a lazy iterator over the bytes of `x`.
     The caller owns `dest`; it borrows `x`, which must remain live through
     traversal. A null `dest` returns NULL, and null `x` is exhausted. Each pull

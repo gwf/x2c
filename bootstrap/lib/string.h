@@ -87,6 +87,7 @@ String String_parse(String str);
 unsigned String_hash(String str);
 int String_equal(String x, String y);
 int String_compare(String x, String y);
+int String_try_next(String str, int * cursor, int * out);
 Iter String_iter(String x, Iter dest);
 
 #endif /* __GUARD_0x38442FC5__ */

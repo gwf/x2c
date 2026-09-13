@@ -60,7 +60,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _31 = cons(_16, _30);
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 List Var_list(Var);
 
@@ -91,7 +91,7 @@ int File_printf(File, const char *, ...);
 int Var_is_floating(Var);
 
 int snapshot_write_var(File output, Var value){
-  if(Var_is(value, 806120)){
+  if(Var_is_row(value, 9, 7, 4)){
     List list = Var_list(value);
     File_putc(output, '(');
     for(List p = list;  List_truth(p);  p = List_cdr(p)){
@@ -107,7 +107,7 @@ int snapshot_write_var(File output, Var value){
     File_puts(output, text);
     return 1;
   }
-  if(Var_is(value, 1318210446)){
+  if(Var_is_row(value, 11, 7, 1)){
     File_puts(output, Var_repr(value));
     return 1;
   }
@@ -126,7 +126,7 @@ static int _function_type(List type){
   if(! List_truth(type)) return 0;
   Var first = List_car(type);
   if(Var_equal(first, Symbol_var(437126)) || Var_equal(first, Symbol_var(634145674))) return 1;
-  return Var_is(first, 806120) ? _function_type(Var_list(first)) : 0;
+  return Var_is_row(first, 9, 7, 4) ? _function_type(Var_list(first)) : 0;
 }
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
@@ -141,9 +141,7 @@ Var Array_push(Array, Var);
 
 Array Array_sort(Array);
 
-Iter Array_iter(Array, Iter);
-
-int Iter_try_next(Iter, Var *);
+int Array_try_next(Array, int *, Var *);
 
 int File_error(File);
 
@@ -160,7 +158,7 @@ int symbol_snapshot_write(Map symbols, Map fn_defs, File output){
       key = _x2c_macro_cursor_output_0;
       value = _x2c_macro_cursor_output_1;
       {
-        List symbol_type = Var_is(value, 806120) ? Var_list(value) : NULL;
+        List symbol_type = Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
         int defined = 0;
 
   {
@@ -187,11 +185,8 @@ Array_push(entries, List_var(defined ? cons(key, cons(value, _11)) : cons(key, c
 
 }
 Array_sort(entries);  File_puts(output, "(snapshot 3 (\n"); {
-  Var entry;  Iter _x2c_macro_iterator_1 = Array_iter(entries, &(struct Iter){
-    int_var(0)
-  }
-  );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-    entry = _x2c_macro_item_1; {
+  Var entry;  Array _x2c_macro_object_1 = entries;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_2)){
+    entry = _x2c_macro_cursor_output_2; {
       File_puts(output, "  ");  if(! snapshot_write_var(output, entry)) return 0;  File_putc(output, '\n');
     }
 
@@ -202,9 +197,9 @@ File_puts(output, "))\n");  Array_free(entries);  return ! File_error(output);
 }
 
 long Var_integer(Var);
-Iter List_iter(List, Iter);
+int List_try_next(List, List *, Var *);
 static int _gensym(Var value){
-  if(! Var_is(value, 806120)) return 0;  List list = Var_list(value);  int maximum = 0;
+  if(! Var_is_row(value, 9, 7, 4)) return 0;  List list = Var_list(value);  int maximum = 0;
   {
     List _x2c_match_expr = list;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -213,11 +208,8 @@ static int _gensym(Var value){
     }
   }
 {
-    Var item;  Iter _x2c_macro_iterator_2 = List_iter(list, &(struct Iter){
-      int_var(0)
-    }
-    );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      item = _x2c_macro_item_2; {
+    Var item;  List _x2c_macro_object_2 = list;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3)){
+      item = _x2c_macro_cursor_output_3; {
         int found = _gensym(item);  if(found > maximum) maximum = found;
       }
 
@@ -242,7 +234,7 @@ Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym){
       _x2c_cleanup_guard_0 = 1; {
         String source = File_string(input);  unsigned cursor = 0;  Var document =((void) 0, Void), trailing =((void) 0, Void);
         Symbol volatile status = Lisp_read(lisp, source, & cursor, & document);
-        if(status != 46228810 || ! Var_is(document, 806120)){
+        if(status != 46228810 || ! Var_is_row(document, 9, 7, 4)){
           static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 127};
           x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));
           __builtin_unreachable();
@@ -274,15 +266,13 @@ status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
       symbols = Map_new();
       {
         Var volatile entry;
-        Iter _x2c_macro_iterator_3 = List_iter(entries, &(struct Iter){
-          int_var(0)
-        }
-        );
-        Var _x2c_macro_item_3;
-        while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-          entry = _x2c_macro_item_3;
+        List _x2c_macro_object_3 = entries;
+        List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+        Var _x2c_macro_cursor_output_4;
+        while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
+          entry = _x2c_macro_cursor_output_4;
           {
-            List row = Var_is(entry, 806120) ? Var_list(entry) : NULL;
+            List row = Var_is_row(entry, 9, 7, 4) ? Var_list(entry) : NULL;
             if(! List_truth(row) ||(List_len(row) != 2 && List_len(row) != 3)){
               static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 144};
               x2c_error_raise_n(& _x2c_error_site_3, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
@@ -296,7 +286,7 @@ status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
             value = List_getindex(_x2c_destructure_0, 1);
             marker = List_getindex(_x2c_destructure_0, 2);
             int defined = List_len(row) == 3 && Var_equal(marker, Symbol_var(292902696930268));
-            if((! defined && List_len(row) != 2) || ! Var_is(key, 806120) || ! Var_is(value, 806120)){
+            if((! defined && List_len(row) != 2) || ! Var_is_row(key, 9, 7, 4) || ! Var_is_row(value, 9, 7, 4)){
               static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 148};
               x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
               __builtin_unreachable();

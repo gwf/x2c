@@ -406,6 +406,8 @@ int Var_is_integer(Var);
 
 int Var_is_floating(Var);
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 List Var_list(Var);
 
 Block Var_block(Var);
@@ -431,23 +433,23 @@ static Var _export_value(Var v, Context source){
     return v;
   }
   if(Var_is_integer(v) || Var_is_floating(v)) return v;
-  if(Var_is(v, 1318210446)) return _export_string(v, source);
+  if(Var_is_row(v, 11, 7, 1)) return _export_string(v, source);
   if(Var_is(v, 826970)) return _export_atom(v, source);
-  if(Var_is(v, 806120)) return List_var(_export_list(Var_list(v), source));
+  if(Var_is_row(v, 9, 7, 4)) return List_var(_export_list(Var_list(v), source));
   if(Var_is(v, 3313778)) return _export_array(v, source);
   if(Var_is(v, 26720)) return _export_map(v, source);
-  if(Var_is(v, 5011670)){
+  if(Var_is_row(v, 8, 7, 1)){
     Block block = Var_block(v);
     if(Context_owns(source, block)) Block_move_to(block, source -> destination_scope);
     return v;
   }
-  if(Var_is(v, 5874022)){
+  if(Var_is_row(v, 8, 7, 3)){
     Bytes bytes = Var_bytes(v);
     Block block = Bytes_block(bytes);
     if(Context_owns(source, block)) Block_move_to(block, source -> destination_scope);
     return v;
   }
-  if(Var_is(v, 178663780)){
+  if(Var_is_row(v, 8, 7, 2)){
     Buffer buffer = Var_buffer(v);
     if(Context_owns(source, buffer)) Buffer_move_to(buffer, source -> destination_scope);
     return v;

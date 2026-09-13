@@ -423,8 +423,8 @@ Public functions:
 `Array.reverse`, `Array.map`, `Array.map2`, `Array.reduce`, `Array.compare`,
 `Array.sort`, `Array.sort_with`, `Array.sort_by`, `Array.heap_push`,
 `Array.heap_pop`, `Array.heapify`, `Array.join`, `Array.equal`,
-`Array.write_repr`, `Array.write_str`, `Array.str`, `Array.repr`, `Array.iter`,
-`Iter.array`, `Array.cleanup`
+`Array.write_repr`, `Array.write_str`, `Array.str`, `Array.repr`,
+`Array.try_next`, `Array.iter`, `Iter.array`, `Array.cleanup`
 
 ### [lib/atom.x](../lib/atom.x)
 
@@ -683,8 +683,8 @@ Public functions:
 `List.flatten_all`, `List.nth_cdr`, `List.getindex`, `List.assoc`, `List.get`,
 `List.tail`, `List.head`, `List.subseq`, `List.getslice`, `List.unpack_n`,
 `List.unpack_vars_n`, `List.hash`, `List.equal`, `List.compare`, `List.str`,
-`List.write_str`, `List.repr`, `List.write_repr`, `List.iter`, `Iter.list`,
-`List.filter`
+`List.write_str`, `List.repr`, `List.write_repr`, `List.try_next`, `List.iter`,
+`Iter.list`, `List.filter`
 
 ### [lib/logger.x](../lib/logger.x)
 
@@ -893,7 +893,7 @@ Public functions:
 `String.replace`, `String.printf`, `String.unescape`, `String.escape`,
 `String.str`, `String.repr`, `String.write_str`, `String.write_repr`,
 `String.parse_char`, `String.symbol`, `String.parse`, `String.hash`,
-`String.equal`, `String.compare`, `String.iter`
+`String.equal`, `String.compare`, `String.try_next`, `String.iter`
 
 ### [lib/symbol.x](../lib/symbol.x)
 

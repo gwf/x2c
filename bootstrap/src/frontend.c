@@ -311,11 +311,7 @@ int List_truth(List);
 
 String SourceView_path(String);
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
@@ -341,13 +337,11 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
   }
   {
     String directory;
-    Iter _x2c_macro_iterator_0 = List_iter(request -> package_dirs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      directory = Var_string(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = request -> package_dirs;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      directory = Var_string(_x2c_macro_cursor_output_0);
       {
         String root;
         if(compiler -> sources) root = SourceView_path(directory);
@@ -512,7 +506,7 @@ return ! Compiler_error_count(compiler);
 
 List Compiler_full_parse(Compiler, Map);
 
-Iter Array_iter(Array, Iter);
+int Array_try_next(Array, int *, Var *);
 
 Var Array_push(Array, Var);
 
@@ -551,13 +545,11 @@ x2c_exception_leave(& _x2c_exception_frame_5);
 }
 {
   Var entry;
-  Iter _x2c_macro_iterator_1 = Array_iter(diagnostics -> entries, &(struct Iter){
-    int_var(0)
-  }
-  );
-  Var _x2c_macro_item_1;
-  while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-    entry = _x2c_macro_item_1;
+  Array _x2c_macro_object_1 = diagnostics -> entries;
+  int _x2c_macro_cursor_1 = 0;
+  Var _x2c_macro_cursor_output_1;
+  while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    entry = _x2c_macro_cursor_output_1;
     Array_push(collected, entry);
   }
 

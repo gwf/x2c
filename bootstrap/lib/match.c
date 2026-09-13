@@ -355,7 +355,7 @@ int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pa
   return MatchPlan_try_match_replace(plan, input, template, out) == 1;
 }
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 List Var_list(Var);
 
@@ -363,7 +363,7 @@ List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, 
   if(! _init_guard_) _file_init_();
   Var result;
   if(! x2c_match_site_try_match_replace(site, input, pat, template, & result)) return input;
-  return Var_is(result, 806120) ? Var_list(result) : NULL;
+  return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
 }
 
 List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template){
@@ -386,7 +386,7 @@ int List_equal(List, List);
 static List _normalize_elements(List elements){
   if(! List_truth(elements)) return NULL;
   Var head = List_car(elements), normalized_head = head;
-  if(Var_is(head, 806120)) normalized_head = List_var(_normalize_pattern(Var_list(head)));
+  if(Var_is_row(head, 9, 7, 4)) normalized_head = List_var(_normalize_pattern(Var_list(head)));
   List tail = List_cdr(elements), normalized_tail = _normalize_elements(tail);
   if(Var_equal(normalized_head, head) && List_equal(normalized_tail, tail)) return elements;
   return cons(normalized_head, List_append(normalized_tail, NULL));
@@ -412,7 +412,7 @@ static int _is_list_literal(List pat){
   if(! List_truth(pat)) return 1;
   Var head = car(pat);
   if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
-  if(! Var_is(head, 806120)) return _is_list_literal(cdr(pat));
+  if(! Var_is_row(head, 9, 7, 4)) return _is_list_literal(cdr(pat));
   return _is_list_literal(Var_list(head)) && _is_list_literal(cdr(pat));
 }
 
@@ -456,6 +456,8 @@ int Var_is_binder(Var atom){
   return _binder_kind(atom) != 0;
 }
 
+int Var_is(Var, Symbol);
+
 int Var_is_match_op(Var atom){
   if(! _init_guard_) _file_init_();
   if(! Var_is(atom, 1328354264)) return 0;
@@ -490,7 +492,7 @@ static int _layout_builder_add(MatchLayoutBuilder * builder, Atom binder){
 int Var_is_nil(Var);
 
 static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
-  if(! Var_is(pattern, 806120)){
+  if(! Var_is_row(pattern, 9, 7, 4)){
     if(_malformed_binder_atom(pattern)) builder -> malformed_binder = 1;
     else if(_named_binder(pattern) && _layout_builder_add(builder, pattern) < 0) builder -> past_capacity = 1;
     return;
@@ -523,22 +525,16 @@ static int _layout_index(MatchCaptureLayout layout, Atom binder){
   return - 1;
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 static void _layout_analyze_sequence(MatchCaptureLayout layout, List patterns, unsigned long * definite, unsigned long * possible){
   {
     Var pattern;
-    Iter _x2c_macro_iterator_0 = List_iter(patterns, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      pattern = _x2c_macro_item_0;
+    List _x2c_macro_object_0 = patterns;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      pattern = _x2c_macro_cursor_output_0;
       {
         unsigned long part_definite, part_possible;
         _layout_analyze_pattern(layout, pattern, & part_definite, & part_possible);
@@ -556,13 +552,11 @@ static void _layout_analyze_alternatives(MatchCaptureLayout layout, List pattern
   int first = 1;
   {
     Var pattern;
-    Iter _x2c_macro_iterator_1 = List_iter(patterns, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      pattern = _x2c_macro_item_1;
+    List _x2c_macro_object_1 = patterns;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      pattern = _x2c_macro_cursor_output_1;
       {
         unsigned long part_definite, part_possible;
         _layout_analyze_pattern(layout, pattern, & part_definite, & part_possible);
@@ -589,7 +583,7 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsi
     * possible = * definite;
     return;
   }
-  if(! Var_is(pattern, 806120) || Var_is_nil(pattern)) return;
+  if(! Var_is_row(pattern, 9, 7, 4) || Var_is_nil(pattern)) return;
   List list = Var_list(pattern);
   Var head = car(list);
   List args = cdr(list);
@@ -657,7 +651,7 @@ static MatchCaptureLayout _capture_layout_analyze(Var pattern, Var * out_normali
     status = MACHINE_MALFORMED;
     reason = "binder-capacity";
   }
-  else if(Var_is(pattern, 806120)) normalized = List_var(_normalize_pattern(Var_list(pattern)));
+  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(_normalize_pattern(Var_list(pattern)));
   if(status != MACHINE_PREPARED) builder.count = 0;
   if(out_normalized) * out_normalized = normalized;
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * builder.count;
@@ -715,16 +709,14 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
   int width = 0;
   {
     Var part;
-    Iter _x2c_macro_iterator_2 = List_iter(pat, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      part = _x2c_macro_item_2;
+    List _x2c_macro_object_2 = pat;
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      part = _x2c_macro_cursor_output_2;
       {
         if(Var_is_list_binder(part)) return 0;
-        if((! Var_is(part, 806120) && ! Var_is_binder(part)) ||(Var_is(part, 806120) && _is_list_literal(Var_list(part)))){
+        if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list(part)))){
           * anchor = part;
           * offset = width;
           return 1;
@@ -741,16 +733,14 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
 static int _pattern_contains_binder(List pat, Var binder){
   {
     Var part;
-    Iter _x2c_macro_iterator_3 = List_iter(pat, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-      part = _x2c_macro_item_3;
+    List _x2c_macro_object_3 = pat;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      part = _x2c_macro_cursor_output_3;
       {
         if(Var_equal(part, binder)) return 1;
-        if(Var_is(part, 806120)){
+        if(Var_is_row(part, 9, 7, 4)){
           List nested = Var_list(part);
           if(List_truth(nested) && ! Var_equal(car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
         }
@@ -811,7 +801,7 @@ static Var _replace(Var input, List bindings){
     if(Var_is_void(val)) return input;
     return val;
   }
-  if(! Var_is(input, 806120)) return input;
+  if(! Var_is_row(input, 9, 7, 4)) return input;
   List lst = Var_list(input);
   if(! List_truth(lst)) return input;
   Var head = car(lst);
@@ -843,7 +833,7 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
     Var value;
     return _capture_lookup(layout, captures, input, & value) ? value : input;
   }
-  if(! Var_is(input, 806120)) return input;
+  if(! Var_is_row(input, 9, 7, 4)) return input;
   List list = Var_list(input);
   if(! List_truth(list)) return input;
   Var head = car(list);
@@ -853,14 +843,14 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
   Var replaced_head = _capture_replace(head, layout, captures);
   List replaced_tail = Var_list(_capture_replace(List_var(tail), layout, captures));
   if(splice){
-    List spliced = Var_is(replaced_head, 806120) ? Var_list(replaced_head) : NULL;
+    List spliced = Var_is_row(replaced_head, 9, 7, 4) ? Var_list(replaced_head) : NULL;
     return List_var(List_append(spliced, List_append(replaced_tail, NULL)));
   }
   return List_var(cons(replaced_head, List_append(replaced_tail, NULL)));
 }
 
 static Var _apply_capture_template(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var template){
-  if(Var_is(template, 806120)) return _capture_replace(template, layout, captures);
+  if(Var_is_row(template, 9, 7, 4)) return _capture_replace(template, layout, captures);
   if(_named_binder(template)){
     Var value =((void) 0, Void);
     _capture_lookup(layout, captures, template, & value);
@@ -882,7 +872,7 @@ List List_match_replace(List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   Var result;
   if(! List_try_match_replace(input, pat, template, & result)) return input;
-  return Var_is(result, 806120) ? Var_list(result) : NULL;
+  return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
 }
 
 static int _walk_prepared(MatchWalk walk, Var input){
@@ -894,7 +884,7 @@ static List _walk_bindings(MatchWalk walk, Var input){
 }
 
 static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List * results){
-  if(Var_is(input, 806120)){
+  if(Var_is_row(input, 9, 7, 4)){
     List lst = Var_list(input);
     if(List_truth(lst)){
       if(_walk_all_prepared(walk, car(lst), 1, results) < 0) return - 1;
@@ -909,7 +899,7 @@ static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List
 }
 
 static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Var * out_match, List * out_bindings){
-  if(Var_is(input, 806120)){
+  if(Var_is_row(input, 9, 7, 4)){
     List lst = Var_list(input);
     if(List_truth(lst)){
       int found = _walk_first_prepared(walk, car(lst), 1, out_match, out_bindings);
@@ -927,7 +917,7 @@ static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Va
 }
 
 static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int include_empty, int * error){
-  if(Var_is(node, 806120)){
+  if(Var_is_row(node, 9, 7, 4)){
     List lst = Var_list(node);
     if(List_truth(lst)){
       Var head = _walk_replace_prepared(walk, car(lst), template, 1, error);
@@ -1111,17 +1101,15 @@ static int MatchLower__collect_guard_args(MatchLower l, List args, Var * element
   int count = 0;
   {
     Var part;
-    Iter _x2c_macro_iterator_4 = List_iter(args, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-      part = _x2c_macro_item_4;
+    List _x2c_macro_object_4 = args;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      part = _x2c_macro_cursor_output_4;
       {
         if(count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "guard-width");
         elements[count] = part;
-        if(! Var_is(part, 806120)) children[count ++] = - 1;
+        if(! Var_is_row(part, 9, 7, 4)) children[count ++] = - 1;
         else{
           children[count] = MatchLower__compile_child(l, part);
           if(children[count ++] < 0) return - 1;
@@ -1279,7 +1267,7 @@ static int MatchLower__compile_guard_core(MatchLower l, Var op, List args){
       List _x2c_destructure_1 = args;
       binder = List_getindex(_x2c_destructure_1, 0);
       test = List_getindex(_x2c_destructure_1, 1);
-      if(! Var_is(test, 806120)) return MatchLower__compile_bind_and_leaf(l, binder, test);
+      if(! Var_is_row(test, 9, 7, 4)) return MatchLower__compile_bind_and_leaf(l, binder, test);
       int child = MatchLower__compile_child(l, test);
       if(child < 0) return - 1;
       return MatchLower__compile_bind_and(l, binder, child);
@@ -1376,13 +1364,11 @@ static int _inline_descend_ok(List child, int reg){
   if(_is_list_literal(child)) return 0;
   {
     Var part;
-    Iter _x2c_macro_iterator_5 = List_iter(child, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      part = _x2c_macro_item_5;
+    List _x2c_macro_object_5 = child;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      part = _x2c_macro_cursor_output_5;
       if(Var_is_list_binder(part)) return 0;
     }
 
@@ -1393,15 +1379,13 @@ static int _inline_descend_ok(List child, int reg){
 static int MatchLower__plan_inline_segment(MatchLower l, List pattern, int reg, MatchInlinePlan * plan){
   {
     Var part;
-    Iter _x2c_macro_iterator_6 = List_iter(pattern, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
-      part = _x2c_macro_item_6;
+    List _x2c_macro_object_6 = pattern;
+    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+    Var _x2c_macro_cursor_output_6;
+    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+      part = _x2c_macro_cursor_output_6;
       {
-        if(! Var_is(part, 806120)) continue;
+        if(! Var_is_row(part, 9, 7, 4)) continue;
         List child = Var_list(part);
         if(_inline_descend_ok(child, reg)){
           if(! MatchLower__plan_inline_segment(l, child, reg + 1, plan)) return 0;
@@ -1436,15 +1420,13 @@ static int MatchLower__emit_inline_segment(MatchLower l, List pattern, int reg, 
   MachineBuilder b = l -> b;
   {
     Var part;
-    Iter _x2c_macro_iterator_7 = List_iter(pattern, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
-      part = _x2c_macro_item_7;
+    List _x2c_macro_object_7 = pattern;
+    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+    Var _x2c_macro_cursor_output_7;
+    while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+      part = _x2c_macro_cursor_output_7;
       {
-        if(! Var_is(part, 806120)){
+        if(! Var_is_row(part, 9, 7, 4)){
           if(! MatchLower__emit_head_leaf(l, part, reg)) return - 1;
           continue;
         }
@@ -1482,7 +1464,7 @@ static int MatchLower__compile_segment(MatchLower l, List pattern){
     if(child_count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "segment-width");
     Var part = car(at);
     elements[child_count] = part;
-    if(! Var_is(part, 806120)) children[child_count ++] = - 1;
+    if(! Var_is_row(part, 9, 7, 4)) children[child_count ++] = - 1;
     else if(_inline_descend_ok(Var_list(part), 0)){
       if(! MatchLower__plan_inline_segment(l, Var_list(part), 1, & plan)) return - 1;
       children[child_count ++] = - 2;
@@ -1555,7 +1537,7 @@ static int MatchLower__compile_literal_list(MatchLower l, List pattern){
 
 static int MatchLower__compile_value(MatchLower l, Var pattern){
   if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(l, pattern);
-  if(! Var_is(pattern, 806120)) return MatchLower__compile_literal(l, pattern);
+  if(! Var_is_row(pattern, 9, 7, 4)) return MatchLower__compile_literal(l, pattern);
   List list = Var_list(pattern);
   if(List_truth(list) && Var_is_match_op(car(list))) return MatchLower__compile_guard_core(l, car(list), cdr(list));
   if(List_truth(list) && _is_list_literal(list)) return MatchLower__compile_literal_list(l, list);
@@ -1849,17 +1831,15 @@ static int _pattern_admissible(Var value, int depth){
     case 35386204516 : case 39939274535114 : return 0;
     case 1011493096 :{
       if(Var_is(value, 826970)) return 1;
-      if(Var_is(value, 1318210446)) return String_is_permanent(Var_str(value));
-      if(! Var_is(value, 806120)) return 0;
+      if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_str(value));
+      if(! Var_is_row(value, 9, 7, 4)) return 0;
       {
         Var part;
-        Iter _x2c_macro_iterator_8 = List_iter((List) Var_pointer(value), &(struct Iter){
-          int_var(0)
-        }
-        );
-        Var _x2c_macro_item_8;
-        while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
-          part = _x2c_macro_item_8;
+        List _x2c_macro_object_8 =(List) Var_pointer(value);
+        List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+        Var _x2c_macro_cursor_output_8;
+        while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+          part = _x2c_macro_cursor_output_8;
           if(! _pattern_admissible(part, depth + 1)) return 0;
         }
 

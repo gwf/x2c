@@ -126,9 +126,7 @@ static void break_inside_switch(void){
 }
 }
 
-Iter List_iter(List, Iter);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 int Var_int(Var);
 
@@ -142,13 +140,11 @@ static int continue_inside_foreach(void){
     if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
       {
         Var volatile item;
-        Iter _x2c_macro_iterator_0 = List_iter(_5, &(struct Iter){
-          int_var(0)
-        }
-        );
-        Var _x2c_macro_item_0;
-        while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-          item = _x2c_macro_item_0;
+        List _x2c_macro_object_0 = _5;
+        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+        Var _x2c_macro_cursor_output_0;
+        while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+          item = _x2c_macro_cursor_output_0;
           {
             if(Var_int(item) == 1) continue;
             if(Var_int(item) == 2){

@@ -1070,6 +1070,21 @@ static int _next(Iter iter, Var *out) {
   return 1;
 }
 
+/** Writes the next element, advances `cursor`, and returns one.
+    Initialize the caller-owned cursor to `lst`. A null pointer or an
+    exhausted cursor returns zero without changing `cursor` or `out`. The
+    cells are immutable, so only releasing the owning pool invalidates a
+    cursor.
+
+    `foreach (Var item, lst)` compiles to this loop.
+*/
+int List.try_next(List lst, List *cursor, Var *out) {
+  if (!cursor || !out || !*cursor) return 0;
+  *out = (*cursor).car();
+  *cursor = (*cursor).cdr;
+  return 1;
+}
+
 /** Initializes caller-owned `dest` as a forward iterator over `lst`.
     The iterator borrows the immutable cells and yields their stored `Var` bits
     without retaining them, so the owning pool must outlive iteration. A null

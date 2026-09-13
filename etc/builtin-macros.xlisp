@@ -32,8 +32,10 @@
         (if (and (equal? (_x2c.type.return type) '(int))
                  (equal? (car parameters) collection-type)
                  (_x2c.type.pointer? cursor-parameter)
-                 (_x2c.type.integral?
-                   (_x2c.type.element cursor-parameter))
+                 (or (_x2c.type.integral?
+                       (_x2c.type.element cursor-parameter))
+                     (equal? (_x2c.type.element cursor-parameter)
+                             collection-type))
                  outputs
                  (null? (filter
                    (lambda (output) (not
@@ -85,7 +87,8 @@
       (list declaration
             (x2c._foreach.declare collection-type object collection)
             (x2c._foreach.declare cursor-type cursor
-              (x2c.literal.int 0)))
+              (if (equal? cursor-type collection-type) object-expression
+                (x2c.literal.int 0))))
       (map x2c._foreach.output-declaration outputs)
       (list `(while ,condition ,loop-body)))))))
 

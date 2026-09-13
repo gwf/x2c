@@ -182,11 +182,13 @@ int ListString_index(ListString _x2c_macro_xs_5, String _x2c_macro_value_5){
   return List_index((List) _x2c_macro_xs_5, _typed_list_encode_string(_x2c_macro_value_5));
 }
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 ListString List_liststring(List _x2c_macro_xs_5){
   if(! _init_guard_) _file_init_();
   int _x2c_macro_index_5 = 0;
   for(List _x2c_macro_cur_5 = _x2c_macro_xs_5;  List_truth(_x2c_macro_cur_5);  _x2c_macro_cur_5 = List_cdr(_x2c_macro_cur_5)){
-    if(! Var_is(_x2c_macro_cur_5 -> car, 1318210446)) _no_convert(_5, _x2c_macro_index_5, Var_tag(_x2c_macro_cur_5 -> car));
+    if(! Var_is_row(_x2c_macro_cur_5 -> car, 11, 7, 1)) _no_convert(_5, _x2c_macro_index_5, Var_tag(_x2c_macro_cur_5 -> car));
     _x2c_macro_index_5 ++;
   }
   return(ListString) _x2c_macro_xs_5;

@@ -194,31 +194,30 @@
            (args (expr ("Var") (ident (binding 45 "right_value"))))))))))))) 
   (at 18 
    (block (declare ("Var") (bindings (bind (binding 48 "value") ()))) 
-    (declare ("Iter") 
+    (declare ("List") 
      (bindings 
-      (op = (bind (binding 49 "_x2c_macro_iterator_0") ()) 
-       (expr ("Iter") 
-        (call (expr ((func (("List") ("Iter"))) "Iter") 
-               (ident (binding 54 "List_iter"))) 
-         (args (expr ("List") (ident (binding 43 "values"))) 
-          (expr (* struct "Iter") 
-           (op & (expr (struct "Iter") 
-                  (cast (decl (struct "Iter") (bindings (bind () ()))) 
-                   (expr () 
-                    (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
-    (declare ("Var") (bindings (bind (binding 50 "_x2c_macro_item_0") ()))) 
+      (op = (bind (binding 52 "_x2c_macro_object_0") ()) 
+       (expr ("List") (ident (binding 43 "values")))))) 
+    (declare ("List") 
+     (bindings 
+      (op = (bind (binding 53 "_x2c_macro_cursor_0") ()) 
+       (expr ("List") (ident (binding 52 "_x2c_macro_object_0")))))) 
+    (declare ("Var") 
+     (bindings (bind (binding 56 "_x2c_macro_cursor_output_0") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("Iter") (* "Var"))) int) 
-             (ident (binding 55 "Iter_try_next"))) 
-       (args (expr ("Iter") (ident (binding 49 "_x2c_macro_iterator_0"))) 
+      (call (expr ((func (("List") (* "List") (* "Var"))) int) 
+             (ident (binding 55 "List_try_next"))) 
+       (args (expr ("List") (ident (binding 52 "_x2c_macro_object_0"))) 
+        (expr (* "List") 
+         (op & (expr ("List") (ident (binding 53 "_x2c_macro_cursor_0"))))) 
         (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 50 "_x2c_macro_item_0")))))))) 
+         (op & (expr ("Var") (ident (binding 56 "_x2c_macro_cursor_output_0")))))))) 
      (block 
       (stmnt 
        (expr ("Var") 
         (op = (expr ("Var") (ident (binding 48 "value"))) 
-         (expr ("Var") (ident (binding 50 "_x2c_macro_item_0")))))) 
+         (expr ("Var") (ident (binding 56 "_x2c_macro_cursor_output_0")))))) 
       (block 
        (at 16 
         (defer 
@@ -246,7 +245,7 @@
   (at 22 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 58 "caught") ()) 
+     (op = (bind (binding 59 "caught") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
   (at 26 
    (try (block 
@@ -268,24 +267,24 @@
         (expr ("List") 
          (cons (expr ("Var") 
                 (call (expr ((func (("Symbol"))) "Var") 
-                       (ident (binding 59 "Symbol_var"))) 
+                       (ident (binding 60 "Symbol_var"))) 
                  (args (expr ("Symbol") 
                         (literal ("Symbol") "invariant" invariant))))) 
           (expr ("List") 
            (cons (expr ("Var") 
                   (call (expr ((func (("List"))) "Var") 
-                         (ident (binding 60 "List_var"))) 
+                         (ident (binding 61 "List_var"))) 
                    (args (expr ("List") 
                           (expr ("List") 
                            (cons (expr ("Var") 
                                   (call (expr ((func (("Symbol"))) "Var") 
-                                         (ident (binding 59 "Symbol_var"))) 
+                                         (ident (binding 60 "Symbol_var"))) 
                                    (args (expr ("Symbol") 
                                           (literal ("Symbol") "value" value))))) 
                             (expr ("List") 
                              (cons (expr ("Var") 
                                     (call (expr ((func (("Symbol"))) "Var") 
-                                           (ident (binding 59 "Symbol_var"))) 
+                                           (ident (binding 60 "Symbol_var"))) 
                                      (args (expr ("Symbol") 
                                             (literal ("Symbol") "?value" ?value))))) 
                               (nil))))))))) (nil)))))) 
@@ -293,8 +292,8 @@
         (at 24 
          (stmnt 
           (expr ("Var") 
-           (op = (expr ("Var") (ident (binding 58 "caught"))) 
-            (expr ("Var") (ident (binding 61 "value"))))))))))) 
+           (op = (expr ("Var") (ident (binding 59 "caught"))) 
+            (expr ("Var") (ident (binding 62 "value"))))))))))) 
     (block 
      (at 25 
       (stmnt 
@@ -303,17 +302,17 @@
   (at 27 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 62 "lambda_value") ()) 
+     (op = (bind (binding 63 "lambda_value") ()) 
       (expr ("Var") 
        (call (expr ((func (("Var"))) "Var") 
               (parens 
                (expr ((func (("Var"))) "Var") 
-                (lambda (params (param ("Var") (bind (binding 63 "value") ()))) 
+                (lambda (params (param ("Var") (bind (binding 64 "value") ()))) 
                  (expr (int) 
                   (op + (expr (int) 
                          (call (expr ((func (("Var"))) (int)) 
                                 (ident (binding 47 "Var_int"))) 
-                          (args (expr ("Var") (ident (binding 63 "value")))))) 
+                          (args (expr ("Var") (ident (binding 64 "value")))))) 
                    (expr (int) (literal (int) "1")))))))) 
         (args (expr (int) (literal (int) "2"))))))))) 
   (at 28 
@@ -324,7 +323,7 @@
       (args (expr ("ast_phase1_Pair") (ident (binding 38 "pair"))) 
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 47 "Var_int"))) 
-         (args (expr ("Var") (ident (binding 58 "caught"))))))))))) 
+         (args (expr ("Var") (ident (binding 59 "caught"))))))))))) 
   (at 29 
    (stmnt 
     (expr (void) 
@@ -339,5 +338,5 @@
    (stmnt 
     (expr (void) 
      (cast (decl (void) (bindings (bind () ()))) 
-      (expr ("Var") (ident (binding 62 "lambda_value"))))))) 
+      (expr ("Var") (ident (binding 63 "lambda_value"))))))) 
   (at 32 (return (int) (expr (int) (literal (int) "0"))))))

@@ -41,6 +41,7 @@ Linked list with `Var` elements.
 | [`List.sort_by`](#List.sort_by) | Returns a stable sorted copy using `Array.sort_by`'s callback contract. |
 | [`List.sort_with`](#List.sort_with) | Returns a stable sorted copy using `Array.sort_with`'s callback contract. |
 | [`List.tail`](#List.tail) | Returns the last `count` elements of `list`. |
+| [`List.try_next`](#List.try_next) | Writes the next element, advances `cursor`, and returns one. |
 | [`List.unique`](#List.unique) | Returns a copy of `lst` with later duplicates removed. |
 | [`List.unpack_n`](#List.unpack_n) | Writes at most `destination_count` elements through `List` pointers. |
 | [`List.unpack_vars_n`](#List.unpack_vars_n) | Writes at most `destination_count` elements through `Var` pointers. |
@@ -129,7 +130,7 @@ never returns for an infinite source. Elements appear in iteration order.
 **Raises:** whatever the iterator's source raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:1089`
+Source: `lib/list.x:1104`
 
 ### `List`
 
@@ -225,7 +226,7 @@ invoking or checking `pred`.
 `<alloc-fail>` or `<size-limit>` while constructing the result. A null
 `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
-Source: `lib/list.x:1103`
+Source: `lib/list.x:1118`
 
 <a id="List.find"></a>
 #### List.find
@@ -327,7 +328,7 @@ The iterator borrows the immutable cells and yields their stored `Var` bits
 without retaining them, so the owning pool must outlive iteration. A null
 `dest` returns NULL; `nil` produces an exhausted iterator.
 
-Source: `lib/list.x:1078`
+Source: `lib/list.x:1093`
 
 <a id="List.last"></a>
 #### List.last
@@ -464,6 +465,21 @@ The result is an existing tail of `list`, so nothing is allocated. When
 `count` reaches or exceeds the length, the whole `list` comes back.
 
 Source: `lib/list.x:777`
+
+<a id="List.try_next"></a>
+#### List.try_next
+
+`int List.try_next(List lst, List *cursor, Var *out)`
+
+Writes the next element, advances `cursor`, and returns one.
+Initialize the caller-owned cursor to `lst`. A null pointer or an
+exhausted cursor returns zero without changing `cursor` or `out`. The
+cells are immutable, so only releasing the owning pool invalidates a
+cursor.
+
+`foreach (Var item, lst)` compiles to this loop.
+
+Source: `lib/list.x:1081`
 
 <a id="List.unique"></a>
 #### List.unique

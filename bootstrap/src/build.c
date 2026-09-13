@@ -227,24 +227,18 @@ static uint64_t _state_text(uint64_t hash, String text){
   return _state_bytes(hash, "\0", 1);
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
 static uint64_t _state_list(uint64_t hash, List values){
   {
     String value;
-    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      value = Var_string(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = values;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      value = Var_string(_x2c_macro_cursor_output_0);
       hash = _state_text(hash, value);
     }
 
@@ -285,13 +279,11 @@ static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
   List dirs = path ? String_split(String_new(path), _1) : NULL;
   {
     String dir;
-    Iter _x2c_macro_iterator_1 = List_iter(dirs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      dir = Var_string(_x2c_macro_item_1);
+    List _x2c_macro_object_1 = dirs;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      dir = Var_string(_x2c_macro_cursor_output_1);
       {
         String candidate = String_truth(dir) && String_getindex(dir, 0) ? String_join(NULL, cons(String_var(dir), cons(String_var(_2), cons(String_var(tool), NULL)))) : tool;
         if(! access(candidate, X_OK)) return _state_file(hash, candidate, ok);
@@ -372,13 +364,11 @@ static uint64_t _state_dependencies(uint64_t hash, String depfile, int * ok){
   }
   {
     String input;
-    Iter _x2c_macro_iterator_2 = List_iter(inputs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      input = Var_string(_x2c_macro_item_2);
+    List _x2c_macro_object_2 = inputs;
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      input = Var_string(_x2c_macro_cursor_output_2);
       hash = _state_file(hash, input, ok);
     }
 
@@ -458,13 +448,11 @@ Build CliRequest_prepare(CliRequest c){
   int compilable = 0, input_count = 0;
   {
     String input;
-    Iter _x2c_macro_iterator_3 = List_iter(c -> inputs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-      input = Var_string(_x2c_macro_item_3);
+    List _x2c_macro_object_3 = c -> inputs;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      input = Var_string(_x2c_macro_cursor_output_3);
       {
         input_count ++;
         _validate_input(input);
@@ -526,13 +514,11 @@ Build CliRequest_prepare(CliRequest c){
   }
   {
     String input;
-    Iter _x2c_macro_iterator_4 = List_iter(c -> inputs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-      input = Var_string(_x2c_macro_item_4);
+    List _x2c_macro_object_4 = c -> inputs;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      input = Var_string(_x2c_macro_cursor_output_4);
       {
         if(String_endswith(input, _10)) state -> xlat_n ++;
         if(String_endswith(input, _11)) Array_push(state -> c_sources, String_var(input));
@@ -601,13 +587,11 @@ static String _package_directory(List roots, String path){
   String canonical = String_join(NULL, cons(String_var(String_new(buffer)), NULL));
   {
     String candidate;
-    Iter _x2c_macro_iterator_5 = List_iter(roots, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      candidate = Var_string(_x2c_macro_item_5);
+    List _x2c_macro_object_5 = roots;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      candidate = Var_string(_x2c_macro_cursor_output_5);
       {
         if(! realpath(candidate, buffer)) continue;
         String directory = x2c_package_directory(String_join(NULL, cons(String_var(String_new(buffer)), NULL)), canonical);
@@ -678,9 +662,9 @@ Array flags = Array_new();
   Var word;
   Split _x2c_macro_object_6 = String_words(text);
   int _x2c_macro_cursor_6 = 0;
-  String _x2c_macro_cursor_output_0;
-  while(Split_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_0)){
-    word = String_var(_x2c_macro_cursor_output_0);
+  String _x2c_macro_cursor_output_6;
+  while(Split_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+    word = String_var(_x2c_macro_cursor_output_6);
     Array_push(flags, word);
   }
 
@@ -701,13 +685,11 @@ static void Build__link_packages(Build state, String input, String directory){
   String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(x2c_path_stem(input)), cons(String_var(_32), NULL)))));
   {
     String dependency;
-    Iter _x2c_macro_iterator_7 = List_iter(_state_dep_inputs(depfile), &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7, & _x2c_macro_item_7)){
-      dependency = Var_string(_x2c_macro_item_7);
+    List _x2c_macro_object_7 = _state_dep_inputs(depfile);
+    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+    Var _x2c_macro_cursor_output_7;
+    while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+      dependency = Var_string(_x2c_macro_cursor_output_7);
       {
         String package = _package_directory(roots, dependency);
         if(! String_truth(package) ||(String_truth(own) && String_equal(package, own))) continue;
@@ -778,13 +760,11 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
   hash = _state_list(hash, action -> arguments);
   {
     String input;
-    Iter _x2c_macro_iterator_8 = List_iter(inputs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_8;
-    while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
-      input = Var_string(_x2c_macro_item_8);
+    List _x2c_macro_object_8 = inputs;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+      input = Var_string(_x2c_macro_cursor_output_8);
       hash = _state_file(hash, input, ok);
     }
 
@@ -855,13 +835,11 @@ static String _compile_command(Build state, ToolAction action, String source, St
   int first = 1;
   {
     String argument;
-    Iter _x2c_macro_iterator_9 = List_iter(action -> arguments, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_9;
-    while(Iter_try_next(_x2c_macro_iterator_9, & _x2c_macro_item_9)){
-      argument = Var_string(_x2c_macro_item_9);
+    List _x2c_macro_object_9 = action -> arguments;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+      argument = Var_string(_x2c_macro_cursor_output_9);
       {
         if(! first) Buffer_write(out, ", ");
         _json_string(out, argument);
@@ -877,7 +855,7 @@ static String _compile_command(Build state, ToolAction action, String source, St
 
 int File_puts(File, const char *);
 
-Iter Array_iter(Array, Iter);
+int Array_try_next(Array, int *, Var *);
 
 void report_line(Symbol, String);
 
@@ -892,13 +870,11 @@ int compile_commands_write(String path, Array commands){
   int ok = File_puts(output, "[\n") != EOF, first = 1;
   {
     String entry;
-    Iter _x2c_macro_iterator_10 = Array_iter(commands, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_10;
-    while(Iter_try_next(_x2c_macro_iterator_10, & _x2c_macro_item_10)){
-      entry = Var_string(_x2c_macro_item_10);
+    Array _x2c_macro_object_10 = commands;
+    int _x2c_macro_cursor_10 = 0;
+    Var _x2c_macro_cursor_output_10;
+    while(Array_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
+      entry = Var_string(_x2c_macro_cursor_output_10);
       {
         if(! first && File_puts(output, ",\n") == EOF) ok = 0;
         if(File_puts(output, entry) == EOF) ok = 0;
@@ -966,13 +942,11 @@ static int _compile_sources(Build b){
   b -> cc_start = report_now_us();
   {
     Var value;
-    Iter _x2c_macro_iterator_12 = Array_iter(b -> c_sources, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_12;
-    while(Iter_try_next(_x2c_macro_iterator_12, & _x2c_macro_item_12)){
-      value = _x2c_macro_item_12;
+    Array _x2c_macro_object_12 = b -> c_sources;
+    int _x2c_macro_cursor_12 = 0;
+    Var _x2c_macro_cursor_output_12;
+    while(Array_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
+      value = _x2c_macro_cursor_output_12;
       {
         String source = Var_string(value);
         report_progress(7477414666, b -> cc_done, b -> cc_n, source);
@@ -983,13 +957,11 @@ static int _compile_sources(Build b){
         if(String_startswith(source, b -> gen_root)) Array_push(include_dirs, String_var(x2c_path_dir(source)));
         {
           Var directory;
-          Iter _x2c_macro_iterator_11 = Array_iter(b -> gen_dirs, &(struct Iter){
-            int_var(0)
-          }
-          );
-          Var _x2c_macro_item_11;
-          while(Iter_try_next(_x2c_macro_iterator_11, & _x2c_macro_item_11)){
-            directory = _x2c_macro_item_11;
+          Array _x2c_macro_object_11 = b -> gen_dirs;
+          int _x2c_macro_cursor_11 = 0;
+          Var _x2c_macro_cursor_output_11;
+          while(Array_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
+            directory = _x2c_macro_cursor_output_11;
             if(! Array_contains(include_dirs, directory)) Array_push(include_dirs, directory);
           }
 
@@ -1036,26 +1008,22 @@ static List _native_action_inputs(Build state){
   Array inputs = Array_new();
   {
     Var value;
-    Iter _x2c_macro_iterator_13 = Array_iter(state -> objects, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_13;
-    while(Iter_try_next(_x2c_macro_iterator_13, & _x2c_macro_item_13)){
-      value = _x2c_macro_item_13;
+    Array _x2c_macro_object_13 = state -> objects;
+    int _x2c_macro_cursor_13 = 0;
+    Var _x2c_macro_cursor_output_13;
+    while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
+      value = _x2c_macro_cursor_output_13;
       Array_push(inputs, value);
     }
 
   }
   {
     Var value;
-    Iter _x2c_macro_iterator_14 = Array_iter(state -> native_inputs, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_14;
-    while(Iter_try_next(_x2c_macro_iterator_14, & _x2c_macro_item_14)){
-      value = _x2c_macro_item_14;
+    Array _x2c_macro_object_14 = state -> native_inputs;
+    int _x2c_macro_cursor_14 = 0;
+    Var _x2c_macro_cursor_output_14;
+    while(Array_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_14)){
+      value = _x2c_macro_cursor_output_14;
       Array_push(inputs, value);
     }
 
@@ -1070,13 +1038,11 @@ static int _mapped_debug(Build state){
   int enabled = 0;
   {
     String flag;
-    Iter _x2c_macro_iterator_15 = List_iter(state -> toolchain -> cc_args, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_15;
-    while(Iter_try_next(_x2c_macro_iterator_15, & _x2c_macro_item_15)){
-      flag = Var_string(_x2c_macro_item_15);
+    List _x2c_macro_object_15 = state -> toolchain -> cc_args;
+    List _x2c_macro_cursor_15 = _x2c_macro_object_15;
+    Var _x2c_macro_cursor_output_15;
+    while(List_try_next(_x2c_macro_object_15, & _x2c_macro_cursor_15, & _x2c_macro_cursor_output_15)){
+      flag = Var_string(_x2c_macro_cursor_output_15);
       {
         if(String_equal(flag, _49) || String_equal(flag, _50)) enabled = 0;
         else if(String_equal(flag, _51) || String_equal(flag, _52) || String_equal(flag, _53) || String_equal(flag, _54) || String_equal(flag, _55) || String_equal(flag, _56) || String_equal(flag, _57) || String_equal(flag, _58) || String_equal(flag, _59) || String_equal(flag, _60) || String_startswith(flag, _105)) enabled = 1;
@@ -1219,13 +1185,11 @@ int Build_run_program(Build state){
   Array_push(arguments, String_var(state -> output));
   {
     String argument;
-    Iter _x2c_macro_iterator_16 = List_iter(state -> request -> run_args, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_16;
-    while(Iter_try_next(_x2c_macro_iterator_16, & _x2c_macro_item_16)){
-      argument = Var_string(_x2c_macro_item_16);
+    List _x2c_macro_object_16 = state -> request -> run_args;
+    List _x2c_macro_cursor_16 = _x2c_macro_object_16;
+    Var _x2c_macro_cursor_output_16;
+    while(List_try_next(_x2c_macro_object_16, & _x2c_macro_cursor_16, & _x2c_macro_cursor_output_16)){
+      argument = Var_string(_x2c_macro_cursor_output_16);
       Array_push(arguments, String_var(argument));
     }
 

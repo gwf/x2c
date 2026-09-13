@@ -569,24 +569,18 @@ static char * _read_response_file(const char * path, size_t * length){
   return text;
 }
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
 static int _response_on_stack(List stack, String path){
   {
     String entry;
-    Iter _x2c_macro_iterator_0 = List_iter(stack, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      entry = Var_string(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = stack;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      entry = Var_string(_x2c_macro_cursor_output_0);
       if(strcmp(entry, path) == 0) return 1;
     }
 
@@ -717,13 +711,11 @@ static void _expand_argument(Array output, String argument, List stack){
   List nested = cons(String_var(identity), stack);
   {
     String word;
-    Iter _x2c_macro_iterator_1 = List_iter(cli_response_arguments(path), &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      word = Var_string(_x2c_macro_item_1);
+    List _x2c_macro_object_1 = cli_response_arguments(path);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      word = Var_string(_x2c_macro_cursor_output_1);
       _expand_argument(output, word, nested);
     }
 
@@ -944,13 +936,11 @@ CliRequest cli_package_options(String path, String package){
   {
     {
       String word;
-      Iter _x2c_macro_iterator_2 = List_iter(cli_response_arguments(path), &(struct Iter){
-        int_var(0)
-      }
-      );
-      Var _x2c_macro_item_2;
-      while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-        word = Var_string(_x2c_macro_item_2);
+      List _x2c_macro_object_2 = cli_response_arguments(path);
+      List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+      Var _x2c_macro_cursor_output_2;
+      while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+        word = Var_string(_x2c_macro_cursor_output_2);
         Array_push(words, String_var(String_replace(word, _49, package)));
       }
 

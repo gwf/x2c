@@ -35,23 +35,17 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("error");
 }
 
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int String_try_next(String, int *, int *);
 
 static void _string(File file, String value){
   fputc('"', file);
   {
     int byte;
-    Iter _x2c_macro_iterator_0 = String_iter(value, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      byte = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
+    String _x2c_macro_object_0 = value;
+    int _x2c_macro_cursor_0 = 0;
+    int _x2c_macro_cursor_output_0;
+    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      byte = _x2c_macro_cursor_output_0;
       {
         unsigned char ch = byte;
         if(ch == '"' || ch == '\\') fprintf(file, "\\%c", ch);
@@ -71,9 +65,9 @@ static void _location(File file, String path, int start, int end){
   fprintf(file, ",\"start\":%d,\"end\":%d", start, end);
 }
 
-Iter List_iter(List, Iter);
-
 List Compiler_diagnostics(Compiler);
+
+int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
@@ -81,7 +75,7 @@ Var List_assoc(List, Var);
 
 Var Symbol_var(Symbol);
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 String Var_string(Var);
 
@@ -95,6 +89,8 @@ Var Map_setindex(Map, Var, Var);
 
 Var String_var(String);
 
+Var int_var(int);
+
 String Symbol_str(Symbol);
 
 static void _diagnostics(File file, Compiler compiler, Map needed){
@@ -102,18 +98,16 @@ static void _diagnostics(File file, Compiler compiler, Map needed){
   fputs("\"diagnostics\":[", file);
   {
     List entry;
-    Iter _x2c_macro_iterator_1 = List_iter(Compiler_diagnostics(compiler), &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-      entry = Var_list(_x2c_macro_item_1);
+    List _x2c_macro_object_1 = Compiler_diagnostics(compiler);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      entry = Var_list(_x2c_macro_cursor_output_1);
       {
         Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
         List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
         Var source = List_assoc(location, Symbol_var(412426));
-        String path = Var_is(source, 1318210446) ? Var_string(source) : compiler -> filename;
+        String path = Var_is_row(source, 11, 7, 1) ? Var_string(source) : compiler -> filename;
         Var position = List_assoc(location, Symbol_var(1133019155420));
         Var width = List_assoc(location, Symbol_var(816725264));
         int start = Var_is_void(position) ? 0 : Var_int(position);
@@ -138,7 +132,7 @@ static void _diagnostics(File file, Compiler compiler, Map needed){
   fputc(']', file);
 }
 
-Iter Array_iter(Array, Iter);
+int Array_try_next(Array, int *, Var *);
 
 Var List_getindex(List, int);
 
@@ -150,13 +144,11 @@ static List _occurrence(Compiler compiler, String path, int offset){
   List found = NULL;
   {
     List row;
-    Iter _x2c_macro_iterator_2 = Array_iter(compiler -> source_occurrences, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      row = Var_list(_x2c_macro_item_2);
+    Array _x2c_macro_object_2 = compiler -> source_occurrences;
+    int _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_2;
+    while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      row = Var_list(_x2c_macro_cursor_output_2);
       {
         String file = Var_string(List_getindex(row, 0));
         int start = Var_int(List_getindex(row, 1)), end = Var_int(List_getindex(row, 2));
@@ -193,7 +185,7 @@ static void _query(File file, Compiler compiler, String path, String kind, int o
   Type type = Var_type(List_getindex(row, 4));
   if(String_equal(kind, _0)){
     Var value = Map_getindex(compiler -> source_definitions, List_var(binding));
-    if(! Var_is(value, 806120)) return;
+    if(! Var_is_row(value, 9, 7, 4)) return;
     List target = Var_list(value);
     Map_setindex(needed, List_getindex(target, 0), int_var(1));
     fputs(",\"definition\":{", file);
@@ -214,6 +206,8 @@ static void _query(File file, Compiler compiler, String path, String kind, int o
 }
 
 Iter Map_keys(Map, Iter);
+
+int Iter_try_next(Iter, Var *);
 
 int Map_try_get(Map, Var, Var *);
 
@@ -274,13 +268,11 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
       for(ProjectBuild node = plan;  node;  node = node -> next){
         {
           String input;
-          Iter _x2c_macro_iterator_4 = List_iter(node -> request -> inputs, &(struct Iter){
-            int_var(0)
-          }
-          );
-          Var _x2c_macro_item_4;
-          while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
-            input = Var_string(_x2c_macro_item_4);
+          List _x2c_macro_object_4 = node -> request -> inputs;
+          List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+          Var _x2c_macro_cursor_output_3;
+          while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_3)){
+            input = Var_string(_x2c_macro_cursor_output_3);
             {
               if(! String_equal(SourceView_path(input), source)) continue;
               if(selected && selected != node -> request){

@@ -111,7 +111,7 @@ int List_truth(List);
 
 List List_cdr(List);
 
-int Var_is(Var, Symbol);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 Var List_car(List);
 
@@ -121,7 +121,7 @@ static List _parameter(Func function, unsigned index){
   if(! function || index >= function -> nparams) return NULL;
   List params = _parameters(function);
   while(List_truth(params) && index --) params = List_cdr(params);
-  return List_truth(params) && Var_is(List_car(params), 806120) ? Var_list(List_car(params)) : NULL;
+  return List_truth(params) && Var_is_row(List_car(params), 9, 7, 4) ? Var_list(List_car(params)) : NULL;
 }
 
 Var unsigned_var(unsigned);
@@ -146,6 +146,8 @@ List x2c_func_reference_type(Func function, unsigned argc, unsigned index){
   List parameter = _parameter(function, index);
   return List_truth(parameter) && Var_equal(List_car(parameter), Symbol_var(77)) ? List_cdr(parameter) : NULL;
 }
+
+int Var_is(Var, Symbol);
 
 static unsigned _type_qualifiers(List * cursor){
   unsigned qualifiers = 0;
@@ -375,7 +377,7 @@ if(context_size && ! context){
 size_t context_offset = _context_offset();  if(context_size > SIZE_MAX - context_offset){
   static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/func.x",.function = "_new",.line = 274};  x2c_error_raise_n(& _x2c_error_site_16, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))), Symbol_var(1265290), Var_box_ulong(context_size));  __builtin_unreachable();
 }
-int void_params = List_len(params) == 1 && Var_is(List_car(params), 806120) && Var_equal(List_car(params), List_var(_33));  size_t bytes = context_offset + context_size;  Func fn = Scope_calloc(1, bytes), result = NULL; {
+int void_params = List_len(params) == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_33));  size_t bytes = context_offset + context_size;  Func fn = Scope_calloc(1, bytes), result = NULL; {
   _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & result, ._x2c_defer_capture_1 =(const void *) & fn};
 
   X2CCleanup _x2c_defer_record_0 = {

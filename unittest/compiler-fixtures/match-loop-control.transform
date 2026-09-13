@@ -14,36 +14,30 @@
           (op = (bind (binding 4 "after") ()) (expr (int) (literal (int) "0")))))) 
   (at 22 
    (block (declare ("Var") (bindings (bind (binding 5 "item") ()))) 
-    (declare ("Iter") 
+    (declare ("List") 
      (bindings 
-      (op = (bind (binding 7 "_x2c_macro_iterator_0") ()) 
-       (expr ("Iter") 
-        (call (expr ((func (("List") ("Iter"))) "Iter") 
-               (ident (binding 12 "List_iter"))) 
-         (args (expr ("List") (ident (binding 2 "break_inputs"))) 
-          (expr (* struct "Iter") 
-           (op & (expr (struct "Iter") 
-                  (cast (struct "Iter") 
-                   (expr (struct "Iter") 
-                    (composite 
-                     (commas 
-                      (expr ("Var") 
-                       (call (expr ((func ((int))) "Var") 
-                              (ident (binding 44 "int_var"))) 
-                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
-    (declare ("Var") (bindings (bind (binding 8 "_x2c_macro_item_0") ()))) 
+      (op = (bind (binding 10 "_x2c_macro_object_0") ()) 
+       (expr ("List") (ident (binding 2 "break_inputs")))))) 
+    (declare ("List") 
+     (bindings 
+      (op = (bind (binding 11 "_x2c_macro_cursor_0") ()) 
+       (expr ("List") (ident (binding 10 "_x2c_macro_object_0")))))) 
+    (declare ("Var") 
+     (bindings (bind (binding 14 "_x2c_macro_cursor_output_0") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("Iter") (* "Var"))) int) 
-             (ident (binding 13 "Iter_try_next"))) 
-       (args (expr ("Iter") (ident (binding 7 "_x2c_macro_iterator_0"))) 
+      (call (expr ((func (("List") (* "List") (* "Var"))) int) 
+             (ident (binding 13 "List_try_next"))) 
+       (args (expr ("List") (ident (binding 10 "_x2c_macro_object_0"))) 
+        (expr (* "List") 
+         (op & (expr ("List") (ident (binding 11 "_x2c_macro_cursor_0"))))) 
         (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 8 "_x2c_macro_item_0")))))))) 
+         (op & (expr ("Var") (ident (binding 14 "_x2c_macro_cursor_output_0")))))))) 
      (block 
       (stmnt 
        (expr ("Var") 
         (op = (expr ("Var") (ident (binding 5 "item"))) 
-         (expr ("Var") (ident (binding 8 "_x2c_macro_item_0")))))) 
+         (expr ("Var") (ident (binding 14 "_x2c_macro_cursor_output_0")))))) 
       (block 
        (at 20 
         (declare ("List") 
@@ -51,7 +45,7 @@
           (op = (bind (binding 6 "value") ()) 
            (expr ("List") 
             (call (expr ((func (("Var"))) "List") 
-                   (ident (binding 45 "Var_list"))) 
+                   (ident (binding 46 "Var_list"))) 
              (args (expr ("Var") (ident (binding 5 "item")))))))))) 
        (at 21 
         (matchcases (expr ("List") (ident (binding 6 "value"))) 
@@ -66,72 +60,66 @@
   (at 10 
    (declare ("List") 
     (bindings 
-     (op = (bind (binding 14 "continue_inputs") ()) 
+     (op = (bind (binding 15 "continue_inputs") ()) 
       (expr ("List") (expr ("List") (cache 19))))))) 
   (at 11 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 15 "visited") ()) (expr (int) (literal (int) "0"))) 
-     (op = (bind (binding 16 "accepted") ()) (expr (int) (literal (int) "0")))))) 
+     (op = (bind (binding 16 "visited") ()) (expr (int) (literal (int) "0"))) 
+     (op = (bind (binding 17 "accepted") ()) (expr (int) (literal (int) "0")))))) 
   (at 25 
-   (block (declare ("Var") (bindings (bind (binding 17 "item") ()))) 
-    (declare ("Iter") 
+   (block (declare ("Var") (bindings (bind (binding 18 "item") ()))) 
+    (declare ("List") 
      (bindings 
-      (op = (bind (binding 19 "_x2c_macro_iterator_1") ()) 
-       (expr ("Iter") 
-        (call (expr ((func (("List") ("Iter"))) "Iter") 
-               (ident (binding 12 "List_iter"))) 
-         (args (expr ("List") (ident (binding 14 "continue_inputs"))) 
-          (expr (* struct "Iter") 
-           (op & (expr (struct "Iter") 
-                  (cast (struct "Iter") 
-                   (expr (struct "Iter") 
-                    (composite 
-                     (commas 
-                      (expr ("Var") 
-                       (call (expr ((func ((int))) "Var") 
-                              (ident (binding 44 "int_var"))) 
-                        (args (expr (int) (literal (int) "0")))))))))))))))))) 
-    (declare ("Var") (bindings (bind (binding 20 "_x2c_macro_item_1") ()))) 
+      (op = (bind (binding 23 "_x2c_macro_object_1") ()) 
+       (expr ("List") (ident (binding 15 "continue_inputs")))))) 
+    (declare ("List") 
+     (bindings 
+      (op = (bind (binding 24 "_x2c_macro_cursor_1") ()) 
+       (expr ("List") (ident (binding 23 "_x2c_macro_object_1")))))) 
+    (declare ("Var") 
+     (bindings (bind (binding 25 "_x2c_macro_cursor_output_1") ()))) 
     (while 
      (expr (int) 
-      (call (expr ((func (("Iter") (* "Var"))) int) 
-             (ident (binding 13 "Iter_try_next"))) 
-       (args (expr ("Iter") (ident (binding 19 "_x2c_macro_iterator_1"))) 
+      (call (expr ((func (("List") (* "List") (* "Var"))) int) 
+             (ident (binding 13 "List_try_next"))) 
+       (args (expr ("List") (ident (binding 23 "_x2c_macro_object_1"))) 
+        (expr (* "List") 
+         (op & (expr ("List") (ident (binding 24 "_x2c_macro_cursor_1"))))) 
         (expr (* "Var") 
-         (op & (expr ("Var") (ident (binding 20 "_x2c_macro_item_1")))))))) 
+         (op & (expr ("Var") (ident (binding 25 "_x2c_macro_cursor_output_1")))))))) 
      (block 
       (stmnt 
        (expr ("Var") 
-        (op = (expr ("Var") (ident (binding 17 "item"))) 
-         (expr ("Var") (ident (binding 20 "_x2c_macro_item_1")))))) 
+        (op = (expr ("Var") (ident (binding 18 "item"))) 
+         (expr ("Var") (ident (binding 25 "_x2c_macro_cursor_output_1")))))) 
       (block 
        (at 23 
         (declare ("List") 
          (bindings 
-          (op = (bind (binding 18 "value") ()) 
+          (op = (bind (binding 19 "value") ()) 
            (expr ("List") 
             (call (expr ((func (("Var"))) "List") 
-                   (ident (binding 45 "Var_list"))) 
-             (args (expr ("Var") (ident (binding 17 "item")))))))))) 
+                   (ident (binding 46 "Var_list"))) 
+             (args (expr ("Var") (ident (binding 18 "item")))))))))) 
        (at 13 
         (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 15 "visited"))))))) 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 16 "visited"))))))) 
        (at 24 
-        (matchcases (expr ("List") (ident (binding 18 "value"))) 
+        (matchcases (expr ("List") (ident (binding 19 "value"))) 
          ((() (expr ("List") (expr ("List") (cache 10))) (continue))))) 
        (at 15 
         (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 16 "accepted")))))))))))) 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 17 "accepted")))))))))))) 
   (at 18 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 24 "printf"))) 
+     (call (expr () (ident (binding 26 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d %d %d\\n\"")) 
        (expr (int) (ident (binding 3 "matched"))) 
        (expr (int) (ident (binding 4 "after"))) 
-       (expr (int) (ident (binding 15 "visited"))) 
-       (expr (int) (ident (binding 16 "accepted")))))))) 
+       (expr (int) (ident (binding 16 "visited"))) 
+       (expr (int) (ident (binding 17 "accepted")))))))) 
   (at 26 
    (return 
     (expr (int) 
@@ -148,9 +136,9 @@
                   (op == (expr (int) (ident (binding 4 "after"))) 
                    (expr (int) (literal (int) "2")))))) 
                (expr (int) 
-                (op == (expr (int) (ident (binding 15 "visited"))) 
+                (op == (expr (int) (ident (binding 16 "visited"))) 
                  (expr (int) (literal (int) "3")))))) 
              (expr (int) 
-              (op == (expr (int) (ident (binding 16 "accepted"))) 
+              (op == (expr (int) (ident (binding 17 "accepted"))) 
                (expr (int) (literal (int) "1")))))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

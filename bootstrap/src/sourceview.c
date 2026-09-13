@@ -235,13 +235,9 @@ int String_startswith(String, String);
 
 Var String_var(String);
 
-Iter List_iter(List, Iter);
-
 List String_split(String, String);
 
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
@@ -262,13 +258,11 @@ String SourceView_path(String path){
   String result = _3;
   {
     String part;
-    Iter _x2c_macro_iterator_0 = List_iter(String_split(path, _3), &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      part = Var_string(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = String_split(path, _3);
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      part = Var_string(_x2c_macro_cursor_output_0);
       {
         if(! String_truth(part) || String_equal(part, _1)) continue;
         if(String_equal(part, _2)){
@@ -287,6 +281,8 @@ String SourceView_path(String path){
 }
 
 Var Map_setindex(Map, Var, Var);
+
+Var int_var(int);
 
 void SourceView_set(SourceView sources, String path, String text, int changed){
   if(! _init_guard_) _file_init_();

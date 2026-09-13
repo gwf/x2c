@@ -397,24 +397,18 @@ int worker_wait(long pid){
   return _cpp_wait((pid_t) pid);
 }
 
-Iter String_iter(String, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int String_try_next(String, int *, int *);
 
 String x2c_filename_hash(String filename){
   if(! _init_guard_) _file_init_();
   unsigned hash = 0;
   {
     char byte;
-    Iter _x2c_macro_iterator_0 = String_iter(filename, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      byte = Var_char(Var_convert(_x2c_macro_item_0, 26993));
+    String _x2c_macro_object_0 = filename;
+    int _x2c_macro_cursor_0 = 0;
+    int _x2c_macro_cursor_output_0;
+    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      byte = _x2c_macro_cursor_output_0;
       hash = hash * 31 +(unsigned char) byte;
     }
 

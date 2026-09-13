@@ -743,12 +743,14 @@ static const char * _level_color(Symbol level){
   return _color_string;
 }
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 int Var_is(Var, Symbol);
 
 Symbol Var_kind(Var);
 
 static const char * _value_color(Var value){
-  if(Var_is(value, 1318210446)) return _color_string;
+  if(Var_is_row(value, 11, 7, 1)) return _color_string;
   if(Var_is(value, 1328354264)) return _color_symbol;
   Symbol kind = Var_kind(value);
   if(kind == 20309162340 || kind == 439096724366) return _color_literal;
@@ -759,7 +761,7 @@ Buffer Var_write_str(Var, Buffer);
 
 static Buffer _write_field_key(Buffer out, Var key){
   if(Var_is(key, 1328354264)) return _write_symbol(out, Var_symbol(key));
-  if(Var_is(key, 1318210446)) return Buffer_write(out, Var_pointer(key));
+  if(Var_is_row(key, 11, 7, 1)) return Buffer_write(out, Var_pointer(key));
   return Var_write_str(key, out);
 }
 
@@ -802,11 +804,7 @@ Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer Buffer_write_char(Buffer, char);
 
-Iter List_iter(List, Iter);
-
-Var int_var(int);
-
-int Iter_try_next(Iter, Var *);
+int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
@@ -840,13 +838,11 @@ static void _render_text(Buffer out, const LogEvent * event, int color){
   }
   {
     List field;
-    Iter _x2c_macro_iterator_0 = List_iter(event -> fields, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
-      field = Var_list(_x2c_macro_item_0);
+    List _x2c_macro_object_0 = event -> fields;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      field = Var_list(_x2c_macro_cursor_output_0);
       {
         if(! List_truth(field)) continue;
         Buffer_write(out, " ");
@@ -1134,7 +1130,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value){
     return copy;
   }
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is(value, 1318210446)){
+  if(Var_is_row(value, 11, 7, 1)){
     if(_memory_pool_owns(l -> pool, value)) return value;
     String string = Var_string(value);
     return String_var(String_new_in(l -> pool, string, String_len(string)));
@@ -1145,7 +1141,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value){
     String copy = String_new_in(l -> pool, spelling, String_len(spelling));
     return Var_new(826970, copy);
   }
-  if(Var_is(value, 806120)){
+  if(Var_is_row(value, 9, 7, 4)){
     List list = Var_list(value);
     if(! List_truth(list) || _memory_pool_owns(l -> pool, value)) return value;
     Var head = _memory_retain_value(l, list -> car);
@@ -1539,7 +1535,7 @@ Symbol Logger_error_handler(List errors, Var data){
 
     }
     Var newest = List_last(errors);
-    if(! Var_is(newest, 806120)){
+    if(! Var_is_row(newest, 9, 7, 4)){
       Symbol _x2c_return_value_22 = 285842436424;
       {
         x2c_cleanup_leave(& _x2c_defer_record_28);
@@ -1609,13 +1605,11 @@ void Logger_shutdown(void){
         List pending = Error_since(logger_error_mark);
         {
           List entry;
-          Iter _x2c_macro_iterator_1 = List_iter(pending, &(struct Iter){
-            int_var(0)
-          }
-          );
-          Var _x2c_macro_item_1;
-          while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
-            entry = Var_list(_x2c_macro_item_1);
+          List _x2c_macro_object_1 = pending;
+          List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+          Var _x2c_macro_cursor_output_1;
+          while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+            entry = Var_list(_x2c_macro_cursor_output_1);
             Logger_log(active, 11703268, 392730881588392, entry);
           }
 
