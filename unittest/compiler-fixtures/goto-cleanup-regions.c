@@ -63,7 +63,8 @@ static int outward_finally(void){
         {
           int _x2c_cleanup_state_0 = _x2c_cleanup_guard_0;
           if (_x2c_cleanup_state_0 >= 0) {_x2c_cleanup_guard_0 = 0;
-          if (_x2c_cleanup_state_0 > 0) {{
+          if (_x2c_cleanup_state_0 > 0) {x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
+          {
             value = value * 10 + 2;
           }
 
@@ -84,7 +85,8 @@ else {x2c_exception_landed(& _x2c_exception_frame_0);
 }
 _x2c_cleanup_done_0 :;
 if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { {
+        if (_x2c_cleanup_guard_0 > 0) { x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
+{
   value = value * 10 + 2;
 }
  }

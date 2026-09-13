@@ -167,7 +167,7 @@ Var volatile caught =((void) 0, Void); {
 }
 }
 _x2c_cleanup_done_0 :;  if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL; {
+        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_cleanup_begin(&_x2c_exception_frame_0); {
   count ++;
 }
  }

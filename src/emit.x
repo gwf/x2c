@@ -1019,7 +1019,12 @@ static List Emitter._try(Emitter e, List ast, List context) {
     ? e.fresh_name("error_handler") : NULL;
   List final_code = NULL, String cleanup_guard = NULL;
   if (finalizer) {
-    final_code = e._emit(%( $finalizer ), context);
+    /* Retire the landing first, so a `raise` from the finalizer reaches the
+       enclosing frame instead of re-entering this one and looping. */
+    final_code = %(
+      "x2c_exception_cleanup_begin(&$frame_name);"
+      @{e._emit(%( $finalizer ), context)}
+    );
     cleanup_guard = e.fresh_name("cleanup_guard");
   }
   if (clause)

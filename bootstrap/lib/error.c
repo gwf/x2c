@@ -883,6 +883,7 @@ void Error_context_close(void * token, int preserve_records){
 
 static void _catch_retain(ErrorHandler handle){
   int pushed = _scope_push(97614135954008, "could not enter error scope for retained catch records");
+  _retained_destroy(handle -> retained);
   handle -> retained = Block_new(sizeof(ErrorRecord));
   while(Error_count() > handle -> watermark){
     ErrorRecord record = * _record_at(Error_count() - 1);

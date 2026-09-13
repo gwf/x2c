@@ -42,7 +42,7 @@ typedef struct ExceptionFrame {
   sigjmp_buf env, volatile Symbol state;
   struct ExceptionFrame *volatile unwind_target, void *error_handler_head;
   void *volatile error_landing_head, int error_dispatch_depth;
-  int error_stack_height;
+  int error_stack_height, volatile int cleanup_active;
 } ExceptionFrame;
 
 #pragma private
@@ -96,6 +96,7 @@ void x2c_exception_push(ExceptionFrame *e) {
   e.cleanup_watermark = state.cleanup_top;
   e.state = <active>;
   e.unwind_target = NULL;
+  e.cleanup_active = 0;
   if (x2c_error_runtime_ready) {
     e.error_handler_head = Error.handler_head();
     e.error_landing_head = e.error_handler_head;
@@ -112,19 +113,25 @@ void x2c_exception_push(ExceptionFrame *e) {
 }
 
 /** Transfers an `Error` toward the selected active exception frame.
-    `target_ptr` must identify this frame or an outer frame in the current
-    thread. The call marks the current frame, drains newer cleanup records in
-    last-in, first-out order, records the post-cleanup handler head, and jumps
-    to the current frame's landing. It never returns normally. An invalid
-    target exits through the raw exception fatal path. The transfer does not
-    restore the process signal mask.
+    `target_ptr` must identify a landable frame in the current thread. The
+    call selects the innermost frame that is not already running its own
+    cleanup, abandons any frame it skips, marks the selected frame, drains
+    newer cleanup records in last-in, first-out order, records the
+    post-cleanup handler head, and jumps to that frame's landing. It never
+    returns normally. An invalid target exits through the raw exception fatal
+    path. The transfer does not restore the process signal mask.
 */
 void ExceptionFrame.unwind(void *target_ptr) {
-  ExceptionFrame *target = target_ptr, *frame = _current();
+  ExceptionFrame *target = target_ptr, *frame = _landable();
   int found = 0;
   for (ExceptionFrame *at = frame; at; at = at.prev)
     if (at == target) found = 1;
   if (!frame || !found) _fatal("invalid error unwind target");
+  /* Abandon the frames whose finalizers raised. Each owes only the reclaim
+     its leave would have done; this transfer replaces what it was carrying. */
+  for (ExceptionFrame *at = _current(); at != frame; at = at.prev)
+    _frame_trim(at, at.state == <err-unwind>);
+  _thread().exception_top = frame;
   frame.state = <err-unwind>;
   frame.unwind_target = target;
   _cleanup_drain(frame.cleanup_watermark);
@@ -157,6 +164,17 @@ int x2c_exception_unwinding(void) {
 int x2c_exception_is_error_target(ExceptionFrame *frame) =>
   _is_error_unwind(frame) && frame.unwind_target == frame;
 
+/** Retires a frame's landing before its `finally` body runs.
+    Compiler-generated code calls this on every path that reaches a finalizer.
+    The frame has already landed, so a `raise` from the finalizer transfers to
+    the enclosing frame instead of re-entering this landing and running the
+    finalizer again; that transfer abandons this frame and replaces any
+    `Error` it was already carrying. A null frame does nothing.
+*/
+void x2c_exception_cleanup_begin(ExceptionFrame *frame) {
+  if (frame) frame.cleanup_active = 1;
+}
+
 /** Marks a selected exception-frame `Error` transfer as handled.
     This prevents `x2c_exception_leave` from continuing the transfer outward.
     A null frame does nothing.
@@ -181,14 +199,7 @@ void x2c_exception_leave(ExceptionFrame *frame) {
   int should_unwind = frame.state == <err-unwind>;
   ExceptionFrame *target = NULL;
   if (should_unwind) target = frame.unwind_target;
-  if (x2c_error_runtime_ready) {
-    /* Reclaim handler registrations made inside the frame, and keep the
-       errors collected during its normal lifetime. The restore point stays
-       available for an abandoned transfer path. */
-    int stack_height = should_unwind
-                     ? frame.error_stack_height : Error.count();
-    Error.trim(frame.error_handler_head, stack_height);
-  }
+  _frame_trim(frame, should_unwind);
   state.exception_top = frame.prev;
   if (should_unwind) ExceptionFrame.unwind(target);
 }
@@ -198,6 +209,25 @@ void x2c_exception_leave(ExceptionFrame *frame) {
 #include "error.x"
 
 static inline ExceptionFrame *_current(void) => _thread().exception_top;
+
+/* The innermost frame that can still land. Frames running their own finalizer
+   have already landed; a transfer raised from one of them belongs to the
+   enclosing frame, and the skipped frames are abandoned by the caller. */
+static ExceptionFrame *_landable(void) {
+  ExceptionFrame *at = _current();
+  while (at && at.cleanup_active) at = at.prev;
+  return at;
+}
+
+/* Reclaim handler registrations made inside the frame, and keep the errors
+   collected during its normal lifetime. An unwinding frame instead restores
+   its error-stack watermark, discarding what it was carrying. The restore
+   point stays available for an abandoned transfer path. */
+static void _frame_trim(ExceptionFrame *frame, int unwinding) {
+  if (!x2c_error_runtime_ready) return;
+  Error.trim(frame.error_handler_head,
+             unwinding ? frame.error_stack_height : Error.count());
+}
 
 static void _fatal(const char *message) {
   fprintf(stderr, "Fatal: uncaught exception %s\n", message);

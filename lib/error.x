@@ -917,10 +917,14 @@ void Error.context_close(void *token, int preserve_records) {
    private regions. Capture values were copied into the newest record's region,
    so the detached catch handle owns both them and the selected Error until
    `_handler_free` destroys `retained`. Records are stored newest first here;
-   their order is immaterial because the catch exposes only captures. */
+   their order is immaterial because the catch exposes only captures. A second
+   transfer can select the same handle before its landing runs, as when a
+   `finally` raises while carrying an Error; the abandoned selection is
+   destroyed here because the replacement transfer owns the handle. */
 static void _catch_retain(ErrorHandler handle) {
   int pushed = _scope_push(
     <alloc-fail>, "could not enter error scope for retained catch records");
+  _retained_destroy(handle.retained);
   handle.retained = Block.new(sizeof(ErrorRecord));
   while (Error.count() > handle.watermark) {
     ErrorRecord record = *_record_at(Error.count() - 1);

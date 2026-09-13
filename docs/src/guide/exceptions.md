@@ -241,6 +241,17 @@ existing `try` statement. Use either for cleanup, not recovery.
 Both forms hook into the `Error` transfer stack. If a callee raises, every
 intervening cleanup frame runs before control reaches the selected `catch`.
 
+### Raising during cleanup
+
+A `raise` inside a `finally` or `defer` body transfers to the enclosing
+handler, never back into the cleanup that raised it. Cleanup runs at most
+once per exit path. If that cleanup was already running for an `Error`, the
+new `Error` replaces it: the pending one is discarded with its detail, and
+only the replacement reaches a `catch`. With no matching handler anywhere
+outward, the replacement terminates the program through the error floor like
+any other unhandled `Error`. This is why cleanup is for release, not
+recovery; handle a failure a finalizer can produce inside the finalizer.
+
 ### Return expressions run before cleanup
 
 A `return` expression is evaluated and saved before cleanup runs. Cleanup then

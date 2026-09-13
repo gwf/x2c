@@ -157,9 +157,10 @@ lib/error.x|advanced|x2c_error_catch_close,x2c_error_catch_detach
 lib/error.x|advanced|x2c_error_catch_push,x2c_error_catch_selected
 lib/error.x|advanced|x2c_error_raise,x2c_error_raise_n
 lib/exception.x|advanced|ExceptionFrame.unwind,x2c_cleanup_leave
-lib/exception.x|advanced|x2c_cleanup_push,x2c_exception_is_error_target
-lib/exception.x|advanced|x2c_exception_landed,x2c_exception_leave
-lib/exception.x|advanced|x2c_exception_mark_handled,x2c_exception_push
+lib/exception.x|advanced|x2c_cleanup_push,x2c_exception_cleanup_begin
+lib/exception.x|advanced|x2c_exception_is_error_target,x2c_exception_landed
+lib/exception.x|advanced|x2c_exception_leave,x2c_exception_mark_handled
+lib/exception.x|advanced|x2c_exception_push
 lib/lisp.x|advanced|Lisp.apply_values,Lisp.enter,Lisp.leave,Lisp.precall
 lib/lisp.x|advanced|Lisp.program,Lisp.resolve,Lisp.retarget
 lib/list.x|advanced|List.cons_in

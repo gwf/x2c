@@ -244,6 +244,47 @@ static void error_unwind_crosses_each_exception_frame(void) {
 }
 
 
+/* The shape the emitter produces for a `finally` that raises. The frame
+   retires its landing before the finalizer body, so the raise reaches the
+   outer frame instead of re-entering this landing and running the body
+   again, and the replacement Error is the one the catch selects. */
+static void raise_in_finalizer_reaches_outer_frame(void) {
+  Error.initialize();
+  volatile int finalizers = 0;
+  ExceptionFrame outer;
+  ErrorHandler handler = x2c_error_catch_push(
+    &outer, 2, %(inner-err *).var(), %(from-fin *).var());
+  x2c_exception_push(&outer);
+  if (!sigsetjmp(outer.env, 0)) {
+    ExceptionFrame inner;
+    x2c_exception_push(&inner);
+    if (!sigsetjmp(inner.env, 0)) {
+      Error.raise(<inner-err>, %((where "body")));
+      EXPECT_TRUE(0);
+    }
+    else {
+      x2c_exception_landed(&inner);
+      EXPECT_TRUE(inner.state == <err-unwind>);
+      EXPECT_FALSE(x2c_exception_is_error_target(&inner));
+    }
+    x2c_exception_cleanup_begin(&inner);
+    finalizers++;
+    Error.raise(<from-fin>, %((where "finalizer")));
+    EXPECT_TRUE(0);
+  }
+  else {
+    x2c_exception_landed(&outer);
+    EXPECT_TRUE(x2c_exception_is_error_target(&outer));
+    EXPECT_INT_EQ(finalizers, 1);
+    EXPECT_INT_EQ(x2c_error_catch_selected(handler), 1);
+    x2c_error_catch_detach(handler);
+    x2c_error_catch_close(handler);
+    x2c_exception_mark_handled(&outer);
+  }
+  x2c_exception_leave(&outer);
+}
+
+
 static void _cleanup_record_digit(void *data) {
   int *order = data;
   *order = *order * 10 + 1;
@@ -624,6 +665,7 @@ void exception_suite(void) {
   $test.run(error_unwind_selects_target_and_bindings);
   $test.run(error_unwind_retains_positional_and_legacy_order);
   $test.run(error_unwind_crosses_each_exception_frame);
+  $test.run(raise_in_finalizer_reaches_outer_frame);
   $test.run(cleanup_chain_leaves_in_lifo_order);
   $test.run(cleanup_chain_unlinks_before_callback);
   $test.run(cleanup_chain_crosses_three_callers);

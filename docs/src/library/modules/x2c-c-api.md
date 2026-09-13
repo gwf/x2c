@@ -27,6 +27,7 @@ prefix.
 | [`x2c_error_catch_selected`](error.md#x2c_error_catch_selected) | `lib/error.x` | `int x2c_error_catch_selected(ErrorHandler handle)` |
 | [`x2c_error_raise`](error.md#x2c_error_raise) | `lib/error.x` | `void x2c_error_raise(Symbol code, List detail)` |
 | [`x2c_error_raise_n`](error.md#x2c_error_raise_n) | `lib/error.x` | `void x2c_error_raise_n( const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)` |
+| [`x2c_exception_cleanup_begin`](exception.md#x2c_exception_cleanup_begin) | `lib/exception.x` | `void x2c_exception_cleanup_begin(ExceptionFrame *frame)` |
 | [`x2c_exception_is_error_target`](exception.md#x2c_exception_is_error_target) | `lib/exception.x` | `int x2c_exception_is_error_target(ExceptionFrame *frame)` |
 | [`x2c_exception_landed`](exception.md#x2c_exception_landed) | `lib/exception.x` | `void x2c_exception_landed(ExceptionFrame *frame)` |
 | [`x2c_exception_leave`](exception.md#x2c_exception_leave) | `lib/exception.x` | `void x2c_exception_leave(ExceptionFrame *frame)` |
@@ -89,4 +90,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 77 functions.
+Total: 78 functions.
