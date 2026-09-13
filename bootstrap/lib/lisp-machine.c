@@ -333,6 +333,8 @@ Var Lisp_immediate(void *, Var);
 
 int Lisp_expanded(void *, List, Var *);
 
+Var Lisp_evaluate(void *, Var);
+
 List cons(Var, List);
 
 Symbol Var_kind(Var);
@@ -387,6 +389,8 @@ int LispMachine_step(LispMachine m){
       }
       break;
     }
+    case MW_LEVAL : LispMachine__push_value(m, Lisp_evaluate(m -> lisp_context, p -> consts[w -> a]));
+    break;
     case MW_LCALL : LispMachine__call(m, w -> b);
     break;
     case MW_LTAILCALL : LispMachine__tail_call(m, w -> b);
@@ -450,7 +454,7 @@ void LispMachine_run(LispMachine m){
 
 void LispMachine_finish(LispMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 415};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 419};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.finish")), NULL))));
     __builtin_unreachable();
   }

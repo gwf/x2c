@@ -2,6 +2,11 @@
 
 ## Coverage
 
+- Lisp AUTO cases cover interpreted forms inside prepared bodies, release
+  of private programs discarded during partial lowering, and special-form
+  rebinding after earlier effects or call arguments. Quasiquote cases retain
+  operation selection, splice identity, and error/effect order. A mutating
+  self-tail-call case checks 100,000 iterations with one machine frame.
 - Automatic-differentiation cases compare forward loop initialization and
   step updates against finite differences, including comma clauses and
   `continue`. Tape cases cover inactive singular operations before and after

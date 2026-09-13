@@ -1,14 +1,15 @@
 # Architecture search follow-ups
 
-> Status: needs author scoping - three items left over from the 2026-09-12
-> architecture search (331be78..d7bb8da). Each has evidence and, for two of
-> them, an unlanded prototype. Nothing here is started on `main`.
+> Status: active - repaired Lisp form fallback is approved for local
+> implementation and validation. Parallel build translation has a successful
+> spike; the no-op depfile shortcut is rejected. Publication remains on hold
+> until Gary and the reviewing agent approve the final result.
 
 The search itself is closed. Its confirmed deletions, performance changes,
 and bug fixes are on `main`; its library removals were reverted and repaired
 in `d7bb8da`. The rejected hypotheses and their evidence are recorded in the
 brazzaville workspace under `.context/arch-search/REPORT.md` and need no
-plan. These three items were found on the way and remain worth doing.
+plan. The following records the current decisions on its three follow-ups.
 
 ## 1. Parallel translation in `x2c build -j N`
 
@@ -27,10 +28,19 @@ earlier unit in the same worker left in the process cache, because build
 reuse is decided from those prerequisites. Generated C must be byte-identical
 across `-j1` and `-j N`, and failures must propagate as before.
 
-A prototype implementing exactly this exists, staged and never gated, in
-`/Users/gary/Git/x2c/.claude/worktrees/agent-a70d3375abbcd2bd3` (main.x,
-a `run-build-parallel.sh` probe, cli.md text). It predates `d7bb8da` and
-must be rebased and re-verified against current `src/build.x`.
+The 2026-09-13 spike at `618c26e` passed worker, failure, same-stem,
+per-unit dependency, selective invalidation, dry-run, and 111 CLI probes.
+All 77 src/lib units produced identical serial/parallel C/H. Three interleaved
+30-unit compiler object builds measured 4.213 s before versus 2.758 s after
+at four jobs (34.5% faster), with single-job time unchanged within variation.
+The prototype is in `/tmp/x2c-spike-parallel-build`; batch progress reporting
+still needs finishing. No publication gate or approval is inferred.
+
+A separate 16-core host sweep measured 6.00/4.12/2.73/1.83/1.36 seconds at
+1/2/4/8/16 jobs. A core-aware standalone build/run default is under discussion;
+explicit `-j` must keep control, and default translation under external Make
+must not multiply workers. CPU affinity/quota and concurrent memory remain
+cross-platform considerations. The product default remains one job.
 
 Validation: the probe asserting worker count under `--verbose`, `-j1` versus
 `-j4` output identity for src+lib, the CLI boundary probes, then
@@ -44,44 +54,58 @@ fingerprint: measured 1.18 s for a no-op build of the repository against
 overlapped that work with compilation but did not remove it for objects the
 state file already covers.
 
-Design: when the recorded state for an object matches the request options,
-the compiler hash, and the source and header prerequisites the depfile
-already lists, skip preprocessing and treat the object as current. Keep the
-preprocessed-input fingerprint for any object whose prerequisites changed,
-so new include shadowing is still caught. Estimated at under ten lines in
-`src/build.x`; not implemented.
+The proposed shortcut is rejected after the 2026-09-13 spike. A new optional
+header, a newly shadowing header, or a changed system header omitted by `-MMD`
+can change preprocessed C while every previously recorded dependency stays
+byte-identical. Falling back to preprocessing only when those dependencies
+change would silently reuse stale objects. Three focused Apple Clang probes
+reproduced these cases with unchanged options, compiler, and environment.
 
-Validation: unchanged-build and one-file-edit timings at `-j1` and `-j N`
-compared with the table in the archived plan; a probe that changes a header
-found through a new shadowing directory still recompiles.
+Retain the current native-preprocessor fingerprint. Further latency work
+needs a measured different source of cost; no replacement cache or production
+change is proposed here.
 
-## 3. Total Lisp lowering
+## 3. Lisp form fallback
 
-`lib/lisp.x` compiles a lambda to the machine only when every subform is
-eligible; about twenty named rejection reasons send the whole lambda to the
-tree-walking evaluator, which recurses on the C stack. A `def` inside a body
-is one such reason, so a `def`-carrying recursion 100,000 deep segfaults and
-a 200-deep one takes 1.1 ms.
+Approved for local implementation on 2026-09-13; final publication approval
+is pending. The original prototype fixed a 100,000-deep self-tail loop with
+`def`, but produced wrong results after rebinding `quote` inside a body.
+Its entry guard had already run. It also checked an invalid quasiquote splice
+after later side effects. Those findings supersede the original total-lowering
+design and its claim that every lambda compiles.
 
-Design: one opcode, `MW_LEVAL` generalizing `MW_LPRECALL`, hands a declining
-subform to `Lisp.evaluate` over the machine frame's existing `LispEnv`, with
-a builder rewind so a partially lowered body is released. Every lambda then
-compiles; the per-form rejection list goes. The parameter-count and rest-
-parameter limits stay, because they are frame limits, not body limits; the
-warm-up counter, `auto_specials` guards, and `Lisp.auto_disable` stay for
-the reasons the prototype report records.
+The repaired design uses `MW_LEVAL` to evaluate one declined subform in the
+machine frame's existing `LispEnv`. Rewind releases owned immediate programs
+and discards partial words before emitting the evaluator crossing. Capacity
+failures still stop preparation of the whole body.
 
-Measured in the prototype: the 100,000-deep case runs correctly in 113 ms,
-`def`-in-body 200 deep goes from 1.100 ms to 0.098 ms, 800 unit tests and
-646 fixtures byte-identical, self-translation unchanged. Net +45 authored
-lines; this is a behavior fix, not a simplification. The prototype is in
-`/Users/gary/Git/x2c/.claude/worktrees/agent-a42a88f532b23d9e2` and its
-report is `.context/arch-search/experiments/macros-h1-total-lowering.md`
-in the brazzaville workspace. Two Lisp tests that asserted rejection reasons
-were rewritten there, not deleted.
+Lowered `quote`, `cond`, and `quasiquote` check their selected binding at the
+form's start through the existing `MW_LEXPAND` operation. A mismatch evaluates
+only that untouched form. An enclosing operation already selected keeps its
+meaning through its own effects; later nested forms check their own bindings.
+Macro sites retain their traced dependencies. This makes the old per-lambda
+`auto_specials` entry guards and bookkeeping redundant; they are removed.
+Immediate constructors and self-tail targets keep their existing runtime checks.
 
-Validation: Lisp and Func suites, the `lisp-auto` gate lane, macro and
-inline-Lisp fixtures, a deep-recursion probe, and one `agent-pr-check`.
+A splice appends nil immediately after its value is evaluated, using the
+existing append type/error owner before later forms run. A valid List is
+returned unchanged, without copying or allocating cells. Parameter, rest,
+program-capacity, and nesting limits remain. Recursion inside an interpreted
+subform can still exhaust the native stack; unbounded recursion is not promised.
+
+The repaired spike passed 132 Machine/Func/Lisp/AUTO tests (1,226 assertions),
+173 macro/Lisp fixtures, and the existing AUTO benchmark check. It preserves
+the 100,000-deep mutating self-tail loop in one frame. Against runtime at
+`618c26e`, 21 paired fresh samples measured 3.1% overhead for an eligible hot
+call and 6.7% for valid quasiquote splicing. Those narrow measurements do not
+establish whole-compiler throughput. Runtime source is net +29 lines; this is
+a correctness change, not a source-reduction claim.
+
+Implementation includes the runtime, regression tests, internal API metadata,
+and authored book description. Regenerate symbols and documentation through
+their existing targets. Review the final authored and generated diff, run
+`tools/gate-state.py ensure agent-pr-check`, and keep the validated local
+result for joint review before publication. No new gate is added.
 
 ## Recorded, not planned
 
@@ -94,15 +118,21 @@ inline-Lisp fixtures, a deep-recursion probe, and one `agent-pr-check`.
 
 ## Plan review
 
-Facts established elsewhere: the translation worker path, output-directory
-layout, and depfile prerequisites already exist in `src/main.x` and
-`src/build.x`; item 1 routes the build through them and adds no second
-scheduler. Item 2 trusts the state file and depfile the build already
-writes; it adds no new fingerprint. Item 3 reuses the machine's existing
-evaluator re-entry and `LispEnv`; the one new opcode replaces a rejection
-list rather than adding a route.
+Translation workers, per-unit directories, and dependency recording already
+exist; the parallel-build spike routes work through them without a second
+scheduler. The native preprocessor remains the authoritative owner of header
+selection, so the rejected depfile shortcut introduces no cache or process.
 
-Nothing here introduces a cache, a representation, or a validator. Item 1's
-probe and item 2's shadowing probe protect deterministic output and correct
-rebuilds, which are documented build behavior. Item 3 has no negative
-fixture; the rewritten Lisp tests cover the rewind's program release.
+Lisp fallback reuses the current evaluator and machine environments. Existing
+form-site dependency checks replace the stale entry-guard owner. Rewind is
+needed to release owned child programs and partial words before fallback.
+Splice checking uses ordinary List append and its existing error behavior.
+The new operation represents exactly one evaluator crossing, not another
+interpreter or representation.
+
+The regression cases protect correct results after mutation, exactly-once
+side effects, splice error order, live frame values, and discarded-program
+ownership. They extend the existing suite; no recurring validation or process
+requirement is added. Completed source review found no additional owner or
+check to remove. Final-tree publication validation remains required, and
+publication is explicitly withheld until joint approval.

@@ -348,6 +348,10 @@ int LispMachine.step(LispMachine m) {
       break;
     }
 
+    case MW_LEVAL:
+      m._push_value(Lisp.evaluate(m.lisp_context, p.consts[w.a]));
+      break;
+
     case MW_LCALL: m._call(w.b);
       break;
 

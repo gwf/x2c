@@ -126,6 +126,32 @@ can exhaust it. Callable addresses are process-specific, as they are in the
 production implementation. This is a tested reference, not a proof that every
 possible program behaves identically.
 
+## Production execution
+
+The production evaluator can prepare repeated Lambda calls as word code.
+Preparation can mix lowered operations with ordinary evaluation: when a form
+has no lowering, its partial words are discarded and that form runs through
+the evaluator with the current parameters, captures, and caller environment.
+For example, an interpreted `def` can sit inside a lowered `cond`; it does
+not prevent preparation of the whole body. This changes execution, not
+which Lisp forms are legal or when their effects occur.
+
+Lowered `quote`, `cond`, and `quasiquote` forms check their binding at the
+start of that form. Prepared macro expansions likewise check the bindings
+used during expansion. If a preceding effect changed a dependency, only the
+original form is evaluated, without replaying earlier effects. Rebinding
+inside a selected special form does not replace that operation midway
+through it; later forms resolve their own bindings.
+
+Preparation still has parameter and program-capacity limits: dotted rest
+parameters and more parameters than the machine frame supports remain
+interpreted. Prepared calls use bounded frame, local, and operand storage;
+when a call cannot fit, it crosses to recursive evaluation. A lowered self
+call in tail position can reuse its frame when the runtime callee still
+matches. Other recursion, including recursion inside an interpreted form,
+can consume native stack. AUTO therefore does not prepare every Lambda or
+promise unbounded recursion.
+
 ## The showcase and comparison
 
 [The Lisp demonstration][demo]

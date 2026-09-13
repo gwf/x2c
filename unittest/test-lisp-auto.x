@@ -191,8 +191,8 @@ static void lisp_auto_replacement_guards(void) {
 }
 
 static void lisp_auto_cond_identity_guard(void) {
-  // L7/L8: shadowing the reserved cond fails the guard before any
-  // effect; restoring the exact identity resumes prepared execution.
+  // A rebound cond reaches its site guard on the machine. It raises before
+  // evaluating arguments; restoring the identity resumes the lowered form.
   Lisp lisp = _auto_session(1);
   Var reserved = _ev(lisp, "cond");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(brancher 7)")), 12);
@@ -202,13 +202,13 @@ static void lisp_auto_cond_identity_guard(void) {
   _ev(lisp, "(def cond 99)");
   EXPECT_INT_EQ(_raised(lisp, "(brancher 7)"), <not-call>);
   LispAutoStats blocked = Lisp.auto_stats(lisp);
-  EXPECT_INT_EQ((int) (blocked.machine_entries - warmed.machine_entries), 0);
+  EXPECT_INT_EQ((int) (blocked.machine_entries - warmed.machine_entries), 1);
   EXPECT_TRUE(blocked.guard_failures > warmed.guard_failures);
   EXPECT_INT_EQ((int) (auto_add_calls - adds), 0);
   Lisp.set_global(lisp, "cond", reserved);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(brancher 7)")), 12);
   EXPECT_INT_EQ((int) (Lisp.auto_stats(lisp).machine_entries -
-                       warmed.machine_entries), 1);
+                       warmed.machine_entries), 2);
   Lisp.destroy(lisp);
 }
 
@@ -364,8 +364,10 @@ static void lisp_auto_quasiquote_capacity(void) {
   EXPECT_INT_EQ((int) Var.list(_ev(lisp, "(deep-qq 7)")).len(), 251);
   EXPECT_INT_EQ((int) Var.list(_ev(lisp, "(deep-qq 7)")).len(), 251);
   LispAutoStats after = Lisp.auto_stats(lisp);
-  EXPECT_INT_EQ((int) (after.machine_entries - before.machine_entries), 0);
-  EXPECT_INT_EQ((int) (after.ineligible - before.ineligible), 1);
+  // The quasiquote exceeds the operand stack, so it is interpreted in place;
+  // the lambda around it still prepares and runs on the machine.
+  EXPECT_INT_EQ((int) (after.machine_entries - before.machine_entries), 1);
+  EXPECT_INT_EQ((int) (after.ineligible - before.ineligible), 0);
   Lisp.destroy(lisp);
 }
 
@@ -459,9 +461,8 @@ static void lisp_auto_tail_calls_stay_flat(void) {
   EXPECT_INT_EQ(mstats.max_frames, 1);
   EXPECT_TRUE(mstats.prepared_calls > 3000);
 
-  // The self-call is noted like any other identity the program was built
-  // against, so rebinding the name that named it declines to the
-  // evaluator instead of tail-calling a callee that is no longer there.
+  // The call resolves the current binding; rebinding its name cannot
+  // tail-call the old program.
   _ev(lisp, "(def old cd)");
   _ev(lisp, "(def cd 5)");
   EXPECT_INT_EQ(_raised(lisp, "(old 3 0)"), <not-call>);
@@ -771,16 +772,122 @@ static void lisp_auto_macro_fresh_closure(void) {
   }
 }
 
-static void lisp_auto_rejected_parent_releases_programs(void) {
+static void lisp_auto_declined_form_releases_programs(void) {
+  // Both unchosen arms decline on call width and rewind to one interpreted
+  // word, so both lambdas publish the same program shape. Only the second
+  // emitted an immediate lambda first; its child program must not survive the
+  // rewind, or the second lambda would cost more.
   Lisp lisp = Lisp.new_bare();
-  _ev(lisp, "(def rejected (lambda (flag)"
-            " (cond (flag ((lambda (x) x) 7))"
-            " (1 (lambda (y) y)))))");
-  long before = Lisp.auto_stats(lisp).program_bytes;
+  _ev(lisp, "(def control (lambda (flag) (cond (flag 1)"
+            " (1 (nine 1 2 3 4 5 6 7 8 9)))))");
   for (int i = 0; i < 3; i++)
-    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(rejected 1)")), 7);
-  EXPECT_INT_EQ(Lisp.auto_stats(lisp).program_bytes, before);
-  EXPECT_TRUE(Lisp.auto_stats(lisp).ineligible > 0);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(control 7)")), 1);
+  long one = Lisp.auto_stats(lisp).program_bytes;
+  EXPECT_TRUE(one > 0);
+
+  _ev(lisp, "(def wide (lambda (flag) (cond (flag 1)"
+            " (1 ((lambda (a b c d e f g h) a) 1 2 3 4 5 6 7 8 9)))))");
+  for (int i = 0; i < 3; i++)
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wide 7)")), 1);
+  LispAutoStats after = Lisp.auto_stats(lisp);
+  EXPECT_TRUE(after.machine_entries > 0);
+  EXPECT_INT_EQ((int) after.ineligible, 0);
+  EXPECT_INT_EQ(after.program_bytes, 2 * one);
+  Lisp.destroy(lisp);
+}
+
+static void lisp_auto_mutating_specials(void) {
+  const char *names[] = { "quote", "cond", "quasiquote" };
+  const char *forms[] = { "(quote 7)", "(cond (1 7))",
+                          "(quasiquote (7))" };
+  for (int special = 0; special < 3; special++)
+    for (int lane = 0; lane < 3; lane++)
+      for (int disabled = 0; disabled < 2; disabled++) {
+        Lisp lisp = _auto_session(1);
+        Lisp.auto_disable(lisp, disabled);
+        String name = String.new(names[special]);
+        String form = String.new(forms[special]);
+        _ev(lisp, "(def replacement (macro (x) 99))");
+        if (!lane) {
+          _ev(lisp, %"(def f (lambda (flag) (cond (flag " +
+                    %"(cond ((log! 1) (cond ((def ${name} replacement) " +
+                    %"${form}))))) (1 0))))");
+          _ev(lisp, "(f ())");
+          auto_order_log[0] = 0;
+          EXPECT_INT_EQ(Var.integer(_ev(lisp, "(f 1)")), 99);
+        }
+        else {
+          _ev(lisp, %"(def f (lambda (x) ${form}))");
+          _ev(lisp, "(f 0)");
+          String call = %"(f (cond ((log! 1) " +
+                         %"(def ${name} replacement))))";
+          if (lane == 2) {
+            _ev(lisp, %"(def caller (lambda (flag) " +
+                      %"(cond (flag ${call}) (1 0))))");
+            _ev(lisp, "(caller ())");
+            call = "(caller 1)";
+          }
+          auto_order_log[0] = 0;
+          EXPECT_INT_EQ(Var.integer(_ev(lisp, call)), 99);
+        }
+        EXPECT_STR_EQ(String.new(auto_order_log), "1");
+        Lisp.destroy(lisp);
+      }
+}
+
+static void lisp_auto_quasiquote_effect_order(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new_bare();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def replacement (macro (x) 99))");
+    _ev(lisp, "(def f (lambda (flag) (cond (flag (quasiquote "
+              "((unquote (cond ((def quasiquote replacement) 5))) 7)))"
+              " (1 0))))");
+    _ev(lisp, "(f ())");
+    EXPECT_TRUE(_ev(lisp, "(f 1)") == %(5 7));
+    Lisp.destroy(lisp);
+
+    lisp = Lisp.new_bare();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def replacement (macro (x) 99))");
+    _ev(lisp, "(def f (lambda (flag) (cond (flag (quasiquote "
+              "((unquote (cond ((def quote replacement) 5))) "
+              "(unquote (quote 7))))) (1 0))))");
+    _ev(lisp, "(f ())");
+    EXPECT_TRUE(_ev(lisp, "(f 1)") == %(5 99));
+    Lisp.destroy(lisp);
+
+    lisp = Lisp.new_bare();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def f (lambda (x) "
+              "(quasiquote ((unquote-splicing x)))))");
+    _ev(lisp, "(f ())");
+    Var original = _ev(lisp, "(def xs (quote (1 2 3)))");
+    EXPECT_TRUE(_ev(lisp, "(f xs)").u64 == original.u64);
+    EXPECT_TRUE(_ev(lisp, "(f ())").is_nil());
+    Lisp.destroy(lisp);
+
+    lisp = Lisp.new_bare();
+    Lisp.auto_disable(lisp, disabled);
+    _ev(lisp, "(def side 0) (def f (lambda (flag) (cond (flag "
+              "(quasiquote ((unquote-splicing 7) "
+              "(unquote (def side 1))))) (1 0))))");
+    _ev(lisp, "(f ())");
+    EXPECT_INT_EQ(_raised(lisp, "(f 1)"), <bad-types>);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "side")), 0);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(f ())")), 0);
+    Lisp.destroy(lisp);
+  }
+}
+
+static void lisp_auto_mutating_tail_recursion(void) {
+  Lisp lisp = Lisp.new();
+  MachineStats stats = {};
+  Lisp.auto_instrument(lisp, &stats);
+  _ev(lisp, "(defun cd (n) "
+            "(cond ((= n 0) 7) ((def seen n) (cd (- n 1)))))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(cd 100000)")), 7);
+  EXPECT_INT_EQ(stats.max_frames, 1);
   Lisp.destroy(lisp);
 }
 
@@ -829,6 +936,9 @@ void lisp_auto_suite(void) {
   $test.run(lisp_auto_macro_global_data);
   $test.run(lisp_auto_macro_helper_rebinding);
   $test.run(lisp_auto_macro_fresh_closure);
-  $test.run(lisp_auto_rejected_parent_releases_programs);
+  $test.run(lisp_auto_declined_form_releases_programs);
   $test.run(lisp_auto_local_recursion_capacity);
+  $test.run(lisp_auto_mutating_specials);
+  $test.run(lisp_auto_quasiquote_effect_order);
+  $test.run(lisp_auto_mutating_tail_recursion);
 }

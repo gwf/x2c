@@ -635,9 +635,9 @@ the Lisp runtime: reader, session, and evaluator.
 Public functions:
 
 `Lisp.program`, `Lisp.resolve`, `Lisp.enter`, `Lisp.leave`, `Lisp.retarget`,
-`Lisp.apply_values`, `Lisp.precall`, `Lisp.immediate`, `Lisp.expanded`,
-`Lisp.new_bare`, `Lisp.new`, `Lisp.destroy`, `Lisp.read`, `lisp_atom`,
-`lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
+`Lisp.apply_values`, `Lisp.precall`, `Lisp.immediate`, `Lisp.evaluate`,
+`Lisp.expanded`, `Lisp.new_bare`, `Lisp.new`, `Lisp.destroy`, `Lisp.read`,
+`lisp_atom`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
 `lisp_symbol`, `lisp_procedure`, `lisp_compare`, `lisp_type`, `lisp_add`,
 `lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
 `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,

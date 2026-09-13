@@ -155,7 +155,7 @@ int Lisp.precall(void *storage, Var callable, List raw, Var *value) {
   if (callable is <lambda>) {
     Lambda lambda = callable;
     if (!lambda.macro && lambda.auto_status == MACHINE_PREPARED &&
-        lambda.auto_program && _auto_specials_ok(lisp, env, lambda))
+        lambda.auto_program)
       return 0;
   }
   *value = _apply(lisp, callable, raw, env);
@@ -180,7 +180,20 @@ Var Lisp.immediate(void *storage, Var callable) {
   return _eval(lisp, %($lsym_lambda ${lambda.params} ${lambda.body}), env);
 }
 
-/** Checks a prepared macro expansion after preceding effects have run.
+/** Evaluates one borrowed form in the running machine's environment.
+    `storage` must name a running LispMachine context. The form is interpreted
+    by the ordinary evaluator with the machine frame's parameters and captures
+    visible, so a form the lowering does not cover behaves exactly as it does
+    outside a prepared program. Results keep their ordinary session or value
+    owners.
+    Raises any cause the form raises.
+*/
+Var Lisp.evaluate(void *storage, Var form) {
+  LispMachineContext context = (LispMachineContext) storage;
+  return _eval(context.lisp, form, _machine_env(context));
+}
+
+/** Checks a lowered form after preceding effects have run.
     Returns 0 when its dependencies match. Otherwise evaluates the original
     call into `out` and returns 1. `storage` must name the running context,
     `site` must contain the original form and dependency pairs, and `out`
@@ -269,7 +282,6 @@ typedef struct Lambda {
   Var body;
   Map captures, int macro, auto_calls, auto_status;
   MachineProgram auto_program;
-  List auto_specials;   // reserved special-form identity guards
 } *Lambda;
 
 static inline Var Lambda.var(Lambda);
@@ -981,7 +993,6 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   lambda.auto_calls = 0;
   lambda.auto_status = -1;
   lambda.auto_program = NULL;
-  lambda.auto_specials = NULL;
   _capture(lisp, env, lambda.params, lambda.body, lambda.captures);
   return result = lambda;
 }
@@ -1172,29 +1183,15 @@ typedef struct LispLower {
   LispEnv *env;         // the call site that triggered analysis
   Lambda lambda;
   MachineBuilder b;
-  List specials;
   List locals;
   int depth;            // macro expansions open on this path
 } *LispLower;
-
-static int LispLower._auto_reject(LispLower l, const char *reason) {
-  MachineBuilder b = l.b;
-  if (b.status == MACHINE_PREPARED) {
-    b.status = MACHINE_INELIGIBLE;
-    b.reason = reason;
-  }
-  return 0;
-}
 
 static int _auto_param_index(Lambda lambda, Var name) {
   int index = -1, at = 0;
   for (List p = lambda.params; p; p = p.cdr(), at++)
     if (p.car() == name) index = at;  // last binding wins, like Map.set
   return index;
-}
-
-static void LispLower._auto_note(LispLower l, Var name, Var value) {
-  l.specials = cons(%($name $value), l.specials);
 }
 
 static int LispLower._auto_load_name(LispLower l, Var name) {
@@ -1223,13 +1220,12 @@ static int LispLower._auto_compile_constant(LispLower l, Var value) {
 static int LispLower._auto_compile_cond(LispLower l, List clauses,
                                         int tail) {
   MachineBuilder b = l.b;
-  l._auto_note(lsym_cond, l.lisp.specials[LISP_COND]);
-  if (!clauses) return l._auto_reject("cond-args");
+  if (!clauses) return 0;
   int end_jumps[64], end_count = 0;
   foreach (Var clause, clauses) {
     if (clause is not <list> || List.len(clause) != 2)
-      return l._auto_reject("cond-clause");
-    if (end_count >= 64) return l._auto_reject("cond-width");
+      return 0;
+    if (end_count >= 64) return 0;
     List pair = clause;
     Var (condition, consequent) = pair;
     if (!l._auto_compile(condition, 0)) return 0;
@@ -1271,7 +1267,7 @@ static int LispLower._auto_compile_qq(
   LispLower l, Var expression, int list, int depth, int live
 ) {
   if (live >= MACHINE_VALUE_MAX - LISP_AUTO_PARAM_MAX)
-    return l._auto_reject("quasiquote-stack");
+    return 0;
   if (!_auto_qq_dynamic(expression, depth)) {
     if (!l._auto_compile_constant(expression)) return 0;
     return !list || l._auto_qq_wrap();
@@ -1287,7 +1283,7 @@ static int LispLower._auto_compile_qq(
       return !list || l._auto_qq_wrap();
     }
     if (head == lsym_unquote || head == lsym_splicing) {
-      if (form.len() != 2) return l._auto_reject("quasiquote-arity");
+      if (form.len() != 2) return 0;
       if (depth > 0) {
         if (!l._auto_compile_constant(%($head)) ||
             !l._auto_compile_qq(form.cdr(), 0, depth - 1, live + 1) ||
@@ -1296,9 +1292,12 @@ static int LispLower._auto_compile_qq(
         return !list || l._auto_qq_wrap();
       }
       if (!list && head == lsym_splicing)
-        return l._auto_reject("quasiquote-splice-position");
+        return 0;
       if (!l._auto_compile(argument, 0)) return 0;
-      return head == lsym_splicing || !list || l._auto_qq_wrap();
+      // Appending nil checks a splice before effects in the remaining forms.
+      if (head == lsym_splicing)
+        return l._auto_compile_constant(%()) && l._auto_qq_append();
+      return !list || l._auto_qq_wrap();
     }
     if (!l._auto_compile_qq(head, 1, depth, live) ||
         !l._auto_compile_qq(form.cdr(), 0, depth, live + 1) ||
@@ -1319,10 +1318,7 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
   if (!_lookup(l.lisp, l.env, head, &value) || value is not <lambda>) return 0;
   Lambda macro = value;
   if (!macro.macro) return 0;
-  if (l.depth >= LISP_AUTO_EXPAND_MAX) {
-    l._auto_reject("macro-depth");
-    return -1;
-  }
+  if (l.depth >= LISP_AUTO_EXPAND_MAX) return 0;
   /* The evaluator expands only the calls it reaches, so a macro call in a
      branch that never runs fails nowhere today. Analysis reaches every
      branch; keep its failures local by rejecting rather than raising. */
@@ -1344,11 +1340,36 @@ static int LispLower._auto_self_call(LispLower l, Var head) {
   Var value;
   if (!_lookup(l.lisp, l.env, head, &value) || value is not <lambda>) return 0;
   if (value.lambda() != l.lambda) return 0;
-  l._auto_note(head, value);
   return 1;
 }
 
+/* Undo a declined attempt. Only LLAMBDA words own a callee, so the rewind
+   frees those programs; constants intern in emission order, so every index
+   the retained words name was added before the mark. */
+static void LispLower._auto_rewind(
+  LispLower l, int mark, int constants) {
+  MachineBuilder b = l.b;
+  for (int i = mark; i < b.length; i++)
+    if (b.code[i].op == MW_LLAMBDA)
+      _auto_discard(l.lisp, b.consts[b.code[i].a]);
+  b.length = mark;
+  b.const_count = constants;
+}
+
+/* A declined form runs through the evaluator in the current frame. Rewind
+   its partial program before emitting that crossing; capacity failures still
+   stop preparation of the whole body. */
 static int LispLower._auto_compile(LispLower l, Var expression, int tail) {
+  MachineBuilder b = l.b;
+  int mark = b.length, constants = b.const_count;
+  if (l._auto_lower(expression, tail)) return 1;
+  if (b.status != MACHINE_PREPARED) return 0;
+  l._auto_rewind(mark, constants);
+  int constant = b.constant(expression);
+  return constant >= 0 && b.emit(MW_LEVAL, constant, 0, 0, 0, 0) >= 0;
+}
+
+static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
   MachineBuilder b = l.b;
   if (expression.is_atom()) return l._auto_load_name(expression);
   if (expression is not <list> || expression.is_nil())
@@ -1358,60 +1379,70 @@ static int LispLower._auto_compile(LispLower l, Var expression, int tail) {
   if (head is <list>) {
     List literal = head;
     if (literal.len() != 3 || literal.car() != lsym_lambda ||
-        literal.cadr() is not <list>)
-      return l._auto_reject("computed-call-head");
-    if (l.depth >= LISP_AUTO_EXPAND_MAX)
-      return l._auto_reject("lambda-depth");
+        literal.cadr() is not <list> || l.depth >= LISP_AUTO_EXPAND_MAX)
+      return 0;
     Lambda immediate = _make_lambda(l.lisp, literal.cdr(), NULL, 0);
     int retained = 0;
     defer if (!retained) _auto_discard(l.lisp, immediate);
     if (_auto_analyze(l.lisp, immediate, l.env, l.depth + 1, l.locals) !=
         MACHINE_PREPARED)
-      return l._auto_reject("immediate-body");
+      return 0;
     int constant = b.constant(immediate);
     if (constant < 0 || b.emit(MW_LLAMBDA, constant, 0, 0, 0, 0) < 0)
       return 0;
     retained = 1;
     return l._auto_compile_call(form.cdr(), 0);
   }
-  if (!head.is_atom()) return l._auto_reject("computed-call-head");
-  if (l._auto_local_name(head)) return l._auto_reject("dynamic-call-head");
-  if (head == lsym_quote) {
-    if (form.len() != 2) return l._auto_reject("quote-args");
-    l._auto_note(lsym_quote, l.lisp.specials[LISP_QUOTE]);
-    return l._auto_compile_constant(argument);
-  }
-  if (head == lsym_cond) return l._auto_compile_cond(form.cdr(), tail);
-  if (head == lsym_def || head == lsym_bind)
-    return l._auto_reject("mutation-form");
-  if (head == lsym_lambda || head == lsym_macro)
-    return l._auto_reject("nested-lambda");
-  if (head == lsym_eval) return l._auto_reject("eval-form");
-  if (head == lsym_quasiquote) {
-    if (form.len() != 2) return l._auto_reject("quasiquote-args");
-    l._auto_note(lsym_quasiquote, l.lisp.specials[LISP_QUASIQUOTE]);
-    return l._auto_compile_qq(argument, 0, 0, 0);
-  }
-  if (head == lsym_import) return l._auto_reject("import-form");
-  if (head == lsym_apply) return l._auto_reject("apply-form");
+  /* A computed head, a head naming a runtime local, and the mutating,
+     binding, and reflective special forms have no wordcode; each declines
+     to MW_LEVAL. */
+  if (!head.is_atom() || l._auto_local_name(head) ||
+      head == lsym_def || head == lsym_bind || head == lsym_lambda ||
+      head == lsym_macro || head == lsym_eval || head == lsym_import ||
+      head == lsym_apply)
+    return 0;
+  if (head == lsym_quote || head == lsym_cond || head == lsym_quasiquote)
+    return l._auto_compile_special(form, tail);
   Var expansion;
   List dependencies;
-  int expanded = l._auto_expand(head, form.cdr(), &expansion, &dependencies);
-  if (expanded < 0) return 0;
-  if (expanded) $let(l.depth, l.depth + 1) {
-    int guard = b.emit(MW_LEXPAND, 0, 0, 0, 0, -1);
-    if (guard < 0 || !l._auto_compile(expansion, tail)) return 0;
-    List guards = dependencies.append(l.specials);
-    int site = b.constant(%($form $guards));
-    if (site < 0) return 0;
-    b.code[guard].a = site;
-    b.set_target(guard, b.length);
-    return 1;
-  }
+  if (l._auto_expand(head, form.cdr(), &expansion, &dependencies))
+    $let(l.depth, l.depth + 1) {
+      int guard = b.emit(MW_LEXPAND, 0, 0, 0, 0, -1);
+      if (guard < 0 || !l._auto_compile(expansion, tail)) return 0;
+      int site = b.constant(%($form $dependencies));
+      if (site < 0) return 0;
+      b.code[guard].a = site;
+      b.set_target(guard, b.length);
+      return 1;
+    }
   int name = b.constant(head);
   if (name < 0 || b.emit(MW_LGLOBAL, name, 0, 0, 0, 0) < 0) return 0;
   return l._auto_compile_call(
     form.cdr(), tail && l._auto_self_call(head));
+}
+
+/* Earlier forms and call arguments may rebind a special. Check at the
+   form's start: a miss evaluates only this untouched form,
+   and a hit keeps its selected operation through effects inside that form. */
+static int LispLower._auto_compile_special(LispLower l, List form, int tail) {
+  Var (head, argument) = form;
+  int special = head == lsym_quote ? LISP_QUOTE
+              : head == lsym_cond ? LISP_COND : LISP_QUASIQUOTE;
+  Var expected = l.lisp.specials[special];
+  MachineBuilder b = l.b;
+  int site = b.constant(%($form (($head $expected))));
+  if (site < 0) return 0;
+  int guard = b.emit(MW_LEXPAND, site, 0, 0, 0, -1);
+  if (guard < 0) return 0;
+  int ok = 0;
+  if (special == LISP_COND)
+    ok = l._auto_compile_cond(form.cdr(), tail);
+  else if (form.len() == 2)
+    ok = special == LISP_QUOTE ? l._auto_compile_constant(argument)
+                             : l._auto_compile_qq(argument, 0, 0, 0);
+  if (!ok) return 0;
+  b.set_target(guard, b.length);
+  return 1;
 }
 
 static int LispLower._auto_compile_call(LispLower l, List args, int tail) {
@@ -1422,7 +1453,7 @@ static int LispLower._auto_compile_call(LispLower l, List args, int tail) {
   if (precall < 0) return 0;
   int argc = 0;
   foreach (Var arg, args) {
-    if (argc >= LISP_AUTO_PARAM_MAX) return l._auto_reject("call-arity");
+    if (argc >= LISP_AUTO_PARAM_MAX) return 0;
     if (!l._auto_compile(arg, 0)) return 0;
     argc++;
   }
@@ -1454,18 +1485,17 @@ static int _auto_analyze(
   Lisp lisp, Lambda lambda, LispEnv *env, int depth, List locals) {
   if (lambda.auto_status >= 0) return lambda.auto_status;
   lisp.auto_stats.analyses++;
-  const char *reason = NULL;
-  int param_count = 0;
+  /* Body fallback does not remove frame limits: a rest parameter has no
+     fixed slot and the local frame is bounded. */
+  int bindable = 1, param_count = 0;
   foreach (Var name, lambda.params) {
     if (name.is_atom() && name.str() == %".") {
-      reason = "rest-parameters";
+      bindable = 0;
       break;
     }
     param_count++;
   }
-  if (!reason && param_count > LISP_AUTO_PARAM_MAX)
-    reason = "parameter-capacity";
-  if (reason) {
+  if (!bindable || param_count > LISP_AUTO_PARAM_MAX) {
     lambda.auto_status = MACHINE_INELIGIBLE;
     lisp.auto_stats.ineligible++;
     return lambda.auto_status;
@@ -1475,14 +1505,13 @@ static int _auto_analyze(
     locals = lambda.params.append(locals);
     foreach (Var (name, value), lambda.captures)
       locals = cons(name, locals);
-    struct LispLower storage = { lisp, env, lambda, b, NULL, locals, depth };
+    struct LispLower storage = { lisp, env, lambda, b, locals, depth };
     LispLower lower = &storage;
     int ok = lower._auto_compile(lambda.body, 1) &&
              b.emit(MW_LRETURN, 0, 0, 0, 0, 0) >= 0;
     if (ok) {
       b.root = 0;
       lambda.auto_program = b.freeze();
-      lambda.auto_specials = lower.specials;
       lambda.auto_status = MACHINE_PREPARED;
     }
     else
@@ -1501,9 +1530,8 @@ static int _auto_analyze(
   }
 }
 
-/* Each note pairs a name with the callable used while compiling it.
-   Rebinding the name invalidates the program, so the call falls back to the
-   evaluator. */
+/* Each dependency pairs a name with the value used while lowering a form.
+   A mismatch makes that form use the evaluator at its execution site. */
 static int _auto_bindings_ok(Lisp lisp, LispEnv *env, List bindings) {
   foreach (List pair, bindings) {
     Var (name, expected) = pair;
@@ -1513,9 +1541,6 @@ static int _auto_bindings_ok(Lisp lisp, LispEnv *env, List bindings) {
   }
   return 1;
 }
-
-static int _auto_specials_ok(Lisp lisp, LispEnv *env, Lambda lambda) =>
-  _auto_bindings_ok(lisp, env, lambda.auto_specials);
 
 static void _raise_machine_error(Var error) {
   if (error is <symbol>) raise %(invariant (owner "Machine") (why $error));
@@ -1586,8 +1611,7 @@ static int _auto_apply(
     return 0;
   }
   if (raw.len() != lambda.params.len() ||
-      lisp.machine_depth >= LISP_MACHINE_NESTING_MAX ||
-      !_auto_specials_ok(lisp, env, lambda)) {
+      lisp.machine_depth >= LISP_MACHINE_NESTING_MAX) {
     lisp.auto_stats.guard_failures++;
     return 0;
   }
