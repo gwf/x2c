@@ -11,13 +11,18 @@
 #include "compiler.x"
 #include "toolchain.x"
 
-/** Borrows a configured request and owns shared source setup.
+/** Receives borrowed native-preprocessor stderr synchronously during collect. */
+typedef void (*FrontendErrorSink)(String text);
+
+/** Borrows a configured request and owns shared native-preprocessor setup.
     Units open sequentially; process caches must outlive the session.
+    The optional stderr sink runs synchronously; units also retain that text.
 */
 typedef struct Frontend {
   CliRequest request;
   List include_dirs;
   Toolchain toolchain;
+  FrontendErrorSink preprocessor_errors;
 } *Frontend;
 
 /** Owns one isolated source lifetime, including unsuccessful diagnostics.
@@ -25,9 +30,10 @@ typedef struct Frontend {
 */
 typedef struct ParsedUnit {
   Context context;
-  Compiler compiler;
-  Map globals;
+  Compiler compiler, preprocessor;
+  Map globals, snapshot_statics;
   List ast;
+  String preprocessor_output, preprocessor_errors;
   int source_lines;
 } ParsedUnit;
 
@@ -42,6 +48,16 @@ typedef struct ParsedUnit {
 #include "deps.x"
 #include "snapshot.x"
 #include "utils.x"
+
+static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
+
+/* The tracked symbol snapshot defines the prelude environment, so its own
+   dump walks lib/x2c.x cold: no snapshot base, no header artifact, and no
+   preprocessor. Either transport flag asks for the host route instead. */
+static int _raw_snapshot_dump(CliRequest request) {
+  return request.dump == <snapshot> && !request.live_symbols &&
+         !request.cpp_symbols;
+}
 
 static int _source_lines(String text) {
   if (!text) return 0;
@@ -95,10 +111,12 @@ static void _load_snapshot_once(void) {
 void Frontend.load_support(CliRequest request) {
   Type.initialize();
   header_symbols_initialize();
-  if (request.no_cpp || request.dump == <snapshot>) return;
-  _load_snapshot_once();
-  if (request.source_facts || request.dump == <hdr-syms> ||
-      header_symbols_loaded)
+  int raw_snapshot = _raw_snapshot_dump(request);
+  if (!request.live_symbols && !request.no_cpp && !raw_snapshot)
+    _load_snapshot_once();
+  if (request.no_cpp || raw_snapshot || request.source_facts ||
+      request.dump == <hdr-syms> ||
+      request.live_symbols || header_symbols_loaded)
     return;
   String artifact = %"${x2c_get_root()}/etc/header-symbols.xlisp";
   header_symbols_open(artifact, snapshot_gensym);
@@ -220,25 +238,89 @@ static void _configure_package(
   }
 }
 
-/* The tracked symbol snapshot defines the prelude environment, so its dump
-   starts from an empty base and walks lib/x2c.x cold. Every other unit
-   starts from that snapshot and collects only its own declarations. */
-static Map _collect_input(CliRequest request, Compiler c) {
+static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
+  Compiler c = unit->compiler;
+  CliRequest request = frontend.request;
+  String filename = c.filename;
   if (request.no_cpp) return NULL;
-  if (request.dump == <snapshot>) {
+  if (_raw_snapshot_dump(request)) {
     c.runtime_hdrs = 1;
     return c.collect_symbols(NULL);
   }
-  if ((void *) snapshot_globals == NULL)
+  String root = x2c_get_root(), int use_snapshot = !request.live_symbols;
+  Map globs = NULL;
+  if (use_snapshot) {
+    if ((void *) snapshot_globals == NULL)
+      c.report_error(
+        <driver>, snapshot_error,
+        _first_preprocessor_token(c), NULL);
+    // One copy per translation unit. collect_symbols merges the unit's
+    // own symbols into its argument, and units must not see each other's
+    // additions.
+    globs = snapshot_globals.copy();
+    c.fn_defs = snapshot_function_definitions.copy();
+    if (gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
+    c.set_gensym(gensym_cursor);
+  }
+  int use_cpp = request.cpp_symbols || request.live_symbols ||
+                cpp_dumps.contains(request.dump);
+  if (use_snapshot && !use_cpp) {
+    Map result = c.collect_symbols(globs);
+    return result;
+  }
+  Compiler cppcompiler = Compiler.new_shared(c);
+  unit->preprocessor = cppcompiler;
+  cppcompiler.filename = filename;
+  String text = NULL, errors = NULL, dependency_text = NULL;
+  String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL, imacros = runtime;
+  int status = frontend.toolchain.preprocess(
+    filename, c.include_dirs, imacros, &text, &errors, &dependency_text);
+  unit->preprocessor_output = text;
+  unit->preprocessor_errors = errors;
+  if (errors && frontend.preprocessor_errors)
+    frontend.preprocessor_errors(errors);
+  if (status) {
+    List notes = %("stage: preprocess" "status: $status");
     c.report_error(
-      <driver>, snapshot_error, _first_preprocessor_token(c), NULL);
-  // One copy per translation unit. collect_symbols merges the unit's own
-  // symbols into its argument, and units must not see each other's additions.
-  Map globs = snapshot_globals.copy();
-  c.fn_defs = snapshot_function_definitions.copy();
-  if (gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
-  c.set_gensym(gensym_cursor);
-  return c.collect_symbols(globs);
+      <driver>, "failed to run C preprocessor",
+      _first_preprocessor_token(c), notes);
+  }
+  foreach (String dependency, translation_depfile_parse(dependency_text))
+    c.add_translation_dependency(dependency);
+  if (!text) return NULL;
+  if (request.dump == <dump-cpp>) return globs;
+  cppcompiler.tokenize(text);
+  // Expanded CPP offsets cannot describe the physical input files.
+  cppcompiler.source_facts = 0;
+  cppcompiler.source_private = -1;
+  cppcompiler.collect_protocols = 0;
+  if (request.dump == <cpp-tokens>) return globs;
+  if (request.live_symbols) c.runtime_hdrs = 1;
+  globs = c.collect_symbols(globs);
+  cppcompiler.imports = c.imports;
+  cppcompiler.macro_lisp = c.macro_lisp;
+  cppcompiler.borrowed_lisp = cppcompiler.macro_lisp != NULL;
+  Map saved_counters = NULL;
+  int saved_gensym = 0;
+  if (!request.live_symbols) {
+    saved_counters = c.names.counters;
+    saved_gensym = c.names.gensym_count;
+    c.names.counters = c.names.counters.copy();
+  }
+  cppcompiler.shallow_parse(globs);
+  globs = cppcompiler.sym.global_symbols();
+  if (request.live_symbols && !request.dump)
+    c.install_generated_protocol_symbols(globs);
+  if (!request.live_symbols) {
+    /* Owning-source collection already counted declaration names. CPP adds
+       host declarations without counting the same source's names again. */
+    c.names.counters = saved_counters;
+    c.names.gensym_count = saved_gensym;
+  }
+  if (request.dump == <snapshot>)
+    unit->snapshot_statics =
+      cppcompiler.sym.file_statics().copy();
+  return globs;
 }
 
 /** Opens and tokenizes an isolated source unit without printing diagnostics.
@@ -271,15 +353,23 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   return !compiler.error_count();
 }
 
-/** Collects the unit's symbols above the process-wide prelude environment. */
+/** Collects symbols and retains preprocessor outputs for adapter inspection. */
 int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
   Compiler compiler = unit->compiler;
   try {
-    unit->globals = _collect_input(frontend.request, compiler);
+    unit->globals = _preprocess_input(frontend, unit);
+    if (unit->preprocessor)
+      compiler.take_diagnostics(unit->preprocessor);
     if (!frontend.request.no_cpp) header_symbols_begin_generated();
     compiler.sym.seed_var_tags(unit->globals);
   }
-  catch %(malformed *): return 0;
+  catch %(malformed *): {
+    if (unit->preprocessor) {
+      compiler.close_child(unit->preprocessor);
+      unit->preprocessor = NULL;
+    }
+    return 0;
+  }
   return !compiler.error_count();
 }
 
@@ -311,6 +401,7 @@ void ParsedUnit.close(ParsedUnit *unit) {
   Compiler compiler = unit->compiler;
   if (gensym_cursor < compiler.names.gensym_count)
     gensym_cursor = compiler.names.gensym_count;
+  if (unit->preprocessor) compiler.close_child(unit->preprocessor);
   compiler.free_lisp();
   Type.end_unit();
   unit->context.close();

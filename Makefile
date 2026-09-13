@@ -15,9 +15,10 @@ CORE_TARGETS = build build-safe verify examples check precommit \
 BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 	stage-1 stage-2 stage-3 packages
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
-	proof-artifact-atomicity build-recovery packages-check
+	proof-artifact-atomicity proof-raw-symbols proof-conformance \
+	build-recovery packages-check
 SYMBOL_TARGETS = sym-ensure sym-check sym-update sym-refresh \
-	hdr-check hdr-sync artifact-refresh
+	sym-live-build hdr-check hdr-sync artifact-refresh
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
 DOC_TARGETS = doc-generate doc-check doc-examples doc-build doc-serve \
@@ -140,6 +141,7 @@ check-after-precommit:
 # Example checks are optional (Gary, 2026-09-01).
 # Run `make examples doc-examples` manually.
 #	$(MAKE) examples
+	$(MAKE) proof-raw-symbols
 	$(MAKE) doc-check
 #	$(MAKE) doc-examples
 
@@ -218,6 +220,12 @@ proof-artifact-atomicity:				## Prove artifact updates are atomic
 build-recovery: build					## Check incremental build recovery
 	./unittest/probes/run-build-recovery.sh
 
+proof-raw-symbols: build				## Check raw symbol collection parity
+	./unittest/probes/run-raw-symbol-sweep.sh
+
+proof-conformance: build ## Compare owned conformance rows between snapshot and live symbol modes
+	./tools/check-conformance-coherence.sh
+
 ##@ Symbols and artifacts
 sym-ensure:						## Refresh stale symbols only when inputs changed
 	@python3 tools/sync-symbol-snapshot.py \
@@ -237,6 +245,12 @@ sym-update: build					## Rewrite the compiler symbol snapshot
 
 sym-refresh: sym-update					## Refresh and verify symbol artifacts
 	$(MAKE) sym-check
+
+sym-live-build: bootstrap-ready				## Build stage 0 from live symbols
+	$(MAKE) -C builds clean
+	$(MAKE) -C include all
+	$(MAKE) -C lib x2c.x
+	$(PARALLEL_MAKE) -C builds x2c X2C_FLAGS=--live-symbols
 
 HEADER_SYMBOL_SOURCES = $(filter-out lib/x2c.x,$(wildcard lib/*.x)) \
 	$(wildcard src/*.x)

@@ -65,6 +65,10 @@ static void _report_diagnostics(Compiler compiler) {
   foreach (Var entry, entries) compiler.print_diagnostic(entry);
 }
 
+static void _preprocessor_errors(String text) {
+  Stderr.printf("%s", text);
+}
+
 // pipeline utilities
 
 static Map _filter_static_symbols(Map globs, Map statics) {
@@ -117,6 +121,19 @@ static void _compile_file(
   ok = unit.collect(frontend);
   _report_diagnostics(compiler);
   if (!ok) exit(1);
+  switch (opts.dump) {
+    case <dump-cpp>:
+      if (unit.preprocessor_output)
+        Stderr.printf("%s", unit.preprocessor_output);
+      exit(0);
+    case <cpp-tokens>:
+      if (unit.preprocessor) unit.preprocessor.dump_tokens();
+      exit(0);
+    case <dump-csym>:
+      if (unit.preprocessor)
+        unit.preprocessor.dump_symbol_table(unit.globals);
+      exit(0);
+  }
   if (!unit.parse()) {
     _report_diagnostics(compiler);
     exit(1);
@@ -135,8 +152,10 @@ static void _compile_file(
       exit(0);
   }
   if (opts.dump == <snapshot>) {
+    Map statics = unit.snapshot_statics ? unit.snapshot_statics : %{};
+    Map.merge(statics, compiler.sym.file_statics());
     Map snapshot = _filter_static_symbols(
-      compiler.sym.global_symbols(), compiler.sym.file_statics());
+      compiler.sym.global_symbols(), statics);
     if (!symbol_snapshot_write(snapshot, compiler.fn_defs, Stdout))
       exit(1);
     exit(0);
@@ -313,6 +332,7 @@ static int _run_translation(CliRequest c) {
     fputc('\n', stderr);
   }
   Frontend frontend = Frontend.new(c);
+  frontend.preprocessor_errors = _preprocessor_errors;
   String output_dir = c.out_dir;
   int total = c.inputs.len(), completed = 0;
   unsigned long long gen_bytes = 0;

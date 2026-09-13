@@ -2985,7 +2985,7 @@ List Sym_declare(Sym sym, List context, List key, List ast){
   {
     if(String_truth((sym -> compiler) -> package)) key = _package_declared_key(sym, context, key, ast);
     String spelling = _declared_spelling(key);
-    if(_is_reserved_spelling(spelling)){
+    if(!(sym -> compiler) -> shallow && _is_reserved_spelling(spelling)){
       String message = String_join(NULL, cons(String_var(_7), cons(String_var(spelling), cons(String_var(_366), NULL))));
       Compiler_report_error((sym -> compiler), 33658058, message, (sym -> compiler) -> token, NULL);
     }

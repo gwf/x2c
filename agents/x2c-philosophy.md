@@ -572,35 +572,34 @@ located diagnostic — one check per declaration in
 `Sym.declare`, with no prescan — so generated names can never
 collide with user names. The `reserved-namespace` fixture pins the rejection
 and `generated-name-hygiene` pins that ordinary names near the convention
-still lower unchanged. The snapshot seeds the anonymous-type sequence. Lambda helpers, adapters, transfer frames, and
+still lower unchanged. Snapshot or live preprocessing seeds the same
+anonymous-type sequence. Lambda helpers, adapters, transfer frames, and
 cleanup temporaries allocate names from that session. Emission keeps cleanup
 and preserved-automatic bookkeeping in a stack-local owner, so failed or
 repeated Compiler invocations cannot contaminate later output.
 
-### Source declaration collection
+### Source declaration collection and host preprocessing
 
-`Compiler.collect_symbols` is the single owner of source-specific declaration
-collection. It recursively splices quote-includes in source order, leaves
-snapshot-covered runtime headers as trivia, and shallow-parses the resulting
-raw stream. No host process participates: x2c resolves includes itself and
-terminates cycles by real path.
+`Compiler.collect_symbols` owns the default source-specific declaration path.
+It recursively splices quote-includes in source order, leaves snapshot-covered
+runtime headers as trivia, and shallow-parses the resulting raw stream without
+invoking the host C preprocessor.
 
-The checked-in snapshot is that collector's proof. `etc/symbols.xlisp` is
-defined as a cold raw walk of `lib/x2c.x`, `make sym-check` re-derives it and
-diffs, and `make sym-ensure` rewrites it when its inputs change. A collector
-change that alters the prelude environment therefore shows up as a diff in a
-tracked file rather than as a silent divergence. The consequence to accept
-deliberately: collection recognizes `#include` and nothing else, so it does
-not expand macros and does not evaluate `#if`.
+The C preprocessor remains the explicit compatibility and parity oracle.
+`Toolchain.preprocess` (`src/toolchain.x`) owns that host process boundary: it passes every source
+and include path as an argv element, captures stdout and stderr separately, and
+returns the real process status. `preprocess_input` owns the compiler response:
+host stderr remains visible, failure becomes a structured driver diagnostic,
+and failed stdout is never consumed.
 
-The declaration stream does not replace the user's source. The original positioned
+Neither declaration stream replaces the user's source. The original positioned
 token stream owns full parsing, diagnostics, and emission. The parser,
 generator, and formatter retain source directives in order at top level and
 within compound statements, except that generation consumes its control
-pragmas and owns the generated header's `#pragma once`. `make sym-check` owns
-prelude-environment identity; the symbol-snapshot and header-cache probes own
-collection ordering and replay; compiler fixtures own structural AST, C, and
-runtime evidence.
+pragmas and owns the generated header's `#pragma once`. The raw sweep owns
+default-path parity; process probes own hostile CPP paths and failure status;
+compiler fixtures own missing-include status and structural AST/C/runtime
+evidence.
 
 ### Header-symbol cache
 

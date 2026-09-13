@@ -213,7 +213,7 @@ Binds a local aggregate tag before its fields, preserving native spelling.
 A reference reuses the nearest visible tag; a definition or standalone
 forward declaration introduces the tag in the current lexical scope.
 
-Source: `src/compiler.x:2750`
+Source: `src/compiler.x:2752`
 
 <a id="Compiler.anchor_origin"></a>
 #### Compiler.anchor_origin
@@ -386,7 +386,7 @@ Source: `src/compiler.x:1337`
 
 Returns a fresh semantic identity for an anonymous aggregate.
 
-Source: `src/compiler.x:2908`
+Source: `src/compiler.x:2910`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -693,7 +693,7 @@ Source: `src/compiler.x:425`
 
 Sets the shared anonymous-aggregate counter used before the next result.
 
-Source: `src/compiler.x:2914`
+Source: `src/compiler.x:2916`
 
 <a id="Compiler.shallow_parse"></a>
 #### Compiler.shallow_parse
@@ -820,7 +820,7 @@ Source: `src/compiler.x:1859`
 
 Installs an existing binding with `ast`'s qualifier-preserving type.
 
-Source: `src/compiler.x:2369`
+Source: `src/compiler.x:2371`
 
 <a id="Sym.binding_is_local"></a>
 #### Sym.binding_is_local
@@ -881,7 +881,7 @@ Source: `src/compiler.x:2314`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/compiler.x:2889`
+Source: `src/compiler.x:2891`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -902,7 +902,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/compiler.x:2868`
+Source: `src/compiler.x:2870`
 
 <a id="Sym.define"></a>
 #### Sym.define
@@ -944,7 +944,7 @@ Source: `src/compiler.x:1911`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/compiler.x:2894`
+Source: `src/compiler.x:2896`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -962,7 +962,7 @@ Source: `src/compiler.x:1892`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/compiler.x:2886`
+Source: `src/compiler.x:2888`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -1027,7 +1027,7 @@ Source: `src/compiler.x:2144`
 
 Reports whether `type` reaches the named `Array` value type.
 
-Source: `src/compiler.x:2839`
+Source: `src/compiler.x:2841`
 
 <a id="Sym.is_map_type"></a>
 #### Sym.is_map_type
@@ -1036,7 +1036,7 @@ Source: `src/compiler.x:2839`
 
 Reports whether `type` reaches the named `Map` value type.
 
-Source: `src/compiler.x:2843`
+Source: `src/compiler.x:2845`
 
 <a id="Sym.is_named_value_type"></a>
 #### Sym.is_named_value_type
@@ -1045,7 +1045,7 @@ Source: `src/compiler.x:2843`
 
 Reports whether `type` reaches a named value type before its definition.
 
-Source: `src/compiler.x:2847`
+Source: `src/compiler.x:2849`
 
 <a id="Sym.is_string_type"></a>
 #### Sym.is_string_type
@@ -1054,7 +1054,7 @@ Source: `src/compiler.x:2847`
 
 Reports whether `type` reaches the named `String` value type.
 
-Source: `src/compiler.x:2835`
+Source: `src/compiler.x:2837`
 
 <a id="Sym.is_var_type"></a>
 #### Sym.is_var_type
@@ -1063,7 +1063,7 @@ Source: `src/compiler.x:2835`
 
 Reports whether `type` reaches the named `Var` value type.
 
-Source: `src/compiler.x:2831`
+Source: `src/compiler.x:2833`
 
 <a id="Sym.local_type"></a>
 #### Sym.local_type
@@ -1075,7 +1075,7 @@ File-scope names retain their semantic identity. Local alias definitions
 are resolved before they are installed, so one lookup crosses the whole
 local chain without consulting names shadowed since its declaration.
 
-Source: `src/compiler.x:2721`
+Source: `src/compiler.x:2723`
 
 <a id="Sym.lookup"></a>
 #### Sym.lookup
@@ -1096,7 +1096,7 @@ Source: `src/compiler.x:2100`
 
 Returns an aggregate field's declared type, or `NULL`.
 
-Source: `src/compiler.x:2856`
+Source: `src/compiler.x:2858`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -1127,7 +1127,7 @@ Resolves one typedef hop and counts against the shared cycle budget.
 Returns `NULL` for an unresolved link. The shared budget turns a cycle
 into the same diagnostic as full-chain resolution.
 
-Source: `src/compiler.x:2653`
+Source: `src/compiler.x:2655`
 
 <a id="Sym.normalize_declared_type"></a>
 #### Sym.normalize_declared_type
@@ -1136,7 +1136,7 @@ Source: `src/compiler.x:2653`
 
 Resolves typedef bases while retaining every declarator qualifier.
 
-Source: `src/compiler.x:2790`
+Source: `src/compiler.x:2792`
 
 <a id="Sym.pop_scope"></a>
 #### Sym.pop_scope
@@ -1145,7 +1145,7 @@ Source: `src/compiler.x:2790`
 
 Pops the innermost scope, or returns an empty scope when none exists.
 
-Source: `src/compiler.x:2933`
+Source: `src/compiler.x:2935`
 
 <a id="Sym.push_new_scope"></a>
 #### Sym.push_new_scope
@@ -1154,7 +1154,7 @@ Source: `src/compiler.x:2933`
 
 Pushes a new empty lexical scope.
 
-Source: `src/compiler.x:2918`
+Source: `src/compiler.x:2920`
 
 <a id="Sym.push_scope"></a>
 #### Sym.push_scope
@@ -1163,7 +1163,7 @@ Source: `src/compiler.x:2918`
 
 Pushes a caller-supplied lexical scope while retaining its map objects.
 
-Source: `src/compiler.x:2928`
+Source: `src/compiler.x:2930`
 
 <a id="Sym.reference"></a>
 #### Sym.reference
@@ -1215,7 +1215,7 @@ Source: `src/compiler.x:2114`
 
 Resolves a canonical typedef key to the end of its declared chain.
 
-Source: `src/compiler.x:2641`
+Source: `src/compiler.x:2643`
 
 <a id="Sym.resolve_numeric_type"></a>
 #### Sym.resolve_numeric_type
@@ -1227,7 +1227,7 @@ Resolves a numeric typedef without reducing semantic object types.
 Returns `NULL` when resolution yields neither a numeric type nor a
 recognized builtin numeric typedef.
 
-Source: `src/compiler.x:2702`
+Source: `src/compiler.x:2704`
 
 <a id="Sym.scope_count"></a>
 #### Sym.scope_count
@@ -1266,7 +1266,7 @@ Returns a type's `Var` tag and optionally stores its resolved type.
 `resolved` receives the final type even when the result is zero because no
 `Var` tag is registered. A null input stores `NULL` and returns zero.
 
-Source: `src/compiler.x:2821`
+Source: `src/compiler.x:2823`
 
 ### `SymTxn`
 
