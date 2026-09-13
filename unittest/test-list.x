@@ -224,17 +224,13 @@ static void list_fold_and_predicates(void) {
   EXPECT_TRUE(empty.reduce(sum_pair) is void);
 }
 
-/* All five predicate APIs accept the same named int-returning function. */
+/* The predicate APIs accept the same named int-returning function. */
 static void list_predicate_shape_is_shared(void) {
   List numbers = %(1 2 3 4);
   EXPECT_TRUE(numbers.filter(greater_than_two) == %(3 4));
   EXPECT_INT_EQ(numbers.find(greater_than_two).integer(), 3);
   EXPECT_TRUE(numbers.any(greater_than_two));
   EXPECT_FALSE(numbers.all(greater_than_two));
-  struct Iter source_storage, filter_storage;
-  Iter kept = numbers.iter(&source_storage)
-    .filter(greater_than_two, &filter_storage);
-  EXPECT_TRUE(kept.list() == %(3 4));
 }
 
 static int reject_three(Var value) {

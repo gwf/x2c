@@ -158,7 +158,7 @@ List List_append(List, List);
 
 List x2c_default_include_dirs(void);
 
-Toolchain toolchain_new(String, String, List, List, List, int, int);
+Toolchain toolchain_new(String, String, List, List, List, int);
 
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -166,7 +166,7 @@ Frontend Frontend_new(CliRequest request){
   Frontend frontend = Scope_calloc(1, sizeof(struct Frontend));
   frontend -> request = request;
   frontend -> include_dirs = List_append(request -> include_dirs, x2c_default_include_dirs());
-  frontend -> toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
+  frontend -> toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose);
   return frontend;
 }
 
@@ -405,7 +405,6 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   Type_begin_unit();
   unit -> compiler = Compiler_new();
   Compiler compiler = unit -> compiler;
-  compiler -> source_map = frontend -> request -> source_map;
   compiler -> sources = frontend -> request -> sources;
   compiler -> source_facts = frontend -> request -> source_facts;
   compiler -> source_primary = 1;

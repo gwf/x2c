@@ -18,7 +18,6 @@ static Var _6, _5, _2, _1, _0;
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
 #include "report.h"
 #include "collect.h"
@@ -48,8 +47,6 @@ static Map _filter_static_symbols(Map globs, Map statics);
 static String _ast_inspection_repr(List node);
 
 static List _transform_ast(Compiler compiler, List ast);
-
-static void _stage_stats(String filename, const char * stage);
 
 static void _compile_file(Frontend frontend, String filename, String output_dir);
 
@@ -244,11 +241,6 @@ static List _transform_ast(Compiler compiler, List ast){
   return ast;
 }
 
-ScopeStats Scope_stats(void);
-static void _stage_stats(String filename, const char * stage){
-  if(! getenv("X2C_STAGE_STATS")) return;  struct timespec ts;  clock_gettime(CLOCK_MONOTONIC, & ts);  unsigned long now_us =(unsigned long) ts.tv_sec * 1000000ul + ts.tv_nsec / 1000;  ScopeStats s = Scope_stats();  fprintf(stderr, "stage-stats,%s,%s,%zu,%zu,%zu,%lu\n", filename, stage, s.live_allocations, s.allocation_calls, s.requested_bytes, now_us);
-}
-
 int Frontend_start(Frontend, String, ParsedUnit *);
 void Compiler_own_diagnostics(Compiler);
 void Compiler_dump_tokens(Compiler);
@@ -263,11 +255,11 @@ int symbol_snapshot_write(Map, Map, File);
 void Compiler_dump_conformance(Compiler, Map);
 List Compiler_generate_protocol_adapters(Compiler, List);
 List Compiler_emit(Compiler, List);
-char * Compiler_code_pretty_string(Compiler, List, String);
+char * Compiler_code_pretty_string(Compiler, List);
 void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
 static void _compile_file(Frontend frontend, String filename, String output_dir){
-  CliRequest request = frontend -> request;  ParsedUnit unit;  _stage_stats(filename, "start");  int ok = Frontend_start(frontend, filename, & unit); {
+  CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, & unit); {
   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
 
   X2CCleanup _x2c_defer_record_0 = {
@@ -286,11 +278,9 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       Compiler_dump_tokens(compiler);
       exit(0);
     }
-    _stage_stats(filename, "tokenize");
     ok = ParsedUnit_collect(&(unit), frontend);
     _report_diagnostics(compiler);
     if(! ok) exit(1);
-    _stage_stats(filename, "symbols");
     if(! ParsedUnit_parse(&(unit))){
       _report_diagnostics(compiler);
       exit(1);
@@ -334,17 +324,14 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       x2c_cleanup_leave(& _x2c_defer_record_0);
       return;
     }
-    _stage_stats(filename, "parse");
     ast = _transform_ast(compiler, ast);
-    _stage_stats(filename, "transform");
     if(opts -> dump == 10268258302218){
       ast = Compiler_emit(compiler, ast);
-      puts(Compiler_code_pretty_string(compiler, ast, NULL));
+      puts(Compiler_code_pretty_string(compiler, ast));
       exit(0);
     }
     generate_code(compiler, ast, output_dir);
     if(! translation_depfile_write(request, compiler, filename, output_dir)) exit(1);
-    _stage_stats(filename, "generate");
   }
 
   x2c_cleanup_leave(&_x2c_defer_record_0);
@@ -553,7 +540,7 @@ static int _run_translation(CliRequest c){
   if(! String_truth(c -> out_dir)) c -> out_dir = _14;
   opts = c;
   _preflight_translation(c);
-  if(c -> verbose || c -> dry_run){
+  if(c -> verbose){
     fprintf(stderr, "x2c: translate");
     fprintf(stderr, " --out-dir %s", c -> out_dir);
     {
@@ -569,7 +556,6 @@ static int _run_translation(CliRequest c){
     }
     fputc('\n', stderr);
   }
-  if(c -> dry_run) return 0;
   Frontend frontend = Frontend_new(c);
   String output_dir = c -> out_dir;
   int total = List_len(c -> inputs), completed = 0;
@@ -638,9 +624,7 @@ static CliRequest _build_translation_request(CliRequest source, String input, St
   request -> run_args = NULL;
   request -> out_dir = output_dir;
   request -> dep_file = NULL;
-  request -> dep_target = NULL;
   request -> no_deps = 0;
-  request -> no_phony_deps = 0;
   request -> nested = 1;
   return request;
 }
@@ -678,20 +662,17 @@ void Build_report_success(Build);
 int Build_run_program(Build);
 
 static int _run_build_request(CliRequest c, Array commands){
-  if(! c -> dry_run){
-    {
-      String input;
-      List _x2c_macro_object_9 = c -> inputs;
-      List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-      Var _x2c_macro_cursor_output_10;
-      while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_10)){
-        input = Var_string(_x2c_macro_cursor_output_10);
-        {
-          if(! String_endswith(input, _12)) continue;
-          Frontend_load_support(c);
-          break;
-        }
-
+  {
+    String input;
+    List _x2c_macro_object_9 = c -> inputs;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_10)){
+      input = Var_string(_x2c_macro_cursor_output_10);
+      {
+        if(! String_endswith(input, _12)) continue;
+        Frontend_load_support(c);
+        break;
       }
 
     }
@@ -727,7 +708,7 @@ static int _run_build_request(CliRequest c, Array commands){
             continue;
           }
           CliRequest translation = _build_translation_request(c, input, directory);
-          if(! c -> dry_run && _run_translation(translation)){
+          if(_run_translation(translation)){
             Build_cleanup(state, 0);
             {
               int _x2c_return_value_0 = 1;
@@ -739,8 +720,7 @@ static int _run_build_request(CliRequest c, Array commands){
             }
 
           }
-          if(c -> dry_run) fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
-          if(! c -> dry_run) Build_record_translation(state, input, directory);
+          Build_record_translation(state, input, directory);
           Build_add_generated(state, input, directory);
           Build_end_translation(state, input, 0);
         }
@@ -805,7 +785,7 @@ static int _run_build_request(CliRequest c, Array commands){
 ProjectBuild project_plan(CliRequest);
 
 static int _run_build(CliRequest request){
-  Array commands = String_truth(request -> compile_commands) && ! request -> dry_run ? Array_new() : NULL;
+  Array commands = String_truth(request -> compile_commands) ? Array_new() : NULL;
   if(List_truth(request -> inputs)){
     if(String_truth(request -> manifest)){
       fputs("x2c: error: --manifest-path conflicts with explicit inputs\n", stderr);
@@ -882,7 +862,7 @@ int editor_request(int, char * *);
 
 CliRequest cli_parse(int, char * *);
 
-void report_configure(int, int, Symbol, int, int, int);
+void report_configure(int, int, Symbol, int, int);
 
 int main(int argc, char * * argv){
   x2c_initialize();
@@ -893,7 +873,7 @@ int main(int argc, char * * argv){
     return editor_request(argc - 1, argv + 1);
   }
   CliRequest request = cli_parse(argc, argv);
-  report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
+  report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);
   _configure_logging(request -> debugging);
   Frontend_load_support(request);

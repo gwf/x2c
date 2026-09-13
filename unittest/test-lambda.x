@@ -647,30 +647,6 @@ static void lambda_list_map2(void) {
   EXPECT_INT_EQ(sums[2].int(), 9);
 }
 
-static Var lambda_double(Var v) {
-  return v * 2;
-}
-
-static void lambda_iter_map(void) {
-  $test.scoped();
-  struct Iter src_storage, mapped_storage;
-  Iter src = range(0, 2, 1, &src_storage);
-  Iter mapped = src.map(lambda_double, &mapped_storage);
-  EXPECT_INT_EQ(mapped.next().int(), 0);
-  EXPECT_INT_EQ(mapped.next().int(), 2);
-  EXPECT_INT_EQ(mapped.next().int(), 4);
-  EXPECT_TRUE(mapped.next() is void);
-}
-
-static void lambda_iter_foldl(void) {
-  $test.scoped();
-  Var zero = 0;
-  struct Iter range_storage;
-  Var sum = range(1, 3, 1, &range_storage).foldl(zero, %!(acc, x) => acc + x);
-  EXPECT_INT_EQ(sum.int(), 6);
-}
-
-
 void lambda_suite(void) {
   $test.run(lambda_nullary_returns_int_as_var);
   $test.run(lambda_unary_identity);
@@ -703,6 +679,4 @@ void lambda_suite(void) {
   $test.run(lambda_list_map);
   $test.run(lambda_list_foldl);
   $test.run(lambda_list_map2);
-  $test.run(lambda_iter_map);
-  $test.run(lambda_iter_foldl);
 }

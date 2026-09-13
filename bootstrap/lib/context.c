@@ -486,9 +486,7 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value){
   return _export_value(value, & source);
 }
 
-void Error_context_close(void *, int);
-
-int x2c_exception_unwinding(void);
+void Error_context_close(void *);
 
 void String_pool_release(void);
 
@@ -505,7 +503,7 @@ void Context_close(Context context){
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
-  Error_context_close(context -> error_state, x2c_exception_unwinding());
+  Error_context_close(context -> error_state);
   if(context -> pool) String_pool_release();
   Scope scope = context -> scope;
   Context parent = context -> parent;
@@ -523,7 +521,7 @@ void Context_cleanup(Context value){
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)){
-    if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state) Error_context_close(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state, x2c_exception_unwinding());
+    if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state) Error_context_close(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state);
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> pool) String_pool_release();
     if((*(int *) _x2c_defer_data_0->_x2c_defer_capture_2)) Scope_pop();
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> scope) Scope_destroy(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> scope);
