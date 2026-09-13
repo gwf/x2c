@@ -6,7 +6,6 @@
 #define __GUARD_0xE8B0EF19__
 
 #include "x2c.h"
-#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 typedef struct MapIntInt{
@@ -91,9 +90,9 @@ void MapIntInt_set(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int _x2c_ma
 
 int MapIntInt_setindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int _x2c_macro_val_1);
 
-int MapIntInt_updateindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, Symbol _x2c_macro_op_0, int _x2c_macro_rhs_0);
+int MapIntInt_updateindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, Symbol _x2c_macro_op_1, int _x2c_macro_rhs_0);
 
-int MapIntInt_postfixindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, Symbol _x2c_macro_op_0);
+int MapIntInt_postfixindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, Symbol _x2c_macro_op_1);
 
 int MapIntInt_try_del(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int * _x2c_macro_out_1);
 
@@ -107,11 +106,11 @@ int MapIntInt_try_next(MapIntInt _x2c_macro_map_1, unsigned * _x2c_macro_cursor_
 
 int MapIntInt_truth(MapIntInt _x2c_macro_map_1);
 
-int MapIntInt_equal(MapIntInt _x2c_macro_a_1, MapIntInt _x2c_macro_b_1);
+int MapIntInt_equal(MapIntInt _x2c_macro_a_2, MapIntInt _x2c_macro_b_2);
 
 Map MapIntInt_map(MapIntInt _x2c_macro_map_3);
 
-int MapIntInt_compare(MapIntInt _x2c_macro_a_3, MapIntInt _x2c_macro_b_3);
+int MapIntInt_compare(MapIntInt _x2c_macro_a_4, MapIntInt _x2c_macro_b_4);
 
 Buffer MapIntInt_write_repr(MapIntInt _x2c_macro_map_3, Buffer _x2c_macro_out_3);
 
@@ -157,9 +156,9 @@ void MapLongDouble_set(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, do
 
 double MapLongDouble_setindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double _x2c_macro_val_4);
 
-double MapLongDouble_updateindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, Symbol _x2c_macro_op_1, double _x2c_macro_rhs_1);
+double MapLongDouble_updateindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, Symbol _x2c_macro_op_2, double _x2c_macro_rhs_1);
 
-double MapLongDouble_postfixindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, Symbol _x2c_macro_op_1);
+double MapLongDouble_postfixindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, Symbol _x2c_macro_op_2);
 
 int MapLongDouble_try_del(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double * _x2c_macro_out_6);
 
@@ -173,11 +172,11 @@ int MapLongDouble_try_next(MapLongDouble _x2c_macro_map_6, unsigned * _x2c_macro
 
 int MapLongDouble_truth(MapLongDouble _x2c_macro_map_6);
 
-int MapLongDouble_equal(MapLongDouble _x2c_macro_a_5, MapLongDouble _x2c_macro_b_5);
+int MapLongDouble_equal(MapLongDouble _x2c_macro_a_6, MapLongDouble _x2c_macro_b_6);
 
 Map MapLongDouble_map(MapLongDouble _x2c_macro_map_8);
 
-int MapLongDouble_compare(MapLongDouble _x2c_macro_a_7, MapLongDouble _x2c_macro_b_7);
+int MapLongDouble_compare(MapLongDouble _x2c_macro_a_8, MapLongDouble _x2c_macro_b_8);
 
 Buffer MapLongDouble_write_repr(MapLongDouble _x2c_macro_map_8, Buffer _x2c_macro_out_8);
 
@@ -223,9 +222,9 @@ void MapStringString_set(MapStringString _x2c_macro_map_11, String _x2c_macro_ke
 
 String MapStringString_setindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String _x2c_macro_val_7);
 
-String MapStringString_updateindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, Symbol _x2c_macro_op_2, String _x2c_macro_rhs_2);
+String MapStringString_updateindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, Symbol _x2c_macro_op_3, String _x2c_macro_rhs_2);
 
-String MapStringString_postfixindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, Symbol _x2c_macro_op_2);
+String MapStringString_postfixindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, Symbol _x2c_macro_op_3);
 
 int MapStringString_try_del(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String * _x2c_macro_out_11);
 
@@ -239,11 +238,11 @@ int MapStringString_try_next(MapStringString _x2c_macro_map_11, unsigned * _x2c_
 
 int MapStringString_truth(MapStringString _x2c_macro_map_11);
 
-int MapStringString_equal(MapStringString _x2c_macro_a_9, MapStringString _x2c_macro_b_9);
+int MapStringString_equal(MapStringString _x2c_macro_a_10, MapStringString _x2c_macro_b_10);
 
 Map MapStringString_map(MapStringString _x2c_macro_map_13);
 
-int MapStringString_compare(MapStringString _x2c_macro_a_11, MapStringString _x2c_macro_b_11);
+int MapStringString_compare(MapStringString _x2c_macro_a_12, MapStringString _x2c_macro_b_12);
 
 Buffer MapStringString_write_repr(MapStringString _x2c_macro_map_13, Buffer _x2c_macro_out_13);
 
@@ -289,9 +288,9 @@ void MapStringInt_set(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, 
 
 int MapStringInt_setindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int _x2c_macro_val_10);
 
-int MapStringInt_updateindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, Symbol _x2c_macro_op_3, int _x2c_macro_rhs_3);
+int MapStringInt_updateindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, Symbol _x2c_macro_op_4, int _x2c_macro_rhs_3);
 
-int MapStringInt_postfixindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, Symbol _x2c_macro_op_3);
+int MapStringInt_postfixindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, Symbol _x2c_macro_op_4);
 
 int MapStringInt_try_del(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int * _x2c_macro_out_16);
 
@@ -305,11 +304,11 @@ int MapStringInt_try_next(MapStringInt _x2c_macro_map_16, unsigned * _x2c_macro_
 
 int MapStringInt_truth(MapStringInt _x2c_macro_map_16);
 
-int MapStringInt_equal(MapStringInt _x2c_macro_a_13, MapStringInt _x2c_macro_b_13);
+int MapStringInt_equal(MapStringInt _x2c_macro_a_14, MapStringInt _x2c_macro_b_14);
 
 Map MapStringInt_map(MapStringInt _x2c_macro_map_18);
 
-int MapStringInt_compare(MapStringInt _x2c_macro_a_15, MapStringInt _x2c_macro_b_15);
+int MapStringInt_compare(MapStringInt _x2c_macro_a_16, MapStringInt _x2c_macro_b_16);
 
 Buffer MapStringInt_write_repr(MapStringInt _x2c_macro_map_18, Buffer _x2c_macro_out_18);
 

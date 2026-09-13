@@ -1,0 +1,45 @@
+/*  integer-ops.xmacro -- shared raw integer arithmetic
+
+    Copyright (c) 2026 Gary William Flake
+
+    Operands contain only their low `bits` bits, with 0 < bits <= 64.
+    Callers validate shift counts and own promotion, diagnostics for those
+    counts, and result storage or boxing.
+*/
+
+macro Unit $integer.raw(Name $name) => {
+  static inline unsigned long long $name(
+    Symbol op, unsigned long long a, unsigned long long b,
+    int bits, int unsigned_value) {
+    unsigned long long mask = Var.width_mask(bits), raw;
+    switch (op) {
+      case <+>: raw = a + b; break;
+      case <->: raw = a - b; break;
+      case <*>: raw = a * b; break;
+      case <&>: raw = a & b; break;
+      case <|>: raw = a | b; break;
+      case <^>: raw = a ^ b; break;
+      case </>: case <%>:
+        if (!b) raise %(div-zero (op $op));
+        if (unsigned_value) raw = op == </> ? a / b : a % b;
+        else {
+          long long signed_a = Var.signed_from_bits(a, bits);
+          long long signed_b = Var.signed_from_bits(b, bits);
+          unsigned long long minimum = 1ull << (bits - 1);
+          if (a == minimum && b == mask)
+            raw = op == </> ? minimum : 0;
+          else raw = op == </> ? (unsigned long long) (signed_a / signed_b)
+                               : (unsigned long long) (signed_a % signed_b);
+        }
+        break;
+      case <"<<">: raw = a << b; break;
+      case <">>">:
+        raw = a >> b;
+        if (!unsigned_value && b && (a & (1ull << (bits - 1))))
+          raw |= mask << (bits - b);
+        break;
+      default: raise %(bad-op (op $op));
+    }
+    return raw & mask;
+  }
+}

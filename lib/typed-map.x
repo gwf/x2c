@@ -11,10 +11,10 @@
 #include "x2c.x"
 $(import "error-macros.xmacro")
 
-#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 $(import "map-generics.xmacro")
+$(import "integer-ops.xmacro")
 
 /** A mutable, `Scope`-owned map from native `int` keys to `int` values.
     Keys and values are copied into native entry fields; assignment shares the
@@ -230,38 +230,16 @@ static void _bad_shift(Symbol op, int count) {
   raise %(bad-shift (op $op) (count $count) (width 32));
 }
 
-static void _div_zero(Symbol op) {
-  raise %(div-zero (op $op));
-}
+$integer.raw(_integer_raw);
 
 static int _update_int(volatile int *slot, Symbol op, int rhs) {
   int current = slot[0];
   unsigned a, b, raw;
   memcpy(&a, &current, sizeof a);
   memcpy(&b, &rhs, sizeof b);
-  switch (op) {
-    case <+>: raw = a + b; break;
-    case <->: raw = a - b; break;
-    case <*>: raw = a * b; break;
-    case <&>: raw = a & b; break;
-    case <|>: raw = a | b; break;
-    case <^>: raw = a ^ b; break;
-    case </>: case <%>:
-      if (!rhs) _div_zero(op);
-      if (current == INT_MIN && rhs == -1)
-        raw = op == </> ? (unsigned) INT_MIN : 0u;
-      else raw = op == </> ? (unsigned) (current / rhs)
-                           : (unsigned) (current % rhs);
-      break;
-    case <"<<">: case <">>">:
-      if (rhs < 0 || rhs >= 32) _bad_shift(op, rhs);
-      if (op == <"<<">) raw = a << rhs;
-      else if (!rhs) raw = a;
-      else if (!(a & 0x80000000u)) raw = a >> rhs;
-      else raw = (a >> rhs) | (~0u << (32 - rhs));
-      break;
-    default: _bad_op(op);
-  }
+  if ((op == <"<<"> || op == <">>">) && (rhs < 0 || rhs >= 32))
+    _bad_shift(op, rhs);
+  raw = _integer_raw(op, a, b, 32, 0);
   int result;
   memcpy(&result, &raw, sizeof result);
   slot[0] = result;

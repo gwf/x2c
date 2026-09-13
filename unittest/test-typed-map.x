@@ -1,5 +1,6 @@
 /*  test-typed-map.x -- native typed Map tests */
 
+#include <limits.h>
 #include "typed-map.x"
 #include "test-support.x"
 $(import "test-macros.xmacro")
@@ -125,6 +126,46 @@ static void typed_map_numeric_updates_and_postfix(void) {
   EXPECT_INT_EQ(map.getindex(8), 12);
   EXPECT_INT_EQ(map.postfixindex(8, <-->) , 12);
   EXPECT_INT_EQ(map.getindex(8), 11);
+}
+
+static void typed_map_integer_edges_and_failure_atomicity(void) {
+  $test.scoped();
+  try {
+    MapIntInt map = MapIntInt.new();
+    MapStringInt strings = MapStringInt.new();
+    map.set(1, INT_MIN);
+    strings.set("key", INT_MIN);
+    EXPECT_INT_EQ(map.updateindex(1, </>, -1), INT_MIN);
+    EXPECT_INT_EQ(strings.updateindex("key", <%>, -1), 0);
+    EXPECT_INT_EQ(map.updateindex(1, <">>">, 31), -1);
+    map.set(1, 12);
+    strings.set("key", 12);
+    int caught = 0;
+    try map.updateindex(1, </>, 0);
+    catch %(div-zero *): caught++;
+    try strings.updateindex("key", <%>, 0);
+    catch %(div-zero *): caught++;
+    try map.updateindex(1, <"<<">, -1);
+    catch %(bad-shift (op ?) (count ?count) (width ?width)): {
+      EXPECT_INT_EQ(count.integer(), -1);
+      EXPECT_INT_EQ(width.integer(), 32);
+      caught++;
+    }
+    try strings.updateindex("key", <">>">, 32);
+    catch %(bad-shift (op ?) (count ?count) (width ?width)): {
+      EXPECT_INT_EQ(count.integer(), 32);
+      EXPECT_INT_EQ(width.integer(), 32);
+      caught++;
+    }
+    try map.updateindex(1, <==>, 2);
+    catch %(bad-op *): caught++;
+    try strings.updateindex("key", <&&>, 2);
+    catch %(bad-op *): caught++;
+    EXPECT_INT_EQ(caught, 6);
+    EXPECT_INT_EQ(map.get(1), 12);
+    EXPECT_INT_EQ(strings.get("key"), 12);
+  }
+  catch: TEST_FAIL("unexpected integer-map error");
 }
 
 static void typed_map_growth_collision_backshift_and_reuse(void) {
@@ -545,6 +586,7 @@ void typed_map_suite(void) {
   $test.run(typed_map_empty_native_layout_and_zero_data);
   $test.run(typed_map_lookup_replace_and_defaults);
   $test.run(typed_map_numeric_updates_and_postfix);
+  $test.run(typed_map_integer_edges_and_failure_atomicity);
   $test.run(typed_map_growth_collision_backshift_and_reuse);
   $test.run(typed_map_traversal_copy_merge_and_equal);
   $test.run(typed_map_missing_and_null_status_paths);

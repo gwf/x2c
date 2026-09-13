@@ -10,6 +10,7 @@
 
 $(import "error-macros.xmacro")
 $(import "varops.xlisp")
+$(import "integer-ops.xmacro")
 #include "common.x"
 #include "varconvert.x"
 
@@ -157,8 +158,7 @@ Var x2c_map_updateindex_from_map(
 #include "array.x"
 #include "map.x"
 
-#include <limits.h>
-#include <string.h>
+$integer.raw(_integer_raw);
 
 /* The immediate i32/u32/f32 and unboxed f64 paths shortcut the general
    decoder path. Recognition runs before encoding validation, so it stays
@@ -225,41 +225,9 @@ static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
   Symbol tag = _integer_result_tag(&lhs, &rhs);
   X2CVarNumericInfo info;
   if (!Var.numeric_info(tag, &info)) raise %(bad-types (op $op));
-  unsigned long long mask = Var.width_mask(info.bits);
-  unsigned long long a = _raw_for_width(&lhs, info.bits);
-  unsigned long long b = _raw_for_width(&rhs, info.bits);
-  unsigned long long raw;
-  switch (op) {
-    case <+>: raw = (a + b) & mask; break;
-    case <->: raw = (a - b) & mask; break;
-    case <*>: raw = (a * b) & mask; break;
-    case </>:
-      if (!b) raise %(div-zero (op $op));
-      if (info.unsigned_value) raw = a / b;
-      else {
-        long long signed_a = Var.signed_from_bits(a, info.bits);
-        long long signed_b = Var.signed_from_bits(b, info.bits);
-        unsigned long long minimum = 1ull << (info.bits - 1);
-        raw = a == minimum && b == mask
-            ? minimum : (unsigned long long) (signed_a / signed_b);
-      }
-      break;
-    case <%>:
-      if (!b) raise %(div-zero (op $op));
-      if (info.unsigned_value) raw = a % b;
-      else {
-        long long signed_a = Var.signed_from_bits(a, info.bits);
-        long long signed_b = Var.signed_from_bits(b, info.bits);
-        unsigned long long minimum = 1ull << (info.bits - 1);
-        raw = a == minimum && b == mask
-            ? 0 : (unsigned long long) (signed_a % signed_b);
-      }
-      break;
-    case <&>: raw = a & b; break;
-    case <|>: raw = a | b; break;
-    case <^>: raw = a ^ b; break;
-    default: raise %(bad-op (op $op));
-  }
+  unsigned long long raw = _integer_raw(
+    op, _raw_for_width(&lhs, info.bits), _raw_for_width(&rhs, info.bits),
+    info.bits, info.unsigned_value);
   return Var.integer_box(tag, raw);
 }
 
@@ -273,19 +241,8 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
                              Var.signed_from_bits(rhs.raw, rhs.bits);
   if (count >= (unsigned long long) lhs.bits)
     raise %(bad-shift (op $op) (count $count) (width ${lhs.bits}));
-  unsigned long long mask = Var.width_mask(lhs.bits);
-  unsigned long long raw = _raw_for_width(&lhs, lhs.bits);
-  if (op == <"<<">) raw = (raw << count) & mask;
-  else if (op == <">>">) {
-    if (lhs.unsigned_value) raw >>= count;
-    else if (count) {
-      long long signed_value = Var.signed_from_bits(raw, lhs.bits);
-      if (signed_value >= 0) raw >>= count;
-      else raw = (raw >> count) | (mask << (lhs.bits - count));
-    }
-  }
-  else
-    raise %(bad-op (op $op));
+  unsigned long long raw = _integer_raw(
+    op, _raw_for_width(&lhs, lhs.bits), count, lhs.bits, lhs.unsigned_value);
   return Var.integer_box(lhs.tag, raw);
 }
 
@@ -355,37 +312,9 @@ static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value) {
 }
 
 static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value) {
-  unsigned raw;
-  switch (op) {
-    case <+>: raw = a + b; break;
-    case <->: raw = a - b; break;
-    case <*>: raw = a * b; break;
-    case <&>: raw = a & b; break;
-    case <|>: raw = a | b; break;
-    case <^>: raw = a ^ b; break;
-    case </>: case <%>:
-      if (!b) raise %(div-zero (op $op));
-      if (unsigned_value) raw = op == </> ? a / b : a % b;
-      else {
-        int signed_a, signed_b;
-        memcpy(&signed_a, &a, sizeof signed_a);
-        memcpy(&signed_b, &b, sizeof signed_b);
-        if (signed_a == INT_MIN && signed_b == -1)
-          raw = op == </> ? (unsigned) INT_MIN : 0u;
-        else raw = op == </> ? (unsigned) (signed_a / signed_b)
-                             : (unsigned) (signed_a % signed_b);
-      }
-      break;
-    case <"<<">: case <">>">:
-      if (b >= 32) raise %(bad-shift (op $op) (count $b) (width 32));
-      if (op == <"<<">) raw = a << b;
-      else if (unsigned_value) raw = a >> b;
-      else if (!b) raw = a;
-      else if (!(a & 0x80000000u)) raw = a >> b;
-      else raw = (a >> b) | (~0u << (32 - b));
-      break;
-    default: raise %(bad-op (op $op));
-  }
+  if ((op == <"<<"> || op == <">>">) && b >= 32)
+    raise %(bad-shift (op $op) (count $b) (width 32));
+  unsigned raw = _integer_raw(op, a, b, 32, unsigned_value);
   return unsigned_value ? Var.box_u32(raw) : Var.box_i32_bits(raw);
 }
 

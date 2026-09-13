@@ -36,7 +36,7 @@ Numeric promotion, failure, and result ownership follow `Var.binary`;
 `String` addition returns a canonical concatenation, and a protocol result
 keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:536`
+Source: `lib/varops.x:465`
 
 <a id="Var.binary"></a>
 #### Var.binary
@@ -58,7 +58,7 @@ or `<bad-shift>`, and `String` concatenation or wide boxing may raise
 `<size-limit>`, `<alloc-fail>`, or `<bad-enc>`.
 A selected protocol, truth, or comparison callback may raise its own cause.
 
-Source: `lib/varops.x:608`
+Source: `lib/varops.x:537`
 
 <a id="Var.div"></a>
 #### Var.div
@@ -70,7 +70,7 @@ Numeric integer zero divisors raise; floating division uses host infinity
 and NaN behavior. Other promotion, failure, and ownership follow
 `Var.binary`.
 
-Source: `lib/varops.x:562`
+Source: `lib/varops.x:491`
 
 <a id="Var.fallback_truth"></a>
 #### Var.fallback_truth
@@ -84,7 +84,7 @@ supported built-ins are true. Container-specific truth comes from dispatch.
 **Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
 `<bad-types>` when no truthiness rule exists.
 
-Source: `lib/varops.x:456`
+Source: `lib/varops.x:385`
 
 <a id="Var.matmul"></a>
 #### Var.matmul
@@ -95,7 +95,7 @@ Multiplies matrices through a registered `matmul` behavior.
 `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:554`
+Source: `lib/varops.x:483`
 
 <a id="Var.mod"></a>
 #### Var.mod
@@ -107,7 +107,7 @@ Numeric operands use the common promoted integer type and reject a zero
 divisor; floating operands are not accepted. Other failure and ownership
 follow `Var.binary`.
 
-Source: `lib/varops.x:569`
+Source: `lib/varops.x:498`
 
 <a id="Var.mul"></a>
 #### Var.mul
@@ -118,7 +118,7 @@ Multiplies dynamic values through numeric or registered `mul` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:548`
+Source: `lib/varops.x:477`
 
 <a id="Var.neg"></a>
 #### Var.neg
@@ -133,7 +133,7 @@ promotion and wrapping, so a narrow integer promotes before negation.
 for an object without `neg`, or any cause from protocol or numeric
 subtraction.
 
-Source: `lib/varops.x:578`
+Source: `lib/varops.x:507`
 
 <a id="Var.postfix"></a>
 #### Var.postfix
@@ -150,7 +150,7 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/varops.x:696`
+Source: `lib/varops.x:625`
 
 <a id="Var.sub"></a>
 #### Var.sub
@@ -161,7 +161,7 @@ Subtracts dynamic values through numeric or registered `sub` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:542`
+Source: `lib/varops.x:471`
 
 <a id="Var.truth"></a>
 #### Var.truth
@@ -179,7 +179,7 @@ return false independently of object state. The call does not retain
 `<bad-types>` when no truthiness rule exists, plus any cause raised by a
 selected descriptor callback.
 
-Source: `lib/varops.x:493`
+Source: `lib/varops.x:422`
 
 <a id="Var.truthy"></a>
 #### Var.truthy
@@ -188,7 +188,7 @@ Source: `lib/varops.x:493`
 
 Returns `value.truth()`.
 
-Source: `lib/varops.x:501`
+Source: `lib/varops.x:430`
 
 <a id="Var.update"></a>
 #### Var.update
@@ -206,7 +206,7 @@ returns `void`, the function leaves the destination unchanged.
 `Var.binary` and `Var.convert`. These failures leave the stored value
 unchanged.
 
-Source: `lib/varops.x:664`
+Source: `lib/varops.x:593`
 
 ## Advanced and interop API
 
@@ -246,7 +246,7 @@ conversion, and failure behavior then follow `Array.updateindex`.
 or destination update. A transferring failure leaves the destination
 unchanged.
 
-Source: `lib/varops.x:97`
+Source: `lib/varops.x:98`
 
 #### x2c_array_updateindex_from_map
 
@@ -258,7 +258,7 @@ the containers share stored objects. A missing source key supplies `void`,
 which the destination rejects without mutation. Other result and failure
 behavior follows `Map.getindex` and `Array.updateindex`.
 
-Source: `lib/varops.x:113`
+Source: `lib/varops.x:114`
 
 #### x2c_map_updateindex_from_array
 
@@ -273,7 +273,7 @@ Other result and failure behavior follows `Array.getindex` and
 **Raises:** `<bad-arg>` for a null source, plus any cause from either
 operation.
 
-Source: `lib/varops.x:129`
+Source: `lib/varops.x:130`
 
 #### x2c_map_updateindex_from_map
 
@@ -286,7 +286,7 @@ destination rejects. Other result and failure behavior follows the two
 `Map`
 operations.
 
-Source: `lib/varops.x:146`
+Source: `lib/varops.x:147`
 
 #### x2c_var_update_f32
 
@@ -303,7 +303,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `float`.
 
-Source: `lib/varops.x:83`
+Source: `lib/varops.x:84`
 
 #### x2c_var_update_f64
 
@@ -320,7 +320,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `double`.
 
-Source: `lib/varops.x:84`
+Source: `lib/varops.x:85`
 
 #### x2c_var_update_i16
 
@@ -337,7 +337,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `short`.
 
-Source: `lib/varops.x:75`
+Source: `lib/varops.x:76`
 
 #### x2c_var_update_i32
 
@@ -354,7 +354,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `int`.
 
-Source: `lib/varops.x:77`
+Source: `lib/varops.x:78`
 
 #### x2c_var_update_i8
 
@@ -371,7 +371,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `char`.
 
-Source: `lib/varops.x:72`
+Source: `lib/varops.x:73`
 
 #### x2c_var_update_long
 
@@ -388,7 +388,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `long`.
 
-Source: `lib/varops.x:79`
+Source: `lib/varops.x:80`
 
 #### x2c_var_update_long_double
 
@@ -405,7 +405,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `long double`.
 
-Source: `lib/varops.x:85`
+Source: `lib/varops.x:86`
 
 #### x2c_var_update_long_long
 
@@ -422,7 +422,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `long long`.
 
-Source: `lib/varops.x:81`
+Source: `lib/varops.x:82`
 
 #### x2c_var_update_schar
 
@@ -439,7 +439,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `signed char`.
 
-Source: `lib/varops.x:73`
+Source: `lib/varops.x:74`
 
 #### x2c_var_update_u16
 
@@ -456,7 +456,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `ushort`.
 
-Source: `lib/varops.x:76`
+Source: `lib/varops.x:77`
 
 #### x2c_var_update_u32
 
@@ -473,7 +473,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `uint`.
 
-Source: `lib/varops.x:78`
+Source: `lib/varops.x:79`
 
 #### x2c_var_update_u8
 
@@ -490,7 +490,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `uchar`.
 
-Source: `lib/varops.x:74`
+Source: `lib/varops.x:75`
 
 #### x2c_var_update_ulong
 
@@ -507,7 +507,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `ulong`.
 
-Source: `lib/varops.x:80`
+Source: `lib/varops.x:81`
 
 #### x2c_var_update_ulong_long
 
@@ -524,7 +524,7 @@ thread synchronization despite accepting a volatile pointer.
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `unsigned long long`.
 
-Source: `lib/varops.x:82`
+Source: `lib/varops.x:83`
 
 ## Design notes
 
