@@ -46,9 +46,9 @@ typedef struct SymTxn *SymTxn;
 
 /** Holds mutable state for one source translation.
 
-    The structure and its state belong to the current `Scope`. Every new
-    compiler is registered for shutdown cleanup, so call `Compiler.free_lisp`
-    before its owning `Scope` ends, even when compile-time `Lisp` was not used.
+    The structure, its state, and its owned compile-time `Lisp` session belong
+    to the current `Scope`. `Compiler.free_lisp` permits early session cleanup;
+    otherwise Scope teardown releases it. All Lisp calls must return first.
 */
 typedef struct Compiler {
   String filename, text, root_dir;
@@ -129,7 +129,7 @@ List Compiler.lift_func_expression(Compiler compiler, List expression);
 #include "parse.x"
 #include "protocol.x"
 #include "macros.x"
-#include <stdlib.h>
+#include <string.h>
 
 /** Merges one translation dependency, preserving an existing content hash. */
 void Map.merge_translation_dependency(
@@ -154,16 +154,6 @@ void Compiler.merge_translation_dependencies(
 
 // compiler lifecycle
 
-/* Compilers whose compile-time Lisp is still alive. A compiler that reaches
-   process shutdown without Compiler.free_lisp is destroyed from here. */
-typedef struct LispOwner {
-  Compiler compiler;
-  struct LispOwner *next;
-} *LispOwner;
-
-static LispOwner compiler_lisp_owners = NULL;
-static int compiler_lisp_shutdown_registered = 0;
-
 typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts;
   int base_scopes, next_binding, local_macro_names;
@@ -171,37 +161,13 @@ typedef struct Sym {
   Compiler compiler;
 } *Sym;
 
-static void _shutdown_lisp(void) {
-  while (compiler_lisp_owners) {
-    LispOwner owner = compiler_lisp_owners;
-    compiler_lisp_owners = owner.next;
-    with owner.compiler {
-      if (_ && _.macro_lisp && !_.borrowed_lisp) {
-        Lisp.destroy(_.macro_lisp);
-        _.macro_lisp = NULL;
-      }
-    }
-    free(owner);
-  }
-}
-
-static void _own_lisp(Compiler compiler) {
-  LispOwner owner = malloc(sizeof(struct LispOwner));
-  if (!owner) raise %(alloc-fail (owner "Compiler.new"));
-  owner.compiler = compiler;
-  owner.next = compiler_lisp_owners;
-  compiler_lisp_owners = owner;
-  if (!compiler_lisp_shutdown_registered) {
-    Scope.shutdown_hook(_shutdown_lisp);
-    compiler_lisp_shutdown_registered = 1;
-  }
-}
-
-/** Unregisters a compiler and destroys its owned `Lisp` session, if any.
+/** Destroys a compiler's owned `Lisp` session, if any.
 
     A borrowed session is left alive. Owned sessions not freed here are
-    destroyed by the process shutdown hook. This is final compiler cleanup:
+    destroyed when the compiler's Scope ends. This is final compiler cleanup:
     it clears the diagnostic store and the compiler must not be reused.
+    At process exit, root Scope cleanup follows shutdown hooks and canonical
+    pool cleanup. Close explicitly while any native session dependencies live.
 */
 void Compiler.free_lisp(Compiler c) {
   if (!c) return;
@@ -209,17 +175,13 @@ void Compiler.free_lisp(Compiler c) {
     Lisp.destroy(c.macro_lisp);
     c.macro_lisp = NULL;
   }
-  LispOwner *link = &compiler_lisp_owners;
-  while (*link) {
-    LispOwner owner = *link;
-    if (owner.compiler == c) {
-      *link = owner.next;
-      free(owner);
-      break;
-    }
-    link = &owner.next;
-  }
   c.diagnostics = NULL;
+}
+
+// Lisp calls must have returned before the compiler's Scope is reclaimed.
+static void _drop_compiler(void *ptr) {
+  Compiler compiler = ptr;
+  compiler.free_lisp();
 }
 
 static void _emit_user(void *owner, List entry) {
@@ -258,18 +220,17 @@ void Compiler.take_diagnostics(Compiler compiler, Compiler child) {
   }
 }
 
-/** Retains a child's final diagnostics and releases its Lisp registration. */
+/** Retains a child's final diagnostics and closes its owned Lisp session. */
 void Compiler.close_child(Compiler compiler, Compiler child) {
   compiler.take_diagnostics(child);
   child.free_lisp();
 }
 
-/* Scope owns the Compiler, Sym, diagnostics, arrays, and maps. Every compiler
-   enters the process cleanup list, so Compiler.free_lisp must unregister it
-   before that Scope dies. The list is only a fallback for compilers whose
-   owning Scope lasts until process shutdown. */
+// Zero finalizer-visible state before any fallible initialization.
 static Compiler _new(Compiler owner) {
-  Compiler compiler = Scope.calloc(1, sizeof(struct Compiler));
+  Compiler compiler =
+    Scope.malloc_finalized(sizeof(struct Compiler), _drop_compiler);
+  memset(compiler, 0, sizeof(struct Compiler));
   with compiler {
     _.id_keys = %[];
     _.key_ids = %{};
@@ -324,7 +285,6 @@ static Compiler _new(Compiler owner) {
     _.early_inits = %[];
     _.late_inits = %[];
     _.collect_protocols = 1;
-    _own_lisp(_);
     _.diagnostics = Diagnostics.new(_emit_user, _, 1);
     if (owner && owner.diagnostics.emit != _emit_user)
       _.diagnostics.set_emitter(

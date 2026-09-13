@@ -462,7 +462,7 @@ compiler, AST, diagnostics, and preprocessor output until explicit close.
 The stages are start/tokenize, collect, and parse. Failed stages return to the
 caller with readable diagnostics. Adapters choose printing and process exit;
 the default frontend collects without printing. Closing a unit releases its
-Lisp registrations, Type unit, and isolated Context before the next unit opens.
+owned Lisp session, Type unit, and isolated Context before the next unit opens.
 
 Process type/header caches and generated-name state still require sequential
 units. This extraction does not establish a concurrent or stable public
