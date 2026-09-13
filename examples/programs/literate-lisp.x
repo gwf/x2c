@@ -1,22 +1,23 @@
-/*  literate-lisp.x -- a Lisp interpreter by Gary William Flake
+/*  literate-lisp.x -- a complete Lisp implementation in x2c
 
-    A Lisp implementation, generously commented in under 1,000 lines.
-    Block comments explain how the interpreter is built. Right-margin
+    Copyright (c) 2026 Gary William Flake
+
+    A recursive Lisp, generously commented in 1,000 lines.
+    It implements the same Lisp as the word-code machine in x2c's compiler.
+    Block comments explain how Lisp is implemented. Right-margin
     comments show how x2c combines native C with a dynamic runtime.
 
-    A Lisp program is represented as a tree of values. Evaluation traverses
-    that tree, resolves names through environments, and applies functions
-    to arguments. Quotation preserves a form as data instead of evaluating
-    it.
+    A Lisp program is a tree of values. Evaluation traverses the tree,
+    resolves names through environments, and applies functions to
+    arguments. Quotation preserves a form as data without evaluating it.
 
       (+ 1 2)             // evaluates to 3
       '(+ 1 2)            // evaluates to the List (+ 1 2)
       (eval '(+ 1 2))     // evaluates that List as a call, producing 3
 
-    The evaluator is followed by environments, closures, runtime Lisp macro
-    expansion, and the reader. Definitions written in Lisp extend the core
-    evaluation rules with conditionals, bindings, and collection
-    operations.
+    Environments, closures, runtime Lisp macro expansion, and the reader
+    follow the evaluator. Definitions written in Lisp add conditionals,
+    bindings, and collection operations to the core evaluation rules.
 
     x2c supplies values, collections, tokenization, and native function
     calls. This file implements Lisp evaluation independently of the
@@ -33,7 +34,7 @@
 
 #include <unistd.h>                                                             // Ordinary C/POSIX headers coexist.
 
-/* Values, names, and memory
+/* Values, names, and memory ------------------------------------------------------------------------------------------
 
    Var can store a number, String, List, or callable. A nonempty List has a
    first element (car) and a remaining List (cdr); the empty List, (),
@@ -84,7 +85,7 @@ macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              
             ,$op ,@$fields)))                                                   // ,@ splices syntax at compile time.
 }
 
-/* Evaluation: the language in three rules
+/* Evaluation: the language in three rules ----------------------------------------------------------------------------
 
    Evaluating a name returns its bound value; evaluating a literal returns
    the literal itself. A nonempty List represents a call. Its head is
@@ -102,7 +103,6 @@ macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              
    in the caller's environment. This expansion happens during Lisp program
    evaluation, after all x2c compile-time macros have already expanded.
 */
-
 static Var Interp.eval(Interp *self, Env *env, Var form) {
   if (form is void) $fail(<void-op>, %"eval");                                  // Macro emits runtime error creation.
   if (form.is_atom()) return self.lookup(env, form);                            // Receiver-style function calls.
@@ -136,7 +136,7 @@ static List Interp.eval_args(Interp *self, Env *env, List forms) {
   return values;                                                                // Build List before Array cleanup.
 }
 
-/* Special forms control evaluation
+/* Special forms control evaluation -----------------------------------------------------------------------------------
 
    Ordinary function arguments are evaluated before the function body runs.
    Special forms require different rules: quote returns an unevaluated
@@ -196,7 +196,7 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
   return _bad_form(op, args);                                                   // Symbol and List passed directly.
 }
 
-/* Applying a value
+/* Applying a value ---------------------------------------------------------------------------------------------------
 
    eval converts expressions to values; apply invokes a callable with
    values already evaluated. For example, (apply list '(a b)) returns (a
@@ -225,7 +225,7 @@ static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
   return _native_call(fn, values);                                              // Implicit Var -> Func conversion.
 }
 
-/* Name lookup and captured bindings
+/* Name lookup and captured bindings ----------------------------------------------------------------------------------
 
    Lookup searches the nearest environment first, then globals, then
    reserved names. An inner binding shadows an outer one without modifying
@@ -309,7 +309,7 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
   return self.eval(&local, closure.body);                                       // C stack address passed to eval.
 }
 
-/* Quotation as a language for constructing code
+/* Quotation as a language for constructing code ----------------------------------------------------------------------
 
    quote returns its argument without evaluation. Quasiquote evaluates the
    comma-marked expressions within a template. Comma-at inserts the
@@ -357,7 +357,7 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
   return %(${self.quasiquote(env, form, depth)});                               // ${...} inserts a whole expression.
 }
 
-/* Errors are part of the language's observable behavior
+/* Errors are part of the language's observable behavior --------------------------------------------------------------
 
    A malformed call is different from an unbound name or a value of the
    wrong type. These helpers construct the corresponding error causes and
@@ -407,7 +407,7 @@ static Var _bad_form(Symbol name, List args) {
   $fail(<bad-arity>, name.str(), <expected>, want, <actual>, n);                // Symbol spelling via receiver syntax.
 }
 
-/* Reading: from characters to values
+/* Reading: from characters to values ---------------------------------------------------------------------------------
 
    The reader parses spelling and nesting without evaluating expressions.
    Reading (+ 1 2) constructs a List; it does not look up + or add.
@@ -515,7 +515,7 @@ static Var Reader.read(Reader *self) {
   return self._form(first);                                                     // C pointer supports x2c dot calls.
 }
 
-/* Native functions
+/* Native functions ---------------------------------------------------------------------------------------------------
 
    Primitive operations are implemented as x2c functions invoked through
    Func. Func signatures specify argument and result types. eval evaluates
@@ -688,7 +688,7 @@ static void _install_natives(Interp *self) {
   }
 }
 
-/* Building the rest of the language in itself
+/* Building the rest of the language in itself ------------------------------------------------------------------------
 
    Startup evaluates the following definitions in order. defmacro is used
    to define defun and if. Recursive functions then implement map, filter,
@@ -812,7 +812,7 @@ static List _stdlib = %(                                                        
   (def lower string-downcase)                                                   // Alias reuses the native function.
 );
 
-/* Completing a session
+/* Completing a session -----------------------------------------------------------------------------------------------
 
    A batch is read and evaluated one form at a time. Earlier definitions
    are available to later forms, and the last value is the batch's result.
@@ -863,7 +863,7 @@ static Interp _interpreter(void) {
   return self;
 }
 
-/* Incremental reading and evaluation
+/* Incremental reading and evaluation ---------------------------------------------------------------------------------
 
    The REPL evaluates complete forms, retains incomplete input for the next
    line, and reports malformed input as an error. The saved start position
