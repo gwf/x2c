@@ -1,0 +1,142 @@
+---
+import { codeToHtml } from "shiki";
+import source from "../../../../../examples/programs/literate-lisp.x?raw";
+import grammar from "../../../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../../../shiki-x2c-theme.mjs";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import ExampleHeading from "../../../components/ExampleHeading.astro";
+import CoreSetup from "../../../components/CoreSetup.astro";
+import "../../../styles/example-pages.css";
+import { articles } from "../../../lib/examples";
+
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const current = articles.findIndex(article => article.frontmatter.slug === "literate-lisp");
+const page = articles[current].frontmatter;
+const previous = articles[(current + articles.length - 1) % articles.length];
+const next = articles[(current + 1) % articles.length];
+const sections = source.split("\n").flatMap((line, index) => {
+  const match = line.match(/^\/\* (.+?) -{3,}$/);
+  return match ? [{ title: match[1], line: index + 1 }] : [];
+});
+const html = await codeToHtml(source, {
+  lang: { ...grammar, name: "x2c" },
+  theme: { ...x2cDarkTheme, name: "literate-lisp", tokenColors: [
+    ...x2cDarkTheme.tokenColors,
+    { scope: ["comment.line", "comment.line punctuation.definition.comment"],
+      settings: { foreground: "#9aaeb5" } },
+  ] },
+  transformers: [{ line(node, line) { node.properties.id = `line-${line}`; node.properties["data-line"] = line; } }],
+});
+---
+<BaseLayout title={`${page.title} - x2c`} description={page.description}>
+  <Fragment slot="header"><SiteHeader /></Fragment>
+  <article class="example-page literate-page" data-example="literate-lisp"
+    data-section="magic" data-surface="detail">
+    <ExampleHeading page={page} sourceUrl="#source"
+      downloadUrl={local("examples/literate-lisp/source.txt")} />
+    <div class="reading-intro example-prose">
+      <p>A Lisp interpreter can be small enough to read in one sitting. This one
+        fits in 1,000 lines, including the explanations: how names acquire values,
+        how closures retain bindings, and how macros construct new expressions.</p>
+      <p>Read down the left for the language being built. Read across to the margin
+        for the <span class="x2c-wordmark">x2c</span> features used to build it: patterns, dynamic values,
+        compile-time macros, and ordinary C pointers. The code, commentary, and
+        diagrams below are the complete source file.</p>
+      <p>The interpreter is independent of <span class="x2c-wordmark">x2c</span>'s built-in Lisp implementation and
+        functionally equivalent to its runtime word-code machine. Here, evaluation
+        follows the expression tree through recursive calls.</p>
+    </div>
+    <details class="contents">
+      <summary>Jump to a section <span>{sections.length} sections</span></summary>
+      <nav class="sections" aria-label="Interpreter sections">
+      {sections.map(section => <a href={`#line-${section.line}`}>{section.title}</a>)}
+      </nav>
+    </details>
+    <section id="source" aria-label="Complete annotated source">
+      <div class="source-caption"><span>literate-lisp.x</span><span>Code + commentary · 120 columns</span></div>
+      <div class="source-stage">
+        <div class="source-scroll" tabindex="0" role="region"
+          aria-label="Source code; scroll horizontally on narrow screens" set:html={html} />
+        <nav class="section-jumps" aria-label="Continue through interpreter sections">
+          {[{ title: "Introduction", line: 1 }, ...sections].map((section, index) => {
+            const following = sections[index];
+            return <a class="section-jump"
+              style={`top: calc(24px + ${(section.line - 1) * 1.8} * var(--source-font))`}
+              href={following ? `#line-${following.line}` : "#run"}
+              aria-label={following ? `Next section: ${following.title}` : "Run it locally"}
+              title={following?.title ?? "Run it locally"}>
+              {following ? "Next" : "Run"}{" "}<span aria-hidden="true">↓</span>
+            </a>;
+          })}
+        </nav>
+      </div>
+    </section>
+    <div class="example-reading">
+      <div class="example-prose">
+        <h2>Try an expression. Then change the interpreter.</h2>
+        <p>Start with <code>(+ 1 2)</code>, define a function, or expand a macro.
+          Follow the result through the reader, evaluator, and environment lookup
+          above. Each part is small enough to modify and run again.</p>
+        <p>To see scripting embedded in a native application, try the{" "}
+          <a href={local("examples/embedded-lisp/")}>scriptable game</a>.</p>
+      </div>
+      <section id="run" class="example-run" aria-labelledby="run-heading">
+        <p class="example-eyebrow">Your turn</p>
+        <h2 id="run-heading">Run it locally.</h2>
+        <p class="example-run-intro">Start the interactive interpreter, or pass a file of Lisp forms.</p>
+        <CoreSetup run={`./x2c run examples/programs/literate-lisp.x
+
+# Evaluate the included Lisp example.
+./x2c run examples/programs/literate-lisp.x -- examples/data/reference-lisp/showcase.xlisp`} />
+      </section>
+    </div>
+    <nav class="example-next" aria-label="Browse examples">
+      <a href={local(`examples/${previous.frontmatter.slug}/`)} rel="prev">
+        <small>Previous example</small>
+        <span><span aria-hidden="true">&larr;</span> {previous.frontmatter.title}</span>
+      </a>
+      <a href={local(`examples/${next.frontmatter.slug}/`)} rel="next">
+        <small>Next example</small>
+        <span>{next.frontmatter.title} <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </nav>
+  </article>
+  <SiteFooter />
+</BaseLayout>
+<style>
+  .literate-page { --source-font: clamp(11px, 1.05vw, 12px); }
+  a { text-underline-offset: 3px; }
+  .reading-intro { max-width: 82ch; }
+  .example-reading { margin-top: clamp(38px, 5vw, 64px); }
+  .contents { margin-top: 28px; border-top: 1px solid #c9c3bb; }
+  .contents summary { cursor: pointer; padding: 14px 0; font-size: 12px; }
+  .contents summary span { float: right; color: var(--muted-dark); }
+  .sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; padding: 8px 0 24px; font: 14px/1.5 "Archivo", sans-serif; }
+  #source { width: 100%; container-type: inline-size; scroll-margin-top: 85px; font: var(--source-font)/1.65 "JetBrains Mono", monospace; }
+  .source-caption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 24px; background: #dedbd5; font-size: 11px; }
+  .source-stage { position: relative; font: var(--source-font)/1.8 "JetBrains Mono", monospace; }
+  .section-jump { position: absolute; right: 0; width: max(5ch, calc((100cqw - 124ch) / 2)); text-align: center; padding: 0; font: inherit; color: #777; background: #000; text-decoration: none; user-select: none; white-space: nowrap; }
+  .section-jump:hover, .section-jump:focus-visible { color: #ddd; }
+  .section-jump:focus-visible { outline: 1px solid #aaa; outline-offset: 2px; }
+  .source-scroll { overflow-x: auto; background: var(--code); }
+  .source-scroll:focus-visible { outline: 2px solid var(--red-text); }
+  .source-scroll :global(pre) { margin: 0; padding: 24px max(7ch, calc((100cqw - 120ch) / 2)); width: 100%; min-width: 134ch; box-sizing: border-box; font: var(--source-font)/1.8 "JetBrains Mono", monospace; }
+  .source-scroll :global(pre) {
+    --gutter: max(7ch, calc((100cqw - 120ch) / 2));
+    --gutter-edge: calc(var(--gutter) - 2ch);
+    background: linear-gradient(to right,
+      #000000 0 var(--gutter-edge),
+      #0b0b0b var(--gutter-edge) calc(100% - var(--gutter-edge)),
+      #000000 calc(100% - var(--gutter-edge)) 100%) !important;
+  }
+  .source-scroll :global(pre code) { display: block; font: inherit; }
+  :global(html:has(.literate-page)) { scroll-padding-top: calc(var(--landing-header-height, 69px) + 30px); }
+  .source-scroll :global(.line) { position: relative; scroll-margin-top: 0; }
+  .source-scroll :global(.line::before) { content: attr(data-line); position: absolute; right: calc(100% + clamp(2ch, (100cqw - 134ch) / 2, 6ch)); width: 4ch; text-align: right; color: #333333; user-select: none; pointer-events: none; }
+  .source-scroll :global(.line:target) { background: #ffffff15; }
+  @media (max-width: 600px) {
+    .sections { grid-template-columns: 1fr; }
+  }
+</style>

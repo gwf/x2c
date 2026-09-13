@@ -4,13 +4,13 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import ExampleWalkthrough from "../../components/ExampleWalkthrough.astro";
-import CopyButton from "../../components/CopyButton.astro";
+import ExampleHeading from "../../components/ExampleHeading.astro";
 import CoreSetup from "../../components/CoreSetup.astro";
 import { articles, slides } from "../../lib/examples";
 import "../../styles/example-pages.css";
 
 export function getStaticPaths() {
-  return articles.map((article) => ({
+  return articles.filter(article => !article.frontmatter.customPage).map((article) => ({
     params: { slug: article.frontmatter.slug },
     props: { article },
   }));
@@ -35,7 +35,6 @@ const outputs = import.meta.glob("../../../../examples/expected/*.stdout", {
   query: "?raw", import: "default", eager: true,
 });
 const output = page.output ? outputs[`../../../../${page.output}`] as string : null;
-const canonicalUrl = new URL(local(`examples/${page.slug}/`), Astro.site).href;
 const current = articles.findIndex((entry) => entry.frontmatter.slug === page.slug);
 const next = articles[(current + 1) % articles.length];
 const previous = articles[(current + articles.length - 1) % articles.length];
@@ -50,24 +49,7 @@ const previous = articles[(current + articles.length - 1) % articles.length];
   <Fragment slot="header"><SiteHeader /></Fragment>
   <article class="example-page" data-example={page.slug}
     data-section={section} data-surface="detail">
-    <header class="example-heading">
-      <nav class="example-eyebrow example-breadcrumb" aria-label="Breadcrumb">
-        <a href={local("#top")}>x2c</a>{" / examples / "}
-        <span aria-current="page">{page.navTitle}</span>
-      </nav>
-      <h1>{page.title}</h1>
-      <p class="example-premise">{page.description}</p>
-      <nav class="example-actions" aria-label="Example actions">
-        <a class="example-run-link" href="#run" data-example-action="run">
-          Run it locally <span aria-hidden="true">&darr;</span>
-        </a>
-        <a href={sourceUrl} data-example-action="source">
-          Full source
-        </a>
-        <a href={local(page.guide)} data-example-action="guide">Read the guide</a>
-        <CopyButton text={canonicalUrl} />
-      </nav>
-    </header>
+    <ExampleHeading page={page} sourceUrl={sourceUrl} />
 
     <ExampleWalkthrough panels={panels}
       codeLabel={page.codeLabel ?? "The idea in code"} />

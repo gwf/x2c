@@ -1,7 +1,7 @@
 ---
 slug: embedded-lisp
-navTitle: Play against Lisp
-order: 2
+navTitle: Embed scripting
+order: 3.5
 slide: runtime-lisp
 title: Give your game a Lisp player.
 description: Play tic-tac-toe against a Lisp strategy inside a native x2c program.

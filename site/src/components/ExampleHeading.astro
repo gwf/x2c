@@ -1,0 +1,24 @@
+---
+import CopyButton from "./CopyButton.astro";
+const { page, sourceUrl, downloadUrl } = Astro.props;
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const canonicalUrl = new URL(local(`examples/${page.slug}/`), Astro.site).href;
+---
+<header class="example-heading">
+  <nav class="example-eyebrow example-breadcrumb" aria-label="Breadcrumb">
+    <a href={local("#top")}>x2c</a>{" / examples / "}
+    <span aria-current="page">{page.navTitle}</span>
+  </nav>
+  <h1>{page.title}</h1>
+  <p class="example-premise">{page.description}</p>
+  <nav class="example-actions" aria-label="Example actions">
+    <a class="example-run-link" href="#run" data-example-action="run">
+      Run it locally <span aria-hidden="true">&darr;</span>
+    </a>
+    <a href={sourceUrl} data-example-action="source">Full source</a>
+    {downloadUrl && <a href={downloadUrl} download={page.source.split("/").pop()}
+      data-example-action="source">Download</a>}
+    <a href={local(page.guide)} data-example-action="guide">Read the guide</a>
+    <CopyButton text={canonicalUrl} />
+  </nav>
+</header>

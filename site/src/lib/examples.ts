@@ -15,4 +15,5 @@ export const articles = Object.values(
   import.meta.glob<ExampleMarkdown>("../content/examples/*.md", { eager: true }),
 ).sort((a, b) => a.frontmatter.order - b.frontmatter.order);
 export const articleFor = (slug: string) =>
-  articles.find((article) => article.frontmatter.slide === slug);
+  articles.find((article) =>
+    !article.frontmatter.customPage && article.frontmatter.slide === slug);

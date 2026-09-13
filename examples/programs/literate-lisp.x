@@ -1,34 +1,34 @@
 /*  literate-lisp.x -- a complete Lisp implementation in x2c
 
-    Copyright (c) 2026 Gary William Flake
-
-    A recursive Lisp, generously commented in 1,000 lines.
-    It implements the same Lisp as the word-code machine in x2c's compiler.
-    Block comments explain how Lisp is implemented. Right-margin
-    comments show how x2c combines native C with a dynamic runtime.
-
-    A Lisp program is a tree of values. Evaluation traverses the tree,
-    resolves names through environments, and applies functions to
-    arguments. Quotation preserves a form as data without evaluating it.
-
-      (+ 1 2)             // evaluates to 3
-      '(+ 1 2)            // evaluates to the List (+ 1 2)
-      (eval '(+ 1 2))     // evaluates that List as a call, producing 3
+    Copyright (c) 2026 Gary William Flake                                             #####                 #####
+                                                                                      ########           ########
+    A recursive Lisp, generously commented in 1,000 lines.                           ##########         ##########
+    It is functionally equivalent to the x2c runtime's word-code machine.                 #######     #######
+    Block comments explain how Lisp is implemented. Right-margin                           ######     ######
+    comments show how x2c combines native C with a dynamic runtime.                         ######   ######
+                                                                                             #####   #####
+    A Lisp program is a tree of values. Evaluation traverses the tree,                       #####   #####
+    resolves names through environments, and applies functions to                           ######   ######
+    arguments. Quotation preserves a form as data without evaluating it.                   ######     ######
+                                                                                          #######     #######
+      (+ 1 2)             // evaluates to 3                                          ##########         ##########
+      '(+ 1 2)            // evaluates to the List (+ 1 2)                            ########           ########
+      (eval '(+ 1 2))     // evaluates that List as a call, producing 3               #####                 #####
 
     Environments, closures, runtime Lisp macro expansion, and the reader
     follow the evaluator. Definitions written in Lisp add conditionals,
     bindings, and collection operations to the core evaluation rules.
-
-    x2c supplies values, collections, tokenization, and native function
-    calls. This file implements Lisp evaluation independently of the
-    production Lisp object and word-code machine. Evaluation uses native
-    recursive calls.
-
-    Two distinct macro systems appear here. The x2c macros $fail and $rest
-    expand when this file is compiled. Runtime Lisp macros are Fn closures
-    executed by this interpreter while evaluating a Lisp program.
-
-    The implementation follows x2c Lisp, including its rules for capture
+                                                                                             ######
+    x2c supplies values, collections, tokenization, and native function                         ####
+    calls. This file implements Lisp evaluation independently of the                             ####
+    production Lisp object and word-code machine. Evaluation uses native                          ####
+    recursive calls.                                                                             ######
+                                                                                                ########
+    Two distinct macro systems appear here. The x2c macros $fail and $rest                     ####  ####
+    expand when this file is compiled. Runtime Lisp macros are Fn closures                    ####    ####
+    executed by this interpreter while evaluating a Lisp program.                            ####      ####
+                                                                                            ####        ####
+    The implementation follows x2c Lisp, including its rules for capture                   ####          ######
     and errors; those rules sometimes differ from Scheme or Common Lisp.
 */
 
@@ -36,13 +36,13 @@
 
 /* Values, names, and memory ------------------------------------------------------------------------------------------
 
-   Var can store a number, String, List, or callable. A nonempty List has a
-   first element (car) and a remaining List (cdr); the empty List, (),
-   marks its end. Nested Lists represent the structure of a Lisp
-   expression.
-
-   Fn stores a parameter List, a body, and captured local bindings. During
-   a call, each parameter is bound to its corresponding argument value.
+   Var can store a number, String, List, or callable. A nonempty List has a            +-----+-----+
+   first element (car) and a remaining List (cdr); the empty List, (),                 | car | cdr |---+
+   marks its end. Nested Lists represent the structure of a Lisp                       +-----+-----+   |
+   expression.                                                                            |           v
+                                                                                        value    +-----+-----+
+   Fn stores a parameter List, a body, and captured local bindings. During                       | car | () |
+   a call, each parameter is bound to its corresponding argument value.                          +-----+-----+
    Captures contain copies of local values taken when the closure was
    created; these bindings remain available when its body is evaluated
    later.
@@ -87,14 +87,14 @@ macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              
 
 /* Evaluation: the language in three rules ----------------------------------------------------------------------------
 
-   Evaluating a name returns its bound value; evaluating a literal returns
-   the literal itself. A nonempty List represents a call. Its head is
-   evaluated first, and argument handling depends on the resulting
-   callable's type: ordinary function, special form, or runtime Lisp macro.
-   Only () is false; zero and the empty String are true.
+   Evaluating a name returns its bound value; evaluating a literal returns                   (+ 1 (* 2 3))
+   the literal itself. A nonempty List represents a call. Its head is                         / | \
+   evaluated first, and argument handling depends on the resulting                           +  1  *
+   callable's type: ordinary function, special form, or runtime Lisp macro.                       / \
+   Only () is false; zero and the empty String are true.                                         2   3
 
-   For (+ 1 (* 2 3)), evaluation first resolves +, then evaluates the
-   arguments to 1 and 6. Applying + to these values returns 7. The same
+   For (+ 1 (* 2 3)), evaluation first resolves +, then evaluates the                  (* 2 3) -> 6
+   arguments to 1 and 6. Applying + to these values returns 7. The same                (+ 1 6) -> 7
    rule handles calls whose heads are expressions, such as ((lambda (x) x)
    7).
 
@@ -125,10 +125,9 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
   return self.apply(env, fn, values);                                           // Apply to values, not source forms.
 }
 
-/* Evaluation proceeds left to right. That ordering matters when arguments
-   define globals, read files, or raise errors: a later failure does not
-   undo an earlier effect. The result is a List of values ready for
-   application.
+/* Evaluation proceeds left to right. When arguments define globals, read
+   files, or raise errors, a later failure leaves earlier effects intact.
+   The result is a List of values ready for application.
 */
 static List Interp.eval_args(Interp *self, Env *env, List forms) {
   Array values = $auto(%[]);                                                    // Array literal; cleanup on exit.
@@ -138,17 +137,17 @@ static List Interp.eval_args(Interp *self, Env *env, List forms) {
 
 /* Special forms control evaluation -----------------------------------------------------------------------------------
 
-   Ordinary function arguments are evaluated before the function body runs.
-   Special forms require different rules: quote returns an unevaluated
-   form, lambda constructs a closure without evaluating its body, and cond
-   evaluates only the selected clause's body. The evaluator handles these
-   forms directly.
-
-   Each pattern matches an accepted form and binds its components. In cond,
-   tests run in order until one is true; only that clause's body is
-   evaluated. The runtime Lisp macro if expands into cond.
-
-   def always writes a global binding. eval first obtains a form, then
+   Ordinary function arguments are evaluated before the function body runs.                   (cond ...)
+   Special forms require different rules: quote returns an unevaluated                             |
+   form, lambda constructs a closure without evaluating its body, and cond                         v
+   evaluates only the selected clause's body. The evaluator handles these                        test
+   forms directly.                                                                                 |
+                                                                                           +-------+-------+
+   Each pattern matches an accepted form and binds its components. In cond,                |               |
+   tests run in order until one is true; only that clause's body is                       true           false
+   evaluated. The runtime Lisp macro if expands into cond.                                 |               |
+                                                                                           v               v
+   def always writes a global binding. eval first obtains a form, then                    body           next
    evaluates it globally. apply instead obtains a callable and a List of
    values. apply passes those values to the callable without evaluating
    them again, including any Lists that could also be parsed as calls.
@@ -175,8 +174,8 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
     }
     case %(eval ?form): return self.eval(NULL, self.eval(env, form));           // Evaluate the form in global scope.
     case %(apply ?fn ?values): {                                                // Pattern binds callable/value forms.
-      Var callable = self.eval(env, fn),                                        // One Var can hold either callable.
-          actual = self.eval(env, values);                                      // Second Var holds the argument List.
+      Var callable = self.eval(env, fn),                                        // Evaluate the callable expression.
+          actual = self.eval(env, values);                                      // Evaluate the argument expression.
       return self.apply(env, callable, _list_argument(actual, "apply"));        // Check List; apply evaluated values.
     }
     case %(bind ?name ?sig): {                                                  // Bind two unevaluated forms.
@@ -198,15 +197,15 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
 
 /* Applying a value ---------------------------------------------------------------------------------------------------
 
-   eval converts expressions to values; apply invokes a callable with
-   values already evaluated. For example, (apply list '(a b)) returns (a
-   b), without looking up either a or b.
-
-   Applying a closure evaluates its saved body with new bindings; applying
-   a native callable invokes an x2c function. Runtime Lisp macros require
-   unevaluated argument forms and subsequent evaluation of their expansion.
-   apply accepts evaluated values and rejects runtime Lisp macros. x2c
-   compile-time macros do not enter this path.
+   eval converts expressions to values; apply invokes a callable with                   callable        values
+   values already evaluated. For example, (apply list '(a b)) returns (a                   |               |
+   b), without looking up either a or b.                                                   +-------+-------+
+                                                                                                   |
+   Applying a closure evaluates its saved body with new bindings; applying                         v
+   a native callable invokes an x2c function. Runtime Lisp macros require                        apply
+   unevaluated argument forms and subsequent evaluation of their expansion.                +-------+-------+
+   apply accepts evaluated values and rejects runtime Lisp macros. x2c                     v               v
+   compile-time macros do not enter this path.                                          closure          native
 */
 static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
   if (fn is <lambda>) {                                                         // Inspect the callable tag.
@@ -227,18 +226,18 @@ static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
 
 /* Name lookup and captured bindings ----------------------------------------------------------------------------------
 
-   Lookup searches the nearest environment first, then globals, then
-   reserved names. An inner binding shadows an outer one without modifying
-   it. Keeping bindings in Maps also separates a missing name from a name
-   bound to ().
-
-   This closure captures the local binding x = 10:
-
-     (def add-ten (let ((x 10)) (lambda (y) (+ x y))))
-     (add-ten 7)     // 17, after the let call has returned
-
-   Call frames can live on the native stack. Closures and their capture
-   Maps belong to the session Scope, so saved bindings outlive those calls.
+   Lookup searches the nearest environment first, then globals, then                      +-------------+
+   reserved names. An inner binding shadows an outer one without modifying                | local frame |
+   it. Keeping bindings in Maps also separates a missing name from a name                 +------+------+
+   bound to ().                                                                                  |
+                                                                                                 | parent
+   This closure captures the local binding x = 10:                                               v
+                                                                                          +-------------+
+     (def add-ten (let ((x 10)) (lambda (y) (+ x y))))                                    | outer frame |
+     (add-ten 7)     // 17, after the let call has returned                               +------+------+
+                                                                                                 |
+   Call frames can live on the native stack. Closures and their capture                          v
+   Maps belong to the session Scope, so saved bindings outlive those calls.                   globals
    The values they refer to keep their ordinary ownership; immutable
    Strings and Lists live in canonical pools.
 */
@@ -251,11 +250,11 @@ static Var Interp.lookup(Interp *self, Env *env, Var name) {
   raise %(unbound (name $name));                                                // $name interpolates one named value.
 }
 
-/* x2c Lisp collects captures by flattening a List body and copying values
-   for names bound in local environments. This includes names inside quoted
-   and nested forms, but excludes parameters and reserved names. Global
-   bindings are looked up during evaluation rather than copied into
-   closures.
+/* x2c Lisp collects captures by flattening one level of a List body. It
+   copies values for locally bound names exposed by that step, excluding
+   parameters and reserved names. Quotation does not prevent capture, but
+   names in deeper Lists are not collected. Global bindings are looked up
+   during evaluation rather than copied into closures.
 
    This is not a free-variable analysis or a purely lexical environment.
    Names absent from the captures may still resolve in the caller. A scalar
@@ -311,13 +310,13 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
 
 /* Quotation as a language for constructing code ----------------------------------------------------------------------
 
-   quote returns its argument without evaluation. Quasiquote evaluates the
-   comma-marked expressions within a template. Comma-at inserts the
-   elements of a List into the surrounding List:
+   quote returns its argument without evaluation. Quasiquote evaluates the                 `(a ,x ,@xs)
+   comma-marked expressions within a template. Comma-at inserts the                            |    |
+   elements of a List into the surrounding List:                                         x = 7 |    | xs = (8 9)
+                                                                                               v    v
+     (let ((x 7) (xs '(8 9))) `(a ,x ,@xs))     // (a 7 8 9)                               (a  7    8 9)
 
-     (let ((x 7) (xs '(8 9))) `(a ,x ,@xs))     // (a 7 8 9)
-
-   There are two result shapes here. quasiquote produces one value;
+   There are two result shapes here. quasiquote produces one value;                     one value   List elements
    quoted_item produces the sequence of elements contributed by an item. An
    ordinary item contributes one element; a splice may contribute many. The
    containing List is constructed by concatenating these item sequences.
@@ -359,13 +358,13 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
 
 /* Errors are part of the language's observable behavior --------------------------------------------------------------
 
-   A malformed call is different from an unbound name or a value of the
-   wrong type. These helpers construct the corresponding error causes and
-   details. Errors are structured data that a surrounding x2c catch can
-   match.
-
-   $fail, defined near the top, is an x2c compile-time macro that
-   constructs raise syntax while compiling this x2c file. Runtime Lisp
+   A malformed call is different from an unbound name or a value of the                       raise
+   wrong type. These helpers construct the corresponding error causes and                       |
+   details. Errors are structured data that a surrounding x2c catch can                (cause (key value) ...)
+   match.                                                                                       |
+                                                                                         catch pattern
+   $fail, defined near the top, is an x2c compile-time macro that                               |
+   constructs raise syntax while compiling this x2c file. Runtime Lisp                     bound fields
    macros in _stdlib construct Lisp forms during evaluation. The shared use
    of Lists does not imply that these two macro systems share an execution
    phase.
@@ -409,13 +408,13 @@ static Var _bad_form(Symbol name, List args) {
 
 /* Reading: from characters to values ---------------------------------------------------------------------------------
 
-   The reader parses spelling and nesting without evaluating expressions.
-   Reading (+ 1 2) constructs a List; it does not look up + or add.
-   Evaluation, quotation, and runtime Lisp macro expansion all consume
-   these same values, so the reader needs no separate representation for
-   executable forms.
-
-   Tokenization recognizes words, numbers, strings, and punctuation.
+   The reader parses spelling and nesting without evaluating expressions.                  "(+ 1 2)"
+   Reading (+ 1 2) constructs a List; it does not look up + or add.                             |
+   Evaluation, quotation, and runtime Lisp macro expansion all consume                        tokens
+   these same values, so the reader needs no separate representation for                        |
+   executable forms.                                                                      +-----+-----+
+                                                                                          |  +  |  *--+-> (1 2)
+   Tokenization recognizes words, numbers, strings, and punctuation.                      +-----+-----+
    Recursive descent supplies the grammar: after an opening parenthesis,
    read forms until its closing parenthesis. Reading a nested List uses the
    same rule. Prefixes are shorthand: 'x becomes (quote x), and commas and
@@ -502,10 +501,9 @@ static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   return reader;                                                                // Return the ordinary struct by value.
 }
 
-/* Reader.read returns void at end of input. The empty List () is a valid
-   form, so it cannot serve as the end marker. Incomplete input raises an
-   error that the REPL handles by retaining the text for the next input
-   line.
+/* Reader.read returns void at end of input; the empty List () is a valid
+   form. Incomplete input raises an error, and the REPL retains the text
+   for the next line.
 */
 static Var Reader.read(Reader *self) {
   Token first = self.tokens.next();                                             // Receiver-style token access.
@@ -517,13 +515,13 @@ static Var Reader.read(Reader *self) {
 
 /* Native functions ---------------------------------------------------------------------------------------------------
 
-   Primitive operations are implemented as x2c functions invoked through
-   Func. Func signatures specify argument and result types. eval evaluates
-   the argument expressions before _native_call passes their values to
-   Func.apply.
-
-   Predicates translate native conditions into Lisp truth values.
-   Arithmetic and collection primitives are used by the recursive and
+   Primitive operations are implemented as x2c functions invoked through                 Lisp argument values
+   Func. Func signatures specify argument and result types. eval evaluates                        |
+   the argument expressions before _native_call passes their values to                        Func.apply
+   Func.apply.                                                                                    |
+                                                                                          typed C arguments
+   Predicates translate native conditions into Lisp truth values.                                 |
+   Arithmetic and collection primitives are used by the recursive and                        C function
    higher-order operations defined in Lisp below.
 */
 
@@ -569,10 +567,10 @@ static Var _plus(List values) {
   return values.foldl(seed, _add);                                              // Direct function uses cached Func.
 }
 
-/* A fold combines a sequence with a running result. Addition and
-   multiplication have empty cases, 0 and 1. Subtraction and division
-   require an argument: one means negation or reciprocal; several combine
-   left to right. Thus (- 10 3 2) means (10 - 3) - 2, not 10 - (3 - 2).
+/* Addition and multiplication fold from 0 and 1. Subtraction and division
+   need at least one argument: a single x computes 0-x or 1/x. Integer
+   division truncates. Multiple arguments combine left to right, so
+   (- 10 3 2) means (10 - 3) - 2, not 10 - (3 - 2).
 */
 static Var _arithmetic(List values, Symbol op, Var identity) {
   if (!values) $fail(<bad-arity>, op.str(), <expected>, 1, <actual>, 0);        // Macro constructs runtime errors.
@@ -690,14 +688,14 @@ static void _install_natives(Interp *self) {
 
 /* Building the rest of the language in itself ------------------------------------------------------------------------
 
-   Startup evaluates the following definitions in order. defmacro is used
-   to define defun and if. Recursive functions then implement map, filter,
-   folds, and other collection operations.
-
-   Runtime Lisp macros express new constructs as transformations into
-   existing forms. They extend the language without adding evaluator
-   branches. The definitions below reduce to lambda, cond, quote, and
-   application, along with the primitive operations in the native registry.
+   Startup evaluates the following definitions in order. defmacro is used               native functions + core
+   to define defun and if. Recursive functions then implement map, filter,                        |
+   folds, and other collection operations.                                                   defmacro
+                                                                                                  |
+   Runtime Lisp macros express new constructs as transformations into                      defun      if
+   existing forms. They extend the language without adding evaluator                              |
+   branches. These definitions combine the core forms with the native                    map / foldl / let / ...
+   operations registered above, including binding and collection functions.
 
    The percent literal constructs a List containing these definitions. It
    does not evaluate them; _interpreter evaluates each definition at
@@ -772,7 +770,7 @@ static List _stdlib = %(                                                        
   (defun cadr (value) (car (cdr value)))                                        // Second element by List composition.
   (defun cdar (value) (cdr (car value)))                                        // Tail of the first nested List.
   (defun cddr (value) (cdr (cdr value)))                                        // Share the tail after two elements.
-  (defun match (subject pattern)                                                // Match data without evaluating it.
+  (defun match (subject pattern)                                                // Match evaluated values as List data.
     (if (list? subject) (_match subject pattern) nil))                          // Call registered native List.match.
   (defun bound (bindings binder) (cadr (assoc binder bindings)))                // Extract a match binding from data.
   (defun search-replace (subject pattern template)                              // Patterns and templates are values.
@@ -814,11 +812,11 @@ static List _stdlib = %(                                                        
 
 /* Completing a session -----------------------------------------------------------------------------------------------
 
-   A batch is read and evaluated one form at a time. Earlier definitions
-   are available to later forms, and the last value is the batch's result.
-   A later read or evaluation error does not roll back effects already
-   performed. File import is another source of such batches, with the same
-   environment.
+   A batch is read and evaluated one form at a time. Earlier definitions               form 1 -> value 1
+   are available to later forms, and the last value is the batch's result.             form 2 -> value 2
+   A later read or evaluation error does not roll back effects already                   ...
+   performed. File import is another source of such batches, with the same             form n -> final value
+   environment.                                                                           one shared environment
 */
 static Var _eval_text(Interp *self, String source) {
   Scope storage = $auto(Scope.new());                                           // Destroy Scope on block exit.
@@ -865,11 +863,11 @@ static Interp _interpreter(void) {
 
 /* Incremental reading and evaluation ---------------------------------------------------------------------------------
 
-   The REPL evaluates complete forms, retains incomplete input for the next
-   line, and reports malformed input as an error. The saved start position
-   prevents rereading earlier complete forms and repeating their effects.
-   Evaluation errors are caught per form, so the next form can still run.
-
+   The REPL evaluates complete forms, retains incomplete input for the next            +------+  +------+  +-------+
+   line, and reports malformed input as an error. The saved start position             | read |->| eval |->| print |
+   prevents rereading earlier complete forms and repeating their effects.              +--^---+  +------+  +---+---+
+   Evaluation errors are caught per form, so the next form can still run.                 |                   |
+                                                                                          +-------------------+
    Each function call uses the native stack. There is no tail-call
    guarantee, so sufficiently deep Lisp recursion can exhaust that stack.
    The production word machine uses a different execution strategy.
@@ -942,7 +940,7 @@ static int _repl(Interp *self) {
   Buffer source = $auto(Buffer.new(0));                                         // Release Buffer on block exit.
   Repl repl = { .source = source,                                               // C designated field initializer.
                 .interactive = isatty(Stdin.fileno()) };                        // x2c file descriptor -> POSIX call.
-  defer repl.storage.destroy();                                                 // Read current storage at cleanup.
+  defer repl.storage.destroy();                                                 // Destroy remaining tokens on exit.
   while (!repl.done) {                                                          // Same dot for a stack struct value.
     Var form = repl.read_unit();                                                // Receiver call takes &repl.
     if (form is void) continue;                                                 // Test the distinct void value.
@@ -958,7 +956,9 @@ static int _repl(Interp *self) {
   return !repl.failed;
 }
 
-/* main converts argv to x2c Strings and matches the supported argument
+/* Command-line interface ---------------------------------------------------------------------------------------------
+
+   main converts argv to x2c Strings and matches the supported argument
    forms. With no arguments it starts the REPL; -e evaluates a supplied
    expression, --selftest runs a small check, and a single path loads a
    Lisp source file. Each mode starts with the native registry and _stdlib
