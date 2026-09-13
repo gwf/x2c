@@ -130,24 +130,19 @@ int main(void){
   ;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    volatile int _x2c_cleanup_guard_0 = 1;
     List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
     ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      _x2c_cleanup_guard_0 = 1;
+      x2c_var_update_i32(&(preserved), 56, b);
+      x2c_var_update_i32(&(preserved_box.value), 56, b);
+      x2c_var_update_i32(&(preserved_values[0]), 56, b);
+      x2c_var_update_i32(&(*(& addressed)), 56, b);
+      x2c_var_update_i32(&((& addressed_box) -> value), 56, b);
       {
-        x2c_var_update_i32(&(preserved), 56, b);
-        x2c_var_update_i32(&(preserved_box.value), 56, b);
-        x2c_var_update_i32(&(preserved_values[0]), 56, b);
-        x2c_var_update_i32(&(*(& addressed)), 56, b);
-        x2c_var_update_i32(&((& addressed_box) -> value), 56, b);
-        {
-          static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
-          x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
-          __builtin_unreachable();
-        }
-
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
+        x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
+        __builtin_unreachable();
       }
 
     }
@@ -156,7 +151,6 @@ int main(void){
       if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
         x2c_error_catch_detach(_x2c_error_handler_0);
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
-        _x2c_cleanup_guard_0 = 1;
          {{
           branch ++;
         }
@@ -169,18 +163,13 @@ int main(void){
 
 }
 _x2c_cleanup_done_0 :;
-if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);
+if (x2c_exception_claim(&_x2c_exception_frame_0)) {x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
-x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
 {
   branch ++;
 }
- }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      }
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 printf("ops=%ld,%ld,%ld,%ld,%.1f converted=%.1f\n", Var_long(sum), Var_long(product), Var_long(shifted), Var_long(bits), Var_double(quotient), converted);
 printf("compound=%d,%d,%d,%ld indexed=%d boxed=%d calls=%d,%d,%d\n", native, compound_result, signed_byte, Var_long(dynamic), values[1], box.value, base_calls, index_calls, rhs_calls);

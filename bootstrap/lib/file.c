@@ -227,20 +227,15 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
   size_t volatile offset = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    volatile int _x2c_cleanup_guard_0 = 1;
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      _x2c_cleanup_guard_0 = 1;
-      {
-        while(offset < size){
-          size_t count = fwrite(bytes + offset, 1, size - offset, file);
-          if(! count){
-            int error = errno;
-            _io_error(49433866, error);
-          }
-          offset += count;
+      while(offset < size){
+        size_t count = fwrite(bytes + offset, 1, size - offset, file);
+        if(! count){
+          int error = errno;
+          _io_error(49433866, error);
         }
-
+        offset += count;
       }
 
     }
@@ -251,14 +246,9 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
 
   }
   _x2c_cleanup_done_0 :;
-  if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
-  if(written) * written += offset;
-   }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      }
+  if (x2c_exception_claim(&_x2c_exception_frame_0)) {if(written) * written += offset;
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 

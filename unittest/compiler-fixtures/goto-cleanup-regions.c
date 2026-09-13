@@ -54,46 +54,32 @@ static int outward_finally(void){
   int volatile value = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    volatile int _x2c_cleanup_guard_0 = 1;
     x2c_exception_push(& _x2c_exception_frame_0);
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      _x2c_cleanup_guard_0 = 1;
+      value = 1;
       {
-        value = 1;
-        {
-          int _x2c_cleanup_state_0 = _x2c_cleanup_guard_0;
-          if (_x2c_cleanup_state_0 >= 0) {_x2c_cleanup_guard_0 = 0;
-          if (_x2c_cleanup_state_0 > 0) {x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
-          {
-            value = value * 10 + 2;
-          }
-
+        if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
+          value = value * 10 + 2;
         }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+
       }
+      x2c_exception_leave(& _x2c_exception_frame_0);
       goto done;
     }
 
   }
+  else {x2c_exception_landed(& _x2c_exception_frame_0);
+  {
+    goto _x2c_cleanup_done_0;
+  }
 
-}
-else {x2c_exception_landed(& _x2c_exception_frame_0);
-{
-  goto _x2c_cleanup_done_0;
-}
 }
 _x2c_cleanup_done_0 :;
-if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
-{
+if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
   value = value * 10 + 2;
 }
- }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      }
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 done : return value;
 }

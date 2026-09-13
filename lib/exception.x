@@ -162,15 +162,19 @@ int x2c_exception_unwinding(void) {
 int x2c_exception_is_error_target(ExceptionFrame *frame) =>
   _is_error_unwind(frame) && frame.unwind_target == frame;
 
-/** Retires a frame's landing before its `finally` body runs.
-    Compiler-generated code calls this on every path that reaches a finalizer.
-    The frame has already landed, so a `raise` from the finalizer transfers to
-    the enclosing frame instead of re-entering this landing and running the
-    finalizer again; that transfer abandons this frame and replaces any
-    `Error` it was already carrying. A null frame does nothing.
+/** Claims a frame's cleanup for the calling exit path, once per frame.
+    Compiler-generated code tests this on every path that reaches a finalizer
+    and runs the finalizer only when it reports the claim. Claiming also
+    retires the frame's landing: the frame has already landed, so a `raise`
+    from the finalizer transfers to the enclosing frame instead of re-entering
+    this landing and running the finalizer again; that transfer abandons this
+    frame and replaces any `Error` it was already carrying. A null or already
+    claimed frame reports zero.
 */
-void x2c_exception_cleanup_begin(ExceptionFrame *frame) {
-  if (frame) frame.cleanup_active = 1;
+int x2c_exception_claim(ExceptionFrame *frame) {
+  if (!frame || frame.cleanup_active) return 0;
+  frame.cleanup_active = 1;
+  return 1;
 }
 
 /** Marks a selected exception-frame `Error` transfer as handled.
@@ -187,16 +191,18 @@ void x2c_exception_mark_handled(ExceptionFrame *frame) {
     removed. Normal leave preserves accumulated errors but reclaims handlers
     registered inside the frame. An intervening unwind instead restores the
     frame's error-stack watermark and transfers to the next outer frame. A null
-    frame does nothing; cleanup imbalance exits through the raw fatal path.
+    or already left frame does nothing; cleanup imbalance exits through the raw
+    fatal path.
 */
 void x2c_exception_leave(ExceptionFrame *frame) {
-  if (!frame) return;
+  if (!frame || frame.state == <left>) return;
   ExceptionThreadState state = _thread();
   if (state.cleanup_top != frame.cleanup_watermark)
     _fatal("exception frame cleanup imbalance");
   int should_unwind = frame.state == <err-unwind>;
   ExceptionFrame *target = NULL;
   if (should_unwind) target = frame.unwind_target;
+  frame.state = <left>;
   _frame_trim(frame);
   state.exception_top = frame.prev;
   if (should_unwind) ExceptionFrame.unwind(target);

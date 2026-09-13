@@ -230,108 +230,102 @@ int File_close(File);
 void Lisp_destroy(Lisp);
 Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym){
   if(! _init_guard_) _file_init_();  if(fn_defs) * fn_defs = NULL;  if(gensym) * gensym = 0;  File input = String_open(path, "r");  Lisp lisp = Lisp_new_bare();  Map volatile symbols = NULL; {
-    ExceptionFrame _x2c_exception_frame_0;  volatile int _x2c_cleanup_guard_0 = 1;  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      _x2c_cleanup_guard_0 = 1; {
-        String source = File_string(input);  unsigned cursor = 0;  Var document =((void) 0, Void), trailing =((void) 0, Void);
-        Symbol volatile status = Lisp_read(lisp, source, & cursor, & document);
-        if(status != 46228810 || ! Var_is_row(document, 9, 7, 4)){
-          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 127};
-          x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));
-          __builtin_unreachable();
-        }
-        List form = Var_list(document);
-        List volatile entries = NULL;
+    ExceptionFrame _x2c_exception_frame_0;  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      String source = File_string(input);  unsigned cursor = 0;  Var document =((void) 0, Void), trailing =((void) 0, Void);
+      Symbol volatile status = Lisp_read(lisp, source, & cursor, & document);
+      if(status != 46228810 || ! Var_is_row(document, 9, 7, 4)){
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 127};
+        x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));
+        __builtin_unreachable();
+      }
+      List form = Var_list(document);
+      List volatile entries = NULL;
 
   {
     List _x2c_match_expr = form;
     Var _x2c_match_values[1];
-        MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+      MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
 
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 1335836754920: ;
-        static MatchCaptureSite _x2c_match_site_1;
-        if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) {Var captured = _x2c_match_values[0];  entries = Var_list(captured);  break;
-      }
-      default: ; {
-        static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 131};  x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));  __builtin_unreachable();
-      }
-      break;
+      static MatchCaptureSite _x2c_match_site_1;
+      if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) {Var captured = _x2c_match_values[0];  entries = Var_list(captured);  break;
+    }
+    default: ; {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 131};  x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot header")), NULL))));  __builtin_unreachable();
+    }
+    break;
     }
   }
 status = Lisp_read(lisp, source, & cursor, & trailing);  if(status != 11212){
-        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 138};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("trailing snapshot form")), NULL))));
-        __builtin_unreachable();
-      }
-      Map imported = Map_new();
-      symbols = Map_new();
-      {
-        Var volatile entry;
-        List _x2c_macro_object_3 = entries;
-        List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-        Var _x2c_macro_cursor_output_4;
-        while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
-          entry = _x2c_macro_cursor_output_4;
-          {
-            List row = Var_is_row(entry, 9, 7, 4) ? Var_list(entry) : NULL;
-            if(! List_truth(row) ||(List_len(row) != 2 && List_len(row) != 3)){
-              static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 144};
-              x2c_error_raise_n(& _x2c_error_site_3, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
-              __builtin_unreachable();
-            }
-            Var volatile key;
-            Var volatile value;
-            Var volatile marker;
-            List _x2c_destructure_0 = row;
-            key = List_getindex(_x2c_destructure_0, 0);
-            value = List_getindex(_x2c_destructure_0, 1);
-            marker = List_getindex(_x2c_destructure_0, 2);
-            int defined = List_len(row) == 3 && Var_equal(marker, Symbol_var(292902696930268));
-            if((! defined && List_len(row) != 2) || ! Var_is_row(key, 9, 7, 4) || ! Var_is_row(value, 9, 7, 4)){
-              static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 148};
-              x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
-              __builtin_unreachable();
-            }
-            Map_setindex(symbols, key, value);
-            if(defined)
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 138};  x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("trailing snapshot form")), NULL))));
+      __builtin_unreachable();
+    }
+    Map imported = Map_new();
+    symbols = Map_new();
+    {
+      Var volatile entry;
+      List _x2c_macro_object_3 = entries;
+      List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+      Var _x2c_macro_cursor_output_4;
+      while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
+        entry = _x2c_macro_cursor_output_4;
+        {
+          List row = Var_is_row(entry, 9, 7, 4) ? Var_list(entry) : NULL;
+          if(! List_truth(row) ||(List_len(row) != 2 && List_len(row) != 3)){
+            static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 144};
+            x2c_error_raise_n(& _x2c_error_site_3, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
+            __builtin_unreachable();
+          }
+          Var volatile key;
+          Var volatile value;
+          Var volatile marker;
+          List _x2c_destructure_0 = row;
+          key = List_getindex(_x2c_destructure_0, 0);
+          value = List_getindex(_x2c_destructure_0, 1);
+          marker = List_getindex(_x2c_destructure_0, 2);
+          int defined = List_len(row) == 3 && Var_equal(marker, Symbol_var(292902696930268));
+          if((! defined && List_len(row) != 2) || ! Var_is_row(key, 9, 7, 4) || ! Var_is_row(value, 9, 7, 4)){
+            static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/snapshot.x",.function = "symbol_snapshot_load",.line = 148};
+            x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 2, Symbol_var(1051920), String_var(path), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid snapshot entry")), NULL))));
+            __builtin_unreachable();
+          }
+          Map_setindex(symbols, key, value);
+          if(defined)
   {
     List _x2c_match_expr = Var_list(key);
     Var _x2c_match_values[1];
-            MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+          MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
 
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(cons(List_var(_9), NULL)), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0]; {
-              Var _x2c_match_value_1 = spelling; {
-                String spelling = Var_string(_x2c_match_value_1);  Map_setindex(imported, String_var(spelling), int_var(1));
-              }
-
+            Var _x2c_match_value_1 = spelling; {
+              String spelling = Var_string(_x2c_match_value_1);  Map_setindex(imported, String_var(spelling), int_var(1));
             }
-            break;
+
           }
+          break;
+        }
 
     }
   }
 int found = _gensym(entry);  if(gensym && found > * gensym) * gensym = found;
-        }
-
       }
 
     }
-    if(fn_defs) * fn_defs = imported;
-  }
 
+  }
+  if(fn_defs) * fn_defs = imported;
 }
 else {x2c_exception_landed(& _x2c_exception_frame_0); {
   goto _x2c_cleanup_done_0;
 }
 }
-_x2c_cleanup_done_0 :;  if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_exception_cleanup_begin(&_x2c_exception_frame_0); {
+_x2c_cleanup_done_0 :;  if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
   File_close(input);  Lisp_destroy(lisp);
 }
- }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-      }
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return symbols;
 }

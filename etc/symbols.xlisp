@@ -2631,7 +2631,7 @@
   (("x2c_error_raise") ((func (("Symbol") ("List"))) void))
   (("x2c_error_raise_n") ((func ((* const "X2CErrorSite") ("Symbol") (unsigned) (...))) void))
   (("x2c_error_runtime_ready") (int))
-  (("x2c_exception_cleanup_begin") ((func ((* "ExceptionFrame"))) void))
+  (("x2c_exception_claim") ((func ((* "ExceptionFrame"))) int))
   (("x2c_exception_is_error_target") ((func ((* "ExceptionFrame"))) int))
   (("x2c_exception_landed") ((func ((* "ExceptionFrame"))) void))
   (("x2c_exception_leave") ((func ((* "ExceptionFrame"))) void))

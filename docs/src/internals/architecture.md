@@ -372,13 +372,13 @@ initialization instead of at the literal's source expression.
 
 Consumes the lowered AST, produces a flat `List` of C tokens. `src/emit.x`
 does this with one stack-local `Emitter` per translation unit, which holds
-cleanup guards and preserved automatic names. Emission is therefore reentrant,
-and a unit that fails cannot contaminate the next one. Cleanup lowering
-happens here instead of in the transform phase, because it depends on emission
-order. `defer` blocks, `catch` handlers, and scope exits must run in the right
-sequence across returns, loop exits, and `Error` transfer. Preprocessor nodes
-are re-emitted here too, with `.x` include targets rewritten to the generated
-`.h` they correspond to.
+the cleanup stack and preserved automatic names. Emission is therefore
+reentrant, and a unit that fails cannot contaminate the next one. Cleanup
+lowering happens here instead of in the transform phase, because it depends on
+emission order. `defer` blocks, `catch` handlers, and scope exits must run in
+the right sequence across returns, loop exits, and `Error` transfer.
+Preprocessor nodes are re-emitted here too, with `.x` include targets rewritten
+to the generated `.h` they correspond to.
 
 ```sh
 ./builds/0/x2c translate --dump-code greet.x

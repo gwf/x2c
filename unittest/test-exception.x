@@ -235,6 +235,19 @@ static void error_unwind_crosses_each_exception_frame(void) {
    retires its landing before the finalizer body, so the raise reaches the
    outer frame instead of re-entering this landing and running the body
    again, and the replacement Error is the one the catch selects. */
+/* One exit path claims a frame's cleanup; a later path finds it claimed and
+   leaves the frame without running the finalizer or unlinking it twice. */
+static void frame_cleanup_claims_once(void) {
+  Error.initialize();
+  ExceptionFrame frame;
+  x2c_exception_push(&frame);
+  EXPECT_TRUE(x2c_exception_claim(&frame));
+  EXPECT_FALSE(x2c_exception_claim(&frame));
+  x2c_exception_leave(&frame);
+  EXPECT_TRUE(frame.state == <left>);
+  x2c_exception_leave(&frame);
+}
+
 static void raise_in_finalizer_reaches_outer_frame(void) {
   Error.initialize();
   volatile int finalizers = 0;
@@ -254,7 +267,7 @@ static void raise_in_finalizer_reaches_outer_frame(void) {
       EXPECT_TRUE(inner.state == <err-unwind>);
       EXPECT_FALSE(x2c_exception_is_error_target(&inner));
     }
-    x2c_exception_cleanup_begin(&inner);
+    EXPECT_TRUE(x2c_exception_claim(&inner));
     finalizers++;
     Error.raise(<from-fin>, %((where "finalizer")));
     EXPECT_TRUE(0);
@@ -638,6 +651,7 @@ void exception_suite(void) {
   $test.run(error_unwind_selects_target_and_bindings);
   $test.run(error_unwind_retains_positional_and_legacy_order);
   $test.run(error_unwind_crosses_each_exception_frame);
+  $test.run(frame_cleanup_claims_once);
   $test.run(raise_in_finalizer_reaches_outer_frame);
   $test.run(cleanup_chain_leaves_in_lifo_order);
   $test.run(cleanup_chain_unlinks_before_callback);

@@ -567,7 +567,7 @@ Public functions:
 
 `x2c_cleanup_push`, `x2c_cleanup_leave`, `x2c_exception_push`,
 `ExceptionFrame.unwind`, `x2c_exception_landed`, `x2c_exception_unwinding`,
-`x2c_exception_is_error_target`, `x2c_exception_cleanup_begin`,
+`x2c_exception_is_error_target`, `x2c_exception_claim`,
 `x2c_exception_mark_handled`, `x2c_exception_leave`
 
 ### [lib/file.x](../lib/file.x)

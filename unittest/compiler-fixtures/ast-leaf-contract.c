@@ -145,18 +145,15 @@ break;
     }
   }
 Var volatile caught =((void) 0, Void); {
-  ExceptionFrame _x2c_exception_frame_0;  volatile int _x2c_cleanup_guard_0 = 1;  List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), cons(List_var(cons(Symbol_var(46228810), cons(Symbol_var(1992385866), NULL))), NULL));  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    _x2c_cleanup_guard_0 = 1; {
-      if(callback((int) count) > 0){
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/ast-leaf-contract.x",.function = "main",.line = 82};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 1, Symbol_var(46228810), left_value);  __builtin_unreachable();
-      }
-
+  ExceptionFrame _x2c_exception_frame_0;  List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), cons(List_var(cons(Symbol_var(46228810), cons(Symbol_var(1992385866), NULL))), NULL));  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    if(callback((int) count) > 0){
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/ast-leaf-contract.x",.function = "main",.line = 82};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 1, Symbol_var(46228810), left_value);  __builtin_unreachable();
     }
 
   }
   else {x2c_exception_landed(& _x2c_exception_frame_0); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  _x2c_cleanup_guard_0 = 1;  {Var value = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
+      x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  {Var value = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
         caught = value;
       }
 
@@ -166,14 +163,11 @@ Var volatile caught =((void) 0, Void); {
   else goto _x2c_cleanup_done_0;
 }
 }
-_x2c_cleanup_done_0 :;  if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_cleanup_begin(&_x2c_exception_frame_0); {
+_x2c_cleanup_done_0 :;  if (x2c_exception_claim(&_x2c_exception_frame_0)) {x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL; {
   count ++;
 }
- }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-      }
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 Var lambda_value =(_x2c_lambda_0)(int_var(2));  ast_phase1_Pair_bump(pair, Var_int(caught)); (void) converted; (void) consumer; (void) lambda_value;  return 0;
 }

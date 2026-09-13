@@ -45,7 +45,7 @@ int x2c_exception_unwinding(void);
 
 int x2c_exception_is_error_target(ExceptionFrame * frame);
 
-void x2c_exception_cleanup_begin(ExceptionFrame * frame);
+int x2c_exception_claim(ExceptionFrame * frame);
 
 void x2c_exception_mark_handled(ExceptionFrame * frame);
 

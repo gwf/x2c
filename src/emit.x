@@ -1,7 +1,7 @@
 /*  emit.x -- emit C tokens from x2c ASTs
 
     Translates normalized ASTs into token `List`s for downstream flattening and
-    formatting. One stack-local Emitter holds cleanup guards and preserved
+    formatting. One stack-local Emitter holds the cleanup stack and preserved
     automatic names, so emission is reentrant and a failed translation cannot
     contaminate later units. Cleanup lowering preserves handler order across
     returns and loop exits.
@@ -20,7 +20,7 @@
 #include "format.x"
 
 typedef struct Cleanup {
-  List final_code, leave_stmt, String guard;
+  List final_code, leave_stmt;
 } Cleanup;
 
 // Per-emission state.
@@ -868,17 +868,17 @@ static void Emitter._cleanup_barrier_leave(
   emitter.continue_stop = saved_continue;
 }
 
-// Emit pending cleanup down to stop_depth, the cleanup-stack index below
-// which unwinding stops. Each record runs its finalizers and then its own
-// leave statement, so an inner exception frame leaves before an outer defer
-// runs; collecting all finalizers ahead of all leave statements would drop
-// the frame's cleanup watermark below its own entries. A guarded record
-// samples its guard first, because its finalizers clear it before running.
-// The stack is only populated by _cleanup_emit, so payload shape is trusted.
 static void _push_fragments(Array output, List fragments) {
   foreach (Var fragment, fragments) output.push(fragment);
 }
 
+// Emit pending cleanup down to stop_depth, the cleanup-stack index below
+// which unwinding stops. Each record runs its finalizers and then its own
+// leave statement, so an inner exception frame leaves before an outer defer
+// runs; collecting all finalizers ahead of all leave statements would drop
+// the frame's cleanup watermark below its own entries. A try's finalizer
+// carries its own run-once claim, so the same pair is correct on every path.
+// The stack is only populated by _cleanup_emit, so payload shape is trusted.
 static List Emitter._cleanup_wrap_exit(
   Emitter e, List statement, int stop_depth) {
   int top = (int) e.cleanups.length;
@@ -886,23 +886,8 @@ static List Emitter._cleanup_wrap_exit(
   Cleanup *records = e.cleanups.bytes;
   Array cleanup = %[];
   for (int i = top - 1; i >= stop_depth; i--) {
-    Cleanup *record = &records[i];
-    List final_code = record.final_code, leave_code = record.leave_stmt;
-    if (!record.guard) {
-      _push_fragments(cleanup, final_code);
-      _push_fragments(cleanup, leave_code);
-      continue;
-    }
-    String guard = record.guard, snapshot = e.fresh_name("cleanup_state");
-    Array guarded = %[ "$guard = 0;" ];
-    _push_fragments(guarded, %("if ($snapshot > 0) {" @final_code "}"));
-    guarded.push(%"$guard = -1;");
-    _push_fragments(guarded, leave_code);
-    _push_fragments(
-      cleanup, %(
-      "int $snapshot = $guard;"
-      "if ($snapshot >= 0) {" @{guarded.list_free()} "}"
-    ));
+    _push_fragments(cleanup, records[i].final_code);
+    _push_fragments(cleanup, records[i].leave_stmt);
   }
   List cleanup_code = cleanup.list_free();
   return %("{" @cleanup_code @statement "}");
@@ -918,10 +903,8 @@ static List Emitter._cleanup_wrap_continue(Emitter emitter, List statement) =>
   emitter._cleanup_wrap_exit(statement, emitter.continue_stop);
 
 static List Emitter._cleanup_emit(
-  Emitter e, List final_code, List leave_stmt, String guard, Var ast,
-  List context) {
-  // Only a try's own finalizer record carries its run-once guard.
-  Cleanup record = { final_code, leave_stmt, guard };
+  Emitter e, List final_code, List leave_stmt, Var ast, List context) {
+  Cleanup record = { final_code, leave_stmt };
   e.cleanups.push(&record);
   e.cleanup_path = cons(ast, e.cleanup_path);
   List out = e._emit(%( $ast ), context);
@@ -953,7 +936,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
   }
 
   List leave = %("x2c_cleanup_leave(&" $cleanup_name ");");
-  List body_code = e._cleanup_emit(leave, NULL, NULL, body, context);
+  List body_code = e._cleanup_emit(leave, NULL, body, context);
   return %("{
   "@env_setup"
   X2CCleanup $cleanup_name = {
@@ -971,13 +954,13 @@ static List Emitter._defer(Emitter e, List ast, List context) {
 // arm exit through the ordinary cleanup stack.
 static List Emitter._filtered_catch(
   Emitter emitter, List records, String frame_name, String handle_name,
-  List context, List final_code, List leave_stmt, String cleanup_guard) {
+  List context, List final_code, List leave_stmt) {
   String selected_name = emitter.fresh_name("catch_selected");
   Array arms = %[], int index = 0, count = records.len();
   foreach (List rec, records) {
     List binders = rec.car(), body = rec.caddr();
     List handler_body = emitter._cleanup_emit(
-      final_code, leave_stmt, cleanup_guard, body, context);
+      final_code, leave_stmt, body, context);
     List declarations = _make_catch_binders(binders, handle_name);
     String branch = index == count - 1 ? (index ? "else" : "") :
                     index ? %"else if ($selected_name == $index)" :
@@ -985,7 +968,6 @@ static List Emitter._filtered_catch(
     arms.push(%("$branch {" @declarations @handler_body "}"));
     index++;
   }
-  List guard = cleanup_guard ? %("$cleanup_guard = 1;") : %();
   List selected = count > 1
     ? %("int $selected_name = x2c_error_catch_selected($handle_name);")
     : %();
@@ -993,23 +975,9 @@ static List Emitter._filtered_catch(
     @selected
     "x2c_error_catch_detach($handle_name);"
     "x2c_exception_mark_handled(&$frame_name);"
-    @guard
     @{arms.list_free()}
   "}");
   return result;
-}
-
-static List _try_trailer(
-  String cleanup_guard, List final_code, List leave_stmt) {
-  if (cleanup_guard)
-    return %(
-      "if ($cleanup_guard >= 0) {
-        if ($cleanup_guard > 0) { "@final_code" }
-        $cleanup_guard = -1;
-        "@leave_stmt"
-      }"
-    );
-  return %( @final_code @leave_stmt );
 }
 
 static List Emitter._try(Emitter e, List ast, List context) {
@@ -1017,41 +985,35 @@ static List Emitter._try(Emitter e, List ast, List context) {
   String frame_name = e.fresh_name("exception_frame");
   String handle_name = clause
     ? e.fresh_name("error_handler") : NULL;
-  List final_code = NULL, String cleanup_guard = NULL;
-  if (finalizer) {
-    /* Retire the landing first, so a `raise` from the finalizer reaches the
-       enclosing frame instead of re-entering this one and looping. */
-    final_code = %(
-      "x2c_exception_cleanup_begin(&$frame_name);"
-      @{e._emit(%( $finalizer ), context)}
-    );
-    cleanup_guard = e.fresh_name("cleanup_guard");
-  }
+  List final_code = finalizer ? e._emit(%( $finalizer ), context) : NULL;
   if (clause)
     final_code = %(
       "x2c_error_catch_close($handle_name);"
       "$handle_name = NULL;"
       @final_code
     );
-  List guard_decl = cleanup_guard ? %("volatile int " $cleanup_guard " = 1;")
-                                  : %();
+  /* The frame owns the run-once claim, so every path that reaches the
+     finalizer emits the same pair. Claiming also retires the landing, so a
+     `raise` from the finalizer reaches the enclosing frame instead of
+     re-entering this one and looping. */
+  if (finalizer)
+    final_code = %(
+      "if (x2c_exception_claim(&$frame_name)) {" @final_code "}"
+    );
   List leave_stmt = %("x2c_exception_leave(&" $frame_name ");");
-  List body_code = e._cleanup_emit(
-    final_code, leave_stmt, cleanup_guard, body, context);
-  body_code = cleanup_guard ? %("{" $cleanup_guard " = 1;" @body_code "}")
-                            : body_code;
+  List body_code = e._cleanup_emit(final_code, leave_stmt, body, context);
   List catch_block = NULL;
   if (clause)
     catch_block = e._filtered_catch(
       clause.cadr(), frame_name, handle_name, context,
-      final_code, leave_stmt, cleanup_guard);
+      final_code, leave_stmt);
   /* The landing branch and the normal fallthrough run the same finalizer,
      so both reach the one trailer at the end of this block. An unhandled
      landing never returns from `x2c_exception_leave`, which continues the
      transfer outward. */
   String done_label = e.fresh_name("cleanup_done");
   List final_trailer = %(
-    $done_label ":" ";" @{_try_trailer(cleanup_guard, final_code, leave_stmt)}
+    $done_label ":" ";" @final_code @leave_stmt
   );
   catch_block = catch_block ? %("{"
       "if (x2c_exception_is_error_target(&$frame_name))"
@@ -1082,7 +1044,6 @@ static List Emitter._try(Emitter e, List ast, List context) {
   ) : %();
   List result = %("{"
              "ExceptionFrame " $frame_name ";"
-             @guard_decl
              @registration
              "x2c_exception_push(&" $frame_name ");"
              "if (!sigsetjmp(" $frame_name ".env, 0))" @body_code

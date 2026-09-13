@@ -2327,11 +2327,11 @@ is rejected at compile time.
 
 Generated `Error` transfer preserves directly modified automatic locals and
 parameters under the repository's optimized build. The compiler supplies the
-required volatile C representation for those values and its cleanup guards;
-source code does not need optimization-specific qualifiers for ordinary direct
-assignments in `try`, `catch`, or `finally`. `Error` transfer does not
-restore the process signal mask; code that changes a signal mask owns
-restoring it.
+required volatile C representation for those values and for the transfer
+state its frames carry; source code does not need optimization-specific
+qualifiers for ordinary direct assignments in `try`, `catch`, or `finally`.
+`Error` transfer does not restore the process signal mask; code that changes a
+signal mask owns restoring it.
 
 ### Type-owned initialization
 

@@ -100,8 +100,10 @@ int x2c_exception_is_error_target(ExceptionFrame * frame){
   return _is_error_unwind(frame) && frame -> unwind_target == frame;
 }
 
-void x2c_exception_cleanup_begin(ExceptionFrame * frame){
-  if(frame) frame -> cleanup_active = 1;
+int x2c_exception_claim(ExceptionFrame * frame){
+  if(! frame || frame -> cleanup_active) return 0;
+  frame -> cleanup_active = 1;
+  return 1;
 }
 
 void x2c_exception_mark_handled(ExceptionFrame * frame){
@@ -109,12 +111,13 @@ void x2c_exception_mark_handled(ExceptionFrame * frame){
 }
 
 void x2c_exception_leave(ExceptionFrame * frame){
-  if(! frame) return;
+  if(! frame || frame -> state == 797096) return;
   ExceptionThreadState state = _thread();
   if(state -> cleanup_top != frame -> cleanup_watermark) _fatal("exception frame cleanup imbalance");
   int should_unwind = frame -> state == 392731102235528;
   ExceptionFrame * target = NULL;
   if(should_unwind) target = frame -> unwind_target;
+  frame -> state = 797096;
   _frame_trim(frame);
   state -> exception_top = frame -> prev;
   if(should_unwind) ExceptionFrame_unwind(target);

@@ -618,9 +618,9 @@ rejection, unreadable-include failure, and batch-vs-solo output parity.
 Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
 The emitter owns the C rule that automatic state changed across that boundary
-must be volatile. It qualifies directly modified named locals and parameters,
-and emits volatile cleanup guards. `ExceptionFrame` owns the volatile
-transfer state and unwind target written before transfer and read afterward.
+must be volatile. It qualifies directly modified named locals and parameters.
+`ExceptionFrame` owns the volatile transfer state, the unwind target, and the
+run-once cleanup claim, written before transfer and read afterward.
 Native-runtime fixtures compile with the active repository build flags, so
 optimized behavior and signal-mask semantics are executable boundaries rather
 than build-mode accidents.

@@ -1676,16 +1676,11 @@ Buffer List_write_str(List lst, Buffer out){
     size_t _x2c_macro_previous_0 = * _x2c_macro_address_0;
     {
       ExceptionFrame _x2c_exception_frame_0;
-      volatile int _x2c_cleanup_guard_0 = 1;
       x2c_exception_push(& _x2c_exception_frame_0);
       if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-        _x2c_cleanup_guard_0 = 1;
+        * _x2c_macro_address_0 = 1;
         {
-          * _x2c_macro_address_0 = 1;
-          {
-            _serialize_nested_list(List_var(lst), out, 40228);
-          }
-
+          _serialize_nested_list(List_var(lst), out, 40228);
         }
 
       }
@@ -1696,16 +1691,10 @@ Buffer List_write_str(List lst, Buffer out){
 
     }
     _x2c_cleanup_done_0 :;
-    if (_x2c_cleanup_guard_0 >= 0) {
-        if (_x2c_cleanup_guard_0 > 0) { x2c_exception_cleanup_begin(&_x2c_exception_frame_0);
-    * _x2c_macro_address_0 = _x2c_macro_previous_0;
-     }
-        _x2c_cleanup_guard_0 = -1;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-
-      }
+    if (x2c_exception_claim(&_x2c_exception_frame_0)) {* _x2c_macro_address_0 = _x2c_macro_previous_0;
   }
-
+  x2c_exception_leave(& _x2c_exception_frame_0);
+}
 }
 return out;
 }

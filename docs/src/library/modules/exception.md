@@ -11,7 +11,7 @@ Transfer frames for x2c `Error` unwinding and cleanup.
 | --- | --- |
 | [`x2c_cleanup_leave`](#x2c_cleanup_leave) | Removes and runs the current compiler-generated cleanup record. |
 | [`x2c_cleanup_push`](#x2c_cleanup_push) | Pushes one compiler-generated cleanup record. |
-| [`x2c_exception_cleanup_begin`](#x2c_exception_cleanup_begin) | Retires a frame's landing before its `finally` body runs. |
+| [`x2c_exception_claim`](#x2c_exception_claim) | Claims a frame's cleanup for the calling exit path, once per frame. |
 | [`x2c_exception_is_error_target`](#x2c_exception_is_error_target) | Reports whether `frame` is carrying an `Error` transfer targeted to itself. |
 | [`x2c_exception_landed`](#x2c_exception_landed) | Restores `Error` handler and dispatch state after a frame landing. |
 | [`x2c_exception_leave`](#x2c_exception_leave) | Removes an active exception frame and continues any pending `Error` transfer. |
@@ -44,18 +44,20 @@ through the raw exception fatal path.
 
 Source: `lib/exception.x:67`
 
-#### x2c_exception_cleanup_begin
+#### x2c_exception_claim
 
-`void x2c_exception_cleanup_begin(ExceptionFrame *frame)`
+`int x2c_exception_claim(ExceptionFrame *frame)`
 
-Retires a frame's landing before its `finally` body runs.
-Compiler-generated code calls this on every path that reaches a finalizer.
-The frame has already landed, so a `raise` from the finalizer transfers to
-the enclosing frame instead of re-entering this landing and running the
-finalizer again; that transfer abandons this frame and replaces any
-`Error` it was already carrying. A null frame does nothing.
+Claims a frame's cleanup for the calling exit path, once per frame.
+Compiler-generated code tests this on every path that reaches a finalizer
+and runs the finalizer only when it reports the claim. Claiming also
+retires the frame's landing: the frame has already landed, so a `raise`
+from the finalizer transfers to the enclosing frame instead of re-entering
+this landing and running the finalizer again; that transfer abandons this
+frame and replaces any `Error` it was already carrying. A null or already
+claimed frame reports zero.
 
-Source: `lib/exception.x:172`
+Source: `lib/exception.x:174`
 
 #### x2c_exception_is_error_target
 
@@ -86,9 +88,10 @@ The frame must be left in nesting order after its cleanup records have been
 removed. Normal leave preserves accumulated errors but reclaims handlers
 registered inside the frame. An intervening unwind instead restores the
 frame's error-stack watermark and transfers to the next outer frame. A null
-frame does nothing; cleanup imbalance exits through the raw fatal path.
+or already left frame does nothing; cleanup imbalance exits through the raw
+fatal path.
 
-Source: `lib/exception.x:192`
+Source: `lib/exception.x:197`
 
 #### x2c_exception_mark_handled
 
@@ -98,7 +101,7 @@ Marks a selected exception-frame `Error` transfer as handled.
 This prevents `x2c_exception_leave` from continuing the transfer outward.
 A null frame does nothing.
 
-Source: `lib/exception.x:180`
+Source: `lib/exception.x:184`
 
 #### x2c_exception_push
 
