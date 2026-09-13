@@ -48,7 +48,7 @@ esac
 
 if [ "$(cat "$root/etc/build-mode" 2>/dev/null || true)" != optimize ]; then
   echo "Jackson benchmark requires the optimized x2c build mode" >&2
-  echo "run 'make optimize', clean, and rebuild before benchmarking" >&2
+  echo "run 'make config-optimize', clean, and rebuild before benchmarking" >&2
   exit 2
 fi
 

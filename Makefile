@@ -32,31 +32,13 @@ SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
 APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
-COMPAT_TARGETS = default x2c safely install bootstrap rebootstrap \
-	cosmopolitan-toolchain cosmopolitan-ape cosmopolitan-verify \
-	test selftest stresstest unittest sanitizer-unittest \
-	compiler-fixtures update-compiler-fixtures \
-	shootout update-shootout calibrate-shootout \
-	symbol-table check-symbol-snapshot update-symbol-snapshot \
-	update-header-symbols check-header-symbols \
-	artifact-atomicity \
-	refresh-artifacts update-examples \
-	docs check-docs check-doc-examples book book-serve \
-	benchmarks scan-benchmark string-benchmark list-benchmark \
-	block-buffer-benchmark scope-benchmark file-benchmark logger-benchmark \
-	iter-benchmark exception-benchmark var-benchmark varops-benchmark \
-	map-benchmark map-standard-benchmark-smoke \
-	map-standard-benchmark-campaign map-u32-benchmark-smoke \
-	map-u32-benchmark-campaign \
-	compiler-translation-benchmark \
-	lisp-auto-benchmark diff0 diff1 diff2 diff3 diffs \
-	debug optimize show-config
+INSTALL_TARGETS = install
 
 .PHONY: $(CORE_TARGETS) $(BUILD_TARGETS) $(VERIFY_TARGETS) \
 	$(SYMBOL_TARGETS) $(DIFF_TARGETS) $(DOC_TARGETS) \
 	$(SITE_TARGETS) \
 	$(BENCHMARK_TARGETS) $(SHOOTOUT_TARGETS) $(APE_TARGETS) \
-	$(CONFIG_TARGETS) $(COMPAT_TARGETS) bootstrap-ready stage0-settle \
+	$(CONFIG_TARGETS) $(INSTALL_TARGETS) bootstrap-ready stage0-settle \
 	check-after-precommit
 # Stage-0 bootstrap artifacts we expect before incremental builds/tests.
 BOOTSTRAP_SENTINEL = bin/x2c-bootstrap
@@ -496,67 +478,11 @@ clean-all: clean					## Also remove bootstrap objects
 	$(MAKE) -C bootstrap clean
 
 ###############################################################################
-# Additional aliases for build, test, and documentation targets.
-default x2c: build
-safely: build-safe
+# Installation.
 ifeq ($(strip $(PREFIX)),)
-install: build-install
+install: build-install					## Install the built toolchain
 else
 install: build
 	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
 	  --destdir "$(DESTDIR)"
 endif
-bootstrap: bootstrap-build
-rebootstrap: bootstrap-refresh
-cosmopolitan-toolchain: ape-toolchain
-cosmopolitan-ape: ape-build
-cosmopolitan-verify: ape-verify
-test: stage-1
-selftest: stage-2
-stresstest: stage-3
-unittest: verify
-sanitizer-unittest: verify-sanitize
-compiler-fixtures: verify-fixtures
-update-compiler-fixtures: verify-fixtures-update
-shootout: shoot-run
-update-shootout: shoot-update
-calibrate-shootout: shoot-calibrate
-symbol-table: sym-refresh
-check-symbol-snapshot: sym-check
-update-symbol-snapshot: sym-update
-update-header-symbols: hdr-sync
-check-header-symbols: hdr-check
-artifact-atomicity: proof-artifact-atomicity
-refresh-artifacts: artifact-refresh
-update-examples: examples-update
-docs: doc-generate
-check-docs: doc-check
-check-doc-examples: doc-examples
-book: doc-build
-book-serve: doc-serve
-benchmarks: bm-all
-scan-benchmark: bm-scan
-string-benchmark: bm-string
-list-benchmark: bm-list
-block-buffer-benchmark: bm-block-buffer
-scope-benchmark: bm-scope
-file-benchmark: bm-file
-logger-benchmark: bm-logger
-exception-benchmark: bm-exception
-var-benchmark: bm-var
-varops-benchmark: bm-varops
-map-benchmark: bm-map
-map-standard-benchmark-smoke: bm-map-standard-smoke
-map-standard-benchmark-campaign: bm-map-standard-campaign
-map-u32-benchmark-smoke: bm-map-u32-smoke
-map-u32-benchmark-campaign: bm-map-u32-campaign
-compiler-translation-benchmark: bm-compiler
-lisp-auto-benchmark: bm-lisp-auto
-diff0: stage-diff-0
-diff1: stage-diff-1
-diff2: stage-diff-2
-diff3: stage-diff-3
-diffs: stage-diff-all
-debug: config-debug
-optimize: config-optimize
-show-config: config-show
