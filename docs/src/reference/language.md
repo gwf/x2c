@@ -1995,24 +1995,19 @@ instead of the container binding.
 
 ## Iterator destination omission
 
-Iterator sources and lazy operations take a final `Iter` destination pointer.
-That argument may be omitted for calls nested in an iterator expression that
-is consumed immediately by `try_next`, `next`, `done`, `list`, `array`,
-`reduce`, `foldl`, `any`, `all`, `find`, `count`, `sum`, `product`, `min`,
-`max`, or `foreach`.
+Iterator sources and collection adapters take a final `Iter` destination
+pointer. That argument may be omitted for a call consumed immediately by
+`try_next`, `next`, `list`, `array`, or `foreach`.
 
 For every missing destination, x2c passes a distinct zero-initialized
 `struct Iter` compound literal. Its automatic lifetime is the enclosing block,
-so every source remains valid while the final consumer runs. Explicit final
-destinations are preserved, including a mixture of explicit and omitted
-destinations in one chain. Calls nested in iterator-valued arguments, such as
-both inputs to `zip` or `map2`, are completed recursively.
+so the source remains valid while the consumer runs. Explicit final
+destinations are preserved, and calls nested in iterator-valued arguments are
+completed recursively.
 
 This is specific to iterator destinations, not general default-argument
 syntax. An iterator assigned to a local, returned from a function, boxed, or
-passed to an arbitrary call still requires explicit storage at every stage.
-`unzip` also remains explicit because its two result iterators share one
-caller-owned `UnzipShared` buffer.
+passed to an arbitrary call still requires explicit storage.
 
 ## Lambdas
 

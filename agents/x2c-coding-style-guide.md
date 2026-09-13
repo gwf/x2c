@@ -974,7 +974,7 @@ Use:
 
 When one parameter is the subject of the whole function, name it with the
 first lowercase letter of its unqualified type: `Compiler c`, `Emitter e`, or
-`UnzipShared *u`. If that name is already bound, repeat the letter until the
+`Build b`. If that name is already bound, repeat the letter until the
 name is free: `c`, `cc`, `ccc`. Other parameters keep names that state their
 roles.
 
