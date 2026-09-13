@@ -186,9 +186,13 @@ static Var _sdk_declaration_bindings(List declaration) {
   return result.list_free();
 }
 
+/* This reads the symbol table only, so it serves any compile-time Lisp
+   evaluation, not just an active macro expansion. */
 static Var _sdk_function_reference(String name) {
+  Compiler compiler = macro_import_compiler;
+  if (!compiler) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
-  List binding = macro_sdk_compiler.sym.lookup(%($name), &type);
+  List binding = compiler.sym.lookup(%($name), &type);
   if (!binding || !type || !type.is_function()) return %();
   return %(expr $type (ident $binding));
 }
@@ -890,6 +894,10 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c._embed.text", _sdk_embed_text);
     $lisp.bind(_.macro_lisp, "_x2c.literal.string", _sdk_literal_string);
     $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
+    /* The checked-in bootstrap still spells this name; the transition round
+       that moves every caller removes it. */
     $lisp.bind(
       _.macro_lisp, "_x2c.foreach.function-reference",
       _sdk_function_reference);
