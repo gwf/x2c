@@ -15,6 +15,7 @@
 #pragma once
 #include "compiler.x"
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 #include "type.x"
 #include "var.x"
 #include "string.x"
@@ -530,14 +531,9 @@ static List _rewrite_header_cache_refs(
       List binding = compiler.sym.reference(%($ident), NULL);
       return %(ident $binding);
     }
-  Array values = %[];
-  foreach (Var child, node) {
-    if (child is <list>)
-      child = _rewrite_header_cache_refs(compiler, child, prefix, replaced);
-    values.push(child);
-  }
-  List result = values.list_free();
-  return result;
+  List child;
+  $ast.rewrite_children(node, child,
+    _rewrite_header_cache_refs(compiler, child, prefix, replaced));
 }
 
 static List _make_header_cache_guard(List guard) => %(declare (static int)
