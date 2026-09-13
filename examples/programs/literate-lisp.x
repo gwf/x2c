@@ -79,7 +79,7 @@ typedef struct Interp {                                                         
    The caller supplies the error code and any additional key/value pairs.
 */
 macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              // Expr parameters capture syntax.
-  raise %($cause (operation ${$op}) $fields...);                                  // Template holes and sequence splice.
+  raise %($cause (operation ${$op}) $fields...);                                // Template holes and sequence splice.
 }
 
 /* Evaluation: the language in three rules ----------------------------------------------------------------------------
