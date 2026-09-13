@@ -520,6 +520,115 @@ printf '%s\n' 'int first_item(void); int second_item(void);' \
 [[ $(find "$BUILD/direct/collision-build/gen" -name item.c | wc -l |
       tr -d ' ') == 2 ]]
 
+# Build defaults respect the host and outer Make; explicit jobs own the limit.
+# Parallel units retain separate same-stem outputs and prerequisite sets.
+python3 - "$X2C" "$BUILD/direct" <<'PY_BUILD_JOBS'
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+
+compiler = sys.argv[1]
+root = pathlib.Path(sys.argv[2]).resolve()
+env = dict(os.environ)
+env.pop('MAKELEVEL', None)
+count = os.sysconf('SC_NPROCESSORS_ONLN')
+count = count if 0 < count <= 2147483647 else 1
+for side, value in [('a', 5), ('b', 6)]:
+    (root / side / (side + '-dep.x')).write_text(
+        'int ' + side + '_value(void) { return ' + str(value) + '; }\n')
+    name = 'first' if side == 'a' else 'second'
+    (root / side / 'item.x').write_text(
+        '#include "' + side + '-dep.x"\nint ' + name + '_item(void) { '
+        'return ' + side + '_value(); }\n')
+inputs = [str(root / side / name) for side in ('a', 'b')
+          for name in ('item.x', side + '-dep.x')]
+inputs.append(str(root / 'collision-main.c'))
+
+def build(name, expected, options=(), level=None):
+    run_env = dict(env)
+    if level is not None:
+        run_env['MAKELEVEL'] = level
+    args = [compiler, 'build', '--plain', '--build-dir', str(root / name),
+            '--output', str(root / (name + '.exe')), *options, *inputs]
+    result = subprocess.run(args + ['--verbose'], env=run_env,
+                            capture_output=True, text=True)
+    text = result.stdout + result.stderr
+    (root / (name + '.log')).write_text(text)
+    assert result.returncode == 0, text
+    if expected > 1:
+        assert f'translate with {min(expected, 4)} workers over 4 files' in text
+    else:
+        assert 'translate with' not in text
+    result = subprocess.run(args, env=run_env, capture_output=True, text=True)
+    receipt = result.stdout + result.stderr
+    (root / (name + '.receipt.log')).write_text(receipt)
+    assert result.returncode == 0, receipt
+    assert re.search(r'using ' + str(expected) + r' jobs?\b', receipt), receipt
+    subprocess.run([str(root / (name + '.exe'))], check=True)
+    return text
+
+build('jobs-serial', 1, ('-j1',))
+build('jobs-parallel', 2, ('-j2',))
+build('jobs-default', count)
+build('jobs-make', 1, level='1')
+build('jobs-override', 2, ('-j2',), level='1')
+serial = root / 'jobs-serial/gen'
+parallel = root / 'jobs-parallel/gen'
+for source in serial.glob('*/*'):
+    if source.suffix in ('.c', '.h'):
+        assert source.read_bytes() == (
+            parallel / source.relative_to(serial)).read_bytes(), source
+for depfile in parallel.glob('*/item.d'):
+    text = depfile.read_text()
+    side = 'a' if str(root / 'a/item.x') in text else 'b'
+    other = 'b' if side == 'a' else 'a'
+    assert str(root / side / (side + '-dep.x')) in text, text
+    assert str(root / other / (other + '-dep.x')) not in text, text
+(root / 'a/a-dep.x').write_text('int a_value(void) { return 5 + 0; }\n')
+result = subprocess.run(
+    [compiler, 'build', '--verbose', '-j2', '--build-dir',
+     str(root / 'jobs-parallel'), '--output',
+     str(root / 'jobs-parallel.exe'), *inputs], env=env,
+    capture_output=True, text=True)
+assert result.returncode == 0, result.stderr
+assert result.stderr.count('x2c: up-to-date translate') == 2, result.stderr
+assert 'translate with 2 workers over 2 files' in result.stderr, result.stderr
+(root / 'a/item.x').write_text('int broken(void) { return (1; }\n')
+result = subprocess.run(
+    [compiler, 'build', '-j2', '--build-dir', str(root / 'jobs-failing'),
+     '--output', str(root / 'jobs-failing.exe'), *inputs], env=env,
+    capture_output=True, text=True)
+assert result.returncode != 0
+assert not (root / 'jobs-failing.exe').exists()
+
+package = root / 'packages/sample'
+(package / 'src').mkdir(parents=True)
+(package / 'builds').mkdir()
+(package / 'src/sample.x').write_text('int value(void);\n')
+(package / 'builds/sample.h').write_text('')
+(root / 'first.x').write_text('import "sample"; int first(void) { return 1; }\n')
+(root / 'later.x').write_text('int later(void) { return 2; }\n')
+database = root / 'package-order.json'
+result = subprocess.run(
+    [compiler, 'build', '-j2', '--kind', 'static-library', '--package-dir',
+     str(root / 'packages'), '--build-dir', str(root / 'package-order'),
+     '--compile-commands', str(database), '--output', str(root / 'order.a'),
+     str(root / 'first.x'), str(root / 'later.x')], env=env,
+    capture_output=True, text=True)
+assert result.returncode == 0, result.stderr
+row = next(row for row in json.loads(database.read_text())
+           if pathlib.Path(row['file']).name == 'first.c')
+args = row['arguments']
+dirs = [args[i + 1] for i, arg in enumerate(args) if arg == '-iquote']
+first = next(i for i, path in enumerate(dirs) if '/gen/first-' in path)
+later = next(i for i, path in enumerate(dirs) if '/gen/later-' in path)
+assert first < dirs.index(str(package / 'builds')) < later, dirs
+assert dirs.index(str(package / 'builds')) < dirs.index(str(package / 'src')) < later
+PY_BUILD_JOBS
+
 "$X2C" build -c --output "$BUILD/direct/single.o" \
   "$BUILD/direct/source.c"
 [[ -f "$BUILD/direct/single.o" ]]
@@ -1059,4 +1168,4 @@ printf '%s\n' '#include "x2c.x"' \
   --output "$BUILD/finally-return" "$BUILD/finally-return.x"
 [[ $("$BUILD/finally-return") == 2 ]]
 
-echo "CLI, dependency, build, run, manifest, and state probes: 111 passed"
+echo "CLI, dependency, build, run, manifest, and state probes: 120 passed"

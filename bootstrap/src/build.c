@@ -542,13 +542,10 @@ Build CliRequest_prepare(CliRequest c){
   return state;
 }
 
-int Array_contains(Array, Var);
-
 String Build_generated_dir(Build state, String input){
   if(! _init_guard_) _file_init_();
   String directory = String_join(NULL, cons(String_var(state -> gen_root), cons(String_var(_2), cons(String_var(_key(input)), NULL))));
   if(! state -> request -> dry_run) _require_directory(directory);
-  if(! Array_contains(state -> gen_dirs, String_var(directory))) Array_push(state -> gen_dirs, String_var(directory));
   return directory;
 }
 
@@ -690,6 +687,8 @@ toolchain -> ld_args = List_append(toolchain -> ld_args, Array_list_free(flags))
 
 int String_equal(String, String);
 
+int Array_contains(Array, Var);
+
 Var List_last(List);
 
 CliRequest cli_package_options(String, String);
@@ -743,6 +742,7 @@ void Build_add_generated(Build state, String input, String directory){
   state -> gen_bytes += report_file_bytes(source);
   state -> gen_bytes += report_file_bytes(header);
   Array_push(state -> c_sources, String_var(source));
+  if(! Array_contains(state -> gen_dirs, String_var(directory))) Array_push(state -> gen_dirs, String_var(directory));
   Build__link_packages(state, input, directory);
 }
 

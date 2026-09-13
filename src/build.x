@@ -295,14 +295,13 @@ Build CliRequest.prepare(CliRequest c) {
   return state;
 }
 
-/** Returns and registers the generated-file directory for `input`.
-    The directory is derived from the input path, created unless this is a dry
-    run, and appended once to the build's generated include directories.
+/** Returns the generated-file directory for `input`.
+    The directory is derived from the input path and created unless this is
+    a dry run. Native registration belongs to `Build.add_generated`.
 */
 String Build.generated_dir(Build state, String input) {
   String directory = %"${state.gen_root}/${_key(input)}";
   if (!state.request.dry_run) _require_directory(directory);
-  if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
   return directory;
 }
 
@@ -443,6 +442,7 @@ void Build.add_generated(Build state, String input, String directory) {
   state.gen_bytes += report_file_bytes(source);
   state.gen_bytes += report_file_bytes(header);
   state.c_sources.push(source);
+  if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
   state._link_packages(input, directory);
 }
 

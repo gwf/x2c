@@ -18,7 +18,7 @@ Typed native build request and artifact graph.
 | [`Build.cleanup`](#Build.cleanup) | Removes the temporary work tree after a successful real build. |
 | [`Build.end_translation`](#Build.end_translation) | Records one completed translation and reports the phase when all finish. |
 | [`Build.finish`](#Build.finish) | Compiles registered C sources and then archives or links the final output. |
-| [`Build.generated_dir`](#Build.generated_dir) | Returns and registers the generated-file directory for `input`. |
+| [`Build.generated_dir`](#Build.generated_dir) | Returns the generated-file directory for `input`. |
 | [`Build.record_translation`](#Build.record_translation) | Records the successful translation fingerprint when retained state exists. |
 | [`Build.report_success`](#Build.report_success) | Prints the completed build receipt and artifact details when enabled. |
 | [`Build.run_program`](#Build.run_program) | Runs the built output with the request's arguments and returns its status. |
@@ -52,7 +52,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:440`
+Source: `src/build.x:439`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -104,9 +104,9 @@ Source: `src/build.x:713`
 
 `String Build.generated_dir(Build state, String input)`
 
-Returns and registers the generated-file directory for `input`.
-The directory is derived from the input path, created unless this is a dry
-run, and appended once to the build's generated include directories.
+Returns the generated-file directory for `input`.
+The directory is derived from the input path and created unless this is
+a dry run. Native registration belongs to `Build.add_generated`.
 
 Source: `src/build.x:302`
 
@@ -120,7 +120,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:351`
+Source: `src/build.x:350`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -151,7 +151,7 @@ Returns zero without retained state, during a dry run, when either output
 is absent, or when any compiler, tool, option, depfile, or dependency
 fingerprint cannot be read or differs.
 
-Source: `src/build.x:332`
+Source: `src/build.x:331`
 
 ### `CliRequest`
 

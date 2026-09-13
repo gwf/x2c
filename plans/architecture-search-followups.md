@@ -1,9 +1,8 @@
 # Architecture search follow-ups
 
-> Status: active - repaired Lisp form fallback is approved for local
-> implementation and validation. Parallel build translation has a successful
-> spike; the no-op depfile shortcut is rejected. Publication remains on hold
-> until Gary and the reviewing agent approve the final result.
+> Status: active - parallel build translation and its core-aware build/run
+> default are approved for implementation. Repaired Lisp form fallback was
+> published in `2619282`; the no-op depfile shortcut is rejected.
 
 The search itself is closed. Its confirmed deletions, performance changes,
 and bug fixes are on `main`; its library removals were reverted and repaired
@@ -33,14 +32,18 @@ per-unit dependency, selective invalidation, dry-run, and 111 CLI probes.
 All 77 src/lib units produced identical serial/parallel C/H. Three interleaved
 30-unit compiler object builds measured 4.213 s before versus 2.758 s after
 at four jobs (34.5% faster), with single-job time unchanged within variation.
-The prototype is in `/tmp/x2c-spike-parallel-build`; batch progress reporting
-still needs finishing. No publication gate or approval is inferred.
+The spike prototype is in `/tmp/x2c-spike-parallel-build`. The approved
+implementation reports completion through the existing Build progress owner
+as each worker is collected. Native directory registration stays in input
+order, including interleaved package directories, after translation finishes.
 
 A separate 16-core host sweep measured 6.00/4.12/2.73/1.83/1.36 seconds at
-1/2/4/8/16 jobs. A core-aware standalone build/run default is under discussion;
-explicit `-j` must keep control, and default translation under external Make
-must not multiply workers. CPU affinity/quota and concurrent memory remain
-cross-platform considerations. The product default remains one job.
+1/2/4/8/16 jobs. The approved standalone build/run default queries online
+processors through `sysconf`, falling back to one if detection fails. Explicit
+`-j` overrides it; `translate` and automatic builds under Make keep one job.
+This portable query does not measure Linux affinity, container quota, or
+memory limits;
+the CLI reference states that scope without adding another scheduler.
 
 Validation: the probe asserting worker count under `--verbose`, `-j1` versus
 `-j4` output identity for src+lib, the CLI boundary probes, then
@@ -67,9 +70,10 @@ change is proposed here.
 
 ## 3. Lisp form fallback
 
-Approved for local implementation on 2026-09-13; final publication approval
-is pending. The original prototype fixed a 100,000-deep self-tail loop with
-`def`, but produced wrong results after rebinding `quote` inside a body.
+Published on 2026-09-13 in `2619282` after the full publication gate and
+176 reference-interpreter comparisons passed. The original prototype fixed a
+100,000-deep self-tail loop with `def`, but produced wrong results after
+rebinding `quote` inside a body.
 Its entry guard had already run. It also checked an invalid quasiquote splice
 after later side effects. Those findings supersede the original total-lowering
 design and its claim that every lambda compiles.
@@ -135,4 +139,4 @@ side effects, splice error order, live frame values, and discarded-program
 ownership. They extend the existing suite; no recurring validation or process
 requirement is added. Completed source review found no additional owner or
 check to remove. Final-tree publication validation remains required, and
-publication is explicitly withheld until joint approval.
+publication follows the approved implementation scope and existing gate.

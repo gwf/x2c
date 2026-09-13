@@ -52,15 +52,17 @@ static List _transform_ast(Compiler compiler, List ast);
 
 static void _compile_file(Frontend frontend, String filename, String output_dir);
 
-static void _preflight_translation(CliRequest c);
+static void _preflight_translation(CliRequest c, Map unit_dirs);
 
-static int _translate_workers(Frontend frontend, Array chunks, String output_dir, int total);
+static String _unit_output_dir(CliRequest c, Map unit_dirs, String input);
 
-static Array _translation_chunks(List inputs, int total, int jobs);
+static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, int total, Build build);
 
-static int _run_translation(CliRequest c);
+static Array _translation_chunks(List inputs, int total, int slices);
 
-static CliRequest _build_translation_request(CliRequest source, String input, String output_dir);
+static int _run_translation(CliRequest c, Map unit_dirs, Build build);
+
+static CliRequest _build_translation_request(CliRequest source, List inputs, String output_dir);
 
 static int _run_build_request(CliRequest c, Array commands);
 
@@ -375,7 +377,7 @@ Var List_car(List);
 
 List List_cdr(List);
 
-static void _preflight_translation(CliRequest c){
+static void _preflight_translation(CliRequest c, Map unit_dirs){
   struct stat info;
   if(! CliRequest_inspects(c)){
     if(stat(c -> out_dir, & info)){
@@ -425,7 +427,7 @@ static void _preflight_translation(CliRequest c){
           exit(2);
         }
         String stem = x2c_path_stem(input);
-        if(! CliRequest_inspects(c)){
+        if(! CliRequest_inspects(c) && ! Map_truth(unit_dirs)){
           List prior_stem = stems, prior_input = stem_inputs;
           while(List_truth(prior_stem)){
             if(String_equal(Var_string(List_car(prior_stem)), stem)){
@@ -450,11 +452,21 @@ static void _preflight_translation(CliRequest c){
 
 }
 
+Var Map_getindex(Map, Var);
+
+static String _unit_output_dir(CliRequest c, Map unit_dirs, String input){
+  if(! Map_truth(unit_dirs)) return c -> out_dir;
+  String directory = Var_string(Map_getindex(unit_dirs, String_var(input)));
+  return directory;
+}
+
 size_t Array_len(Array);
 
 void * Scope_calloc(size_t, size_t);
 
 Var Array_getindex(Array, int);
+
+void Build_begin_translation(Build, String);
 
 long worker_fork(void);
 
@@ -462,25 +474,29 @@ void worker_exit(int);
 
 void report_line(Symbol, String);
 
-int List_len(List);
-
 int worker_wait(long);
+
+void Build_end_translation(Build, String, int);
+
+int List_len(List);
 
 void report_progress(Symbol, int, int, String);
 
 void Scope_free(void *);
 
-static int _translate_workers(Frontend frontend, Array chunks, String output_dir, int total){
+static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, int total, Build build){
   CliRequest request = frontend -> request;
   int jobs = request -> jobs, slices = Array_len(chunks);
   if(jobs > slices) jobs = slices;
+  if(request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, total);
   long * running = Scope_calloc(jobs, sizeof(long));
-  int * carried = Scope_calloc(jobs, sizeof(int));
+  List * carried = Scope_calloc(jobs, sizeof(List));
   int running_count = 0, failed = 0, done = 0, next = 0;
   while(next < slices || running_count){
     while(next < slices && running_count < jobs){
       List slice = Var_list(Array_getindex(chunks, next));
       next ++;
+      if(build) Build_begin_translation(build, Var_string(List_car(slice)));
       long pid = worker_fork();
       if(! pid){
         {
@@ -490,7 +506,7 @@ static int _translate_workers(Frontend frontend, Array chunks, String output_dir
           Var _x2c_macro_cursor_output_6;
           while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_6)){
             input = Var_string(_x2c_macro_cursor_output_6);
-            _compile_file(frontend, input, output_dir);
+            _compile_file(frontend, input, _unit_output_dir(request, unit_dirs, input));
           }
 
         }
@@ -501,16 +517,19 @@ static int _translate_workers(Frontend frontend, Array chunks, String output_dir
         failed ++;
         continue;
       }
-      carried[running_count] = List_len(slice);
+      carried[running_count] = slice;
       running[running_count ++] = pid;
     }
     if(! running_count) continue;
-    if(worker_wait(running[0])) failed ++;
-    done += carried[0];
+    int status = worker_wait(running[0]);
+    if(status) failed ++;
+    List slice = carried[0];
+    if(build && ! status) Build_end_translation(build, Var_string(List_car(slice)), 0);
+    done += List_len(slice);
     running_count --;
     if(running_count){
       memmove(running, running + 1, running_count * sizeof(long));
-      memmove(carried, carried + 1, running_count * sizeof(int));
+      memmove(carried, carried + 1, running_count * sizeof(List));
     }
     if(! request -> nested) report_progress(45220543335690, done, total, NULL);
   }
@@ -523,8 +542,7 @@ Var Array_push(Array, Var);
 
 List Array_list_free(Array);
 
-static Array _translation_chunks(List inputs, int total, int jobs){
-  int slices = jobs;
+static Array _translation_chunks(List inputs, int total, int slices){
   if(slices > total) slices = total;
   if(slices < 1) slices = 1;
   int size =(total + slices - 1) / slices;
@@ -554,11 +572,11 @@ String int_str(int);
 
 String report_size(unsigned long long);
 
-static int _run_translation(CliRequest c){
+static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   unsigned long started_at = report_now_us();
   if(! String_truth(c -> out_dir)) c -> out_dir = _14;
   opts = c;
-  _preflight_translation(c);
+  _preflight_translation(c, unit_dirs);
   if(c -> verbose || c -> dry_run){
     fprintf(stderr, "x2c: translate");
     fprintf(stderr, " --out-dir %s", c -> out_dir);
@@ -578,13 +596,12 @@ static int _run_translation(CliRequest c){
   if(c -> dry_run) return 0;
   Frontend frontend = Frontend_new(c);
   frontend -> preprocessor_errors = _preprocessor_errors;
-  String output_dir = c -> out_dir;
   int total = List_len(c -> inputs), completed = 0;
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
   if(parallel){
-    Array chunks = _translation_chunks(c -> inputs, total, c -> jobs);
-    int failed = _translate_workers(frontend, chunks, output_dir, total);
+    Array chunks = _translation_chunks(c -> inputs, total, Map_truth(unit_dirs) ? total : c -> jobs);
+    int failed = _translate_workers(frontend, chunks, unit_dirs, total, build);
     Array_free(chunks);
     if(failed) return 1;
     completed = total;
@@ -598,7 +615,9 @@ static int _run_translation(CliRequest c){
       input = Var_string(_x2c_macro_cursor_output_8);
       {
         if(! c -> nested) report_progress(45220543335690, completed, total, input);
-        _compile_file(frontend, input, output_dir);
+        if(build) Build_begin_translation(build, input);
+        _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
+        if(build) Build_end_translation(build, input, 0);
         completed ++;
         if(! c -> nested) report_progress(45220543335690, completed, total, input);
       }
@@ -615,8 +634,8 @@ static int _run_translation(CliRequest c){
       input = Var_string(_x2c_macro_cursor_output_9);
       {
         String stem = x2c_path_stem(input);
-        gen_bytes += report_file_bytes(String_join(NULL, cons(String_var(output_dir), cons(String_var(_15), cons(String_var(stem), cons(String_var(_16), NULL))))));
-        gen_bytes += report_file_bytes(String_join(NULL, cons(String_var(output_dir), cons(String_var(_15), cons(String_var(stem), cons(String_var(_17), NULL))))));
+        gen_bytes += report_file_bytes(String_join(NULL, cons(String_var(c -> out_dir), cons(String_var(_15), cons(String_var(stem), cons(String_var(_16), NULL))))));
+        gen_bytes += report_file_bytes(String_join(NULL, cons(String_var(c -> out_dir), cons(String_var(_15), cons(String_var(stem), cons(String_var(_17), NULL))))));
       }
 
     }
@@ -626,7 +645,7 @@ static int _run_translation(CliRequest c){
   if(! c -> nested && ! CliRequest_inspects(c)){
     String duration = report_duration(report_now_us() - started_at);
     String noun = total == 1 ? _18 : _19;
-    report_line(42217975014, String_join(NULL, cons(String_var(_20), cons(String_var(int_str(total)), cons(String_var(_21), cons(String_var(noun), cons(String_var(_22), cons(String_var(output_dir), cons(String_var(_23), cons(String_var(duration), NULL))))))))));
+    report_line(42217975014, String_join(NULL, cons(String_var(_20), cons(String_var(int_str(total)), cons(String_var(_21), cons(String_var(noun), cons(String_var(_22), cons(String_var(c -> out_dir), cons(String_var(_23), cons(String_var(duration), NULL))))))))));
     String size = report_size(gen_bytes);
     String c_noun = total == 1 ? _24 : _25;
     String h_noun = total == 1 ? _26 : _27;
@@ -637,11 +656,11 @@ static int _run_translation(CliRequest c){
 
 void * Scope_malloc(size_t);
 
-static CliRequest _build_translation_request(CliRequest source, String input, String output_dir){
+static CliRequest _build_translation_request(CliRequest source, List inputs, String output_dir){
   CliRequest request = Scope_malloc(sizeof(struct CliRequest));
   * request = * source;
   request -> command = 45220543335690;
-  request -> inputs = cons(String_var(input), NULL);
+  request -> inputs = inputs;
   request -> run_args = NULL;
   request -> out_dir = output_dir;
   request -> dep_file = NULL;
@@ -660,19 +679,15 @@ Build CliRequest_prepare(CliRequest);
 
 Var Context_export(Context, Var);
 
-void Build_begin_translation(Build, String);
-
 String Build_generated_dir(Build, String);
 
 int Build_translation_current(Build, String, String);
 
-void Build_add_generated(Build, String, String);
-
-void Build_end_translation(Build, String, int);
-
 void Build_cleanup(Build, int);
 
 void Build_record_translation(Build, String, String);
+
+void Build_add_generated(Build, String, String);
 
 int Build_finish(Build);
 
@@ -717,6 +732,8 @@ static int _run_build_request(CliRequest c, Array commands){
     Build state = CliRequest_prepare(c);
     c -> cc = Var_string(Context_export(target, String_var(c -> cc)));
     c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
+    Array stale = Array_new();
+    Map stale_dirs = Map_new();
     {
       String input;
       List _x2c_macro_object_10 = c -> inputs;
@@ -726,30 +743,81 @@ static int _run_build_request(CliRequest c, Array commands){
         input = Var_string(_x2c_macro_cursor_output_11);
         {
           if(! String_endswith(input, _12)) continue;
-          Build_begin_translation(state, input);
           String directory = Build_generated_dir(state, input);
           if(Build_translation_current(state, input, directory)){
-            Build_add_generated(state, input, directory);
+            Build_begin_translation(state, input);
             Build_end_translation(state, input, 1);
             continue;
           }
-          CliRequest translation = _build_translation_request(c, input, directory);
-          if(! c -> dry_run && _run_translation(translation)){
+          Map_setindex(stale_dirs, String_var(input), String_var(directory));
+          Array_push(stale, String_var(input));
+        }
+
+      }
+
+    }
+    List inputs = Array_list_free(stale);
+    if(! c -> dry_run && c -> jobs > 1 && List_truth(inputs)){
+      CliRequest translation = _build_translation_request(c, inputs, state -> gen_root);
+      if(_run_translation(translation, stale_dirs, state)){
+        Build_cleanup(state, 0);
+        {
+          int _x2c_return_value_0 = 1;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_1);
+            return _x2c_return_value_0;
+          }
+
+        }
+
+      }
+
+    }
+    else{
+      String input;
+      List _x2c_macro_object_11 = inputs;
+      List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+      Var _x2c_macro_cursor_output_12;
+      while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_12)){
+        input = Var_string(_x2c_macro_cursor_output_12);
+        {
+          CliRequest translation = _build_translation_request(c, cons(String_var(input), NULL), _unit_output_dir(c, stale_dirs, input));
+          if(! c -> dry_run && _run_translation(translation, NULL, state)){
             Build_cleanup(state, 0);
             {
-              int _x2c_return_value_0 = 1;
+              int _x2c_return_value_1 = 1;
               {
                 x2c_cleanup_leave(& _x2c_defer_record_1);
-                return _x2c_return_value_0;
+                return _x2c_return_value_1;
               }
 
             }
 
           }
-          if(c -> dry_run) fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
-          if(! c -> dry_run) Build_record_translation(state, input, directory);
+
+        }
+
+      }
+
+    }
+    {
+      String input;
+      List _x2c_macro_object_12 = c -> inputs;
+      List _x2c_macro_cursor_12 = _x2c_macro_object_12;
+      Var _x2c_macro_cursor_output_13;
+      while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_13)){
+        input = Var_string(_x2c_macro_cursor_output_13);
+        {
+          if(! String_endswith(input, _12)) continue;
+          int cached = ! Map_contains(stale_dirs, String_var(input));
+          String directory = Build_generated_dir(state, input);
+          if(c -> dry_run && ! cached){
+            Build_begin_translation(state, input);
+            fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
+            Build_end_translation(state, input, 0);
+          }
+          if(! c -> dry_run && ! cached) Build_record_translation(state, input, directory);
           Build_add_generated(state, input, directory);
-          Build_end_translation(state, input, 0);
         }
 
       }
@@ -759,10 +827,10 @@ static int _run_build_request(CliRequest c, Array commands){
     if(result){
       Build_cleanup(state, 0);
       {
-        int _x2c_return_value_1 = result;
+        int _x2c_return_value_2 = result;
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
+          return _x2c_return_value_2;
         }
 
       }
@@ -770,11 +838,11 @@ static int _run_build_request(CliRequest c, Array commands){
     }
     if((void *) commands != NULL){
       String entry;
-      Array _x2c_macro_object_11 = state -> compile_commands;
-      int _x2c_macro_cursor_11 = 0;
-      Var _x2c_macro_cursor_output_12;
-      while(Array_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_12)){
-        entry = Var_string(_x2c_macro_cursor_output_12);
+      Array _x2c_macro_object_13 = state -> compile_commands;
+      int _x2c_macro_cursor_13 = 0;
+      Var _x2c_macro_cursor_output_14;
+      while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_14)){
+        entry = Var_string(_x2c_macro_cursor_output_14);
         Array_push(commands, Context_export(target, String_var(entry)));
       }
 
@@ -782,10 +850,10 @@ static int _run_build_request(CliRequest c, Array commands){
     if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands, commands)){
       Build_cleanup(state, 0);
       {
-        int _x2c_return_value_2 = 1;
+        int _x2c_return_value_3 = 1;
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_2;
+          return _x2c_return_value_3;
         }
 
       }
@@ -795,10 +863,10 @@ static int _run_build_request(CliRequest c, Array commands){
     if(c -> command == 38236) result = Build_run_program(state);
     Build_cleanup(state, 1);
     {
-      int _x2c_return_value_3 = result;
+      int _x2c_return_value_4 = result;
       {
         x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_3;
+        return _x2c_return_value_4;
       }
 
     }
@@ -905,7 +973,7 @@ int main(int argc, char * * argv){
   _configure_logging(request -> debugging);
   Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");
-  int result = request -> command == 45220543335690 ? _run_translation(request) : _run_build(request);
+  int result = request -> command == 45220543335690 ? _run_translation(request, NULL, NULL) : _run_build(request);
   Context_close(command);
 #ifdef __COSMOPOLITAN__
   fflush(NULL);

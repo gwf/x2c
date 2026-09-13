@@ -127,6 +127,19 @@ x2c source, compiles generated and native C, then links an executable:
 /tmp/foreach
 ```
 
+`build` and `run` default to the host's online processor count for translation
+and native compilation. Detection failure falls back to one job. Under Make
+(`MAKELEVEL` greater than zero), the automatic default is one job so the
+outer build owns concurrency. An explicit `-j N` or `--jobs N` overrides either
+default; `translate` retains its one-job default. The online count does not
+account for Linux CPU affinity, container quotas, or memory limits; use `-j`
+to choose a smaller limit in those environments.
+
+Parallel builds translate each stale unit in its own worker and generated
+directory. Units with the same basename remain separate, and each unit records
+its own prerequisites for subsequent build reuse. Parallel translation preserves
+native header search and link order.
+
 The driver selects the runtime that matches the compiler and supplies that
 runtime's platform libraries. It also derives one object and dependency path
 per C source. `--kind static-library` uses the selected archiver:

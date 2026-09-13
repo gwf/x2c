@@ -10,6 +10,7 @@ static String _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "buffer.h"
 #include "utils.h"
 enum{
@@ -297,6 +298,8 @@ static void _driver_kind(CliRequest request, String value);
 static void _driver_jobs(CliRequest request, String value);
 
 static void _apply_option(CliRequest c, CliOption * option, String spelling, String value, int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args);
+
+static int _default_build_jobs(void);
 
 static void _one_dash_removed(String arg);
 
@@ -1006,6 +1009,17 @@ CliRequest cli_package_options(String path, String package){
 }
 }
 
+static int _default_build_jobs(void){
+  const char * level = getenv("MAKELEVEL");
+  if(level && * level){
+    char * end = NULL;
+    long depth = strtol(level, & end, 10);
+    if(end && ! * end && depth > 0) return 1;
+  }
+  long count = sysconf(_SC_NPROCESSORS_ONLN);
+  return count > 0 && count <= INT_MAX ?(int) count : 1;
+}
+
 static void _one_dash_removed(String arg){
   const char * attached;
   if(strlen(arg) > 2 && String_getindex(arg, 0) == '-' && String_getindex(arg, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_27), cons(String_var(arg), NULL))), CLI_TRANSLATE, & attached)){
@@ -1027,7 +1041,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   int mask = command -> mask;
   CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
   request -> command = name;
-  request -> jobs = 1;
+  request -> jobs = mask &(CLI_BUILD | CLI_RUN) ? _default_build_jobs() : 1;
   if(mask &(CLI_BUILD | CLI_RUN)) request -> kind = 404971770155786;
   Array inputs = Array_new(), run_args = Array_new(), x_paths = Array_new();
   Array cpp_args = Array_new(), cc_args = Array_new(), ld_args = Array_new();

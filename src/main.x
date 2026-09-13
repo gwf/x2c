@@ -178,7 +178,7 @@ static void _compile_file(
     exit(1);
 }
 
-static void _preflight_translation(CliRequest c) {
+static void _preflight_translation(CliRequest c, Map unit_dirs) {
   struct stat info;
   if (!c.inspects()) {
     if (stat(c.out_dir, &info)) {
@@ -232,7 +232,7 @@ static void _preflight_translation(CliRequest c) {
       exit(2);
     }
     String stem = x2c_path_stem(input);
-    if (!c.inspects()) {
+    if (!c.inspects() && !unit_dirs) {
       List prior_stem = stems, prior_input = stem_inputs;
       while (prior_stem) {
         if (prior_stem.car().string() == stem) {
@@ -253,6 +253,15 @@ static void _preflight_translation(CliRequest c) {
   }
 }
 
+/* Where one unit's generated C, header, and depfile are written. A build
+   gives each unit its own directory so units sharing an output stem cannot
+   collide; `x2c translate` writes them all to the shared `--out-dir`. */
+static String _unit_output_dir(CliRequest c, Map unit_dirs, String input) {
+  if (!unit_dirs) return c.out_dir;
+  String directory = unit_dirs[input];
+  return directory;
+}
+
 /* Translate `inputs` in forked workers, at most `jobs` at a time.
    A worker inherits the loaded snapshot and header artifact rather than
    reading them again, and keeps its slice of the input list to the end, so
@@ -260,23 +269,27 @@ static void _preflight_translation(CliRequest c) {
    the same file. The parent reports progress as workers finish. Returns the
    number that failed. */
 static int _translate_workers(
-  Frontend frontend, Array chunks, String output_dir, int total) {
+  Frontend frontend, Array chunks, Map unit_dirs, int total, Build build) {
   CliRequest request = frontend.request;
   int jobs = request.jobs, slices = chunks.len();
   if (jobs > slices) jobs = slices;
-  // One entry per live worker: its pid and how many units it carries, so a
-  // finished worker counts its own slice rather than the oldest one.
+  if (request.verbose)
+    fprintf(
+      stderr, "x2c: translate with %d workers over %d files\n", jobs, total);
+  // Each live worker retains its input slice for completion reporting.
   long *running = Scope.calloc(jobs, sizeof(long));
-  int *carried = Scope.calloc(jobs, sizeof(int));
+  List *carried = Scope.calloc(jobs, sizeof(List));
   int running_count = 0, failed = 0, done = 0, next = 0;
   while (next < slices || running_count) {
     while (next < slices && running_count < jobs) {
       List slice = chunks[next];
       next++;
+      if (build) build.begin_translation(slice.car());
       long pid = worker_fork();
       if (!pid) {
         foreach (String input, slice)
-          _compile_file(frontend, input, output_dir);
+          _compile_file(
+            frontend, input, _unit_output_dir(request, unit_dirs, input));
         worker_exit(0);
       }
       if (pid < 0) {
@@ -284,16 +297,19 @@ static int _translate_workers(
         failed++;
         continue;
       }
-      carried[running_count] = slice.len();
+      carried[running_count] = slice;
       running[running_count++] = pid;
     }
     if (!running_count) continue;
-    if (worker_wait(running[0])) failed++;
-    done += carried[0];
+    int status = worker_wait(running[0]);
+    if (status) failed++;
+    List slice = carried[0];
+    if (build && !status) build.end_translation(slice.car(), 0);
+    done += slice.len();
     running_count--;
     if (running_count) {
       memmove(running, running + 1, running_count * sizeof(long));
-      memmove(carried, carried + 1, running_count * sizeof(int));
+      memmove(carried, carried + 1, running_count * sizeof(List));
     }
     if (!request.nested) report_progress(<translate>, done, total, NULL);
   }
@@ -304,9 +320,15 @@ static int _translate_workers(
 
 /* One slice per worker. Fewer, larger slices measured better than more,
    smaller ones. The fork and the copy-on-write faults behind it cost more
-   than the imbalance a long unit at the tail of a slice can cause. */
-static Array _translation_chunks(List inputs, int total, int jobs) {
-  int slices = jobs;
+   than the imbalance a long unit at the tail of a slice can cause.
+
+   A build passes `slices == total`. Each of its units then translates in a
+   worker that has translated nothing else, so a unit records the headers its
+   own parse reads rather than inheriting what an earlier unit in the same
+   worker already put in the process cache. Build reuse is decided from those
+   recorded prerequisites, so they must not depend on how units were
+   grouped. */
+static Array _translation_chunks(List inputs, int total, int slices) {
   if (slices > total) slices = total;
   if (slices < 1) slices = 1;
   int size = (total + slices - 1) / slices, Array chunks = %[];
@@ -320,11 +342,13 @@ static Array _translation_chunks(List inputs, int total, int jobs) {
   return chunks;
 }
 
-static int _run_translation(CliRequest c) {
+/* `unit_dirs` maps each input to its own output directory on the build path
+   and is absent for `x2c translate`. */
+static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   unsigned long started_at = report_now_us();
   if (!c.out_dir) c.out_dir = %".";
   opts = c;
-  _preflight_translation(c);
+  _preflight_translation(c, unit_dirs);
   if (c.verbose || c.dry_run) {
     fprintf(stderr, "x2c: translate");
     fprintf(stderr, " --out-dir %s", c.out_dir);
@@ -334,7 +358,6 @@ static int _run_translation(CliRequest c) {
   if (c.dry_run) return 0;
   Frontend frontend = Frontend.new(c);
   frontend.preprocessor_errors = _preprocessor_errors;
-  String output_dir = c.out_dir;
   int total = c.inputs.len(), completed = 0;
   unsigned long long gen_bytes = 0;
   /* A dump writes one ordered stream to stdout, and inspection modes report
@@ -342,23 +365,26 @@ static int _run_translation(CliRequest c) {
   int parallel = c.jobs > 1 && total > 1 &&
                  !c.dump && !c.inspects();
   if (parallel) {
-    Array chunks = _translation_chunks(c.inputs, total, c.jobs);
-    int failed = _translate_workers(frontend, chunks, output_dir, total);
+    Array chunks =
+      _translation_chunks(c.inputs, total, unit_dirs ? total : c.jobs);
+    int failed = _translate_workers(frontend, chunks, unit_dirs, total, build);
     chunks.free();
     if (failed) return 1;
     completed = total;
   }
   foreach (String input, parallel ? (List) NULL : c.inputs) {
     if (!c.nested) report_progress(<translate>, completed, total, input);
-    _compile_file(frontend, input, output_dir);
+    if (build) build.begin_translation(input);
+    _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
+    if (build) build.end_translation(input, 0);
     completed++;
     if (!c.nested) report_progress(<translate>, completed, total, input);
   }
   if (!c.nested)
     foreach (String input, c.inputs) {
       String stem = x2c_path_stem(input);
-      gen_bytes += report_file_bytes(%"$output_dir/$stem.c");
-      gen_bytes += report_file_bytes(%"$output_dir/$stem.h");
+      gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.c");
+      gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.h");
     }
   if (opts.dump == <hdr-syms> &&
       !Frontend.write_header_symbols(Stdout))
@@ -368,7 +394,7 @@ static int _run_translation(CliRequest c) {
     String noun = total == 1 ? %"file" : %"files";
     report_line(
       <success>,
-      %"Translated $total x2c $noun to $output_dir in $duration");
+      %"Translated $total x2c $noun to ${c.out_dir} in $duration");
     String size = report_size(gen_bytes);
     String c_noun = total == 1 ? %"C file" : %"C files";
     String h_noun = total == 1 ? %"header" : %"headers";
@@ -380,11 +406,11 @@ static int _run_translation(CliRequest c) {
 }
 
 static CliRequest _build_translation_request(
-  CliRequest source, String input, String output_dir) {
+  CliRequest source, List inputs, String output_dir) {
   CliRequest request = Scope.malloc(sizeof(struct CliRequest));
   *request = *source;
   request.command = <translate>;
-  request.inputs = cons(input, NULL);
+  request.inputs = inputs;
   request.run_args = NULL;
   request.out_dir = output_dir;
   request.dep_file = NULL;
@@ -410,26 +436,58 @@ static int _run_build_request(CliRequest c, Array commands) {
   Build state = c.prepare();
   c.cc = target.export(c.cc);
   c.ar = target.export(c.ar);
+  /* Units whose artifacts are current are skipped; the rest translate
+     together, so one nested request can fill every job. Each unit keeps its
+     own generated directory, so no two workers write the same file. */
+  Array stale = %[];
+  Map stale_dirs = %{};
   foreach (String input, c.inputs) {
     if (!input.endswith(%".x")) continue;
-    state.begin_translation(input);
     String directory = state.generated_dir(input);
     if (state.translation_current(input, directory)) {
-      state.add_generated(input, directory);
+      state.begin_translation(input);
       state.end_translation(input, 1);
       continue;
     }
+    stale_dirs[input] = directory;
+    stale.push(input);
+  }
+  List inputs = stale.list_free();
+  /* One request carries every stale unit only when it can occupy more than
+     one worker. A single job keeps one request per unit, which is both the
+     faster shape in this process and the one earlier builds recorded their
+     retained translation fingerprints against. */
+  if (!c.dry_run && c.jobs > 1 && inputs) {
     CliRequest translation =
-      _build_translation_request(c, input, directory);
-    if (!c.dry_run && _run_translation(translation)) {
+      _build_translation_request(c, inputs, state.gen_root);
+    if (_run_translation(translation, stale_dirs, state)) {
       state.cleanup(0);
       return 1;
     }
-    if (c.dry_run)
+  }
+  else
+    foreach (String input, inputs) {
+      CliRequest translation = _build_translation_request(
+        c, cons(input, NULL), _unit_output_dir(c, stale_dirs, input));
+      if (!c.dry_run && _run_translation(translation, NULL, state)) {
+        state.cleanup(0);
+        return 1;
+      }
+    }
+  /* Restore input order, including package directories inserted between
+     generated directories, before native compilation and linking. */
+  foreach (String input, c.inputs) {
+    if (!input.endswith(%".x")) continue;
+    int cached = !stale_dirs.contains(input);
+    String directory = state.generated_dir(input);
+    if (c.dry_run && !cached) {
+      state.begin_translation(input);
       fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
-    if (!c.dry_run) state.record_translation(input, directory);
+      state.end_translation(input, 0);
+    }
+    if (!c.dry_run && !cached)
+      state.record_translation(input, directory);
     state.add_generated(input, directory);
-    state.end_translation(input, 0);
   }
   int result = state.finish();
   if (result) {
@@ -546,7 +604,7 @@ int main(int argc, char **argv) {
   /* Reclaim command-owned Scope allocations and canonical values. */
   Context command = Context.open_isolated_named("compiler command");
   int result = request.command == <translate>
-    ? _run_translation(request)
+    ? _run_translation(request, NULL, NULL)
     : _run_build(request);
   command.close();
 #ifdef __COSMOPOLITAN__

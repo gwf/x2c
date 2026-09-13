@@ -36,6 +36,7 @@ typedef struct CliRequest {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "buffer.x"
 #include "utils.x"
@@ -831,6 +832,18 @@ CliRequest cli_package_options(String path, String package) {
   return request;
 }
 
+// An outer Make owns concurrency unless the caller explicitly supplies -j.
+static int _default_build_jobs(void) {
+  const char *level = getenv("MAKELEVEL");
+  if (level && *level) {
+    char *end = NULL;
+    long depth = strtol(level, &end, 10);
+    if (end && !*end && depth > 0) return 1;
+  }
+  long count = sysconf(_SC_NPROCESSORS_ONLN);
+  return count > 0 && count <= INT_MAX ? (int) count : 1;
+}
+
 /* translate reports the diagnostic for x2c's single-dash long-option
    spellings. */
 static void _one_dash_removed(String arg) {
@@ -849,7 +862,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   Symbol name = command.name, int mask = command.mask;
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = name;
-  request.jobs = 1;
+  request.jobs = mask & (CLI_BUILD | CLI_RUN) ? _default_build_jobs() : 1;
   if (mask & (CLI_BUILD | CLI_RUN)) request.kind = <executable>;
   Array inputs = %[], run_args = %[], x_paths = %[];
   Array cpp_args = %[], cc_args = %[], ld_args = %[], int operands = 0;
