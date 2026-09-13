@@ -251,6 +251,7 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   Type.begin_unit();
   unit->compiler = Compiler.new();
   Compiler compiler = unit->compiler;
+  compiler.source_map = frontend.request.source_map;
   compiler.sources = frontend.request.sources;
   compiler.source_facts = frontend.request.source_facts;
   compiler.source_primary = 1;

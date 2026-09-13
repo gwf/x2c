@@ -255,7 +255,7 @@ int symbol_snapshot_write(Map, Map, File);
 void Compiler_dump_conformance(Compiler, Map);
 List Compiler_generate_protocol_adapters(Compiler, List);
 List Compiler_emit(Compiler, List);
-char * Compiler_code_pretty_string(Compiler, List);
+char * Compiler_code_pretty_string(Compiler, List, String);
 void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
 static void _compile_file(Frontend frontend, String filename, String output_dir){
@@ -327,7 +327,7 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     ast = _transform_ast(compiler, ast);
     if(opts -> dump == 10268258302218){
       ast = Compiler_emit(compiler, ast);
-      puts(Compiler_code_pretty_string(compiler, ast));
+      puts(Compiler_code_pretty_string(compiler, ast, NULL));
       exit(0);
     }
     generate_code(compiler, ast, output_dir);
@@ -624,7 +624,9 @@ static CliRequest _build_translation_request(CliRequest source, String input, St
   request -> run_args = NULL;
   request -> out_dir = output_dir;
   request -> dep_file = NULL;
+  request -> dep_target = NULL;
   request -> no_deps = 0;
+  request -> no_phony_deps = 0;
   request -> nested = 1;
   return request;
 }

@@ -37,7 +37,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:547`
+Source: `src/build.x:548`
 
 ### `Build`
 
@@ -52,7 +52,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:430`
+Source: `src/build.x:431`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -61,7 +61,7 @@ Source: `src/build.x:430`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:441`
+Source: `src/build.x:442`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -72,7 +72,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds and retained directories are left untouched; a removal
 failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:845`
+Source: `src/build.x:875`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -82,7 +82,7 @@ Source: `src/build.x:845`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:449`
+Source: `src/build.x:450`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -93,9 +93,11 @@ Compiles registered C sources and then archives or links the final output.
 Returns zero for success and one when compilation or the final native
 action fails. Compile-only requests stop after objects. Static archives
 reuse their recorded inputs; executables always link because library
-selection and implicit linker inputs are not in the fingerprint.
+selection and implicit linker inputs are not in the fingerprint. Mapped
+macOS debug executables also produce a companion dSYM before cleanup;
+failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:681`
+Source: `src/build.x:704`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -118,7 +120,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:341`
+Source: `src/build.x:342`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -127,7 +129,7 @@ Source: `src/build.x:341`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:747`
+Source: `src/build.x:775`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -136,7 +138,7 @@ Source: `src/build.x:747`
 
 Runs the built output with the request's arguments and returns its status.
 
-Source: `src/build.x:804`
+Source: `src/build.x:834`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -148,7 +150,7 @@ Returns zero without retained state, when either output is absent, or
 when any compiler, tool, option, depfile, or dependency fingerprint cannot
 be read or differs.
 
-Source: `src/build.x:322`
+Source: `src/build.x:323`
 
 ### `CliRequest`
 

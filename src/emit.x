@@ -1348,7 +1348,8 @@ static List Emitter._decl_stmt(Emitter e, List ast, List context) {
 }
 
 /* Native macro arguments expand once before C sees the selected conversion.
-   The original argument keeps its original storage scope. */
+   Generated bodies have no source-map directives; the original argument keeps
+   its ordinary mapping at the invocation and its original storage scope. */
 static List Emitter._initializer_macro(
   Emitter e, List input, List body, List context) {
   Buffer parameters = Buffer.new(0);
@@ -1359,9 +1360,12 @@ static List Emitter._initializer_macro(
   String formal = parameters.str_free();
   String hash = x2c_filename_hash(e.compiler.filename);
   String name = e.compiler.fresh_name(%"initializer_choice_$hash");
-  List tokens = e._emit(body, context).flatten_all();
-  String formatted = e.compiler.code_pretty_string(tokens);
-  String replacement = formatted.rstrip("\n").replace("\n", "\\\n");
+  String replacement;
+  $let(e.compiler.source_map, 0) {
+    List tokens = e._emit(body, context).flatten_all();
+    String formatted = e.compiler.code_pretty_string(tokens, NULL);
+    replacement = formatted.rstrip("\n").replace("\n", "\\\n");
+  }
   String expanded = %"${name}_expanded";
   String definition = %"#define $expanded($formal) $replacement";
   e.native_macros.push(%($expanded $definition));
@@ -1600,6 +1604,8 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       e.origin = origin.integer();
       List result = e._emit(inner, context);
       e.origin = old_origin;
+      if (e.compiler.source_map)
+        return %(src-at $origin @result src-at $old_origin);
       return result;
     }
     case %(varray *elements):
@@ -1838,6 +1844,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
 }
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
+    Source mapping adds `src-at`/ID pairs consumed by the formatter.
     `compiler` must own the AST's binding facts and origins, and continue the
     translation session's shared generated-name state. This operation does not
     bind, transform, or choose header and source placement; generation supplies

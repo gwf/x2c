@@ -983,6 +983,7 @@ static Compiler _new(Compiler owner){
       (compiler) -> package_aliases = owner -> package_aliases;
       (compiler) -> package_members = owner -> package_members;
       (compiler) -> names = owner -> names;
+      (compiler) -> source_map = owner -> source_map;
       (compiler) -> recovery_depth = owner -> recovery_depth;
       (compiler) -> sources = owner -> sources;
       (compiler) -> declaration_produced = owner -> declaration_produced;
@@ -1293,14 +1294,15 @@ static void _shallow_block(Compiler c){
   Compiler_expect(c, 251);
 }
 
-String Compiler_display_path(Compiler, String);
-
 int String_truth(String);
+
+String Compiler_display_path(Compiler, String);
 
 int Compiler_record_origin(Compiler c, Token token){
   if(! _init_guard_) _file_init_();
   if(! token) return 0;
-  String file = Compiler_display_path(c, String_truth(c -> filename) ? c -> filename : _14);
+  String file = String_truth(c -> filename) ? c -> filename : _14;
+  if(! c -> source_map) file = Compiler_display_path(c, file);
   Array_push(c -> origins, List_var(cons(_15, cons(String_var(file), cons(int_var(token -> line), cons(int_var(token -> col), cons(int_var(token -> len), cons(int_var(token -> pos), NULL))))))));
   return Array_len(c -> origins);
 }

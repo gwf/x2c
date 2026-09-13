@@ -100,7 +100,7 @@ static void _query(
     needed[row[0]] = 1;
     List declaration = type.declaration_ast(binding);
     String text = String.new(
-      compiler.code_pretty_string(compiler.emit(%($declaration))));
+      compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
     fputs(",\"hover\":{", file);
     _location(file, row[0], row[1].int(), row[2].int());
     fputs(",\"text\":", file);

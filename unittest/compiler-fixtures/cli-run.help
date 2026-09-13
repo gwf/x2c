@@ -12,6 +12,7 @@ Target options:
   -j, --jobs <count>          Maximum parallel translation and compilation jobs
 
 Output options:
+      --source-map            Map generated C locations to original x2c sources
       --output <file>         Name the executable, library, or single object
       --build-dir <dir>       Store generated C, objects, deps, and state here
       --compile-commands <file>

@@ -702,6 +702,8 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       }
       case %(lambda ? ?): return 1;
       case %(expr (!or () (<macro-expr>)) ?): return 1;
+      case %(at m-origin ?):
+        if (compiler.source_map && !compiler.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot) *): return 1;
       case %(ident ?(List binding)): {
         String spelling = binding_identity_spelling(binding);
@@ -1507,7 +1509,10 @@ static List _resolve_initializer(Compiler c, List node, Token origin) {
 static List _resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
   match (content) {
-    case %(at m-origin ?): return input;
+    case %(at m-origin ?inner): {
+      if (!c.source_map || c.macro_holes) return input;
+      return %(expr $input_type (at ${c.origin} $inner));
+    }
     case %(!set ?inner (expr ? ?)):
       return c.resolve_expression(inner, origin);
     case %(managed-init ?initializer): {
@@ -2010,6 +2015,10 @@ List Compiler.parse_variable(Compiler c) {
   if (c.source_facts) match (result)
     case %(expr ?type (ident ?binding)):
       c.record_source_reference(binding, type, origin, after);
+  if (c.source_map &&
+      (origin.text == "__FILE__" || origin.text == "__LINE__"))
+    match (result) case %(expr ?type ?content):
+      return %(expr $type ${c.anchor_origin(content, origin)});
   return result;
 }
 

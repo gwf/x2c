@@ -19,18 +19,20 @@ Code formatting helpers for the x2c compiler.
 <a id="Compiler.code_pretty_string"></a>
 #### Compiler.code_pretty_string
 
-`char *Compiler.code_pretty_string(Compiler compiler, List code)`
+`char *Compiler.code_pretty_string( Compiler compiler, List code, String output_file)`
 
 Returns a canonical formatted C `String` for an emitted token `List`.
 Token order and `code` are unchanged. Braces indent by two spaces,
 semicolons break lines only outside parentheses, and preprocessor tokens
 occupy their own lines with escaped quotes normalized. A `c-direct`
 marker precedes an already-emitted directive whose escapes are preserved.
-An empty `List` returns the empty `String`.
+An empty `List` returns the empty `String`. Emitted `src-at` markers carry
+existing compiler origin IDs; zero restores `output_file` at its physical
+line.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` while materializing the result.
 
-Source: `src/format.x:91`
+Source: `src/format.x:98`
 
 ## Design notes
 
