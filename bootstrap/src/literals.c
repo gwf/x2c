@@ -734,7 +734,9 @@ return node;
 
 Var Compiler_match_pattern_value(Compiler, Var);
 int Map_try_get(Map, Var, Var *);
+void Array_free(Array);
 int Var_is_match_op(Var);
+size_t Array_len(Array);
 Var Array_setindex(Array, int, Var);
 static List _typed_pattern(Compiler c, List node, Map tags){
   Var value = Compiler_match_pattern_value(c, List_var(node)), tag;  if(Var_is_atom_binder(value) && Map_try_get(tags, value, & tag)) return _typed_capture_pattern(c, value, Var_list(tag));  List content = _pattern_content(c, node);

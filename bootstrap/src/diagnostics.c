@@ -146,6 +146,8 @@ Diagnostics Diagnostics_new(DiagnosticEmitter emit, void * owner, int limit){
   return diag;
 }
 
+void Array_clear(Array);
+
 void Diagnostics_reset(Diagnostics diag){
   if(! _init_guard_) _file_init_();
   Array_clear(diag -> entries);
@@ -158,6 +160,8 @@ void Diagnostics_set_emitter(Diagnostics diag, DiagnosticEmitter emit, void * ow
   diag -> emit = emit;
   diag -> owner = owner;
 }
+
+size_t Array_len(Array);
 
 List Array_list(Array);
 

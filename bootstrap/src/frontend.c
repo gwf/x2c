@@ -509,6 +509,8 @@ int Array_try_next(Array, int *, Var *);
 
 Var Array_push(Array, Var);
 
+void Array_free(Array);
+
 int ParsedUnit_parse(ParsedUnit * unit){
   Compiler compiler = unit -> compiler;
   if(Compiler_error_count(compiler)) return 0;

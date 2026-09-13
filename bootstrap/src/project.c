@@ -590,6 +590,8 @@ int String_startswith(String, String);
 
 int String_len(String);
 
+size_t Array_len(Array);
+
 Array Array_sort(Array);
 
 static Array _expand_pattern(Project project, String pattern, const char * owner){
@@ -636,6 +638,8 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
 }
 
 int Array_try_next(Array, int *, Var *);
+
+void Array_free(Array);
 
 int String_endswith(String, String);
 
