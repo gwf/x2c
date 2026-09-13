@@ -1,8 +1,9 @@
 # Architecture search follow-ups
 
-> Status: active - parallel build translation and its core-aware build/run
-> default are approved for implementation. Repaired Lisp form fallback was
-> published in `2619282`; the no-op depfile shortcut is rejected.
+> Status: done - closed on 2026-09-13.
+> Lisp form fallback was published in `2619282`; parallel build translation
+> and the core-aware build/run default were published in `f8972a9`.
+> The no-op depfile shortcut was rejected after reproducing stale-object reuse.
 
 The search itself is closed. Its confirmed deletions, performance changes,
 and bug fixes are on `main`; its library removals were reverted and repaired
@@ -12,48 +13,48 @@ plan. The following records the current decisions on its three follow-ups.
 
 ## 1. Parallel translation in `x2c build -j N`
 
-`x2c build` never translates units in parallel. `_build_translation_request`
-in `src/main.x` builds one-input requests, so the `total > 1` condition that
-forks translation workers is never true, while the `--jobs` help text in
-`src/cli.x` promises parallel translation. Measured on lib: `translate -j1`
+Before this change, `x2c build` translated units serially.
+`_build_translation_request` in `src/main.x` built one-input requests, so the
+`total > 1` worker condition was never true despite the `--jobs` help text in
+`src/cli.x` promising parallel translation. Measured on lib: `translate -j1`
 2.53 s against `-j16` 0.58 s, so a cold manifest build spends about 6.8 s in
 serial translation that is about 1.6 s parallel.
 
-Design: hand the translation phase one multi-input request so the existing
-worker path engages; give each unit its own output directory so units that
-share a stem cannot collide; use one slice per unit on the build path so a
-unit's recorded prerequisites reflect its own parse rather than what an
-earlier unit in the same worker left in the process cache, because build
-reuse is decided from those prerequisites. Generated C must be byte-identical
-across `-j1` and `-j N`, and failures must propagate as before.
+The implementation gives the translation phase one multi-input request to
+engage the existing worker path, with a separate output directory and one
+slice per unit. Same-stem units cannot collide, and recorded prerequisites
+reflect each unit's own parse rather than an earlier unit's process cache.
+Build reuse still depends on those prerequisites. Serial/parallel generated-C
+identity and unchanged failure propagation remain the compatibility boundary.
 
 The 2026-09-13 spike at `618c26e` passed worker, failure, same-stem,
 per-unit dependency, selective invalidation, dry-run, and 111 CLI probes.
 All 77 src/lib units produced identical serial/parallel C/H. Three interleaved
 30-unit compiler object builds measured 4.213 s before versus 2.758 s after
 at four jobs (34.5% faster), with single-job time unchanged within variation.
-The spike prototype is in `/tmp/x2c-spike-parallel-build`. The approved
+The spike prototype was in `/tmp/x2c-spike-parallel-build`. The delivered
 implementation reports completion through the existing Build progress owner
 as each worker is collected. Native directory registration stays in input
 order, including interleaved package directories, after translation finishes.
 
 A separate 16-core host sweep measured 6.00/4.12/2.73/1.83/1.36 seconds at
-1/2/4/8/16 jobs. The approved standalone build/run default queries online
+1/2/4/8/16 jobs. The standalone build/run default queries online
 processors through `sysconf`, falling back to one if detection fails. Explicit
 `-j` overrides it; `translate` and automatic builds under Make keep one job.
 This portable query does not measure Linux affinity, container quota, or
-memory limits;
-the CLI reference states that scope without adding another scheduler.
+memory limits; the CLI reference states that scope without adding another
+scheduler.
 
-Validation: the probe asserting worker count under `--verbose`, `-j1` versus
-`-j4` output identity for src+lib, the CLI boundary probes, then
-`tools/gate-state.py ensure agent-pr-check`.
+The delivered tree passed 120 focused CLI probes and
+`tools/gate-state.py ensure agent-pr-check` before publication. The earlier
+spike results above remain labeled by their source revision and workload;
+they are not new measurements of the delivered tree.
 
 ## 2. No-op `x2c build` still preprocesses every object
 
 An up-to-date retained build runs `cc -E` per object to recompute its
 fingerprint: measured 1.18 s for a no-op build of the repository against
-0.10 s for `make`. The archived plan `archive/native-build-reuse.md`
+0.10 s for `make`. The archived plan `native-build-reuse.md`
 overlapped that work with compilation but did not remove it for objects the
 state file already covers.
 
@@ -105,18 +106,18 @@ call and 6.7% for valid quasiquote splicing. Those narrow measurements do not
 establish whole-compiler throughput. Runtime source is net +29 lines; this is
 a correctness change, not a source-reduction claim.
 
-Implementation includes the runtime, regression tests, internal API metadata,
-and authored book description. Regenerate symbols and documentation through
-their existing targets. Review the final authored and generated diff, run
-`tools/gate-state.py ensure agent-pr-check`, and keep the validated local
-result for joint review before publication. No new gate is added.
+Delivery includes the runtime, regression tests, internal API metadata,
+authored book description, and symbols and documentation regenerated through
+their existing targets. The authored and generated changes were reviewed and
+the final tree passed `tools/gate-state.py ensure agent-pr-check` before
+publication. No new gate was added.
 
 ## Recorded, not planned
 
 - `etc/header-symbols.xlisp` replay adds 74 generated-protocol rows that a
-  cold raw walk does not produce, so cached and cold collection disagree
-  today. The rows looked inert. Worth a check when the collector is next
-  touched.
+  cold raw walk did not produce at the search revision, so cached and cold
+  collection disagreed. The rows looked inert. Worth a check when the
+  collector is next touched.
 - `struct VarMethods` in `lib/common.x` is a hand copy of the protocol row
   set; a row added without a field silently loses its dynamic route.
 
@@ -138,5 +139,5 @@ The regression cases protect correct results after mutation, exactly-once
 side effects, splice error order, live frame values, and discarded-program
 ownership. They extend the existing suite; no recurring validation or process
 requirement is added. Completed source review found no additional owner or
-check to remove. Final-tree publication validation remains required, and
-publication follows the approved implementation scope and existing gate.
+check to remove. Both implementations passed the existing publication gate;
+the rejected shortcut added no production code or process.

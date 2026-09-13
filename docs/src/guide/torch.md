@@ -510,8 +510,16 @@ cumulative process peak of 131 MB versus 257 MB. Repeated temporary creation
 with a per-request List pool ended at 143 MB versus 188 MB after 400,000
 requests. Despite that lower total, the pooled run's peak growth above its
 initial footprint was 2.24 times Python's. Native handles and canonical pool
-storage stayed bounded; the remaining process-footprint excess is unexplained.
-These observations do not establish generally lower memory use.
+storage stayed bounded. These historical observations do not establish
+generally lower memory use.
+
+A later [memory investigation][torch-memory] of the pooled request profile
+on macOS arm64 CPU identified substantial allocator-reclaimable residency
+and ruled out its 2 KB Pool depot as the source of the multi-MB residual.
+It did not identify individual allocation stacks or separate every native
+library cache from allocator fragmentation. Python was not rerun, so this
+does not revise the earlier peak ratio or establish an indefinite memory
+bound or a GPU/Linux result.
 
 All measurements used one active desktop CPU system. They do not cover GPU
 performance, `torch.compile`, or workloads beyond these comparisons.
@@ -524,6 +532,8 @@ performance, `torch.compile`, or workloads beyond these comparisons.
   https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/REMEDIES.md
 [torch-matched]:
   https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/MATCHED.md
+[torch-memory]:
+  https://github.com/gwf/x2c/blob/main/plans/archive/memory-retention.md
 
 ## Limits
 

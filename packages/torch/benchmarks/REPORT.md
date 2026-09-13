@@ -186,7 +186,9 @@ Canonical churn at the longest recorded request count for each lifetime. Samples
 
 `pooled` adds a List-pool bracket per request. `hoisted` retains stable parameter handles but still constructs generated tuple results inside each request. These are explicit caller lifetime choices; the pool owns canonical cells and does not extend wrapper lifetime.
 
-The incremental process-peak excess remaining in the pooled and hoisted churn variants is unresolved. Stable native/Scope counts and bounded pooled canonical storage do not attribute that residual to an allocator or establish general memory suitability.
+The original measurements did not explain the incremental process-peak excess in the pooled and hoisted churn variants. Stable native/Scope counts and bounded pooled canonical storage alone do not attribute that residual to an allocator or establish general memory suitability.
+
+A later [memory investigation](../../../plans/archive/memory-retention.md) of the pooled request profile on macOS arm64 CPU identified substantial allocator-reclaimable residency and ruled out its 2 KB Pool depot as the source of the multi-MB residual. It did not identify individual allocation stacks or separate every native library cache from allocator fragmentation. Python was not rerun, so the earlier peak ratios remain historical; this follow-up does not establish an indefinite memory bound or a GPU/Linux result.
 
 The original sequence profile 4 retained models between window lengths. Its aggregate row remains historical; [the supplemental profile](SUPPLEMENT.md) corrects that ownership mismatch and supersedes its window attribution.
 
