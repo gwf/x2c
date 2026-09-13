@@ -58,6 +58,7 @@ const html = await codeToHtml(source, {
       <div class="source-caption"><span>literate-lisp.x</span><span>Code + commentary · 120 columns</span></div>
       <div class="source-stage">
         <div class="source-scroll" tabindex="0" role="region"
+          style="-webkit-text-size-adjust: none; text-size-adjust: none;"
           aria-label="Source code; scroll horizontally on narrow screens" set:html={html} />
         <nav class="section-jumps" aria-label="Continue through interpreter sections">
           {[{ title: "Introduction", line: 1 }, ...sections].map((section, index) => {
@@ -120,7 +121,7 @@ const html = await codeToHtml(source, {
   .section-jump { position: absolute; right: 0; width: max(5ch, calc((100cqw - 124ch) / 2)); text-align: center; padding: 0; font: inherit; color: #777; background: #000; text-decoration: none; user-select: none; white-space: nowrap; }
   .section-jump:hover, .section-jump:focus-visible { color: #ddd; }
   .section-jump:focus-visible { outline: 1px solid #aaa; outline-offset: 2px; }
-  .source-scroll { overflow-x: auto; background: var(--code); -webkit-text-size-adjust: none; text-size-adjust: none; }
+  .source-scroll { overflow-x: auto; background: var(--code); }
   .source-scroll:focus-visible { outline: 2px solid var(--red-text); }
   .source-scroll :global(pre) { margin: 0; padding: 24px max(7ch, calc((100cqw - 120ch) / 2)); width: 100%; min-width: 134ch; box-sizing: border-box; font: var(--source-font)/1.8 "JetBrains Mono", monospace; }
   .source-scroll :global(pre) {
