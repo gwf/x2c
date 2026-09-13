@@ -728,7 +728,7 @@ Var lisp_string_downcase(String string) => string.lower();
 /** Returns the instantiated `template` when `input` matches `pat`.
     `List.match_replace` returns a `List`, so a template that is a bare binder
     loses a scalar result. Lisp sees the replacement itself. A miss, malformed
-    pattern or machine error returns `input` unchanged.
+    pattern, cache pressure, or machine error returns `input` unchanged.
 */
 Var lisp_match_replace(List input, Var pat, Var template) {
   Var result;

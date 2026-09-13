@@ -101,10 +101,15 @@ lib/map.x|compatibility|Map.del,Map.get,Map.getindex
 lib/map.x|internal|Map.new_capacity
 lib/match.x|advanced|List.match,List.match_replace,Var.is_atom_binder
 lib/match.x|advanced|Var.is_binder,Var.is_list_binder,Var.is_match_op
+lib/match.x|internal|MatchCache.acquire,MatchCache.dispose
+lib/match.x|internal|MatchCache.flush_default,MatchCache.new,MatchCache.search
+lib/match.x|internal|MatchCache.search_replace,MatchCache.try_capture
+lib/match.x|internal|MatchCache.try_match,MatchCache.try_match_replace
+lib/match.x|internal|MatchCache.try_search
 lib/match.x|internal|MatchCaptureBuffer.has,MatchCaptureLayout.analyze
 lib/match.x|internal|MatchCaptureLayout.definite_list,MatchCaptureLayout.free
 lib/match.x|internal|MatchCaptureLayout.index,MatchCaptureLayout.possible_list
-lib/match.x|internal|MatchPlan.execute
+lib/match.x|internal|MatchLease.release,MatchPlan.execute
 lib/match.x|internal|MatchPlan.execute_capture,MatchPlan.free,MatchPlan.prepare
 lib/match.x|internal|MatchPlan.search,MatchPlan.search_replace
 lib/match.x|internal|MatchPlan.try_capture,MatchPlan.try_match

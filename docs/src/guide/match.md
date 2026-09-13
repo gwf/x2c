@@ -337,10 +337,13 @@ Each of these operations runs a pattern program rather than the pattern value.
 When the pattern argument is a literal written at the call, the compiler gives
 that call its own program, prepared once for the life of the process. A
 pattern computed at run time -- built with `cons`, interpolated with `$`, or
-received as a parameter -- is prepared for that call alone, so a loop over a
-computed pattern pays one preparation per iteration. Hoist the literal out of
-the loop, or match on it directly, when that cost matters. The arms of a
-filtered `catch` follow the same rule.
+received as a parameter -- goes through a plan cache instead: the first call
+prepares its program and later calls with the same pattern reuse it, so a loop
+over one computed pattern pays a single preparation. The cache is local to the
+enclosing `Context` and holds a bounded number of recent patterns, so a loop
+that alternates between more distinct patterns than it holds prepares them
+again; hoist the pattern out of the loop when that matters. The arms of a
+filtered `catch` get their own per-site program, like a literal.
 
 ## Match for shape, traversal for search
 

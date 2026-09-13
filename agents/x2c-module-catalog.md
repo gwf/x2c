@@ -771,7 +771,12 @@ Public functions:
 `MatchPlan.free`, `MatchPlan.execute_capture`, `MatchPlan.try_capture`,
 `MatchPlan.execute`, `MatchPlan.try_match`, `MatchPlan.try_search`,
 `MatchPlan.search`, `MatchPlan.try_match_replace`, `MatchPlan.search_replace`,
-`x2c_match_initialize`
+`MatchCache.new`, `MatchCache.acquire`, `MatchLease.release`,
+`MatchCache.dispose`, `MatchCache.try_capture`, `MatchCache.try_match`,
+`MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
+`MatchCache.search_replace`, `x2c_match_thread_release`,
+`MatchCache.context_open`, `MatchCache.context_close`,
+`MatchCache.flush_default`, `x2c_match_initialize`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

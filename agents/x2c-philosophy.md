@@ -117,7 +117,7 @@ captures a value; by itself it does not establish that value's type.
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.pool_retain*`, `List.promote` | Pool suite |
 | Header-symbol cache | verified | `header_symbols_write`/`header_symbols_open` (`src/collect.x`), `etc/header-symbols.xlisp` | `hdr-check`, `run-header-cache.sh` |
-| Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
+| Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts
 
@@ -177,8 +177,9 @@ matches leave caller output untouched. A successful public API constructs an
 association List only where its signature promises one; source `match`,
 replacement internals, and generated catch-arm locals consume fixed capture
 indexes directly. A source-literal pattern retains an immutable per-site
-plan in Match's shutdown-owned scope; a pattern computed at run time
-prepares a plan for the life of the call and frees it.
+plan in Match's shutdown-owned scope; a pattern computed at run time goes to
+the `Context`-local plan cache, which keys it by canonical identity and
+prepares it once per `Context` rather than once per call.
 
 Filtered catch copies committed capture values into the selected Error
 record's private region before transfer. The retained handler region therefore
@@ -817,11 +818,13 @@ outer `String`/`List` pool retained for "header symbols" survives the whole
 batch so cached header contributions promote out of a unit's pools and stay
 live, while each translation unit runs inside its own `Scope.retain()` plus
 per-unit named `String`/`List` pools that release when the unit finishes, so
-batch peak memory stays near single-file peak. Nothing in `Match` has to be
-flushed before those pools release: a compiler-owned pattern site keeps its
-plan in `Match`'s own shutdown-owned scope, and every other pattern's plan
-dies with the call. `run-header-cache.sh` verifies batch-vs-solo output
-parity, which
+batch peak memory stays near single-file peak. A compiler-owned pattern site
+keeps its plan in `Match`'s own shutdown-owned scope and needs no flush. The
+plan cache does key entries on pattern pointers that may point into cells
+consed inside a unit's bracket, which is why it is `Context`-local: each
+translation unit opens its own isolated `Context` (`src/frontend.x`), and
+closing it disposes that cache before the unit's canonical pool is released.
+`run-header-cache.sh` verifies batch-vs-solo output parity, which
 exercises this bracketing incidentally, but no probe directly asserts the
 retain/release discipline itself -- that a unit's transient allocations are
 actually reclaimed at release, or that a leak in one unit's bracket cannot

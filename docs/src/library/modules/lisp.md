@@ -28,7 +28,7 @@ The Lisp runtime: reader, session, and evaluator.
 Returns the instantiated `template` when `input` matches `pat`.
 `List.match_replace` returns a `List`, so a template that is a bare binder
 loses a scalar result. Lisp sees the replacement itself. A miss, malformed
-pattern or machine error returns `input` unchanged.
+pattern, cache pressure, or machine error returns `input` unchanged.
 
 Source: `lib/lisp.x:733`
 
