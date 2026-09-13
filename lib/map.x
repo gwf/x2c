@@ -574,8 +574,7 @@ static int _enumerate_next(Iter iter, Var *out) {
 }
 
 /** Initializes `dest` as an iterator over `x`, yielding each value. Keys come
-    from `Map.enumerate`, which pairs each one with its value the way
-    `Iter.enumerate` pairs an index with an element.
+    from `Map.enumerate`, which pairs each one with its value.
 
     The caller owns the storage: declare a `struct Iter` and pass its address.
     The return value is that same `dest`, or `NULL` when `dest` is null. The

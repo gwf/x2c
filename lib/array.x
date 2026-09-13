@@ -790,8 +790,7 @@ int Array.try_next(Array array, int *cursor, Var *out) {
     The caller owns the storage: declare a `struct Iter` and pass its
     address. The return value is that same `dest`, or `NULL` when `dest` is
     null, as in every iterator constructor in the library.
-    `foreach (Var item, array)` uses this, and the lazy combinators start
-    here.
+    `foreach (Var item, array)` uses this.
 
     The iterator borrows `x` and its stored `Var` values, so
     the `Array` and any

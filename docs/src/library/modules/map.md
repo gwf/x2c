@@ -39,7 +39,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 Releases this Map and both backing Blocks without freeing stored values.
 
-Source: `lib/map.x:698`
+Source: `lib/map.x:697`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -100,7 +100,7 @@ must outlive every pull. A null `Map` produces an exhausted iterator.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` or `<size-limit>` while interning a pair.
 
-Source: `lib/map.x:624`
+Source: `lib/map.x:623`
 
 <a id="Map.getdefault"></a>
 #### Map.getdefault
@@ -123,8 +123,7 @@ Source: `lib/map.x:223`
 `Iter Map.iter(Map x, Iter dest)`
 
 Initializes `dest` as an iterator over `x`, yielding each value. Keys come
-from `Map.enumerate`, which pairs each one with its value the way
-`Iter.enumerate` pairs an index with an element.
+from `Map.enumerate`, which pairs each one with its value.
 
 The caller owns the storage: declare a `struct Iter` and pass its address.
 The return value is that same `dest`, or `NULL` when `dest` is null. The
@@ -135,7 +134,7 @@ any structural mutation.
 
 Neither constructing the iterator nor pulling from it raises.
 
-Source: `lib/map.x:589`
+Source: `lib/map.x:588`
 
 <a id="Map.keys"></a>
 #### Map.keys
@@ -152,7 +151,7 @@ single-pass, and any structural mutation of `x` invalidates it, as for
 
 Neither constructing the iterator nor pulling from it raises.
 
-Source: `lib/map.x:604`
+Source: `lib/map.x:603`
 
 <a id="Map.len"></a>
 #### Map.len
@@ -434,7 +433,7 @@ bucket order. `out` must be nonnull.
 raised while rendering an entry. A failure leaves any prefix already
 appended.
 
-Source: `lib/map.x:658`
+Source: `lib/map.x:657`
 
 ## Advanced and interop API
 
@@ -481,7 +480,7 @@ compare structurally. Two null handles compare equal; exactly one null
 handle compares unequal. Raises: a cause raised by key hashing, key
 equality, or value equality.
 
-Source: `lib/map.x:639`
+Source: `lib/map.x:638`
 
 <a id="Map.repr"></a>
 #### Map.repr
@@ -503,7 +502,7 @@ allocating a `String`, and are what the two `String` forms materialize.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result, or a cause
 raised while rendering an entry.
 
-Source: `lib/map.x:691`
+Source: `lib/map.x:690`
 
 <a id="Map.str"></a>
 #### Map.str
@@ -519,7 +518,7 @@ bucket order and use their display forms.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result, or
 a cause raised while rendering an entry.
 
-Source: `lib/map.x:671`
+Source: `lib/map.x:670`
 
 <a id="Map.update_n"></a>
 #### Map.update_n
@@ -550,7 +549,7 @@ Keys and values use `write_repr`; a null or empty `Map` appends `{  }`.
 raised while rendering an entry. A failure leaves any prefix already
 appended.
 
-Source: `lib/map.x:648`
+Source: `lib/map.x:647`
 
 ## Convenience API
 

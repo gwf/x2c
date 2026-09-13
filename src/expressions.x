@@ -38,16 +38,14 @@ static int _exact_iter_type(Var value) {
     `(expr R (call (expr ((func P) T) (ident B)) (args A)))`, where `R` and
     the last formal in `P` canonicalize to `Iter`. `Iter` arguments are
     completed recursively; a call missing only that last formal receives the
-    hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
+    hidden destination. Variadic calls are returned unchanged.
 */
 List Compiler.complete_iter_chain(Compiler compiler, List expression) {
   match (expression) {
     case %(expr ?result (call (!set ?callee
            (expr ((func (!set ?parameters (*))) ?)
-              (ident ?binding))) (args *arguments))): {
-      String name = binding_identity_spelling(binding);
-      if (!_exact_iter_type(result) || name == "Iter_unzip" ||
-          _iter_parameters_variadic(parameters))
+              (ident ?))) (args *arguments))): {
+      if (!_exact_iter_type(result) || _iter_parameters_variadic(parameters))
         return expression;
 
       Array completed = %[];

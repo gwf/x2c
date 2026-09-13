@@ -601,11 +601,7 @@ single-pass pull iterators.
 
 Public functions:
 
-`Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.filter`, `Iter.map`,
-`Iter.zip`, `Iter.zip_with`, `Iter.map2`, `Iter.chain`, `Iter.enumerate`,
-`Iter.repeat`, `Iter.head`, `Iter.accumulate`, `Iter.scan`, `Iter.unique`,
-`Iter.unzip`, `Iter.reduce`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
-`Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`, `Iter.iter`
+`Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.unique`, `Iter.iter`
 
 ### [lib/lib.x](../lib/lib.x)
 

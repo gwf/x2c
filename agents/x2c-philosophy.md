@@ -492,7 +492,7 @@ are available. File-scope semantic identities survive that resolution.
 ### Status-bearing collection boundaries
 
 `Iter.try_next` owns iterator advancement. Callbacks return success separately
-from a `Var` output, runtime combinators consume that status, and generated
+from a `Var` output, runtime adapters consume that status, and generated
 `foreach` tests it before converting the payload. A callback that reports
 success with a `void` output violates the iterator contract. Exhaustion is
 represented by clearing the iterator callback, and an unsupported or null
@@ -500,12 +500,9 @@ callback is safely exhausted. `Iter.next` delegates to `Iter.try_next` and
 returns `void` on exhaustion.
 Integer ranges are inclusive and direction-sensitive; construction rejects a
 zero step, and endpoint progression terminates before signed overflow.
-Combinators preserve the same status owner: lazy transforms, including
-`Iter.scan`, may not emit `void`, while consuming collectors own their result
-container through the ordinary `Scope` lifetime. Numeric aggregate folds and
-`Iter.accumulate` use `Var.binary`, preserving its promotion, full result tag,
-and failure rules; extrema use total `Var.compare` ordering and keep the first
-value when comparison ties.
+Derived iterators preserve the same status owner: `Iter.unique` may not emit
+`void`, while consuming collectors own their result container through the
+ordinary `Scope` lifetime.
 
 `Map.try_get` and `Map.try_del` likewise separate presence from their value
 outputs. Map storage rejects `void` keys and values, and map literals use a

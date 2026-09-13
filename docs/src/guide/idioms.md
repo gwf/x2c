@@ -114,7 +114,7 @@ List squares = values.map(%!(item) => item * item);
 Var sum = values.foldl(0, %!(total, item) => total + item);
 ```
 
-Choose an explicit `Iter` pipeline when values must stream without first
+Choose an explicit `Iter` when values must stream without first
 materializing a collection.
 
 ## Keep lambdas small

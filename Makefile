@@ -24,7 +24,7 @@ DOC_TARGETS = doc-generate doc-check doc-examples doc-build doc-serve \
 	examples-update
 SITE_TARGETS = site site-build site-check site-serve
 BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
-	bm-scope bm-file bm-logger bm-iter bm-exception bm-var bm-varops \
+	bm-scope bm-file bm-logger bm-exception bm-var bm-varops \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler \
 	bm-lisp-auto
@@ -353,7 +353,7 @@ examples-update: build					## Rewrite expected example output
 
 ##@ Benchmarks
 RUNTIME_BENCHMARKS = bm-scan bm-string bm-list bm-block-buffer bm-scope \
-	bm-file bm-logger bm-iter bm-exception bm-var bm-varops
+	bm-file bm-logger bm-exception bm-var bm-varops
 
 bm-all: $(RUNTIME_BENCHMARKS)				## Run the current runtime timings
 
@@ -416,9 +416,6 @@ bm-logger: build					## Run focused Logger timings
 			./unittest/build/benchmarks/logger-hot-paths-$$mode; \
 		done; \
 	done
-
-bm-iter: build						## Run focused Iter timings
-	$(MAKE) -C unittest iter-benchmark
 
 bm-exception: build					## Run focused exception timings
 	$(MAKE) -C unittest exception-benchmark
@@ -545,7 +542,6 @@ block-buffer-benchmark: bm-block-buffer
 scope-benchmark: bm-scope
 file-benchmark: bm-file
 logger-benchmark: bm-logger
-iter-benchmark: bm-iter
 exception-benchmark: bm-exception
 var-benchmark: bm-var
 varops-benchmark: bm-varops

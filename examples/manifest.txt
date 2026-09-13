@@ -40,9 +40,9 @@ power/generics|showcase|run||expected/power-generics.stdout|Standalone power gen
 power/greet-client|showcase|run||expected/import-greet.stdout|Package import: alias-qualified names and a linked package archive.
 power/imports|optional|none||-|PCRE2 named request captures; checked with optional packages.
 power/indexing|showcase|run||expected/power-indexing.stdout|Standalone power indexing gallery example.
-power/iterators|showcase|run||expected/iter-data.stdout|Lazy selection, merging, validation, and enumeration.
+power/iterators|showcase|run||expected/iter-data.stdout|Selection, merging, validation, and enumeration.
 power/match|showcase|run||expected/power-match.stdout|Standalone power match gallery example.
-power/math|showcase|run||expected/iter-math.stdout|Lazy numeric filtering, pairing, folding, and products.
+power/math|showcase|run||expected/iter-math.stdout|Numeric filtering, pairing, folding, and products.
 power/scopes|showcase|run||expected/power-scopes.stdout|Standalone power scopes gallery example.
 power/shared-threads|showcase|run||expected/context-threads.stdout|Isolated workers, joined results, logging, and Mutex-coordinated shared state.
 power/threads|showcase|run||expected/power-threads.stdout|Standalone power threads gallery example.

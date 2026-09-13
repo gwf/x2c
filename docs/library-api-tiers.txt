@@ -58,8 +58,7 @@ lib/func.x|advanced|Func.apply,Func.context,Func.new,Func.new_context
 lib/func.x|advanced|Func.new_rest,Func.var,FuncArg.reference,FuncArg.value
 lib/func.x|advanced|x2c_func_reference_argument,x2c_func_value_argument
 lib/func.x|internal|x2c_func_reference_type,x2c_func_unrepresentable_argument
-lib/iter.x|advanced|Iter.init,Iter.unzip
-lib/iter.x|compatibility|Iter.accumulate,Iter.next
+lib/iter.x|advanced|Iter.init
 lib/lib.x|advanced|DisjointSet.find,DisjointSet.free,DisjointSet.new
 lib/lib.x|advanced|DisjointSet.num_components,DisjointSet.sizes
 lib/lib.x|advanced|DisjointSet.union

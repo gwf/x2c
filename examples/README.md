@@ -102,7 +102,7 @@ from the gallery examples.
 - Collections and execution: [collection indexing](power/collection-indexing.x),
   [word-count summary](power/word-count-summary.x),
   [shared worker state](power/shared-threads.x),
-  [Context export](power/contexts.x), and iterator recipes for
+  [Context export](power/contexts.x), and collection recipes for
   [data](power/iterators.x), [math](power/math.x), and [finance](power/finance.x).
 - Language extensions: [protocol defaults](magic/protocols.x),
   [lambdas](magic/lambdas.x), [imported macros](magic/imported-macros.x),
