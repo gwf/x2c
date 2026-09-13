@@ -8,11 +8,8 @@ Target options:
 
 Output options:
       --out-dir <dir>         Write generated files under <dir> (default: .)
-      --source-map            Map generated C locations to original x2c sources
       --no-deps               Do not write x2c dependency files
       --dep-file <file>       Override the depfile path (one input only)
-      --dep-target <target>   Override the depfile target (one input only)
-      --no-phony-deps         Omit phony rules for included files
 
 Source options:
   -I <dir>                    Add a shared x2c/C include directory
@@ -34,7 +31,6 @@ Inspection options:
 General options:
   -h, --help                  Show help and exit
   -v, --verbose               Show commands as they are executed
-  -###                        Show commands without executing them
   -q, --quiet                 Suppress successful progress and receipts
       --plain                 Use stable output without terminal rendering
       --color <auto|always|never>

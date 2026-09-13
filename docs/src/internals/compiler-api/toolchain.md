@@ -28,18 +28,18 @@ Host preprocessing, compilation, archive, and link actions.
 
 #### tool_action_new
 
-`ToolAction tool_action_new( Symbol phase, List arguments, int verbose, int dry_run)`
+`ToolAction tool_action_new(Symbol phase, List arguments, int verbose)`
 
 Creates a `Scope`-owned action that reports nonzero status by default.
 The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:238`
+Source: `src/toolchain.x:237`
 
 #### toolchain_new
 
-`Toolchain toolchain_new( String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run)`
+`Toolchain toolchain_new( String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose)`
 
 Creates a `Scope`-owned host toolchain and resolves its native layout.
 Tool selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
@@ -60,7 +60,7 @@ Source: `src/toolchain.x:119`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:251`
+Source: `src/toolchain.x:248`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -73,7 +73,7 @@ A partial capture setup failure returns no defined status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:357`
+Source: `src/toolchain.x:351`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -81,14 +81,14 @@ Source: `src/toolchain.x:357`
 `ToolRun ToolAction.start(ToolAction action)`
 
 Starts the action without a shell and returns a `Scope`-owned execution.
-Verbose and dry-run actions print their quoted argv to stderr. A dry run
-starts no child. After capture setup succeeds, a non-dry execution must be
-waited exactly once; partial capture setup leaves a non-waitable result.
+A verbose action prints its quoted argv to stderr. After capture setup
+succeeds, an execution must be waited exactly once; partial capture setup
+leaves a non-waitable result.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:303`
+Source: `src/toolchain.x:300`
 
 ### `ToolRun`
 
@@ -97,11 +97,11 @@ Source: `src/toolchain.x:303`
 
 `int ToolRun.ready(ToolRun execution)`
 
-Checks whether an execution can be waited without blocking. A dry run
-is ready immediately. A completed child retains its status and captures
-until the required `ToolRun.wait` call.
+Checks whether an execution can be waited without blocking.
+A completed child retains its status and captures until the required
+`ToolRun.wait` call.
 
-Source: `src/toolchain.x:320`
+Source: `src/toolchain.x:316`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -110,14 +110,14 @@ Source: `src/toolchain.x:320`
 
 Waits once for an execution, forwards its captured streams, and returns its
 shell-style status. Signals return `128 + signal`; an invalid action, fork
-failure, or wait failure returns -1, and a dry run returns 0. Captured
-output goes to stderr; program actions inherit standard streams. An
-execution with partial capture setup is not valid input.
+failure, or wait failure returns -1. Captured output goes to stderr;
+program actions inherit standard streams. An execution with partial
+capture setup is not valid input.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:335`
+Source: `src/toolchain.x:330`
 
 ### `Toolchain`
 
@@ -132,7 +132,7 @@ membership must unlink `output` before it runs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:202`
+Source: `src/toolchain.x:201`
 
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
@@ -146,7 +146,7 @@ configured compiler arguments. The action requests dependency output at
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:161`
+Source: `src/toolchain.x:160`
 
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
@@ -159,7 +159,7 @@ runtime archive, and `-lm` follow the inputs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:219`
+Source: `src/toolchain.x:218`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -172,7 +172,7 @@ markers so source locations also belong to the identity.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:185`
+Source: `src/toolchain.x:184`
 
 ## Public types
 
@@ -185,7 +185,7 @@ Source: `src/toolchain.x:185`
 <a id="ToolAction"></a>
 ### ToolAction
 
-`typedef struct ToolAction { Symbol phase, List arguments, int verbose, dry_run, inherit_stdio, report; } *ToolAction`
+`typedef struct ToolAction { Symbol phase, List arguments, int verbose, inherit_stdio, report; } *ToolAction`
 
 Describes one `Scope`-owned host-tool argv action and its reporting policy.
 The `arguments` `List` is retained without copying, follows its owning
@@ -209,7 +209,7 @@ Source: `src/toolchain.x:36`
 <a id="Toolchain"></a>
 ### Toolchain
 
-`typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose, dry_run; } *Toolchain`
+`typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose; } *Toolchain`
 
 Holds resolved host tools, native layout, and borrowed option `List`s.
 The record returned by `toolchain_new` is `Scope`-owned. Its `String`s

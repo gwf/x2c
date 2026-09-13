@@ -1380,8 +1380,6 @@ static List _lower_callable_defer(
 // landing-frame path for lexical transfers or unsupported capture types.
 static List _lower_defer_region(
   Compiler compiler, List body, List finalizer) {
-  if (compiler.source_map && compiler.origin)
-    finalizer = %(at ${compiler.origin} $finalizer);
   if (_defer_needs_landing(finalizer))
     return %(try $body () $finalizer);
   return _lower_callable_defer(compiler, body, finalizer);
@@ -1408,8 +1406,6 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     List head = _without_origin(anchored);
     match (head) case %(defer ?final_stmt): {
       List body = %(block @tail), finalizer = final_stmt;
-      if (compiler.source_map)
-        finalizer = _rewrap_origin(anchored, finalizer);
       List region = _lower_defer_region(compiler, body, finalizer);
       result = %( ${_rewrap_origin(anchored, region)} );
       tail_changed = 1;

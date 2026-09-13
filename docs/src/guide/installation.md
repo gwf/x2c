@@ -52,21 +52,17 @@ in the installation inventory, not as a path to the producer's compiler tools.
 ## Build, debug, and use packages
 
 Direct source and `x2c.toml` project builds use the same installed compiler.
-For source debugging, opt into native debug information and original source
-locations:
+For source debugging, opt into native debug information and retain the
+generated C:
 
 ```sh
-x2c build -g --source-map hello.x --output hello
+x2c build -g --build-dir .x2c-build hello.x --output hello
 lldb ./hello
 ```
 
-On macOS this also produces `hello.dSYM`. Move that companion directory
-with the executable when debugging elsewhere. Generated objects may be removed
-after the build; `--build-dir` remains available when you want to retain them.
-
-See [source mapping](../reference/cli.md) for the source-location
-contract and platform debug-artifact behavior. Source mapping changes native
-`__FILE__` and `__LINE__` to refer to the original x2c source.
+The debugger steps through the generated `.c` files under the build
+directory. Without `--build-dir` or `--save-temps`, generated objects are
+removed after the build.
 
 For a [package source distribution](packages.md), unpack the source archive,
 select the installed compiler, and use a dependency cache outside its prefix:

@@ -914,8 +914,8 @@ void generate_code(Compiler c, List ast, String dir) {
   String basename =
     %"${dir.rstrip(%"/")}/${x2c_path_stem(c.filename)}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
-  String header_text = c.code_pretty_string(header, hfile);
-  String source_text = c.code_pretty_string(source, cfile);
+  String header_text = c.code_pretty_string(header);
+  String source_text = c.code_pretty_string(source);
   String paths[2] = { hfile, cfile };
   String contents[2] = { header_text, source_text };
   _write_outputs(c, paths, contents);

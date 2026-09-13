@@ -116,8 +116,7 @@ static Array _prerequisites(
 }
 
 static int _write_targets(
-  File output, CliRequest request, String output_dir, String stem) {
-  if (request.dep_target) return _write_word(output, request.dep_target);
+  File output, String output_dir, String stem) {
   String base = %"${output_dir.rstrip(%"/")}/$stem";
   if (!_write_word(output, %"$base.c")) return 0;
   if (output.putc(' ') == EOF) return 0;
@@ -131,7 +130,7 @@ static int _write_contents(
   char primary_buffer[PATH_MAX];
   String primary = realpath(input, primary_buffer) ?
                    %"$primary_buffer" : input;
-  int ok = _write_targets(output, request, output_dir, stem);
+  int ok = _write_targets(output, output_dir, stem);
   if (ok && output.putc(':') == EOF) ok = 0;
   foreach (Var value, paths) {
     if (!ok || output.putc(' ') == EOF) {
@@ -147,14 +146,13 @@ static int _write_contents(
   /* Keep the dependency rule first. `translation_depfile_parse` stops at this
      newline so build fingerprints never treat following phony targets as
      prerequisites. */
-  if (ok && !request.no_phony_deps) {
-    foreach (Var value, paths) {
-      String path = value;
-      if (path == primary) continue;
-      if (!_write_word(output, path) || output.puts(":\n") == EOF) {
-        ok = 0;
-        break;
-      }
+  foreach (Var value, paths) {
+    String path = value;
+    if (path == primary) continue;
+    if (!ok) break;
+    if (!_write_word(output, path) || output.puts(":\n") == EOF) {
+      ok = 0;
+      break;
     }
   }
   paths.free();
@@ -165,8 +163,8 @@ static int _write_contents(
     `compiler.deps` must reflect the translated `input`, and the selected
     depfile's parent directory must exist. Disabled dependency output and
     inspection requests return one without writing. Otherwise prerequisites
-    are unique and sorted; the target is `request.dep_target` or the generated
-    C and header pair, followed by optional phony rules. A process-specific
+    are unique and sorted; the target is the generated C and header pair,
+    followed by phony rules. A process-specific
     sibling is written and closed before rename, so handled open, write, close,
     or rename failures preserve any existing depfile, report to stderr, and
     return zero. Cleanup attempts to unlink an opened sibling but does not

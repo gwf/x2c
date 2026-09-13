@@ -40,15 +40,15 @@ Publishes the Make depfile for one completed translation.
 `compiler.deps` must reflect the translated `input`, and the selected
 depfile's parent directory must exist. Disabled dependency output and
 inspection requests return one without writing. Otherwise prerequisites
-are unique and sorted; the target is `request.dep_target` or the generated
-C and header pair, followed by optional phony rules. A process-specific
+are unique and sorted; the target is the generated C and header pair,
+followed by phony rules. A process-specific
 sibling is written and closed before rename, so handled open, write, close,
 or rename failures preserve any existing depfile, report to stderr, and
 return zero. Cleanup attempts to unlink an opened sibling but does not
 report an unlink failure. Allocation failure transfers through ordinary
 runtime `Error` handling instead of returning zero.
 
-Source: `src/deps.x:176`
+Source: `src/deps.x:174`
 
 ## Design notes
 
