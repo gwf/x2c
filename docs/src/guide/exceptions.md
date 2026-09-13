@@ -110,7 +110,10 @@ catch:
 The pattern language and binder rules are the same as `match`. A `?name`
 binder declares a `Var`, a `*name` binder declares a `List`, and arms run in
 source order. `catch:` is an optional default arm and must be last. Filters
-are evaluated once when the `try` is entered.
+are evaluated once when the `try` is entered. Like a literal pattern written
+at a `match`, each arm's program is prepared once for the life of the
+process; an arm whose pattern interpolates a run-time value with `$` is
+prepared on every entry instead.
 
 When no arm matches, the `Error` continues outward. Selecting an arm consumes
 the errors accumulated since that `catch` was registered. Older errors remain

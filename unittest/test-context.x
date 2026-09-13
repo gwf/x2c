@@ -143,8 +143,7 @@ static void context_exports_registered_object(void) {
   outer.close();
 }
 
-static void context_failed_export_restores_container_owner(void) {
-  ScopeStats before = Scope.stats();
+static void _failed_export_round(void) {
   Context context = Context.open_isolated_named("failed export source");
   ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
   probe.value = String.new("failed private value");
@@ -157,6 +156,14 @@ static void context_failed_export_restores_container_owner(void) {
   EXPECT_TRUE(caught);
   EXPECT_TRUE(context.owns(map));
   context.close();
+}
+
+/* The first round publishes the catch site's plans, which `Match` keeps for
+   the life of the process; the second measures the steady state. */
+static void context_failed_export_restores_container_owner(void) {
+  _failed_export_round();
+  ScopeStats before = Scope.stats();
+  _failed_export_round();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);

@@ -41,7 +41,8 @@ int main(void) {
     size_t before = Scope.stats().live_allocations;
     try wrapped.repr();
     catch %(render-err): caught++;
-    assert(Scope.stats().live_allocations == before);
+    // the first attempt publishes the catch site's process-lifetime plans
+    if (attempt) assert(Scope.stats().live_allocations == before);
   }
   assert(caught == 2);
   Bomb *payload = (Bomb *) failure.pointer();

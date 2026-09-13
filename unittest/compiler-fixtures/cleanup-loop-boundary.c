@@ -64,36 +64,34 @@ static int continue_inside_try(void){
   int volatile caught = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      for(int volatile i = 0;  i < 3;  i ++){
-        if(i == 0) continue;
-        if(i == 1){
-          static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_try",.line = 17};
-          x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
-          __builtin_unreachable();
-        }
-
-      }
-
-    }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-         {{
-          caught = 1;
-        }
-
-      }
-
-    }
-    else goto _x2c_cleanup_done_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    for(int volatile i = 0;  i < 3;  i ++){
+      if(i == 0) continue;  if(i == 1){
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_try",.line = 17};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);  __builtin_unreachable();
+      }
 
+    }
+
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        caught = 1;
+      }
+
+    }
+
+  }
+  else goto _x2c_cleanup_done_0;
+}
 }
 _x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);
@@ -134,25 +132,18 @@ static int continue_inside_foreach(void){
   int volatile caught = 0;
   {
     ExceptionFrame _x2c_exception_frame_1;
-    List _x2c_catch_pattern_1 = cons(Symbol_var(20800632064936), NULL);
-    ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, List_var(_x2c_catch_pattern_1));
-    x2c_exception_push(& _x2c_exception_frame_1);
-    if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-      {
-        Var volatile item;
-        List _x2c_macro_object_0 = _5;
-        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-        Var _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-          item = _x2c_macro_cursor_output_0;
-          {
-            if(Var_int(item) == 1) continue;
-            if(Var_int(item) == 2){
-              static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_foreach",.line = 49};
-              x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 0);
-              __builtin_unreachable();
-            }
-
+    static MatchCaptureSite _x2c_catch_arms_1[1];
+    static ErrorCatchSite _x2c_catch_site_1 = { _x2c_catch_arms_1, 0UL, 1, 0, -1 };
+    Var _x2c_catch_patterns_1[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20800632064936), NULL);
+    _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
+  }
+  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
+    {
+      Var volatile item;  List _x2c_macro_object_0 = _5;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+        item = _x2c_macro_cursor_output_0; {
+          if(Var_int(item) == 1) continue;  if(Var_int(item) == 2){
+            static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/cleanup-loop-boundary.x",.function = "continue_inside_foreach",.line = 49};  x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 0);  __builtin_unreachable();
           }
 
         }
@@ -160,21 +151,21 @@ static int continue_inside_foreach(void){
       }
 
     }
-    else {x2c_exception_landed(& _x2c_exception_frame_1);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-        x2c_error_catch_detach(_x2c_error_handler_1);
-        x2c_exception_mark_handled(&_x2c_exception_frame_1);
-         {{
-          caught = 1;
-        }
 
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+      x2c_error_catch_detach(_x2c_error_handler_1);
+      x2c_exception_mark_handled(&_x2c_exception_frame_1);
+       {{
+        caught = 1;
       }
 
     }
-    else goto _x2c_cleanup_done_1;
-  }
 
+  }
+  else goto _x2c_cleanup_done_1;
+}
 }
 _x2c_cleanup_done_1 :;
 x2c_error_catch_close(_x2c_error_handler_1);

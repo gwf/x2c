@@ -509,8 +509,7 @@ static void thread_error_wide_values_survive_until_join(void) {
   thread.free();
 }
 
-static void thread_failed_join_export_releases_storage(void) {
-  ScopeStats before = Scope.stats();
+static void _failing_join_round(void) {
   Thread thread = Thread.start(
     _thread_failing_export_worker, NULL, 0
   );
@@ -519,6 +518,14 @@ static void thread_failed_join_export_releases_storage(void) {
   catch %(thread-exp *): caught = 1;
   EXPECT_TRUE(caught);
   thread.free();
+}
+
+/* The first round publishes the catch site's plans, which `Match` keeps for
+   the life of the process; the second measures the steady state. */
+static void thread_failed_join_export_releases_storage(void) {
+  _failing_join_round();
+  ScopeStats before = Scope.stats();
+  _failing_join_round();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);

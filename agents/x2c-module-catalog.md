@@ -542,6 +542,7 @@ handler stack and error dispatch.
 
 Public functions:
 
+`x2c_error_catch_site_pending`, `x2c_error_catch_site_push`,
 `x2c_error_catch_push`, `x2c_error_catch_selected`, `x2c_error_catch_capture`,
 `x2c_error_catch_detach`, `x2c_error_catch_close`, `x2c_error_raise`,
 `Error.note_rendered`, `x2c_error_raise_n`, `Error.handler_depth`,
@@ -750,6 +751,7 @@ pattern matching and transformation utilities for lists.
 Public functions:
 
 `x2c_match_try_capture`, `x2c_match_site_try_capture`,
+`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
 `x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,

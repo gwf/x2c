@@ -16,6 +16,7 @@
 #pragma once
 
 #include "common.x"
+#include "match.x"
 
 /** Names the structured-error runtime and its static operations.
     Programs do not construct `Error` values; automatic runtime initialization
@@ -40,57 +41,115 @@ typedef struct ErrorHandler *ErrorHandler;
 */
 typedef Symbol (*ErrorHandlerFn)(List errors, Var data);
 
+/** Holds the process-lifetime plans of one compiler-generated filtered catch.
+    `arms` is a zero-initialized static array of `arm_count` `Match` sites and
+    `defaults` marks the arms that have no pattern. `state` and `fenced_arm`
+    belong to `Error`; a site must be static storage that the first
+    registration binds to its patterns.
+*/
+typedef struct ErrorCatchSite {
+  MatchCaptureSite *arms;
+  unsigned long defaults;
+  int arm_count, state, fenced_arm;
+} ErrorCatchSite;
+
 #pragma private
 $(import "error-macros.xmacro")
 $(import "error-private.xmacro")
 $error.private.types();
 #pragma public
 
-/** Registers one compiler-generated transferring catch.
+/* A site is bound on its first registration: `static` when `Match` retains a
+   plan for every arm, `transient` when some pattern is built at run time and
+   each registration must prepare its own plans. */
+#define ERROR_CATCH_PENDING 0
+#define ERROR_CATCH_STATIC 1
+#define ERROR_CATCH_TRANSIENT 2
+
+/** Reports whether one catch site still needs its patterns at registration.
+    A bound static site answers 0, so its caller can skip constructing them.
+*/
+int x2c_error_catch_site_pending(ErrorCatchSite *site) =>
+  !site ||
+  __atomic_load_n(&site.state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
+
+static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
+  int retainable = 1;
+  for (int i = 0; i < site.arm_count; i++)
+    if (!(site.defaults & (1UL << i)) &&
+        !x2c_match_pattern_retainable(patterns[i]))
+      retainable = 0;
+  if (retainable)
+    for (int i = 0; i < site.arm_count; i++) {
+      if (site.defaults & (1UL << i)) continue;
+      MatchPlan plan = x2c_match_site_prepare(&site.arms[i], patterns[i]);
+      if (plan.status == MACHINE_INELIGIBLE && site.fenced_arm < 0)
+        site.fenced_arm = i;
+    }
+  __atomic_store_n(
+    &site.state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT,
+    __ATOMIC_RELEASE);
+}
+
+/* Prepares one plan per arm for a registration of a transient site. */
+static const char *_catch_prepare_plans(
+  ErrorHandler h, Var *patterns, int *fenced_arm) {
+  ErrorCatchSite *site = h.site;
+  const char *fenced = NULL;
+  int pushed = _scope_push(
+    <alloc-fail>, "could not enter error scope for catch patterns");
+  h.plans = Block.new(sizeof(MatchPlan));
+  for (int i = 0; i < site.arm_count; i++) {
+    MatchPlan plan = site.defaults & (1UL << i)
+                   ? NULL : MatchPlan.prepare(patterns[i]);
+    h.plans.push(&plan);
+    if (plan && plan.status == MACHINE_INELIGIBLE && !fenced) {
+      fenced = plan.reason;
+      *fenced_arm = i;
+    }
+  }
+  if (pushed) Scope.pop();
+  return fenced;
+}
+
+/** Registers one compiler-generated transferring catch through its site.
     `target` names the `ExceptionFrame` that the caller pushes immediately
-    afterward; the following `arm_count` arguments are `List` patterns in
-    source
-    order. The registration copies pattern `Var`s into its table but borrows
-    every referenced `List` graph and `MatchPlan` constant.
-    Those values and the
-    target frame must outlive the handle. A null target, zero arm count, or
-    unavailable `Error` runtime reaches the raw error floor.
+    afterward and `site` is the static site of this `try`, whose `patterns`
+    are read in source order. A pending site reads `patterns`; a bound static
+    site ignores them, so a caller may pass anything once
+    `x2c_error_catch_site_pending` answers 0. The site borrows every
+    referenced `List` graph, and those values and the target frame must
+    outlive it.
+    A null target or site, a zero arm count, or an unavailable `Error` runtime
+    reaches the raw error floor.
     Raises: `<alloc-fail>` when registration or fence-detail storage cannot be
     allocated, or `<size-limit>` when an arm's pattern crosses a `Match`
-    lowering
-    fence. A fenced arm can never be selected. The registration is reclaimed
-    and the error reaches the enclosing handler; the caller's own frame is not
-    yet pushed, so it never sees its own failure.
+    lowering fence. A fenced arm can never be selected. The registration is
+    reclaimed and the error reaches the enclosing handler; the caller's own
+    frame is not yet pushed, so it never sees its own failure.
 */
-ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
-  if (!Error.ready() || !target || !arm_count)
+ErrorHandler x2c_error_catch_site_push(
+  void *target, ErrorCatchSite *site, Var *patterns) {
+  if (!Error.ready() || !target || !site || !site.arm_count)
     _floor(<invariant>, "could not register transferring catch");
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
   *h = (struct ErrorHandler) {
       .prev = state.handler_top, .fn = NULL, .data = void,
-      .target = target, .selected = -1,
+      .site = site, .target = target,
+      .selected = -1, .plans = NULL,
       .capture_values = NULL, .retained = NULL, .detached = 0
   };
-  int pushed = _scope_push(
-    <alloc-fail>, "could not enter error scope for catch patterns");
-  h.patterns = %[];
-  h.plans = Block.new(sizeof(MatchPlan));
-  const char *fenced = NULL, int fenced_arm = -1, va_list args;
-  va_start(args, arm_count);
-  for (unsigned i = 0; i < arm_count; i++) {
-    Var pattern = va_arg(args, Var);
-    h.patterns.push(pattern);
-    MatchPlan plan = pattern == <default> ? NULL : MatchPlan.prepare(pattern);
-    h.plans.push(&plan);
-    if (plan && plan.status == MACHINE_INELIGIBLE && !fenced) {
-      fenced = plan.reason;
-      fenced_arm = (int) i;
-    }
+  if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING)
+    _catch_site_bind(site, patterns);
+  const char *fenced = NULL, int fenced_arm = -1;
+  if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) == ERROR_CATCH_TRANSIENT)
+    fenced = _catch_prepare_plans(h, patterns, &fenced_arm);
+  else if (site.fenced_arm >= 0) {
+    fenced_arm = site.fenced_arm;
+    fenced = site.arms[fenced_arm].plan.reason;
   }
-  va_end(args);
-  if (pushed) Scope.pop();
   state.floor_only--;
   /* Report the fence here, where the unusable arm can be named. Reporting it
      from dispatch would re-enter the raise path that is already answering
@@ -102,6 +161,32 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
   }
   state.handler_top = h;
   return h;
+}
+
+/** Registers one transferring catch from patterns supplied per call.
+    A hand-written caller that has no static site uses this form; `arm_count`
+    `List` pattern `Var`s follow in source order, and one plan per arm is
+    prepared for this registration alone. Results and failures follow
+    `x2c_error_catch_site_push`.
+*/
+ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
+  if (!Error.ready() || !arm_count)
+    _floor(<invariant>, "could not register transferring catch");
+  ErrorThreadState state = _thread();
+  ErrorCatchSite *site = Scope.malloc_in(
+    &state.scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
+  Var *patterns = (void *) (site + 1);
+  *site = (ErrorCatchSite) {
+      NULL, 0, (int) arm_count, ERROR_CATCH_TRANSIENT, -1
+  };
+  va_list args;
+  va_start(args, arm_count);
+  for (unsigned i = 0; i < arm_count; i++) {
+    patterns[i] = va_arg(args, Var);
+    if (patterns[i] == <default>) site.defaults |= 1UL << i;
+  }
+  va_end(args);
+  return x2c_error_catch_site_push(target, site, patterns);
 }
 
 /** Returns the selected zero-based catch arm, or -1 before selection or for a
@@ -696,7 +781,7 @@ ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
   h.prev = state.handler_top;
   h.fn = fn;
   h.data = data;
-  h.patterns = NULL;
+  h.site = NULL;
   h.plans = NULL;
   h.target = NULL;
   h.selected = -1;
@@ -738,7 +823,8 @@ static ErrorHandler _handler_at_depth(
 
 static void _handler_free(ErrorHandler handle) {
   if (!handle) return;
-  if ((void *) handle.patterns != NULL) handle.patterns.free();
+  // a per-call site has no static arm storage and belongs to this handler
+  if (handle.site && !handle.site.arms) Scope.free(handle.site);
   if ((void *) handle.plans != NULL) {
     MatchPlan *plans = handle.plans.bytes;
     for (size_t i = 0; i < handle.plans.length; i++) {
@@ -844,10 +930,12 @@ static Symbol _catch_match(ErrorHandler h) {
   state.floor_only++;
   List projection = _cons(&record.region, code, detail);
   List.pool_retain_named("Error catch bindings");
-  MatchPlan *plans = h.plans.bytes;
-  for (int i = 0; i < h.patterns.len(); i++) {
-    Var pattern = h.patterns[i];
-    MatchPlan plan = plans[i];
+  ErrorCatchSite *site = h.site;
+  MatchPlan *plans = (void *) h.plans != NULL ? h.plans.bytes : NULL;
+  for (int i = 0; i < site.arm_count; i++) {
+    int is_default = (site.defaults & (1UL << i)) != 0;
+    MatchPlan plan = is_default ? NULL
+                   : plans ? plans[i] : site.arms[i].plan;
     MatchCaptureLayout layout = plan ? plan.layout : NULL;
     Var *values = layout && layout.binder_count
                 ? Scope.malloc(sizeof(Var) * layout.binder_count)
@@ -855,7 +943,7 @@ static Symbol _catch_match(ErrorHandler h) {
     MatchCaptureBuffer captures = {
       values, 0, layout ? layout.binder_count : 0
     };
-    int matched = pattern == <default> ? 1 :
+    int matched = is_default ? 1 :
       plan.status == MACHINE_PREPARED &&
       plan.execute_capture(projection, &captures, NULL) == 1;
     if (!matched) {
@@ -891,7 +979,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
   for (ErrorHandler h = saved; h; h = h.prev) {
     state.handler_top = h.prev;
     Symbol disposition = <declined>;
-    if (h.patterns) disposition = _catch_match(h);
+    if (h.site) disposition = _catch_match(h);
     else {
       ErrorRegion view = { 0 };
       {
@@ -905,7 +993,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
       }
     }
     if (disposition == <unwind>) {
-      if (h.patterns) {
+      if (h.site) {
         state.handler_top = saved;
         state.dispatch_saved = NULL;
         _leave();

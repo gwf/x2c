@@ -207,11 +207,14 @@ static void * _run(void * argument){
   Context work = Context_open_isolated_named("Thread callback");
   {
     ExceptionFrame _x2c_exception_frame_0;
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, Symbol_var(Symbol_new("default")));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      ErrorHandler logger_handler = Error_push(Logger_error_handler, ((void) 0, Void));
-      {
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 1UL, 1, 0, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {
+  }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    ErrorHandler logger_handler = Error_push(Logger_error_handler, ((void) 0, Void));
+    {
   _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & logger_handler};
 
   X2CCleanup _x2c_defer_record_0 = {
@@ -220,8 +223,8 @@ static void * _run(void * argument){
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-        ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));
-        {
+      ErrorHandler observer = Error_push(_capture_errors, Var_new(1360144456, thread));
+      {
   _x2c_defer_env_0 _x2c_defer_env_4 = {._x2c_defer_capture_0 =(const void *) & observer};
 
   X2CCleanup _x2c_defer_record_1 = {
@@ -230,33 +233,32 @@ static void * _run(void * argument){
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-          const void * input = thread -> input_size ? _input(thread) : NULL;
-          Var result = thread -> function(input, thread -> input_size);
-          thread -> result = Context_export(work, result);
-        }
+        const void * input = thread -> input_size ? _input(thread) : NULL;
+        Var result = thread -> function(input, thread -> input_size);
+        thread -> result = Context_export(work, result);
+      }
 
   x2c_cleanup_leave(&_x2c_defer_record_1);
 }
-      }
+    }
 
   x2c_cleanup_leave(&_x2c_defer_record_0);
 }
-    }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-         {{
-          thread -> result =((void) 0, Void);
-        }
-
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_0);
+  {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        thread -> result =((void) 0, Void);
       }
 
     }
-    else goto _x2c_cleanup_done_0;
-  }
 
+  }
+  else goto _x2c_cleanup_done_0;
+}
 }
 _x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);

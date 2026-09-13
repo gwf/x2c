@@ -21,6 +21,23 @@ void Initialized.init(Initialized item) {
   item.values = %[];
 }
 
+/* Both failing constructors run twice: the first round publishes each catch
+   site's process-lifetime plans and the second measures the balance. */
+static int _failing_constructors(void) {
+  int caught = 0;
+  try {
+    Item item = $auto(Item.new(-1));
+  }
+  catch %(make-fail): caught++;
+  $scope() {
+    Initialized failed = NULL;
+    try failed = Initialized.new();
+    catch %(init-fail): caught++;
+    assert((void *) failed == NULL);
+  }
+  return caught;
+}
+
 int main(void) {
   size_t before = Scope.stats().live_allocations;
   $scope() {
@@ -36,26 +53,18 @@ int main(void) {
   assert(frees == 1);
   assert(Scope.stats().live_allocations == before);
 
-  int caught = 0;
-  try {
-    Item item = $auto(Item.new(-1));
-  }
-  catch %(make-fail): caught++;
-  assert(frees == 1);
   $scope() {
     Initialized good = Initialized.new();
     assert(inits == 1);
     assert(good.values.len() == 0);
   }
   fail_init = 1;
-  $scope() {
-    Initialized failed = NULL;
-    try failed = Initialized.new();
-    catch %(init-fail): caught++;
-    assert((void *) failed == NULL);
-    assert(inits == 2);
-  }
-  assert(caught == 2);
+  int caught = _failing_constructors();
+  before = Scope.stats().live_allocations;
+  caught += _failing_constructors();
+  assert(frees == 1);
+  assert(inits == 3);
+  assert(caught == 4);
   assert(Scope.stats().live_allocations == before);
   puts("class lifetimes passed");
   return 0;

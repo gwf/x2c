@@ -4003,20 +4003,22 @@ SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> ke
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
     Diagnostics_set_emitter(diag, NULL, NULL);  c -> recovery_depth = depth + 1; {
-      ExceptionFrame _x2c_exception_frame_0;  List _x2c_catch_pattern_0 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(1362954), NULL))), NULL));  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-        result = List_truth(({ static MatchCaptureSite _x2c_match_site_95;  x2c_match_site_match(& _x2c_match_site_95, value, List_var(_1131)); })) ? _convert_composite(c, value, Type_canonicalize(type), target, condition, native_used) : Compiler_convert_expression(c, value, type);  SymTxn_commit(transaction);  completed = 1;
-      }
-      else {x2c_exception_landed(& _x2c_exception_frame_0); {
-        if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-          x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  {rejected = 1;
-        }
-
-      }
-      else goto _x2c_cleanup_done_0;
+      ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_catch_arms_0[1];  static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };  Var _x2c_catch_patterns_0[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(1362954), NULL))), NULL));  _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
     }
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      result = List_truth(({ static MatchCaptureSite _x2c_match_site_95;  x2c_match_site_match(& _x2c_match_site_95, value, List_var(_1131)); })) ? _convert_composite(c, value, Type_canonicalize(type), target, condition, native_used) : Compiler_convert_expression(c, value, type);  SymTxn_commit(transaction);  completed = 1;
+    }
+    else {x2c_exception_landed(& _x2c_exception_frame_0); {
+      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+        x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  {rejected = 1;
+      }
 
+    }
+    else goto _x2c_cleanup_done_0;
   }
-  _x2c_cleanup_done_0 :;  x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
+
+}
+_x2c_cleanup_done_0 :;  x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 

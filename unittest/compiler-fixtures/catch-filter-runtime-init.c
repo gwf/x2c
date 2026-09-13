@@ -55,33 +55,32 @@ Var List_var(List);
 static void _relabel_nested_pattern(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 = cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      List detail = cons(Symbol_var(951296328), cons(String_var(String_new("marker")), NULL));
-      {
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 27};
-        x2c_error_raise_n(& _x2c_error_site_0, 33820664566756, 1, Symbol_var(280234584), List_var(detail));
-      }
-
-    }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-         {{
-          static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
-          x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
-        }
-
-      }
-
-    }
-    else goto _x2c_cleanup_done_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    List detail = cons(Symbol_var(951296328), cons(String_var(String_new("marker")), NULL)); {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 27};  x2c_error_raise_n(& _x2c_error_site_0, 33820664566756, 1, Symbol_var(280234584), List_var(detail));
+    }
 
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
+        x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
+      }
+
+    }
+
+  }
+  else goto _x2c_cleanup_done_0;
+}
 }
 _x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);

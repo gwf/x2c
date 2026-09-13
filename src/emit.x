@@ -1020,28 +1020,41 @@ static List Emitter._try(Emitter e, List ast, List context) {
         @catch_block
       "else goto $done_label;"
     "}") : %("{" "goto $done_label;" "}");
-  List pattern_decls = NULL, pattern_args = NULL;
+  /* The arms of one `try` are the same patterns on every entry, so the block
+     carries its own static site: the first registration prepares one plan per
+     arm, and later ones skip both the plans and the pattern construction. */
+  List registration = %();
   if (clause) {
-    Array declarations = %[], arguments = %[];
+    String arms = e.fresh_name("catch_arms");
+    String site = e.fresh_name("catch_site");
+    String patterns = e.fresh_name("catch_patterns");
+    Array declarations = %[];
+    unsigned long defaults = 0;
+    int index = 0;
     foreach (List rec, clause.cadr()) {
       List pattern = rec.cadr();
       if (pattern) {
         String name = e.fresh_name("catch_pattern");
+        String slot = %"$patterns[$index]";
         List emitted = e._emit(pattern, context);
-        declarations.push(%("List $name = " @emitted ";"));
-        arguments.push(%("List_var($name)"));
+        declarations.push(
+          %("List $name = " @emitted ";" "$slot = List_var($name);"));
       }
-      else arguments.push(_atom_intern("default"));
+      else defaults |= 1UL << index;
+      index++;
     }
-    pattern_decls = declarations.list_free();
-    pattern_args = e._commas(arguments.list_free());
+    String count = %"$index", String mask = %"${defaults}UL";
+    registration = %(
+      "static MatchCaptureSite $arms[$count];"
+      "static ErrorCatchSite $site = { $arms, $mask, $count, 0, -1 };"
+      "Var $patterns[$count];"
+      "if (x2c_error_catch_site_pending(&$site)) {"
+        @{declarations.list_free()}
+      "}"
+      "ErrorHandler volatile $handle_name = x2c_error_catch_site_push("
+        "&$frame_name, &$site, $patterns);"
+    );
   }
-  List registration = clause ? %(
-    @pattern_decls
-    "ErrorHandler volatile $handle_name = x2c_error_catch_push("
-      "&$frame_name, ${clause.cadr().list().len()}, " @pattern_args
-    ");"
-  ) : %();
   List result = %("{"
              "ExceptionFrame " $frame_name ";"
              @registration

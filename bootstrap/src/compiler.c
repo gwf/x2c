@@ -1332,25 +1332,25 @@ static int _shallow_parse_compile_time_definition(Compiler c, int keyword){
   c -> recovery_depth = old_depth + 1;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      if(keyword) Compiler_parse_keyword_definition(c);
-      else Compiler_parse_macro_definition(c);
-    }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-         {failed = 1;
-      }
-
-    }
-    else goto _x2c_cleanup_done_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    if(keyword) Compiler_parse_keyword_definition(c);  else Compiler_parse_macro_definition(c);
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {failed = 1;
+    }
 
+  }
+  else goto _x2c_cleanup_done_0;
+}
 }
 _x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);
@@ -2281,56 +2281,57 @@ List Compiler_full_parse(Compiler c, Map globs){
       * _x2c_macro_address_5 = c -> recovery_depth + 1; {
         ast = _prepend_preproc(c, ast);  while(Compiler_peek(c, 0) != 11212){
           {
-            ExceptionFrame _x2c_exception_frame_1;  List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), cons(Symbol_var(54), NULL)));  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_push(&_x2c_exception_frame_1, 1, List_var(_x2c_catch_pattern_1));  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-              Token start = c -> token;  Ast volatile node = _replay_declaration_bundle(c);  if(! List_truth(node)) node = Compiler_parse_top_level(c);  if(List_truth(node) && Var_equal(List_car(node), Symbol_var(39266))){
-                {
-                  List volatile item;  Iter _x2c_macro_iterator_23 = List_iter(List_cdr(node), &(struct Iter){
-                    int_var(0)
-                  }
-                  );  Var _x2c_macro_item_23;  while(Iter_try_next(_x2c_macro_iterator_23, & _x2c_macro_item_23)){
-                    item = Var_list(_x2c_macro_item_23); {
-                      _record_top_level_function_state(c, item);  ast = cons(List_var(item), ast);
-                    }
-
-                  }
-
-                }
-
-              }
-              else if(List_truth(node)){
-                _record_top_level_function_state(c, node);  ast = cons(List_var(node), ast);
-              }
-              ast = _prepend_preproc(c, ast);  _debug_tokens(c, start, c -> token);
-            }
-            else {x2c_exception_landed(& _x2c_exception_frame_1); {
-              if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-                x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  {Var category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
-                  (void) category;  if(Diagnostics_reached_limit(c -> diagnostics)){
-                    x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  break;
-                  }
-                  _sync_top_level(c);  ast = _prepend_preproc(c, ast);  if(Compiler_peek(c, 0) == 11212){
-                    x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  break;
-                  }
-                  {
-                    x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  continue;
-                  }
-
-                }
-
-              }
-
-            }
-            else goto _x2c_cleanup_done_1;
+            ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_catch_arms_1[1];  static ErrorCatchSite _x2c_catch_site_1 = { _x2c_catch_arms_1, 0UL, 1, 0, -1 };  Var _x2c_catch_patterns_1[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), cons(Symbol_var(54), NULL)));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
           }
+          ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
+            Token start = c -> token;  Ast volatile node = _replay_declaration_bundle(c);  if(! List_truth(node)) node = Compiler_parse_top_level(c);  if(List_truth(node) && Var_equal(List_car(node), Symbol_var(39266))){
+              {
+                List volatile item;  Iter _x2c_macro_iterator_23 = List_iter(List_cdr(node), &(struct Iter){
+                  int_var(0)
+                }
+                );  Var _x2c_macro_item_23;  while(Iter_try_next(_x2c_macro_iterator_23, & _x2c_macro_item_23)){
+                  item = Var_list(_x2c_macro_item_23); {
+                    _record_top_level_function_state(c, item);  ast = cons(List_var(item), ast);
+                  }
 
+                }
+
+              }
+
+            }
+            else if(List_truth(node)){
+              _record_top_level_function_state(c, node);  ast = cons(List_var(node), ast);
+            }
+            ast = _prepend_preproc(c, ast);  _debug_tokens(c, start, c -> token);
+          }
+          else {x2c_exception_landed(& _x2c_exception_frame_1); {
+            if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+              x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  {Var category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
+                (void) category;  if(Diagnostics_reached_limit(c -> diagnostics)){
+                  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  break;
+                }
+                _sync_top_level(c);  ast = _prepend_preproc(c, ast);  if(Compiler_peek(c, 0) == 11212){
+                  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  break;
+                }
+                {
+                  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  continue;
+                }
+
+              }
+
+            }
+
+          }
+          else goto _x2c_cleanup_done_1;
         }
-        _x2c_cleanup_done_1 :;  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);
-      }
 
+      }
+      _x2c_cleanup_done_1 :;  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);
     }
 
   }
 
+}
 }
 
   x2c_cleanup_leave(&_x2c_defer_record_7);
@@ -2572,13 +2573,11 @@ static void _semantic_reset(Sym sym, Map base, Map globals, int overlay){
   struct SymScope scope ={
     .symbols = sym -> globals, .bindings = Map_new(), .enumerators = Map_new()
   }
-  ;
-  Block_push(sym -> scopes, & scope);
+  ;  Block_push(sym -> scopes, & scope);
 }
 
 void Sym_reset(Sym sym, Map globals){
-  if(! _init_guard_) _file_init_();
-  _semantic_reset(sym, NULL, globals, 0);
+  if(! _init_guard_) _file_init_();  _semantic_reset(sym, NULL, globals, 0);
 }
 
 static void Sym__reset_overlay(Sym sym, Map base, Map overlay){
@@ -2586,13 +2585,11 @@ static void Sym__reset_overlay(Sym sym, Map base, Map overlay){
 }
 
 Map Sym_global_symbols(Sym sym){
-  if(! _init_guard_) _file_init_();
-  return sym -> globals;
+  if(! _init_guard_) _file_init_();  return sym -> globals;
 }
 
 Map Sym_base_symbols(Sym sym){
-  if(! _init_guard_) _file_init_();
-  Map seed = Map_new();
+  if(! _init_guard_) _file_init_();  Map seed = Map_new();
   for(int i = 0;  i < sym -> base_scopes;  i ++) Map_merge(seed, _semantic_scope(sym, i) -> symbols);
   return seed;
 }

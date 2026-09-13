@@ -25,6 +25,8 @@ prefix.
 | [`x2c_error_catch_detach`](error.md#x2c_error_catch_detach) | `lib/error.x` | `void x2c_error_catch_detach(ErrorHandler handle)` |
 | [`x2c_error_catch_push`](error.md#x2c_error_catch_push) | `lib/error.x` | `ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...)` |
 | [`x2c_error_catch_selected`](error.md#x2c_error_catch_selected) | `lib/error.x` | `int x2c_error_catch_selected(ErrorHandler handle)` |
+| [`x2c_error_catch_site_pending`](error.md#x2c_error_catch_site_pending) | `lib/error.x` | `int x2c_error_catch_site_pending(ErrorCatchSite *site)` |
+| [`x2c_error_catch_site_push`](error.md#x2c_error_catch_site_push) | `lib/error.x` | `ErrorHandler x2c_error_catch_site_push( void *target, ErrorCatchSite *site, Var *patterns)` |
 | [`x2c_error_raise`](error.md#x2c_error_raise) | `lib/error.x` | `void x2c_error_raise(Symbol code, List detail)` |
 | [`x2c_error_raise_n`](error.md#x2c_error_raise_n) | `lib/error.x` | `void x2c_error_raise_n( const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)` |
 | [`x2c_exception_claim`](exception.md#x2c_exception_claim) | `lib/exception.x` | `int x2c_exception_claim(ExceptionFrame *frame)` |
@@ -49,8 +51,10 @@ prefix.
 | [`x2c_map_updateindex_from_array`](varops.md#x2c_map_updateindex_from_array) | `lib/varops.x` | `Var x2c_map_updateindex_from_array( Map dst, Var dst_key, Symbol op, Array src, int src_index)` |
 | [`x2c_map_updateindex_from_map`](varops.md#x2c_map_updateindex_from_map) | `lib/varops.x` | `Var x2c_map_updateindex_from_map( Map dst, Var dst_key, Symbol op, Map src, Var src_key)` |
 | [`x2c_match_initialize`](match.md#x2c_match_initialize) | `lib/match.x` | `void x2c_match_initialize(void)` |
+| [`x2c_match_pattern_retainable`](match.md#x2c_match_pattern_retainable) | `lib/match.x` | `int x2c_match_pattern_retainable(Var pattern)` |
 | [`x2c_match_site_match`](match.md#x2c_match_site_match) | `lib/match.x` | `List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)` |
 | [`x2c_match_site_match_replace`](match.md#x2c_match_site_match_replace) | `lib/match.x` | `List x2c_match_site_match_replace( MatchCaptureSite *site, List input, Var pat, Var template)` |
+| [`x2c_match_site_prepare`](match.md#x2c_match_site_prepare) | `lib/match.x` | `MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern)` |
 | [`x2c_match_site_search`](match.md#x2c_match_site_search) | `lib/match.x` | `List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat)` |
 | [`x2c_match_site_search_replace`](match.md#x2c_match_site_search_replace) | `lib/match.x` | `List x2c_match_site_search_replace( MatchCaptureSite *site, List input, Var pat, Var template)` |
 | [`x2c_match_site_try_capture`](match.md#x2c_match_site_try_capture) | `lib/match.x` | `int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer *captures)` |
@@ -90,4 +94,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 78 functions.
+Total: 82 functions.

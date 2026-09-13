@@ -21,7 +21,8 @@ struct ErrorHandler{
   struct ErrorHandler * prev;
   ErrorHandlerFn fn;
   Var data;
-  Array patterns;
+  int watermark;
+  ErrorCatchSite * site;
   Block plans;
   void * target;
   int selected;
@@ -30,6 +31,10 @@ struct ErrorHandler{
   int detached;
 }
 ;
+
+static void _catch_site_bind(ErrorCatchSite * site, Var * patterns);
+
+static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm);
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -152,13 +157,26 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-void * Scope_malloc_in(Scope *, size_t);
+int x2c_error_catch_site_pending(ErrorCatchSite * site){
+  return ! site || __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
+}
+
+int x2c_match_pattern_retainable(Var);
+
+MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
+
+static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
+  int retainable = 1;
+  for(int i = 0;  i < site -> arm_count;  i ++) if(!(site -> defaults &(1UL << i)) && ! x2c_match_pattern_retainable(patterns[i])) retainable = 0;
+  if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
+    if(site -> defaults &(1UL << i)) continue;
+    MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
+    if(plan -> status == MACHINE_INELIGIBLE && site -> fenced_arm < 0) site -> fenced_arm = i;
+  }
+  __atomic_store_n(& site -> state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT, __ATOMIC_RELEASE);
+}
 
 Block Block_new(size_t);
-
-Var Array_push(Array, Var);
-
-Var Symbol_var(Symbol);
 
 MatchPlan MatchPlan_prepare(Var);
 
@@ -166,47 +184,57 @@ void Block_push(Block, const void *);
 
 void Scope_pop(void);
 
+static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm){
+  ErrorCatchSite * site = h -> site;
+  const char * fenced = NULL;
+  int pushed = _scope_push(97614135954008, "could not enter error scope for catch patterns");
+  h -> plans = Block_new(sizeof(MatchPlan));
+  for(int i = 0;  i < site -> arm_count;  i ++){
+    MatchPlan plan = site -> defaults &(1UL << i) ? NULL : MatchPlan_prepare(patterns[i]);
+    Block_push(h -> plans, & plan);
+    if(plan && plan -> status == MACHINE_INELIGIBLE && ! fenced){
+      fenced = plan -> reason;
+      * fenced_arm = i;
+    }
+
+  }
+  if(pushed) Scope_pop();
+  return fenced;
+}
+
+void * Scope_malloc_in(Scope *, size_t);
+
 String String_new(const char *);
+
+Var Symbol_var(Symbol);
 
 Var String_var(String);
 
 Var int_var(int);
 
-ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
-  if(! Error_ready() || ! target || ! arm_count) _floor(20800632064936, "could not register transferring catch");
+ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns){
+  if(! Error_ready() || ! target || ! site || ! site -> arm_count) _floor(20800632064936, "could not register transferring catch");
   ErrorThreadState state = _thread();
   state -> floor_only ++;
   ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
   * h =(struct ErrorHandler){
-    .prev = state -> handler_top, .fn = NULL, .data =((void) 0, Void), .target = target, .selected = - 1, .capture_values = NULL, .retained = NULL, .detached = 0
+    .prev = state -> handler_top, .fn = NULL, .data =((void) 0, Void), .site = site, .target = target, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
   }
   ;
-  int pushed = _scope_push(97614135954008, "could not enter error scope for catch patterns");
-  h -> patterns = Array_new();
-  h -> plans = Block_new(sizeof(MatchPlan));
+  if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING) _catch_site_bind(site, patterns);
   const char * fenced = NULL;
   int fenced_arm = - 1;
-  va_list args;
-  va_start(args, arm_count);
-  for(unsigned i = 0;  i < arm_count;  i ++){
-    Var pattern = va_arg(args, Var);
-    Array_push(h -> patterns, pattern);
-    MatchPlan plan = Var_equal(pattern, Symbol_var(8938171176)) ? NULL : MatchPlan_prepare(pattern);
-    Block_push(h -> plans, & plan);
-    if(plan && plan -> status == MACHINE_INELIGIBLE && ! fenced){
-      fenced = plan -> reason;
-      fenced_arm =(int) i;
-    }
-
+  if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) == ERROR_CATCH_TRANSIENT) fenced = _catch_prepare_plans(h, patterns, & fenced_arm);
+  else if(site -> fenced_arm >= 0){
+    fenced_arm = site -> fenced_arm;
+    fenced = site -> arms[fenced_arm].plan -> reason;
   }
-  va_end(args);
-  if(pushed) Scope_pop();
   state -> floor_only --;
   if(fenced){
     _handler_free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_push",.line = 101};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 160};
       x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(fenced_arm), Symbol_var(12939466), String_var(fence));
       __builtin_unreachable();
     }
@@ -214,6 +242,25 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   }
   state -> handler_top = h;
   return h;
+}
+
+ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
+  if(! Error_ready() || ! arm_count) _floor(20800632064936, "could not register transferring catch");
+  ErrorThreadState state = _thread();
+  ErrorCatchSite * site = Scope_malloc_in(& state -> scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
+  Var * patterns =(void *)(site + 1);
+  * site =(ErrorCatchSite){
+    NULL, 0, (int) arm_count, ERROR_CATCH_TRANSIENT, - 1
+  }
+  ;
+  va_list args;
+  va_start(args, arm_count);
+  for(unsigned i = 0;  i < arm_count;  i ++){
+    patterns[i] = va_arg(args, Var);
+    if(Var_equal(patterns[i], Symbol_var(8938171176))) site -> defaults |= 1UL << i;
+  }
+  va_end(args);
+  return x2c_error_catch_site_push(target, site, patterns);
 }
 
 int x2c_error_catch_selected(ErrorHandler handle){
@@ -680,12 +727,12 @@ Var Map_setindex(Map, Var, Var);
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 649};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 734};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 652};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 737};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -719,7 +766,7 @@ ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
   h -> prev = state -> handler_top;
   h -> fn = fn;
   h -> data = data;
-  h -> patterns = NULL;
+  h -> site = NULL;
   h -> plans = NULL;
   h -> target = NULL;
   h -> selected = - 1;
@@ -752,15 +799,13 @@ static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth){
   return stop;
 }
 
-void Array_free(Array);
+void Scope_free(void *);
 
 void MatchPlan_free(MatchPlan);
 
-void Scope_free(void *);
-
 static void _handler_free(ErrorHandler handle){
   if(! handle) return;
-  if((void *) handle -> patterns != NULL) Array_free(handle -> patterns);
+  if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
   if((void *) handle -> plans != NULL){
     MatchPlan * plans = handle -> plans -> bytes;
     for(size_t i = 0;  i < handle -> plans -> length;  i ++){
@@ -836,10 +881,6 @@ Var List_cadr(List);
 
 Pool List_pool_retain_named(const char *);
 
-size_t Array_len(Array);
-
-Var Array_getindex(Array, int);
-
 int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
 
 void List_pool_release(void);
@@ -853,17 +894,18 @@ static Symbol _catch_match(ErrorHandler h){
   state -> floor_only ++;
   List projection = _cons(& record -> region, Symbol_var(code), detail);
   List_pool_retain_named("Error catch bindings");
-  MatchPlan * plans = h -> plans -> bytes;
-  for(int i = 0;  i < Array_len(h -> patterns);  i ++){
-    Var pattern = Array_getindex(h -> patterns, i);
-    MatchPlan plan = plans[i];
+  ErrorCatchSite * site = h -> site;
+  MatchPlan * plans =(void *) h -> plans != NULL ? h -> plans -> bytes : NULL;
+  for(int i = 0;  i < site -> arm_count;  i ++){
+    int is_default =(site -> defaults &(1UL << i)) != 0;
+    MatchPlan plan = is_default ? NULL : plans ? plans[i] : site -> arms[i].plan;
     MatchCaptureLayout layout = plan ? plan -> layout : NULL;
     Var * values = layout && layout -> binder_count ? Scope_malloc(sizeof(Var) * layout -> binder_count) : NULL;
     MatchCaptureBuffer captures ={
       values, 0, layout ? layout -> binder_count : 0
     }
     ;
-    int matched = Var_equal(pattern, Symbol_var(8938171176)) ? 1 : plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), & captures, NULL) == 1;
+    int matched = is_default ? 1 : plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), & captures, NULL) == 1;
     if(! matched){
       if(values) Scope_free(values);
       continue;
@@ -881,8 +923,6 @@ static Symbol _catch_match(ErrorHandler h){
   return 285842436424;
 }
 
-int Array_truth(Array);
-
 void ExceptionFrame_unwind(void *);
 
 static Symbol _dispatch(Symbol effective, int raised_at, int depth){
@@ -893,7 +933,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
   for(ErrorHandler h = saved;  h;  h = h -> prev){
     state -> handler_top = h -> prev;
     Symbol disposition = 285842436424;
-    if(Array_truth(h -> patterns)) disposition = _catch_match(h);
+    if(h -> site) disposition = _catch_match(h);
     else{
       ErrorRegion view ={
         0
@@ -923,7 +963,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
 
     }
     if(disposition == 1440172936){
-      if(Array_truth(h -> patterns)){
+      if(h -> site){
         state -> handler_top = saved;
         state -> dispatch_saved = NULL;
         _leave();

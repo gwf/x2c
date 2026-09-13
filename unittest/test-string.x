@@ -220,21 +220,28 @@ static void string_invalid_bytes_transfer(void) {
   EXPECT_INT_EQ(caught, 5);
 }
 
-static void string_callback_transfer_releases_temporary(void) {
+static void _callback_transfer_round(int measure) {
   ScopeStats before = Scope.stats();
   int caught = 0;
   try %"abc".map(_string_raises);
   catch %(invariant (value ?value)): caught = value.int() == 75;
   ScopeStats after = Scope.stats();
   EXPECT_TRUE(caught);
-  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  if (measure) EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
 
   before = Scope.stats();
   try %"abc".map(_string_test_nul);
   catch %(bad-result *): caught++;
   after = Scope.stats();
   EXPECT_INT_EQ(caught, 2);
-  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  if (measure) EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+}
+
+/* The first round publishes the catch sites' plans, which `Match` keeps for
+   the life of the process; the second measures the steady state. */
+static void string_callback_transfer_releases_temporary(void) {
+  _callback_transfer_round(0);
+  _callback_transfer_round(1);
 }
 
 static void string_escape_sequences(void) {

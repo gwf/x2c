@@ -6,11 +6,26 @@
 #define __GUARD_0xE00406E8__
 
 #include "common.h"
+#include "match.h"
 typedef struct Error * Error;
 
 typedef struct ErrorHandler * ErrorHandler;
 
 typedef Symbol(* ErrorHandlerFn)(List errors, Var data);
+
+typedef struct ErrorCatchSite{
+  MatchCaptureSite * arms;
+  unsigned long defaults;
+  int arm_count, state, fenced_arm;
+}
+ErrorCatchSite;
+
+#define ERROR_CATCH_PENDING 0
+#define ERROR_CATCH_STATIC 1
+#define ERROR_CATCH_TRANSIENT 2
+int x2c_error_catch_site_pending(ErrorCatchSite * site);
+
+ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns);
 
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...);
 

@@ -202,86 +202,91 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     Var volatile converted =((void) 0, Void);
     {
       ExceptionFrame _x2c_exception_frame_0;
-      List _x2c_catch_pattern_0 = cons(Symbol_var(4372507526), cons(Symbol_var(1818340554), NULL));
+      static MatchCaptureSite _x2c_catch_arms_0[5];
+      static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 5, 0, -1 };
+      Var _x2c_catch_patterns_0[5];
+      if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(4372507526), cons(Symbol_var(1818340554), NULL));
+      _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
       List _x2c_catch_pattern_1 = cons(Symbol_var(48270474208), cons(Symbol_var(1818340554), NULL));
+      _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
       List _x2c_catch_pattern_2 = cons(Symbol_var(143279306979688), cons(Symbol_var(1818340554), NULL));
+      _x2c_catch_patterns_0[2] = List_var(_x2c_catch_pattern_2);
       List _x2c_catch_pattern_3 = cons(Symbol_var(245103016899018), cons(Symbol_var(1818340554), NULL));
+      _x2c_catch_patterns_0[3] = List_var(_x2c_catch_pattern_3);
       List _x2c_catch_pattern_4 = cons(Symbol_var(1020285550996648), cons(Symbol_var(1818340554), NULL));
-      ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 5, List_var(_x2c_catch_pattern_0), List_var(_x2c_catch_pattern_1), List_var(_x2c_catch_pattern_2), List_var(_x2c_catch_pattern_3), List_var(_x2c_catch_pattern_4));
-      x2c_exception_push(& _x2c_exception_frame_0);
-      if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-        converted = Var_convert(value, want);
-      }
-      else {x2c_exception_landed(& _x2c_exception_frame_0);
-      {
-        if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-          int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-          x2c_error_catch_detach(_x2c_error_handler_0);
-          x2c_exception_mark_handled(&_x2c_exception_frame_0);
-          if (_x2c_catch_selected_0 == 0) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-          {
-            Symbol lower_code = 4372507526;
-            List lower = cons(Symbol_var(lower_code), cause);
-            {
-              static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 179};
-              x2c_error_raise_n(& _x2c_error_site_4, 4372507526, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
-              __builtin_unreachable();
-            }
-
-          }
-
-        }
-        else if (_x2c_catch_selected_0 == 1) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+      _x2c_catch_patterns_0[4] = List_var(_x2c_catch_pattern_4);
+    }
+    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+      converted = Var_convert(value, want);
+    }
+    else {x2c_exception_landed(& _x2c_exception_frame_0); {
+      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+        int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
+        x2c_error_catch_detach(_x2c_error_handler_0);
+        x2c_exception_mark_handled(&_x2c_exception_frame_0);
+        if (_x2c_catch_selected_0 == 0) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
         {
-          Symbol lower_code = 48270474208;
+          Symbol lower_code = 4372507526;
           List lower = cons(Symbol_var(lower_code), cause);
           {
-            static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 184};
-            x2c_error_raise_n(& _x2c_error_site_5, 48270474208, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+            static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 179};
+            x2c_error_raise_n(& _x2c_error_site_4, 4372507526, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
             __builtin_unreachable();
           }
 
         }
 
       }
-      else if (_x2c_catch_selected_0 == 2) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+      else if (_x2c_catch_selected_0 == 1) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
       {
-        Symbol lower_code = 143279306979688;
+        Symbol lower_code = 48270474208;
         List lower = cons(Symbol_var(lower_code), cause);
         {
-          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 189};
-          x2c_error_raise_n(& _x2c_error_site_6, 143279306979688, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 184};
+          x2c_error_raise_n(& _x2c_error_site_5, 48270474208, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
           __builtin_unreachable();
         }
 
       }
 
     }
-    else if (_x2c_catch_selected_0 == 3) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+    else if (_x2c_catch_selected_0 == 2) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
     {
-      Symbol lower_code = 245103016899018;
+      Symbol lower_code = 143279306979688;
       List lower = cons(Symbol_var(lower_code), cause);
       {
-        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 194};
-        x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 189};
+        x2c_error_raise_n(& _x2c_error_site_6, 143279306979688, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
         __builtin_unreachable();
       }
 
     }
 
   }
-  else {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+  else if (_x2c_catch_selected_0 == 3) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
   {
-    Symbol lower_code = 1020285550996648;
+    Symbol lower_code = 245103016899018;
     List lower = cons(Symbol_var(lower_code), cause);
     {
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 199};
-      x2c_error_raise_n(& _x2c_error_site_8, 1020285550996648, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 194};
+      x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
       __builtin_unreachable();
     }
 
   }
 
+}
+else {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+{
+  Symbol lower_code = 1020285550996648;
+  List lower = cons(Symbol_var(lower_code), cause);
+  {
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 199};
+    x2c_error_raise_n(& _x2c_error_site_8, 1020285550996648, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+    __builtin_unreachable();
+  }
+
+}
 }
 }
 else goto _x2c_cleanup_done_0;

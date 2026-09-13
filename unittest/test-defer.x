@@ -209,6 +209,15 @@ static int _scope_return(void) {
   $scope() { Scope.malloc(1); return 9; }
 }
 
+static int _scope_transfer_round(void) {
+  int caught = 0;
+  try {
+    $scope() { Scope.malloc(1); raise %(invariant); }
+  }
+  catch %(invariant): { caught = 1; }
+  return caught;
+}
+
 static void system_scope_restores_destination_and_transfer(void) {
   Scope destination = Scope.new(), *previous = Scope.top();
   int evaluations = 0, caught = 0;
@@ -222,13 +231,11 @@ static void system_scope_restores_destination_and_transfer(void) {
   catch %(invariant): { caught = 1; }
   EXPECT_INT_EQ(caught, 1);
   EXPECT_TRUE(Scope.top() == previous);
-  caught = 0;
-  ScopeStats retained = Scope.stats();
   EXPECT_INT_EQ(_scope_return(), 9);
-  try {
-    $scope() { Scope.malloc(1); raise %(invariant); }
-  }
-  catch %(invariant): { caught = 1; }
+  // the first round publishes this catch site's process-lifetime plans
+  caught = _scope_transfer_round();
+  ScopeStats retained = Scope.stats();
+  caught = _scope_transfer_round();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(after.live_allocations, retained.live_allocations);
