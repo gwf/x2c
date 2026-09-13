@@ -6,11 +6,13 @@ Var int_var(int);
 
 int Var_is(Var, Symbol);
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 int main(void){
   x2c_initialize();
   int number = 1, * pointer = & number;
   Var scalar = int_var(number), pointer_value = Var_new(442085973, pointer);
-  int ok = Var_is(scalar, 3453797) && Var_is(scalar, 3453797) && ! Var_is(scalar, 3356265) && ! Var_is(scalar, 3356265) && Var_is(pointer_value, 442085973) && Var_is(pointer_value, 442085973);
+  int ok = Var_is(scalar, 3453797) && Var_is(scalar, 3453797) && ! Var_is(scalar, 3356265) && ! Var_is(scalar, 3356265) && Var_is_row(pointer_value, 4, 3, 1) && Var_is_row(pointer_value, 4, 3, 1);
   printf("%d\n", ok);
   return ok ? 0 : 1;
 }

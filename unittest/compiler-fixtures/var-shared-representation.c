@@ -102,6 +102,8 @@ void * Scope_malloc(size_t);
 
 String Var_str(Var);
 
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
 int Var_is(Var, Symbol);
 
 int main(void){
@@ -117,7 +119,7 @@ int main(void){
   Row recovered_row = Var_row(boxed_row);
   Cell recovered_cell = Var_cell(boxed_cell);
   PlainRowChild recovered_child = Var_pointer(boxed_child);
-  printf("%s %s %d %d %d %d %d %d %d\n", Row_summary(recovered_row), Var_str(boxed_row), recovered_cell -> value, Var_is(boxed_row, 806120), Var_is(boxed_row, 806120), Var_is(boxed_cell, 3683441), Var_is(boxed_cell, 3683441), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
+  printf("%s %s %d %d %d %d %d %d %d\n", Row_summary(recovered_row), Var_str(boxed_row), recovered_cell -> value, Var_is_row(boxed_row, 9, 7, 4), Var_is_row(boxed_row, 9, 7, 4), Var_is_row(boxed_cell, 0, 0, 0), Var_is_row(boxed_cell, 0, 0, 0), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
   return 0;
 }
 

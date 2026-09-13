@@ -15,6 +15,7 @@
 #pragma once
 
 $(import "error-macros.xmacro")
+$(import "var-tags.xmacro")
 
 #include <float.h>
 #include <limits.h>
@@ -600,63 +601,27 @@ inline String long.repr(long l)          => l.var().repr();
 
 // Var to builtins
 
-/** Extracts the `Array` pointer from `x`, or NULL for another tag. */
-inline Array Var.array(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x0) return NULL;
-  return (Array) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Block` pointer from `x`, or NULL for another tag. */
-inline Block Var.block(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x1) return NULL;
-  return (Block) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Buffer` pointer from `x`, or NULL for another tag. */
-inline Buffer Var.buffer(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x2) return NULL;
-  return (Buffer) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Bytes` pointer from `x`, or NULL for another tag. */
-inline Bytes Var.bytes(Var x) {
-  if (x.u64 >> 48 != 0x0008 || (x.u64 & 0x7) != 0x3) return NULL;
-  return (Bytes) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `file` payload after the caller establishes the matching
-    `Var` kind.
+/** Reports whether `value` occupies the encoding row at `top`/`bottom`.
+    `mask` selects the bits the decoder discriminates on within `top`'s
+    group, so a caller that already knows the row tests it with two
+    compares instead of a decode. `var-tags.xmacro` projects the rows that
+    qualify; a row whose decoded form carries a validity clause is not one
+    of them and must ask `Var.is`.
 */
-inline File Var.file(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x0) return NULL;
-  return (File) (x.u64 & 0x0000FFFFFFFFFFF8ul);
+inline int Var.is_row(
+  Var value, unsigned top, unsigned long mask, unsigned long bottom) {
+  return value.u64 >> 48 == top && (value.u64 & mask) == bottom;
 }
 
-/** Extracts the `List` pointer from `x`, or `nil` for another tag. */
-inline List Var.list(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x4) return NULL;
-  return (List) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Iter` pointer from `x`, or NULL for another tag. */
-inline Iter Var.as_iter(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x2) return NULL;
-  return (Iter) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `Map` pointer from `x`, or NULL for another tag. */
-inline Map Var.map(Var x) {
-  if (x.u64 >> 48 != 0x0009 || (x.u64 & 0x7) != 0x6) return NULL;
-  return (Map) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-/** Extracts the `string` payload after the caller establishes the matching
-    `Var` kind.
-*/
-inline String Var.string(Var x) {
-  if (x.u64 >> 48 != 0x000B || (x.u64 & 0x7) != 0x1) return NULL;
-  return (String) (x.u64 & 0x0000FFFFFFFFFFF8ul);
-}
+$var.tag.unbox(Array, array, <array>);
+$var.tag.unbox(Block, block, <block>);
+$var.tag.unbox(Buffer, buffer, <buffer>);
+$var.tag.unbox(Bytes, bytes, <bytes>);
+$var.tag.unbox(File, file, <file>);
+$var.tag.unbox(Iter, as_iter, <iter>);
+$var.tag.unbox(List, list, <list>);
+$var.tag.unbox(Map, map, <map>);
+$var.tag.unbox(String, string, <string>);
 
 /** Extracts the `symbol` payload after the caller establishes the matching
     `Var` kind.

@@ -384,8 +384,8 @@ Public functions:
 `Type.is_enum_tag_body`, `Type.is_pointer`, `Type.is_array`,
 `Type.is_function`, `Type.is_bitfield`, `Type.scalar`, `Type.scalar_tag`,
 `Type.var_numeric_extractor`, `Type.var_numeric_update_helper`,
-`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.initialize`,
-`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
+`Type.initialize`, `Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
 `Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
 `Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
@@ -497,11 +497,11 @@ Public functions:
 `uint.var`, `uint.str`, `uint.repr`, `unsigned.var`, `unsigned.str`,
 `unsigned.repr`, `float.var`, `float.str`, `float.repr`, `double.var`,
 `double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`, `long.repr`,
-`Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`, `Var.list`,
-`Var.as_iter`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`, `Var.uchar`,
-`Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`, `Var.long`,
-`Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`, `Var.float`,
-`Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
+`Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
+`Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`,
+`Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`,
+`Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`,
+`Var.float`, `Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
 `x2c_normalize_index`, `x2c_normalize_slice`
 
 ### [lib/context.x](../lib/context.x)

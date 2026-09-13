@@ -287,6 +287,27 @@ $(defun var.tag.decode (groups middle bottom)
       (lambda (top) (var.tag.decode-top top rows middle bottom))
       tops))))
 
+/* A `Literal` tag argument arrives as its resolved Symbol expression; the
+   Symbol itself is the last element of the literal node. */
+$(defun var.tag.hole-symbol (form)
+  (car (cdr (cdr (cdr (car (cdr (cdr form))))))))
+
+$(defun var.tag.row (tag)
+  (let ((found (var.tag.filter
+                 (lambda (row) (eq? (car row) tag)) var.tag.row-groups)))
+    (if (null? found)
+        (x2c.diagnostic.fail "unknown Var tag"
+          (list (string-append "tag: " (str tag))))
+        (car found))))
+
+$(defun var.tag.hole-row (form) (var.tag.row (var.tag.hole-symbol form)))
+
+$(defun var.tag.top-of (form)
+  (x2c.literal.int (var.tag.top (var.tag.hole-row form))))
+
+$(defun var.tag.bottom-of (form)
+  (x2c.literal.int (var.tag.bottom (var.tag.hole-row form))))
+
 macro Enumerator $var.tag.ids() => {
   $(var.tag.map var.tag.id-row var.tag.row-groups)...
 }
@@ -309,4 +330,60 @@ macro Expression $var.tag.numeric.symbolset() => (
 
 macro Statement $var.tag.decode(Expr $middle, Expr $bottom) => {
   $(var.tag.decode var.tag.row-groups $middle $bottom)...
+}
+
+/* A group of one is selected by its top alone; the decoder narrows a group
+   of two or four to the low bit or two of the bottom field. */
+$(defun var.tag.group-mask (count)
+  (cond ((= count 1) 0) ((= count 2) 1) ((= count 4) 3) (true 7)))
+
+/* Rows whose decoded form carries a validity clause in `_decode_builtin`,
+   and the immediate rows the decoder discriminates by middle rather than
+   bottom. Neither is one mask-and-compare, so neither gets a constant row. */
+$(defun var.tag.validated? (row)
+  (member (var.tag.id row)
+    '(_long_ _ulong_ _llong_ _ullong_ _ldouble_ _array_ _map_
+      _u8_ _i8_ _u16_ _i16_ _nan_ _neginf_ _posinf_)))
+
+$(defun var.tag.constant-row? (row)
+  (not (or (var.tag.validated? row)
+           (or (= (var.tag.top row) 0x8002) (= (var.tag.top row) 0x8003)))))
+
+$(defun var.tag.list (items)
+  (if (null? items) '(expr ("List") (nil))
+      `(expr ("List") (cons ,(car items) ,(var.tag.list (cdr items))))))
+
+$(defun var.tag.row-entry (row rows)
+  (let ((siblings (filter
+                    (lambda (other) (= (var.tag.top other) (var.tag.top row)))
+                    rows)))
+    `(map-entry ,(x2c.literal.symbol (car row))
+       ,(var.tag.list (list
+          (x2c.literal.int (var.tag.top row))
+          (x2c.literal.int (var.tag.group-mask (length siblings)))
+          (x2c.literal.int (var.tag.bottom row)))))))
+
+$(defun var.tag.constant-rows (groups)
+  (let ((rows (var.tag.filter var.tag.decode-row? groups)))
+    (map (lambda (row) (var.tag.row-entry row rows))
+      (filter var.tag.constant-row? rows))))
+
+/* The rows a caller holding a statically known tag can test without
+   decoding, as `tag : (top, mask, bottom)`. */
+macro Entry $var.tag.constant.rows() => {
+  $(var.tag.constant-rows var.tag.row-groups)...
+}
+
+/* Object rows carry their payload pointer in the low 48 bits with the
+   bottom three bits reserved for the row selector, so reading one back is
+   the row's top and bottom columns and a mask. */
+macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) => {
+  $type Var.$method(Var);
+
+  /** Extracts the `$type` payload of `value`, or NULL for another tag. */
+  inline $type Var.$method(Var value) {
+    if (value.u64 >> 48 != $(var.tag.top-of $tag) ||
+        (value.u64 & 0x7) != $(var.tag.bottom-of $tag)) return NULL;
+    return ($type) (value.u64 & 0x0000FFFFFFFFFFF8ul);
+  }
 }

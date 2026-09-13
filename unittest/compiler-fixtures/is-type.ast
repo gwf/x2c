@@ -1616,14 +1616,24 @@
                                                                                  "Var") 
                                                                                 (
                                                                                  
-                                                                                 "Symbol"))) 
+                                                                                 unsigned) 
+                                                                                (
+                                                                                 
+                                                                                 unsigned 
+                                                                                 
+                                                                                 long) 
+                                                                                (
+                                                                                 
+                                                                                 unsigned 
+                                                                                 
+                                                                                 long))) 
                                                                               
                                                                               int) 
                                                                         (ident 
                                                                          (
                                                                           binding 
-                                                                          24 
-                                                                          "Var_is"))) 
+                                                                          62 
+                                                                          "Var_is_row"))) 
                                                                   (args (expr (
                                                                                
                                                                                "Var") 
@@ -1633,8 +1643,22 @@
                                                                            47 
                                                                            "list"))) 
                                                                    (expr (
-                                                                          "Symbol") 
-                                                                    "806120")))))) 
+                                                                          unsigned) 
+                                                                    (literal 
+                                                                     (unsigned) 
+                                                                     "9")) 
+                                                                   (expr (
+                                                                          unsigned 
+                                                                          long) 
+                                                                    (literal 
+                                                                     (unsigned 
+                                                                      long) "7")) 
+                                                                   (expr (
+                                                                          unsigned 
+                                                                          long) 
+                                                                    (literal 
+                                                                     (unsigned 
+                                                                      long) "4"))))))) 
                                                               (expr (int) 
                                                                (call (expr ((
                                                                              func 
@@ -1643,20 +1667,42 @@
                                                                                "Var") 
                                                                               (
                                                                                
-                                                                               "Symbol"))) 
+                                                                               unsigned) 
+                                                                              (
+                                                                               
+                                                                               unsigned 
+                                                                               
+                                                                               long) 
+                                                                              (
+                                                                               
+                                                                               unsigned 
+                                                                               
+                                                                               long))) 
                                                                             int) 
                                                                       (ident 
                                                                        (binding 
-                                                                        24 
-                                                                        "Var_is"))) 
+                                                                        62 
+                                                                        "Var_is_row"))) 
                                                                 (args (expr (
                                                                              "Var") 
                                                                        (ident 
                                                                         (binding 
                                                                          48 
                                                                          "string"))) 
-                                                                 (expr ("Symbol") 
-                                                                  "1318210446")))))) 
+                                                                 (expr (unsigned) 
+                                                                  (literal 
+                                                                   (unsigned) 
+                                                                   "11")) 
+                                                                 (expr (unsigned 
+                                                                        long) 
+                                                                  (literal 
+                                                                   (unsigned 
+                                                                    long) "7")) 
+                                                                 (expr (unsigned 
+                                                                        long) 
+                                                                  (literal 
+                                                                   (unsigned 
+                                                                    long) "1"))))))) 
                                                             (expr (int) 
                                                              (call (expr ((func 
                                                                            ((
@@ -1686,14 +1732,24 @@
                                                                                   "Var") 
                                                                                  (
                                                                                   
-                                                                                  "Symbol"))) 
+                                                                                  unsigned) 
+                                                                                 (
+                                                                                  
+                                                                                  unsigned 
+                                                                                  
+                                                                                  long) 
+                                                                                 (
+                                                                                  
+                                                                                  unsigned 
+                                                                                  
+                                                                                  long))) 
                                                                                
                                                                                int) 
                                                                          (ident 
                                                                           (
                                                                            binding 
-                                                                           24 
-                                                                           "Var_is"))) 
+                                                                           62 
+                                                                           "Var_is_row"))) 
                                                                    (args (expr 
                                                                           ("Var") 
                                                                           (ident 
@@ -1703,81 +1759,156 @@
                                                                             
                                                                             "scalar"))) 
                                                                     (expr (
-                                                                           "Symbol") 
-                                                                     "45156")))))))) 
+                                                                           unsigned) 
+                                                                     (literal 
+                                                                      (unsigned) 
+                                                                      "11")) 
+                                                                    (expr (
+                                                                           unsigned 
+                                                                           long) 
+                                                                     (literal 
+                                                                      (unsigned 
+                                                                       long) "7")) 
+                                                                    (expr (
+                                                                           unsigned 
+                                                                           long) 
+                                                                     (literal 
+                                                                      (unsigned 
+                                                                       long) "6"))))))))) 
                                                         (expr (int) 
                                                          (call (expr ((func ((
                                                                               "Var") 
                                                                              (
-                                                                              "Symbol"))) 
+                                                                              unsigned) 
+                                                                             (
+                                                                              unsigned 
+                                                                              
+                                                                              long) 
+                                                                             (
+                                                                              unsigned 
+                                                                              
+                                                                              long))) 
                                                                       int) 
                                                                 (ident 
-                                                                 (binding 24 
-                                                                  "Var_is"))) 
+                                                                 (binding 62 
+                                                                  "Var_is_row"))) 
                                                           (args (expr ("Var") 
                                                                  (ident 
                                                                   (binding 50 
                                                                    "pointer_value"))) 
-                                                           (expr ("Symbol") 
-                                                            "442085973")))))) 
+                                                           (expr (unsigned) 
+                                                            (literal (unsigned) 
+                                                             "4")) 
+                                                           (expr (unsigned long) 
+                                                            (literal 
+                                                             (unsigned long) "3")) 
+                                                           (expr (unsigned long) 
+                                                            (literal 
+                                                             (unsigned long) "1"))))))) 
                                                       (expr (int) 
                                                        (call (expr ((func ((
                                                                             "Var") 
                                                                            (
-                                                                            "Symbol"))) 
+                                                                            unsigned) 
+                                                                           (
+                                                                            unsigned 
+                                                                            long) 
+                                                                           (
+                                                                            unsigned 
+                                                                            long))) 
                                                                     int) 
                                                               (ident 
-                                                               (binding 24 
-                                                                "Var_is"))) 
+                                                               (binding 62 
+                                                                "Var_is_row"))) 
                                                         (args (expr ("Var") 
                                                                (ident 
                                                                 (binding 50 
                                                                  "pointer_value"))) 
-                                                         (expr ("Symbol") 
-                                                          "442085973")))))) 
+                                                         (expr (unsigned) 
+                                                          (literal (unsigned) 
+                                                           "4")) 
+                                                         (expr (unsigned long) 
+                                                          (literal 
+                                                           (unsigned long) "3")) 
+                                                         (expr (unsigned long) 
+                                                          (literal 
+                                                           (unsigned long) "1"))))))) 
                                                     (expr (int) 
                                                      (call (expr ((func (("Var") 
                                                                          (
-                                                                          "Symbol"))) 
+                                                                          unsigned) 
+                                                                         (
+                                                                          unsigned 
+                                                                          long) 
+                                                                         (
+                                                                          unsigned 
+                                                                          long))) 
                                                                   int) 
                                                             (ident 
-                                                             (binding 24 
-                                                              "Var_is"))) 
+                                                             (binding 62 
+                                                              "Var_is_row"))) 
                                                       (args (expr ("Var") 
                                                              (ident 
                                                               (binding 51 
                                                                "double_pointer_value"))) 
-                                                       (expr ("Symbol") 
-                                                        "56587004501")))))) 
+                                                       (expr (unsigned) 
+                                                        (literal (unsigned) "6")) 
+                                                       (expr (unsigned long) 
+                                                        (literal (unsigned long) 
+                                                         "7")) 
+                                                       (expr (unsigned long) 
+                                                        (literal (unsigned long) 
+                                                         "6"))))))) 
                                                   (expr (int) 
                                                    (call (expr ((func (("Var") 
-                                                                       ("Symbol"))) 
+                                                                       (unsigned) 
+                                                                       (unsigned 
+                                                                        long) 
+                                                                       (unsigned 
+                                                                        long))) 
                                                                 int) 
                                                           (ident 
-                                                           (binding 24 "Var_is"))) 
+                                                           (binding 62 
+                                                            "Var_is_row"))) 
                                                     (args (expr ("Var") 
                                                            (ident 
                                                             (binding 51 
                                                              "double_pointer_value"))) 
-                                                     (expr ("Symbol") 
-                                                      "56587004501")))))) 
+                                                     (expr (unsigned) 
+                                                      (literal (unsigned) "6")) 
+                                                     (expr (unsigned long) 
+                                                      (literal (unsigned long) 
+                                                       "7")) 
+                                                     (expr (unsigned long) 
+                                                      (literal (unsigned long) 
+                                                       "6"))))))) 
                                                 (expr (int) 
                                                  (call (expr ((func (("Var") 
-                                                                     ("Symbol"))) 
+                                                                     (unsigned) 
+                                                                     (unsigned 
+                                                                      long) 
+                                                                     (unsigned 
+                                                                      long))) 
                                                               int) 
                                                         (ident 
-                                                         (binding 24 "Var_is"))) 
+                                                         (binding 62 
+                                                          "Var_is_row"))) 
                                                   (args (expr ("Var") 
                                                          (ident 
                                                           (binding 52 
                                                            "null_value"))) 
-                                                   (expr ("Symbol") "3683441")))))) 
+                                                   (expr (unsigned) 
+                                                    (literal (unsigned) "0")) 
+                                                   (expr (unsigned long) 
+                                                    (literal (unsigned long) "0")) 
+                                                   (expr (unsigned long) 
+                                                    (literal (unsigned long) "0"))))))) 
                                               (expr (int) 
                                                (op ! (expr (int) 
                                                       (call (expr ((func (("Var"))) 
                                                                    int) 
                                                              (ident 
-                                                              (binding 62 
+                                                              (binding 63 
                                                                "Var_is_void"))) 
                                                        (args (expr ("Var") 
                                                               (ident 
@@ -1786,21 +1917,33 @@
                                             (expr (int) 
                                              (call (expr ((func (("Var"))) int) 
                                                     (ident 
-                                                     (binding 62 "Var_is_void"))) 
+                                                     (binding 63 "Var_is_void"))) 
                                               (args (expr ("Var") 
                                                      (ident 
                                                       (binding 54 "absent")))))))) 
                                           (expr (int) 
                                            (op ! (expr (int) 
                                                   (call (expr ((func (("Var") 
-                                                                      ("Symbol"))) 
+                                                                      (unsigned) 
+                                                                      (unsigned 
+                                                                       long) 
+                                                                      (unsigned 
+                                                                       long))) 
                                                                int) 
                                                          (ident 
-                                                          (binding 24 "Var_is"))) 
+                                                          (binding 62 
+                                                           "Var_is_row"))) 
                                                    (args (expr ("Var") 
                                                           (ident 
                                                            (binding 54 "absent"))) 
-                                                    (expr ("Symbol") "3683441")))))))) 
+                                                    (expr (unsigned) 
+                                                     (literal (unsigned) "0")) 
+                                                    (expr (unsigned long) 
+                                                     (literal (unsigned long) 
+                                                      "0")) 
+                                                    (expr (unsigned long) 
+                                                     (literal (unsigned long) 
+                                                      "0"))))))))) 
                                         (expr (int) 
                                          (call (expr ((func (("Var"))) int) 
                                                 (ident 
@@ -1871,7 +2014,7 @@
                             (expr (int) (literal (int) "1")))))) 
                         (expr (int) 
                          (call (expr ((func (("Var"))) int) 
-                                (ident (binding 62 "Var_is_void"))) 
+                                (ident (binding 63 "Var_is_void"))) 
                           (args (expr ("Var") 
                                  (call (expr ((func ((* (func ((void))) int))) 
                                               "Var") 
@@ -1918,7 +2061,7 @@
   (at 39 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 63 "printf"))) 
+     (call (expr () (ident (binding 64 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
        (expr (int) (ident (binding 61 "ok"))) 
        (expr (int) (ident (binding 15 "calls"))) 

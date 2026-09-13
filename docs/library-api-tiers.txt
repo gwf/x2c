@@ -28,6 +28,7 @@ lib/common.x|advanced|String.truth,String.var,Symbol.var,Var.array,Var.block
 lib/common.x|advanced|Var.char
 lib/common.x|advanced|Var.as_iter,Var.buffer,Var.bytes,Var.double,Var.file
 lib/common.x|advanced|Var.float,Var.int,Var.is_wide,Var.list,Var.long
+lib/common.x|advanced|Var.is_row
 lib/common.x|advanced|Var.long_double,Var.long_long,Var.map
 lib/common.x|advanced|Var.short,Var.string,Var.symbol,Var.uchar,Var.uint
 lib/common.x|advanced|Var.ulong,Var.ulong_long,Var.unsigned,Var.ushort

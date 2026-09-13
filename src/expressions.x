@@ -1479,6 +1479,22 @@ static List Compiler._binary_expression(
   return %(expr $type $operation);
 }
 
+/* A statically known tag whose encoding row the decoder discriminates on
+   `top` and `bottom` alone tests as two compares. `Var.is_row` takes the
+   row as constants so the C compiler folds them and the operand is
+   evaluated once. Tags with a validity clause, an immediate width, or a
+   user registration have no row and keep the deciding decode. */
+static List _constant_row_test(
+  Compiler c, List lhs, Symbol tag, Token origin) {
+  unsigned long top, mask, bottom;
+  if (!Type.var_tag_row(tag, &top, &mask, &bottom)) return NULL;
+  List callee = _resolve_identifier(c, %"Var_is_row", NULL, origin);
+  return %(expr (int) (call $callee (args $lhs
+    (expr (unsigned) (literal (unsigned) ${%"$top"}))
+    (expr (unsigned long) (literal (unsigned long) ${%"$mask"}))
+    (expr (unsigned long) (literal (unsigned long) ${%"$bottom"})))));
+}
+
 static List _resolve_initializer(Compiler c, List node, Token origin) {
   match (node) {
     case %(dotinit ?field ?value):
@@ -1691,6 +1707,8 @@ static List _resolve_content(
         return %(expr (int) (call $callee (args $lhs)));
       }
       Symbol vartag = c.require_var_tag(target, origin);
+      List direct = _constant_row_test(c, lhs, vartag, origin);
+      if (direct) return direct;
       String tagsym = %"${(unsigned long) vartag}";
       List callee = _resolve_identifier(c, %"Var_is", NULL, origin);
       return %(expr (int) (call $callee (args
@@ -1712,6 +1730,11 @@ static List _resolve_content(
         c.report_error(
           <type>, "operator 'is' requires a type or Symbol on the right",
           origin, %("operand type: ${selector_type.repr()}"));
+      match (selector)
+        case %(expr ("Symbol") (literal ("Symbol") ? ?(Symbol tag))): {
+          List direct = _constant_row_test(c, lhs, tag, origin);
+          if (direct) return direct;
+        }
       List callee = _resolve_identifier(c, %"Var_is", NULL, origin);
       return %(expr (int) (call $callee (args $lhs $selector)));
     }
