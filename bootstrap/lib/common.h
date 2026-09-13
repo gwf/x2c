@@ -107,6 +107,7 @@ X2CErrorSite;
 #define VAR_F64_NEG_MAX_RAW    0xFFEFFFFFFFFFFFFFul
 #define VAR_F64_NEG_MAX_ESCAPE 0x8003000400000000ul
 void x2c_scope_thread_release(void);
+void x2c_match_thread_release(void);
 void x2c_static_thread_release(void);
 void x2c_static_shutdown(void);
 void x2c_thread_state_release(void);

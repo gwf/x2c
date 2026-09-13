@@ -27,7 +27,7 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-scope bm-file bm-logger bm-iter bm-exception bm-var bm-varops \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler \
-	bm-lisp-auto
+	bm-match-cache bm-lisp-auto
 SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
 APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
@@ -434,6 +434,9 @@ bm-map-u32-campaign: build			## Run full runtime-free U32Map campaign
 bm-compiler: stage-1					## Measure representative translation
 	./unittest/benchmarks/run-compiler-translation.sh
 
+
+bm-match-cache: stage-1					## Run Match cache acceptance gates
+	./unittest/benchmarks/run-match-cache-benchmark.sh
 
 bm-lisp-auto: stage-1					## Run Lisp AUTO acceptance gate
 	./unittest/benchmarks/run-lisp-auto-benchmark.sh

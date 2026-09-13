@@ -507,7 +507,8 @@ static void fenced_pattern_raises_at_every_consumer(void) {
 
   EXPECT_INT_EQ(caught, 5);
   EXPECT_TRUE(bindings == %(sentinel));
-  // every consumer reported the fence and none returned a plan
+  // no fenced plan was cached and no lease survived the raise
+  MatchCache.flush_default();
 }
 
 // consumer parity: search, replacement - - - - - - - - - - - - - - - - - - -
@@ -830,6 +831,7 @@ static void source_site_owns_only_its_static_plan(void) {
     x2c_match_site_try_capture(&capture_site, %(ok 9), pattern, &captures), 1
   );
   EXPECT_INT_EQ(value.int(), 9);
+  MatchCache.flush_default();
 }
 
 static MatchCaptureSite match_site, try_match_site, sentinel_site;
