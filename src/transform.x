@@ -1310,14 +1310,9 @@ static List _defer_rewrite_captures(
       }
       return ast;
     }
-  Array rewritten = %[];
-  foreach (Var child, ast) {
-    if (child is <list>)
-      child = _defer_rewrite_captures(
-        child, captures, written, env_name);
-    rewritten.push(child);
-  }
-  return rewritten.list_free();
+  List child;
+  $ast.rewrite_children(ast, child,
+    _defer_rewrite_captures(child, captures, written, env_name));
 }
 
 static List _lower_callable_defer(

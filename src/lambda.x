@@ -367,11 +367,47 @@ static List _checked_func_argument(
   return compiler.convert_expression(picked, parameter_type);
 }
 
-/* Every generated native adapter has the runtime `FuncAdapter` ABI:
-   `Var name(Func fn, const FuncArg *argv)`. It reads arguments into locals
-   from index zero upward before calling the direct or context-bound target;
-   C does not sequence call arguments, while these readers can raise. Error
-   transfer through the generated C needs no landing pad. */
+/* Materialize arguments in index order: C does not sequence call operands,
+   and a reader failure must prevent later conversions and body effects. */
+static List _func_argument_locals(
+  Compiler compiler, Type diagnostic_type, List types, List names,
+  List fn_binding, List argv_binding) {
+  List value_type = NULL, reference_type = NULL;
+  List value_helper = _adapter_helper(
+    compiler, %"x2c_func_value_argument", &value_type);
+  List reference_helper = _adapter_helper(
+    compiler, %"x2c_func_reference_argument", &reference_type);
+  Array locals = %[];
+  int index = 0;
+  foreach (Type type, types) {
+    List binding = names.car();
+    names = names.cdr();
+    Type storage_type = NULL;
+    List value = _checked_func_argument(
+      compiler, diagnostic_type, type,
+      value_helper, value_type, reference_helper, reference_type,
+      fn_binding, argv_binding, index++, &storage_type);
+    List (base, mods) = storage_type.declaration_parts();
+    locals.push(
+      %(declare $base (bindings (op = (bind $binding $mods) $value))));
+  }
+  return locals.list_free();
+}
+
+static List _helper_body(Compiler compiler, List body, List setup);
+
+/* One emitted FuncAdapter ABI. Callers order context setup around argument
+   locals; the ordinary helper body owner boxes results and normalizes Null. */
+static void _publish_func_adapter(
+  Compiler compiler, List binding, List fn_binding, List argv_binding,
+  List body, List setup) {
+  List parameters = _decl_params_from_types_with_names(
+    %(("Func") (* const "FuncArg")), %($fn_binding $argv_binding));
+  compiler.add_early(
+    %(function (static ("Var")) (bind $binding ((fnmod $parameters)))
+        ${_helper_body(compiler, body, setup)}));
+}
+
 static List _build_func_adapter(
   Compiler c, Type diagnostic_type, Type source_type,
   List target, List supplied_fn_binding, List prefix) {
@@ -389,18 +425,15 @@ static List _build_func_adapter(
   source_type = source_type.canonicalize();
   return_type = return_type.canonicalize();
 
-  List value_type = NULL, reference_type = NULL, null_type = NULL;
-  List value_helper = _adapter_helper(
-    c, %"x2c_func_value_argument", &value_type);
-  List reference_helper = _adapter_helper(
-    c, %"x2c_func_reference_argument", &reference_type);
-  List null_helper = _adapter_helper(c, %"Var_null", &null_type);
-  if (!value_helper || !value_type ||
-      !reference_helper || !reference_type ||
-      !null_helper || !null_type) {
-    _typed_adapter_error(
-      c, "native binding needs Func argument readers from lib/func.x",
-      diagnostic_type, source_type, NULL);
+  foreach (String helper_name,
+           %("x2c_func_value_argument" "x2c_func_reference_argument"
+             "Var_null")) {
+    List helper_type = NULL;
+    List helper = _adapter_helper(c, helper_name, &helper_type);
+    if (!helper || !helper_type)
+      _typed_adapter_error(
+        c, "native binding needs Func argument readers from lib/func.x",
+        diagnostic_type, source_type, NULL);
   }
 
   String name = c.fresh_name("func_adapt");
@@ -410,47 +443,13 @@ static List _build_func_adapter(
                   : c.sym.introduce(c.fresh_name("func_binding"));
   List argv_binding = c.sym.introduce(c.fresh_name("func_argv"));
   List names = _auto_names(c, params.len());
-  Array locals = %[], arguments = %[], int index = 0;
-  // Each argument becomes a local: C fixes no evaluation order, and
-  // argument readers raise, so index 0 must report before index 1.
-  for (; params;
-       params = params.cdr(), names = names.cdr(), index++) {
-    Type ptype = params.car();
-    List binding = names.car();
-    Type storage_type = NULL;
-    List value = _checked_func_argument(
-      c, diagnostic_type, ptype,
-      value_helper, value_type, reference_helper, reference_type,
-      fn_binding, argv_binding, index, &storage_type);
-    List (base, mods) = storage_type.declaration_parts();
-    locals.push(
-      %(declare $base (bindings (op = (bind $binding $mods) $value))));
-    arguments.push(%(expr $ptype (ident $binding)));
-  }
-  List call = %(call $target (args @{arguments.list_free()}));
-  List body = NULL;
-  if (return_type === %(void)) {
-    List null_call = %(
-      expr ("Var") (call (expr $null_type (ident $null_helper)) (args)));
-    body = %(@prefix @{locals.list_free()}
-             (stmnt (expr $return_type $call))
-             (stmnt (return $null_call)));
-  }
-  else {
-    List boxed = c.convert_expression(%(expr $return_type $call), %("Var"));
-    body = %(@prefix @{locals.list_free()} (stmnt (return $boxed)));
-  }
-  Type fn_type = %("Func"), argv_type = %(* const "FuncArg");
-  List declaration_params = %(params
-    ${fn_type.parameter_ast(fn_binding)}
-    ${argv_type.parameter_ast(argv_binding)}
-  );
-  List function = %(
-    function (static ("Var"))
-      (bind $adapter_binding ((fnmod $declaration_params)))
-      (block @body)
-  );
-  c.add_early(function);
+  List locals = _func_argument_locals(
+    c, diagnostic_type, params, names, fn_binding, argv_binding);
+  List arguments = params.zip_with(
+    names, %!(Type type, List binding) => %(expr $type (ident $binding)));
+  List call = %(expr $return_type (call $target (args @arguments)));
+  _publish_func_adapter(
+    c, adapter_binding, fn_binding, argv_binding, call, %(@prefix @locals));
   return adapter_binding;
 }
 
@@ -686,6 +685,18 @@ static List _direct_func_value(
     bridge, parameters, getter_type, NULL);
 }
 
+static List _func_context_call(
+  Type type, List context, List adapter, Type adapter_type, List signature,
+  List constructor, Type constructor_type) {
+  List address = %(expr ${type.reference()}
+    (op & (expr $type (ident $context))));
+  List size = %(expr (size_t) (sizeof (expr $type (ident $context))));
+  return %(expr ("Func")
+    (call (expr $constructor_type (ident $constructor))
+          (args (expr $adapter_type (ident $adapter))
+                $signature $address $size)));
+}
+
 static List _indirect_func_value(
   Compiler compiler, List expression, Type pointer_type) {
   Type context_type = NULL;
@@ -719,19 +730,9 @@ static List _indirect_func_value(
     expr $pointer_type
       (op . (expr $context_type (ident $context)) ($field_name))
   );
-  List address = %(
-    expr ${context_type.reference()}
-      (op & (expr $context_type (ident $context)))
-  );
-  List size = %(
-    expr (size_t) (sizeof (expr $context_type (ident $context)))
-  );
-  List constructed = %(
-    expr ("Func")
-      (call (expr $constructor_type (ident $constructor))
-            (args (expr ("FuncAdapter") (ident $adapter))
-                  $signature $address $size))
-  );
+  List constructed = _func_context_call(
+    context_type, context, adapter, %("FuncAdapter"), signature,
+    constructor, constructor_type);
   List null_binding = compiler.sym.reference(%("NULL"), NULL);
   List result = %(
     expr ("Func")
@@ -1438,18 +1439,6 @@ static List _helper_body(
   return %(block @setup (stmnt (return $result)));
 }
 
-static List _captured_context_call(
-  Type type, List context, List adapter, Type adapter_type, List signature,
-  List constructor, Type constructor_type) {
-  List address = %(expr ${type.reference()}
-    (op & (expr $type (ident $context))));
-  List size = %(expr (size_t) (sizeof (expr $type (ident $context))));
-  return %(expr ("Func")
-    (call (expr $constructor_type (ident $constructor))
-          (args (expr $adapter_type (ident $adapter))
-                $signature $address $size)));
-}
-
 /* Capture rows arrive resolved and in first-use order from `literals.x`.
    Materialize one local per row before the
    context aggregate so conversion effects run left to right. `Var` fields are
@@ -1511,61 +1500,35 @@ static List _lower_captured_lambda(
             (bindings (bind $environment_typedef ()))
   ));
 
-  List value_type = NULL, reference_type = NULL;
-  List value_helper = _adapter_helper(
-    compiler, %"x2c_func_value_argument", &value_type);
-  List reference_helper = _adapter_helper(
-    compiler, %"x2c_func_reference_argument", &reference_type);
   List context_type = NULL, constructor_type = NULL;
   List context_helper = _adapter_helper(
     compiler, %"Func_context", &context_type);
   List constructor = _adapter_helper(
     compiler, %"Func_new_context", &constructor_type);
   Type adapter_type = compiler.sym.resolve_key(%("FuncAdapter"));
-  Array locals = %[];
-  int index = 0;
-  foreach (Var entry, entries) {
-    Type parameter_type = _entry_type(compiler, entry);
-    List binding = _entry_binding(entry);
-    Type storage_type = NULL;
-    List value = _checked_func_argument(
-      compiler, adapter_type, parameter_type,
-      value_helper, value_type, reference_helper, reference_type,
-      closure_binding, argv_binding, index++, &storage_type);
-    List (base, mods) = storage_type.declaration_parts();
-    locals.push(
-      %(
-      declare $base
-        (bindings (op = (bind $binding $mods) $value))
-      ));
-  }
+  List types = entries.map(
+    %!(List entry) => _entry_type(compiler, entry));
+  List names = entries.map(_entry_binding);
+  List locals = _func_argument_locals(
+    compiler, adapter_type, types, names, closure_binding, argv_binding);
   List context_call = %(
     expr (* const void)
       (call (expr $context_type (ident $context_helper))
             (args (expr ("Func") (ident $closure_binding))))
   );
-  locals.push(
-    %(
+  List context_setup = %(
     declare (const $environment_name)
       (bindings
         (op = (bind $environment_local (*))
               (expr $environment_pointer_type
                 (cast $environment_pointer_type $context_call))))
-  ));
+  );
   body = _lower_nested_lambdas(compiler, body);
   List rewritten = _rewrite_lambda_captures(
     compiler, body, slots, environment_local, environment_pointer_type);
-  Type fn_type = %("Func"), argv_type = %(* const "FuncArg");
-  List declaration_params = %(params
-    ${fn_type.parameter_ast(closure_binding)}
-    ${argv_type.parameter_ast(argv_binding)}
-  );
-  compiler.add_early(
-    %(
-    function (static ("Var"))
-      (bind $lambda_binding ((fnmod $declaration_params)))
-      ${_helper_body(compiler, rewritten, locals.list_free())}
-  ));
+  _publish_func_adapter(
+    compiler, lambda_binding, closure_binding, argv_binding, rewritten,
+    %(@locals $context_setup));
 
   List signature = _signature(compiler, entries);
   if (compiler.inline_header) {
@@ -1587,7 +1550,7 @@ static List _lower_captured_lambda(
                   (composite
                     (commas @{factory_values.list_free()})))))
     );
-    List factory_construction = _captured_context_call(
+    List factory_construction = _func_context_call(
       environment_value_type, factory_context, lambda_binding,
       adapter_type, signature, constructor, constructor_type);
     List declaration_params = %(params @{parameters.list_free()});
@@ -1617,7 +1580,7 @@ static List _lower_captured_lambda(
               (expr $environment_value_type
                 (composite (commas @{field_values.list_free()})))))
   );
-  List construction = _captured_context_call(
+  List construction = _func_context_call(
     environment_value_type, context_value, lambda_binding,
     adapter_type, signature, constructor, constructor_type);
   return %(
