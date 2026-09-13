@@ -1763,7 +1763,6 @@ break;
   }
 }
 
-void Array_free(Array);
 Map Map_copy(Map);
 static List Compiler__resolve_native_protocol_participant(Compiler compiler, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure){
   * failure = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(compiler -> conforms, List_var(key), & stored)){
@@ -2433,7 +2432,6 @@ int Type_is_pointer(Type);
 int Type_is_aggregate(Type);
 String int_str(int);
 List Type_parameter_ast(Type, List);
-size_t Array_len(Array);
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which){
   if(! _init_guard_) _file_init_();  List key = cons(_537, cons(String_var(stem), cons(int_var(which), NULL)));  Var stored;  if(Map_try_get(c -> protocol_helpers, List_var(key), & stored)) return Var_list(stored);  List parameters = Var_list(List_cadr(Var_list(List_car(Type_list(signature)))));  Type result = List_cdr(signature);  Type resolved_result = Sym_resolve_key(c -> sym, result);  long callee_identity =(long) binding;  int fresh = Map_contains(c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_538), cons(String_var(long_str(callee_identity)), NULL)))));
   if(! fresh &&(Type_is_pointer(resolved_result) || Type_is_aggregate(resolved_result))) return NULL;

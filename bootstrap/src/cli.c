@@ -745,8 +745,6 @@ int String_startswith(String, String);
 
 String String_remove_prefix(String, String);
 
-size_t Array_len(Array);
-
 static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached){
   String arg = Var_string(Array_getindex(args, * index)), written = arg, color = NULL;
   int color_equal = 0;
@@ -899,8 +897,6 @@ String String_replace(String, String, String);
 void * Scope_calloc(size_t, size_t);
 
 int String_endswith(String, String);
-
-void Array_free(Array);
 
 CliRequest cli_package_options(String path, String package){
   if(! _init_guard_) _file_init_();

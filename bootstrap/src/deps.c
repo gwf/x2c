@@ -194,8 +194,6 @@ int Array_try_next(Array, int *, Var *);
 
 int String_equal(String, String);
 
-void Array_free(Array);
-
 int File_error(File);
 
 static int _write_contents(File output, CliRequest request, Compiler compiler, String input, String output_dir, String stem){
