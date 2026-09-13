@@ -11,6 +11,7 @@ Transfer frames for x2c `Error` unwinding and cleanup.
 | --- | --- |
 | [`x2c_cleanup_leave`](#x2c_cleanup_leave) | Removes and runs the current compiler-generated cleanup record. |
 | [`x2c_cleanup_push`](#x2c_cleanup_push) | Pushes one compiler-generated cleanup record. |
+| [`x2c_exception_claim`](#x2c_exception_claim) | Claims a frame's cleanup for the calling exit path, once per frame. |
 | [`x2c_exception_is_error_target`](#x2c_exception_is_error_target) | Reports whether `frame` is carrying an `Error` transfer targeted to itself. |
 | [`x2c_exception_landed`](#x2c_exception_landed) | Restores `Error` handler and dispatch state after a frame landing. |
 | [`x2c_exception_leave`](#x2c_exception_leave) | Removes an active exception frame and continues any pending `Error` transfer. |
@@ -43,6 +44,21 @@ through the raw exception fatal path.
 
 Source: `lib/exception.x:67`
 
+#### x2c_exception_claim
+
+`int x2c_exception_claim(ExceptionFrame *frame)`
+
+Claims a frame's cleanup for the calling exit path, once per frame.
+Compiler-generated code tests this on every path that reaches a finalizer
+and runs the finalizer only when it reports the claim. Claiming also
+retires the frame's landing: the frame has already landed, so a `raise`
+from the finalizer transfers to the enclosing frame instead of re-entering
+this landing and running the finalizer again; that transfer abandons this
+frame and replaces any `Error` it was already carrying. A null or already
+claimed frame reports zero.
+
+Source: `lib/exception.x:174`
+
 #### x2c_exception_is_error_target
 
 `int x2c_exception_is_error_target(ExceptionFrame *frame)`
@@ -50,7 +66,7 @@ Source: `lib/exception.x:67`
 Reports whether `frame` is carrying an `Error` transfer targeted to itself.
 A null, inactive, handled, or intervening frame returns false.
 
-Source: `lib/exception.x:157`
+Source: `lib/exception.x:162`
 
 #### x2c_exception_landed
 
@@ -60,7 +76,7 @@ Restores `Error` handler and dispatch state after a frame landing.
 Compiler-generated code calls this only on the nonzero `sigsetjmp` path.
 A null frame does nothing.
 
-Source: `lib/exception.x:139`
+Source: `lib/exception.x:144`
 
 #### x2c_exception_leave
 
@@ -72,9 +88,10 @@ The frame must be left in nesting order after its cleanup records have been
 removed. Normal leave preserves accumulated errors but reclaims handlers
 registered inside the frame. An intervening unwind instead restores the
 frame's error-stack watermark and transfers to the next outer frame. A null
-frame does nothing; cleanup imbalance exits through the raw fatal path.
+or already left frame does nothing; cleanup imbalance exits through the raw
+fatal path.
 
-Source: `lib/exception.x:176`
+Source: `lib/exception.x:197`
 
 #### x2c_exception_mark_handled
 
@@ -84,7 +101,7 @@ Marks a selected exception-frame `Error` transfer as handled.
 This prevents `x2c_exception_leave` from continuing the transfer outward.
 A null frame does nothing.
 
-Source: `lib/exception.x:164`
+Source: `lib/exception.x:184`
 
 #### x2c_exception_push
 
@@ -105,12 +122,13 @@ Source: `lib/exception.x:92`
 `void ExceptionFrame.unwind(void *target_ptr)`
 
 Transfers an `Error` toward the selected active exception frame.
-`target_ptr` must identify this frame or an outer frame in the current
-thread. The call marks the current frame, drains newer cleanup records in
-last-in, first-out order, records the post-cleanup handler head, and jumps
-to the current frame's landing. It never returns normally. An invalid
-target exits through the raw exception fatal path. The transfer does not
-restore the process signal mask.
+`target_ptr` must identify a landable frame in the current thread. The
+call selects the innermost frame that is not already running its own
+cleanup, abandons any frame it skips, marks the selected frame, drains
+newer cleanup records in last-in, first-out order, records the
+post-cleanup handler head, and jumps to that frame's landing. It never
+returns normally. An invalid target exits through the raw exception fatal
+path. The transfer does not restore the process signal mask.
 
 Source: `lib/exception.x:122`
 
@@ -131,7 +149,7 @@ for source readers but are not supported as user API.
 
 Reports whether any active frame is carrying an `Error` transfer.
 
-Source: `lib/exception.x:147`
+Source: `lib/exception.x:152`
 
 ## Public types
 
@@ -144,7 +162,7 @@ Source: `lib/exception.x:147`
 <a id="ExceptionFrame"></a>
 ### ExceptionFrame
 
-`typedef struct ExceptionFrame { struct ExceptionFrame *prev; X2CCleanup *cleanup_watermark; sigjmp_buf env, volatile Symbol state; struct ExceptionFrame *volatile unwind_target, void *error_handler_head; void *volatile error_landing_head, int error_dispatch_depth; int error_stack_height; } ExceptionFrame`
+`typedef struct ExceptionFrame { struct ExceptionFrame *prev; X2CCleanup *cleanup_watermark; sigjmp_buf env, volatile Symbol state; struct ExceptionFrame *volatile unwind_target, void *error_handler_head; void *volatile error_landing_head, int error_dispatch_depth; volatile int cleanup_active; } ExceptionFrame`
 
 Holds one caller-owned non-local `Error` transfer frame.
 Compiler-generated code keeps the frame on the C stack, pushes it before

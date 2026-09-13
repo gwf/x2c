@@ -16,7 +16,7 @@
 */
 typedef struct Toolchain {
   String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args;
-  int verbose, dry_run;
+  int verbose;
 } *Toolchain;
 
 /** Describes one `Scope`-owned host-tool argv action and its reporting policy.
@@ -24,7 +24,7 @@ typedef struct Toolchain {
     canonical pool, and must remain valid through the action's execution.
 */
 typedef struct ToolAction {
-  Symbol phase, List arguments, int verbose, dry_run, inherit_stdio, report;
+  Symbol phase, List arguments, int verbose, inherit_stdio, report;
 } *ToolAction;
 
 /** Tracks one `Scope`-owned started action and its captured child process.
@@ -117,8 +117,8 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
     or its canonical layout.
 */
 Toolchain toolchain_new(
-  String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose,
-  int dry_run) {
+  String cc, String ar, List cpp_args, List cc_args, List ld_args,
+  int verbose) {
   Toolchain toolchain = Scope.calloc(1, sizeof(struct Toolchain));
   toolchain.cc = _tool_selection(
     cc, "X2C_CC", "CC", _installed_tool("CC"), "cc");
@@ -128,7 +128,6 @@ Toolchain toolchain_new(
   toolchain.cc_args = cc_args;
   toolchain.ld_args = ld_args;
   toolchain.verbose = verbose;
-  toolchain.dry_run = dry_run;
   _toolchain_layout(&toolchain.include_dir, &toolchain.runtime_lib);
   return toolchain;
 }
@@ -173,7 +172,7 @@ ToolAction Toolchain.compile_action(
   arguments.push("-o");
   arguments.push(object);
   return tool_action_new(
-    <compile>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
+    <compile>, arguments.list_free(), toolchain.verbose);
 }
 
 /** Captures the native preprocessor view used to identify reusable objects.
@@ -190,7 +189,7 @@ ToolAction Toolchain.preprocess_action(
   arguments.push("-o");
   arguments.push(output);
   return tool_action_new(
-    <preprocess>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
+    <preprocess>, arguments.list_free(), toolchain.verbose);
 }
 
 /** Builds but does not start an `ar rcs` action in object-list order.
@@ -207,7 +206,7 @@ ToolAction Toolchain.archive_action(
   arguments.push(output);
   _append_list(arguments, objects);
   return tool_action_new(
-    <archive>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
+    <archive>, arguments.list_free(), toolchain.verbose);
 }
 
 /** Builds but does not start a host-compiler link action.
@@ -227,7 +226,7 @@ ToolAction Toolchain.link_action(
   arguments.push("-o");
   arguments.push(output);
   return tool_action_new(
-    <link>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
+    <link>, arguments.list_free(), toolchain.verbose);
 }
 
 /** Creates a `Scope`-owned action that reports nonzero status by default.
@@ -235,13 +234,11 @@ ToolAction Toolchain.link_action(
 
     Raises: `<alloc-fail>` when the action cannot be allocated.
 */
-ToolAction tool_action_new(
-  Symbol phase, List arguments, int verbose, int dry_run) {
+ToolAction tool_action_new(Symbol phase, List arguments, int verbose) {
   ToolAction action = Scope.calloc(1, sizeof(struct ToolAction));
   action.phase = phase;
   action.arguments = arguments;
   action.verbose = verbose;
-  action.dry_run = dry_run;
   action.report = 1;
   return action;
 }
@@ -293,48 +290,45 @@ static char **_action_argv(List arguments) {
 }
 
 /** Starts the action without a shell and returns a `Scope`-owned execution.
-    Verbose and dry-run actions print their quoted argv to stderr. A dry run
-    starts no child. After capture setup succeeds, a non-dry execution must be
-    waited exactly once; partial capture setup leaves a non-waitable result.
+    A verbose action prints its quoted argv to stderr. After capture setup
+    succeeds, an execution must be waited exactly once; partial capture setup
+    leaves a non-waitable result.
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the execution
     or argv.
 */
 ToolRun ToolAction.start(ToolAction action) {
-  if (action.verbose || action.dry_run) {
+  if (action.verbose) {
     report_suspend();
     _print_action(action.phase, action.arguments);
   }
   ToolRun execution = Scope.calloc(1, sizeof(struct ToolRun));
   execution.action = action;
-  if (action.dry_run) return execution;
   execution.process = process_start(
     _action_argv(action.arguments), !action.inherit_stdio);
   return execution;
 }
 
-/** Checks whether an execution can be waited without blocking. A dry run
-    is ready immediately. A completed child retains its status and captures
-    until the required `ToolRun.wait` call.
+/** Checks whether an execution can be waited without blocking.
+    A completed child retains its status and captures until the required
+    `ToolRun.wait` call.
 */
 int ToolRun.ready(ToolRun execution) {
-  if (execution.action.dry_run) return 1;
   ChildProcess process = execution.process;
   return process.ready();
 }
 
 /** Waits once for an execution, forwards its captured streams, and returns its
     shell-style status. Signals return `128 + signal`; an invalid action, fork
-    failure, or wait failure returns -1, and a dry run returns 0. Captured
-    output goes to stderr; program actions inherit standard streams. An
-    execution with partial capture setup is not valid input.
+    failure, or wait failure returns -1. Captured output goes to stderr;
+    program actions inherit standard streams. An execution with partial
+    capture setup is not valid input.
 
     Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
     reading either capture as a `String`.
 */
 int ToolRun.wait(ToolRun execution) {
   ToolAction action = execution.action;
-  if (action.dry_run) return 0;
   String output = NULL, errors = NULL;
   ChildProcess process = execution.process;
   int status = process.wait(&output, &errors);

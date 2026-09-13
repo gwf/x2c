@@ -95,8 +95,6 @@ _x2c_initializer_choice_45B76184_1((default_logger = NULL))
 static ErrorHandler logger_error_handler;
 
 _x2c_initializer_choice_45B76184_2((logger_error_handler = NULL))
-static int logger_error_mark;
-
 static pthread_mutex_t logger_mutex;
 
 static pthread_once_t logger_mutex_once;
@@ -1579,12 +1577,6 @@ Symbol Logger_error_handler(List errors, Var data){
 }
 }
 
-Pool String_pool_retain_named(const char *);
-
-List Error_since(int);
-
-void String_pool_release(void);
-
 void Error_pop(ErrorHandler);
 
 void Logger_shutdown(void){
@@ -1600,22 +1592,6 @@ void Logger_shutdown(void){
   {
     Logger active = global_logger;
     if(logger_error_handler){
-      if(active){
-        String_pool_retain_named("Logger shutdown errors");
-        List pending = Error_since(logger_error_mark);
-        {
-          List entry;
-          List _x2c_macro_object_1 = pending;
-          List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-          Var _x2c_macro_cursor_output_1;
-          while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-            entry = Var_list(_x2c_macro_cursor_output_1);
-            Logger_log(active, 11703268, 392730881588392, entry);
-          }
-
-        }
-        String_pool_release();
-      }
       Error_pop(logger_error_handler);
       logger_error_handler = NULL;
     }
@@ -1630,8 +1606,6 @@ void Logger_shutdown(void){
 }
 
 void Error_initialize(void);
-
-int Error_mark(void);
 
 ErrorHandler Error_push(ErrorHandlerFn, Var);
 
@@ -1659,7 +1633,6 @@ void Logger_initialize(void){
     default_logger = Logger_new(618910);
     Logger_add_stderr_sink(default_logger);
     global_logger = default_logger;
-    logger_error_mark = Error_mark();
     logger_error_handler = Error_push(Logger_error_handler, ((void) 0, Void));
   }
 

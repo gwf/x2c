@@ -157,7 +157,7 @@ An `Error` that reaches the callback's outer `catch` makes `Thread.join` raise
 to the joiner. `Thread.join` yields the worker's exported result or transfers.
 A callback that returns `void` joins as `void`; a handled failure transfers
 instead of returning a sentinel. The outer `catch` runs before the worker's
-default `Error` policy, so even `<collect>`, `<log>`, and `<ignore>` errors
+default `Error` policy, so even `<log>` and `<ignore>` errors
 that reach it end the callback. Catch or otherwise handle a resumable `Error`
 inside the callback when execution should continue. Captured values use the
 same sealed worker storage as an ordinary result and enter the joining pools

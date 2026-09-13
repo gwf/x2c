@@ -110,7 +110,10 @@ catch:
 The pattern language and binder rules are the same as `match`. A `?name`
 binder declares a `Var`, a `*name` binder declares a `List`, and arms run in
 source order. `catch:` is an optional default arm and must be last. Filters
-are evaluated once when the `try` is entered.
+are evaluated once when the `try` is entered. Like a literal pattern written
+at a `match`, each arm's program is prepared once for the life of the
+process; an arm whose pattern interpolates a run-time value with `$` is
+prepared on every entry instead.
 
 When no arm matches, the `Error` continues outward. Selecting an arm consumes
 the errors accumulated since that `catch` was registered. Older errors remain
@@ -157,11 +160,10 @@ error raised by its own body.
 
 A filtered `catch` transfers control out of the raising call. Embedders may
 also install observing handlers with `Error.push`. An observing handler runs
-inside the raising call, sees the errors accumulated since its registration,
-and returns:
+inside the raising call, sees the error being raised, and returns:
 
-- `<handled>` to consume those errors and stop;
-- `<declined>` to leave the errors accumulated and continue outward;
+- `<handled>` to consume that error and stop;
+- `<declined>` to leave it for the next handler and continue outward;
 - `<fatal>` to terminate without allocating.
 
 `<unwind>` is reserved for compiler-generated filtered catches.
@@ -170,30 +172,27 @@ An observing handler cannot consume a non-returning cause with `<handled>`.
 If it tries, `Error` terminates the process. Use a filtered `catch` to recover
 outside the failed call.
 
-The handler borrows its `Error`s for the duration of the callback. `Error.pop`
-closes the handler and reclaims everything accumulated since its registration,
-including declined or collected `Error`s. Use
-`Error.snapshot(value)` to retain a value beyond a callback; it copies into the
-caller's ordinary `Scope` and canonical `List` and `String` pools.
-`Error.since(mark)` also returns a snapshot in the caller's scope and pools.
+The handler borrows its `Error` for the duration of the callback, and
+`Error.pop` closes the handler. Use `Error.snapshot(value)` to retain a value
+beyond a callback; it copies into the caller's ordinary `Scope` and canonical
+`List` and `String` pools.
 
 If every handler declines, the code's policy decides what happens:
 
 | Policy | Result |
 | --- | --- |
 | `<abort>` | render if possible, then terminate without further allocation |
-| `<log>` | render once, consume the newest `Error`, and continue |
-| `<collect>` | retain the `Error` without rendering and continue |
-| `<ignore>` | consume the newest `Error` without rendering and continue |
+| `<log>` | render once, consume the `Error`, and continue |
+| `<ignore>` | consume the `Error` without rendering and continue |
 
 Every shared cause defaults to `<abort>` and cannot be reconfigured. A process
 may set policy for unknown and user-defined codes only. The code that raises
 chooses the cause; the embedding caller chooses the policy.
 
-`Error.policy_set` accepts only the four dispositions in the table. Passing
+`Error.policy_set` accepts only the three dispositions in the table. Passing
 another disposition raises `<bad-arg>` and leaves the previous policy
-unchanged. It also rejects `<log>`, `<collect>`, or `<ignore>` for every
-non-returning cause, leaving those policies at `<abort>`. Unknown `Error` codes
+unchanged. It also rejects `<log>` or `<ignore>` for every non-returning
+cause, leaving those policies at `<abort>`. Unknown `Error` codes
 remain legal and default to `<abort>`.
 
 The default `Logger` registers an observing `Error` handler. It renders
@@ -240,6 +239,17 @@ existing `try` statement. Use either for cleanup, not recovery.
 
 Both forms hook into the `Error` transfer stack. If a callee raises, every
 intervening cleanup frame runs before control reaches the selected `catch`.
+
+### Raising during cleanup
+
+A `raise` inside a `finally` or `defer` body transfers to the enclosing
+handler, never back into the cleanup that raised it. Cleanup runs at most
+once per exit path. If that cleanup was already running for an `Error`, the
+new `Error` replaces it: the pending one is discarded with its detail, and
+only the replacement reaches a `catch`. With no matching handler anywhere
+outward, the replacement terminates the program through the error floor like
+any other unhandled `Error`. This is why cleanup is for release, not
+recovery; handle a failure a finalizer can produce inside the finalizer.
 
 ### Return expressions run before cleanup
 

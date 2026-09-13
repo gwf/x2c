@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "report.x"
@@ -98,25 +97,11 @@ static List _transform_ast(Compiler compiler, List ast) {
 
 // public entry point
 
-static void _stage_stats(String filename, const char *stage) {
-  if (!getenv("X2C_STAGE_STATS")) return;
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  unsigned long now_us =
-    (unsigned long) ts.tv_sec * 1000000ul + ts.tv_nsec / 1000;
-  ScopeStats s = Scope.stats();
-  fprintf(
-    stderr, "stage-stats,%s,%s,%zu,%zu,%zu,%lu\n", filename, stage,
-    s.live_allocations, s.allocation_calls, s.requested_bytes,
-    now_us);
-}
-
 // Compile one translation unit through the pipeline.
 static void _compile_file(
   Frontend frontend, String filename, String output_dir) {
   CliRequest request = frontend.request;
   ParsedUnit unit;
-  _stage_stats(filename, "start");
   int ok = frontend.start(filename, &unit);
   defer unit.close();
   Compiler compiler = unit.compiler;
@@ -129,11 +114,9 @@ static void _compile_file(
     compiler.dump_tokens();
     exit(0);
   }
-  _stage_stats(filename, "tokenize");
   ok = unit.collect(frontend);
   _report_diagnostics(compiler);
   if (!ok) exit(1);
-  _stage_stats(filename, "symbols");
   if (!unit.parse()) {
     _report_diagnostics(compiler);
     exit(1);
@@ -165,18 +148,15 @@ static void _compile_file(
   }
   ast = compiler.generate_protocol_adapters(ast);
   if (opts.dump == <hdr-syms>) return;
-  _stage_stats(filename, "parse");
   ast = _transform_ast(compiler, ast);
-  _stage_stats(filename, "transform");
   if (opts.dump == <dump-code>) {
     ast = compiler.emit(ast);
-    puts(compiler.code_pretty_string(ast, NULL));
+    puts(compiler.code_pretty_string(ast));
     exit(0);
   }
   generate_code(compiler, ast, output_dir);
   if (!translation_depfile_write(request, compiler, filename, output_dir))
     exit(1);
-  _stage_stats(filename, "generate");
 }
 
 static void _preflight_translation(CliRequest c) {
@@ -326,13 +306,12 @@ static int _run_translation(CliRequest c) {
   if (!c.out_dir) c.out_dir = %".";
   opts = c;
   _preflight_translation(c);
-  if (c.verbose || c.dry_run) {
+  if (c.verbose) {
     fprintf(stderr, "x2c: translate");
     fprintf(stderr, " --out-dir %s", c.out_dir);
     foreach (String input, c.inputs) fprintf(stderr, " %s", input);
     fputc('\n', stderr);
   }
-  if (c.dry_run) return 0;
   Frontend frontend = Frontend.new(c);
   String output_dir = c.out_dir;
   int total = c.inputs.len(), completed = 0;
@@ -388,20 +367,16 @@ static CliRequest _build_translation_request(
   request.run_args = NULL;
   request.out_dir = output_dir;
   request.dep_file = NULL;
-  request.dep_target = NULL;
   request.no_deps = 0;
-  request.no_phony_deps = 0;
   request.nested = 1;
   return request;
 }
 
 static int _run_build_request(CliRequest c, Array commands) {
-  if (!c.dry_run) {
-    foreach (String input, c.inputs) {
-      if (!input.endswith(%".x")) continue;
-      Frontend.load_support(c);
-      break;
-    }
+  foreach (String input, c.inputs) {
+    if (!input.endswith(%".x")) continue;
+    Frontend.load_support(c);
+    break;
   }
   /* A target has its own build graph and native-action scratch. Isolate
      its Scope allocations and canonical values so a manifest dependency is
@@ -421,13 +396,11 @@ static int _run_build_request(CliRequest c, Array commands) {
     }
     CliRequest translation =
       _build_translation_request(c, input, directory);
-    if (!c.dry_run && _run_translation(translation)) {
+    if (_run_translation(translation)) {
       state.cleanup(0);
       return 1;
     }
-    if (c.dry_run)
-      fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
-    if (!c.dry_run) state.record_translation(input, directory);
+    state.record_translation(input, directory);
     state.add_generated(input, directory);
     state.end_translation(input, 0);
   }
@@ -451,8 +424,7 @@ static int _run_build_request(CliRequest c, Array commands) {
 }
 
 static int _run_build(CliRequest request) {
-  Array commands =
-    request.compile_commands && !request.dry_run ? %[] : NULL;
+  Array commands = request.compile_commands ? %[] : NULL;
   if (request.inputs) {
     if (request.manifest) {
       fputs(
@@ -536,8 +508,7 @@ int main(int argc, char **argv) {
   CliRequest request = cli_parse(argc, argv);
   report_configure(
     request.quiet, request.plain, request.color_mode,
-    request.verbose || request.debugging,
-    request.dry_run, request.inspects());
+    request.verbose || request.debugging, request.inspects());
   if (request.command == <bootstrap>) return _run_bootstrap(request);
   _configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot

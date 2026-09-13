@@ -4,20 +4,27 @@ static void raise_empty(void) {
   raise %(raise-prob);
 }
 
+static List observed;
+
+static Symbol observe_newest(List errors, Var data) {
+  (void) data;
+  observed = Error.snapshot(errors.last());
+  return <handled>;
+}
+
 int main(void) {
   Error.initialize();
-  Error.policy_set(<collected>, <collect>);
-  Error.policy_set(<raise-prob>, <collect>);
-  int bytes = 64, mark = Error.mark();
+  ErrorHandler observer = Error.push(observe_newest, void);
+  int bytes = 64;
   raise %(collected (bytes $bytes) (owner "raise-probe"));
-  List entry = Error.since(mark).car();
+  List entry = observed;
   List detail = entry.assoc(<detail>);
   List location = entry.assoc(<location>);
-  int empty_mark = Error.mark();
   raise_empty();
-  List empty_entry = Error.since(empty_mark).car();
+  List empty_entry = observed;
   List empty_detail = empty_entry.assoc(<detail>);
   List empty_location = empty_entry.assoc(<location>);
+  Error.pop(observer);
   printf("%s %ld %s %s:%ld:%s %ld:%s\n",
          entry.assoc(<code>).symbol().str(),
          detail[0].list().cadr().integer(),

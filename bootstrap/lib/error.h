@@ -6,12 +6,26 @@
 #define __GUARD_0xE00406E8__
 
 #include "common.h"
-#define ERROR_DEFAULT_BOUND 4096
+#include "match.h"
 typedef struct Error * Error;
 
 typedef struct ErrorHandler * ErrorHandler;
 
 typedef Symbol(* ErrorHandlerFn)(List errors, Var data);
+
+typedef struct ErrorCatchSite{
+  MatchCaptureSite * arms;
+  unsigned long defaults;
+  int arm_count, state, fenced_arm;
+}
+ErrorCatchSite;
+
+#define ERROR_CATCH_PENDING 0
+#define ERROR_CATCH_STATIC 1
+#define ERROR_CATCH_TRANSIENT 2
+int x2c_error_catch_site_pending(ErrorCatchSite * site);
+
+ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns);
 
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...);
 
@@ -37,9 +51,9 @@ void * Error_unwind_head(void);
 
 void Error_restore_landing(void * saved_head, int saved_depth);
 
-void Error_trim(void * saved_head, int stack_height);
+void Error_trim(void * saved_head);
 
-void Error_restore(int handler_depth, int stack_height);
+void Error_restore(int handler_depth);
 
 void Error_initialize_raw(void);
 
@@ -49,23 +63,13 @@ int Error_depth(void);
 
 int Error_count(void);
 
-int Error_mark(void);
-
 Var Error_snapshot(Var value);
 
 Var Error_snapshot_in(Var value, Scope * values, Pool pool);
 
-List Error_since_in(int mark, Scope * values, Pool pool);
-
-List Error_since(int mark);
-
 void Error_policy_set(Symbol code, Symbol disposition);
 
 Symbol Error_policy_get(Symbol code);
-
-int Error_bound(void);
-
-void Error_bound_set(int bound);
 
 ErrorHandler Error_push(ErrorHandlerFn fn, Var data);
 
@@ -73,7 +77,7 @@ void Error_pop(ErrorHandler handle);
 
 void * Error_context_open(void);
 
-void Error_context_close(void * token, int preserve_records);
+void Error_context_close(void * token);
 
 Symbol Error_raise(Symbol code, List detail);
 

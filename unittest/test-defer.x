@@ -63,19 +63,6 @@ static void defer_evaluates_return_before_cleanup(void) {
   EXPECT_INT_EQ(defer_return_value, 0);
 }
 
-static void _defer_collect_helper(int *cleanup) {
-  defer (*cleanup)++;
-  Error.raise(<old-error>, %((where "defer return")));
-}
-
-static void defer_preserves_collected_errors(void) {
-  Error.initialize();
-  Error.policy_set(<old-error>, <collect>);
-  int mark = Error.mark(), cleanup = 0;
-  _defer_collect_helper(&cleanup);
-  EXPECT_INT_EQ(cleanup, 1);
-  EXPECT_INT_EQ(Error.count(), mark + 1);
-}
 
 static void defer_uses_lifo_order(void) {
   defer_reset();
@@ -222,6 +209,15 @@ static int _scope_return(void) {
   $scope() { Scope.malloc(1); return 9; }
 }
 
+static int _scope_transfer_round(void) {
+  int caught = 0;
+  try {
+    $scope() { Scope.malloc(1); raise %(invariant); }
+  }
+  catch %(invariant): { caught = 1; }
+  return caught;
+}
+
 static void system_scope_restores_destination_and_transfer(void) {
   Scope destination = Scope.new(), *previous = Scope.top();
   int evaluations = 0, caught = 0;
@@ -235,13 +231,11 @@ static void system_scope_restores_destination_and_transfer(void) {
   catch %(invariant): { caught = 1; }
   EXPECT_INT_EQ(caught, 1);
   EXPECT_TRUE(Scope.top() == previous);
-  caught = 0;
-  ScopeStats retained = Scope.stats();
   EXPECT_INT_EQ(_scope_return(), 9);
-  try {
-    $scope() { Scope.malloc(1); raise %(invariant); }
-  }
-  catch %(invariant): { caught = 1; }
+  // the first round publishes this catch site's process-lifetime plans
+  caught = _scope_transfer_round();
+  ScopeStats retained = Scope.stats();
+  caught = _scope_transfer_round();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(after.live_allocations, retained.live_allocations);
@@ -372,7 +366,6 @@ void defer_suite(void) {
   $test.run(defer_runs_on_scope_exit);
   $test.run(defer_runs_on_return);
   $test.run(defer_evaluates_return_before_cleanup);
-  $test.run(defer_preserves_collected_errors);
   $test.run(defer_uses_lifo_order);
   $test.run(defer_runs_with_break);
   $test.run(defer_continue_preserves_enclosing_catch);

@@ -32,7 +32,7 @@ tool_log="$BUILD/tool-args.log"
 dry_dir="$BUILD/dry build"
 TOOL_ARGS_LOG="$tool_log" X2C_CC="$BUILD/bin/fake-cc" CC=wrong-cc \
   X2C_AR="$BUILD/bin/fake-ar" AR=wrong-ar \
-  "$X2C" build -### --build-dir "$dry_dir" -O2 -g \
+  "$X2C" build --verbose --build-dir "$dry_dir" -O2 -g \
   -I "$BUILD/include first" --x-include-dir "$BUILD/x only" \
   --c-include-dir "$BUILD/include second" \
   --c-system-dir "$BUILD/x include" -D FEATURE=1 -U OLD \
@@ -40,7 +40,6 @@ TOOL_ARGS_LOG="$tool_log" X2C_CC="$BUILD/bin/fake-cc" CC=wrong-cc \
   -Wl,-rpath,"$BUILD/lib dir" -Xlinker -dead_strip \
   --output "$BUILD/dry output" "$BUILD/tool source.c" \
   >"$BUILD/tool-dry.stdout" 2>"$BUILD/tool-dry.stderr"
-[[ ! -e "$dry_dir" && ! -e "$BUILD/dry output" && ! -e "$tool_log" ]]
 grep -Fq "$BUILD/bin/fake-cc" "$BUILD/tool-dry.stderr"
 grep -Fq -- "-fsigned-char" "$BUILD/tool-dry.stderr"
 # -rdynamic is gone: it exported symbols for Func.load's dlsym lookup.
@@ -55,14 +54,14 @@ grep -Fq -- "-D FEATURE=1 -U OLD" "$BUILD/tool-dry.stderr"
       grep -o -- '-MMD' | wc -l | tr -d ' ') == 1 ]]
 
 TOOL_ARGS_LOG="$tool_log" X2C_AR="$BUILD/bin/fake-ar" AR=wrong-ar \
-  "$X2C" build -### --kind static-library \
+  "$X2C" build --verbose --kind static-library \
   --build-dir "$BUILD/dry archive" --output "$BUILD/dry.a" \
   "$BUILD/tool source.c" >"$BUILD/ar-dry.stdout" \
   2>"$BUILD/ar-dry.stderr"
 grep -Fq "$BUILD/bin/fake-ar" "$BUILD/ar-dry.stderr"
 
-"$X2C" build -### --build-dir "$BUILD/no defaults" \
-  --output "$BUILD/no-defaults" "$BUILD/tool source.c" \
+"$X2C" build --verbose --compile-only --build-dir "$BUILD/no defaults" \
+  --output "$BUILD/no-defaults.o" "$BUILD/tool source.c" \
   >"$BUILD/no-defaults.stdout" 2>"$BUILD/no-defaults.stderr"
 ! grep 'x2c: compile ' "$BUILD/no-defaults.stderr" |
   grep -Eq -- '(^| )-O|(^| )-g( |$)'

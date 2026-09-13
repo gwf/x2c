@@ -268,7 +268,7 @@ See [Compile-time Macros](macros.md) for the grammar.
 - [Symbols and Atoms](symbols.md): compact tags versus exact names.
 - [Collections](collections.md): text and collection construction/mutation.
 - [Pattern Matching](match.md): structural `List` decisions.
-- [Iteration](iteration.md): `foreach` and lazy pipelines.
+- [Iteration](iteration.md): `foreach` and iterators.
 - [Scopes and Lifetime](memory.md): grouped allocation ownership.
 - [Contexts and Threads](contexts-and-threads.md): bounded work, native
   workers, result export, and shared-memory rules.

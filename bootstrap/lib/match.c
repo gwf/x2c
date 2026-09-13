@@ -313,6 +313,18 @@ static MatchPlan _site_plan(MatchCaptureSite * site, Var pattern){
   return plan && plan -> status != MACHINE_INELIGIBLE ? plan : NULL;
 }
 
+int x2c_match_pattern_retainable(Var pattern){
+  if(! _init_guard_) _file_init_();
+  return _pattern_admissible(pattern, 0);
+}
+
+MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
+  if(! _init_guard_) _file_init_();
+  if(! site) return NULL;
+  MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
+  return plan ? plan : _capture_site_publish(site, pattern);
+}
+
 int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings){
   if(! _init_guard_) _file_init_();
   MatchPlan plan = _site_plan(site, pat);
@@ -1551,7 +1563,7 @@ Var String_var(String);
 _Noreturn static void _raise_ineligible(const char * reason, const char * owner){
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1557};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1576};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }

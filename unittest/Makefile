@@ -17,7 +17,7 @@ TEST_OBJECTS = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.o,$(X_FILES))
 SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 
 .PHONY: default all test sanitizer compiler-fixtures update-compiler-fixtures \
-	benchmark-list iter-benchmark scope-benchmark match-capture-benchmark \
+	benchmark-list scope-benchmark match-capture-benchmark \
 	scope-probes \
 	error-probes exception-benchmark \
 	varops-probes preprocessor-probes \
@@ -46,9 +46,6 @@ scope-benchmark:
 
 match-capture-benchmark:
 	./benchmarks/run-match-capture-benchmark.sh
-
-iter-benchmark:
-	./benchmarks/run-iter-hot-paths.sh
 
 scope-probes:
 	./probes/run-scope-shutdown.sh

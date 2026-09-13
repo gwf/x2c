@@ -90,19 +90,6 @@ static void exception_finally_runs_on_success(void) {
   EXPECT_INT_EQ(counter, 42);
 }
 
-static void exception_normal_exit_preserves_collected_errors(void) {
-  Error.initialize();
-  Error.policy_set(<old-error>, <collect>);
-  int mark = Error.mark(), cleanup = 0;
-  try {
-    Error.raise(<old-error>, %((where "normal try")));
-  }
-  finally {
-    cleanup++;
-  }
-  EXPECT_INT_EQ(cleanup, 1);
-  EXPECT_INT_EQ(Error.count(), mark + 1);
-}
 
 static void exception_finally_runs_on_exception(void) {
   Error.initialize();
@@ -236,6 +223,60 @@ static void error_unwind_crosses_each_exception_frame(void) {
     x2c_exception_landed(&outer);
     EXPECT_TRUE(x2c_exception_is_error_target(&outer));
     EXPECT_INT_EQ(cleanup, 1);
+    x2c_error_catch_detach(handler);
+    x2c_error_catch_close(handler);
+    x2c_exception_mark_handled(&outer);
+  }
+  x2c_exception_leave(&outer);
+}
+
+
+/* The shape the emitter produces for a `finally` that raises. The frame
+   retires its landing before the finalizer body, so the raise reaches the
+   outer frame instead of re-entering this landing and running the body
+   again, and the replacement Error is the one the catch selects. */
+/* One exit path claims a frame's cleanup; a later path finds it claimed and
+   leaves the frame without running the finalizer or unlinking it twice. */
+static void frame_cleanup_claims_once(void) {
+  Error.initialize();
+  ExceptionFrame frame;
+  x2c_exception_push(&frame);
+  EXPECT_TRUE(x2c_exception_claim(&frame));
+  EXPECT_FALSE(x2c_exception_claim(&frame));
+  x2c_exception_leave(&frame);
+  EXPECT_TRUE(frame.state == <left>);
+  x2c_exception_leave(&frame);
+}
+
+static void raise_in_finalizer_reaches_outer_frame(void) {
+  Error.initialize();
+  volatile int finalizers = 0;
+  ExceptionFrame outer;
+  ErrorHandler handler = x2c_error_catch_push(
+    &outer, 2, %(inner-err *).var(), %(from-fin *).var());
+  x2c_exception_push(&outer);
+  if (!sigsetjmp(outer.env, 0)) {
+    ExceptionFrame inner;
+    x2c_exception_push(&inner);
+    if (!sigsetjmp(inner.env, 0)) {
+      Error.raise(<inner-err>, %((where "body")));
+      EXPECT_TRUE(0);
+    }
+    else {
+      x2c_exception_landed(&inner);
+      EXPECT_TRUE(inner.state == <err-unwind>);
+      EXPECT_FALSE(x2c_exception_is_error_target(&inner));
+    }
+    EXPECT_TRUE(x2c_exception_claim(&inner));
+    finalizers++;
+    Error.raise(<from-fin>, %((where "finalizer")));
+    EXPECT_TRUE(0);
+  }
+  else {
+    x2c_exception_landed(&outer);
+    EXPECT_TRUE(x2c_exception_is_error_target(&outer));
+    EXPECT_INT_EQ(finalizers, 1);
+    EXPECT_INT_EQ(x2c_error_catch_selected(handler), 1);
     x2c_error_catch_detach(handler);
     x2c_error_catch_close(handler);
     x2c_exception_mark_handled(&outer);
@@ -577,19 +618,6 @@ static void error_regions_do_not_capture_application_pools(void) {
 }
 
 
-static void filtered_catch_preserves_older_errors(void) {
-  Error.initialize();
-  Error.policy_set(<old-error>, <collect>);
-  int mark = Error.mark();
-  Error.raise(<old-error>, %((where "older")));
-  int before = Error.count();
-  try {
-    raise %(invariant);
-  }
-  catch %(invariant): {}
-  EXPECT_INT_EQ(before, mark + 1);
-  EXPECT_INT_EQ(Error.count(), before);
-}
 
 
 static void _filtered_catch_once(void) {
@@ -616,7 +644,6 @@ void exception_suite(void) {
   $test.run(exception_try_cleanup_on_return);
   $test.run(exception_try_cleanup_on_loop_control);
   $test.run(exception_finally_runs_on_success);
-  $test.run(exception_normal_exit_preserves_collected_errors);
   $test.run(exception_finally_runs_on_exception);
   $test.run(exception_finally_with_catch);
   $test.run(exception_nested_finally_runs_once);
@@ -624,6 +651,8 @@ void exception_suite(void) {
   $test.run(error_unwind_selects_target_and_bindings);
   $test.run(error_unwind_retains_positional_and_legacy_order);
   $test.run(error_unwind_crosses_each_exception_frame);
+  $test.run(frame_cleanup_claims_once);
+  $test.run(raise_in_finalizer_reaches_outer_frame);
   $test.run(cleanup_chain_leaves_in_lifo_order);
   $test.run(cleanup_chain_unlinks_before_callback);
   $test.run(cleanup_chain_crosses_three_callers);
@@ -640,6 +669,5 @@ void exception_suite(void) {
   $test.run(filtered_catch_binder_survives_transient_pools);
   $test.run(error_snapshot_survives_catch_and_caller_owners);
   $test.run(error_regions_do_not_capture_application_pools);
-  $test.run(filtered_catch_preserves_older_errors);
   $test.run(filtered_catch_repeated_success_does_not_leak);
 }

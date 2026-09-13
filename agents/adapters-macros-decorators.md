@@ -73,18 +73,17 @@ adapter pattern.
 
 Caller ownership does not disqualify the same pattern. Ownership answers where
 the pointee lives and how long it remains valid; protocol participation answers
-how its pointer crosses a typed boundary. `lib/iter.x` keeps every pipeline
-state struct in caller storage, but stores twelve known state-pointer types in
-`Iter.obj`, which is a `Var`. Private `StateRef` aliases and `Var(StateRef)`
-rows therefore name real crossings without allocating, copying, or extending
-the state lifetime. A survey must inspect what enters and leaves each `Var`
-field, not reject the field because the pointed-to storage is native or
-caller-owned.
+how its pointer crosses a typed boundary. A module that keeps its state
+struct in caller storage but carries the pointer through a `Var` field still
+crosses a typed boundary: a private `StateRef` alias and its `Var(StateRef)`
+row name that crossing without allocating, copying, or extending the state
+lifetime. A survey must inspect what enters and leaves each `Var` field, not
+reject the field because the pointed-to storage is native or caller-owned.
 
 Transparent C pointer aliases have one compiler complication. On an implicit
 `Var`-to-pointer assignment, the generic pointer decoder can win before the
 alias's named reverse converter. Call the reverse converter explicitly at that
-boundary, as `iter.obj.mapstateref()`, and keep its implementation inline. A
+boundary, as `state.obj.mapstateref()`, and keep its implementation inline. A
 public parameter that retains the underlying pointer spelling likewise needs
 an inline cast to the private alias before a `Var` parameter can select the
 forward converter. Put that cast directly in the call; do not introduce an

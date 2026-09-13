@@ -231,9 +231,9 @@ relocation remain untouched under `examples/build/hash-table-benchmark/`.
 An optimized x2c runtime is required:
 
 ```sh
-make optimize
+make config-optimize
 make clean
-make x2c
+make build
 make map-standard-benchmark-smoke
 ```
 

@@ -198,10 +198,9 @@ grep -Fq "$BUILD/a" "$BUILD/directory.stderr"
 grep -Fq "inputs produce the same output stem 'item'" \
   "$BUILD/collision.stderr"
 
-"$X2C" translate -### --out-dir "$BUILD/out" "$BUILD/a/item.x" \
-  >"$BUILD/dry-run.stdout" 2>"$BUILD/dry-run.stderr"
-[[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]]
-grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
+"$X2C" translate --verbose --out-dir "$BUILD/out" "$BUILD/a/item.x" \
+  >"$BUILD/verbose.stdout" 2>"$BUILD/verbose.stderr"
+grep -Fq "x2c: translate --out-dir" "$BUILD/verbose.stderr"
 
 set +e
 "$X2C" "$BUILD/a/item.x" >"$BUILD/no-command.stdout" \
@@ -287,12 +286,11 @@ rm -f "$BUILD/deps/out/root.d"
   -I "$BUILD/deps/src" "$BUILD/deps/src/root.x"
 [[ ! -e "$BUILD/deps/out/root.d" ]]
 
-"$X2C" translate --no-phony-deps \
-  --dep-file "$BUILD/deps/custom.d" --dep-target "custom target" \
+"$X2C" translate --dep-file "$BUILD/deps/custom.d" \
   --out-dir "$BUILD/deps/out" -I "$BUILD/deps/src" \
   "$BUILD/deps/src/root.x"
-grep -Fq "custom\\ target:" "$BUILD/deps/custom.d"
-[[ $(wc -l <"$BUILD/deps/custom.d" | tr -d ' ') == 1 ]]
+grep -Fq "$BUILD/deps/out/root.c" "$BUILD/deps/custom.d"
+[[ $(wc -l <"$BUILD/deps/custom.d" | tr -d ' ') -gt 1 ]]
 
 set +e
 "$X2C" translate --dep-file "$BUILD/deps/ambiguous.d" \
@@ -302,7 +300,7 @@ set +e
 multi_dep_status=$?
 set -e
 [[ $multi_dep_status == 2 ]]
-grep -Fq "require exactly one input" "$BUILD/deps/multi.stderr"
+grep -Fq "requires exactly one input" "$BUILD/deps/multi.stderr"
 
 printf 'int broken( {\n' >"$BUILD/deps/bad-src/bad.x"
 set +e
@@ -364,11 +362,13 @@ printf '%s\n' '#include "x2c.x"' 'int helper(void);' 'int main(void) {' \
 [[ $("$BUILD/direct/many") == 4 ]]
 
 printf 'int c_source(void) { return 2; }\n' >"$BUILD/direct/source.c"
-"$X2C" build -### -j2 -I"$BUILD/includes/first" -DCLI_ATTACHED=1 \
-  -Oarbitrary --output "$BUILD/direct/dry-run" "$BUILD/direct/source.c" \
-  >"$BUILD/direct/dry-run.stdout" 2>"$BUILD/direct/dry-run.stderr"
-grep -Fq -- '-Oarbitrary' "$BUILD/direct/dry-run.stderr"
-grep -Fq -- '-DCLI_ATTACHED=1' "$BUILD/direct/dry-run.stderr"
+set +e
+"$X2C" build --verbose -j2 -I"$BUILD/includes/first" -DCLI_ATTACHED=1 \
+  -Oarbitrary --output "$BUILD/direct/attached" "$BUILD/direct/source.c" \
+  >"$BUILD/direct/attached.stdout" 2>"$BUILD/direct/attached.stderr"
+set -e
+grep -Fq -- '-Oarbitrary' "$BUILD/direct/attached.stderr"
+grep -Fq -- '-DCLI_ATTACHED=1' "$BUILD/direct/attached.stderr"
 printf 'int object_value(void) { return 3; }\n' >"$BUILD/direct/object.c"
 printf 'int archive_value(void) { return 4; }\n' >"$BUILD/direct/archive.c"
 host_cc=${CC:-cc}
@@ -572,11 +572,12 @@ finally:
     os.close(master)
 PY
 
-"$X2C" build -### --build-dir "$BUILD/direct/matched-dry" \
+set +e
+"$X2C" build --verbose --build-dir "$BUILD/direct/matched" \
   "$BUILD/direct/source.c" >"$BUILD/direct/matched.stdout" \
   2>"$BUILD/direct/matched.stderr"
+set -e
 grep -Fq "$ROOT/builds/0/libx2c.a" "$BUILD/direct/matched.stderr"
-[[ ! -e "$BUILD/direct/matched-dry" ]]
 
 python3 - "$X2C" "$BUILD/scheduling" <<'PY_SCHEDULING'
 import os
@@ -734,9 +735,6 @@ capture.unlink()
 run(command, 'warm')
 assert database.read_bytes() == first
 assert not capture.exists(), 'warm build executed a native compilation'
-run(command[:2] + ['-###'] + command[2:], 'dry')
-assert database.read_bytes() == first
-assert not capture.exists()
 source.write_text('int broken( {\n')
 run(command, 'failure', 1)
 assert database.read_bytes() == first
@@ -964,80 +962,13 @@ printf 'int main(void) { return 0; }\n' >"$equivalent/main.c"
   printf '[target.app]\n'
   printf 'sources = ["main.c"]\n'
 } >"$equivalent/x2c.toml"
-"$X2C" build -### --manifest-path "$equivalent/x2c.toml" \
+"$X2C" build --verbose --manifest-path "$equivalent/x2c.toml" \
   --build-dir "$equivalent/build" --output "$equivalent/app" \
   >"$equivalent/manifest.stdout" 2>"$equivalent/manifest.stderr"
-"$X2C" build -### --build-dir "$equivalent/build/.x2c/app" \
+rm -rf "$equivalent/build"
+"$X2C" build --verbose --build-dir "$equivalent/build/.x2c/app" \
   --output "$equivalent/app" "$equivalent/main.c" \
   >"$equivalent/direct.stdout" 2>"$equivalent/direct.stderr"
 cmp "$equivalent/manifest.stderr" "$equivalent/direct.stderr"
 
-# Source mapping is independent of -g and belongs to translation reuse.
-python3 - "$X2C" "$BUILD/source-map" <<'PY_SOURCE_MAP'
-from pathlib import Path
-import subprocess
-import sys
-
-compiler = sys.argv[1]
-root = Path(sys.argv[2]).resolve()
-source_dir = root / 'source "quote\\ and space'
-source_dir.mkdir(parents=True)
-source = source_dir / 'mapped.x'
-helper = source_dir / 'included.x'
-(source_dir / 'where.xmacro').write_text(
-    'macro Expression $imported_where() => (__LINE__)\n')
-source.write_text(r'''#include "x2c.x"
-#include "included.x"
-$(import "where.xmacro")
-macro Expression $where() => (__LINE__)
-int main(void) {
-  printf("source=%s:%d\n", __FILE__, __LINE__);
-  printf("multiline=%d\n",
-    __LINE__);
-  printf("macro=%d\n", $where());
-  printf("imported=%d\n",
-    $imported_where());
-  defer printf("cleanup=%d\n", __LINE__);
-  return included();
-}
-''')
-helper.write_text(r'''#include "x2c.x"
-int included(void) {
-  printf("included=%s:%d\n", __FILE__, __LINE__);
-  return 0;
-}
-''')
-
-
-def run(arguments):
-    result = subprocess.run(arguments, capture_output=True, text=True)
-    assert result.returncode == 0, result.stdout + result.stderr
-    return result.stdout
-
-
-command = [compiler, 'build', '--quiet', '-g', '-O0', '--build-dir',
-           str(root / 'build'), '--output', str(root / 'app'),
-           str(source), str(helper)]
-run(command)
-generated = list((root / 'build').rglob('*.c'))
-assert generated and all('#line ' not in p.read_text() for p in generated)
-mapped = command[:2] + ['--source-map'] + command[2:]
-run(mapped)
-expected = (f'source={source}:6\nmultiline=8\nmacro=9\nimported=11\n'
-            f'included={helper}:3\ncleanup=12\n')
-assert run([str(root / 'app')]) == expected
-assert all('#line ' in p.read_text() for p in generated)
-artifacts = generated + list((root / 'build').rglob('*.h'))
-stamps = [p.stat().st_mtime_ns for p in artifacts]
-run(mapped)
-assert stamps == [p.stat().st_mtime_ns for p in artifacts]
-run(command)
-assert all('#line ' not in p.read_text() for p in generated)
-output = root / 'translated'
-output.mkdir()
-run([compiler, 'translate', '--quiet', '--source-map', '--out-dir',
-     str(output), str(source)])
-assert '#line ' in (output / 'mapped.c').read_text()
-PY_SOURCE_MAP
-
-echo "CLI, dependency, build, run, manifest, and state probes: 110 passed"
+echo "CLI, dependency, build, run, manifest, and state probes: 97 passed"

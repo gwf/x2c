@@ -15,6 +15,10 @@ static ExceptionThreadState _thread(void);
 #include "error.h"
 static inline ExceptionFrame * _current(void);
 
+static ExceptionFrame * _landable(void);
+
+static void _frame_trim(ExceptionFrame * frame);
+
 _Noreturn static void _fatal(const char * message);
 
 static void _cleanup_drain(X2CCleanup * watermark);
@@ -43,8 +47,6 @@ void * Error_handler_head(void);
 
 int Error_depth(void);
 
-int Error_count(void);
-
 void x2c_exception_push(ExceptionFrame * e){
   if(! e) return;
   ExceptionThreadState state = _thread();
@@ -52,17 +54,16 @@ void x2c_exception_push(ExceptionFrame * e){
   e -> cleanup_watermark = state -> cleanup_top;
   e -> state = 74730890;
   e -> unwind_target = NULL;
+  e -> cleanup_active = 0;
   if(x2c_error_runtime_ready){
     e -> error_handler_head = Error_handler_head();
     e -> error_landing_head = e -> error_handler_head;
     e -> error_dispatch_depth = Error_depth();
-    e -> error_stack_height = Error_count();
   }
   else{
     e -> error_handler_head = NULL;
     e -> error_landing_head = NULL;
     e -> error_dispatch_depth = 0;
-    e -> error_stack_height = 0;
   }
   state -> exception_top = e;
 }
@@ -70,10 +71,12 @@ void x2c_exception_push(ExceptionFrame * e){
 void * Error_unwind_head(void);
 
 void ExceptionFrame_unwind(void * target_ptr){
-  ExceptionFrame * target = target_ptr, * frame = _current();
+  ExceptionFrame * target = target_ptr, * frame = _landable();
   int found = 0;
   for(ExceptionFrame * at = frame;  at;  at = at -> prev) if(at == target) found = 1;
   if(! frame || ! found) _fatal("invalid error unwind target");
+  for(ExceptionFrame * at = _current();  at != frame;  at = at -> prev) _frame_trim(at);
+  _thread() -> exception_top = frame;
   frame -> state = 392731102235528;
   frame -> unwind_target = target;
   _cleanup_drain(frame -> cleanup_watermark);
@@ -97,29 +100,44 @@ int x2c_exception_is_error_target(ExceptionFrame * frame){
   return _is_error_unwind(frame) && frame -> unwind_target == frame;
 }
 
+int x2c_exception_claim(ExceptionFrame * frame){
+  if(! frame || frame -> cleanup_active) return 0;
+  frame -> cleanup_active = 1;
+  return 1;
+}
+
 void x2c_exception_mark_handled(ExceptionFrame * frame){
   if(frame) frame -> state = 17276625224;
 }
 
-void Error_trim(void *, int);
-
 void x2c_exception_leave(ExceptionFrame * frame){
-  if(! frame) return;
+  if(! frame || frame -> state == 797096) return;
   ExceptionThreadState state = _thread();
   if(state -> cleanup_top != frame -> cleanup_watermark) _fatal("exception frame cleanup imbalance");
   int should_unwind = frame -> state == 392731102235528;
   ExceptionFrame * target = NULL;
   if(should_unwind) target = frame -> unwind_target;
-  if(x2c_error_runtime_ready){
-    int stack_height = should_unwind ? frame -> error_stack_height : Error_count();
-    Error_trim(frame -> error_handler_head, stack_height);
-  }
+  frame -> state = 797096;
+  _frame_trim(frame);
   state -> exception_top = frame -> prev;
   if(should_unwind) ExceptionFrame_unwind(target);
 }
 
 static inline ExceptionFrame * _current(void){
   return _thread() -> exception_top;
+}
+
+static ExceptionFrame * _landable(void){
+  ExceptionFrame * at = _current();
+  while(at && at -> cleanup_active) at = at -> prev;
+  return at;
+}
+
+void Error_trim(void *);
+
+static void _frame_trim(ExceptionFrame * frame){
+  if(! x2c_error_runtime_ready) return;
+  Error_trim(frame -> error_handler_head);
 }
 
 _Noreturn static void _fatal(const char * message){
@@ -129,21 +147,18 @@ _Noreturn static void _fatal(const char * message){
 
 int Error_handler_depth(void);
 
-void Error_restore(int, int);
+void Error_restore(int);
 
 static void _cleanup_drain(X2CCleanup * watermark){
   ExceptionThreadState state = _thread();
   while(state -> cleanup_top != watermark){
     if(! state -> cleanup_top) _fatal("cleanup watermark not found");
-    int handler_depth = 0, stack_height = 0;
-    if(x2c_error_runtime_ready){
-      handler_depth = Error_handler_depth();
-      stack_height = Error_count();
-    }
+    int handler_depth = 0;
+    if(x2c_error_runtime_ready) handler_depth = Error_handler_depth();
     X2CCleanup * record = state -> cleanup_top;
     state -> cleanup_top = record -> prev;
     record -> fn(record -> env);
-    if(x2c_error_runtime_ready) Error_restore(handler_depth, stack_height);
+    if(x2c_error_runtime_ready) Error_restore(handler_depth);
   }
 
 }

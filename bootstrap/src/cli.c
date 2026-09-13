@@ -68,9 +68,6 @@ static CliOption cli_options[] ={
     47618096330, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-v, --verbose", NULL, "Show commands as they are executed", 0
   }
   , {
-    9852392796, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 15397654616, "-###", NULL, "Show commands without executing them", 0
-  }
-  , {
     37046632, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
   }
   , {
@@ -86,19 +83,10 @@ static CliOption cli_options[] ={
     33665524324, CLI_TRANSLATE, 1052018024, "--out-dir", "<dir>", "Write generated files under <dir> (default: .)", 0
   }
   , {
-    42018498656, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1052018024, "--source-map", NULL, "Map generated C locations to original x2c sources", 0
-  }
-  , {
     31136689190, CLI_TRANSLATE, 1052018024, "--no-deps", NULL, "Do not write x2c dependency files", 0
   }
   , {
     286754491146, CLI_TRANSLATE, 1052018024, "--dep-file", "<file>", "Override the depfile path (one input only)", 0
-  }
-  , {
-    293637522078056, CLI_TRANSLATE, 1052018024, "--dep-target", "<target>", "Override the depfile target (one input only)", 0
-  }
-  , {
-    996399414194, CLI_TRANSLATE, 1052018024, "--no-phony-deps", NULL, "Omit phony rules for included files", 0
   }
   , {
     896459484392, CLI_BUILD | CLI_RUN, 1345468776, "--manifest-path", "<file>", "Use <file> instead of discovering x2c.toml", 0
@@ -818,8 +806,6 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     exit(0);
     case 47618096330 : c -> verbose = 1;
     break;
-    case 9852392796 : c -> dry_run = 1;
-    break;
     case 37046632 : c -> quiet = 1;
     break;
     case 34343516 : c -> plain = 1;
@@ -834,15 +820,9 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     break;
     case 33665524324 : c -> out_dir = value;
     break;
-    case 42018498656 : c -> source_map = 1;
-    break;
     case 31136689190 : c -> no_deps = 1;
     break;
     case 286754491146 : c -> dep_file = value;
-    break;
-    case 293637522078056 : c -> dep_target = value;
-    break;
-    case 996399414194 : c -> no_phony_deps = 1;
     break;
     case 20273998090 : Array_push(x_paths, String_var(value));
     if(c -> command != 45220543335690) _push_pair(cc_args, _47, value);
@@ -1048,8 +1028,8 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   request -> ld_args = Array_list_free(ld_args);
   if(List_truth(request -> package_dirs)) request -> package_dirs = List_reverse(request -> package_dirs);
   if(mask == CLI_TRANSLATE && ! List_truth(request -> inputs)) x2c_driver_error("translate requires at least one input");
-  if(List_truth(List_cdr(request -> inputs)) &&(String_truth(request -> dep_file) || String_truth(request -> dep_target))) x2c_driver_error("--dep-file and --dep-target require exactly one input");
-  if(request -> no_deps &&(String_truth(request -> dep_file) || String_truth(request -> dep_target) || request -> no_phony_deps)) x2c_driver_error("--no-deps conflicts with dependency output options");
+  if(List_truth(List_cdr(request -> inputs)) && String_truth(request -> dep_file)) x2c_driver_error("--dep-file requires exactly one input");
+  if(request -> no_deps && String_truth(request -> dep_file)) x2c_driver_error("--no-deps conflicts with dependency output options");
   if(request -> compile_only && request -> kind != 404971770155786) x2c_driver_error("--compile-only conflicts with a library target kind");
   if(mask == CLI_BOOTSTRAP && ! String_truth(request -> prefix)) x2c_driver_error("bootstrap requires --prefix <dir>");
   return request;

@@ -101,7 +101,7 @@ typedef struct Compiler {
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
-  Array origins, int origin, source_map;
+  Array origins, int origin;
   // The request view outlives the unit; semantic stores die with this unit.
   SourceView sources;
   int source_facts, source_primary;
@@ -293,7 +293,6 @@ static Compiler _new(Compiler owner) {
       _.package_aliases = owner.package_aliases;
       _.package_members = owner.package_members;
       _.names = owner.names;
-      _.source_map = owner.source_map;
       _.recovery_depth = owner.recovery_depth;
       _.sources = owner.sources;
       _.declaration_produced = owner.declaration_produced;
@@ -590,8 +589,7 @@ static void _shallow_block(Compiler c) {
 */
 int Compiler.record_origin(Compiler c, Token token) {
   if (!token) return 0;
-  String file = c.filename ? c.filename : %"<stdin>";
-  if (!c.source_map) file = c.display_path(file);
+  String file = c.display_path(c.filename ? c.filename : %"<stdin>");
   c.origins.push(
     %(source $file ${token.line} ${token.col} ${token.len} ${token.pos}));
   return c.origins.len();

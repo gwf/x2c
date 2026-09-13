@@ -287,8 +287,8 @@ container value.
 Successful allocation with satisfied preconditions returns initialized
 storage. Every cause in `lib/error-macros.xmacro`'s shared table may transfer
 to a matching filtered catch, but none of them return to the call that raised
-them. Error locks their policies to `<abort>` and rejects `<collect>`, `<log>`,
-or `<ignore>`; an observing handler also cannot consume one with `<handled>`.
+them. Error locks their policies to `<abort>` and rejects `<log>` and
+`<ignore>`; an observing handler also cannot consume one with `<handled>`.
 Literal raises of these causes emit `__builtin_unreachable()` after the
 runtime call.
 Downstream code therefore does not check whether a valid Scope allocation,
@@ -492,7 +492,7 @@ are available. File-scope semantic identities survive that resolution.
 ### Status-bearing collection boundaries
 
 `Iter.try_next` owns iterator advancement. Callbacks return success separately
-from a `Var` output, runtime combinators consume that status, and generated
+from a `Var` output, runtime adapters consume that status, and generated
 `foreach` tests it before converting the payload. A callback that reports
 success with a `void` output violates the iterator contract. Exhaustion is
 represented by clearing the iterator callback, and an unsupported or null
@@ -500,12 +500,9 @@ callback is safely exhausted. `Iter.next` delegates to `Iter.try_next` and
 returns `void` on exhaustion.
 Integer ranges are inclusive and direction-sensitive; construction rejects a
 zero step, and endpoint progression terminates before signed overflow.
-Combinators preserve the same status owner: lazy transforms, including
-`Iter.scan`, may not emit `void`, while consuming collectors own their result
-container through the ordinary `Scope` lifetime. Numeric aggregate folds and
-`Iter.accumulate` use `Var.binary`, preserving its promotion, full result tag,
-and failure rules; extrema use total `Var.compare` ordering and keep the first
-value when comparison ties.
+Derived iterators preserve the same status owner: `Iter.unique` may not emit
+`void`, while consuming collectors own their result container through the
+ordinary `Scope` lifetime.
 
 `Map.try_get` and `Map.try_del` likewise separate presence from their value
 outputs. Map storage rejects `void` keys and values, and map literals use a
@@ -621,9 +618,9 @@ rejection, unreadable-include failure, and batch-vs-solo output parity.
 Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
 The emitter owns the C rule that automatic state changed across that boundary
-must be volatile. It qualifies directly modified named locals and parameters,
-and emits volatile cleanup guards. `ExceptionFrame` owns the volatile
-transfer state and unwind target written before transfer and read afterward.
+must be volatile. It qualifies directly modified named locals and parameters.
+`ExceptionFrame` owns the volatile transfer state, the unwind target, and the
+run-once cleanup claim, written before transfer and read afterward.
 Native-runtime fixtures compile with the active repository build flags, so
 optimized behavior and signal-mask semantics are executable boundaries rather
 than build-mode accidents.
@@ -780,14 +777,12 @@ Each accumulated Error owns a private Scope plus List and String pools. Error
 details are immutable/value-only graphs: nil, numeric or enum values, Symbols,
 Atoms, Strings, and recursively admissible Lists. Static crossings are checked
 by the compiler and dynamic `Var` contents remain runtime-authoritative.
-Closing a handler truncates to its registration watermark and destroys every
-discarded record region; collected Errors therefore live exactly as long as
-their owning watermark. Observing slices and selected catch bindings are
-borrowed, and `Error.snapshot` is the explicit crossing into the caller's
-ordinary Scope and canonical pools. `Error.since` uses that same snapshot
-owner.
+One record exists per in-flight raise; the dispatch that created it reclaims
+it, or a selected filtered catch retains it. Observing handlers and selected
+catch bindings borrow that record, and `Error.snapshot` is the explicit
+crossing into the caller's ordinary Scope and canonical pools.
 
-Policy accepts only `<abort>`, `<log>`, `<collect>`, and `<ignore>`; an invalid
+Policy accepts only `<abort>`, `<log>`, and `<ignore>`; an invalid
 disposition raises `<bad-arg>` without mutating prior policy, while unknown
 codes remain legal and default to `<abort>`. Every cause in
 `lib/error-macros.xmacro`'s shared table is the exception to configurable

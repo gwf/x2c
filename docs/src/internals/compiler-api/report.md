@@ -27,10 +27,10 @@ Command progress and completion receipts.
 
 #### report_configure
 
-`void report_configure( int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting)`
+`void report_configure( int quiet, int plain, Symbol color_mode, int verbose, int inspecting)`
 
 Resets process reporting for one command.
-Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
+Quiet, verbose, and inspection modes disable receipts. Transient
 progress additionally requires terminal stderr, non-plain output, and no
 parent Make recipe. Plain output disables color; automatic color respects
 terminal capability and `NO_COLOR`.
@@ -62,7 +62,7 @@ Source: `src/report.x:45`
 Writes one newline-terminated receipt to stderr when receipts are enabled.
 Any active transient line is cleared first, and `line` must be non-NULL.
 
-Source: `src/report.x:184`
+Source: `src/report.x:183`
 
 #### report_now_us
 
@@ -81,7 +81,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:232`
+Source: `src/report.x:231`
 
 #### report_progress
 
@@ -92,7 +92,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:196`
+Source: `src/report.x:195`
 
 #### report_receipts
 
@@ -100,7 +100,7 @@ Source: `src/report.x:196`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:122`
+Source: `src/report.x:121`
 
 #### report_size
 
@@ -117,7 +117,7 @@ Source: `src/report.x:63`
 
 Clears the active transient line from stderr, if one exists.
 
-Source: `src/report.x:175`
+Source: `src/report.x:174`
 
 ## Design notes
 

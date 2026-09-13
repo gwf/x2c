@@ -82,21 +82,10 @@ int main(int argc, char **argv) {
     List invalid = %((value $mutable));
     Error.raise(<bad-types>, invalid);
   }
-  if (!strcmp(argv[1], "context-bound")) {
-    Error.initialize();
-    Error.bound_set(100);
-    Context context = Context.open();
-    Error.bound_set(1);
-    Error.policy_set(<bound-prob>, <collect>);
-    Error.raise(<bound-prob>, %((sequence 1)));
-    Error.raise(<bound-prob>, %((sequence 2)));
-    context.close();
-    return 0;
-  }
   if (!strcmp(argv[1], "shutdown-order")) {
     Logger.initialize();
-    Error.policy_set(<hook-probe>, <collect>);
-    Error.policy_set(<late-probe>, <collect>);
+    Error.policy_set(<hook-probe>, <log>);
+    Error.policy_set(<late-probe>, <log>);
     raise %(hook-probe (phase root));
     Scope.shutdown_hook(_raise_during_shutdown);
     Scope_shutdown();

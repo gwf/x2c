@@ -215,8 +215,7 @@ Initializes `dest` as an iterator over the elements of `x`.
 The caller owns the storage: declare a `struct Iter` and pass its
 address. The return value is that same `dest`, or `NULL` when `dest` is
 null, as in every iterator constructor in the library.
-`foreach (Var item, array)` uses this, and the lazy combinators start
-here.
+`foreach (Var item, array)` uses this.
 
 The iterator borrows `x` and its stored `Var` values, so
 the `Array` and any
@@ -227,7 +226,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:805`
+Source: `lib/array.x:804`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -608,7 +607,7 @@ Source: `lib/array.x:58`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:811`
+Source: `lib/array.x:810`
 
 ## Advanced and interop API
 
@@ -635,7 +634,7 @@ Source: `lib/array.x:811`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:819`
+Source: `lib/array.x:818`
 
 <a id="Array.compare"></a>
 #### Array.compare

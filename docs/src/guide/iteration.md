@@ -1,12 +1,12 @@
 # Iteration
 
 x2c has two ways to walk a collection. `foreach(T name, collection)` is the
-short form and covers most cases. `Iter` chains combine operations that process
-one element at a time, then collect, aggregate, or loop over the result.
+short form and covers most cases. An `Iter` walks one element at a time under
+your control, and reports exhaustion separately from the element.
 
 Neither one allocates iterator state on the heap. For an immediately
-consumed chain, x2c supplies stack storage for every stage. Name that
-storage yourself when the iterator has to stay live between expressions. The
+consumed call, x2c supplies stack storage. Name that storage yourself when
+the iterator has to stay live between expressions. The
 [storage convention](#the-storage-convention) covers both forms.
 
 [The language reference](../reference/language.md) states the `foreach` rules,
@@ -112,7 +112,7 @@ conformance, from its own adoption or from the nearest typedef ancestor.
 without `protocol Iter(Ast);`. A type with neither is rejected as not
 iterable.
 
-An `Iter` is itself iterable, so `foreach` can consume a hand-built pipeline.
+An `Iter` is itself iterable, so `foreach` can consume a hand-built iterator.
 That combination appears at the end of this chapter.
 
 ### What the loop variable's type means
@@ -152,8 +152,8 @@ up.
 ## Iterators by hand
 
 An `Iter` points to a small struct holding the object being iterated, one `Var`
-of state, a `Func` slot, and a `next` callback that reports success separately
-from its result. Advancing it calls `next`, which fills a `Var *out` and
+of state, and a `next` callback that reports success separately from its
+result. Advancing it calls `next`, which fills a `Var *out` and
 returns 1, or returns 0 to report exhaustion. The callback is cleared at
 exhaustion.
 
@@ -165,7 +165,7 @@ You read an iterator two ways:
   and `void` at exhaustion. It is unambiguous because no iterator may yield
   `void` as an element.
 
-An `Iter` is single-pass. There is no rewind, and the aggregates below
+An `Iter` is single-pass. There is no rewind, and the collectors below
 consume their input, so build a fresh iterator for a second traversal.
 
 `range` is the simplest source:
@@ -212,29 +212,18 @@ stored callback.
 
 ## The storage convention
 
-An `Iter` is a pointer to caller-owned storage. Each source and lazy
-operation takes a final `Iter` destination internally, initializes it, and
-returns the same pointer. The operation's state is stored in that
+An `Iter` is a pointer to caller-owned storage. Each source and collection
+adapter takes a final `Iter` destination internally, initializes it, and
+returns the same pointer. The iterator's state is stored in that
 `struct Iter`. There is no second state object and nothing to free.
 
-Fluent code omits those destinations when the whole chain is consumed
+Fluent code omits that destination when the iterator is consumed
 immediately:
 
 ```x2c
-static Var double_value(Var value) {
-  return value * 2;
-}
-
-static int divisible_by_four(Var value) {
-  return value % 4 == 0;
-}
-
 int main(void) {
   Scope.retain();
-  Array values = range(1, 8, 1)
-    .map(double_value)
-    .filter(divisible_by_four)
-    .array();
+  Array values = range(1, 8, 1).array();
   for (size_t i = 0; i < values.len(); i++)
     printf("%d\n", values[i].int());
 
@@ -243,146 +232,75 @@ int main(void) {
 }
 ```
 
-x2c inserts a distinct `struct Iter` compound literal for each missing final
-destination. Those objects have automatic storage and remain alive through
-the enclosing block. Completion applies only when the chain ends in
-`try_next`, `next`, `done`, `list`, `array`, `reduce`, `foldl`, `any`, `all`,
-`find`, `count`, `sum`, `product`, `min`, `max`, or `foreach`.
+x2c inserts a `struct Iter` compound literal for the missing final
+destination. That object has automatic storage and remains alive through the
+enclosing block. Completion applies only when the call is consumed
+immediately by `try_next`, `next`, `list`, `array`, or `foreach`.
 
 It does not apply when an iterator is assigned, returned, or passed as an
-argument. Then declare one `struct Iter` for each stage:
+argument. Then declare the `struct Iter` yourself:
 
 ```x2c
-~static Var double_value(Var value) { return value * 2; }
-~static int divisible_by_four(Var value) { return value % 4 == 0; }
-~
 ~int main(void) {
-struct Iter source_storage, map_storage, filter_storage;
+struct Iter source_storage;
 Iter source = range(1, 8, 1, &source_storage);
-Iter doubled = source.map(double_value, &map_storage);
-Iter selected = doubled.filter(divisible_by_four, &filter_storage);
 
-Var first = selected.next();
-// selected and all of its sources remain available here.
+Var first = source.next();
+// source remains available here.
 ~  return first is void;
 ~}
 ```
 
 Storage must outlive every iterator that refers to it. Never return an `Iter`
 built over local storage; take the destination storage as a parameter or
-return a collected `List` or `Array`. One `struct Iter` holds one live stage,
-so reusing it within a pipeline overwrites the earlier stage.
-
-A lazy callback stage also stores its `Func`. A direct function uses one
-file-static binding, and a dynamic function pointer or capturing lambda
-belongs to the active `Scope`. That `Scope` must stay alive until the iterator
-is finished. To return a lazy iterator, its source storage, destination
-storage, and any dynamic or captured callback must outlive the returned
-value.
+return a collected `List` or `Array`. One `struct Iter` holds one live
+iterator, so reusing it overwrites the earlier one.
 
 The iterators need no cleanup. A collected `List` or `Array` is scope-owned
-data, so the first program brackets its work with `Scope.retain` and
+data, so the program above brackets its work with `Scope.retain` and
 `Scope.release`. See [scopes and lifetime](memory.md) for what that pair
 does.
 
-## Pipeline operations
+## Collecting
 
-These operations are lazy. The signatures show the fluent form; add a final
-`&storage` when retaining a result. There is no `take_while`, `flat_map`, or
-lazy sort. For eager transformations over a `List`, see
-[collections](collections.md).
-
-The callback operations accept `Func`, so direct functions, function-pointer
-values, and capturing lambdas use the same method names. Every source
-element and accumulator is passed as a value. A callback with a reference
-parameter is rejected when it is first invoked, and it never receives an
-alias into source storage. An empty source does not invoke or arity-check
-its callback.
-
-- `range(start, end, step)`: each `int` in the range.
-- `iter.filter(pred)`: elements accepted by `Var` truthiness.
-- `iter.map(fn)`: `fn(element)`.
-- `iter.head(count)`: at most `count` leading elements.
-- `iter.enumerate(start)`: `(index element)` `List`s.
-- `iter.unique()`: the first occurrence of each element.
-- `iter.chain(other)`: all of `iter`, then all of `other`.
-- `iter.zip(other)`: `(left right)` `List`s until either side ends.
-- `iter.zip_with(other, fn)`: `fn(left, right)` pairwise.
-- `iter.map2(other, fn)`: the same pairwise mapping with `fn` required.
-- `iter.scan(seed, fn)`: each new accumulator.
-- `iter.accumulate(initial)`: a running numeric sum with `Var` promotion.
-- `iter.unzip(&shared, &storage)`: two independent column iterators. This
-  operation always keeps both arguments explicit.
-- `Iter.repeat(value, count)`: `value`, `count` times.
-
-Some operations need a little explanation:
-
-- `filter` keeps its predicate in the destination `Iter`, like the callbacks
-  used by the other lazy operations.
-- `scan` applies its callback to the accumulator and each element and yields
-  every new accumulator, never the seed. Its callback must not return
-  `void`.
-- `accumulate` is the numeric case. It adds through `Var.binary`, keeps the
-  promoted result tag, and yields each running total. Use `scan` for
-  anything else.
-- `map2` is `zip_with` with the callback required. A `zip_with` given no
-  callback yields pairs.
-- `unzip` requires two-element `List`s and rejects other shapes. It yields two
-  column iterators that can be consumed independently, buffering only the
-  lag between them.
-- `head` and `repeat` treat a negative count as zero.
-
-Nothing runs until you ask for an element. Each stage then requests an
-element from its source. Taking two elements from a `map` over a range calls
-the mapping function twice. The pipeline above starts when `array()` requests
-its first element.
-
-## Collecting and folding
-
-Constructing an iterator does not consume it. Collectors and aggregates do:
+Constructing an iterator does not consume it. The collectors do:
 
 ```x2c
-~static int over_two(Var value) { return value > 2; }
-~
-~int main(void) {
-List numbers = range(1, 4, 1).list();
-Array boxed = range(1, 4, 1).array();
-printf("%s and %s\n", numbers.str(), boxed.str());
-
-printf("sum = %d\n", range(1, 10, 1).sum().int());
-printf("first over two = %s\n",
-       range(1, 10, 1).find(over_two));
-~  return 0;
-~}
+int main(void) {
+  Scope.retain();
+  List numbers = range(1, 4, 1).list();
+  Array boxed = range(1, 4, 1).array();
+  printf("%s and %s\n", numbers.str(), boxed.str());
+  Scope.release();
+  return 0;
+}
 ```
 
 `iter.list()` and `iter.array()` build a fresh `List` or `Array` under the
-current scope. The aggregates are `count`, `sum`, `product`, `min`, `max`,
-`reduce`, `foldl`, `any`, `all`, and `find`. `sum` and `product` use `Var`
-arithmetic promotion. `min` and `max` use total `Var` ordering and keep the
-first of equal values. `min`, `max`, and `find` return `void` when there is
-nothing to return, and `reduce` given a `void` initial value uses the first
-element as its seed.
+current scope, draining the iterator. `iter.unique(&storage)` is the one
+lazy adapter: it yields the first occurrence of each element, using `Map`
+equality and hashing for the seen set. `List.unique` is built from it.
 
-## Handing a pipeline to foreach
+For eager transformations, folds, and predicates over a collection, use the
+`List`, `Array`, and `Map` operations described in
+[collections](collections.md).
 
-An `Iter` is iterable, so `foreach` can consume a fluent pipeline directly.
-The compiler supplies stack storage for every stage, including both sides of
-a `zip` or `map2`, before the loop starts pulling.
+## Handing an iterator to foreach
+
+An `Iter` is iterable, so `foreach` can consume one directly, including a
+source written inline:
 
 ```x2c
-~static int is_even(Var value) { return value % 2 == 0; }
-~
-~int main(void) {
-foreach(int value, range(1, 10, 1).filter(is_even))
-  printf("%d\n", value);
-~  return 0;
-~}
+int main(void) {
+  foreach(int value, range(1, 10, 1))
+    if (value % 2 == 0) printf("%d\n", value);
+  return 0;
+}
 ```
 
-Nested `foreach` loops receive separate storage for each chain. Use the
-explicit form when the same iterator must be paused and resumed outside one
-loop.
+The compiler supplies stack storage before the loop starts pulling, and
+nested `foreach` loops receive separate storage. Use the explicit form when
+the same iterator must be paused and resumed outside one loop.
 
 ## Choosing between the two
 
@@ -392,9 +310,6 @@ cannot leak an iterator.
 
 Drive an `Iter` by hand when:
 
-- you are composing streaming stages, especially over a `range`;
-- you need to interleave or compare two sources with `zip`, `zip_with`, or
-  `chain`;
 - exhaustion status matters to the surrounding code, so you want `try_next`
   instead of a loop that ends silently;
 - you are writing a new source with `Iter.init`;

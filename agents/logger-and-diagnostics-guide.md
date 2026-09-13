@@ -92,7 +92,7 @@ default Logger.
 `Logger.initialize` initializes Error after installing the default stderr
 Logger, then registers `Logger.error_handler` as an observing handler. It
 renders only the newest `<abort>` or `<log>` Error as an `<error-report>`
-event. `<collect>` remains quiet for its boundary reporter and `<ignore>`
+event. `<ignore>` remains quiet for its boundary reporter and `<ignore>`
 remains quiet permanently. The handler always declines, so Error still owns
 consumption, transfer, and the fatal floor.
 

@@ -210,8 +210,8 @@ static void _validate_input(String input) {
 /** Validates a native build request and returns its `Scope`-owned build state.
     It writes the default state seed and selected compiler and archiver back
     to `request`, chooses output and intermediate paths, and creates artifact
-    directories unless this is a dry run. Invalid inputs or setup print a
-    diagnostic and exit with status 2.
+    directories. Invalid inputs or setup print a diagnostic and exit with
+    status 2.
 */
 Build CliRequest.prepare(CliRequest c) {
   if (!c.inputs)
@@ -238,14 +238,13 @@ Build CliRequest.prepare(CliRequest c) {
   state.request = c;
   if (!c.state_seed) c.state_seed = "direct";
   state.toolchain = toolchain_new(
-    c.cc, c.ar, c.cpp_args, c.cc_args,
-    c.ld_args, c.verbose, c.dry_run);
+    c.cc, c.ar, c.cpp_args, c.cc_args, c.ld_args, c.verbose);
   c.cc = state.toolchain.cc; c.ar = state.toolchain.ar;
   state.c_sources = %[];
   state.gen_dirs = %[];
   state.native_inputs = %[];
   state.objects = %[];
-  if (c.compile_commands && !c.dry_run) state.compile_commands = %[];
+  if (c.compile_commands) state.compile_commands = %[];
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
@@ -260,10 +259,6 @@ Build CliRequest.prepare(CliRequest c) {
   if (c.build_dir) state.work_dir = c.build_dir;
   else if (c.temps_dir) state.work_dir = c.temps_dir;
   else if (c.save_temps) state.work_dir = ".x2c-build";
-  else if (c.dry_run) {
-    state.work_dir = "/tmp/x2c-build-dry-run";
-    state.temporary = 1;
-  }
   else {
     char work[] = "/tmp/x2c-build-XXXXXX", *directory = mkdtemp(work);
     if (!directory)
@@ -275,13 +270,11 @@ Build CliRequest.prepare(CliRequest c) {
   state.obj_root = %"${state.work_dir}/obj";
   state.dep_root = %"${state.work_dir}/dep";
   if (c.build_dir) state.state_root = %"${state.work_dir}/.x2c-state";
-  if (!c.dry_run) {
-    _require_directory(state.work_dir);
-    _require_directory(state.gen_root);
-    _require_directory(state.obj_root);
-    _require_directory(state.dep_root);
-    if (state.state_root) _require_directory(state.state_root);
-  }
+  _require_directory(state.work_dir);
+  _require_directory(state.gen_root);
+  _require_directory(state.obj_root);
+  _require_directory(state.dep_root);
+  if (state.state_root) _require_directory(state.state_root);
   foreach (String input, c.inputs) {
     if (input.endswith(%".x")) state.xlat_n++;
     if (input.endswith(%".c")) state.c_sources.push(input);
@@ -296,12 +289,12 @@ Build CliRequest.prepare(CliRequest c) {
 }
 
 /** Returns and registers the generated-file directory for `input`.
-    The directory is derived from the input path, created unless this is a dry
-    run, and appended once to the build's generated include directories.
+    The directory is derived from the input path, created, and appended once
+    to the build's generated include directories.
 */
 String Build.generated_dir(Build state, String input) {
   String directory = %"${state.gen_root}/${_key(input)}";
-  if (!state.request.dry_run) _require_directory(directory);
+  _require_directory(directory);
   if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
   return directory;
 }
@@ -316,19 +309,18 @@ static uint64_t _translation_fingerprint(
   hash = _state_list(hash, request.package_dirs);
   hash = _state_list(hash, request.cpp_args);
   hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
-  hash = _state_text(
-    hash, request.source_map ? %"source-map" : %"generated-lines");
+  hash = _state_text(hash, %"generated-lines");
   String depfile = %"$directory/${x2c_path_stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);
 }
 
 /** Reports whether translated C and header artifacts match current inputs.
-    Returns zero without retained state, during a dry run, when either output
-    is absent, or when any compiler, tool, option, depfile, or dependency
-    fingerprint cannot be read or differs.
+    Returns zero without retained state, when either output is absent, or
+    when any compiler, tool, option, depfile, or dependency fingerprint cannot
+    be read or differs.
 */
 int Build.translation_current(Build state, String input, String directory) {
-  if (!state.state_root || state.request.dry_run) return 0;
+  if (!state.state_root) return 0;
   String stem = x2c_path_stem(input);
   if (access(%"$directory/$stem.c", R_OK)) return 0;
   if (access(%"$directory/$stem.h", R_OK)) return 0;
@@ -347,7 +339,7 @@ int Build.translation_current(Build state, String input, String directory) {
     attempts to unlink the temporary file but cannot guarantee its removal.
 */
 void Build.record_translation(Build state, String input, String directory) {
-  if (!state.state_root || state.request.dry_run) return;
+  if (!state.state_root) return;
   int ok = 1;
   uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
   if (ok) _state_write(%"${state.state_root}/x-${_key(input)}", hash);
@@ -507,7 +499,7 @@ static int _finish_compile(Build state, CcJob *pending) {
       return -1;
     }
   }
-  else if (!status && state.state_root && !state.request.dry_run)
+  else if (!status && state.state_root)
     _state_write(pending->state_path, pending->fingerprint);
   if (!status) {
     state.cc_done++;
@@ -646,7 +638,7 @@ static int _compile_sources(Build b) {
       .action = action, .source = source, .object = object,
       .depfile = depfile, .state_path = state_path
     };
-    if (state_path && !b.request.dry_run) {
+    if (state_path) {
       pending.preprocessed = %"${b.dep_root}/$key.i";
       pending.execution = b.toolchain.preprocess_action(
         source, pending.preprocessed, directories).start();
@@ -680,33 +672,11 @@ static List _native_action_inputs(Build state) {
   return result;
 }
 
-// Native flags are ordered: an explicit -g0 can override a profile's -g.
-static int _mapped_debug(Build state) {
-#ifdef __APPLE__
-  if (!state.request.source_map || state.request.kind == <static-lib>)
-    return 0;
-  int enabled = 0;
-  foreach (String flag, state.toolchain.cc_args) {
-    if (flag == "-g0" || flag == "-ggdb0") enabled = 0;
-    else if (flag == "-g" || flag == "-g1" || flag == "-g2" ||
-             flag == "-g3" || flag == "-ggdb" || flag == "-ggdb1" ||
-             flag == "-ggdb2" || flag == "-ggdb3" ||
-             flag == "-gline-tables-only" || flag == "-gmlt" ||
-             flag.startswith("-gdwarf")) enabled = 1;
-  }
-  return enabled;
-#else
-  return 0;
-#endif
-}
-
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
     reuse their recorded inputs; executables always link because library
-    selection and implicit linker inputs are not in the fingerprint. Mapped
-    macOS debug executables also produce a companion dSYM before cleanup;
-    failed symbol assembly fails the build and preserves intermediates.
+    selection and implicit linker inputs are not in the fingerprint.
 */
 int Build.finish(Build b) {
   if (_compile_sources(b)) return 1;
@@ -727,7 +697,7 @@ int Build.finish(Build b) {
   String state_path =
     b.state_root && b.request.kind == <static-lib> ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
-  if (state_path && !b.request.dry_run &&
+  if (state_path &&
       !access(b.output, R_OK)) {
     int ok = 1;
     uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
@@ -746,15 +716,8 @@ int Build.finish(Build b) {
       return 0;
     }
   }
-  if (b.request.kind == <static-lib> && !b.request.dry_run) unlink(b.output);
+  if (b.request.kind == <static-lib>) unlink(b.output);
   if (action.run()) return 1;
-  if (_mapped_debug(b)) {
-    String output = b.output, symbols = %"$output.dSYM";
-    ToolAction debug = tool_action_new(
-      <dsym>, %("dsymutil" $output "-o" $symbols),
-      b.request.verbose, b.request.dry_run);
-    if (debug.run()) return 1;
-  }
   report_progress(action.phase, 1, 1, b.output);
   int input_count = inputs.len();
   String noun = action.phase == <archive> ?
@@ -833,13 +796,10 @@ void Build.report_success(Build b) {
   if (!b.request.compile_only) {
     String size = report_size(report_file_bytes(b.output));
     report_line(<muted>, %"  Output ${b.output} ($size)");
-    if (_mapped_debug(b))
-      report_line(<muted>, %"  Debug symbols ${b.output}.dSYM");
   }
 }
 
 /** Runs the built output with the request's arguments and returns its status.
-    A dry run prints the action without launching the program.
 */
 int Build.run_program(Build state) {
   report_line(<phase>, %"Running ${state.output}");
@@ -847,8 +807,7 @@ int Build.run_program(Build state) {
   arguments.push(state.output);
   foreach (String argument, state.request.run_args) arguments.push(argument);
   ToolAction action = tool_action_new(
-    <run>, arguments.list_free(),
-    state.request.verbose, state.request.dry_run);
+    <run>, arguments.list_free(), state.request.verbose);
   action.as_program();
   return action.run();
 }
@@ -880,11 +839,11 @@ int _build_remove_tree(String path) {
 }
 
 /** Removes the temporary work tree after a successful real build.
-    Failed builds, retained directories, and dry runs are left untouched; a
-    removal failure emits a warning and is not returned to the caller.
+    Failed builds and retained directories are left untouched; a removal
+    failure emits a warning and is not returned to the caller.
 */
 void Build.cleanup(Build state, int success) {
-  if (!success || !state.temporary || state.request.dry_run) return;
+  if (!success || !state.temporary) return;
   if (!_build_remove_tree(state.work_dir)) {
     fputs("x2c: warning: cannot remove temporary build directory: ", stderr);
     fprintf(stderr, "%s\n", state.work_dir);

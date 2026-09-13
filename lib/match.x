@@ -161,6 +161,25 @@ static MatchPlan _site_plan(MatchCaptureSite *site, Var pattern) {
   return plan && plan.status != MACHINE_INELIGIBLE ? plan : NULL;
 }
 
+/** Reports whether a compiler-owned site can retain `pattern`.
+    A site borrows its pattern's values for the life of the process, so only a
+    graph of values that outlives every call qualifies.
+*/
+int x2c_match_pattern_retainable(Var pattern) =>
+  _pattern_admissible(pattern, 0);
+
+/** Returns the process-lifetime plan for one compiler-owned site.
+    The first retainable pattern binds the site permanently. A pattern the site
+    cannot retain returns NULL; an ineligible one returns its fenced plan so
+    the caller can name the fence.
+    Raises: `<alloc-fail>` while publishing.
+*/
+MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) {
+  if (!site) return NULL;
+  MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
+  return plan ? plan : _capture_site_publish(site, pattern);
+}
+
 /** Matches through one compiler-owned site, writing bindings on success.
     Results follow `List.try_match`.
 */

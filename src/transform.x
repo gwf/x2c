@@ -92,13 +92,7 @@ static const PrintfFn *_printf_family(List callee) {
 
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||
-         name == "Iter_list" || name == "Iter_array" ||
-         name == "Iter_reduce" ||
-         name == "Iter_foldl" || name == "Iter_any" ||
-         name == "Iter_all" || name == "Iter_find" ||
-         name == "Iter_count" || name == "Iter_sum" ||
-         name == "Iter_product" || name == "Iter_min" ||
-         name == "Iter_max";
+         name == "Iter_list" || name == "Iter_array";
 
 // Recover a format known at compile time. Raw C spelling is retained so
 // escaped percent bytes stay outside this first pass.
@@ -858,6 +852,35 @@ static List _dynamic_binary(
   return %(call "Var_binary" (args $lhs ${_symbol_expression(op)} $rhs));
 }
 
+/* One protocol-member update. `x += y`, `++x`, and `x++` all resolve the
+   operator's member on the receiver type, convert the right operand to the
+   member's declared parameter, and ask for the update helper. A null `rhs`
+   is a postfix update, which reads the receiver before the helper runs.
+   The converted operand stays in `*rhs` when no helper exists, so a caller
+   continues into the dynamic path with the operand it already built. */
+static List _protocol_update(
+  Compiler c, Type type, Symbol op, List arg, List *rhs, Symbol spelled) {
+  Symbol member = c.operator_member(op);
+  if (!member) return NULL;
+  String member_name = member;
+  List resolved = c.resolve_protocol_member(type, member_name);
+  if (!resolved) return NULL;
+  if (rhs) {
+    List converted = NULL;
+    match (resolved)
+      case %(? ((func (? ?parameter *)) ?)):
+        converted = c.convert_expression(*rhs, parameter.list());
+    if (!converted) return NULL;
+    *rhs = converted;
+  }
+  String helper = c.protocol_update_helper(type, member_name, !rhs);
+  if (!helper) return NULL;
+  List spell = _symbol_expression(spelled);
+  if (!rhs) return %(vpostfix $arg $spell $helper);
+  List value = *rhs;
+  return %(vcompound $arg $spell $value $helper);
+}
+
 static List _dynamic_compound(
   Compiler c, List ast, Symbol op, List lhs, List rhs) {
   (Var lhs_tag, Type lhs_type) = lhs;
@@ -885,22 +908,9 @@ static List _dynamic_compound(
     member_type = %("String");
   }
   if (!lhs_is_var) {
-    Symbol member = c.operator_member(op);
-    if (member) {
-      String member_name = member;
-      List resolved =
-        c.resolve_protocol_member(member_type, member_name);
-      if (resolved) {
-        Type signature = resolved.cadr();
-        List parameters = signature.car().list().cadr();
-        rhs = c.convert_expression(rhs, parameters.cadr());
-        (rhs_tag, rhs_type) = rhs;
-        String helper = c.protocol_update_helper(
-          member_type, member_name, 0);
-        if (helper)
-          return %(vcompound $lhs ${_symbol_expression(op)} $rhs $helper);
-      }
-    }
+    List updated = _protocol_update(c, member_type, op, lhs, &rhs, op);
+    if (updated) return updated;
+    (rhs_tag, rhs_type) = rhs;
   }
   if (!lhs_is_var && !rhs_is_var) return ast;
   if (lhs_type.is_bitfield())
@@ -984,21 +994,9 @@ static List _operator(Compiler c, List ast) {
       if (indexed) return indexed;
       if (!c.sym.is_var_type(type)) {
         Symbol binary = operator == <++> ? <+> : <->;
-        Symbol member = c.operator_member(binary);
-        if (member) {
-          String member_name = member;
-          List resolved = c.resolve_protocol_member(type, member_name);
-          match (resolved)
-            case %(? ((func (? ?parameter *)) ?)): {
-              List one = %(expr (int) (literal (int) "1"));
-              one = c.convert_expression(one, parameter.list());
-              String helper = c.protocol_update_helper(
-                type, member_name, 0);
-              if (helper)
-                return %(vcompound
-                  $arg ${_symbol_expression(binary)} $one $helper);
-            }
-        }
+        List one = %(expr (int) (literal (int) "1"));
+        List updated = _protocol_update(c, type, binary, arg, &one, binary);
+        if (updated) return updated;
       }
       if (c.sym.is_var_type(type)) {
         List one = %(expr (int) (literal (int) "1"));
@@ -1024,16 +1022,9 @@ static List _postfix(Compiler compiler, List ast) {
       if (indexed) return indexed;
       if (!compiler.sym.is_var_type(type)) {
         Symbol binary = op == <++> ? <+> : <->;
-        Symbol member = compiler.operator_member(binary);
-        if (member) {
-          String member_name = member;
-          if (compiler.resolve_protocol_member(type, member_name)) {
-            String helper = compiler.protocol_update_helper(
-              type, member_name, 1);
-            if (helper)
-              return %(vpostfix $arg ${_symbol_expression(op)} $helper);
-          }
-        }
+        List updated =
+          _protocol_update(compiler, type, binary, arg, NULL, op);
+        if (updated) return updated;
       }
       if (compiler.sym.is_var_type(type)) {
         List address = %(expr (* "Var") (op & (parens $arg)));
@@ -1389,8 +1380,6 @@ static List _lower_callable_defer(
 // landing-frame path for lexical transfers or unsupported capture types.
 static List _lower_defer_region(
   Compiler compiler, List body, List finalizer) {
-  if (compiler.source_map && compiler.origin)
-    finalizer = %(at ${compiler.origin} $finalizer);
   if (_defer_needs_landing(finalizer))
     return %(try $body () $finalizer);
   return _lower_callable_defer(compiler, body, finalizer);
@@ -1417,8 +1406,6 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     List head = _without_origin(anchored);
     match (head) case %(defer ?final_stmt): {
       List body = %(block @tail), finalizer = final_stmt;
-      if (compiler.source_map)
-        finalizer = _rewrap_origin(anchored, finalizer);
       List region = _lower_defer_region(compiler, body, finalizer);
       result = %( ${_rewrap_origin(anchored, region)} );
       tail_changed = 1;

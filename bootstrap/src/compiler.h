@@ -70,7 +70,7 @@ typedef struct Compiler{
   int borrowed_lisp;
   GenNames names;
   Array origins;
-  int origin, source_map;
+  int origin;
   SourceView sources;
   int source_facts, source_primary;
   Array source_occurrences;

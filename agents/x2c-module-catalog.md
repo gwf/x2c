@@ -538,20 +538,19 @@ Public functions:
 
 ### [lib/error.x](../lib/error.x)
 
-handler stack and accumulated errors.
+handler stack and error dispatch.
 
 Public functions:
 
+`x2c_error_catch_site_pending`, `x2c_error_catch_site_push`,
 `x2c_error_catch_push`, `x2c_error_catch_selected`, `x2c_error_catch_capture`,
 `x2c_error_catch_detach`, `x2c_error_catch_close`, `x2c_error_raise`,
 `Error.note_rendered`, `x2c_error_raise_n`, `Error.handler_depth`,
 `Error.handler_head`, `Error.unwind_head`, `Error.restore_landing`,
 `Error.trim`, `Error.restore`, `Error.initialize_raw`, `Error.shutdown_raw`,
-`Error.depth`, `Error.count`, `Error.mark`, `Error.snapshot`,
-`Error.snapshot_in`, `Error.since_in`, `Error.since`, `Error.policy_set`,
-`Error.policy_get`, `Error.bound`, `Error.bound_set`, `Error.push`,
-`Error.pop`, `Error.context_open`, `Error.context_close`, `Error.raise`,
-`Error.ready`
+`Error.depth`, `Error.count`, `Error.snapshot`, `Error.snapshot_in`,
+`Error.policy_set`, `Error.policy_get`, `Error.push`, `Error.pop`,
+`Error.context_open`, `Error.context_close`, `Error.raise`, `Error.ready`
 
 ### [lib/error_init.x](../lib/error_init.x)
 
@@ -569,8 +568,8 @@ Public functions:
 
 `x2c_cleanup_push`, `x2c_cleanup_leave`, `x2c_exception_push`,
 `ExceptionFrame.unwind`, `x2c_exception_landed`, `x2c_exception_unwinding`,
-`x2c_exception_is_error_target`, `x2c_exception_mark_handled`,
-`x2c_exception_leave`
+`x2c_exception_is_error_target`, `x2c_exception_claim`,
+`x2c_exception_mark_handled`, `x2c_exception_leave`
 
 ### [lib/file.x](../lib/file.x)
 
@@ -603,11 +602,7 @@ single-pass pull iterators.
 
 Public functions:
 
-`Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.filter`, `Iter.map`,
-`Iter.zip`, `Iter.zip_with`, `Iter.map2`, `Iter.chain`, `Iter.enumerate`,
-`Iter.repeat`, `Iter.head`, `Iter.accumulate`, `Iter.scan`, `Iter.unique`,
-`Iter.unzip`, `Iter.reduce`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
-`Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`, `Iter.iter`
+`Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.unique`, `Iter.iter`
 
 ### [lib/lib.x](../lib/lib.x)
 
@@ -756,6 +751,7 @@ pattern matching and transformation utilities for lists.
 Public functions:
 
 `x2c_match_try_capture`, `x2c_match_site_try_capture`,
+`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
 `x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,

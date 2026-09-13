@@ -54,8 +54,6 @@ The depfile options control that `.d` output. They belong to `translate`:
 ```text
 --no-deps               Do not write x2c dependency files
 --dep-file <file>       Override the depfile path (one input only)
---dep-target <target>   Override the depfile target (one input only)
---no-phony-deps         Omit phony rules for included files
 ```
 
 Symbol collection options apply to `translate`, `build`, and `run`:
@@ -64,33 +62,10 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 --no-cpp                Skip symbol collection and preprocessing
 ```
 
-`--source-map` adds source locations to generated C for `translate`, `build`,
-and `run`. It is off by default. Combine it with native debug information to
-set breakpoints, step through statements, and read backtraces in the original
-`.x` files:
-
-```sh
-./x2c build --source-map -g -O0 --save-temps --output /tmp/example example.x
-lldb /tmp/example
-```
-
-With source mapping enabled, C `__FILE__` and `__LINE__` refer to the original
-x2c source. Macro expansions use their invocation locations; generated cleanup
-uses its owning source construct. Compiler scaffolding without a source origin
-retains a generated-file location. `-g` alone keeps generated-C locations, and
-`--source-map` alone does not add native debug information. Changing the option
-invalidates reused translation output. Optimized builds may combine or remove
-statements, so source mapping does not guarantee exact stepping or recovery of
-optimized-away values.
-
-On macOS, mapped executable builds with effective native debug information
-also produce `<output>.dSYM` before removing temporary objects. Move that
-companion directory with the executable to retain native debug information.
-Symbol assembly adds time only to these requested debug links. Its failure
-fails the build and retains intermediates for diagnosis. A later `-Xcc -g0`
-overrides an earlier `-g`, including one selected by a project profile.
-Linux keeps its existing debug output; `--build-dir` and `--save-temps` remain
-available for retaining intermediate files on either platform.
+Native debug information comes from the host compiler. `-g` keeps
+generated-C locations, so a debugger steps through the generated `.c` files;
+`--save-temps` or `--build-dir` retains them. A later `-Xcc -g0` overrides an
+earlier `-g`, including one selected by a project profile.
 
 Inspection modes print an intermediate result and stop translation:
 
@@ -152,9 +127,8 @@ refer to generated C for x2c inputs, so the option also retains intermediates.
 
 The destination's parent directory must exist when the build finishes. A
 successful build replaces the database atomically; a failed build preserves
-the previous file. `run` writes it before starting the program, and `-###`
-writes no database. This file describes native C compilation, not x2c syntax
-for an editor's C parser.
+the previous file. `run` writes it before starting the program. This file
+describes native C compilation, not x2c syntax for an editor's C parser.
 
 ### VS Code diagnostics, definitions, and hover
 
@@ -247,8 +221,7 @@ program finishes.
 
 `--` ends build options. Every later value is passed as one program argument,
 including values that begin with `-` or end in `.x`. x2c returns the program's
-exit status. `-###` prints the build and run actions without creating or
-launching anything.
+exit status.
 
 The program inherits standard input, output, and error, so interactive prompts
 and terminal applications work as they do when launched directly. Shell pipes
@@ -376,10 +349,10 @@ diagnostics or a run program's output.
 color. `--debug` enables compiler debug logging; `translate`, `build`, and
 `run` accept it, and `bootstrap` does not.
 
-`--verbose` prints each command as it runs. `-###` prints the same commands
-without running them. Use them first when checking runtime selection, include
-order, or which phase a flag reached. Neither prints completion receipts into
-that output, and the inspection modes keep progress out of their stdout data.
+`--verbose` prints each command as it runs. Use it first when checking
+runtime selection, include order, or which phase a flag reached. It does not
+print completion receipts into that output, and the inspection modes keep
+progress out of their stdout data.
 
 ## Dependencies and external builds
 

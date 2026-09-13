@@ -4,11 +4,25 @@
 
 #include "error.h"
 
+static List observed;
+
+static Symbol observe_newest(List errors, Var data);
+
+List Var_list(Var);
+
+Var Error_snapshot(Var);
+
+Var List_last(List);
+
+static Symbol observe_newest(List errors, Var data){
+  (void) data;
+  observed = Var_list(Error_snapshot(List_last(errors)));
+  return 17276625224;
+}
+
 void Error_initialize(void);
 
-void Error_policy_set(Symbol, Symbol);
-
-int Error_mark(void);
+ErrorHandler Error_push(ErrorHandlerFn, Var);
 
 Var Symbol_var(Symbol);
 
@@ -16,15 +30,13 @@ Var List_var(List);
 
 Var String_var(String);
 
-List Var_list(Var);
-
-Var List_car(List);
-
-List Error_since(int);
+void Error_pop(ErrorHandler);
 
 Var List_assoc(List, Var);
 
 Var List_cadr(List);
+
+Var List_car(List);
 
 Var List_getindex(List, int);
 
@@ -35,13 +47,13 @@ String Symbol_str(Symbol);
 int main(void){
   x2c_initialize();
   Error_initialize();
-  Error_policy_set(1313822537546332, 7475046632);
-  int mark = Error_mark();
+  ErrorHandler observer = Error_push(observe_newest, ((void) 0, Void));
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-runtime-init.x",.function = "main",.line = 9};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-runtime-init.x",.function = "main",.line = 16};
     x2c_error_raise_n(& _x2c_error_site_0, 1313822537546332, 1, Symbol_var(280234584), List_var(cons(Symbol_var(951296328), cons(String_var(String_join(NULL, cons(String_var(String_new("marker")), NULL))), NULL))));
   }
-  List entry = Var_list(List_car(Error_since(mark)));
+  Error_pop(observer);
+  List entry = observed;
   List detail = Var_list(List_assoc(entry, Symbol_var(280234584)));
   List nested = Var_list(List_cadr(Var_list(List_car(detail))));
   List _x2c_destructure_0 = nested;

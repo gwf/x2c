@@ -72,7 +72,6 @@ check_case uncaught-not-found "non-returning error was not caught"
 check_case uncaught-malformed "non-returning error was not caught"
 check_case after-shutdown "raise re-entered or after shutdown"
 check_case dynamic-invalid "error detail contains an identity-bearing value"
-check_case context-bound "error stack exceeded its bound"
 check_case handled-alloc "non-returning error was not caught"
 check_case handled-size "non-returning error was not caught"
 check_case handled-format "non-returning error was not caught"
@@ -97,4 +96,4 @@ test "$(grep -c 'shutdown-hook: after raise' \
 test "$(tail -1 "$BUILD/shutdown-order.stderr")" = \
   "shutdown-complete: error-ready=0"
 
-echo "error floor and shutdown probes: 17 passed"
+echo "error floor and shutdown probes: 16 passed"

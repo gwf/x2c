@@ -23,7 +23,7 @@ static void _add(Array paths, String path);
 
 static Array _prerequisites(CliRequest request, Compiler compiler, String input);
 
-static int _write_targets(File output, CliRequest request, String output_dir, String stem);
+static int _write_targets(File output, String output_dir, String stem);
 
 static int _write_contents(File output, CliRequest request, Compiler compiler, String input, String output_dir, String stem);
 
@@ -183,8 +183,7 @@ static Array _prerequisites(CliRequest request, Compiler compiler, String input)
 
 String String_rstrip(String, char *);
 
-static int _write_targets(File output, CliRequest request, String output_dir, String stem){
-  if(String_truth(request -> dep_target)) return _write_word(output, request -> dep_target);
+static int _write_targets(File output, String output_dir, String stem){
   String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, _2)), cons(String_var(_2), cons(String_var(stem), NULL))));
   if(! _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL))))) return 0;
   if(File_putc(output, ' ') == EOF) return 0;
@@ -203,7 +202,7 @@ static int _write_contents(File output, CliRequest request, Compiler compiler, S
   Array paths = _prerequisites(request, compiler, input);
   char primary_buffer[PATH_MAX];
   String primary = realpath(input, primary_buffer) ? String_join(NULL, cons(String_var(String_new(primary_buffer)), NULL)) : input;
-  int ok = _write_targets(output, request, output_dir, stem);
+  int ok = _write_targets(output, output_dir, stem);
   if(ok && File_putc(output, ':') == EOF) ok = 0;
   {
     Var value;
@@ -228,22 +227,20 @@ static int _write_contents(File output, CliRequest request, Compiler compiler, S
 
   }
   if(ok && File_putc(output, '\n') == EOF) ok = 0;
-  if(ok && ! request -> no_phony_deps){
-    {
-      Var value;
-      Array _x2c_macro_object_3 = paths;
-      int _x2c_macro_cursor_3 = 0;
-      Var _x2c_macro_cursor_output_4;
-      while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
-        value = _x2c_macro_cursor_output_4;
-        {
-          String path = Var_string(value);
-          if(String_equal(path, primary)) continue;
-          if(! _write_word(output, path) || File_puts(output, ":\n") == EOF){
-            ok = 0;
-            break;
-          }
-
+  {
+    Var value;
+    Array _x2c_macro_object_3 = paths;
+    int _x2c_macro_cursor_3 = 0;
+    Var _x2c_macro_cursor_output_4;
+    while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
+      value = _x2c_macro_cursor_output_4;
+      {
+        String path = Var_string(value);
+        if(String_equal(path, primary)) continue;
+        if(! ok) break;
+        if(! _write_word(output, path) || File_puts(output, ":\n") == EOF){
+          ok = 0;
+          break;
         }
 
       }

@@ -41,6 +41,10 @@ int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures
 
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures);
 
+int x2c_match_pattern_retainable(Var pattern);
+
+MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern);
+
 int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings);
 
 List x2c_match_site_match(MatchCaptureSite * site, List input, Var pat);

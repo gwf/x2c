@@ -19,54 +19,47 @@ int main(void){
   int volatile retained = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
-    List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_push(&_x2c_exception_frame_0, 1, List_var(_x2c_catch_pattern_0));
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      sigemptyset(& blocked);
-      sigaddset(& blocked, SIGUSR1);
-      if(sigprocmask(SIG_BLOCK, & blocked, NULL)){
-        int _x2c_return_value_0 = 2;
-        {
-          x2c_error_catch_close(_x2c_error_handler_0);
-          _x2c_error_handler_0 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_0);
-          return _x2c_return_value_0;
-        }
-
-      }
-      {
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/exception-signal-mask.x",.function = "main",.line = 18};
-        x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
-        __builtin_unreachable();
-      }
-
-    }
-    else {x2c_exception_landed(& _x2c_exception_frame_0);
-    {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
-         {{
-          if(sigprocmask(SIG_SETMASK, NULL, & current)){
-            int _x2c_return_value_1 = 2;
-            {
-              x2c_error_catch_close(_x2c_error_handler_0);
-              _x2c_error_handler_0 = NULL;
-              x2c_exception_leave(& _x2c_exception_frame_0);
-              return _x2c_return_value_1;
-            }
-
-          }
-          retained = sigismember(& current, SIGUSR1) == 1;
-        }
-
-      }
-
-    }
-    else goto _x2c_cleanup_done_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    sigemptyset(& blocked);  sigaddset(& blocked, SIGUSR1);  if(sigprocmask(SIG_BLOCK, & blocked, NULL)){
+      int _x2c_return_value_0 = 2; {
+        x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  return _x2c_return_value_0;
+      }
 
+    }
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/exception-signal-mask.x",.function = "main",.line = 18};  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);  __builtin_unreachable();
+    }
+
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        if(sigprocmask(SIG_SETMASK, NULL, & current)){
+          int _x2c_return_value_1 = 2;
+          {
+            x2c_error_catch_close(_x2c_error_handler_0);
+            _x2c_error_handler_0 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_0);
+            return _x2c_return_value_1;
+          }
+
+        }
+        retained = sigismember(& current, SIGUSR1) == 1;
+      }
+
+    }
+
+  }
+  else goto _x2c_cleanup_done_0;
+}
 }
 _x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);

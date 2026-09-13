@@ -116,7 +116,7 @@ static Context _open(const char *name, int isolated) {
        order while the parent's destination state is still live. */
     defer if (!installed) {
       if (_.error_state)
-        Error.context_close(_.error_state, x2c_exception_unwinding());
+        Error.context_close(_.error_state);
       if (_.pool)     String.pool_release();
       if (pushed)     Scope.pop();
       if (_.scope)    Scope.destroy(_.scope);
@@ -354,7 +354,7 @@ void Context.close(Context context) {
      canonical pool before its Scope, restore the destination Scope before
      destroying the child, and publish the parent only after teardown can no
      longer observe this Context. */
-  Error.context_close(context.error_state, x2c_exception_unwinding());
+  Error.context_close(context.error_state);
   if (context.pool) String.pool_release();
 
   Scope scope = context.scope, Context parent = context.parent;

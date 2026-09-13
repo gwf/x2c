@@ -129,7 +129,7 @@ static void _toolchain_layout(String * include_dir, String * runtime_lib){
 
 void * Scope_calloc(size_t, size_t);
 
-Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run){
+Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose){
   if(! _init_guard_) _file_init_();
   Toolchain toolchain = Scope_calloc(1, sizeof(struct Toolchain));
   toolchain -> cc = _tool_selection(cc, "X2C_CC", "CC", _installed_tool("CC"), "cc");
@@ -138,7 +138,6 @@ Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List 
   toolchain -> cc_args = cc_args;
   toolchain -> ld_args = ld_args;
   toolchain -> verbose = verbose;
-  toolchain -> dry_run = dry_run;
   _toolchain_layout(& toolchain -> include_dir, & toolchain -> runtime_lib);
   return toolchain;
 }
@@ -204,7 +203,7 @@ ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String o
   Array_push(arguments, String_var(source));
   Array_push(arguments, String_var(_15));
   Array_push(arguments, String_var(object));
-  return tool_action_new(7477414666, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
+  return tool_action_new(7477414666, Array_list_free(arguments), toolchain -> verbose);
 }
 
 ToolAction Toolchain_preprocess_action(Toolchain toolchain, String source, String output, List gen_dirs){
@@ -214,7 +213,7 @@ ToolAction Toolchain_preprocess_action(Toolchain toolchain, String source, Strin
   Array_push(arguments, String_var(source));
   Array_push(arguments, String_var(_15));
   Array_push(arguments, String_var(output));
-  return tool_action_new(1165861522189542, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
+  return tool_action_new(1165861522189542, Array_list_free(arguments), toolchain -> verbose);
 }
 
 ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List objects){
@@ -224,7 +223,7 @@ ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List obj
   Array_push(arguments, String_var(_17));
   Array_push(arguments, String_var(output));
   _append_list(arguments, objects);
-  return tool_action_new(3362278794, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
+  return tool_action_new(3362278794, Array_list_free(arguments), toolchain -> verbose);
 }
 
 ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs){
@@ -237,15 +236,14 @@ ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs
   Array_push(arguments, String_var(_18));
   Array_push(arguments, String_var(_15));
   Array_push(arguments, String_var(output));
-  return tool_action_new(805782, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
+  return tool_action_new(805782, Array_list_free(arguments), toolchain -> verbose);
 }
 
-ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run){
+ToolAction tool_action_new(Symbol phase, List arguments, int verbose){
   ToolAction action = Scope_calloc(1, sizeof(struct ToolAction));
   action -> phase = phase;
   action -> arguments = arguments;
   action -> verbose = verbose;
-  action -> dry_run = dry_run;
   action -> report = 1;
   return action;
 }
@@ -350,13 +348,12 @@ void report_suspend(void);
 ChildProcess process_start(char * *, int);
 
 ToolRun ToolAction_start(ToolAction action){
-  if(action -> verbose || action -> dry_run){
+  if(action -> verbose){
     report_suspend();
     _print_action(action -> phase, action -> arguments);
   }
   ToolRun execution = Scope_calloc(1, sizeof(struct ToolRun));
   execution -> action = action;
-  if(action -> dry_run) return execution;
   execution -> process = process_start(_action_argv(action -> arguments), ! action -> inherit_stdio);
   return execution;
 }
@@ -364,7 +361,6 @@ ToolRun ToolAction_start(ToolAction action){
 int ChildProcess_ready(ChildProcess);
 
 int ToolRun_ready(ToolRun execution){
-  if(execution -> action -> dry_run) return 1;
   ChildProcess process = execution -> process;
   return ChildProcess_ready(process);
 }
@@ -373,7 +369,6 @@ int ChildProcess_wait(ChildProcess, String *, String *);
 
 int ToolRun_wait(ToolRun execution){
   ToolAction action = execution -> action;
-  if(action -> dry_run) return 0;
   String output = NULL, errors = NULL;
   ChildProcess process = execution -> process;
   int status = ChildProcess_wait(process, & output, & errors);

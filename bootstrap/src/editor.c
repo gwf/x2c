@@ -174,7 +174,7 @@ List Type_declaration_ast(Type, List);
 
 String String_new(const char *);
 
-char * Compiler_code_pretty_string(Compiler, List, String);
+char * Compiler_code_pretty_string(Compiler, List);
 
 List Compiler_emit(Compiler, List);
 
@@ -195,7 +195,7 @@ static void _query(File file, Compiler compiler, String path, String kind, int o
   else if(String_equal(kind, _1) && List_truth(Type_list(type))){
     Map_setindex(needed, List_getindex(row, 0), int_var(1));
     List declaration = Type_declaration_ast(type, binding);
-    String text = String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL)), NULL));
+    String text = String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL))));
     fputs(",\"hover\":{", file);
     _location(file, Var_string(List_getindex(row, 0)), Var_int(List_getindex(row, 1)), Var_int(List_getindex(row, 2)));
     fputs(",\"text\":", file);

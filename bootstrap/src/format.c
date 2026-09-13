@@ -2,7 +2,7 @@
 
 #include "format.h"
 
-static String _9, _8, _6, _5, _4, _3, _2, _1, _0;
+static String _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -24,9 +24,7 @@ static void _write_indent(Buffer buff, int indent);
 
 static void _write_newline(Buffer buff);
 
-static void _write_mapped_newline(Buffer buff, int source_line);
-
-static void _write_token(Buffer buff, String token, int source_line);
+static void _write_token(Buffer buff, String token);
 
 static int _next_is_closing_brace(List rest);
 
@@ -34,15 +32,8 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("#line ");
-  _1 = String_new("\n");
-  _2 = String_new("<generated>");
-  _3 = String_new(" \"");
-  _4 = String_new("\"");
-  _5 = String_new("\\\"");
-  _6 = String_new("\"");
-  _8 = String_new("$$");
-  _9 = String_new("$");
+  _0 = String_new("\\\"");
+  _1 = String_new("\"");
 }
 
 static int _is_prefix_punct(char ch){
@@ -69,7 +60,7 @@ static int _need_space(String prev, String curr){
 String String_replace(String, String, String);
 
 static String _normalized_token(String token){
-  if(String_truth(token) && String_getindex(token, 0) == '#') return String_replace(token, _5, _6);
+  if(String_truth(token) && String_getindex(token, 0) == '#') return String_replace(token, _0, _1);
   return token;
 }
 
@@ -111,16 +102,7 @@ static void _write_newline(Buffer buff){
 
 Buffer Buffer_write(Buffer, const char *);
 
-Var String_var(String);
-
-String int_str(int);
-
-static void _write_mapped_newline(Buffer buff, int source_line){
-  _write_newline(buff);
-  if(source_line) Buffer_write(buff, String_join(NULL, cons(String_var(_0), cons(String_var(int_str(source_line)), cons(String_var(_1), NULL)))));
-}
-
-static void _write_token(Buffer buff, String token, int source_line){
+static void _write_token(Buffer buff, String token){
   const char * start = token;
   while(start && * start){
     const char * newline = strchr(start, '\n');
@@ -129,7 +111,7 @@ static void _write_token(Buffer buff, String token, int source_line){
       return;
     }
     Buffer_write_len(buff, start, newline - start);
-    _write_mapped_newline(buff, source_line);
+    _write_newline(buff);
     start = newline + 1;
   }
 
@@ -152,41 +134,14 @@ List cdr(List);
 
 Var Symbol_var(Symbol);
 
-List Compiler_origin_location(Compiler, int);
-
-long Var_integer(Var);
-
-Var List_assoc(List, Var);
-
-String String_escape(String);
-
 String Buffer_str_free(Buffer);
 
-char * Compiler_code_pretty_string(Compiler compiler, List code, String output_file){
+char * Compiler_code_pretty_string(Compiler compiler, List code){
   if(! _init_guard_) _file_init_();
   Buffer buff = Buffer_new(0);
   int indent = 0, paren_depth = 0, directive_break = 0;
-  int output_line = 1, scanned = 0, source_line = 0;
   String prev_token = NULL;
   for(List lst = code;  List_truth(lst);  lst = cdr(lst)){
-    if(Var_equal(car(lst), Symbol_var(1313077352))){
-      lst = cdr(lst);
-      List location = Compiler_origin_location(compiler, Var_integer(car(lst)));
-      while(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
-      if(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) != '\n') _write_newline(buff);
-      while(scanned < Buffer_len(buff)) if(Buffer_get(buff, scanned ++) == '\n') output_line ++;
-      String file = List_truth(location) ? Var_str(List_assoc(location, Symbol_var(412426))) : output_file;
-      if(! String_truth(file)) file = _2;
-      int line = List_truth(location) ? Var_integer(List_assoc(location, Symbol_var(805770))) : output_line + 1;
-      source_line = List_truth(location) ? line : 0;
-      String escaped = String_replace(String_escape(file), _8, _9);
-      Buffer_write(buff, String_join(NULL, cons(String_var(_0), cons(String_var(int_str(line)), cons(String_var(_3), cons(String_var(escaped), cons(String_var(_4), NULL)))))));
-      _write_newline(buff);
-      if(indent > 0) _write_indent(buff, indent);
-      directive_break = 1;
-      prev_token = NULL;
-      continue;
-    }
     int emitted_directive = Var_equal(car(lst), Symbol_var(273018923240));
     if(emitted_directive) lst = cdr(lst);
     String token = Var_str(car(lst));
@@ -195,7 +150,7 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
     if(directive_break){
       directive_break = 0;
       if(String_truth(token) && String_getindex(token, 0) == '\n'){
-        _write_token(buff, token + 1, source_line);
+        _write_token(buff, token + 1);
         prev_token = NULL;
         continue;
       }
@@ -204,7 +159,7 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
     if(_is_preprocessor(token)){
       while(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
       if(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) != '\n') _write_newline(buff);
-      _write_token(buff, token, 0);
+      _write_token(buff, token);
       _write_newline(buff);
       if(indent > 0) _write_indent(buff, indent);
       directive_break = 1;
@@ -218,21 +173,21 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
     }
     if(_token_is(token, '}')){
       if(indent >= 2) indent -= 2;
-      if(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) != '\n') _write_mapped_newline(buff, source_line);
+      if(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) != '\n') _write_newline(buff);
       if(indent > 0) _write_indent(buff, indent);
       prev_token = NULL;
     }
     else if(_need_space(prev_token, token)) Buffer_write(buff, " ");
-    _write_token(buff, token, source_line);
+    _write_token(buff, token);
     if(_token_is(token, '{')){
       indent += 2;
-      _write_mapped_newline(buff, source_line);
+      _write_newline(buff);
       if(indent > 0) _write_indent(buff, indent);
       prev_token = NULL;
     }
     else if(last == ';'){
       if(paren_depth == 0){
-        _write_mapped_newline(buff, source_line);
+        _write_newline(buff);
         if(! _next_is_closing_brace(cdr(lst)) && indent > 0) _write_indent(buff, indent);
         prev_token = NULL;
       }
@@ -243,7 +198,7 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
 
     }
     else if(_token_is(token, '}')){
-      _write_mapped_newline(buff, source_line);
+      _write_newline(buff);
       if(indent > 0) _write_indent(buff, indent);
       prev_token = NULL;
     }

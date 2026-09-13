@@ -58,12 +58,7 @@ static void _write_newline(Buffer buff) {
   buff.newline();
 }
 
-static void _write_mapped_newline(Buffer buff, int source_line) {
-  _write_newline(buff);
-  if (source_line) buff.write(%"#line $source_line\n");
-}
-
-static void _write_token(Buffer buff, String token, int source_line) {
+static void _write_token(Buffer buff, String token) {
   const char *start = token;
   while (start && *start) {
     const char *newline = strchr(start, '\n');
@@ -72,7 +67,7 @@ static void _write_token(Buffer buff, String token, int source_line) {
       return;
     }
     buff.write_len(start, newline - start);
-    _write_mapped_newline(buff, source_line);
+    _write_newline(buff);
     start = newline + 1;
   }
 }
@@ -89,40 +84,16 @@ static int _next_is_closing_brace(List rest) {
     semicolons break lines only outside parentheses, and preprocessor tokens
     occupy their own lines with escaped quotes normalized. A `c-direct`
     marker precedes an already-emitted directive whose escapes are preserved.
-    An empty `List` returns the empty `String`. Emitted `src-at` markers carry
-    existing compiler origin IDs; zero restores `output_file` at its physical
-    line.
+    An empty `List` returns the empty `String`.
 
     Raises: `<size-limit>` or `<alloc-fail>` while materializing the result.
 */
-char *Compiler.code_pretty_string(
-  Compiler compiler, List code, String output_file) {
+char *Compiler.code_pretty_string(Compiler compiler, List code) {
   Buffer buff = Buffer.new(0);
   int indent = 0, paren_depth = 0, directive_break = 0;
-  int output_line = 1, scanned = 0, source_line = 0;
   String prev_token = NULL;
 
   for (List lst = code; lst; lst = cdr(lst)) {
-    if (car(lst) == <src-at>) {
-      lst = cdr(lst);
-      List location = compiler.origin_location(car(lst).integer());
-      while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
-      if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
-      while (scanned < buff.len())
-        if (buff.get(scanned++) == '\n') output_line++;
-      String file = location ? location.assoc(<file>).str() : output_file;
-      if (!file) file = %"<generated>";
-      int line = location ? location.assoc(<line>).integer()
-                          : output_line + 1;
-      source_line = location ? line : 0;
-      String escaped = file.escape().replace("$$", "$");
-      buff.write(%"#line $line \"$escaped\"");
-      _write_newline(buff);
-      if (indent > 0) _write_indent(buff, indent);
-      directive_break = 1;
-      prev_token = NULL;
-      continue;
-    }
     int emitted_directive = car(lst) == <c-direct>;
     if (emitted_directive) lst = cdr(lst);
     String token = car(lst).str();
@@ -135,7 +106,7 @@ char *Compiler.code_pretty_string(
     if (directive_break) {
       directive_break = 0;
       if (token && token[0] == '\n') {
-        _write_token(buff, token + 1, source_line);
+        _write_token(buff, token + 1);
         prev_token = NULL;
         continue;
       }
@@ -144,7 +115,7 @@ char *Compiler.code_pretty_string(
     if (_is_preprocessor(token)) {
       while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
       if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
-      _write_token(buff, token, 0);
+      _write_token(buff, token);
       _write_newline(buff);
       if (indent > 0) _write_indent(buff, indent);
       directive_break = 1;
@@ -161,23 +132,23 @@ char *Compiler.code_pretty_string(
     if (_token_is(token, '}')) {
       if (indent >= 2) indent -= 2;
       if (buff.len() > 0 && buff.get(-1) != '\n')
-        _write_mapped_newline(buff, source_line);
+        _write_newline(buff);
       if (indent > 0) _write_indent(buff, indent);
       prev_token = NULL;
     }
     else if (_need_space(prev_token, token)) buff.write(" ");
 
-    _write_token(buff, token, source_line);
+    _write_token(buff, token);
 
     if (_token_is(token, '{')) {
       indent += 2;
-      _write_mapped_newline(buff, source_line);
+      _write_newline(buff);
       if (indent > 0) _write_indent(buff, indent);
       prev_token = NULL;
     }
     else if (last == ';') {
       if (paren_depth == 0) {
-        _write_mapped_newline(buff, source_line);
+        _write_newline(buff);
         if (!_next_is_closing_brace(cdr(lst)) && indent > 0)
           _write_indent(buff, indent);
         prev_token = NULL;
@@ -188,7 +159,7 @@ char *Compiler.code_pretty_string(
       }
     }
     else if (_token_is(token, '}')) {
-      _write_mapped_newline(buff, source_line);
+      _write_newline(buff);
       if (indent > 0) _write_indent(buff, indent);
       prev_token = NULL;
     }

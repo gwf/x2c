@@ -15,7 +15,7 @@ macro Unit $error.private.types() => {
     ErrorHandlerFn $(x2c.ident "fn");
     Var $(x2c.ident "data");
     int $(x2c.ident "watermark");
-    Array $(x2c.ident "patterns");
+    ErrorCatchSite *$(x2c.ident "site");
     Block $(x2c.ident "plans");
     void *$(x2c.ident "target");
     int $(x2c.ident "selected");
