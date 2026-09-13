@@ -1178,6 +1178,8 @@ Tokenizer Tokenizer_new(char *);
 
 void Tokenizer_scan(Tokenizer);
 
+void Array_clear(Array);
+
 void Compiler_tokenize(Compiler c, char * text){
   if(! _init_guard_) _file_init_();
   c -> text = String_new(text);
@@ -1243,6 +1245,8 @@ Symbol Compiler_expect(Compiler c, Symbol type){
 }
 
 Var Token_var(Token);
+
+size_t Array_len(Array);
 
 Var Array_take_last(Array);
 
@@ -2462,6 +2466,7 @@ static Symbol _flat_capture_tag(Var element, Var binder){
 
 List cdr(List);
 int Var_is_atom_binder(Var);
+void Array_free(Array);
 Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags){
   if(! _init_guard_) _file_init_();  Symbol head = Compiler_match_pattern_head_symbol(compiler, pattern);  if(! head) return 0;  List elements = List_cdr(Var_list(Compiler_match_pattern_value(compiler, List_var(pattern))));  Array typed = Array_new();  for(List cursor = binders;  List_truth(cursor) && List_truth(elements);  cursor = cdr(cursor), elements = cdr(elements)){
     Var binder = car(cursor), element = car(elements);  Symbol tag = 0;  if(! Var_is_atom_binder(binder) || Var_equal(binder, Symbol_var(58))) return 0;  if(! Var_equal(element, binder) && !(tag = _flat_capture_tag(element, binder))) return 0;  Array_push(typed, tag ? Symbol_var(tag) : int_var(0));

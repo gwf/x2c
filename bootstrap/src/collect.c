@@ -389,6 +389,8 @@ int Array_try_next(Array, int *, Var *);
 
 int String_equal(String, String);
 
+void Array_free(Array);
+
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
   * covered = 0;
   if(String_startswith(target, _68)) return _includable_file(sources, target) ? target : NULL;
@@ -629,9 +631,13 @@ static void _replay_cached(Compiler compiler, List entry, Map globs, Map visited
   compiler -> names -> gensym_count += gensyms;
 }
 
+size_t Array_len(Array);
+
 String String_join(String, List);
 
 List Array_list(Array);
+
+void Array_clear(Array);
 
 Compiler Compiler_new_shared(Compiler);
 
@@ -640,6 +646,8 @@ int String_endswith(String, String);
 void Compiler_tokenize(Compiler, char *);
 
 String SourceView_path(String);
+
+size_t Bytes_len(Bytes);
 
 void Compiler_shallow_parse_overlay(Compiler, Map, Map);
 

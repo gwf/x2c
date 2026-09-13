@@ -1488,6 +1488,7 @@ static int _automatic_static_input(Compiler c, List binding){
 }
 
 Var int_var(int);
+size_t Array_len(Array);
 Var Array_take_last(Array);
 int Var_int(Var);
 int Map_contains(Map, Var);
@@ -2292,6 +2293,8 @@ static List _flat_match_condition(Symbol head, List tags){
 }
 
 Symbol Compiler_match_pattern_flat_head(Compiler, List, List, List *);
+
+void Array_free(Array);
 
 static List Emitter__match_if(Emitter e, List ast, List context, int * dispatched){
   Array values = Array_new(), heads = Array_new();

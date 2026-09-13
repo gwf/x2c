@@ -2120,6 +2120,8 @@ int Compiler_macro_starts_target_at(Compiler compiler, AstPos position){
   return kind == _position(position) -> kind ||(position == AST_STATEMENT && kind == 9147177346020 && Var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(5011670)));
 }
 
+size_t Array_len(Array);
+
 Var Array_getindex(Array, int);
 
 String x2c_path_dir(String);

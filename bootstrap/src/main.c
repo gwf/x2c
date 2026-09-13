@@ -431,6 +431,8 @@ static void _preflight_translation(CliRequest c){
 
 }
 
+size_t Array_len(Array);
+
 void * Scope_calloc(size_t, size_t);
 
 Var Array_getindex(Array, int);
@@ -520,6 +522,8 @@ static Array _translation_chunks(List inputs, int total, int jobs){
 unsigned long report_now_us(void);
 
 Frontend Frontend_new(CliRequest);
+
+void Array_free(Array);
 
 unsigned long long report_file_bytes(String);
 

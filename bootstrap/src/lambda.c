@@ -1441,6 +1441,7 @@ static void _record_region_binding(Compiler compiler, List binding, Map owned, A
   if(! List_truth(binding) || Map_contains(owned, List_var(binding))) return;  Var automatic, stored_type;  Map facts = Compiler_semantic_binding_facts(compiler);  if(! Map_try_get(facts, List_var(cons(_266, cons(List_var(binding), NULL))), & automatic) || ! Map_try_get(facts, List_var(cons(_51, cons(List_var(binding), NULL))), & stored_type)) return;  Type type = Var_type(stored_type);  if(! List_truth(Type_list(type)) || Type_is_static(type)) return;  Map_setindex(owned, List_var(binding), List_var(type));  Array_push(order, List_var(binding));
 }
 
+size_t Array_len(Array);
 Var Array_take_last(Array);
 int Var_is_nil(Var);
 static void _collect_region_bindings(Compiler compiler, List ast, Map owned, Array order){

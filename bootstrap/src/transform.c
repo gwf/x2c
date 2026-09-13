@@ -1277,6 +1277,7 @@ static void _lower_printf_value(Compiler compiler, Array values, int index, Stri
   String message = String_printf(_85, conversion);  _printf_error(compiler, family, String_join(NULL, cons(String_var(message), cons(String_var(_86), NULL))));
 }
 
+size_t Array_len(Array);
 static void _lower_printf_star(Compiler compiler, Array values, int index, String family){
   if(index >= Array_len(values)) _printf_error(compiler, family, _822);  List arg = Var_list(Array_getindex(values, index));  if(Sym_is_var_type(compiler -> sym, Var_type(List_cadr(arg)))) Array_setindex(values, index, List_var(Compiler_convert_expression(compiler, arg, List_type(_9))));
 }
@@ -2141,6 +2142,7 @@ Array rewritten = Array_new(); {
 return Array_list_free(rewritten);
 }
 
+void Array_free(Array);
 List Array_list(Array);
 void Compiler_add_early(Compiler, List);
 static List _lower_callable_defer(Compiler c, List body, List finalizer){
@@ -2742,6 +2744,7 @@ case 1219800220 : ast = _return(c, ast);  break;  case 588 : case 48777994 : cas
 return _finish(c, ast);
 }
 
+void Array_clear(Array);
 List Compiler_transform(Compiler compiler, List ast){
   if(! _init_guard_) _file_init_();  List newast = _sequence(compiler, ast);  while(! List_equal(newast, ast)){
     ast = newast;  newast = _sequence(compiler, ast);

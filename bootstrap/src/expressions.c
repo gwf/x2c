@@ -2256,6 +2256,8 @@ static inline int _type_is_string(List type){
   return type == _187;
 }
 
+size_t Array_len(Array);
+
 Var Array_take_last(Array);
 
 int Map_contains(Map, Var);
@@ -3761,6 +3763,7 @@ static void _initializer_next(Compiler c, List target, List path, List condition
 int Array_try_next(Array, int *, Var *);
 Var Array_getindex(Array, int);
 Var Array_setindex(Array, int, Var);
+void Array_free(Array);
 static List _initializer_merge(Array states){
   Map positions = Map_new();  Array merged = Array_new(); {
     List state;  Array _x2c_macro_object_25 = states;  int _x2c_macro_cursor_25 = 0;  Var _x2c_macro_cursor_output_24;  while(Array_try_next(_x2c_macro_object_25, & _x2c_macro_cursor_25, & _x2c_macro_cursor_output_24)){
