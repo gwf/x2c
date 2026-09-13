@@ -54,3 +54,4 @@ tours/language|showcase|run||expected/docs-tour.stdout|Executable fifteen-minute
 programs/literate-lisp|showcase|run|../../../examples/data/reference-lisp/showcase.xlisp|expected/reference-lisp.stdout|Independent recursive Lisp with symbolic differentiation.
 programs/stutter|external-input|build||-|Book-compatible eight-primitive Lisp; see programs/stutter.md and optional check-stutter.py.
 programs/stutter-min|external-input|build||-|Minimal Stutter with identical behavior; compare with check-stutter.py --exact.
+programs/tiny-lisp|external-input|build||-|Seven-form independent Lisp; runnable unary factorial example in the source header.
