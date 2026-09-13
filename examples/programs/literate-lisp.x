@@ -648,14 +648,14 @@ static void _install_natives(Interp *self) {
     (list?           "lisp_list"            ${Func.var(_list)})
     (eq?             "lisp_eq"              ${Func.var(_eq)})
     (type            "lisp_type"            ${Func.var(Var.tag)})
-    (number?         "lisp_number"          ${Func.var(_number)})              //          /\_/\     _
-    (string?         "lisp_string"          ${Func.var(_string)})              //         ( -.- )   / )
-    (symbol?         "lisp_symbol"          ${Func.var(_symbol)})              //          > ^ <    /
-    (procedure?      "lisp_procedure"       ${Func.var(_procedure)})           //          /   \    |
-    (reverse         "List_reverse"         ${Func.var(List.reverse)})         //         /|   |\   |
-    (length          "List_len"             ${Func.var(List.len)})             //        (_|___|_)_/
-    (_match          "List_match"           ${Func.var(List.match)})           //          Mako
-    (match-replace   "lisp_match_replace"   ${Func.var(_match_replace)})
+    (number?         "lisp_number"          ${Func.var(_number)})
+    (string?         "lisp_string"          ${Func.var(_string)})               //          /\_/\     _
+    (symbol?         "lisp_symbol"          ${Func.var(_symbol)})               //         ( -.- )   / )
+    (procedure?      "lisp_procedure"       ${Func.var(_procedure)})            //          > ^ <    /
+    (reverse         "List_reverse"         ${Func.var(List.reverse)})          //          /   \    |
+    (length          "List_len"             ${Func.var(List.len)})              //         /|   |\   |
+    (_match          "List_match"           ${Func.var(List.match)})            //        (_|___|_)_/
+    (match-replace   "lisp_match_replace"   ${Func.var(_match_replace)})        //          Mako
     (search          "List_search"          ${Func.var(List.search)})
     (_search-replace "List_search_replace"  ${Func.var(List.search_replace)})
     (_add            "lisp_add"             ${Func.var(_add)})
@@ -665,16 +665,16 @@ static void _install_natives(Interp *self) {
     (-               "lisp_minus"           ${$rest(_minus)})
     (*               "lisp_times"           ${$rest(_times)})
     (/               "lisp_divide"          ${$rest(_divide)})
-    (=               "lisp_eq_chain"        ${$rest(_eq_chain)})
-    (<               "lisp_lt_chain"        ${$rest(_lt_chain)})
-    (<=              "lisp_le_chain"        ${$rest(_le_chain)})               //           /\_/\
-    (>               "lisp_gt_chain"        ${$rest(_gt_chain)})               //          ( o.o )
-    (>=              "lisp_ge_chain"        ${$rest(_ge_chain)})               //           > ^ <
-    (str             "lisp_str"             ${Func.var(_str)})                 //          /     \
-    (repr            "lisp_repr"            ${Func.var(_repr)})                //         /       \
-    (string-length   "String_len"           ${Func.var(String.len)})           //        (  (   )  )    /)
-    (_string-append  "lisp_string_append"   ${Func.var(_string_append)})       //         \__)_(__/____//
-    (substring       "lisp_substring"       ${Func.var(_substring)})           //            Liko
+    (=               "lisp_eq_chain"        ${$rest(_eq_chain)})                //           /\_/\ 
+    (<               "lisp_lt_chain"        ${$rest(_lt_chain)})                //          ( o.o )
+    (<=              "lisp_le_chain"        ${$rest(_le_chain)})                //           > ^ <
+    (>               "lisp_gt_chain"        ${$rest(_gt_chain)})                //          /     \ 
+    (>=              "lisp_ge_chain"        ${$rest(_ge_chain)})                //         /       \ 
+    (str             "lisp_str"             ${Func.var(_str)})                  //        (  (   )  )    /)
+    (repr            "lisp_repr"            ${Func.var(_repr)})                 //         \__)_(__/____//
+    (string-length   "String_len"           ${Func.var(String.len)})            //            Liko
+    (_string-append  "lisp_string_append"   ${Func.var(_string_append)})
+    (substring       "lisp_substring"       ${Func.var(_substring)})
     (string-downcase "lisp_string_downcase" ${Func.var(_string_downcase)})
     (()              "lisp_read_file"       ${Func.var(_read_file)})            // No global name; available via bind.
     (()              "lisp_write_file"      ${Func.var(_write_file)})
