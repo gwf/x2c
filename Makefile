@@ -34,12 +34,14 @@ APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
 INSTALL_TARGETS = install
+COMPAT_TARGETS = unittest docs bootstrap debug
 
 .PHONY: $(CORE_TARGETS) $(BUILD_TARGETS) $(VERIFY_TARGETS) \
 	$(SYMBOL_TARGETS) $(DIFF_TARGETS) $(DOC_TARGETS) \
 	$(SITE_TARGETS) \
 	$(BENCHMARK_TARGETS) $(SHOOTOUT_TARGETS) $(APE_TARGETS) \
-	$(CONFIG_TARGETS) $(INSTALL_TARGETS) bootstrap-ready stage0-settle \
+	$(CONFIG_TARGETS) $(INSTALL_TARGETS) $(COMPAT_TARGETS) \
+	bootstrap-ready stage0-settle \
 	check-after-precommit
 # Stage-0 bootstrap artifacts we expect before incremental builds/tests.
 BOOTSTRAP_SENTINEL = bin/x2c-bootstrap
@@ -506,3 +508,9 @@ install: build
 	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
 	  --destdir "$(DESTDIR)"
 endif
+
+# Existing directory names must still dispatch their compatibility targets.
+unittest: verify
+docs: doc-generate
+bootstrap: bootstrap-build
+debug: config-debug

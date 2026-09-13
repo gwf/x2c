@@ -88,7 +88,7 @@ A hand-written caller that has no static site uses this form; `arm_count`
 prepared for this registration alone. Results and failures follow
 `x2c_error_catch_site_push`.
 
-Source: `lib/error.x:175`
+Source: `lib/error.x:174`
 
 #### x2c_error_catch_selected
 
@@ -106,7 +106,7 @@ Source: `lib/error.x:198`
 Reports whether one catch site still needs its patterns at registration.
 A bound static site answers 0, so its caller can skip constructing them.
 
-Source: `lib/error.x:75`
+Source: `lib/error.x:74`
 
 #### x2c_error_catch_site_push
 
@@ -129,7 +129,7 @@ lowering fence. A fenced arm can never be selected. The registration is
 reclaimed and the error reaches the enclosing handler; the caller's own
 frame is not yet pushed, so it never sees its own failure.
 
-Source: `lib/error.x:134`
+Source: `lib/error.x:133`
 
 #### x2c_error_raise
 
@@ -537,11 +537,11 @@ Source: `lib/error.x:28`
 <a id="ErrorCatchSite"></a>
 ### ErrorCatchSite
 
-`typedef struct ErrorCatchSite { MatchCaptureSite *arms; unsigned long defaults; int arm_count, state, fenced_arm; } ErrorCatchSite`
+`typedef struct ErrorCatchSite { MatchCaptureSite *arms; int default_arm, arm_count, state, fenced_arm; } ErrorCatchSite`
 
 Holds the process-lifetime plans of one compiler-generated filtered catch.
 `arms` is a zero-initialized static array of `arm_count` `Match` sites and
-`defaults` marks the arms that have no pattern. `state` and `fenced_arm`
+`default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
 belong to `Error`; a site must be static storage that the first
 registration binds to its patterns.
 

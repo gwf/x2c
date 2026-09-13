@@ -171,9 +171,9 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 
 static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
   int retainable = 1;
-  for(int i = 0;  i < site -> arm_count;  i ++) if(!(site -> defaults &(1UL << i)) && ! x2c_match_pattern_retainable(patterns[i])) retainable = 0;
+  for(int i = 0;  i < site -> arm_count;  i ++) if(i != site -> default_arm && ! x2c_match_pattern_retainable(patterns[i])) retainable = 0;
   if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
-    if(site -> defaults &(1UL << i)) continue;
+    if(i == site -> default_arm) continue;
     MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
     if(plan -> status == MACHINE_INELIGIBLE && site -> fenced_arm < 0) site -> fenced_arm = i;
   }
@@ -181,6 +181,8 @@ static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
 }
 
 Block Block_new(size_t);
+
+Var Symbol_var(Symbol);
 
 MatchPlan MatchPlan_prepare(Var);
 
@@ -194,7 +196,7 @@ static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * f
   int pushed = _scope_push(97614135954008, "could not enter error scope for catch patterns");
   h -> plans = Block_new(sizeof(MatchPlan));
   for(int i = 0;  i < site -> arm_count;  i ++){
-    MatchPlan plan = site -> defaults &(1UL << i) ? NULL : MatchPlan_prepare(patterns[i]);
+    MatchPlan plan = i == site -> default_arm || Var_equal(patterns[i], Symbol_var(8938171176)) ? NULL : MatchPlan_prepare(patterns[i]);
     Block_push(h -> plans, & plan);
     if(plan && plan -> status == MACHINE_INELIGIBLE && ! fenced){
       fenced = plan -> reason;
@@ -209,8 +211,6 @@ static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * f
 void * Scope_malloc_in(Scope *, size_t);
 
 String String_new(const char *);
-
-Var Symbol_var(Symbol);
 
 Var String_var(String);
 
@@ -238,7 +238,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     _handler_free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 163};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 162};
       x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(fenced_arm), Symbol_var(12939466), String_var(fence));
       __builtin_unreachable();
     }
@@ -254,14 +254,14 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   ErrorCatchSite * site = Scope_malloc_in(& state -> scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
   Var * patterns =(void *)(site + 1);
   * site =(ErrorCatchSite){
-    NULL, 0, (int) arm_count, ERROR_CATCH_TRANSIENT, - 1
+    NULL, - 1, (int) arm_count, ERROR_CATCH_TRANSIENT, - 1
   }
   ;
   va_list args;
   va_start(args, arm_count);
   for(unsigned i = 0;  i < arm_count;  i ++){
     patterns[i] = va_arg(args, Var);
-    if(Var_equal(patterns[i], Symbol_var(8938171176))) site -> defaults |= 1UL << i;
+    if(Var_equal(patterns[i], Symbol_var(8938171176)) && site -> default_arm < 0) site -> default_arm =(int) i;
   }
   va_end(args);
   return x2c_error_catch_site_push(target, site, patterns);
@@ -975,7 +975,7 @@ static Symbol _catch_match(ErrorHandler h){
   ErrorCatchSite * site = h -> site;
   MatchPlan * plans =(void *) h -> plans != NULL ? h -> plans -> bytes : NULL;
   for(int i = 0;  i < site -> arm_count;  i ++){
-    int is_default =(site -> defaults &(1UL << i)) != 0;
+    int is_default = i == site -> default_arm;
     MatchPlan plan = is_default ? NULL : plans ? plans[i] : site -> arms[i].plan;
     MatchCaptureLayout layout = plan ? plan -> layout : NULL;
     Var * values = layout && layout -> binder_count ? Scope_malloc(sizeof(Var) * layout -> binder_count) : NULL;

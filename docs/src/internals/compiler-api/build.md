@@ -37,7 +37,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:550`
+Source: `src/build.x:557`
 
 ### `Build`
 
@@ -52,7 +52,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:433`
+Source: `src/build.x:440`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -61,7 +61,7 @@ Source: `src/build.x:433`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:444`
+Source: `src/build.x:451`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -69,10 +69,10 @@ Source: `src/build.x:444`
 `void Build.cleanup(Build state, int success)`
 
 Removes the temporary work tree after a successful real build.
-Failed builds and retained directories are left untouched; a removal
-failure emits a warning and is not returned to the caller.
+Failed builds, retained directories, and dry runs are left untouched; a
+removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:877`
+Source: `src/build.x:888`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -82,7 +82,7 @@ Source: `src/build.x:877`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:452`
+Source: `src/build.x:459`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -97,7 +97,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:706`
+Source: `src/build.x:713`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -105,10 +105,10 @@ Source: `src/build.x:706`
 `String Build.generated_dir(Build state, String input)`
 
 Returns and registers the generated-file directory for `input`.
-The directory is derived from the input path, created, and appended once
-to the build's generated include directories.
+The directory is derived from the input path, created unless this is a dry
+run, and appended once to the build's generated include directories.
 
-Source: `src/build.x:295`
+Source: `src/build.x:302`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -120,7 +120,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:344`
+Source: `src/build.x:351`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -129,7 +129,7 @@ Source: `src/build.x:344`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:777`
+Source: `src/build.x:786`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -137,8 +137,9 @@ Source: `src/build.x:777`
 `int Build.run_program(Build state)`
 
 Runs the built output with the request's arguments and returns its status.
+A dry run prints the action without launching the program.
 
-Source: `src/build.x:836`
+Source: `src/build.x:846`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -146,11 +147,11 @@ Source: `src/build.x:836`
 `int Build.translation_current(Build state, String input, String directory)`
 
 Reports whether translated C and header artifacts match current inputs.
-Returns zero without retained state, when either output is absent, or
-when any compiler, tool, option, depfile, or dependency fingerprint cannot
-be read or differs.
+Returns zero without retained state, during a dry run, when either output
+is absent, or when any compiler, tool, option, depfile, or dependency
+fingerprint cannot be read or differs.
 
-Source: `src/build.x:325`
+Source: `src/build.x:332`
 
 ### `CliRequest`
 
@@ -162,8 +163,8 @@ Source: `src/build.x:325`
 Validates a native build request and returns its `Scope`-owned build state.
 It writes the default state seed and selected compiler and archiver back
 to `request`, chooses output and intermediate paths, and creates artifact
-directories. Invalid inputs or setup print a diagnostic and exit with
-status 2.
+directories unless this is a dry run. Invalid inputs or setup print a
+diagnostic and exit with status 2.
 
 Source: `src/build.x:216`
 

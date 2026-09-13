@@ -789,12 +789,24 @@ static String _match_site_entry(String name) {
 
 /* A source-literal pattern is the same value on every call, so the call gets
    its own process-lifetime plan site and prepares once. A computed pattern
-   keeps the ordinary entry, which prepares one plan per call. Returns NULL
+   keeps the ordinary entry, which prepares one plan per call. Only a direct
+   global function binding identifies a runtime operation. Returns NULL
    when the call is not one of those operations or its pattern is computed. */
 static List Emitter._match_site_call(
   Emitter e, Var function, Var arguments) {
-  String entry = _match_site_entry(_direct_identifier(function));
+  List binding = NULL;
+  while (!binding && function is <list>) match (function) {
+    case %(expr ? (parens ?inner)): function = inner;
+    case %(expr ? (ident ?target)): binding = target;
+    default: return NULL;
+  }
+  String name = binding_identity_spelling(binding);
+  String entry = _match_site_entry(name);
   if (!entry) return NULL;
+  Type type = NULL;
+  List global = e.compiler.sym.resolve_global(%($name), &type);
+  if (!global || !List.equal(global, binding) || !type.is_function())
+    return NULL;
   List args = arguments;
   match (args)
     case %(args ? ?pattern *): {
@@ -1007,46 +1019,45 @@ static List Emitter._try(Emitter e, List ast, List context) {
     catch_block = e._filtered_catch(
       clause.cadr(), frame_name, handle_name, context,
       final_code, leave_stmt);
-  /* The landing branch and the normal fallthrough run the same finalizer,
-     so both reach the one trailer at the end of this block. An unhandled
-     landing never returns from `x2c_exception_leave`, which continues the
-     transfer outward. */
-  String done_label = e.fresh_name("cleanup_done");
-  List final_trailer = %(
-    $done_label ":" ";" @final_code @leave_stmt
-  );
+  /* Normal and handled paths share a trailer. The unhandled landing must
+     remain visibly nonreturning to the native compiler. Avoid labels here:
+     an enclosing finalizer can copy this emitted block into several exits. */
+  List final_trailer = %(@final_code @leave_stmt);
+  List unhandled = %("{" @final_trailer "__builtin_unreachable();" "}");
   catch_block = catch_block ? %("{"
       "if (x2c_exception_is_error_target(&$frame_name))"
         @catch_block
-      "else goto $done_label;"
-    "}") : %("{" "goto $done_label;" "}");
-  /* The arms of one `try` are the same patterns on every entry, so the block
-     carries its own static site: the first registration prepares one plan per
-     arm, and later ones skip both the plans and the pattern construction. */
+      "else" @unhandled
+    "}") : unhandled;
+  /* Literal patterns retain one plan per arm. Interpolated patterns are
+     prepared on each registration because their values may change. */
   List registration = %();
   if (clause) {
     String arms = e.fresh_name("catch_arms");
     String site = e.fresh_name("catch_site");
     String patterns = e.fresh_name("catch_patterns");
     Array declarations = %[];
-    unsigned long defaults = 0;
-    int index = 0;
+    int default_arm = -1, index = 0;
+    String state = "ERROR_CATCH_PENDING";
     foreach (List rec, clause.cadr()) {
       List pattern = rec.cadr();
       if (pattern) {
+        if (!e.match_pattern_is_static(pattern))
+          state = "ERROR_CATCH_TRANSIENT";
         String name = e.fresh_name("catch_pattern");
         String slot = %"$patterns[$index]";
         List emitted = e._emit(pattern, context);
         declarations.push(
           %("List $name = " @emitted ";" "$slot = List_var($name);"));
       }
-      else defaults |= 1UL << index;
+      else default_arm = index;
       index++;
     }
-    String count = %"$index", String mask = %"${defaults}UL";
+    String count = %"$index", String fallback = %"$default_arm";
     registration = %(
       "static MatchCaptureSite $arms[$count];"
-      "static ErrorCatchSite $site = { $arms, $mask, $count, 0, -1 };"
+      "static ErrorCatchSite $site = {"
+      "  $arms, $fallback, $count, $state, -1 };"
       "Var $patterns[$count];"
       "if (x2c_error_catch_site_pending(&$site)) {"
         @{declarations.list_free()}

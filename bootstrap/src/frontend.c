@@ -116,7 +116,7 @@ static void _load_snapshot_once(void){
   {
     ExceptionFrame _x2c_exception_frame_0;
     static MatchCaptureSite _x2c_catch_arms_0[4];
-    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 4, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 4, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_0[4];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
@@ -141,10 +141,14 @@ static void _load_snapshot_once(void){
 else {snapshot_error = String_join(NULL, cons(String_var(_4), cons(String_var(snapshot_path), NULL)));
 }
 }
-else goto _x2c_cleanup_done_0;
+else{
+  x2c_error_catch_close(_x2c_error_handler_0);
+  _x2c_error_handler_0 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_0);
+  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_0 :;
+}
 x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
@@ -175,7 +179,7 @@ List List_append(List, List);
 
 List x2c_default_include_dirs(void);
 
-Toolchain toolchain_new(String, String, List, List, List, int);
+Toolchain toolchain_new(String, String, List, List, List, int, int);
 
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -183,7 +187,7 @@ Frontend Frontend_new(CliRequest request){
   Frontend frontend = Scope_calloc(1, sizeof(struct Frontend));
   frontend -> request = request;
   frontend -> include_dirs = List_append(request -> include_dirs, x2c_default_include_dirs());
-  frontend -> toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose);
+  frontend -> toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
   return frontend;
 }
 
@@ -220,7 +224,7 @@ static String _read_input_text(Compiler compiler, String filename){
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_catch_arms_1[2];
-    static ErrorCatchSite _x2c_catch_site_1 = { _x2c_catch_arms_1, 0UL, 2, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 2, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_1[2];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_4 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_4);
@@ -258,10 +262,14 @@ static String _read_input_text(Compiler compiler, String filename){
   }
 
 }
-else goto _x2c_cleanup_done_1;
+else{
+  x2c_error_catch_close(_x2c_error_handler_1);
+  _x2c_error_handler_1 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_1);
+  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_1 :;
+}
 x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
@@ -275,7 +283,7 @@ String volatile text = NULL;
 {
   ExceptionFrame _x2c_exception_frame_2;
   static MatchCaptureSite _x2c_catch_arms_2[1];
-  static ErrorCatchSite _x2c_catch_site_2 = { _x2c_catch_arms_2, 0UL, 1, 0, -1 };
+  static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
   Var _x2c_catch_patterns_2[1];
   if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_6 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
   _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_6);
@@ -298,10 +306,14 @@ ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exc
   }
 
 }
-else goto _x2c_cleanup_done_2;
+else{
+  x2c_error_catch_close(_x2c_error_handler_2);
+  _x2c_error_handler_2 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_2);
+  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_2 :;
+}
 x2c_error_catch_close(_x2c_error_handler_2);
 _x2c_error_handler_2 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_2);
@@ -524,7 +536,7 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   {
     ExceptionFrame _x2c_exception_frame_3;
     static MatchCaptureSite _x2c_catch_arms_3[1];
-    static ErrorCatchSite _x2c_catch_site_3 = { _x2c_catch_arms_3, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_3[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_7 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_7);
@@ -550,10 +562,15 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
     }
 
   }
-  else goto _x2c_cleanup_done_3;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_3);
+    _x2c_error_handler_3 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_3);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_3 :;
 x2c_error_catch_close(_x2c_error_handler_3);
 _x2c_error_handler_3 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_3);
@@ -575,7 +592,7 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
   {
     ExceptionFrame _x2c_exception_frame_4;
     static MatchCaptureSite _x2c_catch_arms_4[1];
-    static ErrorCatchSite _x2c_catch_site_4 = { _x2c_catch_arms_4, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_4[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_8 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_8);
@@ -608,10 +625,15 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
     }
 
   }
-  else goto _x2c_cleanup_done_4;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_4);
+    _x2c_error_handler_4 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_4);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_4 :;
 x2c_error_catch_close(_x2c_error_handler_4);
 _x2c_error_handler_4 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_4);
@@ -637,7 +659,7 @@ int ParsedUnit_parse(ParsedUnit * unit){
   {
     ExceptionFrame _x2c_exception_frame_5;
     static MatchCaptureSite _x2c_catch_arms_5[1];
-    static ErrorCatchSite _x2c_catch_site_5 = { _x2c_catch_arms_5, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_5 = {  _x2c_catch_arms_5, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_5[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_5)) {List _x2c_catch_pattern_9 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_5[0] = List_var(_x2c_catch_pattern_9);
@@ -650,10 +672,15 @@ int ParsedUnit_parse(ParsedUnit * unit){
     }
 
   }
-  else goto _x2c_cleanup_done_5;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_5);
+    _x2c_error_handler_5 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_5);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_5 :;
 x2c_error_catch_close(_x2c_error_handler_5);
 _x2c_error_handler_5 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_5);

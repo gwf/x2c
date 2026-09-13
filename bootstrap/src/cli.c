@@ -68,6 +68,9 @@ static CliOption cli_options[] ={
     47618096330, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-v, --verbose", NULL, "Show commands as they are executed", 0
   }
   , {
+    9852392796, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 15397654616, "-###", NULL, "Show commands without executing them", 0
+  }
+  , {
     37046632, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
   }
   , {
@@ -832,6 +835,8 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     case 535328 : _print_help(c -> command);
     exit(0);
     case 47618096330 : c -> verbose = 1;
+    break;
+    case 9852392796 : c -> dry_run = 1;
     break;
     case 37046632 : c -> quiet = 1;
     break;

@@ -209,6 +209,27 @@ static void error_unwind_retains_positional_and_legacy_order(void) {
   x2c_exception_leave(&frame);
 }
 
+static void error_unwind_selects_first_legacy_default(void) {
+  Error.initialize();
+  ExceptionFrame frame;
+  ErrorHandler handler = x2c_error_catch_push(
+    &frame, 3, %(other-code *).var(), Symbol.var(<default>),
+    Symbol.var(<default>));
+  x2c_exception_push(&frame);
+  if (!sigsetjmp(frame.env, 0)) {
+    Error.raise(<invariant>, %());
+    EXPECT_TRUE(0);
+  }
+  else {
+    x2c_exception_landed(&frame);
+    EXPECT_INT_EQ(x2c_error_catch_selected(handler), 1);
+    x2c_error_catch_detach(handler);
+    x2c_error_catch_close(handler);
+    x2c_exception_mark_handled(&frame);
+  }
+  x2c_exception_leave(&frame);
+}
+
 
 static void error_unwind_crosses_each_exception_frame(void) {
   Error.initialize();
@@ -677,6 +698,7 @@ void exception_suite(void) {
   $test.run(exception_bubbles_across_frames);
   $test.run(error_unwind_selects_target_and_bindings);
   $test.run(error_unwind_retains_positional_and_legacy_order);
+  $test.run(error_unwind_selects_first_legacy_default);
   $test.run(error_unwind_crosses_each_exception_frame);
   $test.run(frame_cleanup_claims_once);
   $test.run(raise_in_finalizer_reaches_outer_frame);

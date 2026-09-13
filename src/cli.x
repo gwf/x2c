@@ -22,7 +22,7 @@ typedef struct CliRequest {
   String prefix, cc, ar, compile_commands, Symbol kind, color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
   Symbol dump;
-  int jobs, debugging, verbose, quiet, plain, nested, no_deps;
+  int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
   int source_map, source_facts, live_symbols, cpp_symbols;
   SourceView sources;
@@ -76,6 +76,8 @@ static CliOption cli_options[] = {
     "Show the x2c version and exit", 0 },
   { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
     <general>, "-v, --verbose", NULL, "Show commands as they are executed", 0 },
+  { <dry-run>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,
+    <general>, "-###", NULL, "Show commands without executing them", 0 },
   { <quiet>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
     <general>, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0 },
   { <plain>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
@@ -704,6 +706,7 @@ static void _apply_option(
     case <help>: _print_help(c.command);
       exit(0);
     case <verbose>: c.verbose = 1; break;
+    case <dry-run>: c.dry_run = 1; break;
     case <quiet>: c.quiet = 1; break;
     case <plain>: c.plain = 1; break;
     case <color>:

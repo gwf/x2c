@@ -318,10 +318,15 @@ int found = _gensym(entry);  if(gensym && found > * gensym) * gensym = found;
   if(fn_defs) * fn_defs = imported;
 }
 else {x2c_exception_landed(& _x2c_exception_frame_0); {
-  goto _x2c_cleanup_done_0;
+  if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
+    File_close(input);  Lisp_destroy(lisp);
+  }
+
+}
+x2c_exception_leave(& _x2c_exception_frame_0);  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_0 :;  if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
+if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
   File_close(input);  Lisp_destroy(lisp);
 }
 }

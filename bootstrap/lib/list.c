@@ -1686,14 +1686,16 @@ Buffer List_write_str(List lst, Buffer out){
       }
       else {x2c_exception_landed(& _x2c_exception_frame_0);
       {
-        goto _x2c_cleanup_done_0;
+        if (x2c_exception_claim(&_x2c_exception_frame_0)) {* _x2c_macro_address_0 = _x2c_macro_previous_0;
       }
-
+      x2c_exception_leave(& _x2c_exception_frame_0);
+      __builtin_unreachable();
     }
-    _x2c_cleanup_done_0 :;
-    if (x2c_exception_claim(&_x2c_exception_frame_0)) {* _x2c_macro_address_0 = _x2c_macro_previous_0;
+
   }
-  x2c_exception_leave(& _x2c_exception_frame_0);
+  if (x2c_exception_claim(&_x2c_exception_frame_0)) {* _x2c_macro_address_0 = _x2c_macro_previous_0;
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 return out;

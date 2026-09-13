@@ -9,14 +9,14 @@
 typedef struct Toolchain{
   String cc, ar, include_dir, runtime_lib;
   List cpp_args, cc_args, ld_args;
-  int verbose, keep_system_includes;
+  int verbose, dry_run, keep_system_includes;
 }
 * Toolchain;
 
 typedef struct ToolAction{
   Symbol phase;
   List arguments;
-  int verbose, inherit_stdio, report;
+  int verbose, dry_run, inherit_stdio, report;
 }
 * ToolAction;
 
@@ -26,7 +26,7 @@ typedef struct ToolRun{
 }
 * ToolRun;
 
-Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose);
+Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run);
 
 ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String object, String depfile, List gen_dirs);
 
@@ -36,7 +36,7 @@ ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List obj
 
 ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs);
 
-ToolAction tool_action_new(Symbol phase, List arguments, int verbose);
+ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run);
 
 void ToolAction_as_program(ToolAction action);
 

@@ -16,7 +16,7 @@ typedef struct CliRequest{
   String prefix, cc, ar, compile_commands;
   Symbol kind, color_mode;
   Symbol dump;
-  int jobs, debugging, verbose, quiet, plain, nested, no_deps;
+  int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
   int source_map, source_facts, live_symbols, cpp_symbols;
   SourceView sources;

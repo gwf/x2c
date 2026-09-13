@@ -1,0 +1,76 @@
+static int choose(Symbol code) {
+  int selected = -1;
+  try { Error.raise(code, NULL); }
+  catch %(code0): selected = 0;
+  catch %(code1): selected = 1;
+  catch %(code2): selected = 2;
+  catch %(code3): selected = 3;
+  catch %(code4): selected = 4;
+  catch %(code5): selected = 5;
+  catch %(code6): selected = 6;
+  catch %(code7): selected = 7;
+  catch %(code8): selected = 8;
+  catch %(code9): selected = 9;
+  catch %(code10): selected = 10;
+  catch %(code11): selected = 11;
+  catch %(code12): selected = 12;
+  catch %(code13): selected = 13;
+  catch %(code14): selected = 14;
+  catch %(code15): selected = 15;
+  catch %(code16): selected = 16;
+  catch %(code17): selected = 17;
+  catch %(code18): selected = 18;
+  catch %(code19): selected = 19;
+  catch %(code20): selected = 20;
+  catch %(code21): selected = 21;
+  catch %(code22): selected = 22;
+  catch %(code23): selected = 23;
+  catch %(code24): selected = 24;
+  catch %(code25): selected = 25;
+  catch %(code26): selected = 26;
+  catch %(code27): selected = 27;
+  catch %(code28): selected = 28;
+  catch %(code29): selected = 29;
+  catch %(code30): selected = 30;
+  catch %(code31): selected = 31;
+  catch %(code32): selected = 32;
+  catch %(code33): selected = 33;
+  catch %(code34): selected = 34;
+  catch %(code35): selected = 35;
+  catch %(code36): selected = 36;
+  catch %(code37): selected = 37;
+  catch %(code38): selected = 38;
+  catch %(code39): selected = 39;
+  catch %(code40): selected = 40;
+  catch %(code41): selected = 41;
+  catch %(code42): selected = 42;
+  catch %(code43): selected = 43;
+  catch %(code44): selected = 44;
+  catch %(code45): selected = 45;
+  catch %(code46): selected = 46;
+  catch %(code47): selected = 47;
+  catch %(code48): selected = 48;
+  catch %(code49): selected = 49;
+  catch %(code50): selected = 50;
+  catch %(code51): selected = 51;
+  catch %(code52): selected = 52;
+  catch %(code53): selected = 53;
+  catch %(code54): selected = 54;
+  catch %(code55): selected = 55;
+  catch %(code56): selected = 56;
+  catch %(code57): selected = 57;
+  catch %(code58): selected = 58;
+  catch %(code59): selected = 59;
+  catch %(code60): selected = 60;
+  catch %(code61): selected = 61;
+  catch %(code62): selected = 62;
+  catch %(last-code): selected = 63;
+  catch: selected = 64;
+  return selected;
+}
+
+int main(void) {
+  int matched = choose(<last-code>), fallback = choose(<missing>);
+  printf("%d %d\n", matched, fallback);
+  return 0;
+}

@@ -12,7 +12,20 @@ int return_early(void) { {
   Array files = survey_files();
   return files.length;
 } }
+void fail_in_scope(void) {
+  size_t before = Scope.stats().live_allocations;
+  try {
+    Scope.retain();
+    defer Scope.release();
+    Map findings = inspect_file(%"failure.dat");
+    assert(Scope.stats().live_allocations > before);
+    raise %(oops);
+  }
+  catch %(oops): {}
+}
 int main(void) {
+// Prepare the catch before measuring reclaimable working storage.
+fail_in_scope();
 size_t before = Scope.stats().live_allocations;
 // Reclaim working storage regularly in a long-running survey.
 size_t total = 0;
@@ -40,14 +53,7 @@ printf("processed: %zu files\n", total);
 assert(total == 4 && Scope.stats().live_allocations == before);
 assert(return_early() == 2);
 assert(Scope.stats().live_allocations == before);
-try {
-  Scope.retain();
-  defer Scope.release();
-  Map findings = inspect_file(%"failure.dat");
-  assert(Scope.stats().live_allocations > before);
-  raise %(oops);
-}
-catch %(oops): {}
+fail_in_scope();
 assert(Scope.stats().live_allocations == before);
 return 0;
 }

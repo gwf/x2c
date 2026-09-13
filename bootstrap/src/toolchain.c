@@ -136,7 +136,7 @@ static void _toolchain_layout(String * include_dir, String * runtime_lib){
 
 void * Scope_calloc(size_t, size_t);
 
-Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose){
+Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
   Toolchain toolchain = Scope_calloc(1, sizeof(struct Toolchain));
   toolchain -> cc = _tool_selection(cc, "X2C_CC", "CC", _installed_tool("CC"), "cc");
@@ -145,6 +145,7 @@ Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List 
   toolchain -> cc_args = cc_args;
   toolchain -> ld_args = ld_args;
   toolchain -> verbose = verbose;
+  toolchain -> dry_run = dry_run;
   _toolchain_layout(& toolchain -> include_dir, & toolchain -> runtime_lib);
   return toolchain;
 }
@@ -210,7 +211,7 @@ ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String o
   Array_push(arguments, String_var(source));
   Array_push(arguments, String_var(_16));
   Array_push(arguments, String_var(object));
-  return tool_action_new(7477414666, Array_list_free(arguments), toolchain -> verbose);
+  return tool_action_new(7477414666, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
 ToolAction Toolchain_preprocess_action(Toolchain toolchain, String source, String output, List gen_dirs){
@@ -220,7 +221,7 @@ ToolAction Toolchain_preprocess_action(Toolchain toolchain, String source, Strin
   Array_push(arguments, String_var(source));
   Array_push(arguments, String_var(_16));
   Array_push(arguments, String_var(output));
-  return tool_action_new(1165861522189542, Array_list_free(arguments), toolchain -> verbose);
+  return tool_action_new(1165861522189542, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
 ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List objects){
@@ -230,7 +231,7 @@ ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List obj
   Array_push(arguments, String_var(_18));
   Array_push(arguments, String_var(output));
   _append_list(arguments, objects);
-  return tool_action_new(3362278794, Array_list_free(arguments), toolchain -> verbose);
+  return tool_action_new(3362278794, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
 ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs){
@@ -243,14 +244,15 @@ ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs
   Array_push(arguments, String_var(_19));
   Array_push(arguments, String_var(_16));
   Array_push(arguments, String_var(output));
-  return tool_action_new(805782, Array_list_free(arguments), toolchain -> verbose);
+  return tool_action_new(805782, Array_list_free(arguments), toolchain -> verbose, toolchain -> dry_run);
 }
 
-ToolAction tool_action_new(Symbol phase, List arguments, int verbose){
+ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run){
   ToolAction action = Scope_calloc(1, sizeof(struct ToolAction));
   action -> phase = phase;
   action -> arguments = arguments;
   action -> verbose = verbose;
+  action -> dry_run = dry_run;
   action -> report = 1;
   return action;
 }
@@ -355,12 +357,13 @@ void report_suspend(void);
 ChildProcess process_start(char * *, int);
 
 ToolRun ToolAction_start(ToolAction action){
-  if(action -> verbose){
+  if(action -> verbose || action -> dry_run){
     report_suspend();
     _print_action(action -> phase, action -> arguments);
   }
   ToolRun execution = Scope_calloc(1, sizeof(struct ToolRun));
   execution -> action = action;
+  if(action -> dry_run) return execution;
   execution -> process = process_start(_action_argv(action -> arguments), ! action -> inherit_stdio);
   return execution;
 }
@@ -368,6 +371,7 @@ ToolRun ToolAction_start(ToolAction action){
 int ChildProcess_ready(ChildProcess);
 
 int ToolRun_ready(ToolRun execution){
+  if(execution -> action -> dry_run) return 1;
   ChildProcess process = execution -> process;
   return ChildProcess_ready(process);
 }
@@ -376,6 +380,7 @@ int ChildProcess_wait(ChildProcess, String *, String *);
 
 int ToolRun_wait(ToolRun execution){
   ToolAction action = execution -> action;
+  if(action -> dry_run) return 0;
   String output = NULL, errors = NULL;
   ChildProcess process = execution -> process;
   int status = ChildProcess_wait(process, & output, & errors);
@@ -488,7 +493,7 @@ int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_d
       {
         ExceptionFrame _x2c_exception_frame_0;
         static MatchCaptureSite _x2c_catch_arms_0[1];
-        static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };
+        static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
         Var _x2c_catch_patterns_0[1];
         if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
         _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
@@ -501,11 +506,16 @@ int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_d
         }
 
       }
-      else goto _x2c_cleanup_done_0;
+      else{
+        x2c_error_catch_close(_x2c_error_handler_0);
+        _x2c_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
+      }
+
     }
 
   }
-  _x2c_cleanup_done_0 :;
   x2c_error_catch_close(_x2c_error_handler_0);
   _x2c_error_handler_0 = NULL;
   x2c_exception_leave(& _x2c_exception_frame_0);

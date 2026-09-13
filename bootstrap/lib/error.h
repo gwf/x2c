@@ -16,8 +16,7 @@ typedef Symbol(* ErrorHandlerFn)(List errors, Var data);
 
 typedef struct ErrorCatchSite{
   MatchCaptureSite * arms;
-  unsigned long defaults;
-  int arm_count, state, fenced_arm;
+  int default_arm, arm_count, state, fenced_arm;
 }
 ErrorCatchSite;
 

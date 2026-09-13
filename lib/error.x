@@ -46,14 +46,13 @@ typedef Symbol (*ErrorHandlerFn)(List errors, Var data);
 
 /** Holds the process-lifetime plans of one compiler-generated filtered catch.
     `arms` is a zero-initialized static array of `arm_count` `Match` sites and
-    `defaults` marks the arms that have no pattern. `state` and `fenced_arm`
+    `default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
     belong to `Error`; a site must be static storage that the first
     registration binds to its patterns.
 */
 typedef struct ErrorCatchSite {
   MatchCaptureSite *arms;
-  unsigned long defaults;
-  int arm_count, state, fenced_arm;
+  int default_arm, arm_count, state, fenced_arm;
 } ErrorCatchSite;
 
 #pragma private
@@ -79,12 +78,12 @@ int x2c_error_catch_site_pending(ErrorCatchSite *site) =>
 static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
   int retainable = 1;
   for (int i = 0; i < site.arm_count; i++)
-    if (!(site.defaults & (1UL << i)) &&
+    if (i != site.default_arm &&
         !x2c_match_pattern_retainable(patterns[i]))
       retainable = 0;
   if (retainable)
     for (int i = 0; i < site.arm_count; i++) {
-      if (site.defaults & (1UL << i)) continue;
+      if (i == site.default_arm) continue;
       MatchPlan plan = x2c_match_site_prepare(&site.arms[i], patterns[i]);
       if (plan.status == MACHINE_INELIGIBLE && site.fenced_arm < 0)
         site.fenced_arm = i;
@@ -103,7 +102,7 @@ static const char *_catch_prepare_plans(
     <alloc-fail>, "could not enter error scope for catch patterns");
   h.plans = Block.new(sizeof(MatchPlan));
   for (int i = 0; i < site.arm_count; i++) {
-    MatchPlan plan = site.defaults & (1UL << i)
+    MatchPlan plan = i == site.default_arm || patterns[i] == <default>
                    ? NULL : MatchPlan.prepare(patterns[i]);
     h.plans.push(&plan);
     if (plan && plan.status == MACHINE_INELIGIBLE && !fenced) {
@@ -180,13 +179,14 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
     &state.scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
   Var *patterns = (void *) (site + 1);
   *site = (ErrorCatchSite) {
-      NULL, 0, (int) arm_count, ERROR_CATCH_TRANSIENT, -1
+      NULL, -1, (int) arm_count, ERROR_CATCH_TRANSIENT, -1
   };
   va_list args;
   va_start(args, arm_count);
   for (unsigned i = 0; i < arm_count; i++) {
     patterns[i] = va_arg(args, Var);
-    if (patterns[i] == <default>) site.defaults |= 1UL << i;
+    if (patterns[i] == <default> && site.default_arm < 0)
+      site.default_arm = (int) i;
   }
   va_end(args);
   return x2c_error_catch_site_push(target, site, patterns);
@@ -1049,7 +1049,7 @@ static Symbol _catch_match(ErrorHandler h) {
   ErrorCatchSite *site = h.site;
   MatchPlan *plans = (void *) h.plans != NULL ? h.plans.bytes : NULL;
   for (int i = 0; i < site.arm_count; i++) {
-    int is_default = (site.defaults & (1UL << i)) != 0;
+    int is_default = i == site.default_arm;
     MatchPlan plan = is_default ? NULL
                    : plans ? plans[i] : site.arms[i].plan;
     MatchCaptureLayout layout = plan ? plan.layout : NULL;

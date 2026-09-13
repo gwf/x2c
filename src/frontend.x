@@ -135,7 +135,7 @@ Frontend Frontend.new(CliRequest request) {
     request.include_dirs.append(x2c_default_include_dirs());
   frontend.toolchain = toolchain_new(
     request.cc, request.ar, request.cpp_args, request.cc_args,
-    request.ld_args, request.verbose);
+    request.ld_args, request.verbose, request.dry_run);
   return frontend;
 }
 

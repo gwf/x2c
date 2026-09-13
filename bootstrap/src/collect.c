@@ -766,7 +766,7 @@ static void _include(Compiler c, String target, int angle, String dir, Map globs
     {
       ExceptionFrame _x2c_exception_frame_0;
       static MatchCaptureSite _x2c_catch_arms_0[2];
-      static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 2, 0, -1 };
+      static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1 };
       Var _x2c_catch_patterns_0[2];
       if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
       _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
@@ -792,10 +792,15 @@ static void _include(Compiler c, String target, int angle, String dir, Map globs
     }
 
   }
-  else goto _x2c_cleanup_done_0;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
@@ -803,7 +808,7 @@ x2c_exception_leave(& _x2c_exception_frame_0);
 {
   ExceptionFrame _x2c_exception_frame_1;
   static MatchCaptureSite _x2c_catch_arms_1[1];
-  static ErrorCatchSite _x2c_catch_site_1 = { _x2c_catch_arms_1, 0UL, 1, 0, -1 };
+  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
   Var _x2c_catch_patterns_1[1];
   if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
   _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_2);
@@ -820,10 +825,14 @@ ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exc
   }
 
 }
-else goto _x2c_cleanup_done_1;
+else{
+  x2c_error_catch_close(_x2c_error_handler_1);
+  _x2c_error_handler_1 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_1);
+  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_1 :;
+}
 x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
@@ -1243,7 +1252,7 @@ void Compiler_collect_package(Compiler c, String name, Token token){
         {
           ExceptionFrame _x2c_exception_frame_2;
           static MatchCaptureSite _x2c_catch_arms_2[2];
-          static ErrorCatchSite _x2c_catch_site_2 = { _x2c_catch_arms_2, 0UL, 2, 0, -1 };
+          static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 2, ERROR_CATCH_PENDING, -1 };
           Var _x2c_catch_patterns_2[2];
           if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_3 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
           _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_3);
@@ -1261,11 +1270,16 @@ void Compiler_collect_package(Compiler c, String name, Token token){
         }
 
       }
-      else goto _x2c_cleanup_done_2;
+      else{
+        x2c_error_catch_close(_x2c_error_handler_2);
+        _x2c_error_handler_2 = NULL;
+        x2c_exception_leave(& _x2c_exception_frame_2);
+        __builtin_unreachable();
+      }
+
     }
 
   }
-  _x2c_cleanup_done_2 :;
   x2c_error_catch_close(_x2c_error_handler_2);
   _x2c_error_handler_2 = NULL;
   x2c_exception_leave(& _x2c_exception_frame_2);
@@ -1318,7 +1332,7 @@ static String _snapshot_content_hash(void){
   {
     ExceptionFrame _x2c_exception_frame_3;
     static MatchCaptureSite _x2c_catch_arms_3[1];
-    static ErrorCatchSite _x2c_catch_site_3 = { _x2c_catch_arms_3, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_3[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_5 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_5);
@@ -1341,10 +1355,15 @@ static String _snapshot_content_hash(void){
     }
 
   }
-  else goto _x2c_cleanup_done_3;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_3);
+    _x2c_error_handler_3 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_3);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_3 :;
 x2c_error_catch_close(_x2c_error_handler_3);
 _x2c_error_handler_3 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_3);
@@ -1507,7 +1526,7 @@ int header_symbols_open(String path, int gensym_base){
   {
     ExceptionFrame _x2c_exception_frame_4;
     static MatchCaptureSite _x2c_catch_arms_4[1];
-    static ErrorCatchSite _x2c_catch_site_4 = { _x2c_catch_arms_4, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_4[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_6 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_6);
@@ -1530,10 +1549,15 @@ int header_symbols_open(String path, int gensym_base){
     }
 
   }
-  else goto _x2c_cleanup_done_4;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_4);
+    _x2c_error_handler_4 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_4);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_4 :;
 x2c_error_catch_close(_x2c_error_handler_4);
 _x2c_error_handler_4 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_4);
@@ -1614,7 +1638,7 @@ static List _artifact_fetch(Compiler compiler, String canonical){
   {
     ExceptionFrame _x2c_exception_frame_5;
     static MatchCaptureSite _x2c_catch_arms_5[2];
-    static ErrorCatchSite _x2c_catch_site_5 = { _x2c_catch_arms_5, 0UL, 2, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_5 = {  _x2c_catch_arms_5, -1, 2, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_5[2];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_5)) {List _x2c_catch_pattern_7 = cons(Symbol_var(664344300629258), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_5[0] = List_var(_x2c_catch_pattern_7);
@@ -1655,10 +1679,14 @@ static List _artifact_fetch(Compiler compiler, String canonical){
   }
 
 }
-else goto _x2c_cleanup_done_5;
+else{
+  x2c_error_catch_close(_x2c_error_handler_5);
+  _x2c_error_handler_5 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_5);
+  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_5 :;
+}
 x2c_error_catch_close(_x2c_error_handler_5);
 _x2c_error_handler_5 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_5);
@@ -1760,7 +1788,7 @@ List stored_dependencies = Var_list(dependencies_value);
       {
         ExceptionFrame _x2c_exception_frame_6;
         static MatchCaptureSite _x2c_catch_arms_6[3];
-        static ErrorCatchSite _x2c_catch_site_6 = { _x2c_catch_arms_6, 0UL, 3, 0, -1 };
+        static ErrorCatchSite _x2c_catch_site_6 = {  _x2c_catch_arms_6, -1, 3, ERROR_CATCH_PENDING, -1 };
         Var _x2c_catch_patterns_6[3];
         if (x2c_error_catch_site_pending(&_x2c_catch_site_6)) {List _x2c_catch_pattern_9 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
         _x2c_catch_patterns_6[0] = List_var(_x2c_catch_pattern_9);
@@ -1821,10 +1849,15 @@ List stored_dependencies = Var_list(dependencies_value);
     }
 
   }
-  else goto _x2c_cleanup_done_6;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_6);
+    _x2c_error_handler_6 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_6);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_6 :;
 x2c_error_catch_close(_x2c_error_handler_6);
 _x2c_error_handler_6 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_6);

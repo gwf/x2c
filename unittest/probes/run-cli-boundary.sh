@@ -205,9 +205,10 @@ grep -Fq "$BUILD/a" "$BUILD/directory.stderr"
 grep -Fq "inputs produce the same output stem 'item'" \
   "$BUILD/collision.stderr"
 
-"$X2C" translate --verbose --out-dir "$BUILD/out" "$BUILD/a/item.x" \
-  >"$BUILD/verbose.stdout" 2>"$BUILD/verbose.stderr"
-grep -Fq "x2c: translate --out-dir" "$BUILD/verbose.stderr"
+"$X2C" translate -### --out-dir "$BUILD/out" "$BUILD/a/item.x" \
+  >"$BUILD/dry-run.stdout" 2>"$BUILD/dry-run.stderr"
+[[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]]
+grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
 
 set +e
 "$X2C" "$BUILD/a/item.x" >"$BUILD/no-command.stdout" \
@@ -373,13 +374,11 @@ printf '%s\n' '#include "x2c.x"' 'int helper(void);' 'int main(void) {' \
 [[ $("$BUILD/direct/many") == 4 ]]
 
 printf 'int c_source(void) { return 2; }\n' >"$BUILD/direct/source.c"
-set +e
-"$X2C" build --verbose -j2 -I"$BUILD/includes/first" -DCLI_ATTACHED=1 \
-  -Oarbitrary --output "$BUILD/direct/attached" "$BUILD/direct/source.c" \
-  >"$BUILD/direct/attached.stdout" 2>"$BUILD/direct/attached.stderr"
-set -e
-grep -Fq -- '-Oarbitrary' "$BUILD/direct/attached.stderr"
-grep -Fq -- '-DCLI_ATTACHED=1' "$BUILD/direct/attached.stderr"
+"$X2C" build -### -j2 -I"$BUILD/includes/first" -DCLI_ATTACHED=1 \
+  -Oarbitrary --output "$BUILD/direct/dry-run" "$BUILD/direct/source.c" \
+  >"$BUILD/direct/dry-run.stdout" 2>"$BUILD/direct/dry-run.stderr"
+grep -Fq -- '-Oarbitrary' "$BUILD/direct/dry-run.stderr"
+grep -Fq -- '-DCLI_ATTACHED=1' "$BUILD/direct/dry-run.stderr"
 printf 'int object_value(void) { return 3; }\n' >"$BUILD/direct/object.c"
 printf 'int archive_value(void) { return 4; }\n' >"$BUILD/direct/archive.c"
 host_cc=${CC:-cc}
@@ -583,12 +582,11 @@ finally:
     os.close(master)
 PY
 
-set +e
-"$X2C" build --verbose --build-dir "$BUILD/direct/matched" \
+"$X2C" build -### --build-dir "$BUILD/direct/matched-dry" \
   "$BUILD/direct/source.c" >"$BUILD/direct/matched.stdout" \
   2>"$BUILD/direct/matched.stderr"
-set -e
 grep -Fq "$ROOT/builds/0/libx2c.a" "$BUILD/direct/matched.stderr"
+[[ ! -e "$BUILD/direct/matched-dry" ]]
 
 python3 - "$X2C" "$BUILD/scheduling" <<'PY_SCHEDULING'
 import os
@@ -746,6 +744,9 @@ capture.unlink()
 run(command, 'warm')
 assert database.read_bytes() == first
 assert not capture.exists(), 'warm build executed a native compilation'
+run(command[:2] + ['-###'] + command[2:], 'dry')
+assert database.read_bytes() == first
+assert not capture.exists()
 source.write_text('int broken( {\n')
 run(command, 'failure', 1)
 assert database.read_bytes() == first
@@ -973,11 +974,10 @@ printf 'int main(void) { return 0; }\n' >"$equivalent/main.c"
   printf '[target.app]\n'
   printf 'sources = ["main.c"]\n'
 } >"$equivalent/x2c.toml"
-"$X2C" build --verbose --manifest-path "$equivalent/x2c.toml" \
+"$X2C" build -### --manifest-path "$equivalent/x2c.toml" \
   --build-dir "$equivalent/build" --output "$equivalent/app" \
   >"$equivalent/manifest.stdout" 2>"$equivalent/manifest.stderr"
-rm -rf "$equivalent/build"
-"$X2C" build --verbose --build-dir "$equivalent/build/.x2c/app" \
+"$X2C" build -### --build-dir "$equivalent/build/.x2c/app" \
   --output "$equivalent/app" "$equivalent/main.c" \
   >"$equivalent/direct.stdout" 2>"$equivalent/direct.stderr"
 cmp "$equivalent/manifest.stderr" "$equivalent/direct.stderr"
@@ -1050,4 +1050,13 @@ run([compiler, 'translate', '--quiet', '--source-map', '--out-dir',
 assert '#line ' in (output / 'mapped.c').read_text()
 PY_SOURCE_MAP
 
-echo "CLI, dependency, build, run, manifest, and state probes: 107 passed"
+printf '%s\n' '#include "x2c.x"' \
+  'static int result(void) {' \
+  '  try { return 1; } finally { return 2; }' \
+  '}' 'int main(void) { printf("%d\n", result()); return 0; }' \
+  >"$BUILD/finally-return.x"
+"$X2C" build --quiet -Xcc -Werror=return-type \
+  --output "$BUILD/finally-return" "$BUILD/finally-return.x"
+[[ $("$BUILD/finally-return") == 2 ]]
+
+echo "CLI, dependency, build, run, manifest, and state probes: 111 passed"

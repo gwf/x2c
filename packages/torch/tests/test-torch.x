@@ -351,8 +351,7 @@ static void torch_checkpoints(void) {
   EXPECT_INT_EQ(read["b"].tensor().sum().item().integer(), 9);
 }
 
-static void torch_errors_and_lifetimes(void) {
-  ScopeStats before = Scope.stats();
+static void _errors_and_lifetimes_once(void) {
   Scope.retain();
   {
     defer Scope.release();
@@ -386,6 +385,13 @@ static void torch_errors_and_lifetimes(void) {
       (void) Optimizer.adam(extra, 0.01);
     }
   }
+}
+
+static void torch_errors_and_lifetimes(void) {
+  // Prepare the catch sites before measuring reclaimable allocations.
+  _errors_and_lifetimes_once();
+  ScopeStats before = Scope.stats();
+  _errors_and_lifetimes_once();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
 }

@@ -18,7 +18,7 @@ int filtered(int volatile mode){
   {
     ExceptionFrame _x2c_exception_frame_0;
     static MatchCaptureSite _x2c_catch_arms_0[3];
-    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 4UL, 3, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, 2, 3, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_0[3];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(97614135954008), cons(Symbol_var(54), cons(List_var(cons(Symbol_var(5874022), cons(Symbol_var(1953475496), NULL))), cons(Symbol_var(54), NULL))));
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
@@ -93,10 +93,19 @@ else {{
 }
 }
 }
-else goto _x2c_cleanup_done_0;
+else{
+  if (x2c_exception_claim(&_x2c_exception_frame_0)) {x2c_error_catch_close(_x2c_error_handler_0);
+  _x2c_error_handler_0 = NULL;
+  {
+    mode ++;
+  }
+
+}
+x2c_exception_leave(& _x2c_exception_frame_0);
+__builtin_unreachable();
 }
 }
-_x2c_cleanup_done_0 :;
+}
 if (x2c_exception_claim(&_x2c_exception_frame_0)) {x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 {

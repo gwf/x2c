@@ -325,12 +325,13 @@ static int _run_translation(CliRequest c) {
   if (!c.out_dir) c.out_dir = %".";
   opts = c;
   _preflight_translation(c);
-  if (c.verbose) {
+  if (c.verbose || c.dry_run) {
     fprintf(stderr, "x2c: translate");
     fprintf(stderr, " --out-dir %s", c.out_dir);
     foreach (String input, c.inputs) fprintf(stderr, " %s", input);
     fputc('\n', stderr);
   }
+  if (c.dry_run) return 0;
   Frontend frontend = Frontend.new(c);
   frontend.preprocessor_errors = _preprocessor_errors;
   String output_dir = c.out_dir;
@@ -395,10 +396,12 @@ static CliRequest _build_translation_request(
 }
 
 static int _run_build_request(CliRequest c, Array commands) {
-  foreach (String input, c.inputs) {
-    if (!input.endswith(%".x")) continue;
-    Frontend.load_support(c);
-    break;
+  if (!c.dry_run) {
+    foreach (String input, c.inputs) {
+      if (!input.endswith(%".x")) continue;
+      Frontend.load_support(c);
+      break;
+    }
   }
   /* A target has its own build graph and native-action scratch. Isolate
      its Scope allocations and canonical values so a manifest dependency is
@@ -418,11 +421,13 @@ static int _run_build_request(CliRequest c, Array commands) {
     }
     CliRequest translation =
       _build_translation_request(c, input, directory);
-    if (_run_translation(translation)) {
+    if (!c.dry_run && _run_translation(translation)) {
       state.cleanup(0);
       return 1;
     }
-    state.record_translation(input, directory);
+    if (c.dry_run)
+      fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
+    if (!c.dry_run) state.record_translation(input, directory);
     state.add_generated(input, directory);
     state.end_translation(input, 0);
   }
@@ -446,7 +451,8 @@ static int _run_build_request(CliRequest c, Array commands) {
 }
 
 static int _run_build(CliRequest request) {
-  Array commands = request.compile_commands ? %[] : NULL;
+  Array commands =
+    request.compile_commands && !request.dry_run ? %[] : NULL;
   if (request.inputs) {
     if (request.manifest) {
       fputs(
@@ -530,7 +536,8 @@ int main(int argc, char **argv) {
   CliRequest request = cli_parse(argc, argv);
   report_configure(
     request.quiet, request.plain, request.color_mode,
-    request.verbose || request.debugging, request.inspects());
+    request.verbose || request.debugging,
+    request.dry_run, request.inspects());
   if (request.command == <bootstrap>) return _run_bootstrap(request);
   _configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot

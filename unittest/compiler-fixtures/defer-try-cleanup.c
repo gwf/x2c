@@ -51,7 +51,7 @@ static int preserve_parameter(int volatile value){
   {
     ExceptionFrame _x2c_exception_frame_0;
     static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = { _x2c_catch_arms_0, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_0[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20800632064936), NULL);
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
@@ -73,10 +73,15 @@ static int preserve_parameter(int volatile value){
     }
 
   }
-  else goto _x2c_cleanup_done_0;
+  else{
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
+    __builtin_unreachable();
+  }
+
 }
 }
-_x2c_cleanup_done_0 :;
 x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
@@ -96,14 +101,14 @@ int main(void){
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_catch_arms_2[1];
-    static ErrorCatchSite _x2c_catch_site_2 = { _x2c_catch_arms_2, 0UL, 1, 0, -1 };
+    static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_2[1];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(Symbol_var(4477477457162), NULL);
     _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
   }
   ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
     {
-      ExceptionFrame _x2c_exception_frame_2;  static MatchCaptureSite _x2c_catch_arms_1[1];  static ErrorCatchSite _x2c_catch_site_1 = { _x2c_catch_arms_1, 0UL, 1, 0, -1 };  Var _x2c_catch_patterns_1[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20800632064936), cons(List_var(cons(Symbol_var(46228810), cons(Symbol_var(1992385866), NULL))), NULL));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
+      ExceptionFrame _x2c_exception_frame_2;  static MatchCaptureSite _x2c_catch_arms_1[1];  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_1[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20800632064936), cons(List_var(cons(Symbol_var(46228810), cons(Symbol_var(1992385866), NULL))), NULL));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
     }
     ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)){
       {
@@ -135,11 +140,14 @@ int main(void){
       }
 
     }
-    else goto _x2c_cleanup_done_1;
+    else{
+      x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_exception_leave(& _x2c_exception_frame_2);  __builtin_unreachable();
+    }
+
   }
 
 }
-_x2c_cleanup_done_1 :;  x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_exception_leave(& _x2c_exception_frame_2);
+x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_exception_leave(& _x2c_exception_frame_2);
 }
 }
 else {x2c_exception_landed(& _x2c_exception_frame_1); {
@@ -153,10 +161,14 @@ else {x2c_exception_landed(& _x2c_exception_frame_1); {
   }
 
 }
-else goto _x2c_cleanup_done_2;
+else{
+  x2c_error_catch_close(_x2c_error_handler_1);
+  _x2c_error_handler_1 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_1);
+  __builtin_unreachable();
 }
 }
-_x2c_cleanup_done_2 :;
+}
 x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
