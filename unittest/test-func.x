@@ -75,6 +75,11 @@ static void func_apply_converts_numeric_arguments(void) {
 
 static int _side_effect;
 
+static long _counted_add(long left, long right) {
+  _side_effect++;
+  return left + right;
+}
+
 static void _bump_counter(int amount) {
   _side_effect += amount;
 }
@@ -671,6 +676,36 @@ static void func_catch_retains_complete_error_slice(void) {
   EXPECT_INT_EQ(Error.count(), mark);
 }
 
+static void func_adapter_readers_stop_at_first_failure(void) {
+  FuncTestBinary pointer = _counted_add;
+  long bias = 0;
+  Func functions[] = { _counted_add, pointer,
+    %!(long left, long right) => {
+      _side_effect++;
+      return left + right + bias;
+    }
+  };
+  for (int index = 0; index < 3; index++) {
+    Func fn = functions[index];
+    FuncArg args[2] = { FuncArg.value(void),
+                       FuncArg.value(%"not-numeric") };
+    _side_effect = 0;
+    int first = -1, second = -1;
+    try fn.apply(2, args);
+    catch %(void-op *details): first = details.assoc(<index>).integer();
+    EXPECT_INT_EQ(first, 0);
+    EXPECT_INT_EQ(_side_effect, 0);
+    args[0] = FuncArg.value(20);
+    try fn.apply(2, args);
+    catch %(no-convert *details): second = details.assoc(<index>).integer();
+    EXPECT_INT_EQ(second, 1);
+    EXPECT_INT_EQ(_side_effect, 0);
+    args[1] = FuncArg.value(22);
+    EXPECT_INT_EQ(fn.apply(2, args).integer(), 42);
+    EXPECT_INT_EQ(_side_effect, 1);
+  }
+}
+
 static void func_var_boxes_as_func_tag(void) {
   Func fn = Func.new(_add_longs, %((func ((long) (long))) long));
   Var boxed = Func.var(fn);
@@ -713,5 +748,6 @@ void func_suite(void) {
   $test.run(func_cross_file_target_transfers_to_catch);
   $test.run(func_nested_targets_share_one_transfer);
   $test.run(func_catch_retains_complete_error_slice);
+  $test.run(func_adapter_readers_stop_at_first_failure);
   $test.run(func_var_boxes_as_func_tag);
 }
