@@ -165,7 +165,7 @@
     "source": "packages/cstar/examples/abs.x"
   },
   {
-    "slide": "packages-10-torch.md",
+    "slide": "packages-00-torch.md",
     "source": "packages/torch/examples/mlp.x"
   }
 ]
