@@ -34,6 +34,22 @@ jobs:
         run: make ape-build
       - name: Install outside checkout and verify native self-rebuild
         run: make ape-verify
+
+  # The release tarball's own proof is the install-script check, so it does
+  # not wait on the example and package checks above.
+  release-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y clang make python3 git diffutils
+      - name: Select Clang host preprocessor
+        run: |
+          mkdir -p "$RUNNER_TEMP/x2c-clang"
+          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+      - name: Build from checked-in bootstrap
+        run: make build-safe
       - name: Build the release tarball and check the install script
         run: tools/check-install-script.sh
       - name: Write the package index with the source packages
