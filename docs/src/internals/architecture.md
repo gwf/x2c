@@ -431,6 +431,8 @@ The modules under `src/` divide ownership as follows:
   receipts on standard error;
 - `src/bootstrap.x` -- source-bearing APE extraction and the one-time
   transition to a matched host-native compiler and runtime;
+- `src/install.x` -- package installation, removal, and listing under the
+  x2c home, with fetch, digest, and extraction as host child processes;
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
 - `src/compiler.x` -- shared compiler state, token navigation, scopes, symbol
   lookup, generated names, phase entry points, and phase recovery;

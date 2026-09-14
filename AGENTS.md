@@ -91,8 +91,8 @@ Direct destructive operations outside the requested change need approval.
   `collect`, `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,
   `report` owns progress and receipts, `bootstrap` owns the APE-to-native
-  transition, `editor` owns the one-request semantic adapter, and `utils`
-  owns child execution.
+  transition, `install` owns packages under the x2c home, `editor` owns the
+  one-request semantic adapter, and `utils` owns child execution.
 - `lib/` - representative runtime modules include string, list, array, map,
   var, varconvert, varops, iter, match, scope, block, buffer, error,
   exception, file, logger, scan, tokenizer, symbol, symbolset, atom, pool,
