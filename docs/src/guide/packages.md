@@ -313,6 +313,46 @@ make -C packages/sqlite prepare
 make -C packages/sqlite test run run-lisp
 ```
 
+## Install packages
+
+`x2c install` places a package under `<home>/packages`, where every build
+finds it without `--package-dir`:
+
+```sh
+x2c install pcre2                      # a name from the package index
+x2c install ./mylib                    # a local package directory
+x2c install ./mylib-1.2.tar.gz         # a local archive
+x2c install https://example.com/mylib-1.2.tar.gz --sha256 <hex>
+x2c list
+x2c remove pcre2
+```
+
+A name resolves through the package index, `index.txt` at
+`https://x2c-lang.dev/packages/` unless `--index <url-or-path>` names
+another. Each index row is `name version kind platform url sha256`. The
+compiler takes the bundle row for its own platform, otherwise the source row,
+downloads the archive with `curl`, and refuses it when its digest differs. A
+URL given directly needs `--sha256`.
+
+A bundle, the output of `make bundle` below, installs as built. Its
+`BUNDLE.json` names the x2c version that built it; another version refuses
+it unless `--force`, because a bundle carries no ABI promise across releases.
+A source package is a `<name>/src/<name>.x` tree with no `dependency*.json`.
+The compiler translates it in package mode and archives it, the same two
+commands `packages/package.mk` runs, and records the origin and digest in
+`SOURCE.json`. A source package with native dependencies is refused; publish
+its bundle instead.
+
+Installed packages are not owned by the compiler's install inventory, so a
+compiler upgrade keeps them and `x2c remove` is the way to delete one. A
+directory under `<home>/packages` without `BUNDLE.json` or `SOURCE.json` is
+never replaced or removed.
+
+`tools/gen-package-index.py` writes an index from the source packages in a
+directory and the bundle archives named on its command line, copying the
+archives beside `index.txt`; the release workflow keeps that index with the
+release tarball.
+
 ## Movable native bundles
 
 `make bundle` builds a package and assembles its public source interfaces,

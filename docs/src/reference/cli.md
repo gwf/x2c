@@ -364,6 +364,17 @@ option applies to `translate`, `build`, and `run`, and repeats like `-I`.
 After the explicit and manifest directories, every command also searches
 `<home>/packages` when that directory exists.
 
+## Packages
+
+`install`, `remove`, and `list` manage `<home>/packages`; see
+[install packages](../guide/packages.md#install-packages). `install` takes
+one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
+<hex>`, or a name resolved through the index (`--index <url-or-path>`
+overrides the default). `--force` accepts a bundle built by another x2c
+version. `remove` takes one installed name; `list` prints `name version
+kind` lines. Refusals exit with status 2 and leave the installed set as it
+was.
+
 ## Environment
 
 `x2c env` prints the resolved home, executable, include directory, runtime

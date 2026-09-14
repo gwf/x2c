@@ -1,0 +1,8 @@
+Usage:
+  x2c list
+
+List installed packages as 'name version kind' lines.
+
+General options:
+  -h, --help                  Show help and exit
+  @<file>                     Read additional arguments from a response file

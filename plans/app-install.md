@@ -1,6 +1,8 @@
 # x2c application development installs
 
-> Status: active - approved 2026-09-14; Phase 1 in progress.
+> Status: active - approved 2026-09-14; Phases 1 and 2 implemented on
+> branch claude/x2c-install-package-design-793fa2 (draft PR #42), awaiting
+> Gary's end-to-end review before anything reaches main.
 > Decisions recorded 2026-09-14 with Gary:
 > a source checkout is the dev install; modules distribute as a hybrid of
 > prebuilt bundles and source for pure-x2c packages; installed modules live
@@ -108,15 +110,13 @@ bundle entries built by CI.
   (`shasum -a 256` / `sha256sum`, whichever is on PATH). No HTTP or hashing
   code enters the runtime. A missing `--sha256` for a URL spec is an error;
   index entries carry their digests.
-- **Index format** is a JSON file produced by a new
-  `tools/gen-package-index.py` from `packages/*/dependency*.json` plus a
-  release manifest: `{ "schema": 1, "packages": { "<name>": { "version",
-  "source": {url, sha256} | null, "bundles": { "darwin-arm64": {url, sha256},
-  ... } } } }`. Platform key is `sys.platform`-`machine` as `BUNDLE.json`
-  already records. Parsing uses the existing `x2c` JSON-capable path if one
-  exists in lib; otherwise a flat scan the way `_parse_manifest` handles
-  `x2c.toml` (`src/project.x:290-373`). Decide during implementation by
-  checking `lib/` for a JSON reader; do not add a parser if one exists.
+- **Index format** is a line-oriented text file, `index.txt`, one row
+  `name version kind platform url sha256` per entry, written by
+  `tools/gen-package-index.py` from a directory of source packages and the
+  bundle archives named on its command line. The runtime has no JSON reader,
+  so the plan's JSON shape was dropped rather than adding a parser; the one
+  `BUNDLE.json` field the compiler needs is found by a marker scan.
+  Platform key is `sys.platform`-`machine` as `BUNDLE.json` records.
 - **Release artifacts.** A `make dist PREFIX=/opt/x2c` target runs the
   existing installer with `DESTDIR` into `dist/` and tars
   `x2c-<version>-<platform>.tar.gz`. `release-validation.yml` gains an

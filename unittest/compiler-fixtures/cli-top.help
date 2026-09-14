@@ -11,6 +11,9 @@ Commands:
   run         Build an executable and run it
   bootstrap   Install a native x2c from a APE binary
   env         Show the resolved home, layout, and tools
+  install     Install a package into the home
+  remove      Remove an installed package
+  list        List installed packages
   help        Show help for x2c or one command
 
 Global options:

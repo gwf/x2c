@@ -1,6 +1,19 @@
 # Install a Native Compiler
 
-Build and install x2c into a dedicated prefix from a source checkout:
+Install a release with one command, or build and install from a source
+checkout. The release route needs `curl`, `tar`, and a C compiler:
+
+```sh
+curl -fsSL https://x2c-lang.dev/install.sh | sh
+export PATH="$HOME/.local/x2c/bin:$PATH"
+```
+
+`X2C_PREFIX` chooses another prefix and `--version <n>` pins a release.
+Running the script again upgrades the prefix and keeps installed packages.
+`tools/check-install-script.sh` exercises the same script against a
+release layout built from the current tree.
+
+From a source checkout:
 
 ```sh
 make install PREFIX="$HOME/.local/x2c"

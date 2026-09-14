@@ -12,6 +12,7 @@
 #include "project.x"
 #include "frontend.x"
 #include "editor.x"
+#include "install.x"
 #include "toolchain.x"
 #pragma private
 
@@ -629,6 +630,9 @@ int main(int argc, char **argv) {
     request.dry_run, request.inspects());
   if (request.command == <bootstrap>) return _run_bootstrap(request);
   if (request.command == <env>) return _run_env(request);
+  if (request.command == <install>) return install_command(request);
+  if (request.command == <remove>) return remove_command(request);
+  if (request.command == <list>) return list_command(request);
   _configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot
      invalidate their canonical values. */

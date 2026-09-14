@@ -21,7 +21,7 @@ SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 	scope-probes \
 	error-probes exception-benchmark \
 	varops-probes preprocessor-probes \
-	cli-probes \
+	cli-probes package-install-probes \
 	symbol-snapshot-probes \
 	header-cache-probes protocol-probes lisp-reader-benchmark clean clobber \
 	expression-bodied-function-probes \
@@ -65,6 +65,9 @@ preprocessor-probes:
 cli-probes:
 	./probes/run-cli-boundary.sh
 
+package-install-probes:
+	./probes/run-package-install.sh
+
 symbol-snapshot-probes:
 	./probes/run-symbol-snapshot.sh
 
@@ -77,8 +80,9 @@ protocol-probes:
 expression-bodied-function-probes:
 	./probes/run-expression-bodied-functions.sh
 
-compiler-fixtures: cli-probes preprocessor-probes symbol-snapshot-probes \
-		header-cache-probes protocol-probes expression-bodied-function-probes
+compiler-fixtures: cli-probes package-install-probes preprocessor-probes \
+		symbol-snapshot-probes header-cache-probes protocol-probes \
+		expression-bodied-function-probes
 	./compiler-fixtures/run.sh check
 
 update-compiler-fixtures:
