@@ -6,11 +6,13 @@
 #
 # X2C_PREFIX selects the prefix (default $HOME/.local/x2c). X2C_RELEASES
 # selects the download base; it defaults to the GitHub release assets.
-# Re-running the script upgrades the prefix in place.
+# X2C_VERSION_URL names the file holding the current version; it defaults
+# to the one the site publishes. Re-running the script upgrades in place.
 set -eu
 
 prefix="${X2C_PREFIX:-$HOME/.local/x2c}"
 releases="${X2C_RELEASES:-https://github.com/gwf/x2c/releases/download}"
+version_url="${X2C_VERSION_URL:-https://x2c-lang.dev/x2c-version.txt}"
 version="${X2C_VERSION:-latest}"
 
 while [ $# -gt 0 ]; do
@@ -47,8 +49,8 @@ fi
 platform="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
 case "$version" in
   latest)
-    version="$(curl -fsSL "$releases/latest/x2c-version.txt")" ||
-      fail "cannot determine the latest release"
+    version="$(curl -fsSL "$version_url")" ||
+      fail "cannot determine the latest release from $version_url"
     ;;
 esac
 version="${version#v}"

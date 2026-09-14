@@ -8,7 +8,8 @@ curl -fsSL https://x2c-lang.dev/install.sh | sh
 export PATH="$HOME/.local/x2c/bin:$PATH"
 ```
 
-`X2C_PREFIX` chooses another prefix and `--version <n>` pins a release.
+`X2C_PREFIX` chooses another prefix and `--version <n>` pins a release;
+the current version comes from `https://x2c-lang.dev/x2c-version.txt`.
 Running the script again upgrades the prefix and keeps installed packages.
 `tools/check-install-script.sh` exercises the same script against a
 release layout built from the current tree.

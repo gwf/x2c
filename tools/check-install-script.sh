@@ -7,7 +7,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 WORK=${1:-"$ROOT/unittest/build/install-script"}
 rm -rf "$WORK"
-mkdir -p "$WORK/releases/latest"
+mkdir -p "$WORK/releases"
 
 version=$("$ROOT/builds/0/x2c" --version | cut -d' ' -f2)
 platform="$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
@@ -16,9 +16,10 @@ asset="x2c-$version-$platform.tar.gz"
 make -C "$ROOT" dist PREFIX=/opt/x2c >"$WORK/dist.log" 2>&1
 mkdir -p "$WORK/releases/v$version"
 cp "$ROOT/dist/$asset" "$ROOT/dist/$asset.sha256" "$WORK/releases/v$version/"
-printf '%s\n' "$version" >"$WORK/releases/latest/x2c-version.txt"
+printf '%s\n' "$version" >"$WORK/releases/x2c-version.txt"
 
 export X2C_PREFIX="$WORK/prefix" X2C_RELEASES="file://$WORK/releases"
+export X2C_VERSION_URL="file://$WORK/releases/x2c-version.txt"
 sh "$ROOT/site/public/install.sh" >"$WORK/install.stdout"
 grep -q "installed x2c $version" "$WORK/install.stdout"
 [[ -x "$WORK/prefix/bin/x2c" ]]
