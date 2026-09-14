@@ -5,7 +5,7 @@ Each row is `name version kind platform url sha256`. Source rows come from
 pure-x2c packages (a `src/<name>.x` tree with no dependency manifest);
 bundle rows come from `<name>-native.tar.gz` files named on the command
 line, one per platform, tagged by their BUNDLE.json and copied beside the
-index. URLs are `<base>/<file>`.
+index as `<name>-<platform>-native.tar.gz`. URLs are `<base>/<file>`.
 """
 
 import argparse
@@ -48,8 +48,6 @@ def source_rows(packages, output, base):
 
 
 def bundle_row(tarball, output, base):
-  if tarball.resolve().parent != output.resolve():
-    shutil.copy2(tarball, output / tarball.name)
   with tempfile.TemporaryDirectory() as work:
     with tarfile.open(tarball) as tar:
       member = next(m for m in tar.getmembers()
@@ -58,8 +56,13 @@ def bundle_row(tarball, output, base):
       identity = json.loads((Path(work) / member.name).read_text())
   platform = f"{identity['platform']}-{identity['machine']}"
   version = identity.get("dependency_version") or "0"
+  # Every platform's bundle is named <name>-native.tar.gz by its producer,
+  # so the published copy carries the platform to keep them apart.
+  published = output / f"{identity['package']}-{platform}-native.tar.gz"
+  if tarball.resolve() != published.resolve():
+    shutil.copy2(tarball, published)
   return (identity["package"], version, "bundle", platform,
-          f"{base}/{tarball.name}", digest(tarball))
+          f"{base}/{published.name}", digest(published))
 
 
 def main():

@@ -1,0 +1,15 @@
+# x2c package index for x2c 0.12.0
+# name version kind platform url sha256
+blis 2.1 bundle darwin-arm64 https://github.com/gwf/x2c/releases/download/v0.12.0/blis-darwin-arm64-native.tar.gz 0ff87c3cc3d357f5163a98f45513d0a3dce3ab847046efa077824f89a5203d7c
+blis 2.1 bundle linux-x86_64 https://github.com/gwf/x2c/releases/download/v0.12.0/blis-linux-x86_64-native.tar.gz 6fb640527324ebcd51ce83b7df1acbee9e7dd712319b17dd21b2b672b2c6edb7
+greet 0 source - https://github.com/gwf/x2c/releases/download/v0.12.0/greet-source.tar.gz acd3d0cdcc440c663c77dec06e2d419ba093f3c48a9047ea3c35aa39585ad696
+libcurl 8.22.0-openssl-3.6.4 bundle darwin-arm64 https://github.com/gwf/x2c/releases/download/v0.12.0/libcurl-darwin-arm64-native.tar.gz 0a7ad512592d5223943455f8879ff406021b1755325d1b476200dc8a798614c2
+libcurl 8.22.0-openssl-3.6.4 bundle linux-x86_64 https://github.com/gwf/x2c/releases/download/v0.12.0/libcurl-linux-x86_64-native.tar.gz adbd0fba43eefb09cfcaac9b5b798f65b6dc3a6cd2a9586a9de203457a73d5cc
+libuv 1.52.1 bundle darwin-arm64 https://github.com/gwf/x2c/releases/download/v0.12.0/libuv-darwin-arm64-native.tar.gz 9696f30f5829975d99fc4158d7529612e083a22a8d9cca4e3c7e85c0ae75467f
+libuv 1.52.1 bundle linux-x86_64 https://github.com/gwf/x2c/releases/download/v0.12.0/libuv-linux-x86_64-native.tar.gz 47702c2792f4b81ec0cb631997b9d6d7a41a4c1fb6015a53f8dcdc4f7e1c300e
+pcre2 10.48 bundle darwin-arm64 https://github.com/gwf/x2c/releases/download/v0.12.0/pcre2-darwin-arm64-native.tar.gz 9a475bb27cf228046776f97d9bb4fa31a04936c32816d924d2ab6ea5b1b34a33
+pcre2 10.48 bundle linux-x86_64 https://github.com/gwf/x2c/releases/download/v0.12.0/pcre2-linux-x86_64-native.tar.gz 0eac8057affa4f76c5f46a9f4f556a82c93d5bf1ea0da1507989dddadf5fe9a3
+termbox2 2.5.0 bundle darwin-arm64 https://github.com/gwf/x2c/releases/download/v0.12.0/termbox2-darwin-arm64-native.tar.gz e9520717c71b750c5b41a8a53e3e21c37f2fb93bd813155659de15175a0210f8
+termbox2 2.5.0 bundle linux-x86_64 https://github.com/gwf/x2c/releases/download/v0.12.0/termbox2-linux-x86_64-native.tar.gz 01fcb4e9d2e8d486f55fcb48cb3754317efd34ad4b4eed1dc479341338326b90
+yyjson 0.12.0 bundle darwin-arm64 https://github.com/gwf/x2c/releases/download/v0.12.0/yyjson-darwin-arm64-native.tar.gz 835267bd96421c9a16dc34c3b94a2741b5410bcbd7a7fe1b8ebb3d91677696c9
+yyjson 0.12.0 bundle linux-x86_64 https://github.com/gwf/x2c/releases/download/v0.12.0/yyjson-linux-x86_64-native.tar.gz 4465d5fb4ec8121151d858d5ac3a6750f5d914a9198d1cca728aa9d4bd40dc3e
