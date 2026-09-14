@@ -163,7 +163,7 @@ List Compiler_leading_preproc(Compiler compiler);
 
 void Compiler_update_source_visibility(Compiler c, List directives);
 
-List Compiler_full_parse(Compiler c, Map globs);
+List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
 List Compiler_cache(Compiler c, List key);
 

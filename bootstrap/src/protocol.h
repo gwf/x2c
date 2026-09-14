@@ -17,7 +17,7 @@ List Compiler_publish_protocol_node(Compiler c, List node, Token participant_tok
 
 void Compiler_resolve_protocols(Compiler compiler);
 
-void Compiler_install_generated_protocol_symbols(Compiler c, Map symbols);
+void Compiler_install_generated_protocol_symbols(Compiler c);
 
 List Compiler_protocol_members_for(Compiler compiler, Type participant, Type base);
 

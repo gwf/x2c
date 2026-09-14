@@ -419,8 +419,6 @@ void Compiler_shallow_parse(Compiler, Map);
 
 Map Sym_global_symbols(Sym);
 
-void Compiler_install_generated_protocol_symbols(Compiler, Map);
-
 Map Sym_file_statics(Sym);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
@@ -492,7 +490,6 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   }
   Compiler_shallow_parse(cppcompiler, globs);
   globs = Sym_global_symbols(cppcompiler -> sym);
-  if(request -> live_symbols && ! request -> dump) Compiler_install_generated_protocol_symbols(c, globs);
   if(! request -> live_symbols){
     c -> names -> counters = saved_counters;
     c -> names -> gensym_count = saved_gensym;
@@ -517,6 +514,7 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
     0
   }
   ;
+  unit -> generated_symbols = ! frontend -> request -> no_cpp && ! frontend -> request -> dump;
   unit -> context = Context_open_isolated_named("translation unit");
   Type_begin_unit();
   unit -> compiler = Compiler_new();
@@ -641,7 +639,7 @@ x2c_exception_leave(& _x2c_exception_frame_4);
 return ! Compiler_error_count(compiler);
 }
 
-List Compiler_full_parse(Compiler, Map);
+List Compiler_full_parse(Compiler, Map, int);
 
 int Array_try_next(Array, int *, Var *);
 
@@ -664,7 +662,7 @@ int ParsedUnit_parse(ParsedUnit * unit){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_5)) {List _x2c_catch_pattern_9 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_5[0] = List_var(_x2c_catch_pattern_9);
   }
-  ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_5, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_5);  if (!sigsetjmp(_x2c_exception_frame_5.env, 0)) unit -> ast = Compiler_full_parse(unit -> compiler, unit -> globals);  else {x2c_exception_landed(& _x2c_exception_frame_5); {
+  ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_5, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_5);  if (!sigsetjmp(_x2c_exception_frame_5.env, 0)) unit -> ast = Compiler_full_parse(unit -> compiler, unit -> globals, unit -> generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_5); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_5)){
       x2c_error_catch_detach(_x2c_error_handler_5);
       x2c_exception_mark_handled(&_x2c_exception_frame_5);

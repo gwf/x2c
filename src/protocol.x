@@ -1090,9 +1090,7 @@ void Compiler.resolve_protocols(Compiler compiler) {
   }
 }
 
-/* Live collection has complete declarations and protocol rows but does not
-   run generation. Publish its external call signatures so live and artifact
-   lookup enforce the same conversions. */
+/* Publish resolved external signatures before their adapters are generated. */
 static void _install_generated_protocol_symbol(
   Compiler compiler, Type participant, String member, Type signature) {
   String generated = _member_spelling(participant, member);
@@ -1101,18 +1099,10 @@ static void _install_generated_protocol_symbol(
   compiler.sym.define_global(%($generated), signature);
 }
 
-/** Publishes generated protocol call signatures into a live symbol map.
-    The map becomes the active `Sym` table, then protocol rows are rebuilt and
-    resolved so live collection exposes the same external native aliases and
-    ordinary generated members as artifact-backed lookup. A null map is a
-    no-op.
+/** Publishes external native alias and ordinary adapter signatures.
+    Protocols must already be resolved in the active symbol table.
 */
-void Compiler.install_generated_protocol_symbols(
-  Compiler c, Map symbols) {
-  if ((void *) symbols == NULL) return;
-  c.sym.reset(symbols);
-  c.rebuild_protocols(symbols);
-  c.resolve_protocols();
+void Compiler.install_generated_protocol_symbols(Compiler c) {
   foreach (Var value, c.conforms)
     match (value)
       case %(protocol-conformance ?(Type base) ?(Type participant)

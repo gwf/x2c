@@ -143,6 +143,8 @@ Array Array_sort(Array);
 
 int Array_try_next(Array, int *, Var *);
 
+void Array_free(Array);
+
 int File_error(File);
 
 int symbol_snapshot_write(Map symbols, Map fn_defs, File output){

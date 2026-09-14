@@ -119,8 +119,11 @@ publication. No new gate was added.
   collection disagreed. A 2026-09-13 follow-up reproduced a cold native
   String compile failure: collection installed the participant signature
   instead of the native alias signature. The installer now uses the same
-  alias signature as generation. No semantic effect was established for
-  the remaining map differences.
+  alias signature as generation. A later direct-call probe also found missing
+  native-to-Var conversion without the artifact. Signature publication now
+  uses the parser's resolved protocol state in cached, cold, and live modes.
+  No semantic effect was established for the private-name and gensym
+  differences.
 - `struct VarMethods` in `lib/common.x` is a hand copy of the protocol row
   set; a row added without a field silently loses its dynamic route. The
   2026-09-13 review found all 22 names and erased signatures agree. Keep the

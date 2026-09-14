@@ -1293,8 +1293,9 @@ static void _sync_top_level(Compiler c) {
 
     The result is a source-ordered top-level AST. This resets per-parse
     origins, macro state, protocol resolution, and recoverable diagnostics.
+    `generated_symbols` publishes external adapter signatures before parsing.
 */
-List Compiler.full_parse(Compiler c, Map globs) {
+List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   List ast = NULL;
   c.origins.clear();
   c.fixed = %{};
@@ -1315,6 +1316,7 @@ List Compiler.full_parse(Compiler c, Map globs) {
   c.source_private = 0;
   c.diagnostics.reset();
   c.resolve_protocols();
+  if (generated_symbols) c.install_generated_protocol_symbols();
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
     while (c.peek(0) != <eof>) {

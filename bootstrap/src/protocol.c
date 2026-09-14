@@ -1984,10 +1984,9 @@ static void _install_generated_protocol_symbol(Compiler compiler, Type participa
   String generated = _member_spelling(participant, member);  Sym_define_global(compiler -> sym, cons(_236, cons(String_var(generated), NULL)), _326);  Sym_define_global(compiler -> sym, cons(String_var(generated), NULL), Type_list(signature));
 }
 
-void Sym_reset(Sym, Map);
 Type Sym_resolve_numeric_type(Sym, Type);
-void Compiler_install_generated_protocol_symbols(Compiler c, Map symbols){
-  if(! _init_guard_) _file_init_();  if((void *) symbols == NULL) return;  Sym_reset(c -> sym, symbols);  Compiler_rebuild_protocols(c, symbols);  Compiler_resolve_protocols(c); {
+void Compiler_install_generated_protocol_symbols(Compiler c){
+  if(! _init_guard_) _file_init_(); {
     Var value;  Map _x2c_macro_object_20 = c -> conforms;  unsigned _x2c_macro_cursor_20 = 0;  Var _x2c_macro_cursor_output_23;  Var _x2c_macro_cursor_output_24;  while(Map_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_23, & _x2c_macro_cursor_output_24)){
       value = _x2c_macro_cursor_output_24;
   {

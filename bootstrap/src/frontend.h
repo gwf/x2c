@@ -25,7 +25,7 @@ typedef struct ParsedUnit{
   Map globals, snapshot_statics;
   List ast;
   String preprocessor_output, preprocessor_errors;
-  int source_lines;
+  int source_lines, generated_symbols;
 }
 ParsedUnit;
 

@@ -34,7 +34,7 @@ typedef struct ParsedUnit {
   Map globals, snapshot_statics;
   List ast;
   String preprocessor_output, preprocessor_errors;
-  int source_lines;
+  int source_lines, generated_symbols;
 } ParsedUnit;
 
 #pragma private
@@ -309,8 +309,6 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   }
   cppcompiler.shallow_parse(globs);
   globs = cppcompiler.sym.global_symbols();
-  if (request.live_symbols && !request.dump)
-    c.install_generated_protocol_symbols(globs);
   if (!request.live_symbols) {
     /* Owning-source collection already counted declaration names. CPP adds
        host declarations without counting the same source's names again. */
@@ -329,6 +327,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
 */
 int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   *unit = (ParsedUnit) { 0 };
+  unit->generated_symbols = !frontend.request.no_cpp && !frontend.request.dump;
   unit->context = Context.open_isolated_named("translation unit");
   Type.begin_unit();
   unit->compiler = Compiler.new();
@@ -381,7 +380,8 @@ int ParsedUnit.parse(ParsedUnit *unit) {
   Array collected = diagnostics.entries;
   diagnostics.entries = %[];
   int ok = 1;
-  try unit->ast = unit->compiler.full_parse(unit->globals);
+  try unit->ast = unit->compiler.full_parse(
+    unit->globals, unit->generated_symbols);
   catch %(malformed *): ok = 0;
   foreach (Var entry, diagnostics.entries) collected.push(entry);
   diagnostics.entries.free();

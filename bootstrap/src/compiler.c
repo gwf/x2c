@@ -2186,12 +2186,13 @@ static void _sync_top_level(Compiler c){
 }
 
 void Compiler_resolve_protocols(Compiler);
+void Compiler_install_generated_protocol_symbols(Compiler);
 Iter List_iter(List, Iter);
 List List_cdr(List);
 int Diagnostics_reached_limit(Diagnostics);
 int Compiler_error_count(Compiler);
-List Compiler_full_parse(Compiler c, Map globs){
-  if(! _init_guard_) _file_init_();  List volatile ast = NULL;  Array_clear(c -> origins);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Diagnostics_reset(c -> diagnostics);  Compiler_resolve_protocols(c); {
+List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
+  if(! _init_guard_) _file_init_();  List volatile ast = NULL;  Array_clear(c -> origins);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Diagnostics_reset(c -> diagnostics);  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c); {
     int * _x2c_macro_address_5 = & c -> recovery_depth;  int _x2c_macro_previous_5 = * _x2c_macro_address_5; {
   _x2c_defer_env_7 _x2c_defer_env_16 = {._x2c_defer_capture_14 =(const void *) & _x2c_macro_address_5, ._x2c_defer_capture_15 =(const void *) & _x2c_macro_previous_5};
   X2CCleanup _x2c_defer_record_7 = {

@@ -15,6 +15,8 @@
   temporary handles, and interior views while retaining cleanup for fresh
   operator chains. Header promotion covers secondary typedef declarators
   alongside opaque forward declarations.
+  Generated protocol calls preserve native-to-Var conversion with cached,
+  cold, and live symbol collection.
 - Retained native-build probes cover changed include-search environments,
   newly shadowing headers, and `__has_include` without an include, plus
   unchanged object/archive reuse and installed prefixes below `builds`.

@@ -73,7 +73,6 @@ __attribute__((constructor)) static void _file_init_(void){
 void * Scope_calloc(size_t, size_t);
 
 SourceView SourceView_new(){
-  if(! _init_guard_) _file_init_();
   SourceView value = Scope_calloc(1, sizeof(* value));
   void(* initialize)(SourceView) = SourceView_init;
   initialize(value);
@@ -83,12 +82,10 @@ SourceView SourceView_new(){
 void Scope_free(void *);
 
 void SourceView_free(SourceView value){
-  if(! _init_guard_) _file_init_();
   Scope_free(value);
 }
 
 void SourceView_cleanup(SourceView value){
-  if(! _init_guard_) _file_init_();
   SourceView_free(value);
 }
 
@@ -101,7 +98,6 @@ Var SourceView_var(SourceView value){
 void * Var_pointer(Var);
 
 SourceView Var_sourceview(Var value){
-  if(! _init_guard_) _file_init_();
   return(SourceView) Var_pointer(value);
 }
 
@@ -112,7 +108,6 @@ int SourceView_equal(SourceView left, SourceView right){
 unsigned x2c_hash_word(unsigned long);
 
 unsigned SourceView_hash(SourceView value){
-  if(! _init_guard_) _file_init_();
   return x2c_hash_word((unsigned long) value);
 }
 

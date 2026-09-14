@@ -61,7 +61,7 @@ Opens and tokenizes an isolated source unit without printing diagnostics.
 A failed unit remains open so its diagnostics can be inspected. Close it
 before opening the next unit; Type and header caches are process-global.
 
-Source: `src/frontend.x:330`
+Source: `src/frontend.x:328`
 
 <a id="Frontend.write_header_symbols"></a>
 #### Frontend.write_header_symbols
@@ -90,7 +90,7 @@ Source: `src/frontend.x:399`
 
 Collects symbols and retains preprocessor outputs for adapter inspection.
 
-Source: `src/frontend.x:357`
+Source: `src/frontend.x:356`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -99,7 +99,7 @@ Source: `src/frontend.x:357`
 
 Parses a collected unit, retaining both its AST and unsuccessful reports.
 
-Source: `src/frontend.x:377`
+Source: `src/frontend.x:376`
 
 ## Public types
 
@@ -132,7 +132,7 @@ Source: `src/frontend.x:15`
 <a id="ParsedUnit"></a>
 ### ParsedUnit
 
-`typedef struct ParsedUnit { Context context; Compiler compiler, preprocessor; Map globals, snapshot_statics; List ast; String preprocessor_output, preprocessor_errors; int source_lines; } ParsedUnit`
+`typedef struct ParsedUnit { Context context; Compiler compiler, preprocessor; Map globals, snapshot_statics; List ast; String preprocessor_output, preprocessor_errors; int source_lines, generated_symbols; } ParsedUnit`
 
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.
