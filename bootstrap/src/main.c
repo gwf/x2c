@@ -1026,6 +1026,12 @@ CliRequest cli_parse(int, char * *);
 
 void report_configure(int, int, Symbol, int, int, int);
 
+int install_command(CliRequest);
+
+int remove_command(CliRequest);
+
+int list_command(CliRequest);
+
 int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -1038,6 +1044,9 @@ int main(int argc, char * * argv){
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);
   if(request -> command == 11180) return _run_env(request);
+  if(request -> command == 20308036376) return install_command(request);
+  if(request -> command == 1219329418) return remove_command(request);
+  if(request -> command == 806120) return list_command(request);
   _configure_logging(request -> debugging);
   Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");

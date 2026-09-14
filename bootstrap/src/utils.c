@@ -270,9 +270,9 @@ static int _resolve_executable_path(const char * argv0, char * out, size_t size)
     out[len] = 0;
     return 1;
   }
-  if(argv0 && realpath(argv0, out)) return 1;
-  if(argv0 && argv0[0] && _resolve_with_path(argv0, out, size)) return 1;
-  return 0;
+  if(! argv0 || ! argv0[0]) return 0;
+  if(! strchr(argv0, '/')) return _resolve_with_path(argv0, out, size);
+  return realpath(argv0, out) != NULL;
 }
 
 static int _locate_home(const char * start, char * out, size_t size){

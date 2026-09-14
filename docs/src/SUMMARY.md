@@ -91,6 +91,7 @@
   - [src/format.x](internals/compiler-api/format.md)
   - [src/frontend.x](internals/compiler-api/frontend.md)
   - [src/generate.x](internals/compiler-api/generate.md)
+  - [src/install.x](internals/compiler-api/install.md)
   - [src/lambda.x](internals/compiler-api/lambda.md)
   - [src/literals.x](internals/compiler-api/literals.md)
   - [src/macros.x](internals/compiler-api/macros.md)

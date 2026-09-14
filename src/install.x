@@ -12,20 +12,6 @@
 $(import "../lib/private-keywords.xmacro")
 #include "build.x"
 
-/** Installs the package named by the request's one operand and returns 0.
-    The operand is a local directory, a local `.tar.gz`, a URL with
-    `--sha256`, or a name resolved through the package index. A bundle is
-    verified against this compiler's version unless `--force`; a pure-x2c
-    source package is built by this compiler. Failures exit with status 2.
-*/
-int install_command(CliRequest request);
-
-/** Removes the installed package named by the request's one operand. */
-int remove_command(CliRequest request);
-
-/** Lists installed packages as `name version kind` lines. */
-int list_command(CliRequest request);
-
 #pragma private
 
 #include <dirent.h>
@@ -255,6 +241,12 @@ static String _work_directory(String packages) {
   return work;
 }
 
+/** Installs the package named by the request's one operand and returns 0.
+    The operand is a local directory, a local `.tar.gz`, a URL with
+    `--sha256`, or a name resolved through the package index. A bundle is
+    verified against this compiler's version unless `--force`; a pure-x2c
+    source package is built by this compiler. Failures exit with status 2.
+*/
 int install_command(CliRequest request) {
   String spec = request.inputs.car(), packages = _home_packages();
   String work = _work_directory(packages);
@@ -305,6 +297,9 @@ int install_command(CliRequest request) {
   return 0;
 }
 
+/** Removes the installed package named by the request's one operand.
+    A directory without an install marker is left alone. Returns 0.
+*/
 int remove_command(CliRequest request) {
   String name = request.inputs.car(), packages = _home_packages();
   String target = %"$packages/$name";
@@ -317,6 +312,7 @@ int remove_command(CliRequest request) {
   return 0;
 }
 
+/** Lists installed packages as `name version kind` lines and returns 0. */
 int list_command(CliRequest request) {
   String packages = _home_packages();
   foreach (String name, _entries(packages)) {

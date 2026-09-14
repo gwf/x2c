@@ -2,7 +2,7 @@
 
 #include "cli.h"
 
-static String _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <ctype.h>
 #include <errno.h>
@@ -14,7 +14,7 @@ static String _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _
 #include "buffer.h"
 #include "utils.h"
 enum{
-  CLI_TOP = 1, CLI_TRANSLATE = 2, CLI_BUILD = 4, CLI_RUN = 8, CLI_BOOTSTRAP = 32, CLI_ENV = 64
+  CLI_TOP = 1, CLI_TRANSLATE = 2, CLI_BUILD = 4, CLI_RUN = 8, CLI_BOOTSTRAP = 32, CLI_ENV = 64, CLI_INSTALL = 128, CLI_REMOVE = 256, CLI_LIST = 512
 }
 ;
 
@@ -52,6 +52,15 @@ static CliCommand cli_commands[] ={
     11180, CLI_ENV, "Show the resolved home, layout, and tools"
   }
   , {
+    20308036376, CLI_INSTALL, "Install a package into the home"
+  }
+  , {
+    1219329418, CLI_REMOVE, "Remove an installed package"
+  }
+  , {
+    806120, CLI_LIST, "List installed packages"
+  }
+  , {
     535328, CLI_TOP, "Show help for x2c or one command"
   }
   , {
@@ -63,7 +72,7 @@ static CliCommand cli_commands[] ={
 
 static CliOption cli_options[] ={
   {
-    535328, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_ENV, 15397654616, "-h, --help", NULL, "Show help and exit", 0
+    535328, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST, 15397654616, "-h, --help", NULL, "Show help and exit", 0
   }
   , {
     47619197916, CLI_TOP, 495915096, "-V, --version", NULL, "Show the x2c version and exit", 0
@@ -75,7 +84,7 @@ static CliOption cli_options[] ={
     9852392796, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 15397654616, "-###", NULL, "Show commands without executing them", 0
   }
   , {
-    37046632, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
+    37046632, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_INSTALL | CLI_REMOVE, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
   }
   , {
     34343516, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, 15397654616, "--plain", NULL, "Use stable output without terminal rendering", 0
@@ -133,6 +142,15 @@ static CliOption cli_options[] ={
   }
   , {
     41897807850336, CLI_BUILD | CLI_RUN, 1052018024, "--save-temps[=<dir>]", NULL, "Keep generated C and other intermediate files", 0
+  }
+  , {
+    7958982899053, CLI_INSTALL, 1307939018, "--sha256", "<hex>", "Require this digest of a downloaded or local archive", 0
+  }
+  , {
+    19800432, CLI_INSTALL, 1307939018, "--index", "<url-or-path>", "Resolve package names through this index", 0
+  }
+  , {
+    13603018, CLI_INSTALL, 1307939018, "--force", NULL, "Install a bundle built for another x2c version", 0
   }
   , {
     1111831152, CLI_BOOTSTRAP, 1052018024, "--prefix", "<dir>", "Install native x2c and sources under <dir>", 0
@@ -278,6 +296,8 @@ static void _print_bootstrap_help(void);
 
 static void _print_env_help(void);
 
+static void _print_package_help(Symbol command);
+
 static void _print_help(Symbol command);
 
 static void _print_version(void);
@@ -341,48 +361,54 @@ __attribute__((constructor)) static void _file_init_(void){
   _10 = String_new("The seed supplies x2c sources and headers. A GCC- or Clang-compatible\nC compiler and a compatible archiver must be installed.");
   _11 = String_new("Usage:\n  x2c env [options] [name]\n\nPrint the home, executable, include directory, runtime archive,\npackage roots, and host tools this compiler resolved, one\n\'name = value\' line each, or only the value of one name.");
   _12 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/symbols.xlisp. Package roots join with \':\'.");
-  _13 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, bootstrap,\nor env.");
-  _14 = String_new("unknown help command \'");
-  _15 = String_new("\'");
-  _16 = String_new("--color");
-  _17 = String_new("option requires a value \'");
-  _18 = String_new("executable");
-  _19 = String_new("static-library");
-  _20 = String_new("shared-library");
-  _21 = String_new("unknown target kind \'");
-  _22 = String_new("invalid job count \'");
-  _23 = String_new("auto");
-  _24 = String_new("always");
-  _25 = String_new("never");
-  _26 = String_new("invalid color mode \'");
-  _27 = String_new("C dependency option is driver-owned \'");
-  _28 = String_new("unsupported package native argument \'");
-  _29 = String_new("-");
-  _30 = String_new("--");
-  _31 = String_new("unexpected bootstrap operand \'");
-  _32 = String_new("-o");
-  _33 = String_new("unknown option \'");
-  _34 = String_new("--help");
-  _35 = String_new("-h");
-  _36 = String_new("--version");
-  _37 = String_new("-V");
-  _38 = String_new("help");
-  _39 = String_new("unknown command or global option \'");
-  _40 = String_new("--color=");
-  _41 = String_new("-MMD");
-  _42 = String_new("-MP");
-  _43 = String_new("-MF");
-  _44 = String_new("-MT");
-  _45 = String_new(",-MMD");
-  _46 = String_new(",-MP");
-  _47 = String_new(",-MF");
-  _48 = String_new(",-MT");
-  _49 = String_new("-I");
-  _50 = String_new("-isystem");
-  _51 = String_new("{package}");
-  _52 = String_new(".a");
-  _53 = String_new("--save-temps=");
-  _54 = String_new("-O2");
+  _13 = String_new("Usage:\n  x2c install [options] <package>\n\nInstall one package under <home>/packages. The package is a local\ndirectory, a local .tar.gz, a URL with --sha256, or a name resolved\nthrough the package index. A bundle installs as built; a pure-x2c\nsource package is built by this compiler.");
+  _14 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
+  _15 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
+  _16 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
+  _17 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, bootstrap,\nenv, install, remove, or list.");
+  _18 = String_new("unknown help command \'");
+  _19 = String_new("\'");
+  _20 = String_new("--color");
+  _21 = String_new("option requires a value \'");
+  _22 = String_new("executable");
+  _23 = String_new("static-library");
+  _24 = String_new("shared-library");
+  _25 = String_new("unknown target kind \'");
+  _26 = String_new("invalid job count \'");
+  _27 = String_new("auto");
+  _28 = String_new("always");
+  _29 = String_new("never");
+  _30 = String_new("invalid color mode \'");
+  _31 = String_new("C dependency option is driver-owned \'");
+  _32 = String_new("unsupported package native argument \'");
+  _33 = String_new("-");
+  _34 = String_new("--");
+  _35 = String_new("unexpected bootstrap operand \'");
+  _36 = String_new("-o");
+  _37 = String_new("unknown option \'");
+  _38 = String_new(" requires exactly one operand");
+  _39 = String_new("--help");
+  _40 = String_new("-h");
+  _41 = String_new("--version");
+  _42 = String_new("-V");
+  _43 = String_new("help");
+  _44 = String_new("unknown command or global option \'");
+  _45 = String_new("--color=");
+  _46 = String_new("-MMD");
+  _47 = String_new("-MP");
+  _48 = String_new("-MF");
+  _49 = String_new("-MT");
+  _50 = String_new(",-MMD");
+  _51 = String_new(",-MP");
+  _52 = String_new(",-MF");
+  _53 = String_new(",-MT");
+  _54 = String_new("-I");
+  _55 = String_new("-isystem");
+  _56 = String_new("{package}");
+  _57 = String_new(".a");
+  _58 = String_new("--save-temps=");
+  _59 = String_new("-O2");
+  _60 = String_new("x2c 0.12.0");
 }
 
 _Noreturn static void _removed_output(void){
@@ -518,6 +544,17 @@ static void _print_env_help(void){
   puts(_12);
 }
 
+static void _print_package_help(Symbol command){
+  if(command == 20308036376) puts(_13);
+  else if(command == 1219329418) puts(_14);
+  else puts(_15);
+  _print_options(command);
+  _print_help_row("@<file>", "Read additional arguments from a response file", 2);
+  if(command != 20308036376) return;
+  puts("");
+  puts(_16);
+}
+
 void x2c_driver_error(const char *);
 
 Var String_var(String);
@@ -534,15 +571,17 @@ static void _print_help(Symbol command){
     break;
     case 11180 : _print_env_help();
     break;
-    case 535328 : puts(_13);
+    case 20308036376 : case 1219329418 : case 806120 : _print_package_help(command);
     break;
-    default: x2c_driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(Symbol_str(command)), cons(String_var(_15), NULL)))));
+    case 535328 : puts(_17);
+    break;
+    default: x2c_driver_error(String_join(NULL, cons(String_var(_18), cons(String_var(Symbol_str(command)), cons(String_var(_19), NULL)))));
   }
 
 }
 
 static void _print_version(void){
-  printf("x2c 0.12.0\n");
+  puts(cli_version());
 }
 
 static int _valid_utf8(const unsigned char * text, size_t length){
@@ -800,10 +839,10 @@ size_t Array_len(Array);
 static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached){
   String arg = Var_string(Array_getindex(args, * index)), written = arg, color = NULL;
   int color_equal = 0;
-  if(String_startswith(arg, _40)){
+  if(String_startswith(arg, _45)){
     color_equal = 1;
-    color = String_remove_prefix(arg, _40);
-    written = _16;
+    color = String_remove_prefix(arg, _45);
+    written = _20;
   }
   const char * suffix = NULL;
   CliOption * option = _find_option(written, mask, & suffix);
@@ -812,7 +851,7 @@ static CliOption * _take_option(Array args, int * index, int mask, String * spel
   if(attached) * attached = suffix != NULL;
   * value = String_new(suffix);
   if(option -> value && ! String_truth(* value) && ! color_equal){
-    if(++ * index == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_17), cons(String_var(arg), cons(String_var(_15), NULL)))));
+    if(++ * index == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_21), cons(String_var(arg), cons(String_var(_19), NULL)))));
     * value = Var_string(Array_getindex(args, * index));
   }
   if(color_equal) * value = color;
@@ -828,17 +867,17 @@ int String_contains(String, String);
 
 int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
-  return String_truth(s) &&(String_startswith(s, _41) || String_startswith(s, _42) || String_startswith(s, _43) || String_startswith(s, _44) || String_contains(s, _45) || String_contains(s, _46) || String_contains(s, _47) || String_contains(s, _48));
+  return String_truth(s) &&(String_startswith(s, _46) || String_startswith(s, _47) || String_startswith(s, _48) || String_startswith(s, _49) || String_contains(s, _50) || String_contains(s, _51) || String_contains(s, _52) || String_contains(s, _53));
 }
 
 int String_equal(String, String);
 
 static void _driver_kind(CliRequest request, String value){
   request -> kind_explicit = 1;
-  if(String_equal(value, _18)) request -> kind = 404971770155786;
-  else if(String_equal(value, _19)) request -> kind = 1381098885964356;
-  else if(String_equal(value, _20)) x2c_driver_error("shared-library is not supported by this compiler");
-  else x2c_driver_error(String_join(NULL, cons(String_var(_21), cons(String_var(value), cons(String_var(_15), NULL)))));
+  if(String_equal(value, _22)) request -> kind = 404971770155786;
+  else if(String_equal(value, _23)) request -> kind = 1381098885964356;
+  else if(String_equal(value, _24)) x2c_driver_error("shared-library is not supported by this compiler");
+  else x2c_driver_error(String_join(NULL, cons(String_var(_25), cons(String_var(value), cons(String_var(_19), NULL)))));
 }
 
 static void _driver_jobs(CliRequest request, String value){
@@ -846,7 +885,7 @@ static void _driver_jobs(CliRequest request, String value){
   char * end = NULL;
   errno = 0;
   long jobs = strtol(value, & end, 10);
-  if(errno || * end || jobs < 1 || jobs > INT_MAX) x2c_driver_error(String_join(NULL, cons(String_var(_22), cons(String_var(value), cons(String_var(_15), NULL)))));
+  if(errno || * end || jobs < 1 || jobs > INT_MAX) x2c_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(value), cons(String_var(_19), NULL)))));
   request -> jobs =(int) jobs;
 }
 
@@ -863,10 +902,10 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     case 34343516 : c -> plain = 1;
     break;
     case 7300068 : if(! String_truth(value)) x2c_driver_error("--color requires auto, always, or never");
-    if(String_equal(value, _23)) c -> color_mode = 109854;
-    else if(String_equal(value, _24)) c -> color_mode = 93785702;
-    else if(String_equal(value, _25)) c -> color_mode = 29733220;
-    else x2c_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(value), cons(String_var(_15), NULL)))));
+    if(String_equal(value, _27)) c -> color_mode = 109854;
+    else if(String_equal(value, _28)) c -> color_mode = 93785702;
+    else if(String_equal(value, _29)) c -> color_mode = 29733220;
+    else x2c_driver_error(String_join(NULL, cons(String_var(_30), cons(String_var(value), cons(String_var(_19), NULL)))));
     break;
     case 8721742 : c -> debugging = 1;
     break;
@@ -883,7 +922,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     case 996399414194 : c -> no_phony_deps = 1;
     break;
     case 20273998090 : Array_push(x_paths, String_var(value));
-    if(c -> command != 45220543335690) _push_pair(cc_args, _49, value);
+    if(c -> command != 45220543335690) _push_pair(cc_args, _54, value);
     break;
     case 54927135910154 : Array_push(x_paths, String_var(value));
     break;
@@ -898,6 +937,12 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1335836754920 : case 559620016998 : c -> dump = option -> id;
     break;
     case 1111831152 : c -> prefix = value;
+    break;
+    case 7958982899053 : c -> sha256 = value;
+    break;
+    case 19800432 : c -> index = value;
+    break;
+    case 13603018 : c -> force = 1;
     break;
     case 896459484392 : c -> manifest = value;
     break;
@@ -920,9 +965,9 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     break;
     case 41897807850336 : c -> save_temps = 1;
     break;
-    case 8747647543562 : _push_pair(cc_args, _49, value);
+    case 8747647543562 : _push_pair(cc_args, _54, value);
     break;
-    case 274059207002 : _push_pair(cc_args, _50, value);
+    case 274059207002 : _push_pair(cc_args, _55, value);
     break;
     case 198 : c -> cc = value;
     break;
@@ -939,7 +984,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
       _push_pair(cc_args, spelling, value);
     }
     break;
-    case 49350 : if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL, cons(String_var(_27), cons(String_var(value), cons(String_var(_15), NULL)))));
+    case 49350 : if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL, cons(String_var(_31), cons(String_var(value), cons(String_var(_19), NULL)))));
     Array_push(cc_args, String_var(value));
     break;
     case 26380018276 : case 26379160754 : if(attached) Array_push(ld_args, String_var(spelling));
@@ -983,7 +1028,7 @@ CliRequest cli_package_options(String path, String package){
       Var _x2c_macro_cursor_output_2;
       while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
         word = Var_string(_x2c_macro_cursor_output_2);
-        Array_push(words, String_var(String_replace(word, _51, package)));
+        Array_push(words, String_var(String_replace(word, _56, package)));
       }
 
     }
@@ -993,17 +1038,17 @@ CliRequest cli_package_options(String path, String package){
     for(int i = 0;  i < Array_len(words);  i ++){
       String argument = Var_string(Array_getindex(words, i));
       if(! String_truth(argument)) x2c_driver_error("empty package native argument");
-      if(String_getindex(argument, 0) != '-' && String_getindex(argument, 0) != '@' && String_endswith(argument, _52)){
+      if(String_getindex(argument, 0) != '-' && String_getindex(argument, 0) != '@' && String_endswith(argument, _57)){
         Array_push(link, String_var(argument));
         continue;
       }
       String spelling = NULL, value = NULL;
       int attached = 0;
       CliOption * option = _take_option(words, & i, CLI_BUILD, & spelling, & value, & attached);
-      if(! option) x2c_driver_error(String_join(NULL, cons(String_var(_28), cons(String_var(argument), cons(String_var(_15), NULL)))));
+      if(! option) x2c_driver_error(String_join(NULL, cons(String_var(_32), cons(String_var(argument), cons(String_var(_19), NULL)))));
       switch(option -> id){
         case 20273998090 : case 8747647543562 : case 274059207002 : case 279333770 : case 1473453116298 : case 26380018276 : case 26379160754 : case 35719882824 : case 14434122038422 : break;
-        default: x2c_driver_error(String_join(NULL, cons(String_var(_28), cons(String_var(argument), cons(String_var(_15), NULL)))));
+        default: x2c_driver_error(String_join(NULL, cons(String_var(_32), cons(String_var(argument), cons(String_var(_19), NULL)))));
       }
       _apply_option(request, option, spelling, value, attached, includes, cpp, compile, link);
     }
@@ -1039,7 +1084,7 @@ static int _default_build_jobs(void){
 
 static void _one_dash_removed(String arg){
   const char * attached;
-  if(strlen(arg) > 2 && String_getindex(arg, 0) == '-' && String_getindex(arg, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_29), cons(String_var(arg), NULL))), CLI_TRANSLATE, & attached)){
+  if(strlen(arg) > 2 && String_getindex(arg, 0) == '-' && String_getindex(arg, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_33), cons(String_var(arg), NULL))), CLI_TRANSLATE, & attached)){
     fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", arg);
     fprintf(stderr, "note: use '--%s'\n", arg + 1);
     exit(2);
@@ -1066,20 +1111,20 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   for(int i = 1;  i < Array_len(args);  i ++){
     String arg = Var_string(Array_getindex(args, i));
     int dashed = String_truth(arg) && String_getindex(arg, 0) == '-';
-    if(mask != CLI_BOOTSTRAP && ! operands && dashed && String_equal(arg, _30)){
+    if(mask != CLI_BOOTSTRAP && ! operands && dashed && String_equal(arg, _34)){
       operands = 1;
       continue;
     }
-    if(mask == CLI_BOOTSTRAP && ! dashed) x2c_driver_error(String_join(NULL, cons(String_var(_31), cons(String_var(arg), cons(String_var(_15), NULL)))));
+    if(mask == CLI_BOOTSTRAP && ! dashed) x2c_driver_error(String_join(NULL, cons(String_var(_35), cons(String_var(arg), cons(String_var(_19), NULL)))));
     if(operands || ! dashed){
       if(operands && name == 38236) Array_push(run_args, String_var(arg));
       else Array_push(inputs, String_var(arg));
       continue;
     }
-    if(mask != CLI_BOOTSTRAP && String_equal(arg, _32)) _removed_output();
-    if((mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _53)){
+    if(mask != CLI_BOOTSTRAP && String_equal(arg, _36)) _removed_output();
+    if((mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _58)){
       request -> save_temps = 1;
-      request -> temps_dir = String_remove_prefix(arg, _53);
+      request -> temps_dir = String_remove_prefix(arg, _58);
       if(! String_truth(request -> temps_dir)) x2c_driver_error("--save-temps= requires a directory");
       continue;
     }
@@ -1088,7 +1133,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
     CliOption * option = _take_option(args, & i, mask, & spelling, & value, & attached);
     if(! option){
       if(mask == CLI_TRANSLATE) _one_dash_removed(arg);
-      x2c_driver_error(String_join(NULL, cons(String_var(_33), cons(String_var(arg), cons(String_var(_15), NULL)))));
+      x2c_driver_error(String_join(NULL, cons(String_var(_37), cons(String_var(arg), cons(String_var(_19), NULL)))));
     }
     _apply_option(request, option, spelling, value, attached, x_paths, cpp_args, cc_args, ld_args);
   }
@@ -1096,7 +1141,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   request -> run_args = Array_list_free(run_args);
   request -> include_dirs = Array_list_free(x_paths);
   request -> cpp_args = Array_list_free(cpp_args);
-  if(mask == CLI_BOOTSTRAP && ! cc_args -> length) Array_push(cc_args, String_var(_54));
+  if(mask == CLI_BOOTSTRAP && ! cc_args -> length) Array_push(cc_args, String_var(_59));
   request -> cc_args = Array_list_free(cc_args);
   request -> ld_args = Array_list_free(ld_args);
   if(List_truth(request -> package_dirs)) request -> package_dirs = List_reverse(request -> package_dirs);
@@ -1106,6 +1151,8 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   if(request -> compile_only && request -> kind != 404971770155786) x2c_driver_error("--compile-only conflicts with a library target kind");
   if(mask == CLI_BOOTSTRAP && ! String_truth(request -> prefix)) x2c_driver_error("bootstrap requires --prefix <dir>");
   if(mask == CLI_ENV && List_truth(List_cdr(request -> inputs))) x2c_driver_error("env accepts at most one name");
+  if((mask == CLI_INSTALL || mask == CLI_REMOVE) &&(! List_truth(request -> inputs) || List_truth(List_cdr(request -> inputs)))) x2c_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_38), NULL))));
+  if(mask == CLI_LIST && List_truth(request -> inputs)) x2c_driver_error("list accepts no operands");
   return request;
 }
 
@@ -1128,15 +1175,15 @@ CliRequest cli_parse(int argc, char * * argv){
     }
     String first = Var_string(Array_getindex(args, 0));
     if(! String_truth(first)) x2c_driver_error("expected a command, found an empty argument");
-    if(String_equal(first, _34) || String_equal(first, _35)){
+    if(String_equal(first, _39) || String_equal(first, _40)){
       _print_help(0);
       exit(0);
     }
-    if(String_equal(first, _36) || String_equal(first, _37)){
+    if(String_equal(first, _41) || String_equal(first, _42)){
       _print_version();
       exit(0);
     }
-    if(String_equal(first, _38)){
+    if(String_equal(first, _43)){
       if(Array_len(args) == 1){
         _print_help(0);
         exit(0);
@@ -1144,9 +1191,9 @@ CliRequest cli_parse(int argc, char * * argv){
       if(Array_len(args) > 2) x2c_driver_error("help accepts at most one command");
       String name = Var_string(Array_getindex(args, 1));
       CliCommand * asked = _command_row(name);
-      if(String_equal(name, _38) || String_equal(name, _34) || String_equal(name, _35)) _print_help(535328);
+      if(String_equal(name, _43) || String_equal(name, _39) || String_equal(name, _40)) _print_help(535328);
       else if(asked) _print_help(asked -> name);
-      else x2c_driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(name), cons(String_var(_15), NULL)))));
+      else x2c_driver_error(String_join(NULL, cons(String_var(_18), cons(String_var(name), cons(String_var(_19), NULL)))));
       exit(0);
     }
     CliCommand * command = _command_row(first);
@@ -1158,19 +1205,24 @@ CliRequest cli_parse(int argc, char * * argv){
       }
 
     }
-    if(String_equal(first, _32)) _removed_output();
+    if(String_equal(first, _36)) _removed_output();
     const char * attached;
-    if(strlen(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_29), cons(String_var(first), NULL))), CLI_TRANSLATE, & attached)){
+    if(strlen(first) > 2 && String_getindex(first, 0) == '-' && String_getindex(first, 1) != '-' && _find_option(String_join(NULL, cons(String_var(_33), cons(String_var(first), NULL))), CLI_TRANSLATE, & attached)){
       fprintf(stderr, "x2c: error: one-dash long option '%s' was removed\n", first);
       fprintf(stderr, "note: use 'x2c translate --%s ...'\n", first + 1);
       exit(2);
     }
     if(String_getindex(first, 0) != '-') _expected_command(first);
-    x2c_driver_error(String_join(NULL, cons(String_var(_39), cons(String_var(first), cons(String_var(_15), NULL)))));
+    x2c_driver_error(String_join(NULL, cons(String_var(_44), cons(String_var(first), cons(String_var(_19), NULL)))));
   }
 
   x2c_cleanup_leave(&_x2c_defer_record_1);
 }
+}
+
+String cli_version(void){
+  if(! _init_guard_) _file_init_();
+  return _60;
 }
 
 int CliRequest_inspects(CliRequest request){

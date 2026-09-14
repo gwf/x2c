@@ -44,7 +44,7 @@ After capture setup succeeds, output, status, and failure behavior follow
 `process_start` and `ChildProcess.wait`. A partial capture setup failure
 returns no defined status; its closed field remains recorded.
 
-Source: `src/utils.x:375`
+Source: `src/utils.x:376`
 
 #### process_start
 
@@ -59,7 +59,7 @@ with `start_error`; an `execvp` failure is a child exit with status 127.
 Capture setup failure closes any stream that opened, but a partial failure
 leaves that closed field recorded and does not produce a waitable handle.
 
-Source: `src/utils.x:278`
+Source: `src/utils.x:279`
 
 #### worker_exit
 
@@ -70,7 +70,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:397`
+Source: `src/utils.x:398`
 
 #### worker_fork
 
@@ -82,7 +82,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:386`
+Source: `src/utils.x:387`
 
 #### worker_wait
 
@@ -92,7 +92,7 @@ Waits once for `pid` and returns its shell-style status.
 Normal exit returns the worker status, a signal returns `128 + signal`, and
 a wait failure returns -1. Interrupted waits are retried.
 
-Source: `src/utils.x:406`
+Source: `src/utils.x:407`
 
 #### x2c_cpp_include_dirs
 
@@ -127,7 +127,7 @@ Source: `src/utils.x:131`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:409`
+Source: `src/utils.x:410`
 
 #### x2c_get_executable
 
@@ -228,7 +228,7 @@ this child and retains its status for `wait`, which must still be called
 exactly once to consume captured streams. Start and wait failures are
 ready results; partial capture setup remains invalid input to `wait`.
 
-Source: `src/utils.x:325`
+Source: `src/utils.x:326`
 
 <a id="ChildProcess.wait"></a>
 #### ChildProcess.wait
@@ -248,7 +248,7 @@ a valid input to this method.
 reading either capture as a `String`. A failure may leave capture streams
 open.
 
-Source: `src/utils.x:350`
+Source: `src/utils.x:351`
 
 ## Public types
 
