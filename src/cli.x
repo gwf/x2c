@@ -48,7 +48,8 @@ enum {
   CLI_TRANSLATE = 2,
   CLI_BUILD     = 4,
   CLI_RUN       = 8,
-  CLI_BOOTSTRAP = 32
+  CLI_BOOTSTRAP = 32,
+  CLI_ENV       = 64
 };
 
 typedef struct CliOption {
@@ -66,13 +67,14 @@ static CliCommand cli_commands[] = {
   { <build>,     CLI_BUILD,     "Translate, compile, and optionally link a target" },
   { <run>,       CLI_RUN,       "Build an executable and run it" },
   { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from a APE binary" },
+  { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
   { <help>,      CLI_TOP,       "Show help for x2c or one command" },
   { 0 }
 };
 
 static CliOption cli_options[] = {
-  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
-    <general>, "-h, --help", NULL, "Show help and exit", 0 },
+  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
+    CLI_ENV, <general>, "-h, --help", NULL, "Show help and exit", 0 },
   { <version>, CLI_TOP, <global>, "-V, --version", NULL,
     "Show the x2c version and exit", 0 },
   { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
@@ -130,7 +132,7 @@ static CliOption cli_options[] = {
     "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0 },
   { <c-system>, CLI_BUILD | CLI_RUN, <source>,
     "--c-system-dir", "<dir>", "Add a C-only system include directory", 0 },
-  { <pkg-dir>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <pkg-dir>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_ENV, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
@@ -139,10 +141,10 @@ static CliOption cli_options[] = {
     "Collect symbols through the host preprocessor", 0 },
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0 },
-  { <cc>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, <c-compiler>,
+  { <cc>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0 },
-  { <ar>, CLI_BUILD | CLI_BOOTSTRAP, <c-compiler>,
+  { <ar>, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
     "Use <program> as the static-library archiver", 0 },
   { <opt>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
@@ -397,6 +399,24 @@ C compiler and archiver to install a native x2c under <dir>.");
 C compiler and a compatible archiver must be installed.");
 }
 
+static void _print_env_help(void) {
+  puts(
+    %"Usage:
+  x2c env [options] [name]
+
+Print the home, executable, include directory, runtime archive,
+package roots, and host tools this compiler resolved, one
+'name = value' line each, or only the value of one name.");
+  _print_options(<env>);
+  _print_help_row(
+    "@<file>", "Read additional arguments from a response file", 2);
+  puts("");
+  puts(
+    %"The home is X2C_HOME when set; otherwise the nearest directory above
+the executable, then above the current directory, holding include/
+and etc/symbols.xlisp. Package roots join with ':'.");
+}
+
 static void _print_help(Symbol command) {
   switch (command) {
     case 0:            _print_top_help();             break;
@@ -404,13 +424,14 @@ static void _print_help(Symbol command) {
     case <build>:
     case <run>:        _print_driver_help(command);   break;
     case <bootstrap>:  _print_bootstrap_help();       break;
+    case <env>:        _print_env_help();             break;
     case <help>:
       puts(
         %"Usage:
   x2c help [command]
 
-Show top-level help, or help for translate, build, run, or
-bootstrap.");
+Show top-level help, or help for translate, build, run, bootstrap,
+or env.");
       break;
     default: x2c_driver_error(%"unknown help command '${command.str()}'");
   }
@@ -922,6 +943,8 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     x2c_driver_error("--compile-only conflicts with a library target kind");
   if (mask == CLI_BOOTSTRAP && !request.prefix)
     x2c_driver_error("bootstrap requires --prefix <dir>");
+  if (mask == CLI_ENV && request.inputs.cdr())
+    x2c_driver_error("env accepts at most one name");
   return request;
 }
 
@@ -985,3 +1008,15 @@ CliRequest cli_parse(int argc, char **argv) {
 
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;
+
+/** Returns the package roots `request` searches: its explicit `--package-dir`
+    and manifest directories in order, then the home's `packages/` directory
+    when it exists. A root named twice is searched twice and resolves the
+    same entries. Explicit directories are borrowed; the result is a fresh
+    `List` only when the home directory is appended.
+*/
+List CliRequest.package_roots(CliRequest request) {
+  String home = x2c_home_packages();
+  if (!home) return request.package_dirs;
+  return request.package_dirs.append(cons(home, NULL));
+}

@@ -23,9 +23,13 @@ typedef struct ChildProcess {
 } *ChildProcess;
 
 /** Initializes compiler paths and default include `List`s once.
-    The executable is resolved from the host, `argv0`, or `PATH`; repository
-    discovery then walks from that path and the current directory before
-    falling back to `.`. An already configured root leaves all state unchanged.
+    The executable is resolved from the host, `argv0`, or `PATH`. The home is
+    `X2C_HOME` as given when set; otherwise discovery walks from the
+    executable and then from the current directory to a directory holding
+    `include/` and `etc/symbols.xlisp`, a source checkout or an installed
+    prefix alike, before falling back to `.`. Support loading reports a home
+    without a usable snapshot. An already configured root leaves all state
+    unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
   if (x2c_root_path) return;
@@ -33,10 +37,15 @@ void x2c_initialize_environment(const char *argv0) {
   if (_resolve_executable_path(argv0, exec_path, sizeof(exec_path)))
     x2c_executable_path = exec_path;
   char root_path[PATH_MAX] = { 0 };
-  if (!_locate_repo_root(exec_path, root_path, sizeof(root_path))) {
+  const char *home = getenv("X2C_HOME");
+  if (home && *home) {
+    snprintf(root_path, sizeof(root_path), "%s", home);
+    _strip_trailing_slash(root_path);
+  }
+  else if (!_locate_home(exec_path, root_path, sizeof(root_path))) {
     char *cwd = getcwd(NULL, 0);
     if (cwd) {
-      _locate_repo_root(cwd, root_path, sizeof(root_path));
+      _locate_home(cwd, root_path, sizeof(root_path));
       free(cwd);
     }
   }
@@ -104,9 +113,19 @@ int x2c_package_source(String directory, String path) {
 List x2c_default_include_dirs(void) => x2c_base_include_dirs;
 
 /** Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
-    Returns NULL before environment setup.
+    `<root>/src` is present only when the home has that directory. Returns
+    NULL before environment setup.
 */
 List x2c_cpp_include_dirs(void) => x2c_repo_cpp_include_dirs;
+
+/** Returns `<root>/packages` when a discovered home has that directory, or
+    NULL for a missing directory or the `.` fallback.
+*/
+String x2c_home_packages(void) {
+  if (!x2c_root_path || x2c_root_path == ".") return NULL;
+  String packages = %"$x2c_root_path/packages";
+  return _dir_exists(packages) ? packages : NULL;
+}
 
 /** Prints `x2c: error: <message>` to stderr and exits with status 2. */
 void x2c_driver_error(const char *message) {
@@ -155,15 +174,12 @@ static void _dirname_in_place(char *path) {
   *slash = 0;
 }
 
-static int _is_repo_root(const char *path) {
+static int _is_home(const char *path) {
   char probe[PATH_MAX];
-  if (!_dir_exists(path)) return 0;
-  snprintf(probe, sizeof(probe), "%s/src", path);
-  if (!_dir_exists(probe)) return 0;
   snprintf(probe, sizeof(probe), "%s/include", path);
   if (!_dir_exists(probe)) return 0;
-  snprintf(probe, sizeof(probe), "%s/lib", path);
-  return _dir_exists(probe);
+  snprintf(probe, sizeof(probe), "%s/etc/symbols.xlisp", path);
+  return access(probe, R_OK) == 0;
 }
 
 // environment discovery
@@ -200,14 +216,14 @@ static int _resolve_executable_path(
   return 0;
 }
 
-static int _locate_repo_root(const char *start, char *out, size_t size) {
+static int _locate_home(const char *start, char *out, size_t size) {
   if (!start || !start[0]) return 0;
   char probe[PATH_MAX];
   strncpy(probe, start, sizeof(probe));
   probe[sizeof(probe) - 1] = 0;
   if (!_dir_exists(probe)) _dirname_in_place(probe);
   loop {
-    if (_is_repo_root(probe)) {
+    if (_is_home(probe)) {
       strncpy(out, probe, size);
       out[size - 1] = 0;
       return 1;
@@ -224,7 +240,8 @@ static void _prepare_repo_defaults(void) {
   String include_dir = %"%s/include".printf(root);
   String src_dir = %"%s/src".printf(root), lib_dir = %"%s/lib".printf(root);
   x2c_base_include_dirs = cons(include_dir, NULL);
-  x2c_repo_cpp_include_dirs = %( $src_dir $lib_dir );
+  x2c_repo_cpp_include_dirs = _dir_exists(src_dir)
+    ? %( $src_dir $lib_dir ) : %( $lib_dir );
 }
 
 // child processes

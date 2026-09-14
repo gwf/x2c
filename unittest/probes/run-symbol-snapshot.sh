@@ -95,7 +95,9 @@ ln -s "$ROOT/src" "$fake_root/src"
 ln -s "$ROOT/include" "$fake_root/include"
 ln -s "$ROOT/lib" "$fake_root/lib"
 
+# A root without a snapshot is not a home, so X2C_HOME selects it.
 set +e
+X2C_HOME="$fake_root" \
 "$fake_root/x2c" translate --out-dir "$BUILD/missing" "$ROOT/examples/foreach.x" \
   >"$BUILD/missing.stdout" 2>"$BUILD/missing.stderr"
 missing_status=$?

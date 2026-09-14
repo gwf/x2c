@@ -10,13 +10,36 @@ x2c build hello.x --output hello
 ```
 
 Use the project's supported GNU Make. The install command builds the compiler
-and installs its matching runtime, headers, source support, compile-time Lisp
-SDK, symbols, and license. It does not require Cosmopolitan or an APE build.
-With no `PREFIX`, `make install` keeps its development behavior: it installs
-into the checkout's `bin/` under the current branch name.
+and installs its matching runtime, headers, compile-time Lisp SDK, symbols,
+runnable examples, an empty package directory, and license. It does not
+require Cosmopolitan or an APE build. With no `PREFIX`, `make install` keeps
+its development behavior: it installs into the checkout's `bin/` under the
+current branch name.
+
+## The x2c home
+
+An installed prefix and a source checkout share one layout, the x2c home:
+
+```text
+<home>/bin/x2c           the compiler
+<home>/include/          runtime sources and generated headers
+<home>/lib/libx2c.a      the runtime archive
+<home>/etc/              symbol snapshot and compile-time Lisp
+<home>/packages/         installed packages, one directory each
+<home>/examples/         runnable examples (installed prefix)
+<home>/src/              compiler sources (checkout only)
+```
+
+The compiler finds its home by walking up from its own executable, then from
+the current directory, to the nearest directory holding `include/` and
+`etc/symbols.xlisp`. `X2C_HOME` names a home explicitly and takes precedence.
+`x2c env` prints the resolved home, layout, package roots, and host tools;
+`x2c env home` prints one value. Every `import` searches `<home>/packages`
+after the explicit `--package-dir` and manifest directories, so a package
+placed there needs no build flags.
 
 `PREFIX` must be absolute and dedicated to x2c. Move or rename the complete
-prefix to relocate it. Keep `bin`, `include`, `lib`, `src`, `etc`, and
+prefix to relocate it. Keep `bin`, `include`, `lib`, `etc`, `packages`, and
 `licenses` together. Paths may contain spaces. Quote the compiler path when
 invoking it:
 
@@ -39,6 +62,13 @@ make install PREFIX=/opt/x2c DESTDIR="$PWD/staging"
 
 This writes `staging/opt/x2c`. Move that complete directory to its destination;
 the staging path is not embedded in the compiler's runtime configuration.
+`make dist PREFIX=/opt/x2c` stages the same installation under `dist/` and
+writes `dist/x2c-<version>-<platform>.tar.gz` with a `.sha256` beside it.
+
+`make uninstall PREFIX="$HOME/.local/x2c"` removes every file the inventory
+owns and any directory that becomes empty. Packages installed under
+`<prefix>/packages` are not owned by the compiler inventory: an upgrade keeps
+them, and an uninstall leaves the prefix in place when they remain.
 System-wide merged layouts such as installing these support directories
 directly into `/usr` are outside this dedicated-prefix contract. Native
 executables and archives remain specific to their host platform and
@@ -48,6 +78,24 @@ The installed tool defaults are `cc` and `ar` from `PATH`. Explicit `--cc` and
 `--ar` options take precedence, followed by `X2C_CC`/`X2C_AR`, then `CC`/`AR`,
 then the defaults in `lib/x2c/toolchain`. Build identity is recorded separately
 in the installation inventory, not as a path to the producer's compiler tools.
+
+## Developer workflow
+
+A source checkout is the development install. After `make build-safe`, the
+checkout is a complete home with `bin/x2c` (`make build-install` links it to
+the current branch's compiler), and its own `packages/` directory. Select it
+for one shell with `PATH`, or for one command with `X2C_HOME`:
+
+```sh
+export PATH="$HOME/src/x2c/bin:$PATH"
+X2C_HOME="$HOME/src/x2c" x2c env
+```
+
+Keep the global prefix on a release. Install it from a tagged `main`, never
+from a working branch, so a bug seen through it reproduces for every user.
+Validate a release candidate in a scratch prefix and remove that prefix
+afterwards. Compiler development itself runs through `make` inside the
+checkout and does not depend on which compiler `PATH` selects.
 
 ## Build, debug, and use packages
 

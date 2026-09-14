@@ -10,6 +10,7 @@ Commands:
   build       Translate, compile, and optionally link a target
   run         Build an executable and run it
   bootstrap   Install a native x2c from a APE binary
+  env         Show the resolved home, layout, and tools
   help        Show help for x2c or one command
 
 Global options:
