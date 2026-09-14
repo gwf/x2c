@@ -750,4 +750,31 @@ mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
 grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
   fail "consumer retained a stale declaration signature"
 
+# Native aliases keep their C signatures when header artifact replay is absent.
+# Reuse the fake root, adding the real runtime sources for both collection paths.
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$FAKE/lib/"
+cp "$ROOT/etc/init.xlisp" "$ROOT/etc/compiler-sdk.xlisp" \
+  "$ROOT/etc/builtin-macros.xlisp" "$FAKE/etc/"
+cat >"$FAKE/src/native-aliases.x" <<'EOF_NATIVE_ALIASES'
+#include "string.x"
+int main(void) {
+  String value = %"hello";
+  printf("%zu %d %s\n", value.c_len(), String.c_compare(value, "hello"),
+    String.c_find(value, 'e'));
+  return 0;
+}
+EOF_NATIVE_ALIASES
+cp "$ROOT/etc/header-symbols.xlisp" "$FAKE/etc/header-symbols.xlisp"
+for mode in cached cold; do
+  output="$FAKE/native-$mode"
+  mkdir -p "$output"
+  if [[ $mode == cold ]]; then rm "$FAKE/etc/header-symbols.xlisp"; fi
+  (cd "$FAKE" && ./builds/0/x2c translate --out-dir "$output" \
+    src/native-aliases.x)
+  "$ROOT/builds/0/x2c" build --quiet -j1 --output "$output/run" \
+    -Xcc -iquote -Xcc "$ROOT/include" "$output/native-aliases.c"
+  [[ $("$output/run") == '5 0 ello' ]] ||
+    fail "native String aliases changed under $mode collection"
+done
+
 echo "header cache probes passed"

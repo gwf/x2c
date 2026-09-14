@@ -116,10 +116,16 @@ publication. No new gate was added.
 
 - `etc/header-symbols.xlisp` replay adds 74 generated-protocol rows that a
   cold raw walk did not produce at the search revision, so cached and cold
-  collection disagreed. The rows looked inert. Worth a check when the
-  collector is next touched.
+  collection disagreed. A 2026-09-13 follow-up reproduced a cold native
+  String compile failure: collection installed the participant signature
+  instead of the native alias signature. The installer now uses the same
+  alias signature as generation. No semantic effect was established for
+  the remaining map differences.
 - `struct VarMethods` in `lib/common.x` is a hand copy of the protocol row
-  set; a row added without a field silently loses its dynamic route.
+  set; a row added without a field silently loses its dynamic route. The
+  2026-09-13 review found all 22 names and erased signatures agree. Keep the
+  declarations: the ABI layout and associated protocol types encode distinct
+  facts, and a shared generator would add machinery for six ABI field lines.
 
 ## Plan review
 

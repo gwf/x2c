@@ -792,10 +792,10 @@ static void _install_native_bindings(
     case %((? native *) *): {
       foreach (List row, rows)
         match (row)
-          case %(?(String member) ? ? ?(Type expected) ? ?): {
+          case %(?(String member) ? ? ? ? ?(Type signature)): {
             String generated = _member_spelling(participant, member);
             if (!compiler.sym.get(%($generated)))
-              compiler.sym.define_global(%($generated), expected);
+              compiler.sym.define_global(%($generated), signature);
           }
     }
 }
