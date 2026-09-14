@@ -41,11 +41,11 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("/lib/x2c/toolchain");
-  _1 = String_new("/builds");
-  _2 = String_new("/include");
-  _3 = String_new("/libx2c.a");
-  _4 = String_new(".");
+  _0 = String_new(".");
+  _1 = String_new("/lib/x2c/toolchain");
+  _2 = String_new("/builds");
+  _3 = String_new("/include");
+  _4 = String_new("/libx2c.a");
   _5 = String_new("/lib/libx2c.a");
   _6 = String_new("/bootstrap/lib/libx2c.a");
   _7 = String_new(".");
@@ -81,19 +81,18 @@ static String _tool_selection(String explicit, const char * preferred_env, const
   return String_new(fallback);
 }
 
-String x2c_get_executable(void);
+String x2c_get_root(void);
 
-String x2c_path_dir(String);
+int String_equal(String, String);
 
 Var String_var(String);
 
 int File_close(File);
 
 static String _installed_tool(const char * name){
-  String executable = x2c_get_executable();
-  if(! String_truth(executable)) return NULL;
-  String prefix = x2c_path_dir(x2c_path_dir(executable));
-  String path = String_join(NULL, cons(String_var(prefix), cons(String_var(_0), NULL)));
+  String home = x2c_get_root();
+  if(! String_truth(home) || String_equal(home, _0)) return NULL;
+  String path = String_join(NULL, cons(String_var(home), cons(String_var(_1), NULL)));
   File input = fopen(path, "r");
   if(! input) return NULL;
   char line[PATH_MAX];
@@ -110,27 +109,27 @@ static String _installed_tool(const char * name){
   return result;
 }
 
-String x2c_get_root(void);
+String x2c_get_executable(void);
 
-int String_equal(String, String);
+String x2c_path_dir(String);
 
 static void _toolchain_layout(String * include_dir, String * runtime_lib){
   String root = x2c_get_root(), executable = x2c_get_executable();
   String stage_dir = String_truth(executable) ? x2c_path_dir(executable) : NULL;
-  if(String_truth(stage_dir) && String_equal(x2c_path_dir(stage_dir), String_join(NULL, cons(String_var(root), cons(String_var(_1), NULL))))){
-    * include_dir = String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL)));
-    * runtime_lib = String_join(NULL, cons(String_var(stage_dir), cons(String_var(_3), NULL)));
+  if(String_truth(stage_dir) && String_equal(x2c_path_dir(stage_dir), String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL))))){
+    * include_dir = String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL)));
+    * runtime_lib = String_join(NULL, cons(String_var(stage_dir), cons(String_var(_4), NULL)));
     return;
   }
-  if(String_truth(root) && ! String_equal(root, _4)){
-    * include_dir = String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL)));
+  if(String_truth(root) && ! String_equal(root, _0)){
+    * include_dir = String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL)));
     String installed = String_join(NULL, cons(String_var(root), cons(String_var(_5), NULL)));
     * runtime_lib = ! access(installed, R_OK) ? installed : String_join(NULL, cons(String_var(root), cons(String_var(_6), NULL)));
     return;
   }
   String bin_dir = String_truth(executable) ? x2c_path_dir(executable) : _7;
   String prefix = x2c_path_dir(bin_dir);
-  * include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_2), NULL)));
+  * include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_3), NULL)));
   * runtime_lib = String_join(NULL, cons(String_var(prefix), cons(String_var(_5), NULL)));
 }
 
@@ -458,7 +457,7 @@ int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_d
   for(int i = 0;  i < sizeof(base) / sizeof(base[0]);  i ++) Array_push(arguments, String_var(String_new(base[i])));
   if(toolchain -> keep_system_includes > 0) Array_push(arguments, String_var(_21));
   Array_push(arguments, String_var(_20));
-  Array_push(arguments, String_var(_4));
+  Array_push(arguments, String_var(_0));
   _append_includes(arguments, repo_dirs);
   _append_includes(arguments, include_dirs);
   {

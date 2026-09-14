@@ -549,13 +549,15 @@ String Build_generated_dir(Build state, String input){
   return directory;
 }
 
+List CliRequest_package_roots(CliRequest);
+
 static uint64_t _translation_fingerprint(Build state, String input, String directory, int * ok){
   uint64_t hash = _state_base(state, state -> toolchain -> cc, ok);
   hash = _state_text(hash, _27);
   hash = _state_text(hash, input);
   CliRequest request = state -> request;
   hash = _state_list(hash, request -> include_dirs);
-  hash = _state_list(hash, request -> package_dirs);
+  hash = _state_list(hash, CliRequest_package_roots(request));
   hash = _state_list(hash, request -> cpp_args);
   hash = _state_text(hash, request -> no_cpp ? _28 : _29);
   hash = _state_text(hash, request -> live_symbols ? _30 : _31);
@@ -694,7 +696,7 @@ Var List_last(List);
 CliRequest cli_package_options(String, String);
 
 static void Build__link_packages(Build state, String input, String directory){
-  List roots = state -> request -> package_dirs;
+  List roots = CliRequest_package_roots(state -> request);
   if(! List_truth(roots)) return;
   String own = _package_source_directory(roots, input);
   String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(x2c_path_stem(input)), cons(String_var(_36), NULL)))));

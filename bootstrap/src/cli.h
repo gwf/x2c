@@ -33,5 +33,7 @@ CliRequest cli_parse(int argc, char * * argv);
 
 int CliRequest_inspects(CliRequest request);
 
+List CliRequest_package_roots(CliRequest request);
+
 
 #endif /* __GUARD_0x29BB659F__ */

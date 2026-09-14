@@ -62,7 +62,7 @@ x2c command-line parsing and presentation.
 Public functions:
 
 `cli_response_arguments`, `cli_dependency_pass_through`, `cli_package_options`,
-`cli_parse`, `CliRequest.inspects`
+`cli_parse`, `CliRequest.inspects`, `CliRequest.package_roots`
 
 ### [src/collect.x](../src/collect.x)
 
@@ -403,8 +403,9 @@ Public functions:
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
 `x2c_get_executable`, `x2c_path_dir`, `x2c_path_stem`, `x2c_package_directory`,
 `x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
-`x2c_driver_error`, `process_start`, `ChildProcess.ready`, `ChildProcess.wait`,
-`process_run`, `worker_fork`, `worker_exit`, `worker_wait`, `x2c_filename_hash`
+`x2c_home_packages`, `x2c_driver_error`, `process_start`, `ChildProcess.ready`,
+`ChildProcess.wait`, `process_run`, `worker_fork`, `worker_exit`,
+`worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 

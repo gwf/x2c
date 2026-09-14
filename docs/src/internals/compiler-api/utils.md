@@ -23,6 +23,7 @@ System utilities for environment discovery and child processes.
 | [`x2c_filename_hash`](#x2c_filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
 | [`x2c_get_executable`](#x2c_get_executable) | Returns the borrowed resolved executable path, or NULL when unavailable. |
 | [`x2c_get_root`](#x2c_get_root) | Returns the borrowed repository root, or NULL before it is configured. |
+| [`x2c_home_packages`](#x2c_home_packages) | Returns `<root>/packages` when a discovered home has that directory, or NULL for a missing directory or the `.` fallback. |
 | [`x2c_initialize_environment`](#x2c_initialize_environment) | Initializes compiler paths and default include `List`s once. |
 | [`x2c_package_directory`](#x2c_package_directory) | Returns the package directory containing `path` below a registered root. |
 | [`x2c_package_source`](#x2c_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
@@ -43,7 +44,7 @@ After capture setup succeeds, output, status, and failure behavior follow
 `process_start` and `ChildProcess.wait`. A partial capture setup failure
 returns no defined status; its closed field remains recorded.
 
-Source: `src/utils.x:358`
+Source: `src/utils.x:375`
 
 #### process_start
 
@@ -58,7 +59,7 @@ with `start_error`; an `execvp` failure is a child exit with status 127.
 Capture setup failure closes any stream that opened, but a partial failure
 leaves that closed field recorded and does not produce a waitable handle.
 
-Source: `src/utils.x:261`
+Source: `src/utils.x:278`
 
 #### worker_exit
 
@@ -69,7 +70,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:380`
+Source: `src/utils.x:397`
 
 #### worker_fork
 
@@ -81,7 +82,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:369`
+Source: `src/utils.x:386`
 
 #### worker_wait
 
@@ -91,16 +92,17 @@ Waits once for `pid` and returns its shell-style status.
 Normal exit returns the worker status, a signal returns `128 + signal`, and
 a wait failure returns -1. Interrupted waits are retried.
 
-Source: `src/utils.x:389`
+Source: `src/utils.x:406`
 
 #### x2c_cpp_include_dirs
 
 `List x2c_cpp_include_dirs(void)`
 
 Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
-Returns NULL before environment setup.
+`<root>/src` is present only when the home has that directory. Returns
+NULL before environment setup.
 
-Source: `src/utils.x:109`
+Source: `src/utils.x:119`
 
 #### x2c_default_include_dirs
 
@@ -109,7 +111,7 @@ Source: `src/utils.x:109`
 Returns the borrowed default include `List` containing `<root>/include`.
 Returns NULL before environment setup.
 
-Source: `src/utils.x:104`
+Source: `src/utils.x:113`
 
 #### x2c_driver_error
 
@@ -117,7 +119,7 @@ Source: `src/utils.x:104`
 
 Prints `x2c: error: <message>` to stderr and exits with status 2.
 
-Source: `src/utils.x:112`
+Source: `src/utils.x:131`
 
 #### x2c_filename_hash
 
@@ -125,7 +127,7 @@ Source: `src/utils.x:112`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:392`
+Source: `src/utils.x:409`
 
 #### x2c_get_executable
 
@@ -133,7 +135,7 @@ Source: `src/utils.x:392`
 
 Returns the borrowed resolved executable path, or NULL when unavailable.
 
-Source: `src/utils.x:63`
+Source: `src/utils.x:72`
 
 #### x2c_get_root
 
@@ -141,18 +143,31 @@ Source: `src/utils.x:63`
 
 Returns the borrowed repository root, or NULL before it is configured.
 
-Source: `src/utils.x:60`
+Source: `src/utils.x:69`
+
+#### x2c_home_packages
+
+`String x2c_home_packages(void)`
+
+Returns `<root>/packages` when a discovered home has that directory, or
+NULL for a missing directory or the `.` fallback.
+
+Source: `src/utils.x:124`
 
 #### x2c_initialize_environment
 
 `void x2c_initialize_environment(const char *argv0)`
 
 Initializes compiler paths and default include `List`s once.
-The executable is resolved from the host, `argv0`, or `PATH`; repository
-discovery then walks from that path and the current directory before
-falling back to `.`. An already configured root leaves all state unchanged.
+The executable is resolved from the host, `argv0`, or `PATH`. The home is
+`X2C_HOME` as given when set; otherwise discovery walks from the
+executable and then from the current directory to a directory holding
+`include/` and `etc/symbols.xlisp`, a source checkout or an installed
+prefix alike, before falling back to `.`. Support loading reports a home
+without a usable snapshot. An already configured root leaves all state
+unchanged.
 
-Source: `src/utils.x:30`
+Source: `src/utils.x:34`
 
 #### x2c_package_directory
 
@@ -161,7 +176,7 @@ Source: `src/utils.x:30`
 Returns the package directory containing `path` below a registered root.
 Callers establish path identity and own any package-name restrictions.
 
-Source: `src/utils.x:85`
+Source: `src/utils.x:94`
 
 #### x2c_package_source
 
@@ -170,7 +185,7 @@ Source: `src/utils.x:85`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:95`
+Source: `src/utils.x:104`
 
 #### x2c_path_dir
 
@@ -178,7 +193,7 @@ Source: `src/utils.x:95`
 
 Returns the directory part of `path`, or "." when it has no slash.
 
-Source: `src/utils.x:66`
+Source: `src/utils.x:75`
 
 #### x2c_path_stem
 
@@ -189,7 +204,7 @@ A leading dot belongs to the name, so `.x2crc` keeps its spelling while
 `parse.x` becomes `parse`. A null or empty final component returns the
 empty `String`.
 
-Source: `src/utils.x:77`
+Source: `src/utils.x:86`
 
 #### x2c_set_root
 
@@ -199,7 +214,7 @@ Overrides the repository root and rebuilds its default include `List`s.
 `root` is retained without copying. It and the rebuilt values must remain
 valid until the next override or the process no longer uses them.
 
-Source: `src/utils.x:52`
+Source: `src/utils.x:61`
 
 ### `ChildProcess`
 
@@ -213,7 +228,7 @@ this child and retains its status for `wait`, which must still be called
 exactly once to consume captured streams. Start and wait failures are
 ready results; partial capture setup remains invalid input to `wait`.
 
-Source: `src/utils.x:308`
+Source: `src/utils.x:325`
 
 <a id="ChildProcess.wait"></a>
 #### ChildProcess.wait
@@ -233,7 +248,7 @@ a valid input to this method.
 reading either capture as a `String`. A failure may leave capture streams
 open.
 
-Source: `src/utils.x:333`
+Source: `src/utils.x:350`
 
 ## Public types
 

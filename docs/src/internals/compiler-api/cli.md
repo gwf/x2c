@@ -17,6 +17,7 @@ X2c command-line parsing and presentation.
 | [`cli_parse`](#cli_parse) | Expands response files and parses `argv[1..]` into one validated request. |
 | [`cli_response_arguments`](#cli_response_arguments) | Reads response-file tokens with ordinary quoting and UTF-8 checks. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
+| [`CliRequest.package_roots`](#CliRequest.package_roots) | Returns the package roots `request` searches: its explicit `--package-dir` and manifest directories in order, then the home's `packages/` directory when it exists. |
 
 ### Functions
 
@@ -28,7 +29,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:674`
+Source: `src/cli.x:695`
 
 #### cli_package_options
 
@@ -39,7 +40,7 @@ after tokenization. Only native include/define/thread options and ordered
 archive/library/framework inputs are admitted. `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:798`
+Source: `src/cli.x:819`
 
 #### cli_parse
 
@@ -54,7 +55,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:937`
+Source: `src/cli.x:960`
 
 #### cli_response_arguments
 
@@ -64,7 +65,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:566`
+Source: `src/cli.x:587`
 
 ### `CliRequest`
 
@@ -75,7 +76,20 @@ Source: `src/cli.x:566`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:987`
+Source: `src/cli.x:1010`
+
+<a id="CliRequest.package_roots"></a>
+#### CliRequest.package_roots
+
+`List CliRequest.package_roots(CliRequest request)`
+
+Returns the package roots `request` searches: its explicit `--package-dir`
+and manifest directories in order, then the home's `packages/` directory
+when it exists. A root named twice is searched twice and resolves the
+same entries. Explicit directories are borrowed; the result is a fresh
+`List` only when the home directory is appended.
+
+Source: `src/cli.x:1018`
 
 ## Public types
 

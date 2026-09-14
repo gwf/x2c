@@ -339,6 +339,8 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   c -> include_dirs = frontend -> include_dirs;
 }
 
+List CliRequest_package_roots(CliRequest);
+
 int List_truth(List);
 
 String SourceView_path(String);
@@ -359,8 +361,8 @@ Var Map_setindex(Map, Var, Var);
 
 static void _configure_package(Compiler compiler, CliRequest request, String filename){
   char buffer[PATH_MAX];
-  compiler -> package_dirs = request -> package_dirs;
-  if(! List_truth(request -> package_dirs)) return;
+  compiler -> package_dirs = CliRequest_package_roots(request);
+  if(! List_truth(compiler -> package_dirs)) return;
   String source;
   if(compiler -> sources) source = SourceView_path(filename);
   else{
@@ -369,7 +371,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
   }
   {
     String directory;
-    List _x2c_macro_object_0 = request -> package_dirs;
+    List _x2c_macro_object_0 = compiler -> package_dirs;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){

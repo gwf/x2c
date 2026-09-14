@@ -34,6 +34,8 @@ List x2c_default_include_dirs(void);
 
 List x2c_cpp_include_dirs(void);
 
+String x2c_home_packages(void);
+
 _Noreturn void x2c_driver_error(const char * message);
 
 ChildProcess process_start(char * * argv, int capture);
