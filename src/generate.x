@@ -523,8 +523,48 @@ static List _aggregate_typedef_forwards(List items, List earlier) {
   return output.list_free();
 }
 
+/* The groups among `items` that contain an item other than a conditional
+   directive or space, including through a nested group. */
+static Map _filled_conditionals(List items) {
+  Map filled = %{};
+  Array open = %[];
+  foreach (List item, items) {
+    match (item) {
+      case %(conditional ?group ?kind ?): {
+        if (kind == <open>) open.push(group);
+        else if (kind == <close>) open.take_last();
+        continue;
+      }
+      case %(space *): continue;
+    }
+    foreach (Var group, open) filled[group] = 1;
+  }
+  return filled;
+}
+
+/* A conditional group's directives go to each file that holds one of its
+   items, so a group whose items divide between header and source stays
+   balanced in both. A group without items stays on the side it opened on,
+   as `opened` records. */
+static List _place_conditionals(
+  List items, Map filled, Map other, Array opened, int header) {
+  Array output = %[];
+  foreach (List item, items) {
+    match (item)
+      case %(conditional ?group ? ?node): {
+        int placed = opened[group.int()].int() != header;
+        if (filled.contains(group) || (!other.contains(group) && placed))
+          output.push(node);
+        continue;
+      }
+    output.push(item);
+  }
+  return output.list_free();
+}
+
 static List _header_and_source(Compiler compiler, List ast) {
   Array header = %[], source = %[], pending = %[], int private = 0;
+  Array opened = %[], open = %[];
   foreach (Ast node, ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
@@ -572,6 +612,18 @@ static List _header_and_source(Compiler compiler, List ast) {
         continue;
       }
       case %(preproc ?content): {
+        Symbol kind = preproc_conditional_kind(content);
+        if (kind == <open>) {
+          open.push(opened.len());
+          opened.push(private);
+        }
+        if (kind && open.len()) {
+          List marker = %(conditional ${open[open.len() - 1]} $kind $node);
+          header.push(marker);
+          source.push(marker);
+          if (kind == <close>) open.take_last();
+          continue;
+        }
         _partition_preproc(header, source, node, content, &private);
         continue;
       }
@@ -580,6 +632,12 @@ static List _header_and_source(Compiler compiler, List ast) {
   }
   List header_list = _resolve_typedef_markers(header, pending, 1);
   List source_list = _resolve_typedef_markers(source, pending, 0);
+  Map header_filled = _filled_conditionals(header_list);
+  Map source_filled = _filled_conditionals(source_list);
+  header_list = _place_conditionals(
+    header_list, header_filled, source_filled, opened, 1);
+  source_list = _place_conditionals(
+    source_list, source_filled, header_filled, opened, 0);
   header_list = _aggregate_typedef_forwards(header_list, NULL);
   source_list = _aggregate_typedef_forwards(source_list, header_list);
   return %( $header_list $source_list );

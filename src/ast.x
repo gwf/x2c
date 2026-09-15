@@ -61,6 +61,18 @@ String binding_identity_spelling(List binding) {
        ? spelling : NULL;
 }
 
+/** Classifies the preprocessor line `text` as a conditional directive:
+    `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
+    and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
+*/
+Symbol preproc_conditional_kind(String text) {
+  String directive = text.strip(" \t").remove_prefix("#").strip(" \t");
+  if (directive.startswith("if")) return <open>;
+  if (directive.startswith("el")) return <branch>;
+  if (directive.startswith("endif")) return <close>;
+  return 0;
+}
+
 /* Each row pairs a compound assignment `X=` with the binary `X` it computes.
    `_compound_lookup` reads the table in either direction. */
 static const Symbol compound_operators[][2] = {

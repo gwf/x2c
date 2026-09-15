@@ -19,6 +19,8 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling);
 
 String binding_identity_spelling(List binding);
 
+Symbol preproc_conditional_kind(String text);
+
 Symbol Symbol_compound_operator(Symbol op);
 
 Symbol Symbol_compound_assignment(Symbol op);

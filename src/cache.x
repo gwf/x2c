@@ -365,7 +365,7 @@ static void _queue_one_static_initializer(
     _report_static_initializer_cycle(compiler, initializers, state);
   }
   state[binding] = 1;
-  List initializer = pending[binding], assignment = initializer.cadr();
+  Array definitions = pending[binding];
   int late = 0;
   Var stored;
   if (compiler.static_init_deps.try_get(binding, &stored)) {
@@ -380,9 +380,10 @@ static void _queue_one_static_initializer(
       }
     }
   }
-  if (deferred_kind) {
-    Array dependencies = _cache_ids_in(compiler, assignment);
-    if (dependencies) {
+  if (deferred_kind)
+    foreach (List initializer, definitions) {
+      Array dependencies = _cache_ids_in(compiler, initializer.cadr());
+      if (!dependencies) continue;
       Array keys = compiler.id_keys;
       for (int i = 0; i < keys.len(); i++)
         if (!dependencies[i].is_null() &&
@@ -392,12 +393,22 @@ static void _queue_one_static_initializer(
         }
       dependencies.free();
     }
+  /* Each branch of a conditional group may define the binding. A definition
+     runs under the directives that enclose it, since a disabled branch
+     defines no helper. */
+  Array statements = %[];
+  foreach (List initializer, definitions) {
+    List helper = initializer.caddr(), guard = initializer[3];
+    foreach (List directive, guard) statements.push(directive);
+    statements.push(%(stmnt (expr (void)
+      (call (expr ((func ((void))) void) (ident $helper)) (args)))));
+    for (int i = initializer[4].int(); i > 0; i--)
+      statements.push(%(preproc "#endif"));
   }
-  List helper = initializer.caddr();
-  List invocation = %(stmnt (expr (void)
-    (call (expr ((func ((void))) void) (ident $helper)) (args))));
-  if (late) compiler.add_late_init(invocation);
-  else compiler.add_mid_init(invocation);
+  foreach (List statement, statements) {
+    if (late) compiler.add_late_init(statement);
+    else compiler.add_mid_init(statement);
+  }
   phases[binding] = late;
   state[binding] = 2;
 }
@@ -408,8 +419,12 @@ static void _queue_one_static_initializer(
 static void _queue_static_initializers(
   Compiler compiler, Array initializers, Symbol deferred_kind) {
   Map pending = %{}, state = %{}, phases = %{};
-  foreach (List initializer, initializers)
-    pending[initializer.car()] = initializer;
+  foreach (List initializer, initializers) {
+    Var definitions;
+    if (!pending.try_get(initializer.car(), &definitions))
+      pending[initializer.car()] = definitions = %[];
+    definitions.array().push(initializer);
+  }
   foreach (List initializer, initializers)
     _queue_one_static_initializer(
       compiler, initializer.car(), pending, state, phases,
@@ -421,18 +436,30 @@ static void _queue_static_initializers(
    the source's initializer is ordered against the file statics it reads. */
 static List _rewrite_file_scope_statics(
   Compiler compiler, List code, Array initializers) {
-  Array output = %[];
+  Array output = %[], groups = %[];
   foreach (List item, code) {
     int first = initializers.len();
-    match (item)
+    match (item) {
       case %(!set ?declaration (declare *)):
         item = _rewrite_file_scope_decl(compiler, declaration, initializers);
+      case %(preproc ?content): {
+        Symbol kind = preproc_conditional_kind(content);
+        if (kind == <open>) groups.push(%[$item]);
+        else if (kind == <branch> && groups.len())
+          groups[groups.len() - 1].array().push(item);
+        else if (kind == <close> && groups.len()) groups.take_last();
+      }
+    }
     output.push(item);
     for (int i = first; i < initializers.len(); i++) {
       (List binding, List assignment) = initializers[i];
       List helper = compiler.sym.introduce(
         compiler.fresh_name("static_initialize"));
-      initializers[i] = %($binding $assignment $helper);
+      Array guard = %[];
+      foreach (Array group, groups)
+        foreach (List directive, group) guard.push(directive);
+      initializers[i] = %($binding $assignment $helper
+                          ${guard.list_free()} ${groups.len()});
       List function = %(function (static void)
         (bind $helper ((fnmod (params (param (void) (bind () ()))))))
         (block $assignment));

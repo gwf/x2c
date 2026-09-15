@@ -4,7 +4,7 @@
 
 static List _110, _109, _108, _106, _105, _104, _102, _101, _98, _97, _96, _94, _93, _92, _90, _89, _88, _85, _84, _83, _81, _72, _71, _69, _68, _67, _65, _64, _63, _61, _60, _57, _56, _55, _53, _52, _46, _45, _44, _42, _41, _40, _39, _34, _30, _29, _28, _26, _25, _24, _20, _19, _18, _13, _11, _10, _8;
 
-static String _76, _75, _74, _73, _32, _16;
+static String _114, _113, _112, _111, _76, _75, _74, _73, _32, _16;
 
 static Var _107, _103, _100, _99, _95, _91, _87, _86, _82, _80, _79, _78, _77, _70, _66, _62, _59, _58, _54, _51, _50, _49, _48, _47, _43, _38, _37, _36, _35, _33, _31, _27, _23, _22, _21, _17, _15, _14, _12, _9, _7, _2, _1, _0;
 
@@ -189,6 +189,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _108 = cons(_107, NULL);
   _109 = cons(_37, _108);
   _110 = cons(_31, _109);
+  _111 = String_new("#");
+  _112 = String_new("if");
+  _113 = String_new("el");
+  _114 = String_new("endif");
 }
 
 Var int_var(int);
@@ -242,6 +246,21 @@ String binding_identity_spelling(List binding){
   if(! _init_guard_) _file_init_();
   String spelling = NULL;
   return binding_identity_try_parts(binding, NULL, & spelling) ? spelling : NULL;
+}
+
+String String_strip(String, char *);
+
+String String_remove_prefix(String, String);
+
+int String_startswith(String, String);
+
+Symbol preproc_conditional_kind(String text){
+  if(! _init_guard_) _file_init_();
+  String directive = String_strip(String_remove_prefix(String_strip(text, " \t"), _111), " \t");
+  if(String_startswith(directive, _112)) return 1016156;
+  if(String_startswith(directive, _113)) return 172060880;
+  if(String_startswith(directive, _114)) return 7109834;
+  return 0;
 }
 
 static Symbol _compound_lookup(Symbol op, int column){

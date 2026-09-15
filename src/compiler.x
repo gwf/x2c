@@ -1449,10 +1449,7 @@ static void _push_script_conditionals(
   Token tokens = c.tokenizer.tokens;
   for (int i = first; i < end; i++) {
     Token token = tokens + i;
-    if (token.type != <preproc>) continue;
-    String directive = token.text.remove_prefix("#").strip(" \t");
-    if (!directive.startswith("if") && !directive.startswith("el") &&
-        !directive.startswith("endif"))
+    if (token.type != <preproc> || !preproc_conditional_kind(token.text))
       continue;
     statements.push(i);
     statements.push(i + 1);
