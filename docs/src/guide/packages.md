@@ -350,8 +350,9 @@ never replaced or removed.
 
 `tools/gen-package-index.py` writes an index from the source packages in a
 directory and the bundle archives named on its command line, copying the
-archives beside `index.txt`; the release workflow keeps that index with the
-release tarball.
+archives beside `index.txt`; the `release` workflow runs it over every
+platform's bundles and publishes the index with the release tarballs (see
+[Developer workflow](installation.md#developer-workflow)).
 
 ## Movable native bundles
 
