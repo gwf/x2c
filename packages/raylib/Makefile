@@ -5,11 +5,11 @@ include ../package.mk
 RAYLIB_INCLUDE := $(RAYLIB_PREFIX)/include
 RAYLIB_LIBRARY := $(RAYLIB_PREFIX)/lib/libraylib.a
 
-# --c-system-dir is a C-compiler flag. x2c's own symbol collection needs -I
+# --c-include-dir is a C-compiler flag. x2c's own symbol collection needs -I
 # to read raylib.h; without it Vector2 is not a type and neither src/raylib.x
 # nor a consumer that names a raylib type parses.
 PACKAGE_X_FLAGS += -I $(RAYLIB_INCLUDE)
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(RAYLIB_INCLUDE) \
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(RAYLIB_INCLUDE) \
 	-I $(RAYLIB_INCLUDE)
 PACKAGE_LINK := $(RAYLIB_LIBRARY) -l pthread
 

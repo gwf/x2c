@@ -11,7 +11,7 @@ include ../package.mk
 OPENSSL_PREFIX ?= $(CURL_PREFIX)
 CURL_INCLUDE := $(CURL_PREFIX)/include
 
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(CURL_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CURL_INCLUDE)
 PACKAGE_LINK := $(PACKAGE_DEPS)/lib/libcurl.a \
 	-L$(OPENSSL_PREFIX)/lib -lssl -lcrypto
 ifeq ($(shell uname -s),Linux)

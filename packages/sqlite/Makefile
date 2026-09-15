@@ -3,7 +3,7 @@ DEPENDENCY_PREFIX_VAR := SQLITE_PREFIX
 include ../package.mk
 
 SQLITE_INCLUDE := $(SQLITE_PREFIX)/include
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(SQLITE_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(SQLITE_INCLUDE)
 PACKAGE_LINK := -L$(PACKAGE_DEPS)/lib -lsqlite3 -lm -pthread
 
 .PHONY: example short-example lisp-example run run-lisp verify-headers

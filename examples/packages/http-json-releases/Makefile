@@ -13,8 +13,8 @@ YYJSON_PREFIX ?= $(shell $(DEPS_TOOL) path $(JSON_DIR)/dependency.json prefix)
 # this program as the consumer it is instead of looking for an archive
 # named after the enclosing packages directory.
 COMMON := --package-dir $(ROOT)/examples/packages --package-dir $(PACKAGES) \
-	--c-system-dir $(CURL_PREFIX)/include \
-	--c-system-dir $(YYJSON_PREFIX)/include
+	--c-include-dir $(CURL_PREFIX)/include \
+	--c-include-dir $(YYJSON_PREFIX)/include
 
 .PHONY: all build run test prepare packages clean
 

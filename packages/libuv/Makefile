@@ -14,7 +14,7 @@ LIBUV_PLATFORM_SHA256 := \
 	222b6dd3ce67cfbb735b14b1662f065fc23570d6969acf463b39d946b7590d8c
 endif
 
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(LIBUV_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(LIBUV_INCLUDE)
 PACKAGE_LINK := $(LIBUV_STATIC)
 
 .PHONY: example short-example run check-profile verify-profile \

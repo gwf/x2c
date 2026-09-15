@@ -3,7 +3,7 @@ DEPENDENCY_PREFIX_VAR := PCRE2_PREFIX
 include ../package.mk
 
 PCRE2_INCLUDE := $(PCRE2_PREFIX)/include
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(PCRE2_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(PCRE2_INCLUDE)
 PACKAGE_LINK := -L$(PACKAGE_DEPS)/lib -lpcre2-posix -lpcre2-8
 
 .PHONY: example short-example lisp-example run run-lisp \

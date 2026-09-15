@@ -4,7 +4,7 @@ include ../package.mk
 
 YYJSON_INCLUDE := $(YYJSON_PREFIX)/include
 
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(YYJSON_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(YYJSON_INCLUDE)
 PACKAGE_LINK := -L$(PACKAGE_DEPS)/lib -lyyjson
 
 .PHONY: example short-example lisp-example run run-lisp \

@@ -14,7 +14,7 @@ include ../package.mk
 BLIS_INCLUDE := $(BLIS_PREFIX)/include
 BLIS_STATIC := $(BLIS_PREFIX)/lib/libblis.a
 
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(BLIS_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(BLIS_INCLUDE)
 PACKAGE_LINK := $(BLIS_STATIC)
 
 .PHONY: example short-example run check-profile verify-profile \
