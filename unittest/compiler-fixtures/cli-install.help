@@ -1,0 +1,21 @@
+Usage:
+  x2c install [options] <package>
+
+Install one package under <home>/packages. The package is a local
+directory, a local .tar.gz, a URL with --sha256, or a name resolved
+through the package index. A bundle installs as built; a pure-x2c
+source package is built by this compiler.
+
+Translation options:
+      --sha256 <hex>          Require this digest of a downloaded or local archive
+      --index <url-or-path>   Resolve package names through this index
+      --force                 Install a bundle built for another x2c version
+
+General options:
+  -h, --help                  Show help and exit
+  -q, --quiet                 Suppress successful progress and receipts
+  @<file>                     Read additional arguments from a response file
+
+A bundle records the x2c version that built it and is refused for
+another version unless --force. A source package with native
+dependencies is refused; install its bundle instead.

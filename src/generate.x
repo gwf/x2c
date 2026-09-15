@@ -207,8 +207,15 @@ static int _is_protocol_bootstrap_function(String spelling) =>
          spelling == "x2c_register_builtin_descriptor" ||
          spelling == "x2c_try_register_tagged_descriptor";
 
+/* A binding number is unique only within the symbol table that issued it.
+   Generated adapters collected by one table sit beside declarations bound
+   by another in the same unit, so a function is keyed by its number and
+   spelling together, which one unit cannot repeat. */
+static String _cache_function_key(Var identity, String spelling) =>
+  %"${identity.integer()}:$spelling";
+
 static void _collect_cache_function_refs(
-  Var value, int caller, Map callers, int *uses_cache) {
+  Var value, String caller, Map callers, int *uses_cache) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
@@ -216,11 +223,10 @@ static void _collect_cache_function_refs(
       *uses_cache = 1;
       return;
     }
-    case %(ident (binding ?callee ?)): {
-      int callee_identity = callee;
-      List found = callers.contains(callee_identity)
-                 ? callers[callee_identity].list() : NULL;
-      callers[callee_identity] = cons(caller, found);
+    case %(ident (binding ?callee ?(String spelling))): {
+      String key = _cache_function_key(callee, spelling);
+      List found = callers.contains(key) ? callers[key].list() : NULL;
+      callers[key] = cons(caller, found);
       return;
     }
   }
@@ -237,18 +243,18 @@ static Map _cache_reachable_function_ids(List source) {
   foreach (List func, source)
     match (func)
       case %(!set ?definition
-             (function ? (bind (binding ?identity ?) ?) ?)): {
-        int function_identity = identity, uses_cache = 0;
-        _collect_cache_function_refs(
-          definition, function_identity, callers, &uses_cache);
-        if (uses_cache) queue.push(function_identity);
+             (function ? (bind (binding ?identity ?(String spelling)) ?) ?)): {
+        String key = _cache_function_key(identity, spelling);
+        int uses_cache = 0;
+        _collect_cache_function_refs(definition, key, callers, &uses_cache);
+        if (uses_cache) queue.push(key);
       }
   for (int i = 0; i < queue.len(); i++) {
-    int identity = queue[i];
-    if (reachable.contains(identity)) continue;
-    reachable[identity] = 1;
-    if (callers.contains(identity))
-      foreach (Var caller, callers[identity].list()) queue.push(caller);
+    String key = queue[i];
+    if (reachable.contains(key)) continue;
+    reachable[key] = 1;
+    if (callers.contains(key))
+      foreach (Var caller, callers[key].list()) queue.push(caller);
   }
   queue.free();
   return reachable;
@@ -289,7 +295,7 @@ static List _file_init(Compiler c, List source) {
                (!set ?declarator
                (bind (binding ?identity ?spelling) ?))
                (block *statements))): {
-        int function_identity = identity;
+        String function_key = _cache_function_key(identity, spelling);
         if (!inserted) {
           result = _prepend_init_prelude(result, initGuard, initFunc);
           inserted = 1;
@@ -305,7 +311,7 @@ static List _file_init(Compiler c, List source) {
         else if (!type.type().is_static() &&
                  !_is_protocol_bootstrap_function(name) &&
                  (!cache_only ||
-                  cache_reachable_ids.contains(function_identity)))
+                  cache_reachable_ids.contains(function_key)))
           function = _patch_func_with_init(
             type, declarator, statements, initializer_name, guard);
         item = function;

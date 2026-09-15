@@ -33,7 +33,7 @@ SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
 APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
 	config-show clean-all
-INSTALL_TARGETS = install
+INSTALL_TARGETS = install uninstall dist
 COMPAT_TARGETS = unittest docs bootstrap debug
 
 .PHONY: $(CORE_TARGETS) $(BUILD_TARGETS) $(VERIFY_TARGETS) \
@@ -508,6 +508,22 @@ install: build
 	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
 	  --destdir "$(DESTDIR)"
 endif
+
+uninstall:						## Remove the installation under PREFIX
+	python3 etc/x2c-payload.py uninstall --prefix "$(PREFIX)"
+
+# A release tarball of the PREFIX installation, staged under dist/.
+DIST_PLATFORM = $(shell uname -s | tr A-Z a-z)-$(shell uname -m)
+DIST_VERSION = $(shell builds/0/x2c --version | cut -d' ' -f2)
+dist: build						## Package the PREFIX installation under dist/
+	rm -rf dist/stage
+	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
+	  --destdir "$(CURDIR)/dist/stage"
+	tar -C "dist/stage$(dir $(PREFIX))" -czf \
+	  "dist/x2c-$(DIST_VERSION)-$(DIST_PLATFORM).tar.gz" \
+	  "$(notdir $(PREFIX))"
+	cd dist && shasum -a 256 "x2c-$(DIST_VERSION)-$(DIST_PLATFORM).tar.gz" \
+	  >"x2c-$(DIST_VERSION)-$(DIST_PLATFORM).tar.gz.sha256"
 
 # Existing directory names must still dispatch their compatibility targets.
 unittest: verify

@@ -19,12 +19,13 @@ typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
   List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
-  String prefix, cc, ar, compile_commands, Symbol kind, color_mode;
+  String prefix, cc, ar, compile_commands, sha256, index, Symbol kind;
+  Symbol color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int source_map, source_facts, live_symbols, cpp_symbols;
+  int source_map, source_facts, live_symbols, cpp_symbols, force;
   SourceView sources;
 } *CliRequest;
 
@@ -48,7 +49,11 @@ enum {
   CLI_TRANSLATE = 2,
   CLI_BUILD     = 4,
   CLI_RUN       = 8,
-  CLI_BOOTSTRAP = 32
+  CLI_BOOTSTRAP = 32,
+  CLI_ENV       = 64,
+  CLI_INSTALL   = 128,
+  CLI_REMOVE    = 256,
+  CLI_LIST      = 512
 };
 
 typedef struct CliOption {
@@ -66,20 +71,26 @@ static CliCommand cli_commands[] = {
   { <build>,     CLI_BUILD,     "Translate, compile, and optionally link a target" },
   { <run>,       CLI_RUN,       "Build an executable and run it" },
   { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from a APE binary" },
+  { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
+  { <install>,   CLI_INSTALL,   "Install a package into the home" },
+  { <remove>,    CLI_REMOVE,    "Remove an installed package" },
+  { <list>,      CLI_LIST,      "List installed packages" },
   { <help>,      CLI_TOP,       "Show help for x2c or one command" },
   { 0 }
 };
 
 static CliOption cli_options[] = {
-  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
-    <general>, "-h, --help", NULL, "Show help and exit", 0 },
+  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
+    CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST, <general>,
+    "-h, --help", NULL, "Show help and exit", 0 },
   { <version>, CLI_TOP, <global>, "-V, --version", NULL,
     "Show the x2c version and exit", 0 },
   { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
     <general>, "-v, --verbose", NULL, "Show commands as they are executed", 0 },
   { <dry-run>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,
     <general>, "-###", NULL, "Show commands without executing them", 0 },
-  { <quiet>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
+  { <quiet>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
+    CLI_INSTALL | CLI_REMOVE,
     <general>, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0 },
   { <plain>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
     <general>, "--plain", NULL, "Use stable output without terminal rendering", 0 },
@@ -120,6 +131,12 @@ static CliOption cli_options[] = {
   { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
     "--save-temps[=<dir>]", NULL,
     "Keep generated C and other intermediate files", 0 },
+  { <sha256>, CLI_INSTALL, <source>, "--sha256", "<hex>",
+    "Require this digest of a downloaded or local archive", 0 },
+  { <index>, CLI_INSTALL, <source>, "--index", "<url-or-path>",
+    "Resolve package names through this index", 0 },
+  { <force>, CLI_INSTALL, <source>, "--force", NULL,
+    "Install a bundle built for another x2c version", 0 },
   { <prefix>, CLI_BOOTSTRAP, <output>, "--prefix", "<dir>",
     "Install native x2c and sources under <dir>", 0 },
   { <include>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
@@ -130,7 +147,7 @@ static CliOption cli_options[] = {
     "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0 },
   { <c-system>, CLI_BUILD | CLI_RUN, <source>,
     "--c-system-dir", "<dir>", "Add a C-only system include directory", 0 },
-  { <pkg-dir>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <pkg-dir>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_ENV, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
@@ -139,10 +156,10 @@ static CliOption cli_options[] = {
     "Collect symbols through the host preprocessor", 0 },
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0 },
-  { <cc>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP, <c-compiler>,
+  { <cc>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0 },
-  { <ar>, CLI_BUILD | CLI_BOOTSTRAP, <c-compiler>,
+  { <ar>, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
     "Use <program> as the static-library archiver", 0 },
   { <opt>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
@@ -391,6 +408,57 @@ C compiler and archiver to install a native x2c under <dir>.");
 C compiler and a compatible archiver must be installed.");
 }
 
+static void _print_env_help(void) {
+  puts(
+    %"Usage:
+  x2c env [options] [name]
+
+Print the home, executable, include directory, runtime archive,
+package roots, and host tools this compiler resolved, one
+'name = value' line each, or only the value of one name.");
+  _print_options(<env>);
+  _print_help_row(
+    "@<file>", "Read additional arguments from a response file", 2);
+  puts("");
+  puts(
+    %"The home is X2C_HOME when set; otherwise the nearest directory above
+the executable, then above the current directory, holding include/
+and etc/symbols.xlisp. Package roots join with ':'.");
+}
+
+static void _print_package_help(Symbol command) {
+  if (command == <install>)
+    puts(
+      %"Usage:
+  x2c install [options] <package>
+
+Install one package under <home>/packages. The package is a local
+directory, a local .tar.gz, a URL with --sha256, or a name resolved
+through the package index. A bundle installs as built; a pure-x2c
+source package is built by this compiler.");
+  else if (command == <remove>)
+    puts(
+      %"Usage:
+  x2c remove [options] <name>
+
+Remove one installed package from <home>/packages.");
+  else
+    puts(
+      %"Usage:
+  x2c list
+
+List installed packages as 'name version kind' lines.");
+  _print_options(command);
+  _print_help_row(
+    "@<file>", "Read additional arguments from a response file", 2);
+  if (command != <install>) return;
+  puts("");
+  puts(
+    %"A bundle records the x2c version that built it and is refused for
+another version unless --force. A source package with native
+dependencies is refused; install its bundle instead.");
+}
+
 static void _print_help(Symbol command) {
   switch (command) {
     case 0:            _print_top_help();             break;
@@ -398,20 +466,24 @@ static void _print_help(Symbol command) {
     case <build>:
     case <run>:        _print_driver_help(command);   break;
     case <bootstrap>:  _print_bootstrap_help();       break;
+    case <env>:        _print_env_help();             break;
+    case <install>:
+    case <remove>:
+    case <list>:       _print_package_help(command);  break;
     case <help>:
       puts(
         %"Usage:
   x2c help [command]
 
-Show top-level help, or help for translate, build, run, or
-bootstrap.");
+Show top-level help, or help for translate, build, run, bootstrap,
+env, install, remove, or list.");
       break;
     default: x2c_driver_error(%"unknown help command '${command.str()}'");
   }
 }
 
 static void _print_version(void) {
-  printf("x2c 0.12.0\n");
+  puts(cli_version());
 }
 
 // response files
@@ -736,6 +808,9 @@ static void _apply_option(
       c.dump = option.id;
       break;
     case <prefix>: c.prefix = value; break;
+    case <sha256>: c.sha256 = value; break;
+    case <index>: c.index = value; break;
+    case <force>: c.force = 1; break;
     case <manifest>: c.manifest = value; break;
     case <target>: c.target = value; break;
     case <profile>: c.profile = value; break;
@@ -916,6 +991,13 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     x2c_driver_error("--compile-only conflicts with a library target kind");
   if (mask == CLI_BOOTSTRAP && !request.prefix)
     x2c_driver_error("bootstrap requires --prefix <dir>");
+  if (mask == CLI_ENV && request.inputs.cdr())
+    x2c_driver_error("env accepts at most one name");
+  if ((mask == CLI_INSTALL || mask == CLI_REMOVE) &&
+      (!request.inputs || request.inputs.cdr()))
+    x2c_driver_error(%"${name.str()} requires exactly one operand");
+  if (mask == CLI_LIST && request.inputs)
+    x2c_driver_error("list accepts no operands");
   return request;
 }
 
@@ -977,5 +1059,20 @@ CliRequest cli_parse(int argc, char **argv) {
   x2c_driver_error(%"unknown command or global option '$first'");
 }
 
+/** Returns the version line `--version` prints, without a newline. */
+String cli_version(void) => "x2c 0.12.0";
+
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;
+
+/** Returns the package roots `request` searches: its explicit `--package-dir`
+    and manifest directories in order, then the home's `packages/` directory
+    when it exists. A root named twice is searched twice and resolves the
+    same entries. Explicit directories are borrowed; the result is a fresh
+    `List` only when the home directory is appended.
+*/
+List CliRequest.package_roots(CliRequest request) {
+  String home = x2c_home_packages();
+  if (!home) return request.package_dirs;
+  return request.package_dirs.append(cons(home, NULL));
+}

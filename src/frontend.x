@@ -155,15 +155,15 @@ static void _tokenize_input(
 static void _configure_package(
   Compiler compiler, CliRequest request, String filename) {
   char buffer[PATH_MAX];
-  compiler.package_dirs = request.package_dirs;
-  if (!request.package_dirs) return;
+  compiler.package_dirs = request.package_roots();
+  if (!compiler.package_dirs) return;
   String source;
   if (compiler.sources) source = SourceView.path(filename);
   else {
     if (!realpath(filename, buffer)) return;
     source = %"$buffer";
   }
-  foreach (String directory, request.package_dirs) {
+  foreach (String directory, compiler.package_dirs) {
     String root;
     if (compiler.sources) root = SourceView.path(directory);
     else {

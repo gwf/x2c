@@ -312,7 +312,7 @@ static uint64_t _translation_fingerprint(
   hash = _state_text(hash, input);
   CliRequest request = state.request;
   hash = _state_list(hash, request.include_dirs);
-  hash = _state_list(hash, request.package_dirs);
+  hash = _state_list(hash, request.package_roots());
   hash = _state_list(hash, request.cpp_args);
   hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
   hash = _state_text(hash, request.live_symbols ? %"live" : %"prelude");
@@ -400,7 +400,7 @@ static void _package_link_flags(Build state, String name, String path) {
    dependencies. Only an import pulls a package file into a consumer, and
    the record is present even when the translation result was reused. */
 static void Build._link_packages(Build state, String input, String directory) {
-  List roots = state.request.package_dirs;
+  List roots = state.request.package_roots();
   if (!roots) return;
   String own = _package_source_directory(roots, input);
   String depfile = %"$directory/${x2c_path_stem(input)}.d";

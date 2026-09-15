@@ -8,9 +8,9 @@
 
 static List _9, _8, _7, _4, _3;
 
-static String _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
+static String _51, _50, _49, _48, _47, _45, _43, _41, _39, _37, _35, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
 
-static Var _6, _5, _2, _1, _0;
+static Var _46, _44, _42, _40, _38, _36, _34, _6, _5, _2, _1, _0;
 
 #include <ctype.h>
 #include <limits.h>
@@ -68,6 +68,8 @@ static int _run_build_request(CliRequest c, Array commands);
 
 static int _run_build(CliRequest request);
 
+static int _run_env(CliRequest request);
+
 static int _run_bootstrap(CliRequest command);
 
 typedef struct _x2c_defer_env_0{
@@ -89,6 +91,8 @@ Var Symbol_var(Symbol);
 List cons(Var, List);
 
 Var List_var(List);
+
+Var String_var(String);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -127,8 +131,25 @@ __attribute__((constructor)) static void _file_init_(void){
   _30 = String_new(" and ");
   _31 = String_new(" (");
   _32 = String_new(")");
-  _33 = String_new("runtime");
-  _34 = String_new("compiler");
+  _33 = String_new("home");
+  _34 = String_var(_33);
+  _35 = String_new("executable");
+  _36 = String_var(_35);
+  _37 = String_new("include_dir");
+  _38 = String_var(_37);
+  _39 = String_new("runtime_lib");
+  _40 = String_var(_39);
+  _41 = String_new("package_dirs");
+  _42 = String_var(_41);
+  _43 = String_new("cc");
+  _44 = String_var(_43);
+  _45 = String_new("ar");
+  _46 = String_var(_45);
+  _47 = String_new("unknown env name \'");
+  _48 = String_new("\'");
+  _49 = String_new("runtime");
+  _50 = String_new("compiler");
+  _51 = String_new(":");
   _x2c_static_initialize_0();
 }
 
@@ -209,8 +230,6 @@ static Map _filter_static_symbols(Map globs, Map statics){
   }
   return result;
 }
-
-Var String_var(String);
 
 String Var_str(Var);
 
@@ -901,6 +920,54 @@ static int _run_build(CliRequest request){
   return 0;
 }
 
+Toolchain toolchain_new(String, String, List, List, List, int, int);
+
+String x2c_get_executable(void);
+
+String String_join(String, List);
+
+List CliRequest_package_roots(CliRequest);
+
+String x2c_get_root(void);
+
+Var List_cadr(List);
+
+String String_str(String);
+
+void x2c_driver_error(const char *);
+
+static int _run_env(CliRequest request){
+  Toolchain toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
+  String executable = x2c_get_executable();
+  String roots = String_join(_51, CliRequest_package_roots(request));
+  List rows = cons(List_var(cons(_34, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_36, cons(String_var(String_truth(executable) ? executable : 0), NULL))), cons(List_var(cons(_38, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_40, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_42, cons(String_var(String_truth(roots) ? roots : 0), NULL))), cons(List_var(cons(_44, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_46, cons(String_var(toolchain -> ar), NULL))), NULL)))))));
+  String wanted = NULL;
+  if(List_truth(request -> inputs)) wanted = Var_string(List_car(request -> inputs));
+  {
+    List row;
+    List _x2c_macro_object_14 = rows;
+    List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+    Var _x2c_macro_cursor_output_15;
+    while(List_try_next(_x2c_macro_object_14, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_15)){
+      row = Var_list(_x2c_macro_cursor_output_15);
+      {
+        String name = Var_string(List_car(row)), value = Var_string(List_cadr(row));
+        const char * text = String_truth(value) ? String_str(value) : "";
+        if(! String_truth(wanted)) printf("%s = %s\n", String_str(name), text);
+        else if(String_equal(name, wanted)){
+          printf("%s\n", text);
+          return 0;
+        }
+
+      }
+
+    }
+
+  }
+  if(String_truth(wanted)) x2c_driver_error(String_join(NULL, cons(String_var(_47), cons(String_var(wanted), cons(String_var(_48), NULL)))));
+  return 0;
+}
+
 Bootstrap bootstrap_materialize(CliRequest);
 
 void bootstrap_release(Bootstrap);
@@ -923,7 +990,7 @@ static int _run_bootstrap(CliRequest command){
   x2c_set_root(payload -> prefix);
   _configure_logging(command -> debugging);
   CliRequest runtime_request = bootstrap_build_request(command, payload, 40094681930);
-  runtime_request -> label = _33;
+  runtime_request -> label = _49;
   Frontend_load_support(runtime_request);
   Context build = Context_open_isolated_named("bootstrap build");
   int result = _run_build_request(runtime_request, NULL);
@@ -934,7 +1001,7 @@ static int _run_bootstrap(CliRequest command){
     _Exit(result);
   }
   CliRequest compiler_request = bootstrap_build_request(command, payload, 239277269348);
-  compiler_request -> label = _34;
+  compiler_request -> label = _50;
   result = _run_build_request(compiler_request, NULL);
   if(result){
     Context_close(build);
@@ -959,6 +1026,12 @@ CliRequest cli_parse(int, char * *);
 
 void report_configure(int, int, Symbol, int, int, int);
 
+int install_command(CliRequest);
+
+int remove_command(CliRequest);
+
+int list_command(CliRequest);
+
 int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
@@ -970,6 +1043,10 @@ int main(int argc, char * * argv){
   CliRequest request = cli_parse(argc, argv);
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);
+  if(request -> command == 11180) return _run_env(request);
+  if(request -> command == 20308036376) return install_command(request);
+  if(request -> command == 1219329418) return remove_command(request);
+  if(request -> command == 806120) return list_command(request);
   _configure_logging(request -> debugging);
   Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");

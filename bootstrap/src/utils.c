@@ -18,7 +18,7 @@
 
 #include "utils.h"
 
-static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -47,13 +47,13 @@ static void _strip_trailing_slash(char * path);
 
 static void _dirname_in_place(char * path);
 
-static int _is_repo_root(const char * path);
+static int _is_home(const char * path);
 
 static int _resolve_with_path(const char * name, char * out, size_t size);
 
 static int _resolve_executable_path(const char * argv0, char * out, size_t size);
 
-static int _locate_repo_root(const char * start, char * out, size_t size);
+static int _locate_home(const char * start, char * out, size_t size);
 
 static void _prepare_repo_defaults(void);
 
@@ -70,14 +70,15 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/");
   _3 = String_new("/src/");
   _4 = String_new(".x");
-  _5 = String_new("%s/include");
-  _6 = String_new("%s/src");
-  _7 = String_new("%s/lib");
-  _8 = String_new("invalid empty process action");
-  _9 = String_new("unable to create process capture files");
-  _10 = String_new("unable to fork child process");
-  _11 = String_new("%08X");
-  _12 = String_new("/");
+  _5 = String_new("/packages");
+  _6 = String_new("%s/include");
+  _7 = String_new("%s/src");
+  _8 = String_new("%s/lib");
+  _9 = String_new("invalid empty process action");
+  _10 = String_new("unable to create process capture files");
+  _11 = String_new("unable to fork child process");
+  _12 = String_new("%08X");
+  _13 = String_new("/");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -104,10 +105,15 @@ void x2c_initialize_environment(const char * argv0){
     )
   }
   ;
-  if(! _locate_repo_root(exec_path, root_path, sizeof(root_path))){
+  const char * home = getenv("X2C_HOME");
+  if(home && * home){
+    snprintf(root_path, sizeof(root_path), "%s", home);
+    _strip_trailing_slash(root_path);
+  }
+  else if(! _locate_home(exec_path, root_path, sizeof(root_path))){
     char * cwd = getcwd(NULL, 0);
     if(cwd){
-      _locate_repo_root(cwd, root_path, sizeof(root_path));
+      _locate_home(cwd, root_path, sizeof(root_path));
       free(cwd);
     }
 
@@ -139,7 +145,7 @@ int String_rfind(String, String);
 
 String x2c_path_dir(String path){
   if(! _init_guard_) _file_init_();
-  int slash = String_rfind(path, _12);
+  int slash = String_rfind(path, _13);
   if(slash < 0) return _1;
   return slash ? String_getslice(path, -2147483648, slash, 1) : _2;
 }
@@ -152,7 +158,7 @@ List String_split(String, String);
 
 String x2c_path_stem(String path){
   if(! _init_guard_) _file_init_();
-  String base = Var_string(List_last(String_split(path, _12)));
+  String base = Var_string(List_last(String_split(path, _13)));
   int dot = String_rfind(base, _0);
   return dot > 0 ? String_getslice(base, -2147483648, dot, 1) : base;
 }
@@ -169,7 +175,7 @@ String x2c_package_directory(String root, String path){
   if(! _init_guard_) _file_init_();
   String prefix = String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL)));
   if(! String_startswith(path, prefix)) return NULL;
-  int slash = String_find(String_getslice(path, String_len(prefix), -2147483648, 1), _12);
+  int slash = String_find(String_getslice(path, String_len(prefix), -2147483648, 1), _13);
   return slash > 0 ? String_getslice(path, -2147483648, String_len(prefix) + slash, 1) : NULL;
 }
 
@@ -178,7 +184,7 @@ int String_equal(String, String);
 int x2c_package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
   if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_3), NULL))))) return 1;
-  String name = String_getslice(directory, String_rfind(directory, _12) + 1, -2147483648, 1);
+  String name = String_getslice(directory, String_rfind(directory, _13) + 1, -2147483648, 1);
   return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(name), cons(String_var(_4), NULL))))));
 }
 
@@ -190,6 +196,13 @@ List x2c_default_include_dirs(void){
 List x2c_cpp_include_dirs(void){
   if(! _init_guard_) _file_init_();
   return x2c_repo_cpp_include_dirs;
+}
+
+String x2c_home_packages(void){
+  if(! _init_guard_) _file_init_();
+  if(! String_truth(x2c_root_path) || String_equal(x2c_root_path, _0)) return NULL;
+  String packages = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_5), NULL)));
+  return _dir_exists(packages) ? packages : NULL;
 }
 
 _Noreturn void x2c_driver_error(const char * message){
@@ -222,15 +235,12 @@ static void _dirname_in_place(char * path){
   * slash = 0;
 }
 
-static int _is_repo_root(const char * path){
+static int _is_home(const char * path){
   char probe[PATH_MAX];
-  if(! _dir_exists(path)) return 0;
-  snprintf(probe, sizeof(probe), "%s/src", path);
-  if(! _dir_exists(probe)) return 0;
   snprintf(probe, sizeof(probe), "%s/include", path);
   if(! _dir_exists(probe)) return 0;
-  snprintf(probe, sizeof(probe), "%s/lib", path);
-  return _dir_exists(probe);
+  snprintf(probe, sizeof(probe), "%s/etc/symbols.xlisp", path);
+  return access(probe, R_OK) == 0;
 }
 
 static int _resolve_with_path(const char * name, char * out, size_t size){
@@ -260,19 +270,19 @@ static int _resolve_executable_path(const char * argv0, char * out, size_t size)
     out[len] = 0;
     return 1;
   }
-  if(argv0 && realpath(argv0, out)) return 1;
-  if(argv0 && argv0[0] && _resolve_with_path(argv0, out, size)) return 1;
-  return 0;
+  if(! argv0 || ! argv0[0]) return 0;
+  if(! strchr(argv0, '/')) return _resolve_with_path(argv0, out, size);
+  return realpath(argv0, out) != NULL;
 }
 
-static int _locate_repo_root(const char * start, char * out, size_t size){
+static int _locate_home(const char * start, char * out, size_t size){
   if(! start || ! start[0]) return 0;
   char probe[PATH_MAX];
   strncpy(probe, start, sizeof(probe));
   probe[sizeof(probe) - 1] = 0;
   if(! _dir_exists(probe)) _dirname_in_place(probe);
   while(1){
-    if(_is_repo_root(probe)){
+    if(_is_home(probe)){
       strncpy(out, probe, size);
       out[size - 1] = 0;
       return 1;
@@ -290,10 +300,10 @@ List cons(Var, List);
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
   const char * root = x2c_root_path;
-  String include_dir = String_printf(_5, root);
-  String src_dir = String_printf(_6, root), lib_dir = String_printf(_7, root);
+  String include_dir = String_printf(_6, root);
+  String src_dir = String_printf(_7, root), lib_dir = String_printf(_8, root);
   x2c_base_include_dirs = cons(String_var(include_dir), NULL);
-  x2c_repo_cpp_include_dirs = cons(String_var(src_dir), cons(String_var(lib_dir), NULL));
+  x2c_repo_cpp_include_dirs = _dir_exists(src_dir) ? cons(String_var(src_dir), cons(String_var(lib_dir), NULL)) : cons(String_var(lib_dir), NULL);
 }
 
 static int _cpp_status(int status){
@@ -322,7 +332,7 @@ ChildProcess process_start(char * * argv, int capture){
   ChildProcess process = Scope_calloc(1, sizeof(struct ChildProcess));
   if(! argv || ! argv[0]){
     process -> pid = - 1;
-    process -> start_error = _8;
+    process -> start_error = _9;
     return process;
   }
   if(capture){
@@ -332,7 +342,7 @@ ChildProcess process_start(char * * argv, int capture){
       if(process -> output) File_close(process -> output);
       if(process -> errors) File_close(process -> errors);
       process -> pid = - 1;
-      process -> start_error = _9;
+      process -> start_error = _10;
       return process;
     }
 
@@ -353,7 +363,7 @@ ChildProcess process_start(char * * argv, int capture){
     dprintf(STDERR_FILENO, "x2c: unable to execute %s: %s\n", argv[0], strerror(errno));
     _exit(127);
   }
-  if(pid < 0) process -> start_error = _10;
+  if(pid < 0) process -> start_error = _11;
   return process;
 }
 
@@ -435,7 +445,7 @@ String x2c_filename_hash(String filename){
     }
 
   }
-  return String_printf(_11, hash);
+  return String_printf(_12, hash);
 }
 
 #undef _x2c_initializer_choice_6E6B8BB0_0_expanded

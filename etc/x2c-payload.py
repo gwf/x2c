@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Materialize compiler support and install a native dedicated prefix."""
+"""Materialize compiler support; install or remove a native dedicated prefix.
+
+An installed prefix is an x2c home: bin, include, lib, etc, packages,
+examples, and licenses. The APE support payload also carries src so the
+bootstrap can rebuild the compiler; an application install does not.
+"""
 
 import argparse
 import os
@@ -19,20 +24,36 @@ def fnv64(data):
     return f"{value:016x}"
 
 
-def copy_support(destination):
-    for folder, patterns, outputs in (
-        ("src", ("*.x", "*.xmacro"), ("src",)),
+EXAMPLE_SKIPS = {"build", "check.sh", "Makefile", "builds"}
+
+
+def copy_support(destination, sources=True):
+    rows = [
         ("lib", ("*.x", "*.xmacro", "*.xlisp"), ("lib", "include")),
         ("builds/0/lib", ("*.h",), ("include",)),
         ("etc", ("*.xlisp", "*.xmacro"), ("etc",)),
         (".", ("LICENSE",), ("licenses",)),
-    ):
+    ]
+    if sources:
+        rows.insert(0, ("src", ("*.x", "*.xmacro"), ("src",)))
+    for folder, patterns, outputs in rows:
         for pattern in patterns:
             for source in sorted((ROOT / folder).glob(pattern)):
                 for output in outputs:
                     target = destination / output / source.name
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(source, target)
+
+
+def copy_examples(destination):
+    root = ROOT / "examples"
+    for source in sorted(root.rglob("*")):
+        relative = source.relative_to(root)
+        if not source.is_file() or EXAMPLE_SKIPS & set(relative.parts):
+            continue
+        target = destination / "examples" / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
 
 
 def write_manifest(destination, name, kind):
@@ -86,7 +107,10 @@ def install(prefix, destdir):
     with tempfile.TemporaryDirectory(prefix=".x2c-install-",
                                      dir=target.parent) as temporary:
         stage = Path(temporary)
-        copy_support(stage)
+        copy_support(stage, sources=False)
+        copy_examples(stage)
+        (stage / "packages").mkdir()
+        (stage / "packages/.keep").write_text("")
         (stage / "bin").mkdir()
         shutil.copy2(ROOT / "builds/0/x2c", stage / "bin/x2c")
         shutil.copy2(ROOT / "builds/0/libx2c.a", stage / "lib/libx2c.a")
@@ -113,6 +137,27 @@ def install(prefix, destdir):
     print(f"x2c: installed {target}/bin/x2c ({identity})")
 
 
+def remove_empty_dirs(prefix):
+    for path in sorted(prefix.rglob("*"), reverse=True):
+        if path.is_dir() and not path.is_symlink() and not any(path.iterdir()):
+            path.rmdir()
+
+
+def uninstall(prefix):
+    if not prefix.is_absolute():
+        raise ValueError("PREFIX must be an absolute dedicated x2c prefix")
+    if not (prefix / INSTALL_MANIFEST).is_file():
+        raise FileNotFoundError(f"no x2c installation at {prefix}")
+    for relative in sorted(owned_files(prefix)):
+        installed_path(prefix, relative).unlink(missing_ok=True)
+    remove_empty_dirs(prefix)
+    if not any(prefix.iterdir()):
+        prefix.rmdir()
+        print(f"x2c: removed {prefix}")
+    else:
+        print(f"x2c: removed the compiler; {prefix} keeps unowned files")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -122,9 +167,13 @@ def main():
     native = commands.add_parser("install")
     native.add_argument("--prefix", required=True, type=Path)
     native.add_argument("--destdir", default="")
+    removal = commands.add_parser("uninstall")
+    removal.add_argument("--prefix", required=True, type=Path)
     args = parser.parse_args()
     if args.command == "install":
         install(args.prefix, args.destdir)
+    elif args.command == "uninstall":
+        uninstall(args.prefix)
     else:
         copy_support(args.destination)
         if args.licenses:

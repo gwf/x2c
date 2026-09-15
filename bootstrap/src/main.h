@@ -11,6 +11,7 @@
 #include "project.h"
 #include "frontend.h"
 #include "editor.h"
+#include "install.h"
 #include "toolchain.h"
 int main(int argc, char * * argv);
 
