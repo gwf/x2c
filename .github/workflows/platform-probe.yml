@@ -1,5 +1,5 @@
-# Temporary. Compares every pinned digest against the checkout on macOS
-# x86_64, one line at a time. Delete before the pull request.
+# Temporary. Captures the failing recipes to files so the live log cannot
+# interleave their traces. Delete before the pull request.
 name: platform-probe
 
 on:
@@ -18,28 +18,30 @@ jobs:
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v5
-      - name: Compare every pinned license digest with the checkout
-        run: |
-          git status --porcelain
-          git config --get core.autocrlf || echo "autocrlf unset"
-          for f in packages/libuv/LICENSES/*.txt packages/blis/LICENSES/*.txt; do
-            printf '%s  %s  %s bytes\n' \
-              "$(shasum -a 256 "$f" | cut -d' ' -f1)" "$f" \
-              "$(wc -c <"$f" | tr -d ' ')"
-          done
-          echo "--- literals the makefiles expect ---"
-          grep -hoE '^	  [0-9a-f]{64}$' packages/libuv/Makefile \
-            packages/blis/Makefile | tr -d '\t '
       - name: Install build tools
         run: brew install autoconf automake libtool pkg-config jq
+      - name: Show the tools the recipes run under
+        run: |
+          make --version | head -1
+          /bin/sh --version 2>&1 | head -1 || true
+          command -v shasum nm ar jq
       - name: Build from checked-in bootstrap
         run: make build-safe
-      - name: Run the libuv license check alone
+      - name: Trace the libuv license check
         continue-on-error: true
-        run: make -C packages/libuv verify-licenses && echo "libuv licenses ok"
-      - name: Run the libcurl profile check with a trace
+        run: |
+          make -C packages/libuv SHELL='sh -x' verify-licenses \
+            >"$RUNNER_TEMP/libuv.log" 2>&1 || true
+          cat "$RUNNER_TEMP/libuv.log"
+      - name: Trace the libcurl profile check
         continue-on-error: true
-        run: make -C packages/libcurl SHELL='sh -x' verify-profile 2>&1 | tail -40
-      - name: Run the blis profile check with a trace
+        run: |
+          make -C packages/libcurl SHELL='sh -x' verify-profile \
+            >"$RUNNER_TEMP/libcurl.log" 2>&1 || true
+          tail -60 "$RUNNER_TEMP/libcurl.log"
+      - name: Trace the blis profile check
         continue-on-error: true
-        run: make -C packages/blis SHELL='sh -x' verify-profile 2>&1 | tail -40
+        run: |
+          make -C packages/blis SHELL='sh -x' verify-profile \
+            >"$RUNNER_TEMP/blis.log" 2>&1 || true
+          tail -60 "$RUNNER_TEMP/blis.log"
