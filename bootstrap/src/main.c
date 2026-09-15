@@ -441,8 +441,6 @@ static String _unit_output_dir(CliRequest c, Map unit_dirs, String input){
   return directory;
 }
 
-size_t Array_len(Array);
-
 void * Scope_calloc(size_t, size_t);
 
 Var Array_getindex(Array, int);
@@ -540,8 +538,6 @@ static Array _translation_chunks(List inputs, int total, int slices){
 unsigned long report_now_us(void);
 
 Frontend Frontend_new(CliRequest);
-
-void Array_free(Array);
 
 unsigned long long report_file_bytes(String);
 

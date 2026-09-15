@@ -147,8 +147,6 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
 
 Array Array_remslice(Array, int, int);
 
-void Array_free(Array);
-
 static void _unzip_compact(UnzipShared * shared, int column){
   int consumed = shared -> heads[column];
   if(consumed < UNZIP_COMPACT_THRESHOLD) return;
@@ -156,8 +154,6 @@ static void _unzip_compact(UnzipShared * shared, int column){
   Array_free(removed);
   shared -> heads[column] = 0;
 }
-
-size_t Array_len(Array);
 
 static int _unzip_ensure(UnzipShared * shared, int column){
   while(shared -> heads[column] >= Array_len(shared -> buffers[column])){

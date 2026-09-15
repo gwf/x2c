@@ -549,7 +549,6 @@ return Array_list_free(declarations);
 List Array_list(Array);
 List Compiler_typed_match_pattern(Compiler, List, List);
 String List_repr(List);
-void Array_free(Array);
 SymScope Sym_pop_scope(Sym);
 static List _match_case(Compiler c){
   Symbol peek = Compiler_peek(c, 0);  List pattern = NULL;  List types = NULL;  Token start = c -> token;  Compiler_next(c);  if(peek == 199882){

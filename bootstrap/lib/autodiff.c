@@ -153,8 +153,6 @@ AdNode AdTape_input(AdTape tape, double value){
   return _record(tape, value, NULL);
 }
 
-size_t Array_len(Array);
-
 Var Array_getindex(Array, int);
 
 Var Func_apply(Func, unsigned, const FuncArg *);

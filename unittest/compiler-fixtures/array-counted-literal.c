@@ -35,8 +35,6 @@ static void literal_void(void){
   (void) values;
 }
 
-size_t Array_len(Array);
-
 int Var_is_null(Var);
 
 Var Array_getindex(Array, int);

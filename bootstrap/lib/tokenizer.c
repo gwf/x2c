@@ -160,8 +160,6 @@ static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode){
   Array_push(tokenizer -> modes, Symbol_var(mode));
 }
 
-size_t Array_len(Array);
-
 Var Array_take_last(Array);
 
 static inline void Tokenizer__pop_mode(Tokenizer tokenizer){
@@ -345,8 +343,6 @@ static int Tokenizer__number(Tokenizer tokenizer){
   type =(type == 19368) ? 26417777576 : 27051797805160;
   return Tokenizer_tokenize(tokenizer, len, type);
 }
-
-size_t Bytes_len(Bytes);
 
 static Token _significant_back(Tokenizer tokenizer, int back){
   struct Token * tokens =(struct Token *) tokenizer -> tokens;

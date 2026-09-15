@@ -46,8 +46,6 @@ Var Symbol_var(Symbol);
 
 int Array_equal(Array, Array);
 
-size_t Array_len(Array);
-
 int Map_equal(Map, Map);
 
 unsigned Map_len(Map);

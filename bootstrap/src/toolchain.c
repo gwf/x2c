@@ -87,8 +87,6 @@ int String_equal(String, String);
 
 Var String_var(String);
 
-int File_close(File);
-
 static String _installed_tool(const char * name){
   String home = x2c_get_root();
   if(! String_truth(home) || String_equal(home, _0)) return NULL;
