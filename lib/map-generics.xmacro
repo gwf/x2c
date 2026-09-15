@@ -16,8 +16,8 @@ macro Unit $map.var.family(
   }
 
   static int $key_equal(Var *a, Var *b) {
-    if (a[0] is <array> || a[0] is <map>) return a[0] === b[0];
-    return a[0] == b[0];
+    if (a[0] === b[0]) return 1;
+    return a[0] is not <array> && a[0] is not <map> && a[0] == b[0];
   }
 
   static int $value_equal(Var *a, Var *b) {

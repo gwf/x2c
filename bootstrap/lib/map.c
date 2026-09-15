@@ -204,8 +204,8 @@ int Var_is(Var, Symbol);
 int Var_equal(Var, Var);
 
 static int _map_key_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
-  if(Var_is(_x2c_macro_a_0[0], 3313778) || Var_is(_x2c_macro_a_0[0], 26720)) return Var_same(_x2c_macro_a_0[0], _x2c_macro_b_0[0]);
-  return Var_equal(_x2c_macro_a_0[0], _x2c_macro_b_0[0]);
+  if(Var_same(_x2c_macro_a_0[0], _x2c_macro_b_0[0])) return 1;
+  return ! Var_is(_x2c_macro_a_0[0], 3313778) && ! Var_is(_x2c_macro_a_0[0], 26720) && Var_equal(_x2c_macro_a_0[0], _x2c_macro_b_0[0]);
 }
 
 static int _map_value_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
