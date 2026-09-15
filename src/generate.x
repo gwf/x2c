@@ -690,8 +690,13 @@ static void _collect_forward_dependencies(
           Type type = NULL;
           List global = spelling
             ? compiler.sym.resolve_global(%($spelling), &type) : NULL;
+          /* A generated protocol symbol is declared by the header that
+             published it. A native alias among them is a macro over the
+             host function, and newlib spells some of those as function-like
+             macros, so a prototype of the alias would not even parse. */
           if (global && List.equal(global, binding) && type.is_function() &&
-              !locals.contains(global) && !seen.contains(global)) {
+              !locals.contains(global) && !seen.contains(global) &&
+              !compiler.sym.get(%("generated-protocol" $spelling))) {
             seen[global] = 1;
             _forward_types(compiler, type, locals, statics, seen, prototypes);
             prototypes.push(type.declaration_ast(global));
