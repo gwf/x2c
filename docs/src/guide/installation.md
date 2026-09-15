@@ -138,15 +138,9 @@ Validate a release candidate in a scratch prefix and remove that prefix
 afterwards. Compiler development itself runs through `make` inside the
 checkout and does not depend on which compiler `PATH` selects.
 
-A release is a tag. Bump the version in `src/cli.x`, merge it to `main`,
-and push `v<version>` at that commit; the `release` workflow then builds
-`x2c-<version>-<platform>.tar.gz` with its `.sha256` on macOS and Linux for
-arm64 and x86_64, bundles the packages with native dependencies, writes
-the package index, uploads everything as release assets, points the site's
-`x2c-version.txt` and `packages/index.txt` at the new version on `main`,
-and deploys the site. The tag is refused when its version differs from the
-compiler's. Running the workflow by hand performs the builds and keeps the
-results as workflow artifacts without publishing.
+Releases publish the compiler for macOS and Linux on arm64 and x86_64. The
+installer's default is the newest release; `--version <n>` installs an
+earlier one, and every release's downloads stay available.
 
 ## Build, debug, and use packages
 

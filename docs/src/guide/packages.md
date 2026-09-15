@@ -348,11 +348,9 @@ compiler upgrade keeps them and `x2c remove` is the way to delete one. A
 directory under `<home>/packages` without `BUNDLE.json` or `SOURCE.json` is
 never replaced or removed.
 
-`tools/gen-package-index.py` writes an index from the source packages in a
-directory and the bundle archives named on its command line, copying the
-archives beside `index.txt`; the `release` workflow runs it over every
-platform's bundles and publishes the index with the release tarballs (see
-[Developer workflow](installation.md#developer-workflow)).
+Each release publishes the index `x2c install <name>` reads, listing the
+bundles built by that release's compiler. A bundle refuses a different
+compiler version, so upgrade x2c before installing packages by name.
 
 ## Pin packages in a project
 

@@ -41,6 +41,8 @@ are needed rather than maintaining another copy.
   comment cleanup candidates without editing.
 - [find-redundant-validation](skills/find-redundant-validation/SKILL.md) -
   discover and rank redundant checks without editing.
+- [release-x2c](skills/release-x2c/SKILL.md) - prepare, dry-run, and verify
+  a release, or recover from a failed one.
 - [improve-x2c-agent-process](skills/improve-x2c-agent-process/SKILL.md) -
   review or improve agent guidance and tooling for the requested workflow.
 - [agent-failure](skills/agent-failure/SKILL.md) - capture a failure Gary
@@ -58,6 +60,8 @@ Skills have one canonical copy in `agents/skills/`, exposed through
 - [Source style](x2c-coding-style-guide.md) and
   [code organization](x2c-code-organization-guide.md) - how code reads and
   where it belongs.
+- [Releasing](releasing.md) - release workflow stages, site files, versions
+  and tags, bundle compatibility, and recovery.
 - [Development reference](x2c-development-guide.md) and
   [debugging](x2c-debugging-guide.md) - build details and compiler instruments.
 - [AST patterns](replacing-manual-ast-walks-with-match.md) - shared canonical
