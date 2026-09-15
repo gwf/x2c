@@ -71,9 +71,14 @@ for source in "${test_sources[@]}"; do
     -o "$test_objects/$name.o"
 done
 
-for name in ast diagnostics report; do
+# The compiler modules the suites link, named once here and matching
+# COMPILER_OBJECTS in unittest/Makefile.
+compiler_modules=(ast diagnostics report sourceview)
+linked_compiler_objects=()
+for name in "${compiler_modules[@]}"; do
   "$cc" "${sanitizer_flags[@]}" -c "$generated_compiler/$name.c" \
     -o "$compiler_objects/$name.o"
+  linked_compiler_objects+=("$compiler_objects/$name.o")
 done
 
 suite_objects=()
@@ -88,9 +93,7 @@ done
   "$test_objects/test-all.o" \
   "${suite_objects[@]}" \
   "$runtime_archive" \
-  "$compiler_objects/ast.o" \
-  "$compiler_objects/diagnostics.o" \
-  "$compiler_objects/report.o" \
+  "${linked_compiler_objects[@]}" \
   -lm
 
 (
