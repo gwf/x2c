@@ -72,6 +72,18 @@ To keep an executable:
 
 Use `--output foreach` if you want to choose its name.
 
+To use x2c outside the checkout, install it into a dedicated prefix and put
+its `bin` on `PATH`; `x2c env` shows what the compiler resolved:
+
+```sh
+make install PREFIX="$HOME/.local/x2c"
+export PATH="$HOME/.local/x2c/bin:$PATH"
+x2c env
+```
+
+[Install a native compiler](docs/src/guide/installation.md) describes the
+prefix layout, packages, and the developer workflow.
+
 To build and check all curated examples, then try the Lisp shell from the
 repository root:
 

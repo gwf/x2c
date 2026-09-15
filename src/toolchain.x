@@ -64,10 +64,9 @@ static String _tool_selection(
 }
 
 static String _installed_tool(const char *name) {
-  String executable = x2c_get_executable();
-  if (!executable) return NULL;
-  String prefix = x2c_path_dir(x2c_path_dir(executable));
-  String path = %"$prefix/lib/x2c/toolchain", File input = fopen(path, "r");
+  String home = x2c_get_root();
+  if (!home || home == ".") return NULL;
+  String path = %"$home/lib/x2c/toolchain", File input = fopen(path, "r");
   if (!input) return NULL;
   char line[PATH_MAX], String result = NULL, int name_length = strlen(name);
   while (fgets(line, sizeof(line), input)) {
@@ -82,9 +81,10 @@ static String _installed_tool(const char *name) {
   return result;
 }
 
-/* A staged compiler links its stage-local runtime. A repository compiler uses
-   the root runtime or the bootstrap fallback, and an installed compiler uses
-   its prefix. No compiler links an unrelated runtime.
+/* A staged compiler links its stage-local runtime. A compiler with a home,
+   checkout or installed prefix alike, uses `<home>/lib/libx2c.a` or the
+   checkout's bootstrap fallback. Without a home, the layout is read from
+   the executable's own prefix. No compiler links an unrelated runtime.
 */
 static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   String root = x2c_get_root(), executable = x2c_get_executable();

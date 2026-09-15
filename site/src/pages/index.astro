@@ -176,7 +176,15 @@ const [titleHtml, kickerHtml] = await Promise.all([
           </div>
         </header>
         <p>
-          <strong>Run your first x2c program.</strong>{" "}
+          <strong>Install a release.</strong>{" "}
+          One command downloads the compiler, runtime, headers, and
+          examples for your platform into <code>~/.local/x2c</code>.
+          <code>x2c install &lt;package&gt;</code> then adds packages from
+          the <a href={local("docs/guide/packages.html#install-packages")}>
+          package index</a>.
+        </p>
+        <p>
+          <strong>Or build from source.</strong>{" "}
           Clone the repository, build the compiler from its checked-in C,
           and run one of the included examples. The compiler handles
           translation, native compilation, and execution.

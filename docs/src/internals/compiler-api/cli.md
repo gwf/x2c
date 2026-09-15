@@ -16,7 +16,9 @@ X2c command-line parsing and presentation.
 | [`cli_package_options`](#cli_package_options) | Reads a package's native response options, expanding literal `{package}` after tokenization. |
 | [`cli_parse`](#cli_parse) | Expands response files and parses `argv[1..]` into one validated request. |
 | [`cli_response_arguments`](#cli_response_arguments) | Reads response-file tokens with ordinary quoting and UTF-8 checks. |
+| [`cli_version`](#cli_version) | Returns the version line `--version` prints, without a newline. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
+| [`CliRequest.package_roots`](#CliRequest.package_roots) | Returns the package roots `request` searches: its explicit `--package-dir` and manifest directories in order, then the home's `packages/` directory when it exists. |
 
 ### Functions
 
@@ -28,7 +30,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:674`
+Source: `src/cli.x:746`
 
 #### cli_package_options
 
@@ -39,7 +41,7 @@ after tokenization. Only native include/define/thread options and ordered
 archive/library/framework inputs are admitted. `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:798`
+Source: `src/cli.x:873`
 
 #### cli_parse
 
@@ -54,7 +56,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:937`
+Source: `src/cli.x:1019`
 
 #### cli_response_arguments
 
@@ -64,7 +66,15 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:566`
+Source: `src/cli.x:638`
+
+#### cli_version
+
+`String cli_version(void)`
+
+Returns the version line `--version` prints, without a newline.
+
+Source: `src/cli.x:1069`
 
 ### `CliRequest`
 
@@ -75,7 +85,20 @@ Source: `src/cli.x:566`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:987`
+Source: `src/cli.x:1072`
+
+<a id="CliRequest.package_roots"></a>
+#### CliRequest.package_roots
+
+`List CliRequest.package_roots(CliRequest request)`
+
+Returns the package roots `request` searches: its explicit `--package-dir`
+and manifest directories in order, then the home's `packages/` directory
+when it exists. A root named twice is searched twice and resolves the
+same entries. Explicit directories are borrowed; the result is a fresh
+`List` only when the home directory is appended.
+
+Source: `src/cli.x:1080`
 
 ## Public types
 
@@ -86,7 +109,7 @@ Source: `src/cli.x:987`
 <a id="CliRequest"></a>
 ### CliRequest
 
-`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, Symbol kind, color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int source_map, source_facts, live_symbols, cpp_symbols; SourceView sources; } *CliRequest`
+`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int source_map, source_facts, live_symbols, cpp_symbols, force; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
 `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:

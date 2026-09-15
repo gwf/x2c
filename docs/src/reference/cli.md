@@ -361,6 +361,38 @@ The exceptions are:
 `--package-dir <dir>` adds a directory of x2c packages. An `import` statement
 searches those directories for a package that is not beside the source. The
 option applies to `translate`, `build`, and `run`, and repeats like `-I`.
+After the explicit and manifest directories, every command also searches
+`<home>/packages` when that directory exists.
+
+## Packages
+
+`install`, `remove`, and `list` manage `<home>/packages`; see
+[install packages](../guide/packages.md#install-packages). `install` takes
+one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
+<hex>`, or a name resolved through the index (`--index <url-or-path>`
+overrides the default). `--force` accepts a bundle built by another x2c
+version. `remove` takes one installed name; `list` prints `name version
+kind` lines. Refusals exit with status 2 and leave the installed set as it
+was.
+
+## Environment
+
+`x2c env` prints the resolved home, executable, include directory, runtime
+archive, package roots, C compiler, and archiver as `name = value` lines.
+`x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
+their effect on the report.
+
+```sh
+x2c env
+x2c env runtime_lib
+```
+
+The home is `X2C_HOME` when set. Otherwise the compiler walks up from its
+executable, then from the current directory, to the nearest directory holding
+`include/` and `etc/symbols.xlisp`. A source checkout and an
+[installed prefix](../guide/installation.md) are both homes. A stage compiler
+under `<home>/builds/<n>/` links that stage's runtime archive; any other
+compiler links `<home>/lib/libx2c.a`.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,

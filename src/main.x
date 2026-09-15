@@ -12,6 +12,7 @@
 #include "project.x"
 #include "frontend.x"
 #include "editor.x"
+#include "install.x"
 #include "toolchain.x"
 #pragma private
 
@@ -534,6 +535,37 @@ static int _run_build(CliRequest request) {
   return 0;
 }
 
+/* `x2c env` prints every resolved value as `name = value`, or one bare value
+   when a name is given. Package roots join with `:` like `PATH`. */
+static int _run_env(CliRequest request) {
+  Toolchain toolchain = toolchain_new(
+    request.cc, request.ar, request.cpp_args, request.cc_args,
+    request.ld_args, request.verbose, request.dry_run);
+  String executable = x2c_get_executable();
+  String roots = String.join(":", request.package_roots());
+  List rows = %(
+    ("home" ${x2c_get_root()})
+    ("executable" ${executable ? executable : %""})
+    ("include_dir" ${toolchain.include_dir})
+    ("runtime_lib" ${toolchain.runtime_lib})
+    ("package_dirs" ${roots ? roots : %""})
+    ("cc" ${toolchain.cc})
+    ("ar" ${toolchain.ar}) );
+  String wanted = NULL;
+  if (request.inputs) wanted = request.inputs.car();
+  foreach (List row, rows) {
+    String name = row.car(), value = row.cadr();
+    const char *text = value ? value.str() : "";
+    if (!wanted) printf("%s = %s\n", name.str(), text);
+    else if (name == wanted) {
+      printf("%s\n", text);
+      return 0;
+    }
+  }
+  if (wanted) x2c_driver_error(%"unknown env name '$wanted'");
+  return 0;
+}
+
 static int _run_bootstrap(CliRequest command) {
   Bootstrap payload = bootstrap_materialize(command);
   if (payload.complete) {
@@ -597,6 +629,10 @@ int main(int argc, char **argv) {
     request.verbose || request.debugging,
     request.dry_run, request.inspects());
   if (request.command == <bootstrap>) return _run_bootstrap(request);
+  if (request.command == <env>) return _run_env(request);
+  if (request.command == <install>) return install_command(request);
+  if (request.command == <remove>) return remove_command(request);
+  if (request.command == <list>) return list_command(request);
   _configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot
      invalidate their canonical values. */

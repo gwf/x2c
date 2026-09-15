@@ -1,0 +1,9 @@
+Usage:
+  x2c remove [options] <name>
+
+Remove one installed package from <home>/packages.
+
+General options:
+  -h, --help                  Show help and exit
+  -q, --quiet                 Suppress successful progress and receipts
+  @<file>                     Read additional arguments from a response file

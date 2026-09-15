@@ -13,12 +13,13 @@ typedef struct CliRequest{
   List cc_args, ld_args;
   String out_dir, dep_file, dep_target, manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
-  String prefix, cc, ar, compile_commands;
-  Symbol kind, color_mode;
+  String prefix, cc, ar, compile_commands, sha256, index;
+  Symbol kind;
+  Symbol color_mode;
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int source_map, source_facts, live_symbols, cpp_symbols;
+  int source_map, source_facts, live_symbols, cpp_symbols, force;
   SourceView sources;
 }
 * CliRequest;
@@ -31,7 +32,11 @@ CliRequest cli_package_options(String path, String package);
 
 CliRequest cli_parse(int argc, char * * argv);
 
+String cli_version(void);
+
 int CliRequest_inspects(CliRequest request);
+
+List CliRequest_package_roots(CliRequest request);
 
 
 #endif /* __GUARD_0x29BB659F__ */
