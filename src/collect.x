@@ -2,9 +2,10 @@
 
    Raw collection scans includes without running cpp. Each cold walk records
    declaration maps and included paths at their source positions; cache and
-   artifact replay consume that same order so declaration precedence and
-   generated-name counters do not depend on whether a file was already
-   collected.
+   interface replay consume that same order so declaration precedence does
+   not depend on whether a file was already collected. A translated unit
+   writes its own contribution beside its generated C as a `.xi` interface,
+   and the runtime prelude is `lib/x2c.xi`.
 */
 
 #pragma once
@@ -15,9 +16,11 @@
 #include "utils.x"
 #include "snapshot.x"
 
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -169,9 +172,9 @@ static String _resolve_include(
     covered);
 
 /* Process cache: canonical path ->
-   `(ordered-parts gensyms hash definitions dependencies)`. A part is a
-   declaration Map or an included source path. Dependencies map macro, Lisp,
-   and embedded-text paths to a content hash or 1. Entries outlive per-unit
+   `(ordered-parts hash definitions dependencies)`. A part is a declaration
+   Map or an included source path. Dependencies map macro, Lisp, and
+   embedded-text paths to a content hash or 1. Entries outlive per-unit
    scopes, so every retained key and value belongs to header_cache_scope. */
 static Map header_contributions = NULL, static Scope header_cache_scope = NULL;
 static int record_generated_symbols;
@@ -217,8 +220,8 @@ static void _cache_dependencies(Map dependencies, Map additions) {
 }
 
 /* An explicit runtime include matters only when the module contributes a
-   declaration outside the standard snapshot. Standard runtime includes are
-   no-ops; optional x2c modules load from the same header artifact. */
+   declaration outside the prelude. Standard runtime includes are no-ops;
+   optional x2c modules load from their own interfaces. */
 static int _entry_adds_symbols_visit(
   Compiler compiler, List entry, Map globs, Map visited) {
   foreach (Var part, entry.car().list()) {
@@ -231,7 +234,7 @@ static int _entry_adds_symbols_visit(
     if (visited.contains(dependency)) continue;
     visited[dependency] = 1;
     Var cached = _header_cache()[dependency];
-    List resolved = cached is void ? _artifact_fetch(compiler, dependency)
+    List resolved = cached is void ? _interface_read(compiler, dependency)
                                    : cached.list();
     if (resolved &&
         _entry_adds_symbols_visit(compiler, resolved, globs, visited))
@@ -244,13 +247,12 @@ static int _entry_adds_symbols(Compiler compiler, List entry, Map globs) =>
   _entry_adds_symbols_visit(compiler, entry, globs, %{});
 
 /* Replay declaration maps and includes in their recorded source order.
-   visited counts each included file's declarations, dependencies, function
-   definitions, and self-only gensym count once per translation unit. In-memory
-   and artifact entries have the same shape and take this same path. */
+   visited counts each included file's declarations, dependencies, and
+   function definitions once per translation unit. In-memory and interface
+   entries have the same shape and take this same path. */
 static void _replay_cached(
   Compiler compiler, List entry, Map globs, Map visited) {
-  (List parts, int gensyms, Var content_hash, List definitions,
-   Map dependencies) = entry;
+  (List parts, Var content_hash, List definitions, Map dependencies) = entry;
   (void) content_hash;
   foreach (Var definition, definitions) compiler.fn_defs[definition] = 1;
   /* Parsing this file read these macro and Lisp files. They are prerequisites
@@ -267,11 +269,10 @@ static void _replay_cached(
     if (visited.contains(dep_path)) continue;
     visited[dep_path] = 1;
     Var dep_entry = _header_cache()[dep_path];
-    List resolved = dep_entry is void ? _artifact_fetch(compiler, dep_path)
+    List resolved = dep_entry is void ? _interface_read(compiler, dep_path)
                                         : dep_entry.list();
     if (resolved) _replay_cached(compiler, resolved, globs, visited);
   }
-  compiler.names.gensym_count += gensyms;
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -337,17 +338,15 @@ static void _parse_segment(
   c.merge_source_declarations(globs, overlay);
 }
 
-/* Append one segment's nonempty overlay before the following include and
-   return only the generated names minted while parsing that segment. */
-static int _flush_segment(
+/* Append one segment's nonempty overlay before the following include. */
+static void _flush_segment(
   Compiler compiler, String path, String source, Array segment, int start_line,
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
   int *private) {
-  if (!segment.len()) return 0;
+  if (!segment.len()) return;
   Scope.push(&header_cache_scope);
   Map overlay = %{};
   Scope.pop();
-  int before = compiler.names.gensym_count;
   _parse_segment(
     compiler, path, source, segment, start_line, start_pos,
     globs, overlay, definitions, dependencies, private);
@@ -355,7 +354,6 @@ static int _flush_segment(
     Var overlay_var = overlay;
     parts.push(overlay_var);
   }
-  return compiler.names.gensym_count - before;
 }
 
 /* Resolve and splice one include during a file walk. */
@@ -368,7 +366,7 @@ static void _include(
   if (covered && !path.endswith(".x")) return;
   String canonical = _canonical_path(path);
   Var cached = c.source_facts ? void : _header_cache()[canonical];
-  List entry = cached is void ? _artifact_fetch(c, canonical)
+  List entry = cached is void ? _interface_read(c, canonical)
                               : cached.list();
   if (covered && !c.runtime_hdrs && entry &&
       !_entry_adds_symbols(c, entry, globs))
@@ -430,9 +428,8 @@ void Compiler.record_generated_header_symbol(
   Compiler compiler, String name, Type signature) {
   if (!record_generated_symbols) return;
   String path = _canonical_path(compiler.filename);
-  (List parts, int gensyms, Var content_hash, List definitions,
-   Map dependencies) = _header_cache()[path];
-  (void) gensyms;
+  (List parts, Var content_hash, List definitions, Map dependencies) =
+    _header_cache()[path];
   (void) content_hash;
   (void) definitions;
   (void) dependencies;
@@ -475,7 +472,7 @@ static void _file(
     Scope.push(&header_cache_scope);
     Map dependencies = %{};
     Scope.pop();
-    Map definitions = %{}, int self_gensyms = 0, in_comment = 0;
+    Map definitions = %{}, int in_comment = 0;
     int line_number = 1, byte_position = 0;
     int segment_line = 1, segment_position = 0, private = 0;
     String content_hash = %"%08x".printf(String.hash(text));
@@ -490,7 +487,7 @@ static void _file(
         byte_position += line.len();
         continue;
       }
-      self_gensyms += _flush_segment(
+      _flush_segment(
         c, path, text, segment, segment_line, segment_position,
         globs, parts, definitions, dependencies, &private);
       _include(c, target, angle, dir, globs, visited, parts);
@@ -499,7 +496,7 @@ static void _file(
       segment_line = line_number;
       segment_position = byte_position;
     }
-    self_gensyms += _flush_segment(
+    _flush_segment(
       c, path, text, segment, segment_line, segment_position,
       globs, parts, definitions, dependencies, &private);
     segment.free();
@@ -536,23 +533,53 @@ static void _file(
     List definition_list = names.list_free();
     _require_header_cache_owner(definition_list.try_own());
     List entry = %(
-      $part_list $self_gensyms $content_hash $definition_list $dependencies
+      $part_list $content_hash $definition_list $dependencies
     );
     _require_header_cache_owner(entry.try_own());
-    _header_cache()[path] = entry;
+    /* The first walk of a file fixes its contribution. A later walk of the
+       same file, such as a unit whose text the prelude already covered,
+       omits covered includes that add nothing to its own globs and would
+       replace a complete entry with one that depends on that context. */
+    if (!_header_cache().contains(path)) _header_cache()[path] = entry;
     c.kw_aliases = enclosing_aliases;
     c.kw_seen = enclosing_alias_imports;
   }
 }
 
+static String _runtime_text(Compiler c, String runtime) {
+  String text = NULL;
+  if (c.sources) {
+    if (!c.read_source(runtime, &text))
+      c.report_error(<driver>, "cannot read runtime source", c.token, NULL);
+  }
+  else text = runtime.open("r").string_close();
+  return text;
+}
+
+/* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
+   read from `lib/x2c.xi` beside a stage build, or walked cold once. */
+static List _prelude_entry(Compiler c, String runtime, String canonical) {
+  Var cached = _header_cache()[canonical];
+  if (cached is not void) return cached;
+  List entry = _interface_read(c, canonical);
+  if (entry) return entry;
+  Map scratch = %{}, visited = %{};
+  visited[canonical] = 1;
+  _file(
+    c, canonical, _runtime_text(c, runtime), x2c_path_dir(runtime),
+    scratch, visited);
+  return _header_cache()[canonical];
+}
+
 /** Collects the current translation unit's declarations into `globs`.
     The compiler must have its filename, text, and include paths prepared.
     `globs` is the base symbol map and is mutated; a null value starts from an
-    empty map. The source and raw-include closure merge in source order, and
-    the returned map is `globs`. Collection also updates dependencies,
-    function definitions, macro state, and the generated-name count. Keyword
-    alias maps and seen-name state are file-local and restored when each file
-    walk ends.
+    empty map. A prelude unit first replays the runtime contribution, or
+    walks `lib/x2c.x` cold when it must not skip runtime headers. The source
+    and raw-include closure then merge in source order, and the returned map
+    is `globs`. Collection also updates dependencies, function definitions,
+    and macro state. Keyword alias maps and seen-name state are file-local
+    and restored when each file walk ends.
 */
 Map Compiler.collect_symbols(Compiler c, Map globs) {
   if ((void *) globs == NULL) globs = %{};
@@ -561,19 +588,18 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   Map visited = %{}, String canonical = _canonical_path(c.filename);
   c.deps = %{};
   c.add_translation_dependency(canonical);
-  if (c.runtime_hdrs && c.prelude) {
+  if (c.prelude) {
     String runtime = %"${x2c_get_root()}/lib/x2c.x";
     String runtime_canonical = _canonical_path(runtime);
-    String text = NULL;
-    if (c.sources) {
-      if (!c.read_source(runtime, &text))
-        c.report_error(<driver>, "cannot read runtime source", c.token, NULL);
-    }
-    else text = runtime.open("r").string_close();
     visited[runtime_canonical] = 1;
-    _file(
-      c, runtime_canonical, text, x2c_path_dir(runtime),
-      globs, visited);
+    c.add_translation_dependency(runtime_canonical);
+    if (c.runtime_hdrs)
+      _file(
+        c, runtime_canonical, _runtime_text(c, runtime),
+        x2c_path_dir(runtime), globs, visited);
+    else
+      _replay_cached(
+        c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
   }
   visited[canonical] = 1;
   _file(
@@ -668,14 +694,11 @@ static void _package_merge(
 }
 
 /* Replay one cached entry for its declarations only, recording each package
-   file as a dependency of the importing unit. Gensym counts belong to the
-   collection that produced the entry and are not counted again here. */
+   file as a dependency of the importing unit. */
 static void _package_contributions(
   Compiler compiler, String name, String root, String path, List entry,
   Map merged, Map visited, Token token) {
-  (List parts, int gensyms, Var content_hash, List definitions,
-   Map dependencies) = entry;
-  (void) gensyms;
+  (List parts, Var content_hash, List definitions, Map dependencies) = entry;
   (void) content_hash;
   (void) definitions;
   compiler.merge_translation_dependencies(dependencies);
@@ -706,9 +729,8 @@ static void _package_contributions(
     entry include closure is parsed in package mode; cached entries replay
     their previously collected declarations. Public declarations and
     protocol rows enter the current symbol state, and dependencies enter the
-    importing compiler. Cold collection and in-memory replay also merge
-    recorded function definitions; persisted artifact entries carry no
-    function-definition list. `token` locates lookup and public-surface errors.
+    importing compiler. Replay also merges recorded function definitions.
+    `token` locates lookup and public-surface errors.
 */
 void Compiler.collect_package(Compiler c, String name, Token token) {
   if (c.package_roots.contains(name)) return;
@@ -754,9 +776,11 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   }
 }
 
-// persistent header artifacts
+// unit interfaces
 
-/* Missing or stale optional artifacts are cache misses. */
+/* A `.xi` interface is one unit's cache entry written beside its generated
+   C. Missing, stale, or malformed interfaces are cache misses; the caller
+   walks the file cold and installs that result in the process cache. */
 
 static String _root_relative(String path) {
   String prefix = %"${_canonical_root()}/";
@@ -764,208 +788,133 @@ static String _root_relative(String path) {
   return path[prefix.len():];
 }
 
-static String _snapshot_content_hash(void) {
-  String path = %"${x2c_get_root()}/etc/symbols.xlisp";
-  File file = fopen(path, "r");
-  if (!file) return "00000000";
-  String text = NULL;
-  try text = file.string_close();
-  catch %(io-fail *): return "00000000";
-  return %"%08x".printf(String.hash(text));
+/* Paths inside an interface are repository-relative when they can be. */
+static String _portable_path(String path) {
+  String relative = _root_relative(path);
+  return relative ? relative : path;
 }
 
-/** Writes the portable source-collection cache to `output`.
-    The versioned Lisp artifact records repository-relative paths, the supplied
-    generated-name base, and the current symbol-snapshot hash. Entries with an
-    out-of-root part or dependency are omitted. Returns nonzero when `output`
-    has no error and leaves it open.
+static String _absolute_path(String spelling) {
+  if (spelling.startswith("/")) return spelling;
+  return %"${_canonical_root()}/$spelling";
+}
+
+static List interface_search_dirs = NULL;
+
+/** Names the directories searched for `.xi` interfaces.
+    `out_dir` is the current translation output directory, or NULL. The
+    compiler's own stage directory is searched after it.
 */
-int header_symbols_write(File output, int gensym_base) {
-  Array names = %[];
-  foreach (Var key, _header_cache().keys()) {
-    String relative = _root_relative(key);
-    if (relative) names.push(relative);
-  }
-  names.sort();
-  output.printf(
-    "(header-symbols 10 %d \"%s\" (\n", gensym_base,
-    _snapshot_content_hash());
-  String root = _canonical_root();
-  foreach (Var name, names) {
-    String relative = name, canonical = %"$root/$relative";
-    List entry = _header_cache()[canonical];
-    (List cached_parts, Var gensyms, Var hash, List definitions,
-     Map cached_dependencies) = entry;
-    (void) definitions;
-    Array parts = %[], int portable = 1;
-    foreach (Var part, cached_parts) {
-      if (part is <map>) {
-        Array rows = %[], Map contributions = part;
-        foreach (Var (row_key, row_value), contributions)
-          rows.push(%($row_key $row_value));
-        rows.sort();
-        Var rows_var = rows.list_free();
-        parts.push(rows_var);
-        continue;
-      }
-      String part_relative = _root_relative(part);
-      if (!part_relative) {
-        portable = 0;
-        break;
-      }
-      parts.push(part_relative);
-    }
-    Array dependencies = %[];
-    foreach (Var (path, content_hash), cached_dependencies) {
-      String relative_path = _root_relative(path);
-      if (!relative_path) {
-        portable = 0;
-        break;
-      }
-      dependencies.push(%($relative_path $content_hash));
-    }
-    dependencies.sort();
-    List dependency_list = dependencies.list_free();
-    List part_list = parts.list_free();
-    if (!portable) continue;
-    List record = %(
-      $relative $hash $gensyms $part_list $dependency_list
-    );
-    output.puts("  ");
-    if (!snapshot_write_var(output, record)) return 0;
-    output.putc('\n');
-  }
-  names.free();
-  output.puts("))\n");
-  return !output.error();
+void interface_configure(String out_dir) {
+  Array dirs = %[];
+  if (out_dir) dirs.push(out_dir);
+  String executable = x2c_get_executable();
+  if (executable) dirs.push(x2c_path_dir(executable));
+  interface_search_dirs = dirs.list_free();
 }
 
-/* Raw artifact rows are indexed by repository-relative path and parsed only
-   when collection requests them. artifact_loading breaks include cycles. A
-   row is removed before validation, so a malformed or stale row becomes a
-   raw-artifact miss for the remainder of the current open. Its caller performs
-   a cold walk and installs that result in the process cache. Successfully
-   materialized artifact entries move there directly. */
-static Map artifact_index = NULL, artifact_loading = NULL;
-static Lisp artifact_reader = NULL;
-
-static void _artifact_shutdown(void) {
-  Lisp.destroy(artifact_reader);
-  artifact_reader = NULL;
-  artifact_index = NULL;
-  artifact_loading = NULL;
+/* Candidate interface paths for one canonical source path: the output
+   directory by stem, its sibling directory that mirrors the source's
+   repository directory, and the stage directory that mirrors it. */
+static List _interface_candidates(String canonical) {
+  String stem = x2c_path_stem(canonical), relative = _root_relative(canonical);
+  String mirror = relative ? %"${x2c_path_dir(relative)}/$stem.xi" : NULL;
+  Array paths = %[], int first = 1;
+  foreach (String dir, interface_search_dirs) {
+    if (first) paths.push(%"$dir/$stem.xi");
+    if (mirror) paths.push(%"$dir/${first ? %".." : %"."}/$mirror");
+    first = 0;
+  }
+  return paths.list_free();
 }
 
-/** Opens a compatible source-collection artifact for lazy replay.
-    Returns the number of indexed rows, or zero when the file is absent,
-    unreadable, empty, or incompatible. A nonnegative `gensym_base` must match
-    the artifact header; compatibility also requires the current symbol
-    snapshot hash. Raw rows remain indexed until fetched, rejected, or replaced
-    by a later open; materialized rows move to the process-wide cache.
-*/
-int header_symbols_open(String path, int gensym_base) {
-  File input = fopen(path, "r");
-  if (!input) return 0;
-  String source = NULL;
-  try source = input.string_close();
-  catch %(io-fail *): return 0;
-  if (!source) return 0;
-  List lines = source.split_lines(0);
-  if (!lines) return 0;
-  String first = lines.car(), suffix = %"\"${_snapshot_content_hash()}\" (";
-  if (!first.startswith("(header-symbols 10 ") || !first.endswith(suffix))
-    return 0;
-  if (gensym_base >= 0) {
-    String expected = %"(header-symbols 10 $gensym_base $suffix";
-    if (!String.equal(first, expected)) return 0;
-  }
-  _header_cache();  // materializes the cache scope and its shutdown hook
+static Map interface_loading = NULL;
+static Lisp interface_reader = NULL;
+
+static void _interface_shutdown(void) {
+  Lisp.destroy(interface_reader);
+  interface_reader = NULL;
+  interface_loading = NULL;
+}
+
+static Lisp _interface_lisp(void) {
+  if (interface_reader) return interface_reader;
+  _header_cache();
   Scope.push(&header_cache_scope);
-  artifact_index = %{};
-  artifact_loading = %{};
-  if (!artifact_reader) {
-    artifact_reader = Lisp.new_bare();
-    Scope.shutdown_hook(_artifact_shutdown);
-  }
+  interface_reader = Lisp.new_bare();
+  interface_loading = %{};
+  Scope.shutdown_hook(_interface_shutdown);
   Scope.pop();
-  foreach (String line, lines.cdr()) {
-    int open_quote = line.find("\"");
-    if (open_quote < 0) continue;
-    int close_quote = line.find_within("\"", open_quote + 1, -1);
-    if (close_quote < 0) continue;
-    String relative = line[open_quote + 1:close_quote];
-    artifact_index[relative] = line;
-  }
-  return (int) artifact_index.len();
+  return interface_reader;
 }
 
-/** Returns whether the active source-collection artifact has indexed rows.
-    Translation depfiles use this result because every unit translated while
-    the artifact is active depends on it, even if the unit reads no row.
-*/
-int header_symbols_active(void) =>
-  artifact_index && artifact_index.len() ? 1 : 0;
-
-static List _artifact_reject(String relative) {
-  artifact_loading.del(relative);
+static List _interface_reject(String canonical) {
+  interface_loading.del(canonical);
   return NULL;
 }
 
-/* Materialize one indexed artifact entry only after its source hash, included
-   entries, and macro, Lisp, and embedded-text dependencies validate. The
-   reconstructed entry uses header_cache_scope ownership and the same ordered
+static int _hash_matches(Compiler compiler, String path, Var expected) {
+  if (expected is not <string>) return 0;
+  String text = NULL;
+  try {
+    if (!compiler.read_source(path, &text)) return 0;
+  }
+  catch %(io-fail *): return 0;
+  catch %(bad-arg *): return 0;
+  catch %(size-limit *): return 0;
+  return String.equal(%"%08x".printf(String.hash(text)), expected);
+}
+
+/* Materialize one interface file only after its source path and hash,
+   included entries, and macro, Lisp, and embedded-text dependencies
+   validate. The entry uses header_cache_scope ownership and the same ordered
    parts representation as a cold walk. */
-static List _artifact_fetch(Compiler compiler, String canonical) {
-  if (compiler.source_facts || (void *) artifact_index == NULL) return NULL;
-  Var cached = _header_cache()[canonical];
-  if (cached is not void) return cached;
-  String relative = _root_relative(canonical);
-  if (!relative) return NULL;
-  if (artifact_loading.contains(relative)) return %(artifact-pending);
-  Var raw = artifact_index[relative];
-  if (raw is void) return NULL;
-  // Dropping the raw row prevents a second parse and compatibility decision.
-  artifact_index.del(relative);
+static List _interface_load(Compiler compiler, String canonical, String path) {
+  String source = NULL;
+  File input = fopen(path, "r");
+  if (!input) return NULL;
+  try source = input.string_close();
+  catch %(io-fail *): return NULL;
   unsigned cursor = 0;
   Var record = void;
   Symbol status = 0;
-  try {
-    status = Lisp.read(artifact_reader, raw, &cursor, &record);
-  }
+  try status = Lisp.read(_interface_lisp(), source, &cursor, &record);
   catch %(incomplete *): return NULL;
   catch %(malformed *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
-  List fields = record;
-  if (fields.len() != 5) return NULL;
-  Var (
-    stored_relative, expected_hash, gensyms, parts_value,
-    dependencies_value) = fields;
-  (void) stored_relative;
-  if (parts_value is not <list> || dependencies_value is not <list>)
-    return NULL;
-  artifact_loading[relative] = 1;
-  String root = _canonical_root(), path = %"$root/$relative";
-  String text = NULL;
-  if (!compiler.read_source(path, &text)) return _artifact_reject(relative);
-  String current = %"%08x".printf(String.hash(text));
-  if (!String.equal(current, expected_hash)) return _artifact_reject(relative);
-  Array parts = %[], List stored_parts = parts_value;
-  foreach (Var part, stored_parts) {
+  Var (owner, expected_hash, parts_value, definitions_value,
+       dependencies_value) = (List) NULL;
+  match (record.list()) {
+    case %(interface 1 ?(String stored) ?hash ?parts ?definitions ?deps): {
+      owner = stored;
+      expected_hash = hash;
+      parts_value = parts;
+      definitions_value = definitions;
+      dependencies_value = deps;
+    }
+    default: return NULL;
+  }
+  if (parts_value is not <list> || definitions_value is not <list> ||
+      dependencies_value is not <list>) return NULL;
+  if (!String.equal(_absolute_path(owner.str()), canonical)) return NULL;
+  if (!_hash_matches(compiler, canonical, expected_hash)) return NULL;
+  interface_loading[canonical] = 1;
+  Array parts = %[];
+  foreach (Var part, parts_value.list()) {
     if (part is <string>) {
-      String dep_full = %"$root/${part.string()}";
-      String dep_canonical = _canonical_path(dep_full);
-      if (!_artifact_fetch(compiler, dep_canonical))
-        return _artifact_reject(relative);
+      String dep_canonical = _canonical_path(_absolute_path(part));
+      if (!_interface_read(compiler, dep_canonical))
+        return _interface_reject(canonical);
       parts.push(dep_canonical);
       continue;
     }
-    if (part is not <list>) return _artifact_reject(relative);
+    if (part is not <list>) return _interface_reject(canonical);
     Scope.push(&header_cache_scope);
     Map contributions = %{};
     Scope.pop();
     foreach (Var row, part.list()) {
       if (row is not <list> || row.list().len() != 2)
-        return _artifact_reject(relative);
+        return _interface_reject(canonical);
       List pair = row;
       _require_header_cache_owner(pair.try_own());
       Var (contribution_key, contribution_value) = pair;
@@ -974,44 +923,102 @@ static List _artifact_fetch(Compiler compiler, String canonical) {
     Var contributions_var = contributions;
     parts.push(contributions_var);
   }
-  List part_list = parts.list_free();
   Scope.push(&header_cache_scope);
   Map dependencies = %{};
   Scope.pop();
-  List stored_dependencies = dependencies_value;
-  foreach (Var dependency, stored_dependencies) {
+  foreach (Var dependency, dependencies_value.list()) {
     if (dependency is not <list> || dependency.list().len() != 2)
-      return _artifact_reject(relative);
-    List row = dependency;
-    Var (dependency_name, content_hash) = row;
-    if (dependency_name is not <string>) return _artifact_reject(relative);
-    String dependency_path = _canonical_path(
-      %"$root/${dependency_name.string()}");
+      return _interface_reject(canonical);
+    Var (dependency_name, content_hash) = dependency.list();
+    if (dependency_name is not <string>) return _interface_reject(canonical);
+    String dependency_path =
+      _canonical_path(_absolute_path(dependency_name.str()));
     if (content_hash.is_integer() && content_hash.integer() == 1) {
       _cache_dependency(dependencies, dependency_path, content_hash);
       continue;
     }
-    if (content_hash is not <string>) return _artifact_reject(relative);
-    String dependency_text = NULL;
-    try {
-      if (!compiler.read_source(dependency_path, &dependency_text))
-        return _artifact_reject(relative);
-    }
-    catch %(io-fail *): return _artifact_reject(relative);
-    catch %(bad-arg *): return _artifact_reject(relative);
-    catch %(size-limit *): return _artifact_reject(relative);
-    String hash = %"%08x".printf(String.hash(dependency_text));
-    if (!String.equal(hash, content_hash)) return _artifact_reject(relative);
+    if (!_hash_matches(compiler, dependency_path, content_hash))
+      return _interface_reject(canonical);
     _cache_dependency(dependencies, dependency_path, content_hash);
   }
-  List definitions = NULL;
+  foreach (Var definition, definitions_value.list())
+    if (definition is not <string>) return _interface_reject(canonical);
+  List part_list = parts.list_free();
   List entry = %(
-    $part_list $gensyms $expected_hash $definitions
-    $dependencies
+    $part_list $expected_hash $definitions_value $dependencies
   );
   _require_header_cache_owner(canonical.try_own());
   _require_header_cache_owner(entry.try_own());
   _header_cache()[canonical] = entry;
-  artifact_loading.del(relative);
+  interface_loading.del(canonical);
   return entry;
+}
+
+/* Find and validate the interface of one canonical source path. A source
+   under inspection through a SourceView never reads interfaces. */
+static List _interface_read(Compiler compiler, String canonical) {
+  if (compiler.source_facts || !interface_search_dirs) return NULL;
+  Var cached = _header_cache()[canonical];
+  if (cached is not void) return cached;
+  _interface_lisp();
+  if (interface_loading.contains(canonical)) return %(interface-pending);
+  foreach (String path, _interface_candidates(canonical)) {
+    List entry = _interface_load(compiler, canonical, path);
+    if (entry) return entry;
+  }
+  return NULL;
+}
+
+static int _write_interface_entry(File output, String canonical, List entry) {
+  (List cached_parts, Var hash, List definitions, Map cached_dependencies) =
+    entry;
+  Array parts = %[];
+  foreach (Var part, cached_parts) {
+    if (part is <map>) {
+      Array rows = %[], Map contributions = part;
+      foreach (Var (row_key, row_value), contributions)
+        rows.push(%($row_key $row_value));
+      rows.sort();
+      Var rows_var = rows.list_free();
+      parts.push(rows_var);
+      continue;
+    }
+    parts.push(_portable_path(part));
+  }
+  Array dependencies = %[];
+  foreach (Var (path, content_hash), cached_dependencies)
+    dependencies.push(%(${_portable_path(path)} $content_hash));
+  dependencies.sort();
+  List dependency_list = dependencies.list_free();
+  List part_list = parts.list_free();
+  List record = %(
+    interface 1 ${_portable_path(canonical)} $hash
+    $part_list $definitions $dependency_list
+  );
+  return snapshot_write_var(output, record) && output.putc('\n') != EOF;
+}
+
+/** Writes the compiler's own collected contribution to `path`.
+    The unit must have collected its symbols; otherwise nothing is written.
+    A process-specific sibling is written and renamed into place, so a
+    failure leaves any existing interface intact and is reported as an
+    `emit` diagnostic.
+*/
+void interface_write(Compiler compiler, String path) {
+  String canonical = _canonical_path(compiler.filename);
+  Var cached = _header_cache()[canonical];
+  if (cached is void) return;
+  String temporary = %"$path.tmp.%ld".printf((long) getpid());
+  File output = fopen(temporary, "w");
+  int written = output != NULL;
+  if (written) {
+    written = _write_interface_entry(output, canonical, cached);
+    if (output.close()) written = 0;
+  }
+  if (written && !rename(temporary, path)) return;
+  String reason = %"%s".printf(strerror(errno));
+  unlink(temporary);
+  compiler.report_error(
+    <emit>, "failed to write interface file", NULL,
+    %("file: $path" "reason: $reason"));
 }

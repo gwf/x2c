@@ -190,12 +190,6 @@ static CliOption cli_options[] = {
     "Print the compiler cache and stop", 0 },
   { <conform>, CLI_TRANSLATE, <inspection>,
     "--dump-conformance", NULL, "Print protocol conformance and stop", 0 },
-  { <snapshot>, CLI_TRANSLATE, <inspection>,
-    "--dump-symbol-snapshot", NULL,
-    "Print a complete symbol snapshot and stop", 0 },
-  { <hdr-syms>, CLI_TRANSLATE, <inspection>,
-    "--dump-header-symbols", NULL,
-    "Print the header-symbol artifact and stop", 0 },
   { 0 }
 };
 
@@ -738,7 +732,7 @@ static void _apply_option(
     case <cpp-syms>: c.cpp_symbols = 1; break;
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
-    case <dump-cache>: case <conform>: case <snapshot>: case <hdr-syms>:
+    case <dump-cache>: case <conform>:
       c.dump = option.id;
       break;
     case <prefix>: c.prefix = value; break;

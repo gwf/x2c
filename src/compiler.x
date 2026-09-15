@@ -27,7 +27,7 @@ typedef struct Diagnostics *Diagnostics;
     the compiler rather than constructing or freeing it.
 */
 typedef struct GenNames {
-  Map counters, adapters, int gensym_count;
+  Map counters, adapters;
 } *GenNames;
 
 /** Holds the three mutable maps that form one lexical semantic scope.
@@ -129,6 +129,9 @@ List Compiler.lift_func_expression(Compiler compiler, List expression);
 #include "parse.x"
 #include "protocol.x"
 #include "macros.x"
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /** Merges one translation dependency, preserving an existing content hash. */
@@ -1074,7 +1077,6 @@ static List _replay_declaration_bundle(Compiler compiler) {
 static void _shallow_parse_unit_macro(Compiler compiler) {
   with compiler.names {
     Map saved_counters = _.counters;
-    int saved_gensym = _.gensym_count;
     _.counters = _.counters.copy();
     with compiler {
       SymTxn transaction = _.begin_semantic_transaction();
@@ -1088,7 +1090,6 @@ static void _shallow_parse_unit_macro(Compiler compiler) {
        by later shallow invocations, but do not count its generated names
        twice. */
     _.counters = saved_counters;
-    _.gensym_count = saved_gensym;
   }
 }
 
@@ -1667,7 +1668,7 @@ typedef struct SymTxn {
   Compiler compiler;
   int scope_index, next_binding, active, String initializer_name;
   String shutdown_name, Map counters;
-  int gensym_count, local_macro_names;
+  int local_macro_names;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;
@@ -1689,7 +1690,6 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
     _semantic_scope(c.sym, transaction.scope_index);
   transaction.scope = *scope;
   transaction.counters = c.names.counters;
-  transaction.gensym_count = c.names.gensym_count;
   transaction.statics = c.sym.statics;
   transaction.binding_facts = c.semantic_binding_facts();
   transaction.next_binding = c.sym.next_binding;
@@ -1762,7 +1762,6 @@ void SymTxn.rollback(SymTxn transaction) {
     _.sym.next_binding = transaction.next_binding;
     _.sym.local_macro_names = transaction.local_macro_names;
     _.names.counters = transaction.counters;
-    _.names.gensym_count = transaction.gensym_count;
     _.init_fn = transaction.initializer_name;
     _.fini_fn = transaction.shutdown_name;
     if (_.source_facts && _.source_primary) {
@@ -1902,7 +1901,7 @@ List Sym.lookup_macro(Sym sym, Atom name) {
 
 static int _retained_aggregate_member(List key) =>
   !!key.match(%((!or struct union)
-    (!or (binding ? ?) (gensym ?)) ? *));
+    (!or (binding ? ?) (gensym ? ?)) ? *));
 
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym sym, List key, List type) {
@@ -2868,15 +2867,34 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
   return type && type.is_aggregate_tag() ? type : NULL;
 }
 
-/** Returns a fresh semantic identity for an anonymous aggregate. */
-List Compiler.gensym(Compiler compiler) {
-  compiler.names.gensym_count++;
-  return %((gensym ${compiler.names.gensym_count}));
+/* The current file's spelling in generated identities: repository-relative
+   when it lies under the root, otherwise its canonical path. */
+static String _gensym_owner(Compiler compiler) {
+  if (!compiler.filename) return %"";
+  char buffer[PATH_MAX];
+  String path = compiler.sources ? SourceView.path(compiler.filename) :
+                realpath(compiler.filename, buffer) ? %"$buffer" :
+                compiler.filename;
+  static char root[PATH_MAX];
+  if (!*root && !realpath(x2c_get_root(), root))
+    snprintf(root, sizeof root, "%s", (char *) x2c_get_root());
+  String prefix = %"$root/";
+  return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
-/** Sets the shared anonymous-aggregate counter used before the next result. */
-void Compiler.set_gensym(Compiler compiler, int count)
-  { compiler.names.gensym_count = count; }
+/** Returns a fresh semantic identity for an anonymous aggregate.
+    Identities are scoped to the compiler's current file and numbered per
+    file, so every process mints the same sequence for one file and two
+    files never share an identity. No emission path prints one.
+*/
+List Compiler.gensym(Compiler compiler) {
+  String owner = _gensym_owner(compiler), key = %"gensym:$owner";
+  Var stored;
+  int count = compiler.names.counters.try_get(key, &stored)
+            ? stored.int() + 1 : 1;
+  compiler.names.counters[key] = count;
+  return %((gensym $owner $count));
+}
 
 /** Pushes a new empty lexical scope. */
 void Sym.push_new_scope(Sym sym) {

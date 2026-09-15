@@ -1445,7 +1445,7 @@ static List Emitter._capture_source(
       if (node.car() == <enum>) {
         reference = %(enum ${node.cadr()});
         match (node)
-          case %(enum (gensym ?) ?body): {
+          case %(enum (gensym ? ?) ?body): {
             String name = e.fresh_name("static_enum");
             definition = %(enum $name $body);
             reference = %(enum $name);

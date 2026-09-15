@@ -31,7 +31,7 @@ typedef struct Frontend {
 typedef struct ParsedUnit {
   Context context;
   Compiler compiler, preprocessor;
-  Map globals, snapshot_statics;
+  Map globals;
   List ast;
   String preprocessor_output, preprocessor_errors;
   int source_lines, generated_symbols;
@@ -46,18 +46,9 @@ typedef struct ParsedUnit {
 #include <sys/stat.h>
 #include "collect.x"
 #include "deps.x"
-#include "snapshot.x"
 #include "utils.x"
 
 static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
-
-/* The tracked symbol snapshot defines the prelude environment, so its own
-   dump walks lib/x2c.x cold: no snapshot base, no header artifact, and no
-   preprocessor. Either transport flag asks for the host route instead. */
-static int _raw_snapshot_dump(CliRequest request) {
-  return request.dump == <snapshot> && !request.live_symbols &&
-         !request.cpp_symbols;
-}
 
 static int _source_lines(String text) {
   if (!text) return 0;
@@ -73,54 +64,11 @@ static Token _first_preprocessor_token(Compiler compiler) {
   return compiler.token;
 }
 
-// Process-lifetime symbol snapshot, loaded once in the root epoch so
-// every translation unit shares the interned rows.
-static Map snapshot_globals;
-static Map snapshot_function_definitions, static String snapshot_error;
-static int snapshot_gensym, snapshot_loaded;
-
-/* Generated-name counter for the whole process rather than per unit. The
-   header-contribution cache outlives a unit, and its rows embed the gensym
-   numbers allocated when the header was first walked. Restarting the counter
-   at the snapshot base for every unit let a later unit mint a number a
-   cached row already held. Two anonymous aggregates then shared one key
-   and the second won. The numbers are compiler-internal and no emission
-   path prints one, so they need only be unique. */
-static int gensym_cursor;
-static int header_symbols_loaded;
-
-// Load the symbol snapshot once; errors are reported per file because
-// diagnostics need a tokenized compiler for their anchor token.
-static void _load_snapshot_once(void) {
-  if (snapshot_loaded) return;
-  snapshot_loaded = 1;
-  String snapshot_path = %"${x2c_get_root()}/etc/symbols.xlisp";
-  try snapshot_globals = symbol_snapshot_load(
-    snapshot_path, &snapshot_function_definitions, &snapshot_gensym);
-  catch %(not-found *):
-    snapshot_error = %"missing symbol snapshot: $snapshot_path";
-  catch %(io-fail *):
-    snapshot_error = %"cannot read symbol snapshot: $snapshot_path";
-  catch %(incomplete *):
-    snapshot_error = %"incomplete symbol snapshot: $snapshot_path";
-  catch %(malformed *):
-    snapshot_error = %"malformed symbol snapshot: $snapshot_path";
-}
-
-/** Loads process-owned type, snapshot, and header support before units. */
+/** Loads process-owned type and collection support before units. */
 void Frontend.load_support(CliRequest request) {
   Type.initialize();
   header_symbols_initialize();
-  int raw_snapshot = _raw_snapshot_dump(request);
-  if (!request.live_symbols && !request.no_cpp && !raw_snapshot)
-    _load_snapshot_once();
-  if (request.no_cpp || raw_snapshot || request.source_facts ||
-      request.dump == <hdr-syms> ||
-      request.live_symbols || header_symbols_loaded)
-    return;
-  String artifact = %"${x2c_get_root()}/etc/header-symbols.xlisp";
-  header_symbols_open(artifact, snapshot_gensym);
-  header_symbols_loaded = 1;
+  interface_configure(request.out_dir);
 }
 
 /** Borrows a configured request for sequential units. The request and this
@@ -137,11 +85,6 @@ Frontend Frontend.new(CliRequest request) {
     request.cc, request.ar, request.cpp_args, request.cc_args,
     request.ld_args, request.verbose, request.dry_run);
   return frontend;
-}
-
-/** Writes collected header symbols using the loaded snapshot's name base. */
-int Frontend.write_header_symbols(File output) {
-  return header_symbols_write(output, snapshot_gensym);
 }
 
 static String _unreadable_input(
@@ -243,31 +186,11 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   CliRequest request = frontend.request;
   String filename = c.filename;
   if (request.no_cpp) return NULL;
-  if (_raw_snapshot_dump(request)) {
-    c.runtime_hdrs = 1;
-    return c.collect_symbols(NULL);
-  }
-  String root = x2c_get_root(), int use_snapshot = !request.live_symbols;
+  String root = x2c_get_root(), int use_prelude = !request.live_symbols;
   Map globs = NULL;
-  if (use_snapshot) {
-    if ((void *) snapshot_globals == NULL)
-      c.report_error(
-        <driver>, snapshot_error,
-        _first_preprocessor_token(c), NULL);
-    // One copy per translation unit. collect_symbols merges the unit's
-    // own symbols into its argument, and units must not see each other's
-    // additions.
-    globs = snapshot_globals.copy();
-    c.fn_defs = snapshot_function_definitions.copy();
-    if (gensym_cursor < snapshot_gensym) gensym_cursor = snapshot_gensym;
-    c.set_gensym(gensym_cursor);
-  }
   int use_cpp = request.cpp_symbols || request.live_symbols ||
                 cpp_dumps.contains(request.dump);
-  if (use_snapshot && !use_cpp) {
-    Map result = c.collect_symbols(globs);
-    return result;
-  }
+  if (use_prelude && !use_cpp) return c.collect_symbols(NULL);
   Compiler cppcompiler = Compiler.new_shared(c);
   unit->preprocessor = cppcompiler;
   cppcompiler.filename = filename;
@@ -301,23 +224,15 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   cppcompiler.macro_lisp = c.macro_lisp;
   cppcompiler.borrowed_lisp = cppcompiler.macro_lisp != NULL;
   Map saved_counters = NULL;
-  int saved_gensym = 0;
   if (!request.live_symbols) {
     saved_counters = c.names.counters;
-    saved_gensym = c.names.gensym_count;
     c.names.counters = c.names.counters.copy();
   }
   cppcompiler.shallow_parse(globs);
   globs = cppcompiler.sym.global_symbols();
-  if (!request.live_symbols) {
-    /* Owning-source collection already counted declaration names. CPP adds
-       host declarations without counting the same source's names again. */
-    c.names.counters = saved_counters;
-    c.names.gensym_count = saved_gensym;
-  }
-  if (request.dump == <snapshot>)
-    unit->snapshot_statics =
-      cppcompiler.sym.file_statics().copy();
+  /* Owning-source collection already counted declaration names. CPP adds
+     host declarations without counting the same source's names again. */
+  if (!request.live_symbols) c.names.counters = saved_counters;
   return globs;
 }
 
@@ -399,8 +314,6 @@ int Frontend.open(Frontend frontend, String filename, ParsedUnit *unit) {
 void ParsedUnit.close(ParsedUnit *unit) {
   if (!unit->context) return;
   Compiler compiler = unit->compiler;
-  if (gensym_cursor < compiler.names.gensym_count)
-    gensym_cursor = compiler.names.gensym_count;
   if (unit->preprocessor) compiler.close_child(unit->preprocessor);
   compiler.free_lisp();
   Type.end_unit();

@@ -315,7 +315,7 @@ static uint64_t _translation_fingerprint(
   hash = _state_list(hash, request.package_dirs);
   hash = _state_list(hash, request.cpp_args);
   hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
-  hash = _state_text(hash, request.live_symbols ? %"live" : %"snapshot");
+  hash = _state_text(hash, request.live_symbols ? %"live" : %"prelude");
   hash = _state_text(hash, request.cpp_symbols ? %"cpp-symbols" : %"raw");
   hash = _state_text(
     hash, request.source_map ? %"source-map" : %"generated-lines");
@@ -333,6 +333,7 @@ int Build.translation_current(Build state, String input, String directory) {
   String stem = x2c_path_stem(input);
   if (access(%"$directory/$stem.c", R_OK)) return 0;
   if (access(%"$directory/$stem.h", R_OK)) return 0;
+  if (access(%"$directory/$stem.xi", R_OK)) return 0;
   int ok = 1;
   uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
   String path = %"${state.state_root}/x-${_key(input)}";
