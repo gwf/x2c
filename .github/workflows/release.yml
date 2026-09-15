@@ -124,6 +124,7 @@ jobs:
           [ -s bundles.txt ] || { echo "no package bundles" >&2; exit 1; }
           xargs python3 tools/gen-package-index.py --output release \
             --base "https://github.com/$GITHUB_REPOSITORY/releases/download/v$version" \
+            --x2c-version "x2c $version" \
             --package-dir examples/packages --package-dir packages <bundles.txt
           (cd release && sha256sum -- * >SHA256SUMS)
           ls -l release

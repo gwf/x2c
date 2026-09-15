@@ -73,6 +73,9 @@ def main():
                       help="directory receiving index.txt and source archives")
   parser.add_argument("--package-dir", action="append", default=[],
                       type=Path, help="directory of source packages")
+  parser.add_argument("--x2c-version",
+                      help="version line for the index header; defaults to "
+                           "what builds/0/x2c --version prints")
   parser.add_argument("bundles", nargs="*", type=Path,
                       help="<name>-native.tar.gz bundles to list")
   args = parser.parse_args()
@@ -83,7 +86,7 @@ def main():
     rows.extend(source_rows(packages, args.output, args.base))
   for tarball in args.bundles:
     rows.append(bundle_row(tarball, args.output, args.base))
-  version = subprocess.check_output(
+  version = args.x2c_version or subprocess.check_output(
     [str(ROOT / "builds/0/x2c"), "--version"], text=True).strip()
   lines = [f"# x2c package index for {version}",
            "# name version kind platform url sha256"]
