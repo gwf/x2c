@@ -1,6 +1,6 @@
 loss 4702.386283
-d/drate     -15650.816053  finite difference -15650.816049
-d/dcapacity -118.848124  finite difference -118.848118
+d/drate     -15650.816  finite difference -15650.816
+d/dcapacity -118.848  finite difference -118.848
 step 50  loss   2.373136  rate 0.9140  capacity 49.1688
 step 100  loss   0.014606  rate 0.9016  capacity 49.9274
 step 150  loss   0.000256  rate 0.9007  capacity 49.9874
