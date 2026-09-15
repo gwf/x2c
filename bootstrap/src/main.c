@@ -62,6 +62,8 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build);
 
 static CliRequest _build_translation_request(CliRequest source, List inputs, String output_dir);
 
+static int _translate_units(CliRequest c, Build state, List units);
+
 static int _run_build_request(CliRequest c, Array commands);
 
 static int _run_build(CliRequest request);
@@ -648,6 +650,89 @@ static CliRequest _build_translation_request(CliRequest source, List inputs, Str
   return request;
 }
 
+String Build_generated_dir(Build, String);
+
+int Build_translation_current(Build, String, String);
+
+Var Map_setindex(Map, Var, Var);
+
+int Map_contains(Map, Var);
+
+void Build_record_translation(Build, String, String);
+
+void Build_add_generated(Build, String, String);
+
+static int _translate_units(CliRequest c, Build state, List units){
+  Array stale = Array_new();
+  Map stale_dirs = Map_new();
+  {
+    String input;
+    List _x2c_macro_object_8 = units;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+      input = Var_string(_x2c_macro_cursor_output_8);
+      {
+        if(! String_endswith(input, _12)) continue;
+        String directory = Build_generated_dir(state, input);
+        if(Build_translation_current(state, input, directory)){
+          Build_begin_translation(state, input);
+          Build_end_translation(state, input, 1);
+          continue;
+        }
+        Map_setindex(stale_dirs, String_var(input), String_var(directory));
+        Array_push(stale, String_var(input));
+      }
+
+    }
+
+  }
+  List inputs = Array_list_free(stale);
+  if(! c -> dry_run && c -> jobs > 1 && List_truth(inputs)){
+    CliRequest translation = _build_translation_request(c, inputs, state -> gen_root);
+    if(_run_translation(translation, stale_dirs, state)) return 1;
+  }
+  else{
+    String input;
+    List _x2c_macro_object_9 = inputs;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+      input = Var_string(_x2c_macro_cursor_output_9);
+      {
+        CliRequest translation = _build_translation_request(c, cons(String_var(input), NULL), _unit_output_dir(c, stale_dirs, input));
+        if(! c -> dry_run && _run_translation(translation, NULL, state)) return 1;
+      }
+
+    }
+
+  }
+  {
+    String input;
+    List _x2c_macro_object_10 = units;
+    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
+      input = Var_string(_x2c_macro_cursor_output_10);
+      {
+        if(! String_endswith(input, _12)) continue;
+        int cached = ! Map_contains(stale_dirs, String_var(input));
+        String directory = Build_generated_dir(state, input);
+        if(c -> dry_run && ! cached){
+          Build_begin_translation(state, input);
+          fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
+          Build_end_translation(state, input, 0);
+        }
+        if(! c -> dry_run && ! cached) Build_record_translation(state, input, directory);
+        Build_add_generated(state, input, directory);
+      }
+
+    }
+
+  }
+  return 0;
+}
+
 void Frontend_load_support(CliRequest);
 
 Context Context_open_isolated_named(const char *);
@@ -656,19 +741,9 @@ Build CliRequest_prepare(CliRequest);
 
 Var Context_export(Context, Var);
 
-String Build_generated_dir(Build, String);
-
-int Build_translation_current(Build, String, String);
-
-Var Map_setindex(Map, Var, Var);
+List Build_script_helpers(Build);
 
 void Build_cleanup(Build, int);
-
-int Map_contains(Map, Var);
-
-void Build_record_translation(Build, String, String);
-
-void Build_add_generated(Build, String, String);
 
 int Build_finish(Build);
 
@@ -686,11 +761,11 @@ static int _run_build_request(CliRequest c, Array commands){
   if(! c -> dry_run){
     {
       String input;
-      List _x2c_macro_object_8 = c -> inputs;
-      List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-      Var _x2c_macro_cursor_output_8;
-      while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
-        input = Var_string(_x2c_macro_cursor_output_8);
+      List _x2c_macro_object_11 = c -> inputs;
+      List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+      Var _x2c_macro_cursor_output_11;
+      while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
+        input = Var_string(_x2c_macro_cursor_output_11);
         {
           if(! String_endswith(input, _12)) continue;
           Frontend_load_support(c);
@@ -715,105 +790,28 @@ static int _run_build_request(CliRequest c, Array commands){
     Build state = CliRequest_prepare(c);
     c -> cc = Var_string(Context_export(target, String_var(c -> cc)));
     c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
-    Array stale = Array_new();
-    Map stale_dirs = Map_new();
-    {
-      String input;
-      List _x2c_macro_object_9 = c -> inputs;
-      List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-      Var _x2c_macro_cursor_output_9;
-      while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
-        input = Var_string(_x2c_macro_cursor_output_9);
-        {
-          if(! String_endswith(input, _12)) continue;
-          String directory = Build_generated_dir(state, input);
-          if(Build_translation_current(state, input, directory)){
-            Build_begin_translation(state, input);
-            Build_end_translation(state, input, 1);
-            continue;
-          }
-          Map_setindex(stale_dirs, String_var(input), String_var(directory));
-          Array_push(stale, String_var(input));
-        }
-
-      }
-
-    }
-    List inputs = Array_list_free(stale);
-    if(! c -> dry_run && c -> jobs > 1 && List_truth(inputs)){
-      CliRequest translation = _build_translation_request(c, inputs, state -> gen_root);
-      if(_run_translation(translation, stale_dirs, state)){
-        Build_cleanup(state, 0);
-        {
-          int _x2c_return_value_0 = 1;
-          {
-            x2c_cleanup_leave(& _x2c_defer_record_1);
-            return _x2c_return_value_0;
-          }
-
-        }
-
-      }
-
-    }
-    else{
-      String input;
-      List _x2c_macro_object_10 = inputs;
-      List _x2c_macro_cursor_10 = _x2c_macro_object_10;
-      Var _x2c_macro_cursor_output_10;
-      while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
-        input = Var_string(_x2c_macro_cursor_output_10);
-        {
-          CliRequest translation = _build_translation_request(c, cons(String_var(input), NULL), _unit_output_dir(c, stale_dirs, input));
-          if(! c -> dry_run && _run_translation(translation, NULL, state)){
-            Build_cleanup(state, 0);
-            {
-              int _x2c_return_value_1 = 1;
-              {
-                x2c_cleanup_leave(& _x2c_defer_record_1);
-                return _x2c_return_value_1;
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
-    }
-    {
-      String input;
-      List _x2c_macro_object_11 = c -> inputs;
-      List _x2c_macro_cursor_11 = _x2c_macro_object_11;
-      Var _x2c_macro_cursor_output_11;
-      while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
-        input = Var_string(_x2c_macro_cursor_output_11);
-        {
-          if(! String_endswith(input, _12)) continue;
-          int cached = ! Map_contains(stale_dirs, String_var(input));
-          String directory = Build_generated_dir(state, input);
-          if(c -> dry_run && ! cached){
-            Build_begin_translation(state, input);
-            fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
-            Build_end_translation(state, input, 0);
-          }
-          if(! c -> dry_run && ! cached) Build_record_translation(state, input, directory);
-          Build_add_generated(state, input, directory);
-        }
-
-      }
-
-    }
-    int result = Build_finish(state);
+    int result = _translate_units(c, state, c -> inputs);
+    if(! result && c -> command == 1282559016 && ! c -> dry_run) result = _translate_units(c, state, Build_script_helpers(state));
     if(result){
       Build_cleanup(state, 0);
       {
-        int _x2c_return_value_2 = result;
+        int _x2c_return_value_0 = 1;
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_2;
+          return _x2c_return_value_0;
+        }
+
+      }
+
+    }
+    result = Build_finish(state);
+    if(result){
+      Build_cleanup(state, 0);
+      {
+        int _x2c_return_value_1 = result;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
         }
 
       }
@@ -833,10 +831,10 @@ static int _run_build_request(CliRequest c, Array commands){
     if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands, commands)){
       Build_cleanup(state, 0);
       {
-        int _x2c_return_value_3 = 1;
+        int _x2c_return_value_2 = 1;
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_3;
+          return _x2c_return_value_2;
         }
 
       }
@@ -847,10 +845,10 @@ static int _run_build_request(CliRequest c, Array commands){
     else if(c -> command == 1282559016 && ! c -> dry_run) Build_publish_script(state, String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_33), NULL))));
     Build_cleanup(state, 1);
     {
-      int _x2c_return_value_4 = result;
+      int _x2c_return_value_3 = result;
       {
         x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_4;
+        return _x2c_return_value_3;
       }
 
     }
@@ -997,7 +995,7 @@ int editor_request(int, char * *);
 
 CliRequest cli_parse(int, char * *);
 
-void script_prepare(CliRequest);
+int script_prepare(CliRequest);
 
 void report_configure(int, int, Symbol, int, int, int);
 
@@ -1018,7 +1016,7 @@ int main(int argc, char * * argv){
     return editor_request(argc - 1, argv + 1);
   }
   CliRequest request = cli_parse(argc, argv);
-  if(request -> command == 1282559016) script_prepare(request);
+  if(request -> command == 1282559016 && script_prepare(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);
   if(request -> command == 11180) return _run_env(request);

@@ -43,6 +43,8 @@ ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_ru
 
 void ToolAction_as_program(ToolAction action);
 
+List Toolchain_search_directories(Toolchain toolchain);
+
 ToolRun ToolAction_start(ToolAction action);
 
 int ToolRun_ready(ToolRun execution);

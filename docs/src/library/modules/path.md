@@ -24,7 +24,7 @@ Filesystem operations on path `String`s.
 | [`String.join_path`](#String.join_path) | Returns `name` joined to `base` with one separating slash. |
 | [`String.list_dir`](#String.list_dir) | Returns the names in the directory `path`, sorted, without `.` and `..`. |
 | [`String.make_dirs`](#String.make_dirs) | Creates the directory `path` and any missing parents. |
-| [`String.modified_time`](#String.modified_time) | Returns the modification time of `path` in seconds since the epoch. |
+| [`String.modified_time`](#String.modified_time) | Returns the modification time of `path` in seconds since the epoch, with the fraction the filesystem records. |
 | [`String.move_to`](#String.move_to) | Moves `source` to `target`, copying and removing when they are on different filesystems. |
 | [`String.read_text`](#String.read_text) | Returns the contents of the file at `path`, or NULL when it is empty. |
 | [`String.remove_file`](#String.remove_file) | Removes the file or symbolic link `path` when it exists. |
@@ -32,7 +32,7 @@ Filesystem operations on path `String`s.
 | [`String.stem`](#String.stem) | Returns `path`'s last component without its extension. |
 | [`String.symlink_to`](#String.symlink_to) | Creates the symbolic link `link` pointing at `target`. |
 | [`String.temp_dir`](#String.temp_dir) | Creates a new private directory under `TMPDIR`, or `/tmp`, and returns its path. |
-| [`String.walk`](#String.walk) | Returns every path below the directory `root`, parents before their contents and siblings sorted. |
+| [`String.walk`](#String.walk) | Returns a lazy iterator over every path below the directory `root`, parents before their contents and siblings sorted. |
 | [`String.write_text`](#String.write_text) | Replaces the contents of the file at `path` with `text`. |
 
 ### `String`
@@ -71,7 +71,7 @@ giving it `source`'s permission bits.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:340`
+Source: `lib/path.x:406`
 
 <a id="String.copy_tree"></a>
 #### String.copy_tree
@@ -83,7 +83,7 @@ a link, and a regular file with `String.copy_file`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:354`
+Source: `lib/path.x:420`
 
 <a id="String.dirname"></a>
 #### String.dirname
@@ -132,19 +132,22 @@ Source: `lib/path.x:144`
 
 Returns the existing paths that match the glob `pattern`, sorted.
 The walk starts at the longest leading directory without a wildcard and
-descends only as deep as the pattern can match. No match returns an
-empty `List`.
+descends only as deep as the pattern can match. As in a shell, a name
+that begins with a dot matches only where the pattern spells the dot.
+No match returns an empty `List`.
 
-Source: `lib/path.x:249`
+Source: `lib/path.x:301`
 
 <a id="String.glob_match"></a>
 #### String.glob_match
 
 `int String.glob_match(String pattern, String path)`
 
-Reports whether all of `path` matches the glob `pattern`.
+Reports whether all of `path` matches the glob `pattern`. A path
+component that begins with a dot matches only a pattern component that
+begins with one.
 
-Source: `lib/path.x:241`
+Source: `lib/path.x:292`
 
 <a id="String.is_dir"></a>
 #### String.is_dir
@@ -183,7 +186,7 @@ Returns the names in the directory `path`, sorted, without `.` and `..`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:156`
+Source: `lib/path.x:163`
 
 <a id="String.make_dirs"></a>
 #### String.make_dirs
@@ -196,18 +199,19 @@ An existing directory is left as it is.
 **Raises:** `<io-fail>` when a component cannot be created or `path` names
 an existing non-directory, or `<not-found>`.
 
-Source: `lib/path.x:277`
+Source: `lib/path.x:331`
 
 <a id="String.modified_time"></a>
 #### String.modified_time
 
-`long String.modified_time(String path)`
+`double String.modified_time(String path)`
 
-Returns the modification time of `path` in seconds since the epoch.
+Returns the modification time of `path` in seconds since the epoch,
+with the fraction the filesystem records.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:150`
+Source: `lib/path.x:151`
 
 <a id="String.move_to"></a>
 #### String.move_to
@@ -219,7 +223,7 @@ different filesystems.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:379`
+Source: `lib/path.x:445`
 
 <a id="String.read_text"></a>
 #### String.read_text
@@ -231,7 +235,7 @@ Returns the contents of the file at `path`, or NULL when it is empty.
 **Raises:** `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
 a NUL byte.
 
-Source: `lib/path.x:397`
+Source: `lib/path.x:463`
 
 <a id="String.remove_file"></a>
 #### String.remove_file
@@ -242,7 +246,7 @@ Removes the file or symbolic link `path` when it exists.
 
 **Raises:** `<io-fail>` when it exists and cannot be removed.
 
-Source: `lib/path.x:297`
+Source: `lib/path.x:351`
 
 <a id="String.remove_tree"></a>
 #### String.remove_tree
@@ -255,7 +259,7 @@ entry that cannot be removed.
 
 **Raises:** `<io-fail>` naming the first path that could not be removed.
 
-Source: `lib/path.x:328`
+Source: `lib/path.x:394`
 
 <a id="String.stem"></a>
 #### String.stem
@@ -275,7 +279,7 @@ Creates the symbolic link `link` pointing at `target`.
 
 **Raises:** `<io-fail>` when the link cannot be created.
 
-Source: `lib/path.x:389`
+Source: `lib/path.x:455`
 
 <a id="String.temp_dir"></a>
 #### String.temp_dir
@@ -287,21 +291,32 @@ its path. The caller removes it, usually with `String.remove_tree`.
 
 **Raises:** `<io-fail>` when the directory cannot be created.
 
-Source: `lib/path.x:413`
+Source: `lib/path.x:479`
 
 <a id="String.walk"></a>
 #### String.walk
 
-`List String.walk(String root)`
+`Iter String.walk(String root, Iter dest)`
 
-Returns every path below the directory `root`, parents before their
-contents and siblings sorted. Symbolic links to directories are listed
-but not followed, and a directory that cannot be read is listed without
-its contents.
+Returns a lazy iterator over every path below the directory `root`,
+parents before their contents and siblings sorted. Symbolic links to
+directories are listed but not followed, and a directory that cannot be
+read is listed without its contents. Only the paths not yet visited are
+held; the yielded `String`s live in the active pool.
 
-**Raises:** `<not-found>` or `<io-fail>`.
+```x2c
+~#include "path.x"
+~int main(void) {
+foreach (String path, %"src".walk()) printf("%s\n", path);
+long units = %"src".walk().filter(%!(p) => p.str().endswith(".x")).count();
+~  return units >= 0 ? 0 : 1;
+~}
+```
 
-Source: `lib/path.x:183`
+**Raises:** `<not-found>` or `<io-fail>` when `root` cannot be listed, and
+`<io-fail>` from a pull when a directory vanishes during the walk.
+
+Source: `lib/path.x:214`
 
 <a id="String.write_text"></a>
 #### String.write_text
@@ -312,7 +327,7 @@ Replaces the contents of the file at `path` with `text`.
 
 **Raises:** `<not-found>` when the directory does not exist, or `<io-fail>`.
 
-Source: `lib/path.x:403`
+Source: `lib/path.x:469`
 
 ## Design notes
 

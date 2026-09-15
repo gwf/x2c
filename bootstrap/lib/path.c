@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _7, _6, _5, _4, _3, _2, _1, _0;
+static String _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <dirent.h>
 #include <errno.h>
@@ -24,11 +24,17 @@ static int _trimmed_length(String path);
 
 static struct stat _stat(const char * operation, String path);
 
-static void _walk(String directory, int depth, Array paths);
+static int _descends(String path);
+
+static void _push_children(Array pending, String directory);
+
+static int _walk_next(Iter iter, Var * out);
+
+static void _walk(String directory, int depth, int hidden, Array paths);
 
 static int _class_match(const char * * pattern, unsigned char value);
 
-static int _glob_match(const char * pattern, const char * text);
+static int _glob_match(const char * pattern, const char * text, const char * origin);
 
 static void _remove_tree(String path, String * failed, int * failure);
 
@@ -53,6 +59,13 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_3;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -64,7 +77,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new("**");
   _5 = String_new(".");
   _6 = String_new("/tmp");
-  _7 = String_new("x2c-XXXXXX");
+  _7 = String_new("/.");
+  _8 = String_new("x2c-XXXXXX");
 }
 
 Var Symbol_var(Symbol);
@@ -211,8 +225,14 @@ long String_file_size(String path){
   return(long) _stat("String.file_size", path).st_size;
 }
 
-long String_modified_time(String path){
-  return(long) _stat("String.modified_time", path).st_mtime;
+double String_modified_time(String path){
+  struct stat info = _stat("String.modified_time", path);
+#ifdef __APPLE__
+  return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
+#else
+  return info.st_mtim.tv_sec + info.st_mtim.tv_nsec / 1e9;
+#endif
+
 }
 
 Var Array_push(Array, Var);
@@ -231,32 +251,74 @@ List String_list_dir(String path){
   return Array_list_free(Array_sort(names));
 }
 
-static void _walk(String directory, int depth, Array paths){
+static int _descends(String path){
+  struct stat info;
+  return lstat(path, & info) == 0 && S_ISDIR(info.st_mode) && access(path, R_OK | X_OK) == 0;
+}
+
+List List_reverse(List);
+
+static void _push_children(Array pending, String directory){
+  List children = List_reverse(String_list_dir(directory));
   {
     String name;
-    List _x2c_macro_object_1 = String_list_dir(directory);
+    List _x2c_macro_object_1 = children;
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       name = Var_string(_x2c_macro_cursor_output_1);
-      {
-        String child = String_join_path(directory, name);
-        struct stat info;
-        Array_push(paths, String_var(child));
-        if(depth != 1 && lstat(child, & info) == 0 && S_ISDIR(info.st_mode) && access(child, R_OK | X_OK) == 0) _walk(child, depth - 1, paths);
-      }
-
+      Array_push(pending, String_var(String_join_path(directory, name)));
     }
 
   }
 
 }
 
-List String_walk(String root){
+Array Var_array(Var);
+
+Var Array_take_last(Array);
+
+static int _walk_next(Iter iter, Var * out){
+  Array pending = Var_array(iter -> state);
+  if(! Array_truth(pending) || ! Array_len(pending)) return 0;
+  String path = Var_string(Array_take_last(pending));
+  if(_descends(path)) _push_children(pending, path);
+  * out = String_var(path);
+  return 1;
+}
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
+
+Var Array_var(Array);
+
+Iter String_walk(String root, Iter dest){
   if(! _init_guard_) _file_init_();
-  Array paths = Array_new();
-  _walk(root, - 1, paths);
-  return Array_list_free(paths);
+  Array pending = Array_new();
+  _push_children(pending, root);
+  return Iter_init(dest, (Var){
+    0
+  }
+  , _walk_next, Array_var(pending));
+}
+
+static void _walk(String directory, int depth, int hidden, Array paths){
+  {
+    String name;
+    List _x2c_macro_object_2 = String_list_dir(directory);
+    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+      name = Var_string(_x2c_macro_cursor_output_2);
+      {
+        String child = String_join_path(directory, name);
+        Array_push(paths, String_var(child));
+        if(depth != 1 &&(hidden || ! String_startswith(name, _2)) && _descends(child)) _walk(child, depth - 1, hidden, paths);
+      }
+
+    }
+
+  }
+
 }
 
 static int _class_match(const char * * pattern, unsigned char value){
@@ -278,38 +340,41 @@ static int _class_match(const char * * pattern, unsigned char value){
   return negate ? ! matched : matched;
 }
 
-static int _glob_match(const char * pattern, const char * text){
+static int _glob_match(const char * pattern, const char * text, const char * origin){
   if(! * pattern) return ! * text;
+  if(* text == '.' &&(text == origin || text[- 1] == '/') && * pattern != '.' && !(pattern[0] == '\\' && pattern[1] == '.')) return 0;
   if(pattern[0] == '*' && pattern[1] == '*'){
     const char * rest = pattern + 2;
     int components = * rest == '/';
     while(components && rest[1] == '*' && rest[2] == '*' && rest[3] == '/') rest += 3;
     for(const char * ch = text; ;  ch ++){
-      if((! components || ch == text || ch[- 1] == '/') && _glob_match(rest + components, ch)) return 1;
+      if((! components || ch == text || ch[- 1] == '/') && _glob_match(rest + components, ch, origin)) return 1;
       if(! * ch) return 0;
     }
 
   }
   if(* pattern == '*'){
     pattern ++;
-    if(_glob_match(pattern, text)) return 1;
-    return * text && * text != '/' && _glob_match(pattern - 1, text + 1);
+    if(_glob_match(pattern, text, origin)) return 1;
+    return * text && * text != '/' && _glob_match(pattern - 1, text + 1, origin);
   }
-  if(* pattern == '?') return * text && * text != '/' && _glob_match(pattern + 1, text + 1);
+  if(* pattern == '?') return * text && * text != '/' && _glob_match(pattern + 1, text + 1, origin);
   if(* pattern == '['){
     if(! * text || * text == '/') return 0;
     const char * rest = pattern + 1;
     int matched = _class_match(& rest, (unsigned char) * text);
-    if(matched < 0) return * text == '[' && _glob_match(pattern + 1, text + 1);
-    return matched && _glob_match(rest, text + 1);
+    if(matched < 0) return * text == '[' && _glob_match(pattern + 1, text + 1, origin);
+    return matched && _glob_match(rest, text + 1, origin);
   }
   if(* pattern == '\\' && pattern[1]) pattern ++;
-  return * pattern == * text && _glob_match(pattern + 1, text + 1);
+  return * pattern == * text && _glob_match(pattern + 1, text + 1, origin);
 }
 
 int String_glob_match(String pattern, String path){
-  return String_truth(pattern) && String_truth(path) && _glob_match(pattern, path);
+  return String_truth(pattern) && String_truth(path) && _glob_match(pattern, path, path);
 }
+
+int String_contains(String, String);
 
 int Array_try_next(Array, int *, Var *);
 
@@ -321,11 +386,11 @@ List String_glob(String pattern){
   int depth = 0, recursive = 0;
   {
     String part;
-    List _x2c_macro_object_2 = parts;
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-      part = Var_string(_x2c_macro_cursor_output_2);
+    List _x2c_macro_object_3 = parts;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      part = Var_string(_x2c_macro_cursor_output_3);
       {
         if(depth || strpbrk(String_truth(part) ? part : "", "*?[\\")){
           depth ++;
@@ -339,14 +404,14 @@ List String_glob(String pattern){
   }
   String root = String_truth(base) ? base : _5;
   Array paths = Array_new(), matches = Array_new();
-  if(String_is_dir(root)) _walk(root, recursive ? - 1 : depth, paths);
+  if(String_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _2) || String_contains(pattern, _7), paths);
   {
     String path;
-    Array _x2c_macro_object_3 = paths;
-    int _x2c_macro_cursor_3 = 0;
-    Var _x2c_macro_cursor_output_3;
-    while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
-      path = Var_string(_x2c_macro_cursor_output_3);
+    Array _x2c_macro_object_4 = paths;
+    int _x2c_macro_cursor_4 = 0;
+    Var _x2c_macro_cursor_output_4;
+    while(Array_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      path = Var_string(_x2c_macro_cursor_output_4);
       {
         String candidate = String_truth(base) ? path : String_getslice(path, 2, -2147483648, 1);
         if(String_glob_match(pattern, candidate)) Array_push(matches, String_var(candidate));
@@ -376,6 +441,10 @@ void String_remove_file(String path){
   if(unlink(path) && errno != ENOENT) _path_error("String.remove_file", path, errno);
 }
 
+Context Context_open_isolated(void);
+
+Var Context_export(Context, Var);
+
 static void _remove_tree(String path, String * failed, int * failure){
   struct stat info;
   if(lstat(path, & info)){
@@ -386,7 +455,31 @@ static void _remove_tree(String path, String * failed, int * failure){
     DIR * directory = opendir(path);
     if(directory){
       struct dirent * entry;
-      while((entry = readdir(directory))) if(strcmp(entry -> d_name, ".") && strcmp(entry -> d_name, "..")) _remove_tree(String_join_path(path, String_new(entry -> d_name)), failed, failure);
+      while((entry = readdir(directory))){
+        if(! strcmp(entry -> d_name, ".") || ! strcmp(entry -> d_name, "..")) continue;
+        Context context = Context_open_isolated();
+        {
+  _x2c_defer_env_0 _x2c_defer_env_4 = {._x2c_defer_capture_0 =(const void *) & context};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_4
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+          String child_failed = NULL;
+          int child_failure = 0;
+          _remove_tree(String_join_path(path, String_new(entry -> d_name)), & child_failed, & child_failure);
+          if(String_truth(child_failed) && ! String_truth(* failed)){
+            * failed = Var_string(Context_export(context, String_var(child_failed)));
+            * failure = child_failure;
+          }
+
+        }
+
+  x2c_cleanup_leave(&_x2c_defer_record_0);
+}
+      }
       closedir(directory);
     }
     if(rmdir(path) && ! String_truth(* failed)) * failed = path, * failure = errno;
@@ -400,7 +493,7 @@ void String_remove_tree(String path){
   int failure = 0;
   _remove_tree(path, & failed, & failure);
   if(String_truth(failed)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/path.x",.function = "String_remove_tree",.line = 332};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/path.x",.function = "String_remove_tree",.line = 398};
     x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.remove_tree")), NULL))), Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
     __builtin_unreachable();
   }
@@ -414,23 +507,23 @@ int File_copy_to(File, File, size_t *);
 void String_copy_file(String source, String target){
   File input = File_open(source, "rb");
   {
-  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & input};
+  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & input};
 
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_3
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_5
   };
-  x2c_cleanup_push(&_x2c_defer_record_0);
+  x2c_cleanup_push(&_x2c_defer_record_1);
   {
     File output = File_open(target, "wb");
     {
-  _x2c_defer_env_0 _x2c_defer_env_4 = {._x2c_defer_capture_0 =(const void *) & output};
+  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & output};
 
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_4
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_6
   };
-  x2c_cleanup_push(&_x2c_defer_record_1);
+  x2c_cleanup_push(&_x2c_defer_record_2);
   {
       File_copy_to(input, output, NULL);
       if(File_flush(output)) _path_error("String.copy_file", target, errno);
@@ -438,11 +531,11 @@ void String_copy_file(String source, String target){
       if(chmod(target, info.st_mode & 07777)) _path_error("String.copy_file", target, errno);
     }
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
   }
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -461,11 +554,11 @@ void String_copy_tree(String source, String target){
     String_make_dirs(target);
     {
       String name;
-      List _x2c_macro_object_4 = String_list_dir(source);
-      List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-      Var _x2c_macro_cursor_output_4;
-      while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
-        name = Var_string(_x2c_macro_cursor_output_4);
+      List _x2c_macro_object_5 = String_list_dir(source);
+      List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+      Var _x2c_macro_cursor_output_5;
+      while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+        name = Var_string(_x2c_macro_cursor_output_5);
         String_copy_tree(String_join_path(source, name), String_join_path(target, name));
       }
 
@@ -498,19 +591,19 @@ int File_write_all(File, const void *, size_t);
 void String_write_text(String path, String text){
   File output = File_open(path, "w");
   {
-  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & output};
+  _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_3 =(const void *) & output};
 
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_5
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_7
   };
-  x2c_cleanup_push(&_x2c_defer_record_2);
+  x2c_cleanup_push(&_x2c_defer_record_3);
   {
     File_write_all(output, text, String_len(text));
     if(File_flush(output)) _path_error("String.write_text", path, errno);
   }
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
+  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 
@@ -518,7 +611,7 @@ String String_temp_dir(void){
   if(! _init_guard_) _file_init_();
   const char * parent = getenv("TMPDIR");
   String root = parent && * parent ? String_new(parent) : _6;
-  String pattern = String_join_path(root, _7);
+  String pattern = String_join_path(root, _8);
   char buffer[PATH_MAX];
   if(String_len(pattern) >= sizeof(buffer)) _path_error("String.temp_dir", root, ENAMETOOLONG);
   strcpy(buffer, pattern);
@@ -526,12 +619,14 @@ String String_temp_dir(void){
   return String_new(buffer);
 }
 
-void File_cleanup(File);
+void Context_cleanup(Context);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  File_cleanup((*(File *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Context_cleanup((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
+
+void File_cleanup(File);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
@@ -541,5 +636,10 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   File_cleanup((*(File *) _x2c_defer_data_2->_x2c_defer_capture_2));
+}
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  File_cleanup((*(File *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 

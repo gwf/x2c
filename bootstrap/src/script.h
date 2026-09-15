@@ -9,7 +9,7 @@
 #include "build.h"
 String script_cache_root(void);
 
-void script_prepare(CliRequest c);
+int script_prepare(CliRequest c);
 
 int script_run(CliRequest c);
 

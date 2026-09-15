@@ -65,7 +65,7 @@ typedef struct Compiler{
   String fn_name;
   Diagnostics diagnostics;
   Array braces, import_stack;
-  String script;
+  String script, shebang;
   int script_main;
   Lisp macro_lisp;
   String import_src;

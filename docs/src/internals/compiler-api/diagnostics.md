@@ -42,7 +42,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:363`
+Source: `src/diagnostics.x:368`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -61,7 +61,7 @@ Source: `src/diagnostics.x:240`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:399`
+Source: `src/diagnostics.x:404`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -70,7 +70,7 @@ Source: `src/diagnostics.x:399`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:394`
+Source: `src/diagnostics.x:399`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -80,7 +80,7 @@ Source: `src/diagnostics.x:394`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:384`
+Source: `src/diagnostics.x:389`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -90,7 +90,7 @@ Source: `src/diagnostics.x:384`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:357`
+Source: `src/diagnostics.x:362`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location

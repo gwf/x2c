@@ -49,7 +49,7 @@ Names the directories searched for `.xi` interfaces.
 files mirror their home-relative path under the compiler's stage
 directory when it runs from `<home>/builds/`, otherwise under the home.
 
-Source: `src/collect.x:832`
+Source: `src/collect.x:833`
 
 #### interface_prelude
 
@@ -57,7 +57,7 @@ Source: `src/collect.x:832`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:858`
+Source: `src/collect.x:859`
 
 #### interface_write
 
@@ -69,7 +69,7 @@ A process-specific sibling is written and renamed into place, so a
 failure leaves any existing interface intact and is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1038`
+Source: `src/collect.x:1039`
 
 ### `Compiler`
 
@@ -87,7 +87,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:754`
+Source: `src/collect.x:755`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -104,7 +104,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:603`
+Source: `src/collect.x:604`
 
 <a id="Compiler.record_generated_header_symbol"></a>
 #### Compiler.record_generated_header_symbol
@@ -116,7 +116,7 @@ The operation has no effect until generated-symbol recording is enabled.
 The compiler's current file must already have a collected contribution;
 the cache retains `signature`.
 
-Source: `src/collect.x:441`
+Source: `src/collect.x:442`
 
 ## Design notes
 

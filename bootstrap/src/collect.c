@@ -806,6 +806,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
     shadow -> filename = path;
     if(String_equal(path, c -> script)){
       shadow -> script = path;
+      shadow -> shebang = c -> shebang;
       shadow -> script_main = c -> script_main;
     }
     shadow -> include_dirs = c -> include_dirs;

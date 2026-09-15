@@ -25,7 +25,8 @@ typedef struct CliRequest {
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild;
+  int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild,
+    clean;
   SourceView sources;
 } *CliRequest;
 
@@ -130,6 +131,8 @@ static CliOption cli_options[] = {
     "Name the executable, library, or single object", 0 },
   { <rebuild>, CLI_SCRIPT, <output>, "--rebuild", NULL,
     "Build the script even when its cached executable is current", 0 },
+  { <clean>, CLI_SCRIPT, <output>, "--clean", NULL,
+    "Remove the script's cached build and exit without running it", 0 },
   { <build-dir>, CLI_BUILD | CLI_RUN, <output>, "--build-dir",
     "<dir>", "Store generated C, objects, deps, and state here", 0 },
   { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
@@ -484,9 +487,8 @@ it includes or imports, the compiler, the runtime, or an option changes.");
 Every word after <file.x> is passed unchanged to the script, including
 words that begin with - or @. A script whose first line is the shebang
 '#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
-XDG_CACHE_HOME/x2c, or ~/.cache/x2c. --rebuild also picks up a new header
-that shadows an included one or a library that -l now resolves
-differently.");
+XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of
+scripts that no longer exist.");
 }
 
 static void _print_help(Symbol command) {
@@ -819,6 +821,7 @@ static void _apply_option(
     case <out-dir>: c.out_dir = value; break;
     case <src-map>: c.source_map = 1; break;
     case <rebuild>: c.rebuild = 1; break;
+    case <clean>: c.clean = 1; break;
     case <no-deps>: c.no_deps = 1; break;
     case <dep-file>: c.dep_file = value; break;
     case <dep-target>: c.dep_target = value; break;

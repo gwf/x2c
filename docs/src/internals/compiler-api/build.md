@@ -23,6 +23,7 @@ Typed native build request and artifact graph.
 | [`Build.record_translation`](#Build.record_translation) | Records the successful translation fingerprint when retained state exists. |
 | [`Build.report_success`](#Build.report_success) | Prints the completed build receipt and artifact details when enabled. |
 | [`Build.run_program`](#Build.run_program) | Runs the built output with the request's arguments and returns its status. |
+| [`Build.script_helpers`](#Build.script_helpers) | Returns the local `.x` files a script unit includes, which the script's program must translate and link. |
 | [`Build.translation_current`](#Build.translation_current) | Reports whether translated C and header artifacts match current inputs. |
 | [`CliRequest.prepare`](#CliRequest.prepare) | Validates a native build request and returns its `Scope`-owned build state. |
 | [`CliRequest.script_current`](#CliRequest.script_current) | Reports whether the script executable under `directory` still matches everything recorded when it was built. |
@@ -39,7 +40,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:553`
+Source: `src/build.x:555`
 
 ### `Build`
 
@@ -54,7 +55,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:435`
+Source: `src/build.x:436`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -63,7 +64,7 @@ Source: `src/build.x:435`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:447`
+Source: `src/build.x:449`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -74,7 +75,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:866`
+Source: `src/build.x:904`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -84,7 +85,7 @@ Source: `src/build.x:866`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:455`
+Source: `src/build.x:457`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -99,7 +100,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:709`
+Source: `src/build.x:746`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -110,7 +111,7 @@ Returns the generated-file directory for `input`.
 The directory is derived from the input path and created unless this is
 a dry run. Native registration belongs to `Build.add_generated`.
 
-Source: `src/build.x:297`
+Source: `src/build.x:298`
 
 <a id="Build.publish_script"></a>
 #### Build.publish_script
@@ -125,7 +126,7 @@ the runtime archive.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:905`
+Source: `src/build.x:1006`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -137,7 +138,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:346`
+Source: `src/build.x:347`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -146,7 +147,7 @@ Source: `src/build.x:346`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:782`
+Source: `src/build.x:820`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -156,7 +157,19 @@ Source: `src/build.x:782`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:842`
+Source: `src/build.x:880`
+
+<a id="Build.script_helpers"></a>
+#### Build.script_helpers
+
+`List Build.script_helpers(Build b)`
+
+Returns the local `.x` files a script unit includes, which the script's
+program must translate and link. The script's translation depfile already
+lists every file the translation read, so helpers of helpers appear too.
+Runtime and package sources are excluded; their objects are archived.
+
+Source: `src/build.x:983`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -168,7 +181,7 @@ Returns zero without retained state, during a dry run, when either output
 is absent, or when any compiler, tool, option, depfile, or dependency
 fingerprint cannot be read or differs.
 
-Source: `src/build.x:326`
+Source: `src/build.x:327`
 
 ### `CliRequest`
 
@@ -193,7 +206,7 @@ Source: `src/build.x:211`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:932`
+Source: `src/build.x:1034`
 
 ## Public types
 
@@ -204,7 +217,7 @@ Source: `src/build.x:932`
 <a id="Build"></a>
 ### Build
 
-`typedef struct Build { CliRequest request; Toolchain toolchain; String work_dir, gen_root, obj_root, dep_root, state_root, output; int temporary, Array c_sources, gen_dirs, native_inputs, objects; String compile_directory, Array compile_commands; unsigned long started_at; unsigned long xlat_start; unsigned long cc_start; unsigned long final_at; unsigned long long gen_bytes; int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached; } *Build`
+`typedef struct Build { CliRequest request; Toolchain toolchain; String work_dir, gen_root, obj_root, dep_root, state_root, output; int temporary, Array c_sources, gen_dirs, native_inputs, objects, units; String compile_directory, Array compile_commands; unsigned long started_at; unsigned long xlat_start; unsigned long cc_start; unsigned long final_at; unsigned long long gen_bytes; int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached; } *Build`
 
 Holds `Scope`-owned mutable state for one prepared native build target.
 `CliRequest.prepare` allocates the record in the current `Scope` and

@@ -403,27 +403,14 @@ static CliRequest _build_translation_request(
   return request;
 }
 
-static int _run_build_request(CliRequest c, Array commands) {
-  if (!c.dry_run) {
-    foreach (String input, c.inputs) {
-      if (!input.endswith(%".x")) continue;
-      Frontend.load_support(c);
-      break;
-    }
-  }
-  /* A target has its own build graph and native-action scratch. Isolate
-     its Scope allocations and canonical values so a manifest dependency is
-     reclaimed before the next target starts. */
-  Context target = $auto(Context.open_isolated_named("build target"));
-  Build state = c.prepare();
-  c.cc = target.export(c.cc);
-  c.ar = target.export(c.ar);
-  /* Units whose artifacts are current are skipped; the rest translate
-     together, so one nested request can fill every job. Each unit keeps its
-     own generated directory, so no two workers write the same file. */
+/* Translates the stale `units` and registers every unit's generated files.
+   Current units are skipped; the rest translate together, so one nested
+   request can fill every job. Each unit keeps its own generated directory,
+   so no two workers write the same file. */
+static int _translate_units(CliRequest c, Build state, List units) {
   Array stale = %[];
   Map stale_dirs = %{};
-  foreach (String input, c.inputs) {
+  foreach (String input, units) {
     if (!input.endswith(%".x")) continue;
     String directory = state.generated_dir(input);
     if (state.translation_current(input, directory)) {
@@ -442,23 +429,17 @@ static int _run_build_request(CliRequest c, Array commands) {
   if (!c.dry_run && c.jobs > 1 && inputs) {
     CliRequest translation =
       _build_translation_request(c, inputs, state.gen_root);
-    if (_run_translation(translation, stale_dirs, state)) {
-      state.cleanup(0);
-      return 1;
-    }
+    if (_run_translation(translation, stale_dirs, state)) return 1;
   }
   else
     foreach (String input, inputs) {
       CliRequest translation = _build_translation_request(
         c, cons(input, NULL), _unit_output_dir(c, stale_dirs, input));
-      if (!c.dry_run && _run_translation(translation, NULL, state)) {
-        state.cleanup(0);
-        return 1;
-      }
+      if (!c.dry_run && _run_translation(translation, NULL, state)) return 1;
     }
   /* Restore input order, including package directories inserted between
      generated directories, before native compilation and linking. */
-  foreach (String input, c.inputs) {
+  foreach (String input, units) {
     if (!input.endswith(%".x")) continue;
     int cached = !stale_dirs.contains(input);
     String directory = state.generated_dir(input);
@@ -471,7 +452,34 @@ static int _run_build_request(CliRequest c, Array commands) {
       state.record_translation(input, directory);
     state.add_generated(input, directory);
   }
-  int result = state.finish();
+  return 0;
+}
+
+static int _run_build_request(CliRequest c, Array commands) {
+  if (!c.dry_run) {
+    foreach (String input, c.inputs) {
+      if (!input.endswith(%".x")) continue;
+      Frontend.load_support(c);
+      break;
+    }
+  }
+  /* A target has its own build graph and native-action scratch. Isolate
+     its Scope allocations and canonical values so a manifest dependency is
+     reclaimed before the next target starts. */
+  Context target = $auto(Context.open_isolated_named("build target"));
+  Build state = c.prepare();
+  c.cc = target.export(c.cc);
+  c.ar = target.export(c.ar);
+  int result = _translate_units(c, state, c.inputs);
+  /* A script's local `.x` includes are units of its program too; their
+     objects have no other source. */
+  if (!result && c.command == <script> && !c.dry_run)
+    result = _translate_units(c, state, state.script_helpers());
+  if (result) {
+    state.cleanup(0);
+    return 1;
+  }
+  result = state.finish();
   if (result) {
     state.cleanup(0);
     return result;
@@ -611,7 +619,7 @@ int main(int argc, char **argv) {
     return editor_request(argc - 1, argv + 1);
   }
   CliRequest request = cli_parse(argc, argv);
-  if (request.command == <script>) script_prepare(request);
+  if (request.command == <script> && script_prepare(request)) return 0;
   report_configure(
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,

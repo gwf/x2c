@@ -45,8 +45,8 @@ Public functions:
 `Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
 `Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
 `Build.finish`, `Build.report_success`, `Build.run_program`,
-`_build_remove_tree`, `Build.cleanup`, `Build.publish_script`,
-`CliRequest.script_current`
+`_build_remove_tree`, `Build.cleanup`, `Build.script_helpers`,
+`Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -378,8 +378,8 @@ Public functions:
 
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
 `Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
-`ToolAction.as_program`, `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`,
-`ToolAction.run`, `Toolchain.preprocess`
+`ToolAction.as_program`, `Toolchain.search_directories`, `ToolAction.start`,
+`ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`, `Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 

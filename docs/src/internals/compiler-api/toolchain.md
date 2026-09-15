@@ -24,6 +24,7 @@ Host preprocessing, compilation, archive, and link actions.
 | [`Toolchain.link_action`](#Toolchain.link_action) | Builds but does not start a host-compiler link action. |
 | [`Toolchain.preprocess`](#Toolchain.preprocess) | Runs the configured C preprocessor without a shell. |
 | [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Captures the native preprocessor view used to identify reusable objects. |
+| [`Toolchain.search_directories`](#Toolchain.search_directories) | Returns the directories the C compiler searches for headers and libraries without explicit options, as it reports them, plus the `lib` directory beside each reported `include` directory. |
 
 ### Functions
 
@@ -73,7 +74,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:373`
+Source: `src/toolchain.x:411`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -87,7 +88,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:322`
+Source: `src/toolchain.x:360`
 
 ### `ToolRun`
 
@@ -99,7 +100,7 @@ Source: `src/toolchain.x:322`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:340`
+Source: `src/toolchain.x:378`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -114,7 +115,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:351`
+Source: `src/toolchain.x:389`
 
 ### `Toolchain`
 
@@ -177,7 +178,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:397`
+Source: `src/toolchain.x:435`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -191,6 +192,18 @@ markers so source locations also belong to the identity.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
 Source: `src/toolchain.x:187`
+
+<a id="Toolchain.search_directories"></a>
+#### Toolchain.search_directories
+
+`List Toolchain.search_directories(Toolchain toolchain)`
+
+Returns the directories the C compiler searches for headers and libraries
+without explicit options, as it reports them, plus the `lib` directory
+beside each reported `include` directory. A compiler that reports none
+contributes none.
+
+Source: `src/toolchain.x:320`
 
 ## Public types
 

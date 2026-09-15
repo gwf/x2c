@@ -1237,6 +1237,15 @@ set -e
 [[ $none_status == 2 ]] &&
   grep -q 'script requires a script file' "$SCRIPT/none.stderr"
 [[ $(X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" env cache_dir) == "$SCRIPT/cache" ]]
+cp "$SCRIPT/args.x" "$SCRIPT/doomed.x"
+run_script "$SCRIPT/doomed.x" >/dev/null
+compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null
+rm "$SCRIPT/doomed.x"
+run_script --rebuild "$SCRIPT/args.x" >/dev/null
+! compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null
+[[ -z $(run_script --clean "$SCRIPT/args.x") ]]
+! compgen -G "$SCRIPT/cache/scripts/args-*" >/dev/null
+run_script --clean "$SCRIPT/args.x"
 
 cat >"$SCRIPT/unit.x" <<'EOF'
 #!/usr/bin/env -S x2c script
@@ -1279,5 +1288,57 @@ if [[ $(uname) == Darwin ]]; then
   [[ -d $(echo "$SCRIPT"/cache/scripts/unit-*/run.dSYM) ]]
 fi
 
+mkdir -p "$SCRIPT/helpers/lib"
+cat >"$SCRIPT/helpers/lib/inner.x" <<'EOF'
+#pragma once
+int inner_value(void);
+#pragma private
+int inner_value(void) => 40;
+EOF
+cat >"$SCRIPT/helpers/greet.x" <<'EOF'
+#pragma once
+#include "lib/inner.x"
+String greeting(void);
+#pragma private
+String greeting(void) => %"answer ${inner_value() + 2}";
+EOF
+cat >"$SCRIPT/helpers/uses.x" <<'EOF'
+#!/usr/bin/env -S x2c script
+#include "greet.x"
+printf("%s\n", greeting());
+EOF
+[[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 42' ]]
+printf '%s\n' '#include "greet.x"' \
+  'int main(void) { printf("%s\n", greeting()); return 0; }' \
+  >"$SCRIPT/helpers/program.x"
+(cd "$SCRIPT/helpers" &&
+  "$X2C" build --quiet --output program program.x greet.x lib/inner.x)
+[[ $("$SCRIPT/helpers/program") == 'answer 42' ]]
+sed 's/=> 40;/=> 50;/' "$SCRIPT/helpers/lib/inner.x" \
+  >"$SCRIPT/helpers/lib/inner.next" &&
+  mv "$SCRIPT/helpers/lib/inner.next" "$SCRIPT/helpers/lib/inner.x"
+[[ $(run_script "$SCRIPT/helpers/uses.x") == 'answer 52' ]]
+
+mkdir -p "$SCRIPT/search/first" "$SCRIPT/search/second"
+printf '%s\n' '#define WHICH "second"' >"$SCRIPT/search/second/config.h"
+cat >"$SCRIPT/search/pick.x" <<'EOF'
+#!/usr/bin/env -S x2c script
+#include "config.h"
+#if __has_include("optional.h")
+printf("%s optional\n", WHICH);
+#else
+printf("%s plain\n", WHICH);
+#endif
+EOF
+pick() {
+  run_script -I "$SCRIPT/search/first" -I "$SCRIPT/search/second" \
+    "$SCRIPT/search/pick.x"
+}
+[[ $(pick) == 'second plain' ]]
+printf '%s\n' '#define WHICH "first"' >"$SCRIPT/search/first/config.h"
+[[ $(pick) == 'first plain' ]]
+: >"$SCRIPT/search/second/optional.h"
+[[ $(pick) == 'first optional' ]]
+
 echo "CLI, dependency, build, run, script, manifest, and state probes:" \
-  "138 passed"
+  "144 passed"

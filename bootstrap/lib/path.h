@@ -26,11 +26,11 @@ int String_is_file(String path);
 
 long String_file_size(String path);
 
-long String_modified_time(String path);
+double String_modified_time(String path);
 
 List String_list_dir(String path);
 
-List String_walk(String root);
+Iter String_walk(String root, Iter dest);
 
 int String_glob_match(String pattern, String path);
 

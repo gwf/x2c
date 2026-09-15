@@ -40,6 +40,6 @@ printf("total %s", %((cat $report) (awk "{ s += \$1 } END { print s }"))
   .output());
 printf("markdown files %ld\n",
        (long) root.walk().filter(%!(path) => path.str().endswith(".md"))
-         .len());
+         .count());
 root.remove_tree();
 printf("cleaned %s\n", root.exists() ? "no" : "yes");

@@ -1,0 +1,8 @@
+job 1 status 0 out alpha err -
+job 2 status 0 out bravo err -
+job 3 status 3 out - err charlie
+job 4 status 0 out delta err -
+job 5 status 1 out - err -
+job 6 status 0 out echo err -
+peak 3 of 3
+run raised status 4: broken

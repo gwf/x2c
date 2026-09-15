@@ -47,31 +47,74 @@ static void _exec(CliRequest c) {
     %"cannot run $executable: ${String.new(strerror(errno))}");
 }
 
+/* Locks the cache entry `directory` against other runs of its script and
+   returns the descriptor, or -1 when `wait` is zero and another run holds
+   the lock. Closing the descriptor or exiting releases it.
+*/
+static int _lock(String directory, int wait) {
+  int lock = open(%"$directory/lock", O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if (lock < 0) x2c_driver_error(%"cannot lock script cache: $directory");
+  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
+  while (flock(lock, operation)) {
+    if (errno == EINTR) continue;
+    close(lock);
+    return -1;
+  }
+  return lock;
+}
+
+/* Removes each cache entry under `scripts` whose recorded script no longer
+   exists and that no other run holds.
+*/
+static void _prune(String scripts) {
+  foreach (String name, scripts.list_dir()) {
+    String directory = scripts.join_path(name), source = %"$directory/source";
+    if (!source.is_file() || source.read_text().is_file()) continue;
+    int lock = _lock(directory, 0);
+    if (lock < 0) continue;
+    try directory.remove_tree();
+    catch %(io-fail *): {}
+    close(lock);
+  }
+}
+
 /** Points `request` at its script's cache directory and executes the cached
     executable when it is current; that path does not return. Otherwise it
-    locks the directory against concurrent builds of the same script and
-    returns, and the caller builds `request` and calls `script_run`.
+    locks the directory against concurrent builds of the same script, removes
+    the entries of scripts that no longer exist, and returns 0; the caller
+    builds `request` and calls `script_run`. A `--clean` request removes the
+    script's entry and returns 1.
 */
-void script_prepare(CliRequest c) {
+int script_prepare(CliRequest c) {
   String root = script_cache_root();
   if (!root) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = c.inputs.car().string().absolute_path();
+  c.build_dir = %"$root/scripts/${script.stem()}-%08x".printf(
+    String.hash(script));
+  if (c.clean) {
+    if (!c.build_dir.is_dir()) return 1;
+    int lock = _lock(c.build_dir, 1);
+    try c.build_dir.remove_tree();
+    catch %(io-fail *):
+      x2c_driver_error(%"cannot remove script cache: ${c.build_dir}");
+    close(lock);
+    return 1;
+  }
   if (!script.is_file()) x2c_driver_error(%"script does not exist: $script");
   c.inputs = %($script);
   c.state_seed = "direct";
-  c.build_dir = %"$root/scripts/${script.stem()}-%08x".printf(
-    String.hash(script));
   if (!c.verbose) c.quiet = 1;
   c.output = %"${c.build_dir}/run";
-  if (c.dry_run) return;
+  if (c.dry_run) return 0;
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
   if (!_build_mkdirs(c.build_dir))
     x2c_driver_error(%"cannot create script cache: ${c.build_dir}");
-  int lock = open(%"${c.build_dir}/lock", O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if (lock < 0) x2c_driver_error(%"cannot lock script cache: ${c.build_dir}");
-  while (flock(lock, LOCK_EX) && errno == EINTR) {}
+  _lock(c.build_dir, 1);
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
+  %"${c.build_dir}/source".write_text(script);
+  _prune(%"$root/scripts");
   c.output = %"${c.output}.%ld".printf((long) getpid());
+  return 0;
 }
 
 /** Executes a script that `script_prepare` pointed at the cache and the

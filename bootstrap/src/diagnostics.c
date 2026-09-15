@@ -382,7 +382,11 @@ static void Compiler__show_source_context(Compiler compiler, List location){
   char * text = compiler -> text;
   int current_line = 1;
   char * line_start = text, * line_end = text;
-  if(line <= 1) while(* line_end && * line_end != '\n') line_end ++;
+  if(line <= 1 && String_truth(compiler -> shebang)){
+    line_start = compiler -> shebang;
+    line_end = line_start + strlen(line_start);
+  }
+  else if(line <= 1) while(* line_end && * line_end != '\n') line_end ++;
   else{
     for(char * p = text;  * p;  p ++){
       if(* p == '\n'){

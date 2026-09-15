@@ -2,7 +2,7 @@
 
 #include "script.h"
 
-static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
 #include <fcntl.h>
@@ -16,6 +16,10 @@ __attribute__((constructor)) static void _file_init_(void);
 
 static void _exec(CliRequest c);
 
+static int _lock(String directory, int wait);
+
+static void _prune(String scripts);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -25,14 +29,17 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/run");
   _3 = String_new("cannot run ");
   _4 = String_new(": ");
-  _5 = String_new("script does not exist: ");
-  _6 = String_new("direct");
-  _7 = String_new("/scripts/");
-  _8 = String_new("-%08x");
-  _9 = String_new("cannot create script cache: ");
-  _10 = String_new("/lock");
-  _11 = String_new("cannot lock script cache: ");
-  _12 = String_new(".%ld");
+  _5 = String_new("/lock");
+  _6 = String_new("cannot lock script cache: ");
+  _7 = String_new("/source");
+  _8 = String_new("/scripts/");
+  _9 = String_new("-%08x");
+  _10 = String_new("cannot remove script cache: ");
+  _11 = String_new("script does not exist: ");
+  _12 = String_new("direct");
+  _13 = String_new("cannot create script cache: ");
+  _14 = String_new("/scripts");
+  _15 = String_new(".%ld");
 }
 
 String String_new(const char *);
@@ -89,11 +96,85 @@ static void _exec(CliRequest c){
   x2c_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(executable), cons(String_var(_4), cons(String_var(String_new(strerror(errno))), NULL))))));
 }
 
+static int _lock(String directory, int wait){
+  int lock = open(String_join(NULL, cons(String_var(directory), cons(String_var(_5), NULL))), O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if(lock < 0) x2c_driver_error(String_join(NULL, cons(String_var(_6), cons(String_var(directory), NULL))));
+  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
+  while(flock(lock, operation)){
+    if(errno == EINTR) continue;
+    close(lock);
+    return - 1;
+  }
+  return lock;
+}
+
+List String_list_dir(String);
+
+String String_join_path(String, String);
+
+int String_is_file(String);
+
+String String_read_text(String);
+
+void String_remove_tree(String);
+
+Var Symbol_var(Symbol);
+
+static void _prune(String scripts){
+  {
+    String name;
+    List _x2c_macro_object_1 = String_list_dir(scripts);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      name = Var_string(_x2c_macro_cursor_output_1);
+      {
+        String directory = String_join_path(scripts, name), source = String_join(NULL, cons(String_var(directory), cons(String_var(_7), NULL)));
+        if(! String_is_file(source) || String_is_file(String_read_text(source))) continue;
+        int lock = _lock(directory, 0);
+        if(lock < 0) continue;
+        {
+          ExceptionFrame _x2c_exception_frame_0;
+          static MatchCaptureSite _x2c_catch_arms_0[1];
+          static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+          Var _x2c_catch_patterns_0[1];
+          if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+          _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+        }
+        ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) String_remove_tree(directory);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+          if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+            x2c_error_catch_detach(_x2c_error_handler_0);
+            x2c_exception_mark_handled(&_x2c_exception_frame_0);
+             {{
+
+            }
+
+          }
+
+        }
+        else{
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          __builtin_unreachable();
+        }
+
+      }
+
+    }
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
+  }
+  close(lock);
+}
+}
+}
+}
+
 int String_truth(String);
 
 String String_absolute_path(String);
-
-int String_is_file(String);
 
 String String_printf(String, ...);
 
@@ -101,31 +182,70 @@ String String_stem(String);
 
 unsigned String_hash(String);
 
+int String_is_dir(String);
+
 int CliRequest_script_current(CliRequest, String);
 
 int _build_mkdirs(String);
 
-void script_prepare(CliRequest c){
+void String_write_text(String, String);
+
+int script_prepare(CliRequest c){
   if(! _init_guard_) _file_init_();
   String root = script_cache_root();
   if(! String_truth(root)) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = String_absolute_path(Var_string(List_car(c -> inputs)));
-  if(! String_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(script), NULL))));
-  c -> inputs = cons(String_var(script), NULL);
-  c -> state_seed = _6;
-  c -> build_dir = String_printf(String_join(NULL, cons(String_var(root), cons(String_var(_7), cons(String_var(String_stem(script)), cons(String_var(_8), NULL))))), String_hash(script));
-  if(! c -> verbose) c -> quiet = 1;
-  c -> output = String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_2), NULL)));
-  if(c -> dry_run) return;
-  if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
-  if(! _build_mkdirs(c -> build_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(c -> build_dir), NULL))));
-  int lock = open(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_10), NULL))), O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if(lock < 0) x2c_driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(c -> build_dir), NULL))));
-  while(flock(lock, LOCK_EX) && errno == EINTR){
+  c -> build_dir = String_printf(String_join(NULL, cons(String_var(root), cons(String_var(_8), cons(String_var(String_stem(script)), cons(String_var(_9), NULL))))), String_hash(script));
+  if(c -> clean){
+    if(! String_is_dir(c -> build_dir)) return 1;
+    int lock = _lock(c -> build_dir, 1);
+    {
+      ExceptionFrame _x2c_exception_frame_1;
+      static MatchCaptureSite _x2c_catch_arms_1[1];
+      static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
+      Var _x2c_catch_patterns_1[1];
+      if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+      _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
+    }
+    ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) String_remove_tree(c -> build_dir);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+      if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+        x2c_error_catch_detach(_x2c_error_handler_1);
+        x2c_exception_mark_handled(&_x2c_exception_frame_1);
+         {x2c_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(c -> build_dir), NULL))));
+      }
+
+    }
+    else{
+      x2c_error_catch_close(_x2c_error_handler_1);
+      _x2c_error_handler_1 = NULL;
+      x2c_exception_leave(& _x2c_exception_frame_1);
+      __builtin_unreachable();
+    }
 
   }
-  if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
-  c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_12), NULL))), (long) getpid());
+
+}
+x2c_error_catch_close(_x2c_error_handler_1);
+_x2c_error_handler_1 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_1);
+}
+close(lock);
+return 1;
+}
+if(! String_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(script), NULL))));
+c -> inputs = cons(String_var(script), NULL);
+c -> state_seed = _12;
+if(! c -> verbose) c -> quiet = 1;
+c -> output = String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_2), NULL)));
+if(c -> dry_run) return 0;
+if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
+if(! _build_mkdirs(c -> build_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(c -> build_dir), NULL))));
+_lock(c -> build_dir, 1);
+if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
+String_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_7), NULL))), script);
+_prune(String_join(NULL, cons(String_var(root), cons(String_var(_14), NULL))));
+c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_15), NULL))), (long) getpid());
+return 0;
 }
 
 int script_run(CliRequest c){

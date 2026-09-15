@@ -104,8 +104,9 @@ typedef struct Compiler {
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   // The canonical path of a `#!` script unit, whose top-level statements
-  // become `main` unless it defines `main` itself; NULL for other units.
-  String script, int script_main;
+  // become `main` unless it defines `main` itself, and its first line as
+  // written, which diagnostics quote; NULL for other units.
+  String script, shebang, int script_main;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
   Array origins, int origin, source_map;
@@ -1366,20 +1367,24 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.diagnostics.reset();
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
+  Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
     Array statements = %[];
+    int hoisting = c.script && !c.script_main, gap = 0, runs = 0, first = 0;
     loop {
       while (c.peek(0) != <eof>) {
         try {
-          Token start = c.token;
-          if (c.script && !c.script_main && c.script_statement_starts()) {
+          Token start = c.token, tokens = c.tokenizer.tokens;
+          if (hoisting)
+            _push_script_conditionals(c, statements, gap, start - tokens);
+          if (hoisting && c.script_statement_starts()) {
             c.skip_script_statement();
-            Token tokens = c.tokenizer.tokens;
-            int first = start - tokens;
+            int begin = start - tokens;
             int end = _skip_backward(c.token - 1, tokens) + 1 - tokens;
-            statements.push(first);
+            statements.push(begin);
             statements.push(end);
+            if (!runs++) first = begin;
           }
           else {
             if (c.script && c.script_main && c.script_statement_executes())
@@ -1397,6 +1402,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
               ast = cons(node, ast);
             }
           }
+          gap = _skip_backward(c.token - 1, tokens) + 1 - tokens;
           ast = _prepend_preproc(c, ast);
           _debug_tokens(c, start, c.token);
         }
@@ -1404,20 +1410,90 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
           (void) category;
           if (c.diagnostics.reached_limit()) break;
           _sync_top_level(c);
+          Token tokens = c.tokenizer.tokens;
+          gap = _skip_backward(c.token - 1, tokens) + 1 - tokens;
           ast = _prepend_preproc(c, ast);
           if (c.peek(0) == <eof>) break;
           continue;
         }
       }
-      if (!statements.len()) break;
+      if (!runs) break;
+      Token tokens = c.tokenizer.tokens;
+      // A macro can still define `main` where the token scan saw none.
+      if (c.fn_defs.contains("main")) {
+        conflict = tokens + first;
+        break;
+      }
+      _push_script_conditionals(c, statements, gap, c.token - tokens);
       _append_script_main(c, statements);
-      statements.clear();
+      hoisting = runs = 0;
     }
   }
+  if (conflict) {
+    c.token = conflict;
+    _report_script_statement(c);
+  }
   ast = ast.reverse();
+  if (c.script && !c.script_main && !c.error_count())
+    _check_script_locals(c, ast);
   _check_unmatched_braces(c);
   if (!c.error_count()) _validate_static_object_initializers(c);
   return ast;
+}
+
+/* A file-scope conditional directive also governs the statements it
+   surrounds, so a copy of each joins the statement runs in source order and
+   the script body keeps the file's conditional structure. */
+static void _push_script_conditionals(
+  Compiler c, Array statements, int first, int end) {
+  Token tokens = c.tokenizer.tokens;
+  for (int i = first; i < end; i++) {
+    Token token = tokens + i;
+    if (token.type != <preproc>) continue;
+    String directive = token.text.remove_prefix("#").strip(" \t");
+    if (!directive.startswith("if") && !directive.startswith("el") &&
+        !directive.startswith("endif"))
+      continue;
+    statements.push(i);
+    statements.push(i + 1);
+  }
+}
+
+/* A script's functions cannot see the variables declared among its
+   statements, which are locals of `x2c_script`. C would report such a name
+   as undeclared; this names the cause and the `static` spelling that
+   shares it. */
+static void _check_script_locals(Compiler c, List ast) {
+  Map locals = %{};
+  foreach (List node, ast) match (node)
+    case %(function ? (bind (binding ? "x2c_script") ?) (block *items)):
+      foreach (List item, items) match (item)
+        case %(at ? (declare ? (bindings *bindings))):
+          foreach (List binding, bindings) match (binding)
+            case %(!or (bind (binding ? ?(String name)) ?)
+                       (op = (bind (binding ? ?(String name)) ?) ?)):
+              locals[name] = 1;
+  if (!locals.len()) return;
+  foreach (List node, ast) match (node)
+    case %(function ? (bind (binding ? ?(String function)) ?)
+           (block *items)): {
+      if (function == "x2c_script" || function == "main") continue;
+      foreach (List item, items) match (item) case %(at ?origin ?statement):
+        foreach (Var name, locals.keys()) {
+          Var found;
+          List bindings;
+          if (!statement.list().try_search(
+                %(expr () (ident (binding ? $name))), &found, &bindings))
+            continue;
+          c.origin = origin.int();
+          c.report_error(
+            <type>,
+            %"'${name.str()}' is declared among the script's statements",
+            NULL,
+            %("functions cannot see those locals;"
+              "declare it static to share it"));
+        }
+    }
 }
 
 /* A script unit's `main` is ordinary source the parser reads after the last

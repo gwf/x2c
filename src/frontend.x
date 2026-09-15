@@ -151,6 +151,8 @@ static void _tokenize_input(
   String text = _read_input_text(c, filename);
   if (text && text.startswith("#!")) {
     c.script = source_resolved ? String.new(source_path) : filename;
+    int end = text.find("\n");
+    c.shebang = end < 0 ? text : text[:end];
     text = _script_text(text);
   }
   unit->source_lines = _source_lines(text);

@@ -141,6 +141,9 @@ static CliOption cli_options[] ={
     38995839752, CLI_SCRIPT, 1052018024, "--rebuild", NULL, "Build the script even when its cached executable is current", 0
   }
   , {
+    7088220, CLI_SCRIPT, 1052018024, "--clean", NULL, "Remove the script's cached build and exit without running it", 0
+  }
+  , {
     5861298610788, CLI_BUILD | CLI_RUN, 1052018024, "--build-dir", "<dir>", "Store generated C, objects, deps, and state here", 0
   }
   , {
@@ -371,7 +374,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _15 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
   _16 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
   _17 = String_new("Usage:\n  x2c script [options] <file.x> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
-  _18 = String_new("\nEvery word after <file.x> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. --rebuild also picks up a new header\nthat shadows an included one or a library that -l now resolves\ndifferently.");
+  _18 = String_new("\nEvery word after <file.x> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
   _19 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, script,\nbootstrap, env, install, remove, or list.");
   _20 = String_new("unknown help command \'");
   _21 = String_new("\'");
@@ -930,6 +933,8 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     case 42018498656 : c -> source_map = 1;
     break;
     case 38995839752 : c -> rebuild = 1;
+    break;
+    case 7088220 : c -> clean = 1;
     break;
     case 31136689190 : c -> no_deps = 1;
     break;

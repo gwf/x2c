@@ -335,6 +335,7 @@ static void _parse_segment(
   shadow.filename = path;
   if (path == c.script) {
     shadow.script = path;
+    shadow.shebang = c.shebang;
     shadow.script_main = c.script_main;
   }
   shadow.include_dirs = c.include_dirs;

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/script-local-in-function.x:4:27: type: 'total' is declared among the script's statements
+  static int twice(void) => total * 2;
+                            ^^^^^
+  note: functions cannot see those locals; declare it static to share it
+

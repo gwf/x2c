@@ -29,14 +29,16 @@ Source: `src/script.x:27`
 
 #### script_prepare
 
-`void script_prepare(CliRequest c)`
+`int script_prepare(CliRequest c)`
 
 Points `request` at its script's cache directory and executes the cached
 executable when it is current; that path does not return. Otherwise it
-locks the directory against concurrent builds of the same script and
-returns, and the caller builds `request` and calls `script_run`.
+locks the directory against concurrent builds of the same script, removes
+the entries of scripts that no longer exist, and returns 0; the caller
+builds `request` and calls `script_run`. A `--clean` request removes the
+script's entry and returns 1.
 
-Source: `src/script.x:55`
+Source: `src/script.x:88`
 
 #### script_run
 
@@ -46,7 +48,7 @@ Executes a script that `script_prepare` pointed at the cache and the
 caller built; that path does not return. A dry run prints the action and
 returns zero.
 
-Source: `src/script.x:81`
+Source: `src/script.x:124`
 
 ## Design notes
 

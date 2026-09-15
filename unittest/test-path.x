@@ -5,6 +5,7 @@
 $(import "test-macros.xmacro")
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 static void path_parts_examine_text(void) {
@@ -37,6 +38,12 @@ static void path_glob_match_follows_components(void) {
   EXPECT_FALSE(%"*.x".glob_match("src/main.x"));
   EXPECT_TRUE(%"file[0-9].?".glob_match("file7.c"));
   EXPECT_FALSE(%"file[!0-9].c".glob_match("file7.c"));
+  EXPECT_FALSE(%"*".glob_match(".hidden"));
+  EXPECT_FALSE(%"src/*.x".glob_match("src/.draft.x"));
+  EXPECT_FALSE(%"**/*.x".glob_match(".git/objects/a.x"));
+  EXPECT_TRUE(%".*".glob_match(".hidden"));
+  EXPECT_TRUE(%"src/.draft.*".glob_match("src/.draft.x"));
+  EXPECT_TRUE(%"\\.hidden".glob_match(".hidden"));
   EXPECT_TRUE(%"a\\*b".glob_match("a*b"));
   EXPECT_FALSE(%"a\\*b".glob_match("axb"));
   String deep = %"**/**/**/**/**/**/z";
@@ -58,16 +65,30 @@ static void path_tree_operations(void) {
   EXPECT_STR_EQ(file.read_text(), "hello\n");
   EXPECT_INT_EQ(file.file_size(), 6);
   EXPECT_TRUE(file.modified_time() > 0);
+  struct timeval times[2] = { { 1000, 500000 }, { 1000, 500000 } };
+  EXPECT_INT_EQ(utimes(file, times), 0);
+  EXPECT_TRUE(file.modified_time() == 1000.5);
   EXPECT_TRUE(file.is_file() && !file.is_dir() && file.exists());
   EXPECT_LIST_EQ(root.join_path("one").list_dir(), %("g.x" "two"));
 
-  List walked = root.walk().map(%!(path) => path.str()[root.len():]);
+  List walked = root.walk().map(%!(path) => path.str()[root.len():]).list();
   EXPECT_LIST_EQ(walked, %("/one" "/one/g.x" "/one/two" "/one/two/f.x"));
   EXPECT_LIST_EQ(%"$root/**/*.x".glob(),
                  %(${%"$root/one/g.x"} ${%"$root/one/two/f.x"}));
   EXPECT_LIST_EQ(%"$root/one/*.x".glob(), %(${%"$root/one/g.x"}));
   EXPECT_LIST_EQ(root.join_path("one").glob(), %(${root.join_path("one")}));
   EXPECT_NULL(%"$root/*.none".glob());
+  root.join_path(".hidden").make_dirs();
+  root.join_path(".hidden/h.x").write_text("h\n");
+  EXPECT_LIST_EQ(%"$root/**/*.x".glob(),
+                 %(${%"$root/one/g.x"} ${%"$root/one/two/f.x"}));
+  EXPECT_LIST_EQ(%"$root/.*/*.x".glob(), %(${%"$root/.hidden/h.x"}));
+  char *cwd = getcwd(NULL, 0);
+  chdir(root);
+  EXPECT_LIST_EQ(%".*/*.x".glob(), %(".hidden/h.x"));
+  chdir(cwd);
+  free(cwd);
+  root.join_path(".hidden").remove_tree();
 
   chmod(file, 0640);
   root.join_path("one").copy_tree(root.join_path("copy"));

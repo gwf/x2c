@@ -144,11 +144,18 @@ static struct stat _stat(const char *operation, String path) {
 long String.file_size(String path) =>
   (long) _stat("String.file_size", path).st_size;
 
-/** Returns the modification time of `path` in seconds since the epoch.
+/** Returns the modification time of `path` in seconds since the epoch,
+    with the fraction the filesystem records.
     Raises: `<not-found>` or `<io-fail>`.
 */
-long String.modified_time(String path) =>
-  (long) _stat("String.modified_time", path).st_mtime;
+double String.modified_time(String path) {
+  struct stat info = _stat("String.modified_time", path);
+#ifdef __APPLE__
+  return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
+#else
+  return info.st_mtim.tv_sec + info.st_mtim.tv_nsec / 1e9;
+#endif
+}
 
 /** Returns the names in the directory `path`, sorted, without `.` and `..`.
     Raises: `<not-found>` or `<io-fail>`.
@@ -164,26 +171,59 @@ List String.list_dir(String path) {
   return names.sort().list_free();
 }
 
-static void _walk(String directory, int depth, Array paths) {
-  foreach (String name, directory.list_dir()) {
-    String child = directory.join_path(name), struct stat info;
-    paths.push(child);
-    if (depth != 1 && lstat(child, &info) == 0 && S_ISDIR(info.st_mode) &&
-        access(child, R_OK | X_OK) == 0)
-      _walk(child, depth - 1, paths);
-  }
+static int _descends(String path) {
+  struct stat info;
+  return lstat(path, &info) == 0 && S_ISDIR(info.st_mode) &&
+         access(path, R_OK | X_OK) == 0;
 }
 
-/** Returns every path below the directory `root`, parents before their
-    contents and siblings sorted. Symbolic links to directories are listed
-    but not followed, and a directory that cannot be read is listed without
-    its contents.
-    Raises: `<not-found>` or `<io-fail>`.
+/* Pushes a directory's children so the next pop yields the first sorted
+   name. */
+static void _push_children(Array pending, String directory) {
+  List children = directory.list_dir().reverse();
+  foreach (String name, children) pending.push(directory.join_path(name));
+}
+
+static int _walk_next(Iter iter, Var *out) {
+  Array pending = iter.state;
+  if (!pending || !pending.len()) return 0;
+  String path = pending.take_last();
+  if (_descends(path)) _push_children(pending, path);
+  *out = path;
+  return 1;
+}
+
+/** Returns a lazy iterator over every path below the directory `root`,
+    parents before their contents and siblings sorted. Symbolic links to
+    directories are listed but not followed, and a directory that cannot be
+    read is listed without its contents. Only the paths not yet visited are
+    held; the yielded `String`s live in the active pool.
+
+    ```x2c
+    ~#include "path.x"
+    ~int main(void) {
+    foreach (String path, %"src".walk()) printf("%s\n", path);
+    long units = %"src".walk().filter(%!(p) => p.str().endswith(".x")).count();
+    ~  return units >= 0 ? 0 : 1;
+    ~}
+    ```
+
+    Raises: `<not-found>` or `<io-fail>` when `root` cannot be listed, and
+    `<io-fail>` from a pull when a directory vanishes during the walk.
 */
-List String.walk(String root) {
-  Array paths = %[];
-  _walk(root, -1, paths);
-  return paths.list_free();
+Iter String.walk(String root, Iter dest) {
+  Array pending = %[];
+  _push_children(pending, root);
+  return dest.init((Var) {0}, _walk_next, pending);
+}
+
+static void _walk(String directory, int depth, int hidden, Array paths) {
+  foreach (String name, directory.list_dir()) {
+    String child = directory.join_path(name);
+    paths.push(child);
+    if (depth != 1 && (hidden || !name.startswith(".")) && _descends(child))
+      _walk(child, depth - 1, hidden, paths);
+  }
 }
 
 static int _class_match(const char **pattern, unsigned char value) {
@@ -204,8 +244,14 @@ static int _class_match(const char **pattern, unsigned char value) {
   return negate ? !matched : matched;
 }
 
-static int _glob_match(const char *pattern, const char *text) {
+/* A name that begins with a dot matches only a pattern that spells the dot,
+   as in a shell: no wildcard matches a component's leading dot. */
+static int _glob_match(
+  const char *pattern, const char *text, const char *origin) {
   if (!*pattern) return !*text;
+  if (*text == '.' && (text == origin || text[-1] == '/') &&
+      *pattern != '.' && !(pattern[0] == '\\' && pattern[1] == '.'))
+    return 0;
   if (pattern[0] == '*' && pattern[1] == '*') {
     const char *rest = pattern + 2;
     int components = *rest == '/';
@@ -213,38 +259,44 @@ static int _glob_match(const char *pattern, const char *text) {
       rest += 3;
     for (const char *ch = text;; ch++) {
       if ((!components || ch == text || ch[-1] == '/') &&
-          _glob_match(rest + components, ch))
+          _glob_match(rest + components, ch, origin))
         return 1;
       if (!*ch) return 0;
     }
   }
   if (*pattern == '*') {
     pattern++;
-    if (_glob_match(pattern, text)) return 1;
-    return *text && *text != '/' && _glob_match(pattern - 1, text + 1);
+    if (_glob_match(pattern, text, origin)) return 1;
+    return *text && *text != '/' &&
+           _glob_match(pattern - 1, text + 1, origin);
   }
   if (*pattern == '?')
     return *text && *text != '/' &&
-           _glob_match(pattern + 1, text + 1);
+           _glob_match(pattern + 1, text + 1, origin);
   if (*pattern == '[') {
     if (!*text || *text == '/') return 0;
     const char *rest = pattern + 1;
     int matched = _class_match(&rest, (unsigned char) *text);
-    if (matched < 0) return *text == '[' && _glob_match(pattern + 1, text + 1);
-    return matched && _glob_match(rest, text + 1);
+    if (matched < 0)
+      return *text == '[' && _glob_match(pattern + 1, text + 1, origin);
+    return matched && _glob_match(rest, text + 1, origin);
   }
   if (*pattern == '\\' && pattern[1]) pattern++;
-  return *pattern == *text && _glob_match(pattern + 1, text + 1);
+  return *pattern == *text && _glob_match(pattern + 1, text + 1, origin);
 }
 
-/** Reports whether all of `path` matches the glob `pattern`. */
+/** Reports whether all of `path` matches the glob `pattern`. A path
+    component that begins with a dot matches only a pattern component that
+    begins with one.
+*/
 int String.glob_match(String pattern, String path) =>
-  pattern && path && _glob_match(pattern, path);
+  pattern && path && _glob_match(pattern, path, path);
 
 /** Returns the existing paths that match the glob `pattern`, sorted.
     The walk starts at the longest leading directory without a wildcard and
-    descends only as deep as the pattern can match. No match returns an
-    empty `List`.
+    descends only as deep as the pattern can match. As in a shell, a name
+    that begins with a dot matches only where the pattern spells the dot.
+    No match returns an empty `List`.
 */
 List String.glob(String pattern) {
   if (!strpbrk(pattern, "*?[\\"))
@@ -261,7 +313,9 @@ List String.glob(String pattern) {
   }
   String root = base ? base : %".";
   Array paths = %[], matches = %[];
-  if (root.is_dir()) _walk(root, recursive ? -1 : depth, paths);
+  if (root.is_dir())
+    _walk(root, recursive ? -1 : depth,
+          pattern.startswith(".") || pattern.contains("/."), paths);
   foreach (String path, paths) {
     String candidate = base ? path : path[2:];
     if (pattern.glob_match(candidate)) matches.push(candidate);
@@ -309,10 +363,22 @@ static void _remove_tree(String path, String *failed, int *failure) {
     DIR *directory = opendir(path);
     if (directory) {
       struct dirent *entry;
-      while ((entry = readdir(directory)))
-        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
-          _remove_tree(
-            path.join_path(String.new(entry->d_name)), failed, failure);
+      while ((entry = readdir(directory))) {
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+          continue;
+        // Each entry's paths are released before the next, however large
+        // the tree; only a reported failure's path is kept.
+        Context context = $auto(Context.open_isolated());
+        String child_failed = NULL;
+        int child_failure = 0;
+        _remove_tree(
+          path.join_path(String.new(entry->d_name)), &child_failed,
+          &child_failure);
+        if (child_failed && !*failed) {
+          *failed = context.export(child_failed);
+          *failure = child_failure;
+        }
+      }
       closedir(directory);
     }
     if (rmdir(path) && !*failed) *failed = path, *failure = errno;

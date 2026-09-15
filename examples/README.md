@@ -101,7 +101,8 @@ from the gallery examples.
   [basic literals](love/basic-literals.x), and [List methods](love/list-methods.x).
 - Commands and files: [line counts](scripts/line-counts.x) runs parallel
   commands and pipelines and manages a scratch tree with `process.x` and
-  `path.x`.
+  `path.x`; [parallel jobs](scripts/parallel-jobs.x) caps concurrency with
+  `Job.wait_any` and reports failing commands.
 - Collections and execution: [collection indexing](power/collection-indexing.x),
   [word-count summary](power/word-count-summary.x),
   [shared worker state](power/shared-threads.x),

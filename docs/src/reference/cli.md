@@ -120,7 +120,9 @@ Only one inspection mode runs; the last option given wins.
 ## Build native artifacts
 
 `build` accepts explicit `.x`, `.c`, `.o`, and `.a` operands. It translates
-x2c source, compiles generated and native C, then links an executable:
+x2c source, compiles generated and native C, then links an executable. One
+input may include another through a directory, as in
+`#include "lib/inner.x"`, when both are operands:
 
 ```sh
 ./x2c build --output /tmp/foreach examples/foreach.x
@@ -286,17 +288,20 @@ start that executable directly, in a few milliseconds, until one of these
 changes: the script, a file it includes or imports, a header its generated C
 includes, a package archive it links, the compiler, the runtime archive, the
 C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
-`LIBRARY_PATH`, and `SDKROOT` environment variables. A change that adds a
-new file cannot be seen that way: a header that now shadows an included one,
-a `__has_include` whose answer changed, or a `-l` library that now resolves
-to a different file. Run with `--rebuild` after such a change.
+`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also watches
+the directories the build searched: include directories, `-L` directories,
+the C compiler's header and library search paths, and the directory of each
+file the build read. Adding or removing a file in one of them rebuilds the
+script, so a header that now shadows an included one, a `__has_include`
+whose answer changed, and a `-l` library that now resolves elsewhere are all
+noticed. `--rebuild` builds regardless.
 
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
 A response file named before the script supplies options. `script` accepts
 the translation, C compiler, and linker options of `run`, plus `-v`, `-###`,
-`--plain`, `--color`, `--debug`, `-j`, `--source-map`, and `--rebuild`. It
-does not read a project manifest.
+`--plain`, `--color`, `--debug`, `-j`, `--source-map`, `--rebuild`, and
+`--clean`. It does not read a project manifest.
 
 A successful build prints nothing, so the program's output is all that
 appears; build diagnostics still print, and a failed build exits with its
@@ -316,13 +321,21 @@ That line also makes the file a
 [script unit](language.md#script-units), which may put its statements at
 file scope instead of defining `main`.
 
+A script can split its code into local modules with ordinary includes, such
+as `#include "lib/report.x"`. `x2c script` translates, compiles, and links
+every local `.x` file the script includes, directly or through another
+module, and a change to any of them rebuilds the script. Runtime and package
+modules come from their archives instead.
+
 `env -S` splits the line into words. Where `x2c` has a fixed location, the
 interpreter path works without it: `#!/usr/local/bin/x2c script`.
 
 Each script builds under `scripts/` in the cache root: `X2C_CACHE_DIR` when
 set, otherwise `$XDG_CACHE_HOME/x2c`, otherwise `~/.cache/x2c`.
 `x2c env cache_dir` prints the root. Concurrent runs of one script share its
-build and wait for each other. Removing the cache is always safe.
+build and wait for each other. `x2c script --clean <file.x>` removes that
+script's entry without running it, and every build removes the entries of
+scripts that no longer exist. Removing the cache is always safe.
 
 ## Selecting inputs
 
@@ -383,10 +396,11 @@ debug = false
 ```
 
 The manifest lists the sources of each target and how the targets depend on
-each other. Relative paths start at the manifest directory. Its `*`, `?`, and
-bracket patterns stay within a path component; `**` recurses. Matches are
-deduplicated and bytewise sorted. Unmatched patterns, unknown targets, and
-dependency cycles are errors before any action runs.
+each other. Relative paths start at the manifest directory. Its `*`, `?`,
+and bracket patterns stay within a path component; `**` recurses. As in a
+shell, a name that begins with a dot matches only where the pattern spells
+the dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
+unknown targets, and dependency cycles are errors before any action runs.
 
 A target may also set defines, C flags, library directories, libraries, link
 flags, package directories, and an output. Command-line target, profile,

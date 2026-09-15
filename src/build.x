@@ -26,7 +26,7 @@ typedef struct Build {
   CliRequest request;
   Toolchain toolchain;
   String work_dir, gen_root, obj_root, dep_root, state_root, output;
-  int temporary, Array c_sources, gen_dirs, native_inputs, objects;
+  int temporary, Array c_sources, gen_dirs, native_inputs, objects, units;
   String compile_directory, Array compile_commands;
   unsigned long started_at;
   unsigned long xlat_start;
@@ -238,6 +238,7 @@ Build CliRequest.prepare(CliRequest c) {
   c.cc = state.toolchain.cc; c.ar = state.toolchain.ar;
   state.c_sources = %[];
   state.gen_dirs = %[];
+  state.units = %[];
   state.native_inputs = %[];
   state.objects = %[];
   if (c.compile_commands && !c.dry_run) state.compile_commands = %[];
@@ -438,6 +439,7 @@ void Build.add_generated(Build state, String input, String directory) {
   state.gen_bytes += report_file_bytes(source);
   state.gen_bytes += report_file_bytes(header);
   state.c_sources.push(source);
+  state.units.push(input);
   if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
   state._link_packages(input, directory);
 }
@@ -698,6 +700,41 @@ static int _mapped_debug(Build state) {
 #endif
 }
 
+/* A unit that includes another unit through a directory, as in
+   `#include "lib/inner.x"`, names that unit's generated header by the same
+   path from its own generated directory. Copying the header to that path
+   lets the include resolve as it does beside the sources. */
+static void Build._place_unit_headers(Build b) {
+  if (b.request.dry_run || b.units.len() < 2) return;
+  Map headers = %{};
+  foreach (String unit, b.units)
+    headers[unit.absolute_path()] =
+      %"${b.gen_root}/${_key(unit)}/${unit.stem()}.h";
+  foreach (String unit, b.units) {
+    String directory = %"${b.gen_root}/${_key(unit)}", stem = unit.stem();
+    List searched = %(${unit.dirname()} @{b.request.include_dirs});
+    List outputs = %(${%"$directory/$stem.h"} ${%"$directory/$stem.c"});
+    foreach (String generated, outputs)
+      foreach (String line, generated.read_text().split_lines(0)) {
+        String text = line.strip(" \t");
+        if (!text.startswith("#include \"") || !text.endswith(".h\""))
+          continue;
+        String target = text[10:text.len() - 1];
+        if (!target.contains("/")) continue;
+        String source = %"${target[:target.len() - 2]}.x";
+        foreach (String dir, searched) {
+          Var header;
+          if (!headers.try_get(dir.join_path(source).absolute_path(), &header))
+            continue;
+          String placed = directory.join_path(target);
+          placed.dirname().make_dirs();
+          header.str().copy_file(placed);
+          break;
+        }
+      }
+  }
+}
+
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
@@ -707,6 +744,7 @@ static int _mapped_debug(Build state) {
     failed symbol assembly fails the build and preserves intermediates.
 */
 int Build.finish(Build b) {
+  b._place_unit_headers();
   if (_compile_sources(b)) return 1;
   if (b.request.compile_only) return 0;
   List inputs = _native_action_inputs(b);
@@ -873,8 +911,10 @@ void Build.cleanup(Build state, int success) {
 
 /* A script's executable is reused without translating, preprocessing, or
    linking, so its fingerprint names everything those steps would read: the
-   request's options, the environment the C compiler and linker consult, and
-   the contents of every recorded prerequisite. */
+   request's options, the environment the C compiler and linker consult, the
+   contents of every recorded file, and the modification time of every
+   recorded directory. A directory entry ends in `/`; a header or library
+   added where a search would now find it changes that time. */
 static uint64_t _script_fingerprint(
   CliRequest c, String cc, List prerequisites, int *ok) {
   uint64_t hash = _state_base(c, cc, ok);
@@ -891,8 +931,69 @@ static uint64_t _script_fingerprint(
     const char *value = getenv(name);
     hash = _state_text(hash, value ? String.new(value) : NULL);
   }
-  foreach (String path, prerequisites) hash = _state_file(hash, path, ok);
+  foreach (String path, prerequisites) {
+    if (!path.endswith("/")) {
+      hash = _state_file(hash, path, ok);
+      continue;
+    }
+    hash = _state_text(hash, path);
+    hash = _state_text(hash, path.is_dir()
+      ? %"%.9f".printf(path.modified_time()) : %"absent");
+  }
   return hash;
+}
+
+/* Every directory a compile or link of the script searches: explicit include
+   and library options, the compiler's own search lists, and the directory of
+   each prerequisite, where quoted includes look first. */
+static List Build._script_directories(Build b, List prerequisites) {
+  Array directories = %[];
+  foreach (Var directory, b.request.include_dirs) directories.push(directory);
+  directories.push(b.toolchain.include_dir);
+  foreach (List args, %(${b.toolchain.cc_args} ${b.toolchain.ld_args})) {
+    for (List p = args; p; p = p.cdr()) {
+      String arg = p.car();
+      foreach (Var flag, %("-I" "-iquote" "-isystem" "-idirafter" "-L")) {
+        String spelling = flag.str();
+        if (!arg.startswith(spelling)) continue;
+        if (arg.len() > spelling.len()) directories.push(arg[spelling.len():]);
+        else if (p.cdr()) directories.push(p.cadr());
+        break;
+      }
+    }
+  }
+  foreach (String path, prerequisites) directories.push(path.dirname());
+  foreach (Var directory, b.toolchain.search_directories())
+    directories.push(directory);
+  Array unique = %[];
+  foreach (Var value, directories) {
+    String directory = value.str().absolute_path();
+    if (directory.startswith(b.work_dir.absolute_path())) continue;
+    String entry = directory.endswith("/") ? directory : %"$directory/";
+    if (!unique.contains(entry)) unique.push(entry);
+  }
+  return unique.list_free();
+}
+
+/** Returns the local `.x` files a script unit includes, which the script's
+    program must translate and link. The script's translation depfile already
+    lists every file the translation read, so helpers of helpers appear too.
+    Runtime and package sources are excluded; their objects are archived.
+*/
+List Build.script_helpers(Build b) {
+  String script = b.request.inputs.car(), root = x2c_get_root();
+  String translation = %"${b.gen_root}/${_key(script)}/${script.stem()}.d";
+  List excluded = %(${%"$root/lib/"} ${%"$root/include/"} ${%"$root/builds/"})
+    .append(b.request.package_roots().map(%!(dir) => %"${dir.str()}/"));
+  Array helpers = %[];
+  foreach (String path, _state_dep_inputs(translation)) {
+    if (!path.endswith(".x") || path == script || helpers.contains(path))
+      continue;
+    if (excluded.any(%!(prefix) => path.startswith(prefix.str()))) continue;
+    helpers.push(path);
+    b.xlat_n++;
+  }
+  return helpers.list_free();
 }
 
 /** Moves a script's built executable, and its debug symbols on macOS, to
@@ -920,7 +1021,8 @@ void Build.publish_script(Build b, String executable) {
       prerequisites.push(path);
   foreach (Var path, b.native_inputs) prerequisites.push(path);
   prerequisites.push(b.toolchain.runtime_lib);
-  List paths = prerequisites.list_free();
+  List files = prerequisites.list_free();
+  List paths = files.append(b._script_directories(files));
   int ok = 1;
   uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, &ok);
   if (ok) _state_write_lines(%"${b.state_root}/script", hash, paths);

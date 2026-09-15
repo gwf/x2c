@@ -275,6 +275,8 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   String text = _read_input_text(c, filename);
   if(String_truth(text) && String_startswith(text, _22)){
     c -> script = source_resolved ? String_new(source_path) : filename;
+    int end = String_find(text, _18);
+    c -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
     text = _script_text(text);
   }
   unit -> source_lines = _source_lines(text);

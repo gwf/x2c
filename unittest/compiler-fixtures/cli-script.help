@@ -11,6 +11,7 @@ Target options:
 Output options:
       --source-map            Map generated C locations to original x2c sources
       --rebuild               Build the script even when its cached executable is current
+      --clean                 Remove the script's cached build and exit without running it
 
 Translation options:
   -I <dir>                    Add a shared x2c/C include directory
@@ -49,6 +50,5 @@ General options:
 Every word after <file.x> is passed unchanged to the script, including
 words that begin with - or @. A script whose first line is the shebang
 '#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
-XDG_CACHE_HOME/x2c, or ~/.cache/x2c. --rebuild also picks up a new header
-that shadows an included one or a library that -l now resolves
-differently.
+XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of
+scripts that no longer exist.

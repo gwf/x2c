@@ -14,7 +14,7 @@ typedef struct Build{
   Toolchain toolchain;
   String work_dir, gen_root, obj_root, dep_root, state_root, output;
   int temporary;
-  Array c_sources, gen_dirs, native_inputs, objects;
+  Array c_sources, gen_dirs, native_inputs, objects, units;
   String compile_directory;
   Array compile_commands;
   unsigned long started_at;
@@ -53,6 +53,8 @@ int Build_run_program(Build state);
 int _build_remove_tree(String path);
 
 void Build_cleanup(Build state, int success);
+
+List Build_script_helpers(Build b);
 
 void Build_publish_script(Build b, String executable);
 

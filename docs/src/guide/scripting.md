@@ -44,10 +44,11 @@ until the script or something it uses changes:
 x2c script tools/release-notes.x v0.12.0
 ```
 
-With an executable mode, the shebang runs it by name. Every argument after
-the file reaches the program unchanged. The
-[command reference](../reference/cli.md#run-a-script) describes the cache
-and exactly what makes a script build again.
+A script can include its own local `.x` modules, which `x2c script` builds
+and links with it. With an executable mode, the shebang runs it by name.
+Every argument after the file reaches the program unchanged. The [command
+reference](../reference/cli.md#run-a-script) describes the cache and exactly
+what makes a script build again.
 
 ## Run a command
 
@@ -208,9 +209,12 @@ String object = %"build".join_path(%"${source.stem()}.o");
 ```
 
 `exists`, `is_dir`, `is_file`, `file_size`, and `modified_time` ask about a
-path. `list_dir` returns the sorted names in one directory, `walk` returns
+path; `modified_time` keeps the fraction of a second the filesystem records.
+`list_dir` returns the sorted names in one directory, `walk` lazily yields
 every path below a directory, and `glob` returns the paths that match a
-pattern, where `**` matches any number of directories:
+pattern, where `**` matches any number of directories. As in a shell, a
+wildcard does not match a leading dot, so `*` skips `.git` while `.*` finds
+it:
 
 ```x2c
 ~#include "path.x"

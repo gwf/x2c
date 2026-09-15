@@ -312,6 +312,44 @@ static int _run_captured(List arguments, String *output, String *errors) {
   return status;
 }
 
+/** Returns the directories the C compiler searches for headers and libraries
+    without explicit options, as it reports them, plus the `lib` directory
+    beside each reported `include` directory. A compiler that reports none
+    contributes none.
+*/
+List Toolchain.search_directories(Toolchain toolchain) {
+  Array directories = %[];
+  List flags = toolchain.cc_args;
+  String output = NULL, errors = NULL;
+  if (!_run_captured(%(${toolchain.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
+                     &output, &errors)) {
+    int listing = 0;
+    foreach (String line, errors.split_lines(0)) {
+      if (line.startswith("End of search list")) break;
+      if (line.contains("search starts here")) {
+        listing = 1;
+        continue;
+      }
+      if (!listing) continue;
+      String directory = line.strip(" ");
+      int note = directory.find(" (");
+      if (note >= 0) directory = directory[:note];
+      directories.push(directory);
+      if (directory.endswith("/include"))
+        directories.push(directory.dirname().join_path("lib"));
+    }
+  }
+  if (!_run_captured(%(${toolchain.cc} @flags "-print-search-dirs"),
+                     &output, &errors))
+    foreach (String line, output.split_lines(0)) {
+      if (!line.startswith("libraries: ")) continue;
+      String list = line.remove_prefix("libraries: ").remove_prefix("=");
+      foreach (String directory, list.split(":"))
+        if (directory) directories.push(directory);
+    }
+  return directories.list_free();
+}
+
 /** Starts the action without a shell and returns a `Scope`-owned execution.
     Verbose and dry-run actions print their quoted argv to stderr. A dry run
     starts no child.
