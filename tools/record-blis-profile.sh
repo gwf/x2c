@@ -38,7 +38,7 @@ python3 - "$prefix" "$manifest" "$work/external" "$archive" <<'PY'
 import hashlib, json, subprocess, sys
 
 prefix, manifest, external, archive = sys.argv[1:5]
-template = json.load(open("PROFILE-linux.json"))
+template = json.load(open("PROFILE-linux-x86_64.json"))
 header = f"{prefix}/include/blis/blis.h"
 # One member per line, as the profile check counts them: the macOS table
 # of contents starts with "__.SYMDEF SORTED", which splitting on whitespace

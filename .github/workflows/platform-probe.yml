@@ -1,6 +1,6 @@
-# Temporary. Collects package build evidence from the two platforms this
-# branch adds, so per-architecture profiles can be recorded. Delete before
-# the pull request.
+# Temporary. Runs the release workflow's bundle matrix on this branch so the
+# package changes are proved on all four platforms. Delete before the pull
+# request.
 name: platform-probe
 
 on:
@@ -15,58 +15,29 @@ env:
   CC: clang
 
 jobs:
-  intel:
-    runs-on: macos-15-intel
-    steps:
-      - uses: actions/checkout@v5
-      - name: Show which pinned headers /usr/local/include shadows
-        continue-on-error: true
-        run: |
-          for header in pcre2.h uv.h curl/curl.h blis/blis.h; do
-            path="/usr/local/include/$header"
-            if [ -f "$path" ]; then
-              echo "SHADOW $path"
-              grep -hE 'define (PCRE2_MINOR|UV_VERSION_MINOR)' "$path" || true
-            else
-              echo "absent  $path"
-            fi
-          done
-          printf 'int main(void){return 0;}\n' >/tmp/probe.c
-          cc -E -v /tmp/probe.c 2>&1 |
-            sed -n '/#include <...> search starts here/,/End of search list/p'
-      - name: Build from checked-in bootstrap
-        run: make build-safe
-      - name: Bundle pcre2
-        continue-on-error: true
-        run: make -C packages/pcre2 bundle
-      - name: Bundle libcurl
-        continue-on-error: true
-        run: make -C packages/libcurl bundle
-      - name: Show the libuv license digests
-        continue-on-error: true
-        run: shasum -a 256 packages/libuv/LICENSES/*.txt
-      - name: Bundle libuv
-        continue-on-error: true
-        run: make -C packages/libuv bundle
-      - name: Record the blis profile for this platform
-        continue-on-error: true
-        run: tools/record-blis-profile.sh packages/blis/dependency-generic.json
-
-  linux-arm:
-    runs-on: ubuntu-24.04-arm
+  bundles:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm]
+        package: [pcre2, yyjson, libcurl, termbox2, libuv, blis]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - name: Install build tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential clang python3 git jq \
-            autoconf automake libtool pkg-config perl file patch unzip \
-            diffutils
-          mkdir -p "$RUNNER_TEMP/x2c-clang"
-          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
-          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update
+            sudo apt-get install -y build-essential clang python3 git \
+              autoconf automake libtool pkg-config perl jq file patch \
+              ca-certificates unzip diffutils
+            mkdir -p "$RUNNER_TEMP/x2c-clang"
+            ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+            echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+          else
+            brew install autoconf automake libtool pkg-config jq
+          fi
       - name: Build from checked-in bootstrap
         run: make build-safe
-      - name: Record the blis profile for this platform
-        continue-on-error: true
-        run: tools/record-blis-profile.sh packages/blis/dependency-generic.json
+      - name: Bundle the package for this platform
+        run: make -C packages/${{ matrix.package }} bundle

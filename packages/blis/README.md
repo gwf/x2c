@@ -160,13 +160,18 @@ Complex and mixed-domain objects, attached or caller-owned buffers, packing,
 blocked algorithms, custom kernels, contexts, addons, control trees, and
 threading remain raw.
 
-Both profiles use BLIS 2.1, static and single-threaded, with BLAS and CBLAS
-compatibility disabled. macOS keeps the tuned Apple silicon `firestorm`
-configuration. Linux x86-64 uses portable `generic` kernels; it does not
-require Apple silicon instructions. Threading stays disabled in both.
-`dependency.json` and `PROFILE.json` pin the macOS build;
-`dependency-linux.json` and `PROFILE-linux.json` pin the Linux build.
-`LICENSES/` records the incorporated notices.
+Every profile uses BLIS 2.1, static and single-threaded, with BLAS and CBLAS
+compatibility disabled. Apple silicon keeps the tuned `firestorm`
+configuration, pinned by `dependency.json`. Every other platform uses
+portable `generic` kernels, pinned by `dependency-generic.json`, and needs no
+Apple silicon instructions. Threading stays disabled throughout.
+
+The archive's member count and the symbols it leaves undefined follow the
+kernel set, so each platform has its own `PROFILE-<system>-<machine>.json`:
+`PROFILE-darwin-arm64.json`, `PROFILE-darwin-x86_64.json`,
+`PROFILE-linux-x86_64.json`, and `PROFILE-linux-aarch64.json`. Record one for
+a further platform with `tools/record-blis-profile.sh`, running it on that
+machine. `LICENSES/` records the incorporated notices.
 
 x2c preserves imported C qualifiers and rejects conversions that silently
 drop them. `bli_info_get_version_str` returns `const char *`;
