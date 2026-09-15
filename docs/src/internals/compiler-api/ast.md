@@ -17,6 +17,7 @@ Shared helpers for x2c compiler AST nodes.
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
+| [`preproc_conditional_kind`](#preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
@@ -33,7 +34,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:92`
+Source: `src/ast.x:104`
 
 #### ast_contains_head
 
@@ -42,7 +43,7 @@ Source: `src/ast.x:92`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:97`
+Source: `src/ast.x:109`
 
 #### binding_identity_new
 
@@ -71,6 +72,16 @@ zero without changing either output.
 
 Source: `src/ast.x:46`
 
+#### preproc_conditional_kind
+
+`Symbol preproc_conditional_kind(String text)`
+
+Classifies the preprocessor line `text` as a conditional directive:
+`<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
+and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
+
+Source: `src/ast.x:68`
+
 ### `Ast`
 
 <a id="Ast.initializer_cases"></a>
@@ -80,7 +91,7 @@ Source: `src/ast.x:46`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:188`
+Source: `src/ast.x:200`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -90,7 +101,7 @@ Source: `src/ast.x:188`
 Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return NULL.
 
-Source: `src/ast.x:201`
+Source: `src/ast.x:213`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -103,7 +114,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:174`
+Source: `src/ast.x:186`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -115,7 +126,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:116`
+Source: `src/ast.x:128`
 
 ### `Symbol`
 
@@ -126,7 +137,7 @@ Source: `src/ast.x:116`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:85`
+Source: `src/ast.x:97`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -135,7 +146,7 @@ Source: `src/ast.x:85`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:82`
+Source: `src/ast.x:94`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -144,7 +155,7 @@ Source: `src/ast.x:82`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:88`
+Source: `src/ast.x:100`
 
 ## Public types
 
