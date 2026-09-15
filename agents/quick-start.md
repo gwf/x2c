@@ -106,7 +106,8 @@ manifest, including the deterministic Lisp showcase.
 - `plans/` - active plans and archived decisions.
 - `etc/` - shared build rules, Lisp bootstrap, and SDK.
 - `packages/` - optional third-party adapters, outside `make check`.
-- `site/` - public website; it is not gated.
+- `site/` - public website; it is not gated. A tagged release updates its
+  version file and package index; see [Releasing](releasing.md).
 
 `agents/x2c-module-catalog.md` is generated from current source. Run
 `make doc-check` to verify it.

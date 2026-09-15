@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release x2c"
+  short_description: "Prepare, dry-run, and verify a release"
+  default_prompt: "Use $release-x2c to take the current x2c main to a verified public release, handing Gary the merge and tag steps."
