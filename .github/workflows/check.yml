@@ -60,8 +60,8 @@ jobs:
     uses: ./.github/workflows/release-validation.yml
 
   # Windows probes for the install story: the supported WSL2 route checked
-  # end to end with the install script, and a build attempt under the MSYS2
-  # POSIX layer that reports how far it gets. Advisory only.
+  # end to end with the install script, and a source build under the MSYS2
+  # POSIX layer. Advisory only.
   wsl-install:
     if: inputs.windows_spike
     runs-on: windows-latest
@@ -96,6 +96,10 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+      CC: gcc
+      AR: ar
+      X2C_CC: gcc
     steps:
       # The emitter rewrites `#include "x.x"` to `x.h` by line ending, so
       # sources must be checked out with LF.
@@ -118,11 +122,9 @@ jobs:
           gcc --version | head -n 1
           make --version | head -n 1
           python3 --version
-      - name: Attempt the bootstrap build
-        continue-on-error: true
+      - name: Bootstrap the compiler and run an example
         run: |
           mkdir -p debug
-          export CC=gcc AR=ar X2C_CC=gcc
           ./configure
           make build-safe >debug/bootstrap.log 2>&1 || {
             echo "build-safe failed; last 60 lines:"

@@ -95,7 +95,7 @@ in the installation inventory, not as a path to the producer's compiler tools.
 
 ## Windows
 
-Use WSL2. Inside an Ubuntu or Debian distribution the Linux release
+Use WSL2. Inside an Ubuntu 24.04 or newer distribution the Linux release
 installs with the same command, and the compiler needs only `clang` or
 `gcc`, `make`, and `curl` from the distribution's packages:
 
@@ -105,9 +105,19 @@ curl -fsSL https://x2c-lang.dev/install.sh | sh
 ```
 
 Keep the prefix and your projects on the Linux filesystem, under your WSL
-home rather than under `/mnt/c`, so builds run at native speed. Native
-Windows and the MSYS2 or Cygwin layers are not supported; the
-`check` workflow's `windows_spike` input records how far a build gets there.
+home rather than under `/mnt/c`, so builds run at native speed. Ubuntu
+22.04 ships clang 14, which rejects two static initializers in the runtime;
+use clang 15 or newer, or `gcc`.
+
+A source checkout also builds under MSYS2 with its `gcc`, given three
+settings: check the repository out with LF line endings
+(`git config core.autocrlf false`), enable native symlinks
+(`export MSYS=winsymlinks:native`, which needs Developer Mode or an
+administrator shell), and select the compiler with `CC=gcc X2C_CC=gcc`.
+`make build-safe` then produces a working compiler, and the `check`
+workflow's `windows_spike` input proves both routes. Native Windows without
+a POSIX layer, and installing a release rather than building from source
+under MSYS2, are not supported.
 
 ## Developer workflow
 
