@@ -474,8 +474,23 @@ to baseline; 64 custom graphs also returned to baseline after each graph.
 ## Not self-contained
 
 Programs link the pinned libtorch shared libraries dynamically through an
-rpath into the prepared prefix. A torch program depends on that prefix at
-run time.
+rpath. In this checkout that rpath points into the prepared prefix; against
+an installed bundle it points at the bundle's `native/lib`. Either way a
+torch program depends on that directory at run time.
+
+## Install the bundle
+
+Releases publish a torch bundle for macOS arm64 and Linux x86_64:
+
+```sh
+x2c install torch
+```
+
+It carries `libtorch`, `libtorch_cpu`, `libc10`, and the OpenMP runtime,
+plus the shim compiled into the package archive, so a consumer needs no
+libtorch download and no C++ compiler. Build locally with
+`make -C packages/torch bundle`; `packages/tools/check-bundle.sh` installs a
+bundle into a scratch prefix and runs a program against it.
 
 ## Limits
 

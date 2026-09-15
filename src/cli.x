@@ -178,6 +178,8 @@ static CliOption cli_options[] = {
     "Add a library search directory", 0 },
   { <library>, CLI_BUILD | CLI_RUN, <linker>, "-l", "<name>",
     "Link library <name>", 0 },
+  { <rpath>, CLI_BUILD | CLI_RUN, <linker>, "--rpath", "<dir>",
+    "Search <dir> for shared libraries when the program runs", 0 },
   { <wl>, CLI_BUILD | CLI_RUN, <linker>, "-Wl,<arg>[,<arg>...]",
     NULL, "Pass comma-separated arguments to the linker", 0 },
   { <pthread>, CLI_BUILD | CLI_RUN, <c-compiler>, "-pthread", NULL,
@@ -852,6 +854,7 @@ static void _apply_option(
     case <lib-dir>: case <library>: if (attached) ld_args.push(spelling);
       else _push_pair(ld_args, spelling, value);
       break;
+    case <rpath>: ld_args.push(%"-Wl,-rpath,$value"); break;
     case <pthread>: cc_args.push(spelling); ld_args.push(spelling); break;
     case <framework>:
     case <xlinker>: _push_pair(ld_args, spelling, value);
@@ -861,8 +864,9 @@ static void _apply_option(
 }
 
 /** Reads a package's native response options, expanding literal `{package}`
-    after tokenization. Only native include/define/thread options and ordered
-    archive/library/framework inputs are admitted. `cc_args` and `ld_args`
+    after tokenization. Only native include/define/thread options, ordered
+    archive/library/framework inputs, and run-time library search
+    directories are admitted. `cc_args` and `ld_args`
     serve native actions; no source-preprocessing options are returned.
 */
 CliRequest cli_package_options(String path, String package) {
@@ -888,7 +892,7 @@ CliRequest cli_package_options(String path, String package) {
     switch (option.id) {
       case <include>: case <c-include>: case <c-system>:
       case <define>: case <undefine>: case <lib-dir>: case <library>:
-      case <pthread>: case <framework>: break;
+      case <rpath>: case <pthread>: case <framework>: break;
       default:
         x2c_driver_error(%"unsupported package native argument '$argument'");
     }

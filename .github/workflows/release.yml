@@ -65,6 +65,12 @@ jobs:
       matrix:
         os: [macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm]
         package: [pcre2, yyjson, libcurl, termbox2, libuv, blis]
+        # Upstream publishes prebuilt CPU libtorch only for these two.
+        include:
+          - os: macos-15
+            package: torch
+          - os: ubuntu-24.04
+            package: torch
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -85,6 +91,14 @@ jobs:
         run: make build-safe
       - name: Bundle the package for this platform
         run: make -C packages/${{ matrix.package }} bundle
+      # torch carries shared libraries, so its bundle is only proven by a
+      # program that loads them from an installed copy.
+      - name: Run a program against the installed torch bundle
+        if: matrix.package == 'torch'
+        run: |
+          packages/tools/check-bundle.sh \
+            packages/torch/builds/bundle/torch-native.tar.gz \
+            packages/torch/examples/fit-line.x
       - name: Keep the bundle
         uses: actions/upload-artifact@v4
         with:
