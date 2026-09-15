@@ -346,7 +346,7 @@ String Var_string(Var);
 
 int String_endswith(String, String);
 
-String x2c_path_stem(String);
+String String_stem(String);
 
 int Map_truth(Map);
 
@@ -407,7 +407,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs){
           fprintf(stderr, "x2c: error: translation input is not an .x file: %s\n", input);
           exit(2);
         }
-        String stem = x2c_path_stem(input);
+        String stem = String_stem(input);
         if(! CliRequest_inspects(c) && ! Map_truth(unit_dirs)){
           List prior_stem = stems, prior_input = stem_inputs;
           while(List_truth(prior_stem)){
@@ -608,7 +608,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
     while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
       input = Var_string(_x2c_macro_cursor_output_7);
       {
-        String stem = x2c_path_stem(input);
+        String stem = String_stem(input);
         gen_bytes += report_file_bytes(String_join(NULL, cons(String_var(c -> out_dir), cons(String_var(_15), cons(String_var(stem), cons(String_var(_16), NULL))))));
         gen_bytes += report_file_bytes(String_join(NULL, cons(String_var(c -> out_dir), cons(String_var(_15), cons(String_var(stem), cons(String_var(_17), NULL))))));
       }

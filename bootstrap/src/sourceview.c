@@ -2,13 +2,12 @@
 
 #include "sourceview.h"
 
-static String _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,16 +57,12 @@ __attribute__((constructor)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(261698358342, String_new("SourceView"), _x2c__x2c_protocol_methods_0);
-  _0 = String_new("/");
-  _1 = String_new(".");
-  _2 = String_new("..");
-  _3 = String_new("/");
-  _4 = String_new("<SourceView: 0x%012lX>");
-  _5 = String_new("SourceView { ");
-  _6 = String_new("overlays: ");
-  _7 = String_new(", ");
-  _8 = String_new("dirty_paths: ");
-  _9 = String_new(" }");
+  _0 = String_new("<SourceView: 0x%012lX>");
+  _1 = String_new("SourceView { ");
+  _2 = String_new("overlays: ");
+  _3 = String_new(", ");
+  _4 = String_new("dirty_paths: ");
+  _5 = String_new(" }");
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -115,7 +110,7 @@ Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer SourceView_write_str(SourceView value, Buffer out){
   if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _4, (long) value);
+  return Buffer_printf(out, _0, (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -158,9 +153,9 @@ Buffer Map_write_repr(Map, Buffer);
 
 Buffer SourceView_write_repr(SourceView value, Buffer out){
   if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _4, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
   RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _4, (long) value);
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
   {
   _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_1 =(const void *) & path};
 
@@ -170,14 +165,14 @@ Buffer SourceView_write_repr(SourceView value, Buffer out){
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-    Buffer_write(out, _5);
-    Buffer_write(out, _6);
+    Buffer_write(out, _1);
+    Buffer_write(out, _2);
     Map_write_repr(value -> overlays, out);
-    Buffer_write(out, _7);
-    Buffer_write(out, _8);
+    Buffer_write(out, _3);
+    Buffer_write(out, _4);
     Map_write_repr(value -> dirty_paths, out);
     {
-      Buffer _x2c_return_value_1 = Buffer_write(out, _9);
+      Buffer _x2c_return_value_1 = Buffer_write(out, _5);
       {
         x2c_cleanup_leave(& _x2c_defer_record_1);
         return _x2c_return_value_1;
@@ -224,82 +219,34 @@ void SourceView_init(SourceView sources){
   sources -> dirty_paths = Map_new();
 }
 
-String String_new(const char *);
-
-int String_startswith(String, String);
+Var Map_setindex(Map, Var, Var);
 
 Var String_var(String);
 
-List String_split(String, String);
-
-int List_try_next(List, List *, Var *);
-
-String Var_string(Var);
-
-int String_truth(String);
-
-int String_equal(String, String);
-
-int String_rfind(String, String);
-
-String SourceView_path(String path){
-  if(! _init_guard_) _file_init_();
-  char buffer[PATH_MAX];
-  if(realpath(path, buffer)) return String_new(buffer);
-  if(! String_startswith(path, _3)){
-    if(! getcwd(buffer, sizeof(buffer))) return path;
-    path = String_join(NULL, cons(String_var(String_new(buffer)), cons(String_var(_0), cons(String_var(path), NULL))));
-  }
-  String result = _3;
-  {
-    String part;
-    List _x2c_macro_object_0 = String_split(path, _3);
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-      part = Var_string(_x2c_macro_cursor_output_0);
-      {
-        if(! String_truth(part) || String_equal(part, _1)) continue;
-        if(String_equal(part, _2)){
-          int slash = String_rfind(result, _3);
-          result = slash > 0 ? String_getslice(result, -2147483648, slash, 1) : "/";
-          continue;
-        }
-        result = String_equal(result, _3) ? String_join(NULL, cons(String_var(_0), cons(String_var(part), NULL))) : String_join(NULL, cons(String_var(result), cons(String_var(_0), cons(String_var(part), NULL))));
-        if(realpath(result, buffer)) result = String_new(buffer);
-      }
-
-    }
-
-  }
-  return result;
-}
-
-Var Map_setindex(Map, Var, Var);
+String String_absolute_path(String);
 
 Var int_var(int);
 
 void SourceView_set(SourceView sources, String path, String text, int changed){
-  if(! _init_guard_) _file_init_();
-  Map_setindex(sources -> overlays, String_var(SourceView_path(path)), String_var(text));
-  if(changed) Map_setindex(sources -> dirty_paths, String_var(SourceView_path(path)), int_var(1));
+  Map_setindex(sources -> overlays, String_var(String_absolute_path(path)), String_var(text));
+  if(changed) Map_setindex(sources -> dirty_paths, String_var(String_absolute_path(path)), int_var(1));
 }
 
 int Map_contains(Map, Var);
 
 int SourceView_is_changed(SourceView sources, String path){
-  if(! _init_guard_) _file_init_();
-  return sources && Map_contains(sources -> dirty_paths, String_var(SourceView_path(path)));
+  return sources && Map_contains(sources -> dirty_paths, String_var(String_absolute_path(path)));
 }
 
 int SourceView_exists(SourceView sources, String path){
-  if(! _init_guard_) _file_init_();
-  if(sources && Map_contains(sources -> overlays, String_var(SourceView_path(path)))) return 1;
+  if(sources && Map_contains(sources -> overlays, String_var(String_absolute_path(path)))) return 1;
   struct stat info;
   return ! access(path, R_OK) && ! stat(path, & info) && S_ISREG(info.st_mode);
 }
 
 int Map_try_get(Map, Var, Var *);
+
+String Var_string(Var);
 
 int File_stat(File, struct stat *);
 
@@ -308,9 +255,8 @@ String File_string_close(File);
 Var Symbol_var(Symbol);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
-  if(! _init_guard_) _file_init_();
   Var value;
-  if(sources && Map_try_get(sources -> overlays, String_var(SourceView_path(path)), & value)){
+  if(sources && Map_try_get(sources -> overlays, String_var(String_absolute_path(path)), & value)){
     * text = Var_string(value);
     return 1;
   }

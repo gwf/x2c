@@ -85,7 +85,7 @@ int Var_is_void(Var);
 
 int Var_int(Var);
 
-String SourceView_path(String);
+String String_absolute_path(String);
 
 Var Map_setindex(Map, Var, Var);
 
@@ -116,7 +116,7 @@ static void _diagnostics(File file, Compiler compiler, Map needed){
         int length = Var_is_void(width) ? 0 : Var_int(width);
         if(comma ++) fputc(',', file);
         fputc('{', file);
-        path = SourceView_path(path);
+        path = String_absolute_path(path);
         Map_setindex(needed, String_var(path), int_var(1));
         _location(file, path, start, start + length);
         fputs(",\"message\":", file);
@@ -278,7 +278,7 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
           while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_3)){
             input = Var_string(_x2c_macro_cursor_output_3);
             {
-              if(! String_equal(SourceView_path(input), source)) continue;
+              if(! String_equal(String_absolute_path(input), source)) continue;
               if(selected && selected != node -> request){
                 fputs("x2c editor: source belongs to multiple selected targets\n", stderr);
                 exit(2);
@@ -360,7 +360,7 @@ int editor_request(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
   if(argc < 7) return 2;
   String response = String_new(argv[1]);
-  String source = SourceView_path(String_new(argv[2]));
+  String source = String_absolute_path(String_new(argv[2]));
   String kind = String_new(argv[3]);
   int offset = atoi(argv[4]), count = atoi(argv[5]);
   if(count < 0 || count >(argc - 7) / 3) return 2;

@@ -14,7 +14,6 @@ $(import "../lib/private-keywords.xmacro")
 
 #pragma private
 
-#include <dirent.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -47,18 +46,15 @@ static String _platform(void) {
   return %"${String.new(host.sysname).lower()}-${String.new(host.machine)}";
 }
 
-static char **_argv(List arguments) {
-  char **argv = Scope.calloc(arguments.len() + 1, sizeof(char *));
-  int index = 0;
-  foreach (String argument, arguments) argv[index++] = argument;
-  return argv;
-}
-
 /* Runs one host tool and returns its stdout, or exits with its stderr. */
 static String _run(List arguments, const char *what) {
-  String output = NULL, errors = NULL;
-  if (process_run(_argv(arguments), &output, &errors) == 0) return output;
-  String tool = arguments.car();
+  String tool = arguments.car(), errors = "not found";
+  try {
+    Job job = arguments.options(%{stdout: capture, stderr: capture}).start();
+    if (!job.wait()) return job.output();
+    errors = job.errors();
+  }
+  catch %(not-found *): {}
   _error(%"$what failed ($tool): ${errors ? errors.strip(" \n") : %""}");
   return NULL;
 }
@@ -76,22 +72,8 @@ static void _write_text(String path, String text) {
     _error(%"cannot write $path");
 }
 
-static int _is_dir(String path) {
-  struct stat info;
-  return !stat(path, &info) && S_ISDIR(info.st_mode);
-}
-
-static List _entries(String directory) {
-  DIR *input = opendir(directory);
-  if (!input) return NULL;
-  Array names = %[], struct dirent *entry;
-  while ((entry = readdir(input))) {
-    String name = String.new(entry->d_name);
-    if (!name.startswith(".")) names.push(name);
-  }
-  closedir(input);
-  return names.sort().list_free();
-}
+static List _entries(String directory) =>
+  directory.list_dir().filter(%!(name) => !name.str().startswith("."));
 
 static List _files_with(String directory, String suffix) {
   Array paths = %[];
@@ -109,9 +91,12 @@ static String _fetch(String url, String directory, String name) {
 }
 
 static String _digest(String path) {
-  String output = NULL, errors = NULL;
-  if (process_run(_argv(%( "shasum" "-a" "256" $path )), &output, &errors))
-    output = _run(%( "sha256sum" $path ), "sha256");
+  String output = NULL;
+  try output = %( "shasum" "-a" "256" $path )
+    .options(%{stderr: capture}).output();
+  catch %(not-found *): {}
+  catch %(cmd-fail *): {}
+  if (!output) output = _run(%( "sha256sum" $path ), "sha256");
   return output.split(" ").car();
 }
 
@@ -155,13 +140,15 @@ static String _unpack(String tarball, String work) {
   if (!_build_mkdirs(extracted)) _error(%"cannot create $extracted");
   _run(%( "tar" "-xzf" $tarball "-C" $extracted ), "extract");
   List top = _entries(extracted);
-  if (!top || top.cdr() || !_is_dir(%"$extracted/${top.car()}"))
+  if (!top || top.cdr() || !%"$extracted/${top.car()}".is_dir())
     _error(%"$tarball must contain one package directory");
   return %"$extracted/${top.car()}";
 }
 
 static void _copy_tree(String source, String target) {
-  _run(%( "cp" "-R" $source $target ), "copy");
+  try source.copy_tree(target);
+  catch %(not-found *): _error(%"cannot copy $source");
+  catch %(io-fail *): _error(%"cannot copy $source");
 }
 
 static String _json_field(String text, const char *key) {
@@ -192,13 +179,13 @@ static void _build_source(String package, String name, String spec) {
     _error(%"$spec has no src/$name.x entry unit");
   foreach (String manifest, _files_with(package, ".json"))
     if (manifest.endswith("dependency.json") ||
-        x2c_path_stem(manifest).startswith("dependency-"))
+        manifest.stem().startswith("dependency-"))
       _error(%"$name needs native dependencies; install its bundle");
   String builds = %"$package/builds", x2c = x2c_get_executable();
   if (!_build_mkdirs(builds)) _error(%"cannot create $builds");
   _run(%( $x2c "translate" "--out-dir" $builds
           "--x-include-dir" ${%"$package/src"}
-          "--package-dir" ${x2c_path_dir(package)} )
+          "--package-dir" ${package.dirname()} )
          .append(units), "translate");
   List inputs = _files_with(builds, ".c")
     .append(_files_with(%"$package/src", ".c"));
@@ -241,13 +228,8 @@ static void _publish(String staged, String packages, String name) {
 
 /* Staging directories left by an interrupted install are removed first. */
 static String _work_directory(String packages) {
-  DIR *input = opendir(packages);
-  struct dirent *entry;
-  while (input && (entry = readdir(input))) {
-    String name = String.new(entry->d_name);
+  foreach (String name, packages.list_dir())
     if (name.startswith(".install.")) _build_remove_tree(%"$packages/$name");
-  }
-  if (input) closedir(input);
   String work = %"$packages/.install.%ld".printf((long) getpid());
   if (!_build_mkdirs(work)) _error(%"cannot create $work");
   return work;
@@ -262,8 +244,8 @@ static String _install(
     source = _fetch(url, work, "package.tar.gz");
     _verify(source, sha256);
   }
-  else if (sha256 && !_is_dir(source)) _verify(source, sha256);
-  String package = _is_dir(source) ? source : _unpack(source, work);
+  else if (sha256 && !source.is_dir()) _verify(source, sha256);
+  String package = source.is_dir() ? source : _unpack(source, work);
   String name = package.split("/").last();
   if (!name.is_identifier()) _error(%"'$name' is not a package name");
   String staged = %"$work/$name";

@@ -18,7 +18,7 @@ Host preprocessing, compilation, archive, and link actions.
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
 | [`ToolAction.start`](#ToolAction.start) | Starts the action without a shell and returns a `Scope`-owned execution. |
 | [`ToolRun.ready`](#ToolRun.ready) | Checks whether an execution can be waited without blocking. |
-| [`ToolRun.wait`](#ToolRun.wait) | Waits once for an execution, forwards its captured streams, and returns its shell-style status. |
+| [`ToolRun.wait`](#ToolRun.wait) | Waits for an execution, forwards its captured streams, and returns its shell-style status. |
 | [`Toolchain.archive_action`](#Toolchain.archive_action) | Builds but does not start an `ar rcs` action in object-list order. |
 | [`Toolchain.compile_action`](#Toolchain.compile_action) | Builds but does not start one C compilation action. |
 | [`Toolchain.link_action`](#Toolchain.link_action) | Builds but does not start a host-compiler link action. |
@@ -36,7 +36,7 @@ The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:238`
+Source: `src/toolchain.x:240`
 
 #### toolchain_new
 
@@ -50,7 +50,7 @@ option `List`s are borrowed.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
 or its canonical layout.
 
-Source: `src/toolchain.x:119`
+Source: `src/toolchain.x:121`
 
 ### `ToolAction`
 
@@ -61,7 +61,7 @@ Source: `src/toolchain.x:119`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:251`
+Source: `src/toolchain.x:253`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -69,12 +69,11 @@ Source: `src/toolchain.x:251`
 `int ToolAction.run(ToolAction action)`
 
 Starts and waits for the action, returning its final status.
-A partial capture setup failure returns no defined status.
 
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:357`
+Source: `src/toolchain.x:373`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -83,13 +82,12 @@ Source: `src/toolchain.x:357`
 
 Starts the action without a shell and returns a `Scope`-owned execution.
 Verbose and dry-run actions print their quoted argv to stderr. A dry run
-starts no child. After capture setup succeeds, a non-dry execution must be
-waited exactly once; partial capture setup leaves a non-waitable result.
+starts no child.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:303`
+Source: `src/toolchain.x:322`
 
 ### `ToolRun`
 
@@ -99,26 +97,24 @@ Source: `src/toolchain.x:303`
 `int ToolRun.ready(ToolRun execution)`
 
 Checks whether an execution can be waited without blocking. A dry run
-is ready immediately. A completed child retains its status and captures
-until the required `ToolRun.wait` call.
+and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:320`
+Source: `src/toolchain.x:340`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
 
 `int ToolRun.wait(ToolRun execution)`
 
-Waits once for an execution, forwards its captured streams, and returns its
-shell-style status. Signals return `128 + signal`; an invalid action, fork
-failure, or wait failure returns -1, and a dry run returns 0. Captured
-output goes to stderr; program actions inherit standard streams. An
-execution with partial capture setup is not valid input.
+Waits for an execution, forwards its captured streams, and returns its
+shell-style status. Signals return `128 + signal`, a tool that could not
+start returns 127, and a dry run returns 0. Captured output goes to
+stderr; program actions inherit standard streams.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:335`
+Source: `src/toolchain.x:351`
 
 ### `Toolchain`
 
@@ -133,7 +129,7 @@ membership must unlink `output` before it runs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:202`
+Source: `src/toolchain.x:204`
 
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
@@ -147,7 +143,7 @@ configured compiler arguments. The action requests dependency output at
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:161`
+Source: `src/toolchain.x:163`
 
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
@@ -160,7 +156,7 @@ runtime archive, and `-lm` follow the inputs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:219`
+Source: `src/toolchain.x:221`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
@@ -174,14 +170,14 @@ stdout and stderr are captured separately. When `dependencies` is present,
 its temporary depfile is read when possible and removed on returning paths,
 including a handled `<io-fail>` while reading it. A non-returning
 `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
-Returns the shell-style child status, or -1 for invalid arguments, local
-setup failure, child start failure, or wait failure. Partial capture setup
-returns no defined status. This operation does not consult `dry_run`.
+Returns the shell-style child status, 127 when the preprocessor cannot
+start, or -1 for invalid arguments or local setup failure. This operation
+does not consult `dry_run`.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:381`
+Source: `src/toolchain.x:397`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -194,14 +190,14 @@ markers so source locations also belong to the identity.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:185`
+Source: `src/toolchain.x:187`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`ToolAction`](#ToolAction) | struct | Describes one `Scope`-owned host-tool argv action and its reporting policy. |
-| [`ToolRun`](#ToolRun) | struct | Tracks one `Scope`-owned started action and its captured child process. |
+| [`ToolRun`](#ToolRun) | struct | Tracks one `Scope`-owned started action and its job. |
 | [`Toolchain`](#Toolchain) | struct | Holds resolved host tools, native layout, and borrowed option `List`s. |
 
 <a id="ToolAction"></a>
@@ -213,20 +209,19 @@ Describes one `Scope`-owned host-tool argv action and its reporting policy.
 The `arguments` `List` is retained without copying, follows its owning
 canonical pool, and must remain valid through the action's execution.
 
-Source: `src/toolchain.x:26`
+Source: `src/toolchain.x:28`
 
 <a id="ToolRun"></a>
 ### ToolRun
 
-`typedef struct ToolRun { ToolAction action; void *process; } *ToolRun`
+`typedef struct ToolRun { ToolAction action; Job job; String start_error; } *ToolRun`
 
-Tracks one `Scope`-owned started action and its captured child process.
-After capture setup succeeds, a non-dry execution must be passed to
-`ToolRun.wait` exactly once; a returning wait consumes its stdout and
-stderr files. The borrowed action must remain valid through that wait.
-Partial capture setup leaves a non-waitable execution.
+Tracks one `Scope`-owned started action and its job.
+A tool that could not start has no job and keeps the message its
+`ToolRun.wait` reports. The borrowed action must remain valid through
+that wait.
 
-Source: `src/toolchain.x:36`
+Source: `src/toolchain.x:37`
 
 <a id="Toolchain"></a>
 ### Toolchain
@@ -239,9 +234,9 @@ follow
 their owning canonical pools, which may be ancestors; `cpp_args`,
 `cc_args`, and `ld_args` are retained without copying.
 
-Source: `src/toolchain.x:17`
+Source: `src/toolchain.x:19`
 
 ## Design notes
 
-Resolves host tools and builds typed argv. Every action runs through the
-child-process code in utils.x without a shell.
+Resolves host tools and builds typed argv. Every action runs as a
+`lib/process.x` command, without a shell.

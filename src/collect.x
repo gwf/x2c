@@ -310,7 +310,7 @@ static String _include_text(Compiler c, String target, String path) {
 static void _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = _include_text(c, target, canonical);
-  _file(c, canonical, text, x2c_path_dir(canonical), globs, visited);
+  _file(c, canonical, text, canonical.dirname(), globs, visited);
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -347,7 +347,7 @@ static void _parse_segment(
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
   shadow.tokenize(text);
   shadow.text = source;
-  if (c.source_facts) c.source_texts[SourceView.path(path)] = source;
+  if (c.source_facts) c.source_texts[path.absolute_path()] = source;
   for (size_t i = 0; i < shadow.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) shadow.tokenizer.tokens)[i];
     token.line += start_line - 1;
@@ -581,7 +581,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical) {
   Map scratch = %{}, visited = %{};
   visited[canonical] = 1;
   _file(
-    c, canonical, _runtime_text(c, runtime), x2c_path_dir(runtime),
+    c, canonical, _runtime_text(c, runtime), runtime.dirname(),
     scratch, visited);
   return _header_cache()[canonical];
 }
@@ -611,7 +611,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
     if (c.runtime_hdrs)
       _file(
         c, runtime_canonical, _runtime_text(c, runtime),
-        x2c_path_dir(runtime), globs, visited);
+        runtime.dirname(), globs, visited);
     else
       _replay_cached(
         c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
@@ -619,7 +619,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   visited[canonical] = 1;
   _file(
     c, canonical, c.text,
-    x2c_path_dir(c.filename), globs, visited);
+    c.filename.dirname(), globs, visited);
   return globs;
 }
 
@@ -778,7 +778,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
         %( "path: $entry" ));
-    _file(package, entry, text, x2c_path_dir(entry), globs, visited);
+    _file(package, entry, text, entry.dirname(), globs, visited);
   }
   else _replay_cached(package, cached, globs, visited);
   Map.merge(c.fn_defs, package.fn_defs);
@@ -828,20 +828,20 @@ static String interface_out_dir = NULL, interface_mirror = NULL;
 void interface_configure(String out_dir) {
   interface_out_dir = out_dir;
   String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage = executable ? x2c_path_dir(executable) : NULL;
+  String stage = executable ? executable.dirname() : NULL;
   interface_mirror =
-    stage && x2c_path_dir(stage) == %"$root/builds" ? stage : root;
+    stage && stage.dirname() == %"$root/builds" ? stage : root;
 }
 
 /* Candidate interface paths for one canonical source path: the output
    directory by stem, its sibling that mirrors a home file's directory, the
    home mirror, and a package's `builds/` beside or above the source. */
 static List _interface_candidates(String canonical) {
-  String stem = x2c_path_stem(canonical), relative = _root_relative(canonical);
-  String dir = x2c_path_dir(canonical), Array paths = %[];
+  String stem = canonical.stem(), relative = _root_relative(canonical);
+  String dir = canonical.dirname(), Array paths = %[];
   if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
   if (relative) {
-    String mirror = %"${x2c_path_dir(relative)}/$stem.xi";
+    String mirror = %"${relative.dirname()}/$stem.xi";
     if (interface_out_dir) paths.push(%"$interface_out_dir/../$mirror");
     paths.push(%"$interface_mirror/$mirror");
   }

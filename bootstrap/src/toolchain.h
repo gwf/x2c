@@ -6,6 +6,8 @@
 #define __GUARD_0x242786A8__
 
 #include "x2c.h"
+#include "path.h"
+#include "process.h"
 typedef struct Toolchain{
   String cc, ar, include_dir, runtime_lib;
   List cpp_args, cc_args, ld_args;
@@ -22,7 +24,8 @@ typedef struct ToolAction{
 
 typedef struct ToolRun{
   ToolAction action;
-  void * process;
+  Job job;
+  String start_error;
 }
 * ToolRun;
 

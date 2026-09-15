@@ -690,7 +690,7 @@ static void _report_output_error(Compiler compiler, String fname, String message
   Compiler_report_error(compiler, 354920, message, compiler -> token, notes);
 }
 
-String x2c_path_dir(String);
+String String_dirname(String);
 
 String String_printf(String, ...);
 
@@ -709,7 +709,7 @@ static void _write_outputs(Compiler compiler, String paths[2], String contents[2
     fname = paths[i];
     File output = Stdout;
     if(String_truth(fname)){
-      String directory = x2c_path_dir(fname);
+      String directory = String_dirname(fname);
       int fd, serial = 0;
       do{
         temporaries[i] = String_printf(String_join(NULL, cons(String_var(directory), cons(String_var(_6), NULL))), (long) getpid(), serial ++);
@@ -1551,14 +1551,14 @@ List List_filter(List, Func);
 List Compiler_setup_cache_init(Compiler, List, List, String, String, String);
 List Compiler_emit(Compiler, List);
 String String_rstrip(String, char *);
-String x2c_path_stem(String);
+String String_stem(String);
 char * Compiler_code_pretty_string(Compiler, List, String);
 void interface_write(Compiler, String);
 void generate_code(Compiler c, List ast, String dir){
   if(! _init_guard_) _file_init_();  ast = List_filter(ast, _x2c_func_handle_0);  List header, source;  List _x2c_destructure_4 = _header_and_source(c, ast);  header = Var_list(List_getindex(_x2c_destructure_4, 0));  source = Var_list(List_getindex(_x2c_destructure_4, 1));  String hash = x2c_filename_hash(c -> filename); {
     List _x2c_destructure_5 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_480), cons(String_var(hash), cons(String_var(_481), NULL)))), String_join(NULL, cons(String_var(_482), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_483), cons(String_var(hash), NULL))));  header = Var_list(List_getindex(_x2c_destructure_5, 0));  source = Var_list(List_getindex(_x2c_destructure_5, 1));
   }
-  List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, _484)), cons(String_var(_484), cons(String_var(x2c_path_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_485), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_486), NULL)));  String header_text = String_new(Compiler_code_pretty_string(c, header, hfile));  String source_text = String_new(Compiler_code_pretty_string(c, source, cfile));  String paths[2] ={
+  List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, _484)), cons(String_var(_484), cons(String_var(String_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_485), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_486), NULL)));  String header_text = String_new(Compiler_code_pretty_string(c, header, hfile));  String source_text = String_new(Compiler_code_pretty_string(c, source, cfile));  String paths[2] ={
     hfile, cfile
   }
   ;  String contents[2] ={

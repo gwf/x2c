@@ -55,7 +55,7 @@ static void _diagnostics(File file, Compiler compiler, Map needed) {
     int length = width is void ? 0 : width.int();
     if (comma++) fputc(',', file);
     fputc('{', file);
-    path = SourceView.path(path);
+    path = path.absolute_path();
     needed[path] = 1;
     _location(file, path, start, start + length);
     fputs(",\"message\":", file);
@@ -143,7 +143,7 @@ static CliRequest _configure(
       ProjectBuild plan = project_plan(request);
       for (ProjectBuild node = plan; node; node = node.next) {
         foreach (String input, node.request.inputs) {
-          if (SourceView.path(input) != source) continue;
+          if (input.absolute_path() != source) continue;
           if (selected && selected != node.request) {
             fputs("x2c editor: source belongs to multiple selected targets\n",
                   stderr);
@@ -188,7 +188,7 @@ static int _changed_dependency(Compiler compiler, SourceView sources) {
 int editor_request(int argc, char **argv) {
   if (argc < 7) return 2;
   String response = String.new(argv[1]);
-  String source = SourceView.path(String.new(argv[2]));
+  String source = String.new(argv[2]).absolute_path();
   String kind = String.new(argv[3]);
   int offset = atoi(argv[4]), count = atoi(argv[5]);
   if (count < 0 || count > (argc - 7) / 3) return 2;

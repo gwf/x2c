@@ -239,7 +239,7 @@ List Compiler.origin_location(Compiler compiler, int occurrence) {
 */
 String Compiler.display_path(Compiler compiler, String path) {
   if (!path || path.startswith(%"<")) return path;
-  if (compiler.source_facts) return SourceView.path(path);
+  if (compiler.source_facts) return path.absolute_path();
   String root = compiler.root_dir;
   if (root && path && path.startswith(root) &&
       path.len() > root.len() && path[root.len()] == '/')

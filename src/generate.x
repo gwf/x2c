@@ -46,7 +46,7 @@ static void _write_outputs(
     fname = paths[i];
     File output = Stdout;
     if (fname) {
-      String directory = x2c_path_dir(fname);
+      String directory = fname.dirname();
       int fd, serial = 0;
       do {
         temporaries[i] = %"$directory/.x2c-output.%ld.%d".printf(
@@ -908,7 +908,7 @@ void generate_code(Compiler c, List ast, String dir) {
   source = c.emit(source);
 
   String basename =
-    %"${dir.rstrip(%"/")}/${x2c_path_stem(c.filename)}";
+    %"${dir.rstrip(%"/")}/${c.filename.stem()}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
   String header_text = c.code_pretty_string(header, hfile);
   String source_text = c.code_pretty_string(source, cfile);

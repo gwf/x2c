@@ -1,13 +1,22 @@
 # x2c scripting
 
-> Status: active - approved 2026-09-15. Phase 1 (`process.x`, `path.x`,
-> `<cmd-fail>`) implemented; phases 2-4 pending.
+> Status: active - approved 2026-09-15. Phases 1 (`process.x`, `path.x`,
+> `<cmd-fail>`, cb176c0) and 2 (compiler adoption) implemented; phases 3-4
+> pending.
 > Phase 1 notes: a private `extern` declaration lost `extern` in generated C
 > (fixed in `src/generate.x`, fixture `private-extern-declaration`). `walk`
 > returns a `List`, not an `Iter`. `glob` uses the manifest `**` matcher
-> rewritten to try only component boundaries; the manifest copy in
-> `src/project.x` still backtracks exponentially and matches mid-component,
-> and Phase 2 replaces it with `String.glob_match`.
+> rewritten to try only component boundaries.
+> Phase 2 notes: `src/` is 422 lines deleted and 157 added. `ChildProcess`,
+> `process_run`, `x2c_path_dir`, `x2c_path_stem`, `SourceView.path`, the
+> install directory helpers, and the manifest glob matcher are gone; the
+> manifest glob no longer backtracks exponentially or matches mid-component.
+> `_build_mkdirs` and `_build_remove_tree` remain as boolean adapters so
+> bootstrap and install keep their messages, and a tool that cannot start
+> still reports status 127. Self-translation of `src/*.x` at `-j 1` took
+> 3.31-3.51 s against 3.38-3.50 s before. An uncaught `<cmd-fail>` aborts
+> with the error-floor report, so Phase 4's synthesized `main` should report
+> a failed command and exit with its status.
 
 ## Context
 

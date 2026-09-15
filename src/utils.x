@@ -1,26 +1,13 @@
-/*  utils.x -- System utilities for environment discovery and child processes
+/*  utils.x -- System utilities for environment discovery and workers
 
     Copyright (c) 2025 Gary William Flake
 
-    Finds the repository, prints the driver's fatal error line, and starts
-    child processes. Process paths remain argv data; stdout, stderr, and the
-    child status are captured independently.
+    Finds the repository, prints the driver's fatal error line, and forks
+    translation workers. Host tools run through `lib/process.x`.
   */
 
 #pragma once
 $(import "../lib/private-keywords.xmacro")
-
-/** Holds a `Scope`-owned child process and its stdout and stderr captures.
-    `process_start` records a successful child with a nonnegative `pid` and a
-    local start failure with `pid == -1` and `start_error`. Only successful
-    capture setup leaves live streams for `ChildProcess.wait`; such a child
-    must be waited exactly once.
-*/
-typedef struct ChildProcess {
-  long pid;
-  int finished, status;
-  File output, errors, String start_error;
-} *ChildProcess;
 
 /** Initializes compiler paths and default include `List`s once.
     The executable is resolved from the host, `argv0`, or `PATH`. The home is
@@ -69,23 +56,6 @@ String x2c_get_root(void) => x2c_root_path;
 
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
 String x2c_get_executable(void) => x2c_executable_path;
-
-/** Returns the directory part of `path`, or "." when it has no slash. */
-String x2c_path_dir(String path) {
-  int slash = path.rfind("/");
-  if (slash < 0) return %".";
-  return slash ? path[:slash] : %"/";
-}
-
-/** Returns the final path component without its final extension.
-    A leading dot belongs to the name, so `.x2crc` keeps its spelling while
-    `parse.x` becomes `parse`. A null or empty final component returns the
-    empty `String`.
-*/
-String x2c_path_stem(String path) {
-  String base = path.split("/").last(), int dot = base.rfind(".");
-  return dot > 0 ? base[:dot] : base;
-}
 
 /** Returns the package directory containing `path` below a registered root.
     Callers establish path identity and own any package-name restrictions.
@@ -244,138 +214,7 @@ static void _prepare_repo_defaults(void) {
     ? %( $src_dir $lib_dir ) : %( $lib_dir );
 }
 
-// child processes
-
-static int _cpp_status(int status) {
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return -1;
-}
-
-static int _cpp_wait(pid_t pid) {
-  int status;
-  while (waitpid(pid, &status, 0) < 0) {
-    if (errno == EINTR) continue;
-    return -1;
-  }
-  return _cpp_status(status);
-}
-
-/* After both regular temporary files open, the parent can wait before reading
-   without pipe backpressure. The child duplicates them onto stdout and stderr,
-   while the parent retains the original streams until wait consumes them. A
-   partial setup failure closes the stream that opened but leaves its field
-   recorded, so that failure handle is not safe to wait. */
-/** Starts a direct child action. With `capture`, stdout and stderr go to
-    separate temporary files; otherwise all standard streams are inherited.
-    `argv` must be a NULL-terminated vector with a non-NULL first element and
-    need remain valid only through this call. The returned handle is
-    `Scope`-owned. An invalid action or fork failure is recorded as `pid == -1`
-    with `start_error`; an `execvp` failure is a child exit with status 127.
-    Capture setup failure closes any stream that opened, but a partial failure
-    leaves that closed field recorded and does not produce a waitable handle.
-*/
-ChildProcess process_start(char **argv, int capture) {
-  ChildProcess process = Scope.calloc(1, sizeof(struct ChildProcess));
-  if (!argv || !argv[0]) {
-    process.pid = -1;
-    process.start_error = "invalid empty process action";
-    return process;
-  }
-  if (capture) {
-    process.output = tmpfile();
-    process.errors = tmpfile();
-    if (!process.output || !process.errors) {
-      if (process.output) process.output.close();
-      if (process.errors) process.errors.close();
-      process.pid = -1;
-      process.start_error = "unable to create process capture files";
-      return process;
-    }
-  }
-  pid_t pid = fork();
-  process.pid = pid;
-  if (pid == 0) {
-    if (capture) {
-      int out_fd = process.output.fileno(), err_fd = process.errors.fileno();
-      if (dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0) {
-        dprintf(
-          STDERR_FILENO, "x2c: unable to capture child output: %s\n",
-          strerror(errno));
-        _exit(127);
-      }
-      if (out_fd != STDOUT_FILENO) close(out_fd);
-      if (err_fd != STDERR_FILENO) close(err_fd);
-    }
-    execvp(argv[0], argv);
-    dprintf(
-      STDERR_FILENO, "x2c: unable to execute %s: %s\n",
-      argv[0], strerror(errno));
-    _exit(127);
-  }
-  if (pid < 0) process.start_error = "unable to fork child process";
-  return process;
-}
-
-/** Checks whether an owned child has finished, without blocking. Reaps only
-    this child and retains its status for `wait`, which must still be called
-    exactly once to consume captured streams. Start and wait failures are
-    ready results; partial capture setup remains invalid input to `wait`.
-*/
-int ChildProcess.ready(ChildProcess c) {
-  if (c.pid < 0 || c.finished) return 1;
-  int status;
-  pid_t pid;
-  do pid = waitpid((pid_t) c.pid, &status, WNOHANG);
-  while (pid < 0 && errno == EINTR);
-  if (!pid) return 0;
-  c.status = pid < 0 ? -1 : _cpp_status(status);
-  c.finished = 1;
-  return 1;
-}
-
-/** Waits for `process`, then reads and closes its captured streams.
-    Both output pointers are required and are cleared before validation. On a
-    returning call they receive canonical `String`s or the empty `String`. The
-    result is the exit status, `128 + signal`, or -1 for invalid arguments, an
-    invalid action, fork failure, or wait failure. An `execvp` failure returns
-    127 with its diagnostic in `errors`; an invalid action or fork failure
-    places `start_error` there instead. A partial capture setup failure is not
-    a valid input to this method.
-
-    Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
-    reading either capture as a `String`. A failure may leave capture streams
-    open.
-*/
-int ChildProcess.wait(ChildProcess c, String *output, String *errors) {
-  if (output) *output = NULL;
-  if (errors) *errors = NULL;
-  if (!c || !output || !errors) return -1;
-  int result =
-    c.finished ? c.status : c.pid < 0 ? -1 : _cpp_wait((pid_t) c.pid);
-  if (c.output) {
-    c.output.rewind();
-    *output = c.output.string();
-    c.output.close();
-  }
-  if (c.errors) {
-    c.errors.rewind();
-    *errors = c.errors.string();
-    c.errors.close();
-  }
-  if (c.start_error) *errors = c.start_error;
-  return result;
-}
-
-/** Starts and waits for one direct child action.
-    After capture setup succeeds, output, status, and failure behavior follow
-    `process_start` and `ChildProcess.wait`. A partial capture setup failure
-    returns no defined status; its closed field remains recorded.
-*/
-int process_run(char **argv, String *output, String *errors) {
-  ChildProcess process = process_start(argv, 1);
-  return process.wait(output, errors);
-}
+// workers
 
 /** Forks a worker that continues the current program with inherited state.
     Returns zero in the child, its PID in the parent, or -1 on fork failure.
@@ -403,7 +242,13 @@ void worker_exit(int status) {
     Normal exit returns the worker status, a signal returns `128 + signal`, and
     a wait failure returns -1. Interrupted waits are retried.
 */
-int worker_wait(long pid) => _cpp_wait((pid_t) pid);
+int worker_wait(long pid) {
+  int status;
+  while (waitpid((pid_t) pid, &status, 0) < 0)
+    if (errno != EINTR) return -1;
+  if (WIFEXITED(status)) return WEXITSTATUS(status);
+  return WIFSIGNALED(status) ? 128 + WTERMSIG(status) : -1;
+}
 
 /** Hashes unit filename spelling for stable generated C identifiers. */
 String x2c_filename_hash(String filename) {

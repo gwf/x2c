@@ -678,14 +678,14 @@ static String _source_dir(Compiler compiler) {
   String filename = compiler.import_stack.len()
                   ? compiler.import_stack[-1].str()
                   : compiler.filename;
-  return filename ? x2c_path_dir(filename) : %".";
+  return filename ? filename.dirname() : %".";
 }
 
 static String _source_file(Compiler compiler, String file) {
   if (!file || file.startswith("<")) return file;
   char resolved[PATH_MAX];
   if (compiler.sources && compiler.sources.exists(file))
-    return SourceView.path(file);
+    return file.absolute_path();
   if (realpath(file, resolved)) return %"$resolved";
   if (file[0] != '/') {
     String rooted = %"${compiler.root_dir}/$file";
@@ -699,9 +699,9 @@ static String _embed_path(
   String candidate = requested;
   if (requested[0] != '/') {
     String base = _source_file(compiler, source_file);
-    candidate = %"${x2c_path_dir(base)}/$requested";
+    candidate = %"${base.dirname()}/$requested";
   }
-  if (compiler.sources) return SourceView.path(candidate);
+  if (compiler.sources) return candidate.absolute_path();
   char resolved[PATH_MAX];
   return realpath(candidate, resolved) ? %"$resolved" : candidate;
 }
@@ -712,12 +712,12 @@ static String _canonical_path(Compiler compiler, String path) {
     candidate = %"${_source_dir(compiler)}/$path";
   char resolved[PATH_MAX];
   if (compiler.sources && compiler.sources.exists(candidate))
-    return SourceView.path(candidate);
+    return candidate.absolute_path();
   if (realpath(candidate, resolved)) return %"$resolved";
   if (path && path[0] != '/') {
     String system = %"${compiler.root_dir}/lib/$path";
     if (compiler.sources && compiler.sources.exists(system))
-      return SourceView.path(system);
+      return system.absolute_path();
     if (realpath(system, resolved)) return %"$resolved";
   }
   return candidate;
