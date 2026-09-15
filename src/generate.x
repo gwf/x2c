@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "cache.x"
+#include "collect.x"
 #include "format.x"
 #include "emit.x"
 #include "utils.x"
@@ -891,7 +892,8 @@ static List _modify_main(Compiler compiler, List source) {
     its filename, symbols, binding facts, cache keys, and initialization state
     must still describe that same unit. `dir` must already exist. Generation
     partitions the AST, materializes caches and once-only initialization, and
-    writes or replaces `<dir>/<source-stem>.h` and `.c`. It appends generated
+    writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
+    of a collected unit. It appends generated
     bindings and initialization work to the compiler and is not idempotent.
     Both files are closed before individual renames replace their
     destinations; failure can leave only the header replaced, but never a
@@ -930,4 +932,5 @@ void generate_code(Compiler c, List ast, String dir) {
   String paths[2] = { hfile, cfile };
   String contents[2] = { header_text, source_text };
   _write_outputs(c, paths, contents);
+  if (!c.source_facts) interface_write(c, %"$basename.xi");
 }

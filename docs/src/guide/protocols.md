@@ -153,7 +153,7 @@ allowed.
 Protocol declarations and adoptions appear at the top level. Neither creates
 a program object or an AST node. The compiler collects them with surrounding
 declarations for each translation unit; reading source, cached declarations,
-or a symbol snapshot gives the same result. Repeating a byte-identical
+or a unit interface gives the same result. Repeating a byte-identical
 declaration has no effect. Conflicting declarations produce errors at their
 source locations.
 

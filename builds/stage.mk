@@ -75,13 +75,15 @@ $(LIB_BUILD):
 # leaves its dependents holding C generated against the previous shape of
 # a shared struct.  That mixed-generation build links and then fails at
 # runtime.  Translation output is also a function of the compiler binary
-# and the symbol snapshot it loads, so both are prerequisites; a missing
-# generated .c/.h forces the batch to run.  Imported macro and compile-time
-# Lisp sources are inputs to the same translation, so they join the list;
+# and the runtime declarations it replays from the library batch, so the
+# compiler and every library source are prerequisites; a missing generated
+# .c/.h forces the batch to run.  Imported macro and compile-time Lisp
+# sources are inputs to the same translation, so they join the list;
 # without them a macro-only edit leaves every generated file untouched.
-X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(ROOT)/etc/symbols.xlisp \
-	$(wildcard $(ROOT)/etc/header-symbols.xlisp \
-		$(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
+# Each batch writes a .xi interface beside every unit's C; the library batch
+# produces lib/x2c.xi, which later batches and stages replay as the prelude.
+X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
+	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
 		$(ROOT)/etc/builtin-macros.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \
@@ -95,8 +97,7 @@ LIB_MISSING_X = $(sort \
 	$(patsubst $(LIB_BUILD)/%.h,$(LIB_SOURCE)/%.x, \
 		$(filter %.h,$(LIB_MISSING_GENERATED))))
 
-$(LIB_BUILD)/.translated: $(LIB_X_FILES) $(X2C_TRANSLATE_DEPS) \
-		| $(LIB_BUILD)
+$(LIB_BUILD)/.translated: $(X2C_TRANSLATE_DEPS) | $(LIB_BUILD)
 	$(X2C_COMPILER) translate $(X2C_FLAGS) --out-dir $(LIB_BUILD) \
 		$(LIB_X_FILES)
 	@touch $@

@@ -188,21 +188,31 @@ typed lowering has to know the type of every name in scope, including names
 that come from C headers the compiler never parses in full.
 
 The default path does not run the C preprocessor. Every unit starts from the
-implicit runtime prelude: `src/snapshot.x` loads
-`etc/symbols.xlisp` -- a deterministic, versioned serialization of the
-runtime's own global symbol `Map` -- once per process, through the shared Lisp
-reader. `src/collect.x` then shallow-parses the source text directly,
-splicing quote-includes inline at their include points in the same order the
+implicit runtime prelude, the declarations of `lib/x2c.x` and everything it
+includes. `src/collect.x` shallow-parses source text directly, splicing
+quote-includes inline at their include points in the same order the
 preprocessor would have produced them, resolving each through the same search
 order (the including file's directory, `.`, `src/`, `lib/`, then the `-I`
-chain), and overlays what it finds on the snapshot. Includes that land under
-`lib/` or `include/` are already covered by the snapshot and are skipped;
+chain), and overlays what it finds on the prelude. Includes that land under
+`lib/` or `include/` are already covered by the prelude and are skipped;
 unresolved angle includes are system headers the generated C re-includes
 anyway; unresolved quote includes are driver errors. Each file is spliced once
-by real path, so include cycles terminate. Across a batch, `src/frontend.x`
-loads translation support and `src/collect.x` reuses per-header contributions
-from `etc/header-symbols.xlisp`, validated against the snapshot and source
-contents, so repeated headers are not re-collected.
+by real path, so include cycles terminate.
+
+A file's contribution is collected once per process. Every translated unit
+also writes it beside the generated C as a unit interface, `<stem>.xi`: the
+ordered declaration maps and include placeholders, the source content hash,
+function definitions, and the macro, Lisp, and embedded-text files the walk
+read with their hashes. Before walking a file cold, collection looks for its
+interface in the output directory, then in the directory that mirrors the
+file's home-relative path under the compiler's stage directory (or under an
+installed home), then in a package's `builds/`. An interface is used only
+when its recorded path and every hash still match; otherwise the file is
+walked cold. The prelude is the runtime `x2c.xi` interface from the library batch, so a stage
+build produces the prelude the next batch and the next stage replay, and no
+tracked file is both an input and an output of a build. `x2c env prelude`
+prints the interface a compiler would replay; an empty value means it walks
+`lib/x2c.x` cold, which costs about a quarter of a second per process.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C
 preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
@@ -443,8 +453,8 @@ The modules under `src/` divide ownership as follows:
 - `src/ast.x` -- AST sequence placement and binding helpers;
 - `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
   declarations, conformance, and generated adapters;
-- `src/collect.x`, `src/snapshot.x` -- global environment discovery and the
-  serialized symbol snapshot;
+- `src/collect.x`, `src/snapshot.x` -- global environment discovery, unit
+  interfaces, and their Lisp data writer;
 - `src/utils.x` -- repository discovery, child-process execution, output
   capture, and exit status;
 - `src/transform.x`, `src/lambda.x` -- lowering to emitter-ready AST;

@@ -59,21 +59,25 @@ programs.
 - Runtime and compiler behavior is written in `.x` sources.
 - Numbered build directories are generated and untracked.
 - The runtime aggregator is generated from the runtime module set.
-- Portable bootstrap C and symbol artifacts are generated tracked outputs.
+- Portable bootstrap C is the one generated tracked output.
 
 Do not hand-edit generated C or the runtime aggregator.
 
 Contributor instructions cover when to regenerate the bootstrap snapshot and
 which checks to run; see [Contributor checks](#contributor-checks).
 
-## Symbol and native-binding artifacts
+## Unit interfaces and native bindings
 
-The tracked symbol snapshot is one `(snapshot 3 (ENTRIES...))` data form. It
-uses compact bare `Atom`s for its fixed set of structural words, case-sensitive
-`String` identifiers, and the same nested `List` syntax as `%()` x2c literals.
-It never emits the legal but noncanonical `<"name">` spelling; adding the
-percent prefix is the only list-syntax difference. The loader reads exactly
-one form and does not evaluate snapshot content.
+Each translated unit writes `<stem>.xi` beside its `.c` and `.h`: one
+`(interface 1 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
+data form. It uses compact bare `Atom`s for its fixed set of structural
+words, case-sensitive `String` identifiers, and the same nested `List` syntax
+as `%()` x2c literals. It never emits the legal but noncanonical `<"name">`
+spelling; adding the percent prefix is the only list-syntax difference. The
+reader reads exactly one form and does not evaluate its content. A stage
+build leaves the runtime's interfaces under `builds/N/lib`, and `lib/x2c.xi`
+there is the prelude every later translation replays; they are build output,
+not tracked files.
 
 Native `Func` bindings use canonical function `Type` `List`s, for example
 `((func (("String"))) "String")`. Structural words are lowercase `Symbol`s,
@@ -87,7 +91,7 @@ PCRE2 import example. Prepare that optional package first with
 `make -C packages/pcre2 build`; the checker uses its generated headers and
 prepared dependency includes. It does not fetch dependencies itself.
 
-For testing, style, debugging, and artifact-refresh instructions, start with
+For testing, style, debugging, and bootstrap-refresh instructions, start with
 [`agents/README.md`](https://github.com/gwf/x2c/blob/main/agents/README.md).
 
 See [Compiler Architecture](architecture.md) for the translation phases and

@@ -59,7 +59,7 @@ captures a value; by itself it does not establish that value's type.
 | Index normalization | verified | `x2c_normalize_index` | index/slice suite |
 | Slice normalization | verified | `x2c_normalize_slice` | index/slice suite |
 | Runtime aggregator | verified | `lib/Makefile` | executable make rule |
-| Operational compiler storage | verified | Compiler, Diagnostics, Emitter owners | fixtures, unit suite, symbol snapshot |
+| Operational compiler storage | verified | Compiler, Diagnostics, Emitter owners | fixtures, unit suite, unit interfaces |
 | List canonicalization | verified | `cons` | List identity suite |
 | String canonicalization and bytes | verified | `String.intern` | String suite |
 | Exact Atom canonicalization | verified | `Atom.intern` | Atom suite and compiler fixture |
@@ -81,7 +81,7 @@ captures a value; by itself it does not establish that value's type.
 | Logger delivery and ownership | verified | `Logger` | Logger and Diagnostics suites |
 | Raw stream status and text conversion | verified | `File.*_into`, String adapters | File suite |
 | Lexical scanner contracts | verified | `scan_*`, `Tokenizer` | scanner suite and fixtures |
-| Source declaration collection | verified | `Compiler.collect_symbols`; CPP oracle | raw sweep, process probes, fixtures |
+| Source declaration collection | verified | `Compiler.collect_symbols`; prelude replay from the runtime `x2c.xi` interface; CPP oracle | raw sweep, process probes, fixtures |
 | Compiler-generated identifier space | verified | `_is_reserved_spelling` defines the set; minted by `Compiler.gensym`, `src/cache.x` (`_N`), `src/generate.x` (`_init_guard_`, `_file_init_`) | `reserved-namespace` and generated-name fixtures |
 | Typed static callback adaptation | verified | `$x2c.callback.adapt`; compiler-owned typed thunks | callback adapter fixtures and dispatch/runtime suites |
 | Source directive routing | verified | parser, generator, formatter | AST/C/runtime fixtures |
@@ -110,13 +110,13 @@ captures a value; by itself it does not establish that value's type.
 | `Var` truthiness | verified | `Var.truthy` | VarOps/Error fixture |
 | Single-call container update | verified | `Array.updateindex`, `Map.updateindex`, Var owners | atomic-container suite/fixtures |
 | Atomic compound update | verified | typed VarOps adapters | VarOps/fixtures |
-| Identity-only runtime state | verified | Scope, Exception, Machine, Match, Lisp, Func, Var owners | runtime suites and symbol snapshot |
+| Identity-only runtime state | verified | Scope, Exception, Machine, Match, Lisp, Func, Var owners | runtime suites and unit interfaces |
 | Match positional captures | verified | `MatchCaptureLayout`, capture buffers, Error retained regions | Match/exception suites, compiler fixtures, focused sanitizer, cache/capture benchmarks, self-host convergence |
 | Malformed splice | verified | literal parser | diagnostic fixture |
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.pool_retain*`, `List.promote` | Pool suite |
-| Header-symbol cache | verified | `header_symbols_write`/`header_symbols_open` (`src/collect.x`), `etc/header-symbols.xlisp` | `hdr-check`, `run-header-cache.sh` |
+| Unit interfaces | verified | `interface_write`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity.sh` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts
@@ -581,9 +581,12 @@ repeated Compiler invocations cannot contaminate later output.
 ### Source declaration collection and host preprocessing
 
 `Compiler.collect_symbols` owns the default source-specific declaration path.
-It recursively splices quote-includes in source order, leaves snapshot-covered
-runtime headers as trivia, and shallow-parses the resulting raw stream without
-invoking the host C preprocessor.
+A prelude unit first replays the runtime contribution, the entry for
+`lib/x2c.x`, then recursively splices its own quote-includes in source order,
+leaves prelude-covered runtime headers as trivia, and shallow-parses the
+resulting raw stream without invoking the host C preprocessor. The prelude
+entry comes from the process cache, from the runtime `x2c.xi` interface beside a stage build or
+installed home, or from one cold walk of `lib/x2c.x` per process.
 
 The C preprocessor remains the explicit compatibility and parity oracle.
 `Toolchain.preprocess` (`src/toolchain.x`) owns that host process boundary: it passes every source
@@ -601,20 +604,27 @@ default-path parity; process probes own hostile CPP paths and failure status;
 compiler fixtures own missing-include status and structural AST/C/runtime
 evidence.
 
-### Header-symbol cache
+### Unit interfaces
 
 `collect.x` caches the per-file declaration walk it performs for source
-declaration collection: `header_symbols_open` loads the tracked
-`etc/header-symbols.xlisp` artifact keyed by file path and content hash, and
-warm replay from that cache must be byte-identical to a cold walk.
-`header_symbols_write` regenerates the artifact from a live walk
-(`make hdr-sync`); `make hdr-check` diffs a fresh
-dump against the tracked copy so drift fails the gate instead of silently
-committing. A stale entry (path present, hash mismatched) is rejected rather
-than trusted, and an unreadable include fails loudly rather than caching a
-partial result. `run-header-cache.sh` covers merge order across a
-re-declared type, gensym consumption through anonymous aggregates, stale-hash
-rejection, unreadable-include failure, and batch-vs-solo output parity.
+declaration collection in a process cache whose entries install once: the
+first walk of a file fixes its contribution, so a later walk of the same
+text in a context whose globs already cover its includes cannot replace a
+complete entry with a narrower one. `interface_write` publishes the
+translated unit's entry beside its generated C as `<stem>.xi`, and
+`_interface_read` replays an interface found in the output directory, the
+stage or home mirror of the file's home-relative directory, or a package's
+`builds/`, only when its recorded path, source hash, included interfaces,
+and dependency hashes all validate. Anonymous aggregate identities are
+`(gensym "<file>" N)`, numbered per file, so an interface is valid in any
+process. Warm replay is byte-identical to a cold walk; a stale or foreign
+interface is ignored rather than trusted; an unreadable include fails
+loudly; a failed interface write leaves no partial file and reports an
+`emit` diagnostic. `run-header-cache.sh` covers merge order across a
+re-declared type, gensym consumption through anonymous aggregates,
+tampered-row liveness, stale-hash rejection, unreadable-include failure,
+out-of-home includes, and batch-vs-solo output parity;
+`run-artifact-atomicity.sh` covers repeatable and never-partial writes.
 
 ### Error transfer state
 

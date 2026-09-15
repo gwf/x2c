@@ -17,8 +17,6 @@ BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
 	build-recovery packages-check
-SYMBOL_TARGETS = sym-ensure sym-check sym-update sym-refresh \
-	sym-live-build hdr-check hdr-sync artifact-refresh
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
 DOC_TARGETS = doc-generate doc-check doc-examples doc-build doc-serve \
@@ -37,16 +35,15 @@ INSTALL_TARGETS = install uninstall dist
 COMPAT_TARGETS = unittest docs bootstrap debug
 
 .PHONY: $(CORE_TARGETS) $(BUILD_TARGETS) $(VERIFY_TARGETS) \
-	$(SYMBOL_TARGETS) $(DIFF_TARGETS) $(DOC_TARGETS) \
+	$(DIFF_TARGETS) $(DOC_TARGETS) \
 	$(SITE_TARGETS) \
 	$(BENCHMARK_TARGETS) $(SHOOTOUT_TARGETS) $(APE_TARGETS) \
 	$(CONFIG_TARGETS) $(INSTALL_TARGETS) $(COMPAT_TARGETS) \
-	bootstrap-ready stage0-settle \
+	bootstrap-ready \
 	check-after-precommit
 # Stage-0 bootstrap artifacts we expect before incremental builds/tests.
 BOOTSTRAP_SENTINEL = bin/x2c-bootstrap
 STAGE0_X2C ?= ./builds/0/x2c
-SYMBOL_CHANGE_MARKER = builds/.symbol-snapshot-changed
 STATS_COLOR ?= auto
 
 bootstrap-ready: configure
@@ -66,7 +63,7 @@ configure-packages:					## Report package build prerequisites
 build: bootstrap-ready					## Build the runtime and compiler
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
-	$(MAKE) stage0-settle
+	$(PARALLEL_MAKE) -C builds x2c
 
 build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C bootstrap clean
@@ -74,22 +71,7 @@ build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C builds clean
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
-	$(MAKE) stage0-settle
-
-# Build stage 0 against a current snapshot, then ask the resulting compiler
-# for the same snapshot. The second build is normally a no-op; it runs only
-# when the new compiler changed the snapshot that produced it.
-stage0-settle:
-	$(MAKE) sym-ensure
 	$(PARALLEL_MAKE) -C builds x2c
-	$(MAKE) sym-ensure
-	$(PARALLEL_MAKE) -C builds x2c
-	$(MAKE) sym-ensure
-	@if [ -f $(SYMBOL_CHANGE_MARKER) ]; then \
-		echo "symbol snapshot did not settle after rebuilding stage 0" >&2; \
-		echo "use the explicit bootstrap transition for this change" >&2; \
-		exit 1; \
-	fi
 
 verify: build						## Build and run unit test suites
 	./unittest/probes/run-suite-coverage.sh
@@ -132,12 +114,10 @@ packages-check: build					## Test the completed packages
 	$(MAKE) -C packages/torch test run
 
 check: build						## Run extended non-mutating checks
-	$(MAKE) sym-check
 	$(MAKE) check-after-precommit
 	$(MAKE) stage-diff-all
 
 check-after-precommit:
-	$(MAKE) hdr-check
 	$(MAKE) proof-artifact-atomicity
 	$(MAKE) verify
 # Example checks are optional (Gary, 2026-09-01).
@@ -152,8 +132,6 @@ check-after-precommit:
 # the compiler reproduces its own output. `make stage-3` and `stage-diff-all`
 # still run the fourth round on demand.
 precommit: build					## Prepare the final tree for commit
-	$(MAKE) sym-check
-	$(MAKE) hdr-sync
 	$(MAKE) bootstrap-refresh
 	$(MAKE) build-safe
 	$(MAKE) stage-2
@@ -225,59 +203,8 @@ build-recovery: build					## Check incremental build recovery
 proof-raw-symbols: build				## Check raw symbol collection parity
 	./unittest/probes/run-raw-symbol-sweep.sh
 
-proof-conformance: build ## Compare owned conformance rows between snapshot and live symbol modes
+proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes
 	./tools/check-conformance-coherence.sh
-
-##@ Symbols and artifacts
-sym-ensure:						## Refresh stale symbols only when inputs changed
-	@python3 tools/sync-symbol-snapshot.py \
-		--compiler "$(STAGE0_X2C)" --fallback ./bin/x2c \
-		--changed "$(SYMBOL_CHANGE_MARKER)"
-
-sym-check: build					## Check the compiler symbol snapshot
-	@tmp=$$(mktemp); trap 'rm -f "$$tmp"' EXIT; \
-		$(STAGE0_X2C) translate --dump-symbol-snapshot \
-		lib/x2c.x >"$$tmp" && \
-		diff -u etc/symbols.xlisp "$$tmp"
-
-sym-update: build					## Rewrite the compiler symbol snapshot
-	@python3 tools/sync-symbol-snapshot.py \
-		--compiler "$(STAGE0_X2C)" --fallback ./bin/x2c --force
-	$(MAKE) hdr-sync
-
-sym-refresh: sym-update					## Refresh and verify symbol artifacts
-	$(MAKE) sym-check
-
-sym-live-build: bootstrap-ready				## Build stage 0 from live symbols
-	$(MAKE) -C builds clean
-	$(MAKE) -C include all
-	$(MAKE) -C lib x2c.x
-	$(PARALLEL_MAKE) -C builds x2c X2C_FLAGS=--live-symbols
-
-HEADER_SYMBOL_SOURCES = $(filter-out lib/x2c.x,$(wildcard lib/*.x)) \
-	$(wildcard src/*.x)
-
-hdr-check: build					## Check the header symbol artifact
-	@tmp=$$(mktemp); trap 'rm -f "$$tmp"' EXIT; \
-		$(STAGE0_X2C) translate --dump-header-symbols \
-		$(HEADER_SYMBOL_SOURCES) >"$$tmp" && \
-		diff -u etc/header-symbols.xlisp "$$tmp"
-
-hdr-sync: build						## Refresh stale header symbols
-	@tmp=$$(mktemp etc/.header-symbols.xlisp.XXXXXX); \
-		trap 'rm -f "$$tmp"' EXIT; \
-		$(STAGE0_X2C) translate --dump-header-symbols \
-			$(HEADER_SYMBOL_SOURCES) >"$$tmp" || exit $$?; \
-		if cmp -s etc/header-symbols.xlisp "$$tmp"; then \
-			exit 0; \
-		fi; \
-		echo "Refreshing etc/header-symbols.xlisp"; \
-		diff -u etc/header-symbols.xlisp "$$tmp" || true; \
-		mv "$$tmp" etc/header-symbols.xlisp
-
-artifact-refresh:					## Refresh tracked source artifacts
-	$(MAKE) sym-update
-	$(MAKE) bootstrap-refresh
 
 ##@ Stage comparison
 stage-diff-0:						## Compare bootstrap and stage 0

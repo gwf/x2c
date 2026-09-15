@@ -15,7 +15,6 @@ typedef struct Diagnostics * Diagnostics;
 
 typedef struct GenNames{
   Map counters, adapters;
-  int gensym_count;
 }
 * GenNames;
 
@@ -304,8 +303,6 @@ void Sym_declare_delegate_field(Sym sym, Type aggregate, String name);
 Type Sym_delegate_aggregate(Sym sym, Type type);
 
 List Compiler_gensym(Compiler compiler);
-
-void Compiler_set_gensym(Compiler compiler, int count);
 
 void Sym_push_new_scope(Sym sym);
 

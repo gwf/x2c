@@ -103,13 +103,14 @@ FAKE="$BUILD/fake-root"
 mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0" "$FAKE/artifact-out" "$FAKE/conflict-out"
 cp "$X2C" "$FAKE/builds/0/x2c"
-cp "$ROOT/etc/symbols.xlisp" "$FAKE/etc/symbols.xlisp"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$FAKE/lib/"
 cp "$SOURCE"/protocol-conflict-{a,b,primer-a,primer-b,unit}.x "$FAKE/src/"
-(cd "$FAKE" && ./builds/0/x2c translate --dump-header-symbols \
-  src/protocol-conflict-primer-a.x src/protocol-conflict-primer-b.x \
-  >etc/header-symbols.xlisp)
-grep -q 'source-node' "$FAKE/etc/header-symbols.xlisp" ||
-  fail "header artifact omitted retained protocol nodes"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir conflict-out \
+  src/protocol-conflict-a.x src/protocol-conflict-b.x \
+  src/protocol-conflict-primer-a.x src/protocol-conflict-primer-b.x)
+grep -q 'source-node' "$FAKE/conflict-out/protocol-conflict-a.xi" ||
+  fail "unit interface omitted retained protocol nodes"
 if (cd "$FAKE" && ./builds/0/x2c translate --out-dir conflict-out \
     src/protocol-conflict-unit.x) \
     >"$FAKE/conflict.stdout" 2>"$FAKE/conflict.stderr"; then
@@ -331,18 +332,18 @@ grep -Fq '(contains implemented MacroArrayInt_contains dot+punctuation)' \
 grep -Fq '(getindex implemented MacroArrayInt_getindex dot+punctuation)' \
   "$BUILD/generated-conformance" ||
   fail "generated adoption hid its native getindex method"
-"$X2C" translate --dump-symbol-snapshot "$generated" \
+"$X2C" translate --dump-symbols "$generated" \
   >"$BUILD/generated-tag-snapshot"
-"$X2C" translate --live-symbols --dump-symbol-snapshot "$generated" \
+"$X2C" translate --live-symbols --dump-symbols "$generated" \
   >"$BUILD/generated-tag-live"
-grep -F '(adopt ("Var") ("MacroArrayInt")' \
+grep -F '( adopt ( Var ) ( MacroArrayInt )' \
   "$BUILD/generated-tag-snapshot" >"$BUILD/generated-tag-row-snapshot"
-grep -F '(adopt ("Var") ("MacroArrayInt")' \
+grep -F '( adopt ( Var ) ( MacroArrayInt )' \
   "$BUILD/generated-tag-live" >"$BUILD/generated-tag-row-live"
 cmp -s "$BUILD/generated-tag-row-snapshot" \
   "$BUILD/generated-tag-row-live" ||
   fail "generated explicit tag depends on the symbol transport"
-grep -Fq '(tag (expr ("Symbol") (literal ("Symbol") "<macarray>" macarray)))' \
+grep -Fq '( tag ( expr ( Symbol ) ( literal ( Symbol ) <macarray> macarray )))' \
   "$BUILD/generated-tag-snapshot" ||
   fail "generated adoption omitted its explicit tag"
 
@@ -376,13 +377,13 @@ if grep -Fq 'plainrowchild' "$shared_c"; then
   fail "Var descendant gained a tag or registration"
 fi
 
-"$X2C" translate --live-symbols --dump-symbol-snapshot \
+"$X2C" translate --live-symbols --dump-symbols \
   "$FIXTURES/macro-source-parity.x" >"$BUILD/generated-snapshot"
-grep -Fq '("GeneratedProtocol")' "$BUILD/generated-snapshot" ||
-  fail "generated protocol was absent from the symbol snapshot"
-grep -Fq '(adopt ("GeneratedProtocol") ("DirectValue")' \
+grep -Fq '( protocol-record ( GeneratedProtocol )' "$BUILD/generated-snapshot" ||
+  fail "generated protocol was absent from the symbol table"
+grep -Fq '( adopt ( GeneratedProtocol ) ( DirectValue )' \
   "$BUILD/generated-snapshot" ||
-  fail "generated adoption was absent from the symbol snapshot"
+  fail "generated adoption was absent from the symbol table"
 
 # Definition-site locations repeat across invocations of one macro. Retained
 # keys use the invocation site as a separate identity so both protocol rows
@@ -402,22 +403,22 @@ for participant in RepeatOne RepeatTwo; do
     fail "generated conformance omitted $participant"
 done
 
-"$X2C" translate --dump-symbol-snapshot "$repeat" \
+"$X2C" translate --dump-symbols "$repeat" \
   >"$repeat_build/snapshot-first"
-"$X2C" translate --dump-symbol-snapshot "$repeat" \
+"$X2C" translate --dump-symbols "$repeat" \
   >"$repeat_build/snapshot-second"
-cmp -s "$repeat_build/snapshot-first" \
-  "$repeat_build/snapshot-second" ||
-  fail "repeated generated protocol snapshot is not deterministic"
+cmp -s <(LC_ALL=C sort "$repeat_build/snapshot-first") \
+  <(LC_ALL=C sort "$repeat_build/snapshot-second") ||
+  fail "repeated generated protocol symbol table is not deterministic"
 for participant in RepeatOne RepeatTwo; do
-  grep -Fq "(adopt (\"Var\") (\"$participant\")" \
+  grep -Fq "( adopt ( Var ) ( $participant )" \
     "$repeat_build/snapshot-first" ||
-    fail "generated snapshot omitted $participant adoption"
+    fail "generated symbol table omitted $participant adoption"
 done
 for base in RepeatProtocolA RepeatProtocolB; do
-  grep -Fq "(protocol (\"protocol-record\" (\"$base\")" \
+  grep -Fq "( protocol-record ( $base )" \
     "$repeat_build/snapshot-first" ||
-    fail "generated snapshot omitted $base declaration"
+    fail "generated symbol table omitted $base declaration"
 done
 
 mkdir -p "$repeat_build/default" "$repeat_build/live"
@@ -449,13 +450,13 @@ for participant in ExportOne ExportTwo; do
     "$import_build/macro-protocol-export-consumer.c" ||
     fail "imported generated adoption omitted $participant"
 done
-"$X2C" translate --live-symbols --dump-symbol-snapshot -I "$SOURCE" \
+"$X2C" translate --live-symbols --dump-symbols -I "$SOURCE" \
   "$SOURCE/macro-protocol-export-consumer.x" \
   >"$import_build/snapshot-live"
 for participant in ExportOne ExportTwo; do
-  grep -Fq "(adopt (\"Var\") (\"$participant\")" \
+  grep -Fq "( adopt ( Var ) ( $participant )" \
     "$import_build/snapshot-live" ||
-    fail "live imported snapshot omitted $participant"
+    fail "live imported symbol table omitted $participant"
 done
 
 # Two type names longer than a compact Symbol encode to one tag. The second

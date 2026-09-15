@@ -31,6 +31,7 @@ def copy_support(destination, sources=True):
     rows = [
         ("lib", ("*.x", "*.xmacro", "*.xlisp"), ("lib", "include")),
         ("builds/0/lib", ("*.h",), ("include",)),
+        ("builds/0/lib", ("*.xi",), ("lib",)),
         ("etc", ("*.xlisp", "*.xmacro"), ("etc",)),
         (".", ("LICENSE",), ("licenses",)),
     ]

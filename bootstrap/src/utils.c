@@ -239,7 +239,7 @@ static int _is_home(const char * path){
   char probe[PATH_MAX];
   snprintf(probe, sizeof(probe), "%s/include", path);
   if(! _dir_exists(probe)) return 0;
-  snprintf(probe, sizeof(probe), "%s/etc/symbols.xlisp", path);
+  snprintf(probe, sizeof(probe), "%s/etc/compiler-sdk.xlisp", path);
   return access(probe, R_OK) == 0;
 }
 

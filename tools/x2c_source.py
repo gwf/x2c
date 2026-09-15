@@ -3,7 +3,7 @@
 
 Shared by `gen-module-catalog.py` and `gen-api-reference.py`. This module knows
 only about source text; the authoritative types are in
-`etc/header-symbols.xlisp` and are read by `x2c_symbols.py`.
+the stage interfaces under `builds/0` and are read by `x2c_symbols.py`.
 
 `mask_non_code` is byte-length and newline preserving, so an offset into the
 masked text indexes the raw text at the same position. `definitions` relies on

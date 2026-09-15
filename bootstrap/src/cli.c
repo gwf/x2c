@@ -252,12 +252,6 @@ static CliOption cli_options[] ={
     7478869146, CLI_TRANSLATE, 665445396138972, "--dump-conformance", NULL, "Print protocol conformance and stop", 0
   }
   , {
-    1335836754920, CLI_TRANSLATE, 665445396138972, "--dump-symbol-snapshot", NULL, "Print a complete symbol snapshot and stop", 0
-  }
-  , {
-    559620016998, CLI_TRANSLATE, 665445396138972, "--dump-header-symbols", NULL, "Print the header-symbol artifact and stop", 0
-  }
-  , {
     0
   }
 
@@ -360,7 +354,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = String_new("Usage:\n  x2c bootstrap --prefix <dir> [options]\n\nExtract the source distribution carried by this APE and use the host\nC compiler and archiver to install a native x2c under <dir>.");
   _10 = String_new("The seed supplies x2c sources and headers. A GCC- or Clang-compatible\nC compiler and a compatible archiver must be installed.");
   _11 = String_new("Usage:\n  x2c env [options] [name]\n\nPrint the home, executable, include directory, runtime archive,\npackage roots, and host tools this compiler resolved, one\n\'name = value\' line each, or only the value of one name.");
-  _12 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/symbols.xlisp. Package roots join with \':\'.");
+  _12 = String_new("The home is X2C_HOME when set; otherwise the nearest directory above\nthe executable, then above the current directory, holding include/\nand etc/compiler-sdk.xlisp. Package roots join with \':\'.");
   _13 = String_new("Usage:\n  x2c install [options] <package>\n\nInstall one package under <home>/packages. The package is a local\ndirectory, a local .tar.gz, a URL with --sha256, or a name resolved\nthrough the package index. A bundle installs as built; a pure-x2c\nsource package is built by this compiler.");
   _14 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
   _15 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
@@ -932,7 +926,7 @@ static void _apply_option(CliRequest c, CliOption * option, String spelling, Str
     break;
     case 241658219366 : c -> cpp_symbols = 1;
     break;
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1335836754920 : case 559620016998 : c -> dump = option -> id;
+    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : c -> dump = option -> id;
     break;
     case 1111831152 : c -> prefix = value;
     break;

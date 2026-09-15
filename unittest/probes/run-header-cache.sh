@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Regression probes for the raw symbol collection cache (src/collect.x):
-# warm replay -- in-process or via etc/header-symbols.xlisp -- must be
-# byte-identical to a cold walk, stale artifacts must be rejected, and
+# warm replay -- in-process or through a unit's .xi interface -- must be
+# byte-identical to a cold walk, stale interfaces must be rejected, and
 # unreadable includes must fail loudly.  Each case pins a bug found and
 # fixed in the 2026-07 milestone review.
 
@@ -114,69 +114,75 @@ for extension in c h; do
   done
 done
 
-# Fake repo root: artifact paths are root-relative, so the probe gets
-# its own root with the real compiler and snapshot copied in.  Root
-# discovery climbs from the binary looking for src+include+lib.
+# Fake home: interface paths are home-relative, so the probe gets its own
+# home with the real compiler, runtime sources, and compile-time Lisp copied
+# in.  Home discovery climbs from the binary looking for include/ and
+# etc/compiler-sdk.xlisp; the stage directory holds no interfaces, so every
+# prelude here is walked cold from lib/x2c.x.
 FAKE="$BUILD/fake-root"
 mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0"
 cp "$X2C" "$FAKE/builds/0/x2c"
-cp "$ROOT/etc/symbols.xlisp" "$FAKE/etc/symbols.xlisp"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$FAKE/lib/"
 cp "$BUILD/src/bar.x" "$BUILD/src/hdr.x" "$BUILD/src/anon.x" \
   "$BUILD/src/unit.x" "$FAKE/src/"
 
-# Case 3: artifact replay and staleness.  A warm run must reproduce the
-# cold bytes; a tampered artifact must change the outcome (proving
-# replay is live) until a snapshot edit invalidates the artifact
-# wholesale via the banner content hash; a v1 banner is ignored.
+# Case 3: interface replay and staleness.  Headers translated as units
+# leave their .xi in the output directory; a later unit including them must
+# reproduce the cold bytes from those interfaces; tampered interfaces must
+# change the outcome (proving replay is live) until a header's own edit
+# invalidates it through its content hash; an unreadable interface form is
+# ignored.
 mkdir -p "$FAKE/cold" "$FAKE/warm" "$FAKE/tampered" "$FAKE/rejected" \
   "$FAKE/v1"
-(cd "$FAKE" && ./builds/0/x2c translate --dump-header-symbols \
-  src/unit.x >etc/header-symbols.xlisp)
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir cold src/unit.x)
-grep -q '"src/hdr.x"' "$FAKE/etc/header-symbols.xlisp" ||
-  fail "artifact is missing the scratch header entry"
-grep -q '(self "CacheSelfBase_rest")' \
-  "$FAKE/etc/header-symbols.xlisp" ||
-  fail "artifact is missing receiver-relative method metadata"
-grep -q 'struct "CacheDelegateOwner" delegate "part"' \
-  "$FAKE/etc/header-symbols.xlisp" ||
-  fail "artifact is missing delegate field metadata"
+for out in warm tampered rejected v1; do
+  (cd "$FAKE" && ./builds/0/x2c translate --out-dir "$out" \
+    src/bar.x src/hdr.x)
+done
+grep -q '^(interface 1 "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
+  fail "interface is missing the scratch header entry"
+grep -q '(self "CacheSelfBase_rest")' "$FAKE/warm/hdr.xi" ||
+  fail "interface is missing receiver-relative method metadata"
+grep -q 'struct "CacheDelegateOwner" delegate "part"' "$FAKE/warm/hdr.xi" ||
+  fail "interface is missing delegate field metadata"
+grep -q '"src/bar.x"' "$FAKE/warm/hdr.xi" ||
+  fail "interface is missing its include placeholder"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir warm src/unit.x)
 cmp -s "$FAKE/cold/unit.c" "$FAKE/warm/unit.c" ||
-  fail "artifact replay diverged from cold compile"
+  fail "interface replay diverged from cold compile"
 grep -q "_x2c_macro_" "$FAKE/cold/unit.c" ||
   fail "macro name stability probe emitted no generated name"
 grep -q "CacheSelfLeaf_only(CacheSelfBase_rest(value))" \
   "$FAKE/cold/unit.c" ||
-  fail "artifact replay lost the original receiver typedef"
+  fail "interface replay lost the original receiver typedef"
 grep -q "CacheDelegatePart_read(value.part)" \
   "$FAKE/cold/unit.c" ||
-  fail "artifact replay lost delegate field lookup"
+  fail "interface replay lost delegate field lookup"
 
-sed 's/"Foo"/"Fpo"/g' "$FAKE/etc/header-symbols.xlisp" \
-  >"$FAKE/etc/header-symbols.tampered"
-cp "$FAKE/etc/header-symbols.tampered" "$FAKE/etc/header-symbols.xlisp"
+sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/hdr.xi" >"$FAKE/tampered/hdr.xi"
+sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/bar.xi" >"$FAKE/tampered/bar.xi"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir tampered src/unit.x) \
   >/dev/null 2>&1 || true
 cmp -s "$FAKE/cold/unit.c" "$FAKE/tampered/unit.c" &&
-  fail "tampered artifact rows did not reach replay (test is vacuous)"
+  fail "tampered interface rows did not reach replay (test is vacuous)"
 
-printf '\n' >>"$FAKE/etc/symbols.xlisp"
+cp "$FAKE/tampered/hdr.xi" "$FAKE/rejected/hdr.xi"
+printf '// edited after its interface was written\n' >>"$FAKE/src/hdr.x"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir rejected src/unit.x)
 cmp -s "$FAKE/cold/unit.c" "$FAKE/rejected/unit.c" ||
-  fail "snapshot edit did not invalidate the stale artifact"
+  fail "header edit did not invalidate the stale interface"
 
-cp "$ROOT/etc/symbols.xlisp" "$FAKE/etc/symbols.xlisp"
-printf '(header-symbols 1 11 (\n))\n' >"$FAKE/etc/header-symbols.xlisp"
+printf '(header-symbols 1 11 (\n))\n' >"$FAKE/v1/hdr.xi"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir v1 src/unit.x) ||
-  fail "v1 artifact banner was fatal instead of ignored"
+  fail "foreign interface form was fatal instead of ignored"
 cmp -s "$FAKE/cold/unit.c" "$FAKE/v1/unit.c" ||
-  fail "v1 artifact was not ignored"
+  fail "foreign interface form was not ignored"
 
-# Case 4: an entry with a dependency outside the repo root is skipped
-# whole, never persisted with a silently narrowed dep list.
-mkdir -p "$BUILD/outside" "$FAKE/extout"
+# Case 4: an include outside the home is recorded by its absolute path and
+# replays from an interface like any other.
+mkdir -p "$BUILD/outside" "$FAKE/extout" "$FAKE/extwarm"
 cat >"$BUILD/outside/ext.x" <<'EOF'
 typedef int ExtValue;
 EOF
@@ -184,10 +190,20 @@ cat >"$FAKE/src/uses-ext.x" <<'EOF'
 #include "ext.x"
 int probe_ext(ExtValue v) { return v; }
 EOF
-(cd "$FAKE" && ./builds/0/x2c translate --dump-header-symbols \
-  -I "$BUILD/outside" src/uses-ext.x >"$BUILD/ext-artifact.xlisp")
-grep -q '"src/uses-ext.x"' "$BUILD/ext-artifact.xlisp" &&
-  fail "entry with out-of-root dep was persisted"
+cat >"$FAKE/src/uses-ext-twice.x" <<'EOF'
+#include "uses-ext.x"
+int probe_ext_twice(ExtValue v) { return probe_ext(v) + v; }
+EOF
+(cd "$FAKE" && ./builds/0/x2c translate -I "$BUILD/outside" \
+  --out-dir extout src/uses-ext-twice.x)
+(cd "$FAKE" && ./builds/0/x2c translate -I "$BUILD/outside" \
+  --out-dir extwarm src/uses-ext.x)
+grep -Fq "\"$BUILD/outside/ext.x\"" "$FAKE/extwarm/uses-ext.xi" ||
+  fail "out-of-home include was not recorded by its absolute path"
+(cd "$FAKE" && ./builds/0/x2c translate -I "$BUILD/outside" \
+  --out-dir extwarm src/uses-ext-twice.x)
+cmp -s "$FAKE/extout/uses-ext-twice.c" "$FAKE/extwarm/uses-ext-twice.c" ||
+  fail "out-of-home interface replay diverged from cold compile"
 
 # Case 5: unresolved targets contribute no cached symbols. An explicit
 # host preprocess still rejects directory and unreadable include targets.
@@ -527,9 +543,8 @@ mkdir -p "$embed_root/src" "$embed_root/include" "$embed_root/lib" \
   "$embed_root/etc" "$embed_root/builds/0" "$embed_root/cold" \
   "$embed_root/warm"
 cp "$X2C" "$embed_root/builds/0/x2c"
-cp "$ROOT/etc/symbols.xlisp" "$ROOT/etc/init.xlisp" \
-  "$ROOT/etc/compiler-sdk.xlisp" "$ROOT/etc/builtin-macros.xlisp" \
-  "$embed_root/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$embed_root/etc/"
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$embed_root/lib/"
 cat >"$embed_root/src/embed.xmacro" <<'EOF'
 macro Unit $cache.declare() => {
   int $(x2c.ident (x2c.embed.text "name.txt"))(void);
@@ -544,10 +559,9 @@ cat >"$embed_root/src/main.x" <<'EOF'
 #include "hdr.x"
 int use_name(void) { return cold_name(); }
 EOF
-(cd "$embed_root" && ./builds/0/x2c translate --dump-header-symbols \
-  src/main.x >etc/header-symbols.xlisp)
-grep -Fq '"src/name.txt"' "$embed_root/etc/header-symbols.xlisp" ||
-  fail "header artifact omitted its embedded text row"
+(cd "$embed_root" && ./builds/0/x2c translate --out-dir cold src/hdr.x)
+grep -Fq '"src/name.txt"' "$embed_root/cold/hdr.xi" ||
+  fail "header interface omitted its embedded text row"
 (cd "$embed_root" && ./builds/0/x2c translate --out-dir cold src/main.x)
 grep -Fq "$embed_root/src/name.txt" "$embed_root/cold/main.d" ||
   fail "replayed header omitted embedded text from its depfile"
@@ -556,9 +570,10 @@ cat >"$embed_root/src/main.x" <<'EOF'
 #include "hdr.x"
 int use_name(void) { return warm_name(); }
 EOF
+cp "$embed_root/cold/hdr.xi" "$embed_root/warm/hdr.xi"
 (cd "$embed_root" && ./builds/0/x2c translate --out-dir warm src/main.x)
 grep -q "warm_name" "$embed_root/warm/main.c" ||
-  fail "changed embedded text did not invalidate the header artifact"
+  fail "changed embedded text did not invalidate the header interface"
 
 # Declaration bundles retain one production across source segments and the
 # full parse. Nested producers and body-only Lisp keep their captured values;
@@ -706,9 +721,9 @@ mkdir -p "$declaration_root/src" "$declaration_root/etc" \
   "$declaration_root/include" "$declaration_root/lib" \
   "$declaration_root/builds/0" "$declaration_root/out"
 cp "$X2C" "$declaration_root/builds/0/x2c"
-cp "$ROOT/etc/symbols.xlisp" "$ROOT/etc/init.xlisp" \
-  "$ROOT/etc/compiler-sdk.xlisp" "$ROOT/etc/builtin-macros.xlisp" \
-  "$declaration_root/etc/"
+cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$declaration_root/etc/"
+cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp \
+  "$declaration_root/lib/"
 cat >"$declaration_root/src/producer.xmacro" <<'EOF2'
 $(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
 $(def write-file
@@ -730,14 +745,14 @@ cat >"$declaration_root/src/consumer.x" <<'EOF2'
 int consume(void) { return persisted_answer(); }
 EOF2
 : >"$declaration_root/effects"
-(cd "$declaration_root" && ./builds/0/x2c translate --dump-header-symbols \
-  src/consumer.x >etc/header-symbols.xlisp)
+(cd "$declaration_root" && ./builds/0/x2c translate --out-dir out \
+  src/provider.x)
 [ "$(cat "$declaration_root/effects")" = x ] ||
   fail "persisted declaration producer did not run exactly once"
 : >"$declaration_root/effects"
 (cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
 [ ! -s "$declaration_root/effects" ] ||
-  fail "warm declaration artifact reran its producer"
+  fail "warm declaration interface reran its producer"
 sed 's/persisted_answer/changed_answer/g' \
   "$declaration_root/src/producer.xmacro" >"$declaration_root/src/changed"
 mv "$declaration_root/src/changed" "$declaration_root/src/producer.xmacro"
@@ -746,15 +761,13 @@ sed 's/persisted_answer/changed_answer/g' \
 mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
 (cd "$declaration_root" && ./builds/0/x2c translate --out-dir out src/consumer.x)
 [ "$(cat "$declaration_root/effects")" = x ] ||
-  fail "changed declaration macro did not invalidate its artifact"
+  fail "changed declaration macro did not invalidate its interface"
 grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
   fail "consumer retained a stale declaration signature"
 
-# Generated calls keep their signatures when header artifact replay is absent.
-# Reuse the fake root, adding the real runtime sources for both collection paths.
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$FAKE/lib/"
-cp "$ROOT/etc/init.xlisp" "$ROOT/etc/compiler-sdk.xlisp" \
-  "$ROOT/etc/builtin-macros.xlisp" "$ROOT/etc/lisp-bindings.xlisp" "$FAKE/etc/"
+# Generated calls keep their signatures whether the runtime prelude replays
+# from the stage interfaces, walks cold, or comes from the host preprocessor.
+mkdir -p "$FAKE/builds/0/lib"
 cat >"$FAKE/src/native-aliases.x" <<'EOF_NATIVE_ALIASES'
 #include "string.x"
 #include "array.x"
@@ -768,12 +781,16 @@ int main(void) {
   return 0;
 }
 EOF_NATIVE_ALIASES
-cp "$ROOT/etc/header-symbols.xlisp" "$FAKE/etc/header-symbols.xlisp"
+cp "$ROOT"/builds/0/lib/*.xi "$FAKE/builds/0/lib/"
 for mode in cached cold live; do
   output="$FAKE/native-$mode"
   mkdir -p "$output"
   flags=()
-  if [[ $mode == cold ]]; then rm "$FAKE/etc/header-symbols.xlisp"; fi
+  if [[ $mode == cached ]]; then
+    [[ -n "$(cd "$FAKE" && ./builds/0/x2c env prelude)" ]] ||
+      fail "copied stage interfaces did not resolve as the prelude"
+  fi
+  if [[ $mode == cold ]]; then rm "$FAKE/builds/0/lib/"*.xi; fi
   if [[ $mode == live ]]; then flags=(--live-symbols); fi
   (cd "$FAKE" && ./builds/0/x2c translate "${flags[@]}" --out-dir "$output" \
     src/native-aliases.x)

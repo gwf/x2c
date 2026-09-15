@@ -71,7 +71,7 @@ positions. Therefore:
 - The compiler never reads system headers. Declare compiler-visible types in
   `.x` source or the runtime library.
 
-File-local `static` globals do not enter `etc/symbols.xlisp`; only their own
+File-local `static` globals do not enter the runtime prelude; only their own
 translation unit collects them.
 
 ## Documentation evidence

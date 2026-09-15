@@ -56,8 +56,9 @@ def bundle(args: argparse.Namespace) -> None:
     stage = Path(work) / args.package
     stage.mkdir()
     copy(package / 'src', stage / 'src')
-    for header in sorted((package / 'builds').glob('*.h')):
-      copy(header, stage / 'builds' / header.name)
+    for pattern in ('*.h', '*.xi'):
+      for generated in sorted((package / 'builds').glob(pattern)):
+        copy(generated, stage / 'builds' / generated.name)
     archive = 'lib' + args.package + '.a'
     copy(package / 'builds' / archive, stage / 'builds' / archive)
     for pattern in ('README*', 'LICENSE*', 'PROFILE*', 'dependency*.json'):

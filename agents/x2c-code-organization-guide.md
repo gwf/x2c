@@ -127,10 +127,11 @@ adapters may fail fast, but they should delegate rather than duplicate the
 owner's mutation logic. Canonical values should be established once by their
 constructor or interning boundary.
 
-The checked compiler symbol snapshot is part of the runtime organization
-contract. A private-looking runtime struct field, typedef, or helper can still
-be observable there. Representation cleanup that changes that ledger requires
-an explicit snapshot transition; do not disguise it as an internal-only edit.
+The runtime's unit interfaces are part of the runtime organization contract.
+A private-looking runtime struct field, typedef, or helper can still be
+observable to every unit through the prelude. Representation cleanup that
+changes that surface changes what consumers see; do not disguise it as an
+internal-only edit.
 
 ## Dependencies and includes
 

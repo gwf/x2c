@@ -2499,7 +2499,7 @@ static int _initializer_integer(List expression, unsigned long long *value) {
 List Compiler.initializer_native_types(Compiler c, Type type) {
   Type base = type.base_type(), definition = base, reference = base;
   match (base) {
-    case %((!set ?kind (!or struct union)) (gensym ?) ?body): {
+    case %((!set ?kind (!or struct union)) (gensym ? ?) ?body): {
       String name = c.fresh_name("initializer_type");
       definition = %($kind $name $body);
       reference = %($kind $name);

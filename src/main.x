@@ -72,13 +72,6 @@ static void _preprocessor_errors(String text) {
 
 // pipeline utilities
 
-static Map _filter_static_symbols(Map globs, Map statics) {
-  Map result = %{};
-  foreach (Var (key, value), globs)
-    if (!statics.contains(key)) result[key] = value;
-  return result;
-}
-
 static String _ast_inspection_repr(List node) {
   match (node)
     case %(macrodef (name ?name) *):
@@ -152,22 +145,12 @@ static void _compile_file(
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
       exit(0);
   }
-  if (opts.dump == <snapshot>) {
-    Map statics = unit.snapshot_statics ? unit.snapshot_statics : %{};
-    Map.merge(statics, compiler.sym.file_statics());
-    Map snapshot = _filter_static_symbols(
-      compiler.sym.global_symbols(), statics);
-    if (!symbol_snapshot_write(snapshot, compiler.fn_defs, Stdout))
-      exit(1);
-    exit(0);
-  }
   if (opts.dump == <conform>) {
     printf("(unit %s)\n", filename);
     compiler.dump_conformance(unit.globals);
     return;
   }
   ast = compiler.generate_protocol_adapters(ast);
-  if (opts.dump == <hdr-syms>) return;
   ast = _transform_ast(compiler, ast);
   if (opts.dump == <dump-code>) {
     ast = compiler.emit(ast);
@@ -264,8 +247,8 @@ static String _unit_output_dir(CliRequest c, Map unit_dirs, String input) {
 }
 
 /* Translate `inputs` in forked workers, at most `jobs` at a time.
-   A worker inherits the loaded snapshot and header artifact rather than
-   reading them again, and keeps its slice of the input list to the end, so
+   A worker inherits the process collection cache rather than filling it
+   again, and keeps its slice of the input list to the end, so
    the only shared state is the output directory, where no two units write
    the same file. The parent reports progress as workers finish. Returns the
    number that failed. */
@@ -387,9 +370,6 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
       gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.c");
       gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.h");
     }
-  if (opts.dump == <hdr-syms> &&
-      !Frontend.write_header_symbols(Stdout))
-    return 1;
   if (!c.nested && !c.inspects()) {
     String duration = report_duration(report_now_us() - started_at);
     String noun = total == 1 ? %"file" : %"files";
@@ -543,11 +523,14 @@ static int _run_env(CliRequest request) {
     request.ld_args, request.verbose, request.dry_run);
   String executable = x2c_get_executable();
   String roots = String.join(":", request.package_roots());
+  interface_configure(request.out_dir);
+  String prelude = interface_prelude();
   List rows = %(
     ("home" ${x2c_get_root()})
     ("executable" ${executable ? executable : %""})
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
+    ("prelude" ${prelude ? prelude : %""})
     ("package_dirs" ${roots ? roots : %""})
     ("cc" ${toolchain.cc})
     ("ar" ${toolchain.ar}) );

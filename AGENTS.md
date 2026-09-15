@@ -74,7 +74,7 @@ Fix what the review finds. Durable plans follow `plans/README.md`.
 
 Preserve unrelated work and inspect tracked and untracked changes before
 committing. Edit authoritative sources; use documented targets to regenerate
-`bootstrap/`, `lib/x2c.x`, symbol artifacts, and generated documentation.
+`bootstrap/`, `lib/x2c.x`, and generated documentation.
 Never hand-edit bootstrap C/H. Keep temporary outputs in `/tmp` or
 `unittest/build/`, workspace notes in `.context/`, and full failure logs in
 `debug/`. Keep new files ASCII and shipped code free of debug scaffolding.

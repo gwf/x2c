@@ -148,7 +148,7 @@ int Type.is_aggregate(Type type) => !!type.match(%((!or struct union) *));
 /** Returns whether `type` is a body-free struct or union tag reference. */
 int Type.is_aggregate_tag(Type type) =>
   !!type.match(%((!or struct union)
-    (!or (!not (*)) (gensym ?) (binding ? ?))));
+    (!or (!not (*)) (gensym ? ?) (binding ? ?))));
 
 static int Type._is_aggregate_body(Type type) =>
   !!type.match(%((!or struct union) (*)));
@@ -162,7 +162,7 @@ int Type.is_enum(Type type) => !!type.match(%(enum *));
 
 /** Returns whether `type` is a body-free enum tag reference. */
 int Type.is_enum_tag(Type type) =>
-  !!type.match(%(enum (!or (!not (*)) (gensym ?))));
+  !!type.match(%(enum (!or (!not (*)) (gensym ? ?))));
 
 static int Type._is_enum_body(Type type) => !!type.match(%(enum (*)));
 
