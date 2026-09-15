@@ -398,13 +398,19 @@ contain spaces. Producing packages still follows the existing Make path
 restrictions; this does not promise arbitrary spaces in native build/cache
 paths.
 
-A bundle is static and specific to its host platform, architecture, native
-profile, and matching x2c compiler/runtime. `BUNDLE.json` records those build
-identities. Native dependency toolchain information comes from its existing
-cache receipt when available; an explicit external prefix may have no receipt.
-A bundle does not promise an ABI across compiler releases, cross-platform
-execution, shared-library relocation, or automatic dependency resolution.
-Native system libraries and frameworks remain supplied by the host.
+A bundle is specific to its host platform, architecture, native profile, and
+matching x2c compiler/runtime. `BUNDLE.json` records those build identities.
+Native dependency toolchain information comes from its existing cache receipt
+when available; an explicit external prefix may have no receipt. A bundle
+does not promise an ABI across compiler releases, cross-platform execution, or
+automatic dependency resolution. Native system libraries and frameworks remain
+supplied by the host.
+
+Most bundles link statically. torch cannot: libtorch is a set of shared
+libraries. Its bundle carries those libraries under `native/lib`, and a
+program built against it records a run-time search path to that directory.
+Such a program is not self-contained. It loads libtorch from the installed
+package, so moving or removing that package breaks the program.
 
 Bundles carry `builds/<name>.native.rsp`. The compiler reads its quoted native
 arguments, expands the literal `{package}` to the resolved package directory,
@@ -416,8 +422,9 @@ preceding x2c source preprocessing. A new bundle needs a compiler supporting
 this format; older source packages continue using their existing `.link` file.
 
 Native bundle metadata covers yyjson, PCRE2, BLIS, libuv, termbox2,
-libcurl, and raylib. SQLite remains separately distributed as source in this
-release.
+libcurl, raylib, and torch. Releases publish torch for macOS arm64 and Linux
+x86_64, the platforms PyTorch ships prebuilt CPU libtorch for. SQLite remains
+separately distributed as source in this release.
 Pure and mixed C/x2c packages with no external native inputs need no dependency
 manifest; their bundle carries an empty native response file. Distribute any
 other x2c package imports alongside them under the registered package root.
@@ -468,7 +475,10 @@ and directories with the existing `copies` shape and ordered native arguments:
 ```
 
 Copy sources expand `{prefix}` to the prepared native prefix and `{package}`
-to the producer package. Destinations are relative to the bundle. Native
+to the producer package. Destinations are relative to the bundle. An optional
+`archive_objects` list names objects the package compiles outside
+`x2c build`, such as torch's C++ shim; they join the bundled
+`lib<name>.a`, so a consumer links them with no further input. Native
 arguments retain `{package}` for consumer-time expansion. An optional
 `platform_args` object appends arguments keyed by the producer's platform
 (`darwin` or `linux`) when a shared dependency manifest has platform-specific
@@ -476,7 +486,9 @@ system requirements. The manifest selected by the package Makefile remains
 the native profile owner.
 
 Accepted options are native include directories (`-I`, `--c-include-dir`,
-`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, archive inputs, `-pthread`, and
-`-framework <name>`. Keep native archives in dependency order after the wrapper
-archive. Options that replace the consumer's output, command, or tools and
-unrestricted compiler/linker escape options are not package metadata.
+`--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, archive inputs,
+`-pthread`, and `-framework <name>`. A bundle of shared libraries names its
+library directory with `-L` and `--rpath` together, both under `{package}`.
+Keep native archives in dependency order after the wrapper archive. Options
+that replace the consumer's output, command, or tools and unrestricted
+compiler/linker escape options are not package metadata.

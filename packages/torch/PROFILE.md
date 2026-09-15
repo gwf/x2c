@@ -10,8 +10,11 @@
   `https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-2.10.0%2Bcpu.zip`
 - Linux archive SHA-256:
   `c5bf8efda9224a2d971b19d1ef6cf3ba6fee8ab53e69c49427db003d1d300496`
-- Prepared prefix: the archive's `include/` and `lib/` copied unchanged;
-  no build step.
+- Prepared prefix: the archive's `include/` and `lib/` copied, with no build
+  step. On macOS the archive names its own `libomp.dylib` by a Homebrew path,
+  `/opt/homebrew/opt/libomp/lib/libomp.dylib`, so preparation rewrites that
+  name to `@rpath/libomp.dylib` in `libomp` and `libtorch_cpu` and re-signs
+  both. A torch program then loads the archive's libomp, not Homebrew's.
 - Linked components: `libtorch`, `libtorch_cpu`, `libc10`, and the C++
   runtime, all dynamic, found by an rpath into the prepared prefix.
   macOS uses libc++ and `libomp`; Linux uses libstdc++ and `libgomp`.

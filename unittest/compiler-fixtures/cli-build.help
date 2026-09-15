@@ -47,6 +47,7 @@ C compiler options:
 Linker options:
   -L <dir>                    Add a library search directory
   -l <name>                   Link library <name>
+      --rpath <dir>           Search <dir> for shared libraries when the program runs
   -Wl,<arg>[,<arg>...]        Pass comma-separated arguments to the linker
   -framework <name>           Link a native framework on macOS
   -Xlinker <arg>              Pass one argument to the linker

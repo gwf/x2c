@@ -428,7 +428,9 @@ compiler links `<home>/lib/libx2c.a`.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
-`-l`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are rejected.
+`-l`, `--rpath`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are
+rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
+shared libraries when it runs; a package bundle may carry it.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
