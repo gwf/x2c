@@ -11,6 +11,10 @@ on:
         description: Also run installation, examples, and fresh package validation
         type: boolean
         default: false
+      windows_spike:
+        description: Also probe Windows install routes (WSL2 check, MSYS2 build attempt)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -54,3 +58,84 @@ jobs:
   release-validation:
     if: inputs.release_validation
     uses: ./.github/workflows/release-validation.yml
+
+  # Windows probes for the install story: the supported WSL2 route checked
+  # end to end with the install script, and a source build under the MSYS2
+  # POSIX layer. Advisory only.
+  wsl-install:
+    if: inputs.windows_spike
+    runs-on: windows-latest
+    steps:
+      # Ubuntu 22.04 ships clang 14, which rejects two generated static
+      # initializers as non-constant; 24.04 ships clang 18, as the Linux
+      # release job uses.
+      - uses: Vampire/setup-wsl@v3
+        with:
+          distribution: Ubuntu-24.04
+          additional-packages: clang make python3 curl git ca-certificates
+      - name: Build from a Linux-filesystem clone and check the install script
+        shell: wsl-bash {0}
+        # The WSL shell does not receive the step's env, so values are inlined.
+        run: |
+          set -eu
+          mkdir -p /tmp/x2c-clang
+          ln -sf "$(command -v clang)" /tmp/x2c-clang/cc
+          export PATH="/tmp/x2c-clang:$PATH"
+          git clone --quiet --depth 1 --branch "${{ github.ref_name }}" \
+            "https://github.com/${{ github.repository }}" "$HOME/x2c"
+          cd "$HOME/x2c"
+          mkdir -p debug
+          make build-safe >debug/bootstrap.log 2>&1 || {
+            tail -n 40 debug/bootstrap.log; exit 1; }
+          tools/check-install-script.sh "$HOME/install-check"
+          "$HOME/install-check/prefix/bin/x2c" env
+
+  msys2-build:
+    if: inputs.windows_spike
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      CC: gcc
+      AR: ar
+      X2C_CC: gcc
+    steps:
+      # The emitter rewrites `#include "x.x"` to `x.h` by line ending, so
+      # sources must be checked out with LF.
+      - name: Check out with LF line endings
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v5
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: true
+          install: base-devel gcc python git
+        # include/ links headers before they are built; only native symlinks
+        # can dangle, so the copy-mode default fails there.
+      - name: Use native symlinks
+        run: echo "MSYS=winsymlinks:native" >> "$GITHUB_ENV"
+      - name: Report the toolchain
+        run: |
+          uname -a
+          gcc --version | head -n 1
+          make --version | head -n 1
+          python3 --version
+      - name: Bootstrap the compiler and run an example
+        run: |
+          mkdir -p debug
+          ./configure
+          make build-safe >debug/bootstrap.log 2>&1 || {
+            echo "build-safe failed; last 60 lines:"
+            tail -n 60 debug/bootstrap.log
+            exit 1
+          }
+          ./builds/0/x2c env
+          ./builds/0/x2c run examples/foreach.x
+      - name: Keep the build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: msys2-bootstrap-log
+          path: debug/bootstrap.log

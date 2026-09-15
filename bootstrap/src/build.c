@@ -250,8 +250,6 @@ static uint64_t _state_list(uint64_t hash, List values){
   return _state_bytes(hash, "\xfe", 1);
 }
 
-int File_close(File);
-
 static uint64_t _state_file(uint64_t hash, String path, int * ok){
   File input = fopen(path, "rb");
   if(! input){

@@ -22,8 +22,6 @@ double ArrayDbl_push(ArrayDbl, double);
 
 double ArrayDbl_take_last(ArrayDbl);
 
-void ArrayDbl_free(ArrayDbl);
-
 static double scale_grad(double a, double b, double * a_grad, double * b_grad){
   ArrayDbl _ad_tape = ArrayDbl_new();
   double _ad_result = 0.0;

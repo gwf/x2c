@@ -994,8 +994,6 @@ static String _update_string(volatile String * slot, Symbol op, String rhs){
   return result;
 }
 
-void Bytes_free(Bytes);
-
 void Scope_free(void *);
 
 static void MapIntInt__core_free(MapIntInt _x2c_macro_map_0){

@@ -93,6 +93,32 @@ The installed tool defaults are `cc` and `ar` from `PATH`. Explicit `--cc` and
 then the defaults in `lib/x2c/toolchain`. Build identity is recorded separately
 in the installation inventory, not as a path to the producer's compiler tools.
 
+## Windows
+
+Use WSL2. Inside an Ubuntu 24.04 or newer distribution the Linux release
+installs with the same command, and the compiler needs only `clang` or
+`gcc`, `make`, and `curl` from the distribution's packages:
+
+```sh
+sudo apt-get install -y clang make curl
+curl -fsSL https://x2c-lang.dev/install.sh | sh
+```
+
+Keep the prefix and your projects on the Linux filesystem, under your WSL
+home rather than under `/mnt/c`, so builds run at native speed. Ubuntu
+22.04 ships clang 14, which rejects two static initializers in the runtime;
+use clang 15 or newer, or `gcc`.
+
+A source checkout also builds under MSYS2 with its `gcc`, given three
+settings: check the repository out with LF line endings
+(`git config core.autocrlf false`), enable native symlinks
+(`export MSYS=winsymlinks:native`, which needs Developer Mode or an
+administrator shell), and select the compiler with `CC=gcc X2C_CC=gcc`.
+`make build-safe` then produces a working compiler, and the `check`
+workflow's `windows_spike` input proves both routes. Native Windows without
+a POSIX layer, and installing a release rather than building from source
+under MSYS2, are not supported.
+
 ## Developer workflow
 
 A source checkout is the development install. After `make build-safe`, the

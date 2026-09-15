@@ -143,10 +143,6 @@ Array Array_sort(Array);
 
 int Array_try_next(Array, int *, Var *);
 
-void Array_free(Array);
-
-int File_error(File);
-
 int symbol_snapshot_write(Map symbols, Map fn_defs, File output){
   if(! _init_guard_) _file_init_();
   Array entries = Array_new();
@@ -228,7 +224,6 @@ Symbol Lisp_read(Lisp, String, unsigned *, Var *);
 int List_len(List);
 Var List_getindex(List, int);
 Var Map_setindex(Map, Var, Var);
-int File_close(File);
 void Lisp_destroy(Lisp);
 Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym){
   if(! _init_guard_) _file_init_();  if(fn_defs) * fn_defs = NULL;  if(gensym) * gensym = 0;  File input = String_open(path, "r");  Lisp lisp = Lisp_new_bare();  Map volatile symbols = NULL; {

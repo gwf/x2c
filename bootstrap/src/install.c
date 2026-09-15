@@ -270,8 +270,6 @@ int File_printf(File, const char *, ...);
 
 String String_str(String);
 
-int File_close(File);
-
 static void _write_text(String path, String text){
   File output = fopen(path, "w");
   if(! output ||(String_truth(text) && File_printf(output, "%s", String_str(text)) < 0) || File_close(output)) _error(String_join(NULL, cons(String_var(_8), cons(String_var(path), NULL))));
@@ -341,8 +339,6 @@ static void _verify(String path, String expected){
 }
 
 List String_split_lines(String, int);
-
-size_t Array_len(Array);
 
 Var Array_getindex(Array, int);
 

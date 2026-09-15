@@ -47,8 +47,6 @@ double ArrayDbl_take_last(ArrayDbl);
 
 double cos(double);
 
-void ArrayDbl_free(ArrayDbl);
-
 static double walk_grad(double x, double y, int n, double * x_grad, double * y_grad){
   ArrayDbl _ad_tape = ArrayDbl_new();
   double _ad_result = 0.0;
