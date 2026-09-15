@@ -145,8 +145,6 @@ static uint64_t _hash(File input, File output, size_t * length){
   return hash;
 }
 
-int File_close(File);
-
 static int _read_marker(String path, String identity){
   File input = fopen(path, "r");
   if(! input) return 0;
