@@ -93,16 +93,12 @@ static String _unreadable_input(
   compiler.report_error(<driver>, "cannot read input file", NULL, notes);
 }
 
-/* A `#!` first line lets a source file run as an executable script. Spaces
-   replace it, so every later line, column, and byte position stays put. */
-static String _without_shebang(String text) {
-  if (!text || !text.startswith("#!")) return text;
+/* A `#!` first line makes the file a script unit, and that line reads as an
+   include of `scripting.x`. Only the first line changes, so every later
+   line number stays in place. */
+static String _script_text(String text) {
   int end = text.find("\n");
-  if (end < 0) end = text.len();
-  Buffer blanked = $auto(Buffer.new(text.len()));
-  for (int i = 0; i < end; i++) blanked.write_char(' ');
-  blanked.write(text + end);
-  return blanked.str();
+  return %"#include \"scripting.x\"${end < 0 ? %"" : text[end:]}";
 }
 
 // Read the primary source file. fopen() opens directories on some
@@ -115,7 +111,7 @@ static String _read_input_text(Compiler compiler, String filename) {
     String text;
     if (!compiler.read_source(filename, &text))
       return _unreadable_input(compiler, filename, "cannot open");
-    return _without_shebang(text);
+    return text;
   }
   File file = NULL;
   try file = filename.open("r");
@@ -132,7 +128,7 @@ static String _read_input_text(Compiler compiler, String filename) {
   try text = file.string_close();
   catch %(io-fail *):
     return _unreadable_input(compiler, filename, "read failed");
-  return _without_shebang(text);
+  return text;
 }
 
 static void _tokenize_input(
@@ -153,6 +149,10 @@ static void _tokenize_input(
       !strncmp(source_path, lib_path, lib_length) &&
       source_path[lib_length] == '/');
   String text = _read_input_text(c, filename);
+  if (text && text.startswith("#!")) {
+    c.script = source_resolved ? String.new(source_path) : filename;
+    text = _script_text(text);
+  }
   unit->source_lines = _source_lines(text);
   c.tokenize(text);
   c.include_dirs = frontend.include_dirs;

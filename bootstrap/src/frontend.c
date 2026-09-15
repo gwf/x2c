@@ -2,9 +2,9 @@
 
 #include "frontend.h"
 
-static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _7, _6, _5, _4, _3, _2, _0;
+static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _8, _7, _6, _5, _4, _3, _2, _0;
 
-static Var _8, _1;
+static Var _9, _1;
 
 #include <limits.h>
 #include <stdio.h>
@@ -26,7 +26,7 @@ static Token _first_preprocessor_token(Compiler compiler);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason);
 
-static String _without_shebang(String text);
+static String _script_text(String text);
 
 static String _read_input_text(Compiler compiler, String filename);
 
@@ -35,13 +35,6 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 static void _configure_package(Compiler compiler, CliRequest request, String filename);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
-
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 Var String_var(String);
 
@@ -53,20 +46,21 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_var(_0);
   _2 = String_new("file: ");
   _3 = String_new("reason: ");
-  _4 = String_new("/lib");
-  _5 = String_new("/x2c.x");
-  _6 = String_new("/lib/x2c.x");
-  _7 = String_new("stage: preprocess");
-  _8 = String_var(_7);
-  _9 = String_new("status: ");
-  _10 = String_new("cannot read input file");
-  _11 = String_new("#!");
+  _4 = String_new("#include \"scripting.x\"");
+  _5 = String_new("/lib");
+  _6 = String_new("/x2c.x");
+  _7 = String_new("/lib/x2c.x");
+  _8 = String_new("stage: preprocess");
+  _9 = String_var(_8);
+  _10 = String_new("status: ");
+  _11 = String_new("cannot read input file");
   _12 = String_new("\n");
   _13 = String_new("cannot open");
   _14 = String_new("not a regular file");
   _15 = String_new("read failed");
-  _16 = String_new("/");
-  _17 = String_new("failed to run C preprocessor");
+  _16 = String_new("#!");
+  _17 = String_new("/");
+  _18 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -120,50 +114,14 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason){
   List notes = cons(_1, cons(String_var(String_join(NULL, cons(String_var(_2), cons(String_var(filename), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_3), cons(String_var(reason), NULL)))), NULL)));
-  Compiler_report_error(compiler, 306819428, _10, NULL, notes);
+  Compiler_report_error(compiler, 306819428, _11, NULL, notes);
 }
-
-int String_startswith(String, String);
 
 int String_find(String, String);
 
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_write(Buffer, const char *);
-
-String Buffer_str(Buffer);
-
-static String _without_shebang(String text){
-  if(! String_truth(text) || ! String_startswith(text, _11)) return text;
+static String _script_text(String text){
   int end = String_find(text, _12);
-  if(end < 0) end = String_len(text);
-  Buffer blanked = Buffer_new(String_len(text));
-  {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & blanked};
-
-  X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
-  };
-  x2c_cleanup_push(&_x2c_defer_record_0);
-  {
-    for(int i = 0;  i < end;  i ++) Buffer_write_char(blanked, ' ');
-    Buffer_write(blanked, text + end);
-    {
-      String _x2c_return_value_0 = Buffer_str(blanked);
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-        return _x2c_return_value_0;
-      }
-
-    }
-
-  }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
-}
+  return String_join(NULL, cons(String_var(_4), cons(String_var(end < 0 ? 0 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
 int Compiler_read_source(Compiler, String, volatile String *);
@@ -180,7 +138,7 @@ static String _read_input_text(Compiler compiler, String filename){
   if(compiler -> sources){
     String volatile text;
     if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _13);
-    return _without_shebang(text);
+    return text;
   }
   File volatile file = NULL;
   {
@@ -199,24 +157,24 @@ static String _read_input_text(Compiler compiler, String filename){
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
       if (_x2c_catch_selected_0 == 0) {{
-        String _x2c_return_value_1 = _unreadable_input(compiler, filename, _13);
+        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _13);
         {
           x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_0);
-          return _x2c_return_value_1;
+          return _x2c_return_value_0;
         }
 
       }
 
     }
     else {{
-      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _13);
+      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _13);
       {
         x2c_error_catch_close(_x2c_error_handler_0);
         _x2c_error_handler_0 = NULL;
         x2c_exception_leave(& _x2c_exception_frame_0);
-        return _x2c_return_value_2;
+        return _x2c_return_value_1;
       }
 
     }
@@ -255,12 +213,12 @@ ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exc
     x2c_error_catch_detach(_x2c_error_handler_1);
     x2c_exception_mark_handled(&_x2c_exception_frame_1);
      {{
-      String _x2c_return_value_3 = _unreadable_input(compiler, filename, _15);
+      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _15);
       {
         x2c_error_catch_close(_x2c_error_handler_1);
         _x2c_error_handler_1 = NULL;
         x2c_exception_leave(& _x2c_exception_frame_1);
-        return _x2c_return_value_3;
+        return _x2c_return_value_2;
       }
 
     }
@@ -280,10 +238,14 @@ x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
 }
-return _without_shebang(text);
+return text;
 }
 
 String x2c_get_root(void);
+
+int String_startswith(String, String);
+
+String String_new(const char *);
 
 void Compiler_tokenize(Compiler, char *);
 
@@ -291,13 +253,17 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   Compiler c = unit -> compiler;
   c -> filename = filename;
   char source_path[PATH_MAX], runtime_path[PATH_MAX], lib_path[PATH_MAX];
-  String lib = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_4), NULL))), runtime = String_join(NULL, cons(String_var(lib), cons(String_var(_5), NULL)));
+  String lib = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_5), NULL))), runtime = String_join(NULL, cons(String_var(lib), cons(String_var(_6), NULL)));
   int source_resolved = realpath(filename, source_path) != NULL;
   int lib_resolved = realpath(lib, lib_path) != NULL;
   c -> prelude = !(source_resolved && realpath(runtime, runtime_path) && ! strcmp(source_path, runtime_path));
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = _read_input_text(c, filename);
+  if(String_truth(text) && String_startswith(text, _16)){
+    c -> script = source_resolved ? String_new(source_path) : filename;
+    text = _script_text(text);
+  }
   unit -> source_lines = _source_lines(text);
   Compiler_tokenize(c, text);
   c -> include_dirs = frontend -> include_dirs;
@@ -349,7 +315,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
         }
         String package = x2c_package_directory(root, source);
         if(! String_truth(package)) continue;
-        String name = String_getslice(package, String_rfind(package, _16) + 1, -2147483648, 1);
+        String name = String_getslice(package, String_rfind(package, _17) + 1, -2147483648, 1);
         if(! String_is_identifier(name)) continue;
         if(! x2c_package_source(package, source)) continue;
         compiler -> package = name;
@@ -397,14 +363,14 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_6), NULL))) : NULL, imacros = runtime;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_7), NULL))) : NULL, imacros = runtime;
   int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, & text, & errors, & dependency_text);
   unit -> preprocessor_output = text;
   unit -> preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
-    List notes = cons(_8, cons(String_var(String_join(NULL, cons(String_var(_9), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _17, _first_preprocessor_token(c), notes);
+    List notes = cons(_9, cons(String_var(String_join(NULL, cons(String_var(_10), cons(String_var(int_str(status)), NULL)))), NULL));
+    Compiler_report_error(c, 306819428, _18, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
@@ -489,12 +455,12 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
        {{
-        int _x2c_return_value_4 = 0;
+        int _x2c_return_value_3 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_2);
           _x2c_error_handler_2 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_2);
-          return _x2c_return_value_4;
+          return _x2c_return_value_3;
         }
 
       }
@@ -550,12 +516,12 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
           unit -> preprocessor = NULL;
         }
         {
-          int _x2c_return_value_5 = 0;
+          int _x2c_return_value_4 = 0;
           {
             x2c_error_catch_close(_x2c_error_handler_3);
             _x2c_error_handler_3 = NULL;
             x2c_exception_leave(& _x2c_exception_frame_3);
-            return _x2c_return_value_5;
+            return _x2c_return_value_4;
           }
 
         }
@@ -661,12 +627,5 @@ void ParsedUnit_close(ParsedUnit * unit){
     0
   }
   ;
-}
-
-void Buffer_cleanup(Buffer);
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 

@@ -1238,5 +1238,24 @@ set -e
   grep -q 'script requires a script file' "$SCRIPT/none.stderr"
 [[ $(X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" env cache_dir) == "$SCRIPT/cache" ]]
 
+cat >"$SCRIPT/unit.x" <<'EOF'
+#!/usr/bin/env -S x2c script
+String first = args ? args.car().string() : %"none";
+printf("%d:%s\n", args.len(), first);
+if (first == "fail") {
+  %(sh -c "exit 7").run();
+}
+return args.len();
+EOF
+set +e
+unit_output=$(run_script "$SCRIPT/unit.x" first second 2>"$SCRIPT/unit.stderr")
+unit_status=$?
+run_script "$SCRIPT/unit.x" fail >/dev/null 2>"$SCRIPT/fail.stderr"
+fail_status=$?
+set -e
+[[ $unit_status == 2 && $unit_output == '2:first' ]]
+[[ $fail_status == 7 ]] &&
+  grep -Fq 'command (sh -c "exit 7") failed with status 7' "$SCRIPT/fail.stderr"
+
 echo "CLI, dependency, build, run, script, manifest, and state probes:" \
-  "132 passed"
+  "135 passed"

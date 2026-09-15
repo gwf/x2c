@@ -54,6 +54,8 @@ List Compiler_parse_function_target(Compiler compiler);
 
 List Compiler_parse_import_declaration(Compiler c);
 
+int Compiler_script_statement_starts(Compiler c);
+
 List Compiler_parse_top_level(Compiler c);
 
 List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);

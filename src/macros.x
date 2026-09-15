@@ -2324,6 +2324,23 @@ static int _keyword_alias_targets_at(
      _decorator_result_kind(target_kind) == expected);
 }
 
+/** Reports whether the macro or keyword alias at the cursor produces
+    file-scope syntax, directly or through the target it decorates. A script
+    unit keeps such an invocation at file scope. This query does not consume
+    tokens.
+*/
+int Compiler.macro_targets_unit(Compiler compiler) {
+  List definition = compiler.peek(0) == <$>
+    ? _peek_definition(compiler) : _keyword_alias_lookup(compiler);
+  if (!definition || (compiler.peek(0) != <$> &&
+                      !_keyword_alias_invocation_follows(compiler, definition)))
+    return 0;
+  Symbol kind = definition.assoc(<kind>);
+  if (kind == <decorator>)
+    kind = _decorator_result_kind(definition.assoc(<target>));
+  return kind == <unit> || kind == <decl-unit>;
+}
+
 /** Returns whether the parser should claim the current alias at `position`.
     An argument-taking invocation may be claimed before result-kind validation
     so target parsing can report a wrong-position diagnostic. Bare forms must

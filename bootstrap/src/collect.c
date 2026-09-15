@@ -804,6 +804,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
   {
     if(! String_endswith(path, _91)) shadow -> package = NULL;
     shadow -> filename = path;
+    if(String_equal(path, c -> script)) shadow -> script = path;
     shadow -> include_dirs = c -> include_dirs;
     shadow -> source_private = * private;
     shadow -> macros = c -> macros;

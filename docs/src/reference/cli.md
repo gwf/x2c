@@ -311,6 +311,10 @@ A script file can start with a shebang line and run directly:
 #!/usr/bin/env -S x2c script
 ```
 
+That line also makes the file a
+[script unit](language.md#script-units), which may put its statements at
+file scope instead of defining `main`.
+
 `env -S` splits the line into words. Where `x2c` has a fixed location, the
 interpreter path works without it: `#!/usr/local/bin/x2c script`.
 

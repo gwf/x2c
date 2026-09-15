@@ -1491,6 +1491,59 @@ List Compiler.parse_import_declaration(Compiler c) {
   return %(import $name $alias);
 }
 
+/* A declaration in a script unit stays at file scope when a body follows
+   its declarator, `{` for a function or aggregate and `=>` for an
+   expression-bodied function, or when it ends right after a parameter list
+   as a prototype does. An initialized or plain object declaration belongs
+   to `main`. */
+static int _script_declaration_stays(Compiler c) {
+  int depth = 0, Symbol previous = 0;
+  for (Token token = c.token; token.type != <eof>;
+       token = c.skip_trivia_from(token + 1)) {
+    Symbol type = token.type;
+    if (!depth) {
+      if (type == <;>) return previous == <)>;
+      if (type == <"{">) return 1;
+      if (type == <=>) return c.skip_trivia_from(token + 1).type == <">">;
+    }
+    switch (type) {
+      case <(>: case <[>: case <"{">: case <"%(">: case <"%[">:
+      case <"%{">: case <"${">: case <"@{">: case <"$(">:
+        depth++;
+        break;
+      case <)>: case <]>: case <"}">:
+        depth--;
+        break;
+    }
+    previous = type;
+  }
+  return 0;
+}
+
+/** Reports whether the top-level item at the cursor is one of a script
+    unit's statements, which become `main`'s body.
+    Preprocessor lines, imports, protocols, compile-time definitions and
+    Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
+    declarations, type definitions, and function prototypes and definitions
+    stay at file scope. This query does not consume tokens.
+*/
+int Compiler.script_statement_starts(Compiler c) {
+  switch (c.peek(0)) {
+    case <eof>: case <import>: case <protocol>: case <"$(">:
+    case <typedef>: case <static>: case <extern>:
+      return 0;
+    case <$>:
+      return !c.macro_targets_unit();
+  }
+  if (c.test_static_assert() || c.keyword_form_is_definition() ||
+      c.macro_form_is_definition())
+    return 0;
+  if (c.peek(0) == <ident> && c.token.text == "with") return 1;
+  if (c.peek(0) == <ident> && c.keyword_alias_starts_target_at(AST_UNIT))
+    return !c.macro_targets_unit();
+  return !c.test_declaration() || !_script_declaration_stays(c);
+}
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition or top-level Lisp form
     only updates compiler state, with the first following token current.

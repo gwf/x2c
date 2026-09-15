@@ -103,6 +103,9 @@ typedef struct Compiler {
   int declaration_projection, declaration_produced;
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
+  // The canonical path of a `#!` script unit, whose top-level statements
+  // become `main`; NULL for every other unit.
+  String script;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
   Array origins, int origin, source_map;
@@ -646,6 +649,32 @@ void Compiler._skip_shallow_expression(
   }
 }
 
+/** Moves past one run of a script unit's statement tokens, through a `;` or
+    a closing `}` outside every bracket. A statement that ends early this
+    way leaves its remainder as the next run, and runs are rejoined in order.
+*/
+void Compiler.skip_script_statement(Compiler c) {
+  int depth = 0;
+  while (c.peek(0) != <eof>) {
+    Symbol token = c.peek(0);
+    if (token == <"$(">) {
+      c.skip_macro_lisp();
+      continue;
+    }
+    switch (token) {
+      case <(>: case <"?(">: case <[>: case <"{">: case <"%(">:
+      case <"%[">: case <"%{">: case <"${">: case <"@{">:
+        depth++;
+        break;
+      case <)>: case <]>: case <"}">:
+        depth--;
+        break;
+    }
+    c.next();
+    if (depth <= 0 && (token == <;> || token == <"}">)) return;
+  }
+}
+
 static void _shallow_finish_declaration(Compiler c) {
   List declaration = _shallow_parse_declaration(c);
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
@@ -1105,6 +1134,10 @@ static void _shallow_parse_loop(Compiler c) {
   while (c.peek(0) != <eof>) {
     c.update_source_visibility(c.leading_preproc());
     Token start = c.token;
+    if (c.script && c.script_statement_starts()) {
+      c.skip_script_statement();
+      continue;
+    }
     if (c.test_static_assert()) {
       c.parse_static_assert();
       _debug_tokens(c, start, c.token);
@@ -1324,38 +1357,111 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   if (generated_symbols) c.install_generated_protocol_symbols();
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
-    while (c.peek(0) != <eof>) {
-      try {
-        Token start = c.token;
-        Ast node = _replay_declaration_bundle(c);
-        if (!node) node = c.parse_top_level();
-        if (node && node.car() == <seq>) {
-          foreach (List item, node.cdr()) {
-            _record_top_level_function_state(c, item);
-            ast = cons(item, ast);
+    Array statements = %[];
+    loop {
+      while (c.peek(0) != <eof>) {
+        try {
+          Token start = c.token;
+          if (c.script && c.script_statement_starts()) {
+            c.skip_script_statement();
+            Token tokens = c.tokenizer.tokens;
+            int first = start - tokens;
+            int end = _skip_backward(c.token - 1, tokens) + 1 - tokens;
+            statements.push(first);
+            statements.push(end);
           }
+          else {
+            Ast node = _replay_declaration_bundle(c);
+            if (!node) node = c.parse_top_level();
+            if (node && node.car() == <seq>) {
+              foreach (List item, node.cdr()) {
+                _record_top_level_function_state(c, item);
+                ast = cons(item, ast);
+              }
+            }
+            else if (node) {
+              _record_top_level_function_state(c, node);
+              ast = cons(node, ast);
+            }
+          }
+          ast = _prepend_preproc(c, ast);
+          _debug_tokens(c, start, c.token);
         }
-        else if (node) {
-          _record_top_level_function_state(c, node);
-          ast = cons(node, ast);
+        catch %(malformed (category ?category) *): {
+          (void) category;
+          if (c.diagnostics.reached_limit()) break;
+          _sync_top_level(c);
+          ast = _prepend_preproc(c, ast);
+          if (c.peek(0) == <eof>) break;
+          continue;
         }
-        ast = _prepend_preproc(c, ast);
-        _debug_tokens(c, start, c.token);
       }
-      catch %(malformed (category ?category) *): {
-        (void) category;
-        if (c.diagnostics.reached_limit()) break;
-        _sync_top_level(c);
-        ast = _prepend_preproc(c, ast);
-        if (c.peek(0) == <eof>) break;
-        continue;
-      }
+      if (!statements.len()) break;
+      _append_script_main(c, statements);
+      statements.clear();
     }
   }
   ast = ast.reverse();
   _check_unmatched_braces(c);
   if (!c.error_count()) _validate_static_object_initializers(c);
   return ast;
+}
+
+/* A script unit's `main` is ordinary source the parser reads after the last
+   top-level form: this template with the statement runs, in source order,
+   in place of `x2c_script_statements`. The statements run in their own
+   function, so the `try` that reports a failed command leaves their locals
+   ordinary; that failure's status becomes the exit status. */
+static const char *script_main =
+  "static int x2c_script(int argc, char **argv, List args) {\n"
+  "  (void) argc, (void) argv, (void) args;\n"
+  "  x2c_script_statements\n"
+  "  return 0;\n"
+  "}\n"
+  "int main(int argc, char **argv) {\n"
+  "  try {\n"
+  "    return x2c_script(argc, argv, List.arguments(argc, argv));\n"
+  "  }\n"
+  "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
+  "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
+  "            argv[0], command.repr().str(), status.integer());\n"
+  "    return (int) status.integer();\n"
+  "  }\n"
+  "}\n";
+
+/* Replaces the token stream with a copy that ends in the script's `main`.
+   The copy keeps every consumed token at its index, so recorded token
+   indices stay valid, and drops the trivia already read before end of file.
+   Template tokens take the first statement's position with no length, so a
+   diagnostic about them names the script without reading past its text.
+   `statements` holds each run's first and past-the-end token index. */
+static void _append_script_main(Compiler c, Array statements) {
+  Token tokens = c.tokenizer.tokens, eof = c.token;
+  long kept = _skip_backward(eof - 1, tokens) + 1 - tokens;
+  Token first = tokens + statements[0].integer();
+  Bytes stream = Bytes.new(sizeof(struct Token));
+  stream = stream.append(tokens, kept);
+  Tokenizer template = Tokenizer.new((char *) script_main);
+  template.scan();
+  for (Token token = template.tokens; token.type != <eof>; token++) {
+    if (token.text == "x2c_script_statements") {
+      for (int i = 0; i < statements.len(); i += 2) {
+        long start = statements[i].integer();
+        long end = statements[i + 1].integer();
+        stream = stream.append(tokens + start, end - start);
+      }
+      continue;
+    }
+    struct Token placed = *token;
+    placed.line = first.line;
+    placed.col = first.col;
+    placed.pos = first.pos;
+    placed.len = 0;
+    stream = stream.append(&placed, 1);
+  }
+  stream = stream.append(eof, 1);
+  c.tokenizer.tokens = stream;
+  c.token = _skip_forward((Token) stream + kept);
 }
 
 static void _debug_tokens(Compiler compiler, Token start, Token end) {

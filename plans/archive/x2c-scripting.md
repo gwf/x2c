@@ -1,8 +1,7 @@
 # x2c scripting
 
-> Status: active - approved 2026-09-15. Phases 1 (`process.x`, `path.x`,
-> `<cmd-fail>`, cb176c0), 2 (compiler adoption, 6861d32), and 3
-> (`x2c script`) implemented; phase 4 pending.
+> Status: done - 2026-09-15. Phase 1 cb176c0, phase 2 6861d32, phase 3
+> 85c1fd9, and phase 4 in the commit that archived this plan, all on `main`.
 > Phase 1 notes: a private `extern` declaration lost `extern` in generated C
 > (fixed in `src/generate.x`, fixture `private-extern-declaration`). `walk`
 > returns a `List`, not an `Iter`. `glob` uses the manifest `**` matcher
@@ -24,6 +23,17 @@
 > prerequisite path per line after the fingerprint, not a separate depfile.
 > The executable is published by rename after the build, and the record is
 > written after the rename.
+> Phase 4 notes: the design changed in three places. A script's statement
+> runs are skipped where they appear and, at end of file, rejoined into a
+> token stream the ordinary parser reads as `static int x2c_script(argc,
+> argv, args)` plus a `main` that calls it inside a `try`, rather than an
+> AST built through `bind_syntax`; macro templates carry partly typed
+> syntax, so hand-built function syntax was not reliable. The statements
+> live in their own function so the `try` does not make their locals
+> `volatile`. The shebang line reads as `#include "scripting.x"`, a new
+> optional module that includes `path.x` and `process.x`, instead of new
+> implicit-include plumbing. The planned `parallel-jobs` example was folded
+> into `line-counts`, which already caps its jobs with `Job.wait_any`.
 
 ## Context
 

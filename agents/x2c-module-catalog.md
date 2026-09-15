@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 32
-- Runtime modules: 49
+- Runtime modules: 50
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -95,17 +95,17 @@ Public functions:
 `Compiler.skip_trivia_from`, `Compiler.peek`, `Compiler.expect`,
 `Compiler.next`, `Compiler.test`, `Compiler.record_origin`,
 `Compiler.anchor_origin`, `Compiler._at_function_arrow`,
-`Compiler._skip_shallow_expression`, `Compiler.freeze_declaration_syntax`,
-`Compiler.thaw_declaration_syntax`, `Compiler.queue_declaration_effect`,
-`Compiler.run_declaration_effects`, `Compiler.select_declaration_defaults`,
-`Compiler.shallow_parse`, `Compiler.shallow_parse_overlay`,
-`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
-`Compiler.full_parse`, `Compiler.cache`, `Compiler.cache_cons_cell`,
-`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
-`Compiler.match_pattern_is_static`, `Compiler.match_pattern_head_symbol`,
-`Compiler.match_pattern_flat_head`, `Compiler.match_pattern_binders`,
-`Compiler.define_match_binders`, `Compiler.add_early`,
-`Compiler.add_protocol_init`, `Compiler.add_early_init`,
+`Compiler._skip_shallow_expression`, `Compiler.skip_script_statement`,
+`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
+`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
+`Compiler.select_declaration_defaults`, `Compiler.shallow_parse`,
+`Compiler.shallow_parse_overlay`, `Compiler.leading_preproc`,
+`Compiler.update_source_visibility`, `Compiler.full_parse`, `Compiler.cache`,
+`Compiler.cache_cons_cell`, `Compiler.cache_literal_list`,
+`Compiler.match_pattern_value`, `Compiler.match_pattern_is_static`,
+`Compiler.match_pattern_head_symbol`, `Compiler.match_pattern_flat_head`,
+`Compiler.match_pattern_binders`, `Compiler.define_match_binders`,
+`Compiler.add_early`, `Compiler.add_protocol_init`, `Compiler.add_early_init`,
 `Compiler.add_mid_init`, `Compiler.add_late_init`,
 `Compiler.begin_semantic_transaction`, `SymTxn.commit`,
 `SymTxn.local_macros_changed`, `SymTxn.rollback`, `Sym.reset`,
@@ -261,7 +261,8 @@ Public functions:
 `Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
 `Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.keyword_alias_starts_target_at`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.keyword_alias_starts_target_at`,
 `Compiler.keyword_alias_needs_shallow_expansion`,
 `Compiler.skip_keyword_alias`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
@@ -292,8 +293,8 @@ Public functions:
 `Compiler.parse_declaration_row`, `Compiler.finish_managed_declaration`,
 `Compiler.parse_declaration_argument`, `Compiler.parse_function_definition`,
 `Compiler.parse_function_target`, `Compiler.parse_import_declaration`,
-`Compiler.parse_top_level`, `Compiler.finish_foreign_alias`,
-`Compiler.bind_syntax`
+`Compiler.script_statement_starts`, `Compiler.parse_top_level`,
+`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 
@@ -882,6 +883,14 @@ Public functions:
 `Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
 `Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`, `Scope.realloc`,
 `Scope_shutdown`, `Scope.cleanup`
+
+### [lib/scripting.x](../lib/scripting.x)
+
+the modules every script unit includes.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/split.x](../lib/split.x)
 

@@ -3944,6 +3944,15 @@ static int _keyword_alias_targets_at(Compiler compiler, List definition, AstPos 
   return kind == expected ||(kind == 9147177346020 && _decorator_result_kind(target_kind) == expected);
 }
 
+int Compiler_macro_targets_unit(Compiler compiler){
+  if(! _init_guard_) _file_init_();
+  List definition = Compiler_peek(compiler, 0) == 73 ? _peek_definition(compiler) : _keyword_alias_lookup(compiler);
+  if(! List_truth(definition) ||(Compiler_peek(compiler, 0) != 73 && ! _keyword_alias_invocation_follows(compiler, definition))) return 0;
+  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));
+  if(kind == 9147177346020) kind = _decorator_result_kind(Var_symbol(List_assoc(definition, Symbol_var(1345468776))));
+  return kind == 1405544 || kind == 9147004580456;
+}
+
 int Compiler_keyword_alias_starts_target_at(Compiler compiler, AstPos position){
   if(! _init_guard_) _file_init_();
   return _keyword_alias_targets_at(compiler, _keyword_alias_lookup(compiler), position);

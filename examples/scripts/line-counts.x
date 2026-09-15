@@ -1,7 +1,5 @@
+#!/usr/bin/env -S x2c script
 /*  line-counts.x -- count lines with parallel commands and write a report */
-
-#include "path.x"
-#include "process.x"
 
 static void write_sources(String root) {
   Map sources = %{
@@ -17,34 +15,31 @@ static void write_sources(String root) {
   }
 }
 
-int main(void) {
-  String root = String.temp_dir();
-  write_sources(root);
+String root = String.temp_dir();
+write_sources(root);
 
-  Array running = %[], counts = %[];
-  foreach (String unit, %"$root/**/*.x".glob()) {
-    if (running.len() == 2) counts.push(Job.wait_any(running).output());
-    running.push(%(wc -l $unit).options(%{stdout: capture}).start());
-  }
-  while (running.len()) counts.push(Job.wait_any(running).output());
-
-  Array lines = %[];
-  foreach (String count, counts) {
-    List fields = count.strip(" \n").split(" ").filter(%!(word) => word);
-    String path = fields.cadr().str();
-    lines.push(%"${fields.car().str()} ${path[root.len() + 1:]}");
-  }
-  String report = root.join_path("report/lines.txt");
-  report.dirname().make_dirs();
-  report.write_text(%"${String.join("\n", lines.sort().list_free())}\n");
-
-  printf("%s", report.read_text());
-  printf("total %s", %((cat $report) (awk "{ s += \$1 } END { print s }"))
-    .output());
-  printf("markdown files %ld\n",
-         (long) root.walk().filter(%!(path) => path.str().endswith(".md"))
-           .len());
-  root.remove_tree();
-  printf("cleaned %s\n", root.exists() ? "no" : "yes");
-  return 0;
+Array running = %[], counts = %[];
+foreach (String unit, %"$root/**/*.x".glob()) {
+  if (running.len() == 2) counts.push(Job.wait_any(running).output());
+  running.push(%(wc -l $unit).options(%{stdout: capture}).start());
 }
+while (running.len()) counts.push(Job.wait_any(running).output());
+
+Array lines = %[];
+foreach (String count, counts) {
+  List fields = count.strip(" \n").split(" ").filter(%!(word) => word);
+  String path = fields.cadr().str();
+  lines.push(%"${fields.car().str()} ${path[root.len() + 1:]}");
+}
+String report = root.join_path("report/lines.txt");
+report.dirname().make_dirs();
+report.write_text(%"${String.join("\n", lines.sort().list_free())}\n");
+
+printf("%s", report.read_text());
+printf("total %s", %((cat $report) (awk "{ s += \$1 } END { print s }"))
+  .output());
+printf("markdown files %ld\n",
+       (long) root.walk().filter(%!(path) => path.str().endswith(".md"))
+         .len());
+root.remove_tree();
+printf("cleaned %s\n", root.exists() ? "no" : "yes");

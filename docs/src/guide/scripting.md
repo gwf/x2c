@@ -12,9 +12,27 @@ files and directories. Include them explicitly:
 Both keep to ordinary values. A command is a `List`, a path is a `String`,
 and every failure is an [`Error`](exceptions.md) that a `catch` can select.
 
-## Run a file as a script
+## Write a script
 
-`x2c script` runs a source file the way an interpreter would. The first run
+A source file whose first line is a shebang is a script. It includes both
+modules automatically and may put statements at file scope, which run in
+order as the program:
+
+```x2c
+#!/usr/bin/env -S x2c script
+String branch = %(git rev-parse --abbrev-ref HEAD).output().strip("\n");
+foreach (String file, %(git diff --name-only).lines())
+  printf("%s: %s\n", branch, file);
+```
+
+`args` holds the arguments after the script's name as `String`s. Functions,
+types, and macros written between the statements work as they do in any
+file. A command that fails and is not caught ends the script with the
+command's status. The
+[language reference](../reference/language.md#script-units) lists what stays
+at file scope.
+
+`x2c script` runs the file the way an interpreter would. The first run
 builds it; later runs start the cached executable in a few milliseconds
 until the script or something it uses changes:
 
@@ -22,13 +40,8 @@ until the script or something it uses changes:
 x2c script tools/release-notes.x v0.12.0
 ```
 
-Give the file a shebang line and an executable mode to run it by name:
-
-```sh
-#!/usr/bin/env -S x2c script
-```
-
-Every argument after the file reaches the program unchanged. The
+With an executable mode, the shebang runs it by name. Every argument after
+the file reaches the program unchanged. The
 [command reference](../reference/cli.md#run-a-script) describes the cache
 and exactly what makes a script build again.
 

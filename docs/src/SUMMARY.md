@@ -58,6 +58,7 @@
     - [lib/path.x](library/modules/path.md)
     - [lib/process.x](library/modules/process.md)
     - [lib/scope.x](library/modules/scope.md)
+    - [lib/scripting.x](library/modules/scripting.md)
     - [lib/split.x](library/modules/split.md)
     - [lib/string-classify.x](library/modules/string-classify.md)
     - [lib/string-number.x](library/modules/string-number.md)

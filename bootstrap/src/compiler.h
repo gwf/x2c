@@ -65,6 +65,7 @@ typedef struct Compiler{
   String fn_name;
   Diagnostics diagnostics;
   Array braces, import_stack;
+  String script;
   Lisp macro_lisp;
   String import_src;
   int borrowed_lisp;
@@ -144,6 +145,8 @@ List Compiler_anchor_origin(Compiler compiler, List node, Token token);
 int Compiler__at_function_arrow(Compiler compiler);
 
 void Compiler__skip_shallow_expression(Compiler compiler, int stop_at_comma);
+
+void Compiler_skip_script_statement(Compiler c);
 
 Var Compiler_freeze_declaration_syntax(Compiler compiler, Var syntax);
 

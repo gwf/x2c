@@ -14,9 +14,8 @@ compiler](../internals/building.md) covers the self-host stages behind it.
 An `.x` file combines declarations and definitions. Translation produces a
 header and a C source file.
 
-A first line that begins with `#!` is ignored, so a source file can be an
-executable [script](cli.md#run-a-script). Line and column numbers are
-unchanged.
+A source file whose first line begins with `#!` is a
+[script unit](#script-units); every other file is an ordinary unit.
 
 `#pragma private` marks the start of implementation-only content. Declarations
 before it may be emitted to the generated header. A function definition also
@@ -39,6 +38,52 @@ the semantic environment or generated runtime dependency.
 Optional modules shipped with x2c are outside that prelude. They require an
 explicit source include, such as `#include "typed-array.x"`. Third-party code
 uses the package `import` described below.
+
+### Script units
+
+A script unit is a source file whose first line begins with `#!`, usually
+`#!/usr/bin/env -S x2c script` so that [`x2c script`](cli.md#run-a-script)
+runs it. The compiler reads that first line as `#include "scripting.x"`,
+which brings in `path.x` and `process.x`. Every other line keeps its line
+number.
+
+A script unit may write statements at file scope. These top-level forms
+stay at file scope:
+
+- preprocessor lines, `import`, and protocol declarations and adoptions;
+- `macro` and `keyword` definitions, top-level `$(...)` Lisp, and
+  invocations of macros and keyword aliases whose result is file-scope
+  syntax, including decorators of functions and types;
+- `typedef`, `static`, and `extern` declarations and static assertions;
+- type definitions such as `struct Point { int x; };` and classes;
+- function definitions, including expression-bodied ones, and prototypes,
+  meaning declarations that end with a parameter list.
+
+Every other top-level form is a statement, including declarations with an
+initializer or none, such as `int total = 0;` or `Point p;`. The statements,
+in source order, become the body of a function that `main` calls with
+`argc`, `argv`, and `args`, a `List` of the argument `String`s after
+`argv[0]`. Statements can use functions and types declared anywhere in the
+file. The declarations among them are locals of that body, so functions
+cannot name them, although lambdas capture them as usual. Write `static` for
+a variable that functions share.
+
+Falling off the end of the statements returns zero, and `return` among them
+sets the exit status. A `<cmd-fail>` that no statement catches prints the
+command and its status on standard error, and that status becomes the exit
+status. A script unit with no top-level statements gets no generated `main`,
+so it defines its own like any program. The `--cpp-symbols` and
+`--live-symbols` modes run the host preprocessor over the file as written,
+where the `#!` line is not C, so they do not accept script units.
+
+```x2c
+#!/usr/bin/env -S x2c script
+static String greeting(String name) => %"hello, $name";
+
+String name = args ? args.car().string() : %"world";
+printf("%s\n", greeting(name));
+if (!args) return 1;
+```
 
 ## Packages and `import`
 

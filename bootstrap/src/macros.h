@@ -53,6 +53,8 @@ List Compiler_publish_macro_definition_node(Compiler compiler, List node);
 
 void Compiler_parse_keyword_definition(Compiler c);
 
+int Compiler_macro_targets_unit(Compiler compiler);
+
 int Compiler_keyword_alias_starts_target_at(Compiler compiler, AstPos position);
 
 int Compiler_keyword_alias_needs_shallow_expansion(Compiler compiler);
