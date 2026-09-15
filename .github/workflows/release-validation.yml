@@ -35,37 +35,6 @@ jobs:
       - name: Install outside checkout and verify native self-rebuild
         run: make ape-verify
 
-  # The release tarball's own proof is the install-script check, so it does
-  # not wait on the example and package checks above.
-  release-artifacts:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y clang make python3 git diffutils
-      - name: Select Clang host preprocessor
-        run: |
-          mkdir -p "$RUNNER_TEMP/x2c-clang"
-          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
-          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
-      - name: Build from checked-in bootstrap
-        run: make build-safe
-      - name: Build the release tarball and check the install script
-        run: tools/check-install-script.sh
-      - name: Write the package index with the source packages
-        run: |
-          python3 tools/gen-package-index.py --output dist/index \
-            --base "https://github.com/gwf/x2c/releases/download/v$(builds/0/x2c --version | cut -d' ' -f2)" \
-            --package-dir examples/packages --package-dir packages
-      - name: Keep the release tarball and index
-        uses: actions/upload-artifact@v4
-        with:
-          name: x2c-release-${{ runner.os }}-${{ runner.arch }}
-          path: |
-            dist/x2c-*.tar.gz
-            dist/x2c-*.tar.gz.sha256
-            dist/index
-
   packages:
     runs-on: ubuntu-latest
     strategy:
@@ -99,15 +68,6 @@ jobs:
         run: make build-safe
       - name: Prepare fresh dependency and run package tests and examples
         run: make -C packages/${{ matrix.package }} ${{ matrix.targets }}
-      - name: Bundle the package for this platform
-        if: matrix.package != 'raylib'
-        run: make -C packages/${{ matrix.package }} bundle
-      - name: Keep the bundle
-        if: matrix.package != 'raylib'
-        uses: actions/upload-artifact@v4
-        with:
-          name: bundle-${{ matrix.package }}-${{ runner.os }}-${{ runner.arch }}
-          path: packages/${{ matrix.package }}/builds/bundle/*-native.tar.gz
       - name: Run HTTP and JSON composition
         if: matrix.package == 'libcurl'
         run: make -C examples/packages/http-json-releases test

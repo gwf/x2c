@@ -135,7 +135,7 @@ jobs:
           ./builds/0/x2c run examples/foreach.x
       - name: Keep the build log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: msys2-bootstrap-log
           path: debug/bootstrap.log

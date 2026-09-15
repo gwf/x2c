@@ -52,7 +52,7 @@ jobs:
       - name: Build the release tarball and check the install script
         run: tools/check-install-script.sh
       - name: Keep the release tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: compiler-${{ matrix.os }}
           path: |
@@ -100,7 +100,7 @@ jobs:
             packages/torch/builds/bundle/torch-native.tar.gz \
             packages/torch/examples/fit-line.x
       - name: Keep the bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bundle-${{ matrix.package }}-${{ matrix.os }}
           path: packages/${{ matrix.package }}/builds/bundle/*-native.tar.gz
@@ -117,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Collect the built assets
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: built
       - name: Assemble the release directory and package index
@@ -144,7 +144,7 @@ jobs:
           ls -l release
           cat release/index.txt
       - name: Keep the assembled release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release
           path: release
