@@ -3,47 +3,47 @@
 
 (preproc "#include <stdio.h>")
 
-(typedef (int) (bindings (bind (binding 1 "MacroDynamicOwner") ())))
+(typedef (int) (bindings (bind (binding 4 "MacroDynamicOwner") ())))
 
 (macrodef <macro dynamic>)
 
 (macrodef <macro literal_owner>)
 
 (function (inline "Var") 
- (bind (binding 4 "MacroDynamicOwner_var") 
+ (bind (binding 7 "MacroDynamicOwner_var") 
   ((fnmod 
     (params 
-     (param ("MacroDynamicOwner") (bind (binding 3 "_x2c_macro_value_0") ())))))) 
+     (param ("MacroDynamicOwner") (bind (binding 6 "_x2c_macro_value_0") ())))))) 
  (block 
   (at 3 (return ("Var") 
          (expr ("Var") 
           (call (expr ((func (("Symbol") (...))) "Var") 
-                 (ident (binding 2 "Var_new"))) 
+                 (ident (binding 5 "Var_new"))) 
            (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-            (expr ("MacroDynamicOwner") (ident (binding 3 "_x2c_macro_value_0"))))))))))
+            (expr ("MacroDynamicOwner") (ident (binding 6 "_x2c_macro_value_0"))))))))))
 
 (function (inline "Var") 
- (bind (binding 6 "MacroDynamicOwner_box") 
+ (bind (binding 9 "MacroDynamicOwner_box") 
   ((fnmod 
     (params 
-     (param ("MacroDynamicOwner") (bind (binding 5 "_x2c_macro_value_1") ())))))) 
+     (param ("MacroDynamicOwner") (bind (binding 8 "_x2c_macro_value_1") ())))))) 
  (block 
   (at 4 (return ("Var") 
          (expr ("Var") 
           (call (expr ((func (("Symbol") (...))) "Var") 
-                 (ident (binding 2 "Var_new"))) 
+                 (ident (binding 5 "Var_new"))) 
            (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-            (expr ("MacroDynamicOwner") (ident (binding 5 "_x2c_macro_value_1"))))))))))
+            (expr ("MacroDynamicOwner") (ident (binding 8 "_x2c_macro_value_1"))))))))))
 
 (function (int) 
- (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 10 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 5 (declare ("Var") 
          (bindings 
-          (op = (bind (binding 8 "value") ()) 
+          (op = (bind (binding 11 "value") ()) 
            (expr ("Var") 
             (call (expr ((func (("MacroDynamicOwner"))) ("Var")) 
-                   (ident (binding 4 "MacroDynamicOwner_var"))) 
+                   (ident (binding 7 "MacroDynamicOwner_var"))) 
              (args (expr ("MacroDynamicOwner") 
                     (parens 
                      (expr ("MacroDynamicOwner") 
@@ -51,10 +51,10 @@
                        (expr (int) (literal (int) "42"))))))))))))) 
   (at 6 (declare ("Var") 
          (bindings 
-          (op = (bind (binding 9 "boxed") ()) 
+          (op = (bind (binding 12 "boxed") ()) 
            (expr ("Var") 
             (call (expr ((func (("MacroDynamicOwner"))) ("Var")) 
-                   (ident (binding 6 "MacroDynamicOwner_box"))) 
+                   (ident (binding 9 "MacroDynamicOwner_box"))) 
              (args (expr ("MacroDynamicOwner") 
                     (parens 
                      (expr ("MacroDynamicOwner") 
@@ -62,14 +62,14 @@
                        (expr (int) (literal (int) "43"))))))))))))) 
   (at 7 (stmnt 
          (expr () 
-          (call (expr () (ident (binding 10 "printf"))) 
+          (call (expr () (ident (binding 13 "printf"))) 
            (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
             (expr (int) 
-             (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
-              (args (expr ("Var") (ident (binding 8 "value")))))) 
+             (call (expr ((func (("Var"))) (int)) (ident (binding 14 "Var_int"))) 
+              (args (expr ("Var") (ident (binding 11 "value")))))) 
             (expr (int) 
-             (call (expr ((func (("Var"))) (int)) (ident (binding 11 "Var_int"))) 
-              (args (expr ("Var") (ident (binding 9 "boxed"))))))))))) 
+             (call (expr ((func (("Var"))) (int)) (ident (binding 14 "Var_int"))) 
+              (args (expr ("Var") (ident (binding 12 "boxed"))))))))))) 
   (at 8 (return (int) 
          (expr (int) 
           (op ? (expr (int) 
@@ -78,14 +78,14 @@
                    (op == 
                     (expr (int) 
                      (call (expr ((func (("Var"))) (int)) 
-                            (ident (binding 11 "Var_int"))) 
-                      (args (expr ("Var") (ident (binding 8 "value")))))) 
+                            (ident (binding 14 "Var_int"))) 
+                      (args (expr ("Var") (ident (binding 11 "value")))))) 
                     (expr (int) (literal (int) "42")))) 
                   (expr (int) 
                    (op == 
                     (expr (int) 
                      (call (expr ((func (("Var"))) (int)) 
-                            (ident (binding 11 "Var_int"))) 
-                      (args (expr ("Var") (ident (binding 9 "boxed")))))) 
+                            (ident (binding 14 "Var_int"))) 
+                      (args (expr ("Var") (ident (binding 12 "boxed")))))) 
                     (expr (int) (literal (int) "43")))))) 
            (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

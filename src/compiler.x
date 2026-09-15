@@ -24,10 +24,14 @@ typedef struct Diagnostics *Diagnostics;
 /** Holds scope-owned generated-name state shared by related compilers.
 
     `Compiler.new` initializes every valid instance; callers borrow it from
-    the compiler rather than constructing or freeing it.
+    the compiler rather than constructing or freeing it. `next_binding` is
+    the last binding identity issued in the translation unit: collection,
+    shadow, package, and full-parse compilers all draw from it, so a binding
+    number names one declaration across every symbol table in the unit.
 */
 typedef struct GenNames {
   Map counters, adapters;
+  int next_binding;
 } *GenNames;
 
 /** Holds the three mutable maps that form one lexical semantic scope.
@@ -159,7 +163,7 @@ void Compiler.merge_translation_dependencies(
 
 typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts;
-  int base_scopes, next_binding, local_macro_names;
+  int base_scopes, local_macro_names;
   // Owning compiler, so type resolution can report its own diagnostics.
   Compiler compiler;
 } *Sym;
@@ -1692,7 +1696,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   transaction.counters = c.names.counters;
   transaction.statics = c.sym.statics;
   transaction.binding_facts = c.semantic_binding_facts();
-  transaction.next_binding = c.sym.next_binding;
+  transaction.next_binding = c.names.next_binding;
   transaction.local_macro_names = c.sym.local_macro_names;
   transaction.initializer_name = c.init_fn;
   transaction.shutdown_name = c.fini_fn;
@@ -1759,7 +1763,7 @@ void SymTxn.rollback(SymTxn transaction) {
     *scope = transaction.scope;
     _.sym.statics = transaction.statics;
     _.sym.binding_facts = transaction.binding_facts;
-    _.sym.next_binding = transaction.next_binding;
+    _.names.next_binding = transaction.next_binding;
     _.sym.local_macro_names = transaction.local_macro_names;
     _.names.counters = transaction.counters;
     _.init_fn = transaction.initializer_name;
@@ -1779,7 +1783,6 @@ static void _semantic_reset(Sym sym, Map base, Map globals, int overlay) {
   sym.globals = (void *) globals != NULL ? globals : %{};
   sym.statics = %{};
   sym.base_scopes = overlay ? 2 : 1;
-  sym.next_binding = 0;
   sym.local_macro_names = 0;
   sym.binding_facts = %{};
   if (overlay) {
@@ -1915,11 +1918,10 @@ void Sym.set(Sym sym, List key, List type) {
 }
 
 static List _semantic_new_binding(Sym sym, List key) {
-  sym.next_binding++;
+  int identity = ++sym.compiler.names.next_binding;
   Var name = key.last();
-  List binding = binding_identity_new(sym.next_binding, name.str());
-  sym.binding_facts[%(known ${sym.next_binding})] =
-    name;
+  List binding = binding_identity_new(identity, name.str());
+  sym.binding_facts[%(known $identity)] = name;
   return binding;
 }
 

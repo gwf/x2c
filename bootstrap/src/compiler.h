@@ -15,6 +15,7 @@ typedef struct Diagnostics * Diagnostics;
 
 typedef struct GenNames{
   Map counters, adapters;
+  int next_binding;
 }
 * GenNames;
 

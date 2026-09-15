@@ -207,12 +207,9 @@ static int _is_protocol_bootstrap_function(String spelling) =>
          spelling == "x2c_register_builtin_descriptor" ||
          spelling == "x2c_try_register_tagged_descriptor";
 
-/* A binding number is unique only within the symbol table that issued it.
-   Generated adapters collected by one table sit beside declarations bound
-   by another in the same unit, so a function is keyed by its number and
-   spelling together, which one unit cannot repeat. */
-static String _cache_function_key(Var identity, String spelling) =>
-  %"${identity.integer()}:$spelling";
+/* A binding number names one declaration across the whole unit. */
+static String _cache_function_key(Var identity) =>
+  %"${identity.integer()}";
 
 static void _collect_cache_function_refs(
   Var value, String caller, Map callers, int *uses_cache) {
@@ -223,8 +220,8 @@ static void _collect_cache_function_refs(
       *uses_cache = 1;
       return;
     }
-    case %(ident (binding ?callee ?(String spelling))): {
-      String key = _cache_function_key(callee, spelling);
+    case %(ident (binding ?callee ?)): {
+      String key = _cache_function_key(callee);
       List found = callers.contains(key) ? callers[key].list() : NULL;
       callers[key] = cons(caller, found);
       return;
@@ -243,8 +240,8 @@ static Map _cache_reachable_function_ids(List source) {
   foreach (List func, source)
     match (func)
       case %(!set ?definition
-             (function ? (bind (binding ?identity ?(String spelling)) ?) ?)): {
-        String key = _cache_function_key(identity, spelling);
+             (function ? (bind (binding ?identity ?) ?) ?)): {
+        String key = _cache_function_key(identity);
         int uses_cache = 0;
         _collect_cache_function_refs(definition, key, callers, &uses_cache);
         if (uses_cache) queue.push(key);
@@ -295,7 +292,7 @@ static List _file_init(Compiler c, List source) {
                (!set ?declarator
                (bind (binding ?identity ?spelling) ?))
                (block *statements))): {
-        String function_key = _cache_function_key(identity, spelling);
+        String function_key = _cache_function_key(identity);
         if (!inserted) {
           result = _prepend_init_prelude(result, initGuard, initFunc);
           inserted = 1;

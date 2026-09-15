@@ -4,12 +4,12 @@
 (import "geo" "geo")
 
 (function (int) 
- (bind (binding 2 "package_type_is") 
-  ((fnmod (params (param ("Var") (bind (binding 1 "value") ())))))) 
+ (bind (binding 61 "package_type_is") 
+  ((fnmod (params (param ("Var") (bind (binding 60 "value") ())))))) 
  (block 
   (at 1 (return (int) 
          (expr (int) 
           (call (expr ((func (("Var") ("Symbol"))) int) 
-                 (ident (binding 3 "Var_is"))) 
-           (args (expr ("Var") (ident (binding 1 "value"))) 
+                 (ident (binding 62 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 60 "value"))) 
             (expr ("Symbol") "492847477062"))))))))
