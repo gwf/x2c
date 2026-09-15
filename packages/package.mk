@@ -24,6 +24,12 @@ endif
 
 ROOT ?= ../..
 X2C ?= $(ROOT)/builds/0/x2c
+
+# Pinned digests live in .sha256 manifests, checked with this, rather than
+# as literals inside a recipe. Apple's make 3.81 on x86_64 drops bytes from
+# a long continued recipe line, so an embedded 64-character digest can
+# reach the shell corrupted and fail a package that is in fact correct.
+CHECK_SHA256 = shasum -a 256 -c --quiet --strict
 PACKAGE_SUPPORT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 # Translation flags; PACKAGE_C_FLAGS and PACKAGE_LINK are set per package.

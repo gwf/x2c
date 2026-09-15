@@ -4,14 +4,9 @@ include ../package.mk
 
 LIBUV_INCLUDE := $(LIBUV_PREFIX)/include
 LIBUV_STATIC := $(LIBUV_PREFIX)/lib/libuv.a
+LIBUV_HEADERS := headers-darwin.sha256
 ifeq ($(shell uname -s),Linux)
-LIBUV_PLATFORM_HEADER := linux.h
-LIBUV_PLATFORM_SHA256 := \
-	adce0ed0821c8466a87a0a4c9e0df9ea7e4a4b24d099c7d7ed196f72a13f669d
-else
-LIBUV_PLATFORM_HEADER := darwin.h
-LIBUV_PLATFORM_SHA256 := \
-	222b6dd3ce67cfbb735b14b1662f065fc23570d6969acf463b39d946b7590d8c
+LIBUV_HEADERS := headers-linux.sha256
 endif
 
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(LIBUV_INCLUDE)
@@ -49,32 +44,10 @@ $(PACKAGE_ARCHIVE): | verify-profile
 verify-profile: verify-dependency check-profile verify-headers verify-licenses
 
 verify-headers: $(DEPENDENCY_PREREQUISITE)
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv.h" | cut -d' ' -f1)" = \
-	  bb9ed99b80cd22c58361bffdfbb2aa7029ce0391cde616745c0072a6f3c03219
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/errno.h" | cut -d' ' -f1)" = \
-	  4242edf790e4569ef349026ab4c6e31093334ee5fc02b16ed7a0d9fbacdffd16
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/version.h" | cut -d' ' -f1)" = \
-	  a859f2c21f7887d45b0372109ebc91759a6f8c408c7cbf2a12f9bbe579be403b
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/threadpool.h" | cut -d' ' -f1)" = \
-	  09ae41099af710289155be012df45c2fce04da6a02e813278b4558935e645938
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/unix.h" | cut -d' ' -f1)" = \
-	  06ccd9e0f3f312b610a7e7a8ff16596988e02796e7a0c81a62e29d5f6abe4613
-	@test "$$(shasum -a 256 "$(LIBUV_INCLUDE)/uv/$(LIBUV_PLATFORM_HEADER)" | cut -d' ' -f1)" = \
-	  $(LIBUV_PLATFORM_SHA256)
+	@cd "$(LIBUV_INCLUDE)" && $(CHECK_SHA256) $(CURDIR)/$(LIBUV_HEADERS)
 
 verify-licenses:
-	@test "$$(shasum -a 256 LICENSES/libuv-1.52.1-MIT.txt | \
-	  cut -d' ' -f1)" = \
-	  16de0c32b265cb7d46a6d3bd614f259dd4d693a5e26b3407b04aae8d73041f0c
-	@test "$$(shasum -a 256 LICENSES/libuv-1.52.1-extra.txt | \
-	  cut -d' ' -f1)" = \
-	  262c44bd2cdba037e6d2a82fba15f5800d292bc993a6f5d6b6ea487744d02836
-	@test "$$(shasum -a 256 LICENSES/libuv-1.52.1-BSD-2-Clause.txt | \
-	  cut -d' ' -f1)" = \
-	  ba661d1dfdbcb6f30d5f7c583e219f595cd8ae4fefd9f8a45ac5526a1b8e6b75
-	@test "$$(shasum -a 256 LICENSES/libuv-1.52.1-ISC-notices.txt | \
-	  cut -d' ' -f1)" = \
-	  9c3e698639860bd6c45ff70ed43c0c1bba45f3503e5bf527f67d376e9f3175d5
+	@$(CHECK_SHA256) licenses.sha256
 
 verify-linkage: builds/process-report
 	python3 ../tools/check-linkage.py --package libuv builds/process-report

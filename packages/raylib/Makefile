@@ -15,8 +15,8 @@ PACKAGE_LINK := $(RAYLIB_LIBRARY) -l pthread
 
 SHORT_PNG := builds/climate-trends.png
 SHEET_PNG := builds/texture-sheet.png
-SHORT_SHA256 := 6b84cd531131f426a66df4df7bc80bf9c63f466ee3d508a62dbae25206233894
-SHEET_SHA256 := 191db3d0b232681db4aa9822863efcfd6771d03908e9c33a45087d475414a54b
+SHORT_PNG_HEAD := 89504e470d0a1a0a0000000d49484452000005a000000280
+SHEET_PNG_HEAD := 89504e470d0a1a0a0000000d494844520000038400000258
 
 # The windowed profile. `make run-interactive` prepares it, rebuilds the
 # package against it, and opens a real window; nothing else uses it, because
@@ -40,21 +40,13 @@ run: builds/climate-trends builds/texture-sheet
 
 # PNG signature, IHDR length and tag, then width and height big-endian.
 verify: verify-headers run test builds/live-chart
-	@test "$$(od -An -tx1 -N24 $(SHORT_PNG) | tr -d '[:space:]')" = \
-	  "89504e470d0a1a0a0000000d49484452000005a000000280"
-	@test "$$(od -An -tx1 -N24 $(SHEET_PNG) | tr -d '[:space:]')" = \
-	  "89504e470d0a1a0a0000000d494844520000038400000258"
-	@test "$$(shasum -a 256 $(SHORT_PNG) | cut -d' ' -f1)" = \
-	  "$(SHORT_SHA256)"
-	@test "$$(shasum -a 256 $(SHEET_PNG) | cut -d' ' -f1)" = \
-	  "$(SHEET_SHA256)"
+	@./verify-renders.sh $(SHORT_PNG) $(SHORT_PNG_HEAD) \
+	  $(SHEET_PNG) $(SHEET_PNG_HEAD)
+	@$(CHECK_SHA256) renders.sha256
 	@file $(SHORT_PNG) $(SHEET_PNG)
 
 verify-headers: $(DEPENDENCY_PREREQUISITE)
-	@test "$$(shasum -a 256 $(RAYLIB_INCLUDE)/raylib.h | cut -d' ' -f1)" = \
-	  047e7255f93f8c34039cab906ad76136706b5c7b4c5b5b065d84141963ee9b6b
-	@test "$$(shasum -a 256 $(RAYLIB_INCLUDE)/raymath.h | cut -d' ' -f1)" = \
-	  2b8b88f5b3f748e3cf8bdbfb8b7da23a76c755dc40f9c6e455bfc09b3669d028
+	@cd $(RAYLIB_INCLUDE) && $(CHECK_SHA256) $(CURDIR)/headers.sha256
 
 # live-chart keeps the larger shared chart for the explicit windowed demo.
 CHART := examples/chart.x

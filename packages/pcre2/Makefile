@@ -29,10 +29,7 @@ run-lisp: builds/inline-lisp
 	./builds/inline-lisp
 
 verify-headers: $(DEPENDENCY_PREREQUISITE)
-	@test "$$(shasum -a 256 $(PCRE2_INCLUDE)/pcre2.h | cut -d' ' -f1)" = \
-	  20d70c58a3b1f205836ceade32af6179a887f24749b8036620f079919d37b11e
-	@test "$$(shasum -a 256 $(PCRE2_INCLUDE)/pcre2posix.h | cut -d' ' -f1)" = \
-	  4e3f99d21b10f3168fa562c6345e2b387a1a83f8bd2a35784b2832f4dc4d9444
+	@cd $(PCRE2_INCLUDE) && $(CHECK_SHA256) $(CURDIR)/headers.sha256
 
 builds/request-report: examples/request-report.x $(PACKAGE_ARCHIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/request \
