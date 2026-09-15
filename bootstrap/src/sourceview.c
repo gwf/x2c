@@ -303,8 +303,6 @@ int Map_try_get(Map, Var, Var *);
 
 int File_stat(File, struct stat *);
 
-int File_close(File);
-
 String File_string_close(File);
 
 Var Symbol_var(Symbol);

@@ -268,8 +268,6 @@ int ast_changes_left_operand(Symbol op){
 
 Var Array_push(Array, Var);
 
-size_t Array_len(Array);
-
 Var Array_take_last(Array);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -472,7 +470,6 @@ return List_cdr(ast);
 int List_len(List);
 int List_try_next(List, List *, Var *);
 Var List_getindex(List, int);
-void Array_free(Array);
 List Ast_initializer_functions(Ast ast, List * source){
   if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, & header);  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_31, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
     List choice;  List _x2c_macro_object_1 = cases;  List _x2c_macro_cursor_2 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_0)){

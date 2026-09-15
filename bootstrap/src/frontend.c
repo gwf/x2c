@@ -120,8 +120,6 @@ Var Symbol_var(Symbol);
 
 int File_stat(File, struct stat *);
 
-int File_close(File);
-
 String File_string_close(File);
 
 static String _read_input_text(Compiler compiler, String filename){
@@ -534,8 +532,6 @@ List Compiler_full_parse(Compiler, Map, int);
 int Array_try_next(Array, int *, Var *);
 
 Var Array_push(Array, Var);
-
-void Array_free(Array);
 
 int ParsedUnit_parse(ParsedUnit * unit){
   Compiler compiler = unit -> compiler;

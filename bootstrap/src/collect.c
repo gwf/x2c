@@ -437,8 +437,6 @@ int Array_try_next(Array, int *, Var *);
 
 int String_equal(String, String);
 
-void Array_free(Array);
-
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
   * covered = 0;
   if(String_startswith(target, _89)) return _includable_file(sources, target) ? target : NULL;
@@ -775,13 +773,9 @@ static void _walk_cold(Compiler c, String target, String canonical, Map globs, M
   _file(c, canonical, text, x2c_path_dir(canonical), globs, visited);
 }
 
-size_t Array_len(Array);
-
 String String_join(String, List);
 
 List Array_list(Array);
-
-void Array_clear(Array);
 
 Compiler Compiler_new_shared(Compiler);
 
@@ -790,8 +784,6 @@ int String_endswith(String, String);
 void Compiler_tokenize(Compiler, char *);
 
 String SourceView_path(String);
-
-size_t Bytes_len(Bytes);
 
 void Compiler_shallow_parse_overlay(Compiler, Map, Map);
 
@@ -1900,8 +1892,6 @@ static int _write_interface_entry(File output, String canonical, List entry){
   List record = cons(_63, cons(_64, cons(String_var(_portable_path(canonical)), cons(hash, cons(List_var(part_list), cons(List_var(definitions), cons(List_var(dependency_list), NULL)))))));
   return snapshot_write_var(output, List_var(record)) && File_putc(output, '\n') != EOF;
 }
-
-int File_close(File);
 
 void interface_write(Compiler compiler, String path){
   if(! _init_guard_) _file_init_();
