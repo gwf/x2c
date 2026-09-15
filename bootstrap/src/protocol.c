@@ -1719,7 +1719,7 @@ static List _native_requirement(String member, String native, Type template, Str
 
 Map Sym_global_symbols(Sym);
 static Type _participant_definition(Compiler compiler, Type participant){
-  if(! Type_is_bare_typedef_name(participant)) return NULL;  String name = Var_str(List_car(Type_list(participant)));  Var definition = Map_getindex(Sym_global_symbols(compiler -> sym), List_var(cons(_30, cons(String_var(name), NULL))));  return List_type(Var_is_row(definition, 9, 7, 4) ? Var_list(definition) : NULL);
+  if(! Type_is_bare_typedef_name(participant)) return NULL;  String name = Var_str(List_car(Type_list(participant)));  Var definition = Map_getindex(Sym_global_symbols(compiler -> sym), List_var(cons(_30, cons(String_var(name), NULL))));  return Var_is_row(definition, 9, 7, 4) ? List_type(Var_list(definition)) : NULL;
 }
 
 List Sym_define_global(Sym, List, List);
@@ -2291,7 +2291,7 @@ static List _proto_cached(Compiler compiler, Var key, Func compute){
     }
     );
   }
-  ));  Map_setindex(compiler -> proto_cache, key, List_var(List_truth(result) ? result : 0));  return result;
+  ));  Map_setindex(compiler -> proto_cache, key, List_truth(result) ? List_var(result) : int_var(0));  return result;
 }
 
 static List _ordered_occurrences(Compiler compiler){
@@ -2556,7 +2556,7 @@ static List Compiler__generate_protocol_function(Compiler compiler, String name,
   List function_binding = Sym_reference(compiler -> sym, cons(String_var(name), NULL), NULL);
   if(make_static) function_binding = Sym_introduce(compiler -> sym, name);
   if(binding_out) * binding_out = function_binding;
-  List storage = make_static ? cons(_187, cons(_545, List_append(Type_list(target_result), NULL))) : target_result;
+  List storage = make_static ? cons(_187, cons(_545, List_append(Type_list(target_result), NULL))) : Type_list(target_result);
   List function = cons(_22, cons(List_var(storage), cons(List_var(cons(_4, cons(List_var(function_binding), cons(List_var(cons(List_var(cons(_531, cons(List_var(cons(_532, List_append(declarations, NULL))), NULL))), NULL)), NULL)))), cons(List_var(cons(_529, cons(List_var(cons(_530, cons(List_var(target_result), cons(List_var(result), NULL)))), NULL))), NULL))));
   Array_free(parameter_bindings);
   return function;
@@ -2586,7 +2586,7 @@ static List _declaration_from_signature(Compiler compiler, String name, Type sig
 
   }
   List binding = Sym_reference(compiler -> sym, cons(String_var(name), NULL), NULL);
-  List storage = make_static ? cons(_187, List_append(Type_list(result), NULL)) : result;
+  List storage = make_static ? cons(_187, List_append(Type_list(result), NULL)) : Type_list(result);
   List declaration = cons(_31, cons(List_var(storage), cons(List_var(cons(_40, cons(List_var(cons(_4, cons(List_var(binding), cons(List_var(cons(List_var(cons(_531, cons(List_var(cons(_532, List_append(Array_list_free(declarations), NULL))), NULL))), NULL)), NULL)))), NULL))), NULL)));
   return declaration;
 }

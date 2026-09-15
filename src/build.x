@@ -895,14 +895,20 @@ static uint64_t _script_fingerprint(
   return hash;
 }
 
-/** Moves a script's built executable to `executable` and records what it was
-    built from, so `CliRequest.script_current` can reuse it. The record lists
+/** Moves a script's built executable, and its debug symbols on macOS, to
+    `executable` and records what it was built from, so
+    `CliRequest.script_current` can reuse it. The record lists
     the script's translation and compile prerequisites, package archives, and
     the runtime archive.
     Raises: `<io-fail>` when the executable cannot be moved.
 */
 void Build.publish_script(Build b, String executable) {
   b.output.move_to(executable);
+  if (_mapped_debug(b)) {
+    String symbols = %"$executable.dSYM";
+    symbols.remove_tree();
+    %"${b.output}.dSYM".move_to(symbols);
+  }
   String input = b.request.inputs.car();
   Array prerequisites = %[];
   String translation = %"${b.gen_root}/${_key(input)}/${input.stem()}.d";

@@ -356,8 +356,8 @@ Type Type_scalar(Type type){
 
   }
   if(! count || sign_count > 1 || shorts > 1 || longs > 2 || ints > 1 || chars > 1 || floats > 1 || doubles > 1 || voids > 1) return NULL;
-  if(voids) return List_type(count == 1 ? _62 : NULL);
-  if(floats) return List_type(count == 1 ? _64 : NULL);
+  if(voids) return count == 1 ? List_type(_62) : NULL;
+  if(floats) return count == 1 ? List_type(_64) : NULL;
   if(doubles){
     if(doubles == 1 && longs <= 1 && count == doubles + longs) return List_type(longs ? _68 : _67);
     return NULL;
@@ -488,7 +488,7 @@ static Type _integer_literal_type(unsigned long long value, int decimal, int is_
   if(is_unsigned && longs == 1) return List_type(value <= ULONG_MAX ? _79 : _81);
   if(! is_unsigned && longs == 2){
     if(value <= LLONG_MAX) return List_type(_80);
-    return decimal ? NULL : _81;
+    return decimal ? NULL : List_type(_81);
   }
   return List_type(_81);
 }

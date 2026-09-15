@@ -71,10 +71,12 @@ a variable that functions share.
 Falling off the end of the statements returns zero, and `return` among them
 sets the exit status. A `<cmd-fail>` that no statement catches prints the
 command and its status on standard error, and that status becomes the exit
-status. A script unit with no top-level statements gets no generated `main`,
-so it defines its own like any program. The `--cpp-symbols` and
+status. Any other uncaught `Error` prints its cause and details on standard
+error and exits with status 1. A script unit with no top-level statements
+gets no generated `main`, so it defines its own like any program; defining
+`main` beside top-level statements is an error. The `--cpp-symbols` and
 `--live-symbols` modes run the host preprocessor over the file as written,
-where the `#!` line is not C, so they do not accept script units.
+where the `#!` line is not C, so they report an error for a script unit.
 
 ```x2c
 #!/usr/bin/env -S x2c script
@@ -1462,7 +1464,10 @@ In operand position, `%` followed by a literal delimiter is the quoting sigil.
 The delimiter selects a literal grammar, which then decides how to read the
 contents. Quoting here means a parser-context change; it does not mean that
 every percent form contains unevaluated symbolic data. Binary `%` remains the
-modulo operator, and `%!` remains the lambda-literal prefix.
+modulo operator, and `%!` remains the lambda-literal prefix. A `%` after an
+operand, including a closing parenthesis, is the modulo operator, except
+after the parenthesized condition of `if`, `while`, `for`, or `switch`, where
+a statement begins: `if (dirty) %(git stash).run();` quotes.
 
 The collection and string literal forms are:
 

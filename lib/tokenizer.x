@@ -273,8 +273,35 @@ static int _token_ends_operand(Token token) {
   return 0;
 }
 
+/* True when `token` closes the condition of `if`, `while`, `for`, or
+   `switch`. A statement follows, so C allows no operator there. */
+static int _closes_control_condition(Tokenizer tokenizer, Token token) {
+  if (!token || token.type != <")">) return 0;
+  struct Token *first = (struct Token *) tokenizer.tokens;
+  int depth = 0;
+  for (Token scan = token; scan >= first; scan--) {
+    if (scan.type == <")">) depth++;
+    else if (scan.text && scan.text.endswith("(")) depth--;
+    if (depth) continue;
+    do scan--;
+    while (scan >= first && (scan.type == <space> || scan.type == <comment>));
+    return scan >= first &&
+      (scan.type == <if> || scan.type == <while> || scan.type == <for> ||
+       scan.type == <switch>);
+  }
+  return 0;
+}
+
 static inline int _prev_token_ends_operand(Tokenizer tokenizer) =>
   _token_ends_operand(_significant_back(tokenizer, 0));
+
+/* After an operand `%` is modulo, except where a statement starts after a
+   control condition. */
+static inline int _percent_is_operator(Tokenizer tokenizer) {
+  Token token = _significant_back(tokenizer, 0);
+  return _token_ends_operand(token) &&
+         !_closes_control_condition(tokenizer, token);
+}
 
 /* After an operand, `<` opens a Symbol literal only in the comparison forms
    `OPERAND is <sym>` and `OPERAND is not <sym>`. */
@@ -301,11 +328,11 @@ static int Tokenizer._percent_tokens(Tokenizer t) {
   /* `%!` is one lambda-prefix token unless operand context makes `%` the
      modulo operator. The parser owns the following parameters and `=>`. */
   if (next == '!') {
-    if (_prev_token_ends_operand(t)) return t._operator(1);
+    if (_percent_is_operator(t)) return t._operator(1);
     return t.tokenize(2, Symbol.new_len(text, 2));
   }
   if (!opener) return 0;
-  if (_prev_token_ends_operand(t)) return t._operator(1);
+  if (_percent_is_operator(t)) return t._operator(1);
   if (next == '<' && text[2] != '<') return t.error();
   return t._operator(next == '<' ? 3 : 2);
 }

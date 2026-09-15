@@ -1328,10 +1328,25 @@ static List Emitter._goto(Emitter e, Var label_ast, List context) {
   return e._cleanup_wrap_exit(statement, cleanup_depth);
 }
 
+/* A pointer initialized with the address of a preserved local points at a
+   volatile object, so its pointee type must say so or C rejects dropping the
+   qualifier. */
+static Type Emitter._preserve_pointee(Emitter e, Type type, List bindings) {
+  match (bindings)
+    case %(bindings (op = (bind ? ((!quote *))) ?value)): {
+      String name = _addressed_identifier(value);
+      if (name && e.volatile_names.contains(name) &&
+          !type.flatten_all().contains(<volatile>))
+        return cons(<volatile>, type);
+    }
+  return type;
+}
+
 static List Emitter._declare_stmt(
   Emitter e, List ast, List context) {
   if (e.volatile_names && _is_automatic_declaration(ast)) {
     List (type, bindings) = ast.cdr();
+    type = e._preserve_pointee(type, bindings);
     if (_bindings_need_preservation(e, bindings) &&
         bindings.cdr().cdr()) {
       Array result = %[];

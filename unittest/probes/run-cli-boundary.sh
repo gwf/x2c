@@ -1257,5 +1257,27 @@ set -e
 [[ $fail_status == 7 ]] &&
   grep -Fq 'command (sh -c "exit 7") failed with status 7' "$SCRIPT/fail.stderr"
 
+cat >"$SCRIPT/missing.x" <<'EOF'
+#!/usr/bin/env -S x2c script
+String path = "/x2c-script-probe-missing";
+printf("%s", path.read_text());
+EOF
+set +e
+run_script "$SCRIPT/missing.x" >/dev/null 2>"$SCRIPT/missing.stderr"
+missing_status=$?
+"$X2C" translate --cpp-symbols --out-dir "$SCRIPT" "$SCRIPT/unit.x" \
+  >/dev/null 2>"$SCRIPT/cpp.stderr"
+cpp_status=$?
+set -e
+[[ $missing_status == 1 ]] &&
+  grep -Fq 'not-found ((operation open) (path "/x2c-script-probe-missing")' \
+    "$SCRIPT/missing.stderr"
+[[ $cpp_status == 1 ]] &&
+  grep -q 'script units use the default symbol collection' "$SCRIPT/cpp.stderr"
+if [[ $(uname) == Darwin ]]; then
+  run_script --source-map -g "$SCRIPT/unit.x" >/dev/null
+  [[ -d $(echo "$SCRIPT"/cache/scripts/unit-*/run.dSYM) ]]
+fi
+
 echo "CLI, dependency, build, run, script, manifest, and state probes:" \
-  "135 passed"
+  "138 passed"

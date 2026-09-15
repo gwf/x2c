@@ -1131,7 +1131,7 @@ static List _method_identity(Compiler compiler, List binding){
 Var List_car(List);
 Atom Atom_intern(String);
 static Type _self_owner_type(Compiler compiler, List method){
-  String source = Var_str(List_car(method));  Type declared = List_type(Sym_get(compiler -> sym, cons(String_var(source), NULL)));  if(Type_is_typedef(declared)) return List_type(cons(String_var(_package_type_reference(compiler, 0, source)), NULL));  Symbol builtin = Var_symbol(Atom_intern(source));  return List_type(Symbol_is_builtin_type(builtin) ? cons(Symbol_var(builtin), NULL) : NULL);
+  String source = Var_str(List_car(method));  Type declared = List_type(Sym_get(compiler -> sym, cons(String_var(source), NULL)));  if(Type_is_typedef(declared)) return List_type(cons(String_var(_package_type_reference(compiler, 0, source)), NULL));  Symbol builtin = Var_symbol(Atom_intern(source));  return Symbol_is_builtin_type(builtin) ? List_type(cons(Symbol_var(builtin), NULL)) : NULL;
 }
 
 int Map_truth(Map);
@@ -1657,7 +1657,7 @@ static List _direct_declarator(Compiler c, List * method_identity, Token * sourc
     Compiler_next(c);  List decl = _declarator(c, NULL, NULL, method_identity, source_first, source_after);  if(Compiler_peek(c, 0) != 83) Compiler_report_error(c, 33658058, _702, c -> token, NULL);  Compiler_next(c);  return decl;
   }
   if(Map_truth(c -> macro_holes)){
-    Symbol owner_token = Compiler_peek(c, 0);  String owner_spelling = c -> token -> text;  Type owner_type = List_type(String_truth(owner_spelling) ? Sym_get(c -> sym, cons(String_var(owner_spelling), NULL)) : NULL);  int literal_owner = Symbol_is_builtin_type(owner_token) || Symbol_is_type_modifier(owner_token) ||(owner_token == 19147688 &&(Type_is_typedef(owner_type) || Compiler_peek(c, 1) == 93));  if(literal_owner && Compiler_peek(c, 1) == 93 &&(Compiler_peek(c, 2) == 73 || Compiler_peek(c, 2) == 19147688)){
+    Symbol owner_token = Compiler_peek(c, 0);  String owner_spelling = c -> token -> text;  Type owner_type = String_truth(owner_spelling) ? List_type(Sym_get(c -> sym, cons(String_var(owner_spelling), NULL))) : NULL;  int literal_owner = Symbol_is_builtin_type(owner_token) || Symbol_is_type_modifier(owner_token) ||(owner_token == 19147688 &&(Type_is_typedef(owner_type) || Compiler_peek(c, 1) == 93));  if(literal_owner && Compiler_peek(c, 1) == 93 &&(Compiler_peek(c, 2) == 73 || Compiler_peek(c, 2) == 19147688)){
       Compiler_next(c);  Compiler_expect(c, 93);  Var member;  if(Compiler_peek(c, 0) == 73) member = List_var(Compiler_try_parse_macro_slot(c, 920394));  else{
         member = String_var(c -> token -> text);  Compiler_next(c);
       }

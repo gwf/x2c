@@ -1387,6 +1387,11 @@ void String_move_to(String, String);
 void Build_publish_script(Build b, String executable){
   if(! _init_guard_) _file_init_();
   String_move_to(b -> output, executable);
+  if(_mapped_debug(b)){
+    String symbols = String_join(NULL, cons(String_var(executable), cons(String_var(_69), NULL)));
+    String_remove_tree(symbols);
+    String_move_to(String_join(NULL, cons(String_var(b -> output), cons(String_var(_69), NULL))), symbols);
+  }
   String input = Var_string(List_car(b -> request -> inputs));
   Array prerequisites = Array_new();
   String translation = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_2), cons(String_var(_key(input)), cons(String_var(_2), cons(String_var(String_stem(input)), cons(String_var(_35), NULL)))))));

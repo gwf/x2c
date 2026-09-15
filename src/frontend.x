@@ -203,6 +203,12 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   int use_cpp = request.cpp_symbols || request.live_symbols ||
                 cpp_dumps.contains(request.dump);
   if (use_prelude && !use_cpp) return c.collect_symbols(NULL);
+  if (c.script)
+    c.report_error(
+      <driver>, "script units use the default symbol collection",
+      _first_preprocessor_token(c),
+      %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
+        "--live-symbols, and the --dump-cpp modes cannot read a script"));
   Compiler cppcompiler = Compiler.new_shared(c);
   unit->preprocessor = cppcompiler;
   cppcompiler.filename = filename;

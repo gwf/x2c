@@ -76,16 +76,22 @@ String Var_repr(Var);
 
 long Var_integer(Var);
 
+String Var_str(Var);
+
+String List_repr(List);
+
 int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   {
     ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[1];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_0[1];
+    static MatchCaptureSite _x2c_catch_arms_0[2];
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_0[2];
     if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(234409560664), cons(List_var(cons(Symbol_var(7477201800), cons(Symbol_var(2000342027144), NULL))), cons(List_var(cons(Symbol_var(1317119334), cons(Symbol_var(63594145126), NULL))), cons(Symbol_var(54), NULL))));
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+    List _x2c_catch_pattern_1 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
+    _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
     {
@@ -98,9 +104,10 @@ int main(int argc, char * * argv){
   }
   else {x2c_exception_landed(& _x2c_exception_frame_0); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
-       {Var command = x2c_error_catch_capture(_x2c_error_handler_0, 0);
+      if (_x2c_catch_selected_0 == 0) {Var command = x2c_error_catch_capture(_x2c_error_handler_0, 0);
       Var status = x2c_error_catch_capture(_x2c_error_handler_0, 1);
       {
         fprintf(stderr, "%s: command %s failed with status %ld\n", argv[0], String_str(Var_repr(command)), Var_integer(status));
@@ -118,15 +125,32 @@ int main(int argc, char * * argv){
       }
 
     }
+    else {Var code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
+    List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+    {
+      fprintf(stderr, "%s: %s %s\n", argv[0], Var_str(code), String_str(List_repr(detail)));
+      {
+        int _x2c_return_value_2 = 1;
+        {
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          return _x2c_return_value_2;
+        }
+
+      }
+
+    }
 
   }
-  else{
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
-  }
 
+}
+else{
+  x2c_error_catch_close(_x2c_error_handler_0);
+  _x2c_error_handler_0 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_0);
+  __builtin_unreachable();
+}
 }
 }
 x2c_error_catch_close(_x2c_error_handler_0);

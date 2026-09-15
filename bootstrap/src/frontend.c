@@ -2,9 +2,11 @@
 
 #include "frontend.h"
 
-static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _8, _7, _6, _5, _4, _3, _2, _0;
+static List _12, _11;
 
-static Var _9, _1;
+static String _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _14, _13, _9, _7, _6, _5, _4, _3, _2, _0;
+
+static Var _15, _10, _8, _1;
 
 #include <limits.h>
 #include <stdio.h>
@@ -38,6 +40,8 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
 
 Var String_var(String);
 
+List cons(Var, List);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -49,18 +53,25 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new("#include \"scripting.x\"");
   _5 = String_new("/lib");
   _6 = String_new("/x2c.x");
-  _7 = String_new("/lib/x2c.x");
-  _8 = String_new("stage: preprocess");
-  _9 = String_var(_8);
-  _10 = String_new("status: ");
-  _11 = String_new("cannot read input file");
-  _12 = String_new("\n");
-  _13 = String_new("cannot open");
-  _14 = String_new("not a regular file");
-  _15 = String_new("read failed");
-  _16 = String_new("#!");
-  _17 = String_new("/");
-  _18 = String_new("failed to run C preprocessor");
+  _7 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
+  _8 = String_var(_7);
+  _9 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
+  _10 = String_var(_9);
+  _11 = cons(_10, NULL);
+  _12 = cons(_8, _11);
+  _13 = String_new("/lib/x2c.x");
+  _14 = String_new("stage: preprocess");
+  _15 = String_var(_14);
+  _16 = String_new("status: ");
+  _17 = String_new("cannot read input file");
+  _18 = String_new("\n");
+  _19 = String_new("cannot open");
+  _20 = String_new("not a regular file");
+  _21 = String_new("read failed");
+  _22 = String_new("#!");
+  _23 = String_new("/");
+  _24 = String_new("script units use the default symbol collection");
+  _25 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -114,13 +125,13 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason){
   List notes = cons(_1, cons(String_var(String_join(NULL, cons(String_var(_2), cons(String_var(filename), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_3), cons(String_var(reason), NULL)))), NULL)));
-  Compiler_report_error(compiler, 306819428, _11, NULL, notes);
+  Compiler_report_error(compiler, 306819428, _17, NULL, notes);
 }
 
 int String_find(String, String);
 
 static String _script_text(String text){
-  int end = String_find(text, _12);
+  int end = String_find(text, _18);
   return String_join(NULL, cons(String_var(_4), cons(String_var(end < 0 ? 0 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
@@ -137,7 +148,7 @@ String File_string_close(File);
 static String _read_input_text(Compiler compiler, String filename){
   if(compiler -> sources){
     String volatile text;
-    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _13);
+    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _19);
     return text;
   }
   File volatile file = NULL;
@@ -157,7 +168,7 @@ static String _read_input_text(Compiler compiler, String filename){
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
       if (_x2c_catch_selected_0 == 0) {{
-        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _13);
+        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _19);
         {
           x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
@@ -169,7 +180,7 @@ static String _read_input_text(Compiler compiler, String filename){
 
     }
     else {{
-      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _13);
+      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _19);
       {
         x2c_error_catch_close(_x2c_error_handler_0);
         _x2c_error_handler_0 = NULL;
@@ -197,7 +208,7 @@ x2c_exception_leave(& _x2c_exception_frame_0);
 struct stat info;
 if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
   File_close(file);
-  return _unreadable_input(compiler, filename, _14);
+  return _unreadable_input(compiler, filename, _20);
 }
 String volatile text = NULL;
 {
@@ -213,7 +224,7 @@ ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exc
     x2c_error_catch_detach(_x2c_error_handler_1);
     x2c_exception_mark_handled(&_x2c_exception_frame_1);
      {{
-      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _15);
+      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _21);
       {
         x2c_error_catch_close(_x2c_error_handler_1);
         _x2c_error_handler_1 = NULL;
@@ -260,7 +271,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = _read_input_text(c, filename);
-  if(String_truth(text) && String_startswith(text, _16)){
+  if(String_truth(text) && String_startswith(text, _22)){
     c -> script = source_resolved ? String_new(source_path) : filename;
     text = _script_text(text);
   }
@@ -315,7 +326,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
         }
         String package = x2c_package_directory(root, source);
         if(! String_truth(package)) continue;
-        String name = String_getslice(package, String_rfind(package, _17) + 1, -2147483648, 1);
+        String name = String_getslice(package, String_rfind(package, _23) + 1, -2147483648, 1);
         if(! String_is_identifier(name)) continue;
         if(! x2c_package_source(package, source)) continue;
         compiler -> package = name;
@@ -359,18 +370,19 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
+  if(String_truth(c -> script)) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _12);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_7), NULL))) : NULL, imacros = runtime;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_13), NULL))) : NULL, imacros = runtime;
   int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, & text, & errors, & dependency_text);
   unit -> preprocessor_output = text;
   unit -> preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
-    List notes = cons(_9, cons(String_var(String_join(NULL, cons(String_var(_10), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _18, _first_preprocessor_token(c), notes);
+    List notes = cons(_15, cons(String_var(String_join(NULL, cons(String_var(_16), cons(String_var(int_str(status)), NULL)))), NULL));
+    Compiler_report_error(c, 306819428, _25, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;

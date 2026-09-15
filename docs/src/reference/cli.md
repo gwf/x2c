@@ -303,7 +303,8 @@ appears; build diagnostics still print, and a failed build exits with its
 status. `-v` shows the build actions and the final run action. The program
 replaces the `x2c` process, so it receives signals and terminal input
 directly and its exit status is the command's. Its `argv[0]` is the script's
-absolute path.
+absolute path. A `--source-map -g` build on macOS keeps its `run.dSYM` beside
+the cached executable.
 
 A script file can start with a shebang line and run directly:
 

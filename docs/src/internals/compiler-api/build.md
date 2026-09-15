@@ -19,7 +19,7 @@ Typed native build request and artifact graph.
 | [`Build.end_translation`](#Build.end_translation) | Records one completed translation and reports the phase when all finish. |
 | [`Build.finish`](#Build.finish) | Compiles registered C sources and then archives or links the final output. |
 | [`Build.generated_dir`](#Build.generated_dir) | Returns the generated-file directory for `input`. |
-| [`Build.publish_script`](#Build.publish_script) | Moves a script's built executable to `executable` and records what it was built from, so `CliRequest.script_current` can reuse it. |
+| [`Build.publish_script`](#Build.publish_script) | Moves a script's built executable, and its debug symbols on macOS, to `executable` and records what it was built from, so `CliRequest.script_current` can reuse it. |
 | [`Build.record_translation`](#Build.record_translation) | Records the successful translation fingerprint when retained state exists. |
 | [`Build.report_success`](#Build.report_success) | Prints the completed build receipt and artifact details when enabled. |
 | [`Build.run_program`](#Build.run_program) | Runs the built output with the request's arguments and returns its status. |
@@ -117,14 +117,15 @@ Source: `src/build.x:297`
 
 `void Build.publish_script(Build b, String executable)`
 
-Moves a script's built executable to `executable` and records what it was
-built from, so `CliRequest.script_current` can reuse it. The record lists
+Moves a script's built executable, and its debug symbols on macOS, to
+`executable` and records what it was built from, so
+`CliRequest.script_current` can reuse it. The record lists
 the script's translation and compile prerequisites, package archives, and
 the runtime archive.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:904`
+Source: `src/build.x:905`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -192,7 +193,7 @@ Source: `src/build.x:211`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:926`
+Source: `src/build.x:932`
 
 ## Public types
 

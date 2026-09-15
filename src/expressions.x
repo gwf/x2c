@@ -1822,6 +1822,12 @@ static List _resolve_content(
       Type type = true_type, left = c.sym.resolve_numeric_type(type);
       Type right = c.sym.resolve_numeric_type(false_type);
       if (left && right) type = left.widest(right);
+      else if (_conditional_joins(c, false_type, true_type)) {
+        type = false_type;
+        ontrue = c.convert_expression(ontrue, type);
+      }
+      else if (_conditional_joins(c, true_type, false_type))
+        onfalse = c.convert_expression(onfalse, type);
       return %(expr $type (op $operator $condition $ontrue $onfalse));
     }
     case %(op ?operator ?left ?right): {
@@ -3362,6 +3368,12 @@ List Compiler.convert_compound_literal(
   return %(cast $definition $converted);
 }
 
+/* A conditional whose arms are a `Var` and another value is a `Var`: the
+   other arm boxes, so C sees one operand type. Other mixed arms keep their
+   C types until a target converts each arm. */
+static int _conditional_joins(Compiler c, Type type, Type other) =>
+  type && other && c.sym.is_var_type(type) && !c.sym.is_var_type(other);
+
 /** Adds operations to convert a resolved expression AST to `target`.
     The result may contain converter, boxing, unboxing, `Func`, reference, or
     composite-literal operations. Returns the original expression when C
@@ -3402,6 +3414,21 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   }
   if (expr.match(%(expr ? (composite ?))))
     return _convert_composite(c, expr, target, NULL, NULL, NULL);
+  /* Arms of different kinds, such as a null pointer beside a C string, each
+     convert: only one runs, so that converts the result. Numeric arms and
+     arms of one type keep converting as a whole. */
+  match (expr) case %(expr ? (op ?operator ?condition ?ontrue ?onfalse)): {
+    Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
+    if (!List.equal(true_type, false_type) &&
+        !(c.sym.resolve_numeric_type(true_type) &&
+          c.sym.resolve_numeric_type(false_type))) {
+      List converted_true = c.convert_expression(ontrue, declared_target);
+      List converted_false = c.convert_expression(onfalse, declared_target);
+      if (converted_true != ontrue || converted_false != onfalse)
+        return %(expr $declared_target
+          (op $operator $condition $converted_true $converted_false));
+    }
+  }
   if (!type) {
     if (target_is_var &&
         expr.match(%(expr () (ident (binding ? ?))))) {

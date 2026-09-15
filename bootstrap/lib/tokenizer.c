@@ -2,7 +2,7 @@
 
 #include "tokenizer.h"
 
-static String _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include "exception.h"
 #include <string.h>
@@ -32,7 +32,11 @@ static Token _significant_back(Tokenizer tokenizer, int back);
 
 static int _token_ends_operand(Token token);
 
+static int _closes_control_condition(Tokenizer tokenizer, Token token);
+
 static inline int _prev_token_ends_operand(Tokenizer tokenizer);
+
+static inline int _percent_is_operator(Tokenizer tokenizer);
 
 static inline int _can_start_symbol_literal(Tokenizer tokenizer);
 
@@ -92,6 +96,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _8 = String_new("tag");
   _9 = String_new("not");
   _10 = String_new("is");
+  _11 = String_new("(");
 }
 
 unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
@@ -362,8 +367,33 @@ static int _token_ends_operand(Token token){
   return 0;
 }
 
+int String_truth(String);
+
+int String_endswith(String, String);
+
+static int _closes_control_condition(Tokenizer tokenizer, Token token){
+  if(! token || token -> type != 83) return 0;
+  struct Token * first =(struct Token *) tokenizer -> tokens;
+  int depth = 0;
+  for(Token scan = token;  scan >= first;  scan --){
+    if(scan -> type == 83) depth ++;
+    else if(String_truth(scan -> text) && String_endswith(scan -> text, _11)) depth --;
+    if(depth) continue;
+    do scan --;
+    while(scan >= first &&(scan -> type == 40896714 || scan -> type == 7477210024));
+    ;
+    return scan >= first &&(scan -> type == 588 || scan -> type == 48777994 || scan -> type == 13284 || scan -> type == 1323933904);
+  }
+  return 0;
+}
+
 static inline int _prev_token_ends_operand(Tokenizer tokenizer){
   return _token_ends_operand(_significant_back(tokenizer, 0));
+}
+
+static inline int _percent_is_operator(Tokenizer tokenizer){
+  Token token = _significant_back(tokenizer, 0);
+  return _token_ends_operand(token) && ! _closes_control_condition(tokenizer, token);
 }
 
 int String_equal(String, String);
@@ -387,11 +417,11 @@ static int Tokenizer__percent_tokens(Tokenizer t){
   char next = text[1];
   int opener = strchr("([{<\"", next) != NULL;
   if(next == '!'){
-    if(_prev_token_ends_operand(t)) return Tokenizer__operator(t, 1);
+    if(_percent_is_operator(t)) return Tokenizer__operator(t, 1);
     return Tokenizer_tokenize(t, 2, Symbol_new_len(text, 2));
   }
   if(! opener) return 0;
-  if(_prev_token_ends_operand(t)) return Tokenizer__operator(t, 1);
+  if(_percent_is_operator(t)) return Tokenizer__operator(t, 1);
   if(next == '<' && text[2] != '<') return Tokenizer_error(t);
   return Tokenizer__operator(t, next == '<' ? 3 : 2);
 }

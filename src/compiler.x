@@ -1355,6 +1355,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.diagnostics.reset();
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
+  Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
     Array statements = %[];
@@ -1397,10 +1398,20 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
         }
       }
       if (!statements.len()) break;
+      if (c.fn_defs.contains("main")) {
+        Token tokens = c.tokenizer.tokens;
+        conflict = tokens + statements[0].integer();
+        break;
+      }
       _append_script_main(c, statements);
       statements.clear();
     }
   }
+  if (conflict)
+    c.report_error(
+      <parse>, "a script with top-level statements cannot define main",
+      conflict,
+      %("its top-level statements already run as the program"));
   ast = ast.reverse();
   _check_unmatched_braces(c);
   if (!c.error_count()) _validate_static_object_initializers(c);
@@ -1410,8 +1421,9 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
 /* A script unit's `main` is ordinary source the parser reads after the last
    top-level form: this template with the statement runs, in source order,
    in place of `x2c_script_statements`. The statements run in their own
-   function, so the `try` that reports a failed command leaves their locals
-   ordinary; that failure's status becomes the exit status. */
+   function, so the `try` that reports an uncaught error leaves their locals
+   ordinary. A failed command's status becomes the exit status; any other
+   uncaught error exits with 1. */
 static const char *script_main =
   "static int x2c_script(int argc, char **argv, List args) {\n"
   "  (void) argc, (void) argv, (void) args;\n"
@@ -1426,6 +1438,11 @@ static const char *script_main =
   "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
   "            argv[0], command.repr().str(), status.integer());\n"
   "    return (int) status.integer();\n"
+  "  }\n"
+  "  catch %(?code *detail): {\n"
+  "    fprintf(stderr, \"%s: %s %s\\n\",\n"
+  "            argv[0], code.str(), detail.repr().str());\n"
+  "    return 1;\n"
   "  }\n"
   "}\n";
 

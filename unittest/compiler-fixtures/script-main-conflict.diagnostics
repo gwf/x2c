@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/script-main-conflict.x:2:1: parse: a script with top-level statements cannot define main
+  printf("statements already form the program\n");
+  ^^^^^^
+  note: its top-level statements already run as the program
+
