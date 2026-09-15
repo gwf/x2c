@@ -29,6 +29,7 @@ X_FILES  = $(wildcard $(SOURCE)/*.x)
 # Generated files
 C_FILES  = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.c,$(X_FILES))
 H_FILES  = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.h,$(X_FILES))
+XI_FILES = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.xi,$(X_FILES))
 X_DEPS   = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.d,$(X_FILES))
 C_DEPS   = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.c.d,$(X_FILES))
 ###############################################################################
@@ -48,17 +49,15 @@ $(BUILD):
 # changed.  Translation output is a function of the compiler binary and
 # the runtime declarations it replays, so the compiler and the runtime
 # sources are prerequisites and either changing forces a full
-# retranslation; a missing generated .c/.h forces its source back into the
-# batch (self-healing).
+# retranslation; a missing generated .c/.h/.xi forces its source back into
+# the batch (self-healing).
 ifneq ($(strip $(X_FILES)),)
 X2C_TRANSLATE_DEPS = $(X2C) $(wildcard ../lib/*.x)
 MISSING_GENERATED = $(filter-out \
-	$(wildcard $(BUILD)/*.c $(BUILD)/*.h),$(C_FILES) $(H_FILES))
-MISSING_X = $(sort \
-	$(patsubst $(BUILD)/%.c,$(SOURCE)/%.x, \
-		$(filter %.c,$(MISSING_GENERATED))) \
-	$(patsubst $(BUILD)/%.h,$(SOURCE)/%.x, \
-		$(filter %.h,$(MISSING_GENERATED))))
+	$(wildcard $(BUILD)/*.c $(BUILD)/*.h $(BUILD)/*.xi), \
+	$(C_FILES) $(H_FILES) $(XI_FILES))
+MISSING_X = $(sort $(patsubst $(BUILD)/%,$(SOURCE)/%.x, \
+	$(basename $(MISSING_GENERATED))))
 
 $(BUILD)/.translated: $(X_FILES) $(X2C_TRANSLATE_DEPS) | $(BUILD)
 	$(X2C) translate $(X2CFLAGS) \

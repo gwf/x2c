@@ -67,6 +67,35 @@ grep -q "not an installed package" "$BUILD/mine.stderr" || fail "mine diagnostic
 [[ -z "$(ls -A "$BUILD/home/packages" | grep '^\.install')" ]] ||
   fail "staging directory left behind"
 
+# Reinstalling leaves a user's <name>.previous alone.
+mkdir -p "$BUILD/home/packages/greet.previous"
+: >"$BUILD/home/packages/greet.previous/precious"
+"$x2c" install -q "$BUILD/src/greet"
+[[ -f "$BUILD/home/packages/greet.previous/precious" ]] ||
+  fail "reinstall removed greet.previous"
+rm -rf "$BUILD/home/packages/greet.previous"
+
+# A removal waits while another process holds the home's packages lock.
+trap 'touch "$BUILD/release"' EXIT
+python3 - "$BUILD/home/packages/.lock" "$BUILD/release" <<'PY' &
+import fcntl, os, sys, time
+lock = open(sys.argv[1], "a")
+fcntl.flock(lock, fcntl.LOCK_EX)
+open(sys.argv[2] + ".held", "w").close()
+while not os.path.exists(sys.argv[2]):
+    time.sleep(0.05)
+PY
+holder=$!
+while [[ ! -e "$BUILD/release.held" ]]; do sleep 0.05; done
+"$x2c" remove -q greet &
+remover=$!
+sleep 1
+[[ -d "$BUILD/home/packages/greet" ]] || fail "removal ignored the lock"
+touch "$BUILD/release"
+wait "$holder"
+wait "$remover" || fail "removal after the lock failed"
+[[ ! -e "$BUILD/home/packages/greet" ]] || fail "greet not removed"
+
 # The index resolves a name and records its version.
 "$x2c" install -q greet --index "$BUILD/index.txt"
 [[ "$("$x2c" list)" == "greet 1.0 source" ]] || fail "index version"

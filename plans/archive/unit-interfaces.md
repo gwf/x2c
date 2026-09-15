@@ -1,8 +1,8 @@
 # Per-unit interface files replace the tracked symbol artifacts
 
-> Status: active - approved 2026-09-14; implemented on the
-> claude/compiler-architecture-redesign-77de6e branch as local commits
-> (no push requested). Delivery: commits only.
+> Status: done
+> Approved 2026-09-14 and merged to main through PR #45 (3d4c14d) on
+> 2026-09-15. Archived 2026-09-15.
 
 ## Context
 

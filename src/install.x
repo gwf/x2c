@@ -5,7 +5,8 @@
     `x2c install`, `remove`, and `list` manage `<home>/packages`. Fetching,
     hashing, and extraction run host tools as child processes. A package is
     staged in a sibling directory, built there when it is source, and
-    published with one rename.
+    published with one rename. Installs and removals in one home run one at
+    a time.
 */
 
 #pragma once
@@ -15,10 +16,12 @@ $(import "../lib/private-keywords.xmacro")
 #pragma private
 
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include <unistd.h>
@@ -211,22 +214,35 @@ static String _installed_version(String package) {
   return version ? version : %"";
 }
 
+/* Returns the home's packages directory, holding its lock until the process
+   exits, so another install or removal waits for this one to finish. */
+static String _locked_packages(void) {
+  static int lock = -1;
+  String packages = _home_packages();
+  if (lock >= 0) return packages;
+  lock = open(%"$packages/.lock", O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if (lock < 0) _error(%"cannot lock $packages");
+  while (flock(lock, LOCK_EX) && errno == EINTR) {}
+  return packages;
+}
+
 /* Publishes the staged package with one rename, replacing an installed
    package of the same name; a directory that is not an installed package is
-   never replaced. */
+   never replaced. The replaced package moves aside inside the work
+   directory. */
 static void _publish(String staged, String packages, String name) {
-  String target = %"$packages/$name", previous = %"$target.previous";
+  String target = %"$packages/$name", previous = %"$staged.previous";
   if (!access(target, F_OK)) {
     if (!_installed(target))
       _error(%"$target exists and is not an installed package");
-    _build_remove_tree(previous);
     if (rename(target, previous)) _error(%"cannot replace $target");
   }
   if (rename(staged, target)) _error(%"cannot publish $target");
   _build_remove_tree(previous);
 }
 
-/* Staging directories left by an interrupted install are removed first. */
+/* Staging directories left by an interrupted install are removed first; the
+   caller holds the packages lock, so none belongs to a running install. */
 static String _work_directory(String packages) {
   foreach (String name, packages.list_dir())
     if (name.startswith(".install.")) _build_remove_tree(%"$packages/$name");
@@ -278,7 +294,7 @@ static String _install(
     source package is built by this compiler. Failures exit with status 2.
 */
 int install_command(CliRequest request) {
-  String spec = request.inputs.car(), packages = _home_packages();
+  String spec = request.inputs.car(), packages = _locked_packages();
   String work = _work_directory(packages);
   String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
   int remote = spec.startswith("http://") || spec.startswith("https://") ||
@@ -315,7 +331,7 @@ String install_version(String name) =>
     network. Failures exit with status 2.
 */
 List install_require(CliRequest request, String name, String version) {
-  String packages = _home_packages();
+  String packages = _locked_packages();
   String work = _work_directory(packages);
   List row = _index_row(request, name, work);
   String resolved = row.nth_cdr(1).car();
@@ -333,7 +349,7 @@ List install_require(CliRequest request, String name, String version) {
     A directory without an install marker is left alone. Returns 0.
 */
 int remove_command(CliRequest request) {
-  String name = request.inputs.car(), packages = _home_packages();
+  String name = request.inputs.car(), packages = _locked_packages();
   String target = %"$packages/$name";
   if (!name.is_identifier() || access(target, F_OK))
     _error(%"no installed package '$name'");

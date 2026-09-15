@@ -48,6 +48,7 @@ MAKEFLAGS        += -S
 LIB_X_FILES  = $(wildcard $(LIB_SOURCE)/*.x)
 LIB_H_FILES  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.h,$(LIB_X_FILES))
 LIB_C_FILES  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c,$(LIB_X_FILES))
+LIB_XI_FILES = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.xi,$(LIB_X_FILES))
 LIB_OBJECTS  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.o,$(LIB_X_FILES))
 LIB_X_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.d,$(LIB_X_FILES))
 LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
@@ -56,6 +57,7 @@ LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
 BIN_X_FILES  = $(wildcard $(BIN_SOURCE)/*.x)
 BIN_H_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.h,$(BIN_X_FILES))
 BIN_C_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.c,$(BIN_X_FILES))
+BIN_XI_FILES = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.xi,$(BIN_X_FILES))
 BIN_OBJECTS  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.o,$(BIN_X_FILES))
 BIN_X_DEPS   = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.d,$(BIN_X_FILES))
 BIN_C_DEPS   = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.c.d,$(BIN_X_FILES))
@@ -77,7 +79,7 @@ $(LIB_BUILD):
 # runtime.  Translation output is also a function of the compiler binary
 # and the runtime declarations it replays from the library batch, so the
 # compiler and every library source are prerequisites; a missing generated
-# .c/.h forces the batch to run.  Imported macro and compile-time Lisp
+# .c/.h/.xi forces the batch to run.  Imported macro and compile-time Lisp
 # sources are inputs to the same translation, so they join the list;
 # without them a macro-only edit leaves every generated file untouched.
 # Each batch writes a .xi interface beside every unit's C; the library batch
@@ -89,13 +91,10 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xmacro) $(wildcard $(BIN_SOURCE)/*.xmacro)
 LIB_MISSING_GENERATED = $(filter-out \
-	$(wildcard $(LIB_BUILD)/*.c $(LIB_BUILD)/*.h), \
-	$(LIB_C_FILES) $(LIB_H_FILES))
-LIB_MISSING_X = $(sort \
-	$(patsubst $(LIB_BUILD)/%.c,$(LIB_SOURCE)/%.x, \
-		$(filter %.c,$(LIB_MISSING_GENERATED))) \
-	$(patsubst $(LIB_BUILD)/%.h,$(LIB_SOURCE)/%.x, \
-		$(filter %.h,$(LIB_MISSING_GENERATED))))
+	$(wildcard $(LIB_BUILD)/*.c $(LIB_BUILD)/*.h $(LIB_BUILD)/*.xi), \
+	$(LIB_C_FILES) $(LIB_H_FILES) $(LIB_XI_FILES))
+LIB_MISSING_X = $(sort $(patsubst $(LIB_BUILD)/%,$(LIB_SOURCE)/%.x, \
+	$(basename $(LIB_MISSING_GENERATED))))
 
 $(LIB_BUILD)/.translated: $(X2C_TRANSLATE_DEPS) | $(LIB_BUILD)
 	$(X2C_COMPILER) translate $(X2C_FLAGS) --out-dir $(LIB_BUILD) \
@@ -131,13 +130,10 @@ $(BIN_BUILD):
 	mkdir -p $(BIN_BUILD)
 # Translate binary .x files in one batch invocation (see library note).
 BIN_MISSING_GENERATED = $(filter-out \
-	$(wildcard $(BIN_BUILD)/*.c $(BIN_BUILD)/*.h), \
-	$(BIN_C_FILES) $(BIN_H_FILES))
-BIN_MISSING_X = $(sort \
-	$(patsubst $(BIN_BUILD)/%.c,$(BIN_SOURCE)/%.x, \
-		$(filter %.c,$(BIN_MISSING_GENERATED))) \
-	$(patsubst $(BIN_BUILD)/%.h,$(BIN_SOURCE)/%.x, \
-		$(filter %.h,$(BIN_MISSING_GENERATED))))
+	$(wildcard $(BIN_BUILD)/*.c $(BIN_BUILD)/*.h $(BIN_BUILD)/*.xi), \
+	$(BIN_C_FILES) $(BIN_H_FILES) $(BIN_XI_FILES))
+BIN_MISSING_X = $(sort $(patsubst $(BIN_BUILD)/%,$(BIN_SOURCE)/%.x, \
+	$(basename $(BIN_MISSING_GENERATED))))
 
 $(BIN_BUILD)/.translated: $(BIN_X_FILES) $(X2C_TRANSLATE_DEPS) \
 		| $(BIN_BUILD)
