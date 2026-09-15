@@ -93,6 +93,22 @@ The installed tool defaults are `cc` and `ar` from `PATH`. Explicit `--cc` and
 then the defaults in `lib/x2c/toolchain`. Build identity is recorded separately
 in the installation inventory, not as a path to the producer's compiler tools.
 
+## Windows
+
+Use WSL2. Inside an Ubuntu or Debian distribution the Linux release
+installs with the same command, and the compiler needs only `clang` or
+`gcc`, `make`, and `curl` from the distribution's packages:
+
+```sh
+sudo apt-get install -y clang make curl
+curl -fsSL https://x2c-lang.dev/install.sh | sh
+```
+
+Keep the prefix and your projects on the Linux filesystem, under your WSL
+home rather than under `/mnt/c`, so builds run at native speed. Native
+Windows and the MSYS2 or Cygwin layers are not supported; the
+`windows-spike` workflow records how far a build gets there.
+
 ## Developer workflow
 
 A source checkout is the development install. After `make build-safe`, the
