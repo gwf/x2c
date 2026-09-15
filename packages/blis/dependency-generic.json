@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "blis",
   "version": "2.1",
-  "profile": "generic-static-single-threaded-no-blas-linux",
+  "profile": "generic-static-single-threaded-no-blas",
   "sources": [
     {
       "name": "blis",
@@ -54,7 +54,7 @@
       }
     ],
     "native_args": [
-      "--c-system-dir",
+      "--c-include-dir",
       "{package}/native/include",
       "{package}/native/lib/libblis.a"
     ]

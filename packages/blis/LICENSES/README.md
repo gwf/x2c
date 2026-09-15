@@ -115,16 +115,18 @@ contains no BLAS or CBLAS compatibility exports.
 The macOS static archive has 48 unresolved external names. They are C library,
 allocation, math, Mach clock, thread-local-storage, and pthread facilities
 provided by macOS `libSystem`. There are no Fortran, OpenMP-runtime, or other
-third-party library references. `PROFILE.json` retains the complete 48-name
-set; `make verify-profile` compares it, and `make verify-linkage` rejects
-non-system dynamic libraries in the example and test executables.
+third-party library references. `PROFILE-darwin-arm64.json` retains the
+complete 48-name set; `make verify-profile` compares it, and
+`make verify-linkage` rejects non-system dynamic libraries in the example and
+test executables.
 
-The Linux x86-64 `generic` profile uses the same framework and reference sources,
-with generic kernels instead of the Firestorm/armv8a kernels. Its exact
-header hash, archive member count, and unresolved external symbols are
-recorded separately in `PROFILE-linux.json` and checked by the same target.
-The retained armv8a notice applies to the macOS profile. Neither profile
-builds the BLAS compatibility tests or addons.
+The `generic` profiles use the same framework and reference sources, with
+generic kernels instead of the Firestorm/armv8a kernels. Each platform's
+exact header hash, archive member count, and unresolved external symbols are
+recorded separately, in `PROFILE-darwin-x86_64.json`,
+`PROFILE-linux-x86_64.json`, and `PROFILE-linux-aarch64.json`, and checked by
+the same target. The retained armv8a notice applies to the Apple silicon
+profile. No profile builds the BLAS compatibility tests or addons.
 
 Clang, `make`, `ar`, `nm`, `jq`, `readelf`, and `otool` are build and
 verification tools rather than distributed runtime dependencies. The integration does not vendor

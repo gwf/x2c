@@ -44,7 +44,7 @@
       }
     ],
     "native_args": [
-      "--c-system-dir",
+      "--c-include-dir",
       "{package}/native/include",
       "{package}/native/lib/libblis.a"
     ]

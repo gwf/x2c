@@ -1,11 +1,18 @@
 PACKAGE := blis
 DEPENDENCY_PREFIX_VAR := BLIS_PREFIX
-BLIS_PROFILE := PROFILE.json
+BLIS_PLATFORM := $(shell uname -s | tr A-Z a-z)-$(shell uname -m)
+# Apple Silicon builds BLIS's firestorm kernels; every other platform builds
+# the generic configuration. Archive members and the symbols the archive
+# leaves undefined follow the kernel set, so each platform has its own
+# recorded profile. tools/record-blis-profile.sh writes one.
+DEPENDENCY_MANIFEST := dependency-generic.json
+ifeq ($(BLIS_PLATFORM),darwin-arm64)
+DEPENDENCY_MANIFEST := dependency.json
+endif
+BLIS_PROFILE := PROFILE-$(BLIS_PLATFORM).json
 BLIS_SHARED := libblis.dylib
 NM_SYMBOL := substr($$1, 2)
 ifeq ($(shell uname -s),Linux)
-DEPENDENCY_MANIFEST := dependency-linux.json
-BLIS_PROFILE := PROFILE-linux.json
 BLIS_SHARED := libblis.so
 NM_SYMBOL := $$1
 endif
@@ -14,7 +21,7 @@ include ../package.mk
 BLIS_INCLUDE := $(BLIS_PREFIX)/include
 BLIS_STATIC := $(BLIS_PREFIX)/lib/libblis.a
 
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(BLIS_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(BLIS_INCLUDE)
 PACKAGE_LINK := $(BLIS_STATIC)
 
 .PHONY: example short-example run check-profile verify-profile \
@@ -43,41 +50,8 @@ check-profile:
 	    exit 1; }
 
 verify-profile: verify-dependency check-profile
-	@test "$$(shasum -a 256 $(BLIS_INCLUDE)/blis/blis.h | \
-	  cut -d' ' -f1)" = \
-	  "$$(jq -r '.header_sha256' $(BLIS_PROFILE))"
-	@test "$$(shasum -a 256 LICENSES/BLIS-2.1-BSD-3-Clause.txt | \
-	  cut -d' ' -f1)" = \
-	  6b54dbb27c2aeba07c72084ea948d3d7ec206758b119eef37a1cc4f958ac694c
-	@test "$$(shasum -a 256 LICENSES/BLIS-2.1-additional-notices.txt | \
-	  cut -d' ' -f1)" = \
-	  05f25bac1e33ea02071a5b8d0c6b311438e61c92e652250c949757704517333a
-	@test "$$(shasum -a 256 LICENSES/BLIS-2.1-armv8a-BSD-3-Clause.txt | \
-	  cut -d' ' -f1)" = \
-	  b59895ecabd0b1935e509829344e0c30490b4e8eae6e4bbc176f7bf5b4e17edc
-	@test "$$(shasum -a 256 LICENSES/LAPACK-3.2-BSD-3-Clause.txt | \
-	  cut -d' ' -f1)" = \
-	  fd725c12cb2d3bbedf0c7bb55fd42ce6ffbc3f82a696051618077808b6b7f3d4
-	@test "$$(ar -t $(BLIS_STATIC) | wc -l | tr -d ' ')" = \
-	  "$$(jq -r '.archive.members' $(BLIS_PROFILE))"
-# The symbol comparison sorts both sides under LC_ALL=C. Without it the
-# collation follows the caller's locale: en_US.UTF-8 ignores the leading
-# underscores, so _DefaultRuneLocale moves and the diff fails on a machine
-# whose LC_COLLATE is not C.
-	@profile_tmp=$$(mktemp -d /tmp/x2c-blis-profile.XXXXXX); \
-	  trap 'rm -rf "$$profile_tmp"' EXIT; \
-	  export LC_ALL=C; \
-	  nm -g --format=posix $(BLIS_STATIC) | \
-	    awk '$$2 == "U" {print $(NM_SYMBOL)}' | sort -u > \
-	    "$$profile_tmp/undefined"; \
-	  nm -g --format=posix $(BLIS_STATIC) | \
-	    awk '$$2 != "U" && NF >= 2 {print $(NM_SYMBOL)}' | sort -u > \
-	    "$$profile_tmp/defined"; \
-	  comm -23 "$$profile_tmp/undefined" "$$profile_tmp/defined" > \
-	    "$$profile_tmp/external"; \
-	  jq -r '.archive.external_undefined_symbols[]' $(BLIS_PROFILE) | \
-	    sort -u > "$$profile_tmp/expected"; \
-	  diff -u "$$profile_tmp/expected" "$$profile_tmp/external"
+	@$(CHECK_SHA256) licenses.sha256
+	@./verify-archive.sh $(BLIS_PROFILE) "$(BLIS_PREFIX)"
 
 verify-provenance: verify-profile
 

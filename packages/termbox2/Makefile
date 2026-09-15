@@ -3,7 +3,7 @@ DEPENDENCY_PREFIX_VAR := TERMBOX2_PREFIX
 include ../package.mk
 
 TERMBOX2_INCLUDE := $(TERMBOX2_PREFIX)/include
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(TERMBOX2_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(TERMBOX2_INCLUDE)
 # glibc needs wcwidth plus the BSD declarations used by the x2c runtime.
 ifeq ($(shell uname -s),Linux)
 PACKAGE_C_FLAGS += -D _GNU_SOURCE
@@ -13,12 +13,6 @@ PACKAGE_LINK :=
 PACKAGE_TEST_COMMAND := expect tests/run-test.expect
 
 HEADER := $(TERMBOX2_INCLUDE)/termbox2.h
-HEADER_SHA256 := \
-	ef63b6bd6e3a1c8ad339b7aa0bf52dc21f3e92bd886264ebe588ab86ccd1e5d1
-RELEASE_LICENSE_SHA256 := \
-	de32c2a6efe313c76fb56692a54a8b544ed31cc9ca04a052e134844740a0bb1e
-HEADER_LICENSE_SHA256 := \
-	23190431e232877cc40c6d39af50c58719402c4a76404e41b73358a08ef405fa
 
 .PHONY: example short-example run run-interactive run-life-interactive \
 	verify-profile
@@ -42,21 +36,9 @@ run-interactive: builds/incident-filter
 	./builds/incident-filter
 
 verify-profile: $(DEPENDENCY_PREREQUISITE)
-	@test -f "$(HEADER)" || { \
-	  echo "missing $(HEADER)" >&2; \
-	  exit 2; \
-	}
-	@test "$$(shasum -a 256 "$(HEADER)" | cut -d' ' -f1)" = \
-	  "$(HEADER_SHA256)" || { \
-	  echo "termbox2.h does not match pinned v2.5.0" >&2; \
-	  exit 2; \
-	}
-	@test "$$(shasum -a 256 \
-	  LICENSES/termbox2-release-LICENSE.txt | cut -d' ' -f1)" = \
-	  "$(RELEASE_LICENSE_SHA256)"
-	@test "$$(shasum -a 256 \
-	  LICENSES/termbox2-header-MIT.txt | cut -d' ' -f1)" = \
-	  "$(HEADER_LICENSE_SHA256)"
+	@test -f "$(HEADER)" || { echo "missing $(HEADER)" >&2; exit 2; }
+	@cd $(TERMBOX2_INCLUDE) && $(CHECK_SHA256) $(CURDIR)/headers.sha256
+	@$(CHECK_SHA256) licenses.sha256
 
 builds/game-of-life: examples/game-of-life.x $(PACKAGE_ARCHIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/life-build \

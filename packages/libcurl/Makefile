@@ -11,7 +11,7 @@ include ../package.mk
 OPENSSL_PREFIX ?= $(CURL_PREFIX)
 CURL_INCLUDE := $(CURL_PREFIX)/include
 
-PACKAGE_C_FLAGS := --c-include-dir src --c-system-dir $(CURL_INCLUDE)
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CURL_INCLUDE)
 PACKAGE_LINK := $(PACKAGE_DEPS)/lib/libcurl.a \
 	-L$(OPENSSL_PREFIX)/lib -lssl -lcrypto
 ifeq ($(shell uname -s),Linux)
@@ -46,33 +46,15 @@ run-lisp: builds/inline-lisp
 	python3 tools/run-fixture.py builds/inline-lisp
 
 verify-profile: verify-dependency verify-headers
-	@test "$$($(CURL_PREFIX)/bin/curl-config --version)" = \
-	  "libcurl 8.22.0"
-	@test "$$($(OPENSSL_PREFIX)/bin/openssl version | cut -d' ' -f1-2)" = \
-	  "OpenSSL 3.6.4"
-	@test "$$(shasum -a 256 LICENSES/OpenSSL-3.6.4.txt | \
-	  cut -d' ' -f1)" = \
-	  7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a
-	@test "$$(shasum -a 256 LICENSES/curl-8.22.0.txt | \
-	  cut -d' ' -f1)" = \
-	  82f2f4427d6545ee5aaac4f0b80428da6cc8ba41c2cf5da3a03680ec327b9681
-	@config="$$($(CURL_PREFIX)/bin/curl-config --configure)"; \
-	  echo "$$config" | grep -q -- \
-	    "--with-ca-bundle=$(CURL_CA_BUNDLE)" || exit 1; \
-	  for option in without-zlib without-brotli without-zstd \
-	    without-libpsl without-libidn2 without-nghttp2 without-ngtcp2 \
-	    without-nghttp3 without-libssh2 disable-threaded-resolver \
-	    disable-ftp disable-file disable-ldap disable-ldaps disable-rtsp \
-	    disable-dict disable-telnet disable-tftp disable-pop3 disable-imap \
-	    disable-smb disable-smtp disable-gopher disable-mqtt; do \
-	    echo "$$config" | grep -q -- "--$$option" || exit 1; \
-	  done
+	@$(CHECK_SHA256) licenses.sha256
+	@./verify-profile.sh "$(CURL_PREFIX)" "$(OPENSSL_PREFIX)" \
+	  "$(CURL_CA_BUNDLE)"
 
 verify-headers: $(DEPENDENCY_PREREQUISITE)
-	@test "$$(cd $(CURL_INCLUDE) && \
-	  find curl -maxdepth 1 -type f -print | LC_ALL=C sort | \
-	  xargs shasum -a 256 | shasum -a 256 | cut -d' ' -f1)" = \
-	  506b4f38572b387a06f8fb59803cd93ca193f88d98df1e02bf78798eeb20743e
+# One digest over the curl header tree's own digests, not a file manifest.
+	@cd $(CURL_INCLUDE) && find curl -maxdepth 1 -type f -print | \
+	  LC_ALL=C sort | xargs shasum -a 256 | shasum -a 256 | \
+	  cut -d" " -f1 | cmp -s - $(CURDIR)/header-tree.sha256
 
 builds/endpoint-report: examples/endpoint-report.x $(PACKAGE_ARCHIVE) | builds
 	$(X2C) build --output $@ --build-dir builds/example \

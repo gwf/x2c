@@ -431,9 +431,11 @@ def _preflight(names: list[str]) -> int:
     if os.environ.get(variable):
       continue
     path = root / name / "dependency.json"
-    linux = path.with_name("dependency-linux.json")
-    if sys.platform == "linux" and linux.is_file():
-      path = linux
+    for alternate in ("dependency-generic.json", "dependency-linux.json"):
+      candidate = path.with_name(alternate)
+      if sys.platform == "linux" and candidate.is_file():
+        path = candidate
+        break
     manifest, _ = _load_manifest(path)
     cannot_inspect = False
     for command, package in (("git", "git"),
