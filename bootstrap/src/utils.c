@@ -18,7 +18,7 @@
 
 #include "utils.h"
 
-static String _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -57,28 +57,20 @@ static int _locate_home(const char * start, char * out, size_t size);
 
 static void _prepare_repo_defaults(void);
 
-static int _cpp_status(int status);
-
-static int _cpp_wait(pid_t pid);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new(".");
-  _1 = String_new(".");
-  _2 = String_new("/");
-  _3 = String_new("/src/");
-  _4 = String_new(".x");
-  _5 = String_new("/packages");
-  _6 = String_new("%s/include");
-  _7 = String_new("%s/src");
-  _8 = String_new("%s/lib");
-  _9 = String_new("invalid empty process action");
-  _10 = String_new("unable to create process capture files");
-  _11 = String_new("unable to fork child process");
-  _12 = String_new("%08X");
-  _13 = String_new("/");
+  _1 = String_new("/");
+  _2 = String_new("/src/");
+  _3 = String_new(".x");
+  _4 = String_new("/packages");
+  _5 = String_new("%s/include");
+  _6 = String_new("%s/src");
+  _7 = String_new("%s/lib");
+  _8 = String_new("%08X");
+  _9 = String_new("/");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -141,28 +133,6 @@ String x2c_get_executable(void){
   return x2c_executable_path;
 }
 
-int String_rfind(String, String);
-
-String x2c_path_dir(String path){
-  if(! _init_guard_) _file_init_();
-  int slash = String_rfind(path, _13);
-  if(slash < 0) return _1;
-  return slash ? String_getslice(path, -2147483648, slash, 1) : _2;
-}
-
-String Var_string(Var);
-
-Var List_last(List);
-
-List String_split(String, String);
-
-String x2c_path_stem(String path){
-  if(! _init_guard_) _file_init_();
-  String base = Var_string(List_last(String_split(path, _13)));
-  int dot = String_rfind(base, _0);
-  return dot > 0 ? String_getslice(base, -2147483648, dot, 1) : base;
-}
-
 Var String_var(String);
 
 int String_startswith(String, String);
@@ -173,19 +143,21 @@ int String_len(String);
 
 String x2c_package_directory(String root, String path){
   if(! _init_guard_) _file_init_();
-  String prefix = String_join(NULL, cons(String_var(root), cons(String_var(_2), NULL)));
+  String prefix = String_join(NULL, cons(String_var(root), cons(String_var(_1), NULL)));
   if(! String_startswith(path, prefix)) return NULL;
-  int slash = String_find(String_getslice(path, String_len(prefix), -2147483648, 1), _13);
+  int slash = String_find(String_getslice(path, String_len(prefix), -2147483648, 1), _9);
   return slash > 0 ? String_getslice(path, -2147483648, String_len(prefix) + slash, 1) : NULL;
 }
+
+int String_rfind(String, String);
 
 int String_equal(String, String);
 
 int x2c_package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
-  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_3), NULL))))) return 1;
-  String name = String_getslice(directory, String_rfind(directory, _13) + 1, -2147483648, 1);
-  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(name), cons(String_var(_4), NULL))))));
+  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_2), NULL))))) return 1;
+  String name = String_getslice(directory, String_rfind(directory, _9) + 1, -2147483648, 1);
+  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_1), cons(String_var(name), cons(String_var(_3), NULL))))));
 }
 
 List x2c_default_include_dirs(void){
@@ -201,7 +173,7 @@ List x2c_cpp_include_dirs(void){
 String x2c_home_packages(void){
   if(! _init_guard_) _file_init_();
   if(! String_truth(x2c_root_path) || String_equal(x2c_root_path, _0)) return NULL;
-  String packages = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_5), NULL)));
+  String packages = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_4), NULL)));
   return _dir_exists(packages) ? packages : NULL;
 }
 
@@ -300,109 +272,10 @@ List cons(Var, List);
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
   const char * root = x2c_root_path;
-  String include_dir = String_printf(_6, root);
-  String src_dir = String_printf(_7, root), lib_dir = String_printf(_8, root);
+  String include_dir = String_printf(_5, root);
+  String src_dir = String_printf(_6, root), lib_dir = String_printf(_7, root);
   x2c_base_include_dirs = cons(String_var(include_dir), NULL);
   x2c_repo_cpp_include_dirs = _dir_exists(src_dir) ? cons(String_var(src_dir), cons(String_var(lib_dir), NULL)) : cons(String_var(lib_dir), NULL);
-}
-
-static int _cpp_status(int status){
-  if(WIFEXITED(status)) return WEXITSTATUS(status);
-  if(WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return - 1;
-}
-
-static int _cpp_wait(pid_t pid){
-  int status;
-  while(waitpid(pid, & status, 0) < 0){
-    if(errno == EINTR) continue;
-    return - 1;
-  }
-  return _cpp_status(status);
-}
-
-void * Scope_calloc(size_t, size_t);
-
-ChildProcess process_start(char * * argv, int capture){
-  if(! _init_guard_) _file_init_();
-  ChildProcess process = Scope_calloc(1, sizeof(struct ChildProcess));
-  if(! argv || ! argv[0]){
-    process -> pid = - 1;
-    process -> start_error = _9;
-    return process;
-  }
-  if(capture){
-    process -> output = tmpfile();
-    process -> errors = tmpfile();
-    if(! process -> output || ! process -> errors){
-      if(process -> output) File_close(process -> output);
-      if(process -> errors) File_close(process -> errors);
-      process -> pid = - 1;
-      process -> start_error = _10;
-      return process;
-    }
-
-  }
-  pid_t pid = fork();
-  process -> pid = pid;
-  if(pid == 0){
-    if(capture){
-      int out_fd = File_fileno(process -> output), err_fd = File_fileno(process -> errors);
-      if(dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0){
-        dprintf(STDERR_FILENO, "x2c: unable to capture child output: %s\n", strerror(errno));
-        _exit(127);
-      }
-      if(out_fd != STDOUT_FILENO) close(out_fd);
-      if(err_fd != STDERR_FILENO) close(err_fd);
-    }
-    execvp(argv[0], argv);
-    dprintf(STDERR_FILENO, "x2c: unable to execute %s: %s\n", argv[0], strerror(errno));
-    _exit(127);
-  }
-  if(pid < 0) process -> start_error = _11;
-  return process;
-}
-
-int ChildProcess_ready(ChildProcess c){
-  if(! _init_guard_) _file_init_();
-  if(c -> pid < 0 || c -> finished) return 1;
-  int status;
-  pid_t pid;
-  do pid = waitpid((pid_t) c -> pid, & status, WNOHANG);
-  while(pid < 0 && errno == EINTR);
-  ;
-  if(! pid) return 0;
-  c -> status = pid < 0 ? - 1 : _cpp_status(status);
-  c -> finished = 1;
-  return 1;
-}
-
-String File_string(File);
-
-int ChildProcess_wait(ChildProcess c, String * output, String * errors){
-  if(! _init_guard_) _file_init_();
-  if(output) * output = NULL;
-  if(errors) * errors = NULL;
-  if(! c || ! output || ! errors) return - 1;
-  int result = c -> finished ? c -> status : c -> pid < 0 ? - 1 : _cpp_wait((pid_t) c -> pid);
-  if(c -> output){
-    File_rewind(c -> output);
-    * output = File_string(c -> output);
-    File_close(c -> output);
-  }
-  if(c -> errors){
-    File_rewind(c -> errors);
-    * errors = File_string(c -> errors);
-    File_close(c -> errors);
-  }
-  if(String_truth(c -> start_error)) * errors = c -> start_error;
-  return result;
-}
-
-int process_run(char * * argv, String * output, String * errors){
-  if(! _init_guard_) _file_init_();
-  ChildProcess process = process_start(argv, 1);
-  return ChildProcess_wait(process, output, errors);
 }
 
 long worker_fork(void){
@@ -420,7 +293,10 @@ void worker_exit(int status){
 
 int worker_wait(long pid){
   if(! _init_guard_) _file_init_();
-  return _cpp_wait((pid_t) pid);
+  int status;
+  while(waitpid((pid_t) pid, & status, 0) < 0) if(errno != EINTR) return - 1;
+  if(WIFEXITED(status)) return WEXITSTATUS(status);
+  return WIFSIGNALED(status) ? 128 + WTERMSIG(status) : - 1;
 }
 
 int String_try_next(String, int *, int *);
@@ -439,7 +315,7 @@ String x2c_filename_hash(String filename){
     }
 
   }
-  return String_printf(_12, hash);
+  return String_printf(_8, hash);
 }
 
 #undef _x2c_initializer_choice_6E6B8BB0_0_expanded

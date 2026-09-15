@@ -70,6 +70,7 @@ dynamic operation, resource or external operation, API contract, then
 | `<format>` | formatting failed without output | `<abort>` |
 | `<not-found>` | an external resource does not exist | `<abort>` |
 | `<io-fail>` | another external I/O operation failed | `<abort>` |
+| `<cmd-fail>` | a command or pipeline exited with a nonzero status | `<abort>` |
 | `<join-fail>` | a worker transferred captured errors at join | `<abort>` |
 
 Every spelling shown is the compact `Symbol` identity. Unknown codes default to

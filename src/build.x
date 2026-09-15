@@ -38,7 +38,6 @@ typedef struct Build {
 
 #pragma private
 
-#include <dirent.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -54,7 +53,7 @@ typedef struct Build {
    spelling-derived key. The input path is not canonicalized, so its spelling
    is part of incremental cache identity. */
 static String _key(String path) {
-  String stem = x2c_path_stem(path);
+  String stem = path.stem();
   return %"$stem-%08x".printf(String.hash(path));
 }
 
@@ -169,29 +168,17 @@ static void _state_write(String path, uint64_t hash) {
   if (!ok || rename(temporary, path)) unlink(temporary);
 }
 
-/* Creates `path` and missing parents. Returns nonzero when every `mkdir`
-   succeeds or reports `EEXIST`; it does not verify that an existing final
-   entry is a directory. */
+/* Creates `path` and missing parents, returning zero when it cannot. */
 int _build_mkdirs(String path) {
-  if (!path || !path[0]) return 0;
-  char buffer[PATH_MAX];
-  if (strlen(path) >= sizeof(buffer)) return 0;
-  strcpy(buffer, path);
-  for (char *ch = buffer + 1; *ch; ch++) {
-    if (*ch != '/') continue;
-    *ch = 0;
-    if (mkdir(buffer, 0777) && errno != EEXIST) return 0;
-    *ch = '/';
-  }
-  return mkdir(buffer, 0777) == 0 || errno == EEXIST;
+  try path.make_dirs();
+  catch %(not-found *): return 0;
+  catch %(io-fail *): return 0;
+  return 1;
 }
 
 static void _require_directory(String path) {
   if (!_build_mkdirs(path))
     x2c_driver_error(%"cannot create build directory: $path");
-  struct stat info;
-  if (stat(path, &info) || !S_ISDIR(info.st_mode))
-    x2c_driver_error(%"build path is not a directory: $path");
 }
 
 static void _validate_input(String input) {
@@ -249,10 +236,10 @@ Build CliRequest.prepare(CliRequest c) {
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
-    state.output = %"${x2c_path_stem(c.inputs.car().string())}.o";
+    state.output = %"${c.inputs.car().string().stem()}.o";
   else if (c.kind == <static-lib>) {
     String stem = c.inputs ?
-                  x2c_path_stem(c.inputs.car()) : %"target";
+                  c.inputs.car().string().stem() : %"target";
     state.output = %"lib$stem.a";
   }
   else state.output = "a.out";
@@ -319,7 +306,7 @@ static uint64_t _translation_fingerprint(
   hash = _state_text(hash, request.cpp_symbols ? %"cpp-symbols" : %"raw");
   hash = _state_text(
     hash, request.source_map ? %"source-map" : %"generated-lines");
-  String depfile = %"$directory/${x2c_path_stem(input)}.d";
+  String depfile = %"$directory/${input.stem()}.d";
   return _state_dependencies(hash, depfile, ok);
 }
 
@@ -330,7 +317,7 @@ static uint64_t _translation_fingerprint(
 */
 int Build.translation_current(Build state, String input, String directory) {
   if (!state.state_root || state.request.dry_run) return 0;
-  String stem = x2c_path_stem(input);
+  String stem = input.stem();
   if (access(%"$directory/$stem.c", R_OK)) return 0;
   if (access(%"$directory/$stem.h", R_OK)) return 0;
   if (access(%"$directory/$stem.xi", R_OK)) return 0;
@@ -403,7 +390,7 @@ static void Build._link_packages(Build state, String input, String directory) {
   List roots = state.request.package_roots();
   if (!roots) return;
   String own = _package_source_directory(roots, input);
-  String depfile = %"$directory/${x2c_path_stem(input)}.d";
+  String depfile = %"$directory/${input.stem()}.d";
   foreach (String dependency, _state_dep_inputs(depfile)) {
     String package = _package_directory(roots, dependency);
     if (!package || (own && package == own)) continue;
@@ -438,7 +425,7 @@ static void Build._link_packages(Build state, String input, String directory) {
     a diagnostic and exits with status 2. Static libraries skip link inputs.
 */
 void Build.add_generated(Build state, String input, String directory) {
-  String stem = x2c_path_stem(input), source = %"$directory/$stem.c";
+  String stem = input.stem(), source = %"$directory/$stem.c";
   String header = %"$directory/$stem.h";
   state.gen_bytes += report_file_bytes(source);
   state.gen_bytes += report_file_bytes(header);
@@ -629,7 +616,7 @@ static int _compile_sources(Build b) {
       object = b.output;
     String depfile = %"${b.dep_root}/$key.d", Array include_dirs = %[];
     if (source.startswith(b.gen_root))
-      include_dirs.push(x2c_path_dir(source));
+      include_dirs.push(source.dirname());
     foreach (Var directory, b.gen_dirs)
       if (!include_dirs.contains(directory)) include_dirs.push(directory);
     List directories = include_dirs.list_free();
@@ -856,30 +843,12 @@ int Build.run_program(Build state) {
   return action.run();
 }
 
-/* Recursively removes `path`, continuing through sibling entries after a
-   failure. Returns nonzero when the path was absent or every entry and the
-   root were removed. */
+/* Removes `path` and everything below it, returning zero when any entry
+   could not be removed. An absent path counts as removed. */
 int _build_remove_tree(String path) {
-  DIR *directory = opendir(path);
-  if (!directory) return unlink(path) == 0 || errno == ENOENT;
-  struct dirent *entry, int ok = 1;
-  while ((entry = readdir(directory))) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
-    Context context = $auto(Context.open_isolated());
-    String child = %"$path/${String.new(entry->d_name)}", struct stat info;
-    if (lstat(child, &info)) {
-      ok = 0;
-      continue;
-    }
-    if (S_ISDIR(info.st_mode)) {
-      if (!_build_remove_tree(child)) ok = 0;
-    }
-    else if (unlink(child)) ok = 0;
-  }
-  closedir(directory);
-  if (rmdir(path)) ok = 0;
-  return ok;
+  try path.remove_tree();
+  catch %(io-fail *): return 0;
+  return 1;
 }
 
 /** Removes the temporary work tree after a successful real build.

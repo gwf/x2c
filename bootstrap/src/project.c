@@ -100,10 +100,6 @@ static String _absolute(Project project, String path);
 
 static int _has_glob(String pattern);
 
-static int _class_match(const char * * pattern, unsigned char value);
-
-static int _glob_match(const char * pattern, const char * text);
-
 static void _walk_matches(Project project, String directory, String relative, String pattern, Array matches);
 
 static Array _expand_pattern(Project project, String pattern, const char * owner);
@@ -554,53 +550,7 @@ static int _has_glob(String pattern){
   return String_truth(pattern) && strpbrk(pattern, "*?[");
 }
 
-static int _class_match(const char * * pattern, unsigned char value){
-  const char * ch = * pattern;
-  int negate = * ch == '!' || * ch == '^';
-  if(negate) ch ++;
-  int matched = 0;
-  while(* ch && * ch != ']'){
-    unsigned char first = * ch ++;
-    if(* ch == '-' && ch[1] && ch[1] != ']'){
-      ch ++;
-      unsigned char last = * ch ++;
-      if(value >= first && value <= last) matched = 1;
-    }
-    else if(value == first) matched = 1;
-  }
-  if(* ch != ']') return - 1;
-  * pattern = ch + 1;
-  return negate ? ! matched : matched;
-}
-
-static int _glob_match(const char * pattern, const char * text){
-  if(! * pattern) return ! * text;
-  if(pattern[0] == '*' && pattern[1] == '*'){
-    pattern += 2;
-    if(* pattern == '/'){
-      if(_glob_match(pattern + 1, text)) return 1;
-      for(const char * ch = text;  * ch;  ch ++) if(_glob_match(pattern - 2, ch + 1)) return 1;
-      return 0;
-    }
-    if(_glob_match(pattern, text)) return 1;
-    return * text && _glob_match(pattern - 2, text + 1);
-  }
-  if(* pattern == '*'){
-    pattern ++;
-    if(_glob_match(pattern, text)) return 1;
-    return * text && * text != '/' && _glob_match(pattern - 1, text + 1);
-  }
-  if(* pattern == '?') return * text && * text != '/' && _glob_match(pattern + 1, text + 1);
-  if(* pattern == '['){
-    if(! * text || * text == '/') return 0;
-    const char * rest = pattern + 1;
-    int matched = _class_match(& rest, (unsigned char) * text);
-    if(matched < 0) return * text == '[' && _glob_match(pattern + 1, text + 1);
-    return matched && _glob_match(rest, text + 1);
-  }
-  if(* pattern == '\\' && pattern[1]) pattern ++;
-  return * pattern == * text && _glob_match(pattern + 1, text + 1);
-}
+int String_glob_match(String, String);
 
 int Array_contains(Array, Var);
 
@@ -620,7 +570,7 @@ static void _walk_matches(Project project, String directory, String relative, St
       _walk_matches(project, child, child_relative, pattern, matches);
       continue;
     }
-    if(S_ISREG(info.st_mode) && _glob_match(pattern, child_relative) && ! Array_contains(matches, String_var(child))) Array_push(matches, String_var(child));
+    if(S_ISREG(info.st_mode) && String_glob_match(pattern, child_relative) && ! Array_contains(matches, String_var(child))) Array_push(matches, String_var(child));
   }
   closedir(input);
 }
@@ -662,7 +612,7 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
             if(! String_startswith(path, prefix)) continue;
             if(String_truth(project -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(project -> build_root), cons(String_var(_26), NULL))))) continue;
             String relative = String_getslice(path, String_len(prefix), -2147483648, 1);
-            if(_glob_match(pattern, relative) && ! Array_contains(matches, String_var(path))) Array_push(matches, String_var(path));
+            if(String_glob_match(pattern, relative) && ! Array_contains(matches, String_var(path))) Array_push(matches, String_var(path));
           }
 
         }
@@ -1199,11 +1149,11 @@ String project_manifest(CliRequest request){
   return NULL;
 }
 
-String SourceView_path(String);
+String String_absolute_path(String);
 
 int SourceView_read(SourceView, String, volatile String *);
 
-String x2c_path_dir(String);
+String String_dirname(String);
 
 ProjectBuild project_plan(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -1215,7 +1165,7 @@ ProjectBuild project_plan(CliRequest request){
   char resolved[PATH_MAX];
   if(realpath(project -> path, resolved)) project -> path = String_join(NULL, cons(String_var(String_new(resolved)), NULL));
   if(project -> sources){
-    project -> path = SourceView_path(project -> path);
+    project -> path = String_absolute_path(project -> path);
     if(! SourceView_read(project -> sources, project -> path, & project -> text)) _error(project, 0, "cannot read manifest");
   }
   else{
@@ -1252,7 +1202,7 @@ _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
 }
 }
-project -> root = x2c_path_dir(project -> path);
+project -> root = String_dirname(project -> path);
 _parse_manifest(project);
 for(ProjectTarget target = project -> targets;  target;  target = target -> next) _validate_target(project, target);
 _resolve_dependencies(project, request);

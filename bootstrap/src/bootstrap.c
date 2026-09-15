@@ -93,7 +93,7 @@ int String_equal(String, String);
 
 String String_new(const char *);
 
-String x2c_path_dir(String);
+String String_dirname(String);
 
 static String _absolute(String path){
   if(! String_truth(path) || ! String_getindex(path, 0)) _error("empty installation prefix");
@@ -103,7 +103,7 @@ static String _absolute(String path){
     if(! realpath(path, resolved)) _error_path("cannot resolve installation prefix", path);
     return String_new(resolved);
   }
-  String parent = x2c_path_dir(path);
+  String parent = String_dirname(path);
   if(! realpath(parent, resolved)) _error_path("installation parent does not exist", parent);
   const char * base = strrchr(path, '/');
   base = base ? base + 1 : path;
@@ -279,7 +279,7 @@ static void _extract(Bootstrap payload, char * manifest){
     if(! _record(line, & expected_hash, & expected_size, relative) || ! _safe_path(relative)) _error("malformed embedded source record");
     String source = String_join(NULL, cons(String_var(_6), cons(String_var(String_new(relative)), NULL)));
     String target = String_join(NULL, cons(String_var(temporary), cons(String_var(_3), cons(String_var(String_new(relative)), NULL))));
-    String parent = x2c_path_dir(target);
+    String parent = String_dirname(target);
     if(! _build_mkdirs(parent)) _error_path("cannot create payload directory", parent);
     File input = fopen(source, "rb"), output = fopen(target, "wb");
     if(! input || ! output) _error_path("cannot extract embedded source", String_new(relative));

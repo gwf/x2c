@@ -253,7 +253,7 @@ List CliRequest_package_roots(CliRequest);
 
 int List_truth(List);
 
-String SourceView_path(String);
+String String_absolute_path(String);
 
 int List_try_next(List, List *, Var *);
 
@@ -274,7 +274,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
   compiler -> package_dirs = CliRequest_package_roots(request);
   if(! List_truth(compiler -> package_dirs)) return;
   String source;
-  if(compiler -> sources) source = SourceView_path(filename);
+  if(compiler -> sources) source = String_absolute_path(filename);
   else{
     if(! realpath(filename, buffer)) return;
     source = String_join(NULL, cons(String_var(String_new(buffer)), NULL));
@@ -288,7 +288,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
       directory = Var_string(_x2c_macro_cursor_output_0);
       {
         String root;
-        if(compiler -> sources) root = SourceView_path(directory);
+        if(compiler -> sources) root = String_absolute_path(directory);
         else{
           if(! realpath(directory, buffer)) continue;
           root = String_join(NULL, cons(String_var(String_new(buffer)), NULL));

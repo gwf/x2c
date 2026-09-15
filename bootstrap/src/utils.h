@@ -6,14 +6,6 @@
 #define __GUARD_0x6E6B8BB0__
 
 #include "x2c.h"
-typedef struct ChildProcess{
-  long pid;
-  int finished, status;
-  File output, errors;
-  String start_error;
-}
-* ChildProcess;
-
 void x2c_initialize_environment(const char * argv0);
 
 void x2c_set_root(String root);
@@ -21,10 +13,6 @@ void x2c_set_root(String root);
 String x2c_get_root(void);
 
 String x2c_get_executable(void);
-
-String x2c_path_dir(String path);
-
-String x2c_path_stem(String path);
 
 String x2c_package_directory(String root, String path);
 
@@ -37,14 +25,6 @@ List x2c_cpp_include_dirs(void);
 String x2c_home_packages(void);
 
 _Noreturn void x2c_driver_error(const char * message);
-
-ChildProcess process_start(char * * argv, int capture);
-
-int ChildProcess_ready(ChildProcess c);
-
-int ChildProcess_wait(ChildProcess c, String * output, String * errors);
-
-int process_run(char * * argv, String * output, String * errors);
 
 long worker_fork(void);
 

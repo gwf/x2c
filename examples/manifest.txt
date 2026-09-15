@@ -48,6 +48,7 @@ power/scopes|showcase|run||expected/power-scopes.stdout|Standalone power scopes 
 power/shared-threads|showcase|run||expected/context-threads.stdout|Isolated workers, joined results, logging, and Mutex-coordinated shared state.
 power/threads|showcase|run||expected/power-threads.stdout|Standalone power threads gallery example.
 power/word-count-summary|showcase|run|../../data/docs-words.txt|expected/docs-word-count.stdout|Task-oriented file and collection tutorial.
+scripts/line-counts|showcase|run||expected/line-counts.stdout|Parallel commands, pipelines, globbing, and file operations with process.x and path.x.
 programs/lisp|showcase|run|--init ../../../etc/init.xlisp --selftest|expected/lisp.stdout|Bootstrapped Lisp command-line shell.
 programs/mandelbrot|showcase|run||expected/parallel-mandelbrot.stdout|Deep Mandelbrot zoom rendered on native threads.
 tours/hello-worlds|showcase|run||expected/hello-worlds.stdout|Twelve idiomatic paths to Hello, World.

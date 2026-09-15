@@ -320,7 +320,7 @@ int Compiler.read_source(
   Compiler compiler, String path, String volatile *text) {
   if (!compiler.sources.read(path, text)) return 0;
   if (compiler.source_facts)
-    compiler.source_texts[SourceView.path(path)] = *text;
+    compiler.source_texts[path.absolute_path()] = *text;
   return 1;
 }
 
@@ -349,7 +349,7 @@ static List _source_range(Compiler compiler, Token first, Token after) {
   while (last > first &&
          (last.type == <space> || last.type == <comment> ||
           last.type == <preproc>)) last--;
-  String path = SourceView.path(compiler.filename);
+  String path = compiler.filename.absolute_path();
   if (!compiler.source_texts.contains(path))
     compiler.source_texts[path] = compiler.text;
   return %($path ${first.pos} ${last.pos + last.len});
@@ -786,7 +786,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
 }
 
 static List _declaration_source_key(Compiler compiler, Token token) {
-  String path = SourceView.path(compiler.filename);
+  String path = compiler.filename.absolute_path();
   String prefix = %"${compiler.root_dir}/";
   if (path.startswith(prefix)) path = path[prefix.len():];
   return %("source-node" (declaration $path ${token.pos}));
@@ -2874,7 +2874,7 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
 static String _gensym_owner(Compiler compiler) {
   if (!compiler.filename) return %"";
   char buffer[PATH_MAX];
-  String path = compiler.sources ? SourceView.path(compiler.filename) :
+  String path = compiler.sources ? compiler.filename.absolute_path() :
                 realpath(compiler.filename, buffer) ? %"$buffer" :
                 compiler.filename;
   static char root[PATH_MAX];

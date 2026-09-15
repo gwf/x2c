@@ -38,6 +38,8 @@ examples/*
 !examples/power/**
 !examples/magic/
 !examples/magic/**
+!examples/scripts/
+!examples/scripts/**
 !examples/programs/
 !examples/programs/**
 !examples/tours/

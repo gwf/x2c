@@ -102,8 +102,8 @@ func, lisp                    native callable binding and embedded Lisp
 lib                           DisjointSet utility
 ```
 
-Five more modules ship with the runtime but stay out of the implicit prelude,
-so a client names one in an explicit include:
+More modules ship with the runtime but stay out of the implicit prelude, so
+a client names one in an explicit include:
 
 ```text
 typed-array                   packed numeric storage with a native bracket
@@ -111,11 +111,14 @@ typed-list                    typed views over canonical List cells
 typed-map                     native numeric and canonical String maps
 list-selectors                compound List selectors past caddr
 match-recursive               readable recursive Match reference
+autodiff                      runtime reverse-mode differentiation tape
+process                       commands, pipelines, and jobs without a shell
+path                          filesystem operations on path Strings
 ```
 
 `docs/library-manifest.txt` is the owner of that split and of every module's
 visibility in the generated library reference; `lib/Makefile` builds the same
-five from `OPTIONAL_SOURCES`.
+modules from `OPTIONAL_SOURCES`.
 
 `lib/x2c.x` is generated from the standard modules by `lib/Makefile`. Never
 edit it by hand. `.xmacro` files beside the modules own shared macro

@@ -46,7 +46,7 @@ static void _write_outputs(
     fname = paths[i];
     File output = Stdout;
     if (fname) {
-      String directory = x2c_path_dir(fname);
+      String directory = fname.dirname();
       int fd, serial = 0;
       do {
         temporaries[i] = %"$directory/.x2c-output.%ld.%d".printf(
@@ -329,9 +329,6 @@ static List _file_init(Compiler c, List source) {
 
 // header/source partitioning
 
-static Type _remove_extern_from_type(Type type) =>
-  type.filter(%!(elem) => elem != <extern>);
-
 // Normalize declarations for header emission.
 static List _header_declaration(List node, Type type, List bindings) {
   if (type.is_extern()) {
@@ -342,16 +339,6 @@ static List _header_declaration(List node, Type type, List bindings) {
   }
   if (type.is_enum_tag_body() || type.is_aggregate_tag_body())
     return %(declare $type (bindings (bind () ())));
-  return node;
-}
-
-// Normalize declarations that stay in the source file.
-static List _source_declaration(List node, Type type, List bindings) {
-  if (type.is_static()) return node;
-  if (type.is_extern()) {
-    type = _remove_extern_from_type(type);
-    return %( declare $type $bindings );
-  }
   return node;
 }
 
@@ -406,8 +393,7 @@ static void _partition_function(
 static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
-  if (private)
-    _push_spaced(source, _source_declaration(declaration, type, bindings));
+  if (private) _push_spaced(source, declaration);
   else _push_spaced(header, _header_declaration(declaration, type, bindings));
 }
 
@@ -922,7 +908,7 @@ void generate_code(Compiler c, List ast, String dir) {
   source = c.emit(source);
 
   String basename =
-    %"${dir.rstrip(%"/")}/${x2c_path_stem(c.filename)}";
+    %"${dir.rstrip(%"/")}/${c.filename.stem()}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
   String header_text = c.code_pretty_string(header, hfile);
   String source_text = c.code_pretty_string(source, cfile);

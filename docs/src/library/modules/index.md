@@ -36,6 +36,8 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/match-recursive.x`](match-recursive.md) | optional reference matcher. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
+| [`lib/path.x`](path.md) | filesystem operations on path `String`s. |
+| [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
 | [`lib/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/split.x`](split.md) | `String` field splitting and repeatable typed cursors. |
 | [`lib/string-classify.x`](string-classify.md) | byte classification for canonical strings. |
@@ -59,6 +61,8 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
+- [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
+- [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 - [`lib/typed-map.x`](typed-map.md) - Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.

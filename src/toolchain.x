@@ -2,11 +2,13 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Resolves host tools and builds typed argv. Every action runs through the
-    child-process code in utils.x without a shell.
+    Resolves host tools and builds typed argv. Every action runs as a
+    `lib/process.x` command, without a shell.
 */
 
 #pragma once
+#include "path.x"
+#include "process.x"
 
 /** Holds resolved host tools, native layout, and borrowed option `List`s.
     The record returned by `toolchain_new` is `Scope`-owned. Its `String`s
@@ -27,15 +29,15 @@ typedef struct ToolAction {
   Symbol phase, List arguments, int verbose, dry_run, inherit_stdio, report;
 } *ToolAction;
 
-/** Tracks one `Scope`-owned started action and its captured child process.
-    After capture setup succeeds, a non-dry execution must be passed to
-    `ToolRun.wait` exactly once; a returning wait consumes its stdout and
-    stderr files. The borrowed action must remain valid through that wait.
-    Partial capture setup leaves a non-waitable execution.
+/** Tracks one `Scope`-owned started action and its job.
+    A tool that could not start has no job and keeps the message its
+    `ToolRun.wait` reports. The borrowed action must remain valid through
+    that wait.
 */
 typedef struct ToolRun {
   ToolAction action;
-  void *process;
+  Job job;
+  String start_error;
 } *ToolRun;
 
 #pragma private
@@ -88,8 +90,8 @@ static String _installed_tool(const char *name) {
 */
 static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage_dir = executable ? x2c_path_dir(executable) : NULL;
-  if (stage_dir && x2c_path_dir(stage_dir) == %"$root/builds") {
+  String stage_dir = executable ? executable.dirname() : NULL;
+  if (stage_dir && stage_dir.dirname() == %"$root/builds") {
     *include_dir = %"$root/include";
     *runtime_lib = %"$stage_dir/libx2c.a";
     return;
@@ -102,8 +104,8 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
                        %"$root/bootstrap/lib/libx2c.a";
     return;
   }
-  String bin_dir = executable ? x2c_path_dir(executable) : %".";
-  String prefix = x2c_path_dir(bin_dir);
+  String bin_dir = executable ? executable.dirname() : %".";
+  String prefix = bin_dir.dirname();
   *include_dir = %"$prefix/include";
   *runtime_lib = %"$prefix/lib/libx2c.a";
 }
@@ -284,18 +286,35 @@ static void _print_action(Symbol phase, List arguments) {
   fputc('\n', stderr);
 }
 
-static char **_action_argv(List arguments) {
-  int count = arguments.len();
-  char **argv = Scope.calloc(count + 1, sizeof(char *)), int index = 0;
-  foreach (String argument, arguments)
-    argv[index++] = argument ? argument : "";
-  return argv;
+static String _start_failure(String program, List detail) {
+  long error = detail.assoc(Symbol.new("errno")).integer();
+  String reason = String.new(strerror((int) error));
+  return %"x2c: unable to execute $program: $reason\n";
+}
+
+/* A tool that cannot start reports like a child that exited 127, the status
+   a shell gives a missing program, so every caller keeps one failure path. */
+static Job _start_tool(List command, String program, String *failure) {
+  Job job = NULL;
+  try job = command.start();
+  catch %(not-found *detail): *failure = _start_failure(program, detail);
+  catch %(io-fail *detail): *failure = _start_failure(program, detail);
+  return job;
+}
+
+static int _run_captured(List arguments, String *output, String *errors) {
+  List command = arguments.options(%{stdout: capture, stderr: capture});
+  Job job = _start_tool(command, arguments.car(), errors);
+  if (!job) return 127;
+  int status = job.wait();
+  *output = job.output();
+  *errors = job.errors();
+  return status;
 }
 
 /** Starts the action without a shell and returns a `Scope`-owned execution.
     Verbose and dry-run actions print their quoted argv to stderr. A dry run
-    starts no child. After capture setup succeeds, a non-dry execution must be
-    waited exactly once; partial capture setup leaves a non-waitable result.
+    starts no child.
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the execution
     or argv.
@@ -308,26 +327,23 @@ ToolRun ToolAction.start(ToolAction action) {
   ToolRun execution = Scope.calloc(1, sizeof(struct ToolRun));
   execution.action = action;
   if (action.dry_run) return execution;
-  execution.process = process_start(
-    _action_argv(action.arguments), !action.inherit_stdio);
+  List command = action.inherit_stdio ? action.arguments :
+    action.arguments.options(%{stdout: capture, stderr: capture});
+  execution.job = _start_tool(
+    command, action.arguments.car(), &execution.start_error);
   return execution;
 }
 
 /** Checks whether an execution can be waited without blocking. A dry run
-    is ready immediately. A completed child retains its status and captures
-    until the required `ToolRun.wait` call.
+    and a tool that could not start are ready immediately.
 */
-int ToolRun.ready(ToolRun execution) {
-  if (execution.action.dry_run) return 1;
-  ChildProcess process = execution.process;
-  return process.ready();
-}
+int ToolRun.ready(ToolRun execution) =>
+  !execution.job || execution.job.ready();
 
-/** Waits once for an execution, forwards its captured streams, and returns its
-    shell-style status. Signals return `128 + signal`; an invalid action, fork
-    failure, or wait failure returns -1, and a dry run returns 0. Captured
-    output goes to stderr; program actions inherit standard streams. An
-    execution with partial capture setup is not valid input.
+/** Waits for an execution, forwards its captured streams, and returns its
+    shell-style status. Signals return `128 + signal`, a tool that could not
+    start returns 127, and a dry run returns 0. Captured output goes to
+    stderr; program actions inherit standard streams.
 
     Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
     reading either capture as a `String`.
@@ -335,9 +351,10 @@ int ToolRun.ready(ToolRun execution) {
 int ToolRun.wait(ToolRun execution) {
   ToolAction action = execution.action;
   if (action.dry_run) return 0;
-  String output = NULL, errors = NULL;
-  ChildProcess process = execution.process;
-  int status = process.wait(&output, &errors);
+  Job job = execution.job;
+  int status = job ? job.wait() : 127;
+  String output = job ? job.output() : NULL;
+  String errors = job ? job.errors() : execution.start_error;
   report_suspend();
   if (output) fputs(output, stderr);
   if (errors) fputs(errors, stderr);
@@ -349,7 +366,6 @@ int ToolRun.wait(ToolRun execution) {
 }
 
 /** Starts and waits for the action, returning its final status.
-    A partial capture setup failure returns no defined status.
 
     Raises: the same construction and capture-reading causes as
     `ToolAction.start` and `ToolRun.wait`.
@@ -371,9 +387,9 @@ static void _append_includes(Array arguments, List dirs) {
     its temporary depfile is read when possible and removed on returning paths,
     including a handled `<io-fail>` while reading it. A non-returning
     `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` may transfer before removal.
-    Returns the shell-style child status, or -1 for invalid arguments, local
-    setup failure, child start failure, or wait failure. Partial capture setup
-    returns no defined status. This operation does not consult `dry_run`.
+    Returns the shell-style child status, 127 when the preprocessor cannot
+    start, or -1 for invalid arguments or local setup failure. This operation
+    does not consult `dry_run`.
 
     Raises: `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
     constructing arguments or reading captured text.
@@ -386,13 +402,10 @@ int Toolchain.preprocess(
   if (dependencies) *dependencies = NULL;
   if (!fname || !output || !errors) return -1;
   if (!toolchain.keep_system_includes) {
-    char *probe[] = {
-      toolchain.cc, "-E", "-x", "c", "-fkeep-system-includes",
-      "/dev/null", NULL
-    };
     String probe_output = NULL, probe_errors = NULL;
-    toolchain.keep_system_includes =
-      process_run(probe, &probe_output, &probe_errors) == 0 ? 1 : -1;
+    toolchain.keep_system_includes = _run_captured(
+      %(${toolchain.cc} "-E" "-x" "c" "-fkeep-system-includes" "/dev/null"),
+      &probe_output, &probe_errors) == 0 ? 1 : -1;
   }
   char *base[] = {
     "-E", "-P", "-x", "c",
@@ -436,7 +449,7 @@ int Toolchain.preprocess(
   arguments.push(fname);
   List argument_list = arguments.list_free();
   if (toolchain.verbose) _print_action(<preprocess>, argument_list);
-  int result = process_run(_action_argv(argument_list), output, errors);
+  int result = _run_captured(argument_list, output, errors);
   /* The dependency file is consumed and its unlink attempted even after host
      failure. The returned status tells the caller whether stdout is usable. */
   if (dependencies) {

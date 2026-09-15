@@ -111,6 +111,14 @@ PRIMARY_EVIDENCE = {
     ),
     "match-recursive": "`make verify` (`unittest/test-match.x`).",
     "mutex": "`make verify` (`unittest/test-mutex.x`).",
+    "path": (
+        "`make verify` (`unittest/test-path.x`) and `make examples` "
+        "(`scripts/line-counts`)."
+    ),
+    "process": (
+        "`make verify` (`unittest/test-process.x`) and `make examples` "
+        "(`scripts/line-counts`)."
+    ),
     "scope": (
         "`make verify` (`unittest/test-scope.x`) and `make examples` "
         "(`docs-tour`)."

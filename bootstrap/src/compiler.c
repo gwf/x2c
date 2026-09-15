@@ -968,11 +968,11 @@ Compiler Compiler_new_shared(Compiler owner){
 
 int SourceView_read(SourceView, String, volatile String *);
 
-String SourceView_path(String);
+String String_absolute_path(String);
 
 int Compiler_read_source(Compiler compiler, String path, String volatile * text){
   if(! SourceView_read(compiler -> sources, path, text)) return 0;
-  if(compiler -> source_facts) Map_setindex(compiler -> source_texts, String_var(SourceView_path(path)), String_var(* text));
+  if(compiler -> source_facts) Map_setindex(compiler -> source_texts, String_var(String_absolute_path(path)), String_var(* text));
   return 1;
 }
 
@@ -1022,7 +1022,7 @@ static List _source_range(Compiler compiler, Token first, Token after){
   if(! first || ! after || first >= after || Map_truth(compiler -> macro_holes)) return NULL;
   Token last = after - 1;
   while(last > first &&(last -> type == 40896714 || last -> type == 7477210024 || last -> type == 35579270086)) last --;
-  String path = SourceView_path(compiler -> filename);
+  String path = String_absolute_path(compiler -> filename);
   if(! Map_contains(compiler -> source_texts, String_var(path))) Map_setindex(compiler -> source_texts, String_var(path), String_var(compiler -> text));
   return cons(String_var(path), cons(int_var(first -> pos), cons(int_var(last -> pos + last -> len), NULL)));
 }
@@ -1567,7 +1567,7 @@ return List_var(Array_list_free(rows));
 }
 
 static List _declaration_source_key(Compiler compiler, Token token){
-  String path = SourceView_path(compiler -> filename);  String prefix = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_34), NULL)));  if(String_startswith(path, prefix)) path = String_getslice(path, String_len(prefix), -2147483648, 1);  return cons(_109, cons(List_var(cons(_110, cons(String_var(path), cons(int_var(token -> pos), NULL)))), NULL));
+  String path = String_absolute_path(compiler -> filename);  String prefix = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_34), NULL)));  if(String_startswith(path, prefix)) path = String_getslice(path, String_len(prefix), -2147483648, 1);  return cons(_109, cons(List_var(cons(_110, cons(String_var(path), cons(int_var(token -> pos), NULL)))), NULL));
 }
 
 void Compiler_queue_declaration_effect(Compiler compiler, String form, Token first, Token after){
@@ -3380,7 +3380,7 @@ Type Sym_delegate_aggregate(Sym sym, Type type){
 }
 
 static String _gensym_owner(Compiler compiler){
-  if(! String_truth(compiler -> filename)) return 0;  char buffer[PATH_MAX];  String path = compiler -> sources ? SourceView_path(compiler -> filename) : realpath(compiler -> filename, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : compiler -> filename;  static char root[PATH_MAX];  if(! * root && ! realpath(x2c_get_root(), root)) snprintf(root, sizeof root, "%s", (char *) x2c_get_root());  String prefix = String_join(NULL, cons(String_var(String_new(root)), cons(String_var(_34), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
+  if(! String_truth(compiler -> filename)) return 0;  char buffer[PATH_MAX];  String path = compiler -> sources ? String_absolute_path(compiler -> filename) : realpath(compiler -> filename, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : compiler -> filename;  static char root[PATH_MAX];  if(! * root && ! realpath(x2c_get_root(), root)) snprintf(root, sizeof root, "%s", (char *) x2c_get_root());  String prefix = String_join(NULL, cons(String_var(String_new(root)), cons(String_var(_34), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
 }
 
 List Compiler_gensym(Compiler compiler){

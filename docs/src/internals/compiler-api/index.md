@@ -40,4 +40,4 @@ Functions and types exposed by each compiler module.
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |
 | [`src/type.x`](type.md) | x2c semantic types. |
-| [`src/utils.x`](utils.md) | System utilities for environment discovery and child processes. |
+| [`src/utils.x`](utils.md) | System utilities for environment discovery and workers. |

@@ -158,14 +158,14 @@ static void _configure_package(
   compiler.package_dirs = request.package_roots();
   if (!compiler.package_dirs) return;
   String source;
-  if (compiler.sources) source = SourceView.path(filename);
+  if (compiler.sources) source = filename.absolute_path();
   else {
     if (!realpath(filename, buffer)) return;
     source = %"$buffer";
   }
   foreach (String directory, compiler.package_dirs) {
     String root;
-    if (compiler.sources) root = SourceView.path(directory);
+    if (compiler.sources) root = directory.absolute_path();
     else {
       if (!realpath(directory, buffer)) continue;
       root = %"$buffer";

@@ -6,6 +6,7 @@
 #define __GUARD_0x118AEF35__
 
 #include "x2c.h"
+#include "path.h"
 typedef struct SourceView{
   Map overlays, dirty_paths;
 }
@@ -34,8 +35,6 @@ Buffer SourceView_write_repr(SourceView value, Buffer out);
 String SourceView_repr(SourceView value);
 
 void SourceView_init(SourceView sources);
-
-String SourceView_path(String path);
 
 void SourceView_set(SourceView sources, String path, String text, int changed);
 

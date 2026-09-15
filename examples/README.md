@@ -99,6 +99,9 @@ from the gallery examples.
   [concatenation](love/string-concatenation.x),
   [symbol forms](love/symbol-forms.x), [symbol sets](love/symbol-sets.x),
   [basic literals](love/basic-literals.x), and [List methods](love/list-methods.x).
+- Commands and files: [line counts](scripts/line-counts.x) runs parallel
+  commands and pipelines and manages a scratch tree with `process.x` and
+  `path.x`.
 - Collections and execution: [collection indexing](power/collection-indexing.x),
   [word-count summary](power/word-count-summary.x),
   [shared worker state](power/shared-threads.x),
