@@ -34,6 +34,14 @@
 > optional module that includes `path.x` and `process.x`, instead of new
 > implicit-include plumbing. The planned `parallel-jobs` example was folded
 > into `line-counts`, which already caps its jobs with `Job.wait_any`.
+> Follow-up round 4a19965 and b4debf9: a script's local `.x` includes build
+> and link with it; the cache also watches the directories the build
+> searched, so the three changes it used to miss now rebuild; `walk` became
+> a lazy `Iter`; globs skip leading dots as a shell does, in manifests too;
+> `modified_time` keeps fractions; `x2c script --clean` and pruning of
+> entries whose script is gone; `examples/scripts/parallel-jobs.x` was
+> written after all. File-scope conditionals around `static` declarations
+> were broken in the generated C and are fixed.
 
 ## Context
 
