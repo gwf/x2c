@@ -18,7 +18,7 @@ about 2x slow, and `precommit` carried `sym-check`, `hdr-sync`, and
 `hdr-check`.
 
 Every translated unit now writes its collected contribution beside its
-generated C as `<stem>.xi`. The prelude is `lib/x2c.xi`, produced by the
+generated C as `<stem>.xi`. The prelude is the runtime `x2c.xi` interface, produced by the
 library batch of the stage that consumes it. Nothing tracked is both an
 input and an output of a stage, so the convergence machinery, the artifact
 hash checks, the sync tool, nine Make targets, and two CLI flags are gone.
@@ -41,7 +41,7 @@ aliases. The x2c home discovered by the installer keys on
   `builds/` beside or above the source. A candidate is used only when its
   recorded path, source hash, included interfaces, and dependency hashes
   validate; otherwise the file is walked cold and cached for the process.
-- The prelude entry is `lib/x2c.x`'s: the process cache, `lib/x2c.xi`, or
+- The prelude entry is `lib/x2c.x`'s: the process cache, the runtime `x2c.xi` interface, or
   one cold walk per process (about 0.26 s). `x2c env prelude` prints the
   interface a compiler would replay.
 - Cache entries install once. A unit's own walk after the prelude replay

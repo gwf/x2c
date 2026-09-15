@@ -208,7 +208,7 @@ interface in the output directory, then in the directory that mirrors the
 file's home-relative path under the compiler's stage directory (or under an
 installed home), then in a package's `builds/`. An interface is used only
 when its recorded path and every hash still match; otherwise the file is
-walked cold. The prelude is `lib/x2c.xi` from the library batch, so a stage
+walked cold. The prelude is the runtime `x2c.xi` interface from the library batch, so a stage
 build produces the prelude the next batch and the next stage replay, and no
 tracked file is both an input and an output of a build. `x2c env prelude`
 prints the interface a compiler would replay; an empty value means it walks

@@ -81,7 +81,7 @@ captures a value; by itself it does not establish that value's type.
 | Logger delivery and ownership | verified | `Logger` | Logger and Diagnostics suites |
 | Raw stream status and text conversion | verified | `File.*_into`, String adapters | File suite |
 | Lexical scanner contracts | verified | `scan_*`, `Tokenizer` | scanner suite and fixtures |
-| Source declaration collection | verified | `Compiler.collect_symbols`; prelude replay from `lib/x2c.xi`; CPP oracle | raw sweep, process probes, fixtures |
+| Source declaration collection | verified | `Compiler.collect_symbols`; prelude replay from the runtime `x2c.xi` interface; CPP oracle | raw sweep, process probes, fixtures |
 | Compiler-generated identifier space | verified | `_is_reserved_spelling` defines the set; minted by `Compiler.gensym`, `src/cache.x` (`_N`), `src/generate.x` (`_init_guard_`, `_file_init_`) | `reserved-namespace` and generated-name fixtures |
 | Typed static callback adaptation | verified | `$x2c.callback.adapt`; compiler-owned typed thunks | callback adapter fixtures and dispatch/runtime suites |
 | Source directive routing | verified | parser, generator, formatter | AST/C/runtime fixtures |
@@ -585,7 +585,7 @@ A prelude unit first replays the runtime contribution, the entry for
 `lib/x2c.x`, then recursively splices its own quote-includes in source order,
 leaves prelude-covered runtime headers as trivia, and shallow-parses the
 resulting raw stream without invoking the host C preprocessor. The prelude
-entry comes from the process cache, from `lib/x2c.xi` beside a stage build or
+entry comes from the process cache, from the runtime `x2c.xi` interface beside a stage build or
 installed home, or from one cold walk of `lib/x2c.x` per process.
 
 The C preprocessor remains the explicit compatibility and parity oracle.

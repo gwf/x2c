@@ -377,7 +377,7 @@ was.
 
 `x2c env` prints the resolved home, executable, include directory, runtime
 archive, prelude interface, package roots, C compiler, and archiver as
-`name = value` lines. The prelude is the `lib/x2c.xi` interface the compiler
+`name = value` lines. The prelude is the the runtime `x2c.xi` interface interface the compiler
 replays for the runtime declarations; an empty value means it walks
 `lib/x2c.x` cold once per process.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
