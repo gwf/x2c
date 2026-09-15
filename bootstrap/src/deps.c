@@ -185,6 +185,10 @@ int Array_try_next(Array, int *, Var *);
 
 int String_equal(String, String);
 
+void Array_free(Array);
+
+int File_error(File);
+
 static int _write_contents(File output, CliRequest request, Compiler compiler, String input, String output_dir, String stem){
   Array paths = _prerequisites(request, compiler, input);
   char primary_buffer[PATH_MAX];
@@ -244,6 +248,8 @@ static int _write_contents(File output, CliRequest request, Compiler compiler, S
 int CliRequest_inspects(CliRequest);
 
 String String_printf(String, ...);
+
+int File_close(File);
 
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir){
   if(! _init_guard_) _file_init_();

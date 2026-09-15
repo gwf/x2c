@@ -59,6 +59,8 @@ List Array_list(Array);
 
 Array Array_sort(Array);
 
+void Array_free(Array);
+
 List DisjointSet_sizes(DisjointSet set){
   Array sizes = Array_new();
   for(int i = 0, n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes, List_var(cons(int_var(set -> size[i]), cons(int_var(i), NULL))));

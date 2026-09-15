@@ -223,6 +223,8 @@ static void _map_value_valid(Var * _x2c_macro_value_0){
 
 }
 
+void Bytes_free(Bytes);
+
 void Scope_free(void *);
 
 static void Map__core_free(Map _x2c_macro_map_0){

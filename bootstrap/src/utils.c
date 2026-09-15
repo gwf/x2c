@@ -323,6 +323,10 @@ static int _cpp_wait(pid_t pid){
 
 void * Scope_calloc(size_t, size_t);
 
+int File_close(File);
+
+int File_fileno(File);
+
 ChildProcess process_start(char * * argv, int capture){
   if(! _init_guard_) _file_init_();
   ChildProcess process = Scope_calloc(1, sizeof(struct ChildProcess));
@@ -376,6 +380,8 @@ int ChildProcess_ready(ChildProcess c){
   c -> finished = 1;
   return 1;
 }
+
+void File_rewind(File);
 
 String File_string(File);
 

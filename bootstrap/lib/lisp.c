@@ -891,6 +891,8 @@ Var Array_push(Array, Var);
 
 List Array_list(Array);
 
+void Array_free(Array);
+
 static Symbol _read_token_list(Tokenizer tokenizer, char * source, unsigned base, unsigned * end, Var * out){
   Array elements = Array_new();
   Symbol status = 46228810;
@@ -1478,6 +1480,8 @@ Var lisp_read_file(String path){
 }
 
 int File_puts(File, const char *);
+
+int File_close(File);
 
 Var lisp_write_file(String path, String text){
   if(! _init_guard_) _file_init_();

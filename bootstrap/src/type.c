@@ -1283,6 +1283,8 @@ static List _from_ast_items(List items, List context){
 
 List List_flatten(List);
 
+int Array_truth(Array);
+
 static List _from_ast(List ast, List context){
   if(! List_truth(ast)) return ast;
 

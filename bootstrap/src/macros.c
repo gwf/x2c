@@ -2126,6 +2126,8 @@ int Compiler_macro_starts_target_at(Compiler compiler, AstPos position){
   return kind == _position(position) -> kind ||(position == AST_STATEMENT && kind == 9147177346020 && Var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(5011670)));
 }
 
+size_t Array_len(Array);
+
 Var Array_getindex(Array, int);
 
 String x2c_path_dir(String);
@@ -2217,6 +2219,7 @@ void Map_merge_translation_dependency(Map, String, Var);
 String String_printf(String, ...);
 File String_open(String, const char *);
 int File_stat(File, struct stat *);
+int File_close(File);
 String File_string_close(File);
 static Var _sdk_embed_text(Var requested){
   Compiler compiler = macro_sdk_compiler;  if(! compiler) return _sdk_reject(_605, NULL);  String source_file = macro_sdk_source_file, requested_path = NULL;  if(Var_is_row(requested, 11, 7, 1)) requested_path = Var_string(requested);  else{

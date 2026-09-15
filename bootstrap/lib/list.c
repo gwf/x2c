@@ -415,6 +415,8 @@ List Var_cdr(Var var){
   return cdr(Var_pointer(var));
 }
 
+size_t Array_len(Array);
+
 static List _prepend_array(Array values, List tail){
   Var * data = values -> bytes;
   for(size_t i = Array_len(values);  i;  i --){
@@ -1846,6 +1848,8 @@ List List_filter(List lst, Func pred){
   x2c_cleanup_leave(&_x2c_defer_record_23);
 }
 }
+
+void Array_free(Array);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
