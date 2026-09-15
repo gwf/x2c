@@ -293,7 +293,8 @@ Public functions:
 `Compiler.parse_declaration_row`, `Compiler.finish_managed_declaration`,
 `Compiler.parse_declaration_argument`, `Compiler.parse_function_definition`,
 `Compiler.parse_function_target`, `Compiler.parse_import_declaration`,
-`Compiler.script_statement_starts`, `Compiler.parse_top_level`,
+`Compiler.defines_main`, `Compiler.script_statement_starts`,
+`Compiler.script_statement_executes`, `Compiler.parse_top_level`,
 `Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)

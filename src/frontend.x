@@ -155,6 +155,7 @@ static void _tokenize_input(
   }
   unit->source_lines = _source_lines(text);
   c.tokenize(text);
+  if (c.script) c.script_main = c.defines_main();
   c.include_dirs = frontend.include_dirs;
 }
 

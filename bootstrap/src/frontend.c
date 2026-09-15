@@ -260,6 +260,8 @@ String String_new(const char *);
 
 void Compiler_tokenize(Compiler, char *);
 
+int Compiler_defines_main(Compiler);
+
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename){
   Compiler c = unit -> compiler;
   c -> filename = filename;
@@ -277,6 +279,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   }
   unit -> source_lines = _source_lines(text);
   Compiler_tokenize(c, text);
+  if(String_truth(c -> script)) c -> script_main = Compiler_defines_main(c);
   c -> include_dirs = frontend -> include_dirs;
 }
 

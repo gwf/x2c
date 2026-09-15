@@ -27,7 +27,10 @@ foreach (String file, %(git diff --name-only).lines())
 
 `args` holds the arguments after the script's name as `String`s. Functions,
 types, and macros written between the statements work as they do in any
-file. A command that fails and is not caught ends the script with the
+file, and the statements can call those functions wherever they are
+defined. An existing program also becomes a script by adding the shebang
+line: a file that defines `main` runs `main` and keeps its declarations at
+file scope, so it may not also have top-level statements. A command that fails and is not caught ends the script with the
 command's status, and any other uncaught error prints its cause and ends the
 script with status 1. The
 [language reference](../reference/language.md#script-units) lists what stays

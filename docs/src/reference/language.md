@@ -47,8 +47,19 @@ runs it. The compiler reads that first line as `#include "scripting.x"`,
 which brings in `path.x` and `process.x`. Every other line keeps its line
 number.
 
-A script unit may write statements at file scope. These top-level forms
-stay at file scope:
+A script unit takes one of two forms, chosen by whether it defines a
+function named `main` at file scope:
+
+- **With `main`**, it is an ordinary program. Its declarations, including
+  initialized ones such as `int count = 0;`, stay at file scope and `main`
+  runs. Adding a shebang line is enough to turn a program into a script.
+- **Without `main`**, its top-level statements run in order as the program.
+
+A script unit that defines `main` and also has a top-level statement, such
+as an expression, control flow, a `with` block, or a statement macro, is an
+error.
+
+In the second form these top-level forms stay at file scope:
 
 - preprocessor lines, `import`, and protocol declarations and adoptions;
 - `macro` and `keyword` definitions, top-level `$(...)` Lisp, and
@@ -61,22 +72,21 @@ stay at file scope:
 
 Every other top-level form is a statement, including declarations with an
 initializer or none, such as `int total = 0;` or `Point p;`. The statements,
-in source order, become the body of a function that `main` calls with
-`argc`, `argv`, and `args`, a `List` of the argument `String`s after
-`argv[0]`. Statements can use functions and types declared anywhere in the
-file. The declarations among them are locals of that body, so functions
-cannot name them, although lambdas capture them as usual. Write `static` for
-a variable that functions share.
+in source order, become the body of a function that the generated `main`
+calls with `argc`, `argv`, and `args`, a `List` of the argument `String`s
+after `argv[0]`. Statements can call the script's functions wherever they
+are defined, and those functions can call one another. The declarations
+among the statements are locals of that body, so functions cannot name
+them, although lambdas capture them as usual. Write `static` for a variable
+that functions share.
 
 Falling off the end of the statements returns zero, and `return` among them
 sets the exit status. A `<cmd-fail>` that no statement catches prints the
 command and its status on standard error, and that status becomes the exit
 status. Any other uncaught `Error` prints its cause and details on standard
-error and exits with status 1. A script unit with no top-level statements
-gets no generated `main`, so it defines its own like any program; defining
-`main` beside top-level statements is an error. The `--cpp-symbols` and
-`--live-symbols` modes run the host preprocessor over the file as written,
-where the `#!` line is not C, so they report an error for a script unit.
+error and exits with status 1. The `--cpp-symbols` and `--live-symbols`
+modes run the host preprocessor over the file as written, where the `#!`
+line is not C, so they report an error for a script unit.
 
 ```x2c
 #!/usr/bin/env -S x2c script

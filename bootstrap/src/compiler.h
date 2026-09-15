@@ -66,6 +66,7 @@ typedef struct Compiler{
   Diagnostics diagnostics;
   Array braces, import_stack;
   String script;
+  int script_main;
   Lisp macro_lisp;
   String import_src;
   int borrowed_lisp;

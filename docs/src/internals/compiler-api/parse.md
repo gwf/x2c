@@ -14,6 +14,7 @@ X2c recursive-descent parser core.
 | --- | --- |
 | [`Compiler.bind_syntax`](#Compiler.bind_syntax) | Binds parser-shaped `syntax` at `context` into current compiler state. |
 | [`Compiler.bind_template_local`](#Compiler.bind_template_local) | Installs a definition-local template binding or typedef provisionally. |
+| [`Compiler.defines_main`](#Compiler.defines_main) | Reports whether the unit's tokens define a function named `main` at file scope. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_managed_declaration`](#Compiler.finish_managed_declaration) | Lowers managed block declarations to declaration/defer pairs in source order, preserving their installed bindings and the enclosing lifetime. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
@@ -36,6 +37,7 @@ X2c recursive-descent parser core.
 | [`Compiler.parse_static_assert`](#Compiler.parse_static_assert) | Parses a C assertion declaration; native C owns constant-expression checks. |
 | [`Compiler.parse_top_level`](#Compiler.parse_top_level) | Parses one top-level form and applies its source-ordered compiler effects. |
 | [`Compiler.parse_type_name`](#Compiler.parse_type_name) | Parses a type specifier with qualifiers and pointer/reference modifiers. |
+| [`Compiler.script_statement_executes`](#Compiler.script_statement_executes) | Reports whether the top-level item at the cursor is a script statement that runs, rather than a declaration: an expression, control flow, a `with` block, or a statement macro. |
 | [`Compiler.script_statement_starts`](#Compiler.script_statement_starts) | Reports whether the top-level item at the cursor is one of a script unit's statements, which become `main`'s body. |
 | [`Compiler.test_declaration`](#Compiler.test_declaration) | Tests whether the current token can begin a declaration without consuming. |
 | [`Compiler.test_static_assert`](#Compiler.test_static_assert) | Reports whether the current identifier starts a C static assertion. |
@@ -53,7 +55,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:1865`
+Source: `src/parse.x:1909`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -63,6 +65,18 @@ Source: `src/parse.x:1865`
 Installs a definition-local template binding or typedef provisionally.
 
 Source: `src/parse.x:896`
+
+<a id="Compiler.defines_main"></a>
+#### Compiler.defines_main
+
+`int Compiler.defines_main(Compiler c)`
+
+Reports whether the unit's tokens define a function named `main` at file
+scope. A script unit that does is an ordinary program: its declarations
+stay at file scope and it may not have top-level statements. Both parse
+passes read the same tokens, so they agree before either parses.
+
+Source: `src/parse.x:1499`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -74,7 +88,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:1799`
+Source: `src/parse.x:1843`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -287,7 +301,7 @@ Parses one top-level form and applies its source-ordered compiler effects.
 Returns its AST, or NULL when a keyword definition or top-level Lisp form
 only updates compiler state, with the first following token current.
 
-Source: `src/parse.x:1551`
+Source: `src/parse.x:1595`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -298,6 +312,17 @@ Parses a type specifier with qualifiers and pointer/reference modifiers.
 Returns its flat `Type` AST and leaves the first following token current.
 
 Source: `src/parse.x:621`
+
+<a id="Compiler.script_statement_executes"></a>
+#### Compiler.script_statement_executes
+
+`int Compiler.script_statement_executes(Compiler c)`
+
+Reports whether the top-level item at the cursor is a script statement
+that runs, rather than a declaration: an expression, control flow, a
+`with` block, or a statement macro. This query does not consume tokens.
+
+Source: `src/parse.x:1587`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -311,7 +336,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, type definitions, and function prototypes and definitions
 stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1530`
+Source: `src/parse.x:1566`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration

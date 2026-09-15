@@ -49,7 +49,7 @@ Source: `src/frontend.x:78`
 
 Runs the source stages. On either result, the caller must close the unit.
 
-Source: `src/frontend.x:326`
+Source: `src/frontend.x:327`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -60,7 +60,7 @@ Opens and tokenizes an isolated source unit without printing diagnostics.
 A failed unit remains open so its diagnostics can be inspected. Close it
 before opening the next unit; Type and header caches are process-global.
 
-Source: `src/frontend.x:261`
+Source: `src/frontend.x:262`
 
 ### `ParsedUnit`
 
@@ -71,7 +71,7 @@ Source: `src/frontend.x:261`
 
 Releases the unit after its caller has inspected or exported its results.
 
-Source: `src/frontend.x:332`
+Source: `src/frontend.x:333`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -80,7 +80,7 @@ Source: `src/frontend.x:332`
 
 Collects symbols and retains preprocessor outputs for adapter inspection.
 
-Source: `src/frontend.x:289`
+Source: `src/frontend.x:290`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -89,7 +89,7 @@ Source: `src/frontend.x:289`
 
 Parses a collected unit, retaining both its AST and unsuccessful reports.
 
-Source: `src/frontend.x:309`
+Source: `src/frontend.x:310`
 
 ## Public types
 

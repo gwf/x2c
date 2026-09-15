@@ -104,8 +104,8 @@ typedef struct Compiler {
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   // The canonical path of a `#!` script unit, whose top-level statements
-  // become `main`; NULL for every other unit.
-  String script;
+  // become `main` unless it defines `main` itself; NULL for other units.
+  String script, int script_main;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
   Array origins, int origin, source_map;
@@ -675,6 +675,15 @@ void Compiler.skip_script_statement(Compiler c) {
   }
 }
 
+/* A script unit either defines `main` or runs its top-level statements, so
+   a statement beside `main` is the one form it rejects. */
+static void _report_script_statement(Compiler c) {
+  c.report_error(
+    <parse>, "a script that defines main cannot have top-level statements",
+    c.token,
+    %("move the statement into main, or remove main so the statements run"));
+}
+
 static void _shallow_finish_declaration(Compiler c) {
   List declaration = _shallow_parse_declaration(c);
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
@@ -1134,10 +1143,12 @@ static void _shallow_parse_loop(Compiler c) {
   while (c.peek(0) != <eof>) {
     c.update_source_visibility(c.leading_preproc());
     Token start = c.token;
-    if (c.script && c.script_statement_starts()) {
+    if (c.script && !c.script_main && c.script_statement_starts()) {
       c.skip_script_statement();
       continue;
     }
+    if (c.script && c.script_main && c.script_statement_executes())
+      _report_script_statement(c);
     if (c.test_static_assert()) {
       c.parse_static_assert();
       _debug_tokens(c, start, c.token);
@@ -1355,7 +1366,6 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.diagnostics.reset();
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
-  Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
     Array statements = %[];
@@ -1363,7 +1373,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
       while (c.peek(0) != <eof>) {
         try {
           Token start = c.token;
-          if (c.script && c.script_statement_starts()) {
+          if (c.script && !c.script_main && c.script_statement_starts()) {
             c.skip_script_statement();
             Token tokens = c.tokenizer.tokens;
             int first = start - tokens;
@@ -1372,6 +1382,8 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
             statements.push(end);
           }
           else {
+            if (c.script && c.script_main && c.script_statement_executes())
+              _report_script_statement(c);
             Ast node = _replay_declaration_bundle(c);
             if (!node) node = c.parse_top_level();
             if (node && node.car() == <seq>) {
@@ -1398,20 +1410,10 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
         }
       }
       if (!statements.len()) break;
-      if (c.fn_defs.contains("main")) {
-        Token tokens = c.tokenizer.tokens;
-        conflict = tokens + statements[0].integer();
-        break;
-      }
       _append_script_main(c, statements);
       statements.clear();
     }
   }
-  if (conflict)
-    c.report_error(
-      <parse>, "a script with top-level statements cannot define main",
-      conflict,
-      %("its top-level statements already run as the program"));
   ast = ast.reverse();
   _check_unmatched_braces(c);
   if (!c.error_count()) _validate_static_object_initializers(c);

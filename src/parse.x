@@ -1491,6 +1491,42 @@ List Compiler.parse_import_declaration(Compiler c) {
   return %(import $name $alias);
 }
 
+/** Reports whether the unit's tokens define a function named `main` at file
+    scope. A script unit that does is an ordinary program: its declarations
+    stay at file scope and it may not have top-level statements. Both parse
+    passes read the same tokens, so they agree before either parses.
+*/
+int Compiler.defines_main(Compiler c) {
+  int depth = 0;
+  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
+    switch (token.type) {
+      case <space>: case <comment>: case <preproc>:
+        continue;
+      case <)>: case <]>: case <"}">:
+        depth--;
+        continue;
+    }
+    String text = token.text;
+    if (text.endswith("(") || text.endswith("[") || text.endswith("{")) {
+      depth++;
+      continue;
+    }
+    if (depth || token.type != <ident> || text != "main") continue;
+    Token scan = c.skip_trivia_from(token + 1);
+    if (scan.type != <(>) continue;
+    for (int parens = 0; scan.type != <eof>; scan++) {
+      if (scan.type == <(>) parens++;
+      else if (scan.type == <)> && !--parens) break;
+    }
+    if (scan.type == <eof>) return 0;
+    Token body = c.skip_trivia_from(scan + 1);
+    if (body.type == <"{"> || (body.type == <=> &&
+        c.skip_trivia_from(body + 1).type == <">">))
+      return 1;
+  }
+  return 0;
+}
+
 /* A declaration in a script unit stays at file scope when a body follows
    its declarator, `{` for a function or aggregate and `=>` for an
    expression-bodied function, or when it ends right after a parameter list
@@ -1543,6 +1579,14 @@ int Compiler.script_statement_starts(Compiler c) {
     return !c.macro_targets_unit();
   return !c.test_declaration() || !_script_declaration_stays(c);
 }
+
+/** Reports whether the top-level item at the cursor is a script statement
+    that runs, rather than a declaration: an expression, control flow, a
+    `with` block, or a statement macro. This query does not consume tokens.
+*/
+int Compiler.script_statement_executes(Compiler c) =>
+  c.script_statement_starts() &&
+  (c.peek(0) == <$> || c.token.text == "with" || !c.test_declaration());
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition or top-level Lisp form

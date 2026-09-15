@@ -333,7 +333,10 @@ static void _parse_segment(
      over one of them still names a type the header defines. */
   if (!path.endswith(".x")) shadow.package = NULL;
   shadow.filename = path;
-  if (path == c.script) shadow.script = path;
+  if (path == c.script) {
+    shadow.script = path;
+    shadow.script_main = c.script_main;
+  }
   shadow.include_dirs = c.include_dirs;
   shadow.source_private = *private;
   shadow.macros = c.macros;

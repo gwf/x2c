@@ -15,6 +15,12 @@ static int width(Span span);
 static int calls;
 
 _x2c_initializer_choice_8DEEEF00_0((calls = 0))
+static int fib(int n);
+
+static int is_even(int n);
+
+static int is_odd(int n);
+
 static int x2c_script(int argc, char * * argv, List args);
 
 __attribute__((constructor)) static void _file_init_(void){
@@ -32,6 +38,18 @@ int doubled(int value){
   if(! _init_guard_) _file_init_();
   calls ++;
   return value * 2;
+}
+
+static int fib(int n){
+  return n < 2 ? n : fib(n - 1) + fib(n - 2);
+}
+
+static int is_even(int n){
+  return n == 0 ? 1 : is_odd(n - 1);
+}
+
+static int is_odd(int n){
+  return n == 0 ? 0 : is_even(n - 1);
 }
 
 Var int_var(int);
@@ -59,6 +77,7 @@ static int x2c_script(int argc, char * * argv, List args){
 
   }
   printf("total=%d args=%d\n", total, List_len(args));
+  printf("fib=%d even=%d\n", fib(10), is_even(7));
   if(calls != 3) return 1;
   printf("calls=%d\n", calls);
   return 0;
