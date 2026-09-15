@@ -20,6 +20,7 @@ Output options:
       --save-temps[=<dir>]    Keep generated C and other intermediate files
 
 Translation options:
+      --index <url-or-path>   Resolve package names through this index
   -I <dir>                    Add a shared x2c/C include directory
       --x-include-dir <dir>   Add an x2c-only include directory
       --c-include-dir <dir>   Add a C-only ordinary include directory

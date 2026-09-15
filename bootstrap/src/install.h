@@ -9,6 +9,10 @@
 #include "build.h"
 int install_command(CliRequest request);
 
+String install_version(String name);
+
+List install_require(CliRequest request, String name, String version);
+
 int remove_command(CliRequest request);
 
 int list_command(CliRequest request);

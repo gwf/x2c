@@ -342,6 +342,34 @@ defaults. `--target <name>` builds the named manifest target and `--profile
 <name>` applies the named manifest build profile; both work with `build` and
 `run`.
 
+### Pinned packages
+
+A `[dependencies]` section pins packages by exact version. Each key is a
+package name in the index and each value is the version that index row
+carries:
+
+```toml
+[dependencies]
+pcre2 = "10.48"
+```
+
+This is separate from a target's `dependencies` field, which names other
+targets in the same manifest.
+
+`build` and `run` resolve the section before planning. A pinned package the
+x2c home does not already hold at that version is installed through the
+index, the same way [`x2c install <name>`](#packages) does, and `--index`
+selects another index. The resolution is then written to `x2c.lock` beside
+the manifest, one `name version kind platform url sha256` row per package.
+Keep that file with the manifest so a later build reproduces the same
+packages.
+
+A build whose lockfile already covers every pinned package, at the pinned
+version and installed in the home, reads no index and reaches no network.
+Any other state re-resolves through the index and rewrites the lockfile. A
+version the index cannot supply stops the build and names both versions. The
+editor adapter never installs.
+
 ## Include and tool ownership
 
 `-I <dir>` is the shared include option. Repeated paths keep command order,
@@ -372,6 +400,9 @@ overrides the default). `--force` accepts a bundle built by another x2c
 version. `remove` takes one installed name; `list` prints `name version
 kind` lines. Refusals exit with status 2 and leave the installed set as it
 was.
+
+A project manifest can pin packages instead of installing them by hand; see
+[pinned packages](#pinned-packages).
 
 ## Environment
 

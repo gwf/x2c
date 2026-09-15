@@ -212,6 +212,18 @@ static int _installed(String package) =>
   !access(%"$package/BUNDLE.json", F_OK) ||
   !access(%"$package/SOURCE.json", F_OK);
 
+/* The version an installed package records, or NULL when it is not one. */
+static String _installed_version(String package) {
+  String marker = %"$package/BUNDLE.json", key = "dependency_version";
+  if (access(marker, F_OK)) {
+    marker = %"$package/SOURCE.json";
+    key = "version";
+  }
+  if (access(marker, F_OK)) return NULL;
+  String version = _json_field(_read_text(marker), key);
+  return version ? version : %"";
+}
+
 /* Publishes the staged package with one rename, replacing an installed
    package of the same name; a directory that is not an installed package is
    never replaced. */
@@ -241,30 +253,11 @@ static String _work_directory(String packages) {
   return work;
 }
 
-/** Installs the package named by the request's one operand and returns 0.
-    The operand is a local directory, a local `.tar.gz`, a URL with
-    `--sha256`, or a name resolved through the package index. A bundle is
-    verified against this compiler's version unless `--force`; a pure-x2c
-    source package is built by this compiler. Failures exit with status 2.
-*/
-int install_command(CliRequest request) {
-  String spec = request.inputs.car(), packages = _home_packages();
-  String work = _work_directory(packages);
-  String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
-  int remote = spec.startswith("http://") || spec.startswith("https://") ||
-               spec.startswith("file://");
-  if (remote) {
-    if (!sha256) _error("a URL needs --sha256 <hex>");
-    url = spec;
-  }
-  else if (!access(spec, F_OK)) source = spec;
-  else if (spec.is_identifier()) {
-    List row = _index_row(request, spec, work);
-    version = row.nth_cdr(1).car();
-    url = row.nth_cdr(4).car();
-    sha256 = row.nth_cdr(5).car();
-  }
-  else _error(%"unknown package spec '$spec'");
+/* Stages, builds, and publishes one package. `source` is a local directory
+   or tarball, or NULL when `url` names the archive to fetch. */
+static String _install(
+  CliRequest request, String spec, String source, String url, String sha256,
+  String version, String packages, String work) {
   if (url) {
     source = _fetch(url, work, "package.tar.gz");
     _verify(source, sha256);
@@ -291,10 +284,67 @@ int install_command(CliRequest request) {
 ");
   }
   _publish(staged, packages, name);
-  _build_remove_tree(work);
   if (!request.quiet)
     printf("x2c: installed %s/%s\n", packages.str(), name.str());
+  return name;
+}
+
+/** Installs the package named by the request's one operand and returns 0.
+    The operand is a local directory, a local `.tar.gz`, a URL with
+    `--sha256`, or a name resolved through the package index. A bundle is
+    verified against this compiler's version unless `--force`; a pure-x2c
+    source package is built by this compiler. Failures exit with status 2.
+*/
+int install_command(CliRequest request) {
+  String spec = request.inputs.car(), packages = _home_packages();
+  String work = _work_directory(packages);
+  String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
+  int remote = spec.startswith("http://") || spec.startswith("https://") ||
+               spec.startswith("file://");
+  if (remote) {
+    if (!sha256) _error("a URL needs --sha256 <hex>");
+    url = spec;
+  }
+  else if (!access(spec, F_OK)) source = spec;
+  else if (spec.is_identifier()) {
+    List row = _index_row(request, spec, work);
+    version = row.nth_cdr(1).car();
+    url = row.nth_cdr(4).car();
+    sha256 = row.nth_cdr(5).car();
+  }
+  else _error(%"unknown package spec '$spec'");
+  (void) _install(
+    request, spec, source, url, sha256, version, packages, work);
+  _build_remove_tree(work);
   return 0;
+}
+
+/** Returns the version an installed package records, or NULL when no package
+    of that name is installed. A package installed without a recorded version
+    returns the empty string. Reaches no network.
+*/
+String install_version(String name) =>
+  _installed_version(%"${_home_packages()}/$name");
+
+/** Returns the index row for `name`, installing it under the x2c home first
+    unless an installed package already records `version`. The row is
+    `name version kind platform url sha256`, the same shape the package index
+    and a project lockfile hold. An already satisfied dependency reaches no
+    network. Failures exit with status 2.
+*/
+List install_require(CliRequest request, String name, String version) {
+  String packages = _home_packages();
+  String work = _work_directory(packages);
+  List row = _index_row(request, name, work);
+  String resolved = row.nth_cdr(1).car();
+  if (resolved != version)
+    _error(%"the index has $name $resolved, not the pinned $version");
+  if (_installed_version(%"$packages/$name") != version)
+    (void) _install(
+      request, name, NULL, row.nth_cdr(4).car(), row.nth_cdr(5).car(),
+      resolved, packages, work);
+  _build_remove_tree(work);
+  return row;
 }
 
 /** Removes the installed package named by the request's one operand.

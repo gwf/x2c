@@ -37,6 +37,7 @@ typedef struct ProjectBuild {
 #include <unistd.h>
 
 #include "buffer.x"
+#include "install.x"
 
 typedef struct ProjectProfile {
   String name, optimization, int debug, List defines, c_flags, link_flags;
@@ -52,8 +53,15 @@ typedef struct ProjectTarget {
   struct ProjectTarget *next;
 } *ProjectTarget;
 
+typedef struct ProjectDependency {
+  String name, version;
+  struct ProjectDependency *next;
+} *ProjectDependency;
+
 typedef struct Project {
   String path, root, text, default_target, build_dir, build_root, Map seen;
+  ProjectDependency dependencies;
+  Map dependency_seen;
   int declared;
   SourceView sources;
   ProjectTarget targets;
@@ -287,8 +295,19 @@ static void _set_profile_field(
   else _error_name(project, line, "unknown profile field", key);
 }
 
+/* One `[dependencies]` entry: an index package name and its exact version. */
+static void _set_dependency(
+  Project p, int line, String key, String value) {
+  ProjectDependency entry = Scope.calloc(1, sizeof(struct ProjectDependency));
+  entry.name = key;
+  entry.version = _string_value(p, line, value);
+  ProjectDependency *link = &p.dependencies;
+  while (*link) link = &(*link).next;
+  *link = entry;
+}
+
 static void _parse_manifest(Project p) {
-  enum { NONE, PROJECT, TARGET, PROFILE } section = NONE;
+  enum { NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES } section = NONE;
   ProjectTarget target = NULL;
   ProjectProfile profile = NULL;
   List lines = p.text.split_lines(0), int line_number = 0;
@@ -313,6 +332,15 @@ static void _parse_manifest(Project p) {
           _error(p, line_number, "duplicate project section");
         p.declared = 1;
         section = PROJECT;
+        target = NULL;
+        profile = NULL;
+        continue;
+      }
+      if (name == "dependencies") {
+        if (p.dependency_seen)
+          _error(p, line_number, "duplicate dependencies section");
+        p.dependency_seen = %{};
+        section = DEPENDENCIES;
         target = NULL;
         profile = NULL;
         continue;
@@ -361,10 +389,13 @@ static void _parse_manifest(Project p) {
     _set_once(
       p, line_number,
       section == PROJECT ? p.seen :
+      section == DEPENDENCIES ? p.dependency_seen :
       section == TARGET ? target.seen : profile.seen,
       key
     );
     if (section == PROJECT) _set_project_field(p, line_number, key, value);
+    else if (section == DEPENDENCIES)
+      _set_dependency(p, line_number, key, value);
     else if (section == TARGET)
       _set_target_field(p, target, line_number, key, value);
     else _set_profile_field(p, profile, line_number, key, value);
@@ -703,6 +734,76 @@ static void _plan_target(
   target.planned = 1;
 }
 
+// dependencies
+
+#define PROJECT_LOCK_HEADER \
+  "# x2c lockfile. Written by x2c build; keep it with the manifest.\n" \
+  "# name version kind platform url sha256\n"
+
+/* The lockfile's rows, or NULL when it is absent or unreadable. */
+static List _read_lock(String path) {
+  File input = fopen(path, "r");
+  if (!input) return NULL;
+  String text = NULL;
+  try text = input.string_close();
+  catch %(io-fail *): return NULL;
+  Array rows = %[];
+  foreach (String line, text.split_lines(0)) {
+    if (!line || line.startswith("#")) continue;
+    Array fields = %[];
+    foreach (String field, line.split(" "))
+      if (field) fields.push(field);
+    if (fields.len() == 6) rows.push(fields.list_free());
+  }
+  return rows.list_free();
+}
+
+/* Every dependency is locked at its pinned version and already installed at
+   that version, so the build needs no index and no network. */
+static int _lock_satisfies(Project project, List rows) {
+  if (!rows) return 0;
+  for (ProjectDependency entry = project.dependencies; entry;
+       entry = entry.next) {
+    List found = NULL;
+    foreach (List row, rows)
+      if (row.car() == entry.name) found = row;
+    if (!found || found.cdr().car() != entry.version) return 0;
+    if (install_version(entry.name) != entry.version) return 0;
+  }
+  return 1;
+}
+
+static void _write_lock(Project project, String path, List rows) {
+  File output = fopen(path, "w");
+  if (!output) _error(project, 0, "cannot write x2c.lock");
+  fputs(PROJECT_LOCK_HEADER, output);
+  foreach (List row, rows) {
+    int first = 1;
+    foreach (String field, row) {
+      if (!first) fputc(' ', output);
+      fputs(field, output);
+      first = 0;
+    }
+    fputc('\n', output);
+  }
+  if (fclose(output)) _error(project, 0, "cannot write x2c.lock");
+}
+
+/* Installs whatever the manifest pins that the home does not already hold,
+   then records what was resolved beside the manifest. The editor reads a
+   source view and never installs. */
+static void _resolve_dependencies(Project project, CliRequest request) {
+  if (!project.dependencies || project.sources) return;
+  String path = %"${project.root}/x2c.lock";
+  List locked = _read_lock(path);
+  if (_lock_satisfies(project, locked)) return;
+  Array rows = %[];
+  for (ProjectDependency entry = project.dependencies; entry;
+       entry = entry.next)
+    rows.push(install_require(request, entry.name, entry.version));
+  _write_lock(project, path, rows.list_free());
+}
+
 /** Returns the explicit or nearest readable project manifest, or NULL.
     Discovery uses the same request view as project parsing.
 */
@@ -755,6 +856,7 @@ ProjectBuild project_plan(CliRequest request) {
   _parse_manifest(project);
   for (ProjectTarget target = project.targets; target; target = target.next)
     _validate_target(project, target);
+  _resolve_dependencies(project, request);
 
   String selected_name = request.target ? request.target :
                          project.default_target;

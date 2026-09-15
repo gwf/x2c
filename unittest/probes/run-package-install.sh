@@ -88,4 +88,46 @@ grep -q "built for 'x2c 0.0.0'" "$BUILD/fake.stderr" || fail "fake diagnostic"
 "$x2c" remove -q greet
 rm -rf "$BUILD/home/packages/mine"
 
+# A project manifest pins packages, and `x2c build` installs what the home
+# does not already hold, then records the resolution in x2c.lock.
+mkdir -p "$BUILD/project/src"
+cp "$ROOT/examples/power/greet-client.x" "$BUILD/project/src/client.x"
+cat >"$BUILD/project/x2c.toml" <<'MANIFEST'
+[project]
+name = "client"
+default-target = "client"
+
+[dependencies]
+greet = "1.0"
+
+[target.client]
+kind = "executable"
+sources = ["src/client.x"]
+MANIFEST
+cd "$BUILD/project"
+"$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client"
+[[ "$("$x2c" list)" == "greet 1.0 source" ]] || fail "dependency not installed"
+grep -q '^greet 1.0 source - ' x2c.lock || fail "lockfile row"
+"$BUILD/project/client" >"$BUILD/project/client.stdout"
+grep -q "ping ping ping" "$BUILD/project/client.stdout" || fail "client output"
+
+# A satisfied lockfile reaches no index, so an unreachable one still builds.
+rm -rf .x2c-build
+"$x2c" build -q --index "file://$BUILD/absent/index.txt" \
+  --output "$BUILD/project/client"
+
+# A pin the index cannot satisfy stops the build and names both versions.
+sed 's/greet = "1.0"/greet = "9.9"/' x2c.toml >x2c.toml.next
+mv x2c.toml.next x2c.toml
+rm -rf .x2c-build
+set +e
+"$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client" \
+  2>"$BUILD/project/pin.stderr"
+[[ $? == 2 ]] || fail "unsatisfiable pin accepted"
+set -e
+grep -q "the index has greet 1.0, not the pinned 9.9" \
+  "$BUILD/project/pin.stderr" || fail "pin diagnostic"
+cd "$ROOT"
+"$x2c" remove -q greet
+
 echo "package install probes passed"

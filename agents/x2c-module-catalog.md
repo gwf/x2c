@@ -212,7 +212,8 @@ Package installation into the x2c home.
 
 Public functions:
 
-`install_command`, `remove_command`, `list_command`
+`install_command`, `install_version`, `install_require`, `remove_command`,
+`list_command`
 
 ### [src/lambda.x](../src/lambda.x)
 
