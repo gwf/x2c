@@ -70,6 +70,14 @@ def bundle(args: argparse.Namespace) -> None:
       if relative.is_absolute() or '..' in relative.parts:
         raise DependencyError('bundle copy destination must be relative')
       copy(Path(_format(item['from'], variables)), stage / relative)
+    # Objects a package compiles outside `x2c build`, such as a C++ shim,
+    # join the bundled archive so a consumer links them with no extra input.
+    objects = [_format(item, variables)
+               for item in distribution.get('archive_objects', [])]
+    if objects:
+      subprocess.run([os.environ.get('AR', 'ar'), 'rs',
+                      str(stage / 'builds' / archive), *objects],
+                     check=True, stdout=subprocess.DEVNULL)
     response = stage / 'builds' / (args.package + '.native.rsp')
     response.write_text(''.join(quoted(arg) + '\n' for arg in native_args))
     compiler = Path(shutil.which(args.compiler) or args.compiler).resolve()

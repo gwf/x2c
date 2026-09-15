@@ -35,5 +35,51 @@
     "{prefix}/include/torch/csrc/api/include/torch/torch.h",
     "{prefix}/lib/libtorch_cpu.so",
     "{prefix}/lib/libc10.so"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/lib/libtorch.so",
+        "to": "native/lib/libtorch.so"
+      },
+      {
+        "from": "{prefix}/lib/libtorch_cpu.so",
+        "to": "native/lib/libtorch_cpu.so"
+      },
+      {
+        "from": "{prefix}/lib/libc10.so",
+        "to": "native/lib/libc10.so"
+      },
+      {
+        "from": "{prefix}/lib/libgomp-98b21ff3.so.1",
+        "to": "native/lib/libgomp-98b21ff3.so.1"
+      },
+      {
+        "from": "{package}/generated/xt_ops.h",
+        "to": "src/xt_ops.h"
+      },
+      {
+        "from": "{package}/generated/xt_ops_support.h",
+        "to": "src/xt_ops_support.h"
+      }
+    ],
+    "archive_objects": [
+      "{package}/builds/torch-shim.o",
+      "{package}/builds/xt_ops.o"
+    ],
+    "native_args": [
+      "-L",
+      "{package}/native/lib",
+      "-l",
+      "torch",
+      "-l",
+      "torch_cpu",
+      "-l",
+      "c10",
+      "-l",
+      "stdc++",
+      "--rpath",
+      "{package}/native/lib"
+    ]
+  }
 }

@@ -19,11 +19,45 @@
     {
       "cwd": "{work}",
       "argv": ["cp", "-R", "{source_libtorch}/lib/.", "{prefix}/lib"]
+    },
+    {
+      "cwd": "{work}",
+      "argv": ["install_name_tool", "-id", "@rpath/libomp.dylib",
+               "{prefix}/lib/libomp.dylib"]
+    },
+    {
+      "cwd": "{work}",
+      "argv": ["install_name_tool", "-change",
+               "/opt/homebrew/opt/libomp/lib/libomp.dylib",
+               "@rpath/libomp.dylib", "{prefix}/lib/libtorch_cpu.dylib"]
+    },
+    {
+      "cwd": "{work}",
+      "argv": ["codesign", "--force", "--sign", "-",
+               "{prefix}/lib/libomp.dylib", "{prefix}/lib/libtorch_cpu.dylib"]
     }
   ],
   "receipts": [
     "{prefix}/include/torch/csrc/api/include/torch/torch.h",
     "{prefix}/lib/libtorch_cpu.dylib",
     "{prefix}/lib/libc10.dylib"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {"from": "{prefix}/lib/libtorch.dylib",
+       "to": "native/lib/libtorch.dylib"},
+      {"from": "{prefix}/lib/libtorch_cpu.dylib",
+       "to": "native/lib/libtorch_cpu.dylib"},
+      {"from": "{prefix}/lib/libc10.dylib", "to": "native/lib/libc10.dylib"},
+      {"from": "{prefix}/lib/libomp.dylib", "to": "native/lib/libomp.dylib"},
+      {"from": "{package}/generated/xt_ops.h", "to": "src/xt_ops.h"},
+      {"from": "{package}/generated/xt_ops_support.h",
+       "to": "src/xt_ops_support.h"}
+    ],
+    "archive_objects": ["{package}/builds/torch-shim.o",
+                        "{package}/builds/xt_ops.o"],
+    "native_args": ["-L", "{package}/native/lib", "-l", "torch",
+                    "-l", "torch_cpu", "-l", "c10", "-l", "c++",
+                    "--rpath", "{package}/native/lib"]
+  }
 }
