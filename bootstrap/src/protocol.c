@@ -2674,8 +2674,7 @@ static List _string_literal(Compiler compiler, String value){
 
 String Compiler_fresh_name(Compiler, String);
 Symbol Type_var_tag(Type);
-void Compiler_add_protocol_init(Compiler, List);
-void Compiler_add_early_init(Compiler, List);
+void Compiler_add_init(Compiler, Symbol, List);
 static void Compiler__generate_descriptor_registration(Compiler compiler, Type participant, String name, Symbol explicit_tag, List thunks, int central_initializer){
   String methods_name = Compiler_fresh_name(compiler, _817);  List methods_binding = Sym_introduce(compiler -> sym, methods_name);  Array fields = Array_new(); {
     List row;  List _x2c_macro_object_42 = thunks;  List _x2c_macro_cursor_42 = _x2c_macro_object_42;  Var _x2c_macro_cursor_output_48;  while(List_try_next(_x2c_macro_object_42, & _x2c_macro_cursor_42, & _x2c_macro_cursor_output_48)){
@@ -2687,10 +2686,10 @@ static void Compiler__generate_descriptor_registration(Compiler compiler, Type p
 
   }
   List declaration = cons(_31, cons(_572, cons(List_var(cons(_40, cons(List_var(cons(_4, cons(List_var(methods_binding), _516))), NULL))), NULL)));  List methods_type = _583;  List methods_literal = cons(_64, cons(_515, cons(List_var(cons(_584, cons(List_var(cons(_585, List_append(Array_list_free(fields), NULL))), NULL))), NULL)));  List methods_value = cons(_64, cons(_574, cons(List_var(cons(_586, cons(List_var(methods_type), cons(List_var(methods_literal), NULL)))), NULL)));  List assignment = List_truth(thunks) ? cons(_528, cons(List_var(cons(_64, cons(_574, cons(List_var(cons(_10, cons(_11, cons(List_var(cons(_64, cons(_574, cons(List_var(cons(_498, cons(List_var(methods_binding), NULL))), NULL)))), cons(List_var(methods_value), NULL))))), NULL)))), NULL)) : NULL;  Symbol tag_symbol = Type_var_tag(participant);  List early_call = cons(_64, cons(_501, cons(List_var(cons(_526, cons(_588, cons(List_var(cons(_527, cons(List_var(cons(_64, cons(_73, cons(List_var(cons(_74, cons(_73, cons(String_var(name), cons(Symbol_var(tag_symbol), NULL))))), NULL)))), cons(List_var(cons(_64, cons(_574, cons(List_var(cons(_498, cons(List_var(methods_binding), NULL))), NULL)))), NULL)))), NULL)))), NULL)));  List fallback = cons(_528, cons(List_var(cons(_64, cons(_539, cons(List_var(cons(_526, cons(_590, cons(List_var(cons(_527, cons(List_var(_string_literal(compiler, name)), cons(List_var(cons(_64, cons(_574, cons(List_var(cons(_498, cons(List_var(methods_binding), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL));  List registration = cons(_591, cons(List_var(cons(_64, cons(_501, cons(List_var(cons(_10, cons(_592, cons(List_var(early_call), NULL)))), NULL)))), cons(List_var(cons(_529, cons(List_var(fallback), NULL))), NULL)));  List explicit_call = NULL;  if(explicit_tag) explicit_call = cons(_64, cons(_539, cons(List_var(cons(_526, cons(_594, cons(List_var(cons(_527, cons(List_var(cons(_64, cons(_73, cons(List_var(cons(_74, cons(_73, cons(String_var(Symbol_str(explicit_tag)), cons(Symbol_var(explicit_tag), NULL))))), NULL)))), cons(List_var(_string_literal(compiler, name)), cons(List_var(cons(_64, cons(_574, cons(List_var(cons(_498, cons(List_var(methods_binding), NULL))), NULL)))), NULL))))), NULL)))), NULL)));  Compiler_add_early(compiler, declaration);  List call = explicit_tag ? explicit_call : early_call;  if(central_initializer){
-    if(List_truth(assignment)) Compiler_add_protocol_init(compiler, assignment);  Compiler_add_protocol_init(compiler, cons(_528, cons(List_var(call), NULL)));
+    if(List_truth(assignment)) Compiler_add_init(compiler, 1139215899608, assignment);  Compiler_add_init(compiler, 1139215899608, cons(_528, cons(List_var(call), NULL)));
   }
   else{
-    if(List_truth(assignment)) Compiler_add_early_init(compiler, assignment);  Compiler_add_early_init(compiler, explicit_tag ? cons(_528, cons(List_var(call), NULL)) : registration);
+    if(List_truth(assignment)) Compiler_add_init(compiler, 10588978, assignment);  Compiler_add_init(compiler, 10588978, explicit_tag ? cons(_528, cons(List_var(call), NULL)) : registration);
   }
 
 }
