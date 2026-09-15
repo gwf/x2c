@@ -97,6 +97,11 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
+      # The emitter rewrites `#include "x.x"` to `x.h` by line ending, so
+      # sources must be checked out with LF.
+      - name: Check out with LF line endings
+        shell: pwsh
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v5
       - uses: msys2/setup-msys2@v2
         with:
