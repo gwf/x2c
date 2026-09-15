@@ -1,5 +1,5 @@
-# Temporary. Traces the macOS x86_64 verification failures that survive the
-# include fix. Delete before the pull request.
+# Temporary. Compares every pinned digest against the checkout on macOS
+# x86_64, one line at a time. Delete before the pull request.
 name: platform-probe
 
 on:
@@ -18,25 +18,28 @@ jobs:
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v5
-      - name: Show the checksum tool before brew
+      - name: Compare every pinned license digest with the checkout
         run: |
-          command -v shasum; shasum --version || true
-          shasum -a 256 packages/libuv/LICENSES/libuv-1.52.1-MIT.txt
+          git status --porcelain
+          git config --get core.autocrlf || echo "autocrlf unset"
+          for f in packages/libuv/LICENSES/*.txt packages/blis/LICENSES/*.txt; do
+            printf '%s  %s  %s bytes\n' \
+              "$(shasum -a 256 "$f" | cut -d' ' -f1)" "$f" \
+              "$(wc -c <"$f" | tr -d ' ')"
+          done
+          echo "--- literals the makefiles expect ---"
+          grep -hoE '^	  [0-9a-f]{64}$' packages/libuv/Makefile \
+            packages/blis/Makefile | tr -d '\t '
       - name: Install build tools
         run: brew install autoconf automake libtool pkg-config jq
-      - name: Show the checksum tool after brew
-        run: |
-          command -v shasum; shasum --version || true
-          shasum -a 256 packages/libuv/LICENSES/libuv-1.52.1-MIT.txt
-          echo "PATH=$PATH"
       - name: Build from checked-in bootstrap
         run: make build-safe
-      - name: Trace the libuv license check
+      - name: Run the libuv license check alone
         continue-on-error: true
-        run: make -C packages/libuv SHELL='sh -x' verify-licenses
-      - name: Trace the libcurl profile check
+        run: make -C packages/libuv verify-licenses && echo "libuv licenses ok"
+      - name: Run the libcurl profile check with a trace
         continue-on-error: true
-        run: make -C packages/libcurl SHELL='sh -x' verify-profile
-      - name: Trace the blis profile check
+        run: make -C packages/libcurl SHELL='sh -x' verify-profile 2>&1 | tail -40
+      - name: Run the blis profile check with a trace
         continue-on-error: true
-        run: make -C packages/blis SHELL='sh -x' verify-profile
+        run: make -C packages/blis SHELL='sh -x' verify-profile 2>&1 | tail -40
