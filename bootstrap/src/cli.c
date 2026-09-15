@@ -147,7 +147,7 @@ static CliOption cli_options[] ={
     7958982899053, CLI_INSTALL, 1307939018, "--sha256", "<hex>", "Require this digest of a downloaded or local archive", 0
   }
   , {
-    19800432, CLI_INSTALL, 1307939018, "--index", "<url-or-path>", "Resolve package names through this index", 0
+    19800432, CLI_INSTALL | CLI_BUILD | CLI_RUN, 1307939018, "--index", "<url-or-path>", "Resolve package names through this index", 0
   }
   , {
     13603018, CLI_INSTALL, 1307939018, "--force", NULL, "Install a bundle built for another x2c version", 0

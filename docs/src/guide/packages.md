@@ -354,6 +354,28 @@ archives beside `index.txt`; the `release` workflow runs it over every
 platform's bundles and publishes the index with the release tarballs (see
 [Developer workflow](installation.md#developer-workflow)).
 
+## Pin packages in a project
+
+A project manifest can name the packages it needs, so a build installs them
+instead of asking you to. Each entry pins one exact version:
+
+```toml
+[dependencies]
+pcre2 = "10.48"
+```
+
+`x2c build` and `x2c run` install anything missing through the index before
+planning the build, then write `x2c.lock` beside the manifest recording what
+they resolved. Commit that file. A later build whose lockfile is already
+satisfied by the installed packages reads no index at all, so it works
+offline and gives everyone the same packages.
+
+To change a version, edit the manifest and build again; the lockfile is
+rewritten. `x2c remove` still deletes an installed package, and the next
+build reinstalls it. See
+[project manifests](../reference/cli.md#pinned-packages) for the exact rules.
+
+
 ## Movable native bundles
 
 `make bundle` builds a package and assembles its public source interfaces,

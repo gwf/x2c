@@ -2,7 +2,7 @@
 
 #include "project.h"
 
-static String _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <ctype.h>
 #include <dirent.h>
@@ -14,6 +14,7 @@ static String _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _
 #include <sys/stat.h>
 #include <unistd.h>
 #include "buffer.h"
+#include "install.h"
 typedef struct ProjectProfile{
   String name, optimization;
   int debug;
@@ -38,9 +39,17 @@ typedef struct ProjectTarget{
 }
 * ProjectTarget;
 
+typedef struct ProjectDependency{
+  String name, version;
+  struct ProjectDependency * next;
+}
+* ProjectDependency;
+
 typedef struct Project{
   String path, root, text, default_target, build_dir, build_root;
   Map seen;
+  ProjectDependency dependencies;
+  Map dependency_seen;
   int declared;
   SourceView sources;
   ProjectTarget targets;
@@ -83,6 +92,8 @@ static void _set_target_field(Project p, ProjectTarget target, int line, String 
 
 static void _set_profile_field(Project project, ProjectProfile profile, int line, String key, String value);
 
+static void _set_dependency(Project p, int line, String key, String value);
+
 static void _parse_manifest(Project p);
 
 static String _absolute(Project project, String path);
@@ -118,6 +129,17 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
 static void _append_plan(Project project, CliRequest request);
 
 static void _plan_target(Project project, ProjectTarget target, CliRequest command, ProjectTarget selected, String build_root);
+
+#define PROJECT_LOCK_HEADER \
+  "# x2c lockfile. Written by x2c build; keep it with the manifest.\n" \
+  "# name version kind platform url sha256\n"
+static List _read_lock(String path);
+
+static int _lock_satisfies(Project project, List rows);
+
+static void _write_lock(Project project, String path, List rows);
+
+static void _resolve_dependencies(Project project, CliRequest request);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -166,9 +188,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _40 = String_new("\n");
   _41 = String_new("target=");
   _42 = String_new("\nprofile=");
-  _43 = String_new("/x2c.toml");
-  _44 = String_new("/.x2c-build");
-  _45 = String_new("-O");
+  _43 = String_new("/x2c.lock");
+  _44 = String_new("/x2c.toml");
+  _45 = String_new("/.x2c-build");
+  _46 = String_new("-O");
+  _47 = String_new("#");
+  _48 = String_new(" ");
 }
 
 int String_truth(String);
@@ -400,6 +425,15 @@ static void _set_profile_field(Project project, ProjectProfile profile, int line
   else _error_name(project, line, "unknown profile field", key);
 }
 
+static void _set_dependency(Project p, int line, String key, String value){
+  ProjectDependency entry = Scope_calloc(1, sizeof(struct ProjectDependency));
+  entry -> name = key;
+  entry -> version = _string_value(p, line, value);
+  ProjectDependency * link = & p -> dependencies;
+  while(* link) link = &(* link) -> next;
+  * link = entry;
+}
+
 List String_split_lines(String, int);
 
 int List_try_next(List, List *, Var *);
@@ -409,6 +443,8 @@ String Var_string(Var);
 void * Scope_malloc(size_t);
 
 String String_new(const char *);
+
+int Map_truth(Map);
 
 List String_split(String, String);
 
@@ -422,7 +458,7 @@ List List_cdr(List);
 
 static void _parse_manifest(Project p){
   enum{
-    NONE, PROJECT, TARGET, PROFILE
+    NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
   }
   section = NONE;
   ProjectTarget target = NULL;
@@ -459,6 +495,14 @@ static void _parse_manifest(Project p){
             profile = NULL;
             continue;
           }
+          if(String_equal(name, _11)){
+            if(Map_truth(p -> dependency_seen)) _error(p, line_number, "duplicate dependencies section");
+            p -> dependency_seen = Map_new();
+            section = DEPENDENCIES;
+            target = NULL;
+            profile = NULL;
+            continue;
+          }
           List parts = String_split(name, _23);
           int count = List_len(parts);
           String first = Var_string(List_car(parts));
@@ -488,8 +532,9 @@ static void _parse_manifest(Project p){
         String key = String_new(_trim(line));
         String value = String_new(_trim(equals + 1));
         if(! _name_ok(key)) _error(p, line_number, "invalid field name");
-        _set_once(p, line_number, section == PROJECT ? p -> seen : section == TARGET ? target -> seen : profile -> seen, key);
+        _set_once(p, line_number, section == PROJECT ? p -> seen : section == DEPENDENCIES ? p -> dependency_seen : section == TARGET ? target -> seen : profile -> seen, key);
         if(section == PROJECT) _set_project_field(p, line_number, key, value);
+        else if(section == DEPENDENCIES) _set_dependency(p, line_number, key, value);
         else if(section == TARGET) _set_target_field(p, target, line_number, key, value);
         else _set_profile_field(p, profile, line_number, key, value);
       }
@@ -920,7 +965,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
       while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_16)){
         argument = Var_string(_x2c_macro_cursor_output_16);
         {
-          if(String_truth(argument) && String_startswith(argument, _45)) has_optimization = 1;
+          if(String_truth(argument) && String_startswith(argument, _46)) has_optimization = 1;
           if(String_equal(argument, _34)) has_debug = 1;
         }
 
@@ -982,13 +1027,168 @@ static void _plan_target(Project project, ProjectTarget target, CliRequest comma
   target -> planned = 1;
 }
 
+String File_string_close(File);
+
+Var Symbol_var(Symbol);
+
+Var List_var(List);
+
+static List _read_lock(String path){
+  File input = fopen(path, "r");
+  if(! input) return NULL;
+  String volatile text = NULL;
+  {
+    ExceptionFrame _x2c_exception_frame_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+  }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) text = File_string_close(input);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        List _x2c_return_value_0 = NULL;
+        {
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          return _x2c_return_value_0;
+        }
+
+      }
+
+    }
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
+    __builtin_unreachable();
+  }
+
+}
+}
+x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_error_handler_0 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_0);
+}
+Array rows = Array_new();
+{
+  String line;
+  List _x2c_macro_object_21 = String_split_lines(text, 0);
+  List _x2c_macro_cursor_21 = _x2c_macro_object_21;
+  Var _x2c_macro_cursor_output_20;
+  while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_20)){
+    line = Var_string(_x2c_macro_cursor_output_20);
+    {
+      if(! String_truth(line) || String_startswith(line, _47)) continue;
+      Array fields = Array_new();
+      {
+        String field;
+        List _x2c_macro_object_20 = String_split(line, _48);
+        List _x2c_macro_cursor_20 = _x2c_macro_object_20;
+        Var _x2c_macro_cursor_output_19;
+        while(List_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_19)){
+          field = Var_string(_x2c_macro_cursor_output_19);
+          if(String_truth(field)) Array_push(fields, String_var(field));
+        }
+
+      }
+      if(Array_len(fields) == 6) Array_push(rows, List_var(Array_list_free(fields)));
+    }
+
+  }
+
+}
+return Array_list_free(rows);
+}
+
+List Var_list(Var);
+
+String install_version(String);
+
+static int _lock_satisfies(Project project, List rows){
+  if(! List_truth(rows)) return 0;
+  for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next){
+    List found = NULL;
+    {
+      List row;
+      List _x2c_macro_object_22 = rows;
+      List _x2c_macro_cursor_22 = _x2c_macro_object_22;
+      Var _x2c_macro_cursor_output_21;
+      while(List_try_next(_x2c_macro_object_22, & _x2c_macro_cursor_22, & _x2c_macro_cursor_output_21)){
+        row = Var_list(_x2c_macro_cursor_output_21);
+        if(Var_equal(List_car(row), String_var(entry -> name))) found = row;
+      }
+
+    }
+    if(! List_truth(found) || ! Var_equal(List_car(List_cdr(found)), String_var(entry -> version))) return 0;
+    if(! String_equal(install_version(entry -> name), entry -> version)) return 0;
+  }
+  return 1;
+}
+
+static void _write_lock(Project project, String path, List rows){
+  File output = fopen(path, "w");
+  if(! output) _error(project, 0, "cannot write x2c.lock");
+  fputs(PROJECT_LOCK_HEADER, output);
+  {
+    List row;
+    List _x2c_macro_object_24 = rows;
+    List _x2c_macro_cursor_24 = _x2c_macro_object_24;
+    Var _x2c_macro_cursor_output_23;
+    while(List_try_next(_x2c_macro_object_24, & _x2c_macro_cursor_24, & _x2c_macro_cursor_output_23)){
+      row = Var_list(_x2c_macro_cursor_output_23);
+      {
+        int first = 1;
+        {
+          String field;
+          List _x2c_macro_object_23 = row;
+          List _x2c_macro_cursor_23 = _x2c_macro_object_23;
+          Var _x2c_macro_cursor_output_22;
+          while(List_try_next(_x2c_macro_object_23, & _x2c_macro_cursor_23, & _x2c_macro_cursor_output_22)){
+            field = Var_string(_x2c_macro_cursor_output_22);
+            {
+              if(! first) fputc(' ', output);
+              fputs(field, output);
+              first = 0;
+            }
+
+          }
+
+        }
+        fputc('\n', output);
+      }
+
+    }
+
+  }
+  if(fclose(output)) _error(project, 0, "cannot write x2c.lock");
+}
+
+List install_require(CliRequest, String, String);
+
+static void _resolve_dependencies(Project project, CliRequest request){
+  if(! project -> dependencies || project -> sources) return;
+  String path = String_join(NULL, cons(String_var(project -> root), cons(String_var(_43), NULL)));
+  List locked = _read_lock(path);
+  if(_lock_satisfies(project, locked)) return;
+  Array rows = Array_new();
+  for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next) Array_push(rows, List_var(install_require(request, entry -> name, entry -> version)));
+  _write_lock(project, path, Array_list_free(rows));
+}
+
 String project_manifest(CliRequest request){
   if(! _init_guard_) _file_init_();
   if(String_truth(request -> manifest)) return request -> manifest;
   char current[PATH_MAX];
   if(! getcwd(current, sizeof(current))) _error(NULL, 0, "cannot read current directory");
   while(1){
-    String candidate = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_43), NULL)));
+    String candidate = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_44), NULL)));
     if(request -> sources ? SourceView_exists(request -> sources, candidate) : ! access(candidate, R_OK)) return candidate;
     if(strcmp(current, "/") == 0) break;
     char * slash = strrchr(current, '/');
@@ -1002,10 +1202,6 @@ String project_manifest(CliRequest request){
 String SourceView_path(String);
 
 int SourceView_read(SourceView, String, volatile String *);
-
-String File_string_close(File);
-
-Var Symbol_var(Symbol);
 
 String x2c_path_dir(String);
 
@@ -1026,39 +1222,40 @@ ProjectBuild project_plan(CliRequest request){
     File input = fopen(project -> path, "r");
     if(! input) _error(project, 0, "cannot open manifest");
     {
-      ExceptionFrame _x2c_exception_frame_0;
-      static MatchCaptureSite _x2c_catch_arms_0[1];
-      static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
-      Var _x2c_catch_patterns_0[1];
-      if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-      _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+      ExceptionFrame _x2c_exception_frame_1;
+      static MatchCaptureSite _x2c_catch_arms_1[1];
+      static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
+      Var _x2c_catch_patterns_1[1];
+      if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+      _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
     }
-    ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) project -> text = File_string_close(input);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
-      if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(&_x2c_exception_frame_0);
+    ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) project -> text = File_string_close(input);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+      if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+        x2c_error_catch_detach(_x2c_error_handler_1);
+        x2c_exception_mark_handled(&_x2c_exception_frame_1);
          {_error(project, 0, "cannot read manifest");
       }
 
     }
     else{
-      x2c_error_catch_close(_x2c_error_handler_0);
-      _x2c_error_handler_0 = NULL;
-      x2c_exception_leave(& _x2c_exception_frame_0);
+      x2c_error_catch_close(_x2c_error_handler_1);
+      _x2c_error_handler_1 = NULL;
+      x2c_exception_leave(& _x2c_exception_frame_1);
       __builtin_unreachable();
     }
 
   }
 
 }
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
+x2c_error_catch_close(_x2c_error_handler_1);
+_x2c_error_handler_1 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_1);
 }
 }
 project -> root = x2c_path_dir(project -> path);
 _parse_manifest(project);
 for(ProjectTarget target = project -> targets;  target;  target = target -> next) _validate_target(project, target);
+_resolve_dependencies(project, request);
 String selected_name = String_truth(request -> target) ? request -> target : project -> default_target;
 if(! String_truth(selected_name)){
   if(project -> targets && ! project -> targets -> next) selected_name = project -> targets -> name;
@@ -1074,7 +1271,7 @@ if(String_truth(build_root) && String_getindex(build_root, 0) != '/'){
   if(! getcwd(current, sizeof(current))) _error(project, 0, "cannot read current directory");
   build_root = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_26), cons(String_var(build_root), NULL))));
 }
-if(! String_truth(build_root)) build_root = String_truth(project -> build_dir) ? _absolute(project, project -> build_dir) : String_join(NULL, cons(String_var(project -> root), cons(String_var(_44), NULL)));
+if(! String_truth(build_root)) build_root = String_truth(project -> build_dir) ? _absolute(project, project -> build_dir) : String_join(NULL, cons(String_var(project -> root), cons(String_var(_45), NULL)));
 project -> build_root = build_root;
 _plan_target(project, selected, request, selected, build_root);
 return project -> head;

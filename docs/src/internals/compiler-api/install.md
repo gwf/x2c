@@ -13,6 +13,8 @@ Package installation into the x2c home.
 | Function | Summary |
 | --- | --- |
 | [`install_command`](#install_command) | Installs the package named by the request's one operand and returns 0. |
+| [`install_require`](#install_require) | Returns the index row for `name`, installing it under the x2c home first unless an installed package already records `version`. |
+| [`install_version`](#install_version) | Returns the version an installed package records, or NULL when no package of that name is installed. |
 | [`list_command`](#list_command) | Lists installed packages as `name version kind` lines and returns 0. |
 | [`remove_command`](#remove_command) | Removes the installed package named by the request's one operand. |
 
@@ -28,7 +30,29 @@ The operand is a local directory, a local `.tar.gz`, a URL with
 verified against this compiler's version unless `--force`; a pure-x2c
 source package is built by this compiler. Failures exit with status 2.
 
-Source: `src/install.x:250`
+Source: `src/install.x:298`
+
+#### install_require
+
+`List install_require(CliRequest request, String name, String version)`
+
+Returns the index row for `name`, installing it under the x2c home first
+unless an installed package already records `version`. The row is
+`name version kind platform url sha256`, the same shape the package index
+and a project lockfile hold. An already satisfied dependency reaches no
+network. Failures exit with status 2.
+
+Source: `src/install.x:335`
+
+#### install_version
+
+`String install_version(String name)`
+
+Returns the version an installed package records, or NULL when no package
+of that name is installed. A package installed without a recorded version
+returns the empty string. Reaches no network.
+
+Source: `src/install.x:326`
 
 #### list_command
 
@@ -36,7 +60,7 @@ Source: `src/install.x:250`
 
 Lists installed packages as `name version kind` lines and returns 0.
 
-Source: `src/install.x:316`
+Source: `src/install.x:366`
 
 #### remove_command
 
@@ -45,7 +69,7 @@ Source: `src/install.x:316`
 Removes the installed package named by the request's one operand.
 A directory without an install marker is left alone. Returns 0.
 
-Source: `src/install.x:303`
+Source: `src/install.x:353`
 
 ## Design notes
 
