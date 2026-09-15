@@ -66,9 +66,12 @@ jobs:
     if: inputs.windows_spike
     runs-on: windows-latest
     steps:
+      # Ubuntu 22.04 ships clang 14, which rejects two generated static
+      # initializers as non-constant; 24.04 ships clang 18, as the Linux
+      # release job uses.
       - uses: Vampire/setup-wsl@v3
         with:
-          distribution: Ubuntu-22.04
+          distribution: Ubuntu-24.04
           additional-packages: clang make python3 curl git ca-certificates
       - name: Build from a Linux-filesystem clone and check the install script
         shell: wsl-bash {0}
@@ -100,6 +103,10 @@ jobs:
           msystem: MSYS
           update: true
           install: base-devel gcc python git
+        # include/ links headers before they are built; only native symlinks
+        # can dangle, so the copy-mode default fails there.
+      - name: Use native symlinks
+        run: echo "MSYS=winsymlinks:native" >> "$GITHUB_ENV"
       - name: Report the toolchain
         run: |
           uname -a
