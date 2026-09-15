@@ -402,7 +402,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _57 = String_new(".a");
   _58 = String_new("--save-temps=");
   _59 = String_new("-O2");
-  _60 = String_new("x2c 0.12.0");
+  _60 = String_new("x2c 0.12.1");
 }
 
 _Noreturn static void _removed_output(void){
