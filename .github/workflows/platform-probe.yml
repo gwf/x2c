@@ -1,5 +1,5 @@
-# Temporary. Uploads the failing recipes' traces as an artifact, because the
-# live log is not byte-exact. Delete before the pull request.
+# Temporary. Compares recipe forms for a pinned digest on macOS x86_64,
+# where the current form loses bytes. Delete before the pull request.
 name: platform-probe
 
 on:
@@ -14,31 +14,41 @@ env:
   CC: clang
 
 jobs:
-  intel:
-    runs-on: macos-15-intel
+  forms:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15-intel, macos-15]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
-      - name: Install build tools
-        run: brew install autoconf automake libtool pkg-config jq
-      - name: Build from checked-in bootstrap
-        run: make build-safe
-      - name: Collect the failing recipes
+      - name: Try each recipe form
         run: |
-          out="$RUNNER_TEMP/probe"
-          mkdir -p "$out"
-          make --version >"$out/tools.txt" 2>&1
-          command -v shasum nm ar jq make >>"$out/tools.txt" 2>&1
-          sed -n '60,80p' packages/libuv/Makefile | od -c >"$out/makefile.txt"
-          (cd packages/libuv && shasum -a 256 LICENSES/*.txt) \
-            >"$out/digests.txt" 2>&1
-          make -C packages/libuv SHELL='sh -x' verify-licenses \
-            >"$out/libuv.txt" 2>&1 || echo "exit $?" >>"$out/libuv.txt"
-          make -C packages/libcurl SHELL='sh -x' verify-profile \
-            >"$out/libcurl.txt" 2>&1 || echo "exit $?" >>"$out/libcurl.txt"
-          make -C packages/blis SHELL='sh -x' verify-profile \
-            >"$out/blis.txt" 2>&1 || echo "exit $?" >>"$out/blis.txt"
-      - name: Keep the traces
-        uses: actions/upload-artifact@v4
-        with:
-          name: probe
-          path: ${{ runner.temp }}/probe
+          cd packages/libuv
+          cat >/tmp/Forms.mk <<'MK'
+          SUM := 16de0c32b265cb7d46a6d3bd614f259dd4d693a5e26b3407b04aae8d73041f0c
+          FILE := LICENSES/libuv-1.52.1-MIT.txt
+
+          continued:
+          	@test "$$(shasum -a 256 $(FILE) | \
+          	  cut -d' ' -f1)" = \
+          	  16de0c32b265cb7d46a6d3bd614f259dd4d693a5e26b3407b04aae8d73041f0c
+
+          variable:
+          	@test "$$(shasum -a 256 $(FILE) | \
+          	  cut -d' ' -f1)" = "$(SUM)"
+
+          oneline:
+          	@test "$$(shasum -a 256 $(FILE) | cut -d' ' -f1)" = "$(SUM)"
+
+          checkfile:
+          	@printf '%s  %s\n' "$(SUM)" "$(FILE)" | shasum -a 256 -c --status
+          MK
+          sed -i '' 's/^          //' /tmp/Forms.mk
+          for form in continued variable oneline checkfile; do
+            if make -f /tmp/Forms.mk "$form" 2>/dev/null; then
+              echo "PASS $form"
+            else
+              echo "FAIL $form"
+            fi
+          done
