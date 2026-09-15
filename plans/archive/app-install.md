@@ -1,12 +1,14 @@
 # x2c application development installs
 
-> Status: active - approved 2026-09-14; Phases 1 and 2 implemented on
-> branch claude/x2c-install-package-design-793fa2 (draft PR #42), awaiting
-> Gary's end-to-end review before anything reaches main.
-> Decisions recorded 2026-09-14 with Gary:
-> a source checkout is the dev install; modules distribute as a hybrid of
-> prebuilt bundles and source for pure-x2c packages; installed modules live
-> only under `<home>/packages`.
+> Status: done 2026-09-15. Both phases merged to main in PR #42 (merge
+> commit "merge x2c home and package installs"); release assets and the
+> package index uploaded to v0.12.0; site deployed; live install.sh and
+> `x2c install pcre2` verified from a machine with no checkout. Deviations
+> from the design: the index is line-oriented text, not JSON; examples
+> install to `<home>/examples/`; `install.sh` reads the current version
+> from the site. Follow-ups: v0.12.0 tag predates the merge; torch and
+> raylib have no bundles; linux-aarch64 has no release; binding numbers
+> remain unique only per symbol table (reachability keyed by spelling).
 
 ## Context
 
