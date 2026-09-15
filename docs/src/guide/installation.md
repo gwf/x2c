@@ -107,7 +107,7 @@ curl -fsSL https://x2c-lang.dev/install.sh | sh
 Keep the prefix and your projects on the Linux filesystem, under your WSL
 home rather than under `/mnt/c`, so builds run at native speed. Native
 Windows and the MSYS2 or Cygwin layers are not supported; the
-`windows-spike` workflow records how far a build gets there.
+`check` workflow's `windows_spike` input records how far a build gets there.
 
 ## Developer workflow
 
