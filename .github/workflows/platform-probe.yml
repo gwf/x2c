@@ -1,5 +1,5 @@
-# Temporary. Captures the failing recipes to files so the live log cannot
-# interleave their traces. Delete before the pull request.
+# Temporary. Uploads the failing recipes' traces as an artifact, because the
+# live log is not byte-exact. Delete before the pull request.
 name: platform-probe
 
 on:
@@ -20,28 +20,25 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install build tools
         run: brew install autoconf automake libtool pkg-config jq
-      - name: Show the tools the recipes run under
-        run: |
-          make --version | head -1
-          /bin/sh --version 2>&1 | head -1 || true
-          command -v shasum nm ar jq
       - name: Build from checked-in bootstrap
         run: make build-safe
-      - name: Trace the libuv license check
-        continue-on-error: true
+      - name: Collect the failing recipes
         run: |
+          out="$RUNNER_TEMP/probe"
+          mkdir -p "$out"
+          make --version >"$out/tools.txt" 2>&1
+          command -v shasum nm ar jq make >>"$out/tools.txt" 2>&1
+          sed -n '60,80p' packages/libuv/Makefile | od -c >"$out/makefile.txt"
+          (cd packages/libuv && shasum -a 256 LICENSES/*.txt) \
+            >"$out/digests.txt" 2>&1
           make -C packages/libuv SHELL='sh -x' verify-licenses \
-            >"$RUNNER_TEMP/libuv.log" 2>&1 || true
-          cat "$RUNNER_TEMP/libuv.log"
-      - name: Trace the libcurl profile check
-        continue-on-error: true
-        run: |
+            >"$out/libuv.txt" 2>&1 || echo "exit $?" >>"$out/libuv.txt"
           make -C packages/libcurl SHELL='sh -x' verify-profile \
-            >"$RUNNER_TEMP/libcurl.log" 2>&1 || true
-          tail -60 "$RUNNER_TEMP/libcurl.log"
-      - name: Trace the blis profile check
-        continue-on-error: true
-        run: |
+            >"$out/libcurl.txt" 2>&1 || echo "exit $?" >>"$out/libcurl.txt"
           make -C packages/blis SHELL='sh -x' verify-profile \
-            >"$RUNNER_TEMP/blis.log" 2>&1 || true
-          tail -60 "$RUNNER_TEMP/blis.log"
+            >"$out/blis.txt" 2>&1 || echo "exit $?" >>"$out/blis.txt"
+      - name: Keep the traces
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe
+          path: ${{ runner.temp }}/probe
