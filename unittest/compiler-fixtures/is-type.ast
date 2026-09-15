@@ -5,249 +5,250 @@
 
 (preproc "#include <stdio.h>")
 
-(typedef ("Var") (bindings (bind (binding 1 "Dynamic") ())))
+(typedef ("Var") (bindings (bind (binding 28 "Dynamic") ())))
 
-(typedef ("Dynamic") (bindings (bind (binding 2 "DynamicAgain") ())))
+(typedef ("Dynamic") (bindings (bind (binding 29 "DynamicAgain") ())))
 
-(typedef (int) (bindings (bind (binding 3 "NativeInt") ())))
+(typedef (int) (bindings (bind (binding 30 "NativeInt") ())))
 
-(typedef ("NativeInt") (bindings (bind (binding 4 "NativeIntAlias") ())))
+(typedef ("NativeInt") (bindings (bind (binding 31 "NativeIntAlias") ())))
 
-(typedef ("NativeIntAlias") (bindings (bind (binding 5 "NativeIntPointer") (*))))
+(typedef ("NativeIntAlias") 
+ (bindings (bind (binding 32 "NativeIntPointer") (*))))
 
 (typedef ("NativeIntPointer") 
- (bindings (bind (binding 6 "NativeIntDoublePointer") (*))))
+ (bindings (bind (binding 33 "NativeIntDoublePointer") (*))))
 
 (typedef 
  (struct "IsWidgetData" 
-  (fields (declare (int) (bindings (bind (binding 7 "value") ()))))) 
- (bindings (bind (binding 9 "IsWidget") (*))))
+  (fields (declare (int) (bindings (bind (binding 34 "value") ()))))) 
+ (bindings (bind (binding 36 "IsWidget") (*))))
 
-(typedef ("IsWidget") (bindings (bind (binding 10 "IsWidgetAlias") ())))
+(typedef ("IsWidget") (bindings (bind (binding 37 "IsWidgetAlias") ())))
 
 (declare ("Var") 
  (bindings 
-  (bind (binding 12 "IsWidget_var") 
-   ((fnmod (params (param ("IsWidget") (bind (binding 11 "widget") ()))))))))
+  (bind (binding 39 "IsWidget_var") 
+   ((fnmod (params (param ("IsWidget") (bind (binding 38 "widget") ()))))))))
 
 (declare ("IsWidget") 
  (bindings 
-  (bind (binding 14 "Var_iswidget") 
-   ((fnmod (params (param ("Var") (bind (binding 13 "value") ()))))))))
+  (bind (binding 41 "Var_iswidget") 
+   ((fnmod (params (param ("Var") (bind (binding 40 "value") ()))))))))
 
-(declare (static int) (bindings (bind (binding 15 "calls") ())))
+(declare (static int) (bindings (bind (binding 42 "calls") ())))
 
-(declare (static int) (bindings (bind (binding 16 "tag_calls") ())))
+(declare (static int) (bindings (bind (binding 43 "tag_calls") ())))
 
 (function (static "Var") 
- (bind (binding 17 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 44 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 1 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 15 "calls"))))))) 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 42 "calls"))))))) 
   (at 2 (return ("Var") (expr (int) (literal (int) "7"))))))
 
 (function (static "Symbol") 
- (bind (binding 18 "next_tag") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 45 "next_tag") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 3 (stmnt 
-         (expr (int) (postfix ++ (expr (int) (ident (binding 16 "tag_calls"))))))) 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 43 "tag_calls"))))))) 
   (at 4 (return ("Symbol") (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))
 
 (function (static "Var") 
- (bind (binding 20 "call_or_void") 
+ (bind (binding 47 "call_or_void") 
   ((fnmod 
     (params 
      (param (int) 
-      (bind (binding 19 "function") 
+      (bind (binding 46 "function") 
        (* (fnmod (params (param (void) (bind () ()))))))))))) 
  (block 
-  (at 5 (if (expr (* (func ((void))) int) (ident (binding 19 "function"))) 
+  (at 5 (if (expr (* (func ((void))) int) (ident (binding 46 "function"))) 
          (return ("Var") 
           (expr (int) 
-           (call (expr (* (func ((void))) int) (ident (binding 19 "function"))) 
+           (call (expr (* (func ((void))) int) (ident (binding 46 "function"))) 
             (args (expr (void) ()))))))) 
   (at 6 (return ("Var") (expr ("Var") (literal ("Var") "void"))))))
 
 (function (static int) 
- (bind (binding 22 "symbol_shadows_type") 
-  ((fnmod (params (param ("Var") (bind (binding 21 "value") ())))))) 
+ (bind (binding 49 "symbol_shadows_type") 
+  ((fnmod (params (param ("Var") (bind (binding 48 "value") ())))))) 
  (block 
   (at 7 (declare ("Symbol") 
          (bindings 
-          (op = (bind (binding 23 "NativeInt") ()) 
+          (op = (bind (binding 50 "NativeInt") ()) 
            (expr ("Symbol") (literal ("Symbol") "<i32>" i32)))))) 
   (at 8 (return (int) 
          (expr (int) 
           (call (expr ((func (("Var") ("Symbol"))) int) 
-                 (ident (binding 24 "Var_is"))) 
-           (args (expr ("Var") (ident (binding 21 "value"))) 
-            (expr ("Symbol") (ident (binding 23 "NativeInt"))))))))))
+                 (ident (binding 51 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 48 "value"))) 
+            (expr ("Symbol") (ident (binding 50 "NativeInt"))))))))))
 
 (function (static int) 
- (bind (binding 26 "custom_visible_before_protocol") 
-  ((fnmod (params (param ("Var") (bind (binding 25 "value") ())))))) 
+ (bind (binding 53 "custom_visible_before_protocol") 
+  ((fnmod (params (param ("Var") (bind (binding 52 "value") ())))))) 
  (block 
   (at 9 (return (int) 
          (expr (int) 
           (call (expr ((func (("Var") ("Symbol"))) int) 
-                 (ident (binding 24 "Var_is"))) 
-           (args (expr ("Var") (ident (binding 25 "value"))) 
+                 (ident (binding 51 "Var_is"))) 
+           (args (expr ("Var") (ident (binding 52 "value"))) 
             (expr ("Symbol") "660840135016"))))))))
 
 (function ("Var") 
- (bind (binding 12 "IsWidget_var") 
-  ((fnmod (params (param ("IsWidget") (bind (binding 27 "widget") ())))))) 
+ (bind (binding 39 "IsWidget_var") 
+  ((fnmod (params (param ("IsWidget") (bind (binding 54 "widget") ())))))) 
  (block 
   (at 10 
    (return ("Var") 
     (expr ("Var") 
      (call (expr ((func (("Symbol") (...))) "Var") 
-            (ident (binding 28 "Var_new"))) 
+            (ident (binding 55 "Var_new"))) 
       (args (expr ("Symbol") (literal ("Symbol") "<iswidget>" iswidget)) 
-       (expr ("IsWidget") (ident (binding 27 "widget"))))))))))
+       (expr ("IsWidget") (ident (binding 54 "widget"))))))))))
 
 (function ("IsWidget") 
- (bind (binding 14 "Var_iswidget") 
-  ((fnmod (params (param ("Var") (bind (binding 29 "value") ())))))) 
+ (bind (binding 41 "Var_iswidget") 
+  ((fnmod (params (param ("Var") (bind (binding 56 "value") ())))))) 
  (block 
   (at 11 
    (return ("IsWidget") 
     (expr (* void) 
-     (call (expr ((func (("Var"))) (* void)) (ident (binding 30 "Var_pointer"))) 
-      (args (expr ("Var") (ident (binding 29 "value"))))))))))
+     (call (expr ((func (("Var"))) (* void)) (ident (binding 57 "Var_pointer"))) 
+      (args (expr ("Var") (ident (binding 56 "value"))))))))))
 
 (adopt ("Var") ("IsWidget") external 
  ((file "unittest/compiler-fixtures/is-type.x") 
   (line 56) (column 1) (length 8) (position 1018)))
 
 (function (int) 
- (bind (binding 31 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 58 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 12 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("String"))) void) 
-            (ident (binding 32 "x2c_register_type"))) 
+            (ident (binding 59 "x2c_register_type"))) 
       (args (expr ("String") (cache 0))))))) 
   (at 13 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 33 "integer") ()) (expr (int) (literal (int) "7"))) 
-     (op = (bind (binding 34 "pointer") (*)) 
-      (expr (* int) (op & (expr (int) (ident (binding 33 "integer")))))) 
-     (op = (bind (binding 35 "double_pointer") (* *)) 
-      (expr (* * int) (op & (expr (* int) (ident (binding 34 "pointer"))))))))) 
+     (op = (bind (binding 60 "integer") ()) (expr (int) (literal (int) "7"))) 
+     (op = (bind (binding 61 "pointer") (*)) 
+      (expr (* int) (op & (expr (int) (ident (binding 60 "integer")))))) 
+     (op = (bind (binding 62 "double_pointer") (* *)) 
+      (expr (* * int) (op & (expr (* int) (ident (binding 61 "pointer"))))))))) 
   (at 14 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 36 "scalar") ()) 
-      (expr (int) (ident (binding 33 "integer"))))))) 
+     (op = (bind (binding 63 "scalar") ()) 
+      (expr (int) (ident (binding 60 "integer"))))))) 
   (at 15 
    (declare ("Dynamic") 
     (bindings 
-     (op = (bind (binding 37 "alias") ()) 
-      (expr ("Var") (ident (binding 36 "scalar"))))))) 
+     (op = (bind (binding 64 "alias") ()) 
+      (expr ("Var") (ident (binding 63 "scalar"))))))) 
   (at 16 
    (declare ("DynamicAgain") 
     (bindings 
-     (op = (bind (binding 38 "nested_alias") ()) 
-      (expr ("Dynamic") (ident (binding 37 "alias"))))))) 
+     (op = (bind (binding 65 "nested_alias") ()) 
+      (expr ("Dynamic") (ident (binding 64 "alias"))))))) 
   (at 17 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 39 "signed_byte") ()) 
+     (op = (bind (binding 66 "signed_byte") ()) 
       (expr (signed char) 
        (cast (decl (signed char) (bindings (bind () ()))) 
         (expr (int) (op - (expr (int) (literal (int) "1")))))))))) 
   (at 18 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 40 "unsigned_byte") ()) 
+     (op = (bind (binding 67 "unsigned_byte") ()) 
       (expr (unsigned char) 
        (cast (decl (unsigned char) (bindings (bind () ()))) 
         (expr (int) (literal (int) "255")))))))) 
   (at 19 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 41 "unsigned_value") ()) 
+     (op = (bind (binding 68 "unsigned_value") ()) 
       (expr (unsigned) 
        (cast (decl (unsigned) (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
   (at 20 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 42 "wide_integer") ()) 
+     (op = (bind (binding 69 "wide_integer") ()) 
       (expr (long long) 
        (cast (decl (long long) (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
   (at 21 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 43 "wide_unsigned") ()) 
+     (op = (bind (binding 70 "wide_unsigned") ()) 
       (expr (unsigned long long) 
        (cast (decl (unsigned long long) (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
   (at 22 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 44 "floating") ()) 
+     (op = (bind (binding 71 "floating") ()) 
       (expr (float) 
        (cast (decl (float) (bindings (bind () ()))) 
         (expr (double) (literal (double) "1.5")))))))) 
   (at 23 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 45 "wide_floating") ()) 
+     (op = (bind (binding 72 "wide_floating") ()) 
       (expr (long double) 
        (cast (decl (long double) (bindings (bind () ()))) 
         (expr (double) (literal (double) "1.5")))))))) 
   (at 24 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 46 "system_integer") ()) 
+     (op = (bind (binding 73 "system_integer") ()) 
       (expr ("int32_t") 
        (cast (decl ("int32_t") (bindings (bind () ()))) 
         (expr (int) (literal (int) "7")))))))) 
   (at 25 
    (declare ("Var") 
-    (bindings (op = (bind (binding 47 "list") ()) (expr ("List") (nil)))))) 
+    (bindings (op = (bind (binding 74 "list") ()) (expr ("List") (nil)))))) 
   (at 26 
    (declare ("Var") 
-    (bindings (op = (bind (binding 48 "string") ()) (expr ("String") (0)))))) 
+    (bindings (op = (bind (binding 75 "string") ()) (expr ("String") (0)))))) 
   (at 27 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 49 "symbol") ()) 
+     (op = (bind (binding 76 "symbol") ()) 
       (expr ("Symbol") (literal ("Symbol") "<fixture>" fixture)))))) 
   (at 28 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 50 "pointer_value") ()) 
-      (expr (* int) (ident (binding 34 "pointer"))))))) 
+     (op = (bind (binding 77 "pointer_value") ()) 
+      (expr (* int) (ident (binding 61 "pointer"))))))) 
   (at 29 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 51 "double_pointer_value") ()) 
-      (expr (* * int) (ident (binding 35 "double_pointer"))))))) 
+     (op = (bind (binding 78 "double_pointer_value") ()) 
+      (expr (* * int) (ident (binding 62 "double_pointer"))))))) 
   (at 30 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 52 "null_value") ()) 
+     (op = (bind (binding 79 "null_value") ()) 
       (expr (* void) 
        (cast (decl (void) (bindings (bind () (*)))) 
-        (expr () (ident (binding 53 "NULL"))))))))) 
+        (expr () (ident (binding 80 "NULL"))))))))) 
   (at 31 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 54 "absent") ()) 
+     (op = (bind (binding 81 "absent") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
   (at 32 
    (declare ("IsWidget") 
     (bindings 
-     (op = (bind (binding 55 "widget") ()) 
+     (op = (bind (binding 82 "widget") ()) 
       (expr (* void) 
        (call (expr ((func (("size_t"))) * void) 
-              (ident (binding 56 "Scope_malloc"))) 
+              (ident (binding 83 "Scope_malloc"))) 
         (args (expr (unsigned) 
                (sizeof 
                 (parens (decl (struct "IsWidgetData") (bindings (bind () ()))))))))))))) 
@@ -255,31 +256,31 @@
    (stmnt 
     (expr (int) 
      (op = (expr (int) 
-            (op -> (expr ("IsWidget") (ident (binding 55 "widget"))) 
+            (op -> (expr ("IsWidget") (ident (binding 82 "widget"))) 
              ("value"))) (expr (int) (literal (int) "9")))))) 
   (at 34 
    (declare ("IsWidgetAlias") 
     (bindings 
-     (op = (bind (binding 57 "widget_alias") ()) 
-      (expr ("IsWidget") (ident (binding 55 "widget"))))))) 
+     (op = (bind (binding 84 "widget_alias") ()) 
+      (expr ("IsWidget") (ident (binding 82 "widget"))))))) 
   (at 35 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 58 "custom") ()) 
-      (expr ("IsWidgetAlias") (ident (binding 57 "widget_alias"))))))) 
+     (op = (bind (binding 85 "custom") ()) 
+      (expr ("IsWidgetAlias") (ident (binding 84 "widget_alias"))))))) 
   (at 36 
    (declare ("Symbol") 
     (bindings 
-     (op = (bind (binding 59 "scalar_tag") ()) 
+     (op = (bind (binding 86 "scalar_tag") ()) 
       (expr ("Symbol") (literal ("Symbol") "<i32>" i32)))))) 
   (at 37 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 60 "is") ()) (expr (int) (literal (int) "1")))))) 
+     (op = (bind (binding 87 "is") ()) (expr (int) (literal (int) "1")))))) 
   (at 38 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 61 "ok") ()) 
+     (op = (bind (binding 88 "ok") ()) 
       (expr (int) 
        (op && 
         (expr (int) 
@@ -513,7 +514,7 @@
                                                                                                          
                                                                                                          binding 
                                                                                                          
-                                                                                                         24 
+                                                                                                         51 
                                                                                                          
                                                                                                          "Var_is"))) 
                                                                                                       (
@@ -532,7 +533,7 @@
                                                                                                           
                                                                                                           binding 
                                                                                                           
-                                                                                                          38 
+                                                                                                          65 
                                                                                                           
                                                                                                           "nested_alias"))) 
                                                                                                        (
@@ -575,7 +576,7 @@
                                                                                                          
                                                                                                          binding 
                                                                                                          
-                                                                                                         24 
+                                                                                                         51 
                                                                                                          
                                                                                                          "Var_is"))) 
                                                                                                       (
@@ -594,7 +595,7 @@
                                                                                                           
                                                                                                           binding 
                                                                                                           
-                                                                                                          36 
+                                                                                                          63 
                                                                                                           
                                                                                                           "scalar"))) 
                                                                                                        (
@@ -637,7 +638,7 @@
                                                                                                        
                                                                                                        binding 
                                                                                                        
-                                                                                                       24 
+                                                                                                       51 
                                                                                                        
                                                                                                        "Var_is"))) 
                                                                                                     (
@@ -656,7 +657,7 @@
                                                                                                         
                                                                                                         binding 
                                                                                                         
-                                                                                                        36 
+                                                                                                        63 
                                                                                                         
                                                                                                         "scalar"))) 
                                                                                                      (
@@ -699,7 +700,7 @@
                                                                                                      
                                                                                                      binding 
                                                                                                      
-                                                                                                     24 
+                                                                                                     51 
                                                                                                      
                                                                                                      "Var_is"))) 
                                                                                                   (
@@ -718,7 +719,7 @@
                                                                                                       
                                                                                                       binding 
                                                                                                       
-                                                                                                      36 
+                                                                                                      63 
                                                                                                       
                                                                                                       "scalar"))) 
                                                                                                    (
@@ -761,7 +762,7 @@
                                                                                                    
                                                                                                    binding 
                                                                                                    
-                                                                                                   24 
+                                                                                                   51 
                                                                                                    
                                                                                                    "Var_is"))) 
                                                                                                 (
@@ -780,7 +781,7 @@
                                                                                                     
                                                                                                     binding 
                                                                                                     
-                                                                                                    36 
+                                                                                                    63 
                                                                                                     
                                                                                                     "scalar"))) 
                                                                                                  (
@@ -823,7 +824,7 @@
                                                                                                  
                                                                                                  binding 
                                                                                                  
-                                                                                                 24 
+                                                                                                 51 
                                                                                                  
                                                                                                  "Var_is"))) 
                                                                                               (
@@ -842,7 +843,7 @@
                                                                                                   
                                                                                                   binding 
                                                                                                   
-                                                                                                  39 
+                                                                                                  66 
                                                                                                   
                                                                                                   "signed_byte"))) 
                                                                                                (
@@ -885,7 +886,7 @@
                                                                                                
                                                                                                binding 
                                                                                                
-                                                                                               24 
+                                                                                               51 
                                                                                                
                                                                                                "Var_is"))) 
                                                                                             (
@@ -904,7 +905,7 @@
                                                                                                 
                                                                                                 binding 
                                                                                                 
-                                                                                                39 
+                                                                                                66 
                                                                                                 
                                                                                                 "signed_byte"))) 
                                                                                              (
@@ -958,7 +959,7 @@
                                                                                                
                                                                                                binding 
                                                                                                
-                                                                                               24 
+                                                                                               51 
                                                                                                
                                                                                                "Var_is"))) 
                                                                                             (
@@ -977,7 +978,7 @@
                                                                                                 
                                                                                                 binding 
                                                                                                 
-                                                                                                39 
+                                                                                                66 
                                                                                                 
                                                                                                 "signed_byte"))) 
                                                                                              (
@@ -1020,7 +1021,7 @@
                                                                                            
                                                                                            binding 
                                                                                            
-                                                                                           24 
+                                                                                           51 
                                                                                            
                                                                                            "Var_is"))) 
                                                                                         (
@@ -1039,7 +1040,7 @@
                                                                                             
                                                                                             binding 
                                                                                             
-                                                                                            40 
+                                                                                            67 
                                                                                             
                                                                                             "unsigned_byte"))) 
                                                                                          (
@@ -1082,7 +1083,7 @@
                                                                                          
                                                                                          binding 
                                                                                          
-                                                                                         24 
+                                                                                         51 
                                                                                          
                                                                                          "Var_is"))) 
                                                                                       (
@@ -1101,7 +1102,7 @@
                                                                                           
                                                                                           binding 
                                                                                           
-                                                                                          41 
+                                                                                          68 
                                                                                           
                                                                                           "unsigned_value"))) 
                                                                                        (
@@ -1155,7 +1156,7 @@
                                                                                          
                                                                                          binding 
                                                                                          
-                                                                                         24 
+                                                                                         51 
                                                                                          
                                                                                          "Var_is"))) 
                                                                                       (
@@ -1174,7 +1175,7 @@
                                                                                           
                                                                                           binding 
                                                                                           
-                                                                                          41 
+                                                                                          68 
                                                                                           
                                                                                           "unsigned_value"))) 
                                                                                        (
@@ -1217,7 +1218,7 @@
                                                                                      
                                                                                      binding 
                                                                                      
-                                                                                     24 
+                                                                                     51 
                                                                                      
                                                                                      "Var_is"))) 
                                                                                   (
@@ -1236,7 +1237,7 @@
                                                                                       
                                                                                       binding 
                                                                                       
-                                                                                      42 
+                                                                                      69 
                                                                                       
                                                                                       "wide_integer"))) 
                                                                                    (
@@ -1290,7 +1291,7 @@
                                                                                      
                                                                                      binding 
                                                                                      
-                                                                                     24 
+                                                                                     51 
                                                                                      
                                                                                      "Var_is"))) 
                                                                                   (
@@ -1309,7 +1310,7 @@
                                                                                       
                                                                                       binding 
                                                                                       
-                                                                                      42 
+                                                                                      69 
                                                                                       
                                                                                       "wide_integer"))) 
                                                                                    (
@@ -1349,7 +1350,7 @@
                                                                                  
                                                                                  binding 
                                                                                  
-                                                                                 24 
+                                                                                 51 
                                                                                  
                                                                                  "Var_is"))) 
                                                                               (
@@ -1368,7 +1369,7 @@
                                                                                   
                                                                                   binding 
                                                                                   
-                                                                                  43 
+                                                                                  70 
                                                                                   
                                                                                   "wide_unsigned"))) 
                                                                                (
@@ -1414,7 +1415,7 @@
                                                                                    
                                                                                    binding 
                                                                                    
-                                                                                   24 
+                                                                                   51 
                                                                                    
                                                                                    "Var_is"))) 
                                                                                 (
@@ -1433,7 +1434,7 @@
                                                                                     
                                                                                     binding 
                                                                                     
-                                                                                    43 
+                                                                                    70 
                                                                                     
                                                                                     "wide_unsigned"))) 
                                                                                  (
@@ -1462,7 +1463,7 @@
                                                                             ident 
                                                                             (
                                                                              binding 
-                                                                             24 
+                                                                             51 
                                                                              
                                                                              "Var_is"))) 
                                                                           (args 
@@ -1473,7 +1474,7 @@
                                                                              ident 
                                                                              (
                                                                               binding 
-                                                                              44 
+                                                                              71 
                                                                               
                                                                               "floating"))) 
                                                                            (expr 
@@ -1513,7 +1514,7 @@
                                                                                   
                                                                                   binding 
                                                                                   
-                                                                                  24 
+                                                                                  51 
                                                                                   
                                                                                   "Var_is"))) 
                                                                                (
@@ -1532,7 +1533,7 @@
                                                                                    
                                                                                    binding 
                                                                                    
-                                                                                   44 
+                                                                                   71 
                                                                                    
                                                                                    "floating"))) 
                                                                                 (
@@ -1559,7 +1560,7 @@
                                                                              ident 
                                                                              (
                                                                               binding 
-                                                                              24 
+                                                                              51 
                                                                               
                                                                               "Var_is"))) 
                                                                       (args (
@@ -1572,7 +1573,7 @@
                                                                                
                                                                                binding 
                                                                                
-                                                                               45 
+                                                                               72 
                                                                                
                                                                                "wide_floating"))) 
                                                                        (expr (
@@ -1590,7 +1591,7 @@
                                                                           (ident 
                                                                            (
                                                                             binding 
-                                                                            24 
+                                                                            51 
                                                                             
                                                                             "Var_is"))) 
                                                                     (args (expr 
@@ -1600,7 +1601,7 @@
                                                                             ident 
                                                                             (
                                                                              binding 
-                                                                             46 
+                                                                             73 
                                                                              
                                                                              "system_integer"))) 
                                                                      (expr (
@@ -1632,7 +1633,7 @@
                                                                         (ident 
                                                                          (
                                                                           binding 
-                                                                          62 
+                                                                          89 
                                                                           "Var_is_row"))) 
                                                                   (args (expr (
                                                                                
@@ -1640,7 +1641,7 @@
                                                                          (ident 
                                                                           (
                                                                            binding 
-                                                                           47 
+                                                                           74 
                                                                            "list"))) 
                                                                    (expr (
                                                                           unsigned) 
@@ -1681,13 +1682,13 @@
                                                                             int) 
                                                                       (ident 
                                                                        (binding 
-                                                                        62 
+                                                                        89 
                                                                         "Var_is_row"))) 
                                                                 (args (expr (
                                                                              "Var") 
                                                                        (ident 
                                                                         (binding 
-                                                                         48 
+                                                                         75 
                                                                          "string"))) 
                                                                  (expr (unsigned) 
                                                                   (literal 
@@ -1711,12 +1712,12 @@
                                                                              "Symbol"))) 
                                                                           int) 
                                                                     (ident 
-                                                                     (binding 24 
+                                                                     (binding 51 
                                                                       "Var_is"))) 
                                                               (args (expr ("Var") 
                                                                      (ident 
                                                                       (binding 
-                                                                       49 
+                                                                       76 
                                                                        "symbol"))) 
                                                                (expr ("Symbol") 
                                                                 "1328354264")))))) 
@@ -1748,14 +1749,14 @@
                                                                          (ident 
                                                                           (
                                                                            binding 
-                                                                           62 
+                                                                           89 
                                                                            "Var_is_row"))) 
                                                                    (args (expr 
                                                                           ("Var") 
                                                                           (ident 
                                                                            (
                                                                             binding 
-                                                                            36 
+                                                                            63 
                                                                             
                                                                             "scalar"))) 
                                                                     (expr (
@@ -1790,11 +1791,11 @@
                                                                               long))) 
                                                                       int) 
                                                                 (ident 
-                                                                 (binding 62 
+                                                                 (binding 89 
                                                                   "Var_is_row"))) 
                                                           (args (expr ("Var") 
                                                                  (ident 
-                                                                  (binding 50 
+                                                                  (binding 77 
                                                                    "pointer_value"))) 
                                                            (expr (unsigned) 
                                                             (literal (unsigned) 
@@ -1818,11 +1819,11 @@
                                                                             long))) 
                                                                     int) 
                                                               (ident 
-                                                               (binding 62 
+                                                               (binding 89 
                                                                 "Var_is_row"))) 
                                                         (args (expr ("Var") 
                                                                (ident 
-                                                                (binding 50 
+                                                                (binding 77 
                                                                  "pointer_value"))) 
                                                          (expr (unsigned) 
                                                           (literal (unsigned) 
@@ -1845,11 +1846,11 @@
                                                                           long))) 
                                                                   int) 
                                                             (ident 
-                                                             (binding 62 
+                                                             (binding 89 
                                                               "Var_is_row"))) 
                                                       (args (expr ("Var") 
                                                              (ident 
-                                                              (binding 51 
+                                                              (binding 78 
                                                                "double_pointer_value"))) 
                                                        (expr (unsigned) 
                                                         (literal (unsigned) "6")) 
@@ -1868,11 +1869,11 @@
                                                                         long))) 
                                                                 int) 
                                                           (ident 
-                                                           (binding 62 
+                                                           (binding 89 
                                                             "Var_is_row"))) 
                                                     (args (expr ("Var") 
                                                            (ident 
-                                                            (binding 51 
+                                                            (binding 78 
                                                              "double_pointer_value"))) 
                                                      (expr (unsigned) 
                                                       (literal (unsigned) "6")) 
@@ -1891,11 +1892,11 @@
                                                                       long))) 
                                                               int) 
                                                         (ident 
-                                                         (binding 62 
+                                                         (binding 89 
                                                           "Var_is_row"))) 
                                                   (args (expr ("Var") 
                                                          (ident 
-                                                          (binding 52 
+                                                          (binding 79 
                                                            "null_value"))) 
                                                    (expr (unsigned) 
                                                     (literal (unsigned) "0")) 
@@ -1908,19 +1909,19 @@
                                                       (call (expr ((func (("Var"))) 
                                                                    int) 
                                                              (ident 
-                                                              (binding 63 
+                                                              (binding 90 
                                                                "Var_is_void"))) 
                                                        (args (expr ("Var") 
                                                               (ident 
-                                                               (binding 52 
+                                                               (binding 79 
                                                                 "null_value")))))))))) 
                                             (expr (int) 
                                              (call (expr ((func (("Var"))) int) 
                                                     (ident 
-                                                     (binding 63 "Var_is_void"))) 
+                                                     (binding 90 "Var_is_void"))) 
                                               (args (expr ("Var") 
                                                      (ident 
-                                                      (binding 54 "absent")))))))) 
+                                                      (binding 81 "absent")))))))) 
                                           (expr (int) 
                                            (op ! (expr (int) 
                                                   (call (expr ((func (("Var") 
@@ -1931,11 +1932,11 @@
                                                                        long))) 
                                                                int) 
                                                          (ident 
-                                                          (binding 62 
+                                                          (binding 89 
                                                            "Var_is_row"))) 
                                                    (args (expr ("Var") 
                                                           (ident 
-                                                           (binding 54 "absent"))) 
+                                                           (binding 81 "absent"))) 
                                                     (expr (unsigned) 
                                                      (literal (unsigned) "0")) 
                                                     (expr (unsigned long) 
@@ -1947,32 +1948,32 @@
                                         (expr (int) 
                                          (call (expr ((func (("Var"))) int) 
                                                 (ident 
-                                                 (binding 26 
+                                                 (binding 53 
                                                   "custom_visible_before_protocol"))) 
                                           (args (expr ("Var") 
-                                                 (ident (binding 58 "custom")))))))) 
+                                                 (ident (binding 85 "custom")))))))) 
                                       (expr (int) 
                                        (call (expr ((func (("Var") ("Symbol"))) 
                                                     int) 
-                                              (ident (binding 24 "Var_is"))) 
+                                              (ident (binding 51 "Var_is"))) 
                                         (args (expr ("Var") 
-                                               (ident (binding 58 "custom"))) 
+                                               (ident (binding 85 "custom"))) 
                                          (expr ("Symbol") "660840135016")))))) 
                                     (expr (int) 
                                      (call (expr ((func (("Var") ("Symbol"))) 
                                                   int) 
-                                            (ident (binding 24 "Var_is"))) 
+                                            (ident (binding 51 "Var_is"))) 
                                       (args (expr ("Var") 
-                                             (ident (binding 58 "custom"))) 
+                                             (ident (binding 85 "custom"))) 
                                        (expr ("Symbol") "660840135016")))))) 
                                   (expr (int) 
                                    (op == 
                                     (expr (int) 
                                      (call (expr ((func (("Var") ("Symbol"))) 
                                                   int) 
-                                            (ident (binding 24 "Var_is"))) 
+                                            (ident (binding 51 "Var_is"))) 
                                       (args (expr ("Var") 
-                                             (ident (binding 36 "scalar"))) 
+                                             (ident (binding 63 "scalar"))) 
                                        (expr ("Symbol") "3453797")))) 
                                     (expr (int) (literal (int) "1")))))) 
                                 (expr (int) 
@@ -1982,92 +1983,92 @@
                                     (expr (int) 
                                      (call (expr ((func (("Var") ("Symbol"))) 
                                                   int) 
-                                            (ident (binding 24 "Var_is"))) 
+                                            (ident (binding 51 "Var_is"))) 
                                       (args (expr ("Var") 
-                                             (ident (binding 36 "scalar"))) 
+                                             (ident (binding 63 "scalar"))) 
                                        (expr ("Symbol") "3453797")))) 
                                     (expr (int) 
                                      (call (expr ((func (("Var") ("Symbol"))) 
                                                   int) 
-                                            (ident (binding 24 "Var_is"))) 
+                                            (ident (binding 51 "Var_is"))) 
                                       (args (expr ("Var") 
-                                             (ident (binding 36 "scalar"))) 
+                                             (ident (binding 63 "scalar"))) 
                                        (expr ("Symbol") "30065")))))))))) 
                               (expr (int) 
                                (op ! (expr (int) 
                                       (call (expr ((func (("Var") ("Symbol"))) 
                                                    int) 
-                                             (ident (binding 24 "Var_is"))) 
+                                             (ident (binding 51 "Var_is"))) 
                                        (args (expr ("Var") 
-                                              (ident (binding 36 "scalar"))) 
+                                              (ident (binding 63 "scalar"))) 
                                         (expr ("Symbol") "3356265")))))))) 
                             (expr (int) 
                              (call (expr ((func (("Var") ("Symbol"))) int) 
-                                    (ident (binding 24 "Var_is"))) 
+                                    (ident (binding 51 "Var_is"))) 
                               (args (expr ("Var") 
                                      (call (expr ((func ((void))) "Var") 
-                                            (ident (binding 17 "next_value"))) 
+                                            (ident (binding 44 "next_value"))) 
                                       (args (expr (void) ())))) 
                                (expr ("Symbol") "3453797")))))) 
                           (expr (int) 
-                           (op == (expr (int) (ident (binding 15 "calls"))) 
+                           (op == (expr (int) (ident (binding 42 "calls"))) 
                             (expr (int) (literal (int) "1")))))) 
                         (expr (int) 
                          (call (expr ((func (("Var"))) int) 
-                                (ident (binding 63 "Var_is_void"))) 
+                                (ident (binding 90 "Var_is_void"))) 
                           (args (expr ("Var") 
                                  (call (expr ((func ((* (func ((void))) int))) 
                                               "Var") 
-                                        (ident (binding 20 "call_or_void"))) 
-                                  (args (expr () (ident (binding 53 "NULL"))))))))))) 
+                                        (ident (binding 47 "call_or_void"))) 
+                                  (args (expr () (ident (binding 80 "NULL"))))))))))) 
                       (expr (int) 
                        (call (expr ((func (("Var"))) int) 
-                              (ident (binding 22 "symbol_shadows_type"))) 
-                        (args (expr ("Var") (ident (binding 36 "scalar")))))))) 
+                              (ident (binding 49 "symbol_shadows_type"))) 
+                        (args (expr ("Var") (ident (binding 63 "scalar")))))))) 
                     (expr (int) 
                      (call (expr ((func (("Var") ("Symbol"))) int) 
-                            (ident (binding 24 "Var_is"))) 
-                      (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                            (ident (binding 51 "Var_is"))) 
+                      (args (expr ("Var") (ident (binding 63 "scalar"))) 
                        (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))) 
                   (expr (int) 
                    (call (expr ((func (("Var") ("Symbol"))) int) 
-                          (ident (binding 24 "Var_is"))) 
-                    (args (expr ("Var") (ident (binding 36 "scalar"))) 
-                     (expr ("Symbol") (ident (binding 59 "scalar_tag")))))))) 
+                          (ident (binding 51 "Var_is"))) 
+                    (args (expr ("Var") (ident (binding 63 "scalar"))) 
+                     (expr ("Symbol") (ident (binding 86 "scalar_tag")))))))) 
                 (expr (int) 
                  (call (expr ((func (("Var") ("Symbol"))) int) 
-                        (ident (binding 24 "Var_is"))) 
-                  (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                        (ident (binding 51 "Var_is"))) 
+                  (args (expr ("Var") (ident (binding 63 "scalar"))) 
                    (expr ("Symbol") 
                     (call (expr ((func ((void))) "Symbol") 
-                           (ident (binding 18 "next_tag"))) 
+                           (ident (binding 45 "next_tag"))) 
                      (args (expr (void) ()))))))))) 
               (expr (int) 
-               (op == (expr (int) (ident (binding 16 "tag_calls"))) 
+               (op == (expr (int) (ident (binding 43 "tag_calls"))) 
                 (expr (int) (literal (int) "1")))))) 
             (expr (int) 
              (op ! (expr (int) 
                     (call (expr ((func (("Var") ("Symbol"))) int) 
-                           (ident (binding 24 "Var_is"))) 
-                     (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                           (ident (binding 51 "Var_is"))) 
+                     (args (expr ("Var") (ident (binding 63 "scalar"))) 
                       (expr ("Symbol") 
                        (literal ("Symbol") "<not-a-type>" not-a-type))))))))) 
           (expr (int) 
            (call (expr ((func (("Var") ("Symbol"))) (int)) 
-                  (ident (binding 24 "Var_is"))) 
-            (args (expr ("Var") (ident (binding 36 "scalar"))) 
+                  (ident (binding 51 "Var_is"))) 
+            (args (expr ("Var") (ident (binding 63 "scalar"))) 
              (expr ("Symbol") (literal ("Symbol") "<i32>" i32))))))) 
-        (expr (int) (ident (binding 60 "is"))))))))) 
+        (expr (int) (ident (binding 87 "is"))))))))) 
   (at 39 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 64 "printf"))) 
+     (call (expr () (ident (binding 91 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d %d\\n\"")) 
-       (expr (int) (ident (binding 61 "ok"))) 
-       (expr (int) (ident (binding 15 "calls"))) 
-       (expr (int) (ident (binding 16 "tag_calls")))))))) 
+       (expr (int) (ident (binding 88 "ok"))) 
+       (expr (int) (ident (binding 42 "calls"))) 
+       (expr (int) (ident (binding 43 "tag_calls")))))))) 
   (at 40 
    (return (int) 
     (expr (int) 
-     (op ? (expr (int) (ident (binding 61 "ok"))) 
+     (op ? (expr (int) (ident (binding 88 "ok"))) 
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

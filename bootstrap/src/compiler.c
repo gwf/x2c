@@ -25,7 +25,7 @@ List Compiler_lift_func_expression(Compiler compiler, List expression);
 typedef struct Sym{
   Block scopes;
   Map globals, statics, binding_facts;
-  int base_scopes, next_binding, local_macro_names;
+  int base_scopes, local_macro_names;
   Compiler compiler;
 }
 * Sym;
@@ -2450,7 +2450,7 @@ static SymScope * _semantic_scope(Sym sym, int index){
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c){
-  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> compiler = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = _semantic_scope(c -> sym, transaction -> scope_index);  transaction -> scope = * scope;  transaction -> counters = c -> names -> counters;  transaction -> statics = c -> sym -> statics;  transaction -> binding_facts = Compiler_semantic_binding_facts(c);  transaction -> next_binding = c -> sym -> next_binding;  transaction -> local_macro_names = c -> sym -> local_macro_names;  transaction -> initializer_name = c -> init_fn;  transaction -> shutdown_name = c -> fini_fn;  if(c -> source_facts && c -> source_primary){
+  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> compiler = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = _semantic_scope(c -> sym, transaction -> scope_index);  transaction -> scope = * scope;  transaction -> counters = c -> names -> counters;  transaction -> statics = c -> sym -> statics;  transaction -> binding_facts = Compiler_semantic_binding_facts(c);  transaction -> next_binding = c -> names -> next_binding;  transaction -> local_macro_names = c -> sym -> local_macro_names;  transaction -> initializer_name = c -> init_fn;  transaction -> shutdown_name = c -> fini_fn;  if(c -> source_facts && c -> source_primary){
     transaction -> source_definitions = Map_copy(c -> source_definitions);  transaction -> source_occurrences = Array_len(c -> source_occurrences);
   }
   scope -> symbols = Map_copy(transaction -> scope.symbols);  Compiler_merge_source_declarations(c, scope -> symbols, transaction -> scope.symbols);  scope -> bindings = Map_copy(transaction -> scope.bindings);  scope -> enumerators = Map_copy(transaction -> scope.enumerators);  scope -> macros =(void *) transaction -> scope.macros != NULL ? Map_copy(transaction -> scope.macros) : NULL;  c -> sym -> statics = Map_copy(c -> sym -> statics);  c -> sym -> binding_facts = Map_copy(Compiler_semantic_binding_facts(c));  c -> names -> counters = Map_copy(c -> names -> counters);  transaction -> active = 1;  return transaction;
@@ -2471,7 +2471,7 @@ int SymTxn_local_macros_changed(SymTxn transaction){
 List Iter_list(Iter);
 void SymTxn_rollback(SymTxn transaction){
   if(! transaction || ! transaction -> active) return;  Compiler compiler = transaction -> compiler; {
-    SymScope * scope = _semantic_scope((compiler) -> sym, transaction -> scope_index);  * scope = transaction -> scope; (compiler) -> sym -> statics = transaction -> statics; (compiler) -> sym -> binding_facts = transaction -> binding_facts; (compiler) -> sym -> next_binding = transaction -> next_binding; (compiler) -> sym -> local_macro_names = transaction -> local_macro_names; (compiler) -> names -> counters = transaction -> counters; (compiler) -> init_fn = transaction -> initializer_name; (compiler) -> fini_fn = transaction -> shutdown_name;  if((compiler) -> source_facts &&(compiler) -> source_primary){
+    SymScope * scope = _semantic_scope((compiler) -> sym, transaction -> scope_index);  * scope = transaction -> scope; (compiler) -> sym -> statics = transaction -> statics; (compiler) -> sym -> binding_facts = transaction -> binding_facts; (compiler) -> names -> next_binding = transaction -> next_binding; (compiler) -> sym -> local_macro_names = transaction -> local_macro_names; (compiler) -> names -> counters = transaction -> counters; (compiler) -> init_fn = transaction -> initializer_name; (compiler) -> fini_fn = transaction -> shutdown_name;  if((compiler) -> source_facts &&(compiler) -> source_primary){
       Array_resize((compiler) -> source_occurrences, transaction -> source_occurrences); {
         Var key;  List _x2c_macro_object_27 = Iter_list(Map_keys((compiler) -> source_definitions, &(struct Iter){
           int_var(0)
@@ -2491,7 +2491,7 @@ void SymTxn_rollback(SymTxn transaction){
 void Block_clear(Block);
 void Block_push(Block, const void *);
 static void _semantic_reset(Sym sym, Map base, Map globals, int overlay){
-  Block_clear(sym -> scopes);  sym -> globals =(void *) globals != NULL ? globals : Map_new();  sym -> statics = Map_new();  sym -> base_scopes = overlay ? 2 : 1;  sym -> next_binding = 0;  sym -> local_macro_names = 0;  sym -> binding_facts = Map_new();  if(overlay){
+  Block_clear(sym -> scopes);  sym -> globals =(void *) globals != NULL ? globals : Map_new();  sym -> statics = Map_new();  sym -> base_scopes = overlay ? 2 : 1;  sym -> local_macro_names = 0;  sym -> binding_facts = Map_new();  if(overlay){
     struct SymScope base_scope ={
       .symbols =(void *) base != NULL ? base : Map_new(), .bindings = Map_new(), .enumerators = Map_new()
     }
@@ -2605,10 +2605,10 @@ void Sym_set(Sym sym, List key, List type){
 List binding_identity_new(int, String);
 
 static List _semantic_new_binding(Sym sym, List key){
-  sym -> next_binding ++;
+  int identity = ++ sym -> compiler -> names -> next_binding;
   Var name = List_last(key);
-  List binding = binding_identity_new(sym -> next_binding, Var_str(name));
-  Map_setindex(sym -> binding_facts, List_var(cons(_334, cons(int_var(sym -> next_binding), NULL))), name);
+  List binding = binding_identity_new(identity, Var_str(name));
+  Map_setindex(sym -> binding_facts, List_var(cons(_334, cons(int_var(identity), NULL))), name);
   return binding;
 }
 
