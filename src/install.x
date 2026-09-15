@@ -16,12 +16,10 @@ $(import "../lib/private-keywords.xmacro")
 #pragma private
 
 #include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include <unistd.h>
@@ -215,14 +213,20 @@ static String _installed_version(String package) {
 }
 
 /* Returns the home's packages directory, holding its lock until the process
-   exits, so another install or removal waits for this one to finish. */
-static String _locked_packages(void) {
-  static int lock = -1;
-  String packages = _home_packages();
-  if (lock >= 0) return packages;
-  lock = open(%"$packages/.lock", O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if (lock < 0) _error(%"cannot lock $packages");
-  while (flock(lock, LOCK_EX) && errno == EINTR) {}
+   exits, so another install or removal waits for this one to finish and,
+   unless `quiet`, says so. */
+static String _locked_packages(int quiet) {
+  static int locked = 0;
+  String packages = _home_packages(), lock = %"$packages/.lock";
+  if (locked) return packages;
+  if (_build_lock(lock, 0) < 0) {
+    if (!quiet)
+      fprintf(
+        stderr, "x2c: waiting for another install or removal in %s\n",
+        packages.str());
+    _build_lock(lock, 1);
+  }
+  locked = 1;
   return packages;
 }
 
@@ -294,7 +298,8 @@ static String _install(
     source package is built by this compiler. Failures exit with status 2.
 */
 int install_command(CliRequest request) {
-  String spec = request.inputs.car(), packages = _locked_packages();
+  String spec = request.inputs.car();
+  String packages = _locked_packages(request.quiet);
   String work = _work_directory(packages);
   String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
   int remote = spec.startswith("http://") || spec.startswith("https://") ||
@@ -331,7 +336,7 @@ String install_version(String name) =>
     network. Failures exit with status 2.
 */
 List install_require(CliRequest request, String name, String version) {
-  String packages = _locked_packages();
+  String packages = _locked_packages(request.quiet);
   String work = _work_directory(packages);
   List row = _index_row(request, name, work);
   String resolved = row.nth_cdr(1).car();
@@ -349,7 +354,8 @@ List install_require(CliRequest request, String name, String version) {
     A directory without an install marker is left alone. Returns 0.
 */
 int remove_command(CliRequest request) {
-  String name = request.inputs.car(), packages = _locked_packages();
+  String name = request.inputs.car();
+  String packages = _locked_packages(request.quiet);
   String target = %"$packages/$name";
   if (!name.is_identifier() || access(target, F_OK))
     _error(%"no installed package '$name'");

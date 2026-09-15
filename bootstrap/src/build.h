@@ -52,6 +52,8 @@ int Build_run_program(Build state);
 
 int _build_remove_tree(String path);
 
+int _build_lock(String path, int wait);
+
 void Build_cleanup(Build state, int success);
 
 List Build_script_helpers(Build b);

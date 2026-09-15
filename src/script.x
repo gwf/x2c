@@ -15,10 +15,8 @@
 #pragma private
 
 #include <errno.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/file.h>
 #include <unistd.h>
 
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
@@ -47,22 +45,6 @@ static void _exec(CliRequest c) {
     %"cannot run $executable: ${String.new(strerror(errno))}");
 }
 
-/* Locks the cache entry `directory` against other runs of its script and
-   returns the descriptor, or -1 when `wait` is zero and another run holds
-   the lock. Closing the descriptor or exiting releases it.
-*/
-static int _lock(String directory, int wait) {
-  int lock = open(%"$directory/lock", O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if (lock < 0) x2c_driver_error(%"cannot lock script cache: $directory");
-  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
-  while (flock(lock, operation)) {
-    if (errno == EINTR) continue;
-    close(lock);
-    return -1;
-  }
-  return lock;
-}
-
 /* Removes each cache entry under `scripts` whose recorded script no longer
    exists and that no other run holds.
 */
@@ -70,7 +52,7 @@ static void _prune(String scripts) {
   foreach (String name, scripts.list_dir()) {
     String directory = scripts.join_path(name), source = %"$directory/source";
     if (!source.is_file() || source.read_text().is_file()) continue;
-    int lock = _lock(directory, 0);
+    int lock = _build_lock(%"$directory/lock", 0);
     if (lock < 0) continue;
     try directory.remove_tree();
     catch %(io-fail *): {}
@@ -93,7 +75,7 @@ int script_prepare(CliRequest c) {
     String.hash(script));
   if (c.clean) {
     if (!c.build_dir.is_dir()) return 1;
-    int lock = _lock(c.build_dir, 1);
+    int lock = _build_lock(%"${c.build_dir}/lock", 1);
     try c.build_dir.remove_tree();
     catch %(io-fail *):
       x2c_driver_error(%"cannot remove script cache: ${c.build_dir}");
@@ -109,7 +91,7 @@ int script_prepare(CliRequest c) {
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
   if (!_build_mkdirs(c.build_dir))
     x2c_driver_error(%"cannot create script cache: ${c.build_dir}");
-  _lock(c.build_dir, 1);
+  _build_lock(%"${c.build_dir}/lock", 1);
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
   %"${c.build_dir}/source".write_text(script);
   _prune(%"$root/scripts");

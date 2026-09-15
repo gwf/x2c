@@ -46,7 +46,7 @@ Public functions:
 `Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
 `Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
 `Build.finish`, `Build.report_success`, `Build.run_program`,
-`_build_remove_tree`, `Build.cleanup`, `Build.script_helpers`,
+`_build_remove_tree`, `_build_lock`, `Build.cleanup`, `Build.script_helpers`,
 `Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)

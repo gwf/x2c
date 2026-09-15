@@ -39,11 +39,13 @@ typedef struct Build {
 #pragma private
 
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -895,6 +897,21 @@ int _build_remove_tree(String path) {
   try path.remove_tree();
   catch %(io-fail *): return 0;
   return 1;
+}
+
+/* Locks the file `path`, creating it, and returns a descriptor that holds
+   the lock until it is closed or the process exits. Returns -1 when `wait`
+   is zero and another process holds the lock. */
+int _build_lock(String path, int wait) {
+  int lock = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if (lock < 0) x2c_driver_error(%"cannot lock $path");
+  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
+  while (flock(lock, operation)) {
+    if (errno == EINTR) continue;
+    close(lock);
+    return -1;
+  }
+  return lock;
 }
 
 /** Removes the temporary work tree after a successful real build.

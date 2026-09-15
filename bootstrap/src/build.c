@@ -6,18 +6,20 @@
 
 #include "build.h"
 
-static List _158, _156, _155, _153, _151, _134, _133, _132, _131, _130, _117, _116, _115, _114;
+static List _159, _157, _156, _154, _152, _135, _134, _133, _132, _131, _118, _117, _116, _115;
 
-static String _159, _149, _147, _146, _145, _144, _139, _138, _137, _136, _135, _128, _126, _124, _122, _120, _119, _118, _112, _110, _108, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _72, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _160, _150, _148, _147, _146, _145, _140, _139, _138, _137, _136, _129, _127, _125, _123, _121, _120, _119, _113, _111, _109, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _72, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _157, _154, _152, _150, _148, _129, _127, _125, _123, _121, _113, _111, _109, _107, _73, _71;
+static Var _158, _155, _153, _151, _149, _130, _128, _126, _124, _122, _114, _112, _110, _108, _73, _71;
 
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include "report.h"
@@ -103,7 +105,7 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _158)))
+_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _159)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }
@@ -228,57 +230,58 @@ __attribute__((constructor)) static void _file_init_(void){
   _102 = String_new("  Output ");
   _103 = String_new("  Debug symbols ");
   _104 = String_new("Running ");
-  _105 = String_new("script");
-  _106 = String_new("CPATH");
-  _107 = String_var(_106);
-  _108 = String_new("C_INCLUDE_PATH");
-  _109 = String_var(_108);
-  _110 = String_new("LIBRARY_PATH");
-  _111 = String_var(_110);
-  _112 = String_new("SDKROOT");
-  _113 = String_var(_112);
-  _114 = cons(_113, NULL);
-  _115 = cons(_111, _114);
-  _116 = cons(_109, _115);
-  _117 = cons(_107, _116);
-  _118 = String_new("%.9f");
-  _119 = String_new("absent");
-  _120 = String_new("-I");
-  _121 = String_var(_120);
-  _122 = String_new("-iquote");
-  _123 = String_var(_122);
-  _124 = String_new("-isystem");
-  _125 = String_var(_124);
-  _126 = String_new("-idirafter");
-  _127 = String_var(_126);
-  _128 = String_new("-L");
-  _129 = String_var(_128);
-  _130 = cons(_129, NULL);
-  _131 = cons(_127, _130);
-  _132 = cons(_125, _131);
-  _133 = cons(_123, _132);
-  _134 = cons(_121, _133);
-  _135 = String_new("/lib/");
-  _136 = String_new("/include/");
-  _137 = String_new("/builds/");
-  _138 = String_new("/script");
-  _139 = String_new("/.x2c-state/script");
-  _144 = String_new("-gdwarf");
-  _145 = String_new("#include \"");
-  _146 = String_new(".h\"");
-  _147 = String_new("/");
-  _148 = Symbol_var(437126);
-  _149 = String_new("Var");
-  _150 = String_var(_149);
-  _151 = cons(_150, NULL);
-  _152 = List_var(_151);
-  _153 = cons(_152, NULL);
-  _154 = List_var(_153);
-  _155 = cons(_154, NULL);
-  _156 = cons(_148, _155);
-  _157 = List_var(_156);
-  _158 = cons(_157, _151);
-  _159 = String_new(".x");
+  _105 = String_new("cannot lock ");
+  _106 = String_new("script");
+  _107 = String_new("CPATH");
+  _108 = String_var(_107);
+  _109 = String_new("C_INCLUDE_PATH");
+  _110 = String_var(_109);
+  _111 = String_new("LIBRARY_PATH");
+  _112 = String_var(_111);
+  _113 = String_new("SDKROOT");
+  _114 = String_var(_113);
+  _115 = cons(_114, NULL);
+  _116 = cons(_112, _115);
+  _117 = cons(_110, _116);
+  _118 = cons(_108, _117);
+  _119 = String_new("%.9f");
+  _120 = String_new("absent");
+  _121 = String_new("-I");
+  _122 = String_var(_121);
+  _123 = String_new("-iquote");
+  _124 = String_var(_123);
+  _125 = String_new("-isystem");
+  _126 = String_var(_125);
+  _127 = String_new("-idirafter");
+  _128 = String_var(_127);
+  _129 = String_new("-L");
+  _130 = String_var(_129);
+  _131 = cons(_130, NULL);
+  _132 = cons(_128, _131);
+  _133 = cons(_126, _132);
+  _134 = cons(_124, _133);
+  _135 = cons(_122, _134);
+  _136 = String_new("/lib/");
+  _137 = String_new("/include/");
+  _138 = String_new("/builds/");
+  _139 = String_new("/script");
+  _140 = String_new("/.x2c-state/script");
+  _145 = String_new("-gdwarf");
+  _146 = String_new("#include \"");
+  _147 = String_new(".h\"");
+  _148 = String_new("/");
+  _149 = Symbol_var(437126);
+  _150 = String_new("Var");
+  _151 = String_var(_150);
+  _152 = cons(_151, NULL);
+  _153 = List_var(_152);
+  _154 = cons(_153, NULL);
+  _155 = List_var(_154);
+  _156 = cons(_155, NULL);
+  _157 = cons(_149, _156);
+  _158 = List_var(_157);
+  _159 = cons(_158, _152);
+  _160 = String_new(".x");
   _x2c_static_initialize_0();
 }
 
@@ -1201,7 +1204,7 @@ static int _mapped_debug(Build state){
       flag = Var_string(_x2c_macro_cursor_output_16);
       {
         if(String_equal(flag, _53) || String_equal(flag, _54)) enabled = 0;
-        else if(String_equal(flag, _55) || String_equal(flag, _56) || String_equal(flag, _57) || String_equal(flag, _58) || String_equal(flag, _59) || String_equal(flag, _60) || String_equal(flag, _61) || String_equal(flag, _62) || String_equal(flag, _63) || String_equal(flag, _64) || String_startswith(flag, _144)) enabled = 1;
+        else if(String_equal(flag, _55) || String_equal(flag, _56) || String_equal(flag, _57) || String_equal(flag, _58) || String_equal(flag, _59) || String_equal(flag, _60) || String_equal(flag, _61) || String_equal(flag, _62) || String_equal(flag, _63) || String_equal(flag, _64) || String_startswith(flag, _145)) enabled = 1;
       }
 
     }
@@ -1277,9 +1280,9 @@ static void Build__place_unit_headers(Build b){
                 line = Var_string(_x2c_macro_cursor_output_19);
                 {
                   String text = String_strip(line, " \t");
-                  if(! String_startswith(text, _145) || ! String_endswith(text, _146)) continue;
+                  if(! String_startswith(text, _146) || ! String_endswith(text, _147)) continue;
                   String target = String_getslice(text, 10, String_len(text) - 1, 1);
-                  if(! String_contains(target, _147)) continue;
+                  if(! String_contains(target, _148)) continue;
                   String source = String_join(NULL, cons(String_var(String_getslice(target, -2147483648, String_len(target) - 2, 1)), cons(String_var(_9), NULL)));
                   {
                     String dir;
@@ -1507,6 +1510,19 @@ x2c_exception_leave(& _x2c_exception_frame_3);
 return 1;
 }
 
+int _build_lock(String path, int wait){
+  if(! _init_guard_) _file_init_();
+  int lock = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+  if(lock < 0) x2c_driver_error(String_join(NULL, cons(String_var(_105), cons(String_var(path), NULL))));
+  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
+  while(flock(lock, operation)){
+    if(errno == EINTR) continue;
+    close(lock);
+    return - 1;
+  }
+  return lock;
+}
+
 void Build_cleanup(Build state, int success){
   if(! _init_guard_) _file_init_();
   if(! success || ! state -> temporary || state -> request -> dry_run) return;
@@ -1523,7 +1539,7 @@ double String_modified_time(String);
 
 static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites, int * ok){
   uint64_t hash = _state_base(c, cc, ok);
-  hash = _state_text(hash, _105);
+  hash = _state_text(hash, _106);
   hash = _state_list(hash, c -> inputs);
   hash = _state_list(hash, c -> include_dirs);
   hash = _state_list(hash, CliRequest_package_roots(c));
@@ -1533,7 +1549,7 @@ static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites,
   hash = _state_text(hash, c -> source_map ? _33 : _34);
   {
     String name;
-    List _x2c_macro_object_23 = _117;
+    List _x2c_macro_object_23 = _118;
     List _x2c_macro_cursor_23 = _x2c_macro_object_23;
     Var _x2c_macro_cursor_output_23;
     while(List_try_next(_x2c_macro_object_23, & _x2c_macro_cursor_23, & _x2c_macro_cursor_output_23)){
@@ -1554,12 +1570,12 @@ static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites,
     while(List_try_next(_x2c_macro_object_24, & _x2c_macro_cursor_24, & _x2c_macro_cursor_output_24)){
       path = Var_string(_x2c_macro_cursor_output_24);
       {
-        if(! String_endswith(path, _147)){
+        if(! String_endswith(path, _148)){
           hash = _state_file(hash, path, ok);
           continue;
         }
         hash = _state_text(hash, path);
-        hash = _state_text(hash, String_is_dir(path) ? String_printf(_118, String_modified_time(path)) : _119);
+        hash = _state_text(hash, String_is_dir(path) ? String_printf(_119, String_modified_time(path)) : _120);
       }
 
     }
@@ -1600,7 +1616,7 @@ static List Build__script_directories(Build b, List prerequisites){
           String arg = Var_string(List_car(p));
           {
             Var flag;
-            List _x2c_macro_object_26 = _134;
+            List _x2c_macro_object_26 = _135;
             List _x2c_macro_cursor_26 = _x2c_macro_object_26;
             Var _x2c_macro_cursor_output_26;
             while(List_try_next(_x2c_macro_object_26, & _x2c_macro_cursor_26, & _x2c_macro_cursor_output_26)){
@@ -1657,7 +1673,7 @@ static List Build__script_directories(Build b, List prerequisites){
       {
         String directory = String_absolute_path(Var_str(value));
         if(String_startswith(directory, String_absolute_path(b -> work_dir))) continue;
-        String entry = String_endswith(directory, _147) ? directory : String_join(NULL, cons(String_var(directory), cons(String_var(_2), NULL)));
+        String entry = String_endswith(directory, _148) ? directory : String_join(NULL, cons(String_var(directory), cons(String_var(_2), NULL)));
         if(! Array_contains(unique, String_var(entry))) Array_push(unique, String_var(entry));
       }
 
@@ -1679,7 +1695,7 @@ List Build_script_helpers(Build b){
   if(! _init_guard_) _file_init_();
   String script = Var_string(List_car(b -> request -> inputs)), root = x2c_get_root();
   String translation = String_join(NULL, cons(String_var(b -> gen_root), cons(String_var(_2), cons(String_var(_key(script)), cons(String_var(_2), cons(String_var(String_stem(script)), cons(String_var(_35), NULL)))))));
-  List excluded = List_append(cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_135), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_136), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_137), NULL)))), NULL))), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
+  List excluded = List_append(cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_136), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_137), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_138), NULL)))), NULL))), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
   Array helpers = Array_new();
   {
     String path;
@@ -1689,12 +1705,12 @@ List Build_script_helpers(Build b){
     while(List_try_next(_x2c_macro_object_31, & _x2c_macro_cursor_31, & _x2c_macro_cursor_output_31)){
       path = Var_string(_x2c_macro_cursor_output_31);
       {
-        if(! String_endswith(path, _159) || String_equal(path, script) || Array_contains(helpers, String_var(path))) continue;
+        if(! String_endswith(path, _160) || String_equal(path, script) || Array_contains(helpers, String_var(path))) continue;
         if(List_any(excluded, ({
           Var _x2c_lambda_capture_value_0 = String_var(path);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
             _x2c_lambda_capture_value_0
           }
-          ;  Func_new_context(_x2c_lambda_1, _158, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+          ;  Func_new_context(_x2c_lambda_1, _159, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
         }
         ))) continue;
         Array_push(helpers, String_var(path));
@@ -1769,12 +1785,12 @@ void Build_publish_script(Build b, String executable){
   List paths = List_append(files, Build__script_directories(b, files));
   int ok = 1;
   uint64_t hash = _script_fingerprint(b -> request, b -> toolchain -> cc, paths, & ok);
-  if(ok) _state_write_lines(String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_138), NULL))), hash, paths);
+  if(ok) _state_write_lines(String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_139), NULL))), hash, paths);
 }
 
 int CliRequest_script_current(CliRequest c, String directory){
   if(! _init_guard_) _file_init_();
-  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_139), NULL)));
+  String record = String_join(NULL, cons(String_var(directory), cons(String_var(_140), NULL)));
   if(access(String_join(NULL, cons(String_var(directory), cons(String_var(_65), NULL))), X_OK) || access(record, R_OK)) return 0;
   List volatile lines = NULL;
   {

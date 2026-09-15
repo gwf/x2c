@@ -346,7 +346,8 @@ its bundle instead.
 Installed packages are not owned by the compiler's install inventory, so a
 compiler upgrade keeps them and `x2c remove` is the way to delete one. A
 directory under `<home>/packages` without `BUNDLE.json` or `SOURCE.json` is
-never replaced or removed.
+never replaced or removed. Installs and removals in one home run one at a
+time; a second one waits, and says so unless `-q`, until the first finishes.
 
 Each release publishes the index `x2c install <name>` reads, listing the
 bundles built by that release's compiler. A bundle refuses a different

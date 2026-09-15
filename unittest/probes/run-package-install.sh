@@ -87,10 +87,12 @@ while not os.path.exists(sys.argv[2]):
 PY
 holder=$!
 while [[ ! -e "$BUILD/release.held" ]]; do sleep 0.05; done
-"$x2c" remove -q greet &
+"$x2c" remove greet >/dev/null 2>"$BUILD/wait.stderr" &
 remover=$!
 sleep 1
 [[ -d "$BUILD/home/packages/greet" ]] || fail "removal ignored the lock"
+grep -q "waiting for another install or removal" "$BUILD/wait.stderr" ||
+  fail "waiting diagnostic"
 touch "$BUILD/release"
 wait "$holder"
 wait "$remover" || fail "removal after the lock failed"

@@ -40,7 +40,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:555`
+Source: `src/build.x:557`
 
 ### `Build`
 
@@ -55,7 +55,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:436`
+Source: `src/build.x:438`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -64,7 +64,7 @@ Source: `src/build.x:436`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:449`
+Source: `src/build.x:451`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -75,7 +75,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:904`
+Source: `src/build.x:921`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -85,7 +85,7 @@ Source: `src/build.x:904`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:457`
+Source: `src/build.x:459`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -100,7 +100,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:746`
+Source: `src/build.x:748`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -111,7 +111,7 @@ Returns the generated-file directory for `input`.
 The directory is derived from the input path and created unless this is
 a dry run. Native registration belongs to `Build.add_generated`.
 
-Source: `src/build.x:298`
+Source: `src/build.x:300`
 
 <a id="Build.publish_script"></a>
 #### Build.publish_script
@@ -126,7 +126,7 @@ the runtime archive.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1006`
+Source: `src/build.x:1023`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -138,7 +138,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:347`
+Source: `src/build.x:349`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -147,7 +147,7 @@ Source: `src/build.x:347`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:820`
+Source: `src/build.x:822`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -157,7 +157,7 @@ Source: `src/build.x:820`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:880`
+Source: `src/build.x:882`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -169,7 +169,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:983`
+Source: `src/build.x:1000`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -181,7 +181,7 @@ Returns zero without retained state, during a dry run, when either output
 is absent, or when any compiler, tool, option, depfile, or dependency
 fingerprint cannot be read or differs.
 
-Source: `src/build.x:327`
+Source: `src/build.x:329`
 
 ### `CliRequest`
 
@@ -196,7 +196,7 @@ to `request`, chooses output and intermediate paths, and creates artifact
 directories unless this is a dry run. Invalid inputs or setup print a
 diagnostic and exit with status 2.
 
-Source: `src/build.x:211`
+Source: `src/build.x:213`
 
 <a id="CliRequest.script_current"></a>
 #### CliRequest.script_current
@@ -206,7 +206,7 @@ Source: `src/build.x:211`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1034`
+Source: `src/build.x:1051`
 
 ## Public types
 

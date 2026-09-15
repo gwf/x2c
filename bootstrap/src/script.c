@@ -2,21 +2,17 @@
 
 #include "script.h"
 
-static String _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/file.h>
 #include <unistd.h>
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
 static void _exec(CliRequest c);
-
-static int _lock(String directory, int wait);
 
 static void _prune(String scripts);
 
@@ -29,17 +25,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/run");
   _3 = String_new("cannot run ");
   _4 = String_new(": ");
-  _5 = String_new("/lock");
-  _6 = String_new("cannot lock script cache: ");
-  _7 = String_new("/source");
-  _8 = String_new("/scripts/");
-  _9 = String_new("-%08x");
-  _10 = String_new("cannot remove script cache: ");
-  _11 = String_new("script does not exist: ");
-  _12 = String_new("direct");
-  _13 = String_new("cannot create script cache: ");
-  _14 = String_new("/scripts");
-  _15 = String_new(".%ld");
+  _5 = String_new("/source");
+  _6 = String_new("/lock");
+  _7 = String_new("/scripts/");
+  _8 = String_new("-%08x");
+  _9 = String_new("cannot remove script cache: ");
+  _10 = String_new("script does not exist: ");
+  _11 = String_new("direct");
+  _12 = String_new("cannot create script cache: ");
+  _13 = String_new("/scripts");
+  _14 = String_new(".%ld");
 }
 
 String String_new(const char *);
@@ -96,18 +91,6 @@ static void _exec(CliRequest c){
   x2c_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(executable), cons(String_var(_4), cons(String_var(String_new(strerror(errno))), NULL))))));
 }
 
-static int _lock(String directory, int wait){
-  int lock = open(String_join(NULL, cons(String_var(directory), cons(String_var(_5), NULL))), O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if(lock < 0) x2c_driver_error(String_join(NULL, cons(String_var(_6), cons(String_var(directory), NULL))));
-  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
-  while(flock(lock, operation)){
-    if(errno == EINTR) continue;
-    close(lock);
-    return - 1;
-  }
-  return lock;
-}
-
 List String_list_dir(String);
 
 String String_join_path(String, String);
@@ -115,6 +98,8 @@ String String_join_path(String, String);
 int String_is_file(String);
 
 String String_read_text(String);
+
+int _build_lock(String, int);
 
 void String_remove_tree(String);
 
@@ -129,9 +114,9 @@ static void _prune(String scripts){
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       name = Var_string(_x2c_macro_cursor_output_1);
       {
-        String directory = String_join_path(scripts, name), source = String_join(NULL, cons(String_var(directory), cons(String_var(_7), NULL)));
+        String directory = String_join_path(scripts, name), source = String_join(NULL, cons(String_var(directory), cons(String_var(_5), NULL)));
         if(! String_is_file(source) || String_is_file(String_read_text(source))) continue;
-        int lock = _lock(directory, 0);
+        int lock = _build_lock(String_join(NULL, cons(String_var(directory), cons(String_var(_6), NULL))), 0);
         if(lock < 0) continue;
         {
           ExceptionFrame _x2c_exception_frame_0;
@@ -195,10 +180,10 @@ int script_prepare(CliRequest c){
   String root = script_cache_root();
   if(! String_truth(root)) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = String_absolute_path(Var_string(List_car(c -> inputs)));
-  c -> build_dir = String_printf(String_join(NULL, cons(String_var(root), cons(String_var(_8), cons(String_var(String_stem(script)), cons(String_var(_9), NULL))))), String_hash(script));
+  c -> build_dir = String_printf(String_join(NULL, cons(String_var(root), cons(String_var(_7), cons(String_var(String_stem(script)), cons(String_var(_8), NULL))))), String_hash(script));
   if(c -> clean){
     if(! String_is_dir(c -> build_dir)) return 1;
-    int lock = _lock(c -> build_dir, 1);
+    int lock = _build_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
     {
       ExceptionFrame _x2c_exception_frame_1;
       static MatchCaptureSite _x2c_catch_arms_1[1];
@@ -211,7 +196,7 @@ int script_prepare(CliRequest c){
       if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
         x2c_error_catch_detach(_x2c_error_handler_1);
         x2c_exception_mark_handled(&_x2c_exception_frame_1);
-         {x2c_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(c -> build_dir), NULL))));
+         {x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(c -> build_dir), NULL))));
       }
 
     }
@@ -232,19 +217,19 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 close(lock);
 return 1;
 }
-if(! String_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(script), NULL))));
+if(! String_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(script), NULL))));
 c -> inputs = cons(String_var(script), NULL);
-c -> state_seed = _12;
+c -> state_seed = _11;
 if(! c -> verbose) c -> quiet = 1;
 c -> output = String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_2), NULL)));
 if(c -> dry_run) return 0;
 if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
-if(! _build_mkdirs(c -> build_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(c -> build_dir), NULL))));
-_lock(c -> build_dir, 1);
+if(! _build_mkdirs(c -> build_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(c -> build_dir), NULL))));
+_build_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
 if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
-String_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_7), NULL))), script);
-_prune(String_join(NULL, cons(String_var(root), cons(String_var(_14), NULL))));
-c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_15), NULL))), (long) getpid());
+String_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_5), NULL))), script);
+_prune(String_join(NULL, cons(String_var(root), cons(String_var(_13), NULL))));
+c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_14), NULL))), (long) getpid());
 return 0;
 }
 
