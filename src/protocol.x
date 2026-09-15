@@ -2060,12 +2060,12 @@ static void Compiler._generate_descriptor_registration(
   compiler.add_early(declaration);
   List call = explicit_tag ? explicit_call : early_call;
   if (central_initializer) {
-    if (assignment) compiler.add_protocol_init(assignment);
-    compiler.add_protocol_init(%(stmnt $call));
+    if (assignment) compiler.add_init(<protocol>, assignment);
+    compiler.add_init(<protocol>, %(stmnt $call));
   }
   else {
-    if (assignment) compiler.add_early_init(assignment);
-    compiler.add_early_init(explicit_tag ? %(stmnt $call) : registration);
+    if (assignment) compiler.add_init(<early>, assignment);
+    compiler.add_init(<early>, explicit_tag ? %(stmnt $call) : registration);
   }
 }
 
