@@ -8,9 +8,5 @@
 #include "x2c.h"
 int snapshot_write_var(File output, Var value);
 
-int symbol_snapshot_write(Map symbols, Map fn_defs, File output);
-
-Map symbol_snapshot_load(String path, Map * fn_defs, int * gensym);
-
 
 #endif /* __GUARD_0xEAC59579__ */

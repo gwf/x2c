@@ -423,7 +423,7 @@ package roots, and host tools this compiler resolved, one
   puts(
     %"The home is X2C_HOME when set; otherwise the nearest directory above
 the executable, then above the current directory, holding include/
-and etc/symbols.xlisp. Package roots join with ':'.");
+and etc/compiler-sdk.xlisp. Package roots join with ':'.");
 }
 
 static void _print_package_help(Symbol command) {

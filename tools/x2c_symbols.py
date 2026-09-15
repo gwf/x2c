@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Read the compiler's own header-symbol artifact.
+"""Read the compiler's own unit interfaces.
 
-`etc/header-symbols.xlisp` is written by `src/collect.x:header_symbols_write`
-and byte-compared by `make hdr-check`. It records, per source file, a
-content hash and every symbol with a canonical Type list. That makes it the
-authoritative source of signatures for documentation: nothing here re-derives a
-type from source.
+Every translated unit writes a `.xi` interface beside its generated C
+(`src/collect.x:interface_write`), and `make build` leaves the runtime's and
+compiler's under `builds/0/lib` and `builds/0/src`. Each records its source
+path, a content hash, and every symbol with a canonical Type list. That makes
+them the authoritative source of signatures for documentation: nothing here
+re-derives a type from source.
 
 Two pieces of knowledge are duplicated from the runtime and are deliberately
 narrow. `content_hash` mirrors `String.hash` (`lib/string.x`), and
 `read_sexp` mirrors the subset of the Lisp grammar that
-`snapshot_write_var` (`src/snapshot.x:16`) emits. Both are pinned: a grammar
-change moves the artifact's version integer, and a hash change makes every file
+`snapshot_write_var` (`src/snapshot.x`) emits. Both are pinned: a grammar
+change moves the interface version integer, and a hash change makes every file
 comparison fail at once. Neither can drift quietly into a plausible wrong
 answer, which is the only kind of drift that would matter here.
 
@@ -27,9 +28,8 @@ import sys
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "etc" / "header-symbols.xlisp"
-SNAPSHOT = ROOT / "etc" / "symbols.xlisp"
-ARTIFACT_VERSION = 10
+STAGE = ROOT / "builds" / "0"
+INTERFACE_VERSION = 1
 UINT32 = 0xFFFFFFFF
 UINT64 = 0xFFFFFFFFFFFFFFFF
 # String.escape emits these and nothing else; anything outside [32,126] becomes
@@ -242,32 +242,31 @@ class FuncType:
 
 
 class HeaderSymbols:
-    """The parsed artifact, indexed by source path."""
+    """The parsed interfaces, indexed by source path."""
 
-    def __init__(self, tree: list) -> None:
-        if len(tree) != 1 or not isinstance(tree[0], list):
-            raise ValueError("artifact is not a single s-expression")
-        node = tree[0]
-        if not node or node[0] != "header-symbols":
-            raise ValueError("artifact is not a header-symbols form")
-        self.version = node[1]
-        if self.version != ARTIFACT_VERSION:
-            raise ValueError(
-                f"artifact version {self.version}, expected {ARTIFACT_VERSION}"
-                "; src/collect.x:header_symbols_write changed shape"
-            )
-        self.gensym_base = node[2]
-        self.snapshot_hash = node[3]
+    def __init__(self, interfaces: list[list]) -> None:
+        self.version = INTERFACE_VERSION
         self._entries: dict[str, list] = {}
-        for entry in node[4]:
-            self._entries[str(entry[0])] = entry
+        for tree in interfaces:
+            if len(tree) != 1 or not isinstance(tree[0], list):
+                raise ValueError("interface is not a single s-expression")
+            node = tree[0]
+            if len(node) != 7 or node[0] != "interface":
+                raise ValueError("file is not an interface form")
+            if node[1] != INTERFACE_VERSION:
+                raise ValueError(
+                    f"interface version {node[1]}, expected "
+                    f"{INTERFACE_VERSION}; src/collect.x:interface_write "
+                    "changed shape"
+                )
+            self._entries[str(node[2])] = node
         self._cache: dict[str, dict[str, object]] = {}
 
     def paths(self) -> tuple[str, ...]:
         return tuple(sorted(self._entries))
 
     def file_hash(self, path: str) -> str:
-        return str(self._entries[path][1])
+        return str(self._entries[path][3])
 
     def rows(self, path: str) -> dict[str, object]:
         """Every symbol in the entry, unioning all rows tables.
@@ -279,7 +278,7 @@ class HeaderSymbols:
         if path in self._cache:
             return self._cache[path]
         table: dict[str, object] = {}
-        for part in self._entries[path][3]:
+        for part in self._entries[path][4]:
             if not isinstance(part, list):
                 continue
             for row in part:
@@ -320,7 +319,7 @@ class HeaderSymbols:
                 elif isinstance(binding, list) and len(binding) == 1:
                     names.append(str(binding[0]))
 
-        for part in self._entries[path][3]:
+        for part in self._entries[path][4]:
             if not isinstance(part, list):
                 continue
             for row in part:
@@ -397,8 +396,17 @@ def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
     return tuple(authored)
 
 
-def load(path: pathlib.Path = ARTIFACT) -> HeaderSymbols:
-    return HeaderSymbols(read_sexp(path.read_text(encoding="utf-8")))
+def load(stage: pathlib.Path = STAGE) -> HeaderSymbols:
+    """Load every interface a stage build left under lib/ and src/."""
+    files = sorted((stage / "lib").glob("*.xi")) + \
+        sorted((stage / "src").glob("*.xi"))
+    if not files:
+        raise FileNotFoundError(
+            f"no unit interfaces under {stage}; run 'make build'"
+        )
+    return HeaderSymbols(
+        [read_sexp(path.read_text(encoding="utf-8")) for path in files]
+    )
 
 
 SPECIFIER_ORDER = ("const", "volatile", "unsigned", "signed", "long", "short",
@@ -432,26 +440,19 @@ def selftest() -> int:
     symbols = load()
     failures: list[str] = []
 
-    snapshot = content_hash(SNAPSHOT.read_bytes())
-    ok_snapshot = snapshot == symbols.snapshot_hash
-    if not ok_snapshot:
-        failures.append(
-            f"snapshot hash {snapshot} != artifact {symbols.snapshot_hash}"
-        )
-
     matched = 0
     for path in symbols.paths():
         source = ROOT / path
         if not source.exists():
-            failures.append(f"{path}: artifact names a missing source")
+            failures.append(f"{path}: interface names a missing source")
             continue
         actual = content_hash(source.read_bytes())
         if actual == symbols.file_hash(path):
             matched += 1
         else:
             failures.append(
-                f"{path}: content hash {actual} != artifact "
-                f"{symbols.file_hash(path)}; run 'make hdr-sync'"
+                f"{path}: content hash {actual} != interface "
+                f"{symbols.file_hash(path)}; run 'make build'"
             )
 
     checked = 0
@@ -468,7 +469,7 @@ def selftest() -> int:
             entry = table.get(c_name)
             if entry is None:
                 failures.append(f"{path}:{definition.line}: {definition.name} "
-                                "is absent from the artifact")
+                                "is absent from the interface")
                 continue
             ret, _, params = split_signature(definition.signature)
             owner = definition.name.split(".", 1)[0]
@@ -482,7 +483,7 @@ def selftest() -> int:
             if len(source_params) != len(entry.params):
                 failures.append(
                     f"{path}:{definition.line}: {definition.name} arity "
-                    f"{len(source_params)} != artifact {len(entry.params)}"
+                    f"{len(source_params)} != interface {len(entry.params)}"
                 )
                 continue
             # The symbol table records const on parameter types but not on a
@@ -492,7 +493,7 @@ def selftest() -> int:
             if _unqualified(ret) != _unqualified(entry.returns):
                 failures.append(
                     f"{path}:{definition.line}: {definition.name} returns "
-                    f"{ret!r} != artifact {entry.returns!r}"
+                    f"{ret!r} != interface {entry.returns!r}"
                 )
                 continue
             mismatch = [
@@ -507,8 +508,7 @@ def selftest() -> int:
                 continue
             checked += 1
 
-    print(f"artifact version {symbols.version}, "
-          f"snapshot hash {'matches' if ok_snapshot else 'DIFFERS'}")
+    print(f"interface version {symbols.version}")
     print(f"{matched}/{len(symbols.paths())} file content hashes match")
     print(f"{checked} lib signatures agree with the compiler's symbol table")
     if failures:
@@ -557,8 +557,8 @@ def main() -> int:
     if args.selftest:
         return selftest()
     symbols = load()
-    print(f"header-symbols version {symbols.version}, "
-          f"{len(symbols.paths())} files, snapshot {symbols.snapshot_hash}")
+    print(f"interface version {symbols.version}, "
+          f"{len(symbols.paths())} files")
     return 0
 
 

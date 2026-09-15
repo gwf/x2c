@@ -37,8 +37,8 @@ An installed prefix and a source checkout share one layout, the x2c home:
 ```text
 <home>/bin/x2c           the compiler
 <home>/include/          runtime sources and generated headers
-<home>/lib/libx2c.a      the runtime archive
-<home>/etc/              symbol snapshot and compile-time Lisp
+<home>/lib/              the runtime archive and unit interfaces
+<home>/etc/              compile-time Lisp and macro sources
 <home>/packages/         installed packages, one directory each
 <home>/examples/         runnable examples (installed prefix)
 <home>/src/              compiler sources (checkout only)
@@ -46,7 +46,8 @@ An installed prefix and a source checkout share one layout, the x2c home:
 
 The compiler finds its home by walking up from its own executable, then from
 the current directory, to the nearest directory holding `include/` and
-`etc/symbols.xlisp`. `X2C_HOME` names a home explicitly and takes precedence.
+`etc/compiler-sdk.xlisp`. `X2C_HOME` names a home explicitly and takes
+precedence.
 `x2c env` prints the resolved home, layout, package roots, and host tools;
 `x2c env home` prints one value. Every `import` searches `<home>/packages`
 after the explicit `--package-dir` and manifest directories, so a package

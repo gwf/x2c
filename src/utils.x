@@ -26,10 +26,9 @@ typedef struct ChildProcess {
     The executable is resolved from the host, `argv0`, or `PATH`. The home is
     `X2C_HOME` as given when set; otherwise discovery walks from the
     executable and then from the current directory to a directory holding
-    `include/` and `etc/symbols.xlisp`, a source checkout or an installed
-    prefix alike, before falling back to `.`. Support loading reports a home
-    without a usable snapshot. An already configured root leaves all state
-    unchanged.
+    `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
+    installed prefix alike, before falling back to `.`. An already configured
+    root leaves all state unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
   if (x2c_root_path) return;
@@ -178,7 +177,7 @@ static int _is_home(const char *path) {
   char probe[PATH_MAX];
   snprintf(probe, sizeof(probe), "%s/include", path);
   if (!_dir_exists(probe)) return 0;
-  snprintf(probe, sizeof(probe), "%s/etc/symbols.xlisp", path);
+  snprintf(probe, sizeof(probe), "%s/etc/compiler-sdk.xlisp", path);
   return access(probe, R_OK) == 0;
 }
 

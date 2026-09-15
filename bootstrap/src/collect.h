@@ -17,11 +17,11 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
 
-int header_symbols_write(File output, int gensym_base);
+void interface_configure(String out_dir);
 
-int header_symbols_open(String path, int gensym_base);
+String interface_prelude(void);
 
-int header_symbols_active(void);
+void interface_write(Compiler compiler, String path);
 
 
 #endif /* __GUARD_0xAB8728A9__ */

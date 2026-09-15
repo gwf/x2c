@@ -2,7 +2,7 @@
 
 #include "deps.h"
 
-static String _6, _5, _4, _3, _2, _1, _0;
+static String _4, _3, _2, _1, _0;
 
 #include "collect.h"
 #include <errno.h>
@@ -31,13 +31,11 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("/etc/symbols.xlisp");
-  _1 = String_new("/etc/header-symbols.xlisp");
-  _2 = String_new("/");
-  _3 = String_new(".c");
-  _4 = String_new(".h");
-  _5 = String_new(".d");
-  _6 = String_new(".tmp.%ld");
+  _0 = String_new("/");
+  _1 = String_new(".c");
+  _2 = String_new(".h");
+  _3 = String_new(".d");
+  _4 = String_new(".tmp.%ld");
 }
 
 String String_new_len(const char *, int);
@@ -150,13 +148,10 @@ int Map_try_next(Map, unsigned *, Var *, Var *);
 
 String Var_string(Var);
 
-String x2c_get_root(void);
-
-int header_symbols_active(void);
-
 Array Array_sort(Array);
 
 static Array _prerequisites(CliRequest request, Compiler compiler, String input){
+  (void) request;
   Array paths = Array_new();
   if(Map_len(compiler -> deps)){
     Var path, content_hash;
@@ -172,11 +167,6 @@ static Array _prerequisites(CliRequest request, Compiler compiler, String input)
 
   }
   else _add(paths, input);
-  if(! request -> no_cpp && ! request -> live_symbols){
-    String root = x2c_get_root();
-    _add(paths, String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL))));
-    if(header_symbols_active()) _add(paths, String_join(NULL, cons(String_var(root), cons(String_var(_1), NULL))));
-  }
   Array_sort(paths);
   return paths;
 }
@@ -185,10 +175,10 @@ String String_rstrip(String, char *);
 
 static int _write_targets(File output, CliRequest request, String output_dir, String stem){
   if(String_truth(request -> dep_target)) return _write_word(output, request -> dep_target);
-  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, _2)), cons(String_var(_2), cons(String_var(stem), NULL))));
-  if(! _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL))))) return 0;
+  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, _0)), cons(String_var(_0), cons(String_var(stem), NULL))));
+  if(! _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))))) return 0;
   if(File_putc(output, ' ') == EOF) return 0;
-  return _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_4), NULL))));
+  return _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
 }
 
 int Array_try_next(Array, int *, Var *);
@@ -265,8 +255,8 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
   if(! _init_guard_) _file_init_();
   if(request -> no_deps || CliRequest_inspects(request)) return 1;
   String stem = _stem(input);
-  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, _2)), cons(String_var(_2), cons(String_var(stem), cons(String_var(_5), NULL)))));
-  String temporary = String_printf(String_join(NULL, cons(String_var(path), cons(String_var(_6), NULL))), (long) getpid());
+  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, _0)), cons(String_var(_0), cons(String_var(stem), cons(String_var(_3), NULL)))));
+  String temporary = String_printf(String_join(NULL, cons(String_var(path), cons(String_var(_4), NULL))), (long) getpid());
   File output = fopen(temporary, "w");
   if(! output){
     fprintf(stderr, "x2c: error: cannot open dependency file: %s\n", path);

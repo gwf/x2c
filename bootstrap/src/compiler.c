@@ -4,7 +4,7 @@
 
 static List _488, _485, _482, _481, _479, _477, _476, _475, _474, _472, _470, _469, _468, _466, _464, _463, _460, _459, _457, _456, _454, _453, _452, _449, _448, _447, _445, _444, _443, _441, _440, _439, _437, _436, _433, _432, _428, _427, _426, _425, _423, _422, _421, _418, _417, _414, _413, _410, _409, _408, _406, _405, _403, _402, _401, _399, _398, _397, _394, _393, _392, _389, _388, _375, _372, _371, _365, _352, _351, _347, _346, _329, _328, _325, _324, _323, _321, _320, _319, _317, _314, _313, _310, _309, _308, _302, _301, _300, _298, _297, _295, _290, _286, _284, _283, _282, _281, _280, _278, _277, _276, _274, _271, _270, _268, _267, _265, _261, _260, _259, _257, _256, _254, _248, _247, _243, _242, _239, _236, _235, _234, _233, _232, _230, _229, _227, _226, _225, _223, _222, _221, _220, _219, _218, _217, _216, _201, _197, _194, _192, _191, _188, _187, _186, _183, _179, _178, _177, _176, _171, _170, _169, _167, _166, _165, _161, _160, _157, _156, _154, _153, _152, _150, _149, _148, _147, _146, _139, _138, _137, _136, _132, _131, _129, _128, _127, _124, _122, _121, _119, _115, _114, _112, _111, _107, _106, _105, _104, _103, _102, _101, _100, _99, _93, _92, _90, _89, _88, _85, _84, _83, _82, _81, _80, _79, _75, _73, _72, _70, _64, _63, _62, _59, _58, _57, _56, _52, _51, _47, _45, _42, _41, _38, _37, _33, _32, _31, _29, _28, _26, _25, _24, _13, _10, _2;
 
-static String _506, _505, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _492, _491, _490, _489, _483, _450, _430, _429, _384, _383, _382, _381, _380, _379, _378, _367, _366, _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _348, _326, _304, _303, _293, _288, _272, _263, _245, _198, _195, _180, _108, _34, _14, _11, _8, _7, _6, _4, _3;
+static String _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _492, _491, _490, _489, _483, _450, _430, _429, _384, _383, _382, _381, _380, _379, _378, _367, _366, _363, _362, _361, _360, _359, _358, _357, _356, _355, _354, _353, _348, _326, _304, _303, _293, _288, _272, _263, _245, _198, _195, _180, _108, _34, _14, _11, _8, _7, _6, _4, _3;
 
 static Var _487, _486, _484, _480, _478, _473, _471, _467, _465, _462, _461, _458, _455, _451, _446, _442, _438, _435, _434, _431, _424, _420, _419, _416, _415, _412, _411, _407, _404, _400, _396, _395, _391, _390, _387, _386, _385, _377, _376, _374, _373, _370, _369, _368, _364, _336, _335, _334, _333, _332, _331, _330, _327, _322, _318, _316, _315, _312, _311, _307, _306, _305, _299, _296, _294, _292, _291, _289, _287, _285, _279, _275, _273, _269, _266, _264, _262, _258, _255, _253, _252, _251, _250, _249, _246, _244, _238, _231, _228, _224, _215, _214, _213, _212, _211, _210, _209, _208, _207, _206, _205, _204, _203, _202, _200, _199, _196, _193, _190, _189, _185, _184, _181, _175, _172, _168, _164, _163, _162, _159, _158, _155, _151, _145, _144, _143, _142, _141, _140, _135, _134, _133, _130, _126, _125, _123, _120, _118, _117, _116, _113, _110, _109, _98, _97, _96, _95, _94, _91, _87, _86, _78, _77, _76, _74, _71, _69, _65, _61, _60, _55, _54, _53, _50, _49, _48, _46, _44, _43, _40, _39, _36, _35, _30, _27, _23, _22, _21, _20, _19, _18, _17, _16, _15, _12, _9, _5, _1, _0;
 
@@ -18,6 +18,9 @@ List Compiler_lift_func_expression(Compiler compiler, List expression);
 #include "parse.h"
 #include "protocol.h"
 #include "macros.h"
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 typedef struct Sym{
   Block scopes;
@@ -107,7 +110,7 @@ typedef struct SymTxn{
   String initializer_name;
   String shutdown_name;
   Map counters;
-  int gensym_count, local_macro_names;
+  int local_macro_names;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;
@@ -180,6 +183,8 @@ static Type _typedef_target(Sym sym, Type key);
 static Type _normalize_declared_type(Sym sym, Type type, Type origin, int hops);
 
 static Symbol _var_tag_for_type_helper(Sym sym, Type type, Type origin, Type * resolved, int hops);
+
+static String _gensym_owner(Compiler compiler);
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
@@ -577,7 +582,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _314 = cons(_312, _313);
   _315 = List_var(_314);
   _316 = Symbol_var(481205850);
-  _317 = cons(_316, _24);
+  _317 = cons(_316, _313);
   _318 = List_var(_317);
   _319 = cons(_318, NULL);
   _320 = cons(_315, _319);
@@ -738,24 +743,25 @@ __attribute__((constructor)) static void _file_init_(void){
   _486 = Symbol_var(421880102);
   _487 = Symbol_var(286431579402);
   _488 = cons(_487, NULL);
-  _489 = String_new("unexpected '}'");
-  _490 = String_new("missing '}'");
-  _491 = String_new("unexpected end of file");
-  _492 = String_new("<");
-  _493 = String_new("a forwarded class constructor has no completed parent constructor");
-  _494 = String_new("pragma private");
-  _495 = String_new("pragma public");
-  _496 = String_new("_x2c_");
-  _497 = String_new("alias");
-  _498 = String_new("name");
-  _499 = String_new("local_typedef");
-  _500 = String_new("var_converter_shadow");
-  _501 = String_new("List");
-  _502 = String_new("Func");
-  _503 = String_new("Var");
-  _504 = String_new("String");
-  _505 = String_new("Array");
-  _506 = String_new("Map");
+  _489 = String_new("gensym:");
+  _490 = String_new("unexpected '}'");
+  _491 = String_new("missing '}'");
+  _492 = String_new("unexpected end of file");
+  _493 = String_new("<");
+  _494 = String_new("a forwarded class constructor has no completed parent constructor");
+  _495 = String_new("pragma private");
+  _496 = String_new("pragma public");
+  _497 = String_new("_x2c_");
+  _498 = String_new("alias");
+  _499 = String_new("name");
+  _500 = String_new("local_typedef");
+  _501 = String_new("var_converter_shadow");
+  _502 = String_new("List");
+  _503 = String_new("Func");
+  _504 = String_new("Var");
+  _505 = String_new("String");
+  _506 = String_new("Array");
+  _507 = String_new("Map");
 }
 
 Var Compiler_var(Compiler compiler){
@@ -1175,7 +1181,7 @@ static void _update_brace_stack(Compiler c, Token consumed){
     case 251 : if(Array_len(c -> braces)) Array_take_last(c -> braces);
     else{
       List notes = _10;
-      Compiler_report_error(c, 33658058, _489, consumed, notes);
+      Compiler_report_error(c, 33658058, _490, consumed, notes);
     }
     break;
   }
@@ -1196,14 +1202,14 @@ Var Array_getindex(Array, int);
 
 static void _check_unmatched_braces(Compiler c){
   if(! Array_len(c -> braces)) return;
-  Compiler_report_error(c, 33658058, _490, Var_token(Array_getindex(c -> braces, - 1)), _13);
+  Compiler_report_error(c, 33658058, _491, Var_token(Array_getindex(c -> braces, - 1)), _13);
 }
 
 static void _shallow_block(Compiler c){
   Symbol peek;
   Compiler_next(c);
   while((peek = Compiler_peek(c, 0)) != 251){
-    if(peek == 11212) Compiler_report_error(c, 33658058, _491, c -> token, NULL);
+    if(peek == 11212) Compiler_report_error(c, 33658058, _492, c -> token, NULL);
     if(peek == 247 || peek == 9719 || peek == 9463 || peek == 16631) _shallow_block(c);
     else Compiler_next(c);
   }
@@ -1364,7 +1370,7 @@ int String_startswith(String, String);
 int String_getindex(String, int);
 int String_len(String);
 static String _declaration_path(Compiler compiler, String path, int thaw){
-  if(! String_truth(path) || String_startswith(path, _492)) return path;  if(thaw) return String_getindex(path, 0) == '/' ? path : String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_34), cons(String_var(path), NULL))));  String prefix = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_34), NULL)));
+  if(! String_truth(path) || String_startswith(path, _493)) return path;  if(thaw) return String_getindex(path, 0) == '/' ? path : String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_34), cons(String_var(path), NULL))));  String prefix = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_34), NULL)));
   return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
 }
 
@@ -1999,7 +2005,7 @@ int remaining = Map_len(pending);  while(remaining){
   int previous = remaining;  remaining = 0;  for(size_t index = 0;  index < Array_len(sources);  index ++){
     List _x2c_destructure_3 = Var_list(Array_getindex(sources, index));  Map declarations = Var_map(List_getindex(_x2c_destructure_3, 0));  Var key = List_getindex(_x2c_destructure_3, 1);  Var end = List_getindex(_x2c_destructure_3, 2);  List rows = Var_list(List_getindex(_x2c_destructure_3, 3));  rows = _select_declaration_forwards(shadow, rows, pending, & remaining);  Array_setindex(sources, index, List_var(cons(Map_var(declarations), cons(key, cons(end, cons(List_var(rows), NULL))))));
   }
-  if(remaining && remaining == previous) Compiler_report_error(shadow, 1362954, _493, shadow -> token, NULL);
+  if(remaining && remaining == previous) Compiler_report_error(shadow, 1362954, _494, shadow -> token, NULL);
 }
 {
   List source;  Array _x2c_macro_object_19 = sources;  int _x2c_macro_cursor_19 = 0;  Var _x2c_macro_cursor_output_21;  while(Array_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_21)){
@@ -2049,10 +2055,10 @@ Map Map_copy(Map);
 List Compiler_parse_top_level(Compiler);
 static void _shallow_parse_unit_macro(Compiler compiler){
   {
-    Map saved_counters =(compiler -> names) -> counters;  int saved_gensym =(compiler -> names) -> gensym_count; (compiler -> names) -> counters = Map_copy((compiler -> names) -> counters); {
+    Map saved_counters =(compiler -> names) -> counters; (compiler -> names) -> counters = Map_copy((compiler -> names) -> counters); {
       SymTxn transaction = Compiler_begin_semantic_transaction((compiler));  Token first =(compiler) -> token;  List syntax = Compiler_parse_top_level((compiler));  int retained = _retain_declaration_bundle((compiler), syntax, first, (compiler) -> token);  SymTxn_commit(transaction);  if(retained) return;
     }
-    (compiler -> names) -> counters = saved_counters; (compiler -> names) -> gensym_count = saved_gensym;
+    (compiler -> names) -> counters = saved_counters;
   }
 
 }
@@ -2150,7 +2156,7 @@ void Compiler_update_source_visibility(Compiler c, List directives){
   if(c -> source_private < 0) return; {
     List directive;  List _x2c_macro_object_21 = directives;  List _x2c_macro_cursor_21 = _x2c_macro_object_21;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_23)){
       directive = Var_list(_x2c_macro_cursor_output_23); {
-        String content = Var_string(List_cadr(directive));  if(String_contains(content, _494)) c -> source_private = 1;  else if(String_contains(content, _495)) c -> source_private = 0;
+        String content = Var_string(List_cadr(directive));  if(String_contains(content, _495)) c -> source_private = 1;  else if(String_contains(content, _496)) c -> source_private = 0;
       }
 
     }
@@ -2449,7 +2455,7 @@ static SymScope * _semantic_scope(Sym sym, int index){
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c){
-  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> compiler = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = _semantic_scope(c -> sym, transaction -> scope_index);  transaction -> scope = * scope;  transaction -> counters = c -> names -> counters;  transaction -> gensym_count = c -> names -> gensym_count;  transaction -> statics = c -> sym -> statics;  transaction -> binding_facts = Compiler_semantic_binding_facts(c);  transaction -> next_binding = c -> sym -> next_binding;  transaction -> local_macro_names = c -> sym -> local_macro_names;  transaction -> initializer_name = c -> init_fn;  transaction -> shutdown_name = c -> fini_fn;  if(c -> source_facts && c -> source_primary){
+  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> compiler = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = _semantic_scope(c -> sym, transaction -> scope_index);  transaction -> scope = * scope;  transaction -> counters = c -> names -> counters;  transaction -> statics = c -> sym -> statics;  transaction -> binding_facts = Compiler_semantic_binding_facts(c);  transaction -> next_binding = c -> sym -> next_binding;  transaction -> local_macro_names = c -> sym -> local_macro_names;  transaction -> initializer_name = c -> init_fn;  transaction -> shutdown_name = c -> fini_fn;  if(c -> source_facts && c -> source_primary){
     transaction -> source_definitions = Map_copy(c -> source_definitions);  transaction -> source_occurrences = Array_len(c -> source_occurrences);
   }
   scope -> symbols = Map_copy(transaction -> scope.symbols);  Compiler_merge_source_declarations(c, scope -> symbols, transaction -> scope.symbols);  scope -> bindings = Map_copy(transaction -> scope.bindings);  scope -> enumerators = Map_copy(transaction -> scope.enumerators);  scope -> macros =(void *) transaction -> scope.macros != NULL ? Map_copy(transaction -> scope.macros) : NULL;  c -> sym -> statics = Map_copy(c -> sym -> statics);  c -> sym -> binding_facts = Map_copy(Compiler_semantic_binding_facts(c));  c -> names -> counters = Map_copy(c -> names -> counters);  transaction -> active = 1;  return transaction;
@@ -2470,7 +2476,7 @@ int SymTxn_local_macros_changed(SymTxn transaction){
 List Iter_list(Iter);
 void SymTxn_rollback(SymTxn transaction){
   if(! transaction || ! transaction -> active) return;  Compiler compiler = transaction -> compiler; {
-    SymScope * scope = _semantic_scope((compiler) -> sym, transaction -> scope_index);  * scope = transaction -> scope; (compiler) -> sym -> statics = transaction -> statics; (compiler) -> sym -> binding_facts = transaction -> binding_facts; (compiler) -> sym -> next_binding = transaction -> next_binding; (compiler) -> sym -> local_macro_names = transaction -> local_macro_names; (compiler) -> names -> counters = transaction -> counters; (compiler) -> names -> gensym_count = transaction -> gensym_count; (compiler) -> init_fn = transaction -> initializer_name; (compiler) -> fini_fn = transaction -> shutdown_name;  if((compiler) -> source_facts &&(compiler) -> source_primary){
+    SymScope * scope = _semantic_scope((compiler) -> sym, transaction -> scope_index);  * scope = transaction -> scope; (compiler) -> sym -> statics = transaction -> statics; (compiler) -> sym -> binding_facts = transaction -> binding_facts; (compiler) -> sym -> next_binding = transaction -> next_binding; (compiler) -> sym -> local_macro_names = transaction -> local_macro_names; (compiler) -> names -> counters = transaction -> counters; (compiler) -> init_fn = transaction -> initializer_name; (compiler) -> fini_fn = transaction -> shutdown_name;  if((compiler) -> source_facts &&(compiler) -> source_primary){
       Array_resize((compiler) -> source_occurrences, transaction -> source_occurrences); {
         Var key;  List _x2c_macro_object_27 = Iter_list(Map_keys((compiler) -> source_definitions, &(struct Iter){
           int_var(0)
@@ -2767,7 +2773,7 @@ List Sym_introduce(Sym sym, String spelling){
 }
 
 static int _is_reserved_spelling(String s){
-  if(! String_truth(s)) return 0;  if(String_startswith(s, _496)) return 1;  if(String_equal(s, _353)) return 1;  if(String_equal(s, _354)) return 1;  if(String_len(s) < 2 || String_getindex(s, 0) != '_') return 0;  for(int i = 1;  i < String_len(s);  i ++) if(String_getindex(s, i) < '0' || String_getindex(s, i) > '9') return 0;  return 1;
+  if(! String_truth(s)) return 0;  if(String_startswith(s, _497)) return 1;  if(String_equal(s, _353)) return 1;  if(String_equal(s, _354)) return 1;  if(String_len(s) < 2 || String_getindex(s, 0) != '_') return 0;  for(int i = 1;  i < String_len(s);  i ++) if(String_getindex(s, i) < '0' || String_getindex(s, i) > '9') return 0;  return 1;
 }
 
 static String _declared_spelling(List key){
@@ -2790,7 +2796,7 @@ void Compiler_register_package_alias(Compiler compiler, String name, String alia
   if(! _init_guard_) _file_init_();
   Var bound = Map_getindex(compiler -> package_aliases, String_var(alias));
   if(! Var_is_void(bound) && String_equal(Var_string(bound), name)) return;
-  _check_package_binding(compiler, _497, alias, token);
+  _check_package_binding(compiler, _498, alias, token);
   Map_setindex(compiler -> package_aliases, String_var(alias), String_var(name));
 }
 
@@ -2801,7 +2807,7 @@ void Compiler_register_package_member(Compiler c, String name, String member, St
   if(! Var_is_void(bound) && Var_list(bound) == binding) return;
   String spelling = String_join(NULL, cons(String_var(name), cons(String_var(_355), cons(String_var(member), NULL))));
   if(! List_truth(Sym_get_exact(c -> sym, cons(String_var(spelling), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_362), cons(String_var(name), cons(String_var(_363), cons(String_var(member), cons(String_var(_7), NULL)))))), member_token, NULL);
-  _check_package_binding(c, _498, local, local_token);
+  _check_package_binding(c, _499, local, local_token);
   Map_setindex(c -> package_members, String_var(local), List_var(binding));
 }
 
@@ -2927,14 +2933,14 @@ List Sym_declare(Sym sym, List context, List key, List ast){
   else{
     Sym_set(sym, Type_list(ctxkey), (List) type);
     if(Type_is_aggregate_tag(type) &&(int) Block_len(sym -> scopes) > sym -> base_scopes) Map_setindex(sym -> binding_facts, List_var(cons(_368, cons(List_var(binding), NULL))), List_var(type));
-    if((int) Block_len(sym -> scopes) > sym -> base_scopes) Map_setindex(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(sym -> compiler, _499)));
+    if((int) Block_len(sym -> scopes) > sym -> base_scopes) Map_setindex(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(sym -> compiler, _500)));
   }
   if(! List_truth(context) &&(int) Block_len(sym -> scopes) > sym -> base_scopes){
     Map_setindex(sym -> binding_facts, List_var(cons(_369, cons(List_var(binding), NULL))), int_var(1));
     Map_setindex(sym -> binding_facts, List_var(cons(_71, cons(List_var(binding), NULL))), List_var(declared_type));
     List global_type = NULL;
     Sym_resolve_global(sym, key, & global_type);
-    if(String_truth(_declared_var_converter_owner(key, global_type)) && ! Map_contains(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))))) Map_setindex(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(sym -> compiler, _500)));
+    if(String_truth(_declared_var_converter_owner(key, global_type)) && ! Map_contains(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))))) Map_setindex(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(sym -> compiler, _501)));
   }
   return binding;
 }
@@ -2950,7 +2956,7 @@ List Sym_bind_identity(Sym sym, List context, List binding, List ast){
     key = cons(String_var(spelling), NULL);
     Map_setindex(scope -> symbols, List_var(key), List_var(cons(_364, cons(String_var(spelling), NULL))));
     if(Type_is_aggregate_tag(annotation) &&(int) Block_len(sym -> scopes) > sym -> base_scopes) Map_setindex(sym -> binding_facts, List_var(cons(_368, cons(List_var(binding), NULL))), List_var(annotation));
-    if((int) Block_len(sym -> scopes) > sym -> base_scopes) Map_setindex(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(sym -> compiler, _499)));
+    if((int) Block_len(sym -> scopes) > sym -> base_scopes) Map_setindex(sym -> binding_facts, List_var(cons(_5, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(sym -> compiler, _500)));
   }
   Map_setindex(scope -> bindings, List_var(key), List_var(binding));
   if(! List_truth(context) &&(int) Block_len(sym -> scopes) > sym -> base_scopes){
@@ -3067,7 +3073,7 @@ static void _record_function_definition(Compiler c, Type type, List binding){
 }
 
 static int _is_initializable_object_type(Compiler compiler, Type type){
-  return Sym_is_string_type(compiler -> sym, type) || Sym_is_named_value_type(compiler -> sym, type, _501) || Sym_is_array_type(compiler -> sym, type) || Sym_is_map_type(compiler -> sym, type) || Sym_is_named_value_type(compiler -> sym, type, _502);
+  return Sym_is_string_type(compiler -> sym, type) || Sym_is_named_value_type(compiler -> sym, type, _502) || Sym_is_array_type(compiler -> sym, type) || Sym_is_map_type(compiler -> sym, type) || Sym_is_named_value_type(compiler -> sym, type, _503);
 }
 
 static void _collect_initializer_references(Var value, Map references, List * ordered){
@@ -3313,19 +3319,19 @@ Symbol Sym_var_tag_for_type(Sym sym, Type type, Type * resolved){
 }
 
 int Sym_is_var_type(Sym sym, Type type){
-  if(! _init_guard_) _file_init_();  return Sym_is_named_value_type(sym, type, _503);
-}
-
-int Sym_is_string_type(Sym sym, Type type){
   if(! _init_guard_) _file_init_();  return Sym_is_named_value_type(sym, type, _504);
 }
 
-int Sym_is_array_type(Sym sym, Type type){
+int Sym_is_string_type(Sym sym, Type type){
   if(! _init_guard_) _file_init_();  return Sym_is_named_value_type(sym, type, _505);
 }
 
-int Sym_is_map_type(Sym sym, Type type){
+int Sym_is_array_type(Sym sym, Type type){
   if(! _init_guard_) _file_init_();  return Sym_is_named_value_type(sym, type, _506);
+}
+
+int Sym_is_map_type(Sym sym, Type type){
+  if(! _init_guard_) _file_init_();  return Sym_is_named_value_type(sym, type, _507);
 }
 
 int Sym_is_named_value_type(Sym sym, Type type, String name){
@@ -3378,12 +3384,12 @@ Type Sym_delegate_aggregate(Sym sym, Type type){
   return List_truth(Type_list(type)) && Type_is_aggregate_tag(type) ? type : NULL;
 }
 
-List Compiler_gensym(Compiler compiler){
-  if(! _init_guard_) _file_init_();  compiler -> names -> gensym_count ++;  return cons(List_var(cons(_316, cons(int_var(compiler -> names -> gensym_count), NULL))), NULL);
+static String _gensym_owner(Compiler compiler){
+  if(! String_truth(compiler -> filename)) return 0;  char buffer[PATH_MAX];  String path = compiler -> sources ? SourceView_path(compiler -> filename) : realpath(compiler -> filename, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : compiler -> filename;  static char root[PATH_MAX];  if(! * root && ! realpath(x2c_get_root(), root)) snprintf(root, sizeof root, "%s", (char *) x2c_get_root());  String prefix = String_join(NULL, cons(String_var(String_new(root)), cons(String_var(_34), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
 }
 
-void Compiler_set_gensym(Compiler compiler, int count){
-  compiler -> names -> gensym_count = count;
+List Compiler_gensym(Compiler compiler){
+  if(! _init_guard_) _file_init_();  String owner = _gensym_owner(compiler), key = String_join(NULL, cons(String_var(_489), cons(String_var(owner), NULL)));  Var stored;  int count = Map_try_get(compiler -> names -> counters, String_var(key), & stored) ? Var_int(stored) + 1 : 1;  Map_setindex(compiler -> names -> counters, String_var(key), int_var(count));  return cons(List_var(cons(_316, cons(String_var(owner), cons(int_var(count), NULL)))), NULL);
 }
 
 void Sym_push_new_scope(Sym sym){

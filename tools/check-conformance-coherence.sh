@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compare owned protocol conformance rows between snapshot and live
+# Compare owned protocol conformance rows between prelude and live
 # symbol modes. A row is owned when its adoption row's
 # file matches the unit being dumped; adapter emission is keyed
 # separately, to the unit defining the forward converter. If the two
@@ -38,13 +38,13 @@ filter='^\((unit|conformance owned)'
 if ! diff -u "$snap" "$live" > /dev/null; then
   echo "conformance coherence failure:" \
        "owned conformance rows differ by symbol mode." >&2
-  echo "--- snapshot symbols / +++ live symbols" >&2
+  echo "--- prelude symbols / +++ live symbols" >&2
   diff -u "$snap" "$live" | tail -n +3 >&2 || true
   echo "Generated adapters would depend on the build mode." \
        "Investigate before publishing artifacts" \
-       "(a stale snapshot usually means: make sym-refresh)." >&2
+       "(a stale stage usually means: make build)." >&2
   exit 1
 fi
 units=$(grep -c '^(unit ' "$snap" || true)
-echo "conformance: owned rows agree between snapshot and live symbol modes" \
+echo "conformance: owned rows agree between prelude and live symbol modes" \
      "($units units)"

@@ -16,7 +16,8 @@ mkdir -p "$BUILD/home/include" "$BUILD/home/etc" "$BUILD/home/lib" \
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$BUILD/home/etc/"
 cp "$ROOT/lib/"*.x "$ROOT/lib/"*.xmacro "$ROOT/lib/"*.xlisp \
   "$ROOT/builds/0/lib/"*.h "$BUILD/home/include/"
-cp "$ROOT/builds/0/libx2c.a" "$BUILD/home/lib/"
+cp "$ROOT/lib/"*.x "$ROOT/lib/"*.xmacro "$ROOT/lib/"*.xlisp \
+  "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
 cp "$X2C" "$BUILD/home/bin/x2c"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"

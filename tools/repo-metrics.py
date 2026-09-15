@@ -38,7 +38,7 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
 MACRO_PATTERNS = ("src/*.xmacro", "lib/*.xmacro", "etc/*.xmacro")
-GENERATED_LISP = {"etc/symbols.xlisp", "etc/header-symbols.xlisp"}
+GENERATED_LISP = set()
 SUMMARY_GROUPS = {
     "src": "src/*.x",
     "lib": "lib/*.x",

@@ -72,8 +72,8 @@ Public functions:
 
 `header_symbols_initialize`, `header_symbols_begin_generated`,
 `Compiler.record_generated_header_symbol`, `Compiler.collect_symbols`,
-`Compiler.collect_package`, `header_symbols_write`, `header_symbols_open`,
-`header_symbols_active`
+`Compiler.collect_package`, `interface_configure`, `interface_prelude`,
+`interface_write`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -125,7 +125,7 @@ Public functions:
 `Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_named_value_type`,
 `Sym.lookup_field`, `Sym.declare_field_order`, `Sym.field_order`,
 `Sym.declare_delegate_field`, `Sym.delegate_aggregate`, `Compiler.gensym`,
-`Compiler.set_gensym`, `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
+`Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -195,9 +195,8 @@ configured compiler sessions and sequential source units.
 
 Public functions:
 
-`Frontend.load_support`, `Frontend.new`, `Frontend.write_header_symbols`,
-`Frontend.start`, `ParsedUnit.collect`, `ParsedUnit.parse`, `Frontend.open`,
-`ParsedUnit.close`
+`Frontend.load_support`, `Frontend.new`, `Frontend.start`,
+`ParsedUnit.collect`, `ParsedUnit.parse`, `Frontend.open`, `ParsedUnit.close`
 
 ### [src/generate.x](../src/generate.x)
 
@@ -330,11 +329,11 @@ Public functions:
 
 ### [src/snapshot.x](../src/snapshot.x)
 
-deterministic compiler symbol snapshot I/O.
+deterministic Lisp data writer for compiler artifacts.
 
 Public functions:
 
-`snapshot_write_var`, `symbol_snapshot_write`, `symbol_snapshot_load`
+`snapshot_write_var`
 
 ### [src/sourceview.x](../src/sourceview.x)
 

@@ -272,7 +272,45 @@ static void _replay_cached(
     List resolved = dep_entry is void ? _interface_read(compiler, dep_path)
                                         : dep_entry.list();
     if (resolved) _replay_cached(compiler, resolved, globs, visited);
+    else _walk_cold(compiler, dep_path, dep_path, globs, visited);
   }
+}
+
+/* Read an include's text, reporting an unreadable target as a driver error. */
+static String _include_text(Compiler c, String target, String path) {
+  String text = NULL;
+  if (c.sources) {
+    if (!c.read_source(path, &text))
+      c.report_error(<driver>, "cannot read include", c.token,
+                     %("stage: collect" "include: $target" "path: $path"));
+    return text;
+  }
+  File file = NULL;
+  try file = path.open("r");
+  catch %(not-found *): {
+    List notes = %(
+      "stage: collect" "include: $target" "path: $path");
+    c.report_error(<driver>, "cannot read include", c.token, notes);
+  }
+  catch %(io-fail *): {
+    List notes = %(
+      "stage: collect" "include: $target" "path: $path");
+    c.report_error(<driver>, %"cannot read include", c.token, notes);
+  }
+  try text = file.string_close();
+  catch %(io-fail *): {
+    List notes = %(
+      "stage: collect" "include: $target" "path: $path");
+    c.report_error(<driver>, %"cannot read include", c.token, notes);
+  }
+  return text;
+}
+
+/* Walk one included file cold into globs; its entry joins the cache. */
+static void _walk_cold(
+  Compiler c, String target, String canonical, Map globs, Map visited) {
+  String text = _include_text(c, target, canonical);
+  _file(c, canonical, text, x2c_path_dir(canonical), globs, visited);
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -356,10 +394,12 @@ static void _flush_segment(
   }
 }
 
-/* Resolve and splice one include during a file walk. */
+/* Resolve and splice one include during a file walk. The included file's
+   content hash joins the including file's dependencies, so a replayed
+   interface is rejected when any file it spliced has changed. */
 static void _include(
   Compiler c, String target, int angle, String dir, Map globs,
-  Map visited, Array parts) {
+  Map visited, Array parts, Map dependencies) {
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, &covered);
   if (!path) return;
@@ -372,45 +412,15 @@ static void _include(
       !_entry_adds_symbols(c, entry, globs))
     return;
   c.add_translation_dependency(canonical);
-  if (visited.contains(canonical)) {
-    parts.push(canonical);
-    return;
-  }
-  if (entry) {
-    visited[canonical] = 1;
-    parts.push(canonical);
-    _replay_cached(c, entry, globs, visited);
-    return;
-  }
-  String text = NULL;
-  if (c.sources) {
-    if (!c.read_source(path, &text))
-      c.report_error(<driver>, "cannot read include", c.token,
-                     %("stage: collect" "include: $target" "path: $path"));
-  }
-  else {
-    File file = NULL;
-    try file = path.open("r");
-    catch %(not-found *): {
-      List notes = %(
-        "stage: collect" "include: $target" "path: $path");
-      c.report_error(<driver>, "cannot read include", c.token, notes);
-    }
-    catch %(io-fail *): {
-      List notes = %(
-        "stage: collect" "include: $target" "path: $path");
-      c.report_error(<driver>, %"cannot read include", c.token, notes);
-    }
-    try text = file.string_close();
-    catch %(io-fail *): {
-      List notes = %(
-        "stage: collect" "include: $target" "path: $path");
-      c.report_error(<driver>, %"cannot read include", c.token, notes);
-    }
-  }
-  visited[canonical] = 1;
   parts.push(canonical);
-  _file(c, canonical, text, x2c_path_dir(path), globs, visited);
+  if (!visited.contains(canonical)) {
+    visited[canonical] = 1;
+    if (entry) _replay_cached(c, entry, globs, visited);
+    else _walk_cold(c, target, canonical, globs, visited);
+  }
+  Var walked = _header_cache()[canonical];
+  if (walked is not void)
+    _cache_dependency(dependencies, canonical, walked.list().cadr());
 }
 
 static void _require_header_cache_owner(int owned) {
@@ -490,7 +500,7 @@ static void _file(
       _flush_segment(
         c, path, text, segment, segment_line, segment_position,
         globs, parts, definitions, dependencies, &private);
-      _include(c, target, angle, dir, globs, visited, parts);
+      _include(c, target, angle, dir, globs, visited, parts, dependencies);
       line_number++;
       byte_position += line.len();
       segment_line = line_number;
@@ -547,12 +557,17 @@ static void _file(
 }
 
 static String _runtime_text(Compiler c, String runtime) {
-  String text = NULL;
-  if (c.sources) {
-    if (!c.read_source(runtime, &text))
-      c.report_error(<driver>, "cannot read runtime source", c.token, NULL);
+  String text = NULL, int failed = 0;
+  if (c.sources) failed = !c.read_source(runtime, &text);
+  else {
+    try text = runtime.open("r").string_close();
+    catch %(not-found *): failed = 1;
+    catch %(io-fail *): failed = 1;
   }
-  else text = runtime.open("r").string_close();
+  if (failed)
+    c.report_error(
+      <driver>, "cannot read runtime source", c.token,
+      %("path: $runtime"));
   return text;
 }
 
@@ -748,6 +763,10 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   visited[entry] = 1;
   Var cached = c.source_facts ? void : _header_cache()[entry];
   if (cached is void) {
+    List replayed = _interface_read(c, entry);
+    if (replayed) cached = replayed;
+  }
+  if (cached is void) {
     String text = NULL, int failed = 0;
     if (c.sources) failed = !package.read_source(entry, &text);
     else {
@@ -799,33 +818,44 @@ static String _absolute_path(String spelling) {
   return %"${_canonical_root()}/$spelling";
 }
 
-static List interface_search_dirs = NULL;
+static String interface_out_dir = NULL, interface_mirror = NULL;
 
 /** Names the directories searched for `.xi` interfaces.
-    `out_dir` is the current translation output directory, or NULL. The
-    compiler's own stage directory is searched after it.
+    `out_dir` is the current translation output directory, or NULL. Home
+    files mirror their home-relative path under the compiler's stage
+    directory when it runs from `<home>/builds/`, otherwise under the home.
 */
 void interface_configure(String out_dir) {
-  Array dirs = %[];
-  if (out_dir) dirs.push(out_dir);
-  String executable = x2c_get_executable();
-  if (executable) dirs.push(x2c_path_dir(executable));
-  interface_search_dirs = dirs.list_free();
+  interface_out_dir = out_dir;
+  String root = x2c_get_root(), executable = x2c_get_executable();
+  String stage = executable ? x2c_path_dir(executable) : NULL;
+  interface_mirror =
+    stage && x2c_path_dir(stage) == %"$root/builds" ? stage : root;
 }
 
 /* Candidate interface paths for one canonical source path: the output
-   directory by stem, its sibling directory that mirrors the source's
-   repository directory, and the stage directory that mirrors it. */
+   directory by stem, its sibling that mirrors a home file's directory, the
+   home mirror, and a package's `builds/` beside or above the source. */
 static List _interface_candidates(String canonical) {
   String stem = x2c_path_stem(canonical), relative = _root_relative(canonical);
-  String mirror = relative ? %"${x2c_path_dir(relative)}/$stem.xi" : NULL;
-  Array paths = %[], int first = 1;
-  foreach (String dir, interface_search_dirs) {
-    if (first) paths.push(%"$dir/$stem.xi");
-    if (mirror) paths.push(%"$dir/${first ? %".." : %"."}/$mirror");
-    first = 0;
+  String dir = x2c_path_dir(canonical), Array paths = %[];
+  if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
+  if (relative) {
+    String mirror = %"${x2c_path_dir(relative)}/$stem.xi";
+    if (interface_out_dir) paths.push(%"$interface_out_dir/../$mirror");
+    paths.push(%"$interface_mirror/$mirror");
   }
+  paths.push(%"$dir/builds/$stem.xi");
+  paths.push(%"$dir/../builds/$stem.xi");
   return paths.list_free();
+}
+
+/** Returns the readable prelude interface path, or NULL when none exists. */
+String interface_prelude(void) {
+  String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
+  foreach (String path, _interface_candidates(runtime))
+    if (!access(path, R_OK)) return path;
+  return NULL;
 }
 
 static Map interface_loading = NULL;
@@ -902,10 +932,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   Array parts = %[];
   foreach (Var part, parts_value.list()) {
     if (part is <string>) {
-      String dep_canonical = _canonical_path(_absolute_path(part));
-      if (!_interface_read(compiler, dep_canonical))
-        return _interface_reject(canonical);
-      parts.push(dep_canonical);
+      parts.push(_canonical_path(_absolute_path(part)));
       continue;
     }
     if (part is not <list>) return _interface_reject(canonical);
@@ -957,7 +984,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
 /* Find and validate the interface of one canonical source path. A source
    under inspection through a SourceView never reads interfaces. */
 static List _interface_read(Compiler compiler, String canonical) {
-  if (compiler.source_facts || !interface_search_dirs) return NULL;
+  if (compiler.source_facts || !interface_mirror) return NULL;
   Var cached = _header_cache()[canonical];
   if (cached is not void) return cached;
   _interface_lisp();

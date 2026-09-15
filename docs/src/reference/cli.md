@@ -35,7 +35,7 @@ flat output directory and are rejected.
 `build --output` or `run --output`.
 
 `-j`, or `--jobs`, translates several units at once, in worker processes that
-inherit the symbol snapshot and header artifact the parent already read:
+inherit the collected declarations the parent already read:
 
 ```sh
 ./x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
@@ -111,8 +111,6 @@ Inspection modes print an intermediate result and stop translation:
 - `--dump-cpp-symbols` prints the CPP symbol table and stops.
 - `--dump-cache` prints the compiler cache and stops.
 - `--dump-conformance` prints protocol conformance and stops.
-- `--dump-symbol-snapshot` prints a complete symbol snapshot and stops.
-- `--dump-header-symbols` prints the header-symbol artifact and stops.
 
 An inspection that does not write generated files does not need `--out-dir`.
 Only one inspection mode runs; the last option given wins.
@@ -378,7 +376,10 @@ was.
 ## Environment
 
 `x2c env` prints the resolved home, executable, include directory, runtime
-archive, package roots, C compiler, and archiver as `name = value` lines.
+archive, prelude interface, package roots, C compiler, and archiver as
+`name = value` lines. The prelude is the `lib/x2c.xi` interface the compiler
+replays for the runtime declarations; an empty value means it walks
+`lib/x2c.x` cold once per process.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
 
@@ -389,7 +390,7 @@ x2c env runtime_lib
 
 The home is `X2C_HOME` when set. Otherwise the compiler walks up from its
 executable, then from the current directory, to the nearest directory holding
-`include/` and `etc/symbols.xlisp`. A source checkout and an
+`include/` and `etc/compiler-sdk.xlisp`. A source checkout and an
 [installed prefix](../guide/installation.md) are both homes. A stage compiler
 under `<home>/builds/<n>/` links that stage's runtime archive; any other
 compiler links `<home>/lib/libx2c.a`.

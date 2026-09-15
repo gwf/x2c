@@ -43,14 +43,15 @@ $(BUILD):
 	mkdir -p $(BUILD)
 
 # Translate .x files in one batch invocation: $? passes only the sources
-# newer than the stamp, so a clean build is one process (the symbol
-# snapshot loads once) and an incremental build retranslates only what
+# newer than the stamp, so a clean build is one process (the runtime
+# prelude loads once) and an incremental build retranslates only what
 # changed.  Translation output is a function of the compiler binary and
-# the symbol snapshot it loads at runtime, so both are prerequisites
-# and either changing forces a full retranslation; a missing generated
-# .c/.h forces its source back into the batch (self-healing).
+# the runtime declarations it replays, so the compiler and the runtime
+# sources are prerequisites and either changing forces a full
+# retranslation; a missing generated .c/.h forces its source back into the
+# batch (self-healing).
 ifneq ($(strip $(X_FILES)),)
-X2C_TRANSLATE_DEPS = $(X2C) ../etc/symbols.xlisp
+X2C_TRANSLATE_DEPS = $(X2C) $(wildcard ../lib/*.x)
 MISSING_GENERATED = $(filter-out \
 	$(wildcard $(BUILD)/*.c $(BUILD)/*.h),$(C_FILES) $(H_FILES))
 MISSING_X = $(sort \

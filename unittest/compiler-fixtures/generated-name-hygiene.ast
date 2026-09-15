@@ -63,8 +63,9 @@
  (bind (binding 12 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 3 (declare 
-         (struct (gensym 3) 
-          (fields (declare (int) (bindings (bind (binding 13 "value") ()))))) 
+         (struct 
+          (gensym "unittest/compiler-fixtures/generated-name-hygiene.x" 
+           1) (fields (declare (int) (bindings (bind (binding 13 "value") ()))))) 
          (bindings 
           (op = (bind (binding 15 "item") ()) 
            (expr () 

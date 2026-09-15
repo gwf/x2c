@@ -12,9 +12,9 @@ mkdir -p debug
 make build-safe >debug/bootstrap.log 2>&1
 ```
 
-Use `make build` when a source change needs a current compiler. It uses
-`stage0-settle`: refresh the symbol snapshot when its inputs changed, rebuild
-stage 0, and confirm that the rebuilt compiler agrees. Use a focused compiler
+Use `make build` when a source change needs a current compiler. It rebuilds
+stage 0, whose library batch writes the unit interfaces later translations
+replay as the runtime prelude. Use a focused compiler
 invocation or test to answer the question being worked on. The root
 [Verify and deliver](../AGENTS.md#verify-and-deliver) section owns final
 validation and publication; the commands below are a reference, not another
@@ -28,15 +28,11 @@ required sequence.
 | `make check` | Standalone extended non-mutating checks. |
 | `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
 | `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
-| `make sym-check` | Check the deterministic compiler symbol snapshot. |
-| `make sym-refresh` | Refresh symbols, verify regeneration, and display the diff. |
-| `make sym-update` | Accept an intentional, reviewed symbol change. |
-| `make proof-conformance` | Optional snapshot/live protocol conformance comparison. |
+| `make proof-conformance` | Optional prelude/live protocol conformance comparison. |
 | `make examples` | Check the curated executable examples manifest. |
 | `make examples-update` | Accept intentional, reviewed example-output changes. |
 | `make doc-examples` | Compile the book's code examples; optional. |
 | `make packages-check` | Check packages with their prepared dependency cache; outside `check`. |
-| `make artifact-refresh` | Refresh symbols and bootstrap; does not establish publication readiness. |
 | `make sanity-check` | Refresh bootstrap, rebuild stage 0, and build through stage 3 without checks. |
 
 For an optional focused unit run, build with `make -C unittest test-all`, then
@@ -108,7 +104,7 @@ manifest, including the deterministic Lisp showcase.
 - `docs/` - language, library, and compiler book.
 - `agents/` - task routing and implementation references.
 - `plans/` - active plans and archived decisions.
-- `etc/` - shared build rules, symbol snapshot, Lisp bootstrap, and SDK.
+- `etc/` - shared build rules, Lisp bootstrap, and SDK.
 - `packages/` - optional third-party adapters, outside `make check`.
 - `site/` - public website; it is not gated.
 

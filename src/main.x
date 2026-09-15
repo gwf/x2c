@@ -523,11 +523,14 @@ static int _run_env(CliRequest request) {
     request.ld_args, request.verbose, request.dry_run);
   String executable = x2c_get_executable();
   String roots = String.join(":", request.package_roots());
+  interface_configure(request.out_dir);
+  String prelude = interface_prelude();
   List rows = %(
     ("home" ${x2c_get_root()})
     ("executable" ${executable ? executable : %""})
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
+    ("prelude" ${prelude ? prelude : %""})
     ("package_dirs" ${roots ? roots : %""})
     ("cc" ${toolchain.cc})
     ("ar" ${toolchain.ar}) );

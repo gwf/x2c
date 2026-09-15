@@ -281,14 +281,13 @@ printf '#include "x2c.x"\nint other(void) { return 1; }\n' \
 grep -Fq "$BUILD/deps/src/root.x" "$BUILD/deps/out/root.d"
 grep -Fq "$BUILD/deps/src/middle.x" "$BUILD/deps/out/root.d"
 grep -Fq "$BUILD/deps/src/leaf.x" "$BUILD/deps/out/root.d"
-grep -Fq "$ROOT/etc/symbols.xlisp" "$BUILD/deps/out/root.d"
+grep -Fq "$ROOT/lib/x2c.x" "$BUILD/deps/out/root.d"
 grep -Fq "$BUILD/deps/src/leaf.x:" "$BUILD/deps/out/root.d"
 "$X2C" translate --live-symbols --out-dir "$BUILD/deps/live-out" \
   -I "$BUILD/deps/src" "$BUILD/deps/src/root.x"
 grep -Fq "$BUILD/deps/src/leaf.x" "$BUILD/deps/live-out/root.d"
 "$X2C" translate --out-dir "$BUILD/deps/repo-out" "$ROOT/src/main.x"
-grep -Fq "$ROOT/etc/header-symbols.xlisp" \
-  "$BUILD/deps/repo-out/main.d"
+grep -Fq "$ROOT/lib/list.x" "$BUILD/deps/repo-out/main.d"
 cp "$BUILD/deps/out/root.d" "$BUILD/deps/root.d.saved"
 printf 'int broken( {\n' >"$BUILD/deps/bad-src/root.x"
 set +e

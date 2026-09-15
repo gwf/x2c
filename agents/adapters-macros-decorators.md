@@ -212,7 +212,7 @@ tools rather than assuming they understand a new source-shaped macro.
 
 Unit macros may generate protocol adoptions after the methods and converters
 that satisfy them. Successful expansion retains those rows for conformance and
-symbol snapshots. Repeated applications retain distinct rows by combining the
+unit interfaces. Repeated applications retain distinct rows by combining the
 generated declaration location with the macro invocation location. Shallow
 collection transactionally expands file-scope unit macros that contain
 protocol rows, so importing units receive them and the expansion's public
