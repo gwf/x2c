@@ -18,6 +18,7 @@ $(def error.nonreturning.causes '(
   format
   not-found
   io-fail
+  cmd-fail
   bad-sig
   bad-arity
   no-symbol

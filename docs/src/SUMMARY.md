@@ -18,6 +18,7 @@
 - [Compile-time Macros](guide/macros.md)
 - [Packages](guide/packages.md)
 - [Wrapping a C Library](guide/wrapping-c-libraries.md)
+- [Commands and Files](guide/scripting.md)
 - [Programming Idioms](guide/idioms.md)
 
 # Language reference
@@ -54,6 +55,8 @@
     - [lib/match-recursive.x](library/modules/match-recursive.md)
     - [lib/match.x](library/modules/match.md)
     - [lib/mutex.x](library/modules/mutex.md)
+    - [lib/path.x](library/modules/path.md)
+    - [lib/process.x](library/modules/process.md)
     - [lib/scope.x](library/modules/scope.md)
     - [lib/split.x](library/modules/split.md)
     - [lib/string-classify.x](library/modules/string-classify.md)

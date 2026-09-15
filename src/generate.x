@@ -329,9 +329,6 @@ static List _file_init(Compiler c, List source) {
 
 // header/source partitioning
 
-static Type _remove_extern_from_type(Type type) =>
-  type.filter(%!(elem) => elem != <extern>);
-
 // Normalize declarations for header emission.
 static List _header_declaration(List node, Type type, List bindings) {
   if (type.is_extern()) {
@@ -342,16 +339,6 @@ static List _header_declaration(List node, Type type, List bindings) {
   }
   if (type.is_enum_tag_body() || type.is_aggregate_tag_body())
     return %(declare $type (bindings (bind () ())));
-  return node;
-}
-
-// Normalize declarations that stay in the source file.
-static List _source_declaration(List node, Type type, List bindings) {
-  if (type.is_static()) return node;
-  if (type.is_extern()) {
-    type = _remove_extern_from_type(type);
-    return %( declare $type $bindings );
-  }
   return node;
 }
 
@@ -406,8 +393,7 @@ static void _partition_function(
 static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
-  if (private)
-    _push_spaced(source, _source_declaration(declaration, type, bindings));
+  if (private) _push_spaced(source, declaration);
   else _push_spaced(header, _header_declaration(declaration, type, bindings));
 }
 

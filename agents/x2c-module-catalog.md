@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 31
-- Runtime modules: 47
+- Runtime modules: 49
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -796,6 +796,20 @@ Public functions:
 `Mutex.new`, `Mutex.lock`, `Mutex.try_lock`, `Mutex.unlock`, `Mutex.free`,
 `Mutex.cleanup`
 
+### [lib/path.x](../lib/path.x)
+
+filesystem operations on path `String`s.
+
+Public functions:
+
+`String.join_path`, `String.dirname`, `String.basename`, `String.extension`,
+`String.stem`, `String.absolute_path`, `String.exists`, `String.is_dir`,
+`String.is_file`, `String.file_size`, `String.modified_time`,
+`String.list_dir`, `String.walk`, `String.glob_match`, `String.glob`,
+`String.make_dirs`, `String.remove_file`, `String.remove_tree`,
+`String.copy_file`, `String.copy_tree`, `String.move_to`, `String.symlink_to`,
+`String.read_text`, `String.write_text`, `String.temp_dir`
+
 ### [lib/pool.x](../lib/pool.x)
 
 nested interning pools with region-backed object storage.
@@ -810,6 +824,18 @@ Public functions:
 `x2c_pool_values_is_permanent`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
 `Pool.malloc`, `Pool.free`, `Pool.owns`, `Pool.promote`, `Pool.own`,
 `Pool.stats`
+
+### [lib/process.x](../lib/process.x)
+
+run commands and pipelines without a shell.
+
+Public functions:
+
+`Job.free`, `Job.var`, `Var.job`, `Job.equal`, `Job.hash`, `Job.write_str`,
+`Job.str`, `Job.write_repr`, `Job.repr`, `List.options`, `List.pipe`,
+`List.start`, `List.status`, `List.run`, `List.output`, `List.lines`,
+`List.arguments`, `Job.ready`, `Job.wait`, `Job.check`, `Job.output`,
+`Job.errors`, `Job.kill`, `Job.cleanup`, `Job.wait_any`
 
 ### [lib/protocols.x](../lib/protocols.x)
 

@@ -34,6 +34,8 @@ void typed_array_suite(void);
 void typed_list_suite(void);
 void typed_map_suite(void);
 void autodiff_suite(void);
+void process_suite(void);
+void path_suite(void);
 void protocols_suite(void);
 void atomic_container_suite(void);
 void var_suite(void);
@@ -90,6 +92,8 @@ int main(int argc, char **argv) {
   $test.suite(typed_list_suite);
   $test.suite(typed_map_suite);
   $test.suite(autodiff_suite);
+  $test.suite(process_suite);
+  $test.suite(path_suite);
   $test.suite(protocols_suite);
   $test.suite(atomic_container_suite);
   // The core Atom descriptor registers before suites begin. Keep the runtime

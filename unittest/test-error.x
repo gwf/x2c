@@ -202,7 +202,7 @@ static void error_stack_bound_is_configurable(void) {
 
 static void error_default_policies_match_contract(void) {
   Error.initialize();
-  EXPECT_INT_EQ(nonreturning_error_causes.len(), 28);
+  EXPECT_INT_EQ(nonreturning_error_causes.len(), 29);
   foreach(Symbol code, nonreturning_error_causes)
     EXPECT_TRUE(Error.policy_get(code) == <abort>);
   EXPECT_TRUE(Error.policy_get(<join-fail>) == <abort>);
@@ -233,7 +233,7 @@ static void error_policy_locks_nonreturning_causes(void) {
       EXPECT_TRUE(Error.policy_get(code) == <abort>);
     }
   }
-  EXPECT_INT_EQ(caught, 84);
+  EXPECT_INT_EQ(caught, 87);
 }
 
 
