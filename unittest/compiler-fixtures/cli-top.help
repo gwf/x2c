@@ -9,6 +9,7 @@ Commands:
   translate   Translate .x files to .c and .h files
   build       Translate, compile, and optionally link a target
   run         Build an executable and run it
+  script      Build a script when it changes and run it
   bootstrap   Install a native x2c from a APE binary
   env         Show the resolved home, layout, and tools
   install     Install a package into the home

@@ -25,7 +25,7 @@ typedef struct CliRequest {
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int source_map, source_facts, live_symbols, cpp_symbols, force;
+  int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild;
   SourceView sources;
 } *CliRequest;
 
@@ -49,11 +49,14 @@ enum {
   CLI_TRANSLATE = 2,
   CLI_BUILD     = 4,
   CLI_RUN       = 8,
+  CLI_SCRIPT    = 16,
   CLI_BOOTSTRAP = 32,
   CLI_ENV       = 64,
   CLI_INSTALL   = 128,
   CLI_REMOVE    = 256,
-  CLI_LIST      = 512
+  CLI_LIST      = 512,
+  // Commands that build native code from options on the command line.
+  CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
 };
 
 typedef struct CliOption {
@@ -70,6 +73,7 @@ static CliCommand cli_commands[] = {
   { <translate>, CLI_TRANSLATE, "Translate .x files to .c and .h files" },
   { <build>,     CLI_BUILD,     "Translate, compile, and optionally link a target" },
   { <run>,       CLI_RUN,       "Build an executable and run it" },
+  { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
   { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from a APE binary" },
   { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
   { <install>,   CLI_INSTALL,   "Install a package into the home" },
@@ -80,27 +84,27 @@ static CliCommand cli_commands[] = {
 };
 
 static CliOption cli_options[] = {
-  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
+  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP |
     CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST, <general>,
     "-h, --help", NULL, "Show help and exit", 0 },
   { <version>, CLI_TOP, <global>, "-V, --version", NULL,
     "Show the x2c version and exit", 0 },
-  { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
+  { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "-v, --verbose", NULL, "Show commands as they are executed", 0 },
-  { <dry-run>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,
+  { <dry-run>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0 },
   { <quiet>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
     CLI_INSTALL | CLI_REMOVE,
     <general>, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0 },
-  { <plain>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
+  { <plain>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--plain", NULL, "Use stable output without terminal rendering", 0 },
-  { <color>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
+  { <color>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
-  { <debug>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN,
+  { <debug>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0 },
-  { <src-map>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <output>, "--source-map",
+  { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
     NULL, "Map generated C locations to original x2c sources", 0 },
   { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0 },
@@ -120,10 +124,12 @@ static CliOption cli_options[] = {
     "executable or static-library", 0 },
   { <compile>, CLI_BUILD, <target>, "-c, --compile-only",
     NULL, "Produce object files without linking", 0 },
-  { <jobs>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <target>, "-j, --jobs",
+  { <jobs>, CLI_TRANSLATE | CLI_NATIVE, <target>, "-j, --jobs",
     "<count>", "Maximum parallel translation and compilation jobs", 0 },
   { <output>, CLI_BUILD | CLI_RUN, <output>, "--output", "<file>",
     "Name the executable, library, or single object", 0 },
+  { <rebuild>, CLI_SCRIPT, <output>, "--rebuild", NULL,
+    "Build the script even when its cached executable is current", 0 },
   { <build-dir>, CLI_BUILD | CLI_RUN, <output>, "--build-dir",
     "<dir>", "Store generated C, objects, deps, and state here", 0 },
   { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
@@ -140,15 +146,15 @@ static CliOption cli_options[] = {
     "Install a bundle built for another x2c version", 0 },
   { <prefix>, CLI_BOOTSTRAP, <output>, "--prefix", "<dir>",
     "Install native x2c and sources under <dir>", 0 },
-  { <include>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
     "-I", "<dir>", "Add a shared x2c/C include directory", 0 },
-  { <x-include>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <x-include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
     "--x-include-dir", "<dir>", "Add an x2c-only include directory", 0 },
-  { <c-include>, CLI_BUILD | CLI_RUN, <source>,
+  { <c-include>, CLI_NATIVE, <source>,
     "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0 },
-  { <c-system>, CLI_BUILD | CLI_RUN, <source>,
+  { <c-system>, CLI_NATIVE, <source>,
     "--c-system-dir", "<dir>", "Add a C-only system include directory", 0 },
-  { <pkg-dir>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_ENV, <source>,
+  { <pkg-dir>, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
@@ -157,36 +163,36 @@ static CliOption cli_options[] = {
     "Collect symbols through the host preprocessor", 0 },
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0 },
-  { <cc>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
+  { <cc>, CLI_NATIVE | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0 },
   { <ar>, CLI_BUILD | CLI_BOOTSTRAP | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
     "Use <program> as the static-library archiver", 0 },
-  { <opt>, CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP,
+  { <opt>, CLI_NATIVE | CLI_BOOTSTRAP,
     <c-compiler>,
     "-O0, -O1, -O2, -O3, -Os", NULL, "Set C optimization", 0 },
-  { <g>, CLI_BUILD | CLI_RUN, <c-compiler>, "-g", NULL,
+  { <g>, CLI_NATIVE, <c-compiler>, "-g", NULL,
     "Emit debug information", 0 },
-  { <define>, CLI_BUILD | CLI_RUN, <c-compiler>, "-D",
+  { <define>, CLI_NATIVE, <c-compiler>, "-D",
     "<name>[=<value>]", "Define a C preprocessor macro", 0 },
-  { <undefine>, CLI_BUILD | CLI_RUN, <c-compiler>, "-U", "<name>",
+  { <undefine>, CLI_NATIVE, <c-compiler>, "-U", "<name>",
     "Undefine a C preprocessor macro", 0 },
-  { <xcc>, CLI_BUILD | CLI_RUN, <c-compiler>, "-Xcc", "<arg>",
+  { <xcc>, CLI_NATIVE, <c-compiler>, "-Xcc", "<arg>",
     "Pass one argument only to C compilation", 0 },
-  { <lib-dir>, CLI_BUILD | CLI_RUN, <linker>, "-L", "<dir>",
+  { <lib-dir>, CLI_NATIVE, <linker>, "-L", "<dir>",
     "Add a library search directory", 0 },
-  { <library>, CLI_BUILD | CLI_RUN, <linker>, "-l", "<name>",
+  { <library>, CLI_NATIVE, <linker>, "-l", "<name>",
     "Link library <name>", 0 },
-  { <rpath>, CLI_BUILD | CLI_RUN, <linker>, "--rpath", "<dir>",
+  { <rpath>, CLI_NATIVE, <linker>, "--rpath", "<dir>",
     "Search <dir> for shared libraries when the program runs", 0 },
-  { <wl>, CLI_BUILD | CLI_RUN, <linker>, "-Wl,<arg>[,<arg>...]",
+  { <wl>, CLI_NATIVE, <linker>, "-Wl,<arg>[,<arg>...]",
     NULL, "Pass comma-separated arguments to the linker", 0 },
-  { <pthread>, CLI_BUILD | CLI_RUN, <c-compiler>, "-pthread", NULL,
+  { <pthread>, CLI_NATIVE, <c-compiler>, "-pthread", NULL,
     "Enable native threading for compilation and linking", 0 },
-  { <framework>, CLI_BUILD | CLI_RUN, <linker>, "-framework", "<name>",
+  { <framework>, CLI_NATIVE, <linker>, "-framework", "<name>",
     "Link a native framework on macOS", 0 },
-  { <xlinker>, CLI_BUILD | CLI_RUN, <linker>, "-Xlinker", "<arg>",
+  { <xlinker>, CLI_NATIVE, <linker>, "-Xlinker", "<arg>",
     "Pass one argument to the linker", 0 },
   { <tokens>, CLI_TRANSLATE, <inspection>, "--dump-tokens",
     NULL, "Print source tokens and stop", 0 },
@@ -417,7 +423,7 @@ static void _print_env_help(void) {
   x2c env [options] [name]
 
 Print the home, executable, include directory, runtime archive,
-package roots, and host tools this compiler resolved, one
+package roots, host tools, and script cache this compiler resolved, one
 'name = value' line each, or only the value of one name.");
   _print_options(<env>);
   _print_help_row(
@@ -462,12 +468,34 @@ another version unless --force. A source package with native
 dependencies is refused; install its bundle instead.");
 }
 
+static void _print_script_help(void) {
+  puts(
+    %"Usage:
+  x2c script [options] <file.x> [<argument>...]
+
+Run an x2c source file as a script. The first run builds an executable in
+the per-user cache; later runs start it directly until the script, a file
+it includes or imports, the compiler, the runtime, or an option changes.");
+  _print_options(<script>);
+  _print_help_row(
+    "@<file>", "Read additional options from a response file", 2);
+  puts(
+    %"
+Every word after <file.x> is passed unchanged to the script, including
+words that begin with - or @. A script whose first line is the shebang
+'#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
+XDG_CACHE_HOME/x2c, or ~/.cache/x2c. --rebuild also picks up a new header
+that shadows an included one or a library that -l now resolves
+differently.");
+}
+
 static void _print_help(Symbol command) {
   switch (command) {
     case 0:            _print_top_help();             break;
     case <translate>:  _print_translate_help();       break;
     case <build>:
     case <run>:        _print_driver_help(command);   break;
+    case <script>:     _print_script_help();          break;
     case <bootstrap>:  _print_bootstrap_help();       break;
     case <env>:        _print_env_help();             break;
     case <install>:
@@ -478,8 +506,8 @@ static void _print_help(Symbol command) {
         %"Usage:
   x2c help [command]
 
-Show top-level help, or help for translate, build, run, bootstrap,
-env, install, remove, or list.");
+Show top-level help, or help for translate, build, run, script,
+bootstrap, env, install, remove, or list.");
       break;
     default: x2c_driver_error(%"unknown help command '${command.str()}'");
   }
@@ -790,6 +818,7 @@ static void _apply_option(
     case <debug>: c.debugging = 1; break;
     case <out-dir>: c.out_dir = value; break;
     case <src-map>: c.source_map = 1; break;
+    case <rebuild>: c.rebuild = 1; break;
     case <no-deps>: c.no_deps = 1; break;
     case <dep-file>: c.dep_file = value; break;
     case <dep-target>: c.dep_target = value; break;
@@ -936,10 +965,11 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   Symbol name = command.name, int mask = command.mask;
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = name;
-  request.jobs = mask & (CLI_BUILD | CLI_RUN) ? _default_build_jobs() : 1;
-  if (mask & (CLI_BUILD | CLI_RUN)) request.kind = <executable>;
+  request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
+  if (mask & CLI_NATIVE) request.kind = <executable>;
   Array inputs = %[], run_args = %[], x_paths = %[];
   Array cpp_args = %[], cc_args = %[], ld_args = %[], int operands = 0;
+  int expanded_end = 0;
   for (int i = 1; i < args.len(); i++) {
     String arg = args[i], int dashed = arg && arg[0] == '-';
     /* bootstrap has no operand syntax, so `--`, `-o`, and a bare word are
@@ -951,9 +981,22 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     }
     if (mask == CLI_BOOTSTRAP && !dashed)
       x2c_driver_error(%"unexpected bootstrap operand '$arg'");
+    // Expanded words are parsed next but never expanded again.
+    if (mask == CLI_SCRIPT && !operands && i >= expanded_end &&
+        arg.startswith("@")) {
+      Array expanded = %[];
+      _expand_argument(expanded, arg, NULL);
+      args.splice(i, 1, expanded);
+      expanded_end = i + expanded.len();
+      i--;
+      continue;
+    }
     if (operands || !dashed) {
       if (operands && name == <run>) run_args.push(arg);
       else inputs.push(arg);
+      // Every word after a script belongs to the script, `@` and `--` too.
+      if (mask == CLI_SCRIPT)
+        while (++i < args.len()) run_args.push(args[i]);
       continue;
     }
     if (mask != CLI_BOOTSTRAP && arg == "-o") _removed_output();
@@ -1003,6 +1046,8 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     x2c_driver_error(%"${name.str()} requires exactly one operand");
   if (mask == CLI_LIST && request.inputs)
     x2c_driver_error("list accepts no operands");
+  if (mask == CLI_SCRIPT && !request.inputs)
+    x2c_driver_error("script requires a script file");
   return request;
 }
 
@@ -1017,8 +1062,13 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
 */
 CliRequest cli_parse(int argc, char **argv) {
   Array args = $auto(%[]);
-  for (int i = 1; i < argc; i++)
-    _expand_argument(args, String.new(argv[i]), NULL);
+  // A script's arguments are its own, so `script` expands response files
+  // only while it parses its options.
+  int script = argc > 1 && !strcmp(argv[1], "script");
+  for (int i = 1; i < argc; i++) {
+    if (script) args.push(String.new(argv[i]));
+    else _expand_argument(args, String.new(argv[i]), NULL);
+  }
   if (!args.len()) {
     _print_help(0);
     exit(2);

@@ -1,5 +1,5 @@
 Usage:
   x2c help [command]
 
-Show top-level help, or help for translate, build, run, bootstrap,
-env, install, remove, or list.
+Show top-level help, or help for translate, build, run, script,
+bootstrap, env, install, remove, or list.

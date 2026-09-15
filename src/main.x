@@ -13,6 +13,7 @@
 #include "frontend.x"
 #include "editor.x"
 #include "install.x"
+#include "script.x"
 #include "toolchain.x"
 #pragma private
 
@@ -485,6 +486,8 @@ static int _run_build_request(CliRequest c, Array commands) {
   }
   state.report_success();
   if (c.command == <run>) result = state.run_program();
+  else if (c.command == <script> && !c.dry_run)
+    state.publish_script(%"${c.build_dir}/run");
   state.cleanup(1);
   return result;
 }
@@ -533,7 +536,8 @@ static int _run_env(CliRequest request) {
     ("prelude" ${prelude ? prelude : %""})
     ("package_dirs" ${roots ? roots : %""})
     ("cc" ${toolchain.cc})
-    ("ar" ${toolchain.ar}) );
+    ("ar" ${toolchain.ar})
+    ("cache_dir" ${script_cache_root()}) );
   String wanted = NULL;
   if (request.inputs) wanted = request.inputs.car();
   foreach (List row, rows) {
@@ -607,6 +611,7 @@ int main(int argc, char **argv) {
     return editor_request(argc - 1, argv + 1);
   }
   CliRequest request = cli_parse(argc, argv);
+  if (request.command == <script>) script_prepare(request);
   report_configure(
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,
@@ -626,6 +631,7 @@ int main(int argc, char **argv) {
     ? _run_translation(request, NULL, NULL)
     : _run_build(request);
   command.close();
+  if (request.command == <script> && !result) result = script_run(request);
 #ifdef __COSMOPOLITAN__
   fflush(NULL);
   _Exit(result);

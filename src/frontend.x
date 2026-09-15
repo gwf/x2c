@@ -93,6 +93,18 @@ static String _unreadable_input(
   compiler.report_error(<driver>, "cannot read input file", NULL, notes);
 }
 
+/* A `#!` first line lets a source file run as an executable script. Spaces
+   replace it, so every later line, column, and byte position stays put. */
+static String _without_shebang(String text) {
+  if (!text || !text.startswith("#!")) return text;
+  int end = text.find("\n");
+  if (end < 0) end = text.len();
+  Buffer blanked = $auto(Buffer.new(text.len()));
+  for (int i = 0; i < end; i++) blanked.write_char(' ');
+  blanked.write(text + end);
+  return blanked.str();
+}
+
 // Read the primary source file. fopen() opens directories on some
 // platforms and then reads nothing, so the handle is checked for a regular
 // file before its text is taken. An empty file yields the canonical empty
@@ -103,7 +115,7 @@ static String _read_input_text(Compiler compiler, String filename) {
     String text;
     if (!compiler.read_source(filename, &text))
       return _unreadable_input(compiler, filename, "cannot open");
-    return text;
+    return _without_shebang(text);
   }
   File file = NULL;
   try file = filename.open("r");
@@ -120,7 +132,7 @@ static String _read_input_text(Compiler compiler, String filename) {
   try text = file.string_close();
   catch %(io-fail *):
     return _unreadable_input(compiler, filename, "read failed");
-  return text;
+  return _without_shebang(text);
 }
 
 static void _tokenize_input(

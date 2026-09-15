@@ -19,11 +19,13 @@ Typed native build request and artifact graph.
 | [`Build.end_translation`](#Build.end_translation) | Records one completed translation and reports the phase when all finish. |
 | [`Build.finish`](#Build.finish) | Compiles registered C sources and then archives or links the final output. |
 | [`Build.generated_dir`](#Build.generated_dir) | Returns the generated-file directory for `input`. |
+| [`Build.publish_script`](#Build.publish_script) | Moves a script's built executable to `executable` and records what it was built from, so `CliRequest.script_current` can reuse it. |
 | [`Build.record_translation`](#Build.record_translation) | Records the successful translation fingerprint when retained state exists. |
 | [`Build.report_success`](#Build.report_success) | Prints the completed build receipt and artifact details when enabled. |
 | [`Build.run_program`](#Build.run_program) | Runs the built output with the request's arguments and returns its status. |
 | [`Build.translation_current`](#Build.translation_current) | Reports whether translated C and header artifacts match current inputs. |
 | [`CliRequest.prepare`](#CliRequest.prepare) | Validates a native build request and returns its `Scope`-owned build state. |
+| [`CliRequest.script_current`](#CliRequest.script_current) | Reports whether the script executable under `directory` still matches everything recorded when it was built. |
 
 ### Functions
 
@@ -37,7 +39,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:545`
+Source: `src/build.x:553`
 
 ### `Build`
 
@@ -52,7 +54,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:427`
+Source: `src/build.x:435`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -61,7 +63,7 @@ Source: `src/build.x:427`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:439`
+Source: `src/build.x:447`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -72,7 +74,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:858`
+Source: `src/build.x:866`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -82,7 +84,7 @@ Source: `src/build.x:858`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:447`
+Source: `src/build.x:455`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -97,7 +99,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:701`
+Source: `src/build.x:709`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -108,7 +110,21 @@ Returns the generated-file directory for `input`.
 The directory is derived from the input path and created unless this is
 a dry run. Native registration belongs to `Build.add_generated`.
 
-Source: `src/build.x:289`
+Source: `src/build.x:297`
+
+<a id="Build.publish_script"></a>
+#### Build.publish_script
+
+`void Build.publish_script(Build b, String executable)`
+
+Moves a script's built executable to `executable` and records what it was
+built from, so `CliRequest.script_current` can reuse it. The record lists
+the script's translation and compile prerequisites, package archives, and
+the runtime archive.
+
+**Raises:** `<io-fail>` when the executable cannot be moved.
+
+Source: `src/build.x:904`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -120,7 +136,7 @@ Dry runs and incomplete fingerprints are ignored. Writing the private
 state file is best effort; after a write or rename failure, cleanup
 attempts to unlink the temporary file but cannot guarantee its removal.
 
-Source: `src/build.x:338`
+Source: `src/build.x:346`
 
 <a id="Build.report_success"></a>
 #### Build.report_success
@@ -129,7 +145,7 @@ Source: `src/build.x:338`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:774`
+Source: `src/build.x:782`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -139,7 +155,7 @@ Source: `src/build.x:774`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:834`
+Source: `src/build.x:842`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -151,7 +167,7 @@ Returns zero without retained state, during a dry run, when either output
 is absent, or when any compiler, tool, option, depfile, or dependency
 fingerprint cannot be read or differs.
 
-Source: `src/build.x:318`
+Source: `src/build.x:326`
 
 ### `CliRequest`
 
@@ -166,7 +182,17 @@ to `request`, chooses output and intermediate paths, and creates artifact
 directories unless this is a dry run. Invalid inputs or setup print a
 diagnostic and exit with status 2.
 
-Source: `src/build.x:203`
+Source: `src/build.x:211`
+
+<a id="CliRequest.script_current"></a>
+#### CliRequest.script_current
+
+`int CliRequest.script_current(CliRequest c, String directory)`
+
+Reports whether the script executable under `directory` still matches
+everything recorded when it was built.
+
+Source: `src/build.x:926`
 
 ## Public types
 

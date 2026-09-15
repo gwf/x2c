@@ -2,7 +2,7 @@
 
 #include "frontend.h"
 
-static String _15, _14, _13, _12, _11, _10, _9, _7, _6, _5, _4, _3, _2, _0;
+static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _7, _6, _5, _4, _3, _2, _0;
 
 static Var _8, _1;
 
@@ -26,6 +26,8 @@ static Token _first_preprocessor_token(Compiler compiler);
 
 static String _unreadable_input(Compiler compiler, String filename, String reason);
 
+static String _without_shebang(String text);
+
 static String _read_input_text(Compiler compiler, String filename);
 
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename);
@@ -33,6 +35,13 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 static void _configure_package(Compiler compiler, CliRequest request, String filename);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 Var String_var(String);
 
@@ -51,11 +60,13 @@ __attribute__((constructor)) static void _file_init_(void){
   _8 = String_var(_7);
   _9 = String_new("status: ");
   _10 = String_new("cannot read input file");
-  _11 = String_new("cannot open");
-  _12 = String_new("not a regular file");
-  _13 = String_new("read failed");
-  _14 = String_new("/");
-  _15 = String_new("failed to run C preprocessor");
+  _11 = String_new("#!");
+  _12 = String_new("\n");
+  _13 = String_new("cannot open");
+  _14 = String_new("not a regular file");
+  _15 = String_new("read failed");
+  _16 = String_new("/");
+  _17 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -112,6 +123,49 @@ static String _unreadable_input(Compiler compiler, String filename, String reaso
   Compiler_report_error(compiler, 306819428, _10, NULL, notes);
 }
 
+int String_startswith(String, String);
+
+int String_find(String, String);
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write_char(Buffer, char);
+
+Buffer Buffer_write(Buffer, const char *);
+
+String Buffer_str(Buffer);
+
+static String _without_shebang(String text){
+  if(! String_truth(text) || ! String_startswith(text, _11)) return text;
+  int end = String_find(text, _12);
+  if(end < 0) end = String_len(text);
+  Buffer blanked = Buffer_new(String_len(text));
+  {
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & blanked};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_1
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    for(int i = 0;  i < end;  i ++) Buffer_write_char(blanked, ' ');
+    Buffer_write(blanked, text + end);
+    {
+      String _x2c_return_value_0 = Buffer_str(blanked);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
+    }
+
+  }
+
+  x2c_cleanup_leave(&_x2c_defer_record_0);
+}
+}
+
 int Compiler_read_source(Compiler, String, volatile String *);
 
 File String_open(String, const char *);
@@ -125,8 +179,8 @@ String File_string_close(File);
 static String _read_input_text(Compiler compiler, String filename){
   if(compiler -> sources){
     String volatile text;
-    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _11);
-    return text;
+    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _13);
+    return _without_shebang(text);
   }
   File volatile file = NULL;
   {
@@ -145,24 +199,24 @@ static String _read_input_text(Compiler compiler, String filename){
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
       if (_x2c_catch_selected_0 == 0) {{
-        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _11);
+        String _x2c_return_value_1 = _unreadable_input(compiler, filename, _13);
         {
           x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_0);
-          return _x2c_return_value_0;
+          return _x2c_return_value_1;
         }
 
       }
 
     }
     else {{
-      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _11);
+      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _13);
       {
         x2c_error_catch_close(_x2c_error_handler_0);
         _x2c_error_handler_0 = NULL;
         x2c_exception_leave(& _x2c_exception_frame_0);
-        return _x2c_return_value_1;
+        return _x2c_return_value_2;
       }
 
     }
@@ -185,7 +239,7 @@ x2c_exception_leave(& _x2c_exception_frame_0);
 struct stat info;
 if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
   File_close(file);
-  return _unreadable_input(compiler, filename, _12);
+  return _unreadable_input(compiler, filename, _14);
 }
 String volatile text = NULL;
 {
@@ -201,12 +255,12 @@ ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exc
     x2c_error_catch_detach(_x2c_error_handler_1);
     x2c_exception_mark_handled(&_x2c_exception_frame_1);
      {{
-      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _13);
+      String _x2c_return_value_3 = _unreadable_input(compiler, filename, _15);
       {
         x2c_error_catch_close(_x2c_error_handler_1);
         _x2c_error_handler_1 = NULL;
         x2c_exception_leave(& _x2c_exception_frame_1);
-        return _x2c_return_value_2;
+        return _x2c_return_value_3;
       }
 
     }
@@ -226,7 +280,7 @@ x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
 }
-return text;
+return _without_shebang(text);
 }
 
 String x2c_get_root(void);
@@ -295,7 +349,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
         }
         String package = x2c_package_directory(root, source);
         if(! String_truth(package)) continue;
-        String name = String_getslice(package, String_rfind(package, _14) + 1, -2147483648, 1);
+        String name = String_getslice(package, String_rfind(package, _16) + 1, -2147483648, 1);
         if(! String_is_identifier(name)) continue;
         if(! x2c_package_source(package, source)) continue;
         compiler -> package = name;
@@ -350,7 +404,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
     List notes = cons(_8, cons(String_var(String_join(NULL, cons(String_var(_9), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _15, _first_preprocessor_token(c), notes);
+    Compiler_report_error(c, 306819428, _17, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
@@ -435,12 +489,12 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
        {{
-        int _x2c_return_value_3 = 0;
+        int _x2c_return_value_4 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_2);
           _x2c_error_handler_2 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_2);
-          return _x2c_return_value_3;
+          return _x2c_return_value_4;
         }
 
       }
@@ -496,12 +550,12 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
           unit -> preprocessor = NULL;
         }
         {
-          int _x2c_return_value_4 = 0;
+          int _x2c_return_value_5 = 0;
           {
             x2c_error_catch_close(_x2c_error_handler_3);
             _x2c_error_handler_3 = NULL;
             x2c_exception_leave(& _x2c_exception_frame_3);
-            return _x2c_return_value_4;
+            return _x2c_return_value_5;
           }
 
         }
@@ -607,5 +661,12 @@ void ParsedUnit_close(ParsedUnit * unit){
     0
   }
   ;
+}
+
+void Buffer_cleanup(Buffer);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 

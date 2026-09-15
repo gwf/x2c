@@ -2,7 +2,7 @@ Usage:
   x2c env [options] [name]
 
 Print the home, executable, include directory, runtime archive,
-package roots, and host tools this compiler resolved, one
+package roots, host tools, and script cache this compiler resolved, one
 'name = value' line each, or only the value of one name.
 
 Translation options:

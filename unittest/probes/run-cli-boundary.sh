@@ -14,6 +14,7 @@ mkdir -p "$BUILD/out" "$BUILD/a" "$BUILD/b" \
 "$X2C" translate --help >"$BUILD/translate.help"
 "$X2C" build --help >"$BUILD/build.help"
 "$X2C" run --help >"$BUILD/run.help"
+"$X2C" script --help >"$BUILD/script.help"
 "$X2C" bootstrap --help >"$BUILD/bootstrap.help"
 "$X2C" env --help >"$BUILD/env.help"
 "$X2C" install --help >"$BUILD/install.help"
@@ -25,12 +26,14 @@ mkdir -p "$BUILD/out" "$BUILD/a" "$BUILD/b" \
 "$X2C" translate -h >"$BUILD/translate-short.help"
 "$X2C" build -h >"$BUILD/build-short.help"
 "$X2C" run -h >"$BUILD/run-short.help"
+"$X2C" script -h >"$BUILD/script-short.help"
 "$X2C" bootstrap -h >"$BUILD/bootstrap-short.help"
 "$X2C" help -h >"$BUILD/help-short.help"
 diff -u "$FIXTURES/cli-top.help" "$BUILD/top.help"
 diff -u "$FIXTURES/cli-translate.help" "$BUILD/translate.help"
 diff -u "$FIXTURES/cli-build.help" "$BUILD/build.help"
 diff -u "$FIXTURES/cli-run.help" "$BUILD/run.help"
+diff -u "$FIXTURES/cli-script.help" "$BUILD/script.help"
 diff -u "$FIXTURES/cli-bootstrap.help" "$BUILD/bootstrap.help"
 diff -u "$FIXTURES/cli-env.help" "$BUILD/env.help"
 diff -u "$FIXTURES/cli-install.help" "$BUILD/install.help"
@@ -42,6 +45,7 @@ cmp "$BUILD/top.help" "$BUILD/top-short.help"
 cmp "$BUILD/translate.help" "$BUILD/translate-short.help"
 cmp "$BUILD/build.help" "$BUILD/build-short.help"
 cmp "$BUILD/run.help" "$BUILD/run-short.help"
+cmp "$BUILD/script.help" "$BUILD/script-short.help"
 cmp "$BUILD/bootstrap.help" "$BUILD/bootstrap-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
 [[ $("$X2C" --version) == "x2c 0.12.1" ]]
@@ -1175,4 +1179,64 @@ printf '%s\n' '#include "x2c.x"' \
   --output "$BUILD/finally-return" "$BUILD/finally-return.x"
 [[ $("$BUILD/finally-return") == 2 ]]
 
-echo "CLI, dependency, build, run, manifest, and state probes: 120 passed"
+SCRIPT="$BUILD/script"
+mkdir -p "$SCRIPT/bin"
+ln -s "$X2C" "$SCRIPT/bin/x2c"
+run_script() { X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" script "$@"; }
+printf '%s\n' 'macro Expression $greeting() => ("hello")' \
+  >"$SCRIPT/greeting.xmacro"
+cat >"$SCRIPT/args.x" <<'EOF'
+#!/usr/bin/env -S x2c script
+$(import "greeting.xmacro")
+int main(int argc, char **argv) {
+  printf("%s", $greeting());
+  for (int i = 1; i < argc; i++) printf(" [%s]", argv[i]);
+  printf("\n");
+  return argc - 1;
+}
+EOF
+chmod +x "$SCRIPT/args.x"
+set +e
+script_output=$(run_script "$SCRIPT/args.x" "two words" -- --help @none \
+  2>"$SCRIPT/first.stderr")
+script_status=$?
+set -e
+[[ $script_status == 4 &&
+   $script_output == 'hello [two words] [--] [--help] [@none]' ]]
+[[ ! -s "$SCRIPT/first.stderr" ]]
+[[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
+     "$SCRIPT/args.x") == hello ]]
+run_script -v "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/warm.stderr"
+! grep -Eq '^x2c: (translate|preprocess|compile|link) ' "$SCRIPT/warm.stderr"
+grep -q '^x2c: run ' "$SCRIPT/warm.stderr"
+printf '%s\n' 'macro Expression $greeting() => ("changed")' \
+  >"$SCRIPT/greeting.xmacro"
+[[ $(run_script "$SCRIPT/args.x") == changed ]]
+run_script -v --rebuild "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/rebuild.stderr"
+grep -q '^x2c: link ' "$SCRIPT/rebuild.stderr"
+rm -rf "$SCRIPT/cache"
+script_jobs=()
+for i in 1 2 3; do
+  run_script "$SCRIPT/args.x" >"$SCRIPT/parallel-$i.stdout" &
+  script_jobs+=($!)
+done
+for job in "${script_jobs[@]}"; do wait "$job"; done
+for i in 1 2 3; do [[ $(cat "$SCRIPT/parallel-$i.stdout") == changed ]]; done
+printf '%s\n' -v >"$SCRIPT/options.rsp"
+run_script "@$SCRIPT/options.rsp" "$SCRIPT/args.x" >/dev/null \
+  2>"$SCRIPT/response.stderr"
+grep -q '^x2c: run ' "$SCRIPT/response.stderr"
+printf '%s\n' 'int main(void) { return missing(; }' >"$SCRIPT/broken.x"
+set +e
+run_script "$SCRIPT/broken.x" >/dev/null 2>"$SCRIPT/broken.stderr"
+broken_status=$?
+run_script >/dev/null 2>"$SCRIPT/none.stderr"
+none_status=$?
+set -e
+[[ $broken_status == 1 ]] && grep -q 'broken.x:1:' "$SCRIPT/broken.stderr"
+[[ $none_status == 2 ]] &&
+  grep -q 'script requires a script file' "$SCRIPT/none.stderr"
+[[ $(X2C_CACHE_DIR="$SCRIPT/cache" "$X2C" env cache_dir) == "$SCRIPT/cache" ]]
+
+echo "CLI, dependency, build, run, script, manifest, and state probes:" \
+  "132 passed"

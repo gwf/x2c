@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 31
+- Compiler modules: 32
 - Runtime modules: 49
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -45,7 +45,8 @@ Public functions:
 `Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
 `Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
 `Build.finish`, `Build.report_success`, `Build.run_program`,
-`_build_remove_tree`, `Build.cleanup`
+`_build_remove_tree`, `Build.cleanup`, `Build.publish_script`,
+`CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -327,6 +328,14 @@ Public functions:
 `report_now_us`, `report_file_bytes`, `report_duration`, `report_size`,
 `report_configure`, `report_receipts`, `report_suspend`, `report_line`,
 `report_progress`, `report_phase`
+
+### [src/script.x](../src/script.x)
+
+Build-once execution of x2c scripts.
+
+Public functions:
+
+`script_cache_root`, `script_prepare`, `script_run`
 
 ### [src/snapshot.x](../src/snapshot.x)
 

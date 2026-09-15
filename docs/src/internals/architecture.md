@@ -443,6 +443,8 @@ The modules under `src/` divide ownership as follows:
   transition to a matched host-native compiler and runtime;
 - `src/install.x` -- package installation, removal, and listing under the
   x2c home, with fetch, digest, and extraction as host child processes;
+- `src/script.x` -- `x2c script`: the per-user executable cache, its lock,
+  and executing a current or freshly built script;
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
 - `src/compiler.x` -- shared compiler state, token navigation, scopes, symbol
   lookup, generated names, phase entry points, and phase recovery;
@@ -455,8 +457,8 @@ The modules under `src/` divide ownership as follows:
   declarations, conformance, and generated adapters;
 - `src/collect.x`, `src/snapshot.x` -- global environment discovery, unit
   interfaces, and their Lisp data writer;
-- `src/utils.x` -- repository discovery, child-process execution, output
-  capture, and exit status;
+- `src/utils.x` -- repository discovery, the driver's fatal error line, and
+  forked translation workers;
 - `src/transform.x`, `src/lambda.x` -- lowering to emitter-ready AST;
 - `src/cache.x` -- cached constants and their generated initialization;
 - `src/generate.x` -- header/source partitioning, unit initialization,

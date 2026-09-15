@@ -14,6 +14,10 @@ compiler](../internals/building.md) covers the self-host stages behind it.
 An `.x` file combines declarations and definitions. Translation produces a
 header and a C source file.
 
+A first line that begins with `#!` is ignored, so a source file can be an
+executable [script](cli.md#run-a-script). Line and column numbers are
+unchanged.
+
 `#pragma private` marks the start of implementation-only content. Declarations
 before it may be emitted to the generated header. A function definition also
 begins source-private output, except that a typedef after it still belongs

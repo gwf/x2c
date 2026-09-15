@@ -117,10 +117,10 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
   return _state_text(hash, tool);
 }
 
-static uint64_t _state_base(Build state, String tool, int *ok) {
+static uint64_t _state_base(CliRequest request, String tool, int *ok) {
   uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, %"x2c-state-v1");
-  hash = _state_text(hash, state.request.state_seed);
+  hash = _state_text(hash, request.state_seed);
   hash = _state_tool(hash, x2c_get_executable(), ok);
   hash = _state_tool(hash, tool, ok);
   return hash;
@@ -158,14 +158,22 @@ static int _state_matches(String path, uint64_t hash) {
   return saved == (unsigned long long) hash;
 }
 
-static void _state_write(String path, uint64_t hash) {
+/* Lines after the fingerprint name the files it covers, for a reader that
+   must check it without rebuilding the list. */
+static void _state_write_lines(String path, uint64_t hash, List lines) {
   String temporary = %"$path.tmp.%ld".printf((long) getpid());
   File output = fopen(temporary, "w");
   if (!output) return;
   int ok = output.printf(
     "x2c-state-v1 %016llx\n", (unsigned long long) hash) >= 0;
+  foreach (String line, lines)
+    if (output.printf("%s\n", line) < 0) ok = 0;
   if (output.close()) ok = 0;
   if (!ok || rename(temporary, path)) unlink(temporary);
+}
+
+static void _state_write(String path, uint64_t hash) {
+  _state_write_lines(path, hash, NULL);
 }
 
 /* Creates `path` and missing parents, returning zero when it cannot. */
@@ -294,7 +302,7 @@ String Build.generated_dir(Build state, String input) {
 
 static uint64_t _translation_fingerprint(
   Build state, String input, String directory, int *ok) {
-  uint64_t hash = _state_base(state, state.toolchain.cc, ok);
+  uint64_t hash = _state_base(state.request, state.toolchain.cc, ok);
   hash = _state_text(hash, %"translate");
   hash = _state_text(hash, input);
   CliRequest request = state.request;
@@ -467,7 +475,7 @@ typedef struct CcJob {
 static uint64_t _action_fingerprint(
   Build state, ToolAction action, List inputs, int *ok) {
   String tool = action.arguments ? action.arguments.car().string() : NULL;
-  uint64_t hash = _state_base(state, tool, ok);
+  uint64_t hash = _state_base(state.request, tool, ok);
   hash = _state_text(hash, action.phase);
   hash = _state_list(hash, action.arguments);
   foreach (String input, inputs) hash = _state_file(hash, input, ok);
@@ -861,4 +869,69 @@ void Build.cleanup(Build state, int success) {
     fputs("x2c: warning: cannot remove temporary build directory: ", stderr);
     fprintf(stderr, "%s\n", state.work_dir);
   }
+}
+
+/* A script's executable is reused without translating, preprocessing, or
+   linking, so its fingerprint names everything those steps would read: the
+   request's options, the environment the C compiler and linker consult, and
+   the contents of every recorded prerequisite. */
+static uint64_t _script_fingerprint(
+  CliRequest c, String cc, List prerequisites, int *ok) {
+  uint64_t hash = _state_base(c, cc, ok);
+  hash = _state_text(hash, %"script");
+  hash = _state_list(hash, c.inputs);
+  hash = _state_list(hash, c.include_dirs);
+  hash = _state_list(hash, c.package_roots());
+  hash = _state_list(hash, c.cpp_args);
+  hash = _state_list(hash, c.cc_args);
+  hash = _state_list(hash, c.ld_args);
+  hash = _state_text(
+    hash, c.source_map ? %"source-map" : %"generated-lines");
+  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT")) {
+    const char *value = getenv(name);
+    hash = _state_text(hash, value ? String.new(value) : NULL);
+  }
+  foreach (String path, prerequisites) hash = _state_file(hash, path, ok);
+  return hash;
+}
+
+/** Moves a script's built executable to `executable` and records what it was
+    built from, so `CliRequest.script_current` can reuse it. The record lists
+    the script's translation and compile prerequisites, package archives, and
+    the runtime archive.
+    Raises: `<io-fail>` when the executable cannot be moved.
+*/
+void Build.publish_script(Build b, String executable) {
+  b.output.move_to(executable);
+  String input = b.request.inputs.car();
+  Array prerequisites = %[];
+  String translation = %"${b.gen_root}/${_key(input)}/${input.stem()}.d";
+  foreach (String path, _state_dep_inputs(translation))
+    prerequisites.push(path);
+  foreach (String source, b.c_sources)
+    foreach (String path,
+             _state_dep_inputs(%"${b.dep_root}/${_key(source)}.d"))
+      prerequisites.push(path);
+  foreach (Var path, b.native_inputs) prerequisites.push(path);
+  prerequisites.push(b.toolchain.runtime_lib);
+  List paths = prerequisites.list_free();
+  int ok = 1;
+  uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, &ok);
+  if (ok) _state_write_lines(%"${b.state_root}/script", hash, paths);
+}
+
+/** Reports whether the script executable under `directory` still matches
+    everything recorded when it was built.
+*/
+int CliRequest.script_current(CliRequest c, String directory) {
+  String record = %"$directory/.x2c-state/script";
+  if (access(%"$directory/run", X_OK) || access(record, R_OK)) return 0;
+  List lines = NULL;
+  try lines = record.read_text().split_lines(0);
+  catch %(io-fail *): return 0;
+  Toolchain toolchain = toolchain_new(
+    c.cc, c.ar, c.cpp_args, c.cc_args, c.ld_args, 0, 0);
+  int ok = 1;
+  uint64_t hash = _script_fingerprint(c, toolchain.cc, lines.cdr(), &ok);
+  return ok && _state_matches(record, hash);
 }

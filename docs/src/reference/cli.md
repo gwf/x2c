@@ -1,8 +1,9 @@
 # Command-line interface
 
 After building the repository, `./x2c` links to the development compiler;
-`./bin/x2c` is the bootstrap compiler. Every invocation begins with `translate`, `build`, `run`,
-`bootstrap`, or `help`.
+`./bin/x2c` is the bootstrap compiler. Every invocation begins with a command:
+`translate`, `build`, `run`, `script`, `bootstrap`, `env`, `install`,
+`remove`, `list`, or `help`.
 
 The generated help is the short option reference:
 
@@ -11,6 +12,7 @@ The generated help is the short option reference:
 ./x2c help translate
 ./x2c build --help
 ./x2c run --help
+./x2c script --help
 ./x2c bootstrap --help
 ```
 
@@ -271,6 +273,52 @@ The program inherits standard input, output, and error, so interactive prompts
 and terminal applications work as they do when launched directly. Shell pipes
 and redirections also apply to the program; its output is not held until exit.
 
+## Run a script
+
+`script` runs one `.x` file and builds it only when needed:
+
+```sh
+./x2c script tools/report.x -- first --second
+```
+
+The first run builds an executable into the per-user cache. Later runs
+start that executable directly, in a few milliseconds, until one of these
+changes: the script, a file it includes or imports, a header its generated C
+includes, a package archive it links, the compiler, the runtime archive, the
+C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
+`LIBRARY_PATH`, and `SDKROOT` environment variables. A change that adds a
+new file cannot be seen that way: a header that now shadows an included one,
+a `__has_include` whose answer changed, or a `-l` library that now resolves
+to a different file. Run with `--rebuild` after such a change.
+
+Options come before the script file, and every word after it is passed to
+the program unchanged, including `--` and words that begin with `-` or `@`.
+A response file named before the script supplies options. `script` accepts
+the translation, C compiler, and linker options of `run`, plus `-v`, `-###`,
+`--plain`, `--color`, `--debug`, `-j`, `--source-map`, and `--rebuild`. It
+does not read a project manifest.
+
+A successful build prints nothing, so the program's output is all that
+appears; build diagnostics still print, and a failed build exits with its
+status. `-v` shows the build actions and the final run action. The program
+replaces the `x2c` process, so it receives signals and terminal input
+directly and its exit status is the command's. Its `argv[0]` is the script's
+absolute path.
+
+A script file can start with a shebang line and run directly:
+
+```sh
+#!/usr/bin/env -S x2c script
+```
+
+`env -S` splits the line into words. Where `x2c` has a fixed location, the
+interpreter path works without it: `#!/usr/local/bin/x2c script`.
+
+Each script builds under `scripts/` in the cache root: `X2C_CACHE_DIR` when
+set, otherwise `$XDG_CACHE_HOME/x2c`, otherwise `~/.cache/x2c`.
+`x2c env cache_dir` prints the root. Concurrent runs of one script share its
+build and wait for each other. Removing the cache is always safe.
+
 ## Selecting inputs
 
 Shell wildcards work because the shell expands them into explicit operands:
@@ -407,10 +455,10 @@ A project manifest can pin packages instead of installing them by hand; see
 ## Environment
 
 `x2c env` prints the resolved home, executable, include directory, runtime
-archive, prelude interface, package roots, C compiler, and archiver as
-`name = value` lines. The prelude is the the runtime `x2c.xi` interface interface the compiler
-replays for the runtime declarations; an empty value means it walks
-`lib/x2c.x` cold once per process.
+archive, prelude interface, package roots, C compiler, archiver, and script
+cache root as `name = value` lines. The prelude is the runtime `x2c.xi`
+interface the compiler replays for the runtime declarations; an empty value
+means it walks `lib/x2c.x` cold once per process.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
 

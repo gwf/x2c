@@ -1,8 +1,8 @@
 # x2c scripting
 
 > Status: active - approved 2026-09-15. Phases 1 (`process.x`, `path.x`,
-> `<cmd-fail>`, cb176c0) and 2 (compiler adoption) implemented; phases 3-4
-> pending.
+> `<cmd-fail>`, cb176c0), 2 (compiler adoption, 6861d32), and 3
+> (`x2c script`) implemented; phase 4 pending.
 > Phase 1 notes: a private `extern` declaration lost `extern` in generated C
 > (fixed in `src/generate.x`, fixture `private-extern-declaration`). `walk`
 > returns a `List`, not an `Iter`. `glob` uses the manifest `**` matcher
@@ -17,6 +17,13 @@
 > 3.31-3.51 s against 3.38-3.50 s before. An uncaught `<cmd-fail>` aborts
 > with the error-floor report, so Phase 4's synthesized `main` should report
 > a failed command and exit with its status.
+> Phase 3 notes: on this Mac `x2c script` on the language tour takes 0.29 s
+> cold and 14 ms warm, against 0.17 s for a warm `run --build-dir`; hashing
+> the compiler binary on every run stayed inside the 15 ms budget, so no
+> identity shortcut was added. The record is the build-state file with one
+> prerequisite path per line after the fingerprint, not a separate depfile.
+> The executable is published by rename after the build, and the record is
+> written after the rename.
 
 ## Context
 

@@ -54,5 +54,9 @@ int _build_remove_tree(String path);
 
 void Build_cleanup(Build state, int success);
 
+void Build_publish_script(Build b, String executable);
+
+int CliRequest_script_current(CliRequest c, String directory);
+
 
 #endif /* __GUARD_0x8309C62D__ */
