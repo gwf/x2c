@@ -39,7 +39,11 @@ def copy_support(destination, sources=True):
         rows.insert(0, ("src", ("*.x", "*.xmacro"), ("src",)))
     for folder, patterns, outputs in rows:
         for pattern in patterns:
-            for source in sorted((ROOT / folder).glob(pattern)):
+            matches = sorted((ROOT / folder).glob(pattern))
+            if not matches:
+                raise FileNotFoundError(
+                    f"no {pattern} under {folder}; run 'make build' first")
+            for source in matches:
                 for output in outputs:
                     target = destination / output / source.name
                     target.parent.mkdir(parents=True, exist_ok=True)
