@@ -1118,7 +1118,7 @@ CliRequest cli_parse(int argc, char **argv) {
 }
 
 /** Returns the version line `--version` prints, without a newline. */
-String cli_version(void) => "x2c 0.12.1";
+String cli_version(void) => "x2c 0.13.0";
 
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;
