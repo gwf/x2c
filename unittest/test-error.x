@@ -7,6 +7,14 @@ $(import "../lib/error-macros.xmacro")
 static const SymbolSet nonreturning_error_causes =
   $error.nonreturning.causes();
 
+/* A plain C string literal is an immutable raise detail. */
+static void error_plain_literal_detail(void) {
+  String detail = NULL;
+  try raise %(bad-arg (why ${"plain"}));
+  catch %(bad-arg (why ?why)): detail = why;
+  EXPECT_STR_EQ(detail, "plain");
+}
+
 static void error_initialize_is_idempotent(void) {
   Error.initialize();
   EXPECT_TRUE(Error.ready());
@@ -394,6 +402,7 @@ $(import "test-macros.xmacro")
 
 void error_suite(void) {
   $test.run(error_initialize_is_idempotent);
+  $test.run(error_plain_literal_detail);
   $test.run(error_depth_starts_at_zero);
   $test.run(error_default_policies_match_contract);
   $test.run(error_policy_rejects_unknown_disposition);

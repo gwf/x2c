@@ -101,6 +101,9 @@ static void string_literal_receives_methods(void) {
   EXPECT_TRUE("abc".upper() == "ABC");
   Var count = 42L;
   EXPECT_STR_EQ("<%ld>".printf(count), "<42>");
+  int bytes = 0;
+  foreach (char ch, "Az") bytes += ch;
+  EXPECT_INT_EQ(bytes, 'A' + 'z');
 }
 
 static void string_add_and_len(void) {

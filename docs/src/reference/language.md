@@ -1552,7 +1552,10 @@ kinds; nested `List` data is written `%(...)`.
 `[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
 when its destination is a `Map`, an alias of `Map`, or a type that converts
 from `Map`, and likewise for `Array`; for any other destination, including
-`Var`, it is the native zero initializer.
+`Var`, it is the native zero initializer. The same holds in a `?:` arm, where a
+brace that remains an initializer becomes a compound literal of the
+destination: `Map m = ready ? {} : NULL;` builds a Map, and
+`Var v = ready ? {} : NULL;` is Null either way.
 
 The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
 bare forms differ only in evaluating elements, values, and non-identifier
@@ -1698,7 +1701,8 @@ typing and converts to `String` when its context requires it. A context whose
 type is a `class` or `typedef` alias reaching `String`, such as
 `class Path String;`, requires the same conversion. A literal that receives a
 method with no `char *` definition converts to `String` first, so
-`"hello".len()` is `5`. This adjacency rule does not combine percent strings or
+`"hello".len()` is `5`. `foreach` iterates such a literal as that `String`,
+and a raise detail accepts it as an immutable `String`. This adjacency rule does not combine percent strings or
 change quoted collection syntax.
 
 Immutable literal construction is cached for the process lifetime. This

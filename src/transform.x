@@ -1469,6 +1469,9 @@ static List _raise(
   Array values = [], int changed = 0, index = 0;
   foreach (List value, arguments) {
     Type invalid = NULL;
+    if (index & 1 &&
+        value.match(%(expr (* char) (literal (* char) ?))))
+      value = compiler.convert_expression(value, %("String"));
     if (index & 1)
       match (value)
         case %(expr ?value_type ?content): {

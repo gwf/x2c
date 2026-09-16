@@ -247,6 +247,11 @@ static Var _sdk_complete_iter_chain(List expression) {
   return macro_sdk_compiler.complete_iter_chain(expression);
 }
 
+static Var _sdk_string_collection(List expression) {
+  $_sdk_guard("private foreach string conversion");
+  return macro_sdk_compiler.convert_expression(expression, %("String"));
+}
+
 static Var _sdk_type_parts(List value) => value.type().declaration_parts();
 
 static Var _sdk_type_reverse_name(String base, String participant) {
@@ -937,6 +942,9 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.foreach.complete-iter-chain",
       _sdk_complete_iter_chain);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.string-collection",
+      _sdk_string_collection);
     $lisp.bind(_.macro_lisp, "x2c.type.fields", _sdk_type_fields);
     $lisp.bind(_.macro_lisp, "x2c.type.parts", _sdk_type_parts);
     $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", _sdk_type_reverse_name);
