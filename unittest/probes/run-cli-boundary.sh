@@ -1252,7 +1252,7 @@ cat >"$SCRIPT/unit.x" <<'EOF'
 String first = args ? args.car().string() : %"none";
 printf("%d:%s\n", args.len(), first);
 if (first == "fail") {
-  %(sh -c "exit 7").run();
+  %(sh -c "exit 7").job().run();
 }
 return args.len();
 EOF

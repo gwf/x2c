@@ -52,8 +52,8 @@ static String _platform(void) {
 static String _run(List arguments, const char *what) {
   String tool = arguments.car(), errors = "not found";
   try {
-    Job job = arguments.options(%{stdout: capture, stderr: capture}).start();
-    if (!job.wait()) return job.output();
+    Job job = arguments.job().options(%{stdout: capture, stderr: capture});
+    if (!job.status()) return job.output();
     errors = job.errors();
   }
   catch %(not-found *): {}

@@ -18,33 +18,36 @@ static int fail(String message) {
 if (!args) return fail(%"usage: tools/check-release.x <version> [package]");
 String version = args.car().str().remove_prefix("v");
 String package = args.cdr() ? args.cadr().str() : %"pcre2";
-String site = %"X2C_SITE".env();
+String site = Env.get("X2C_SITE");
 if (!site) site = %"https://x2c-lang.dev";
 
 String work = String.temp_dir();
 defer work.remove_tree();
 
-String published = %(curl -fsSL "$site/x2c-version.txt").output().strip("\n");
+String published =
+  %(curl -fsSL "$site/x2c-version.txt").job().output().strip("\n");
 if (published != version)
   return fail(%"the site names $published, not $version");
 
-String heading = %(curl -fsSL "$site/packages/index.txt").lines().car().str();
+String heading =
+  %(curl -fsSL "$site/packages/index.txt").job().lines().car().str();
 if (heading != %"# x2c package index for x2c $version")
   return fail(%"the site's package index is not for x2c $version");
 
 String prefix = work.join_path("x2c");
-%((curl -fsSL "$site/install.sh") (sh -s "--" --version $version))
+%(curl -fsSL "$site/install.sh").job()
+  .pipe(%(sh -s "--" --version $version))
   .options(%{env: {X2C_PREFIX: $prefix},
              stdout: ${work.join_path("install.log")}})
-  .run();
+  .check();
 
 String x2c = prefix.join_path("bin/x2c");
-String reported = %($x2c --version).output().strip("\n");
+String reported = %($x2c --version).job().output().strip("\n");
 if (reported != %"x2c $version")
   return fail(%"install.sh installed $reported, not x2c $version");
 
-%($x2c install -q $package).run();
-List listed = %($x2c list).lines();
+%($x2c install -q $package).job().run();
+List listed = %($x2c list).job().lines();
 int installed = 0;
 foreach (String row, listed)
   if (row.startswith(%"$package ") && row.endswith(" bundle")) installed = 1;

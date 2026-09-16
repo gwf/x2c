@@ -9,46 +9,60 @@ Run commands and pipelines without a shell.
 
 | Function | Summary |
 | --- | --- |
-| [`Job.check`](#Job.check) | Waits for `job` and raises when its status is not zero. |
+| [`Env.get`](#Env.get) | Returns the value of this process's environment variable `name`, or NULL when it is unset. |
+| [`Job.check`](#Job.check) | Returns `job` once its status is zero, starting it and waiting as needed. |
 | [`Job.cleanup`](#Job.cleanup) | Terminates and reaps a job that is still running. |
 | [`Job.equal`](#Job.equal) | Provides the class default for `Job.equal`. |
-| [`Job.errors`](#Job.errors) | Waits for `job` and returns its captured standard error, or NULL when errors were not captured or were empty. |
+| [`Job.errors`](#Job.errors) | Returns the captured standard error of `job`, starting it and waiting as needed, or NULL when standard error was not captured or was empty. |
 | [`Job.free`](#Job.free) | Provides the class default for `Job.free`. |
 | [`Job.hash`](#Job.hash) | Provides the class default for `Job.hash`. |
-| [`Job.kill`](#Job.kill) | Sends `signal` to every stage of `job` that has not been reaped. |
-| [`Job.output`](#Job.output) | Waits for `job` and returns its captured standard output, or NULL when output was not captured or was empty. |
+| [`Job.kill`](#Job.kill) | Sends `signal` to every stage of `job` that is still running. |
+| [`Job.lines`](#Job.lines) | Returns the captured standard output of `job` as lines without their endings. |
+| [`Job.live`](#Job.live) | Makes `job` pass standard output through instead of capturing it, the same as `options(%{stdout: inherit})`, and returns it. |
+| [`Job.new`](#Job.new) | Provides the class default for `Job.new`. |
+| [`Job.options`](#Job.options) | Sets `options` on `job` and returns it. |
+| [`Job.output`](#Job.output) | Returns the captured standard output of `job`, starting it and waiting as needed. |
+| [`Job.pipe`](#Job.pipe) | Adds `command` as the last stage of `job`, reading the output of the stage before it, and returns the job. |
 | [`Job.ready`](#Job.ready) | Reports whether every stage of `job` has exited, without blocking. |
 | [`Job.repr`](#Job.repr) | Provides the class default for `Job.repr`. |
+| [`Job.run`](#Job.run) | Passes standard output through, waits for `job`, and raises when its status is not zero: `live()` followed by `check()`. |
+| [`Job.start`](#Job.start) | Starts `job` without waiting and returns it. |
+| [`Job.status`](#Job.status) | Returns the status of `job`, starting it and waiting as needed: the exit status, or 128 plus a signal. |
 | [`Job.str`](#Job.str) | Provides the class default for `Job.str`. |
 | [`Job.var`](#Job.var) | Provides the class default for `Job.var`. |
-| [`Job.wait`](#Job.wait) | Waits for every stage of `job` and returns the pipeline status. |
 | [`Job.wait_any`](#Job.wait_any) | Removes and returns the first job in `jobs` that has finished, waiting until one does. |
 | [`Job.write_repr`](#Job.write_repr) | Provides the class default for `Job.write_repr`. |
 | [`Job.write_str`](#Job.write_str) | Provides the class default for `Job.write_str`. |
 | [`List.arguments`](#List.arguments) | Returns the program arguments that follow `argv[0]` as `String`s. |
-| [`List.lines`](#List.lines) | Runs `command` and returns its standard output as lines without their endings. |
-| [`List.options`](#List.options) | Returns a new command that runs `command` with `options`. |
-| [`List.output`](#List.output) | Runs `command` and returns its captured standard output. |
-| [`List.pipe`](#List.pipe) | Returns a pipeline that sends the output of `command` into `next`. |
-| [`List.run`](#List.run) | Runs `command` to completion with the standard streams inherited. |
-| [`List.start`](#List.start) | Starts `command` and returns its running `Job`. |
-| [`List.status`](#List.status) | Runs `command` to completion and returns its status. |
-| [`String.env`](#String.env) | Returns the value of the environment variable `name`, or NULL when it is unset. |
+| [`List.job`](#List.job) | Returns a `Job` for `command` without starting it. |
 | [`Var.job`](#Var.job) | Provides the class default for `Var.job`. |
+
+### `Env`
+
+<a id="Env.get"></a>
+#### Env.get
+
+`String Env.get(String name)`
+
+Returns the value of this process's environment variable `name`, or
+NULL when it is unset. The `env` option sets variables for a child
+instead.
+
+Source: `lib/process.x:512`
 
 ### `Job`
 
 <a id="Job.check"></a>
 #### Job.check
 
-`void Job.check(Job job)`
+`Job Job.check(Job job)`
 
-Waits for `job` and raises when its status is not zero.
+Returns `job` once its status is zero, starting it and waiting as needed.
 
-**Raises:** `<cmd-fail>` with `command` and `status` details, plus `errors`
-when standard error was captured.
+**Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
+and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:449`
+Source: `lib/process.x:409`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -57,7 +71,7 @@ Source: `lib/process.x:449`
 
 Terminates and reaps a job that is still running.
 
-Source: `lib/process.x:482`
+Source: `lib/process.x:479`
 
 <a id="Job.equal"></a>
 #### Job.equal
@@ -75,10 +89,12 @@ Source: `lib/process.x:26`
 
 `String Job.errors(Job job)`
 
-Waits for `job` and returns its captured standard error, or NULL when
-errors were not captured or were empty.
+Returns the captured standard error of `job`, starting it and waiting as
+needed, or NULL when standard error was not captured or was empty.
 
-Source: `lib/process.x:470`
+**Raises:** the start causes of `Job.start`.
+
+Source: `lib/process.x:451`
 
 <a id="Job.free"></a>
 #### Job.free
@@ -107,28 +123,103 @@ Source: `lib/process.x:26`
 
 `void Job.kill(Job job, int signal)`
 
-Sends `signal` to every stage of `job` that has not been reaped.
+Sends `signal` to every stage of `job` that is still running.
 
-Source: `lib/process.x:476`
+Source: `lib/process.x:473`
+
+<a id="Job.lines"></a>
+#### Job.lines
+
+`List Job.lines(Job job)`
+
+Returns the captured standard output of `job` as lines without their
+endings.
+
+**Raises:** the causes of `Job.check`.
+
+Source: `lib/process.x:445`
+
+<a id="Job.live"></a>
+#### Job.live
+
+`Job Job.live(Job job)`
+
+Makes `job` pass standard output through instead of capturing it, the
+same as `options(%{stdout: inherit})`, and returns it.
+
+**Raises:** `<bad-arg>` for a job that has started.
+
+Source: `lib/process.x:369`
+
+<a id="Job.new"></a>
+#### Job.new
+
+`Job Job.new(void)`
+
+Provides the class default for `Job.new`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `lib/process.x:26`
+
+<a id="Job.options"></a>
+#### Job.options
+
+`Job Job.options(Job job, Map options)`
+
+Sets `options` on `job` and returns it.
+The keys are atoms: `dir` names the working directory, `env` is a `Map`
+of variables added to the inherited environment, and `input` is a
+`String` given to the first stage's standard input. `stdout` is
+`capture`, `inherit`, or a file path and applies to the last stage;
+`stderr` is `inherit`, `capture`, `stdout` to merge, or a file path and
+applies to every stage. A key set again replaces its earlier value.
+
+```x2c
+~#include "process.x"
+~int main(void) {
+String root = %(pwd).job().options(%{dir: "/"}).output();
+~  return root == "/\n" ? 0 : 1;
+~}
+```
+
+**Raises:** `<bad-arg>` for an unknown key or a job that has started.
+
+Source: `lib/process.x:329`
 
 <a id="Job.output"></a>
 #### Job.output
 
 `String Job.output(Job job)`
 
-Waits for `job` and returns its captured standard output, or NULL when
-output was not captured or was empty.
+Returns the captured standard output of `job`, starting it and waiting
+as needed. A live job, or one whose output was empty, returns NULL.
 
-Source: `lib/process.x:462`
+**Raises:** the causes of `Job.check`.
+
+Source: `lib/process.x:439`
+
+<a id="Job.pipe"></a>
+#### Job.pipe
+
+`Job Job.pipe(Job job, List command)`
+
+Adds `command` as the last stage of `job`, reading the output of the
+stage before it, and returns the job.
+
+**Raises:** `<bad-arg>` for a job that has started.
+
+Source: `lib/process.x:375`
 
 <a id="Job.ready"></a>
 #### Job.ready
 
 `int Job.ready(Job job)`
 
-Reports whether every stage of `job` has exited, without blocking.
+Reports whether every stage of `job` has exited, without blocking. A job
+that has not started reports 0.
 
-Source: `lib/process.x:423`
+Source: `lib/process.x:459`
 
 <a id="Job.repr"></a>
 #### Job.repr
@@ -140,6 +231,45 @@ Provides the class default for `Job.repr`.
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
 Source: `lib/process.x:26`
+
+<a id="Job.run"></a>
+#### Job.run
+
+`void Job.run(Job job)`
+
+Passes standard output through, waits for `job`, and raises when its
+status is not zero: `live()` followed by `check()`.
+
+**Raises:** the causes of `Job.live` and `Job.check`.
+
+Source: `lib/process.x:431`
+
+<a id="Job.start"></a>
+#### Job.start
+
+`Job Job.start(Job job)`
+
+Starts `job` without waiting and returns it. A job that has started is
+returned unchanged.
+
+**Raises:** `<not-found>` when a program or the `dir` option does not exist,
+`<io-fail>` when a pipe, fork, output file, or other start step fails, or
+`<bad-arg>` for an empty command.
+
+Source: `lib/process.x:387`
+
+<a id="Job.status"></a>
+#### Job.status
+
+`int Job.status(Job job)`
+
+Returns the status of `job`, starting it and waiting as needed: the exit
+status, or 128 plus a signal. A status that is not zero is an ordinary
+result here.
+
+**Raises:** the start causes of `Job.start`.
+
+Source: `lib/process.x:397`
 
 <a id="Job.str"></a>
 #### Job.str
@@ -163,23 +293,14 @@ See [Classes and system macros](../../guide/system-macros.md) for the default be
 
 Source: `lib/process.x:26`
 
-<a id="Job.wait"></a>
-#### Job.wait
-
-`int Job.wait(Job job)`
-
-Waits for every stage of `job` and returns the pipeline status.
-Waiting again returns the same status.
-
-Source: `lib/process.x:438`
-
 <a id="Job.wait_any"></a>
 #### Job.wait_any
 
 `Job Job.wait_any(Array jobs)`
 
 Removes and returns the first job in `jobs` that has finished, waiting
-until one does. An empty `jobs` returns NULL.
+until one does. Every job in `jobs` must have started. An empty `jobs`
+returns NULL.
 
 Source: `lib/process.x:489`
 
@@ -214,116 +335,26 @@ Source: `lib/process.x:26`
 
 Returns the program arguments that follow `argv[0]` as `String`s.
 
-Source: `lib/process.x:406`
+Source: `lib/process.x:501`
 
-<a id="List.lines"></a>
-#### List.lines
+<a id="List.job"></a>
+#### List.job
 
-`List List.lines(List command)`
+`Job List.job(List command)`
 
-Runs `command` and returns its standard output as lines without their
-endings.
-
-**Raises:** the causes of `List.output`.
-
-Source: `lib/process.x:403`
-
-<a id="List.options"></a>
-#### List.options
-
-`List List.options(List command, Map options)`
-
-Returns a new command that runs `command` with `options`.
-The keys are atoms: `dir` names the working directory, `env` is a `Map`
-of variables added to the inherited environment, and `input` is a
-`String` fed to the first stage's standard input. `stdout` is a path or
-`capture`; `stderr` is a path, `capture`, or `stdout`. Standard output
-options apply to the last stage and `stderr` to every stage. Options
-already on `command` are kept unless `options` replaces the same key.
+Returns a `Job` for `command` without starting it.
+The job captures standard output and passes standard error through. Its
+first result starts it, waits, and records the run.
 
 ```x2c
 ~#include "process.x"
 ~int main(void) {
-String home = %(pwd).options(%{dir: "/"}).output();
-~  return home == "/\n" ? 0 : 1;
+Job job = %(printf "a\nb\n").job();
+~  return job.status() == 0 && job.lines().len() == 2 ? 0 : 1;
 ~}
 ```
 
-Source: `lib/process.x:349`
-
-<a id="List.output"></a>
-#### List.output
-
-`String List.output(List command)`
-
-Runs `command` and returns its captured standard output.
-
-**Raises:** `<cmd-fail>` when the status is not zero, or the start causes of
-`List.start`.
-
-Source: `lib/process.x:393`
-
-<a id="List.pipe"></a>
-#### List.pipe
-
-`List List.pipe(List command, List next)`
-
-Returns a pipeline that sends the output of `command` into `next`.
-Either side may already be a pipeline; the options of both sides are
-merged, with `next` replacing any key both define.
-
-Source: `lib/process.x:360`
-
-<a id="List.run"></a>
-#### List.run
-
-`void List.run(List command)`
-
-Runs `command` to completion with the standard streams inherited.
-
-**Raises:** `<cmd-fail>` with `command` and `status` details when the status
-is not zero, or the start causes of `List.start`.
-
-Source: `lib/process.x:385`
-
-<a id="List.start"></a>
-#### List.start
-
-`Job List.start(List command)`
-
-Starts `command` and returns its running `Job`.
-
-**Raises:** `<not-found>` when a program or the `dir` option does not exist,
-`<io-fail>` when a pipe, fork, output file, or other start step fails, or
-`<bad-arg>` for an empty command or an unknown option. Stages already
-started are terminated and reaped before the error transfers.
-
-Source: `lib/process.x:373`
-
-<a id="List.status"></a>
-#### List.status
-
-`int List.status(List command)`
-
-Runs `command` to completion and returns its status.
-A non-zero status is an ordinary result here.
-
-**Raises:** the start causes of `List.start`.
-
-Source: `lib/process.x:379`
-
-### `String`
-
-<a id="String.env"></a>
-#### String.env
-
-`String String.env(String name)`
-
-Returns the value of the environment variable `name`, or NULL when it is
-unset. The result is a fresh `String`; the `env` option sets variables for
-a child instead of changing this process.
-
-Source: `lib/process.x:417`
+Source: `lib/process.x:305`
 
 ### `Var`
 
@@ -342,16 +373,26 @@ Source: `lib/process.x:26`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Job`](#Job) | class | A started command or pipeline. |
+| [`Env`](#Env) | enum | The receiverless owner of `Env.get`. |
+| [`Job`](#Job) | class | A command or pipeline and the record of its one run. |
+
+<a id="Env"></a>
+### Env
+
+`typedef enum Env { ENV_NAMESPACE } Env`
+
+The receiverless owner of `Env.get`.
+
+Source: `lib/process.x:39`
 
 <a id="Job"></a>
 ### Job
 
-`class Job struct { List command; long *pids; int *statuses; int count, finished, status; File output_file, errors_file; String output_text, errors_text; } *`
+`class Job struct { List stages; struct _Launch *launch; long *pids; int *statuses; int count, started, finished, status; File output_file, errors_file; String output_text, errors_text; } *`
 
-A started command or pipeline.
-`Job.wait` reaps every stage and collects captured output. A `$auto` job
-that is still running when its block exits is terminated and reaped.
+A command or pipeline and the record of its one run.
+A `$auto` job that is still running when its block exits is terminated
+and reaped.
 
 Source: `lib/process.x:26`
 
@@ -359,13 +400,13 @@ Source: `lib/process.x:26`
 
 A command is an ordinary `List`. Each element's `str` becomes one
 argument and no shell reads the words, so `%(grep $pattern $file)` passes
-a pattern containing spaces or quotes as a single argument. A `List`
-whose first element is itself a `List` is a pipeline, one command per
-element. `List.options` puts an options `Map` in front of either shape.
+a pattern containing spaces or quotes as a single argument. `List.job`
+turns a command into a `Job`, which holds its stages and stream options
+until the first result requested starts it. That run is recorded, so a
+job runs exactly once however many results are read from it.
 
-Children inherit the standard streams unless an option routes them. A
-pipeline's status is the status of its last failing stage, or zero when
-every stage succeeds. A signalled stage reports 128 plus the signal.
+A pipeline's status is the status of its last failing stage, or zero
+when every stage succeeds. A signalled stage reports 128 plus the signal.
 
 This module also owns the calling process's own argument list and
 environment, which a script reads to decide what to run.

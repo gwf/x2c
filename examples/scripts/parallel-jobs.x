@@ -2,10 +2,11 @@
 /*  parallel-jobs.x -- run commands at most three at a time and report each */
 
 static String describe(String name, Job job) {
-  String output = job.output(), errors = job.errors();
+  int status = job.status();
+  String output = status ? NULL : job.output(), errors = job.errors();
   String out = output ? output.strip("\n") : "-";
   String err = errors ? errors.strip("\n") : "-";
-  return %"$name status ${job.wait()} out $out err $err";
+  return %"$name status $status out $out err $err";
 }
 
 List queue = %(
@@ -25,7 +26,7 @@ foreach (List command, queue) {
     Job done = Job.wait_any(running);
     results.push(describe(names[done], done));
   }
-  Job job = command.options(%{stdout: capture, stderr: capture}).start();
+  Job job = command.job().options(%{stderr: capture}).start();
   names[job] = %"job ${++started}";
   running.push(job);
   if (running.len() > peak) peak = running.len();
@@ -38,7 +39,8 @@ while (running.len()) {
 foreach (String line, results.sort()) printf("%s\n", line);
 printf("peak %d of %d\n", peak, limit);
 
-try %(sh -c "echo broken >&2; exit 4").options(%{stderr: capture}).run();
+try %(sh -c "echo broken >&2; exit 4").job().options(%{stderr: capture})
+  .run();
 catch %(cmd-fail *detail):
   printf("run raised status %ld: %s", detail.assoc(<status>).integer(),
          detail.assoc(<errors>).string());

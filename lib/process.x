@@ -4,13 +4,13 @@
 
     A command is an ordinary `List`. Each element's `str` becomes one
     argument and no shell reads the words, so `%(grep $pattern $file)` passes
-    a pattern containing spaces or quotes as a single argument. A `List`
-    whose first element is itself a `List` is a pipeline, one command per
-    element. `List.options` puts an options `Map` in front of either shape.
+    a pattern containing spaces or quotes as a single argument. `List.job`
+    turns a command into a `Job`, which holds its stages and stream options
+    until the first result requested starts it. That run is recorded, so a
+    job runs exactly once however many results are read from it.
 
-    Children inherit the standard streams unless an option routes them. A
-    pipeline's status is the status of its last failing stage, or zero when
-    every stage succeeds. A signalled stage reports 128 plus the signal.
+    A pipeline's status is the status of its last failing stage, or zero
+    when every stage succeeds. A signalled stage reports 128 plus the signal.
 
     This module also owns the calling process's own argument list and
     environment, which a script reads to decide what to run.
@@ -19,20 +19,26 @@
 #pragma once
 #include "x2c.x"
 
-/** A started command or pipeline.
-    `Job.wait` reaps every stage and collects captured output. A `$auto` job
-    that is still running when its block exits is terminated and reaped.
+/** A command or pipeline and the record of its one run.
+    A `$auto` job that is still running when its block exits is terminated
+    and reaped.
 */
 class Job struct {
-  List command;
+  List stages;
+  struct _Launch *launch;
   long *pids;
   int *statuses;
-  int count, finished, status;
+  int count, started, finished, status;
   File output_file, errors_file;
   String output_text, errors_text;
 } *;
 
 protocol Cleanup(Job);
+
+/** The receiverless owner of `Env.get`. */
+typedef enum Env {
+  ENV_NAMESPACE
+} Env;
 
 #pragma private
 
@@ -63,19 +69,6 @@ static int _decoded_status(int status) {
   return -1;
 }
 
-static Map _command_options(List command) {
-  if (!command || command.car() is not Map) return NULL;
-  return command.car();
-}
-
-static List _command_body(List command) =>
-  _command_options(command) ? command.cdr() : command;
-
-static List _command_stages(List command) {
-  List body = _command_body(command);
-  return body && body.car() is List ? body : %($body);
-}
-
 static char **_environment(Map env) {
   Map names = %{};
   foreach (Var name, env.keys()) names[name.str()] = 1;
@@ -94,41 +87,8 @@ static char **_environment(Map env) {
   return result;
 }
 
-static _Launch _launch(Map options) {
-  _Launch launch = {0};
-  if (!options) return launch;
-  foreach (Var (key, value), options) {
-    if (key is not Symbol)
-      raise %(bad-arg (operation "List.start") (why "option keys are atoms"));
-    Symbol name = key;
-    switch (name) {
-      case <dir>:
-        launch.dir = value.str();
-        break;
-      case <env>:
-        launch.environment = _environment(value);
-        break;
-      case <input>:
-        launch.input = value.str();
-        break;
-      case <stdout>:
-        if (value is Symbol && value.symbol() == <capture>)
-          launch.capture_output = 1;
-        else launch.stdout_path = value.str();
-        break;
-      case <stderr>:
-        if (value is Symbol && value.symbol() == <capture>)
-          launch.capture_errors = 1;
-        else if (value is Symbol && value.symbol() == <stdout>)
-          launch.errors_to_output = 1;
-        else launch.stderr_path = value.str();
-        break;
-      default:
-        raise %(bad-arg (operation "List.start") (option $name));
-    }
-  }
-  return launch;
-}
+static int _is(Var value, Symbol name) =>
+  value is Symbol && value.symbol() == name;
 
 static void _close_on_exec(int fd) {
   fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
@@ -137,7 +97,7 @@ static void _close_on_exec(int fd) {
 static void _pipe(int fds[2]) {
   if (pipe(fds)) {
     int error = errno;
-    raise %(io-fail (operation "List.start") (errno $error));
+    raise %(io-fail (operation "Job.start") (errno $error));
   }
   _close_on_exec(fds[0]);
   _close_on_exec(fds[1]);
@@ -147,7 +107,7 @@ static int _open_output(String path) {
   int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fd < 0) {
     int error = errno;
-    raise %(io-fail (operation "List.start") (path $path) (errno $error));
+    raise %(io-fail (operation "Job.start") (path $path) (errno $error));
   }
   _close_on_exec(fd);
   return fd;
@@ -157,7 +117,7 @@ static File _capture_file(void) {
   File file = tmpfile();
   if (!file) {
     int error = errno;
-    raise %(io-fail (operation "List.start") (errno $error));
+    raise %(io-fail (operation "Job.start") (errno $error));
   }
   _close_on_exec(file.fileno());
   return file;
@@ -169,7 +129,7 @@ static void _close(int fd) {
 
 static char **_argv(List stage) {
   if (!stage)
-    raise %(bad-arg (operation "List.start") (why "empty command"));
+    raise %(bad-arg (operation "Job.start") (why "empty command"));
   char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
   int index = 0;
   // An empty word is a NULL String, which would end the vector early.
@@ -201,16 +161,10 @@ static void _child(
   _exit(127);
 }
 
-/* Terminates the stages already started and closes capture files, so a
-   start that fails part way leaves no child or descriptor behind. */
-static void Job._abandon(Job job) {
-  job.kill(SIGTERM);
-  job.wait();
-}
-
 static void Job._spawn(
-  Job job, int index, List stage, _Launch *launch, int stdin_fd,
-  int stdout_fd, int stderr_fd) {
+  Job job, int index, List stage, int stdin_fd, int stdout_fd,
+  int stderr_fd) {
+  _Launch *launch = job.launch;
   char **argv = _argv(stage);
   int report[2];
   _pipe(report);
@@ -226,58 +180,54 @@ static void Job._spawn(
   }
   close(report[0]);
   if (pid < 0)
-    raise %(io-fail (operation "List.start") (errno $fork_error));
+    raise %(io-fail (operation "Job.start") (errno $fork_error));
   job.pids[index] = pid;
   if (count != sizeof(failure)) return;
   int error = failure[1];
   if (failure[0] == _STEP_DIR) {
     String dir = launch->dir;
     if (error == ENOENT)
-      raise %(not-found (operation "List.start") (path $dir) (errno $error));
-    raise %(io-fail (operation "List.start") (path $dir) (errno $error));
+      raise %(not-found (operation "Job.start") (path $dir) (errno $error));
+    raise %(io-fail (operation "Job.start") (path $dir) (errno $error));
   }
   String program = argv[0];
   if (error == ENOENT)
-    raise %(not-found (operation "List.start") (program $program)
+    raise %(not-found (operation "Job.start") (program $program)
             (errno $error));
-  raise %(io-fail (operation "List.start") (program $program)
+  raise %(io-fail (operation "Job.start") (program $program)
           (errno $error));
 }
 
-static Job Job.new(List command, int count) {
-  Job job = Scope.calloc(1, sizeof(struct Job));
-  job.command = command;
-  job.count = count;
-  job.pids = Scope.calloc(count, sizeof(long));
-  job.statuses = Scope.calloc(count, sizeof(int));
-  return job;
-}
-
-static Job _start(List command, int capture_output) {
-  _Launch launch = _launch(_command_options(command));
-  if (capture_output) launch.capture_output = 1;
-  List stages = _command_stages(command);
-  Job job = Job.new(_command_body(command), stages.len());
-  int input = -1, output = -1, errors = -1, started = 0;
-  defer if (!started) job._abandon();
-  if (launch.input) {
+/* The one launch of a job. The job counts as started before the first
+   fork, so a launch that fails part way records its partial run: the stages
+   already started are terminated and reaped, and capture files are closed,
+   before the error transfers. */
+static void Job._start(Job job) {
+  _Launch *launch = job.launch;
+  job.started = 1;
+  job.count = job.stages.len();
+  job.pids = Scope.calloc(job.count, sizeof(long));
+  job.statuses = Scope.calloc(job.count, sizeof(int));
+  int input = -1, output = -1, errors = -1, launched = 0;
+  defer if (!launched) job.cleanup();
+  if (launch->input) {
     File file = _capture_file();
-    file.write_all(launch.input, launch.input.len());
+    file.write_all(launch->input, launch->input.len());
     file.rewind();
     input = dup(file.fileno());
     file.close();
     _close_on_exec(input);
   }
-  if (launch.capture_output) {
+  if (launch->capture_output) {
     job.output_file = _capture_file();
     output = job.output_file.fileno();
   }
-  else if (launch.stdout_path) output = _open_output(launch.stdout_path);
-  if (launch.capture_errors) {
+  else if (launch->stdout_path) output = _open_output(launch->stdout_path);
+  if (launch->capture_errors) {
     job.errors_file = _capture_file();
     errors = job.errors_file.fileno();
   }
-  else if (launch.stderr_path) errors = _open_output(launch.stderr_path);
+  else if (launch->stderr_path) errors = _open_output(launch->stderr_path);
   fflush(NULL);
   int previous = input, index = 0, last = job.count - 1;
   {
@@ -286,21 +236,30 @@ static Job _start(List command, int capture_output) {
       if (!job.output_file) _close(output);
       if (!job.errors_file) _close(errors);
     }
-    foreach (List stage, stages) {
+    foreach (List stage, job.stages) {
       int link[2] = { -1, -1 };
       if (index < last) _pipe(link);
       {
         defer _close(link[1]);
-        job._spawn(index, stage, &launch, previous,
-                   index < last ? link[1] : output, errors);
+        job._spawn(index, stage, previous, index < last ? link[1] : output,
+                   errors);
       }
       _close(previous);
       previous = link[0];
       index++;
     }
   }
-  started = 1;
-  return job;
+  launched = 1;
+}
+
+static void Job._reap(Job job, int index, int flags) {
+  int status;
+  pid_t pid;
+  do pid = waitpid((pid_t) job.pids[index], &status, flags);
+  while (pid < 0 && errno == EINTR);
+  if (!pid) return;
+  job.statuses[index] = pid < 0 ? -1 : _decoded_status(status);
+  job.pids[index] = 0;
 }
 
 static void Job._finish(Job job) {
@@ -320,107 +279,185 @@ static void Job._finish(Job job) {
   }
 }
 
-static void Job._reap(Job job, int index, int flags) {
-  int status;
-  pid_t pid;
-  do pid = waitpid((pid_t) job.pids[index], &status, flags);
-  while (pid < 0 && errno == EINTR);
-  if (!pid) return;
-  job.statuses[index] = pid < 0 ? -1 : _decoded_status(status);
-  job.pids[index] = 0;
+static void Job.init(Job job) {
+  job.launch = Scope.calloc(1, sizeof(_Launch));
+  job.launch->capture_output = 1;
 }
 
-/** Returns a new command that runs `command` with `options`.
-    The keys are atoms: `dir` names the working directory, `env` is a `Map`
-    of variables added to the inherited environment, and `input` is a
-    `String` fed to the first stage's standard input. `stdout` is a path or
-    `capture`; `stderr` is a path, `capture`, or `stdout`. Standard output
-    options apply to the last stage and `stderr` to every stage. Options
-    already on `command` are kept unless `options` replaces the same key.
+static Job Job._unstarted(Job job, String operation) {
+  if (job.started)
+    raise %(bad-arg (operation $operation) (why "the job has started"));
+  return job;
+}
+
+/** Returns a `Job` for `command` without starting it.
+    The job captures standard output and passes standard error through. Its
+    first result starts it, waits, and records the run.
 
     ```x2c
     ~#include "process.x"
     ~int main(void) {
-    String home = %(pwd).options(%{dir: "/"}).output();
-    ~  return home == "/\n" ? 0 : 1;
+    Job job = %(printf "a\nb\n").job();
+    ~  return job.status() == 0 && job.lines().len() == 2 ? 0 : 1;
     ~}
     ```
 */
-List List.options(List command, Map options) {
-  Map existing = _command_options(command);
-  Map merged = existing ? existing.copy().merge(options) : options;
-  List body = _command_body(command);
-  return %($merged @body);
+Job List.job(List command) {
+  Job job = Job.new();
+  job.stages = %($command);
+  return job;
 }
 
-/** Returns a pipeline that sends the output of `command` into `next`.
-    Either side may already be a pipeline; the options of both sides are
-    merged, with `next` replacing any key both define.
+/** Sets `options` on `job` and returns it.
+    The keys are atoms: `dir` names the working directory, `env` is a `Map`
+    of variables added to the inherited environment, and `input` is a
+    `String` given to the first stage's standard input. `stdout` is
+    `capture`, `inherit`, or a file path and applies to the last stage;
+    `stderr` is `inherit`, `capture`, `stdout` to merge, or a file path and
+    applies to every stage. A key set again replaces its earlier value.
+
+    ```x2c
+    ~#include "process.x"
+    ~int main(void) {
+    String root = %(pwd).job().options(%{dir: "/"}).output();
+    ~  return root == "/\n" ? 0 : 1;
+    ~}
+    ```
+
+    Raises: `<bad-arg>` for an unknown key or a job that has started.
 */
-List List.pipe(List command, List next) {
-  Map options = _command_options(command), after = _command_options(next);
-  if (after) options = options ? options.copy().merge(after) : after;
-  List stages = _command_stages(command).append(_command_stages(next));
-  return options ? %($options @stages) : stages;
+Job Job.options(Job job, Map options) {
+  _Launch *launch = job._unstarted("Job.options").launch;
+  foreach (Var (key, value), options) {
+    if (key is not Symbol)
+      raise %(bad-arg (operation "Job.options")
+              (why "option keys are atoms"));
+    Symbol name = key;
+    switch (name) {
+      case <dir>:
+        launch->dir = value.str();
+        break;
+      case <env>:
+        launch->environment = _environment(value);
+        break;
+      case <input>:
+        launch->input = value.str();
+        break;
+      case <stdout>:
+        launch->capture_output = _is(value, <capture>);
+        launch->stdout_path = launch->capture_output ||
+          _is(value, <inherit>) ? NULL : value.str();
+        break;
+      case <stderr>:
+        launch->capture_errors = _is(value, <capture>);
+        launch->errors_to_output = _is(value, <stdout>);
+        launch->stderr_path =
+          launch->capture_errors || launch->errors_to_output ||
+          _is(value, <inherit>) ? NULL : value.str();
+        break;
+      default:
+        raise %(bad-arg (operation "Job.options") (option $name));
+    }
+  }
+  return job;
 }
 
-/** Starts `command` and returns its running `Job`.
+/** Makes `job` pass standard output through instead of capturing it, the
+    same as `options(%{stdout: inherit})`, and returns it.
+    Raises: `<bad-arg>` for a job that has started.
+*/
+Job Job.live(Job job) => job.options(%{stdout: inherit});
+
+/** Adds `command` as the last stage of `job`, reading the output of the
+    stage before it, and returns the job.
+    Raises: `<bad-arg>` for a job that has started.
+*/
+Job Job.pipe(Job job, List command) {
+  job._unstarted("Job.pipe");
+  job.stages = job.stages.append(%($command));
+  return job;
+}
+
+/** Starts `job` without waiting and returns it. A job that has started is
+    returned unchanged.
     Raises: `<not-found>` when a program or the `dir` option does not exist,
     `<io-fail>` when a pipe, fork, output file, or other start step fails, or
-    `<bad-arg>` for an empty command or an unknown option. Stages already
-    started are terminated and reaped before the error transfers.
+    `<bad-arg>` for an empty command.
 */
-Job List.start(List command) => _start(command, 0);
-
-/** Runs `command` to completion and returns its status.
-    A non-zero status is an ordinary result here.
-    Raises: the start causes of `List.start`.
-*/
-int List.status(List command) => _start(command, 0).wait();
-
-/** Runs `command` to completion with the standard streams inherited.
-    Raises: `<cmd-fail>` with `command` and `status` details when the status
-    is not zero, or the start causes of `List.start`.
-*/
-void List.run(List command) {
-  _start(command, 0).check();
+Job Job.start(Job job) {
+  if (!job.started) job._start();
+  return job;
 }
 
-/** Runs `command` and returns its captured standard output.
-    Raises: `<cmd-fail>` when the status is not zero, or the start causes of
-    `List.start`.
+/** Returns the status of `job`, starting it and waiting as needed: the exit
+    status, or 128 plus a signal. A status that is not zero is an ordinary
+    result here.
+    Raises: the start causes of `Job.start`.
 */
-String List.output(List command) {
-  Job job = _start(command, 1);
-  job.check();
-  return job.output_text;
+int Job.status(Job job) {
+  job.start();
+  for (int i = 0; i < job.count; i++)
+    if (job.pids[i]) job._reap(i, 0);
+  job._finish();
+  return job.status;
 }
 
-/** Runs `command` and returns its standard output as lines without their
+/** Returns `job` once its status is zero, starting it and waiting as needed.
+    Raises: `<cmd-fail>` with `command` and `status` details, plus `output`
+    and `errors` when they were captured, or the start causes of `Job.start`.
+*/
+Job Job.check(Job job) {
+  int status = job.status();
+  if (!status) return job;
+  List stages = job.stages;
+  List command = stages.cdr() ? stages : stages.car();
+  String output = job.output_text, errors = job.errors_text;
+  int captured = job.launch->capture_output;
+  int logged = job.launch->capture_errors;
+  if (captured && logged)
+    raise %(cmd-fail (command $command) (status $status) (output $output)
+            (errors $errors));
+  if (captured)
+    raise %(cmd-fail (command $command) (status $status) (output $output));
+  if (logged)
+    raise %(cmd-fail (command $command) (status $status) (errors $errors));
+  raise %(cmd-fail (command $command) (status $status));
+}
+
+/** Passes standard output through, waits for `job`, and raises when its
+    status is not zero: `live()` followed by `check()`.
+    Raises: the causes of `Job.live` and `Job.check`.
+*/
+void Job.run(Job job) {
+  job.live().check();
+}
+
+/** Returns the captured standard output of `job`, starting it and waiting
+    as needed. A live job, or one whose output was empty, returns NULL.
+    Raises: the causes of `Job.check`.
+*/
+String Job.output(Job job) => job.check().output_text;
+
+/** Returns the captured standard output of `job` as lines without their
     endings.
-    Raises: the causes of `List.output`.
+    Raises: the causes of `Job.check`.
 */
-List List.lines(List command) => command.output().split_lines(0);
+List Job.lines(Job job) => job.output().split_lines(0);
 
-/** Returns the program arguments that follow `argv[0]` as `String`s. */
-List List.arguments(int argc, char **argv) {
-  List result = NULL;
-  for (int i = argc - 1; i > 0; i--)
-    result = %(${String.new(argv[i])} @result);
-  return result;
+/** Returns the captured standard error of `job`, starting it and waiting as
+    needed, or NULL when standard error was not captured or was empty.
+    Raises: the start causes of `Job.start`.
+*/
+String Job.errors(Job job) {
+  job.status();
+  return job.errors_text;
 }
 
-/** Returns the value of the environment variable `name`, or NULL when it is
-    unset. The result is a fresh `String`; the `env` option sets variables for
-    a child instead of changing this process.
+/** Reports whether every stage of `job` has exited, without blocking. A job
+    that has not started reports 0.
 */
-String String.env(String name) {
-  const char *value = name ? getenv(name) : NULL;
-  return value ? String.new(value) : NULL;
-}
-
-/** Reports whether every stage of `job` has exited, without blocking. */
 int Job.ready(Job job) {
+  if (!job.started) return 0;
   if (job.finished) return 1;
   int running = 0;
   for (int i = 0; i < job.count; i++) {
@@ -432,47 +469,7 @@ int Job.ready(Job job) {
   return 1;
 }
 
-/** Waits for every stage of `job` and returns the pipeline status.
-    Waiting again returns the same status.
-*/
-int Job.wait(Job job) {
-  for (int i = 0; i < job.count; i++)
-    if (job.pids[i]) job._reap(i, 0);
-  job._finish();
-  return job.status;
-}
-
-/** Waits for `job` and raises when its status is not zero.
-    Raises: `<cmd-fail>` with `command` and `status` details, plus `errors`
-    when standard error was captured.
-*/
-void Job.check(Job job) {
-  int status = job.wait();
-  if (!status) return;
-  List command = job.command;
-  String errors = job.errors_text;
-  if (errors)
-    raise %(cmd-fail (command $command) (status $status) (errors $errors));
-  raise %(cmd-fail (command $command) (status $status));
-}
-
-/** Waits for `job` and returns its captured standard output, or NULL when
-    output was not captured or was empty.
-*/
-String Job.output(Job job) {
-  job.wait();
-  return job.output_text;
-}
-
-/** Waits for `job` and returns its captured standard error, or NULL when
-    errors were not captured or were empty.
-*/
-String Job.errors(Job job) {
-  job.wait();
-  return job.errors_text;
-}
-
-/** Sends `signal` to every stage of `job` that has not been reaped. */
+/** Sends `signal` to every stage of `job` that is still running. */
 void Job.kill(Job job, int signal) {
   for (int i = 0; i < job.count; i++)
     if (job.pids[i]) kill((pid_t) job.pids[i], signal);
@@ -480,11 +477,14 @@ void Job.kill(Job job, int signal) {
 
 /** Terminates and reaps a job that is still running. */
 void Job.cleanup(Job job) {
-  if (job && !job.finished) job._abandon();
+  if (!job || !job.started || job.finished) return;
+  job.kill(SIGTERM);
+  job.status();
 }
 
 /** Removes and returns the first job in `jobs` that has finished, waiting
-    until one does. An empty `jobs` returns NULL.
+    until one does. Every job in `jobs` must have started. An empty `jobs`
+    returns NULL.
 */
 Job Job.wait_any(Array jobs) {
   while (jobs.len()) {
@@ -495,4 +495,21 @@ Job Job.wait_any(Array jobs) {
     usleep(1000);
   }
   return NULL;
+}
+
+/** Returns the program arguments that follow `argv[0]` as `String`s. */
+List List.arguments(int argc, char **argv) {
+  List result = NULL;
+  for (int i = argc - 1; i > 0; i--)
+    result = %(${String.new(argv[i])} @result);
+  return result;
+}
+
+/** Returns the value of this process's environment variable `name`, or
+    NULL when it is unset. The `env` option sets variables for a child
+    instead.
+*/
+String Env.get(String name) {
+  const char *value = getenv(name);
+  return value ? String.new(value) : NULL;
 }

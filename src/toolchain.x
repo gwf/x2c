@@ -294,7 +294,7 @@ static String _start_failure(String program, List detail) {
 
 /* A tool that cannot start reports like a child that exited 127, the status
    a shell gives a missing program, so every caller keeps one failure path. */
-static Job _start_tool(List command, String program, String *failure) {
+static Job _start_tool(Job command, String program, String *failure) {
   Job job = NULL;
   try job = command.start();
   catch %(not-found *detail): *failure = _start_failure(program, detail);
@@ -303,12 +303,13 @@ static Job _start_tool(List command, String program, String *failure) {
 }
 
 static int _run_captured(List arguments, String *output, String *errors) {
-  List command = arguments.options(%{stdout: capture, stderr: capture});
+  Job command =
+    arguments.job().options(%{stdout: capture, stderr: capture});
   Job job = _start_tool(command, arguments.car(), errors);
   if (!job) return 127;
-  int status = job.wait();
-  *output = job.output();
-  *errors = job.errors();
+  int status = job.status();
+  *output = job.output_text;
+  *errors = job.errors_text;
   return status;
 }
 
@@ -365,8 +366,8 @@ ToolRun ToolAction.start(ToolAction action) {
   ToolRun execution = Scope.calloc(1, sizeof(struct ToolRun));
   execution.action = action;
   if (action.dry_run) return execution;
-  List command = action.inherit_stdio ? action.arguments :
-    action.arguments.options(%{stdout: capture, stderr: capture});
+  Job command = action.inherit_stdio ? action.arguments.job().live() :
+    action.arguments.job().options(%{stdout: capture, stderr: capture});
   execution.job = _start_tool(
     command, action.arguments.car(), &execution.start_error);
   return execution;
@@ -390,9 +391,9 @@ int ToolRun.wait(ToolRun execution) {
   ToolAction action = execution.action;
   if (action.dry_run) return 0;
   Job job = execution.job;
-  int status = job ? job.wait() : 127;
-  String output = job ? job.output() : NULL;
-  String errors = job ? job.errors() : execution.start_error;
+  int status = job ? job.status() : 127;
+  String output = job ? job.output_text : NULL;
+  String errors = job ? job.errors_text : execution.start_error;
   report_suspend();
   if (output) fputs(output, stderr);
   if (errors) fputs(errors, stderr);

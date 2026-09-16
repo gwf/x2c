@@ -74,7 +74,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:411`
+Source: `src/toolchain.x:412`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -88,7 +88,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:360`
+Source: `src/toolchain.x:361`
 
 ### `ToolRun`
 
@@ -100,7 +100,7 @@ Source: `src/toolchain.x:360`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:378`
+Source: `src/toolchain.x:379`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -115,7 +115,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:389`
+Source: `src/toolchain.x:390`
 
 ### `Toolchain`
 
@@ -178,7 +178,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:435`
+Source: `src/toolchain.x:436`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -203,7 +203,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:320`
+Source: `src/toolchain.x:321`
 
 ## Public types
 
