@@ -1517,6 +1517,47 @@ private descriptor tables and other fixed C callback positions.
 The tagged value model specified here is introduced gradually in
 [values and Var](../guide/values.md).
 
+### Array and Map literals
+
+In operand position, a bare `[` begins an `Array` literal. Its
+comma-separated elements are ordinary x2c expressions, each converted to
+`Var`, and a trailing comma is accepted:
+
+```x2c
+int n = 4;
+Array values = [1, n * 10, "text", <sym>, [n]];
+```
+
+A `{` whose first entry is a Map entry begins a `Map` literal. An entry is
+`KEY: VALUE`, or an `Entry` macro invocation. A key that is a bare identifier
+is an `Atom`, with the same spelling rules as a bare collection `Atom`. Every
+other key, and every value, is an ordinary x2c expression. Parenthesize an
+expression key that is a single identifier:
+
+```x2c
+int n = 4;
+String name = "ada";
+Map ages = {ada: 36, grace: n + 41, "text": 1, <sym>: 2, (name): 3};
+```
+
+The literal recognizes the entry by its first `:` that is outside nested
+brackets and belongs to no `?:` conditional. A brace without such an entry
+remains a C initializer. Inside an initializer, a bracketed index followed by
+`=`, `.`, or `[` remains a designator; any other bracket is an `Array`
+literal. Both literals build a fresh object at each evaluation, as `%[]` and
+`%{}` do, and a declared typed `Array` or `Map` family builds its own
+representation. Nested `[...]` and `{...}` are evaluated literals of the same
+kinds; nested `List` data is written `%(...)`.
+
+`[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
+when its destination is a `Map`, an alias of `Map`, or a type that converts
+from `Map`, and likewise for `Array`; for any other destination, including
+`Var`, it is the native zero initializer.
+
+The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
+bare forms differ only in evaluating elements, values, and non-identifier
+keys.
+
 ### Percent literals, quote, and unquote
 
 In operand position, `%` followed by a literal delimiter is the quoting sigil.
@@ -1655,8 +1696,10 @@ comments or newlines. Their separate escape boundaries are preserved:
 `"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
 typing and converts to `String` when its context requires it. A context whose
 type is a `class` or `typedef` alias reaching `String`, such as
-`class Path String;`, requires the same conversion. This adjacency rule does
-not combine percent strings or change quoted collection syntax.
+`class Path String;`, requires the same conversion. A literal that receives a
+method with no `char *` definition converts to `String` first, so
+`"hello".len()` is `5`. This adjacency rule does not combine percent strings or
+change quoted collection syntax.
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,

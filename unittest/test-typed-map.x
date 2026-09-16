@@ -542,6 +542,14 @@ static void typed_map_common_capabilities_keep_null_and_float_order(void) {
 
 /* A generated family iterates the same three ways the Var Map does, and a
    foreach over one binds the native type without crossing Var. */
+/* An empty brace initializes a typed map with a fresh table. */
+static void typed_map_empty_brace_is_fresh(void) {
+  MapIntInt counts = {};
+  EXPECT_NOT_NULL(counts);
+  counts[3] = 4;
+  EXPECT_INT_EQ(counts[3], 4);
+}
+
 static void typed_map_iterates_values_keys_and_pairs(void) {
   MapIntInt counts = MapIntInt.new();
   counts.set(1, 10);
@@ -580,6 +588,7 @@ static void typed_map_iterates_values_keys_and_pairs(void) {
 
 void typed_map_suite(void) {
   $test.run(typed_map_iterates_values_keys_and_pairs);
+  $test.run(typed_map_empty_brace_is_fresh);
   $test.run(typed_map_common_capabilities_cover_every_family);
   $test.run(typed_map_common_capabilities_keep_null_and_float_order);
   $test.run(typed_map_packs_map_literals);

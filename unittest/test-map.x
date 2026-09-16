@@ -38,6 +38,48 @@ static void map_empty_literal_identity(void) {
   EXPECT_INT_EQ(second.len(), 0);
 }
 
+typedef Map MapTestEnv;
+
+macro Entry $map_test_row(Literal $key, Expr $value) => {
+  $key: $value
+}
+
+/* A bare identifier key is an Atom and every other key and value is
+   evaluated. An empty brace is a fresh Map for a Map target and stays the
+   native zero value for a Var. */
+static void map_bare_literal_quotes_only_identifier_keys(void) {
+  $test.scoped();
+  int ada = 36;
+  Map ages = {ada: ada, grace: ada + 9};
+  EXPECT_TRUE(Var.equal(ages, %{ada: 36, grace: 45}));
+  EXPECT_INT_EQ(ages[<ada>].int(), 36);
+
+  String name = "key";
+  Map keys = {"text": 1, 7: 2, <sym>: 3, (name): 4, $map_test_row("row", 5)};
+  EXPECT_INT_EQ(keys["text"].int(), 1);
+  EXPECT_INT_EQ(keys[7].int(), 2);
+  EXPECT_INT_EQ(keys[<sym>].int(), 3);
+  EXPECT_INT_EQ(keys["key"].int(), 4);
+  EXPECT_INT_EQ(keys["row"].int(), 5);
+  int picked[] = {ada > 0 ? 1 : 2};
+  EXPECT_INT_EQ(picked[0], 1);
+
+  Map nested = {list: %(a b), rows: [1, {inner: <x>}]};
+  EXPECT_STR_EQ(nested[<rows>].str(), "[ 1, { inner: x } ]");
+
+  Map first = {}, second = {};
+  MapTestEnv env = {};
+  EXPECT_NOT_NULL(first);
+  EXPECT_NOT_NULL(env);
+  EXPECT_FALSE(first === second);
+  first[<a>] = 1;
+  EXPECT_INT_EQ(second.len(), 0);
+  Var zero = {};
+  EXPECT_TRUE(zero.u64 == 0);
+  Var boxed = {k: 1};
+  EXPECT_STR_EQ(boxed.str(), "{ k: 1 }");
+}
+
 static void map_set_get_updates(void) {
   $test.scoped();
   Map map = %{};
@@ -505,6 +547,7 @@ static void map_iterates_values_keys_and_pairs(void) {
 void map_suite(void) {
   $test.run(map_iterates_values_keys_and_pairs);
   $test.run(map_empty_literal_identity);
+  $test.run(map_bare_literal_quotes_only_identifier_keys);
   $test.run(map_set_get_updates);
   $test.run(map_void_writes_transfer_before_mutation);
   $test.run(map_delete_and_len);

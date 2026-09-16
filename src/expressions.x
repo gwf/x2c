@@ -1567,6 +1567,12 @@ static List _resolve_call(
       Type type = receiver.cadr();
       String method = name.str();
       List resolution = c.resolve_postfix_member(type, field, <.>, 1);
+      if (!resolution &&
+          receiver.list().match(%(expr (* char) (literal (* char) ?)))) {
+        receiver = c.convert_expression(receiver, %("String"));
+        type = receiver.cadr();
+        resolution = c.resolve_postfix_member(type, field, <.>, 1);
+      }
       if (!resolution)
         resolution = _resolve_delegate_method(c, type, method, origin);
       if (!resolution && _deferred_receiver(receiver)) {
@@ -2266,12 +2272,79 @@ static List _parse_comma_list(Compiler compiler) {
   return expressions.list_free();
 }
 
+static int _opens_group(Symbol type) {
+  switch (type) {
+    case <"(">: case <[>: case <"{">: case <"%(">: case <"%[">:
+    case <"%{">: case <"$(">: case <"${">: case <"@{">: case <"?(">:
+      return 1;
+  }
+  return 0;
+}
+
+static int _closes_group(Symbol type) =>
+  type == <")"> || type == <]> || type == <"}">;
+
+/* A bracketed index followed by `=`, `.`, or `[` designates an element;
+   any other bracket is an Array literal. */
+static int _bracket_designates(Compiler compiler) {
+  Token token = compiler.token;
+  int depth = 0;
+  do {
+    if (token.type == <eof>) return 1;
+    if (_opens_group(token.type)) depth++;
+    else if (_closes_group(token.type)) depth--;
+    token = compiler.skip_trivia_from(token + 1);
+  } while (depth);
+  return token.type == <=> || token.type == <.> || token.type == <[>;
+}
+
+/* An entry that begins with a Map-entry macro, or whose first bracket-level
+   `:` belongs to no conditional, makes a brace a Map literal. */
+static int _brace_starts_map(Compiler compiler) {
+  Token token = compiler.token;
+  if ((token.type == <$> && compiler.macro_starts_target_at(AST_MAP_ENTRY)) ||
+      (token.type == <ident> &&
+       compiler.keyword_alias_starts_target_at(AST_MAP_ENTRY)))
+    return 1;
+  int depth = 0, conditionals = 0;
+  while (1) {
+    Symbol type = token.type;
+    if (type == <eof> || type == <;>) return 0;
+    if (_opens_group(type)) depth++;
+    else if (_closes_group(type)) {
+      if (!depth) return 0;
+      depth--;
+    }
+    else if (!depth && type == <,>) return 0;
+    else if (!depth && type == <?>) conditionals++;
+    else if (!depth && type == <:>) {
+      if (!conditionals) return token != compiler.token;
+      conditionals--;
+    }
+    token = compiler.skip_trivia_from(token + 1);
+  }
+}
+
+/* A bracket in operand position builds an Array of evaluated elements. */
+static List _parse_bracket_array(Compiler compiler) {
+  compiler.expect(<[>);
+  Array elements = %[];
+  while (compiler.peek(0) != <]>) {
+    elements.push(compiler.parse_assignment());
+    if (!compiler.test(<,>)) break;
+  }
+  compiler.expect(<]>);
+  return %(expr ("Array") (array @{elements.list_free()}));
+}
+
 static List _parse_composite_elements(Compiler compiler) {
   Array elements = %[];
   while (compiler.peek(0) != <"}">) {
-    List element = _test_dot_init(compiler) ? _parse_designated_init(compiler)
-                 : compiler.peek(0) == <[> ? _parse_designated_init(compiler)
-                 : compiler.parse_assignment();
+    List element =
+      _test_dot_init(compiler) ||
+      (compiler.peek(0) == <[> && _bracket_designates(compiler))
+        ? _parse_designated_init(compiler)
+        : compiler.parse_assignment();
     elements.push(element);
     if (!compiler.test(<,>)) break;
   }
@@ -2280,6 +2353,11 @@ static List _parse_composite_elements(Compiler compiler) {
 
 static List _parse_composite(Compiler compiler) {
   compiler.expect(<"{">);
+  if (_brace_starts_map(compiler)) {
+    List entries = compiler.parse_map_entries();
+    compiler.expect(<"}">);
+    return %(expr ("Map") (map @entries));
+  }
   List elems = _parse_composite_elements(compiler);
   elems = %( commas @elems );
   compiler.expect(<"}">);
@@ -2391,6 +2469,7 @@ List Compiler.parse_primary(Compiler compiler) {
     }
     case <"(">:       return _parse_parens(compiler);
     case <"{">:       return _parse_composite(compiler);
+    case <[>:         return _parse_bracket_array(compiler);
     case <"%(">:      return compiler.parse_list_literal();
     case <"%<<">:     return compiler.parse_symbol_set_literal();
     case <"%[">:      return compiler.parse_array_literal();
@@ -3492,9 +3571,27 @@ static List _initializer_adapters(
   return adapted.list_free();
 }
 
+/* An empty initializer for a Map or Array, or for a type that converts from
+   one, is a fresh empty collection. A Var keeps the native zero value. */
+static List _empty_collection(Compiler c, Type target) {
+  if (c.sym.is_var_type(target)) return NULL;
+  foreach (List literal, %((expr ("Map") (map)) (expr ("Array") (array)))) {
+    Type source = literal.cadr();
+    if (List.equal(c.sym.resolve_key(target), c.sym.resolve_key(source)))
+      return c.convert_expression(literal, target);
+    List converted = _converter_call(c, literal, source, target);
+    if (converted) return converted;
+  }
+  return NULL;
+}
+
 static List _convert_composite(
   Compiler compiler, List expr, Type target, List native_target,
   List parent_condition, int *native_used) {
+  if (!expr.caddr().cadr().list().cdr()) {
+    List fresh = _empty_collection(compiler, target);
+    if (fresh) return fresh;
+  }
   if (!native_target) {
     Type pointer = cons(<*>, target);
     List zero = %(expr (int) (literal (int) "0"));

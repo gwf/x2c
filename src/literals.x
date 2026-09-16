@@ -56,6 +56,7 @@ static List _parse_variable_reference(Compiler compiler) {
 }
 
 static List _parse_typed_capture(Compiler compiler);
+static List _atom_literal(Compiler c, String text);
 
 static List _parse_literal_element(Compiler compiler) {
   switch (compiler.peek(0)) {
@@ -658,6 +659,7 @@ List Compiler.parse_array_literal(Compiler compiler) {
 }
 
 /** Parses one `Map` entry without consuming its following comma or `}`.
+    A bare identifier key is an Atom; any other key is an expression.
     A direct row returns a resolved `(map-entry KEY VALUE)` node; an
     entry-position macro may return `(seq ...)` for its caller to splice.
 */
@@ -673,7 +675,13 @@ List Compiler.parse_map_entry(Compiler compiler) {
     ? compiler.try_parse_macro_target_at(AST_MAP_ENTRY) : NULL;
   if (macro) return macro;
   Token origin = compiler.token;
-  List key = compiler.parse_assignment();
+  List key = NULL;
+  if (compiler.peek(0) == <ident> && compiler.peek(1) == <:>) {
+    List literal = _atom_literal(compiler, compiler.token.text);
+    compiler.next();
+    key = %(expr ${literal.cadr()} $literal);
+  }
+  else key = compiler.parse_assignment();
   compiler.expect(<:>);
   List value = compiler.parse_assignment();
   return compiler.resolve_map_entry(%(map-entry $key $value), origin);
@@ -1220,6 +1228,27 @@ static void _validate_match_binder_atom(Compiler compiler, Atom atom) {
     compiler.token, %( "binder-name:" ${atom.str()} ));
 }
 
+/* A bare spelling names an Atom, which is a compact Symbol when it fits. */
+static List _atom_literal(Compiler c, String text) {
+  String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
+  _validate_match_binder_atom(c, atom);
+  /* The preprocessor never sees a literal, so a macro's name here is
+     data. The author who wanted its value must unquote it. */
+  if (c.object_macros.contains(spelling)) {
+    String unquoted = "${(long) " + spelling + "}";
+    c.report_warning(
+      <literal>,
+      %"'$spelling' is a Symbol here; unquote a typed value such as "
+        + %"$unquoted to insert the macro's value",
+      c.token, NULL);
+  }
+  if (atom is <symbol>)
+    return %(literal ("Symbol") $text ${atom.symbol()});
+  Var value = c.macro_holes && atom.is_binder()
+            ? %(!quote $atom).var() : atom;
+  return %(literal ("Atom") $spelling $value);
+}
+
 /** Parses the current atomic token into a typed expression and advances once.
     Pattern and macro-hole state control binder validation and quoting, while
     shallow parsing permits provisional numeric types.
@@ -1241,28 +1270,7 @@ List Compiler.parse_atomic_literal(Compiler c) {
       break;
     }
     case <lit-char*>:  literal = %(literal (* char) $text);    break;
-    case <lit-atom>: {
-      String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
-      _validate_match_binder_atom(c, atom);
-      /* The preprocessor never sees a literal, so a macro's name here is
-         data. The author who wanted its value must unquote it. */
-      if (c.object_macros.contains(spelling)) {
-        String unquoted = "${(long) " + spelling + "}";
-        c.report_warning(
-          <literal>,
-          %"'$spelling' is a Symbol here; unquote a typed value such as "
-            + %"$unquoted to insert the macro's value",
-          c.token, NULL);
-      }
-      if (atom is <symbol>)
-        literal = %(literal ("Symbol") $text ${atom.symbol()});
-      else {
-        Var value = c.macro_holes && atom.is_binder()
-                  ? %(!quote $atom).var() : atom;
-        literal = %(literal ("Atom") $spelling $value);
-      }
-      break;
-    }
+    case <lit-atom>:   literal = _atom_literal(c, text);      break;
     case <lit-symbol>: {
       String spelling = _symbol_source_spelling(text, 1);
       Symbol symbol = _exact_symbol_literal(c, c.token, spelling);

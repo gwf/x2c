@@ -67,6 +67,30 @@ static void array_empty_literal_identity(void) {
   EXPECT_INT_EQ(second.len(), 0);
 }
 
+/* A bare bracket evaluates its elements; braces around brackets stay a native
+   initializer whose bracketed indexes still designate elements. */
+static void array_bare_literal_evaluates_elements(void) {
+  $test.scoped();
+  int n = 4;
+  String name = "ada";
+  Array values = [1, n * 10, name, <sym>, "text", [n], {k: n}];
+  EXPECT_STR_EQ(values.str(), "[ 1, 40, ada, sym, text, [ 4 ], { k: 4 } ]");
+  EXPECT_TRUE(values[2] is <string>);
+  EXPECT_TRUE(values[3] is <symbol>);
+  EXPECT_TRUE(Var.equal(%[1, 2, sym], [1, 2, <sym>]));
+
+  Array first = [], second = [];
+  EXPECT_NOT_NULL(first);
+  EXPECT_FALSE(first === second);
+  first.push(1);
+  EXPECT_INT_EQ(second.len(), 0);
+
+  Var rows[] = {[1, 2], [n]};
+  int designated[3] = {[1] = 5};
+  EXPECT_STR_EQ(rows[1].str(), "[ 4 ]");
+  EXPECT_INT_EQ(designated[1], 5);
+}
+
 static void array_push_pop(void) {
   $test.scoped();
   Array arr = %[];
@@ -580,6 +604,7 @@ static void array_sort_callback_errors_preserve_elements(void) {
 
 void array_suite(void) {
   $test.run(array_empty_literal_identity);
+  $test.run(array_bare_literal_evaluates_elements);
   $test.run(array_push_pop);
   $test.run(array_void_writes_transfer_before_mutation);
   $test.run(array_map_transfer_releases_temporary_scope);

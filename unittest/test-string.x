@@ -94,6 +94,13 @@ static void string_empty_is_native_zero(void) {
   EXPECT_TRUE(literal.repr() == %"\"\"");
 }
 
+/* A C string literal receives String methods. */
+static void string_literal_receives_methods(void) {
+  EXPECT_INT_EQ("hello".len(), 5);
+  EXPECT_TRUE("x.c".endswith(".c"));
+  EXPECT_TRUE("abc".upper() == "ABC");
+}
+
 static void string_add_and_len(void) {
   String hello = %"hello";
   String world = %"world";
@@ -537,6 +544,7 @@ void string_suite(void) {
   $test.run(string_canonical_identity);
   $test.run(string_empty_is_native_zero);
   $test.run(string_add_and_len);
+  $test.run(string_literal_receives_methods);
   $test.run(string_slice_and_contains);
   $test.run(string_slice_stack_probe_boundaries);
   $test.run(string_withindex_copies_and_leaves_input_intact);

@@ -4,8 +4,11 @@ C gives you `char *`, `struct`, and `malloc`. x2c keeps all of that and adds
 four runtime data types: `String`, `List`, `Array`, and `Map`. Much of the
 compiler and runtime is built with these four types.
 
-Three ideas run through everything below:
+Four ideas run through everything below:
 
+- **Brackets and braces evaluate.** `[a, b]` builds an `Array` and
+  `{key: value}` builds a `Map` from ordinary x2c expressions; only a bare
+  identifier key is quoted, as an `Atom`.
 - **Percent is the quoting sigil.** A following delimiter selects which
   literal grammar reads the contents: `%"..."`, `%(...)`, `%[...]`,
   `%{...}`, or `%<<...>>`.
@@ -19,6 +22,37 @@ Three ideas run through everything below:
 All four are represented by C pointers and can be boxed into `Var`, so they
 can share a heterogeneous container. See [Values and Var](values.md) for
 boxing and conversion.
+
+## Array and Map literals
+
+A bracket in operand position builds an `Array`, and a brace whose entries are
+`key: value` builds a `Map`. Elements, values, and keys are ordinary x2c
+expressions, except that a bare identifier key is an `Atom`:
+
+```x2c
+int port = 8080;
+String host = "localhost";
+
+Array ports = [80, 443, port];
+Map server = {host: host, port: port, tags: ["web", <public>]};
+Map empty = {};
+
+printf("%s %s %d\n", ports.repr(), server[<host>].repr(), empty.len());
+```
+
+```text
+[ 80, 443, 8080 ] "localhost" 0
+```
+
+A symbol value is written `<public>`, and a computed key is parenthesized, as
+in `{(host): port}`. `[]` is always a fresh `Array`. `{}` is a fresh `Map`
+when it initializes or is assigned to a `Map`; a `Var` initialized with `{}`
+is `Null`, as in C. A plain string literal is a `String` wherever one is
+expected, and it receives `String` methods directly: `"x2c".len()` is `3`.
+
+The percent forms below quote their contents instead. They suit symbolic data
+such as ASTs, patterns, and configuration trees, where the names are the
+content.
 
 ## Percent literals
 
