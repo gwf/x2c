@@ -136,7 +136,12 @@ jobs:
           find built -path 'built/bundle-*' -name '*-native.tar.gz' \
             >bundles.txt
           [ -s bundles.txt ] || { echo "no package bundles" >&2; exit 1; }
-          xargs python3 tools/gen-package-index.py --output release \
+          # The index script runs on the Linux compiler this release built.
+          mkdir -p "$RUNNER_TEMP/x2c-release"
+          tar -xzf "release/x2c-$version-linux-$(uname -m).tar.gz" \
+            -C "$RUNNER_TEMP/x2c-release"
+          x2c="$(echo "$RUNNER_TEMP"/x2c-release/*/bin/x2c)"
+          xargs "$x2c" script tools/gen-package-index.x --output release \
             --base "https://github.com/$GITHUB_REPOSITORY/releases/download/v$version" \
             --x2c-version "x2c $version" \
             --package-dir examples/packages --package-dir packages <bundles.txt

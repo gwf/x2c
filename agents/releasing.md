@@ -28,7 +28,8 @@ published, and hands him exact commands at each step.
     libtorch for. torch is also run against an installed copy with
     `packages/tools/check-bundle.sh`. raylib is not released.
   - `publish` runs only when every job above succeeded. It writes the
-    package index with `tools/gen-package-index.py`, creates the GitHub
+    package index with `tools/gen-package-index.x`, run by the Linux
+    compiler from the release tarball, creates the GitHub
     Release if absent, uploads every asset with `--clobber`, commits
     `site/public/x2c-version.txt` and `site/public/packages/index.txt` to
     `main`, and dispatches `pages.yml`. On a dry run it stops after

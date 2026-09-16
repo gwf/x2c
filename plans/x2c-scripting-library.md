@@ -1,6 +1,6 @@
 # The scripting library gap
 
-> Status: active - 2026-09-16. Phases A and B done; phases C and D remain.
+> Status: active - 2026-09-16. Phases A, B, and C done; phase D remains.
 > Second of four plans from the 2026-09-15 capabilities and market spike.
 > The scripting capability shipped 2026-09-15 and the repository still runs
 > 30,212 lines of Python, shell, and awk automation against it.
@@ -120,11 +120,11 @@ Decisions a reviewer should check:
   `src/cli.x`'s conventions, have no consumer yet; abbreviated long options
   are rejected as unknown.
 
-## Phase C - `lib/json.x` (in progress)
+## Phase C - `lib/json.x` (done)
 
 The module is built and registered as an optional module. A script includes
-it with `#include "json.x"`; `lib/scripting.x` does not. The tool conversion
-waits for `lib/args.x` and `lib/digest.x`.
+it with `#include "json.x"`; `lib/scripting.x` does not. Its consumer is
+`tools/gen-package-index.x`, recorded below.
 
 | Operation | Result |
 | --- | --- |
@@ -213,14 +213,39 @@ documents Python accepts only through its extensions (NaN, infinities, a
 number beyond `double`, an unpaired surrogate, or U+0000) are all rejected
 here, and integers beyond `unsigned long` compare as `double`s.
 
-**Consumer.** `tools/gen-package-index.py`, once `lib/args.x` and
-`lib/digest.x` land: it reads `BUNDLE.json`, hashes archives with SHA-256,
-parses arguments, and runs `tar` through `process.x`. Its only caller found
-so far is `.github/workflows/release.yml`; confirm it is off the gate path
-before converting. `tools/check-gallery-examples.py` was the first choice but
-is also edited by open draft PR #59, and it would need the Markdown fence
-reader from `tools/check-doc-examples.py` rewritten without regex.
-`tools/agent-failure.py` needs `lib/time.x`.
+**Consumer.** `tools/gen-package-index.py` became
+`tools/gen-package-index.x`. It reads each bundle's `BUNDLE.json` with
+`Json.parse`, hashes archives with `File.sha256`, parses its options with
+`List.parse_args`, and makes and reads archives with the system `tar`
+through `process.x`, which `x2c install` already uses to unpack them. It is
+not on a gate path: its one caller is the `publish` job of
+`.github/workflows/release.yml`, and no Makefile, probe, or check script
+names it. That job has no built compiler, so it now unpacks the Linux
+release tarball the `compiler` job produced and runs the script with that
+`bin/x2c`. `tools/check-gallery-examples.py` was the first choice, but open
+draft PR #59 also edits it.
+
+Both versions ran on the same inputs: the greet and yyjson bundles from
+`make bundle`, two synthetic Linux bundles (a null and a set
+`dependency_version`), `examples/packages`, `packages`, and a synthetic
+package tree with nested and hidden files, an empty directory, a symbolic
+link, an executable, `builds/` and nested `deps/` entries, a manifest
+package, and a directory without `src/<name>.x`. Exit status and stdout
+matched in every case. `index.txt` was byte-identical for bundle-only,
+default, empty, and in-place runs. With source packages it differs only in
+the source archives' `sha256` column, and cannot match: Python's `tarfile`
+stamps the gzip header with the current time, so two Python runs disagree
+with each other. Those archives were compared by member instead, and name,
+order, type, mode, size, mtime, owner, link target, and content digest all
+matched; each digest in the new index is the digest of the file beside it,
+and copied bundles are byte-identical. Missing `--base`, an unknown option,
+and a missing value exit 2 with generated usage instead of argparse's text;
+a missing bundle, a tarball without `BUNDLE.json`, malformed JSON, and a
+missing package directory exit 1 with an `x2c:` message. `--help` and `-h`
+exit 0. The publish step was also rehearsed with a `make dist` tarball
+unpacked elsewhere and run with an empty environment.
+
+`tools/agent-failure.py` still needs `lib/time.x`.
 
 ## Phase D - `lib/digest.x`
 
