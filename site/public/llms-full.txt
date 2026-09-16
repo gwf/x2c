@@ -2955,6 +2955,11 @@ parentheses around the literal. Other C pointer expressions, including
 variables, casts, and conditional expressions, retain their native comparison
 behavior. `===` and `!==` do not perform this literal conversion.
 
+For `+`, when each operand is a `String`, an alias reaching `String`, a
+`char` array, a `char *`, or a `const char *`, both convert to `String` and
+the result is the `String` that `String.add` returns, so `path + ".o"`
+concatenates.
+
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
 `Var` operand at its original C short-circuit position.
