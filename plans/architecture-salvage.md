@@ -61,7 +61,11 @@ Validation: `conditional-private-split` and the existing initializer fixtures,
 `make verify-fixtures`, and the self-translation comparison. Emission changes,
 so publication takes two gate rounds.
 
-## 2. Cleanup lowering out of `src/emit.x` (remaining)
+## 2. Cleanup lowering out of `src/emit.x` (scoped, see plan)
+
+Scoped on 2026-09-16 in `plans/emit-cleanup-lowering.md`, which holds the
+phases, the constraints, and the validation. The summary below is the
+motivation only.
 
 `emit.x` carries a cleanup stack, cleanup labels, break/continue barriers, a
 cleanup path, and volatile preservation. That is semantic lowering performed
