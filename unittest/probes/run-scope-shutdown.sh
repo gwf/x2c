@@ -9,7 +9,7 @@ mkdir -p "$BUILD"
 
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/probes/scope-shutdown.x"
-cc -g -iquote "$ROOT/include" -iquote "$ROOT/builds/0/src" \
+cc -g -iquote "$ROOT/include/x2c" -iquote "$ROOT/builds/0/src" \
   "$BUILD/scope-shutdown.c" -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
 cc -g -iquote "$ROOT/builds/0/lib" \
   "$ROOT/unittest/probes/scope-preinit.c" \

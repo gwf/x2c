@@ -795,7 +795,7 @@ for mode in cached cold live; do
   (cd "$FAKE" && ./builds/0/x2c translate "${flags[@]}" --out-dir "$output" \
     src/native-aliases.x)
   "$ROOT/builds/0/x2c" build --quiet -j1 --output "$output/run" \
-    -Xcc -iquote -Xcc "$ROOT/include" "$output/native-aliases.c"
+    -Xcc -iquote -Xcc "$ROOT/include/x2c" "$output/native-aliases.c"
   [[ $("$output/run") == $'3 5\n5 0 ello' ]] ||
     fail "generated call signatures changed under $mode collection"
 done

@@ -191,7 +191,7 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("/lib");
-  _1 = String_new("/include");
+  _1 = String_new("/include/x2c");
   _2 = String_new("/src");
   _3 = String_new("/");
   _4 = String_new("stage: collect");

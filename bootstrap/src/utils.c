@@ -66,7 +66,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/src/");
   _3 = String_new(".x");
   _4 = String_new("/packages");
-  _5 = String_new("%s/include");
+  _5 = String_new("%s/include/x2c");
   _6 = String_new("%s/src");
   _7 = String_new("%s/lib");
   _8 = String_new("%08X");

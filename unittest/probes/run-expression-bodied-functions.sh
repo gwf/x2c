@@ -66,7 +66,7 @@ for mode in snapshot cpp live; do
       >"$out/parity.ast"
     "$X2C" translate "${flags[@]+"${flags[@]}"}" \
       --out-dir "$out" "$source"
-    "$CC" -iquote "$ROOT/include" "$out/parity.c" \
+    "$CC" -iquote "$ROOT/include/x2c" "$out/parity.c" \
       -L"$ROOT/builds/0" -lx2c -lm -o "$out/parity"
     "$out/parity" >"$out/parity.stdout"
   done

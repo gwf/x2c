@@ -289,7 +289,7 @@ define RUN_X2C_BENCHMARK
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
 		unittest/benchmarks/$(1).x
-	$(CC) $(2) -iquote include \
+	$(CC) $(2) -iquote include/x2c \
 		unittest/build/benchmarks/$(1).c \
 		-L builds/0 -lx2c -lm -o unittest/build/benchmarks/$(1)
 endef
@@ -327,11 +327,11 @@ bm-logger: build					## Run focused Logger timings
 	mkdir -p unittest/build/benchmarks
 	./builds/0/x2c translate --out-dir unittest/build/benchmarks \
 		unittest/benchmarks/logger-hot-paths.x
-	$(CC) -g -iquote include \
+	$(CC) -g -iquote include/x2c \
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-debug
-	$(CC) -O2 -iquote include \
+	$(CC) -O2 -iquote include/x2c \
 		unittest/build/benchmarks/logger-hot-paths.c \
 		-L builds/0 -lx2c -lm \
 		-o unittest/build/benchmarks/logger-hot-paths-optimized

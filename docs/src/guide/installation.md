@@ -36,7 +36,7 @@ An installed prefix and a source checkout share one layout, the x2c home:
 
 ```text
 <home>/bin/x2c           the compiler
-<home>/include/          runtime sources and generated headers
+<home>/include/x2c/      runtime sources and generated headers
 <home>/lib/              the runtime archive and unit interfaces
 <home>/etc/              compile-time Lisp and macro sources
 <home>/packages/         installed packages, one directory each
@@ -160,6 +160,26 @@ after the build; `--build-dir` remains available when you want to retain them.
 See [source mapping](../reference/cli.md) for the source-location
 contract and platform debug-artifact behavior. Source mapping changes native
 `__FILE__` and `__LINE__` to refer to the original x2c source.
+
+### Compile C against the x2c runtime
+
+A C program can call x2c code through the generated header. Point `-I` at the
+include root and name the runtime header under `x2c/`, so every system header
+still resolves to the C library:
+
+```c
+#include <string.h>        /* the C library */
+#include <x2c/x2c.h>       /* the x2c runtime */
+```
+
+```sh
+cc app.c -I "$HOME/.local/x2c/include" \
+  "$HOME/.local/x2c/lib/libx2c.a" -pthread -lm -o app
+```
+
+C that `x2c translate` generated keeps its own quoted includes, so compiling
+that by hand uses `-iquote "$HOME/.local/x2c/include/x2c"` instead. `x2c build`
+passes it for you.
 
 For a [package source distribution](packages.md), unpack the source archive,
 select the installed compiler, and use a dependency cache outside its prefix:

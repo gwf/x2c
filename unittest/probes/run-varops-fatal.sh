@@ -18,7 +18,7 @@ esac
 
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/probes/varops-fatal.x"
-"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include" \
+"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
   "$BUILD/varops-fatal.c" -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
 
 check_case() {

@@ -82,7 +82,7 @@ Use `translate` when another build owns native compilation:
 ```sh
 mkdir -p /tmp/x2c-example
 ./builds/0/x2c translate --out-dir /tmp/x2c-example examples/foreach.x
-cc -iquote include /tmp/x2c-example/foreach.c \
+cc -iquote include/x2c /tmp/x2c-example/foreach.c \
   builds/0/libx2c.a -lm -o /tmp/x2c-example/foreach
 /tmp/x2c-example/foreach
 ```

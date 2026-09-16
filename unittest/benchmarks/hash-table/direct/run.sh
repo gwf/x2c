@@ -67,7 +67,7 @@ mkdir -p "$generated_dir"
   "$root/unittest/benchmarks/hash-table/x2c/flat-map.x" >/dev/null
 
 "$cc" -O2 -DNDEBUG -Wall -Wextra -Werror \
-  -iquote "$root/include" -I"$vendor_dir" -I"$generated_dir" \
+  -iquote "$root/include/x2c" -I"$vendor_dir" -I"$generated_dir" \
   -I"$root/unittest/benchmarks/hash-table/x2c" \
   "$root/unittest/benchmarks/hash-table/direct/map-comparison.c" \
   "$root/unittest/benchmarks/hash-table/x2c/khashl-map.c" \

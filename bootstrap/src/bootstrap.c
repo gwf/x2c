@@ -65,7 +65,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _12 = String_new("/lib");
   _13 = String_new("/.x2c-build/runtime");
   _14 = String_new("/.x2c-build/compiler");
-  _15 = String_new("/include");
+  _15 = String_new("/include/x2c");
   _16 = String_new("/lib/x2c");
   _17 = String_new("/toolchain");
   _18 = String_new("lib/");

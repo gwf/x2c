@@ -92,12 +92,12 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   String root = x2c_get_root(), executable = x2c_get_executable();
   String stage_dir = executable ? executable.dirname() : NULL;
   if (stage_dir && stage_dir.dirname() == %"$root/builds") {
-    *include_dir = %"$root/include";
+    *include_dir = %"$root/include/x2c";
     *runtime_lib = %"$stage_dir/libx2c.a";
     return;
   }
   if (root && root != ".") {
-    *include_dir = %"$root/include";
+    *include_dir = %"$root/include/x2c";
     String installed = %"$root/lib/libx2c.a";
     *runtime_lib = !access(installed, R_OK) ?
                        installed :
@@ -106,7 +106,7 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   }
   String bin_dir = executable ? executable.dirname() : %".";
   String prefix = bin_dir.dirname();
-  *include_dir = %"$prefix/include";
+  *include_dir = %"$prefix/include/x2c";
   *runtime_lib = %"$prefix/lib/libx2c.a";
 }
 

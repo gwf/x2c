@@ -104,7 +104,7 @@ check_example() {
       record_failure "$name did not translate"
       return 0
     fi
-    if ! "$cc" "${linker_flags[@]}" -iquote "$root/include" \
+    if ! "$cc" "${linker_flags[@]}" -iquote "$root/include/x2c" \
         "$output/${name##*/}.c" -L"$root/builds/0" -lx2c -lm -o "$program" \
         >"$case_build/cc.stdout" 2>"$case_build/cc.stderr"; then
       cat "$case_build/cc.stderr" >&2

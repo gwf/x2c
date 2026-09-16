@@ -334,7 +334,7 @@ CliRequest bootstrap_build_request(
   request.build_dir = component == <runtime> ?
     %"${payload.prefix}/.x2c-build/runtime" :
     %"${payload.prefix}/.x2c-build/compiler";
-  request.include_dirs = cons(%"${payload.prefix}/include", NULL);
+  request.include_dirs = cons(%"${payload.prefix}/include/x2c", NULL);
   request.cc_args = command.cc_args;
   request.cc = command.cc;
   request.ar = command.ar;

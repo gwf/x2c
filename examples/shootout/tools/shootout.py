@@ -254,7 +254,7 @@ def selected_benchmarks(
 def resolve_toolchain(args: argparse.Namespace) -> dict[str, Any]:
   x2c = REPO / "builds/0/x2c"
   runtime = REPO / "builds/0/libx2c.a"
-  include = REPO / "include"
+  include = REPO / "include" / "x2c"
   cc = shutil.which(args.cc)
   python = shutil.which(args.python) if args.action == "calibrate" else None
   missing = [

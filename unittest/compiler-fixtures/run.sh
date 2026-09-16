@@ -233,7 +233,7 @@ run_fixture() {
 
   program="$case_build/program"
   if ! "$cc" "${build_cflags[@]}" \
-      -iquote "$root/include" -iquote "$fixture_dir" \
+      -iquote "$root/include/x2c" -iquote "$fixture_dir" \
       "$output/$name.c" \
       -L"$root/builds/0" -lx2c -lm -o "$program" \
       >"$case_build/cc.stdout" 2>"$case_build/cc.stderr"; then

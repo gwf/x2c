@@ -49,7 +49,7 @@ grep -q 'Vec_var' "$BUILD/header-solo/header-unit.c" ||
   fail "source-declared boxing bypassed its exact converter"
 
 "$X2C" translate --out-dir "$BUILD/converter" "$SOURCE/converter-count.x"
-"$CC" -iquote "$ROOT/include" "$BUILD/converter/converter-count.c" \
+"$CC" -iquote "$ROOT/include/x2c" "$BUILD/converter/converter-count.c" \
   -L"$ROOT/builds/0" -lx2c -lm \
   -o "$BUILD/converter/converter-count"
 "$BUILD/converter/converter-count" >"$BUILD/converter/stdout"
@@ -57,7 +57,7 @@ grep -qx '1 1' "$BUILD/converter/stdout" ||
   fail "ordinary custom boxing did not call P.var exactly once"
 
 "$X2C" translate --out-dir "$BUILD/wrong-case" "$SOURCE/wrong-case.x"
-"$CC" -iquote "$ROOT/include" "$BUILD/wrong-case/wrong-case.c" \
+"$CC" -iquote "$ROOT/include/x2c" "$BUILD/wrong-case/wrong-case.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$BUILD/wrong-case/wrong-case"
 if ( "$BUILD/wrong-case/wrong-case" \
       >"$BUILD/wrong-case/stdout" 2>"$BUILD/wrong-case/stderr"
@@ -134,7 +134,7 @@ if grep -q '_x2c_proto_vec_str\\|x2c_register_descriptor' \
     "$BUILD/protocol-owner/protocol-consumer.c"; then
   fail "protocol consumer claimed owner-local runtime artifacts"
 fi
-"$CC" -iquote "$ROOT/include" -iquote "$BUILD/protocol-owner" \
+"$CC" -iquote "$ROOT/include/x2c" -iquote "$BUILD/protocol-owner" \
   "$BUILD/protocol-owner/protocol-owner.c" \
   "$BUILD/protocol-owner/protocol-consumer.c" \
   -L"$ROOT/builds/0" -lx2c -lm \
@@ -165,7 +165,7 @@ grep -q 'Feet_magnitude(value)' \
   "$BUILD/protocol-basedefault/protocol-basedefault-consumer.c" ||
   fail "base-default consumer did not resolve the dot call to the \
 generated binding"
-"$CC" -iquote "$ROOT/include" -iquote "$BUILD/protocol-basedefault" \
+"$CC" -iquote "$ROOT/include/x2c" -iquote "$BUILD/protocol-basedefault" \
   "$BUILD/protocol-basedefault/protocol-basedefault-owner.c" \
   "$BUILD/protocol-basedefault/protocol-basedefault-consumer.c" \
   -L"$ROOT/builds/0" -lx2c -lm \
@@ -236,7 +236,7 @@ for mode in snapshot live; do
   if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
   out="$BUILD/protocol-inherited/$mode"
   "$X2C" translate "${flags[@]}" --out-dir "$out" "$inherited"
-  "$CC" -iquote "$ROOT/include" \
+  "$CC" -iquote "$ROOT/include/x2c" \
     "$out/protocol-typedef-inherited-adoption.c" \
     -L"$ROOT/builds/0" -lx2c -lm -o "$out/program"
   "$out/program" >"$out/stdout"
@@ -282,7 +282,7 @@ for mode in snapshot live; do
     count=$(grep -c '^int Packet_truth(Packet a0){$' "$out/$name.c")
     [[ "$count" == 1 ]] ||
       fail "$mode $name emitted $count Packet_truth definitions"
-    "$CC" -iquote "$ROOT/include" "$out/$name.c" \
+    "$CC" -iquote "$ROOT/include/x2c" "$out/$name.c" \
       -L"$ROOT/builds/0" -lx2c -lm -o "$out/program"
     "$out/program" >"$out/stdout"
     cmp -s "$FIXTURES/$name.stdout" "$out/stdout" ||

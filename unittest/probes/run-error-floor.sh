@@ -19,7 +19,7 @@ esac
 
 "$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD" \
   "$ROOT/unittest/probes/error-fatal.x"
-"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include" \
+"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
   "$BUILD/error-fatal.c" -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
 "${CC:-cc}" "${flags[@]}" -iquote "$ROOT/builds/0/lib" \
   "$ROOT/unittest/probes/error-fatal-preinit.c" \

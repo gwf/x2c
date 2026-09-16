@@ -29,7 +29,7 @@ sanitizer_flags=(
   -fsanitize=address,undefined
   -fno-sanitize-recover=all
   -Wno-invalid-pp-token
-  -iquote "$root/include"
+  -iquote "$root/include/x2c"
   -iquote "$generated_runtime"
   -iquote "$generated_compiler"
 )

@@ -10,7 +10,7 @@ include ../etc/build-config.mk
 STAGE       = 0
 X2CPATH     = ../builds/$(STAGE)
 X2C         = $(X2CPATH)/x2c
-INCLUDE     = ../include
+INCLUDE     = ../include/x2c
 LDFLAGS    += -L$(X2CPATH) -lx2c -lm
 LDFLAGS    += $(BUILD_LDFLAGS)
 CFLAGS     += $(BUILD_CFLAGS)

@@ -122,7 +122,7 @@ static String _canonical_lib(void) {
 static String _canonical_include(void) {
   static char cache[PATH_MAX];
   if (*cache) return %"$cache";
-  return _cached_canonical(cache, %"${x2c_get_root()}/include");
+  return _cached_canonical(cache, %"${x2c_get_root()}/include/x2c");
 }
 
 static String _canonical_src(void) {
