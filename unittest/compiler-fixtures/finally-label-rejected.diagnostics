@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/finally-label-rejected.x:14:1: emit: a finally body cannot define a label
+  again:
+  ^^^^^
+  note: a finalizer runs on every path that leaves its region, so 'again' would be defined once for each
+

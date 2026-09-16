@@ -60,6 +60,37 @@ static List _region_binding(Compiler compiler, const char *role) =>
 static List _defer_cleanup(List record) =>
   %(${_region_call("x2c_cleanup_leave", _record_type, record)});
 
+/* The first label a finalizer defines, or NULL. The statements that leave a
+   region run on every path that leaves it, so a label among them would be
+   defined once per path. */
+static Var _finalizer_label(Var value, int origin, int *at) {
+  Array pending = $auto(%[$value]), origins = $auto(%[$origin]);
+  while (pending.len()) {
+    Var current = pending.take_last();
+    int here = origins.take_last().int();
+    if (current is not <list> || current.is_nil()) continue;
+    List node = current;
+    match (node) {
+      case %(function *): continue;
+      case %(expr *): continue;
+      case %(at ?(int inner) ?wrapped): {
+        pending.push(wrapped);
+        origins.push(inner);
+        continue;
+      }
+      case %(label ?name *): {
+        *at = here;
+        return name;
+      }
+    }
+    foreach (Var child, node) {
+      pending.push(child);
+      origins.push(here);
+    }
+  }
+  return NULL;
+}
+
 /* The statements that leave a `try` region, in the order the frame
    requires: a catch clause closes and clears its handler, a finalizer runs
    under the frame's run-once claim, and the frame leaves last. Claiming also
@@ -556,6 +587,18 @@ static Var _rewrite(Walk walk, Var value) {
       List frame = _region_binding(walk.compiler, "exception_frame");
       List handle = clause
         ? _region_binding(walk.compiler, "error_handler") : NULL;
+      int labelled_at = walk.origin;
+      Var labelled = _finalizer_label(finalizer, walk.origin, &labelled_at);
+      if (labelled) {
+        String name = _label_spelling(labelled);
+        int previous = walk.compiler.origin;
+        walk.compiler.origin = labelled_at;
+        walk.compiler.report_error(
+          <emit>, "a finally body cannot define a label", NULL,
+          %(${%"a finalizer runs on every path that leaves its region, so '${
+            name ? name : %"this label"}' would be defined once for each"}));
+        walk.compiler.origin = previous;
+      }
       List cleanup = _try_cleanup(
         frame, handle, _rewrite(walk, finalizer).list(), !!clause);
       List body_out = _inside(walk, cleanup, body, body);

@@ -2371,7 +2371,9 @@ when the `try` is entered.
 
 Selecting a filtered arm consumes the errors accumulated since that arm was
 registered and transfers through each intervening cleanup frame. Its
-`finally` and `defer` cleanup runs before the selected arm. The transferring
+`finally` and `defer` cleanup runs before the selected arm. A `finally` body
+may not define a label, because its statements are repeated on each path that
+leaves the region. The transferring
 registration is removed before the arm executes, so raising a replacement
 `Error` continues outward instead of re-entering the same arm. When no arm
 matches, the `Error` continues outward unchanged. Catch bindings are borrowed
