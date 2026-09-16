@@ -4,10 +4,12 @@
 
     A command is an ordinary `List`. Each element's `str` becomes one
     argument and no shell reads the words, so `%(grep $pattern $file)` passes
-    a pattern containing spaces or quotes as a single argument. `List.job`
-    turns a command into a `Job`, which holds its stages and stream options
-    until the first result requested starts it. That run is recorded, so a
-    job runs exactly once however many results are read from it.
+    a pattern containing spaces or quotes as a single argument. A `List`
+    whose first element is itself a `List` is a pipeline, one command per
+    element. `List.job` turns a command into a `Job`, which holds its stages
+    and stream options until the first result requested starts it. That run
+    is recorded, so a job runs exactly once however many results are read
+    from it.
 
     A pipeline's status is the status of its last failing stage, or zero
     when every stage succeeds. A signalled stage reports 128 plus the signal.
@@ -86,6 +88,10 @@ static char **_environment(Map env) {
   foreach (String entry, entries) result[index++] = entry;
   return result;
 }
+
+// A command whose first element is a List is a pipeline of those commands.
+static List _stages(List command) =>
+  command && command.car() is List ? command : %($command);
 
 static int _is(Var value, Symbol name) =>
   value is Symbol && value.symbol() == name;
@@ -281,7 +287,7 @@ static void Job._finish(Job job) {
 
 static Job Job.new(List command) {
   Job job = Scope.calloc(1, sizeof(struct Job));
-  job.stages = %($command);
+  job.stages = _stages(command);
   job.launch = Scope.calloc(1, sizeof(_Launch));
   job.launch->capture_output = 1;
   return job;
@@ -293,9 +299,9 @@ static Job Job._unstarted(Job job, String operation) {
   return job;
 }
 
-/** Returns a `Job` for `command` without starting it.
-    The job captures standard output and passes standard error through. Its
-    first result starts it, waits, and records the run.
+/** Returns a `Job` for `command`, a command or pipeline, without starting
+    it. The job captures standard output and passes standard error through.
+    Its first result starts it, waits, and records the run.
 
     ```x2c
     ~#include "process.x"
@@ -367,13 +373,14 @@ Job Job.options(Job job, Map options) {
 */
 Job Job.live(Job job) => job.options(%{stdout: inherit});
 
-/** Adds `command` as the last stage of `job`, reading the output of the
-    stage before it, and returns the job.
+/** Adds `command` after the last stage of `job`, reading that stage's
+    output, and returns the job. A pipeline `command` adds each of its
+    stages.
     Raises: `<bad-arg>` for a job that has started.
 */
 Job Job.pipe(Job job, List command) {
   job._unstarted("Job.pipe");
-  job.stages = job.stages.append(%($command));
+  job.stages = job.stages.append(_stages(command));
   return job;
 }
 

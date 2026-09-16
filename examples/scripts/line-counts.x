@@ -36,8 +36,8 @@ report.dirname().make_dirs();
 report.write_text(%"${String.join("\n", lines.sort().list_free())}\n");
 
 printf("%s", report.read_text());
-printf("total %s", %(cat $report).job()
-  .pipe(%(awk "{ s += \$1 } END { print s }")).output());
+printf("total %s", %((cat $report) (awk "{ s += \$1 } END { print s }"))
+  .job().output());
 printf("markdown files %ld\n",
        (long) root.walk().filter(%!(path) => path.str().endswith(".md"))
          .count());

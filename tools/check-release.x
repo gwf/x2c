@@ -35,8 +35,7 @@ if (heading != %"# x2c package index for x2c $version")
   return fail(%"the site's package index is not for x2c $version");
 
 String prefix = work.join_path("x2c");
-%(curl -fsSL "$site/install.sh").job()
-  .pipe(%(sh -s "--" --version $version))
+%((curl -fsSL "$site/install.sh") (sh -s "--" --version $version)).job()
   .options(%{env: {X2C_PREFIX: $prefix},
              stdout: ${work.join_path("install.log")}})
   .check();

@@ -157,6 +157,37 @@ static void process_pipelines_join_stages(void) {
   EXPECT_INT_EQ(caught, 1);
 }
 
+static void process_nested_pipelines_compose_with_pipe(void) {
+  $test.scoped();
+  EXPECT_STR_EQ(%((printf "b\na\nb\n") (sort) (uniq)).job().output(),
+                "a\nb\n");
+  Job nested = %((printf "c\n") (cat)).job().pipe(%(tr c d));
+  EXPECT_INT_EQ(nested.stages.len(), 3);
+  EXPECT_STR_EQ(nested.output(), "d\n");
+  Job appended = %(printf "e\n").job().pipe(%((cat) (tr e f)));
+  EXPECT_INT_EQ(appended.stages.len(), 3);
+  EXPECT_STR_EQ(appended.output(), "f\n");
+  EXPECT_INT_EQ(%((sh -c "exit 4") (cat)).job().status(), 4);
+  EXPECT_INT_EQ(%((sh -c "exit 4") (sh -c "cat; exit 5")).job().status(), 5);
+  EXPECT_INT_EQ(%((false) (true)).job().status(), 1);
+  int caught = 0;
+  try %((false) (cat)).job().check();
+  catch %(cmd-fail *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<command>).repr(), "((false) (cat))");
+  }
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_STR_EQ(%((sh -c "pwd; echo one >&2") (sh -c "cat; echo two >&2"))
+                  .job().options(%{dir: "/", input: "in\n", stderr: stdout})
+                  .output(),
+                "/\none\ntwo\n");
+  Job logged = %((sh -c "cat; echo one >&2") (sh -c "cat; echo two >&2"))
+    .job().options(%{input: "in\n", stderr: capture});
+  EXPECT_STR_EQ(logged.output(), "in\n");
+  EXPECT_TRUE(logged.errors() == "one\ntwo\n" ||
+              logged.errors() == "two\none\n");
+}
+
 static void process_pipeline_status_is_last_failure(void) {
   $test.scoped();
   EXPECT_INT_EQ(%(sh -c "exit 4").job().pipe(%(cat)).status(), 4);
@@ -332,6 +363,7 @@ void process_suite(void) {
   $test.run(process_output_and_lines_capture_stdout);
   $test.run(process_live_passes_output_through);
   $test.run(process_pipelines_join_stages);
+  $test.run(process_nested_pipelines_compose_with_pipe);
   $test.run(process_pipeline_status_is_last_failure);
   $test.run(process_options_route_streams);
   $test.run(process_options_write_files_and_merge);

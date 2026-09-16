@@ -21,7 +21,7 @@ Run commands and pipelines without a shell.
 | [`Job.live`](#Job.live) | Makes `job` pass standard output through instead of capturing it, the same as `options(%{stdout: inherit})`, and returns it. |
 | [`Job.options`](#Job.options) | Sets `options` on `job` and returns it. |
 | [`Job.output`](#Job.output) | Returns the captured standard output of `job`, starting it and waiting as needed. |
-| [`Job.pipe`](#Job.pipe) | Adds `command` as the last stage of `job`, reading the output of the stage before it, and returns the job. |
+| [`Job.pipe`](#Job.pipe) | Adds `command` after the last stage of `job`, reading that stage's output, and returns the job. |
 | [`Job.ready`](#Job.ready) | Reports whether every stage of `job` has exited, without blocking. |
 | [`Job.repr`](#Job.repr) | Provides the class default for `Job.repr`. |
 | [`Job.run`](#Job.run) | Passes standard output through, waits for `job`, and raises when its status is not zero: `live()` followed by `check()`. |
@@ -33,7 +33,7 @@ Run commands and pipelines without a shell.
 | [`Job.write_repr`](#Job.write_repr) | Provides the class default for `Job.write_repr`. |
 | [`Job.write_str`](#Job.write_str) | Provides the class default for `Job.write_str`. |
 | [`List.arguments`](#List.arguments) | Returns the program arguments that follow `argv[0]` as `String`s. |
-| [`List.job`](#List.job) | Returns a `Job` for `command` without starting it. |
+| [`List.job`](#List.job) | Returns a `Job` for `command`, a command or pipeline, without starting it. |
 | [`Var.job`](#Var.job) | Provides the class default for `Var.job`. |
 
 ### `Env`
@@ -47,7 +47,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:515`
+Source: `lib/process.x:522`
 
 ### `Job`
 
@@ -61,7 +61,7 @@ Returns `job` once its status is zero, starting it and waiting as needed.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
 and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:408`
+Source: `lib/process.x:415`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -70,7 +70,7 @@ Source: `lib/process.x:408`
 
 Terminates and reaps a job that is still running.
 
-Source: `lib/process.x:478`
+Source: `lib/process.x:485`
 
 <a id="Job.equal"></a>
 #### Job.equal
@@ -81,7 +81,7 @@ Provides the class default for `Job.equal`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.errors"></a>
 #### Job.errors
@@ -93,7 +93,7 @@ needed, or NULL when standard error was not captured or was empty.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:450`
+Source: `lib/process.x:457`
 
 <a id="Job.free"></a>
 #### Job.free
@@ -104,7 +104,7 @@ Provides the class default for `Job.free`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.hash"></a>
 #### Job.hash
@@ -115,7 +115,7 @@ Provides the class default for `Job.hash`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.kill"></a>
 #### Job.kill
@@ -124,7 +124,7 @@ Source: `lib/process.x:26`
 
 Sends `signal` to every stage of `job` that is still running.
 
-Source: `lib/process.x:472`
+Source: `lib/process.x:479`
 
 <a id="Job.lines"></a>
 #### Job.lines
@@ -136,7 +136,7 @@ endings.
 
 **Raises:** the causes of `Job.check`.
 
-Source: `lib/process.x:444`
+Source: `lib/process.x:451`
 
 <a id="Job.live"></a>
 #### Job.live
@@ -148,7 +148,7 @@ same as `options(%{stdout: inherit})`, and returns it.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:368`
+Source: `lib/process.x:374`
 
 <a id="Job.options"></a>
 #### Job.options
@@ -173,7 +173,7 @@ String root = %(pwd).job().options(%{dir: "/"}).output();
 
 **Raises:** `<bad-arg>` for an unknown key or a job that has started.
 
-Source: `lib/process.x:328`
+Source: `lib/process.x:334`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -185,19 +185,20 @@ as needed. A live job, or one whose output was empty, returns NULL.
 
 **Raises:** the causes of `Job.check`.
 
-Source: `lib/process.x:438`
+Source: `lib/process.x:445`
 
 <a id="Job.pipe"></a>
 #### Job.pipe
 
 `Job Job.pipe(Job job, List command)`
 
-Adds `command` as the last stage of `job`, reading the output of the
-stage before it, and returns the job.
+Adds `command` after the last stage of `job`, reading that stage's
+output, and returns the job. A pipeline `command` adds each of its
+stages.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:374`
+Source: `lib/process.x:381`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -207,7 +208,7 @@ Source: `lib/process.x:374`
 Reports whether every stage of `job` has exited, without blocking. A job
 that has not started reports 0.
 
-Source: `lib/process.x:458`
+Source: `lib/process.x:465`
 
 <a id="Job.repr"></a>
 #### Job.repr
@@ -218,7 +219,7 @@ Provides the class default for `Job.repr`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.run"></a>
 #### Job.run
@@ -230,7 +231,7 @@ status is not zero: `live()` followed by `check()`.
 
 **Raises:** the causes of `Job.live` and `Job.check`.
 
-Source: `lib/process.x:430`
+Source: `lib/process.x:437`
 
 <a id="Job.start"></a>
 #### Job.start
@@ -244,7 +245,7 @@ returned unchanged.
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
 `<bad-arg>` for an empty command.
 
-Source: `lib/process.x:386`
+Source: `lib/process.x:393`
 
 <a id="Job.status"></a>
 #### Job.status
@@ -257,7 +258,7 @@ result here.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:396`
+Source: `lib/process.x:403`
 
 <a id="Job.str"></a>
 #### Job.str
@@ -268,7 +269,7 @@ Provides the class default for `Job.str`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.var"></a>
 #### Job.var
@@ -279,7 +280,7 @@ Provides the class default for `Job.var`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.wait_any"></a>
 #### Job.wait_any
@@ -291,7 +292,7 @@ until one does. An empty `jobs` returns NULL.
 
 **Raises:** `<bad-arg>` when a job in `jobs` has not started.
 
-Source: `lib/process.x:488`
+Source: `lib/process.x:495`
 
 <a id="Job.write_repr"></a>
 #### Job.write_repr
@@ -302,7 +303,7 @@ Provides the class default for `Job.write_repr`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 <a id="Job.write_str"></a>
 #### Job.write_str
@@ -313,7 +314,7 @@ Provides the class default for `Job.write_str`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 ### `List`
 
@@ -324,16 +325,16 @@ Source: `lib/process.x:26`
 
 Returns the program arguments that follow `argv[0]` as `String`s.
 
-Source: `lib/process.x:504`
+Source: `lib/process.x:511`
 
 <a id="List.job"></a>
 #### List.job
 
 `Job List.job(List command)`
 
-Returns a `Job` for `command` without starting it.
-The job captures standard output and passes standard error through. Its
-first result starts it, waits, and records the run.
+Returns a `Job` for `command`, a command or pipeline, without starting
+it. The job captures standard output and passes standard error through.
+Its first result starts it, waits, and records the run.
 
 ```x2c
 ~#include "process.x"
@@ -343,7 +344,7 @@ Job job = %(printf "a\nb\n").job();
 ~}
 ```
 
-Source: `lib/process.x:308`
+Source: `lib/process.x:314`
 
 ### `Var`
 
@@ -356,7 +357,7 @@ Provides the class default for `Var.job`.
 
 See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 ## Public types
 
@@ -372,7 +373,7 @@ Source: `lib/process.x:26`
 
 The receiverless owner of `Env.get`.
 
-Source: `lib/process.x:39`
+Source: `lib/process.x:41`
 
 <a id="Job"></a>
 ### Job
@@ -383,16 +384,18 @@ A command or pipeline and the record of its one run.
 A `$auto` job that is still running when its block exits is terminated
 and reaped.
 
-Source: `lib/process.x:26`
+Source: `lib/process.x:28`
 
 ## Design notes
 
 A command is an ordinary `List`. Each element's `str` becomes one
 argument and no shell reads the words, so `%(grep $pattern $file)` passes
-a pattern containing spaces or quotes as a single argument. `List.job`
-turns a command into a `Job`, which holds its stages and stream options
-until the first result requested starts it. That run is recorded, so a
-job runs exactly once however many results are read from it.
+a pattern containing spaces or quotes as a single argument. A `List`
+whose first element is itself a `List` is a pipeline, one command per
+element. `List.job` turns a command into a `Job`, which holds its stages
+and stream options until the first result requested starts it. That run
+is recorded, so a job runs exactly once however many results are read
+from it.
 
 A pipeline's status is the status of its last failing stage, or zero
 when every stage succeeds. A signalled stage reports 128 plus the signal.
