@@ -475,7 +475,7 @@ void Compiler.tokenize(Compiler c, char *text) {
      shebang, whichever compiler reads it. */
   if (c.unit_script && c.filename &&
       (c.filename == c.unit_script.path ||
-       (String) Path.absolute(c.filename) == c.unit_script.path))
+       Path.absolute(c.filename) == c.unit_script.path))
     c.script = c.unit_script;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);

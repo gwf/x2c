@@ -91,7 +91,7 @@ static String _installed_tool(const char *name) {
 static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   String root = x2c_get_root(), executable = x2c_get_executable();
   String stage_dir = executable ? Path.dirname(executable) : NULL;
-  if (stage_dir && (String) Path.dirname(stage_dir) == %"$root/builds") {
+  if (stage_dir && Path.dirname(stage_dir) == %"$root/builds") {
     *include_dir = %"$root/include/x2c";
     *runtime_lib = %"$stage_dir/libx2c.a";
     return;

@@ -133,7 +133,7 @@ static CliRequest _configure(
       ProjectBuild plan = project_plan(request);
       for (ProjectBuild node = plan; node; node = node.next) {
         foreach (String input, node.request.inputs) {
-          if ((String) Path.absolute(input) != source) continue;
+          if (Path.absolute(input) != source) continue;
           if (selected && selected != node.request) {
             fputs("x2c editor: source belongs to multiple selected targets\n",
                   stderr);

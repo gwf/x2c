@@ -812,7 +812,7 @@ void interface_configure(String out_dir) {
   String root = x2c_get_root(), executable = x2c_get_executable();
   String stage = executable ? Path.dirname(executable) : NULL;
   interface_mirror =
-    stage && (String) Path.dirname(stage) == %"$root/builds" ? stage : root;
+    stage && Path.dirname(stage) == %"$root/builds" ? stage : root;
 }
 
 /* Candidate interface paths for one canonical source path: the output
