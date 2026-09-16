@@ -445,7 +445,7 @@ parse program arguments against a declarative spec.
 
 Public functions:
 
-`List.parse_args`, `List.usage`
+`Args.parse`, `Args.usage`, `Args.from_argv`
 
 ### [lib/array.x](../lib/array.x)
 
@@ -836,17 +836,17 @@ Public functions:
 
 ### [lib/path.x](../lib/path.x)
 
-filesystem operations on path `String`s.
+filesystem locations and the operations on them.
 
 Public functions:
 
-`String.join_path`, `String.dirname`, `String.basename`, `String.extension`,
-`String.stem`, `String.absolute_path`, `String.exists`, `String.is_dir`,
-`String.is_file`, `String.is_executable`, `String.file_size`,
-`String.modified_time`, `String.list_dir`, `String.walk`, `String.glob_match`,
-`String.glob`, `String.make_dirs`, `String.remove_file`, `String.remove_tree`,
-`String.copy_file`, `String.copy_tree`, `String.move_to`, `String.symlink_to`,
-`String.read_text`, `String.write_text`, `String.temp_dir`
+`Path.new`, `Path.join`, `Path.dirname`, `Path.basename`, `Path.extension`,
+`Path.stem`, `Path.absolute`, `Path.exists`, `Path.is_dir`, `Path.is_file`,
+`Path.is_executable`, `Path.size`, `Path.modified_time`, `Path.list_dir`,
+`Path.walk`, `Path.glob_match`, `Path.glob`, `Path.make_dirs`,
+`Path.remove_file`, `Path.remove_tree`, `Path.copy_file`, `Path.copy_tree`,
+`Path.move_to`, `Path.symlink_to`, `Path.read_text`, `Path.write_text`,
+`Path.temp_dir`
 
 ### [lib/pool.x](../lib/pool.x)
 
@@ -873,7 +873,7 @@ Public functions:
 `Job.str`, `Job.write_repr`, `Job.repr`, `List.job`, `Job.options`, `Job.live`,
 `Job.pipe`, `Job.start`, `Job.status`, `Job.check`, `Job.run`, `Job.output`,
 `Job.lines`, `Job.errors`, `Job.ready`, `Job.kill`, `Job.cleanup`,
-`Job.wait_any`, `List.arguments`, `Env.get`
+`Job.wait_any`, `Env.get`
 
 ### [lib/protocols.x](../lib/protocols.x)
 

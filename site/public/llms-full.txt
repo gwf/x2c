@@ -2469,7 +2469,7 @@ In `%(`, `%{`, and `%!` after an operand, including a closing parenthesis or
 brace, the `%` is the modulo operator, except where a statement begins:
 
 - after the parenthesized condition of `if`, `while`, `for`, or `switch`, so
-  `if (dirty) %(git stash).run();` quotes;
+  `if (dirty) %(git stash).job().run();` quotes;
 - after the `}` of a compound statement or declaration body, so a `%(...)`
   statement may follow the closing brace of a `foreach` body.
 

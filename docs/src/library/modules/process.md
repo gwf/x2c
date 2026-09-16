@@ -32,7 +32,6 @@ Run commands and pipelines without a shell.
 | [`Job.wait_any`](#Job.wait_any) | Removes and returns the first job in `jobs` that has finished, waiting until one does. |
 | [`Job.write_repr`](#Job.write_repr) | Provides the class default for `Job.write_repr`. |
 | [`Job.write_str`](#Job.write_str) | Provides the class default for `Job.write_str`. |
-| [`List.arguments`](#List.arguments) | Returns the program arguments that follow `argv[0]` as `String`s. |
 | [`List.job`](#List.job) | Returns a `Job` for `command`, a command or pipeline, without starting it. |
 | [`Var.job`](#Var.job) | Provides the class default for `Var.job`. |
 
@@ -47,7 +46,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:522`
+Source: `lib/process.x:514`
 
 ### `Job`
 
@@ -318,15 +317,6 @@ Source: `lib/process.x:28`
 
 ### `List`
 
-<a id="List.arguments"></a>
-#### List.arguments
-
-`List List.arguments(int argc, char **argv)`
-
-Returns the program arguments that follow `argv[0]` as `String`s.
-
-Source: `lib/process.x:511`
-
 <a id="List.job"></a>
 #### List.job
 
@@ -400,8 +390,8 @@ from it.
 A pipeline's status is the status of its last failing stage, or zero
 when every stage succeeds. A signalled stage reports 128 plus the signal.
 
-This module also owns the calling process's own argument list and
-environment, which a script reads to decide what to run.
+This module also owns the calling process's own environment, which a
+script reads to decide what to run.
 
 ## Tests and examples
 
