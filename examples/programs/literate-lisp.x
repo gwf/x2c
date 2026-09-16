@@ -101,7 +101,7 @@ macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              
    evaluation, after all x2c compile-time macros have already expanded.
 */
 static Var Interp.eval(Interp *self, Env *env, Var form) {
-  if (form is void) $fail(<void-op>, %"eval");                                  // Macro emits runtime error creation.
+  if (form is void) $fail(<void-op>, "eval");                                  // Macro emits runtime error creation.
   if (form.is_atom()) return self.lookup(env, form);                            // Receiver-style function calls.
   if (form is not <list> || form.is_nil()) return form;                         // is inspects the Var tag.
   List expr = form;                                                             // Implicit Var -> List conversion.
@@ -209,13 +209,13 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
 static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
   if (fn is <lambda>) {                                                         // Inspect the callable tag.
     Fn closure = fn.pointer();                                                  // Unbox the closure pointer.
-    if (closure.macro) $fail(<not-call>, %"apply", <actual>, fn.kind());        // kind() supplies runtime type data.
+    if (closure.macro) $fail(<not-call>, "apply", <actual>, fn.kind());        // kind() supplies runtime type data.
     return self.invoke(env, closure, values);                                   // Receiver call passes self first.
   }
   if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));                // Structured error with interpolation.
   if (fn in self.specials) {                                                    // Map membership by callable value.
     if (self.specials[fn] != <apply>.var())                                     // Box a Symbol for Var comparison.
-      $fail(<not-call>, %"apply", <actual>, fn.kind());                         // Compile-time macro; runtime error.
+      $fail(<not-call>, "apply", <actual>, fn.kind());                         // Compile-time macro; runtime error.
     match (values) case %(?callable ?args):                                     // Destructure by pattern.
       return self.apply(env, callable, _list_argument(args, "apply"));          // C literal promotes to String.
     return _bad_form(<apply>, values);                                          // <apply> is a Symbol literal.
@@ -292,16 +292,16 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
        params = params.cdr()) {                                                 // Advance with an x2c List method.
     Var (name, rest) = params;                                                  // Extract and convert by position.
     if (name.is_atom() && name.str() == ".") {                                  // Canonical String identity test.
-      if (!params.cdr()) $fail(<bad-sig>, %"apply", <value>, closure.body);     // Error detail needs an x2c String.
+      if (!params.cdr()) $fail(<bad-sig>, "apply", <value>, closure.body);     // Error detail needs an x2c String.
       bindings[rest] = values;                                                  // List boxes as the Map value.
       values = NULL;
       break;
     }
-    if (!values) $fail(<bad-arity>, %"apply", <value>, closure.body);           // Macro builds the runtime error.
+    if (!values) $fail(<bad-arity>, "apply", <value>, closure.body);           // Macro builds the runtime error.
     bindings[name] = values.car();                                              // Receiver-style List access.
     values = values.cdr();                                                      // Advance the argument tail too.
   }
-  if (values) $fail(<bad-arity>, %"apply", <value>, closure.body);              // Macro constructs the error record.
+  if (values) $fail(<bad-arity>, "apply", <value>, closure.body);              // Macro constructs the error record.
   Env captured = { closure.captures, env };                                     // C aggregate with x2c Map handle.
   Env local = { bindings, &captured };                                          // & takes a stack frame's C address.
   return self.eval(&local, closure.body);                                       // C stack address passed to eval.
@@ -333,11 +333,11 @@ static Var Interp.quasiquote(Interp *self, Env *env, Var form, int depth) {
   if (head == quote)                                                            // Var equality with a Symbol value.
     return cons(head, self.quasiquote(env, expr.cdr(), depth + 1));             // Construct List; result boxes as Var.
   if (head == unquote || head == splice) {                                      // Compare Symbols held in Vars.
-    if (expr.len() != 2) $fail(<bad-arity>, %"quasiquote", <value>, form);      // Receiver-style length query.
+    if (expr.len() != 2) $fail(<bad-arity>, "quasiquote", <value>, form);      // Receiver-style length query.
     if (depth) return cons(head, self.quasiquote(env, expr.cdr(), depth - 1));  // C condition with List construction.
     Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
     if (head == splice)                                                         // Var equality against a Symbol.
-      $fail(<bad-types>, %"quasiquote-splice", <actual>, form.kind());          // Runtime kind in macro-built error.
+      $fail(<bad-types>, "quasiquote-splice", <actual>, form.kind());          // Runtime kind in macro-built error.
     return value;
   }
   List first = self.quoted_item(env, head, depth);                              // Receiver call returns a typed List.
@@ -349,7 +349,7 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
   match (form) case %(unquote-splicing ?argument) if (!depth): {                // Pattern plus guard.
     Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
     if (value is not <list>)                                                    // Runtime type inspection.
-      $fail(<bad-types>, %"quasiquote-splice", <actual>, value.kind());         // Macro emits runtime error creation.
+      $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());         // Macro emits runtime error creation.
     return value;                                                               // Implicit Var -> List conversion.
   }
   return %(${self.quasiquote(env, form, depth)});                               // ${...} inserts a whole expression.
@@ -371,27 +371,27 @@ static List Interp.quoted_item(Interp *self, Env *env, Var form, int depth) {
 
 static List _list_argument(Var value, String op) {
   if (value is not <list>)                                                      // Runtime type inspection.
-    $fail(<bad-types>, op, <actual>, value.kind(), <want>, %"List");            // op boxes as Var in the error List.
+    $fail(<bad-types>, op, <actual>, value.kind(), <want>, "List");            // op boxes as Var in the error List.
   return value;                                                                 // Implicit Var -> List conversion.
 }
 
 static String _string_argument(Var value, String op) {
   if (value is not <string>)                                                    // Runtime type inspection.
-    $fail(<bad-types>, op, <actual>, value.kind(), <want>, %"String");          // op boxes as Var in the error List.
+    $fail(<bad-types>, op, <actual>, value.kind(), <want>, "String");          // op boxes as Var in the error List.
   return value;                                                                 // Implicit Var -> String conversion.
 }
 
 static Var Interp.bind(Interp *self, Var name, Var sig) {
   _string_argument(name, "bind");                                               // C literal promotes to String.
-  if (sig is not <list>) $fail(<bad-sig>, %"bind", <value>, sig);               // Type check and error macro.
+  if (sig is not <list>) $fail(<bad-sig>, "bind", <value>, sig);               // Type check and error macro.
   if (name in self.natives) return self.natives[name];                          // Hash lookup; no linear name scan.
   raise %(no-symbol (name $name) (sig $sig));                                   // Runtime values in an error List.
 }
 
 static void _bad_clause(Var clause) {
   if (clause is not <list>)                                                     // Runtime type inspection.
-    $fail(<bad-types>, %"cond", <value>, clause, <want>, %"List");              // Macro emits runtime error creation.
-  $fail(<bad-arity>, %"cond-clause", <expected>, 2, <actual>,                   // Symbol keys; runtime boxed values.
+    $fail(<bad-types>, "cond", <value>, clause, <want>, "List");              // Macro emits runtime error creation.
+  $fail(<bad-arity>, "cond-clause", <expected>, 2, <actual>,                   // Symbol keys; runtime boxed values.
         clause.list().len(), <value>, clause);                                  // Chain conversion; O(n) List length.
 }
 
@@ -400,7 +400,7 @@ static Var _bad_form(Symbol name, List args) {
     $fail(<bad-sig>, name, <value>, args);                                      // Symbol and List box as error values.
   int n = args.len();                                                           // Receiver-style length query.
   if (name == <def>)                                                            // Constant-time Symbol comparison.
-    $fail(<bad-arity>, %"def", <expected>, 2, <actual>, n, <value>, args);      // List and integers become error data.
+    $fail(<bad-arity>, "def", <expected>, 2, <actual>, n, <value>, args);      // List and integers become error data.
   int want = name == <apply> || name == <bind> ? 2 : 1;                         // C ternary with Symbol comparisons.
   $fail(<bad-arity>, name.str(), <expected>, want, <actual>, n);                // Symbol spelling via receiver syntax.
 }
@@ -552,7 +552,7 @@ static Var _eq(Var a, Var b) => _bool(a == b);                                  
 
 static Var _compare(Var a, Var b) {
   if (!_is_number(a) || !_is_number(b))                                         // C logic over Var type predicates.
-    $fail(<bad-types>, %"lisp_compare",                                         // Compile-time macro emits error code.
+    $fail(<bad-types>, "lisp_compare",                                         // Compile-time macro emits error code.
           <left-kind>, a.kind(), <right-kind>, b.kind());                       // Runtime types in the error record.
   return a.compare(b);                                                          // Var comparison via receiver syntax.
 }
@@ -835,10 +835,10 @@ static Var _import_file(Interp *self, String path) {
   if (source.read_into(content) == FILE_READ_EOF) return %();                   // C status; empty List result.
   if (content.length > INT_MAX) {                                               // Native C size limit.
     size_t size = content.length, int limit = INT_MAX;                          // Mixed types in one declaration.
-    $fail(<size-limit>, %"Lisp.eval_file", <size>, size, <limit>, limit);       // Integers box into the error List.
+    $fail(<size-limit>, "Lisp.eval_file", <size>, size, <limit>, limit);       // Integers box into the error List.
   }
   if (memchr(content.bytes, '\0', content.length))                              // C library scans the raw bytes.
-    $fail(<bad-arg>, %"Lisp.eval_file", <why>, %"embedded NUL");                // String details in generated error.
+    $fail(<bad-arg>, "Lisp.eval_file", <why>, "embedded NUL");                // String details in generated error.
   return _eval_text(self, String.new_len(content.bytes, (int) content.length)); // C bytes converted to x2c String.
 }
 

@@ -399,7 +399,7 @@ static void string_search_and_replace(void) {
 
 static void string_foreach_bytes_as_int_and_char(void) {
   int total = 0, count = 0;
-  foreach(int byte, %"Az") {
+  foreach(int byte, "Az") {
     total += byte;
     count++;
   }
@@ -407,7 +407,7 @@ static void string_foreach_bytes_as_int_and_char(void) {
   EXPECT_INT_EQ(count, 2);
 
   char first = 0, last = 0;
-  foreach(char ch, %"Az") {
+  foreach(char ch, "Az") {
     if (!first) first = ch;
     last = ch;
   }
