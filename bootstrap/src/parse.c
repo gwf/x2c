@@ -40,6 +40,8 @@ static List _append_declarator_modifiers(List declarator, List modifiers);
 
 static List _finish_declaration(Compiler compiler, Symbol tag, List base, List declarators, int preserved_self);
 
+static int _skip_empty_macro(Compiler compiler);
+
 static List _storage_class(Compiler compiler);
 
 static List _type_qualifiers(Compiler compiler);
@@ -1232,8 +1234,13 @@ static List _finish_declaration(Compiler compiler, Symbol tag, List base, List d
   List declaration = cons(Symbol_var(tag), cons(List_var(base), cons(List_var(cons(_37, List_append(declarators, NULL))), NULL)));  return tag == 8932560010 && ! preserved_self ? _lower_self_declaration(compiler, declaration) : declaration;
 }
 
+int Var_equal(Var, Var);
+static int _skip_empty_macro(Compiler compiler){
+  Var definition;  if(! compiler -> shallow || Compiler_peek(compiler, 0) != 19147688 || ! Map_try_get(compiler -> object_macros, String_var(compiler -> token -> text), & definition) || ! Var_equal(definition, Symbol_var(11371826))) return 0;  Compiler_next(compiler);  return 1;
+}
+
 static List _storage_class(Compiler compiler){
-  List storage = NULL;  int seen_threaded = 0, seen_ordinary = 0;  for(Symbol symbol = Compiler_peek(compiler, 0);  Symbol_is_storage_class(symbol);  symbol = Compiler_peek(compiler, 0)){
+  List storage = NULL;  int seen_threaded = 0, seen_ordinary = 0;  while(_skip_empty_macro(compiler));  for(Symbol symbol = Compiler_peek(compiler, 0);  Symbol_is_storage_class(symbol);  symbol = Compiler_peek(compiler, 0)){
     if(symbol == 1392787923272){
       if(seen_threaded) break;  seen_threaded = 1;
     }
@@ -1251,11 +1258,13 @@ static List _storage_class(Compiler compiler){
 int Symbol_is_type_qualifier(Symbol);
 static List _type_qualifiers(Compiler compiler){
   Array quals = Array_new();
-  Symbol symbol = Compiler_peek(compiler, 0);
-  while(Symbol_is_type_qualifier(symbol)){
-    Array_push(quals, Symbol_var(symbol));
-    Compiler_next(compiler);
-    symbol = Compiler_peek(compiler, 0);
+  while(1){
+    Symbol symbol = Compiler_peek(compiler, 0);
+    if(Symbol_is_type_qualifier(symbol)){
+      Array_push(quals, Symbol_var(symbol));
+      Compiler_next(compiler);
+    }
+    else if(! _skip_empty_macro(compiler)) break;
   }
   List result = Array_list_free(quals);
   return result;
