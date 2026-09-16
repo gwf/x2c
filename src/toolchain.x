@@ -104,7 +104,7 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
                        %"$root/bootstrap/lib/libx2c.a";
     return;
   }
-  String bin_dir = executable ? Path.dirname(executable) : %".";
+  String bin_dir = executable ? Path.dirname(executable) : ".";
   String prefix = Path.dirname(bin_dir);
   *include_dir = %"$prefix/include/x2c";
   *runtime_lib = %"$prefix/lib/libx2c.a";
@@ -140,7 +140,7 @@ static void _append_list(Array output, List values) {
 }
 
 static Array _compile_arguments(Toolchain toolchain, List gen_dirs) {
-  Array arguments = %[];
+  Array arguments = [];
   arguments.push(toolchain.cc);
   arguments.push("-fsigned-char");
   foreach (String directory, gen_dirs) {
@@ -203,7 +203,7 @@ ToolAction Toolchain.preprocess_action(
 */
 ToolAction Toolchain.archive_action(
   Toolchain toolchain, String output, List objects) {
-  Array arguments = %[];
+  Array arguments = [];
   arguments.push(toolchain.ar);
   arguments.push("rcs");
   arguments.push(output);
@@ -220,7 +220,7 @@ ToolAction Toolchain.archive_action(
 */
 ToolAction Toolchain.link_action(
   Toolchain toolchain, String output, List inputs) {
-  Array arguments = %[];
+  Array arguments = [];
   arguments.push(toolchain.cc);
   _append_list(arguments, inputs);
   _append_list(arguments, toolchain.ld_args);
@@ -304,7 +304,7 @@ static Job _start_tool(Job command, String program, String *failure) {
 
 static int _run_captured(List arguments, String *output, String *errors) {
   Job command =
-    arguments.job().options(%{stdout: capture, stderr: capture});
+    arguments.job().options({stdout: <capture>, stderr: <capture>});
   Job job = _start_tool(command, arguments.car(), errors);
   if (!job) return 127;
   int status = job.status();
@@ -319,7 +319,7 @@ static int _run_captured(List arguments, String *output, String *errors) {
     contributes none.
 */
 List Toolchain.search_directories(Toolchain toolchain) {
-  Array directories = %[];
+  Array directories = [];
   List flags = toolchain.cc_args;
   String output = NULL, errors = NULL;
   if (!_run_captured(%(${toolchain.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
@@ -337,7 +337,7 @@ List Toolchain.search_directories(Toolchain toolchain) {
       if (note >= 0) directory = directory[:note];
       directories.push(directory);
       if (directory.endswith("/include"))
-        directories.push(Path.dirname(directory).join(%"lib"));
+        directories.push(Path.dirname(directory).join("lib"));
     }
   }
   if (!_run_captured(%(${toolchain.cc} @flags "-print-search-dirs"),
@@ -367,7 +367,7 @@ ToolRun ToolAction.start(ToolAction action) {
   execution.action = action;
   if (action.dry_run) return execution;
   Job command = action.inherit_stdio ? action.arguments.job().live() :
-    action.arguments.job().options(%{stdout: capture, stderr: capture});
+    action.arguments.job().options({stdout: <capture>, stderr: <capture>});
   execution.job = _start_tool(
     command, action.arguments.car(), &execution.start_error);
   return execution;
@@ -455,7 +455,7 @@ int Toolchain.preprocess(
     "-Wno-invalid-pp-token", "-Wno-pragma-once-outside-header"
   };
   List repo_dirs = x2c_cpp_include_dirs();
-  Array arguments = %[], char dependency_path[] = "/tmp/x2c-cpp-deps-XXXXXX";
+  Array arguments = [], char dependency_path[] = "/tmp/x2c-cpp-deps-XXXXXX";
   if (dependencies) {
     int fd = mkstemp(dependency_path);
     if (fd < 0) {

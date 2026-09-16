@@ -9,9 +9,10 @@ they help and keep ordinary C elsewhere. The
 [C compatibility notes](docs/src/reference/language.md#host-preprocessing)
 describe the cases that need source changes.
 
-Two characters introduce much of the added syntax. `%` starts literals for
-lists, maps, arrays, and strings: `%(list)`, `%{}`, `%[]`, and `%"text"`.
-`$` inserts expressions into literals and introduces compile-time Lisp.
+Arrays and maps are written `[a, b]` and `{key: value}`. Two characters
+introduce much of the other added syntax. `%` quotes lists and interpolated
+strings: `%(list)` and `%"text $name"`. `$` inserts expressions into quoted
+literals and introduces compile-time Lisp.
 These forms let you combine C code, structured data, and code generation
 in the same program.
 

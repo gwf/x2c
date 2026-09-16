@@ -4,7 +4,7 @@
 int main(void) {
   Var integer_value = 42;
   Var floating_value = 3.14;
-  Var string_value = %"hello";
+  Var string_value = "hello";
   Var list_value = %(alpha beta gamma);
   Var symbol_value = <config>;
 

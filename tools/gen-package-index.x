@@ -15,12 +15,12 @@ static Path root;
 /* Spells `path` as Python's `PurePosixPath` does, so the printed index path
    matches the tool this replaced. */
 static Path normal(String path) {
-  Array parts = %[];
+  Array parts = [];
   foreach (String part, path.split("/"))
     if (part && part != ".") parts.push(part);
   String joined = parts.len() ? parts.join("/") : NULL;
-  if (path.startswith("/")) return joined ? %"/$joined" : %"/";
-  return joined ? joined : %".";
+  if (path.startswith("/")) return joined ? %"/$joined" : "/";
+  return joined ? joined : ".";
 }
 
 static String digest(String path) {
@@ -34,7 +34,7 @@ static String digest(String path) {
 static Path source_archive(Path package, Path output) {
   String name = package.basename();
   Path archive = output.absolute().join(%"$name-source.tar.gz");
-  Array members = %[];
+  Array members = [];
   foreach (String path, package.walk()) {
     String relative = path[package.len() + 1:];
     List parts = relative.split("/");
@@ -44,7 +44,7 @@ static Path source_archive(Path package, Path output) {
   // COPYFILE_DISABLE keeps macOS tar from adding AppleDouble members.
   %(tar -czf $archive -C ${package.dirname()} --no-recursion
     @{members.list_free()}).job()
-    .options(%{env: {COPYFILE_DISABLE: 1}}).run();
+    .options({env: {COPYFILE_DISABLE: 1}}).run();
   return archive;
 }
 
@@ -78,7 +78,7 @@ static String bundle_row(Path tarball, Path output, String base) {
   String platform =
     %"${field(identity, "platform")}-${field(identity, "machine")}";
   Var dependency = identity.getdefault("dependency_version", NULL);
-  String version = dependency ? dependency.str() : %"0";
+  String version = dependency ? dependency.str() : "0";
   // Every platform's bundle is named <name>-native.tar.gz by its producer,
   // so the published copy carries the platform to keep them apart.
   Path published = output.join(%"$package-$platform-native.tar.gz");
@@ -118,7 +118,7 @@ try {
   Path output = options["output"].str();
   String base = options["base"].str();
   output.make_dirs();
-  Array rows = %[];
+  Array rows = [];
   List directories = options["package-dir"];
   if (!directories) directories = %(${root.join("packages")});
   foreach (Var directory, directories)
@@ -129,7 +129,7 @@ try {
   if (!version)
     version = %(${root.join("builds/0/x2c")} --version).job().output()
                 .strip(NULL);
-  Array lines = %["# x2c package index for $version",
+  Array lines = [%"# x2c package index for $version",
                   "# name version kind platform url sha256"];
   foreach (Var row, rows.sort()) lines.push(row);
   Path index = normal(output).join("index.txt");

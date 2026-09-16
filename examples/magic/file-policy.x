@@ -2,8 +2,8 @@
 
 $lisp.binding(policy, "role-limit")
 static int role_limit(String role) {
-  if (role == %"admin") return 100;
-  if (role == %"editor") return 8;
+  if (role == "admin") return 100;
+  if (role == "editor") return 8;
   return 2;
 }
 

@@ -108,7 +108,7 @@ class ClassificationTest(unittest.TestCase):
     def test_flags_fresh_literal_null_guard(self):
         finding = analyze(
             "Array copy(void) {\n"
-            "  Array result = %[];\n"
+            "  Array result = [];\n"
             "  if ((void *) result == NULL) return NULL;\n"
             "  return result;\n"
             "}\n"
@@ -120,7 +120,7 @@ class ClassificationTest(unittest.TestCase):
     def test_keeps_null_input_defaulted_to_fresh_map(self):
         finding = analyze(
             "Map collect(Map globs) {\n"
-            "  if ((void *) globs == NULL) globs = %{};\n"
+            "  if ((void *) globs == NULL) globs = {};\n"
             "  return globs;\n"
             "}\n"
         )
@@ -307,7 +307,7 @@ class ProducerConsumerTest(unittest.TestCase):
     def test_partial_state_continue_ranks_first(self):
         groups = self.groups(
             "static List collect(List values) {\n"
-            "  Array rows = %[];\n"
+            "  Array rows = [];\n"
             "  foreach (Var value, values) {\n"
             "    if (value is not <list>) continue;\n"
             "    rows.push(value);\n"

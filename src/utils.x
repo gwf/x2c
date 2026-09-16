@@ -207,8 +207,8 @@ static int _locate_home(const char *start, char *out, size_t size) {
 static void _prepare_repo_defaults(void) {
   if (!x2c_root_path) return;
   const char *root = x2c_root_path;
-  String include_dir = %"%s/include/x2c".printf(root);
-  String src_dir = %"%s/src".printf(root), lib_dir = %"%s/lib".printf(root);
+  String include_dir = "%s/include/x2c".printf(root);
+  String src_dir = "%s/src".printf(root), lib_dir = "%s/lib".printf(root);
   x2c_base_include_dirs = cons(include_dir, NULL);
   x2c_repo_cpp_include_dirs = _dir_exists(src_dir)
     ? %( $src_dir $lib_dir ) : %( $lib_dir );
@@ -254,5 +254,5 @@ int worker_wait(long pid) {
 String x2c_filename_hash(String filename) {
   unsigned hash = 0;
   foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
-  return %"%08X".printf(hash);
+  return "%08X".printf(hash);
 }

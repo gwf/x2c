@@ -111,35 +111,35 @@ static int _report_finished(Array checks, int *passed, int *expired) {
 }
 
 int main(void) {
-  String work = %"/tmp/x2c-libuv-release";
+  String work = "/tmp/x2c-libuv-release";
   String output = _sandbox(work);
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  Map environment = %{
+  Map environment = {
     "PATH": "/usr/bin:/bin", "RELEASE_MODE": "strict"
   };
-  Array artifacts = %[];
-  Array checks = %[];
+  Array artifacts = [];
+  Array checks = [];
   int passed = 0, expired = 0;
 
   UvWatch watch = loop.watch(output, 0, _artifact);
-  UvTimer budget = loop.timer(5000, 0, %"5 s", _out_of_budget);
-  loop.signal(SIGINT, %"batch abandoned", _abandon);
-  loop.signal(SIGTERM, %"batch abandoned", _abandon);
+  UvTimer budget = loop.timer(5000, 0, "5 s", _out_of_budget);
+  loop.signal(SIGINT, "batch abandoned", _abandon);
+  loop.signal(SIGTERM, "batch abandoned", _abandon);
 
   checks.push(_plan(
-    loop, work, environment, %"line-count",
+    loop, work, environment, "line-count",
     %"wc -l < release.txt | tr -d ' ' | tee out/lines.txt", 2000
   ));
   checks.push(_plan(
-    loop, work, environment, %"fingerprint",
+    loop, work, environment, "fingerprint",
     %"cksum release.txt | cut -d' ' -f1 | tee out/sum.txt", 2000
   ));
   checks.push(_plan(
-    loop, work, environment, %"environment", %"printenv RELEASE_MODE", 2000
+    loop, work, environment, "environment", "printenv RELEASE_MODE", 2000
   ));
   checks.push(_plan(
-    loop, work, environment, %"slow-scan", %"exec sleep 30", 200
+    loop, work, environment, "slow-scan", "exec sleep 30", 200
   ));
 
   printf("%s", %"${checks.len()} checks in $work\n");
@@ -164,7 +164,7 @@ int main(void) {
   loop.scan(output, artifacts, _scan);
   loop.run(UV_RUN_DEFAULT);
 
-  Array contents = %[];
+  Array contents = [];
   foreach(String name, artifacts) {
     Artifact artifact = Scope.calloc(1, sizeof(struct Artifact));
     artifact.name = name;

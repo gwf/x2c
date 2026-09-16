@@ -52,14 +52,14 @@ int main(void) {
   Var value = Var.new(<p48>, &report);
   report.guard = loop.timer(5000, 0, value, timed_out);
   report.receiver = loop.udp()
-    .bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+    .bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .max_receive(8).receive(value, received);
   UvAddress destination = report.receiver.local_address();
   report.unconnected = loop.udp().bind(
-    UvAddress.ip4(%"127.0.0.1", 0), 0
+    UvAddress.ip4("127.0.0.1", 0), 0
   );
   report.connected = loop.udp().bind(
-    UvAddress.ip4(%"127.0.0.1", 0), 0
+    UvAddress.ip4("127.0.0.1", 0), 0
   ).connect(destination);
   UvAddress unconnected = report.unconnected.local_address();
   UvAddress connected = report.connected.local_address();
@@ -93,7 +93,7 @@ int main(void) {
   }
   for (int i = 0; i < 3; i++) {
     int port = i ? connected.port() : unconnected.port();
-    if (!report.sources[i].host().equal(%"127.0.0.1") ||
+    if (!report.sources[i].host().equal("127.0.0.1") ||
         report.sources[i].port() != port) {
       raise %(malformed (operation "datagram-report")
               (reason "the sender address changed"));

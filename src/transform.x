@@ -120,6 +120,9 @@ static String _printf_static_format(Compiler compiler, List expr, int *raw) {
           *raw = 0;
           return format.str();
         }
+      match (key)
+        case %(string (expr ("String") (call "String_new" (args ?literal)))):
+          return _printf_static_format(compiler, literal, raw);
       return NULL;
     }
   }
@@ -136,7 +139,7 @@ static int _printf_has_var(Compiler compiler, List args, int first_value) {
 }
 
 static void _printf_error(Compiler compiler, String family, String message) {
-  String note = %"printf-family call: %s".printf(family);
+  String note = "printf-family call: %s".printf(family);
   compiler.report_error(<xform>, message, NULL, %($note));
 }
 
@@ -198,7 +201,7 @@ static void _lower_printf_value(
   }
 
   String message =
-    %"cannot infer a native argument for Var at %%%c"
+    "cannot infer a native argument for Var at %%%c"
       .printf(conversion);
   _printf_error(
     compiler, family,
@@ -224,7 +227,7 @@ static List _lower_printf_vars(Compiler c, List ast) {
   List args = args_node.cdr();
   if (!_printf_has_var(c, args, info->first_arg)) return ast;
 
-  Array values = %[];
+  Array values = [];
   foreach (Var arg, args) values.push(arg);
   String family = (String) info->name;
   if (info->fmt_arg >= values.len())
@@ -317,13 +320,13 @@ static List _lower_printf_vars(Compiler c, List ast) {
     int conversion = format[cursor++];
     if (!_printf_valid_length(length, conversion)) {
       String message =
-        %"unsupported or malformed format conversion %%%c"
+        "unsupported or malformed format conversion %%%c"
           .printf(conversion);
       _printf_error(c, family, message);
     }
     if (value_index >= values.len()) {
       String message =
-        %"format conversion %%%c consumes a missing argument"
+        "format conversion %%%c consumes a missing argument"
           .printf(conversion);
       _printf_error(c, family, message);
     }
@@ -352,7 +355,7 @@ static List _typed_call(
   int list_varargs = callee_name == "List_list_n";
   if (compiler.fn_name && _iter_immediate_consumer(callee_name) && args)
     args = cons(compiler.complete_iter_chain(args.car()), args.cdr());
-  Array values = %[], int arg_index = 0;
+  Array values = [], int arg_index = 0;
   for (List p = params, a = args; a;
        p = cdr(p), a = cdr(a), arg_index++) {
     List param = (p ? car(p).list() : NULL), arg = car(a);
@@ -419,7 +422,7 @@ static List _assignment(
 static List _declaration(Compiler compiler, List ast) {
   match (ast) {
     case %(declare ?target (bindings *bound_list)): {
-      Array values = %[], List new_bind = NULL;
+      Array values = [], List new_bind = NULL;
       foreach (Ast binding, bound_list) {
         new_bind = binding;
         match (binding)
@@ -517,7 +520,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
       List temporary = compiler.sym.introduce(
         compiler.fresh_name("destructure"));
 
-      Array declarations = %[], expressions = %[];
+      Array declarations = [], expressions = [];
       foreach (List ident, targets) {
         declarations.push(%(bind $ident ()));
         expressions.push(%(expr $type (ident $ident)));
@@ -541,7 +544,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
                           compiler, source, source_type.list())})));
-      Array declarations = %[];
+      Array declarations = [];
       declarations.push(temp_decl);
       int index = 0;
       foreach (List parameter, parameters) match (parameter) {
@@ -602,7 +605,7 @@ static List _return(Compiler compiler, List ast) {
 static List _match_cases(Compiler compiler, List ast) {
   List (expr, cases) = ast.cdr();
   expr = compiler.convert_expression(expr, %("List"));
-  Array values = %[];
+  Array values = [];
   foreach (List rec, cases) {
     List binders = compiler.match_pattern_binders(rec.car(), NULL);
     values.push(%($binders @rec));
@@ -613,7 +616,7 @@ static List _match_cases(Compiler compiler, List ast) {
 
 // (catchcases ((pattern body) ...))
 static List _catch_cases(Compiler compiler, List ast) {
-  Array values = %[];
+  Array values = [];
   foreach (List rec, ast.cadr()) {
     List pattern = rec.car();
     List binders = pattern ?
@@ -733,7 +736,7 @@ static List _sequenced_protocol_call(
   Compiler compiler, List resolved, List arguments) {
   (List binding, Type signature) = resolved;
   List parameters = signature.car().list().cadr();
-  Type result = signature.cdr(), Array converted = %[];
+  Type result = signature.cdr(), Array converted = [];
   for (List actual = arguments, expected = parameters;
        actual && expected;
        actual = actual.cdr(), expected = expected.cdr()) {
@@ -1082,7 +1085,7 @@ static List _cons(Compiler compiler, List ast) {
     `(varray ...)` form, converting every typed element to `Var`.
 */
 List transform_array_literal(Compiler compiler, List ast) {
-  List elems = cdr(ast), Array values = %[];
+  List elems = cdr(ast), Array values = [];
   foreach (List elem, elems) {
     List velem = compiler.convert_expression(elem, %("Var"));
     values.push(velem);
@@ -1096,7 +1099,7 @@ List transform_array_literal(Compiler compiler, List ast) {
     `Var`.
 */
 List transform_map_literal(Compiler compiler, List ast) {
-  List elems = cdr(ast), Array values = %[];
+  List elems = cdr(ast), Array values = [];
   foreach (List entry, elems) {
     List (key, val) = entry.cdr();
     List vkey = compiler.convert_expression(key, %("Var"));
@@ -1144,7 +1147,7 @@ static List _string_segments(Compiler compiler, List ast) {
         return compiler.cache(
           %(string (expr ("String") (literal ("String") $text))));
   }
-  Array values = %[];
+  Array values = [];
   foreach (List seg, ast.cdr()) {
     Symbol kind = seg.car();
     switch (kind) {
@@ -1319,7 +1322,7 @@ static List _defer_rewrite_captures(
 static List _lower_callable_defer(
   Compiler c, List body, List finalizer) {
   List declared = NULL, written = NULL;
-  Map captures = %{}, Array records = %[], int unsupported = 0;
+  Map captures = {}, Array records = [], int unsupported = 0;
   _defer_collect_captures(
     c, finalizer, &declared, captures, records, &written, &unsupported);
   if (unsupported) {
@@ -1333,7 +1336,7 @@ static List _lower_callable_defer(
     env_name = c.fresh_name("defer_env");
     env_binding = c.sym.introduce(env_name);
     env_local = c.sym.introduce(c.fresh_name("defer_data"));
-    Array fields = %[];
+    Array fields = [];
     foreach (List record, record_list) {
       List field = record.caddr();
       fields.push(%(declare (const void) (bindings (bind $field (*)))));
@@ -1398,7 +1401,7 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     if (has_defer) break;
   }
   if (!has_defer) return stmts;
-  Array suffixes = $auto(%[]);
+  Array suffixes = $auto([]);
   for (List suffix = stmts; suffix; suffix = suffix.cdr())
     suffixes.push(suffix);
   List result = stmts;
@@ -1463,7 +1466,7 @@ static Type _raise_nested_invalid_type(Compiler compiler, Var node) {
 // Normalize raise detail crossings to the counted runtime's Var pairs.
 static List _raise(
   Compiler compiler, List ast, Var cause, List arguments) {
-  Array values = %[], int changed = 0, index = 0;
+  Array values = [], int changed = 0, index = 0;
   foreach (List value, arguments) {
     Type invalid = NULL;
     if (index & 1)
@@ -1548,7 +1551,7 @@ static List _cast(Compiler compiler, List ast) {
 // transform driver
 
 static List _match_records(Compiler compiler, List records) {
-  Array transformed = %[];
+  Array transformed = [];
   foreach (List record, records)
     match (record)
       case %(*prefix ?body):
@@ -1560,7 +1563,7 @@ static List _match_records(Compiler compiler, List records) {
    Children transform left to right, then reverse assembly preserves source
    order while allocating generated splice origins from right to left. */
 static Ast _sequence(Compiler compiler, Ast ast) {
-  Array transformed = $auto(%[]);
+  Array transformed = $auto([]);
   foreach (List value, ast) transformed.push(_node(compiler, value));
   Ast tail = NULL;
   for (int i = (int) transformed.len() - 1; i >= 0; i--) {
@@ -1570,7 +1573,7 @@ static Ast _sequence(Compiler compiler, Ast ast) {
       case %(at ?parent ?):
         match (payload)
           case %(seq *items): {
-            Array anchored = %[];
+            Array anchored = [];
             foreach (List item, items) {
               compiler.origins.push(%(generated $parent splice));
               int generated = compiler.origins.len();
@@ -1616,8 +1619,8 @@ static Ast _finish(Compiler compiler, Ast ast) {
    transform the deepest term, and rebuild upward. Entered only for chain
    heads, with expression rewrites already applied. */
 static Ast _op_chain(Compiler compiler, Ast ast) {
-  Array levels = %[];
-  Array types = %[];
+  Array levels = [];
+  Array types = [];
   defer levels.free();
   defer types.free();
   Ast rebuilt = NULL;
@@ -1647,7 +1650,7 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
   for (int i = (int) levels.len() - 1; i >= 0; i--)
     match (levels[i])
       case %(expr ? (op ?operator ? *rest)): {
-        Array parts = %[];
+        Array parts = [];
         if (operator is <list>) parts.push(_node(compiler, operator.list()));
         else parts.push(operator);
         parts.push(rebuilt);
@@ -1855,7 +1858,7 @@ List Compiler.transform(Compiler compiler, List ast) {
     newast = _sequence(compiler, ast);
   }
   // Merge and lower synthesized lambda siblings.
-  Array generated = %[];
+  Array generated = [];
   while (compiler.early_decls.len()) {
     List items = compiler.early_decls;
     compiler.early_decls.clear();

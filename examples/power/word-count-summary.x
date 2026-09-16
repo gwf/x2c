@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 
   Scope.retain();
   defer Scope.release();
-  Map counts = %{};
+  Map counts = {};
   int lines = 0, words = 0;
 
   try {

@@ -129,7 +129,7 @@ static void typed_list_covers_every_family(void) {
   EXPECT_INT_EQ(integers.cdr().car(), 4);
   EXPECT_TRUE(reals.cdr().car() == 2.5f);
   EXPECT_TRUE(doubles.cdr().car() == 2.5);
-  EXPECT_TRUE(words.cdr().car() == %"beta");
+  EXPECT_TRUE(words.cdr().car() == "beta");
   EXPECT_TRUE(names.cdr().car() == <beta>);
 }
 
@@ -217,7 +217,7 @@ static void typed_list_widens_for_var_transforms(void) {
      widening is how a caller reaches them. */
   List widened = values;
   EXPECT_INT_EQ(widened.len(), 3);
-  EXPECT_TRUE(widened.str() == %"( 1 2 3 )");
+  EXPECT_TRUE(widened.str() == "( 1 2 3 )");
 }
 
 static void typed_list_converts_through_var(void) {

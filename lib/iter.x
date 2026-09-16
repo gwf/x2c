@@ -653,8 +653,8 @@ static int _unzip_column_next(Iter iter, Var *out) {
 static void _unzip_shared_init(UnzipShared *u, Iter source) {
   if (!u) return;
   u->source = source;
-  u->buffers[0] = %[];
-  u->buffers[1] = %[];
+  u->buffers[0] = [];
+  u->buffers[1] = [];
   u->heads[0] = u->heads[1] = 0;
   u->done = 0;
   for (int i = 0; i < 2; i++) {

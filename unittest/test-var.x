@@ -39,15 +39,15 @@ static Symbol _var_runtime_error_code(void) {
 
 
 static String dispatch_fixture_str(Var value) {
-  return %"custom-str";
+  return "custom-str";
 }
 
 static String dispatch_fixture_str_replacement(Var value) {
-  return %"custom-str-replaced";
+  return "custom-str-replaced";
 }
 
 static String dispatch_fixture_repr(Var value) {
-  return %"custom-repr";
+  return "custom-repr";
 }
 
 static Buffer dispatch_fixture_write_repr(Var value, Buffer out) {
@@ -161,11 +161,11 @@ static void var_construction_and_void_dispatch_transfer(void) {
   EXPECT_TRUE(Var.register_object_tag(custom) >= 0);
   VarMethods methods = {0};
   EXPECT_TRUE(x2c_try_register_tagged_descriptor(
-    custom, %"Example.FullQualifiedClass", methods));
+    custom, "Example.FullQualifiedClass", methods));
   x2c_register_tagged_descriptor(
-    custom, %"Example.FullQualifiedClass", methods);
+    custom, "Example.FullQualifiedClass", methods);
   EXPECT_FALSE(x2c_try_register_descriptor(
-    %"Example.FullQualifiedClass", methods));
+    "Example.FullQualifiedClass", methods));
   unsigned char bytes[16], *misaligned = bytes;
   while (((uintptr_t) misaligned & 0x7) == 0) misaligned++;
   try Var.new(custom, misaligned);
@@ -237,7 +237,7 @@ static void var_typed_empty_representation(void) {
   EXPECT_TRUE(list_var is <list>);
   EXPECT_NULL(string_var.string());
   EXPECT_NULL(list_var.list());
-  EXPECT_TRUE(string_var.repr() == %"\"\"");
+  EXPECT_TRUE(string_var.repr() == "\"\"");
   EXPECT_TRUE(string_var.u64 != list_var.u64);
   EXPECT_TRUE(string_var.hash() != 0);
   EXPECT_TRUE(list_var.hash() != 0);
@@ -248,8 +248,8 @@ static void var_typed_empty_representation(void) {
 
 static void var_mutable_container_roundtrip(void) {
   $test.scoped();
-  Array array = %[];
-  Map map = %{};
+  Array array = [];
+  Map map = {};
   Var array_var = array, map_var = map;
 
   EXPECT_TRUE(array_var is <array>);
@@ -267,7 +267,7 @@ static void var_mutable_container_roundtrip(void) {
 }
 
 static void var_pointer_and_object(void) {
-  String text = %"hello";
+  String text = "hello";
   Var vstr = text, raw = (void *) text;
   String *slot = &text;
   Var ref = slot;
@@ -374,7 +374,7 @@ static void var_scalar_reader_conversion(void) {
   // a nonnumeric source and an unrepresentable floating-to-integer
   // reader raise the existing conversion causes
   int caught = 0;
-  Var text = %"text";
+  Var text = "text";
   try text.int();
   catch %(no-convert *): caught++;
   try text.double();
@@ -414,8 +414,8 @@ static void var_compare_numeric_total_order(void) {
 
 static void var_compare_cross_type_groups(void) {
   $test.scoped();
-  Var number = 1, sym = <alpha>, str = %"alpha";
-  Array arr = %[];
+  Var number = 1, sym = <alpha>, str = "alpha";
+  Array arr = [];
   arr.push(1);
   List lst = %(1);
 
@@ -424,9 +424,9 @@ static void var_compare_cross_type_groups(void) {
   EXPECT_TRUE(Var.compare(str, arr) < 0);
   EXPECT_TRUE(Var.compare(arr, lst) < 0);
 
-  Array a = %[];
+  Array a = [];
   a.push(1); a.push(2);
-  Array b = %[];
+  Array b = [];
   b.push(1); b.push(3);
   EXPECT_TRUE(Var.compare(a, b) < 0);
   EXPECT_TRUE(Var.compare(b, a) > 0);
@@ -440,7 +440,7 @@ static void var_compare_cross_type_groups(void) {
 static void var_equality_and_identity_operators(void) {
   $test.scoped();
 
-  Array a = %[];
+  Array a = [];
   a.push(1);
   a.push(2);
   Array b = a.copy();
@@ -495,15 +495,15 @@ static void var_comparison_operators(void) {
   EXPECT_TRUE(11 > v);
   EXPECT_TRUE(10 >= v);
 
-  Var sa = %"a", sb = %"b";
+  Var sa = "a", sb = "b";
   EXPECT_TRUE(sa < sb);
   EXPECT_TRUE(sb > sa);
 
-  Array a = %[1, 2], b = %[1, 3];
+  Array a = [1, 2], b = [1, 3];
   Var va = a, vb = b;
   EXPECT_TRUE(va < vb);
 
-  Array c = %[1, 2];
+  Array c = [1, 2];
   Var vc = c;
   EXPECT_TRUE(va == vc);
   EXPECT_FALSE(va != vc);
@@ -553,7 +553,7 @@ static void var_source_conversion_matrix(void) {
   float f32 = 1.25f;
   double f64 = -3.5;
   Symbol symbol = <matrix>;
-  String string = %"matrix";
+  String string = "matrix";
   List list = %(1 2);
 
   Var vi8 = i8, vu8 = u8, vi16 = i16, vu16 = u16;
@@ -645,10 +645,10 @@ static void var_explicit_i48_boundaries(void) {
 }
 
 static void var_numeric_parse_is_exact(void) {
-  Var integer_zero = Var.parse(%"0", <int>);
-  Var floating_zero = Var.parse(%"0", <double>);
-  Var integer = Var.parse(%"  2147483647  ", <int>);
-  Var floating = Var.parse(%"  1.25  ", <float>);
+  Var integer_zero = Var.parse("0", <int>);
+  Var floating_zero = Var.parse("0", <double>);
+  Var integer = Var.parse("  2147483647  ", <int>);
+  Var floating = Var.parse("  1.25  ", <float>);
 
   EXPECT_TRUE(integer_zero is <i32>);
   EXPECT_INT_EQ(integer_zero.int(), 0);
@@ -658,15 +658,15 @@ static void var_numeric_parse_is_exact(void) {
   EXPECT_INT_EQ(integer.int(), INT_MAX);
   EXPECT_TRUE(floating is <f64>);
   EXPECT_DOUBLE_NEAR("floating.floating()", floating.floating(), 1.25, 1e-9);
-  EXPECT_TRUE(Var.parse(%"", <int>) is void);
-  EXPECT_TRUE(Var.parse(%"   ", <double>) is void);
-  EXPECT_TRUE(Var.parse(%"nope", <int>) is void);
-  EXPECT_TRUE(Var.parse(%"42junk", <int>) is void);
-  EXPECT_TRUE(Var.parse(%"1.5junk", <double>) is void);
-  EXPECT_TRUE(Var.parse(%"2147483648", <int>) is void);
-  EXPECT_TRUE(Var.parse(%"-2147483649", <int>) is void);
-  EXPECT_TRUE(Var.parse(%"1e400", <double>) is void);
-  EXPECT_TRUE(Var.parse(%"1e-400", <float>) is void);
+  EXPECT_TRUE(Var.parse("", <int>) is void);
+  EXPECT_TRUE(Var.parse("   ", <double>) is void);
+  EXPECT_TRUE(Var.parse("nope", <int>) is void);
+  EXPECT_TRUE(Var.parse("42junk", <int>) is void);
+  EXPECT_TRUE(Var.parse("1.5junk", <double>) is void);
+  EXPECT_TRUE(Var.parse("2147483648", <int>) is void);
+  EXPECT_TRUE(Var.parse("-2147483649", <int>) is void);
+  EXPECT_TRUE(Var.parse("1e400", <double>) is void);
+  EXPECT_TRUE(Var.parse("1e-400", <float>) is void);
 }
 
 
@@ -918,7 +918,7 @@ static void var_wide_value_semantics(void) {
   EXPECT_TRUE(wide_infinity < wide_nan);
   EXPECT_TRUE(wide_nan > first_float);
 
-  Map map = %{};
+  Map map = {};
   map[first] = 73;
   EXPECT_INT_EQ(map[same_value].integer(), 73);
   EXPECT_TRUE(map[adjacent] is void);
@@ -934,10 +934,10 @@ static void var_wide_value_semantics(void) {
 static void var_streaming_repr_matches_canonical(void) {
   $test.scoped();
   List list = %(alpha 17 "line\ntext");
-  Array array = %[ 1, "two", $list ];
-  Map map = %{ key: $array, empty: "" };
-  Array simple_array = %[ 1, "two" ], empty_array = %[];
-  Map simple_map = %{ key: 1 }, empty_map = %{};
+  Array array = [ 1, "two", list ];
+  Map map = { key: array, empty: "" };
+  Array simple_array = [ 1, "two" ], empty_array = [];
+  Map simple_map = { key: 1 }, empty_map = {};
   File file = tmpfile();
   int pointer_value = 0;
   EXPECT_STR_EQ(list.repr(), "(alpha 17 \"line\\ntext\")");
@@ -993,7 +993,7 @@ static void var_dense_custom_dispatch(void) {
     .truth = dispatch_fixture_truth,
     .iter = dispatch_fixture_iter
   };
-  EXPECT_TRUE(x2c_try_register_descriptor(%"fixture", methods));
+  EXPECT_TRUE(x2c_try_register_descriptor("fixture", methods));
   EXPECT_TRUE(Var.known_tag(<fixture>));
 
   DispatchFixture first = { .value = 7 };
@@ -1016,7 +1016,7 @@ static void var_dense_custom_dispatch(void) {
   EXPECT_STR_EQ(fallback.str_free(), "custom-repr");
 
   methods.write_repr = dispatch_fixture_write_repr;
-  x2c_register_descriptor(%"fixture", methods);
+  x2c_register_descriptor("fixture", methods);
   Buffer streamed = Buffer.new(0);
   a.write_repr(streamed);
   EXPECT_STR_EQ(streamed.str_free(), "custom-stream-repr");
@@ -1028,7 +1028,7 @@ static void var_dense_custom_dispatch(void) {
   EXPECT_STR_EQ(str_fallback.str_free(), "custom-str");
 
   methods.write_str = dispatch_fixture_write_str;
-  x2c_register_descriptor(%"fixture", methods);
+  x2c_register_descriptor("fixture", methods);
   Buffer str_streamed = Buffer.new(0);
   a.write_str(str_streamed);
   EXPECT_STR_EQ(str_streamed.str_free(), "custom-stream-str");
@@ -1055,13 +1055,13 @@ static void var_dense_custom_dispatch(void) {
   VarMethods str_replacement = {
     .str = dispatch_fixture_str_replacement
   };
-  EXPECT_TRUE(x2c_try_register_descriptor(%"fixture", str_replacement));
+  EXPECT_TRUE(x2c_try_register_descriptor("fixture", str_replacement));
   EXPECT_STR_EQ(a.str(), "custom-str-replaced");
   EXPECT_STR_EQ(a.repr(), "custom-repr");
   VarMethods truth_replacement = {
     .truth = dispatch_fixture_false
   };
-  x2c_register_descriptor(%"fixture", truth_replacement);
+  x2c_register_descriptor("fixture", truth_replacement);
   EXPECT_FALSE(a.truthy());
   EXPECT_STR_EQ(a.str(), "custom-str-replaced");
 }
@@ -1069,7 +1069,7 @@ static void var_dense_custom_dispatch(void) {
 
 static void var_protocol_builtin_dispatch_is_reachable(void) {
   struct Token first_storage = {
-    .text = %"same", .type = <ident>,
+    .text = "same", .type = <ident>,
     .line = 1, .col = 2, .len = 4, .pos = 3
   };
   struct Token equal_storage;
@@ -1098,8 +1098,8 @@ static void var_protocol_builtin_dispatch_is_reachable(void) {
 
 static void var_builtin_dispatch_tags_match_registration(void) {
   String active[] = {
-    %"array", %"block", %"buffer", %"bytes", %"file", %"iter",
-    %"lambda", %"list", %"map", %"string", %"symbol", %"token"
+    "array", "block", "buffer", "bytes", "file", "iter",
+    "lambda", "list", "map", "string", "symbol", "token"
   };
   int active_count = sizeof(active) / sizeof(active[0]);
   for (int i = 0; i < active_count; i++) {
@@ -1108,9 +1108,9 @@ static void var_builtin_dispatch_tags_match_registration(void) {
   }
 
   String reserved[] = {
-    %"context", %"error", %"func", %"logger", %"mutex", %"pipe", %"proc",
-    %"regexp", %"rope", %"scope", %"slice", %"socket", %"stream",
-    %"tensor", %"thread", %"var"
+    "context", "error", "func", "logger", "mutex", "pipe", "proc",
+    "regexp", "rope", "scope", "slice", "socket", "stream",
+    "tensor", "thread", "var"
   };
   int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
   for (int i = 0; i < reserved_count; i++) {
@@ -1147,7 +1147,7 @@ static void var_clone_wide_returns_void_for_narrow_values(void) {
   // raising. Prove the silence with a capture handler left untouched.
   ErrorHandler handler = Error.push(_capture_var_runtime_error, void);
   var_runtime_errors = NULL;
-  Var narrow = 17, text = %"not-wide";
+  Var narrow = 17, text = "not-wide";
 
   EXPECT_TRUE(narrow.clone_wide() is void);
   EXPECT_TRUE(text.clone_wide() is void);
@@ -1161,7 +1161,7 @@ static void var_clone_wide_returns_void_for_narrow_values(void) {
 static void var_dense_dispatch_capacity(void) {
   VarMethods methods = {0};
   EXPECT_FALSE(x2c_try_register_descriptor(NULL, methods));
-  x2c_register_type(%"token");
+  x2c_register_type("token");
   long token_value = 1;
   EXPECT_TRUE(Var.new(<token>, &token_value).truthy());
   EXPECT_FALSE(Var.new(<token>, NULL).truthy());
@@ -1169,14 +1169,14 @@ static void var_dense_dispatch_capacity(void) {
   // earlier suites own an unknown share of the 32.
   int filled = 0;
   for (int i = 0; i < 32; i++) {
-    String name = %"dense%02d".printf(i);
+    String name = "dense%02d".printf(i);
     if (!x2c_try_register_descriptor(name, methods)) break;
     filled++;
   }
   EXPECT_TRUE(filled < 32);
-  EXPECT_FALSE(x2c_try_register_descriptor(%"overflow", methods));
+  EXPECT_FALSE(x2c_try_register_descriptor("overflow", methods));
   int caught = 0;
-  try x2c_register_tagged_descriptor(<overflow>, %"Overflow", methods);
+  try x2c_register_tagged_descriptor(<overflow>, "Overflow", methods);
   catch %(bad-state *): caught = 1;
   EXPECT_INT_EQ(caught, 1);
   // Tags registered before capacity keep working.
@@ -1194,8 +1194,8 @@ static void var_write_str_matches_str(void) {
   Block block = Block.new(sizeof(int));
   Var samples[] = {
     payload, block,
-    %"plain text", %(1 two "three"), %[4, "five"],
-    %{k: 6}, <sym>, Var.box_long(-9), Var.box_ulong(9),
+    "plain text", %(1 two "three"), [4, "five"],
+    {k: 6}, <sym>, Var.box_long(-9), Var.box_ulong(9),
     7, 2.5, void, ((String) NULL)
   };
   for (int i = 0; i < (int) (sizeof samples / sizeof samples[0]); i++) {
@@ -1266,7 +1266,7 @@ static void var_nested_list_keeps_display_padding(void) {
 static void var_empty_container_display_forms(void) {
   EXPECT_STR_EQ(%{}.str(), "{ }");
   EXPECT_STR_EQ(%{}.repr(), "{  }");
-  EXPECT_STR_EQ(%[].str(), "[  ]");
+  EXPECT_STR_EQ([].str(), "[  ]");
   EXPECT_STR_EQ(%().str(), "()");
   // A null Array renders without dereferencing its storage.
   EXPECT_STR_EQ(((Array) NULL).str(), "[  ]");
@@ -1292,14 +1292,14 @@ static void var_symbol_atom_stream_without_allocating(void) {
 
 
 static void var_recursive_rendering(void) {
-  Array array = %[];
+  Array array = [];
   array.push(array);
   String pointer = array.var().pointer_string();
   EXPECT_STR_EQ(array.repr(), %"[ $pointer ]");
   EXPECT_STR_EQ(array.str(), %"[ $pointer ]");
   EXPECT_STR_EQ(array.var().repr(), array.repr());
 
-  Map map = %{};
+  Map map = {};
   map[1] = map;
   pointer = map.var().pointer_string();
   EXPECT_STR_EQ(map.repr(), %"{ 1: $pointer }");
@@ -1314,14 +1314,14 @@ static void var_recursive_rendering(void) {
   EXPECT_TRUE(list.str().contains(pointer));
 
   // Leave each path before rendering the same child through another edge.
-  Array child = %[1, 2];
-  Array repeated = %[$child, $child];
+  Array child = [1, 2];
+  Array repeated = [child, child];
   EXPECT_STR_EQ(repeated.repr(), "[ [ 1, 2 ], [ 1, 2 ] ]");
   List repeated_list = %($child $child);
   EXPECT_STR_EQ(repeated_list.repr(), "([ 1, 2 ] [ 1, 2 ])");
 
   // Exercise the multiline List writer as well as its trial line rendering.
-  Array long_cycle = %[];
+  Array long_cycle = [];
   List long_list = %("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
                     "abcdefghijklmnopqrstuvwxyz" $long_cycle);
   long_cycle.push(long_list);
@@ -1336,15 +1336,15 @@ static Buffer _rendering_failure(Var value, Buffer out) {
 
 static void var_rendering_restores_after_error(void) {
   VarMethods methods = { .write_repr = _rendering_failure };
-  EXPECT_TRUE(x2c_try_register_descriptor(%"fixture", methods));
+  EXPECT_TRUE(x2c_try_register_descriptor("fixture", methods));
   defer {
     methods.write_repr = dispatch_fixture_write_repr;
-    x2c_register_descriptor(%"fixture", methods);
+    x2c_register_descriptor("fixture", methods);
   }
   DispatchFixture fixture = { .value = 1 };
   Var value = Var.new(<fixture>, &fixture);
-  Array array = %[$value];
-  Map map = %{1: $array};
+  Array array = [value];
+  Map map = {1: array};
   List list = %($map);
   Buffer out = Buffer.new(0);
   int caught = 0;

@@ -14,7 +14,7 @@ features:
   - name: Mutable <br/> Containers
     detail: "`Array`s and `Map`s store `Var`s, grow automatically, and have native syntax for all common operations."
   - name: Compound <br/> Literals
-    detail: "Containers: `%[]`, `%{}`, `%()`. Strings: `%\"\"`. Bare names are data; `$` inserts expressions, `@` splices Lists."
+    detail: "Containers: `[a, b]`, `{key: value}`, `%(a b)`. Strings: `%\"hi $name\"`. Quoted names are data; `$` inserts expressions, `@` splices Lists."
   - name: Iteration <br/>& Loops
     detail: "Chained functional iterators and `foreach` over anything sequence-like, including `File`s and `Slice`s."
   - name: Object <br/>Orientation

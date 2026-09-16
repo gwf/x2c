@@ -7,7 +7,7 @@ tab: maps
 ```x2c
 ~int main(void) {
 // Start with named items and their stock quantities.
-Map stock = %{"tea": 12, "coffee": 8, "milk": 6, "sugar": 0};
+Map stock = {"tea": 12, "coffee": 8, "milk": 6, "sugar": 0};
 
 // Update existing entries or add new ones with the same syntax.
 stock["tea"] -= 2;

@@ -18,15 +18,15 @@ List queue = %(
   (echo echo)
 );
 int limit = 3, peak = 0, started = 0;
-Array running = %[], results = %[];
-Map names = %{};
+Array running = [], results = [];
+Map names = {};
 
 foreach (List command, queue) {
   if (running.len() == limit) {
     Job done = Job.wait_any(running);
     results.push(describe(names[done], done));
   }
-  Job job = command.job().options(%{stderr: capture}).start();
+  Job job = command.job().options({stderr: <capture>}).start();
   names[job] = %"job ${++started}";
   running.push(job);
   if (running.len() > peak) peak = running.len();
@@ -39,7 +39,7 @@ while (running.len()) {
 foreach (String line, results.sort()) printf("%s\n", line);
 printf("peak %d of %d\n", peak, limit);
 
-try %(sh -c "echo broken >&2; exit 4").job().options(%{stderr: capture})
+try %(sh -c "echo broken >&2; exit 4").job().options({stderr: <capture>})
   .run();
 catch %(cmd-fail *detail):
   printf("run raised status %ld: %s", detail.assoc(<status>).integer(),

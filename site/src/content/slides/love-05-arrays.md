@@ -9,12 +9,12 @@ tab: arrays
 
 ~int main(void) {
 // Grow and update a sequence in place.
-Array scores = %[7, 3, 9];
+Array scores = [7, 3, 9];
 scores.push(5); scores[1] += 1;
 
 // Sorting mutates; copy first to keep the original order.
 Array ranked = scores.copy().sort().reverse();
-assert(scores == %[7, 4, 9, 5] && scores !== ranked);
+assert(scores == [7, 4, 9, 5] && scores !== ranked);
 
 // Slices and map create new Arrays.
 Array top = ranked[:2];

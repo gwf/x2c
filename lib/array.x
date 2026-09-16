@@ -119,7 +119,7 @@ Self Array.update_n(Self array, unsigned element_count, ...) {
     synchronization.
 
     ```x2c
-    ~Array digits = %[0, 1, 2, 3, 4, 5];
+    ~Array digits = [0, 1, 2, 3, 4, 5];
     printf("%s %s\n", digits[0].repr(), digits[-1].repr());
     printf("%s %s\n", digits[6].repr(), digits[-7].repr());
     ```
@@ -201,9 +201,9 @@ Var Array.postfixindex(Array array, int index, Symbol op) {
     detail.
 
     ```x2c
-    ~Array queue = %[];
+    ~Array queue = [];
     queue.push(10);
-    queue.push(%"twenty");
+    queue.push("twenty");
     printf("%s\n", queue.repr().str());
     ```
     Raises: `<void-op>` when `elem` is `void`, or `<size-limit>` when the
@@ -327,7 +327,7 @@ Self Array.copy(Self array) {
     and reads one element beyond the last.
 
     ```x2c
-    ~Array digits = %[0, 1, 2, 3, 4, 5];
+    ~Array digits = [0, 1, 2, 3, 4, 5];
     printf("%s %s\n", digits[1:4].repr(), digits[3:].repr());
     printf("%s %s\n", digits[::2].repr(), digits[::-1].repr());
     ```
@@ -453,7 +453,7 @@ Self Array.reverse(Self array) => array._core_reverse();
     while constructing the result. The partial result is freed.
 */
 Array Array.map(Array array, Func func) {
-  Array output = %[], result = NULL;
+  Array output = [], result = NULL;
   defer if ((void *) result == NULL) output.free();
   foreach (Var item, array) {
     FuncArg arguments[1] = { FuncArg.value(item) };
@@ -470,7 +470,7 @@ Array Array.map(Array array, Func func) {
     while constructing the result. The partial result is freed.
 */
 Array Array.map2(Array a, Array b, Func func) {
-  Array output = %[], result = NULL;
+  Array output = [], result = NULL;
   defer if ((void *) result == NULL) output.free();
   size_t an = a.len(), bn = b.len(), n = (an < bn) ? an : bn;
   for (size_t i = 0; i < n; i++) {
@@ -520,7 +520,7 @@ static int _sort_compare(const void *ap, const void *bp) {
     null or one-element `array` is returned unchanged.
 
     ```x2c
-    ~Array numbers = %[5, 3, 9, 1];
+    ~Array numbers = [5, 3, 9, 1];
     Array sorted = numbers.sort();
     printf("%s %d\n", numbers.repr(), sorted == numbers);
     ```
@@ -552,7 +552,7 @@ Self Array.sort_with(Self array, Func compare) {
   if (!array || array.length < 2) return array;
   size_t count = array.length;
   Array source = $auto(array.copy());
-  Array target = $auto(%[]);
+  Array target = $auto([]);
   target.resize(count);
   for (size_t width = 1; width < count; width *= 2) {
     for (size_t base = 0; base < count; base += 2 * width) {
@@ -647,7 +647,7 @@ static void _heap_shift_down(Array heap, int i) {
     popping again.
 
     ```x2c
-    ~Array heap = %[];
+    ~Array heap = [];
     heap.heap_push(30);
     heap.heap_push(10);
     heap.heap_push(20);
@@ -809,7 +809,7 @@ Iter Array.iter(Array x, Iter dest) {
 
 /** Drains `iter` into a fresh `Array`. */
 Array Iter.array(Iter iter) {
-  Array output = %[], result = NULL;
+  Array output = [], result = NULL;
   defer if ((void *) result == NULL) output.free();
   foreach (Var item, iter) output.push(item);
   return result = output;

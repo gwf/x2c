@@ -52,12 +52,12 @@ static String _platform(void) {
 static String _run(List arguments, const char *what) {
   String tool = arguments.car(), errors = "not found";
   try {
-    Job job = arguments.job().options(%{stdout: capture, stderr: capture});
+    Job job = arguments.job().options({stdout: <capture>, stderr: <capture>});
     if (!job.status()) return job.output();
     errors = job.errors();
   }
   catch %(not-found *): {}
-  _error(%"$what failed ($tool): ${errors ? errors.strip(" \n") : %""}");
+  _error(%"$what failed ($tool): ${errors ? errors.strip(" \n") : ""}");
   return NULL;
 }
 
@@ -78,7 +78,7 @@ static List _entries(String directory) =>
   Path.list_dir(directory).filter(%!(name) => !name.str().startswith("."));
 
 static List _files_with(String directory, String suffix) {
-  Array paths = %[];
+  Array paths = [];
   foreach (String name, _entries(directory))
     if (name.endswith(suffix)) paths.push(%"$directory/$name");
   return paths.list_free();
@@ -114,7 +114,7 @@ static List _index_row(CliRequest request, String name, String work) {
   String platform = _platform(), List source = NULL;
   foreach (String line, _read_text(path).split_lines(0)) {
     if (!line || line.startswith("#")) continue;
-    Array fields = %[];
+    Array fields = [];
     foreach (String field, line.split(" "))
       if (field) fields.push(field);
     if (fields.len() != 6 || fields[0] != name) continue;
@@ -187,7 +187,7 @@ static void _build_source(String package, String name, String spec) {
   _run(%( $x2c "build" "--kind" "static-library"
           "--output" ${%"$builds/lib$name.a"}
           "--build-dir" ${%"$builds/cc"} ).append(inputs), "build");
-  _write_text(%"$builds/$name.link", %"");
+  _write_text(%"$builds/$name.link", "");
 }
 
 static int _installed(String package) =>
@@ -203,7 +203,7 @@ static String _installed_version(String package) {
   }
   if (access(marker, F_OK)) return NULL;
   String version = _json_field(_read_text(marker), key);
-  return version ? version : %"";
+  return version ? version : "";
 }
 
 /* Returns the home's packages directory, holding its lock until the process
@@ -268,8 +268,8 @@ static String _install(
     _check_bundle(request, staged, name);
   else {
     _build_source(staged, name, spec);
-    String origin = url ? url : spec, digest = sha256 ? sha256 : %"";
-    String label = version ? version : %"";
+    String origin = url ? url : spec, digest = sha256 ? sha256 : "";
+    String label = version ? version : "";
     _write_text(%"$staged/SOURCE.json", %"{
   \"package\": \"$name\",
   \"version\": \"$label\",

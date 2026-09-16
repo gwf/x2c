@@ -122,7 +122,7 @@ static void cache_admission_and_bypass(void) {
   // A String the outermost pool owns is process-lifetime, so a pattern
   // holding one is admitted like any other canonical graph.
   Var text_pattern = %(tag "needle" ?v);
-  EXPECT_TRUE(String.is_permanent(%"needle"));
+  EXPECT_TRUE(String.is_permanent("needle"));
   EXPECT_INT_EQ(_acquire(cache, text_pattern, &lease),
                 MACHINE_PREPARED);
   generation = lease.generation;

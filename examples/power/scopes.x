@@ -1,7 +1,7 @@
 #include <assert.h>
 int wait_for_day(void) { static int days = 0; return days++ < 2; }
-Array survey_files(void) => %["first.dat", "second.dat"];
-Map inspect_file(String path) => %{sizes: [12, 24], errors: 0};
+Array survey_files(void) => ["first.dat", "second.dat"];
+Map inspect_file(String path) => {sizes: [12, 24], errors: 0};
 void save_findings(String path, Map findings) {
   Array sizes = findings[<sizes>];
   assert(sizes[0] == 12 && findings[<errors>] == 0);
@@ -17,7 +17,7 @@ void fail_in_scope(void) {
   try {
     Scope.retain();
     defer Scope.release();
-    Map findings = inspect_file(%"failure.dat");
+    Map findings = inspect_file("failure.dat");
     assert(Scope.stats().live_allocations > before);
     raise %(oops);
   }

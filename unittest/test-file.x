@@ -453,7 +453,7 @@ static void file_var_dispatches_existing_methods(void) {
 
   EXPECT_TRUE(boxed is <file>);
   EXPECT_INT_EQ(boxed.hash(), file.hash());
-  EXPECT_TRUE(boxed.repr().startswith(%"<File:"));
+  EXPECT_TRUE(boxed.repr().startswith("<File:"));
   EXPECT_STR_EQ(boxed.str(), "boxed\n");
 
   rewind(file);

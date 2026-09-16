@@ -96,7 +96,7 @@ static void event_copy_timeout_resize_and_render(void) {
     2
   );
   int caught = 0;
-  try terminal.print(terminal.width(), 1, %"x", TB_WHITE, TB_DEFAULT);
+  try terminal.print(terminal.width(), 1, "x", TB_WHITE, TB_DEFAULT);
   catch %(term-error *detail): {
     caught = 1;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"print");
@@ -138,7 +138,7 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
   Termbox terminal = Termbox.open();
   terminal.clear();
 
-  terminal.fill(2, 1, 3, 2, %"#", TB_GREEN | TB_BOLD, TB_BLUE);
+  terminal.fill(2, 1, 3, 2, "#", TB_GREEN | TB_BOLD, TB_BLUE);
   TermboxCell drawn = terminal.cell(3, 2);
   EXPECT_STR_EQ(drawn.text, %"#");
   EXPECT_INT_EQ(drawn.foreground, TB_GREEN | TB_BOLD);
@@ -159,11 +159,11 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
 
   /*  The extent is clipped to the screen; the origin is not. */
   int width = terminal.width(), height = terminal.height();
-  terminal.fill(width - 2, height - 1, 40, 40, %"*", TB_WHITE, TB_DEFAULT);
+  terminal.fill(width - 2, height - 1, 40, 40, "*", TB_WHITE, TB_DEFAULT);
   EXPECT_STR_EQ(terminal.cell(width - 1, height - 1).text, %"*");
 
   int outside = 0;
-  try terminal.fill(width, 0, 1, 1, %"*", TB_WHITE, TB_DEFAULT);
+  try terminal.fill(width, 0, 1, 1, "*", TB_WHITE, TB_DEFAULT);
   catch %(term-error *detail): {
     outside = 1;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"fill");
@@ -172,7 +172,7 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
   EXPECT_TRUE(outside);
 
   int blank = 0;
-  try terminal.fill(0, 0, 1, 1, %"", TB_WHITE, TB_DEFAULT);
+  try terminal.fill(0, 0, 1, 1, "", TB_WHITE, TB_DEFAULT);
   catch %(bad-arg *detail): {
     blank = 1;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"fill");
@@ -257,11 +257,11 @@ static void box_draws_a_frame_around_its_interior(void) {
 }
 
 static void measure_agrees_with_print_without_drawing(void) {
-  EXPECT_INT_EQ(Termbox.measure(%"abc"), 3);
+  EXPECT_INT_EQ(Termbox.measure("abc"), 3);
   EXPECT_INT_EQ(Termbox.measure(%"e\xcc\x81 \xe7\x95\x8c"), 4);
-  EXPECT_INT_EQ(Termbox.measure(%""), 0);
+  EXPECT_INT_EQ(Termbox.measure(""), 0);
   EXPECT_INT_EQ(Termbox.measure(NULL), 0);
-  EXPECT_INT_EQ(Termbox.measure(%"a\nbc"), 3);
+  EXPECT_INT_EQ(Termbox.measure("a\nbc"), 3);
 
   Termbox terminal = Termbox.open();
   terminal.clear();
@@ -271,7 +271,7 @@ static void measure_agrees_with_print_without_drawing(void) {
 
   /*  Measuring costs no cells: nothing was drawn where print would have
       raised, and the row it would have used is still blank. */
-  String wide = %"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  String wide = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   EXPECT_INT_EQ(Termbox.measure(wide), 50);
   EXPECT_STR_EQ(terminal.cell(0, 1).text, %" ");
   EXPECT_NULL(terminal.close());

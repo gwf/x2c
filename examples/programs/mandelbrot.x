@@ -39,7 +39,7 @@ static Var render(const void *input, size_t ignored) {
 }
 
 static ArrayChar _rgb(ArrayDbl pixels) {
-  ArrayChar rgb = %[];
+  ArrayChar rgb = [];
   rgb.append(NULL, pixels.len() * 3);
   int at = 0;
   foreach (double value, pixels) {
@@ -62,9 +62,9 @@ static void write_image(String path, ArrayChar rgb) {
 int main(int argc, char **argv) {
   Scope.retain();
   String path = argc > 1 ? argv[1] : "mandelbrot.ppm";
-  ArrayDbl pixels = %[];
+  ArrayDbl pixels = [];
   pixels.append(NULL, width * height);
-  Array threads = %[];
+  Array threads = [];
   for (int worker = 0; worker < nworkers; worker++) {
     struct Job job = { worker, pixels };
     threads.push(Thread.start(render, &job, sizeof(job)));

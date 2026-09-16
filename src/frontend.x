@@ -98,7 +98,7 @@ static String _unreadable_input(
    line number stays in place. */
 static String _script_text(String text) {
   int end = text.find("\n");
-  return %"#include \"scripting.x\"${end < 0 ? %"" : text[end:]}";
+  return %"#include \"scripting.x\"${end < 0 ? "" : text[end:]}";
 }
 
 // Read the primary source file. fopen() opens directories on some
@@ -276,10 +276,10 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   compiler.source_facts = frontend.request.source_facts;
   compiler.source_primary = 1;
   if (compiler.source_facts) {
-    compiler.source_occurrences = %[];
-    compiler.source_definitions = %{};
-    compiler.source_declarations = %{};
-    compiler.source_texts = %{};
+    compiler.source_occurrences = [];
+    compiler.source_definitions = {};
+    compiler.source_declarations = {};
+    compiler.source_texts = {};
   }
   compiler.diagnostics.set_emitter(NULL, NULL);
   compiler.recovery_depth++;
@@ -317,7 +317,7 @@ int ParsedUnit.parse(ParsedUnit *unit) {
   if (compiler.error_count()) return 0;
   Diagnostics diagnostics = compiler.diagnostics;
   Array collected = diagnostics.entries;
-  diagnostics.entries = %[];
+  diagnostics.entries = [];
   int ok = 1;
   try unit->ast = unit->compiler.full_parse(
     unit->globals, unit->generated_symbols);

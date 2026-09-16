@@ -118,7 +118,7 @@ static void tcp_exchanges_copied_binary_data_with_several_clients(void) {
   };
   Var state = Var.new(<p48>, &test);
   test.guard = loop.timer(5000, 0, state, _tcp_timeout);
-  test.listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0);
+  test.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0);
   test.listener.listen(TCP_CLIENTS + 1, state, _client_accepted);
   UvAddress address = test.listener.local_address();
 
@@ -193,12 +193,12 @@ static void _restart_timer(UvTimer timer, Var value) {
   RestartState *state = value.pointer();
   timer.stop();
   state.server.read(value, _restart_read);
-  state.client.write(%"B").shutdown_write();
+  state.client.write("B").shutdown_write();
 }
 
 static void _restart_connected(UvTcp tcp, Var value) {
   RestartState *state = value.pointer();
-  tcp.write(%"A");
+  tcp.write("A");
   state.timer = state.loop.timer(10, 0, value, _restart_timer);
 }
 
@@ -215,7 +215,7 @@ static void tcp_reads_stop_and_restart_and_eof_is_null(void) {
   RestartState state = { .loop = loop, .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);
-  state.listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+  state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .listen(4, value, _restart_accepted);
   UvAddress address = state.listener.local_address();
   state.client = loop.tcp().connect(address, value, _restart_connected);
@@ -255,7 +255,7 @@ static void _owned_read(UvTcp tcp, Bytes chunk, Var value) {
 
 static void _owned_connected(UvTcp tcp, Var value) {
   (void) value;
-  tcp.write(%"owned").shutdown_write();
+  tcp.write("owned").shutdown_write();
 }
 
 static void _owned_accepted(UvTcp listener, UvTcp tcp, Var value) {
@@ -271,7 +271,7 @@ static void tcp_accepted_connection_outlives_its_listener(void) {
   OwnedState state = { .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);
-  state.listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+  state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .listen(2, value, _owned_accepted);
   state.client = loop.tcp().connect(
     state.listener.local_address(), value, _owned_connected
@@ -353,7 +353,7 @@ static void tcp_large_writes_own_their_copy_and_report_backpressure(void) {
   PressureState state = { .loop = loop, .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);
-  state.listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+  state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .listen(4, value, _pressure_accepted);
   state.sender = loop.tcp().connect(
     state.listener.local_address(), value, _pressure_connected
@@ -385,7 +385,7 @@ static void _ignore_accept(UvTcp listener, UvTcp tcp, Var value) {
 
 static void tcp_refused_connection_reports_error_and_finishes_request(void) {
   UvLoop loop = UvLoop.new();
-  UvTcp listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+  UvTcp listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .listen(1, void, _ignore_accept);
   UvAddress unused = listener.local_address();
   listener.close();
@@ -435,7 +435,7 @@ static void _failing_read(UvTcp tcp, Bytes chunk, Var value) {
 }
 
 static void _failure_connected(UvTcp tcp, Var value) {
-  tcp.write(%"fail").shutdown_write();
+  tcp.write("fail").shutdown_write();
   (void) value;
 }
 
@@ -451,7 +451,7 @@ static void tcp_read_error_returns_from_run_and_the_loop_resumes(void) {
   defer loop.free();
   FailureState state = { 0 };
   Var value = Var.new(<p48>, &state);
-  state.listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+  state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .listen(2, value, _failure_accepted);
   state.client = loop.tcp().connect(
     state.listener.local_address(), value, _failure_connected
@@ -486,7 +486,7 @@ static void tcp_accept_error_closes_listener_and_accepted_connection(void) {
   defer loop.free();
   FailureState state = { 0 };
   Var value = Var.new(<p48>, &state);
-  state.listener = loop.tcp().bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+  state.listener = loop.tcp().bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .listen(2, value, _failing_accept);
   state.client = loop.tcp().connect(
     state.listener.local_address(), value, _empty_connect
@@ -509,7 +509,7 @@ static void tcp_rejects_stream_operations_before_connection(void) {
   defer loop.free();
   UvTcp tcp = loop.tcp();
   int caught = 0;
-  try tcp.write(%"x");
+  try tcp.write("x");
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"write");

@@ -63,9 +63,9 @@ Self Path.join(Self base, Path name) {
 Self Path.dirname(Self path) {
   String trimmed = _trimmed(path);
   int slash = trimmed.rfind("/");
-  if (slash < 0) return %".";
+  if (slash < 0) return ".";
   while (slash > 0 && trimmed[slash - 1] == '/') slash--;
-  return slash ? trimmed[:slash] : %"/";
+  return slash ? trimmed[:slash] : "/";
 }
 
 /** Returns the last component of `path`, ignoring trailing slashes. */
@@ -107,7 +107,7 @@ Self Path.absolute(Self path) {
       _path_error("Path.absolute", path, errno);
     path = Path.join(String.new(buffer), path);
   }
-  Path result = %"/";
+  Path result = "/";
   foreach (String part, path.split("/")) {
     if (!part || part == ".") continue;
     if (part == "..") {
@@ -171,7 +171,7 @@ double Path.modified_time(Path path) {
 List Path.list_dir(Path path) {
   DIR *directory = opendir(path);
   if (!directory) _path_error("Path.list_dir", path, errno);
-  Array names = %[], struct dirent *entry;
+  Array names = [], struct dirent *entry;
   while ((entry = readdir(directory)))
     if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
       names.push(String.new(entry->d_name));
@@ -221,7 +221,7 @@ static int _walk_next(Iter iter, Var *out) {
     `<io-fail>` from a pull when a directory vanishes during the walk.
 */
 Iter Path.walk(Path root, Iter dest) {
-  Array pending = %[];
+  Array pending = [];
   _push_children(pending, root);
   return dest.init((Var) {0}, _walk_next, pending);
 }
@@ -318,10 +318,10 @@ List Path.glob(Path pattern) {
       depth++;
       if (part == "**") recursive = 1;
     }
-    else base = base ? base.join(part) : part ? part : %"/";
+    else base = base ? base.join(part) : part ? part : "/";
   }
-  Path root = base ? base : %".";
-  Array paths = %[], matches = %[];
+  Path root = base ? base : ".";
+  Array paths = [], matches = [];
   if (root.is_dir())
     _walk(root, recursive ? -1 : depth,
           pattern.startswith(".") || pattern.contains("/."), paths);
@@ -487,8 +487,8 @@ void Path.write_text(Path path, String text) {
 */
 Path Path.temp_dir(void) {
   const char *parent = getenv("TMPDIR");
-  Path root = parent && *parent ? String.new(parent) : %"/tmp";
-  String pattern = root.join(%"x2c-XXXXXX");
+  Path root = parent && *parent ? String.new(parent) : "/tmp";
+  String pattern = root.join("x2c-XXXXXX");
   char buffer[PATH_MAX];
   if (pattern.len() >= sizeof(buffer))
     _path_error("Path.temp_dir", root, ENAMETOOLONG);

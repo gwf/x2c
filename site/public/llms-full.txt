@@ -152,13 +152,13 @@ When failure or absence is expected, use the operation that reports it
 separately:
 
 ```x2c
-Map settings = %{theme: "dark"};
+Map settings = {theme: "dark"};
 Var found;
 if (settings.try_get(<theme>, &found))
   printf("theme=%s\n", found);
 
 long number;
-if (!%"not a number".try_long(&number))
+if (!"not a number".try_long(&number))
   printf("invalid integer\n");
 ```
 
@@ -374,7 +374,7 @@ printed without writing its constructor, converters, hash, or printer:
 class Point { int x; int y; };
 int main(void) {
 Point point = Point.new(3, 4);
-Map labels = $auto(%{});
+Map labels = $auto({});
 labels[point] = "origin";
 printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)].str());
   return 0;
@@ -466,7 +466,7 @@ its address:
 ```x2c
 class History struct { int count; Array items; } *;
 void History.init(History self) {
-  self.items = %[];
+  self.items = [];
 }
 void History.free(History self) {
   self.items.free();
@@ -504,7 +504,7 @@ class Point { int x; int y; };
 int main(void) {
 Point point = Point.new(3, 4);
 Var first = point, second = Point.new(3, 4);
-Map labels = $auto(%{});
+Map labels = $auto({});
 labels[first] = "origin";
 printf("%s\n", labels[second].str());
   return labels.contains(second) ? 0 : 1;
@@ -544,7 +544,7 @@ release:
 
 ```x2c
 int main(void) {
-$scope() { Array values = %[]; values.push(1); }
+$scope() { Array values = []; values.push(1); }
   return 0;
 }
 ```
@@ -557,7 +557,7 @@ int main(void) {
   Scope.retain();
   {
     defer Scope.release();
-    { Array values = %[]; values.push(1); }
+    { Array values = []; values.push(1); }
   }
 }
   return 0;
@@ -652,7 +652,7 @@ private synchronized decorator keeps its own policy.
 
 ```x2c
 int main(void) {
-Array items = $auto(%[]);
+Array items = $auto([]);
 Buffer text = $auto(Buffer.new(0));
 items.push(42);
 text.write(items.repr());
@@ -685,9 +685,9 @@ a new Array to an `$auto` local does not free the earlier Array:
 
 ```x2c
 int main(void) {
-Array current = $auto(%[]);
+Array current = $auto([]);
 Array earlier = current;
-current = %[];
+current = [];
 earlier.free();
   return 0;
 }
@@ -716,7 +716,7 @@ explicit.
 class History struct { Array lengths; } *;
 
 void History.init(History self) {
-  self.lengths = %[];
+  self.lengths = [];
 }
 
 void History.free(History self) {
@@ -806,8 +806,8 @@ indexed sequences, and `Map` for mutable key/value pairs. Build text with
 
 ```x2c
 List syntax = %(call print "hello");
-Array work = %[1, 2, 3];
-Map index = %{name: "x2c"};
+Array work = [1, 2, 3];
+Map index = {name: "x2c"};
 
 work.push(4);
 index[<count>] = work.len();
@@ -886,7 +886,7 @@ Prefer `try_*` operations when the full value domain includes `Null` or when a
 fallback would lose information:
 
 ```x2c
-Map map = %{"name": "x2c"};
+Map map = {"name": "x2c"};
 Var key = "name";
 Var value;
 if (!map.try_get(key, &value))
@@ -1028,7 +1028,7 @@ line is not C, so they report an error for a script unit.
 #!/usr/bin/env -S x2c script
 static String greeting(String name) => %"hello, $name";
 
-String name = args ? args.car().string() : %"world";
+String name = args ? args.car().string() : "world";
 printf("%s\n", greeting(name));
 if (!args) return 1;
 ```
@@ -2453,6 +2453,47 @@ private descriptor tables and other fixed C callback positions.
 The tagged value model specified here is introduced gradually in
 [values and Var](https://x2c-lang.dev/docs/guide/values.html).
 
+### Array and Map literals
+
+In operand position, a bare `[` begins an `Array` literal. Its
+comma-separated elements are ordinary x2c expressions, each converted to
+`Var`, and a trailing comma is accepted:
+
+```x2c
+int n = 4;
+Array values = [1, n * 10, "text", <sym>, [n]];
+```
+
+A `{` whose first entry is a Map entry begins a `Map` literal. An entry is
+`KEY: VALUE`, or an `Entry` macro invocation. A key that is a bare identifier
+is an `Atom`, with the same spelling rules as a bare collection `Atom`. Every
+other key, and every value, is an ordinary x2c expression. Parenthesize an
+expression key that is a single identifier:
+
+```x2c
+int n = 4;
+String name = "ada";
+Map ages = {ada: 36, grace: n + 41, "text": 1, <sym>: 2, (name): 3};
+```
+
+The literal recognizes the entry by its first `:` that is outside nested
+brackets and belongs to no `?:` conditional. A brace without such an entry
+remains a C initializer. Inside an initializer, a bracketed index followed by
+`=`, `.`, or `[` remains a designator; any other bracket is an `Array`
+literal. Both literals build a fresh object at each evaluation, as `%[]` and
+`%{}` do, and a declared typed `Array` or `Map` family builds its own
+representation. Nested `[...]` and `{...}` are evaluated literals of the same
+kinds; nested `List` data is written `%(...)`.
+
+`[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
+when its destination is a `Map`, an alias of `Map`, or a type that converts
+from `Map`, and likewise for `Array`; for any other destination, including
+`Var`, it is the native zero initializer.
+
+The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
+bare forms differ only in evaluating elements, values, and non-identifier
+keys.
+
 ### Percent literals, quote, and unquote
 
 In operand position, `%` followed by a literal delimiter is the quoting sigil.
@@ -2591,8 +2632,10 @@ comments or newlines. Their separate escape boundaries are preserved:
 `"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
 typing and converts to `String` when its context requires it. A context whose
 type is a `class` or `typedef` alias reaching `String`, such as
-`class Path String;`, requires the same conversion. This adjacency rule does
-not combine percent strings or change quoted collection syntax.
+`class Path String;`, requires the same conversion. A literal that receives a
+method with no `char *` definition converts to `String` first, so
+`"hello".len()` is `5`. This adjacency rule does not combine percent strings or
+change quoted collection syntax.
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,
@@ -3293,7 +3336,7 @@ bind one name or destructure a key and value:
 ```x2c
 int main(void) {
   List values = %(1 2 3);
-  Map map = %{1: 10, 2: 20};
+  Map map = {1: 10, 2: 20};
   int total = 0;
 foreach(int value, values) total += value;
 foreach(int key, map.keys()) printf("%d\n", key);

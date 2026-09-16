@@ -124,7 +124,7 @@ runtime matching functions when the patterns are themselves data.
 ```x2c
 Scope.retain();
 String text = "temporary";
-Array values = %[$text, 1, 2, 3];
+Array values = [text, 1, 2, 3];
 printf("%s\n", values.repr());
 Scope.release();
 ```

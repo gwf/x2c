@@ -14,7 +14,7 @@ String raw = "  tea:42  ", row = raw.strip(NULL);
 String name = row[:3].upper(), title = name + " ORDER";
 
 // Equal contents compare in constant time, however they were built.
-assert(title == %"tea order".upper());
+assert(title == "tea order".upper());
 
 // Parse a sliced field and interpolate the result.
 long quantity;

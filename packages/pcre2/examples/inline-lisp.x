@@ -7,7 +7,7 @@ int main(void) {
   defer lisp.destroy();
   RegexpLisp.install(lisp);
 
-  String text = %"Order 41 ships with 3 labels";
+  String text = "Order 41 ships with 3 labels";
   List result = lisp.eval(%(
     `(,(length (regex-find-all "[[:alpha:]]+" $text))
       ,(regex-replace "[0-9]+" $text "#"))
@@ -18,7 +18,7 @@ int main(void) {
   printf("%d words: %s\n", words, redacted);
 
   /*  The same session composes the bindings without returning to x2c. */
-  String csv = %"alpha, beta, gamma";
+  String csv = "alpha, beta, gamma";
   puts(lisp.eval(%(
     regex-replace "," (car (regex-split ", " $csv)) ""
   )).string());

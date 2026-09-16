@@ -44,7 +44,7 @@ static int _train(void) {
   Tensor y = x @ weights.t() + 0.5 + Tensor.randn(%(64 1), XT_FLOAT32) * 0.05;
 
   Module model = _mlp();
-  Map start = %{};
+  Map start = {};
   foreach (List pair, model.named_parameters())
     start[pair[0].str()] = pair[1].tensor();
   start["data.x"] = x;

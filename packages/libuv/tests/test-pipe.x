@@ -102,7 +102,7 @@ static void _exchange_accepted(UvPipe listener, UvPipe pipe, Var value) {
 }
 
 static void pipe_exchanges_binary_data_and_copies_names(void) {
-  String path = _pipe_path(%"exchange");
+  String path = _pipe_path("exchange");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -172,7 +172,7 @@ static void _owned_pipe_read(UvPipe pipe, Bytes chunk, Var value) {
 
 static void _owned_pipe_connected(UvPipe pipe, Var value) {
   (void) value;
-  pipe.write(%"owned").shutdown_write();
+  pipe.write("owned").shutdown_write();
 }
 
 static void _owned_pipe_accepted(UvPipe listener, UvPipe pipe, Var value) {
@@ -184,7 +184,7 @@ static void _owned_pipe_accepted(UvPipe listener, UvPipe pipe, Var value) {
 }
 
 static void pipe_accepted_connection_outlives_listener_and_removes_path(void) {
-  String path = _pipe_path(%"owned");
+  String path = _pipe_path("owned");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -215,7 +215,7 @@ static void _unexpected_pipe_connect(UvPipe pipe, Var value) {
 }
 
 static void pipe_missing_path_reports_error_and_finishes_request(void) {
-  String path = _pipe_path(%"missing");
+  String path = _pipe_path("missing");
   unlink(path);
   UvLoop loop = UvLoop.new();
   int calls = 0;
@@ -251,7 +251,7 @@ static void pipe_missing_path_reports_error_and_finishes_request(void) {
 }
 
 static void pipe_failed_bind_does_not_remove_another_listeners_path(void) {
-  String path = _pipe_path(%"occupied");
+  String path = _pipe_path("occupied");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -291,7 +291,7 @@ static void _failing_pipe_read(UvPipe pipe, Bytes chunk, Var value) {
 
 static void _failure_pipe_connected(UvPipe pipe, Var value) {
   (void) value;
-  pipe.write(%"fail").shutdown_write();
+  pipe.write("fail").shutdown_write();
 }
 
 static void _failure_pipe_accepted(UvPipe listener, UvPipe pipe, Var value) {
@@ -302,7 +302,7 @@ static void _failure_pipe_accepted(UvPipe listener, UvPipe pipe, Var value) {
 }
 
 static void pipe_read_error_returns_from_run_and_the_loop_resumes(void) {
-  String path = _pipe_path(%"read-fail");
+  String path = _pipe_path("read-fail");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -341,7 +341,7 @@ static void _empty_pipe_connect(UvPipe pipe, Var value) {
 }
 
 static void pipe_accept_error_closes_listener_and_accepted_connection(void) {
-  String path = _pipe_path(%"accept-fail");
+  String path = _pipe_path("accept-fail");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -385,7 +385,7 @@ static void pipe_rejects_invalid_names_and_operations_before_connection(void) {
   EXPECT_TRUE(caught);
 
   caught = 0;
-  try pipe.write(%"x");
+  try pipe.write("x");
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"write");

@@ -35,7 +35,7 @@ static inline String _generate_cache_ident(Var id, String prefix) =>
 static List _generate_cache_declare(
   List ids, String type, Compiler compiler, String prefix) {
   if (!ids) return NULL;
-  Array values = %[];
+  Array values = [];
   foreach (Var id, ids) {
     List binding = compiler.sym.reference(
       %(${_generate_cache_ident(id, prefix)}), NULL);
@@ -142,7 +142,7 @@ static List _zero_static_initializer(Compiler compiler, List value) {
     case %(expr ?type (!set ?body (initval *))): {
       List header = NULL;
       List cases = Ast.initializer_cases(body.list(), &header);
-      Array zeroed = %[];
+      Array zeroed = [];
       foreach (List choice, cases) {
         (List condition, List path, Type destination, List input) = choice;
         List zero = _zero_static_initializer(compiler, input);
@@ -161,7 +161,7 @@ static List _zero_static_initializer(Compiler compiler, List value) {
         ? %(expr $type (composite (commas $zero))) : zero;
     }
     case %(composite (commas *items)): {
-      Array zeroed = %[];
+      Array zeroed = [];
       foreach (List item, items)
         zeroed.push(_zero_static_initializer(compiler, item));
       return %(composite (commas @{zeroed.list_free()}));
@@ -177,7 +177,7 @@ static List _zero_static_initializer(Compiler compiler, List value) {
    native object's actual dimensions rather than the initializer count. */
 static List _build_static_array_block(
   Compiler compiler, List target, Type array, List items) {
-  Array statements = %[];
+  Array statements = [];
   foreach (List row, compiler.initializer_rows(array, items, target)) {
     (List original, List cases) = row;
     List terminal = original, header = NULL, source = NULL;
@@ -189,7 +189,7 @@ static List _build_static_array_block(
         Ast.initializer_cases(body.list(), &header);
         functions = Ast.initializer_functions(body.list(), &source);
       }
-    Array assigned = %[];
+    Array assigned = [];
     List applicable = NULL;
     int unconditional = 0;
     foreach (List choice, cases) {
@@ -308,7 +308,7 @@ static List _defer_one_binding(
 
 static List _defer_bindings(
   Compiler compiler, List decltype, List bound_list, Array initializers) {
-  Array values = %[];
+  Array values = [];
   foreach (Ast bound, bound_list)
     values.push(_defer_one_binding(compiler, decltype, bound, initializers));
   return %(declare $decltype (bindings @{values.list_free()}));
@@ -333,7 +333,7 @@ static List _rewrite_file_scope_decl(
 
 static void _report_static_initializer_cycle(
   Compiler compiler, Array initializers, Map state) {
-  Array notes = %[], List first = NULL;
+  Array notes = [], List first = NULL;
   foreach (List initializer, initializers)
     match (initializer)
       case %(?binding *): {
@@ -396,7 +396,7 @@ static void _queue_one_static_initializer(
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
      defines no helper. */
-  Array statements = %[];
+  Array statements = [];
   foreach (List initializer, definitions) {
     List helper = initializer.caddr(), guard = initializer[3];
     foreach (List directive, guard) statements.push(directive);
@@ -417,11 +417,11 @@ static void _queue_one_static_initializer(
    consuming initializer late as well. */
 static void _queue_static_initializers(
   Compiler compiler, Array initializers, Symbol deferred_kind) {
-  Map pending = %{}, state = %{}, phases = %{};
+  Map pending = {}, state = {}, phases = {};
   foreach (List initializer, initializers) {
     Var definitions;
     if (!pending.try_get(initializer.car(), &definitions))
-      pending[initializer.car()] = definitions = %[];
+      pending[initializer.car()] = definitions = [];
     definitions.array().push(initializer);
   }
   foreach (List initializer, initializers)
@@ -435,7 +435,7 @@ static void _queue_static_initializers(
    the source's initializer is ordered against the file statics it reads. */
 static List _rewrite_file_scope_statics(
   Compiler compiler, List code, Array initializers) {
-  Array output = %[], groups = %[];
+  Array output = [], groups = [];
   foreach (List item, code) {
     int first = initializers.len();
     match (item) {
@@ -443,7 +443,7 @@ static List _rewrite_file_scope_statics(
         item = _rewrite_file_scope_decl(compiler, declaration, initializers);
       case %(preproc ?content): {
         Symbol kind = preproc_conditional_kind(content);
-        if (kind == <open>) groups.push(%[$item]);
+        if (kind == <open>) groups.push([item]);
         else if (kind == <branch> && groups.len())
           groups[groups.len() - 1].array().push(item);
         else if (kind == <close> && groups.len()) groups.take_last();
@@ -454,7 +454,7 @@ static List _rewrite_file_scope_statics(
       (List binding, List assignment) = initializers[i];
       List helper = compiler.sym.introduce(
         compiler.fresh_name("static_initialize"));
-      Array guard = %[];
+      Array guard = [];
       foreach (Array group, groups)
         foreach (List directive, group) guard.push(directive);
       initializers[i] = %($binding $assignment $helper
@@ -504,7 +504,7 @@ static List _split_ids(Array keys, Array ids) {
    replaces one memo entry and may cause harmless extra work. */
 static int _collect_cache_ids(
   Compiler compiler, Var value, List *seen, Array ids) {
-  Array pending = $auto(%[$value]);
+  Array pending = $auto([value]);
   int count = 0;
   while (pending) {
     Var current = pending.take_last();
@@ -529,7 +529,7 @@ static int _collect_cache_ids(
 
 static Array _cache_ids_in(Compiler compiler, List code) {
   List seen[4096] = { 0 };
-  Array ids = %[];
+  Array ids = [];
   ids.resize(compiler.id_keys.len());
   if (!_collect_cache_ids(compiler, code, seen, ids)) {
     ids.free();
@@ -595,7 +595,7 @@ static List _setup_header_cache(
   String initializer_name) {
   if (!ids) return header;
   List (list_ids, string_ids, var_ids) = _split_ids(c.id_keys, ids);
-  Array declarations = %[];
+  Array declarations = [];
   List declaration = _generate_cache_declare(list_ids, "List", c, prefix);
   if (declaration) declarations.push(declaration);
   declaration = _generate_cache_declare(string_ids, "String", c, prefix);
@@ -605,7 +605,7 @@ static List _setup_header_cache(
   List guard = c.sym.reference(%($guard_name), NULL);
   List initializer = c.sym.reference(%($initializer_name), NULL);
   declarations.push(_make_header_cache_guard(guard));
-  Array statements = %[];
+  Array statements = [];
   for (int i = 0, n = c.id_keys.len(); i < n; i++) {
     if (ids[i].is_null()) continue;
     List statement = _generate_cache_initializer(i, c, prefix);
@@ -614,7 +614,7 @@ static List _setup_header_cache(
   declarations.push(
     _make_header_cache_init(guard, initializer, statements.list_free()));
   ids.free();
-  List prelude = declarations.list_free(), Array output = %[];
+  List prelude = declarations.list_free(), Array output = [];
   int inserted = 0;
   foreach (List node, header) {
     int replaced = 0;
@@ -672,7 +672,7 @@ static List _setup_source_cache_init(
   _queue_static_initializers(c, initializers, deferred_kind);
   List (list_ids, string_ids, var_ids) = _split_ids(keys, ids);
   ids.free();
-  Array built = %[];
+  Array built = [];
   List declaration = _generate_cache_declare(list_ids, "List", c, NULL);
   if (declaration) built.push(declaration);
   declaration = _generate_cache_declare(string_ids, "String", c, NULL);
@@ -696,12 +696,12 @@ static List _setup_source_cache_init(
 List Compiler.setup_cache_init(
   Compiler compiler, List header, List source, String prefix,
   String guard_name, String initializer_name) {
-  Array initializers = %[];
+  Array initializers = [];
   header = _rewrite_file_scope_statics(compiler, header, initializers);
   Array header_ids = _cache_ids_in(compiler, header);
   /* A deferred header initializer is now in the source's initializer,
      so its slots belong to the source region. */
-  Array scan = %[];
+  Array scan = [];
   scan.push(source);
   foreach (Var initializer, initializers) scan.push(initializer);
   Array source_ids = _cache_ids_in(compiler, scan.list_free());

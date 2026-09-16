@@ -565,7 +565,7 @@ int File.equal(File x, File y) => (void *) x == (void *) y;
 /** Returns a readable handle and descriptor representation without reading. */
 String File.repr(File file) {
   if (!file) return Var.pointer_string(file);
-  return %"<File:%p, fd:%d>".printf(file, file.fileno());
+  return "<File:%p, fd:%d>".printf(file, file.fileno());
 }
 
 /** Returns the display `String` for `file`.

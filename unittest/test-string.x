@@ -29,7 +29,7 @@ static Var _string_identity_var(Var value) {
 }
 
 static Var _string_truthy_var(Var value) {
-  return value.char() == 'a' ? %"truthy" : NULL;
+  return value.char() == 'a' ? "truthy" : NULL;
 }
 
 static long _string_long_next(char ch) {
@@ -38,7 +38,7 @@ static long _string_long_next(char ch) {
 
 static Var _string_bad_map(char ch) {
   (void) ch;
-  return %"not a number";
+  return "not a number";
 }
 
 static Var _string_no_arguments(void) {
@@ -80,7 +80,7 @@ static void string_canonical_identity(void) {
 }
 
 static void string_empty_is_native_zero(void) {
-  String literal = %"";
+  String literal = "";
   String constructed = String.new("");
   String sized = String.new_len("ignored", 0);
   String allocated = String.malloc(1);
@@ -91,39 +91,48 @@ static void string_empty_is_native_zero(void) {
   EXPECT_NULL(constructed);
   EXPECT_NULL(sized);
   EXPECT_NULL(allocated.intern_free());
-  EXPECT_TRUE(literal.repr() == %"\"\"");
+  EXPECT_TRUE(literal.repr() == "\"\"");
+}
+
+/* A C string literal receives String methods. */
+static void string_literal_receives_methods(void) {
+  EXPECT_INT_EQ("hello".len(), 5);
+  EXPECT_TRUE("x.c".endswith(".c"));
+  EXPECT_TRUE("abc".upper() == "ABC");
+  Var count = 42L;
+  EXPECT_STR_EQ("<%ld>".printf(count), "<42>");
 }
 
 static void string_add_and_len(void) {
-  String hello = %"hello";
-  String world = %"world";
+  String hello = "hello";
+  String world = "world";
   String joined = String.add(hello, world);
   EXPECT_INT_EQ(joined.len(), 10);
-  EXPECT_TRUE(joined == %"helloworld");
+  EXPECT_TRUE(joined == "helloworld");
 
-  String repeated = String.repeat(%"ab", 3);
-  EXPECT_TRUE(repeated == %"ababab");
+  String repeated = String.repeat("ab", 3);
+  EXPECT_TRUE(repeated == "ababab");
 }
 
 static void string_slice_and_contains(void) {
-  String text = %"compiler", mid = text.getslice(1, 4, 1);
-  EXPECT_TRUE(mid == %"omp");
-  EXPECT_TRUE(text.contains(%"pile"));
+  String text = "compiler", mid = text.getslice(1, 4, 1);
+  EXPECT_TRUE(mid == "omp");
+  EXPECT_TRUE(text.contains("pile"));
 
   String replaced = text.withindex(0, 'C');
-  EXPECT_TRUE(replaced == %"Compiler");
+  EXPECT_TRUE(replaced == "Compiler");
 }
 
 static void string_slice_stack_probe_boundaries(void) {
-  String text = %"abcdef";
+  String text = "abcdef";
   EXPECT_TRUE(text.getslice(0, 6, 1) === text);
-  EXPECT_TRUE(text.getslice(1, 5, 1) == %"bcde");
-  EXPECT_TRUE(text.getslice(-4, -1, 1) == %"cdef");
+  EXPECT_TRUE(text.getslice(1, 5, 1) == "bcde");
+  EXPECT_TRUE(text.getslice(-4, -1, 1) == "cdef");
   EXPECT_TRUE(text.getslice(-99, 99, 1) === text);
   EXPECT_NULL(text.getslice(3, 3, 1));
   EXPECT_NULL(text.getslice(4, 2, 1));
-  EXPECT_TRUE(text.getslice(0, 6, 2) == %"ace");
-  EXPECT_TRUE(text.getslice(5, -7, -2) == %"fdb");
+  EXPECT_TRUE(text.getslice(0, 6, 2) == "ace");
+  EXPECT_TRUE(text.getslice(5, -7, -2) == "fdb");
 
   char raw[259];
   for (int i = 0; i < 258; i++) raw[i] = 'a' + i % 26;
@@ -156,18 +165,18 @@ static void string_slice_stack_probe_boundaries(void) {
    equal String sharing this canonical storage; see the
    string-bracket-assignment compiler fixture. */
 static void string_withindex_copies_and_leaves_input_intact(void) {
-  String original = %"hello", alias = %"hello";
+  String original = "hello", alias = "hello";
   EXPECT_TRUE(original == alias);
 
   String updated = original.withindex(0, 'j');
 
-  EXPECT_TRUE(updated == %"jello");
+  EXPECT_TRUE(updated == "jello");
   EXPECT_TRUE(updated != original);
-  EXPECT_TRUE(original == %"hello");
-  EXPECT_TRUE(alias == %"hello");
+  EXPECT_TRUE(original == "hello");
+  EXPECT_TRUE(alias == "hello");
   EXPECT_INT_EQ(original.len(), 5);
-  EXPECT_TRUE(original.hash() == String.hash(%"hello"));
-  EXPECT_TRUE(updated.hash() == String.hash(%"jello"));
+  EXPECT_TRUE(original.hash() == String.hash("hello"));
+  EXPECT_TRUE(updated.hash() == String.hash("jello"));
 
   // A fresh intern of the original content still yields the original bytes.
   EXPECT_TRUE(String.new("hello") == original);
@@ -175,19 +184,19 @@ static void string_withindex_copies_and_leaves_input_intact(void) {
   // Out-of-range indices return the input unchanged rather than mutating.
   EXPECT_TRUE(original.withindex(5, 'x') == original);
   EXPECT_TRUE(original.withindex(-6, 'x') == original);
-  EXPECT_TRUE(original == %"hello");
+  EXPECT_TRUE(original == "hello");
 }
 
 static void string_noop_construction_preserves_owner(void) {
   Pool pool = String.pool_retain_named("string-noop-construction");
-  String text = %"unchanged";
-  String long_text = %"abcdefghij".repeat(30);
+  String text = "unchanged";
+  String long_text = "abcdefghij".repeat(30);
   PoolStats before = Pool.stats(pool);
 
   EXPECT_TRUE(text.repeat(1) === text);
   EXPECT_TRUE(text.withindex(0, 'u') === text);
   EXPECT_TRUE(long_text.getslice(0, long_text.len(), 1) === long_text);
-  EXPECT_TRUE(text.replace_n(%"change", %"change", -1) === text);
+  EXPECT_TRUE(text.replace_n("change", "change", -1) === text);
 
   PoolStats after = Pool.stats(pool);
   EXPECT_INT_EQ((int) after.allocation_calls,
@@ -198,7 +207,7 @@ static void string_noop_construction_preserves_owner(void) {
   EXPECT_TRUE(transient.repeat(1) === text);
   EXPECT_TRUE(transient.withindex(0, 'u') === text);
   EXPECT_TRUE(transient.getslice(0, transient.len(), 1) === text);
-  EXPECT_TRUE(transient.replace_n(%"change", %"change", -1) === text);
+  EXPECT_TRUE(transient.replace_n("change", "change", -1) === text);
   transient.free();
   String.pool_release();
 }
@@ -207,12 +216,12 @@ static void string_invalid_bytes_transfer(void) {
   int caught = 0;
   try String.new_fill('\0', 3);
   catch %(bad-arg *): caught++;
-  try %"abc".withindex(1, '\0');
+  try "abc".withindex(1, '\0');
   catch %(bad-arg *): caught++;
-  try %"x".pad_left(3, '\0');
+  try "x".pad_left(3, '\0');
   catch %(bad-arg *): caught++;
 
-  try %"abc".map(_string_test_nul);
+  try "abc".map(_string_test_nul);
   catch %(bad-result *): caught++;
 
   try String.pool_release();
@@ -223,14 +232,14 @@ static void string_invalid_bytes_transfer(void) {
 static void _callback_transfer_round(int measure) {
   ScopeStats before = Scope.stats();
   int caught = 0;
-  try %"abc".map(_string_raises);
+  try "abc".map(_string_raises);
   catch %(invariant (value ?value)): caught = value.int() == 75;
   ScopeStats after = Scope.stats();
   EXPECT_TRUE(caught);
   if (measure) EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
 
   before = Scope.stats();
-  try %"abc".map(_string_test_nul);
+  try "abc".map(_string_test_nul);
   catch %(bad-result *): caught++;
   after = Scope.stats();
   EXPECT_INT_EQ(caught, 2);
@@ -249,7 +258,7 @@ static void string_escape_sequences(void) {
   EXPECT_INT_EQ(esc.len(), 5);
   EXPECT_INT_EQ(esc.getindex(0), 27);
 
-  String mixed = %"\n\t\\\"";
+  String mixed = "\n\t\\\"";
   EXPECT_INT_EQ(mixed.len(), 4);
   EXPECT_INT_EQ(mixed.getindex(0), '\n');
   EXPECT_INT_EQ(mixed.getindex(1), '\t');
@@ -301,15 +310,15 @@ going");
 }
 
 static void string_boundary_behavior(void) {
-  String text = %"abc";
+  String text = "abc";
   EXPECT_INT_EQ(text.getindex(3), -1);
   EXPECT_INT_EQ(text.getindex(-1), 'c');
   EXPECT_INT_EQ(text.getindex(-4), -1);
   EXPECT_INT_EQ(text.getindex(99), -1);
-  EXPECT_INT_EQ(text.find(%"abc"), 0);
-  EXPECT_INT_EQ(text.find(%"bc"), 1);
-  EXPECT_INT_EQ(text.find_within(%"bc", 1, -1), 1);
-  EXPECT_INT_EQ(text.find_within(%"c", 0, 2), -1);
+  EXPECT_INT_EQ(text.find("abc"), 0);
+  EXPECT_INT_EQ(text.find("bc"), 1);
+  EXPECT_INT_EQ(text.find_within("bc", 1, -1), 1);
+  EXPECT_INT_EQ(text.find_within("c", 0, 2), -1);
   EXPECT_TRUE(String.compare(NULL, text) < 0);
   EXPECT_TRUE(text.compare(NULL) > 0);
 }
@@ -322,7 +331,7 @@ static void string_constructor_invariants(void) {
 
   char embedded[] = {'b', 'c', '\0', 'd', '\0'};
   String truncated = String.new_len(embedded, 4);
-  EXPECT_TRUE(truncated == %"bc");
+  EXPECT_TRUE(truncated == "bc");
   EXPECT_INT_EQ(truncated.len(), 2);
 
   String first = String.new_len("order-sensitive", 64);
@@ -350,11 +359,11 @@ static void string_constructor_invariants(void) {
   strcpy(oversized, "short");
   String finalized = oversized.intern_free();
   EXPECT_INT_EQ(finalized.len(), 5);
-  EXPECT_TRUE(finalized == %"short");
+  EXPECT_TRUE(finalized == "short");
 }
 
 static void string_empty_search_contract(void) {
-  String empty = NULL, text = %"abc";
+  String empty = NULL, text = "abc";
   EXPECT_INT_EQ(text.find(empty), 0);
   EXPECT_INT_EQ(empty.find(empty), 0);
   EXPECT_INT_EQ(text.find_within(empty, -1, -1), 2);
@@ -363,26 +372,26 @@ static void string_empty_search_contract(void) {
   EXPECT_TRUE(empty.contains(empty));
   EXPECT_TRUE(text.startswith(empty));
   EXPECT_TRUE(text.endswith(empty));
-  EXPECT_FALSE(empty.contains(%"a"));
-  EXPECT_FALSE(empty.startswith(%"a"));
-  EXPECT_FALSE(empty.endswith(%"a"));
+  EXPECT_FALSE(empty.contains("a"));
+  EXPECT_FALSE(empty.startswith("a"));
+  EXPECT_FALSE(empty.endswith("a"));
   EXPECT_INT_EQ(text.find_all(empty, 0, -1).len(), 0);
   EXPECT_INT_EQ(text.count(empty), 0);
 }
 
 static void string_search_and_replace(void) {
-  String text = %"abxxabxxab";
-  EXPECT_INT_EQ(text.rfind(%"ab"), 8);
-  EXPECT_INT_EQ(text.count(%"ab"), 3);
-  EXPECT_INT_EQ(%"aaaa".count(%"aa"), 2);
-  EXPECT_TRUE(%"aaaa".find_all(%"aa", 0, -1) == %(0 2));
-  EXPECT_TRUE(%"ababa".find_all(%"ba", 0, 4) == %(1));
-  EXPECT_INT_EQ(%"ababa".find_all(%"ba", 2, -1).car().integer(), 3);
-  EXPECT_TRUE(text.replace(%"ab", NULL) == %"xxxx");
-  EXPECT_TRUE(text.replace_n(%"ab", %"Q", 2) == %"QxxQxxab");
-  EXPECT_TRUE(text.replace_n(%"ab", %"Q", 0) === text);
-  EXPECT_TRUE(text.replace_n(NULL, %"Q", -1) === text);
-  EXPECT_TRUE(text.replace(%"missing", %"Q") === text);
+  String text = "abxxabxxab";
+  EXPECT_INT_EQ(text.rfind("ab"), 8);
+  EXPECT_INT_EQ(text.count("ab"), 3);
+  EXPECT_INT_EQ("aaaa".count("aa"), 2);
+  EXPECT_TRUE("aaaa".find_all("aa", 0, -1) == %(0 2));
+  EXPECT_TRUE("ababa".find_all("ba", 0, 4) == %(1));
+  EXPECT_INT_EQ("ababa".find_all("ba", 2, -1).car().integer(), 3);
+  EXPECT_TRUE(text.replace("ab", NULL) == "xxxx");
+  EXPECT_TRUE(text.replace_n("ab", "Q", 2) == "QxxQxxab");
+  EXPECT_TRUE(text.replace_n("ab", "Q", 0) === text);
+  EXPECT_TRUE(text.replace_n(NULL, "Q", -1) === text);
+  EXPECT_TRUE(text.replace("missing", "Q") === text);
 }
 
 static void string_foreach_bytes_as_int_and_char(void) {
@@ -408,33 +417,33 @@ static void string_foreach_bytes_as_int_and_char(void) {
 }
 
 static void string_transformations(void) {
-  String lower = %"already";
+  String lower = "already";
   EXPECT_TRUE(lower.lower() === lower);
-  EXPECT_TRUE(%"HeLLo".lower() == %"hello");
-  EXPECT_TRUE(%"HeLLo".upper() == %"HELLO");
-  EXPECT_TRUE(%"hELLO".capitalize() == %"Hello");
-  EXPECT_TRUE(%"  x  ".strip(NULL) == %"x");
-  EXPECT_TRUE(%"x".strip(NULL) === %"x");
-  EXPECT_TRUE(%"  x  ".lstrip(NULL) == %"x  ");
-  EXPECT_TRUE(%"  x  ".rstrip(NULL) == %"  x");
-  EXPECT_TRUE(%"xytextyx".lstrip("xy") == %"textyx");
-  EXPECT_TRUE(%"xytextyx".rstrip("xy") == %"xytext");
+  EXPECT_TRUE("HeLLo".lower() == "hello");
+  EXPECT_TRUE("HeLLo".upper() == "HELLO");
+  EXPECT_TRUE("hELLO".capitalize() == "Hello");
+  EXPECT_TRUE("  x  ".strip(NULL) == "x");
+  EXPECT_TRUE("x".strip(NULL) === %"x");
+  EXPECT_TRUE("  x  ".lstrip(NULL) == "x  ");
+  EXPECT_TRUE("  x  ".rstrip(NULL) == "  x");
+  EXPECT_TRUE("xytextyx".lstrip("xy") == "textyx");
+  EXPECT_TRUE("xytextyx".rstrip("xy") == "xytext");
   EXPECT_TRUE(lower.lstrip(NULL) === lower);
   EXPECT_TRUE(lower.rstrip(NULL) === lower);
-  EXPECT_NULL(%" \t".lstrip(NULL));
-  EXPECT_NULL(%" \t".rstrip(NULL));
-  EXPECT_NULL(%"".lstrip(NULL));
-  EXPECT_NULL(%"".rstrip(NULL));
-  EXPECT_TRUE(String.new_fill('x', 3) == %"xxx");
+  EXPECT_NULL(" \t".lstrip(NULL));
+  EXPECT_NULL(" \t".rstrip(NULL));
+  EXPECT_NULL("".lstrip(NULL));
+  EXPECT_NULL("".rstrip(NULL));
+  EXPECT_TRUE(String.new_fill('x', 3) == "xxx");
   EXPECT_NULL(String.new_fill('x', 0));
-  EXPECT_TRUE(%"a1b2".filter(_string_test_alpha) == %"ab");
-  EXPECT_TRUE(%"abc".map(_string_test_next) == %"bcd");
-  EXPECT_NULL(%"abc".keep(NULL));
-  EXPECT_TRUE(%"abc".keep(%"ac") == %"ac");
-  EXPECT_TRUE(%"abc".reject(NULL) === %"abc");
-  EXPECT_TRUE(%"aaabb".squeeze(%"ab") == %"ab");
-  EXPECT_NULL(%"abc".repeat(0));
-  EXPECT_TRUE(%"ab".repeat(2) == %"abab");
+  EXPECT_TRUE("a1b2".filter(_string_test_alpha) == "ab");
+  EXPECT_TRUE("abc".map(_string_test_next) == "bcd");
+  EXPECT_NULL("abc".keep(NULL));
+  EXPECT_TRUE("abc".keep("ac") == "ac");
+  EXPECT_TRUE("abc".reject(NULL) === %"abc");
+  EXPECT_TRUE("aaabb".squeeze("ab") == "ab");
+  EXPECT_NULL("abc".repeat(0));
+  EXPECT_TRUE("ab".repeat(2) == "abab");
 }
 
 static void string_func_callbacks(void) {
@@ -445,18 +454,18 @@ static void string_func_callbacks(void) {
   Func captured_filter = %!(char ch) => ch != rejected;
   Func captured_map = %!(char ch) => ch + shift;
 
-  EXPECT_TRUE(%"a1b2".filter(alpha_pointer) == %"ab");
-  EXPECT_TRUE(%"abc".filter(captured_filter) == %"ac");
-  EXPECT_TRUE(%"abc".filter(_string_truthy_var) == %"a");
-  EXPECT_TRUE(%"abc".map(next_pointer) == %"bcd");
-  EXPECT_TRUE(%"abc".map(captured_map) == %"bcd");
-  EXPECT_TRUE(%"abc".map(_string_long_next) == %"bcd");
+  EXPECT_TRUE("a1b2".filter(alpha_pointer) == "ab");
+  EXPECT_TRUE("abc".filter(captured_filter) == "ac");
+  EXPECT_TRUE("abc".filter(_string_truthy_var) == "a");
+  EXPECT_TRUE("abc".map(next_pointer) == "bcd");
+  EXPECT_TRUE("abc".map(captured_map) == "bcd");
+  EXPECT_TRUE("abc".map(_string_long_next) == "bcd");
   _string_saw_char = 0;
-  EXPECT_TRUE(%"a".map(_string_identity_var) == %"a");
+  EXPECT_TRUE("a".map(_string_identity_var) == "a");
   EXPECT_TRUE(_string_saw_char);
   // the reported defect: a callback reading its <i8> box through int()
   Func int_reader_map = %!(Var ch) => ch.int() + shift;
-  EXPECT_TRUE(%"abc".map(int_reader_map) == %"bcd");
+  EXPECT_TRUE("abc".map(int_reader_map) == "bcd");
 }
 
 static void string_func_rejects_invalid_callbacks_on_invocation(void) {
@@ -464,11 +473,11 @@ static void string_func_rejects_invalid_callbacks_on_invocation(void) {
   Func reference = _string_reference_argument;
   int arity_caught = 0, reference_caught = 0, conversion_caught = 0;
 
-  try %"abc".filter(wrong_arity);
+  try "abc".filter(wrong_arity);
   catch %(bad-arity *): arity_caught++;
-  try %"abc".map(reference);
+  try "abc".map(reference);
   catch %(bad-types *): reference_caught++;
-  try %"abc".map(_string_bad_map);
+  try "abc".map(_string_bad_map);
   catch %(no-convert *): conversion_caught++;
   EXPECT_INT_EQ(arity_caught, 1);
   EXPECT_INT_EQ(reference_caught, 1);
@@ -477,8 +486,8 @@ static void string_func_rejects_invalid_callbacks_on_invocation(void) {
   String empty = NULL;
   EXPECT_NULL(empty.filter(wrong_arity));
   EXPECT_NULL(empty.map(wrong_arity));
-  EXPECT_TRUE(%"abc".filter(NULL) === %"abc");
-  EXPECT_TRUE(%"abc".map(NULL) === %"abc");
+  EXPECT_TRUE("abc".filter(NULL) === %"abc");
+  EXPECT_TRUE("abc".map(NULL) === %"abc");
 }
 
 static void string_byte_escaping(void) {
@@ -493,42 +502,42 @@ static void string_byte_escaping(void) {
   String mixed = String.new_len(mixed_raw, 7);
   Buffer out = Buffer.new(0);
   mixed.write_repr(out);
-  EXPECT_TRUE(out.str_free() == %"\"%s\"".printf(mixed.escape()));
+  EXPECT_TRUE(out.str_free() == "\"%s\"".printf(mixed.escape()));
 }
 
 static void string_padding_removal_and_partition(void) {
-  EXPECT_TRUE(%"x".pad_left(3, '-') == %"--x");
-  EXPECT_TRUE(%"x".pad_right(3, '-') == %"x--");
-  EXPECT_TRUE(%"abc".pad_center(6, '-') == %"-abc--");
-  EXPECT_TRUE(String.pad_left(NULL, 3, ' ') == %"   ");
-  EXPECT_TRUE(%"wide".pad_left(2, '-') === %"wide");
+  EXPECT_TRUE("x".pad_left(3, '-') == "--x");
+  EXPECT_TRUE("x".pad_right(3, '-') == "x--");
+  EXPECT_TRUE("abc".pad_center(6, '-') == "-abc--");
+  EXPECT_TRUE(String.pad_left(NULL, 3, ' ') == "   ");
+  EXPECT_TRUE("wide".pad_left(2, '-') === %"wide");
 
-  String path = %"prefix-body-suffix";
-  EXPECT_TRUE(path.remove_prefix(%"prefix-") == %"body-suffix");
-  EXPECT_TRUE(path.remove_suffix(%"-suffix") == %"prefix-body");
-  EXPECT_TRUE(path.remove_prefix(%"missing") === path);
+  String path = "prefix-body-suffix";
+  EXPECT_TRUE(path.remove_prefix("prefix-") == "body-suffix");
+  EXPECT_TRUE(path.remove_suffix("-suffix") == "prefix-body");
+  EXPECT_TRUE(path.remove_prefix("missing") === path);
   EXPECT_TRUE(path.remove_suffix(NULL) === path);
 
-  List parts = %"a=b=c".partition(%"=");
+  List parts = "a=b=c".partition("=");
   EXPECT_INT_EQ(parts.len(), 3);
-  expect_string_item(parts, 0, %"a");
-  expect_string_item(parts, 1, %"=");
-  expect_string_item(parts, 2, %"b=c");
+  expect_string_item(parts, 0, "a");
+  expect_string_item(parts, 1, "=");
+  expect_string_item(parts, 2, "b=c");
 
-  List right = %"a=b=c".rpartition(%"=");
-  expect_string_item(right, 0, %"a=b");
-  expect_string_item(right, 1, %"=");
-  expect_string_item(right, 2, %"c");
+  List right = "a=b=c".rpartition("=");
+  expect_string_item(right, 0, "a=b");
+  expect_string_item(right, 1, "=");
+  expect_string_item(right, 2, "c");
 
-  List missing = %"abc".partition(%"=");
-  expect_string_item(missing, 0, %"abc");
+  List missing = "abc".partition("=");
+  expect_string_item(missing, 0, "abc");
   expect_string_item(missing, 1, NULL);
   expect_string_item(missing, 2, NULL);
 
-  List empty = %"abc".rpartition(NULL);
+  List empty = "abc".rpartition(NULL);
   expect_string_item(empty, 0, NULL);
   expect_string_item(empty, 1, NULL);
-  expect_string_item(empty, 2, %"abc");
+  expect_string_item(empty, 2, "abc");
 }
 
 $(import "test-macros.xmacro")
@@ -537,6 +546,7 @@ void string_suite(void) {
   $test.run(string_canonical_identity);
   $test.run(string_empty_is_native_zero);
   $test.run(string_add_and_len);
+  $test.run(string_literal_receives_methods);
   $test.run(string_slice_and_contains);
   $test.run(string_slice_stack_probe_boundaries);
   $test.run(string_withindex_copies_and_leaves_input_intact);

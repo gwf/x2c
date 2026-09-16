@@ -189,7 +189,7 @@ static void _loop_collect(
 
 List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
   Map definitions = project_function_targets(compiler, ast, path);
-  Array direct = %[], pending = %[];
+  Array direct = [], pending = [];
   foreach (List node, ast)
     match (node)
       case %(function ?type
@@ -259,7 +259,7 @@ static List _loop_candidate(List key, List events) {
       visibility = site_visibility, location = site_location;
     }
 
-  Map counts = %{};
+  Map counts = {};
   int loop_depth = 0;
   foreach (List event, events)
     match (event)
@@ -289,7 +289,7 @@ static List _loop_candidate(List key, List events) {
   int condition = _loop_count(counts, %(use condition));
   int nested = _loop_count(counts, %(use nested));
 
-  Array operations = %[];
+  Array operations = [];
   foreach (Var (raw_operation, raw_count), counts) {
     List operation = raw_operation;
     match (operation) {
@@ -337,7 +337,7 @@ static List _loop_candidate_rank(List candidate) {
 }
 
 List LoopAllocations.finish(List units, int limit) {
-  Array lifetime_units = %[], direct = %[], pending = %[];
+  Array lifetime_units = [], direct = [], pending = [];
   foreach (List unit, units)
     match (unit)
       case %(
@@ -352,13 +352,13 @@ List LoopAllocations.finish(List units, int limit) {
     lifetime_units.list_free(), pending.list_free()
   );
 
-  Map groups = %{}, totals = %{}, functions = %{};
+  Map groups = {}, totals = {}, functions = {};
   foreach (List event, direct)
     _loop_add_event(groups, totals, functions, event);
   foreach (List event, resolved)
     _loop_add_event(groups, totals, functions, event);
 
-  Array ranked = %[];
+  Array ranked = [];
   foreach (Var (raw_key, raw_events), groups)
     ranked.push(
       _loop_candidate(raw_key.list(), raw_events.list())

@@ -59,7 +59,7 @@ static void _emit_entry(Diagnostics diag, List entry) {
 */
 Diagnostics Diagnostics.new(DiagnosticEmitter emit, void *owner, int limit) {
   Diagnostics diag = Scope.malloc(sizeof(struct Diagnostics));
-  diag.entries = %[];
+  diag.entries = [];
   diag.emit = emit;
   diag.owner = owner;
   diag.limit = (limit < 0) ? 0 : limit;
@@ -184,7 +184,7 @@ static void _emit_note_summaries(List notes) {
   if (!notes) return;
   List strings = notes.filter(%!(entry) => entry is <string>);
   if (!strings) return;
-  fprintf(stderr, "  note: %s\n", %" ".join(strings));
+  fprintf(stderr, "  note: %s\n", " ".join(strings));
 }
 
 /** Sends every later printed diagnostic to `path` as JSON Lines.
@@ -209,7 +209,7 @@ static String Compiler._json_path(Compiler compiler, String path) {
   if (!path.startswith("/") && !Path.exists(path))
     path = Path.join(compiler.root_dir, path);
   path = Path.absolute(path);
-  String directory = %"${Path.absolute(%".")}/";
+  String directory = %"${Path.absolute(".")}/";
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
@@ -311,7 +311,7 @@ List Compiler.origin_location(Compiler compiler, int occurrence) {
     relative to the compiler root. Pseudo paths and NULL stay unchanged.
 */
 String Compiler.display_path(Compiler compiler, String path) {
-  if (!path || path.startswith(%"<")) return path;
+  if (!path || path.startswith("<")) return path;
   if (compiler.source_facts) return Path.absolute(path);
   String root = compiler.root_dir;
   if (root && path && path.startswith(root) &&
@@ -330,7 +330,7 @@ String Compiler.display_path(Compiler compiler, String path) {
     producing-pool lifetime.
 */
 List Compiler.token_location(Compiler compiler, Token token) {
-  String file = compiler.filename ? compiler.filename : %"<stdin>";
+  String file = compiler.filename ? compiler.filename : "<stdin>";
   if (compiler.source_facts) file = compiler.display_path(file);
   // Unreadable input fails before tokenization; anchor it at the file start.
   if (!token) token = compiler.token;
@@ -362,7 +362,7 @@ void Compiler.report_error(
   Compiler compiler, Symbol code, String message, Token token, List notes) {
   report_suspend();
   Diagnostics diag = compiler.diagnostics;
-  message = message ? message : %"compiler error";
+  message = message ? message : "compiler error";
   List loc = _compiler_location(compiler, token);
   diag.report(code, message, loc, notes);
   if (compiler.recovery_depth > 0) raise %(malformed (category $code));
@@ -378,7 +378,7 @@ void Compiler.report_warning(
   Compiler compiler, Symbol code, String message, Token token, List notes) {
   report_suspend();
   Diagnostics diag = compiler.diagnostics;
-  message = message ? message : %"compiler warning";
+  message = message ? message : "compiler warning";
   List loc = _compiler_location(compiler, token);
   diag._warn(code ? code : <warning>, message, loc, notes);
 }

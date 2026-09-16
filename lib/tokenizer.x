@@ -86,7 +86,7 @@ Tokenizer Tokenizer.new_mode(char *text, Symbol mode) {
   tokenizer.col = 1;
   tokenizer.cursor = NULL;
   tokenizer.scan_status = <ok>;
-  tokenizer.modes = %[];
+  tokenizer.modes = [];
   tokenizer.modes.push(mode);
   tokenizer.tokens = Bytes.new(sizeof(struct Token));
   return tokenizer;

@@ -72,9 +72,9 @@ static int _decoded_status(int status) {
 }
 
 static char **_environment(Map env) {
-  Map names = %{};
+  Map names = {};
   foreach (Var name, env.keys()) names[name.str()] = 1;
-  Array entries = %[];
+  Array entries = [];
   for (char **entry = environ; *entry; entry++) {
     String text = String.new(*entry);
     int equals = text.find("=");
@@ -324,7 +324,7 @@ Job List.job(List command) => Job.new(command);
     ```x2c
     ~#include "process.x"
     ~int main(void) {
-    String root = %(pwd).job().options(%{dir: "/"}).output();
+    String root = %(pwd).job().options({dir: "/"}).output();
     ~  return root == "/\n" ? 0 : 1;
     ~}
     ```
@@ -371,7 +371,7 @@ Job Job.options(Job job, Map options) {
     same as `options(%{stdout: inherit})`, and returns it.
     Raises: `<bad-arg>` for a job that has started.
 */
-Job Job.live(Job job) => job.options(%{stdout: inherit});
+Job Job.live(Job job) => job.options({stdout: <inherit>});
 
 /** Adds `command` after the last stage of `job`, reading that stage's
     output, and returns the job. A pipeline `command` adds each of its

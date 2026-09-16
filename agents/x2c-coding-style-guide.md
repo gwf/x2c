@@ -1177,10 +1177,17 @@ type, target type, and context.
 
 The same rule applies to String literals. Use an ordinary C `"..."` literal
 when a String or Var target requests its promotion, including Array elements
-and Map keys and values. Inside `%()`, nested `"..."` already selects String
-grammar, so write `"text $name"`, not `${%"text $name"}`. Keep `%"..."` when
-interpolation, multiline text, percent-string escape decoding, or String
-receiver selection requires that literal form.
+and Map keys and values, and as a method receiver: `"x2c".len()`. Inside
+`%()`, nested `"..."` already selects String grammar, so write
+`"text $name"`, not `${%"text $name"}`. Keep `%"..."` when interpolation,
+multiline text, or percent-string escape decoding requires that literal form.
+
+Write Arrays and Maps as evaluated literals: `[item, count + 1]`,
+`{name: value, (key): other}`, `[]`, and `{}`. Only a bare identifier Map key
+is quoted, as an Atom; write a Symbol value as `<name>` and a computed key in
+parentheses. Keep `%[...]` and `%{...}` for quoted data, where bare names are
+Atoms and `$` inserts values. A `Var` initialized with `{}` is Null, so an
+empty Map for a `Var` destination is `%{}` or `Map.new()`.
 
 Within a List or String literal, use `$name` for a single identifier. Use
 `${expression}` for a complete expression and retain braces when an ASCII
@@ -1339,7 +1346,7 @@ results. Errors travel on the ambient channel; a raise site that continues
 declares its handled value inline with `$error.fallback`, which is now
 reserved for user-defined causes. Every cause in the shared table of
 `lib/error-macros.xmacro` is non-returning, so do not give one a fallback and
-do not test whether a valid allocation, growth call, `%[]`, `%{}`, open,
+do not test whether a valid allocation, growth call, `[]`, `{}`, open,
 read, write, format, or binding succeeded. Preserve checks only when the
 operation has a separate documented nullable or status result.
 
@@ -1380,8 +1387,8 @@ including empty values:
 ```x2c
 String text = %"";
 List items = %();
-Array values = %[];
-Map index = %{};
+Array values = [];
+Map index = {};
 ```
 
 Avoid spelling the same values through constructors or representation
@@ -1394,7 +1401,7 @@ Array values = Array.new();
 Map index = Map.new();
 ```
 
-File-static declarations keep their percent literals too. The compiler moves
+File-static declarations use these literals too. The compiler moves
 each runtime assignment into the unit's guarded initializer in dependency
 order, so a static `String`, `List`, `Array`, `Map`, or `Var` of those does
 not need a bare declaration with a distant `TYPE.initialize` assignment.
@@ -1458,7 +1465,7 @@ Do not destructure a conditional shape or association lookup. Use `match`,
 Build a variable-length forward sequence with a transient Array:
 
 ```x2c
-Array statements = %[];
+Array statements = [];
 while (compiler.peek() != <}>)
   statements.push(compiler.parse_statement());
 List body = statements.list();

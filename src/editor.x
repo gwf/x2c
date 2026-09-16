@@ -219,7 +219,7 @@ int editor_request(int argc, char **argv) {
   out.write("{\"file\":");
   report_json_string(out, source);
   out.write_char(',');
-  Map needed = %{};
+  Map needed = {};
   _diagnostics(out, unit.compiler, needed);
   if (parsed) _query(out, unit.compiler, source, kind, offset, needed);
   _sources(out, unit.compiler, needed);

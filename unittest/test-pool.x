@@ -50,14 +50,14 @@ static void pool_lookup_shadows_outward(void) {
   Pool root = Pool.retain_named(NULL, "test-pool-root");
   EXPECT_STR_EQ(Scope.name(root.scope), "test-pool-root");
   EXPECT_TRUE(root.table.scope == &root.scope);
-  String alpha = %"pool-alpha";
+  String alpha = "pool-alpha";
   Pool.insert(root, alpha);
   Pool child = Pool.retain_named(root, "test-pool-child");
   EXPECT_STR_EQ(Scope.name(child.scope), "test-pool-child");
   EXPECT_TRUE(child.table.scope == &child.scope);
   Var from_parent = alpha;
   EXPECT_TRUE(Pool.lookup(child, alpha) == from_parent);
-  String beta = %"pool-beta";
+  String beta = "pool-beta";
   Pool.insert(child, beta);
   Var from_child = beta;
   EXPECT_TRUE(Pool.lookup(child, beta) == from_child);
@@ -79,7 +79,7 @@ static void pool_intern_uses_one_probe(void) {
     .hash = _pool_probe_hash,
     .equal = _pool_probe_equal
   };
-  EXPECT_TRUE(x2c_try_register_descriptor(%"pprobe", methods));
+  EXPECT_TRUE(x2c_try_register_descriptor("pprobe", methods));
 
   Pool root = Pool.retain_named(NULL, "test-pool-one-probe");
   PoolProbe *first = Pool.malloc(root, sizeof(PoolProbe));
@@ -191,10 +191,10 @@ static void pool_promote_is_pointer_stable(void) {
   Pool child = Pool.retain_named(root, "test-promote-child");
   char *buf = Pool.malloc(child, 32);
   strcpy(buf, "survivor");
-  String key = %"pool-promote-key";
+  String key = "pool-promote-key";
   Pool.insert(child, key);
   EXPECT_FALSE(Pool.promote(root, key, buf));  // root has no parent
-  EXPECT_FALSE(Pool.promote(child, %"pool-promote-miss", buf));
+  EXPECT_FALSE(Pool.promote(child, "pool-promote-miss", buf));
   EXPECT_TRUE(Pool.promote(child, key, buf));
   PoolStats promoted = Pool.stats(child);
   EXPECT_INT_EQ(promoted.promoted, 1);
@@ -214,7 +214,7 @@ static void pool_promote_transfers_partial_blocks(void) {
   char *kept = Pool.malloc(child, 16), *garbage = Pool.malloc(child, 16);
   strcpy(kept, "kept");
   strcpy(garbage, "gone");
-  String key = %"pool-partial-key";
+  String key = "pool-partial-key";
   Pool.insert(child, key);
   EXPECT_TRUE(Pool.promote(child, key, kept));
   Pool.release(child);
@@ -251,7 +251,7 @@ static void pool_promote_crosses_multiple_levels(void) {
   Pool inner = Pool.retain_named(middle, "test-multi-inner");
   char *kept = Pool.malloc(inner, 32);
   strcpy(kept, "multi-level survivor");
-  String key = %"pool-multi-key";
+  String key = "pool-multi-key";
   Pool.insert(inner, key);
   EXPECT_TRUE(Pool.promote(inner, key, kept));
   EXPECT_TRUE(Pool.promote(middle, key, kept));
@@ -269,7 +269,7 @@ static void pool_large_promotion_retains_scope_path(void) {
   Pool child = Pool.retain_named(root, "test-large-child");
   char *kept = Pool.malloc(child, 1024);
   strcpy(kept, "large survivor");
-  String key = %"pool-large-key";
+  String key = "pool-large-key";
   Pool.insert(child, key);
   EXPECT_TRUE(Pool.promote(child, key, kept));
   Pool.release(child);
@@ -381,7 +381,7 @@ static void pool_unpromoted_identity_is_wiped(void) {
 }
 
 static void pool_try_own_reports_lifetime_safety(void) {
-  String permanent_string = %"pool-permanent-string";
+  String permanent_string = "pool-permanent-string";
   List permanent_list = %(pool-permanent-list);
   EXPECT_TRUE(String.try_own(NULL));
   EXPECT_TRUE(List.try_own(NULL));
@@ -411,7 +411,7 @@ static void pool_try_own_reports_lifetime_safety(void) {
 }
 
 static void string_is_permanent_asks_without_promoting(void) {
-  String permanent = %"pool-permanent-string";
+  String permanent = "pool-permanent-string";
   EXPECT_TRUE(String.is_permanent(NULL));
   EXPECT_TRUE(String.is_permanent(""));
   EXPECT_TRUE(String.is_permanent(permanent));

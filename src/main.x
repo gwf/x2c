@@ -210,7 +210,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
         stderr, "x2c: error: input is not a regular file: %s\n", input);
       exit(2);
     }
-    if (!input.endswith(%".x")) {
+    if (!input.endswith(".x")) {
       fprintf(
         stderr, "x2c: error: translation input is not an .x file: %s\n",
         input);
@@ -278,7 +278,7 @@ static int _translate_workers(
         worker_exit(0);
       }
       if (pid < 0) {
-        report_line(<error>, %"could not start a translation worker");
+        report_line(<error>, "could not start a translation worker");
         failed++;
         continue;
       }
@@ -316,10 +316,10 @@ static int _translate_workers(
 static Array _translation_chunks(List inputs, int total, int slices) {
   if (slices > total) slices = total;
   if (slices < 1) slices = 1;
-  int size = (total + slices - 1) / slices, Array chunks = %[];
+  int size = (total + slices - 1) / slices, Array chunks = [];
   List cur = inputs;
   while (cur) {
-    Array slice = %[];
+    Array slice = [];
     for (int n = 0; n < size && cur; n++, cur = cur.cdr())
       slice.push(cur.car());
     chunks.push(slice.list_free());
@@ -331,7 +331,7 @@ static Array _translation_chunks(List inputs, int total, int slices) {
    and is absent for `x2c translate`. */
 static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   unsigned long started_at = report_now_us();
-  if (!c.out_dir) c.out_dir = %".";
+  if (!c.out_dir) c.out_dir = ".";
   opts = c;
   _preflight_translation(c, unit_dirs);
   if (c.verbose || c.dry_run) {
@@ -373,13 +373,13 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
     }
   if (!c.nested && !c.inspects()) {
     String duration = report_duration(report_now_us() - started_at);
-    String noun = total == 1 ? %"file" : %"files";
+    String noun = total == 1 ? "file" : "files";
     report_line(
       <success>,
       %"Translated $total x2c $noun to ${c.out_dir} in $duration");
     String size = report_size(gen_bytes);
-    String c_noun = total == 1 ? %"C file" : %"C files";
-    String h_noun = total == 1 ? %"header" : %"headers";
+    String c_noun = total == 1 ? "C file" : "C files";
+    String h_noun = total == 1 ? "header" : "headers";
     report_line(
       <muted>,
       %"  Generated $total $c_noun and $total $h_noun ($size)");
@@ -408,10 +408,10 @@ static CliRequest _build_translation_request(
    request can fill every job. Each unit keeps its own generated directory,
    so no two workers write the same file. */
 static int _translate_units(CliRequest c, Build state, List units) {
-  Array stale = %[];
-  Map stale_dirs = %{};
+  Array stale = [];
+  Map stale_dirs = {};
   foreach (String input, units) {
-    if (!input.endswith(%".x")) continue;
+    if (!input.endswith(".x")) continue;
     String directory = state.generated_dir(input);
     if (state.translation_current(input, directory)) {
       state.begin_translation(input);
@@ -440,7 +440,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
   /* Restore input order, including package directories inserted between
      generated directories, before native compilation and linking. */
   foreach (String input, units) {
-    if (!input.endswith(%".x")) continue;
+    if (!input.endswith(".x")) continue;
     int cached = !stale_dirs.contains(input);
     String directory = state.generated_dir(input);
     if (c.dry_run && !cached) {
@@ -458,7 +458,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
 static int _run_build_request(CliRequest c, Array commands) {
   if (!c.dry_run) {
     foreach (String input, c.inputs) {
-      if (!input.endswith(%".x")) continue;
+      if (!input.endswith(".x")) continue;
       Frontend.load_support(c);
       break;
     }
@@ -502,7 +502,7 @@ static int _run_build_request(CliRequest c, Array commands) {
 
 static int _run_build(CliRequest request) {
   Array commands =
-    request.compile_commands && !request.dry_run ? %[] : NULL;
+    request.compile_commands && !request.dry_run ? [] : NULL;
   if (request.inputs) {
     if (request.manifest) {
       fputs(

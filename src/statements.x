@@ -201,7 +201,7 @@ static List _match_capture_declaration(
 }
 
 static List _match_capture_temporaries(Compiler c, List types, Array locals) {
-  Array declarations = %[];
+  Array declarations = [];
   foreach (List row, types) match (row)
     case %(?name ?type): {
       String temporary = c.fresh_name("match_value");
@@ -213,7 +213,7 @@ static List _match_capture_temporaries(Compiler c, List types, Array locals) {
 }
 
 static List _match_capture_locals(Compiler c, Array locals) {
-  Array declarations = %[];
+  Array declarations = [];
   foreach (List row, locals) match (row)
     case %(?name ?type ?temporary):
       declarations.push(_match_capture_declaration(
@@ -228,7 +228,7 @@ static List _match_case(Compiler c) {
   c.next();
   if (peek == <case>) {
     {
-      Array captures = $auto(%[]);
+      Array captures = $auto([]);
       $let(c.in_pattern, 1)
       $let(c.match_types, captures) {
         pattern = c.parse_expression();
@@ -247,7 +247,7 @@ static List _match_case(Compiler c) {
   c.begin_match_arm(pattern, start, peek == <case>);
   List temporaries = NULL, declarations = NULL;
   if (types) {
-    Array locals = %[];
+    Array locals = [];
     temporaries = _match_capture_temporaries(c, types, locals);
     c.sym.push_new_scope();
     declarations = _match_capture_locals(c, locals);
@@ -271,7 +271,7 @@ error:
 }
 
 static List _match_cases(Compiler compiler) {
-  Array cases = %[], Symbol peek = compiler.peek(0), int saw_default = 0;
+  Array cases = [], Symbol peek = compiler.peek(0), int saw_default = 0;
   while (peek == <case> || peek == <default>) {
     if (saw_default)
       compiler.report_error(
@@ -320,7 +320,7 @@ static List _filtered_catch_arm(Compiler c, int *is_default) {
 }
 
 static List _filtered_catches(Compiler compiler) {
-  Array arms = %[], int saw_default = 0;
+  Array arms = [], int saw_default = 0;
   loop {
     int is_default = 0;
     List arm = _filtered_catch_arm(compiler, &is_default);
@@ -434,7 +434,7 @@ List Compiler.parse_statement(Compiler compiler) {
         compiler.peek(0) == <;> || compiler.peek(0) == <eof>)
       compiler.report_error(
         <parse>, "with requires an expression", compiler.token, NULL);
-    List expression = compiler.parse_expression(), String alias = %"_";
+    List expression = compiler.parse_expression(), String alias = "_";
     if (compiler.peek(0) == <ident> && compiler.token.text == "as") {
       compiler.next();
       if (compiler.peek(0) != <ident>)
@@ -514,7 +514,7 @@ List Compiler.parse_statement(Compiler compiler) {
     invocation origin over its inserted items.
 */
 List Compiler.parse_block_items(Compiler c, int anchor_items) {
-  Array block = %[], List stmt = NULL;
+  Array block = [], List stmt = NULL;
   c.sym.push_new_scope();
   loop {
     foreach (Var directive, c.leading_preproc()) block.push(directive);

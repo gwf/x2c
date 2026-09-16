@@ -39,7 +39,7 @@ static String _stem(String input) {
 */
 List translation_depfile_parse(String text) {
   if (!text) return NULL;
-  Array paths = %[], Buffer word = Buffer.new(0), int prerequisites = 0;
+  Array paths = [], Buffer word = Buffer.new(0), int prerequisites = 0;
   for (const char *ch = text; *ch; ch++) {
     if (!prerequisites) {
       if (*ch == ':') prerequisites = 1;
@@ -101,7 +101,7 @@ static Array _prerequisites(
   /* Collection and cached replay populate a Map with no publication order.
      Deduplicate and sort paths so both routes write the same depfile. */
   (void) request;
-  Array paths = %[];
+  Array paths = [];
   if (compiler.deps.len())
     foreach (Var (path, content_hash), compiler.deps) _add(paths, path);
   else _add(paths, input);

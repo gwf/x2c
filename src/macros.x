@@ -53,7 +53,7 @@ static void _install_source(
     Map.merge(compiler.kw_aliases, installed);
     return;
   }
-  Map aliases = %{};
+  Map aliases = {};
   Compiler definitions = Compiler.new_shared(compiler);
   defer compiler.close_child(definitions);
   definitions.filename = filename;
@@ -153,7 +153,7 @@ static Var _sdk_syntax_type(List value) {
 }
 
 static Var _sdk_declaration_bindings(List declaration) {
-  Array result = %[];
+  Array result = [];
   match (declaration)
     case %((!or declare decl typedef) ? (bindings *bindings)):
       foreach (List binding, bindings)
@@ -248,7 +248,7 @@ static Var _sdk_type_parts(List value) => value.type().declaration_parts();
 static Var _sdk_type_reverse_name(String base, String participant) {
   $_sdk_guard("x2c.type.reverse-name");
   return macro_sdk_compiler.reverse_converter_spelling(
-    base, %"", participant);
+    base, "", participant);
 }
 
 static Var _sdk_type_resolve(List value) {
@@ -303,7 +303,7 @@ static Var _sdk_type_fields(List value) {
     return _sdk_reject(
       "x2c.type.fields requires a complete struct or union Type",
       %("value: ${value.repr()}"));
-  Array named = %[];
+  Array named = [];
   foreach (List row, metadata.cdr())
     if (row.car().truth()) named.push(row);
   return named.list_free();
@@ -469,7 +469,7 @@ static Var _sdk_native_function_type(List syntax) {
   }
   Type type = value.type().canonicalize();
   List source_parameters = _sdk_function_type_parameters(type);
-  Type source_result = type.apply(), Array parameters = %[];
+  Type source_result = type.apply(), Array parameters = [];
   foreach (Var parameter, source_parameters)
     parameters.push(_lisp_resolve_type(parameter.list()));
   Type result = _lisp_resolve_type(source_result);
@@ -685,7 +685,7 @@ static String _source_dir(Compiler compiler) {
   String filename = compiler.import_stack.len()
                   ? compiler.import_stack[-1].str()
                   : compiler.filename;
-  return filename ? Path.dirname(filename) : %".";
+  return filename ? Path.dirname(filename) : ".";
 }
 
 static String _source_file(Compiler compiler, String file) {
@@ -775,7 +775,7 @@ static Var _sdk_embed_text(Var requested) {
         "cannot read embedded text",
         %("path: ${compiler.display_path(path)}"));
     compiler.deps.merge_translation_dependency(
-      path, %"%08x".printf(String.hash(text)));
+      path, "%08x".printf(String.hash(text)));
     return text;
   }
   struct stat info;
@@ -821,7 +821,7 @@ static Var _sdk_embed_text(Var requested) {
     return _sdk_reject(
       "embedded text exceeds the String size limit",
       %("path: ${compiler.display_path(path)}"));
-  String content_hash = %"%08x".printf(String.hash(result));
+  String content_hash = "%08x".printf(String.hash(result));
   compiler.deps.merge_translation_dependency(path, content_hash);
   return result;
 }
@@ -856,7 +856,7 @@ static String _read_source(
   }
   else text = _open(compiler, path, message, token, notes).string_close();
   compiler.deps.merge_translation_dependency(
-    path, %"%08x".printf(String.hash(text)));
+    path, "%08x".printf(String.hash(text)));
   return text;
 }
 
@@ -993,7 +993,7 @@ static Var _rebind_import_definition(Compiler compiler, Var stored) {
   if (stored is not <list>) return stored;
   List definition = stored;
   if (definition.car() != <macrodef>) return definition;
-  Map replacements = %{};
+  Map replacements = {};
   _import_reference_bindings(compiler, definition, replacements);
   if (!replacements.len()) return definition;
   return _replace_definition_bindings(definition, replacements);
@@ -1024,7 +1024,7 @@ static void _import(
   }
   if (c.import_stack.contains(path)) {
     String display = c.display_path(path);
-    Array notes = %[ "import: $display" ];
+    Array notes = [ %"import: $display" ];
     foreach (Var parent, c.import_stack)
       notes.push(%"from: ${c.display_path(parent.str())}");
     c.report_error(
@@ -1045,7 +1045,7 @@ static void _import(
       else c.queue_declaration_effect(text, invocation, invocation);
     }
     else if (path.endswith(".xmacro")) {
-      imported_aliases = %{};
+      imported_aliases = {};
       String text = _read_source(
         c, path, "cannot open macro import", invocation,
         %( "path: ${c.display_path(path)}" ));
@@ -1101,7 +1101,7 @@ static void _import(
         invocation,
         %( "path: ${c.display_path(path)}" ));
   }
-  Map definitions = %{}, dependencies = %{};
+  Map definitions = {}, dependencies = {};
   foreach (Var (name, definition), c.macros)
     if (previous_definitions[name] != definition)
       definitions[name] = definition;
@@ -1214,8 +1214,8 @@ List Compiler.parse_macro_lisp_expression(Compiler compiler) {
 static List _lisp_construction(Compiler compiler, String form) {
   Tokenizer tokenizer = Tokenizer.new_mode(form, <macro-lisp>);
   tokenizer.scan();
-  Array construction = %[];
-  Map seen = %{};
+  Array construction = [];
+  Map seen = {};
   Token token = tokenizer.next();
   while (token && token.type != <eof>) {
     if (token.type == <$>) {
@@ -1272,7 +1272,7 @@ static Var _eval_template_form(
   _ensure_lisp(compiler);
   /* Provenance lookup uses captured Var identity. Structural equality must
      not let constructed or selected syntax acquire a caller's source text. */
-  List references = NULL, Map source_captures = %{};
+  List references = NULL, Map source_captures = {};
   foreach (List pair, bindings) {
     if (!pair) continue;
     Var (binder, syntax) = pair;
@@ -1433,7 +1433,7 @@ static Var _replace_definition_bindings(Var value, Map bindings) {
   Var replacement;
   if (candidate && bindings.try_get(value, &replacement)) return replacement;
   if (value is not <list> || value.is_nil()) return value;
-  Array items = $auto(%[]);
+  Array items = $auto([]);
   int changed = 0;
   foreach (Var child, value.list()) {
     Var item = _replace_definition_bindings(child, bindings);
@@ -1528,9 +1528,9 @@ static List _capture_pattern(List hole, Map binders) {
 
 static List _invocation_pattern(
   Symbol kind, List target, List parameters, List fresh, List template) {
-  Map binders = %{};
+  Map binders = {};
   _template_binders(template, binders);
-  Array arguments = %[];
+  Array arguments = [];
   foreach (List parameter, parameters)
     arguments.push(_capture_pattern(parameter, binders));
   List invocation = kind == <decorator>
@@ -1538,7 +1538,7 @@ static List _invocation_pattern(
       target (args @{arguments.list_free()})
       ${_capture_pattern(target, binders)}
     ) : %(args @{arguments.list_free()});
-  Array fresh_patterns = %[];
+  Array fresh_patterns = [];
   foreach (Var row, fresh) {
     Var (binder, spelling, lisp) = row;
     (void) spelling;
@@ -1558,7 +1558,7 @@ static List _invocation_pattern(
    the accepted prefixes come from _replacement_binder; <?> supplies its
    empty author name. */
 static List _forwarded_prefix_list(void) {
-  Array prefixes = %[];
+  Array prefixes = [];
   foreach (String projection, %("expression" "value" "source" "splice"))
     for (int sequence = 0; sequence <= 1; sequence++)
       prefixes.push(_replacement_binder(<?>, projection, sequence).str());
@@ -1619,7 +1619,7 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
     if (forwarded) return forwarded;
   }
   if (sequence) {
-    Array captured_sources = %[], values = %[], construction = %[];
+    Array captured_sources = [], values = [], construction = [];
     foreach (Var captured, sources) {
       List forwarded = _forwarded_capture(compiler, captured);
       match (forwarded)
@@ -1895,7 +1895,7 @@ static List _parse_body(Compiler c, Symbol result_kind) {
     c.expect(<"}">);
     return %(seq @entries);
   }
-  Array items = %[];
+  Array items = [];
   while (c.peek(0) != <"}">) {
     foreach (Var directive, c.leading_preproc()) items.push(directive);
     if (c.peek(0) == <"}">) break;
@@ -1925,7 +1925,7 @@ static Atom _hole_name(List hole) {
 }
 
 static List _parameter_rows(Compiler compiler, List parameters) {
-  Array rows = %[];
+  Array rows = [];
   foreach (List parameter, parameters)
     rows.push(_hole_record(compiler, _hole_name(parameter)));
   return rows.list_free();
@@ -2003,8 +2003,8 @@ List Compiler.parse_macro_definition(Compiler c) {
   // A rejected signature must not leave later declarations as templates.
   Map old_holes = c.macro_holes;
   defer c.macro_holes = old_holes;
-  c.macro_holes = %{};
-  Map definition_locals = %{};
+  c.macro_holes = {};
+  Map definition_locals = {};
   c.macro_holes[%(locals)] = definition_locals;
   List parameters = NULL, using_holes = NULL;
   List target_hole = NULL;
@@ -2117,7 +2117,7 @@ List Compiler.parse_macro_definition(Compiler c) {
 
   Map old_local_macro_captures = c.local_macro_captures;
   int old_local_macro_capture_scopes = c.local_macro_capture_scopes;
-  c.local_macro_captures = local ? %{} : NULL;
+  c.local_macro_captures = local ? {} : NULL;
   Map definition_captures = c.local_macro_captures;
   c.local_macro_capture_scopes = c.sym.scope_count();
   c.sym.push_new_scope();
@@ -2178,7 +2178,7 @@ List Compiler.parse_macro_definition(Compiler c) {
   /* Parsed literal names carry definition-only identities. Store binders in
      the template instead, so each expansion can allocate one fresh semantic
      identity per literal spelling and reuse it throughout that expansion. */
-  Map definition_bindings = %{};
+  Map definition_bindings = {};
   if (target_hole && target_hole.assoc(<kind>) == <unit>) {
     Var required = _replacement_binder(
       target_hole.assoc(<binder>), "construction", 1);
@@ -2207,7 +2207,7 @@ List Compiler.parse_macro_definition(Compiler c) {
         start, %("annotate holes used only by compile-time Lisp"));
     }
   }
-  Array fresh = %[];
+  Array fresh = [];
   foreach (Var binder, using_holes)
     fresh.push(%($binder ${binder.str()[1:]} 1));
   foreach (Var local, local_names)
@@ -2434,7 +2434,7 @@ static Var _capture_source(
   if (!last || last < first) return syntax;
   int end = last.pos + last.len;
   String file = _source_file(
-    compiler, compiler.filename ? compiler.filename : %"<stdin>");
+    compiler, compiler.filename ? compiler.filename : "<stdin>");
   List source = %(source $file ${first.pos} $end);
   Var result = %(src $source $syntax);
   return result;
@@ -2475,7 +2475,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
 }
 
 static List _invocation_arguments(Compiler c, List definition) {
-  Array arguments = %[];
+  Array arguments = [];
   c.expect(
     <(>);
   List descriptors = definition.assoc(<parameters>);
@@ -2483,7 +2483,7 @@ static List _invocation_arguments(Compiler c, List definition) {
     List hole = nodes.car();
     Symbol kind = hole.assoc(<kind>);
     int sequence = hole.assoc(<sequence>).int();
-    Array captured = %[];
+    Array captured = [];
     if (c.peek(0) == <)> && !sequence)
       c.report_error(
         <parse>, "macro invocation has too few arguments",
@@ -2632,8 +2632,8 @@ List Compiler.expand_macro_invocation_node(
       $let(_.macro_stack, _.macro_stack) {
         List old_stack = _.macro_stack;
         List template = definition.assoc(<template>);
-        Map introduced = %{};
-        Array fresh_values = %[];
+        Map introduced = {};
+        Array fresh_values = [];
         List direct_bindings = NULL;
         foreach (List fresh, definition.assoc(<fresh>).list()) {
           Var (binder, spelling, lisp) = fresh;
@@ -2852,7 +2852,7 @@ static List _parse_target_definition(
     if (position == AST_STATEMENT)
       target = c.anchor_origin(target, target_start);
     List targets = target.car() == <seq> ? target.cdr() : %($target);
-    Array captured_targets = %[];
+    Array captured_targets = [];
     foreach (Var item, targets)
       captured_targets.push(
         _capture_source(c, item, target_start, c.token));

@@ -91,7 +91,7 @@ static Var _thread_test_worker(const void *input, size_t input_size) {
     data.mutex.unlock();
   }
 
-  Map result = %{};
+  Map result = {};
   result[<value>] = data.value;
   result[<caught>] = caught;
   result[<matched>] = matched;
@@ -163,7 +163,7 @@ static Var _thread_packed_result_worker(const void *input, size_t input_size) {
   string_map.set("", String.printf("thread-empty-key-%d", 43));
   string_map.set(String.printf("thread-empty-value-%d", 44), "");
 
-  Array graph = %[];
+  Array graph = [];
   graph.push(chars);
   graph.push(shorts);
   graph.push(ints);
@@ -182,7 +182,7 @@ static Var _thread_recursive_export_worker(
   (void) input;
   (void) input_size;
   ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
-  Array nested = %[];
+  Array nested = [];
   nested.push(String.printf("recursive-worker-%d", 51));
   probe.value = nested;
   probe.exports = 0;
@@ -290,7 +290,7 @@ static void thread_workers_isolate_and_join_results(void) {
   Logger previous_logger = log_set_global_logger(logger);
   String ancestor_string = String.new("parent immutable");
   List ancestor_list = %(parent immutable list);
-  Map ancestor_map = %{};
+  Map ancestor_map = {};
   ancestor_map[<number>] = 47;
   ThreadTestInput first = {
     11, 250, &counter, mutex, ancestor_string, ancestor_list, ancestor_map
@@ -532,10 +532,10 @@ static void thread_failed_join_export_releases_storage(void) {
 }
 
 static void thread_rejects_free_before_join_and_double_join(void) {
-  Map map = %{};
+  Map map = {};
   map[<number>] = 47;
   ThreadTestInput input = {
-    3, 0, NULL, NULL, %"parent", %(parent), map
+    3, 0, NULL, NULL, "parent", %(parent), map
   };
   Thread thread = Thread.start(
     _thread_test_worker, &input, sizeof(input)
@@ -553,7 +553,7 @@ static void thread_rejects_free_before_join_and_double_join(void) {
 
 static void thread_freezes_late_descriptor_registration(void) {
   int caught = 0, tag_caught = 0;
-  try x2c_register_type(%"too-late-thread-type");
+  try x2c_register_type("too-late-thread-type");
   catch %(bad-state *): caught = 1;
   try Var.register_object_tag(<too-late>);
   catch %(bad-state *): tag_caught = 1;
@@ -565,12 +565,12 @@ static Var _thread_render_shared(const void *input, size_t input_size) {
   if (input_size != sizeof(Array)) return 0;
   Array shared = *(Array *) input;
   for (int i = 0; i < 20; i++)
-    if (shared.repr() != %"[ 1, 2 ]") return 0;
+    if (shared.repr() != "[ 1, 2 ]") return 0;
   return 1;
 }
 
 static void thread_rendering_paths_are_independent(void) {
-  Array shared = %[1, 2];
+  Array shared = [1, 2];
   RenderPath path;
   EXPECT_TRUE(path.enter(shared));
   defer path.leave();

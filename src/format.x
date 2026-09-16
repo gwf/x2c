@@ -111,7 +111,7 @@ char *Compiler.code_pretty_string(
       while (scanned < buff.len())
         if (buff.get(scanned++) == '\n') output_line++;
       String file = location ? location.assoc(<file>).str() : output_file;
-      if (!file) file = %"<generated>";
+      if (!file) file = "<generated>";
       int line = location ? location.assoc(<line>).integer()
                           : output_line + 1;
       source_line = location ? line : 0;

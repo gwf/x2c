@@ -12,7 +12,7 @@ int main(void) {
   CurlEasy curl = CurlEasy.new().timeouts(1000, 3000);
   defer curl.free();
 
-  CurlResponse response = curl.get(%"https://example.com/guide");
+  CurlResponse response = curl.get("https://example.com/guide");
   defer response.free();
   printf("%ld %zu bytes\n", response.response_code(), response.body_size());
   return 0;

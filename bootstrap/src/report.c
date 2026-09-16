@@ -2,7 +2,7 @@
 
 #include "report.h"
 
-static String _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
 #include <stdio.h>
@@ -46,12 +46,13 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("%llu B");
   _4 = String_new("%.1f KiB");
   _5 = String_new("%.1f MiB");
-  _6 = String_new(" (up to date)");
-  _7 = String_new(", ");
-  _8 = String_new(" cached");
-  _9 = String_new("  ");
-  _10 = String_new(" ");
-  _11 = String_new(" in ");
+  _6 = String_new(", ");
+  _7 = String_new(" cached");
+  _8 = String_new("  ");
+  _9 = String_new(" ");
+  _10 = String_new(" in ");
+  _11 = String_new(" (up to date)");
+  _12 = String_new("");
 }
 
 unsigned long report_now_us(void){
@@ -264,9 +265,9 @@ String String_add(String, String);
 
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  String cache = cached == count && count ? _6 : cached ? String_join(NULL, cons(String_var(_7), cons(String_var(int_str(cached)), cons(String_var(_8), NULL)))) : 0;
+  String cache = cached == count && count ? _11 : cached ? String_join(NULL, cons(String_var(_6), cons(String_var(int_str(cached)), cons(String_var(_7), NULL)))) : _12;
   String name = String_capitalize(Symbol_str(phase));
-  String line = String_add(String_join(NULL, cons(String_var(_9), cons(String_var(name), cons(String_var(_10), cons(String_var(int_str(count)), cons(String_var(_10), cons(String_var(noun), cons(String_var(_11), NULL)))))))), String_join(NULL, cons(String_var(report_duration(microseconds)), cons(String_var(cache), NULL))));
+  String line = String_add(String_join(NULL, cons(String_var(_8), cons(String_var(name), cons(String_var(_9), cons(String_var(int_str(count)), cons(String_var(_9), cons(String_var(noun), cons(String_var(_10), NULL)))))))), String_join(NULL, cons(String_var(report_duration(microseconds)), cons(String_var(cache), NULL))));
   report_line(28680520, line);
 }
 

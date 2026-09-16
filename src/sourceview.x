@@ -28,8 +28,8 @@ class SourceView struct {
 
 /** Initializes empty overlays in the current request lifetime. */
 void SourceView.init(SourceView sources) {
-  sources.overlays = %{};
-  sources.dirty_paths = %{};
+  sources.overlays = {};
+  sources.dirty_paths = {};
 }
 
 /** Stores an immutable snapshot under its logical source path. Empty text

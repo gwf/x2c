@@ -165,7 +165,7 @@ static void plan_guard_parity(void) {
 // !is guard family - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 static void plan_is_parity(void) {
-  String string_value = %"hello";
+  String string_value = "hello";
   Var integer_var = 42, float_var = (double) 3.14159;
   List list_value = %(alpha beta);
   Var symbol_var = <bar>;
@@ -189,8 +189,8 @@ static void plan_is_parity(void) {
   _parity_case(%((x)), %((!is atom)));
   _parity_case(%(x), %((!is banana)));
   _parity_case(%(x), %((!is type 5)));
-  Array arr = %[1, 2];
-  Map map = %{ k: 1 };
+  Array arr = [1, 2];
+  Map map = { k: 1 };
   List typed = %( $arr $map );
   _parity_case(typed, %((!is type varray) (!is type vmap)));
 }
@@ -696,9 +696,9 @@ static void capture_layout_owns_canonical_order(void) {
   EXPECT_TRUE(layout.possible_list() ==
               %(?root ?left ?shared ?right ?hidden *tail));
   EXPECT_TRUE(layout.definite_list() == %(?root ?shared *tail));
-  EXPECT_INT_EQ(layout.index(Atom.intern(%"?root")), 0);
-  EXPECT_INT_EQ(layout.index(Atom.intern(%"?shared")), 2);
-  EXPECT_INT_EQ(layout.index(Atom.intern(%"*tail")), 5);
+  EXPECT_INT_EQ(layout.index(Atom.intern("?root")), 0);
+  EXPECT_INT_EQ(layout.index(Atom.intern("?shared")), 2);
+  EXPECT_INT_EQ(layout.index(Atom.intern("*tail")), 5);
   layout.free();
 
   MatchPlan plan = MatchPlan.prepare(
@@ -740,9 +740,9 @@ static void prepared_capture_is_atomic_and_positional(void) {
   EXPECT_TRUE(short_buffer.present == 0x55UL);
 
   EXPECT_INT_EQ(plan.try_capture(%(err bad a b), &captures), 1);
-  int value_index = plan.layout.index(Atom.intern(%"?value"));
-  int message_index = plan.layout.index(Atom.intern(%"?message"));
-  int rest_index = plan.layout.index(Atom.intern(%"*rest"));
+  int value_index = plan.layout.index(Atom.intern("?value"));
+  int message_index = plan.layout.index(Atom.intern("?message"));
+  int rest_index = plan.layout.index(Atom.intern("*rest"));
   EXPECT_FALSE(_capture_present(&captures, value_index));
   EXPECT_TRUE(_capture_present(&captures, message_index));
   EXPECT_TRUE(_capture_present(&captures, rest_index));
@@ -754,7 +754,7 @@ static void prepared_capture_is_atomic_and_positional(void) {
 /* One capacity fence answers both implementations: the layout refuses the
    pattern before either implementation runs it. */
 static void capture_layout_refuses_past_the_binder_limit(void) {
-  Array pattern_values = %[], input_values = %[];
+  Array pattern_values = [], input_values = [];
   for (int i = 0; i < MACHINE_BINDER_MAX + 1; i++) {
     pattern_values.push(Atom.intern(%"?binder_$i"));
     input_values.push(i);
@@ -794,7 +794,7 @@ static void capture_layout_refuses_past_the_binder_limit(void) {
 }
 
 static void capture_presence_is_separate_from_void(void) {
-  Var binder = Atom.intern(%"?captured_void");
+  Var binder = Atom.intern("?captured_void");
   MatchPlan plan = MatchPlan.prepare(binder);
   if (!EXPECT_NOT_NULL(plan)) return;
   Var value = <old>;
@@ -940,8 +940,8 @@ static void plan_programs_stay_immutable(void) {
 }
 
 static void plan_long_atom_binder_layout(void) {
-  Atom value_binder = Atom.intern(%"?VeryLongIdentifierValue");
-  Atom list_binder = Atom.intern(%"*RemainingLongValues");
+  Atom value_binder = Atom.intern("?VeryLongIdentifierValue");
+  Atom list_binder = Atom.intern("*RemainingLongValues");
   MatchPlan plan = MatchPlan.prepare(
     %(item ?VeryLongIdentifierValue *RemainingLongValues)
   );

@@ -5,9 +5,9 @@
 $(import "test-macros.xmacro")
 
 static void ast_bindings_separate_identity_from_spelling(void) {
-  List captured = binding_identity_new(17, %"value");
+  List captured = binding_identity_new(17, "value");
   List retained = captured;
-  List introduced = binding_identity_new(18, %"value");
+  List introduced = binding_identity_new(18, "value");
   int identity = 0;
   String spelling = NULL;
 
@@ -22,7 +22,7 @@ static void ast_bindings_separate_identity_from_spelling(void) {
 
 static void ast_rewrite_preserves_identity_and_child_order(void) {
   $test.scoped();
-  Array seen = %[];
+  Array seen = [];
   Func visit = %!(List child) => {
     seen.push(child);
     return child;
@@ -45,7 +45,7 @@ static void ast_rewrite_changes_first_middle_and_last_children(void) {
     ((head (change) tail) (head (changed) tail))
     ((head (keep) (change)) (head (keep) (changed))))) {
     List (input, expected) = row;
-    Array seen = %[];
+    Array seen = [];
     List result = Ast.rewrite_children(input, %!(List child) => {
       seen.push(child);
       return child.car() == <change> ? %(changed) : child;

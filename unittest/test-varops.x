@@ -229,7 +229,7 @@ static void var_numeric_conversion_boundaries(void) {
   try Var.convert(void, <i32>);
   catch %(void-op *): caught++;
   List detail = NULL;
-  try Var.convert(%"text", <i32>);
+  try Var.convert("text", <i32>);
   catch %(no-convert *cause): { caught++; detail = cause; }
   List cause = detail.assoc(<cause>);
   EXPECT_TRUE(cause.car() == <bad-types>);
@@ -241,7 +241,7 @@ static void var_numeric_conversion_boundaries(void) {
   catch %(bad-target *): caught++;
   EXPECT_INT_EQ(caught, 5);
 
-  Var text = %"same";
+  Var text = "same";
   out = text.convert(<string>);
   EXPECT_TRUE(out === text);
 
@@ -385,7 +385,7 @@ static void var_operation_edges_and_status(void) {
   catch %(bad-shift *): caught++;
   try Var.binary(1.0, <%>, 2);
   catch %(bad-types *): caught++;
-  try Var.binary(%"x", <unknown>, 2);
+  try Var.binary("x", <unknown>, 2);
   catch %(bad-op *): caught++;
 
   Var result = Var.binary(Var.box_long(1), <+>, 2);
@@ -493,13 +493,13 @@ static void var_truth_and_generic_predicates(void) {
   EXPECT_FALSE(((Var) {0}).truthy());
   EXPECT_FALSE(Var.new(<symbol>, 0ul).truthy());
   Var empty_string = (String) NULL;
-  Var text = %"x";
+  Var text = "x";
   Var empty_list = (List) NULL;
   Var list = %(1);
-  Var empty_array = %[];
-  Var array = %[1];
+  Var empty_array = [];
+  Var array = [1];
   Var empty_map = %{};
-  Var map = %{ a: 1 };
+  Var map = { a: 1 };
   EXPECT_FALSE(empty_string.truthy());
   EXPECT_TRUE(text.truthy());
   EXPECT_FALSE(empty_list.truthy());
@@ -530,8 +530,8 @@ static void var_truth_and_generic_predicates(void) {
   catch %(void-op *): caught = 1;
   EXPECT_TRUE(caught);
 
-  EXPECT_INT_EQ(Var.binary(1, <&&>, %"x").int(), 1);
-  EXPECT_INT_EQ(Var.binary(0, <||>, %"").int(), 0);
+  EXPECT_INT_EQ(Var.binary(1, <&&>, "x").int(), 1);
+  EXPECT_INT_EQ(Var.binary(0, <||>, "").int(), 0);
   EXPECT_INT_EQ(Var.binary(3, <==>, 3).int(), 1);
   EXPECT_INT_EQ(Var.binary(3, <!=>, 4).int(), 1);
   EXPECT_INT_EQ(Var.binary(3, <===>, 3).int(), 1);
@@ -540,8 +540,8 @@ static void var_truth_and_generic_predicates(void) {
   EXPECT_INT_EQ(Var.binary(3, <"<=">, 3).int(), 1);
   EXPECT_INT_EQ(Var.binary(4, <">">, 3).int(), 1);
   EXPECT_INT_EQ(Var.binary(4, <">=">, 4).int(), 1);
-  EXPECT_INT_EQ(Var.binary(%"same", <==>, %"same").int(), 1);
-  EXPECT_INT_EQ(Var.binary(%"a", <"<">, %"b").int(), 1);
+  EXPECT_INT_EQ(Var.binary("same", <==>, "same").int(), 1);
+  EXPECT_INT_EQ(Var.binary("a", <"<">, "b").int(), 1);
 
   Symbol numeric_tags[] = {
     <i8>, <u8>, <i16>, <u16>, <i32>, <u32>, <i48>, <u48>,
@@ -553,7 +553,7 @@ static void var_truth_and_generic_predicates(void) {
     EXPECT_TRUE(numeric_value_for_tag(numeric_tags[i], 1).truthy());
   }
 
-  Array iter_values = %[7];
+  Array iter_values = [7];
   struct Iter iter_storage;
   Iter iter = iter_values.iter(&iter_storage);
   Var boxed_iter = iter;

@@ -83,11 +83,11 @@ static void _offset_opened(UvFs request, Var value) {
   EXPECT_PTR_EQ(state.file.loop(), request.loop());
   EXPECT_NULL(request.native()->path);
 
-  state.file.write(%"00", 0, value, _offset_text_written);
+  state.file.write("00", 0, value, _offset_text_written);
 }
 
 static void file_offset_io_copies_buffers_and_closes(void) {
-  String path = _fs_path(%"offset");
+  String path = _fs_path("offset");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -119,7 +119,7 @@ static void file_offset_io_copies_buffers_and_closes(void) {
   }
   EXPECT_TRUE(caught);
   caught = 0;
-  try state.file.write(%"x", 0, void, _offset_written);
+  try state.file.write("x", 0, void, _offset_written);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"fs_write");
@@ -160,7 +160,7 @@ static void _whole_done(UvFs request, Var value) {
 }
 
 static void whole_file_io_is_bounded_and_binary_safe(void) {
-  String path = _fs_path(%"whole");
+  String path = _fs_path("whole");
   unlink(path);
   defer unlink(path);
   UvLoop loop = UvLoop.new();
@@ -231,7 +231,7 @@ static void whole_file_io_is_bounded_and_binary_safe(void) {
 
   WholeState text_written = { 0 }, text_read = { 0 };
   loop.write_file(
-    path, %"text", Var.new(<p48>, &text_written), _whole_done
+    path, "text", Var.new(<p48>, &text_written), _whole_done
   );
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_INT_EQ(text_written.result, 4);
@@ -287,7 +287,7 @@ static int _entry_index(UvFs scan, String name) {
 }
 
 static void stat_and_scan_results_are_independent_copies(void) {
-  String directory = _fs_path(%"metadata");
+  String directory = _fs_path("metadata");
   String file_path = %"$directory/file.bin";
   String subdirectory = %"$directory/subdir";
   String link_path = %"$directory/link";
@@ -325,9 +325,9 @@ static void stat_and_scan_results_are_independent_copies(void) {
   EXPECT_TRUE(stat.modified_nanoseconds() >= 0);
   EXPECT_NOT_NULL(stat.native());
   EXPECT_TRUE(stat.native() != &state.stat_request.native()->statbuf);
-  int file_index = _entry_index(state.scan_request, %"file.bin");
-  int dir_index = _entry_index(state.scan_request, %"subdir");
-  int link_index = _entry_index(state.scan_request, %"link");
+  int file_index = _entry_index(state.scan_request, "file.bin");
+  int dir_index = _entry_index(state.scan_request, "subdir");
+  int link_index = _entry_index(state.scan_request, "link");
   EXPECT_TRUE(file_index >= 0);
   EXPECT_TRUE(dir_index >= 0);
   EXPECT_TRUE(link_index >= 0);
@@ -390,8 +390,8 @@ static void _close_error_done(UvFs request, Var value) {
 }
 
 static void whole_transfer_and_close_errors_release_descriptors(void) {
-  String directory = _fs_path(%"read-directory");
-  String path = _fs_path(%"raw-closed");
+  String directory = _fs_path("read-directory");
+  String path = _fs_path("raw-closed");
   rmdir(directory);
   unlink(path);
   mkdir(directory, 0700);
@@ -463,18 +463,18 @@ static void _expect_missing(UvLoop loop, UvFs request, String operation) {
 }
 
 static void missing_paths_preserve_libuv_errors(void) {
-  String path = _fs_path(%"absent");
+  String path = _fs_path("absent");
   unlink(path);
   UvLoop loop = UvLoop.new();
   defer loop.free();
   int calls = 0;
   Var value = Var.new(<p48>, &calls);
   UvFs read = loop.read_file(path, 32, value, _count_fs);
-  _expect_missing(loop, read, %"fs_open");
+  _expect_missing(loop, read, "fs_open");
   UvFs stat = loop.stat(path, value, _count_fs);
-  _expect_missing(loop, stat, %"fs_stat");
+  _expect_missing(loop, stat, "fs_stat");
   UvFs scan = loop.scan(path, value, _count_fs);
-  _expect_missing(loop, scan, %"fs_scandir");
+  _expect_missing(loop, scan, "fs_scandir");
   EXPECT_INT_EQ(calls, 0);
 }
 
@@ -522,7 +522,7 @@ static void cancelled_fs_request_completes_once(void) {
   ), 0);
   uv_sem_wait(&blocker.started);
   UvFs request = loop.stat(
-    %"/tmp", Var.new(<p48>, &state), _cancel_done
+    "/tmp", Var.new(<p48>, &state), _cancel_done
   );
   uv_fs_t *native = request.native();
   EXPECT_TRUE(request.cancel());
@@ -571,7 +571,7 @@ static void _pending_open(UvFs request, Var value) {
 }
 
 static void file_close_and_loop_free_reject_live_work(void) {
-  String path = _fs_path(%"pending");
+  String path = _fs_path("pending");
   unlink(path);
   defer unlink(path);
   File seed = File.open(path, %"w");
@@ -636,7 +636,7 @@ static void filesystem_callback_error_returns_and_loop_resumes(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
   FailureState failed = { 0 };
-  loop.stat(%"/tmp", Var.new(<p48>, &failed), _failing_stat);
+  loop.stat("/tmp", Var.new(<p48>, &failed), _failing_stat);
   int caught = 0;
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
@@ -649,7 +649,7 @@ static void filesystem_callback_error_returns_and_loop_resumes(void) {
   EXPECT_TRUE(S_ISDIR(failed.copied.mode()));
 
   MetadataState resumed = { 0 };
-  loop.stat(%"/tmp", Var.new(<p48>, &resumed), _stat_done);
+  loop.stat("/tmp", Var.new(<p48>, &resumed), _stat_done);
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_INT_EQ(resumed.stat_calls, 1);
   EXPECT_TRUE(S_ISDIR(resumed.stat_request.stat().mode()));

@@ -15,11 +15,11 @@ static int fail(String message) {
   return 1;
 }
 
-if (!args) return fail(%"usage: tools/check-release.x <version> [package]");
+if (!args) return fail("usage: tools/check-release.x <version> [package]");
 String version = args.car().str().remove_prefix("v");
-String package = args.cdr() ? args.cadr().str() : %"pcre2";
+String package = args.cdr() ? args.cadr().str() : "pcre2";
 String site = Env.get("X2C_SITE");
-if (!site) site = %"https://x2c-lang.dev";
+if (!site) site = "https://x2c-lang.dev";
 
 Path work = Path.temp_dir();
 defer work.remove_tree();
@@ -36,8 +36,8 @@ if (heading != %"# x2c package index for x2c $version")
 
 Path prefix = work.join("x2c");
 %((curl -fsSL "$site/install.sh") (sh -s "--" --version $version)).job()
-  .options(%{env: {X2C_PREFIX: $prefix},
-             stdout: ${work.join("install.log")}})
+  .options({env: {X2C_PREFIX: prefix},
+             stdout: work.join("install.log")})
   .check();
 
 Path x2c = prefix.join("bin/x2c");

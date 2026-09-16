@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -71,14 +71,13 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("/");
-  _1 = String_new(".");
-  _2 = String_new("/");
-  _3 = String_new(".");
-  _4 = String_new("..");
-  _5 = String_new("**");
+  _1 = String_new("/");
+  _2 = String_new(".");
+  _3 = String_new("..");
+  _4 = String_new("**");
+  _5 = String_new("/.");
   _6 = String_new("/tmp");
   _7 = String_new("x2c-XXXXXX");
-  _8 = String_new("/.");
 }
 
 Path Path_new(const char * argument0){
@@ -125,8 +124,8 @@ int String_endswith(String, String);
 Path Path_join(Path base, Path name){
   if(! _init_guard_) _file_init_();
   if(! String_truth(name)) return base;
-  if(! String_truth(base) || String_startswith(name, _2)) return name;
-  return String_endswith(base, _2) ? String_join(NULL, cons(String_var(base), cons(String_var(name), NULL))) : String_join(NULL, cons(String_var(base), cons(String_var(_0), cons(String_var(name), NULL))));
+  if(! String_truth(base) || String_startswith(name, _1)) return name;
+  return String_endswith(base, _1) ? String_join(NULL, cons(String_var(base), cons(String_var(name), NULL))) : String_join(NULL, cons(String_var(base), cons(String_var(_0), cons(String_var(name), NULL))));
 }
 
 int String_rfind(String, String);
@@ -134,10 +133,10 @@ int String_rfind(String, String);
 Path Path_dirname(Path path){
   if(! _init_guard_) _file_init_();
   String trimmed = _trimmed(path);
-  int slash = String_rfind(trimmed, _2);
-  if(slash < 0) return _1;
+  int slash = String_rfind(trimmed, _1);
+  if(slash < 0) return _2;
   while(slash > 0 && String_getindex(trimmed, slash - 1) == '/') slash --;
-  return slash ? String_getslice(trimmed, -2147483648, slash, 1) : _0;
+  return slash ? String_getslice(trimmed, -2147483648, slash, 1) : _1;
 }
 
 int String_equal(String, String);
@@ -145,22 +144,22 @@ int String_equal(String, String);
 Path Path_basename(Path path){
   if(! _init_guard_) _file_init_();
   String trimmed = _trimmed(path);
-  if(String_equal(trimmed, _2)) return trimmed;
-  int slash = String_rfind(trimmed, _2);
+  if(String_equal(trimmed, _1)) return trimmed;
+  int slash = String_rfind(trimmed, _1);
   return slash < 0 ? trimmed : String_getslice(trimmed, slash + 1, -2147483648, 1);
 }
 
 String Path_extension(Path path){
   if(! _init_guard_) _file_init_();
   String base = Path_basename(path);
-  int dot = String_rfind(base, _3);
+  int dot = String_rfind(base, _2);
   return dot > 0 ? String_getslice(base, dot, -2147483648, 1) : NULL;
 }
 
 String Path_stem(Path path){
   if(! _init_guard_) _file_init_();
   String base = Path_basename(path);
-  int dot = String_rfind(base, _3);
+  int dot = String_rfind(base, _2);
   return dot > 0 ? String_getslice(base, -2147483648, dot, 1) : base;
 }
 
@@ -176,21 +175,21 @@ Path Path_absolute(Path path){
   if(! _init_guard_) _file_init_();
   char buffer[PATH_MAX];
   if(realpath(path, buffer)) return String_new(buffer);
-  if(! String_startswith(path, _2)){
+  if(! String_startswith(path, _1)){
     if(! getcwd(buffer, sizeof(buffer))) _path_error("Path.absolute", path, errno);
     path = Path_join(String_new(buffer), path);
   }
-  Path result = _0;
+  Path result = _1;
   {
     String part;
-    List _x2c_macro_object_0 = String_split(path, _2);
+    List _x2c_macro_object_0 = String_split(path, _1);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       part = Var_string(_x2c_macro_cursor_output_0);
       {
-        if(! String_truth(part) || String_equal(part, _3)) continue;
-        if(String_equal(part, _4)){
+        if(! String_truth(part) || String_equal(part, _2)) continue;
+        if(String_equal(part, _3)){
           result = Path_dirname(result);
           continue;
         }
@@ -320,7 +319,7 @@ static void _walk(Path directory, int depth, int hidden, Array paths){
       {
         Path child = Path_join(directory, name);
         Array_push(paths, String_var(child));
-        if(depth != 1 &&(hidden || ! String_startswith(name, _3)) && _descends(child)) _walk(child, depth - 1, hidden, paths);
+        if(depth != 1 &&(hidden || ! String_startswith(name, _2)) && _descends(child)) _walk(child, depth - 1, hidden, paths);
       }
 
     }
@@ -389,7 +388,7 @@ int Array_try_next(Array, int *, Var *);
 List Path_glob(Path pattern){
   if(! _init_guard_) _file_init_();
   if(! strpbrk(pattern, "*?[\\")) return Path_exists(pattern) ? cons(String_var(pattern), NULL) : NULL;
-  List parts = String_split(pattern, _2);
+  List parts = String_split(pattern, _1);
   Path base = NULL;
   int depth = 0, recursive = 0;
   {
@@ -402,17 +401,17 @@ List Path_glob(Path pattern){
       {
         if(depth || strpbrk(String_truth(part) ? part : "", "*?[\\")){
           depth ++;
-          if(String_equal(part, _5)) recursive = 1;
+          if(String_equal(part, _4)) recursive = 1;
         }
-        else base = String_truth(base) ? Path_join(base, part) : String_truth(part) ? part : _0;
+        else base = String_truth(base) ? Path_join(base, part) : String_truth(part) ? part : _1;
       }
 
     }
 
   }
-  Path root = String_truth(base) ? base : _1;
+  Path root = String_truth(base) ? base : _2;
   Array paths = Array_new(), matches = Array_new();
-  if(Path_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _3) || String_contains(pattern, _8), paths);
+  if(Path_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _2) || String_contains(pattern, _5), paths);
   {
     String path;
     Array _x2c_macro_object_4 = paths;

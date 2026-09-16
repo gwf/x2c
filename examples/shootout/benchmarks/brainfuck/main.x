@@ -59,7 +59,7 @@ static uint64_t _run(Program program, int repetitions) {
 
 int main(int argc, char **argv) {
   if (argc != 2) return 2;
-  Program program = _compile(%"noise ++++++++[>++++++++<-]>+.+.+.+. ignored");
+  Program program = _compile("noise ++++++++[>++++++++<-]>+.+.+.+. ignored");
   printf("%llu\n", (unsigned long long) _run(program, atoi(argv[1])));
   return 0;
 }

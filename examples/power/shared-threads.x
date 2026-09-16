@@ -26,9 +26,9 @@ static Var count(const void *input, size_t input_size) {
 
   String message = %"${work.name} complete";
   log_info(<worker>, %((message $message)));
-  Map result = %{
-    name: ${work.name},
-    message: $message
+  Map result = {
+    name: work.name,
+    message: message
   };
   return result;
 }

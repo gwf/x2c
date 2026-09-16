@@ -151,7 +151,7 @@ static void error_counted_bridge_records_site_and_pairs(void) {
   x2c_error_raise_n(
     &site, code, 2,
     <bytes>.var(), bytes.var(),
-    <owner>.var(), %"probe".var()
+    <owner>.var(), "probe".var()
   );
   List entry = Error.since(mark).car();
   List detail = entry.assoc(<detail>);

@@ -29,7 +29,7 @@ static void _record_lookup(UvLookup lookup, Var value) {
 }
 
 static void numeric_addresses_round_trip(void) {
-  UvAddress ip4 = UvAddress.ip4(%"127.0.0.1", 4321);
+  UvAddress ip4 = UvAddress.ip4("127.0.0.1", 4321);
   EXPECT_STR_EQ(ip4.host(), %"127.0.0.1");
   EXPECT_INT_EQ(ip4.port(), 4321);
   EXPECT_INT_EQ(ip4.family(), AF_INET);
@@ -39,7 +39,7 @@ static void numeric_addresses_round_trip(void) {
   EXPECT_NULL(ip4.canonical_name());
   EXPECT_INT_EQ(ip4.native()->sa_family, AF_INET);
 
-  UvAddress ip6 = UvAddress.ip6(%"::1", 4321);
+  UvAddress ip6 = UvAddress.ip6("::1", 4321);
   EXPECT_STR_EQ(ip6.host(), %"::1");
   EXPECT_INT_EQ(ip6.port(), 4321);
   EXPECT_INT_EQ(ip6.family(), AF_INET6);
@@ -50,7 +50,7 @@ static void numeric_addresses_round_trip(void) {
   EXPECT_INT_EQ(ip6.native()->sa_family, AF_INET6);
 
   int caught = 0;
-  try UvAddress.ip4(%"not-an-ip", 80);
+  try UvAddress.ip4("not-an-ip", 80);
   catch %(io-fail (library *) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"ip4_addr");
@@ -58,7 +58,7 @@ static void numeric_addresses_round_trip(void) {
   EXPECT_TRUE(caught);
 
   caught = 0;
-  try UvAddress.ip6(%"::1", 65536);
+  try UvAddress.ip6("::1", 65536);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"ip6");
@@ -87,11 +87,11 @@ static void lookup_hints_copy_ipv4_and_ipv6_results(void) {
   LookupState ip4_state = { 0 }, ip6_state = { 0 };
   ip4_state.loop_thread = ip6_state.loop_thread = uv_thread_self();
 
-  UvLookup ip4 = loop.lookup(%"127.0.0.1", %"4321")
+  UvLookup ip4 = loop.lookup("127.0.0.1", "4321")
     .hints(AF_INET, SOCK_DGRAM, IPPROTO_UDP,
            AI_NUMERICHOST | AI_NUMERICSERV)
     .start(Var.new(<p48>, &ip4_state), _record_lookup);
-  UvLookup ip6 = loop.lookup(%"::1", %"4321")
+  UvLookup ip6 = loop.lookup("::1", "4321")
     .hints(AF_INET6, SOCK_DGRAM, IPPROTO_UDP,
            AI_NUMERICHOST | AI_NUMERICSERV)
     .start(Var.new(<p48>, &ip6_state), _record_lookup);
@@ -113,10 +113,10 @@ static void lookup_hints_copy_ipv4_and_ipv6_results(void) {
   EXPECT_NULL(ip4.native()->addrinfo);
   EXPECT_NULL(ip6.native()->addrinfo);
   _verify_numeric_lookup(
-    ip4, AF_INET, SOCK_DGRAM, IPPROTO_UDP, %"127.0.0.1", 4321
+    ip4, AF_INET, SOCK_DGRAM, IPPROTO_UDP, "127.0.0.1", 4321
   );
   _verify_numeric_lookup(
-    ip6, AF_INET6, SOCK_DGRAM, IPPROTO_UDP, %"::1", 4321
+    ip6, AF_INET6, SOCK_DGRAM, IPPROTO_UDP, "::1", 4321
   );
 }
 
@@ -125,9 +125,9 @@ static void resolve_and_canonical_names_use_copied_results(void) {
   defer loop.free();
   LookupState resolved_state = { 0 }, canonical_state = { 0 };
   UvLookup resolved = loop.resolve(
-    %"localhost", %"80", Var.new(<p48>, &resolved_state), _record_lookup
+    "localhost", "80", Var.new(<p48>, &resolved_state), _record_lookup
   );
-  UvLookup canonical = loop.lookup(%"localhost", %"80")
+  UvLookup canonical = loop.lookup("localhost", "80")
     .hints(AF_UNSPEC, SOCK_STREAM, 0, AI_CANONNAME)
     .start(Var.new(<p48>, &canonical_state), _record_lookup);
 
@@ -162,7 +162,7 @@ static void resolve_and_canonical_names_use_copied_results(void) {
 static void invalid_numeric_host_preserves_libuv_error_detail(void) {
   UvLoop loop = UvLoop.new();
   LookupState state = { 0 };
-  UvLookup lookup = loop.lookup(%"not-an-ip", %"80")
+  UvLookup lookup = loop.lookup("not-an-ip", "80")
     .hints(AF_UNSPEC, SOCK_STREAM, IPPROTO_TCP,
            AI_NUMERICHOST | AI_NUMERICSERV)
     .start(Var.new(<p48>, &state), _record_lookup);
@@ -191,7 +191,7 @@ static void loop_free_rejects_a_pending_lookup_without_draining_it(void) {
   UvLoop loop = UvLoop.new();
   LookupState state = { 0 };
   UvLookup lookup = loop.resolve(
-    %"127.0.0.1", %"80", Var.new(<p48>, &state), _record_lookup
+    "127.0.0.1", "80", Var.new(<p48>, &state), _record_lookup
   );
 
   int caught = 0;
@@ -221,7 +221,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   }
   EXPECT_TRUE(caught);
 
-  UvLookup lookup = loop.lookup(%"127.0.0.1", %"80");
+  UvLookup lookup = loop.lookup("127.0.0.1", "80");
   caught = 0;
   try lookup.count();
   catch %(bad-state (library *) (operation ?operation) *): {
@@ -259,7 +259,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   EXPECT_INT_EQ(state.calls, 1);
 
   UvLoop closed = UvLoop.new();
-  UvLookup abandoned = closed.lookup(%"127.0.0.1", %"80");
+  UvLookup abandoned = closed.lookup("127.0.0.1", "80");
   closed.free();
   caught = 0;
   try abandoned.start(void, _record_lookup);
@@ -305,7 +305,7 @@ static void accepted_cancel_keeps_request_alive_until_completion(void) {
   uv_sem_wait(&blocker.started);
 
   UvLookup lookup = loop.resolve(
-    %"127.0.0.1", %"80", Var.new(<p48>, &state), _record_lookup
+    "127.0.0.1", "80", Var.new(<p48>, &state), _record_lookup
   );
   uv_getaddrinfo_t *native = lookup.native();
   EXPECT_TRUE(lookup.cancel());
@@ -344,7 +344,7 @@ static void lookup_callback_errors_preserve_results_and_loop_resumption(void) {
   defer loop.free();
   FailingLookupState failed = { 0 };
   UvLookup first = loop.resolve(
-    %"127.0.0.1", %"80", Var.new(<p48>, &failed), _raise_after_lookup
+    "127.0.0.1", "80", Var.new(<p48>, &failed), _raise_after_lookup
   );
 
   int caught = 0;
@@ -362,7 +362,7 @@ static void lookup_callback_errors_preserve_results_and_loop_resumption(void) {
 
   LookupState resumed = { 0 };
   UvLookup second = loop.resolve(
-    %"::1", %"80", Var.new(<p48>, &resumed), _record_lookup
+    "::1", "80", Var.new(<p48>, &resumed), _record_lookup
   );
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_INT_EQ(resumed.calls, 1);

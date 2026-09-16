@@ -15,7 +15,7 @@ int main(void) {
   );
   defer request.free();
 
-  RegexpMatch found = request.match(%"GET /docs");
+  RegexpMatch found = request.match("GET /docs");
   if (found)
     printf("%s %s\n", found[<method>], found[<path>]);
   return 0;

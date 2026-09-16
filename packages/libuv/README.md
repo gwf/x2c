@@ -17,7 +17,7 @@ int main(void) {
 
   UvProcess counted = loop.spawn(%("/usr/bin/wc" "-l"));
   defer counted.free();
-  counted.write(%"alpha\nbeta\ngamma\n").close_stdin();
+  counted.write("alpha\nbeta\ngamma\n").close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
   printf("%s", %"lines: ${counted.stdout()}");

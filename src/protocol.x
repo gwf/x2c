@@ -32,7 +32,7 @@ static String _path(Compiler compiler) {
   Var cached;
   if (compiler.protocol_helpers.try_get(<proto-path>, &cached)) return cached;
   String result = _normalize_file(
-    compiler, compiler.filename ? compiler.filename : %"<stdin>");
+    compiler, compiler.filename ? compiler.filename : "<stdin>");
   compiler.protocol_helpers[<proto-path>] = result;
   return result;
 }
@@ -161,7 +161,7 @@ static List _adoption_location(List adoption) => adoption.last();
 
 static String _location_file(List location) {
   Var file = location ? location.assoc(<file>) : void;
-  return file is <string> ? file.string() : %"<unknown>";
+  return file is <string> ? file.string() : "<unknown>";
 }
 
 static String _canonical_file(Compiler compiler, List location) {
@@ -262,10 +262,10 @@ static void Compiler._install_protocol_occurrence(
     to `resolve_protocols`.
 */
 void Compiler.rebuild_protocols(Compiler compiler, Map symbols) {
-  compiler.protocols = %{};
-  compiler.adoptions = %{};
-  compiler.protocol_helpers = %{};
-  compiler.proto_cache = %{};
+  compiler.protocols = {};
+  compiler.adoptions = {};
+  compiler.protocol_helpers = {};
+  compiler.proto_cache = {};
   if (!symbols) return;
   foreach (Var value, symbols) {
     if (value is not <list>) continue;
@@ -387,7 +387,7 @@ static List Compiler._publish_protocol_record(
   Compiler compiler, List record, Type base, List location) {
   Symbol storage = compiler.source_private > 0 ? <static> : <external>;
   compiler._install_protocol_occurrence(base, record, storage, location);
-  compiler.proto_cache = %{};
+  compiler.proto_cache = {};
   List published = %(protocol $record $storage $location);
   compiler._retain_protocol_source_node(published, storage, location);
   return published;
@@ -446,10 +446,10 @@ static List Compiler._publish_protocol_adoption(
   String base_name = _base_name(base);
   String forward = base_name ? %"${spelling}_${base_name.lower()}" : NULL;
   String reverse = base_name
-    ? c.reverse_converter_spelling(base_name, %"", spelling)
+    ? c.reverse_converter_spelling(base_name, "", spelling)
     : NULL;
   String alternate = base_name
-    ? c.reverse_converter_spelling(base_name, %"as_", spelling)
+    ? c.reverse_converter_spelling(base_name, "as_", spelling)
     : NULL;
   Var occurrence_value;
   List occurrence = c.protocols.try_get(base, &occurrence_value)
@@ -498,7 +498,7 @@ static List Compiler._publish_protocol_adoption(
   c._install_protocol_adoption(
     base, participant, storage, representation, tag, tag_expression, location);
   c.conforms.del(%($base $participant));
-  c.proto_cache = %{};
+  c.proto_cache = {};
   if (!c.shallow) _resolve_declared_adoption(c, base, participant, location);
   List published = _adoption_node(
     base, participant, storage, representation, tag_expression, location);
@@ -628,7 +628,7 @@ static Var _substitute(Var value, Map variables, Map bindings) {
   String variable = _type_variable(value, variables);
   if (variable) return bindings[variable];
   if (value is not <list>) return value;
-  Array output = %[];
+  Array output = [];
   foreach (Var item, value.list())
     output.push(_substitute(item, variables, bindings));
   List result = output.list_free();
@@ -822,7 +822,7 @@ static List Compiler._resolve_native_protocol_participant(
     compiler.conforms[key] = 0;
     return NULL;
   }
-  Map variables = %{}, bindings = %{};
+  Map variables = {}, bindings = {};
   variables[binder] = 1;
   bindings[binder] = participant;
   foreach (List association, associations) {
@@ -830,7 +830,7 @@ static List Compiler._resolve_native_protocol_participant(
     variables[association_name] = 1;
     bindings[association_name] = binding;
   }
-  Array members = %[];
+  Array members = [];
   foreach (List template, templates) {
     (String member_name, Type template_type, String native_name) = template;
     List requirement = _native_requirement(
@@ -870,11 +870,11 @@ static String _reverse_binding(
   if (!base_name || !participant.is_bare_typedef_name()) return NULL;
   String participant_name = participant.car().str();
   String conventional =
-    compiler.reverse_converter_spelling(base_name, %"", participant_name);
+    compiler.reverse_converter_spelling(base_name, "", participant_name);
   Type found = _declared(compiler, conventional);
   if (_exact_conversion(found, base, participant)) return conventional;
   String alternate =
-    compiler.reverse_converter_spelling(base_name, %"as_", participant_name);
+    compiler.reverse_converter_spelling(base_name, "as_", participant_name);
   found = _declared(compiler, alternate);
   if (_exact_conversion(found, base, participant)) return alternate;
   return NULL;
@@ -897,7 +897,7 @@ static List _resolve_members(
     ? _adoption_representation(
       _visible_adoption_row(compiler, base, participant))
     : NULL;
-  Map variables = %{}, defaults = %{}, bindings = %{};
+  Map variables = {}, defaults = {}, bindings = {};
   variables[binder] = 1;
   bindings[binder] = participant;
   foreach (List association, associations) {
@@ -906,7 +906,7 @@ static List _resolve_members(
     defaults[association_name] = value;
   }
 
-  Array resolved = %[];
+  Array resolved = [];
   foreach (List row, templates)
     match (row)
       case %(?(String member_name) ?(Type template_type) ?): {
@@ -946,7 +946,7 @@ static List _resolve_members(
 
   foreach (Var (name, value), defaults) bindings.setdefault(name, value);
 
-  Array final = %[];
+  Array final = [];
   foreach (List row, resolved)
     match (row)
       case %(?(String member_name) ?(Symbol status) ?(String source)
@@ -1075,7 +1075,7 @@ does_not_conform: compiler.conforms[key] = 0;
     adoptions owned by the current translation unit.
 */
 void Compiler.resolve_protocols(Compiler compiler) {
-  compiler.conforms = %{};
+  compiler.conforms = {};
   String owner = _path(compiler);
   foreach (Var value, compiler.adoptions) {
     List adoption = value;
@@ -1400,7 +1400,7 @@ static void _dump_conformance_row(
     live and artifact symbol modes.
 */
 void Compiler.dump_conformance(Compiler compiler, Map globs) {
-  Array names = %[];
+  Array names = [];
   foreach (Var (key, value), globs)
     match (%($key $value))
       case %((?(String name)) (typedef *)):
@@ -1448,7 +1448,7 @@ static List _proto_cached(Compiler compiler, Var key, Func compute) {
 
 static List _ordered_occurrences(Compiler compiler) =>
   _proto_cached(compiler, <proto-ordr>, %!(Compiler &compiler) => {
-    Array ordered = %[];
+    Array ordered = [];
     foreach (Var (base, occurrence), compiler.protocols)
       ordered.push(%($base $occurrence));
     ordered.sort();
@@ -1458,7 +1458,7 @@ static List _ordered_occurrences(Compiler compiler) =>
 static List _ancestry(Compiler compiler, Type participant) => _proto_cached(
     compiler, %("protocol-ancestry" $participant),
     %!(Compiler &compiler) => {
-      Array ancestry = %[], Type current = participant;
+      Array ancestry = [], Type current = participant;
       for (int distance = 0; current && distance <= 128; distance++) {
         ancestry.push(current);
         if (!current.is_typedef_name() && !current.is_typedef()) break;
@@ -1504,7 +1504,7 @@ static List _generated_owner(
   Compiler compiler, Type participant, String member_name) {
   List cache_key = %("protocol-generated-owner" $participant $member_name);
   return _proto_cached(compiler, cache_key, %!(Compiler &compiler) => {
-    Array candidates = %[], List result = NULL, first_linkage = NULL;
+    Array candidates = [], List result = NULL, first_linkage = NULL;
     Symbol first_storage = 0;
     _each_adopted_row(
       compiler, _ordered_occurrences(compiler), participant,
@@ -1716,7 +1716,7 @@ String Compiler.protocol_update_helper(
   List zero = %(expr (int) (literal (int) "0"));
   List current = %(expr $participant (index $lhs_pointer $zero));
   List call_rhs = NULL, old_declaration = NULL, return_value = current;
-  Array declarations = %[];
+  Array declarations = [];
   declarations.push(%(param $pointer_base (bind $lhs_binding (*))));
   declarations.push(%(param ("Symbol") (bind $op_binding ())));
 
@@ -1779,7 +1779,7 @@ List Compiler.discard_helper(
   if (!fresh && (resolved_result.is_pointer() ||
                  resolved_result.is_aggregate()))
     return NULL;
-  Array declarations = %[], arguments = %[], discards = %[];
+  Array declarations = [], arguments = [], discards = [];
   int index = 0;
   foreach (Type parameter, parameters) {
     List argument_binding = c.sym.introduce(%"a$index");
@@ -1838,7 +1838,7 @@ List Compiler.protocol_discard_helper(
 
 static List _parameter_declarations(
   Compiler compiler, List types, Array bindings) {
-  Array declarations = %[], int index = 0;
+  Array declarations = [], int index = 0;
   foreach (Type type, types) {
     List binding = compiler.sym.introduce(%"a$index");
     bindings.push(binding);
@@ -1882,10 +1882,10 @@ static List Compiler._generate_protocol_function(
   Type source_result = source_signature.cdr();
   List template_parameters = template.car().list().cadr();
   Type template_result = template.cdr();
-  Array parameter_bindings = %[];
+  Array parameter_bindings = [];
   List declarations = _parameter_declarations(
     compiler, target_parameters, parameter_bindings);
-  Array arguments = %[];
+  Array arguments = [];
   List target_at = target_parameters, template_at = template_parameters;
   List source_at = source_parameters;
   for (int i = 0; target_at;
@@ -1933,7 +1933,7 @@ static List _declaration_from_signature(
   Compiler compiler, String name, Type signature, int make_static) {
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
-  Array declarations = %[];
+  Array declarations = [];
   foreach (Type type, parameters) declarations.push(type.parameter_ast(NULL));
   List binding = compiler.sym.reference(%($name), NULL);
   List storage = make_static ? %(static @result) : result;
@@ -1968,7 +1968,7 @@ static int _starts_private_region(List node) {
 static List _insert_at_visibility_boundary(
   List ast, List declaration, int declaration_private, List additions,
   int make_static) {
-  Array output = %[], int eligible = 0, inserted = 0;
+  Array output = [], int eligible = 0, inserted = 0;
   foreach (List node, ast) {
     int boundary = eligible && _starts_private_region(node);
     if (!inserted && boundary && !make_static) {
@@ -2003,7 +2003,7 @@ static void Compiler._generate_descriptor_registration(
   List thunks, int central_initializer) {
   String methods_name = compiler.fresh_name("_x2c_protocol_methods");
   List methods_binding = compiler.sym.introduce(methods_name);
-  Array fields = %[];
+  Array fields = [];
   foreach (List row, thunks) {
     (String member, List thunk_binding, Type thunk_type) = row;
     fields.push(
@@ -2152,7 +2152,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
   List adoption = _visible_adoption_row(c, base, participant);
   int shares_var_tag = base === %("Var") &&
     _adoption_representation(adoption);
-  Array thunks = %[];
+  Array thunks = [];
   foreach (List row, rows)
     match (row)
       case %(?(String member) ?(Symbol status) ?(String source)
@@ -2248,7 +2248,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
   /* Emit adapters only for finalized, declared conformances. */
   int central_initializer =
     _defines_function(c, "x2c_initialize_protocols");
-  Array ordered = %[];
+  Array ordered = [];
   foreach (Var (key, value), c.conforms)
     if (value is <list>) ordered.push(%($key $value));
   ordered.sort();
@@ -2268,7 +2268,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
           (List source, int private) = stored;
           int make_static =
             _adoption_visibility(c, base, participant) == <static>;
-          Array aliases = %[];
+          Array aliases = [];
           foreach (List row, rows)
             match (row)
               case %(?(String member) ? ?(String binding) ? ?
@@ -2463,8 +2463,8 @@ List Compiler.parse_protocol_declaration(Compiler c) {
     }
   }
 
-  Array associations = %[], members = %[];
-  Map type_names = %{}, member_names = %{};
+  Array associations = [], members = [];
+  Map type_names = {}, member_names = {};
   c.sym.push_new_scope();
   c.sym.define(%($participant), %(typedef $participant));
   type_names[participant] = 1;

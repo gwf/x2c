@@ -369,11 +369,11 @@ static void search_replace_binder_prefix_handles_is(void) {
 }
 
 static void match_is_type_accepts_var_tags(void) {
-  String string_value = %"hello";
+  String string_value = "hello";
   Var integer_var = 42, float_var = (double) 3.14159;
   List list_value = %(alpha beta);
-  Array array_value = %[1, 2];
-  Map map_value = %{ foo: 1 };
+  Array array_value = [1, 2];
+  Map map_value = { foo: 1 };
   Var symbol_var = <bar>;
 
   List samples = %( $string_value $integer_var $float_var $list_value
@@ -426,9 +426,9 @@ static void match_long_atom_binders_across_consumers(void) {
   List bindings = input.match(pattern);
   if (!EXPECT_NOT_NULL(bindings)) return;
   EXPECT_INT_EQ(bindings.assoc(
-    Atom.intern(%"?VeryLongIdentifierValue")).integer(), 42);
+    Atom.intern("?VeryLongIdentifierValue")).integer(), 42);
   EXPECT_TRUE(bindings.assoc(
-    Atom.intern(%"*RemainingLongValues")).list() == %(tail));
+    Atom.intern("*RemainingLongValues")).list() == %(tail));
 
   List oracle = %(sentinel);
   EXPECT_TRUE(test_match_oracle_try_match(input, pattern, &oracle));
@@ -440,7 +440,7 @@ static void match_long_atom_binders_across_consumers(void) {
   EXPECT_TRUE(corpus.try_search(pattern, &found, &found_bindings));
   EXPECT_TRUE(found.list() == %(item 7 tail));
   EXPECT_INT_EQ(found_bindings.assoc(
-    Atom.intern(%"?VeryLongIdentifierValue")).integer(), 7);
+    Atom.intern("?VeryLongIdentifierValue")).integer(), 7);
 
   Var template = %(
     captured ?VeryLongIdentifierValue *RemainingLongValues

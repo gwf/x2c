@@ -185,7 +185,7 @@ static int _check(String artifacts, String out) {
   Tensor error = Tensor.mse_loss(output, y_train.index_select(0, pick));
   adam.zero_grad();
   error.backward();
-  Map step1 = %{};
+  Map step1 = {};
   step1["probe.output"] = output;
   step1["probe.loss"] = error;
   foreach (List pair, model.named_parameters()) {
@@ -217,7 +217,7 @@ static int _check(String artifacts, String out) {
     Scope.retain();
     defer Scope.release();
     Torch.inference_mode();
-    Map final = %{};
+    Map final = {};
     foreach (List pair, trained.named_parameters()) {
       String name = pair[0].str();
       final[%"final.$name"] = pair[1].tensor().clone();
@@ -368,7 +368,7 @@ static int _trace(String artifacts, String out, String variant, int n) {
   int native = !strcmp(variant, "native");
   _train(layers, adam, x_train, y_train, rows, n, 0, native, 0);
 
-  Map trace = %{};
+  Map trace = {};
   foreach (List pair, model.named_parameters()) {
     String name = pair[0].str();
     trace[%"pre.$name"] = pair[1].tensor().clone();
@@ -611,7 +611,7 @@ static void _memory_control(String artifacts, Map data, int steps) {
   Scope.retain();
   {
     defer Scope.release();
-    Array retained = %[];
+    Array retained = [];
     Tensor block = x_val.narrow(0, 0, 2048);
     long held = 0, capacity = RETAIN_CAP_BYTES;
     int count = 0;

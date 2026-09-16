@@ -25,7 +25,7 @@ static int is_even(Var value) {
 }
 
 static List range_list(int count) {
-  Array values = %[];
+  Array values = [];
   for (int i = 0; i < count; i++) values.push(i);
   List result = values.list_free();
   return result;
@@ -81,8 +81,8 @@ int main(void) {
   for (int i = 0; i < hit_count; i++) sink += base.hash();
   result("hash", now_ns() - start, hit_count);
 
-  Map map = %{};
-  Array keys = %[];
+  Map map = {};
+  Array keys = [];
   int key_count = 2048;
   for (int i = 0; i < key_count; i++) {
     List key = %( $i ${base.nth_cdr(i & 1023)} );

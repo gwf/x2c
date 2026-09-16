@@ -59,17 +59,17 @@ static void udp_sends_connected_unconnected_binary_and_empty_datagrams(void) {
   Var value = Var.new(<p48>, &state);
   state.guard = loop.timer(5000, 0, value, _udp_timeout);
   state.receiver = loop.udp()
-    .bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+    .bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .max_receive(8).receive(value, _udp_exchange_receive);
   UvAddress destination = state.receiver.local_address();
   UvAddress copied_target = UvAddress.ip4(
     destination.host(), destination.port()
   );
   state.unconnected = loop.udp().bind(
-    UvAddress.ip4(%"127.0.0.1", 0), 0
+    UvAddress.ip4("127.0.0.1", 0), 0
   );
   state.connected = loop.udp().bind(
-    UvAddress.ip4(%"127.0.0.1", 0), 0
+    UvAddress.ip4("127.0.0.1", 0), 0
   ).connect(destination);
   UvAddress unconnected = state.unconnected.local_address();
   UvAddress connected = state.connected.local_address();
@@ -163,7 +163,7 @@ static void _udp_restart_receive(
     state.first = packet;
     state.first_flags = flags;
     udp.stop().stop();
-    state.sender.send(udp.local_address(), %"B");
+    state.sender.send(udp.local_address(), "B");
     state.restart = state.loop.timer(10, 0, value, _udp_restart_timer);
     return;
   }
@@ -181,7 +181,7 @@ static void udp_receive_limit_truncates_and_stop_restarts(void) {
   Var value = Var.new(<p48>, &state);
   state.guard = loop.timer(5000, 0, value, _udp_timeout);
   state.receiver = loop.udp()
-    .bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+    .bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .max_receive(4).receive(value, _udp_restart_receive);
   state.sender = loop.udp();
   Bytes first = Bytes.new(1).append("abcdefgh", 8);
@@ -226,7 +226,7 @@ static void udp_default_receive_limit_accepts_a_large_datagram(void) {
   Var value = Var.new(<p48>, &state);
   state.guard = loop.timer(5000, 0, value, _udp_timeout);
   state.receiver = loop.udp()
-    .bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+    .bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .receive(value, _udp_large_receive);
   uv_buf_t allocated = { 0 };
   state.receiver.native()->alloc_cb(
@@ -270,7 +270,7 @@ static void _udp_resume_timer(UvTimer timer, Var value) {
 static void udp_callback_error_returns_from_run_and_the_loop_resumes(void) {
   UvLoop loop = UvLoop.new();
   UvUdp receiver = loop.udp()
-    .bind(UvAddress.ip4(%"127.0.0.1", 0), 0)
+    .bind(UvAddress.ip4("127.0.0.1", 0), 0)
     .receive(void, _udp_fail_receive);
   UvUdp sender = loop.udp();
   Bytes packet = Bytes.new(1).append("fail", 4);
@@ -299,7 +299,7 @@ static void udp_callback_error_returns_from_run_and_the_loop_resumes(void) {
 static void udp_pending_send_prevents_loop_destruction_and_close_drains(void) {
   UvLoop loop = UvLoop.new();
   UvUdp receiver = loop.udp().bind(
-    UvAddress.ip4(%"127.0.0.1", 0), 0
+    UvAddress.ip4("127.0.0.1", 0), 0
   );
   UvUdp sender = loop.udp();
   Bytes packet = Bytes.new(1).append("pending", 7);
@@ -372,7 +372,7 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   EXPECT_PTR_EQ(udp.stop(), udp);
 
   UvUdp receiver = loop.udp().bind(
-    UvAddress.ip4(%"127.0.0.1", 0), 0
+    UvAddress.ip4("127.0.0.1", 0), 0
   );
   udp.connect(receiver.local_address());
   caught = 0;

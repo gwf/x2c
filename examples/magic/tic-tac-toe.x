@@ -29,7 +29,7 @@ $lisp.binding(game, "wins?")
 static Var _wins(int square, String player) {
   if (!_empty(square)) return %();
   char saved = board[square - 1];
-  board[square - 1] = player == %"X" ? 'X' : 'O';
+  board[square - 1] = player == "X" ? 'X' : 'O';
   int won = _won(board[square - 1]);
   board[square - 1] = saved;
   if (won) return <true>;

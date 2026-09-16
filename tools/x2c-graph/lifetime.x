@@ -52,14 +52,14 @@ static String _lifetime_callee(Lifetime lifetime, Var value, List *arguments) {
       if (lifetime.compiler.semantic_binding_facts().contains(
             %(automatic $binding)
           ))
-        return %"computed";
+        return "computed";
       String name = lifetime.compiler.emitted_binding_name(binding);
       if (name && strlen(name)) return name;
       return spelling.str();
     }
     case %(call ? (!set ?call_arguments (args *))): {
       *arguments = call_arguments;
-      return %"computed";
+      return "computed";
     }
   }
   return NULL;
@@ -131,19 +131,19 @@ Symbol Lifetime.loop_allocation_kind(
   Compiler compiler, List node, String *operation) {
   match (node) {
     case %(array *): {
-      *operation = %"Array literal";
+      *operation = "Array literal";
       return <scoped>;
     }
     case %(map *): {
-      *operation = %"Map literal";
+      *operation = "Map literal";
       return <scoped>;
     }
     case %(cons *): {
-      *operation = %"cons";
+      *operation = "cons";
       return <pooled>;
     }
     case %(append *): {
-      *operation = %"List.append";
+      *operation = "List.append";
       return <pooled>;
     }
     case %(call
@@ -151,13 +151,13 @@ Symbol Lifetime.loop_allocation_kind(
              (ident (!set ?callee (binding ? ?))))
            (args *)): {
       String name = compiler.emitted_binding_name(callee);
-      if (name == %"Array_new" || name == %"Map_new") {
+      if (name == "Array_new" || name == "Map_new") {
         *operation = name;
         return <scoped>;
       }
-      if (name == %"cons" || name == %"List_append" ||
-          name == %"String_concat" || name == %"String_join" ||
-          name == %"String_new") {
+      if (name == "cons" || name == "List_append" ||
+          name == "String_concat" || name == "String_join" ||
+          name == "String_new") {
         *operation = name;
         return <pooled>;
       }
@@ -167,16 +167,16 @@ Symbol Lifetime.loop_allocation_kind(
 }
 
 static Symbol _lifetime_named_allocation_kind(String name) {
-  if (name == %"Scope_malloc" || name == %"Scope_calloc" ||
-      name == %"Scope_memdup" || name == %"Array_new" ||
-      name == %"Map_new" || name == %"Block_new" ||
-      name == %"Buffer_new")
+  if (name == "Scope_malloc" || name == "Scope_calloc" ||
+      name == "Scope_memdup" || name == "Array_new" ||
+      name == "Map_new" || name == "Block_new" ||
+      name == "Buffer_new")
     return <scoped>;
-  if (name == %"cons" || name == %"List_append" ||
-      name == %"String_concat" || name == %"String_join" ||
-      name == %"String_new" || name == %"String_new_len" ||
-      name == %"String_new_fill" || name == %"Atom_intern" ||
-      name == %"Array_list_free")
+  if (name == "cons" || name == "List_append" ||
+      name == "String_concat" || name == "String_join" ||
+      name == "String_new" || name == "String_new_len" ||
+      name == "String_new_fill" || name == "Atom_intern" ||
+      name == "Array_list_free")
     return <pooled>;
   return 0;
 }
@@ -193,7 +193,7 @@ static Symbol _lifetime_region_allocation_kind(
     case %(at ? ?inner):
       return _lifetime_region_allocation_kind(lifetime, inner, operation);
     case %(segments *): {
-      *operation = %"String interpolation";
+      *operation = "String interpolation";
       return <pooled>;
     }
   }
@@ -266,10 +266,10 @@ static int _lifetime_allocation_id(Lifetime lifetime, Var value) {
 }
 
 static int _lifetime_transparent(String name) {
-  return name == %"Var_map" || name == %"Var_array" ||
-         name == %"Var_list" || name == %"Var_string" ||
-         name == %"Map_var" || name == %"Array_var" ||
-         name == %"List_var" || name == %"String_var";
+  return name == "Var_map" || name == "Var_array" ||
+         name == "Var_list" || name == "Var_string" ||
+         name == "Map_var" || name == "Array_var" ||
+         name == "List_var" || name == "String_var";
 }
 
 static List _lifetime_summary_fact(Lifetime lifetime, Var value) {
@@ -297,7 +297,7 @@ static List _lifetime_summary_fact(Lifetime lifetime, Var value) {
   if (!name) return %(other);
   if (_lifetime_transparent(name) && arguments && arguments.len() > 1)
     return _lifetime_summary_fact(lifetime, arguments[1]);
-  if (name == %"Context_export") return %(other);
+  if (name == "Context_export") return %(other);
   List target = project_call_target(
     lifetime.compiler, lifetime.definitions, node, &name
   );
@@ -363,19 +363,19 @@ static int _lifetime_export_result(Lifetime lifetime, Var value) {
   if (!name) return 0;
   if (_lifetime_transparent(name) && arguments && arguments.len() > 1)
     return _lifetime_export_result(lifetime, arguments[1]);
-  if (name != %"Context_export") return 0;
+  if (name != "Context_export") return 0;
   lifetime.transfers++;
   return 1;
 }
 
 static int _lifetime_known_call(String name) {
   return name && (
-    name == %"Scope_retain" || name == %"Scope_release" ||
-    name == %"Scope_move" || name == %"Context_open" ||
-    name == %"Context_open_named" ||
-    name == %"Context_open_isolated" ||
-    name == %"Context_open_isolated_named" ||
-    name == %"Context_close" || name == %"Context_export" ||
+    name == "Scope_retain" || name == "Scope_release" ||
+    name == "Scope_move" || name == "Context_open" ||
+    name == "Context_open_named" ||
+    name == "Context_open_isolated" ||
+    name == "Context_open_isolated_named" ||
+    name == "Context_close" || name == "Context_export" ||
     _lifetime_named_allocation_kind(name) || _lifetime_transparent(name)
   );
 }
@@ -514,10 +514,10 @@ static int _lifetime_context_open(
   List arguments;
   String name = _lifetime_callee(lifetime, value, &arguments);
   if (!name) return 0;
-  *isolated = name == %"Context_open_isolated" ||
-              name == %"Context_open_isolated_named";
-  return *isolated || name == %"Context_open" ||
-         name == %"Context_open_named";
+  *isolated = name == "Context_open_isolated" ||
+              name == "Context_open_isolated_named";
+  return *isolated || name == "Context_open" ||
+         name == "Context_open_named";
 }
 
 static void _lifetime_bind(Lifetime lifetime, List binding, Var expression) {
@@ -720,11 +720,11 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
     case %(defer ?cleanup): {
       List arguments;
       String name = _lifetime_callee(lifetime, cleanup, &arguments);
-      if (name == %"Scope_release")
+      if (name == "Scope_release")
         _lifetime_end_region(
           lifetime, _lifetime_scope_region(lifetime), 1
         );
-      else if (name == %"Context_close" && arguments &&
+      else if (name == "Context_close" && arguments &&
                arguments.len() > 1) {
         List binding = _lifetime_binding(arguments[1]);
         if (binding)
@@ -759,25 +759,25 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
     case %(stmnt ?expression): {
       List arguments;
       String name = _lifetime_callee(lifetime, expression, &arguments);
-      if (name == %"Scope_retain") {
+      if (name == "Scope_retain") {
         int id = ++lifetime.next_region;
         lifetime.regions[id] = %(region $id scope 0 1 0 none none);
         return;
       }
-      if (name == %"Scope_release") {
+      if (name == "Scope_release") {
         _lifetime_end_region(
           lifetime, _lifetime_scope_region(lifetime), 0
         );
         return;
       }
-      if (name == %"Scope_move" && arguments && arguments.len() > 1) {
+      if (name == "Scope_move" && arguments && arguments.len() > 1) {
         int id = _lifetime_wrapped_allocation(lifetime, arguments[1]);
         _lifetime_transfer(lifetime, id);
         _lifetime_replace_return_fact(lifetime, arguments[1], %(other));
         lifetime.transfers++;
         return;
       }
-      if (name == %"Context_close" && arguments &&
+      if (name == "Context_close" && arguments &&
           arguments.len() > 1) {
         List binding = _lifetime_binding(arguments[1]);
         if (binding)
@@ -798,27 +798,27 @@ List Lifetime.analyze_unit(
   Compiler compiler, List ast, String path, Map definitions) {
   int regions = 0, allocations = 0, transfers = 0;
 
-  Array functions = %[], allocation_returns = %[];
-  Array findings = %[], unresolved = %[];
-  Array pending_allocations = %[], pending_returns = %[];
+  Array functions = [], allocation_returns = [];
+  Array findings = [], unresolved = [];
+  Array pending_allocations = [], pending_returns = [];
   foreach (List node, ast)
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
-        Array return_facts = %[];
+        Array return_facts = [];
         struct Lifetime state = {
           .compiler = compiler,
           .path = path,
           .function = compiler.emitted_binding_name(binding),
           .target = definitions[binding],
           .definitions = definitions,
-          .bindings = %{},
-          .return_bindings = %{},
-          .regions = %{},
-          .allocations = %{},
-          .allocation_unresolved = %{},
-          .uncertain_allocations = %{},
+          .bindings = {},
+          .return_bindings = {},
+          .regions = {},
+          .allocations = {},
+          .allocation_unresolved = {},
+          .uncertain_allocations = {},
           .return_facts = return_facts,
           .allocation_returns = allocation_returns,
           .findings = findings,
@@ -898,7 +898,7 @@ static int _lifetime_resolve_summary(
 }
 
 static Map _lifetime_summaries(List functions, Map publics) {
-  Map summaries = %{};
+  Map summaries = {};
   foreach (List function, functions)
     match (function)
       case %(function ?target ?name public (returns *)):
@@ -935,7 +935,7 @@ static Symbol _lifetime_resolved_kind(
 }
 
 static List _lifetime_functions(List units) {
-  Array functions = %[];
+  Array functions = [];
   foreach (List unit, units)
     match (unit)
       case %(
@@ -947,7 +947,7 @@ static List _lifetime_functions(List units) {
 }
 
 List Lifetime.allocation_returns(List units, String wanted) {
-  Array returns = %[];
+  Array returns = [];
   foreach (List unit, units)
     match (unit)
       case %(
@@ -967,11 +967,11 @@ List Lifetime.allocation_returns(List units, String wanted) {
 }
 
 List Lifetime.resolve_allocation_returns(List units, List pending) {
-  Map publics = %{};
+  Map publics = {};
   Map summaries = _lifetime_summaries(
     _lifetime_functions(units), publics
   );
-  Array resolved = %[];
+  Array resolved = [];
   foreach (List row, pending)
     match (row)
       case %(allocation-return ?target *payload): {
@@ -1044,8 +1044,8 @@ static void _lifetime_finish_return(
 
 List Lifetime.finish(List units) {
   int region_count = 0, allocation_count = 0, transfer_count = 0;
-  Array functions = %[], pending_allocations = %[];
-  Array pending_returns = %[], findings = %[], unresolved = %[];
+  Array functions = [], pending_allocations = [];
+  Array pending_returns = [], findings = [], unresolved = [];
   foreach (List unit, units)
     match (unit)
       case %(
@@ -1070,7 +1070,7 @@ List Lifetime.finish(List units) {
         foreach (List call, unit_unresolved) unresolved.push(call);
       }
   functions.sort();
-  Map publics = %{};
+  Map publics = {};
   Map summaries = _lifetime_summaries(
     functions.list_free(), publics
   );

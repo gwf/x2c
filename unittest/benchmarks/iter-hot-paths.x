@@ -41,7 +41,7 @@ static int is_even(Var value) {
 }
 
 static List range_list(int count) {
-  Array values = %[];
+  Array values = [];
   for (int i = 0; i < count; i++) values.push(i);
   List result = values.list_free();
   return result;
@@ -144,7 +144,7 @@ int main(void) {
   }
   result("list-iter", now_ns() - start, (long) width * repeats);
 
-  Array array = %[];
+  Array array = [];
   for (int i = 0; i < width; i++) array.push(i);
   start = now_ns();
   for (int r = 0; r < repeats; r++) {
@@ -164,7 +164,7 @@ int main(void) {
   }
   result("string-iter", now_ns() - start, (long) text.len() * text_repeats);
 
-  String word_text = %"alpha beta gamma delta epsilon zeta eta theta";
+  String word_text = "alpha beta gamma delta epsilon zeta eta theta";
   int words_per_scan = 8, word_repeats = count / words_per_scan;
   Split words = word_text.words();
   start = now_ns();
@@ -184,7 +184,7 @@ int main(void) {
   result("split-try-next", now_ns() - start,
          (long) words_per_scan * word_repeats);
 
-  Map entries = %{};
+  Map entries = {};
   for (int i = 0; i < width; i++) entries.set(i, i + 1);
   start = now_ns();
   for (int r = 0; r < repeats; r++)

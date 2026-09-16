@@ -15,9 +15,9 @@ static Var _atom_read_lisp(String source, Symbol *status) {
 
 
 static void atom_compact_and_long_representations(void) {
-  Atom compact = Atom.intern(%"alpha");
-  Atom compact_exact = Atom.intern(%"va_arg");
-  Atom long_name = Atom.intern(%"VeryLongIdentifierName");
+  Atom compact = Atom.intern("alpha");
+  Atom compact_exact = Atom.intern("va_arg");
+  Atom long_name = Atom.intern("VeryLongIdentifierName");
   EXPECT_TRUE(compact.is_atom());
   EXPECT_TRUE(compact is <symbol>);
   EXPECT_STR_EQ(compact.str(), "alpha");
@@ -31,8 +31,8 @@ static void atom_compact_and_long_representations(void) {
 
 
 static void atom_preserves_exact_spelling(void) {
-  Atom mixed = Atom.intern(%"Mixed_Case_Identifier");
-  Atom lower = Atom.intern(%"mixed_case_identifier");
+  Atom mixed = Atom.intern("Mixed_Case_Identifier");
+  Atom lower = Atom.intern("mixed_case_identifier");
   EXPECT_STR_EQ(mixed.str(), "Mixed_Case_Identifier");
   EXPECT_STR_EQ(lower.str(), "mixed_case_identifier");
   EXPECT_FALSE(mixed.equal(lower));
@@ -40,9 +40,9 @@ static void atom_preserves_exact_spelling(void) {
 
 
 static void atom_long_identity_and_prefixes(void) {
-  Atom alpha = Atom.intern(%"common-prefix-long-name-alpha");
+  Atom alpha = Atom.intern("common-prefix-long-name-alpha");
   Atom again = Atom.intern(String.new("common-prefix-long-name-alpha"));
-  Atom beta = Atom.intern(%"common-prefix-long-name-beta");
+  Atom beta = Atom.intern("common-prefix-long-name-beta");
   EXPECT_TRUE(alpha.u64 == again.u64);
   EXPECT_TRUE(alpha.same(again));
   EXPECT_FALSE(alpha.equal(beta));
@@ -52,7 +52,7 @@ static void atom_long_identity_and_prefixes(void) {
 
 
 static void atom_hash_and_string_alignment(void) {
-  String spelling = %"LongAtomHashAndAlignment";
+  String spelling = "LongAtomHashAndAlignment";
   Atom atom = Atom.intern(spelling);
   EXPECT_TRUE(atom.hash() == spelling.hash());
   EXPECT_TRUE(((uintptr_t) atom.pointer() & 0x7) == 0);
@@ -72,15 +72,15 @@ static void atom_rejects_empty_spelling(void) {
 
 static void atom_repr_round_trips_lisp_reader(void) {
   String spellings[] = {
-    %"Very Long Atom",
-    %"1234567890123",
-    %"+123456789012",
-    %"comment//looking-long",
-    %"comment/*looking-long",
-    %"angle<atom>long",
-    %"paren(atom)long",
-    %"backslash\\atom-long",
-    %"line\nbreak-long"
+    "Very Long Atom",
+    "1234567890123",
+    "+123456789012",
+    "comment//looking-long",
+    "comment/*looking-long",
+    "angle<atom>long",
+    "paren(atom)long",
+    "backslash\\atom-long",
+    "line\nbreak-long"
   };
   for (int i = 0; i < sizeof spellings / sizeof spellings[0]; i++) {
     Atom expected = Atom.intern(spellings[i]);
@@ -179,21 +179,21 @@ static void atom_list_promotion_preserves_long_payload(void) {
 
 
 static void atom_bare_spelling_owns_writer_contract(void) {
-  EXPECT_TRUE(Atom.bare_spelling(%"foo"));
-  EXPECT_TRUE(Atom.bare_spelling(%"*"));
-  EXPECT_TRUE(Atom.bare_spelling(%"set!"));
-  EXPECT_TRUE(Atom.bare_spelling(%"+"));
+  EXPECT_TRUE(Atom.bare_spelling("foo"));
+  EXPECT_TRUE(Atom.bare_spelling("*"));
+  EXPECT_TRUE(Atom.bare_spelling("set!"));
+  EXPECT_TRUE(Atom.bare_spelling("+"));
   EXPECT_FALSE(Atom.bare_spelling(NULL));
-  EXPECT_FALSE(Atom.bare_spelling(%""));
-  EXPECT_FALSE(Atom.bare_spelling(%"1x"));
-  EXPECT_FALSE(Atom.bare_spelling(%"+1"));
-  EXPECT_FALSE(Atom.bare_spelling(%"]x"));
-  EXPECT_FALSE(Atom.bare_spelling(%"}x"));
-  EXPECT_FALSE(Atom.bare_spelling(%"<x"));
+  EXPECT_FALSE(Atom.bare_spelling(""));
+  EXPECT_FALSE(Atom.bare_spelling("1x"));
+  EXPECT_FALSE(Atom.bare_spelling("+1"));
+  EXPECT_FALSE(Atom.bare_spelling("]x"));
+  EXPECT_FALSE(Atom.bare_spelling("}x"));
+  EXPECT_FALSE(Atom.bare_spelling("<x"));
   EXPECT_FALSE(Atom.bare_spelling(%"\\x"));
-  EXPECT_FALSE(Atom.bare_spelling(%"a b"));
-  EXPECT_FALSE(Atom.bare_spelling(%"a\"b"));
-  EXPECT_FALSE(Atom.bare_spelling(%"a//b"));
+  EXPECT_FALSE(Atom.bare_spelling("a b"));
+  EXPECT_FALSE(Atom.bare_spelling("a\"b"));
+  EXPECT_FALSE(Atom.bare_spelling("a//b"));
 }
 
 $(import "test-macros.xmacro")

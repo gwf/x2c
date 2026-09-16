@@ -41,7 +41,7 @@ static int _bfs(Array graph, ArrayInt queue, ArrayInt distance) {
 int main(int argc, char **argv) {
   if (argc != 4) return 2;
   int n = atoi(argv[1]), jumps = atoi(argv[2]), runs = atoi(argv[3]);
-  Array graph = %[];
+  Array graph = [];
   for (int i = 0; i < n; i++) graph.push(%());
   for (int i = 1; i < n; i++) _add(graph, i - 1, i);
   uint32_t state = 1;

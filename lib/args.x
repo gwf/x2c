@@ -106,7 +106,7 @@ static void _read_row(_Option *option, List row, Map index, int position) {
 }
 
 static _Spec _read_spec(List spec) {
-  _Spec result = { .count = spec.len(), .index = %{} };
+  _Spec result = { .count = spec.len(), .index = {} };
   result.options = Scope.calloc(result.count, sizeof(_Option));
   int position = 0;
   foreach (List row, spec) {
@@ -231,10 +231,10 @@ static void _assign_operands(_Spec *spec, Map result, List operands) {
 */
 Map Args.parse(List args, List spec) {
   _Spec parsed = _read_spec(spec);
-  Map result = %{};
+  Map result = {};
   for (int i = 0; i < parsed.count; i++)
     result[parsed.options[i].name] = parsed.options[i].fallback;
-  Array operands = %[];
+  Array operands = [];
   int options_ended = 0;
   for (List rest = args; rest; rest = rest.cdr()) {
     String word = rest.car().str();
@@ -263,7 +263,7 @@ static String _label(_Option *option) {
     if (option->repeated) label = %"$label...";
     return option->required ? label : %"[$label]";
   }
-  Array spellings = %[];
+  Array spellings = [];
   foreach (Var word, option->row)
     if (word is not List && word.str().startswith("-"))
       spellings.push(word.str());

@@ -13,7 +13,7 @@ $(import "test-macros.xmacro")
 
 static void protocols_block_defaults_reach_array(void) {
   $test.scoped();
-  Array values = %[1, 2, 3];
+  Array values = [1, 2, 3];
 
   // truth, pop, truncate, and clear are Block(Array) base defaults; Array
   // defines none of them directly.

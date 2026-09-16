@@ -86,7 +86,7 @@ void DisjointSet.union(DisjointSet set, int a, int b) {
     Raises: `<size-limit>` or `<alloc-fail>` while collecting or sorting rows.
 */
 List DisjointSet.sizes(DisjointSet set) {
-  Array sizes = %[];
+  Array sizes = [];
   for (int i = 0, n = set.length; i < n; i++)
     if (set.parent[i] == i) sizes.push(%(${set.size[i]} $i));
   List result = sizes.sort();

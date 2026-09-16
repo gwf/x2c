@@ -10,7 +10,7 @@ int main(void) {
   defer lisp.destroy();
   json.JsonLisp.install(lisp);
 
-  String source = %"{\"service\":\"artifact-api\",\"ports\":[80,443,8080]}";
+  String source = "{\"service\":\"artifact-api\",\"ports\":[80,443,8080]}";
   List summary = lisp.eval(%(
     `(,(json-pointer (json-parse $source) "/service")
       ,(json-len (json-pointer (json-parse $source) "/ports")))

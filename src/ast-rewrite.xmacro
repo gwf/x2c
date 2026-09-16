@@ -9,7 +9,7 @@ macro Statement $ast.rewrite_children(
       value = $replacement;
     }
     if (!(void *) rewritten && value != item) {
-      rewritten = %[];
+      rewritten = [];
       for (List prefix = original; prefix != cursor; prefix = prefix.cdr())
         rewritten.push(prefix.car());
     }

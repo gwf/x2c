@@ -80,7 +80,7 @@ static inline int _line_end(String str, int start, int keep_ends, int *next) {
 */
 List String.split_n(String str, String sep, int max_splits) {
   if (!str) return %();
-  Array results = %[], int start = 0, splits = 0;
+  Array results = [], int start = 0, splits = 0;
   while (start >= 0) {
     int next = -1;
     int end = max_splits >= 0 && splits >= max_splits
@@ -103,8 +103,8 @@ List String.split_n(String str, String sep, int max_splits) {
     until their actual `String` and `List` pools are released.
 
     ```x2c
-    printf("%s\n", %"a:b:c".split(":").repr());
-    printf("%s\n", %"a::b".split(":").repr());
+    printf("%s\n", "a:b:c".split(":").repr());
+    printf("%s\n", "a::b".split(":").repr());
     ```
     Raises: the same causes as `String.split_n`.
 */
@@ -123,7 +123,7 @@ List String.split(String str, String sep) => str.split_n(sep, -1);
 */
 List String.split_lines(String str, int keep_ends) {
   if (!str) return %();
-  Array results = %[], int start = 0;
+  Array results = [], int start = 0;
   while (start < str.len()) {
     int next, end = _line_end(str, start, keep_ends, &next);
     String field = String.new_len(str + start, end - start);
@@ -230,7 +230,7 @@ Split String.splits(String str, String sep) => _new(str, sep, _splits_next);
     canonical `String` remains live until its actual owning pool is released.
 
     ```x2c
-    Split words = %"ada lovelace".words();
+    Split words = "ada lovelace".words();
     int cursor = 0;
     String word;
     while (words.try_next(&cursor, &word)) printf("%s\n", word);

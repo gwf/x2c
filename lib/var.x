@@ -738,7 +738,7 @@ double Var.floating(Var v) {
     such as `Var.int`, go through `Var.convert` too.
 
     ```x2c
-    ~Var text = %"ada";
+    ~Var text = "ada";
     ~Var small = (unsigned char) 44;
     printf("small=%ld text=%ld\n", small.integer(), text.integer());
     ```
@@ -1045,9 +1045,9 @@ void *Var.pointer(Var v) {
     literal gives `<i32>` -1.
 
     ```x2c
-    ~Var count = Var.parse(%"42", <int>);
-    ~Var broken = Var.parse(%"abc", <int>);
-    ~Var refused = Var.parse(%"3", <u8>);
+    ~Var count = Var.parse("42", <int>);
+    ~Var broken = Var.parse("abc", <int>);
+    ~Var refused = Var.parse("3", <u8>);
     printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
            broken.tag().str(), broken, refused is void);
     ```

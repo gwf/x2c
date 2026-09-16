@@ -27,7 +27,7 @@
 
 static void _report_output_error(
   Compiler compiler, String fname, String message, int error) {
-  String target = fname ? fname : %"<stdout>";
+  String target = fname ? fname : "<stdout>";
   List notes = %( "file:" $target );
   String err_note = %"errno: $error (${String.new(strerror(error))})";
   notes = cons(err_note, notes);
@@ -232,7 +232,7 @@ static void _collect_cache_function_refs(
    already runs the initializers, and unrelated foundational calls then
    cannot recursively materialize literals during String/List pool setup. */
 static Map _cache_reachable_function_ids(List source) {
-  Map callers = %{}, reachable = %{}, Array queue = %[];
+  Map callers = {}, reachable = {}, Array queue = [];
   foreach (List func, source)
     match (func)
       case %(!set ?definition
@@ -426,7 +426,7 @@ static int _mentions_type(List node, String name) {
 static List _typedef_names(List typedef_node) {
   match (typedef_node)
     case %(typedef ? (bindings *declarations)): {
-      Array names = %[];
+      Array names = [];
       foreach (List declaration, declarations)
         match (declaration) {
           case %(bind (binding ? ?name) ?): names.push(name);
@@ -444,7 +444,7 @@ static List _typedef_names(List typedef_node) {
    private. Markers hold each such typedef's position in both files until
    the whole unit has been partitioned. */
 static List _resolve_typedef_markers(Array items, Array pending, int header) {
-  Array output = %[];
+  Array output = [];
   int count = items.len();
   if (header) for (int i = count - 1; i >= 0; i--) {
     match (items[i])
@@ -482,7 +482,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
    field needs it. The forward uses the final declarator, preserving pointer
    and value identity; an incomplete by-value field remains a native error. */
 static List _aggregate_typedef_forwards(List items, List earlier) {
-  Array candidates = %[];
+  Array candidates = [];
   foreach (List node, items)
     match (node)
       case %(typedef ?base ?bindings): {
@@ -497,10 +497,10 @@ static List _aggregate_typedef_forwards(List items, List earlier) {
               candidates.push(%($alias $forward));
           }
       }
-  Map available = %{};
+  Map available = {};
   foreach (List node, earlier)
     foreach (String name, _typedef_names(node)) available[name] = 1;
-  Array output = %[];
+  Array output = [];
   foreach (List node, items) {
     match (node)
       case %(typedef ?base ?):
@@ -522,8 +522,8 @@ static List _aggregate_typedef_forwards(List items, List earlier) {
 /* The groups among `items` that contain an item other than a conditional
    directive or space, including through a nested group. */
 static Map _filled_conditionals(List items) {
-  Map filled = %{};
-  Array open = %[];
+  Map filled = {};
+  Array open = [];
   foreach (List item, items) {
     match (item) {
       case %(conditional ?group ?kind ?): {
@@ -544,7 +544,7 @@ static Map _filled_conditionals(List items) {
    as `opened` records. */
 static List _place_conditionals(
   List items, Map filled, Map other, Array opened, int header) {
-  Array output = %[];
+  Array output = [];
   foreach (List item, items) {
     match (item)
       case %(conditional ?group ? ?node): {
@@ -559,8 +559,8 @@ static List _place_conditionals(
 }
 
 static List _header_and_source(Compiler compiler, List ast) {
-  Array header = %[], source = %[], pending = %[], int private = 0;
-  Array opened = %[], open = %[];
+  Array header = [], source = [], pending = [], int private = 0;
+  Array opened = [], open = [];
   foreach (Ast node, ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
@@ -711,7 +711,7 @@ static void _collect_forward_dependencies(
   Compiler compiler, Var value, Map locals, Map statics, Map seen,
   Array prototypes) {
   if (value is not <list> || value.is_nil()) return;
-  Array resume = $auto(%[]);
+  Array resume = $auto([]);
   List node = value;
   for (;;) {
     match (node) {
@@ -808,7 +808,7 @@ static void _static_declarations(Var value, Map declarations) {
    preserving their existing access to later private includes and macros.
    Source initializer helpers stay at their capture positions. */
 static List _static_prototypes(Compiler compiler, List source, List header) {
-  Array output = %[], declarations = %[], functions = %[];
+  Array output = [], declarations = [], functions = [];
   foreach (List node, source) {
     match (node)
       case %(function ?type ?signature ?): {
@@ -821,7 +821,7 @@ static List _static_prototypes(Compiler compiler, List source, List header) {
     declarations.push(node);
   }
   source = declarations.list_free().append(functions.list_free());
-  Map statics = %{}, available = %{}, seen = %{};
+  Map statics = {}, available = {}, seen = {};
   _collect_declared_bindings(header, available);
   _static_declarations(source, statics);
   foreach (List node, source) {
@@ -860,7 +860,7 @@ static List _include_directive(String fname) =>
   %((preproc "#include \"$fname\"") (space "\n") (space "\n"));
 
 static List _vertical_spacing(List code) {
-  Array values = %[];
+  Array values = [];
   foreach (Var elem, code) {
     Symbol kind = elem.car();
     if (kind == <space>) continue;

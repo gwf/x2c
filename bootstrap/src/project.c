@@ -2,7 +2,7 @@
 
 #include "project.h"
 
-static String _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <ctype.h>
 #include <dirent.h>
@@ -164,32 +164,31 @@ __attribute__((constructor)) static void _file_init_(void){
   _20 = String_new("optimization");
   _21 = String_new("debug");
   _22 = String_new("project");
-  _23 = String_new(".");
-  _24 = String_new("target");
-  _25 = String_new("profile");
+  _23 = String_new("target");
+  _24 = String_new("profile");
+  _25 = String_new("/");
   _26 = String_new("/");
-  _27 = String_new("/");
-  _28 = String_new(".x");
-  _29 = String_new(".c");
-  _30 = String_new("-D");
-  _31 = String_new("/lib");
-  _32 = String_new(".a");
-  _33 = String_new("/.x2c/");
-  _34 = String_new("-g");
-  _35 = String_new("-");
-  _36 = String_new("debug");
-  _37 = String_new("-I");
-  _38 = String_new("-L");
-  _39 = String_new("-l");
-  _40 = String_new("\n");
-  _41 = String_new("target=");
-  _42 = String_new("\nprofile=");
-  _43 = String_new("/x2c.lock");
-  _44 = String_new("/x2c.toml");
-  _45 = String_new("/.x2c-build");
-  _46 = String_new("-O");
-  _47 = String_new("#");
-  _48 = String_new(" ");
+  _27 = String_new("-D");
+  _28 = String_new("/lib");
+  _29 = String_new(".a");
+  _30 = String_new("/.x2c/");
+  _31 = String_new("-g");
+  _32 = String_new("-");
+  _33 = String_new("-l");
+  _34 = String_new("\n");
+  _35 = String_new("target=");
+  _36 = String_new("\nprofile=");
+  _37 = String_new("/x2c.lock");
+  _38 = String_new("/x2c.toml");
+  _39 = String_new("/.x2c-build");
+  _40 = String_new(".x");
+  _41 = String_new(".c");
+  _42 = String_new("-O");
+  _43 = String_new("-I");
+  _44 = String_new("-L");
+  _45 = String_new("#");
+  _46 = String_new(" ");
+  _47 = String_new(".");
 }
 
 int String_truth(String);
@@ -499,13 +498,13 @@ static void _parse_manifest(Project p){
             profile = NULL;
             continue;
           }
-          List parts = String_split(name, _23);
+          List parts = String_split(name, _47);
           int count = List_len(parts);
           String first = Var_string(List_car(parts));
           String second = List_truth(List_cdr(parts)) ? Var_string(List_car(List_cdr(parts))) : NULL;
           String third = List_truth(List_cdr(parts)) && List_truth(List_cdr(List_cdr(parts))) ? Var_string(List_car(List_cdr(List_cdr(parts)))) : NULL;
           String fourth = List_truth(List_cdr(parts)) && List_truth(List_cdr(List_cdr(parts))) && List_truth(List_cdr(List_cdr(List_cdr(parts)))) ? Var_string(List_car(List_cdr(List_cdr(List_cdr(parts))))) : NULL;
-          if((count != 2 && count != 4) || ! String_equal(first, _24) || ! _name_ok(second) ||(count == 4 &&(! String_equal(third, _25) || ! _name_ok(fourth)))) _error(p, line_number, "unknown manifest section");
+          if((count != 2 && count != 4) || ! String_equal(first, _23) || ! _name_ok(second) ||(count == 4 &&(! String_equal(third, _24) || ! _name_ok(fourth)))) _error(p, line_number, "unknown manifest section");
           target = _target(p, second, 1);
           if(count == 2){
             if(target -> declared) _error_name(p, line_number, "duplicate target section", second);
@@ -543,7 +542,7 @@ static void _parse_manifest(Project p){
 
 static String _absolute(Project project, String path){
   if(String_truth(path) && String_getindex(path, 0) == '/') return path;
-  return String_join(NULL, cons(String_var(project -> root), cons(String_var(_26), cons(String_var(path), NULL))));
+  return String_join(NULL, cons(String_var(project -> root), cons(String_var(_25), cons(String_var(path), NULL))));
 }
 
 static int _has_glob(String pattern){
@@ -561,8 +560,8 @@ static void _walk_matches(Project project, String directory, String relative, St
   while((entry = readdir(input))){
     if(strcmp(entry -> d_name, ".") == 0 || strcmp(entry -> d_name, "..") == 0) continue;
     String name = String_new(entry -> d_name);
-    String child_relative = String_truth(relative) ? String_join(NULL, cons(String_var(relative), cons(String_var(_26), cons(String_var(name), NULL)))) : name;
-    String child = String_join(NULL, cons(String_var(project -> root), cons(String_var(_26), cons(String_var(child_relative), NULL))));
+    String child_relative = String_truth(relative) ? String_join(NULL, cons(String_var(relative), cons(String_var(_25), cons(String_var(name), NULL)))) : name;
+    String child = String_join(NULL, cons(String_var(project -> root), cons(String_var(_25), cons(String_var(child_relative), NULL))));
     struct stat info;
     if(lstat(child, & info)) continue;
     if(S_ISDIR(info.st_mode)){
@@ -598,7 +597,7 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
   else{
     _walk_matches(project, project -> root, NULL, pattern, matches);
     if(project -> sources){
-      String prefix = String_equal(project -> root, _27) ? _26 : String_join(NULL, cons(String_var(project -> root), cons(String_var(_26), NULL)));
+      String prefix = String_equal(project -> root, _26) ? _26 : String_join(NULL, cons(String_var(project -> root), cons(String_var(_25), NULL)));
       {
         String path;
         Iter _x2c_macro_iterator_2 = Map_keys(project -> sources -> overlays, &(struct Iter){
@@ -610,7 +609,7 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
           path = Var_string(_x2c_macro_item_2);
           {
             if(! String_startswith(path, prefix)) continue;
-            if(String_truth(project -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(project -> build_root), cons(String_var(_26), NULL))))) continue;
+            if(String_truth(project -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(project -> build_root), cons(String_var(_25), NULL))))) continue;
             String relative = String_getslice(path, String_len(prefix), -2147483648, 1);
             if(Path_glob_match(pattern, relative) && ! Array_contains(matches, String_var(path))) Array_push(matches, String_var(path));
           }
@@ -720,7 +719,7 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
       value = _x2c_macro_cursor_output_7;
       {
         String path = Var_string(value);
-        if(!(String_endswith(path, _28) || String_endswith(path, _29))) _error_name(project, 0, "manifest source is not .x or .c", path);
+        if(!(String_endswith(path, _40) || String_endswith(path, _41))) _error_name(project, 0, "manifest source is not .x or .c", path);
       }
 
     }
@@ -804,7 +803,7 @@ static void _append_defines(Array output, List values){
     Var _x2c_macro_cursor_output_11;
     while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_11)){
       value = Var_string(_x2c_macro_cursor_output_11);
-      Array_push(output, String_var(String_join(NULL, cons(String_var(_30), cons(String_var(value), NULL)))));
+      Array_push(output, String_var(String_join(NULL, cons(String_var(_27), cons(String_var(value), NULL)))));
     }
 
   }
@@ -832,8 +831,8 @@ static void _append_paths(Project project, Array output, List values, String opt
 
 static String _target_output(Project project, ProjectTarget target, String build_root, Symbol kind){
   if(String_truth(target -> output)) return _absolute(project, target -> output);
-  if(kind == 1381098885964356) return String_join(NULL, cons(String_var(build_root), cons(String_var(_31), cons(String_var(target -> name), cons(String_var(_32), NULL)))));
-  return String_join(NULL, cons(String_var(build_root), cons(String_var(_26), cons(String_var(target -> name), NULL))));
+  if(kind == 1381098885964356) return String_join(NULL, cons(String_var(build_root), cons(String_var(_28), cons(String_var(target -> name), cons(String_var(_29), NULL)))));
+  return String_join(NULL, cons(String_var(build_root), cons(String_var(_25), cons(String_var(target -> name), NULL))));
 }
 
 String String_add(String, String);
@@ -846,7 +845,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
   request -> compile_only = 0;
   request -> kind = target == selected && command -> kind_explicit ? command -> kind : target -> kind;
   request -> output = target == selected && String_truth(command -> output) ? command -> output : _target_output(p, target, build_root, request -> kind);
-  request -> build_dir = String_join(NULL, cons(String_var(build_root), cons(String_var(_33), cons(String_var(target -> name), NULL))));
+  request -> build_dir = String_join(NULL, cons(String_var(build_root), cons(String_var(_30), cons(String_var(target -> name), NULL))));
   request -> save_temps = 0;
   request -> temps_dir = NULL;
   if(request -> kind == 1381098885964356 && List_truth(target -> dependencies)) _error_name(p, 0, "static-library target cannot contain target dependencies", target -> name);
@@ -915,8 +914,8 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
       while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_16)){
         argument = Var_string(_x2c_macro_cursor_output_16);
         {
-          if(String_truth(argument) && String_startswith(argument, _46)) has_optimization = 1;
-          if(String_equal(argument, _34)) has_debug = 1;
+          if(String_truth(argument) && String_startswith(argument, _42)) has_optimization = 1;
+          if(String_equal(argument, _31)) has_debug = 1;
         }
 
       }
@@ -924,14 +923,14 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
     }
     _append_defines(compile, profile -> defines);
     _append_c_flags(p, compile, profile -> c_flags);
-    if(String_truth(profile -> optimization) && ! has_optimization) Array_push(compile, String_var(String_join(NULL, cons(String_var(_35), cons(String_var(profile -> optimization), NULL)))));
-    if(Map_contains(profile -> seen, String_var(_36)) && profile -> debug && ! has_debug) Array_push(compile, String_var(_34));
+    if(String_truth(profile -> optimization) && ! has_optimization) Array_push(compile, String_var(String_join(NULL, cons(String_var(_32), cons(String_var(profile -> optimization), NULL)))));
+    if(Map_contains(profile -> seen, String_var(_21)) && profile -> debug && ! has_debug) Array_push(compile, String_var(_31));
   }
   _append_values(compile, command -> cc_args);
-  _append_paths(p, compile, target -> include_dirs, _37);
+  _append_paths(p, compile, target -> include_dirs, _43);
   request -> cc_args = Array_list_free(compile);
   Array link = Array_new();
-  _append_paths(p, link, target -> library_dirs, _38);
+  _append_paths(p, link, target -> library_dirs, _44);
   {
     String library;
     List _x2c_macro_object_18 = target -> libraries;
@@ -939,7 +938,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
     Var _x2c_macro_cursor_output_17;
     while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_17)){
       library = Var_string(_x2c_macro_cursor_output_17);
-      Array_push(link, String_var(String_join(NULL, cons(String_var(_39), cons(String_var(library), NULL)))));
+      Array_push(link, String_var(String_join(NULL, cons(String_var(_33), cons(String_var(library), NULL)))));
     }
 
   }
@@ -948,7 +947,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
   _append_values(link, command -> ld_args);
   request -> ld_args = Array_list_free(link);
   request -> label = target -> name;
-  request -> state_seed = String_add(String_join(NULL, cons(String_var(p -> path), cons(String_var(_40), NULL))), String_join(NULL, cons(String_var(_41), cons(String_var(target -> name), cons(String_var(_42), cons(String_var(command -> profile), NULL))))));
+  request -> state_seed = String_add(String_join(NULL, cons(String_var(p -> path), cons(String_var(_34), NULL))), String_join(NULL, cons(String_var(_35), cons(String_var(target -> name), cons(String_var(_36), cons(String_var(command -> profile), NULL))))));
   return request;
 }
 
@@ -1035,11 +1034,11 @@ Array rows = Array_new();
   while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_20)){
     line = Var_string(_x2c_macro_cursor_output_20);
     {
-      if(! String_truth(line) || String_startswith(line, _47)) continue;
+      if(! String_truth(line) || String_startswith(line, _45)) continue;
       Array fields = Array_new();
       {
         String field;
-        List _x2c_macro_object_20 = String_split(line, _48);
+        List _x2c_macro_object_20 = String_split(line, _46);
         List _x2c_macro_cursor_20 = _x2c_macro_object_20;
         Var _x2c_macro_cursor_output_19;
         while(List_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_19)){
@@ -1124,7 +1123,7 @@ List install_require(CliRequest, String, String);
 
 static void _resolve_dependencies(Project project, CliRequest request){
   if(! project -> dependencies || project -> sources) return;
-  String path = String_join(NULL, cons(String_var(project -> root), cons(String_var(_43), NULL)));
+  String path = String_join(NULL, cons(String_var(project -> root), cons(String_var(_37), NULL)));
   List locked = _read_lock(path);
   if(_lock_satisfies(project, locked)) return;
   Array rows = Array_new();
@@ -1138,7 +1137,7 @@ String project_manifest(CliRequest request){
   char current[PATH_MAX];
   if(! getcwd(current, sizeof(current))) _error(NULL, 0, "cannot read current directory");
   while(1){
-    String candidate = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_44), NULL)));
+    String candidate = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_38), NULL)));
     if(request -> sources ? SourceView_exists(request -> sources, candidate) : ! access(candidate, R_OK)) return candidate;
     if(strcmp(current, "/") == 0) break;
     char * slash = strrchr(current, '/');
@@ -1219,9 +1218,9 @@ String build_root = request -> build_dir;
 if(String_truth(build_root) && String_getindex(build_root, 0) != '/'){
   char current[PATH_MAX];
   if(! getcwd(current, sizeof(current))) _error(project, 0, "cannot read current directory");
-  build_root = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_26), cons(String_var(build_root), NULL))));
+  build_root = String_join(NULL, cons(String_var(String_new(current)), cons(String_var(_25), cons(String_var(build_root), NULL))));
 }
-if(! String_truth(build_root)) build_root = String_truth(project -> build_dir) ? _absolute(project, project -> build_dir) : String_join(NULL, cons(String_var(project -> root), cons(String_var(_45), NULL)));
+if(! String_truth(build_root)) build_root = String_truth(project -> build_dir) ? _absolute(project, project -> build_dir) : String_join(NULL, cons(String_var(project -> root), cons(String_var(_39), NULL)));
 project -> build_root = build_root;
 _plan_target(project, selected, request, selected, build_root);
 return project -> head;

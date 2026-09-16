@@ -65,8 +65,8 @@ indexed sequences, and `Map` for mutable key/value pairs. Build text with
 
 ```x2c
 List syntax = %(call print "hello");
-Array work = %[1, 2, 3];
-Map index = %{name: "x2c"};
+Array work = [1, 2, 3];
+Map index = {name: "x2c"};
 
 work.push(4);
 index[<count>] = work.len();
@@ -145,7 +145,7 @@ Prefer `try_*` operations when the full value domain includes `Null` or when a
 fallback would lose information:
 
 ```x2c
-Map map = %{"name": "x2c"};
+Map map = {"name": "x2c"};
 Var key = "name";
 Var value;
 if (!map.try_get(key, &value))

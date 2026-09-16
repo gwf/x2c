@@ -32,8 +32,8 @@ static int _only_space(const char *rest) {
 
     ```x2c
     ~long value = 0;
-    printf("%d %ld\n", %" -0b101 ".try_long(&value), value);
-    printf("%d\n", %"42junk".try_long(&value));
+    printf("%d %ld\n", " -0b101 ".try_long(&value), value);
+    printf("%d\n", "42junk".try_long(&value));
     ```
 */
 int String.try_long(String str, long *out) {

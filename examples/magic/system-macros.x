@@ -44,14 +44,14 @@ int main(void) {
 
     assert(notebook.scale == 1);
     printf("%s\n", notebook.readings.repr());
-    Array display = $auto(%[$notebook]);
+    Array display = $auto([notebook]);
     printf("%s\n", display.repr());
 
     Point point = Point.new(1, 2);
     Var boxed = point;
     point.x = 99;
     Point copy = boxed;
-    Map labels = $auto(%{});
+    Map labels = $auto({});
     labels[boxed] = "same point";
     Var lookup = Point.new(1, 2);
     assert(boxed == lookup && boxed.hash() == lookup.hash());

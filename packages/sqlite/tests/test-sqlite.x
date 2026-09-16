@@ -56,18 +56,18 @@ static void named_parameters_replace_all_values(void) {
   defer db.close();
   Statement query = db.prepare("SELECT :left + :right, :left");
   defer query.free();
-  query.bind_named(%{":left": 4, ":right": 7});
+  query.bind_named({":left": 4, ":right": 7});
   List row = query.next();
   EXPECT_INT_EQ(row[0].long_long_value(), 11);
   EXPECT_INT_EQ(row[1].long_long_value(), 4);
-  query.bind_named(%{":left": 20, ":right": 2});
+  query.bind_named({":left": 20, ":right": 2});
   EXPECT_INT_EQ(query.next()[0].long_long_value(), 22);
   int caught = 0;
-  try { query.bind_named(%{":left": 1}); }
+  try { query.bind_named({":left": 1}); }
   catch %(bad-arg *_): { caught = 1; }
   EXPECT_TRUE(caught);
   caught = 0;
-  try { query.bind_named(%{":left": 1, ":right": 2, ":extra": 3}); }
+  try { query.bind_named({":left": 1, ":right": 2, ":extra": 3}); }
   catch %(bad-arg *_): { caught = 1; }
   EXPECT_TRUE(caught);
 }
@@ -259,7 +259,7 @@ static void nested_transactions_reject_without_partial_commit(void) {
 }
 
 static void file_reopen_readonly_and_busy_are_observable(void) {
-  String filename = %"builds/test-sqlite.db";
+  String filename = "builds/test-sqlite.db";
   remove(filename);
   defer remove(filename);
   Database db = Database.open(filename);

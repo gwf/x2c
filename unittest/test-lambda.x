@@ -349,16 +349,16 @@ static void lambda_capture_clauses_keep_shadowing_and_omit_unused(void) {
 static void lambda_snapshot_contents_remain_mutable(void) {
   int value = 1;
   int *const pointer = &value;
-  Array array = %[3], original_array = array;
-  Map map = %{key: 5}, original_map = map;
+  Array array = [3], original_array = array;
+  Map map = {key: 5}, original_map = map;
   Func mutate = %!() => {
     ++*pointer;
     array[0] = array[0] + 1;
     map[<key>] = map[<key>] + 1;
     return *pointer + array[0] + map[<key>];
   };
-  array = %[20];
-  map = %{key: 30};
+  array = [20];
+  map = {key: 30};
   EXPECT_INT_EQ(mutate().integer(), 12);
   EXPECT_INT_EQ(value, 2);
   EXPECT_INT_EQ(original_array[0].integer(), 4);
