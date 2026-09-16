@@ -6,9 +6,16 @@
 #define __GUARD_0xBE511011__
 
 #include "x2c.h"
-Map List_parse_args(List args, List spec);
+typedef enum Args{
+  ARGS_NAMESPACE
+}
+Args;
 
-String List_usage(List spec, String program);
+Map Args_parse(List args, List spec);
+
+String Args_usage(List spec, String program);
+
+List Args_from_argv(int argc, char * * argv);
 
 
 #endif /* __GUARD_0xBE511011__ */

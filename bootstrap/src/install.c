@@ -259,11 +259,11 @@ String Var_string(Var);
 
 Var List_car(List);
 
-Job List_start(List);
+Job Job_options(Job, Map);
 
-List List_options(List, Map);
+Job List_job(List);
 
-int Job_wait(Job);
+int Job_status(Job);
 
 String Job_output(Job);
 
@@ -283,8 +283,8 @@ static String _run(List arguments, const char * what){
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    Job job = List_start(List_options(arguments, Map_update_n(Map_new(), 2, Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130))));
-    if(! Job_wait(job)){
+    Job job = Job_options(List_job(arguments), Map_update_n(Map_new(), 2, Symbol_var(1317305704), Symbol_var(6544469130), Symbol_var(1317285028), Symbol_var(6544469130)));
+    if(! Job_status(job)){
       String _x2c_return_value_0 = Job_output(job);
       {
         x2c_error_catch_close(_x2c_error_handler_0);
@@ -344,10 +344,10 @@ static void _write_text(String path, String text){
 
 List List_filter(List, Func);
 
-List String_list_dir(String);
+List Path_list_dir(Path);
 
 static List _entries(String directory){
-  return List_filter(String_list_dir(directory), _x2c_func_handle_0);
+  return List_filter(Path_list_dir(directory), _x2c_func_handle_0);
 }
 
 int List_try_next(List, List *, Var *);
@@ -454,18 +454,18 @@ static List _index_row(CliRequest request, String name, String work){
 
 List List_cdr(List);
 
-int String_is_dir(String);
+int Path_is_dir(Path);
 
 static String _unpack(String tarball, String work){
   String extracted = String_join(NULL, cons(String_var(work), cons(String_var(_24), NULL)));
   if(! _build_mkdirs(extracted)) _error(String_join(NULL, cons(String_var(_3), cons(String_var(extracted), NULL))));
   _run(cons(_26, cons(_28, cons(String_var(tarball), cons(_30, cons(String_var(extracted), NULL))))), "extract");
   List top = _entries(extracted);
-  if(! List_truth(top) || List_truth(List_cdr(top)) || ! String_is_dir(String_join(NULL, cons(String_var(extracted), cons(String_var(_9), cons(String_var(Var_str(List_car(top))), NULL)))))) _error(String_join(NULL, cons(String_var(tarball), cons(String_var(_31), NULL))));
+  if(! List_truth(top) || List_truth(List_cdr(top)) || ! Path_is_dir(String_join(NULL, cons(String_var(extracted), cons(String_var(_9), cons(String_var(Var_str(List_car(top))), NULL)))))) _error(String_join(NULL, cons(String_var(tarball), cons(String_var(_31), NULL))));
   return String_join(NULL, cons(String_var(extracted), cons(String_var(_9), cons(String_var(Var_str(List_car(top))), NULL))));
 }
 
-void String_copy_tree(String, String);
+void Path_copy_tree(Path, Path);
 
 static void _copy_tree(String source, String target){
   {
@@ -478,7 +478,7 @@ static void _copy_tree(String source, String target){
     List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_1[1] = List_var(_x2c_catch_pattern_2);
   }
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) String_copy_tree(source, target);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) Path_copy_tree(source, target);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
       int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
       x2c_error_catch_detach(_x2c_error_handler_1);
@@ -527,13 +527,13 @@ static void _check_bundle(CliRequest request, String package, String name){
 
 int List_contains(List, Var);
 
-String String_stem(String);
+String Path_stem(Path);
 
 String x2c_get_executable(void);
 
 List List_append(List, List);
 
-String String_dirname(String);
+Path Path_dirname(Path);
 
 static void _build_source(String package, String name, String spec){
   List units = _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_43), NULL))), _113);
@@ -545,13 +545,13 @@ static void _build_source(String package, String name, String spec){
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       manifest = Var_string(_x2c_macro_cursor_output_3);
-      if(String_endswith(manifest, _115) || String_startswith(String_stem(manifest), _116)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_48), NULL))));
+      if(String_endswith(manifest, _115) || String_startswith(Path_stem(manifest), _116)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_48), NULL))));
     }
 
   }
   String builds = String_join(NULL, cons(String_var(package), cons(String_var(_49), NULL))), x2c = x2c_get_executable();
   if(! _build_mkdirs(builds)) _error(String_join(NULL, cons(String_var(_3), cons(String_var(builds), NULL))));
-  _run(List_append(cons(String_var(x2c), cons(_51, cons(_53, cons(String_var(builds), cons(_55, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_43), NULL)))), cons(_57, cons(String_var(String_dirname(package)), NULL)))))))), units), "translate");
+  _run(List_append(cons(String_var(x2c), cons(_51, cons(_53, cons(String_var(builds), cons(_55, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_43), NULL)))), cons(_57, cons(String_var(Path_dirname(package)), NULL)))))))), units), "translate");
   List inputs = List_append(_files_with(builds, _117), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_43), NULL))), _117));
   _run(List_append(cons(String_var(x2c), cons(_59, cons(_61, cons(_63, cons(_65, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_66), cons(String_var(name), cons(String_var(_41), NULL)))))), cons(_68, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_69), NULL)))), NULL)))))))), inputs), "build");
   _write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_9), cons(String_var(name), cons(String_var(_70), NULL))))), 0);
@@ -603,7 +603,7 @@ String String_printf(String, ...);
 static String _work_directory(String packages){
   {
     String name;
-    List _x2c_macro_object_4 = String_list_dir(packages);
+    List _x2c_macro_object_4 = Path_list_dir(packages);
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
@@ -626,8 +626,8 @@ static String _install(CliRequest request, String spec, String source, String ur
     source = _fetch(url, work, _120);
     _verify(source, sha256);
   }
-  else if(String_truth(sha256) && ! String_is_dir(source)) _verify(source, sha256);
-  String package = String_is_dir(source) ? source : _unpack(source, work);
+  else if(String_truth(sha256) && ! Path_is_dir(source)) _verify(source, sha256);
+  String package = Path_is_dir(source) ? source : _unpack(source, work);
   String name = Var_string(List_last(String_split(package, _121)));
   if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_79), cons(String_var(name), cons(String_var(_80), NULL)))));
   String staged = String_join(NULL, cons(String_var(work), cons(String_var(_9), cons(String_var(name), NULL))));

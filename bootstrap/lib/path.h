@@ -6,57 +6,61 @@
 #define __GUARD_0xD6FFF159__
 
 #include "x2c.h"
-String String_join_path(String base, String name);
+typedef String Path;
 
-String String_dirname(String path);
+Path Path_new(const char * argument0);
 
-String String_basename(String path);
+Path Path_join(Path base, Path name);
 
-String String_extension(String path);
+Path Path_dirname(Path path);
 
-String String_stem(String path);
+Path Path_basename(Path path);
 
-String String_absolute_path(String path);
+String Path_extension(Path path);
 
-int String_exists(String path);
+String Path_stem(Path path);
 
-int String_is_dir(String path);
+Path Path_absolute(Path path);
 
-int String_is_file(String path);
+int Path_exists(Path path);
 
-int String_is_executable(String path);
+int Path_is_dir(Path path);
 
-long String_file_size(String path);
+int Path_is_file(Path path);
 
-double String_modified_time(String path);
+int Path_is_executable(Path path);
 
-List String_list_dir(String path);
+long Path_size(Path path);
 
-Iter String_walk(String root, Iter dest);
+double Path_modified_time(Path path);
 
-int String_glob_match(String pattern, String path);
+List Path_list_dir(Path path);
 
-List String_glob(String pattern);
+Iter Path_walk(Path root, Iter dest);
 
-void String_make_dirs(String path);
+int Path_glob_match(Path pattern, Path path);
 
-void String_remove_file(String path);
+List Path_glob(Path pattern);
 
-void String_remove_tree(String path);
+void Path_make_dirs(Path path);
 
-void String_copy_file(String source, String target);
+void Path_remove_file(Path path);
 
-void String_copy_tree(String source, String target);
+void Path_remove_tree(Path path);
 
-void String_move_to(String source, String target);
+void Path_copy_file(Path source, Path target);
 
-void String_symlink_to(String link, String target);
+void Path_copy_tree(Path source, Path target);
 
-String String_read_text(String path);
+void Path_move_to(Path source, Path target);
 
-void String_write_text(String path, String text);
+void Path_symlink_to(Path link, Path target);
 
-String String_temp_dir(void);
+String Path_read_text(Path path);
+
+void Path_write_text(Path path, String text);
+
+Path Path_temp_dir(void);
 
 
 #endif /* __GUARD_0xD6FFF159__ */

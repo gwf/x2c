@@ -2147,23 +2147,23 @@ int Compiler_macro_starts_target_at(Compiler compiler, AstPos position){
 
 Var Array_getindex(Array, int);
 
-String String_dirname(String);
+Path Path_dirname(Path);
 
 static String _source_dir(Compiler compiler){
   String filename = Array_len(compiler -> import_stack) ? Var_str(Array_getindex(compiler -> import_stack, - 1)) : compiler -> filename;
-  return String_truth(filename) ? String_dirname(filename) : _143;
+  return String_truth(filename) ? Path_dirname(filename) : _143;
 }
 
 int SourceView_exists(SourceView, String);
 
-String String_absolute_path(String);
+Path Path_absolute(Path);
 
 int String_getindex(String, int);
 
 static String _source_file(Compiler compiler, String file){
   if(! String_truth(file) || String_startswith(file, _604)) return file;
   char resolved[PATH_MAX];
-  if(compiler -> sources && SourceView_exists(compiler -> sources, file)) return String_absolute_path(file);
+  if(compiler -> sources && SourceView_exists(compiler -> sources, file)) return Path_absolute(file);
   if(realpath(file, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
   if(String_getindex(file, 0) != '/'){
     String rooted = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_241), cons(String_var(file), NULL))));
@@ -2176,9 +2176,9 @@ static String _embed_path(Compiler compiler, String source_file, String requeste
   String candidate = requested;
   if(String_getindex(requested, 0) != '/'){
     String base = _source_file(compiler, source_file);
-    candidate = String_join(NULL, cons(String_var(String_dirname(base)), cons(String_var(_241), cons(String_var(requested), NULL))));
+    candidate = String_join(NULL, cons(String_var(Path_dirname(base)), cons(String_var(_241), cons(String_var(requested), NULL))));
   }
-  if(compiler -> sources) return String_absolute_path(candidate);
+  if(compiler -> sources) return Path_absolute(candidate);
   char resolved[PATH_MAX];
   return realpath(candidate, resolved) ? String_join(NULL, cons(String_var(String_new(resolved)), NULL)) : candidate;
 }
@@ -2187,11 +2187,11 @@ static String _canonical_path(Compiler compiler, String path){
   String candidate = path;
   if(String_truth(path) && String_getindex(path, 0) != '/') candidate = String_join(NULL, cons(String_var(_source_dir(compiler)), cons(String_var(_241), cons(String_var(path), NULL))));
   char resolved[PATH_MAX];
-  if(compiler -> sources && SourceView_exists(compiler -> sources, candidate)) return String_absolute_path(candidate);
+  if(compiler -> sources && SourceView_exists(compiler -> sources, candidate)) return Path_absolute(candidate);
   if(realpath(candidate, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
   if(String_truth(path) && String_getindex(path, 0) != '/'){
     String system = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_242), cons(String_var(path), NULL))));
-    if(compiler -> sources && SourceView_exists(compiler -> sources, system)) return String_absolute_path(system);
+    if(compiler -> sources && SourceView_exists(compiler -> sources, system)) return Path_absolute(system);
     if(realpath(system, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
   }
   return candidate;

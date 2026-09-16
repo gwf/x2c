@@ -6,6 +6,10 @@
 
 static String _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
@@ -14,29 +18,25 @@ static String _8, _7, _6, _5, _4, _3, _2, _1, _0;
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-static int _init_guard_ = 0;
-
-__attribute__((constructor)) static void _file_init_(void);
-
 _Noreturn static void _path_error(const char * operation, String path, int error);
 
-static int _trimmed_length(String path);
+static String _trimmed(String path);
 
 static struct stat _stat(const char * operation, String path);
 
 static int _descends(String path);
 
-static void _push_children(Array pending, String directory);
+static void _push_children(Array pending, Path directory);
 
 static int _walk_next(Iter iter, Var * out);
 
-static void _walk(String directory, int depth, int hidden, Array paths);
+static void _walk(Path directory, int depth, int hidden, Array paths);
 
 static int _class_match(const char * * pattern, unsigned char value);
 
 static int _glob_match(const char * pattern, const char * text, const char * origin);
 
-static void _remove_tree(String path, String * failed, int * failure);
+static void _remove_tree(Path path, String * failed, int * failure);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -71,14 +71,18 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("/");
-  _1 = String_new("/");
-  _2 = String_new(".");
-  _3 = String_new("..");
-  _4 = String_new("**");
-  _5 = String_new(".");
+  _1 = String_new(".");
+  _2 = String_new("/");
+  _3 = String_new(".");
+  _4 = String_new("..");
+  _5 = String_new("**");
   _6 = String_new("/tmp");
-  _7 = String_new("/.");
-  _8 = String_new("x2c-XXXXXX");
+  _7 = String_new("x2c-XXXXXX");
+  _8 = String_new("/.");
+}
+
+Path Path_new(const char * argument0){
+  return(Path) String_new(argument0);
 }
 
 Var Symbol_var(Symbol);
@@ -90,12 +94,12 @@ Var int_var(int);
 _Noreturn static void _path_error(const char * operation, String path, int error){
   String name = String_new(operation);
   if(error == ENOENT){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "_path_error",.line = 34};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "_path_error",.line = 40};
     x2c_error_raise_n(& _x2c_error_site_0, 31862161386376, 3, Symbol_var(34096809266140), String_var(name), Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/path.x",.function = "_path_error",.line = 36};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/path.x",.function = "_path_error",.line = 42};
     x2c_error_raise_n(& _x2c_error_site_1, 20399393368, 3, Symbol_var(34096809266140), String_var(name), Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -106,61 +110,61 @@ int String_len(String);
 
 int String_getindex(String, int);
 
-static int _trimmed_length(String path){
+static String _trimmed(String path){
   int length = String_len(path);
   while(length > 1 && String_getindex(path, length - 1) == '/') length --;
-  return length;
+  return String_getslice(path, -2147483648, length, 1);
 }
 
 int String_truth(String);
 
+int String_startswith(String, String);
+
 int String_endswith(String, String);
 
-String String_join_path(String base, String name){
+Path Path_join(Path base, Path name){
   if(! _init_guard_) _file_init_();
   if(! String_truth(name)) return base;
-  if(! String_truth(base) || String_getindex(name, 0) == '/') return name;
-  return String_endswith(base, _1) ? String_join(NULL, cons(String_var(base), cons(String_var(name), NULL))) : String_join(NULL, cons(String_var(base), cons(String_var(_0), cons(String_var(name), NULL))));
+  if(! String_truth(base) || String_startswith(name, _2)) return name;
+  return String_endswith(base, _2) ? String_join(NULL, cons(String_var(base), cons(String_var(name), NULL))) : String_join(NULL, cons(String_var(base), cons(String_var(_0), cons(String_var(name), NULL))));
 }
 
 int String_rfind(String, String);
 
-String String_dirname(String path){
+Path Path_dirname(Path path){
   if(! _init_guard_) _file_init_();
-  String trimmed = String_getslice(path, -2147483648, _trimmed_length(path), 1);
-  int slash = String_rfind(trimmed, _1);
-  if(slash < 0) return _2;
+  String trimmed = _trimmed(path);
+  int slash = String_rfind(trimmed, _2);
+  if(slash < 0) return _1;
   while(slash > 0 && String_getindex(trimmed, slash - 1) == '/') slash --;
   return slash ? String_getslice(trimmed, -2147483648, slash, 1) : _0;
 }
 
 int String_equal(String, String);
 
-String String_basename(String path){
+Path Path_basename(Path path){
   if(! _init_guard_) _file_init_();
-  String trimmed = String_getslice(path, -2147483648, _trimmed_length(path), 1);
-  if(String_equal(trimmed, _1)) return trimmed;
-  int slash = String_rfind(trimmed, _1);
+  String trimmed = _trimmed(path);
+  if(String_equal(trimmed, _2)) return trimmed;
+  int slash = String_rfind(trimmed, _2);
   return slash < 0 ? trimmed : String_getslice(trimmed, slash + 1, -2147483648, 1);
 }
 
-String String_extension(String path){
+String Path_extension(Path path){
   if(! _init_guard_) _file_init_();
-  String base = String_basename(path);
-  int dot = String_rfind(base, _2);
+  String base = Path_basename(path);
+  int dot = String_rfind(base, _3);
   return dot > 0 ? String_getslice(base, dot, -2147483648, 1) : NULL;
 }
 
-String String_stem(String path){
+String Path_stem(Path path){
   if(! _init_guard_) _file_init_();
-  String base = String_basename(path);
-  int dot = String_rfind(base, _2);
+  String base = Path_basename(path);
+  int dot = String_rfind(base, _3);
   return dot > 0 ? String_getslice(base, -2147483648, dot, 1) : base;
 }
 
 String String_new(const char *);
-
-int String_startswith(String, String);
 
 List String_split(String, String);
 
@@ -168,29 +172,29 @@ int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
-String String_absolute_path(String path){
+Path Path_absolute(Path path){
   if(! _init_guard_) _file_init_();
   char buffer[PATH_MAX];
   if(realpath(path, buffer)) return String_new(buffer);
-  if(! String_startswith(path, _1)){
-    if(! getcwd(buffer, sizeof(buffer))) _path_error("String.absolute_path", path, errno);
-    path = String_join_path(String_new(buffer), path);
+  if(! String_startswith(path, _2)){
+    if(! getcwd(buffer, sizeof(buffer))) _path_error("Path.absolute", path, errno);
+    path = Path_join(String_new(buffer), path);
   }
-  String result = _1;
+  Path result = _0;
   {
     String part;
-    List _x2c_macro_object_0 = String_split(path, _1);
+    List _x2c_macro_object_0 = String_split(path, _2);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       part = Var_string(_x2c_macro_cursor_output_0);
       {
-        if(! String_truth(part) || String_equal(part, _2)) continue;
-        if(String_equal(part, _3)){
-          result = String_dirname(result);
+        if(! String_truth(part) || String_equal(part, _3)) continue;
+        if(String_equal(part, _4)){
+          result = Path_dirname(result);
           continue;
         }
-        result = String_join_path(result, part);
+        result = Path_join(result, part);
         if(realpath(result, buffer)) result = String_new(buffer);
       }
 
@@ -200,22 +204,22 @@ String String_absolute_path(String path){
   return result;
 }
 
-int String_exists(String path){
+int Path_exists(Path path){
   struct stat info;
   return String_truth(path) && stat(path, & info) == 0;
 }
 
-int String_is_dir(String path){
+int Path_is_dir(Path path){
   struct stat info;
   return String_truth(path) && stat(path, & info) == 0 && S_ISDIR(info.st_mode);
 }
 
-int String_is_file(String path){
+int Path_is_file(Path path){
   struct stat info;
   return String_truth(path) && stat(path, & info) == 0 && S_ISREG(info.st_mode);
 }
 
-int String_is_executable(String path){
+int Path_is_executable(Path path){
   return String_truth(path) && access(path, X_OK) == 0;
 }
 
@@ -225,12 +229,12 @@ static struct stat _stat(const char * operation, String path){
   return info;
 }
 
-long String_file_size(String path){
-  return(long) _stat("String.file_size", path).st_size;
+long Path_size(Path path){
+  return(long) _stat("Path.size", path).st_size;
 }
 
-double String_modified_time(String path){
-  struct stat info = _stat("String.modified_time", path);
+double Path_modified_time(Path path){
+  struct stat info = _stat("Path.modified_time", path);
 #ifdef __APPLE__
   return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
 #else
@@ -245,9 +249,9 @@ List Array_list_free(Array);
 
 Array Array_sort(Array);
 
-List String_list_dir(String path){
+List Path_list_dir(Path path){
   DIR * directory = opendir(path);
-  if(! directory) _path_error("String.list_dir", path, errno);
+  if(! directory) _path_error("Path.list_dir", path, errno);
   Array names = Array_new();
   struct dirent * entry;
   while((entry = readdir(directory))) if(strcmp(entry -> d_name, ".") && strcmp(entry -> d_name, "..")) Array_push(names, String_var(String_new(entry -> d_name)));
@@ -262,8 +266,8 @@ static int _descends(String path){
 
 List List_reverse(List);
 
-static void _push_children(Array pending, String directory){
-  List children = List_reverse(String_list_dir(directory));
+static void _push_children(Array pending, Path directory){
+  List children = List_reverse(Path_list_dir(directory));
   {
     String name;
     List _x2c_macro_object_1 = children;
@@ -271,7 +275,7 @@ static void _push_children(Array pending, String directory){
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       name = Var_string(_x2c_macro_cursor_output_1);
-      Array_push(pending, String_var(String_join_path(directory, name)));
+      Array_push(pending, String_var(Path_join(directory, name)));
     }
 
   }
@@ -295,7 +299,7 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Var Array_var(Array);
 
-Iter String_walk(String root, Iter dest){
+Iter Path_walk(Path root, Iter dest){
   if(! _init_guard_) _file_init_();
   Array pending = Array_new();
   _push_children(pending, root);
@@ -305,18 +309,18 @@ Iter String_walk(String root, Iter dest){
   , _walk_next, Array_var(pending));
 }
 
-static void _walk(String directory, int depth, int hidden, Array paths){
+static void _walk(Path directory, int depth, int hidden, Array paths){
   {
     String name;
-    List _x2c_macro_object_2 = String_list_dir(directory);
+    List _x2c_macro_object_2 = Path_list_dir(directory);
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
     while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
       name = Var_string(_x2c_macro_cursor_output_2);
       {
-        String child = String_join_path(directory, name);
+        Path child = Path_join(directory, name);
         Array_push(paths, String_var(child));
-        if(depth != 1 &&(hidden || ! String_startswith(name, _2)) && _descends(child)) _walk(child, depth - 1, hidden, paths);
+        if(depth != 1 &&(hidden || ! String_startswith(name, _3)) && _descends(child)) _walk(child, depth - 1, hidden, paths);
       }
 
     }
@@ -374,7 +378,7 @@ static int _glob_match(const char * pattern, const char * text, const char * ori
   return * pattern == * text && _glob_match(pattern + 1, text + 1, origin);
 }
 
-int String_glob_match(String pattern, String path){
+int Path_glob_match(Path pattern, Path path){
   return String_truth(pattern) && String_truth(path) && _glob_match(pattern, path, path);
 }
 
@@ -382,11 +386,11 @@ int String_contains(String, String);
 
 int Array_try_next(Array, int *, Var *);
 
-List String_glob(String pattern){
+List Path_glob(Path pattern){
   if(! _init_guard_) _file_init_();
-  if(! strpbrk(pattern, "*?[\\")) return String_exists(pattern) ? cons(String_var(pattern), NULL) : NULL;
-  List parts = String_split(pattern, _1);
-  String base = NULL;
+  if(! strpbrk(pattern, "*?[\\")) return Path_exists(pattern) ? cons(String_var(pattern), NULL) : NULL;
+  List parts = String_split(pattern, _2);
+  Path base = NULL;
   int depth = 0, recursive = 0;
   {
     String part;
@@ -398,17 +402,17 @@ List String_glob(String pattern){
       {
         if(depth || strpbrk(String_truth(part) ? part : "", "*?[\\")){
           depth ++;
-          if(String_equal(part, _4)) recursive = 1;
+          if(String_equal(part, _5)) recursive = 1;
         }
-        else base = String_truth(base) ? String_join_path(base, part) : String_truth(part) ? part : _0;
+        else base = String_truth(base) ? Path_join(base, part) : String_truth(part) ? part : _0;
       }
 
     }
 
   }
-  String root = String_truth(base) ? base : _5;
+  Path root = String_truth(base) ? base : _1;
   Array paths = Array_new(), matches = Array_new();
-  if(String_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _2) || String_contains(pattern, _7), paths);
+  if(Path_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _3) || String_contains(pattern, _8), paths);
   {
     String path;
     Array _x2c_macro_object_4 = paths;
@@ -418,7 +422,7 @@ List String_glob(String pattern){
       path = Var_string(_x2c_macro_cursor_output_4);
       {
         String candidate = String_truth(base) ? path : String_getslice(path, 2, -2147483648, 1);
-        if(String_glob_match(pattern, candidate)) Array_push(matches, String_var(candidate));
+        if(Path_glob_match(pattern, candidate)) Array_push(matches, String_var(candidate));
       }
 
     }
@@ -427,29 +431,29 @@ List String_glob(String pattern){
   return Array_list_free(Array_sort(matches));
 }
 
-void String_make_dirs(String path){
+void Path_make_dirs(Path path){
   char buffer[PATH_MAX];
-  if(String_len(path) >= sizeof(buffer)) _path_error("String.make_dirs", path, ENAMETOOLONG);
+  if(String_len(path) >= sizeof(buffer)) _path_error("Path.make_dirs", path, ENAMETOOLONG);
   strcpy(buffer, path);
   for(char * ch = buffer + 1;  * ch;  ch ++){
     if(* ch != '/') continue;
     * ch = 0;
-    if(mkdir(buffer, 0777) && errno != EEXIST) _path_error("String.make_dirs", String_new(buffer), errno);
+    if(mkdir(buffer, 0777) && errno != EEXIST) _path_error("Path.make_dirs", String_new(buffer), errno);
     * ch = '/';
   }
-  if(mkdir(buffer, 0777) && errno != EEXIST) _path_error("String.make_dirs", path, errno);
-  if(! String_is_dir(path)) _path_error("String.make_dirs", path, ENOTDIR);
+  if(mkdir(buffer, 0777) && errno != EEXIST) _path_error("Path.make_dirs", path, errno);
+  if(! Path_is_dir(path)) _path_error("Path.make_dirs", path, ENOTDIR);
 }
 
-void String_remove_file(String path){
-  if(unlink(path) && errno != ENOENT) _path_error("String.remove_file", path, errno);
+void Path_remove_file(Path path){
+  if(unlink(path) && errno != ENOENT) _path_error("Path.remove_file", path, errno);
 }
 
 Context Context_open_isolated(void);
 
 Var Context_export(Context, Var);
 
-static void _remove_tree(String path, String * failed, int * failure){
+static void _remove_tree(Path path, String * failed, int * failure){
   struct stat info;
   if(lstat(path, & info)){
     if(errno != ENOENT && ! String_truth(* failed)) * failed = path, * failure = errno;
@@ -473,7 +477,7 @@ static void _remove_tree(String path, String * failed, int * failure){
   {
           String child_failed = NULL;
           int child_failure = 0;
-          _remove_tree(String_join_path(path, String_new(entry -> d_name)), & child_failed, & child_failure);
+          _remove_tree(Path_join(path, String_new(entry -> d_name)), & child_failed, & child_failure);
           if(String_truth(child_failed) && ! String_truth(* failed)){
             * failed = Var_string(Context_export(context, String_var(child_failed)));
             * failure = child_failure;
@@ -491,14 +495,14 @@ static void _remove_tree(String path, String * failed, int * failure){
   else if(unlink(path) && ! String_truth(* failed)) * failed = path, * failure = errno;
 }
 
-void String_remove_tree(String path){
+void Path_remove_tree(Path path){
   if(! _init_guard_) _file_init_();
   String failed = NULL;
   int failure = 0;
   _remove_tree(path, & failed, & failure);
   if(String_truth(failed)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/path.x",.function = "String_remove_tree",.line = 401};
-    x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.remove_tree")), NULL))), Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 407};
+    x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Path.remove_tree")), NULL))), Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
     __builtin_unreachable();
   }
 
@@ -508,7 +512,7 @@ File File_open(const char *, const char *);
 
 int File_copy_to(File, File, size_t *);
 
-void String_copy_file(String source, String target){
+void Path_copy_file(Path source, Path target){
   File input = File_open(source, "rb");
   {
   _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & input};
@@ -530,9 +534,9 @@ void String_copy_file(String source, String target){
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
       File_copy_to(input, output, NULL);
-      if(File_flush(output)) _path_error("String.copy_file", target, errno);
-      struct stat info = _stat("String.copy_file", source);
-      if(chmod(target, info.st_mode & 07777)) _path_error("String.copy_file", target, errno);
+      if(File_flush(output)) _path_error("Path.copy_file", target, errno);
+      struct stat info = _stat("Path.copy_file", source);
+      if(chmod(target, info.st_mode & 07777)) _path_error("Path.copy_file", target, errno);
     }
     x2c_cleanup_leave(& _x2c_defer_record_2);
 
@@ -543,56 +547,56 @@ void String_copy_file(String source, String target){
 }
 }
 
-void String_copy_tree(String source, String target){
+void Path_copy_tree(Path source, Path target){
   if(! _init_guard_) _file_init_();
   struct stat info;
-  if(lstat(source, & info)) _path_error("String.copy_tree", source, errno);
+  if(lstat(source, & info)) _path_error("Path.copy_tree", source, errno);
   if(S_ISLNK(info.st_mode)){
     char buffer[PATH_MAX];
     ssize_t length = readlink(source, buffer, sizeof(buffer) - 1);
-    if(length < 0) _path_error("String.copy_tree", source, errno);
+    if(length < 0) _path_error("Path.copy_tree", source, errno);
     buffer[length] = 0;
-    if(symlink(buffer, target)) _path_error("String.copy_tree", target, errno);
+    if(symlink(buffer, target)) _path_error("Path.copy_tree", target, errno);
   }
   else if(S_ISDIR(info.st_mode)){
-    String_make_dirs(target);
+    Path_make_dirs(target);
     {
       String name;
-      List _x2c_macro_object_5 = String_list_dir(source);
+      List _x2c_macro_object_5 = Path_list_dir(source);
       List _x2c_macro_cursor_5 = _x2c_macro_object_5;
       Var _x2c_macro_cursor_output_5;
       while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
         name = Var_string(_x2c_macro_cursor_output_5);
-        String_copy_tree(String_join_path(source, name), String_join_path(target, name));
+        Path_copy_tree(Path_join(source, name), Path_join(target, name));
       }
 
     }
-    if(chmod(target, info.st_mode & 07777)) _path_error("String.copy_tree", target, errno);
+    if(chmod(target, info.st_mode & 07777)) _path_error("Path.copy_tree", target, errno);
   }
-  else String_copy_file(source, target);
+  else Path_copy_file(source, target);
 }
 
-void String_move_to(String source, String target){
+void Path_move_to(Path source, Path target){
   if(! _init_guard_) _file_init_();
   if(! rename(source, target)) return;
-  if(errno != EXDEV) _path_error("String.move_to", source, errno);
-  String_copy_tree(source, target);
-  String_remove_tree(source);
+  if(errno != EXDEV) _path_error("Path.move_to", source, errno);
+  Path_copy_tree(source, target);
+  Path_remove_tree(source);
 }
 
-void String_symlink_to(String link, String target){
-  if(symlink(target, link)) _path_error("String.symlink_to", link, errno);
+void Path_symlink_to(Path link, Path target){
+  if(symlink(target, link)) _path_error("Path.symlink_to", link, errno);
 }
 
 String File_string_close(File);
 
-String String_read_text(String path){
+String Path_read_text(Path path){
   return File_string_close(File_open(path, "r"));
 }
 
 int File_write_all(File, const void *, size_t);
 
-void String_write_text(String path, String text){
+void Path_write_text(Path path, String text){
   File output = File_open(path, "w");
   {
   _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_3 =(const void *) & output};
@@ -604,22 +608,22 @@ void String_write_text(String path, String text){
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
     File_write_all(output, text, String_len(text));
-    if(File_flush(output)) _path_error("String.write_text", path, errno);
+    if(File_flush(output)) _path_error("Path.write_text", path, errno);
   }
   x2c_cleanup_leave(& _x2c_defer_record_3);
 
 }
 }
 
-String String_temp_dir(void){
+Path Path_temp_dir(void){
   if(! _init_guard_) _file_init_();
   const char * parent = getenv("TMPDIR");
-  String root = parent && * parent ? String_new(parent) : _6;
-  String pattern = String_join_path(root, _8);
+  Path root = parent && * parent ? String_new(parent) : _6;
+  String pattern = Path_join(root, _7);
   char buffer[PATH_MAX];
-  if(String_len(pattern) >= sizeof(buffer)) _path_error("String.temp_dir", root, ENAMETOOLONG);
+  if(String_len(pattern) >= sizeof(buffer)) _path_error("Path.temp_dir", root, ENAMETOOLONG);
   strcpy(buffer, pattern);
-  if(! mkdtemp(buffer)) _path_error("String.temp_dir", root, errno);
+  if(! mkdtemp(buffer)) _path_error("Path.temp_dir", root, errno);
   return String_new(buffer);
 }
 

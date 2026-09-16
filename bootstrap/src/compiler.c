@@ -96,7 +96,7 @@ static void _push_script_conditionals(Compiler c, Array statements, int first, i
 
 static void _check_script_locals(Compiler c, List ast);
 
-static const char * script_main = "static int x2c_script(int argc, char **argv, List args) {\n" "  (void) argc, (void) argv, (void) args;\n" "  x2c_script_statements\n" "  return 0;\n" "}\n" "int main(int argc, char **argv) {\n" "  try {\n" "    return x2c_script(argc, argv, List.arguments(argc, argv));\n" "  }\n" "  catch %(cmd-fail (command ?command) (status ?status) *): {\n" "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n" "            argv[0], command.repr().str(), status.integer());\n" "    return (int) status.integer();\n" "  }\n" "  catch %(?code *detail): {\n" "    fprintf(stderr, \"%s: %s %s\\n\",\n" "            argv[0], code.str(), detail.repr().str());\n" "    return 1;\n" "  }\n" "}\n";
+static const char * script_main = "static int x2c_script(int argc, char **argv, List args) {\n" "  (void) argc, (void) argv, (void) args;\n" "  x2c_script_statements\n" "  return 0;\n" "}\n" "int main(int argc, char **argv) {\n" "  try {\n" "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n" "  }\n" "  catch %(cmd-fail (command ?command) (status ?status) *): {\n" "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n" "            argv[0], command.repr().str(), status.integer());\n" "    return (int) status.integer();\n" "  }\n" "  catch %(?code *detail): {\n" "    fprintf(stderr, \"%s: %s %s\\n\",\n" "            argv[0], code.str(), detail.repr().str());\n" "    return 1;\n" "  }\n" "}\n";
 
 static void _append_script_main(Compiler c, Array statements);
 
@@ -1045,11 +1045,11 @@ void Compiler_return_unit_state(Compiler compiler, Compiler owner){
 
 int SourceView_read(SourceView, String, volatile String *);
 
-String String_absolute_path(String);
+Path Path_absolute(Path);
 
 int Compiler_read_source(Compiler compiler, String path, String volatile * text){
   if(! SourceView_read(compiler -> sources, path, text)) return 0;
-  if(compiler -> source_facts) Map_setindex(compiler -> source_texts, String_var(String_absolute_path(path)), String_var(* text));
+  if(compiler -> source_facts) Map_setindex(compiler -> source_texts, String_var(Path_absolute(path)), String_var(* text));
   return 1;
 }
 
@@ -1099,7 +1099,7 @@ static List _source_range(Compiler compiler, Token first, Token after){
   if(! first || ! after || first >= after || Map_truth(compiler -> macro_holes)) return NULL;
   Token last = after - 1;
   while(last > first &&(last -> type == 40896714 || last -> type == 7477210024 || last -> type == 35579270086)) last --;
-  String path = String_absolute_path(compiler -> filename);
+  String path = Path_absolute(compiler -> filename);
   if(! Map_contains(compiler -> source_texts, String_var(path))) Map_setindex(compiler -> source_texts, String_var(path), String_var(compiler -> text));
   return cons(String_var(path), cons(int_var(first -> pos), cons(int_var(last -> pos + last -> len), NULL)));
 }
@@ -1186,7 +1186,7 @@ Tokenizer Tokenizer_new(char *);
 void Tokenizer_scan(Tokenizer);
 
 void Compiler_tokenize(Compiler c, char * text){
-  if(c -> unit_script && String_truth(c -> filename) &&(String_equal(c -> filename, c -> unit_script -> path) || String_equal(String_absolute_path(c -> filename), c -> unit_script -> path))) c -> script = c -> unit_script;
+  if(c -> unit_script && String_truth(c -> filename) &&(String_equal(c -> filename, c -> unit_script -> path) || String_equal(Path_absolute(c -> filename), c -> unit_script -> path))) c -> script = c -> unit_script;
   c -> text = String_new(text);
   c -> tokenizer = Tokenizer_new(c -> text);
   Tokenizer_scan(c -> tokenizer);
@@ -1672,7 +1672,7 @@ return List_var(Array_list_free(rows));
 }
 
 static List _declaration_source_key(Compiler compiler, Token token){
-  String path = String_absolute_path(compiler -> filename);  String prefix = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_37), NULL)));  if(String_startswith(path, prefix)) path = String_getslice(path, String_len(prefix), -2147483648, 1);  return cons(_112, cons(List_var(cons(_113, cons(String_var(path), cons(int_var(token -> pos), NULL)))), NULL));
+  String path = Path_absolute(compiler -> filename);  String prefix = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_37), NULL)));  if(String_startswith(path, prefix)) path = String_getslice(path, String_len(prefix), -2147483648, 1);  return cons(_112, cons(List_var(cons(_113, cons(String_var(path), cons(int_var(token -> pos), NULL)))), NULL));
 }
 
 void Compiler_queue_declaration_effect(Compiler compiler, String form, Token first, Token after){
@@ -3569,7 +3569,7 @@ Type Sym_delegate_aggregate(Sym sym, Type type){
 }
 
 static String _gensym_owner(Compiler compiler){
-  if(! String_truth(compiler -> filename)) return 0;  char buffer[PATH_MAX];  String path = compiler -> sources ? String_absolute_path(compiler -> filename) : realpath(compiler -> filename, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : compiler -> filename;  static char root[PATH_MAX];  if(! * root && ! realpath(x2c_get_root(), root)) snprintf(root, sizeof root, "%s", (char *) x2c_get_root());  String prefix = String_join(NULL, cons(String_var(String_new(root)), cons(String_var(_37), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
+  if(! String_truth(compiler -> filename)) return 0;  char buffer[PATH_MAX];  String path = compiler -> sources ? Path_absolute(compiler -> filename) : realpath(compiler -> filename, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : compiler -> filename;  static char root[PATH_MAX];  if(! * root && ! realpath(x2c_get_root(), root)) snprintf(root, sizeof root, "%s", (char *) x2c_get_root());  String prefix = String_join(NULL, cons(String_var(String_new(root)), cons(String_var(_37), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
 }
 
 List Compiler_gensym(Compiler compiler){

@@ -550,7 +550,7 @@ static int _has_glob(String pattern){
   return String_truth(pattern) && strpbrk(pattern, "*?[");
 }
 
-int String_glob_match(String, String);
+int Path_glob_match(Path, Path);
 
 int Array_contains(Array, Var);
 
@@ -570,7 +570,7 @@ static void _walk_matches(Project project, String directory, String relative, St
       _walk_matches(project, child, child_relative, pattern, matches);
       continue;
     }
-    if(S_ISREG(info.st_mode) && String_glob_match(pattern, child_relative) && ! Array_contains(matches, String_var(child))) Array_push(matches, String_var(child));
+    if(S_ISREG(info.st_mode) && Path_glob_match(pattern, child_relative) && ! Array_contains(matches, String_var(child))) Array_push(matches, String_var(child));
   }
   closedir(input);
 }
@@ -612,7 +612,7 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
             if(! String_startswith(path, prefix)) continue;
             if(String_truth(project -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(project -> build_root), cons(String_var(_26), NULL))))) continue;
             String relative = String_getslice(path, String_len(prefix), -2147483648, 1);
-            if(String_glob_match(pattern, relative) && ! Array_contains(matches, String_var(path))) Array_push(matches, String_var(path));
+            if(Path_glob_match(pattern, relative) && ! Array_contains(matches, String_var(path))) Array_push(matches, String_var(path));
           }
 
         }
@@ -1149,11 +1149,11 @@ String project_manifest(CliRequest request){
   return NULL;
 }
 
-String String_absolute_path(String);
+Path Path_absolute(Path);
 
 int SourceView_read(SourceView, String, volatile String *);
 
-String String_dirname(String);
+Path Path_dirname(Path);
 
 ProjectBuild project_plan(CliRequest request){
   if(! _init_guard_) _file_init_();
@@ -1165,7 +1165,7 @@ ProjectBuild project_plan(CliRequest request){
   char resolved[PATH_MAX];
   if(realpath(project -> path, resolved)) project -> path = String_join(NULL, cons(String_var(String_new(resolved)), NULL));
   if(project -> sources){
-    project -> path = String_absolute_path(project -> path);
+    project -> path = Path_absolute(project -> path);
     if(! SourceView_read(project -> sources, project -> path, & project -> text)) _error(project, 0, "cannot read manifest");
   }
   else{
@@ -1202,7 +1202,7 @@ _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
 }
 }
-project -> root = String_dirname(project -> path);
+project -> root = Path_dirname(project -> path);
 _parse_manifest(project);
 for(ProjectTarget target = project -> targets;  target;  target = target -> next) _validate_target(project, target);
 _resolve_dependencies(project, request);

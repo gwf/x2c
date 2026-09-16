@@ -766,11 +766,11 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 return text;
 }
 
-String String_dirname(String);
+Path Path_dirname(Path);
 
 static void _walk_cold(Compiler c, String target, String canonical, Map globs, Map visited){
   String text = _include_text(c, target, canonical);
-  _file(c, canonical, text, String_dirname(canonical), globs, visited);
+  _file(c, canonical, text, Path_dirname(canonical), globs, visited);
 }
 
 String String_join(String, List);
@@ -785,7 +785,7 @@ void Compiler_take_unit_state(Compiler, Compiler);
 
 void Compiler_tokenize(Compiler, char *);
 
-String String_absolute_path(String);
+Path Path_absolute(Path);
 
 void Compiler_shallow_parse_overlay(Compiler, Map, Map);
 
@@ -812,7 +812,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
     Compiler_take_unit_state(shadow, c);
     Compiler_tokenize(shadow, text);
     shadow -> text = source;
-    if(c -> source_facts) Map_setindex(c -> source_texts, String_var(String_absolute_path(path)), String_var(source));
+    if(c -> source_facts) Map_setindex(c -> source_texts, String_var(Path_absolute(path)), String_var(source));
     for(size_t i = 0;  i < Bytes_len(shadow -> tokenizer -> tokens);  i ++){
       Token token = &((struct Token *) shadow -> tokenizer -> tokens)[i];
       token -> line += start_line - 1;
@@ -1127,7 +1127,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical){
   if(List_truth(entry)) return entry;
   Map scratch = Map_new(), visited = Map_new();
   Map_setindex(visited, String_var(canonical), int_var(1));
-  _file(c, canonical, _runtime_text(c, runtime), String_dirname(runtime), scratch, visited);
+  _file(c, canonical, _runtime_text(c, runtime), Path_dirname(runtime), scratch, visited);
   return Var_list(Map_getindex(_header_cache(), String_var(canonical)));
 }
 
@@ -1145,11 +1145,11 @@ Map Compiler_collect_symbols(Compiler c, Map globs){
     String runtime_canonical = _canonical_path(runtime);
     Map_setindex(visited, String_var(runtime_canonical), int_var(1));
     Compiler_add_translation_dependency(c, runtime_canonical);
-    if(c -> runtime_hdrs) _file(c, runtime_canonical, _runtime_text(c, runtime), String_dirname(runtime), globs, visited);
+    if(c -> runtime_hdrs) _file(c, runtime_canonical, _runtime_text(c, runtime), Path_dirname(runtime), globs, visited);
     else _replay_cached(c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
   }
   Map_setindex(visited, String_var(canonical), int_var(1));
-  _file(c, canonical, c -> text, String_dirname(c -> filename), globs, visited);
+  _file(c, canonical, c -> text, Path_dirname(c -> filename), globs, visited);
   return globs;
 }
 
@@ -1369,7 +1369,7 @@ void Compiler_collect_package(Compiler c, String name, Token token){
 }
 }
 if(failed) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_57), cons(String_var(name), cons(String_var(_47), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(entry), NULL)))), NULL));
-_file(package, entry, text, String_dirname(entry), globs, visited);
+_file(package, entry, text, Path_dirname(entry), globs, visited);
 }
 else _replay_cached(package, Var_list(cached), globs, visited);
 Map_merge(c -> fn_defs, package -> fn_defs);
@@ -1423,19 +1423,19 @@ void interface_configure(String out_dir){
   if(! _init_guard_) _file_init_();
   interface_out_dir = out_dir;
   String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage = String_truth(executable) ? String_dirname(executable) : NULL;
-  interface_mirror = String_truth(stage) && String_equal(String_dirname(stage), String_join(NULL, cons(String_var(root), cons(String_var(_58), NULL)))) ? stage : root;
+  String stage = String_truth(executable) ? Path_dirname(executable) : NULL;
+  interface_mirror = String_truth(stage) && String_equal(Path_dirname(stage), String_join(NULL, cons(String_var(root), cons(String_var(_58), NULL)))) ? stage : root;
 }
 
-String String_stem(String);
+String Path_stem(Path);
 
 static List _interface_candidates(String canonical){
-  String stem = String_stem(canonical), relative = _root_relative(canonical);
-  String dir = String_dirname(canonical);
+  String stem = Path_stem(canonical), relative = _root_relative(canonical);
+  String dir = Path_dirname(canonical);
   Array paths = Array_new();
   if(String_truth(interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(interface_out_dir), cons(String_var(_3), cons(String_var(stem), cons(String_var(_59), NULL)))))));
   if(String_truth(relative)){
-    String mirror = String_join(NULL, cons(String_var(String_dirname(relative)), cons(String_var(_3), cons(String_var(stem), cons(String_var(_59), NULL)))));
+    String mirror = String_join(NULL, cons(String_var(Path_dirname(relative)), cons(String_var(_3), cons(String_var(stem), cons(String_var(_59), NULL)))));
     if(String_truth(interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(interface_out_dir), cons(String_var(_60), cons(String_var(mirror), NULL))))));
     Array_push(paths, String_var(String_join(NULL, cons(String_var(interface_mirror), cons(String_var(_3), cons(String_var(mirror), NULL))))));
   }

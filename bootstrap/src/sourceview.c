@@ -223,23 +223,23 @@ Var Map_setindex(Map, Var, Var);
 
 Var String_var(String);
 
-String String_absolute_path(String);
+Path Path_absolute(Path);
 
 Var int_var(int);
 
 void SourceView_set(SourceView sources, String path, String text, int changed){
-  Map_setindex(sources -> overlays, String_var(String_absolute_path(path)), String_var(text));
-  if(changed) Map_setindex(sources -> dirty_paths, String_var(String_absolute_path(path)), int_var(1));
+  Map_setindex(sources -> overlays, String_var(Path_absolute(path)), String_var(text));
+  if(changed) Map_setindex(sources -> dirty_paths, String_var(Path_absolute(path)), int_var(1));
 }
 
 int Map_contains(Map, Var);
 
 int SourceView_is_changed(SourceView sources, String path){
-  return sources && Map_contains(sources -> dirty_paths, String_var(String_absolute_path(path)));
+  return sources && Map_contains(sources -> dirty_paths, String_var(Path_absolute(path)));
 }
 
 int SourceView_exists(SourceView sources, String path){
-  if(sources && Map_contains(sources -> overlays, String_var(String_absolute_path(path)))) return 1;
+  if(sources && Map_contains(sources -> overlays, String_var(Path_absolute(path)))) return 1;
   struct stat info;
   return ! access(path, R_OK) && ! stat(path, & info) && S_ISREG(info.st_mode);
 }
@@ -256,7 +256,7 @@ Var Symbol_var(Symbol);
 
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;
-  if(sources && Map_try_get(sources -> overlays, String_var(String_absolute_path(path)), & value)){
+  if(sources && Map_try_get(sources -> overlays, String_var(Path_absolute(path)), & value)){
     * text = Var_string(value);
     return 1;
   }

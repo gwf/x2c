@@ -115,8 +115,8 @@ Var String_var(String);
 
 _Noreturn static void _bad_option(String why, String option){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 36};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.parse_args")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1041517532), String_var(option));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 43};
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1041517532), String_var(option));
     __builtin_unreachable();
   }
 
@@ -124,8 +124,8 @@ _Noreturn static void _bad_option(String why, String option){
 
 _Noreturn static void _bad_operand(String why, String operand){
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 40};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.parse_args")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(33297664904), String_var(operand));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 47};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(33297664904), String_var(operand));
     __builtin_unreachable();
   }
 
@@ -133,8 +133,8 @@ _Noreturn static void _bad_operand(String why, String operand){
 
 _Noreturn static void _bad_spec(String why, Var entry){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 45};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("List.parse_args")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1278278), entry);
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 52};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1278278), entry);
     __builtin_unreachable();
   }
 
@@ -337,7 +337,7 @@ Var Array_push(Array, Var);
 
 List Array_list_free(Array);
 
-Map List_parse_args(List args, List spec){
+Map Args_parse(List args, List spec){
   if(! _init_guard_) _file_init_();
   _Spec parsed = _read_spec(spec);
   Map result = Map_new();
@@ -400,7 +400,7 @@ Buffer Buffer_new(size_t);
 
 String Buffer_str(Buffer);
 
-String List_usage(List spec, String program){
+String Args_usage(List spec, String program){
   if(! _init_guard_) _file_init_();
   _Spec parsed = _read_spec(spec);
   Buffer synopsis = Buffer_new(0);
@@ -486,6 +486,14 @@ String List_usage(List spec, String program){
   x2c_cleanup_leave(& _x2c_defer_record_0);
 
 }
+}
+
+String String_new(const char *);
+
+List Args_from_argv(int argc, char * * argv){
+  List result = NULL;
+  for(int i = argc - 1;  i > 0;  i --) result = cons(String_var(String_new(argv[i])), List_append(result, NULL));
+  return result;
 }
 
 void Buffer_cleanup(Buffer);
