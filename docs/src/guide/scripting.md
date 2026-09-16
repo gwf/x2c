@@ -421,6 +421,17 @@ String abc = %"abc".sha256();
 
 ## JSON
 
+A script that reads or writes JSON includes `json.x` itself:
+
+```x2c
+#include "json.x"
+```
+
+It is not included automatically because its names match the converting
+surface of the [`yyjson` package](../../../packages/yyjson/README.md), so a
+script moves to the package by replacing that line with
+`import "yyjson" with Json;`.
+
 `Json.parse` reads JSON text and `Json.read_file` reads a JSON file. The
 result is made of ordinary values: an object is a `Map` with `String` keys,
 an array is an `Array`, a string is a `String`, and a number is an integer or
@@ -481,10 +492,9 @@ Writing raises `<bad-types>` for a value JSON cannot hold, such as a `File`
 or a `Map` key that is not a `String` or `Symbol`, and `<conv-range>` for NaN
 or an infinity.
 
-The [`yyjson` package](../../../packages/yyjson/README.md) keeps what a `Map`
-cannot: object order, duplicate names, and whether a number was signed,
-unsigned, or real. Its converting names are the same as these. A script
-unit already declares `Json` and `Var.json`, so a script reaches the package
-through its alias, as `yy.Json.parse(text)` and `yy.Var_json(value)` after
-`import "yyjson" as yy;`.
+The package keeps what a `Map` cannot: object order, duplicate names, and
+whether a number was signed, unsigned, or real. Its converted integers are
+`long long` or `unsigned long long` values, which do not compare equal to an
+`int` literal such as the 5 in `%{n: 5}`, and malformed text raises
+`<malformed>` rather than `<bad-arg>`.
 

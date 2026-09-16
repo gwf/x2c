@@ -122,8 +122,9 @@ Decisions a reviewer should check:
 
 ## Phase C - `lib/json.x` (in progress)
 
-The module is built, registered, and included from `lib/scripting.x`; the
-tool conversion waits for `lib/args.x`.
+The module is built and registered as an optional module. A script includes
+it with `#include "json.x"`; `lib/scripting.x` does not. The tool conversion
+waits for `lib/args.x` and `lib/digest.x`.
 
 | Operation | Result |
 | --- | --- |
@@ -151,18 +152,22 @@ Decisions a reviewer should check:
   module has exactly those names. The package's `_opts` forms take yyjson
   flag types and have no counterpart. `String.parse_json` was rejected
   because it would not survive a move to the package.
-- **The package collides with a script unit.** Because `lib/scripting.x`
-  declares `Json` and `Var.json`, `import "yyjson" with Json;` in a script is
+- **`json.x` is opt-in (Gary, 2026-09-16).** A script writes
+  `#include "json.x"`, and moving to the package replaces that line with
+  `import "yyjson" with Json;`. This avoids a collision measured with the
+  module in `lib/scripting.x`: the script unit then declared `Json` and
+  `Var.json`, so `import "yyjson" with Json;` failed with
   `package name 'Json' collides with a declared name`, and `value.json()` on
-  a package value resolves to this module (ordinary methods come first) and
-  raises `<bad-types>` on the package's `<yyjson--bo>` booleans. A script
-  therefore uses the package through its alias: `yy.Json.parse(text)` and
-  `yy.Var_json(value)`. No C symbol collides; a program including `json.x`
-  and importing the package builds and runs both. The alternative is to keep
-  `json.x` out of `lib/scripting.x`: a script would add
-  `#include "json.x"`, and moving to the package would then be the one-line
-  change to `import "yyjson" with Json;`. That was the stated goal, but the
-  task placed the module in `scripting.x`, so the choice is left to Gary.
+  a package value resolved to this module, because ordinary methods come
+  before imported ones, and raised `<bad-types>` on the package's
+  `<yyjson--bo>` booleans. No C symbol collides either way.
+  Rejected: including it automatically with the yyjson names, which forces
+  every script that uses the package through its alias
+  (`yy.Json.parse`, `yy.Var_json`); and including it automatically with
+  distinct names such as `String.parse_json`, which removes the collision
+  but makes a move to the package a rewrite of every call. The switch still
+  changes integer families and the malformed-input cause, as the next items
+  record.
 - **Integers match x2c literals rather than the package.** yyjson boxes every
   integer as `<llong>` or `<ullong>`. `Var.equal` does not equate integer
   families, so `<llong>` 5 never equals the literal 5 in `%{n: 5}`; parsing
@@ -174,8 +179,9 @@ Decisions a reviewer should check:
   `json.dumps(value, indent=2,
   sort_keys=True)`, which `tools/gate-state.py`, `tools/repo-metrics.py`,
   `tools/harness-metrics.py`, and `packages/tools/deps.py` already write.
-- **Every rejected document raises `<bad-arg>`.** Syntax, nesting past 512,
-  a number beyond `double`, an unpaired surrogate, invalid UTF-8, and
+- **Every rejected document raises `<bad-arg>`, unlike the package.**
+  Syntax, nesting past 512, a number beyond `double`, an unpaired surrogate,
+  invalid UTF-8, and
   `\u0000` all carry `why`, `offset`, `line`, and `column`, plus `path` from
   `Json.read_file`. `<malformed>` is the compiler's recovery cause, and the
   package's split between `<malformed>`, `<size-limit>`, and `<bad-enc>` would
@@ -207,21 +213,14 @@ documents Python accepts only through its extensions (NaN, infinities, a
 number beyond `double`, an unpaired surrogate, or U+0000) are all rejected
 here, and integers beyond `unsigned long` compare as `double`s.
 
-**Consumer.** `tools/check-gallery-examples.py` remains the best proof. It
-runs only from `examples/check.sh`, which `check-after-precommit` no longer
-calls, and it needs JSON, globbing, and file reads that now exist. It still
-needs:
-
-- `lib/args.x` for `--update` and `--help`;
-- the Markdown fence reader it imports from `tools/check-doc-examples.py`
-  (`FENCE_PATTERN`, `collect`, `dedent`, `reveal_hidden`, and the
-  `<!-- ignore: ... -->` look-behind), written as a line scanner in the
-  script, since regex is not in the library;
-- a one-line change at `examples/check.sh:154` to run the script.
-
-`tools/gen-package-index.py` (release workflow only) also reads JSON but
-needs Phase D's SHA-256 and tar handling; `tools/agent-failure.py` needs
-`lib/time.x`.
+**Consumer.** `tools/gen-package-index.py`, once `lib/args.x` and
+`lib/digest.x` land: it reads `BUNDLE.json`, hashes archives with SHA-256,
+parses arguments, and runs `tar` through `process.x`. Its only caller found
+so far is `.github/workflows/release.yml`; confirm it is off the gate path
+before converting. `tools/check-gallery-examples.py` was the first choice but
+is also edited by open draft PR #59, and it would need the Markdown fence
+reader from `tools/check-doc-examples.py` rewritten without regex.
+`tools/agent-failure.py` needs `lib/time.x`.
 
 ## Phase D - `lib/digest.x`
 

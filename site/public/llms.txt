@@ -61,6 +61,7 @@
 - [lib/file.x](https://x2c-lang.dev/docs/library/modules/file.html)
 - [lib/func.x](https://x2c-lang.dev/docs/library/modules/func.html)
 - [lib/iter.x](https://x2c-lang.dev/docs/library/modules/iter.html)
+- [lib/json.x](https://x2c-lang.dev/docs/library/modules/json.html)
 - [lib/lib.x](https://x2c-lang.dev/docs/library/modules/lib.html)
 - [lib/lisp.x](https://x2c-lang.dev/docs/library/modules/lisp.html)
 - [lib/list-selectors.x](https://x2c-lang.dev/docs/library/modules/list-selectors.html)
