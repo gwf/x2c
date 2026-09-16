@@ -2692,6 +2692,24 @@ static List _converter_call(
   return NULL;
 }
 
+/* A built-in payload has an exact tag-checked reader, and a Var(T)
+   participant declares its own reverse converter. Either takes the crossing
+   ahead of the unchecked pointer payload. An alias with neither reads
+   through its nearest ancestor that has one, so an alias of `String` checks
+   the tag exactly as `String` does. */
+static List _var_checked_reader(
+  Compiler compiler, List expr, Type type, Type target) {
+  List owners = target.is_bare_typedef_name()
+              ? _typedef_names(compiler, target).list_free() : %($target);
+  foreach (Type owner, owners) {
+    List reader = _var_exact_reader(compiler, expr, owner);
+    if (!reader) reader = _converter_call(compiler, expr, type, owner);
+    if (reader)
+      return owner == target ? reader : %(expr $target ${reader.caddr()});
+  }
+  return NULL;
+}
+
 /* Promote raw string expressions while caching only exact literal leaves.
    Parentheses and conditional arms retain their evaluation structure; a
    dynamic leaf still calls String_new each time it is selected. */
@@ -3789,13 +3807,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
         return %(expr $target (call $extractor (args $converted)));
       }
     }
-    // A built-in payload has an exact tag-checked reader, and a Var(T)
-    // participant declares its own reverse converter. Either takes the
-    // crossing ahead of the unchecked pointer payload below.
-    List reader = _var_exact_reader(c, expr, target);
+    List reader = _var_checked_reader(c, expr, type, target);
     if (reader) return reader;
-    List declared = _converter_call(c, expr, type, target);
-    if (declared) return declared;
     if (target.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));
     if (target.is_typedef_name()) {
