@@ -12,6 +12,7 @@
 #include "emit.h"
 #include "format.h"
 #include "diagnostics.h"
+#include "report.h"
 #include "utils.h"
 int editor_request(int argc, char * * argv);
 

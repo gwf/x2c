@@ -2295,7 +2295,7 @@ static List _raise(Compiler compiler, List ast, Var cause, List arguments){
 if(List_truth(Type_list(invalid))){
           String message = String_join(NULL, cons(String_var(_642), cons(String_var(List_repr(Type_list(invalid))), cons(String_var(_643), NULL))));  List location = Compiler_origin_location(compiler, compiler -> origin);  Diagnostics_report(compiler -> diagnostics, 1362954, message, location, _646);
         }
-        List converted = Compiler_convert_expression(compiler, value, List_type(_2));  if(! List_equal(converted, value)) changed = 1;  Array_push(values, List_var(converted));  index ++;
+        List converted = List_truth(Type_list(invalid)) ? value : Compiler_convert_expression(compiler, value, List_type(_2));  if(! List_equal(converted, value)) changed = 1;  Array_push(values, List_var(converted));  index ++;
       }
 
     }

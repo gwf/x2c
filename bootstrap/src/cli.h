@@ -15,10 +15,12 @@ typedef struct CliRequest{
   String target, profile, output, build_dir, temps_dir, label, state_seed;
   String prefix, cc, ar, compile_commands, sha256, index;
   Symbol kind;
+  String diagnostics_file;
   Symbol color_mode;
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
+  int max_errors;
   int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild, clean;
   SourceView sources;
 }

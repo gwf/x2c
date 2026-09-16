@@ -84,6 +84,34 @@ String report_size(unsigned long long bytes){
   return String_printf(_5, bytes /(1024.0 * 1024.0));
 }
 
+Buffer Buffer_write_char(Buffer, char);
+
+int String_try_next(String, int *, int *);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
+void report_json_string(Buffer out, String text){
+  Buffer_write_char(out, '"');
+  {
+    int byte;
+    String _x2c_macro_object_0 = text;
+    int _x2c_macro_cursor_0 = 0;
+    int _x2c_macro_cursor_output_0;
+    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      byte = _x2c_macro_cursor_output_0;
+      {
+        unsigned char ch = byte;
+        if(ch == '"' || ch == '\\') Buffer_write_char(out, '\\');
+        if(ch < 32) Buffer_printf(out, "\\u%04x", ch);
+        else Buffer_write_char(out, ch);
+      }
+
+    }
+
+  }
+  Buffer_write_char(out, '"');
+}
+
 static int _terminal(void){
   if(! isatty(fileno(stderr))) return 0;
   const char * term = getenv("TERM");

@@ -11,17 +11,15 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static void _string(File file, String value);
+static void _location(Buffer out, String path, int start, int end);
 
-static void _location(File file, String path, int start, int end);
-
-static void _diagnostics(File file, Compiler compiler, Map needed);
+static void _diagnostics(Buffer out, Compiler compiler, Map needed);
 
 static List _occurrence(Compiler compiler, String path, int offset);
 
-static void _query(File file, Compiler compiler, String path, String kind, int offset, Map needed);
+static void _query(Buffer out, Compiler compiler, String path, String kind, int offset, Map needed);
 
-static void _sources(File file, Compiler compiler, Map needed);
+static void _sources(Buffer out, Compiler compiler, Map needed);
 
 static CliRequest _configure(int argc, char * * argv, SourceView sources, String source);
 
@@ -37,34 +35,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("error");
 }
 
-int String_try_next(String, int *, int *);
+Buffer Buffer_write(Buffer, const char *);
 
-static void _string(File file, String value){
-  fputc('"', file);
-  {
-    int byte;
-    String _x2c_macro_object_0 = value;
-    int _x2c_macro_cursor_0 = 0;
-    int _x2c_macro_cursor_output_0;
-    while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-      byte = _x2c_macro_cursor_output_0;
-      {
-        unsigned char ch = byte;
-        if(ch == '"' || ch == '\\') fprintf(file, "\\%c", ch);
-        else if(ch < 32) fprintf(file, "\\u%04x", ch);
-        else fputc(ch, file);
-      }
+void report_json_string(Buffer, String);
 
-    }
+Buffer Buffer_printf(Buffer, const char *, ...);
 
-  }
-  fputc('"', file);
-}
-
-static void _location(File file, String path, int start, int end){
-  fputs("\"file\":", file);
-  _string(file, path);
-  fprintf(file, ",\"start\":%d,\"end\":%d", start, end);
+static void _location(Buffer out, String path, int start, int end){
+  Buffer_write(out, "\"file\":");
+  report_json_string(out, path);
+  Buffer_printf(out, ",\"start\":%d,\"end\":%d", start, end);
 }
 
 List Compiler_diagnostics(Compiler);
@@ -85,6 +65,8 @@ int Var_is_void(Var);
 
 int Var_int(Var);
 
+Buffer Buffer_write_char(Buffer, char);
+
 String String_absolute_path(String);
 
 Var Map_setindex(Map, Var, Var);
@@ -95,16 +77,16 @@ Var int_var(int);
 
 String Symbol_str(Symbol);
 
-static void _diagnostics(File file, Compiler compiler, Map needed){
+static void _diagnostics(Buffer out, Compiler compiler, Map needed){
   int comma = 0;
-  fputs("\"diagnostics\":[", file);
+  Buffer_write(out, "\"diagnostics\":[");
   {
     List entry;
-    List _x2c_macro_object_1 = Compiler_diagnostics(compiler);
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-      entry = Var_list(_x2c_macro_cursor_output_1);
+    List _x2c_macro_object_0 = Compiler_diagnostics(compiler);
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      entry = Var_list(_x2c_macro_cursor_output_0);
       {
         Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
         List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
@@ -114,24 +96,24 @@ static void _diagnostics(File file, Compiler compiler, Map needed){
         Var width = List_assoc(location, Symbol_var(816725264));
         int start = Var_is_void(position) ? 0 : Var_int(position);
         int length = Var_is_void(width) ? 0 : Var_int(width);
-        if(comma ++) fputc(',', file);
-        fputc('{', file);
+        if(comma ++) Buffer_write_char(out, ',');
+        Buffer_write_char(out, '{');
         path = String_absolute_path(path);
         Map_setindex(needed, String_var(path), int_var(1));
-        _location(file, path, start, start + length);
-        fputs(",\"message\":", file);
-        _string(file, Var_string(List_assoc(entry, Symbol_var(28293925322))));
-        fputs(",\"code\":", file);
-        _string(file, Symbol_str(code));
-        fputs(",\"severity\":", file);
-        _string(file, code == 49497918350 ? _2 : _3);
-        fputc('}', file);
+        _location(out, path, start, start + length);
+        Buffer_write(out, ",\"message\":");
+        report_json_string(out, Var_string(List_assoc(entry, Symbol_var(28293925322))));
+        Buffer_write(out, ",\"code\":");
+        report_json_string(out, Symbol_str(code));
+        Buffer_write(out, ",\"severity\":");
+        report_json_string(out, code == 49497918350 ? _2 : _3);
+        Buffer_write_char(out, '}');
       }
 
     }
 
   }
-  fputc(']', file);
+  Buffer_write_char(out, ']');
 }
 
 int Array_try_next(Array, int *, Var *);
@@ -146,11 +128,11 @@ static List _occurrence(Compiler compiler, String path, int offset){
   List found = NULL;
   {
     List row;
-    Array _x2c_macro_object_2 = compiler -> source_occurrences;
-    int _x2c_macro_cursor_2 = 0;
-    Var _x2c_macro_cursor_output_2;
-    while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-      row = Var_list(_x2c_macro_cursor_output_2);
+    Array _x2c_macro_object_1 = compiler -> source_occurrences;
+    int _x2c_macro_cursor_1 = 0;
+    Var _x2c_macro_cursor_output_1;
+    while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      row = Var_list(_x2c_macro_cursor_output_1);
       {
         String file = Var_string(List_getindex(row, 0));
         int start = Var_int(List_getindex(row, 1)), end = Var_int(List_getindex(row, 2));
@@ -180,7 +162,7 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 
 List Compiler_emit(Compiler, List);
 
-static void _query(File file, Compiler compiler, String path, String kind, int offset, Map needed){
+static void _query(Buffer out, Compiler compiler, String path, String kind, int offset, Map needed){
   List row = _occurrence(compiler, path, offset);
   if(! List_truth(row)) return;
   List binding = Var_list(List_getindex(row, 3));
@@ -190,19 +172,19 @@ static void _query(File file, Compiler compiler, String path, String kind, int o
     if(! Var_is_row(value, 9, 7, 4)) return;
     List target = Var_list(value);
     Map_setindex(needed, List_getindex(target, 0), int_var(1));
-    fputs(",\"definition\":{", file);
-    _location(file, Var_string(List_getindex(target, 0)), Var_int(List_getindex(target, 1)), Var_int(List_getindex(target, 2)));
-    fputc('}', file);
+    Buffer_write(out, ",\"definition\":{");
+    _location(out, Var_string(List_getindex(target, 0)), Var_int(List_getindex(target, 1)), Var_int(List_getindex(target, 2)));
+    Buffer_write_char(out, '}');
   }
   else if(String_equal(kind, _1) && List_truth(Type_list(type))){
     Map_setindex(needed, List_getindex(row, 0), int_var(1));
     List declaration = Type_declaration_ast(type, binding);
     String text = String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL)), NULL));
-    fputs(",\"hover\":{", file);
-    _location(file, Var_string(List_getindex(row, 0)), Var_int(List_getindex(row, 1)), Var_int(List_getindex(row, 2)));
-    fputs(",\"text\":", file);
-    _string(file, text);
-    fputc('}', file);
+    Buffer_write(out, ",\"hover\":{");
+    _location(out, Var_string(List_getindex(row, 0)), Var_int(List_getindex(row, 1)), Var_int(List_getindex(row, 2)));
+    Buffer_write(out, ",\"text\":");
+    report_json_string(out, text);
+    Buffer_write_char(out, '}');
   }
 
 }
@@ -213,33 +195,33 @@ int Iter_try_next(Iter, Var *);
 
 int Map_try_get(Map, Var, Var *);
 
-static void _sources(File file, Compiler compiler, Map needed){
+static void _sources(Buffer out, Compiler compiler, Map needed){
   int comma = 0;
-  fputs(",\"sources\":[", file);
+  Buffer_write(out, ",\"sources\":[");
   {
     Var key;
-    Iter _x2c_macro_iterator_3 = Map_keys(needed, &(struct Iter){
+    Iter _x2c_macro_iterator_2 = Map_keys(needed, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
-      key = _x2c_macro_item_3;
+    Var _x2c_macro_item_2;
+    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
+      key = _x2c_macro_item_2;
       {
         Var text;
         if(! Map_try_get(compiler -> source_texts, key, & text)) continue;
-        if(comma ++) fputc(',', file);
-        fputs("{\"file\":", file);
-        _string(file, Var_string(key));
-        fputs(",\"text\":", file);
-        _string(file, Var_string(text));
-        fputc('}', file);
+        if(comma ++) Buffer_write_char(out, ',');
+        Buffer_write(out, "{\"file\":");
+        report_json_string(out, Var_string(key));
+        Buffer_write(out, ",\"text\":");
+        report_json_string(out, Var_string(text));
+        Buffer_write_char(out, '}');
       }
 
     }
 
   }
-  fputc(']', file);
+  Buffer_write_char(out, ']');
 }
 
 CliRequest cli_parse(int, char * *);
@@ -272,11 +254,11 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
       for(ProjectBuild node = plan;  node;  node = node -> next){
         {
           String input;
-          List _x2c_macro_object_4 = node -> request -> inputs;
-          List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-          Var _x2c_macro_cursor_output_3;
-          while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_3)){
-            input = Var_string(_x2c_macro_cursor_output_3);
+          List _x2c_macro_object_3 = node -> request -> inputs;
+          List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+          Var _x2c_macro_cursor_output_2;
+          while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_2)){
+            input = Var_string(_x2c_macro_cursor_output_2);
             {
               if(! String_equal(String_absolute_path(input), source)) continue;
               if(selected && selected != node -> request){
@@ -311,26 +293,26 @@ static CliRequest _configure(int argc, char * * argv, SourceView sources, String
 static int _changed_dependency(Compiler compiler, SourceView sources){
   {
     Var path;
-    Iter _x2c_macro_iterator_5 = Map_keys(compiler -> deps, &(struct Iter){
+    Iter _x2c_macro_iterator_4 = Map_keys(compiler -> deps, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
-      path = _x2c_macro_item_5;
+    Var _x2c_macro_item_4;
+    while(Iter_try_next(_x2c_macro_iterator_4, & _x2c_macro_item_4)){
+      path = _x2c_macro_item_4;
       if(SourceView_is_changed(sources, Var_string(path))) return 1;
     }
 
   }
   {
     Var path;
-    Iter _x2c_macro_iterator_6 = Map_keys(compiler -> source_texts, &(struct Iter){
+    Iter _x2c_macro_iterator_5 = Map_keys(compiler -> source_texts, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_6)){
-      path = _x2c_macro_item_6;
+    Var _x2c_macro_item_5;
+    while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_5)){
+      path = _x2c_macro_item_5;
       if(SourceView_is_changed(sources, Var_string(path))) return 1;
     }
 
@@ -355,6 +337,10 @@ int Frontend_open(Frontend, String, ParsedUnit *);
 void ParsedUnit_close(ParsedUnit *);
 
 void Context_close(Context);
+
+Buffer Buffer_new(size_t);
+
+String Buffer_str_free(Buffer);
 
 int editor_request(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
@@ -393,14 +379,16 @@ int editor_request(int argc, char * * argv){
     Context_close(command);
     return 2;
   }
-  fputs("{\"file\":", result);
-  _string(result, source);
-  fputc(',', result);
+  Buffer out = Buffer_new(0);
+  Buffer_write(out, "{\"file\":");
+  report_json_string(out, source);
+  Buffer_write_char(out, ',');
   Map needed = Map_new();
-  _diagnostics(result, unit.compiler, needed);
-  if(parsed) _query(result, unit.compiler, source, kind, offset, needed);
-  _sources(result, unit.compiler, needed);
-  fputs("}\n", result);
+  _diagnostics(out, unit.compiler, needed);
+  if(parsed) _query(out, unit.compiler, source, kind, offset, needed);
+  _sources(out, unit.compiler, needed);
+  Buffer_write(out, "}\n");
+  fputs(Buffer_str_free(out), result);
   int failed = fclose(result);
   ParsedUnit_close(&(unit));
   Context_close(command);

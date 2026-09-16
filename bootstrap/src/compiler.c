@@ -88,7 +88,9 @@ static void _note_object_macro(Compiler c, String content);
 
 static List _prepend_preproc(Compiler compiler, List ast);
 
-static void _sync_top_level(Compiler c);
+static int _delimiter_step(Symbol type);
+
+static void _sync_top_level(Compiler c, Token start, int braces);
 
 static void _push_script_conditionals(Compiler c, Array statements, int first, int end);
 
@@ -1001,7 +1003,7 @@ static Compiler _new(Compiler owner){
     (compiler) -> inits = Array_new();
     (compiler) -> early_decls = Array_new();
     (compiler) -> collect_protocols = 1;
-    (compiler) -> diagnostics = Diagnostics_new(_emit_user, (compiler), 1);
+    (compiler) -> diagnostics = Diagnostics_new(_emit_user, (compiler), owner ? owner -> diagnostics -> limit : 1);
     if(owner && owner -> diagnostics -> emit != _emit_user) Diagnostics_set_emitter((compiler) -> diagnostics, owner -> diagnostics -> emit, owner -> diagnostics -> owner);
     (compiler) -> braces = Array_new();
     (compiler) -> import_stack = Array_new();
@@ -2155,6 +2157,7 @@ static void _shallow_parse_unit_macro(Compiler compiler){
 
 }
 
+int Compiler_skip_linkage_brace(Compiler);
 int Compiler_script_statement_starts(Compiler);
 int Compiler_script_statement_executes(Compiler);
 int Compiler_test_static_assert(Compiler);
@@ -2172,7 +2175,7 @@ void Compiler_skip_keyword_alias(Compiler);
 void Compiler_skip_macro_invocation(Compiler);
 static void _shallow_parse_loop(Compiler c){
   Compiler_rebuild_protocols(c, NULL);  c -> conforms = Map_new();  c -> shallow = 1;  Array_clear(c -> braces);  while(Compiler_peek(c, 0) != 11212){
-    Compiler_update_source_visibility(c, Compiler_leading_preproc(c));  Token start = c -> token;  if(c -> script && ! c -> script -> defines_main && Compiler_script_statement_starts(c)){
+    Compiler_update_source_visibility(c, Compiler_leading_preproc(c));  if(Compiler_skip_linkage_brace(c)) continue;  Token start = c -> token;  if(c -> script && ! c -> script -> defines_main && Compiler_script_statement_starts(c)){
       Compiler_skip_script_statement(c);  continue;
     }
     if(c -> script && c -> script -> defines_main && Compiler_script_statement_executes(c)) _report_script_statement(c);  if(Compiler_test_static_assert(c)){
@@ -2272,18 +2275,16 @@ static List _prepend_preproc(Compiler compiler, List ast){
   return ast;
 }
 
-static void _sync_top_level(Compiler c){
-  int depth = 0;  while(Compiler_peek(c, 0) != 11212){
-    Symbol sym = Compiler_peek(c, 0);  if(depth == 0 &&(sym == 119 || sym == 251)){
-      Compiler_next(c);  break;
-    }
-    if(sym == 247 || sym == 9719 || sym == 9463 || sym == 16631){
-      depth += 1;  Compiler_next(c);  continue;
-    }
-    if(sym == 251 && depth > 0){
-      depth -= 1;  Compiler_next(c);  if(depth == 0) break;  continue;
-    }
-    Compiler_next(c);
+static int _delimiter_step(Symbol type){
+  switch(type){
+    case 81 : case 183 : case 247 : case 16209 : case 9297 : case 9463 : case 9553 : case 9655 : case 9719 : case 16631 : return 1;  case 83 : case 187 : case 251 : return - 1;
+  }
+  return 0;
+}
+
+static void _sync_top_level(Compiler c, Token start, int braces){
+  c -> token = start;  Array_resize(c -> braces, braces);  int depth = 0;  while(Compiler_peek(c, 0) != 11212){
+    Token token = c -> token;  Compiler_next(c);  if(! depth && token -> type == 119) return;  int step = _delimiter_step(token -> type);  depth += step;  if(depth < 0) depth = 0;  if(! depth && step < 0 && c -> token -> line > token -> line) return;
   }
 
 }
@@ -2307,11 +2308,11 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
       * _x2c_macro_address_5 = c -> recovery_depth + 1; {
         ast = _prepend_preproc(c, ast);  Array statements = Array_new();  int hoisting = c -> script && ! c -> script -> defines_main;  int volatile gap = 0;  int volatile runs = 0;  int volatile first = 0;  while(1){
           while(Compiler_peek(c, 0) != 11212){
-            {
+            Token start = c -> token;  int braces = Array_len(c -> braces); {
               ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_catch_arms_1[1];  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_1[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), cons(Symbol_var(54), NULL)));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
             }
             ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
-              Token start = c -> token, tokens = c -> tokenizer -> tokens;  if(hoisting) _push_script_conditionals(c, statements, gap, start - tokens);  if(hoisting && Compiler_script_statement_starts(c)){
+              Token tokens = c -> tokenizer -> tokens;  if(hoisting) _push_script_conditionals(c, statements, gap, start - tokens);  if(hoisting && Compiler_script_statement_starts(c)){
                 Compiler_skip_script_statement(c);  int begin = start - tokens;  int end = _skip_backward(c -> token - 1, tokens) + 1 - tokens;  Array_push(statements, int_var(begin));  Array_push(statements, int_var(end));  if(! runs ++) first = begin;
               }
               else{
@@ -2343,7 +2344,7 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
                   (void) category;  if(Diagnostics_reached_limit(c -> diagnostics)){
                     x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  break;
                   }
-                  _sync_top_level(c);  Token tokens = c -> tokenizer -> tokens;  gap = _skip_backward(c -> token - 1, tokens) + 1 - tokens;  ast = _prepend_preproc(c, ast);  if(Compiler_peek(c, 0) == 11212){
+                  _sync_top_level(c, start, braces);  Token tokens = c -> tokenizer -> tokens;  gap = _skip_backward(c -> token - 1, tokens) + 1 - tokens;  ast = _prepend_preproc(c, ast);  if(Compiler_peek(c, 0) == 11212){
                     x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  break;
                   }
                   {

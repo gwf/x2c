@@ -67,6 +67,8 @@ int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
+int String_truth(String);
+
 void x2c_driver_error(const char *);
 
 static void _exec(CliRequest c){
@@ -82,7 +84,7 @@ static void _exec(CliRequest c){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       argument = Var_string(_x2c_macro_cursor_output_0);
-      argv[index ++] = argument;
+      argv[index ++] = String_truth(argument) ? argument : "";
     }
 
   }
@@ -156,8 +158,6 @@ static void _prune(String scripts){
 }
 }
 }
-
-int String_truth(String);
 
 String String_absolute_path(String);
 

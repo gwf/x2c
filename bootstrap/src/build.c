@@ -77,8 +77,6 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
 
 static int _finish_compile(Build state, CcJob * pending);
 
-static void _json_string(Buffer out, String text);
-
 static String _compile_command(Build state, ToolAction action, String source, String object);
 
 static int _finish_compiles(Build state, CcJob * running, int * count, int wait);
@@ -962,34 +960,22 @@ static int _finish_compile(Build state, CcJob * pending){
   return status != 0;
 }
 
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-static void _json_string(Buffer out, String text){
-  Buffer_write_char(out, '"');
-  for(const unsigned char * p =(const unsigned char *) text;  p && * p;  p ++){
-    if(* p == '"' || * p == '\\') Buffer_write_char(out, '\\');
-    if(* p < 32) Buffer_printf(out, "\\u%04x", * p);
-    else Buffer_write_char(out, * p);
-  }
-  Buffer_write_char(out, '"');
-}
-
 Buffer Buffer_new(size_t);
 
 Buffer Buffer_write(Buffer, const char *);
+
+void report_json_string(Buffer, String);
 
 String Buffer_str_free(Buffer);
 
 static String _compile_command(Build state, ToolAction action, String source, String object){
   Buffer out = Buffer_new(0);
   Buffer_write(out, "  {\"directory\": ");
-  _json_string(out, state -> compile_directory);
+  report_json_string(out, state -> compile_directory);
   Buffer_write(out, ", \"file\": ");
-  _json_string(out, source);
+  report_json_string(out, source);
   Buffer_write(out, ", \"output\": ");
-  _json_string(out, object);
+  report_json_string(out, object);
   Buffer_write(out, ", \"arguments\": [");
   int first = 1;
   {
@@ -1001,7 +987,7 @@ static String _compile_command(Build state, ToolAction action, String source, St
       argument = Var_string(_x2c_macro_cursor_output_10);
       {
         if(! first) Buffer_write(out, ", ");
-        _json_string(out, argument);
+        report_json_string(out, argument);
         first = 0;
       }
 

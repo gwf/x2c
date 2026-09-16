@@ -8,7 +8,7 @@
 
 static List _9, _8, _7, _4, _3;
 
-static String _56, _55, _54, _53, _52, _50, _48, _46, _44, _42, _40, _38, _36, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
+static String _57, _56, _55, _54, _53, _52, _50, _48, _46, _44, _42, _40, _38, _36, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
 
 static Var _51, _49, _47, _45, _43, _41, _39, _37, _35, _6, _5, _2, _1, _0;
 
@@ -154,7 +154,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _53 = String_new("\'");
   _54 = String_new("runtime");
   _55 = String_new("compiler");
-  _56 = String_new(":");
+  _56 = String_new("cannot open diagnostics file \'");
+  _57 = String_new(":");
   _x2c_static_initialize_0();
 }
 
@@ -908,7 +909,7 @@ void x2c_driver_error(const char *);
 static int _run_env(CliRequest request){
   Toolchain toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
   String executable = x2c_get_executable();
-  String roots = String_join(_56, CliRequest_package_roots(request));
+  String roots = String_join(_57, CliRequest_package_roots(request));
   interface_configure(request -> out_dir);
   String prelude = interface_prelude();
   List rows = cons(List_var(cons(_35, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_37, cons(String_var(String_truth(executable) ? executable : 0), NULL))), cons(List_var(cons(_39, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_41, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_43, cons(String_var(String_truth(prelude) ? prelude : 0), NULL))), cons(List_var(cons(_45, cons(String_var(String_truth(roots) ? roots : 0), NULL))), cons(List_var(cons(_47, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_49, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_51, cons(String_var(script_cache_root()), NULL))), NULL)))))))));
@@ -995,6 +996,8 @@ int editor_request(int, char * *);
 
 CliRequest cli_parse(int, char * *);
 
+int diagnostics_write_json(String);
+
 int script_prepare(CliRequest);
 
 void report_configure(int, int, Symbol, int, int, int);
@@ -1016,6 +1019,8 @@ int main(int argc, char * * argv){
     return editor_request(argc - 1, argv + 1);
   }
   CliRequest request = cli_parse(argc, argv);
+  String diagnostics = request -> diagnostics_file;
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) x2c_driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(diagnostics), cons(String_var(_53), NULL)))));
   if(request -> command == 1282559016 && script_prepare(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   if(request -> command == 5462434287712) return _run_bootstrap(request);

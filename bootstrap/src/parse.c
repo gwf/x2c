@@ -1241,7 +1241,7 @@ static List _storage_class(Compiler compiler){
     else{
       if(seen_ordinary) break;  seen_ordinary = 1;
     }
-    Compiler_next(compiler);  storage = List_truth(storage) ? List_append(storage, cons(Symbol_var(symbol), NULL)) : cons(Symbol_var(symbol), NULL);
+    Compiler_next(compiler);  if(symbol == 387198108 && Compiler_peek(compiler, 0) == 27051791223990) Compiler_next(compiler);  storage = List_truth(storage) ? List_append(storage, cons(Symbol_var(symbol), NULL)) : cons(Symbol_var(symbol), NULL);
   }
   if(Symbol_is_inline(Compiler_peek(compiler, 0))){
     Symbol symbol = Compiler_peek(compiler, 0);  Compiler_next(compiler);  storage = List_append(storage, cons(Symbol_var(symbol), NULL));
@@ -2171,13 +2171,20 @@ int Compiler_keyword_form_is_definition(Compiler);
 int Compiler_macro_form_is_definition(Compiler);
 int Compiler_script_statement_starts(Compiler c){
   if(! _init_guard_) _file_init_();  switch(Compiler_peek(c, 0)){
-    case 11212 : case 632323240 : case 1139215899608 : case 9297 : case 44661285196 : case 1317118534 : case 387198108 : return 0;  case 73 : return ! Compiler_macro_targets_unit(c);
+    case 11212 : case 632323240 : case 1139215899608 : case 9297 : case 44661285196 : case 1317118534 : case 387198108 : case 251 : return 0;  case 73 : return ! Compiler_macro_targets_unit(c);
   }
   if(Compiler_test_static_assert(c) || Compiler_keyword_form_is_definition(c) || Compiler_macro_form_is_definition(c)) return 0;  if(Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _236)) return 1;  if(Compiler_peek(c, 0) == 19147688 && Compiler_keyword_alias_starts_target_at(c, AST_UNIT)) return ! Compiler_macro_targets_unit(c);  return ! Compiler_test_declaration(c) || ! _script_declaration_stays(c);
 }
 
 int Compiler_script_statement_executes(Compiler c){
   if(! _init_guard_) _file_init_();  return Compiler_script_statement_starts(c) &&(Compiler_peek(c, 0) == 73 || String_equal(c -> token -> text, _236) || ! Compiler_test_declaration(c));
+}
+
+int Compiler_skip_linkage_brace(Compiler c){
+  if(Compiler_peek(c, 0) == 387198108 && Compiler_peek(c, 1) == 27051791223990 && Compiler_peek(c, 2) == 247){
+    Compiler_next(c);  Compiler_next(c);
+  }
+  else if(Compiler_peek(c, 0) != 251 || ! Array_len(c -> braces)) return 0;  Compiler_next(c);  return 1;
 }
 
 void Compiler_update_source_visibility(Compiler, List);
@@ -2188,7 +2195,7 @@ void Compiler_parse_macro_lisp_top_level(Compiler);
 List Compiler_parse_macro_definition(Compiler);
 void Compiler_record_declaration_visibility(Compiler, List);
 List Compiler_parse_top_level(Compiler c){
-  if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)) Compiler_update_source_visibility(c, Compiler_leading_preproc(c));  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 1405544);  if(List_truth(slot)) return slot;  if(Compiler_keyword_form_is_definition(c)){
+  if(! _init_guard_) _file_init_();  if(! Map_truth(c -> macro_holes)) Compiler_update_source_visibility(c, Compiler_leading_preproc(c));  if(Compiler_skip_linkage_brace(c)) return NULL;  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 1405544);  if(List_truth(slot)) return slot;  if(Compiler_keyword_form_is_definition(c)){
     Compiler_parse_keyword_definition(c);  return NULL;
   }
   List keyword = Compiler_peek(c, 0) == 19147688 ? Compiler_try_parse_macro_target_at(c, AST_UNIT) : NULL;  if(List_truth(keyword)) return keyword;  if(Compiler_peek(c, 0) == 1317118534 && Compiler_peek(c, 1) == 1139215899608) return Compiler_parse_protocol_declaration(c);  if(Compiler_peek(c, 0) == 73 && !(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)))) return Compiler_try_parse_macro_target_at(c, AST_UNIT);  switch(Compiler_peek(c, 0)){

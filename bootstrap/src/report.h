@@ -14,6 +14,8 @@ String report_duration(unsigned long microseconds);
 
 String report_size(unsigned long long bytes);
 
+void report_json_string(Buffer out, String text);
+
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting);
 
 int report_receipts(void);

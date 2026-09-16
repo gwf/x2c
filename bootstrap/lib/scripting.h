@@ -5,6 +5,8 @@
 #ifndef __GUARD_0x114A5957__
 #define __GUARD_0x114A5957__
 
+#include "args.h"
+#include "digest.h"
 #include "path.h"
 #include "process.h"
 

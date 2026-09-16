@@ -60,6 +60,8 @@ int Compiler_script_statement_starts(Compiler c);
 
 int Compiler_script_statement_executes(Compiler c);
 
+int Compiler_skip_linkage_brace(Compiler c);
+
 List Compiler_parse_top_level(Compiler c);
 
 List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
