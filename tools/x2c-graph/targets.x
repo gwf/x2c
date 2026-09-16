@@ -14,7 +14,7 @@ List resolve_project_target(List target, Map publics);
 #include <string.h>
 
 Map project_function_targets(Compiler compiler, List ast, String path) {
-  Map definitions = %{};
+  Map definitions = {};
   foreach (List node, ast)
     match (node)
       case %(function ?
@@ -45,7 +45,7 @@ List project_call_target(
       if (compiler.semantic_binding_facts().contains(
             %(automatic $binding)
           )) {
-        *name = %"computed";
+        *name = "computed";
         return %(computed);
       }
       String emitted = compiler.emitted_binding_name(binding);
@@ -55,7 +55,7 @@ List project_call_target(
            ? definitions[binding].list() : %(public $emitted);
     }
     case %(call ? (args *)): {
-      *name = %"computed";
+      *name = "computed";
       return %(computed);
     }
   }

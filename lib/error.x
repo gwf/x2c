@@ -365,7 +365,7 @@ void Error.initialize_raw(void) {
   state.scope = Scope.new_named("error");
   Scope.push(&state.scope);
   state.stack = Block.new(sizeof(ErrorRecord));
-  state.policy = %{};
+  state.policy = {};
   Scope.pop();
   x2c_error_runtime_ready = 1;
   _initialize_policies();
@@ -971,7 +971,7 @@ void *Error.context_open(void) {
   ErrorThreadState thread = _thread();
   ErrorContextState state = Scope.malloc(sizeof(struct ErrorContextState));
   state.prev = thread.context_top;
-  state.policy = %{};
+  state.policy = {};
   state.bound = Error.bound();
   state.handler_depth = Error.handler_depth();
   state.stack_height = Error.count();

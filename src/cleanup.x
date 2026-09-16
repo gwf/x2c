@@ -64,7 +64,7 @@ static List _defer_cleanup(List record) =>
    region run on every path that leaves it, so a label among them would be
    defined once per path. */
 static Var _finalizer_label(Var value, int origin, int *at) {
-  Array pending = $auto(%[$value]), origins = $auto(%[$origin]);
+  Array pending = $auto([value]), origins = $auto([origin]);
   while (pending.len()) {
     Var current = pending.take_last();
     int here = origins.take_last().int();
@@ -98,7 +98,7 @@ static Var _finalizer_label(Var value, int origin, int *at) {
    frame instead of re-entering this one and looping. */
 static List _try_cleanup(
   List frame, List handle, List finalizer, int has_clause) {
-  Array body = %[];
+  Array body = [];
   if (has_clause) {
     Type handler = %((${String.new(_handler_type)}));
     body.push(%(stmnt (expr (void)
@@ -121,7 +121,7 @@ static List _try_cleanup(
    Each region runs its own statements before the next one out, so an inner
    frame leaves before an outer defer runs. */
 static List _unwind(Walk walk, int stop) {
-  Array statements = %[];
+  Array statements = [];
   for (int i = (int) walk.regions.len() - 1; i >= stop; i--)
     foreach (List statement, walk.regions[i].list().car().list())
       statements.push(statement);
@@ -266,7 +266,7 @@ static int _automatic_static_input(Compiler c, List binding) {
     that way, and gains this one's bindings.
 */
 int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
-  Array pending = %[], modes = %[];
+  Array pending = [], modes = [];
   defer pending.free();
   defer modes.free();
   pending.push(value);
@@ -364,7 +364,7 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
   match (ast) {
     case %((!or function localinit expr declare typedef) *): return ast;
     case %(block *statements): {
-      Array before = %[];
+      Array before = [];
       foreach (List statement, statements) {
         if (_runtime_static_declaration(c, statement, runtime)) {
           List rest = statements;
@@ -378,7 +378,7 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
       return %(block @{before.list_free()});
     }
   }
-  Array children = %[];
+  Array children = [];
   foreach (Var child, ast) {
     if (child is <list>) children.push(_static_regions(c, child, runtime));
     else children.push(child);
@@ -393,7 +393,7 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
 static void _collect_preserved(Var value, int in_try, Map names) {
   /* A long expression chain nests as deeply as it is long, so the walk keeps
      its pending work off the C stack. */
-  Array pending = $auto(%[$value]), flags = $auto(%[$in_try]);
+  Array pending = $auto([value]), flags = $auto([in_try]);
   while (pending.len()) {
     Var current = pending.take_last();
     int inside = flags.take_last().int();
@@ -510,7 +510,7 @@ static Var _preserve(Var value, Map names) {
     case %(param ?type ?bind):
       return %(param $type ${_preserve_binding(bind, names)});
     case %(block *statements): {
-      Array output = %[];
+      Array output = [];
       foreach (Var statement, statements) {
         Var lowered = _preserve(statement, names);
         List origin = NULL, Var inner = lowered;
@@ -540,7 +540,7 @@ static Var _preserve(Var value, Map names) {
       Symbol head = declaration.car();
       if (!_is_automatic(declaration)) return node;
       type = _preserve_pointee(type.list(), bindings, names);
-      Array preserved = %[];
+      Array preserved = [];
       foreach (List binding, bindings.cdr())
         match (binding) {
           case %(op = ?bind ?value):
@@ -551,7 +551,7 @@ static Var _preserve(Var value, Map names) {
       return %($head $type (bindings @{preserved.list_free()}));
     }
   }
-  Array children = %[];
+  Array children = [];
   foreach (Var child, node) children.push(_preserve(child, names));
   return children.list_free();
 }
@@ -596,7 +596,7 @@ static Var _rewrite(Walk walk, Var value) {
         walk.compiler.report_error(
           <emit>, "a finally body cannot define a label", NULL,
           %(${%"a finalizer runs on every path that leaves its region, so '${
-            name ? name : %"this label"}' would be defined once for each"}));
+            name ? name : "this label"}' would be defined once for each"}));
         walk.compiler.origin = previous;
       }
       List cleanup = _try_cleanup(
@@ -608,7 +608,7 @@ static Var _rewrite(Walk walk, Var value) {
       List clause_out = clause;
       match (clause)
         case %(catcharms ?records): {
-          Array rewritten = %[];
+          Array rewritten = [];
           foreach (List record, records) {
             List arm = record.caddr();
             rewritten.push(%(${record.car()} ${record.cadr()}
@@ -653,7 +653,7 @@ static Var _rewrite(Walk walk, Var value) {
                ${_bounded(walk, body, 0)});
     case %(function *): return _function(walk.compiler, node);
   }
-  Array children = %[];
+  Array children = [];
   foreach (Var child, node) children.push(_rewrite(walk, child));
   return children.list_free();
 }
@@ -665,14 +665,14 @@ static List _function(Compiler compiler, List node) {
     case %(function ?type ?bindings ?body): {
       List declaration = %(declare $type (bindings $bindings));
       struct Walk state = {
-        compiler, %[], 0, 0, 0, %{},
+        compiler, [], 0, 0, 0, {},
         cdr(declaration.type_from_ast()).type().declared()
       };
       Walk walk = &state;
-      Map runtime = %{};
+      Map runtime = {};
       body = _static_regions(compiler, body, runtime);
       _collect_labels(walk, body, NULL);
-      Map preserved = %{};
+      Map preserved = {};
       _collect_preserved(body, 0, preserved);
       List rewritten = _rewrite(walk, body).list();
       if (preserved.len()) {
@@ -694,7 +694,7 @@ static Var _units(Compiler compiler, Var value) {
     // definition hides inside an expression for the walk to find.
     case %(expr *): return value;
   }
-  Array children = %[];
+  Array children = [];
   foreach (Var child, node) children.push(_units(compiler, child));
   return children.list_free();
 }

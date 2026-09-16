@@ -60,7 +60,7 @@ static Var _modifier_declaration_ast(Var value) {
 */
 List Type.declaration_parts(Type type) {
   List modifiers = NULL;
-  Type base = _declarator_parts(type, &modifiers), Array syntax = %[];
+  Type base = _declarator_parts(type, &modifiers), Array syntax = [];
   foreach (Var item, modifiers)
     syntax.push(_modifier_declaration_ast(item));
   List result = %($base (@{syntax.list_free()}));
@@ -132,11 +132,11 @@ String ast_direct_identifier(Var value) {
     not to the declaration its callers read.
 */
 List ast_prototype_declarator(List declarator) {
-  Array modifiers = %[], int changed = 0;
+  Array modifiers = [], int changed = 0;
   foreach (Var modifier, declarator.caddr()) {
     match (modifier)
       case %(fnmod (params *parameters)): {
-        Array rebuilt = %[];
+        Array rebuilt = [];
         foreach (List parameter, parameters) {
           match (parameter)
             case %(param ?type (bind ?name (volatile *rest))): {
@@ -600,7 +600,7 @@ void Type.initialize(void) {
     unit.
 */
 void Type.begin_unit(void) {
-  declared_typetags = %{};
+  declared_typetags = {};
 }
 
 /** Ends the source-declared `Var`-row lifetime before the unit `Scope` is
@@ -713,7 +713,7 @@ static Type _canonical(Type type, int keep_qualifiers) {
                  !_omit_specifier(rest.car(), keep_qualifiers)))
     rest = rest.cdr();
   if (!rest) return type;
-  Array result = %[];
+  Array result = [];
   foreach (Var head, type) {
     if (head is <symbol>) {
       Symbol first = head;
@@ -936,7 +936,7 @@ static List _from_ast(List ast, List context) {
     case <bindings>:
       return _from_ast_items(cdr(ast), context);
     case <fields>: {
-      Array types = %[];
+      Array types = [];
       foreach (List field, ast.cdr()) {
         List declaration = field;
         while (declaration.car() == <at>) declaration = declaration.caddr();
@@ -1004,7 +1004,7 @@ static List _from_ast(List ast, List context) {
       modifier = _from_ast(modifier, context);
     }
     else break;
-    if (!modifiers) modifiers = %[];
+    if (!modifiers) modifiers = [];
     modifiers.push(modifier);
     rest = rest.cdr();
   }

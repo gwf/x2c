@@ -66,7 +66,7 @@ void curl_raw_suite(void) {
 
 int main(int argc, char **argv) {
   if (argc != 2) return 2;
-  fixture_url = String.new(argv[1]) + %"/ok";
+  fixture_url = String.new(argv[1]) + "/ok";
   TestHarness_begin();
   $test.suite(curl_raw_suite);
   return TestHarness_finish();

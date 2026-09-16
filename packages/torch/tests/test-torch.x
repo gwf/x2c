@@ -333,7 +333,7 @@ static void torch_checkpoints(void) {
   EXPECT_TRUE(_mlp_forward(third, x).detach().allclose(before, 1e-6, 1e-8));
 
   /* A checkpoint missing a parameter name is a clear failure. */
-  Map partial = %{};
+  Map partial = {};
   partial["l1.weight"] = model.parameters()[0].tensor();
   Checkpoint.save(partial, "builds/test-partial.pt");
   int caught = 0;
@@ -341,7 +341,7 @@ static void torch_checkpoints(void) {
   catch %(bad-state (library "torch") *): caught++;
   EXPECT_INT_EQ(caught, 1);
 
-  Map pair = %{};
+  Map pair = {};
   pair["a"] = Tensor.of(%(1 2 3), %(3), XT_FLOAT64);
   pair["b"] = Tensor.of(%(4 5), %(2), XT_INT64);
   Checkpoint.save(pair, "builds/test-pair.pt");

@@ -93,7 +93,7 @@ static void array_bare_literal_evaluates_elements(void) {
 
 static void array_push_pop(void) {
   $test.scoped();
-  Array arr = %[];
+  Array arr = [];
   arr.push(1);
   arr.push(2);
   EXPECT_INT_EQ(arr.len(), 2);
@@ -104,7 +104,7 @@ static void array_push_pop(void) {
 
 static void array_void_writes_transfer_before_mutation(void) {
   $test.scoped();
-  Array array = %[1];
+  Array array = [1];
   int caught = 0;
 
   try array.setindex(0, void);
@@ -123,7 +123,7 @@ static void array_void_writes_transfer_before_mutation(void) {
 
 static void array_map_transfer_releases_temporary_scope(void) {
   $test.scoped();
-  Array values = %[1];
+  Array values = [1];
   Scope active = *Scope.top();
   int allocations_before = _array_scope_allocation_count(active);
   int transferred = 0;
@@ -139,7 +139,7 @@ static void array_map_transfer_releases_temporary_scope(void) {
 
 static void array_map2_transfer_releases_temporary_scope(void) {
   $test.scoped();
-  Array values = %[1];
+  Array values = [1];
   Scope active = *Scope.top();
   int allocations_before = _array_scope_allocation_count(active);
   int transferred = 0;
@@ -152,7 +152,7 @@ static void array_map2_transfer_releases_temporary_scope(void) {
 
 static void array_reports_slice_domain_failures(void) {
   $test.scoped();
-  Array array = %[1];
+  Array array = [1];
   int caught = 0;
 
   try array.getslice(0, 1, 0);
@@ -163,7 +163,7 @@ static void array_reports_slice_domain_failures(void) {
 static void array_counted_update_preserves_values(void) {
   $test.scoped();
   Var one = 1, null = (Var) { .u64 = 0 }, two = 2;
-  Array arr = Array.update_n(%[], 3, one, null, two);
+  Array arr = Array.update_n([], 3, one, null, two);
   EXPECT_INT_EQ(arr.len(), 3);
   EXPECT_VAR_EQ(arr[0], one);
   EXPECT_TRUE(arr[1].is_null());
@@ -173,7 +173,7 @@ static void array_counted_update_preserves_values(void) {
 static void array_insert_and_remove(void) {
   $test.scoped();
   Var one = 1, two = 2, three = 3;
-  Array arr = Array.update_n(%[], 2, one, three);
+  Array arr = Array.update_n([], 2, one, three);
   arr.insert(1, two);
   EXPECT_INT_EQ(arr.len(), 3);
   EXPECT_VAR_EQ(arr[1], two);
@@ -185,11 +185,11 @@ static void array_insert_and_remove(void) {
 static void array_mixed_mutation_integrity(void) {
   $test.scoped();
   Var number = 7;
-  String text = %"mixed";
+  String text = "mixed";
   Var string = text;
   List pair = %(pair 9);
   Var list = pair;
-  Array arr = Array.update_n(%[], 3, number, string, list);
+  Array arr = Array.update_n([], 3, number, string, list);
 
   EXPECT_VAR_EQ(arr.shift(), number);
   EXPECT_VAR_EQ(arr[0], string);
@@ -212,11 +212,11 @@ static void array_mixed_mutation_integrity(void) {
 
 static void array_setindex_bounds(void) {
   $test.scoped();
-  Array arr = %[];
-  String hello = %"hello";
+  Array arr = [];
+  String hello = "hello";
   Var vhello = hello;
   arr.push(vhello);
-  String world = %"world";
+  String world = "world";
   Var vworld = world;
   EXPECT_VAR_EQ(arr.setindex(0, vworld), vworld);
   EXPECT_VAR_EQ(arr.getindex(-1), vworld);
@@ -227,7 +227,7 @@ static void array_setindex_bounds(void) {
 static void array_getslice_unit_step(void) {
   $test.scoped();
   Var zero = 0, one = 1, two = 2, three = 3, four = 4;
-  Array arr = Array.update_n(%[], 5, zero, one, two, three, four);
+  Array arr = Array.update_n([], 5, zero, one, two, three, four);
   Array slice = arr.getslice(1, 3, 1);
   EXPECT_INT_EQ(slice.len(), 2);
   EXPECT_VAR_EQ(slice[0], one);
@@ -237,7 +237,7 @@ static void array_getslice_unit_step(void) {
 static void array_getslice_variable_steps(void) {
   $test.scoped();
   Var zero = 0, one = 1, two = 2, three = 3, four = 4, five = 5;
-  Array arr = Array.update_n(%[], 6, zero, one, two, three, four, five);
+  Array arr = Array.update_n([], 6, zero, one, two, three, four, five);
   Array skip = arr.getslice(0, arr.len(), 2);
   Array reverse = arr.getslice(5, 0, -2);
   EXPECT_INT_EQ(skip.len(), 3);
@@ -253,8 +253,8 @@ static void array_getslice_variable_steps(void) {
 static void array_setslice_and_remslice(void) {
   $test.scoped();
   Var zero = 0, one = 1, two = 2, three = 3, four = 4, nine = 9, eight = 8;
-  Array arr = Array.update_n(%[], 5, zero, one, two, three, four);
-  Array replacement = Array.update_n(%[], 2, nine, eight);
+  Array arr = Array.update_n([], 5, zero, one, two, three, four);
+  Array replacement = Array.update_n([], 2, nine, eight);
   arr.setslice(1, 3, replacement);
   Array removed = arr.remslice(1, 3);
   EXPECT_INT_EQ(arr.len(), 3);
@@ -269,10 +269,10 @@ static void array_setslice_and_remslice(void) {
 static void array_splice_and_concat(void) {
   $test.scoped();
   Var zero = 0, one = 1, two = 2, three = 3, five = 5, seven = 7, eight = 8;
-  Array arr = Array.update_n(%[], 4, zero, one, two, three);
-  Array insert = Array.update_n(%[], 2, seven, eight);
+  Array arr = Array.update_n([], 4, zero, one, two, three);
+  Array insert = Array.update_n([], 2, seven, eight);
   Array removed = arr.splice(1, 2, insert);
-  Array extra = Array.update_n(%[], 1, five);
+  Array extra = Array.update_n([], 1, five);
   Array combined = Array.concat(arr, extra);
   EXPECT_INT_EQ(arr.len(), 4);
   EXPECT_VAR_EQ(arr[0], zero);
@@ -289,7 +289,7 @@ static void array_splice_and_concat(void) {
 static void array_find_contains_count(void) {
   $test.scoped();
   Var five = 5, six = 6, seven = 7, forty_two = 42;
-  Array arr = Array.update_n(%[], 4, five, six, five, seven);
+  Array arr = Array.update_n([], 4, five, six, five, seven);
   EXPECT_INT_EQ(Array.find(arr, five), 0);
   EXPECT_INT_EQ(Array.indexof(arr, seven), 3);
   EXPECT_INT_EQ(Array.count(arr, five), 2);
@@ -300,7 +300,7 @@ static void array_find_contains_count(void) {
 static void array_sort_reverse_join(void) {
   $test.scoped();
   Var one = 1, two = 2, three = 3, neg = -4;
-  Array numbers = Array.update_n(%[], 4, three, one, two, neg);
+  Array numbers = Array.update_n([], 4, three, one, two, neg);
   numbers.sort();
   EXPECT_VAR_EQ(numbers[0], neg);
   EXPECT_VAR_EQ(numbers[3], three);
@@ -312,14 +312,14 @@ static void array_sort_reverse_join(void) {
   Var word_a = Var.new(<string>, %"a");
   Var word_b = Var.new(<string>, %"b");
   Var word_c = Var.new(<string>, %"c");
-  Array words = Array.update_n(%[], 3, word_a, word_b, word_c);
-  String joined = Array.join(words, %"-");
-  EXPECT_TRUE(joined == %"a-b-c");
+  Array words = Array.update_n([], 3, word_a, word_b, word_c);
+  String joined = Array.join(words, "-");
+  EXPECT_TRUE(joined == "a-b-c");
 }
 
 static void array_heap_push_pop_min_basic(void) {
   $test.scoped();
-  Array heap = %[];
+  Array heap = [];
   Var zero = 0, one = 1, two = 2, three = 3, four = 4;
   heap.heap_push(four);
   heap.heap_push(one);
@@ -339,7 +339,7 @@ static void array_heap_push_pop_min_basic(void) {
 static void array_heapify_basic(void) {
   $test.scoped();
   Var one = 1, two = 2, three = 3, four = 4, five = 5, six = 6;
-  Array heap = Array.update_n(%[], 6, six, one, four, three, five, two);
+  Array heap = Array.update_n([], 6, six, one, four, three, five, two);
   heap.heapify();
   EXPECT_INT_EQ(heap.len(), 6);
   EXPECT_VAR_EQ(heap.heap_pop(), one);
@@ -355,7 +355,7 @@ static void array_heap_ops_lists(void) {
   $test.scoped();
   List l0 = %(0), l1 = %(1 0), l2 = %(1 1), l3 = %(2);
   Var v_l0 = l0, v_l1 = l1, v_l2 = l2, v_l3 = l3;
-  Array heap = %[];
+  Array heap = [];
   heap.heap_push(l2);
   heap.heap_push(l3);
   heap.heap_push(l0);
@@ -371,7 +371,7 @@ static void array_sort_nested_values(void) {
   $test.scoped();
 
   List c = %(0), a = %(1 2), b = %(1 3);
-  Array lists = %[];
+  Array lists = [];
   lists.push(b);
   lists.push(a);
   lists.push(c);
@@ -382,14 +382,14 @@ static void array_sort_nested_values(void) {
   EXPECT_VAR_EQ(lists[1], va);
   EXPECT_VAR_EQ(lists[2], vb);
 
-  Array ac = %[];
+  Array ac = [];
   ac.push(0);
-  Array aa = %[];
+  Array aa = [];
   aa.push(1);
-  Array ab = %[];
+  Array ab = [];
   ab.push(1);
   ab.push(0);
-  Array arrays = %[];
+  Array arrays = [];
   arrays.push(ab);
   arrays.push(aa);
   arrays.push(ac);
@@ -411,11 +411,11 @@ static void array_sort_nested_values(void) {
 static void array_equal_hash_and_compare_nested(void) {
   $test.scoped();
 
-  Array inner_a = %[1, 2], inner_b = %[1, 2];
+  Array inner_a = [1, 2], inner_b = [1, 2];
 
-  Array a = %[];
+  Array a = [];
   a.push(inner_a);
-  Array b = %[];
+  Array b = [];
   b.push(inner_b);
 
   Var va = a, vb = b;
@@ -424,7 +424,7 @@ static void array_equal_hash_and_compare_nested(void) {
   EXPECT_INT_EQ(va.compare(vb), 0);
   EXPECT_TRUE(a !== b);
 
-  Map map = %{};
+  Map map = {};
   Var one = 1;
   map[va] = one;
   EXPECT_VAR_EQ(map[va], one);
@@ -434,14 +434,14 @@ static void array_equal_hash_and_compare_nested(void) {
 
 static void array_reduce_uses_first_value_once(void) {
   $test.scoped();
-  Array values = %[2, 3, 4];
+  Array values = [2, 3, 4];
   EXPECT_INT_EQ(values.reduce(add_array_values).int(), 9);
-  EXPECT_TRUE(Array.reduce(%[], add_array_values) is void);
+  EXPECT_TRUE(Array.reduce([], add_array_values) is void);
 }
 
 static void array_func_callbacks(void) {
   $test.scoped();
-  Array values = %[1, 2, 3], right = %[10, 20];
+  Array values = [1, 2, 3], right = [10, 20];
   ArrayUnaryFunction unary_pointer = _array_add_one;
   ArrayBinaryFunction binary_pointer = _array_add_pair;
   int bias = 1;
@@ -467,7 +467,7 @@ static void array_func_callbacks(void) {
 
 static void array_func_rejects_invalid_callbacks_on_invocation(void) {
   $test.scoped();
-  Array values = %[1, 2], empty = %[];
+  Array values = [1, 2], empty = [];
   Func wrong_arity = _array_no_arguments;
   Func reference = _array_reference_argument;
   Func numeric = _array_long_value;
@@ -477,7 +477,7 @@ static void array_func_rejects_invalid_callbacks_on_invocation(void) {
   catch %(bad-arity *): arity_caught++;
   try values.map(reference);
   catch %(bad-types *): reference_caught++;
-  try %[ "text" ].map(numeric);
+  try [ "text" ].map(numeric);
   catch %(no-convert *): conversion_caught++;
   EXPECT_INT_EQ(arity_caught, 1);
   EXPECT_INT_EQ(reference_caught, 1);
@@ -487,18 +487,18 @@ static void array_func_rejects_invalid_callbacks_on_invocation(void) {
   EXPECT_INT_EQ(empty.map2(values, wrong_arity).len(), 0);
   EXPECT_INT_EQ(values.map2(empty, wrong_arity).len(), 0);
   EXPECT_TRUE(empty.reduce(wrong_arity) is void);
-  EXPECT_TRUE(%[1].reduce(wrong_arity) == 1);
+  EXPECT_TRUE([1].reduce(wrong_arity) == 1);
 }
 
 
 static void array_sort_callbacks_keep_ties_and_identity(void) {
   $test.scoped();
-  Array values = %[];
+  Array values = [];
   values.push(%(2 first));
   values.push(%(1 low));
   values.push(%(2 second));
   int calls = 0;
-  Array other = %[3, 1, 2];
+  Array other = [3, 1, 2];
   Func key = %!(List row) using &calls, &other => {
     calls++;
     other.sort_with(%!(int left, int right) => right - left);
@@ -516,7 +516,7 @@ static void array_sort_callbacks_keep_ties_and_identity(void) {
   EXPECT_TRUE(values.sort_with(compare) == values);
   EXPECT_TRUE(values.list() == %((2 first) (2 second) (1 low)));
   EXPECT_TRUE(other.list() == %(1 2 3));
-  Array empty = %[], single = %[1];
+  Array empty = [], single = [1];
   EXPECT_TRUE(empty.sort_by(NULL) == empty);
   EXPECT_TRUE(single.sort_with(NULL) == single);
 }
@@ -525,7 +525,7 @@ static void array_sort_by_releases_scratch(void) {
   $test.scoped();
   Pool pool = List.pool_retain();
   defer List.pool_release();
-  Array values = %[3, 2, 1];
+  Array values = [3, 2, 1];
   Func key = %!(int value) => value;
   FuncArg arguments[1] = { FuncArg.value(42) };
   key.apply(1, arguments);
@@ -545,7 +545,7 @@ static void array_sort_by_releases_scratch(void) {
 
 static void array_sort_callbacks_cover_merge_tails(void) {
   $test.scoped();
-  Array values = %[];
+  Array values = [];
   for (int index = 0; index < 17; index++)
     values.push(%(${(index * 7) % 5} $index));
   Array by_key = values.copy();
@@ -559,7 +559,7 @@ static void array_sort_callbacks_cover_merge_tails(void) {
     if (left.car() == right.car()) EXPECT_TRUE(left.cadr() < right.cadr());
   }
   int calls = 0;
-  Array single = %[3];
+  Array single = [3];
   single.sort_by(%!(int value) using &calls => { calls++; return value; });
   EXPECT_INT_EQ(calls, 1);
   EXPECT_TRUE(single.list() == %(3));
@@ -567,7 +567,7 @@ static void array_sort_callbacks_cover_merge_tails(void) {
 
 static void array_sort_callback_errors_preserve_elements(void) {
   $test.scoped();
-  Array values = %[4, 3, 2, 1];
+  Array values = [4, 3, 2, 1];
   int calls = 0, caught = 0;
   Func compare = %!(Var left, Var right) using &calls => {
     if (++calls == 2) raise %(invariant (sort callback));

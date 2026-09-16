@@ -110,7 +110,7 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
   }
   if (strchr(tool, '/')) return _state_file(hash, tool, ok);
   const char *path = getenv("PATH");
-  List dirs = path ? String.new(path).split(%":") : NULL;
+  List dirs = path ? String.new(path).split(":") : NULL;
   foreach (String dir, dirs) {
     String candidate = dir && dir[0] ? %"$dir/$tool" : tool;
     if (!access(candidate, X_OK)) return _state_file(hash, candidate, ok);
@@ -121,7 +121,7 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
 
 static uint64_t _state_base(CliRequest request, String tool, int *ok) {
   uint64_t hash = UINT64_C(1469598103934665603);
-  hash = _state_text(hash, %"x2c-state-v1");
+  hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
   hash = _state_tool(hash, x2c_get_executable(), ok);
   hash = _state_tool(hash, tool, ok);
@@ -199,8 +199,8 @@ static void _validate_input(String input) {
     x2c_driver_error(%"input is a directory: $input");
   if (!S_ISREG(info.st_mode))
     x2c_driver_error(%"input is not a regular file: $input");
-  if (!(input.endswith(%".x") || input.endswith(%".c") ||
-        input.endswith(%".o") || input.endswith(%".a")))
+  if (!(input.endswith(".x") || input.endswith(".c") ||
+        input.endswith(".o") || input.endswith(".a")))
     x2c_driver_error(%"unsupported build input: $input");
 }
 
@@ -217,8 +217,8 @@ Build CliRequest.prepare(CliRequest c) {
   foreach (String input, c.inputs) {
     input_count++;
     _validate_input(input);
-    if (input.endswith(%".x") || input.endswith(%".c")) compilable++;
-    if (c.kind == <static-lib> && input.endswith(%".a"))
+    if (input.endswith(".x") || input.endswith(".c")) compilable++;
+    if (c.kind == <static-lib> && input.endswith(".a"))
       x2c_driver_error(
         %"cannot nest an archive in a static library: $input");
   }
@@ -238,19 +238,19 @@ Build CliRequest.prepare(CliRequest c) {
     c.cc, c.ar, c.cpp_args, c.cc_args,
     c.ld_args, c.verbose, c.dry_run);
   c.cc = state.toolchain.cc; c.ar = state.toolchain.ar;
-  state.c_sources = %[];
-  state.gen_dirs = %[];
-  state.units = %[];
-  state.native_inputs = %[];
-  state.objects = %[];
-  if (c.compile_commands && !c.dry_run) state.compile_commands = %[];
+  state.c_sources = [];
+  state.gen_dirs = [];
+  state.units = [];
+  state.native_inputs = [];
+  state.objects = [];
+  if (c.compile_commands && !c.dry_run) state.compile_commands = [];
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
     state.output = %"${Path.stem(c.inputs.car().string())}.o";
   else if (c.kind == <static-lib>) {
     String stem = c.inputs ?
-                  Path.stem(c.inputs.car().string()) : %"target";
+                  Path.stem(c.inputs.car().string()) : "target";
     state.output = %"lib$stem.a";
   }
   else state.output = "a.out";
@@ -281,9 +281,9 @@ Build CliRequest.prepare(CliRequest c) {
     if (state.state_root) _require_directory(state.state_root);
   }
   foreach (String input, c.inputs) {
-    if (input.endswith(%".x")) state.xlat_n++;
-    if (input.endswith(%".c")) state.c_sources.push(input);
-    else if (input.endswith(%".o") || input.endswith(%".a"))
+    if (input.endswith(".x")) state.xlat_n++;
+    if (input.endswith(".c")) state.c_sources.push(input);
+    else if (input.endswith(".o") || input.endswith(".a"))
       state.native_inputs.push(input);
   }
   String runtime_lib = state.toolchain.runtime_lib;
@@ -306,17 +306,17 @@ String Build.generated_dir(Build state, String input) {
 static uint64_t _translation_fingerprint(
   Build state, String input, String directory, int *ok) {
   uint64_t hash = _state_base(state.request, state.toolchain.cc, ok);
-  hash = _state_text(hash, %"translate");
+  hash = _state_text(hash, "translate");
   hash = _state_text(hash, input);
   CliRequest request = state.request;
   hash = _state_list(hash, request.include_dirs);
   hash = _state_list(hash, request.package_roots());
   hash = _state_list(hash, request.cpp_args);
-  hash = _state_text(hash, request.no_cpp ? %"no-cpp" : %"cpp");
-  hash = _state_text(hash, request.live_symbols ? %"live" : %"prelude");
-  hash = _state_text(hash, request.cpp_symbols ? %"cpp-symbols" : %"raw");
+  hash = _state_text(hash, request.no_cpp ? "no-cpp" : "cpp");
+  hash = _state_text(hash, request.live_symbols ? "live" : "prelude");
+  hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");
   hash = _state_text(
-    hash, request.source_map ? %"source-map" : %"generated-lines");
+    hash, request.source_map ? "source-map" : "generated-lines");
   String depfile = %"$directory/${Path.stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);
 }
@@ -389,7 +389,7 @@ static void _package_link_flags(Build state, String name, String path) {
   try text = input.string_close();
   catch %(io-fail *): return;
   Toolchain toolchain = state.toolchain;
-  Array flags = %[];
+  Array flags = [];
   foreach (Var word, text.words()) flags.push(word);
   toolchain.ld_args = toolchain.ld_args.append(flags.list_free());
 }
@@ -410,7 +410,7 @@ static void Build._link_packages(Build state, String input, String directory) {
     state.gen_dirs.push(builds);
     // A package may publish a vendored foreign header from its src.
     state.gen_dirs.push(%"$package/src");
-    String name = package.split(%"/").last();
+    String name = package.split("/").last();
     String response = %"$builds/$name.native.rsp";
     CliRequest native = NULL;
     if (!access(response, F_OK)) {
@@ -464,7 +464,7 @@ void Build.end_translation(Build state, String input, int cached) {
     unsigned long elapsed = report_now_us() - state.xlat_start;
     report_phase(
       <translate>, state.xlat_n,
-      state.xlat_n == 1 ? %"x2c file" : %"x2c files",
+      state.xlat_n == 1 ? "x2c file" : "x2c files",
       state.xlat_cached, elapsed);
   }
 }
@@ -616,7 +616,7 @@ static int _compile_sources(Build b) {
     if (b.request.compile_only && !b.request.inputs.cdr() &&
         b.output)
       object = b.output;
-    String depfile = %"${b.dep_root}/$key.d", Array include_dirs = %[];
+    String depfile = %"${b.dep_root}/$key.d", Array include_dirs = [];
     if (source.startswith(b.gen_root))
       include_dirs.push(Path.dirname(source));
     foreach (Var directory, b.gen_dirs)
@@ -658,14 +658,14 @@ static int _compile_sources(Build b) {
     unsigned long elapsed = report_now_us() - b.cc_start;
     report_phase(
       <compile>, b.cc_n,
-      b.cc_n == 1 ? %"C file" : %"C files",
+      b.cc_n == 1 ? "C file" : "C files",
       b.cc_cached, elapsed);
   }
   return failed;
 }
 
 static List _native_action_inputs(Build state) {
-  Array inputs = %[];
+  Array inputs = [];
   foreach (Var value, state.objects) inputs.push(value);
   foreach (Var value, state.native_inputs) inputs.push(value);
   List result = inputs.list_free();
@@ -698,7 +698,7 @@ static int _mapped_debug(Build state) {
    lets the include resolve as it does beside the sources. */
 static void Build._place_unit_headers(Build b) {
   if (b.request.dry_run || b.units.len() < 2) return;
-  Map headers = %{};
+  Map headers = {};
   foreach (String unit, b.units)
     headers[Path.absolute(unit)] =
       %"${b.gen_root}/${_key(unit)}/${Path.stem(unit)}.h";
@@ -768,7 +768,7 @@ int Build.finish(Build b) {
       b.final_cached = 1;
       report_progress(action.phase, 1, 1, b.output);
       int input_count = inputs.len();
-      String noun = input_count == 1 ? %"object" : %"objects";
+      String noun = input_count == 1 ? "object" : "objects";
       report_phase(
         action.phase, input_count, noun, input_count,
         report_now_us() - b.final_at);
@@ -787,8 +787,8 @@ int Build.finish(Build b) {
   report_progress(action.phase, 1, 1, b.output);
   int input_count = inputs.len();
   String noun = action.phase == <archive> ?
-                (input_count == 1 ? %"object" : %"objects") :
-                (input_count == 1 ? %"input" : %"inputs");
+                (input_count == 1 ? "object" : "objects") :
+                (input_count == 1 ? "input" : "inputs");
   report_phase(
     action.phase, input_count, noun, 0,
     report_now_us() - b.final_at);
@@ -814,9 +814,9 @@ void Build.report_success(Build b) {
   if (!report_receipts()) return;
   unsigned long elapsed = report_now_us() - b.started_at;
   String duration = report_duration(elapsed);
-  String cache = _all_cached(b) ? %" (up to date)" : %"";
+  String cache = _all_cached(b) ? " (up to date)" : "";
   String label = b.request.label ?
-                 %" target '${b.request.label}'" : %"";
+                 %" target '${b.request.label}'" : "";
   String result;
   if (b.request.compile_only) {
     if (b.objects.length == 1)
@@ -829,14 +829,14 @@ void Build.report_success(Build b) {
   }
   else {
     String kind = b.request.kind == <static-lib> ?
-                  %"static library" : %"executable";
+                  "static library" : "executable";
     result = %"Built$label $kind ${b.output} in $duration$cache";
   }
   report_line(<success>, result);
   if (b.xlat_n) {
     String size = report_size(b.gen_bytes);
-    String c_noun = b.xlat_n == 1 ? %"C file" : %"C files";
-    String h_noun = b.xlat_n == 1 ? %"header" : %"headers";
+    String c_noun = b.xlat_n == 1 ? "C file" : "C files";
+    String h_noun = b.xlat_n == 1 ? "header" : "headers";
     report_line(
       <muted>,
       %"  Generated ${b.xlat_n} $c_noun and " +
@@ -845,7 +845,7 @@ void Build.report_success(Build b) {
   }
   if (b.cc_n) {
     int count = b.request.jobs;
-    String jobs = count == 1 ? %"1 job" : %"$count jobs";
+    String jobs = count == 1 ? "1 job" : %"$count jobs";
     report_line(
       <muted>,
       %"  Compiled with ${b.toolchain.cc} using $jobs");
@@ -855,9 +855,9 @@ void Build.report_success(Build b) {
       report_line(<muted>, %"  Archived with ${b.toolchain.ar}");
     else report_line(<muted>, %"  Linked with ${b.toolchain.cc}");
   }
-  String retention = !b.temporary ? %"retained" :
-    b.request.command == <run> ? %"temporary; removed after run" :
-                                 %"temporary; removed after build";
+  String retention = !b.temporary ? "retained" :
+    b.request.command == <run> ? "temporary; removed after run" :
+                                 "temporary; removed after build";
   report_line(<muted>, %"  Intermediates ${b.work_dir} ($retention)");
   if (!b.request.compile_only) {
     String size = report_size(report_file_bytes(b.output));
@@ -872,7 +872,7 @@ void Build.report_success(Build b) {
 */
 int Build.run_program(Build state) {
   report_line(<phase>, %"Running ${state.output}");
-  Array arguments = %[];
+  Array arguments = [];
   arguments.push(state.output);
   foreach (String argument, state.request.run_args) arguments.push(argument);
   ToolAction action = tool_action_new(
@@ -926,7 +926,7 @@ void Build.cleanup(Build state, int success) {
 static uint64_t _script_fingerprint(
   CliRequest c, String cc, List prerequisites, int *ok) {
   uint64_t hash = _state_base(c, cc, ok);
-  hash = _state_text(hash, %"script");
+  hash = _state_text(hash, "script");
   hash = _state_list(hash, c.inputs);
   hash = _state_list(hash, c.include_dirs);
   hash = _state_list(hash, c.package_roots());
@@ -934,7 +934,7 @@ static uint64_t _script_fingerprint(
   hash = _state_list(hash, c.cc_args);
   hash = _state_list(hash, c.ld_args);
   hash = _state_text(
-    hash, c.source_map ? %"source-map" : %"generated-lines");
+    hash, c.source_map ? "source-map" : "generated-lines");
   foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT")) {
     const char *value = getenv(name);
     hash = _state_text(hash, value ? String.new(value) : NULL);
@@ -946,7 +946,7 @@ static uint64_t _script_fingerprint(
     }
     hash = _state_text(hash, path);
     hash = _state_text(hash, Path.is_dir(path)
-      ? %"%.9f".printf(Path.modified_time(path)) : %"absent");
+      ? "%.9f".printf(Path.modified_time(path)) : "absent");
   }
   return hash;
 }
@@ -955,7 +955,7 @@ static uint64_t _script_fingerprint(
    and library options, the compiler's own search lists, and the directory of
    each prerequisite, where quoted includes look first. */
 static List Build._script_directories(Build b, List prerequisites) {
-  Array directories = %[];
+  Array directories = [];
   foreach (Var directory, b.request.include_dirs) directories.push(directory);
   directories.push(b.toolchain.include_dir);
   foreach (List args, %(${b.toolchain.cc_args} ${b.toolchain.ld_args})) {
@@ -974,7 +974,7 @@ static List Build._script_directories(Build b, List prerequisites) {
     directories.push(Path.dirname(path));
   foreach (Var directory, b.toolchain.search_directories())
     directories.push(directory);
-  Array unique = %[];
+  Array unique = [];
   foreach (Var value, directories) {
     String directory = Path.absolute(value.str());
     if (directory.startswith(Path.absolute(b.work_dir))) continue;
@@ -995,7 +995,7 @@ List Build.script_helpers(Build b) {
     %"${b.gen_root}/${_key(script)}/${Path.stem(script)}.d";
   List excluded = %(${%"$root/lib/"} ${%"$root/include/"} ${%"$root/builds/"})
     .append(b.request.package_roots().map(%!(dir) => %"${dir.str()}/"));
-  Array helpers = %[];
+  Array helpers = [];
   foreach (String path, _state_dep_inputs(translation)) {
     if (!path.endswith(".x") || path == script || helpers.contains(path))
       continue;
@@ -1021,7 +1021,7 @@ void Build.publish_script(Build b, String executable) {
     Path.move_to(%"${b.output}.dSYM", symbols);
   }
   String input = b.request.inputs.car();
-  Array prerequisites = %[];
+  Array prerequisites = [];
   String translation =
     %"${b.gen_root}/${_key(input)}/${Path.stem(input)}.d";
   foreach (String path, _state_dep_inputs(translation))

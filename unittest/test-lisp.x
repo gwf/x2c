@@ -919,8 +919,8 @@ static void lisp_bootstrap_collections_and_macros(void) {
 
 static void lisp_bootstrap_predicates_are_exact(void) {
   Lisp lisp = _boot_session();
-  Array array = %[];
-  Map map = %{};
+  Array array = [];
+  Map map = {};
   Lisp.set_global(lisp, "array-value", array);
   Lisp.set_global(lisp, "map-value", map);
 

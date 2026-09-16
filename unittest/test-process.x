@@ -10,7 +10,7 @@ $(import "test-macros.xmacro")
 
 static void process_arguments_stay_whole(void) {
   $test.scoped();
-  String spaced = %"two  words", dashed = "-n", empty = "";
+  String spaced = "two  words", dashed = "-n", empty = "";
   EXPECT_STR_EQ(%(printf "%s|" $spaced $dashed $empty q).job().output(),
                 "two  words|-n||q|");
 }
@@ -23,7 +23,7 @@ static void process_job_runs_once(void) {
   close(fd);
   String log = String.new(path);
   Job job = %(sh -c "echo run >> \$1; echo out; echo err >&2" sh $log)
-    .job().options(%{stderr: capture});
+    .job().options({stderr: <capture>});
   EXPECT_FALSE(job.started);
   EXPECT_INT_EQ(job.status(), 0);
   EXPECT_STR_EQ(job.output(), "out\n");
@@ -47,7 +47,7 @@ static void process_status_reports_exit_and_signal(void) {
 static void process_status_and_errors_never_raise(void) {
   $test.scoped();
   Job job = %(sh -c "echo out; echo err >&2; exit 3").job()
-    .options(%{stderr: capture});
+    .options({stderr: <capture>});
   EXPECT_STR_EQ(job.errors(), "err\n");
   EXPECT_INT_EQ(job.status(), 3);
   EXPECT_NULL(%(sh -c "exit 2").job().errors());
@@ -78,7 +78,7 @@ static void process_failure_detail_carries_captures(void) {
     EXPECT_TRUE(detail.assoc(<errors>) is void);
   }
   try %(sh -c "echo out; echo err >&2; exit 5").job()
-    .options(%{stderr: capture}).lines();
+    .options({stderr: <capture>}).lines();
   catch %(cmd-fail *detail): {
     caught++;
     EXPECT_INT_EQ(detail.assoc(<status>).integer(), 5);
@@ -86,7 +86,7 @@ static void process_failure_detail_carries_captures(void) {
     EXPECT_STR_EQ(detail.assoc(<errors>).string(), "err\n");
   }
   try %(sh -c "echo err >&2; exit 5").job()
-    .options(%{stdout: inherit, stderr: capture}).check();
+    .options({stdout: <inherit>, stderr: <capture>}).check();
   catch %(cmd-fail *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<output>) is void);
@@ -175,11 +175,11 @@ static void process_nested_pipelines_compose_with_pipe(void) {
   }
   EXPECT_INT_EQ(caught, 1);
   EXPECT_STR_EQ(%((sh -c "pwd; echo one >&2") (sh -c "cat; echo two >&2"))
-                  .job().options(%{dir: "/", input: "in\n", stderr: stdout})
+                  .job().options({dir: "/", input: "in\n", stderr: <stdout>})
                   .output(),
                 "/\none\ntwo\n");
   Job logged = %((sh -c "cat; echo one >&2") (sh -c "cat; echo two >&2"))
-    .job().options(%{input: "in\n", stderr: capture});
+    .job().options({input: "in\n", stderr: <capture>});
   EXPECT_STR_EQ(logged.output(), "in\n");
   EXPECT_TRUE(logged.errors() == "one\ntwo\n" ||
               logged.errors() == "two\none\n");
@@ -196,17 +196,17 @@ static void process_pipeline_status_is_last_failure(void) {
 
 static void process_options_route_streams(void) {
   $test.scoped();
-  EXPECT_STR_EQ(%(tr a-z A-Z).job().options(%{input: "shout"}).output(),
+  EXPECT_STR_EQ(%(tr a-z A-Z).job().options({input: "shout"}).output(),
                 "SHOUT");
-  EXPECT_STR_EQ(%(pwd).job().options(%{dir: "/"}).output(), "/\n");
+  EXPECT_STR_EQ(%(pwd).job().options({dir: "/"}).output(), "/\n");
   EXPECT_STR_EQ(%(sh -c "echo \$X2C_PROCESS_TEST").job()
-                  .options(%{env: {X2C_PROCESS_TEST: "set"}}).output(),
+                  .options({env: {X2C_PROCESS_TEST: "set"}}).output(),
                 "set\n");
   EXPECT_STR_EQ(%(sh -c "echo out; echo err >&2").job()
-                  .options(%{stderr: stdout}).output(),
+                  .options({stderr: <stdout>}).output(),
                 "out\nerr\n");
   Job job = %(sh -c "echo err >&2; exit 6").job()
-    .options(%{stderr: capture}).start();
+    .options({stderr: <capture>}).start();
   EXPECT_INT_EQ(job.status(), 6);
   EXPECT_STR_EQ(job.errors(), "err\n");
 }
@@ -218,13 +218,13 @@ static void process_options_write_files_and_merge(void) {
   if (!EXPECT_TRUE(fd >= 0)) return;
   close(fd);
   String output = String.new(path);
-  %(printf hello).job().options(%{stdout: $output}).check();
+  %(printf hello).job().options({stdout: output}).check();
   File file = File.open(path, "r");
   EXPECT_STR_EQ(file.string_close(), "hello");
-  Job job = %(pwd).job().options(%{dir: "/", stdout: $output})
-    .options(%{input: "x"}).live().options(%{stdout: capture});
+  Job job = %(pwd).job().options({dir: "/", stdout: output})
+    .options({input: "x"}).live().options({stdout: <capture>});
   EXPECT_STR_EQ(job.output(), "/\n");
-  EXPECT_STR_EQ(%(pwd).job().options(%{dir: "/"}).pipe(%(cat)).output(),
+  EXPECT_STR_EQ(%(pwd).job().options({dir: "/"}).pipe(%(cat)).output(),
                 "/\n");
   unlink(path);
 }
@@ -234,7 +234,7 @@ static void process_changes_after_start_raise(void) {
   Job job = %(true).job();
   job.status();
   int caught = 0;
-  try job.options(%{dir: "/"});
+  try job.options({dir: "/"});
   catch %(bad-arg *detail): {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Job.options");
@@ -248,7 +248,7 @@ static void process_changes_after_start_raise(void) {
   catch %(bad-arg *): caught++;
   try job.run();
   catch %(bad-arg *): caught++;
-  try %(true).job().options(%{cwd: "/"});
+  try %(true).job().options({cwd: "/"});
   catch %(bad-arg *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<option>).symbol() == <cwd>);
@@ -266,7 +266,7 @@ static void process_start_failures_raise(void) {
                   "x2c-process-test-missing-program");
     EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), ENOENT);
   }
-  try %(pwd).job().options(%{dir: "/x2c-process-test-missing"}).run();
+  try %(pwd).job().options({dir: "/x2c-process-test-missing"}).run();
   catch %(not-found *detail): {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<path>).string(), "/x2c-process-test-missing");
@@ -280,7 +280,7 @@ static void process_start_failures_raise(void) {
   int before = dup(STDERR_FILENO);
   close(before);
   for (int i = 0; i < 64; i++) {
-    try %(pwd).job().options(%{stderr: capture, dir: "/x2c-missing"})
+    try %(pwd).job().options({stderr: <capture>, dir: "/x2c-missing"})
       .output();
     catch %(not-found *): caught++;
   }
@@ -292,12 +292,12 @@ static void process_start_failures_raise(void) {
 
 static void process_jobs_wait_kill_and_clean_up(void) {
   $test.scoped();
-  Array jobs = %[];
+  Array jobs = [];
   for (int i = 3; i >= 1; i--)
     jobs.push(%(sh -c ${%"sleep 0.$i; exit $i"}).job().start());
-  Array order = %[];
+  Array order = [];
   while (jobs.len()) order.push(Job.wait_any(jobs).status());
-  EXPECT_TRUE(order.equal(%[1, 2, 3]));
+  EXPECT_TRUE(order.equal([1, 2, 3]));
   EXPECT_NULL(Job.wait_any(jobs));
   jobs.push(%(true).job());
   int caught = 0;
@@ -341,7 +341,7 @@ static void process_jobs_wait_kill_and_clean_up(void) {
 
 static void process_env_reads_the_calling_process(void) {
   $test.scoped();
-  String name = %"X2C_TEST_ENVIRONMENT_VALUE";
+  String name = "X2C_TEST_ENVIRONMENT_VALUE";
   EXPECT_NULL(Env.get(name));
   setenv(name, "present", 1);
   EXPECT_STR_EQ(Env.get(name), "present");

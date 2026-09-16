@@ -28,8 +28,8 @@ String Greeting.line(Greeting greeting) {
 }
 
 String repeat(String text, int times) {
-  Array parts = %[];
+  Array parts = [];
   for (int i = 0; i < times; i++) parts.push(text);
-  String joined = %" ".join(parts.list_free());
+  String joined = " ".join(parts.list_free());
   return joined;
 }

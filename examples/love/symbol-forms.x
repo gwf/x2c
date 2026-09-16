@@ -8,7 +8,7 @@ int main(void) {
   Symbol repeated = <demo>;
   Symbol quoted = <"->">;
   Symbol seven_bit = <"Token@!">;
-  Map config = %{host: "localhost", port: 8080};
+  Map config = {host: "localhost", port: 8080};
 
   printf("simple: %s\n", simple.str());
   printf("quoted: %s\n", quoted.str());

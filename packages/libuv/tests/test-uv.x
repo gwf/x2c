@@ -46,17 +46,17 @@ static void process_stdin_and_concurrent_children(void) {
 
   UvProcess upper = loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
   defer upper.free();
-  upper.write(%"one\n").write(%"two\n").close_stdin();
+  upper.write("one\n").write("two\n").close_stdin();
 
   UvProcess lines = loop.spawn(%("/usr/bin/wc" "-l"));
   defer lines.free();
-  lines.write(%"one\ntwo\n").close_stdin();
+  lines.write("one\ntwo\n").close_stdin();
 
   EXPECT_TRUE(loop.alive());
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_FALSE(loop.alive());
   EXPECT_STR_EQ(upper.stdout(), %"ONE\nTWO\n");
-  EXPECT_TRUE(lines.stdout().contains(%"2"));
+  EXPECT_TRUE(lines.stdout().contains("2"));
   EXPECT_INT_EQ(upper.exit_status(), 0);
   EXPECT_INT_EQ(lines.exit_status(), 0);
 
@@ -130,20 +130,20 @@ static void process_free_waits_for_every_close_callback(void) {
 }
 
 static void command_sets_directory_and_environment(void) {
-  String work = _scratch(%"cwd");
+  String work = _scratch("cwd");
   UvLoop loop = UvLoop.new();
   defer loop.free();
 
   UvProcess child = loop.command(%("/bin/sh" "-c" "pwd; printenv MODE"))
     .directory(work)
-    .environment(%{"MODE": "strict", "PATH": "/usr/bin:/bin"})
+    .environment({"MODE": "strict", "PATH": "/usr/bin:/bin"})
     .start();
   defer child.free();
   child.close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
-  EXPECT_TRUE(child.stdout().contains(%"x2c-libuv-cwd"));
-  EXPECT_TRUE(child.stdout().contains(%"strict"));
+  EXPECT_TRUE(child.stdout().contains("x2c-libuv-cwd"));
+  EXPECT_TRUE(child.stdout().contains("strict"));
   EXPECT_INT_EQ(child.exit_status(), 0);
 }
 
@@ -177,7 +177,7 @@ static void command_rejects_bad_argv_environment_and_stdio(void) {
   EXPECT_TRUE(caught);
 
   caught = 0;
-  try loop.command(%("/usr/bin/printf" "x")).environment(%{"MODE": 7});
+  try loop.command(%("/usr/bin/printf" "x")).environment({"MODE": 7});
   catch %(bad-types (library *) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"environment");
@@ -264,7 +264,7 @@ static void _record_async(UvAsync async, Var value) {
 static void async_sends_coalesce_and_stop_is_idempotent(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  Array calls = %[];
+  Array calls = [];
   UvAsync async = loop.async(calls, _record_async);
 
   EXPECT_PTR_EQ(async.loop(), loop);
@@ -354,7 +354,7 @@ static void timer_fires_once_and_repeats(void) {
 
 static void _stop_the_loop(UvTimer timer, Var value) {
   Array reached = value;
-  reached.push(%"budget");
+  reached.push("budget");
   timer.loop().stop();
 }
 
@@ -401,7 +401,7 @@ static void loop_phases_keep_their_order_and_native_handles(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
   PhaseState state = { 0 };
-  state.order = %[];
+  state.order = [];
   state.loop_thread = uv_thread_self();
   Var value = Var.new(<p48>, &state);
   state.prepare = loop.prepare(value, _record_prepare);
@@ -488,7 +488,7 @@ static void _close_async(UvAsync async, Var value) {
 static void phase_callback_errors_are_independent_and_resumable(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  Array guard = %[];
+  Array guard = [];
   UvTimer guard_timer = loop.timer(250, 0, guard, _stop_the_loop);
   loop.idle(void, _raise_inside_idle);
 
@@ -503,7 +503,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
   guard_timer.stop();
   loop.run(UV_RUN_NOWAIT);
 
-  guard = %[];
+  guard = [];
   guard_timer = loop.timer(250, 0, guard, _stop_the_loop);
   loop.prepare(void, _raise_inside_prepare);
   caught = 0;
@@ -517,7 +517,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
   guard_timer.stop();
   loop.run(UV_RUN_NOWAIT);
 
-  guard = %[];
+  guard = [];
   guard_timer = loop.timer(250, 0, guard, _stop_the_loop);
   UvAsync wake = loop.async(void, _close_async);
   loop.check(void, _raise_inside_check);
@@ -532,7 +532,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
   EXPECT_INT_EQ(guard.len(), 0);
   guard_timer.stop();
 
-  Array resumed = %[];
+  Array resumed = [];
   loop.timer(0, 0, resumed, _record_tick);
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_INT_EQ(resumed.len(), 1);
@@ -626,7 +626,7 @@ static void _abandon_watch(UvTimer timer, Var value) {
 }
 
 static void watch_reports_an_entry_a_child_creates(void) {
-  String work = _scratch(%"same-name");
+  String work = _scratch("same-name");
   UvLoop loop = UvLoop.new();
   defer loop.free();
 
@@ -660,7 +660,7 @@ static void _record_change(UvWatch watch, Var value) {
 }
 
 static void watch_distinguishes_content_changes(void) {
-  String work = _scratch(%"watch-change");
+  String work = _scratch("watch-change");
   String path = %"$work/content.txt";
   File seed = File.open(path, %"w");
   seed.puts(%"before\n");
@@ -668,7 +668,7 @@ static void watch_distinguishes_content_changes(void) {
 
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  Array seen = %[];
+  Array seen = [];
   UvWatch watch = loop.watch(path, seen, _record_change);
   UvTimer timeout = loop.timer(5000, 0, seen, _abandon_watch);
   UvProcess append = loop.command(%(
@@ -736,7 +736,7 @@ static void a_failed_signal_callback_reaches_the_caller_once(void) {
   defer slow.free();
   slow.close_stdin();
   loop.signal(SIGUSR2, 0, _raise_inside_a_signal);
-  Array guard = %[];
+  Array guard = [];
   UvTimer guard_timer = loop.timer(250, 0, guard, _stop_the_loop);
   uv_kill(uv_os_getpid(), SIGUSR2);
 
@@ -773,7 +773,7 @@ static void a_failed_async_callback_stops_and_resumes_the_loop(void) {
   defer slow.free();
   slow.close_stdin();
   UvAsync async = loop.async(void, _raise_inside_async);
-  Array guard = %[];
+  Array guard = [];
   UvTimer guard_timer = loop.timer(250, 0, guard, _stop_the_loop);
   async.send();
 
@@ -805,7 +805,7 @@ static void _write_watched_file(UvTimer timer, Var value) {
 }
 
 static void a_failed_watch_callback_reaches_the_caller(void) {
-  String work = _scratch(%"failed-watch");
+  String work = _scratch("failed-watch");
   String path = %"$work/watched.txt";
   UvLoop loop = UvLoop.new();
   defer loop.free();
@@ -855,7 +855,7 @@ static void async_watch_and_timer_reject_bad_arguments(void) {
   EXPECT_TRUE(caught);
 
   caught = 0;
-  try loop.watch(%"/no/such/directory/here", 0, _record_entry);
+  try loop.watch("/no/such/directory/here", 0, _record_entry);
   catch %(io-fail (library ?library) (operation ?operation) *): {
     caught = 1;
     EXPECT_STR_EQ(operation.string(), %"fs_event_start");

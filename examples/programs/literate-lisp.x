@@ -127,7 +127,7 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
    The result is a List of values ready for application.
 */
 static List Interp.eval_args(Interp *self, Env *env, List forms) {
-  Array values = $auto(%[]);                                                    // Array literal; cleanup on exit.
+  Array values = $auto([]);                                                     // Array literal; cleanup on exit.
   foreach (Var form, forms) values.push(self.eval(env, form));                  // Typed List iteration.
   return values;                                                                // Build List before Array cleanup.
 }
@@ -262,7 +262,7 @@ static Var Interp.lookup(Interp *self, Env *env, Var name) {
 */
 static Var Interp.closure(
   Interp *self, Env *env, List params, Var body, int macro) {
-  Map captures = %{};                                                           // Mutable Map; Var keys and values.
+  Map captures = {};                                                            // Mutable Map; Var keys and values.
   if (body is <list>)                                                           // Test before converting the Var.
     foreach (Var name, body.list().flatten()) {                                 // Chain conversion and traversal.
       if (!name.is_atom() || name in self.reserved ||                           // Receiver predicate; Map membership.
@@ -286,7 +286,7 @@ static Var Interp.closure(
    binding of the same name.
 */
 static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
-  Map bindings = $auto(%{});                                                    // Map literal; cleanup on exit.
+  Map bindings = $auto({});                                                     // Map literal; cleanup on exit.
   for (List params = closure.params;                                            // C for with a typed List handle.
        params;                                                                  // Empty List is the null handle.
        params = params.cdr()) {                                                 // Advance with an x2c List method.
@@ -444,7 +444,7 @@ static Var Reader._form(Reader *self, Token token) {
         return self._error(<incomplete>, self.start);                           // Receiver call builds a source error.
       break;
     case <"(">: {                                                               // Quoted Symbol in a switch.
-      Array elements = $auto(%[]);                                              // Array literal; cleanup on exit.
+      Array elements = $auto([]);                                               // Array literal; cleanup on exit.
       while (1) {
         Token next = self.tokens.next();                                        // Pull a token with receiver syntax.
         if (next && next.type == <")">) return elements.list();                 // List result boxes as Var.
@@ -851,7 +851,7 @@ static Var _reserved(void) => Var.null();                                       
    to it.
 */
 static Interp _interpreter(void) {
-  Interp self = { %{}, %{}, %{}, %{} };                                         // Four independently allocated Maps.
+  Interp self = { {}, {}, {}, {} };                                             // Four independently allocated Maps.
   _install_natives(&self);                                                      // Pass a C stack address.
   foreach (Var name, %(quote quasiquote cond def lambda macro eval              // Typed iteration over literal data.
                        apply bind import)) {                                    // Iterate literal Symbol values.

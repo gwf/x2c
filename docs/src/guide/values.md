@@ -223,7 +223,7 @@ A missing `Map` key reads the same way, but `Map` also offers a status-bearing
 form that keeps presence separate from the payload. Prefer it:
 
 ```x2c
-Map settings = %{width: 80};
+Map settings = {width: 80};
 
 Var height;
 if (settings.try_get(<height>, &height)) {
@@ -411,7 +411,7 @@ the collection's update operation and evaluates the receiver, index, and
 right operand once:
 
 ```x2c
-Array counts = %[1, 2, 3];
+Array counts = [1, 2, 3];
 
 counts[0] += 1;
 

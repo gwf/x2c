@@ -168,8 +168,8 @@ failure is not hidden by a later stage that succeeds.
 ~#include "path.x"
 ~int main(void) {
 Path root = "build";
-%(make all).job().options(%{dir: $root, env: {CC: clang}}).run();
-String upper = %(tr a-z A-Z).job().options(%{input: "quiet"}).output();
+%(make all).job().options({dir: root, env: {CC: <clang>}}).run();
+String upper = %(tr a-z A-Z).job().options({input: "quiet"}).output();
 ~  return upper == "QUIET" ? 0 : 1;
 ~}
 ```
@@ -198,7 +198,7 @@ once:
 ```x2c
 ~#include "process.x"
 ~int main(void) {
-Array running = %[];
+Array running = [];
 foreach (Var host, %(alpha beta gamma delta)) {
   if (running.len() == 2) Job.wait_any(running).check();
   running.push(%(ping -c 1 $host).job().live().start());
@@ -416,7 +416,7 @@ end, so it also works on binary files that `read_text` refuses:
 ~int main(void) {
 File shell = $auto(File.open("/bin/sh", "rb"));
 printf("%s  /bin/sh\n", shell.sha256());
-String abc = %"abc".sha256();
+String abc = "abc".sha256();
 ~  return abc.startswith("ba7816bf8f01cfea") ? 0 : 1;
 ~}
 ```
@@ -467,7 +467,7 @@ which is written as a string, and `Json.bool` makes a boolean. A `Map` or
 ```x2c
 ~#include "json.x"
 ~int main(void) {
-Map report = %{name: "x2c", passed: ${Json.bool(1)}, counts: [3, 0]};
+Map report = {name: "x2c", passed: Json.bool(1), counts: [3, 0]};
 printf("%s\n", Var.pretty_json(report));
 Json.write_file(report, "/tmp/report.json");
 ~  return 0;

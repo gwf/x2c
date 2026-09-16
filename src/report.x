@@ -52,18 +52,18 @@ unsigned long long report_file_bytes(String path) {
     two decimal places.
 */
 String report_duration(unsigned long microseconds) {
-  if (microseconds < 1000) return %"%lu us".printf(microseconds);
-  if (microseconds < 1000000) return %"%.0f ms".printf(microseconds / 1000.0);
-  return %"%.2f s".printf(microseconds / 1000000.0);
+  if (microseconds < 1000) return "%lu us".printf(microseconds);
+  if (microseconds < 1000000) return "%.0f ms".printf(microseconds / 1000.0);
+  return "%.2f s".printf(microseconds / 1000000.0);
 }
 
 /** Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
     Byte counts are exact; larger units use one decimal place.
 */
 String report_size(unsigned long long bytes) {
-  if (bytes < 1024) return %"%llu B".printf(bytes);
-  if (bytes < 1024ull * 1024ull) return %"%.1f KiB".printf(bytes / 1024.0);
-  return %"%.1f MiB".printf(bytes / (1024.0 * 1024.0));
+  if (bytes < 1024) return "%llu B".printf(bytes);
+  if (bytes < 1024ull * 1024ull) return "%.1f KiB".printf(bytes / 1024.0);
+  return "%.1f MiB".printf(bytes / (1024.0 * 1024.0));
 }
 
 /** Writes `text` to `out` as one quoted JSON string.
@@ -247,8 +247,8 @@ void report_progress(Symbol phase, int done, int total, String detail) {
 void report_phase(
   Symbol phase, int count, String noun, int cached,
   unsigned long microseconds) {
-  String cache = cached == count && count ? %" (up to date)" :
-                 cached ? %", $cached cached" : %"";
+  String cache = cached == count && count ? " (up to date)" :
+                 cached ? %", $cached cached" : "";
   String name = phase.str().capitalize();
   String line = %"  $name $count $noun in " +
                 %"${report_duration(microseconds)}$cache";

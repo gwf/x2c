@@ -252,18 +252,18 @@ static Compiler _new(Compiler owner) {
     Scope.malloc_finalized(sizeof(struct Compiler), _drop_compiler);
   memset(compiler, 0, sizeof(struct Compiler));
   with compiler {
-    _.id_keys = %[];
-    _.key_ids = %{};
-    _.deps = %{};
-    _.macros = %{};
-    _.kw_aliases = %{};
-    _.kw_seen = %{};
-    _.object_macros = %{};
-    _.proto_cache = %{};
-    _.imports = %{};
-    _.init_tokens = %{};
-    _.static_init_deps = %{};
-    _.fn_defs = %{};
+    _.id_keys = [];
+    _.key_ids = {};
+    _.deps = {};
+    _.macros = {};
+    _.kw_aliases = {};
+    _.kw_seen = {};
+    _.object_macros = {};
+    _.proto_cache = {};
+    _.imports = {};
+    _.init_tokens = {};
+    _.static_init_deps = {};
+    _.fn_defs = {};
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
          registries and generated-name state belong to the whole translation
@@ -287,31 +287,31 @@ static Compiler _new(Compiler owner) {
       _.include_dirs = owner.include_dirs;
     }
     else {
-      _.package_roots = %{};
-      _.package_aliases = %{};
-      _.package_members = %{};
+      _.package_roots = {};
+      _.package_aliases = {};
+      _.package_members = {};
       _.names = Scope.calloc(1, sizeof(struct GenNames));
-      _.names.counters = %{};
-      _.names.adapters = %{};
+      _.names.counters = {};
+      _.names.adapters = {};
     }
     _.sym = Scope.calloc(1, sizeof(struct Sym));
     with _.sym {
       _.compiler = compiler;
-      _.binding_facts = %{};
+      _.binding_facts = {};
       _.scopes = Block.new(sizeof(SymScope));
-      _.statics = %{};
+      _.statics = {};
     }
-    _.inits = %[];
-    _.early_decls = %[];
+    _.inits = [];
+    _.early_decls = [];
     _.collect_protocols = 1;
     _.diagnostics =
       Diagnostics.new(_emit_user, _, owner ? owner.diagnostics.limit : 1);
     if (owner && owner.diagnostics.emit != _emit_user)
       _.diagnostics.set_emitter(
         owner.diagnostics.emit, owner.diagnostics.owner);
-    _.braces = %[];
-    _.import_stack = %[];
-    _.origins = %[];
+    _.braces = [];
+    _.import_stack = [];
+    _.origins = [];
     _.root_dir = x2c_get_root();
     return _;
   }
@@ -605,7 +605,7 @@ static void _shallow_block(Compiler c) {
 */
 int Compiler.record_origin(Compiler c, Token token) {
   if (!token) return 0;
-  String file = c.filename ? c.filename : %"<stdin>";
+  String file = c.filename ? c.filename : "<stdin>";
   if (!c.source_map) file = c.display_path(file);
   c.origins.push(
     %(source $file ${token.line} ${token.col} ${token.len} ${token.pos}));
@@ -759,7 +759,7 @@ static String _declaration_path(Compiler compiler, String path, int thaw) {
 
 static List _declaration_location(
   Compiler compiler, List location, int thaw) {
-  Array rows = %[];
+  Array rows = [];
   foreach (List row, location) {
     match (row)
       case %(file ?path):
@@ -770,7 +770,7 @@ static List _declaration_location(
 }
 
 static List _declaration_macro(Compiler compiler, List rows, int thaw) {
-  Array result = %[];
+  Array result = [];
   foreach (List row, rows) {
     match (row) {
       case %(file ?path):
@@ -816,7 +816,7 @@ Var Compiler.freeze_declaration_syntax(Compiler compiler, Var syntax) {
                 ${compiler.freeze_declaration_syntax(node)});
     }
   }
-  Array rows = %[];
+  Array rows = [];
   foreach (Var row, syntax.list())
     rows.push(compiler.freeze_declaration_syntax(row));
   match (syntax)
@@ -831,7 +831,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
     case %(declaration-list *rows): {
-      Array values = %[];
+      Array values = [];
       foreach (Var row, rows)
         values.push(compiler.thaw_declaration_syntax(row));
       return values.list_free();
@@ -862,7 +862,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
                 ${compiler.thaw_declaration_syntax(node)});
     }
   }
-  Array rows = %[];
+  Array rows = [];
   foreach (Var row, syntax.list())
     rows.push(compiler.thaw_declaration_syntax(row));
   return rows.list_free();
@@ -965,7 +965,7 @@ static void _produce_declaration_rows(
 }
 
 static List _select_declaration_rows(Compiler compiler, List rows) {
-  Array selected = %[];
+  Array selected = [];
   foreach (List row, rows) {
     match (row) {
       case %(declaration-default ?function ?construction ?privacy): {
@@ -1014,7 +1014,7 @@ static List _declaration_forward(
   if (!signature) return NULL;
   List types = NULL;
   match (signature) case %((func ?parameters) *): types = parameters;
-  Array parameters = %[], arguments = %[];
+  Array parameters = [], arguments = [];
   int index = 0;
   foreach (Var type, types) {
     if (type == <...>)
@@ -1037,7 +1037,7 @@ static List _declaration_forward(
 
 static List _select_declaration_forwards(
   Compiler compiler, List rows, Map pending, int *remaining) {
-  Array selected = %[];
+  Array selected = [];
   foreach (List row, rows) {
     match (row)
       case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
@@ -1080,17 +1080,17 @@ Map Compiler.select_declaration_defaults(
   shadow.filename = path;
   shadow.macro_lisp = compiler.macro_lisp;
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
-  shadow.sym._reset_overlay(symbols, %{});
+  shadow.sym._reset_overlay(symbols, {});
   shadow.rebuild_protocols(symbols);
-  shadow.conforms = %{};
+  shadow.conforms = {};
   shadow.shallow = 1;
   shadow.declaration_projection = 1;
-  Array sources = %[];
-  Map pending = %{};
+  Array sources = [];
+  Map pending = {};
   foreach (Var part, parts) {
     if (part is not <map>) continue;
     Map declarations = part;
-    Array ordered = %[];
+    Array ordered = [];
     foreach (Var (key, value), declarations)
       match (key)
         case %("source-node" (declaration ? ?position)):
@@ -1103,7 +1103,7 @@ Map Compiler.select_declaration_defaults(
         case %(declaration-source ?end
                  (declaration-bundle (rows *rows))): {
           rows = shadow.thaw_declaration_syntax(rows);
-          Array produced = %[];
+          Array produced = [];
           _produce_declaration_rows(shadow, rows, produced);
           sources.push(%($declarations $key $end ${produced.list_free()}));
         }
@@ -1182,7 +1182,7 @@ static void _shallow_parse_unit_macro(Compiler compiler) {
 
 static void _shallow_parse_loop(Compiler c) {
   c.rebuild_protocols(NULL);
-  c.conforms = %{};
+  c.conforms = {};
   c.shallow = 1;
   c.braces.clear();
   while (c.peek(0) != <eof>) {
@@ -1263,9 +1263,9 @@ static void _shallow_parse_loop(Compiler c) {
 
 /** Collects file-scope declarations into `globals` without parsing bodies. */
 void Compiler.shallow_parse(Compiler c, Map globals) {
-  c.macros = %{};
-  c.kw_aliases = %{};
-  c.kw_seen = %{};
+  c.macros = {};
+  c.kw_aliases = {};
+  c.kw_seen = {};
   c.import_stack.clear();
   c.sym.reset(globals);
   c.install_builtin_macros();
@@ -1281,10 +1281,10 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   int initialize_macros =
     (void *) c.macros == NULL || !c.macros.len();
   if (initialize_macros) {
-    c.macros = %{};
-    if ((void *) c.kw_aliases == NULL) c.kw_aliases = %{};
-    if ((void *) c.kw_seen == NULL) c.kw_seen = %{};
-    c.imports = %{};
+    c.macros = {};
+    if ((void *) c.kw_aliases == NULL) c.kw_aliases = {};
+    if ((void *) c.kw_seen == NULL) c.kw_seen = {};
+    c.imports = {};
     c.import_stack.clear();
   }
   c.sym._reset_overlay(base, overlay);
@@ -1401,18 +1401,18 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   List ast = NULL;
   c.origins.clear();
-  c.fixed = %{};
-  c.init_tokens = %{};
-  c.static_init_deps = %{};
+  c.fixed = {};
+  c.init_tokens = {};
+  c.static_init_deps = {};
   c.origin = 0;
   c.braces.clear();
   c.sym.reset(globs);
   c.rebuild_protocols(globs);
-  c.macros = %{};
-  c.kw_aliases = %{};
-  c.kw_seen = %{};
+  c.macros = {};
+  c.kw_aliases = {};
+  c.kw_seen = {};
   c.install_builtin_macros();
-  if (!c.declaration_produced) c.imports = %{};
+  if (!c.declaration_produced) c.imports = {};
   c.import_stack.clear();
   c.macro_count = 0;
   c.macro_stack = NULL;
@@ -1423,7 +1423,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
-    Array statements = %[];
+    Array statements = [];
     int hoisting = c.script && !c.script.defines_main, gap = 0, runs = 0, first = 0;
     loop {
       while (c.peek(0) != <eof>) {
@@ -1516,7 +1516,7 @@ static void _push_script_conditionals(
    as undeclared; this names the cause and the `static` spelling that
    shares it. */
 static void _check_script_locals(Compiler c, List ast) {
-  Map locals = %{};
+  Map locals = {};
   foreach (List node, ast) match (node)
     case %(function ? (bind (binding ? "x2c_script") ?) (block *items)):
       foreach (List item, items) match (item)
@@ -1684,7 +1684,7 @@ static List _cache_literal_var(Compiler compiler, Var value) {
 }
 
 static List _cache_literal_list(Compiler compiler, List values) {
-  Array heads = $auto(%[]);
+  Array heads = $auto([]);
   foreach (Var value, values)
     heads.push(_cache_literal_var(compiler, value));
   List result = %(nil);
@@ -1800,7 +1800,7 @@ Symbol Compiler.match_pattern_flat_head(
   Symbol head = compiler.match_pattern_head_symbol(pattern);
   if (!head) return 0;
   List elements = compiler.match_pattern_value(pattern).list().cdr();
-  Array typed = %[];
+  Array typed = [];
   for (List cursor = binders; cursor && elements;
        cursor = cdr(cursor), elements = cdr(elements)) {
     Var binder = car(cursor), element = car(elements);
@@ -1854,7 +1854,7 @@ void Compiler.add_init(Compiler compiler, Symbol phase, List stmt) {
 
 /** Returns the statements queued for `phase`, in the order they were added. */
 List Compiler.init_statements(Compiler compiler, Symbol phase) {
-  Array selected = %[];
+  Array selected = [];
   foreach (List entry, compiler.inits)
     if (entry.car() == phase) selected.push(entry.cadr());
   return selected.list_free();
@@ -1986,7 +1986,7 @@ void SymTxn.commit(SymTxn s) {
   Map.merge(scope.bindings, staged.bindings);
   Map.merge(scope.enumerators, staged.enumerators);
   if ((void *) staged.macros != NULL) {
-    if ((void *) scope.macros == NULL) scope.macros = %{};
+    if ((void *) scope.macros == NULL) scope.macros = {};
     Map.merge(scope.macros, staged.macros);
   }
   s.active = 0;
@@ -2029,22 +2029,22 @@ void SymTxn.rollback(SymTxn transaction) {
 
 static void _semantic_reset(Sym sym, Map base, Map globals, int overlay) {
   sym.scopes.clear();
-  sym.globals = (void *) globals != NULL ? globals : %{};
-  sym.statics = %{};
+  sym.globals = (void *) globals != NULL ? globals : {};
+  sym.statics = {};
   sym.base_scopes = overlay ? 2 : 1;
   sym.local_macro_names = 0;
-  sym.binding_facts = %{};
+  sym.binding_facts = {};
   if (overlay) {
     struct SymScope base_scope = {
-      .symbols = (void *) base != NULL ? base : %{},
-      .bindings = %{}, .enumerators = %{}
+      .symbols = (void *) base != NULL ? base : {},
+      .bindings = {}, .enumerators = {}
     };
     sym.scopes.push(&base_scope);
   }
   struct SymScope scope = {
     .symbols = sym.globals,
-    .bindings = %{},
-    .enumerators = %{}
+    .bindings = {},
+    .enumerators = {}
   };
   sym.scopes.push(&scope);
 }
@@ -2070,7 +2070,7 @@ Map Sym.global_symbols(Sym sym) => sym.globals;
     importing unit's already-visible includes without mutating either.
 */
 Map Sym.base_symbols(Sym sym) {
-  Map seed = %{};
+  Map seed = {};
   for (int i = 0; i < sym.base_scopes; i++)
     Map.merge(seed, _semantic_scope(sym, i).symbols);
   return seed;
@@ -2123,7 +2123,7 @@ void Sym.declare_enumerator(Sym sym, List key, Symbol owner) {
 */
 void Sym.define_macro(Sym sym, Atom name, List definition) {
   SymScope *scope = _semantic_scope(sym, -1);
-  if ((void *) scope.macros == NULL) scope.macros = %{};
+  if ((void *) scope.macros == NULL) scope.macros = {};
   if (!scope.macros.contains(name)) sym.local_macro_names++;
   scope.macros[name] = definition;
   Var captures = definition.assoc(<captures>);
@@ -2605,7 +2605,7 @@ List Sym.bind_identity(Sym sym, List context, List binding, List ast) {
 }
 
 static Type _function_contract_type(Type type, int keep_qualifiers) {
-  Array result = %[];
+  Array result = [];
   foreach (Var item, type) {
     if (item is <list>) {
       result.push(
@@ -2766,7 +2766,7 @@ static void _record_static_object_declaration(
         if (declared_var && !_is_initializable_object_type(
           c, initializer_type))
           continue;
-        Map references = %{}, List ordered = NULL;
+        Map references = {}, List ordered = NULL;
         _collect_initializer_references(value, references, &ordered);
         c.static_init_deps[binding] = ordered.reverse();
       }
@@ -3080,7 +3080,7 @@ Type Sym.lookup_field(Sym sym, Type type, List field) {
     and an empty name so initializer traversal preserves anonymous subobjects.
 */
 void Sym.declare_field_order(Sym sym, Type type, List fields) {
-  Array rows = %[];
+  Array rows = [];
   foreach (List declaration, fields) {
     while (declaration.car() == <at>) declaration = declaration.caddr();
     if (declaration.car() == <c-assert>) continue;
@@ -3121,7 +3121,7 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
 /* The current file's spelling in generated identities: repository-relative
    when it lies under the root, otherwise its canonical path. */
 static String _gensym_owner(Compiler compiler) {
-  if (!compiler.filename) return %"";
+  if (!compiler.filename) return "";
   char buffer[PATH_MAX];
   String path = compiler.sources ? Path.absolute(compiler.filename) :
                 realpath(compiler.filename, buffer) ? %"$buffer" :
@@ -3150,9 +3150,9 @@ List Compiler.gensym(Compiler compiler) {
 /** Pushes a new empty lexical scope. */
 void Sym.push_new_scope(Sym sym) {
   struct SymScope scope = {
-    .symbols = %{},
-    .bindings = %{},
-    .enumerators = %{}
+    .symbols = {},
+    .bindings = {},
+    .enumerators = {}
   };
   sym.scopes.push(&scope);
 }

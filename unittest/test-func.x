@@ -688,7 +688,7 @@ static void func_adapter_readers_stop_at_first_failure(void) {
   for (int index = 0; index < 3; index++) {
     Func fn = functions[index];
     FuncArg args[2] = { FuncArg.value(void),
-                       FuncArg.value(%"not-numeric") };
+                       FuncArg.value("not-numeric") };
     _side_effect = 0;
     int first = -1, second = -1;
     try fn.apply(2, args);

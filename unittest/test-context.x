@@ -74,10 +74,10 @@ static void context_exports_nested_builtin_graph(void) {
   String text = String.new("private array text");
   List list = %(text $text 29);
   Var wide = Var.box_long(0x123456789L);
-  Array array = %[];
+  Array array = [];
   array.push(list);
   array.push(wide);
-  Map map = %{};
+  Map map = {};
   map[key] = array;
 
   Var exported = inner.export(map);
@@ -98,8 +98,8 @@ static void context_exports_nested_builtin_graph(void) {
 static void context_exports_cyclic_arrays_and_maps(void) {
   Context outer = Context.open_isolated_named("cyclic destination");
   Context inner = Context.open_isolated_named("cyclic source");
-  Array array = %[];
-  Map map = %{};
+  Array array = [];
+  Map map = {};
   array.push(array);
   array.push(map);
   map[<array>] = array;
@@ -120,7 +120,7 @@ static void context_rehashes_exported_map_keys(void) {
   Context outer = Context.open_isolated_named("Map key destination");
   Context inner = Context.open_isolated_named("Map key source");
   List key = %(private list key);
-  Map map = %{};
+  Map map = {};
   map[key] = 47;
 
   map = inner.export(map);
@@ -154,7 +154,7 @@ static void _failed_export_round(void) {
   probe.value = String.new("failed private value");
   probe.exports = 1;
   probe.fail_at = 1;
-  Map map = %{probe: ${Var.new(<ctxprobe>, probe)}};
+  Map map = {probe: Var.new(<ctxprobe>, probe)};
   int caught = 0;
   try context.export(map);
   catch %(thread-exp *): caught = 1;
@@ -184,7 +184,7 @@ static void context_exports_owned_storage(void) {
   bytes = bytes.append("abc", 3);
   Buffer buffer = Buffer.new(0);
   buffer.write("buffer text");
-  Array values = %[];
+  Array values = [];
   values.push(block);
   values.push(bytes);
   values.push(buffer);
@@ -312,8 +312,8 @@ static void context_leaves_borrowed_packed_containers_untouched(void) {
   array.push(31);
   MapStringString map = MapStringString.new();
   map.set("borrowed", "unchanged");
-  ArrayString strings = %["borrowed-array"];
-  MapStringInt counts = %{"borrowed-map": 41};
+  ArrayString strings = ["borrowed-array"];
+  MapStringInt counts = {"borrowed-map": 41};
   Context inner = Context.open_isolated_named("packed borrower");
 
   EXPECT_PTR_EQ(inner.export(array).arrayint(), array);
@@ -331,7 +331,7 @@ static void context_leaves_borrowed_packed_containers_untouched(void) {
 static void context_string_array_staging_failure_preserves_storage(void) {
   Context outer = Context.open_isolated_named("ArrayString destination");
   Context inner = Context.open_isolated_named("ArrayString source");
-  ArrayString strings = %[${String.new("private array String")}];
+  ArrayString strings = [String.new("private array String")];
   Bytes original = strings.bytes;
   size_t capacity = strings.cap;
   strings.cap = SIZE_MAX;

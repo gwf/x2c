@@ -400,7 +400,7 @@ static void typed_map_string_growth_traversal_and_errors(void) {
 
 static void typed_map_string_int_family(void) {
   $test.scoped();
-  MapStringInt counts = %{"alpha": 5, "beta": 7};
+  MapStringInt counts = {"alpha": 5, "beta": 7};
   MapStringInt empty = MapStringInt.new(), missing = NULL;
   String built = String.new_len("alpha!", 5);
   int out = 0;
@@ -445,7 +445,7 @@ static void typed_map_string_int_family(void) {
   struct Iter key_storage;
   int keys = 0;
   foreach (String key, counts.keys(&key_storage)) {
-    EXPECT_TRUE(key == %"alpha" || key == %"beta" || key == %"gamma");
+    EXPECT_TRUE(key == "alpha" || key == "beta" || key == "gamma");
     keys++;
   }
   EXPECT_INT_EQ(keys, 3);
@@ -474,7 +474,7 @@ static void _expect_typed_map_common(
 static void typed_map_common_capabilities_cover_every_family(void) {
   $test.scoped();
 
-  MapIntInt ints = %{1: 2}, later_ints = %{1: 3};
+  MapIntInt ints = {1: 2}, later_ints = {1: 3};
   Map int_map = ints.map();
   Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
   ints.write_str(int_str); ints.write_repr(int_repr);
@@ -485,8 +485,8 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   int_map[1] = 99;
   EXPECT_INT_EQ(ints[1], 2);
 
-  MapLongDouble doubles = %{10L: 2.5};
-  MapLongDouble later_doubles = %{10L: 3.5};
+  MapLongDouble doubles = {10L: 2.5};
+  MapLongDouble later_doubles = {10L: 3.5};
   Map double_map = doubles.map();
   Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
   doubles.write_str(double_str); doubles.write_repr(double_repr);
@@ -495,8 +495,8 @@ static void typed_map_common_capabilities_cover_every_family(void) {
     double_str, double_repr, doubles.compare(later_doubles));
   EXPECT_TRUE(double_map[10L].double() == 2.5);
 
-  MapStringString strings = %{"alpha": "one"};
-  MapStringString later_strings = %{"alpha": "two"};
+  MapStringString strings = {"alpha": "one"};
+  MapStringString later_strings = {"alpha": "two"};
   Map string_map = strings.map();
   Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
   strings.write_str(string_str); strings.write_repr(string_repr);
@@ -505,8 +505,8 @@ static void typed_map_common_capabilities_cover_every_family(void) {
     string_str, string_repr, strings.compare(later_strings));
   EXPECT_STR_EQ(string_map["alpha"].string(), "one");
 
-  MapStringInt string_ints = %{"alpha": 1};
-  MapStringInt later_string_ints = %{"alpha": 2};
+  MapStringInt string_ints = {"alpha": 1};
+  MapStringInt later_string_ints = {"alpha": 2};
   Map string_int_map = string_ints.map();
   Buffer string_int_str = Buffer.new(0), string_int_repr = Buffer.new(0);
   string_ints.write_str(string_int_str);
@@ -530,12 +530,12 @@ static void typed_map_common_capabilities_keep_null_and_float_order(void) {
   EXPECT_TRUE(missing.compare(empty) < 0);
   EXPECT_INT_EQ(missing.compare(NULL), 0);
 
-  MapLongDouble positive_zero = %{1L: 0.0};
-  MapLongDouble negative_zero = %{1L: -0.0};
+  MapLongDouble positive_zero = {1L: 0.0};
+  MapLongDouble negative_zero = {1L: -0.0};
   EXPECT_INT_EQ(positive_zero.compare(negative_zero),
                 Var.compare(0.0, -0.0));
-  MapLongDouble nan = %{1L: ${0.0 / 0.0}};
-  MapLongDouble infinity = %{1L: ${1.0 / 0.0}};
+  MapLongDouble nan = {1L: 0.0 / 0.0};
+  MapLongDouble infinity = {1L: 1.0 / 0.0};
   EXPECT_INT_EQ(nan.compare(infinity),
                 Var.compare(0.0 / 0.0, 1.0 / 0.0));
 }
@@ -574,13 +574,13 @@ static void typed_map_iterates_values_keys_and_pairs(void) {
   EXPECT_INT_EQ(pair_values, 60);
 
   MapStringString names = MapStringString.new();
-  names.set(%"ada", %"lovelace");
-  names.set(%"grace", %"hopper");
+  names.set("ada", "lovelace");
+  names.set("grace", "hopper");
   int lengths = 0;
   foreach(String value, names) lengths += value.len();
   EXPECT_INT_EQ(lengths, 14);
 
-  MapStringInt counts_by_name = %{"ada": 3, "grace": 5};
+  MapStringInt counts_by_name = {"ada": 3, "grace": 5};
   int total = 0;
   foreach (int value, counts_by_name) total += value;
   EXPECT_INT_EQ(total, 8);

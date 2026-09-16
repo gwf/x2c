@@ -92,7 +92,7 @@ line is not C, so they report an error for a script unit.
 #!/usr/bin/env -S x2c script
 static String greeting(String name) => %"hello, $name";
 
-String name = args ? args.car().string() : %"world";
+String name = args ? args.car().string() : "world";
 printf("%s\n", greeting(name));
 if (!args) return 1;
 ```
@@ -2400,7 +2400,7 @@ bind one name or destructure a key and value:
 ```x2c
 ~int main(void) {
 ~  List values = %(1 2 3);
-~  Map map = %{1: 10, 2: 20};
+~  Map map = {1: 10, 2: 20};
 ~  int total = 0;
 foreach(int value, values) total += value;
 foreach(int key, map.keys()) printf("%d\n", key);

@@ -7,7 +7,7 @@ tab: counting
 ```x2c
 // Files supply lines; each line supplies words.
 Map word_count(String path) {
-  Map counts = %{};
+  Map counts = {};
   File input = path.open("r");
   defer input.close();
   foreach (String line, input)

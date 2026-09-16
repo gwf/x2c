@@ -50,7 +50,7 @@ List Compiler.complete_iter_chain(Compiler compiler, List expression) {
           _iter_parameters_variadic(parameters))
         return expression;
 
-      Array completed = %[];
+      Array completed = [];
       List formal = parameters, actual = arguments;
       int supplied = arguments.len(), expected = formal.len();
       if (!formal ||
@@ -154,7 +154,7 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(
     <(>);
-  Array arguments = %[];
+  Array arguments = [];
   if (c.peek(0) == <)>) arguments.push(%(expr (void) ()));
   while (c.peek(0) != <)>) {
     List argument = c.try_parse_macro_slot(<argument>);
@@ -264,11 +264,11 @@ static String _delegate_type_name(Type type) {
 }
 
 static String _delegate_path_string(Type receiver, List path, String member) {
-  Array parts = %[];
+  Array parts = [];
   parts.push(_delegate_type_name(receiver));
   foreach (List step, path.cdr()) parts.push(step.caddr());
   if (member) parts.push(member);
-  return %".".join(parts.list_free());
+  return ".".join(parts.list_free());
 }
 
 static void _report_imported_method_ambiguity(
@@ -332,7 +332,7 @@ static void _find_delegate_methods(
 
 static List _resolve_delegate_method(
   Compiler compiler, Type receiver, String member, Token origin) {
-  Array found = %[], List first_cycle = NULL;
+  Array found = [], List first_cycle = NULL;
   _find_delegate_methods(
     compiler, receiver, member, NULL, NULL,
     found, &first_cycle, receiver, origin);
@@ -521,7 +521,7 @@ static List _parse_generic(Compiler c) {
   c.next();
   c.expect(<(>);
   List control = c.parse_assignment();
-  Array associations = %[];
+  Array associations = [];
   while (c.test(<,>)) {
     if (c.test(<default>)) {
       c.expect(<:>);
@@ -580,7 +580,7 @@ static void _generic_push_qualifiers(Array result, unsigned qualifiers) {
    uncollected typedef name, an enum, a reference, an array, function, or
    bitfield declarator, or an unnamed or block-scope aggregate. */
 static Type _generic_canonical(Type type, int *decidable) {
-  Array result = %[];
+  Array result = [];
   unsigned qualifiers = 0;
   for (Type rest = type; rest; rest = rest.cdr()) {
     Var head = rest.car();
@@ -913,7 +913,7 @@ static Type _parse_is_type(Compiler c, Token origin) {
 static int _expression_requires_resolution(Compiler compiler, Var value) {
   // The scan is an any-search; a worklist keeps deep operator chains from
   // costing one C frame per nesting level.
-  Array pending = $auto(%[]);
+  Array pending = $auto([]);
   pending.push(value);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -993,7 +993,7 @@ static int _converts_operands(Compiler compiler, Type type) {
 
 /* The typedef names `type` passes through, starting with itself. */
 static Array _typedef_names(Compiler compiler, Type type) {
-  Array names = %[];
+  Array names = [];
   int hops = 0;
   for (; type && (type.is_bare_typedef_name() || type.is_typedef());
        type = compiler.sym.next_typedef(type, &hops))
@@ -1351,7 +1351,7 @@ static List _method_bind(
 
 static List _resolve_call_arguments(
   Compiler compiler, List receiver, List supplied, Token origin) {
-  Array arguments = %[];
+  Array arguments = [];
   if (receiver) arguments.push(receiver);
   if (!receiver && !supplied) supplied = %((expr (void) ()));
   if (receiver && supplied === %((expr (void) ()))) supplied = NULL;
@@ -1442,7 +1442,7 @@ static List _resolve_func_call(
   match (arguments)
     case %((expr (void) ())): arguments = NULL;
   List storage = NULL;
-  Array locals = %[], values = %[];
+  Array locals = [], values = [];
   List invoked = callee;
   String count_text = %"${arguments.len()}";
   List count = %(
@@ -1754,7 +1754,7 @@ static List _constant_row_test(
   Compiler c, List lhs, Symbol tag, Token origin) {
   unsigned long top, mask, bottom;
   if (!Type.var_tag_row(tag, &top, &mask, &bottom)) return NULL;
-  List callee = _resolve_identifier(c, %"Var_is_row", NULL, origin);
+  List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
   return %(expr (int) (call $callee (args $lhs
     (expr (unsigned) (literal (unsigned) ${%"$top"}))
     (expr (unsigned long) (literal (unsigned long) ${%"$mask"}))
@@ -1808,14 +1808,14 @@ static List _resolve_content(
         c.lift_macro_lisp_expression(value, origin), origin);
     }
     case %(map *entries): {
-      Array resolved = %[];
+      Array resolved = [];
       foreach (Var entry, entries)
         foreach (Var row, c.evaluate_macro_rows(entry))
           resolved.push(c.resolve_map_entry(row, origin));
       return %(expr $input_type (map @{resolved.list_free()}));
     }
     case %(segments *items): {
-      Array resolved = %[];
+      Array resolved = [];
       Type type = %("String");
       foreach (List item, items) match (item) {
         case %((!set ?tag (!or segvar segexp)) ?value): {
@@ -1872,7 +1872,7 @@ static List _resolve_content(
                (getindex ${c.resolve_expression(receiver, origin)}
                          ${c.resolve_expression(selector, origin)}));
     case %(dstrasgn (targets *targets) ?source): {
-      Array resolved = %[];
+      Array resolved = [];
       foreach (List target, targets)
         resolved.push(c.resolve_expression(target, origin));
       source = c.resolve_expression(source, origin);
@@ -1887,7 +1887,7 @@ static List _resolve_content(
                (sizeof ${c.resolve_expression(argument, origin)}));
     case %(generic ?control *associations): {
       control = c.resolve_expression(control, origin);
-      Array resolved = %[];
+      Array resolved = [];
       foreach (List association, associations) match (association)
         case %(association ?selector ?value):
           resolved.push(%(association $selector
@@ -1906,7 +1906,7 @@ static List _resolve_content(
                (va-arg ${c.resolve_expression(argument, origin)}
                        ${c.resolve_expression(declaration, origin)}));
     case %(commas *expressions): {
-      Array resolved = %[];
+      Array resolved = [];
       foreach (List expression, expressions)
         resolved.push(c.resolve_expression(expression, origin));
       List values = resolved.list_free();
@@ -1918,7 +1918,7 @@ static List _resolve_content(
       return %(expr $input_type
                (splice ${c.resolve_expression(expression, origin)}));
     case %(array *elements): {
-      Array resolved = %[];
+      Array resolved = [];
       foreach (List element, elements)
         resolved.push(c.resolve_expression(element, origin));
       return %(expr $input_type (array @{resolved.list_free()}));
@@ -1940,9 +1940,9 @@ static List _resolve_content(
     case %(initval *choices): {
       List header = NULL;
       List cases = Ast.initializer_cases(content, &header);
-      Array resolved = %[];
+      Array resolved = [];
       if (header) {
-        Array inputs = %[];
+        Array inputs = [];
         foreach (List argument, header.cdr()) {
           List value = c.resolve_expression(argument.cadr(), origin);
           inputs.push(%(${argument.car()} $value));
@@ -1958,7 +1958,7 @@ static List _resolve_content(
       return %(expr $input_type (initval @{resolved.list_free()}));
     }
     case %(composite (commas *elements)): {
-      Array values = %[];
+      Array values = [];
       foreach (List element, elements)
         values.push(_resolve_initializer(c, element, origin));
       return %(expr $input_type
@@ -1985,14 +1985,14 @@ static List _resolve_content(
           <type>, "operator 'is' requires Var on the left",
           origin, %("operand type: ${lhs_type.repr()}"));
       if (target === %(void) || target === %("Void")) {
-        List callee = _resolve_identifier(c, %"Var_is_void", NULL, origin);
+        List callee = _resolve_identifier(c, "Var_is_void", NULL, origin);
         return %(expr (int) (call $callee (args $lhs)));
       }
       Symbol vartag = c.require_var_tag(target, origin);
       List direct = _constant_row_test(c, lhs, vartag, origin);
       if (direct) return direct;
       String tagsym = %"${(unsigned long) vartag}";
-      List callee = _resolve_identifier(c, %"Var_is", NULL, origin);
+      List callee = _resolve_identifier(c, "Var_is", NULL, origin);
       return %(expr (int) (call $callee (args
         $lhs (expr ("Symbol") $tagsym))));
     }
@@ -2017,7 +2017,7 @@ static List _resolve_content(
           List direct = _constant_row_test(c, lhs, tag, origin);
           if (direct) return direct;
         }
-      List callee = _resolve_identifier(c, %"Var_is", NULL, origin);
+      List callee = _resolve_identifier(c, "Var_is", NULL, origin);
       return %(expr (int) (call $callee (args $lhs $selector)));
     }
     case %(index ?receiver ?selector): {
@@ -2264,7 +2264,7 @@ static List _destructure_assignment_targets(Compiler compiler, List lhs) {
 }
 
 static List _parse_comma_list(Compiler compiler) {
-  Array expressions = %[];
+  Array expressions = [];
   do {
     compiler.expect(<,>);
     expressions.push(compiler.parse_assignment());
@@ -2328,7 +2328,7 @@ static int _brace_starts_map(Compiler compiler) {
 /* A bracket in operand position builds an Array of evaluated elements. */
 static List _parse_bracket_array(Compiler compiler) {
   compiler.expect(<[>);
-  Array elements = %[];
+  Array elements = [];
   while (compiler.peek(0) != <]>) {
     elements.push(compiler.parse_assignment());
     if (!compiler.test(<,>)) break;
@@ -2338,7 +2338,7 @@ static List _parse_bracket_array(Compiler compiler) {
 }
 
 static List _parse_composite_elements(Compiler compiler) {
-  Array elements = %[];
+  Array elements = [];
   while (compiler.peek(0) != <"}">) {
     List element =
       _test_dot_init(compiler) ||
@@ -2423,13 +2423,13 @@ List Compiler.parse_assignment(Compiler compiler) =>
 static List _parse_c_string_literals(Compiler compiler) {
   List first = compiler.parse_atomic_literal();
   if (compiler.peek(0) != <lit-char*>) return first;
-  Array spellings = %[];
+  Array spellings = [];
   spellings.push(first.caddr().caddr());
   while (compiler.peek(0) == <lit-char*>) {
     spellings.push(compiler.token.text);
     compiler.next();
   }
-  String text = %" ".join(spellings.list_free());
+  String text = " ".join(spellings.list_free());
   return %(expr (* char) (literal (* char) $text));
 }
 
@@ -2898,7 +2898,7 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
     case %((!set ?kind (!or struct union)) ?name (fields *)):
       reference = %($kind $name);
   }
-  Array definitions = %[], references = %[];
+  Array definitions = [], references = [];
   for (List rest = type; rest !== base; rest = rest.cdr()) {
     Var modifier = rest.car(), reused = modifier;
     match (modifier)
@@ -3077,8 +3077,8 @@ static void _initializer_next(
 }
 
 static List _initializer_merge(Array states) {
-  Map positions = %{};
-  Array merged = %[];
+  Map positions = {};
+  Array merged = [];
   foreach (List state, states) {
     (List condition, List path, int available) = state;
     List key = %($path $available);
@@ -3206,7 +3206,7 @@ static List _initializer_layout(
     return %($type $count ((${path.car()} $child)));
   }
   if (owner.car() == <union>) return NULL;
-  Array children = %[];
+  Array children = [];
   List count = NULL;
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {
@@ -3304,7 +3304,7 @@ static List _initializer_scalar_rows(
   List layout = _initializer_layout(c, root, target, string, &symbolic);
   if (!layout || !symbolic) return NULL;
   int array = c.sym.resolve_key(root).is_array();
-  Array rows = %[];
+  Array rows = [];
   unsigned long long at = 0;
   foreach (List value, items) {
     String spelling = %"${at++}ULL";
@@ -3313,7 +3313,7 @@ static List _initializer_scalar_rows(
     List count = layout.cadr();
     List condition = array ? %(expr (int)
       (op < $ordinal (expr (unsigned long long) (parens $count)))) : NULL;
-    Array cases = %[];
+    Array cases = [];
     _initializer_ordinal(layout, ordinal, NULL, condition, value, cases);
     cases.push(%(() () () $value));
     rows.push(%($value ${cases.list_free()}));
@@ -3330,7 +3330,7 @@ List Compiler.initializer_rows(
   Compiler c, Type root, List items, List target) {
   List scalar = _initializer_scalar_rows(c, root, items, target);
   if (scalar) return scalar;
-  Array rows = %[];
+  Array rows = [];
   List first_path = _initializer_first(c, root, NULL);
   Type resolved_root = c.sym.resolve_key(root);
   int available = !!first_path || resolved_root.scalar() ||
@@ -3347,7 +3347,7 @@ List Compiler.initializer_rows(
       case %(expr ? (!set ?body (initval *))): {
         List header = NULL;
         List choices = Ast.initializer_cases(body.list(), &header);
-        Array following = %[];
+        Array following = [];
         foreach (List choice, choices) {
           (List condition, List path, Type type, List input) = choice;
           _initializer_next(c, target, path, condition, following);
@@ -3357,7 +3357,7 @@ List Compiler.initializer_rows(
         first = 0;
         continue;
       }
-    Array cases = %[], following = %[];
+    Array cases = [], following = [];
     foreach (List state, states) {
       (List condition, List path, int available) = state;
       Type type = available ? _initializer_type(path, root) : NULL;
@@ -3487,7 +3487,7 @@ static List _initializer_capture_leaves(
     case %((!set ?kind (!or dotinit indexinit)) ?key ?inner):
       return %($kind $key ${_initializer_capture_leaves(c, inner, inputs)});
     case %(expr ?type (composite (commas *items))): {
-      Array captured = %[];
+      Array captured = [];
       foreach (List item, items)
         captured.push(_initializer_capture_leaves(c, item, inputs));
       return %(expr $type (composite (commas @{captured.list_free()})));
@@ -3540,7 +3540,7 @@ static List _initializer_adapters(
   Compiler c, List source, List choices, List placeholder) {
   Type from = _initializer_value_type(c, source.cadr());
   if (!from || !ast_contains_head(source, <fields>)) return NULL;
-  Array prepared = %[];
+  Array prepared = [];
   foreach (List choice, choices) {
     (List condition, List path, Type destination, List value) = choice;
     if (destination && !_initializer_value_type(c, destination)) {
@@ -3560,7 +3560,7 @@ static List _initializer_adapters(
     }
     prepared.push(%($condition $path $destination $value));
   }
-  Array adapted = %[];
+  Array adapted = [];
   foreach (List choice, prepared.list_free()) {
     (List condition, List path, Type destination, List value) = choice;
     List adapter = _initializer_adapter(c, source, value);
@@ -3598,7 +3598,7 @@ static List _convert_composite(
     native_target = %(expr $target (parens (expr $target
       (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
   }
-  Array rows = %[], elements = %[];
+  Array rows = [], elements = [];
   List items = expr.caddr().cadr().list().cdr();
   int initialized = 0, discarded = 0;
   foreach (List row, compiler.initializer_rows(target, items, native_target)) {
@@ -3657,7 +3657,7 @@ static List _convert_composite(
     if (terminal.match(%(expr ? (initval *)))) {
       if (row_condition === parent_condition) elements.push(original);
       else {
-        Array checked = %[];
+        Array checked = [];
         foreach (List choice, cases) {
           (List condition, List path, Type destination, List input) = choice;
           List slot = compiler.initializer_slot(native_target, path);
@@ -3686,7 +3686,7 @@ static List _convert_composite(
       elements.push(_initializer_replace(original, converted));
     }
     else {
-      Array converted = %[], captured = %[];
+      Array converted = [], captured = [];
       List source = value, prepared = value;
       if (value.match(%(expr ? (composite *))))
         prepared = _initializer_capture_leaves(compiler, value, captured);
@@ -3719,7 +3719,7 @@ static List _convert_composite(
       List values = converted.list_free();
       List adapted = _initializer_adapters(compiler, source, values, placeholder);
       if (adapted) values = adapted;
-      Array replaced = %[];
+      Array replaced = [];
       List inputs = captured.list_free();
       int uses_input = !!adapted;
       foreach (List choice, values) {

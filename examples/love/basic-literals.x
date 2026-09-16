@@ -3,14 +3,14 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-  Map m = %{
+  Map m = {
     foo: 1,
     bar: 2,
     baz: 3
   };
   List l = %(a b c);
-  Array a = %["hello", "world", 42];
-  String s = %"this is a string";
+  Array a = ["hello", "world", 42];
+  String s = "this is a string";
 
   printf("Map m: %s\n", Map.repr(m));
   printf("List l: %s\n", List.repr(l));

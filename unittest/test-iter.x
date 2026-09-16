@@ -55,7 +55,7 @@ static long _iter_long_pair(long left, long right) {
 }
 
 static Var _iter_truthy_string(Var value) {
-  return value > 1 ? %"yes" : NULL;
+  return value > 1 ? "yes" : NULL;
 }
 
 static Var _iter_raise(Var value) {
@@ -108,7 +108,7 @@ static void iter_rejects_void_from_source(void) {
 static void iter_empty_and_unsupported_status(void) {
   $test.scoped();
   Var out;
-  Array empty = %[];
+  Array empty = [];
   struct Iter empty_storage;
   Iter empty_iter = empty.iter(&empty_storage);
   EXPECT_FALSE(empty_iter.try_next(&out));
@@ -414,7 +414,7 @@ static void iter_rejects_invalid_ranges_and_unzip_rows(void) {
 static void iter_chain_unique(void) {
   $test.scoped();
   Var one = 1, two = 2, three = 3, four = 4;
-  Array values = Array.update_n(%[], 5, one, one, two, two, three);
+  Array values = Array.update_n([], 5, one, one, two, two, three);
   struct Iter values_iter, uniq_iter;
   Iter uniq = values.iter(&values_iter).unique(&uniq_iter);
   Array collected = Array.new();
@@ -526,7 +526,7 @@ static void iter_accumulate_and_aggregates(void) {
   Iter min_iter = range(1, 5, 1, &min_storage);
   EXPECT_INT_EQ(min_iter.min().int(), 1);
 
-  Array empty = %[];
+  Array empty = [];
   struct Iter empty_reduce_storage;
   Iter empty_reduce = empty.iter(&empty_reduce_storage);
   EXPECT_TRUE(empty_reduce.reduce(add_values, void) is void);
@@ -542,46 +542,46 @@ static void iter_accumulate_and_aggregates(void) {
 
 static void iter_aggregates_preserve_var_semantics(void) {
   $test.scoped();
-  Array floats = %[
-    ${Var.new(<f32>, 1.25)}, ${Var.new(<f64>, 2.5)},
-    ${Var.box_long_double(3.0L)}
+  Array floats = [
+    Var.new(<f32>, 1.25), Var.new(<f64>, 2.5),
+    Var.box_long_double(3.0L)
   ];
   struct Iter sum_storage;
   Var sum = floats.iter(&sum_storage).sum();
   EXPECT_TRUE(sum is <ldouble>);
   EXPECT_TRUE(sum.long_double_value() == 6.75L);
 
-  Array products = %[${Var.box_long_double(1.5L)}, ${Var.new(<ulong>, 2)}];
+  Array products = [Var.box_long_double(1.5L), Var.new(<ulong>, 2)];
   struct Iter product_storage;
   Var product = products.iter(&product_storage).product();
   EXPECT_TRUE(product is <ldouble>);
   EXPECT_TRUE(product.long_double_value() == 3.0L);
 
   unsigned long long wide_value = (unsigned long long) LONG_MAX + 1ULL;
-  Array wide = %[${Var.box_ulong_long(wide_value)}, ${Var.box_ulong_long(2)}];
+  Array wide = [Var.box_ulong_long(wide_value), Var.box_ulong_long(2)];
   struct Iter wide_sum_storage;
   Var wide_sum = wide.iter(&wide_sum_storage).sum();
   EXPECT_TRUE(wide_sum is <ullong>);
   EXPECT_TRUE(wide_sum.ulong_long_value() == wide_value + 2);
 
-  Array negatives = %[
-    ${Var.new(<f64>, -4.5)}, ${Var.new(<f64>, -2.25)},
-    ${Var.new(<f64>, -3.0)}
+  Array negatives = [
+    Var.new(<f64>, -4.5), Var.new(<f64>, -2.25),
+    Var.new(<f64>, -3.0)
   ];
   struct Iter max_storage, min_storage;
   EXPECT_TRUE(negatives.iter(&max_storage).max().floating() == -2.25);
   EXPECT_TRUE(negatives.iter(&min_storage).min().floating() == -4.5);
 
-  Array strings = %[ "z", "a", "m" ];
+  Array strings = [ "z", "a", "m" ];
   struct Iter string_max_storage, string_min_storage;
   EXPECT_STR_EQ(strings.iter(&string_max_storage).max().string(), "z");
   EXPECT_STR_EQ(strings.iter(&string_min_storage).min().string(), "a");
 
   Var integer = 7;
-  Var string = %"seven";
+  Var string = "seven";
   Var expected_max = integer > string ? integer : string;
   Var expected_min = integer < string ? integer : string;
-  Array mixed = %[$integer, $string];
+  Array mixed = [integer, string];
   struct Iter mixed_max_storage, mixed_min_storage;
   EXPECT_VAR_EQ(mixed.iter(&mixed_max_storage).max(), expected_max);
   EXPECT_VAR_EQ(mixed.iter(&mixed_min_storage).min(), expected_min);
@@ -668,7 +668,7 @@ static void iter_fold_predicates_and_zip_with(void) {
 static void iter_var_iter_into(void) {
   $test.scoped();
   Var seven = 7, eight = 8, nine = 9;
-  Array arr = Array.update_n(%[], 3, seven, eight, nine);
+  Array arr = Array.update_n([], 3, seven, eight, nine);
   struct Iter arr_iter_storage;
   Iter arr_iter = Var.iter(arr, &arr_iter_storage);
   EXPECT_INT_EQ(arr_iter.next().int(), 7);
@@ -684,7 +684,7 @@ static void iter_var_iter_into(void) {
   EXPECT_INT_EQ(list_iter.next().int(), 3);
   EXPECT_TRUE(list_iter.next() is void);
 
-  String str = %"ab";
+  String str = "ab";
   struct Iter str_iter_storage;
   Iter str_iter = Var.iter(str, &str_iter_storage);
   EXPECT_INT_EQ(str_iter.next().int(), 'a');

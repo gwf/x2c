@@ -25,10 +25,10 @@ static int next_byte(char ch) {
 int main(void) {
   int fast_count = 5000000, build_count = 200000, callback_count = 5000;
   volatile unsigned long sink = 0;
-  String canonical = %"canonical benchmark string";
-  String left = %"compiler-", right = %"runtime";
-  String dense = %"abxxabxxabxxabxxabxxabxxabxxabxx";
-  String count_text = %"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  String canonical = "canonical benchmark string";
+  String left = "compiler-", right = "runtime";
+  String dense = "abxxabxxabxxabxxabxxabxxabxxabxx";
+  String count_text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   List words = %("alpha" "beta" "gamma" "delta");
   uint64_t start;
 
@@ -42,7 +42,7 @@ int main(void) {
   result("intern-duplicate", now_ns() - start, build_count);
 
   start = now_ns();
-  for (int i = 0; i < build_count; i++) sink += count_text.count(%"aa");
+  for (int i = 0; i < build_count; i++) sink += count_text.count("aa");
   result("count-dense", now_ns() - start, build_count);
 
   start = now_ns();
@@ -50,17 +50,17 @@ int main(void) {
   result("concat", now_ns() - start, build_count);
 
   start = now_ns();
-  for (int i = 0; i < build_count; i++) sink += %"-".join(words).len();
+  for (int i = 0; i < build_count; i++) sink += "-".join(words).len();
   result("join", now_ns() - start, build_count);
 
   start = now_ns();
   for (int i = 0; i < build_count; i++)
-    sink += dense.replace(%"ab", %"wxyz").len();
+    sink += dense.replace("ab", "wxyz").len();
   result("replace-dense", now_ns() - start, build_count);
 
   start = now_ns();
   for (int i = 0; i < build_count; i++)
-    sink += dense.replace(%"ab", NULL).len();
+    sink += dense.replace("ab", NULL).len();
   result("replace-delete", now_ns() - start, build_count);
 
   start = now_ns();

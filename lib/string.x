@@ -542,7 +542,7 @@ int String.rfind(String str, String sub) {
 */
 List String.find_all(String str, String sub, int start, int end) {
   if (!str || !sub) return %();
-  Array results = %[], int n = sub.len(), pos = start;
+  Array results = [], int n = sub.len(), pos = start;
   while (pos >= 0) {
     pos = str.find_within(sub, pos, end);
     if (pos >= 0) {
@@ -1321,7 +1321,7 @@ String String.str(String str) => str;
 */
 String String.repr(String str) {
   if (!str || !*str) return "\"\"";
-  return %"\"%s\"".printf(str.escape());
+  return "\"%s\"".printf(str.escape());
 }
 
 /** Appends `str` to `out` unchanged.

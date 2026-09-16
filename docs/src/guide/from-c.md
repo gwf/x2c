@@ -142,13 +142,13 @@ When failure or absence is expected, use the operation that reports it
 separately:
 
 ```x2c
-Map settings = %{theme: "dark"};
+Map settings = {theme: "dark"};
 Var found;
 if (settings.try_get(<theme>, &found))
   printf("theme=%s\n", found);
 
 long number;
-if (!%"not a number".try_long(&number))
+if (!"not a number".try_long(&number))
   printf("invalid integer\n");
 ```
 

@@ -222,7 +222,7 @@ static int _check(String artifacts, String out) {
                         _zero_state(streams), &ended);
   adam.zero_grad();
   loss.backward();
-  Map step1 = %{};
+  Map step1 = {};
   step1["probe.loss"] = loss;
   step1["probe.state"] = ended.detach();
   foreach (List pair, model.named_parameters()) {
@@ -249,7 +249,7 @@ static int _check(String artifacts, String out) {
   {
     Scope.retain();
     defer Scope.release();
-    Map final = %{};
+    Map final = {};
     foreach (List pair, trained.named_parameters()) {
       String name = pair[0].str();
       final[%"final.$name"] = pair[1].tensor().clone();

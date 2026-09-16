@@ -13,7 +13,7 @@ static Var _tree(int item, int depth) {
   if (!depth) return item;
   Var left = _tree(item * 2 - 1, depth - 1);
   Var right = _tree(item * 2, depth - 1);
-  return %[$item, $left, $right];
+  return [item, left, right];
 }
 
 static int _sum(Var tree) {

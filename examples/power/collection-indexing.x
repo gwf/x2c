@@ -12,7 +12,7 @@ int main(void) {
   ptr[3] = raw_first + ptr_second;
 
   // Built-in Array indexing and explicit helper calls (Var-typed elements).
-  Array arr = %[10, 20, 30, 40, 50];
+  Array arr = [10, 20, 30, 40, 50];
   Var arr_zero = arr[0];              // RHS get-index
   Var arr_neg = arr[-1];              // RHS negative index
   Var arr_call = arr.getindex(2);     // Explicit method call

@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   Tensor output = Tensor.custom(_swish, _gradient, %($input));
   output.square().sum().backward_callbacks();
   Tensor gradient = input.grad();
-  Map values = %{};
+  Map values = {};
   values["input"] = input;
   values["output"] = output;
   values["gradient"] = gradient;

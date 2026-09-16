@@ -28,7 +28,7 @@ static List _decl_params_from_types_with_names(List types, List names) {
 
 // Build fresh binding identities a0..aN.
 static List _auto_names(Compiler compiler, int count) {
-  Array out = %[];
+  Array out = [];
   for (int index = 0; index < count; index++) {
     String pname = %"a$index";
     out.push(compiler.sym.introduce(pname));
@@ -40,7 +40,7 @@ static List _auto_names(Compiler compiler, int count) {
 // Preserve typed declarators; bare lambda parameters remain Var.
 static List _params_to_decl_params(List names) {
   if (!names) return %(params (param (void) (bind () ()))) ;
-  Array out = %[];
+  Array out = [];
   foreach(Var item, names)
     match (item) {
       case %(!set ?identity (binding ? ?)):
@@ -52,7 +52,7 @@ static List _params_to_decl_params(List names) {
 }
 
 static int _collect_param_types(List raw_params, List *out_types) {
-  Array types = %[], int all_var = 1;
+  Array types = [], int all_var = 1;
   foreach(Var entry, raw_params) {
     Var ptype = entry;
     match (entry)
@@ -96,10 +96,10 @@ static void _typed_adapter_error(
   Compiler compiler, String message, Type target, Type source, List details) {
   String target_note = target
     ? %"target signature: ${target.repr()}"
-    : %"target signature: unresolved";
+    : "target signature: unresolved";
   String source_note = source
     ? %"source signature: ${source.repr()}"
-    : %"source signature: unresolved";
+    : "source signature: unresolved";
   compiler.report_error(
     <type>, message, NULL,
     %($target_note $source_note @details));
@@ -125,7 +125,7 @@ static List _callback_function(
   List names = _auto_names(compiler, parameters.len());
   List declaration_params =
     _decl_params_from_types_with_names(parameters, names);
-  Array arguments = %[];
+  Array arguments = [];
   for (; parameters;
        parameters = parameters.cdr(),
        source_parameters = source_parameters.cdr(),
@@ -206,7 +206,7 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
     int target_count = target_params.len(), source_count = source_params.len();
     if (target_count != source_count) {
       String detail =
-        %"target has %d parameters; source has %d".printf(
+        "target has %d parameters; source has %d".printf(
           target_count, source_count);
       _typed_adapter_error(
         c, "typed callback adapter arity mismatch",
@@ -232,7 +232,7 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
       Type source_param = sources.car();
       if (!_typed_adapter_parameter_allowed(c, target_param, source_param)) {
         String detail =
-          %"parameter %d: %s cannot adapt to %s".printf(
+          "parameter %d: %s cannot adapt to %s".printf(
             index + 1, target_param.repr(), source_param.repr());
         _typed_adapter_error(
           c, "typed callback adapter parameter mismatch",
@@ -317,7 +317,7 @@ static List _func_signature_literal(Compiler compiler, Type type) {
   List params = NULL;
   Type result = NULL;
   _typed_function_parts(type, &params, &result);
-  Array normalized = %[];
+  Array normalized = [];
   foreach (List parameter, params) {
     Type ptype = parameter.type().declared();
     if (ptype.car() == <&>)
@@ -374,10 +374,10 @@ static List _func_argument_locals(
   List fn_binding, List argv_binding) {
   List value_type = NULL, reference_type = NULL;
   List value_helper = _adapter_helper(
-    compiler, %"x2c_func_value_argument", &value_type);
+    compiler, "x2c_func_value_argument", &value_type);
   List reference_helper = _adapter_helper(
-    compiler, %"x2c_func_reference_argument", &reference_type);
-  Array locals = %[];
+    compiler, "x2c_func_reference_argument", &reference_type);
+  Array locals = [];
   int index = 0;
   foreach (Type type, types) {
     List binding = names.car();
@@ -565,7 +565,7 @@ static List _indirect_func_adapter(
   Type context_pointer = %(* const $context_name);
   List context_helper_type = NULL;
   List context_helper = _adapter_helper(
-    compiler, %"Func_context", &context_helper_type);
+    compiler, "Func_context", &context_helper_type);
   if (!context_helper || !context_helper_type) {
     _typed_adapter_error(
       compiler, "native binding needs Func.context from lib/func.x",
@@ -616,7 +616,7 @@ static List _direct_func_handle(
   List signature = _func_signature_literal(compiler, source_type);
   List constructor_type = NULL;
   List constructor = _adapter_helper(
-    compiler, %"Func_new", &constructor_type);
+    compiler, "Func_new", &constructor_type);
   if (!constructor || !constructor_type) {
     _typed_adapter_error(
       compiler, "function conversion needs Func.new from lib/func.x",
@@ -639,7 +639,7 @@ static List _direct_func_handle(
 }
 
 static List _func_bridge_binding(Compiler compiler, String stem) {
-  String hash = %"%08x".printf(compiler.filename.hash());
+  String hash = "%08x".printf(compiler.filename.hash());
   return compiler.sym.introduce(
     compiler.fresh_name(%"${stem}_$hash"));
 }
@@ -707,7 +707,7 @@ static List _indirect_func_value(
   List signature = _func_signature_literal(compiler, pointer_type);
   List constructor_type = NULL;
   List constructor = _adapter_helper(
-    compiler, %"Func_new_context", &constructor_type);
+    compiler, "Func_new_context", &constructor_type);
   if (!constructor || !constructor_type) {
     _typed_adapter_error(
       compiler,
@@ -944,7 +944,7 @@ static List _entry_binding(List entry) {
 }
 
 static List _signature(Compiler compiler, List entries) {
-  Array types = %[];
+  Array types = [];
   foreach (List entry, entries)
     types.push(_entry_type(compiler, entry));
   List parameter_types = entries ? types.list_free() : %((void));
@@ -987,7 +987,7 @@ static void _record_region_binding(
 static void _collect_region_bindings(
   Compiler compiler, List ast, Map owned, Array order) {
   if (!ast) return;
-  Array resume = $auto(%[]);
+  Array resume = $auto([]);
   for (;;) {
     int pruned = 0;
     match (ast) {
@@ -1048,7 +1048,7 @@ static void _require_capture_lvalue(Compiler c, List target) {
 */
 void Compiler.check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
-  Array pending = $auto(%[]);
+  Array pending = $auto([]);
   pending.push(ast);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -1080,7 +1080,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
 
 static void _collect_reference_captures(
   List ast, Map owned, Map candidates) {
-  Array pending = $auto(%[]);
+  Array pending = $auto([]);
   pending.push(ast);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -1169,7 +1169,7 @@ static List _rewrite_lambda_declaration(
   }
   if (!has_cell) return NULL;
 
-  Array sequence = %[];
+  Array sequence = [];
   foreach (List item, bindings) {
     List binding = NULL, initializer = NULL;
     match (item) {
@@ -1250,7 +1250,7 @@ static List _prepare_nested_lambda_regions(
 
 static List _parameter_setup(
   Compiler compiler, List entries, Map cells) {
-  Array setup = %[];
+  Array setup = [];
   foreach (List entry, entries) {
     List binding = _entry_binding(entry);
     List cell = NULL;
@@ -1284,19 +1284,19 @@ static List _prepare_lambda_region(
   Compiler compiler, List entries, List body) {
   if (!ast_contains_head(body, <lambda>)) return body;
   body = _prepare_nested_lambda_regions(compiler, body);
-  Map owned = %{};
-  Array order = %[];
+  Map owned = {};
+  Array order = [];
   foreach (List entry, entries)
     _record_region_binding(
       compiler, _entry_binding(entry), owned, order);
   _collect_region_bindings(
     compiler, body, owned, order);
 
-  Map candidates = %{};
+  Map candidates = {};
   _collect_reference_captures(body, owned, candidates);
   if (!candidates.len()) return body;
 
-  Map cells = %{};
+  Map cells = {};
   foreach (List binding, order) {
     Var stored_type;
     if (!candidates.try_get(binding, &stored_type)) continue;
@@ -1464,9 +1464,9 @@ static List _lower_captured_lambda(
   compiler.semantic_binding_facts()[%(type $environment_local)] =
     environment_pointer_type;
 
-  Map slots = %{};
-  Array fields = %[], field_types = %[];
-  Array capture_locals = %[], field_values = %[];
+  Map slots = {};
+  Array fields = [], field_types = [];
+  Array capture_locals = [], field_values = [];
   foreach (List capture, captures)
     match (capture)
       case %(capture ?binding ?captured_type ?expression): {
@@ -1502,9 +1502,9 @@ static List _lower_captured_lambda(
 
   List context_type = NULL, constructor_type = NULL;
   List context_helper = _adapter_helper(
-    compiler, %"Func_context", &context_type);
+    compiler, "Func_context", &context_type);
   List constructor = _adapter_helper(
-    compiler, %"Func_new_context", &constructor_type);
+    compiler, "Func_new_context", &constructor_type);
   Type adapter_type = compiler.sym.resolve_key(%("FuncAdapter"));
   List types = entries.map(
     %!(List entry) => _entry_type(compiler, entry));
@@ -1533,7 +1533,7 @@ static List _lower_captured_lambda(
   List signature = _signature(compiler, entries);
   if (compiler.inline_header) {
     List bridge = _func_bridge_binding(compiler, "func_from_capture");
-    Array parameters = %[], factory_values = %[];
+    Array parameters = [], factory_values = [];
     foreach (Type field_type, field_types) {
       List parameter = compiler.sym.introduce(
         compiler.fresh_name("lambda_capture"));

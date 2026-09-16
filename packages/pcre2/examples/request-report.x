@@ -9,14 +9,14 @@ int main(void) {
   );
   defer request.free();
 
-  Regexp api_path = Regexp.compile(%"^/api/", PCRE2_UTF | PCRE2_UCP);
+  Regexp api_path = Regexp.compile("^/api/", PCRE2_UTF | PCRE2_UCP);
   defer api_path.free();
   Regexp parameter = Regexp.compile(
-    %"(?:[?&])(?<name>[^=&]+)=(?<value>[^&]*)",
+    "(?:[?&])(?<name>[^=&]+)=(?<value>[^&]*)",
     PCRE2_UTF | PCRE2_UCP
   );
   defer parameter.free();
-  Regexp token = Regexp.compile(%"token=[^& ]+", PCRE2_UTF | PCRE2_UCP);
+  Regexp token = Regexp.compile("token=[^& ]+", PCRE2_UTF | PCRE2_UCP);
   defer token.free();
 
   List lines = %(
@@ -25,7 +25,7 @@ int main(void) {
     "GET /api/releases?channel=beta HTTP/1.1 503"
     "not a request"
   );
-  Map methods = %{};
+  Map methods = {};
   int api_requests = 0;
 
   foreach(String line, lines) {
@@ -49,7 +49,7 @@ int main(void) {
     foreach(RegexpMatch field, parameter.find_all(path))
       printf("%s", %"  query ${field[<name>]}=${field[2]}\n");
 
-    String safe = token.replace_all(line, %"token=[redacted]");
+    String safe = token.replace_all(line, "token=[redacted]");
     printf("%s", %"  safe $safe\n");
   }
 

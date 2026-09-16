@@ -22,7 +22,7 @@ static void symbol_length_boundaries(void) {
   Symbol seven = <"Token@!">;
   EXPECT_INT_EQ(seven.len(), 7);
   String copy = seven;
-  EXPECT_TRUE(copy == %"Token@!");
+  EXPECT_TRUE(copy == "Token@!");
 }
 
 static void symbol_invalid_inputs(void) {
@@ -34,19 +34,19 @@ static void symbol_invalid_inputs(void) {
 
 static void symbol_try_new_requires_exact_spelling(void) {
   Symbol symbol = <unchanged>;
-  EXPECT_TRUE(Symbol.try_new(%"abcdefghij", &symbol));
+  EXPECT_TRUE(Symbol.try_new("abcdefghij", &symbol));
   EXPECT_TRUE(symbol == <abcdefghij>);
   EXPECT_TRUE(Symbol.try_new(NULL, &symbol));
   EXPECT_INT_EQ(symbol, 0);
 
   symbol = <unchanged>;
-  EXPECT_FALSE(Symbol.try_new(%"read_only", &symbol));
+  EXPECT_FALSE(Symbol.try_new("read_only", &symbol));
   EXPECT_TRUE(symbol == <unchanged>);
-  EXPECT_FALSE(Symbol.try_new(%"abcdefghijk", &symbol));
+  EXPECT_FALSE(Symbol.try_new("abcdefghijk", &symbol));
   EXPECT_TRUE(symbol == <unchanged>);
-  EXPECT_FALSE(Symbol.try_new(%"Token@!!", &symbol));
+  EXPECT_FALSE(Symbol.try_new("Token@!!", &symbol));
   EXPECT_TRUE(symbol == <unchanged>);
-  EXPECT_FALSE(Symbol.try_new(%"exact", NULL));
+  EXPECT_FALSE(Symbol.try_new("exact", NULL));
 }
 
 static void symbol_truncates_5bit_preferred(void) {
@@ -54,7 +54,7 @@ static void symbol_truncates_5bit_preferred(void) {
   Symbol longish = Symbol.new("abcdefghijklmno");
   EXPECT_TRUE(longish == prefix);
   String decoded = longish;
-  EXPECT_TRUE(decoded == %"abcdefghij");
+  EXPECT_TRUE(decoded == "abcdefghij");
 }
 
 static void symbol_truncates_mixed_to_7bit(void) {
@@ -63,7 +63,7 @@ static void symbol_truncates_mixed_to_7bit(void) {
   EXPECT_TRUE(mixed == truncated);
   EXPECT_INT_EQ(mixed.len(), 7);
   String decoded = mixed;
-  EXPECT_TRUE(decoded == %"abc@def");
+  EXPECT_TRUE(decoded == "abc@def");
 }
 
 static void symbol_repr_variants(void) {

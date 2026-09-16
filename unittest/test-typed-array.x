@@ -6,12 +6,12 @@ $(import "test-macros.xmacro")
 
 static void typed_array_keeps_array_unchanged(void) {
   $test.scoped();
-  Array values = %[1, "two"];
+  Array values = [1, "two"];
 
   EXPECT_INT_EQ(values.width, sizeof(Var));
   EXPECT_INT_EQ(values.len(), 2);
   EXPECT_INT_EQ(values[0].int(), 1);
-  EXPECT_TRUE(values[1].string() == %"two");
+  EXPECT_TRUE(values[1].string() == "two");
 }
 
 static void typed_array_packs_array_literals(void) {
@@ -154,7 +154,7 @@ static void typed_array_additional_scalar_families(void) {
 
 static void typed_array_string_family(void) {
   $test.scoped();
-  ArrayString words = %["alpha", "beta"];
+  ArrayString words = ["alpha", "beta"];
   ArrayString empty = ArrayString.new(), missing = NULL;
   String built = String.new_len("alpha!", 5);
 
@@ -246,7 +246,7 @@ static void _expect_typed_array_common(
 static void typed_array_common_capabilities_cover_every_family(void) {
   $test.scoped();
 
-  ArrayChar chars = %[1, 2], later_chars = %[1, 3];
+  ArrayChar chars = [1, 2], later_chars = [1, 3];
   int char_cursor = 0; char char_value = 0;
   EXPECT_TRUE(chars.try_next(&char_cursor, &char_value));
   EXPECT_INT_EQ(char_value, 1);
@@ -258,7 +258,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
     char_str, char_repr, chars.compare(later_chars));
   EXPECT_INT_EQ(char_array[1].char(), 2);
 
-  ArrayShort shorts = %[10, 20], later_shorts = %[10, 30];
+  ArrayShort shorts = [10, 20], later_shorts = [10, 30];
   int short_cursor = 0; short short_value = 0;
   EXPECT_TRUE(shorts.try_next(&short_cursor, &short_value));
   EXPECT_INT_EQ(short_value, 10);
@@ -270,7 +270,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
     short_str, short_repr, shorts.compare(later_shorts));
   EXPECT_INT_EQ(short_array[1].short(), 20);
 
-  ArrayInt ints = %[100, 200], later_ints = %[100, 300];
+  ArrayInt ints = [100, 200], later_ints = [100, 300];
   int int_cursor = 0, int_value = 0;
   EXPECT_TRUE(ints.try_next(&int_cursor, &int_value));
   EXPECT_INT_EQ(int_value, 100);
@@ -284,8 +284,8 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int_array[0] = 999;
   EXPECT_INT_EQ(ints[0], 100);
 
-  ArrayLong longs = %[3000000000L, 3000000001L];
-  ArrayLong later_longs = %[3000000000L, 3000000002L];
+  ArrayLong longs = [3000000000L, 3000000001L];
+  ArrayLong later_longs = [3000000000L, 3000000002L];
   int long_cursor = 0; long long_value = 0;
   EXPECT_TRUE(longs.try_next(&long_cursor, &long_value));
   EXPECT_TRUE(long_value == 3000000000L);
@@ -297,7 +297,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
     long_str, long_repr, longs.compare(later_longs));
   EXPECT_TRUE(long_array[1].long() == 3000000001L);
 
-  ArrayFloat floats = %[1.5f, 2.5f], later_floats = %[1.5f, 3.5f];
+  ArrayFloat floats = [1.5f, 2.5f], later_floats = [1.5f, 3.5f];
   int float_cursor = 0; float float_value = 0.0f;
   EXPECT_TRUE(floats.try_next(&float_cursor, &float_value));
   EXPECT_TRUE(float_value == 1.5f);
@@ -309,7 +309,7 @@ static void typed_array_common_capabilities_cover_every_family(void) {
     float_str, float_repr, floats.compare(later_floats));
   EXPECT_TRUE(float_array[1].float() == 2.5f);
 
-  ArrayDbl doubles = %[1.5, 2.5], later_doubles = %[1.5, 3.5];
+  ArrayDbl doubles = [1.5, 2.5], later_doubles = [1.5, 3.5];
   int double_cursor = 0; double double_value = 0.0;
   EXPECT_TRUE(doubles.try_next(&double_cursor, &double_value));
   EXPECT_TRUE(double_value == 1.5);
@@ -321,8 +321,8 @@ static void typed_array_common_capabilities_cover_every_family(void) {
     double_str, double_repr, doubles.compare(later_doubles));
   EXPECT_TRUE(double_array[1].double() == 2.5);
 
-  ArrayString strings = %["alpha", "beta"];
-  ArrayString later_strings = %["alpha", "gamma"];
+  ArrayString strings = ["alpha", "beta"];
+  ArrayString later_strings = ["alpha", "gamma"];
   int string_cursor = 0; String string_value = NULL;
   EXPECT_TRUE(strings.try_next(&string_cursor, &string_value));
   EXPECT_STR_EQ(string_value, "alpha");
@@ -352,10 +352,10 @@ static void typed_array_common_capabilities_keep_null_and_float_order(void) {
   EXPECT_TRUE(missing.compare(empty) < 0);
   EXPECT_INT_EQ(missing.compare(NULL), 0);
 
-  ArrayFloat positive_zero = %[0.0f], negative_zero = %[-0.0f];
+  ArrayFloat positive_zero = [0.0f], negative_zero = [-0.0f];
   EXPECT_INT_EQ(positive_zero.compare(negative_zero),
                 Var.compare(0.0f, -0.0f));
-  ArrayDbl nan = %[${0.0 / 0.0}], infinity = %[${1.0 / 0.0}];
+  ArrayDbl nan = [0.0 / 0.0], infinity = [1.0 / 0.0];
   EXPECT_INT_EQ(nan.compare(infinity),
                 Var.compare(0.0 / 0.0, 1.0 / 0.0));
 }

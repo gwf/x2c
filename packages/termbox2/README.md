@@ -13,8 +13,8 @@ int main(void) {
   Termbox terminal = Termbox.open();
   defer terminal.close();
 
-  terminal.fill(0, 0, terminal.width(), 1, %" ", TB_BLACK, TB_WHITE);
-  terminal.print(0, 0, %"press any key", TB_BLACK, TB_WHITE);
+  terminal.fill(0, 0, terminal.width(), 1, " ", TB_BLACK, TB_WHITE);
+  terminal.print(0, 0, "press any key", TB_BLACK, TB_WHITE);
   terminal.box(0, 1, 20, 5, TB_CYAN, TB_DEFAULT);
   terminal.set_cursor(1, 2);
   terminal.present();

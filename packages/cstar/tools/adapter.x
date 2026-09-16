@@ -127,15 +127,15 @@ static String _declared(Adapter adapter, Var type, List declarator) {
 static String _expression(Adapter adapter, Var value);
 
 static String _arguments(Adapter adapter, List args) {
-  Array rendered = %[];
+  Array rendered = [];
   foreach (Var argument, args) {
     String text = _expression(adapter, argument);
     if (!text) return NULL;
     rendered.push(text);
   }
   return rendered.len()
-    ? %"(expression []) { ${rendered.join(%", ")} }"
-    : %"(expression *) NULL";
+    ? %"(expression []) { ${rendered.join(", ")} }"
+    : "(expression *) NULL";
 }
 
 static String _call(Adapter adapter, List callee, List args, String result) {
@@ -146,7 +146,7 @@ static String _call(Adapter adapter, List callee, List args, String result) {
       if (!adapter.earlier.contains(name))
         return _reject(adapter,
           %"call to ${name}, which no earlier verified function defines");
-      Array types = %[];
+      Array types = [];
       foreach (Var parameter, parameters.list()) {
         String text = _ctype(adapter, parameter);
         if (!text) return NULL;
@@ -156,16 +156,16 @@ static String _call(Adapter adapter, List callee, List args, String result) {
       String rendered = _arguments(adapter, args);
       if (!returned || !rendered) return NULL;
       String signature = %"make_function_type(${returned}, (ctype []) " +
-                         %"{ ${types.join(%", ")} }, ${types.len()})";
+                         %"{ ${types.join(", ")} }, ${types.len()})";
       return %"make_call_expr(make_var_expr(\"${name}\", ${signature}), " +
              %"${rendered}, ${args.len()}, ${result})";
     }
   }
-  return _reject(adapter, %"indirect call");
+  return _reject(adapter, "indirect call");
 }
 
 static String _expression(Adapter adapter, Var value) {
-  if (value is not <list>) return _reject(adapter, %"expression");
+  if (value is not <list>) return _reject(adapter, "expression");
   List node = value;
   match (node) {
     case %(expr ?type ?inner): {
@@ -242,9 +242,9 @@ static List _annotation(Adapter adapter, List node) {
 }
 
 static String _quoted(List texts) {
-  Array parts = %[];
+  Array parts = [];
   foreach (Var text, texts) parts.push(%"\"${text.str()}\"");
-  return parts.join(%", ");
+  return parts.join(", ");
 }
 
 static void _feed_annotation(Adapter adapter, List record) {
@@ -282,7 +282,7 @@ static void _statement(Adapter adapter, Var value);
 static void _increment(Adapter adapter, Var operator, Var operand,
                        String position) {
   String rendered = _expression(adapter, operand);
-  String step = operator === <"++"> ? %"INCREMENT" : %"DECREMENT";
+  String step = operator === <"++"> ? "INCREMENT" : "DECREMENT";
   if (rendered)
     _feed(adapter, %"make_inc_dec(${rendered}, INCDEC_${step}_${position})");
 }
@@ -293,15 +293,15 @@ static void _braced(Adapter adapter, Var value) {
     _statement(adapter, node);
     return;
   }
-  _feed(adapter, %"make_block_begin()");
+  _feed(adapter, "make_block_begin()");
   _statement(adapter, node);
-  _feed(adapter, %"make_block_end()");
+  _feed(adapter, "make_block_end()");
 }
 
 static void _declaration(Adapter adapter, Var type, List bindings) {
   Type declared_type = type;
   if (declared_type.is_static() || declared_type.is_extern()) {
-    _reject(adapter, %"static or extern local declaration");
+    _reject(adapter, "static or extern local declaration");
     return;
   }
   foreach (Var declared, bindings) {
@@ -338,9 +338,9 @@ static void _statement(Adapter adapter, Var value) {
   match (node) {
     case %(empty): return;
     case %(block *items): {
-      _feed(adapter, %"make_block_begin()");
+      _feed(adapter, "make_block_begin()");
       foreach (Var item, items) _statement(adapter, item);
-      _feed(adapter, %"make_block_end()");
+      _feed(adapter, "make_block_end()");
       return;
     }
     case %(declare ?type (bindings *bindings)): {
@@ -348,7 +348,7 @@ static void _statement(Adapter adapter, Var value) {
       return;
     }
     case %(return): {
-      _feed(adapter, %"make_return()");
+      _feed(adapter, "make_return()");
       return;
     }
     case %(return ? ?result): {
@@ -361,7 +361,7 @@ static void _statement(Adapter adapter, Var value) {
       if (!rendered) return;
       _feed(adapter, %"make_if_condition(${rendered})");
       _braced(adapter, consequent);
-      _feed(adapter, %"make_else()");
+      _feed(adapter, "make_else()");
       _braced(adapter, alternative);
       return;
     }
@@ -380,11 +380,11 @@ static void _statement(Adapter adapter, Var value) {
       return;
     }
     case %(stmnt (expr ? (postfix ?operator ?operand))): {
-      _increment(adapter, operator, operand, %"POST");
+      _increment(adapter, operator, operand, "POST");
       return;
     }
     case %(stmnt (expr ? (op (!set ?operator (!or ++ --)) ?operand))): {
-      _increment(adapter, operator, operand, %"PRE");
+      _increment(adapter, operator, operand, "PRE");
       return;
     }
     case %(stmnt (expr ? (op = ?target ?source))): {
@@ -408,7 +408,7 @@ static void _statement(Adapter adapter, Var value) {
 
 static void _signature(Adapter adapter, String name, Var returns,
                        List parameters) {
-  Array types = %[], names = %[];
+  Array types = [], names = [];
   foreach (Var declared, parameters) {
     match (declared.list()) {
       case %(param ?type (bind (binding ? ?spelling) ?declarator)): {
@@ -426,9 +426,9 @@ static void _signature(Adapter adapter, String name, Var returns,
   String result = _ctype(adapter, returns);
   if (!result) return;
   String type_list = types.len()
-    ? %"(ctype []) { ${types.join(%", ")} }" : %"(ctype *) NULL";
+    ? %"(ctype []) { ${types.join(", ")} }" : "(ctype *) NULL";
   String name_list = names.len()
-    ? %"(const char *[]) { ${names.join(%", ")} }" : %"(const char **) NULL";
+    ? %"(const char *[]) { ${names.join(", ")} }" : "(const char **) NULL";
   _feed(adapter, %"make_function_start(\"${name}\", ${result}, " +
                  %"${type_list}, ${name_list}, ${types.len()})");
 }
@@ -446,12 +446,12 @@ void Adapter.function(Adapter adapter, List record, List definition) {
       _emit(adapter, %"static void _verify_${spelling}(Cstar cstar) {");
       String spelled = ghosts.str();
       if (spelled.len()) {
-        List ghost_terms = spelled.split(%",");
-        Array parsed = %[];
+        List ghost_terms = spelled.split(",");
+        Array parsed = [];
         foreach (Var ghost, ghost_terms)
           parsed.push(%"cstar.term(\"${ghost.str().strip(NULL)}\")");
         _emit(adapter,
-          %"  term ghosts[${parsed.len()}] = { ${parsed.join(%", ")} };");
+          %"  term ghosts[${parsed.len()}] = { ${parsed.join(", ")} };");
         _feed(adapter,
           %"make_cst_param((type *) NULL, 0, ghosts, ${parsed.len()})");
       }
@@ -465,12 +465,12 @@ void Adapter.function(Adapter adapter, List record, List definition) {
           _signature(adapter, spelling, returns, parameters);
       List body = captured.list();
       if (body && body.car() === <block>) body = body.cdr();
-      _feed(adapter, %"make_block_begin()");
+      _feed(adapter, "make_block_begin()");
       foreach (Var item, body) _statement(adapter, item);
-      _feed(adapter, %"make_block_end()");
-      _feed(adapter, %"make_function_end()");
-      _emit(adapter, %"  cstar.complete();");
-      _emit(adapter, %"}\n");
+      _feed(adapter, "make_block_end()");
+      _feed(adapter, "make_function_end()");
+      _emit(adapter, "  cstar.complete();");
+      _emit(adapter, "}\n");
       adapter.earlier[spelling] = spelling;
     }
 }
@@ -479,9 +479,9 @@ void Adapter.function(Adapter adapter, List record, List definition) {
 Adapter Adapter.new(Compiler compiler, Map annotations) {
   Adapter adapter = Scope.calloc(1, sizeof(struct Adapter));
   adapter.compiler = compiler;
-  adapter.lines = %[];
+  adapter.lines = [];
   adapter.annotations = annotations;
-  adapter.earlier = %{};
+  adapter.earlier = {};
   return adapter;
 }
 
@@ -494,4 +494,4 @@ String Adapter.failure(Adapter adapter) => adapter.failure;
 int Adapter.uses_arrays(Adapter adapter) => adapter.arrays;
 
 /** Returns the rendered function bodies. */
-String Adapter.text(Adapter adapter) => adapter.lines.join(%"\n");
+String Adapter.text(Adapter adapter) => adapter.lines.join("\n");

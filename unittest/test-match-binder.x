@@ -15,7 +15,7 @@ static void matcher_should_bind_ident_var(void) {
       if (!EXPECT_TRUE(Var_is(ident, <string>))) return;
       String bound_name = Var_string(ident);
       Var bound_value = rhs;
-      EXPECT_TRUE(bound_name == %"color");
+      EXPECT_TRUE(bound_name == "color");
       EXPECT_FALSE(bound_value is void);
       return;
     }

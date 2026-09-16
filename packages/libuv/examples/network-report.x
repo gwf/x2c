@@ -102,7 +102,7 @@ int main(void) {
   NetworkState network = { .loop = loop };
   Var state = Var.new(<p48>, &network);
   network.guard = loop.timer(5000, 0, state, timed_out);
-  loop.resolve(%"localhost", %"0", state, resolved);
+  loop.resolve("localhost", "0", state, resolved);
   loop.run(UV_RUN_DEFAULT);
 
   for (int i = 0; i < CLIENTS; i++) {

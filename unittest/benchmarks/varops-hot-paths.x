@@ -122,7 +122,7 @@ int main(void) {
   }
   result("wide-update", now_ns() - start, wide_count);
 
-  Array array = %[0];
+  Array array = [0];
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
     out = array.updateindex(0, <+>, 1);
@@ -131,7 +131,7 @@ int main(void) {
   }
   result("array-existing-update", now_ns() - start, update_count);
 
-  Map existing = %{ count: 0 };
+  Map existing = { count: 0 };
   start = now_ns();
   for (int i = 0; i < update_count; i++) {
     out = existing.updateindex(<count>, <+>, 1);
@@ -141,7 +141,7 @@ int main(void) {
   result("map-existing-update", now_ns() - start, update_count);
 
   int missing_count = 100000;
-  Map missing = %{};
+  Map missing = {};
   start = now_ns();
   for (int i = 0; i < missing_count; i++) {
     out = missing.updateindex(i, <+>, 1);

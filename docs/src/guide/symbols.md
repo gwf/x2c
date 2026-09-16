@@ -204,7 +204,7 @@ because the compiler chose them.
 `Symbol`s also make good map keys for fixed configuration:
 
 ```x2c
-Map config = %{host: "localhost", port: 8080};
+Map config = {host: "localhost", port: 8080};
 printf("%s:%d\n", config.get(<host>).string(), config.get(<port>).int());
 ```
 

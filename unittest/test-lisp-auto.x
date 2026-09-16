@@ -809,7 +809,7 @@ static void lisp_auto_mutating_specials(void) {
         String form = String.new(forms[special]);
         _ev(lisp, "(def replacement (macro (x) 99))");
         if (!lane) {
-          _ev(lisp, %"(def f (lambda (flag) (cond (flag " +
+          _ev(lisp, "(def f (lambda (flag) (cond (flag " +
                     %"(cond ((log! 1) (cond ((def ${name} replacement) " +
                     %"${form}))))) (1 0))))");
           _ev(lisp, "(f ())");
@@ -819,10 +819,10 @@ static void lisp_auto_mutating_specials(void) {
         else {
           _ev(lisp, %"(def f (lambda (x) ${form}))");
           _ev(lisp, "(f 0)");
-          String call = %"(f (cond ((log! 1) " +
+          String call = "(f (cond ((log! 1) " +
                          %"(def ${name} replacement))))";
           if (lane == 2) {
-            _ev(lisp, %"(def caller (lambda (flag) " +
+            _ev(lisp, "(def caller (lambda (flag) " +
                       %"(cond (flag ${call}) (1 0))))");
             _ev(lisp, "(caller ())");
             call = "(caller 1)";

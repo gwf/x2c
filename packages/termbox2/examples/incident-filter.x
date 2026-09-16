@@ -43,9 +43,9 @@ static List _matching(List incidents, String filter) {
 }
 
 static uintattr_t _severity_color(String severity) {
-  if (severity == %"CRITICAL") return TB_RED | TB_BOLD;
-  if (severity == %"ERROR") return TB_RED;
-  if (severity == %"WARN") return TB_YELLOW;
+  if (severity == "CRITICAL") return TB_RED | TB_BOLD;
+  if (severity == "ERROR") return TB_RED;
+  if (severity == "WARN") return TB_YELLOW;
   return TB_GREEN;
 }
 
@@ -61,9 +61,9 @@ static void _draw(Termbox terminal, List matched, String filter, int chosen) {
   }
 
   terminal.clear();
-  terminal.fill(0, 0, width, 1, %" ", TB_WHITE | TB_BOLD, TB_BLUE);
+  terminal.fill(0, 0, width, 1, " ", TB_WHITE | TB_BOLD, TB_BLUE);
   terminal.print(
-    0, 0, %"incident filter - UTF-8 and EGC output",
+    0, 0, "incident filter - UTF-8 and EGC output",
     TB_WHITE | TB_BOLD, TB_BLUE
   );
 
@@ -78,7 +78,7 @@ static void _draw(Termbox terminal, List matched, String filter, int chosen) {
       foreground = TB_BLACK;
       background = TB_CYAN;
       terminal.fill(
-        1, LIST_TOP + row, width - 2, 1, %" ", foreground, background
+        1, LIST_TOP + row, width - 2, 1, " ", foreground, background
       );
     }
     terminal.print(
@@ -92,13 +92,13 @@ static void _draw(Termbox terminal, List matched, String filter, int chosen) {
       border rather than printed over it. */
   terminal.box(0, 1, width, height - 2, TB_CYAN, TB_DEFAULT);
 
-  String shown = filter ? filter : %"<all>";
-  String prompt = %"filter: ";
-  terminal.fill(0, height - 1, width, 1, %" ", TB_BLACK, TB_WHITE);
+  String shown = filter ? filter : "<all>";
+  String prompt = "filter: ";
+  terminal.fill(0, height - 1, width, 1, " ", TB_BLACK, TB_WHITE);
   terminal.print(
     0, height - 1,
     %"$prompt$shown | ${matched.len()} matches | click selects | " +
-    %"Backspace edits | Esc quits",
+    "Backspace edits | Esc quits",
     TB_BLACK, TB_WHITE
   );
   terminal.set_cursor(
@@ -113,7 +113,7 @@ static List _run(String path) {
 
   List incidents = _read_incidents(path);
   List matched = NULL;
-  Array typed = %[];
+  Array typed = [];
   String filter = NULL;
   int chosen = -1, dirty = 1;
 
@@ -161,7 +161,7 @@ static List _run(String path) {
   }
 
   filter = typed.join(NULL);
-  String service = chosen < 0 ? %"<none>" :
+  String service = chosen < 0 ? "<none>" :
     matched[chosen].list()[2].string();
   return %($filter ${matched.len()} $service);
 }
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     Stderr.puts("failed: cannot initialize the character locale");
     return 2;
   }
-  String path = argc > 1 ? String.new(argv[1]) : %"examples/incidents.log";
+  String path = argc > 1 ? String.new(argv[1]) : "examples/incidents.log";
 
   try {
     List result = _run(path);

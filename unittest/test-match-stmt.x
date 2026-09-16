@@ -495,7 +495,7 @@ static int _flat_typed_pair(List input, Var *left, Var *right) {
 static void match_flat_typed_capture_agrees_with_runtime(void) {
   $test.scoped();
   Var head = <flat>;
-  Var payloads[4] = {(List) NULL, %"text", 7, %(nested)};
+  Var payloads[4] = {(List) NULL, "text", 7, %(nested)};
   for (int length = 0; length < 5; length++)
     for (int value = 0; value < 4; value++) {
       List input = NULL;

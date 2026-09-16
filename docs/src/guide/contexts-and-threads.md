@@ -38,10 +38,10 @@ into the caller's pools, and preserves the cycle:
 int main(void) {
   Context input = Context.open_isolated_named("input file");
   String temporary = String.new("temporary text");
-  Array values = %[];
+  Array values = [];
   values.push(temporary);
 
-  Map result = %{};
+  Map result = {};
   result[<values>] = values;
   result[<self>] = result;
 

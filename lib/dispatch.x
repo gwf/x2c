@@ -210,8 +210,8 @@ void x2c_register_tagged_descriptor(
 /** Formats the fallback display `String` for a pointer-bearing `Var`. */
 String Var.pointer_string(Var v) {
   Symbol tag = v.tag();
-  if (tag == <p48>) return %"<0x%012lX>".printf((long) v.pointer());
-  return %"<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
+  if (tag == <p48>) return "<0x%012lX>".printf((long) v.pointer());
+  return "<%s: 0x%012lX>".printf(tag.str(), (long) v.pointer());
 }
 
 /** Writes the fallback readable form of a pointer-bearing `Var`. */
@@ -497,17 +497,17 @@ static void _install_descriptor_methods(
 static String _primitive_repr(Var v, Symbol tag) {
   switch (tag) {
     case <i8>:    case <u8>:    return %"'%c'".printf(v);
-    case <u16>:   case <i16>:   return %"0x%04X".printf(v);
-    case <u32>:   case <i32>:   return %"%d".printf(v);
-    case <u48>:   return %"0x%012lXul".printf(v);
-    case <i48>:   return %"0x%012lXl".printf(v);
-    case <long>:   return %"%ldl".printf(v);
-    case <ulong>:   return %"%luul".printf(v);
-    case <llong>:  return %"%lldll".printf(v);
-    case <ullong>:  return %"%lluull".printf(v);
-    case <f32>:   return %"%f".printf(v);
-    case <f64>:   return %"%lfl".printf(v);
-    case <ldouble>:  return %"%Lfl".printf(v);
+    case <u16>:   case <i16>:   return "0x%04X".printf(v);
+    case <u32>:   case <i32>:   return "%d".printf(v);
+    case <u48>:   return "0x%012lXul".printf(v);
+    case <i48>:   return "0x%012lXl".printf(v);
+    case <long>:   return "%ldl".printf(v);
+    case <ulong>:   return "%luul".printf(v);
+    case <llong>:  return "%lldll".printf(v);
+    case <ullong>:  return "%lluull".printf(v);
+    case <f32>:   return "%f".printf(v);
+    case <f64>:   return "%lfl".printf(v);
+    case <ldouble>:  return "%Lfl".printf(v);
     case <nan>:   return "NaN";
     case <+inf>:  return "+Inf";
     case <-inf>:  return "-Inf";
@@ -517,17 +517,17 @@ static String _primitive_repr(Var v, Symbol tag) {
 
 static String _primitive_str(Var v, Symbol tag) {
   switch (tag) {
-    case <i8>:   case <u8>:   return %"%c".printf(v);
-    case <i16>:  case <i32>:  return %"%d".printf(v);
-    case <i48>:  return %"%ld".printf(v);
-    case <long>:  return %"%ld".printf(v);
-    case <llong>: return %"%lld".printf(v);
-    case <u16>:  case <u32>:  return %"%u".printf(v);
-    case <u48>:  return %"%lu".printf(v);
-    case <ulong>:  return %"%lu".printf(v);
-    case <ullong>: return %"%llu".printf(v);
-    case <f32>:  case <f64>:  return %"%lf".printf(v);
-    case <ldouble>: return %"%Lf".printf(v);
+    case <i8>:   case <u8>:   return "%c".printf(v);
+    case <i16>:  case <i32>:  return "%d".printf(v);
+    case <i48>:  return "%ld".printf(v);
+    case <long>:  return "%ld".printf(v);
+    case <llong>: return "%lld".printf(v);
+    case <u16>:  case <u32>:  return "%u".printf(v);
+    case <u48>:  return "%lu".printf(v);
+    case <ulong>:  return "%lu".printf(v);
+    case <ullong>: return "%llu".printf(v);
+    case <f32>:  case <f64>:  return "%lf".printf(v);
+    case <ldouble>: return "%Lf".printf(v);
     case <nan>:  case <+inf>: case <-inf>: return %"$tag";
   }
   return Var.pointer_string(v);

@@ -32,10 +32,10 @@ typedef struct Emitter {
 static List Emitter._commas(Emitter emitter, List lst) {
   (void) emitter;
   if (!lst.cdr()) return lst;
-  Array result = %[];
+  Array result = [];
   int first = 1;
   foreach (Var item, lst) {
-    if (!first) result.push(%", ");
+    if (!first) result.push(", ");
     result.push(item);
     first = 0;
   }
@@ -119,12 +119,12 @@ static List Emitter._param(Emitter e, List ast, List context) {
 
 static List Emitter._args(Emitter emitter, List ast, List context) {
   (void) context;
-  Array result = %[];
+  Array result = [];
   int first = 1;
   foreach (List argument, cdr(ast)) {
     List emitted = emitter._emit(argument, NULL);
     if (argument.match(%(expr ? (commas *)))) emitted = _parens(emitted);
-    if (!first) result.push(%", ");
+    if (!first) result.push(", ");
     result.push(emitted);
     first = 0;
   }
@@ -153,7 +153,7 @@ static List Emitter._function(Emitter e, List ast, List context) {
   bindings = %( $bindings );
   body = %( $body );
   Map old_statics = e.static_objects;
-  e.static_objects = %{};
+  e.static_objects = {};
   // No loop or switch spans a function boundary, so a nested body starts
   // with the barriers cleared rather than inheriting an enclosing loop's.
   List decl = e._emit(bindings, type), body_code = e._emit(body, NULL);
@@ -339,7 +339,7 @@ static List Emitter._local_static(Emitter e, List ast, List context) {
   Type declared_base = base;
   String base_name = e.fresh_name("static_type");
   List base_decl = e._semantic_name(declared_base.declared(), base_name);
-  Array output = %[];
+  Array output = [];
   output.push(%("typedef" @base_decl ";"));
   String storage = declared_base.is_threaded() ? "static _Thread_local"
                                               : "static";
@@ -483,7 +483,7 @@ static List Emitter._match_site_call(
 static List Emitter._sequenced_call(
   Emitter e, Var callee, List arguments, List context) {
   List c_fn = e._emit(%($callee), context);
-  Array declarations = %[], names = %[];
+  Array declarations = [], names = [];
   foreach (List argument, arguments)
     match (argument)
       case %(expr ?argument_type ?): {
@@ -530,7 +530,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
 
   if (env_binding) {
     String env_type = binding_identity_spelling(env_binding);
-    String env_name = e.fresh_name("defer_env"), Array initializers = %[];
+    String env_name = e.fresh_name("defer_env"), Array initializers = [];
     foreach (List record, records) {
       String source = binding_identity_spelling(record.car());
       String field = binding_identity_spelling(record.caddr());
@@ -561,7 +561,7 @@ static List Emitter._filtered_catch(
   Emitter emitter, List records, String frame_name, String handle_name,
   List context, List final_code, List leave_stmt) {
   String selected_name = emitter.fresh_name("catch_selected");
-  Array arms = %[], int index = 0, count = records.len();
+  Array arms = [], int index = 0, count = records.len();
   foreach (List rec, records) {
     List binders = rec.car(), body = rec.caddr();
     List handler_body = emitter._emit(%( $body ), context);
@@ -616,7 +616,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
     String arms = e.fresh_name("catch_arms");
     String site = e.fresh_name("catch_site");
     String patterns = e.fresh_name("catch_patterns");
-    Array declarations = %[];
+    Array declarations = [];
     int default_arm = -1, index = 0;
     String state = "ERROR_CATCH_PENDING";
     foreach (List rec, clause.cadr()) {
@@ -675,7 +675,7 @@ static List Emitter._raise(
     ? location.assoc(<file>).string() : e.compiler.filename;
   int line = location ? location.assoc(<line>).integer() : 0;
   String function = e.fn_name
-    ? e.fn_name : %"<unknown>";
+    ? e.fn_name : "<unknown>";
   String file_literal = _c_string_literal(file);
   String function_literal = _c_string_literal(function);
   List tail = arguments ? %("," @arg_tokens) : NULL;
@@ -697,7 +697,7 @@ static List Emitter._raise(
    binders `*` and `?` get no declaration. */
 
 static List _make_local_binders(List binders, String values_name) {
-  Array values = %[], int index = 0;
+  Array values = [], int index = 0;
   foreach (Var binder, binders) {
     if (binder != <?> && binder != <*>) {
       String bvar = String.new(binder.str() + 1);
@@ -714,7 +714,7 @@ static List _make_local_binders(List binders, String values_name) {
 }
 
 static List _make_catch_binders(List binders, String handle_name) {
-  Array values = %[], int index = 0;
+  Array values = [], int index = 0;
   foreach (Var binder, binders) {
     String bvar = String.new(binder.str() + 1);
     String rhs = %"x2c_error_catch_capture($handle_name, $index)";
@@ -757,15 +757,15 @@ static List _match_arm_label(
 static List _flat_match_condition(Symbol head, List tags) {
   Var literal = head;
   unsigned long long bits = literal.u64;
-  Array condition = %[];
-  condition.push(%"_x2c_match_expr && "
+  Array condition = [];
+  condition.push("_x2c_match_expr && "
     + %"_x2c_match_expr->car.u64 == ${bits}ULL && "
     + "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)");
   int index = 0;
   foreach (Var tag, tags) {
     condition.push("&& _x2c_match_cursor ");
     if (tag is <symbol>)
-      condition.push(%"&& Var_is(_x2c_match_cursor->car, "
+      condition.push("&& Var_is(_x2c_match_cursor->car, "
         + %"${(unsigned long) tag.symbol()}) ");
     condition.push(%"&& (_x2c_match_values[$index] = _x2c_match_cursor->car, "
       + "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)");
@@ -779,7 +779,7 @@ static List _flat_match_condition(Symbol head, List tags) {
 
 static List Emitter._match_if(
   Emitter e, List ast, List context, int *dispatched) {
-  Array values = %[], heads = %[], int labelling = 1;
+  Array values = [], heads = [], int labelling = 1;
   foreach (List rec, ast) {
     List (binders, pattern_ast, body_ast) = rec;
     List implicit_break = %("break;");
@@ -850,7 +850,7 @@ static List Emitter._match_cases(Emitter e, List ast, List context) {
   if (max_binders) {
     String values_decl = %"Var _x2c_match_values[$max_binders];";
     String capture_decl =
-      %"MatchCaptureBuffer _x2c_match_capture = { "
+      "MatchCaptureBuffer _x2c_match_capture = { "
       + %".values = _x2c_match_values, .capacity = $max_binders };";
     capture_declarations = %($values_decl $capture_decl);
   }
@@ -908,7 +908,7 @@ static List Emitter._initializer_macro(
   e.native_macros.push(%($expanded $definition));
   e.native_macros.push(%($name
     ${%"#define $name($formal) $expanded($formal)"}));
-  Array arguments = %[];
+  Array arguments = [];
   foreach (List argument, input.cdr()) {
     List emitted = e._emit(argument.cadr(), context);
     arguments.push(%("(" @emitted ")"));
@@ -917,7 +917,7 @@ static List Emitter._initializer_macro(
 }
 
 static int _source_type_definition(List value) {
-  Array pending = $auto(%[]);
+  Array pending = $auto([]);
   pending.push(value);
   while (pending.len()) {
     List node = pending.take_last();
@@ -977,7 +977,7 @@ static List Emitter._capture_source(
             reference = %(enum $name);
           }
       }
-      Array children = %[];
+      Array children = [];
       foreach (Var child, definition) {
         if (child is <list>)
           children.push(e._capture_source(child, inputs, declarations));
@@ -992,7 +992,7 @@ static List Emitter._capture_source(
       return %(call $callee $captured);
     }
   }
-  Array children = %[];
+  Array children = [];
   foreach (Var child, node) {
     if (child is <list>)
       children.push(e._capture_source(child, inputs, declarations));
@@ -1004,7 +1004,7 @@ static List Emitter._capture_source(
 static List Emitter._source_initializer(
   Emitter e, List function, List context) {
   List (type, binding, body) = function.cdr();
-  Array inputs = %[], declarations = %[];
+  Array inputs = [], declarations = [];
   body = e._capture_source(body, inputs, declarations);
   List emitted = %(@{declarations.list_free()}
     (function $type $binding $body));
@@ -1068,8 +1068,8 @@ static List Emitter._preproc(Emitter emitter, List ast, List context) {
    spine arrays out of _emit's frame on every other recursion path. */
 static List Emitter._op_spine(
   Emitter e, Var operator, Var left, Var right, List context) {
-  Array operators = %[];
-  Array rights = %[];
+  Array operators = [];
+  Array rights = [];
   defer operators.free();
   defer rights.free();
   Var op_item = operator, left_item = left, right_item = right;
@@ -1089,7 +1089,7 @@ static List Emitter._op_spine(
   }
   int chained = (int) operators.len() > 1;
   List result = e._emit(%($left_item), chained ? NULL : context);
-  Array pieces = $auto(%[]);
+  Array pieces = $auto([]);
   for (int i = (int) operators.len() - 1; i >= 0; i--) {
     pieces.push(operators[i]);
     pieces.push(e._emit(%(${rights[i]}), i ? NULL : context));
@@ -1107,7 +1107,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
   if (!ast) return ast;
   Var head = car(ast);
   if (head is <list>) {
-    Array emitted = $auto(%[]);
+    Array emitted = $auto([]);
     while (ast && ast.car() is <list>) {
       emitted.push(e._emit(ast.car(), context));
       ast = ast.cdr();
@@ -1122,14 +1122,14 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       (head.symbol().is_storage_class() ||
        head.symbol().is_type_qualifier() ||
        head.symbol().is_inline())) {
-    Array prefix = %[];
+    Array prefix = [];
     while (ast && ast.car() is <symbol>) {
       Symbol item = ast.car();
       if (item == <typedef> ||
           (!item.is_storage_class() && !item.is_type_qualifier() &&
            !item.is_inline()))
         break;
-      if (item == <threaded>) prefix.push(%"_Thread_local");
+      if (item == <threaded>) prefix.push("_Thread_local");
       else prefix.push(ast.car());
       ast = ast.cdr();
     }
@@ -1202,7 +1202,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
     }
     case %(generic ?control *associations): {
       List c_control = e._emit(%($control), NULL);
-      Array rows = %[];
+      Array rows = [];
       foreach (List association, associations) match (association) {
         case %(association default ?value):
           rows.push(%("default" ":" @{e._emit(%($value), NULL)}));
@@ -1395,13 +1395,13 @@ List Compiler.emit(Compiler compiler, List ast) {
     .return_type = NULL,
     .origin = 0,
     .fn_name = NULL,
-    .native_macros = %[]
+    .native_macros = []
   };
   Emitter emitter = &state;
   // flatten_all leaves no list element behind, so one pass is the fixed
   // point and a second call would only re-cons the whole unit to prove it.
   List code = emitter._emit(ast, NULL).flatten_all();
-  Array before = %[], after = %[];
+  Array before = [], after = [];
   if (state.static_support)
     before.push(%(c-direct "#include \"exception.h\"\n#include <string.h>"));
   foreach (List entry, state.native_macros.list_free()) {

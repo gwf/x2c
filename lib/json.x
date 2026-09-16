@@ -57,7 +57,7 @@ Var JsonBool.var(JsonBool value) => Var.new(<jsonbool>, value);
 JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 
 /** Returns `true` or `false`. */
-String JsonBool.str(JsonBool value) => value.value ? %"true" : %"false";
+String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
 
 /** Returns `true` or `false`. */
 String JsonBool.repr(JsonBool value) => value.str();
@@ -313,7 +313,7 @@ static String JsonReader._string(JsonReader j) {
 }
 
 static Var JsonReader._array(JsonReader j) {
-  Array array = %[];
+  Array array = [];
   j.at++;
   j._space();
   if (j._peek() == ']') {
@@ -332,7 +332,7 @@ static Var JsonReader._array(JsonReader j) {
 }
 
 static Var JsonReader._object(JsonReader j) {
-  Map object = %{};
+  Map object = {};
   j.at++;
   j._space();
   if (j._peek() == '}') {
@@ -492,7 +492,7 @@ static void _write_elements(Buffer out, Var sequence, int pretty, int depth) {
 }
 
 static void _write_members(Buffer out, Map object, int pretty, int depth) {
-  Array names = $auto(%[]);
+  Array names = $auto([]);
   foreach (Var (name, member), object) {
     if (name is not <string> && name is not <symbol>) {
       Symbol tag = name.tag();

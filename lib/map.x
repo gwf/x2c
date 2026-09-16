@@ -159,10 +159,10 @@ unsigned Map.len(Map map) => map.used;
     `List`s hash and compare by content.
 
     ```x2c
-    ~Map ages = %{"ada": 36, "grace": 45};
+    ~Map ages = {"ada": 36, "grace": 45};
     Var found;
-    if (ages.try_get(%"ada", &found)) printf("%s\n", found.repr());
-    if (!ages.try_get(%"nobody", &found)) printf("absent\n");
+    if (ages.try_get("ada", &found)) printf("%s\n", found.repr());
+    if (!ages.try_get("nobody", &found)) printf("absent\n");
     ```
     Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key
     hashing or equality. */
@@ -180,12 +180,12 @@ int Map.try_get(Map map, Var key, Var *out) => map._core_try_get(&key, out);
     content.
 
     ```x2c
-    ~Map by_list = %{};
-    ~Map by_array = %{};
-    by_list[%(1 2)] = %"found";
-    by_array[%[1, 2]] = %"found";
+    ~Map by_list = {};
+    ~Map by_array = {};
+    by_list[%(1 2)] = "found";
+    by_array[[1, 2]] = "found";
     printf("list key: %s\n", by_list[%(1 2)].repr());
-    printf("array key: %s\n", by_array[%[1, 2]].repr());
+    printf("array key: %s\n", by_array[[1, 2]].repr());
     ```
 
     That prints `"found"` for the `List` key and `void` for the `Array` key. An
@@ -510,7 +510,7 @@ Self Map.merge(Self map, Self other) => map._core_merge(other);
     `Map.enumerate`.
 
     ```x2c
-    ~Map ages = %{"ada": 36, "grace": 45};
+    ~Map ages = {"ada": 36, "grace": 45};
     unsigned cursor = 0;
     Var key, val;
     while (ages.try_next(&cursor, &key, &val))

@@ -21,9 +21,9 @@ static void diagnostics_records_entries(void) {
   Diagnostics diag = Diagnostics.new(NULL, NULL, 2);
   diag.set_emitter(capture_entry, &sink_buffer);
   List first_notes = %( "initialize flag before use" );
-  diag.report(<first>, %"first", NULL, first_notes);
-  diag.report(<second>, %"second", NULL, NULL);
-  diag.report(<third>, %"third", NULL, NULL);
+  diag.report(<first>, "first", NULL, first_notes);
+  diag.report(<second>, "second", NULL, NULL);
+  diag.report(<third>, "third", NULL, NULL);
 
   EXPECT_INT_EQ(diag.count, 2);
   EXPECT_TRUE(diag.reached_limit());
@@ -48,23 +48,23 @@ static void diagnostics_records_entries(void) {
   String second_str = second_message is void ? NULL : second_message.string();
   EXPECT_TRUE(first_str != NULL);
   EXPECT_TRUE(second_str != NULL);
-  EXPECT_TRUE(first_str == %"first");
-  EXPECT_TRUE(second_str == %"second");
+  EXPECT_TRUE(first_str == "first");
+  EXPECT_TRUE(second_str == "second");
 
   List sink_entries = sink_buffer.reverse();
   EXPECT_INT_EQ(sink_entries.len(), 3);
   List first_sink_entry = sink_entries.car();
   Var log_message = first_sink_entry.assoc(<message>);
   Var log_notes = first_sink_entry.assoc(<notes>);
-  EXPECT_TRUE(log_message.string() == %"first");
+  EXPECT_TRUE(log_message.string() == "first");
   EXPECT_FALSE(log_notes is void);
   List logged_notes = log_notes;
   EXPECT_INT_EQ(logged_notes.len(), 1);
-  EXPECT_TRUE(logged_notes.car().string() == %"initialize flag before use");
+  EXPECT_TRUE(logged_notes.car().string() == "initialize flag before use");
 
   Var limit_code = limit.assoc(<code>), limit_message = limit.assoc(<message>);
   EXPECT_TRUE(limit_code.symbol() == <limit>);
-  EXPECT_TRUE(limit_message.string() == %"too many errors, stopping");
+  EXPECT_TRUE(limit_message.string() == "too many errors, stopping");
   EXPECT_INT_EQ(capture_calls, 3);
 }
 
@@ -72,8 +72,8 @@ static void diagnostics_reset_clears_state(void) {
   $test.scoped();
 
   Diagnostics diag = Diagnostics.new(NULL, NULL, 1);
-  diag.report(<once>, %"only", NULL, NULL);
-  diag.report(<ignored>, %"later", NULL, NULL);
+  diag.report(<once>, "only", NULL, NULL);
+  diag.report(<ignored>, "later", NULL, NULL);
 
   EXPECT_INT_EQ(1, diag.count);
   EXPECT_TRUE(diag.reached_limit());
@@ -91,9 +91,9 @@ static void diagnostics_ignores_repeated_report(void) {
 
   Diagnostics diag = Diagnostics.new(NULL, NULL, 0);
   List location = %( (file "unit.x") (line 3) );
-  diag.report(<type>, %"same", location, NULL);
-  diag.report(<type>, %"same", location, NULL);
-  diag.report(<type>, %"other", location, NULL);
+  diag.report(<type>, "same", location, NULL);
+  diag.report(<type>, "same", location, NULL);
+  diag.report(<type>, "other", location, NULL);
 
   EXPECT_INT_EQ(2, diag.count);
   EXPECT_INT_EQ(diag.entries().len(), 2);

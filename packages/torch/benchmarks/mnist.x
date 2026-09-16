@@ -172,7 +172,7 @@ static int _check(String artifacts, String out, String root) {
   Tensor loss = Tensor.cross_entropy(output, targets.index_select(0, pick));
   adam.zero_grad();
   loss.backward();
-  Map step1 = %{};
+  Map step1 = {};
   step1["probe.output"] = output;
   step1["probe.loss"] = loss;
   foreach (List pair, model.named_parameters()) {
@@ -203,7 +203,7 @@ static int _check(String artifacts, String out, String root) {
        it refers to do not. `no_grad` rather than inference mode, because
        the pickler detaches what it writes. */
     Torch.no_grad();
-    Map final = %{};
+    Map final = {};
     _save_state(trained, final, "final");
     trained.eval();
     final["predictions"] =

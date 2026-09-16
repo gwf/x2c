@@ -50,7 +50,7 @@ static void _collect_calls(Compiler compiler, Var value, Map calls) {
 }
 
 static List _call_records(Map calls) {
-  Array records = %[];
+  Array records = [];
   foreach (Var (key, count), calls) {
     List call = key;
     match (call) {
@@ -77,15 +77,15 @@ static String _source_function_name(Compiler compiler, List binding) {
 }
 
 static List _analyze_unit(Compiler compiler, List ast) {
-  Array functions = %[];
-  Map top_level_calls = %{};
+  Array functions = [];
+  Map top_level_calls = {};
   int source_order = 0;
   foreach (List node, ast) {
     match (node) {
       case %(function ?type
              (bind (!set ?binding (binding ?identity ?)) ?)
              ?body): {
-        Map calls = %{};
+        Map calls = {};
         _collect_calls(compiler, body, calls);
         String name = compiler.emitted_binding_name(binding);
         String source_name = _source_function_name(compiler, binding);
@@ -163,15 +163,15 @@ static List _walk_stable_root(Var value, Var type) {
 }
 
 static String _walk_root_spelling(String root, List path) {
-  Array parts = %[];
+  Array parts = [];
   parts.push(root);
   foreach (List step, path)
     match (step)
       case %(member ? ?name): {
-        parts.push(%".");
+        parts.push(".");
         parts.push(name);
       }
-  return %"".join(parts.list_free());
+  return "".join(parts.list_free());
 }
 
 static int _walk_candidate_type(Var type) {
@@ -271,14 +271,14 @@ static int _kind_count(Map counts, Symbol kind) {
 }
 
 static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
-  Array functions = %[];
+  Array functions = [];
   foreach (List node, ast)
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
-        Map counts = %{}, blockers = %{};
-        Array sites = %[];
+        Map counts = {}, blockers = {};
+        Array sites = [];
         _collect_tail_calls(
           compiler, body, binding, path, 0, 0,
           counts, blockers, sites
@@ -286,7 +286,7 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
         int tail = _kind_count(counts, <tail>);
         int non_tail = _kind_count(counts, <non-tail>);
         if (!tail) continue;
-        Array blocker_rows = %[];
+        Array blocker_rows = [];
         foreach (Var (blocker, present), blockers)
           blocker_rows.push(blocker);
         blocker_rows.sort();
@@ -323,7 +323,7 @@ static void _collect_walk_calls(
                (ident
                  (!set ?callee (binding ?callee_identity ?))))
              (args *arguments))): {
-      Array direct_arguments = %[];
+      Array direct_arguments = [];
       int position = 0;
       foreach (Var argument, arguments) {
         List root = _walk_stable_root(argument, void);
@@ -437,7 +437,7 @@ static int _walk_loop_has_exit(Var value) {
 
 static List _walk_direct_parameters(
   Var body, List self, List parameter_records, List calls) {
-  Map parameters = %{}, direct = %{};
+  Map parameters = {}, direct = {};
   foreach (List parameter, parameter_records)
     match (parameter)
       case %(parameter ?position ?binding ? ?):
@@ -455,7 +455,7 @@ static List _walk_direct_parameters(
           recursive = 1;
           recursive_location = location;
         }
-        if (name is <string> && name.string() == %"Iter_try_next")
+        if (name is <string> && name.string() == "Iter_try_next")
           foreach (List argument, arguments)
             match (argument)
               case %(
@@ -483,7 +483,7 @@ static List _walk_direct_parameters(
           call ? ?name (!set ?location (location ? ? ?))
           (arguments *arguments)
         ):
-          if (name is <string> && name.string() == %"List_iter")
+          if (name is <string> && name.string() == "List_iter")
             foreach (List argument, arguments)
               match (argument)
                 case %(argument 0 ?root):
@@ -500,14 +500,14 @@ static List _walk_direct_parameters(
               walk 0 $type (path) $spelling linear
               (location "" 0 0)
             )] = 1;
-  Array summaries = %[];
+  Array summaries = [];
   foreach (Var (summary, present), direct) summaries.push(summary);
   summaries.sort();
   return summaries.list_free();
 }
 
 static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
-  Map definitions = %{};
+  Map definitions = {};
   foreach (List node, ast)
     match (node)
       case %(function ?type
@@ -517,20 +517,20 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
           target $path ${compiler.emitted_binding_name(binding)}
         );
 
-  Array functions = %[];
+  Array functions = [];
   foreach (List node, ast)
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
         List target = definitions[binding].list();
-        Map parameters = %{};
-        Array parameter_records = %[];
+        Map parameters = {};
+        Array parameter_records = [];
         _walk_collect_parameters(
           modifiers, parameters, parameter_records
         );
         List parameter_list = parameter_records.list_free();
-        Array calls = %[];
+        Array calls = [];
         _collect_walk_calls(
           compiler, body, path, 0, definitions, calls
         );
@@ -560,7 +560,7 @@ static List _walk_call_argument(List arguments, int position) {
 }
 
 static List _walk_candidates(List functions) {
-  Map publics = %{}, walked = %{};
+  Map publics = {}, walked = {};
   foreach (List function, functions)
     match (function)
       case %(
@@ -597,7 +597,7 @@ static List _walk_candidates(List functions) {
           function ?caller ? ? (parameters *parameters)
           (calls *calls) (direct *)
         ): {
-          Map parameter_map = %{};
+          Map parameter_map = {};
           foreach (List parameter, parameters)
             match (parameter)
               case %(parameter ?position ?binding ? ?):
@@ -647,7 +647,7 @@ static List _walk_candidates(List functions) {
         }
   } while (changed);
 
-  Map groups = %{};
+  Map groups = {};
   foreach (List function, functions)
     match (function)
       case %(
@@ -686,7 +686,7 @@ static List _walk_candidates(List functions) {
               (arguments *arguments)
             ): {
               List target = resolve_project_target(raw_target, publics);
-              Map matched_groups = %{};
+              Map matched_groups = {};
               if (target && !List.equal(target, caller) &&
                   walked.contains(target))
                 foreach (List summary, walked[target].list()) {
@@ -711,7 +711,7 @@ static List _walk_candidates(List functions) {
                       root ?argument_identity ?spelling ?
                       (path *prefix) ?
                     ): {
-                      Array path_parts = %[];
+                      Array path_parts = [];
                       foreach (Var step, prefix) path_parts.push(step);
                       foreach (Var step, suffix) path_parts.push(step);
                       List combined = path_parts.list_free();
@@ -735,12 +735,12 @@ static List _walk_candidates(List functions) {
             }
       }
 
-  Map by_unit = %{};
+  Map by_unit = {};
   foreach (Var (key_value, sites_value), groups) {
     List sites = sites_value;
     if (!sites.cdr()) continue;
-    Map seen_walkers = %{};
-    Array sorted_walkers = %[], sorted_sites = %[];
+    Map seen_walkers = {};
+    Array sorted_walkers = [], sorted_sites = [];
     foreach (List site, sites) {
       sorted_sites.push(site);
       match (site)
@@ -768,9 +768,9 @@ static List _walk_candidates(List functions) {
         ), candidates);
       }
   }
-  Array units = %[];
+  Array units = [];
   foreach (Var (path, values), by_unit) {
-    Array candidates = %[];
+    Array candidates = [];
     foreach (List candidate, values.list()) candidates.push(candidate);
     candidates.sort();
     units.push(%(
@@ -820,7 +820,7 @@ static List _site_value_summary(
     case %(ident (!set ?binding (binding ? ?spelling))): {
       if (parameters.contains(binding)) return %(parameter $spelling);
       if (prior_writes.contains(binding)) {
-        Array writes = %[];
+        Array writes = [];
         foreach (List write, prior_writes[binding].list())
           writes.push(write);
         writes.sort();
@@ -919,7 +919,7 @@ static void _collect_sites(
       );
       _site_add_prior_write(
         prior_writes, binding,
-        _site_value_summary(compiler, right, %{}, %{})
+        _site_value_summary(compiler, right, {}, {})
       );
       return;
     }
@@ -939,7 +939,7 @@ static void _collect_sites(
         if (binding) {
           List summary = operator == <=> && right
                        ? _site_value_summary(
-                           compiler, right.car(), %{}, %{}
+                           compiler, right.car(), {}, {}
                          )
                        : %(operator $operator);
           _site_add_prior_write(prior_writes, binding, summary);
@@ -961,7 +961,7 @@ static void _collect_sites(
     case %(expr ? (call ?callee (args *arguments))): {
       String name = _site_direct_callee(compiler, callee);
       if (name == wanted) {
-        Array summaries = %[];
+        Array summaries = [];
         foreach (Var argument, arguments)
           summaries.push(_site_argument_summary(
             compiler, argument, parameters, prior_writes
@@ -985,7 +985,7 @@ static void _collect_sites(
 }
 
 static List _site_records(Map sites) {
-  Array records = %[];
+  Array records = [];
   foreach (Var (key, count), sites) {
     List call = key;
     match (call)
@@ -1001,13 +1001,13 @@ static List _site_records(Map sites) {
 
 static List _analyze_sites_unit(
   Compiler compiler, List ast, String path, String wanted) {
-  Map sites = %{}, top_level_writes = %{};
+  Map sites = {}, top_level_writes = {};
   foreach (List node, ast) {
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        Map parameters = %{}, prior_writes = %{};
+        Map parameters = {}, prior_writes = {};
         _site_collect_parameters(modifiers, parameters);
         String caller = compiler.emitted_binding_name(binding);
         Symbol visibility = ((Type) type).is_static()
@@ -1020,7 +1020,7 @@ static List _analyze_sites_unit(
       }
     _collect_sites(
       compiler, node, path, "<top-level>", <static>, wanted,
-      %{}, top_level_writes, sites
+      {}, top_level_writes, sites
     );
   }
   return _site_records(sites);
@@ -1064,7 +1064,7 @@ static void _collect_field_sites(
     if (access == <replace>) {
       Var type = _field_site_value_type(replacement);
       List summary = _site_value_summary(
-        compiler, replacement, parameters, %{}
+        compiler, replacement, parameters, {}
       );
       detail = %(access replace (value $type $summary));
     }
@@ -1183,7 +1183,7 @@ static void _collect_field_sites(
 }
 
 static List _field_site_records(Map sites) {
-  Array records = %[];
+  Array records = [];
   foreach (Var (key, count), sites) {
     List site = key;
     match (site)
@@ -1200,13 +1200,13 @@ static List _field_site_records(Map sites) {
 static List _analyze_field_sites_unit(
   Compiler compiler, List ast, String path, String receiver_name,
   String field_name) {
-  Map sites = %{};
+  Map sites = {};
   foreach (List node, ast) {
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        Map parameters = %{};
+        Map parameters = {};
         _site_collect_parameters(modifiers, parameters);
         _collect_field_sites(
           compiler, body, path, compiler.emitted_binding_name(binding),
@@ -1217,14 +1217,14 @@ static List _analyze_field_sites_unit(
       }
     _collect_field_sites(
       compiler, node, path, "<top-level>", <static>,
-      receiver_name, field_name, %{}, <read>, void, 0, sites
+      receiver_name, field_name, {}, <read>, void, 0, sites
     );
   }
   return _field_site_records(sites);
 }
 
 static List _field_functions_from_sites(List sites) {
-  Map reads = %{}, lvalues = %{};
+  Map reads = {}, lvalues = {};
   foreach (List site, sites)
     match (site)
       case %(site ? ?caller ?visibility ? ?access (count ?count)):
@@ -1235,11 +1235,11 @@ static List _field_functions_from_sites(List sites) {
             case %(access *): _increment(lvalues, key, count.integer());
           }
         }
-  Map functions = %{};
+  Map functions = {};
   foreach (Var (key, count), reads) functions[key] = count;
   foreach (Var (key, count), lvalues)
     if (!functions.contains(key)) functions[key] = 0;
-  Array records = %[];
+  Array records = [];
   foreach (Var (key_value, read_count), functions) {
     List key = key_value;
     match (key)
@@ -1291,7 +1291,7 @@ static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
 }
 
 static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
-  Array units = %[];
+  Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1312,7 +1312,7 @@ static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
 
 static List _parse_field_units(
   Frontend frontend, Array inputs, String receiver_name, String field_name) {
-  Array units = %[];
+  Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1336,7 +1336,7 @@ static List _parse_field_units(
 
 static List _parse_field_sites(
   Frontend frontend, Array inputs, String receiver_name, String field_name) {
-  Array sites = %[];
+  Array sites = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1356,7 +1356,7 @@ static List _parse_field_sites(
 }
 
 static List _parse_sites(Frontend frontend, Array inputs, String wanted) {
-  Array sites = %[];
+  Array sites = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1373,7 +1373,7 @@ static List _parse_sites(Frontend frontend, Array inputs, String wanted) {
 }
 
 static List _parse_walk_units(Frontend frontend, Array inputs) {
-  Array functions = %[];
+  Array functions = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1391,7 +1391,7 @@ static List _parse_walk_units(Frontend frontend, Array inputs) {
 
 static List _parse_flow_units(
   Frontend frontend, Array inputs, String producer, String consumer) {
-  Array functions = %[];
+  Array functions = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1408,7 +1408,7 @@ static List _parse_flow_units(
 }
 
 static List _parse_tail_units(Frontend frontend, Array inputs) {
-  Array units = %[];
+  Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1429,7 +1429,7 @@ static List _parse_tail_units(Frontend frontend, Array inputs) {
 
 static List _parse_loop_allocation_units(
   Frontend frontend, Array inputs, int limit) {
-  Array units = %[];
+  Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1447,7 +1447,7 @@ static List _parse_loop_allocation_units(
 
 static List _parse_lifetime_units(
   Frontend frontend, Array inputs, String allocation_returns) {
-  Array units = %[];
+  Array units = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, &parsed)) return NULL;
@@ -1514,7 +1514,7 @@ static void _resolve_call(
 }
 
 static List _resolved_calls(Map calls) {
-  Array rows = %[];
+  Array rows = [];
   foreach (Var (key, count), calls) {
     List call = key;
     match (call) {
@@ -1543,18 +1543,18 @@ static void _resolved_unresolved_counts(
 }
 
 static List _resolve_graph(List units, Map attributes) {
-  Map publics = %{};
+  Map publics = {};
   _index_public_functions(units, publics);
-  Array output_units = %[];
+  Array output_units = [];
   foreach (List unit, units) {
     match (unit)
       case %(unit ?path ?subtree ?source_lines (functions *functions)): {
-        Map local = %{};
+        Map local = {};
         foreach (List function, functions)
           match (function)
             case %(function ?identity ?name ? ? (calls *)):
               local[identity] = %(target $path $name);
-        Array output_functions = %[];
+        Array output_functions = [];
         foreach (List function, functions)
           match (function)
             case %(
@@ -1562,7 +1562,7 @@ static List _resolve_graph(List units, Map attributes) {
               (source ?source_name ?source_order)
               (calls *calls)
             ): {
-              Map resolved = %{};
+              Map resolved = {};
               foreach (List call, calls)
                 _resolve_call(call, path, local, publics, resolved);
               if ((void *) attributes != NULL) {
@@ -1601,15 +1601,15 @@ static int _reachable(String from, String target, Map adjacency, Map seen) {
 }
 
 static List _dependency_cycles(Array paths, Map adjacency) {
-  Map assigned = %{};
-  Array cycles = %[];
+  Map assigned = {};
+  Array cycles = [];
   foreach (String path, paths) {
     if (assigned.contains(path)) continue;
-    Array component = %[];
+    Array component = [];
     foreach (String candidate, paths) {
       if (assigned.contains(candidate)) continue;
-      if (_reachable(path, candidate, adjacency, %{}) &&
-          _reachable(candidate, path, adjacency, %{}))
+      if (_reachable(path, candidate, adjacency, {}) &&
+          _reachable(candidate, path, adjacency, {}))
         component.push(candidate);
     }
     if (component.len() > 1) {
@@ -1624,8 +1624,8 @@ static List _dependency_cycles(Array paths, Map adjacency) {
 }
 
 static List _digest(List graph) {
-  Array units = %[], paths = %[];
-  Map adjacency = %{};
+  Array units = [], paths = [];
+  Map adjacency = {};
   int function_count = 0, direct_count = 0;
   int external_count = 0, indirect_count = 0;
   match (graph)
@@ -1636,7 +1636,7 @@ static List _digest(List graph) {
             paths.push(path);
             int public_count = 0, static_count = 0, internal_count = 0;
             int unit_external = 0, unit_indirect = 0;
-            Map dependencies = %{};
+            Map dependencies = {};
             foreach (List function, functions) {
               function_count++;
               match (function) {
@@ -1660,7 +1660,7 @@ static List _digest(List graph) {
                         indirect_count += count, unit_indirect += count;
                     }
             }
-            Array dependency_rows = %[];
+            Array dependency_rows = [];
             List adjacent = NULL;
             foreach (Var (key, count), dependencies) {
               match ((List) key)
@@ -1723,7 +1723,7 @@ static void _architecture_call_counts(
               match (function)
                 case %(function ?name ?visibility (calls *)):
                   definitions[%($path $name)] = visibility;
-      Map seen_cross_units = %{}, seen_units = %{}, seen_functions = %{};
+      Map seen_cross_units = {}, seen_units = {}, seen_functions = {};
       foreach (List unit, graph_units)
         match (unit)
           case %(unit ?path (functions *members)):
@@ -1758,12 +1758,12 @@ static void _architecture_call_counts(
 }
 
 static List _architecture_choke_points(List graph) {
-  Map definitions = %{}, cross_units = %{}, units = %{};
-  Map functions = %{}, calls = %{};
+  Map definitions = {}, cross_units = {}, units = {};
+  Map functions = {}, calls = {};
   _architecture_call_counts(
     graph, definitions, cross_units, units, functions, calls
   );
-  Array ranked = %[];
+  Array ranked = [];
   foreach (Var (raw_key, raw_visibility), definitions) {
     List key = raw_key;
     Var value;
@@ -1794,7 +1794,7 @@ static List _architecture_choke_points(List graph) {
 }
 
 static Map _unit_edges(List graph) {
-  Map edges = %{};
+  Map edges = {};
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -1813,7 +1813,7 @@ static Map _unit_edges(List graph) {
 
 static List _architecture_reciprocal(List graph) {
   Map edges = _unit_edges(graph);
-  Array ranked = %[];
+  Array ranked = [];
   foreach (Var (raw_key, raw_count), edges) {
     List key = raw_key;
     (String left, String right) = key;
@@ -1875,9 +1875,9 @@ static List _boundary_direction(
 }
 
 static List _architecture_dependency_width(List graph) {
-  Map pairs = %{}, participants = %{}, edges = %{}, calls = %{};
-  Map callers = %{}, callees = %{}, seen_participants = %{};
-  Map seen_callers = %{}, seen_callees = %{};
+  Map pairs = {}, participants = {}, edges = {}, calls = {};
+  Map callers = {}, callees = {}, seen_participants = {};
+  Map seen_callers = {}, seen_callees = {};
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -1916,7 +1916,7 @@ static List _architecture_dependency_width(List graph) {
                             left, right, target_path, callee_name
                           );
                         }
-  Array ranked = %[];
+  Array ranked = [];
   foreach (Var (raw_pair, raw_value), pairs) {
     (void) raw_value;
     List pair = raw_pair;
@@ -1969,7 +1969,7 @@ static void _add_neighbor(Map adjacency, String from, String to) {
 }
 
 static List _unit_function_names(List functions) {
-  Array names = %[];
+  Array names = [];
   foreach (List function, functions)
     match (function)
       case %(function ?name ? (calls *)): names.push(name);
@@ -1978,7 +1978,7 @@ static List _unit_function_names(List functions) {
 }
 
 static Map _unit_adjacency(String path, List functions) {
-  Map adjacency = %{};
+  Map adjacency = {};
   foreach (List function, functions)
     match (function)
       case %(function ?name ? (calls *calls)):
@@ -2009,12 +2009,12 @@ static void _collect_component(
 }
 
 static List _components(List names, Map adjacency, String excluded) {
-  Map allowed = %{}, seen = %{};
+  Map allowed = {}, seen = {};
   foreach (String name, names) allowed[name] = 1;
-  Array groups = %[];
+  Array groups = [];
   foreach (String name, names) {
     if (name == excluded || seen.contains(name)) continue;
-    Array members = %[];
+    Array members = [];
     _collect_component(
       name, excluded, allowed, adjacency, seen, members
     );
@@ -2026,7 +2026,7 @@ static List _components(List names, Map adjacency, String excluded) {
 }
 
 static List _component_sizes(List groups) {
-  Array sizes = %[];
+  Array sizes = [];
   foreach (List group, groups)
     match (group)
       case %(group *members): sizes.push(members.len());
@@ -2034,7 +2034,7 @@ static List _component_sizes(List groups) {
 }
 
 static List _nontrivial_components(List groups, Array isolated) {
-  Array components = %[];
+  Array components = [];
   foreach (List group, groups)
     match (group)
       case %(group *members): {
@@ -2069,7 +2069,7 @@ static void _collect_unit_bridges(
 }
 
 static List _architecture_local_components(List graph) {
-  Array rows = %[];
+  Array rows = [];
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -2080,7 +2080,7 @@ static List _architecture_local_components(List graph) {
             List names = _unit_function_names(functions);
             Map adjacency = _unit_adjacency(path, functions);
             List groups = _components(names, adjacency, NULL);
-            Array isolated = %[];
+            Array isolated = [];
             List components = _nontrivial_components(groups, isolated);
             if ((int) components.len() < 2) continue;
             int isolated_count = isolated.len();
@@ -2095,7 +2095,7 @@ static List _architecture_local_components(List graph) {
 }
 
 static List _architecture_bridges(List graph) {
-  Array ranked = %[];
+  Array ranked = [];
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -2150,7 +2150,7 @@ static int _unit_internal_calls(String path, List functions) {
 }
 
 static List _structure(List graph, String wanted) {
-  Array matches = %[];
+  Array matches = [];
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -2160,9 +2160,9 @@ static List _structure(List graph, String wanted) {
               List names = _unit_function_names(functions);
               Map adjacency = _unit_adjacency(path, functions);
               List groups = _components(names, adjacency, NULL);
-              Array isolated = %[];
+              Array isolated = [];
               List components = _nontrivial_components(groups, isolated);
-              Array bridge_rows = %[];
+              Array bridge_rows = [];
               _collect_unit_bridges(
                 path, names, adjacency, groups, 1, bridge_rows
               );
@@ -2195,7 +2195,7 @@ static List _structure(List graph, String wanted) {
 }
 
 static List _between_direction(List graph, String from, String to) {
-  Array edges = %[];
+  Array edges = [];
   int total = 0;
   match (graph)
     case %(graph *units):
@@ -2232,7 +2232,7 @@ static List _between(List graph, String left, String right) {
 }
 
 static List _callers(List graph, String target_path, String target_name) {
-  Array rows = %[];
+  Array rows = [];
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -2254,7 +2254,7 @@ static List _callers(List graph, String target_path, String target_name) {
 }
 
 static List _focus(List graph, String wanted) {
-  Array matches = %[];
+  Array matches = [];
   match (graph)
     case %(graph *units):
       foreach (List unit, units)
@@ -2307,12 +2307,12 @@ static List _compare_definition(Map by_target, Map by_name, String name) {
         return %(function $path $function_name $visibility);
   }
   return %(
-    unproved ${by_name.contains(name) ? %"ambiguous" : %"missing"}
+    unproved ${by_name.contains(name) ? "ambiguous" : "missing"}
   );
 }
 
 static List _compare_present_path(List targets, Map by_target) {
-  Array rows = %[];
+  Array rows = [];
   foreach (List target, targets) {
     List function = by_target[target];
     match (function)
@@ -2325,8 +2325,8 @@ static List _compare_present_path(List targets, Map by_target) {
 static List _compare_shortest(List start, List destination, Map by_target) {
   if (!start) return %(unproved "entry-unresolved");
   if (!destination) return %(unproved "target-unresolved");
-  Array queue = %[];
-  Map seen = %{}, predecessor = %{};
+  Array queue = [];
+  Map seen = {}, predecessor = {};
   queue.push(start);
   seen[start] = 1;
   for (int index = 0; index < queue.len(); index++) {
@@ -2364,11 +2364,11 @@ static int _compare_proved(List result) {
 
 static List _compare_result(
   List graph, String left_name, String right_name, List operations) {
-  Map by_target = %{}, by_name = %{};
+  Map by_target = {}, by_name = {};
   _compare_indexes(graph, by_target, by_name);
   List left = _compare_exact_target(by_name, left_name);
   List right = _compare_exact_target(by_name, right_name);
-  Array rows = %[];
+  Array rows = [];
   foreach (String operation, operations) {
     List destination = _compare_exact_target(by_name, operation);
     List left_path = _compare_shortest(left, destination, by_target);
@@ -2447,10 +2447,10 @@ static void _dataset_rows(
                       ?external_calls ?indirect_calls
                     ): {
                       String function_id = _dataset_function_id(path, name);
-                      String kind = name == %"<top-level>"
-                                  ? %"top-level" : %"function";
+                      String kind = name == "<top-level>"
+                                  ? "top-level" : "function";
                       functions.push(
-                        %"%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%d\t%d".printf(
+                        "%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%d\t%d".printf(
                           function_id, kind, subtree.symbol().str(), path,
                           unit_lines.int(), source_order.int(), source_name,
                           name, visibility.str(), external_calls.int(),
@@ -2470,7 +2470,7 @@ static void _dataset_rows(
                             String callee_id = _dataset_function_id(
                               callee_path, callee_name
                             );
-                            String row = %"%s\t%s\t%d".printf(
+                            String row = "%s\t%s\t%d".printf(
                               function_id, callee_id, count.int()
                             );
                             Symbol callee_subtree;
@@ -2488,13 +2488,13 @@ static void _dataset_rows(
 
 static void _write_datasets(
   String output, List graph, Map attributes) {
-  Array functions = %[], src_calls = %[], lib_calls = %[];
+  Array functions = [], src_calls = [], lib_calls = [];
   _dataset_rows(graph, attributes, functions, src_calls, lib_calls);
   functions.sort();
   src_calls.sort();
   lib_calls.sort();
   _dataset_mkdirs(output);
-  String function_header = %"".join(%(
+  String function_header = "".join(%(
     "function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
     "source_name\temitted_name\tvisibility\texternal_calls\t"
     "indirect_calls"
@@ -2505,11 +2505,11 @@ static void _write_datasets(
   );
   _dataset_write_rows(
     %"$output/src-calls.tsv",
-    %"caller_id\tcallee_id\tstatic_calls", src_calls
+    "caller_id\tcallee_id\tstatic_calls", src_calls
   );
   _dataset_write_rows(
     %"$output/lib-calls.tsv",
-    %"caller_id\tcallee_id\tstatic_calls", lib_calls
+    "caller_id\tcallee_id\tstatic_calls", lib_calls
   );
 }
 
@@ -2595,9 +2595,9 @@ int main(int argc, char **argv) {
     return 2;
   }
   x2c_initialize_environment(argv[0]);
-  Array inputs = %[], include_dirs = %[], compare_operations = %[];
-  Array src_inputs = %[], lib_inputs = %[];
-  Map seen = %{}, subtrees = %{};
+  Array inputs = [], include_dirs = [], compare_operations = [];
+  Array src_inputs = [], lib_inputs = [];
+  Map seen = {}, subtrees = {};
   String dataset_output = datasets ? String.new(argv[2]) : NULL;
   String wanted = structure ? _display_input(String.new(argv[2]))
                 : focus || sites || allocation_returns
@@ -2700,7 +2700,7 @@ int main(int argc, char **argv) {
         frontend, inputs, datasets ? subtrees : NULL
       );
       if (units) {
-        Map attributes = datasets ? %{} : NULL;
+        Map attributes = datasets ? {} : NULL;
         List graph = _resolve_graph(units, attributes);
         if (datasets) _write_datasets(dataset_output, graph, attributes);
         result = datasets ? graph

@@ -33,7 +33,7 @@ static void _draw(Termbox terminal, ArrayChar cells, int width, int height) {
       if (!cells[y * width + x]) continue;
       int run = 1;
       while (x + run < width && cells[y * width + x + run]) run++;
-      terminal.fill(x, y, run, 1, %"#", TB_GREEN | TB_BOLD, TB_DEFAULT);
+      terminal.fill(x, y, run, 1, "#", TB_GREEN | TB_BOLD, TB_DEFAULT);
       x += run - 1;
     }
   terminal.present();

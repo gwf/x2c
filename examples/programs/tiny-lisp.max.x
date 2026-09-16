@@ -67,7 +67,7 @@ static Var _read(void) {
   if (lookahead == '(') {
     _next();
     // Append in source order, then freeze as an immutable proper List.
-    Array items = $auto(%[]);
+    Array items = $auto([]);
     for (_skip(); lookahead != ')'; _skip()) items.push(_read());
     _next();
     return items.list();
@@ -155,7 +155,7 @@ static Var _eval(Var expression, Map environment) {
           /* Evaluate every actual argument in the caller before installing
              parameters. Copy the environment afterward: an argument's def
              must be visible both to later arguments and to the body. */
-          Array values = $auto(%[]);
+          Array values = $auto([]);
           foreach (Var argument, arguments)
             values.push(_eval(argument, environment));
 
@@ -182,7 +182,7 @@ int main(void) {
      shutdown, so returned values outlive those temporary containers. There
      is no tracing collector or per-expression pool to invalidate bindings. */
   $scope() {
-    Map environment = %{};
+    Map environment = {};
     for (_skip(); lookahead != EOF; _skip())
       puts(_eval(_read(), environment).str());
   }

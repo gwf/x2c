@@ -36,7 +36,7 @@ printed without writing its constructor, converters, hash, or printer:
 class Point { int x; int y; };
 ~int main(void) {
 Point point = Point.new(3, 4);
-Map labels = $auto(%{});
+Map labels = $auto({});
 labels[point] = "origin";
 printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)].str());
 ~  return 0;
@@ -128,7 +128,7 @@ its address:
 ```x2c
 class History struct { int count; Array items; } *;
 void History.init(History self) {
-  self.items = %[];
+  self.items = [];
 }
 void History.free(History self) {
   self.items.free();
@@ -166,7 +166,7 @@ class Point { int x; int y; };
 ~int main(void) {
 Point point = Point.new(3, 4);
 Var first = point, second = Point.new(3, 4);
-Map labels = $auto(%{});
+Map labels = $auto({});
 labels[first] = "origin";
 printf("%s\n", labels[second].str());
 ~  return labels.contains(second) ? 0 : 1;
@@ -206,7 +206,7 @@ release:
 
 ```x2c
 ~int main(void) {
-$scope() { Array values = %[]; values.push(1); }
+$scope() { Array values = []; values.push(1); }
 ~  return 0;
 ~}
 ```
@@ -219,7 +219,7 @@ The block placement is equivalent to:
   Scope.retain();
   {
     defer Scope.release();
-    { Array values = %[]; values.push(1); }
+    { Array values = []; values.push(1); }
   }
 }
 ~  return 0;
@@ -314,7 +314,7 @@ private synchronized decorator keeps its own policy.
 
 ```x2c
 ~int main(void) {
-Array items = $auto(%[]);
+Array items = $auto([]);
 Buffer text = $auto(Buffer.new(0));
 items.push(42);
 text.write(items.repr());
@@ -347,9 +347,9 @@ a new Array to an `$auto` local does not free the earlier Array:
 
 ```x2c
 ~int main(void) {
-Array current = $auto(%[]);
+Array current = $auto([]);
 Array earlier = current;
-current = %[];
+current = [];
 earlier.free();
 ~  return 0;
 ~}
@@ -378,7 +378,7 @@ explicit.
 class History struct { Array lengths; } *;
 
 void History.init(History self) {
-  self.lengths = %[];
+  self.lengths = [];
 }
 
 void History.free(History self) {

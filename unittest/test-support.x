@@ -119,7 +119,7 @@ static Var _context_probe_export(Var value, Context source) {
 */
 int Test_register_context_probe(void) {
   VarMethods methods = { .export_context = _context_probe_export };
-  return x2c_try_register_descriptor(%"ctxprobe", methods);
+  return x2c_try_register_descriptor("ctxprobe", methods);
 }
 
 void TestHarness_begin(void) {

@@ -6,8 +6,8 @@
 
 int main(void) {
 // Store native ints and count each response code.
-ArrayInt responses = %[200, 200, 404, 200, 500, 404];
-MapIntInt counts = %{};
+ArrayInt responses = [200, 200, 404, 200, 500, 404];
+MapIntInt counts = {};
 for (int i = 0, n = responses.len(); i < n; i++)
   counts[responses[i]] += 1;
 

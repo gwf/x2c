@@ -8,10 +8,10 @@ int main(void) {
     0
   );
   defer entry.free();
-  Regexp fields = Regexp.compile(%"\\s*\\|\\s*", 0);
+  Regexp fields = Regexp.compile("\\s*\\|\\s*", 0);
   defer fields.free();
 
-  Map counts = %{};
+  Map counts = {};
   foreach(String line, %(
     "09:14:02 sshd[441]: accepted key | user=ada | port=22"
     "09:14:07 cron[88]: ran backup | status=ok"

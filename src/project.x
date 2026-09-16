@@ -176,7 +176,7 @@ static List _string_array(Project project, int line, String value) {
   if (*cursor != '[')
     _error(project, line, "expected an array of quoted strings");
   cursor++;
-  Array values = %[];
+  Array values = [];
   loop {
     while (isspace((unsigned char) *cursor)) cursor++;
     if (*cursor == ']') {
@@ -210,7 +210,7 @@ static ProjectTarget _target(Project project, String name, int create) {
   if (!create) return NULL;
   ProjectTarget target = Scope.calloc(1, sizeof(struct ProjectTarget));
   target.name = name;
-  target.seen = %{};
+  target.seen = {};
   target.kind = <executable>;
   target.next = project.targets;
   project.targets = target;
@@ -224,7 +224,7 @@ static ProjectProfile _profile(ProjectTarget target, String name, int create) {
   if (!create) return NULL;
   ProjectProfile profile = Scope.calloc(1, sizeof(struct ProjectProfile));
   profile.name = name;
-  profile.seen = %{};
+  profile.seen = {};
   profile.next = target.profiles;
   target.profiles = profile;
   return profile;
@@ -339,13 +339,13 @@ static void _parse_manifest(Project p) {
       if (name == "dependencies") {
         if (p.dependency_seen)
           _error(p, line_number, "duplicate dependencies section");
-        p.dependency_seen = %{};
+        p.dependency_seen = {};
         section = DEPENDENCIES;
         target = NULL;
         profile = NULL;
         continue;
       }
-      List parts = name.split(%"."), int count = parts.len();
+      List parts = name.split("."), int count = parts.len();
       String first = parts.car();
       String second = parts.cdr() ? parts.cdr().car().string() : NULL;
       String third = parts.cdr() && parts.cdr().cdr() ?
@@ -438,7 +438,7 @@ static void _walk_matches(
 
 static Array _expand_pattern(
   Project project, String pattern, const char *owner) {
-  Array matches = %[];
+  Array matches = [];
   if (!_has_glob(pattern)) {
     String path = _absolute(project, pattern), struct stat info;
     int present = project.sources ? project.sources.exists(path) :
@@ -448,7 +448,7 @@ static Array _expand_pattern(
   else {
     _walk_matches(project, project.root, NULL, pattern, matches);
     if (project.sources) {
-      String prefix = project.root == "/" ? %"/" : %"${project.root}/";
+      String prefix = project.root == "/" ? "/" : %"${project.root}/";
       foreach (String path, project.sources.overlays.keys()) {
         if (!path.startswith(prefix)) continue;
         if (project.build_root &&
@@ -474,21 +474,21 @@ static Array _target_sources(
   Project project, ProjectTarget target, int verbose) {
   if (!target.sources)
     _error_name(project, 0, "target has no sources", target.name);
-  Array sources = %[];
+  Array sources = [];
   foreach (String pattern, target.sources) {
     Array expanded = _expand_pattern(project, pattern, "source");
     foreach (Var value, expanded)
       if (!sources.contains(value)) sources.push(value);
     expanded.free();
   }
-  Array excluded = %[];
+  Array excluded = [];
   foreach (String pattern, target.exclude) {
     Array expanded = _expand_pattern(project, pattern, "exclude");
     foreach (Var value, expanded)
       if (!excluded.contains(value)) excluded.push(value);
     expanded.free();
   }
-  Array kept = %[];
+  Array kept = [];
   foreach (Var value, sources) {
     if (excluded.contains(value)) {
       if (verbose)
@@ -503,7 +503,7 @@ static Array _target_sources(
   kept.sort();
   foreach (Var value, kept) {
     String path = value;
-    if (!(path.endswith(%".x") || path.endswith(%".c")))
+    if (!(path.endswith(".x") || path.endswith(".c")))
       _error_name(project, 0, "manifest source is not .x or .c", path);
   }
   return kept;
@@ -606,13 +606,13 @@ static CliRequest _target_request(
   }
   request.inputs = inputs.list_free();
 
-  Array x_paths = %[];
+  Array x_paths = [];
   _append_values(x_paths, command.include_dirs);
   foreach (String path, target.include_dirs)
     x_paths.push(_absolute(p, path));
   request.include_dirs = x_paths.list_free();
 
-  Array package_paths = %[];
+  Array package_paths = [];
   _append_values(package_paths, command.package_dirs);
   foreach (String path, target.package_dirs)
     package_paths.push(_absolute(p, path));
@@ -621,13 +621,13 @@ static CliRequest _target_request(
   ProjectProfile profile =
     target == selected ?
     _selected_profile(p, target, command.profile) : NULL;
-  Array preprocess = %[];
+  Array preprocess = [];
   _append_defines(preprocess, target.defines);
   if (profile) _append_defines(preprocess, profile.defines);
   _append_values(preprocess, command.cpp_args);
   request.cpp_args = preprocess.list_free();
 
-  Array compile = %[];
+  Array compile = [];
   _append_defines(compile, target.defines);
   _append_c_flags(p, compile, target.c_flags);
   if (profile) {
@@ -640,16 +640,16 @@ static CliRequest _target_request(
     _append_c_flags(p, compile, profile.c_flags);
     if (profile.optimization && !has_optimization)
       compile.push(%"-${profile.optimization}");
-    if (profile.seen.contains(%"debug") && profile.debug &&
+    if (profile.seen.contains("debug") && profile.debug &&
         !has_debug)
       compile.push("-g");
   }
   _append_values(compile, command.cc_args);
-  _append_paths(p, compile, target.include_dirs, %"-I");
+  _append_paths(p, compile, target.include_dirs, "-I");
   request.cc_args = compile.list_free();
 
-  Array link = %[];
-  _append_paths(p, link, target.library_dirs, %"-L");
+  Array link = [];
+  _append_paths(p, link, target.library_dirs, "-L");
   foreach (String library, target.libraries) link.push(%"-l$library");
   _append_values(link, target.link_flags);
   if (profile) _append_values(link, profile.link_flags);
@@ -698,10 +698,10 @@ static List _read_lock(String path) {
   String text = NULL;
   try text = input.string_close();
   catch %(io-fail *): return NULL;
-  Array rows = %[];
+  Array rows = [];
   foreach (String line, text.split_lines(0)) {
     if (!line || line.startswith("#")) continue;
-    Array fields = %[];
+    Array fields = [];
     foreach (String field, line.split(" "))
       if (field) fields.push(field);
     if (fields.len() == 6) rows.push(fields.list_free());
@@ -748,7 +748,7 @@ static void _resolve_dependencies(Project project, CliRequest request) {
   String path = %"${project.root}/x2c.lock";
   List locked = _read_lock(path);
   if (_lock_satisfies(project, locked)) return;
-  Array rows = %[];
+  Array rows = [];
   for (ProjectDependency entry = project.dependencies; entry;
        entry = entry.next)
     rows.push(install_require(request, entry.name, entry.version));
@@ -785,7 +785,7 @@ String project_manifest(CliRequest request) {
 */
 ProjectBuild project_plan(CliRequest request) {
   Project project = Scope.calloc(1, sizeof(struct Project));
-  project.seen = %{};
+  project.seen = {};
   project.sources = request.sources;
   project.path = project_manifest(request);
   if (!project.path)

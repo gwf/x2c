@@ -33,7 +33,7 @@ static void json_parse_builds_ordinary_values(void) {
   EXPECT_INT_EQ(object.len(), 7);
   EXPECT_STR_EQ(object["name"].string(), "x2c");
   EXPECT_TRUE(object["tags"] is <array>);
-  EXPECT_TRUE(Var.equal(object["tags"], %["a", ""]));
+  EXPECT_TRUE(Var.equal(object["tags"], ["a", ""]));
   EXPECT_TRUE(object["tags"][1] is <string>);
   EXPECT_TRUE(object["empty"] is <map>);
   EXPECT_INT_EQ(object["empty"].map().len(), 0);
@@ -149,14 +149,14 @@ static void json_rejects_malformed_text_with_position(void) {
 
 static void json_nesting_is_limited_to_512_levels(void) {
   $test.scoped();
-  String deepest = %"${%"[".repeat(512)}${%"]".repeat(512)}";
+  String deepest = %"${"[".repeat(512)}${"]".repeat(512)}";
   Var value = Json.parse(deepest);
   EXPECT_STR_EQ(value.json(), deepest);
-  String deeper = %"${%"{\"a\":".repeat(513)}1${%"}".repeat(513)}";
+  String deeper = %"${"{\"a\":".repeat(513)}1${"}".repeat(513)}";
   _expect_rejected(deeper, "nesting exceeds 512 levels");
-  _expect_rejected(%"[".repeat(100000), "nesting exceeds 512 levels");
+  _expect_rejected("[".repeat(100000), "nesting exceeds 512 levels");
 
-  Array cycle = %[];
+  Array cycle = [];
   cycle.push(cycle);
   int caught = 0;
   try Var.json(cycle);
@@ -168,27 +168,27 @@ static void json_repeated_names_keep_the_last_value(void) {
   $test.scoped();
   Map object = Json.parse("{\"a\": 1, \"b\": 2, \"a\": [3]}");
   EXPECT_INT_EQ(object.len(), 2);
-  EXPECT_TRUE(Var.equal(object["a"], %[3]));
+  EXPECT_TRUE(Var.equal(object["a"], [3]));
   EXPECT_STR_EQ(Var.json(object), "{\"a\":[3],\"b\":2}");
 }
 
 static void json_writes_compact_and_pretty_text(void) {
   $test.scoped();
   Var none = NULL;
-  Map object = %{
-    zeta: (1 2), "alpha": {}, mid: [], flag: ${Json.bool(1)}, none: $none,
-    text: "tab\t\"q\" \\ \x01 \x7f \xc3\xa9", mode: fast
+  Map object = {
+    zeta: %(1 2), "alpha": %{}, mid: [], flag: Json.bool(1), none: none,
+    text: %"tab\t\"q\" \\ \x01 \x7f \xc3\xa9", mode: <fast>
   };
   EXPECT_STR_EQ(Var.json(object),
     "{\"alpha\":{},\"flag\":true,\"mid\":[],\"mode\":\"fast\","
     "\"none\":null,\"text\":\"tab\\t\\\"q\\\" \\\\ \\u0001 \x7f \xc3\xa9\","
     "\"zeta\":[1,2]}");
-  EXPECT_STR_EQ(Var.pretty_json(%{a: [1, {b: $none}], c: {}}),
+  EXPECT_STR_EQ(Var.pretty_json({a: [1, {b: none}], c: %{}}),
     "{\n  \"a\": [\n    1,\n    {\n      \"b\": null\n    }\n  ],\n"
     "  \"c\": {}\n}");
-  EXPECT_STR_EQ(Var.pretty_json(%[]), "[]");
+  EXPECT_STR_EQ(Var.pretty_json([]), "[]");
   EXPECT_STR_EQ(Var.json("line\nbreak"), "\"line\\nbreak\"");
-  EXPECT_STR_EQ(Var.json(%""), "\"\"");
+  EXPECT_STR_EQ(Var.json(""), "\"\"");
 
   const double doubles[] = {
     0.1, 1.0, -0.0, 1e16, 1e15, 1e-5, 0.0001, 123456789.125, 5e-324,
@@ -211,10 +211,10 @@ static void json_writes_compact_and_pretty_text(void) {
   catch %(conv-range *): caught++;
   try Var.json((double) -HUGE_VAL);
   catch %(conv-range *): caught++;
-  try Var.json(%{1: "numeric key"});
+  try Var.json({1: "numeric key"});
   catch %(bad-types *): caught++;
   File output = stdout;
-  try Var.json(%[{}, $output]);
+  try Var.json([%{}, output]);
   catch %(bad-types *): caught++;
   try Var.json(String.new("\xc3("));
   catch %(bad-arg *): caught++;
@@ -232,13 +232,13 @@ static void json_values_round_trip(void) {
   EXPECT_TRUE(Var.equal(Json.parse(value.pretty_json()), value));
   EXPECT_STR_EQ(Json.parse(value.pretty_json()).json(), text);
 
-  Map built = %{
-    count: 3, ratio: 0.5, names: ["a", "b"], "on": ${Json.bool(1)}
+  Map built = {
+    count: 3, ratio: 0.5, names: ["a", "b"], "on": Json.bool(1)
   };
   Map read = Json.parse(Var.json(built));
   EXPECT_TRUE(Var.equal(read["count"], 3));
   EXPECT_TRUE(Var.equal(read["ratio"], 0.5));
-  EXPECT_TRUE(Var.equal(read["names"], %["a", "b"]));
+  EXPECT_TRUE(Var.equal(read["names"], ["a", "b"]));
   EXPECT_TRUE(Json.boolean(read["on"]));
 
   const double hard[] = { 0.1 + 0.2, 1e23, 2.2250738585072014e-308,
@@ -250,7 +250,7 @@ static void json_values_round_trip(void) {
 static void json_files_read_and_write(void) {
   $test.scoped();
   Path root = Path.temp_dir(), path = root.join("value.json");
-  Json.write_file(%{name: "x2c", list: [1, 2]}, path);
+  Json.write_file({name: "x2c", list: [1, 2]}, path);
   EXPECT_STR_EQ(path.read_text(), "{\"list\":[1,2],\"name\":\"x2c\"}");
   Map value = Json.read_file(path);
   EXPECT_STR_EQ(value["name"].string(), "x2c");

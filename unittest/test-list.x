@@ -53,7 +53,7 @@ static void list_builders_and_indexing(void) {
 }
 
 static void list_counted_values_are_boxed(void) {
-  List values = List.list_n(3, 1, 2, %"three");
+  List values = List.list_n(3, 1, 2, "three");
   EXPECT_INT_EQ(values.len(), 3);
   EXPECT_INT_EQ(values[0].int(), 1);
   EXPECT_INT_EQ(values[1].int(), 2);
@@ -181,7 +181,7 @@ typedef Var (*ListBinaryFunction)(Var, Var);
 typedef int (*ListPredicateFunction)(Var);
 
 static Var _list_truthy_string(Var value) {
-  return value.integer() > 2 ? %"yes" : NULL;
+  return value.integer() > 2 ? "yes" : NULL;
 }
 
 static Var _list_no_arguments(void) {
@@ -432,14 +432,14 @@ static void list_assoc_hash_equal(void) {
   EXPECT_TRUE(assoc == assoc_copy);
   EXPECT_TRUE(assoc != different);
 
-  Map keyed = %{};
+  Map keyed = {};
   keyed[assoc] = 77;
   EXPECT_INT_EQ(keyed[assoc_copy].integer(), 77);
   EXPECT_INT_EQ(assoc.hash(), assoc_copy.hash());
 }
 
 static void list_array_conversion_boundaries(void) {
-  Array values = %[1, 2, 3];
+  Array values = [1, 2, 3];
   List list = values.list_free();
   Array roundtrip = list.array();
 
@@ -463,12 +463,12 @@ static void list_array_conversion_boundaries(void) {
 
 static void list_array_list_free_consumes_the_receiver(void) {
   ScopeStats before = Scope.stats();
-  Array values = %[1, 2, 3];
+  Array values = [1, 2, 3];
   EXPECT_TRUE(values.list_free() == %(1 2 3));
   // An empty Array converts to nil and is released just the same, so the live
   // allocation count returns to where it started either way. Cons cells live
   // in the List pool, not in a Scope.
-  Array empty = %[];
+  Array empty = [];
   EXPECT_NULL(empty.list_free());
   EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
 }
@@ -479,7 +479,7 @@ static int keep_even(Var value) {
 
 static void list_large_operations_are_iterative(void) {
   int count = 50000;
-  Array values = %[];
+  Array values = [];
   for (int i = 0; i < count; i++) values.push(i);
   List source = values.list_free();
 
@@ -560,7 +560,7 @@ static void list_unique_removes_duplicates(void) {
 }
 
 static void list_intern_preserves_map_identity(void) {
-  Map m1 = %{}, m2 = %{};
+  Map m1 = {}, m2 = {};
 
   List l1 = cons(m1, NULL), l2 = cons(m2, NULL);
 
@@ -576,7 +576,7 @@ static void list_intern_preserves_map_identity(void) {
   EXPECT_TRUE(car(l1) === m1);
   EXPECT_TRUE(car(l2) === m2);
 
-  Map keyed = %{};
+  Map keyed = {};
   keyed[l1] = 88;
   m1[<changed>] = 1;
   EXPECT_INT_EQ(keyed[l1].integer(), 88);

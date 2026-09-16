@@ -203,7 +203,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
     case %(cons ? ?): break;
     default: return node;
   }
-  Array elements = %[];
+  Array elements = [];
   List tail = content;
   loop {
     match (tail) {
@@ -249,7 +249,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
 
 /** Applies each typed capture's predicate to every unquoted occurrence. */
 List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
-  Map tags = %{};
+  Map tags = {};
   foreach (List row, types) match (row)
     case %(?name ?type):
       tags[Atom.intern(%"?${name.str()}")] =
@@ -411,7 +411,7 @@ static Buffer _write_symbol_set_word(
 }
 
 static int _symbol_set_duplicate(List values) {
-  Map seen = %{};
+  Map seen = {};
   int index = 0;
   foreach (Symbol value, values) {
     if (seen.contains(value)) return index;
@@ -477,7 +477,7 @@ List Compiler.symbol_set_expression(
 */
 List Compiler.parse_symbol_set_literal(Compiler c) {
   c.expect(<"%<<">);
-  Array symbols = %[], tokens = %[];
+  Array symbols = [], tokens = [];
   while (c.peek(0) != <">>">) {
     Token token = c.token;
     Symbol kind = c.peek(0);
@@ -535,7 +535,7 @@ List Compiler.parse_raise_literal(Compiler c) {
   List code = _parse_error_symbol(
     c, "raise", "code", "use raise %(code (key value)...);");
 
-  Array args = %[];
+  Array args = [];
   while (c.peek(0) != <)>) {
     List slot = c.try_parse_macro_slot(<argument>);
     if (slot) {
@@ -593,7 +593,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
     c, "catch filter", "code",
     "use catch %(code (key pattern)...):");
 
-  Array elements = %[];
+  Array elements = [];
   elements.push(code);
   while (c.peek(0) != <)>) {
     Token detail_token = c.token;
@@ -623,7 +623,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
         <parse>, "catch filter detail requires exactly one pattern",
         detail_token, NULL);
     c.expect(<)>);
-    Array pair = %[];
+    Array pair = [];
     pair.push(key);
     pair.push(value);
     elements.push(_build_error_pattern_list(c, pair));
@@ -639,7 +639,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
 
 static List _parse_quoted_array_elements(Compiler compiler) {
   if (compiler.peek(0) == <]>) return NULL;
-  Array values = %[];
+  Array values = [];
   values.push(_parse_collection_element(compiler));
   while (compiler.test(<,>)) {
     if (compiler.peek(0) == <]>) break;
@@ -691,7 +691,7 @@ List Compiler.parse_map_entry(Compiler compiler) {
     `Entry`-position macro sequences are flattened in source order.
 */
 List Compiler.parse_map_entries(Compiler c) {
-  Array values = %[];
+  Array values = [];
   while (c.peek(0) != <"}">) {
     Ast insertion = c.parse_map_entry();
     if (insertion && insertion.car() == <seq>)
@@ -732,7 +732,7 @@ static List _parse_quoted_map_entry(Compiler c) {
 }
 
 static List _parse_quoted_map_entries(Compiler c) {
-  Array values = %[];
+  Array values = [];
   while (c.peek(0) != <"}">) {
     Ast insertion = _parse_quoted_map_entry(c);
     if (insertion && insertion.car() == <seq>)
@@ -833,7 +833,7 @@ static List _parse_string_segment(Compiler c) {
 }
 
 static List _parse_string_segments(Compiler compiler) {
-  Array segments = %[];
+  Array segments = [];
   while (compiler.peek(0) != <"\"">)
     segments.push(_parse_string_segment(compiler));
   List result = segments.list_free();
@@ -875,7 +875,7 @@ static void _lambda_expect_arrow(Compiler compiler) {
 }
 
 static List _lambda_parse_typed_params(Compiler compiler, List *out_names) {
-  Array names = %[], List typed_params = compiler.parse_parameter_list();
+  Array names = [], List typed_params = compiler.parse_parameter_list();
   foreach (List param, typed_params)
     match (param) {
       case %(param ? (bind ?binding ?)): {
@@ -889,7 +889,7 @@ static List _lambda_parse_typed_params(Compiler compiler, List *out_names) {
 }
 
 static List _lambda_parse_bare_params(Compiler compiler) {
-  Array names = %[];
+  Array names = [];
   loop {
     if (compiler.peek(0) != <ident>)
       compiler.report_error(
@@ -912,7 +912,7 @@ static List _lambda_parse_bare_params(Compiler compiler) {
 static List _lambda_param_types_for_signature(
   Compiler compiler, List entries) {
   if (!entries) return %((void));
-  Array types = %[];
+  Array types = [];
   foreach (List entry, entries)
     match (entry) {
       case %(binding ? ?): types.push(%("Var"));
@@ -1062,7 +1062,7 @@ List Compiler.capture_lambda_identifier(
 */
 List Compiler.bind_lambda_expression(
   Compiler c, Type type, List parameters, List supplied, List body) {
-  Array prescribed = %[], aliases = %[];
+  Array prescribed = [], aliases = [];
   foreach (List row, supplied)
     match (row)
       case %(capture ?target ?captured_type ?expression): {
@@ -1095,7 +1095,7 @@ List Compiler.bind_lambda_expression(
   defer c.lambda_scopes = previous;
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  Array entries = %[];
+  Array entries = [];
   foreach (List entry, parameters.cdr()) {
     List declaration = NULL;
     match (entry) {
@@ -1154,7 +1154,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   }
   c.expect(<)>);
   SymScope params = c.sym.pop_scope();
-  Array references = %[], prescribed = %[];
+  Array references = [], prescribed = [];
   if (c.peek(0) == <ident> && c.token.text == "using") {
     c.next();
     do {

@@ -8,11 +8,11 @@ int main(void) {
 
   UvProcess normalized = loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
   defer normalized.free();
-  normalized.write(%"alpha\nbeta\ngamma\n").close_stdin();
+  normalized.write("alpha\nbeta\ngamma\n").close_stdin();
 
   UvProcess counted = loop.spawn(%("/usr/bin/wc" "-l"));
   defer counted.free();
-  counted.write(%"alpha\nbeta\ngamma\n").close_stdin();
+  counted.write("alpha\nbeta\ngamma\n").close_stdin();
 
   printf("started %d and %d before running the loop\n",
          normalized.pid(), counted.pid());

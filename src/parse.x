@@ -203,7 +203,7 @@ static List _declaration_base(Type type, List *modifiers) {
   List (base, mods) = type.declared().declaration_parts();
   *modifiers = mods;
   if (!mods) return type;
-  Array storage = %[];
+  Array storage = [];
   foreach (Var item, type)
     if (item is <symbol> &&
         (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
@@ -229,7 +229,7 @@ static List _finish_declaration(
   List modifiers = NULL;
   base = _declaration_base(base, &modifiers);
   if (modifiers) {
-    Array bound = %[];
+    Array bound = [];
     foreach (List declarator, declarators)
       bound.push(_append_declarator_modifiers(declarator, modifiers));
     declarators = bound.list_free();
@@ -273,7 +273,7 @@ static List _storage_class(Compiler compiler) {
 }
 
 static List _type_qualifiers(Compiler compiler) {
-  Array quals = %[], Symbol symbol = compiler.peek(0);
+  Array quals = [], Symbol symbol = compiler.peek(0);
   while (symbol.is_type_qualifier()) {
     quals.push(symbol);
     compiler.next();
@@ -293,7 +293,7 @@ static int _is_scalar_specifier(Symbol symbol) {
 
 static List _primitive_type(Compiler compiler) {
   Token start = compiler.token;
-  Array specs = %[];
+  Array specs = [];
   while (_is_scalar_specifier(compiler.peek(0))) {
     specs.push(compiler.peek(0));
     compiler.next();
@@ -305,7 +305,7 @@ static List _primitive_type(Compiler compiler) {
   if (compiler.shallow) return source;
   compiler.report_error(
     <type>, source ? %"invalid scalar type ${source.str()}"
-                   : %"expected scalar type",
+                   : "expected scalar type",
     start, NULL
   );
 }
@@ -343,7 +343,7 @@ static List _typedef_name(Compiler compiler) {
 }
 
 static List _field_declaration_row(Compiler compiler, List context) {
-  Array declarations = %[];
+  Array declarations = [];
   loop {
     declarations.push(_decl_context_group(compiler, context));
     if (!_test_declaration_group_comma(compiler)) break;
@@ -436,7 +436,7 @@ List Compiler.parse_field(Compiler compiler, List context) {
     the closing brace unconsumed.
 */
 List Compiler.parse_fields(Compiler c, List context) {
-  Array fields = %[];
+  Array fields = [];
   loop {
     int delegated = c.test(<delegate>);
     List field = delegated
@@ -561,7 +561,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
     Returns their flat source-order `List` and leaves the brace unconsumed.
 */
 List Compiler.parse_enumerators(Compiler c, List context) {
-  Array enumerators = %[];
+  Array enumerators = [];
   while (c.peek(0) != <"}">) {
     if (c.shallow && c.peek(0) == <$>) c.skip_macro_invocation();
     else if (c.shallow &&
@@ -712,7 +712,7 @@ List Compiler.parse_parameter(Compiler compiler) {
     current.
 */
 List Compiler.parse_parameter_list(Compiler c) {
-  Array parameters = %[];
+  Array parameters = [];
   while (1) {
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
@@ -966,7 +966,7 @@ static List _declarator_init(
 
 static List _declarator_list(
   Compiler compiler, List type, List context, int row) {
-  Array bindings = %[];
+  Array bindings = [];
   loop {
     bindings.push(_declarator_init(compiler, type, context));
     if ((row && _test_declaration_group_comma(compiler)) ||
@@ -1042,14 +1042,14 @@ static int _test_destructure_declaration(Compiler compiler) {
    so a foreach binder reaches the transform as a plain declaration of two
    names. */
 static List _destructure_binds(List targets) {
-  Array binds = %[];
+  Array binds = [];
   foreach (List target, targets) binds.push(%(bind $target ()));
   return binds.list_free();
 }
 
 static List _destructure_declaration(
   Compiler c, List type, List binding_type, int allow_uninitialized) {
-  Array targets = %[];
+  Array targets = [];
   Token origin_token = c.token;
   c.expect(
     <(>);
@@ -1129,7 +1129,7 @@ List Compiler.parse_simple_declaration(Compiler compiler) =>
   _declaration_group(compiler, 0);
 
 static List _declaration_rows(Compiler compiler) {
-  Array declarations = %[];
+  Array declarations = [];
   loop {
     declarations.push(_declaration_group(compiler, 1));
     if (!_test_declaration_group_comma(compiler)) break;
@@ -1183,7 +1183,7 @@ static void _append_managed_declaration(
       return;
     }
     case %(declare ?base (bindings *declarators)): {
-      Array ordinary = %[];
+      Array ordinary = [];
       defer ordinary.free();
       foreach (List declarator, declarators) {
         List initializer = NULL, binding = NULL, modifiers = NULL;
@@ -1233,7 +1233,7 @@ static void _append_managed_declaration(
 List Compiler.finish_managed_declaration(Compiler c, List declaration) {
   if (c.macro_holes || !_has_managed_declaration(declaration))
     return declaration;
-  Array output = %[];
+  Array output = [];
   _append_managed_declaration(c, declaration, output);
   return %(seq @{output.list_free()});
 }
@@ -1446,7 +1446,7 @@ static void _import_members(Compiler c, String name) {
     Token member_token = c.token, local_token = member_token;
     String member = c.token.text, local = member;
     c.next();
-    if (_test_contextual(c, %"as")) {
+    if (_test_contextual(c, "as")) {
       if (c.peek(0) != <ident>)
         c.report_error(
           <parse>, "expected a local name after 'as'", c.token, NULL);
@@ -1479,7 +1479,7 @@ List Compiler.parse_import_declaration(Compiler c) {
       <parse>, "package name must be a C identifier", name_token, NULL);
   c.next();
   String alias = name;
-  if (_test_contextual(c, %"as")) {
+  if (_test_contextual(c, "as")) {
     if (c.peek(0) != <ident>)
       c.report_error(
         <parse>, "expected an alias identifier after 'as'",
@@ -1489,7 +1489,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   }
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);
-  if (_test_contextual(c, %"with")) _import_members(c, name);
+  if (_test_contextual(c, "with")) _import_members(c, name);
   c.expect(<;>);
   return %(import $name $alias);
 }
@@ -1672,7 +1672,7 @@ static List _finish_aggregate_type(
   List type = %($tag $name);
   List previous = c.aggregate_type;
   c.aggregate_type = type;
-  Array bound = %[];
+  Array bound = [];
   {
     defer c.aggregate_type = previous;
     foreach (List member, members) {
@@ -1716,7 +1716,7 @@ static List _finish_type(Compiler compiler, List type) {
               ? constructed.cdr() : constructed;
     return compiler.sym.local_type(type);
   }
-  Array bound = %[];
+  Array bound = [];
   foreach (Var spec, type) {
     Var value = _finish_type_spec(compiler, spec);
     if (value is <list> && !value.is_nil() &&
@@ -1736,11 +1736,11 @@ static List _finish_declarator_parameters(Compiler compiler, List declarator) {
       return %(op = ${_finish_declarator_parameters(compiler, binding)}
                $value);
     case %(bind ?binding ?modifiers): {
-      Array output = %[];
+      Array output = [];
       foreach (Var modifier, modifiers.list()) {
         match (modifier) {
           case %(fnmod (params *parameters)): {
-            Array params = %[];
+            Array params = [];
             compiler.sym.push_new_scope();
             {
               defer compiler.sym.pop_scope();
@@ -2002,7 +2002,7 @@ List Compiler.bind_syntax(
           _.run_declaration_effects();
         }
         $let(_.declaration_projection, _.declaration_projection + 1) {
-          Array projected = %[];
+          Array projected = [];
           foreach (List row, rows) {
             List bound = _.bind_syntax(row, context, _.return_type);
             _append_declaration_rows(projected, bound);
@@ -2054,7 +2054,7 @@ List Compiler.bind_syntax(
             return _.bind_syntax(only.list(), context, _.return_type);
           _.report_error(<parse>, "expected one statement", _.token, NULL);
         }
-        Array bound = %[];
+        Array bound = [];
         foreach (Var item, items) {
           List value = _.bind_syntax(item.list(), context, _.return_type);
           if (value.car() == <seq>)
@@ -2065,7 +2065,7 @@ List Compiler.bind_syntax(
       }
       case %(args *arguments): {
         if (context != AST_EXPRESSION) goto construction_error;
-        Array bound = %[];
+        Array bound = [];
         foreach (List argument, arguments)
           bound.push(_.resolve_expression(argument, _.token));
         return %(args @{bound.list_free()});
@@ -2105,7 +2105,7 @@ List Compiler.bind_syntax(
                              ? _.aggregate_type : NULL;
           List declaration_context = tag == <typedef>
                                    ? %(typedef) : field_context;
-          Array output = %[];
+          Array output = [];
           int preserved_self = 0;
           foreach (List declarator, declarators) {
             declarator = _finish_declarator_parameters(_, declarator);
@@ -2131,7 +2131,7 @@ List Compiler.bind_syntax(
       }
       case %(dstrdecl ?base (targets *targets) ?source): {
         if (context != AST_BLOCK) goto construction_error;
-        Array declarators = %[];
+        Array declarators = [];
         foreach (Var target, targets) declarators.push(%(bind $target ()));
         List declaration = _.bind_syntax(
           %(declare $base
@@ -2140,7 +2140,7 @@ List Compiler.bind_syntax(
         );
         match (declaration)
           case %(declare ?bound_base (bindings *bindings)): {
-            Array bound_targets = %[];
+            Array bound_targets = [];
             foreach (List binding, bindings)
               match (binding)
                 case %(bind ?name ?): bound_targets.push(name);
@@ -2151,7 +2151,7 @@ List Compiler.bind_syntax(
       }
       case %(dstrdecl (params *parameters) ?source): {
         if (context != AST_BLOCK) goto construction_error;
-        Array bound_parameters = %[];
+        Array bound_parameters = [];
         foreach (List parameter, parameters)
           match (parameter)
             case %(param ?base (!set ?declarator (bind ? ?))): {
@@ -2172,7 +2172,7 @@ List Compiler.bind_syntax(
                ?body)): {
         if (context != AST_UNIT) goto construction_error;
         if (_.shallow && !_.declaration_projection) return function;
-        Array parameters = %[];
+        Array parameters = [];
         _.sym.push_new_scope();
         {
           defer _.params = _.sym.pop_scope();
@@ -2295,7 +2295,7 @@ List Compiler.bind_syntax(
       }
       case %(raise ?code (args *details)): {
         if (!statement_position) goto construction_error;
-        Array bound = %[];
+        Array bound = [];
         foreach (List detail, details)
           bound.push(_.resolve_expression(detail, _.token));
         return %(raise ${_.resolve_expression(code, _.token)}
@@ -2303,7 +2303,7 @@ List Compiler.bind_syntax(
       }
       case %(catchcases ?arms): {
         if (context != AST_STATEMENT) goto construction_error;
-        Array bound = %[];
+        Array bound = [];
         foreach (List arm, arms.list()) {
           List pattern = arm.car();
           _.begin_catch_arm(pattern, _.token);
@@ -2334,7 +2334,7 @@ List Compiler.bind_syntax(
       }
       case %(match ?subject ?cases): {
         if (!statement_position) goto construction_error;
-        Array bound = %[];
+        Array bound = [];
         foreach (List row, cases.list()) {
           List pattern = row.car();
           int binds = pattern !== %(*);
@@ -2362,7 +2362,7 @@ List Compiler.bind_syntax(
       }
       case %(block *children): {
         if (!statement_position) goto construction_error;
-        Array fields = %[];
+        Array fields = [];
         _.sym.push_new_scope();
         {
           defer _.sym.pop_scope();

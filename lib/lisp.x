@@ -360,7 +360,7 @@ static Symbol _malformed(String source, unsigned at) {
 
 static Symbol _read_token_list(
   Tokenizer tokenizer, char *source, unsigned base, unsigned *end, Var *out) {
-  Array elements = %[], Symbol status = <value>;
+  Array elements = [], Symbol status = <value>;
   loop {
     Token token = tokenizer.next();
     if (!token || token.type == <eof>) {
@@ -516,8 +516,8 @@ Lisp Lisp.kernel(void) {
   lisp.auto_machine_stats = NULL;
   lisp.auto_disabled = 0;
   $scope(&lisp.scope) {
-    lisp.globals = %{};
-    lisp.reserved = %{};
+    lisp.globals = {};
+    lisp.reserved = {};
     _install_specials(lisp);
   }
   return result = lisp;
@@ -695,31 +695,31 @@ static Var _chain(List values, String operation, int want, int expect) {
     Fewer than two values raise `<bad-arity>`; a nonnumber raises
     `<bad-types>`.
 */
-Var lisp_eq_chain(List values) => _chain(values, %"=", 0, 1);
+Var lisp_eq_chain(List values) => _chain(values, "=", 0, 1);
 
 /** Reports whether two or more numbers strictly increase.
     Fewer than two values raise `<bad-arity>`; a nonnumber raises
     `<bad-types>`.
 */
-Var lisp_lt_chain(List values) => _chain(values, %"<", -1, 1);
+Var lisp_lt_chain(List values) => _chain(values, "<", -1, 1);
 
 /** Reports whether two or more numbers never decrease.
     Fewer than two values raise `<bad-arity>`; a nonnumber raises
     `<bad-types>`.
 */
-Var lisp_le_chain(List values) => _chain(values, %"<=", 1, 0);
+Var lisp_le_chain(List values) => _chain(values, "<=", 1, 0);
 
 /** Reports whether two or more numbers strictly decrease.
     Fewer than two values raise `<bad-arity>`; a nonnumber raises
     `<bad-types>`.
 */
-Var lisp_gt_chain(List values) => _chain(values, %">", 1, 1);
+Var lisp_gt_chain(List values) => _chain(values, ">", 1, 1);
 
 /** Reports whether two or more numbers never increase.
     Fewer than two values raise `<bad-arity>`; a nonnumber raises
     `<bad-types>`.
 */
-Var lisp_ge_chain(List values) => _chain(values, %">=", -1, 0);
+Var lisp_ge_chain(List values) => _chain(values, ">=", -1, 0);
 
 /** Boxes the display `String` of `value`. */
 Var lisp_str(Var value) => value.str();
@@ -936,7 +936,7 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
 }
 
 static void _eval_args(Lisp lisp, List args, LispEnv *env, List *out) {
-  Array values = $auto(%[]);
+  Array values = $auto([]);
   foreach (Var arg, args) values.push(_eval(lisp, arg, env));
   *out = values;
 }
@@ -988,7 +988,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   (List params, Var body) = args;
   lambda.params = params;
   lambda.body = body;
-  lambda.captures = %{};
+  lambda.captures = {};
   lambda.macro = macro;
   lambda.auto_calls = 0;
   lambda.auto_status = -1;
@@ -1000,7 +1000,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
 static void _bind_params(Lambda lambda, List args, Map bindings) {
   for (List p = lambda.params; p; p = p.cdr()) {
     Var (name, rest_name) = p;
-    if (name.is_atom() && name.str() == %".") {
+    if (name.is_atom() && name.str() == ".") {
       if (!p.cdr())
         raise %(bad-sig (operation "apply") (value ${lambda.body}));
       Var rest = args;
@@ -1019,7 +1019,7 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
   if (trace && ++trace.calls >= MACHINE_FRAME_MAX) _expansion_decline();
   defer if (trace) trace.calls--;
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
-  $scope(&frame) { bindings = %{}; }
+  $scope(&frame) { bindings = {}; }
   LispEnv captured = {
     .bindings = lambda.captures,
     .parent = env
@@ -1489,7 +1489,7 @@ static int _auto_analyze(
      fixed slot and the local frame is bounded. */
   int bindable = 1, param_count = 0;
   foreach (Var name, lambda.params) {
-    if (name.is_atom() && name.str() == %".") {
+    if (name.is_atom() && name.str() == ".") {
       bindable = 0;
       break;
     }

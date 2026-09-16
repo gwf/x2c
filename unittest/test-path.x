@@ -36,7 +36,7 @@ static void path_values_act_as_strings(void) {
   Var boxed = path;
   EXPECT_TRUE(boxed is String);
   EXPECT_STR_EQ(boxed.str(), "src/parse.x");
-  Map seen = %{};
+  Map seen = {};
   seen[path] = 1;
   EXPECT_TRUE(seen.contains(same) && seen.contains("src/parse.x"));
   EXPECT_STR_EQ(path.repr(), "\"src/parse.x\"");

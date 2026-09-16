@@ -8,8 +8,8 @@ static Var bang(Var s) { return %"${s.string()}!"; }            // Var -> Var
 static void _hello_machine(void) {
   String hi = %"He${$(lower "LL")}o";                           // CT Lisp
   List tail = %("World"), words = %($hi @tail);                 // List + $/@
-  Array back = %[${words[$(+ 1 0)]}, ${words[$(- 1 1)]}];       // Array
-  Map machine = %{parts: $back};                                // Map + Symbol
+  Array back = [words[$(+ 1 0)], words[$(- 1 1)]];              // Array
+  Map machine = {parts: back};                                  // Map + Symbol
   Lisp lisp = Lisp.new(); defer lisp.destroy();                 // RT Lisp
   List parts = machine[<parts>].array().list();                 // methods
   List order = lisp.eval(%(reverse (quote $parts)));            // code/data
@@ -24,24 +24,24 @@ static void _hello_machine(void) {
 
 /*  hello-world: string chain  */
 static void _string_chain(void) {
-  String noise = %"__dlroW__olleH__";
-  String order = noise.strip("_").replace(%"__", %" ")[::-1];
-  puts(%", ".join(order.split(%" ")) + %"!");
+  String noise = "__dlroW__olleH__";
+  String order = noise.strip("_").replace("__", " ")[::-1];
+  puts(", ".join(order.split(" ")) + "!");
 }
 
 /*  hello-world: word pipeline  */
 static void _word_pipeline(void) {
-  List words = %"---hello---world---".split(%"---")
+  List words = "---hello---world---".split("---")
     .filter(%!(String word) => word)
     .map(%!(String word) => word.capitalize());
-  puts(%", ".join(words) + %"!");
+  puts(", ".join(words) + "!");
 }
 
 /*  hello-world: partitioned  */
 static void _partitioned(void) {
   (String hello, String slash, String world) =
-    %"hello/world".partition(%"/");
-  String comma = slash.replace(%"/", %", ");
+    "hello/world".partition("/");
+  String comma = slash.replace("/", ", ");
   puts(%"${hello.capitalize()}$comma${world.capitalize()}!");
 }
 
@@ -50,7 +50,7 @@ static String _render(List form) {
   match (form) {
     case %(text ?value): return value.str();
     case %(title ?value): return value.str().capitalize();
-    case %(script *forms): return %"".join(forms.map(_render));
+    case %(script *forms): return "".join(forms.map(_render));
   }
   raise %(bad-arg (owner "_render"));
 }
@@ -63,18 +63,18 @@ static void _list_dsl(void) {
 
 /*  hello-world: map decoder  */
 static void _map_decoder(void) {
-  Map decoder = %{uryyb: "Hello", jbeyq: "World"};
+  Map decoder = {uryyb: "Hello", jbeyq: "World"};
   List cipher = %(uryyb jbeyq);
-  puts(%", ".join(cipher.map(%!(Symbol key) => decoder[key])) + %"!");
+  puts(", ".join(cipher.map(%!(Symbol key) => decoder[key])) + "!");
 }
 
 /*  hello-world: array sort  */
 static void _array_sort(void) {
-  Array puzzle = %["08:o", "00:H", "12:!", "06: ", "03:l",
+  Array puzzle = ["08:o", "00:H", "12:!", "06: ", "03:l",
                     "10:l", "01:e", "11:d", "05:,", "09:r",
                     "04:o", "07:W", "02:l"];
   String greeting = puzzle.sort()
-    .map(%!(String piece) => piece[3:]).join(%"");
+    .map(%!(String piece) => piece[3:]).join("");
   puts(greeting);
 }
 
@@ -101,7 +101,7 @@ static void _iterator_deltas(void) {
   String greeting = deltas.iter()
     .scan(0, %!(int sum, int step) => sum + step)
     .map(%!(int byte) => String.new_fill((char) byte, 1))
-    .array().join(%"");
+    .array().join("");
   puts(greeting);
 }
 

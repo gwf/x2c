@@ -55,7 +55,7 @@ int main(void) {
   result("compare-numeric", now_ns() - start, count);
 
   Scope.retain();
-  Map map = %{};
+  Map map = {};
   for (int i = 0; i < 1024; i++) map[i] = i + 1;
   start = now_ns();
   for (int i = 0; i < count; i++) sink += map[i & 1023].integer();

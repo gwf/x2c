@@ -45,7 +45,7 @@ AdNode Var.adnode(Var value) => (AdNode) value.pointer();
 /** Creates an empty tape in the active `Scope`. */
 AdTape AdTape.new(void) {
   AdTape tape = Scope.malloc(sizeof(struct AdTape));
-  tape.nodes = %[];
+  tape.nodes = [];
   return tape;
 }
 

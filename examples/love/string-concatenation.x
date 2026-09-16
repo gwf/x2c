@@ -2,7 +2,7 @@
 
 
 int main(void) {
-  String lhs = %"hello, ", rhs = %"world", combined = lhs + rhs;
+  String lhs = "hello, ", rhs = "world", combined = lhs + rhs;
   printf("combined: %s\n", combined);
 
   String literal = "foo" + "bar";

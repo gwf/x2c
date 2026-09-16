@@ -90,7 +90,7 @@ static void map_bare_literal_quotes_only_identifier_keys(void) {
 
 static void map_set_get_updates(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   map.set(<a>, 1);
   map.set(<b>, 2);
   EXPECT_INT_EQ(map.len(), 2);
@@ -102,7 +102,7 @@ static void map_set_get_updates(void) {
 
 static void map_void_writes_transfer_before_mutation(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   int caught = 0;
 
   try map.set(void, 1);
@@ -121,7 +121,7 @@ static void map_void_writes_transfer_before_mutation(void) {
 
 static void map_delete_and_len(void) {
   $test.scoped();
-  Map map = %{<a>: 10, <b>: 20};
+  Map map = {<a>: 10, <b>: 20};
   EXPECT_INT_EQ(map.len(), 2);
   Var removed = map.del(<a>);
   EXPECT_INT_EQ(removed.int(), 10);
@@ -131,7 +131,7 @@ static void map_delete_and_len(void) {
 
 static void map_update_counted_pairs(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   Var alpha = <alpha>, beta = <beta>, ten = 10, twenty = 20;
   map.update_n(2, alpha, ten, beta, twenty);
   EXPECT_INT_EQ(map.len(), 2);
@@ -141,7 +141,7 @@ static void map_update_counted_pairs(void) {
 
 static void map_update_avoids_growth(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   map[<key>] = 1;
   unsigned capacity = map.capacity;
   map[<key>] = 2;
@@ -162,11 +162,11 @@ static void map_updateindex_hashes_existing_key_once(void) {
     .hash = _map_probe_hash,
     .equal = _map_probe_equal
   };
-  EXPECT_TRUE(x2c_try_register_descriptor(%"mprobe", methods));
+  EXPECT_TRUE(x2c_try_register_descriptor("mprobe", methods));
 
   MapProbe probe = { .value = 17 };
   Var key = Var.new(%"mprobe", &probe);
-  Map map = %{};
+  Map map = {};
   map[key] = 10;
   map_probe_hash_calls = 0;
   Var result = map.updateindex(key, <+>, 3);
@@ -177,7 +177,7 @@ static void map_updateindex_hashes_existing_key_once(void) {
 
 static void map_reports_exhausted_probe_invariant(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   Var key = <probe-key>;
   unsigned hash = key.hash(), fake = hash ^ 2;
   if (!fake) fake = hash ^ 4;
@@ -195,7 +195,7 @@ static void map_reports_exhausted_probe_invariant(void) {
 
 static void map_growth_preserves_entries(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   for (int i = 0; i < 128; i++) {
     Var key = i + 1000, val = i * 7;
     map[key] = val;
@@ -215,7 +215,7 @@ static void map_growth_preserves_entries(void) {
   Map copy = map.copy();
   EXPECT_TRUE(map.equal(copy));
   EXPECT_INT_EQ(map.compare(copy), 0);
-  Map merged = %{ extra: 1 };
+  Map merged = { extra: 1 };
   merged.merge(map);
   EXPECT_INT_EQ(merged.len(), map.len() + 1);
   for (int i = 1; i < 128; i += 3) {
@@ -259,7 +259,7 @@ static void map_collision_backshift_and_reuse(void) {
 
 static void map_reference_model_churn(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   int present[32] = { 0 }, values[32] = { 0 };
   unsigned state = 0x13579bdu;
 
@@ -299,7 +299,7 @@ static void map_reference_model_churn(void) {
 
 static void map_stable_traversal_visits_every_entry(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   int seen[64] = { 0 };
   for (int i = 0; i < 64; i++) map[i] = i * 11;
 
@@ -326,15 +326,15 @@ static int _compare_sign(int value) {
 
 static void map_compare_structural_laws(void) {
   $test.scoped();
-  Map a = %{}, b = %{};
-  Array akey = %[1, 2], bkey = %[1, 2];
+  Map a = {}, b = {};
+  Array akey = [1, 2], bkey = [1, 2];
   a[akey] = 10;
   b[bkey] = 10;
   EXPECT_INT_EQ(a.compare(b), 0);
   EXPECT_INT_EQ(b.compare(a), 0);
 
-  Map pairs_a = %{}, pairs_b = %{};
-  Array a1 = %[7], a2 = %[7], b1 = %[7], b2 = %[7];
+  Map pairs_a = {}, pairs_b = {};
+  Array a1 = [7], a2 = [7], b1 = [7], b2 = [7];
   pairs_a[a1] = 1;
   pairs_a[a2] = 2;
   pairs_b[b2] = 2;
@@ -342,20 +342,20 @@ static void map_compare_structural_laws(void) {
   EXPECT_INT_EQ(pairs_a.compare(pairs_b), 0);
   EXPECT_INT_EQ(pairs_b.compare(pairs_a), 0);
 
-  Map low = %{}, middle = %{}, high = %{};
-  low[%[9]] = 1;
-  middle[%[9]] = 2;
-  high[%[9]] = 3;
+  Map low = {}, middle = {}, high = {};
+  low[[9]] = 1;
+  middle[[9]] = 2;
+  high[[9]] = 3;
   EXPECT_TRUE(low.compare(middle) < 0);
   EXPECT_TRUE(middle.compare(high) < 0);
   EXPECT_TRUE(low.compare(high) < 0);
   EXPECT_INT_EQ(_compare_sign(low.compare(middle)),
                 -_compare_sign(middle.compare(low)));
 
-  Map inner_a = %{ key: 5 };
-  Map inner_b = %{ key: 5 };
-  Map outer_a = %{};
-  Map outer_b = %{};
+  Map inner_a = { key: 5 };
+  Map inner_b = { key: 5 };
+  Map outer_a = {};
+  Map outer_b = {};
   outer_a[inner_a] = 8;
   outer_b[inner_b] = 8;
   EXPECT_INT_EQ(outer_a.compare(outer_b), 0);
@@ -364,7 +364,7 @@ static void map_compare_structural_laws(void) {
 
 static void map_setdefault_behavior(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   Var key = <foo>, defv = 123, v1 = map.setdefault(key, defv);
   EXPECT_VAR_EQ(v1, defv);
   EXPECT_INT_EQ(map.len(), 1);
@@ -379,7 +379,7 @@ static void map_setdefault_behavior(void) {
 
 static void map_getdefault_behavior(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   Var key = <bar>;
   // Absent key returns default without inserting
   Var v7 = 7, gd = map.getdefault(key, v7);
@@ -396,7 +396,7 @@ static void map_getdefault_behavior(void) {
 static void map_hash_equal_and_compare(void) {
   $test.scoped();
 
-  Map a = %{}, b = %{};
+  Map a = {}, b = {};
   Var ka = <a>, kb = <b>, one = 1, two = 2;
 
   a[ka] = one;
@@ -421,7 +421,7 @@ static void map_hash_equal_and_compare(void) {
   a[<c>] = 3;
   EXPECT_TRUE(a.var().hash() == ha);
 
-  Map c = %{}, d = %{};
+  Map c = {}, d = {};
   c[ka] = one;
   d[kb] = one;
   EXPECT_TRUE(c.compare(d) < 0);
@@ -432,32 +432,32 @@ static void map_hash_equal_and_compare(void) {
 static void map_mutable_keys_use_identity(void) {
   $test.scoped();
 
-  Map map = %{};
-  Array a = %[1, 2], b = %[1, 2];
+  Map map = {};
+  Array a = [1, 2], b = [1, 2];
   Var va = a, vb = b;
   unsigned hash_before = va.hash();
 
-  map[va] = %"left";
-  map[vb] = %"right";
+  map[va] = "left";
+  map[vb] = "right";
 
   EXPECT_TRUE(va == vb);
   EXPECT_TRUE(va !== vb);
   EXPECT_INT_EQ(va.compare(vb), 0);
   EXPECT_INT_EQ(map.len(), 2);
-  EXPECT_TRUE(map[va] == %"left");
-  EXPECT_TRUE(map[vb] == %"right");
+  EXPECT_TRUE(map[va] == "left");
+  EXPECT_TRUE(map[vb] == "right");
 
   a.push(3);
   EXPECT_TRUE(va.hash() == hash_before);
-  EXPECT_TRUE(map[va] == %"left");
-  EXPECT_TRUE(map[vb] == %"right");
+  EXPECT_TRUE(map[va] == "left");
+  EXPECT_TRUE(map[vb] == "right");
 
 }
 
 static void map_typed_empty_keys(void) {
   $test.scoped();
 
-  Map map = %{};
+  Map map = {};
   String empty_string = NULL;
   List empty_list = NULL;
   Var string_key = empty_string, list_key = empty_list;
@@ -476,7 +476,7 @@ static void map_typed_empty_keys(void) {
 
 static void map_null_pair_status_iteration(void) {
   $test.scoped();
-  Map map = %{};
+  Map map = {};
   Var null = (Var) { .u64 = 0 };
   map[null] = null;
 
@@ -518,7 +518,7 @@ static void map_null_pair_status_iteration(void) {
   EXPECT_TRUE(map.equal(copy));
   EXPECT_INT_EQ(map.compare(copy), 0);
 
-  Map merged = %{};
+  Map merged = {};
   merged.merge(map);
   EXPECT_TRUE(merged.try_get(null, &val));
   EXPECT_INT_EQ(val.u64, 0);
@@ -527,7 +527,7 @@ static void map_null_pair_status_iteration(void) {
 
 /* The three iterators walk the same entries: values, keys, and pairs. */
 static void map_iterates_values_keys_and_pairs(void) {
-  Map map = %{"a": 1, "b": 2, "c": 3};
+  Map map = {"a": 1, "b": 2, "c": 3};
   long values = 0, keys = 0, pair_keys = 0, pair_values = 0;
   int counted = 0;
 

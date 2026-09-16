@@ -12,7 +12,7 @@
 typedef int Celsius;
 
 String Celsius.str(Celsius c) {
-  return %"C%d".printf((int) c);
+  return "C%d".printf((int) c);
 }
 
 // A file-scope alias of Var.  A segment declared with this name has to
@@ -40,8 +40,8 @@ static void interp_context_boundaries(void) {
   List braced_list = %(${value}(tail));
   String text = %"$value()";
   String braced_text = %"${value}()";
-  Array array = %[${$(+ 1 2)}];
-  Map map = %{answer: ${$(+ 2 3)}};
+  Array array = [$(+ 1 2)];
+  Map map = {answer: $(+ 2 3)};
 
   EXPECT_LIST_EQ(list, %(7 (tail)));
   EXPECT_LIST_EQ(braced_list, list);
@@ -69,11 +69,11 @@ static void interp_braced_complete_expression(void) {
 
 
 static void interp_typed_values_without_var_aliases(void) {
-  String string = %"text";
+  String string = "text";
   Symbol symbol = <tag>;
   List nested = %(one two);
-  Array array = %[1, 2];
-  Map map = %{ key: 3 };
+  Array array = [1, 2];
+  Map map = { key: 3 };
   List values = %($string $symbol $nested $array $map);
 
   EXPECT_TRUE(values[0].string() === string);
@@ -96,7 +96,7 @@ static void interp_splice_var(void) {
 
 static Var _interp_splice_call(int list_value) {
   if (list_value) return %( x y );
-  return %"not a list";
+  return "not a list";
 }
 
 static void interp_splice_var_call(void) {
@@ -107,12 +107,12 @@ static void interp_splice_var_call(void) {
 }
 
 static void interp_string_value(void) {
-  String x = %"42", s = %"Value: $x";
+  String x = "42", s = %"Value: $x";
   EXPECT_STR_EQ(s, "Value: 42");
 }
 
 static void interp_string_expr(void) {
-  String x = %"42", s = %"Value: ${x}";
+  String x = "42", s = %"Value: ${x}";
   EXPECT_STR_EQ(s, "Value: 42");
 }
 
@@ -183,7 +183,7 @@ static void interp_string_converter_expr(void) {
 // the String typedef for a pointer and splice Var_pointer.
 
 static void interp_string_var_value(void) {
-  Var integer = 5, floating = 3.14, string = %"text";
+  Var integer = 5, floating = 3.14, string = "text";
 
   EXPECT_STR_EQ(%"v = $integer", "v = 5");
   EXPECT_STR_EQ(%"v = $floating", "v = 3.140000");
@@ -191,7 +191,7 @@ static void interp_string_var_value(void) {
 }
 
 static void interp_string_var_expr(void) {
-  Var integer = 5, floating = 3.14, string = %"text";
+  Var integer = 5, floating = 3.14, string = "text";
 
   EXPECT_STR_EQ(%"v = ${integer}", "v = 5");
   EXPECT_STR_EQ(%"v = ${floating}", "v = 3.140000");
@@ -199,7 +199,7 @@ static void interp_string_var_expr(void) {
 }
 
 static void interp_string_var_alias_value(void) {
-  Reading integer = 5, floating = 3.14, string = %"text";
+  Reading integer = 5, floating = 3.14, string = "text";
 
   EXPECT_STR_EQ(%"v = $integer", "v = 5");
   EXPECT_STR_EQ(%"v = $floating", "v = 3.140000");
@@ -207,7 +207,7 @@ static void interp_string_var_alias_value(void) {
 }
 
 static void interp_string_var_alias_expr(void) {
-  Reading integer = 5, floating = 3.14, string = %"text";
+  Reading integer = 5, floating = 3.14, string = "text";
 
   EXPECT_STR_EQ(%"v = ${integer}", "v = 5");
   EXPECT_STR_EQ(%"v = ${floating}", "v = 3.140000");

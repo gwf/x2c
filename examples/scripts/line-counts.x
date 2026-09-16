@@ -2,7 +2,7 @@
 /*  line-counts.x -- count lines with parallel commands and write a report */
 
 static void write_sources(Path root) {
-  Map sources = %{
+  Map sources = {
     "src/main.x": "int main(void) {\n  return run();\n}\n",
     "src/run.x": "int run(void) {\n  int total = 0;\n  return total;\n}\n",
     "lib/text.x": "String greeting(void) => \"hello\";\n",
@@ -18,14 +18,14 @@ static void write_sources(Path root) {
 Path root = Path.temp_dir();
 write_sources(root);
 
-Array running = %[], counts = %[];
+Array running = [], counts = [];
 foreach (Path unit, root.join("**/*.x").glob()) {
   if (running.len() == 2) counts.push(Job.wait_any(running).output());
   running.push(%(wc -l $unit).job().start());
 }
 while (running.len()) counts.push(Job.wait_any(running).output());
 
-Array lines = %[];
+Array lines = [];
 foreach (String count, counts) {
   List fields = count.strip(" \n").split(" ").filter(%!(word) => word);
   String path = fields.cadr().str();

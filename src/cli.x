@@ -672,7 +672,7 @@ static void _tokenize_response(
 */
 List cli_response_arguments(String path) {
   size_t length = 0, char *text = _read_response_file(path, &length);
-  Array arguments = %[];
+  Array arguments = [];
   _tokenize_response(arguments, path, text, length);
   Scope.free(text);
   return arguments.list_free();
@@ -912,12 +912,12 @@ static void _apply_option(
     serve native actions; no source-preprocessing options are returned.
 */
 CliRequest cli_package_options(String path, String package) {
-  Array words = $auto(%[]);
+  Array words = $auto([]);
   foreach (String word, cli_response_arguments(path))
     words.push(word.replace("{package}", package));
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <build>;
-  Array includes = %[], cpp = %[], compile = %[], link = %[];
+  Array includes = [], cpp = [], compile = [], link = [];
   for (int i = 0; i < words.len(); i++) {
     String argument = words[i];
     if (!argument) x2c_driver_error("empty package native argument");
@@ -981,8 +981,8 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
   request.max_errors = 20;
   if (mask & CLI_NATIVE) request.kind = <executable>;
-  Array inputs = %[], run_args = %[], x_paths = %[];
-  Array cpp_args = %[], cc_args = %[], ld_args = %[], int operands = 0;
+  Array inputs = [], run_args = [], x_paths = [];
+  Array cpp_args = [], cc_args = [], ld_args = [], int operands = 0;
   int expanded_end = 0;
   for (int i = 1; i < args.len(); i++) {
     String arg = args[i], int dashed = arg && arg[0] == '-';
@@ -998,7 +998,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     // Expanded words are parsed next but never expanded again.
     if (mask == CLI_SCRIPT && !operands && i >= expanded_end &&
         arg.startswith("@")) {
-      Array expanded = %[];
+      Array expanded = [];
       _expand_argument(expanded, arg, NULL);
       args.splice(i, 1, expanded);
       expanded_end = i + expanded.len();
@@ -1075,7 +1075,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     constructing request values.
 */
 CliRequest cli_parse(int argc, char **argv) {
-  Array args = $auto(%[]);
+  Array args = $auto([]);
   // A script's arguments are its own, so `script` expands response files
   // only while it parses its options.
   int script = argc > 1 && !strcmp(argv[1], "script");
