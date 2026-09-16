@@ -14,6 +14,7 @@ points used by generated code, native callers, and compiler setup.
 
 | Module | Description |
 | --- | --- |
+| [`lib/args.x`](args.md) | parse program arguments against a declarative spec. |
 | [`lib/array.x`](array.md) | dynamic contiguous arrays of `Var` elements. |
 | [`lib/atom.x`](atom.md) | canonical exact names. |
 | [`lib/autodiff.x`](autodiff.md) | reverse-mode differentiation recorded on a runtime tape. |
@@ -60,13 +61,14 @@ points used by generated code, native callers, and compiler setup.
 These modules ship with x2c but are not loaded by the standard
 prelude. Include one explicitly to use its declarations.
 
+- [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
 - [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
-- [`lib/scripting.x`](scripting.md) - The `digest.x`, `path.x`, and `process.x` modules that every script unit includes; include `scripting.x` to use all three.
+- [`lib/scripting.x`](scripting.md) - The `args.x`, `digest.x`, `path.x`, and `process.x` modules that every script unit includes; include `scripting.x` to use all four.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 - [`lib/typed-map.x`](typed-map.md) - Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.

@@ -95,8 +95,8 @@ static String _fetch(String url, String directory, String name) {
 static void _verify(String path, String expected) {
   File input = fopen(path, "rb");
   if (!input) _error(%"cannot read $path");
+  defer input.close();
   String actual = input.sha256();
-  input.close();
   if (actual != expected.lower())
     _error(%"sha256 mismatch for $path: expected $expected, got $actual");
 }

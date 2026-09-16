@@ -352,7 +352,7 @@ work.remove_tree();
 A missing path raises `<not-found>` and any other failure raises `<io-fail>`,
 both naming the operation and path.
 
-[`examples/scripts/line-counts.x`](../../../examples/scripts/line-counts.x)
+[`examples/scripts/line-counts.x`](https://github.com/gwf/x2c/blob/main/examples/scripts/line-counts.x)
 combines `process.x` and `path.x`: it builds a small tree, counts lines with
 parallel jobs, and writes a report.
 
