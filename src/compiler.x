@@ -328,12 +328,13 @@ Compiler Compiler.new_shared(Compiler owner) {
   return _new(owner);
 }
 
-/** Takes over `owner`'s macro, import, keyword, and Lisp state for one
-    segment of a collected file. Segments are one translation unit, so a
+/** Takes over `owner`'s macro, object-like `#define`, import, keyword, and
+    Lisp state for one segment of a collected file. Segments are one translation unit, so a
     shadow uses the unit's Lisp environment rather than its own.
 */
 void Compiler.take_unit_state(Compiler compiler, Compiler owner) {
   compiler.macros = owner.macros;
+  compiler.object_macros = owner.object_macros;
   compiler.imports = owner.imports;
   compiler.kw_aliases = owner.kw_aliases;
   compiler.kw_seen = owner.kw_seen;
@@ -348,6 +349,7 @@ void Compiler.take_unit_state(Compiler compiler, Compiler owner) {
 */
 void Compiler.return_unit_state(Compiler compiler, Compiler owner) {
   owner.macros = compiler.macros;
+  owner.object_macros = compiler.object_macros;
   owner.imports = compiler.imports;
   owner.kw_aliases = compiler.kw_aliases;
   owner.kw_seen = compiler.kw_seen;
@@ -1180,6 +1182,8 @@ static void _shallow_parse_unit_macro(Compiler compiler) {
   }
 }
 
+static void _note_object_macro(Compiler c, String content);
+
 static void _shallow_parse_loop(Compiler c) {
   c.rebuild_protocols(NULL);
   c.conforms = {};
@@ -1257,6 +1261,10 @@ static void _shallow_parse_loop(Compiler c) {
     _shallow_finish_declaration(c);
     _debug_tokens(c, start, c.token);
   }
+  /* Definitions after the last declaration, as before an include, still
+     define macros for the segments that follow. */
+  foreach (List directive, c.leading_preproc())
+    _note_object_macro(c, directive.cadr());
   _check_unmatched_braces(c);
   c.shallow = 0;
 }
@@ -1313,7 +1321,8 @@ List Compiler.leading_preproc(Compiler compiler) {
 
 /* Records the name of an object-like `#define` so a bare atom spelled the
    same way inside a literal can be flagged. A function-like macro cannot be
-   mistaken for data, so `#define F(x)` is skipped. */
+   mistaken for data, so `#define F(x)` is skipped. A name with any definition
+   to nothing is recorded as `<empty>`, so header collection can skip it. */
 static void _note_object_macro(Compiler c, String content) {
   char *p = content;
   while (*p == ' ' || *p == '\t') p++;
@@ -1330,7 +1339,11 @@ static void _note_object_macro(Compiler c, String content) {
     p++;
   if (p == start || *p == '(') return;
   String name = String.new_len(start, p - start);
-  c.object_macros[name] = 1;
+  while (*p == ' ' || *p == '\t') p++;
+  int empty = !*p || *p == '\n' || *p == '\r' ||
+              (p[0] == '/' && (p[1] == '/' || p[1] == '*'));
+  if (empty) c.object_macros[name] = <empty>;
+  else if (!c.object_macros.contains(name)) c.object_macros[name] = 1;
 }
 
 /** Applies public and private pragma directives to source visibility state

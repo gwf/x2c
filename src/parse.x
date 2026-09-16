@@ -242,12 +242,26 @@ static List _finish_declaration(
 
 // type parsing
 
+/* Header collection reads source before preprocessing, so a macro defined to
+   nothing, such as an export annotation, still precedes a declaration. It
+   contributes no syntax there. Unit source keeps parsing unexpanded. */
+static int _skip_empty_macro(Compiler compiler) {
+  Var definition;
+  if (!compiler.shallow || compiler.peek(0) != <ident> ||
+      !compiler.object_macros.try_get(compiler.token.text, &definition) ||
+      !Var.equal(definition, <empty>))
+    return 0;
+  compiler.next();
+  return 1;
+}
+
 /* One storage class, except that `threaded` pairs with another one the way
    C's thread-local specifier pairs with `static` or `extern`, in either
    order. A second one still stops the run, so `static extern` is diagnosed
    here instead of being passed to C. */
 static List _storage_class(Compiler compiler) {
   List storage = NULL, int seen_threaded = 0, seen_ordinary = 0;
+  while (_skip_empty_macro(compiler));
   for (Symbol symbol = compiler.peek(0); symbol.is_storage_class();
        symbol = compiler.peek(0)) {
     if (symbol == <threaded>) {
@@ -273,11 +287,14 @@ static List _storage_class(Compiler compiler) {
 }
 
 static List _type_qualifiers(Compiler compiler) {
-  Array quals = [], Symbol symbol = compiler.peek(0);
-  while (symbol.is_type_qualifier()) {
-    quals.push(symbol);
-    compiler.next();
-    symbol = compiler.peek(0);
+  Array quals = [];
+  loop {
+    Symbol symbol = compiler.peek(0);
+    if (symbol.is_type_qualifier()) {
+      quals.push(symbol);
+      compiler.next();
+    }
+    else if (!_skip_empty_macro(compiler)) break;
   }
   List result = quals.list_free();
   return result;

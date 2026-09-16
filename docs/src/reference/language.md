@@ -2673,6 +2673,14 @@ belong to file scope, and its braces are not emitted. Any string literal is
 accepted as the linkage name. `extern "C"` before a single declaration is
 read as `extern`.
 
+A collected header may place an object-like macro defined to nothing, such as
+`#define RLAPI` with an optional trailing comment, before or among a
+declaration's specifiers: `RLAPI void InitWindow(int width, ...);`. Any
+definition of that name to nothing, anywhere earlier in the unit or its
+headers, lets collection skip the name, whatever other definitions its
+conditional branches contain. Unit source still parses unexpanded, so the same
+spelling in a `.x` file is rejected.
+
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host
 stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;

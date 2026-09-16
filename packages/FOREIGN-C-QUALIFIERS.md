@@ -51,8 +51,10 @@ results, globals, and fields. `qualifier-void-pointer` and
 `foreign-alias-pointer-result` cover the corresponding pointer conversions
 and aliases.
 
-A header that spells its declarations with macros needs `--cpp-symbols`,
-because x2c does not expand macros.
+Collection reads headers unexpanded. It skips an object-like macro defined
+to nothing before or among a declaration's specifiers, such as raylib's
+`RLAPI`. A header whose declarations depend on other macro expansion, such as
+a function-like attribute macro, is not collected correctly.
 
 ## Package source
 
