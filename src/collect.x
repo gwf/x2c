@@ -391,19 +391,24 @@ static void _include(
   Var cached = c.source_facts ? void : _header_cache()[canonical];
   List entry = cached is void ? _interface_read(c, canonical)
                               : cached.list();
-  if (covered && !c.runtime_hdrs && entry &&
-      !_entry_adds_symbols(c, entry, globs))
-    return;
-  c.add_translation_dependency(canonical);
+  /* The entry records every include, so it does not depend on what the unit
+     that first walked this file had already seen. */
   parts.push(canonical);
-  if (!visited.contains(canonical)) {
-    visited[canonical] = 1;
-    if (entry) _replay_cached(c, entry, globs, visited);
-    else _walk_cold(c, target, canonical, globs, visited);
+  if (!covered || c.runtime_hdrs || !entry ||
+      _entry_adds_symbols(c, entry, globs)) {
+    c.add_translation_dependency(canonical);
+    if (!visited.contains(canonical)) {
+      visited[canonical] = 1;
+      if (entry) _replay_cached(c, entry, globs, visited);
+      else _walk_cold(c, target, canonical, globs, visited);
+    }
   }
+  /* A file still being walked, as in an include cycle, has no entry yet. */
   Var walked = _header_cache()[canonical];
-  if (walked is not void)
-    _cache_dependency(dependencies, canonical, walked.list().cadr());
+  String content_hash = walked is void
+    ? "%08x".printf(String.hash(_include_text(c, target, canonical)))
+    : walked.list().cadr();
+  _cache_dependency(dependencies, canonical, content_hash);
 }
 
 static void _require_header_cache_owner(int owned) {
@@ -531,8 +536,7 @@ static void _file(
     _require_header_cache_owner(entry.try_own());
     /* The first walk of a file fixes its contribution. A later walk of the
        same file, such as a unit whose text the prelude already covered,
-       omits covered includes that add nothing to its own globs and would
-       replace a complete entry with one that depends on that context. */
+       does not replace an entry that other units may already have replayed. */
     if (!_header_cache().contains(path)) _header_cache()[path] = entry;
     c.kw_aliases = enclosing_aliases;
     c.kw_seen = enclosing_alias_imports;
@@ -840,13 +844,16 @@ String interface_prelude(void) {
   return NULL;
 }
 
-static Map interface_loading = NULL;
+/* Interfaces name the same sources many times, so a process hashes each
+   source once. */
+static Map interface_loading = NULL, static Map source_hashes = NULL;
 static Lisp interface_reader = NULL;
 
 static void _interface_shutdown(void) {
   Lisp.destroy(interface_reader);
   interface_reader = NULL;
   interface_loading = NULL;
+  source_hashes = NULL;
 }
 
 static Lisp _interface_lisp(void) {
@@ -855,6 +862,7 @@ static Lisp _interface_lisp(void) {
   Scope.push(&header_cache_scope);
   interface_reader = Lisp.kernel();
   interface_loading = {};
+  source_hashes = {};
   Scope.shutdown_hook(_interface_shutdown);
   Scope.pop();
   return interface_reader;
@@ -867,14 +875,22 @@ static List _interface_reject(String canonical) {
 
 static int _hash_matches(Compiler compiler, String path, Var expected) {
   if (expected is not <string>) return 0;
-  String text = NULL;
-  try {
-    if (!compiler.read_source(path, &text)) return 0;
+  Var hash = source_hashes[path];
+  if (hash is void) {
+    String text = NULL;
+    try {
+      if (!compiler.read_source(path, &text)) return 0;
+    }
+    catch %(io-fail *): return 0;
+    catch %(bad-arg *): return 0;
+    catch %(size-limit *): return 0;
+    String value = "%08x".printf(String.hash(text));
+    _require_header_cache_owner(path.try_own());
+    _require_header_cache_owner(value.try_own());
+    source_hashes[path] = value;
+    hash = value;
   }
-  catch %(io-fail *): return 0;
-  catch %(bad-arg *): return 0;
-  catch %(size-limit *): return 0;
-  return String.equal("%08x".printf(String.hash(text)), expected);
+  return String.equal(hash.string(), expected);
 }
 
 /* Materialize one interface file only after its source path and hash,
@@ -978,17 +994,34 @@ static List _interface_read(Compiler compiler, String canonical) {
   return NULL;
 }
 
+/* A cold walk numbers bindings from wherever the shared counter stands, which
+   depends on the files walked before it. An interface renumbers them in order
+   of first appearance, keeping equal bindings equal. */
+static Var _renumber_bindings(Var value, Map identities) {
+  if (value is not <list>) return value;
+  List node = value, String spelling = NULL;
+  if (binding_identity_try_parts(node, NULL, &spelling)) {
+    Var identity = identities.setdefault(node, identities.len() + 1);
+    return binding_identity_new(identity.integer(), spelling);
+  }
+  Array children = [];
+  foreach (Var child, node)
+    children.push(_renumber_bindings(child, identities));
+  return children.list_free();
+}
+
 static int _write_interface_entry(File output, String canonical, List entry) {
   (List cached_parts, Var hash, List definitions, Map cached_dependencies) =
     entry;
   Array parts = [];
+  Map identities = {};
   foreach (Var part, cached_parts) {
     if (part is <map>) {
       Array rows = [], Map contributions = part;
       foreach (Var (row_key, row_value), contributions)
         rows.push(%($row_key $row_value));
       rows.sort();
-      Var rows_var = rows.list_free();
+      Var rows_var = _renumber_bindings(rows.list_free(), identities);
       parts.push(rows_var);
       continue;
     }

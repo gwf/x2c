@@ -86,7 +86,7 @@ static void _install_lisp_bindings(Compiler compiler) {
   if (compiler.macros.contains(lisp_binding_macros_marker)) return;
   _ensure_lisp(compiler);
   _eval_library(
-    compiler, "etc/lisp-bindings.xlisp",
+    compiler, 0, "etc/lisp-bindings.xlisp",
     "cannot open the native Lisp macro support");
   _install_source(
     compiler, lisp_binding_macros, "<builtin:lisp-bindings>",
@@ -847,7 +847,7 @@ static File _open(
   return source;
 }
 
-static String _read_source(
+static String _source_text(
   Compiler compiler, String path, String message, Token token, List notes) {
   String text;
   if (compiler.sources) {
@@ -855,15 +855,26 @@ static String _read_source(
       compiler.report_error(<macro>, message, token, notes);
   }
   else text = _open(compiler, path, message, token, notes).string_close();
+  return text;
+}
+
+static String _read_source(
+  Compiler compiler, String path, String message, Token token, List notes) {
+  String text = _source_text(compiler, path, message, token, notes);
   compiler.deps.merge_translation_dependency(
     path, "%08x".printf(String.hash(text)));
   return text;
 }
 
+/* A home Lisp library is evaluated once, when `loaded` is zero, but every use
+   records it, so a file's dependencies do not depend on whether an earlier
+   file loaded it. */
 static void _eval_library(
-  Compiler compiler, String relative, String message) {
+  Compiler compiler, int loaded, String relative, String message) {
   String path = %"${compiler.root_dir}/$relative";
-  String text = _read_source(
+  compiler.add_translation_dependency(path);
+  if (loaded) return;
+  String text = _source_text(
     compiler, path, message, compiler.token, %("path:" $path));
   _eval_string(compiler, text, compiler.token);
 }
@@ -872,17 +883,18 @@ static void _eval_library(
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
   with compiler {
-    if (_.macro_lisp) return;
-    _.macro_lisp = Lisp.kernel();
+    int loaded = _.macro_lisp != NULL;
+    if (!loaded) _.macro_lisp = Lisp.kernel();
     _eval_library(
-      _, "etc/init.xlisp",
+      _, loaded, "etc/init.xlisp",
       "cannot open the compile-time Lisp environment");
     _eval_library(
-      _, "etc/compiler-sdk.xlisp",
+      _, loaded, "etc/compiler-sdk.xlisp",
       "cannot open the compile-time Lisp SDK");
     _eval_library(
-      _, "etc/builtin-macros.xlisp",
+      _, loaded, "etc/builtin-macros.xlisp",
       "cannot open the built-in macro support");
+    if (loaded) return;
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
     $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
     $lisp.bind(

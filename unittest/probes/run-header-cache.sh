@@ -765,6 +765,39 @@ mv "$declaration_root/src/changed" "$declaration_root/src/consumer.x"
 grep -q 'changed_answer' "$declaration_root/out/consumer.c" ||
   fail "consumer retained a stale declaration signature"
 
+# Case 12: an interface is the same bytes whichever unit first walked its
+# file. The batch walks the cycle hist-a.x <-> hist-b.x inside hist-main.x,
+# after path.x has been included and bindings numbered; translating each
+# file alone walks it first.
+mkdir -p "$FAKE/hist-batch" "$FAKE/hist-a" "$FAKE/hist-b"
+for name in a b; do
+  other=$([[ $name == a ]] && echo b || echo a)
+  upper=$(echo "$name" | tr a-z A-Z)
+  cat >"$FAKE/src/hist-$name.x" <<EOF
+#include "path.x"
+#include "hist-$other.x"
+class Hist$upper struct {
+  Path path;
+} *;
+EOF
+done
+cat >"$FAKE/src/hist-main.x" <<'EOF'
+#include "path.x"
+class HistMain struct {
+  int size;
+} *;
+#include "hist-b.x"
+#include "hist-a.x"
+EOF
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir hist-batch \
+  src/hist-main.x src/hist-a.x src/hist-b.x)
+for name in a b; do
+  (cd "$FAKE" && ./builds/0/x2c translate --out-dir "hist-$name" \
+    "src/hist-$name.x")
+  cmp -s "$FAKE/hist-batch/hist-$name.xi" "$FAKE/hist-$name/hist-$name.xi" ||
+    fail "hist-$name.xi depends on which unit first walked it"
+done
+
 # Generated calls keep their signatures whether the runtime prelude replays
 # from the stage interfaces, walks cold, or comes from the host preprocessor.
 mkdir -p "$FAKE/builds/0/lib"
