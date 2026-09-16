@@ -4,9 +4,10 @@
 > redesign on 2026-09-14; no plan was written for it. Three pieces of it
 > survive as incremental work, delivered as separate PRs in this order.
 > Interface files, the fourth piece, already shipped as
-> `plans/archive/unit-interfaces.md`.
+> `plans/archive/unit-interfaces.md`. Item 1 landed as PR #57 and item 3 as
+> PR #58; item 2 remains, and needs scoping on its own evidence first.
 
-## 1. One file initialization mechanism
+## 1. One file initialization mechanism (queue done, PR #57)
 
 A file-static initializer passes through three unrelated layers today:
 
@@ -60,7 +61,7 @@ Validation: `conditional-private-split` and the existing initializer fixtures,
 `make verify-fixtures`, and the self-translation comparison. Emission changes,
 so publication takes two gate rounds.
 
-## 2. Cleanup lowering out of `src/emit.x`
+## 2. Cleanup lowering out of `src/emit.x` (remaining)
 
 `emit.x` carries a cleanup stack, cleanup labels, break/continue barriers, a
 cleanup path, and volatile preservation. That is semantic lowering performed
@@ -73,16 +74,20 @@ This is a project, not a cleanup. Defer ordering and the `volatile`
 interaction are subtle; a `$let` inside `try` needed an emission fix on
 2026-09-15. Scope it on its own evidence before starting.
 
-## 3. Collection reuses the real parse configuration
+## 3. Collection reuses the real parse configuration (done, PR #58)
 
-`src/collect.x` builds a shadow `Compiler` and hand-copies state into it
-(`_parse_segment`). The scripting work had to propagate `script`, `shebang`,
-and `script_main` by hand, and binding ids still collide between collection
-and the full parse. The repair is contained: collection configures itself
-from the same request the full parse uses, rather than copying fields.
+`src/collect.x` built a shadow `Compiler` and hand-copied state into it. The
+three script fields became one `ScriptUnit` record that every compiler of the
+unit inherits, with `Compiler.tokenize` activating it on the file that
+carries the shebang; `include_dirs` inherits the same way; and the borrowed
+segment state became `Compiler.take_unit_state` and
+`Compiler.return_unit_state`. `_parse_segment` lost 22 lines and generated C
+did not change.
 
-The general "parse separated from bind" idea from the redesign is not part of
-this; only the duplication it reacted to.
+Still open in the same area: binding numbers collide between collection and
+the full parse, so a graph keyed by number alone mixes the two passes. The
+general "parse separated from bind" idea from the redesign is not part of
+this.
 
 ## Declined, with reasons
 
