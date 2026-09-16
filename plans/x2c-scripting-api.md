@@ -1,9 +1,17 @@
 # Scripting API: commands, paths, arguments, and environment
 
-> Status: active - 2026-09-16. Gary approved the API on 2026-09-16 after
-> reviewing it as a book chapter. Implementation runs in three lanes and
-> lands in two pushes. Supersedes the command and path surface recorded in
-> `plans/x2c-scripting-library.md`.
+> Status: done - 2026-09-16. Gary approved the API on 2026-09-16 after
+> reviewing it as a book chapter. Supersedes the command and path surface
+> recorded in `plans/x2c-scripting-library.md`.
+> Notes: push 1 landed as `e718d95` and push 2 as `18637ee`. The literal
+> fix grew to cover `==`, `<`, and `+` between aliases and `String` through
+> their nearest shared ancestor, and Var reads into an alias through the
+> ancestor's checked reader; that changed eight emitted Var reads in the
+> compiler's own source, so push 1 needed the two-round bootstrap refresh.
+> Nested-List pipelines stayed beside `Job.pipe`. `+` between an alias and a
+> C string, `char *`, or `const char *` landed afterward. `%(` directly after
+> a cast stays modulo; the tokenizer cannot tell a cast from a parenthesized
+> operand, and the language reference gives the `(T) (%(...))` spelling.
 
 ## The result
 

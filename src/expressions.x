@@ -910,8 +910,6 @@ static Type _parse_is_type(Compiler c, Token origin) {
   return type;
 }
 
-static inline int _type_is_string(List type) => type === %("String");
-
 static int _expression_requires_resolution(Compiler compiler, Var value) {
   // The scan is an any-search; a worklist keeps deep operator chains from
   // costing one C frame per nesting level.
@@ -962,13 +960,15 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
 
 static inline int _type_is_char_pointer_like(List type) {
   if (!type) return 0;
-  return !!type.match(%((!or (dim *) (!quote *)) char));
+  return type.match(%((!or (dim *) (!quote *)) char)) ||
+    type.match(%((!or (dim *) (!quote *)) const char));
 }
 
-static inline int _expr_is_string_like(List expr) {
+static inline int _expr_is_string_like(Compiler compiler, List expr) {
   if (!expr) return 0;
   List type = expr.cadr();
-  return _type_is_string(type) || _type_is_char_pointer_like(type);
+  return compiler.sym.is_string_type(type) ||
+         _type_is_char_pointer_like(type);
 }
 
 static int _expr_is_raw_string_literal(List expr) {
@@ -1158,7 +1158,8 @@ static List _binary_op_type_addsub(
   (Var lhs_tag, Type ltype) = lhs;
   (Var rhs_tag, Type rtype) = rhs;
   (void) lhs_tag; (void) rhs_tag;
-  if (op == <+> && _expr_is_string_like(lhs) && _expr_is_string_like(rhs))
+  if (op == <+> && _expr_is_string_like(compiler, lhs) &&
+      _expr_is_string_like(compiler, rhs))
     return %("String");
   Type lscalar = compiler.sym.resolve_numeric_type(ltype);
   Type rscalar = compiler.sym.resolve_numeric_type(rtype);
@@ -1682,7 +1683,7 @@ static List Compiler._binary_expression(
   }
   int constant_string = 0;
   if (operator == <+> &&
-      _expr_is_string_like(lhs) && _expr_is_string_like(rhs)) {
+      _expr_is_string_like(c, lhs) && _expr_is_string_like(c, rhs)) {
     Var matched;
     List bindings;
     /* Bare `%(ident *)` also matches literal data ending in <ident>. */

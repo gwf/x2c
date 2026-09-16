@@ -294,8 +294,9 @@ work.remove_tree();
 A missing path raises `<not-found>`, and any other failure raises
 `<io-fail>`. Both name the operation and the path.
 
-Text operations such as slicing and `+` are `String` operations. Convert a
-`Path` to a `String` to use them.
+`+` joins a `Path` with a `String`, another `Path`, or a C string literal and
+produces a `String`, as in `path + ".o"`. Slicing is a `String` operation.
+Convert a `Path` to a `String` to slice it.
 
 [`examples/scripts/line-counts.x`](https://github.com/gwf/x2c/blob/main/examples/scripts/line-counts.x)
 combines commands and paths: it builds a small tree, counts lines with
