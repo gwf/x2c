@@ -2,3 +2,7 @@ unittest/compiler-fixtures/macro-statement-hole-collision.x:8:8: parse: expected
     $item;
          ^
 
+unittest/compiler-fixtures/macro-statement-hole-collision.x:12:3: parse: expected syntax
+    $broken(0);
+    ^
+

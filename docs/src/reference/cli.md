@@ -505,6 +505,51 @@ installed record, then `ar`. Omitted optimization, debug, define, and undefine
 options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
 implicitly consumed.
 
+## Compiler diagnostics
+
+Translation reports each diagnostic on standard error as
+`file:line:column: code: message`, followed by the source line, a caret, and
+any notes. A unit stops after 20 errors. `--max-errors <count>` changes that
+bound for `translate`, `build`, `run`, and `script`, and `--max-errors 0`
+removes it. A unit that reaches its bound ends with
+`limit: too many errors, stopping`. The
+[diagnostics section](language.md#diagnostics) of the language reference
+describes which errors are reported together.
+
+`--diagnostics-file <file>` writes the same diagnostics to `<file>` as JSON
+Lines instead of standard error:
+
+```sh
+./x2c build --diagnostics-file /tmp/app.jsonl --output /tmp/app app.x
+```
+
+x2c creates or truncates the file when the command starts, so a command with
+no diagnostics leaves it empty. Each line is one JSON object:
+
+```text
+{"code":"type","message":"operator 'is' requires Var on the left","severity":"error","file":"app.x","line":9,"column":16,"length":2,"position":120,"notes":["operand type: (int)"]}
+```
+
+- `code` is the diagnostic category, such as `parse`, `type`, `macro`,
+  `protocol`, `xform`, `warning`, or `limit`.
+- `severity` is `warning` for `warning`, `note` for the `limit` notice, and
+  `error` otherwise.
+- `file` is relative to the working directory for a source inside it and
+  absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
+- `line` and `column` are one-based, `length` is the token width in bytes,
+  and `position` is its zero-based byte offset. All five location fields are
+  `null` for a diagnostic without a location.
+- `notes` holds the text notes in order; standard error joins them with
+  spaces.
+
+Compile-time Lisp and macros may print to standard output and standard error,
+so neither stream carries JSON. Parallel translation workers share the file;
+each diagnostic is one appended write, so lines never interleave. A diagnostic
+is written when it is reported, and the file is complete when the command
+exits, including after a failed unit. Command-line, host preprocessor, C
+compiler, and linker failures are not compiler diagnostics and remain on
+standard error; the exit status reports the failure.
+
 ## Progress and receipts
 
 Commands report completed translation, C compilation, archive, and link

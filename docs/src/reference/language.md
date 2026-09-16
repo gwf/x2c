@@ -2606,7 +2606,17 @@ Command-line options, including the dump flags that expose an individual
 phase and the include and output directory switches, are listed in
 [compiler options](cli.md).
 
-By default a run records one ordinary error and then emits a `<limit>`
-diagnostic. Locations retain `file`, one-based `line` and `column`, token
+By default each translation unit reports up to 20 errors, then emits a
+`<limit>` diagnostic and stops; `--max-errors` changes the bound. Parsing
+recovers at top-level declarations. A rejected declaration is skipped whole
+and parsing resumes at the next one, so independent errors in separate
+declarations are reported together in source order, and one declaration
+contributes at most one error. Tokenization, symbol collection,
+transformation, generation, and emission stop at their first error. Warnings
+do not count toward the bound, and a report identical to an earlier one is not
+repeated. `--diagnostics-file` writes the same diagnostics as JSON Lines; the
+[command-line reference](cli.md#compiler-diagnostics) describes the fields.
+
+Locations retain `file`, one-based `line` and `column`, token
 `length`, and absolute byte `position`. The source renderer uses `length` for
 the caret width.

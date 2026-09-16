@@ -3,3 +3,8 @@ unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:17:1: protocol: 
   ^^^^^^^^
   note: protocol member 'iter' declared by Iter(InvalidChild) at lib/protocols.x:29:1 conflicting definition 'InvalidChild_iter': ((func (("InvalidChild") (int))) int) expected: ((func (("InvalidChild") ("Iter"))) "Iter")
 
+unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:21:3: macro: type ("InvalidChild") is not iterable
+    foreach(int value, values) (void) value;
+    ^^^^^^^
+  note: declare an Iter protocol adoption or iterate an Iter directly
+

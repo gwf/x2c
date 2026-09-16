@@ -40,6 +40,13 @@ typedef struct Diagnostics {
 
 #include "report.x"
 
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+// The JSON Lines descriptor that replaces stderr text, or -1.
+static int diagnostics_json = -1;
+
 static void _emit_entry(Diagnostics diag, List entry) {
   if (diag.emit) diag.emit(diag.owner, entry);
 }
@@ -131,7 +138,8 @@ static void _publish_limit_notice(Diagnostics diag) {
 }
 
 /** Records and synchronously emits one diagnostic unless already limited.
-    Entries retain publication order. NULL `code` becomes `<driver>`. Reaching
+    Entries retain publication order. NULL `code` becomes `<driver>`. A report
+    equal to a stored entry is ignored. Reaching
     a limit greater than one publishes a following `<limit>` notice; a limit
     of one stops after the first error. Later reports are ignored. Supplied
     message, location, and notes are shared; their canonical-value pools must
@@ -147,7 +155,10 @@ void Diagnostics.report(
     return;
   }
 
+  /* Protocol adoption is checked before and while parsing its declaration,
+     so a failed adoption is submitted twice. */
   List entry = _build_entry(code, message, location, notes);
+  if (diag.entries.contains(entry)) return;
   diag.entries.push(entry);
   diag.count += 1;
   _emit_entry(diag, entry);
@@ -176,12 +187,74 @@ static void _emit_note_summaries(List notes) {
   fprintf(stderr, "  note: %s\n", %" ".join(strings));
 }
 
-/** Writes one structured diagnostic entry and source context to stderr.
+/** Sends every later printed diagnostic to `path` as JSON Lines.
+    The file is created or truncated. Each diagnostic is one append write, so
+    forked translation workers sharing the descriptor never interleave lines,
+    and a line is complete before any exit. Returns zero when `path` cannot be
+    opened.
+*/
+int diagnostics_write_json(String path) {
+  diagnostics_json =
+    open(path, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND | O_CLOEXEC, 0666);
+  return diagnostics_json >= 0;
+}
+
+/* Text names a source under the x2c root relative to that root and leaves
+   another relative path as given. JSON resolves both against the working
+   directory: a relative path that is not there came from the root. A source
+   inside the working directory stays relative to it; any other is absolute.
+*/
+static String Compiler._json_path(Compiler compiler, String path) {
+  if (!path || path.startswith("<")) return path;
+  if (!path.startswith("/") && !path.exists())
+    path = compiler.root_dir.join_path(path);
+  path = path.absolute_path();
+  String directory = %"${String.new(".").absolute_path()}/";
+  return path.startswith(directory) ? path.remove_prefix(directory) : path;
+}
+
+static void Compiler._write_json(Compiler compiler, List entry) {
+  Symbol code = entry.assoc(<code>);
+  List location = entry.assoc(<location>), notes = entry.assoc(<notes>);
+  Buffer out = $auto(Buffer.new(0));
+  out.write("{\"code\":");
+  report_json_string(out, code.str());
+  out.write(",\"message\":");
+  report_json_string(out, entry.assoc(<message>).string());
+  out.write(",\"severity\":");
+  report_json_string(
+    out, code == <warning> ? "warning" : code == <limit> ? "note" : "error");
+  foreach (Symbol key, %(file line column length position)) {
+    Var value = location.assoc(key);
+    out.printf(",\"%s\":", key.str());
+    if (value is void) out.write("null");
+    else if (value is <string>)
+      report_json_string(out, compiler._json_path(value));
+    else out.printf("%d", value.int());
+  }
+  out.write(",\"notes\":[");
+  int comma = 0;
+  foreach (Var note, notes) {
+    if (note is not <string>) continue;
+    if (comma++) out.write_char(',');
+    report_json_string(out, note.string());
+  }
+  out.write("]}\n");
+  while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
+         errno == EINTR) {}
+}
+
+/** Writes one structured diagnostic entry and source context to stderr, or
+    one JSON line after `diagnostics_write_json`.
     NULL is ignored. A present location supplies `file`, one-based `line` and
     `column`, and token `length`; `String` notes are joined into one note line.
 */
 void Compiler.print_diagnostic(Compiler compiler, List entry) {
   if (!entry) return;
+  if (diagnostics_json >= 0) {
+    compiler._write_json(entry);
+    return;
+  }
   Var v;
   Symbol code = entry.assoc(<code>), String message = entry.assoc(<message>);
   v = entry.assoc(<location>);

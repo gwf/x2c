@@ -66,6 +66,21 @@ String report_size(unsigned long long bytes) {
   return %"%.1f MiB".printf(bytes / (1024.0 * 1024.0));
 }
 
+/** Writes `text` to `out` as one quoted JSON string.
+    Quote, backslash, and control bytes are escaped; other bytes, including
+    UTF-8 sequences, are copied. A NULL `text` writes `""`.
+*/
+void report_json_string(Buffer out, String text) {
+  out.write_char('"');
+  foreach (int byte, text) {
+    unsigned char ch = byte;
+    if (ch == '"' || ch == '\\') out.write_char('\\');
+    if (ch < 32) out.printf("\\u%04x", ch);
+    else out.write_char(ch);
+  }
+  out.write_char('"');
+}
+
 static int _terminal(void) {
   if (!isatty(fileno(stderr))) return 0;
   const char *term = getenv("TERM");

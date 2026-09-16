@@ -131,12 +131,17 @@ token are preserved so the caret remains aligned with the displayed source.
 There is no alternate `span` location contract.
 
 The generic Diagnostics store retains its configurable limit. Zero disables
-the limit. Reaching a positive limit appends one `<limit>` entry with the
-message `too many errors, stopping`; later reports are ignored.
+the limit. Reaching a limit greater than one appends one `<limit>` entry with
+the message `too many errors, stopping`; later reports are ignored. A report
+equal to a stored entry is ignored, because some producers derive the same
+failure twice.
 
-The compiler chooses a limit of one in `Compiler.new`. Consequently the CLI
-prints one ordinary diagnostic followed by the existing limit notice. This is
-a compiler policy, not a restriction on the reusable Diagnostics API.
+`Compiler.new` starts with a limit of one, and child compilers inherit their
+owner's limit. The frontend applies `--max-errors`, whose default is 20. This
+is a compiler policy, not a restriction on the reusable Diagnostics API.
+`--diagnostics-file` makes `Compiler.print_diagnostic` append one JSON line
+per entry to a descriptor opened once in `main`; forked translation workers
+inherit it.
 
 ## Compiler flow
 
@@ -145,7 +150,11 @@ Token and passes the entry to Diagnostics, whose emitter is the compiler's own
 `print_diagnostic`. Compilers that share one store take the stream in turn
 with `Compiler.own_diagnostics`. During `Compiler.full_parse`, the
 reporter raises `<malformed>` with the diagnostic category. A filtered catch
-synchronizes at the next top-level boundary. Outside that recovery region the
+rewinds to the start of the failed top-level declaration and skips it whole.
+State set before a raise must be restored by `defer` or `$let`, or later
+declarations parse in the wrong mode. A `<malformed>` transfer out of
+compile-time Lisp continues outward, since its diagnostic is already
+reported. Outside that recovery region the
 reporter exits with status 1.
 
 Tokenizer helpers must honor their scanner preconditions. In particular, the

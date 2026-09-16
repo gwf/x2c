@@ -44,6 +44,9 @@ General options:
       --color <auto|always|never>
                               Control terminal color
       --debug                 Enable compiler debug logging
+      --max-errors <count>    Stop after <count> errors per unit (default: 20)
+      --diagnostics-file <file>
+                              Write compiler diagnostics to <file> as JSON Lines
   @<file>                     Read additional arguments from a response file
   --                          End option parsing
 

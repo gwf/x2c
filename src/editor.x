@@ -13,6 +13,7 @@
 #include "emit.x"
 #include "format.x"
 #include "diagnostics.x"
+#include "report.x"
 #include "utils.x"
 
 #pragma private
@@ -24,26 +25,15 @@
 /* The private request uses argv for metadata and separate files for source
    snapshots. Only this response file carries JSON; macros can print freely
    to stdout/stderr without corrupting it. No JSON input parser is needed. */
-static void _string(File file, String value) {
-  fputc('"', file);
-  foreach (int byte, value) {
-    unsigned char ch = byte;
-    if (ch == '"' || ch == '\\') fprintf(file, "\\%c", ch);
-    else if (ch < 32) fprintf(file, "\\u%04x", ch);
-    else fputc(ch, file);
-  }
-  fputc('"', file);
+static void _location(Buffer out, String path, int start, int end) {
+  out.write("\"file\":");
+  report_json_string(out, path);
+  out.printf(",\"start\":%d,\"end\":%d", start, end);
 }
 
-static void _location(File file, String path, int start, int end) {
-  fputs("\"file\":", file);
-  _string(file, path);
-  fprintf(file, ",\"start\":%d,\"end\":%d", start, end);
-}
-
-static void _diagnostics(File file, Compiler compiler, Map needed) {
+static void _diagnostics(Buffer out, Compiler compiler, Map needed) {
   int comma = 0;
-  fputs("\"diagnostics\":[", file);
+  out.write("\"diagnostics\":[");
   foreach (List entry, compiler.diagnostics()) {
     Symbol code = entry.assoc(<code>);
     List location = entry.assoc(<location>);
@@ -53,20 +43,20 @@ static void _diagnostics(File file, Compiler compiler, Map needed) {
     Var width = location.assoc(<length>);
     int start = position is void ? 0 : position.int();
     int length = width is void ? 0 : width.int();
-    if (comma++) fputc(',', file);
-    fputc('{', file);
+    if (comma++) out.write_char(',');
+    out.write_char('{');
     path = path.absolute_path();
     needed[path] = 1;
-    _location(file, path, start, start + length);
-    fputs(",\"message\":", file);
-    _string(file, entry.assoc(<message>).string());
-    fputs(",\"code\":", file);
-    _string(file, code.str());
-    fputs(",\"severity\":", file);
-    _string(file, code == <warning> ? "warning" : "error");
-    fputc('}', file);
+    _location(out, path, start, start + length);
+    out.write(",\"message\":");
+    report_json_string(out, entry.assoc(<message>).string());
+    out.write(",\"code\":");
+    report_json_string(out, code.str());
+    out.write(",\"severity\":");
+    report_json_string(out, code == <warning> ? "warning" : "error");
+    out.write_char('}');
   }
-  fputc(']', file);
+  out.write_char(']');
 }
 
 static List _occurrence(Compiler compiler, String path, int offset) {
@@ -81,7 +71,7 @@ static List _occurrence(Compiler compiler, String path, int offset) {
 }
 
 static void _query(
-  File file, Compiler compiler, String path, String kind, int offset,
+  Buffer out, Compiler compiler, String path, String kind, int offset,
   Map needed) {
   List row = _occurrence(compiler, path, offset);
   if (!row) return;
@@ -92,37 +82,37 @@ static void _query(
     if (value is not <list>) return;
     List target = value;
     needed[target[0]] = 1;
-    fputs(",\"definition\":{", file);
-    _location(file, target[0], target[1].int(), target[2].int());
-    fputc('}', file);
+    out.write(",\"definition\":{");
+    _location(out, target[0], target[1].int(), target[2].int());
+    out.write_char('}');
   }
   else if (kind == "hover" && type) {
     needed[row[0]] = 1;
     List declaration = type.declaration_ast(binding);
     String text = String.new(
       compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
-    fputs(",\"hover\":{", file);
-    _location(file, row[0], row[1].int(), row[2].int());
-    fputs(",\"text\":", file);
-    _string(file, text);
-    fputc('}', file);
+    out.write(",\"hover\":{");
+    _location(out, row[0], row[1].int(), row[2].int());
+    out.write(",\"text\":");
+    report_json_string(out, text);
+    out.write_char('}');
   }
 }
 
-static void _sources(File file, Compiler compiler, Map needed) {
+static void _sources(Buffer out, Compiler compiler, Map needed) {
   int comma = 0;
-  fputs(",\"sources\":[", file);
+  out.write(",\"sources\":[");
   foreach (Var key, needed.keys()) {
     Var text;
     if (!compiler.source_texts.try_get(key, &text)) continue;
-    if (comma++) fputc(',', file);
-    fputs("{\"file\":", file);
-    _string(file, key.string());
-    fputs(",\"text\":", file);
-    _string(file, text.string());
-    fputc('}', file);
+    if (comma++) out.write_char(',');
+    out.write("{\"file\":");
+    report_json_string(out, key.string());
+    out.write(",\"text\":");
+    report_json_string(out, text.string());
+    out.write_char('}');
   }
-  fputc(']', file);
+  out.write_char(']');
 }
 
 static CliRequest _configure(
@@ -225,14 +215,16 @@ int editor_request(int argc, char **argv) {
     command.close();
     return 2;
   }
-  fputs("{\"file\":", result);
-  _string(result, source);
-  fputc(',', result);
+  Buffer out = Buffer.new(0);
+  out.write("{\"file\":");
+  report_json_string(out, source);
+  out.write_char(',');
   Map needed = %{};
-  _diagnostics(result, unit.compiler, needed);
-  if (parsed) _query(result, unit.compiler, source, kind, offset, needed);
-  _sources(result, unit.compiler, needed);
-  fputs("}\n", result);
+  _diagnostics(out, unit.compiler, needed);
+  if (parsed) _query(out, unit.compiler, source, kind, offset, needed);
+  _sources(out, unit.compiler, needed);
+  out.write("}\n");
+  fputs(out.str_free(), result);
   int failed = fclose(result);
   unit.close();
   command.close();

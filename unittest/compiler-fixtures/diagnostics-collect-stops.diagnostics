@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/diagnostics-collect-stops.x:6:13: parse: expected ';'
+    int value +;
+              ^
+

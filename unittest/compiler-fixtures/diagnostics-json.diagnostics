@@ -1,0 +1,3 @@
+{"code":"parse","message":"expected atomic expression","severity":"error","file":"unittest/compiler-fixtures/diagnostics-json.x","line":4,"column":17,"length":1,"position":58,"notes":["token:",";","kind:",";"]}
+{"code":"type","message":"operator 'is' requires Var on the left","severity":"error","file":"unittest/compiler-fixtures/diagnostics-json.x","line":9,"column":16,"length":2,"position":120,"notes":["operand type: (int)"]}
+{"code":"limit","message":"too many errors, stopping","severity":"note","file":null,"line":null,"column":null,"length":null,"position":null,"notes":[]}

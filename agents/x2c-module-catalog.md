@@ -153,10 +153,11 @@ Public functions:
 
 `Diagnostics.new`, `Diagnostics.reset`, `Diagnostics.set_emitter`,
 `Diagnostics.entries`, `Diagnostics.has_emitter`, `Diagnostics.reached_limit`,
-`Diagnostics.report`, `Compiler.print_diagnostic`, `Compiler.origin_location`,
-`Compiler.display_path`, `Compiler.token_location`, `Compiler.report_error`,
-`Compiler.report_warning`, `Compiler.error_count`, `Compiler.diagnostics`,
-`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
+`Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
+`Compiler.report_error`, `Compiler.report_warning`, `Compiler.error_count`,
+`Compiler.diagnostics`, `Compiler.dump_tokens`, `Compiler.dump_symbol_table`,
+`Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
@@ -338,8 +339,8 @@ Command progress and completion receipts.
 Public functions:
 
 `report_now_us`, `report_file_bytes`, `report_duration`, `report_size`,
-`report_configure`, `report_receipts`, `report_suspend`, `report_line`,
-`report_progress`, `report_phase`
+`report_json_string`, `report_configure`, `report_receipts`, `report_suspend`,
+`report_line`, `report_progress`, `report_phase`
 
 ### [src/script.x](../src/script.x)
 

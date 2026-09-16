@@ -1481,7 +1481,9 @@ static List _raise(
         <type>, message, location,
         %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
     }
-    List converted = compiler.convert_expression(value, %("Var"));
+    // Converting a rejected detail would report the same value again.
+    List converted =
+      invalid ? value : compiler.convert_expression(value, %("Var"));
     if (converted != value) changed = 1;
     values.push(converted);
     index++;

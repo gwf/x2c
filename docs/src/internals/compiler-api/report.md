@@ -15,6 +15,7 @@ Command progress and completion receipts.
 | [`report_configure`](#report_configure) | Resets process reporting for one command. |
 | [`report_duration`](#report_duration) | Formats microseconds as integer `us`, rounded whole `ms`, or seconds with two decimal places. |
 | [`report_file_bytes`](#report_file_bytes) | Returns the size of a regular file. |
+| [`report_json_string`](#report_json_string) | Writes `text` to `out` as one quoted JSON string. |
 | [`report_line`](#report_line) | Writes one newline-terminated receipt to stderr when receipts are enabled. |
 | [`report_now_us`](#report_now_us) | Returns monotonic time in microseconds, or zero when the clock read fails. |
 | [`report_phase`](#report_phase) | Writes a muted phase receipt when receipts are enabled. |
@@ -35,7 +36,7 @@ progress additionally requires terminal stderr, non-plain output, and no
 parent Make recipe. Plain output disables color; automatic color respects
 terminal capability and `NO_COLOR`.
 
-Source: `src/report.x:105`
+Source: `src/report.x:120`
 
 #### report_duration
 
@@ -55,6 +56,16 @@ NULL, a failed `stat`, or a non-regular path returns zero.
 
 Source: `src/report.x:45`
 
+#### report_json_string
+
+`void report_json_string(Buffer out, String text)`
+
+Writes `text` to `out` as one quoted JSON string.
+Quote, backslash, and control bytes are escaped; other bytes, including
+UTF-8 sequences, are copied. A NULL `text` writes `""`.
+
+Source: `src/report.x:73`
+
 #### report_line
 
 `void report_line(Symbol tone, String line)`
@@ -62,7 +73,7 @@ Source: `src/report.x:45`
 Writes one newline-terminated receipt to stderr when receipts are enabled.
 Any active transient line is cleared first, and `line` must be non-NULL.
 
-Source: `src/report.x:184`
+Source: `src/report.x:199`
 
 #### report_now_us
 
@@ -81,7 +92,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:232`
+Source: `src/report.x:247`
 
 #### report_progress
 
@@ -92,7 +103,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:196`
+Source: `src/report.x:211`
 
 #### report_receipts
 
@@ -100,7 +111,7 @@ Source: `src/report.x:196`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:122`
+Source: `src/report.x:137`
 
 #### report_size
 
@@ -117,7 +128,7 @@ Source: `src/report.x:63`
 
 Clears the active transient line from stderr, if one exists.
 
-Source: `src/report.x:175`
+Source: `src/report.x:190`
 
 ## Design notes
 

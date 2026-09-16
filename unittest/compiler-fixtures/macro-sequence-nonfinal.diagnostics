@@ -2,3 +2,7 @@ unittest/compiler-fixtures/macro-sequence-nonfinal.x:3:42: parse: sequence macro
   macro Expression $call(Expr $arguments..., Expr $final) => ($final)
                                            ^
 
+unittest/compiler-fixtures/macro-sequence-nonfinal.x:6:10: parse: unknown or forward-referenced macro 'call'
+    return $call(1, 2);
+           ^
+

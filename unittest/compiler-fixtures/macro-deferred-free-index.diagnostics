@@ -2,3 +2,7 @@ unittest/compiler-fixtures/macro-deferred-free-index.x:5:1: parse: type () does 
   )
   ^
 
+unittest/compiler-fixtures/macro-deferred-free-index.x:7:13: parse: expected syntax
+  int value = $read_free_name();
+              ^
+

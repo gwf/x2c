@@ -304,7 +304,8 @@ static Compiler _new(Compiler owner) {
     _.inits = %[];
     _.early_decls = %[];
     _.collect_protocols = 1;
-    _.diagnostics = Diagnostics.new(_emit_user, _, 1);
+    _.diagnostics =
+      Diagnostics.new(_emit_user, _, owner ? owner.diagnostics.limit : 1);
     if (owner && owner.diagnostics.emit != _emit_user)
       _.diagnostics.set_emitter(
         owner.diagnostics.emit, owner.diagnostics.owner);
@@ -1359,27 +1360,35 @@ static List _prepend_preproc(Compiler compiler, List ast) {
   return ast;
 }
 
-static void _sync_top_level(Compiler c) {
+static int _delimiter_step(Symbol type) {
+  switch (type) {
+    case <"(">: case <"[">: case <"{">: case <"?(">: case <"$(">:
+    case <"${">: case <"%(">: case <"%[">: case <"%{">: case <"@{">:
+      return 1;
+    case <")">: case <"]">: case <"}">:
+      return -1;
+  }
+  return 0;
+}
+
+/* A failed declaration is skipped whole from its first token, because a
+   report inside a body leaves the cursor where no declaration can start.
+   The declaration ends at a `;` outside delimiters, or at a closing
+   delimiter whose next token begins a later line: a function body or a
+   macro definition. A `struct` body followed by its declarators on the same
+   line continues to their `;`. */
+static void _sync_top_level(Compiler c, Token start, int braces) {
+  c.token = start;
+  c.braces.resize(braces);
   int depth = 0;
   while (c.peek(0) != <eof>) {
-    Symbol sym = c.peek(0);
-    if (depth == 0 && (sym == <;> || sym == <"}">)) {
-      c.next();
-      break;
-    }
-    if (sym == <"{"> || sym == <"%{"> ||
-        sym == <"${"> || sym == <"@{">) {
-      depth += 1;
-      c.next();
-      continue;
-    }
-    if (sym == <"}"> && depth > 0) {
-      depth -= 1;
-      c.next();
-      if (depth == 0) break;
-      continue;
-    }
+    Token token = c.token;
     c.next();
+    if (!depth && token.type == <;>) return;
+    int step = _delimiter_step(token.type);
+    depth += step;
+    if (depth < 0) depth = 0;
+    if (!depth && step < 0 && c.token.line > token.line) return;
   }
 }
 
@@ -1418,8 +1427,10 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     int hoisting = c.script && !c.script.defines_main, gap = 0, runs = 0, first = 0;
     loop {
       while (c.peek(0) != <eof>) {
+        Token start = c.token;
+        int braces = c.braces.len();
         try {
-          Token start = c.token, tokens = c.tokenizer.tokens;
+          Token tokens = c.tokenizer.tokens;
           if (hoisting)
             _push_script_conditionals(c, statements, gap, start - tokens);
           if (hoisting && c.script_statement_starts()) {
@@ -1453,7 +1464,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
         catch %(malformed (category ?category) *): {
           (void) category;
           if (c.diagnostics.reached_limit()) break;
-          _sync_top_level(c);
+          _sync_top_level(c, start, braces);
           Token tokens = c.tokenizer.tokens;
           gap = _skip_backward(c.token - 1, tokens) + 1 - tokens;
           ast = _prepend_preproc(c, ast);

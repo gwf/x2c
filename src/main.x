@@ -619,6 +619,9 @@ int main(int argc, char **argv) {
     return editor_request(argc - 1, argv + 1);
   }
   CliRequest request = cli_parse(argc, argv);
+  String diagnostics = request.diagnostics_file;
+  if (diagnostics && !diagnostics_write_json(diagnostics))
+    x2c_driver_error(%"cannot open diagnostics file '$diagnostics'");
   if (request.command == <script> && script_prepare(request)) return 0;
   report_configure(
     request.quiet, request.plain, request.color_mode,

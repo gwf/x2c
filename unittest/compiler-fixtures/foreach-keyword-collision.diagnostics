@@ -2,3 +2,7 @@ unittest/compiler-fixtures/foreach-keyword-collision.x:4:1: macro: built-in keyw
   keyword foreach $fixture.value;
   ^^^^^^^
 
+unittest/compiler-fixtures/foreach-keyword-collision.x:7:18: parse: macro invocation has too few arguments
+    return foreach();
+                   ^
+

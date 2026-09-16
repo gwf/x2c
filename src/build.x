@@ -518,30 +518,20 @@ static int _finish_compile(Build state, CcJob *pending) {
   return status != 0;
 }
 
-static void _json_string(Buffer out, String text) {
-  out.write_char('"');
-  for (const unsigned char *p = (const unsigned char *) text; p && *p; p++) {
-    if (*p == '"' || *p == '\\') out.write_char('\\');
-    if (*p < 32) out.printf("\\u%04x", *p);
-    else out.write_char(*p);
-  }
-  out.write_char('"');
-}
-
 static String _compile_command(
   Build state, ToolAction action, String source, String object) {
   Buffer out = Buffer.new(0);
   out.write("  {\"directory\": ");
-  _json_string(out, state.compile_directory);
+  report_json_string(out, state.compile_directory);
   out.write(", \"file\": ");
-  _json_string(out, source);
+  report_json_string(out, source);
   out.write(", \"output\": ");
-  _json_string(out, object);
+  report_json_string(out, object);
   out.write(", \"arguments\": [");
   int first = 1;
   foreach (String argument, action.arguments) {
     if (!first) out.write(", ");
-    _json_string(out, argument);
+    report_json_string(out, argument);
     first = 0;
   }
   out.write("]}");

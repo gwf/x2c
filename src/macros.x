@@ -497,12 +497,15 @@ static Var _sdk_function_parameter(List function, String wanted) {
 static Var _sdk_function_body(List function) =>
   function.match_replace(%(function ? ? (block *body)), %(*body));
 
+/* An SDK rejection outside an expansion has no scope to clear it, so the
+   report consumes it; a later failure must not repeat a stale message. */
 static void _report_lisp_failure(
   Compiler compiler, Token invocation, List error, String source) {
-  if (macro_sdk_failure_message)
+  String message = macro_sdk_failure_message;
+  macro_sdk_failure_message = NULL;
+  if (message)
     compiler.report_error(
-      <macro>, macro_sdk_failure_message,
-      invocation, macro_sdk_failure_notes);
+      <macro>, message, invocation, macro_sdk_failure_notes);
   String form_note = %"form: $source", error_note = %"error: ${error.repr()}";
   compiler.report_error(
     <macro>, "compile-time Lisp evaluation failed",
@@ -514,7 +517,11 @@ static Var _eval_string(
   Var result;
   $let(macro_import_invocation, invocation)
   $let(macro_import_compiler, compiler) {
+    /* A compiler operation called from Lisp has already reported its
+       failure; wrapping the transfer would report it a second time. */
     try result = compiler.macro_lisp.eval_string(source);
+    catch %(malformed (category ?category)):
+      raise %(malformed (category $category));
     catch %(?code *detail):
       _report_lisp_failure(compiler, invocation, cons(code, detail), source);
   }
@@ -1993,7 +2000,9 @@ List Compiler.parse_macro_definition(Compiler c) {
     );
   }
 
+  // A rejected signature must not leave later declarations as templates.
   Map old_holes = c.macro_holes;
+  defer c.macro_holes = old_holes;
   c.macro_holes = %{};
   Map definition_locals = %{};
   c.macro_holes[%(locals)] = definition_locals;

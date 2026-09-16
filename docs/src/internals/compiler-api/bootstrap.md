@@ -69,7 +69,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:354`
+Source: `src/bootstrap.x:355`
 
 #### bootstrap_release
 
@@ -79,7 +79,7 @@ Attempts to remove a held bootstrap lock without freeing the payload.
 The lock path is cleared even if `unlink` fails. NULL payloads and repeated
 calls have no effect.
 
-Source: `src/bootstrap.x:373`
+Source: `src/bootstrap.x:374`
 
 ## Public types
 

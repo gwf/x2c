@@ -20,11 +20,14 @@ typedef struct CliRequest {
   List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
   String prefix, cc, ar, compile_commands, sha256, index, Symbol kind;
+  String diagnostics_file;
   Symbol color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
+  // The translation error limit; 0 reports every recoverable error.
+  int max_errors;
   int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild,
     clean;
   SourceView sources;
@@ -103,6 +106,11 @@ static CliOption cli_options[] = {
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
   { <debug>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
+  { <max-errors>, CLI_TRANSLATE | CLI_NATIVE, <general>, "--max-errors",
+    "<count>", "Stop after <count> errors per unit (default: 20)", 0 },
+  { <diag-file>, CLI_TRANSLATE | CLI_NATIVE, <general>,
+    "--diagnostics-file", "<file>",
+    "Write compiler diagnostics to <file> as JSON Lines", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0 },
   { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
@@ -788,15 +796,13 @@ static void _driver_kind(CliRequest request, String value) {
   else x2c_driver_error(%"unknown target kind '$value'");
 }
 
-static void _driver_jobs(CliRequest request, String value) {
-  if (!value || !value[0])
-    x2c_driver_error("--jobs requires a positive count");
+static int _driver_count(String value, int minimum, String noun) {
   char *end = NULL;
   errno = 0;
-  long jobs = strtol(value, &end, 10);
-  if (errno || *end || jobs < 1 || jobs > INT_MAX)
-    x2c_driver_error(%"invalid job count '$value'");
-  request.jobs = (int) jobs;
+  long count = value ? strtol(value, &end, 10) : 0;
+  if (!value || errno || *end || count < minimum || count > INT_MAX)
+    x2c_driver_error(%"invalid $noun '$value'");
+  return (int) count;
 }
 
 static void _apply_option(
@@ -851,7 +857,11 @@ static void _apply_option(
     case <profile>: c.profile = value; break;
     case <kind>: _driver_kind(c, value); break;
     case <compile>: c.compile_only = 1; break;
-    case <jobs>: _driver_jobs(c, value); break;
+    case <jobs>: c.jobs = _driver_count(value, 1, "job count"); break;
+    case <max-errors>:
+      c.max_errors = _driver_count(value, 0, "error limit");
+      break;
+    case <diag-file>: c.diagnostics_file = value; break;
     case <output>: c.output = value; break;
     case <build-dir>: c.build_dir = value; break;
     case <cc-db>:
@@ -969,6 +979,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = name;
   request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
+  request.max_errors = 20;
   if (mask & CLI_NATIVE) request.kind = <executable>;
   Array inputs = %[], run_args = %[], x_paths = %[];
   Array cpp_args = %[], cc_args = %[], ld_args = %[], int operands = 0;

@@ -12,6 +12,7 @@ Structured compiler diagnostics collection.
 
 | Function | Summary |
 | --- | --- |
+| [`diagnostics_write_json`](#diagnostics_write_json) | Sends every later printed diagnostic to `path` as JSON Lines. |
 | [`Compiler.diagnostics`](#Compiler.diagnostics) | Returns a report-order snapshot of all collected diagnostics. |
 | [`Compiler.display_path`](#Compiler.display_path) | Returns a physical source path for semantic facts, otherwise a path relative to the compiler root. |
 | [`Compiler.dump_cache`](#Compiler.dump_cache) | Prints each cached numeric identifier and its key to stdout. |
@@ -19,7 +20,7 @@ Structured compiler diagnostics collection.
 | [`Compiler.dump_tokens`](#Compiler.dump_tokens) | Prints every non-EOF token with its position and visible content. |
 | [`Compiler.error_count`](#Compiler.error_count) | Returns the number of counted diagnostics accepted since the last reset. |
 | [`Compiler.origin_location`](#Compiler.origin_location) | Resolves a recorded occurrence through generated ancestry to its source. |
-| [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr. |
+| [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr, or one JSON line after `diagnostics_write_json`. |
 | [`Compiler.report_error`](#Compiler.report_error) | Submits a located compiler error, then transfers or exits. |
 | [`Compiler.report_warning`](#Compiler.report_warning) | Records and emits a located warning without consuming the error limit. |
 | [`Compiler.token_location`](#Compiler.token_location) | Builds the diagnostic location for `token` or the current token. |
@@ -30,6 +31,20 @@ Structured compiler diagnostics collection.
 | [`Diagnostics.report`](#Diagnostics.report) | Records and synchronously emits one diagnostic unless already limited. |
 | [`Diagnostics.reset`](#Diagnostics.reset) | Clears stored entries and limit state while preserving configuration. |
 | [`Diagnostics.set_emitter`](#Diagnostics.set_emitter) | Replaces the borrowed emitter and owner without replaying stored entries. |
+
+### Functions
+
+#### diagnostics_write_json
+
+`int diagnostics_write_json(String path)`
+
+Sends every later printed diagnostic to `path` as JSON Lines.
+The file is created or truncated. Each diagnostic is one append write, so
+forked translation workers sharing the descriptor never interleave lines,
+and a line is complete before any exit. Returns zero when `path` cannot be
+opened.
+
+Source: `src/diagnostics.x:196`
 
 ### `Compiler`
 
@@ -42,7 +57,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:368`
+Source: `src/diagnostics.x:441`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -52,7 +67,7 @@ Source: `src/diagnostics.x:368`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:240`
+Source: `src/diagnostics.x:313`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -61,7 +76,7 @@ Source: `src/diagnostics.x:240`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:404`
+Source: `src/diagnostics.x:477`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -70,7 +85,7 @@ Source: `src/diagnostics.x:404`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:399`
+Source: `src/diagnostics.x:472`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -80,7 +95,7 @@ Source: `src/diagnostics.x:399`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:389`
+Source: `src/diagnostics.x:462`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -90,7 +105,7 @@ Source: `src/diagnostics.x:389`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:362`
+Source: `src/diagnostics.x:435`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -104,18 +119,19 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:215`
+Source: `src/diagnostics.x:288`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
 
 `void Compiler.print_diagnostic(Compiler compiler, List entry)`
 
-Writes one structured diagnostic entry and source context to stderr.
+Writes one structured diagnostic entry and source context to stderr, or
+one JSON line after `diagnostics_write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:183`
+Source: `src/diagnostics.x:252`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -129,7 +145,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:288`
+Source: `src/diagnostics.x:361`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -141,7 +157,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:304`
+Source: `src/diagnostics.x:377`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -157,7 +173,7 @@ are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:259`
+Source: `src/diagnostics.x:332`
 
 ### `Diagnostics`
 
@@ -172,7 +188,7 @@ retain their actual producing-pool lifetime. They share the stored entry
 `List`s. The snapshot includes warnings and the limit notice; changing or
 resetting `diag` does not change it.
 
-Source: `src/diagnostics.x:88`
+Source: `src/diagnostics.x:95`
 
 <a id="Diagnostics.has_emitter"></a>
 #### Diagnostics.has_emitter
@@ -181,7 +197,7 @@ Source: `src/diagnostics.x:88`
 
 Returns whether `diag` currently has an emitter.
 
-Source: `src/diagnostics.x:94`
+Source: `src/diagnostics.x:101`
 
 <a id="Diagnostics.new"></a>
 #### Diagnostics.new
@@ -192,7 +208,7 @@ Creates an empty diagnostic store with an optional emitter.
 A negative `limit` is treated as zero; zero collects without a stopping
 threshold. The emitter and `owner` are borrowed.
 
-Source: `src/diagnostics.x:53`
+Source: `src/diagnostics.x:60`
 
 <a id="Diagnostics.reached_limit"></a>
 #### Diagnostics.reached_limit
@@ -202,7 +218,7 @@ Source: `src/diagnostics.x:53`
 Returns whether counted reports have reached the positive limit.
 A zero limit never reports that it has been reached.
 
-Source: `src/diagnostics.x:99`
+Source: `src/diagnostics.x:106`
 
 <a id="Diagnostics.report"></a>
 #### Diagnostics.report
@@ -210,13 +226,14 @@ Source: `src/diagnostics.x:99`
 `void Diagnostics.report( Diagnostics diag, Symbol code, String message, List location, List notes)`
 
 Records and synchronously emits one diagnostic unless already limited.
-Entries retain publication order. NULL `code` becomes `<driver>`. Reaching
+Entries retain publication order. NULL `code` becomes `<driver>`. A report
+equal to a stored entry is ignored. Reaching
 a limit greater than one publishes a following `<limit>` notice; a limit
 of one stops after the first error. Later reports are ignored. Supplied
 message, location, and notes are shared; their canonical-value pools must
 outlive the store and its snapshots.
 
-Source: `src/diagnostics.x:140`
+Source: `src/diagnostics.x:148`
 
 <a id="Diagnostics.reset"></a>
 #### Diagnostics.reset
@@ -225,7 +242,7 @@ Source: `src/diagnostics.x:140`
 
 Clears stored entries and limit state while preserving configuration.
 
-Source: `src/diagnostics.x:65`
+Source: `src/diagnostics.x:72`
 
 <a id="Diagnostics.set_emitter"></a>
 #### Diagnostics.set_emitter
@@ -235,7 +252,7 @@ Source: `src/diagnostics.x:65`
 Replaces the borrowed emitter and owner without replaying stored entries.
 A NULL emitter disables streaming.
 
-Source: `src/diagnostics.x:74`
+Source: `src/diagnostics.x:81`
 
 ## Public types
 

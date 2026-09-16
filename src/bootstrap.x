@@ -339,6 +339,7 @@ CliRequest bootstrap_build_request(
   request.cc = command.cc;
   request.ar = command.ar;
   request.jobs = command.jobs;
+  request.max_errors = command.max_errors;
   request.verbose = command.verbose;
   return request;
 }
