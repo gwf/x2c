@@ -323,8 +323,8 @@ static void Compiler._show_source_context(Compiler compiler, List location) {
   int length = len_var is void ? 1 : len_var.int(), char *text = compiler.text;
   int current_line = 1, char *line_start = text, *line_end = text;
   // A script's first line reads as an include, but the reader wrote it.
-  if (line <= 1 && compiler.shebang) {
-    line_start = compiler.shebang;
+  if (line <= 1 && compiler.script) {
+    line_start = compiler.script.shebang;
     line_end = line_start + strlen(line_start);
   }
   else if (line <= 1) while (*line_end && *line_end != '\n') line_end++;

@@ -781,11 +781,15 @@ Compiler Compiler_new_shared(Compiler);
 
 int String_endswith(String, String);
 
+void Compiler_take_unit_state(Compiler, Compiler);
+
 void Compiler_tokenize(Compiler, char *);
 
 String String_absolute_path(String);
 
 void Compiler_shallow_parse_overlay(Compiler, Map, Map);
+
+void Compiler_return_unit_state(Compiler, Compiler);
 
 static void _parse_segment(Compiler c, String path, String source, Array lines, int start_line, int start_pos, Map globs, Map overlay, Map definitions, Map dependencies, int * private){
   if(! Array_len(lines)) return;
@@ -804,20 +808,8 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
   {
     if(! String_endswith(path, _91)) shadow -> package = NULL;
     shadow -> filename = path;
-    if(String_equal(path, c -> script)){
-      shadow -> script = path;
-      shadow -> shebang = c -> shebang;
-      shadow -> script_main = c -> script_main;
-    }
-    shadow -> include_dirs = c -> include_dirs;
     shadow -> source_private = * private;
-    shadow -> macros = c -> macros;
-    shadow -> imports = c -> imports;
-    shadow -> kw_aliases = c -> kw_aliases;
-    shadow -> kw_seen = c -> kw_seen;
-    shadow -> macro_lisp = c -> macro_lisp;
-    shadow -> declaration_effects = c -> declaration_effects;
-    shadow -> borrowed_lisp = shadow -> macro_lisp != NULL;
+    Compiler_take_unit_state(shadow, c);
     Compiler_tokenize(shadow, text);
     shadow -> text = source;
     if(c -> source_facts) Map_setindex(c -> source_texts, String_var(String_absolute_path(path)), String_var(source));
@@ -827,14 +819,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
       token -> pos += start_pos;
     }
     Compiler_shallow_parse_overlay(shadow, globs, overlay);
-    c -> macros = shadow -> macros;
-    c -> imports = shadow -> imports;
-    c -> kw_aliases = shadow -> kw_aliases;
-    c -> kw_seen = shadow -> kw_seen;
-    c -> macro_lisp = shadow -> macro_lisp;
-    c -> declaration_effects = shadow -> declaration_effects;
-    c -> declaration_produced |= shadow -> declaration_produced;
-    shadow -> borrowed_lisp = shadow -> macro_lisp != NULL;
+    Compiler_return_unit_state(shadow, c);
     if(String_endswith(path, _91)){
       Map_merge(c -> fn_defs, shadow -> fn_defs);
       Map_merge(definitions, shadow -> fn_defs);
@@ -1335,7 +1320,7 @@ void Compiler_collect_package(Compiler c, String name, Token token){
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-    package -> package = name;  package -> filename = entry;  package -> include_dirs = c -> include_dirs;  Map globs = Sym_base_symbols(c -> sym), visited = Map_new();
+    package -> package = name;  package -> filename = entry;  Map globs = Sym_base_symbols(c -> sym), visited = Map_new();
     Map_setindex(visited, String_var(entry), int_var(1));
     Var cached = c -> source_facts ?((void) 0, Void) : Map_getindex(_header_cache(), String_var(entry));
     if(Var_is_void(cached)){
