@@ -63,6 +63,49 @@ double length_squared(Point point) {
 
 Nothing is boxed and no runtime collection is involved.
 
+## Bring existing C files
+
+Rename a C source file from `.c` to `.x` and it compiles as x2c. Headers stay
+`.h` files and are reached with `#include`. x2c collects the declarations a
+header provides and keeps the directive in the generated C, where the native
+compiler reads the header itself. An `.x` file is a translation unit, for
+which x2c writes its own C file and header.
+
+x2c parses the original source rather than preprocessor output, so both
+branches of an `#ifdef` must parse. The usual guard for C++ callers does:
+
+```x2c
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int add(int left, int right);
+
+#ifdef __cplusplus
+}
+#endif
+```
+
+The declarations inside a braced `extern "C"` group stay at file scope. The
+group's braces do not appear in the generated C. `extern "C" int f(void);`
+declares `f` as `extern int f(void);` does.
+
+A C11 generic selection has a static type in x2c. The compiler selects the
+association from the controlling expression's type and gives the whole
+expression that association's type. The selection reaches the generated C
+unchanged, so the native compiler makes the same choice:
+
+```x2c
+~
+~int main(void) {
+const char *text = "hello";
+Var kind = _Generic(text, char *: "mutable", const char *: 1);
+~  return kind.int() == 1 ? 0 : 1;
+~}
+```
+
+`kind` receives an `int` because the `const char *` association is selected.
+
 ## Cross into Var deliberately
 
 Box when a value is dynamic:

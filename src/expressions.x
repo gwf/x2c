@@ -513,6 +513,61 @@ static List _parse_va_arg(Compiler compiler) {
   return %( expr $type $expr );
 }
 
+/* A C11 generic selection. An association names its type with
+   `parse_type_name`, which covers specifiers, qualifiers, and pointers; a
+   function-pointer or array association needs a typedef name. */
+static List _parse_generic(Compiler c) {
+  Token origin = c.token;
+  c.next();
+  c.expect(<(>);
+  List control = c.parse_assignment();
+  Array associations = %[];
+  while (c.test(<,>)) {
+    if (c.test(<default>)) {
+      c.expect(<:>);
+      associations.push(%(association default ${c.parse_assignment()}));
+      continue;
+    }
+    Type type = c.parse_type_name();
+    c.expect(<:>);
+    associations.push(%(association $type ${c.parse_assignment()}));
+  }
+  c.expect(<)>);
+  List selection = %(generic $control @{associations.list_free()});
+  return c.resolve_expression(%(expr () $selection), origin);
+}
+
+static Type _generic_type(Compiler c, Type type) {
+  type = c.sym.normalize_declared_type(type);
+  Type base = type.base_type(), scalar = base.scalar();
+  if (!scalar) return type;
+  return type.list()[:type.len() - base.len()].append(scalar);
+}
+
+/* Returns the value of the association C selects, or NULL when none does.
+   C11 6.5.1.1 compares the controlling type after lvalue conversion: an
+   array or function decays to a pointer and top-level qualifiers drop. Both
+   sides resolve typedefs and scalar spellings first. An unknown controlling
+   type selects nothing, so the expression stays untyped and C decides. */
+static List _generic_selection(
+  Compiler c, Type control, List associations) {
+  if (!control) return NULL;
+  Type key = _generic_type(c, control);
+  if (key.is_array()) key = key.dereference().reference();
+  else if (key.is_function()) key = key.reference();
+  while (key && key.car() is <symbol> &&
+         Symbol.is_type_qualifier(key.car()))
+    key = key.cdr();
+  List fallback = NULL;
+  foreach (List association, associations) match (association) {
+    case %(association default ?value):
+      fallback = value;
+    case %(association ?type ?value):
+      if (List.equal(_generic_type(c, type), key)) return value;
+  }
+  return fallback;
+}
+
 static List _parse_unary_op(Compiler c) {
   Symbol op = c.peek(0);
   Token origin = c.token;
@@ -1619,6 +1674,22 @@ static List _resolve_content(
     case %(sizeof ?(List argument)):
       return %(expr $input_type
                (sizeof ${c.resolve_expression(argument, origin)}));
+    case %(generic ?control *associations): {
+      control = c.resolve_expression(control, origin);
+      Array resolved = %[];
+      foreach (List association, associations) match (association)
+        case %(association ?selector ?value):
+          resolved.push(%(association $selector
+                          ${c.resolve_expression(value, origin)}));
+      associations = resolved.list_free();
+      Type control_type = control.cadr(), type = NULL;
+      if (control_type === %(<macro-expr>)) type = control_type;
+      else {
+        List selected = _generic_selection(c, control_type, associations);
+        if (selected) type = selected.cadr();
+      }
+      return %(expr $type (generic $control @associations));
+    }
     case %(va-arg ?argument ?declaration):
       return %(expr $input_type
                (va-arg ${c.resolve_expression(argument, origin)}
@@ -2110,6 +2181,7 @@ List Compiler.parse_primary(Compiler compiler) {
       List keyword = compiler.try_parse_macro_expression();
       if (keyword) return keyword;
       if (compiler.token.text == "va_arg") return _parse_va_arg(compiler);
+      if (compiler.token.text == "_Generic") return _parse_generic(compiler);
       return compiler.parse_variable();
     }
     case <"(">:       return _parse_parens(compiler);
@@ -2279,6 +2351,13 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
     // one: no type in C has size zero.
     case %(expr ? (sizeof *)):
       return "sizeof";
+    // A generic selection is the association it selects.
+    case %(expr ? (generic ?control *associations)): {
+      List selected = _generic_selection(
+        compiler, control.list().cadr(), associations);
+      return selected ? _not_null_pointer_constant(compiler, selected)
+                      : NULL;
+    }
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
     // which would need folding, does not match it.

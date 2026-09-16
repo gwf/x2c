@@ -525,6 +525,33 @@ _Static_assert(sizeof(int) >= 2, "int is at least 16 bits");
 The native compiler evaluates the condition and rejects a false or nonconstant
 assertion. Translation and source analysis alone do not perform that check.
 
+### Generic selection
+
+`_Generic(controlling, type: value, ..., default: value)` is a C11 generic
+selection. x2c selects an association from the controlling expression's static
+type and gives the whole expression the selected value's type, so conversions,
+method calls, and interpolation apply to that value:
+
+```x2c
+size_t count = 3;
+List names = %(a b c);
+int length = _Generic(count, size_t: names, default: NULL).len();
+```
+
+The controlling type is compared after C's lvalue conversion: top-level
+qualifiers are dropped and an array or function decays to a pointer. Both
+sides resolve typedef names, and scalar spellings such as `unsigned int` and
+`unsigned` compare equal. Without a matching association the `default` value
+is selected; without either, or when x2c does not know the controlling type,
+the expression has no static type. The selection is emitted unchanged, and
+the native compiler makes the final choice and reports its constraint errors.
+x2c types a character constant as `char` and compares qualifiers within one
+pointer level in written order, and an enum type matches no integer type, so
+a selection on those can differ from C's.
+
+An association type is a type name of specifiers, qualifiers, and pointers.
+Name a function-pointer or array type through a typedef.
+
 ### Mixed declaration rows
 
 A semicolon-terminated declaration at file scope, block scope, or inside a
@@ -2533,6 +2560,18 @@ This is not full preprocessing of x2c source: the original tokens must still
 form syntax that x2c can parse. Macro expansion that supplies grammar, or
 inactive branches containing otherwise unparseable source, can require
 adjustment even when the host C compiler accepts them.
+
+A C source file renamed from `.c` to `.x` is an x2c translation unit. A C
+header stays a `.h` file reached with `#include`; x2c collects its
+declarations and the native compiler reads it from the generated C.
+
+Because both branches of a conditional are parsed, the C++ linkage guard is
+accepted in a unit and in a collected header. At file scope,
+`extern "C" {` opens a linkage group and a `}` closes it, even when the two
+braces sit in separate `#ifdef __cplusplus` regions. The group's declarations
+belong to file scope, and its braces are not emitted. Any string literal is
+accepted as the linkage name. `extern "C"` before a single declaration is
+read as `extern`.
 
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host

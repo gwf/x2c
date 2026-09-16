@@ -1186,6 +1186,7 @@ static void _shallow_parse_loop(Compiler c) {
   c.braces.clear();
   while (c.peek(0) != <eof>) {
     c.update_source_visibility(c.leading_preproc());
+    if (c.skip_linkage_brace()) continue;
     Token start = c.token;
     if (c.script && !c.script.defines_main && c.script_statement_starts()) {
       c.skip_script_statement();

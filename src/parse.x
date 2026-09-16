@@ -259,6 +259,9 @@ static List _storage_class(Compiler compiler) {
       seen_ordinary = 1;
     }
     compiler.next();
+    // The linkage name in `extern "C" int f(void);` means nothing to C.
+    if (symbol == <extern> && compiler.peek(0) == <lit-char*>)
+      compiler.next();
     storage = storage ? %( @storage $symbol ) : %($symbol);
   }
   if (compiler.peek(0).is_inline()) {
@@ -1560,13 +1563,13 @@ static int _script_declaration_stays(Compiler c) {
     unit's statements, which become `main`'s body.
     Preprocessor lines, imports, protocols, compile-time definitions and
     Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
-    declarations, type definitions, and function prototypes and definitions
-    stay at file scope. This query does not consume tokens.
+    declarations, linkage braces, type definitions, and function prototypes
+    and definitions stay at file scope. This query does not consume tokens.
 */
 int Compiler.script_statement_starts(Compiler c) {
   switch (c.peek(0)) {
     case <eof>: case <import>: case <protocol>: case <"$(">:
-    case <typedef>: case <static>: case <extern>:
+    case <typedef>: case <static>: case <extern>: case <"}">:
       return 0;
     case <$>:
       return !c.macro_targets_unit();
@@ -1588,12 +1591,32 @@ int Compiler.script_statement_executes(Compiler c) =>
   c.script_statement_starts() &&
   (c.peek(0) == <$> || c.token.text == "with" || !c.test_declaration());
 
+/** Consumes one brace of a C linkage specification at file scope and reports
+    whether it did. `extern "C" {` opens a group; a `}` at file scope closes
+    the innermost open group, because every other file-scope form consumes
+    its own braces. The declarations between them stay at file scope. Both
+    branches of `#ifdef __cplusplus` are parsed, so the braces of the usual
+    header guard balance.
+*/
+int Compiler.skip_linkage_brace(Compiler c) {
+  if (c.peek(0) == <extern> && c.peek(1) == <lit-char*> &&
+      c.peek(2) == <"{">) {
+    c.next();
+    c.next();
+  }
+  else if (c.peek(0) != <"}"> || !c.braces.len()) return 0;
+  c.next();
+  return 1;
+}
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
-    Returns its AST, or NULL when a keyword definition or top-level Lisp form
-    only updates compiler state, with the first following token current.
+    Returns its AST, or NULL when a keyword definition, top-level Lisp form,
+    or linkage brace only updates compiler state, with the first following
+    token current.
 */
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) c.update_source_visibility(c.leading_preproc());
+  if (c.skip_linkage_brace()) return NULL;
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<unit>);
   if (slot) return slot;

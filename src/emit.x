@@ -1200,6 +1200,21 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       List c_arg = e._emit(%($argument), context);
       return %(@c_arg $operator);
     }
+    case %(generic ?control *associations): {
+      List c_control = e._emit(%($control), NULL);
+      Array rows = %[];
+      foreach (List association, associations) match (association) {
+        case %(association default ?value):
+          rows.push(%("default" ":" @{e._emit(%($value), NULL)}));
+        case %(association ?type ?value): {
+          List c_type = e._semantic_type(type);
+          List c_value = e._emit(%($value), NULL);
+          rows.push(%(@c_type ":" @c_value));
+        }
+      }
+      List c_rows = e._commas(rows.list_free());
+      return %("_Generic(" @c_control ", " @c_rows ")");
+    }
     case %(va-arg ?expression ?declaration): {
       List c_expr = e._emit(%($expression), NULL);
       List c_decl = e._emit(%($declaration), context);
