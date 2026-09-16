@@ -94,9 +94,9 @@ typedef struct Compiler {
   // Import path -> declared alias map, or 1 when no aliases need replay.
   Map imports;
   Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys, mid_inits;
+  Array id_keys, inits;
   String init_fn, fini_fn;
-  Array early_decls, proto_inits, early_inits, late_inits, int prelude;
+  Array early_decls, int prelude;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
@@ -290,11 +290,8 @@ static Compiler _new(Compiler owner) {
       _.scopes = Block.new(sizeof(SymScope));
       _.statics = %{};
     }
-    _.mid_inits = %[];
+    _.inits = %[];
     _.early_decls = %[];
-    _.proto_inits = %[];
-    _.early_inits = %[];
-    _.late_inits = %[];
     _.collect_protocols = 1;
     _.diagnostics = Diagnostics.new(_emit_user, _, 1);
     if (owner && owner.diagnostics.emit != _emit_user)
@@ -1789,24 +1786,20 @@ void Compiler.add_early(Compiler compiler, List decl) {
   compiler.early_decls.push(decl);
 }
 
-/** Appends a statement to protocol initialization order. */
-void Compiler.add_protocol_init(Compiler compiler, List stmt) {
-  compiler.proto_inits.push(stmt);
+/** Appends a statement to file initialization order under `phase`, which is
+    `<protocol>` for protocol setup, or `<early>`, `<mid>`, or `<late>` for
+    the file initializer's three stages.
+*/
+void Compiler.add_init(Compiler compiler, Symbol phase, List stmt) {
+  compiler.inits.push(%($phase $stmt));
 }
 
-/** Appends a statement to early file initialization order. */
-void Compiler.add_early_init(Compiler compiler, List stmt) {
-  compiler.early_inits.push(stmt);
-}
-
-/** Appends a statement to middle file initialization order. */
-void Compiler.add_mid_init(Compiler compiler, List stmt) {
-  compiler.mid_inits.push(stmt);
-}
-
-/** Appends a statement to late file initialization order. */
-void Compiler.add_late_init(Compiler compiler, List stmt) {
-  compiler.late_inits.push(stmt);
+/** Returns the statements queued for `phase`, in the order they were added. */
+List Compiler.init_statements(Compiler compiler, Symbol phase) {
+  Array selected = %[];
+  foreach (List entry, compiler.inits)
+    if (entry.car() == phase) selected.push(entry.cadr());
+  return selected.list_free();
 }
 
 // symbol table

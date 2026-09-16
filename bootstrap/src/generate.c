@@ -790,23 +790,23 @@ static List _patch_func_with_init(List type, List bind, List statements, String 
   return cons(_38, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_39, cons(List_var(_make_init_call(initializer, guard)), List_append(statements, NULL)))), NULL))));
 }
 
-List Array_list(Array);
+List Compiler_init_statements(Compiler, Symbol);
 
 static List _wrap_initializer_function(Compiler compiler, List type, List bind, List statements, List guard){
   List shutdown = _make_shutdown_registration(compiler, compiler -> fini_fn);
-  return cons(_38, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_39, cons(List_var(cons(_11, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _43))), cons(List_var(cons(_19, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _56)))), NULL)))), NULL))), List_append(Array_list(compiler -> early_inits), List_append(Array_list(compiler -> mid_inits), List_append(statements, List_append(Array_list(compiler -> late_inits), List_append(shutdown, NULL))))))))), NULL))));
+  return cons(_38, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_39, cons(List_var(cons(_11, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _43))), cons(List_var(cons(_19, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _56)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 10588978), List_append(Compiler_init_statements(compiler, 27208), List_append(statements, List_append(Compiler_init_statements(compiler, 789770), List_append(shutdown, NULL))))))))), NULL))));
 }
 
 static List _make_file_init_func(Compiler compiler, List guard, List initializer){
   List shutdown = _make_shutdown_registration(compiler, compiler -> fini_fn);
-  return cons(_38, cons(_64, cons(List_var(cons(_65, cons(List_var(initializer), _86))), cons(List_var(cons(_39, cons(_98, cons(List_var(cons(_11, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _43))), cons(List_var(cons(_19, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _56)))), NULL)))), NULL))), List_append(Array_list(compiler -> early_inits), List_append(Array_list(compiler -> mid_inits), List_append(Array_list(compiler -> late_inits), List_append(shutdown, NULL))))))))), NULL))));
+  return cons(_38, cons(_64, cons(List_var(cons(_65, cons(List_var(initializer), _86))), cons(List_var(cons(_39, cons(_98, cons(List_var(cons(_11, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _43))), cons(List_var(cons(_19, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _56)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 10588978), List_append(Compiler_init_statements(compiler, 27208), List_append(Compiler_init_statements(compiler, 789770), List_append(shutdown, NULL))))))))), NULL))));
 }
 
 List Sym_introduce(Sym, String);
 
 static List _wrap_protocol_initializer_function(Compiler compiler, List type, List bind, List statements){
   List guard = Sym_introduce(compiler -> sym, _500);
-  return cons(_38, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_39, cons(List_var(cons(_99, cons(_101, cons(List_var(cons(_102, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_65, cons(List_var(guard), _70))), _113)))), NULL))), NULL)))), cons(List_var(cons(_11, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _43))), cons(List_var(cons(_19, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _56)))), NULL)))), NULL))), List_append(Array_list(compiler -> proto_inits), List_append(statements, NULL))))))), NULL))));
+  return cons(_38, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_39, cons(List_var(cons(_99, cons(_101, cons(List_var(cons(_102, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_65, cons(List_var(guard), _70))), _113)))), NULL))), NULL)))), cons(List_var(cons(_11, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _43))), cons(List_var(cons(_19, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_16, cons(_44, cons(List_var(cons(_12, cons(_15, cons(List_var(cons(_18, cons(List_var(guard), NULL))), NULL)))), _56)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 1139215899608), List_append(statements, NULL))))))), NULL))));
 }
 
 static List _make_init_guard(List guard){
@@ -814,7 +814,7 @@ static List _make_init_guard(List guard){
 }
 
 static inline int _has_file_init_blocks(Compiler compiler){
-  return Array_len(compiler -> proto_inits) || Array_len(compiler -> early_inits) || Array_len(compiler -> late_inits) || Array_len(compiler -> mid_inits) || String_truth(compiler -> fini_fn);
+  return Array_len(compiler -> inits) || String_truth(compiler -> fini_fn);
 }
 
 int List_truth(List);
@@ -925,7 +925,7 @@ static List _file_init(Compiler c, List source){
   int hasInitBlocks = _has_file_init_blocks(c);  String initializer = c -> init_fn;  if(! hasInitBlocks && ! String_truth(initializer)) return source;  List guard = Sym_reference(c -> sym, _146, NULL), initFunc = NULL;  if(! String_truth(initializer)){
     List file_init = Sym_introduce(c -> sym, _501);  initFunc = _make_file_init_func(c, guard, file_init);
   }
-  List initGuard = _make_init_guard(guard);  String initializer_name = _501;  if(String_truth(initializer)) initializer_name = initializer;  int cache_only = ! String_truth(initializer) && Array_len(c -> early_inits) && ! Array_len(c -> mid_inits) && ! Array_len(c -> late_inits);  Map cache_reachable_ids = cache_only ? _cache_reachable_function_ids(source) : NULL;  int inserted = 0;  List result = NULL; {
+  List initGuard = _make_init_guard(guard);  String initializer_name = _501;  if(String_truth(initializer)) initializer_name = initializer;  int cache_only = ! String_truth(initializer) && List_truth(Compiler_init_statements(c, 10588978)) && ! List_truth(Compiler_init_statements(c, 27208)) && ! List_truth(Compiler_init_statements(c, 789770));  Map cache_reachable_ids = cache_only ? _cache_reachable_function_ids(source) : NULL;  int inserted = 0;  List result = NULL; {
     List item;  List _x2c_macro_object_3 = source;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       item = Var_list(_x2c_macro_cursor_output_3); {
 

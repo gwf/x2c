@@ -53,9 +53,9 @@ typedef struct Compiler{
   Array match_types;
   Map imports;
   Map init_tokens, static_init_deps, fn_defs;
-  Array id_keys, mid_inits;
+  Array id_keys, inits;
   String init_fn, fini_fn;
-  Array early_decls, proto_inits, early_inits, late_inits;
+  Array early_decls;
   int prelude;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int in_pattern, match_is, runtime_literals, inline_header;
@@ -189,13 +189,9 @@ void Compiler_define_match_binders(Compiler compiler, List pattern);
 
 void Compiler_add_early(Compiler compiler, List decl);
 
-void Compiler_add_protocol_init(Compiler compiler, List stmt);
+void Compiler_add_init(Compiler compiler, Symbol phase, List stmt);
 
-void Compiler_add_early_init(Compiler compiler, List stmt);
-
-void Compiler_add_mid_init(Compiler compiler, List stmt);
-
-void Compiler_add_late_init(Compiler compiler, List stmt);
+List Compiler_init_statements(Compiler compiler, Symbol phase);
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 

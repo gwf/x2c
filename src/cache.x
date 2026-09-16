@@ -406,8 +406,7 @@ static void _queue_one_static_initializer(
       statements.push(%(preproc "#endif"));
   }
   foreach (List statement, statements) {
-    if (late) compiler.add_late_init(statement);
-    else compiler.add_mid_init(statement);
+    compiler.add_init(late ? <late> : <mid>, statement);
   }
   phases[binding] = late;
   state[binding] = 2;
@@ -668,8 +667,7 @@ static List _setup_source_cache_init(
       }
       dependencies.free();
     }
-    if (deferred) c.add_late_init(stmt);
-    else c.add_early_init(stmt);
+    c.add_init(deferred ? <late> : <early>, stmt);
   }
   _queue_static_initializers(c, initializers, deferred_kind);
   List (list_ids, string_ids, var_ids) = _split_ids(keys, ids);

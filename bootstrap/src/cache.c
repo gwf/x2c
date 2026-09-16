@@ -849,8 +849,7 @@ int Map_contains(Map, Var);
 int Var_is_void(Var);
 int Var_is_null(Var);
 int Var_int(Var);
-void Compiler_add_late_init(Compiler, List);
-void Compiler_add_mid_init(Compiler, List);
+void Compiler_add_init(Compiler, Symbol, List);
 static void _queue_one_static_initializer(Compiler compiler, List binding, Map pending, Map state, Map phases, Array initializers, Symbol deferred_kind){
   Var status;  if(Map_try_get(state, List_var(binding), & status)){
     if(Var_integer(status) == 2) return;  _report_static_initializer_cycle(compiler, initializers, state);
@@ -900,7 +899,7 @@ static void _queue_one_static_initializer(Compiler compiler, List binding, Map p
   {
     List statement;  Array _x2c_macro_object_13 = statements;  int _x2c_macro_cursor_13 = 0;  Var _x2c_macro_cursor_output_13;  while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
       statement = Var_list(_x2c_macro_cursor_output_13); {
-        if(late) Compiler_add_late_init(compiler, statement);  else Compiler_add_mid_init(compiler, statement);
+        Compiler_add_init(compiler, late ? 789770 : 27208, statement);
       }
 
     }
@@ -1156,7 +1155,6 @@ return Array_list_free(output);
 
 int String_equal(String, String);
 Var Var_car(Var);
-void Compiler_add_early_init(Compiler, List);
 List List_append(List, List);
 static List _setup_source_cache_init(Compiler c, List source, Array ids, Array initializers){
   source = _rewrite_file_scope_statics(c, source, initializers);  Array keys = c -> id_keys;  Symbol deferred_kind = 0;  if(String_equal(c -> init_fn, _336)) deferred_kind = 1318210446;  else if(String_equal(c -> init_fn, _337)) deferred_kind = 228262;  if(! Array_truth(ids)){
@@ -1172,7 +1170,7 @@ static List _setup_source_cache_init(Compiler c, List source, Array ids, Array i
       }
       Array_free(dependencies);
     }
-    if(deferred) Compiler_add_late_init(c, stmt);  else Compiler_add_early_init(c, stmt);
+    Compiler_add_init(c, deferred ? 789770 : 10588978, stmt);
   }
   _queue_static_initializers(c, initializers, deferred_kind);  List list_ids, string_ids, var_ids;  List _x2c_destructure_6 = _split_ids(keys, ids);  list_ids = Var_list(List_getindex(_x2c_destructure_6, 0));  string_ids = Var_list(List_getindex(_x2c_destructure_6, 1));  var_ids = Var_list(List_getindex(_x2c_destructure_6, 2));  Array_free(ids);  Array built = Array_new();  List declaration = _generate_cache_declare(list_ids, _341, c, NULL);  if(List_truth(declaration)) Array_push(built, List_var(declaration));  declaration = _generate_cache_declare(string_ids, _342, c, NULL);  if(List_truth(declaration)) Array_push(built, List_var(declaration));  declaration = _generate_cache_declare(var_ids, _343, c, NULL);  if(List_truth(declaration)) Array_push(built, List_var(declaration));  List declarations = Array_list_free(built);  return List_append(declarations, source);
 }

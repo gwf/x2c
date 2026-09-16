@@ -128,10 +128,10 @@ static List _wrap_initializer_function(
     (block (if (expr (int) (ident $guard)) (return))
       (stmnt(expr (int) (op = (expr (int) (ident $guard))
           (expr (int) (literal (int) "1")))))
-      @{compiler.early_inits}
-      @{compiler.mid_inits}
+      @{compiler.init_statements(<early>)}
+      @{compiler.init_statements(<mid>)}
       @statements
-      @{compiler.late_inits}
+      @{compiler.init_statements(<late>)}
       @shutdown
     )
   );
@@ -154,9 +154,9 @@ static List _make_file_init_func(
         (stmnt
           ( expr (int) (op = (expr (int) (ident $guard))
                              (expr (int) (literal (int) "1")))))
-        @{compiler.early_inits}
-        @{compiler.mid_inits}
-        @{compiler.late_inits}
+        @{compiler.init_statements(<early>)}
+        @{compiler.init_statements(<mid>)}
+        @{compiler.init_statements(<late>)}
         @shutdown
       )
   );
@@ -177,7 +177,7 @@ static List _wrap_protocol_initializer_function(
           (expr (int)
             (op = (expr (int) (ident $guard))
                   (expr (int) (literal (int) "1")))))
-        @{compiler.proto_inits}
+        @{compiler.init_statements(<protocol>)}
         @statements)
   );
 }
@@ -187,11 +187,7 @@ static List _make_init_guard(List guard) => %( declare (static int)
     ( bindings ( op = ( bind $guard ()) (expr (int) (literal (int) "0")))) );
 
 static inline int _has_file_init_blocks(Compiler compiler) =>
-  compiler.proto_inits.len() ||
-         compiler.early_inits.len() ||
-         compiler.late_inits.len() ||
-         compiler.mid_inits.len() ||
-         compiler.fini_fn;
+  compiler.inits.len() || compiler.fini_fn;
 
 /* `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
@@ -278,8 +274,8 @@ static List _file_init(Compiler c, List source) {
   String initializer_name = "_file_init_";
   if (initializer) initializer_name = initializer;
   int cache_only =
-    !initializer && c.early_inits.len() &&
-    !c.mid_inits.len() && !c.late_inits.len();
+    !initializer && c.init_statements(<early>) &&
+    !c.init_statements(<mid>) && !c.init_statements(<late>);
   Map cache_reachable_ids = cache_only
                           ? _cache_reachable_function_ids(source) : NULL;
   int inserted = 0, List result = NULL;
