@@ -38,12 +38,36 @@ value, then `_generic_selection` picks the association and the expression
 takes the selected value's type. The C compiler makes the same choice from
 the emitted text.
 
-Selection applies C11's lvalue conversion to the controlling type: typedef
-bases resolve through `Sym.normalize_declared_type` (which also maps system
-names such as `size_t`), array and function types decay to pointers, and
-leading qualifiers drop. Both sides normalize scalar spellings through
-`Type.scalar`, so `unsigned int` equals `unsigned`. Types compare with
-`List.equal`.
+The rule: x2c never gives a selection a static type that could disagree
+with the association C selects. Where x2c's model of the controlling type can
+differ from C's, it selects nothing, the expression stays untyped, and the
+native compiler decides alone.
+
+`_generic_control_type` walks the controlling expression by production and
+returns the type C gives it, or NULL where the two can differ:
+
+- a character constant is `int` (C11 6.4.4.4p10), including through parens,
+  commas, and a nested selection;
+- `!`, comparisons, `&&`, and `||` are `int`; unary `-`, `+`, `~` and
+  shifts promote their (left) operand; binary arithmetic applies `widest` to
+  two known scalar operands, which follows the LP64 widths `lib/common.x`
+  asserts; assignments, `++`, and `--` take their left operand's type;
+- a conditional joins two known scalars with `widest`, or keeps a pointer
+  type both branches share, and is otherwise NULL;
+- an operation x2c lowers because an operand is `Var` keeps its declared
+  type, since C sees the lowered call;
+- every other form uses the type x2c recorded, after typedef resolution.
+
+`_generic_resolve` resolves typedef bases through collected declarations
+only, never through the LP64 table `Sym.normalize_declared_type` falls back
+to. `_generic_canonical` spells a type with each level's qualifiers as a set
+in one order, scalar bases through `Type.scalar`, and named aggregates as
+their tag. It also reports whether a difference between two spellings proves
+two different types. `_generic_selection` decays the control, drops its
+top-level qualifiers, and selects an association whose canonical type is
+equal. C then either selects the same association or rejects a second
+compatible one. `default` is selected only when every other comparison was
+decidable.
 
 Recorded decisions:
 
@@ -54,24 +78,47 @@ Recorded decisions:
   association's `:` as a bitfield width. Threading a no-bitfield flag
   through four declarator functions costs more than the case is worth; a
   decayed controlling type never matches an array association anyway.
-- **No match.** Without a matching association the `default` value is
-  selected. Without one, or when the controlling type is unknown (a `NULL`
-  type, such as a call into an uncollected system function), the expression
-  is left untyped and C alone decides. A compile-time `<macro-expr>`
-  controlling type stays deferred. Rejected: an x2c diagnostic for a
-  missing association, which would duplicate C's constraint error and would
-  also fire where x2c's type knowledge is incomplete.
+- **No match.** Without a certainly matching association, `default` is
+  selected only when every association is certainly a different type.
+  Otherwise, or without `default`, the expression is left untyped. A
+  compile-time `<macro-expr>` controlling type stays deferred. Rejected: an
+  x2c diagnostic for a missing association, which would duplicate C's
+  constraint error and would also fire where x2c's type knowledge is
+  incomplete.
+- **Untyped, not approximated.** An uncertain selection loses its static
+  type, so it cannot convert to `Var` or receive a method call; C still
+  accepts it where the value is used natively. Rejected: selecting from
+  x2c's approximate types, which converted `_Generic('a', int: 3.75,
+  default: 7)` through `int` and printed 3, and emitted
+  `String_var(42)` for `_Generic('a', int: 42, default: %"fallback")`.
 - **Selection is recomputed, not stored.** `_not_null_pointer_constant`
   calls `_generic_selection` again instead of reading a marker left in the
   AST, so constructed `(generic ...)` syntax needs no extra field.
 
-Known limits, each reproduced with a `Var` boxing probe, where x2c selects
-`default` while C selects another association: a character constant has
-type `char` in x2c rather than C's `int`; qualifiers within one declarator
-level compare in written order (`volatile const int *` against
-`const volatile int *`); an enum type matches neither `int` nor `unsigned`.
-The unselected associations are still resolved and transformed, as C still
-type-checks them.
+Classifications that deliberately stay untyped, each a divergence found by
+typing a probe per form with `--dump-ast`:
+
+- an enum-typed expression: x2c types an enumeration constant as the enum
+  where C gives `int`, and an enum's compatible integer type is
+  implementation-defined (so is its promotion, which makes `color + 0`
+  untyped too);
+- a bitfield: x2c keeps a `(bitfield N)` declarator, and C compilers
+  disagree on a bitfield's type in a selection;
+- `sizeof` and `offsetof`: x2c types them `unsigned`, C `size_t`;
+- a pointer difference: x2c types it `int`, C `ptrdiff_t`;
+- a system typedef without a collected declaration: x2c's LP64 table maps
+  `int64_t` to `long`, which is `long long` on macOS;
+- a type containing an array or function declarator, a reference, an
+  unnamed or block-scope aggregate, or an uncollected typedef name, when not
+  identical to the association.
+
+Checked and consistent with C: string literals (`char *` after decay),
+compound literals (their cast type, decayed or unqualified), integer and
+floating literal suffixes and magnitudes under LP64, integer promotion in
+shifts and unary operators, and the conditional operator over scalars. The
+unselected associations are still resolved and transformed, as C still
+type-checks them. The remaining trust is in the types x2c collects from
+declarations, which the rest of the compiler shares.
 
 ### `extern "C"`
 
@@ -114,6 +161,12 @@ not preprocessing) and the file-naming rule and linkage groups in
 
 ### Fixtures
 
+- `c-generic-uncertain` (`c stdout status`): both review reproductions
+  printing C's values (3.75 and 42), a `char` association beside `int`, a
+  character constant through a comma, qualifier sets, and untyped
+  selections on an enum variable, an enumeration constant, enum arithmetic,
+  `sizeof`, a pointer difference, and a bitfield, which compile and print
+  C's choice.
 - `c-generic-selection` (`c stdout status`): file-scope initializer, macro
   expansion, return, argument, condition, method receiver, interpolation, and
   `Var` boxing that depends on x2c's selection for a `const` object, an
@@ -171,15 +224,19 @@ integration. 4b: `make examples`, then the same gate.
 - **Facts already established.** The parser already tokenizes and parses
   both branches of a conditional, and `Compiler.next` already maintains the
   brace stack, so the linkage change adds no branch or depth tracking. The
-  resolver already types the controlling expression; selection reads that
-  type and checks nothing else.
+  resolver already types every operand; the control walk reads those types
+  and rederives only the operator results where x2c's type is not C's.
 - **Reuse and deletion.** `_Generic` reuses `parse_type_name`,
-  `Sym.normalize_declared_type`, `Type.scalar`, and `Emitter._semantic_type`.
+  `Sym.next_typedef`, `Type.scalar`, `Type.promote`, `Type.widest`, and
+  `Emitter._semantic_type`. The control walk and canonical spelling are new
+  because x2c's recorded types are approximations elsewhere tolerated by
+  conversion, and a selection must not act on an approximation.
   The one new public operation, `Compiler.skip_linkage_brace`, exists
   because two token loops (`parse_top_level` and the shallow loop) must
   agree. No new state is added to `Compiler`.
 - **Why idiomatic.** Each change is a case in an existing dispatcher over an
   existing AST or token shape, written with `%(...)` patterns and templates.
-- **Validators and fixtures.** No new validator or diagnostic. Two positive
-  fixtures protect the added behavior; no negative fixture, because ordinary
+- **Validators and fixtures.** No new validator or diagnostic. Three
+  positive fixtures protect the added behavior, one of them the rule that an
+  uncertain selection stays untyped; no negative fixture, because ordinary
   parse errors already describe malformed input.

@@ -34,7 +34,7 @@ int main(void) {
   Var constant = _Generic(limit, int: 1, default: "no");
   Var array = _Generic(buffer, char *: 1, default: "no");
   Var alias = _Generic(count, unsigned: 1, default: "no");
-  Var system = _Generic(size, unsigned long: 1, default: "no");
+  Var system = _Generic(size, size_t: 1, default: "no");
   Var function = _Generic(twice, Handler: 1, default: "no");
   Var pointee = _Generic(text, char *: "no", const char *: 1);
   printf("%s %s %s %s %s %s\n", constant.str(), array.str(), alias.str(),

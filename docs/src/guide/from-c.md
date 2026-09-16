@@ -90,10 +90,12 @@ The declarations inside a braced `extern "C"` group stay at file scope. The
 group's braces do not appear in the generated C. `extern "C" int f(void);`
 declares `f` as `extern int f(void);` does.
 
-A C11 generic selection has a static type in x2c. The compiler selects the
-association from the controlling expression's type and gives the whole
-expression that association's type. The selection reaches the generated C
-unchanged, so the native compiler makes the same choice:
+A C11 generic selection has a static type in x2c when x2c knows which
+association C selects. The compiler selects that association from the
+controlling expression's type and gives the whole expression its type. The
+selection reaches the generated C unchanged, so the native compiler makes the
+same choice. Where x2c's types can differ from C's, such as for an enum or a
+bitfield, the selection has no static type and C alone chooses:
 
 ```x2c
 ~

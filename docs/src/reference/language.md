@@ -538,16 +538,38 @@ List names = %(a b c);
 int length = _Generic(count, size_t: names, default: NULL).len();
 ```
 
+x2c gives a selection a static type only when it knows the association C
+selects. Where x2c's model of the controlling type can differ from C's, the
+expression has no static type and the native compiler chooses alone, as C
+does. The selection is always emitted unchanged, and the native compiler
+reports its constraint errors.
+
 The controlling type is compared after C's lvalue conversion: top-level
-qualifiers are dropped and an array or function decays to a pointer. Both
-sides resolve typedef names, and scalar spellings such as `unsigned int` and
-`unsigned` compare equal. Without a matching association the `default` value
-is selected; without either, or when x2c does not know the controlling type,
-the expression has no static type. The selection is emitted unchanged, and
-the native compiler makes the final choice and reports its constraint errors.
-x2c types a character constant as `char` and compares qualifiers within one
-pointer level in written order, and an enum type matches no integer type, so
-a selection on those can differ from C's.
+qualifiers are dropped and an array or function decays to a pointer. A
+character constant has type `int`, and the arithmetic, shift, comparison, and
+conditional operators derive C's type from their operands. Typedef names
+resolve through collected declarations, scalar spellings such as
+`unsigned int` and `unsigned` compare equal, and the qualifiers at one pointer
+level compare as a set. An equal association is selected. The `default` value
+is selected only when every other association is certainly a different type.
+
+These controlling expressions stay untyped:
+
+- an enum or an enumeration constant, whose compatible integer type is
+  implementation-defined, and arithmetic on one;
+- a bitfield, whose type C compilers treat differently;
+- `sizeof`, `offsetof`, and a pointer difference, whose `size_t` and
+  `ptrdiff_t` identities x2c does not know;
+- a system typedef without a collected declaration, which x2c otherwise
+  models by width, such as `int64_t`, which is `long` on Linux and
+  `long long` on macOS;
+- a controlling or association type that contains an array or function
+  declarator, a reference, or an unnamed or block-scope aggregate, when it is
+  not identical to an association.
+
+An untyped selection still works where C accepts the value directly, such as
+`int size = _Generic(sizeof(int), size_t: 1, default: 2);`, but it does not
+convert to `Var` or take part in method calls.
 
 An association type is a type name of specifiers, qualifiers, and pointers.
 Name a function-pointer or array type through a typedef.

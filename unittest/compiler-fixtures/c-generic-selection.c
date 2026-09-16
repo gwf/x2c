@@ -65,7 +65,7 @@ int main(void){
   Var constant = int_var(_Generic(limit, int : 1, default : "no"));
   Var array = int_var(_Generic(buffer, char * : 1, default : "no"));
   Var alias = int_var(_Generic(count, unsigned : 1, default : "no"));
-  Var system = int_var(_Generic(size, unsigned long : 1, default : "no"));
+  Var system = int_var(_Generic(size, size_t : 1, default : "no"));
   Var function = int_var(_Generic(twice, Handler : 1, default : "no"));
   Var pointee = int_var(_Generic(text, char * : "no", const char * : 1));
   printf("%s %s %s %s %s %s\n", Var_str(constant), Var_str(array), Var_str(alias), Var_str(system), Var_str(function), Var_str(pointee));
