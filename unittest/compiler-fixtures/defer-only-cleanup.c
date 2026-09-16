@@ -39,8 +39,8 @@ static int local_latest(void){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -63,8 +63,8 @@ static int global_only(void){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 

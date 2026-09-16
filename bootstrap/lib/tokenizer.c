@@ -315,8 +315,8 @@ static int Tokenizer__operator(Tokenizer t, int len){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 

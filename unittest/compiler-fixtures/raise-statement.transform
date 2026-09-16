@@ -284,4 +284,21 @@
                           (ident (binding 36 "Symbol_var"))) 
                     (args (expr ("Symbol") 
                            (literal ("Symbol") "bad-arg" bad-arg))))) 
-             (nil)))) (block)))) ()))))
+             (nil)))) (block)))) () (binding 57 "_x2c_exception_frame_0") 
+    (binding 58 "_x2c_error_handler_0") 
+    ((stmnt 
+      (expr (void) 
+       (call "x2c_error_catch_close" 
+        (args (expr (("ErrorHandler")) 
+               (ident (binding 58 "_x2c_error_handler_0"))))))) 
+     (stmnt 
+      (expr (("ErrorHandler")) 
+       (op = (expr (("ErrorHandler")) 
+              (ident (binding 58 "_x2c_error_handler_0"))) 
+        (expr (("ErrorHandler")) (nil))))) 
+     (stmnt 
+      (expr (void) 
+       (call "x2c_exception_leave" 
+        (args (expr (* ("ExceptionFrame")) 
+               (op & (expr (("ExceptionFrame")) 
+                      (ident (binding 57 "_x2c_exception_frame_0"))))))))))))))

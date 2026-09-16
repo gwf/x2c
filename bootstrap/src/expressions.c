@@ -2418,8 +2418,7 @@ break;
 
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+x2c_cleanup_leave(& _x2c_defer_record_0);
 }
 }
 
@@ -4058,8 +4057,7 @@ SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> ke
 x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+x2c_cleanup_leave(& _x2c_defer_record_1);
 }
 }
 List zero = _initializer_zero(type, target);  if(! rejected){

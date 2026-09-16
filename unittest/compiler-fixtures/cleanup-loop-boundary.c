@@ -124,8 +124,8 @@ static void break_inside_switch(void){
     }
     record_step(3);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -205,8 +205,8 @@ static void loop_switch_boundaries(void){
       }
       record_step(i);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
   }
 
@@ -235,8 +235,8 @@ static void switch_loop_boundaries(void){
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
     }
     default: break;

@@ -144,7 +144,7 @@
      (op = (bind (binding 37 "value_total") ()) 
       (expr (int) (literal (int) "0")))))) 
   (at 17 
-   (block (declare ("Var") (bindings (bind (binding 38 "value") ()))) 
+   (block (declare ("Var") (bindings (bind (binding 38 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
       (op = (bind (binding 43 "_x2c_macro_object_1") ()) 
@@ -189,7 +189,7 @@
    (block 
     (declare (int) 
      (bindings 
-      (op = (bind (binding 50 "value") ()) 
+      (op = (bind (binding 50 "value") (volatile)) 
        (expr (int) 
         (call (expr ((func ((void))) int) (ident (binding 21 "initial_value"))) 
          (args (expr (void) ()))))))) 
@@ -479,7 +479,7 @@
      (op = (bind (binding 101 "skipped") ()) (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 102 "stopped") ()) (expr (int) (literal (int) "0")))))) 
   (at 42 
-   (block (declare ("Var") (bindings (bind (binding 103 "value") ()))) 
+   (block (declare ("Var") (bindings (bind (binding 103 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
       (op = (bind (binding 107 "_x2c_macro_object_7") ()) 
@@ -526,7 +526,7 @@
                    (ident (binding 39 "Var_integer"))) 
              (args (expr ("Var") (ident (binding 103 "value"))))))))))))))) 
   (at 120 
-   (block (declare ("Var") (bindings (bind (binding 111 "value") ()))) 
+   (block (declare ("Var") (bindings (bind (binding 111 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
       (op = (bind (binding 115 "_x2c_macro_object_8") ()) 
@@ -570,10 +570,8 @@
      (op = (bind (binding 119 "deferred_keys") ()) 
       (expr (int) (literal (int) "0")))))) 
   (at 124 
-   (block 
-    (declare ("Var") 
-     (bindings (bind (binding 120 "name") ()) 
-      (bind (binding 121 "value") ()))) 
+   (block (declare ("Var") (bindings (bind (binding 120 "name") ()))) 
+    (declare ("Var") (bindings (bind (binding 121 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
       (op = (bind (binding 125 "_x2c_macro_object_9") ()) 
@@ -629,7 +627,13 @@
              (expr (int) 
               (postfix ++ (expr (int) (ident (binding 119 "deferred_keys"))))))))) 
          () (binding 303 "_x2c_defer_cleanup_0") () 
-         ()))))))) 
+         () (binding 308 "_x2c_defer_record_0") 
+         ((stmnt 
+           (expr (void) 
+            (call "x2c_cleanup_leave" 
+             (args (expr (* ("X2CCleanup")) 
+                    (op & (expr (("X2CCleanup")) 
+                           (ident (binding 308 "_x2c_defer_record_0"))))))))))))))))) 
   (at 53 
    (declare (int) 
     (bindings 
@@ -710,11 +714,13 @@
   (at 57 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 146 "caught") ()) (expr (int) (literal (int) "0")))))) 
+     (op = (bind (binding 146 "caught") (volatile)) 
+      (expr (int) (literal (int) "0")))))) 
   (at 128 
    (try (block 
          (at 127 
-          (block (declare ("Var") (bindings (bind (binding 147 "value") ()))) 
+          (block 
+           (declare ("Var") (bindings (bind (binding 147 "value") (volatile)))) 
            (declare ("Map") 
             (bindings 
              (op = (bind (binding 151 "_x2c_macro_object_12") ()) 
@@ -759,7 +765,13 @@
                    (raise 
                     (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
                     (args))))) () (binding 306 "_x2c_defer_cleanup_1") 
-                () ())))))))) 
+                () () (binding 311 "_x2c_defer_record_1") 
+                ((stmnt 
+                  (expr (void) 
+                   (call "x2c_cleanup_leave" 
+                    (args (expr (* ("X2CCleanup")) 
+                           (op & (expr (("X2CCleanup")) 
+                                  (ident (binding 311 "_x2c_defer_record_1")))))))))))))))))) 
     (catcharms 
      ((() (expr ("List") 
            (expr ("List") 
@@ -772,7 +784,24 @@
        (stmnt 
         (expr (int) 
          (op = (expr (int) (ident (binding 146 "caught"))) 
-          (expr (int) (literal (int) "1")))))))) ())) 
+          (expr (int) (literal (int) "1")))))))) () 
+    (binding 309 "_x2c_exception_frame_0") (binding 310 "_x2c_error_handler_0") 
+    ((stmnt 
+      (expr (void) 
+       (call "x2c_error_catch_close" 
+        (args (expr (("ErrorHandler")) 
+               (ident (binding 310 "_x2c_error_handler_0"))))))) 
+     (stmnt 
+      (expr (("ErrorHandler")) 
+       (op = (expr (("ErrorHandler")) 
+              (ident (binding 310 "_x2c_error_handler_0"))) 
+        (expr (("ErrorHandler")) (nil))))) 
+     (stmnt 
+      (expr (void) 
+       (call "x2c_exception_leave" 
+        (args (expr (* ("ExceptionFrame")) 
+               (op & (expr (("ExceptionFrame")) 
+                      (ident (binding 309 "_x2c_exception_frame_0")))))))))))) 
   (at 63 
    (declare (int) 
     (bindings 
@@ -1217,7 +1246,7 @@
      (op = (bind (binding 241 "native_pairs") ()) 
       (expr (int) (literal (int) "0")))))) 
   (at 101 
-   (block (declare (int) (bindings (bind (binding 242 "value") ()))) 
+   (block (declare (int) (bindings (bind (binding 242 "value") (volatile)))) 
     (declare ("MapIntInt") 
      (bindings 
       (op = (bind (binding 246 "_x2c_macro_object_21") ()) 
@@ -1251,9 +1280,8 @@
         (op += (expr (int) (ident (binding 240 "native_values"))) 
          (expr (int) (ident (binding 242 "value")))))))))) 
   (at 103 
-   (block 
-    (declare (int) 
-     (bindings (bind (binding 252 "key") ()) (bind (binding 253 "value") ()))) 
+   (block (declare (int) (bindings (bind (binding 252 "key") ()))) 
+    (declare (int) (bindings (bind (binding 253 "value") (volatile)))) 
     (declare ("MapIntInt") 
      (bindings 
       (op = (bind (binding 257 "_x2c_macro_object_22") ()) 
@@ -1313,7 +1341,8 @@
      (op = (bind (binding 264 "native_bytes") ()) 
       (expr (int) (literal (int) "0")))))) 
   (at 108 
-   (block (declare ("String") (bindings (bind (binding 265 "value") ()))) 
+   (block 
+    (declare ("String") (bindings (bind (binding 265 "value") (volatile)))) 
     (declare ("MapStringString") 
      (bindings 
       (op = (bind (binding 269 "_x2c_macro_object_23") ()) 
@@ -1356,7 +1385,8 @@
   (at 109 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 275 "value") ()) (expr (int) (literal (int) "7")))))) 
+     (op = (bind (binding 275 "value") (volatile)) 
+      (expr (int) (literal (int) "7")))))) 
   (at 110 
    (stmnt 
     (expr () 

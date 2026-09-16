@@ -637,8 +637,8 @@ Pool Pool_retain_named(Pool inner, const char * name){
           }
 
         }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
       }
 
@@ -661,8 +661,8 @@ Pool Pool_retain_named(Pool inner, const char * name){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -796,8 +796,8 @@ void Pool_insert(Pool inner, Var object){
   {
     _insert_locked(inner, object);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -839,8 +839,8 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
   }
   if(discard) Pool_free(inner, alloc);
@@ -912,8 +912,8 @@ void * Pool_malloc(Pool inner, size_t size){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
 }
 
@@ -959,12 +959,12 @@ void Pool_free(Pool inner, void * alloc){
       }
       Scope_free(alloc);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
 }
 
@@ -996,8 +996,8 @@ int Pool_owns(Pool pool, Var key){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 
@@ -1059,12 +1059,12 @@ static int _promote_block(Pool inner, Var object, void * alloc, PoolBlock block)
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
 }
 
@@ -1149,12 +1149,12 @@ PoolStats Pool_stats(Pool inner){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_11);
 
-  x2c_cleanup_leave(&_x2c_defer_record_11);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_leave(&_x2c_defer_record_10);
 }
 }
 

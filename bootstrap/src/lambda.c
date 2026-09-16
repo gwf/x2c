@@ -1032,8 +1032,7 @@ static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_0);
 }
   }
 
@@ -1096,8 +1095,7 @@ default: ;  return expression;  break;
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 }
 }
 }
@@ -1542,8 +1540,7 @@ List rest = pruned ? NULL : ast;  for(; ; ){
 
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_2);
+x2c_cleanup_leave(& _x2c_defer_record_2);
 }
 }
 
@@ -1626,8 +1623,7 @@ default: break;
 }
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_3);
+x2c_cleanup_leave(& _x2c_defer_record_3);
 }
 }
 
@@ -1667,8 +1663,7 @@ static void _collect_reference_captures(List ast, Map owned, Map candidates){
   }
 
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_4);
+x2c_cleanup_leave(& _x2c_defer_record_4);
 }
 }
 

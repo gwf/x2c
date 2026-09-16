@@ -75,6 +75,89 @@ List Type.declaration_ast(Type type, List binding) {
   return %(declare $base (bindings (bind $binding $mods)));
 }
 
+// Defined below; the two forms reach each other through `&` and `*`.
+String ast_direct_identifier(Var value);
+
+/** Returns the name whose address an expression takes, or `NULL`. */
+String ast_addressed_identifier(Var value) {
+  if (value is not <list>) return NULL;
+  List ast = value;
+  match (ast) {
+    case %(expr ? ?inner): return ast_addressed_identifier(inner);
+    case %(parens ?inner): return ast_addressed_identifier(inner);
+    case %(op & ?inner):   return ast_direct_identifier(inner);
+  }
+  return NULL;
+}
+
+/** Returns the name an expression designates directly, following the forms
+    that still name the same object - parentheses, a member, an array index,
+    a dereference - or `NULL` when the expression designates no single name.
+    A declaration qualifier that must reach one object, such as the `volatile`
+    an error transfer requires, applies to this name.
+*/
+String ast_direct_identifier(Var value) {
+  while (value is <list>) {
+    List ast = value;
+    match (ast) {
+      case %(ident ?binding):
+        return binding_identity_spelling(binding);
+      case %(!or (expr ? ?inner) (parens ?inner)): {
+        value = inner;
+        continue;
+      }
+      case %(index (!set ?base (expr ?base_type ?)) ?): {
+        Type type = base_type;
+        if (type.is_array()) {
+          value = base;
+          continue;
+        }
+      }
+      case %(op . ?base *): {
+        value = base;
+        continue;
+      }
+      case %(op (!quote ->) ?base *): return ast_addressed_identifier(base);
+      case %(op (!quote *) ?base): return ast_addressed_identifier(base);
+    }
+    return NULL;
+  }
+  return NULL;
+}
+
+/** Returns `declarator` with the outermost `volatile` removed from each of
+    its parameters. C ignores a parameter's top-level qualifier when it
+    compares a prototype with its definition, and the qualifier the error
+    transfer requires belongs to the definition that writes the parameter,
+    not to the declaration its callers read.
+*/
+List ast_prototype_declarator(List declarator) {
+  Array modifiers = %[], int changed = 0;
+  foreach (Var modifier, declarator.caddr()) {
+    match (modifier)
+      case %(fnmod (params *parameters)): {
+        Array rebuilt = %[];
+        foreach (List parameter, parameters) {
+          match (parameter)
+            case %(param ?type (bind ?name (volatile *rest))): {
+              rebuilt.push(%(param $type (bind $name (@rest))));
+              changed = 1;
+              continue;
+            }
+          rebuilt.push(parameter);
+        }
+        modifiers.push(%(fnmod (params @{rebuilt.list_free()})));
+        continue;
+      }
+    modifiers.push(modifier);
+  }
+  if (!changed) {
+    modifiers.free();
+    return declarator;
+  }
+  return %(bind ${declarator.cadr()} ${modifiers.list_free()});
+}
+
 /** Returns a complete `(param ...)` AST for `type` and `binding`.
     A `NULL` binding produces an unnamed parameter.
 */

@@ -1042,8 +1042,7 @@ static int _collect_cache_ids(Compiler compiler, Var value, List * seen, Array i
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 }
 }
 

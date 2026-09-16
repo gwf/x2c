@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/goto-catch-arm-rejected.x:10:5: emit: goto cannot enter or cross a protected cleanup region
+      goto handler;
+      ^^^^
+  note: jump only within the same region or outward
+

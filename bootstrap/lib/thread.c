@@ -244,12 +244,12 @@ static void * _run(void * argument){
         Var result = thread -> function(input, thread -> input_size);
         thread -> result = Context_export(work, result);
       }
+      x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
     }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
   }
   else {x2c_exception_landed(& _x2c_exception_frame_0);
@@ -389,8 +389,8 @@ Var Thread_join(Thread t){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 

@@ -1424,8 +1424,7 @@ List Compiler_parse_field(Compiler compiler, List context){
         }
 
       }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+      x2c_cleanup_leave(& _x2c_defer_record_0);
 }
     }
 
@@ -1518,8 +1517,7 @@ List Compiler_parse_enumerator(Compiler c, Type context){
         }
 
       }
-
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+      x2c_cleanup_leave(& _x2c_defer_record_1);
 }
     }
 
@@ -1959,8 +1957,7 @@ if(Array_len(ordinary)) Array_push(output, List_var(cons(_40, cons(base, cons(Li
   x2c_cleanup_leave(& _x2c_defer_record_2);  return;
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_2);
+x2c_cleanup_leave(& _x2c_defer_record_2);
 }
 }
 break;
@@ -2034,8 +2031,7 @@ static List _parse_expression_function_body(Compiler compiler){
   {
         List expression = Compiler_parse_expression((compiler));  Compiler_expect((compiler), 119);  result = Compiler_finish_return_statement((compiler), expression);
       }
-
-  x2c_cleanup_leave(&_x2c_defer_record_3);
+      x2c_cleanup_leave(& _x2c_defer_record_3);
 }
     }
     return cons(_207, cons(List_var(Compiler_anchor_origin((compiler), result, origin)), NULL));
@@ -2067,8 +2063,7 @@ c -> return_type = Type_list(declared_return);  String old_fn = c -> fn_name;  c
   {
     if(List_truth(syntax)) body = Compiler_bind_syntax(c, List_var(syntax), AST_BLOCK, List_type(c -> return_type));  else if(expression_body) body = _parse_expression_function_body(c);  else body = Compiler_parse_compound_statement(c);
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 }
 }
 c -> params.symbols = NULL;  c -> params.bindings = NULL;  c -> params.enumerators = NULL;  c -> params.macros = NULL;  _publish_function_lifecycle(c, name, initializer_owner, shutdown_owner);  return cons(_214, cons(List_var(rtype), cons(List_var(declarator), cons(List_var(body), NULL))));
@@ -2249,8 +2244,7 @@ static List _finish_aggregate_type(Compiler c, Symbol tag, Var name, List member
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_5);
+    x2c_cleanup_leave(& _x2c_defer_record_5);
 }
   }
   return _publish_aggregate_type(c, tag, name, Array_list_free(bound));
@@ -2344,8 +2338,7 @@ case 150408: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr
               }
 
             }
-
-  x2c_cleanup_leave(&_x2c_defer_record_6);
+            x2c_cleanup_leave(& _x2c_defer_record_6);
 }
           }
           modifier = List_var(cons(_94, cons(List_var(cons(_93, List_append(Array_list_free(params), NULL))), NULL)));
@@ -2672,8 +2665,7 @@ break; } } static MatchCaptureSite _x2c_match_site_49;  if (x2c_match_site_try_c
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_8);
+    x2c_cleanup_leave(& _x2c_defer_record_8);
 }
   }
 
@@ -2761,8 +2753,7 @@ break; } } static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_c
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_9);
+    x2c_cleanup_leave(& _x2c_defer_record_9);
 }
   }
 
@@ -3036,8 +3027,7 @@ static MatchCaptureSite _x2c_match_site_70;  if (x2c_match_site_try_capture(& _x
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_10);
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 }
 }
 List parameter_list = Array_list_free(parameters);  List declarator = cons(_24, cons(function_name, cons(List_var(cons(List_var(cons(_94, cons(List_var(cons(_93, List_append(parameter_list, NULL))), NULL))), List_append(return_modifiers, NULL))), NULL)));  List declaration = Compiler_bind_syntax((compiler), List_var(cons(_40, cons(return_type, cons(List_var(cons(_37, cons(List_var(declarator), NULL))), NULL)))), context, List_type((compiler) -> return_type));  if((compiler) -> shallow){
@@ -3231,8 +3221,7 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_11);
+  x2c_cleanup_leave(& _x2c_defer_record_11);
 }
 }
 break; } } static MatchCaptureSite _x2c_match_site_76;  if (x2c_match_site_try_capture(& _x2c_match_site_76, _x2c_match_expr, List_var(_671), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List details = Var_list(_x2c_match_values[1]); {
@@ -3267,8 +3256,7 @@ break;
   {
             Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(Compiler_bind_syntax((compiler), List_cadr(arm), AST_STATEMENT, List_type((compiler) -> return_type))), NULL))));
           }
-
-  x2c_cleanup_leave(&_x2c_defer_record_12);
+          x2c_cleanup_leave(& _x2c_defer_record_12);
 }
         }
 
@@ -3317,8 +3305,7 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
   }
 Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(body), NULL))));
           }
-
-  x2c_cleanup_leave(&_x2c_defer_record_13);
+          x2c_cleanup_leave(& _x2c_defer_record_13);
 }
         }
 
@@ -3362,8 +3349,7 @@ break; } } static MatchCaptureSite _x2c_match_site_77;  if (x2c_match_site_try_c
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_14);
+    x2c_cleanup_leave(& _x2c_defer_record_14);
 }
   }
   {
@@ -3382,8 +3368,7 @@ break;
 construction_error : Compiler_report_error((compiler), 33658058, _698, (compiler) -> token, NULL);
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_7);
+x2c_cleanup_leave(& _x2c_defer_record_7);
 }
 }
 }

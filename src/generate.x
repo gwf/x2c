@@ -341,7 +341,7 @@ static List _header_declaration(List node, Type type, List bindings) {
 // Promote inline functions into header prototypes.
 static List _header_function(Type type, List bind, List body) {
   if (type.is_inline()) return %( function ( static @type ) $bind $body );
-  return %( declare $type $bind );
+  return %( declare $type ${ast_prototype_declarator(bind)} );
 }
 
 // Keep only eligible functions in the source unit.
@@ -737,7 +737,8 @@ static void _collect_forward_dependencies(
               !compiler.sym.get(%("generated-protocol" $spelling))) {
             seen[global] = 1;
             _forward_types(compiler, type, locals, statics, seen, prototypes);
-            prototypes.push(type.declaration_ast(global));
+            prototypes.push(
+              ast_prototype_declarator(type.declaration_ast(global)));
           }
         }
       }
@@ -774,7 +775,8 @@ static void _static_declarations(Var value, Map declarations) {
   match (node) {
     case %(function ?type (!set ?signature (bind ?binding ?)) ?): {
       if (type.list().type().is_static()) {
-        List declaration = %(declare $type $signature);
+        List declaration =
+          %(declare $type ${ast_prototype_declarator(signature)});
         declarations[binding] = declaration;
         declarations[%(native ${binding_identity_spelling(binding)})] =
           declaration;
@@ -812,7 +814,8 @@ static List _static_prototypes(Compiler compiler, List source, List header) {
       case %(function ?type ?signature ?): {
         functions.push(node);
         if (type.list().type().is_static())
-          declarations.push(%(declare $type $signature));
+          declarations.push(
+            %(declare $type ${ast_prototype_declarator(signature)}));
         continue;
       }
     declarations.push(node);

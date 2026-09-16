@@ -241,16 +241,18 @@ static void _write_bytes(File file, const void * ptr, size_t size, size_t * writ
     }
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
-      if (x2c_exception_claim(&_x2c_exception_frame_0)) {if(written) * written += offset;
+      if(x2c_exception_claim(& _x2c_exception_frame_0)){
+        if(written) * written += offset;
+      }
+      x2c_exception_leave(& _x2c_exception_frame_0);
+      __builtin_unreachable();
     }
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
-  }
 
-}
-if (x2c_exception_claim(&_x2c_exception_frame_0)) {if(written) * written += offset;
-}
-x2c_exception_leave(& _x2c_exception_frame_0);
+  }
+  if(x2c_exception_claim(& _x2c_exception_frame_0)){
+    if(written) * written += offset;
+  }
+  x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 
@@ -347,8 +349,8 @@ static String _regular_text(File file, size_t requested){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -373,8 +375,8 @@ String File_string_close(File file){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -484,8 +486,8 @@ String File_readblock(File file, long size){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -515,8 +517,8 @@ FileReadStatus File_readline_into(File file, Block dest){
       failed = ferror(file);
       error = failed ? errno : 0;
     }
+    x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
   }
   if(failed) _io_error(1189960, error);
@@ -577,8 +579,8 @@ String File_readline(File file){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
 }
 
@@ -618,8 +620,8 @@ String File_string(File file){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
 }
 
@@ -664,8 +666,8 @@ static int _next(Iter iter, Var * out){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
 }
 
@@ -709,8 +711,8 @@ Iter File_iter(File file, Iter dest){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 

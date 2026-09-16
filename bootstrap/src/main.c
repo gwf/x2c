@@ -340,8 +340,8 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     generate_code(compiler, ast, output_dir);
     if(! translation_depfile_write(request, compiler, filename, output_dir)) exit(1);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -854,8 +854,8 @@ static int _run_build_request(CliRequest c, Array commands){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 

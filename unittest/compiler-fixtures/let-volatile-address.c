@@ -33,24 +33,26 @@ int main(void){
           * _x2c_macro_address_0 = 5;
           printf("inside %d\n", outer);
         }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
       }
 
     }
     else {x2c_exception_landed(& _x2c_exception_frame_0);
     {
-      if (x2c_exception_claim(&_x2c_exception_frame_0)) {printf("after %d\n", outer);
+      if(x2c_exception_claim(& _x2c_exception_frame_0)){
+        printf("after %d\n", outer);
+      }
+      x2c_exception_leave(& _x2c_exception_frame_0);
+      __builtin_unreachable();
     }
-    x2c_exception_leave(& _x2c_exception_frame_0);
-    __builtin_unreachable();
-  }
 
-}
-if (x2c_exception_claim(&_x2c_exception_frame_0)) {printf("after %d\n", outer);
-}
-x2c_exception_leave(& _x2c_exception_frame_0);
+  }
+  if(x2c_exception_claim(& _x2c_exception_frame_0)){
+    printf("after %d\n", outer);
+  }
+  x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return 0;
 }

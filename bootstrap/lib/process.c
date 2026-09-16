@@ -213,8 +213,8 @@ String Job_str(Job value){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -286,8 +286,8 @@ Buffer Job_write_repr(Job value, Buffer out){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -314,8 +314,8 @@ String Job_repr(Job value){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -728,45 +728,48 @@ static Job _start(List command, int capture_output){
                   }
                   else {x2c_exception_landed(& _x2c_exception_frame_0);
                   {
-                    if (x2c_exception_claim(&_x2c_exception_frame_0)) {_close(link[1]);
+                    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+                      _close(link[1]);
+                    }
+                    x2c_exception_leave(& _x2c_exception_frame_0);
+                    __builtin_unreachable();
                   }
-                  x2c_exception_leave(& _x2c_exception_frame_0);
-                  __builtin_unreachable();
-                }
 
+                }
+                if(x2c_exception_claim(& _x2c_exception_frame_0)){
+                  _close(link[1]);
+                }
+                x2c_exception_leave(& _x2c_exception_frame_0);
               }
-              if (x2c_exception_claim(&_x2c_exception_frame_0)) {_close(link[1]);
+
             }
-            x2c_exception_leave(& _x2c_exception_frame_0);
+            _close(previous);
+            previous = link[0];
+            index ++;
           }
 
         }
-        _close(previous);
-        previous = link[0];
-        index ++;
+
       }
 
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_4);
+
+}
+  }
+  started = 1;
+  {
+    Job _x2c_return_value_3 = job;
+    {
+      x2c_cleanup_leave(& _x2c_defer_record_3);
+      return _x2c_return_value_3;
     }
 
   }
 
 }
+x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
-}
-}
-started = 1;
-{
-  Job _x2c_return_value_3 = job;
-  {
-    x2c_cleanup_leave(& _x2c_defer_record_3);
-    return _x2c_return_value_3;
-  }
-
-}
-}
-
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 

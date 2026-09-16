@@ -84,6 +84,7 @@
   - [src/bootstrap.x](internals/compiler-api/bootstrap.md)
   - [src/build.x](internals/compiler-api/build.md)
   - [src/cache.x](internals/compiler-api/cache.md)
+  - [src/cleanup.x](internals/compiler-api/cleanup.md)
   - [src/cli.x](internals/compiler-api/cli.md)
   - [src/collect.x](internals/compiler-api/collect.md)
   - [src/compiler.x](internals/compiler-api/compiler.md)

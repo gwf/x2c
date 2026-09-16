@@ -19,6 +19,7 @@ static Var _837, _834, _817, _814, _813, _809, _798, _791, _785, _784, _783, _78
 #include "list.h"
 #include "protocol.h"
 #include "lambda.h"
+#include "cleanup.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -2220,8 +2221,7 @@ if(tail_changed) result = cons(List_var(anchored), result);
   }
 
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+x2c_cleanup_leave(& _x2c_defer_record_0);
 }
 }
 
@@ -2486,8 +2486,7 @@ tail = cons(List_var(node), tail);
 
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+x2c_cleanup_leave(& _x2c_defer_record_1);
 }
 }
 
@@ -2599,12 +2598,10 @@ if(! List_truth(first)){
   }
 
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_3);
+x2c_cleanup_leave(& _x2c_defer_record_3);
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_2);
+x2c_cleanup_leave(& _x2c_defer_record_2);
 }
 }
 
@@ -2642,8 +2639,7 @@ Var head = List_car(ast);  if(! Var_is(head, 1328354264)) return _children(c, as
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_4);
+    x2c_cleanup_leave(& _x2c_defer_record_4);
 }
   }
   if(Var_equal(List_var(transformed), inner)){
@@ -2742,6 +2738,7 @@ case 1219800220 : ast = _return(c, ast);  break;  case 588 : case 48777994 : cas
 return _finish(c, ast);
 }
 
+List Compiler_mark_cleanup_regions(Compiler, List);
 List Compiler_transform(Compiler compiler, List ast){
   if(! _init_guard_) _file_init_();  List newast = _sequence(compiler, ast);  while(! List_equal(newast, ast)){
     ast = newast;  newast = _sequence(compiler, ast);
@@ -2758,7 +2755,7 @@ List Compiler_transform(Compiler compiler, List ast){
     }
 
   }
-  if(Array_len(generated)) newast = List_append(newast, Array_list_free(generated));  return newast;
+  if(Array_len(generated)) newast = List_append(newast, Array_list_free(generated));  return Compiler_mark_cleanup_regions(compiler, newast);
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);

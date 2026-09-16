@@ -466,8 +466,8 @@ List List_append(List a, List b){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -512,8 +512,8 @@ static List _concat_n_va(unsigned list_count, va_list ap){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -557,8 +557,8 @@ static List _n_va(unsigned element_count, va_list ap){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -666,8 +666,8 @@ List List_map(List lst, Func fn){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 
@@ -820,8 +820,8 @@ List List_sort(List lst){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
 }
 
@@ -862,8 +862,8 @@ List List_sort_with(List lst, Func compare){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
 }
 
@@ -904,8 +904,8 @@ List List_sort_by(List lst, Func key){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
 }
 
@@ -935,8 +935,8 @@ List Array_list_free(Array arr){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 
@@ -991,8 +991,8 @@ List List_unique(List lst){
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
     }
 
@@ -1035,8 +1035,8 @@ List List_zip_with(List a, List b, Func fn){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
 }
 
@@ -1089,8 +1089,8 @@ static Var _sublis_node(List alist, Var node){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_leave(&_x2c_defer_record_10);
 }
 }
 
@@ -1153,8 +1153,8 @@ List List_flatten(List lst){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_11);
 
-  x2c_cleanup_leave(&_x2c_defer_record_11);
 }
 }
 
@@ -1202,8 +1202,8 @@ List List_flatten_all(List lst){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_12);
 
-  x2c_cleanup_leave(&_x2c_defer_record_12);
 }
 }
 
@@ -1318,8 +1318,8 @@ List List_head(List list, unsigned count){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_leave(&_x2c_defer_record_13);
 }
 }
 
@@ -1351,8 +1351,8 @@ static List _collect_subseq(List list, int start, int step, int span){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_leave(&_x2c_defer_record_14);
 }
 }
 
@@ -1415,12 +1415,12 @@ List List_getslice(List list, int start, int stop, int step){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_16);
 
-  x2c_cleanup_leave(&_x2c_defer_record_16);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_15);
 
-  x2c_cleanup_leave(&_x2c_defer_record_15);
 }
 }
 
@@ -1547,8 +1547,8 @@ static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
     Buffer_write(buf, ")");
     Buffer_pop(buf);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_17);
 
-  x2c_cleanup_leave(&_x2c_defer_record_17);
 }
 }
 
@@ -1605,8 +1605,8 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_leave(&_x2c_defer_record_18);
 }
   }
   RenderPath path;
@@ -1632,8 +1632,8 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
     Buffer_write(buf, ")");
     Buffer_pop(buf);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_leave(&_x2c_defer_record_19);
 }
 }
 
@@ -1662,8 +1662,8 @@ String List_str(List lst){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_leave(&_x2c_defer_record_20);
 }
 }
 
@@ -1684,17 +1684,20 @@ Buffer List_write_str(List lst, Buffer out){
       }
       else {x2c_exception_landed(& _x2c_exception_frame_0);
       {
-        if (x2c_exception_claim(&_x2c_exception_frame_0)) {* _x2c_macro_address_0 = _x2c_macro_previous_0;
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+          * _x2c_macro_address_0 = _x2c_macro_previous_0;
+        }
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        __builtin_unreachable();
       }
-      x2c_exception_leave(& _x2c_exception_frame_0);
-      __builtin_unreachable();
-    }
 
+    }
+    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+      * _x2c_macro_address_0 = _x2c_macro_previous_0;
+    }
+    x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  if (x2c_exception_claim(&_x2c_exception_frame_0)) {* _x2c_macro_address_0 = _x2c_macro_previous_0;
-}
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
+
 }
 return out;
 }
@@ -1722,8 +1725,8 @@ String List_repr(List lst){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_21);
 
-  x2c_cleanup_leave(&_x2c_defer_record_21);
 }
 }
 
@@ -1795,8 +1798,8 @@ List Iter_list(Iter iter){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_22);
 
-  x2c_cleanup_leave(&_x2c_defer_record_22);
 }
 }
 
@@ -1842,8 +1845,8 @@ List List_filter(List lst, Func pred){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_23);
 
-  x2c_cleanup_leave(&_x2c_defer_record_23);
 }
 }
 

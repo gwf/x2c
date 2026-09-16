@@ -315,8 +315,8 @@ static List _for_statement(Compiler c){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -587,20 +587,20 @@ static List _match_case(Compiler c){
                 }
 
               }
+              x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
             }
 
           }
+          x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
     }
     if(List_truth(types)) pattern = Compiler_typed_match_pattern(c, pattern, types);
@@ -815,8 +815,8 @@ Sym_push_new_scope(compiler -> sym);  List binding = Sym_define(compiler -> sym,
       Compiler_next(compiler);
       body = Compiler_parse_compound_statement(compiler);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
   }
   return body;

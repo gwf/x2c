@@ -154,23 +154,27 @@ int main(void){
 
   }
   else{
-    if (x2c_exception_claim(&_x2c_exception_frame_0)) {x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    {
-      branch ++;
-    }
+    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+      x2c_error_catch_close(_x2c_error_handler_0);
+      _x2c_error_handler_0 = NULL;
+      {
+        branch ++;
+      }
 
+    }
+    x2c_exception_leave(& _x2c_exception_frame_0);
+    __builtin_unreachable();
   }
-  x2c_exception_leave(& _x2c_exception_frame_0);
-  __builtin_unreachable();
+
 }
 }
-}
-if (x2c_exception_claim(&_x2c_exception_frame_0)) {x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-{
-  branch ++;
-}
+if(x2c_exception_claim(& _x2c_exception_frame_0)){
+  x2c_error_catch_close(_x2c_error_handler_0);
+  _x2c_error_handler_0 = NULL;
+  {
+    branch ++;
+  }
+
 }
 x2c_exception_leave(& _x2c_exception_frame_0);
 }

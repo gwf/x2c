@@ -1138,12 +1138,12 @@ static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
       Bytes_free((Bytes) _x2c_macro_hashes_0);
       Bytes_free((Bytes) _x2c_macro_entries_0);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -1273,8 +1273,8 @@ static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_0){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -1306,8 +1306,8 @@ static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_0, MapIntInt _x2
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 
@@ -1529,8 +1529,8 @@ static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_3, MapIntInt _x2c_macr
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
 }
 
@@ -1586,8 +1586,8 @@ static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macr
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
 }
 
@@ -1751,8 +1751,8 @@ static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
 }
 
@@ -1890,12 +1890,12 @@ static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5){
       Bytes_free((Bytes) _x2c_macro_hashes_1);
       Bytes_free((Bytes) _x2c_macro_entries_2);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 
@@ -2025,8 +2025,8 @@ static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_5){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
 }
 
@@ -2058,8 +2058,8 @@ static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_5, M
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_leave(&_x2c_defer_record_10);
 }
 }
 
@@ -2275,8 +2275,8 @@ static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_7, MapLongDoub
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_11);
 
-  x2c_cleanup_leave(&_x2c_defer_record_11);
 }
 }
 
@@ -2322,8 +2322,8 @@ static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_7, Buffer _
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_12);
 
-  x2c_cleanup_leave(&_x2c_defer_record_12);
 }
 }
 
@@ -2465,8 +2465,8 @@ static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_9
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_leave(&_x2c_defer_record_13);
 }
 }
 
@@ -2604,12 +2604,12 @@ static void MapStringString__core_expand(MapStringString _x2c_macro_map_10){
       Bytes_free((Bytes) _x2c_macro_hashes_2);
       Bytes_free((Bytes) _x2c_macro_entries_4);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_15);
 
-  x2c_cleanup_leave(&_x2c_defer_record_15);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_leave(&_x2c_defer_record_14);
 }
 }
 
@@ -2739,8 +2739,8 @@ static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_16);
 
-  x2c_cleanup_leave(&_x2c_defer_record_16);
 }
 }
 
@@ -2772,8 +2772,8 @@ static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_ma
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_17);
 
-  x2c_cleanup_leave(&_x2c_defer_record_17);
 }
 }
 
@@ -2991,8 +2991,8 @@ static int MapStringString__core_compare(MapStringString _x2c_macro_a_11, MapStr
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_leave(&_x2c_defer_record_18);
 }
 }
 
@@ -3038,8 +3038,8 @@ static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_12, Buf
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_leave(&_x2c_defer_record_19);
 }
 }
 
@@ -3120,8 +3120,8 @@ static MapStringString _prepare_string_export(MapStringString map, Context sourc
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_leave(&_x2c_defer_record_20);
 }
 }
 
@@ -3228,8 +3228,8 @@ static MapStringString MapStringString_export_context(MapStringString _x2c_macro
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_21);
 
-  x2c_cleanup_leave(&_x2c_defer_record_21);
 }
 }
 
@@ -3367,12 +3367,12 @@ static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15){
       Bytes_free((Bytes) _x2c_macro_hashes_3);
       Bytes_free((Bytes) _x2c_macro_entries_6);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_23);
 
-  x2c_cleanup_leave(&_x2c_defer_record_23);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_22);
 
-  x2c_cleanup_leave(&_x2c_defer_record_22);
 }
 }
 
@@ -3502,8 +3502,8 @@ static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_15){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_24);
 
-  x2c_cleanup_leave(&_x2c_defer_record_24);
 }
 }
 
@@ -3535,8 +3535,8 @@ static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_15, Map
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_25);
 
-  x2c_cleanup_leave(&_x2c_defer_record_25);
 }
 }
 
@@ -3752,8 +3752,8 @@ static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_15, MapStringInt
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_26);
 
-  x2c_cleanup_leave(&_x2c_defer_record_26);
 }
 }
 
@@ -3799,8 +3799,8 @@ static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_17, Buffer _x
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_27);
 
-  x2c_cleanup_leave(&_x2c_defer_record_27);
 }
 }
 
@@ -3868,8 +3868,8 @@ static MapStringInt _prepare_string_int_export(MapStringInt map, Context source)
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_28);
 
-  x2c_cleanup_leave(&_x2c_defer_record_28);
 }
 }
 
@@ -3976,8 +3976,8 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_19, 
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_29);
 
-  x2c_cleanup_leave(&_x2c_defer_record_29);
 }
 }
 

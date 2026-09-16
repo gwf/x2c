@@ -1033,8 +1033,8 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
           state -> floor_only --;
           disposition = h -> fn(slice, h -> data);
         }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
       }
 

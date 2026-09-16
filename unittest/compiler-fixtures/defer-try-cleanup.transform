@@ -28,7 +28,7 @@
 
 (function (static int) 
  (bind (binding 11 "preserve_parameter") 
-  ((fnmod (params (param (int) (bind (binding 10 "value") ())))))) 
+  ((fnmod (params (param (int) (bind (binding 10 "value") (volatile))))))) 
  (block 
   (at 20 
    (try (block 
@@ -47,17 +47,37 @@
                           (ident (binding 12 "Symbol_var"))) 
                     (args (expr ("Symbol") 
                            (literal ("Symbol") "invariant" invariant))))) 
-             (nil)))) (block)))) ())) 
+             (nil)))) (block)))) () (binding 41 "_x2c_exception_frame_0") 
+    (binding 42 "_x2c_error_handler_0") 
+    ((stmnt 
+      (expr (void) 
+       (call "x2c_error_catch_close" 
+        (args (expr (("ErrorHandler")) 
+               (ident (binding 42 "_x2c_error_handler_0"))))))) 
+     (stmnt 
+      (expr (("ErrorHandler")) 
+       (op = (expr (("ErrorHandler")) 
+              (ident (binding 42 "_x2c_error_handler_0"))) 
+        (expr (("ErrorHandler")) (nil))))) 
+     (stmnt 
+      (expr (void) 
+       (call "x2c_exception_leave" 
+        (args (expr (* ("ExceptionFrame")) 
+               (op & (expr (("ExceptionFrame")) 
+                      (ident (binding 41 "_x2c_exception_frame_0")))))))))))) 
   (at 21 (return (expr (int) (ident (binding 10 "value")))))))
 
 (function (int) 
  (bind (binding 13 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 7 (declare (int) 
-         (bindings 
-          (op = (bind (binding 14 "caught") ()) (expr (int) (literal (int) "0"))) 
-          (op = (bind (binding 15 "inner_handled") ()) 
-           (expr (int) (literal (int) "0")))))) 
+  (declare (int) 
+   (bindings 
+    (op = (bind (binding 14 "caught") (volatile)) 
+     (expr (int) (literal (int) "0"))))) 
+  (declare (int) 
+   (bindings 
+    (op = (bind (binding 15 "inner_handled") (volatile)) 
+     (expr (int) (literal (int) "0"))))) 
   (at 24 
    (try (block 
          (at 23 
@@ -71,7 +91,15 @@
                                   (call (expr ((func ((void))) void) 
                                          (ident (binding 9 "raise_from_callee"))) 
                                    (args (expr (void) ()))))))) () 
-                         (binding 40 "_x2c_defer_cleanup_0") () ()))))) 
+                         (binding 40 "_x2c_defer_cleanup_0") () () 
+                         (binding 47 "_x2c_defer_record_0") 
+                         ((stmnt 
+                           (expr (void) 
+                            (call "x2c_cleanup_leave" 
+                             (args (expr (* ("X2CCleanup")) 
+                                    (op & (expr (("X2CCleanup")) 
+                                           (ident 
+                                            (binding 47 "_x2c_defer_record_0"))))))))))))))) 
            (catcharms 
             (((?value) 
               (expr ("List") 
@@ -120,7 +148,24 @@
                (at 13 
                 (raise 
                  (expr ("Symbol") (literal ("Symbol") "bad-state" bad-state)) 
-                 (args))))))) ()))) 
+                 (args))))))) () (binding 45 "_x2c_exception_frame_2") 
+           (binding 46 "_x2c_error_handler_2") 
+           ((stmnt 
+             (expr (void) 
+              (call "x2c_error_catch_close" 
+               (args (expr (("ErrorHandler")) 
+                      (ident (binding 46 "_x2c_error_handler_2"))))))) 
+            (stmnt 
+             (expr (("ErrorHandler")) 
+              (op = (expr (("ErrorHandler")) 
+                     (ident (binding 46 "_x2c_error_handler_2"))) 
+               (expr (("ErrorHandler")) (nil))))) 
+            (stmnt 
+             (expr (void) 
+              (call "x2c_exception_leave" 
+               (args (expr (* ("ExceptionFrame")) 
+                      (op & (expr (("ExceptionFrame")) 
+                             (ident (binding 45 "_x2c_exception_frame_2"))))))))))))) 
     (catcharms 
      ((() (expr ("List") 
            (expr ("List") 
@@ -129,7 +174,24 @@
                           (ident (binding 12 "Symbol_var"))) 
                     (args (expr ("Symbol") 
                            (literal ("Symbol") "bad-state" bad-state))))) 
-             (nil)))) (block)))) ())) 
+             (nil)))) (block)))) () (binding 43 "_x2c_exception_frame_1") 
+    (binding 44 "_x2c_error_handler_1") 
+    ((stmnt 
+      (expr (void) 
+       (call "x2c_error_catch_close" 
+        (args (expr (("ErrorHandler")) 
+               (ident (binding 44 "_x2c_error_handler_1"))))))) 
+     (stmnt 
+      (expr (("ErrorHandler")) 
+       (op = (expr (("ErrorHandler")) 
+              (ident (binding 44 "_x2c_error_handler_1"))) 
+        (expr (("ErrorHandler")) (nil))))) 
+     (stmnt 
+      (expr (void) 
+       (call "x2c_exception_leave" 
+        (args (expr (* ("ExceptionFrame")) 
+               (op & (expr (("ExceptionFrame")) 
+                      (ident (binding 43 "_x2c_exception_frame_1")))))))))))) 
   (at 16 
    (declare (int) 
     (bindings 

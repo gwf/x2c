@@ -2089,8 +2089,8 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
     }
 
@@ -2381,8 +2381,8 @@ static void _capture_sites_initialize(void){
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
     }
 
@@ -2413,8 +2413,8 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
     }
 
@@ -2443,8 +2443,8 @@ static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 

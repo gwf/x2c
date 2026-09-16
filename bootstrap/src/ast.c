@@ -335,8 +335,8 @@ int ast_contains_head(Var value, Symbol kind){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 

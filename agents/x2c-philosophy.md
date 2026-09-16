@@ -630,8 +630,10 @@ out-of-home includes, and batch-vs-solo output parity;
 
 Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
-The emitter owns the C rule that automatic state changed across that boundary
-must be volatile. It qualifies directly modified named locals and parameters.
+`src/cleanup.x` owns the C rule that automatic state changed across that
+boundary must be volatile. It qualifies directly modified named locals and
+parameters in the definition; a prototype drops the parameter qualifier,
+which C ignores when it compares the two.
 `ExceptionFrame` owns the volatile transfer state, the unwind target, and the
 run-once cleanup claim, written before transfer and read afterward.
 Native-runtime fixtures compile with the active repository build flags, so
@@ -655,10 +657,13 @@ capture type cannot move safely into a callable thunk retain the synthetic
 `try`/`finally` lowering. The nested callee-transfer fixture remains the
 boundary for either lowering.
 
-Every label also has a statically computed cleanup ancestry. A same-ancestry
-`goto` runs no cleanup, while an outward jump drains exactly the exited
-regions through the established cleanup wrapper. Entering an unregistered
-protected region, including a sibling region, is rejected. Return lowering
+Every label also has a statically computed cleanup ancestry, which the same
+pass computes. A `try` body, each of its catch arms, and the block a static
+local's runtime initializer protects are each their own region; the guards
+and the finalizer run outside. A same-ancestry `goto` runs no cleanup, while
+an outward jump drains exactly the exited regions through the established
+cleanup wrapper. Entering an unregistered protected region, including a
+sibling region or a catch arm, is rejected. Return lowering
 evaluates and saves its expression before draining cleanup and returning the
 saved value.
 

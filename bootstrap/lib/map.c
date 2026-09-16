@@ -367,12 +367,12 @@ static void Map__core_expand(Map _x2c_macro_map_0){
       Bytes_free((Bytes) _x2c_macro_hashes_0);
       Bytes_free((Bytes) _x2c_macro_entries_0);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -502,8 +502,8 @@ static Map Map__core_copy(Map _x2c_macro_map_0){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -535,8 +535,8 @@ static Map Map__core_merge(Map _x2c_macro_map_0, Map _x2c_macro_other_0){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 
@@ -783,12 +783,12 @@ void Map_export_to(Map map, Context source, VarExportContextFn export_value, Sco
       Block_move_to(Bytes_block(map -> entries), scope);
       map -> scope = scope;
     }
+    x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
 }
 
@@ -880,8 +880,8 @@ static int Map__core_compare(Map _x2c_macro_a_2, Map _x2c_macro_b_2){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
 }
 
@@ -937,8 +937,8 @@ static Buffer Map__core_write(Map _x2c_macro_map_1, Buffer _x2c_macro_out_1, Sym
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 
@@ -1045,8 +1045,8 @@ String Map_str(Map map){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
 }
 
@@ -1072,8 +1072,8 @@ String Map_repr(Map map){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
 }
 

@@ -830,8 +830,8 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
     Map_merge(globs, overlay);
     Compiler_merge_source_declarations(c, globs, overlay);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -1069,8 +1069,8 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
   }
 
@@ -1396,8 +1396,8 @@ Map_setindex(c -> package_roots, String_var(name), String_var(root));
 
 }
 }
+x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 

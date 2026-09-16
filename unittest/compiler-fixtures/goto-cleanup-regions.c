@@ -43,8 +43,8 @@ static int outward_defer(void){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
   }
   done : return value;
@@ -58,32 +58,37 @@ static int outward_finally(void){
     if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
       value = 1;
       {
-        if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
+        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+          {
+            value = value * 10 + 2;
+          }
+
+        }
+        x2c_exception_leave(& _x2c_exception_frame_0);
+        goto done;
+      }
+
+    }
+    else {x2c_exception_landed(& _x2c_exception_frame_0);
+    {
+      if(x2c_exception_claim(& _x2c_exception_frame_0)){
+        {
           value = value * 10 + 2;
         }
 
       }
       x2c_exception_leave(& _x2c_exception_frame_0);
-      goto done;
+      __builtin_unreachable();
     }
 
   }
-  else {x2c_exception_landed(& _x2c_exception_frame_0);
-  {
-    if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
+  if(x2c_exception_claim(& _x2c_exception_frame_0)){
+    {
       value = value * 10 + 2;
     }
 
   }
   x2c_exception_leave(& _x2c_exception_frame_0);
-  __builtin_unreachable();
-}
-}
-if (x2c_exception_claim(&_x2c_exception_frame_0)) {{
-  value = value * 10 + 2;
-}
-}
-x2c_exception_leave(& _x2c_exception_frame_0);
 }
 done : return value;
 }
@@ -103,8 +108,8 @@ static int same_region(void){
       again : value ++;
       if(value < 2) goto again;
     }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
   }
   return value;

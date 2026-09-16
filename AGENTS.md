@@ -86,7 +86,8 @@ Direct destructive operations outside the requested change need approval.
   `frontend` (configured source units) -> `compiler` (translation state) ->
   shared runtime `lib/tokenizer.x` ->
   `parse`/`expressions`/`statements`/`macros`/
-  `literals` -> `ast` -> `type`/`protocol` -> `transform` (+ `lambda`) ->
+  `literals` -> `ast` -> `type`/`protocol` -> `transform` (+ `lambda`,
+  `cleanup`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `snapshot`,
   `collect`, `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,

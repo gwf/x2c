@@ -476,8 +476,8 @@ static void _remove_tree(String path, String * failed, int * failure){
           }
 
         }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
       }
       closedir(directory);
@@ -530,12 +530,12 @@ void String_copy_file(String source, String target){
       struct stat info = _stat("String.copy_file", source);
       if(chmod(target, info.st_mode & 07777)) _path_error("String.copy_file", target, errno);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -602,8 +602,8 @@ void String_write_text(String path, String text){
     File_write_all(output, text, String_len(text));
     if(File_flush(output)) _path_error("String.write_text", path, errno);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 

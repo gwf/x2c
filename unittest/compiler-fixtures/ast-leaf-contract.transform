@@ -144,7 +144,7 @@
           (expr ((func ((int))) int) (ident (binding 65 "ast_phase1_identity"))))))))))) 
   (at 8 (declare ("ast_phase1_Count") 
          (bindings 
-          (op = (bind (binding 76 "count") ()) 
+          (op = (bind (binding 76 "count") (volatile)) 
            (expr (int) 
             (call (expr ((func ((void))) int) 
                    (ident (binding 63 "ast_phase1_zero"))) 
@@ -251,7 +251,13 @@
          (((binding 76 "count") ("ast_phase1_Count") 
            (binding 122 "_x2c_defer_capture_0")) 
           ((binding 85 "value") ("Var") (binding 123 "_x2c_defer_capture_1"))) 
-         ((binding 76 "count"))))))))) 
+         ((binding 76 "count")) (binding 131 "_x2c_defer_record_0") 
+         ((stmnt 
+           (expr (void) 
+            (call "x2c_cleanup_leave" 
+             (args (expr (* ("X2CCleanup")) 
+                    (op & (expr (("X2CCleanup")) 
+                           (ident (binding 131 "_x2c_defer_record_0"))))))))))))))))) 
   (at 42 
    (matchcases (expr ("List") (ident (binding 80 "values"))) 
     (((?head *tail) (expr ("List") (expr ("List") (cache 9))) 
@@ -271,7 +277,7 @@
   (at 22 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 96 "caught") ()) 
+     (op = (bind (binding 96 "caught") (volatile)) 
       (expr ("Var") (literal ("Var") "void")))))) 
   (at 44 
    (try (block 
@@ -328,7 +334,35 @@
      (at 25 
       (stmnt 
        (expr ("ast_phase1_Count") 
-        (postfix ++ (expr ("ast_phase1_Count") (ident (binding 76 "count")))))))))) 
+        (postfix ++ (expr ("ast_phase1_Count") (ident (binding 76 "count")))))))) 
+    (binding 132 "_x2c_exception_frame_0") (binding 133 "_x2c_error_handler_0") 
+    ((if (expr (int) 
+          (call "x2c_exception_claim" 
+           (args (expr (* ("ExceptionFrame")) 
+                  (op & (expr (("ExceptionFrame")) 
+                         (ident (binding 132 "_x2c_exception_frame_0")))))))) 
+      (block 
+       (stmnt 
+        (expr (void) 
+         (call "x2c_error_catch_close" 
+          (args (expr (("ErrorHandler")) 
+                 (ident (binding 133 "_x2c_error_handler_0"))))))) 
+       (stmnt 
+        (expr (("ErrorHandler")) 
+         (op = (expr (("ErrorHandler")) 
+                (ident (binding 133 "_x2c_error_handler_0"))) 
+          (expr (("ErrorHandler")) (nil))))) 
+       (block 
+        (at 25 
+         (stmnt 
+          (expr ("ast_phase1_Count") 
+           (postfix ++ (expr ("ast_phase1_Count") (ident (binding 76 "count")))))))))) 
+     (stmnt 
+      (expr (void) 
+       (call "x2c_exception_leave" 
+        (args (expr (* ("ExceptionFrame")) 
+               (op & (expr (("ExceptionFrame")) 
+                      (ident (binding 132 "_x2c_exception_frame_0")))))))))))) 
   (at 45 
    (declare ("Var") 
     (bindings 

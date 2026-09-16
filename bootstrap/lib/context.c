@@ -203,8 +203,8 @@ static Context _open(const char * name, int isolated){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
   }
 
@@ -310,8 +310,8 @@ static List _export_list(List list, Context source){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -350,8 +350,8 @@ static Var _export_array(Var value, Context source){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -386,8 +386,8 @@ static Var _export_map(Var value, Context source){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 

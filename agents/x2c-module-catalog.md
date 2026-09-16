@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 32
+- Compiler modules: 33
 - Runtime modules: 50
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -56,6 +56,14 @@ constant caching for x2c code generation.
 Public functions:
 
 `Compiler.setup_cache_init`
+
+### [src/cleanup.x](../src/cleanup.x)
+
+what a cleanup region runs, and which exits run it.
+
+Public functions:
+
+`Compiler.static_value_is_runtime`, `Compiler.mark_cleanup_regions`
 
 ### [src/cli.x](../src/cli.x)
 
@@ -396,7 +404,8 @@ x2c semantic types.
 
 Public functions:
 
-`Type.declaration_parts`, `Type.declaration_ast`, `Type.parameter_ast`,
+`Type.declaration_parts`, `Type.declaration_ast`, `ast_addressed_identifier`,
+`ast_direct_identifier`, `ast_prototype_declarator`, `Type.parameter_ast`,
 `Var.type`, `Type.list`, `List.type`, `Symbol.is_storage_class`,
 `Symbol.is_inline`, `Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
 `Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,

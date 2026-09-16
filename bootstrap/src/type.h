@@ -13,6 +13,12 @@ List Type_declaration_parts(Type type);
 
 List Type_declaration_ast(Type type, List binding);
 
+String ast_addressed_identifier(Var value);
+
+String ast_direct_identifier(Var value);
+
+List ast_prototype_declarator(List declarator);
+
 List Type_parameter_ast(Type type, List binding);
 
 static inline Type Var_type(Var x){

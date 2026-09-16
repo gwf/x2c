@@ -1404,8 +1404,8 @@ static void _install_source(Compiler compiler, String text, String filename, Str
     }
     Map_setindex(compiler -> macros, String_var(marker), Map_var(aliases));
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -1989,13 +1989,13 @@ static Var _eval_string(Compiler compiler, String source, Token invocation){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 }
+x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 return result;
@@ -2697,26 +2697,26 @@ return;
                   }
 
                 }
+                x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
               }
 
             }
+            x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
           }
 
         }
+        x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
       }
       else Compiler_report_error(c, 27335838, _647, invocation, cons(String_var(String_join(NULL, cons(String_var(_255), cons(String_var(Compiler_display_path(c, path)), NULL)))), NULL));
     }
+    x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
   }
   Map definitions = Map_new(), dependencies = Map_new();
@@ -2786,8 +2786,8 @@ void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token 
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
   }
 
@@ -2976,8 +2976,8 @@ static Var _eval_template_form(Compiler compiler, String form, List bindings, To
       Buffer_write_len(rewritten, form + copied, String_len(form) - copied);
       form = Buffer_str(rewritten);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
   }
   if(! Var_is_void(construction)){
@@ -3073,38 +3073,38 @@ static Var _eval_template_form(Compiler compiler, String form, List bindings, To
                           }
 
                         }
+                        x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_leave(&_x2c_defer_record_14);
 }
                       }
 
                     }
+                    x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_leave(&_x2c_defer_record_13);
 }
                   }
 
                 }
+                x2c_cleanup_leave(& _x2c_defer_record_12);
 
-  x2c_cleanup_leave(&_x2c_defer_record_12);
 }
               }
 
             }
+            x2c_cleanup_leave(& _x2c_defer_record_11);
 
-  x2c_cleanup_leave(&_x2c_defer_record_11);
 }
           }
 
         }
+        x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_leave(&_x2c_defer_record_10);
 }
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
   }
   if(String_truth(message)) Compiler_report_error(compiler, 27335838, message, invocation, notes);
@@ -3212,8 +3212,7 @@ static Var _replace_definition_bindings(Var value, Map bindings){
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_15);
+  x2c_cleanup_leave(& _x2c_defer_record_15);
 }
 }
 
@@ -3758,8 +3757,8 @@ List Compiler_parse_macro_definition(Compiler c){
       Var local_order = Map_getindex(definition_locals, Symbol_var(32645476));
       local_names = Var_is_row(local_order, 9, 7, 4) ? List_reverse(Var_list(local_order)) : NULL;
     }
+    x2c_cleanup_leave(& _x2c_defer_record_16);
 
-  x2c_cleanup_leave(&_x2c_defer_record_16);
 }
   }
   if(result_kind == 9147177346020 && target_kind == 458361162716){
@@ -4327,16 +4326,16 @@ if(! List_truth(definition)) definition = Var_list(stored);  List input = argume
                     }
 
                   }
+                  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_leave(&_x2c_defer_record_20);
 }
                 }
 
               }
 
             }
+            x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_leave(&_x2c_defer_record_19);
 }
           }
           {
@@ -4352,14 +4351,14 @@ if(! List_truth(definition)) definition = Var_list(stored);  List input = argume
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_leave(&_x2c_defer_record_18);
 }
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_17);
 
-  x2c_cleanup_leave(&_x2c_defer_record_17);
 }
 }
 }
@@ -4397,8 +4396,8 @@ static List _invoke_definition(Compiler compiler, List definition, Token invocat
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_21);
 
-  x2c_cleanup_leave(&_x2c_defer_record_21);
 }
 }
 
@@ -4612,8 +4611,7 @@ if(target_kind == 1405544 && ! private_target && List_truth(captured) && ! List_
         }
 
       }
-
-  x2c_cleanup_leave(&_x2c_defer_record_24);
+      x2c_cleanup_leave(& _x2c_defer_record_24);
 }
     }
     {
@@ -4624,13 +4622,11 @@ if(target_kind == 1405544 && ! private_target && List_truth(captured) && ! List_
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_23);
+  x2c_cleanup_leave(& _x2c_defer_record_23);
 }
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_22);
+x2c_cleanup_leave(& _x2c_defer_record_22);
 }
 }
 

@@ -1450,8 +1450,7 @@ List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type){
   {
                 expression = Compiler_resolve_expression(c, Var_list(value), c -> token);
               }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+              x2c_cleanup_leave(& _x2c_defer_record_0);
 }
             }
             reference = Var_equal(List_car(Type_list(captured_type)), Symbol_var(77));
@@ -1648,16 +1647,13 @@ if(type == _277){
 
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_3);
+x2c_cleanup_leave(& _x2c_defer_record_3);
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_2);
+x2c_cleanup_leave(& _x2c_defer_record_2);
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+x2c_cleanup_leave(& _x2c_defer_record_1);
 }
 }
 
@@ -1711,8 +1707,7 @@ List Compiler_parse_lambda_literal(Compiler c){
           }
 
         }
-
-  x2c_cleanup_leave(&_x2c_defer_record_5);
+        x2c_cleanup_leave(& _x2c_defer_record_5);
 }
       }
 
@@ -1731,8 +1726,7 @@ List Compiler_parse_lambda_literal(Compiler c){
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 }
 }
 

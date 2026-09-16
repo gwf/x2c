@@ -234,8 +234,8 @@ void x2c_register_type(String name){
     }
     _reserve_descriptor(name);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -275,8 +275,8 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -316,8 +316,8 @@ int x2c_try_register_descriptor(String name, VarMethods methods){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -361,8 +361,8 @@ int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods metho
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 

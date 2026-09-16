@@ -967,8 +967,9 @@ static List _header_declaration(List node, Type type, List bindings){
 
 int Type_is_inline(Type);
 List Type_list(Type);
+List ast_prototype_declarator(List);
 static List _header_function(Type type, List bind, List body){
-  if(Type_is_inline(type)) return cons(_38, cons(List_var(cons(_61, List_append(Type_list(type), NULL))), cons(List_var(bind), cons(List_var(body), NULL))));  return cons(_99, cons(List_var(type), cons(List_var(bind), NULL)));
+  if(Type_is_inline(type)) return cons(_38, cons(List_var(cons(_61, List_append(Type_list(type), NULL))), cons(List_var(bind), cons(List_var(body), NULL))));  return cons(_99, cons(List_var(type), cons(List_var(ast_prototype_declarator(bind)), NULL)));
 }
 
 static List _source_function(List node, Type type){
@@ -1445,7 +1446,7 @@ static void _collect_forward_dependencies(Compiler compiler, Var value, Map loca
       default: ;  static MatchCaptureSite _x2c_match_site_27;  if (x2c_match_site_try_capture(& _x2c_match_site_27, _x2c_match_expr, List_var(_347), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
         String spelling = binding_identity_spelling(Var_list(binding));  List native = cons(_365, cons(String_var(spelling), NULL));  if(Map_contains(statics, binding)) _forward_declaration(compiler, binding, locals, statics, seen, prototypes);  else if(Map_contains(statics, List_var(native))) _forward_declaration(compiler, List_var(native), locals, statics, seen, prototypes);  else{
           Type type = NULL;  List global = String_truth(spelling) ? Sym_resolve_global(compiler -> sym, cons(String_var(spelling), NULL), & type) : NULL;  if(List_truth(global) && List_equal(global, Var_list(binding)) && Type_is_function(type) && ! Map_contains(locals, List_var(global)) && ! Map_contains(seen, List_var(global)) && ! List_truth(Sym_get(compiler -> sym, cons(_384, cons(String_var(spelling), NULL))))){
-            Map_setindex(seen, List_var(global), int_var(1));  _forward_types(compiler, Type_list(type), locals, statics, seen, prototypes);  Array_push(prototypes, List_var(Type_declaration_ast(type, global)));
+            Map_setindex(seen, List_var(global), int_var(1));  _forward_types(compiler, Type_list(type), locals, statics, seen, prototypes);  Array_push(prototypes, List_var(ast_prototype_declarator(Type_declaration_ast(type, global))));
           }
 
         }
@@ -1476,8 +1477,7 @@ List rest = node;  for(; ; ){
 }
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+x2c_cleanup_leave(& _x2c_defer_record_0);
 }
 }
 
@@ -1489,7 +1489,7 @@ static void _static_declarations(Var value, Map declarations){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 458361162716: ;  static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_412), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var signature = _x2c_match_values[1];  Var binding = _x2c_match_values[2]; {
     if(Type_is_static(List_type(Var_list(type)))){
-      List declaration = cons(_99, cons(type, cons(signature, NULL)));  Map_setindex(declarations, binding, List_var(declaration));  Map_setindex(declarations, List_var(cons(_365, cons(String_var(binding_identity_spelling(Var_list(binding))), NULL))), List_var(declaration));
+      List declaration = cons(_99, cons(type, cons(List_var(ast_prototype_declarator(Var_list(signature))), NULL)));  Map_setindex(declarations, binding, List_var(declaration));  Map_setindex(declarations, List_var(cons(_365, cons(String_var(binding_identity_spelling(Var_list(binding))), NULL))), List_var(declaration));
     }
     return;
   }
@@ -1540,7 +1540,7 @@ static List _static_prototypes(Compiler compiler, List source, List header){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 458361162716: ;  static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_426), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var signature = _x2c_match_values[1]; {
-          Array_push(functions, List_var(node));  if(Type_is_static(List_type(Var_list(type)))) Array_push(declarations, List_var(cons(_99, cons(type, cons(signature, NULL)))));  continue;
+          Array_push(functions, List_var(node));  if(Type_is_static(List_type(Var_list(type)))) Array_push(declarations, List_var(cons(_99, cons(type, cons(List_var(ast_prototype_declarator(Var_list(signature))), NULL)))));  continue;
         }
         break;
       }

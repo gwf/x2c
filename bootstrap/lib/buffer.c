@@ -213,8 +213,8 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -362,8 +362,8 @@ String Buffer_str_free(Buffer buf){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 

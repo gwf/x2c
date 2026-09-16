@@ -16,18 +16,58 @@
             (expr (int) 
              (op = (expr (int) (ident (binding 7 "value"))) 
               (expr (int) (literal (int) "42")))))) 
-     (at 10 (return (expr (int) (ident (binding 7 "value")))))) 
+     (at 10 
+      (block 
+       (declare (int) 
+        (bindings 
+         (op = (bind (binding 40 "_x2c_return_value_0") ()) 
+          (expr (int) (ident (binding 7 "value")))))) 
+       (block 
+        (stmnt 
+         (expr (void) 
+          (call "x2c_cleanup_leave" 
+           (args (expr (* ("X2CCleanup")) 
+                  (op & (expr (("X2CCleanup")) 
+                         (ident (binding 39 "_x2c_defer_record_0"))))))))) 
+        (return (expr (int) (ident (binding 40 "_x2c_return_value_0")))))))) 
     (binding 33 "_x2c_defer_env_0") (binding 36 "_x2c_defer_cleanup_0") 
     (((binding 7 "value") (int) (binding 32 "_x2c_defer_capture_0"))) 
-    ()))))
+    () (binding 39 "_x2c_defer_record_0") 
+    ((stmnt 
+      (expr (void) 
+       (call "x2c_cleanup_leave" 
+        (args (expr (* ("X2CCleanup")) 
+               (op & (expr (("X2CCleanup")) 
+                      (ident (binding 39 "_x2c_defer_record_0"))))))))))))))
 
 (function (static int) 
  (bind (binding 8 "global_only") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 13 
-   (defer (block (at 12 (return (expr (int) (ident (binding 5 "observed")))))) 
+   (defer 
+    (block 
+     (at 12 
+      (block 
+       (declare (int) 
+        (bindings 
+         (op = (bind (binding 42 "_x2c_return_value_1") ()) 
+          (expr (int) (ident (binding 5 "observed")))))) 
+       (block 
+        (stmnt 
+         (expr (void) 
+          (call "x2c_cleanup_leave" 
+           (args (expr (* ("X2CCleanup")) 
+                  (op & (expr (("X2CCleanup")) 
+                         (ident (binding 41 "_x2c_defer_record_1"))))))))) 
+        (return (expr (int) (ident (binding 42 "_x2c_return_value_1")))))))) 
     () (binding 38 "_x2c_defer_cleanup_1") () 
-    ()))))
+    () (binding 41 "_x2c_defer_record_1") 
+    ((stmnt 
+      (expr (void) 
+       (call "x2c_cleanup_leave" 
+        (args (expr (* ("X2CCleanup")) 
+               (op & (expr (("X2CCleanup")) 
+                      (ident (binding 41 "_x2c_defer_record_1"))))))))))))))
 
 (function (int) 
  (bind (binding 9 "main") ((fnmod (params (param (void) (bind () ())))))) 

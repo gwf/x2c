@@ -413,8 +413,8 @@ int void_params = List_len(params) == 1 && Var_is_row(List_car(params), 9, 7, 4)
   }
 
 }
+x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 

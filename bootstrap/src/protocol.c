@@ -2922,8 +2922,7 @@ static List _parse_protocol_member(Compiler c, String participant, Map members){
       }
 
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_0);
 }
   }
   List binding = NULL, identity = NULL;

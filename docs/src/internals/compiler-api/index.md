@@ -14,6 +14,7 @@ Functions and types exposed by each compiler module.
 | [`src/bootstrap.x`](bootstrap.md) | Source-bearing APE to native x2c transition. |
 | [`src/build.x`](build.md) | Typed native build request and artifact graph. |
 | [`src/cache.x`](cache.md) | constant caching for x2c code generation. |
+| [`src/cleanup.x`](cleanup.md) | what a cleanup region runs, and which exits run it. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |

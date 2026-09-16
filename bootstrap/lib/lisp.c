@@ -1051,8 +1051,8 @@ static Tokenizer _scan_lisp_tokens(String source, Scope * scope){
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
     }
 
@@ -1103,8 +1103,8 @@ Lisp Lisp_new_bare(void){
           }
 
         }
+        x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
       }
 
@@ -1139,8 +1139,8 @@ Lisp Lisp_new_bare(void){
           }
 
         }
+        x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
       }
 
@@ -1155,8 +1155,8 @@ Lisp Lisp_new_bare(void){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -1194,8 +1194,8 @@ Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
       Tokenizer tokenizer = _scan_lisp_tokens(source + base, & tokens_scope);
       status = _read_tokenizer(tokenizer, source, base, cursor, out);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
   }
   return status;
@@ -1657,8 +1657,8 @@ static void _eval_args(Lisp lisp, List args, LispEnv * env, List * out){
     }
     * out = Array_list(values);
   }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
 }
 
@@ -1756,8 +1756,8 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
 }
 
@@ -1834,8 +1834,8 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv * env){
             }
 
           }
+          x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
         }
 
@@ -1860,12 +1860,12 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv * env){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 
@@ -2085,8 +2085,8 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv * env){
   {
       result = Lisp_eval_file(lisp, source);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_leave(&_x2c_defer_record_10);
 }
   }
   return result;
@@ -2249,8 +2249,8 @@ static int LispLower__auto_expand(LispLower l, Var head, List args, Var * expans
       * _x2c_macro_address_0 = & trace;
       * expansion = _call_lambda(l -> lisp, macro, args, l -> env);
     }
+    x2c_cleanup_leave(& _x2c_defer_record_11);
 
-  x2c_cleanup_leave(&_x2c_defer_record_11);
 }
   }
   else {x2c_exception_landed(& _x2c_exception_frame_0);
@@ -2367,8 +2367,8 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_12);
 
-  x2c_cleanup_leave(&_x2c_defer_record_12);
 }
   }
   if(! Var_is_atom(head) || LispLower__auto_local_name(l, head) || Var_equal(head, lsym_def) || Var_equal(head, lsym_bind) || Var_equal(head, lsym_lambda) || Var_equal(head, lsym_macro) || Var_equal(head, lsym_eval) || Var_equal(head, lsym_import) || Var_equal(head, lsym_apply)) return 0;
@@ -2421,8 +2421,8 @@ static int LispLower__auto_lower(LispLower l, Var expression, int tail){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_leave(&_x2c_defer_record_13);
 }
   }
   int name = MachineBuilder_constant(b, head);
@@ -2603,14 +2603,14 @@ static int _auto_analyze(Lisp lisp, Lambda lambda, LispEnv * env, int depth, Lis
             }
 
           }
+          x2c_cleanup_leave(& _x2c_defer_record_15);
 
-  x2c_cleanup_leave(&_x2c_defer_record_15);
 }
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_leave(&_x2c_defer_record_14);
 }
     }
 
@@ -2748,12 +2748,10 @@ static int _auto_apply(Lisp lisp, Lambda lambda, List raw, LispEnv * env, Var * 
       }
       Var error = m -> error;  lisp -> auto_stats.machine_errors ++;  _raise_machine_error(error);
     }
-
-  x2c_cleanup_leave(&_x2c_defer_record_17);
+    x2c_cleanup_leave(& _x2c_defer_record_17);
 }
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_16);
+  x2c_cleanup_leave(& _x2c_defer_record_16);
 }
 }
 
@@ -2905,8 +2903,8 @@ Var Lisp_eval(Lisp lisp, Var expression){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_leave(&_x2c_defer_record_18);
 }
 }
 
@@ -2932,8 +2930,8 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_leave(&_x2c_defer_record_19);
 }
 }
 
@@ -2987,12 +2985,12 @@ Var Lisp_eval_string(Lisp lisp, String source){
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_21);
 
-  x2c_cleanup_leave(&_x2c_defer_record_21);
 }
   }
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_leave(&_x2c_defer_record_20);
 }
 }
 
@@ -3051,8 +3049,8 @@ Var Lisp_eval_file(Lisp lisp, File source){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_22);
 
-  x2c_cleanup_leave(&_x2c_defer_record_22);
 }
 }
 
@@ -3090,8 +3088,8 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
         }
 
       }
+      x2c_cleanup_leave(& _x2c_defer_record_23);
 
-  x2c_cleanup_leave(&_x2c_defer_record_23);
 }
     }
 

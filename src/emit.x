@@ -18,22 +18,11 @@
 #include "var.x"
 #include "ast.x"
 #include "format.x"
-
-typedef struct Cleanup {
-  List final_code, leave_stmt;
-} Cleanup;
+#include "cleanup.x"
 
 // Per-emission state.
 typedef struct Emitter {
   delegate Compiler compiler;
-  Block cleanups;
-  // Cleanup-stack depths recorded when the innermost enclosing loop or
-  // switch body was entered. "break" and "continue" only transfer control
-  // inside that construct, so they must not run or pop cleanup records
-  // registered outside it. "return" leaves the function and runs cleanup
-  // records from depth zero.
-  int break_stop;
-  int continue_stop, List cleanup_path, Map label_paths, List volatile_names;
   Type return_type, int origin, String fn_name, List native_aliases;
   Array native_macros;
   Map static_objects;
@@ -114,82 +103,6 @@ static List Emitter._declarator(Emitter e, List decl, List mods) {
   return %( @mods @decl );
 }
 
-static String _addressed_identifier(Var value) {
-  if (value is not <list>) return NULL;
-  List ast = value;
-  match (ast) {
-    case %(expr ? ?inner): return _addressed_identifier(inner);
-    case %(parens ?inner): return _addressed_identifier(inner);
-    case %(op & ?inner):   return _direct_identifier(inner);
-  }
-  return NULL;
-}
-
-static String _direct_identifier(Var value) {
-  while (value is <list>) {
-    List ast = value;
-    match (ast) {
-      case %(ident ?binding):
-        return binding_identity_spelling(binding);
-      case %(!or (expr ? ?inner) (parens ?inner)): {
-        value = inner;
-        continue;
-      }
-      case %(index (!set ?base (expr ?base_type ?)) ?): {
-        Type type = base_type;
-        if (type.is_array()) {
-          value = base;
-          continue;
-        }
-      }
-      case %(op . ?base *): {
-        value = base;
-        continue;
-      }
-      case %(op (!quote ->) ?base *): return _addressed_identifier(base);
-      case %(op (!quote *) ?base): return _addressed_identifier(base);
-    }
-    return NULL;
-  }
-  return NULL;
-}
-
-// C requires automatic state changed after sigsetjmp to be volatile after
-// siglongjmp.
-static Ast Emitter._preserve_bindings(Emitter e, Ast ast) {
-  if (!ast) return ast;
-  Var head = ast.car();
-  if (head == <bind>) {
-    List (name, mods) = ast.cdr();
-    String spelling = binding_identity_spelling(name);
-    if (e.volatile_names.contains(spelling) &&
-        !mods.contains(<volatile>))
-      mods = cons(<volatile>, mods);
-    return %(bind $name $mods);
-  }
-  if (head is <list>) head = e._preserve_bindings(head);
-  return cons(head, e._preserve_bindings(ast.cdr()));
-}
-
-static int _bindings_need_preservation(Emitter emitter, List bindings) {
-  foreach (Ast binding, bindings.cdr()) match (binding)
-    case %(!or (bind ?name ?) (op = (bind ?name ?) ?)): {
-      String spelling = binding_identity_spelling(name);
-      if (emitter.volatile_names.contains(spelling)) return 1;
-    }
-  return 0;
-}
-
-// Static, extern, and typedef declarations do not have automatic storage.
-/* A `threaded` object has static storage duration, one copy per thread, so
-   like a static it is not automatic and needs no volatile preservation
-   across a sigsetjmp boundary. */
-static int _is_automatic_declaration(List ast) {
-  Type type = ast.cadr();
-  return !type.is_static() && !type.is_extern() && !type.is_typedef() &&
-         !type.is_threaded();
-}
-
 static List Emitter._bind(Emitter emitter, Ast ast, List context) {
   List (ident, mods) = ast.cdr();
   ident = emitter._emit(ident, NULL);
@@ -201,7 +114,6 @@ static List Emitter._param(Emitter e, List ast, List context) {
   List (type, mods) = ast.cdr();
   context = e._emit(type, NULL);
   mods = %( $mods );
-  if (e.volatile_names) mods = e._preserve_bindings(mods);
   return context.append(e._emit(mods, NULL));
 }
 
@@ -226,246 +138,8 @@ static List Emitter._declare(Emitter emitter, List ast, List context) {
   return type.append(emitter._emit(bindings, type));
 }
 
-static String _cleanup_label_spelling(Var value) {
-  String direct = _direct_identifier(value);
-  if (direct) return direct;
-  if (value is not <list>) return NULL;
-  List label = value;
-  return label && !label.cdr() && label.car() is <string>
-       ? label.car().string() : NULL;
-}
-
-static int _automatic_static_input(Compiler c, List binding) {
-  Var automatic, stored;
-  Map facts = c.semantic_binding_facts();
-  if (!facts.try_get(%(automatic $binding), &automatic) ||
-      !automatic.truth()) return 0;
-  if (!facts.try_get(%(type $binding), &stored)) return 1;
-  Type type = stored;
-  return !type.is_static() && !type.is_extern() && !type.is_threaded();
-}
-
-static int _runtime_static_value(Compiler c, List value, Map runtime) {
-  Array pending = %[], modes = %[];
-  defer pending.free();
-  defer modes.free();
-  pending.push(value);
-  modes.push(0);
-  while (pending.len()) {
-    List node = pending.take_last();
-    int address = modes.take_last().int();
-    if (address) {
-      match (node) {
-        case %(!or (expr ? ?inner) (parens ?inner)
-                   (op . ?inner ?)): {
-          pending.push(inner);
-          modes.push(1);
-          continue;
-        }
-        case %(ident ?binding): {
-          if (runtime.contains(binding) ||
-              _automatic_static_input(c, binding)) return 1;
-          continue;
-        }
-        case %(index (!set ?base (expr ?type ?)) ?index): {
-          pending.push(index);
-          modes.push(0);
-          pending.push(base);
-          modes.push(type.list().type().is_array());
-          continue;
-        }
-        case %(op (!quote *) ?inner): {
-          pending.push(inner);
-          modes.push(0);
-          continue;
-        }
-      }
-      return 1;
-    }
-    match (node) {
-      case %((!or cache call var array map initval) *): return 1;
-      case %(expr ?type (ident ?binding)): {
-        if (runtime.contains(binding) ||
-            _automatic_static_input(c, binding)) return 1;
-        Type native = type;
-        if (native && !native.is_enum() && !native.is_function() &&
-            !native.is_array() &&
-            (native.is_pointer() || !native.contains(<const>))) return 1;
-        continue;
-      }
-      case %(expr ? (op & ?inner)): {
-        pending.push(inner);
-        modes.push(1);
-        continue;
-      }
-      case %(expr ?type (!set ?content (index *))): {
-        Type native = type;
-        if (native.is_array()) {
-          pending.push(content);
-          modes.push(1);
-          continue;
-        }
-        if (native.is_pointer() || !native.contains(<const>)) return 1;
-      }
-      case %(expr ? (sizeof ?)): continue;
-    }
-    foreach (Var child, node)
-      if (child is <list>) {
-        pending.push(child);
-        modes.push(0);
-      }
-  }
-  return 0;
-}
-
-static int _runtime_static_declaration(
-  Compiler c, List node, Map runtime) {
-  int found = 0;
-  match (node) {
-    case %(at ? ?body): return _runtime_static_declaration(c, body, runtime);
-    case %(declare (!set ?type (*)) (bindings *bindings)):
-      if (type.list().type().is_static())
-        foreach (List binding, bindings)
-          match (binding)
-            case %(op = (bind ?name ?) ?value):
-              if (_runtime_static_value(c, value, runtime)) {
-                runtime[name] = 1;
-                found = 1;
-              }
-  }
-  return found;
-}
-
-/* A dynamic declaration protects the remainder of its block just as a
-   cleanup region does. Keeping the canonical binding makes shadowing and
-   generated syntax use the same object reference. */
-static List _static_regions(Compiler c, List ast, Map runtime) {
-  match (ast) {
-    case %((!or function localinit expr declare typedef) *): return ast;
-    case %(block *statements): {
-      Array before = %[];
-      foreach (List statement, statements) {
-        if (_runtime_static_declaration(c, statement, runtime)) {
-          List rest = statements;
-          for (int i = 0; i <= before.len(); i++) rest = rest.cdr();
-          List body = _static_regions(c, %(block @rest), runtime);
-          before.push(%(localinit $statement $body));
-          return %(block @{before.list_free()});
-        }
-        before.push(_static_regions(c, statement, runtime));
-      }
-      return %(block @{before.list_free()});
-    }
-  }
-  Array children = %[];
-  foreach (Var child, ast) {
-    if (child is <list>) children.push(_static_regions(c, child, runtime));
-    else children.push(child);
-  }
-  return children.list_free();
-}
-
-// Record label ancestry and automatic assignments inside try regions in one
-// function walk. Paths are innermost-first canonical Lists; a legal outward
-// target is therefore a suffix of the source path.
-static void Emitter._collect_function_state(
-  Emitter e, List ast, List path, int in_try) {
-  // Nested lists continue in this frame, with pending sibling suffixes and
-  // their `in_try` states parked on `resume`, so nesting depth never costs
-  // C stack. Statement-scoped cases below still recurse with a new path.
-  Array resume = %[];
-  Array resume_try = %[];
-  defer resume.free();
-  defer resume_try.free();
-  for (;;) {
-    if (!ast) {
-      if (!resume.len()) return;
-      ast = resume.take_last();
-      in_try = (int) resume_try.take_last().integer();
-      continue;
-    }
-    Var head = ast.car();
-    if (head is <list>) {
-      if (ast.cdr()) {
-        resume.push(ast.cdr());
-        resume_try.push(in_try);
-      }
-      ast = head;
-      continue;
-    }
-    if (head is not <symbol>) {
-      ast = ast.cdr();
-      continue;
-    }
-    if (head == <try>) in_try = 1;
-    String name = NULL;
-    if (in_try) {
-      match (ast) {
-        case %(op ?operator ?target *):
-          if (operator is <symbol> &&
-              ast_changes_left_operand(operator))
-            name = _direct_identifier(target);
-        case %((!or vcompound vpostfix) ?target *):
-          name = _direct_identifier(target);
-        case %(postfix ? ?target): name = _direct_identifier(target);
-      }
-      if (name && !e.volatile_names.contains(name))
-        e.volatile_names = cons(name, e.volatile_names);
-    }
-    switch (head.symbol()) {
-      case <at>:
-        ast = ast.caddr();
-        continue;
-      case <label>: {
-        String name = _cleanup_label_spelling(ast.cadr());
-        if (name) e.label_paths.setindex(name, path);
-        ast = NULL;
-        continue;
-      }
-      case <localinit>: {
-        e._collect_function_state(ast.cadr(), path, in_try);
-        List body = ast.caddr();
-        e._collect_function_state(body, cons(ast, path), in_try);
-        ast = NULL;
-        continue;
-      }
-      case <defer>: {
-        List body = ast.cadr(), written = ast.last();
-        if (in_try) foreach (List binding, written) {
-          String captured = binding_identity_spelling(binding);
-          if (!e.volatile_names.contains(captured))
-            e.volatile_names = cons(captured, e.volatile_names);
-        }
-        e._collect_function_state(body, cons(body, path), in_try);
-        ast = NULL;
-        continue;
-      }
-      case <try>: {
-        List (body, clause, finalizer) = ast.cdr();
-        e._collect_function_state(body, cons(body, path), in_try);
-        if (clause) {
-          foreach (List record, clause.cadr()) {
-            e._collect_function_state(record.car(), path, in_try);
-            e._collect_function_state(record.cadr(), path, in_try);
-            List arm = record.caddr();
-            e._collect_function_state(arm, cons(arm, path), in_try);
-          }
-        }
-        if (finalizer)
-          e._collect_function_state(finalizer, path, in_try);
-        ast = NULL;
-        continue;
-      }
-      case <function>: ast = NULL; continue;
-    }
-    ast = ast.cdr();
-  }
-}
-
 static List Emitter._function(Emitter e, List ast, List context) {
   List (type, bindings, body) = ast.cdr();
-  Map runtime = %{};
-  body = _static_regions(e.compiler, body, runtime);
   List declaration = %(declare $type (bindings $bindings));
   Type old_return_type = e.return_type, String old_fn = e.fn_name;
   e.return_type = cdr(declaration.type_from_ast()).type().declared();
@@ -478,23 +152,11 @@ static List Emitter._function(Emitter e, List ast, List context) {
   type = e._emit(%( $type ), NULL);
   bindings = %( $bindings );
   body = %( $body );
-  List previous = e.volatile_names, Map old_labels = e.label_paths;
-  List old_path = e.cleanup_path;
   Map old_statics = e.static_objects;
   e.static_objects = %{};
-  e.label_paths = %{};
-  e.cleanup_path = NULL;
-  e.volatile_names = NULL;
-  e._collect_function_state(body, NULL, 0);
   // No loop or switch spans a function boundary, so a nested body starts
   // with the barriers cleared rather than inheriting an enclosing loop's.
-  int prev_break, prev_continue;
-  e._cleanup_barrier_enter(1, &prev_break, &prev_continue);
   List decl = e._emit(bindings, type), body_code = e._emit(body, NULL);
-  e._cleanup_barrier_leave(prev_break, prev_continue);
-  e.label_paths = old_labels;
-  e.cleanup_path = old_path;
-  e.volatile_names = previous;
   e.return_type = old_return_type;
   e.fn_name = old_fn;
   e.static_objects = old_statics;
@@ -697,7 +359,7 @@ static List Emitter._local_static(Emitter e, List ast, List context) {
     Type type = mods.append(%($base_name));
     String spelling = e.emitted_binding_name(name);
     if (!initial ||
-        !_runtime_static_value(e.compiler, initial, e.static_objects)) {
+        !e.compiler.static_value_is_runtime(initial, e.static_objects)) {
       List native = e._semantic_name(type, spelling);
       List value = initial ? %("=" @{e._emit(initial, NULL)}) : NULL;
       output.push(%($storage @native @value ";"));
@@ -763,10 +425,7 @@ static List Emitter._local_static(Emitter e, List ast, List context) {
       $pointer "=" $guard ".payload;"
     ));
   }
-  List previous = e.cleanup_path;
-  e.cleanup_path = cons(ast, previous);
   output.push(e._emit(body, context));
-  e.cleanup_path = previous;
   return output.list_free();
 }
 
@@ -858,79 +517,14 @@ static List Emitter._destructure_value(
            @c_stmts $result_name ";" "})");
 }
 
-// Loop and switch cleanup barriers.
-// Record the current cleanup depth as the barrier that "break" must not
-// unwind past, saving the outer barriers through the out parameters. Loop
-// bodies also bound "continue"; a switch body does not, because "continue"
-// inside a switch still targets the enclosing loop. Every caller must pass
-// the saved pair back to _cleanup_barrier_leave once the body is emitted.
-static void Emitter._cleanup_barrier_enter(
-  Emitter e, int is_loop, int *saved_break, int *saved_continue) {
-  *saved_break = e.break_stop;
-  *saved_continue = e.continue_stop;
-  int depth = (int) e.cleanups.length;
-  e.break_stop = depth;
-  if (is_loop) e.continue_stop = depth;
-}
-
-// Restore the barriers that were active before a body was emitted.
-static void Emitter._cleanup_barrier_leave(
-  Emitter emitter, int saved_break, int saved_continue) {
-  emitter.break_stop = saved_break;
-  emitter.continue_stop = saved_continue;
-}
-
-static void _push_fragments(Array output, List fragments) {
-  foreach (Var fragment, fragments) output.push(fragment);
-}
-
-// Emit pending cleanup down to stop_depth, the cleanup-stack index below
-// which unwinding stops. Each record runs its finalizers and then its own
-// leave statement, so an inner exception frame leaves before an outer defer
-// runs; collecting all finalizers ahead of all leave statements would drop
-// the frame's cleanup watermark below its own entries. A try's finalizer
-// carries its own run-once claim, so the same pair is correct on every path.
-// The stack is only populated by _cleanup_emit, so payload shape is trusted.
-static List Emitter._cleanup_wrap_exit(
-  Emitter e, List statement, int stop_depth) {
-  int top = (int) e.cleanups.length;
-  if (top <= stop_depth) return statement;
-  Cleanup *records = e.cleanups.bytes;
-  Array cleanup = %[];
-  for (int i = top - 1; i >= stop_depth; i--) {
-    _push_fragments(cleanup, records[i].final_code);
-    _push_fragments(cleanup, records[i].leave_stmt);
-  }
-  List cleanup_code = cleanup.list_free();
-  return %("{" @cleanup_code @statement "}");
-}
-
-static List Emitter._cleanup_wrap_return(Emitter emitter, List statement) =>
-  emitter._cleanup_wrap_exit(statement, 0);
-
-static List Emitter._cleanup_wrap_break(Emitter emitter, List statement) =>
-  emitter._cleanup_wrap_exit(statement, emitter.break_stop);
-
-static List Emitter._cleanup_wrap_continue(Emitter emitter, List statement) =>
-  emitter._cleanup_wrap_exit(statement, emitter.continue_stop);
-
-static List Emitter._cleanup_emit(
-  Emitter e, List final_code, List leave_stmt, Var ast, List context) {
-  Cleanup record = { final_code, leave_stmt };
-  e.cleanups.push(&record);
-  e.cleanup_path = cons(ast, e.cleanup_path);
-  List out = e._emit(%( $ast ), context);
-  e.cleanups.pop();
-  e.cleanup_path = e.cleanup_path.cdr();
-  return out;
-}
 
 // Emit a callable defer region. The runtime record covers nonlocal transfer;
 // the emitter cleanup stack covers ordinary fallthrough and structured exits.
 static List Emitter._defer(Emitter e, List ast, List context) {
-  List (body, env_binding, callback, records, written) = ast.cdr();
+  List (body, env_binding, callback, records, written, record, cleanup) =
+    ast.cdr();
   (void) written;
-  String cleanup_name = e.fresh_name("defer_record");
+  String cleanup_name = binding_identity_spelling(record);
   String callback_name = binding_identity_spelling(callback);
   List env_setup = NULL, env_arg = %("NULL");
 
@@ -947,8 +541,8 @@ static List Emitter._defer(Emitter e, List ast, List context) {
     env_arg = %("&" $env_name);
   }
 
-  List leave = %("x2c_cleanup_leave(&" $cleanup_name ");");
-  List body_code = e._cleanup_emit(leave, NULL, body, context);
+  List leave = e._emit(%( $cleanup ), context);
+  List body_code = e._emit(%( $body ), context);
   return %("{
   "@env_setup"
   X2CCleanup $cleanup_name = {
@@ -956,8 +550,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
     .env = "@env_arg"
   };
   x2c_cleanup_push(&$cleanup_name);
-  "@body_code"
-  x2c_cleanup_leave(&$cleanup_name);
+  "@body_code @leave"
 }");
 }
 
@@ -971,8 +564,7 @@ static List Emitter._filtered_catch(
   Array arms = %[], int index = 0, count = records.len();
   foreach (List rec, records) {
     List binders = rec.car(), body = rec.caddr();
-    List handler_body = emitter._cleanup_emit(
-      final_code, leave_stmt, body, context);
+    List handler_body = emitter._emit(%( $body ), context);
     List declarations = _make_catch_binders(binders, handle_name);
     String branch = index == count - 1 ? (index ? "else" : "") :
                     index ? %"else if ($selected_name == $index)" :
@@ -993,27 +585,15 @@ static List Emitter._filtered_catch(
 }
 
 static List Emitter._try(Emitter e, List ast, List context) {
-  List (body, clause, finalizer) = ast.cdr();
-  String frame_name = e.fresh_name("exception_frame");
-  String handle_name = clause
-    ? e.fresh_name("error_handler") : NULL;
-  List final_code = finalizer ? e._emit(%( $finalizer ), context) : NULL;
-  if (clause)
-    final_code = %(
-      "x2c_error_catch_close($handle_name);"
-      "$handle_name = NULL;"
-      @final_code
-    );
-  /* The frame owns the run-once claim, so every path that reaches the
-     finalizer emits the same pair. Claiming also retires the landing, so a
-     `raise` from the finalizer reaches the enclosing frame instead of
-     re-entering this one and looping. */
-  if (finalizer)
-    final_code = %(
-      "if (x2c_exception_claim(&$frame_name)) {" @final_code "}"
-    );
-  List leave_stmt = %("x2c_exception_leave(&" $frame_name ");");
-  List body_code = e._cleanup_emit(final_code, leave_stmt, body, context);
+  List (body, clause, finalizer, frame, handle, cleanup) = ast.cdr();
+  (void) finalizer;
+  String frame_name = binding_identity_spelling(frame);
+  String handle_name = handle ? binding_identity_spelling(handle) : NULL;
+  /* The pass built the statements that leave this region, including the
+     run-once claim around a finalizer. Every path that leaves emits them. */
+  List final_code = e._emit(%( $cleanup ), context);
+  List leave_stmt = NULL;
+  List body_code = e._emit(%( $body ), context);
   List catch_block = NULL;
   if (clause)
     catch_block = e._filtered_catch(
@@ -1278,12 +858,8 @@ static List Emitter._match_cases(Emitter e, List ast, List context) {
     capture_declarations = %(
       "MatchCaptureBuffer _x2c_match_capture = { 0 };"
     );
-  // Arms are lowered into a real switch, so a "break" inside an arm leaves
-  // that switch and must obey the same cleanup barrier as any other switch.
-  int prev_break, prev_continue, dispatched;
-  e._cleanup_barrier_enter(0, &prev_break, &prev_continue);
+  int dispatched;
   List arms = e._match_if(cases, context, &dispatched);
-  e._cleanup_barrier_leave(prev_break, prev_continue);
   // The subject's head symbol selects the first arm that can still match;
   // with no case labels every subject reaches the sole default arm.
   List selector = dispatched
@@ -1299,77 +875,12 @@ static List Emitter._match_cases(Emitter e, List ast, List context) {
 ");
 }
 
-static List Emitter._goto(Emitter e, Var label_ast, List context) {
-  List label = e._emit(%($label_ast), context);
-  List statement = %("goto" @label ";");
-  String name = _cleanup_label_spelling(label_ast);
-  Var target_var;
-  if (!name || !e.label_paths ||
-      !e.label_paths.try_get(name, &target_var)) {
-    e.compiler.origin = e.origin;
-    e.report_error(
-      <emit>, "goto target label is not defined in this function",
-      NULL, NULL);
-  }
-  List target = target_var, source = e.cleanup_path;
-  int source_depth = source.len(), target_depth = target.len();
-  List suffix = source;
-  for (int i = source_depth; i > target_depth && suffix; i--)
-    suffix = suffix.cdr();
-  if (target_depth > source_depth || suffix != target) {
-    e.compiler.origin = e.origin;
-    e.report_error(
-      <emit>, "goto cannot enter or cross a protected cleanup region",
-      NULL, %("jump only within the same region or outward"));
-  }
-  int cleanup_depth = 0;
-  foreach (List region, target)
-    if (region.car() != <localinit>) cleanup_depth++;
-  return e._cleanup_wrap_exit(statement, cleanup_depth);
-}
-
-/* A pointer initialized with the address of a preserved local points at a
-   volatile object, so its pointee type must say so or C rejects dropping the
-   qualifier. */
-static Type Emitter._preserve_pointee(Emitter e, Type type, List bindings) {
-  match (bindings)
-    case %(bindings (op = (bind ? ((!quote *))) ?value)): {
-      String name = _addressed_identifier(value);
-      if (name && e.volatile_names.contains(name) &&
-          !type.flatten_all().contains(<volatile>))
-        return cons(<volatile>, type);
-    }
-  return type;
-}
-
-static List Emitter._declare_stmt(
-  Emitter e, List ast, List context) {
-  if (e.volatile_names && _is_automatic_declaration(ast)) {
-    List (type, bindings) = ast.cdr();
-    type = e._preserve_pointee(type, bindings);
-    if (_bindings_need_preservation(e, bindings) &&
-        bindings.cdr().cdr()) {
-      Array result = %[];
-      bindings = e._preserve_bindings(bindings).cdr();
-      foreach (List binding, bindings) {
-        List declaration = %(declare $type (bindings $binding));
-        _push_fragments(
-          result, %(@{e._declare(declaration, context)} ";"));
-      }
-      return result.list_free();
-    }
-    ast = %(declare $type ${e._preserve_bindings(bindings)});
-  }
-  return %( @{e._declare(ast, context)} ";");
-}
+static List Emitter._declare_stmt(Emitter e, List ast, List context) =>
+  %( @{e._declare(ast, context)} ";");
 
 static List Emitter._decl_stmt(Emitter e, List ast, List context) {
   match (ast)
     case %(decl *declaration): ast = %(declare @declaration);
-  if (e.volatile_names && _is_automatic_declaration(ast)) {
-    List (type, bindings) = ast.cdr();
-    ast = %(declare $type ${e._preserve_bindings(bindings)});
-  }
   return e._declare(ast, context);
 }
 
@@ -1743,10 +1254,8 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       return e._destructure_value(
         type, result, source, temporary,
         converted, statements, context);
-    case %(break):
-      return e._cleanup_wrap_break(%("break;"));
-    case %(continue):
-      return e._cleanup_wrap_continue(%("continue;"));
+    case %(break): return %("break;");
+    case %(continue): return %("continue;");
     case %(if ?condition ?ontrue): {
       List c_cond = e._emit(%($condition), NULL);
       List c_then = e._emit(%($ontrue), NULL);
@@ -1760,17 +1269,12 @@ static List Emitter._emit(Emitter e, List ast, List context) {
                "else" @c_else);
     }
     case %(while ?condition ?body): {
-      List c_cond = e._emit(%($condition), NULL), int old_break, old_continue;
-      e._cleanup_barrier_enter(1, &old_break, &old_continue);
+      List c_cond = e._emit(%($condition), NULL);
       List c_body = e._emit(%($body), NULL);
-      e._cleanup_barrier_leave(old_break, old_continue);
       return %("while" "(" @c_cond ")" @c_body);
     }
     case %(do ?body ?condition): {
-      int old_break, old_continue;
-      e._cleanup_barrier_enter(1, &old_break, &old_continue);
       List c_body = e._emit(%($body), NULL);
-      e._cleanup_barrier_leave(old_break, old_continue);
       List c_cond = e._emit(%($condition), NULL);
       return %("do" @c_body "while"
                "(" @c_cond ")" ";");
@@ -1779,33 +1283,21 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       List c_init = e._emit(%($initial), context);
       List c_cond = e._emit(%($condition), context);
       List c_inc = e._emit(%($increment), context);
-      int old_break, old_continue;
-      e._cleanup_barrier_enter(1, &old_break, &old_continue);
       List c_body = e._emit(%($body), context);
-      e._cleanup_barrier_leave(old_break, old_continue);
       return %("for" "(" @c_init ";" @c_cond ";"
                @c_inc ")" @c_body);
     }
     case %(switch ?expression ?body): {
       List c_expr = e._emit(%($expression), context);
-      int old_break, old_continue;
-      e._cleanup_barrier_enter(0, &old_break, &old_continue);
       List c_body = e._emit(%($body), context);
-      e._cleanup_barrier_leave(old_break, old_continue);
       return %("switch" "(" @c_expr ")" @c_body);
     }
-    case %(return):
-      return e._cleanup_wrap_return(%("return;"));
+    case %(return): return %("return;");
     case %(return (!set ?expression (expr ? ?))): {
       List value = e._emit(%($expression), context);
-      if (!e.cleanups.length) return %("return" @value ";");
-      // Cleanup may mutate referenced state; save the return value first.
-      String value_name = e.fresh_name("return_value");
-      List declaration = e._semantic_name(e.return_type, value_name);
-      List statement = e._cleanup_wrap_return(%("return" $value_name ";"));
-      return %("{" @declaration "=" @value ";" @statement "}");
+      return %("return" @value ";");
     }
-    case %(goto ?label): return e._goto(label, context);
+    case %(goto ?label): return %("goto" @{e._emit(%($label), context)} ";");
     case %(raise ?cause (args *arguments)):
       return e._raise(ast, cause, arguments, context);
     case %((!or fnmod func) ?parameters): {
@@ -1885,11 +1377,6 @@ static List Emitter._emit(Emitter e, List ast, List context) {
 List Compiler.emit(Compiler compiler, List ast) {
   struct Emitter state = {
     .compiler = compiler,
-    .cleanups = Block.new(sizeof(Cleanup)),
-    .break_stop = 0,
-    .continue_stop = 0,
-    .cleanup_path = NULL,
-    .label_paths = NULL,
     .return_type = NULL,
     .origin = 0,
     .fn_name = NULL,
@@ -1907,7 +1394,6 @@ List Compiler.emit(Compiler compiler, List ast) {
     before.push(%(c-direct $definition));
     after.push(%(c-direct ${%"#undef $name"}));
   }
-  state.cleanups.free();
   return before.list_free().flatten_all().append(code)
     .append(after.list_free().flatten_all());
 }

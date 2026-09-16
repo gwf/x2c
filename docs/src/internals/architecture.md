@@ -315,6 +315,18 @@ the owning unit's initializer. Those synthesized declarations go onto a
 compiler-owned early-declaration queue, are driven to a fixed point themselves,
 and are appended to the unit.
 
+`src/cleanup.x` runs once after that fixed point, over each function on its
+own. It names the runtime record of every `defer` and `try` region, builds the
+statements that leave the region, and runs them wherever control leaves it:
+the region's own end, a `return` -- after saving the value, since cleanup may
+change what the expression read -- a `break` or `continue` that leaves the
+construct that bounds it, and an outward `goto`. Entering a region a jump did
+not open is rejected here, including the region a static local's runtime
+initializer opens over the rest of its block. The pass also marks the locals
+and parameters a `try` writes as `volatile`, which C requires of automatic
+state changed across `sigsetjmp`. Because it rewrites transfers, it runs after
+the driver settles rather than inside it.
+
 ```sh
 ./builds/0/x2c translate --dump-transforms greet.x
 ```
@@ -459,11 +471,13 @@ The modules under `src/` divide ownership as follows:
   interfaces, and their Lisp data writer;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
-- `src/transform.x`, `src/lambda.x` -- lowering to emitter-ready AST;
+- `src/transform.x`, `src/lambda.x`, `src/cleanup.x` -- lowering to
+  emitter-ready AST, including which exits leave a cleanup region and which
+  locals an error transfer preserves;
 - `src/cache.x` -- cached constants and their generated initialization;
 - `src/generate.x` -- header/source partitioning, unit initialization,
   include guards, and output writes;
-- `src/emit.x` -- AST to C tokens, including cleanup lowering;
+- `src/emit.x` -- AST to C tokens;
 - `src/format.x` -- C tokens to text;
 - `src/diagnostics.x` -- recorded diagnostics;
 - `src/sourceview.x` -- request-owned source overlays and logical file paths;

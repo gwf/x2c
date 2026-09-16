@@ -1089,8 +1089,8 @@ CliRequest cli_package_options(String path, String package){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -1255,8 +1255,8 @@ CliRequest cli_parse(int argc, char * * argv){
     if(String_getindex(first, 0) != '-') _expected_command(first);
     x2c_driver_error(String_join(NULL, cons(String_var(_47), cons(String_var(first), cons(String_var(_21), NULL)))));
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 

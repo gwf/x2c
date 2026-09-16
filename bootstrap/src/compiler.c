@@ -1704,8 +1704,7 @@ Array_push(compiler -> import_stack, String_var(context)); {
   {
         Token token = Var_token(Compiler_thaw_declaration_syntax(compiler, site));  Compiler_evaluate_declaration_effect(compiler, form, token);  if(compiler -> collect_protocols) Sym_set(compiler -> sym, key, cons(_119, cons(int_var(end), _127)));
       }
-
-  x2c_cleanup_leave(&_x2c_defer_record_0);
+      x2c_cleanup_leave(& _x2c_defer_record_0);
 }
     }
 
@@ -1790,14 +1789,12 @@ _produce_declaration_rows(compiler, additions, selected);
               }
 
             }
-
-  x2c_cleanup_leave(&_x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_defer_record_2);
 }
           }
 
         }
-
-  x2c_cleanup_leave(&_x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
 }
       }
       continue;
@@ -1887,14 +1884,12 @@ Array_push(selected, List_var(_bind_declaration_default(compiler, syntax)));
             }
 
           }
-
-  x2c_cleanup_leave(&_x2c_defer_record_4);
+          x2c_cleanup_leave(& _x2c_defer_record_4);
 }
         }
 
       }
-
-  x2c_cleanup_leave(&_x2c_defer_record_3);
+      x2c_cleanup_leave(& _x2c_defer_record_3);
 }
     }
     continue;
@@ -1980,8 +1975,7 @@ static List _select_declaration_forwards(Compiler compiler, List rows, Map pendi
               }
 
             }
-
-  x2c_cleanup_leave(&_x2c_defer_record_5);
+            x2c_cleanup_leave(& _x2c_defer_record_5);
 }
           }
           continue;
@@ -2122,8 +2116,7 @@ Map additions = Sym_current_symbols(shadow -> sym);  Map_merge(symbols, addition
 
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_6);
+x2c_cleanup_leave(& _x2c_defer_record_6);
 }
 }
 
@@ -2381,8 +2374,7 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
 
 }
 }
-
-  x2c_cleanup_leave(&_x2c_defer_record_7);
+x2c_cleanup_leave(& _x2c_defer_record_7);
 }
 }
 if(conflict){
@@ -2589,8 +2581,7 @@ static List _cache_literal_list(Compiler compiler, List values){
     }
 
   }
-
-  x2c_cleanup_leave(&_x2c_defer_record_8);
+  x2c_cleanup_leave(& _x2c_defer_record_8);
 }
 }
 

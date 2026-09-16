@@ -28,6 +28,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "list.x"
 #include "protocol.x"
 #include "lambda.x"
+#include "cleanup.x"
 
 // type coercion passes
 
@@ -1864,5 +1865,7 @@ List Compiler.transform(Compiler compiler, List ast) {
     foreach (Var sibling, lowered) generated.push(sibling);
   }
   if (generated.len()) newast = newast.append(generated.list_free());
-  return newast;
+  /* Cleanup regions are named once the forms feeding them are final. The
+     pass rewrites exits, so it must not re-enter the fixed point above. */
+  return compiler.mark_cleanup_regions(newast);
 }

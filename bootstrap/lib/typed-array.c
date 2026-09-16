@@ -976,8 +976,8 @@ static ArrayString _prepare_string_array_export(ArrayString array, Context sourc
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
 
-  x2c_cleanup_leave(&_x2c_defer_record_0);
 }
 }
 
@@ -1098,8 +1098,8 @@ static void ArrayChar__core_setslice(ArrayChar _x2c_macro_array_0, int _x2c_macr
     if(_x2c_macro_insert_0 > 0 && ArrayChar_truth(_x2c_macro_source_0)) memcpy(_x2c_macro_data_0 + _x2c_macro_begin_0, _x2c_macro_source_0 -> bytes, _x2c_macro_insert_0 * sizeof(char));
     if(_x2c_macro_delta_0 < 0) _x2c_macro_array_0 -> length = _x2c_macro_n_0 + _x2c_macro_delta_0;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
-  x2c_cleanup_leave(&_x2c_defer_record_1);
 }
 }
 
@@ -1387,8 +1387,8 @@ static Buffer ArrayChar__core_write(ArrayChar _x2c_macro_array_3, Buffer _x2c_ma
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
 
-  x2c_cleanup_leave(&_x2c_defer_record_2);
 }
 }
 
@@ -1421,8 +1421,8 @@ Array ArrayChar_array(ArrayChar _x2c_macro_array_2){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
-  x2c_cleanup_leave(&_x2c_defer_record_3);
 }
 }
 
@@ -1476,8 +1476,8 @@ ArrayChar Array_arraychar(Array _x2c_macro_values_2){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
-  x2c_cleanup_leave(&_x2c_defer_record_4);
 }
 }
 
@@ -1556,8 +1556,8 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_macro_array_5, Context 
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_5);
 
-  x2c_cleanup_leave(&_x2c_defer_record_5);
 }
 }
 
@@ -1672,8 +1672,8 @@ static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_6, int _x2c_ma
     if(_x2c_macro_insert_1 > 0 && ArrayShort_truth(_x2c_macro_source_2)) memcpy(_x2c_macro_data_3 + _x2c_macro_begin_1, _x2c_macro_source_2 -> bytes, _x2c_macro_insert_1 * sizeof(short));
     if(_x2c_macro_delta_1 < 0) _x2c_macro_array_6 -> length = _x2c_macro_n_2 + _x2c_macro_delta_1;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
-  x2c_cleanup_leave(&_x2c_defer_record_6);
 }
 }
 
@@ -1949,8 +1949,8 @@ static Buffer ArrayShort__core_write(ArrayShort _x2c_macro_array_9, Buffer _x2c_
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
-  x2c_cleanup_leave(&_x2c_defer_record_7);
 }
 }
 
@@ -1983,8 +1983,8 @@ Array ArrayShort_array(ArrayShort _x2c_macro_array_8){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_8);
 
-  x2c_cleanup_leave(&_x2c_defer_record_8);
 }
 }
 
@@ -2036,8 +2036,8 @@ ArrayShort Array_arrayshort(Array _x2c_macro_values_5){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
-  x2c_cleanup_leave(&_x2c_defer_record_9);
 }
 }
 
@@ -2104,8 +2104,8 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_macro_array_11, Cont
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
-  x2c_cleanup_leave(&_x2c_defer_record_10);
 }
 }
 
@@ -2220,8 +2220,8 @@ static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_12, int _x2c_macro
     if(_x2c_macro_insert_2 > 0 && ArrayInt_truth(_x2c_macro_source_4)) memcpy(_x2c_macro_data_6 + _x2c_macro_begin_2, _x2c_macro_source_4 -> bytes, _x2c_macro_insert_2 * sizeof(int));
     if(_x2c_macro_delta_2 < 0) _x2c_macro_array_12 -> length = _x2c_macro_n_4 + _x2c_macro_delta_2;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_11);
 
-  x2c_cleanup_leave(&_x2c_defer_record_11);
 }
 }
 
@@ -2495,8 +2495,8 @@ static Buffer ArrayInt__core_write(ArrayInt _x2c_macro_array_15, Buffer _x2c_mac
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_12);
 
-  x2c_cleanup_leave(&_x2c_defer_record_12);
 }
 }
 
@@ -2529,8 +2529,8 @@ Array ArrayInt_array(ArrayInt _x2c_macro_array_14){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_13);
 
-  x2c_cleanup_leave(&_x2c_defer_record_13);
 }
 }
 
@@ -2582,8 +2582,8 @@ ArrayInt Array_arrayint(Array _x2c_macro_values_8){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_14);
 
-  x2c_cleanup_leave(&_x2c_defer_record_14);
 }
 }
 
@@ -2650,8 +2650,8 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_macro_array_17, Context _x
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_15);
 
-  x2c_cleanup_leave(&_x2c_defer_record_15);
 }
 }
 
@@ -2766,8 +2766,8 @@ static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_18, int _x2c_mac
     if(_x2c_macro_insert_3 > 0 && ArrayLong_truth(_x2c_macro_source_6)) memcpy(_x2c_macro_data_9 + _x2c_macro_begin_3, _x2c_macro_source_6 -> bytes, _x2c_macro_insert_3 * sizeof(long));
     if(_x2c_macro_delta_3 < 0) _x2c_macro_array_18 -> length = _x2c_macro_n_6 + _x2c_macro_delta_3;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_16);
 
-  x2c_cleanup_leave(&_x2c_defer_record_16);
 }
 }
 
@@ -3043,8 +3043,8 @@ static Buffer ArrayLong__core_write(ArrayLong _x2c_macro_array_21, Buffer _x2c_m
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_17);
 
-  x2c_cleanup_leave(&_x2c_defer_record_17);
 }
 }
 
@@ -3077,8 +3077,8 @@ Array ArrayLong_array(ArrayLong _x2c_macro_array_20){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_18);
 
-  x2c_cleanup_leave(&_x2c_defer_record_18);
 }
 }
 
@@ -3130,8 +3130,8 @@ ArrayLong Array_arraylong(Array _x2c_macro_values_11){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_19);
 
-  x2c_cleanup_leave(&_x2c_defer_record_19);
 }
 }
 
@@ -3198,8 +3198,8 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_macro_array_23, Context
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_20);
 
-  x2c_cleanup_leave(&_x2c_defer_record_20);
 }
 }
 
@@ -3314,8 +3314,8 @@ static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_24, int _x2c_m
     if(_x2c_macro_insert_4 > 0 && ArrayFloat_truth(_x2c_macro_source_8)) memcpy(_x2c_macro_data_12 + _x2c_macro_begin_4, _x2c_macro_source_8 -> bytes, _x2c_macro_insert_4 * sizeof(float));
     if(_x2c_macro_delta_4 < 0) _x2c_macro_array_24 -> length = _x2c_macro_n_8 + _x2c_macro_delta_4;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_21);
 
-  x2c_cleanup_leave(&_x2c_defer_record_21);
 }
 }
 
@@ -3589,8 +3589,8 @@ static Buffer ArrayFloat__core_write(ArrayFloat _x2c_macro_array_27, Buffer _x2c
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_22);
 
-  x2c_cleanup_leave(&_x2c_defer_record_22);
 }
 }
 
@@ -3623,8 +3623,8 @@ Array ArrayFloat_array(ArrayFloat _x2c_macro_array_26){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_23);
 
-  x2c_cleanup_leave(&_x2c_defer_record_23);
 }
 }
 
@@ -3676,8 +3676,8 @@ ArrayFloat Array_arrayfloat(Array _x2c_macro_values_14){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_24);
 
-  x2c_cleanup_leave(&_x2c_defer_record_24);
 }
 }
 
@@ -3744,8 +3744,8 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_macro_array_29, Cont
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_25);
 
-  x2c_cleanup_leave(&_x2c_defer_record_25);
 }
 }
 
@@ -3860,8 +3860,8 @@ static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro
     if(_x2c_macro_insert_5 > 0 && ArrayDbl_truth(_x2c_macro_source_10)) memcpy(_x2c_macro_data_15 + _x2c_macro_begin_5, _x2c_macro_source_10 -> bytes, _x2c_macro_insert_5 * sizeof(double));
     if(_x2c_macro_delta_5 < 0) _x2c_macro_array_30 -> length = _x2c_macro_n_10 + _x2c_macro_delta_5;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_26);
 
-  x2c_cleanup_leave(&_x2c_defer_record_26);
 }
 }
 
@@ -4135,8 +4135,8 @@ static Buffer ArrayDbl__core_write(ArrayDbl _x2c_macro_array_33, Buffer _x2c_mac
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_27);
 
-  x2c_cleanup_leave(&_x2c_defer_record_27);
 }
 }
 
@@ -4169,8 +4169,8 @@ Array ArrayDbl_array(ArrayDbl _x2c_macro_array_32){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_28);
 
-  x2c_cleanup_leave(&_x2c_defer_record_28);
 }
 }
 
@@ -4222,8 +4222,8 @@ ArrayDbl Array_arraydbl(Array _x2c_macro_values_17){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_29);
 
-  x2c_cleanup_leave(&_x2c_defer_record_29);
 }
 }
 
@@ -4290,8 +4290,8 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_macro_array_35, Context _x
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_30);
 
-  x2c_cleanup_leave(&_x2c_defer_record_30);
 }
 }
 
@@ -4406,8 +4406,8 @@ static void ArrayString__core_setslice(ArrayString _x2c_macro_array_36, int _x2c
     if(_x2c_macro_insert_6 > 0 && ArrayString_truth(_x2c_macro_source_12)) memcpy(_x2c_macro_data_18 + _x2c_macro_begin_6, _x2c_macro_source_12 -> bytes, _x2c_macro_insert_6 * sizeof(String));
     if(_x2c_macro_delta_6 < 0) _x2c_macro_array_36 -> length = _x2c_macro_n_12 + _x2c_macro_delta_6;
   }
+  x2c_cleanup_leave(& _x2c_defer_record_31);
 
-  x2c_cleanup_leave(&_x2c_defer_record_31);
 }
 }
 
@@ -4683,8 +4683,8 @@ static Buffer ArrayString__core_write(ArrayString _x2c_macro_array_39, Buffer _x
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_32);
 
-  x2c_cleanup_leave(&_x2c_defer_record_32);
 }
 }
 
@@ -4717,8 +4717,8 @@ Array ArrayString_array(ArrayString _x2c_macro_array_38){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_33);
 
-  x2c_cleanup_leave(&_x2c_defer_record_33);
 }
 }
 
@@ -4770,8 +4770,8 @@ ArrayString Array_arraystring(Array _x2c_macro_values_20){
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_34);
 
-  x2c_cleanup_leave(&_x2c_defer_record_34);
 }
 }
 
@@ -4838,8 +4838,8 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_macro_array_41, C
     }
 
   }
+  x2c_cleanup_leave(& _x2c_defer_record_35);
 
-  x2c_cleanup_leave(&_x2c_defer_record_35);
 }
 }
 

@@ -360,7 +360,8 @@
   (at 49 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 63 "branch") ()) (expr (int) (literal (int) "0")))))) 
+     (op = (bind (binding 63 "branch") (volatile)) 
+      (expr (int) (literal (int) "0")))))) 
   (at 118 
    (if (expr (int) 
         (call (expr ((func (("Var"))) int) (ident (binding 98 "Var_truth"))) 
@@ -434,23 +435,25 @@
   (at 61 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 68 "preserved") ()) 
+     (op = (bind (binding 68 "preserved") (volatile)) 
       (expr (int) (literal (int) "1")))))) 
   (at 126 
    (declare ("NumericBox") 
     (bindings 
-     (op = (bind (binding 69 "preserved_box") ()) 
+     (op = (bind (binding 69 "preserved_box") (volatile)) 
       (expr ("NumericBox") (composite (commas (expr (int) (literal (int) "2"))))))))) 
-  (at 127 
-   (declare (int) 
-    (bindings 
-     (op = (bind (binding 70 "preserved_values") ((dim))) 
-      (expr ((dim) int) (composite (commas (expr (int) (literal (int) "3")))))) 
-     (op = (bind (binding 71 "addressed") ()) (expr (int) (literal (int) "4")))))) 
+  (declare (int) 
+   (bindings 
+    (op = (bind (binding 70 "preserved_values") (volatile (dim))) 
+     (expr ((dim) int) (composite (commas (expr (int) (literal (int) "3")))))))) 
+  (declare (int) 
+   (bindings 
+    (op = (bind (binding 71 "addressed") (volatile)) 
+     (expr (int) (literal (int) "4"))))) 
   (at 128 
    (declare ("NumericBox") 
     (bindings 
-     (op = (bind (binding 72 "addressed_box") ()) 
+     (op = (bind (binding 72 "addressed_box") (volatile)) 
       (expr ("NumericBox") (composite (commas (expr (int) (literal (int) "5"))))))))) 
   (at 134 
    (try (block 
@@ -524,7 +527,34 @@
     (block 
      (at 72 
       (stmnt 
-       (expr (int) (postfix ++ (expr (int) (ident (binding 63 "branch")))))))))) 
+       (expr (int) (postfix ++ (expr (int) (ident (binding 63 "branch")))))))) 
+    (binding 99 "_x2c_exception_frame_0") (binding 100 "_x2c_error_handler_0") 
+    ((if (expr (int) 
+          (call "x2c_exception_claim" 
+           (args (expr (* ("ExceptionFrame")) 
+                  (op & (expr (("ExceptionFrame")) 
+                         (ident (binding 99 "_x2c_exception_frame_0")))))))) 
+      (block 
+       (stmnt 
+        (expr (void) 
+         (call "x2c_error_catch_close" 
+          (args (expr (("ErrorHandler")) 
+                 (ident (binding 100 "_x2c_error_handler_0"))))))) 
+       (stmnt 
+        (expr (("ErrorHandler")) 
+         (op = (expr (("ErrorHandler")) 
+                (ident (binding 100 "_x2c_error_handler_0"))) 
+          (expr (("ErrorHandler")) (nil))))) 
+       (block 
+        (at 72 
+         (stmnt 
+          (expr (int) (postfix ++ (expr (int) (ident (binding 63 "branch")))))))))) 
+     (stmnt 
+      (expr (void) 
+       (call "x2c_exception_leave" 
+        (args (expr (* ("ExceptionFrame")) 
+               (op & (expr (("ExceptionFrame")) 
+                      (ident (binding 99 "_x2c_exception_frame_0")))))))))))) 
   (at 74 
    (stmnt 
     (expr () 
