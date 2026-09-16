@@ -1,6 +1,7 @@
 # The scripting library gap
 
-> Status: active - 2026-09-16. Phases A, B, and C done; phase D remains.
+> Status: active - 2026-09-16. All four phases are done; the defects at the
+> end remain open.
 > Second of four plans from the 2026-09-15 capabilities and market spike.
 > The scripting capability shipped 2026-09-15 and the repository still runs
 > 30,212 lines of Python, shell, and awk automation against it.
@@ -247,7 +248,7 @@ unpacked elsewhere and run with an empty environment.
 
 `tools/agent-failure.py` still needs `lib/time.x`.
 
-## Phase D - `lib/digest.x`
+## Phase D - `lib/digest.x` (done)
 
 SHA-256 over `String` and `File`: `String.sha256` hashes text and
 `File.sha256` hashes the raw bytes remaining in a stream, each returning the
@@ -289,6 +290,30 @@ exception frame that `src/compiler.x:1539-1563` wraps around the synthesized
 `x2c_script`. The same call in a program with `main` exits 3, and `return 3` in
 a script exits 3. Either the synthesized main should tolerate it or the
 language reference should say `return` is the only way out of a script unit.
+
+## Defect found during Phase C
+
+A statement that starts with a `%(` List literal directly after a `{...}`
+block fails to parse with `parse: expected atomic expression`, while the same
+literal after a `;` parses:
+
+```x2c
+int main(void) {
+  {
+    printf("block\n");
+  }
+  %(echo after);
+  return 0;
+}
+```
+
+The diagnostic's note, `token: % kind: %`, shows the tokenizer classified `%`
+as the modulo operator. Its operand lookback (`_prev_token_ends_operand` in
+`lib/tokenizer.x`) treats `}` as the end of an operand, which is right after a
+compound literal or initializer and wrong after a statement block. This hits
+the ordinary script shape of a `foreach` or `if` block followed by a command
+literal. `tools/gen-package-index.x` works around it by assigning the List to
+a local first. Not yet fixed.
 
 ## Defects found during Phase B
 

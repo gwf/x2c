@@ -399,7 +399,7 @@ Options:
 ```
 
 A script with subcommands reads the first word itself and parses the rest
-with that command's spec. [`etc/x2c-payload.x`](../../../etc/x2c-payload.x),
+with that command's spec. [`etc/x2c-payload.x`](https://github.com/gwf/x2c/blob/main/etc/x2c-payload.x),
 which `make install` runs, works this way.
 
 ## Checksums
@@ -428,7 +428,7 @@ A script that reads or writes JSON includes `json.x` itself:
 ```
 
 It is not included automatically because its names match the converting
-surface of the [`yyjson` package](../../../packages/yyjson/README.md), so a
+surface of the [`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md), so a
 script moves to the package by replacing that line with
 `import "yyjson" with Json;`.
 
