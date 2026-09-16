@@ -21,6 +21,16 @@ $(import "../lib/private-keywords.xmacro")
 /** Names the positioned diagnostic store routed by a `Compiler`. */
 typedef struct Diagnostics *Diagnostics;
 
+/** Describes the `#!` script unit a translation unit was started from: its
+    canonical path, its first line as written, and whether it defines `main`
+    itself. Every compiler of that unit shares one record, so collection sees
+    the same script settings the full parse does.
+*/
+typedef struct ScriptUnit {
+  String path, shebang;
+  int defines_main;
+} *ScriptUnit;
+
 /** Holds scope-owned generated-name state shared by related compilers.
 
     `Compiler.new` initializes every valid instance; callers borrow it from
@@ -103,10 +113,9 @@ typedef struct Compiler {
   int declaration_projection, declaration_produced;
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
-  // The canonical path of a `#!` script unit, whose top-level statements
-  // become `main` unless it defines `main` itself, and its first line as
-  // written, which diagnostics quote; NULL for other units.
-  String script, shebang, int script_main;
+  // The unit's script record, and the same record on the compiler whose own
+  // file is that script; both NULL for an ordinary unit.
+  ScriptUnit unit_script, script;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
   GenNames names;
   Array origins, int origin, source_map;
@@ -274,6 +283,8 @@ static Compiler _new(Compiler owner) {
       _.source_definitions = owner.source_definitions;
       _.source_declarations = owner.source_declarations;
       _.source_texts = owner.source_texts;
+      _.unit_script = owner.unit_script;
+      _.include_dirs = owner.include_dirs;
     }
     else {
       _.package_roots = %{};
@@ -314,6 +325,35 @@ Compiler Compiler.new_shared(Compiler owner) {
      and share the owner's package maps so an import seen in one segment is
      registered and collected exactly once for the whole unit. */
   return _new(owner);
+}
+
+/** Takes over `owner`'s macro, import, keyword, and Lisp state for one
+    segment of a collected file. Segments are one translation unit, so a
+    shadow uses the unit's Lisp environment rather than its own.
+*/
+void Compiler.take_unit_state(Compiler compiler, Compiler owner) {
+  compiler.macros = owner.macros;
+  compiler.imports = owner.imports;
+  compiler.kw_aliases = owner.kw_aliases;
+  compiler.kw_seen = owner.kw_seen;
+  compiler.macro_lisp = owner.macro_lisp;
+  compiler.declaration_effects = owner.declaration_effects;
+  compiler.borrowed_lisp = compiler.macro_lisp != NULL;
+}
+
+/** Returns that state to `owner`, so the next segment starts where this one
+    finished and any Lisp environment this segment created stays alive after
+    the shadow is released.
+*/
+void Compiler.return_unit_state(Compiler compiler, Compiler owner) {
+  owner.macros = compiler.macros;
+  owner.imports = compiler.imports;
+  owner.kw_aliases = compiler.kw_aliases;
+  owner.kw_seen = compiler.kw_seen;
+  owner.macro_lisp = compiler.macro_lisp;
+  owner.declaration_effects = compiler.declaration_effects;
+  owner.declaration_produced |= compiler.declaration_produced;
+  compiler.borrowed_lisp = compiler.macro_lisp != NULL;
 }
 
 /** Reads a source through the request view and retains exact response bytes. */
@@ -430,6 +470,12 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
     translation finishes.
 */
 void Compiler.tokenize(Compiler c, char *text) {
+  /* The unit's script settings apply to the one file that carries the
+     shebang, whichever compiler reads it. */
+  if (c.unit_script && c.filename &&
+      (c.filename == c.unit_script.path ||
+       c.filename.absolute_path() == c.unit_script.path))
+    c.script = c.unit_script;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
   c.tokenizer.scan();
@@ -1141,11 +1187,11 @@ static void _shallow_parse_loop(Compiler c) {
   while (c.peek(0) != <eof>) {
     c.update_source_visibility(c.leading_preproc());
     Token start = c.token;
-    if (c.script && !c.script_main && c.script_statement_starts()) {
+    if (c.script && !c.script.defines_main && c.script_statement_starts()) {
       c.skip_script_statement();
       continue;
     }
-    if (c.script && c.script_main && c.script_statement_executes())
+    if (c.script && c.script.defines_main && c.script_statement_executes())
       _report_script_statement(c);
     if (c.test_static_assert()) {
       c.parse_static_assert();
@@ -1368,7 +1414,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   $let(c.recovery_depth, c.recovery_depth + 1) {
     ast = _prepend_preproc(c, ast);
     Array statements = %[];
-    int hoisting = c.script && !c.script_main, gap = 0, runs = 0, first = 0;
+    int hoisting = c.script && !c.script.defines_main, gap = 0, runs = 0, first = 0;
     loop {
       while (c.peek(0) != <eof>) {
         try {
@@ -1384,7 +1430,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
             if (!runs++) first = begin;
           }
           else {
-            if (c.script && c.script_main && c.script_statement_executes())
+            if (c.script && c.script.defines_main && c.script_statement_executes())
               _report_script_statement(c);
             Ast node = _replay_declaration_bundle(c);
             if (!node) node = c.parse_top_level();
@@ -1431,7 +1477,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     _report_script_statement(c);
   }
   ast = ast.reverse();
-  if (c.script && !c.script_main && !c.error_count())
+  if (c.script && !c.script.defines_main && !c.error_count())
     _check_script_locals(c, ast);
   _check_unmatched_braces(c);
   if (!c.error_count()) _validate_static_object_initializers(c);

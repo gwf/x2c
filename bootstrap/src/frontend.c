@@ -274,15 +274,17 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = _read_input_text(c, filename);
   if(String_truth(text) && String_startswith(text, _22)){
-    c -> script = source_resolved ? String_new(source_path) : filename;
     int end = String_find(text, _18);
-    c -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
+    ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
+    script -> path = source_resolved ? String_new(source_path) : filename;
+    script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
+    c -> unit_script = script;
     text = _script_text(text);
   }
+  c -> include_dirs = frontend -> include_dirs;
   unit -> source_lines = _source_lines(text);
   Compiler_tokenize(c, text);
-  if(String_truth(c -> script)) c -> script_main = Compiler_defines_main(c);
-  c -> include_dirs = frontend -> include_dirs;
+  if(c -> script) c -> script -> defines_main = Compiler_defines_main(c);
 }
 
 List CliRequest_package_roots(CliRequest);
@@ -375,7 +377,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
-  if(String_truth(c -> script)) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _12);
+  if(c -> script) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _12);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;

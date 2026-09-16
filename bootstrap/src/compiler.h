@@ -13,6 +13,12 @@
 #include "sourceview.h"
 typedef struct Diagnostics * Diagnostics;
 
+typedef struct ScriptUnit{
+  String path, shebang;
+  int defines_main;
+}
+* ScriptUnit;
+
 typedef struct GenNames{
   Map counters, adapters;
   int next_binding;
@@ -65,8 +71,7 @@ typedef struct Compiler{
   String fn_name;
   Diagnostics diagnostics;
   Array braces, import_stack;
-  String script, shebang;
-  int script_main;
+  ScriptUnit unit_script, script;
   Lisp macro_lisp;
   String import_src;
   int borrowed_lisp;
@@ -104,6 +109,10 @@ void Compiler_close_child(Compiler compiler, Compiler child);
 Compiler Compiler_new(void);
 
 Compiler Compiler_new_shared(Compiler owner);
+
+void Compiler_take_unit_state(Compiler compiler, Compiler owner);
+
+void Compiler_return_unit_state(Compiler compiler, Compiler owner);
 
 int Compiler_read_source(Compiler compiler, String path, String volatile * text);
 

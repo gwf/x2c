@@ -980,6 +980,8 @@ static Compiler _new(Compiler owner){
       (compiler) -> source_definitions = owner -> source_definitions;
       (compiler) -> source_declarations = owner -> source_declarations;
       (compiler) -> source_texts = owner -> source_texts;
+      (compiler) -> unit_script = owner -> unit_script;
+      (compiler) -> include_dirs = owner -> include_dirs;
     }
     else{
       (compiler) -> package_roots = Map_new();
@@ -1016,6 +1018,27 @@ Compiler Compiler_new(void){
 
 Compiler Compiler_new_shared(Compiler owner){
   return _new(owner);
+}
+
+void Compiler_take_unit_state(Compiler compiler, Compiler owner){
+  compiler -> macros = owner -> macros;
+  compiler -> imports = owner -> imports;
+  compiler -> kw_aliases = owner -> kw_aliases;
+  compiler -> kw_seen = owner -> kw_seen;
+  compiler -> macro_lisp = owner -> macro_lisp;
+  compiler -> declaration_effects = owner -> declaration_effects;
+  compiler -> borrowed_lisp = compiler -> macro_lisp != NULL;
+}
+
+void Compiler_return_unit_state(Compiler compiler, Compiler owner){
+  owner -> macros = compiler -> macros;
+  owner -> imports = compiler -> imports;
+  owner -> kw_aliases = compiler -> kw_aliases;
+  owner -> kw_seen = compiler -> kw_seen;
+  owner -> macro_lisp = compiler -> macro_lisp;
+  owner -> declaration_effects = compiler -> declaration_effects;
+  owner -> declaration_produced |= compiler -> declaration_produced;
+  compiler -> borrowed_lisp = compiler -> macro_lisp != NULL;
 }
 
 int SourceView_read(SourceView, String, volatile String *);
@@ -1152,11 +1175,16 @@ String Compiler_emitted_binding_name(Compiler compiler, List binding){
   return binding_identity_spelling(binding);
 }
 
+int String_truth(String);
+
+int String_equal(String, String);
+
 Tokenizer Tokenizer_new(char *);
 
 void Tokenizer_scan(Tokenizer);
 
 void Compiler_tokenize(Compiler c, char * text){
+  if(c -> unit_script && String_truth(c -> filename) &&(String_equal(c -> filename, c -> unit_script -> path) || String_equal(String_absolute_path(c -> filename), c -> unit_script -> path))) c -> script = c -> unit_script;
   c -> text = String_new(text);
   c -> tokenizer = Tokenizer_new(c -> text);
   Tokenizer_scan(c -> tokenizer);
@@ -1263,8 +1291,6 @@ static void _shallow_block(Compiler c){
   }
   Compiler_expect(c, 251);
 }
-
-int String_truth(String);
 
 String Compiler_display_path(Compiler, String);
 
@@ -2153,10 +2179,10 @@ void Compiler_skip_keyword_alias(Compiler);
 void Compiler_skip_macro_invocation(Compiler);
 static void _shallow_parse_loop(Compiler c){
   Compiler_rebuild_protocols(c, NULL);  c -> conforms = Map_new();  c -> shallow = 1;  Array_clear(c -> braces);  while(Compiler_peek(c, 0) != 11212){
-    Compiler_update_source_visibility(c, Compiler_leading_preproc(c));  Token start = c -> token;  if(String_truth(c -> script) && ! c -> script_main && Compiler_script_statement_starts(c)){
+    Compiler_update_source_visibility(c, Compiler_leading_preproc(c));  Token start = c -> token;  if(c -> script && ! c -> script -> defines_main && Compiler_script_statement_starts(c)){
       Compiler_skip_script_statement(c);  continue;
     }
-    if(String_truth(c -> script) && c -> script_main && Compiler_script_statement_executes(c)) _report_script_statement(c);  if(Compiler_test_static_assert(c)){
+    if(c -> script && c -> script -> defines_main && Compiler_script_statement_executes(c)) _report_script_statement(c);  if(Compiler_test_static_assert(c)){
       Compiler_parse_static_assert(c);  _debug_tokens(c, start, c -> token);  continue;
     }
     if(Compiler_peek(c, 0) == 9297){
@@ -2286,7 +2312,7 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
   x2c_cleanup_push(&_x2c_defer_record_7);
   {
       * _x2c_macro_address_5 = c -> recovery_depth + 1; {
-        ast = _prepend_preproc(c, ast);  Array statements = Array_new();  int hoisting = String_truth(c -> script) && ! c -> script_main;  int volatile gap = 0;  int volatile runs = 0;  int volatile first = 0;  while(1){
+        ast = _prepend_preproc(c, ast);  Array statements = Array_new();  int hoisting = c -> script && ! c -> script -> defines_main;  int volatile gap = 0;  int volatile runs = 0;  int volatile first = 0;  while(1){
           while(Compiler_peek(c, 0) != 11212){
             {
               ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_catch_arms_1[1];  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_1[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(63981333478578), NULL))), cons(Symbol_var(54), NULL)));  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
@@ -2296,7 +2322,7 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
                 Compiler_skip_script_statement(c);  int begin = start - tokens;  int end = _skip_backward(c -> token - 1, tokens) + 1 - tokens;  Array_push(statements, int_var(begin));  Array_push(statements, int_var(end));  if(! runs ++) first = begin;
               }
               else{
-                if(String_truth(c -> script) && c -> script_main && Compiler_script_statement_executes(c)) _report_script_statement(c);  Ast volatile node = _replay_declaration_bundle(c);  if(! List_truth(node)) node = Compiler_parse_top_level(c);  if(List_truth(node) && Var_equal(List_car(node), Symbol_var(39266))){
+                if(c -> script && c -> script -> defines_main && Compiler_script_statement_executes(c)) _report_script_statement(c);  Ast volatile node = _replay_declaration_bundle(c);  if(! List_truth(node)) node = Compiler_parse_top_level(c);  if(List_truth(node) && Var_equal(List_car(node), Symbol_var(39266))){
                   {
                     List volatile item;  Iter _x2c_macro_iterator_23 = List_iter(List_cdr(node), &(struct Iter){
                       int_var(0)
@@ -2362,7 +2388,7 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
 if(conflict){
   c -> token = conflict;  _report_script_statement(c);
 }
-ast = List_reverse(ast);  if(String_truth(c -> script) && ! c -> script_main && ! Compiler_error_count(c)) _check_script_locals(c, ast);  _check_unmatched_braces(c);  if(! Compiler_error_count(c)) _validate_static_object_initializers(c);  return ast;
+ast = List_reverse(ast);  if(c -> script && ! c -> script -> defines_main && ! Compiler_error_count(c)) _check_script_locals(c, ast);  _check_unmatched_braces(c);  if(! Compiler_error_count(c)) _validate_static_object_initializers(c);  return ast;
 }
 
 Symbol preproc_conditional_kind(String);
@@ -2373,7 +2399,6 @@ static void _push_script_conditionals(Compiler c, Array statements, int first, i
 
 }
 
-int String_equal(String, String);
 int List_try_search(List, Var, Var *, List *);
 static void _check_script_locals(Compiler c, List ast){
   Map locals = Map_new(); {

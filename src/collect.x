@@ -333,23 +333,8 @@ static void _parse_segment(
      over one of them still names a type the header defines. */
   if (!path.endswith(".x")) shadow.package = NULL;
   shadow.filename = path;
-  if (path == c.script) {
-    shadow.script = path;
-    shadow.shebang = c.shebang;
-    shadow.script_main = c.script_main;
-  }
-  shadow.include_dirs = c.include_dirs;
   shadow.source_private = *private;
-  shadow.macros = c.macros;
-  shadow.imports = c.imports;
-  shadow.kw_aliases = c.kw_aliases;
-  shadow.kw_seen = c.kw_seen;
-  /* Segments are one translation unit. Let each shadow use the unit's Lisp
-     environment, and keep any environment the first importing segment
-     creates alive after that shadow is released. */
-  shadow.macro_lisp = c.macro_lisp;
-  shadow.declaration_effects = c.declaration_effects;
-  shadow.borrowed_lisp = shadow.macro_lisp != NULL;
+  shadow.take_unit_state(c);
   shadow.tokenize(text);
   shadow.text = source;
   if (c.source_facts) c.source_texts[path.absolute_path()] = source;
@@ -359,14 +344,7 @@ static void _parse_segment(
     token.pos += start_pos;
   }
   shadow.shallow_parse_overlay(globs, overlay);
-  c.macros = shadow.macros;
-  c.imports = shadow.imports;
-  c.kw_aliases = shadow.kw_aliases;
-  c.kw_seen = shadow.kw_seen;
-  c.macro_lisp = shadow.macro_lisp;
-  c.declaration_effects = shadow.declaration_effects;
-  c.declaration_produced |= shadow.declaration_produced;
-  shadow.borrowed_lisp = shadow.macro_lisp != NULL;
+  shadow.return_unit_state(c);
   if (path.endswith(".x")) {
     Map.merge(c.fn_defs, shadow.fn_defs);
     Map.merge(definitions, shadow.fn_defs);
@@ -763,7 +741,6 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   defer c.close_child(package);
   package.package = name;
   package.filename = entry;
-  package.include_dirs = c.include_dirs;
   Map globs = c.sym.base_symbols(), visited = %{};
   visited[entry] = 1;
   Var cached = c.source_facts ? void : _header_cache()[entry];

@@ -150,15 +150,17 @@ static void _tokenize_input(
       source_path[lib_length] == '/');
   String text = _read_input_text(c, filename);
   if (text && text.startswith("#!")) {
-    c.script = source_resolved ? String.new(source_path) : filename;
     int end = text.find("\n");
-    c.shebang = end < 0 ? text : text[:end];
+    ScriptUnit script = Scope.calloc(1, sizeof(struct ScriptUnit));
+    script.path = source_resolved ? String.new(source_path) : filename;
+    script.shebang = end < 0 ? text : text[:end];
+    c.unit_script = script;
     text = _script_text(text);
   }
+  c.include_dirs = frontend.include_dirs;
   unit->source_lines = _source_lines(text);
   c.tokenize(text);
-  if (c.script) c.script_main = c.defines_main();
-  c.include_dirs = frontend.include_dirs;
+  if (c.script) c.script.defines_main = c.defines_main();
 }
 
 /* A unit compiles in package mode only when it is one of that package's own
