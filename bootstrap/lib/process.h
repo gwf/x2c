@@ -50,6 +50,8 @@ List List_lines(List command);
 
 List List_arguments(int argc, char * * argv);
 
+String String_env(String name);
+
 int Job_ready(Job job);
 
 int Job_wait(Job job);

@@ -20,6 +20,7 @@ Filesystem operations on path `String`s.
 | [`String.glob`](#String.glob) | Returns the existing paths that match the glob `pattern`, sorted. |
 | [`String.glob_match`](#String.glob_match) | Reports whether all of `path` matches the glob `pattern`. |
 | [`String.is_dir`](#String.is_dir) | Reports whether `path` names a directory, following links. |
+| [`String.is_executable`](#String.is_executable) | Reports whether this process may execute `path`, as the shell's `-x`. |
 | [`String.is_file`](#String.is_file) | Reports whether `path` names a regular file, following links. |
 | [`String.join_path`](#String.join_path) | Returns `name` joined to `base` with one separating slash. |
 | [`String.list_dir`](#String.list_dir) | Returns the names in the directory `path`, sorted, without `.` and `..`. |
@@ -71,7 +72,7 @@ giving it `source`'s permission bits.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:406`
+Source: `lib/path.x:409`
 
 <a id="String.copy_tree"></a>
 #### String.copy_tree
@@ -83,7 +84,7 @@ a link, and a regular file with `String.copy_file`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:420`
+Source: `lib/path.x:423`
 
 <a id="String.dirname"></a>
 #### String.dirname
@@ -123,7 +124,7 @@ Returns the size of the file at `path` in bytes.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:144`
+Source: `lib/path.x:147`
 
 <a id="String.glob"></a>
 #### String.glob
@@ -136,7 +137,7 @@ descends only as deep as the pattern can match. As in a shell, a name
 that begins with a dot matches only where the pattern spells the dot.
 No match returns an empty `List`.
 
-Source: `lib/path.x:301`
+Source: `lib/path.x:304`
 
 <a id="String.glob_match"></a>
 #### String.glob_match
@@ -147,7 +148,7 @@ Reports whether all of `path` matches the glob `pattern`. A path
 component that begins with a dot matches only a pattern component that
 begins with one.
 
-Source: `lib/path.x:292`
+Source: `lib/path.x:295`
 
 <a id="String.is_dir"></a>
 #### String.is_dir
@@ -157,6 +158,15 @@ Source: `lib/path.x:292`
 Reports whether `path` names a directory, following links.
 
 Source: `lib/path.x:124`
+
+<a id="String.is_executable"></a>
+#### String.is_executable
+
+`int String.is_executable(String path)`
+
+Reports whether this process may execute `path`, as the shell's `-x`.
+
+Source: `lib/path.x:136`
 
 <a id="String.is_file"></a>
 #### String.is_file
@@ -186,7 +196,7 @@ Returns the names in the directory `path`, sorted, without `.` and `..`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:163`
+Source: `lib/path.x:166`
 
 <a id="String.make_dirs"></a>
 #### String.make_dirs
@@ -199,7 +209,7 @@ An existing directory is left as it is.
 **Raises:** `<io-fail>` when a component cannot be created or `path` names
 an existing non-directory, or `<not-found>`.
 
-Source: `lib/path.x:331`
+Source: `lib/path.x:334`
 
 <a id="String.modified_time"></a>
 #### String.modified_time
@@ -211,7 +221,7 @@ with the fraction the filesystem records.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:151`
+Source: `lib/path.x:154`
 
 <a id="String.move_to"></a>
 #### String.move_to
@@ -223,7 +233,7 @@ different filesystems.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:445`
+Source: `lib/path.x:448`
 
 <a id="String.read_text"></a>
 #### String.read_text
@@ -235,7 +245,7 @@ Returns the contents of the file at `path`, or NULL when it is empty.
 **Raises:** `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
 a NUL byte.
 
-Source: `lib/path.x:463`
+Source: `lib/path.x:466`
 
 <a id="String.remove_file"></a>
 #### String.remove_file
@@ -246,7 +256,7 @@ Removes the file or symbolic link `path` when it exists.
 
 **Raises:** `<io-fail>` when it exists and cannot be removed.
 
-Source: `lib/path.x:351`
+Source: `lib/path.x:354`
 
 <a id="String.remove_tree"></a>
 #### String.remove_tree
@@ -259,7 +269,7 @@ entry that cannot be removed.
 
 **Raises:** `<io-fail>` naming the first path that could not be removed.
 
-Source: `lib/path.x:394`
+Source: `lib/path.x:397`
 
 <a id="String.stem"></a>
 #### String.stem
@@ -279,7 +289,7 @@ Creates the symbolic link `link` pointing at `target`.
 
 **Raises:** `<io-fail>` when the link cannot be created.
 
-Source: `lib/path.x:455`
+Source: `lib/path.x:458`
 
 <a id="String.temp_dir"></a>
 #### String.temp_dir
@@ -291,7 +301,7 @@ its path. The caller removes it, usually with `String.remove_tree`.
 
 **Raises:** `<io-fail>` when the directory cannot be created.
 
-Source: `lib/path.x:479`
+Source: `lib/path.x:482`
 
 <a id="String.walk"></a>
 #### String.walk
@@ -316,7 +326,7 @@ long units = %"src".walk().filter(%!(p) => p.str().endswith(".x")).count();
 **Raises:** `<not-found>` or `<io-fail>` when `root` cannot be listed, and
 `<io-fail>` from a pull when a directory vanishes during the walk.
 
-Source: `lib/path.x:214`
+Source: `lib/path.x:217`
 
 <a id="String.write_text"></a>
 #### String.write_text
@@ -327,7 +337,7 @@ Replaces the contents of the file at `path` with `text`.
 
 **Raises:** `<not-found>` when the directory does not exist, or `<io-fail>`.
 
-Source: `lib/path.x:469`
+Source: `lib/path.x:472`
 
 ## Design notes
 
@@ -340,8 +350,8 @@ succeeds.
 The path-part methods only examine text. `dirname` and `basename` follow
 POSIX, ignoring trailing slashes. Glob patterns use `*` and `?` within
 one path component, `[...]` character classes, `**` for any number of
-components, and backslash to quote the next character. Wildcards also
-match names that begin with a dot.
+components, and backslash to quote the next character. As in a shell, a
+wildcard does not match a leading dot; spell the dot to match it.
 
 ## Tests and examples
 

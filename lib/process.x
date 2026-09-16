@@ -11,6 +11,9 @@
     Children inherit the standard streams unless an option routes them. A
     pipeline's status is the status of its last failing stage, or zero when
     every stage succeeds. A signalled stage reports 128 plus the signal.
+
+    This module also owns the calling process's own argument list and
+    environment, which a script reads to decide what to run.
 */
 
 #pragma once
@@ -401,6 +404,15 @@ List List.arguments(int argc, char **argv) {
   for (int i = argc - 1; i > 0; i--)
     result = %(${String.new(argv[i])} @result);
   return result;
+}
+
+/** Returns the value of the environment variable `name`, or NULL when it is
+    unset. The result is a fresh `String`; the `env` option sets variables for
+    a child instead of changing this process.
+*/
+String String.env(String name) {
+  const char *value = name ? getenv(name) : NULL;
+  return value ? String.new(value) : NULL;
 }
 
 /** Reports whether every stage of `job` has exited, without blocking. */

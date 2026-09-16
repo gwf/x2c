@@ -24,6 +24,8 @@ int String_is_dir(String path);
 
 int String_is_file(String path);
 
+int String_is_executable(String path);
+
 long String_file_size(String path);
 
 double String_modified_time(String path);

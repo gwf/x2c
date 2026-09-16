@@ -11,8 +11,8 @@
     The path-part methods only examine text. `dirname` and `basename` follow
     POSIX, ignoring trailing slashes. Glob patterns use `*` and `?` within
     one path component, `[...]` character classes, `**` for any number of
-    components, and backslash to quote the next character. Wildcards also
-    match names that begin with a dot.
+    components, and backslash to quote the next character. As in a shell, a
+    wildcard does not match a leading dot; spell the dot to match it.
 */
 
 #pragma once
@@ -131,6 +131,9 @@ int String.is_file(String path) {
   struct stat info;
   return path && stat(path, &info) == 0 && S_ISREG(info.st_mode);
 }
+
+/** Reports whether this process may execute `path`, as the shell's `-x`. */
+int String.is_executable(String path) => path && access(path, X_OK) == 0;
 
 static struct stat _stat(const char *operation, String path) {
   struct stat info;

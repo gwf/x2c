@@ -25,7 +25,21 @@ foreach (String file, %(git diff --name-only).lines())
   printf("%s: %s\n", branch, file);
 ```
 
-`args` holds the arguments after the script's name as `String`s. Functions,
+`args` holds the arguments after the script's name as `String`s, and
+`String.env` reads one environment variable of the script's own process,
+returning NULL when it is unset:
+
+```x2c
+~#include "process.x"
+~int main(void) {
+String site = %"X2C_SITE".env();
+if (!site) site = %"https://x2c-lang.dev";
+~  return site ? 0 : 1;
+~}
+```
+
+The `env` option sets variables for a child instead; this reads the script's
+own environment. Functions,
 types, and macros written between the statements work as they do in any
 file, and the statements can call those functions wherever they are
 defined. An existing program also becomes a script by adding the shebang
@@ -208,8 +222,9 @@ String object = %"build".join_path(%"${source.stem()}.o");
 ~}
 ```
 
-`exists`, `is_dir`, `is_file`, `file_size`, and `modified_time` ask about a
-path; `modified_time` keeps the fraction of a second the filesystem records.
+`exists`, `is_dir`, `is_file`, `is_executable`, `file_size`, and
+`modified_time` ask about a path; `modified_time` keeps the fraction of a
+second the filesystem records.
 `list_dir` returns the sorted names in one directory, `walk` lazily yields
 every path below a directory, and `glob` returns the paths that match a
 pattern, where `**` matches any number of directories. As in a shell, a

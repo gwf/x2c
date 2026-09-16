@@ -59,8 +59,9 @@ prepare the next patch version instead. Say which case applies.
 ## Verify the release
 
 Watch the tag's run and the `pages` run it dispatches. Then run
-`tools/check-release.sh <version>`, and again with `torch` as the package on
-a platform torch supports. Report failures with the step that failed.
+`./x2c script tools/check-release.x <version>`, and again with `torch` as
+the package on a platform torch supports. Report failures with the step that
+failed.
 
 The release is complete when both runs succeeded and the check passes. A
 merged pull request or a green build is not completion.

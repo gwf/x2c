@@ -145,9 +145,25 @@ static void path_failures_raise_with_details(void) {
   root.remove_tree();
 }
 
+static void path_reports_executable_permission(void) {
+  $test.scoped();
+  String root = String.temp_dir();
+  String script = root.join_path("run.sh");
+  script.write_text("#!/bin/sh\nexit 0\n");
+  EXPECT_TRUE(script.is_file() && !script.is_executable());
+  chmod(script, 0755);
+  EXPECT_TRUE(script.is_executable());
+  // `-x` asks about search permission too, so a directory qualifies.
+  EXPECT_TRUE(root.is_executable());
+  EXPECT_TRUE(!root.join_path("absent").is_executable());
+  EXPECT_TRUE(!String.is_executable(NULL));
+  root.remove_tree();
+}
+
 void path_suite(void) {
   $test.run(path_parts_examine_text);
   $test.run(path_glob_match_follows_components);
   $test.run(path_tree_operations);
+  $test.run(path_reports_executable_permission);
   $test.run(path_failures_raise_with_details);
 }

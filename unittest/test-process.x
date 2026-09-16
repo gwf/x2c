@@ -5,6 +5,7 @@
 $(import "test-macros.xmacro")
 #include <errno.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 static void process_arguments_stay_whole(void) {
@@ -171,8 +172,20 @@ static void process_jobs_wait_kill_and_clean_up(void) {
   EXPECT_INT_EQ(done.wait(), 0);
 }
 
+static void process_env_reads_the_calling_process(void) {
+  $test.scoped();
+  String name = %"X2C_TEST_ENVIRONMENT_VALUE";
+  EXPECT_NULL(name.env());
+  setenv(name, "present", 1);
+  EXPECT_STR_EQ(name.env(), "present");
+  unsetenv(name);
+  EXPECT_NULL(name.env());
+  EXPECT_NULL(String.env(NULL));
+}
+
 void process_suite(void) {
   $test.run(process_arguments_stay_whole);
+  $test.run(process_env_reads_the_calling_process);
   $test.run(process_status_reports_exit_and_signal);
   $test.run(process_run_raises_command_failure);
   $test.run(process_output_and_lines_capture_stdout);

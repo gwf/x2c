@@ -824,9 +824,9 @@ Public functions:
 
 `String.join_path`, `String.dirname`, `String.basename`, `String.extension`,
 `String.stem`, `String.absolute_path`, `String.exists`, `String.is_dir`,
-`String.is_file`, `String.file_size`, `String.modified_time`,
-`String.list_dir`, `String.walk`, `String.glob_match`, `String.glob`,
-`String.make_dirs`, `String.remove_file`, `String.remove_tree`,
+`String.is_file`, `String.is_executable`, `String.file_size`,
+`String.modified_time`, `String.list_dir`, `String.walk`, `String.glob_match`,
+`String.glob`, `String.make_dirs`, `String.remove_file`, `String.remove_tree`,
 `String.copy_file`, `String.copy_tree`, `String.move_to`, `String.symlink_to`,
 `String.read_text`, `String.write_text`, `String.temp_dir`
 
@@ -854,8 +854,8 @@ Public functions:
 `Job.free`, `Job.var`, `Var.job`, `Job.equal`, `Job.hash`, `Job.write_str`,
 `Job.str`, `Job.write_repr`, `Job.repr`, `List.options`, `List.pipe`,
 `List.start`, `List.status`, `List.run`, `List.output`, `List.lines`,
-`List.arguments`, `Job.ready`, `Job.wait`, `Job.check`, `Job.output`,
-`Job.errors`, `Job.kill`, `Job.cleanup`, `Job.wait_any`
+`List.arguments`, `String.env`, `Job.ready`, `Job.wait`, `Job.check`,
+`Job.output`, `Job.errors`, `Job.kill`, `Job.cleanup`, `Job.wait_any`
 
 ### [lib/protocols.x](../lib/protocols.x)
 

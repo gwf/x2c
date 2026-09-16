@@ -71,8 +71,8 @@ built it.
 5. **Verify** once the tag run and the pages deploy finish:
 
    ```sh
-   tools/check-release.sh <version>
-   tools/check-release.sh <version> torch
+   ./x2c script tools/check-release.x <version>
+   ./x2c script tools/check-release.x <version> torch
    ```
 
    It checks that the site names the version, that the site's installer
