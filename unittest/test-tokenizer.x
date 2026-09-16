@@ -75,6 +75,59 @@ static void tokenizer_postfix_update_ends_operand(void) {
 }
 
 
+/* Scans x2c source and returns the text of its last `%`-prefixed token. */
+static String _last_percent_token(char *source) {
+  Tokenizer tokenizer = Tokenizer.new(source);
+  tokenizer.scan();
+  EXPECT_INT_EQ(tokenizer.status(), <ok>);
+  String text = NULL;
+  for (Token token = tokenizer.next(); token.type != <eof>;
+       token = tokenizer.next())
+    if (token.text.startswith("%")) text = token.text;
+  return text;
+}
+
+static void tokenizer_percent_after_closing_delimiter(void) {
+  char *cases[][2] = {
+    { "x; { y; } %(a)", "%(" },
+    { "x; { s = \"{\"; } %(a)", "%(" },
+    { "int f(void) { } %\"a\"", "%\"" },
+    { "if (x) { } else { } %!(a) => a", "%!" },
+    { "foreach (T x, xs) { } %(a)", "%(" },
+    { "with x { } %(a)", "%(" },
+    { "case 1: { } %(a)", "%(" },
+    { "match (x) { } %(a)", "%(" },
+    { "x = (int){7} %(a)", "%" },
+    { "x = (int){ /* { */ 7 } %!a", "%" },
+    { "m = %{a: b} %(c)", "%" },
+    { "{ } %(a)", "%" },
+    { "(a) %(b)", "%" },
+    { "(a) %!b", "%" },
+    { "a[i] %(n)", "%" },
+    { "(T) %\"a\"", "%\"" },
+    { "(T) %[a]", "%[" },
+    { "(T) %<<a>>", "%<<" }
+  };
+  for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+    String source = String.new(cases[i][0]);
+    String actual = _last_percent_token(cases[i][0]);
+    String expected = String.new(cases[i][1]);
+    EXPECT_STR_EQ(%"$source -> $actual", %"$source -> $expected");
+  }
+
+  // A `%` that ends the input is one byte, even where a literal could open.
+  Tokenizer tokenizer = Tokenizer.new("x = %");
+  tokenizer.scan();
+  Symbol expected[] = { <ident>, <=>, <%>, <eof> };
+  for (int i = 0; i < 4; i++) {
+    Token token = tokenizer.next();
+    EXPECT_INT_EQ(token.type, expected[i]);
+    if (i == 2) EXPECT_INT_EQ(token.len, 1);
+  }
+  EXPECT_INT_EQ(tokenizer.status(), <ok>);
+}
+
+
 static void tokenizer_list_mode_bare_at_is_an_atom(void) {
   Tokenizer tokenizer = Tokenizer.new("%(op @ a b); %(op @= a); %(@); @rest");
   tokenizer.scan();
@@ -236,6 +289,7 @@ void tokenizer_suite(void) {
   $test.run(tokenizer_status_owns_lexical_failures);
   $test.run(tokenizer_stray_close_keeps_lisp_mode);
   $test.run(tokenizer_postfix_update_ends_operand);
+  $test.run(tokenizer_percent_after_closing_delimiter);
   $test.run(tokenizer_list_mode_bare_at_is_an_atom);
   $test.run(tokenizer_parenthesized_forms_stay_in_literal_modes);
   $test.run(tokenizer_braced_literal_unquote_modes);

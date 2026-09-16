@@ -1523,10 +1523,31 @@ In operand position, `%` followed by a literal delimiter is the quoting sigil.
 The delimiter selects a literal grammar, which then decides how to read the
 contents. Quoting here means a parser-context change; it does not mean that
 every percent form contains unevaluated symbolic data. Binary `%` remains the
-modulo operator, and `%!` remains the lambda-literal prefix. A `%` after an
-operand, including a closing parenthesis, is the modulo operator, except
-after the parenthesized condition of `if`, `while`, `for`, or `switch`, where
-a statement begins: `if (dirty) %(git stash).run();` quotes.
+modulo operator, and `%!` remains the lambda-literal prefix.
+
+`%"`, `%[`, and `%<<` open literals after any token. Modulo by a string literal
+is invalid C, and neither `[` nor `<<` begins an expression, so a cast may
+precede these literals: `return (Path) %"$base/$name";` quotes.
+
+In `%(`, `%{`, and `%!` after an operand, including a closing parenthesis or
+brace, the `%` is the modulo operator, except where a statement begins:
+
+- after the parenthesized condition of `if`, `while`, `for`, or `switch`, so
+  `if (dirty) %(git stash).run();` quotes;
+- after the `}` of a compound statement or declaration body, so a `%(...)`
+  statement may follow the closing brace of a `foreach` body.
+
+A brace counts as a body when the token before its `{` is `;`, `:`, `{`, `}`,
+`]`, an identifier, `else`, `do`, `try`, `finally`, or `defer`, or a `)` that
+closes a control condition, a `match` subject, or a parenthesized list after
+an identifier, as in a function header, `foreach`, `with`, or a decorator. A
+compound literal or initializer brace follows an operator or a cast, so `%`
+after it stays modulo: `(int){9} %(4)` is `1`.
+
+The tokenizer does not know type names, so it cannot distinguish a cast from a
+parenthesized operand. After any other `)`, `%(`, `%{`, and `%!` are modulo,
+as in `(a) %(b)`. Parenthesize such a literal after a cast:
+`(List) (%(echo done))`.
 
 The collection and string literal forms are:
 

@@ -1,0 +1,15 @@
+(after function body)
+after nested block
+one
+two
+(after foreach)
+(after else)
+[ <after>, "if" ]
+(after while)
+(after decorator)
+if
+(after with)
+after case block
+(after case block)
+SymbolSet of 2
+(after switch)

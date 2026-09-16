@@ -273,21 +273,67 @@ static int _token_ends_operand(Token token) {
   return 0;
 }
 
-/* True when `token` closes the condition of `if`, `while`, `for`, or
-   `switch`. A statement follows, so C allows no operator there. */
-static int _closes_control_condition(Tokenizer tokenizer, Token token) {
-  if (!token || token.type != <")">) return 0;
+/* Returns the significant token before `token`, or NULL at stream start. */
+static Token _significant_before(Tokenizer tokenizer, Token token) {
+  struct Token *first = (struct Token *) tokenizer.tokens;
+  while (token > first) {
+    token--;
+    if (token.type != <space> && token.type != <comment>) return token;
+  }
+  return NULL;
+}
+
+/* Returns the significant token before the group that the `)` or `}` token
+   `close` ends, or NULL when that group does not open with `opener` or
+   starts the stream. Nesting counts delimiter token types, so parentheses
+   and braces inside strings, comments, and Lisp atoms never count. */
+static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener) {
   struct Token *first = (struct Token *) tokenizer.tokens;
   int depth = 0;
-  for (Token scan = token; scan >= first; scan--) {
-    if (scan.type == <")">) depth++;
-    else if (scan.text && scan.text.endswith("(")) depth--;
-    if (depth) continue;
-    do scan--;
-    while (scan >= first && (scan.type == <space> || scan.type == <comment>));
-    return scan >= first &&
-      (scan.type == <if> || scan.type == <while> || scan.type == <for> ||
-       scan.type == <switch>);
+  for (Token scan = close + 1; scan > first;) {
+    switch ((--scan).type) {
+      case <")">: case <"}">:
+        depth++;
+        break;
+      case <"(">: case <"%(">: case <"$(">: case <"?(">:
+      case <"{">: case <"%{">: case <"${">: case <"@{">:
+        if (--depth) break;
+        return scan.type == opener ? _significant_before(tokenizer, scan)
+                                   : NULL;
+    }
+  }
+  return NULL;
+}
+
+static inline int _is_control_keyword(Token token) =>
+  token && (token.type == <if> || token.type == <while> ||
+            token.type == <for> || token.type == <switch>);
+
+/* True when `token` closes the condition of `if`, `while`, `for`, or
+   `switch`. A statement follows, so C allows no operator there. */
+static int _closes_control_condition(Tokenizer tokenizer, Token token) =>
+  token && token.type == <")"> &&
+  _is_control_keyword(_before_group(tokenizer, token, <"(">));
+
+/* True when `token` is the `}` of a compound statement or declaration body,
+   which binary `%` cannot follow. The token before its `{` decides: a
+   statement boundary, an identifier or `]` as in `with value {`, or a `)`
+   after a control keyword, `match`, or an identifier as in a function header
+   or `foreach (...)`. A compound literal or initializer brace follows an
+   operator or a cast's `)` and does not qualify. */
+static int _closes_statement_block(Tokenizer tokenizer, Token token) {
+  if (!token || token.type != <"}">) return 0;
+  Token before = _before_group(tokenizer, token, <"{">);
+  if (!before) return 0;
+  switch (before.type) {
+    case <;>: case <:>: case <"{">: case <"}">: case <"]">: case <ident>:
+    case <else>: case <do>: case <try>: case <finally>: case <defer>:
+      return 1;
+    case <")">: {
+      Token head = _before_group(tokenizer, before, <"(">);
+      return head && (head.type == <ident> || head.type == <match> ||
+                      _is_control_keyword(head));
+    }
   }
   return 0;
 }
@@ -296,11 +342,12 @@ static inline int _prev_token_ends_operand(Tokenizer tokenizer) =>
   _token_ends_operand(_significant_back(tokenizer, 0));
 
 /* After an operand `%` is modulo, except where a statement starts after a
-   control condition. */
+   control condition or a statement block. */
 static inline int _percent_is_operator(Tokenizer tokenizer) {
   Token token = _significant_back(tokenizer, 0);
   return _token_ends_operand(token) &&
-         !_closes_control_condition(tokenizer, token);
+         !_closes_control_condition(tokenizer, token) &&
+         !_closes_statement_block(tokenizer, token);
 }
 
 /* After an operand, `<` opens a Symbol literal only in the comparison forms
@@ -323,16 +370,19 @@ static inline int _can_start_symbol_literal(Tokenizer tokenizer) {
 
 static int Tokenizer._percent_tokens(Tokenizer t) {
   char *text = t.text + t.pos;
-  if (text[0] != '%') return 0;
-  char next = text[1], int opener = strchr("([{<\"", next) != NULL;
+  if (text[0] != '%' || !text[1]) return 0;
+  char next = text[1];
   /* `%!` is one lambda-prefix token unless operand context makes `%` the
      modulo operator. The parser owns the following parameters and `=>`. */
   if (next == '!') {
     if (_percent_is_operator(t)) return t._operator(1);
     return t.tokenize(2, Symbol.new_len(text, 2));
   }
-  if (!opener) return 0;
-  if (_percent_is_operator(t)) return t._operator(1);
+  if (!strchr("([{<\"", next)) return 0;
+  /* Modulo of a string literal is never valid, and neither `[` nor `<<`
+     begins an operand, so these literals open after any token. */
+  int quoted = next == '"' || next == '[' || (next == '<' && text[2] == '<');
+  if (!quoted && _percent_is_operator(t)) return t._operator(1);
   if (next == '<' && text[2] != '<') return t.error();
   return t._operator(next == '<' ? 3 : 2);
 }
