@@ -120,7 +120,7 @@ static const char *_default_init(char *buffer, size_t size) {
 }
 
 int main(int argc, char **argv) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   defer Lisp.destroy(lisp);
   const char *init = NULL;
   char probed[512];

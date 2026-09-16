@@ -269,7 +269,7 @@ String result = lisp.eval(%(greet "Ada"));
 `Lisp.new()` creates an isolated session and loads `etc/init.xlisp`. That file
 supplies `defun`, short-circuit control, higher-order `List` operations,
 numeric comparisons, basic `String` operations, and the pattern matching
-described in [the language reference][lisp]. `Lisp.new_bare()` creates the
+described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
 `etc/lisp-extras.xlisp` and `etc/lisp-io.xlisp` stay optional and must be
 loaded by name.

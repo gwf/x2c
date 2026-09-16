@@ -1469,13 +1469,13 @@ static void _interface_shutdown(void){
   interface_loading = NULL;
 }
 
-Lisp Lisp_new_bare(void);
+Lisp Lisp_kernel(void);
 
 static Lisp _interface_lisp(void){
   if(interface_reader) return interface_reader;
   _header_cache();
   Scope_push(& header_cache_scope);
-  interface_reader = Lisp_new_bare();
+  interface_reader = Lisp_kernel();
   interface_loading = Map_new();
   Scope_shutdown_hook(_interface_shutdown);
   Scope_pop();

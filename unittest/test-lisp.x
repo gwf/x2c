@@ -33,7 +33,7 @@ static void _expect_read_failure(
 }
 
 static void lisp_read_integer_value(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var value = _read1(lisp, "42", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -48,7 +48,7 @@ static void lisp_read_integer_value(void) {
 }
 
 static void lisp_read_float_value(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var value = _read1(lisp, "3.5", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -58,7 +58,7 @@ static void lisp_read_float_value(void) {
 }
 
 static void lisp_read_string_value(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var value = _read1(lisp, "\"hi\\nthere\"", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -68,7 +68,7 @@ static void lisp_read_string_value(void) {
 }
 
 static void lisp_read_identifier_representations(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var first = _read1(lisp, "foo-bar!", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -91,7 +91,7 @@ static void lisp_read_identifier_representations(void) {
 }
 
 static void lisp_read_case_sensitive_long_identifiers(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var alpha = _read1(lisp, "VeryLongIdentifierNameAlpha", &status);
   Var beta = _read1(lisp, "VeryLongIdentifierNameBeta", &status);
@@ -103,7 +103,7 @@ static void lisp_read_case_sensitive_long_identifiers(void) {
 }
 
 static void lisp_read_compact_symbol_literal(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var value = _read1(lisp, "<sym>", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -113,7 +113,7 @@ static void lisp_read_compact_symbol_literal(void) {
 }
 
 static void lisp_read_list_form(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var value = _read1(lisp, "(add 1 (sub 2 3))", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -128,7 +128,7 @@ static void lisp_read_list_form(void) {
 }
 
 static void lisp_read_matches_x2c_list_literal(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Var actual = Lisp.eval_string(lisp,
     "'((enum \"FileReadStatus\") (struct (* int)) (op &&) (dim (8)))");
   List expected = %((enum "FileReadStatus")
@@ -138,7 +138,7 @@ static void lisp_read_matches_x2c_list_literal(void) {
 }
 
 static void lisp_read_quote_sugar(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   List form = Var.list(_read1(lisp, "'x", &status));
   if (!EXPECT_NOT_NULL(form)) return;
@@ -156,7 +156,7 @@ static void lisp_read_quote_sugar(void) {
 }
 
 static void lisp_read_comments_and_whitespace(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   Var value = _read1(lisp, "  // note\n  41", &status);
   EXPECT_INT_EQ(status, <value>);
@@ -167,7 +167,7 @@ static void lisp_read_comments_and_whitespace(void) {
 }
 
 static void lisp_read_eof_cases(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Symbol status;
   _read1(lisp, "", &status);
   EXPECT_INT_EQ(status, <eof>);
@@ -177,7 +177,7 @@ static void lisp_read_eof_cases(void) {
 }
 
 static void lisp_read_incomplete_resets_cursor(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   _expect_read_failure(lisp, "  (add 1", <incomplete>, 2, 1, 3);
   _expect_read_failure(lisp, "\"open", <incomplete>, 0, 1, 1);
   _expect_read_failure(lisp, "'", <incomplete>, 0, 1, 1);
@@ -185,14 +185,14 @@ static void lisp_read_incomplete_resets_cursor(void) {
 }
 
 static void lisp_read_malformed_reports_error(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   _expect_read_failure(lisp, ")", <malformed>, 0, 1, 1);
   Lisp.destroy(lisp);
 }
 
 
 static void lisp_read_classifies_lexical_failures(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   _expect_read_failure(lisp, "  \"open", <incomplete>, 2, 1, 3);
   _expect_read_failure(lisp, "  /* open", <incomplete>, 2, 1, 3);
   _expect_read_failure(lisp, "  <open", <incomplete>, 2, 1, 3);
@@ -214,7 +214,7 @@ static void lisp_read_classifies_lexical_failures(void) {
 
 
 static void lisp_read_advances_cursor_across_forms(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   unsigned cursor = 0;
   Var out = void;
   String source = "1 (a b)\n\"s\"";
@@ -241,12 +241,12 @@ static Var _ev2(Lisp lisp, const char *left, const char *right) {
 static void lisp_canonical_names_outlive_initial_context(void) {
   Context initial_context =
     Context.open_isolated_named("Lisp canonical-name initialization");
-  Lisp initial = Lisp.new_bare();
+  Lisp initial = Lisp.kernel();
   EXPECT_TRUE(_ev(initial, "'(initialized)") is <list>);
   Lisp.destroy(initial);
   initial_context.close();
 
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Var result = _ev(lisp, "`(1 ,@(quote (2 3)))");
   EXPECT_TRUE(result == %(1 2 3));
   Lisp.destroy(lisp);
@@ -309,7 +309,7 @@ static void _install(Lisp lisp, const char *name, FuncAdapter fn, List sig) {
 }
 
 static Lisp _session(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   _install(lisp, "add", _native_add2,
            %((func (("Var") ("Var"))) "Var"));
   _install(lisp, "log!", _native_log,
@@ -318,7 +318,7 @@ static Lisp _session(void) {
 }
 
 static Lisp _boot_session(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   File bootstrap = File.open("../etc/init.xlisp", "r");
   if (!EXPECT_NOT_NULL(bootstrap)) return lisp;
   Lisp.eval_file(lisp, bootstrap);
@@ -335,7 +335,7 @@ static int _load_lisp_layer(Lisp lisp, String path) {
 }
 
 static void lisp_eval_self_and_quote(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "42")), 42);
   EXPECT_TRUE(_ev(lisp, "\"s\"") is <string>);
   EXPECT_TRUE(_ev(lisp, "()").is_nil());
@@ -364,7 +364,7 @@ static void lisp_eval_def_and_globals(void) {
 }
 
 static void lisp_eval_cond_nil_only_false(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(cond (() 1) (0 2) (3 4))")), 2);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(cond (\"\" 7))")), 7);
   EXPECT_TRUE(_ev(lisp, "(cond (() 1))").is_nil());
@@ -399,7 +399,7 @@ static void lisp_apply_uses_evaluated_values(void) {
 }
 
 static void lisp_eval_rest_parameters(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   EXPECT_VAR_EQ(_ev(lisp, "((lambda (a . r) r) 1 2 3)"),
                 _ev(lisp, "(quote (2 3))"));
   EXPECT_TRUE(_ev(lisp, "((lambda (a . r) r) 1)").is_nil());
@@ -419,7 +419,7 @@ static void lisp_eval_capture_semantics(void) {
 }
 
 static void lisp_eval_globals_shadow_reserved(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   EXPECT_STR_EQ(_ev(lisp, "(quote a)").str(), "a");
   _ev(lisp, "(def cond 99)");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "cond")), 99);
@@ -552,7 +552,7 @@ static void lisp_eval_strips_locals(void) {
 }
 
 static void lisp_eval_bind_native(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Var first = _ev(lisp,
     "(bind \"Var_car\" '((func ((\"Var\"))) \"Var\"))");
   Var second = _ev(lisp,
@@ -643,7 +643,7 @@ static void lisp_match_case_dispatch(void) {
 }
 
 static void lisp_bare_session_has_only_primitives(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   if (!EXPECT_NOT_NULL(lisp)) return;
   EXPECT_INT_EQ(_raised_code(lisp, "(defun answer () 42)"), <unbound>);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "((lambda (x) x) 42)")), 42);
@@ -712,7 +712,7 @@ static void lisp_binding_storage_belongs_to_session(void) {
 }
 
 static void lisp_eval_file_runs_forms(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
   if (!EXPECT_NOT_NULL(raw)) return;
   fputs("(def z 7)\n// comment\nz\n", raw);
@@ -730,7 +730,7 @@ static void lisp_eval_file_runs_forms(void) {
 
 
 static void lisp_eval_file_transfers_read_failure(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   File source = File.open("/dev/null", "w");
   if (!EXPECT_NOT_NULL(source)) {
     Lisp.destroy(lisp);
@@ -746,7 +746,7 @@ static void lisp_eval_file_transfers_read_failure(void) {
 
 
 static void lisp_eval_file_rejects_embedded_nul(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   File source = tmpfile();
   if (!EXPECT_NOT_NULL(source)) {
     Lisp.destroy(lisp);
@@ -984,12 +984,12 @@ static void lisp_bootstrap_import_uses_current_session(void) {
 }
 
 static void lisp_sessions_release_scopes(void) {
-  Lisp warm = Lisp.new_bare();
+  Lisp warm = Lisp.kernel();
   Lisp.eval_string(warm, "(def w (lambda (a) a)) (w 4)");
   Lisp.destroy(warm);
   ScopeStats before = Scope.stats();
   for (int i = 0; i < 3; i++) {
-    Lisp lisp = Lisp.new_bare();
+    Lisp lisp = Lisp.kernel();
     Lisp.eval_string(lisp, "(def w (lambda (a) a)) (w 4)");
     Lisp.destroy(lisp);
   }

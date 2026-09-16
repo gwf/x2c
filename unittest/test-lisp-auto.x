@@ -60,7 +60,7 @@ static Symbol _raised(Lisp lisp, const char *text) {
 }
 
 static Lisp _auto_session(int with_add) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   if (with_add)
     Lisp.set_global(lisp, "add",
                     Func.var(_make_func(
@@ -777,7 +777,7 @@ static void lisp_auto_declined_form_releases_programs(void) {
   // word, so both lambdas publish the same program shape. Only the second
   // emitted an immediate lambda first; its child program must not survive the
   // rewind, or the second lambda would cost more.
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   _ev(lisp, "(def control (lambda (flag) (cond (flag 1)"
             " (1 (nine 1 2 3 4 5 6 7 8 9)))))");
   for (int i = 0; i < 3; i++)
@@ -837,7 +837,7 @@ static void lisp_auto_mutating_specials(void) {
 
 static void lisp_auto_quasiquote_effect_order(void) {
   for (int disabled = 0; disabled < 2; disabled++) {
-    Lisp lisp = Lisp.new_bare();
+    Lisp lisp = Lisp.kernel();
     Lisp.auto_disable(lisp, disabled);
     _ev(lisp, "(def replacement (macro (x) 99))");
     _ev(lisp, "(def f (lambda (flag) (cond (flag (quasiquote "
@@ -847,7 +847,7 @@ static void lisp_auto_quasiquote_effect_order(void) {
     EXPECT_TRUE(_ev(lisp, "(f 1)") == %(5 7));
     Lisp.destroy(lisp);
 
-    lisp = Lisp.new_bare();
+    lisp = Lisp.kernel();
     Lisp.auto_disable(lisp, disabled);
     _ev(lisp, "(def replacement (macro (x) 99))");
     _ev(lisp, "(def f (lambda (flag) (cond (flag (quasiquote "
@@ -857,7 +857,7 @@ static void lisp_auto_quasiquote_effect_order(void) {
     EXPECT_TRUE(_ev(lisp, "(f 1)") == %(5 99));
     Lisp.destroy(lisp);
 
-    lisp = Lisp.new_bare();
+    lisp = Lisp.kernel();
     Lisp.auto_disable(lisp, disabled);
     _ev(lisp, "(def f (lambda (x) "
               "(quasiquote ((unquote-splicing x)))))");
@@ -867,7 +867,7 @@ static void lisp_auto_quasiquote_effect_order(void) {
     EXPECT_TRUE(_ev(lisp, "(f ())").is_nil());
     Lisp.destroy(lisp);
 
-    lisp = Lisp.new_bare();
+    lisp = Lisp.kernel();
     Lisp.auto_disable(lisp, disabled);
     _ev(lisp, "(def side 0) (def f (lambda (flag) (cond (flag "
               "(quasiquote ((unquote-splicing 7) "

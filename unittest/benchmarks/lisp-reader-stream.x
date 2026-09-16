@@ -25,7 +25,7 @@ static String _many_forms(int count) {
 
 
 static void _run(const char *lane, int count, String source) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Lisp.eval_string(lisp, "0");
   uint64_t start = _now_ns();
   Var result = Lisp.eval_string(lisp, source);

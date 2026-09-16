@@ -42,7 +42,7 @@ static Var _native_add(Var a, Var b) {
 }
 
 static Lisp _session(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   Func add = Func.new(_native_add,
                       %((func (("Var") ("Var"))) "Var"));
   _check(add != NULL, "native-add");

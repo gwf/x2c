@@ -37,7 +37,7 @@ Var Lisp_evaluate(void * storage, Var form);
 
 int Lisp_expanded(void * storage, List site, Var * out);
 
-Lisp Lisp_new_bare(void);
+Lisp Lisp_kernel(void);
 
 Lisp Lisp_new(void);
 

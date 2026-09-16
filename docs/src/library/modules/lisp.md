@@ -15,8 +15,8 @@ The Lisp runtime: reader, session, and evaluator.
 | [`Lisp.eval`](#Lisp.eval) | Evaluates one Lisp form in `lisp`. |
 | [`Lisp.eval_file`](#Lisp.eval_file) | Reads and evaluates every form from `file`. |
 | [`Lisp.eval_string`](#Lisp.eval_string) | Reads and evaluates every form in `source`. |
+| [`Lisp.kernel`](#Lisp.kernel) | Creates an isolated embedded `Lisp` session with only evaluator primitives. |
 | [`Lisp.new`](#Lisp.new) | Creates an isolated session with the standard Lisp environment loaded. |
-| [`Lisp.new_bare`](#Lisp.new_bare) | Creates an isolated embedded `Lisp` session with only evaluator primitives. |
 | [`Lisp.try_get`](#Lisp.try_get) | Writes the global binding for `name` to `out` when present. |
 
 ### Functions
@@ -118,23 +118,10 @@ while reading, or any cause from `Lisp.eval`.
 
 Source: `lib/lisp.x:1801`
 
-<a id="Lisp.new"></a>
-#### Lisp.new
+<a id="Lisp.kernel"></a>
+#### Lisp.kernel
 
-`Lisp Lisp.new(void)`
-
-Creates an isolated session with the standard Lisp environment loaded.
-The caller owns the result and must pass it to `Lisp.destroy`.
-If standard-source evaluation transfers, no handle is returned and the
-constructed session remains allocated.
-Raises any cause from `Lisp.new_bare` or `Lisp.eval_string`.
-
-Source: `lib/lisp.x:532`
-
-<a id="Lisp.new_bare"></a>
-#### Lisp.new_bare
-
-`Lisp Lisp.new_bare(void)`
+`Lisp Lisp.kernel(void)`
 
 Creates an isolated embedded `Lisp` session with only evaluator primitives.
 The caller owns a successful session and must pass it to `Lisp.destroy`.
@@ -146,6 +133,19 @@ aborts the process.
 `<bad-enc>` while interning shared or special-form names.
 
 Source: `lib/lisp.x:506`
+
+<a id="Lisp.new"></a>
+#### Lisp.new
+
+`Lisp Lisp.new(void)`
+
+Creates an isolated session with the standard Lisp environment loaded.
+The caller owns the result and must pass it to `Lisp.destroy`.
+If standard-source evaluation transfers, no handle is returned and the
+constructed session remains allocated.
+Raises any cause from `Lisp.kernel` or `Lisp.eval_string`.
+
+Source: `lib/lisp.x:532`
 
 <a id="Lisp.try_get"></a>
 #### Lisp.try_get
@@ -700,7 +700,7 @@ Source: `lib/lisp.x:171`
 `typedef struct Lisp *Lisp`
 
 Represents one isolated embedded `Lisp` session.
-Create it with `Lisp.new` or `Lisp.new_bare` and end it with
+Create it with `Lisp.new` or `Lisp.kernel` and end it with
 `Lisp.destroy`. The module header describes its owned and borrowed state.
 A session is mutable and requires caller serialization.
 

@@ -853,7 +853,7 @@ static Lisp _interface_lisp(void) {
   if (interface_reader) return interface_reader;
   _header_cache();
   Scope.push(&header_cache_scope);
-  interface_reader = Lisp.new_bare();
+  interface_reader = Lisp.kernel();
   interface_loading = %{};
   Scope.shutdown_hook(_interface_shutdown);
   Scope.pop();

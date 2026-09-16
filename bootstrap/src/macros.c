@@ -2389,7 +2389,7 @@ static void _eval_library(Compiler compiler, String relative, String message){
   _eval_string(compiler, text, compiler -> token);
 }
 
-Lisp Lisp_new_bare(void);
+Lisp Lisp_kernel(void);
 
 Func Func_new(FuncAdapter, List);
 
@@ -2398,7 +2398,7 @@ void Lisp_bind(Lisp, String, Func);
 static void _ensure_lisp(Compiler compiler){
   {
     if((compiler) -> macro_lisp) return;
-    (compiler) -> macro_lisp = Lisp_new_bare();
+    (compiler) -> macro_lisp = Lisp_kernel();
     _eval_library((compiler), _614, _615);
     _eval_library((compiler), _616, _617);
     _eval_library((compiler), _618, _619);

@@ -1073,7 +1073,7 @@ Scope Scope_new_named(const char *);
 
 void * Scope_calloc(size_t, size_t);
 
-Lisp Lisp_new_bare(void){
+Lisp Lisp_kernel(void){
   if(! _init_guard_) _file_init_();
   Scope session = Scope_new_named("Lisp session");
   Lisp result = NULL;
@@ -1162,7 +1162,7 @@ Lisp Lisp_new_bare(void){
 
 Lisp Lisp_new(void){
   if(! _init_guard_) _file_init_();
-  Lisp lisp = Lisp_new_bare();
+  Lisp lisp = Lisp_kernel();
   Lisp_eval_string(lisp, lisp_standard_source);
   return lisp;
 }

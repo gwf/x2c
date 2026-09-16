@@ -35,7 +35,7 @@ $(import "private-keywords.xmacro")
 #include "machine.x"
 
 /** Represents one isolated embedded `Lisp` session.
-    Create it with `Lisp.new` or `Lisp.new_bare` and end it with
+    Create it with `Lisp.new` or `Lisp.kernel` and end it with
     `Lisp.destroy`. The module header describes its owned and borrowed state.
     A session is mutable and requires caller serialization.
 */
@@ -503,7 +503,7 @@ macro Decorator $lisp.entry(Function $function, Expr $operation) => {
     Raises: `<alloc-fail>` or `<size-limit>` while creating session storage, or
     `<bad-enc>` while interning shared or special-form names.
 */
-Lisp Lisp.new_bare(void) {
+Lisp Lisp.kernel(void) {
   Scope session = Scope.new_named("Lisp session"), Lisp result = NULL;
   defer if (!result) Scope.destroy(session);
   Lisp lisp = NULL;
@@ -527,10 +527,10 @@ Lisp Lisp.new_bare(void) {
     The caller owns the result and must pass it to `Lisp.destroy`.
     If standard-source evaluation transfers, no handle is returned and the
     constructed session remains allocated.
-    Raises any cause from `Lisp.new_bare` or `Lisp.eval_string`.
+    Raises any cause from `Lisp.kernel` or `Lisp.eval_string`.
 */
 Lisp Lisp.new(void) {
-  Lisp lisp = Lisp.new_bare();
+  Lisp lisp = Lisp.kernel();
   lisp.eval_string(lisp_standard_source);
   return lisp;
 }

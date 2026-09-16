@@ -13,7 +13,7 @@ int main(void) {
     Mutex mutex = $auto(Mutex.new());
     Scope scope = $auto(Scope.new());
     File input = $auto(File.open("/dev/null", "r"));
-    Lisp lisp = $auto(Lisp.new_bare());
+    Lisp lisp = $auto(Lisp.kernel());
     MachineBuilder builder = $auto(MachineBuilder.new());
     ArrayInt ints = $auto(ArrayInt.new());
     MapStringInt counts = $auto(MapStringInt.new());

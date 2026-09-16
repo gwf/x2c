@@ -866,7 +866,7 @@ static void _eval_library(
 static void _ensure_lisp(Compiler compiler) {
   with compiler {
     if (_.macro_lisp) return;
-    _.macro_lisp = Lisp.new_bare();
+    _.macro_lisp = Lisp.kernel();
     _eval_library(
       _, "etc/init.xlisp",
       "cannot open the compile-time Lisp environment");
