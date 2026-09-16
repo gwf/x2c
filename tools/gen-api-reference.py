@@ -77,6 +77,7 @@ TIER_HEADINGS = {
     "internal": "Runtime-internal callables",
 }
 PRIMARY_EVIDENCE = {
+    "args": "`make verify` (`unittest/test-args.x`).",
     "array": "`make verify` (`unittest/test-array.x`) and `make examples`.",
     "atom": "`make verify` (`unittest/test-atom.x`).",
     "autodiff": (

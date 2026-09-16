@@ -48,7 +48,7 @@ Waits for `job` and raises when its status is not zero.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `errors`
 when standard error was captured.
 
-Source: `lib/process.x:445`
+Source: `lib/process.x:449`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -57,7 +57,7 @@ Source: `lib/process.x:445`
 
 Terminates and reaps a job that is still running.
 
-Source: `lib/process.x:478`
+Source: `lib/process.x:482`
 
 <a id="Job.equal"></a>
 #### Job.equal
@@ -78,7 +78,7 @@ Source: `lib/process.x:26`
 Waits for `job` and returns its captured standard error, or NULL when
 errors were not captured or were empty.
 
-Source: `lib/process.x:466`
+Source: `lib/process.x:470`
 
 <a id="Job.free"></a>
 #### Job.free
@@ -109,7 +109,7 @@ Source: `lib/process.x:26`
 
 Sends `signal` to every stage of `job` that has not been reaped.
 
-Source: `lib/process.x:472`
+Source: `lib/process.x:476`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -119,7 +119,7 @@ Source: `lib/process.x:472`
 Waits for `job` and returns its captured standard output, or NULL when
 output was not captured or was empty.
 
-Source: `lib/process.x:458`
+Source: `lib/process.x:462`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -128,7 +128,7 @@ Source: `lib/process.x:458`
 
 Reports whether every stage of `job` has exited, without blocking.
 
-Source: `lib/process.x:419`
+Source: `lib/process.x:423`
 
 <a id="Job.repr"></a>
 #### Job.repr
@@ -171,7 +171,7 @@ Source: `lib/process.x:26`
 Waits for every stage of `job` and returns the pipeline status.
 Waiting again returns the same status.
 
-Source: `lib/process.x:434`
+Source: `lib/process.x:438`
 
 <a id="Job.wait_any"></a>
 #### Job.wait_any
@@ -181,7 +181,7 @@ Source: `lib/process.x:434`
 Removes and returns the first job in `jobs` that has finished, waiting
 until one does. An empty `jobs` returns NULL.
 
-Source: `lib/process.x:485`
+Source: `lib/process.x:489`
 
 <a id="Job.write_repr"></a>
 #### Job.write_repr
@@ -214,7 +214,7 @@ Source: `lib/process.x:26`
 
 Returns the program arguments that follow `argv[0]` as `String`s.
 
-Source: `lib/process.x:402`
+Source: `lib/process.x:406`
 
 <a id="List.lines"></a>
 #### List.lines
@@ -226,7 +226,7 @@ endings.
 
 **Raises:** the causes of `List.output`.
 
-Source: `lib/process.x:399`
+Source: `lib/process.x:403`
 
 <a id="List.options"></a>
 #### List.options
@@ -249,7 +249,7 @@ String home = %(pwd).options(%{dir: "/"}).output();
 ~}
 ```
 
-Source: `lib/process.x:345`
+Source: `lib/process.x:349`
 
 <a id="List.output"></a>
 #### List.output
@@ -261,7 +261,7 @@ Runs `command` and returns its captured standard output.
 **Raises:** `<cmd-fail>` when the status is not zero, or the start causes of
 `List.start`.
 
-Source: `lib/process.x:389`
+Source: `lib/process.x:393`
 
 <a id="List.pipe"></a>
 #### List.pipe
@@ -272,7 +272,7 @@ Returns a pipeline that sends the output of `command` into `next`.
 Either side may already be a pipeline; the options of both sides are
 merged, with `next` replacing any key both define.
 
-Source: `lib/process.x:356`
+Source: `lib/process.x:360`
 
 <a id="List.run"></a>
 #### List.run
@@ -284,7 +284,7 @@ Runs `command` to completion with the standard streams inherited.
 **Raises:** `<cmd-fail>` with `command` and `status` details when the status
 is not zero, or the start causes of `List.start`.
 
-Source: `lib/process.x:381`
+Source: `lib/process.x:385`
 
 <a id="List.start"></a>
 #### List.start
@@ -298,7 +298,7 @@ Starts `command` and returns its running `Job`.
 `<bad-arg>` for an empty command or an unknown option. Stages already
 started are terminated and reaped before the error transfers.
 
-Source: `lib/process.x:369`
+Source: `lib/process.x:373`
 
 <a id="List.status"></a>
 #### List.status
@@ -310,7 +310,7 @@ A non-zero status is an ordinary result here.
 
 **Raises:** the start causes of `List.start`.
 
-Source: `lib/process.x:375`
+Source: `lib/process.x:379`
 
 ### `String`
 
@@ -323,7 +323,7 @@ Returns the value of the environment variable `name`, or NULL when it is
 unset. The result is a fresh `String`; the `env` option sets variables for
 a child instead of changing this process.
 
-Source: `lib/process.x:413`
+Source: `lib/process.x:417`
 
 ### `Var`
 

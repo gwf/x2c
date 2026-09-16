@@ -33,6 +33,7 @@
   - [Overview](library/overview.md)
   - [Module Reference](library/modules/index.md)
     - [x2c C API](library/modules/x2c-c-api.md)
+    - [lib/args.x](library/modules/args.md)
     - [lib/array.x](library/modules/array.md)
     - [lib/atom.x](library/modules/atom.md)
     - [lib/autodiff.x](library/modules/autodiff.md)

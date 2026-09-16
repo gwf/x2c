@@ -1197,12 +1197,12 @@ int main(int argc, char **argv) {
 EOF
 chmod +x "$SCRIPT/args.x"
 set +e
-script_output=$(run_script "$SCRIPT/args.x" "two words" -- --help @none \
+script_output=$(run_script "$SCRIPT/args.x" "two words" "" -- --help @none \
   2>"$SCRIPT/first.stderr")
 script_status=$?
 set -e
-[[ $script_status == 4 &&
-   $script_output == 'hello [two words] [--] [--help] [@none]' ]]
+[[ $script_status == 5 &&
+   $script_output == 'hello [two words] [] [--] [--help] [@none]' ]]
 [[ ! -s "$SCRIPT/first.stderr" ]]
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
      "$SCRIPT/args.x") == hello ]]

@@ -1,6 +1,6 @@
 # The scripting library gap
 
-> Status: active - 2026-09-16. Phase A done; phases B, C, and D remain.
+> Status: active - 2026-09-16. Phases A and B done; phases C and D remain.
 > Second of four plans from the 2026-09-15 capabilities and market spike.
 > The scripting capability shipped 2026-09-15 and the repository still runs
 > 30,212 lines of Python, shell, and awk automation against it.
@@ -51,14 +51,74 @@ which is why `plans/x2c-include-prefix.md` landed first.
 (`Makefile:207-220`). Rewriting them in x2c would put the check that detects a
 broken compiler behind the compiler's own scripting feature. They stay shell.
 
-## Phase B - `lib/args.x`
+## Phase B - `lib/args.x` (done)
 
-Argument parsing from a declarative spec, returning a `Map`. Unblocks 17 of the
-repository's 21 Python tools. `src/cli.x` supplies the spelling conventions
-(attached values, `--opt=value`, `--`, `@response`) and nothing else; its
-engine is welded to `CliRequest` and a Symbol `switch` and is not extractable.
-Proof: convert `etc/x2c-payload.py`, which needs only argument parsing and
-path operations.
+Argument parsing from a declarative spec, returning a `Map`. `src/cli.x`
+supplied the spelling conventions and nothing else; its engine is welded to
+`CliRequest` and a Symbol `switch` and is not extractable.
+
+| Operation | Contract |
+| --- | --- |
+| `Map List.parse_args(List args, List spec)` | parses `args`; every spec name is present in the result |
+| `String List.usage(List spec, String program)` | synopsis, options, and described operands, help at column 30 as in `x2c help` |
+
+A spec is a `List` of rows. A row that begins with dashed words is an option
+with those spellings, named by its first long spelling without dashes, or by
+its short one. A row that begins with any other word is an operand. The rest
+of a row holds `(value placeholder)`, `(default value)`, `(help "text")`,
+`required`, and `repeated`. Long options take `--name value` and
+`--name=value`; short options take `-n value` and `-nvalue`, and short flags
+share a word. Operands may interleave with options, `--` ends option
+parsing, and operand rows take operands in spec order, a `repeated` one
+taking the rest. A flag's value is its occurrence count, a `repeated` row's
+is a `List`, and any other row's is its last `String`; an absent row holds
+its default, or else zero, an empty `List`, or a NULL `String`, all falsy.
+Bad input and an unreadable spec raise `<bad-arg>` with `why` and the
+offending `option`, `operand`, or `spec` entry; nothing exits.
+
+`etc/x2c-payload.py` became `etc/x2c-payload.x`. It is not on a gate path:
+`install`, `uninstall`, and `dist` are outside `precommit`, `sanity-check`,
+and `agent-pr-check`, and `ape-build` is a release-only target. Every caller
+already needed a native `builds/0`: `install` and `dist` depend on `build`,
+`uninstall` now does too, and `etc/cosmopolitan/build-ape.sh` compares
+`bootstrap` with `builds/0` before the payload step, which in turn copied
+`builds/0/lib/*.h` and `*.xi`. Each workflow that reaches these targets runs
+`make build-safe` first. The two
+versions were run side by side on `support` (with and without
+`--licenses`), `install` with and without `--destdir` (including an empty
+one), reinstall, `uninstall` with and without an unowned file, an unowned
+target, a relative prefix, and a missing installation: identical stdout,
+identical status, and identical trees by path, mode, content, and mtime,
+apart from the three files written at run time. `make install PREFIX=`,
+`make install DESTDIR=`, `make dist`, and `make uninstall` produced
+identical output, installed file digests, and tarball listings; `make
+uninstall` adds only the `build` prerequisite's banner. Argument
+misuse still exits 2 but prints the generated usage instead of argparse's.
+A warm run takes 0.11 s against Python's 0.56 s.
+
+Decisions a reviewer should check:
+
+- **Rows are a `List`, not a `Map` of `Map`s.** `Map` iteration order is not
+  source order, which the usage text needs, and bare words inside `%()` are
+  exact `Atom`s, so a long option such as `--no-phony-deps` keeps its full
+  spelling where a compact `Symbol` key would truncate at ten characters.
+- **Result keys are `String`s.** `Symbol` keys would truncate the same long
+  names; `options["dry-run"]` reads directly.
+- **Every name is present, and values stay `String`s.** A `void` `Map` read
+  raises on a truth test, so an absent flag is zero and an absent value a
+  NULL `String`. Converting to a number is left to the caller rather than
+  adding a type column to the spec.
+- **A non-repeated option given twice keeps the last value**, as `getopt`
+  programs and argparse do; a flag counts instead, so `-vv` is 2.
+- **No automatic `--help`.** Parsing raises instead of exiting, so a script
+  that wants `--help` beside `required` rows catches `<bad-arg>` and prints
+  `List.usage`. The rejected alternative, a built-in help row that
+  suppresses `required` checks, special-cases one name.
+- **Subcommands are not a spec feature.** The payload tool dispatches on its
+  first word and parses the rest with that command's spec.
+- **Not supported:** `@response` files, which the plan listed among
+  `src/cli.x`'s conventions, have no consumer yet; abbreviated long options
+  are rejected as unknown.
 
 ## Phase C - `lib/json.x`
 
@@ -113,6 +173,24 @@ exception frame that `src/compiler.x:1539-1563` wraps around the synthesized
 `x2c_script`. The same call in a program with `main` exits 3, and `return 3` in
 a script exits 3. Either the synthesized main should tolerate it or the
 language reference should say `return` is the only way out of a script unit.
+
+## Defects found during Phase B
+
+Fixed in this phase, because the payload conversion depends on them:
+
+- **An empty argument truncated a child's argv.** An empty `String` is
+  NULL, and both `_exec` in `src/script.x` and `_argv` in `lib/process.x`
+  copied it into the argument vector, ending it early.
+  `x2c script probe.x a "" b` gave the script only `a`, and
+  `%(printf "[%s]" $empty x).output()` returned `[]`. `make install` passes
+  `--destdir ""`. Covered by `unittest/test-process.x` and the script case in
+  `unittest/probes/run-cli-boundary.sh`.
+
+Found here and fixed separately on `main`: `include/Makefile` named its
+header directory `PREFIX`, so a command-line `make install PREFIX=<dir>`
+filled `<dir>` with symlinks, `make dist PREFIX=/opt/x2c` failed creating
+`/opt/x2c`, and `make clean PREFIX=<dir>` ran `rm -rf <dir>`. The `make`
+comparison above was run with that fix in place.
 
 ## Validation
 

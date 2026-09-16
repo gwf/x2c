@@ -49,7 +49,8 @@ for source in "$REPO_ROOT"/bootstrap/src/*.c; do
 done
 "$COSMOCC" -Os -o "$WORK/x2c.com" "$@" "$WORK/libx2c.a" -lm
 
-identity=$(python3 "$REPO_ROOT/etc/x2c-payload.py" support \
+identity=$("$REPO_ROOT/builds/0/x2c" script \
+  "$REPO_ROOT/etc/x2c-payload.x" support \
   "$WORK/payload/x2c" --licenses "$COSMO_LICENSE_DIR")
 
 mkdir -p "$(dirname "$OUTPUT")"

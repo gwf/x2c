@@ -10,9 +10,9 @@ $(import "test-macros.xmacro")
 
 static void process_arguments_stay_whole(void) {
   $test.scoped();
-  String spaced = %"two  words", dashed = "-n";
-  EXPECT_STR_EQ(%(printf "%s|" $spaced $dashed q).output(),
-                "two  words|-n|q|");
+  String spaced = %"two  words", dashed = "-n", empty = "";
+  EXPECT_STR_EQ(%(printf "%s|" $spaced $dashed $empty q).output(),
+                "two  words|-n||q|");
   char *argv[] = { "tool", "first", "second third", NULL };
   EXPECT_LIST_EQ(List.arguments(3, argv), %("first" "second third"));
   EXPECT_NULL(List.arguments(1, argv));

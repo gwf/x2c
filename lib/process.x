@@ -172,7 +172,11 @@ static char **_argv(List stage) {
     raise %(bad-arg (operation "List.start") (why "empty command"));
   char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
   int index = 0;
-  foreach (Var word, stage) argv[index++] = word.str();
+  // An empty word is a NULL String, which would end the vector early.
+  foreach (Var word, stage) {
+    String text = word.str();
+    argv[index++] = text ? text : "";
+  }
   return argv;
 }
 

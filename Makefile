@@ -433,19 +433,19 @@ ifeq ($(strip $(PREFIX)),)
 install: build-install					## Install the built toolchain
 else
 install: build
-	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
+	$(STAGE0_X2C) script etc/x2c-payload.x install --prefix "$(PREFIX)" \
 	  --destdir "$(DESTDIR)"
 endif
 
-uninstall:						## Remove the installation under PREFIX
-	python3 etc/x2c-payload.py uninstall --prefix "$(PREFIX)"
+uninstall: build					## Remove the installation under PREFIX
+	$(STAGE0_X2C) script etc/x2c-payload.x uninstall --prefix "$(PREFIX)"
 
 # A release tarball of the PREFIX installation, staged under dist/.
 DIST_PLATFORM = $(shell uname -s | tr A-Z a-z)-$(shell uname -m)
 DIST_VERSION = $(shell builds/0/x2c --version | cut -d' ' -f2)
 dist: build						## Package the PREFIX installation under dist/
 	rm -rf dist/stage
-	python3 etc/x2c-payload.py install --prefix "$(PREFIX)" \
+	$(STAGE0_X2C) script etc/x2c-payload.x install --prefix "$(PREFIX)" \
 	  --destdir "$(CURDIR)/dist/stage"
 	tar -C "dist/stage$(dir $(PREFIX))" -czf \
 	  "dist/x2c-$(DIST_VERSION)-$(DIST_PLATFORM).tar.gz" \

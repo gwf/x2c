@@ -4,11 +4,12 @@
 
     A source file whose first line is a `#!` line is a script unit, and the
     compiler reads that line as an include of this module. Any program may
-    include it to get commands, pipelines, jobs, path operations, and
-    digests together.
+    include it to get commands, pipelines, jobs, path operations,
+    argument parsing, and digests together.
 */
 
 #pragma once
+#include "args.x"
 #include "digest.x"
 #include "path.x"
 #include "process.x"

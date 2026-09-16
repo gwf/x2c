@@ -114,6 +114,7 @@ match-recursive               readable recursive Match reference
 autodiff                      runtime reverse-mode differentiation tape
 process                       commands, pipelines, and jobs without a shell
 path                          filesystem operations on path Strings
+args                          argument parsing against a declarative spec
 digest                        SHA-256 digests of Strings and streams
 ```
 

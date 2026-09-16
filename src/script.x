@@ -38,7 +38,9 @@ static void _exec(CliRequest c) {
   char **argv = Scope.calloc(c.run_args.len() + 2, sizeof(char *));
   int index = 0;
   argv[index++] = c.inputs.car().str();
-  foreach (String argument, c.run_args) argv[index++] = argument;
+  // An empty word is a NULL String, which would end the vector early.
+  foreach (String argument, c.run_args)
+    argv[index++] = argument ? argument : "";
   fflush(NULL);
   execv(executable, argv);
   x2c_driver_error(

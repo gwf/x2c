@@ -1,22 +1,26 @@
 # Commands and Files
 
-Two optional modules cover the work shell scripts usually do. `process.x`
+Four optional modules cover the work shell scripts usually do. `process.x`
 runs commands, pipelines, and background jobs. `path.x` inspects and changes
-files and directories. Include them explicitly:
+files and directories. `args.x` parses a script's own arguments, and
+`digest.x` computes checksums. Include them explicitly:
 
 ```x2c
 #include "process.x"
 #include "path.x"
+#include "args.x"
+#include "digest.x"
 ```
 
-Both keep to ordinary values. A command is a `List`, a path is a `String`,
-and every failure is an [`Error`](exceptions.md) that a `catch` can select.
+All three keep to ordinary values. A command is a `List`, a path is a
+`String`, parsed arguments are a `Map`, and every failure is an
+[`Error`](exceptions.md) that a `catch` can select.
 
 ## Write a script
 
-A source file whose first line is a shebang is a script. It includes both
-modules, and `digest.x` for [checksums](#checksums), automatically and may
-put statements at file scope, which run in order as the program:
+A source file whose first line is a shebang is a script. It includes
+`process.x`, `path.x`, `args.x`, and `digest.x` automatically and may put
+statements at file scope, which run in order as the program:
 
 ```x2c
 #!/usr/bin/env -S x2c script
@@ -63,6 +67,94 @@ and links with it. With an executable mode, the shebang runs it by name.
 Every argument after the file reaches the program unchanged. The [command
 reference](../reference/cli.md#run-a-script) describes the cache and exactly
 what makes a script build again.
+
+## Parse arguments
+
+`parse_args` reads an argument `List` against a spec, which is a `List` with
+one row per option or operand, and returns a `Map` from each row's name to
+its value:
+
+```x2c
+~#include "args.x"
+~#include "process.x"
+~int main(int argc, char **argv) {
+~List args = List.arguments(argc, argv);
+List spec = %(
+  (-v --verbose (help "Report each input"))
+  (-o --output (value file) (default "report.txt") (help "Write <file>"))
+  (-I --include (value dir) repeated (help "Also search <dir>"))
+  (inputs repeated required (help "Files to read")));
+Map options = args.parse_args(spec);
+String output = options["output"].str();
+foreach (String input, options["inputs"].list())
+  if (options["verbose"]) printf("%s -> %s\n", input, output);
+~  return 0;
+~}
+```
+
+A row that begins with dashed words is an option with those spellings. Its
+name is the first long spelling without the dashes, or the short spelling
+when it has no long one, so the rows above are named `verbose`, `output`,
+and `include`. A row that begins with any other word is an operand of that
+name. The rest of a row describes it:
+
+| Row part | Meaning |
+| --- | --- |
+| `(value file)` | the option takes a value, shown as `<file>` in usage |
+| `(default "report.txt")` | the value when the row is not given |
+| `(help "text")` | the row's description in usage text |
+| `required` | a missing option or operand raises `<bad-arg>` |
+| `repeated` | every value is kept in a `List`; an operand takes the rest |
+
+A long option takes its value as `--output out.txt` or `--output=out.txt`,
+and a short one as `-o out.txt` or `-oout.txt`. Short flags may share a word,
+as in `-vv`. Operands may come before, between, or after options, and every
+word after `--` is an operand. Operand rows take operands in spec order.
+
+Every name in the spec is present in the result. A flag holds the number of
+times it appeared, a `repeated` row holds a `List`, and any other row holds
+its last value as a `String`. A row that was not given holds its default, or
+else zero, an empty `List`, or a NULL `String`, all of which test false.
+Values stay `String`s; convert one to a number where the script needs it.
+
+An unknown option, a missing or unexpected value, an extra operand, or a
+missing `required` row raises `<bad-arg>` with `why` and the offending
+`option` or `operand`. Nothing exits on the script's behalf, so the script
+chooses the message and the status. `usage` returns help text generated
+from the same spec:
+
+```x2c
+~#include "args.x"
+~#include "process.x"
+~int main(int argc, char **argv) {
+List spec = %(
+  (--prefix (value path) required (help "Install under <path>"))
+  (-q --quiet (help "Print nothing on success")));
+try {
+  Map options = List.arguments(argc, argv).parse_args(spec);
+  String prefix = options["prefix"].str();
+  if (!options["quiet"]) printf("installing to %s\n", prefix);
+}
+catch %(bad-arg *detail): {
+  Stderr.printf("%s", spec.usage("install.x"));
+  return 2;
+}
+~  return 0;
+~}
+```
+
+```text
+Usage:
+  install.x [options]
+
+Options:
+      --prefix <path>         Install under <path>
+  -q, --quiet                 Print nothing on success
+```
+
+A script with subcommands reads the first word itself and parses the rest
+with that command's spec. [`etc/x2c-payload.x`](../../../etc/x2c-payload.x),
+which `make install` runs, works this way.
 
 ## Run a command
 
@@ -261,8 +353,8 @@ A missing path raises `<not-found>` and any other failure raises `<io-fail>`,
 both naming the operation and path.
 
 [`examples/scripts/line-counts.x`](../../../examples/scripts/line-counts.x)
-combines both modules: it builds a small tree, counts lines with parallel
-jobs, and writes a report.
+combines `process.x` and `path.x`: it builds a small tree, counts lines with
+parallel jobs, and writes a report.
 
 ## Checksums
 

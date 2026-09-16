@@ -437,6 +437,14 @@ Public functions:
 
 ## Runtime modules
 
+### [lib/args.x](../lib/args.x)
+
+parse program arguments against a declarative spec.
+
+Public functions:
+
+`List.parse_args`, `List.usage`
+
 ### [lib/array.x](../lib/array.x)
 
 dynamic contiguous arrays of `Var` elements.

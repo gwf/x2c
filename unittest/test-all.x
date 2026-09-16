@@ -36,6 +36,7 @@ void typed_map_suite(void);
 void autodiff_suite(void);
 void process_suite(void);
 void path_suite(void);
+void args_suite(void);
 void digest_suite(void);
 void protocols_suite(void);
 void atomic_container_suite(void);
@@ -95,6 +96,7 @@ int main(int argc, char **argv) {
   $test.suite(autodiff_suite);
   $test.suite(process_suite);
   $test.suite(path_suite);
+  $test.suite(args_suite);
   $test.suite(digest_suite);
   $test.suite(protocols_suite);
   $test.suite(atomic_container_suite);
