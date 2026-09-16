@@ -3772,6 +3772,16 @@ List Compiler.convert_compound_literal(
 static int _conditional_joins(Compiler c, Type type, Type other) =>
   type && other && c.sym.is_var_type(type) && !c.sym.is_var_type(other);
 
+/* A brace arm that stays a native initializer becomes a compound literal of
+   the destination, because C has no braced conditional operand. */
+static List _conditional_arm(Compiler c, List arm, Type target) {
+  List converted = c.convert_expression(arm, target);
+  match (converted)
+    case %(expr ?type (composite *)):
+      return %(expr $type (cast $type $converted));
+  return converted;
+}
+
 /** Adds operations to convert a resolved expression AST to `target`.
     The result may contain converter, boxing, unboxing, `Func`, reference, or
     composite-literal operations. Returns the original expression when C
@@ -3823,8 +3833,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
         (!List.equal(true_type, false_type) &&
          !(c.sym.resolve_numeric_type(true_type) &&
            c.sym.resolve_numeric_type(false_type)))) {
-      List converted_true = c.convert_expression(ontrue, declared_target);
-      List converted_false = c.convert_expression(onfalse, declared_target);
+      List converted_true = _conditional_arm(c, ontrue, declared_target);
+      List converted_false = _conditional_arm(c, onfalse, declared_target);
       if (converted_true != ontrue || converted_false != onfalse)
         return %(expr $declared_target
           (op $operator $condition $converted_true $converted_false));

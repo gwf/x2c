@@ -135,9 +135,16 @@
       ,(x2c._foreach.declare '("Var") item nil)
       (while ,condition ,loop-body)))))
 
+// A C string literal iterates as the String it converts to.
+(defun x2c._foreach.collection (collection)
+  (if (match collection '(expr (* char) (literal (* char) ?)))
+      (_x2c.foreach.string-collection collection)
+      collection))
+
 (defun x2c._foreach.expand
   (declaration collection body iterator item pair object cursor)
-  (let* ((targets
+  (let* ((collection (x2c._foreach.collection collection))
+         (targets
            (_x2c.foreach.declaration-bindings declaration))
          (collection-type (x2c.syntax.type collection))
          (direct (equal? collection-type '("Iter")))

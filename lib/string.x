@@ -1468,8 +1468,8 @@ int String.try_next(String str, int *cursor, int *out) {
     Foreach may convert each yielded byte to either `int` or `char`:
 
     ```x2c
-    foreach (int byte, %"abc") printf("%d\n", byte);
-    foreach (char ch, %"abc") printf("%c\n", ch);
+    foreach (int byte, "abc") printf("%d\n", byte);
+    foreach (char ch, "abc") printf("%c\n", ch);
     ```
 
     This is byte traversal, not Unicode character iteration.
