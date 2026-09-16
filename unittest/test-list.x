@@ -399,6 +399,21 @@ static void list_literal_integers(void) {
   EXPECT_INT_EQ(neg_only.car().integer(), -5);
 }
 
+static List _quoted_collections(void) => %(k [a, b] (x {c: d}));
+
+/* Quoted Arrays and Maps inside a List literal keep quoted contents and are
+   built fresh at each evaluation. */
+static void list_literal_nested_collections(void) {
+  List first = _quoted_collections(), second = _quoted_collections();
+  EXPECT_STR_EQ(first.str(), "( k [ a, b ] ( x { c: d } ))");
+  Array array = first.cadr();
+  EXPECT_TRUE(array[1] is <symbol>);
+  EXPECT_STR_EQ(array[1].str(), "b");
+  array.push(<extra>);
+  EXPECT_STR_EQ(second.str(), "( k [ a, b ] ( x { c: d } ))");
+  EXPECT_STR_EQ(%(k []).str(), "( k [  ] )");
+}
+
 static void list_assoc_hash_equal(void) {
   Var one = 1L, two = 2L, nine = 9L;
   List pair1 = %(alpha $one);
@@ -620,6 +635,7 @@ void list_suite(void) {
   $test.run(list_func_callbacks);
   $test.run(list_func_rejects_invalid_callbacks_on_invocation);
   $test.run(list_literal_integers);
+  $test.run(list_literal_nested_collections);
   $test.run(list_assoc_hash_equal);
   $test.run(list_array_conversion_boundaries);
   $test.run(list_array_list_free_consumes_the_receiver);

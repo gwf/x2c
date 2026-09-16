@@ -284,6 +284,11 @@ static List _parse_list_head(Compiler compiler) {
      literal node ending in the Symbol <ident>. */
   if (elem.try_search(%(ident (*)), &matched, &bindings)) return elem;
   if (compiler.runtime_literals) return elem;
+  /* Each evaluation builds a fresh Array or Map, so a List that holds one,
+     at any depth, is built at runtime too. */
+  if (elem.match(%(expr (!or ("Array") ("Map")) *)) ||
+      elem.match(%(expr ("List") (expr ("List") (cons *)))))
+    return elem;
   return compiler.cache(%(var $elem));
 }
 
