@@ -229,6 +229,7 @@ stage-diff-all: stage-3				## Compare every generated stage
 doc-generate:						## Regenerate derived documentation
 	python3 tools/gen-module-catalog.py --write
 	python3 tools/gen-api-reference.py --write
+	python3 tools/gen-llms-txt.py --write
 
 doc-check:						## Check documentation for drift
 	python3 tools/check-docs.py
