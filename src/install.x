@@ -2,11 +2,10 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    `x2c install`, `remove`, and `list` manage `<home>/packages`. Fetching,
-    hashing, and extraction run host tools as child processes. A package is
-    staged in a sibling directory, built there when it is source, and
-    published with one rename. Installs and removals in one home run one at
-    a time.
+    `x2c install`, `remove`, and `list` manage `<home>/packages`. Fetching
+    and extraction run host tools as child processes. A package is staged in
+    a sibling directory, built there when it is source, and published with
+    one rename. Installs and removals in one home run one at a time.
 */
 
 #pragma once
@@ -23,6 +22,8 @@ $(import "../lib/private-keywords.xmacro")
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include <unistd.h>
+
+#include "digest.x"
 
 #define INSTALL_INDEX "https://x2c-lang.dev/packages/index.txt"
 
@@ -91,18 +92,11 @@ static String _fetch(String url, String directory, String name) {
   return target;
 }
 
-static String _digest(String path) {
-  String output = NULL;
-  try output = %( "shasum" "-a" "256" $path )
-    .options(%{stderr: capture}).output();
-  catch %(not-found *): {}
-  catch %(cmd-fail *): {}
-  if (!output) output = _run(%( "sha256sum" $path ), "sha256");
-  return output.split(" ").car();
-}
-
 static void _verify(String path, String expected) {
-  String actual = _digest(path);
+  File input = fopen(path, "rb");
+  if (!input) _error(%"cannot read $path");
+  String actual = input.sha256();
+  input.close();
   if (actual != expected.lower())
     _error(%"sha256 mismatch for $path: expected $expected, got $actual");
 }

@@ -114,6 +114,7 @@ match-recursive               readable recursive Match reference
 autodiff                      runtime reverse-mode differentiation tape
 process                       commands, pipelines, and jobs without a shell
 path                          filesystem operations on path Strings
+digest                        SHA-256 digests of Strings and streams
 ```
 
 `docs/library-manifest.txt` is the owner of that split and of every module's

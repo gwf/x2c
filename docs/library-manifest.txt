@@ -53,7 +53,8 @@ lib/thread-state.x|internal|Native pthread-key storage for per-thread runtime st
 lib/thread.x|api|
 lib/tokenizer.x|internal|Token stream used by the compiler and the Lisp reader.
 lib/path.x|optional|Filesystem operations on path `String`s; explicitly include `path.x` to use them.
-lib/scripting.x|optional|The `path.x` and `process.x` pair that every script unit includes; include `scripting.x` to use both.
+lib/scripting.x|optional|The `digest.x`, `path.x`, and `process.x` modules that every script unit includes; include `scripting.x` to use all three.
+lib/digest.x|optional|SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 lib/process.x|optional|Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 lib/autodiff.x|optional|Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.

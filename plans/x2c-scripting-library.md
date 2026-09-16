@@ -73,10 +73,23 @@ becoming a third. Proof: convert `tools/check-gallery-examples.py`.
 
 ## Phase D - `lib/digest.x`
 
-SHA-256 and CRC32 over `String` and `File`. Nothing in the repository computes
-a checksum today; `src/install.x:96-107` shells out to `shasum`. Proof: convert
-`tools/gate-state.py`, which needs SHA-256, JSON, file mode bits, and argument
-parsing, and is the best fit for the scripting API.
+SHA-256 over `String` and `File`: `String.sha256` hashes text and
+`File.sha256` hashes the raw bytes remaining in a stream, each returning the
+lowercase hexadecimal `String` that `shasum -a 256` prints. Proof: `_verify`
+in `src/install.x` calls `File.sha256` instead of running `shasum` or
+`sha256sum`, so verifying a package download no longer needs a host tool.
+`unittest/probes/run-package-install.sh` covers the matching and mismatched
+digests.
+
+Two changes from the original phase. CRC32 is dropped because nothing
+consumes it. `tools/gate-state.py` is not the proof: it is the publication
+gate, and gate-path tooling must not depend on the scripting feature it
+validates.
+
+The file entry point is a `File` method, not a path method. A `String`
+receiver already means text for `String.sha256`, so a path spelling would need
+a second name; `File.open(path, "rb")` with `$auto` is the path form, and a
+`File` also hashes a pipe or an already-open stream.
 
 ## Module placement
 

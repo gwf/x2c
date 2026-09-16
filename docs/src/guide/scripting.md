@@ -15,8 +15,8 @@ and every failure is an [`Error`](exceptions.md) that a `catch` can select.
 ## Write a script
 
 A source file whose first line is a shebang is a script. It includes both
-modules automatically and may put statements at file scope, which run in
-order as the program:
+modules, and `digest.x` for [checksums](#checksums), automatically and may
+put statements at file scope, which run in order as the program:
 
 ```x2c
 #!/usr/bin/env -S x2c script
@@ -263,3 +263,20 @@ both naming the operation and path.
 [`examples/scripts/line-counts.x`](../../../examples/scripts/line-counts.x)
 combines both modules: it builds a small tree, counts lines with parallel
 jobs, and writes a report.
+
+## Checksums
+
+`digest.x` computes SHA-256 digests, spelled as the lowercase hexadecimal
+`String` that `shasum -a 256` prints. `String.sha256` hashes the text of a
+`String`. `File.sha256` hashes the raw bytes from a stream's position to its
+end, so it also works on binary files that `read_text` refuses:
+
+```x2c
+~#include "digest.x"
+~int main(void) {
+File shell = $auto(File.open("/bin/sh", "rb"));
+printf("%s  /bin/sh\n", shell.sha256());
+String abc = %"abc".sha256();
+~  return abc.startswith("ba7816bf8f01cfea") ? 0 : 1;
+~}
+```
