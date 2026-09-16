@@ -688,7 +688,7 @@ macro Unit $array.typed.observe(
   Array $family.array($family array) {
     if ((void *) array == NULL) return NULL;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    Array boxed = %[], result = NULL;
+    Array boxed = [], result = NULL;
     defer if ((void *) result == NULL) Block_free((Block) boxed);
     $element *data = ($element *) array.bytes;
     for (size_t i = 0; i < array.length; i++) {

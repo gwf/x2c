@@ -40,11 +40,11 @@ hand-rolled `cdr` walk, which pays a `car` and a `cdr` call per cell. Prefer
 own module, so all four work directly:
 
 ```x2c
-Array scores = %[3, 4, 5];
+Array scores = [3, 4, 5];
 foreach(int score, scores)
   printf("score = %d\n", score);
 
-Map ages = %{"ada": 36, "alan": 41};
+Map ages = {"ada": 36, "alan": 41};
 foreach(Var (name, age), ages)
   printf("%s is %d\n", name, age.int());
 
@@ -91,7 +91,7 @@ foreach(String field, text.splits(":"))
 
 `words()` coalesces runs of C whitespace, ignores leading and trailing
 whitespace, and yields no empty `String`. `splits(sep)` treats every explicit
-separator independently, so `%" a  b ".splits(" ")` yields empty fields
+separator independently, so `" a  b ".splits(" ")` yields empty fields
 around and between the words. `lines()` recognizes LF, CR, and CRLF and
 strips the endings.
 

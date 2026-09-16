@@ -236,7 +236,7 @@ def analyze_function(function: Function, causes: set[str]) -> Finding | None:
             break
 
     literal_assignments = re.finditer(
-        r"\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*%(?:\[\s*\]|\{\s*\})\s*;", body
+        r"\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*%?(?:\[\s*\]|\{\s*\})\s*;", body
     )
     for assignment in literal_assignments:
         name = assignment.group(1)

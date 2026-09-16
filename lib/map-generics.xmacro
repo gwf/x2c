@@ -642,7 +642,7 @@ macro Unit $map.typed.observe(
   */
   Map $map.map($map map) {
     if ((void *) map == NULL) return NULL;
-    Map boxed = %{};
+    Map boxed = {};
     unsigned cursor = 0;
     $key key;
     $value value;

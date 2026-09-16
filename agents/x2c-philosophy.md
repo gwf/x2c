@@ -278,7 +278,7 @@ hash zero; equality still resolves ordinary hash collisions.
 
 Array and Map do not support that representation. They are mutable,
 identity-bearing objects, so even their empty values are allocated by
-`Array.new` and `Map.new`. Separate `%[]` and `%{}` evaluations produce
+`Array.new` and `Map.new`. Separate `[]` and `{}` evaluations produce
 separate objects that may be mutated immediately. `Var.new` rejects a null
 pointer for the Array and Map value tags; boxing and unboxing preserve the
 allocated object identity. A raw null Array or Map pointer may still express
@@ -293,7 +293,7 @@ or `<ignore>`; an observing handler also cannot consume one with `<handled>`.
 Literal raises of these causes emit `__builtin_unreachable()` after the
 runtime call.
 Downstream code therefore does not check whether a valid Scope allocation,
-growth operation, `%[]`, or `%{}` succeeded. Null remains meaningful only
+growth operation, `[]`, or `{}` succeeded. Null remains meaningful only
 where the API documents it, including empty String and nil/List, optional
 inputs, absence, null-safe destruction, `Scope.memdup(NULL, 0)`, and
 `Scope.realloc(ptr, 0)`.

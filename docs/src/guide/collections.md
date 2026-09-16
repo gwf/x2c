@@ -365,7 +365,7 @@ A file-static x2c object can keep its literal beside its declaration:
 static String endpoint = %"$scheme://example.test";
 static String scheme = "https";
 static List labels = %(service $scheme $endpoint);
-static Array routes = %[$endpoint];
+static Array routes = [endpoint];
 static Map route_by_name = %{default: $endpoint};
 static Var boxed_labels = %(boxed $scheme);
 ```
@@ -417,17 +417,17 @@ you.
 
 ### Array and Map are objects
 
-`Array.new`, `Map.new`, `%[]`, and `%{}` each produce a **fresh allocated
+`Array.new`, `Map.new`, `[]`, and `{}` each produce a **fresh allocated
 object** with its own identity. Two separately written empty literals are two
 different `Array`s. Assigning one to another variable aliases it.
 
 ```x2c
-Array a = %[1, 2, 3];
+Array a = [1, 2, 3];
 Array alias = a;
 Array copy = a.copy();
 alias.push(4);
 printf("a=%s alias=%s copy=%s\n", a.repr(), alias.repr(), copy.repr());
-printf("distinct empty literals: %d\n", %[] === %[]);
+printf("distinct empty literals: %d\n", [] === []);
 ```
 
 ```text
@@ -439,7 +439,7 @@ Mutating operations mutate in place and return the same object, so
 `array.sort()` is not a sorted copy:
 
 ```x2c
-Array numbers = %[5, 3, 9, 1];
+Array numbers = [5, 3, 9, 1];
 Array sorted = numbers.sort();
 printf("numbers=%s  same object=%d\n", numbers.repr(), sorted === numbers);
 ```
@@ -458,8 +458,8 @@ and what identity each returns.
 ```x2c
 String empty = "";
 List nil = %();
-Array none = %[];
-Map blank = %{};
+Array none = [];
+Map blank = {};
 printf("empty String is null: %d  nil is null: %d\n",
        empty == NULL, nil == NULL);
 printf("empty Array allocated: %d  empty Map allocated: %d\n",
@@ -481,7 +481,7 @@ is false even when an empty `Array` or `Map` owns storage. Compare the pointer
 when you are asking about the allocation instead of the content:
 
 ```x2c
-Array none = %[];
+Array none = [];
 Var boxed = none;
 printf("pointer test: %d   boxed truthiness: %d\n",
        none != NULL, boxed ? 1 : 0);
@@ -497,13 +497,13 @@ static truthiness: 0   len test: 1
 ### Equality and identity are explicit
 
 ```x2c
-Array left = %[1, 2];
-Array right = %[1, 2];
+Array left = [1, 2];
+Array right = [1, 2];
 printf("array structural: %d  identity: %d\n",
        left == right, left === right);
 
-Map a = %{k: 1};
-Map b = %{k: 1};
+Map a = {k: 1};
+Map b = {k: 1};
 printf("map structural: %d  identity: %d\n", a == b, a === b);
 ```
 
@@ -518,13 +518,13 @@ values. Boxed `Array` and `Map` hashing is identity-based, so they make poor
 `Map` keys:
 
 ```x2c
-Map by_list = %{};
+Map by_list = {};
 by_list[%(1 2)] = "found";
 printf("List key, rebuilt: %s\n", by_list[cons(1, cons(2, NULL))].repr());
 
-Map by_array = %{};
-by_array[%[1, 2]] = "found";
-printf("Array key, equal contents: %s\n", by_array[%[1, 2]].repr());
+Map by_array = {};
+by_array[[1, 2]] = "found";
+printf("Array key, equal contents: %s\n", by_array[[1, 2]].repr());
 ```
 
 ```text
@@ -679,8 +679,8 @@ stream directly through `foreach` instead. `String.join` is the inverse of
 eager `split`, with the separator as the receiver:
 
 ```x2c
-List parts = %"a:b:c".split(":");
-printf("%s -> %s\n", parts.repr(), %"-".join(parts));
+List parts = "a:b:c".split(":");
+printf("%s -> %s\n", parts.repr(), "-".join(parts));
 ```
 
 ```text
@@ -691,9 +691,9 @@ Numeric parsing reports success separately from the result:
 
 ```x2c
 long value;
-if (%"42".try_long(&value)) printf("parsed %ld\n", value);
-if (!%"abc".try_long(&value)) printf("rejected abc\n");
-if (!%"4x".try_long(&value)) printf("rejected 4x\n");
+if ("42".try_long(&value)) printf("parsed %ld\n", value);
+if (!"abc".try_long(&value)) printf("rejected abc\n");
+if (!"4x".try_long(&value)) printf("rejected 4x\n");
 ```
 
 ```text
@@ -713,7 +713,7 @@ with a C string literal using `==` or `!=` promotes the literal to `String`
 and compares their contents:
 
 ```x2c
-String built = %"hello" + %", world";
+String built = "hello" + ", world";
 printf("%s  %d\n", built, built == "hello, world");
 ```
 
@@ -774,7 +774,7 @@ For anything longer, use `Buffer`. It grows, it tracks indentation, and
 
 ```x2c
 Buffer out = Buffer.new(0);
-foreach(Var item, %[1, 2, 3]) {
+foreach(Var item, [1, 2, 3]) {
   out.write("item ");
   out.write(item.str());
   out.newline();
@@ -801,7 +801,7 @@ mutation, a stack, a queue, or scratch storage. `Array.len` is O(1) and
 returns a `size_t`.
 
 ```x2c
-Array stack = %[];
+Array stack = [];
 stack.push(1);
 stack.push(2);
 stack.push(3);
@@ -825,7 +825,7 @@ same object; Lists return a sorted copy. The existing `sort()` still uses
 `Var.compare` and does not promise stable ties.
 
 ```x2c
-Array rows = %[];
+Array rows = [];
 rows.push(%(2 "first"));
 rows.push(%(1 "low"));
 rows.push(%(2 "second"));
@@ -857,7 +857,7 @@ the removed value is needed. `truncate` shortens the `Array` without changing
 its identity, and `free` releases its storage before the owning scope ends.
 
 ```x2c
-Array items = %["a", "c"];
+Array items = ["a", "c"];
 items.insert(1, "b");
 items.unshift("start");
 Var gone = items.remove(0);
@@ -874,7 +874,7 @@ find b at 1, joined a-b-c
 queue without a second data structure:
 
 ```x2c
-Array heap = %[];
+Array heap = [];
 heap.heap_push(30);
 heap.heap_push(10);
 heap.heap_push(20);
@@ -886,7 +886,7 @@ smallest first: 10
 ```
 
 `Array.push` rejects `void`, and so does the counted construction used by
-non-empty `%[...]` literals. Raw `Null` is `Array` data. An out-of-range read
+non-empty Array literals. Raw `Null` is `Array` data. An out-of-range read
 returns `void`. `Array` has no status-bearing read.
 
 ### Packed numeric Arrays
@@ -895,8 +895,8 @@ returns `void`. `Array` has no status-bearing read.
 than `Var`: `ArrayChar`, `ArrayShort`, `ArrayInt`, `ArrayLong`,
 `ArrayFloat`, and `ArrayDbl`. Each stores its elements packed, at the width
 of the C type, and carries the same positional, slicing, searching, and
-`Block` operations that `Array` does. `%[...]` builds one when that is the
-declared type, so `ArrayInt counts = %[1, 2, 3];` packs the literal; an
+`Block` operations that `Array` does. An Array literal builds one when that is
+the declared type, so `ArrayInt counts = [1, 2, 3];` packs the literal; an
 element that is not a number raises `<no-convert>`.
 
 The bracket is where they differ. `numbers[i]` is native indexing on a
@@ -988,7 +988,7 @@ A `Map` is a mutable Robin Hood hash table from `Var` keys to `Var` values.
 Keys and values are both `Var`, so a `Map` can be heterogeneous.
 
 ```x2c
-Map counts = %{};
+Map counts = {};
 List words = %("to" "be" "or" "not" "to" "be");
 foreach(Var w, words)
   counts[w] += 1;
@@ -1016,7 +1016,7 @@ value is. `copy` and `merge` combine `Map`s.
 Nested literals work, and `Symbol`s make readable keys for fixed schemas:
 
 ```x2c
-Map config = %{
+Map config = {
   name: "x2c",
   targets: ["c"],
   limits: {depth: 8}
@@ -1037,7 +1037,7 @@ operations report presence separately from the value and leave the output
 pointer untouched on failure.
 
 ```x2c
-Map ages = %{"ada": 36, "grace": 45};
+Map ages = {"ada": 36, "grace": 45};
 ages["alan"] = 41;
 
 Var found;
@@ -1066,7 +1066,7 @@ it can yield an entry whose key is raw `Null` without that looking like
 exhaustion.
 
 ```x2c
-Map ages = %{"ada": 36, "grace": 45};
+Map ages = {"ada": 36, "grace": 45};
 unsigned cursor = 0;
 Var key, value;
 while (ages.try_next(&cursor, &key, &value))
@@ -1097,7 +1097,7 @@ A `foreach` over a `Map` yields each value. Two binders ask for the key as
 well, and the loop reads both out of the table without allocating:
 
 ```x2c
-Map ages = %{"ada": 36, "grace": 45};
+Map ages = {"ada": 36, "grace": 45};
 foreach(Var (key, value), ages)
   printf("%s -> %s\n", key, value.repr());
 ```
@@ -1120,7 +1120,7 @@ destructuring form.
 rather than `Var`. `MapIntInt` and `MapLongDouble` store native numeric
 scalars; `MapStringString` stores canonical `String` pointers. Each carries the
 same lookup, defaulting, update, deletion, traversal, `copy`, and `merge`
-operations that `Map` does. `%{...}` builds one when that is the declared
+operations that `Map` does. A Map literal builds one when that is the declared
 type, converting every key and value to the field type; an entry that cannot
 be converted raises `<no-convert>`.
 
@@ -1128,11 +1128,11 @@ be converted raises `<no-convert>`.
 #include "typed-map.x"
 
 int main(void) {
-  MapIntInt counts = %{1: 2, 3: 4};
+  MapIntInt counts = {1: 2, 3: 4};
   counts.updateindex(1, <+>, 10);
   counts.set(5, 25);
 
-  MapStringString label = %{"name": "x"};
+  MapStringString label = {"name": "x"};
   label.updateindex("name", <+>, "2c");
 
   int out = 0;
@@ -1182,7 +1182,7 @@ Native C arrays and pointers keep C indexing. `Array`, `List`, `String`, and
 `Map` also define `value[...]`.
 
 ```x2c
-Array digits = %[0, 1, 2, 3, 4, 5];
+Array digits = [0, 1, 2, 3, 4, 5];
 List letters = %(a b c d);
 String text = "sphinx";
 
@@ -1232,7 +1232,7 @@ new `Array`, a `List` gives a new `List`, and a `String` gives a new `String`.
 The result is a fresh value, and slices do not alias.
 
 ```x2c
-Array digits = %[0, 1, 2, 3, 4, 5];
+Array digits = [0, 1, 2, 3, 4, 5];
 Array first_three = digits[:3];
 Array every_other = digits[::2];
 Array backwards = digits[::-1];
@@ -1303,11 +1303,11 @@ carry each entry.
 ```x2c
 String text = "the quick the lazy the end";
 
-Map counts = %{};
+Map counts = {};
 foreach(Var word, text.words())
   counts[word] += 1;
 
-Array ranked = %[];
+Array ranked = [];
 foreach(Var (word, count), counts)
   ranked.push(%($count $word));
 ranked.sort();

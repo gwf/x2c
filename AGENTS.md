@@ -57,7 +57,7 @@ passing tests support that result rather than replace it.
   behavior after valid allocation, growth, open, read, write, format, and
   binding operations. Keep checks for documented null inputs, absence,
   callbacks, and other returning failures; reserve `$error.fallback` for
-  user-defined causes. Fresh `%[]` and `%{}` need no null checks.
+  user-defined causes. Fresh `[]` and `{}` need no null checks.
 - Choose representations and scopes by their actual identity and lifetime
   behavior. Consult the relevant section of `agents/x2c-philosophy.md` for
   technical facts and their evidence.
