@@ -27,9 +27,9 @@ Image chart_image(int *series) {
   Rectangle panel = { 48, 42, 1104, 588 };
   chart.draw_rectangle(panel, WHITE);
   chart.draw_rectangle_lines(panel, 2, Color.from_hex(0xd7dce5ff));
-  chart.draw_text(%"Weekly high temperature", 84, 68, 36, DARKGRAY);
+  chart.draw_text("Weekly high temperature", 84, 68, 36, DARKGRAY);
   chart.draw_text(
-    %"A deterministic raylib Image rendered from x2c Lists",
+    "A deterministic raylib Image rendered from x2c Lists",
     86, 112, 20, GRAY
   );
 

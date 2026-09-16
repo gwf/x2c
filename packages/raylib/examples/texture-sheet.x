@@ -81,9 +81,9 @@ int main(void) {
 
   Image sheet = Image.new(900, 600, Color.rgb(247, 248, 252));
   defer sheet.free();
-  sheet.draw_text(%"Procedural texture tiles", 36, 30, 32, ink);
+  sheet.draw_text("Procedural texture tiles", 36, 30, 32, ink);
   sheet.draw_text(
-    %"generated, written to builds/, and read back from disk",
+    "generated, written to builds/, and read back from disk",
     38, 74, 18, Color.rgb(120, 128, 146)
   );
 
@@ -127,7 +127,7 @@ int main(void) {
     %"noise below $knockout_cut removed"
   );
 
-  sheet.draw_text(%"Sheet report", 300, 336, 24, ink);
+  sheet.draw_text("Sheet report", 300, 336, 24, ink);
   sheet.draw_text(
     %"${captions.len()} tiles at $tile_size square, read from PNG",
     300, 378, 18, Color.rgb(94, 102, 120)
@@ -142,14 +142,14 @@ int main(void) {
   sheet.draw_polygon(pentagon, Color.rgb(20, 125, 245));
   sheet.draw_polygon_lines(pentagon, 3, Color.rgb(12, 78, 156));
   sheet.draw_text(
-    %"PASS", 802 - RaylibText.width(%"PASS", 20) / 2, 442, 20, WHITE
+    "PASS", 802 - RaylibText.width("PASS", 20) / 2, 442, 20, WHITE
   );
 
-  String output = %"builds/texture-sheet.png";
+  String output = "builds/texture-sheet.png";
   sheet.export(output);
 
   /* A tile that was never published is a raylib failure, not an absence. */
-  String missing = %"builds/tile-9.png";
+  String missing = "builds/tile-9.png";
   try {
     Image absent = Image.load(missing);
     absent.free();

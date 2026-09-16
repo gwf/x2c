@@ -445,7 +445,7 @@ Var Tensor.item(Tensor t) {
     tensor's dtype. */
 Array Tensor.to_values(Tensor t) {
   int64_t count = t.numel();
-  Array values = %[];
+  Array values = [];
   if (_integer_dtype(t.dtype())) {
     int64_t *whole = Scope.calloc(count ? count : 1, sizeof(int64_t));
     _check(xt_copy_out_int64s(t.native, whole, count), "to_values");
@@ -1352,7 +1352,7 @@ Map Checkpoint.load(String path) {
   defer xt_pickle_free(opened);
   int64_t count;
   _check(xt_pickle_count(opened, &count), "checkpoint load");
-  Map values = %{};
+  Map values = {};
   for (int64_t i = 0; i < count; i++) {
     String name = _text(xt_pickle_name(opened, i), "checkpoint load");
     Tensor value = _wrap(xt_pickle_tensor(opened, i), "checkpoint load");

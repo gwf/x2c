@@ -287,7 +287,7 @@ Statement Statement.bind_named(Statement statement, Map values) {
 /** Copies column names in result order, preserving duplicate names. */
 List Statement.columns(Statement statement) {
   _statement_live(statement, "sqlite3_column_name");
-  Array names = %[];
+  Array names = [];
   int count = sqlite3_column_count(statement.handle);
   for (int index = 0; index < count; index++) {
     const char *name = sqlite3_column_name(statement.handle, index);
@@ -343,7 +343,7 @@ static int _statement_step(Statement statement) {
 */
 List Statement.next(Statement statement) {
   if (_statement_step(statement) == SQLITE_DONE) return NULL;
-  Array row = %[];
+  Array row = [];
   int count = sqlite3_column_count(statement.handle);
   for (int index = 0; index < count; index++)
     row.push(_statement_column(statement, index));

@@ -233,7 +233,7 @@ static void _curl_check(CurlEasy easy, String operation, CURLcode result) {
 
 static void _curl_getinfo(CurlEasy easy, CURLINFO info, void *out) {
   CURLcode result = curl_easy_getinfo(easy.native, info, out);
-  if (result != CURLE_OK) _curl_raise(easy, %"easy_getinfo", result);
+  if (result != CURLE_OK) _curl_raise(easy, "easy_getinfo", result);
 }
 
 static void _curl_add_header(struct curl_slist **list, String line) {
@@ -340,7 +340,7 @@ static List _curl_blocks(const unsigned char *bytes, size_t length) {
     if (stop > start && bytes[stop - 1] == '\r') stop--;
     size_t line_length = stop - start;
     if (line_length) {
-      String line = _curl_header_text(bytes + start, line_length, %"headers");
+      String line = _curl_header_text(bytes + start, line_length, "headers");
       if (_curl_status_line(line)) {
         if (status) blocks = cons(_curl_block(status, headers), blocks);
         status = line;
@@ -364,15 +364,15 @@ CurlEasy CurlEasy.new(void) {
   CurlEasy completed = NULL;
   defer if (!completed) easy.free();
   easy.body_limit = 1024 * 1024;
-  _curl_check(easy, %"CURLOPT_ERRORBUFFER",
+  _curl_check(easy, "CURLOPT_ERRORBUFFER",
     curl_easy_setopt(easy.native, CURLOPT_ERRORBUFFER, easy.error));
-  _curl_check(easy, %"CURLOPT_NOSIGNAL",
+  _curl_check(easy, "CURLOPT_NOSIGNAL",
     curl_easy_setopt(easy.native, CURLOPT_NOSIGNAL, 1L));
-  _curl_check(easy, %"CURLOPT_PROTOCOLS_STR",
+  _curl_check(easy, "CURLOPT_PROTOCOLS_STR",
     curl_easy_setopt(easy.native, CURLOPT_PROTOCOLS_STR, "http,https"));
-  _curl_check(easy, %"CURLOPT_REDIR_PROTOCOLS_STR",
+  _curl_check(easy, "CURLOPT_REDIR_PROTOCOLS_STR",
     curl_easy_setopt(easy.native, CURLOPT_REDIR_PROTOCOLS_STR, "http,https"));
-  _curl_check(easy, %"CURLOPT_USERAGENT",
+  _curl_check(easy, "CURLOPT_USERAGENT",
     curl_easy_setopt(easy.native, CURLOPT_USERAGENT, "x2c-libcurl/2"));
   return completed = easy;
 }
@@ -416,9 +416,9 @@ CurlEasy CurlEasy.timeouts(CurlEasy easy, long connect_ms, long total_ms) {
   if (!easy || !easy.native || connect_ms <= 0 || total_ms <= 0) {
     raise %(bad-arg (library "libcurl") (operation "timeouts"));
   }
-  _curl_check(easy, %"CURLOPT_CONNECTTIMEOUT_MS",
+  _curl_check(easy, "CURLOPT_CONNECTTIMEOUT_MS",
     curl_easy_setopt(easy.native, CURLOPT_CONNECTTIMEOUT_MS, connect_ms));
-  _curl_check(easy, %"CURLOPT_TIMEOUT_MS",
+  _curl_check(easy, "CURLOPT_TIMEOUT_MS",
     curl_easy_setopt(easy.native, CURLOPT_TIMEOUT_MS, total_ms));
   return easy;
 }
@@ -427,9 +427,9 @@ CurlEasy CurlEasy.follow_redirects(CurlEasy easy, long maximum) {
   if (!easy || !easy.native || maximum < 0) {
     raise %(bad-arg (library "libcurl") (operation "follow_redirects"));
   }
-  _curl_check(easy, %"CURLOPT_FOLLOWLOCATION",
+  _curl_check(easy, "CURLOPT_FOLLOWLOCATION",
     curl_easy_setopt(easy.native, CURLOPT_FOLLOWLOCATION, maximum ? 1L : 0L));
-  _curl_check(easy, %"CURLOPT_MAXREDIRS",
+  _curl_check(easy, "CURLOPT_MAXREDIRS",
     curl_easy_setopt(easy.native, CURLOPT_MAXREDIRS, maximum));
   return easy;
 }
@@ -447,7 +447,7 @@ CurlEasy CurlEasy.user_agent(CurlEasy easy, String value) {
     raise %(bad-arg (library "libcurl") (operation "user_agent"));
   }
   easy.user_agent = value.intern();
-  _curl_check(easy, %"CURLOPT_USERAGENT",
+  _curl_check(easy, "CURLOPT_USERAGENT",
     curl_easy_setopt(easy.native, CURLOPT_USERAGENT, easy.user_agent));
   return easy;
 }
@@ -469,11 +469,11 @@ CurlEasy CurlEasy.basic_auth(CurlEasy easy, String user, String password) {
   if (!easy || !easy.native || !user || !password) {
     raise %(bad-arg (library "libcurl") (operation "basic_auth"));
   }
-  _curl_check(easy, %"CURLOPT_HTTPAUTH",
+  _curl_check(easy, "CURLOPT_HTTPAUTH",
     curl_easy_setopt(easy.native, CURLOPT_HTTPAUTH, (long) CURLAUTH_BASIC));
-  _curl_check(easy, %"CURLOPT_USERNAME",
+  _curl_check(easy, "CURLOPT_USERNAME",
     curl_easy_setopt(easy.native, CURLOPT_USERNAME, user));
-  _curl_check(easy, %"CURLOPT_PASSWORD",
+  _curl_check(easy, "CURLOPT_PASSWORD",
     curl_easy_setopt(easy.native, CURLOPT_PASSWORD, password));
   return easy;
 }
@@ -502,7 +502,7 @@ CurlEasy CurlEasy.body(CurlEasy easy, String content_type, String content) {
   if (!content) {
     raise %(bad-arg (library "libcurl") (operation "body"));
   }
-  return _curl_set_body(easy, content_type, content, content.len(), %"body");
+  return _curl_set_body(easy, content_type, content, content.len(), "body");
 }
 
 /** Sets an arbitrary byte body for the next request and its `Content-Type`.
@@ -515,7 +515,7 @@ CurlEasy CurlEasy.body_bytes(
   }
   Block block = content;
   return _curl_set_body(
-    easy, content_type, content, block.width * block.length, %"body_bytes"
+    easy, content_type, content, block.width * block.length, "body_bytes"
   );
 }
 
@@ -589,41 +589,41 @@ static void _curl_transfer_begin(
     _curl_add_header(
       &transfer.request_headers, %"Content-Type: $content_type");
 
-  _curl_check(easy, %"CURLOPT_URL",
+  _curl_check(easy, "CURLOPT_URL",
     curl_easy_setopt(easy.native, CURLOPT_URL, easy.url));
-  _curl_check(easy, %"CURLOPT_POSTFIELDS",
+  _curl_check(easy, "CURLOPT_POSTFIELDS",
     curl_easy_setopt(easy.native, CURLOPT_POSTFIELDS, NULL));
-  _curl_check(easy, %"CURLOPT_HTTPGET",
+  _curl_check(easy, "CURLOPT_HTTPGET",
     curl_easy_setopt(easy.native, CURLOPT_HTTPGET, 1L));
-  _curl_check(easy, %"CURLOPT_NOBODY",
+  _curl_check(easy, "CURLOPT_NOBODY",
     curl_easy_setopt(easy.native, CURLOPT_NOBODY,
                      !strcmp(method, "HEAD") ? 1L : 0L));
-  _curl_check(easy, %"CURLOPT_CUSTOMREQUEST",
+  _curl_check(easy, "CURLOPT_CUSTOMREQUEST",
     curl_easy_setopt(easy.native, CURLOPT_CUSTOMREQUEST,
                      bodyless ? NULL : (const char *) method));
   if ((void *) request_body != NULL) {
-    _curl_check(easy, %"CURLOPT_POSTFIELDSIZE_LARGE",
+    _curl_check(easy, "CURLOPT_POSTFIELDSIZE_LARGE",
       curl_easy_setopt(easy.native, CURLOPT_POSTFIELDSIZE_LARGE,
                        (curl_off_t) request_body_size));
-    _curl_check(easy, %"CURLOPT_COPYPOSTFIELDS",
+    _curl_check(easy, "CURLOPT_COPYPOSTFIELDS",
       curl_easy_setopt(easy.native, CURLOPT_COPYPOSTFIELDS,
                        (const char *) request_body));
   }
-  _curl_check(easy, %"CURLOPT_HTTPHEADER",
+  _curl_check(easy, "CURLOPT_HTTPHEADER",
     curl_easy_setopt(
       easy.native, CURLOPT_HTTPHEADER, transfer.request_headers));
-  _curl_check(easy, %"CURLOPT_WRITEFUNCTION",
+  _curl_check(easy, "CURLOPT_WRITEFUNCTION",
     curl_easy_setopt(easy.native, CURLOPT_WRITEFUNCTION,
                      path ? _curl_spill : consume ? _curl_stream
                                                 : _curl_collect));
-  _curl_check(easy, %"CURLOPT_WRITEDATA",
+  _curl_check(easy, "CURLOPT_WRITEDATA",
     curl_easy_setopt(easy.native, CURLOPT_WRITEDATA,
                      path ? (void *) &transfer.sink
                        : consume ? (void *) &transfer.stream
                                  : (void *) &transfer.body));
-  _curl_check(easy, %"CURLOPT_HEADERFUNCTION",
+  _curl_check(easy, "CURLOPT_HEADERFUNCTION",
     curl_easy_setopt(easy.native, CURLOPT_HEADERFUNCTION, _curl_collect));
-  _curl_check(easy, %"CURLOPT_HEADERDATA",
+  _curl_check(easy, "CURLOPT_HEADERDATA",
     curl_easy_setopt(easy.native, CURLOPT_HEADERDATA, &transfer.headers));
 }
 
@@ -642,9 +642,9 @@ static CurlResponse _curl_transfer_finish(
   String path = transfer.path;
   CurlStreamFn consume = transfer.stream.consume;
   if (transfer.body.failure)
-    _curl_buffer_failure(easy, &transfer.body, %"body", operation);
+    _curl_buffer_failure(easy, &transfer.body, "body", operation);
   if (transfer.headers.failure)
-    _curl_buffer_failure(easy, &transfer.headers, %"headers", operation);
+    _curl_buffer_failure(easy, &transfer.headers, "headers", operation);
   if (transfer.sink.failed ||
       (transfer.sink.file && fflush(transfer.sink.file))) {
     raise %(io-fail (library "libcurl") (operation "download")
@@ -690,7 +690,7 @@ static CurlResponse _curl_perform(
   _curl_transfer_begin(
     &transfer, easy, method, url, path, consume, stream_data);
   return _curl_transfer_finish(
-    &transfer, curl_easy_perform(easy.native), %"easy_perform");
+    &transfer, curl_easy_perform(easy.native), "easy_perform");
 }
 
 /** Performs `method` against `url` and returns the complete response.
@@ -704,7 +704,7 @@ CurlResponse CurlEasy.request(CurlEasy easy, String method, String url) {
 
 /** Performs a GET and buffers the body under the handle's `max_body`. */
 CurlResponse CurlEasy.get(CurlEasy easy, String url) {
-  return _curl_perform(easy, %"GET", url, NULL, NULL, void);
+  return _curl_perform(easy, "GET", url, NULL, NULL, void);
 }
 
 /** Performs a GET and passes copied body chunks to `consume` as they arrive.
@@ -718,7 +718,7 @@ CurlResponse CurlEasy.stream(
   if (!consume) {
     raise %(bad-arg (library "libcurl") (operation "stream"));
   }
-  return _curl_perform(easy, %"GET", url, NULL, consume, data);
+  return _curl_perform(easy, "GET", url, NULL, consume, data);
 }
 
 /** Performs a GET whose body is written straight to `path` as it arrives.
@@ -731,7 +731,7 @@ CurlResponse CurlEasy.download(CurlEasy easy, String url, String path) {
   if (!path) {
     raise %(bad-arg (library "libcurl") (operation "download"));
   }
-  return _curl_perform(easy, %"GET", url, path, NULL, void);
+  return _curl_perform(easy, "GET", url, path, NULL, void);
 }
 
 static CurlEasy _curl_duplicate(CurlEasy source) {
@@ -744,7 +744,7 @@ static CurlEasy _curl_duplicate(CurlEasy source) {
   easy.body_limit = source.body_limit;
   for (struct curl_slist *node = source.headers; node; node = node->next)
     _curl_add_header(&easy.headers, node->data);
-  _curl_check(easy, %"CURLOPT_ERRORBUFFER",
+  _curl_check(easy, "CURLOPT_ERRORBUFFER",
     curl_easy_setopt(easy.native, CURLOPT_ERRORBUFFER, easy.error));
   return completed = easy;
 }
@@ -774,7 +774,7 @@ static void _curl_batch_live(CurlBatch batch, String operation) {
 
 /** Returns the number of input URLs, including failed transfers. */
 int CurlBatch.len(CurlBatch batch) {
-  _curl_batch_live(batch, %"batch.len");
+  _curl_batch_live(batch, "batch.len");
   return batch.count;
 }
 
@@ -784,7 +784,7 @@ int CurlBatch.len(CurlBatch batch) {
     owns returned responses; callers must not release them separately.
 */
 CurlResponse CurlBatch.response(CurlBatch batch, int index) {
-  _curl_batch_live(batch, %"batch.response");
+  _curl_batch_live(batch, "batch.response");
   if (index < 0 || index >= batch.count)
     raise %(bad-arg (library "libcurl") (operation "batch.response")
             (index $index));
@@ -853,7 +853,7 @@ CurlBatch CurlEasy.request_all(
         try {
           if ((void *) easy.request_body != NULL)
             _curl_set_body(slot.easy, easy.content_type, easy.request_body,
-              easy.request_body_size, %"request_all");
+              easy.request_body_size, "request_all");
           _curl_transfer_begin(
             &slot.transfer, slot.easy, method, url, NULL, NULL, void);
         }
@@ -862,7 +862,7 @@ CurlBatch CurlEasy.request_all(
           _curl_transfer_close(&slot.transfer);
           continue;
         }
-        _curl_multi_check(%"multi_add_handle",
+        _curl_multi_check("multi_add_handle",
           curl_multi_add_handle(multi, slot.easy.native));
         slot.attached = 1;
         active++;
@@ -870,7 +870,7 @@ CurlBatch CurlEasy.request_all(
     }
     if (!active) continue;
     int running = 0, messages = 0, finished = 0;
-    _curl_multi_check(%"multi_perform", curl_multi_perform(multi, &running));
+    _curl_multi_check("multi_perform", curl_multi_perform(multi, &running));
     CURLMsg *message;
     while ((message = curl_multi_info_read(multi, &messages))) {
       if (message->msg != CURLMSG_DONE) continue;
@@ -879,13 +879,13 @@ CurlBatch CurlEasy.request_all(
         if (!slot.attached || slot.easy.native != message->easy_handle)
           continue;
         CURLcode result = message->data.result;
-        _curl_multi_check(%"multi_remove_handle",
+        _curl_multi_check("multi_remove_handle",
           curl_multi_remove_handle(multi, slot.easy.native));
         slot.attached = 0;
         active--;
         finished = 1;
         try batch.items[slot.index].response =
-          _curl_transfer_finish(&slot.transfer, result, %"multi_info_read");
+          _curl_transfer_finish(&slot.transfer, result, "multi_info_read");
         catch %(?cause *detail):
           _curl_batch_failure(&batch.items[slot.index], cause, detail);
         _curl_transfer_close(&slot.transfer);
@@ -893,7 +893,7 @@ CurlBatch CurlEasy.request_all(
       }
     }
     if (active && !finished)
-      _curl_multi_check(%"multi_poll",
+      _curl_multi_check("multi_poll",
         curl_multi_poll(multi, NULL, 0, 1000, NULL));
   }
   return completed = batch;
@@ -901,7 +901,7 @@ CurlBatch CurlEasy.request_all(
 
 /** Performs buffered GET requests concurrently with input-order results. */
 CurlBatch CurlEasy.get_all(CurlEasy easy, List urls, int maximum) =>
-  easy.request_all(%"GET", urls, maximum);
+  easy.request_all("GET", urls, maximum);
 
 static void _curl_response_live(CurlResponse response, String operation) {
   if (response && !response.released) return;
@@ -932,29 +932,29 @@ CurlResponse CurlResponse.free(CurlResponse response) {
 }
 
 long CurlResponse.response_code(CurlResponse response) {
-  _curl_response_live(response, %"response_code");
+  _curl_response_live(response, "response_code");
   return response.response_code;
 }
 
 String CurlResponse.effective_url(CurlResponse response) {
-  _curl_response_live(response, %"effective_url");
+  _curl_response_live(response, "effective_url");
   return response.effective_url;
 }
 
 List CurlResponse.blocks(CurlResponse response) {
-  _curl_response_live(response, %"blocks");
+  _curl_response_live(response, "blocks");
   return response.blocks;
 }
 
 /** Returns the microseconds libcurl measured for the whole transfer. */
 long CurlResponse.elapsed_us(CurlResponse response) {
-  _curl_response_live(response, %"elapsed_us");
+  _curl_response_live(response, "elapsed_us");
   return response.elapsed_us;
 }
 
 /** Returns the request-body bytes libcurl counted as sent. */
 long CurlResponse.upload_size(CurlResponse response) {
-  _curl_response_live(response, %"upload_size");
+  _curl_response_live(response, "upload_size");
   return response.upload_size;
 }
 
@@ -962,18 +962,18 @@ long CurlResponse.upload_size(CurlResponse response) {
     Callers must not free, resize, or retain the storage beyond that point.
 */
 Bytes CurlResponse.body(CurlResponse response) {
-  _curl_response_buffered(response, %"body");
+  _curl_response_buffered(response, "body");
   return response.body;
 }
 
 /** Returns the body bytes received, whether buffered or written to a file. */
 size_t CurlResponse.body_size(CurlResponse response) {
-  _curl_response_live(response, %"body_size");
+  _curl_response_live(response, "body_size");
   return response.body_size;
 }
 
 String CurlResponse.text(CurlResponse response) {
-  _curl_response_buffered(response, %"text");
+  _curl_response_buffered(response, "text");
   size_t length = response.body_size;
   if (length && memchr(response.body, '\0', length)) {
     raise %(bad-enc (library "libcurl") (operation "text")
@@ -1053,7 +1053,7 @@ $lisp.binding(libcurl_lisp, "http-post")
 static String _lisp_http_post(String url, String content_type, String body) {
   CurlEasy easy = _lisp_easy();
   defer easy.free();
-  CurlResponse response = easy.body(content_type, body).request(%"POST", url);
+  CurlResponse response = easy.body(content_type, body).request("POST", url);
   defer response.free();
   return response.text();
 }
@@ -1074,7 +1074,7 @@ $lisp.binding(libcurl_lisp, "http-headers")
 static List _lisp_http_headers(String url) {
   CurlEasy easy = _lisp_easy();
   defer easy.free();
-  CurlResponse response = easy.request(%"HEAD", url);
+  CurlResponse response = easy.request("HEAD", url);
   defer response.free();
   CurlResponseBlock block = response.blocks().last();
   List lines = NULL;
