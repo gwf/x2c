@@ -1879,7 +1879,7 @@ static List _rewrite_lambda_captures(Compiler compiler, List ast, Map slots, Lis
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 808259842: ;  static MatchCaptureSite _x2c_match_site_51;  if (x2c_match_site_try_capture(& _x2c_match_site_51, _x2c_match_expr, List_var(_424), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  Var rows = _x2c_match_values[1];  Var body = _x2c_match_values[2]; {
-    List rewritten = Ast_rewrite_children(Var_pointer(rows), ({
+    List rewritten = Ast_rewrite_children(Var_list(rows), ({
       Var _x2c_lambda_capture_value_3 = Compiler_var(compiler);  Var _x2c_lambda_capture_value_4 = Map_var(slots);  Var _x2c_lambda_capture_value_5 = List_var(environment_binding);  Var _x2c_lambda_capture_value_6 = List_var(environment_type);  _x2c_lambda_context_4 _x2c_lambda_context_5 ={
         _x2c_lambda_capture_value_3, _x2c_lambda_capture_value_4, _x2c_lambda_capture_value_5, _x2c_lambda_capture_value_6
       }

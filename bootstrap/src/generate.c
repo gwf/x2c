@@ -1275,7 +1275,7 @@ Symbol preproc_conditional_kind(String);
 static List _header_and_source(Compiler compiler, List ast){
   Array header = Array_new(), source = Array_new(), pending = Array_new();  int private = 0;  Array opened = Array_new(), open = Array_new(); {
     Ast node;  List _x2c_macro_object_18 = ast;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_18;  while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_18)){
-      node = Var_pointer(_x2c_macro_cursor_output_18); {
+      node = Var_list(_x2c_macro_cursor_output_18); {
 
   {
     List _x2c_match_expr = node;
@@ -1292,7 +1292,7 @@ static List _header_and_source(Compiler compiler, List ast){
       break;
     }
     static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_300), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Var body = _x2c_match_values[2]; {
-      _partition_function(header, source, Var_type(type), Var_list(declarator), Var_pointer(body));  private = 1;  continue;
+      _partition_function(header, source, Var_type(type), Var_list(declarator), Var_list(body));  private = 1;  continue;
     }
     break;
   }

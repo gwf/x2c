@@ -781,7 +781,7 @@ return bound;
 static List _defer_bindings(Compiler compiler, List decltype, List bound_list, Array initializers){
   Array values = Array_new(); {
     Ast bound;  List _x2c_macro_object_7 = bound_list;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
-      bound = Var_pointer(_x2c_macro_cursor_output_7);  Array_push(values, List_var(_defer_one_binding(compiler, decltype, bound, initializers)));
+      bound = Var_list(_x2c_macro_cursor_output_7);  Array_push(values, List_var(_defer_one_binding(compiler, decltype, bound, initializers)));
     }
 
   }

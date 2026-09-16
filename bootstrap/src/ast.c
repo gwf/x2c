@@ -397,7 +397,7 @@ static Ast _unwrap_origin(Ast node){
     static MatchCaptureSite _x2c_match_site_0;
     if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_30), &_x2c_match_capture)) {Var origin = _x2c_match_values[0];  if(Var_is_integer(origin)){
       {
-        node = Var_pointer(List_caddr(node));  continue;
+        node = Var_list(List_caddr(node));  continue;
       }
       break;
     }
@@ -457,7 +457,7 @@ static int _contains_return(Ast node){
       int_var(0)
     }
     );  Var _x2c_macro_item_1;  while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_1)){
-      head = _x2c_macro_item_1;  if(Var_is_row(head, 9, 7, 4) && _contains_return(Var_pointer(head))) return 1;
+      head = _x2c_macro_item_1;  if(Var_is_row(head, 9, 7, 4) && _contains_return(Var_list(head))) return 1;
     }
 
   }
@@ -466,7 +466,7 @@ static int _contains_return(Ast node){
 
 Var List_last(List);
 int Ast_never_returns(Ast ast){
-  if(! _init_guard_) _file_init_();  List node = _unwrap_origin(ast);  if(! List_truth(node) || ! Var_is(List_car(node), 1328354264)) return 0;  Symbol head = Var_symbol(List_car(node));  if(head == 37833930) return _raise_never_returns(node);  if(head == 41184168) return _call_never_returns(node);  if(head != 5011670 || _contains_return(node)) return 0;  Var last = List_last(node);  if(! Var_is_row(last, 9, 7, 4)) return 0;  Ast terminal = Var_pointer(last);  return Ast_never_returns(terminal);
+  if(! _init_guard_) _file_init_();  List node = _unwrap_origin(ast);  if(! List_truth(node) || ! Var_is(List_car(node), 1328354264)) return 0;  Symbol head = Var_symbol(List_car(node));  if(head == 37833930) return _raise_never_returns(node);  if(head == 41184168) return _call_never_returns(node);  if(head != 5011670 || _contains_return(node)) return 0;  Var last = List_last(node);  if(! Var_is_row(last, 9, 7, 4)) return 0;  Ast terminal = Var_list(last);  return Ast_never_returns(terminal);
 }
 
 List Ast_initializer_cases(Ast ast, List * input){

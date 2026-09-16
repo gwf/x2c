@@ -1412,7 +1412,7 @@ static List _declaration(Compiler compiler, List ast){
       case 8932560010: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_187), &_x2c_match_capture)) {Var target = _x2c_match_values[0];  List bound_list = Var_list(_x2c_match_values[1]); {
     Array values = Array_new();  List new_bind = NULL; {
       Ast binding;  List _x2c_macro_object_2 = bound_list;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-        binding = Var_pointer(_x2c_macro_cursor_output_2); {
+        binding = Var_list(_x2c_macro_cursor_output_2); {
           new_bind = binding;
   {
     List _x2c_match_expr = binding;
