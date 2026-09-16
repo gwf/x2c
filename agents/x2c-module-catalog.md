@@ -869,11 +869,11 @@ run commands and pipelines without a shell.
 
 Public functions:
 
-`Job.new`, `Job.free`, `Job.var`, `Var.job`, `Job.equal`, `Job.hash`,
-`Job.write_str`, `Job.str`, `Job.write_repr`, `Job.repr`, `List.job`,
-`Job.options`, `Job.live`, `Job.pipe`, `Job.start`, `Job.status`, `Job.check`,
-`Job.run`, `Job.output`, `Job.lines`, `Job.errors`, `Job.ready`, `Job.kill`,
-`Job.cleanup`, `Job.wait_any`, `List.arguments`, `Env.get`
+`Job.free`, `Job.var`, `Var.job`, `Job.equal`, `Job.hash`, `Job.write_str`,
+`Job.str`, `Job.write_repr`, `Job.repr`, `List.job`, `Job.options`, `Job.live`,
+`Job.pipe`, `Job.start`, `Job.status`, `Job.check`, `Job.run`, `Job.output`,
+`Job.lines`, `Job.errors`, `Job.ready`, `Job.kill`, `Job.cleanup`,
+`Job.wait_any`, `List.arguments`, `Env.get`
 
 ### [lib/protocols.x](../lib/protocols.x)
 

@@ -279,9 +279,12 @@ static void Job._finish(Job job) {
   }
 }
 
-static void Job.init(Job job) {
+static Job Job.new(List command) {
+  Job job = Scope.calloc(1, sizeof(struct Job));
+  job.stages = %($command);
   job.launch = Scope.calloc(1, sizeof(_Launch));
   job.launch->capture_output = 1;
+  return job;
 }
 
 static Job Job._unstarted(Job job, String operation) {
@@ -302,11 +305,7 @@ static Job Job._unstarted(Job job, String operation) {
     ~}
     ```
 */
-Job List.job(List command) {
-  Job job = Job.new();
-  job.stages = %($command);
-  return job;
-}
+Job List.job(List command) => Job.new(command);
 
 /** Sets `options` on `job` and returns it.
     The keys are atoms: `dir` names the working directory, `env` is a `Map`
@@ -483,10 +482,14 @@ void Job.cleanup(Job job) {
 }
 
 /** Removes and returns the first job in `jobs` that has finished, waiting
-    until one does. Every job in `jobs` must have started. An empty `jobs`
-    returns NULL.
+    until one does. An empty `jobs` returns NULL.
+    Raises: `<bad-arg>` when a job in `jobs` has not started.
 */
 Job Job.wait_any(Array jobs) {
+  foreach (Job job, jobs)
+    if (!job.started)
+      raise %(bad-arg (operation "Job.wait_any")
+              (why "a job has not started"));
   while (jobs.len()) {
     for (int i = 0; i < jobs.len(); i++) {
       Job job = jobs[i];

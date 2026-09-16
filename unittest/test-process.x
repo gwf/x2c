@@ -271,6 +271,16 @@ static void process_jobs_wait_kill_and_clean_up(void) {
   while (jobs.len()) order.push(Job.wait_any(jobs).status());
   EXPECT_TRUE(order.equal(%[1, 2, 3]));
   EXPECT_NULL(Job.wait_any(jobs));
+  jobs.push(%(true).job());
+  int caught = 0;
+  try Job.wait_any(jobs);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Job.wait_any");
+  }
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(jobs.len(), 1);
+  jobs.pop();
 
   Job killed = %(sleep 30).job();
   EXPECT_FALSE(killed.ready());
