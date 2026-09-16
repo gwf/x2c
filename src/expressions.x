@@ -3813,13 +3813,16 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   if (expr.match(%(expr ? (composite ?))))
     return _convert_composite(c, expr, target, NULL, NULL, NULL);
   /* Arms of different kinds, such as a null pointer beside a C string, each
-     convert: only one runs, so that converts the result. Numeric arms and
+     convert: only one runs, so that converts the result. A brace arm always
+     converts, because C has no braced conditional operand. Numeric arms and
      arms of one type keep converting as a whole. */
   match (expr) case %(expr ? (op ?operator ?condition ?ontrue ?onfalse)): {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
-    if (!List.equal(true_type, false_type) &&
-        !(c.sym.resolve_numeric_type(true_type) &&
-          c.sym.resolve_numeric_type(false_type))) {
+    if (ontrue.list().match(%(expr ? (composite *))) ||
+        onfalse.list().match(%(expr ? (composite *))) ||
+        (!List.equal(true_type, false_type) &&
+         !(c.sym.resolve_numeric_type(true_type) &&
+           c.sym.resolve_numeric_type(false_type)))) {
       List converted_true = c.convert_expression(ontrue, declared_target);
       List converted_false = c.convert_expression(onfalse, declared_target);
       if (converted_true != ontrue || converted_false != onfalse)

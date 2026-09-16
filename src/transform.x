@@ -120,6 +120,9 @@ static String _printf_static_format(Compiler compiler, List expr, int *raw) {
           *raw = 0;
           return format.str();
         }
+      match (key)
+        case %(string (expr ("String") (call "String_new" (args ?literal)))):
+          return _printf_static_format(compiler, literal, raw);
       return NULL;
     }
   }

@@ -99,6 +99,8 @@ static void string_literal_receives_methods(void) {
   EXPECT_INT_EQ("hello".len(), 5);
   EXPECT_TRUE("x.c".endswith(".c"));
   EXPECT_TRUE("abc".upper() == "ABC");
+  Var count = 42L;
+  EXPECT_STR_EQ("<%ld>".printf(count), "<42>");
 }
 
 static void string_add_and_len(void) {

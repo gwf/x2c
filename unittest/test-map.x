@@ -78,6 +78,14 @@ static void map_bare_literal_quotes_only_identifier_keys(void) {
   EXPECT_TRUE(zero.u64 == 0);
   Var boxed = {k: 1};
   EXPECT_STR_EQ(boxed.str(), "{ k: 1 }");
+
+  Map chosen = ada ? {} : NULL, skipped = ada ? NULL : {};
+  Array items = ada ? [] : NULL;
+  EXPECT_NOT_NULL(chosen);
+  EXPECT_NULL(skipped);
+  EXPECT_NOT_NULL(items);
+  chosen = !ada ? NULL : {};
+  EXPECT_NOT_NULL(chosen);
 }
 
 static void map_set_get_updates(void) {
