@@ -418,3 +418,73 @@ String abc = %"abc".sha256();
 ~  return abc.startswith("ba7816bf8f01cfea") ? 0 : 1;
 ~}
 ```
+
+## JSON
+
+`Json.parse` reads JSON text and `Json.read_file` reads a JSON file. The
+result is made of ordinary values: an object is a `Map` with `String` keys,
+an array is an `Array`, a string is a `String`, and a number is an integer or
+`double` `Var`. JSON null is the all-zero `Var`. `true` and `false` are
+`JsonBool` values, which test true and false in a condition and stay distinct
+from the numbers 1 and 0:
+
+```x2c
+~#include "json.x"
+~int main(void) {
+Map release = Json.read_file("release.json");
+if (!release["draft"]) printf("release %s\n", release["version"]);
+foreach (Map asset, release["assets"]) printf("  %s\n", asset["name"]);
+~  return 0;
+~}
+```
+
+An integer that fits in an `int` reads as one, then as a `long` or an
+`unsigned long`; every other number is a `double`. A repeated object name
+keeps its last value.
+
+`Var.json` returns compact text, `Var.pretty_json` indents two spaces per
+level, and `Json.write_file` writes the compact form to a file. Object names
+are written in byte order, so equal values always produce the same text, and
+the indented layout is the one Python's `json.dumps` produces with
+`indent=2` and `sort_keys=True`. A bare key in a `%{}` literal is a `Symbol`,
+which is written as a string, and `Json.bool` makes a boolean. A `Map` or
+`Array` variable reaches the writers through `Var`:
+
+```x2c
+~#include "json.x"
+~int main(void) {
+Map report = %{name: "x2c", passed: ${Json.bool(1)}, counts: [3, 0]};
+printf("%s\n", Var.pretty_json(report));
+Json.write_file(report, "/tmp/report.json");
+~  return 0;
+~}
+```
+
+Text that is not JSON raises `<bad-arg>` with `why`, a zero-based byte
+`offset`, and one-based `line` and `column` details; `Json.read_file` adds
+the `path`. The same cause rejects nesting deeper than 512 arrays and
+objects, a number too large for a `double`, an unpaired surrogate escape,
+and `\u0000`, which a `String` cannot hold:
+
+```x2c
+~#include "json.x"
+~int main(void) {
+try Json.read_file("settings.json");
+catch %(bad-arg *detail):
+  printf("settings.json:%ld:%ld: %s\n", detail.assoc(<line>).integer(),
+         detail.assoc(<column>).integer(), detail.assoc(<why>).string());
+~  return 0;
+~}
+```
+
+Writing raises `<bad-types>` for a value JSON cannot hold, such as a `File`
+or a `Map` key that is not a `String` or `Symbol`, and `<conv-range>` for NaN
+or an infinity.
+
+The [`yyjson` package](../../../packages/yyjson/README.md) keeps what a `Map`
+cannot: object order, duplicate names, and whether a number was signed,
+unsigned, or real. Its converting names are the same as these. A script
+unit already declares `Json` and `Var.json`, so a script reaches the package
+through its alias, as `yy.Json.parse(text)` and `yy.Var_json(value)` after
+`import "yyjson" as yy;`.
+

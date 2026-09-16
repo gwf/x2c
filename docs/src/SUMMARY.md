@@ -48,6 +48,7 @@
     - [lib/file.x](library/modules/file.md)
     - [lib/func.x](library/modules/func.md)
     - [lib/iter.x](library/modules/iter.md)
+    - [lib/json.x](library/modules/json.md)
     - [lib/lib.x](library/modules/lib.md)
     - [lib/lisp.x](library/modules/lisp.md)
     - [lib/list-selectors.x](library/modules/list-selectors.md)

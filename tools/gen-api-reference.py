@@ -101,6 +101,7 @@ PRIMARY_EVIDENCE = {
         "`make verify` (`unittest/test-list.x`) and `make examples` "
         "(`docs-tour`)."
     ),
+    "json": "`make verify` (`unittest/test-json.x`).",
     "list-selectors": "`make verify` (`unittest/test-list.x`).",
     "logger": "`make verify` (`unittest/test-logger.x`).",
     "map": (

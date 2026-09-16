@@ -657,6 +657,16 @@ Public functions:
 `Iter.unzip`, `Iter.reduce`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
 `Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`, `Iter.iter`
 
+### [lib/json.x](../lib/json.x)
+
+JSON text to and from ordinary x2c values.
+
+Public functions:
+
+`JsonBool.var`, `Var.jsonbool`, `JsonBool.str`, `JsonBool.repr`,
+`JsonBool.truth`, `Json.bool`, `Json.is_bool`, `Json.boolean`, `Json.parse`,
+`Json.read_file`, `Var.json`, `Var.pretty_json`, `Json.write_file`
+
 ### [lib/lib.x](../lib/lib.x)
 
 disjoint sets with union-find.

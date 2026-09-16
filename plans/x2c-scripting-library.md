@@ -120,16 +120,108 @@ Decisions a reviewer should check:
   `src/cli.x`'s conventions, have no consumer yet; abbreviated long options
   are rejected as unknown.
 
-## Phase C - `lib/json.x`
+## Phase C - `lib/json.x` (in progress)
 
-`String.parse_json` returning ordinary `Map`/`Array`/`String`/number/null
-values, and `Var.json` writing them back, matching the converting surface
-`packages/yyjson` already exposes so a script can move to the package for order
-and duplicate fidelity without rewriting. `lib/scan.x` supplies scalar scanning
-(`scan_number_typed`, `scan_c_string_status`); `lib/tokenizer.x` is x2c/Lisp
-specific and is not reusable. This should consolidate the two duplicate JSON
-string escapers at `src/editor.x:27-36` and `src/build.x:521-529` rather than
-becoming a third. Proof: convert `tools/check-gallery-examples.py`.
+The module is built, registered, and included from `lib/scripting.x`; the
+tool conversion waits for `lib/args.x`.
+
+| Operation | Result |
+| --- | --- |
+| `Json.parse(String)` | the value of JSON text |
+| `Json.read_file(String path)` | the value of a JSON file |
+| `Json.write_file(Var, String path)` | writes compact JSON text |
+| `Var.json(Var)` | compact JSON text |
+| `Var.pretty_json(Var)` | JSON text indented two spaces per level |
+| `Json.bool(int)` | the JSON `true` or `false` value |
+| `Json.is_bool(Var)` | whether a value is a JSON boolean |
+| `Json.boolean(Var)` | 1 or 0; `<bad-types>` for a non-boolean |
+
+An object is a `Map` with `String` keys, an array an `Array`, a string a
+`String`. An integer is an `int` `Var` when it fits, then `long`, then
+`unsigned long`; every other number is a `double`. Null is the all-zero `Var`
+the values guide calls `Null`. Booleans are `JsonBool`, a registered
+`<jsonbool>` object tag over two static singletons, with `str`, `repr`, and
+`truth`.
+
+Decisions a reviewer should check:
+
+- **Names follow the package, not `String.parse_json`.** The yyjson converting
+  surface is `Json.parse`, `Json.read_file`, `Json.write_file`, `Var.json`,
+  `Var.pretty_json`, `Json.bool`, `Json.is_bool`, and `Json.boolean`; this
+  module has exactly those names. The package's `_opts` forms take yyjson
+  flag types and have no counterpart. `String.parse_json` was rejected
+  because it would not survive a move to the package.
+- **The package collides with a script unit.** Because `lib/scripting.x`
+  declares `Json` and `Var.json`, `import "yyjson" with Json;` in a script is
+  `package name 'Json' collides with a declared name`, and `value.json()` on
+  a package value resolves to this module (ordinary methods come first) and
+  raises `<bad-types>` on the package's `<yyjson--bo>` booleans. A script
+  therefore uses the package through its alias: `yy.Json.parse(text)` and
+  `yy.Var_json(value)`. No C symbol collides; a program including `json.x`
+  and importing the package builds and runs both. The alternative is to keep
+  `json.x` out of `lib/scripting.x`: a script would add
+  `#include "json.x"`, and moving to the package would then be the one-line
+  change to `import "yyjson" with Json;`. That was the stated goal, but the
+  task placed the module in `scripting.x`, so the choice is left to Gary.
+- **Integers match x2c literals rather than the package.** yyjson boxes every
+  integer as `<llong>` or `<ullong>`. `Var.equal` does not equate integer
+  families, so `<llong>` 5 never equals the literal 5 in `%{n: 5}`; parsing
+  to `<i32>` and `<long>`, as the compiler types literals, keeps parsed
+  values equal to written ones.
+- **Output sorts object names.** A `Map` has no insertion order, so the
+  package writes the `Map`'s iteration order. Sorting by name makes equal
+  values produce equal text, and the pretty layout is Python's
+  `json.dumps(value, indent=2,
+  sort_keys=True)`, which `tools/gate-state.py`, `tools/repo-metrics.py`,
+  `tools/harness-metrics.py`, and `packages/tools/deps.py` already write.
+- **Every rejected document raises `<bad-arg>`.** Syntax, nesting past 512,
+  a number beyond `double`, an unpaired surrogate, invalid UTF-8, and
+  `\u0000` all carry `why`, `offset`, `line`, and `column`, plus `path` from
+  `Json.read_file`. `<malformed>` is the compiler's recovery cause, and the
+  package's split between `<malformed>`, `<size-limit>`, and `<bad-enc>` would
+  make a script catch three causes for one kind of bad input. No cause was
+  added.
+- **Writing accepts `Symbol`s.** `Symbol` keys and values are written as
+  strings, because bare `%{}` literal keys are `Symbol`s; the package rejects
+  them. NaN and infinities raise `<conv-range>`, strings that are not UTF-8
+  raise `<bad-arg>`, other unsupported tags raise `<bad-types>`, and nesting
+  past 512 (including a cycle) raises `<size-limit>`.
+- **Repeated names keep the last value**, as in the package's `to_x2c` and
+  in Python.
+
+`lib/scan.x` supplies only `scan_ascii_digit` and `scan_next_line_col`.
+`scan_number_typed` accepts a leading `+`, octal, hexadecimal, `.5`, `5.`, and
+C suffixes, and `scan_c_string_status` accepts C escapes, so neither matches
+JSON. The escapers in `src/editor.x` and `src/build.x` are being consolidated
+by another change; the compiler does not include optional modules, so that
+work cannot call this one.
+
+**Evidence.** `unittest/test-json.x` has 10 tests and 170 assertions. A
+one-off comparison, not wired into any target, parsed all 41 tracked
+`*.json` files: 39 match Python's `json` module semantically, and byte for
+byte in both the compact and sorted-pretty forms, and the two JSONC files under
+`etc/vsc-extension/` are rejected by both parsers at the same line and
+column. A differential run of 798,478 generated valid and corrupted
+documents against Python's `json.loads` found no disagreement. The 4,528
+documents Python accepts only through its extensions (NaN, infinities, a
+number beyond `double`, an unpaired surrogate, or U+0000) are all rejected
+here, and integers beyond `unsigned long` compare as `double`s.
+
+**Consumer.** `tools/check-gallery-examples.py` remains the best proof. It
+runs only from `examples/check.sh`, which `check-after-precommit` no longer
+calls, and it needs JSON, globbing, and file reads that now exist. It still
+needs:
+
+- `lib/args.x` for `--update` and `--help`;
+- the Markdown fence reader it imports from `tools/check-doc-examples.py`
+  (`FENCE_PATTERN`, `collect`, `dedent`, `reveal_hidden`, and the
+  `<!-- ignore: ... -->` look-behind), written as a line scanner in the
+  script, since regex is not in the library;
+- a one-line change at `examples/check.sh:154` to run the script.
+
+`tools/gen-package-index.py` (release workflow only) also reads JSON but
+needs Phase D's SHA-256 and tar handling; `tools/agent-failure.py` needs
+`lib/time.x`.
 
 ## Phase D - `lib/digest.x`
 

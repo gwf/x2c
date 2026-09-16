@@ -52,6 +52,7 @@ lib/symbolset.x|api|
 lib/thread-state.x|internal|Native pthread-key storage for per-thread runtime state.
 lib/thread.x|api|
 lib/tokenizer.x|internal|Token stream used by the compiler and the Lisp reader.
+lib/json.x|optional|JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 lib/path.x|optional|Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 lib/scripting.x|optional|The `args.x`, `digest.x`, `path.x`, and `process.x` modules that every script unit includes; include `scripting.x` to use all four.
 lib/args.x|optional|Argument parsing against a declarative spec; explicitly include `args.x` to use it.

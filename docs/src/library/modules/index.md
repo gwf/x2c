@@ -29,6 +29,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/file.x`](file.md) | `File` I/O operations and stream handling. |
 | [`lib/func.x`](func.md) | generic native function binding. |
 | [`lib/iter.x`](iter.md) | single-pass pull iterators. |
+| [`lib/json.x`](json.md) | JSON text to and from ordinary x2c values. |
 | [`lib/lib.x`](lib.md) | disjoint sets with union-find. |
 | [`lib/lisp.x`](lisp.md) | the Lisp runtime: reader, session, and evaluator. |
 | [`lib/list-selectors.x`](list-selectors.md) | optional compound `List` selectors. |
@@ -64,6 +65,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
 - [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
+- [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.

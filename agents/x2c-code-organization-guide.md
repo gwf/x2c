@@ -116,6 +116,7 @@ process                       commands, pipelines, and jobs without a shell
 path                          filesystem operations on path Strings
 args                          argument parsing against a declarative spec
 digest                        SHA-256 digests of Strings and streams
+json                          JSON text to and from ordinary values
 ```
 
 `docs/library-manifest.txt` is the owner of that split and of every module's
