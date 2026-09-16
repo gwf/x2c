@@ -91,6 +91,10 @@ Astro pages and components:
 
 - `home.md` is the hero copy; `title` and `kicker` are its frontmatter.
 - `about.md` is the About page copy.
+- `from-c.md` introduces the Start from C section between installation and
+  packages, and `from-c-build.md` supplies the commands beside it. Its slides
+  use `section: from-c` and form a progression: each slide marks the lines
+  of its first code block that differ from the previous slide.
 - `love.md`, `power.md`, and `magic.md` hold the three section introductions;
   each single-word title is frontmatter and its overview is ordinary Markdown.
 - `install.md` is the installation code window.
@@ -103,13 +107,15 @@ Astro pages and components:
   also supply `imagePoster` for the pause control and reduced-motion fallback.
 - `packages-build.md` supplies the shell commands beside the package
   introduction, using the same code-window styling as installation.
-- `slides/*.md` are the Love, Power, Magic, and Packages slides, one file per
-  slide, ordered by filename. Frontmatter names the `section`, the `tab`
-  label, and the `title` shown below the code.
+- `slides/*.md` are the From C, Love, Power, Magic, and Packages slides, one
+  file per slide, ordered by filename. Frontmatter names the `section`, the
+  `tab` label, and the `title` shown below the code.
 
 A slide is split into its two panels at the end of its first code block: the
-code appears first, and the prose after it appears below. The descent slide has
-no code, so it uses a `---` rule as the separator instead.
+code appears first, and the prose after it appears below. A `codeBlocks` count
+in the frontmatter keeps that many leading code blocks, such as a C file and
+the x2c file it calls, in the code panel. The descent slide has no code, so it
+uses a `---` rule as the separator instead.
 
 Fence a sample with ```` ```x2c ```` and it is highlighted by the same grammar
 the VS Code extension uses (`etc/vsc-extension/syntaxes/`), coloured by the

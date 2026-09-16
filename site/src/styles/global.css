@@ -548,7 +548,7 @@ html:has(.landing-header) {
   scroll-padding-top: var(--landing-header-height, 69px);
 }
 
-#love, #power, #magic, #packages, #install {
+#from-c, #love, #power, #magic, #packages, #install {
   scroll-margin-top: 0;
 }
 
@@ -815,6 +815,16 @@ html:has(.landing-header) {
   font: 500 11.5px/1.4 "JetBrains Mono", monospace;
 }
 
+.feature-code pre + .feature-code-label {
+  margin-top: 28px;
+}
+
+.feature-code .line.changed {
+  display: inline-block;
+  width: 100%;
+  background: rgba(255, 113, 90, 0.16);
+}
+
 .feature-result-image {
   display: block;
   width: 100%;
@@ -850,25 +860,25 @@ html:has(.landing-header) {
   }
 }
 
-#packages .feature-code {
+:is(#packages, #from-c) .feature-code {
   flex: 0 0 auto;
   padding: clamp(16px, 2vw, 24px);
   font-size: 12px;
   line-height: 1.65;
 }
 
-#packages .feature-code pre,
+:is(#packages, #from-c) .feature-code pre,
 #packages .feature-copy pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-#packages .feature-copy {
+:is(#packages, #from-c) .feature-copy {
   border-top: 0;
   border-left: 1px solid rgba(244, 241, 236, 0.18);
 }
 
-#packages .carousel-slide {
+:is(#packages, #from-c) .carousel-slide {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   background: var(--dark);
@@ -887,7 +897,7 @@ html:has(.landing-header) {
 }
 
 @media (max-width: 639px) {
-  #packages .carousel-slide {
+  :is(#packages, #from-c) .carousel-slide {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -897,7 +907,7 @@ html:has(.landing-header) {
     grid-row: auto;
   }
 
-  #packages .carousel-slide .feature-copy,
+  :is(#packages, #from-c) .carousel-slide .feature-copy,
   #packages .carousel-slide:nth-child(even) .feature-copy {
     border: 0;
     border-top: 1px solid rgba(244, 241, 236, 0.18);
@@ -925,25 +935,25 @@ html:has(.landing-header) {
   font: inherit;
 }
 
-#packages .feature-copy {
+:is(#packages, #from-c) .feature-copy {
   background: #dedbd5;
   color: var(--dark);
 }
 
-#packages .feature-copy h3 {
+:is(#packages, #from-c) .feature-copy h3 {
   color: var(--dark);
 }
 
-#packages .feature-copy p,
-#packages .caption-links .copy-button {
+:is(#packages, #from-c) .feature-copy p,
+:is(#packages, #from-c) .caption-links .copy-button {
   color: var(--muted-dark);
 }
 
-#packages .feature-status {
+:is(#packages, #from-c) .feature-status {
   color: var(--red-text);
 }
 
-#packages .feature-copy code:not(pre code) {
+:is(#packages, #from-c) .feature-copy code:not(pre code) {
   border-color: rgba(218, 41, 28, 0.24);
   background: rgba(218, 41, 28, 0.07);
   color: #9e1f16;
@@ -969,15 +979,22 @@ html:has(.landing-header) {
   display: none;
 }
 
-#packages .section-exit>p {
+:is(#packages, #from-c) .section-exit>p {
   margin: 0 0 18px;
 }
 
 #packages .package-note {
   margin: 12px 19px 0;
-  color: var(--muted-light);
   font-size: 13px;
   line-height: 1.5;
+}
+
+.package-note {
+  color: var(--muted-dark);
+}
+
+.landing-section:nth-of-type(odd) .package-note {
+  color: var(--muted-light);
 }
 
 /* Code samples are Markdown fences highlighted by Shiki with the x2c grammar

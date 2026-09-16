@@ -32,6 +32,8 @@ examples/*
 !examples/*.[xch]
 !examples/*.x[ch]
 !examples/*.xlisp
+!examples/c/
+!examples/c/**
 !examples/love/
 !examples/love/**
 !examples/power/

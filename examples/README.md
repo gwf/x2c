@@ -42,6 +42,26 @@ replace the executable paths below with absolute paths too:
 ./examples/build/power-exceptions/exceptions /absolute/path/to/fixtures
 ```
 
+## Start from C
+
+Each step changes a few lines of the previous one and prints the same result.
+
+1. [C](c/account-c.x): an unmodified C program compiled as x2c.
+2. [Dots](c/account-dots.x): `.` instead of `->` for fields behind pointers.
+3. [Methods](c/account-methods.x): `Account.new` and `Account.deposit`.
+4. [Class](c/account-class.x): a `class` generates the constructor, and the
+   current Scope owns the allocation.
+5. [Foreach](c/account-foreach.x): a loop over an `Array` literal.
+6. [C calls x2c](c/account.x): the C program in [main.c](c/main.c) uses the
+   class through the generated `account.h`. [account.flags](c/account.flags)
+   adds `main.c` to the ordinary build.
+
+```sh
+x2c run examples/c/account-c.x
+x2c build --output /tmp/account examples/c/main.c examples/c/account.x
+/tmp/account
+```
+
 ## Love: values, data, and methods
 
 - [Values](love/values.x): dynamic values, operators, type inspection, and C calls.
@@ -204,15 +224,18 @@ name|category|check|arguments|stdout|note
 
 `name` is a relative path without `.x`, such as `power/counting`. Expected
 output paths are relative to this directory. An optional `<name>.flags` file
-supplies additional build options. Runtime fixtures live under
+supplies additional build options or C sources, as repository-relative
+paths. Runtime fixtures live under
 `data/<name-with-slashes-replaced-by-hyphens>/`.
 
 The slide Markdown owns each synchronized gallery program. After editing it, run
 `python3 tools/check-gallery-examples.py --update` to copy its complete code
 into the standalone example, then run `make examples`. The check rejects a
 missing slide mapping, missing source, or any difference, including hidden
-assertions. The self-hosting guide keeps the same shell recipe but is not
-executed by this suite because it rebuilds and installs the compiler.
+assertions. An entry's optional `c` names a C file under this directory; the
+slide's one `c` block must match it, and `--update` does not write it. The
+self-hosting guide keeps the same shell recipe but is not executed by this
+suite because it rebuilds and installs the compiler.
 
 Registry entries with `source` name an existing repository-relative program.
 The check verifies its file and slide link without copying the slide over it.

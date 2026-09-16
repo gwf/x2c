@@ -58,6 +58,13 @@ def check(update=False):
             if blocks != actual or not blocks:
                 errors.append(f"{target.relative_to(ROOT)}: shell recipe differs from {name}")
             continue
+        if "c" in entry:
+            target = ROOT / "examples" / entry["c"]
+            blocks = [m.group("body") for m in doc.FENCE_PATTERN.finditer(
+                slide.read_text()) if m.group("info") == "c"]
+            if not target.is_file() or blocks != [target.read_text()]:
+                errors.append(f"{target.relative_to(ROOT)}: missing or "
+                              f"differs from the C sample in {name}")
         samples = doc.collect(slide, errors)
         if len(samples) != 1:
             errors.append(f"{name}: expected one runnable x2c sample")

@@ -1,5 +1,36 @@
 [
   {
+    "slide": "from-c-01-c.md",
+    "example": "c/account-c",
+    "optional": false
+  },
+  {
+    "slide": "from-c-02-dots.md",
+    "example": "c/account-dots",
+    "optional": false
+  },
+  {
+    "slide": "from-c-03-methods.md",
+    "example": "c/account-methods",
+    "optional": false
+  },
+  {
+    "slide": "from-c-04-class.md",
+    "example": "c/account-class",
+    "optional": false
+  },
+  {
+    "slide": "from-c-05-foreach.md",
+    "example": "c/account-foreach",
+    "optional": false
+  },
+  {
+    "slide": "from-c-06-call.md",
+    "example": "c/account",
+    "c": "c/main.c",
+    "optional": false
+  },
+  {
     "slide": "love-01-var.md",
     "example": "love/values",
     "optional": false

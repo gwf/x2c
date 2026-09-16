@@ -12,6 +12,13 @@ import HeroTitle from "../components/HeroTitle.astro";
 import { articles, inSection, slides } from "../lib/examples";
 import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
+import {
+  Content as FromCCopy,
+  frontmatter as fromC,
+} from "../content/from-c.md";
+import {
+  compiledContent as fromCBuildCode,
+} from "../content/from-c-build.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
 import {
   Content as PackagesCopy,
@@ -210,6 +217,40 @@ const [titleHtml, kickerHtml] = await Promise.all([
             theme={x2cDarkTheme} />
         </div>
       </figure>
+    </div>
+  </section>
+
+  <section id="from-c" class="landing-section landing-action">
+    <div class="section-shell">
+      <div class="package-intro">
+        <div>
+          <header class="section-heading">
+            <h2>{fromC.title}</h2>
+            <div class="section-overview"><FromCCopy /></div>
+          </header>
+          <div class="section-exit">
+            <p>
+              Read <a href={local("docs/guide/from-c.html")}>From C to x2c</a>{" "}
+              or learn how to{" "}
+              <a href={local("docs/guide/installation.html#compile-c-against-the-x2c-runtime")}
+                >compile C against the runtime</a>.
+            </p>
+          </div>
+        </div>
+        <div class="package-setup">
+          <figure class="install-window package-build">
+            <figcaption>Run the first and last steps</figcaption>
+            <div class="install-code" set:html={await fromCBuildCode()} />
+          </figure>
+        </div>
+      </div>
+      <FeatureCarousel
+        name="from-c"
+        label="Steps from C to x2c"
+        tone="dark"
+        slides={inSection("from-c")}
+        progression
+      />
     </div>
   </section>
 

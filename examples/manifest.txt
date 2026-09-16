@@ -1,4 +1,10 @@
 # name|category|check|arguments|stdout|note
+c/account|showcase|run||expected/c-account.stdout|The Account class called from a C main through its generated header.
+c/account-c|showcase|run||expected/c-account.stdout|An unmodified C program compiled as x2c.
+c/account-class|showcase|run||expected/c-account.stdout|The Account program with a generated class constructor.
+c/account-dots|showcase|run||expected/c-account.stdout|The Account program with dots instead of arrows.
+c/account-foreach|showcase|run||expected/c-account.stdout|The Account program with a foreach loop over an Array literal.
+c/account-methods|showcase|run||expected/c-account.stdout|The Account program with type-named methods.
 foreach|showcase|run||expected/foreach.stdout|Basic List iteration.
 love/arrays|showcase|run||expected/love-arrays.stdout|Standalone love arrays gallery example.
 love/basic-literals|showcase|run||expected/static-test.stdout|Runtime collection and String literals.

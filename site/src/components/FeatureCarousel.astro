@@ -1,7 +1,7 @@
 ---
 import ExamplePanel from "./ExamplePanel.astro";
 import CopyButton from "./CopyButton.astro";
-import { articleFor } from "../lib/examples";
+import { articleFor, changedLines } from "../lib/examples";
 import { absoluteSiteUrl, sitePath } from "../../site-config.mjs";
 
 interface Props {
@@ -10,9 +10,11 @@ interface Props {
   tone: "dark" | "light";
   slides: any[];
   codeLabel?: string;
+  // Mark the lines of each slide that differ from the previous slide.
+  progression?: boolean;
 }
 
-const { name, label, tone, slides, codeLabel } = Astro.props;
+const { name, label, tone, slides, codeLabel, progression } = Astro.props;
 const count = String(slides.length).padStart(2, "0");
 ---
 
@@ -43,7 +45,7 @@ const count = String(slides.length).padStart(2, "0");
   </div>
   <div class="carousel-viewport">
     <div data-carousel-track class="carousel-track">
-      {slides.map((slide) => {
+      {slides.map((slide, position) => {
         const { slug } = slide.frontmatter;
         const anchor = `#example-${slug}`;
         const article = articleFor(slug);
@@ -52,6 +54,8 @@ const count = String(slides.length).padStart(2, "0");
             role="tabpanel" aria-labelledby={`example-tab-${slug}`}
             data-example={slug} data-section={name} data-surface="home">
             <ExamplePanel slide={slide} codeLabel={codeLabel}
+              changed={progression && position > 0 ?
+                changedLines(slides[position - 1], slide) : undefined}
               expanded={article && {
                 href: sitePath(`/examples/${article.frontmatter.slug}/`),
                 title: article.frontmatter.navTitle,

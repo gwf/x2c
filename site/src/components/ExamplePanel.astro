@@ -5,27 +5,37 @@ interface Props {
   part?: "code" | "notes";
   section?: number;
   expanded?: { href: string; title: string };
+  changed?: Set<number>;
 }
 
-const { slide, codeLabel, part, section, expanded } = Astro.props;
+const { slide, codeLabel, part, section, expanded, changed } = Astro.props;
 const panel = slide.frontmatter;
 const html = await slide.compiledContent();
 
-// Keep the first code block; a rule only separates a diagram from its prose.
+// Keep the first code block, or the first `codeBlocks` of them; a rule only
+// separates a diagram from its prose.
 const split = (html: string) => {
   for (const { token, keep } of [
     { token: "</pre>", keep: true },
     { token: "<hr", keep: false },
   ]) {
-    const at = html.indexOf(token);
+    let at = html.indexOf(token);
     if (at === -1) continue;
+    for (let block = 1; keep && block < (panel.codeBlocks ?? 1); block++)
+      at = html.indexOf(token, at + token.length);
     const end = keep ? at + token.length : at;
     const resume = html.indexOf(">", at + token.length) + 1;
     return { left: html.slice(0, end), right: html.slice(keep ? end : resume) };
   }
   return { left: "", right: html };
 };
-const { left, right } = split(html);
+const { left: code, right } = split(html);
+// Mark the changed lines of the first code block.
+let line = 0;
+const first = code.indexOf("</pre>");
+const left = changed ? code.slice(0, first).replace(/<span class="line">/g,
+  (span) => changed.has(line++) ? '<span class="line changed">' : span) +
+  code.slice(first) : code;
 const base = import.meta.env.BASE_URL;
 ---
 
