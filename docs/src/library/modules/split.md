@@ -55,7 +55,7 @@ alongside a `Split.iter` iterator over the same descriptor. A yielded
 canonical `String` remains live until its actual owning pool is released.
 
 ```x2c
-Split words = %"ada lovelace".words();
+Split words = "ada lovelace".words();
 int cursor = 0;
 String word;
 while (words.try_next(&cursor, &word)) printf("%s\n", word);
@@ -107,8 +107,8 @@ live
 until their actual `String` and `List` pools are released.
 
 ```x2c
-printf("%s\n", %"a:b:c".split(":").repr());
-printf("%s\n", %"a::b".split(":").repr());
+printf("%s\n", "a:b:c".split(":").repr());
+printf("%s\n", "a::b".split(":").repr());
 ```
 
 **Raises:** the same causes as `String.split_n`.

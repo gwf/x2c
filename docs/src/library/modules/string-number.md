@@ -52,8 +52,8 @@ A value outside the range of `long` fails.
 
 ```x2c
 ~long value = 0;
-printf("%d %ld\n", %" -0b101 ".try_long(&value), value);
-printf("%d\n", %"42junk".try_long(&value));
+printf("%d %ld\n", " -0b101 ".try_long(&value), value);
+printf("%d\n", "42junk".try_long(&value));
 ```
 
 Source: `lib/string-number.x:39`

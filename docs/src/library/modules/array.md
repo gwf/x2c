@@ -137,7 +137,7 @@ modify, and write happen in one call. That is not thread-safe
 synchronization.
 
 ```x2c
-~Array digits = %[0, 1, 2, 3, 4, 5];
+~Array digits = [0, 1, 2, 3, 4, 5];
 printf("%s %s\n", digits[0].repr(), digits[-1].repr());
 printf("%s %s\n", digits[6].repr(), digits[-7].repr());
 ```
@@ -165,7 +165,7 @@ empty `Array`. Ask for the rest of an array by omitting the bound, as in
 and reads one element beyond the last.
 
 ```x2c
-~Array digits = %[0, 1, 2, 3, 4, 5];
+~Array digits = [0, 1, 2, 3, 4, 5];
 printf("%s %s\n", digits[1:4].repr(), digits[3:].repr());
 printf("%s %s\n", digits[::2].repr(), digits[::-1].repr());
 ```
@@ -318,9 +318,9 @@ expression. The array grows as needed; capacity is an implementation
 detail.
 
 ```x2c
-~Array queue = %[];
+~Array queue = [];
 queue.push(10);
-queue.push(%"twenty");
+queue.push("twenty");
 printf("%s\n", queue.repr().str());
 ```
 
@@ -451,7 +451,7 @@ and `Atom`s by content. The sort is `qsort`, so it is not stable, and a
 null or one-element `array` is returned unchanged.
 
 ```x2c
-~Array numbers = %[5, 3, 9, 1];
+~Array numbers = [5, 3, 9, 1];
 Array sorted = numbers.sort();
 printf("%s %d\n", numbers.repr(), sorted == numbers);
 ```
@@ -689,7 +689,7 @@ through `Array.setindex`, or any slicing, call `Array.heapify` before
 popping again.
 
 ```x2c
-~Array heap = %[];
+~Array heap = [];
 heap.heap_push(30);
 heap.heap_push(10);
 heap.heap_push(20);

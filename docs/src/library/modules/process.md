@@ -165,7 +165,7 @@ applies to every stage. A key set again replaces its earlier value.
 ```x2c
 ~#include "process.x"
 ~int main(void) {
-String root = %(pwd).job().options(%{dir: "/"}).output();
+String root = %(pwd).job().options({dir: "/"}).output();
 ~  return root == "/\n" ? 0 : 1;
 ~}
 ```
