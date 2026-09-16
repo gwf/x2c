@@ -1534,7 +1534,7 @@ static List _cast(Compiler compiler, List ast) {
     int unresolved = 0;
     match (expression)
       case %(expr () (ident ?)): unresolved = 1;
-    if (type != %(void) &&
+    if (type !== %(void) &&
         (source_var || (target_var && (source_type || unresolved))))
       return compiler.convert_expression(expression, type);
     return %(cast $type $expression);

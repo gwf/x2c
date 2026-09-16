@@ -34,7 +34,7 @@ static Type _declarator_parts(Type type, List *modifiers) {
     return type;
   }
   List reversed = NULL, qualifiers = NULL;
-  for (List rest = type; rest != base; rest = rest.cdr())
+  for (List rest = type; rest !== base; rest = rest.cdr())
     reversed = cons(rest.car(), reversed);
   while (reversed && reversed.car() is <symbol> &&
          Symbol.is_type_qualifier(reversed.car())) {

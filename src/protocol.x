@@ -428,7 +428,7 @@ static List Compiler._publish_protocol_adoption(
           <protocol>, "Var adoption tag must be a Symbol literal",
           location, NULL);
     }
-    if (base != %("Var")) {
+    if (base !== %("Var")) {
       if (modifier_token)
         c.report_error(
           <protocol>, "'tag' applies only to a Var adoption",
@@ -893,7 +893,7 @@ static String _forward_binding(
 static List _resolve_members(
   Compiler compiler, Type base, String binder, List associations,
   List templates, Type participant, Map *variables_out, Map *bindings_out) {
-  Type representation = base == %("Var")
+  Type representation = base === %("Var")
     ? _adoption_representation(
       _visible_adoption_row(compiler, base, participant))
     : NULL;
@@ -923,13 +923,13 @@ static List _resolve_members(
         }
         if (actual) selected = binding;
         foreach (Type owner,
-                 (base != %("Var") || representation) && !actual
+                 (base !== %("Var") || representation) && !actual
                    ? _ancestry(compiler, participant).cdr() : NULL) {
           if (owner == base) break;
-          if (base == %("Var") && owner != representation) continue;
+          if (base === %("Var") && owner != representation) continue;
           actual = _method_signature(
             compiler, owner, participant, member_name, &selected);
-          if (actual || base == %("Var")) break;
+          if (actual || base === %("Var")) break;
         }
         if (actual) {
           Map candidate = bindings.copy();
@@ -956,7 +956,7 @@ static List _resolve_members(
         Symbol default_kind = <none>;
         if (status == <no-member>) {
           String base_name = _base_name(base);
-          if (base_name && base != %("Var")) {
+          if (base_name && base !== %("Var")) {
             String fallback = %"${base_name}_$member_name";
             Type fallback_type = _declared(compiler, fallback);
             Map base_bindings = bindings.copy();
@@ -1008,7 +1008,7 @@ static List _conversion_requirement(
 static List _descriptor_requirement(
   Compiler compiler, Type base, String binder, String member, Type template,
   String forward, String reverse) {
-  if (base != %("Var") ||
+  if (base !== %("Var") ||
       !compiler.sym.lookup_field(%(struct "VarMethods"), %($member)))
     return NULL;
   return _conversion_requirement(
@@ -1122,7 +1122,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
         }
         if (!c.fn_defs.contains(forward)) continue;
         if (c.sym.resolve_numeric_type(participant) &&
-            participant != %("Symbol"))
+            participant !== %("Symbol"))
           continue;
         foreach (List row, rows)
           match (row)
@@ -2150,7 +2150,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
   String reverse, Map variables, Map bindings, String binder, List rows,
   int central_initializer) {
   List adoption = _visible_adoption_row(c, base, participant);
-  int shares_var_tag = base == %("Var") &&
+  int shares_var_tag = base === %("Var") &&
     _adoption_representation(adoption);
   Array thunks = %[];
   foreach (List row, rows)
@@ -2183,7 +2183,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
           continue;
         }
         if (status == <no-member>) {
-          if (base != %("Var") || shares_var_tag) continue;
+          if (base !== %("Var") || shares_var_tag) continue;
           List decision = _generated_owner(c, participant, member);
           match (decision) {
             case %(owner ? ? ?owner_expected ?): {
@@ -2218,7 +2218,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
           }
           continue;
         }
-        if (status != <implmntd> || base != %("Var") || shares_var_tag)
+        if (status != <implmntd> || base !== %("Var") || shares_var_tag)
           continue;
         if (!c.sym.lookup_field(%(struct "VarMethods"), %($member)))
           continue;
@@ -2229,7 +2229,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
         );
       }
   List thunk_rows = thunks.list_free();
-  if (base == %("Var") && !shares_var_tag) {
+  if (base === %("Var") && !shares_var_tag) {
     List tag_expression = _adoption_tag(adoption);
     Symbol explicit_tag = _protocol_tag_value(tag_expression);
     String name = participant.car().str();
@@ -2281,7 +2281,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
         }
         if (!_defines_function(c, forward)) continue;
         if (c.sym.resolve_numeric_type(participant) &&
-            participant != %("Symbol"))
+            participant !== %("Symbol"))
           continue;
         match (c._record(base))
           case %(? ? ?(String binder) ? ?):
@@ -2398,7 +2398,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
     modifier_token = c.token;
     c.next();
     representation = c.parse_type_name().canonicalize();
-    if (!generated_base && base != %("Var"))
+    if (!generated_base && base !== %("Var"))
       c.report_error(
         <protocol>, "'as' applies only to a Var adoption",
         modifier_token, NULL);
@@ -2412,7 +2412,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
         modifier_token, NULL);
     tag = c.try_parse_macro_slot(<expression>);
     if (!tag) tag = c.parse_atomic_literal();
-    if (!generated_base && base != %("Var"))
+    if (!generated_base && base !== %("Var"))
       c.report_error(
         <protocol>, "'tag' applies only to a Var adoption",
         modifier_token, NULL);

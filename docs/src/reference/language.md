@@ -2006,8 +2006,11 @@ prefix returns the updated `Var` and postfix returns its original value. Unary
 `Var` base member for a dynamic value. Comparisons dispatch separately.
 `==`/`!=` use an eligible `equal` member, relational punctuation derives from
 `compare`, and `===`/`!==` remain unconditional identity tests. Eligible means
-implemented, native, or a base default. Equality, identity, and total ordering
-do not become binary-arithmetic operations.
+implemented, native, or a base default. When the operands of a protocol
+operator are two different typedef names that share an ancestor, such as an
+alias of `String` and a `String`, or two aliases of `String`, the operator
+uses the eligible member of their nearest shared ancestor. Equality,
+identity, and total ordering do not become binary-arithmetic operations.
 
 For `==` and `!=`, a C string literal opposite an operand of static type
 `String`, or an alias reaching `String`, converts to that type before ordinary

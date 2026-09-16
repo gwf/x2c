@@ -991,6 +991,32 @@ static int _converts_operands(Compiler compiler, Type type) {
   return resolved && resolved.is_aggregate();
 }
 
+/* The typedef names `type` passes through, starting with itself. */
+static Array _typedef_names(Compiler compiler, Type type) {
+  Array names = %[];
+  int hops = 0;
+  for (; type && (type.is_bare_typedef_name() || type.is_typedef());
+       type = compiler.sym.next_typedef(type, &hops))
+    if (type.is_bare_typedef_name()) names.push(type);
+  return names;
+}
+
+/* Two different typedef names that share an ancestor meet at the nearest
+   one that has `member`, so an alias of `String` compares with a `String`,
+   or with another alias, through `String.equal` rather than as the pointers
+   C sees. */
+static Type _shared_participant(
+  Compiler compiler, Type lhs_type, Type rhs_type, Symbol member) {
+  if (!lhs_type.is_bare_typedef_name() || !rhs_type.is_bare_typedef_name())
+    return NULL;
+  Array lhs_names = _typedef_names(compiler, lhs_type);
+  foreach (Type name, _typedef_names(compiler, rhs_type))
+    if (lhs_names.contains(name) &&
+        compiler.resolve_protocol_member(name, member))
+      return name;
+  return NULL;
+}
+
 /* A binary operator whose one operand is a converting participant converts
    the other operand to that type through its declared converter, so
    `x * 2.0` and `2.0 - x` resolve like `x * two`. The converted operand
@@ -1026,6 +1052,9 @@ static List _resolve_protocol_operator(
       if (compiler.sym.is_var_type(participant) ||
           compiler.sym.is_var_type(rhs_type))
         return NULL;
+      Type shared =
+        _shared_participant(compiler, participant, rhs_type, member);
+      if (shared) return compiler.resolve_protocol_member(shared, member);
       int lhs_member = !!compiler.resolve_protocol_member(participant, member)
         && _converts_operands(compiler, participant);
       int rhs_member = !!compiler.resolve_protocol_member(rhs_type, member)
@@ -1309,7 +1338,7 @@ static List _method_bind(
   Compiler compiler, List receiver, Type type, Type declared, Token origin) {
   if (!declared || !type) return receiver;
   Type target = declared.canonicalize();
-  if (car(target) != <*> || cdr(target) != type.canonicalize())
+  if (car(target) != <*> || cdr(target) !== type.canonicalize())
     return receiver;
   if (!_expression_is_addressable(compiler, receiver))
     compiler.report_error(
@@ -2772,7 +2801,7 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
       reference = %($kind $name);
   }
   Array definitions = %[], references = %[];
-  for (List rest = type; rest != base; rest = rest.cdr()) {
+  for (List rest = type; rest !== base; rest = rest.cdr()) {
     Var modifier = rest.car(), reused = modifier;
     match (modifier)
       case %(dim ?dimension): {
@@ -3706,7 +3735,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
      silently discarded const, in both directions: `void *`
      took a `const char *` going in, and `char *` took a `const void *`
      coming back out. */
-  int take_reference = car(target) == <&> && type == cdr(target);
+  int take_reference = car(target) == <&> && type === cdr(target);
   Type qualifier_source = take_reference
                         ? declared_source.reference() : declared_source;
   if ((take_reference || type == target || cdr(type) == cdr(target) ||
@@ -3726,7 +3755,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     return expr;
   // pointers, references, and address-of/dereference conversions
   // T -> &T : pass address of LHS as ref w/ updated type
-  if (type == cdr(target) && car(target) == <&>)
+  if (type === cdr(target) && car(target) == <&>)
     return %(expr $target (op & (parens $expr)));
   // *T -> &T : pass pointer as ref w/ updated type
   // &T -> *T : pass ref as pointer w/ updated type
@@ -3735,7 +3764,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
          (car(type) == <&> && car(target) == <*>))
       return %(expr $target $expr);
   // &T -> T : pass deref ref as value
-  if (car(type) == <&> && cdr(type) == target)
+  if (car(type) == <&> && cdr(type) === target)
     return %(expr $target (op * (parens $expr)));
   if (type.match(%((!or (dim *) (!quote *)) char))) {
     List string = _raw_string_to_string(c, expr);
