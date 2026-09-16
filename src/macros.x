@@ -80,14 +80,18 @@ static void _install_source(
   compiler.macros[marker] = aliases;
 }
 
-static void _install_lisp_bindings(Compiler compiler) {
+/* Every `lisp.` lookup records the bindings file, which is installed only
+   when `install` is nonzero and the bindings are not yet installed. */
+static void _use_lisp_bindings(Compiler compiler, int install) {
   if (!lisp_binding_macros_marker)
     lisp_binding_macros_marker = String.new("_x2c.lisp.bindings");
-  if (compiler.macros.contains(lisp_binding_macros_marker)) return;
-  _ensure_lisp(compiler);
+  int loaded =
+    !install || compiler.macros.contains(lisp_binding_macros_marker);
+  if (!loaded) _ensure_lisp(compiler);
   _eval_library(
-    compiler, 0, "etc/lisp-bindings.xlisp",
+    compiler, loaded, "etc/lisp-bindings.xlisp",
     "cannot open the native Lisp macro support");
+  if (loaded) return;
   _install_source(
     compiler, lisp_binding_macros, "<builtin:lisp-bindings>",
     lisp_binding_macros_marker, 0);
@@ -95,11 +99,11 @@ static void _install_lisp_bindings(Compiler compiler) {
 
 static int _try_definition(
   Compiler compiler, Atom name, int install_lisp, Var *stored) {
-  if (compiler.macros.try_get(name, stored)) return 1;
+  int found = compiler.macros.try_get(name, stored);
   String spelling = name.str();
-  if (!install_lisp || !spelling.startswith("lisp.")) return 0;
-  _install_lisp_bindings(compiler);
-  return compiler.macros.try_get(name, stored);
+  if (!install_lisp || !spelling.startswith("lisp.")) return found;
+  _use_lisp_bindings(compiler, !found);
+  return found || compiler.macros.try_get(name, stored);
 }
 
 /** Installs the compiler-shipped source macros into `compiler` once. */
