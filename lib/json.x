@@ -17,6 +17,7 @@
 #pragma once
 $(import "private-keywords.xmacro")
 #include "x2c.x"
+#include "path.x"
 
 /** The receiverless owner of `Json.parse` and the other JSON operations. */
 typedef enum Json {
@@ -38,8 +39,6 @@ protocol Var(JsonBool);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "path.x"
 
 #define JSON_MAX_DEPTH 512
 
@@ -400,10 +399,10 @@ static Var _parse(String source, String path) {
 Var Json.parse(String source) => _parse(source, NULL);
 
 /** Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
-    Raises: the causes of `String.read_text`, or `<bad-arg>` as
+    Raises: the causes of `Path.read_text`, or `<bad-arg>` as
     `Json.parse` does, with a `path` detail added.
 */
-Var Json.read_file(String path) => _parse(path.read_text(), path);
+Var Json.read_file(Path path) => _parse(path.read_text(), path);
 
 /*  writing
 
@@ -559,8 +558,8 @@ String Var.json(Var value) => _json(value, 0);
 String Var.pretty_json(Var value) => _json(value, 1);
 
 /** Replaces the file at `path` with `value` as compact JSON text.
-    Raises: the causes of `Var.json` and `String.write_text`.
+    Raises: the causes of `Var.json` and `Path.write_text`.
 */
-void Json.write_file(Var value, String path) {
+void Json.write_file(Var value, Path path) {
   path.write_text(value.json());
 }

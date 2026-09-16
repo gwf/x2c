@@ -10,11 +10,11 @@
 */
 #include "json.x"
 
-static String root;
+static Path root;
 
 /* Spells `path` as Python's `PurePosixPath` does, so the printed index path
    matches the tool this replaced. */
-static String normal(String path) {
+static Path normal(String path) {
   Array parts = %[];
   foreach (String part, path.split("/"))
     if (part && part != ".") parts.push(part);
@@ -31,9 +31,9 @@ static String digest(String path) {
 /* The walk visits parents first and siblings in sorted order, and each member
    is archived without recursion, so the archive lists exactly this walk less
    build products and prepared dependencies at any depth. */
-static String source_archive(String package, String output) {
+static Path source_archive(Path package, Path output) {
   String name = package.basename();
-  String archive = output.absolute_path().join_path(%"$name-source.tar.gz");
+  Path archive = output.absolute().join(%"$name-source.tar.gz");
   Array members = %[];
   foreach (String path, package.walk()) {
     String relative = path[package.len() + 1:];
@@ -42,20 +42,20 @@ static String source_archive(String package, String output) {
       members.push(%"$name/$relative");
   }
   // COPYFILE_DISABLE keeps macOS tar from adding AppleDouble members.
-  List command = %(tar -czf $archive -C ${package.dirname()} --no-recursion
-                   @{members.list_free()});
-  command.options(%{env: {COPYFILE_DISABLE: 1}}).run();
+  %(tar -czf $archive -C ${package.dirname()} --no-recursion
+    @{members.list_free()}).job()
+    .options(%{env: {COPYFILE_DISABLE: 1}}).run();
   return archive;
 }
 
 static void source_rows(
-  String directory, String output, String base, Array rows) {
+  Path directory, Path output, String base, Array rows) {
   foreach (String name, directory.list_dir()) {
-    String package = directory.join_path(name);
-    if (!package.is_dir() || package.join_path("dependency*.json").glob() ||
-        !package.join_path(%"src/$name.x").is_file())
+    Path package = directory.join(name);
+    if (!package.is_dir() || package.join("dependency*.json").glob() ||
+        !package.join(%"src/$name.x").is_file())
       continue;
-    String archive = source_archive(package, output);
+    Path archive = source_archive(package, output);
     String url = %"$base/${archive.basename()}";
     rows.push(%"$name 0 source - $url ${digest(archive)}");
   }
@@ -68,12 +68,12 @@ static String field(Map identity, String name) {
   return value.str();
 }
 
-static String bundle_row(String tarball, String output, String base) {
+static String bundle_row(Path tarball, Path output, String base) {
   String member = NULL;
-  foreach (String entry, %(tar -tzf $tarball).lines())
+  foreach (String entry, %(tar -tzf $tarball).job().lines())
     if (!member && entry.endswith("/BUNDLE.json")) member = entry;
   if (!member) raise %(bad-arg (why "$tarball has no BUNDLE.json"));
-  Map identity = Json.parse(%(tar -xOzf $tarball $member).output());
+  Map identity = Json.parse(%(tar -xOzf $tarball $member).job().output());
   String package = field(identity, "package");
   String platform =
     %"${field(identity, "platform")}-${field(identity, "machine")}";
@@ -81,15 +81,16 @@ static String bundle_row(String tarball, String output, String base) {
   String version = dependency ? dependency.str() : %"0";
   // Every platform's bundle is named <name>-native.tar.gz by its producer,
   // so the published copy carries the platform to keep them apart.
-  String published = output.join_path(%"$package-$platform-native.tar.gz");
-  if (tarball.absolute_path() != published.absolute_path())
+  Path published = output.join(%"$package-$platform-native.tar.gz");
+  if (tarball.absolute() != published.absolute())
     tarball.copy_file(published);
   String url = %"$base/${published.basename()}";
   return %"$package $version bundle $platform $url ${digest(published)}";
 }
 
-root = String.new(argv[0]).absolute_path().dirname().dirname();
-String program = String.new(argv[0]).basename();
+Path self = String.new(argv[0]);
+root = self.absolute().dirname().dirname();
+String program = self.basename();
 List spec = %(
   (--base (value url) required
    (help "URL prefix under which the files are published"))
@@ -101,36 +102,37 @@ List spec = %(
    (help "index header version; defaults to builds/0/x2c --version"))
   (bundles repeated (help "<name>-native.tar.gz bundles to list")));
 if (args.contains("-h") || args.contains("--help")) {
-  printf("%s", spec.usage(program));
+  printf("%s", Args.usage(spec, program));
   return 0;
 }
 
 Map options = NULL;
-try options = args.parse_args(spec);
+try options = Args.parse(args, spec);
 catch %(bad-arg *detail): {
   String why = detail.assoc(<why>).str(), subject = detail[2].cadr().str();
-  Stderr.printf("%sx2c: %s: %s\n", spec.usage(program), why, subject);
+  Stderr.printf("%sx2c: %s: %s\n", Args.usage(spec, program), why, subject);
   return 2;
 }
 
 try {
-  String output = options["output"].str(), base = options["base"].str();
+  Path output = options["output"].str();
+  String base = options["base"].str();
   output.make_dirs();
   Array rows = %[];
   List directories = options["package-dir"];
-  if (!directories) directories = %(${root.join_path("packages")});
+  if (!directories) directories = %(${root.join("packages")});
   foreach (Var directory, directories)
     source_rows(directory.str(), output, base, rows);
   foreach (Var tarball, options["bundles"])
     rows.push(bundle_row(tarball.str(), output, base));
   String version = options["x2c-version"].str();
   if (!version)
-    version = %(${root.join_path("builds/0/x2c")} --version).output()
+    version = %(${root.join("builds/0/x2c")} --version).job().output()
                 .strip(NULL);
   Array lines = %["# x2c package index for $version",
                   "# name version kind platform url sha256"];
   foreach (Var row, rows.sort()) lines.push(row);
-  String index = normal(output).join_path("index.txt");
+  Path index = normal(output).join("index.txt");
   index.write_text(%"${lines.join("\n")}\n");
   printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len());
 }

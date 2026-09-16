@@ -399,7 +399,8 @@ Options:
 ```
 
 A script with subcommands reads the first word itself and parses the rest
-with that command's spec. [`etc/x2c-payload.x`](https://github.com/gwf/x2c/blob/main/etc/x2c-payload.x),
+with that command's spec.
+[`etc/x2c-payload.x`](https://github.com/gwf/x2c/blob/main/etc/x2c-payload.x),
 which `make install` runs, works this way.
 
 ## Checksums
@@ -428,8 +429,9 @@ A script that reads or writes JSON includes `json.x` itself:
 ```
 
 It is not included automatically because its names match the converting
-surface of the [`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md), so a
-script moves to the package by replacing that line with
+surface of the
+[`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md),
+so a script moves to the package by replacing that line with
 `import "yyjson" with Json;`.
 
 `Json.parse` reads JSON text and `Json.read_file` reads a JSON file. The
@@ -497,4 +499,3 @@ whether a number was signed, unsigned, or real. Its converted integers are
 `long long` or `unsigned long long` values, which do not compare equal to an
 `int` literal such as the 5 in `%{n: 5}`, and malformed text raises
 `<malformed>` rather than `<bad-arg>`.
-

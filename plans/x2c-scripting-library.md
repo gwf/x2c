@@ -312,8 +312,8 @@ as the modulo operator. Its operand lookback (`_prev_token_ends_operand` in
 `lib/tokenizer.x`) treats `}` as the end of an operand, which is right after a
 compound literal or initializer and wrong after a statement block. This hits
 the ordinary script shape of a `foreach` or `if` block followed by a command
-literal. `tools/gen-package-index.x` works around it by assigning the List to
-a local first. Not yet fixed.
+literal. Fixed in `e718d95`: a `%(` after the `}` of a statement block now
+opens a literal, and `tools/gen-package-index.x` no longer works around it.
 
 ## Defects found during Phase B
 

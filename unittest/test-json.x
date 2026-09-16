@@ -249,7 +249,7 @@ static void json_values_round_trip(void) {
 
 static void json_files_read_and_write(void) {
   $test.scoped();
-  String root = String.temp_dir(), path = root.join_path("value.json");
+  Path root = Path.temp_dir(), path = root.join("value.json");
   Json.write_file(%{name: "x2c", list: [1, 2]}, path);
   EXPECT_STR_EQ(path.read_text(), "{\"list\":[1,2],\"name\":\"x2c\"}");
   Map value = Json.read_file(path);
@@ -265,7 +265,7 @@ static void json_files_read_and_write(void) {
     EXPECT_INT_EQ(detail.assoc(<line>).integer(), 2);
     EXPECT_INT_EQ(detail.assoc(<column>).integer(), 6);
   }
-  try Json.read_file(root.join_path("missing.json"));
+  try Json.read_file(root.join("missing.json"));
   catch %(not-found *): caught++;
   EXPECT_INT_EQ(caught, 2);
   root.remove_tree();
