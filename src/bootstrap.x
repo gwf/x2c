@@ -56,7 +56,7 @@ static String _absolute(String path) {
       _error_path("cannot resolve installation prefix", path);
     return String.new(resolved);
   }
-  String parent = path.dirname();
+  String parent = Path.dirname(path);
   if (!realpath(parent, resolved))
     _error_path("installation parent does not exist", parent);
   const char *base = strrchr(path, '/');
@@ -213,7 +213,7 @@ static void _extract(Bootstrap payload, char *manifest) {
       _error("malformed embedded source record");
     String source = %"/zip/x2c/${String.new(relative)}";
     String target = %"$temporary/${String.new(relative)}";
-    String parent = target.dirname();
+    String parent = Path.dirname(target);
     if (!_build_mkdirs(parent))
       _error_path("cannot create payload directory", parent);
     File input = fopen(source, "rb"), output = fopen(target, "wb");

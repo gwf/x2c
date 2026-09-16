@@ -1268,7 +1268,7 @@ set -e
 
 cat >"$SCRIPT/missing.x" <<'EOF'
 #!/usr/bin/env -S x2c script
-String path = "/x2c-script-probe-missing";
+Path path = "/x2c-script-probe-missing";
 printf("%s", path.read_text());
 EOF
 set +e

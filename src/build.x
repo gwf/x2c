@@ -55,7 +55,7 @@ typedef struct Build {
    spelling-derived key. The input path is not canonicalized, so its spelling
    is part of incremental cache identity. */
 static String _key(String path) {
-  String stem = path.stem();
+  String stem = Path.stem(path);
   return %"$stem-%08x".printf(String.hash(path));
 }
 
@@ -180,7 +180,7 @@ static void _state_write(String path, uint64_t hash) {
 
 /* Creates `path` and missing parents, returning zero when it cannot. */
 int _build_mkdirs(String path) {
-  try path.make_dirs();
+  try Path.make_dirs(path);
   catch %(not-found *): return 0;
   catch %(io-fail *): return 0;
   return 1;
@@ -247,10 +247,10 @@ Build CliRequest.prepare(CliRequest c) {
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
-    state.output = %"${c.inputs.car().string().stem()}.o";
+    state.output = %"${Path.stem(c.inputs.car().string())}.o";
   else if (c.kind == <static-lib>) {
     String stem = c.inputs ?
-                  c.inputs.car().string().stem() : %"target";
+                  Path.stem(c.inputs.car().string()) : %"target";
     state.output = %"lib$stem.a";
   }
   else state.output = "a.out";
@@ -317,7 +317,7 @@ static uint64_t _translation_fingerprint(
   hash = _state_text(hash, request.cpp_symbols ? %"cpp-symbols" : %"raw");
   hash = _state_text(
     hash, request.source_map ? %"source-map" : %"generated-lines");
-  String depfile = %"$directory/${input.stem()}.d";
+  String depfile = %"$directory/${Path.stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);
 }
 
@@ -328,7 +328,7 @@ static uint64_t _translation_fingerprint(
 */
 int Build.translation_current(Build state, String input, String directory) {
   if (!state.state_root || state.request.dry_run) return 0;
-  String stem = input.stem();
+  String stem = Path.stem(input);
   if (access(%"$directory/$stem.c", R_OK)) return 0;
   if (access(%"$directory/$stem.h", R_OK)) return 0;
   if (access(%"$directory/$stem.xi", R_OK)) return 0;
@@ -401,7 +401,7 @@ static void Build._link_packages(Build state, String input, String directory) {
   List roots = state.request.package_roots();
   if (!roots) return;
   String own = _package_source_directory(roots, input);
-  String depfile = %"$directory/${input.stem()}.d";
+  String depfile = %"$directory/${Path.stem(input)}.d";
   foreach (String dependency, _state_dep_inputs(depfile)) {
     String package = _package_directory(roots, dependency);
     if (!package || (own && package == own)) continue;
@@ -436,7 +436,7 @@ static void Build._link_packages(Build state, String input, String directory) {
     a diagnostic and exits with status 2. Static libraries skip link inputs.
 */
 void Build.add_generated(Build state, String input, String directory) {
-  String stem = input.stem(), source = %"$directory/$stem.c";
+  String stem = Path.stem(input), source = %"$directory/$stem.c";
   String header = %"$directory/$stem.h";
   state.gen_bytes += report_file_bytes(source);
   state.gen_bytes += report_file_bytes(header);
@@ -618,7 +618,7 @@ static int _compile_sources(Build b) {
       object = b.output;
     String depfile = %"${b.dep_root}/$key.d", Array include_dirs = %[];
     if (source.startswith(b.gen_root))
-      include_dirs.push(source.dirname());
+      include_dirs.push(Path.dirname(source));
     foreach (Var directory, b.gen_dirs)
       if (!include_dirs.contains(directory)) include_dirs.push(directory);
     List directories = include_dirs.list_free();
@@ -700,14 +700,15 @@ static void Build._place_unit_headers(Build b) {
   if (b.request.dry_run || b.units.len() < 2) return;
   Map headers = %{};
   foreach (String unit, b.units)
-    headers[unit.absolute_path()] =
-      %"${b.gen_root}/${_key(unit)}/${unit.stem()}.h";
+    headers[Path.absolute(unit)] =
+      %"${b.gen_root}/${_key(unit)}/${Path.stem(unit)}.h";
   foreach (String unit, b.units) {
-    String directory = %"${b.gen_root}/${_key(unit)}", stem = unit.stem();
-    List searched = %(${unit.dirname()} @{b.request.include_dirs});
+    String directory = %"${b.gen_root}/${_key(unit)}";
+    String stem = Path.stem(unit);
+    List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
     List outputs = %(${%"$directory/$stem.h"} ${%"$directory/$stem.c"});
     foreach (String generated, outputs)
-      foreach (String line, generated.read_text().split_lines(0)) {
+      foreach (String line, Path.read_text(generated).split_lines(0)) {
         String text = line.strip(" \t");
         if (!text.startswith("#include \"") || !text.endswith(".h\""))
           continue;
@@ -716,11 +717,11 @@ static void Build._place_unit_headers(Build b) {
         String source = %"${target[:target.len() - 2]}.x";
         foreach (String dir, searched) {
           Var header;
-          if (!headers.try_get(dir.join_path(source).absolute_path(), &header))
+          if (!headers.try_get(Path.join(dir, source).absolute(), &header))
             continue;
-          String placed = directory.join_path(target);
+          Path placed = Path.join(directory, target);
           placed.dirname().make_dirs();
-          header.str().copy_file(placed);
+          Path.copy_file(header.str(), placed);
           break;
         }
       }
@@ -884,7 +885,7 @@ int Build.run_program(Build state) {
 /* Removes `path` and everything below it, returning zero when any entry
    could not be removed. An absent path counts as removed. */
 int _build_remove_tree(String path) {
-  try path.remove_tree();
+  try Path.remove_tree(path);
   catch %(io-fail *): return 0;
   return 1;
 }
@@ -944,8 +945,8 @@ static uint64_t _script_fingerprint(
       continue;
     }
     hash = _state_text(hash, path);
-    hash = _state_text(hash, path.is_dir()
-      ? %"%.9f".printf(path.modified_time()) : %"absent");
+    hash = _state_text(hash, Path.is_dir(path)
+      ? %"%.9f".printf(Path.modified_time(path)) : %"absent");
   }
   return hash;
 }
@@ -969,13 +970,14 @@ static List Build._script_directories(Build b, List prerequisites) {
       }
     }
   }
-  foreach (String path, prerequisites) directories.push(path.dirname());
+  foreach (String path, prerequisites)
+    directories.push(Path.dirname(path));
   foreach (Var directory, b.toolchain.search_directories())
     directories.push(directory);
   Array unique = %[];
   foreach (Var value, directories) {
-    String directory = value.str().absolute_path();
-    if (directory.startswith(b.work_dir.absolute_path())) continue;
+    String directory = Path.absolute(value.str());
+    if (directory.startswith(Path.absolute(b.work_dir))) continue;
     String entry = directory.endswith("/") ? directory : %"$directory/";
     if (!unique.contains(entry)) unique.push(entry);
   }
@@ -989,7 +991,8 @@ static List Build._script_directories(Build b, List prerequisites) {
 */
 List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
-  String translation = %"${b.gen_root}/${_key(script)}/${script.stem()}.d";
+  String translation =
+    %"${b.gen_root}/${_key(script)}/${Path.stem(script)}.d";
   List excluded = %(${%"$root/lib/"} ${%"$root/include/"} ${%"$root/builds/"})
     .append(b.request.package_roots().map(%!(dir) => %"${dir.str()}/"));
   Array helpers = %[];
@@ -1011,15 +1014,16 @@ List Build.script_helpers(Build b) {
     Raises: `<io-fail>` when the executable cannot be moved.
 */
 void Build.publish_script(Build b, String executable) {
-  b.output.move_to(executable);
+  Path.move_to(b.output, executable);
   if (_mapped_debug(b)) {
-    String symbols = %"$executable.dSYM";
+    Path symbols = %"$executable.dSYM";
     symbols.remove_tree();
-    %"${b.output}.dSYM".move_to(symbols);
+    Path.move_to(%"${b.output}.dSYM", symbols);
   }
   String input = b.request.inputs.car();
   Array prerequisites = %[];
-  String translation = %"${b.gen_root}/${_key(input)}/${input.stem()}.d";
+  String translation =
+    %"${b.gen_root}/${_key(input)}/${Path.stem(input)}.d";
   foreach (String path, _state_dep_inputs(translation))
     prerequisites.push(path);
   foreach (String source, b.c_sources)
@@ -1042,7 +1046,7 @@ int CliRequest.script_current(CliRequest c, String directory) {
   String record = %"$directory/.x2c-state/script";
   if (access(%"$directory/run", X_OK) || access(record, R_OK)) return 0;
   List lines = NULL;
-  try lines = record.read_text().split_lines(0);
+  try lines = Path.read_text(record).split_lines(0);
   catch %(io-fail *): return 0;
   Toolchain toolchain = toolchain_new(
     c.cc, c.ar, c.cpp_args, c.cc_args, c.ld_args, 0, 0);

@@ -21,7 +21,7 @@ String package = args.cdr() ? args.cadr().str() : %"pcre2";
 String site = Env.get("X2C_SITE");
 if (!site) site = %"https://x2c-lang.dev";
 
-String work = String.temp_dir();
+Path work = Path.temp_dir();
 defer work.remove_tree();
 
 String published =
@@ -34,13 +34,13 @@ String heading =
 if (heading != %"# x2c package index for x2c $version")
   return fail(%"the site's package index is not for x2c $version");
 
-String prefix = work.join_path("x2c");
+Path prefix = work.join("x2c");
 %((curl -fsSL "$site/install.sh") (sh -s "--" --version $version)).job()
   .options(%{env: {X2C_PREFIX: $prefix},
-             stdout: ${work.join_path("install.log")}})
+             stdout: ${work.join("install.log")}})
   .check();
 
-String x2c = prefix.join_path("bin/x2c");
+Path x2c = prefix.join("bin/x2c");
 String reported = %($x2c --version).job().output().strip("\n");
 if (reported != %"x2c $version")
   return fail(%"install.sh installed $reported, not x2c $version");

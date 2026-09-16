@@ -310,7 +310,7 @@ static String _include_text(Compiler c, String target, String path) {
 static void _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = _include_text(c, target, canonical);
-  _file(c, canonical, text, canonical.dirname(), globs, visited);
+  _file(c, canonical, text, Path.dirname(canonical), globs, visited);
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -337,7 +337,7 @@ static void _parse_segment(
   shadow.take_unit_state(c);
   shadow.tokenize(text);
   shadow.text = source;
-  if (c.source_facts) c.source_texts[path.absolute_path()] = source;
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = source;
   for (size_t i = 0; i < shadow.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) shadow.tokenizer.tokens)[i];
     token.line += start_line - 1;
@@ -564,7 +564,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical) {
   Map scratch = %{}, visited = %{};
   visited[canonical] = 1;
   _file(
-    c, canonical, _runtime_text(c, runtime), runtime.dirname(),
+    c, canonical, _runtime_text(c, runtime), Path.dirname(runtime),
     scratch, visited);
   return _header_cache()[canonical];
 }
@@ -594,7 +594,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
     if (c.runtime_hdrs)
       _file(
         c, runtime_canonical, _runtime_text(c, runtime),
-        runtime.dirname(), globs, visited);
+        Path.dirname(runtime), globs, visited);
     else
       _replay_cached(
         c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
@@ -602,7 +602,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   visited[canonical] = 1;
   _file(
     c, canonical, c.text,
-    c.filename.dirname(), globs, visited);
+    Path.dirname(c.filename), globs, visited);
   return globs;
 }
 
@@ -760,7 +760,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
         %( "path: $entry" ));
-    _file(package, entry, text, entry.dirname(), globs, visited);
+    _file(package, entry, text, Path.dirname(entry), globs, visited);
   }
   else _replay_cached(package, cached, globs, visited);
   Map.merge(c.fn_defs, package.fn_defs);
@@ -810,20 +810,20 @@ static String interface_out_dir = NULL, interface_mirror = NULL;
 void interface_configure(String out_dir) {
   interface_out_dir = out_dir;
   String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage = executable ? executable.dirname() : NULL;
+  String stage = executable ? Path.dirname(executable) : NULL;
   interface_mirror =
-    stage && stage.dirname() == %"$root/builds" ? stage : root;
+    stage && (String) Path.dirname(stage) == %"$root/builds" ? stage : root;
 }
 
 /* Candidate interface paths for one canonical source path: the output
    directory by stem, its sibling that mirrors a home file's directory, the
    home mirror, and a package's `builds/` beside or above the source. */
 static List _interface_candidates(String canonical) {
-  String stem = canonical.stem(), relative = _root_relative(canonical);
-  String dir = canonical.dirname(), Array paths = %[];
+  String stem = Path.stem(canonical), relative = _root_relative(canonical);
+  String dir = Path.dirname(canonical), Array paths = %[];
   if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
   if (relative) {
-    String mirror = %"${relative.dirname()}/$stem.xi";
+    String mirror = %"${Path.dirname(relative)}/$stem.xi";
     if (interface_out_dir) paths.push(%"$interface_out_dir/../$mirror");
     paths.push(%"$interface_mirror/$mirror");
   }

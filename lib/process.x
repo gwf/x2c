@@ -14,8 +14,8 @@
     A pipeline's status is the status of its last failing stage, or zero
     when every stage succeeds. A signalled stage reports 128 plus the signal.
 
-    This module also owns the calling process's own argument list and
-    environment, which a script reads to decide what to run.
+    This module also owns the calling process's own environment, which a
+    script reads to decide what to run.
 */
 
 #pragma once
@@ -505,14 +505,6 @@ Job Job.wait_any(Array jobs) {
     usleep(1000);
   }
   return NULL;
-}
-
-/** Returns the program arguments that follow `argv[0]` as `String`s. */
-List List.arguments(int argc, char **argv) {
-  List result = NULL;
-  for (int i = argc - 1; i > 0; i--)
-    result = %(${String.new(argv[i])} @result);
-  return result;
 }
 
 /** Returns the value of this process's environment variable `name`, or

@@ -9,15 +9,25 @@ Parse program arguments against a declarative spec.
 
 | Function | Summary |
 | --- | --- |
-| [`List.parse_args`](#List.parse_args) | Parses `args` against `spec` and returns a `Map` from each row's name to its value. |
-| [`List.usage`](#List.usage) | Returns usage text for `spec` as `List.parse_args` reads it: a synopsis for `program`, then each option, then each operand that has help, in spec order. |
+| [`Args.from_argv`](#Args.from_argv) | Returns the program arguments that follow `argv[0]` as `String`s. |
+| [`Args.parse`](#Args.parse) | Parses `args` against `spec` and returns a `Map` from each row's name to its value. |
+| [`Args.usage`](#Args.usage) | Returns usage text for `spec` as `Args.parse` reads it: a synopsis for `program`, then each option, then each operand that has help, in spec order. |
 
-### `List`
+### `Args`
 
-<a id="List.parse_args"></a>
-#### List.parse_args
+<a id="Args.from_argv"></a>
+#### Args.from_argv
 
-`Map List.parse_args(List args, List spec)`
+`List Args.from_argv(int argc, char **argv)`
+
+Returns the program arguments that follow `argv[0]` as `String`s.
+
+Source: `lib/args.x:310`
+
+<a id="Args.parse"></a>
+#### Args.parse
+
+`Map Args.parse(List args, List spec)`
 
 Parses `args` against `spec` and returns a `Map` from each row's name
 to its value.
@@ -25,10 +35,10 @@ to its value.
 Each row of `spec` is a `List`. A row that begins with dashed words is
 an option spelled by each of them, such as `-p --prefix`, and named by
 its first long spelling without the dashes, or else by its short one. A
-row that begins with any other word is an operand of that name. The rest of a row may hold
-`(value placeholder)`, which makes an option take a value;
-`(default value)`; `(help "text")` for `List.usage`; `required`; and
-`repeated`.
+row that begins with any other word is an operand of that name. The rest
+of a row may hold `(value placeholder)`, which makes an option take a
+value; `(default value)`; `(help "text")` for `Args.usage`; `required`;
+and `repeated`.
 
 A long option takes its value as `--name value` or `--name=value`, and a
 short option as `-n value` or `-nvalue`; short flags may share one word.
@@ -50,7 +60,7 @@ List spec = %(
   (-o --output (value file) (default "a.out"))
   (-I (value dir) repeated)
   (inputs repeated required));
-Map options = %(-vI src -Ilib main.x).parse_args(spec);
+Map options = Args.parse(%(-vI src -Ilib main.x), spec);
 ~  return options["verbose"] == 1 &&
 ~    options["output"].str() == "a.out" &&
 ~    options["I"].list().len() == 2 &&
@@ -63,18 +73,34 @@ for an unknown option, a missing or unexpected value, an unexpected
 operand, or a `required` row that was not given; and with `why` and the
 offending `spec` entry for a property or word it cannot read.
 
-Source: `lib/args.x:225`
+Source: `lib/args.x:232`
 
-<a id="List.usage"></a>
-#### List.usage
+<a id="Args.usage"></a>
+#### Args.usage
 
-`String List.usage(List spec, String program)`
+`String Args.usage(List spec, String program)`
 
-Returns usage text for `spec` as `List.parse_args` reads it: a synopsis
+Returns usage text for `spec` as `Args.parse` reads it: a synopsis
 for `program`, then each option, then each operand that has help, in
 spec order. Help text starts at column 30, as in `x2c help`.
 
-Source: `lib/args.x:280`
+Source: `lib/args.x:287`
+
+## Public types
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`Args`](#Args) | enum | The receiverless owner of `Args.parse` and the other argument operations. |
+
+<a id="Args"></a>
+### Args
+
+`typedef enum Args { ARGS_NAMESPACE } Args`
+
+The receiverless owner of `Args.parse` and the other argument
+operations.
+
+Source: `lib/args.x:19`
 
 ## Design notes
 
@@ -83,7 +109,7 @@ parse result is a `Map` from each row's name to its value, so a script
 describes its command line as data and reads the answer by name. Words
 are `String`s throughout; converting a value to a number is the caller's
 choice. Bad input raises `<bad-arg>` instead of exiting, so the caller
-decides whether to print `List.usage` and which status to return.
+decides whether to print `Args.usage` and which status to return.
 
 ## Tests and examples
 

@@ -429,7 +429,7 @@ static void _walk_matches(
       continue;
     }
     if (S_ISREG(info.st_mode) &&
-        pattern.glob_match(child_relative) &&
+        Path.glob_match(pattern, child_relative) &&
         !matches.contains(child))
       matches.push(child);
   }
@@ -454,7 +454,8 @@ static Array _expand_pattern(
         if (project.build_root &&
             path.startswith(%"${project.build_root}/")) continue;
         String relative = path[prefix.len():];
-        if (pattern.glob_match(relative) && !matches.contains(path))
+        if (Path.glob_match(pattern, relative) &&
+            !matches.contains(path))
           matches.push(path);
       }
     }
@@ -792,7 +793,7 @@ ProjectBuild project_plan(CliRequest request) {
   char resolved[PATH_MAX];
   if (realpath(project.path, resolved)) project.path = %"$resolved";
   if (project.sources) {
-    project.path = project.path.absolute_path();
+    project.path = Path.absolute(project.path);
     if (!project.sources.read(project.path, &project.text))
       _error(project, 0, "cannot read manifest");
   }
@@ -802,7 +803,7 @@ ProjectBuild project_plan(CliRequest request) {
     try project.text = input.string_close();
     catch %(io-fail *): _error(project, 0, "cannot read manifest");
   }
-  project.root = project.path.dirname();
+  project.root = Path.dirname(project.path);
   _parse_manifest(project);
   for (ProjectTarget target = project.targets; target; target = target.next)
     _validate_target(project, target);

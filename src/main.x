@@ -216,7 +216,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
         input);
       exit(2);
     }
-    String stem = input.stem();
+    String stem = Path.stem(input);
     if (!c.inspects() && !unit_dirs) {
       List prior_stem = stems, prior_input = stem_inputs;
       while (prior_stem) {
@@ -367,7 +367,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   }
   if (!c.nested)
     foreach (String input, c.inputs) {
-      String stem = input.stem();
+      String stem = Path.stem(input);
       gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.c");
       gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.h");
     }

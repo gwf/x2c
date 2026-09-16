@@ -7,11 +7,18 @@
     describes its command line as data and reads the answer by name. Words
     are `String`s throughout; converting a value to a number is the caller's
     choice. Bad input raises `<bad-arg>` instead of exiting, so the caller
-    decides whether to print `List.usage` and which status to return.
+    decides whether to print `Args.usage` and which status to return.
 */
 
 #pragma once
 #include "x2c.x"
+
+/** The receiverless owner of `Args.parse` and the other argument
+    operations.
+*/
+typedef enum Args {
+  ARGS_NAMESPACE
+} Args;
 
 #pragma private
 
@@ -33,16 +40,16 @@ typedef struct _Spec {
 } _Spec;
 
 static void _bad_option(String why, String option) {
-  raise %(bad-arg (operation "List.parse_args") (why $why) (option $option));
+  raise %(bad-arg (operation "Args.parse") (why $why) (option $option));
 }
 
 static void _bad_operand(String why, String operand) {
-  raise %(bad-arg (operation "List.parse_args") (why $why)
+  raise %(bad-arg (operation "Args.parse") (why $why)
           (operand $operand));
 }
 
 static void _bad_spec(String why, Var entry) {
-  raise %(bad-arg (operation "List.parse_args") (why $why) (spec $entry));
+  raise %(bad-arg (operation "Args.parse") (why $why) (spec $entry));
 }
 
 static void _read_property(_Option *option, List property) {
@@ -184,10 +191,10 @@ static void _assign_operands(_Spec *spec, Map result, List operands) {
     Each row of `spec` is a `List`. A row that begins with dashed words is
     an option spelled by each of them, such as `-p --prefix`, and named by
     its first long spelling without the dashes, or else by its short one. A
-    row that begins with any other word is an operand of that name. The rest of a row may hold
-    `(value placeholder)`, which makes an option take a value;
-    `(default value)`; `(help "text")` for `List.usage`; `required`; and
-    `repeated`.
+    row that begins with any other word is an operand of that name. The rest
+    of a row may hold `(value placeholder)`, which makes an option take a
+    value; `(default value)`; `(help "text")` for `Args.usage`; `required`;
+    and `repeated`.
 
     A long option takes its value as `--name value` or `--name=value`, and a
     short option as `-n value` or `-nvalue`; short flags may share one word.
@@ -209,7 +216,7 @@ static void _assign_operands(_Spec *spec, Map result, List operands) {
       (-o --output (value file) (default "a.out"))
       (-I (value dir) repeated)
       (inputs repeated required));
-    Map options = %(-vI src -Ilib main.x).parse_args(spec);
+    Map options = Args.parse(%(-vI src -Ilib main.x), spec);
     ~  return options["verbose"] == 1 &&
     ~    options["output"].str() == "a.out" &&
     ~    options["I"].list().len() == 2 &&
@@ -222,7 +229,7 @@ static void _assign_operands(_Spec *spec, Map result, List operands) {
     operand, or a `required` row that was not given; and with `why` and the
     offending `spec` entry for a property or word it cannot read.
 */
-Map List.parse_args(List args, List spec) {
+Map Args.parse(List args, List spec) {
   _Spec parsed = _read_spec(spec);
   Map result = %{};
   for (int i = 0; i < parsed.count; i++)
@@ -273,11 +280,11 @@ static void _write_row(Buffer out, String label, String help) {
   else out.printf("  %-*s%s\n", column - 2, label, help);
 }
 
-/** Returns usage text for `spec` as `List.parse_args` reads it: a synopsis
+/** Returns usage text for `spec` as `Args.parse` reads it: a synopsis
     for `program`, then each option, then each operand that has help, in
     spec order. Help text starts at column 30, as in `x2c help`.
 */
-String List.usage(List spec, String program) {
+String Args.usage(List spec, String program) {
   _Spec parsed = _read_spec(spec);
   Buffer synopsis = $auto(Buffer.new(0)), options = $auto(Buffer.new(0));
   Buffer operands = $auto(Buffer.new(0)), out = $auto(Buffer.new(0));
@@ -297,4 +304,12 @@ String List.usage(List spec, String program) {
   if (option_rows) out.printf("\nOptions:\n%s", option_rows);
   if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);
   return out.str();
+}
+
+/** Returns the program arguments that follow `argv[0]` as `String`s. */
+List Args.from_argv(int argc, char **argv) {
+  List result = NULL;
+  for (int i = argc - 1; i > 0; i--)
+    result = %(${String.new(argv[i])} @result);
+  return result;
 }

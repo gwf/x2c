@@ -3,45 +3,46 @@
 
 # `lib/path.x`
 
-Filesystem operations on path `String`s.
+Filesystem locations and the operations on them.
 
 ## Primary API
 
 | Function | Summary |
 | --- | --- |
-| [`String.absolute_path`](#String.absolute_path) | Returns an absolute form of `path` with symbolic links resolved. |
-| [`String.basename`](#String.basename) | Returns the last component of `path`, ignoring trailing slashes. |
-| [`String.copy_file`](#String.copy_file) | Copies the regular file `source` to `target`, replacing `target` and giving it `source`'s permission bits. |
-| [`String.copy_tree`](#String.copy_tree) | Copies `source` to `target`: a directory recursively, a symbolic link as a link, and a regular file with `String.copy_file`. |
-| [`String.dirname`](#String.dirname) | Returns the directory part of `path`: `.` when it has no slash and `/` for a path directly under the root. |
-| [`String.exists`](#String.exists) | Reports whether `path` names an existing file, following links. |
-| [`String.extension`](#String.extension) | Returns the extension of `path`'s last component, including its dot, or NULL when there is none. |
-| [`String.file_size`](#String.file_size) | Returns the size of the file at `path` in bytes. |
-| [`String.glob`](#String.glob) | Returns the existing paths that match the glob `pattern`, sorted. |
-| [`String.glob_match`](#String.glob_match) | Reports whether all of `path` matches the glob `pattern`. |
-| [`String.is_dir`](#String.is_dir) | Reports whether `path` names a directory, following links. |
-| [`String.is_executable`](#String.is_executable) | Reports whether this process may execute `path`, as the shell's `-x`. |
-| [`String.is_file`](#String.is_file) | Reports whether `path` names a regular file, following links. |
-| [`String.join_path`](#String.join_path) | Returns `name` joined to `base` with one separating slash. |
-| [`String.list_dir`](#String.list_dir) | Returns the names in the directory `path`, sorted, without `.` and `..`. |
-| [`String.make_dirs`](#String.make_dirs) | Creates the directory `path` and any missing parents. |
-| [`String.modified_time`](#String.modified_time) | Returns the modification time of `path` in seconds since the epoch, with the fraction the filesystem records. |
-| [`String.move_to`](#String.move_to) | Moves `source` to `target`, copying and removing when they are on different filesystems. |
-| [`String.read_text`](#String.read_text) | Returns the contents of the file at `path`, or NULL when it is empty. |
-| [`String.remove_file`](#String.remove_file) | Removes the file or symbolic link `path` when it exists. |
-| [`String.remove_tree`](#String.remove_tree) | Removes `path` and everything below it when it exists. |
-| [`String.stem`](#String.stem) | Returns `path`'s last component without its extension. |
-| [`String.symlink_to`](#String.symlink_to) | Creates the symbolic link `link` pointing at `target`. |
-| [`String.temp_dir`](#String.temp_dir) | Creates a new private directory under `TMPDIR`, or `/tmp`, and returns its path. |
-| [`String.walk`](#String.walk) | Returns a lazy iterator over every path below the directory `root`, parents before their contents and siblings sorted. |
-| [`String.write_text`](#String.write_text) | Replaces the contents of the file at `path` with `text`. |
+| [`Path.absolute`](#Path.absolute) | Returns an absolute form of `path` with symbolic links resolved. |
+| [`Path.basename`](#Path.basename) | Returns the last component of `path`, ignoring trailing slashes. |
+| [`Path.copy_file`](#Path.copy_file) | Copies the regular file `source` to `target`, replacing `target` and giving it `source`'s permission bits. |
+| [`Path.copy_tree`](#Path.copy_tree) | Copies `source` to `target`: a directory recursively, a symbolic link as a link, and a regular file with `Path.copy_file`. |
+| [`Path.dirname`](#Path.dirname) | Returns the directory part of `path`: `.` when it has no slash and `/` for a path directly under the root. |
+| [`Path.exists`](#Path.exists) | Reports whether `path` names an existing file, following links. |
+| [`Path.extension`](#Path.extension) | Returns the extension of `path`'s last component, including its dot, or NULL when there is none. |
+| [`Path.glob`](#Path.glob) | Returns the existing paths that match the glob `pattern`, sorted. |
+| [`Path.glob_match`](#Path.glob_match) | Reports whether all of `path` matches the glob `pattern`. |
+| [`Path.is_dir`](#Path.is_dir) | Reports whether `path` names a directory, following links. |
+| [`Path.is_executable`](#Path.is_executable) | Reports whether this process may execute `path`, as the shell's `-x`. |
+| [`Path.is_file`](#Path.is_file) | Reports whether `path` names a regular file, following links. |
+| [`Path.join`](#Path.join) | Returns `name` joined to `base` with one separating slash. |
+| [`Path.list_dir`](#Path.list_dir) | Returns the names in the directory `path`, sorted, without `.` and `..`. |
+| [`Path.make_dirs`](#Path.make_dirs) | Creates the directory `path` and any missing parents. |
+| [`Path.modified_time`](#Path.modified_time) | Returns the modification time of `path` in seconds since the epoch, with the fraction the filesystem records. |
+| [`Path.move_to`](#Path.move_to) | Moves `source` to `target`, copying and removing when they are on different filesystems. |
+| [`Path.new`](#Path.new) | Provides the class default for `Path.new`. |
+| [`Path.read_text`](#Path.read_text) | Returns the contents of the file at `path`, or NULL when it is empty. |
+| [`Path.remove_file`](#Path.remove_file) | Removes the file or symbolic link `path` when it exists. |
+| [`Path.remove_tree`](#Path.remove_tree) | Removes `path` and everything below it when it exists. |
+| [`Path.size`](#Path.size) | Returns the size of the file at `path` in bytes. |
+| [`Path.stem`](#Path.stem) | Returns `path`'s last component without its extension. |
+| [`Path.symlink_to`](#Path.symlink_to) | Creates the symbolic link `link` pointing at `target`. |
+| [`Path.temp_dir`](#Path.temp_dir) | Creates a new private directory under `TMPDIR`, or `/tmp`, and returns its path. |
+| [`Path.walk`](#Path.walk) | Returns a lazy iterator over every path below the directory `root`, parents before their contents and siblings sorted. |
+| [`Path.write_text`](#Path.write_text) | Replaces the contents of the file at `path` with `text`. |
 
-### `String`
+### `Path`
 
-<a id="String.absolute_path"></a>
-#### String.absolute_path
+<a id="Path.absolute"></a>
+#### Path.absolute
 
-`String String.absolute_path(String path)`
+`Self Path.absolute(Self path)`
 
 Returns an absolute form of `path` with symbolic links resolved.
 Missing trailing components are appended to their resolved parent with
@@ -51,85 +52,74 @@ stable identity.
 **Raises:** `<io-fail>` when a relative path needs the current directory and
 it cannot be read.
 
-Source: `lib/path.x:96`
+Source: `lib/path.x:102`
 
-<a id="String.basename"></a>
-#### String.basename
+<a id="Path.basename"></a>
+#### Path.basename
 
-`String String.basename(String path)`
+`Self Path.basename(Self path)`
 
 Returns the last component of `path`, ignoring trailing slashes.
 
-Source: `lib/path.x:66`
+Source: `lib/path.x:72`
 
-<a id="String.copy_file"></a>
-#### String.copy_file
+<a id="Path.copy_file"></a>
+#### Path.copy_file
 
-`void String.copy_file(String source, String target)`
+`void Path.copy_file(Path source, Path target)`
 
 Copies the regular file `source` to `target`, replacing `target` and
 giving it `source`'s permission bits.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:409`
+Source: `lib/path.x:415`
 
-<a id="String.copy_tree"></a>
-#### String.copy_tree
+<a id="Path.copy_tree"></a>
+#### Path.copy_tree
 
-`void String.copy_tree(String source, String target)`
+`void Path.copy_tree(Path source, Path target)`
 
 Copies `source` to `target`: a directory recursively, a symbolic link as
-a link, and a regular file with `String.copy_file`.
+a link, and a regular file with `Path.copy_file`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:423`
+Source: `lib/path.x:429`
 
-<a id="String.dirname"></a>
-#### String.dirname
+<a id="Path.dirname"></a>
+#### Path.dirname
 
-`String String.dirname(String path)`
+`Self Path.dirname(Self path)`
 
 Returns the directory part of `path`: `.` when it has no slash and `/`
 for a path directly under the root.
 
-Source: `lib/path.x:57`
+Source: `lib/path.x:63`
 
-<a id="String.exists"></a>
-#### String.exists
+<a id="Path.exists"></a>
+#### Path.exists
 
-`int String.exists(String path)`
+`int Path.exists(Path path)`
 
 Reports whether `path` names an existing file, following links.
 
-Source: `lib/path.x:118`
+Source: `lib/path.x:124`
 
-<a id="String.extension"></a>
-#### String.extension
+<a id="Path.extension"></a>
+#### Path.extension
 
-`String String.extension(String path)`
+`String Path.extension(Path path)`
 
 Returns the extension of `path`'s last component, including its dot, or
 NULL when there is none. A leading dot does not start an extension.
 
-Source: `lib/path.x:76`
+Source: `lib/path.x:82`
 
-<a id="String.file_size"></a>
-#### String.file_size
+<a id="Path.glob"></a>
+#### Path.glob
 
-`long String.file_size(String path)`
-
-Returns the size of the file at `path` in bytes.
-
-**Raises:** `<not-found>` or `<io-fail>`.
-
-Source: `lib/path.x:147`
-
-<a id="String.glob"></a>
-#### String.glob
-
-`List String.glob(String pattern)`
+`List Path.glob(Path pattern)`
 
 Returns the existing paths that match the glob `pattern`, sorted.
 The walk starts at the longest leading directory without a wildcard and
@@ -137,71 +127,71 @@ descends only as deep as the pattern can match. As in a shell, a name
 that begins with a dot matches only where the pattern spells the dot.
 No match returns an empty `List`.
 
-Source: `lib/path.x:304`
+Source: `lib/path.x:310`
 
-<a id="String.glob_match"></a>
-#### String.glob_match
+<a id="Path.glob_match"></a>
+#### Path.glob_match
 
-`int String.glob_match(String pattern, String path)`
+`int Path.glob_match(Path pattern, Path path)`
 
 Reports whether all of `path` matches the glob `pattern`. A path
 component that begins with a dot matches only a pattern component that
 begins with one.
 
-Source: `lib/path.x:295`
+Source: `lib/path.x:301`
 
-<a id="String.is_dir"></a>
-#### String.is_dir
+<a id="Path.is_dir"></a>
+#### Path.is_dir
 
-`int String.is_dir(String path)`
+`int Path.is_dir(Path path)`
 
 Reports whether `path` names a directory, following links.
 
-Source: `lib/path.x:124`
+Source: `lib/path.x:130`
 
-<a id="String.is_executable"></a>
-#### String.is_executable
+<a id="Path.is_executable"></a>
+#### Path.is_executable
 
-`int String.is_executable(String path)`
+`int Path.is_executable(Path path)`
 
 Reports whether this process may execute `path`, as the shell's `-x`.
 
-Source: `lib/path.x:136`
+Source: `lib/path.x:142`
 
-<a id="String.is_file"></a>
-#### String.is_file
+<a id="Path.is_file"></a>
+#### Path.is_file
 
-`int String.is_file(String path)`
+`int Path.is_file(Path path)`
 
 Reports whether `path` names a regular file, following links.
 
-Source: `lib/path.x:130`
+Source: `lib/path.x:136`
 
-<a id="String.join_path"></a>
-#### String.join_path
+<a id="Path.join"></a>
+#### Path.join
 
-`String String.join_path(String base, String name)`
+`Self Path.join(Self base, Path name)`
 
 Returns `name` joined to `base` with one separating slash.
 An absolute `name`, or an empty `base`, is returned unchanged.
 
-Source: `lib/path.x:48`
+Source: `lib/path.x:54`
 
-<a id="String.list_dir"></a>
-#### String.list_dir
+<a id="Path.list_dir"></a>
+#### Path.list_dir
 
-`List String.list_dir(String path)`
+`List Path.list_dir(Path path)`
 
 Returns the names in the directory `path`, sorted, without `.` and `..`.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:166`
+Source: `lib/path.x:171`
 
-<a id="String.make_dirs"></a>
-#### String.make_dirs
+<a id="Path.make_dirs"></a>
+#### Path.make_dirs
 
-`void String.make_dirs(String path)`
+`void Path.make_dirs(Path path)`
 
 Creates the directory `path` and any missing parents.
 An existing directory is left as it is.
@@ -209,59 +199,70 @@ An existing directory is left as it is.
 **Raises:** `<io-fail>` when a component cannot be created or `path` names
 an existing non-directory, or `<not-found>`.
 
-Source: `lib/path.x:334`
+Source: `lib/path.x:340`
 
-<a id="String.modified_time"></a>
-#### String.modified_time
+<a id="Path.modified_time"></a>
+#### Path.modified_time
 
-`double String.modified_time(String path)`
+`double Path.modified_time(Path path)`
 
 Returns the modification time of `path` in seconds since the epoch,
 with the fraction the filesystem records.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:154`
+Source: `lib/path.x:159`
 
-<a id="String.move_to"></a>
-#### String.move_to
+<a id="Path.move_to"></a>
+#### Path.move_to
 
-`void String.move_to(String source, String target)`
+`void Path.move_to(Path source, Path target)`
 
 Moves `source` to `target`, copying and removing when they are on
 different filesystems.
 
 **Raises:** `<not-found>` or `<io-fail>`.
 
-Source: `lib/path.x:448`
+Source: `lib/path.x:454`
 
-<a id="String.read_text"></a>
-#### String.read_text
+<a id="Path.new"></a>
+#### Path.new
 
-`String String.read_text(String path)`
+`Path Path.new(const char *)`
+
+Provides the class default for `Path.new`.
+
+See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
+
+Source: `lib/path.x:25`
+
+<a id="Path.read_text"></a>
+#### Path.read_text
+
+`String Path.read_text(Path path)`
 
 Returns the contents of the file at `path`, or NULL when it is empty.
 
 **Raises:** `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
 a NUL byte.
 
-Source: `lib/path.x:466`
+Source: `lib/path.x:472`
 
-<a id="String.remove_file"></a>
-#### String.remove_file
+<a id="Path.remove_file"></a>
+#### Path.remove_file
 
-`void String.remove_file(String path)`
+`void Path.remove_file(Path path)`
 
 Removes the file or symbolic link `path` when it exists.
 
 **Raises:** `<io-fail>` when it exists and cannot be removed.
 
-Source: `lib/path.x:354`
+Source: `lib/path.x:360`
 
-<a id="String.remove_tree"></a>
-#### String.remove_tree
+<a id="Path.remove_tree"></a>
+#### Path.remove_tree
 
-`void String.remove_tree(String path)`
+`void Path.remove_tree(Path path)`
 
 Removes `path` and everything below it when it exists.
 Symbolic links are removed, not followed. Removal continues past an
@@ -269,56 +270,68 @@ entry that cannot be removed.
 
 **Raises:** `<io-fail>` naming the first path that could not be removed.
 
-Source: `lib/path.x:397`
+Source: `lib/path.x:403`
 
-<a id="String.stem"></a>
-#### String.stem
+<a id="Path.size"></a>
+#### Path.size
 
-`String String.stem(String path)`
+`long Path.size(Path path)`
+
+Returns the size of the file at `path` in bytes.
+
+**Raises:** `<not-found>` or `<io-fail>`.
+
+Source: `lib/path.x:153`
+
+<a id="Path.stem"></a>
+#### Path.stem
+
+`String Path.stem(Path path)`
 
 Returns `path`'s last component without its extension.
 
-Source: `lib/path.x:83`
+Source: `lib/path.x:89`
 
-<a id="String.symlink_to"></a>
-#### String.symlink_to
+<a id="Path.symlink_to"></a>
+#### Path.symlink_to
 
-`void String.symlink_to(String link, String target)`
+`void Path.symlink_to(Path link, Path target)`
 
 Creates the symbolic link `link` pointing at `target`.
 
 **Raises:** `<io-fail>` when the link cannot be created.
 
-Source: `lib/path.x:458`
+Source: `lib/path.x:464`
 
-<a id="String.temp_dir"></a>
-#### String.temp_dir
+<a id="Path.temp_dir"></a>
+#### Path.temp_dir
 
-`String String.temp_dir(void)`
+`Path Path.temp_dir(void)`
 
 Creates a new private directory under `TMPDIR`, or `/tmp`, and returns
-its path. The caller removes it, usually with `String.remove_tree`.
+its path. The caller removes it, usually with `Path.remove_tree`.
 
 **Raises:** `<io-fail>` when the directory cannot be created.
 
-Source: `lib/path.x:482`
+Source: `lib/path.x:488`
 
-<a id="String.walk"></a>
-#### String.walk
+<a id="Path.walk"></a>
+#### Path.walk
 
-`Iter String.walk(String root, Iter dest)`
+`Iter Path.walk(Path root, Iter dest)`
 
 Returns a lazy iterator over every path below the directory `root`,
 parents before their contents and siblings sorted. Symbolic links to
 directories are listed but not followed, and a directory that cannot be
 read is listed without its contents. Only the paths not yet visited are
-held; the yielded `String`s live in the active pool.
+held; the yielded paths live in the active pool.
 
 ```x2c
 ~#include "path.x"
 ~int main(void) {
-foreach (String path, %"src".walk()) printf("%s\n", path);
-long units = %"src".walk().filter(%!(p) => p.str().endswith(".x")).count();
+Path source = "src";
+foreach (Path path, source.walk()) printf("%s\n", path);
+long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
 ~  return units >= 0 ? 0 : 1;
 ~}
 ```
@@ -326,26 +339,43 @@ long units = %"src".walk().filter(%!(p) => p.str().endswith(".x")).count();
 **Raises:** `<not-found>` or `<io-fail>` when `root` cannot be listed, and
 `<io-fail>` from a pull when a directory vanishes during the walk.
 
-Source: `lib/path.x:217`
+Source: `lib/path.x:223`
 
-<a id="String.write_text"></a>
-#### String.write_text
+<a id="Path.write_text"></a>
+#### Path.write_text
 
-`void String.write_text(String path, String text)`
+`void Path.write_text(Path path, String text)`
 
 Replaces the contents of the file at `path` with `text`.
 
 **Raises:** `<not-found>` when the directory does not exist, or `<io-fail>`.
 
-Source: `lib/path.x:472`
+Source: `lib/path.x:478`
+
+## Public types
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`Path`](#Path) | class | A `String` that names a filesystem location. |
+
+<a id="Path"></a>
+### Path
+
+`class Path String`
+
+A `String` that names a filesystem location. A literal or a `String`
+converts to a `Path` wherever one is expected, and a `Path` passes
+wherever a `String` is expected. Slicing and `+` are `String` operations.
+
+Source: `lib/path.x:25`
 
 ## Design notes
 
-Paths stay ordinary `String`s; these methods read and change the files
-they name. A failure raises `<not-found>` when a named path does not
-exist and `<io-fail>` for any other host failure, both with `operation`,
-`path`, and `errno` details. Removing a path that is already absent
-succeeds.
+A `Path` is a `String` that names a filesystem location; its methods read
+and change the files it names. A failure raises `<not-found>` when a
+named path does not exist and `<io-fail>` for any other host failure,
+both with `operation`, `path`, and `errno` details. Removing a path that
+is already absent succeeds.
 
 The path-part methods only examine text. `dirname` and `basename` follow
 POSIX, ignoring trailing slashes. Glob patterns use `*` and `?` within

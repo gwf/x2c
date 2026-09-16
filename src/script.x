@@ -51,12 +51,13 @@ static void _exec(CliRequest c) {
    exists and that no other run holds.
 */
 static void _prune(String scripts) {
-  foreach (String name, scripts.list_dir()) {
-    String directory = scripts.join_path(name), source = %"$directory/source";
-    if (!source.is_file() || source.read_text().is_file()) continue;
+  foreach (String name, Path.list_dir(scripts)) {
+    String directory = Path.join(scripts, name);
+    Path source = %"$directory/source";
+    if (!source.is_file() || Path.is_file(source.read_text())) continue;
     int lock = _build_lock(%"$directory/lock", 0);
     if (lock < 0) continue;
-    try directory.remove_tree();
+    try Path.remove_tree(directory);
     catch %(io-fail *): {}
     close(lock);
   }
@@ -72,19 +73,20 @@ static void _prune(String scripts) {
 int script_prepare(CliRequest c) {
   String root = script_cache_root();
   if (!root) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
-  String script = c.inputs.car().string().absolute_path();
-  c.build_dir = %"$root/scripts/${script.stem()}-%08x".printf(
+  String script = Path.absolute(c.inputs.car().string());
+  c.build_dir = %"$root/scripts/${Path.stem(script)}-%08x".printf(
     String.hash(script));
   if (c.clean) {
-    if (!c.build_dir.is_dir()) return 1;
+    if (!Path.is_dir(c.build_dir)) return 1;
     int lock = _build_lock(%"${c.build_dir}/lock", 1);
-    try c.build_dir.remove_tree();
+    try Path.remove_tree(c.build_dir);
     catch %(io-fail *):
       x2c_driver_error(%"cannot remove script cache: ${c.build_dir}");
     close(lock);
     return 1;
   }
-  if (!script.is_file()) x2c_driver_error(%"script does not exist: $script");
+  if (!Path.is_file(script))
+    x2c_driver_error(%"script does not exist: $script");
   c.inputs = %($script);
   c.state_seed = "direct";
   if (!c.verbose) c.quiet = 1;
@@ -95,7 +97,7 @@ int script_prepare(CliRequest c) {
     x2c_driver_error(%"cannot create script cache: ${c.build_dir}");
   _build_lock(%"${c.build_dir}/lock", 1);
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
-  %"${c.build_dir}/source".write_text(script);
+  Path.write_text(%"${c.build_dir}/source", script);
   _prune(%"$root/scripts");
   c.output = %"${c.output}.%ld".printf((long) getpid());
   return 0;

@@ -1,12 +1,12 @@
-/*  path.x -- filesystem operations on path `String`s
+/*  path.x -- filesystem locations and the operations on them
 
     Copyright (c) 2026 Gary William Flake
 
-    Paths stay ordinary `String`s; these methods read and change the files
-    they name. A failure raises `<not-found>` when a named path does not
-    exist and `<io-fail>` for any other host failure, both with `operation`,
-    `path`, and `errno` details. Removing a path that is already absent
-    succeeds.
+    A `Path` is a `String` that names a filesystem location; its methods read
+    and change the files it names. A failure raises `<not-found>` when a
+    named path does not exist and `<io-fail>` for any other host failure,
+    both with `operation`, `path`, and `errno` details. Removing a path that
+    is already absent succeeds.
 
     The path-part methods only examine text. `dirname` and `basename` follow
     POSIX, ignoring trailing slashes. Glob patterns use `*` and `?` within
@@ -17,6 +17,12 @@
 
 #pragma once
 #include "x2c.x"
+
+/** A `String` that names a filesystem location. A literal or a `String`
+    converts to a `Path` wherever one is expected, and a `Path` passes
+    wherever a `String` is expected. Slicing and `+` are `String` operations.
+*/
+class Path String;
 
 #pragma private
 
@@ -36,35 +42,35 @@ static void _path_error(const char *operation, String path, int error) {
   raise %(io-fail (operation $name) (path $path) (errno $error));
 }
 
-static int _trimmed_length(String path) {
+static String _trimmed(String path) {
   int length = path.len();
   while (length > 1 && path[length - 1] == '/') length--;
-  return length;
+  return path[:length];
 }
 
 /** Returns `name` joined to `base` with one separating slash.
     An absolute `name`, or an empty `base`, is returned unchanged.
 */
-String String.join_path(String base, String name) {
+Self Path.join(Self base, Path name) {
   if (!name) return base;
-  if (!base || name[0] == '/') return name;
+  if (!base || name.startswith("/")) return name;
   return base.endswith("/") ? %"$base$name" : %"$base/$name";
 }
 
 /** Returns the directory part of `path`: `.` when it has no slash and `/`
     for a path directly under the root.
 */
-String String.dirname(String path) {
-  String trimmed = path[:_trimmed_length(path)];
+Self Path.dirname(Self path) {
+  String trimmed = _trimmed(path);
   int slash = trimmed.rfind("/");
-  if (slash < 0) return ".";
+  if (slash < 0) return %".";
   while (slash > 0 && trimmed[slash - 1] == '/') slash--;
   return slash ? trimmed[:slash] : %"/";
 }
 
 /** Returns the last component of `path`, ignoring trailing slashes. */
-String String.basename(String path) {
-  String trimmed = path[:_trimmed_length(path)];
+Self Path.basename(Self path) {
+  String trimmed = _trimmed(path);
   if (trimmed == "/") return trimmed;
   int slash = trimmed.rfind("/");
   return slash < 0 ? trimmed : trimmed[slash + 1:];
@@ -73,14 +79,14 @@ String String.basename(String path) {
 /** Returns the extension of `path`'s last component, including its dot, or
     NULL when there is none. A leading dot does not start an extension.
 */
-String String.extension(String path) {
+String Path.extension(Path path) {
   String base = path.basename();
   int dot = base.rfind(".");
   return dot > 0 ? base[dot:] : NULL;
 }
 
 /** Returns `path`'s last component without its extension. */
-String String.stem(String path) {
+String Path.stem(Path path) {
   String base = path.basename();
   int dot = base.rfind(".");
   return dot > 0 ? base[:dot] : base;
@@ -93,47 +99,47 @@ String String.stem(String path) {
     Raises: `<io-fail>` when a relative path needs the current directory and
     it cannot be read.
 */
-String String.absolute_path(String path) {
+Self Path.absolute(Self path) {
   char buffer[PATH_MAX];
   if (realpath(path, buffer)) return String.new(buffer);
   if (!path.startswith("/")) {
     if (!getcwd(buffer, sizeof(buffer)))
-      _path_error("String.absolute_path", path, errno);
-    path = String.new(buffer).join_path(path);
+      _path_error("Path.absolute", path, errno);
+    path = Path.join(String.new(buffer), path);
   }
-  String result = "/";
+  Path result = %"/";
   foreach (String part, path.split("/")) {
     if (!part || part == ".") continue;
     if (part == "..") {
       result = result.dirname();
       continue;
     }
-    result = result.join_path(part);
+    result = result.join(part);
     if (realpath(result, buffer)) result = String.new(buffer);
   }
   return result;
 }
 
 /** Reports whether `path` names an existing file, following links. */
-int String.exists(String path) {
+int Path.exists(Path path) {
   struct stat info;
   return path && stat(path, &info) == 0;
 }
 
 /** Reports whether `path` names a directory, following links. */
-int String.is_dir(String path) {
+int Path.is_dir(Path path) {
   struct stat info;
   return path && stat(path, &info) == 0 && S_ISDIR(info.st_mode);
 }
 
 /** Reports whether `path` names a regular file, following links. */
-int String.is_file(String path) {
+int Path.is_file(Path path) {
   struct stat info;
   return path && stat(path, &info) == 0 && S_ISREG(info.st_mode);
 }
 
 /** Reports whether this process may execute `path`, as the shell's `-x`. */
-int String.is_executable(String path) => path && access(path, X_OK) == 0;
+int Path.is_executable(Path path) => path && access(path, X_OK) == 0;
 
 static struct stat _stat(const char *operation, String path) {
   struct stat info;
@@ -144,15 +150,14 @@ static struct stat _stat(const char *operation, String path) {
 /** Returns the size of the file at `path` in bytes.
     Raises: `<not-found>` or `<io-fail>`.
 */
-long String.file_size(String path) =>
-  (long) _stat("String.file_size", path).st_size;
+long Path.size(Path path) => (long) _stat("Path.size", path).st_size;
 
 /** Returns the modification time of `path` in seconds since the epoch,
     with the fraction the filesystem records.
     Raises: `<not-found>` or `<io-fail>`.
 */
-double String.modified_time(String path) {
-  struct stat info = _stat("String.modified_time", path);
+double Path.modified_time(Path path) {
+  struct stat info = _stat("Path.modified_time", path);
 #ifdef __APPLE__
   return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
 #else
@@ -163,9 +168,9 @@ double String.modified_time(String path) {
 /** Returns the names in the directory `path`, sorted, without `.` and `..`.
     Raises: `<not-found>` or `<io-fail>`.
 */
-List String.list_dir(String path) {
+List Path.list_dir(Path path) {
   DIR *directory = opendir(path);
-  if (!directory) _path_error("String.list_dir", path, errno);
+  if (!directory) _path_error("Path.list_dir", path, errno);
   Array names = %[], struct dirent *entry;
   while ((entry = readdir(directory)))
     if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
@@ -182,9 +187,9 @@ static int _descends(String path) {
 
 /* Pushes a directory's children so the next pop yields the first sorted
    name. */
-static void _push_children(Array pending, String directory) {
+static void _push_children(Array pending, Path directory) {
   List children = directory.list_dir().reverse();
-  foreach (String name, children) pending.push(directory.join_path(name));
+  foreach (String name, children) pending.push(directory.join(name));
 }
 
 static int _walk_next(Iter iter, Var *out) {
@@ -200,13 +205,14 @@ static int _walk_next(Iter iter, Var *out) {
     parents before their contents and siblings sorted. Symbolic links to
     directories are listed but not followed, and a directory that cannot be
     read is listed without its contents. Only the paths not yet visited are
-    held; the yielded `String`s live in the active pool.
+    held; the yielded paths live in the active pool.
 
     ```x2c
     ~#include "path.x"
     ~int main(void) {
-    foreach (String path, %"src".walk()) printf("%s\n", path);
-    long units = %"src".walk().filter(%!(p) => p.str().endswith(".x")).count();
+    Path source = "src";
+    foreach (Path path, source.walk()) printf("%s\n", path);
+    long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
     ~  return units >= 0 ? 0 : 1;
     ~}
     ```
@@ -214,15 +220,15 @@ static int _walk_next(Iter iter, Var *out) {
     Raises: `<not-found>` or `<io-fail>` when `root` cannot be listed, and
     `<io-fail>` from a pull when a directory vanishes during the walk.
 */
-Iter String.walk(String root, Iter dest) {
+Iter Path.walk(Path root, Iter dest) {
   Array pending = %[];
   _push_children(pending, root);
   return dest.init((Var) {0}, _walk_next, pending);
 }
 
-static void _walk(String directory, int depth, int hidden, Array paths) {
+static void _walk(Path directory, int depth, int hidden, Array paths) {
   foreach (String name, directory.list_dir()) {
-    String child = directory.join_path(name);
+    Path child = directory.join(name);
     paths.push(child);
     if (depth != 1 && (hidden || !name.startswith(".")) && _descends(child))
       _walk(child, depth - 1, hidden, paths);
@@ -292,7 +298,7 @@ static int _glob_match(
     component that begins with a dot matches only a pattern component that
     begins with one.
 */
-int String.glob_match(String pattern, String path) =>
+int Path.glob_match(Path pattern, Path path) =>
   pattern && path && _glob_match(pattern, path, path);
 
 /** Returns the existing paths that match the glob `pattern`, sorted.
@@ -301,20 +307,20 @@ int String.glob_match(String pattern, String path) =>
     that begins with a dot matches only where the pattern spells the dot.
     No match returns an empty `List`.
 */
-List String.glob(String pattern) {
+List Path.glob(Path pattern) {
   if (!strpbrk(pattern, "*?[\\"))
     return pattern.exists() ? %($pattern) : NULL;
   List parts = pattern.split("/");
-  String base = NULL;
+  Path base = NULL;
   int depth = 0, recursive = 0;
   foreach (String part, parts) {
     if (depth || strpbrk(part ? part : "", "*?[\\")) {
       depth++;
       if (part == "**") recursive = 1;
     }
-    else base = base ? base.join_path(part) : part ? part : %"/";
+    else base = base ? base.join(part) : part ? part : %"/";
   }
-  String root = base ? base : %".";
+  Path root = base ? base : %".";
   Array paths = %[], matches = %[];
   if (root.is_dir())
     _walk(root, recursive ? -1 : depth,
@@ -331,32 +337,32 @@ List String.glob(String pattern) {
     Raises: `<io-fail>` when a component cannot be created or `path` names
     an existing non-directory, or `<not-found>`.
 */
-void String.make_dirs(String path) {
+void Path.make_dirs(Path path) {
   char buffer[PATH_MAX];
   if (path.len() >= sizeof(buffer))
-    _path_error("String.make_dirs", path, ENAMETOOLONG);
+    _path_error("Path.make_dirs", path, ENAMETOOLONG);
   strcpy(buffer, path);
   for (char *ch = buffer + 1; *ch; ch++) {
     if (*ch != '/') continue;
     *ch = 0;
     if (mkdir(buffer, 0777) && errno != EEXIST)
-      _path_error("String.make_dirs", String.new(buffer), errno);
+      _path_error("Path.make_dirs", String.new(buffer), errno);
     *ch = '/';
   }
   if (mkdir(buffer, 0777) && errno != EEXIST)
-    _path_error("String.make_dirs", path, errno);
-  if (!path.is_dir()) _path_error("String.make_dirs", path, ENOTDIR);
+    _path_error("Path.make_dirs", path, errno);
+  if (!path.is_dir()) _path_error("Path.make_dirs", path, ENOTDIR);
 }
 
 /** Removes the file or symbolic link `path` when it exists.
     Raises: `<io-fail>` when it exists and cannot be removed.
 */
-void String.remove_file(String path) {
+void Path.remove_file(Path path) {
   if (unlink(path) && errno != ENOENT)
-    _path_error("String.remove_file", path, errno);
+    _path_error("Path.remove_file", path, errno);
 }
 
-static void _remove_tree(String path, String *failed, int *failure) {
+static void _remove_tree(Path path, String *failed, int *failure) {
   struct stat info;
   if (lstat(path, &info)) {
     if (errno != ENOENT && !*failed) *failed = path, *failure = errno;
@@ -375,7 +381,7 @@ static void _remove_tree(String path, String *failed, int *failure) {
         String child_failed = NULL;
         int child_failure = 0;
         _remove_tree(
-          path.join_path(String.new(entry->d_name)), &child_failed,
+          path.join(String.new(entry->d_name)), &child_failed,
           &child_failure);
         if (child_failed && !*failed) {
           *failed = context.export(child_failed);
@@ -394,11 +400,11 @@ static void _remove_tree(String path, String *failed, int *failure) {
     entry that cannot be removed.
     Raises: `<io-fail>` naming the first path that could not be removed.
 */
-void String.remove_tree(String path) {
+void Path.remove_tree(Path path) {
   String failed = NULL;
   int failure = 0;
   _remove_tree(path, &failed, &failure);
-  if (failed) raise %(io-fail (operation "String.remove_tree")
+  if (failed) raise %(io-fail (operation "Path.remove_tree")
                       (path $failed) (errno $failure));
 }
 
@@ -406,37 +412,37 @@ void String.remove_tree(String path) {
     giving it `source`'s permission bits.
     Raises: `<not-found>` or `<io-fail>`.
 */
-void String.copy_file(String source, String target) {
+void Path.copy_file(Path source, Path target) {
   File input = $auto(File.open(source, "rb"));
   File output = $auto(File.open(target, "wb"));
   input.copy_to(output, NULL);
-  if (output.flush()) _path_error("String.copy_file", target, errno);
-  struct stat info = _stat("String.copy_file", source);
+  if (output.flush()) _path_error("Path.copy_file", target, errno);
+  struct stat info = _stat("Path.copy_file", source);
   if (chmod(target, info.st_mode & 07777))
-    _path_error("String.copy_file", target, errno);
+    _path_error("Path.copy_file", target, errno);
 }
 
 /** Copies `source` to `target`: a directory recursively, a symbolic link as
-    a link, and a regular file with `String.copy_file`.
+    a link, and a regular file with `Path.copy_file`.
     Raises: `<not-found>` or `<io-fail>`.
 */
-void String.copy_tree(String source, String target) {
+void Path.copy_tree(Path source, Path target) {
   struct stat info;
-  if (lstat(source, &info)) _path_error("String.copy_tree", source, errno);
+  if (lstat(source, &info)) _path_error("Path.copy_tree", source, errno);
   if (S_ISLNK(info.st_mode)) {
     char buffer[PATH_MAX];
     ssize_t length = readlink(source, buffer, sizeof(buffer) - 1);
-    if (length < 0) _path_error("String.copy_tree", source, errno);
+    if (length < 0) _path_error("Path.copy_tree", source, errno);
     buffer[length] = 0;
     if (symlink(buffer, target))
-      _path_error("String.copy_tree", target, errno);
+      _path_error("Path.copy_tree", target, errno);
   }
   else if (S_ISDIR(info.st_mode)) {
     target.make_dirs();
     foreach (String name, source.list_dir())
-      source.join_path(name).copy_tree(target.join_path(name));
+      source.join(name).copy_tree(target.join(name));
     if (chmod(target, info.st_mode & 07777))
-      _path_error("String.copy_tree", target, errno);
+      _path_error("Path.copy_tree", target, errno);
   }
   else source.copy_file(target);
 }
@@ -445,9 +451,9 @@ void String.copy_tree(String source, String target) {
     different filesystems.
     Raises: `<not-found>` or `<io-fail>`.
 */
-void String.move_to(String source, String target) {
+void Path.move_to(Path source, Path target) {
   if (!rename(source, target)) return;
-  if (errno != EXDEV) _path_error("String.move_to", source, errno);
+  if (errno != EXDEV) _path_error("Path.move_to", source, errno);
   source.copy_tree(target);
   source.remove_tree();
 }
@@ -455,38 +461,38 @@ void String.move_to(String source, String target) {
 /** Creates the symbolic link `link` pointing at `target`.
     Raises: `<io-fail>` when the link cannot be created.
 */
-void String.symlink_to(String link, String target) {
-  if (symlink(target, link)) _path_error("String.symlink_to", link, errno);
+void Path.symlink_to(Path link, Path target) {
+  if (symlink(target, link)) _path_error("Path.symlink_to", link, errno);
 }
 
 /** Returns the contents of the file at `path`, or NULL when it is empty.
     Raises: `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
     a NUL byte.
 */
-String String.read_text(String path) =>
+String Path.read_text(Path path) =>
   File.open(path, "r").string_close();
 
 /** Replaces the contents of the file at `path` with `text`.
     Raises: `<not-found>` when the directory does not exist, or `<io-fail>`.
 */
-void String.write_text(String path, String text) {
+void Path.write_text(Path path, String text) {
   File output = $auto(File.open(path, "w"));
   output.write_all(text, text.len());
-  if (output.flush()) _path_error("String.write_text", path, errno);
+  if (output.flush()) _path_error("Path.write_text", path, errno);
 }
 
 /** Creates a new private directory under `TMPDIR`, or `/tmp`, and returns
-    its path. The caller removes it, usually with `String.remove_tree`.
+    its path. The caller removes it, usually with `Path.remove_tree`.
     Raises: `<io-fail>` when the directory cannot be created.
 */
-String String.temp_dir(void) {
+Path Path.temp_dir(void) {
   const char *parent = getenv("TMPDIR");
-  String root = parent && *parent ? String.new(parent) : %"/tmp";
-  String pattern = root.join_path("x2c-XXXXXX");
+  Path root = parent && *parent ? String.new(parent) : %"/tmp";
+  String pattern = root.join(%"x2c-XXXXXX");
   char buffer[PATH_MAX];
   if (pattern.len() >= sizeof(buffer))
-    _path_error("String.temp_dir", root, ENAMETOOLONG);
+    _path_error("Path.temp_dir", root, ENAMETOOLONG);
   strcpy(buffer, pattern);
-  if (!mkdtemp(buffer)) _path_error("String.temp_dir", root, errno);
+  if (!mkdtemp(buffer)) _path_error("Path.temp_dir", root, errno);
   return String.new(buffer);
 }

@@ -90,8 +90,8 @@ static String _installed_tool(const char *name) {
 */
 static void _toolchain_layout(String *include_dir, String *runtime_lib) {
   String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage_dir = executable ? executable.dirname() : NULL;
-  if (stage_dir && stage_dir.dirname() == %"$root/builds") {
+  String stage_dir = executable ? Path.dirname(executable) : NULL;
+  if (stage_dir && (String) Path.dirname(stage_dir) == %"$root/builds") {
     *include_dir = %"$root/include/x2c";
     *runtime_lib = %"$stage_dir/libx2c.a";
     return;
@@ -104,8 +104,8 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
                        %"$root/bootstrap/lib/libx2c.a";
     return;
   }
-  String bin_dir = executable ? executable.dirname() : %".";
-  String prefix = bin_dir.dirname();
+  String bin_dir = executable ? Path.dirname(executable) : %".";
+  String prefix = Path.dirname(bin_dir);
   *include_dir = %"$prefix/include/x2c";
   *runtime_lib = %"$prefix/lib/libx2c.a";
 }
@@ -337,7 +337,7 @@ List Toolchain.search_directories(Toolchain toolchain) {
       if (note >= 0) directory = directory[:note];
       directories.push(directory);
       if (directory.endswith("/include"))
-        directories.push(directory.dirname().join_path("lib"));
+        directories.push(Path.dirname(directory).join(%"lib"));
     }
   }
   if (!_run_captured(%(${toolchain.cc} @flags "-print-search-dirs"),

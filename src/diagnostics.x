@@ -206,10 +206,10 @@ int diagnostics_write_json(String path) {
 */
 static String Compiler._json_path(Compiler compiler, String path) {
   if (!path || path.startswith("<")) return path;
-  if (!path.startswith("/") && !path.exists())
-    path = compiler.root_dir.join_path(path);
-  path = path.absolute_path();
-  String directory = %"${String.new(".").absolute_path()}/";
+  if (!path.startswith("/") && !Path.exists(path))
+    path = Path.join(compiler.root_dir, path);
+  path = Path.absolute(path);
+  String directory = %"${Path.absolute(%".")}/";
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
@@ -312,7 +312,7 @@ List Compiler.origin_location(Compiler compiler, int occurrence) {
 */
 String Compiler.display_path(Compiler compiler, String path) {
   if (!path || path.startswith(%"<")) return path;
-  if (compiler.source_facts) return path.absolute_path();
+  if (compiler.source_facts) return Path.absolute(path);
   String root = compiler.root_dir;
   if (root && path && path.startswith(root) &&
       path.len() > root.len() && path[root.len()] == '/')

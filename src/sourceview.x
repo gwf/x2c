@@ -37,17 +37,17 @@ void SourceView.init(SourceView sources) {
 */
 void SourceView.set(
   SourceView sources, String path, String text, int changed) {
-  sources.overlays[path.absolute_path()] = text;
-  if (changed) sources.dirty_paths[path.absolute_path()] = 1;
+  sources.overlays[Path.absolute(path)] = text;
+  if (changed) sources.dirty_paths[Path.absolute(path)] = 1;
 }
 
 /** Returns whether this logical file has an unsaved overlay. */
 int SourceView.is_changed(SourceView sources, String path) =>
-  sources && sources.dirty_paths.contains(path.absolute_path());
+  sources && sources.dirty_paths.contains(Path.absolute(path));
 
 /** Returns readable-file presence, including unsaved new files. */
 int SourceView.exists(SourceView sources, String path) {
-  if (sources && sources.overlays.contains(path.absolute_path())) return 1;
+  if (sources && sources.overlays.contains(Path.absolute(path))) return 1;
   struct stat info;
   return !access(path, R_OK) && !stat(path, &info) &&
          S_ISREG(info.st_mode);
@@ -60,7 +60,7 @@ int SourceView.exists(SourceView sources, String path) {
 int SourceView.read(
   SourceView sources, String path, String volatile *text) {
   Var value;
-  if (sources && sources.overlays.try_get(path.absolute_path(), &value)) {
+  if (sources && sources.overlays.try_get(Path.absolute(path), &value)) {
     *text = value.string();
     return 1;
   }

@@ -38,7 +38,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/match-recursive.x`](match-recursive.md) | optional reference matcher. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
-| [`lib/path.x`](path.md) | filesystem operations on path `String`s. |
+| [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
 | [`lib/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |

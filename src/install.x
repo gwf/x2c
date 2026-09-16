@@ -75,7 +75,7 @@ static void _write_text(String path, String text) {
 }
 
 static List _entries(String directory) =>
-  directory.list_dir().filter(%!(name) => !name.str().startswith("."));
+  Path.list_dir(directory).filter(%!(name) => !name.str().startswith("."));
 
 static List _files_with(String directory, String suffix) {
   Array paths = %[];
@@ -135,13 +135,13 @@ static String _unpack(String tarball, String work) {
   if (!_build_mkdirs(extracted)) _error(%"cannot create $extracted");
   _run(%( "tar" "-xzf" $tarball "-C" $extracted ), "extract");
   List top = _entries(extracted);
-  if (!top || top.cdr() || !%"$extracted/${top.car()}".is_dir())
+  if (!top || top.cdr() || !Path.is_dir(%"$extracted/${top.car()}"))
     _error(%"$tarball must contain one package directory");
   return %"$extracted/${top.car()}";
 }
 
 static void _copy_tree(String source, String target) {
-  try source.copy_tree(target);
+  try Path.copy_tree(source, target);
   catch %(not-found *): _error(%"cannot copy $source");
   catch %(io-fail *): _error(%"cannot copy $source");
 }
@@ -174,13 +174,13 @@ static void _build_source(String package, String name, String spec) {
     _error(%"$spec has no src/$name.x entry unit");
   foreach (String manifest, _files_with(package, ".json"))
     if (manifest.endswith("dependency.json") ||
-        manifest.stem().startswith("dependency-"))
+        Path.stem(manifest).startswith("dependency-"))
       _error(%"$name needs native dependencies; install its bundle");
   String builds = %"$package/builds", x2c = x2c_get_executable();
   if (!_build_mkdirs(builds)) _error(%"cannot create $builds");
   _run(%( $x2c "translate" "--out-dir" $builds
           "--x-include-dir" ${%"$package/src"}
-          "--package-dir" ${package.dirname()} )
+          "--package-dir" ${Path.dirname(package)} )
          .append(units), "translate");
   List inputs = _files_with(builds, ".c")
     .append(_files_with(%"$package/src", ".c"));
@@ -242,7 +242,7 @@ static void _publish(String staged, String packages, String name) {
 /* Staging directories left by an interrupted install are removed first; the
    caller holds the packages lock, so none belongs to a running install. */
 static String _work_directory(String packages) {
-  foreach (String name, packages.list_dir())
+  foreach (String name, Path.list_dir(packages))
     if (name.startswith(".install.")) _build_remove_tree(%"$packages/$name");
   String work = %"$packages/.install.%ld".printf((long) getpid());
   if (!_build_mkdirs(work)) _error(%"cannot create $work");
@@ -258,8 +258,8 @@ static String _install(
     source = _fetch(url, work, "package.tar.gz");
     _verify(source, sha256);
   }
-  else if (sha256 && !source.is_dir()) _verify(source, sha256);
-  String package = source.is_dir() ? source : _unpack(source, work);
+  else if (sha256 && !Path.is_dir(source)) _verify(source, sha256);
+  String package = Path.is_dir(source) ? source : _unpack(source, work);
   String name = package.split("/").last();
   if (!name.is_identifier()) _error(%"'$name' is not a package name");
   String staged = %"$work/$name";

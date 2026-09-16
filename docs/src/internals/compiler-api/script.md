@@ -38,7 +38,7 @@ the entries of scripts that no longer exist, and returns 0; the caller
 builds `request` and calls `script_run`. A `--clean` request removes the
 script's entry and returns 1.
 
-Source: `src/script.x:72`
+Source: `src/script.x:73`
 
 #### script_run
 
@@ -48,7 +48,7 @@ Executes a script that `script_prepare` pointed at the cache and the
 caller built; that path does not return. A dry run prints the action and
 returns zero.
 
-Source: `src/script.x:108`
+Source: `src/script.x:110`
 
 ## Design notes
 

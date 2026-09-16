@@ -13,9 +13,6 @@ static void process_arguments_stay_whole(void) {
   String spaced = %"two  words", dashed = "-n", empty = "";
   EXPECT_STR_EQ(%(printf "%s|" $spaced $dashed $empty q).job().output(),
                 "two  words|-n||q|");
-  char *argv[] = { "tool", "first", "second third", NULL };
-  EXPECT_LIST_EQ(List.arguments(3, argv), %("first" "second third"));
-  EXPECT_NULL(List.arguments(1, argv));
 }
 
 static void process_job_runs_once(void) {

@@ -362,7 +362,7 @@ int Compiler.read_source(
   Compiler compiler, String path, String volatile *text) {
   if (!compiler.sources.read(path, text)) return 0;
   if (compiler.source_facts)
-    compiler.source_texts[path.absolute_path()] = *text;
+    compiler.source_texts[Path.absolute(path)] = *text;
   return 1;
 }
 
@@ -391,7 +391,7 @@ static List _source_range(Compiler compiler, Token first, Token after) {
   while (last > first &&
          (last.type == <space> || last.type == <comment> ||
           last.type == <preproc>)) last--;
-  String path = compiler.filename.absolute_path();
+  String path = Path.absolute(compiler.filename);
   if (!compiler.source_texts.contains(path))
     compiler.source_texts[path] = compiler.text;
   return %($path ${first.pos} ${last.pos + last.len});
@@ -475,7 +475,7 @@ void Compiler.tokenize(Compiler c, char *text) {
      shebang, whichever compiler reads it. */
   if (c.unit_script && c.filename &&
       (c.filename == c.unit_script.path ||
-       c.filename.absolute_path() == c.unit_script.path))
+       (String) Path.absolute(c.filename) == c.unit_script.path))
     c.script = c.unit_script;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
@@ -869,7 +869,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
 }
 
 static List _declaration_source_key(Compiler compiler, Token token) {
-  String path = compiler.filename.absolute_path();
+  String path = Path.absolute(compiler.filename);
   String prefix = %"${compiler.root_dir}/";
   if (path.startswith(prefix)) path = path[prefix.len():];
   return %("source-node" (declaration $path ${token.pos}));
@@ -1562,7 +1562,7 @@ static const char *script_main =
   "}\n"
   "int main(int argc, char **argv) {\n"
   "  try {\n"
-  "    return x2c_script(argc, argv, List.arguments(argc, argv));\n"
+  "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n"
   "  }\n"
   "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
   "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
@@ -3123,7 +3123,7 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
 static String _gensym_owner(Compiler compiler) {
   if (!compiler.filename) return %"";
   char buffer[PATH_MAX];
-  String path = compiler.sources ? compiler.filename.absolute_path() :
+  String path = compiler.sources ? Path.absolute(compiler.filename) :
                 realpath(compiler.filename, buffer) ? %"$buffer" :
                 compiler.filename;
   static char root[PATH_MAX];
