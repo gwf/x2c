@@ -98,7 +98,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3909`
+Source: `src/expressions.x:3910`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types

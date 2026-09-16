@@ -1645,9 +1645,9 @@ static List Compiler._binary_expression(
     return %(expr $type (op $operator $lhs $rhs));
   }
   if (operator == <==> || operator == <!=>) {
-    if (_type_is_string(lhs_type) && _expr_is_raw_string_literal(rhs))
+    if (c.sym.is_string_type(lhs_type) && _expr_is_raw_string_literal(rhs))
       rhs = c.convert_expression(rhs, lhs_type);
-    else if (_type_is_string(rhs_type) &&
+    else if (c.sym.is_string_type(rhs_type) &&
              _expr_is_raw_string_literal(lhs))
       lhs = c.convert_expression(lhs, rhs_type);
   }
@@ -3739,7 +3739,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     return %(expr $target (op * (parens $expr)));
   if (type.match(%((!or (dim *) (!quote *)) char))) {
     List string = _raw_string_to_string(c, expr);
-    if (target === %("String")) return string;
+    if (c.sym.is_string_type(target))
+      return %(expr $target ${string.caddr()});
     if (target_is_var)
       return %(expr ("Var") (call "String_var" (args $string)));
   }

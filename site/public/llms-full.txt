@@ -2568,8 +2568,10 @@ including exactly four digits for `\\u`, eight for `\\U`, and one or more for
 Adjacent ordinary C string literals form one expression, including across
 comments or newlines. Their separate escape boundaries are preserved:
 `"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
-typing and converts to `String` when its context requires it. This adjacency
-rule does not combine percent strings or change quoted collection syntax.
+typing and converts to `String` when its context requires it. A context whose
+type is a `class` or `typedef` alias reaching `String`, such as
+`class Path String;`, requires the same conversion. This adjacency rule does
+not combine percent strings or change quoted collection syntax.
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,
@@ -2923,11 +2925,11 @@ implemented, native, or a base default. Equality, identity, and total ordering
 do not become binary-arithmetic operations.
 
 For `==` and `!=`, a C string literal opposite an operand of static type
-`String` converts to `String` before ordinary protocol comparison. This
-applies in either operand order and through parentheses around the literal.
-Other C pointer expressions, including variables, casts, and conditional
-expressions, retain their native comparison behavior. `===` and `!==` do not
-perform this literal conversion.
+`String`, or an alias reaching `String`, converts to that type before ordinary
+protocol comparison. This applies in either operand order and through
+parentheses around the literal. Other C pointer expressions, including
+variables, casts, and conditional expressions, retain their native comparison
+behavior. `===` and `!==` do not perform this literal conversion.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
