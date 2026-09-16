@@ -70,7 +70,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3782`
+Source: `src/expressions.x:3792`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -98,7 +98,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:4053`
+Source: `src/expressions.x:4063`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
