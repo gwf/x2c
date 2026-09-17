@@ -430,11 +430,14 @@ static List _function(Compiler compiler, List node);
 /* Rewrite a construct's body with the transfer barriers it establishes. A
    loop bounds both `break` and `continue`; a switch bounds only `break`,
    because a `continue` inside it still targets the enclosing loop. */
-static Var _bounded(Walk w, Var body, int is_loop) {
-  int depth = w.regions.len();
-  $let(w.break_stop, depth)
-  $let(w.continue_stop, is_loop ? depth : w.continue_stop)
-    return _rewrite(w, body);
+static Var _bounded(Walk walk, Var body, int is_loop) {
+  int saved_break = walk.break_stop, saved_continue = walk.continue_stop;
+  walk.break_stop = (int) walk.regions.len();
+  if (is_loop) walk.continue_stop = (int) walk.regions.len();
+  Var result = _rewrite(walk, body);
+  walk.break_stop = saved_break;
+  walk.continue_stop = saved_continue;
+  return result;
 }
 
 /* Rewrite a region's body and its handlers with the region open. */
@@ -611,8 +614,13 @@ static Var _rewrite(Walk walk, Var value) {
     case %(localinit ?guard ?body):
       return %(localinit ${_rewrite(walk, guard)}
                ${_inside(walk, NULL, node, body)});
-    case %(at ?(int origin) ?inner):
-      $let(walk.origin, origin) return %(at $origin ${_rewrite(walk, inner)});
+    case %(at ?(int origin) ?inner): {
+      int previous = walk.origin;
+      walk.origin = origin;
+      Var lowered = _rewrite(walk, inner);
+      walk.origin = previous;
+      return %(at $origin $lowered);
+    }
     case %(return): return _transfer(walk, 0, node);
     case %(return (!set ?expression (expr ? ?))): {
       /* Only a region that runs something can change what the expression
