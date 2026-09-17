@@ -130,9 +130,10 @@ Map Map.new_capacity(unsigned capacity) {
     doubles from there.
 
     Keys and values are both `Var`, so one `Map` may be heterogeneous. Key by
-    `String`, `Symbol`, `Atom`, number, or `List`: those hash by content.
-    `Array` and `Map` keys hash and compare by identity, so distinct objects
-    remain distinct keys even when their contents are equal.
+    `String`, `Symbol`, `Atom`, or number: those hash by content. `Array` and
+    `Map` keys hash and compare by identity, so distinct objects remain
+    distinct keys even when their contents are equal. A `List` key reaches as
+    far as its elements do, which `Map.try_get` describes.
     Raises: `<alloc-fail>` or `<size-limit>` when initial
     storage cannot be allocated. */
 Map Map.new(void) => Map.new_capacity(2);
@@ -155,8 +156,16 @@ unsigned Map.len(Map map) => map.used;
 
     `Array` and `Map` keys hash and compare by identity; changing their
     contents preserves lookup through the same object. Other keys use `Var`
-    equality after a hash probe. `String`s, `Symbol`s, `Atom`s, numbers, and
-    `List`s hash and compare by content.
+    equality after a hash probe. `String`s, `Symbol`s, `Atom`s, and numbers
+    hash and compare by content.
+
+    A `List` key hashes and compares its head's exact `Var` bits and its
+    tail's identity. An element held inside the `Var` word therefore compares
+    by content: a small number, a `Symbol`, an `Atom`, a canonical `String`,
+    or a nested `List`. An element the word points at compares by identity: a
+    wide number boxed in a `Scope` (`long`, `ulong`, `long long`,
+    `long double`), an `Array`, or a `Map`. Two `List`s built from one `long`
+    value hold two boxes and are two keys.
 
     ```x2c
     ~Map ages = {"ada": 36, "grace": 45};
@@ -275,12 +284,13 @@ static void _set(Map map, Var key, Var val) {
     stay under its load factor; growth also rehashes every entry and may change
     traversal order. Replacing an existing value is non-structural.
 
-    Keys hash by content for `String`s, `Symbol`s, `Atom`s, numbers, and
-    `List`s.
+    Keys hash by content for `String`s, `Symbol`s, `Atom`s, and numbers.
     `Array`s and `Map`s compare structurally but hash by identity, so an
     `Array` key
     can only be retrieved reliably through the very same object. `Map.get`
-    shows what that looks like. Allocation, validation, and callback failures
+    shows what that looks like. A `List` key hashes its elements' `Var` bits,
+    so it reaches content only for elements the `Var` word holds; `Map.try_get`
+    lists them. Allocation, validation, and callback failures
     do not install or replace a pair. If growth completed before a retrying
     custom key callback failed, capacity and traversal order may still have
     changed. An `<invariant>` raised after Robin Hood displacement begins does

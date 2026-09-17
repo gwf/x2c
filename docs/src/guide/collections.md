@@ -541,8 +541,35 @@ List key, rebuilt: "found"
 Array key, equal contents: void
 ```
 
-Key your `Map`s with `String`s, `Symbol`s, `Atom`s, numbers, or `List`s. Those
-compare by content.
+Key your `Map`s with `String`s, `Symbol`s, `Atom`s, or numbers. Those compare
+by content.
+
+A `List` key compares by content only as far as its elements do. `List.equal`
+and `List.hash` read the head's exact bits and the tail's identity, which is a
+constant-time test that works because cells are canonical. An element that
+lives inside the `Var` word compares by content: a small number, a `Symbol`, an
+`Atom`, a canonical `String`, or a nested `List`. An element that the `Var`
+word only points at compares by identity: a wide number boxed in a `Scope`
+(`long`, `ulong`, `long long`, `long double`), an `Array`, or a `Map`. Two
+`List`s built from one `long` value hold two boxes, so they are different keys:
+
+```x2c
+Var first = Var.box_long(5l);
+Var second = Var.box_long(5l);
+Map counts = {};
+counts[%($first)] = "boxed";
+
+printf("same number, rebuilt key: %s\n", counts[%($second)].repr());
+printf("small number key: %s\n", %(5) == %(5) ? "matches" : "differs");
+```
+
+```text
+same number, rebuilt key: void
+small number key: matches
+```
+
+Key on the number itself, or on a `String` or `Symbol` spelling of it, when a
+value that wide has to be part of the key.
 
 ## Working with Lists
 

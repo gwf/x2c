@@ -34,11 +34,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.postfixindex`](#ArrayChar.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayChar.push`](#ArrayChar.push) | Appends `value` and returns it. |
 | [`ArrayChar.remove`](#ArrayChar.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayChar.remslice`](#ArrayChar.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayChar.remslice`](#ArrayChar.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayChar.repr`](#ArrayChar.repr) | Returns the readable packed-Array representation. |
 | [`ArrayChar.reverse`](#ArrayChar.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayChar.setindex`](#ArrayChar.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayChar.setslice`](#ArrayChar.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayChar.setslice`](#ArrayChar.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayChar.shift`](#ArrayChar.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayChar.splice`](#ArrayChar.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayChar.str`](#ArrayChar.str) | Returns the packed-Array display String. |
@@ -69,11 +69,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.postfixindex`](#ArrayDbl.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayDbl.push`](#ArrayDbl.push) | Appends `value` and returns it. |
 | [`ArrayDbl.remove`](#ArrayDbl.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayDbl.remslice`](#ArrayDbl.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayDbl.remslice`](#ArrayDbl.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayDbl.repr`](#ArrayDbl.repr) | Returns the readable packed-Array representation. |
 | [`ArrayDbl.reverse`](#ArrayDbl.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayDbl.setindex`](#ArrayDbl.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayDbl.setslice`](#ArrayDbl.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayDbl.setslice`](#ArrayDbl.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayDbl.shift`](#ArrayDbl.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayDbl.splice`](#ArrayDbl.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayDbl.str`](#ArrayDbl.str) | Returns the packed-Array display String. |
@@ -104,11 +104,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.postfixindex`](#ArrayFloat.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayFloat.push`](#ArrayFloat.push) | Appends `value` and returns it. |
 | [`ArrayFloat.remove`](#ArrayFloat.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayFloat.remslice`](#ArrayFloat.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayFloat.remslice`](#ArrayFloat.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayFloat.repr`](#ArrayFloat.repr) | Returns the readable packed-Array representation. |
 | [`ArrayFloat.reverse`](#ArrayFloat.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayFloat.setindex`](#ArrayFloat.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayFloat.setslice`](#ArrayFloat.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayFloat.setslice`](#ArrayFloat.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayFloat.shift`](#ArrayFloat.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayFloat.splice`](#ArrayFloat.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayFloat.str`](#ArrayFloat.str) | Returns the packed-Array display String. |
@@ -139,11 +139,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.postfixindex`](#ArrayInt.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayInt.push`](#ArrayInt.push) | Appends `value` and returns it. |
 | [`ArrayInt.remove`](#ArrayInt.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayInt.remslice`](#ArrayInt.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayInt.remslice`](#ArrayInt.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayInt.repr`](#ArrayInt.repr) | Returns the readable packed-Array representation. |
 | [`ArrayInt.reverse`](#ArrayInt.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayInt.setindex`](#ArrayInt.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayInt.setslice`](#ArrayInt.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayInt.setslice`](#ArrayInt.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayInt.shift`](#ArrayInt.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayInt.splice`](#ArrayInt.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayInt.str`](#ArrayInt.str) | Returns the packed-Array display String. |
@@ -174,11 +174,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.postfixindex`](#ArrayLong.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayLong.push`](#ArrayLong.push) | Appends `value` and returns it. |
 | [`ArrayLong.remove`](#ArrayLong.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayLong.remslice`](#ArrayLong.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayLong.remslice`](#ArrayLong.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayLong.repr`](#ArrayLong.repr) | Returns the readable packed-Array representation. |
 | [`ArrayLong.reverse`](#ArrayLong.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayLong.setindex`](#ArrayLong.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayLong.setslice`](#ArrayLong.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayLong.setslice`](#ArrayLong.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayLong.shift`](#ArrayLong.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayLong.splice`](#ArrayLong.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayLong.str`](#ArrayLong.str) | Returns the packed-Array display String. |
@@ -209,11 +209,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.postfixindex`](#ArrayShort.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayShort.push`](#ArrayShort.push) | Appends `value` and returns it. |
 | [`ArrayShort.remove`](#ArrayShort.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayShort.remslice`](#ArrayShort.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayShort.remslice`](#ArrayShort.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayShort.repr`](#ArrayShort.repr) | Returns the readable packed-Array representation. |
 | [`ArrayShort.reverse`](#ArrayShort.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayShort.setindex`](#ArrayShort.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayShort.setslice`](#ArrayShort.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayShort.setslice`](#ArrayShort.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayShort.shift`](#ArrayShort.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayShort.splice`](#ArrayShort.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayShort.str`](#ArrayShort.str) | Returns the packed-Array display String. |
@@ -244,11 +244,11 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.postfixindex`](#ArrayString.postfixindex) | Raises `<bad-op>` because String elements have no postfix operation. |
 | [`ArrayString.push`](#ArrayString.push) | Appends `value` and returns it. |
 | [`ArrayString.remove`](#ArrayString.remove) | Removes and returns the element at normalized `index`. |
-| [`ArrayString.remslice`](#ArrayString.remslice) | Removes normalized bounds `[start:end]` and returns a fresh packed array. |
+| [`ArrayString.remslice`](#ArrayString.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
 | [`ArrayString.repr`](#ArrayString.repr) | Returns the readable packed-Array representation. |
 | [`ArrayString.reverse`](#ArrayString.reverse) | Reverses `array` in place and returns that same array. |
 | [`ArrayString.setindex`](#ArrayString.setindex) | Stores and returns `value` at raw `index` with no bounds or null check. |
-| [`ArrayString.setslice`](#ArrayString.setslice) | Replaces normalized bounds `[start:end]` and returns `array`. |
+| [`ArrayString.setslice`](#ArrayString.setslice) | Replaces the region `array[start:end]` and returns `array`. |
 | [`ArrayString.shift`](#ArrayString.shift) | Removes and returns the first element, shifting the remainder left. |
 | [`ArrayString.splice`](#ArrayString.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
 | [`ArrayString.str`](#ArrayString.str) | Returns the packed-Array display String. |
@@ -581,7 +581,8 @@ Source: `lib/typed-array.x:106`
 
 `Self ArrayChar.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -624,7 +625,8 @@ Source: `lib/typed-array.x:106`
 
 `Self ArrayChar.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 
@@ -1001,7 +1003,8 @@ Source: `lib/typed-array.x:151`
 
 `Self ArrayDbl.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -1044,7 +1047,8 @@ Source: `lib/typed-array.x:151`
 
 `Self ArrayDbl.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 
@@ -1419,7 +1423,8 @@ Source: `lib/typed-array.x:142`
 
 `Self ArrayFloat.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -1462,7 +1467,8 @@ Source: `lib/typed-array.x:142`
 
 `Self ArrayFloat.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 
@@ -1837,7 +1843,8 @@ Source: `lib/typed-array.x:124`
 
 `Self ArrayInt.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -1880,7 +1887,8 @@ Source: `lib/typed-array.x:124`
 
 `Self ArrayInt.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 
@@ -2257,7 +2265,8 @@ Source: `lib/typed-array.x:133`
 
 `Self ArrayLong.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -2300,7 +2309,8 @@ Source: `lib/typed-array.x:133`
 
 `Self ArrayLong.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 
@@ -2677,7 +2687,8 @@ Source: `lib/typed-array.x:115`
 
 `Self ArrayShort.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -2720,7 +2731,8 @@ Source: `lib/typed-array.x:115`
 
 `Self ArrayShort.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 
@@ -3094,7 +3106,8 @@ Source: `lib/typed-array.x:160`
 
 `Self ArrayString.remslice(Self array, int start, int end)`
 
-Removes normalized bounds `[start:end]` and returns a fresh packed array.
+Removes the region `array[start:end]` and returns a fresh packed array.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped, and the removed values retain their order.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -3137,7 +3150,8 @@ Source: `lib/typed-array.x:160`
 
 `Self ArrayString.setslice(Self array, int start, int end, Self values)`
 
-Replaces normalized bounds `[start:end]` and returns `array`.
+Replaces the region `array[start:end]` and returns `array`.
+Bounds normalize as slice bounds, so a negative `end` is a stop.
 Reversed bounds are swapped; null `values` deletes the region. Passing
 `array` itself as `values` is supported and copies before mutation.
 

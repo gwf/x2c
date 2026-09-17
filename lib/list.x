@@ -814,7 +814,13 @@ int List.unpack_vars_n(List src, unsigned destination_count, ...) {
 // object methods
 
 /** Returns the stable hash of `List`'s exact head bits and tail identity.
-    Mutating an object referenced by the head does not change this hash.
+    This is a constant-time hash of one cell, which canonical cells make
+    sound. It reaches an element's content only when the `Var` word holds it:
+    a small number, a `Symbol`, an `Atom`, a canonical `String`, or a nested
+    `List`. An element the word points at hashes by identity, so a wide
+    number boxed in a `Scope`, an `Array`, or a `Map` gives two equal-looking
+    `List`s two hashes. Mutating an object referenced by the head does not
+    change this hash.
 */
 unsigned List.hash(List lst) {
   if (!lst) return 0;
@@ -826,8 +832,12 @@ unsigned List.hash(List lst) {
 }
 
 /** Reports equality of canonical chains by exact head and tail identity.
-    Referenced mutable objects therefore compare by identity here rather than
-    by their current contents.
+    It matches `List.hash`, so the same elements decide it: content for a
+    small number, `Symbol`, `Atom`, canonical `String`, or nested `List`, and
+    identity for a wide number boxed in a `Scope`, an `Array`, or a `Map`.
+    Two `List`s built from one `long` value hold two boxes and are unequal,
+    while `List.compare` reads the values and calls them equal. Use
+    `List.compare` where content has to decide.
 */
 int List.equal(List a, List b) {
   if ((void *) a == (void *) b) return 1;
