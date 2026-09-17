@@ -22,8 +22,7 @@
 /** Parses prerequisite words after the first literal colon in `text`.
     Backslash escapes and doubled dollars are decoded in that region. A
     backslash-newline continues the rule; an ordinary newline ends it before
-    any phony rules. A word immediately before that newline is currently
-    returned twice. This accepts internally generated rules with colon-free
+    any phony rules. This accepts internally generated rules with colon-free
     targets rather than general Make syntax. A NULL input or no parsed
     prerequisites returns NULL. Returned cells and path `String`s follow the
     current canonical `List` and `String` pool lifetimes.
@@ -47,10 +46,8 @@ List translation_depfile_parse(String text) {
       ch++;
       continue;
     }
-    if (*ch == '\n') {
-      if (word.len()) paths.push(word.str());
-      break;
-    }
+    // The word before the newline is pushed once, after the loop.
+    if (*ch == '\n') break;
     if (*ch == ' ' || *ch == '\t' || *ch == '\r') {
       if (word.len()) {
         paths.push(word.str());
