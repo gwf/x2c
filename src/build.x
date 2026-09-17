@@ -38,6 +38,7 @@ typedef struct Build {
 
 #pragma private
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -55,6 +56,11 @@ static String _key(String path) {
   String stem = Path.stem(path), digest = "%08x".printf(path.hash());
   return %"$stem-$digest";
 }
+
+/* Names one process's private sibling of a shared artifact path. Concurrent
+   builds in one project write through these and publish with rename, so no
+   destination is ever absent or half written. */
+static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
 
 /* Every incremental fingerprint starts with the state format, project or
    direct-build seed, and compiler and selected tool contents. Translation
@@ -87,19 +93,22 @@ static uint64_t _state_list(uint64_t hash, List values) {
   return build_hash_bytes(hash, "\xfe", 1);
 }
 
-static uint64_t _state_file(uint64_t hash, String path, int *ok) {
+static uint64_t _state_contents(uint64_t hash, String path, int *ok) {
   File input = fopen(path, "rb");
   if (!input) {
     *ok = 0;
-    return _state_text(hash, path);
+    return hash;
   }
-  hash = _state_text(hash, path);
   unsigned char buffer[16384], size_t length;
   while ((length = fread(buffer, 1, sizeof(buffer), input)))
     hash = build_hash_bytes(hash, buffer, length);
   if (ferror(input)) *ok = 0;
   input.close();
   return hash;
+}
+
+static uint64_t _state_file(uint64_t hash, String path, int *ok) {
+  return _state_contents(_state_text(hash, path), path, ok);
 }
 
 static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
@@ -447,6 +456,14 @@ static uint64_t _action_fingerprint(
   return hash;
 }
 
+/* The preprocessed text is scratch named for this process, so only what it
+   says extends the compile fingerprint. */
+static uint64_t _compile_fingerprint(
+  Build state, ToolAction action, String preprocessed, int *ok) {
+  return _state_contents(
+    _action_fingerprint(state, action, NULL, ok), preprocessed, ok);
+}
+
 /* Returns -1 when preprocessing starts a compile in the same job slot. A
    fingerprint this run cannot read is a cache miss: the source compiles and
    records nothing. Only the preprocessing command itself failing is an
@@ -457,8 +474,8 @@ static int _finish_compile(Build state, CcJob *pending) {
     int ok = 1;
     String preprocessed = pending.preprocessed;
     if (!status)
-      pending.fingerprint = _action_fingerprint(
-        state, pending.action, %($preprocessed), &ok);
+      pending.fingerprint = _compile_fingerprint(
+        state, pending.action, preprocessed, &ok);
     unlink(pending.preprocessed);
     pending.preprocessed = NULL;
     if (status) return 1;
@@ -572,7 +589,8 @@ static int _compile_sources(Build b) {
       .depfile = depfile, .state_path = state_path
     };
     if (state_path && !b.request.dry_run) {
-      pending.preprocessed = %"${b.dep_root}/$key.i";
+      // Per process: concurrent builds of one project share `dep_root`.
+      pending.preprocessed = %"${b.dep_root}/$key.${_process_suffix()}.i";
       pending.execution = b.toolchain.preprocess_action(
         source, pending.preprocessed, directories).start();
     }
@@ -664,7 +682,10 @@ static void Build._place_unit_headers(Build b) {
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
     reuse their recorded inputs; executables always link because library
-    selection and implicit linker inputs are not in the fingerprint. Mapped
+    selection and implicit linker inputs are not in the fingerprint. The
+    archiver or linker writes a private sibling that replaces the output by
+    rename, so a concurrent build in the same project finds the whole
+    previous artifact or the whole new one. Mapped
     macOS debug executables also produce a companion dSYM before cleanup;
     failed symbol assembly fails the build and preserves intermediates.
 */
@@ -706,8 +727,27 @@ int Build.finish(Build b) {
       return 0;
     }
   }
-  if (b.request.kind == <static-lib> && !b.request.dry_run) unlink(b.output);
-  if (action.run()) return 1;
+  // The fingerprint and the receipts name the output; the tool writes a
+  // private sibling that rename puts in its place.
+  ToolAction publish = action;
+  String staged = NULL;
+  if (!b.request.dry_run) {
+    staged = %"${b.output}.${_process_suffix()}";
+    publish = b.request.kind == <static-lib> ?
+      b.toolchain.archive_action(staged, inputs) :
+      b.toolchain.link_action(staged, inputs);
+  }
+  if (publish.run()) {
+    if (staged) Path.remove_file(staged);
+    return 1;
+  }
+  if (staged && rename(staged, b.output)) {
+    fprintf(
+      stderr, "x2c: error: cannot replace %s: %s\n",
+      b.output.str(), strerror(errno));
+    Path.remove_file(staged);
+    return 1;
+  }
   if (_mapped_debug(b)) {
     String output = b.output, symbols = %"$output.dSYM";
     ToolAction debug = tool_action_new(
