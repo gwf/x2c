@@ -44,7 +44,7 @@ Opens lexical capture resolution while a lambda body is parsed or bound.
 contains canonical capture rows supplied by constructed syntax. Evolving
 rows live in semantic binding facts so macro transactions restore them.
 
-Source: `src/literals.x:950`
+Source: `src/literals.x:949`
 
 <a id="Compiler.bind_lambda_expression"></a>
 #### Compiler.bind_lambda_expression
@@ -55,7 +55,7 @@ Binds a constructed lambda through the lexical capture operations used by
 source literals. Parameter declarations keep their existing declarators;
 supplied canonical capture rows retain their value or reference mode.
 
-Source: `src/literals.x:1052`
+Source: `src/literals.x:1051`
 
 <a id="Compiler.capture_lambda_identifier"></a>
 #### Compiler.capture_lambda_identifier
@@ -67,7 +67,7 @@ Fresh captured bindings keep sibling snapshots independent of shared-cell
 rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
-Source: `src/literals.x:976`
+Source: `src/literals.x:975`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -76,7 +76,7 @@ Source: `src/literals.x:976`
 
 Finishes the active lambda's captures in first-use order.
 
-Source: `src/literals.x:959`
+Source: `src/literals.x:958`
 
 <a id="Compiler.lambda_capture_required"></a>
 #### Compiler.lambda_capture_required
@@ -85,7 +85,7 @@ Source: `src/literals.x:959`
 
 Reports whether the active lambda still needs to capture a binding.
 
-Source: `src/literals.x:934`
+Source: `src/literals.x:933`
 
 <a id="Compiler.map_entry_macro_follows"></a>
 #### Compiler.map_entry_macro_follows
@@ -116,7 +116,7 @@ Parses the current atomic token into a typed expression and advances once.
 Pattern and macro-hole state control binder validation and quoting, while
 shallow parsing permits provisional numeric types.
 
-Source: `src/literals.x:1246`
+Source: `src/literals.x:1244`
 
 <a id="Compiler.parse_catch_pattern_literal"></a>
 #### Compiler.parse_catch_pattern_literal
@@ -141,7 +141,7 @@ active return type, and capture rows come from `semantic_binding_facts`.
 Capturing lambdas have type `Func`; noncapturing lambdas retain a native
 function type.
 
-Source: `src/literals.x:1132`
+Source: `src/literals.x:1131`
 
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal

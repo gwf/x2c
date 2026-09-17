@@ -98,7 +98,7 @@ supplies Lisp bindings, source location, and recursion checks; the
 definition's fresh rows allocate invocation-local names. This method does
 not begin a semantic transaction.
 
-Source: `src/macros.x:2527`
+Source: `src/macros.x:2525`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -118,7 +118,7 @@ Returns whether the current keyword alias needs shallow expansion.
 A visible invocation qualifies when its captured `Unit` definition is
 imported, or when its local template contains protocol or adoption rows.
 
-Source: `src/macros.x:2320`
+Source: `src/macros.x:2319`
 
 <a id="Compiler.keyword_alias_starts_target_at"></a>
 #### Compiler.keyword_alias_starts_target_at
@@ -130,7 +130,7 @@ An argument-taking invocation may be claimed before result-kind validation
 so target parsing can report a wrong-position diagnostic. Bare forms must
 already fit the position. This query does not consume tokens.
 
-Source: `src/macros.x:2312`
+Source: `src/macros.x:2311`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -205,7 +205,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros.x:2504`
+Source: `src/macros.x:2502`
 
 <a id="Compiler.macro_lisp_starts_declaration"></a>
 #### Compiler.macro_lisp_starts_declaration
@@ -239,7 +239,7 @@ file-scope syntax, directly or through the target it decorates. A script
 unit keeps such an invocation at file scope. This query does not consume
 tokens.
 
-Source: `src/macros.x:2294`
+Source: `src/macros.x:2293`
 
 <a id="Compiler.parse_keyword_definition"></a>
 #### Compiler.parse_keyword_definition
@@ -250,7 +250,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon.
 
-Source: `src/macros.x:2231`
+Source: `src/macros.x:2230`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -324,7 +324,7 @@ Source: `src/macros.x:2186`
 Consumes the current keyword alias and any required argument list.
 Its terminator or following decorator target remains current.
 
-Source: `src/macros.x:2329`
+Source: `src/macros.x:2328`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -344,7 +344,7 @@ Source: `src/macros.x:571`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros.x:2341`
+Source: `src/macros.x:2339`
 
 <a id="Compiler.try_parse_macro_expression"></a>
 #### Compiler.try_parse_macro_expression
@@ -355,7 +355,7 @@ Parses and resolves a direct or keyword-alias expression macro.
 Returns NULL without consuming an identifier that is not an applicable
 alias; a direct `$` invocation must resolve to a visible expression form.
 
-Source: `src/macros.x:2701`
+Source: `src/macros.x:2699`
 
 <a id="Compiler.try_parse_macro_slot"></a>
 #### Compiler.try_parse_macro_slot
@@ -379,7 +379,7 @@ Returns NULL without consuming a macro hole or inapplicable identifier;
 template parsing returns a deferred `(seq (macro-invoke ...))`, and
 ordinary parsing returns the bound expansion.
 
-Source: `src/macros.x:2845`
+Source: `src/macros.x:2843`
 
 ## Design notes
 
