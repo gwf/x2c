@@ -239,6 +239,7 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* Descriptors are process-global and never freed. They borrow native function
    pointers and the canonical `name`: callback code must remain loaded, and
