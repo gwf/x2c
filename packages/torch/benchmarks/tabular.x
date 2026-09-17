@@ -474,7 +474,7 @@ static void _memory_churn(String artifacts, Map data, int steps,
   Bench.sample("setup", 0);
   Bench.record_text("churn_lifetime", lifetime);
   Bench.record_int("churn_pool_depth",
-                   Pool.stats(String.pool_current()).depth);
+                   Pool.stats(Pool.current()).depth);
   for (int step = -WARMUP; step < steps; step++) {
     if (step == 0) {
       values_sum = 0;
@@ -482,8 +482,8 @@ static void _memory_churn(String artifacts, Map data, int steps,
       Bench.sample("warm", 0);
     }
     {
-      if (pooled) String.pool_retain();
-      defer { if (pooled) String.pool_release(); }
+      if (pooled) Pool.open();
+      defer { if (pooled) Pool.close(); }
       Scope.retain();
       defer Scope.release();
       Torch.inference_mode();
@@ -510,7 +510,7 @@ static void _memory_churn(String artifacts, Map data, int steps,
       Bench.sample("request", step + 1);
   }
   Bench.record_int("churn_final_pool_depth",
-                   Pool.stats(String.pool_current()).depth);
+                   Pool.stats(Pool.current()).depth);
   Bench.record_int("churn_requests", steps);
   Bench.record("churn_values_sum", values_sum);
   Bench.record_int("churn_indices_sum", indices_sum);

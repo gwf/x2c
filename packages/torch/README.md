@@ -309,8 +309,8 @@ NULL.
 List results such as `parameters`, `named_parameters`, and generated tuples
 intern their wrapper references in the current List pool. Releasing a Scope
 does not reclaim those canonical cells. Long-running loops that create these
-Lists can bracket each request with `String.pool_retain` and
-`String.pool_release`, releasing the request Scope before its List pool.
+Lists can bracket each request with `Pool.open` and
+`Pool.close`, releasing the request Scope before its List pool.
 Keep stable parameter handles outside that bracket when useful. Surviving
 values still need their ordinary Scope and pool ownership; a pool bracket
 does not extend a Tensor wrapper's lifetime. The canonical-churn measurements
