@@ -144,31 +144,6 @@ static void _cache_dependencies(Map dependencies, Map additions) {
     _cache_dependency(dependencies, path, content_hash);
 }
 
-/* An explicit runtime include matters only when the module contributes a
-   declaration outside the prelude. Standard runtime includes are no-ops;
-   optional x2c modules load from their own interfaces. */
-static int _entry_adds_symbols_visit(
-  Compiler compiler, List entry, Map globs, Map visited) {
-  foreach (Var part, entry.car().list()) {
-    if (part is <map>) {
-      Map additions = part;
-      foreach (Var key, additions.keys()) if (!globs.contains(key)) return 1;
-      continue;
-    }
-    String dependency = part;
-    if (visited.contains(dependency)) continue;
-    visited[dependency] = 1;
-    List resolved = _entry(compiler, dependency);
-    if (resolved &&
-        _entry_adds_symbols_visit(compiler, resolved, globs, visited))
-      return 1;
-  }
-  return 0;
-}
-
-static int _entry_adds_symbols(Compiler compiler, List entry, Map globs) =>
-  _entry_adds_symbols_visit(compiler, entry, globs, {});
-
 /* Replay declaration maps and includes in their recorded source order.
    visited counts each included file's declarations, dependencies, and
    function definitions once per translation unit. In-memory and interface
@@ -287,14 +262,11 @@ static void _include(
   /* The entry records every include, so it does not depend on what the unit
      that first walked this file had already seen. */
   parts.push(canonical);
-  if (!covered || c.runtime_hdrs || !entry ||
-      _entry_adds_symbols(c, entry, globs)) {
-    c.add_translation_dependency(canonical);
-    if (!visited.contains(canonical)) {
-      visited[canonical] = 1;
-      if (entry) _replay_cached(c, entry, globs, visited);
-      else _walk_cold(c, target, canonical, globs, visited);
-    }
+  c.add_translation_dependency(canonical);
+  if (!visited.contains(canonical)) {
+    visited[canonical] = 1;
+    if (entry) _replay_cached(c, entry, globs, visited);
+    else _walk_cold(c, target, canonical, globs, visited);
   }
   /* A file still being walked, as in an include cycle, has no entry yet. */
   Var walked = _process_cache()[canonical];
