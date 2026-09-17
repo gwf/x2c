@@ -85,13 +85,13 @@ protocol Cleanup(File);
 #include <stdlib.h>
 #include <string.h>
 
-static void _open_error(Symbol operation, const char *path, int error) {
-  if (!path) raise %(io-fail (operation $operation) (errno $error));
-  String resource = path;
+/** Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
+    with `operation`, `path`, and `errno` details.
+*/
+void File.path_error(Var operation, String path, int error) {
   if (error == ENOENT)
-    raise %(not-found (operation $operation) (path $resource)
-            (errno $error));
-  raise %(io-fail (operation $operation) (path $resource) (errno $error));
+    raise %(not-found (operation $operation) (path $path) (errno $error));
+  raise %(io-fail (operation $operation) (path $path) (errno $error));
 }
 
 static void _io_error(Symbol operation, int error) {
@@ -109,7 +109,7 @@ static File _open_path(const char *path, const char *mode, Symbol op) {
   File file = fopen(path, mode);
   if (file) return file;
   int error = errno;
-  _open_error(op, path, error);
+  File.path_error(op, path, error);
 }
 
 static int _string_allocation(size_t length) {
@@ -250,7 +250,7 @@ File File.fdopen(int fildes, const char *mode) {
   File file = fdopen(fildes, mode);
   if (file) return file;
   int error = errno;
-  _open_error(<fdopen>, NULL, error);
+  _io_error(<fdopen>, error);
 }
 
 /** Opens `path` with the requested stdio mode.
@@ -274,7 +274,7 @@ File File.popen(const char *cmd, const char *mode) {
   File file = popen(cmd, mode);
   if (file) return file;
   int error = errno;
-  _open_error(<popen>, cmd, error);
+  File.path_error(<popen>, cmd, error);
 }
 
 /** Reuses `file` for a newly opened path and mode.
@@ -289,7 +289,7 @@ Self File.reopen(Self file, const char *path, const char *mode) {
   File opened = freopen(path, mode, file);
   if (opened) return opened;
   int error = errno;
-  _open_error(<reopen>, path, error);
+  File.path_error(<reopen>, path, error);
 }
 
 /** Reads a native line into `str` and returns `str`, or NULL at EOF or error.

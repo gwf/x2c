@@ -151,7 +151,11 @@ static void path_failures_raise_with_details(void) {
     EXPECT_STR_EQ(detail.assoc(<path>).string(), missing);
   }
   try missing.join("x").write_text("x");
-  catch %(not-found *): caught++;
+  catch %(not-found (operation "Path.write_text") *): caught++;
+  try missing.read_text();
+  catch %(not-found (operation "Path.read_text") *): caught++;
+  try missing.copy_file(root.join("copy"));
+  catch %(not-found (operation "Path.copy_file") *): caught++;
   try missing.size();
   catch %(not-found *): caught++;
   Path file = root.join("file");
@@ -163,7 +167,7 @@ static void path_failures_raise_with_details(void) {
     caught++;
     EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), ENOTDIR);
   }
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 7);
   root.remove_tree();
 }
 

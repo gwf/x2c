@@ -35,13 +35,6 @@ class Path String;
 #include <sys/stat.h>
 #include <unistd.h>
 
-static void _path_error(const char *operation, String path, int error) {
-  String name = operation;
-  if (error == ENOENT)
-    raise %(not-found (operation $name) (path $path) (errno $error));
-  raise %(io-fail (operation $name) (path $path) (errno $error));
-}
-
 static String _trimmed(String path) {
   int length = path.len();
   while (length > 1 && path[length - 1] == '/') length--;
@@ -104,7 +97,7 @@ Self Path.absolute(Self path) {
   if (realpath(path, buffer)) return String.new(buffer);
   if (!path.startswith("/")) {
     if (!getcwd(buffer, sizeof(buffer)))
-      _path_error("Path.absolute", path, errno);
+      File.path_error("Path.absolute", path, errno);
     path = Path.join(String.new(buffer), path);
   }
   Path result = "/";
@@ -120,31 +113,33 @@ Self Path.absolute(Self path) {
   return result;
 }
 
-/** Reports whether `path` names an existing file, following links. */
-int Path.exists(Path path) {
+static int _mode(Path p) {
   struct stat info;
-  return path && stat(path, &info) == 0;
+  return p && stat(p, &info) == 0 ? info.st_mode : 0;
 }
 
-/** Reports whether `path` names a directory, following links. */
-int Path.is_dir(Path path) {
-  struct stat info;
-  return path && stat(path, &info) == 0 && S_ISDIR(info.st_mode);
-}
+/** Reports whether `p` names an existing file, following links. */
+int Path.exists(Path p) => _mode(p) != 0;
 
-/** Reports whether `path` names a regular file, following links. */
-int Path.is_file(Path path) {
-  struct stat info;
-  return path && stat(path, &info) == 0 && S_ISREG(info.st_mode);
-}
+/** Reports whether `p` names a directory, following links. */
+int Path.is_dir(Path p) => S_ISDIR(_mode(p));
+
+/** Reports whether `p` names a regular file, following links. */
+int Path.is_file(Path p) => S_ISREG(_mode(p));
 
 /** Reports whether this process may execute `path`, as the shell's `-x`. */
 int Path.is_executable(Path path) => path && access(path, X_OK) == 0;
 
-static struct stat _stat(const char *operation, String path) {
+static struct stat _stat(String operation, String path) {
   struct stat info;
-  if (stat(path, &info)) _path_error(operation, path, errno);
+  if (stat(path, &info)) File.path_error(operation, path, errno);
   return info;
+}
+
+static File _open(String operation, Path path, const char *mode) {
+  File file = fopen(path, mode);
+  if (!file) File.path_error(operation, path, errno);
+  return file;
 }
 
 /** Returns the size of the file at `path` in bytes.
@@ -170,7 +165,7 @@ double Path.modified_time(Path path) {
 */
 List Path.list_dir(Path path) {
   DIR *directory = opendir(path);
-  if (!directory) _path_error("Path.list_dir", path, errno);
+  if (!directory) File.path_error("Path.list_dir", path, errno);
   Array names = [], struct dirent *entry;
   while ((entry = readdir(directory)))
     if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, ".."))
@@ -194,7 +189,7 @@ static void _push_children(Array pending, Path directory) {
 
 static int _walk_next(Iter iter, Var *out) {
   Array pending = iter.state;
-  if (!pending || !pending.len()) return 0;
+  if (!pending.len()) return 0;
   String path = pending.take_last();
   if (_descends(path)) _push_children(pending, path);
   *out = path;
@@ -336,26 +331,19 @@ List Path.glob(Path pattern) {
   return matches.sort().list_free();
 }
 
-/** Creates the directory `path` and any missing parents.
+/** Creates the directory `p` and any missing parents.
     An existing directory is left as it is.
-    Raises: `<io-fail>` when a component cannot be created or `path` names
-    an existing non-directory, or `<not-found>`.
+    Raises: `<io-fail>` when a component cannot be created or names an
+    existing non-directory, or `<not-found>`.
 */
-void Path.make_dirs(Path path) {
-  char buffer[PATH_MAX];
-  if (path.len() >= sizeof(buffer))
-    _path_error("Path.make_dirs", path, ENAMETOOLONG);
-  strcpy(buffer, path);
-  for (char *ch = buffer + 1; *ch; ch++) {
-    if (*ch != '/') continue;
-    *ch = 0;
-    if (mkdir(buffer, 0777) && errno != EEXIST)
-      _path_error("Path.make_dirs", String.new(buffer), errno);
-    *ch = '/';
-  }
-  if (mkdir(buffer, 0777) && errno != EEXIST)
-    _path_error("Path.make_dirs", path, errno);
-  if (!path.is_dir()) _path_error("Path.make_dirs", path, ENOTDIR);
+void Path.make_dirs(Path p) {
+  if (p.is_dir()) return;
+  Path parent = p.dirname();
+  if (parent != p) parent.make_dirs();
+  if (!mkdir(p, 0777)) return;
+  int error = errno;
+  if (error != EEXIST || !p.is_dir())
+    File.path_error("Path.make_dirs", p, error == EEXIST ? ENOTDIR : error);
 }
 
 /** Removes the file or symbolic link `path` when it exists.
@@ -363,7 +351,7 @@ void Path.make_dirs(Path path) {
 */
 void Path.remove_file(Path path) {
   if (unlink(path) && errno != ENOENT)
-    _path_error("Path.remove_file", path, errno);
+    File.path_error("Path.remove_file", path, errno);
 }
 
 static void _remove_tree(Path path, String *failed, int *failure) {
@@ -417,13 +405,13 @@ void Path.remove_tree(Path path) {
     Raises: `<not-found>` or `<io-fail>`.
 */
 void Path.copy_file(Path source, Path target) {
-  File input = $auto(File.open(source, "rb"));
-  File output = $auto(File.open(target, "wb"));
+  File input = $auto(_open("Path.copy_file", source, "rb"));
+  File output = $auto(_open("Path.copy_file", target, "wb"));
   input.copy_to(output, NULL);
-  if (output.flush()) _path_error("Path.copy_file", target, errno);
+  if (output.flush()) File.path_error("Path.copy_file", target, errno);
   struct stat info = _stat("Path.copy_file", source);
   if (chmod(target, info.st_mode & 07777))
-    _path_error("Path.copy_file", target, errno);
+    File.path_error("Path.copy_file", target, errno);
 }
 
 /** Copies `source` to `target`: a directory recursively, a symbolic link as
@@ -432,21 +420,21 @@ void Path.copy_file(Path source, Path target) {
 */
 void Path.copy_tree(Path source, Path target) {
   struct stat info;
-  if (lstat(source, &info)) _path_error("Path.copy_tree", source, errno);
+  if (lstat(source, &info)) File.path_error("Path.copy_tree", source, errno);
   if (S_ISLNK(info.st_mode)) {
     char buffer[PATH_MAX];
     ssize_t length = readlink(source, buffer, sizeof(buffer) - 1);
-    if (length < 0) _path_error("Path.copy_tree", source, errno);
+    if (length < 0) File.path_error("Path.copy_tree", source, errno);
     buffer[length] = 0;
     if (symlink(buffer, target))
-      _path_error("Path.copy_tree", target, errno);
+      File.path_error("Path.copy_tree", target, errno);
   }
   else if (S_ISDIR(info.st_mode)) {
     target.make_dirs();
     foreach (String name, source.list_dir())
       source.join(name).copy_tree(target.join(name));
     if (chmod(target, info.st_mode & 07777))
-      _path_error("Path.copy_tree", target, errno);
+      File.path_error("Path.copy_tree", target, errno);
   }
   else source.copy_file(target);
 }
@@ -457,7 +445,7 @@ void Path.copy_tree(Path source, Path target) {
 */
 void Path.move_to(Path source, Path target) {
   if (!rename(source, target)) return;
-  if (errno != EXDEV) _path_error("Path.move_to", source, errno);
+  if (errno != EXDEV) File.path_error("Path.move_to", source, errno);
   source.copy_tree(target);
   source.remove_tree();
 }
@@ -466,7 +454,7 @@ void Path.move_to(Path source, Path target) {
     Raises: `<io-fail>` when the link cannot be created.
 */
 void Path.symlink_to(Path link, Path target) {
-  if (symlink(target, link)) _path_error("Path.symlink_to", link, errno);
+  if (symlink(target, link)) File.path_error("Path.symlink_to", link, errno);
 }
 
 /** Returns the contents of the file at `path`, or NULL when it is empty.
@@ -474,15 +462,15 @@ void Path.symlink_to(Path link, Path target) {
     a NUL byte.
 */
 String Path.read_text(Path path) =>
-  File.open(path, "r").string_close();
+  _open("Path.read_text", path, "r").string_close();
 
 /** Replaces the contents of the file at `path` with `text`.
     Raises: `<not-found>` when the directory does not exist, or `<io-fail>`.
 */
 void Path.write_text(Path path, String text) {
-  File output = $auto(File.open(path, "w"));
+  File output = $auto(_open("Path.write_text", path, "w"));
   output.write_all(text, text.len());
-  if (output.flush()) _path_error("Path.write_text", path, errno);
+  if (output.flush()) File.path_error("Path.write_text", path, errno);
 }
 
 /** Creates a new private directory under `TMPDIR`, or `/tmp`, and returns
@@ -493,10 +481,7 @@ Path Path.temp_dir(void) {
   const char *parent = getenv("TMPDIR");
   Path root = parent && *parent ? String.new(parent) : "/tmp";
   String pattern = root.join("x2c-XXXXXX");
-  char buffer[PATH_MAX];
-  if (pattern.len() >= sizeof(buffer))
-    _path_error("Path.temp_dir", root, ENAMETOOLONG);
-  strcpy(buffer, pattern);
-  if (!mkdtemp(buffer)) _path_error("Path.temp_dir", root, errno);
-  return String.new(buffer);
+  char *created = Scope.memdup(pattern, pattern.len() + 1);
+  if (!mkdtemp(created)) File.path_error("Path.temp_dir", root, errno);
+  return String.new(created);
 }

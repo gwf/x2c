@@ -190,12 +190,8 @@ static void Job._spawn(
   job.pids[index] = pid;
   if (count != sizeof(failure)) return;
   int error = failure[1];
-  if (failure[0] == _STEP_DIR) {
-    String dir = launch.dir;
-    if (error == ENOENT)
-      raise %(not-found (operation "Job.start") (path $dir) (errno $error));
-    raise %(io-fail (operation "Job.start") (path $dir) (errno $error));
-  }
+  if (failure[0] == _STEP_DIR)
+    File.path_error("Job.start", launch.dir, error);
   String program = argv[0];
   if (error == ENOENT)
     raise %(not-found (operation "Job.start") (program $program)
