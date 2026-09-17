@@ -260,12 +260,12 @@ static void *_context(Func function) =>
 static Func _new(
   FuncAdapter adapter, List signature, int rest,
   const void *context, size_t context_size) {
-  if (rest && !signature.match(%((func (("List"))) ?result)))
+  if (rest && !signature.match(%((func (("List"))) ? *)))
     raise %(bad-sig (sig $signature));
   if (!adapter) raise %(bad-sig (sig $signature));
   List params = NULL;
   match (signature)
-    case %((func (!set ?captured (!is type list))) ?):
+    case %((func (!set ?captured (!is type list))) ? *):
       params = captured;
   if (!params) raise %(bad-sig (sig $signature));
   if (context_size && !context)

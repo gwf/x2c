@@ -541,6 +541,44 @@ static void func_bad_signatures_rejected(void) {
   EXPECT_TRUE(_rejects_signature(%((func ()) long)));
 }
 
+/* A signature spells the result the way C does, so a result of more than
+   one word is ordinary. A direct binding builds its Func before main, so a
+   rejected signature there aborts the process rather than raising. */
+static unsigned char _wide_uchar(unsigned char value) {
+  return (unsigned char) (value + 1);
+}
+
+static long long _wide_llong(long long value) {
+  return value * 2;
+}
+
+static unsigned long _wide_ulong(unsigned long value) {
+  return value + 1;
+}
+
+static void *_wide_pointer(void *value) {
+  return value;
+}
+
+static Func _uchar_binding = _wide_uchar;
+static Func _pointer_binding = _wide_pointer;
+
+static void func_accepts_a_multi_token_result(void) {
+  EXPECT_NOT_NULL(_uchar_binding);
+  EXPECT_NOT_NULL(_pointer_binding);
+  FuncArg argv[1];
+  argv[0] = FuncArg.value(Var.new(<i32>, 7));
+  EXPECT_INT_EQ(Var.integer(_uchar_binding.apply(1, argv)), 8);
+  Func llong_binding = _wide_llong;
+  argv[0] = FuncArg.value(Var.new(<i32>, 21));
+  EXPECT_INT_EQ(Var.integer(llong_binding.apply(1, argv)), 42);
+  Func ulong_binding = _wide_ulong;
+  argv[0] = FuncArg.value(Var.new(<i32>, 5));
+  EXPECT_INT_EQ(Var.integer(ulong_binding.apply(1, argv)), 6);
+  EXPECT_FALSE(_rejects_signature(%((func (("Var"))) unsigned long)));
+  EXPECT_FALSE(_rejects_signature(%((func (("List"))) long long)));
+}
+
 static void func_native_raise_observer_is_safe(void) {
   Symbol previous = Error.policy_get(<observer-p>);
   Error.policy_set(<observer-p>, <ignore>);
@@ -743,6 +781,7 @@ void func_suite(void) {
   $test.run(func_var_result_rejects_void);
   $test.run(func_list_argument_round_trips);
   $test.run(func_bad_signatures_rejected);
+  $test.run(func_accepts_a_multi_token_result);
   $test.run(func_native_raise_observer_is_safe);
   $test.run(func_direct_target_transfers_to_catch);
   $test.run(func_cross_file_target_transfers_to_catch);
