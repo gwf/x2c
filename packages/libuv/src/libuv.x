@@ -371,7 +371,7 @@ static void _uv_address_name(UvAddress address, Pool strings) {
   int status = uv_ip_name(
     (struct sockaddr *) &address.address, host, sizeof(host)
   );
-  if (status < 0) _uv_raise(%"ip_name", status);
+  if (status < 0) _uv_raise("ip_name", status);
   address.host = _uv_address_string(strings, host);
 }
 
@@ -409,7 +409,7 @@ static void _uv_lookup_take_results(
     lookup.request.addrinfo = NULL;
   }
   if (status < 0 && !lookup.cancelled) {
-    _uv_raise(%"getaddrinfo", status);
+    _uv_raise("getaddrinfo", status);
   }
   if (!lookup.cancelled) _uv_lookup_copy(lookup, result);
 }
@@ -838,7 +838,7 @@ static UvTcp _uv_tcp_new(UvLoop loop) {
   int status = uv_tcp_init(&loop.loop, &tcp.tcp);
   if (status < 0) {
     Scope.free(tcp);
-    _uv_raise(%"tcp_init", status);
+    _uv_raise("tcp_init", status);
   }
   _uv_stream_initialize(
     &tcp.stream, loop, (uv_stream_t *) &tcp.tcp, tcp
@@ -851,7 +851,7 @@ static UvPipe _uv_pipe_new(UvLoop loop) {
   int status = uv_pipe_init(&loop.loop, &pipe.pipe, 0);
   if (status < 0) {
     Scope.free(pipe);
-    _uv_raise(%"pipe_init", status);
+    _uv_raise("pipe_init", status);
   }
   _uv_stream_initialize(
     &pipe.stream, loop, (uv_stream_t *) &pipe.pipe, pipe
@@ -892,7 +892,7 @@ static UvStream _uv_tcp_accept(UvStream listener) {
   int status = uv_accept(listener.native, tcp.stream.native);
   if (status < 0) {
     _uv_stream_close(&tcp.stream);
-    _uv_raise(%"accept", status);
+    _uv_raise("accept", status);
   }
   tcp.stream.connected = 1;
   return &tcp.stream;
@@ -922,7 +922,7 @@ static UvStream _uv_pipe_accept(UvStream listener) {
   int status = uv_accept(listener.native, pipe.stream.native);
   if (status < 0) {
     _uv_stream_close(&pipe.stream);
-    _uv_raise(%"accept", status);
+    _uv_raise("accept", status);
   }
   pipe.stream.connected = 1;
   return &pipe.stream;
@@ -969,7 +969,7 @@ static void _uv_stream_listen_callback(uv_stream_t *native, int status) {
   UvStream listener = native ? native->data : NULL;
   if (!listener) return;
   if (status < 0) {
-    _uv_stream_fail(listener, %"listen", status);
+    _uv_stream_fail(listener, "listen", status);
     return;
   }
   UvStream accepted = NULL;
@@ -999,7 +999,7 @@ static void _uv_stream_read_callback(
     free(buffer ? buffer->base : NULL);
     stream.reading = 0;
     if (count != UV_EOF) {
-      _uv_stream_fail(stream, %"read", (int) count);
+      _uv_stream_fail(stream, "read", (int) count);
       return;
     }
     stream.read_eof = 1;
@@ -1038,7 +1038,7 @@ static void _uv_stream_write_callback(uv_write_t *request, int status) {
   Scope.free(write.bytes);
   Scope.free(write);
   if (status < 0 && !(status == UV_ECANCELED && stream.closing))
-    _uv_stream_fail(stream, %"write", status);
+    _uv_stream_fail(stream, "write", status);
 }
 
 static void _uv_stream_shutdown_callback(uv_shutdown_t *request, int status) {
@@ -1048,21 +1048,21 @@ static void _uv_stream_shutdown_callback(uv_shutdown_t *request, int status) {
   stream.shutdown_done = status >= 0;
   stream.loop.pending_requests--;
   if (status < 0 && !(status == UV_ECANCELED && stream.closing))
-    _uv_stream_fail(stream, %"shutdown", status);
+    _uv_stream_fail(stream, "shutdown", status);
 }
 
 static void _uv_stream_start_read(UvStream stream) {
   int status = uv_read_start(
     stream.native, _uv_alloc_event, _uv_stream_read_callback
   );
-  if (status < 0) _uv_raise(%"read_start", status);
+  if (status < 0) _uv_raise("read_start", status);
   stream.reading = 1;
 }
 
 static void _uv_stream_stop_read(UvStream stream) {
   if (!stream.reading) return;
   int status = uv_read_stop(stream.native);
-  if (status < 0) _uv_raise(%"read_stop", status);
+  if (status < 0) _uv_raise("read_stop", status);
   stream.reading = 0;
 }
 
@@ -1085,7 +1085,7 @@ static void _uv_stream_submit_write(
   if (status < 0) {
     Scope.free(write.bytes);
     Scope.free(write);
-    _uv_raise(%"write", status);
+    _uv_raise("write", status);
   }
   stream.loop.pending_requests++;
 }
@@ -1096,7 +1096,7 @@ static void _uv_stream_submit_shutdown(UvStream stream) {
     &stream.shutdown_request, stream.native,
     _uv_stream_shutdown_callback
   );
-  if (status < 0) _uv_raise(%"shutdown", status);
+  if (status < 0) _uv_raise("shutdown", status);
   stream.shutdown_pending = 1;
   stream.loop.pending_requests++;
 }
@@ -1111,7 +1111,7 @@ UvLoop UvLoop.new(void) {
   int status = uv_loop_init(&loop.loop);
   if (status < 0) {
     Scope.free(loop);
-    _uv_raise(%"loop_init", status);
+    _uv_raise("loop_init", status);
   }
   loop.initialized = 1;
   return loop;
@@ -1135,7 +1135,7 @@ UvLoop UvLoop.free(UvLoop loop) {
   uv_run(&loop.loop, UV_RUN_DEFAULT);
   int status = uv_loop_close(&loop.loop);
   if (status < 0) {
-    _uv_raise(%"loop_close", status);
+    _uv_raise("loop_close", status);
   }
   loop.initialized = 0;
   return NULL;
@@ -1186,7 +1186,7 @@ UvAddress UvAddress.ip4(String host, int port) {
   );
   if (status < 0) {
     Scope.free(address);
-    _uv_raise(%"ip4_addr", status);
+    _uv_raise("ip4_addr", status);
   }
   address.length = sizeof(struct sockaddr_in);
   _uv_address_name(address, String.pool_current());
@@ -1204,7 +1204,7 @@ UvAddress UvAddress.ip6(String host, int port) {
   );
   if (status < 0) {
     Scope.free(address);
-    _uv_raise(%"ip6_addr", status);
+    _uv_raise("ip6_addr", status);
   }
   address.length = sizeof(struct sockaddr_in6);
   _uv_address_name(address, String.pool_current());
@@ -1318,7 +1318,7 @@ UvLookup UvLookup.start(
   if (status < 0) {
     lookup.started = 0;
     lookup.handler = NULL;
-    _uv_raise(%"getaddrinfo", status);
+    _uv_raise("getaddrinfo", status);
   }
   lookup.loop.pending_requests++;
   return lookup;
@@ -1343,7 +1343,7 @@ int UvLookup.cancel(UvLookup lookup) {
   int status = uv_cancel((uv_req_t *) &lookup.request);
   if (!status) return 1;
   if (status == UV_EBUSY) return 0;
-  _uv_raise(%"getaddrinfo_cancel", status);
+  _uv_raise("getaddrinfo_cancel", status);
 }
 
 int UvLookup.cancelled(UvLookup lookup) {
@@ -1356,7 +1356,7 @@ size_t UvLookup.count(UvLookup lookup) {
             (reason "the lookup has not completed"));
   }
   if (lookup.status < 0 && !lookup.cancelled) {
-    _uv_raise(%"getaddrinfo", lookup.status);
+    _uv_raise("getaddrinfo", lookup.status);
   }
   return lookup.count;
 }
@@ -1405,20 +1405,20 @@ UvTcp UvLoop.tcp(UvLoop loop) {
 }
 
 UvTcp UvTcp.bind(UvTcp tcp, UvAddress address, unsigned flags) {
-  _uv_tcp_ready(tcp, %"tcp_bind");
+  _uv_tcp_ready(tcp, "tcp_bind");
   if (!address || (address.family() != AF_INET &&
                    address.family() != AF_INET6)) {
     raise %(bad-arg (library "libuv") (operation "tcp_bind")
             (reason "an IPv4 or IPv6 address is required"));
   }
   int status = uv_tcp_bind(&tcp.tcp, address.native(), flags);
-  if (status < 0) _uv_raise(%"tcp_bind", status);
+  if (status < 0) _uv_raise("tcp_bind", status);
   return tcp;
 }
 
 UvTcp UvTcp.connect(
   UvTcp tcp, UvAddress address, Var value, void (*fn)(UvTcp, Var)) {
-  UvStream stream = _uv_tcp_ready(tcp, %"tcp_connect");
+  UvStream stream = _uv_tcp_ready(tcp, "tcp_connect");
   if (!address || !fn) {
     raise %(bad-arg (library "libuv") (operation "tcp_connect")
             (reason "an address and callback are required"));
@@ -1430,7 +1430,7 @@ UvTcp UvTcp.connect(
   tcp.connect_value = value;
   tcp.connect_handler = fn;
   stream.connected_fn = _uv_tcp_connected;
-  stream.connect_operation = %"tcp_connect";
+  stream.connect_operation = "tcp_connect";
   int status = uv_tcp_connect(
     &stream.connect_request, &tcp.tcp, address.native(),
     _uv_stream_connect_callback
@@ -1438,7 +1438,7 @@ UvTcp UvTcp.connect(
   if (status < 0) {
     tcp.connect_handler = NULL;
     stream.connected_fn = NULL;
-    _uv_raise(%"tcp_connect", status);
+    _uv_raise("tcp_connect", status);
   }
   stream.connect_pending = 1;
   stream.loop.pending_requests++;
@@ -1450,7 +1450,7 @@ UvTcp UvTcp.connect(
 */
 UvTcp UvTcp.listen(
   UvTcp tcp, int backlog, Var value, void (*fn)(UvTcp, UvTcp, Var)) {
-  UvStream stream = _uv_tcp_ready(tcp, %"listen");
+  UvStream stream = _uv_tcp_ready(tcp, "listen");
   if (!fn || backlog < 1) {
     raise %(bad-arg (library "libuv") (operation "listen")
             (reason "a positive backlog and callback are required"));
@@ -1469,14 +1469,14 @@ UvTcp UvTcp.listen(
   if (status < 0) {
     tcp.listen_handler = NULL;
     stream.listen_fn = NULL;
-    _uv_raise(%"listen", status);
+    _uv_raise("listen", status);
   }
   stream.listening = 1;
   return tcp;
 }
 
 UvTcp UvTcp.read(UvTcp tcp, Var value, void (*fn)(UvTcp, Bytes, Var)) {
-  UvStream stream = _uv_tcp_ready(tcp, %"read_start");
+  UvStream stream = _uv_tcp_ready(tcp, "read_start");
   if (!fn) {
     raise %(bad-arg (library "libuv") (operation "read_start")
             (reason "a callback is required"));
@@ -1501,13 +1501,13 @@ UvTcp UvTcp.read(UvTcp tcp, Var value, void (*fn)(UvTcp, Bytes, Var)) {
 }
 
 UvTcp UvTcp.stop_read(UvTcp tcp) {
-  UvStream stream = _uv_tcp_ready(tcp, %"read_stop");
+  UvStream stream = _uv_tcp_ready(tcp, "read_stop");
   _uv_stream_stop_read(stream);
   return tcp;
 }
 
 static UvTcp _uv_tcp_write(UvTcp tcp, const void *bytes, size_t length) {
-  UvStream stream = _uv_tcp_ready(tcp, %"write");
+  UvStream stream = _uv_tcp_ready(tcp, "write");
   if (!stream.connected) {
     raise %(bad-state (library "libuv") (operation "write")
             (reason "the TCP handle is not connected"));
@@ -1540,7 +1540,7 @@ UvTcp UvTcp.write_bytes(UvTcp tcp, Bytes bytes) {
 }
 
 UvTcp UvTcp.shutdown_write(UvTcp tcp) {
-  UvStream stream = _uv_tcp_ready(tcp, %"shutdown");
+  UvStream stream = _uv_tcp_ready(tcp, "shutdown");
   if (!stream.connected) {
     raise %(bad-state (library "libuv") (operation "shutdown")
             (reason "the TCP handle is not connected"));
@@ -1557,7 +1557,7 @@ UvTcp UvTcp.close(UvTcp tcp) {
 
 static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
   UvStream stream = _uv_tcp_ready(
-    tcp, peer ? %"tcp_getpeername" : %"tcp_getsockname"
+    tcp, peer ? "tcp_getpeername" : "tcp_getsockname"
   );
   UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
   int length = sizeof(address.address);
@@ -1570,7 +1570,7 @@ static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
       );
   if (status < 0) {
     Scope.free(address);
-    _uv_raise(peer ? %"tcp_getpeername" : %"tcp_getsockname", status);
+    _uv_raise(peer ? "tcp_getpeername" : "tcp_getsockname", status);
   }
   address.length = length;
   address.socket_type = SOCK_STREAM;
@@ -1589,7 +1589,7 @@ UvAddress UvTcp.peer_address(UvTcp tcp) {
 }
 
 size_t UvTcp.write_queue_size(UvTcp tcp) {
-  UvStream stream = _uv_tcp_ready(tcp, %"write_queue_size");
+  UvStream stream = _uv_tcp_ready(tcp, "write_queue_size");
   return uv_stream_get_write_queue_size(stream.native);
 }
 
@@ -1631,17 +1631,17 @@ UvPipe UvLoop.pipe(UvLoop loop) {
 }
 
 UvPipe UvPipe.bind(UvPipe pipe, String name) {
-  _uv_pipe_ready(pipe, %"pipe_bind");
-  _uv_pipe_path(name, %"pipe_bind");
+  _uv_pipe_ready(pipe, "pipe_bind");
+  _uv_pipe_path(name, "pipe_bind");
   int status = uv_pipe_bind(&pipe.pipe, name);
-  if (status < 0) _uv_raise(%"pipe_bind", status);
+  if (status < 0) _uv_raise("pipe_bind", status);
   return pipe;
 }
 
 UvPipe UvPipe.connect(
   UvPipe pipe, String name, Var value, void (*fn)(UvPipe, Var)) {
-  UvStream stream = _uv_pipe_ready(pipe, %"pipe_connect");
-  _uv_pipe_path(name, %"pipe_connect");
+  UvStream stream = _uv_pipe_ready(pipe, "pipe_connect");
+  _uv_pipe_path(name, "pipe_connect");
   if (!fn) {
     raise %(bad-arg (library "libuv") (operation "pipe_connect")
             (reason "a callback is required"));
@@ -1653,7 +1653,7 @@ UvPipe UvPipe.connect(
   pipe.connect_value = value;
   pipe.connect_handler = fn;
   stream.connected_fn = _uv_pipe_connected;
-  stream.connect_operation = %"pipe_connect";
+  stream.connect_operation = "pipe_connect";
   stream.connect_pending = 1;
   stream.loop.pending_requests++;
   uv_pipe_connect(
@@ -1665,7 +1665,7 @@ UvPipe UvPipe.connect(
 
 UvPipe UvPipe.listen(
   UvPipe pipe, int backlog, Var value, void (*fn)(UvPipe, UvPipe, Var)) {
-  UvStream stream = _uv_pipe_ready(pipe, %"listen");
+  UvStream stream = _uv_pipe_ready(pipe, "listen");
   if (!fn || backlog < 1) {
     raise %(bad-arg (library "libuv") (operation "listen")
             (reason "a positive backlog and callback are required"));
@@ -1684,14 +1684,14 @@ UvPipe UvPipe.listen(
   if (status < 0) {
     pipe.listen_handler = NULL;
     stream.listen_fn = NULL;
-    _uv_raise(%"listen", status);
+    _uv_raise("listen", status);
   }
   stream.listening = 1;
   return pipe;
 }
 
 UvPipe UvPipe.read(UvPipe pipe, Var value, void (*fn)(UvPipe, Bytes, Var)) {
-  UvStream stream = _uv_pipe_ready(pipe, %"read_start");
+  UvStream stream = _uv_pipe_ready(pipe, "read_start");
   if (!fn) {
     raise %(bad-arg (library "libuv") (operation "read_start")
             (reason "a callback is required"));
@@ -1716,13 +1716,13 @@ UvPipe UvPipe.read(UvPipe pipe, Var value, void (*fn)(UvPipe, Bytes, Var)) {
 }
 
 UvPipe UvPipe.stop_read(UvPipe pipe) {
-  UvStream stream = _uv_pipe_ready(pipe, %"read_stop");
+  UvStream stream = _uv_pipe_ready(pipe, "read_stop");
   _uv_stream_stop_read(stream);
   return pipe;
 }
 
 static UvPipe _uv_pipe_write(UvPipe pipe, const void *bytes, size_t length) {
-  UvStream stream = _uv_pipe_ready(pipe, %"write");
+  UvStream stream = _uv_pipe_ready(pipe, "write");
   if (!stream.connected) {
     raise %(bad-state (library "libuv") (operation "write")
             (reason "the pipe handle is not connected"));
@@ -1755,7 +1755,7 @@ UvPipe UvPipe.write_bytes(UvPipe pipe, Bytes bytes) {
 }
 
 UvPipe UvPipe.shutdown_write(UvPipe pipe) {
-  UvStream stream = _uv_pipe_ready(pipe, %"shutdown");
+  UvStream stream = _uv_pipe_ready(pipe, "shutdown");
   if (!stream.connected) {
     raise %(bad-state (library "libuv") (operation "shutdown")
             (reason "the pipe handle is not connected"));
@@ -1772,7 +1772,7 @@ UvPipe UvPipe.close(UvPipe pipe) {
 
 static String _uv_pipe_name(UvPipe pipe, int peer) {
   _uv_pipe_ready(
-    pipe, peer ? %"pipe_getpeername" : %"pipe_getsockname"
+    pipe, peer ? "pipe_getpeername" : "pipe_getsockname"
   );
   char byte = 0;
   char *buffer = &byte;
@@ -1793,7 +1793,7 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
   }
   if (status < 0) {
     if (allocated) Scope.free(buffer);
-    _uv_raise(peer ? %"pipe_getpeername" : %"pipe_getsockname", status);
+    _uv_raise(peer ? "pipe_getpeername" : "pipe_getsockname", status);
   }
   if (length > INT_MAX || memchr(buffer, '\0', length)) {
     if (allocated) Scope.free(buffer);
@@ -1813,7 +1813,7 @@ String UvPipe.peer_name(UvPipe pipe) {
 }
 
 size_t UvPipe.write_queue_size(UvPipe pipe) {
-  UvStream stream = _uv_pipe_ready(pipe, %"write_queue_size");
+  UvStream stream = _uv_pipe_ready(pipe, "write_queue_size");
   return uv_stream_get_write_queue_size(stream.native);
 }
 
@@ -1919,7 +1919,7 @@ static void _uv_udp_receive_callback(
   if (count < 0) {
     free(buffer ? buffer->base : NULL);
     udp.receiving = 0;
-    _uv_udp_fail(udp, %"udp_receive", (int) count);
+    _uv_udp_fail(udp, "udp_receive", (int) count);
     return;
   }
 
@@ -1955,7 +1955,7 @@ static void _uv_udp_send_callback(uv_udp_send_t *request, int status) {
   Scope.free(send.bytes);
   Scope.free(send);
   if (status < 0 && !(status == UV_ECANCELED && udp.closing))
-    _uv_udp_fail(udp, %"udp_send", status);
+    _uv_udp_fail(udp, "udp_send", status);
 }
 
 UvUdp UvLoop.udp(UvLoop loop) {
@@ -1967,7 +1967,7 @@ UvUdp UvLoop.udp(UvLoop loop) {
   int status = uv_udp_init(&loop.loop, &udp.udp);
   if (status < 0) {
     Scope.free(udp);
-    _uv_raise(%"udp_init", status);
+    _uv_raise("udp_init", status);
   }
   udp.loop = loop;
   udp.owner_scope = *Scope.top();
@@ -1978,26 +1978,26 @@ UvUdp UvLoop.udp(UvLoop loop) {
 }
 
 UvUdp UvUdp.bind(UvUdp udp, UvAddress address, unsigned flags) {
-  _uv_udp_ready(udp, %"udp_bind");
-  _uv_udp_address_size(address, %"udp_bind");
+  _uv_udp_ready(udp, "udp_bind");
+  _uv_udp_address_size(address, "udp_bind");
   int status = uv_udp_bind(&udp.udp, address.native(), flags);
-  if (status < 0) _uv_raise(%"udp_bind", status);
+  if (status < 0) _uv_raise("udp_bind", status);
   return udp;
 }
 
 UvUdp UvUdp.connect(UvUdp udp, UvAddress address) {
-  _uv_udp_ready(udp, %"udp_connect");
-  _uv_udp_address_size(address, %"udp_connect");
+  _uv_udp_ready(udp, "udp_connect");
+  _uv_udp_address_size(address, "udp_connect");
   int status = uv_udp_connect(&udp.udp, address.native());
-  if (status < 0) _uv_raise(%"udp_connect", status);
+  if (status < 0) _uv_raise("udp_connect", status);
   return udp;
 }
 
 static UvUdp _uv_udp_send(
   UvUdp udp, UvAddress target, const void *bytes, size_t length) {
-  _uv_udp_ready(udp, %"udp_send");
+  _uv_udp_ready(udp, "udp_send");
   size_t target_length = target
-    ? _uv_udp_address_size(target, %"udp_send")
+    ? _uv_udp_address_size(target, "udp_send")
     : 0;
   if (length > UINT_MAX) {
     raise %(size-limit (library "libuv") (operation "udp_send")
@@ -2023,7 +2023,7 @@ static UvUdp _uv_udp_send(
   if (status < 0) {
     Scope.free(send.bytes);
     Scope.free(send);
-    _uv_raise(%"udp_send", status);
+    _uv_raise("udp_send", status);
   }
   udp.loop.pending_requests++;
   return udp;
@@ -2052,7 +2052,7 @@ UvUdp UvUdp.send_bytes(UvUdp udp, UvAddress target, Bytes bytes) {
 }
 
 UvUdp UvUdp.max_receive(UvUdp udp, size_t bytes) {
-  _uv_udp_ready(udp, %"udp_max_receive");
+  _uv_udp_ready(udp, "udp_max_receive");
   if (!bytes) {
     raise %(bad-arg (library "libuv") (operation "udp_max_receive")
             (reason "a positive limit is required"));
@@ -2067,7 +2067,7 @@ UvUdp UvUdp.max_receive(UvUdp udp, size_t bytes) {
 
 UvUdp UvUdp.receive(
   UvUdp udp, Var value, void (*fn)(UvUdp, Bytes, UvAddress, unsigned, Var)) {
-  _uv_udp_ready(udp, %"udp_receive");
+  _uv_udp_ready(udp, "udp_receive");
   if (!fn) {
     raise %(bad-arg (library "libuv") (operation "udp_receive")
             (reason "a callback is required"));
@@ -2081,16 +2081,16 @@ UvUdp UvUdp.receive(
   int status = uv_udp_recv_start(
     &udp.udp, _uv_udp_alloc, _uv_udp_receive_callback
   );
-  if (status < 0) _uv_raise(%"udp_recv_start", status);
+  if (status < 0) _uv_raise("udp_recv_start", status);
   udp.receiving = 1;
   return udp;
 }
 
 UvUdp UvUdp.stop(UvUdp udp) {
-  _uv_udp_ready(udp, %"udp_recv_stop");
+  _uv_udp_ready(udp, "udp_recv_stop");
   if (!udp.receiving) return udp;
   int status = uv_udp_recv_stop(&udp.udp);
-  if (status < 0) _uv_raise(%"udp_recv_stop", status);
+  if (status < 0) _uv_raise("udp_recv_stop", status);
   udp.receiving = 0;
   return udp;
 }
@@ -2103,7 +2103,7 @@ UvUdp UvUdp.close(UvUdp udp) {
 
 static UvAddress _uv_udp_address(UvUdp udp, int peer) {
   _uv_udp_ready(
-    udp, peer ? %"udp_getpeername" : %"udp_getsockname"
+    udp, peer ? "udp_getpeername" : "udp_getsockname"
   );
   UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
   int length = sizeof(address.address);
@@ -2116,7 +2116,7 @@ static UvAddress _uv_udp_address(UvUdp udp, int peer) {
       );
   if (status < 0) {
     Scope.free(address);
-    _uv_raise(peer ? %"udp_getpeername" : %"udp_getsockname", status);
+    _uv_raise(peer ? "udp_getpeername" : "udp_getsockname", status);
   }
   address.length = length;
   address.socket_type = SOCK_DGRAM;
@@ -2134,12 +2134,12 @@ UvAddress UvUdp.peer_address(UvUdp udp) {
 }
 
 size_t UvUdp.send_queue_size(UvUdp udp) {
-  _uv_udp_ready(udp, %"udp_send_queue_size");
+  _uv_udp_ready(udp, "udp_send_queue_size");
   return uv_udp_get_send_queue_size(&udp.udp);
 }
 
 size_t UvUdp.send_queue_count(UvUdp udp) {
-  _uv_udp_ready(udp, %"udp_send_queue_count");
+  _uv_udp_ready(udp, "udp_send_queue_count");
   return uv_udp_get_send_queue_count(&udp.udp);
 }
 
@@ -2153,13 +2153,13 @@ uv_udp_t *UvUdp.native(UvUdp udp) {
 
 static String _uv_fs_operation_name(uv_fs_type operation) {
   switch (operation) {
-    case UV_FS_OPEN: return %"fs_open";
-    case UV_FS_CLOSE: return %"fs_close";
-    case UV_FS_READ: return %"fs_read";
-    case UV_FS_WRITE: return %"fs_write";
-    case UV_FS_STAT: return %"fs_stat";
-    case UV_FS_SCANDIR: return %"fs_scandir";
-    default: return %"fs";
+    case UV_FS_OPEN: return "fs_open";
+    case UV_FS_CLOSE: return "fs_close";
+    case UV_FS_READ: return "fs_read";
+    case UV_FS_WRITE: return "fs_write";
+    case UV_FS_STAT: return "fs_stat";
+    case UV_FS_SCANDIR: return "fs_scandir";
+    default: return "fs";
   }
 }
 
@@ -2235,7 +2235,7 @@ static void _uv_fs_copy_scan(UvFs fs) {
     fs.entries[fs.entry_count].type = entry.type;
     fs.entry_count++;
   }
-  if (status != UV_EOF) _uv_raise(%"fs_scandir_next", status);
+  if (status != UV_EOF) _uv_raise("fs_scandir_next", status);
 }
 
 static void _uv_fs_complete_file(UvFs fs) {
@@ -2348,7 +2348,7 @@ static void _uv_fs_whole_closed(UvFs fs, ssize_t result) {
       !fs.limit_exceeded && !fs.failure_cause) {
     fs.status = (int) result;
     fs.result = result;
-    fs.error_operation = %"fs_close";
+    fs.error_operation = "fs_close";
   }
   if (!fs.status && !fs.cancelled &&
       !fs.limit_exceeded && !fs.failure_cause)
@@ -2375,12 +2375,12 @@ static void _uv_fs_whole_close(UvFs fs) {
       !fs.limit_exceeded && !fs.failure_cause) {
     fs.status = status;
     fs.result = status;
-    fs.error_operation = %"fs_close";
+    fs.error_operation = "fs_close";
   }
   if (close_status < 0 && !fs.status && !fs.cancelled &&
       !fs.limit_exceeded && !fs.failure_cause) {
     fs.status = close_status;
-    fs.error_operation = %"fs_close";
+    fs.error_operation = "fs_close";
   }
   _uv_fs_finish(fs);
 }
@@ -2443,7 +2443,7 @@ static void _uv_fs_whole_callback(uv_fs_t *request) {
     fs.status = (int) result;
     fs.result = result;
     fs.error_operation = fs.phase == UV_FS_PHASE_OPEN
-      ? %"fs_open"
+      ? "fs_open"
       : _uv_fs_operation_name(fs.operation);
     if (fs.descriptor >= 0) _uv_fs_whole_close(fs);
     else {
@@ -2495,7 +2495,7 @@ static void _uv_fs_whole_callback(uv_fs_t *request) {
     }
     fs.status = UV_EIO;
     fs.result = UV_EIO;
-    fs.error_operation = %"fs_write";
+    fs.error_operation = "fs_write";
     _uv_fs_whole_close(fs);
     return;
   }
@@ -2517,7 +2517,7 @@ UvFs UvLoop.open(
     &loop.loop, &fs.request, fs.path, flags, mode,
     _uv_fs_single_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_open", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_open", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2537,7 +2537,7 @@ static UvFile _uv_file_ready(UvFile file, String operation) {
 UvFs UvFile.read(
   UvFile file, size_t length, int64_t offset, Var value,
   void (*fn)(UvFs, Var)) {
-  _uv_file_ready(file, %"fs_read");
+  _uv_file_ready(file, "fs_read");
   if (length > UINT_MAX) {
     raise %(size-limit (library "libuv") (operation "fs_read")
             (length $length));
@@ -2554,7 +2554,7 @@ UvFs UvFile.read(
     &file.loop.loop, &fs.request, file.descriptor, &buffer, 1,
     offset, _uv_fs_single_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_read", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_read", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2562,7 +2562,7 @@ UvFs UvFile.read(
 static UvFs _uv_file_write(
   UvFile file, const void *bytes, size_t length, int64_t offset, Var value,
   UvFsFn fn) {
-  _uv_file_ready(file, %"fs_write");
+  _uv_file_ready(file, "fs_write");
   if (length > UINT_MAX) {
     raise %(size-limit (library "libuv") (operation "fs_write")
             (length $length));
@@ -2581,7 +2581,7 @@ static UvFs _uv_file_write(
     &file.loop.loop, &fs.request, file.descriptor, &buffer, 1,
     offset, _uv_fs_single_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_write", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_write", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2611,7 +2611,7 @@ UvFs UvFile.write_bytes(
 }
 
 UvFs UvFile.close(UvFile file, Var value, void (*fn)(UvFs, Var)) {
-  _uv_file_ready(file, %"fs_close");
+  _uv_file_ready(file, "fs_close");
   if (file.pending) {
     size_t pending = file.pending;
     raise %(bad-state (library "libuv") (operation "fs_close")
@@ -2628,7 +2628,7 @@ UvFs UvFile.close(UvFile file, Var value, void (*fn)(UvFs, Var)) {
     &file.loop.loop, &fs.request, file.descriptor,
     _uv_fs_single_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_close", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_close", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2638,7 +2638,7 @@ UvLoop UvFile.loop(UvFile file) {
 }
 
 uv_file UvFile.native(UvFile file) {
-  _uv_file_ready(file, %"file_native");
+  _uv_file_ready(file, "file_native");
   return file.descriptor;
 }
 
@@ -2673,7 +2673,7 @@ static UvFs _uv_fs_whole(
     &loop.loop, &fs.request, fs.path, flags, mode,
     _uv_fs_whole_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_open", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_open", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2722,7 +2722,7 @@ UvFs UvLoop.stat(UvLoop loop, String path, Var value, void (*fn)(UvFs, Var)) {
   int status = uv_fs_stat(
     &loop.loop, &fs.request, fs.path, _uv_fs_single_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_stat", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_stat", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2737,7 +2737,7 @@ UvFs UvLoop.scan(UvLoop loop, String path, Var value, void (*fn)(UvFs, Var)) {
   int status = uv_fs_scandir(
     &loop.loop, &fs.request, fs.path, 0, _uv_fs_single_callback
   );
-  if (status < 0) _uv_fs_submit_failed(fs, %"fs_scandir", status);
+  if (status < 0) _uv_fs_submit_failed(fs, "fs_scandir", status);
   _uv_fs_started(fs);
   return fs;
 }
@@ -2755,7 +2755,7 @@ int UvFs.cancel(UvFs fs) {
   int status = uv_cancel((uv_req_t *) &fs.request);
   if (!status) return 1;
   if (status == UV_EBUSY) return 0;
-  _uv_raise(%"fs_cancel", status);
+  _uv_raise("fs_cancel", status);
 }
 
 int UvFs.cancelled(UvFs fs) {
@@ -2803,26 +2803,26 @@ uv_fs_type UvFs.operation(UvFs fs) {
 }
 
 ssize_t UvFs.result(UvFs fs) {
-  _uv_fs_completed(fs, %"fs_result");
+  _uv_fs_completed(fs, "fs_result");
   return fs.result;
 }
 
 UvFile UvFs.file(UvFs fs) {
-  return _uv_fs_result_type(fs, UV_FS_OPEN, %"fs_file").file;
+  return _uv_fs_result_type(fs, UV_FS_OPEN, "fs_file").file;
 }
 
 Bytes UvFs.bytes(UvFs fs) {
-  return _uv_fs_result_type(fs, UV_FS_READ, %"fs_bytes").bytes;
+  return _uv_fs_result_type(fs, UV_FS_READ, "fs_bytes").bytes;
 }
 
 UvStat UvFs.stat(UvFs fs) {
-  _uv_fs_result_type(fs, UV_FS_STAT, %"fs_stat_result");
+  _uv_fs_result_type(fs, UV_FS_STAT, "fs_stat_result");
   return &fs.stat;
 }
 
 size_t UvFs.entry_count(UvFs fs) {
   return _uv_fs_result_type(
-    fs, UV_FS_SCANDIR, %"fs_entry_count"
+    fs, UV_FS_SCANDIR, "fs_entry_count"
   ).entry_count;
 }
 
@@ -2837,11 +2837,11 @@ static UvDirEntry _uv_fs_entry(UvFs fs, int index, String operation) {
 }
 
 String UvFs.entry_name(UvFs fs, int index) {
-  return _uv_fs_entry(fs, index, %"fs_entry_name").name;
+  return _uv_fs_entry(fs, index, "fs_entry_name").name;
 }
 
 uv_dirent_type_t UvFs.entry_type(UvFs fs, int index) {
-  return _uv_fs_entry(fs, index, %"fs_entry_type").type;
+  return _uv_fs_entry(fs, index, "fs_entry_type").type;
 }
 
 UvLoop UvFs.loop(UvFs fs) {
@@ -2888,7 +2888,7 @@ UvAsync UvLoop.async(UvLoop loop, Var value, void (*fn)(UvAsync, Var)) {
   int status = uv_async_init(&loop.loop, &async.async, _uv_async_callback);
   if (status < 0) {
     Scope.free(async);
-    _uv_raise(%"async_init", status);
+    _uv_raise("async_init", status);
   }
   async.async.data = async;
   return async;
@@ -2904,7 +2904,7 @@ UvAsync UvAsync.send(UvAsync async) {
             (reason "the async handle has stopped"));
   }
   int status = uv_async_send(&async.async);
-  if (status < 0) _uv_raise(%"async_send", status);
+  if (status < 0) _uv_raise("async_send", status);
   return async;
 }
 
@@ -2937,13 +2937,13 @@ UvIdle UvLoop.idle(UvLoop loop, Var value, void (*fn)(UvIdle, Var)) {
   int status = uv_idle_init(&loop.loop, &idle.idle);
   if (status < 0) {
     Scope.free(idle);
-    _uv_raise(%"idle_init", status);
+    _uv_raise("idle_init", status);
   }
   idle.idle.data = idle;
   status = uv_idle_start(&idle.idle, _uv_idle_callback);
   if (status < 0) {
     _uv_idle_release(idle);
-    _uv_raise(%"idle_start", status);
+    _uv_raise("idle_start", status);
   }
   return idle;
 }
@@ -2974,13 +2974,13 @@ UvPrepare UvLoop.prepare(UvLoop loop, Var value, void (*fn)(UvPrepare, Var)) {
   int status = uv_prepare_init(&loop.loop, &prepare.prepare);
   if (status < 0) {
     Scope.free(prepare);
-    _uv_raise(%"prepare_init", status);
+    _uv_raise("prepare_init", status);
   }
   prepare.prepare.data = prepare;
   status = uv_prepare_start(&prepare.prepare, _uv_prepare_callback);
   if (status < 0) {
     _uv_prepare_release(prepare);
-    _uv_raise(%"prepare_start", status);
+    _uv_raise("prepare_start", status);
   }
   return prepare;
 }
@@ -3011,13 +3011,13 @@ UvCheck UvLoop.check(UvLoop loop, Var value, void (*fn)(UvCheck, Var)) {
   int status = uv_check_init(&loop.loop, &check.check);
   if (status < 0) {
     Scope.free(check);
-    _uv_raise(%"check_init", status);
+    _uv_raise("check_init", status);
   }
   check.check.data = check;
   status = uv_check_start(&check.check, _uv_check_callback);
   if (status < 0) {
     _uv_check_release(check);
-    _uv_raise(%"check_start", status);
+    _uv_raise("check_start", status);
   }
   return check;
 }
@@ -3049,7 +3049,7 @@ UvTimer UvLoop.timer(
   int status = uv_timer_init(&loop.loop, &timer.timer);
   if (status < 0) {
     Scope.free(timer);
-    _uv_raise(%"timer_init", status);
+    _uv_raise("timer_init", status);
   }
   timer.loop = loop;
   timer.value = value;
@@ -3060,7 +3060,7 @@ UvTimer UvLoop.timer(
   );
   if (status < 0) {
     _uv_timer_release(timer);
-    _uv_raise(%"timer_start", status);
+    _uv_raise("timer_start", status);
   }
   return timer;
 }
@@ -3092,7 +3092,7 @@ UvSignal UvLoop.signal(
   int status = uv_signal_init(&loop.loop, &signal.signal);
   if (status < 0) {
     Scope.free(signal);
-    _uv_raise(%"signal_init", status);
+    _uv_raise("signal_init", status);
   }
   signal.loop = loop;
   signal.value = value;
@@ -3102,7 +3102,7 @@ UvSignal UvLoop.signal(
   status = uv_signal_start(&signal.signal, _uv_signal_callback, number);
   if (status < 0) {
     _uv_signal_release(signal);
-    _uv_raise(%"signal_start", status);
+    _uv_raise("signal_start", status);
   }
   uv_unref((uv_handle_t *) &signal.signal);
   return signal;
@@ -3141,7 +3141,7 @@ UvWatch UvLoop.watch(
   int status = uv_fs_event_init(&loop.loop, &watch.event);
   if (status < 0) {
     Scope.free(watch);
-    _uv_raise(%"fs_event_init", status);
+    _uv_raise("fs_event_init", status);
   }
   watch.loop = loop;
   watch.value = value;
@@ -3150,7 +3150,7 @@ UvWatch UvLoop.watch(
   status = uv_fs_event_start(&watch.event, _uv_watch_callback, path, 0);
   if (status < 0) {
     _uv_watch_release(watch);
-    _uv_raise(%"fs_event_start", status);
+    _uv_raise("fs_event_start", status);
   }
   return watch;
 }
@@ -3164,7 +3164,7 @@ String UvWatch.entry(UvWatch watch) {
             (reason "a watch is required"));
   }
   if (watch.status < 0) {
-    _uv_raise(%"entry", watch.status);
+    _uv_raise("entry", watch.status);
   }
   return watch.entry;
 }
@@ -3243,17 +3243,17 @@ static UvStdioMode _uv_stdio_mode(Symbol mode, String operation) {
 */
 UvProcess UvProcess.stdio(
   UvProcess process, Symbol input, Symbol output, Symbol error) {
-  _uv_process_pending(process, %"stdio");
-  process.input_mode = _uv_stdio_mode(input, %"stdio");
-  process.output_mode = _uv_stdio_mode(output, %"stdio");
-  process.error_mode = _uv_stdio_mode(error, %"stdio");
+  _uv_process_pending(process, "stdio");
+  process.input_mode = _uv_stdio_mode(input, "stdio");
+  process.output_mode = _uv_stdio_mode(output, "stdio");
+  process.error_mode = _uv_stdio_mode(error, "stdio");
   process.output.enabled = process.output_mode == UV_STDIO_PIPE;
   process.error.enabled = process.error_mode == UV_STDIO_PIPE;
   return process;
 }
 
 UvProcess UvProcess.directory(UvProcess process, String path) {
-  _uv_process_pending(process, %"directory");
+  _uv_process_pending(process, "directory");
   if (!path || !path.len()) {
     raise %(bad-arg (library "libuv") (operation "directory")
             (reason "a nonempty path is required"));
@@ -3266,7 +3266,7 @@ UvProcess UvProcess.directory(UvProcess process, String path) {
     uv_os_environ on the raw path when the child should inherit and extend.
 */
 UvProcess UvProcess.environment(UvProcess process, Map variables) {
-  _uv_process_pending(process, %"environment");
+  _uv_process_pending(process, "environment");
   if (!variables) {
     raise %(bad-arg (library "libuv") (operation "environment")
             (reason "a Map of names to values is required"));
@@ -3278,7 +3278,7 @@ UvProcess UvProcess.environment(UvProcess process, Map variables) {
       raise %(bad-types (library "libuv") (operation "environment")
               (reason "every name and value must be a String"));
     }
-    environment[index++] = %"%s=%s".printf(name.string(), value.string());
+    environment[index++] = "%s=%s".printf(name.string(), value.string());
   }
   process.environment = environment;
   return process;
@@ -3288,7 +3288,7 @@ UvProcess UvProcess.environment(UvProcess process, Map variables) {
     the moment it starts. UvProcess.timed_out reports it afterwards.
 */
 UvProcess UvProcess.deadline(UvProcess process, long milliseconds) {
-  _uv_process_pending(process, %"deadline");
+  _uv_process_pending(process, "deadline");
   if (milliseconds <= 0) {
     raise %(bad-arg (library "libuv") (operation "deadline")
             (reason "a positive deadline in milliseconds is required"));
@@ -3298,7 +3298,7 @@ UvProcess UvProcess.deadline(UvProcess process, long milliseconds) {
 }
 
 UvProcess UvProcess.max_output(UvProcess process, size_t bytes) {
-  _uv_process_pending(process, %"max_output");
+  _uv_process_pending(process, "max_output");
   if (!bytes) {
     raise %(bad-arg (library "libuv") (operation "max_output")
             (reason "a positive limit is required"));
@@ -3309,7 +3309,7 @@ UvProcess UvProcess.max_output(UvProcess process, size_t bytes) {
 }
 
 UvProcess UvProcess.start(UvProcess process) {
-  _uv_process_pending(process, %"start");
+  _uv_process_pending(process, "start");
   UvLoop loop = process.loop;
 
   int status = 0;
@@ -3418,7 +3418,7 @@ UvProcess UvProcess.start(UvProcess process) {
   return process;
 
 pipe_failed: _uv_discard_closed_handles(loop, process);
-  _uv_raise(%"spawn", status);
+  _uv_raise("spawn", status);
 }
 
 UvProcess UvLoop.spawn(UvLoop loop, List arguments) {
@@ -3426,7 +3426,7 @@ UvProcess UvLoop.spawn(UvLoop loop, List arguments) {
 }
 
 UvProcess UvProcess.write(UvProcess process, String text) {
-  _uv_process_ready(process, %"write");
+  _uv_process_ready(process, "write");
   if (process.input_mode != UV_STDIO_PIPE) {
     raise %(bad-state (library "libuv") (operation "write")
             (reason "stdin was not configured as <pipe>"));
@@ -3461,14 +3461,14 @@ UvProcess UvProcess.write(UvProcess process, String text) {
   if (status < 0) {
     free(write.bytes);
     free(write);
-    _uv_raise(%"write", status);
+    _uv_raise("write", status);
   }
   process.pending_writes++;
   return process;
 }
 
 UvProcess UvProcess.close_stdin(UvProcess process) {
-  _uv_process_ready(process, %"shutdown");
+  _uv_process_ready(process, "shutdown");
   if (process.input_mode != UV_STDIO_PIPE) return process;
   if (process.input_closed || process.shutdown_pending) return process;
   int status = uv_shutdown(
@@ -3480,42 +3480,42 @@ UvProcess UvProcess.close_stdin(UvProcess process) {
       _uv_input_close(process);
       return process;
     }
-    _uv_raise(%"shutdown", status);
+    _uv_raise("shutdown", status);
   }
   process.shutdown_pending = 1;
   return process;
 }
 
 UvProcess UvProcess.kill(UvProcess process, int number) {
-  _uv_process_ready(process, %"process_kill");
+  _uv_process_ready(process, "process_kill");
   if (process.exited) {
     raise %(bad-state (library "libuv") (operation "process_kill")
             (reason "the process has already exited"));
   }
   int status = uv_process_kill(&process.process, number);
   if (status < 0) {
-    _uv_raise(%"process_kill", status);
+    _uv_raise("process_kill", status);
   }
   return process;
 }
 
 int UvProcess.pid(UvProcess process) {
-  _uv_process_ready(process, %"process_get_pid");
+  _uv_process_ready(process, "process_get_pid");
   return (int) uv_process_get_pid(&process.process);
 }
 
 int UvProcess.exited(UvProcess process) {
-  _uv_process_ready(process, %"exited");
+  _uv_process_ready(process, "exited");
   return process.exited;
 }
 
 int UvProcess.timed_out(UvProcess process) {
-  _uv_process_ready(process, %"timed_out");
+  _uv_process_ready(process, "timed_out");
   return process.timed_out;
 }
 
 long UvProcess.exit_status(UvProcess process) {
-  _uv_process_ready(process, %"exit_status");
+  _uv_process_ready(process, "exit_status");
   if (!process.exited) {
     raise %(bad-state (library "libuv") (operation "exit_status")
             (reason "the process has not exited"));
@@ -3524,7 +3524,7 @@ long UvProcess.exit_status(UvProcess process) {
 }
 
 int UvProcess.term_signal(UvProcess process) {
-  _uv_process_ready(process, %"term_signal");
+  _uv_process_ready(process, "term_signal");
   if (!process.exited) {
     raise %(bad-state (library "libuv") (operation "term_signal")
             (reason "the process has not exited"));
@@ -3573,28 +3573,28 @@ Bytes UvProcess.stdout_bytes(UvProcess process) {
   if (!process) {
     raise %(bad-arg (library "libuv") (operation "stdout_bytes"));
   }
-  return _uv_capture_bytes(process, &process.output, %"stdout_bytes");
+  return _uv_capture_bytes(process, &process.output, "stdout_bytes");
 }
 
 Bytes UvProcess.stderr_bytes(UvProcess process) {
   if (!process) {
     raise %(bad-arg (library "libuv") (operation "stderr_bytes"));
   }
-  return _uv_capture_bytes(process, &process.error, %"stderr_bytes");
+  return _uv_capture_bytes(process, &process.error, "stderr_bytes");
 }
 
 String UvProcess.stdout(UvProcess process) {
   if (!process) {
     raise %(bad-arg (library "libuv") (operation "stdout"));
   }
-  return _uv_capture_text(process, &process.output, %"stdout");
+  return _uv_capture_text(process, &process.output, "stdout");
 }
 
 String UvProcess.stderr(UvProcess process) {
   if (!process) {
     raise %(bad-arg (library "libuv") (operation "stderr"));
   }
-  return _uv_capture_text(process, &process.error, %"stderr");
+  return _uv_capture_text(process, &process.error, "stderr");
 }
 
 UvProcess UvProcess.free(UvProcess process) {

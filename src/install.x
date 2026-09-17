@@ -69,13 +69,12 @@ static String _read_text(String path) {
 
 static void _write_text(String path, String text) {
   File output = fopen(path, "w");
-  if (!output || (text && output.printf("%s", text.str()) < 0) ||
-      output.close())
+  if (!output || (text && output.puts(text) == EOF) || output.close())
     _error(%"cannot write $path");
 }
 
 static List _entries(String directory) =>
-  Path.list_dir(directory).filter(%!(name) => !name.str().startswith("."));
+  Path.list_dir(directory).filter(%!(String name) => !name.startswith("."));
 
 static List _files_with(String directory, String suffix) {
   Array paths = [];
@@ -106,7 +105,7 @@ static void _verify(String path, String expected) {
 /* One index line is `name version kind platform url sha256`; `kind` is
    `source` or `bundle`, and a source row's platform is `-`. */
 static List _index_row(CliRequest request, String name, String work) {
-  String location = request.index ? request.index : String.new(INSTALL_INDEX);
+  String location = request.index ? request.index : INSTALL_INDEX;
   String path = location.startswith("http://") ||
                 location.startswith("https://") ||
                 location.startswith("file://")
@@ -179,14 +178,14 @@ static void _build_source(String package, String name, String spec) {
   String builds = %"$package/builds", x2c = x2c_get_executable();
   if (!_build_mkdirs(builds)) _error(%"cannot create $builds");
   _run(%( $x2c "translate" "--out-dir" $builds
-          "--x-include-dir" ${%"$package/src"}
+          "--x-include-dir" "$package/src"
           "--package-dir" ${Path.dirname(package)} )
          .append(units), "translate");
   List inputs = _files_with(builds, ".c")
     .append(_files_with(%"$package/src", ".c"));
   _run(%( $x2c "build" "--kind" "static-library"
-          "--output" ${%"$builds/lib$name.a"}
-          "--build-dir" ${%"$builds/cc"} ).append(inputs), "build");
+          "--output" "$builds/lib$name.a"
+          "--build-dir" "$builds/cc" ).append(inputs), "build");
   _write_text(%"$builds/$name.link", "");
 }
 
@@ -295,6 +294,7 @@ int install_command(CliRequest request) {
   String spec = request.inputs.car();
   String packages = _locked_packages(request.quiet);
   String work = _work_directory(packages);
+  defer _build_remove_tree(work);
   String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
   int remote = spec.startswith("http://") || spec.startswith("https://") ||
                spec.startswith("file://");
@@ -312,7 +312,6 @@ int install_command(CliRequest request) {
   else _error(%"unknown package spec '$spec'");
   (void) _install(
     request, spec, source, url, sha256, version, packages, work);
-  _build_remove_tree(work);
   return 0;
 }
 
@@ -332,6 +331,7 @@ String install_version(String name) =>
 List install_require(CliRequest request, String name, String version) {
   String packages = _locked_packages(request.quiet);
   String work = _work_directory(packages);
+  defer _build_remove_tree(work);
   List row = _index_row(request, name, work);
   String resolved = row.nth_cdr(1).car();
   if (resolved != version)
@@ -340,7 +340,6 @@ List install_require(CliRequest request, String name, String version) {
     (void) _install(
       request, name, NULL, row.nth_cdr(4).car(), row.nth_cdr(5).car(),
       resolved, packages, work);
-  _build_remove_tree(work);
   return row;
 }
 

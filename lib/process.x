@@ -82,7 +82,7 @@ static char **_environment(Map env) {
       entries.push(text);
   }
   foreach (Var (name, value), env)
-    entries.push(%"${name.str()}=${value.str()}");
+    entries.push(%"$name=$value");
   char **result = Scope.calloc(entries.len() + 1, sizeof(char *));
   int index = 0;
   foreach (String entry, entries) result[index++] = entry;
@@ -94,7 +94,7 @@ static List _stages(List command) =>
   command && command.car() is List ? command : %($command);
 
 static int _is(Var value, Symbol name) =>
-  value is Symbol && value.symbol() == name;
+  value is Symbol && value == name;
 
 static void _close_on_exec(int fd) {
   fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
@@ -153,11 +153,11 @@ static void _child(
   int report) {
   if (stdin_fd >= 0) dup2(stdin_fd, STDIN_FILENO);
   if (stdout_fd >= 0) dup2(stdout_fd, STDOUT_FILENO);
-  if (launch->errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
+  if (launch.errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
   else if (stderr_fd >= 0) dup2(stderr_fd, STDERR_FILENO);
   int failure[2] = { _STEP_DIR, 0 };
-  if (!launch->dir || chdir(launch->dir) == 0) {
-    if (launch->environment) environ = launch->environment;
+  if (!launch.dir || chdir(launch.dir) == 0) {
+    if (launch.environment) environ = launch.environment;
     execvp(argv[0], argv);
     failure[0] = _STEP_EXEC;
   }
@@ -191,7 +191,7 @@ static void Job._spawn(
   if (count != sizeof(failure)) return;
   int error = failure[1];
   if (failure[0] == _STEP_DIR) {
-    String dir = launch->dir;
+    String dir = launch.dir;
     if (error == ENOENT)
       raise %(not-found (operation "Job.start") (path $dir) (errno $error));
     raise %(io-fail (operation "Job.start") (path $dir) (errno $error));
@@ -216,24 +216,24 @@ static void Job._start(Job job) {
   job.statuses = Scope.calloc(job.count, sizeof(int));
   int input = -1, output = -1, errors = -1, launched = 0;
   defer if (!launched) job.cleanup();
-  if (launch->input) {
+  if (launch.input) {
     File file = _capture_file();
-    file.write_all(launch->input, launch->input.len());
+    file.write_all(launch.input, launch.input.len());
     file.rewind();
     input = dup(file.fileno());
     file.close();
     _close_on_exec(input);
   }
-  if (launch->capture_output) {
+  if (launch.capture_output) {
     job.output_file = _capture_file();
     output = job.output_file.fileno();
   }
-  else if (launch->stdout_path) output = _open_output(launch->stdout_path);
-  if (launch->capture_errors) {
+  else if (launch.stdout_path) output = _open_output(launch.stdout_path);
+  if (launch.capture_errors) {
     job.errors_file = _capture_file();
     errors = job.errors_file.fileno();
   }
-  else if (launch->stderr_path) errors = _open_output(launch->stderr_path);
+  else if (launch.stderr_path) errors = _open_output(launch.stderr_path);
   fflush(NULL);
   int previous = input, index = 0, last = job.count - 1;
   {
@@ -289,7 +289,7 @@ static Job Job.new(List command) {
   Job job = Scope.calloc(1, sizeof(struct Job));
   job.stages = _stages(command);
   job.launch = Scope.calloc(1, sizeof(_Launch));
-  job.launch->capture_output = 1;
+  job.launch.capture_output = 1;
   return job;
 }
 
@@ -340,25 +340,25 @@ Job Job.options(Job job, Map options) {
     Symbol name = key;
     switch (name) {
       case <dir>:
-        launch->dir = value.str();
+        launch.dir = value;
         break;
       case <env>:
-        launch->environment = _environment(value);
+        launch.environment = _environment(value);
         break;
       case <input>:
-        launch->input = value.str();
+        launch.input = value;
         break;
       case <stdout>:
-        launch->capture_output = _is(value, <capture>);
-        launch->stdout_path = launch->capture_output ||
-          _is(value, <inherit>) ? NULL : value.str();
+        launch.capture_output = _is(value, <capture>);
+        launch.stdout_path = launch.capture_output ||
+          _is(value, <inherit>) ? NULL : value;
         break;
       case <stderr>:
-        launch->capture_errors = _is(value, <capture>);
-        launch->errors_to_output = _is(value, <stdout>);
-        launch->stderr_path =
-          launch->capture_errors || launch->errors_to_output ||
-          _is(value, <inherit>) ? NULL : value.str();
+        launch.capture_errors = _is(value, <capture>);
+        launch.errors_to_output = _is(value, <stdout>);
+        launch.stderr_path =
+          launch.capture_errors || launch.errors_to_output ||
+          _is(value, <inherit>) ? NULL : value;
         break;
       default:
         raise %(bad-arg (operation "Job.options") (option $name));
@@ -418,8 +418,8 @@ Job Job.check(Job job) {
   List stages = job.stages;
   List command = stages.cdr() ? stages : stages.car();
   String output = job.output_text, errors = job.errors_text;
-  int captured = job.launch->capture_output;
-  int logged = job.launch->capture_errors;
+  int captured = job.launch.capture_output;
+  int logged = job.launch.capture_errors;
   if (captured && logged)
     raise %(cmd-fail (command $command) (status $status) (output $output)
             (errors $errors));

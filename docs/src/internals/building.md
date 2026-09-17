@@ -69,7 +69,7 @@ which checks to run; see [Contributor checks](#contributor-checks).
 ## Unit interfaces and native bindings
 
 Each translated unit writes `<stem>.xi` beside its `.c` and `.h`: one
-`(interface 1 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
+`(interface 2 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
 data form. It uses compact bare `Atom`s for its fixed set of structural
 words, case-sensitive `String` identifiers, and the same nested `List` syntax
 as `%()` x2c literals. It never emits the legal but noncanonical `<"name">`

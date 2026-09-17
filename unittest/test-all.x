@@ -38,6 +38,8 @@ void process_suite(void);
 void path_suite(void);
 void args_suite(void);
 void digest_suite(void);
+void regex_suite(void);
+void diff_suite(void);
 void json_suite(void);
 void protocols_suite(void);
 void atomic_container_suite(void);
@@ -99,6 +101,8 @@ int main(int argc, char **argv) {
   $test.suite(path_suite);
   $test.suite(args_suite);
   $test.suite(digest_suite);
+  $test.suite(regex_suite);
+  $test.suite(diff_suite);
   $test.suite(json_suite);
   $test.suite(protocols_suite);
   $test.suite(atomic_container_suite);

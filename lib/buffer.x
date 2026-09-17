@@ -194,8 +194,7 @@ Self Buffer.printf(Self buf, const char *format, ...) {
   int written = vsnprintf(bytes, (size_t) length + 1, format, args);
   va_end(args);
   if (written < 0) raise %(format);
-  buf = buf.write_len(bytes, length);
-  return buf;
+  return buf.write_len(bytes, length);
 }
 
 /** Appends the non-NUL byte `value` to `buf`.

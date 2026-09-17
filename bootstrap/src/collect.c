@@ -32,7 +32,7 @@
 
 static List _79, _77, _76, _72, _71, _70, _69, _51, _50, _49, _48, _43, _41, _40, _38, _26, _25, _24, _13;
 
-static String _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _60, _59, _58, _57, _56, _55, _54, _53, _52, _33, _32, _31, _30, _29, _28, _27, _20, _19, _18, _17, _16, _14, _10, _9, _8, _7, _6, _4, _3, _2, _1, _0;
+static String _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _60, _59, _58, _57, _56, _55, _54, _53, _52, _33, _32, _31, _30, _29, _28, _27, _20, _19, _18, _17, _16, _14, _10, _9, _8, _7, _6, _4, _3, _2, _1, _0;
 
 static Var _78, _68, _67, _66, _65, _63, _62, _61, _47, _44, _42, _39, _37, _34, _23, _22, _21, _15, _12, _11, _5;
 
@@ -272,19 +272,17 @@ __attribute__((constructor)) static void _file_init_(void){
   _78 = Atom_intern(String_new("interface-pending"));
   _79 = cons(_78, NULL);
   _80 = String_new(".tmp.%ld");
-  _81 = String_new("%s");
-  _82 = String_new("file: ");
-  _83 = String_new("reason: ");
-  _84 = String_new("#");
-  _85 = String_new("include");
-  _86 = String_new(".");
-  _87 = String_new("/");
-  _88 = String_new("cannot read include");
-  _89 = String_new(".x");
-  _90 = String_new("cannot read runtime source");
-  _91 = String_new("failed to write interface file");
-  _92 = String_new(">");
-  _93 = String_new("\"");
+  _81 = String_new("file: ");
+  _82 = String_new("reason: ");
+  _83 = String_new("#");
+  _84 = String_new("include");
+  _85 = String_new(".");
+  _86 = String_new("/");
+  _87 = String_new("cannot read include");
+  _88 = String_new("cannot read runtime source");
+  _89 = String_new("failed to write interface file");
+  _90 = String_new(">");
+  _91 = String_new("\"");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -311,16 +309,16 @@ int String_find(String, String);
 static String _preproc_include_target(String text, int * angle){
   * angle = 0;
   String body = String_strip(text, " \t\r\n");
-  if(! String_startswith(body, _84)) return NULL;
+  if(! String_startswith(body, _83)) return NULL;
   body = String_lstrip(String_getslice(body, 1, -2147483648, 1), " \t");
-  if(! String_startswith(body, _85)) return NULL;
-  body = String_lstrip(String_remove_prefix(body, _85), " \t");
+  if(! String_startswith(body, _84)) return NULL;
+  body = String_lstrip(String_remove_prefix(body, _84), " \t");
   if(! String_len(body)) return NULL;
   char open = String_getindex(body, 0);
   if(open != '"' && open != '<') return NULL;
   * angle = open == '<';
   String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, * angle ? _92 : _93);
+  int close = String_find(rest, * angle ? _90 : _91);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 
@@ -428,7 +426,7 @@ static String _canonical_src(void){
 
 static String _canonical_cwd(void){
   static char cache[PATH_MAX];
-  return _cached_canonical(cache, _86);
+  return _cached_canonical(cache, _85);
 }
 
 int String_truth(String);
@@ -447,7 +445,7 @@ int String_equal(String, String);
 
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
   * covered = 0;
-  if(String_startswith(target, _87)) return _includable_file(sources, target) ? target : NULL;
+  if(String_startswith(target, _86)) return _includable_file(sources, target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
   Array dirs = Array_new();
   if(! angle && String_truth(includer_dir)) Array_push(dirs, String_var(_canonical_path(includer_dir)));
@@ -579,6 +577,8 @@ Var Map_getindex(Map, Var);
 
 int Var_is_void(Var);
 
+Var List_var(List);
+
 int List_truth(List);
 
 static int _entry_adds_symbols_visit(Compiler compiler, List entry, Map globs, Map visited){
@@ -611,7 +611,7 @@ static int _entry_adds_symbols_visit(Compiler compiler, List entry, Map globs, M
         if(Map_contains(visited, String_var(dependency))) continue;
         Map_setindex(visited, String_var(dependency), int_var(1));
         Var cached = Map_getindex(_header_cache(), String_var(dependency));
-        List resolved = Var_is_void(cached) ? _interface_read(compiler, dependency) : Var_list(cached);
+        List resolved = Var_list(Var_is_void(cached) ? List_var(_interface_read(compiler, dependency)) : cached);
         if(List_truth(resolved) && _entry_adds_symbols_visit(compiler, resolved, globs, visited)) return 1;
       }
 
@@ -672,7 +672,7 @@ static void _replay_cached(Compiler compiler, List entry, Map globs, Map visited
         if(Map_contains(visited, String_var(dep_path))) continue;
         Map_setindex(visited, String_var(dep_path), int_var(1));
         Var dep_entry = Map_getindex(_header_cache(), String_var(dep_path));
-        List resolved = Var_is_void(dep_entry) ? _interface_read(compiler, dep_path) : Var_list(dep_entry);
+        List resolved = Var_list(Var_is_void(dep_entry) ? List_var(_interface_read(compiler, dep_path)) : dep_entry);
         if(List_truth(resolved)) _replay_cached(compiler, resolved, globs, visited);
         else _walk_cold(compiler, dep_path, dep_path, globs, visited);
       }
@@ -694,7 +694,7 @@ String File_string_close(File);
 static String _include_text(Compiler c, String target, String path){
   String volatile text = NULL;
   if(c -> sources){
-    if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 306819428, _88, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
+    if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 306819428, _87, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
     return text;
   }
   File volatile file = NULL;
@@ -715,13 +715,13 @@ static String _include_text(Compiler c, String target, String path){
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
       if (_x2c_catch_selected_0 == 0) {{
         List notes = cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL)));
-        Compiler_report_error(c, 306819428, _88, c -> token, notes);
+        Compiler_report_error(c, 306819428, _87, c -> token, notes);
       }
 
     }
     else {{
       List notes = cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL)));
-      Compiler_report_error(c, 306819428, _88, c -> token, notes);
+      Compiler_report_error(c, 306819428, _87, c -> token, notes);
     }
 
   }
@@ -753,7 +753,7 @@ ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exc
     x2c_exception_mark_handled(&_x2c_exception_frame_1);
      {{
       List notes = cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL)));
-      Compiler_report_error(c, 306819428, _88, c -> token, notes);
+      Compiler_report_error(c, 306819428, _87, c -> token, notes);
     }
 
   }
@@ -787,7 +787,7 @@ List Array_list(Array);
 
 Compiler Compiler_new_shared(Compiler);
 
-int String_endswith(String, String);
+int x2c_source_file(String);
 
 void Compiler_take_unit_state(Compiler, Compiler);
 
@@ -814,7 +814,8 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    if(! String_endswith(path, _89)) shadow -> package = NULL;
+    int unit = x2c_source_file(path);
+    if(! unit) shadow -> package = NULL;
     shadow -> filename = path;
     shadow -> source_private = * private;
     Compiler_take_unit_state(shadow, c);
@@ -828,7 +829,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
     }
     Compiler_shallow_parse_overlay(shadow, globs, overlay);
     Compiler_return_unit_state(shadow, c);
-    if(String_endswith(path, _89)){
+    if(unit){
       Map_merge(c -> fn_defs, shadow -> fn_defs);
       Map_merge(definitions, shadow -> fn_defs);
     }
@@ -870,10 +871,10 @@ static void _include(Compiler c, String target, int angle, String dir, Map globs
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, & covered);
   if(! String_truth(path)) return;
-  if(covered && ! String_endswith(path, _89)) return;
+  if(covered && ! x2c_source_file(path)) return;
   String canonical = _canonical_path(path);
   Var cached = c -> source_facts ?((void) 0, Void) : Map_getindex(_header_cache(), String_var(canonical));
-  List entry = Var_is_void(cached) ? _interface_read(c, canonical) : Var_list(cached);
+  List entry = Var_list(Var_is_void(cached) ? List_var(_interface_read(c, canonical)) : cached);
   Array_push(parts, String_var(canonical));
   if(! covered || c -> runtime_hdrs || ! List_truth(entry) || _entry_adds_symbols(c, entry, globs)){
     Compiler_add_translation_dependency(c, canonical);
@@ -920,8 +921,6 @@ static Map _own_contribution(Compiler compiler){
 int List_try_own(List);
 
 List Type_list(Type);
-
-Var List_var(List);
 
 void Compiler_record_generated_header_symbol(Compiler compiler, String name, Type signature){
   if(! _init_guard_) _file_init_();
@@ -1139,7 +1138,7 @@ _x2c_error_handler_2 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_2);
 }
 }
-if(failed) Compiler_report_error(c, 306819428, _90, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
+if(failed) Compiler_report_error(c, 306819428, _88, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
 return text;
 }
 
@@ -1199,8 +1198,6 @@ static String _package_entry(Compiler compiler, String name, String * directory)
   return NULL;
 }
 
-String Var_str(Var);
-
 List List_cdr(List);
 
 List List_cddr(List);
@@ -1211,13 +1208,13 @@ static String _package_key_spelling(List key){
   head = List_getindex(_x2c_destructure_1, 0);
   spelling_value = List_getindex(_x2c_destructure_1, 1);
   if(Var_is_row(head, 11, 7, 1)){
-    String spelling = Var_str(head);
+    String spelling = Var_string(head);
     if(List_truth(List_cdr(key)) || String_equal(spelling, _19)) return NULL;
     return String_equal(spelling, _20) ? NULL : spelling;
   }
-  if(Var_equal(head, Symbol_var(1256204))) return List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(spelling_value, 11, 7, 1) ? Var_str(spelling_value) : NULL;
+  if(Var_equal(head, Symbol_var(1256204))) return List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(spelling_value, 11, 7, 1) ? Var_string(spelling_value) : NULL;
   if(! Var_equal(head, Symbol_var(44661285196)) && ! Var_equal(head, Symbol_var(1318234344)) && ! Var_equal(head, Symbol_var(44977116)) && ! Var_equal(head, Symbol_var(357722))) return NULL;
-  return List_truth(List_cdr(key)) && Var_is_row(spelling_value, 11, 7, 1) ? Var_str(spelling_value) : NULL;
+  return List_truth(List_cdr(key)) && Var_is_row(spelling_value, 11, 7, 1) ? Var_string(spelling_value) : NULL;
 }
 
 int List_contains(List, Var);
@@ -1238,7 +1235,7 @@ List String_split(String, String);
 
 static void _package_merge(Compiler compiler, String name, String root, String path, Map part, Map merged, Token token){
   String prefix = String_join(NULL, cons(String_var(name), cons(String_var(_27), NULL)));
-  int header = ! String_endswith(path, _89);
+  int header = ! x2c_source_file(path);
   int foreign = ! String_startswith(path, String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL))));
   {
     Var key, value;
@@ -1264,7 +1261,7 @@ static void _package_merge(Compiler compiler, String name, String root, String p
           continue;
         }
         if(! foreign) continue;
-        String unit = Var_string(List_last(String_split(path, _87)));
+        String unit = Var_string(List_last(String_split(path, _86)));
         String fix = String_join(NULL, cons(String_var(_28), cons(String_var(name), cons(String_var(_29), NULL))));
         Compiler_report_error(compiler, 306819428, String_join(NULL, cons(String_var(_30), cons(String_var(name), cons(String_var(_31), cons(String_var(spelling), cons(String_var(_32), NULL)))))), token, cons(String_var(String_join(NULL, cons(String_var(_32), cons(String_var(unit), cons(String_var(_33), cons(String_var(fix), NULL)))))), NULL));
       }
@@ -1436,7 +1433,7 @@ static String _portable_path(String path){
 }
 
 static String _absolute_path(String spelling){
-  if(String_startswith(spelling, _87)) return spelling;
+  if(String_startswith(spelling, _86)) return spelling;
   return String_join(NULL, cons(String_var(_canonical_root()), cons(String_var(_3), cons(String_var(spelling), NULL))));
 }
 
@@ -1741,7 +1738,7 @@ break;
 default: ;  return NULL;  break;
     }
   }
-if(! Var_is_row(parts_value, 9, 7, 4) || ! Var_is_row(definitions_value, 9, 7, 4) || ! Var_is_row(dependencies_value, 9, 7, 4)) return NULL;  if(! String_equal(_absolute_path(Var_str(owner)), canonical)) return NULL;  if(! _hash_matches(compiler, canonical, expected_hash)) return NULL;  Map_setindex(interface_loading, String_var(canonical), int_var(1));  Array parts = Array_new(); {
+if(! Var_is_row(parts_value, 9, 7, 4) || ! Var_is_row(definitions_value, 9, 7, 4) || ! Var_is_row(dependencies_value, 9, 7, 4)) return NULL;  if(! String_equal(_absolute_path(Var_string(owner)), canonical)) return NULL;  if(! _hash_matches(compiler, canonical, expected_hash)) return NULL;  Map_setindex(interface_loading, String_var(canonical), int_var(1));  Array parts = Array_new(); {
   Var part;  List _x2c_macro_object_18 = Var_list(parts_value);  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_18, & _x2c_macro_cursor_18, & _x2c_macro_cursor_output_19)){
     part = _x2c_macro_cursor_output_19; {
       if(Var_is_row(part, 11, 7, 1)){
@@ -1794,7 +1791,7 @@ Scope_pop();
       dependency_name = List_getindex(_x2c_destructure_5, 0);
       content_hash = List_getindex(_x2c_destructure_5, 1);
       if(! Var_is_row(dependency_name, 11, 7, 1)) return _interface_reject(canonical);
-      String dependency_path = _canonical_path(_absolute_path(Var_str(dependency_name)));
+      String dependency_path = _canonical_path(_absolute_path(Var_string(dependency_name)));
       if(Var_is_integer(content_hash) && Var_integer(content_hash) == 1){
         _cache_dependency(dependencies, dependency_path, content_hash);
         continue;
@@ -1864,7 +1861,7 @@ static Var _renumber_bindings(Var value, Map identities){
   String spelling = NULL;
   if(binding_identity_try_parts(node, NULL, & spelling)){
     Var identity = Map_setdefault(identities, List_var(node), unsigned_var(Map_len(identities) + 1));
-    return List_var(binding_identity_new(Var_integer(identity), spelling));
+    return List_var(binding_identity_new(Var_int(Var_convert(identity, 3453797)), spelling));
   }
   Array children = Array_new();
   {
@@ -1949,6 +1946,8 @@ static int _write_interface_entry(File output, String canonical, List entry){
   return snapshot_write_var(output, List_var(record)) && File_putc(output, '\n') != EOF;
 }
 
+String String_new(const char *);
+
 void interface_write(Compiler compiler, String path){
   if(! _init_guard_) _file_init_();
   String canonical = _canonical_path(compiler -> filename);
@@ -1962,9 +1961,9 @@ void interface_write(Compiler compiler, String path){
     if(File_close(output)) written = 0;
   }
   if(written && ! rename(temporary, path)) return;
-  String reason = String_printf(_81, strerror(errno));
+  String reason = String_new(strerror(errno));
   unlink(temporary);
-  Compiler_report_error(compiler, 354920, _91, NULL, cons(String_var(String_join(NULL, cons(String_var(_82), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_83), cons(String_var(reason), NULL)))), NULL)));
+  Compiler_report_error(compiler, 354920, _89, NULL, cons(String_var(String_join(NULL, cons(String_var(_81), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_82), cons(String_var(reason), NULL)))), NULL)));
 }
 
 void Compiler_close_child(Compiler, Compiler);

@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 33
-- Runtime modules: 53
+- Compiler modules: 34
+- Runtime modules: 55
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -81,9 +81,9 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `header_symbols_initialize`, `header_symbols_begin_generated`,
-`Compiler.record_generated_header_symbol`, `Compiler.collect_symbols`,
-`Compiler.collect_package`, `interface_configure`, `interface_prelude`,
-`interface_write`
+`Compiler.record_generated_header_symbol`, `Compiler.record_region_summary`,
+`Compiler.collect_symbols`, `Compiler.collect_package`, `interface_configure`,
+`interface_prelude`, `interface_write`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -332,6 +332,14 @@ Public functions:
 `Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
 `Compiler.generate_protocol_adapters`, `Compiler.parse_protocol_declaration`
 
+### [src/regions.x](../src/regions.x)
+
+values that can outlive the region that allocated them.
+
+Public functions:
+
+`Compiler.check_regions`
+
 ### [src/report.x](../src/report.x)
 
 Command progress and completion receipts.
@@ -416,7 +424,7 @@ Public functions:
 `Type.is_function`, `Type.is_bitfield`, `Type.scalar`, `Type.scalar_tag`,
 `Type.var_numeric_extractor`, `Type.var_numeric_update_helper`,
 `Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
-`Type.initialize`, `Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
 `Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
 `Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
@@ -432,10 +440,10 @@ System utilities for environment discovery and workers.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
-`x2c_get_executable`, `x2c_package_directory`, `x2c_package_source`,
-`x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_home_packages`,
-`x2c_driver_error`, `worker_fork`, `worker_exit`, `worker_wait`,
-`x2c_filename_hash`
+`x2c_get_executable`, `x2c_package_directory`, `x2c_source_file`,
+`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
+`x2c_home_packages`, `x2c_driver_error`, `worker_fork`, `worker_exit`,
+`worker_wait`, `x2c_filename_hash`
 
 ## Runtime modules
 
@@ -554,6 +562,14 @@ Public functions:
 `Context.open_isolated`, `Context.open_isolated_named`, `Context.current`,
 `Context.export_nested`, `Context.export`, `Context.export_scope`,
 `Context.close`, `Context.cleanup`
+
+### [lib/diff.x](../lib/diff.x)
+
+line differences between two texts.
+
+Public functions:
+
+`Diff.lines`, `Diff.unified`
 
 ### [lib/digest.x](../lib/digest.x)
 
@@ -892,6 +908,21 @@ built-in runtime protocol declarations.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [lib/regex.x](../lib/regex.x)
+
+regular expressions over the bytes of a String.
+
+Public functions:
+
+`Regex.free`, `Regex.cleanup`, `Regex.var`, `Var.regex`, `Regex.equal`,
+`Regex.hash`, `Regex.write_str`, `Regex.str`, `Regex.write_repr`, `Regex.repr`,
+`Regex.compile`, `Regex.pattern`, `Regex.capture_count`, `Regex.capture_names`,
+`Regex.escape`, `Regex.match_from`, `Regex.match`, `Regex.find_all`,
+`Regex.split`, `Regex.replace`, `Regex.replace_all`, `Regex.replace_fn`,
+`RegexMatch.capture`, `RegexMatch.getindex`, `RegexCapture.index`,
+`RegexCapture.name`, `RegexCapture.matched`, `RegexCapture.text`,
+`RegexCapture.start`, `RegexCapture.end`, `Var.regexcapture`, `Var.regexmatch`
 
 ### [lib/scan.x](../lib/scan.x)
 

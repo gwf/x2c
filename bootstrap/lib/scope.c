@@ -16,11 +16,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#define PTR_ALLOC(p)      ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
-#define ALLOC_PTR(a)      ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
-#define TAG_POINTER(p)    ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
-#define UNTAG_POINTER(p)  ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
-#define IS_TAGGED(p)      ((uintptr_t) (p) & (uintptr_t) 1)
+#define PTR_ALLOC(p) ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
+#define ALLOC_PTR(a) ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
+#define TAG_POINTER(p) ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
+#define UNTAG_POINTER(p) ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
+#define IS_TAGGED(p) ((uintptr_t) (p) & (uintptr_t) 1)
 typedef struct ScopeFinalizer{
   void(* drop)(void *);
   void * pad;
@@ -93,6 +93,8 @@ static void * _raw_malloc(size_t size);
 static void _raw_free(void * ptr);
 
 static void * _raw_realloc(void * ptr, size_t size);
+
+static void * _raw_grow(void * items, int count, int * capacity, size_t size);
 
 static void _initialize(void);
 
@@ -191,6 +193,23 @@ static void * _raw_realloc(void * ptr, size_t size){
   return result;
 }
 
+static void * _raw_grow(void * items, int count, int * capacity, size_t size){
+  if(! items){
+    items = _raw_malloc(16 * size);
+    * capacity = 16;
+  }
+  else if(count == * capacity){
+    if(* capacity > INT_MAX / 2){
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/scope.x",.function = "_raw_grow",.line = 172};
+      x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 0);
+      __builtin_unreachable();
+    }
+    items = _raw_realloc(items, * capacity * 2 * size);
+    * capacity *= 2;
+  }
+  return items;
+}
+
 static void _initialize(void){
   if(scope_state == 40094288782 || scope_state == 1324302486414) return;
   if(scope_state == 1324301450716) _raw_fatal("operation attempted after shutdown");
@@ -212,8 +231,8 @@ static void _require_running(void){
 static void * _data_malloc(size_t size){
   void * ptr = malloc(size);
   if(! ptr){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/scope.x",.function = "_data_malloc",.line = 187};
-    x2c_error_raise_n(& _x2c_error_site_2, 97614135954008, 0);
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/scope.x",.function = "_data_malloc",.line = 202};
+    x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 0);
     __builtin_unreachable();
   }
   return ptr;
@@ -222,8 +241,8 @@ static void * _data_malloc(size_t size){
 static void * _data_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);
   if(! result){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/scope.x",.function = "_data_realloc",.line = 193};
-    x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 0);
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/scope.x",.function = "_data_realloc",.line = 208};
+    x2c_error_raise_n(& _x2c_error_site_4, 97614135954008, 0);
     __builtin_unreachable();
   }
   return result;
@@ -243,8 +262,8 @@ static void _register_name(Scope scope, const char * name){
   if(! name) return;
   size_t length = strlen(name);
   if(length == SIZE_MAX){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/scope.x",.function = "_register_name",.line = 211};
-    x2c_error_raise_n(& _x2c_error_site_4, 1358596898646632, 0);
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/scope.x",.function = "_register_name",.line = 226};
+    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 0);
     __builtin_unreachable();
   }
   ScopeName node = _raw_malloc(sizeof(struct ScopeName));
@@ -277,20 +296,7 @@ static void _unregister_name(Scope scope){
 
 static void _record_retain(Scope scope, Scope * slot){
   ScopeThreadState state = _thread();
-  if(! state -> retains){
-    state -> retain_capacity = 16;
-    state -> retains = _raw_malloc(state -> retain_capacity * sizeof(* state -> retains));
-  }
-  else if(state -> retain_count == state -> retain_capacity){
-    if(state -> retain_capacity > INT_MAX / 2){
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/scope.x",.function = "_record_retain",.line = 248};
-      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 0);
-      __builtin_unreachable();
-    }
-    int new_capacity = state -> retain_capacity * 2;
-    state -> retains = _raw_realloc(state -> retains, new_capacity * sizeof(* state -> retains));
-    state -> retain_capacity = new_capacity;
-  }
+  state -> retains = _raw_grow(state -> retains, state -> retain_count, & state -> retain_capacity, sizeof(* state -> retains));
   state -> retains[state -> retain_count ++] =(ScopeRetain){
     .scope = scope, .slot = slot
   }
@@ -324,13 +330,13 @@ static Scope _new_scope(const char * name){
 static void * _malloc_in(Scope * slot, size_t size, void(* drop)(void *)){
   size_t extra = drop ? sizeof(ScopeFinalizer) : 0;
   if(! slot){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/scope.x",.function = "_malloc_in",.line = 288};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/scope.x",.function = "_malloc_in",.line = 294};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 0);
     __builtin_unreachable();
   }
   if(size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra){
     if(x2c_error_runtime_ready){
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/scope.x",.function = "_malloc_in",.line = 290};
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/scope.x",.function = "_malloc_in",.line = 296};
       x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 0);
       __builtin_unreachable();
     }
@@ -357,7 +363,7 @@ static void * _malloc_in(Scope * slot, size_t size, void(* drop)(void *)){
 static void * _calloc_in(Scope * slot, size_t count, size_t size){
   if(count && size > SIZE_MAX / count){
     if(x2c_error_runtime_ready){
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/scope.x",.function = "_calloc_in",.line = 313};
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/scope.x",.function = "_calloc_in",.line = 319};
       x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 0);
       __builtin_unreachable();
     }
@@ -509,17 +515,17 @@ void Scope_destroy(Scope scope){
   _require_running();
   ScopeThreadState state = _thread();
   if(scope == state -> root){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 535};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 541};
     x2c_error_raise_n(& _x2c_error_site_9, 4477477457162, 0);
     __builtin_unreachable();
   }
   for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 536};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 542};
     x2c_error_raise_n(& _x2c_error_site_10, 4477477457162, 0);
     __builtin_unreachable();
   }
   if(scope -> up){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 538};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 544};
     x2c_error_raise_n(& _x2c_error_site_11, 4477477457162, 0);
     __builtin_unreachable();
   }
@@ -531,24 +537,11 @@ void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! hook){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 553};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 559};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);
     __builtin_unreachable();
   }
-  if(! hooks){
-    hook_capacity = 16;
-    hooks = _raw_malloc(hook_capacity * sizeof(* hooks));
-  }
-  else if(hook_count == hook_capacity){
-    if(hook_capacity > INT_MAX / 2){
-      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 559};
-      x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 0);
-      __builtin_unreachable();
-    }
-    int new_capacity = hook_capacity * 2;
-    hooks = _raw_realloc(hooks, new_capacity * sizeof(* hooks));
-    hook_capacity = new_capacity;
-  }
+  hooks = _raw_grow(hooks, hook_count, & hook_capacity, sizeof(* hooks));
   hooks[hook_count ++] = hook;
 }
 
@@ -556,25 +549,12 @@ void Scope_push(Scope * scope){
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! scope){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 596};
-    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 0);
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 593};
+    x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 0);
     __builtin_unreachable();
   }
   ScopeThreadState state = _thread();
-  if(! state -> stack){
-    state -> stack_capacity = 16;
-    state -> stack = _raw_malloc(state -> stack_capacity * sizeof(* state -> stack));
-  }
-  else if(state -> stack_size == state -> stack_capacity){
-    if(state -> stack_capacity > INT_MAX / 2){
-      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 603};
-      x2c_error_raise_n(& _x2c_error_site_15, 1358596898646632, 0);
-      __builtin_unreachable();
-    }
-    int new_capacity = state -> stack_capacity * 2;
-    state -> stack = _raw_realloc(state -> stack, new_capacity * sizeof(* state -> stack));
-    state -> stack_capacity = new_capacity;
-  }
+  state -> stack = _raw_grow(state -> stack, state -> stack_size, & state -> stack_capacity, sizeof(* state -> stack));
   state -> active = state -> stack[state -> stack_size ++] = scope;
 }
 
@@ -589,8 +569,8 @@ void Scope_pop(void){
   _require_running();
   ScopeThreadState state = _thread();
   if(! state -> stack_size){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/scope.x",.function = "Scope_pop",.line = 638};
-    x2c_error_raise_n(& _x2c_error_site_16, 4477477457162, 0);
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/scope.x",.function = "Scope_pop",.line = 627};
+    x2c_error_raise_n(& _x2c_error_site_14, 4477477457162, 0);
     __builtin_unreachable();
   }
   state -> stack_size --;
@@ -616,8 +596,8 @@ void Scope_release(void){
   ScopeThreadState state = _thread();
   {
     if(! *(state -> active) || ! _forget_retain(*(state -> active), (state -> active))){
-      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_release",.line = 719};
-      x2c_error_raise_n(& _x2c_error_site_17, 4477477457162, 0);
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/scope.x",.function = "Scope_release",.line = 708};
+      x2c_error_raise_n(& _x2c_error_site_15, 4477477457162, 0);
       __builtin_unreachable();
     }
     Scope top = *(state -> active);
@@ -638,8 +618,8 @@ void * Scope_malloc_finalized(size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! drop){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized",.line = 767};
-    x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized",.line = 756};
+    x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 0);
     __builtin_unreachable();
   }
   return _malloc_in(_thread() -> active, size, drop);
@@ -655,8 +635,8 @@ void * Scope_malloc_finalized_in(Scope * slot, size_t size, void(* drop)(void *)
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! drop){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 797};
-    x2c_error_raise_n(& _x2c_error_site_19, 4372499598, 0);
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 786};
+    x2c_error_raise_n(& _x2c_error_site_17, 4372499598, 0);
     __builtin_unreachable();
   }
   return _malloc_in(slot, size, drop);
@@ -707,8 +687,8 @@ void Scope_move(void * ptr, Scope * slot){
   _require_running();
   if(! ptr) return;
   if(! slot){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 924};
-    x2c_error_raise_n(& _x2c_error_site_20, 4372499598, 0);
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 913};
+    x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);
     __builtin_unreachable();
   }
   if(! * slot) * slot = _new_scope(NULL);
@@ -737,8 +717,8 @@ void * Scope_realloc(void * ptr, size_t size){
   ScopeAlloc old = PTR_ALLOC(ptr), next = NEXT(old), prev = old -> prev;
   size_t extra = IS_FINALIZED(old) ? sizeof(ScopeFinalizer) : 0;
   if(size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra){
-    static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 961};
-    x2c_error_raise_n(& _x2c_error_site_21, 1358596898646632, 0);
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 950};
+    x2c_error_raise_n(& _x2c_error_site_19, 1358596898646632, 0);
     __builtin_unreachable();
   }
   char * base = _data_realloc(ALLOC_BASE(old), size + sizeof(struct ScopeAlloc) + extra);

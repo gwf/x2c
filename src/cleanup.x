@@ -26,9 +26,9 @@
 #include "type.x"
 
 /* The runtime types a region's record and frame have. */
-static const char *_frame_type = "ExceptionFrame";
-static const char *_record_type = "X2CCleanup";
-static const char *_handler_type = "ErrorHandler";
+static String _frame_type = "ExceptionFrame";
+static String _record_type = "X2CCleanup";
+static String _handler_type = "ErrorHandler";
 
 /* The walk state for one function body. */
 typedef struct Walk {
@@ -39,20 +39,20 @@ typedef struct Walk {
   Type return_type;
 } *Walk;
 
-static List _address_of(const char *spelling, List binding) {
-  Type type = %((${String.new(spelling)}));
+static List _address_of(String spelling, List binding) {
+  Type type = %(($spelling));
   return %(expr ${type.reference()} (op & (expr $type (ident $binding))));
 }
 
 /* One native call on a region's record or frame, as a statement. */
-static List _region_call(String function, const char *type, List binding) =>
+static List _region_call(String function, String type, List binding) =>
   %(stmnt (expr (void)
     (call $function (args ${_address_of(type, binding)}))));
 
 /* Introduce a name this pass owns. The emitted declaration spells this
    binding, so the record a region pushes and the record its exits leave are
    one name by construction. */
-static List _region_binding(Compiler compiler, const char *role) =>
+static List _region_binding(Compiler compiler, String role) =>
   compiler.sym.introduce(compiler.fresh_name(role));
 
 /* The statements that leave a `defer` region: the runtime unlinks the
@@ -67,7 +67,7 @@ static Var _finalizer_label(Var value, int origin, int *at) {
   Array pending = $auto([value]), origins = $auto([origin]);
   while (pending.len()) {
     Var current = pending.take_last();
-    int here = origins.take_last().int();
+    int here = origins.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     match (node) {
@@ -100,7 +100,7 @@ static List _try_cleanup(
   List frame, List handle, List finalizer, int has_clause) {
   Array body = [];
   if (has_clause) {
-    Type handler = %((${String.new(_handler_type)}));
+    Type handler = %(($_handler_type));
     body.push(%(stmnt (expr (void)
       (call "x2c_error_catch_close"
         (args (expr $handler (ident $handle)))))));
@@ -138,7 +138,7 @@ static List _transfer(Walk walk, int stop, List statement) {
 /* The open regions, innermost first. A label's ancestry is this list, and a
    jump may only leave a suffix of it. */
 static List _region_path(Walk walk) {
-  List path = NULL;
+  List path = %();
   foreach (List region, walk.regions) path = cons(region.cadr(), path);
   return path;
 }
@@ -146,7 +146,7 @@ static List _region_path(Walk walk) {
 /* A label reads as a binding, as a wrapped expression, or as the bare name
    a macro wrote. */
 static String _label_spelling(Var label) {
-  if (label is <string>) return label.str();
+  if (label is <string>) return label;
   if (label is not <list>) return NULL;
   List node = label;
   match (node) {
@@ -207,10 +207,10 @@ static void _collect_labels(Walk walk, Var value, List path) {
    depth the jump unwinds to. */
 /* Report at the jump the walk is on, and leave the compiler's origin as it
    was for whatever reports next. */
-static void _reject_goto(Walk walk, const char *message, List note) {
+static void _reject_goto(Walk walk, String message, List note) {
   int previous = walk.compiler.origin;
   walk.compiler.origin = walk.origin;
-  walk.compiler.report_error(<emit>, %"${String.new(message)}", NULL, note);
+  walk.compiler.report_error(<emit>, message, NULL, note);
   walk.compiler.origin = previous;
 }
 
@@ -273,7 +273,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
   modes.push(0);
   while (pending.len()) {
     List node = pending.take_last();
-    int address = modes.take_last().int();
+    int address = modes.take_last();
     if (address) {
       match (node) {
         case %(!or (expr ? ?inner) (parens ?inner)
@@ -396,7 +396,7 @@ static void _collect_preserved(Var value, int in_try, Map names) {
   Array pending = $auto([value]), flags = $auto([in_try]);
   while (pending.len()) {
     Var current = pending.take_last();
-    int inside = flags.take_last().int();
+    int inside = flags.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     if (inside) {
@@ -539,7 +539,7 @@ static Var _preserve(Var value, Map names) {
            ((!or declare decl) ?type (!set ?bindings (bindings *)))): {
       Symbol head = declaration.car();
       if (!_is_automatic(declaration)) return node;
-      type = _preserve_pointee(type.list(), bindings, names);
+      type = _preserve_pointee(type, bindings, names);
       Array preserved = [];
       foreach (List binding, bindings.cdr())
         match (binding) {
@@ -600,7 +600,7 @@ static Var _rewrite(Walk walk, Var value) {
         walk.compiler.origin = previous;
       }
       List cleanup = _try_cleanup(
-        frame, handle, _rewrite(walk, finalizer).list(), !!clause);
+        frame, handle, _rewrite(walk, finalizer), !!clause);
       List body_out = _inside(walk, cleanup, body, body);
       /* A catch arm runs inside the region it handles, so it leaves the
          same statements behind on its own exits. Each arm is its own
@@ -674,10 +674,10 @@ static List _function(Compiler compiler, List node) {
       _collect_labels(walk, body, NULL);
       Map preserved = {};
       _collect_preserved(body, 0, preserved);
-      List rewritten = _rewrite(walk, body).list();
+      List rewritten = _rewrite(walk, body);
       if (preserved.len()) {
-        rewritten = _preserve(rewritten, preserved).list();
-        bindings = _preserve(bindings, preserved).list();
+        rewritten = _preserve(rewritten, preserved);
+        bindings = _preserve(bindings, preserved);
       }
       state.regions.free();
       return %(function $type $bindings $rewritten);
@@ -706,4 +706,4 @@ static Var _units(Compiler compiler, Var value) {
     point.
 */
 List Compiler.mark_cleanup_regions(Compiler compiler, List ast) =>
-  _units(compiler, ast).list();
+  _units(compiler, ast);

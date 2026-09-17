@@ -94,7 +94,7 @@ Replaces the file at `path` with `value` as compact JSON text.
 
 **Raises:** the causes of `Var.json` and `Path.write_text`.
 
-Source: `lib/json.x:563`
+Source: `lib/json.x:564`
 
 ### `JsonBool`
 
@@ -151,7 +151,7 @@ to the same value.
 `<conv-range>` for NaN or an infinity, `<bad-arg>` for a string that is
 not UTF-8, or `<size-limit>` for nesting deeper than 512 levels.
 
-Source: `lib/json.x:553`
+Source: `lib/json.x:554`
 
 <a id="Var.jsonbool"></a>
 #### Var.jsonbool
@@ -171,7 +171,7 @@ Returns `value` as JSON text indented two spaces per level.
 
 **Raises:** the causes of `Var.json`.
 
-Source: `lib/json.x:558`
+Source: `lib/json.x:559`
 
 ## Public types
 

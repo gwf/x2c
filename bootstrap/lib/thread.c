@@ -95,8 +95,6 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-String String_new(const char *);
-
 Var Symbol_var(Symbol);
 
 Var String_var(String);

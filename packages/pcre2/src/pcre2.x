@@ -49,7 +49,7 @@ static PCRE2_SPTR _pcre2_bytes(String string) {
 static String _pcre2_error_message(int code) {
   PCRE2_UCHAR bytes[256] = { 0 };
   int length = pcre2_get_error_message(code, bytes, sizeof(bytes));
-  if (length < 0) return %"unknown PCRE2 error";
+  if (length < 0) return "unknown PCRE2 error";
   return String.new_len((char *) bytes, length);
 }
 
@@ -131,7 +131,7 @@ Regexp Regexp.compile_context(
   int info_result = _regexp_load_names(regexp);
   if (info_result < 0) {
     regexp.free();
-    _pcre2_match_error(%"pattern_info", info_result);
+    _pcre2_match_error("pattern_info", info_result);
   }
   return regexp;
 }
@@ -158,29 +158,29 @@ Regexp Regexp.free(Regexp regexp) {
 }
 
 String Regexp.pattern(Regexp regexp) {
-  _regexp_live(regexp, %"pattern");
+  _regexp_live(regexp, "pattern");
   return regexp.pattern;
 }
 
 uint32_t Regexp.capture_count(Regexp regexp) {
-  _regexp_live(regexp, %"capture_count");
+  _regexp_live(regexp, "capture_count");
   return regexp.capture_count;
 }
 
 /*  These pointers are borrowed until `free()`. Ordinary matching reuses the
     match-data block, so a raw match through it replaces the same ovector. */
 pcre2_code *Regexp.native(Regexp regexp) {
-  _regexp_live(regexp, %"native");
+  _regexp_live(regexp, "native");
   return regexp.code;
 }
 
 pcre2_match_data *Regexp.native_match_data(Regexp regexp) {
-  _regexp_live(regexp, %"native_match_data");
+  _regexp_live(regexp, "native_match_data");
   return regexp.match_data;
 }
 
 pcre2_match_context *Regexp.native_match_context(Regexp regexp) {
-  _regexp_live(regexp, %"native_match_context");
+  _regexp_live(regexp, "native_match_context");
   return regexp.match_context;
 }
 
@@ -229,7 +229,7 @@ Regexp Regexp.set_match_limit(Regexp regexp, uint32_t limit) {
             (reason "freed or null Regexp"));
   }
   return _regexp_limit_result(
-    regexp, %"set_match_limit",
+    regexp, "set_match_limit",
     pcre2_set_match_limit(regexp.match_context, limit)
   );
 }
@@ -240,7 +240,7 @@ Regexp Regexp.set_depth_limit(Regexp regexp, uint32_t limit) {
             (reason "freed or null Regexp"));
   }
   return _regexp_limit_result(
-    regexp, %"set_depth_limit",
+    regexp, "set_depth_limit",
     pcre2_set_depth_limit(regexp.match_context, limit)
   );
 }
@@ -251,7 +251,7 @@ Regexp Regexp.set_heap_limit(Regexp regexp, uint32_t limit) {
             (reason "freed or null Regexp"));
   }
   return _regexp_limit_result(
-    regexp, %"set_heap_limit",
+    regexp, "set_heap_limit",
     pcre2_set_heap_limit(regexp.match_context, limit)
   );
 }
@@ -262,7 +262,7 @@ Regexp Regexp.set_offset_limit(Regexp regexp, ulong limit) {
             (reason "freed or null Regexp"));
   }
   return _regexp_limit_result(
-    regexp, %"set_offset_limit",
+    regexp, "set_offset_limit",
     pcre2_set_offset_limit(regexp.match_context, (PCRE2_SIZE) limit)
   );
 }
@@ -274,7 +274,7 @@ Regexp Regexp.jit_compile(Regexp regexp, uint32_t options) {
   }
   int result = pcre2_jit_compile(regexp.code, options);
   if (result < 0) {
-    _pcre2_match_error(%"jit_compile", result);
+    _pcre2_match_error("jit_compile", result);
   }
   return regexp;
 }
@@ -284,7 +284,7 @@ ulong Regexp.jit_size(Regexp regexp) {
   PCRE2_SIZE size = 0;
   int result = pcre2_pattern_info(regexp.code, PCRE2_INFO_JITSIZE, &size);
   if (result < 0) {
-    _pcre2_match_error(%"pattern_info", result);
+    _pcre2_match_error("pattern_info", result);
   }
   return (ulong) size;
 }
@@ -346,7 +346,7 @@ static RegexpMatch _regexp_match_at(
   );
   if (*result == PCRE2_ERROR_NOMATCH) return NULL;
   if (*result < 0) {
-    _pcre2_match_error(%"match", *result);
+    _pcre2_match_error("match", *result);
   }
   return _regexp_result(regexp, subject);
 }
@@ -417,7 +417,7 @@ String Regexp.substitute(
     NULL, &length
   );
   if (result != PCRE2_ERROR_NOMEMORY || !length || length == PCRE2_UNSET) {
-    if (result < 0) _pcre2_match_error(%"substitute", result);
+    if (result < 0) _pcre2_match_error("substitute", result);
     return NULL;
   }
   if (length >= INT_MAX) {
@@ -436,7 +436,7 @@ String Regexp.substitute(
   );
   if (result < 0) {
     output.free();
-    _pcre2_match_error(%"substitute", result);
+    _pcre2_match_error("substitute", result);
   }
   char *bytes = output;
   *(bytes + capacity) = '\0';
@@ -488,7 +488,7 @@ String Regexp.replace_fn(
     cursor = (int) whole.end();
   }
   parts = cons(subject.getslice(cursor, subject.len(), 1), parts);
-  return %"".join(parts.reverse());
+  return "".join(parts.reverse());
 }
 
 RegexpCapture RegexpMatch.capture(RegexpMatch found, Var key) {

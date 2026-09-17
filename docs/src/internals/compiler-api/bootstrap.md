@@ -34,7 +34,7 @@ their actual canonical pool lifetimes, which may belong to ancestor pools.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the request.
 
-Source: `src/bootstrap.x:324`
+Source: `src/bootstrap.x:316`
 
 #### bootstrap_materialize
 
@@ -55,7 +55,7 @@ constructing the result. If one transfers after lock acquisition, no
 payload is returned for release and the live process keeps the lock until
 it exits.
 
-Source: `src/bootstrap.x:281`
+Source: `src/bootstrap.x:275`
 
 #### bootstrap_record_install
 
@@ -69,7 +69,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:355`
+Source: `src/bootstrap.x:347`
 
 #### bootstrap_release
 
@@ -79,7 +79,7 @@ Attempts to remove a held bootstrap lock without freeing the payload.
 The lock path is cleared even if `unlink` fails. NULL payloads and repeated
 calls have no effect.
 
-Source: `src/bootstrap.x:374`
+Source: `src/bootstrap.x:364`
 
 ## Public types
 

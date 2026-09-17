@@ -445,7 +445,7 @@ static void _raylib_trace_reset(void) {
 
 static String _raylib_trace_detail(void) {
   return _raylib_trace_message[0]
-    ? String.new(_raylib_trace_message) : %"raylib reported no detail";
+    ? String.new(_raylib_trace_message) : "raylib reported no detail";
 }
 
 static void _raylib_renderer(void) {
@@ -496,7 +496,7 @@ RaylibWindow RaylibWindow.open(int width, int height, String title) {
 }
 
 void RaylibWindow.upload(RaylibWindow window, Image image) {
-  _raylib_window_live(window, %"upload");
+  _raylib_window_live(window, "upload");
   if (!image.valid()) {
     raise %(bad-arg (library "raylib") (operation "LoadTextureFromImage")
             (reason "this image holds no pixels"));
@@ -513,7 +513,7 @@ void RaylibWindow.upload(RaylibWindow window, Image image) {
 }
 
 void RaylibWindow.present(RaylibWindow window) {
-  _raylib_window_live(window, %"present");
+  _raylib_window_live(window, "present");
   BeginDrawing();
   ClearBackground(RAYWHITE);
   if (window.uploaded) DrawTexture(window.texture, 0, 0, WHITE);
@@ -521,17 +521,17 @@ void RaylibWindow.present(RaylibWindow window) {
 }
 
 int RaylibWindow.should_close(RaylibWindow window) {
-  _raylib_window_live(window, %"should_close");
+  _raylib_window_live(window, "should_close");
   return WindowShouldClose() != 0;
 }
 
 void RaylibWindow.target_fps(RaylibWindow window, int fps) {
-  _raylib_window_live(window, %"target_fps");
+  _raylib_window_live(window, "target_fps");
   SetTargetFPS(fps);
 }
 
 Texture2D *RaylibWindow.native(RaylibWindow window) {
-  _raylib_window_live(window, %"native");
+  _raylib_window_live(window, "native");
   if (!window.uploaded) {
     raise %(bad-state (library "raylib") (operation "native")
             (reason "this window has no uploaded image"));
@@ -621,7 +621,7 @@ void Image.draw_polygon(Image image, List points, Color color) {
   defer Scope.release();
 
   int count = 0;
-  Vector2 *vertices = _raylib_vertices(points, %"draw polygon", &count);
+  Vector2 *vertices = _raylib_vertices(points, "draw polygon", &count);
   ImageDrawTriangleFan(&image, vertices, count, color);
 }
 
@@ -631,7 +631,7 @@ void Image.draw_polygon_lines(
   defer Scope.release();
 
   int count = 0;
-  Vector2 *vertices = _raylib_vertices(points, %"draw polygon lines", &count);
+  Vector2 *vertices = _raylib_vertices(points, "draw polygon lines", &count);
   for (int index = 0; index < count; index++)
     ImageDrawLineEx(
       &image, vertices[index], vertices[(index + 1) % count],
@@ -641,7 +641,7 @@ void Image.draw_polygon_lines(
 
 Image Image.new(int width, int height, Color color) {
   return _raylib_generated(
-    GenImageColor(width, height, color), %"GenImageColor", width, height
+    GenImageColor(width, height, color), "GenImageColor", width, height
   );
 }
 
@@ -649,7 +649,7 @@ Image Image.gradient_linear(
   int width, int height, int direction, Color start, Color end) {
   return _raylib_generated(
     GenImageGradientLinear(width, height, direction, start, end),
-    %"GenImageGradientLinear", width, height
+    "GenImageGradientLinear", width, height
   );
 }
 
@@ -657,7 +657,7 @@ Image Image.gradient_radial(
   int width, int height, float density, Color inner, Color outer) {
   return _raylib_generated(
     GenImageGradientRadial(width, height, density, inner, outer),
-    %"GenImageGradientRadial", width, height
+    "GenImageGradientRadial", width, height
   );
 }
 
@@ -665,7 +665,7 @@ Image Image.gradient_square(
   int width, int height, float density, Color inner, Color outer) {
   return _raylib_generated(
     GenImageGradientSquare(width, height, density, inner, outer),
-    %"GenImageGradientSquare", width, height
+    "GenImageGradientSquare", width, height
   );
 }
 
@@ -674,14 +674,14 @@ Image Image.checked(
   Color second) {
   return _raylib_generated(
     GenImageChecked(width, height, checks_x, checks_y, first, second),
-    %"GenImageChecked", width, height
+    "GenImageChecked", width, height
   );
 }
 
 Image Image.white_noise(int width, int height, float factor) {
   return _raylib_generated(
     GenImageWhiteNoise(width, height, factor),
-    %"GenImageWhiteNoise", width, height
+    "GenImageWhiteNoise", width, height
   );
 }
 
@@ -689,14 +689,14 @@ Image Image.perlin_noise(
   int width, int height, int offset_x, int offset_y, float scale) {
   return _raylib_generated(
     GenImagePerlinNoise(width, height, offset_x, offset_y, scale),
-    %"GenImagePerlinNoise", width, height
+    "GenImagePerlinNoise", width, height
   );
 }
 
 Image Image.cellular(int width, int height, int tile_size) {
   return _raylib_generated(
     GenImageCellular(width, height, tile_size),
-    %"GenImageCellular", width, height
+    "GenImageCellular", width, height
   );
 }
 
@@ -735,30 +735,30 @@ ImagePixels Image.pixels(Image image) {
 }
 
 int ImagePixels.len(ImagePixels pixels) {
-  _raylib_pixels_live(pixels, %"pixels len");
+  _raylib_pixels_live(pixels, "pixels len");
   return pixels.width * pixels.height;
 }
 
 Color ImagePixels.getindex(ImagePixels pixels, int index) {
-  return pixels.data[_raylib_pixel_offset(pixels, index, %"pixels index")];
+  return pixels.data[_raylib_pixel_offset(pixels, index, "pixels index")];
 }
 
 Color ImagePixels.setindex(ImagePixels pixels, int index, Color color) {
-  pixels.data[_raylib_pixel_offset(pixels, index, %"pixels store")] = color;
+  pixels.data[_raylib_pixel_offset(pixels, index, "pixels store")] = color;
   return color;
 }
 
 Color ImagePixels.at(ImagePixels pixels, int x, int y) {
-  return pixels.data[_raylib_pixel_xy(pixels, x, y, %"pixels at")];
+  return pixels.data[_raylib_pixel_xy(pixels, x, y, "pixels at")];
 }
 
 Color ImagePixels.put(ImagePixels pixels, int x, int y, Color color) {
-  pixels.data[_raylib_pixel_xy(pixels, x, y, %"pixels put")] = color;
+  pixels.data[_raylib_pixel_xy(pixels, x, y, "pixels put")] = color;
   return color;
 }
 
 Image ImagePixels.image(ImagePixels pixels) {
-  _raylib_pixels_live(pixels, %"pixels image");
+  _raylib_pixels_live(pixels, "pixels image");
   size_t bytes = (size_t) pixels.width * pixels.height * sizeof(Color);
   Color *copy = MemAlloc((unsigned int) bytes);
   if (!copy) {

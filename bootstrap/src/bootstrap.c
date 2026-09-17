@@ -46,6 +46,13 @@ static void _extract(Bootstrap payload, char * manifest);
 
 static void _collect_existing(Bootstrap payload, char * manifest);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -326,23 +333,43 @@ Bootstrap bootstrap_materialize(CliRequest request){
   Bootstrap payload = Scope_calloc(1, sizeof(struct Bootstrap));
   payload -> prefix = _absolute(request -> prefix);
   char * manifest = _manifest(& payload -> identity);
-  _acquire(payload);
-  String source_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL)));
-  String complete_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL)));
-  if(! access(payload -> prefix, F_OK)){
-    if(! _read_marker(source_marker, payload -> identity)){
-      bootstrap_release(payload);
-      _error_path("prefix exists but does not contain this source payload", payload -> prefix);
+  {
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & manifest};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_1
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    _acquire(payload);
+    String source_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_7), NULL)));
+    String complete_marker = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_8), NULL)));
+    if(! access(payload -> prefix, F_OK)){
+      if(! _read_marker(source_marker, payload -> identity)){
+        bootstrap_release(payload);
+        _error_path("prefix exists but does not contain this source payload", payload -> prefix);
+      }
+      _collect_existing(payload, manifest);
     }
-    _collect_existing(payload, manifest);
+    else _extract(payload, manifest);
+    payload -> runtime_srcs = List_reverse(payload -> runtime_srcs);
+    payload -> compiler_srcs = List_reverse(payload -> compiler_srcs);
+    payload -> complete = _read_marker(complete_marker, payload -> identity) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))), X_OK) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_10), NULL))), R_OK);
+    if(! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_11), NULL)))) || ! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_12), NULL))))) _error_path("cannot create installation directories", payload -> prefix);
+    {
+      Bootstrap _x2c_return_value_0 = payload;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
+    }
+
   }
-  else _extract(payload, manifest);
-  payload -> runtime_srcs = List_reverse(payload -> runtime_srcs);
-  payload -> compiler_srcs = List_reverse(payload -> compiler_srcs);
-  free(manifest);
-  payload -> complete = _read_marker(complete_marker, payload -> identity) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_9), NULL))), X_OK) && ! access(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_10), NULL))), R_OK);
-  if(! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_11), NULL)))) || ! _build_mkdirs(String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_12), NULL))))) _error_path("cannot create installation directories", payload -> prefix);
-  return payload;
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
 }
 
 CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol component){
@@ -377,5 +404,10 @@ void bootstrap_release(Bootstrap payload){
   if(! payload || ! String_truth(payload -> lock_path)) return;
   unlink(payload -> lock_path);
   payload -> lock_path = NULL;
+}
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  free((*(char * *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 

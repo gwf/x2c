@@ -35,7 +35,7 @@ Source: `lib/buffer.x:107`
 
 Returns the number of bytes currently stored in `buf`.
 
-Source: `lib/buffer.x:313`
+Source: `lib/buffer.x:312`
 
 <a id="Buffer.new"></a>
 #### Buffer.new
@@ -56,7 +56,7 @@ Source: `lib/buffer.x:62`
 
 Pops one indentation depth from `buf`'s stack when present.
 
-Source: `lib/buffer.x:271`
+Source: `lib/buffer.x:270`
 
 <a id="Buffer.push"></a>
 #### Buffer.push
@@ -68,7 +68,7 @@ Pushes the current column as a later indentation depth.
 **Raises:** `<size-limit>` or `<alloc-fail>` if the stack cannot grow. Failure
 leaves the stack unchanged.
 
-Source: `lib/buffer.x:265`
+Source: `lib/buffer.x:264`
 
 <a id="Buffer.truth"></a>
 #### Buffer.truth
@@ -77,7 +77,7 @@ Source: `lib/buffer.x:265`
 
 Returns nonzero when `buffer` contains at least one byte.
 
-Source: `lib/buffer.x:352`
+Source: `lib/buffer.x:351`
 
 <a id="Buffer.try_get"></a>
 #### Buffer.try_get
@@ -88,7 +88,7 @@ Writes the byte at normalized `index` to `out` when it exists.
 Negative indexes count from the end. Returns zero for a null `Buffer`, null
 output, or missing byte and leaves `out` unchanged.
 
-Source: `lib/buffer.x:287`
+Source: `lib/buffer.x:286`
 
 ## Advanced and interop API
 
@@ -121,7 +121,7 @@ Source: `lib/buffer.x:287`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/buffer.x:356`
+Source: `lib/buffer.x:355`
 
 <a id="Buffer.free"></a>
 #### Buffer.free
@@ -139,7 +139,7 @@ Source: `lib/buffer.x:75`
 
 Appends spaces through `buf`'s current indentation depth.
 
-Source: `lib/buffer.x:256`
+Source: `lib/buffer.x:255`
 
 <a id="Buffer.newline"></a>
 #### Buffer.newline
@@ -148,7 +148,7 @@ Source: `lib/buffer.x:256`
 
 Appends a newline to `buf`.
 
-Source: `lib/buffer.x:253`
+Source: `lib/buffer.x:252`
 
 <a id="Buffer.newline_indent"></a>
 #### Buffer.newline_indent
@@ -157,7 +157,7 @@ Source: `lib/buffer.x:253`
 
 Appends a newline followed by current indentation.
 
-Source: `lib/buffer.x:259`
+Source: `lib/buffer.x:258`
 
 <a id="Buffer.pad"></a>
 #### Buffer.pad
@@ -166,7 +166,7 @@ Source: `lib/buffer.x:259`
 
 Appends the configured number of padding spaces.
 
-Source: `lib/buffer.x:250`
+Source: `lib/buffer.x:249`
 
 <a id="Buffer.printf"></a>
 #### Buffer.printf
@@ -190,7 +190,7 @@ Returns the readable representation of `Buffer`.
 
 **Raises:** the same causes as `Buffer.str` or `String` rendering.
 
-Source: `lib/buffer.x:345`
+Source: `lib/buffer.x:344`
 
 <a id="Buffer.reserve"></a>
 #### Buffer.reserve
@@ -219,7 +219,7 @@ live until its owning `String` pool is released.
 **Raises:** `<size-limit>` when the text exceeds `String`'s representation, or
 `<alloc-fail>` while canonicalizing it.
 
-Source: `lib/buffer.x:322`
+Source: `lib/buffer.x:321`
 
 <a id="Buffer.str_free"></a>
 #### Buffer.str_free
@@ -233,7 +233,7 @@ on success and when the conversion transfers an `Error`.
 
 **Raises:** the same causes as `Buffer.str`.
 
-Source: `lib/buffer.x:337`
+Source: `lib/buffer.x:336`
 
 <a id="Buffer.tabstop"></a>
 #### Buffer.tabstop
@@ -242,7 +242,7 @@ Source: `lib/buffer.x:337`
 
 Returns the most recently pushed indentation depth.
 
-Source: `lib/buffer.x:277`
+Source: `lib/buffer.x:276`
 
 <a id="Buffer.unwrite"></a>
 #### Buffer.unwrite
@@ -251,7 +251,7 @@ Source: `lib/buffer.x:277`
 
 Removes the final `count` bytes from `buf`.
 
-Source: `lib/buffer.x:242`
+Source: `lib/buffer.x:241`
 
 <a id="Buffer.write"></a>
 #### Buffer.write
@@ -275,7 +275,7 @@ Appends the non-NUL byte `value` to `buf`.
 `<alloc-fail>` when the `Buffer` cannot grow. These failures leave text and
 line state unchanged.
 
-Source: `lib/buffer.x:206`
+Source: `lib/buffer.x:205`
 
 <a id="Buffer.write_len"></a>
 #### Buffer.write_len
@@ -302,7 +302,7 @@ uses NUL, or `<size-limit>` or `<alloc-fail>` when the `Buffer` cannot
 grow.
 These failures leave text and line state unchanged.
 
-Source: `lib/buffer.x:226`
+Source: `lib/buffer.x:225`
 
 ## Convenience API
 
@@ -321,7 +321,7 @@ Returns the byte at `index`, or NUL when `index` is out of range.
 Prefer `Buffer.try_get` to distinguish an out-of-range index from a NUL
 byte.
 
-Source: `lib/buffer.x:307`
+Source: `lib/buffer.x:306`
 
 ## Runtime-internal callables
 

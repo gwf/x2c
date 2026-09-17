@@ -187,6 +187,8 @@ static void json_writes_compact_and_pretty_text(void) {
     "{\n  \"a\": [\n    1,\n    {\n      \"b\": null\n    }\n  ],\n"
     "  \"c\": {}\n}");
   EXPECT_STR_EQ(Var.pretty_json([]), "[]");
+  EXPECT_STR_EQ(Var.json({dependency_version: 1, x: 2}),
+    "{\"dependency_version\":1,\"x\":2}");
   EXPECT_STR_EQ(Var.json("line\nbreak"), "\"line\\nbreak\"");
   EXPECT_STR_EQ(Var.json(""), "\"\"");
 

@@ -42,7 +42,7 @@ Returns the protocol member used to derive a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/protocol.x:1432`
+Source: `src/protocol.x:1424`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -57,7 +57,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:1766`
+Source: `src/protocol.x:1758`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -69,7 +69,7 @@ Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, making the output suitable for comparing
 live and artifact symbol modes.
 
-Source: `src/protocol.x:1402`
+Source: `src/protocol.x:1394`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -81,7 +81,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2247`
+Source: `src/protocol.x:2236`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -91,7 +91,7 @@ Source: `src/protocol.x:2247`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol.x:1105`
+Source: `src/protocol.x:1096`
 
 <a id="Compiler.operator_member"></a>
 #### Compiler.operator_member
@@ -101,7 +101,7 @@ Source: `src/protocol.x:1105`
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/protocol.x:1363`
+Source: `src/protocol.x:1355`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -114,7 +114,7 @@ publishes the normalized row immediately. Macro-hole parsing returns syntax
 for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node.
 
-Source: `src/protocol.x:2378`
+Source: `src/protocol.x:2367`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -123,7 +123,7 @@ Source: `src/protocol.x:2378`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:1830`
+Source: `src/protocol.x:1822`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -135,7 +135,7 @@ Lookup canonicalizes the participant and may use the nearest adopted
 typedef ancestor. Native conformances install their generated bindings
 before the cached conformance row is returned.
 
-Source: `src/protocol.x:1295`
+Source: `src/protocol.x:1286`
 
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
@@ -146,7 +146,7 @@ Reports whether conformance supersedes an ambient direct member.
 The answer is cached for the canonical participant and includes the first
 visible adopted ancestor that declares the member.
 
-Source: `src/protocol.x:1319`
+Source: `src/protocol.x:1310`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -159,7 +159,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1688`
+Source: `src/protocol.x:1680`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -172,7 +172,7 @@ storage and source location. Installation invalidates cached protocol
 decisions and returns the canonical published node. Generated contexts may
 also retain that node in `Sym` for replay.
 
-Source: `src/protocol.x:515`
+Source: `src/protocol.x:509`
 
 <a id="Compiler.rebuild_protocols"></a>
 #### Compiler.rebuild_protocols
@@ -184,7 +184,7 @@ Existing rows, helper decisions, and lookup caches are discarded; a null
 map leaves those registries empty. Conformance reset and resolution belong
 to `resolve_protocols`.
 
-Source: `src/protocol.x:264`
+Source: `src/protocol.x:263`
 
 <a id="Compiler.record_declaration_visibility"></a>
 #### Compiler.record_declaration_visibility
@@ -207,7 +207,7 @@ Returns a `(binding signature)` pair for the selected implementation or
 null when no eligible resolved member exists; positive and negative
 results are cached.
 
-Source: `src/protocol.x:1669`
+Source: `src/protocol.x:1661`
 
 <a id="Compiler.resolve_protocol_method"></a>
 #### Compiler.resolve_protocol_method
@@ -219,7 +219,7 @@ Returns a `(binding signature)` pair for the selected implementation or
 null when no eligible resolved member exists; positive and negative
 results are cached separately from operator lookup.
 
-Source: `src/protocol.x:1678`
+Source: `src/protocol.x:1670`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
@@ -230,7 +230,7 @@ Resolves every visible adoption into the current conformance registry.
 Resolution starts from an empty registry; diagnostics are located only for
 adoptions owned by the current translation unit.
 
-Source: `src/protocol.x:1077`
+Source: `src/protocol.x:1068`
 
 <a id="Compiler.reverse_converter_spelling"></a>
 #### Compiler.reverse_converter_spelling
@@ -244,7 +244,7 @@ the package prefix sits at the front of the derived binding instead of
 inside it. The split is keyed on a known package because a foreign
 header may spell `__` in a type name.
 
-Source: `src/protocol.x:344`
+Source: `src/protocol.x:340`
 
 ## Design notes
 

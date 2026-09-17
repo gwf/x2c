@@ -67,6 +67,22 @@ String x2c_package_directory(String root, String path) {
   return slash > 0 ? path[:prefix.len() + slash] : NULL;
 }
 
+/** Reports whether `path` is x2c source: a `.x` file, or a file of any
+    other name whose first line is a shebang, which is a script.
+*/
+int x2c_source_file(String path) {
+  if (path.endswith(".x")) return 1;
+  if (path.endswith(".c") || path.endswith(".h") || path.endswith(".o") ||
+      path.endswith(".a")) return 0;
+  FILE *file = fopen(path, "r");
+  if (!file) return 0;
+  char head[2];
+  int shebang = fread(head, 1, 2, file) == 2 && head[0] == '#' &&
+                head[1] == '!';
+  fclose(file);
+  return shebang;
+}
+
 /** Recognizes a package's `src/` files or its package-named legacy entry.
     Other files under the package directory are consumers.
 */
@@ -206,9 +222,8 @@ static int _locate_home(const char *start, char *out, size_t size) {
 
 static void _prepare_repo_defaults(void) {
   if (!x2c_root_path) return;
-  const char *root = x2c_root_path;
-  String include_dir = "%s/include/x2c".printf(root);
-  String src_dir = "%s/src".printf(root), lib_dir = "%s/lib".printf(root);
+  String include_dir = %"$x2c_root_path/include/x2c";
+  String src_dir = %"$x2c_root_path/src", lib_dir = %"$x2c_root_path/lib";
   x2c_base_include_dirs = cons(include_dir, NULL);
   x2c_repo_cpp_include_dirs = _dir_exists(src_dir)
     ? %( $src_dir $lib_dir ) : %( $lib_dir );

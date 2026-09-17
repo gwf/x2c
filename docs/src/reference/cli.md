@@ -277,7 +277,8 @@ and redirections also apply to the program; its output is not held until exit.
 
 ## Run a script
 
-`script` runs one `.x` file and builds it only when needed:
+`script` runs one source file and builds it only when needed. The file is
+named with `.x`, or with any name when its first line is a shebang:
 
 ```sh
 ./x2c script tools/report.x -- first --second
@@ -333,7 +334,7 @@ interpreter path works without it: `#!/usr/local/bin/x2c script`.
 Each script builds under `scripts/` in the cache root: `X2C_CACHE_DIR` when
 set, otherwise `$XDG_CACHE_HOME/x2c`, otherwise `~/.cache/x2c`.
 `x2c env cache_dir` prints the root. Concurrent runs of one script share its
-build and wait for each other. `x2c script --clean <file.x>` removes that
+build and wait for each other. `x2c script --clean <file>` removes that
 script's entry without running it, and every build removes the entries of
 scripts that no longer exist. Removing the cache is always safe.
 

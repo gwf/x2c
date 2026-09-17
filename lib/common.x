@@ -461,7 +461,7 @@ inline unsigned Var.payload32(Var value) => (unsigned) value.u64;
 
 /** Decodes an immediate `<f32>` `Var`. */
 inline float Var.decode_f32(Var value) {
-  unsigned raw = Var.payload32(value);
+  unsigned raw = value.payload32();
   float result;
   memcpy(&result, &raw, sizeof result);
   return result;
@@ -643,7 +643,7 @@ inline Symbol Var.symbol(Var x) {
 */
 char Var.char(Var x) {
   if (x is <i8> || x is <u8>) return (char) x.integer();
-  return (char) Var.convert(x, <i8>).integer();
+  return (char) x.convert(<i8>).integer();
 }
 
 /** Returns `x` as a native `uchar` under the `Var.convert` rules.
@@ -652,7 +652,7 @@ char Var.char(Var x) {
 */
 uchar Var.uchar(Var x) {
   if (x is <u8>) return (uchar) x.integer();
-  return (uchar) Var.convert(x, <u8>).integer();
+  return (uchar) x.convert(<u8>).integer();
 }
 
 /** Returns `x` as a native `short` under the `Var.convert` rules.
@@ -661,7 +661,7 @@ uchar Var.uchar(Var x) {
 */
 short Var.short(Var x) {
   if (x is <i16>) return (short) x.integer();
-  return (short) Var.convert(x, <i16>).integer();
+  return (short) x.convert(<i16>).integer();
 }
 
 /** Returns `x` as a native `ushort` under the `Var.convert` rules.
@@ -670,7 +670,7 @@ short Var.short(Var x) {
 */
 ushort Var.ushort(Var x) {
   if (x is <u16>) return (ushort) x.integer();
-  return (ushort) Var.convert(x, <u16>).integer();
+  return (ushort) x.convert(<u16>).integer();
 }
 
 /** Returns `x` as a native `int` under the `Var.convert` rules.
@@ -679,7 +679,7 @@ ushort Var.ushort(Var x) {
 */
 int Var.int(Var x) {
   if (x is <i32>) return (int) x.integer();
-  return (int) Var.convert(x, <i32>).integer();
+  return (int) x.convert(<i32>).integer();
 }
 
 /** Returns `x` as a native `uint` under the `Var.convert` rules.
@@ -688,7 +688,7 @@ int Var.int(Var x) {
 */
 uint Var.uint(Var x) {
   if (x is <u32>) return (uint) x.integer();
-  return (uint) Var.convert(x, <u32>).integer();
+  return (uint) x.convert(<u32>).integer();
 }
 
 /** Returns `x` as a native `unsigned` under the `Var.convert` rules.
@@ -697,7 +697,7 @@ uint Var.uint(Var x) {
 */
 unsigned Var.unsigned(Var x) {
   if (x is <u32>) return (unsigned) x.integer();
-  return (unsigned) Var.convert(x, <u32>).integer();
+  return (unsigned) x.convert(<u32>).integer();
 }
 
 /** Returns `x` as a native `long` under the `Var.convert` rules.
@@ -709,7 +709,7 @@ long Var.long(Var x) {
   if (x is <i48> || x is <i32> || x is <u32> ||
       x is <i16> || x is <u16> || x is <i8> || x is <u8>)
     return (long) x.integer();
-  return Var.convert(x, <long>).long_value();
+  return x.convert(<long>).long_value();
 }
 
 /** Returns `x` as a native `ulong` under the `Var.convert` rules.
@@ -720,7 +720,7 @@ ulong Var.ulong(Var x) {
   if (x is <ulong>) return x.ulong_value();
   if (x is <u48> || x is <u32> || x is <u16> || x is <u8>)
     return (ulong) x.integer();
-  return Var.convert(x, <ulong>).ulong_value();
+  return x.convert(<ulong>).ulong_value();
 }
 
 /** Returns `x` as a native `long long` under the `Var.convert` rules.
@@ -731,7 +731,7 @@ long long Var.long_long(Var x) {
   if (x is <llong>) return x.long_long_value();
   if (x is <long>) return (long long) x.long_value();
   if (x.kind() == <integer>) return (long long) x.integer();
-  return Var.convert(x, <llong>).long_long_value();
+  return x.convert(<llong>).long_long_value();
 }
 
 /** Returns `x` as a native `unsigned long long` under the `Var.convert`
@@ -744,7 +744,7 @@ unsigned long long Var.ulong_long(Var x) {
   if (x is <ulong>) return (unsigned long long) x.ulong_value();
   if (x is <u48> || x is <u32> || x is <u16> || x is <u8>)
     return (unsigned long long) x.integer();
-  return Var.convert(x, <ullong>).ulong_long_value();
+  return x.convert(<ullong>).ulong_long_value();
 }
 
 /** Returns `x` as a native `long double` under the `Var.convert` rules.
@@ -754,7 +754,7 @@ unsigned long long Var.ulong_long(Var x) {
 long double Var.long_double(Var x) {
   if (x is <ldouble>) return x.long_double_value();
   if (x is <f64> || x is <f32>) return (long double) x.floating();
-  return Var.convert(x, <ldouble>).long_double_value();
+  return x.convert(<ldouble>).long_double_value();
 }
 
 /** Returns `x` as a native `float` under the `Var.convert` rules.
@@ -763,7 +763,7 @@ long double Var.long_double(Var x) {
 */
 float Var.float(Var x) {
   if (x is <f32>) return (float) x.floating();
-  return (float) Var.convert(x, <f32>).floating();
+  return (float) x.convert(<f32>).floating();
 }
 
 /** Returns `x` as a native `double` under the `Var.convert` rules.
@@ -772,7 +772,7 @@ float Var.float(Var x) {
 */
 double Var.double(Var x) {
   if (x is <f64>) return x.floating();
-  return Var.convert(x, <f64>).floating();
+  return x.convert(<f64>).floating();
 }
 
 /* Source-only declarations for centrally declared Block adoptions. Static

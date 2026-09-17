@@ -76,7 +76,7 @@ static void _preprocessor_errors(String text) {
 static String _ast_inspection_repr(List node) {
   match (node)
     case %(macrodef (name ?name) *):
-      return %"(macrodef <macro ${name.str()}>)";
+      return %"(macrodef <macro $name>)";
   return node.repr();
 }
 
@@ -185,7 +185,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
       exit(2);
     }
   }
-  List stems = NULL, stem_inputs = NULL;
+  List stems = %(), stem_inputs = %();
   foreach (String input, c.inputs) {
     if (!input) {
       fputs("x2c: error: input path is empty\n", stderr);
@@ -200,9 +200,9 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
     if (S_ISDIR(info.st_mode)) {
       fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
       fputs(
-        "note: pass source files, use a shell wildcard, or define a ",
+        "note: pass source files, use a shell wildcard, or define a "
+        "manifest target\n",
         stderr);
-      fputs("manifest target\n", stderr);
       exit(2);
     }
     if (!S_ISREG(info.st_mode)) {
@@ -210,7 +210,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
         stderr, "x2c: error: input is not a regular file: %s\n", input);
       exit(2);
     }
-    if (!input.endswith(".x")) {
+    if (!x2c_source_file(input)) {
       fprintf(
         stderr, "x2c: error: translation input is not an .x file: %s\n",
         input);
@@ -220,7 +220,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
     if (!c.inspects() && !unit_dirs) {
       List prior_stem = stems, prior_input = stem_inputs;
       while (prior_stem) {
-        if (prior_stem.car().string() == stem) {
+        if (prior_stem.car() == stem) {
           fprintf(
             stderr,
             "x2c: error: inputs produce the same output stem '%s'\n", stem);
@@ -357,7 +357,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
     if (failed) return 1;
     completed = total;
   }
-  foreach (String input, parallel ? (List) NULL : c.inputs) {
+  foreach (String input, parallel ? %() : c.inputs) {
     if (!c.nested) report_progress(<translate>, completed, total, input);
     if (build) build.begin_translation(input);
     _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
@@ -411,7 +411,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
   Array stale = [];
   Map stale_dirs = {};
   foreach (String input, units) {
-    if (!input.endswith(".x")) continue;
+    if (!x2c_source_file(input)) continue;
     String directory = state.generated_dir(input);
     if (state.translation_current(input, directory)) {
       state.begin_translation(input);
@@ -440,7 +440,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
   /* Restore input order, including package directories inserted between
      generated directories, before native compilation and linking. */
   foreach (String input, units) {
-    if (!input.endswith(".x")) continue;
+    if (!x2c_source_file(input)) continue;
     int cached = !stale_dirs.contains(input);
     String directory = state.generated_dir(input);
     if (c.dry_run && !cached) {
@@ -458,7 +458,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
 static int _run_build_request(CliRequest c, Array commands) {
   if (!c.dry_run) {
     foreach (String input, c.inputs) {
-      if (!input.endswith(".x")) continue;
+      if (!x2c_source_file(input)) continue;
       Frontend.load_support(c);
       break;
     }
@@ -533,7 +533,7 @@ static int _run_env(CliRequest request) {
     request.cc, request.ar, request.cpp_args, request.cc_args,
     request.ld_args, request.verbose, request.dry_run);
   String executable = x2c_get_executable();
-  String roots = String.join(":", request.package_roots());
+  String roots = ":".join(request.package_roots());
   interface_configure(request.out_dir);
   String prelude = interface_prelude();
   List rows = %(
@@ -550,7 +550,7 @@ static int _run_env(CliRequest request) {
   if (request.inputs) wanted = request.inputs.car();
   foreach (List row, rows) {
     String name = row.car(), value = row.cadr();
-    const char *text = value ? value.str() : "";
+    const char *text = value ? value : "";
     if (!wanted) printf("%s = %s\n", name.str(), text);
     else if (name == wanted) {
       printf("%s\n", text);

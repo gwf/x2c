@@ -270,7 +270,7 @@ File File.open(const char *path, const char *mode) =>
     `<bad-arg>`.
 */
 File File.popen(const char *cmd, const char *mode) {
-  if (!cmd || !mode) raise %(bad-arg (operation popen));
+  if (!cmd || !mode) raise %(bad-arg (operation <popen>));
   File file = popen(cmd, mode);
   if (file) return file;
   int error = errno;
@@ -285,7 +285,7 @@ File File.popen(const char *cmd, const char *mode) {
     path, operation, and captured errno.
 */
 Self File.reopen(Self file, const char *path, const char *mode) {
-  if (!file || !path || !mode) raise %(bad-arg (operation reopen));
+  if (!file || !path || !mode) raise %(bad-arg (operation <reopen>));
   File opened = freopen(path, mode, file);
   if (opened) return opened;
   int error = errno;
@@ -485,9 +485,7 @@ String File.readline(File file) {
   Block line = $auto(Block.new(sizeof(char)));
   line.reserve(BUFSIZ);
   FileReadStatus status = file.readline_into(line);
-  String result = status == FILE_READ_DATA
-    ? _text(line.bytes, line.length) : NULL;
-  return result;
+  return status == FILE_READ_DATA ? _text(line.bytes, line.length) : NULL;
 }
 
 /** Reads the remaining stream into one canonical `String`.

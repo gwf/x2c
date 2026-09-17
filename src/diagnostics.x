@@ -221,9 +221,9 @@ static void Compiler._write_json(Compiler compiler, List entry) {
   List location = entry.assoc(<location>), notes = entry.assoc(<notes>);
   Buffer out = $auto(Buffer.new(0));
   out.write("{\"code\":");
-  report_json_string(out, code.str());
+  report_json_string(out, code);
   out.write(",\"message\":");
-  report_json_string(out, entry.assoc(<message>).string());
+  report_json_string(out, entry.assoc(<message>));
   out.write(",\"severity\":");
   report_json_string(out, entry.assoc(<severity>).symbol().str());
   foreach (Symbol key, %(file line column length position)) {
@@ -239,7 +239,7 @@ static void Compiler._write_json(Compiler compiler, List entry) {
   foreach (Var note, notes) {
     if (note is not <string>) continue;
     if (comma++) out.write_char(',');
-    report_json_string(out, note.string());
+    report_json_string(out, note);
   }
   out.write("]}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
@@ -260,15 +260,15 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
   Var v;
   Symbol code = entry.assoc(<code>), String message = entry.assoc(<message>);
   v = entry.assoc(<location>);
-  List location = v is <list> ? v.list() : NULL;
+  List location = v is <list> ? v : NULL;
   v = entry.assoc(<notes>);
-  List notes = v is <list> ? v.list() : NULL;
+  List notes = v is <list> ? v : NULL;
   if (location) {
     String text = "<input>";
     v = location.assoc(<file>);
-    if (v is not void && v is <string>) text = v;
-    int line = location.assoc(<line>).int();
-    int column = location.assoc(<column>).int();
+    if (v is <string>) text = v;
+    int line = location.assoc(<line>);
+    int column = location.assoc(<column>);
     fprintf(
       stderr, "%s:%d:%d: %s: %s\n",
       text, line, column, code.str(), message);
@@ -295,7 +295,7 @@ List Compiler.origin_location(Compiler compiler, int occurrence) {
     List origin = compiler.origins[occurrence - 1];
     match (origin) {
       case %(generated ?parent (!or splice xform)): {
-        occurrence = parent.integer();
+        occurrence = parent;
         continue;
       }
       case %(source ?file ?line ?column ?length ?position):
@@ -393,9 +393,9 @@ static void Compiler._show_source_context(Compiler compiler, List location) {
   Var line_var = location.assoc(<line>);
   Var col_var = location.assoc(<column>);
   Var len_var = location.assoc(<length>);
-  int line = line_var is void ? 0 : line_var.int();
-  int column = col_var is void ? 0 : col_var.int();
-  int length = len_var is void ? 1 : len_var.int(), char *text = compiler.text;
+  int line = line_var is void ? 0 : line_var;
+  int column = col_var is void ? 0 : col_var;
+  int length = len_var is void ? 1 : len_var, char *text = compiler.text;
   int current_line = 1, char *line_start = text, *line_end = text;
   // A script's first line reads as an include, but the reader wrote it.
   if (line <= 1 && compiler.script) {

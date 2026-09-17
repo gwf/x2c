@@ -22,11 +22,7 @@
 
 #include "buffer.x"
 
-static String _stem(String input) {
-  const char *base = strrchr(input, '/');
-  base = base ? base + 1 : input;
-  return String.new_len(base, strlen(base) - 2);
-}
+static String _stem(String input) => Path.stem(input);
 
 /** Parses prerequisite words after the first literal colon in `text`.
     Backslash escapes and doubled dollars are decoded in that region. A
@@ -71,8 +67,7 @@ List translation_depfile_parse(String text) {
   }
   if (word.len()) paths.push(word.str());
   word.free();
-  List result = paths.list_free();
-  return result;
+  return paths.list_free();
 }
 
 /* Backslash-escape space, tab, '#', ':', and backslash as Make word bytes.
@@ -112,7 +107,7 @@ static Array _prerequisites(
 static int _write_targets(
   File output, CliRequest request, String output_dir, String stem) {
   if (request.dep_target) return _write_word(output, request.dep_target);
-  String base = %"${output_dir.rstrip(%"/")}/$stem";
+  String base = %"${output_dir.rstrip("/")}/$stem";
   if (!_write_word(output, %"$base.c")) return 0;
   if (output.putc(' ') == EOF) return 0;
   return _write_word(output, %"$base.h");
@@ -172,7 +167,7 @@ int translation_depfile_write(
   if (request.no_deps || request.inspects()) return 1;
   String stem = _stem(input);
   String path = request.dep_file ? request.dep_file :
-                %"${output_dir.rstrip(%"/")}/$stem.d";
+                %"${output_dir.rstrip("/")}/$stem.d";
   String temporary = %"$path.tmp.%ld".printf((long) getpid());
   File output = fopen(temporary, "w");
   if (!output) {

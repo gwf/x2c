@@ -36,7 +36,7 @@ progress additionally requires terminal stderr, non-plain output, and no
 parent Make recipe. Plain output disables color; automatic color respects
 terminal capability and `NO_COLOR`.
 
-Source: `src/report.x:120`
+Source: `src/report.x:119`
 
 #### report_duration
 
@@ -45,7 +45,7 @@ Source: `src/report.x:120`
 Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
 two decimal places.
 
-Source: `src/report.x:54`
+Source: `src/report.x:53`
 
 #### report_file_bytes
 
@@ -54,7 +54,7 @@ Source: `src/report.x:54`
 Returns the size of a regular file.
 NULL, a failed `stat`, or a non-regular path returns zero.
 
-Source: `src/report.x:45`
+Source: `src/report.x:44`
 
 #### report_json_string
 
@@ -64,7 +64,7 @@ Writes `text` to `out` as one quoted JSON string.
 Quote, backslash, and control bytes are escaped; other bytes, including
 UTF-8 sequences, are copied. A NULL `text` writes `""`.
 
-Source: `src/report.x:73`
+Source: `src/report.x:72`
 
 #### report_line
 
@@ -73,7 +73,7 @@ Source: `src/report.x:73`
 Writes one newline-terminated receipt to stderr when receipts are enabled.
 Any active transient line is cleared first, and `line` must be non-NULL.
 
-Source: `src/report.x:199`
+Source: `src/report.x:198`
 
 #### report_now_us
 
@@ -82,7 +82,7 @@ Source: `src/report.x:199`
 Returns monotonic time in microseconds, or zero when the clock read fails.
 The value measures elapsed time; it is not a wall-clock timestamp.
 
-Source: `src/report.x:35`
+Source: `src/report.x:34`
 
 #### report_phase
 
@@ -92,7 +92,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:247`
+Source: `src/report.x:246`
 
 #### report_progress
 
@@ -103,7 +103,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:211`
+Source: `src/report.x:210`
 
 #### report_receipts
 
@@ -111,7 +111,7 @@ Source: `src/report.x:211`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:137`
+Source: `src/report.x:136`
 
 #### report_size
 
@@ -120,7 +120,7 @@ Source: `src/report.x:137`
 Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
 Byte counts are exact; larger units use one decimal place.
 
-Source: `src/report.x:63`
+Source: `src/report.x:62`
 
 #### report_suspend
 
@@ -128,7 +128,7 @@ Source: `src/report.x:63`
 
 Clears the active transient line from stderr, if one exists.
 
-Source: `src/report.x:190`
+Source: `src/report.x:189`
 
 ## Design notes
 

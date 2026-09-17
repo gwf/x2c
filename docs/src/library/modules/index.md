@@ -22,6 +22,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
 | [`lib/common.x`](common.md) | the shared `Var` union and operations used by every module. |
 | [`lib/context.x`](context.md) | bounded runtime state and value export. |
+| [`lib/diff.x`](diff.md) | line differences between two texts. |
 | [`lib/digest.x`](digest.md) | SHA-256 digests of Strings and streams. |
 | [`lib/dispatch.x`](dispatch.md) | typed descriptors for runtime `Var` behavior. |
 | [`lib/error.x`](error.md) | handler stack and accumulated errors. |
@@ -41,6 +42,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
+| [`lib/regex.x`](regex.md) | regular expressions over the bytes of a String. |
 | [`lib/scope.x`](scope.md) | memory allocation scope management. |
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |
 | [`lib/split.x`](split.md) | `String` field splitting and repeatable typed cursors. |
@@ -64,13 +66,15 @@ prelude. Include one explicitly to use its declarations.
 
 - [`lib/args.x`](args.md) - Argument parsing against a declarative spec; explicitly include `args.x` to use it.
 - [`lib/autodiff.x`](autodiff.md) - Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.
+- [`lib/diff.x`](diff.md) - Line differences between two texts; explicitly include `diff.x` to use them.
 - [`lib/digest.x`](digest.md) - SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
-- [`lib/scripting.x`](scripting.md) - The `args.x`, `digest.x`, `path.x`, and `process.x` modules that every script unit includes; include `scripting.x` to use all four.
+- [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
+- [`lib/scripting.x`](scripting.md) - The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all six.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 - [`lib/typed-list.x`](typed-list.md) - Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 - [`lib/typed-map.x`](typed-map.md) - Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.

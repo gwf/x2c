@@ -93,11 +93,11 @@ static ArrayString _prepare_string_array_export(
   ArrayString array, Context source) {
   ArrayString staged = ArrayString.new(), result = NULL;
   defer if ((void *) result == NULL) staged.free();
-  Block_reserve((Block) staged, array.cap);
+  ((Block) staged).reserve(array.cap);
   String *data = array.bytes;
   for (size_t i = 0; i < array.length; i++) {
     String value = source.export_nested(data[i]);
-    Block_append((Block) staged, &value, 1);
+    ((Block) staged).append(&value, 1);
   }
   return result = staged;
 }

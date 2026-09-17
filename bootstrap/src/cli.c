@@ -379,8 +379,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _14 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
   _15 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
   _16 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
-  _17 = String_new("Usage:\n  x2c script [options] <file.x> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
-  _18 = String_new("\nEvery word after <file.x> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
+  _17 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
+  _18 = String_new("\nEvery word after <file> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
   _19 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, script,\nbootstrap, env, install, remove, or list.");
   _20 = String_new("unknown help command \'");
   _21 = String_new("\'");
@@ -429,12 +429,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _64 = String_new("@");
   _65 = String_new("--save-temps=");
   _66 = String_new("-O2");
-  _67 = String_new("x2c 0.13.0");
+  _67 = String_new("x2c 0.14.0");
 }
 
 _Noreturn static void _removed_output(void){
-  fputs("x2c: error: option '-o' was removed\n", stderr);
-  fputs("note: use '--out-dir' with translate or '--output' with build and run\n", stderr);
+  fputs("x2c: error: option '-o' was removed\n" "note: use '--out-dir' with translate or '--output' with build and run\n", stderr);
   exit(2);
 }
 
@@ -680,6 +679,8 @@ int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
+int String_equal(String, String);
+
 static int _response_on_stack(List stack, String path){
   {
     String entry;
@@ -688,7 +689,7 @@ static int _response_on_stack(List stack, String path){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       entry = Var_string(_x2c_macro_cursor_output_0);
-      if(strcmp(entry, path) == 0) return 1;
+      if(String_equal(entry, path)) return 1;
     }
 
   }
@@ -897,8 +898,6 @@ int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
   return String_truth(s) &&(String_startswith(s, _50) || String_startswith(s, _51) || String_startswith(s, _52) || String_startswith(s, _53) || String_contains(s, _54) || String_contains(s, _55) || String_contains(s, _56) || String_contains(s, _57));
 }
-
-int String_equal(String, String);
 
 static void _driver_kind(CliRequest request, String value){
   request -> kind_explicit = 1;
@@ -1189,7 +1188,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   request -> run_args = Array_list_free(run_args);
   request -> include_dirs = Array_list_free(x_paths);
   request -> cpp_args = Array_list_free(cpp_args);
-  if(mask == CLI_BOOTSTRAP && ! cc_args -> length) Array_push(cc_args, String_var(_66));
+  if(mask == CLI_BOOTSTRAP && ! Array_len(cc_args)) Array_push(cc_args, String_var(_66));
   request -> cc_args = Array_list_free(cc_args);
   request -> ld_args = Array_list_free(ld_args);
   if(List_truth(request -> package_dirs)) request -> package_dirs = List_reverse(request -> package_dirs);

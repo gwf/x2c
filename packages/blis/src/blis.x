@@ -89,11 +89,11 @@ static int _blis_supported_storage(num_t storage) {
 
 static void _blis_live(BlisObject object, String operation) {
   if (!object) {
-    _blis_bad_state(operation, %"null BlisObject");
+    _blis_bad_state(operation, "null BlisObject");
   }
   BlisObject owner = object.owner ? object.owner : object;
   if (owner.released || object.owner_generation != owner.generation) {
-    _blis_bad_state(operation, %"released owner or invalidated view");
+    _blis_bad_state(operation, "released owner or invalidated view");
   }
 }
 
@@ -164,17 +164,17 @@ static Var _blis_sequence_value(Var values, int index) {
 
 static void _blis_numeric_rows(Var rows, int *columns) {
   *columns = 0;
-  int row_count = _blis_sequence_length(rows, %"copy_rows");
+  int row_count = _blis_sequence_length(rows, "copy_rows");
   if (!row_count) return;
   Var first = _blis_sequence_value(rows, 0);
-  *columns = _blis_sequence_length(first, %"copy_rows");
+  *columns = _blis_sequence_length(first, "copy_rows");
 
   for (int row_index = 0; row_index < row_count; row_index++) {
     Var row = _blis_sequence_value(rows, row_index);
-    int row_length = _blis_sequence_length(row, %"copy_rows");
+    int row_length = _blis_sequence_length(row, "copy_rows");
     if (row_length != *columns) {
       _blis_bad_shape(
-        %"copy_rows", row_count, *columns, row_count, row_length
+        "copy_rows", row_count, *columns, row_count, row_length
       );
     }
     for (int column = 0; column < row_length; column++) {
@@ -184,13 +184,13 @@ static void _blis_numeric_rows(Var rows, int *columns) {
         raise %(bad-types (library "BLIS") (operation "copy_rows")
                 (want "numeric values") (tag $tag));
       }
-      _blis_numeric_value(value, %"copy_rows");
+      _blis_numeric_value(value, "copy_rows");
     }
   }
 }
 
 static void _blis_numeric_vector(Var values) {
-  int length = _blis_sequence_length(values, %"copy_vector");
+  int length = _blis_sequence_length(values, "copy_vector");
   for (int index = 0; index < length; index++) {
     Var value = _blis_sequence_value(values, index);
     if (!value.is_integer() && !value.is_floating()) {
@@ -198,7 +198,7 @@ static void _blis_numeric_vector(Var values) {
       raise %(bad-types (library "BLIS") (operation "copy_vector")
               (want "numeric values") (tag $tag));
     }
-    _blis_numeric_value(value, %"copy_vector");
+    _blis_numeric_value(value, "copy_vector");
   }
 }
 
@@ -261,15 +261,15 @@ String Blis.version(void) {
 }
 
 BlisObject BlisObject.new(num_t storage, int rows, int columns) {
-  return _blis_owned(storage, rows, columns, %"new");
+  return _blis_owned(storage, rows, columns, "new");
 }
 
 BlisObject BlisObject.copy_rows(Var rows, num_t storage) {
   int columns = 0;
   _blis_numeric_rows(rows, &columns);
-  int row_count = _blis_sequence_length(rows, %"copy_rows");
+  int row_count = _blis_sequence_length(rows, "copy_rows");
   BlisObject object = _blis_owned(
-    storage, row_count, columns, %"copy_rows"
+    storage, row_count, columns, "copy_rows"
   );
 
   for (int row = 0; row < row_count; row++)
@@ -284,8 +284,8 @@ BlisObject BlisObject.copy_rows(Var rows, num_t storage) {
 
 BlisObject BlisObject.copy_vector(Var values, num_t storage) {
   _blis_numeric_vector(values);
-  int length = _blis_sequence_length(values, %"copy_vector");
-  BlisObject object = _blis_owned(storage, length, 1, %"copy_vector");
+  int length = _blis_sequence_length(values, "copy_vector");
+  BlisObject object = _blis_owned(storage, length, 1, "copy_vector");
   for (int index = 0; index < length; index++)
     object.put(
       index, 0, _blis_sequence_value(values, index).convert(<f64>).double()
@@ -296,7 +296,7 @@ BlisObject BlisObject.copy_vector(Var values, num_t storage) {
 BlisObject BlisObject.free(BlisObject object) {
   if (!object) return NULL;
   if (!object.owns_buffer) {
-    _blis_bad_state(%"free", %"a view does not own its numerical buffer");
+    _blis_bad_state("free", "a view does not own its numerical buffer");
   }
   if (object.released) return NULL;
   if (object.scoped_buffer) {
@@ -313,58 +313,58 @@ BlisObject BlisObject.free(BlisObject object) {
 }
 
 int BlisObject.rows(BlisObject object) {
-  _blis_live(object, %"rows");
+  _blis_live(object, "rows");
   return (int) bli_obj_length(&object.native);
 }
 
 /** Returns the borrowed BLIS descriptor, valid until the owner is freed. */
 obj_t *BlisObject.native(BlisObject object) {
-  _blis_live(object, %"native");
+  _blis_live(object, "native");
   return &object.native;
 }
 
 int BlisObject.columns(BlisObject object) {
-  _blis_live(object, %"columns");
+  _blis_live(object, "columns");
   return (int) bli_obj_width(&object.native);
 }
 
 int BlisObject.length(BlisObject object) {
-  _blis_vector(object, %"length");
+  _blis_vector(object, "length");
   return (int) bli_obj_vector_dim(&object.native);
 }
 
 long BlisObject.row_stride(BlisObject object) {
-  _blis_live(object, %"row_stride");
+  _blis_live(object, "row_stride");
   return (long) bli_obj_row_stride(&object.native);
 }
 
 long BlisObject.column_stride(BlisObject object) {
-  _blis_live(object, %"column_stride");
+  _blis_live(object, "column_stride");
   return (long) bli_obj_col_stride(&object.native);
 }
 
 int BlisObject.row_offset(BlisObject object) {
-  _blis_live(object, %"row_offset");
+  _blis_live(object, "row_offset");
   return object.row_offset;
 }
 
 int BlisObject.column_offset(BlisObject object) {
-  _blis_live(object, %"column_offset");
+  _blis_live(object, "column_offset");
   return object.column_offset;
 }
 
 int BlisObject.transposed(BlisObject object) {
-  _blis_live(object, %"transposed");
+  _blis_live(object, "transposed");
   return object.transposed;
 }
 
 int BlisObject.is_view(BlisObject object) {
-  _blis_live(object, %"is_view");
+  _blis_live(object, "is_view");
   return !object.owns_buffer;
 }
 
 Symbol BlisObject.orientation(BlisObject object) {
-  _blis_live(object, %"orientation");
+  _blis_live(object, "orientation");
   int rows = object.rows(), columns = object.columns();
   if (rows == 1 && columns == 1) return <scalar>;
   if (columns == 1) return <column>;
@@ -373,19 +373,19 @@ Symbol BlisObject.orientation(BlisObject object) {
 }
 
 String BlisObject.storage_precision(BlisObject object) {
-  _blis_live(object, %"storage_precision");
-  return bli_obj_dt(&object.native) == BLIS_FLOAT ? %"single" : %"double";
+  _blis_live(object, "storage_precision");
+  return bli_obj_dt(&object.native) == BLIS_FLOAT ? "single" : "double";
 }
 
 String BlisObject.computation_precision(BlisObject object) {
-  _blis_live(object, %"computation_precision");
+  _blis_live(object, "computation_precision");
   return bli_obj_comp_prec(&object.native) == BLIS_SINGLE_PREC
-    ? %"single" : %"double";
+    ? "single" : "double";
 }
 
 BlisObject BlisObject.set_computation_precision(
   BlisObject object, prec_t precision) {
-  _blis_live(object, %"set_computation_precision");
+  _blis_live(object, "set_computation_precision");
   if (precision != BLIS_SINGLE_PREC && precision != BLIS_DOUBLE_PREC) {
     int value = precision;
     raise %(bad-arg (library "BLIS")
@@ -397,12 +397,12 @@ BlisObject BlisObject.set_computation_precision(
 }
 
 double BlisObject.at(BlisObject object, int row, int column) {
-  _blis_live(object, %"at");
+  _blis_live(object, "at");
   int rows = object.rows(), columns = object.columns();
   row = x2c_normalize_index(row, rows);
   column = x2c_normalize_index(column, columns);
   if (row < 0 || column < 0) {
-    _blis_bad_index(%"at", row, column, rows, columns);
+    _blis_bad_index("at", row, column, rows, columns);
   }
   double real = 0.0, imaginary = 0.0;
   err_t result = bli_getijm(
@@ -417,12 +417,12 @@ double BlisObject.at(BlisObject object, int row, int column) {
 
 BlisObject BlisObject.put(
   BlisObject object, int row, int column, double value) {
-  _blis_live(object, %"put");
+  _blis_live(object, "put");
   int rows = object.rows(), columns = object.columns();
   row = x2c_normalize_index(row, rows);
   column = x2c_normalize_index(column, columns);
   if (row < 0 || column < 0) {
-    _blis_bad_index(%"put", row, column, rows, columns);
+    _blis_bad_index("put", row, column, rows, columns);
   }
   err_t result = bli_setijm(
     value, 0.0, (dim_t) row, (dim_t) column, &object.native
@@ -435,17 +435,17 @@ BlisObject BlisObject.put(
 }
 
 Array BlisObject.to_rows(BlisObject object) {
-  _blis_live(object, %"to_rows");
+  _blis_live(object, "to_rows");
   num_t storage = bli_obj_dt(&object.native);
   void *buffer = bli_obj_buffer_at_off(&object.native);
   inc_t row_stride = bli_obj_row_stride(&object.native);
   inc_t column_stride = bli_obj_col_stride(&object.native);
   int rows = object.rows(), columns = object.columns();
 
-  Array table = %[];
+  Array table = [];
   table.block().reserve(rows);
   for (int row = 0; row < rows; row++) {
-    Array values = %[];
+    Array values = [];
     values.block().reserve(columns);
     for (int column = 0; column < columns; column++)
       values.push(
@@ -457,13 +457,13 @@ Array BlisObject.to_rows(BlisObject object) {
 }
 
 Array BlisObject.to_values(BlisObject object) {
-  _blis_vector(object, %"to_values");
+  _blis_vector(object, "to_values");
   num_t storage = bli_obj_dt(&object.native);
   void *buffer = bli_obj_buffer_at_off(&object.native);
   inc_t stride = bli_obj_vector_inc(&object.native);
   int length = object.length();
 
-  Array values = %[];
+  Array values = [];
   values.block().reserve(length);
   for (int index = 0; index < length; index++)
     values.push(_blis_read(buffer, storage, index * stride));
@@ -472,14 +472,14 @@ Array BlisObject.to_values(BlisObject object) {
 
 BlisObject BlisObject.part(
   BlisObject object, int row, int column, int rows, int columns) {
-  _blis_live(object, %"part");
+  _blis_live(object, "part");
   int source_rows = object.rows(), source_columns = object.columns();
   if (row < 0) row += source_rows;
   if (column < 0) column += source_columns;
   if (rows < 0 || columns < 0 || row < 0 || column < 0 ||
       row > source_rows || column > source_columns ||
       rows > source_rows - row || columns > source_columns - column) {
-    _blis_bad_index(%"part", row, column, source_rows, source_columns);
+    _blis_bad_index("part", row, column, source_rows, source_columns);
   }
 
   BlisObject view = _blis_view(object);
@@ -493,17 +493,17 @@ BlisObject BlisObject.part(
 }
 
 BlisObject BlisObject.column(BlisObject object, int index) {
-  _blis_live(object, %"column");
+  _blis_live(object, "column");
   int columns = object.columns();
   int normalized = x2c_normalize_index(index, columns);
   if (normalized < 0) {
-    _blis_bad_index(%"column", 0, index, object.rows(), columns);
+    _blis_bad_index("column", 0, index, object.rows(), columns);
   }
   return object.part(0, normalized, object.rows(), 1);
 }
 
 BlisObject BlisObject.transpose_view(BlisObject object) {
-  _blis_live(object, %"transpose_view");
+  _blis_live(object, "transpose_view");
   BlisObject view = _blis_view(object);
   bli_obj_alias_to(&object.native, &view.native);
   bli_obj_induce_trans(&view.native);
@@ -515,7 +515,7 @@ BlisObject BlisObject.transpose_view(BlisObject object) {
 }
 
 BlisObject BlisObject.fill(BlisObject object, double value) {
-  _blis_live(object, %"fill");
+  _blis_live(object, "fill");
   float single = 0.0f;
   double wide = 0.0;
   obj_t scalar;
@@ -525,26 +525,26 @@ BlisObject BlisObject.fill(BlisObject object, double value) {
 }
 
 BlisObject BlisObject.copy_from(BlisObject destination, BlisObject source) {
-  _blis_live(destination, %"copy_from");
-  _blis_live(source, %"copy_from");
+  _blis_live(destination, "copy_from");
+  _blis_live(source, "copy_from");
   if (destination.rows() != source.rows() ||
       destination.columns() != source.columns()) {
     _blis_bad_shape(
-      %"copy_from", destination.rows(), destination.columns(),
+      "copy_from", destination.rows(), destination.columns(),
       source.rows(), source.columns()
     );
   }
   num_t storage = bli_obj_dt(&destination.native);
   num_t source_storage = bli_obj_dt(&source.native);
   if (storage != source_storage) {
-    _blis_precision_mismatch(%"copy_from", storage, source_storage);
+    _blis_precision_mismatch("copy_from", storage, source_storage);
   }
   bli_copym(&source.native, &destination.native);
   return destination;
 }
 
 double BlisObject.dotv(BlisObject left, BlisObject right) {
-  _blis_same_vector_shape(left, right, %"dotv");
+  _blis_same_vector_shape(left, right, "dotv");
   num_t storage = bli_obj_dt(&left.native);
   float single = 0.0f;
   double wide = 0.0;
@@ -556,7 +556,7 @@ double BlisObject.dotv(BlisObject left, BlisObject right) {
 
 BlisObject BlisObject.axpyv(
   BlisObject destination, double alpha, BlisObject source) {
-  _blis_same_vector_shape(destination, source, %"axpyv");
+  _blis_same_vector_shape(destination, source, "axpyv");
   num_t storage = bli_obj_dt(&destination.native);
   float single = 0.0f;
   double wide = 0.0;
@@ -567,7 +567,7 @@ BlisObject BlisObject.axpyv(
 }
 
 double BlisObject.normfv(BlisObject object) {
-  _blis_vector(object, %"normfv");
+  _blis_vector(object, "normfv");
   num_t storage = bli_obj_dt(&object.native);
   float single = 0.0f;
   double wide = 0.0;
@@ -580,14 +580,14 @@ double BlisObject.normfv(BlisObject object) {
 BlisObject BlisObject.gemm(
   BlisObject destination, double alpha, BlisObject left, BlisObject right,
   double beta) {
-  _blis_live(destination, %"gemm");
-  _blis_live(left, %"gemm");
-  _blis_live(right, %"gemm");
+  _blis_live(destination, "gemm");
+  _blis_live(left, "gemm");
+  _blis_live(right, "gemm");
   if (left.columns() != right.rows() ||
       destination.rows() != left.rows() ||
       destination.columns() != right.columns()) {
     _blis_bad_shape(
-      %"gemm", left.rows(), left.columns(),
+      "gemm", left.rows(), left.columns(),
       right.rows(), right.columns()
     );
   }
@@ -596,13 +596,13 @@ BlisObject BlisObject.gemm(
   num_t left_storage = bli_obj_dt(&left.native);
   num_t right_storage = bli_obj_dt(&right.native);
   if (!_blis_supported_storage(destination_storage)) {
-    _blis_bad_type(%"gemm", destination_storage);
+    _blis_bad_type("gemm", destination_storage);
   }
   if (!_blis_supported_storage(left_storage)) {
-    _blis_bad_type(%"gemm", left_storage);
+    _blis_bad_type("gemm", left_storage);
   }
   if (!_blis_supported_storage(right_storage)) {
-    _blis_bad_type(%"gemm", right_storage);
+    _blis_bad_type("gemm", right_storage);
   }
 
   float alpha_single = 0.0f, beta_single = 0.0f;
@@ -624,21 +624,21 @@ BlisObject BlisObject.gemm(
 }
 
 BlisObject BlisObject.add(BlisObject left, BlisObject right) {
-  _blis_live(left, %"add");
-  _blis_live(right, %"add");
+  _blis_live(left, "add");
+  _blis_live(right, "add");
   if (left.rows() != right.rows() || left.columns() != right.columns()) {
     _blis_bad_shape(
-      %"add", left.rows(), left.columns(),
+      "add", left.rows(), left.columns(),
       right.rows(), right.columns()
     );
   }
   num_t storage = bli_obj_dt(&left.native);
   num_t right_storage = bli_obj_dt(&right.native);
   if (storage != right_storage) {
-    _blis_precision_mismatch(%"add", storage, right_storage);
+    _blis_precision_mismatch("add", storage, right_storage);
   }
   BlisObject result = _blis_scoped(
-    storage, left.rows(), left.columns(), %"add"
+    storage, left.rows(), left.columns(), "add"
   );
   bli_copym(&left.native, &result.native);
   bli_addm(&right.native, &result.native);
@@ -646,21 +646,21 @@ BlisObject BlisObject.add(BlisObject left, BlisObject right) {
 }
 
 BlisObject BlisObject.sub(BlisObject left, BlisObject right) {
-  _blis_live(left, %"sub");
-  _blis_live(right, %"sub");
+  _blis_live(left, "sub");
+  _blis_live(right, "sub");
   if (left.rows() != right.rows() || left.columns() != right.columns()) {
     _blis_bad_shape(
-      %"sub", left.rows(), left.columns(),
+      "sub", left.rows(), left.columns(),
       right.rows(), right.columns()
     );
   }
   num_t storage = bli_obj_dt(&left.native);
   num_t right_storage = bli_obj_dt(&right.native);
   if (storage != right_storage) {
-    _blis_precision_mismatch(%"sub", storage, right_storage);
+    _blis_precision_mismatch("sub", storage, right_storage);
   }
   BlisObject result = _blis_scoped(
-    storage, left.rows(), left.columns(), %"sub"
+    storage, left.rows(), left.columns(), "sub"
   );
   bli_copym(&left.native, &result.native);
   bli_subm(&right.native, &result.native);
@@ -668,10 +668,10 @@ BlisObject BlisObject.sub(BlisObject left, BlisObject right) {
 }
 
 BlisObject BlisObject.scale(BlisObject object, double alpha) {
-  _blis_live(object, %"scale");
+  _blis_live(object, "scale");
   num_t storage = bli_obj_dt(&object.native);
   BlisObject result = _blis_scoped(
-    storage, object.rows(), object.columns(), %"scale"
+    storage, object.rows(), object.columns(), "scale"
   );
   bli_copym(&object.native, &result.native);
   float single = 0.0f;
@@ -687,21 +687,21 @@ BlisObject BlisObject.neg(BlisObject object) {
 }
 
 BlisObject BlisObject.matmul(BlisObject left, BlisObject right) {
-  _blis_live(left, %"matmul");
-  _blis_live(right, %"matmul");
+  _blis_live(left, "matmul");
+  _blis_live(right, "matmul");
   if (left.columns() != right.rows()) {
     _blis_bad_shape(
-      %"matmul", left.rows(), left.columns(),
+      "matmul", left.rows(), left.columns(),
       right.rows(), right.columns()
     );
   }
   num_t storage = bli_obj_dt(&left.native);
   num_t right_storage = bli_obj_dt(&right.native);
   if (storage != right_storage) {
-    _blis_precision_mismatch(%"matmul", storage, right_storage);
+    _blis_precision_mismatch("matmul", storage, right_storage);
   }
   BlisObject result = _blis_scoped(
-    storage, left.rows(), right.columns(), %"matmul"
+    storage, left.rows(), right.columns(), "matmul"
   );
   float alpha_single = 0.0f, beta_single = 0.0f;
   double alpha_wide = 0.0, beta_wide = 0.0;

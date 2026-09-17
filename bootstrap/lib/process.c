@@ -426,17 +426,15 @@ static List _stages(List command){
 
 int Var_is(Var, Symbol);
 
-Symbol Var_symbol(Var);
+Var Symbol_var(Symbol);
 
 static int _is(Var value, Symbol name){
-  return Var_is(value, 1328354264) && Var_symbol(value) == name;
+  return Var_is(value, 1328354264) && Var_equal(value, Symbol_var(name));
 }
 
 static void _close_on_exec(int fd){
   fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 }
-
-Var Symbol_var(Symbol);
 
 static void _pipe(int fds[2]){
   if(pipe(fds)){
@@ -776,18 +774,18 @@ Job Job_options(Job job, Map options){
         }
         Symbol name = Var_symbol(key);
         switch(name){
-          case 8804 : launch -> dir = Var_str(value);
+          case 8804 : launch -> dir = Var_string(value);
           break;
           case 11180 : launch -> environment = _environment(Var_map(value));
           break;
-          case 19826024 : launch -> input = Var_str(value);
+          case 19826024 : launch -> input = Var_string(value);
           break;
           case 1317305704 : launch -> capture_output = _is(value, 6544469130);
-          launch -> stdout_path = launch -> capture_output || _is(value, 20284019304) ? NULL : Var_str(value);
+          launch -> stdout_path = launch -> capture_output || _is(value, 20284019304) ? NULL : Var_string(value);
           break;
           case 1317285028 : launch -> capture_errors = _is(value, 6544469130);
           launch -> errors_to_output = _is(value, 1317305704);
-          launch -> stderr_path = launch -> capture_errors || launch -> errors_to_output || _is(value, 20284019304) ? NULL : Var_str(value);
+          launch -> stderr_path = launch -> capture_errors || launch -> errors_to_output || _is(value, 20284019304) ? NULL : Var_string(value);
           break;
           default:{
             static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/process.x",.function = "Job_options",.line = 364};

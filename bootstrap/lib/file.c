@@ -568,9 +568,8 @@ String File_readline(File file){
   {
     Block_reserve(line, BUFSIZ);
     FileReadStatus status = File_readline_into(file, line);
-    String result = status == FILE_READ_DATA ? _text(line -> bytes, line -> length) : NULL;
     {
-      String _x2c_return_value_5 = result;
+      String _x2c_return_value_5 = status == FILE_READ_DATA ? _text(line -> bytes, line -> length) : NULL;
       {
         x2c_cleanup_leave(& _x2c_defer_record_4);
         return _x2c_return_value_5;

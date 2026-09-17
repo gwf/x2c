@@ -89,9 +89,7 @@ List DisjointSet.sizes(DisjointSet set) {
   Array sizes = [];
   for (int i = 0, n = set.length; i < n; i++)
     if (set.parent[i] == i) sizes.push(%(${set.size[i]} $i));
-  List result = sizes.sort();
-  sizes.free();
-  return result;
+  return sizes.sort().list_free();
 }
 
 /** Returns the live set's current number of disjoint components. */

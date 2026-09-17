@@ -11,7 +11,9 @@
 #include "compiler.x"
 #include "toolchain.x"
 
-/** Receives borrowed native-preprocessor stderr synchronously during collect. */
+/** Receives borrowed native-preprocessor stderr synchronously during
+    collect.
+*/
 typedef void (*FrontendErrorSink)(String text);
 
 /** Borrows a configured request and owns shared native-preprocessor setup.
@@ -64,9 +66,8 @@ static Token _first_preprocessor_token(Compiler compiler) {
   return compiler.token;
 }
 
-/** Loads process-owned type and collection support before units. */
+/** Loads process-owned collection support before units. */
 void Frontend.load_support(CliRequest request) {
-  Type.initialize();
   header_symbols_initialize();
   interface_configure(request.out_dir);
 }
@@ -133,7 +134,7 @@ static String _read_input_text(Compiler compiler, String filename) {
 
 static void _tokenize_input(
   Frontend frontend, ParsedUnit *unit, String filename) {
-  Compiler c = unit->compiler;
+  Compiler c = unit.compiler;
   c.filename = filename;
   char source_path[PATH_MAX], runtime_path[PATH_MAX], lib_path[PATH_MAX];
   String lib = %"${x2c_get_root()}/lib", runtime = %"$lib/x2c.x";
@@ -158,7 +159,7 @@ static void _tokenize_input(
     text = _script_text(text);
   }
   c.include_dirs = frontend.include_dirs;
-  unit->source_lines = _source_lines(text);
+  unit.source_lines = _source_lines(text);
   c.tokenize(text);
   if (c.script) c.script.defines_main = c.defines_main();
 }
@@ -199,7 +200,7 @@ static void _configure_package(
 }
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
-  Compiler c = unit->compiler;
+  Compiler c = unit.compiler;
   CliRequest request = frontend.request;
   String filename = c.filename;
   if (request.no_cpp) return NULL;
@@ -215,14 +216,14 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
       %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
         "--live-symbols, and the --dump-cpp modes cannot read a script"));
   Compiler cppcompiler = Compiler.new_shared(c);
-  unit->preprocessor = cppcompiler;
+  unit.preprocessor = cppcompiler;
   cppcompiler.filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
   String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL, imacros = runtime;
   int status = frontend.toolchain.preprocess(
     filename, c.include_dirs, imacros, &text, &errors, &dependency_text);
-  unit->preprocessor_output = text;
-  unit->preprocessor_errors = errors;
+  unit.preprocessor_output = text;
+  unit.preprocessor_errors = errors;
   if (errors && frontend.preprocessor_errors)
     frontend.preprocessor_errors(errors);
   if (status) {
@@ -265,11 +266,12 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
 */
 int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   *unit = (ParsedUnit) { 0 };
-  unit->generated_symbols = !frontend.request.no_cpp && !frontend.request.dump;
-  unit->context = Context.open_isolated_named("translation unit");
+  unit.generated_symbols =
+    !frontend.request.no_cpp && !frontend.request.dump;
+  unit.context = Context.open_isolated_named("translation unit");
   Type.begin_unit();
-  unit->compiler = Compiler.new();
-  Compiler compiler = unit->compiler;
+  unit.compiler = Compiler.new();
+  Compiler compiler = unit.compiler;
   compiler.diagnostics.limit = frontend.request.max_errors;
   compiler.source_map = frontend.request.source_map;
   compiler.sources = frontend.request.sources;
@@ -291,36 +293,40 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   return !compiler.error_count();
 }
 
-/** Collects symbols and retains preprocessor outputs for adapter inspection. */
+/** Collects symbols and retains preprocessor outputs for adapter
+    inspection.
+*/
 int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
-  Compiler compiler = unit->compiler;
+  Compiler compiler = unit.compiler;
   try {
-    unit->globals = _preprocess_input(frontend, unit);
-    if (unit->preprocessor)
-      compiler.take_diagnostics(unit->preprocessor);
+    unit.globals = _preprocess_input(frontend, unit);
+    if (unit.preprocessor)
+      compiler.take_diagnostics(unit.preprocessor);
     if (!frontend.request.no_cpp) header_symbols_begin_generated();
-    compiler.sym.seed_var_tags(unit->globals);
+    compiler.sym.seed_var_tags(unit.globals);
   }
   catch %(malformed *): {
-    if (unit->preprocessor) {
-      compiler.close_child(unit->preprocessor);
-      unit->preprocessor = NULL;
+    if (unit.preprocessor) {
+      compiler.close_child(unit.preprocessor);
+      unit.preprocessor = NULL;
     }
     return 0;
   }
   return !compiler.error_count();
 }
 
-/** Parses a collected unit, retaining both its AST and unsuccessful reports. */
+/** Parses a collected unit, retaining both its AST and unsuccessful
+    reports.
+*/
 int ParsedUnit.parse(ParsedUnit *unit) {
-  Compiler compiler = unit->compiler;
+  Compiler compiler = unit.compiler;
   if (compiler.error_count()) return 0;
   Diagnostics diagnostics = compiler.diagnostics;
   Array collected = diagnostics.entries;
   diagnostics.entries = [];
   int ok = 1;
-  try unit->ast = unit->compiler.full_parse(
-    unit->globals, unit->generated_symbols);
+  try unit.ast = unit.compiler.full_parse(
+    unit.globals, unit.generated_symbols);
   catch %(malformed *): ok = 0;
   foreach (Var entry, diagnostics.entries) collected.push(entry);
   diagnostics.entries.free();
@@ -328,19 +334,23 @@ int ParsedUnit.parse(ParsedUnit *unit) {
   return ok && !compiler.error_count();
 }
 
-/** Runs the source stages. On either result, the caller must close the unit. */
+/** Runs the source stages. On either result, the caller must close the
+    unit.
+*/
 int Frontend.open(Frontend frontend, String filename, ParsedUnit *unit) {
   return frontend.start(filename, unit) && unit.collect(frontend) &&
          unit.parse();
 }
 
-/** Releases the unit after its caller has inspected or exported its results. */
+/** Releases the unit after its caller has inspected or exported its
+    results.
+*/
 void ParsedUnit.close(ParsedUnit *unit) {
-  if (!unit->context) return;
-  Compiler compiler = unit->compiler;
-  if (unit->preprocessor) compiler.close_child(unit->preprocessor);
+  if (!unit.context) return;
+  Compiler compiler = unit.compiler;
+  if (unit.preprocessor) compiler.close_child(unit.preprocessor);
   compiler.free_lisp();
   Type.end_unit();
-  unit->context.close();
+  unit.context.close();
   *unit = (ParsedUnit) { 0 };
 }

@@ -468,28 +468,24 @@ static List _normalize_elements(List elements){
   return cons(normalized_head, List_append(normalized_tail, NULL));
 }
 
-Var car(List);
-
-List cdr(List);
-
 static List _normalize_pattern(List pattern){
-  if(! List_truth(pattern) || Var_equal(car(pattern), Symbol_var(2050325770))) return pattern;
+  if(! List_truth(pattern) || Var_equal(List_car(pattern), Symbol_var(2050325770))) return pattern;
   List normalized = _normalize_elements(pattern);
-  Var op = car(normalized);
-  List args = cdr(normalized);
+  Var op = List_car(normalized);
+  List args = List_cdr(normalized);
   if(! Var_is_match_op(op) || Var_equal(op, Symbol_var(2005352)) || Var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
-  Var binder = car(args);
+  Var binder = List_car(args);
   if(! Var_is_binder(binder)) return normalized;
-  List rest = cdr(args);
+  List rest = List_cdr(args);
   return cons(_2, cons(binder, cons(List_var(cons(op, List_append(rest, NULL))), NULL)));
 }
 
 static int _is_list_literal(List pat){
   if(! List_truth(pat)) return 1;
-  Var head = car(pat);
+  Var head = List_car(pat);
   if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
-  if(! Var_is_row(head, 9, 7, 4)) return _is_list_literal(cdr(pat));
-  return _is_list_literal(Var_list(head)) && _is_list_literal(cdr(pat));
+  if(! Var_is_row(head, 9, 7, 4)) return _is_list_literal(List_cdr(pat));
+  return _is_list_literal(Var_list(head)) && _is_list_literal(List_cdr(pat));
 }
 
 int Var_is_atom(Var);
@@ -575,17 +571,17 @@ static void _layout_collect(MatchLayoutBuilder * builder, Var pattern){
   }
   if(Var_is_nil(pattern)) return;
   List list = Var_list(pattern);
-  Var head = car(list);
+  Var head = List_car(list);
   if(Var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
-    List args = cdr(list);
-    if(List_truth(args) && Var_is_list_binder(car(args))) builder -> leading_list_binder = 1;
+    List args = List_cdr(list);
+    if(List_truth(args) && Var_is_list_binder(List_car(args))) builder -> leading_list_binder = 1;
   }
-  List parts = Var_equal(head, Symbol_var(1059020478773725)) ? cdr(list) : list;
+  List parts = Var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
   int predicate_form = Var_equal(head, Symbol_var(62054));
-  for(List at = parts;  List_truth(at);  at = cdr(at)){
-    Var part = car(at);
-    if(predicate_form && ! List_truth(cdr(at)) && _reserved_match_predicate(part)) continue;
+  for(List at = parts;  List_truth(at);  at = List_cdr(at)){
+    Var part = List_car(at);
+    if(predicate_form && ! List_truth(List_cdr(at)) && _reserved_match_predicate(part)) continue;
     _layout_collect(builder, part);
     if(builder -> malformed_binder) return;
   }
@@ -661,8 +657,8 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsi
   }
   if(! Var_is_row(pattern, 9, 7, 4) || Var_is_nil(pattern)) return;
   List list = Var_list(pattern);
-  Var head = car(list);
-  List args = cdr(list);
+  Var head = List_car(list);
+  List args = List_cdr(list);
   if(Var_equal(head, Symbol_var(2050325770))) return;
   if(Var_equal(head, Symbol_var(1059020478773725))){
     unsigned long ignored = 0;
@@ -673,12 +669,12 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsi
     _layout_analyze_sequence(layout, list, definite, possible);
     return;
   }
-  if(! Var_equal(head, Symbol_var(2005352)) && List_truth(args) && _named_binder(car(args))){
-    int index = _layout_index(layout, car(args));
+  if(! Var_equal(head, Symbol_var(2005352)) && List_truth(args) && _named_binder(List_car(args))){
+    int index = _layout_index(layout, List_car(args));
     assert(index >= 0);
     * definite |= 1UL << index;
     * possible |= 1UL << index;
-    args = cdr(args);
+    args = List_cdr(args);
   }
   if(Var_equal(head, Symbol_var(1969032))){
     _layout_analyze_sequence(layout, args, definite, possible);
@@ -698,7 +694,7 @@ static void _layout_analyze_pattern(MatchCaptureLayout layout, Var pattern, unsi
     return;
   }
   if(Var_equal(head, Symbol_var(2005352))){
-    if(List_len(args) == 2 && _named_binder(car(args))) _layout_analyze_sequence(layout, args, definite, possible);
+    if(List_len(args) == 2 && _named_binder(List_car(args))) _layout_analyze_sequence(layout, args, definite, possible);
     else _layout_analyze_alternatives(layout, args, definite, possible);
   }
 
@@ -818,7 +814,7 @@ static int _pattern_contains_binder(List pat, Var binder){
         if(Var_equal(part, binder)) return 1;
         if(Var_is_row(part, 9, 7, 4)){
           List nested = Var_list(part);
-          if(List_truth(nested) && ! Var_equal(car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
+          if(List_truth(nested) && ! Var_equal(List_car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
         }
 
       }
@@ -868,7 +864,7 @@ Var List_assoc(List, Var);
 int Var_is_void(Var);
 
 static Var _replace(Var input, List bindings){
-  if(Var_is_binder(input) && !(Var_equal(input, Symbol_var(54))) && !(Var_equal(input, Symbol_var(58)))){
+  if(Var_is_binder(input) && ! Var_equal(input, Symbol_var(54)) && ! Var_equal(input, Symbol_var(58))){
     Var val = List_assoc(bindings, input);
     if(Var_is_void(val)) return input;
     return val;
@@ -876,9 +872,9 @@ static Var _replace(Var input, List bindings){
   if(! Var_is_row(input, 9, 7, 4)) return input;
   List lst = Var_list(input);
   if(! List_truth(lst)) return input;
-  Var head = car(lst);
-  List tail = cdr(lst);
-  if(Var_equal(head, Symbol_var(2050325770))) return car(tail);
+  Var head = List_car(lst);
+  List tail = List_cdr(lst);
+  if(Var_equal(head, Symbol_var(2050325770))) return List_car(tail);
   int splice = Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58));
   head = _replace(head, bindings);
   tail = Var_list(_replace(List_var(tail), bindings));
@@ -908,9 +904,9 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
   if(! Var_is_row(input, 9, 7, 4)) return input;
   List list = Var_list(input);
   if(! List_truth(list)) return input;
-  Var head = car(list);
-  List tail = cdr(list);
-  if(Var_equal(head, Symbol_var(2050325770))) return car(tail);
+  Var head = List_car(list);
+  List tail = List_cdr(list);
+  if(Var_equal(head, Symbol_var(2050325770))) return List_car(tail);
   int splice = Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58));
   Var replaced_head = _capture_replace(head, layout, captures);
   List replaced_tail = Var_list(_capture_replace(List_var(tail), layout, captures));
@@ -955,8 +951,8 @@ static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List
   if(Var_is_row(input, 9, 7, 4)){
     List lst = Var_list(input);
     if(List_truth(lst)){
-      if(_walk_all_prepared(walk, car(lst), 1, results) < 0) return - 1;
-      if(_walk_all_prepared(walk, List_var(cdr(lst)), 0, results) < 0) return - 1;
+      if(_walk_all_prepared(walk, List_car(lst), 1, results) < 0) return - 1;
+      if(_walk_all_prepared(walk, List_var(List_cdr(lst)), 0, results) < 0) return - 1;
     }
     else if(! include_empty) return 0;
   }
@@ -970,9 +966,9 @@ static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Va
   if(Var_is_row(input, 9, 7, 4)){
     List lst = Var_list(input);
     if(List_truth(lst)){
-      int found = _walk_first_prepared(walk, car(lst), 1, out_match, out_bindings);
+      int found = _walk_first_prepared(walk, List_car(lst), 1, out_match, out_bindings);
       if(found) return found;
-      found = _walk_first_prepared(walk, List_var(cdr(lst)), 0, out_match, out_bindings);
+      found = _walk_first_prepared(walk, List_var(List_cdr(lst)), 0, out_match, out_bindings);
       if(found) return found;
     }
     else if(! include_empty) return 0;
@@ -988,9 +984,9 @@ static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int in
   if(Var_is_row(node, 9, 7, 4)){
     List lst = Var_list(node);
     if(List_truth(lst)){
-      Var head = _walk_replace_prepared(walk, car(lst), template, 1, error);
+      Var head = _walk_replace_prepared(walk, List_car(lst), template, 1, error);
       if(* error) return node;
-      List tail = Var_list(_walk_replace_prepared(walk, List_var(cdr(lst)), template, 0, error));
+      List tail = Var_list(_walk_replace_prepared(walk, List_var(List_cdr(lst)), template, 0, error));
       if(* error) return node;
       node = List_var(cons(head, tail));
     }
@@ -1046,8 +1042,7 @@ static int MatchLower__fail_site(MatchLower l, int op, int a, int b, int c, int 
   if(site < 0) return 0;
   if(l -> site_count >= l -> site_capacity){
     int capacity = l -> site_capacity ? l -> site_capacity * 2 : 64;
-    int * grown = Scope_realloc(l -> sites, sizeof(int) * capacity);
-    l -> sites = grown;
+    l -> sites = Scope_realloc(l -> sites, sizeof(int) * capacity);
     l -> site_capacity = capacity;
   }
   l -> sites[l -> site_count ++] = site;
@@ -1266,19 +1261,15 @@ static int MatchLower__compile_not(MatchLower l, List args){
   return entry;
 }
 
-Var List_getindex(List, int);
-
 List List_cddr(List);
+
+Var List_cadr(List);
 
 Symbol Var_symbol(Var);
 
 static int MatchLower__compile_is(MatchLower l, List args){
   MachineBuilder b = l -> b;
   int entry = b -> length, base = l -> site_count, kind = - 1;
-  Var kind_arg, type_tag;
-  List _x2c_destructure_0 = args;
-  kind_arg = List_getindex(_x2c_destructure_0, 0);
-  type_tag = List_getindex(_x2c_destructure_0, 1);
   if(List_equal(args, _7)) kind = MACHINE_KIND_ATOM_BINDER;
   else if(List_equal(args, _9)) kind = MACHINE_KIND_LIST_BINDER;
   else if(List_equal(args, _6)) kind = MACHINE_KIND_BINDER;
@@ -1300,7 +1291,8 @@ static int MatchLower__compile_is(MatchLower l, List args){
     MachineBuilder_set_target(b, is_list, failure);
     return entry;
   }
-  else if(List_truth(args) && Var_equal(kind_arg, Symbol_var(1362954)) && List_truth(cdr(args)) && ! List_truth(List_cddr(args))){
+  else if(List_truth(args) && Var_equal(List_car(args), Symbol_var(1362954)) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args))){
+    Var type_tag = List_cadr(args);
     Symbol tag = Var_is(type_tag, 1328354264) ? Var_symbol(type_tag) : 0;
     tag = _canonical_type_tag(tag);
     if(! tag){
@@ -1317,16 +1309,18 @@ static int MatchLower__compile_is(MatchLower l, List args){
   return MatchLower__finish(l, base) ? entry : - 1;
 }
 
+Var List_getindex(List, int);
+
 static int MatchLower__compile_guard_core(MatchLower l, Var op, List args){
   if(Var_equal(op, Symbol_var(62436))) return MatchLower__compile_choice(l, args);
   if(Var_equal(op, Symbol_var(1995752))) return MatchLower__compile_not(l, args);
   if(Var_equal(op, Symbol_var(62054))) return MatchLower__compile_is(l, args);
   if(Var_equal(op, Symbol_var(2005352))){
-    if(List_truth(args) && List_truth(cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(car(args))){
+    if(List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args))){
       Var binder, test;
-      List _x2c_destructure_1 = args;
-      binder = List_getindex(_x2c_destructure_1, 0);
-      test = List_getindex(_x2c_destructure_1, 1);
+      List _x2c_destructure_0 = args;
+      binder = List_getindex(_x2c_destructure_0, 0);
+      test = List_getindex(_x2c_destructure_0, 1);
       if(! Var_is_row(test, 9, 7, 4)) return MatchLower__compile_bind_and_leaf(l, binder, test);
       int child = MatchLower__compile_child(l, test);
       if(child < 0) return - 1;
@@ -1335,8 +1329,8 @@ static int MatchLower__compile_guard_core(MatchLower l, Var op, List args){
     return MatchLower__compile_choice(l, args);
   }
   if(Var_equal(op, Symbol_var(1969032))) return MatchLower__compile_call_sequence(l, args);
-  if(! List_truth(args) || List_truth(cdr(args))) return MatchLower__fail(l, "quote-arity");
-  return MatchLower__compile_literal(l, car(args));
+  if(! List_truth(args) || List_truth(List_cdr(args))) return MatchLower__fail(l, "quote-arity");
+  return MatchLower__compile_literal(l, List_car(args));
 }
 
 static int MatchLower__lower_final_star(MatchLower l, int slot){
@@ -1420,7 +1414,7 @@ static int MatchLower__lower_search_star(MatchLower l, int slot, int delayed, in
 static int _inline_descend_ok(List child, int reg){
   if(reg + 1 >= MACHINE_CURSOR_REGS) return 0;
   if(! List_truth(child)) return 0;
-  if(Var_is_match_op(car(child))) return 0;
+  if(Var_is_match_op(List_car(child))) return 0;
   if(_is_list_literal(child)) return 0;
   {
     Var part;
@@ -1520,9 +1514,9 @@ static int MatchLower__compile_segment(MatchLower l, List pattern){
   plan.used = 0;
   int child_count = 0;
   List at = pattern;
-  while(List_truth(at) && ! Var_is_list_binder(car(at))){
+  while(List_truth(at) && ! Var_is_list_binder(List_car(at))){
     if(child_count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "segment-width");
-    Var part = car(at);
+    Var part = List_car(at);
     elements[child_count] = part;
     if(! Var_is_row(part, 9, 7, 4)) children[child_count ++] = - 1;
     else if(_inline_descend_ok(Var_list(part), 0)){
@@ -1533,7 +1527,7 @@ static int MatchLower__compile_segment(MatchLower l, List pattern){
       children[child_count] = MatchLower__compile_child(l, part);
       if(children[child_count ++] < 0) return - 1;
     }
-    at = cdr(at);
+    at = List_cdr(at);
   }
   Var star_binder;
   List tail = NULL;
@@ -1541,8 +1535,8 @@ static int MatchLower__compile_segment(MatchLower l, List pattern){
   Var anchor =((void) 0, Void);
   int anchor_offset = 0;
   if(List_truth(at)){
-    star_binder = car(at);
-    tail = cdr(at);
+    star_binder = List_car(at);
+    tail = List_cdr(at);
     if(! Var_equal(star_binder, Symbol_var(54))){
       star_slot = MachineBuilder_binder(b, star_binder);
       if(star_slot < 0) return - 1;
@@ -1599,7 +1593,7 @@ static int MatchLower__compile_value(MatchLower l, Var pattern){
   if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(l, pattern);
   if(! Var_is_row(pattern, 9, 7, 4)) return MatchLower__compile_literal(l, pattern);
   List list = Var_list(pattern);
-  if(List_truth(list) && Var_is_match_op(car(list))) return MatchLower__compile_guard_core(l, car(list), cdr(list));
+  if(List_truth(list) && Var_is_match_op(List_car(list))) return MatchLower__compile_guard_core(l, List_car(list), List_cdr(list));
   if(List_truth(list) && _is_list_literal(list)) return MatchLower__compile_literal_list(l, list);
   return MatchLower__compile_segment(l, list);
 }
@@ -1881,6 +1875,8 @@ Symbol Var_kind(Var);
 
 int String_is_permanent(String);
 
+String Var_string(Var);
+
 void * Var_pointer(Var);
 
 static int _pattern_admissible(Var value, int depth){
@@ -1891,7 +1887,7 @@ static int _pattern_admissible(Var value, int depth){
     case 35386204516 : case 39939274535114 : return 0;
     case 1011493096 :{
       if(Var_is(value, 826970)) return 1;
-      if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_str(value));
+      if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_string(value));
       if(! Var_is_row(value, 9, 7, 4)) return 0;
       {
         Var part;

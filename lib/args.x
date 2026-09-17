@@ -57,14 +57,14 @@ static void _read_property(_Option *option, List property) {
   if (property.car() is Symbol) key = property.car();
   switch (key) {
     case <value>:
-      option->value = property.cadr().str();
+      option.value = property.cadr().str();
       break;
     case <default>:
-      option->fallback = property.cadr();
-      option->defaulted = 1;
+      option.fallback = property.cadr();
+      option.defaulted = 1;
       break;
     case <help>:
-      option->help = property.cadr().str();
+      option.help = property.cadr().str();
       break;
     default:
       _bad_spec("unknown spec property", property);
@@ -74,9 +74,9 @@ static void _read_property(_Option *option, List property) {
 /* The first word names an operand unless it begins with a dash; every
    dashed word is a spelling of the same option. */
 static void _read_row(_Option *option, List row, Map index, int position) {
-  option->row = row;
+  option.row = row;
   String first = row.car().str();
-  option->operand = !first.startswith("-");
+  option.operand = !first.startswith("-");
   foreach (Var word, row) {
     if (word is List) {
       _read_property(option, word);
@@ -84,25 +84,25 @@ static void _read_row(_Option *option, List row, Map index, int position) {
     }
     String text = word.str();
     if (text.startswith("-")) {
-      if (!option->spelling ||
-          (text.startswith("--") && !option->spelling.startswith("--")))
-        option->spelling = text;
+      if (!option.spelling ||
+          (text.startswith("--") && !option.spelling.startswith("--")))
+        option.spelling = text;
       index[text] = position;
     }
-    else if (text == "required") option->required = 1;
-    else if (text == "repeated") option->repeated = 1;
+    else if (text == "required") option.required = 1;
+    else if (text == "repeated") option.repeated = 1;
     else if (text != first) _bad_spec("unknown spec word", text);
   }
-  if (option->operand) option->name = first;
+  if (option.operand) option.name = first;
   else {
-    int dashes = option->spelling.startswith("--") ? 2 : 1;
-    option->name = option->spelling[dashes:];
+    int dashes = option.spelling.startswith("--") ? 2 : 1;
+    option.name = option.spelling[dashes:];
   }
-  if (option->defaulted) return;
-  if (option->repeated) option->fallback = (List) NULL;
-  else if (option->value || option->operand)
-    option->fallback = (String) NULL;
-  else option->fallback = 0;
+  if (option.defaulted) return;
+  if (option.repeated) option.fallback = (List) NULL;
+  else if (option.value || option.operand)
+    option.fallback = (String) NULL;
+  else option.fallback = 0;
 }
 
 static _Spec _read_spec(List spec) {
@@ -118,23 +118,23 @@ static _Spec _read_spec(List spec) {
 
 static _Option *_find(_Spec *spec, String spelling) {
   Var position;
-  if (!spec->index.try_get(spelling, &position))
+  if (!spec.index.try_get(spelling, &position))
     _bad_option("unknown option", spelling);
-  return &spec->options[position.integer()];
+  return &spec.options[position.integer()];
 }
 
 /* A repeated row collects every value in order, replacing its default at
    the first occurrence; a flag counts its occurrences; any other value
    replaces an earlier one. */
 static void _store(_Option *option, Map result, Var value) {
-  if (option->repeated) {
+  if (option.repeated) {
     List earlier = NULL;
-    if (option->given) earlier = result[option->name];
-    result[option->name] = earlier.append(%($value));
+    if (option.given) earlier = result[option.name];
+    result[option.name] = earlier.append(%($value));
   }
-  else if (option->value || option->operand) result[option->name] = value;
-  else result[option->name] = option->given + 1;
-  option->given++;
+  else if (option.value || option.operand) result[option.name] = value;
+  else result[option.name] = option.given + 1;
+  option.given++;
 }
 
 static String _next_value(List *rest, String spelling) {
@@ -147,7 +147,7 @@ static void _parse_long(_Spec *spec, Map result, List *rest, String word) {
   int equals = word.find("=");
   String spelling = equals < 0 ? word : word[:equals];
   _Option *option = _find(spec, spelling);
-  if (!option->value) {
+  if (!option.value) {
     if (equals >= 0) _bad_option("unexpected value", spelling);
     _store(option, result, 1);
   }
@@ -161,7 +161,7 @@ static void _parse_short(_Spec *spec, Map result, List *rest, String word) {
   for (int at = 1; at < word.len(); at++) {
     String spelling = %"-${word[at:at + 1]}";
     _Option *option = _find(spec, spelling);
-    if (!option->value) {
+    if (!option.value) {
       _store(option, result, 1);
       continue;
     }
@@ -173,13 +173,13 @@ static void _parse_short(_Spec *spec, Map result, List *rest, String word) {
 }
 
 static void _assign_operands(_Spec *spec, Map result, List operands) {
-  for (int i = 0; i < spec->count; i++) {
-    _Option *option = &spec->options[i];
-    if (!option->operand) continue;
+  for (int i = 0; i < spec.count; i++) {
+    _Option *option = &spec.options[i];
+    if (!option.operand) continue;
     while (operands) {
       _store(option, result, operands.car());
       operands = operands.cdr();
-      if (!option->repeated) break;
+      if (!option.repeated) break;
     }
   }
   if (operands) _bad_operand("unexpected operand", operands.car().str());
@@ -218,7 +218,7 @@ static void _assign_operands(_Spec *spec, Map result, List operands) {
       (inputs repeated required));
     Map options = Args.parse(%(-vI src -Ilib main.x), spec);
     ~  return options["verbose"] == 1 &&
-    ~    options["output"].str() == "a.out" &&
+    ~    options["output"] == "a.out" &&
     ~    options["I"].list().len() == 2 &&
     ~    options["inputs"].list().car().str() == "main.x" ? 0 : 1;
     ~}
@@ -247,9 +247,9 @@ Map Args.parse(List args, List spec) {
   _assign_operands(&parsed, result, operands.list_free());
   for (int i = 0; i < parsed.count; i++) {
     _Option *option = &parsed.options[i];
-    if (!option->required || option->given) continue;
-    String name = option->name, spelling = option->spelling;
-    if (option->operand) _bad_operand("missing operand", name);
+    if (!option.required || option.given) continue;
+    String name = option.name, spelling = option.spelling;
+    if (option.operand) _bad_operand("missing operand", name);
     _bad_option("missing option", spelling);
   }
   return result;
@@ -258,17 +258,17 @@ Map Args.parse(List args, List spec) {
 // usage text
 
 static String _label(_Option *option) {
-  if (option->operand) {
-    String label = %"<${option->name}>";
-    if (option->repeated) label = %"$label...";
-    return option->required ? label : %"[$label]";
+  if (option.operand) {
+    String label = %"<${option.name}>";
+    if (option.repeated) label = %"$label...";
+    return option.required ? label : %"[$label]";
   }
   Array spellings = [];
-  foreach (Var word, option->row)
+  foreach (Var word, option.row)
     if (word is not List && word.str().startswith("-"))
       spellings.push(word.str());
   String label = spellings.join(", ");
-  if (option->value) label = %"$label <${option->value}>";
+  if (option.value) label = %"$label <${option.value}>";
   return label.startswith("--") ? %"    $label" : label;
 }
 
@@ -291,19 +291,19 @@ String Args.usage(List spec, String program) {
   for (int i = 0; i < parsed.count; i++) {
     _Option *option = &parsed.options[i];
     String label = _label(option);
-    if (!option->operand) _write_row(options, label, option->help);
+    if (!option.operand) _write_row(options, label, option.help);
     else {
       synopsis.printf(" %s", label);
-      if (option->help) _write_row(operands, label, option->help);
+      if (option.help) _write_row(operands, label, option.help);
     }
   }
-  String option_rows = options.str(), operand_rows = operands.str();
-  String words = synopsis.str();
+  String option_rows = options, operand_rows = operands;
+  String words = synopsis;
   out.printf("Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
              words ? words : "");
   if (option_rows) out.printf("\nOptions:\n%s", option_rows);
   if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);
-  return out.str();
+  return out;
 }
 
 /** Returns the program arguments that follow `argv[0]` as `String`s. */

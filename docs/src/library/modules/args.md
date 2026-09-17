@@ -62,7 +62,7 @@ List spec = %(
   (inputs repeated required));
 Map options = Args.parse(%(-vI src -Ilib main.x), spec);
 ~  return options["verbose"] == 1 &&
-~    options["output"].str() == "a.out" &&
+~    options["output"] == "a.out" &&
 ~    options["I"].list().len() == 2 &&
 ~    options["inputs"].list().car().str() == "main.x" ? 0 : 1;
 ~}

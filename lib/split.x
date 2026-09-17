@@ -247,7 +247,7 @@ int Split.try_next(Split split, int *cursor, String *out) {
 }
 
 static int _iter_next(Iter iter, Var *out) {
-  Split split = iter.obj, int cursor = iter.state.int(), String value;
+  Split split = iter.obj, int cursor = iter.state, String value;
   if (!split.try_next(&cursor, &value)) return 0;
   iter.state = cursor;
   *out = value;

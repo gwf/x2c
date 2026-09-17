@@ -24,7 +24,7 @@ X2c project manifests.
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project.x:761`
+Source: `src/project.x:751`
 
 #### project_plan
 
@@ -37,7 +37,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:786`
+Source: `src/project.x:776`
 
 ## Public types
 

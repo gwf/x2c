@@ -31,8 +31,6 @@ static int _is_active_canonical(List list);
 
 static List _prepend_array(Array values, List tail);
 
-static void _append_value(Array values, Var value);
-
 static List _concat_lists(Array lists);
 
 static List _concat_n_va(unsigned list_count, va_list ap);
@@ -418,17 +416,12 @@ List Var_cdr(Var var){
 static List _prepend_array(Array values, List tail){
   Var * data = values -> bytes;
   for(size_t i = Array_len(values);  i;  i --){
-    List next = cons(data[i - 1], tail);
-    tail = next;
+    tail = cons(data[i - 1], tail);
   }
   return tail;
 }
 
 Var Array_push(Array, Var);
-
-static void _append_value(Array values, Var value){
-  Array_push(values, value);
-}
 
 List List_append(List a, List b){
   if(! _init_guard_) List_initialize();
@@ -451,13 +444,12 @@ List List_append(List a, List b){
       Var _x2c_macro_cursor_output_0;
       while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
         value = _x2c_macro_cursor_output_0;
-        _append_value(values, value);
+        Array_push(values, value);
       }
 
     }
-    List result = _prepend_array(values, b);
     {
-      List _x2c_return_value_0 = result;
+      List _x2c_return_value_0 = _prepend_array(values, b);
       {
         x2c_cleanup_leave(& _x2c_defer_record_0);
         return _x2c_return_value_0;
@@ -476,8 +468,8 @@ Var Array_getindex(Array, int);
 static List _concat_lists(Array lists){
   List result = NULL;
   for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
-    List current = Var_list(Array_getindex(lists, i)), next = List_append(current, result);
-    result = next;
+    List current = Var_list(Array_getindex(lists, i));
+    result = List_append(current, result);
   }
   return result;
 }
@@ -486,7 +478,7 @@ Var unsigned_var(unsigned);
 
 static List _concat_n_va(unsigned list_count, va_list ap){
   if(list_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 339};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 333};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(list_count));
     __builtin_unreachable();
   }
@@ -500,10 +492,9 @@ static List _concat_n_va(unsigned list_count, va_list ap){
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-    for(unsigned i = 0;  i < list_count;  i ++) _append_value(lists, List_var(va_arg(ap, List)));
-    List result = _concat_lists(lists);
+    for(unsigned i = 0;  i < list_count;  i ++) Array_push(lists, List_var(va_arg(ap, List)));
     {
-      List _x2c_return_value_1 = result;
+      List _x2c_return_value_1 = _concat_lists(lists);
       {
         x2c_cleanup_leave(& _x2c_defer_record_1);
         return _x2c_return_value_1;
@@ -540,15 +531,14 @@ static List _n_va(unsigned element_count, va_list ap){
     for(unsigned i = 0;  i < element_count;  i ++){
       Var value = va_arg(ap, Var);
       if(Var_is_void(value)){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "_n_va",.line = 366};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "_n_va",.line = 359};
         x2c_error_raise_n(& _x2c_error_site_4, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
         __builtin_unreachable();
       }
-      _append_value(values, value);
+      Array_push(values, value);
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_2 = result;
+      List _x2c_return_value_2 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_2);
         return _x2c_return_value_2;
@@ -582,8 +572,7 @@ List List_reverse(List lst){
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
       value = _x2c_macro_cursor_output_1;
       {
-        List next = cons(value, rev);
-        rev = next;
+        rev = cons(value, rev);
       }
 
     }
@@ -597,14 +586,14 @@ Var List_last(List lst){
   if(! List_truth(lst)) return((void) 0, Void);
   List tail;
   while(List_truth((tail = List_cdr(lst)))) lst = tail;
-  return car(lst);
+  return List_car(lst);
 }
 
 int Var_equal(Var, Var);
 
 int List_index(List lst, Var key){
   if(! _init_guard_) List_initialize();
-  for(int index = 0;  List_truth(lst);  lst = cdr(lst), index ++) if(Var_equal(lst -> car, key)) return index;
+  for(int index = 0;  List_truth(lst);  lst = List_cdr(lst), index ++) if(Var_equal(lst -> car, key)) return index;
   return - 1;
 }
 
@@ -616,7 +605,7 @@ int List_contains(List lst, Var key){
 int List_len(List lst){
   if(! _init_guard_) List_initialize();
   int len = 0;
-  for(List l = lst;  List_truth(l);  l = cdr(l)) len ++;
+  for(List l = lst;  List_truth(l);  l = List_cdr(l)) len ++;
   return len;
 }
 
@@ -649,15 +638,14 @@ List List_map(List lst, Func fn){
             FuncArg_value(value)
           }
           ;
-          _append_value(values, Func_apply(fn, 1, arguments));
+          Array_push(values, Func_apply(fn, 1, arguments));
         }
 
       }
 
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_3 = result;
+      List _x2c_return_value_3 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_3);
         return _x2c_return_value_3;
@@ -786,7 +774,7 @@ Array Array_sort(Array);
 
 List List_sort(List lst){
   if(! _init_guard_) List_initialize();
-  if(! List_truth(lst) || ! List_truth(cdr(lst))) return lst;
+  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   Array values = Array_new();
   {
   _x2c_defer_env_7 _x2c_defer_env_27 = {._x2c_defer_capture_7 =(const void *) & values};
@@ -804,14 +792,13 @@ List List_sort(List lst){
       Var _x2c_macro_cursor_output_7;
       while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
         value = _x2c_macro_cursor_output_7;
-        _append_value(values, value);
+        Array_push(values, value);
       }
 
     }
     Array_sort(values);
-    List result = Array_list(values);
     {
-      List _x2c_return_value_4 = result;
+      List _x2c_return_value_4 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_4);
         return _x2c_return_value_4;
@@ -829,7 +816,7 @@ Array Array_sort_with(Array, Func);
 
 List List_sort_with(List lst, Func compare){
   if(! _init_guard_) List_initialize();
-  if(! List_truth(lst) || ! List_truth(cdr(lst))) return lst;
+  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   Array values = Array_new();
   {
   _x2c_defer_env_8 _x2c_defer_env_28 = {._x2c_defer_capture_8 =(const void *) & values};
@@ -950,7 +937,7 @@ Array List_array(List lst){
     Var _x2c_macro_cursor_output_10;
     while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
       value = _x2c_macro_cursor_output_10;
-      _append_value(array, value);
+      Array_push(array, value);
     }
 
   }
@@ -963,7 +950,7 @@ Iter Iter_unique(Iter, Iter);
 
 List List_unique(List lst){
   if(! _init_guard_) List_initialize();
-  if(! List_truth(lst) || ! List_truth(cdr(lst))) return lst;
+  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   {
     Scope_retain();
     {
@@ -1022,11 +1009,10 @@ List List_zip_with(List a, List b, Func fn){
         item = Func_apply(fn, 2, arguments);
       }
       else item = List_var(cons(left, cons(right, NULL)));
-      _append_value(values, item);
+      Array_push(values, item);
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_9 = result;
+      List _x2c_return_value_9 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_9);
         return _x2c_return_value_9;
@@ -1072,7 +1058,7 @@ static Var _sublis_node(List alist, Var node){
         source = _x2c_macro_cursor_output_11;
         {
           Var item = _sublis_node(alist, source);
-          _append_value(items, item);
+          Array_push(items, item);
         }
 
       }
@@ -1130,21 +1116,20 @@ List List_flatten(List lst){
               Var _x2c_macro_cursor_output_12;
               while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
                 item = _x2c_macro_cursor_output_12;
-                _append_value(values, item);
+                Array_push(values, item);
               }
 
             }
 
           }
-          else _append_value(values, head);
+          else Array_push(values, head);
         }
 
       }
 
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_11 = result;
+      List _x2c_return_value_11 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_11);
         return _x2c_return_value_11;
@@ -1168,7 +1153,7 @@ static void _flatten_all_collect(Array values, List lst){
       head = _x2c_macro_cursor_output_14;
       {
         if(Var_is_row(head, 9, 7, 4)) _flatten_all_collect(values, Var_list(head));
-        else _append_value(values, head);
+        else Array_push(values, head);
       }
 
     }
@@ -1191,9 +1176,8 @@ List List_flatten_all(List lst){
   x2c_cleanup_push(&_x2c_defer_record_12);
   {
     _flatten_all_collect(values, lst);
-    List result = Array_list(values);
     {
-      List _x2c_return_value_12 = result;
+      List _x2c_return_value_12 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_12);
         return _x2c_return_value_12;
@@ -1209,7 +1193,7 @@ List List_flatten_all(List lst){
 
 List List_nth_cdr(List list, int n){
   if(! _init_guard_) List_initialize();
-  while(n -- > 0 && List_truth(list)) list = cdr(list);
+  while(n -- > 0 && List_truth(list)) list = List_cdr(list);
   return list;
 }
 
@@ -1259,11 +1243,9 @@ Var List_assoc(List list, Var key){
 
 Symbol Var_kind(Var);
 
-long Var_integer(Var);
-
 Var List_get(List list, Var key){
   if(! _init_guard_) List_initialize();
-  if(Var_kind(key) == 20309162340) return List_getindex(list, Var_integer(key));
+  if(Var_kind(key) == 20309162340) return List_getindex(list, Var_int(Var_convert(key, 3453797)));
   return List_assoc(list, key);
 }
 
@@ -1296,7 +1278,7 @@ List List_head(List list, unsigned count){
   x2c_cleanup_push(&_x2c_defer_record_13);
   {
     while(List_truth(list) && count --){
-      _append_value(values, list -> car);
+      Array_push(values, list -> car);
       list = List_cdr(list);
     }
     if(! List_truth(list)){
@@ -1307,9 +1289,8 @@ List List_head(List list, unsigned count){
       }
 
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_14 = result;
+      List _x2c_return_value_14 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_13);
         return _x2c_return_value_14;
@@ -1337,12 +1318,11 @@ static List _collect_subseq(List list, int start, int step, int span){
   x2c_cleanup_push(&_x2c_defer_record_14);
   {
     while(List_truth(list) && span --){
-      _append_value(values, list -> car);
+      Array_push(values, list -> car);
       for(int i = 0;  List_truth(list) && i < step;  i ++) list = List_cdr(list);
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_15 = result;
+      List _x2c_return_value_15 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_14);
         return _x2c_return_value_15;
@@ -1363,7 +1343,7 @@ int x2c_normalize_slice(int *, int *, int, int);
 List List_subseq(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
   if(step < 1){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 826};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 810};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1374,7 +1354,7 @@ List List_subseq(List list, int start, int stop, int step){
 List List_getslice(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
   if(! step){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 840};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 824};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1402,10 +1382,9 @@ List List_getslice(List list, int start, int stop, int step){
   };
   x2c_cleanup_push(&_x2c_defer_record_16);
   {
-      for(int i = 0;  i < span;  i ++) _append_value(values, Array_getindex(source, start + i * step));
-      List result = Array_list(values);
+      for(int i = 0;  i < span;  i ++) Array_push(values, Array_getindex(source, start + i * step));
       {
-        List _x2c_return_value_16 = result;
+        List _x2c_return_value_16 = Array_list(values);
         {
           x2c_cleanup_leave(& _x2c_defer_record_16);
           x2c_cleanup_leave(& _x2c_defer_record_15);
@@ -1426,7 +1405,7 @@ List List_getslice(List list, int start, int stop, int step){
 
 static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs){
   if(destination_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 856};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 839};
     x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
     __builtin_unreachable();
   }
@@ -1434,13 +1413,13 @@ static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int li
   while(List_truth(src) && count < destination_count){
     if(list_outputs){
       List * dst = va_arg(ap, List *);
-      if(dst) * dst = Var_list(car(src));
+      if(dst) * dst = Var_list(List_car(src));
     }
     else{
       Var * dst = va_arg(ap, Var *);
-      if(dst) * dst = car(src);
+      if(dst) * dst = List_car(src);
     }
-    src = cdr(src);
+    src = List_cdr(src);
     count ++;
   }
   return count;
@@ -1487,10 +1466,10 @@ int List_compare(List a, List b){
   if(! _init_guard_) List_initialize();
   if((void *) a ==(void *) b) return 0;
   while(List_truth(a) && List_truth(b)){
-    int c = Var_compare(car(a), car(b));
+    int c = Var_compare(List_car(a), List_car(b));
     if(c) return c;
-    a = cdr(a);
-    b = cdr(b);
+    a = List_cdr(a);
+    b = List_cdr(b);
   }
   if(List_equal(a, b)) return 0;
   return List_truth(a) ? 1 : - 1;
@@ -1537,10 +1516,10 @@ static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
   x2c_cleanup_push(&_x2c_defer_record_17);
   {
     Buffer_write(buf, "(");
-    if(! Var_is_row(car(lst), 9, 7, 4)) Buffer_pad(buf);
+    if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(buf);
     Buffer_push(buf);
-    for(List l = lst;  List_truth(l);  l = cdr(l)){
-      _serialize_list_line(car(l), buf, mode);
+    for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+      _serialize_list_line(List_car(l), buf, mode);
       if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
     }
     if(Buffer_get(buf, - 1) != ')') Buffer_pad(buf);
@@ -1622,10 +1601,10 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
   {
     if(buf -> pos - Buffer_tabstop(buf) > 5) Buffer_newline_indent(buf);
     Buffer_write(buf, "(");
-    if(! Var_is_row(car(lst), 9, 7, 4)) Buffer_pad(buf);
+    if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(buf);
     Buffer_push(buf);
-    for(List l = lst;  List_truth(l);  l = cdr(l)){
-      _serialize_nested_list(car(l), buf, mode);
+    for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+      _serialize_nested_list(List_car(l), buf, mode);
       if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
     }
     if(Buffer_get(buf, - 1) != ')') Buffer_pad(buf);
@@ -1787,9 +1766,8 @@ List Iter_list(Iter iter){
       }
 
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_19 = result;
+      List _x2c_return_value_19 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_22);
         return _x2c_return_value_19;
@@ -1828,15 +1806,14 @@ List List_filter(List lst, Func pred){
             FuncArg_value(value)
           }
           ;
-          if(Var_truth(Func_apply(pred, 1, arguments))) _append_value(values, value);
+          if(Var_truth(Func_apply(pred, 1, arguments))) Array_push(values, value);
         }
 
       }
 
     }
-    List result = Array_list(values);
     {
-      List _x2c_return_value_20 = result;
+      List _x2c_return_value_20 = Array_list(values);
       {
         x2c_cleanup_leave(& _x2c_defer_record_23);
         return _x2c_return_value_20;

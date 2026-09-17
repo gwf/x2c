@@ -1,9 +1,9 @@
 # The C on-ramp
 
-> Status: active - 4a implemented 2026-09-16 on a worker branch, awaiting
-> integration. 4b (the landing page) has not started. termbox2 still does
-> not translate as a unit; the next failures are listed under "End-to-end
-> result" and are outside this plan.
+> Status: active - 4a landed on main as `f94f034` and `76b27c0` (2026-09-16).
+> 4b (the landing page) has not started. The failures under "End-to-end
+> result" and the rest of a 22-unit corpus are handled by
+> `plans/x2c-c-on-ramp-corpus.md`.
 
 ## The result
 

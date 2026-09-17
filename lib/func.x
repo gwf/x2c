@@ -93,7 +93,7 @@ static List _parameter(Func function, unsigned index) {
   if (!function || index >= function.nparams) return NULL;
   List params = _parameters(function);
   while (params && index--) params = params.cdr();
-  return params && params.car() is <list> ? params.car().list() : NULL;
+  return params && params.car() is <list> ? params.car() : NULL;
 }
 
 /* Dynamic-call lowering evaluates the Func expression once, queries every
@@ -145,7 +145,7 @@ static int _reference_type_accepts(List target, List source) {
   unsigned target_qualifiers = _type_qualifiers(&target);
   unsigned source_qualifiers = _type_qualifiers(&source);
   return !(source_qualifiers & ~target_qualifiers) &&
-         List.equal(target, source);
+         target.equal(source);
 }
 
 /** Checks and converts value argument `i`, reporting its position.
@@ -175,27 +175,27 @@ Var x2c_func_value_argument(
       converted = value.convert(want);
     }
     catch %(bad-enc *cause): {
-      Symbol lower_code = <bad-enc>, List lower = cons(lower_code, cause);
+      List lower = cons(<bad-enc>, cause);
       raise %(bad-enc (sig $sig) (index $i) (value $value)
                        (want $want) (cause $lower));
     }
     catch %(void-op *cause): {
-      Symbol lower_code = <void-op>, List lower = cons(lower_code, cause);
+      List lower = cons(<void-op>, cause);
       raise %(void-op (sig $sig) (index $i) (value $value)
                        (want $want) (cause $lower));
     }
     catch %(bad-target *cause): {
-      Symbol lower_code = <bad-target>, List lower = cons(lower_code, cause);
+      List lower = cons(<bad-target>, cause);
       raise %(bad-target (sig $sig) (index $i) (value $value)
                           (want $want) (cause $lower));
     }
     catch %(conv-range *cause): {
-      Symbol lower_code = <conv-range>, List lower = cons(lower_code, cause);
+      List lower = cons(<conv-range>, cause);
       raise %(conv-range (sig $sig) (index $i) (value $value)
                           (want $want) (cause $lower));
     }
     catch %(no-convert *cause): {
-      Symbol lower_code = <no-convert>, List lower = cons(lower_code, cause);
+      List lower = cons(<no-convert>, cause);
       raise %(no-convert (sig $sig) (index $i) (value $value)
                           (want $want) (cause $lower));
     }
@@ -223,7 +223,7 @@ void *x2c_func_reference_argument(
   int signature_reference = declared && declared.car() == <&>;
   List target = signature_reference ? declared.cdr() : NULL;
   if (!source || !argv[i].data.reference || !signature_reference || !want ||
-      !List.equal(target, want) ||
+      !target.equal(want) ||
       !_reference_type_accepts(want, source)) {
     List sig = fn ? fn.sig : NULL;
     raise %(bad-types (sig $sig) (index $i)
@@ -284,7 +284,7 @@ static Func _new(
   fn.adapter = adapter;
   fn.rest = rest;
   fn.context_size = context_size;
-  for (List p = void_params ? NULL : params; p; p = p.cdr()) fn.nparams++;
+  fn.nparams = void_params ? 0 : params.len();
   if (context_size) memcpy(_context(fn), context, context_size);
   result = fn;
   return result;

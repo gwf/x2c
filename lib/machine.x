@@ -320,9 +320,9 @@ inline int MachineSlot.prefix_equal(
     end = slot.span.end;
   }
   for (int n = 0; n < length; n++) {
-    if (!input || !expected || !(car(input) == car(expected))) return 0;
-    input = cdr(input);
-    expected = cdr(expected);
+    if (!input || !expected || !(input.car() == expected.car())) return 0;
+    input = input.cdr();
+    expected = expected.cdr();
   }
   return slot.kind == MACHINE_SLOT_SPAN ? expected == end : !expected;
 }
@@ -345,9 +345,9 @@ inline int MachineSlot.final_equal(
   }
   List expected = slot.span.begin, candidate = input, int length = 0;
   while (length < slot.span.length && expected != slot.span.end && candidate) {
-    if (car(expected).u64 != car(candidate).u64) return 0;
-    expected = cdr(expected);
-    candidate = cdr(candidate);
+    if (expected.car().u64 != candidate.car().u64) return 0;
+    expected = expected.cdr();
+    candidate = candidate.cdr();
     length++;
   }
   return length == slot.span.length && expected == slot.span.end && !candidate;
@@ -472,7 +472,7 @@ void MachineBuilder.patch(
   MachineBuilder b, int *sites, int count, int target) {
   if (target < 0 || target >= MACHINE_CODE_MAX) b.set_target(-1, target);
   for (int i = 0; i < count; i++)
-    MachineBuilder.set_target(b, sites[i], target);
+    b.set_target(sites[i], target);
 }
 
 /* Borrow the builder's current arrays and counts. Emission and constant or

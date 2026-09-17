@@ -2,7 +2,7 @@
 # Install a released x2c into a dedicated prefix.
 #
 #   curl -fsSL https://x2c-lang.dev/install.sh | sh
-#   curl -fsSL https://x2c-lang.dev/install.sh | sh -s -- --version 0.13.0
+#   curl -fsSL https://x2c-lang.dev/install.sh | sh -s -- --version 0.14.0
 #
 # X2C_PREFIX selects the prefix (default $HOME/.local/x2c). X2C_RELEASES
 # selects the download base; it defaults to the GitHub release assets.

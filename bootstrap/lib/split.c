@@ -164,13 +164,11 @@ int Split_try_next(Split split, int * cursor, String * out){
   return split -> next(split, cursor, out);
 }
 
-int Var_int(Var);
-
 Var int_var(int);
 
 static int _iter_next(Iter iter, Var * out){
   Split split = Var_pointer(iter -> obj);
-  int cursor = Var_int(iter -> state);
+  int cursor = Var_int(Var_convert(iter -> state, 3453797));
   String value;
   if(! Split_try_next(split, & cursor, & value)) return 0;
   iter -> state = int_var(cursor);

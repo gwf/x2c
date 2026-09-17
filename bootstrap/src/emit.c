@@ -95,7 +95,7 @@ static List Emitter__destructure_value(Emitter e, Type type, List result, List s
 
 static List Emitter__defer(Emitter e, List ast, List context);
 
-static List Emitter__filtered_catch(Emitter emitter, List records, String frame_name, String handle_name, List context, List final_code, List leave_stmt);
+static List Emitter__filtered_catch(Emitter emitter, List records, String frame_name, String handle_name, List context);
 
 static List Emitter__try(Emitter e, List ast, List context);
 
@@ -1099,16 +1099,14 @@ static List Emitter__array_declarator(Emitter emitter, List decl, List array_lis
   return Emitter__declarator(emitter, decl, mods);
 }
 
-Var car(List);
-
-List cdr(List);
+Var List_car(List);
 
 int Symbol_is_type_qualifier(Symbol);
 
 static List Emitter__pointer_declarator(Emitter emitter, List decl, List mods){
-  Var first = car(mods);
-  if(Var_equal(first, Symbol_var(77))) return Emitter__declarator(emitter, cons(Symbol_var(54), decl), cdr(mods));
-  if(Var_equal(first, Symbol_var(54)) || Symbol_is_type_qualifier(Var_symbol(first))) return Emitter__declarator(emitter, cons(first, decl), cdr(mods));
+  Var first = List_car(mods);
+  if(Var_equal(first, Symbol_var(77))) return Emitter__declarator(emitter, cons(Symbol_var(54), decl), List_cdr(mods));
+  if(Var_equal(first, Symbol_var(54)) || Symbol_is_type_qualifier(Var_symbol(first))) return Emitter__declarator(emitter, cons(first, decl), List_cdr(mods));
   return List_append(mods, List_append(decl, NULL));
 }
 
@@ -1122,19 +1120,19 @@ int Type_is_array(Type);
 
 static List Emitter__declarator(Emitter e, List decl, List mods){
   if(! List_truth(mods)) return decl;
-  Var first = car(mods);
+  Var first = List_car(mods);
   if(Var_is_row(first, 9, 7, 4)){
     Type mod = Var_type(first);
-    if(Var_equal(car(Type_list(mod)), Symbol_var(13528008))) return Emitter__function_declarator(e, decl, Type_list(mod), cdr(mods));
-    if(Type_is_array(mod)) return Emitter__array_declarator(e, decl, Type_list(mod), cdr(mods));
-    return Emitter__bitfield_declarator(e, decl, Type_list(mod), cdr(mods));
+    if(Var_equal(List_car(Type_list(mod)), Symbol_var(13528008))) return Emitter__function_declarator(e, decl, Type_list(mod), List_cdr(mods));
+    if(Type_is_array(mod)) return Emitter__array_declarator(e, decl, Type_list(mod), List_cdr(mods));
+    return Emitter__bitfield_declarator(e, decl, Type_list(mod), List_cdr(mods));
   }
   Symbol sym = Var_symbol(first);
   switch(sym){
-    case 8794 : return Emitter__array_declarator(e, decl, NULL, cdr(mods));
+    case 8794 : return Emitter__array_declarator(e, decl, NULL, List_cdr(mods));
     case 54 : case 77 : return Emitter__pointer_declarator(e, decl, mods);
-    case 158121667336 : return Emitter__emit(e, cdr(mods), NULL);
-    case 44661285196 : return cons(Symbol_var(44661285196), Emitter__declarator(e, decl, cdr(mods)));
+    case 158121667336 : return Emitter__emit(e, List_cdr(mods), NULL);
+    case 44661285196 : return cons(Symbol_var(44661285196), Emitter__declarator(e, decl, List_cdr(mods)));
   }
   if(Symbol_is_type_qualifier(sym)) return Emitter__pointer_declarator(e, decl, mods);
   return List_append(mods, List_append(decl, NULL));
@@ -1172,7 +1170,7 @@ static List Emitter__args(Emitter emitter, List ast, List context){
   int first = 1;
   {
     List argument;
-    List _x2c_macro_object_1 = cdr(ast);
+    List _x2c_macro_object_1 = List_cdr(ast);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
@@ -1203,6 +1201,8 @@ static List Emitter__declare(Emitter emitter, List ast, List context){
 
 Type Type_declared(Type);
 
+List cdr(List);
+
 Type List_type_from_ast(List);
 
 String binding_identity_spelling(List);
@@ -1211,7 +1211,7 @@ int Map_try_get(Map, Var, Var *);
 
 Map Compiler_semantic_binding_facts(Compiler);
 
-String Var_str(Var);
+String Var_string(Var);
 
 static List Emitter__function(Emitter e, List ast, List context){
   List type, bindings, body;
@@ -1226,7 +1226,7 @@ static List Emitter__function(Emitter e, List ast, List context){
   List function_binding = Var_list(List_cadr(bindings));
   e -> fn_name = binding_identity_spelling(function_binding);
   Var defer_owner;
-  if(Map_try_get(Compiler_semantic_binding_facts(e -> compiler), List_var(cons(_27, cons(List_var(function_binding), NULL))), & defer_owner)) e -> fn_name = Var_str(defer_owner);
+  if(Map_try_get(Compiler_semantic_binding_facts(e -> compiler), List_var(cons(_27, cons(List_var(function_binding), NULL))), & defer_owner)) e -> fn_name = Var_string(defer_owner);
   type = Emitter__emit(e, cons(List_var(type), NULL), NULL);
   bindings = cons(List_var(bindings), NULL);
   body = cons(List_var(body), NULL);
@@ -1265,8 +1265,6 @@ static List Emitter__foreign_alias(Emitter e, List ast, List context){
   return cons(_33, cons(_35, cons(_37, List_append(native, cons(_39, List_append(pointer, cons(_41, cons(String_var(String_join(NULL, cons(String_var(_42), cons(String_var(message), cons(String_var(_43), NULL))))), cons(_45, cons(String_var(define), NULL))))))))));
 }
 
-Var List_car(List);
-
 static int _is_gensym_tag(List tag){
   if(! List_truth(tag)) return 0;
   Var head = List_car(tag);
@@ -1281,15 +1279,15 @@ List Type_body(Type);
 int Type_is_enum_tag(Type);
 
 static List Emitter__enum(Emitter emitter, List ast, List context){
-  List name = Type_tag(List_type(ast)), body = Var_list(car(Type_body(List_type(ast))));
+  List name = Type_tag(List_type(ast)), body = Var_list(List_car(Type_body(List_type(ast))));
   if(_is_gensym_tag(name) && ! Type_is_enum_tag(List_type(ast))) name = NULL;
   body = Emitter__emit(emitter, body, NULL);
   body = Emitter__commas(emitter, body);
   if(List_truth(name)){
-    if(List_truth(body)) return cons(car(ast), List_append(name, cons(_47, List_append(body, _50))));
-    return cons(car(ast), List_append(name, NULL));
+    if(List_truth(body)) return cons(List_car(ast), List_append(name, cons(_47, List_append(body, _50))));
+    return cons(List_car(ast), List_append(name, NULL));
   }
-  return cons(car(ast), cons(_47, List_append(body, _50)));
+  return cons(List_car(ast), cons(_47, List_append(body, _50)));
 }
 
 int Type_is_aggregate_tag(Type);
@@ -1306,13 +1304,13 @@ static List Emitter__aggregate(Emitter emitter, List ast, List context){
   List tag = Type_tag(List_type(ast));
   if(_is_gensym_tag(tag) && ! Type_is_aggregate_tag(List_type(ast))) tag = NULL;
   if(List_truth(tag)) tag = Emitter__emit(emitter, tag, NULL);
-  if(Type_is_aggregate_tag(List_type(ast))) return cons(car(ast), List_append(tag, NULL));
+  if(Type_is_aggregate_tag(List_type(ast))) return cons(List_car(ast), List_append(tag, NULL));
   List body = Type_body(List_type(ast));
   body = Emitter__emit(emitter, body, NULL);
   body = List_flatten_all(body);
-  if(List_truth(tag) && List_truth(body)) return cons(car(ast), List_append(tag, cons(_47, List_append(body, _50))));
-  if(List_truth(tag)) return cons(car(ast), List_append(tag, NULL));
-  return cons(car(ast), cons(_47, List_append(body, _50)));
+  if(List_truth(tag) && List_truth(body)) return cons(List_car(ast), List_append(tag, cons(_47, List_append(body, _50))));
+  if(List_truth(tag)) return cons(List_car(ast), List_append(tag, NULL));
+  return cons(List_car(ast), cons(_47, List_append(body, _50)));
 }
 
 List Var_cdr(Var);
@@ -1383,8 +1381,6 @@ static List _atom_intern(String spelling){
   if(Var_is(atom, 1328354264)) return cons(String_var(String_join(NULL, cons(String_var(_57), cons(String_var(text), cons(String_var(_58), NULL))))), NULL);
   return cons(String_var(String_join(NULL, cons(String_var(_59), cons(String_var(text), cons(String_var(_58), NULL))))), NULL);
 }
-
-String Var_string(Var);
 
 int String_equal(String, String);
 
@@ -1471,14 +1467,13 @@ static List Emitter__static_copy(Emitter e, String alias, String guard, List sou
   String data = Compiler_fresh_name(e -> compiler, _782);  String index = Compiler_fresh_name(e -> compiler, _783);  return cons(_101, cons(String_var(alias), cons(_103, cons(String_var(alias), cons(_105, cons(_107, cons(String_var(data), cons(_109, cons(_111, List_append(source, cons(_54, cons(_113, cons(String_var(index), cons(_115, cons(String_var(index), cons(_117, cons(String_var(object), cons(_119, cons(String_var(index), cons(_121, cons(_123, cons(String_var(guard), cons(_125, cons(String_var(index), cons(_127, cons(String_var(data), cons(_8, cons(String_var(index), cons(_129, cons(_131, cons(String_var(guard), cons(_133, List_append(source, cons(_135, cons(_137, cons(String_var(object), _140))))))))))))))))))))))))))))))))))));
 }
 
-int Var_int(Var);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 int Type_is_threaded(Type);
 int Compiler_static_value_is_runtime(Compiler, List, Map);
 Var Map_setindex(Map, Var, Var);
 static List Emitter__local_static(Emitter e, List ast, List context){
   List declaration = Var_list(List_cadr(ast)), body = Var_list(List_caddr(ast));  while(Var_equal(List_car(declaration), Symbol_var(104))){
-    e -> origin = Var_int(List_cadr(declaration));  declaration = Var_list(List_caddr(declaration));
+    e -> origin = Var_int(Var_convert(List_cadr(declaration), 3453797));  declaration = Var_list(List_caddr(declaration));
   }
   if(_static_case_entry(body)){
     e -> compiler -> origin = e -> origin;  String note = _143;  Compiler_report_error(e -> compiler, 354920, _784, NULL, cons(String_var(note), NULL));
@@ -1597,7 +1592,7 @@ static List Emitter__defer(Emitter e, List ast, List context){
   List leave = Emitter__emit(e, cons(List_var(cleanup), NULL), context);  List body_code = Emitter__emit(e, cons(List_var(body), NULL), context);  return cons(_268, List_append(env_setup, cons(String_var(String_join(NULL, cons(String_var(_269), cons(String_var(cleanup_name), cons(String_var(_270), cons(String_var(callback_name), cons(String_var(_271), NULL))))))), List_append(env_arg, cons(String_var(String_join(NULL, cons(String_var(_272), cons(String_var(cleanup_name), cons(String_var(_273), NULL))))), List_append(body_code, List_append(leave, _276)))))));
 }
 
-static List Emitter__filtered_catch(Emitter emitter, List records, String frame_name, String handle_name, List context, List final_code, List leave_stmt){
+static List Emitter__filtered_catch(Emitter emitter, List records, String frame_name, String handle_name, List context){
   String selected_name = Compiler_fresh_name(emitter -> compiler, _804);  Array arms = Array_new();  int index = 0, count = List_len(records); {
     List rec;  List _x2c_macro_object_7 = records;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
       rec = Var_list(_x2c_macro_cursor_output_7); {
@@ -1608,8 +1603,7 @@ static List Emitter__filtered_catch(Emitter emitter, List records, String frame_
 
   }
   List selected = count > 1 ? cons(String_var(String_join(NULL, cons(String_var(_281), cons(String_var(selected_name), cons(String_var(_282), cons(String_var(handle_name), cons(String_var(_118), NULL))))))), NULL) : NULL;
-  List result = cons(_47, List_append(selected, cons(String_var(String_join(NULL, cons(String_var(_283), cons(String_var(handle_name), cons(String_var(_118), NULL))))), cons(String_var(String_join(NULL, cons(String_var(_284), cons(String_var(frame_name), cons(String_var(_118), NULL))))), List_append(Array_list_free(arms), _50)))));
-  return result;
+  return cons(_47, List_append(selected, cons(String_var(String_join(NULL, cons(String_var(_283), cons(String_var(handle_name), cons(String_var(_118), NULL))))), cons(String_var(String_join(NULL, cons(String_var(_284), cons(String_var(frame_name), cons(String_var(_118), NULL))))), List_append(Array_list_free(arms), _50)))));
 }
 
 Iter Var_iter(Var, Iter);
@@ -1634,7 +1628,7 @@ static List Emitter__try(Emitter e, List ast, List context){
   List leave_stmt = NULL;
   List body_code = Emitter__emit(e, cons(List_var(body), NULL), context);
   List catch_block = NULL;
-  if(List_truth(clause)) catch_block = Emitter__filtered_catch(e, Var_list(List_cadr(clause)), frame_name, handle_name, context, final_code, leave_stmt);
+  if(List_truth(clause)) catch_block = Emitter__filtered_catch(e, Var_list(List_cadr(clause)), frame_name, handle_name, context);
   List final_trailer = List_append(final_code, List_append(leave_stmt, NULL));
   List unhandled = cons(_47, List_append(final_trailer, _287));
   catch_block = List_truth(catch_block) ? cons(_47, cons(String_var(String_join(NULL, cons(String_var(_288), cons(String_var(frame_name), cons(String_var(_58), NULL))))), List_append(catch_block, cons(_290, List_append(unhandled, _50))))) : unhandled;
@@ -1675,8 +1669,7 @@ static List Emitter__try(Emitter e, List ast, List context){
     String fallback = String_join(NULL, cons(String_var(int_str(default_arm)), NULL));
     registration = cons(String_var(String_join(NULL, cons(String_var(_295), cons(String_var(arms), cons(String_var(_7), cons(String_var(count), cons(String_var(_128), NULL))))))), cons(String_var(String_join(NULL, cons(String_var(_296), cons(String_var(site), cons(String_var(_265), NULL))))), cons(String_var(String_join(NULL, cons(String_var(_297), cons(String_var(arms), cons(String_var(_38), cons(String_var(fallback), cons(String_var(_38), cons(String_var(count), cons(String_var(_38), cons(String_var(state), cons(String_var(_298), NULL))))))))))), cons(String_var(String_join(NULL, cons(String_var(_299), cons(String_var(patterns), cons(String_var(_7), cons(String_var(count), cons(String_var(_128), NULL))))))), cons(String_var(String_join(NULL, cons(String_var(_300), cons(String_var(site), cons(String_var(_179), NULL))))), List_append(Array_list_free(declarations), cons(_49, cons(String_var(String_join(NULL, cons(String_var(_301), cons(String_var(handle_name), cons(String_var(_302), NULL))))), cons(String_var(String_join(NULL, cons(String_var(_193), cons(String_var(frame_name), cons(String_var(_303), cons(String_var(site), cons(String_var(_38), cons(String_var(patterns), cons(String_var(_118), NULL))))))))), NULL)))))))));
   }
-  List result = cons(_47, cons(_305, cons(String_var(frame_name), cons(_54, List_append(registration, cons(_307, cons(String_var(frame_name), cons(_119, cons(_309, cons(String_var(frame_name), cons(_311, List_append(body_code, cons(_313, cons(_315, cons(String_var(frame_name), cons(_119, List_append(catch_block, cons(_49, List_append(final_trailer, _50)))))))))))))))))));
-  return result;
+  return cons(_47, cons(_305, cons(String_var(frame_name), cons(_54, List_append(registration, cons(_307, cons(String_var(frame_name), cons(_119, cons(_309, cons(String_var(frame_name), cons(_311, List_append(body_code, cons(_313, cons(_315, cons(String_var(frame_name), cons(_119, List_append(catch_block, cons(_49, List_append(final_trailer, _50)))))))))))))))))));
 }
 
 static String _c_string_literal(String value){
@@ -1686,8 +1679,6 @@ static String _c_string_literal(String value){
 
 List Compiler_origin_location(Compiler, int);
 
-long Var_integer(Var);
-
 int Ast_never_returns(Ast);
 
 static List Emitter__raise(Emitter e, Ast ast, Var cause, List arguments, List context){
@@ -1695,8 +1686,8 @@ static List Emitter__raise(Emitter e, Ast ast, Var cause, List arguments, List c
   List arg_tokens = Emitter__commas(e, Emitter__emit(e, arguments, context));
   String site_name = Compiler_fresh_name(e -> compiler, _812);
   List location = Compiler_origin_location(e -> compiler, e -> origin);
-  String file = List_truth(location) ? Var_string(List_assoc(location, Symbol_var(412426))) : e -> compiler -> filename;
-  int line = List_truth(location) ? Var_integer(List_assoc(location, Symbol_var(805770))) : 0;
+  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var(e -> compiler -> filename));
+  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));
   String function = String_truth(e -> fn_name) ? e -> fn_name : _316;
   String file_literal = _c_string_literal(file);
   String function_literal = _c_string_literal(function);
@@ -1706,6 +1697,8 @@ static List Emitter__raise(Emitter e, Ast ast, Var cause, List arguments, List c
 }
 
 String String_new(const char *);
+
+String Var_str(Var);
 
 int Var_is_list_binder(Var);
 
@@ -1731,8 +1724,7 @@ static List _make_local_binders(List binders, String values_name){
     }
 
   }
-  List result = Array_list_free(values);
-  return result;
+  return Array_list_free(values);
 }
 
 static List _make_catch_binders(List binders, String handle_name){
@@ -1755,8 +1747,7 @@ static List _make_catch_binders(List binders, String handle_name){
     }
 
   }
-  List result = Array_list_free(values);
-  return result;
+  return Array_list_free(values);
 }
 
 Symbol Compiler_match_pattern_head_symbol(Compiler, List);
@@ -1872,8 +1863,7 @@ List flat_tags = NULL;
   if(labelling) Array_push(values, List_var(_369));
   * dispatched = Array_len(heads) != 0;
   Array_free(heads);
-  List result = Array_list_free(values);
-  return result;
+  return Array_list_free(values);
 }
 
 static List Emitter__match_cases(Emitter e, List ast, List context){
@@ -2186,7 +2176,7 @@ Var List_last(List);
 List String_split(String, String);
 String String_strip(String, char *);
 static List Emitter__preproc(Emitter emitter, List ast, List context){
-  String text = Var_string(List_cadr(ast));  text = String_rstrip(text, "\n");  if(! String_startswith(text, _821)) return cdr(ast);  if(String_endswith(text, _822) || String_endswith(text, _823)){
+  String text = Var_string(List_cadr(ast));  text = String_rstrip(text, "\n");  if(! String_startswith(text, _821)) return List_cdr(ast);  if(String_endswith(text, _822) || String_endswith(text, _823)){
     String last = Var_string(List_last(String_split(text, _824))), stem = String_getslice(String_strip(last, "\"<>"), -2147483648, - 3, 1);  String name = String_join(NULL, cons(String_var(stem), cons(String_var(_512), NULL))), out = String_join(NULL, cons(String_var(_513), cons(String_var(name), cons(String_var(_42), NULL))));  return cons(String_var(out), NULL);
   }
   return cons(String_var(text), NULL);
@@ -2263,7 +2253,7 @@ int Symbol_is_inline(Symbol);
 Var Var_car(Var);
 int Map_truth(Map);
 static List Emitter__emit(Emitter e, List ast, List context){
-  if(! List_truth(ast)) return ast;  Var head = car(ast);  if(Var_is_row(head, 9, 7, 4)){
+  if(! List_truth(ast)) return ast;  Var head = List_car(ast);  if(Var_is_row(head, 9, 7, 4)){
     Array emitted = Array_new(); {
   _x2c_defer_env_6 _x2c_defer_env_13 = {._x2c_defer_capture_8 =(const void *) & emitted};
   X2CCleanup _x2c_defer_record_6 = {
@@ -2286,7 +2276,7 @@ static List Emitter__emit(Emitter e, List ast, List context){
     x2c_cleanup_leave(& _x2c_defer_record_6);
 }
   }
-  if(! Var_is(head, 1328354264)) return cons(head, List_append(Emitter__emit(e, cdr(ast), context), NULL));  if(! Var_equal(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
+  if(! Var_is(head, 1328354264)) return cons(head, List_append(Emitter__emit(e, List_cdr(ast), context), NULL));  if(! Var_equal(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
     Array prefix = Array_new();  while(List_truth(ast) && Var_is(List_car(ast), 1328354264)){
       Symbol item = Var_symbol(List_car(ast));  if(item == 44661285196 ||(! Symbol_is_storage_class(item) && ! Symbol_is_type_qualifier(item) && ! Symbol_is_inline(item))) break;  if(item == 1392787923272) Array_push(prefix, String_var(_825));  else Array_push(prefix, List_car(ast));  ast = List_cdr(ast);
     }
@@ -2301,7 +2291,7 @@ static List Emitter__emit(Emitter e, List ast, List context){
   Var inner = _x2c_match_values[1];
   {
     int old_origin = e -> origin;
-    e -> origin = Var_integer(origin);
+    e -> origin = Var_int(Var_convert(origin, 3453797));
     List result = Emitter__emit(e, Var_list(inner), context);
     e -> origin = old_origin;
     if(e -> compiler -> source_map) return cons(_529, cons(origin, List_append(result, cons(_529, cons(int_var(old_origin), NULL)))));
@@ -2560,9 +2550,9 @@ break; } }
     }
   }
 switch(Var_symbol(head)){
-  case 26416091224 : return Emitter__literal(e, ast, context);  case 35579270086 : return Emitter__preproc(e, ast, context);  case 150408 : return Emitter__bind(e, ast, context);  case 8932560010 : return Emitter__declare_stmt(e, ast, context);  case 272600 : return Emitter__decl_stmt(e, ast, context);  case 357722 : return Emitter__enum(e, ast, context);  case 405555302 : return Emitter__foreign_alias(e, ast, context);  case 458361162716 : return Emitter__function(e, ast, context);  case 33656922 : return Emitter__param(e, ast, context);  case 1318234344 : return Emitter__aggregate(e, ast, context);  case 44661285196 : return Emitter__typedef(e, ast, context);  case 44977116 : return Emitter__aggregate(e, ast, context);  case 102886 : return Emitter__args(e, ast, context);  case 157714837990 : case 1077021542 : return Emitter__commas(e, Emitter__emit(e, cdr(ast), NULL));  case 421880102 : return Emitter__emit(e, cdr(ast), NULL);  case 5011670 : return Emitter__block(e, ast);  case 1077029798 : return cons(_1, List_append(Emitter__emit(e, cdr(ast), NULL), _4));  case 1295657932 : return cons(_764, List_append(Emitter__emit(e, cdr(ast), context), NULL));  case 199882 : return cons(_766, cons(List_var(Emitter__emit(e, List_cdr(ast), context)), _757));  case 7656885669130 : return cons(_47, List_append(Emitter__emit(e, cdr(ast), context), _50));  case 8938171176 : return _769;  case 8728932 : return Emitter__defer(e, ast, context);  case 11371826 : return _55;  case 42162 : return Emitter__try(e, ast, context);  case 41184168 : return List_append(Emitter__emit(e, cdr(ast), context), _55);  case 918374072818022 : return Emitter__match_cases(e, ast, context);  case 4928588686 : return Emitter__binding(e, ast, context);  case 233662566 : return Emitter__commas(e, Emitter__emit(e, cdr(ast), context));  case 7477210024 : return cdr(ast);  case 29272 : return _260;  case 40896714 : return cdr(ast);  case 1392787923272 : return cons(_771, List_append(Emitter__emit(e, cdr(ast), context), NULL));
+  case 26416091224 : return Emitter__literal(e, ast, context);  case 35579270086 : return Emitter__preproc(e, ast, context);  case 150408 : return Emitter__bind(e, ast, context);  case 8932560010 : return Emitter__declare_stmt(e, ast, context);  case 272600 : return Emitter__decl_stmt(e, ast, context);  case 357722 : return Emitter__enum(e, ast, context);  case 405555302 : return Emitter__foreign_alias(e, ast, context);  case 458361162716 : return Emitter__function(e, ast, context);  case 33656922 : return Emitter__param(e, ast, context);  case 1318234344 : return Emitter__aggregate(e, ast, context);  case 44661285196 : return Emitter__typedef(e, ast, context);  case 44977116 : return Emitter__aggregate(e, ast, context);  case 102886 : return Emitter__args(e, ast, context);  case 157714837990 : case 1077021542 : return Emitter__commas(e, Emitter__emit(e, List_cdr(ast), NULL));  case 421880102 : return Emitter__emit(e, List_cdr(ast), NULL);  case 5011670 : return Emitter__block(e, ast);  case 15891808 : return Emitter__emit(e, List_cdr(ast), context);  case 1077029798 : return cons(_1, List_append(Emitter__emit(e, List_cdr(ast), NULL), _4));  case 1295657932 : return cons(_764, List_append(Emitter__emit(e, List_cdr(ast), context), NULL));  case 199882 : return cons(_766, cons(List_var(Emitter__emit(e, List_cdr(ast), context)), _757));  case 7656885669130 : return cons(_47, List_append(Emitter__emit(e, List_cdr(ast), context), _50));  case 8938171176 : return _769;  case 8728932 : return Emitter__defer(e, ast, context);  case 11371826 : return _55;  case 42162 : return Emitter__try(e, ast, context);  case 41184168 : return List_append(Emitter__emit(e, List_cdr(ast), context), _55);  case 918374072818022 : return Emitter__match_cases(e, ast, context);  case 4928588686 : return Emitter__binding(e, ast, context);  case 233662566 : return Emitter__commas(e, Emitter__emit(e, List_cdr(ast), context));  case 7477210024 : return List_cdr(ast);  case 29272 : return _260;  case 40896714 : return List_cdr(ast);  case 1392787923272 : return cons(_771, List_append(Emitter__emit(e, List_cdr(ast), context), NULL));
 }
-return cons(head, List_append(Emitter__emit(e, cdr(ast), context), NULL));
+return cons(head, List_append(Emitter__emit(e, List_cdr(ast), context), NULL));
 }
 
 List Compiler_emit(Compiler compiler, List ast){

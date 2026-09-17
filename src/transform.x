@@ -107,7 +107,7 @@ static int _iter_immediate_consumer(String name) =>
 static String _printf_static_format(Compiler compiler, List expr, int *raw) {
   match (expr) {
     case %(expr (* char) (literal (* char) ?format)): {
-      String spelling = format.str();
+      String spelling = format;
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
         return NULL;
@@ -115,11 +115,11 @@ static String _printf_static_format(Compiler compiler, List expr, int *raw) {
       return spelling;
     }
     case %(expr ("String") (cache ?id)): {
-      List key = compiler.id_keys[id.integer()];
+      List key = compiler.id_keys[id];
       match (key)
         case %(string (expr ("String") (literal ("String") ?format))): {
           *raw = 0;
-          return format.str();
+          return format;
         }
       match (key)
         case %(string (expr ("String") (call "String_new" (args ?literal)))):
@@ -358,8 +358,8 @@ static List _typed_call(
     args = cons(compiler.complete_iter_chain(args.car()), args.cdr());
   Array values = [], int arg_index = 0;
   for (List p = params, a = args; a;
-       p = cdr(p), a = cdr(a), arg_index++) {
-    List param = (p ? car(p).list() : NULL), arg = car(a);
+       p = p.cdr(), a = a.cdr(), arg_index++) {
+    List param = (p ? p.car().list() : NULL), arg = a.car();
     List expected = param;
     if (list_varargs && arg_index > 0) expected = %("Var");
     if (param && param.car() == <param>) expected = param.type_from_ast();
@@ -404,10 +404,14 @@ static List _assignment(
          would mutate shared storage and leave its cached header hash
          stale. A raw write bypasses that invariant, while generic
          setindex returns a copy that this assignment would discard. */
-      if (compiler.sym.is_string_type(base_type))
+      if (compiler.sym.is_string_type(base_type)) {
+        String note = "String is immutable: use the copy-producing " +
+                      "String.withindex, or bind a char * to write a " +
+                      "transient String.malloc buffer";
         compiler.report_error(
           <xform>, "String does not support bracket assignment", NULL,
-          %("String is immutable: use the copy-producing String.withindex, or bind a char * to write a transient String.malloc buffer"));
+          %($note));
+      }
       if (!compiler.resolve_protocol_member(base_type, "setindex"))
         compiler.report_error(
           <xform>, %"type $base_type does not support bracket assignment",
@@ -434,7 +438,7 @@ static List _declaration(Compiler compiler, List ast) {
             List converted = compiler.convert_initializer(
               rhs, target_type, native_target);
             new_bind = %(
-              op = (bind ${var.list()} ${mods.list()}) $converted
+              op = (bind $var $mods) $converted
             );
             if (target_type.type().is_static())
               match (converted)
@@ -505,7 +509,7 @@ static List _destructure_statement(Compiler compiler, List ast) {
       List temp_decl = %(declare ("List")
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
-                          compiler, source, source_type.list())})));
+                          compiler, source, source_type)})));
       List assignments = _destructure_assignments(targets, temporary);
       return %(block $temp_decl @assignments);
     }
@@ -531,11 +535,10 @@ static List _destructure_declaration(Compiler compiler, List ast) {
       List temp_decl = %(declare ("List")
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
-                          compiler, source, source_type.list())})));
+                          compiler, source, source_type)})));
       List assignments =
         _destructure_assignments(expressions.list_free(), temporary);
-      List result = %(seq $target_decl $temp_decl @assignments);
-      return result;
+      return %(seq $target_decl $temp_decl @assignments);
     }
     case %(dstrdecl (params *parameters)
                     (!set ?source (expr ?source_type ?))): {
@@ -544,7 +547,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
       List temp_decl = %(declare ("List")
         (bindings (op = (bind $temporary ())
                       ${_destructure_source(
-                          compiler, source, source_type.list())})));
+                          compiler, source, source_type)})));
       Array declarations = [];
       declarations.push(temp_decl);
       int index = 0;
@@ -586,7 +589,7 @@ static List _destructure_value(Compiler compiler, List ast) {
         compiler.fresh_name("destructure"));
       List result_expr = %(expr $type (ident $result));
       List converted = _destructure_source(
-        compiler, result_expr, type.list());
+        compiler, result_expr, type);
       List assignments = _destructure_assignments(targets, temporary);
       return %(dstrvalue $type $result $source $temporary $converted
                @assignments);
@@ -668,14 +671,14 @@ static int _raw_string_type(Type type) {
 }
 
 static int _string_operand(Compiler compiler, Type type) =>
-  Sym.is_string_type(compiler.sym, type)
+  compiler.sym.is_string_type(type)
       || _raw_string_type(type);
 
 // Identify only the built-in helper family. Protocol resolution still
 // handles every bracket form.
 static Symbol _indexed_builtin_helper(Compiler compiler, Type type) {
-  if (Sym.is_array_type(compiler.sym, type)) return <array>;
-  if (Sym.is_map_type(compiler.sym, type)) return <map>;
+  if (compiler.sym.is_array_type(type)) return <array>;
+  if (compiler.sym.is_map_type(type)) return <map>;
   return 0;
 }
 
@@ -705,7 +708,7 @@ static int _indexed_parts(
   match (expr)
     case %(expr ? (getindex (!set ?matched_base (expr ?type ?))
                             ?matched_selector)): {
-      *owner = _indexed_builtin_helper(compiler, type.list());
+      *owner = _indexed_builtin_helper(compiler, type);
       *base = matched_base;
       *selector = matched_selector;
       return 1;
@@ -880,7 +883,7 @@ static List _protocol_update(
     List converted = NULL;
     match (resolved)
       case %(? ((func (? ?parameter *)) ?)):
-        converted = c.convert_expression(*rhs, parameter.list());
+        converted = c.convert_expression(*rhs, parameter);
     if (!converted) return NULL;
     *rhs = converted;
   }
@@ -992,7 +995,7 @@ static List _operator(Compiler c, List ast) {
     }
     case %(op (!set ?operator (!or + - ~))
              (!set ?argument (expr ?argument_type ?))): {
-      if (c.sym.is_var_type(argument_type.list()))
+      if (c.sym.is_var_type(argument_type))
         c.report_error(
           <xform>, "dynamic unary numeric operators are not supported",
           NULL, %("use Var.binary with an explicit numeric operand"));
@@ -1000,7 +1003,7 @@ static List _operator(Compiler c, List ast) {
     }
     case %(op (!set ?operator (!or ++ --))
              (!set ?argument (expr ?argument_type ?))): {
-      Type type = argument_type.list(), List arg = argument;
+      Type type = argument_type, List arg = argument;
       List indexed = _indexed_prefix(c, arg, operator);
       if (indexed) return indexed;
       if (!c.sym.is_var_type(type)) {
@@ -1028,7 +1031,7 @@ static List _postfix(Compiler compiler, List ast) {
     case %(postfix ?operator
                    (!set ?argument (expr ?argument_type ?))): {
       Symbol op = operator, List arg = argument;
-      Type type = argument_type.list();
+      Type type = argument_type;
       List indexed = _indexed_postfix(compiler, arg, op);
       if (indexed) return indexed;
       if (!compiler.sym.is_var_type(type)) {
@@ -1086,7 +1089,7 @@ static List _cons(Compiler compiler, List ast) {
     `(varray ...)` form, converting every typed element to `Var`.
 */
 List transform_array_literal(Compiler compiler, List ast) {
-  List elems = cdr(ast), Array values = [];
+  List elems = ast.cdr(), Array values = [];
   foreach (List elem, elems) {
     List velem = compiler.convert_expression(elem, %("Var"));
     values.push(velem);
@@ -1100,7 +1103,7 @@ List transform_array_literal(Compiler compiler, List ast) {
     `Var`.
 */
 List transform_map_literal(Compiler compiler, List ast) {
-  List elems = cdr(ast), Array values = [];
+  List elems = ast.cdr(), Array values = [];
   foreach (List entry, elems) {
     List (key, val) = entry.cdr();
     List vkey = compiler.convert_expression(key, %("Var"));
@@ -1123,7 +1126,7 @@ static List _append(Compiler compiler, List ast) {
 // string passes
 
 static List _process_raw_segment(Compiler compiler, List seg) {
-  String raw = seg.cadr().str(), literal = %"\"${raw.escape()}\"";
+  String raw = seg.cadr(), literal = %"\"${raw.escape()}\"";
   List constructor = compiler.sym.reference(%("String_new"), NULL);
   return %(expr ("String") (call
            (expr ((func ((* char))) "String") (ident $constructor))
@@ -1132,7 +1135,7 @@ static List _process_raw_segment(Compiler compiler, List seg) {
 
 static List _build_cons_list(List list) {
   if (!list) return %(nil);
-  List head = car(list), tail = _build_cons_list(cdr(list));
+  List head = list.car(), tail = _build_cons_list(list.cdr());
   return %(cons $head $tail);
 }
 
@@ -1259,14 +1262,14 @@ static void _defer_collect_captures(
             %(automatic $binding), &automatic) &&
           !captures.try_get(binding, &existing)) {
         stored_type = compiler.semantic_binding_facts()[%(type $binding)];
-        if (!_defer_type_hoistable(compiler, stored_type.list())) {
+        if (!_defer_type_hoistable(compiler, stored_type)) {
           *unsupported = 1;
           return;
         }
         String field_name = compiler.fresh_name("defer_capture");
         List field = compiler.sym.introduce(field_name);
         captures[binding] = field;
-        records.push(%($binding ${stored_type.list()} $field));
+        records.push(%($binding $stored_type $field));
       }
       return;
     }
@@ -1302,7 +1305,7 @@ static List _defer_rewrite_captures(
       Var field_var;
       if (captures.try_get(binding, &field_var)) {
         String field_name = binding_identity_spelling(field_var);
-        Type type = captured_type.list(), target = type;
+        Type type = captured_type, target = type;
         if (written.contains(binding) &&
             !type.flatten_all().contains(<volatile>))
           target = cons(<volatile>, type);
@@ -1322,7 +1325,7 @@ static List _defer_rewrite_captures(
 
 static List _lower_callable_defer(
   Compiler c, List body, List finalizer) {
-  List declared = NULL, written = NULL;
+  List declared = %(), written = %();
   Map captures = {}, Array records = [], int unsupported = 0;
   _defer_collect_captures(
     c, finalizer, &declared, captures, records, &written, &unsupported);
@@ -1332,7 +1335,7 @@ static List _lower_callable_defer(
   }
 
   List env_binding = NULL, env_local = NULL, String env_name = NULL;
-  List record_list = records;
+  List record_list = records.list_free();
   if (record_list) {
     env_name = c.fresh_name("defer_env");
     env_binding = c.sym.introduce(env_name);
@@ -1378,7 +1381,6 @@ static List _lower_callable_defer(
     c.semantic_binding_facts()[%(defer-ownr $callback)] =
       c.fn_name;
 
-  records.free();
   return %(defer $body $env_binding $callback $record_list $written);
 }
 
@@ -1444,7 +1446,7 @@ static Type _raise_nested_invalid_type(Compiler compiler, Var node) {
   List ast = node;
   match (ast)
     case %(expr ?expr_type ?value): {
-      Type type = expr_type.list();
+      Type type = expr_type;
       if (!_raise_detail_type_allowed(compiler, type)) return type;
       if (compiler.sym.is_var_type(type)) {
         List payload = value;
@@ -1476,7 +1478,7 @@ static List _raise(
     if (index & 1)
       match (value)
         case %(expr ?value_type ?content): {
-          Type type = value_type.list();
+          Type type = value_type;
           if (!_raise_detail_type_allowed(compiler, type)) invalid = type;
           else if (compiler.sym.is_named_value_type(type, "List"))
             invalid = _raise_nested_invalid_type(compiler, content);
@@ -1506,8 +1508,8 @@ static List _raise(
 // Lower bracket reads into helper calls with method-call conversions.
 static List _nominal_getindex(Compiler compiler, Type type) {
   if (!type.is_typedef_name()) return NULL;
-  if (Sym.is_array_type(compiler.sym, type) ||
-      Sym.is_map_type(compiler.sym, type))
+  if (compiler.sym.is_array_type(type) ||
+      compiler.sym.is_map_type(type))
     return NULL;
   match (type)
     case %(?(String nominal)): {
@@ -1536,7 +1538,7 @@ static List _cast(Compiler compiler, List ast) {
           native = mods.list().append(base);
       return compiler.convert_compound_literal(operand, type, native);
     }
-    int source_var = compiler.sym.is_var_type(source_type.list());
+    int source_var = compiler.sym.is_var_type(source_type);
     int target_var = compiler.sym.is_var_type(type);
     int unresolved = 0;
     match (expression)
@@ -1559,7 +1561,7 @@ static List _match_records(Compiler compiler, List records) {
   foreach (List record, records)
     match (record)
       case %(*prefix ?body):
-        transformed.push(%(@prefix ${_node(compiler, body.list())}));
+        transformed.push(%(@prefix ${_node(compiler, body)}));
   return transformed.list_free();
 }
 
@@ -1571,7 +1573,7 @@ static Ast _sequence(Compiler compiler, Ast ast) {
   foreach (List value, ast) transformed.push(_node(compiler, value));
   Ast tail = NULL;
   for (int i = (int) transformed.len() - 1; i >= 0; i--) {
-    Ast node = transformed[i].list();
+    Ast node = transformed[i];
     List payload = _without_origin(node);
     match (node)
       case %(at ?parent ?):
@@ -1607,7 +1609,7 @@ static Ast _finish(Compiler compiler, Ast ast) {
   match (ast) {
     case %(seq *): return ast;
     case %(matchcases ?subject ?records): {
-      List new_subject = _node(compiler, subject.list());
+      List new_subject = _node(compiler, subject);
       List new_records = _match_records(compiler, records);
       return %(matchcases $new_subject $new_records);
     }
@@ -1639,7 +1641,7 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
       break;
     }
     Var type = ast.cadr();
-    if (type is <list>) type = _node(compiler, type.list());
+    if (type is <list>) type = _node(compiler, type);
     List opnode = ast.caddr();
     List rewritten = _operator(compiler, opnode);
     if (rewritten != opnode) {
@@ -1655,11 +1657,11 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
     match (levels[i])
       case %(expr ? (op ?operator ? *rest)): {
         Array parts = [];
-        if (operator is <list>) parts.push(_node(compiler, operator.list()));
+        if (operator is <list>) parts.push(_node(compiler, operator));
         else parts.push(operator);
         parts.push(rebuilt);
         foreach (Var operand, rest) {
-          if (operand is <list>) parts.push(_node(compiler, operand.list()));
+          if (operand is <list>) parts.push(_node(compiler, operand));
           else parts.push(operand);
         }
         rebuilt = %(expr ${types[i]} (op @{parts.list_free()}));
@@ -1687,10 +1689,10 @@ static Ast _node(Compiler c, Ast ast) {
       // itself. Recording that keeps the driver's later passes from
       // rebuilding the whole unit to rediscover it.
       if (c.fixed.contains(ast)) return ast;
-      int occurrence = origin.integer();
+      int occurrence = origin;
       List transformed = NULL;
       $let(c.origin, occurrence) {
-        transformed = _node(c, inner.list());
+        transformed = _node(c, inner);
       }
       if (transformed == inner) {
         c.fixed[ast] = 1;
@@ -1705,16 +1707,16 @@ static Ast _node(Compiler c, Ast ast) {
       String owner = binding_identity_spelling(binding);
       Var stored_owner;
       if (c.semantic_binding_facts().try_get(
-        %(defer-ownr ${binding.list()}), &stored_owner))
-        owner = stored_owner.str();
+        %(defer-ownr $binding), &stored_owner))
+        owner = stored_owner;
       String previous = c.fn_name;
       int previous_inline = c.inline_header;
       c.fn_name = owner;
       Type function_type = return_type;
       c.inline_header = function_type.is_inline() &&
                         !function_type.is_static();
-      List new_return = _node(c, return_type.list());
-      List new_decl = _node(c, declarator.list());
+      List new_return = _node(c, return_type);
+      List new_decl = _node(c, declarator);
       List prepared_body = _lower_lambda_destructuring(
         c, body);
       prepared_body = c.prepare_lambda_cells(
@@ -1728,7 +1730,7 @@ static Ast _node(Compiler c, Ast ast) {
     }
     case %(getindex
            (!set ?expression (expr ?matched_type ?)) ?index): {
-      Type type = matched_type.list();
+      Type type = matched_type;
       List resolved = _nominal_getindex(c, type);
       if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
       if (!resolved)
@@ -1744,7 +1746,7 @@ static Ast _node(Compiler c, Ast ast) {
     }
     case %(setindex
            (!set ?expression (expr ?matched_type ?)) ?index ?value): {
-      Type type = matched_type.list();
+      Type type = matched_type;
       List resolved = c.resolve_protocol_member(type, "setindex");
       if (!resolved)
         c.report_error(
@@ -1767,7 +1769,7 @@ static Ast _node(Compiler c, Ast ast) {
            (!set ?expression
              (expr (!set ?matched_type (*)) ?))
            ?start ?stop ?step): {
-      Type type = matched_type.list();
+      Type type = matched_type;
       String nominal = NULL;
       match (type)
         case %(?(String name)): nominal = name;

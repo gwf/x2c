@@ -113,7 +113,7 @@ Boolean Var.boolean(Var value) {
 }
 
 String Boolean.str(Boolean value) {
-  return value && value.value ? %"true" : %"false";
+  return value && value.value ? "true" : "false";
 }
 
 String Boolean.repr(Boolean value) {
@@ -144,8 +144,8 @@ NullValue Var.nullvalue(Var value) {
   return value is <yyjson--nu> ? (NullValue) value.pointer() : NULL;
 }
 
-String NullValue.str(NullValue value) { return %"null"; }
-String NullValue.repr(NullValue value) { return %"null"; }
+String NullValue.str(NullValue value) { return "null"; }
+String NullValue.repr(NullValue value) { return "null"; }
 int NullValue.truth(NullValue value) { return value != NULL; }
 unsigned NullValue.hash(NullValue value) { return 0x16bc8c2du; }
 int NullValue.equal(NullValue left, NullValue right) { return left == right; }
@@ -170,7 +170,7 @@ int Json.boolean(Var value) {
 }
 
 static String _json_message(const char *message) {
-  return message ? String.new((char *) message) : %"unknown yyjson error";
+  return message ? String.new((char *) message) : "unknown yyjson error";
 }
 
 static void _json_read_error(yyjson_read_err *error) {
@@ -223,7 +223,7 @@ static Var _json_from_value(yyjson_val *value, unsigned depth) {
   if (yyjson_is_real(value)) return Var.new(<f64>, yyjson_get_real(value));
   if (yyjson_is_str(value)) {
     return _json_string(
-      yyjson_get_str(value), yyjson_get_len(value), %"parse"
+      yyjson_get_str(value), yyjson_get_len(value), "parse"
     );
   }
   if (yyjson_is_arr(value)) {
@@ -243,7 +243,7 @@ static Var _json_from_value(yyjson_val *value, unsigned depth) {
     yyjson_val *key = NULL;
     while ((key = yyjson_obj_iter_next(&iter))) {
       String name = _json_string(
-        yyjson_get_str(key), yyjson_get_len(key), %"parse"
+        yyjson_get_str(key), yyjson_get_len(key), "parse"
       );
       if (!name && yyjson_get_len(key)) return void;
       Var converted = _json_from_value(
@@ -278,7 +278,7 @@ static Var _json_from_mut_value(yyjson_mut_val *value, unsigned depth) {
   if (yyjson_mut_is_str(value)) {
     return _json_string(
       yyjson_mut_get_str(value), yyjson_mut_get_len(value),
-      %"convert"
+      "convert"
     );
   }
   if (yyjson_mut_is_arr(value)) {
@@ -299,7 +299,7 @@ static Var _json_from_mut_value(yyjson_mut_val *value, unsigned depth) {
     while ((key = yyjson_mut_obj_iter_next(&iter))) {
       String name = _json_string(
         yyjson_mut_get_str(key), yyjson_mut_get_len(key),
-        %"convert"
+        "convert"
       );
       if (!name && yyjson_mut_get_len(key)) return void;
       Var converted = _json_from_mut_value(
@@ -438,7 +438,7 @@ static yyjson_mut_doc *_json_document(Var value, String operation) {
 }
 
 String Json.stringify_opts(Var value, yyjson_write_flag options) {
-  yyjson_mut_doc *document = _json_document(value, %"stringify");
+  yyjson_mut_doc *document = _json_document(value, "stringify");
   defer yyjson_mut_doc_free(document);
 
   size_t length = 0;
@@ -447,25 +447,25 @@ String Json.stringify_opts(Var value, yyjson_write_flag options) {
     document, options, NULL, &length, &error
   );
   if (!bytes) {
-    _json_write_error(&error, %"stringify");
+    _json_write_error(&error, "stringify");
     return NULL;
   }
   defer free(bytes);
-  return _json_string(bytes, length, %"stringify");
+  return _json_string(bytes, length, "stringify");
 }
 
 /*  Writes an x2c value to `path` as JSON. Pass
     YYJSON_WRITE_PRETTY_TWO_SPACES for the indented form.
 */
 void Json.write_file_opts(Var value, String path, yyjson_write_flag options) {
-  yyjson_mut_doc *document = _json_document(value, %"write_file");
+  yyjson_mut_doc *document = _json_document(value, "write_file");
   defer yyjson_mut_doc_free(document);
 
   yyjson_write_err error = { 0 };
   if (!yyjson_mut_write_file(
         path ? path : "", document, options, NULL, &error
       )) {
-    _json_write_error(&error, %"write_file");
+    _json_write_error(&error, "write_file");
   }
 }
 
@@ -483,7 +483,7 @@ String Var.pretty_json(Var value) {
 
 int Var.try_json_pointer(Var value, String pointer, Var *out) {
   if (!out) return 0;
-  yyjson_mut_doc *document = _json_document(value, %"pointer");
+  yyjson_mut_doc *document = _json_document(value, "pointer");
   defer yyjson_mut_doc_free(document);
 
   yyjson_ptr_err error = { 0 };
@@ -568,7 +568,7 @@ static JsonDocument _json_document_wrap(yyjson_doc *native) {
 
 static JsonValue _json_value_new(JsonDocument document, yyjson_val *native) {
   if (!native) return NULL;
-  _json_document_live(document, %"value");
+  _json_document_live(document, "value");
   JsonValue value = Scope.calloc(1, sizeof(struct JsonValue));
   value.document = document;
   value.native = native;
@@ -640,12 +640,12 @@ JsonDocument JsonDocument.free(JsonDocument document) {
 }
 
 yyjson_doc *JsonDocument.native(JsonDocument document) {
-  _json_document_live(document, %"native");
+  _json_document_live(document, "native");
   return document.native;
 }
 
 JsonValue JsonDocument.root(JsonDocument document) {
-  _json_document_live(document, %"root");
+  _json_document_live(document, "root");
   return _json_value_new(document, yyjson_doc_get_root(document.native));
 }
 
@@ -663,19 +663,19 @@ JsonValue Var.jsonvalue(Var value) {
 }
 
 yyjson_val *JsonValue.native(JsonValue value) {
-  _json_value_live(value, %"native");
+  _json_value_live(value, "native");
   return value.native;
 }
 
 String JsonValue.str(JsonValue value) {
   if (!value) return NULL;
-  _json_value_live(value, %"str");
+  _json_value_live(value, "str");
   if (yyjson_is_str(value.native)) return value.string();
   return value.json();
 }
 
 Symbol JsonValue.kind(JsonValue value) {
-  _json_value_live(value, %"kind");
+  _json_value_live(value, "kind");
   with value.native {
     if (yyjson_is_null(_)) return <null>;
     if (yyjson_is_bool(_)) return <bool>;
@@ -700,39 +700,39 @@ static void _json_value_expect(
 
 int JsonValue.is_null(JsonValue value) {
   if (!value) return 0;
-  _json_value_live(value, %"is_null");
+  _json_value_live(value, "is_null");
   return yyjson_is_null(value.native);
 }
 
 int JsonValue.boolean(JsonValue value) {
-  _json_value_expect(value, <bool>, %"boolean");
+  _json_value_expect(value, <bool>, "boolean");
   return yyjson_get_bool(value.native);
 }
 
 long long JsonValue.sint(JsonValue value) {
-  _json_value_expect(value, <sint>, %"sint");
+  _json_value_expect(value, <sint>, "sint");
   return (long long) yyjson_get_sint(value.native);
 }
 
 unsigned long long JsonValue.uint(JsonValue value) {
-  _json_value_expect(value, <uint>, %"uint");
+  _json_value_expect(value, <uint>, "uint");
   return (unsigned long long) yyjson_get_uint(value.native);
 }
 
 double JsonValue.real(JsonValue value) {
-  _json_value_expect(value, <real>, %"real");
+  _json_value_expect(value, <real>, "real");
   return yyjson_get_real(value.native);
 }
 
 String JsonValue.string(JsonValue value) {
-  _json_value_expect(value, <string>, %"string");
+  _json_value_expect(value, <string>, "string");
   return _json_string(
-    yyjson_get_str(value.native), yyjson_get_len(value.native), %"string"
+    yyjson_get_str(value.native), yyjson_get_len(value.native), "string"
   );
 }
 
 JsonArray JsonValue.array(JsonValue value) {
-  _json_value_expect(value, <array>, %"array");
+  _json_value_expect(value, <array>, "array");
   JsonArray array = Scope.calloc(1, sizeof(struct JsonArray));
   array.document = value.document;
   array.native = value.native;
@@ -740,7 +740,7 @@ JsonArray JsonValue.array(JsonValue value) {
 }
 
 JsonObject JsonValue.object(JsonValue value) {
-  _json_value_expect(value, <object>, %"object");
+  _json_value_expect(value, <object>, "object");
   JsonObject object = Scope.calloc(1, sizeof(struct JsonObject));
   object.document = value.document;
   object.native = value.native;
@@ -748,13 +748,13 @@ JsonObject JsonValue.object(JsonValue value) {
 }
 
 Var JsonValue.to_x2c(JsonValue value) {
-  _json_value_live(value, %"to_x2c");
+  _json_value_live(value, "to_x2c");
   return _json_from_value(value.native, 0);
 }
 
 int JsonArray.len(JsonArray array) {
   if (!array) return 0;
-  _json_document_live(array.document, %"array len");
+  _json_document_live(array.document, "array len");
   return (int) yyjson_arr_size(array.native);
 }
 
@@ -780,19 +780,19 @@ static int _json_array_next(Iter iter, Var *out) {
 
 Iter JsonArray.iter(JsonArray array, Iter dest) {
   if (!array) return NULL;
-  _json_document_live(array.document, %"array iter");
+  _json_document_live(array.document, "array iter");
   return dest.init((void *) array, _json_array_next, 0);
 }
 
 int JsonObject.len(JsonObject object) {
   if (!object) return 0;
-  _json_document_live(object.document, %"object len");
+  _json_document_live(object.document, "object len");
   return (int) yyjson_obj_size(object.native);
 }
 
 JsonValue JsonObject.getindex(JsonObject object, String key) {
   if (!object) return NULL;
-  _json_document_live(object.document, %"object index");
+  _json_document_live(object.document, "object index");
   yyjson_val *native = yyjson_obj_getn(
     object.native, key ? key : "", key.len()
   );
@@ -808,7 +808,7 @@ JsonValue JsonObject.require(JsonObject object, String key) {
 
 static JsonMember _json_member(JsonDocument document, yyjson_val *key) {
   String name = _json_string(
-    yyjson_get_str(key), yyjson_get_len(key), %"member key"
+    yyjson_get_str(key), yyjson_get_len(key), "member key"
   );
   if (!name && yyjson_get_len(key)) return NULL;
   JsonValue value = _json_value_new(document, yyjson_obj_iter_get_val(key));
@@ -827,7 +827,7 @@ static int _json_object_next(Iter iter, Var *out) {
 
 Iter JsonObject.iter(JsonObject object, Iter dest) {
   if (!object) return NULL;
-  _json_document_live(object.document, %"object iter");
+  _json_document_live(object.document, "object iter");
   JsonObjectCursor cursor = Scope.calloc(1, sizeof(struct JsonObjectCursor));
   cursor.object = object;
   cursor.iterator = yyjson_obj_iter_with(object.native);
@@ -836,7 +836,7 @@ Iter JsonObject.iter(JsonObject object, Iter dest) {
 
 List JsonObject.all(JsonObject object, String key) {
   if (!object) return NULL;
-  _json_document_live(object.document, %"object all");
+  _json_document_live(object.document, "object all");
   List values = NULL;
   yyjson_obj_iter iterator = yyjson_obj_iter_with(object.native);
   yyjson_val *native_key = NULL;
@@ -868,18 +868,18 @@ JsonValue JsonMember.value(JsonMember member) {
 
 static String _json_write_document(
   JsonDocument document, yyjson_write_flag options) {
-  _json_document_live(document, %"document write");
+  _json_document_live(document, "document write");
   size_t length = 0;
   yyjson_write_err error = { 0 };
   char *bytes = yyjson_write_opts(
     document.native, options, NULL, &length, &error
   );
   if (!bytes) {
-    _json_write_error(&error, %"document write");
+    _json_write_error(&error, "document write");
     return NULL;
   }
   defer free(bytes);
-  return _json_string(bytes, length, %"document write");
+  return _json_string(bytes, length, "document write");
 }
 
 String JsonDocument.json(JsonDocument document) {
@@ -895,12 +895,12 @@ String JsonDocument.pretty_json(JsonDocument document) {
 */
 JsonDocument JsonDocument.write_file_opts(
   JsonDocument document, String path, yyjson_write_flag options) {
-  _json_document_live(document, %"document write_file");
+  _json_document_live(document, "document write_file");
   yyjson_write_err error = { 0 };
   if (!yyjson_write_file(
         path ? path : "", document.native, options, NULL, &error
       )) {
-    _json_write_error(&error, %"document write_file");
+    _json_write_error(&error, "document write_file");
   }
   return document;
 }
@@ -910,22 +910,22 @@ JsonDocument JsonDocument.write_file(JsonDocument document, String path) {
 }
 
 String JsonValue.json(JsonValue value) {
-  _json_value_live(value, %"value write");
+  _json_value_live(value, "value write");
   size_t length = 0;
   yyjson_write_err error = { 0 };
   char *bytes = yyjson_val_write_opts(
     value.native, YYJSON_WRITE_NOFLAG, NULL, &length, &error
   );
   if (!bytes) {
-    _json_write_error(&error, %"value write");
+    _json_write_error(&error, "value write");
     return NULL;
   }
   defer free(bytes);
-  return _json_string(bytes, length, %"value write");
+  return _json_string(bytes, length, "value write");
 }
 
 JsonDocument JsonDocument.patch(JsonDocument document, Var patch) {
-  _json_document_live(document, %"document patch");
+  _json_document_live(document, "document patch");
   yyjson_mut_doc *mutable = yyjson_doc_mut_copy(document.native, NULL);
   if (!mutable) {
     raise %(alloc-fail (library "yyjson") (operation "document patch"));

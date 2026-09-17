@@ -6,11 +6,11 @@
 
 #include "install.h"
 
-static List _106, _104, _103, _101, _99;
+static List _109, _108, _104, _103, _101, _99;
 
-static String _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _97, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _68, _67, _65, _63, _61, _59, _57, _55, _53, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _30, _28, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _106, _97, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _68, _67, _65, _63, _61, _59, _57, _55, _53, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _30, _28, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _105, _102, _100, _98, _96, _69, _66, _64, _62, _60, _58, _56, _54, _52, _31, _29, _27, _16, _14, _12;
+static Var _107, _105, _102, _100, _98, _96, _69, _66, _64, _62, _60, _58, _56, _54, _52, _31, _29, _27, _16, _14, _12;
 
 #include <errno.h>
 #include <limits.h>
@@ -70,7 +70,7 @@ static String _work_directory(String packages);
 
 static String _install(CliRequest request, String spec, String source, String url, String sha256, String version, String packages, String work);
 
-static Var _x2c_lambda_0(Var name);
+static Var _x2c_lambda_0(String name);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
@@ -78,13 +78,27 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_3CFE94DA_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _106)))
+_x2c_initializer_choice_3CFE94DA_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _109)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 Var String_var(String);
 
@@ -195,7 +209,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _94 = String_new("cannot remove ");
   _95 = String_new("not found");
   _96 = Symbol_var(437126);
-  _97 = String_new("Var");
+  _97 = String_new("String");
   _98 = String_var(_97);
   _99 = cons(_98, NULL);
   _100 = List_var(_99);
@@ -204,23 +218,26 @@ __attribute__((constructor)) static void _file_init_(void){
   _103 = cons(_102, NULL);
   _104 = cons(_96, _103);
   _105 = List_var(_104);
-  _106 = cons(_105, _99);
-  _107 = String_new("http://");
-  _108 = String_new("https://");
-  _109 = String_new("file://");
-  _110 = String_new("index.txt");
-  _111 = String_new("#");
-  _112 = String_new(" ");
-  _113 = String_new("\"");
-  _114 = String_new(".x");
-  _115 = String_new(".json");
-  _116 = String_new("dependency.json");
-  _117 = String_new("dependency-");
-  _118 = String_new(".c");
-  _119 = String_new("dependency_version");
-  _120 = String_new(".install.");
-  _121 = String_new("package.tar.gz");
-  _122 = String_new("/");
+  _106 = String_new("Var");
+  _107 = String_var(_106);
+  _108 = cons(_107, NULL);
+  _109 = cons(_105, _108);
+  _110 = String_new("http://");
+  _111 = String_new("https://");
+  _112 = String_new("file://");
+  _113 = String_new("index.txt");
+  _114 = String_new("#");
+  _115 = String_new(" ");
+  _116 = String_new("\"");
+  _117 = String_new(".x");
+  _118 = String_new(".json");
+  _119 = String_new("dependency.json");
+  _120 = String_new("dependency-");
+  _121 = String_new(".c");
+  _122 = String_new("dependency_version");
+  _123 = String_new(".install.");
+  _124 = String_new("package.tar.gz");
+  _125 = String_new("/");
   _x2c_static_initialize_0();
 }
 
@@ -334,13 +351,11 @@ static String _read_text(String path){
   return File_string_close(input);
 }
 
-int File_printf(File, const char *, ...);
-
-String String_str(String);
+int File_puts(File, const char *);
 
 static void _write_text(String path, String text){
   File output = fopen(path, "w");
-  if(! output ||(String_truth(text) && File_printf(output, "%s", String_str(text)) < 0) || File_close(output)) _error(String_join(NULL, cons(String_var(_9), cons(String_var(path), NULL))));
+  if(! output ||(String_truth(text) && File_puts(output, text) == EOF) || File_close(output)) _error(String_join(NULL, cons(String_var(_9), cons(String_var(path), NULL))));
 }
 
 List List_filter(List, Func);
@@ -387,11 +402,11 @@ static void _verify(String path, String expected){
   File input = fopen(path, "rb");
   if(! input) _error(String_join(NULL, cons(String_var(_8), cons(String_var(path), NULL))));
   {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & input};
+  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & input};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
+    .env = & _x2c_defer_env_3
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -414,8 +429,8 @@ Var Array_getindex(Array, int);
 int List_truth(List);
 
 static List _index_row(CliRequest request, String name, String work){
-  String location = String_truth(request -> index) ? request -> index : String_new(INSTALL_INDEX);
-  String path = String_startswith(location, _107) || String_startswith(location, _108) || String_startswith(location, _109) ? _fetch(location, work, _110) : location;
+  String location = String_truth(request -> index) ? request -> index : INSTALL_INDEX;
+  String path = String_startswith(location, _110) || String_startswith(location, _111) || String_startswith(location, _112) ? _fetch(location, work, _113) : location;
   String platform = _platform();
   List source = NULL;
   {
@@ -426,11 +441,11 @@ static List _index_row(CliRequest request, String name, String work){
     while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
       line = Var_string(_x2c_macro_cursor_output_2);
       {
-        if(! String_truth(line) || String_startswith(line, _111)) continue;
+        if(! String_truth(line) || String_startswith(line, _114)) continue;
         Array fields = Array_new();
         {
           String field;
-          List _x2c_macro_object_1 = String_split(line, _112);
+          List _x2c_macro_object_1 = String_split(line, _115);
           List _x2c_macro_cursor_1 = _x2c_macro_object_1;
           Var _x2c_macro_cursor_output_1;
           while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
@@ -513,7 +528,7 @@ static String _json_field(String text, const char * key){
   int start = String_find(text, marker);
   if(start < 0) return NULL;
   String rest = String_getslice(text, start + String_len(marker), -2147483648, 1);
-  int end = String_find(rest, _113);
+  int end = String_find(rest, _116);
   return end < 0 ? NULL : String_getslice(rest, -2147483648, end, 1);
 }
 
@@ -537,23 +552,23 @@ List List_append(List, List);
 Path Path_dirname(Path);
 
 static void _build_source(String package, String name, String spec){
-  List units = _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_44), NULL))), _114);
+  List units = _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_44), NULL))), _117);
   if(! List_contains(units, String_var(String_join(NULL, cons(String_var(package), cons(String_var(_45), cons(String_var(name), cons(String_var(_46), NULL)))))))) _error(String_join(NULL, cons(String_var(spec), cons(String_var(_47), cons(String_var(name), cons(String_var(_48), NULL))))));
   {
     String manifest;
-    List _x2c_macro_object_3 = _files_with(package, _115);
+    List _x2c_macro_object_3 = _files_with(package, _118);
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       manifest = Var_string(_x2c_macro_cursor_output_3);
-      if(String_endswith(manifest, _116) || String_startswith(Path_stem(manifest), _117)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_49), NULL))));
+      if(String_endswith(manifest, _119) || String_startswith(Path_stem(manifest), _120)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_49), NULL))));
     }
 
   }
   String builds = String_join(NULL, cons(String_var(package), cons(String_var(_50), NULL))), x2c = x2c_get_executable();
   if(! _build_mkdirs(builds)) _error(String_join(NULL, cons(String_var(_3), cons(String_var(builds), NULL))));
   _run(List_append(cons(String_var(x2c), cons(_52, cons(_54, cons(String_var(builds), cons(_56, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_44), NULL)))), cons(_58, cons(String_var(Path_dirname(package)), NULL)))))))), units), "translate");
-  List inputs = List_append(_files_with(builds, _118), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_44), NULL))), _118));
+  List inputs = List_append(_files_with(builds, _121), _files_with(String_join(NULL, cons(String_var(package), cons(String_var(_44), NULL))), _121));
   _run(List_append(cons(String_var(x2c), cons(_60, cons(_62, cons(_64, cons(_66, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_67), cons(String_var(name), cons(String_var(_42), NULL)))))), cons(_69, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_70), NULL)))), NULL)))))))), inputs), "build");
   _write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_10), cons(String_var(name), cons(String_var(_71), NULL))))), _7);
 }
@@ -563,7 +578,7 @@ static int _installed(String package){
 }
 
 static String _installed_version(String package){
-  String marker = String_join(NULL, cons(String_var(package), cons(String_var(_36), NULL))), key = _119;
+  String marker = String_join(NULL, cons(String_var(package), cons(String_var(_36), NULL))), key = _122;
   if(access(marker, F_OK)){
     marker = String_join(NULL, cons(String_var(package), cons(String_var(_72), NULL)));
     key = _73;
@@ -574,6 +589,8 @@ static String _installed_version(String package){
 }
 
 int _build_lock(String, int);
+
+String String_str(String);
 
 static String _locked_packages(int quiet){
   static int locked = 0;
@@ -609,7 +626,7 @@ static String _work_directory(String packages){
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
       name = Var_string(_x2c_macro_cursor_output_4);
-      if(String_startswith(name, _120)) _build_remove_tree(String_join(NULL, cons(String_var(packages), cons(String_var(_10), cons(String_var(name), NULL)))));
+      if(String_startswith(name, _123)) _build_remove_tree(String_join(NULL, cons(String_var(packages), cons(String_var(_10), cons(String_var(name), NULL)))));
     }
 
   }
@@ -624,12 +641,12 @@ int String_is_identifier(String);
 
 static String _install(CliRequest request, String spec, String source, String url, String sha256, String version, String packages, String work){
   if(String_truth(url)){
-    source = _fetch(url, work, _121);
+    source = _fetch(url, work, _124);
     _verify(source, sha256);
   }
   else if(String_truth(sha256) && ! Path_is_dir(source)) _verify(source, sha256);
   String package = Path_is_dir(source) ? source : _unpack(source, work);
-  String name = Var_string(List_last(String_split(package, _122)));
+  String name = Var_string(List_last(String_split(package, _125)));
   if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_80), cons(String_var(name), cons(String_var(_81), NULL)))));
   String staged = String_join(NULL, cons(String_var(work), cons(String_var(_10), cons(String_var(name), NULL))));
   _copy_tree(package, staged);
@@ -652,23 +669,43 @@ int install_command(CliRequest request){
   String spec = Var_string(List_car(request -> inputs));
   String packages = _locked_packages(request -> quiet);
   String work = _work_directory(packages);
-  String source = NULL, sha256 = request -> sha256, version = NULL, url = NULL;
-  int remote = String_startswith(spec, _107) || String_startswith(spec, _108) || String_startswith(spec, _109);
-  if(remote){
-    if(! String_truth(sha256)) _error("a URL needs --sha256 <hex>");
-    url = spec;
+  {
+  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_1 =(const void *) & work};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_4
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    String source = NULL, sha256 = request -> sha256, version = NULL, url = NULL;
+    int remote = String_startswith(spec, _110) || String_startswith(spec, _111) || String_startswith(spec, _112);
+    if(remote){
+      if(! String_truth(sha256)) _error("a URL needs --sha256 <hex>");
+      url = spec;
+    }
+    else if(! access(spec, F_OK)) source = spec;
+    else if(String_is_identifier(spec)){
+      List row = _index_row(request, spec, work);
+      version = Var_string(List_car(List_nth_cdr(row, 1)));
+      url = Var_string(List_car(List_nth_cdr(row, 4)));
+      sha256 = Var_string(List_car(List_nth_cdr(row, 5)));
+    }
+    else _error(String_join(NULL, cons(String_var(_88), cons(String_var(spec), cons(String_var(_80), NULL)))));
+    (void) _install(request, spec, source, url, sha256, version, packages, work);
+    {
+      int _x2c_return_value_1 = 0;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
+
+    }
+
   }
-  else if(! access(spec, F_OK)) source = spec;
-  else if(String_is_identifier(spec)){
-    List row = _index_row(request, spec, work);
-    version = Var_string(List_car(List_nth_cdr(row, 1)));
-    url = Var_string(List_car(List_nth_cdr(row, 4)));
-    sha256 = Var_string(List_car(List_nth_cdr(row, 5)));
-  }
-  else _error(String_join(NULL, cons(String_var(_88), cons(String_var(spec), cons(String_var(_80), NULL)))));
-  (void) _install(request, spec, source, url, sha256, version, packages, work);
-  _build_remove_tree(work);
-  return 0;
+  x2c_cleanup_leave(& _x2c_defer_record_1);
+
+}
 }
 
 String install_version(String name){
@@ -680,12 +717,32 @@ List install_require(CliRequest request, String name, String version){
   if(! _init_guard_) _file_init_();
   String packages = _locked_packages(request -> quiet);
   String work = _work_directory(packages);
-  List row = _index_row(request, name, work);
-  String resolved = Var_string(List_car(List_nth_cdr(row, 1)));
-  if(! String_equal(resolved, version)) _error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_90), cons(String_var(resolved), cons(String_var(_91), cons(String_var(version), NULL))))))));
-  if(! String_equal(_installed_version(String_join(NULL, cons(String_var(packages), cons(String_var(_10), cons(String_var(name), NULL))))), version))(void) _install(request, name, NULL, Var_string(List_car(List_nth_cdr(row, 4))), Var_string(List_car(List_nth_cdr(row, 5))), resolved, packages, work);
-  _build_remove_tree(work);
-  return row;
+  {
+  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & work};
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_5
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+    List row = _index_row(request, name, work);
+    String resolved = Var_string(List_car(List_nth_cdr(row, 1)));
+    if(! String_equal(resolved, version)) _error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_90), cons(String_var(resolved), cons(String_var(_91), cons(String_var(version), NULL))))))));
+    if(! String_equal(_installed_version(String_join(NULL, cons(String_var(packages), cons(String_var(_10), cons(String_var(name), NULL))))), version))(void) _install(request, name, NULL, Var_string(List_car(List_nth_cdr(row, 4))), Var_string(List_car(List_nth_cdr(row, 5))), resolved, packages, work);
+    {
+      List _x2c_return_value_2 = row;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
+
+}
 }
 
 int remove_command(CliRequest request){
@@ -731,17 +788,15 @@ int list_command(CliRequest request){
 
 Var int_var(int);
 
-String Var_str(Var);
-
-static Var _x2c_lambda_0(Var name){
-  return int_var(! String_startswith(Var_str(name), _1));
+static Var _x2c_lambda_0(String name){
+  return int_var(! String_startswith(name, _1));
   ;
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return _x2c_lambda_0(a0);
   ;
 }
@@ -749,6 +804,16 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
   File_close((*(File *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  _build_remove_tree((*(String *) _x2c_defer_data_1->_x2c_defer_capture_1));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  _build_remove_tree((*(String *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 #undef _x2c_initializer_choice_3CFE94DA_0_expanded

@@ -194,8 +194,7 @@ static List _string_array(Project project, int line, String value) {
   }
   while (isspace((unsigned char) *cursor)) cursor++;
   if (*cursor) _error(project, line, "unexpected text after array");
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static int _bool_value(Project project, int line, String value) {
@@ -255,9 +254,7 @@ static void _set_target_field(
     if (kind == "executable") target.kind = <executable>;
     else if (kind == "static-library") target.kind = <static-lib>;
     else if (kind == "shared-library")
-      _error(
-        p, line,
-        "shared-library is not supported by this compiler");
+      _error(p, line, "shared-library is not supported by this compiler");
     else _error_name(p, line, "unknown target kind", kind);
   }
   else if (key == "sources") target.sources = _string_array(p, line, value);
@@ -296,8 +293,7 @@ static void _set_profile_field(
 }
 
 /* One `[dependencies]` entry: an index package name and its exact version. */
-static void _set_dependency(
-  Project p, int line, String key, String value) {
+static void _set_dependency(Project p, int line, String key, String value) {
   ProjectDependency entry = Scope.calloc(1, sizeof(struct ProjectDependency));
   entry.name = key;
   entry.version = _string_value(p, line, value);
@@ -347,13 +343,13 @@ static void _parse_manifest(Project p) {
       }
       List parts = name.split("."), int count = parts.len();
       String first = parts.car();
-      String second = parts.cdr() ? parts.cdr().car().string() : NULL;
+      String second = parts.cdr() ? parts.cdr().car() : NULL;
       String third = parts.cdr() && parts.cdr().cdr() ?
-                     parts.cdr().cdr().car().string() : NULL;
+                     parts.cdr().cdr().car() : NULL;
       String fourth =
         parts.cdr() && parts.cdr().cdr() &&
         parts.cdr().cdr().cdr() ?
-        parts.cdr().cdr().cdr().car().string() : NULL;
+        parts.cdr().cdr().cdr().car() : NULL;
       if ((count != 2 && count != 4) ||
           first != "target" ||
           !_name_ok(second) ||
@@ -362,8 +358,7 @@ static void _parse_manifest(Project p) {
       target = _target(p, second, 1);
       if (count == 2) {
         if (target.declared)
-          _error_name(
-            p, line_number, "duplicate target section", second);
+          _error_name(p, line_number, "duplicate target section", second);
         target.declared = 1;
         section = TARGET;
         profile = NULL;
@@ -372,8 +367,7 @@ static void _parse_manifest(Project p) {
         section = PROFILE;
         profile = _profile(target, fourth, 1);
         if (profile.declared)
-          _error_name(
-            p, line_number, "duplicate profile section", fourth);
+          _error_name(p, line_number, "duplicate profile section", fourth);
         profile.declared = 1;
       }
       continue;
@@ -501,9 +495,8 @@ static Array _target_sources(
   sources.free();
   excluded.free();
   kept.sort();
-  foreach (Var value, kept) {
-    String path = value;
-    if (!(path.endswith(".x") || path.endswith(".c")))
+  foreach (String path, kept) {
+    if (!(x2c_source_file(path) || path.endswith(".c")))
       _error_name(project, 0, "manifest source is not .x or .c", path);
   }
   return kept;
@@ -520,9 +513,7 @@ static ProjectProfile _selected_profile(
 static void _validate_target(Project project, ProjectTarget target) {
   if (target.visited) return;
   if (target.visiting)
-    _error_name(
-      project, 0, "target dependency cycle reaches",
-      target.name);
+    _error_name(project, 0, "target dependency cycle reaches", target.name);
   target.visiting = 1;
   foreach (String name, target.dependencies) {
     ProjectTarget dependency = _target(project, name, 0);
@@ -541,8 +532,7 @@ static void _append_values(Array output, List values) {
 static void _append_c_flags(Project project, Array output, List values) {
   foreach (String value, values) {
     if (cli_dependency_pass_through(value))
-      _error_name(
-        project, 0, "C dependency option is driver-owned", value);
+      _error_name(project, 0, "C dependency option is driver-owned", value);
     output.push(value);
   }
 }
@@ -815,9 +805,7 @@ ProjectBuild project_plan(CliRequest request) {
     if (project.targets && !project.targets.next)
       selected_name = project.targets.name;
     else
-      _error(
-        project, 0,
-        "select --target or set project.default-target");
+      _error(project, 0, "select --target or set project.default-target");
   }
   ProjectTarget selected = _target(project, selected_name, 0);
   if (!selected)

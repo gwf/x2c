@@ -76,7 +76,7 @@ static int _bind_final(
   if (!(state.present & bit)) return _bind(state, binder, input);
   if (!(state.spans & bit))
     return state.values[index] is <list> &&
-           state.values[index].list() == input;
+           state.values[index] == input;
 
   List expected = state.span_begin[index], candidate = input, int length = 0;
   while (length < state.span_length[index] &&
@@ -126,7 +126,7 @@ static int _star(
 
 static int _all(
   RecursiveMatchState state, Var input, List patterns) {
-  foreach(Var pattern, patterns)
+  foreach (Var pattern, patterns)
     if (!_match(state, input, pattern)) return 0;
   return 1;
 }
@@ -134,7 +134,7 @@ static int _all(
 /* Alternatives run in source order and restore captures after each miss. */
 static int _any(
   RecursiveMatchState state, Var input, List patterns) {
-  foreach(Var pattern, patterns) {
+  foreach (Var pattern, patterns) {
     struct RecursiveMatchState snapshot = *state;
     if (_match(state, input, pattern)) return 1;
     *state = snapshot;
@@ -145,7 +145,7 @@ static int _any(
 /* Negated probes never publish captures. */
 static int _none(
   RecursiveMatchState state, Var input, List patterns) {
-  foreach(Var pattern, patterns) {
+  foreach (Var pattern, patterns) {
     struct RecursiveMatchState snapshot = *state;
     int matched = _match(state, input, pattern);
     *state = snapshot;
@@ -166,10 +166,8 @@ static int _is(Var input, List patterns) {
   if (patterns == %(binder))      return input.is_binder();
   if (patterns == %(op))          return input.is_match_op();
   if (patterns == %(atom))        return input is not <list>;
-  Var (kind, type) = patterns;
-  if (patterns && kind == <type> && patterns.cdr() &&
-      !patterns.cddr()) {
-    Symbol tag = type is <symbol> ? type.symbol() : 0;
+  match (patterns) case %(type ?type): {
+    Symbol tag = type is <symbol> ? type : 0;
     return input is _type_tag(tag);
   }
   return 0;
@@ -215,8 +213,7 @@ static List _bindings(RecursiveMatchState state) {
     Var value = state.values[i];
     if (state.spans & bit) {
       int length = state.span_length[i];
-      value = length ? state.span_begin[i][:length].var()
-                     : ((List) NULL).var();
+      value = length ? state.span_begin[i][:length] : (List) NULL;
     }
     result = cons(%(${state.layout.binders[i]} $value), result);
   }
@@ -238,8 +235,8 @@ static int _try_capture(
     if (!(state.present & bit)) continue;
     if (state.spans & bit) {
       int length = state.span_length[i];
-      captures.values[i] = length ? state.span_begin[i][:length].var()
-                                  : ((List) NULL).var();
+      captures.values[i] =
+        length ? state.span_begin[i][:length] : (List) NULL;
     }
     else captures.values[i] = state.values[i];
   }

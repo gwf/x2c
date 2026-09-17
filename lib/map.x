@@ -588,7 +588,7 @@ static int _enumerate_next(Iter iter, Var *out) {
 */
 Iter Map.iter(Map x, Iter dest) {
   if (!dest) return NULL;
-  return dest.init(x, _next, Var.new(<u32>, 0u));
+  return dest.init(x, _next, 0u);
 }
 
 /** Initializes `dest` as an iterator over `x`, yielding each key. The mirror
@@ -603,7 +603,7 @@ Iter Map.iter(Map x, Iter dest) {
 */
 Iter Map.keys(Map x, Iter dest) {
   if (!dest) return NULL;
-  return dest.init(x, _keys_next, Var.new(<u32>, 0u));
+  return dest.init(x, _keys_next, 0u);
 }
 
 /** Initializes `dest` as an iterator over `x`, yielding each entry as a
@@ -623,7 +623,7 @@ Iter Map.keys(Map x, Iter dest) {
 */
 Iter Map.enumerate(Map x, Iter dest) {
   if (!dest) return NULL;
-  return dest.init(x, _enumerate_next, Var.new(<u32>, 0u));
+  return dest.init(x, _enumerate_next, 0u);
 }
 
 /** Returns nonzero when `map1` and `map2` hold the same key/value pairs.
@@ -671,7 +671,7 @@ Buffer Map.write_str(Map map, Buffer out) {
 String Map.str(Map map) {
   Buffer buf = $auto(Buffer.new(0));
   map.write_str(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Returns the readable `{ key: value, ... }` representation of `map`.
@@ -691,7 +691,7 @@ String Map.str(Map map) {
 String Map.repr(Map map) {
   Buffer buf = $auto(Buffer.new(0));
   map.write_repr(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Releases this Map and both backing Blocks without freeing stored values. */

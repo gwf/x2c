@@ -618,14 +618,14 @@ static void _write_string(Buffer out, String text){
     else Buffer_printf(out, "\\u%04x", byte);
     run = ++ at;
   }
-  Buffer_write_len(out, text + run, length - run);
+  if(run < length) Buffer_write_len(out, text + run, length - run);
   Buffer_write_char(out, '"');
 }
 
 static void _write_double(Buffer out, double number){
   if(! isfinite(number)){
     {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_double",.line = 455};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_double",.line = 456};
       x2c_error_raise_n(& _x2c_error_site_4, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("JSON has no NaN or infinity")), NULL))));
       __builtin_unreachable();
     }
@@ -701,6 +701,8 @@ int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
+int Var_is_atom(Var);
+
 Array Array_sort_by(Array, Func);
 
 int Array_try_next(Array, int *, Var *);
@@ -730,10 +732,10 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
         name = _x2c_macro_cursor_output_0;
         member = _x2c_macro_cursor_output_1;
         {
-          if(! Var_is_row(name, 11, 7, 1) && ! Var_is(name, 1328354264)){
+          if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
             Symbol tag = Var_tag(name);
             {
-              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 499};
+              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 500};
               x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL))), Symbol_var(41038), Symbol_var(tag));
               __builtin_unreachable();
             }
@@ -787,7 +789,7 @@ Map Var_map(Var);
 static void _write(Buffer out, Var value, int pretty, int depth){
   if(depth > JSON_MAX_DEPTH){
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 520};
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 521};
       x2c_error_raise_n(& _x2c_error_site_6, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
       __builtin_unreachable();
     }
@@ -803,7 +805,7 @@ static void _write(Buffer out, Var value, int pretty, int depth){
   else{
     Symbol tag = Var_tag(value);
     {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write",.line = 534};
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write",.line = 535};
       x2c_error_raise_n(& _x2c_error_site_7, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }

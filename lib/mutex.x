@@ -32,7 +32,7 @@ struct Mutex {
 };
 
 static void _error(const char *operation, int error) {
-  String name = String.new(operation);
+  String name = operation;
   raise %(io-fail (operation $name) (errno $error));
 }
 

@@ -14,8 +14,6 @@ struct Mutex{
 
 _Noreturn static void _error(const char * operation, int error);
 
-String String_new(const char *);
-
 Var Symbol_var(Symbol);
 
 Var String_var(String);

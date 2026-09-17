@@ -33,8 +33,9 @@ int snapshot_write_var(File output, Var value) {
   if (value.is_atom()) {
     // lib/atom.x owns bare spelling and the reader's Symbol/Atom choice.
     String text = value.str();
-    if (!Atom.bare_spelling(text)) return 0;
-    output.puts(text);
+    if (Atom.bare_spelling(text)) output.puts(text);
+    else if (value is <symbol>) output.puts(value.repr());  // `<"<<">`
+    else return 0;
     return 1;
   }
   if (value is <string>) {

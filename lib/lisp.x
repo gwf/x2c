@@ -636,7 +636,7 @@ Var lisp_add(Var a, Var b) {
 /** Adds or concatenates every value left to right; no values gives 0. */
 Var lisp_plus(List values) {
   Var total = 0;
-  if (values && values.car() is <string>) total = String.new("");
+  if (values && values.car() is <string>) total = %"";
   foreach (Var value, values) total = lisp_add(total, value);
   return total;
 }
@@ -685,7 +685,7 @@ static Var _chain(List values, String operation, int want, int expect) {
     raise %(bad-arity (operation $operation) (expected 2) (actual $actual));
   for (List p = values; p.cdr(); p = p.cdr()) {
     Var (left, right) = p;
-    int order = lisp_compare(left, right).integer();
+    int order = lisp_compare(left, right);
     if (expect ? order != want : order == want) return _bool(0);
   }
   return _bool(1);
@@ -744,7 +744,7 @@ Var lisp_string_downcase(String string) => string.lower();
 */
 Var lisp_match_replace(List input, Var pat, Var template) {
   Var result;
-  if (!input.try_match_replace(pat, template, &result)) return input.var();
+  if (!input.try_match_replace(pat, template, &result)) return input;
   return result;
 }
 
@@ -886,7 +886,7 @@ static void _expansion_native(Lisp lisp, Func function) {
     "lisp_string_downcase"
   };
   for (unsigned i = 0; i < sizeof(names) / sizeof(names[0]); i++)
-    if (function == _native_target(String.new(names[i]))) return;
+    if (function == _native_target(names[i])) return;
   _expansion_decline();
 }
 
@@ -1209,7 +1209,7 @@ static int LispLower._auto_load_name(LispLower l, Var name) {
 
 static int LispLower._auto_local_name(LispLower l, Var name) =>
   _auto_param_index(l.lambda, name) >= 0 ||
-         l.lambda.captures.contains(name);
+  l.lambda.captures.contains(name);
 
 static int LispLower._auto_compile_constant(LispLower l, Var value) {
   int constant = l.b.constant(value);
@@ -1439,7 +1439,7 @@ static int LispLower._auto_compile_special(LispLower l, List form, int tail) {
     ok = l._auto_compile_cond(form.cdr(), tail);
   else if (form.len() == 2)
     ok = special == LISP_QUOTE ? l._auto_compile_constant(argument)
-                             : l._auto_compile_qq(argument, 0, 0, 0);
+                               : l._auto_compile_qq(argument, 0, 0, 0);
   if (!ok) return 0;
   b.set_target(guard, b.length);
   return 1;
@@ -1604,7 +1604,8 @@ static int _auto_apply(
   if (lambda.auto_calls < 2) lambda.auto_calls++;
   if (lambda.auto_calls < 2) return 0;
   if (lambda.auto_status < 0) {
-    if (_auto_analyze(lisp, lambda, env, 0, NULL) != MACHINE_PREPARED) return 0;
+    if (_auto_analyze(lisp, lambda, env, 0, NULL) != MACHINE_PREPARED)
+      return 0;
   }
   else if (lambda.auto_status != MACHINE_PREPARED) {
     lisp.auto_stats.remembered_fallbacks++;
@@ -1883,7 +1884,7 @@ void Lisp.bind(Lisp lisp, String name, Func function) {
   if (!lisp || !name || !function) raise %(bad-arg (operation "Lisp.bind"));
 
   Scope.move(function, &lisp.scope);
-  lisp.set_global(name, Func.var(function));
+  lisp.set_global(name, function);
 }
 
 /** Ends the owned lifetime when a managed local leaves its block. */

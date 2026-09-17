@@ -18,7 +18,7 @@
 
 #include "utils.h"
 
-static String _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -66,11 +66,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/src/");
   _3 = String_new(".x");
   _4 = String_new("/packages");
-  _5 = String_new("%s/include/x2c");
-  _6 = String_new("%s/src");
-  _7 = String_new("%s/lib");
+  _5 = String_new("/include/x2c");
+  _6 = String_new("/src");
+  _7 = String_new("/lib");
   _8 = String_new("%08X");
   _9 = String_new("/");
+  _10 = String_new(".x");
+  _11 = String_new(".c");
+  _12 = String_new(".h");
+  _13 = String_new(".o");
+  _14 = String_new(".a");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -147,6 +152,20 @@ String x2c_package_directory(String root, String path){
   if(! String_startswith(path, prefix)) return NULL;
   int slash = String_find(String_getslice(path, String_len(prefix), -2147483648, 1), _9);
   return slash > 0 ? String_getslice(path, -2147483648, String_len(prefix) + slash, 1) : NULL;
+}
+
+int String_endswith(String, String);
+
+int x2c_source_file(String path){
+  if(! _init_guard_) _file_init_();
+  if(String_endswith(path, _10)) return 1;
+  if(String_endswith(path, _11) || String_endswith(path, _12) || String_endswith(path, _13) || String_endswith(path, _14)) return 0;
+  FILE * file = fopen(path, "r");
+  if(! file) return 0;
+  char head[2];
+  int shebang = fread(head, 1, 2, file) == 2 && head[0] == '#' && head[1] == '!';
+  fclose(file);
+  return shebang;
 }
 
 int String_rfind(String, String);
@@ -265,15 +284,12 @@ static int _locate_home(const char * start, char * out, size_t size){
   return 0;
 }
 
-String String_printf(String, ...);
-
 List cons(Var, List);
 
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
-  const char * root = x2c_root_path;
-  String include_dir = String_printf(_5, root);
-  String src_dir = String_printf(_6, root), lib_dir = String_printf(_7, root);
+  String include_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_5), NULL)));
+  String src_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_6), NULL))), lib_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_7), NULL)));
   x2c_base_include_dirs = cons(String_var(include_dir), NULL);
   x2c_repo_cpp_include_dirs = _dir_exists(src_dir) ? cons(String_var(src_dir), cons(String_var(lib_dir), NULL)) : cons(String_var(lib_dir), NULL);
 }
@@ -300,6 +316,8 @@ int worker_wait(long pid){
 }
 
 int String_try_next(String, int *, int *);
+
+String String_printf(String, ...);
 
 String x2c_filename_hash(String filename){
   if(! _init_guard_) _file_init_();

@@ -126,7 +126,7 @@ static void _walk_statement(Walk w, Var value);
 
 static void _collect_functions(Var value, Array found);
 
-static void _analyze(Walk w, List row, Map state, int report);
+static void _analyze(Walk w, List parameters, Var body, Map state, int report);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -1717,8 +1717,8 @@ default: break;
 }
 }
 
-static void _analyze(Walk w, List row, Map state, int report){
-  List _x2c_destructure_0 = row;  String name = Var_string(List_getindex(_x2c_destructure_0, 0));  Var is_static = List_getindex(_x2c_destructure_0, 1);  List parameters = Var_list(List_getindex(_x2c_destructure_0, 2));  Var body = List_getindex(_x2c_destructure_0, 3); (void) name; (void) is_static;  if(! Var_is_row(body, 9, 7, 4) || Var_is_nil(body)) return;  w -> facts = Map_new();  w -> restored = Map_new();  w -> sinks = Map_new();  w -> open = Array_new();  w -> parameters = Array_new();  w -> depth = 0;  w -> origin = 0;  w -> report = report;  w -> allocates = 0;  w -> fresh = 0;  int index = 0; {
+static void _analyze(Walk w, List parameters, Var body, Map state, int report){
+  if(! Var_is_row(body, 9, 7, 4) || Var_is_nil(body)) return;  w -> facts = Map_new();  w -> restored = Map_new();  w -> sinks = Map_new();  w -> open = Array_new();  w -> parameters = Array_new();  w -> depth = 0;  w -> origin = 0;  w -> report = report;  w -> allocates = 0;  w -> fresh = 0;  int index = 0; {
     Var parameter;  List _x2c_macro_object_29 = parameters;  List _x2c_macro_cursor_29 = _x2c_macro_object_29;  Var _x2c_macro_cursor_output_29;  while(List_try_next(_x2c_macro_object_29, & _x2c_macro_cursor_29, & _x2c_macro_cursor_output_29)){
       parameter = _x2c_macro_cursor_output_29; {
         Map fact = _new_fact(w, index);  if(Var_is_row(parameter, 9, 7, 4) && ! Var_is_nil(parameter)) Map_setindex(w -> facts, parameter, Map_var(fact));  Array_push(w -> parameters, Map_var(fact));  index ++;
@@ -1787,7 +1787,7 @@ void Compiler_check_regions(Compiler compiler, List ast){
       changed = 0; {
         List row;  Array _x2c_macro_object_33 = functions;  int _x2c_macro_cursor_33 = 0;  Var _x2c_macro_cursor_output_33;  while(Array_try_next(_x2c_macro_object_33, & _x2c_macro_cursor_33, & _x2c_macro_cursor_output_33)){
           row = Var_list(_x2c_macro_cursor_output_33); {
-            Map current = Var_map(Map_getindex(summaries, List_car(row)));  List before = _summary_of(current);  _analyze(w, row, current, 0);  if(! List_equal(_summary_of(current), before)) changed = 1;
+            List _x2c_destructure_0 = row;  Var name = List_getindex(_x2c_destructure_0, 0);  Var is_static = List_getindex(_x2c_destructure_0, 1);  List parameters = Var_list(List_getindex(_x2c_destructure_0, 2));  Var body = List_getindex(_x2c_destructure_0, 3); (void) is_static;  Map current = Var_map(Map_getindex(summaries, name));  List before = _summary_of(current);  _analyze(w, parameters, body, current, 0);  if(! List_equal(_summary_of(current), before)) changed = 1;
           }
 
         }
@@ -1798,7 +1798,7 @@ void Compiler_check_regions(Compiler compiler, List ast){
     {
       List row;  Array _x2c_macro_object_34 = functions;  int _x2c_macro_cursor_34 = 0;  Var _x2c_macro_cursor_output_34;  while(Array_try_next(_x2c_macro_object_34, & _x2c_macro_cursor_34, & _x2c_macro_cursor_output_34)){
         row = Var_list(_x2c_macro_cursor_output_34); {
-          Map current = Var_map(Map_getindex(summaries, List_car(row)));  _analyze(w, row, current, 1);  List summary = _summary_of(current);  if(Var_int(List_cadr(row)) || List_equal(summary, _453)) continue;  Compiler_record_region_summary(compiler, Var_string(List_car(row)), summary);
+          List _x2c_destructure_1 = row;  String name = Var_string(List_getindex(_x2c_destructure_1, 0));  Var is_static = List_getindex(_x2c_destructure_1, 1);  List parameters = Var_list(List_getindex(_x2c_destructure_1, 2));  Var body = List_getindex(_x2c_destructure_1, 3);  Map current = Var_map(Map_getindex(summaries, String_var(name)));  _analyze(w, parameters, body, current, 1);  List summary = _summary_of(current);  if(Var_int(is_static) || List_equal(summary, _453)) continue;  Compiler_record_region_summary(compiler, name, summary);
         }
 
       }

@@ -474,6 +474,8 @@ The modules under `src/` divide ownership as follows:
 - `src/transform.x`, `src/lambda.x`, `src/cleanup.x` -- lowering to
   emitter-ready AST, including which exits leave a cleanup region and which
   locals an error transfer preserves;
+- `src/regions.x` -- per-function region summaries and the warnings for a
+  value that can outlive the region that allocated it;
 - `src/cache.x` -- cached constants and their generated initialization;
 - `src/generate.x` -- header/source partitioning, unit initialization,
   include guards, and output writes;

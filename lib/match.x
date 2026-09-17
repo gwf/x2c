@@ -263,7 +263,7 @@ List x2c_match_site_match_replace(
   Var result;
   if (!x2c_match_site_try_match_replace(site, input, pat, template, &result))
     return input;
-  return result is <list> ? result.list() : NULL;
+  return result is <list> ? result : NULL;
 }
 
 /** Replaces every match through one compiler-owned site.
@@ -327,24 +327,24 @@ static List _normalize_elements(List elements) {
 }
 
 static List _normalize_pattern(List pattern) {
-  if (!pattern || car(pattern) == <!quote>) return pattern;
+  if (!pattern || pattern.car() == <!quote>) return pattern;
   List normalized = _normalize_elements(pattern);
-  Var op = car(normalized);
-  List args = cdr(normalized);
+  Var op = normalized.car();
+  List args = normalized.cdr();
   if (!op.is_match_op() || op == <!set> || op == <!quote> || !args)
     return normalized;
-  Var binder = car(args);
+  Var binder = args.car();
   if (!binder.is_binder()) return normalized;
-  List rest = cdr(args);
+  List rest = args.cdr();
   return %(!set $binder ($op @rest));
 }
 
 static int _is_list_literal(List pat) {
   if (!pat) return 1;
-  Var head = car(pat);
+  Var head = pat.car();
   if (head.is_binder() || head.is_match_op()) return 0;
-  if (head is not <list>) return _is_list_literal(cdr(pat));
-  return _is_list_literal(head) && _is_list_literal(cdr(pat));
+  if (head is not <list>) return _is_list_literal(pat.cdr());
+  return _is_list_literal(head) && _is_list_literal(pat.cdr());
 }
 
 static int _binder_kind(Var atom) {
@@ -427,28 +427,28 @@ static int _layout_builder_add(MatchLayoutBuilder *builder, Atom binder) {
    binders in its literal children without treating the marker as data. */
 static void _layout_collect(MatchLayoutBuilder *builder, Var pattern) {
   if (pattern is not <list>) {
-    if (_malformed_binder_atom(pattern)) builder->malformed_binder = 1;
+    if (_malformed_binder_atom(pattern)) builder.malformed_binder = 1;
     else if (_named_binder(pattern) &&
              _layout_builder_add(builder, pattern) < 0)
-      builder->past_capacity = 1;
+      builder.past_capacity = 1;
     return;
   }
   if (pattern.is_nil()) return;
   List list = pattern;
-  Var head = car(list);
+  Var head = list.car();
   if (head == <!quote>) return;
   if (head.is_match_op()) {
-    List args = cdr(list);
-    if (args && car(args).is_list_binder()) builder->leading_list_binder = 1;
+    List args = list.cdr();
+    if (args && args.car().is_list_binder()) builder.leading_list_binder = 1;
   }
-  List parts = head == <x2c-dyn> ? cdr(list) : list;
+  List parts = head == <x2c-dyn> ? list.cdr() : list;
   int predicate_form = head == <!is>;
-  for (List at = parts; at; at = cdr(at)) {
-    Var part = car(at);
-    if (predicate_form && !cdr(at) && _reserved_match_predicate(part))
+  for (List at = parts; at; at = at.cdr()) {
+    Var part = at.car();
+    if (predicate_form && !at.cdr() && _reserved_match_predicate(part))
       continue;
     _layout_collect(builder, part);
-    if (builder->malformed_binder) return;
+    if (builder.malformed_binder) return;
   }
 }
 
@@ -506,8 +506,8 @@ static void _layout_analyze_pattern(
   if (pattern is not <list> || pattern.is_nil()) return;
 
   List list = pattern;
-  Var head = car(list);
-  List args = cdr(list);
+  Var head = list.car();
+  List args = list.cdr();
   if (head == <!quote>) return;
   if (head == <x2c-dyn>) {
     unsigned long ignored = 0;
@@ -518,12 +518,12 @@ static void _layout_analyze_pattern(
     _layout_analyze_sequence(layout, list, definite, possible);
     return;
   }
-  if (head != <!set> && args && _named_binder(car(args))) {
-    int index = _layout_index(layout, car(args));
+  if (head != <!set> && args && _named_binder(args.car())) {
+    int index = _layout_index(layout, args.car());
     assert(index >= 0);
     *definite |= 1UL << index;
     *possible |= 1UL << index;
-    args = cdr(args);
+    args = args.cdr();
   }
   if (head == <!and>) {
     _layout_analyze_sequence(layout, args, definite, possible);
@@ -543,7 +543,7 @@ static void _layout_analyze_pattern(
     return;
   }
   if (head == <!set>) {
-    if (args.len() == 2 && _named_binder(car(args)))
+    if (args.len() == 2 && _named_binder(args.car()))
       _layout_analyze_sequence(layout, args, definite, possible);
     else _layout_analyze_alternatives(layout, args, definite, possible);
   }
@@ -669,7 +669,7 @@ static int _pattern_contains_binder(List pat, Var binder) {
     if (part == binder) return 1;
     if (part is <list>) {
       List nested = part;
-      if (nested && car(nested) != <!quote> &&
+      if (nested && nested.car() != <!quote> &&
           _pattern_contains_binder(nested, binder))
         return 1;
     }
@@ -722,7 +722,7 @@ List List.match(List input, Var pat) {
 }
 
 static Var _replace(Var input, List bindings) {
-  if (input.is_binder() && !(input == <*>) && !(input == <?>)) {
+  if (input.is_binder() && input != <*> && input != <?>) {
     Var val = bindings.assoc(input);
     if (val is void) return input;
     return val;
@@ -730,9 +730,9 @@ static Var _replace(Var input, List bindings) {
   if (input is not <list>) return input;
   List lst = input;
   if (!lst) return input;
-  Var head = car(lst);
-  List tail = cdr(lst);
-  if (head == <!quote>) return car(tail);
+  Var head = lst.car();
+  List tail = lst.cdr();
+  if (head == <!quote>) return tail.car();
   // sequence binders splice their captured List into the result
   int splice = head.is_list_binder() && head != <*> && head != <?>;
   head = _replace(head, bindings);
@@ -773,14 +773,14 @@ static Var _capture_replace(
   if (input is not <list>) return input;
   List list = input;
   if (!list) return input;
-  Var head = car(list);
-  List tail = cdr(list);
-  if (head == <!quote>) return car(tail);
+  Var head = list.car();
+  List tail = list.cdr();
+  if (head == <!quote>) return tail.car();
   int splice = head.is_list_binder() && head != <*> && head != <?>;
   Var replaced_head = _capture_replace(head, layout, captures);
   List replaced_tail = _capture_replace(tail, layout, captures);
   if (splice) {
-    List spliced = replaced_head is <list> ? replaced_head.list() : NULL;
+    List spliced = replaced_head is <list> ? replaced_head : NULL;
     return %(@spliced @replaced_tail);
   }
   return %($replaced_head @replaced_tail);
@@ -818,7 +818,7 @@ int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
 List List.match_replace(List input, Var pat, Var template) {
   Var result;
   if (!input.try_match_replace(pat, template, &result)) return input;
-  return result is <list> ? result.list() : NULL;
+  return result is <list> ? result : NULL;
 }
 
 /* One prepared walk owns a layout, machine, and capture buffer. */
@@ -852,8 +852,8 @@ static int _walk_all_prepared(
   if (input is <list>) {
     List lst = input;
     if (lst) {
-      if (_walk_all_prepared(walk, car(lst), 1, results) < 0) return -1;
-      if (_walk_all_prepared(walk, cdr(lst), 0, results) < 0) return -1;
+      if (_walk_all_prepared(walk, lst.car(), 1, results) < 0) return -1;
+      if (_walk_all_prepared(walk, lst.cdr(), 0, results) < 0) return -1;
     }
     else if (!include_empty) return 0;
   }
@@ -870,9 +870,10 @@ static int _walk_first_prepared(
     List lst = input;
     if (lst) {
       int found =
-        _walk_first_prepared(walk, car(lst), 1, out_match, out_bindings);
+        _walk_first_prepared(walk, lst.car(), 1, out_match, out_bindings);
       if (found) return found;
-      found = _walk_first_prepared(walk, cdr(lst), 0, out_match, out_bindings);
+      found =
+        _walk_first_prepared(walk, lst.cdr(), 0, out_match, out_bindings);
       if (found) return found;
     }
     else if (!include_empty) return 0;
@@ -889,9 +890,9 @@ static Var _walk_replace_prepared(
   if (node is <list>) {
     List lst = node;
     if (lst) {
-      Var head = _walk_replace_prepared(walk, car(lst), template, 1, error);
+      Var head = _walk_replace_prepared(walk, lst.car(), template, 1, error);
       if (*error) return node;
-      List tail = _walk_replace_prepared(walk, cdr(lst), template, 0, error);
+      List tail = _walk_replace_prepared(walk, lst.cdr(), template, 0, error);
       if (*error) return node;
       node = cons(head, tail);
     }
@@ -989,8 +990,7 @@ static int MatchLower._fail_site(
   if (site < 0) return 0;
   if (l.site_count >= l.site_capacity) {
     int capacity = l.site_capacity ? l.site_capacity * 2 : 64;
-    int *grown = Scope.realloc(l.sites, sizeof(int) * capacity);
-    l.sites = grown;
+    l.sites = Scope.realloc(l.sites, sizeof(int) * capacity);
     l.site_capacity = capacity;
   }
   l.sites[l.site_count++] = site;
@@ -1237,7 +1237,6 @@ static int MatchLower._compile_not(MatchLower l, List args) {
 static int MatchLower._compile_is(MatchLower l, List args) {
   MachineBuilder b = l.b;
   int entry = b.length, base = l.site_count, kind = -1;
-  Var (kind_arg, type_tag) = args;
   if (args == %(var binder))       kind = MACHINE_KIND_ATOM_BINDER;
   else if (args == %(list binder)) kind = MACHINE_KIND_LIST_BINDER;
   else if (args == %(binder))      kind = MACHINE_KIND_BINDER;
@@ -1259,7 +1258,8 @@ static int MatchLower._compile_is(MatchLower l, List args) {
     b.set_target(is_list, failure);
     return entry;
   }
-  else if (args && kind_arg == <type> && cdr(args) && !args.cddr()) {
+  else if (args && args.car() == <type> && args.cdr() && !args.cddr()) {
+    Var type_tag = args.cadr();
     Symbol tag = type_tag is <symbol> ? type_tag.symbol() : 0;
     tag = _canonical_type_tag(tag);
     if (!tag) {
@@ -1281,7 +1281,7 @@ static int MatchLower._compile_guard_core(MatchLower l, Var op, List args) {
   if (op == <!not>) return l._compile_not(args);
   if (op == <!is>) return l._compile_is(args);
   if (op == <!set>) {
-    if (args && cdr(args) && !args.cddr() && car(args).is_atom_binder()) {
+    if (args && args.cdr() && !args.cddr() && args.car().is_atom_binder()) {
       Var (binder, test) = args;
       if (test is not <list>) return l._compile_bind_and_leaf(binder, test);
       int child = l._compile_child(test);
@@ -1292,8 +1292,8 @@ static int MatchLower._compile_guard_core(MatchLower l, Var op, List args) {
   }
   if (op == <!and>) return l._compile_call_sequence(args);
   // op == <!quote>: current runtime compares only one quoted operand.
-  if (!args || cdr(args)) return l._fail("quote-arity");
-  return l._compile_literal(car(args));
+  if (!args || args.cdr()) return l._fail("quote-arity");
+  return l._compile_literal(args.car());
 }
 
 /* A final star consumes the remaining input: a fresh binder shares the
@@ -1407,7 +1407,7 @@ static int MatchLower._lower_search_star(
 static int _inline_descend_ok(List child, int reg) {
   if (reg + 1 >= MACHINE_CURSOR_REGS) return 0;
   if (!child) return 0;
-  if (car(child).is_match_op()) return 0;
+  if (child.car().is_match_op()) return 0;
   if (_is_list_literal(child)) return 0;
   foreach (Var part, child) if (part.is_list_binder()) return 0;
   return 1;
@@ -1480,10 +1480,10 @@ static int MatchLower._compile_segment(MatchLower l, List pattern) {
   plan.count = 0;
   plan.used = 0;
   int child_count = 0, List at = pattern;
-  while (at && !car(at).is_list_binder()) {
+  while (at && !at.car().is_list_binder()) {
     if (child_count >= MATCH_SEGMENT_MAX)
       return l._fail("segment-width");
-    Var part = car(at);
+    Var part = at.car();
     elements[child_count] = part;
     /* Atom elements execute inline against the cursor head; star-free
        plain sublists descend inline through the next register;
@@ -1498,7 +1498,7 @@ static int MatchLower._compile_segment(MatchLower l, List pattern) {
       children[child_count] = l._compile_child(part);
       if (children[child_count++] < 0) return -1;
     }
-    at = cdr(at);
+    at = at.cdr();
   }
 
   Var star_binder;
@@ -1507,8 +1507,8 @@ static int MatchLower._compile_segment(MatchLower l, List pattern) {
   Var anchor = void;
   int anchor_offset = 0;
   if (at) {
-    star_binder = car(at);
-    tail = cdr(at);
+    star_binder = at.car();
+    tail = at.cdr();
     if (star_binder != <*>) {
       star_slot = b.binder(star_binder);
       if (star_slot < 0) return -1;
@@ -1575,8 +1575,8 @@ static int MatchLower._compile_value(MatchLower l, Var pattern) {
   if (pattern.is_atom_binder()) return l._compile_binder(pattern);
   if (pattern is not <list>) return l._compile_literal(pattern);
   List list = pattern;
-  if (list && car(list).is_match_op())
-    return l._compile_guard_core(car(list), cdr(list));
+  if (list && list.car().is_match_op())
+    return l._compile_guard_core(list.car(), list.cdr());
   if (list && _is_list_literal(list)) return l._compile_literal_list(list);
   return l._compile_segment(list);
 }
@@ -1886,7 +1886,7 @@ static int _pattern_admissible(Var value, int depth) {
     case <pointer>: case <reference>: return 0;
     case <object>: {
       if (value is <lsym>) return 1;
-      if (value is <string>) return String.is_permanent(value.str());
+      if (value is <string>) return String.is_permanent(value);
       if (value is not <list>) return 0;
       // kind and tag prove the raw payload is a List cell
       foreach (Var part, (List) value.pointer())
@@ -2103,7 +2103,7 @@ int MatchCache.acquire(
   }
 
   slot = m.size < m.capacity ? _cache_free_slot(m)
-                                     : _cache_victim(m);
+                            : _cache_victim(m);
   if (slot < 0) return MATCH_CACHE_PRESSURE;
 
   MatchPlan plan = NULL;

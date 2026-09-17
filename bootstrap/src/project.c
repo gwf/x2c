@@ -2,7 +2,7 @@
 
 #include "project.h"
 
-static String _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <ctype.h>
 #include <dirent.h>
@@ -181,14 +181,13 @@ __attribute__((constructor)) static void _file_init_(void){
   _37 = String_new("/x2c.lock");
   _38 = String_new("/x2c.toml");
   _39 = String_new("/.x2c-build");
-  _40 = String_new(".x");
-  _41 = String_new(".c");
-  _42 = String_new("-O");
-  _43 = String_new("-I");
-  _44 = String_new("-L");
-  _45 = String_new("#");
-  _46 = String_new(" ");
-  _47 = String_new(".");
+  _40 = String_new(".c");
+  _41 = String_new("-O");
+  _42 = String_new("-I");
+  _43 = String_new("-L");
+  _44 = String_new("#");
+  _45 = String_new(" ");
+  _46 = String_new(".");
 }
 
 int String_truth(String);
@@ -334,8 +333,7 @@ static List _string_array(Project project, int line, String value){
   }
   while(isspace((unsigned char) * cursor)) cursor ++;
   if(* cursor) _error(project, line, "unexpected text after array");
-  List result = Array_list_free(values);
-  return result;
+  return Array_list_free(values);
 }
 
 int String_equal(String, String);
@@ -498,7 +496,7 @@ static void _parse_manifest(Project p){
             profile = NULL;
             continue;
           }
-          List parts = String_split(name, _47);
+          List parts = String_split(name, _46);
           int count = List_len(parts);
           String first = Var_string(List_car(parts));
           String second = List_truth(List_cdr(parts)) ? Var_string(List_car(List_cdr(parts))) : NULL;
@@ -631,6 +629,8 @@ static Array _expand_pattern(Project project, String pattern, const char * owner
 
 int Array_try_next(Array, int *, Var *);
 
+int x2c_source_file(String);
+
 int String_endswith(String, String);
 
 static Array _target_sources(Project project, ProjectTarget target, int verbose){
@@ -711,15 +711,14 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
   Array_free(excluded);
   Array_sort(kept);
   {
-    Var value;
+    String path;
     Array _x2c_macro_object_8 = kept;
     int _x2c_macro_cursor_8 = 0;
     Var _x2c_macro_cursor_output_7;
     while(Array_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_7)){
-      value = _x2c_macro_cursor_output_7;
+      path = Var_string(_x2c_macro_cursor_output_7);
       {
-        String path = Var_string(value);
-        if(!(String_endswith(path, _40) || String_endswith(path, _41))) _error_name(project, 0, "manifest source is not .x or .c", path);
+        if(!(x2c_source_file(path) || String_endswith(path, _40))) _error_name(project, 0, "manifest source is not .x or .c", path);
       }
 
     }
@@ -914,7 +913,7 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
       while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_16)){
         argument = Var_string(_x2c_macro_cursor_output_16);
         {
-          if(String_truth(argument) && String_startswith(argument, _42)) has_optimization = 1;
+          if(String_truth(argument) && String_startswith(argument, _41)) has_optimization = 1;
           if(String_equal(argument, _31)) has_debug = 1;
         }
 
@@ -927,10 +926,10 @@ static CliRequest _target_request(Project p, ProjectTarget target, CliRequest co
     if(Map_contains(profile -> seen, String_var(_21)) && profile -> debug && ! has_debug) Array_push(compile, String_var(_31));
   }
   _append_values(compile, command -> cc_args);
-  _append_paths(p, compile, target -> include_dirs, _43);
+  _append_paths(p, compile, target -> include_dirs, _42);
   request -> cc_args = Array_list_free(compile);
   Array link = Array_new();
-  _append_paths(p, link, target -> library_dirs, _44);
+  _append_paths(p, link, target -> library_dirs, _43);
   {
     String library;
     List _x2c_macro_object_18 = target -> libraries;
@@ -1034,11 +1033,11 @@ Array rows = Array_new();
   while(List_try_next(_x2c_macro_object_21, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_20)){
     line = Var_string(_x2c_macro_cursor_output_20);
     {
-      if(! String_truth(line) || String_startswith(line, _45)) continue;
+      if(! String_truth(line) || String_startswith(line, _44)) continue;
       Array fields = Array_new();
       {
         String field;
-        List _x2c_macro_object_20 = String_split(line, _46);
+        List _x2c_macro_object_20 = String_split(line, _45);
         List _x2c_macro_cursor_20 = _x2c_macro_object_20;
         Var _x2c_macro_cursor_output_19;
         while(List_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_19)){

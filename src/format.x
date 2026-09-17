@@ -20,7 +20,7 @@ static int _is_prefix_punct(char ch) =>
 
 static int _is_suffix_punct(char ch) =>
   ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' ||
-         ch == ';' || ch == ',' || ch == '{' || ch == '}';
+  ch == ';' || ch == ',' || ch == '{' || ch == '}';
 
 static int _need_space(String prev, String curr) {
   if (!prev || !curr) return 0;
@@ -79,7 +79,7 @@ static void _write_token(Buffer buff, String token, int source_line) {
 
 static int _next_is_closing_brace(List rest) {
   if (!rest) return 0;
-  return _token_is(car(rest).str(), '}');
+  return _token_is(rest.car().str(), '}');
 }
 
 // pretty print formatting
@@ -102,17 +102,17 @@ char *Compiler.code_pretty_string(
   int output_line = 1, scanned = 0, source_line = 0;
   String prev_token = NULL;
 
-  for (List lst = code; lst; lst = cdr(lst)) {
-    if (car(lst) == <src-at>) {
-      lst = cdr(lst);
-      List location = compiler.origin_location(car(lst).integer());
+  for (List lst = code; lst; lst = lst.cdr()) {
+    if (lst.car() == <src-at>) {
+      lst = lst.cdr();
+      List location = compiler.origin_location(lst.car());
       while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
       if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
       while (scanned < buff.len())
         if (buff.get(scanned++) == '\n') output_line++;
-      String file = location ? location.assoc(<file>).str() : output_file;
+      String file = location ? location.assoc(<file>) : output_file;
       if (!file) file = "<generated>";
-      int line = location ? location.assoc(<line>).integer()
+      int line = location ? location.assoc(<line>)
                           : output_line + 1;
       source_line = location ? line : 0;
       String escaped = file.escape().replace("$$", "$");
@@ -123,9 +123,9 @@ char *Compiler.code_pretty_string(
       prev_token = NULL;
       continue;
     }
-    int emitted_directive = car(lst) == <c-direct>;
-    if (emitted_directive) lst = cdr(lst);
-    String token = car(lst).str();
+    int emitted_directive = lst.car() == <c-direct>;
+    if (emitted_directive) lst = lst.cdr();
+    String token = lst.car().str();
     if (!emitted_directive) token = _normalized_token(token);
     char last = token ? token[-1] : '\0';
 
@@ -178,7 +178,7 @@ char *Compiler.code_pretty_string(
     else if (last == ';') {
       if (paren_depth == 0) {
         _write_mapped_newline(buff, source_line);
-        if (!_next_is_closing_brace(cdr(lst)) && indent > 0)
+        if (!_next_is_closing_brace(lst.cdr()) && indent > 0)
           _write_indent(buff, indent);
         prev_token = NULL;
       }
@@ -195,6 +195,5 @@ char *Compiler.code_pretty_string(
     else prev_token = token;
   }
 
-  char *result = buff.str_free();
-  return result;
+  return buff.str_free();
 }

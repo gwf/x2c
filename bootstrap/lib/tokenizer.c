@@ -243,7 +243,7 @@ static int Tokenizer__operator(Tokenizer t, int len){
       break;
       case 9297 : push = 917238583151840;
       break;
-      case 251 : pop = 1;
+      case 251 : pop = Array_len(t -> modes) > 1;
       break;
       case 9553 : push = 806120;
       break;

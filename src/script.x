@@ -73,7 +73,7 @@ static void _prune(String scripts) {
 int script_prepare(CliRequest c) {
   String root = script_cache_root();
   if (!root) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
-  String script = Path.absolute(c.inputs.car().string());
+  String script = Path.absolute(c.inputs.car());
   c.build_dir = %"$root/scripts/${Path.stem(script)}-%08x".printf(
     String.hash(script));
   if (c.clean) {

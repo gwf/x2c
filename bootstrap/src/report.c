@@ -15,8 +15,7 @@ static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 #include <unistd.h>
 static struct{
   int receipts, transient, color, columns, width;
-  unsigned long start;
-  unsigned long update;
+  unsigned long start, update;
 }
 report;
 
@@ -261,13 +260,12 @@ Var String_var(String);
 
 String int_str(int);
 
-String String_add(String, String);
-
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();
   String cache = cached == count && count ? _11 : cached ? String_join(NULL, cons(String_var(_6), cons(String_var(int_str(cached)), cons(String_var(_7), NULL)))) : _12;
   String name = String_capitalize(Symbol_str(phase));
-  String line = String_add(String_join(NULL, cons(String_var(_8), cons(String_var(name), cons(String_var(_9), cons(String_var(int_str(count)), cons(String_var(_9), cons(String_var(noun), cons(String_var(_10), NULL)))))))), String_join(NULL, cons(String_var(report_duration(microseconds)), cons(String_var(cache), NULL))));
+  String duration = report_duration(microseconds);
+  String line = String_join(NULL, cons(String_var(_8), cons(String_var(name), cons(String_var(_9), cons(String_var(int_str(count)), cons(String_var(_9), cons(String_var(noun), cons(String_var(_10), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
   report_line(28680520, line);
 }
 

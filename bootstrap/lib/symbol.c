@@ -127,8 +127,7 @@ String Buffer_str_free(Buffer);
 String Symbol_repr(Symbol symbol){
   Buffer out = Buffer_new(0);
   Symbol_write_repr(symbol, out);
-  String result = Buffer_str_free(out);
-  return result;
+  return Buffer_str_free(out);
 }
 
 Buffer Buffer_write(Buffer, const char *);

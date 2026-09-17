@@ -78,7 +78,7 @@ long long Var.signed_from_bits(unsigned long long raw, int bits) {
 */
 void Var.numeric_decode(Var value, X2CVarNumeric *out) {
   if (!out) raise %(bad-arg (owner "Var.numeric_decode"));
-  if (!Var.encoding_valid(value)) {
+  if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     raise %(bad-enc (value $bits));
   }
@@ -190,21 +190,21 @@ static long double _integer_limit(int bits) {
 }
 
 static float _numeric_f32(X2CVarNumeric *value) {
-  if (value->floating) return (float) value->floating_value;
-  if (value->unsigned_value) return (float) value->raw;
-  return (float) Var.signed_from_bits(value->raw, value->bits);
+  if (value.floating) return (float) value.floating_value;
+  if (value.unsigned_value) return (float) value.raw;
+  return (float) Var.signed_from_bits(value.raw, value.bits);
 }
 
 static double _numeric_f64(X2CVarNumeric *value) {
-  if (value->floating) return (double) value->floating_value;
-  if (value->unsigned_value) return (double) value->raw;
-  return (double) Var.signed_from_bits(value->raw, value->bits);
+  if (value.floating) return (double) value.floating_value;
+  if (value.unsigned_value) return (double) value.raw;
+  return (double) Var.signed_from_bits(value.raw, value.bits);
 }
 
 static long double _numeric_long_double(X2CVarNumeric *value) {
-  if (value->floating) return value->floating_value;
-  if (value->unsigned_value) return (long double) value->raw;
-  return (long double) Var.signed_from_bits(value->raw, value->bits);
+  if (value.floating) return value.floating_value;
+  if (value.unsigned_value) return (long double) value.raw;
+  return (long double) Var.signed_from_bits(value.raw, value.bits);
 }
 
 /* Conversion first decodes one source family. Integer-to-integer never passes
@@ -214,16 +214,16 @@ static long double _numeric_long_double(X2CVarNumeric *value) {
 static Var _convert_to_integer(
   X2CVarNumeric *source, Symbol target, int unsigned_target, int bits) {
   unsigned long long raw;
-  if (source->floating) {
-    long double truncated = truncl(source->floating_value);
-    if (!isfinite(source->floating_value)) {
-      Symbol source_tag = source->tag;
+  if (source.floating) {
+    long double truncated = truncl(source.floating_value);
+    if (!isfinite(source.floating_value)) {
+      Symbol source_tag = source.tag;
       raise %(conv-range (source $source_tag) (target $target));
     }
     if (unsigned_target) {
       long double upper = _integer_limit(bits);
       if (truncated < 0.0L || truncated >= upper) {
-        Symbol source_tag = source->tag;
+        Symbol source_tag = source.tag;
         raise %(conv-range (source $source_tag) (target $target));
       }
       raw = (unsigned long long) truncated;
@@ -231,7 +231,7 @@ static Var _convert_to_integer(
     else {
       long double limit = _integer_limit(bits - 1);
       if (truncated < -limit || truncated >= limit) {
-        Symbol source_tag = source->tag;
+        Symbol source_tag = source.tag;
         raise %(conv-range (source $source_tag) (target $target));
       }
       long long signed_value = (long long) truncated;
@@ -239,10 +239,10 @@ static Var _convert_to_integer(
     }
   }
   else
-    raw = source->unsigned_value
-        ? source->raw
+    raw = source.unsigned_value
+        ? source.raw
         : (unsigned long long)
-          Var.signed_from_bits(source->raw, source->bits);
+          Var.signed_from_bits(source.raw, source.bits);
   return Var.integer_box(target, raw);
 }
 
@@ -271,7 +271,7 @@ static Var _convert_to_float(X2CVarNumeric *source, Symbol target) {
     decoding, with the decoder's `<bad-types>` detail nested under
     `<no-convert>`. */
 Var Var.convert(Var value, Symbol target) {
-  if (!Var.encoding_valid(value)) {
+  if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     raise %(bad-enc (value $bits));
   }

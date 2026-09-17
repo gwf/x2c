@@ -77,7 +77,7 @@ static List _parse_collection_element(Compiler compiler) {
 static List _build_cons_cell(Compiler compiler, List head, List tail) {
   match (head) {
     case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))): {
-      head = Var.list(sexpr);
+      head = sexpr;
       if (compiler.sym.is_var_type(head.cadr()))
         head = %(expr ("List") (call "Var_list" (args $head)));
       else head = compiler.convert_expression(head, %("List"));
@@ -197,13 +197,13 @@ static List _pattern_content(Compiler c, List node) {
 static List _typed_pattern(Compiler c, List node, Map tags) {
   Var value = c.match_pattern_value(node), tag;
   if (value.is_atom_binder() && tags.try_get(value, &tag))
-    return _typed_capture_pattern(c, value, tag.list());
+    return _typed_capture_pattern(c, value, tag);
   List content = _pattern_content(c, node);
   match (content) {
     case %(cons ? ?): break;
     default: return node;
   }
-  Array elements = [];
+  Array elements = $auto([]);
   List tail = content;
   loop {
     match (tail) {
@@ -216,17 +216,14 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
     break;
   }
   Var operator = c.match_pattern_value(elements[0]);
-  if (operator == <!quote>) {
-    elements.free();
-    return node;
-  }
+  if (operator == <!quote>) return node;
   int first = operator.is_match_op() ? 1 : 0;
   List capture_tag = NULL;
   if (first && elements.len() > 1) {
     Var binder = c.match_pattern_value(elements[1]);
     if (binder.is_atom_binder() &&
         (operator != <!set> || elements.len() == 3)) {
-      if (tags.try_get(binder, &tag)) capture_tag = tag.list();
+      if (tags.try_get(binder, &tag)) capture_tag = tag;
       first++;
     }
   }
@@ -235,7 +232,6 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
       elements[i] = _typed_pattern(c, elements[i], tags);
   for (int i = (int) elements.len() - 1; i >= 0; i--)
     tail = _build_cons_cell(c, elements[i], tail);
-  elements.free();
   List result = %(expr ("List") $tail);
   if (capture_tag) {
     tail = _build_cons_cell(c, result, %(nil));
@@ -252,7 +248,7 @@ List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
   foreach (List row, types) match (row)
     case %(?name ?type):
-      tags[Atom.intern(%"?${name.str()}")] =
+      tags[Atom.intern(%"?${name}")] =
         c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);
 }
@@ -543,8 +539,7 @@ List Compiler.parse_raise_literal(Compiler c) {
       continue;
     }
     Token pair_token = c.token;
-    c.expect(
-      <(>);
+    c.expect(<(>);
     List key = _parse_error_symbol(
       c, "raise", "detail key",
       "use raise %(code (key value)...);");
@@ -623,9 +618,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
         <parse>, "catch filter detail requires exactly one pattern",
         detail_token, NULL);
     c.expect(<)>);
-    Array pair = [];
-    pair.push(key);
-    pair.push(value);
+    Array pair = [key, value];
     elements.push(_build_error_pattern_list(c, pair));
     pair.free();
   }
@@ -713,7 +706,8 @@ static List _parse_quoted_map_entry(Compiler c) {
         (c.peek(0) == <$> && c.macro_starts_target_at(AST_MAP_ENTRY)) ||
         (c.peek(0) == <ident> &&
          c.keyword_alias_starts_target_at(AST_MAP_ENTRY));
-      if (macro_follows) insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
+      if (macro_follows)
+        insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
     }
     if (insertion) {
       c.expect(<"}">);
@@ -836,8 +830,7 @@ static List _parse_string_segments(Compiler compiler) {
   Array segments = [];
   while (compiler.peek(0) != <"\"">)
     segments.push(_parse_string_segment(compiler));
-  List result = segments.list_free();
-  return result;
+  return segments.list_free();
 }
 
 /** Parses a percent `String` literal and returns its typed
@@ -850,7 +843,8 @@ List Compiler.parse_string_literal(Compiler compiler) {
   if (compiler.test(<"\"">)) return %(expr ("String") (0));
   List segments = _parse_string_segments(compiler);
   compiler.expect(<"\"">);
-  if (segments.match(%((cache *)))) return %(expr ("String") ${car(segments)});
+  if (segments.match(%((cache *))))
+    return %(expr ("String") ${segments.car()});
   return %(expr ("String") (segments @segments));
 }
 
@@ -904,8 +898,7 @@ static List _lambda_parse_bare_params(Compiler compiler) {
     compiler.next();
     if (!compiler.test(<,>)) break;
   }
-  List result = names.list_free();
-  return result;
+  return names.list_free();
 }
 
 // Build the function parameter types while retaining typed declarators.
@@ -948,7 +941,7 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
       foreach (List row, supplied.list())
         match (row) case %(capture ?target ? ?):
           if (target == binding) return 1;
-      return _lambda_binding_is_outer(c, binding, depth.integer());
+      return _lambda_binding_is_outer(c, binding, depth);
     }
   return 0;
 }
@@ -997,7 +990,7 @@ List Compiler.capture_lambda_identifier(
               if (target == binding || target == original):
                 prescribed = row;
         if (!prescribed &&
-            !_lambda_binding_is_outer(c, binding, depth.integer())) continue;
+            !_lambda_binding_is_outer(c, binding, depth)) continue;
         if (type.is_static()) continue;
         Map facts = c.semantic_binding_facts();
         List key = %(lambda-capture $scope $binding);
@@ -1068,11 +1061,11 @@ List Compiler.bind_lambda_expression(
       case %(capture ?target ?captured_type ?expression): {
         Type source = NULL, target_type = captured_type;
         List binding = target is <string>
-                     ? c.sym.lookup(%($target), &source) : target.list();
+                     ? c.sym.lookup(%($target), &source) : target;
         if (target_type.contains(<macro-expr>))
           target_type = source.car() == <&> ? source : cons(<&>, source);
         if (!binding_identity_spelling(binding)) {
-          String spelling = target is <string> ? target.str() : NULL;
+          String spelling = target is <string> ? target : NULL;
           match (binding) {
             case %(?(String name)): spelling = name;
             case %("x2c.ident" ?(String name)): spelling = name;
@@ -1185,7 +1178,8 @@ List Compiler.parse_lambda_literal(Compiler c) {
       List binding = c.sym.lookup(%($spelling), &type);
       if (!type)
         c.report_error(
-          <type>, %"identifier '$spelling' has no semantic type", origin, NULL);
+          <type>, %"identifier '$spelling' has no semantic type",
+          origin, NULL);
       references.push(binding);
     } while (c.test(<,>));
   }
@@ -1245,7 +1239,7 @@ static List _atom_literal(Compiler c, String text) {
   if (atom is <symbol>)
     return %(literal ("Symbol") $text ${atom.symbol()});
   Var value = c.macro_holes && atom.is_binder()
-            ? %(!quote $atom).var() : atom;
+            ? %(!quote $atom) : atom;
   return %(literal ("Atom") $spelling $value);
 }
 

@@ -47,7 +47,7 @@ int binding_identity_try_parts(List binding, int *identity, String *spelling) {
   match (binding)
     case %(binding ?id ?(String name)): {
       if (!id.is_integer() || id.integer() <= 0) return 0;
-      if (identity) *identity = id.integer();
+      if (identity) *identity = id;
       if (spelling) *spelling = name;
       return 1;
     }
@@ -73,28 +73,24 @@ Symbol preproc_conditional_kind(String text) {
   return 0;
 }
 
-/* Each row pairs a compound assignment `X=` with the binary `X` it computes.
-   `_compound_lookup` reads the table in either direction. */
-static const Symbol compound_operators[][2] = {
-  { <+=>, <+> },   { <-=>, <-> }, { <*=>, <*> },     { </=>, </> },
-  { <%=>, <%> },   { <&=>, <&> }, { <^=>, <^> },     { <|=>, <"|"> },
-  { <"<<=">, <"<<"> },            { <">>=">, <">>"> },
-  { <@=>, <@> }
-};
-
-static Symbol _compound_lookup(Symbol op, int column) {
-  int count = sizeof(compound_operators) / sizeof(compound_operators[0]);
-  for (int i = 0; i < count; i++)
-    if (compound_operators[i][column] == op)
-      return compound_operators[i][1 - column];
-  return 0;
-}
+/* Source position pairs a compound assignment `X=` with the binary `X` it
+   computes, so one set's index reads the other's operator. */
+static const SymbolSet compound_assignments =
+  %<<"+=" "-=" "*=" "/=" "%=" "&=" "^=" "|=" "<<=" ">>=" "@=">>;
+static const SymbolSet compound_binaries =
+  %<<"+" "-" "*" "/" "%" "&" "^" "|" "<<" ">>" "@">>;
 
 /** Returns the binary operator computed by a compound assignment, or zero. */
-Symbol Symbol.compound_operator(Symbol op) => _compound_lookup(op, 0);
+Symbol Symbol.compound_operator(Symbol op) {
+  int index = compound_assignments.index(op);
+  return index < 0 ? 0 : compound_binaries.getindex(index);
+}
 
 /** Returns the compound assignment for a binary operator, or zero. */
-Symbol Symbol.compound_assignment(Symbol op) => _compound_lookup(op, 1);
+Symbol Symbol.compound_assignment(Symbol op) {
+  int index = compound_binaries.index(op);
+  return index < 0 ? 0 : compound_assignments.getindex(index);
+}
 
 /** Returns whether `op` is plain or compound assignment. */
 int Symbol.is_assignment_op(Symbol op) =>
@@ -208,27 +204,28 @@ List Ast.initializer_cases(Ast ast, List *input) {
 }
 
 /** Returns function alternatives when every initializer arm calls one shared
-    input, and stores that input expression in `source`. Other forms return NULL.
+    input, and stores that input expression in `source`. Other forms return
+    NULL.
 */
 List Ast.initializer_functions(Ast ast, List *source) {
   List header = NULL;
-  List cases = Ast.initializer_cases(ast, &header);
+  List cases = ast.initializer_cases(&header);
   if (!header || header.cdr().len() != 1) return NULL;
   List input = header.cadr();
   List value = input.cadr();
   List argument = %(expr ${value.cadr()} ${input.car()});
-  Array functions = [];
+  Array functions = $auto([]);
   foreach (List choice, cases) {
     (List condition, List path, List destination, List expression) = choice;
     match (expression) {
       case %(expr ? (call (!set ?callee (expr ? ?)) (args ?actual))): {
-        if (actual !== argument) { functions.free(); return NULL; }
+        if (actual !== argument) return NULL;
         List function = callee;
         functions.push(%($condition $path ${function.cadr()} $function));
       }
-      default: { functions.free(); return NULL; }
+      default: return NULL;
     }
   }
   *source = value;
-  return functions.list_free();
+  return functions;
 }

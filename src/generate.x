@@ -192,20 +192,19 @@ static inline int _has_file_init_blocks(Compiler compiler) =>
 /* `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
 static List _prepend_init_prelude(
-  List result, List initGuard, List initFunc) {
-  result = cons(initGuard, result);
-  if (initFunc) result = cons(initFunc, result);
+  List result, List init_guard, List init_func) {
+  result = cons(init_guard, result);
+  if (init_func) result = cons(init_func, result);
   return result;
 }
 
 static int _is_protocol_bootstrap_function(String spelling) =>
   spelling == "x2c_initialize_protocols" ||
-         spelling == "x2c_register_builtin_descriptor" ||
-         spelling == "x2c_try_register_tagged_descriptor";
+  spelling == "x2c_register_builtin_descriptor" ||
+  spelling == "x2c_try_register_tagged_descriptor";
 
 /* A binding number names one declaration across the whole unit. */
-static String _cache_function_key(Var identity) =>
-  %"${identity.integer()}";
+static String _cache_function_key(Var identity) => %"${identity.integer()}";
 
 static void _collect_cache_function_refs(
   Var value, String caller, Map callers, int *uses_cache) {
@@ -218,7 +217,7 @@ static void _collect_cache_function_refs(
     }
     case %(ident (binding ?callee ?)): {
       String key = _cache_function_key(callee);
-      List found = callers.contains(key) ? callers[key].list() : NULL;
+      List found = callers.contains(key) ? callers[key] : NULL;
       callers[key] = cons(caller, found);
       return;
     }
@@ -261,18 +260,17 @@ static Map _cache_reachable_function_ids(List source) {
    markers do not reach generated output; the compiler's initialization
    queues hold those statements. */
 static List _file_init(Compiler c, List source) {
-  int hasInitBlocks = _has_file_init_blocks(c);
+  int has_init_blocks = _has_file_init_blocks(c);
   String initializer = c.init_fn;
-  if (!hasInitBlocks && !initializer) return source;
+  if (!has_init_blocks && !initializer) return source;
 
-  List guard = c.sym.reference(%("_init_guard_"), NULL), initFunc = NULL;
+  List guard = c.sym.reference(%("_init_guard_"), NULL), init_func = NULL;
   if (!initializer) {
     List file_init = c.sym.introduce("_file_init_");
-    initFunc = _make_file_init_func(c, guard, file_init);
+    init_func = _make_file_init_func(c, guard, file_init);
   }
-  List initGuard = _make_init_guard(guard);
-  String initializer_name = "_file_init_";
-  if (initializer) initializer_name = initializer;
+  List init_guard = _make_init_guard(guard);
+  String initializer_name = initializer ? initializer : "_file_init_";
   int cache_only =
     !initializer && c.init_statements(<early>) &&
     !c.init_statements(<mid>) && !c.init_statements(<late>);
@@ -290,7 +288,7 @@ static List _file_init(Compiler c, List source) {
                (block *statements))): {
         String function_key = _cache_function_key(identity);
         if (!inserted) {
-          result = _prepend_init_prelude(result, initGuard, initFunc);
+          result = _prepend_init_prelude(result, init_guard, init_func);
           inserted = 1;
         }
         String name = spelling;
@@ -318,7 +316,7 @@ static List _file_init(Compiler c, List source) {
      constructor is then the only thing that runs the initializers the loop
      above dropped, so it goes after the declarations it assigns. */
   if (!inserted)
-    result = _prepend_init_prelude(result, initGuard, initFunc);
+    result = _prepend_init_prelude(result, init_guard, init_func);
 
   return result.reverse();
 }
@@ -371,8 +369,24 @@ static int _is_completed_function_prototype(Compiler compiler, List binding) {
   return 0;
 }
 
+/* A public prototype that names `struct tag` before the header declares it
+   would give the tag prototype scope in C. A forward declaration of each
+   tag the prototype spells keeps it the file-scope type. */
+static void _forward_tags(List node, Map forwarded, Array header) {
+  match (node)
+    case %((!set ?tag (!or struct union)) ?(String name)): {
+      if (forwarded.contains(name)) return;
+      forwarded[name] = 1;
+      _push_spaced(header, %(declare ($tag $name) (bindings (bind () ()))));
+      return;
+    }
+  foreach (Var item, node)
+    if (item is <list>) _forward_tags(item, forwarded, header);
+}
+
 static void _partition_function(
-  Array header, Array source, Type type, List declarator, Ast body) {
+  Array header, Array source, Type type, List declarator, Ast body,
+  Map forwarded) {
   /* C sees only the prototype of a helper that always raises, so a caller
      whose last statement is that call looks like a missing return. Marking
      the type here reaches every generated form of the function. */
@@ -382,15 +396,47 @@ static void _partition_function(
     _push_spaced(source, _source_function(function, type));
     return;
   }
+  _forward_tags(%($type $declarator), forwarded, header);
   _push_spaced(header, _header_function(type, declarator, body));
   _push_spaced(source, _source_function(function, type));
+}
+
+// A binding list with a named declarator, as opposed to a bare tag body.
+static int _declares_object(List bindings) {
+  match (bindings) case %(bindings *declarators):
+    foreach (List declarator, declarators)
+      match (declarator) {
+        case %(bind ?name *): if (name.truth()) return 1;
+        case %(op = * *): return 1;
+      }
+  return 0;
+}
+
+/* `struct b { ... } g;` at public file scope publishes the body and an
+   `extern` declaration of `g`, and defines `g` in the source. */
+static int _partition_tagged_object(
+  Array header, Array source, Type type, List bindings) {
+  Type core = type.base_type();
+  String tag = NULL;
+  match (core)
+    case %((!or struct union enum) ?(String found) (*)): tag = found;
+  if (!tag || !_declares_object(bindings)) return 0;
+  List tagged = type.list()[:type.len() - core.len()]
+                  .append(%(${core.car()} $tag));
+  _push_spaced(header, %(declare $type (bindings (bind () ()))));
+  _push_spaced(header, _header_declaration(
+    NULL, %(extern @tagged), bindings));
+  _push_spaced(source, %(declare $tagged $bindings));
+  return 1;
 }
 
 static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
   if (private) _push_spaced(source, declaration);
-  else _push_spaced(header, _header_declaration(declaration, type, bindings));
+  else if (!(type.is_aggregate_tag_body() || type.is_enum_tag_body()) ||
+           !_partition_tagged_object(header, source, type, bindings))
+    _push_spaced(header, _header_declaration(declaration, type, bindings));
 }
 
 static void _partition_alias(
@@ -449,16 +495,16 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
   if (header) for (int i = count - 1; i >= 0; i--) {
     match (items[i])
       case %(pending ?index): {
-        int at = index.int();
+        int at = index;
         (List names, List node, int promoted) = pending[at];
         foreach (String name, names) {
           int declared = 0;
           for (int j = 0; j < i && !declared; j++)
             declared = items[j] is <list> &&
-                       _typedef_names(items[j].list()).contains(name);
+                       _typedef_names(items[j]).contains(name);
           for (int j = i + 1; j < count && !promoted && !declared; j++)
             promoted = items[j] is <list> &&
-                       _mentions_type(items[j].list(), name);
+                       _mentions_type(items[j], name);
           if (promoted) break;
         }
         pending[at] = %($names $node $promoted);
@@ -468,7 +514,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
   foreach (Var item, items) {
     match (item)
       case %(pending ?index): {
-        (List names, List node, int promoted) = pending[index.int()];
+        (List names, List node, int promoted) = pending[index];
         (void) names;
         if (promoted == header) output.push(node);
         continue;
@@ -548,7 +594,7 @@ static List _place_conditionals(
   foreach (List item, items) {
     match (item)
       case %(conditional ?group ? ?node): {
-        int placed = opened[group.int()].int() != header;
+        int placed = opened[group].int() != header;
         if (filled.contains(group) || (!other.contains(group) && placed))
           output.push(node);
         continue;
@@ -560,7 +606,7 @@ static List _place_conditionals(
 
 static List _header_and_source(Compiler compiler, List ast) {
   Array header = [], source = [], pending = [], int private = 0;
-  Array opened = [], open = [];
+  Array opened = [], open = [], Map forwarded = {};
   foreach (Ast node, ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
@@ -578,7 +624,15 @@ static List _header_and_source(Compiler compiler, List ast) {
       }
       case %(function (!set ?type (*)) ?declarator
              (!set ?body (block *))): {
-        _partition_function(header, source, type, declarator, body);
+        Type function_type = type;
+        match (declarator) case %(bind ?binding *): {
+          Var attributes;
+          if (compiler.semantic_binding_facts().try_get(
+                %(attributes $binding), &attributes))
+            function_type = %( @{attributes.list()} @function_type );
+        }
+        _partition_function(
+          header, source, function_type, declarator, body, forwarded);
         private = 1;
         continue;
       }
@@ -591,6 +645,8 @@ static List _header_and_source(Compiler compiler, List ast) {
               continue;
         Type declaration_type = type;
         if (declaration_type.is_static()) private = 1;
+        if (!private) match (declaration_type.base_type())
+          case %((!or struct union) ?(String tag) *): forwarded[tag] = 1;
         _partition_declaration(
           header, source, declaration, declaration_type, bindings, private);
         continue;
@@ -732,7 +788,7 @@ static void _collect_forward_dependencies(
              published it. A native alias among them is a macro over the
              host function, and newlib spells some of those as function-like
              macros, so a prototype of the alias would not even parse. */
-          if (global && List.equal(global, binding) && type.is_function() &&
+          if (global && global.equal(binding) && type.is_function() &&
               !locals.contains(global) && !seen.contains(global) &&
               !compiler.sym.get(%("generated-protocol" $spelling))) {
             seen[global] = 1;
@@ -803,24 +859,82 @@ static void _static_declarations(Var value, Map declarations) {
     _static_declarations(child, declarations);
 }
 
+/* Follows the conditional groups open at each directive: `arms` holds one
+   `Array` per open group with the directives that select its current arm. */
+static void _track_arms(Array arms, String content) {
+  Symbol kind = preproc_conditional_kind(content);
+  if (kind == <open>) arms.push([content]);
+  else if (kind == <branch> && arms.len()) {
+    Array group = arms[-1];
+    group.push(content);
+  }
+  else if (kind == <close> && arms.len()) arms.take_last();
+}
+
+/* A function body that moves after the declarations keeps the conditional
+   arm it was written in: the arm's directives precede it and an `#endif`
+   per group follows. */
+static void _push_within_arms(Array functions, List node, Array arms) {
+  foreach (Array group, arms)
+    foreach (String content, group)
+      functions.push(%(preproc $content));
+  functions.push(node);
+  for (size_t i = 0; i < arms.len(); i++)
+    functions.push(%(preproc "#endif"));
+}
+
+/* An `#undef` written after the functions that use its macro must still
+   follow their bodies, unless a later `#define` of the same name relies on
+   its position. */
+static int _undef_stays_deferred(List source, List node, String content) {
+  String directive = content.strip(" \t").remove_prefix("#").strip(" \t");
+  if (!directive.startswith("undef")) return 0;
+  String name = directive.remove_prefix("undef").strip(" \t");
+  int after = 0;
+  foreach (List item, source) {
+    if (item == node) {
+      after = 1;
+      continue;
+    }
+    if (!after) continue;
+    match (item) case %(preproc ?(String later)): {
+      String text = later.strip(" \t").remove_prefix("#").strip(" \t");
+      if (text.startswith("define") &&
+          text.remove_prefix("define").strip(" \t").startswith(name))
+        return 0;
+    }
+  }
+  return 1;
+}
+
 /* Native directives and initializer inputs keep their source order.
    Ordinary function bodies follow the file's declarations and directives,
    preserving their existing access to later private includes and macros.
    Source initializer helpers stay at their capture positions. */
 static List _static_prototypes(Compiler compiler, List source, List header) {
-  Array output = [], declarations = [], functions = [];
+  Array output = [], declarations = [], functions = [], undefs = [];
+  Array arms = [];
   foreach (List node, source) {
-    match (node)
+    match (node) {
       case %(function ?type ?signature ?): {
-        functions.push(node);
+        _push_within_arms(functions, node, arms);
         if (type.list().type().is_static())
           declarations.push(
             %(declare $type ${ast_prototype_declarator(signature)}));
         continue;
       }
+      case %(preproc ?content): {
+        _track_arms(arms, content);
+        if (_undef_stays_deferred(source, node, content)) {
+          undefs.push(node);
+          continue;
+        }
+      }
+    }
     declarations.push(node);
   }
   source = declarations.list_free().append(functions.list_free());
+  source = source.append(undefs.list_free());
   Map statics = {}, available = {}, seen = {};
   _collect_declared_bindings(header, available);
   _static_declarations(source, statics);
@@ -867,8 +981,7 @@ static List _vertical_spacing(List code) {
     values.push(elem);
     values.push(%(space "\n"));
   }
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static int _has_runtime_include(List content) {
@@ -882,8 +995,7 @@ static int _has_runtime_include(List content) {
   return 0;
 }
 
-static List _include_guard(
-  Compiler compiler, List content, String filename) {
+static List _include_guard(Compiler compiler, List content, String filename) {
   if (compiler.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
   String guard = x2c_filename_hash(filename), List header = _header();
@@ -893,9 +1005,8 @@ static List _include_guard(
 
 // Insert the generated header include at the top of the source file.
 static List _primary_include(Compiler compiler, List content) {
-  String xname = compiler.filename.split("/").last();
-  if (xname.endswith(".x")) xname = xname[:-2];
-  String hname = %"${xname}h", List header = _header();
+  String hname = %"${Path.stem(compiler.filename)}.h";
+  List header = _header();
   List include = _include_directive(hname);
   List error = ast_contains_head(content, <raise>)
              ? _include_directive("error.h") : NULL;
@@ -943,8 +1054,7 @@ void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
     %!(unit) => !unit.list().match(%((!or space comment empty) *)));
 
-  List (header, source) =
-    _header_and_source(c, ast);
+  List (header, source) = _header_and_source(c, ast);
   String hash = x2c_filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
     header, source,
@@ -964,8 +1074,7 @@ void generate_code(Compiler c, List ast, String dir) {
   source = _modify_main(c, source);
   source = c.emit(source);
 
-  String basename =
-    %"${dir.rstrip(%"/")}/${Path.stem(c.filename)}";
+  String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
   String header_text = c.code_pretty_string(header, hfile);
   String source_text = c.code_pretty_string(source, cfile);

@@ -112,7 +112,7 @@ Symbol Symbol.new(const char *str) => Symbol.new_len(str, strlen(str));
 int Symbol.try_new(String spelling, Symbol *out) {
   if (!out) return 0;
   Symbol symbol = spelling ? Symbol.new(spelling) : 0;
-  if (!String.equal(spelling, symbol.str())) return 0;
+  if (!spelling.equal(symbol)) return 0;
   *out = symbol;
   return 1;
 }
@@ -194,8 +194,7 @@ int Symbol.compare(Symbol a, Symbol b) {
 String Symbol.repr(Symbol symbol) {
   Buffer out = Buffer.new(0);
   symbol.write_repr(out);
-  String result = out.str_free();
-  return result;
+  return out.str_free();
 }
 
 /** Appends the decoded spelling of `symbol` to `out`.

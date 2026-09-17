@@ -38,7 +38,7 @@ static inline int _ascii_hex(int c){
 }
 
 static inline int _token_break(int c){
-  return !((unsigned)(c - '0') < 10 ||(unsigned)((c | 32) - 'a') < 26 || c == '_');
+  return !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
 }
 
 Symbol scan_number_type(char * s, int n){
@@ -138,7 +138,7 @@ int scan_identifier(char * s){
     __builtin_unreachable();
   }
   int n = 1;
-  while((unsigned)((unsigned char) s[n] - '0') < 10 ||(unsigned)(((unsigned char) s[n] | 32) - 'a') < 26 || s[n] == '_') n ++;
+  while(! _token_break((unsigned char) s[n])) n ++;
   return n;
 }
 
@@ -196,10 +196,14 @@ Symbol scan_keyword_type(const char * s, int n){
     if(! memcmp(s, "threaded", 8)) return 1392787923272;
     if(! memcmp(s, "unsigned", 8)) return 1474468213064;
     if(! memcmp(s, "volatile", 8)) return 1544849476362;
+    if(! memcmp(s, "__inline", 8)) return 634145674;
     break;
     case 10 : if(! memcmp(s, "associated", 10)) return 113488288653640;
+    if(! memcmp(s, "__inline__", 10)) return 634145674;
+    if(! memcmp(s, "__restrict", 10)) return 1249006209256;
     break;
     case 12 : if(! memcmp(s, "thread_local", 12)) return 1392787923272;
+    if(! memcmp(s, "__restrict__", 12)) return 1249006209256;
     break;
     case 13 : if(! memcmp(s, "_Thread_local", 13)) return 1392787923272;
     break;
@@ -456,7 +460,7 @@ static int _radix_integer(char * s, int base, int digit_before){
 
 static int _hex_number(char * s, Symbol * type){
   int n = 0;
-  while((unsigned)((unsigned char) s[n] - '0') < 10 ||(unsigned)(((unsigned char) s[n] | 32) - 'a') < 6) n ++;
+  while(_ascii_hex((unsigned char) s[n])) n ++;
   int digits = n, has_point = 0;
   if(s[n] == '.'){
     has_point = 1;
@@ -481,7 +485,7 @@ static int _hex_number(char * s, Symbol * type){
 
 static int _decimal_number(char * s, Symbol * type){
   int n = 0;
-  while((unsigned)((unsigned char) s[n] - '0') < 10) n ++;
+  while(scan_ascii_digit((unsigned char) s[n])) n ++;
   if(s[n] == '.'){
     int fraction = _float_tail(s + n + 1, n > 0);
     if(fraction < 0) return - 1;

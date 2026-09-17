@@ -235,7 +235,7 @@ static int _entry_adds_symbols_visit(
     visited[dependency] = 1;
     Var cached = _header_cache()[dependency];
     List resolved = cached is void ? _interface_read(compiler, dependency)
-                                   : cached.list();
+                                   : cached;
     if (resolved &&
         _entry_adds_symbols_visit(compiler, resolved, globs, visited))
       return 1;
@@ -260,7 +260,7 @@ static void _replay_cached(
   compiler.merge_translation_dependencies(dependencies);
   foreach (Var part, parts) {
     if (part is <map>) {
-      Map.merge(globs, part);
+      globs.merge(part);
       compiler.merge_source_declarations(globs, part);
       continue;
     }
@@ -270,7 +270,7 @@ static void _replay_cached(
     visited[dep_path] = 1;
     Var dep_entry = _header_cache()[dep_path];
     List resolved = dep_entry is void ? _interface_read(compiler, dep_path)
-                                        : dep_entry.list();
+                                        : dep_entry;
     if (resolved) _replay_cached(compiler, resolved, globs, visited);
     else _walk_cold(compiler, dep_path, dep_path, globs, visited);
   }
@@ -331,7 +331,8 @@ static void _parse_segment(
   /* A package renames what it declares, not what it includes. A C header's
      types and enumerators keep their upstream spelling, so a public method
      over one of them still names a type the header defines. */
-  if (!path.endswith(".x")) shadow.package = NULL;
+  int unit = x2c_source_file(path);
+  if (!unit) shadow.package = NULL;
   shadow.filename = path;
   shadow.source_private = *private;
   shadow.take_unit_state(c);
@@ -345,9 +346,9 @@ static void _parse_segment(
   }
   shadow.shallow_parse_overlay(globs, overlay);
   shadow.return_unit_state(c);
-  if (path.endswith(".x")) {
-    Map.merge(c.fn_defs, shadow.fn_defs);
-    Map.merge(definitions, shadow.fn_defs);
+  if (unit) {
+    c.fn_defs.merge(shadow.fn_defs);
+    definitions.merge(shadow.fn_defs);
   }
   /* A segment's import collects the package once for the whole unit, so its
      files are prerequisites of the unit rather than of this shadow, and they
@@ -355,7 +356,7 @@ static void _parse_segment(
   _cache_dependencies(dependencies, shadow.deps);
   c.merge_translation_dependencies(shadow.deps);
   *private = shadow.source_private;
-  Map.merge(globs, overlay);
+  globs.merge(overlay);
   c.merge_source_declarations(globs, overlay);
 }
 
@@ -386,11 +387,11 @@ static void _include(
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, &covered);
   if (!path) return;
-  if (covered && !path.endswith(".x")) return;
+  if (covered && !x2c_source_file(path)) return;
   String canonical = _canonical_path(path);
   Var cached = c.source_facts ? void : _header_cache()[canonical];
   List entry = cached is void ? _interface_read(c, canonical)
-                              : cached.list();
+                              : cached;
   /* The entry records every include, so it does not depend on what the unit
      that first walked this file had already seen. */
   parts.push(canonical);
@@ -406,7 +407,7 @@ static void _include(
   /* A file still being walked, as in an include cycle, has no entry yet. */
   Var walked = _header_cache()[canonical];
   String content_hash = walked is void
-    ? "%08x".printf(String.hash(_include_text(c, target, canonical)))
+    ? "%08x".printf(_include_text(c, target, canonical).hash())
     : walked.list().cadr();
   _cache_dependency(dependencies, canonical, content_hash);
 }
@@ -484,7 +485,7 @@ static void _file(
     Map definitions = {}, int in_comment = 0;
     int line_number = 1, byte_position = 0;
     int segment_line = 1, segment_position = 0, private = 0;
-    String content_hash = "%08x".printf(String.hash(text));
+    String content_hash = "%08x".printf(text.hash());
     List lines = text.split_lines(1);
     foreach (String line, lines) {
       int angle = 0, String stripped = _directive_line(line, &in_comment);
@@ -647,17 +648,17 @@ static String _package_entry(
 static String _package_key_spelling(List key) {
   Var (head, spelling_value) = key;
   if (head is <string>) {
-    String spelling = head.str();
+    String spelling = head;
     if (key.cdr() || spelling == "source-node") return NULL;
     return spelling == "source-typedef" ? NULL : spelling;
   }
   if (head == <self>)
     return key.cdr() && !key.cddr() && spelling_value is <string>
-         ? spelling_value.str() : NULL;
+         ? spelling_value : NULL;
   if (head != <typedef> && head != <struct> &&
       head != <union> && head != <enum>) return NULL;
   return key.cdr() && spelling_value is <string>
-       ? spelling_value.str() : NULL;
+       ? spelling_value : NULL;
 }
 
 /* Protocol declarations and adoptions are keyed by source location instead
@@ -679,7 +680,7 @@ static int _package_protocol_row(List key, Var value) {
 static void _package_merge(
   Compiler compiler, String name, String root, String path, Map part,
   Map merged, Token token) {
-  String prefix = %"${name}__", int header = !path.endswith(".x");
+  String prefix = %"${name}__", int header = !x2c_source_file(path);
   int foreign = !path.startswith(%"$root/");
   foreach (Var (key, value), part) {
     if (key is not <list> || key.is_nil()) continue;
@@ -778,7 +779,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
     _file(package, entry, text, Path.dirname(entry), globs, visited);
   }
   else _replay_cached(package, cached, globs, visited);
-  Map.merge(c.fn_defs, package.fn_defs);
+  c.fn_defs.merge(package.fn_defs);
   Map merged = {}, walked = {};
   walked[entry] = 1;
   c.add_translation_dependency(entry);
@@ -895,13 +896,13 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
     catch %(io-fail *): return 0;
     catch %(bad-arg *): return 0;
     catch %(size-limit *): return 0;
-    String value = "%08x".printf(String.hash(text));
+    String value = "%08x".printf(text.hash());
     _require_header_cache_owner(path.try_own());
     _require_header_cache_owner(value.try_own());
     source_hashes[path] = value;
     hash = value;
   }
-  return String.equal(hash.string(), expected);
+  return String.equal(hash, expected);
 }
 
 /* Materialize one interface file only after its source path and hash,
@@ -923,7 +924,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   if (status != <value> || record is not <list>) return NULL;
   Var (owner, expected_hash, parts_value, definitions_value,
        dependencies_value) = (List) NULL;
-  match (record.list()) {
+  match (record) {
     case %(interface 2 ?(String stored) ?hash ?parts ?definitions ?deps): {
       owner = stored;
       expected_hash = hash;
@@ -935,7 +936,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   }
   if (parts_value is not <list> || definitions_value is not <list> ||
       dependencies_value is not <list>) return NULL;
-  if (!String.equal(_absolute_path(owner.str()), canonical)) return NULL;
+  if (!_absolute_path(owner).equal(canonical)) return NULL;
   if (!_hash_matches(compiler, canonical, expected_hash)) return NULL;
   interface_loading[canonical] = 1;
   Array parts = [];
@@ -965,10 +966,10 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   foreach (Var dependency, dependencies_value.list()) {
     if (dependency is not <list> || dependency.list().len() != 2)
       return _interface_reject(canonical);
-    Var (dependency_name, content_hash) = dependency.list();
+    Var (dependency_name, content_hash) = dependency;
     if (dependency_name is not <string>) return _interface_reject(canonical);
     String dependency_path =
-      _canonical_path(_absolute_path(dependency_name.str()));
+      _canonical_path(_absolute_path(dependency_name));
     if (content_hash.is_integer() && content_hash.integer() == 1) {
       _cache_dependency(dependencies, dependency_path, content_hash);
       continue;
@@ -1013,7 +1014,7 @@ static Var _renumber_bindings(Var value, Map identities) {
   List node = value, String spelling = NULL;
   if (binding_identity_try_parts(node, NULL, &spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);
-    return binding_identity_new(identity.integer(), spelling);
+    return binding_identity_new(identity, spelling);
   }
   Array children = [];
   foreach (Var child, node)
@@ -1069,7 +1070,7 @@ void interface_write(Compiler compiler, String path) {
     if (output.close()) written = 0;
   }
   if (written && !rename(temporary, path)) return;
-  String reason = "%s".printf(strerror(errno));
+  String reason = String.new(strerror(errno));
   unlink(temporary);
   compiler.report_error(
     <emit>, "failed to write interface file", NULL,

@@ -20,6 +20,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
 | [`Compiler.record_generated_header_symbol`](#Compiler.record_generated_header_symbol) | Records one generated public callable in its source file's cached surface. |
+| [`Compiler.record_region_summary`](#Compiler.record_region_summary) | Records one function's region summary in its source file's cached surface. |
 
 ### Functions
 
@@ -49,7 +50,7 @@ Names the directories searched for `.xi` interfaces.
 files mirror their home-relative path under the compiler's stage
 directory when it runs from `<home>/builds/`, otherwise under the home.
 
-Source: `src/collect.x:814`
+Source: `src/collect.x:826`
 
 #### interface_prelude
 
@@ -57,7 +58,7 @@ Source: `src/collect.x:814`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:840`
+Source: `src/collect.x:852`
 
 #### interface_write
 
@@ -69,7 +70,7 @@ A process-specific sibling is written and renamed into place, so a
 failure leaves any existing interface intact and is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1049`
+Source: `src/collect.x:1061`
 
 ### `Compiler`
 
@@ -87,7 +88,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:737`
+Source: `src/collect.x:749`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -104,7 +105,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:586`
+Source: `src/collect.x:598`
 
 <a id="Compiler.record_generated_header_symbol"></a>
 #### Compiler.record_generated_header_symbol
@@ -116,7 +117,19 @@ The operation has no effect until generated-symbol recording is enabled.
 The compiler's current file must already have a collected contribution;
 the cache retains `signature`.
 
-Source: `src/collect.x:425`
+Source: `src/collect.x:438`
+
+<a id="Compiler.record_region_summary"></a>
+#### Compiler.record_region_summary
+
+`void Compiler.record_region_summary( Compiler compiler, String name, List summary)`
+
+Records one function's region summary in its source file's cached surface.
+A dependent unit reads the same `("region-summary" NAME)` key from its
+symbol table after replaying this file's interface. The call has no effect
+when the file has no collected contribution, as under a SourceView.
+
+Source: `src/collect.x:458`
 
 ## Design notes
 

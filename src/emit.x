@@ -72,32 +72,32 @@ static List Emitter._array_declarator(
    may be flat and must not consume one C stack frame per parameter. */
 static List Emitter._pointer_declarator(
   Emitter emitter, List decl, List mods) {
-  Var first = car(mods);
+  Var first = mods.car();
   if (first == <&>)
-    return emitter._declarator(cons(<*>, decl), cdr(mods));
+    return emitter._declarator(cons(<*>, decl), mods.cdr());
   if (first == <*> || Symbol.is_type_qualifier(first))
-    return emitter._declarator(cons(first, decl), cdr(mods));
+    return emitter._declarator(cons(first, decl), mods.cdr());
   return %( @mods @decl );
 }
 
 static List Emitter._declarator(Emitter e, List decl, List mods) {
   if (!mods) return decl;
-  Var first = car(mods);
+  Var first = mods.car();
   if (first is <list>) {
     Type mod = first;
-    if (car(mod) == <fnmod>)
-      return e._function_declarator(decl, mod, cdr(mods));
-    if (mod.is_array()) return e._array_declarator(decl, mod, cdr(mods));
-    return e._bitfield_declarator(decl, mod, cdr(mods));
+    if (mod.car() == <fnmod>)
+      return e._function_declarator(decl, mod, mods.cdr());
+    if (mod.is_array()) return e._array_declarator(decl, mod, mods.cdr());
+    return e._bitfield_declarator(decl, mod, mods.cdr());
   }
   Symbol sym = first;
   switch (sym) {
-    case <dim>: return e._array_declarator(decl, NULL, cdr(mods));
+    case <dim>: return e._array_declarator(decl, NULL, mods.cdr());
     case <*>: case <&>:
       return e._pointer_declarator(decl, mods);
-    case <bitfield>:   return e._emit(cdr(mods), NULL);
+    case <bitfield>:   return e._emit(mods.cdr(), NULL);
     case <typedef>:
-      return cons(<typedef>, e._declarator(decl, cdr(mods)));
+      return cons(<typedef>, e._declarator(decl, mods.cdr()));
   }
   if (sym.is_type_qualifier()) return e._pointer_declarator(decl, mods);
   return %( @mods @decl );
@@ -121,7 +121,7 @@ static List Emitter._args(Emitter emitter, List ast, List context) {
   (void) context;
   Array result = [];
   int first = 1;
-  foreach (List argument, cdr(ast)) {
+  foreach (List argument, ast.cdr()) {
     List emitted = emitter._emit(argument, NULL);
     if (argument.match(%(expr ? (commas *)))) emitted = _parens(emitted);
     if (!first) result.push(", ");
@@ -148,7 +148,7 @@ static List Emitter._function(Emitter e, List ast, List context) {
   Var defer_owner;
   if (e.semantic_binding_facts().try_get(
     %(defer-ownr $function_binding), &defer_owner))
-    e.fn_name = defer_owner.str();
+    e.fn_name = defer_owner;
   type = e._emit(%( $type ), NULL);
   bindings = %( $bindings );
   body = %( $body );
@@ -201,32 +201,32 @@ static int _is_gensym_tag(List tag) {
 }
 
 static List Emitter._enum(Emitter emitter, List ast, List context) {
-  List name = ast.type().tag(), body = car(ast.type().body());
+  List name = ast.type().tag(), body = ast.type().body().car();
   if (_is_gensym_tag(name) && !ast.type().is_enum_tag()) name = NULL;
   body = emitter._emit(body, NULL);
   body = emitter._commas(body);
   if (name) {
-    if (body) return %( ${car(ast)} @name "{" @body "}");
-    return %( ${car(ast)} @name );
+    if (body) return %( ${ast.car()} @name "{" @body "}");
+    return %( ${ast.car()} @name );
   }
-  return %( ${car(ast)} "{" @body "}");
+  return %( ${ast.car()} "{" @body "}");
 }
 
 static List Emitter._aggregate(Emitter emitter, List ast, List context) {
   if (ast.type().is_aggregate_tag()) {
     Var alias = emitter.native_aliases.assoc(ast);
-    if (alias is <list>) return emitter._emit(alias.list(), NULL);
+    if (alias is <list>) return emitter._emit(alias, NULL);
   }
   List tag = ast.type().tag();
   if (_is_gensym_tag(tag) && !ast.type().is_aggregate_tag()) tag = NULL;
   if (tag) tag = emitter._emit(tag, NULL);
-  if (ast.type().is_aggregate_tag()) return %( ${car(ast)} @tag );
+  if (ast.type().is_aggregate_tag()) return %( ${ast.car()} @tag );
   List body = ast.type().body();
   body = emitter._emit(body, NULL);
   body = body.flatten_all();
-  if (tag && body) return %( ${car(ast)} @tag "{" @body "}");
-  if (tag) return %( ${car(ast)} @tag );
-  return %( ${car(ast)} "{" @body "}");
+  if (tag && body) return %( ${ast.car()} @tag "{" @body "}");
+  if (tag) return %( ${ast.car()} @tag );
+  return %( ${ast.car()} "{" @body "}");
 }
 
 static List Emitter._typedef(Emitter e, List ast, List context) {
@@ -325,7 +325,7 @@ static List Emitter._static_copy(
 static List Emitter._local_static(Emitter e, List ast, List context) {
   List declaration = ast.cadr(), body = ast.caddr();
   while (declaration.car() == <at>) {
-    e.origin = declaration.cadr().int();
+    e.origin = declaration.cadr();
     declaration = declaration.caddr();
   }
   if (_static_case_entry(body)) {
@@ -429,9 +429,6 @@ static List Emitter._local_static(Emitter e, List ast, List context) {
   return output.list_free();
 }
 
-/* Transform has converted every `vseqcall` operand to its parameter type.
-   C leaves call-argument evaluation order unspecified, so typed temporaries
-   materialize these operands left-to-right before the protocol member call. */
 /* Runtime Match entry points whose second argument is the pattern. */
 static String _match_site_entry(String name) {
   if (!name) return NULL;
@@ -464,13 +461,13 @@ static List Emitter._match_site_call(
   if (!entry) return NULL;
   Type type = NULL;
   List global = e.compiler.sym.resolve_global(%($name), &type);
-  if (!global || !List.equal(global, binding) || !type.is_function())
+  if (!global || !global.equal(binding) || !type.is_function())
     return NULL;
   List args = arguments;
   match (args)
     case %(args ? ?pattern *): {
       if (pattern is not <list> ||
-          !e.match_pattern_is_static(pattern.list()))
+          !e.match_pattern_is_static(pattern))
         return NULL;
       String site = e.fresh_name("match_site");
       List c_args = e._emit(%($arguments), NULL);
@@ -480,6 +477,9 @@ static List Emitter._match_site_call(
   return NULL;
 }
 
+/* Transform has converted every `vseqcall` operand to its parameter type.
+   C leaves call-argument evaluation order unspecified, so typed temporaries
+   materialize these operands left-to-right before the protocol member call. */
 static List Emitter._sequenced_call(
   Emitter e, Var callee, List arguments, List context) {
   List c_fn = e._emit(%($callee), context);
@@ -559,7 +559,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
 // arm exit through the ordinary cleanup stack.
 static List Emitter._filtered_catch(
   Emitter emitter, List records, String frame_name, String handle_name,
-  List context, List final_code, List leave_stmt) {
+  List context) {
   String selected_name = emitter.fresh_name("catch_selected");
   Array arms = [], int index = 0, count = records.len();
   foreach (List rec, records) {
@@ -575,13 +575,12 @@ static List Emitter._filtered_catch(
   List selected = count > 1
     ? %("int $selected_name = x2c_error_catch_selected($handle_name);")
     : %();
-  List result = %("{"
+  return %("{"
     @selected
     "x2c_error_catch_detach($handle_name);"
     "x2c_exception_mark_handled(&$frame_name);"
     @{arms.list_free()}
   "}");
-  return result;
 }
 
 static List Emitter._try(Emitter e, List ast, List context) {
@@ -597,8 +596,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
   List catch_block = NULL;
   if (clause)
     catch_block = e._filtered_catch(
-      clause.cadr(), frame_name, handle_name, context,
-      final_code, leave_stmt);
+      clause.cadr(), frame_name, handle_name, context);
   /* Normal and handled paths share a trailer. The unhandled landing must
      remain visibly nonreturning to the native compiler. Avoid labels here:
      an enclosing finalizer can copy this emitted block into several exits. */
@@ -646,7 +644,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
         "&$frame_name, &$site, $patterns);"
     );
   }
-  List result = %("{"
+  return %("{"
              "ExceptionFrame " $frame_name ";"
              @registration
              "x2c_exception_push(&" $frame_name ");"
@@ -657,7 +655,6 @@ static List Emitter._try(Emitter e, List ast, List context) {
              "}"
              @final_trailer
            "}");
-  return result;
 }
 
 static String _c_string_literal(String value) {
@@ -672,8 +669,8 @@ static List Emitter._raise(
   String site_name = e.fresh_name("error_site");
   List location = e.origin_location(e.origin);
   String file = location
-    ? location.assoc(<file>).string() : e.compiler.filename;
-  int line = location ? location.assoc(<line>).integer() : 0;
+    ? location.assoc(<file>) : e.compiler.filename;
+  int line = location ? location.assoc(<line>) : 0;
   String function = e.fn_name
     ? e.fn_name : "<unknown>";
   String file_literal = _c_string_literal(file);
@@ -709,8 +706,7 @@ static List _make_local_binders(List binders, String values_name) {
     }
     index++;
   }
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static List _make_catch_binders(List binders, String handle_name) {
@@ -724,8 +720,7 @@ static List _make_catch_binders(List binders, String handle_name) {
         : %"Var $bvar = $rhs;");
     index++;
   }
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 /* Label one arm so the switch can reach it directly. An arm whose pattern
@@ -832,8 +827,7 @@ static List Emitter._match_if(
   if (labelling) values.push(%("default: break;"));
   *dispatched = heads.len() != 0;
   heads.free();
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static List Emitter._match_cases(Emitter e, List ast, List context) {
@@ -1044,7 +1038,7 @@ static List Emitter._initializer_value(
 static List Emitter._preproc(Emitter emitter, List ast, List context) {
   String text = ast.cadr();
   text = text.rstrip("\n");
-  if (!text.startswith("#include")) return cdr(ast);
+  if (!text.startswith("#include")) return ast.cdr();
   if (text.endswith(".x\"") || text.endswith(".x>")) {
     String last = text.split(" ").last(), stem = last.strip("\"<>")[:-3];
     String name = %"$stem.h", out = %"#include \"$name\"";
@@ -1105,7 +1099,7 @@ static List Emitter._op_spine(
 
 static List Emitter._emit(Emitter e, List ast, List context) {
   if (!ast) return ast;
-  Var head = car(ast);
+  Var head = ast.car();
   if (head is <list>) {
     Array emitted = $auto([]);
     while (ast && ast.car() is <list>) {
@@ -1117,7 +1111,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
       result = cons(emitted[i], result);
     return result;
   }
-  if (head is not <symbol>) return %( $head @{e._emit(cdr(ast), context)} );
+  if (head is not <symbol>) return %( $head @{e._emit(ast.cdr(), context)} );
   if (head != <typedef> &&
       (head.symbol().is_storage_class() ||
        head.symbol().is_type_qualifier() ||
@@ -1138,7 +1132,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
   match (ast) {
     case %(at ?origin ?inner): {
       int old_origin = e.origin;
-      e.origin = origin.integer();
+      e.origin = origin;
       List result = e._emit(inner, context);
       e.origin = old_origin;
       if (e.compiler.source_map)
@@ -1348,32 +1342,33 @@ static List Emitter._emit(Emitter e, List ast, List context) {
     case <args>:       return e._args(ast, context);
     case <bindings>:
     case <params>:
-      return e._commas(e._emit(cdr(ast), NULL));
-    case <fields>:     return e._emit(cdr(ast), NULL);
+      return e._commas(e._emit(ast.cdr(), NULL));
+    case <fields>:     return e._emit(ast.cdr(), NULL);
     // Expressions
     case <block>:      return e._block(ast);
-    case <parens>:     return %("(" @{e._emit(cdr(ast), NULL)} ")");
-    case <sizeof>: return %("sizeof" @{e._emit(cdr(ast), context)});
+    case <group>:      return e._emit(ast.cdr(), context);
+    case <parens>:     return %("(" @{e._emit(ast.cdr(), NULL)} ")");
+    case <sizeof>: return %("sizeof" @{e._emit(ast.cdr(), context)});
     // Statements
     case <case>: return %("case" ${e._emit(ast.cdr(), context)} ":");
-    case <composite>: return %("{" @{e._emit(cdr(ast), context)} "}");
+    case <composite>: return %("{" @{e._emit(ast.cdr(), context)} "}");
     case <default>:    return %("default:");
     case <defer>:      return e._defer(ast, context);
     case <empty>:      return %(";");
     case <try>:        return e._try(ast, context);
-    case <stmnt>:      return %( @{e._emit(cdr(ast), context)} ";");
+    case <stmnt>:      return %( @{e._emit(ast.cdr(), context)} ";");
     case <matchcases>: return e._match_cases(ast, context);
     // Miscellaneous
     case <binding>:    return e._binding(ast, context);
-    case <commas>: return e._commas(e._emit(cdr(ast), context));
-    case <comment>:    return cdr(ast);
+    case <commas>: return e._commas(e._emit(ast.cdr(), context));
+    case <comment>:    return ast.cdr();
     case <nil>:        return %("NULL");
-    case <space>:      return cdr(ast);
+    case <space>:      return ast.cdr();
     // The one storage class whose x2c spelling is not its C spelling.
     case <threaded>:
-      return %("_Thread_local" @{e._emit(cdr(ast), context)});
+      return %("_Thread_local" @{e._emit(ast.cdr(), context)});
   }
-  return %($head @{e._emit(cdr(ast), context)});
+  return %($head @{e._emit(ast.cdr(), context)});
 }
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.

@@ -55,16 +55,14 @@ Var List_var(List);
 
 Var int_var(int);
 
-List Array_list(Array);
+List Array_list_free(Array);
 
 Array Array_sort(Array);
 
 List DisjointSet_sizes(DisjointSet set){
   Array sizes = Array_new();
   for(int i = 0, n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes, List_var(cons(int_var(set -> size[i]), cons(int_var(i), NULL))));
-  List result = Array_list(Array_sort(sizes));
-  Array_free(sizes);
-  return result;
+  return Array_list_free(Array_sort(sizes));
 }
 
 int DisjointSet_num_components(DisjointSet set){

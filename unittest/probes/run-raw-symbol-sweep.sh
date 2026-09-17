@@ -91,20 +91,17 @@ for phases in "$ROOT"/unittest/compiler-fixtures/*.phases; do
   fi
 done
 
-for src in "$ROOT"/unittest/compiler-fixtures/*.x; do
-  if [[ $(head -c 2 "$src") == '#!' ]]; then
-    exclusions["$src"]=$(
-      printf '%s' "script unit: CPP symbol modes read its #! line as C"
-    )
-  fi
-done
-
 sources=()
 for src in "$ROOT"/src/*.x "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
     "$ROOT"/unittest/*.x "$ROOT"/unittest/compiler-fixtures/*.x \
     "$ROOT"/unittest/probes/*.x "$ROOT"/unittest/benchmarks/*.x; do
   total=$((total + 1))
   relative=${src#"$ROOT/"}
+  if [[ $(head -c 2 "$src") == '#!' ]]; then
+    exclusions["$src"]=$(
+      printf '%s' "script unit: CPP symbol modes read its #! line as C"
+    )
+  fi
   if [[ -n ${exclusions[$src]+classified} ]]; then
     echo "raw symbol exclusion: $relative -- ${exclusions[$src]}"
     excluded=$((excluded + 1))

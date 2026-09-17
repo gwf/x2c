@@ -34,6 +34,7 @@ Functions and types exposed by each compiler module.
 | [`src/parse.x`](parse.md) | x2c recursive-descent parser core. |
 | [`src/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
+| [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
 | [`src/snapshot.x`](snapshot.md) | deterministic Lisp data writer for compiler artifacts. |

@@ -373,11 +373,11 @@ Source: `lib/var.x:703`
 
 Returns `v`'s payload as a `long` when its tag is integral, or 0.
 This reads the payload; it does not convert. It decodes every integer
-family, from `<u8>` through `<ullong>`, including the scope-owned boxes, and
-returns 0 for a tag it does not handle. A `double` reads as 0, and so does
-a `String`; nothing reports the mismatch. A `<ullong>` or `<llong>`
-payload is truncated to `long`, and a `<ulong>` above `LONG_MAX` comes
-back negative. `Var.ulong_value` preserves the unsigned payload. A
+family, from `<u8>` through `<ullong>`, including the scope-owned boxes,
+and returns 0 for a tag it does not handle. A `double` reads as 0, and so
+does a `String`; nothing reports the mismatch. A `<ullong>` or `<llong>`
+payload is truncated to `long`, and a `<ulong>` above `LONG_MAX` comes back
+negative. `Var.ulong_value` preserves the unsigned payload. A
 `Symbol` reads as its numeric `Symbol` value.
 
 When the tag might not be what you expect, convert instead of reading.
@@ -403,8 +403,8 @@ Source: `lib/var.x:748`
 Orders the integer payloads of `a` and `b`, returning -1, 0, or 1.
 Each value is decomposed into a sign and an unsigned magnitude first, so
 the whole integer range orders correctly, including a `<ullong>` above
-`LONG_MAX` against a negative `<long>`. Subtracting in a fixed-width integer
-type could overflow.
+`LONG_MAX` against a negative `<long>`. Subtracting in a fixed-width
+integer type could overflow.
 
 Both arguments are assumed to be integer-kinded. Another value is decoded
 by `Var.integer`, which reads it as 0. Confirm with `Var.is_integer` when

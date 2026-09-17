@@ -535,7 +535,7 @@ Self Array.sort(Self array) {
 
 static int _sort_order(Func compare, Var left, Var right) {
   FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
-  return compare.apply(2, arguments).int();
+  return compare.apply(2, arguments);
 }
 
 /** Stably sorts `array` with a borrowed synchronous comparator and returns it.
@@ -717,8 +717,7 @@ String Array.join(Array array, String separator) {
     else elem.write_str(buf);
     if (separator && i < n - 1) buf.write(separator);
   }
-  String str = buf.str_free();
-  return str;
+  return buf.str_free();
 }
 
 /** Returns nonzero when two `Array`s have structurally equal elements. */
@@ -739,7 +738,7 @@ Buffer Array.write_str(Array array, Buffer out) =>
 String Array.str(Array array) {
   Buffer buf = $auto(Buffer.new(0));
   array.write_str(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Returns the readable `[ a, b, c ]` representation of `array`.
@@ -756,13 +755,13 @@ String Array.str(Array array) {
 String Array.repr(Array array) {
   Buffer buf = $auto(Buffer.new(0));
   array.write_repr(buf);
-  return buf.str();
+  return buf;
 }
 
 static int _next(Iter iter, Var *out) {
   Array array = iter.obj;
   if (!array) return 0;
-  int index = (int) iter.state.integer(), length = _int_length(array);
+  int index = iter.state, length = _int_length(array);
   if (index >= length) return 0;
   Var *values = (Var *) array.bytes;
   *out = values[index];

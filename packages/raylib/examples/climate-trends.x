@@ -13,7 +13,7 @@ static void _label(
 int main(void) {
   List days = %("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun");
   List highs = %(68 72 74 71 76 79 77);
-  String output = %"builds/climate-trends.png";
+  String output = "builds/climate-trends.png";
 
   Color paper = Color.from_hex(0xf8f7f3ff);
   Color ink = Color.from_hex(0x243b40ff);
@@ -28,9 +28,9 @@ int main(void) {
 
   Image chart = Image.new(2160, 960, paper);
   defer chart.free();
-  _label(chart, font, %"Seattle", 38, 28, 28, ink);
-  _label(chart, font, %"A week of daily highs", 40, 68, 16, muted);
-  _label(chart, font, %"TEMPERATURE / F", 514, 38, 12, muted);
+  _label(chart, font, "Seattle", 38, 28, 28, ink);
+  _label(chart, font, "A week of daily highs", 40, 68, 16, muted);
+  _label(chart, font, "TEMPERATURE / F", 514, 38, 12, muted);
 
   Vector2 origin = { 84, 252 }, previous = { 0 };
   foreach(int tick, %(60 70 80)) {

@@ -38,12 +38,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new(".tmp.%ld");
 }
 
-String String_new_len(const char *, int);
+String Path_stem(Path);
 
 static String _stem(String input){
-  const char * base = strrchr(input, '/');
-  base = base ? base + 1 : input;
-  return String_new_len(base, strlen(base) - 2);
+  return Path_stem(input);
 }
 
 int String_truth(String);
@@ -102,8 +100,7 @@ List translation_depfile_parse(String text){
   }
   if(Buffer_len(word)) Array_push(paths, String_var(Buffer_str(word)));
   Buffer_free(word);
-  List result = Array_list_free(paths);
-  return result;
+  return Array_list_free(paths);
 }
 
 int File_puts(File, const char *);
@@ -175,7 +172,7 @@ String String_rstrip(String, char *);
 
 static int _write_targets(File output, CliRequest request, String output_dir, String stem){
   if(String_truth(request -> dep_target)) return _write_word(output, request -> dep_target);
-  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, _0)), cons(String_var(_0), cons(String_var(stem), NULL))));
+  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(stem), NULL))));
   if(! _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))))) return 0;
   if(File_putc(output, ' ') == EOF) return 0;
   return _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
@@ -249,7 +246,7 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
   if(! _init_guard_) _file_init_();
   if(request -> no_deps || CliRequest_inspects(request)) return 1;
   String stem = _stem(input);
-  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, _0)), cons(String_var(_0), cons(String_var(stem), cons(String_var(_3), NULL)))));
+  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(stem), cons(String_var(_3), NULL)))));
   String temporary = String_printf(String_join(NULL, cons(String_var(path), cons(String_var(_4), NULL))), (long) getpid());
   File output = fopen(temporary, "w");
   if(! output){

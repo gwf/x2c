@@ -44,7 +44,8 @@ uses the package `import` described below.
 A script unit is a source file whose first line begins with `#!`, usually
 `#!/usr/bin/env -S x2c script` so that [`x2c script`](cli.md#run-a-script)
 runs it. The compiler reads that first line as `#include "scripting.x"`,
-which brings in `args.x`, `digest.x`, `path.x`, and `process.x`. Every other
+which brings in `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and
+`regex.x`. Every other
 line keeps its line number.
 
 A script unit takes one of two forms, chosen by whether it defines a
@@ -1555,7 +1556,8 @@ from `Map`, and likewise for `Array`; for any other destination, including
 `Var`, it is the native zero initializer. The same holds in a `?:` arm, where a
 brace that remains an initializer becomes a compound literal of the
 destination: `Map m = ready ? {} : NULL;` builds a Map, and
-`Var v = ready ? {} : NULL;` is Null either way.
+`Var v = ready ? {} : NULL;` is Null either way. An anonymous struct or union
+destination has no compound-literal spelling and is rejected.
 
 The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
 bare forms differ only in evaluating elements, values, and non-identifier
@@ -2648,7 +2650,9 @@ context.
 The active preprocessed stream is shallow-parsed only to establish the global
 environment. Full parsing, diagnostics, and emitted source still come from the
 original token stream. Directives remain AST nodes in source order at top level
-and inside compound statements, including a trailing directive before `}`.
+and inside compound statements, including a trailing directive before `}`
+and a directive between `if (...)`, `else`, `while (...)`, `for (...)`, or
+`do` and the statement it governs.
 
 An include that x2c cannot resolve remains in the emitted C. Translation
 without host preprocessing can therefore succeed with an active missing
@@ -2665,21 +2669,50 @@ A C source file renamed from `.c` to `.x` is an x2c translation unit. A C
 header stays a `.h` file reached with `#include`; x2c collects its
 declarations and the native compiler reads it from the generated C.
 
-Because both branches of a conditional are parsed, the C++ linkage guard is
-accepted in a unit and in a collected header. At file scope,
-`extern "C" {` opens a linkage group and a `}` closes it, even when the two
-braces sit in separate `#ifdef __cplusplus` regions. The group's declarations
-belong to file scope, and its braces are not emitted. Any string literal is
-accepted as the linkage name. `extern "C"` before a single declaration is
-read as `extern`.
+Every branch of a conditional is parsed except the branches C never
+compiles. x2c output is compiled as C by a GNU-style compiler, so the branch
+under `#ifdef __cplusplus`, `#if defined(__cplusplus)` alone or first in a
+`&&` conjunction, and `#ifdef _MSC_VER` or `#if defined(_MSC_VER)` likewise,
+the `#else` branch of `#ifndef __cplusplus` or `#if !defined(__cplusplus)`,
+and `#if 0` are skipped: their tokens are trivia, and the directives around
+them stay in place and are emitted. A function defined in two arms of one
+conditional is one definition. At file scope, `extern "C" {` opens a
+linkage group and a `}` closes it; the group's declarations belong to file
+scope, and its braces are not emitted. Any string literal is accepted as the
+linkage name. `extern "C"` before a single declaration is read as `extern`.
 
-A collected header may place an object-like macro defined to nothing, such as
-`#define RLAPI` with an optional trailing comment, before or among a
-declaration's specifiers: `RLAPI void InitWindow(int width, ...);`. Any
-definition of that name to nothing, anywhere earlier in the unit or its
-headers, lets collection skip the name, whatever other definitions its
-conditional branches contain. Unit source still parses unexpanded, so the same
-spelling in a `.x` file is rejected.
+A unit or a collected header may place a macro before or among a
+declaration's specifiers. The macro's definition decides what the name
+contributes: nothing for an empty body or an attribute (`#define RLAPI`,
+`#define WEAK __attribute__((weak))`), its storage class for `static`,
+`extern`, or `inline` (`#define JSMN_API static`), builtin type words for a
+body such as `signed int`, and another prefix macro's reading for a body that
+names one. A function-like macro whose body is its parameter amid such
+prefixes wraps a type: `CJSON_PUBLIC(const char *) f(void);` reads the type
+inside the parentheses. Where a name is defined differently in several
+conditional branches, a `static` definition wins, then any other prefix. A
+name defined to any other text is a typedef name, as before.
+
+A GNU attribute or a function-like attribute macro after a declarator,
+`int f(int x) __attribute__((unused));`, is kept as text and emitted before
+the declaration's type, where C accepts it on a prototype and a definition.
+It is not part of the signature compared between a prototype and its
+definition. A definition without `static` after a `static` prototype keeps
+the prototype's internal linkage. `__inline`, `__inline__`, `__restrict`, and
+`__restrict__` are the standard keywords.
+
+`in` and `match` are keywords only where their x2c forms can occur: `in`
+between two operands, and `match` as `match (...)` followed by `case` or
+`{`. Elsewhere both are identifiers. A field of a foreign struct whose type
+x2c does not know can be indexed; C alone types the result.
+
+A public `struct tag { ... } name;` publishes the tag body and
+`extern struct tag name;` in the header and defines `name` in the source.
+A public prototype naming `struct tag` is preceded in the header by
+`struct tag;` when the header has not declared the tag. A function body that
+follows the declarations keeps the conditional arm it was written in, and
+an `#undef` written after the functions that use its macro follows their
+bodies unless a later `#define` of the same name depends on its position.
 
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host

@@ -265,7 +265,7 @@ static int _range_down_next(Iter iter, Var *out) {
 static int _range_general_next(Iter iter, Var *out) {
   int stop = _range_raw_high(iter.obj);
   int step = _range_raw_value(iter.obj);
-  int result = iter.state.int();
+  int result = iter.state;
   if ((step > 0 && result > stop) || (step < 0 && result < stop)) return 0;
   *out = result;
   long long next = (long long) result + step;
@@ -652,16 +652,16 @@ static int _unzip_column_next(Iter iter, Var *out) {
 
 static void _unzip_shared_init(UnzipShared *u, Iter source) {
   if (!u) return;
-  u->source = source;
-  u->buffers[0] = [];
-  u->buffers[1] = [];
-  u->heads[0] = u->heads[1] = 0;
-  u->done = 0;
+  u.source = source;
+  u.buffers[0] = [];
+  u.buffers[1] = [];
+  u.heads[0] = u.heads[1] = 0;
+  u.done = 0;
   for (int i = 0; i < 2; i++) {
-    u->columns[i].shared = u;
-    u->columns[i].column = i;
+    u.columns[i].shared = u;
+    u.columns[i].column = i;
     Iter.init(
-      &u->column_iters[i], (UnzipColumnRef) &u->columns[i],
+      &u.column_iters[i], (UnzipColumnRef) &u.columns[i],
       _unzip_column_next, 1);
   }
 }
@@ -669,7 +669,7 @@ static void _unzip_shared_init(UnzipShared *u, Iter source) {
 static int _unzip_next(Iter iter, Var *out) {
   UnzipSharedRef shared = iter.obj.unzipsharedref();
   if (!shared) return 0;
-  int stage = (int) iter.state.long();
+  int stage = iter.state;
   if (stage >= 2) return 0;
   Iter child = &shared.column_iters[stage];
   iter.state = stage + 1;

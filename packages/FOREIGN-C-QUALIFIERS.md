@@ -51,10 +51,12 @@ results, globals, and fields. `qualifier-void-pointer` and
 `foreign-alias-pointer-result` cover the corresponding pointer conversions
 and aliases.
 
-Collection reads headers unexpanded. It skips an object-like macro defined
-to nothing before or among a declaration's specifiers, such as raylib's
-`RLAPI`. A header whose declarations depend on other macro expansion, such as
-a function-like attribute macro, is not collected correctly.
+Collection reads headers unexpanded. A macro before or among a
+declaration's specifiers reads as its definition: nothing, a storage class,
+an attribute, builtin type words, or a type-wrapping function-like macro,
+and a trailing attribute macro is kept as text. A header whose declarations
+depend on other macro expansion, such as a macro that supplies grammar, is
+not collected correctly.
 
 ## Package source
 

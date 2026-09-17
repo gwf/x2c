@@ -48,8 +48,8 @@ cmp "$BUILD/run.help" "$BUILD/run-short.help"
 cmp "$BUILD/script.help" "$BUILD/script-short.help"
 cmp "$BUILD/bootstrap.help" "$BUILD/bootstrap-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
-[[ $("$X2C" --version) == "x2c 0.13.0" ]]
-[[ $("$X2C" -V) == "x2c 0.13.0" ]]
+[[ $("$X2C" --version) == "x2c 0.14.0" ]]
+[[ $("$X2C" -V) == "x2c 0.14.0" ]]
 "$X2C" build -q --help >"$BUILD/build-short-quiet.help"
 "$X2C" build --compile-only --help >"$BUILD/build-long-compile.help"
 "$X2C" build -j 1 --help >"$BUILD/build-short-jobs.help"
@@ -1206,6 +1206,10 @@ set -e
 [[ ! -s "$SCRIPT/first.stderr" ]]
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
      "$SCRIPT/args.x") == hello ]]
+# A script is x2c source by its shebang line, whatever its name.
+cp "$SCRIPT/args.x" "$SCRIPT/greet"
+[[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
+     "$SCRIPT/greet" there) == 'hello [there]' ]]
 run_script -v "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/warm.stderr"
 ! grep -Eq '^x2c: (translate|preprocess|compile|link) ' "$SCRIPT/warm.stderr"
 grep -q '^x2c: run ' "$SCRIPT/warm.stderr"

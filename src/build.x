@@ -56,7 +56,7 @@ typedef struct Build {
    is part of incremental cache identity. */
 static String _key(String path) {
   String stem = Path.stem(path);
-  return %"$stem-%08x".printf(String.hash(path));
+  return %"$stem-%08x".printf(path.hash());
 }
 
 /* Every incremental fingerprint starts with the state format, project or
@@ -199,7 +199,7 @@ static void _validate_input(String input) {
     x2c_driver_error(%"input is a directory: $input");
   if (!S_ISREG(info.st_mode))
     x2c_driver_error(%"input is not a regular file: $input");
-  if (!(input.endswith(".x") || input.endswith(".c") ||
+  if (!(x2c_source_file(input) || input.endswith(".c") ||
         input.endswith(".o") || input.endswith(".a")))
     x2c_driver_error(%"unsupported build input: $input");
 }
@@ -217,7 +217,7 @@ Build CliRequest.prepare(CliRequest c) {
   foreach (String input, c.inputs) {
     input_count++;
     _validate_input(input);
-    if (input.endswith(".x") || input.endswith(".c")) compilable++;
+    if (x2c_source_file(input) || input.endswith(".c")) compilable++;
     if (c.kind == <static-lib> && input.endswith(".a"))
       x2c_driver_error(
         %"cannot nest an archive in a static library: $input");
@@ -247,10 +247,10 @@ Build CliRequest.prepare(CliRequest c) {
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
-    state.output = %"${Path.stem(c.inputs.car().string())}.o";
+    state.output = %"${Path.stem(c.inputs.car())}.o";
   else if (c.kind == <static-lib>) {
     String stem = c.inputs ?
-                  Path.stem(c.inputs.car().string()) : "target";
+                  Path.stem(c.inputs.car()) : "target";
     state.output = %"lib$stem.a";
   }
   else state.output = "a.out";
@@ -281,14 +281,13 @@ Build CliRequest.prepare(CliRequest c) {
     if (state.state_root) _require_directory(state.state_root);
   }
   foreach (String input, c.inputs) {
-    if (input.endswith(".x")) state.xlat_n++;
+    if (x2c_source_file(input)) state.xlat_n++;
     if (input.endswith(".c")) state.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
       state.native_inputs.push(input);
   }
   String runtime_lib = state.toolchain.runtime_lib;
-  if (!c.compile_only && c.kind == <executable> &&
-      access(runtime_lib, R_OK))
+  if (!c.compile_only && c.kind == <executable> && access(runtime_lib, R_OK))
     x2c_driver_error(%"matching x2c runtime is unavailable: $runtime_lib");
   return state;
 }
@@ -400,9 +399,14 @@ static void _package_link_flags(Build state, String name, String path) {
 static void Build._link_packages(Build state, String input, String directory) {
   List roots = state.request.package_roots();
   if (!roots) return;
+  char buffer[PATH_MAX];
+  String self = realpath(input, buffer) ? %"$buffer" : input;
   String own = _package_source_directory(roots, input);
   String depfile = %"$directory/${Path.stem(input)}.d";
   foreach (String dependency, _state_dep_inputs(depfile)) {
+    // A unit under a package directory that is not the package's own
+    // source, such as a script kept beside it, consumes nothing by itself.
+    if (dependency == self || dependency == input) continue;
     String package = _package_directory(roots, dependency);
     if (!package || (own && package == own)) continue;
     String builds = %"$package/builds";
@@ -478,7 +482,7 @@ typedef struct CcJob {
 
 static uint64_t _action_fingerprint(
   Build state, ToolAction action, List inputs, int *ok) {
-  String tool = action.arguments ? action.arguments.car().string() : NULL;
+  String tool = action.arguments ? action.arguments.car() : NULL;
   uint64_t hash = _state_base(state.request, tool, ok);
   hash = _state_text(hash, action.phase);
   hash = _state_list(hash, action.arguments);
@@ -488,32 +492,32 @@ static uint64_t _action_fingerprint(
 
 /* Returns -1 when preprocessing starts a compile in the same job slot. */
 static int _finish_compile(Build state, CcJob *pending) {
-  int status = pending->execution.wait();
-  if (pending->preprocessed) {
+  int status = pending.execution.wait();
+  if (pending.preprocessed) {
     int ok = !status;
-    String preprocessed = pending->preprocessed;
+    String preprocessed = pending.preprocessed;
     if (ok)
-      pending->fingerprint = _action_fingerprint(
-        state, pending->action, %($preprocessed), &ok);
-    unlink(pending->preprocessed);
-    pending->preprocessed = NULL;
+      pending.fingerprint = _action_fingerprint(
+        state, pending.action, %($preprocessed), &ok);
+    unlink(pending.preprocessed);
+    pending.preprocessed = NULL;
     if (!ok) return 1;
-    if (!access(pending->object, R_OK) && !access(pending->depfile, R_OK) &&
-        _state_matches(pending->state_path, pending->fingerprint)) {
+    if (!access(pending.object, R_OK) && !access(pending.depfile, R_OK) &&
+        _state_matches(pending.state_path, pending.fingerprint)) {
       if (state.request.verbose)
-        fprintf(stderr, "x2c: up-to-date compile %s\n", pending->source);
+        fprintf(stderr, "x2c: up-to-date compile %s\n", pending.source);
       state.cc_cached++;
     }
     else {
-      pending->execution = pending->action.start();
+      pending.execution = pending.action.start();
       return -1;
     }
   }
   else if (!status && state.state_root && !state.request.dry_run)
-    _state_write(pending->state_path, pending->fingerprint);
+    _state_write(pending.state_path, pending.fingerprint);
   if (!status) {
     state.cc_done++;
-    report_progress(<compile>, state.cc_done, state.cc_n, pending->source);
+    report_progress(<compile>, state.cc_done, state.cc_n, pending.source);
   }
   return status != 0;
 }
@@ -604,17 +608,14 @@ static int _compile_sources(Build b) {
       x2c_driver_error("cannot read compilation working directory");
     b.compile_directory = String.new(current);
   }
-  CcJob *running =
-    Scope.calloc(b.request.jobs, sizeof(CcJob));
+  CcJob *running = Scope.calloc(b.request.jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
-  b.cc_n = b.c_sources.length;
+  b.cc_n = b.c_sources.len();
   b.cc_start = report_now_us();
-  foreach (Var value, b.c_sources) {
-    String source = value;
+  foreach (String source, b.c_sources) {
     report_progress(<compile>, b.cc_done, b.cc_n, source);
     String key = _key(source), object = %"${b.obj_root}/$key.o";
-    if (b.request.compile_only && !b.request.inputs.cdr() &&
-        b.output)
+    if (b.request.compile_only && !b.request.inputs.cdr() && b.output)
       object = b.output;
     String depfile = %"${b.dep_root}/$key.d", Array include_dirs = [];
     if (source.startswith(b.gen_root))
@@ -628,8 +629,7 @@ static int _compile_sources(Build b) {
     if ((void *) b.compile_commands != NULL)
       b.compile_commands.push(_compile_command(b, action, source, object));
     String state_path =
-      b.state_root ?
-      %"${b.state_root}/c-${_key(source)}" : NULL;
+      b.state_root ? %"${b.state_root}/c-${_key(source)}" : NULL;
     if (_finish_compiles(b, running, &running_count, 0)) {
       failed = 1;
       break;
@@ -668,8 +668,7 @@ static List _native_action_inputs(Build state) {
   Array inputs = [];
   foreach (Var value, state.objects) inputs.push(value);
   foreach (Var value, state.native_inputs) inputs.push(value);
-  List result = inputs.list_free();
-  return result;
+  return inputs.list_free();
 }
 
 // Native flags are ordered: an explicit -g0 can override a profile's -g.
@@ -706,7 +705,7 @@ static void Build._place_unit_headers(Build b) {
     String directory = %"${b.gen_root}/${_key(unit)}";
     String stem = Path.stem(unit);
     List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
-    List outputs = %(${%"$directory/$stem.h"} ${%"$directory/$stem.c"});
+    List outputs = %("$directory/$stem.h" "$directory/$stem.c");
     foreach (String generated, outputs)
       foreach (String line, Path.read_text(generated).split_lines(0)) {
         String text = line.strip(" \t");
@@ -721,7 +720,7 @@ static void Build._place_unit_headers(Build b) {
             continue;
           Path placed = Path.join(directory, target);
           placed.dirname().make_dirs();
-          Path.copy_file(header.str(), placed);
+          Path.copy_file(header, placed);
           break;
         }
       }
@@ -756,8 +755,7 @@ int Build.finish(Build b) {
   String state_path =
     b.state_root && b.request.kind == <static-lib> ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
-  if (state_path && !b.request.dry_run &&
-      !access(b.output, R_OK)) {
+  if (state_path && !b.request.dry_run && !access(b.output, R_OK)) {
     int ok = 1;
     uint64_t hash = _action_fingerprint(b, action, inputs, &ok);
     if (ok && _state_matches(state_path, hash)) {
@@ -801,9 +799,7 @@ int Build.finish(Build b) {
 }
 
 static int _all_cached(Build state) {
-  if (state.xlat_n &&
-      state.xlat_cached != state.xlat_n)
-    return 0;
+  if (state.xlat_n && state.xlat_cached != state.xlat_n) return 0;
   if (state.cc_n && state.cc_cached != state.cc_n) return 0;
   if (!state.request.compile_only && !state.final_cached) return 0;
   return state.xlat_n || state.cc_n || state.final_cached;
@@ -815,21 +811,20 @@ void Build.report_success(Build b) {
   unsigned long elapsed = report_now_us() - b.started_at;
   String duration = report_duration(elapsed);
   String cache = _all_cached(b) ? " (up to date)" : "";
-  String label = b.request.label ?
-                 %" target '${b.request.label}'" : "";
+  String label = b.request.label ? %" target '${b.request.label}'" : "";
   String result;
   if (b.request.compile_only) {
-    if (b.objects.length == 1)
-      result =
-        %"Built$label object ${b.output} in $duration$cache";
-    else
-      result =
-        %"Built$label ${b.objects.length} object files in " +
-        %"${b.obj_root} in $duration$cache";
+    int objects = b.objects.len();
+    if (objects == 1)
+      result = %"Built$label object ${b.output} in $duration$cache";
+    else {
+      String tail = %"${b.obj_root} in $duration$cache";
+      result = %"Built$label $objects object files in $tail";
+    }
   }
   else {
-    String kind = b.request.kind == <static-lib> ?
-                  "static library" : "executable";
+    String kind =
+      b.request.kind == <static-lib> ? "static library" : "executable";
     result = %"Built$label $kind ${b.output} in $duration$cache";
   }
   report_line(<success>, result);
@@ -839,16 +834,12 @@ void Build.report_success(Build b) {
     String h_noun = b.xlat_n == 1 ? "header" : "headers";
     report_line(
       <muted>,
-      %"  Generated ${b.xlat_n} $c_noun and " +
-      %"${b.xlat_n} $h_noun ($size)"
-    );
+      %"  Generated ${b.xlat_n} $c_noun and ${b.xlat_n} $h_noun ($size)");
   }
   if (b.cc_n) {
     int count = b.request.jobs;
     String jobs = count == 1 ? "1 job" : %"$count jobs";
-    report_line(
-      <muted>,
-      %"  Compiled with ${b.toolchain.cc} using $jobs");
+    report_line(<muted>, %"  Compiled with ${b.toolchain.cc} using $jobs");
   }
   if (!b.request.compile_only) {
     if (b.request.kind == <static-lib>)
@@ -933,8 +924,7 @@ static uint64_t _script_fingerprint(
   hash = _state_list(hash, c.cpp_args);
   hash = _state_list(hash, c.cc_args);
   hash = _state_list(hash, c.ld_args);
-  hash = _state_text(
-    hash, c.source_map ? "source-map" : "generated-lines");
+  hash = _state_text(hash, c.source_map ? "source-map" : "generated-lines");
   foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT")) {
     const char *value = getenv(name);
     hash = _state_text(hash, value ? String.new(value) : NULL);
@@ -962,7 +952,7 @@ static List Build._script_directories(Build b, List prerequisites) {
     for (List p = args; p; p = p.cdr()) {
       String arg = p.car();
       foreach (Var flag, %("-I" "-iquote" "-isystem" "-idirafter" "-L")) {
-        String spelling = flag.str();
+        String spelling = flag;
         if (!arg.startswith(spelling)) continue;
         if (arg.len() > spelling.len()) directories.push(arg[spelling.len():]);
         else if (p.cdr()) directories.push(p.cadr());
@@ -976,7 +966,7 @@ static List Build._script_directories(Build b, List prerequisites) {
     directories.push(directory);
   Array unique = [];
   foreach (Var value, directories) {
-    String directory = Path.absolute(value.str());
+    String directory = Path.absolute(value);
     if (directory.startswith(Path.absolute(b.work_dir))) continue;
     String entry = directory.endswith("/") ? directory : %"$directory/";
     if (!unique.contains(entry)) unique.push(entry);
@@ -991,15 +981,14 @@ static List Build._script_directories(Build b, List prerequisites) {
 */
 List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
-  String translation =
-    %"${b.gen_root}/${_key(script)}/${Path.stem(script)}.d";
-  List excluded = %(${%"$root/lib/"} ${%"$root/include/"} ${%"$root/builds/"})
-    .append(b.request.package_roots().map(%!(dir) => %"${dir.str()}/"));
+  String translation = %"${b.gen_root}/${_key(script)}/${Path.stem(script)}.d";
+  List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
+    .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   Array helpers = [];
   foreach (String path, _state_dep_inputs(translation)) {
-    if (!path.endswith(".x") || path == script || helpers.contains(path))
+    if (!x2c_source_file(path) || path == script || helpers.contains(path))
       continue;
-    if (excluded.any(%!(prefix) => path.startswith(prefix.str()))) continue;
+    if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     helpers.push(path);
     b.xlat_n++;
   }
@@ -1022,8 +1011,7 @@ void Build.publish_script(Build b, String executable) {
   }
   String input = b.request.inputs.car();
   Array prerequisites = [];
-  String translation =
-    %"${b.gen_root}/${_key(input)}/${Path.stem(input)}.d";
+  String translation = %"${b.gen_root}/${_key(input)}/${Path.stem(input)}.d";
   foreach (String path, _state_dep_inputs(translation))
     prerequisites.push(path);
   foreach (String source, b.c_sources)

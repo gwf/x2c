@@ -300,14 +300,9 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
 static List _prepend_array(Array values, List tail) {
   Var *data = values.bytes;
   for (size_t i = values.len(); i; i--) {
-    List next = cons(data[i - 1], tail);
-    tail = next;
+    tail = cons(data[i - 1], tail);
   }
   return tail;
-}
-
-static void _append_value(Array values, Var value) {
-  values.push(value);
 }
 
 /** Returns the concatenation of `a` and `b`.
@@ -321,16 +316,15 @@ Self List.append(Self a, Self b) {
   if (!a) return b;
   if (!b) return a;
   Array values = $auto([]);
-  foreach (Var value, a) _append_value(values, value);
-  List result = _prepend_array(values, b);
-  return result;
+  foreach (Var value, a) values.push(value);
+  return _prepend_array(values, b);
 }
 
 static List _concat_lists(Array lists) {
   List result = NULL;
   for (int i = (int) lists.len() - 1; i >= 0; i--) {
-    List current = lists[i], next = current.append(result);
-    result = next;
+    List current = lists[i];
+    result = current.append(result);
   }
   return result;
 }
@@ -340,9 +334,8 @@ static List _concat_n_va(unsigned list_count, va_list ap) {
     raise %(size-limit (owner "List.concat_n") (count $list_count));
   Array lists = $auto([]);
   for (unsigned i = 0; i < list_count; i++)
-    _append_value(lists, va_arg(ap, List));
-  List result = _concat_lists(lists);
-  return result;
+    lists.push(va_arg(ap, List));
+  return _concat_lists(lists);
 }
 
 /** Returns the concatenation of exactly `list_count` `List` arguments.
@@ -364,10 +357,9 @@ static List _n_va(unsigned element_count, va_list ap) {
   for (unsigned i = 0; i < element_count; i++) {
     Var value = va_arg(ap, Var);
     if (value is void) raise %(void-op (owner "List.list_n") (index $i));
-    _append_value(values, value);
+    values.push(value);
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Builds a `List` from exactly `element_count` `Var` arguments.
@@ -392,8 +384,7 @@ List List.list_n(unsigned element_count, ...) {
 Self List.reverse(Self lst) {
   List rev = NULL;
   foreach (Var value, lst) {
-    List next = cons(value, rev);
-    rev = next;
+    rev = cons(value, rev);
   }
   return rev;
 }
@@ -403,12 +394,12 @@ Var List.last(List lst) {
   if (!lst) return void;
   List tail;
   while ((tail = lst.cdr())) lst = tail;
-  return car(lst);
+  return lst.car();
 }
 
 /** Returns the first index of `key`, or -1 when absent. */
 int List.index(List lst, Var key) {
-  for (int index = 0; lst; lst = cdr(lst), index++)
+  for (int index = 0; lst; lst = lst.cdr(), index++)
     if (lst.car == key) return index;
   return -1;
 }
@@ -419,7 +410,7 @@ int List.contains(List lst, Var key) => lst.index(key) != -1;
 /** Returns the number of cells in `lst` in O(n) time. */
 int List.len(List lst) {
   int len = 0;
-  for (List l = lst; l; l = cdr(l)) len++;
+  for (List l = lst; l; l = l.cdr()) len++;
   return len;
 }
 
@@ -437,10 +428,9 @@ List List.map(List lst, Func fn) {
   Array values = $auto([]);
   foreach (Var value, lst) {
     FuncArg arguments[1] = { FuncArg.value(value) };
-    _append_value(values, fn.apply(1, arguments));
+    values.push(fn.apply(1, arguments));
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Folds `fn` over the elements of `lst` from the left, starting at `seed`.
@@ -533,12 +523,11 @@ int List.all(List lst, Func pred) {
     constructing the result.
 */
 Self List.sort(Self lst) {
-  if (!lst || !cdr(lst)) return lst;
+  if (!lst || !lst.cdr()) return lst;
   Array values = $auto([]);
-  foreach (Var value, lst) _append_value(values, value);
+  foreach (Var value, lst) values.push(value);
   values.sort();
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns a stable sorted copy using `Array.sort_with`'s callback contract.
@@ -546,11 +535,11 @@ Self List.sort(Self lst) {
     a callback. Raises: allocation and the comparator's ordinary causes.
 */
 Self List.sort_with(Self lst, Func compare) {
-  if (!lst || !cdr(lst)) return lst;
+  if (!lst || !lst.cdr()) return lst;
   Array values = $auto([]);
   foreach (Var value, lst) values.push(value);
   values.sort_with(compare);
-  return values.list();
+  return values;
 }
 
 /** Returns a stable sorted copy using `Array.sort_by`'s callback contract.
@@ -563,7 +552,7 @@ Self List.sort_by(Self lst, Func key) {
   Array values = $auto([]);
   foreach (Var value, lst) values.push(value);
   values.sort_by(key);
-  return values.list();
+  return values;
 }
 
 /** Returns a new `List` holding the elements of `arr` in order.
@@ -595,7 +584,7 @@ List Array.list_free(Array arr) {
 */
 Array List.array(List lst) {
   Array array = [];
-  foreach (Var value, lst) _append_value(array, value);
+  foreach (Var value, lst) array.push(value);
   return array;
 }
 
@@ -609,7 +598,7 @@ Array List.array(List lst) {
     `<size-limit>` while constructing the result.
 */
 Self List.unique(Self lst) {
-  if (!lst || !cdr(lst)) return lst;
+  if (!lst || !lst.cdr()) return lst;
   $scope() {
     struct Iter iter_storage, unique_storage;
     Iter iter = lst.iter(&iter_storage);
@@ -635,10 +624,9 @@ List List.zip_with(List a, List b, Func fn) {
       item = fn.apply(2, arguments);
     }
     else item = %($left $right);
-    _append_value(values, item);
+    values.push(item);
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Maps `fn` over aligned pairs from `a` and `b`.
@@ -661,7 +649,7 @@ static Var _sublis_node(List alist, Var node) {
   Array items = $auto([]);
   foreach (Var source, list) {
     Var item = _sublis_node(alist, source);
-    _append_value(items, item);
+    items.push(item);
   }
   List rebuilt = items;
   return rebuilt;
@@ -676,7 +664,7 @@ static Var _sublis_node(List alist, Var node) {
 */
 List List.sublis(List alist, List tree) {
   if (!tree) return NULL;
-  return _sublis_node(alist, tree).list();
+  return _sublis_node(alist, tree);
 }
 
 /** Flattens one level of nested `List`s into a canonical result.
@@ -691,18 +679,17 @@ Self List.flatten(Self lst) {
   foreach (Var head, lst) {
     if (head is <list>) {
       List inner = head;
-      foreach (Var item, inner) _append_value(values, item);
+      foreach (Var item, inner) values.push(item);
     }
-    else _append_value(values, head);
+    else values.push(head);
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 static void _flatten_all_collect(Array values, List lst) {
   foreach (Var head, lst) {
-    if (head is <list>) _flatten_all_collect(values, head.list());
-    else _append_value(values, head);
+    if (head is <list>) _flatten_all_collect(values, head);
+    else values.push(head);
   }
 }
 
@@ -714,15 +701,14 @@ Self List.flatten_all(Self lst) {
   if (!lst) return lst;
   Array values = $auto([]);
   _flatten_all_collect(values, lst);
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns the shared tail beginning `n` cells in.
     Returns `nil` past the end and `list` itself when `n` is nonpositive.
 */
 Self List.nth_cdr(Self list, int n) {
-  while (n-- > 0 && list) list = cdr(list);
+  while (n-- > 0 && list) list = list.cdr();
   return list;
 }
 
@@ -766,7 +752,7 @@ Var List.assoc(List list, Var key) {
     key uses `List.assoc`. Either absent form returns `void`.
 */
 Var List.get(List list, Var key) {
-  if (key.kind() == <integer>) return list[key.integer()];
+  if (key.kind() == <integer>) return list[key];
   return list.assoc(key);
 }
 
@@ -797,12 +783,11 @@ Self List.tail(Self list, unsigned count) {
 Self List.head(Self list, unsigned count) {
   List original = list, Array values = $auto([]);
   while (list && count--) {
-    _append_value(values, list.car);
+    values.push(list.car);
     list = list.cdr();
   }
   if (!list) return original;
-  List result = values;
-  return result;
+  return values;
 }
 
 static List _collect_subseq(List list, int start, int step, int span) {
@@ -810,11 +795,10 @@ static List _collect_subseq(List list, int start, int step, int span) {
   for (int i = 0; list && i < start; i++) list = list.cdr();
   Array values = $auto([]);
   while (list && span--) {
-    _append_value(values, list.car);
+    values.push(list.car);
     for (int i = 0; list && i < step; i++) list = list.cdr();
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns every `step`th element from `start` up to exclusive `stop`.
@@ -846,9 +830,8 @@ Self List.getslice(Self list, int start, int stop, int step) {
   Array source = $auto(list);
   Array values = $auto([]);
   for (int i = 0; i < span; i++)
-    _append_value(values, source[start + i * step]);
-  List result = values;
-  return result;
+    values.push(source[start + i * step]);
+  return values;
 }
 
 static int _unpack_n_va(
@@ -860,13 +843,13 @@ static int _unpack_n_va(
   while (src && count < destination_count) {
     if (list_outputs) {
       List *dst = va_arg(ap, List *);
-      if (dst) *dst = car(src);
+      if (dst) *dst = src.car();
     }
     else {
       Var *dst = va_arg(ap, Var *);
-      if (dst) *dst = car(src);
+      if (dst) *dst = src.car();
     }
-    src = cdr(src);
+    src = src.cdr();
     count++;
   }
   return count;
@@ -934,10 +917,10 @@ int List.equal(List a, List b) {
 int List.compare(List a, List b) {
   if ((void *) a == (void *) b) return 0;
   while (a && b) {
-    int c = car(a).compare(car(b));
+    int c = a.car().compare(b.car());
     if (c) return c;
-    a = cdr(a);
-    b = cdr(b);
+    a = a.cdr();
+    b = b.cdr();
   }
   if (a == b) return 0;
   return a ? 1 : -1;
@@ -956,10 +939,10 @@ static void _serialize_list_line(Var elem, Buffer buf, Symbol mode) {
   if (!path.enter(lst)) return (void) elem.write_pointer_repr(buf);
   defer path.leave();
   buf.write("(");
-  if (car(lst) is not <list>) buf.pad();
+  if (lst.car() is not <list>) buf.pad();
   buf.push();
-  for (List l = lst; l; l = cdr(l)) {
-    _serialize_list_line(car(l), buf, mode);
+  for (List l = lst; l; l = l.cdr()) {
+    _serialize_list_line(l.car(), buf, mode);
     if (l.cdr()) buf.write(" ");
   }
   if (buf.get(-1) != ')') buf.pad();
@@ -1001,10 +984,10 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode) {
   defer path.leave();
   if (buf.pos - buf.tabstop() > 5) buf.newline_indent();
   buf.write("(");
-  if (car(lst) is not <list>) buf.pad();
+  if (lst.car() is not <list>) buf.pad();
   buf.push();
-  for (List l = lst; l; l = cdr(l)) {
-    _serialize_nested_list(car(l), buf, mode);
+  for (List l = lst; l; l = l.cdr()) {
+    _serialize_nested_list(l.car(), buf, mode);
     if (l.cdr()) buf.write(" ");
   }
   if (buf.get(-1) != ')') buf.pad();
@@ -1024,7 +1007,7 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode) {
 String List.str(List lst) {
   Buffer buf = $auto(Buffer.new(0));
   lst.write_str(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Appends the `List` display text to `out`, using each element's `write_str`.
@@ -1052,7 +1035,7 @@ Buffer List.write_str(List lst, Buffer out) {
 String List.repr(List lst) {
   Buffer buf = $auto(Buffer.new(0));
   lst.write_repr(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Appends the readable representation of `List` to a `Buffer`. */
@@ -1104,8 +1087,7 @@ Iter List.iter(List lst, Iter dest) {
 List Iter.list(Iter iter) {
   Array values = $auto([]);
   foreach (Var item, iter) values.push(item);
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns the elements `pred` accepts by ordinary `Var` truthiness.
@@ -1120,8 +1102,7 @@ Self List.filter(Self lst, Func pred) {
   Array values = $auto([]);
   foreach (Var value, lst) {
     FuncArg arguments[1] = { FuncArg.value(value) };
-    if (pred.apply(1, arguments)) _append_value(values, value);
+    if (pred.apply(1, arguments)) values.push(value);
   }
-  List result = values;
-  return result;
+  return values;
 }

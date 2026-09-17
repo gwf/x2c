@@ -60,7 +60,7 @@ JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
 
 /** Returns `true` or `false`. */
-String JsonBool.repr(JsonBool value) => value.str();
+String JsonBool.repr(JsonBool value) => value;
 
 /** Returns nonzero for `true`. */
 int JsonBool.truth(JsonBool value) => value.value != 0;
@@ -442,7 +442,8 @@ static void _write_string(Buffer out, String text) {
     else out.printf("\\u%04x", byte);
     run = ++at;
   }
-  out.write_len(text + run, length - run);
+  // The empty String is NULL, so an empty tail must not offset it.
+  if (run < length) out.write_len(text + run, length - run);
   out.write_char('"');
 }
 
@@ -494,7 +495,7 @@ static void _write_elements(Buffer out, Var sequence, int pretty, int depth) {
 static void _write_members(Buffer out, Map object, int pretty, int depth) {
   Array names = $auto([]);
   foreach (Var (name, member), object) {
-    if (name is not <string> && name is not <symbol>) {
+    if (name is not <string> && !name.is_atom()) {
       Symbol tag = name.tag();
       raise %(bad-types (operation "Var.json") (want "String object key")
               (tag $tag));
@@ -538,7 +539,7 @@ static void _write(Buffer out, Var value, int pretty, int depth) {
 static String _json(Var value, int pretty) {
   Buffer out = $auto(Buffer.new(0));
   _write(out, value, pretty, 0);
-  return out.str();
+  return out;
 }
 
 /** Returns `value` as compact JSON text.
