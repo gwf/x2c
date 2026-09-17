@@ -327,8 +327,7 @@ List Compiler.resolve_postfix_member(
         List imported = rejected
           ? NULL : _imported_method(c, method, receiver_type);
         if (imported) return imported;
-        List resolved =
-          c.resolve_protocol_method(ctype, field.car().str());
+        List resolved = c.resolve_protocol_member(ctype, field.car().str());
         if (resolved) {
           (List method_binding, Type method_signature) = resolved;
           return %(method $method_binding $method_signature);

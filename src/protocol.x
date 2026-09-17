@@ -1581,13 +1581,8 @@ static void _report_generated_collision(
 }
 
 static List _resolve_protocol_member(
-  Compiler compiler, Type participant, String member_name, int method_path) {
-  // A const or volatile receiver adopts exactly what its unqualified type
-  // adopts, so conformance is keyed on the unqualified participant.
-  participant = participant.canonicalize();
-  List cache_key =
-    %("protocol-member" ${method_path ? <method> : <operator>}
-      $participant $member_name);
+  Compiler compiler, Type participant, String member_name) {
+  List cache_key = %("protocol-member" $participant $member_name);
   return _proto_cached(compiler, cache_key, %!(Compiler &compiler) => {
     List protocols = _ordered_occurrences(compiler);
     List base_ancestry = _ancestry(compiler, participant);
@@ -1597,7 +1592,6 @@ static List _resolve_protocol_member(
       match (decision)
         case %(owner ? ? ?signature ?): {
           String source = _member_spelling(current, member_name);
-          if (source == compiler.fn_name) return %();
           List binding = compiler.sym.reference(%($source), NULL);
           return %($binding $signature);
         }
@@ -1623,7 +1617,6 @@ static List _resolve_protocol_member(
       String source = %"${base_name}_$member_name";
       Type signature = compiler.sym.get(%($source));
       if (!signature || !signature.is_function()) continue;
-      if (source == compiler.fn_name) return %();
       List binding = compiler.sym.reference(%($source), NULL);
       return %($binding $signature);
     }
@@ -1634,13 +1627,11 @@ static List _resolve_protocol_member(
       match (row)
         case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
           if (status == <implmntd>) {
-            if (source == compiler.fn_name) return %();
             List binding = compiler.sym.reference(%($source), NULL);
             return %($binding $signature);
           }
           if (status == <native>) {
             String binding_name = _member_spelling(current, member_name);
-            if (binding_name == compiler.fn_name) return %();
             List binding = compiler.sym.reference(%($binding_name), NULL);
             return %($binding $signature);
           }
@@ -1651,23 +1642,22 @@ static List _resolve_protocol_member(
   });
 }
 
-/** Resolves an operator-facing protocol member for `participant`.
+/** Resolves a protocol member for `participant`.
     Returns a `(binding signature)` pair for the selected implementation or
     null when no eligible resolved member exists; positive and negative
-    results are cached.
+    results are cached. Inside the selected implementation itself the result
+    is null, so the member's own body keeps the native operation.
 */
 List Compiler.resolve_protocol_member(
-  Compiler compiler, Type participant, String member_name) =>
-    _resolve_protocol_member(compiler, participant, member_name, 0);
-
-/** Resolves a method-facing protocol member for `participant`.
-    Returns a `(binding signature)` pair for the selected implementation or
-    null when no eligible resolved member exists; positive and negative
-    results are cached separately from operator lookup.
-*/
-List Compiler.resolve_protocol_method(
-  Compiler compiler, Type participant, String member_name) =>
-    _resolve_protocol_member(compiler, participant, member_name, 1);
+  Compiler compiler, Type participant, String member_name) {
+  // A const or volatile receiver adopts exactly what its unqualified type
+  // adopts, so conformance is keyed on the unqualified participant.
+  List resolved = _resolve_protocol_member(
+    compiler, participant.canonicalize(), member_name);
+  if (!resolved) return NULL;
+  String spelling = binding_identity_spelling(resolved.car());
+  return spelling == compiler.fn_name ? NULL : resolved;
+}
 
 /** Returns a generated helper for a direct protocol-backed update.
     The resolved member must have exactly `(Participant, RHS) -> Participant`.
