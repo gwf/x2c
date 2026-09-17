@@ -1,5 +1,0 @@
-3 5 3 9
-src/parse.x lib/tokenizer.x
-8 7
-5 build/main.o
-1 1

@@ -1,5 +1,0 @@
-build.o src/main
-main.h include/build
-build.c build/main.c
-.c.x .xmain
-build.d

@@ -1,0 +1,19 @@
+3 5 3 9
+src/parse.x lib/tokenizer.x
+8 7
+5 build/main.o
+1 1
+build.o src/main
+main.h include/build
+build.c build/main.c
+.c.x .xmain
+build.d
+1 1 1 1 1 1
+0 0 0
+0 0 1
+NULL NULL NULL
+alpha alpha alpha
+NULL NULL NULL
+ NULL NULL NULL text
+ NULL NULL NULL text
+ NULL NULL NULL text
