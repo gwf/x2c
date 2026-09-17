@@ -19,6 +19,12 @@ static int _string_test_nul(char ch) {
   return 0;
 }
 
+/* A nonzero result whose low byte is NUL: the byte, not the `int`, decides. */
+static int _string_wide_nul(char ch) {
+  (void) ch;
+  return 256;
+}
+
 typedef int (*StringCharFunction)(char);
 
 static int _string_saw_char;
@@ -228,10 +234,13 @@ static void string_invalid_bytes_transfer(void) {
 
   try "abc".map(_string_test_nul);
   catch %(bad-result *): caught++;
+  /* 256 is nonzero but truncates to NUL; the stored byte decides. */
+  try "abc".map(_string_wide_nul);
+  catch %(bad-result *): caught++;
 
   try String.pool_release();
   catch %(bad-state *): caught++;
-  EXPECT_INT_EQ(caught, 6);
+  EXPECT_INT_EQ(caught, 7);
 }
 
 static void _callback_transfer_round(int measure) {

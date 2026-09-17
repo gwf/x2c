@@ -889,11 +889,12 @@ String String.filter(String str, Func fn) {
 }
 
 /** Returns `str` with `fn` applied to every byte.
-    Each byte is boxed from `char` and passed by value. Each result is checked
-    and converted to `int` before byte assignment. A null or empty `str`, or a
-    null `fn`, returns `str` without invoking the callback. Otherwise `fn` is
-    called once per byte from left to right and is not retained. Each result
-    must convert to a non-NUL byte.
+    Each byte is boxed from `char` and passed by value. Each result is
+    converted to `int` and truncated to the byte that is stored, and that byte
+    is what is checked, so a result such as 256 raises rather than storing NUL.
+    A null or empty `str`, or a null `fn`, returns `str` without invoking the
+    callback. Otherwise `fn` is called once per byte from left to right and is
+    not retained. Each result must convert to a non-NUL byte.
     Raises: whatever `Func.apply`, `fn`, or result conversion raises,
     `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
     the result cannot be allocated.
@@ -905,7 +906,7 @@ String String.map(String str, Func fn) {
   defer if (!done) string.free();
   char *out = string, const char *src = str;
   for (int i = 0; i < n; i++) {
-    int ch = _apply(fn, src[i]);
+    char ch = (char) _apply(fn, src[i]);
     if (!ch) {
       raise %(bad-result (owner "String.map") (index $i));
     }
