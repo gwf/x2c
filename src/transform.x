@@ -194,14 +194,14 @@ static List _lower_printf_vars(Compiler c, List ast) {
   const PrintfFn *info = callee.printf_family();
   if (!info) return ast;
   List args = args_node.cdr();
-  if (!_printf_has_var(c, args, info->first_arg)) return ast;
+  if (!_printf_has_var(c, args, info.first_arg)) return ast;
 
   Array values = [];
   foreach (Var arg, args) values.push(arg);
-  String family = (String) info->name;
-  if (info->fmt_arg >= values.len())
+  String family = (String) info.name;
+  if (info.fmt_arg >= values.len())
     _printf_error(c, family, "call has no format argument");
-  List format_arg = values[info->fmt_arg], int raw = 0;
+  List format_arg = values[info.fmt_arg], int raw = 0;
   String format = _printf_static_format(c, format_arg, &raw);
   if (!format)
     _printf_error(
@@ -209,7 +209,7 @@ static List _lower_printf_vars(Compiler c, List ast) {
       "Var arguments require a single static format literal");
 
   int cursor = raw ? 1 : 0, end = raw ? format.len() - 1 : format.len();
-  int value_index = info->first_arg;
+  int value_index = info.first_arg;
   while (cursor < end) {
     if (raw && format[cursor] == '\\') {
       cursor += cursor + 1 < end ? 2 : 1;
@@ -1167,7 +1167,7 @@ static int _defer_needs_landing(List ast) {
 static int _defer_type_hoistable(Compiler compiler, Type type) {
   if (!type) return 0;
   Type flat = type.flatten_all();
-  if (flat.contains(<register>) || flat.contains(<dim>)) return 0;
+  if (<register> in flat || <dim> in flat) return 0;
   Type base = type.base_type();
   if (!base) return 0;
   Var first = base.car();
@@ -1251,7 +1251,7 @@ static List _defer_rewrite_captures(
       if (captures.try_get(binding, &field_var)) {
         String field_name = binding_identity_spelling(field_var);
         Type type = captured_type, target = type;
-        if (written.contains(binding) &&
+        if (binding in written &&
             !type.flatten_all().contains(<volatile>))
           target = cons(<volatile>, type);
         Type pointer = cons(<*>, target);
@@ -1633,7 +1633,7 @@ static Ast _node(Compiler c, Ast ast) {
       // An anchored statement that already reached its fixed point yields
       // itself. Recording that keeps the driver's later passes from
       // rebuilding the whole unit to rediscover it.
-      if (c.fixed.contains(ast)) return ast;
+      if (ast in c.fixed) return ast;
       int occurrence = origin;
       List transformed = NULL;
       $let(c.origin, occurrence) {

@@ -24,7 +24,7 @@ static String _normalize_file(Compiler compiler, String file) {
   char path[PATH_MAX], String root = compiler.root_dir;
   if (realpath(file, path) ||
       (root && file[0] != '/' && realpath(%"$root/$file", path)))
-    file = %"$path";
+    file = path;
   return compiler.display_path(file);
 }
 
@@ -49,7 +49,7 @@ static void _mark_private(
 static int _declaration_is_private(
   Compiler compiler, Symbol kind, String name) {
   (void) kind;
-  return compiler.sym.file_statics().contains(%($name));
+  return %($name) in compiler.sym.file_statics();
 }
 
 static void _record_declaration_binding_visibility(
@@ -340,7 +340,7 @@ String Compiler.reverse_converter_spelling(
   int split = participant.find("__");
   String package = split > 0 &&
     (compiler.package == participant[:split] ||
-     compiler.package_roots.contains(participant[:split]))
+     participant[:split] in compiler.package_roots)
       ? participant[:split] : NULL;
   String bare = package ? participant[split + 2:] : participant;
   String binding = %"${base_name}_$infix${bare.lower()}";
@@ -480,7 +480,7 @@ static List Compiler._publish_protocol_adoption(
   c._install_protocol_adoption(
     base, participant, storage, representation, tag, tag_expression, location);
   // An adoption resolved when the parse began has reported its failures.
-  int resolved = c.conforms.contains(%($base $participant));
+  int resolved = %($base $participant) in c.conforms;
   c.conforms.del(%($base $participant));
   c.proto_cache = {};
   if (!c.shallow)
@@ -564,7 +564,7 @@ static String _type_variable(Var value, Map variables) {
   match (value)
     case %(?(String only)): name = only;
   if (!name) return NULL;
-  return variables.contains(name) ? name : NULL;
+  return name in variables ? name : NULL;
 }
 
 static int _unify(
@@ -1131,7 +1131,7 @@ static void _report_member_sig_conflicts(
       case %(?(String member) sig-cnflct ?(String binding)
              ?(Type expected) ? ?): {
         List dedupe = %("protocol-sig-conflict" $participant $member);
-        if (compiler.protocol_helpers.contains(dedupe)) continue;
+        if (dedupe in compiler.protocol_helpers) continue;
         compiler.protocol_helpers[dedupe] = 1;
         Type actual = _declared(compiler, binding);
         String owner = %"$base_repr($participant_repr)";
@@ -1532,7 +1532,7 @@ static void _report_generated_collision(
   (Type second_base, String second_source, Type second_expected,
    Symbol second_storage) = second.cdr();
   List dedupe = %("protocol-generated-collision" $participant $member);
-  if (compiler.protocol_helpers.contains(dedupe)) return;
+  if (dedupe in compiler.protocol_helpers) return;
   compiler.protocol_helpers[dedupe] = 1;
   int linkage_conflict = kind == <linkage>;
   String first_repr = _type_spelling(first_base);
@@ -2040,7 +2040,7 @@ static void _report_requirement(
   Compiler compiler, Type base, Type participant, List failure) {
   List dedupe =
     %("protocol-adapter-requirement" $base $participant ${failure.car()});
-  if (compiler.protocol_helpers.contains(dedupe)) return;
+  if (dedupe in compiler.protocol_helpers) return;
   compiler.protocol_helpers[dedupe] = 1;
   List row = _visible_adoption_row(compiler, base, participant);
   compiler.diagnostics.report(
@@ -2267,7 +2267,7 @@ static List _parse_associated_type(
       <protocol>, "expected associated type name", c.token, NULL);
   String name = c.token.text;
   c.next();
-  if (names.contains(name))
+  if (name in names)
     c.report_error(
       <protocol>, %"duplicate protocol type variable '$name'",
       c.token, NULL);
@@ -2316,7 +2316,7 @@ static List _parse_protocol_member(
     c.report_error(
       <protocol>, "protocol member must be a function",
       c.token, %("member:" $name));
-  if (members.contains(name))
+  if (name in members)
     c.report_error(
       <protocol>, %"duplicate protocol member '$name'",
       c.token, NULL);

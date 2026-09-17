@@ -199,11 +199,11 @@ static int _unzip_ensure(UnzipShared *shared, int column) {
     reads as exhausted without raising.
 */
 int Iter.try_next(Iter iter, Var *out) {
-  if (!iter || !out || !iter->next) return 0;
+  if (!iter || !out || !iter.next) return 0;
   /* Arrow syntax calls the stored callback. A receiver call here would
      recursively select Iter.next. */
   if (!iter->next(iter, out)) {
-    iter->next = NULL;
+    iter.next = NULL;
     return 0;
   }
   if (out[0] is void) raise %(void-op (owner "Iter.try_next"));
@@ -248,7 +248,7 @@ static int _range_up_next(Iter iter, Var *out) {
   int result = _range_raw_value(iter.state), stop = _range_raw_value(iter.obj);
   if (result > stop) return 0;
   *out = result;
-  if (result == stop) iter->next = NULL;
+  if (result == stop) iter.next = NULL;
   else iter.state = _range_raw_int(result + 1);
   return 1;
 }
@@ -257,7 +257,7 @@ static int _range_down_next(Iter iter, Var *out) {
   int result = _range_raw_value(iter.state), stop = _range_raw_value(iter.obj);
   if (result < stop) return 0;
   *out = result;
-  if (result == stop) iter->next = NULL;
+  if (result == stop) iter.next = NULL;
   else iter.state = _range_raw_int(result - 1);
   return 1;
 }
@@ -271,7 +271,7 @@ static int _range_general_next(Iter iter, Var *out) {
   long long next = (long long) result + step;
   if ((step > 0 && next > stop) || (step < 0 && next < stop) ||
       next > INT_MAX || next < INT_MIN)
-    iter->next = NULL;
+    iter.next = NULL;
   else iter.state = (int) next;
   return 1;
 }

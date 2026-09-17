@@ -169,7 +169,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
     if (!x2c_source_file(input))
       x2c_driver_error(%"translation input is not an .x file: $input");
     String stem = Path.stem(input);
-    if (checked && stems.contains(stem)) {
+    if (checked && stem in stems) {
       String first = stems[stem];
       fprintf(
         stderr, "x2c: error: inputs produce the same output stem '%s'\n"

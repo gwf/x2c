@@ -429,6 +429,20 @@ favor of `String.pool_*`, `Iter.foldl`, and `Var.truth`.
 
 Open questions with no owner yet, recorded so they are not lost:
 
+- **The `in` operator accepts a narrower left operand than an ordinary
+  argument.** `%"k" in m` and `i++ in a` both fail with `parse: expected ')'`
+  at ecdcea9+, while `m.contains(%"k")` and `a.contains(i++)` compile. Found
+  while converting membership tests in Phase 6 of
+  [x2c-dogfooding-remediation](x2c-dogfooding-remediation.md); three sites in
+  `src/` keep `.contains` for this reason.
+- **A string-literal key caches at a different point through `in`.**
+  `m.contains("k")` and `"k" in m` produce semantically equal but textually
+  different C, because the literal is cached in a later pass through the call
+  form, which renumbers every cached slot in the unit. Fourteen otherwise
+  clean conversions in `src/` and one in `lib/path.x` were left alone to keep
+  the phase translation-identical. They become free once both spellings cache
+  in the same pass.
+
 - **Why do torch's private protocol adoptions still work?** 2d84cd5 stopped a
   private region from publishing its adoptions, which broke blis (see
   "Resolved since the baseline"). `packages/torch/src/torch.x:1445-1450` has

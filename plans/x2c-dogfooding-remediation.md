@@ -230,12 +230,19 @@ declarations are a per-line catalog.
 For gallery entries the slide is the owner: edit the slide, then run
 `python3 tools/check-gallery-examples.py --update`.
 
-## Phase 6 - `in` in src and lib
+## Phase 6 - `in` in src and lib (landed)
 
 The largest dogfooding gap in the core: zero uses against 142 `.contains(`
-calls, while `literate-lisp.x` uses it ten times. Convert the ~95 positive
-membership tests on Map, List, Array, and String receivers. Probe-verified:
-`x in m` emits exactly `Map_contains(m, x)`, including for typed families.
+calls, while `literate-lisp.x` uses it ten times. Converted 64 positive
+membership tests, 61 in `src/` across 17 files and 3 in `lib/lisp.x`. Every
+generated `.c` and `.h` is byte-identical, checked per file and again across
+the whole tree.
+
+Fifteen more conversions are correct but were left alone because a
+string-literal key caches in a different pass through `in` than through the
+call, which renumbers a unit's cached literals; and three sites keep
+`.contains` because a percent string and a post-increment are not accepted as
+the operator's left operand. Both are recorded in the review backlog.
 
 Do not change: the 47 negated sites, because there is no `not in` spelling;
 the 17 `SymbolSet` receivers, which `in` rejects; the 10 `kind() ==` sites,
@@ -244,9 +251,27 @@ which compare tag families.
 Verification: `make build`, then diff the generated C under `builds/0/src` and
 `builds/0/lib` against a copy taken before the edit. The diff must be empty.
 
-## Phase 7 - arrows and percent literals in src, lib, tools, unittest
+## Phase 7 - arrows and percent literals in src, lib, tools, unittest (landed)
 
-76 arrows after exclusions: `lib/var.x` 22, `lib/iter.x` 5, `lib/lisp.x` 1,
+Converted 59 arrows - `lib/var.x` 22, `lib/iter.x` 5, `lib/lisp.x` 1,
+`lib/map-generics.xmacro` 2, `src/expressions.x` 3, `src/transform.x` 5,
+`tools/x2c-graph` 4, `unittest/test-logger.x` 11, `test-pool.x` 5,
+`test-iter.x` 1 - all byte-identical in the generated C, and 13 percent sites.
+
+The percent conversions are the one part of these two phases that changes
+emission, and they change it for the better: `%"$buffer"` was emitting
+`String_join(NULL, cons(String_var(String_new(buffer)), NULL))` where the bare
+identifier emits `String_new(buffer)`. Seven such sites in `src/collect.x`,
+`src/compiler.x`, and `src/protocol.x` now do less work for the same value.
+`src/literals.x` loses two `\$` escapes that existed only because the literal
+was a percent string, which renumbers that unit's cached literals without
+changing their contents.
+
+`lib/lisp.x`'s `%""` stays: the bare `""` registers an interned empty String
+where `%""` emits the null String directly, so that one is not a spelling
+change.
+
+The original scope follows. 76 arrows after exclusions: `lib/var.x` 22, `lib/iter.x` 5, `lib/lisp.x` 1,
 `lib/map-generics.xmacro` 2 (the only macro template with a hole-typed
 receiver, verified through its instantiation), `src/expressions.x` and
 `src/transform.x` 8, `tools/x2c-graph` 5, `unittest` 17. About 40 percent

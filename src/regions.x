@@ -160,8 +160,8 @@ static String _callee_of(Var value, List *arguments) {
    compound literal allocates. */
 static Symbol _class(Walk w, Type type) {
   Symbol tag = w.compiler.sym.var_tag_for_type(type, NULL);
-  if (%(string list symbol).contains(tag)) return <canonical>;
-  return %(map array block buffer).contains(tag) ? <container> : 0;
+  if (tag in %(string list symbol)) return <canonical>;
+  return tag in %(map array block buffer) ? <container> : 0;
 }
 
 // regions and facts
@@ -575,7 +575,7 @@ static Var _target_place(Walk w, Var target) {
 }
 
 static void _store(Walk w, Var target, Var value) {
-  if (w.restored.contains(_target_place(w, target))) {
+  if (_target_place(w, target) in w.restored) {
     _scan(w, value, 0);
     return;
   }

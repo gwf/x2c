@@ -153,7 +153,7 @@ static int _custom_tag_id(Symbol tag) {
 
 static int _wide_encoding_valid(Var value, Symbol tag) {
   VarWideBox box = _wide_box(value);
-  return box && box->tag == tag;
+  return box && box.tag == tag;
 }
 
 /* Wide rows validate the family recorded inside their readable box. Array and
@@ -429,8 +429,8 @@ static Var _new_pointer(TagId id, void *ptr) {
 
 static Var _new_wide(TagId id, VarWideValue value) {
   VarWideBox box = Scope.malloc(sizeof(struct VarWideBox));
-  box->tag = taginfo[id].tag;
-  box->value = value;
+  box.tag = taginfo[id].tag;
+  box.value = value;
   uintptr_t raw = (uintptr_t) box;
   if ((raw & 0x7) != 0 || raw >= (1ul << 48)) {
     Scope.free(box);
@@ -717,7 +717,7 @@ double Var.floating(Var v) {
     case <"nan">:    return  0.0 / 0.0;  // Generate NaN
     case <"-inf">:   return -1.0 / 0.0;
     case <"+inf">:   return  1.0 / 0.0;
-    case <ldouble>:      return (double) _wide_box(v)->value.long_double_value;
+    case <ldouble>:      return (double) _wide_box(v).value.long_double_value;
   }
   return 0.0;
 }
@@ -764,14 +764,14 @@ long Var.integer(Var v) {
   }
   if (top == 0x0005) {
     switch (_bottom_bits(v)) {
-      case 0x5: return _wide_box(v)->value.long_value;
-      case 0x6: return (long) _wide_box(v)->value.ulong_value;
-      case 0x7: return (long) _wide_box(v)->value.long_long_value;
+      case 0x5: return _wide_box(v).value.long_value;
+      case 0x6: return (long) _wide_box(v).value.ulong_value;
+      case 0x7: return (long) _wide_box(v).value.long_long_value;
     }
   }
   if (top == 0x0007) {
     unsigned bottom = _bottom_bits(v);
-    if (bottom == 0x6) return (long) _wide_box(v)->value.ulong_long_value;
+    if (bottom == 0x6) return (long) _wide_box(v).value.ulong_long_value;
   }
   if (top >= 0x8004 && top <= 0x800B) {
     static unsigned long const offset = taginfo[_symbol_].top << 48;
@@ -787,7 +787,7 @@ long Var.integer(Var v) {
 
     A tag mismatch yields 0.
 */
-long Var.long_value(Var v) => v is <long> ? _wide_box(v)->value.long_value : 0;
+long Var.long_value(Var v) => v is <long> ? _wide_box(v).value.long_value : 0;
 
 /** Returns the payload of a `<ulong>` box, or 0 if `v` has a different tag.
     Prefer this to `Var.integer` for a `<ulong>`: the general reader casts the
@@ -799,15 +799,15 @@ long Var.long_value(Var v) => v is <long> ? _wide_box(v)->value.long_value : 0;
     A tag mismatch yields 0.
 */
 unsigned long Var.ulong_value(Var v) =>
-  v is <ulong> ? _wide_box(v)->value.ulong_value : 0;
+  v is <ulong> ? _wide_box(v).value.ulong_value : 0;
 
 /** Returns an `<llong>` box's signed payload, or 0 for another tag. */
 long long Var.long_long_value(Var v) =>
-  v is <llong> ? _wide_box(v)->value.long_long_value : 0;
+  v is <llong> ? _wide_box(v).value.long_long_value : 0;
 
 /** Returns a `<ullong>` box's unsigned payload, or 0 for another tag. */
 unsigned long long Var.ulong_long_value(Var v) =>
-  v is <ullong> ? _wide_box(v)->value.ulong_long_value : 0;
+  v is <ullong> ? _wide_box(v).value.ulong_long_value : 0;
 
 /** Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag.
     This is the only reader that preserves a `long double`. Every other
@@ -817,7 +817,7 @@ unsigned long long Var.ulong_long_value(Var v) =>
     A tag mismatch yields 0.0.
 */
 long double Var.long_double_value(Var v) =>
-  v is <ldouble> ? _wide_box(v)->value.long_double_value : 0.0L;
+  v is <ldouble> ? _wide_box(v).value.long_double_value : 0.0L;
 
 /* A wide box holds one or two machine words, so it mixes as words rather
    than as bytes. The tag seeds the chain, so two boxes with equal bits but
@@ -830,7 +830,7 @@ unsigned Var.wide_hash(Var v) {
   if (!v.is_wide()) return 0;
   VarWideBox box = _wide_box(v);
   Symbol tag = v.tag();
-  with box->value {
+  with box.value {
     switch (tag) {
       case <long>: return _hash_bytes((unsigned) tag,
         &_.long_value, sizeof(_.long_value));
@@ -865,15 +865,15 @@ int Var.wide_equal(Var a, Var b) {
   if (tag != b.tag()) return 0;
   VarWideBox abox = _wide_box(a), bbox = _wide_box(b);
   switch (tag) {
-    case <long>:  return abox->value.long_value == bbox->value.long_value;
-    case <ulong>:  return abox->value.ulong_value == bbox->value.ulong_value;
+    case <long>:  return abox.value.long_value == bbox.value.long_value;
+    case <ulong>:  return abox.value.ulong_value == bbox.value.ulong_value;
     case <llong>:
-      return abox->value.long_long_value == bbox->value.long_long_value;
+      return abox.value.long_long_value == bbox.value.long_long_value;
     case <ullong>:
-      return abox->value.ulong_long_value == bbox->value.ulong_long_value;
+      return abox.value.ulong_long_value == bbox.value.ulong_long_value;
     case <ldouble>: return !memcmp(
-      &abox->value.long_double_value, &bbox->value.long_double_value,
-      sizeof(abox->value.long_double_value));
+      &abox.value.long_double_value, &bbox.value.long_double_value,
+      sizeof(abox.value.long_double_value));
   }
   return 0;
 }
@@ -985,8 +985,8 @@ int Var.wide_compare(Var a, Var b) {
   if (av < bv) return -1;
   if (av > bv) return 1;
   int cmp = memcmp(
-    &_wide_box(a)->value.long_double_value,
-    &_wide_box(b)->value.long_double_value, sizeof(av));
+    &_wide_box(a).value.long_double_value,
+    &_wide_box(b).value.long_double_value, sizeof(av));
   return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
 }
 

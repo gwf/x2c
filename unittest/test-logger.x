@@ -62,14 +62,14 @@ static void logger_free_stops_during_emission(void) {
 static void capture_emit(Logger logger, const LogEvent *event, Var data) {
   (void) logger;
   CaptureState *state = data;
-  if (!state || state->count >= 16) return;
-  CapturedEvent *copy = &state->events[state->count++];
-  copy->sequence = event->sequence;
-  copy->wall_time_us = event->wall_time_us;
-  copy->elapsed_us = event->elapsed_us;
-  copy->level = event->level;
-  copy->category = event->category;
-  copy->fields = event->fields;
+  if (!state || state.count >= 16) return;
+  CapturedEvent *copy = &state.events[state.count++];
+  copy.sequence = event.sequence;
+  copy.wall_time_us = event.wall_time_us;
+  copy.elapsed_us = event.elapsed_us;
+  copy.level = event.level;
+  copy.category = event.category;
+  copy.fields = event.fields;
 }
 
 static void order_emit(Logger logger, const LogEvent *event, Var data) {
@@ -77,20 +77,20 @@ static void order_emit(Logger logger, const LogEvent *event, Var data) {
   (void) event;
   OrderState *state = data;
   if (!state) return;
-  state->order[(*state->count)++] = state->id;
+  state.order[(*state.count)++] = state.id;
 }
 
 static void flush_emit(Logger logger, const LogEvent *event, Var data) {
   (void) logger;
   (void) event;
   FlushState *state = data;
-  if (state) state->emits++;
+  if (state) state.emits++;
 }
 
 static void flush_sink(Logger logger, Var data) {
   (void) logger;
   FlushState *state = data;
-  if (state) state->flushes++;
+  if (state) state.flushes++;
 }
 
 static MutationState mutation;

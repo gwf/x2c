@@ -42,11 +42,11 @@ void SourceView.set(SourceView s, String path, String text, int changed) {
 
 /** Returns whether this logical file has an unsaved overlay. */
 int SourceView.is_changed(SourceView sources, String path) =>
-  sources && sources.dirty_paths.contains(Path.absolute(path));
+  sources && Path.absolute(path) in sources.dirty_paths;
 
 /** Returns readable-file presence, including unsaved new files. */
 int SourceView.exists(SourceView sources, String path) {
-  if (sources && sources.overlays.contains(Path.absolute(path))) return 1;
+  if (sources && Path.absolute(path) in sources.overlays) return 1;
   struct stat info;
   return !access(path, R_OK) && !stat(path, &info) &&
          S_ISREG(info.st_mode);

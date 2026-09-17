@@ -562,8 +562,8 @@ macro Unit $map.core.observe(
 ) using $record_compare => {
   static int $record_compare(const void *ap, const void *bp) {
     const $entry *a = ap, *b = bp;
-    int comparison = $compare_key(a->key, b->key);
-    return comparison ? comparison : $compare_value(a->val, b->val);
+    int comparison = $compare_key(a.key, b.key);
+    return comparison ? comparison : $compare_value(a.val, b.val);
   }
 
   static int $map._core_compare($map a, $map b) {

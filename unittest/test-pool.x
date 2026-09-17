@@ -14,14 +14,14 @@ typedef struct PoolThreadProbe {
 
 static void *_pool_parent_allocator(void *data) {
   PoolThreadProbe *probe = data;
-  atomic_store(&probe->started, 1);
-  while (!atomic_load(&probe->stop)) {
-    void *allocation = probe->parent.malloc(16);
-    probe->parent.free(allocation);
+  atomic_store(&probe.started, 1);
+  while (!atomic_load(&probe.stop)) {
+    void *allocation = probe.parent.malloc(16);
+    probe.parent.free(allocation);
     Scope scratch = Scope.new();
     Scope.malloc_in(&scratch, 16);
     scratch.destroy();
-    probe->allocations++;
+    probe.allocations++;
   }
   x2c_thread_state_release();
   return NULL;

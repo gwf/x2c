@@ -1027,8 +1027,8 @@ static List _lvalue_binding(List ast) {
 
 static void _require_capture_lvalue(Compiler c, List target) {
   List binding = _lvalue_binding(target);
-  if (binding && c.semantic_binding_facts().contains(
-                   %(lambda-snapshot $binding)))
+  if (binding &&
+      %(lambda-snapshot $binding) in c.semantic_binding_facts())
     c.report_error(
       <type>, "captured value requires 'using &name' for reference access",
       c.token, %("binding: ${binding_identity_spelling(binding)}"));
@@ -1154,7 +1154,7 @@ static List _rewrite_lambda_declaration(
       case %(bind ?matched *): binding = matched;
       case %(op = (bind ?matched *) ?): binding = matched;
     }
-    has_cell |= binding && cells.contains(binding);
+    has_cell |= binding && binding in cells;
   }
   if (!has_cell) return NULL;
 

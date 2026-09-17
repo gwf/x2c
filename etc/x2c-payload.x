@@ -30,7 +30,7 @@ static uint64_t fnv64(uint64_t value, const unsigned char *bytes, size_t n) {
 }
 
 static String hex(uint64_t value) =>
-  %"%016llx".printf((unsigned long long) value);
+  "%016llx".printf((unsigned long long) value);
 
 static uint64_t file_digest(Path path) {
   File file = $auto(File.open(path, "rb"));
@@ -54,8 +54,8 @@ static Path normal(Path path) {
   foreach (String part, path.split("/"))
     if (part && part != ".") parts.push(part);
   String joined = parts.len() ? parts.join("/") : NULL;
-  if (path.startswith("/")) return joined ? %"/$joined" : %"/";
-  return joined ? joined : %".";
+  if (path.startswith("/")) return joined ? %"/$joined" : "/";
+  return joined ? joined : ".";
 }
 
 static void copy(Path source, Path target) {
@@ -137,7 +137,7 @@ static Map owned_files(Path prefix) {
     int second = first < 0 ? -1 : line[first + 1:].find(" ");
     if (second < 0) fail(%"invalid installation inventory row: $line");
     String relative = line[first + second + 2:];
-    if (relative.startswith("/") || relative.split("/").contains(%".."))
+    if (relative.startswith("/") || relative.split("/").contains(".."))
       fail(%"invalid installed file path: $relative");
     files[relative] = 1;
   }

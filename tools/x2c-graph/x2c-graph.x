@@ -1265,13 +1265,13 @@ static void _preprocessor_errors(String text) {
 static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
   int ok = frontend.start(filename, unit);
   if (ok) {
-    unit->compiler.own_diagnostics();
+    unit.compiler.own_diagnostics();
     ok = unit.collect(frontend) && unit.parse();
   }
   if (ok) return 1;
-  if (!unit->compiler.diagnostics.printer)
-    foreach (Var entry, unit->compiler.diagnostics())
-      unit->compiler.print_diagnostic(entry);
+  if (!unit.compiler.diagnostics.printer)
+    foreach (Var entry, unit.compiler.diagnostics())
+      unit.compiler.print_diagnostic(entry);
   unit.close();
   return 0;
 }

@@ -388,7 +388,7 @@ static void _queue_one_static_initializer(
   if (compiler.static_init_deps.try_get(binding, &stored)) {
     List dependencies = stored;
     foreach (List dependency, dependencies) {
-      if (pending.contains(dependency)) {
+      if (dependency in pending) {
         _queue_one_static_initializer(
           compiler, dependency, pending, state, phases,
           initializers, deferred_kind);

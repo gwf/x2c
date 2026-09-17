@@ -143,7 +143,7 @@ static void _collect_cache_function_refs(
       return;
     }
     case %(ident (binding ?callee ?)): {
-      List found = callers.contains(callee) ? callers[callee] : NULL;
+      List found = callee in callers ? callers[callee] : NULL;
       callers[callee] = cons(caller, found);
       return;
     }
@@ -169,9 +169,9 @@ static Map _cache_reachable_function_ids(List source) {
       }
   for (int i = 0; i < queue.len(); i++) {
     Var key = queue[i];
-    if (reachable.contains(key)) continue;
+    if (key in reachable) continue;
     reachable[key] = 1;
-    if (callers.contains(key))
+    if (key in callers)
       foreach (Var caller, callers[key].list()) queue.push(caller);
   }
   queue.free();
@@ -227,7 +227,7 @@ static List _file_init(Compiler c, List source) {
         else if (!type.type().is_static() &&
                  !_is_protocol_bootstrap_function(name) &&
                  (!cache_only ||
-                  cache_reachable_ids.contains(identity)))
+                  identity in cache_reachable_ids))
           function = _patch_func_with_init(
             type, declarator, statements, initializer_name, guard);
         item = function;
@@ -289,7 +289,7 @@ static int _is_completed_function_prototype(Compiler compiler, List binding) {
 static void _forward_tags(List node, Map forwarded, Array header) {
   match (node)
     case %((!set ?tag (!or struct union)) ?(String name)): {
-      if (forwarded.contains(name)) return;
+      if (name in forwarded) return;
       forwarded[name] = 1;
       header.push(%(declare ($tag $name) (bindings (bind () ()))));
       return;
@@ -432,7 +432,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
           int declared = 0;
           for (int j = 0; j < i && !declared; j++)
             declared = items[j] is <list> &&
-                       _typedef_names(items[j]).contains(name);
+                       name in _typedef_names(items[j]);
           for (int j = i + 1; j < count && !promoted && !declared; j++)
             promoted = items[j] is <list> &&
                        _mentions_type(items[j], name);
@@ -668,7 +668,7 @@ static void _forward_declaration(
   Compiler c, Var key, Map available, Map declarations, Map seen,
   Array output) {
   Var declaration;
-  if (available.contains(key) || seen.contains(key) ||
+  if (key in available || key in seen ||
       !declarations.try_get(key, &declaration)) return;
   seen[key] = 1;
   seen[declaration] = 1;
@@ -702,10 +702,10 @@ static void _collect_forward_dependencies(
       case %(!set ?binding (binding ? ?)): {
         String spelling = binding_identity_spelling(binding);
         List native = %(native $spelling);
-        if (statics.contains(binding))
+        if (binding in statics)
           _forward_declaration(
             compiler, binding, locals, statics, seen, prototypes);
-        else if (statics.contains(native))
+        else if (native in statics)
           _forward_declaration(
             compiler, native, locals, statics, seen, prototypes);
         else {
@@ -858,7 +858,7 @@ static List _static_prototypes(Compiler compiler, List source, List header) {
   _collect_declared_bindings(header, available);
   _static_declarations(source, statics);
   foreach (List node, source) {
-    if (node.car() == <typedef> && seen.contains(node)) continue;
+    if (node.car() == <typedef> && node in seen) continue;
     _collect_declared_bindings(node, available);
     _collect_forward_dependencies(
       compiler, node, available, statics, seen, output);

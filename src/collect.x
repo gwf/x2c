@@ -42,31 +42,31 @@ static int _visibility_pragma(String directive) {
 /* Unresolvable paths retain the caller's spelling. */
 static String _canonical_path(String path) {
   char buffer[PATH_MAX];
-  return realpath(path, buffer) ? %"$buffer" : path;
+  return realpath(path, buffer) ? buffer : path;
 }
 
 /* Canonical process-wide include roots. */
 static String _cached_canonical(char *cache, String dir) {
   if (!*cache && !realpath(dir, cache))
     snprintf(cache, PATH_MAX, "%s", (char *) dir);
-  return %"$cache";
+  return cache;
 }
 
 static String _canonical_lib(void) {
   static char cache[PATH_MAX];
-  if (*cache) return %"$cache";
+  if (*cache) return cache;
   return _cached_canonical(cache, %"${x2c_get_root()}/lib");
 }
 
 static String _canonical_include(void) {
   static char cache[PATH_MAX];
-  if (*cache) return %"$cache";
+  if (*cache) return cache;
   return _cached_canonical(cache, %"${x2c_get_root()}/include/x2c");
 }
 
 static String _canonical_src(void) {
   static char cache[PATH_MAX];
-  if (*cache) return %"$cache";
+  if (*cache) return cache;
   return _cached_canonical(cache, %"${x2c_get_root()}/src");
 }
 
@@ -170,7 +170,7 @@ static void _replay_cached(
     if (part is <symbol>) continue;
     String dep_path = part;
     compiler.add_translation_dependency(dep_path);
-    if (visited.contains(dep_path)) continue;
+    if (dep_path in visited) continue;
     visited[dep_path] = 1;
     List resolved = _entry(compiler, dep_path);
     if (!resolved)
@@ -546,7 +546,7 @@ static String _package_key_spelling(List key) {
 static int _package_protocol_row(List key, Var value) {
   if (key.car() != "source-node" || value is not <list>) return 0;
   List row = value;
-  return row && %(protocol adopt declaration-source).contains(row.car());
+  return row && row.car() in %(protocol adopt declaration-source);
 }
 
 /* The package's `name__` space is visible in the importing unit, and so does
@@ -614,7 +614,7 @@ static void _package_contributions(
       }
       case %(?(String dependency)): {
         compiler.add_translation_dependency(dependency);
-        if (private || visited.contains(dependency)) continue;
+        if (private || dependency in visited) continue;
         visited[dependency] = 1;
         _package_contributions(
           compiler, name, root, dependency,
@@ -636,7 +636,7 @@ static void _package_contributions(
     `token` locates lookup and public-surface errors.
 */
 void Compiler.collect_package(Compiler c, String name, Token token) {
-  if (c.package_roots.contains(name)) return;
+  if (name in c.package_roots) return;
   String root = NULL, entry = _package_entry(c, name, &root);
   if (!entry)
     c.report_error(

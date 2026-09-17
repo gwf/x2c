@@ -102,7 +102,7 @@ static void iter_rejects_void_from_source(void) {
   try iter.try_next(&out);
   catch %(void-op *): caught = 1;
   EXPECT_TRUE(caught);
-  EXPECT_TRUE(iter->next != NULL);
+  EXPECT_TRUE(iter.next != NULL);
 }
 
 static void iter_empty_and_unsupported_status(void) {
@@ -415,7 +415,7 @@ static void iter_chain_unique(void) {
   Array values = Array.update_n([], 5, one, one, two, two, three);
   struct Iter values_iter, uniq_iter;
   Iter uniq = values.iter(&values_iter).unique(&uniq_iter);
-  Array collected = Array.new();
+  Array collected = [];
   Var next = uniq.next();
   while (next is not void) {
     collected.push(next);

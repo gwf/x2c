@@ -282,7 +282,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
           continue;
         }
         case %(ident ?binding): {
-          if (runtime.contains(binding) ||
+          if (binding in runtime ||
               _automatic_static_input(c, binding)) return 1;
           continue;
         }
@@ -304,7 +304,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
     match (node) {
       case %((!or cache call var array map initval) *): return 1;
       case %(expr ?type (ident ?binding)): {
-        if (runtime.contains(binding) ||
+        if (binding in runtime ||
             _automatic_static_input(c, binding)) return 1;
         Type native = type;
         if (native && !native.is_enum() && !native.is_function() &&
@@ -453,7 +453,7 @@ static List _preserve_binding(List bind, Map names) {
   match (bind)
     case %(bind ?name ?mods): {
       String spelling = binding_identity_spelling(name);
-      if (spelling && names.contains(spelling) && !mods.contains(<volatile>))
+      if (spelling && spelling in names && !mods.contains(<volatile>))
         return %(bind $name ${cons(<volatile>, mods)});
     }
   return bind;
@@ -464,7 +464,7 @@ static int _declares_preserved(List bindings, Map names) {
     match (binding)
       case %(!or (bind ?name ?) (op = (bind ?name ?) ?)): {
         String spelling = binding_identity_spelling(name);
-        if (spelling && names.contains(spelling)) return 1;
+        if (spelling && spelling in names) return 1;
       }
   return 0;
 }
@@ -484,7 +484,7 @@ static List _preserve_pointee(List type, List bindings, Map names) {
   match (bindings)
     case %(bindings (op = (bind ? ((!quote *))) ?value)): {
       String name = ast_addressed_identifier(value);
-      if (name && names.contains(name) &&
+      if (name && name in names &&
           !type.type().flatten_all().contains(<volatile>))
         return cons(<volatile>, type);
     }

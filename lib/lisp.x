@@ -490,7 +490,7 @@ macro Decorator $lisp.entry(Function $function, Expr $operation) => {
   if (!$(x2c.function.parameter $function "lisp"))
     return _bad_session($operation);
 
-  Scope.push(&$(x2c.function.parameter $function "lisp")->scope);
+  Scope.push(&$(x2c.function.parameter $function "lisp").scope);
   defer Scope.pop();
   $(x2c.function.body $function)...
 }
@@ -928,8 +928,8 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
   if (body is not <list>) return;
   foreach (Var name, List.flatten(body)) {
     Var value;
-    if (!name.is_atom() || lisp.reserved.contains(name) ||
-        captures.contains(name) || _param_has(params, name))
+    if (!name.is_atom() || name in lisp.reserved ||
+        name in captures || _param_has(params, name))
       continue;
     if (_env_lookup(lisp, env, name, &value)) captures[name] = value;
   }
@@ -1209,7 +1209,7 @@ static int LispLower._auto_load_name(LispLower l, Var name) {
 
 static int LispLower._auto_local_name(LispLower l, Var name) =>
   _auto_param_index(l.lambda, name) >= 0 ||
-  l.lambda.captures.contains(name);
+  name in l.lambda.captures;
 
 static int LispLower._auto_compile_constant(LispLower l, Var value) {
   int constant = l.b.constant(value);

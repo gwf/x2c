@@ -1015,7 +1015,7 @@ static void _import(
       }
     return;
   }
-  if (c.import_stack.contains(path)) {
+  if (path in c.import_stack) {
     String display = c.display_path(path);
     Array notes = [ %"import: $display" ];
     foreach (Var parent, c.import_stack)
@@ -1463,7 +1463,7 @@ static void _template_binders(Var value, Map binders) {
 }
 
 static Var _projection(Map binders, Var binder, Var otherwise) =>
-  binders.contains(binder) ? binder : otherwise;
+  binder in binders ? binder : otherwise;
 
 /* A hole has source, value, expression, and splice projections. A singular
    Function hole also has return and declarator projections, while a Unit hole
@@ -1508,11 +1508,11 @@ static List _capture_pattern(List hole, Map binders) {
     );
   Var construction = _replacement_binder(author, "construction", 1);
   if (hole.assoc(<kind>) == <unit> &&
-      (binders.contains(author) ||
-       binders.contains(source_binder) ||
-       binders.contains(value_binder) ||
-       binders.contains(splice_binder) ||
-       binders.contains(construction))) {
+      (author in binders ||
+       source_binder in binders ||
+       value_binder in binders ||
+       splice_binder in binders ||
+       construction in binders)) {
     capture = capture.append(%($construction));
   }
   return capture;
@@ -1796,9 +1796,9 @@ static List _parse_hole(Compiler c, Symbol role) {
   }
   Var binder = hole.assoc(<binder>);
   int splice = sequence || role == <type>;
-  int preserve_source = c.macro_holes.contains(%(source $binder));
+  int preserve_source = %(source $binder) in c.macro_holes;
   String projection = preserve_source ? "source" : splice ? "splice" :
-    %(expression argument expr).contains(role) ? "expression" : "value";
+    role in %(expression argument expr) ? "expression" : "value";
   int list_binder = preserve_source
                   ? binder.is_list_binder() : splice;
   Atom replacement = _replacement_binder(

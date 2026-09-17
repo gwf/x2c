@@ -203,8 +203,8 @@ const PrintfFn *List.printf_family(List l) {
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
       for (int i = 0; i < count; i++) {
         const PrintfFn *info = &printf_family_info[i];
-        if (!String.equal(name, (String) info->name)) continue;
-        if (info->unresolved && type.list()) return NULL;
+        if (!String.equal(name, (String) info.name)) continue;
+        if (info.unresolved && type.list()) return NULL;
         return info;
       }
     }
@@ -258,9 +258,9 @@ static void _check_explicit_converter_arguments(
      family's positions count the receiver a method call spells before the
      dot, which `arguments` has already dropped. */
   const PrintfFn *info = callee.printf_family();
-  if (!info || !_static_printf_format(compiler, supplied[info->fmt_arg]))
+  if (!info || !_static_printf_format(compiler, supplied[info.fmt_arg]))
     return;
-  int first = info->first_arg - method, index = 0;
+  int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
     if (index++ >= first && car(a) is <list>)
       _check_noted_converter(
@@ -419,7 +419,7 @@ static void _find_delegate_methods(
   List seen, Array candidates, List *first_cycle, Type outer, Token origin) {
   Type aggregate = compiler.sym.delegate_aggregate(receiver);
   if (!aggregate) return;
-  if (seen.contains(aggregate)) {
+  if (aggregate in seen) {
     if (!*first_cycle) *first_cycle = cons(<path>, reverse_path.reverse());
     return;
   }
@@ -885,15 +885,15 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       case %((!or macro-bind macro-invoke macro-slot) *): return 1;
       case %(ident ?(List binding)): {
         String spelling = binding_identity_spelling(binding);
-        int retained_parameter = compiler.semantic_binding_facts().contains(
-          %(lambda-param $binding));
-        int retained_capture = compiler.semantic_binding_facts().contains(
-          %(lambda-depth $binding));
+        int retained_parameter =
+          %(lambda-param $binding) in compiler.semantic_binding_facts();
+        int retained_capture =
+          %(lambda-depth $binding) in compiler.semantic_binding_facts();
         if (compiler.lambda_capture_required(binding)) return 1;
         if (retained_parameter &&
             ((void *) compiler.local_macro_captures != NULL ||
-             compiler.semantic_binding_facts().contains(
-               %(local-macro-capture $binding))))
+             %(local-macro-capture $binding) in
+               compiler.semantic_binding_facts()))
           return 1;
         if (!spelling ||
             (compiler.sym.lookup(%($spelling), NULL) != binding &&
@@ -973,7 +973,7 @@ static Type _shared_participant(
     return NULL;
   Array lhs_names = _typedef_names(compiler, lhs_type);
   foreach (Type name, _typedef_names(compiler, rhs_type))
-    if (lhs_names.contains(name) &&
+    if (name in lhs_names &&
         compiler.resolve_protocol_member(name, member))
       return name;
   return NULL;
@@ -1210,7 +1210,7 @@ static List _resolve_identifier(
     List visible_type = NULL;
     List visible = c.sym.lookup(%($spelling), &visible_type);
     if (visible && visible != binding) {
-      if (binding_facts.contains(%(local-macro-capture $binding))) {
+      if (%(local-macro-capture $binding) in binding_facts) {
         if (!binding_facts.contains(%(emitted $visible)))
           binding_facts[%(emitted $visible)] =
             c.fresh_name("binding_shadow");
@@ -1247,7 +1247,7 @@ static List _resolve_identifier(
       }
   }
   if (read_reference &&
-      binding_facts.contains(%(reference-param $binding))) {
+      %(reference-param $binding) in binding_facts) {
     Type value_type = cdr(type);
     return %(expr $value_type
              (parens (expr $value_type (op * $result))));

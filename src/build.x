@@ -365,7 +365,7 @@ static void Build._link_packages(Build state, String input, String directory) {
     String package = x2c_package_directory(roots, dependency);
     if (!package || (own && package == own)) continue;
     String builds = %"$package/builds";
-    if (state.gen_dirs.contains(builds)) continue;
+    if (builds in state.gen_dirs) continue;
     state.gen_dirs.push(builds);
     // A package may publish a vendored foreign header from its src.
     state.gen_dirs.push(%"$package/src");

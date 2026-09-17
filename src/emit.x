@@ -723,7 +723,7 @@ static List _match_arm_label(
     *labelling = 0;
     return %("default: ;");
   }
-  if (heads.contains(head)) return NULL;
+  if (head in heads) return NULL;
   heads.push(head);
   long code = head;
   return %("case $code: ;");

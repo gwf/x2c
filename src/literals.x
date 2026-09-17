@@ -46,7 +46,7 @@ static List _parse_splice_element(Compiler compiler) {
 static List _parse_variable_reference(Compiler compiler) {
   if (compiler.peek(0) == <$>)
     return _parse_named_reference(
-      compiler, <$>, %"use '\${...}' to insert an expression");
+      compiler, <$>, "use '${...}' to insert an expression");
   if (compiler.peek(0) != <"${"> || compiler.token.len != 2)
     return NULL;
   compiler.next();
@@ -408,7 +408,7 @@ static int _symbol_set_duplicate(List values) {
   Map seen = {};
   int index = 0;
   foreach (Symbol value, values) {
-    if (seen.contains(value)) return index;
+    if (value in seen) return index;
     seen[value] = 1;
     index++;
   }
@@ -796,7 +796,7 @@ static List _parse_string_segment(Compiler c) {
       return sgmnt;
     case <$>:
       expr = _parse_named_reference(
-        c, <$>, %"use '\${...}' to insert an expression");
+        c, <$>, "use '${...}' to insert an expression");
       expr = c.convert_segment_to_string(expr);
       return %(segvar $expr);
     case <"${">:
@@ -914,7 +914,7 @@ static int _lambda_binding_is_outer(
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(lambda-depth $binding), &captured_depth))
     return captured_depth.integer() < depth;
-  return facts.contains(%(automatic $binding)) &&
+  return %(automatic $binding) in facts &&
          c.sym.binding_is_local_before(binding, depth);
 }
 
@@ -984,7 +984,7 @@ List Compiler.capture_lambda_identifier(
         else {
           Type captured_type = type.car() == <&> ? type.cdr() : type;
           List expression = %(expr $type (ident $binding));
-          int reference = references.list().contains(original);
+          int reference = original in references.list();
           if (prescribed) {
             match (prescribed)
               case %(capture ? ?target_type ?value): {
@@ -1007,7 +1007,7 @@ List Compiler.capture_lambda_identifier(
           }
           else if (type.car() == <&>)
             expression = %(expr $captured_type (op * $expression));
-          if (reference && facts.contains(%(lambda-snapshot $binding)))
+          if (reference && %(lambda-snapshot $binding) in facts)
             c.report_error(
               <type>,
               "reference capture requires an enclosing reference capture",
@@ -1046,7 +1046,7 @@ List Compiler.bind_lambda_expression(
         Type source = NULL, target_type = captured_type;
         List binding = target is <string>
                      ? c.sym.lookup(%($target), &source) : target;
-        if (target_type.contains(<macro-expr>))
+        if (<macro-expr> in target_type)
           target_type = source.car() == <&> ? source : cons(<&>, source);
         if (!binding_identity_spelling(binding)) {
           String spelling = target is <string> ? target : NULL;
@@ -1211,7 +1211,7 @@ static List _atom_literal(Compiler c, String text) {
   _validate_match_binder_atom(c, atom);
   /* The preprocessor never sees a literal, so a macro's name here is
      data. The author who wanted its value must unquote it. */
-  if (c.object_macros.contains(spelling)) {
+  if (spelling in c.object_macros) {
     String unquoted = "${(long) " + spelling + "}";
     c.report_warning(
       <literal>,

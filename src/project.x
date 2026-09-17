@@ -214,7 +214,7 @@ static ProjectProfile _profile(ProjectTarget target, String name, int create) {
 // Each section object records the keys it has taken. A repeated key is an
 // error, and `debug = false` stays distinguishable from an absent `debug`.
 static void _set_once(Project project, int line, Map seen, String key) {
-  if (seen.contains(key))
+  if (key in seen)
     _error(project, line, "duplicate manifest field");
   seen[key] = 1;
 }
@@ -424,7 +424,7 @@ static Array _target_sources(
   }
   Array kept = [];
   foreach (Var value, sources) {
-    if (excluded.contains(value)) {
+    if (value in excluded) {
       if (verbose)
         fprintf(
           stderr, "x2c: excluded %s from target %s\n",

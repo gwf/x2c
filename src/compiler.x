@@ -384,7 +384,7 @@ int Compiler.read_source(Compiler c, String path, String volatile *text) {
 String Compiler.canonical_path(Compiler c, String path) {
   if (c.sources) return Path.absolute(path);
   char resolved[PATH_MAX];
-  return realpath(path, resolved) ? %"$resolved" : path;
+  return realpath(path, resolved) ? resolved : path;
 }
 
 /** Returns `path` relative to the canonical x2c home when it lies below the
@@ -1132,7 +1132,7 @@ static List _declaration_forward(
   if (compiler.sym.get(%($name))) return %(seq);
   List method = compiler.resolve_postfix_member(parent, %($member), <.>, 1);
   if (!method) {
-    if (pending.contains(parent)) return NULL;
+    if (parent in pending) return NULL;
     return fallback ? _bind_declaration_default(compiler, fallback.car())
                     : NULL;
   }
