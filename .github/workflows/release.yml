@@ -128,7 +128,7 @@ jobs:
           # Every platform must have produced the same version.
           version="$(ls release/x2c-*.tar.gz |
             sed 's|release/x2c-\(.*\)-[^-]*-[^-]*\.tar\.gz|\1|' |
-            sort -u)"
+            sort -u | paste -sd ' ' -)"
           case "$version" in
             *" "*|"") echo "tarball versions disagree: $version" >&2; exit 1 ;;
           esac
