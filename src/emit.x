@@ -1372,12 +1372,11 @@ List Compiler.emit(Compiler compiler, List ast) {
   List code = emitter._emit(ast).flatten_all();
   Array before = [], after = [];
   if (state.static_support)
-    before.push(%(c-direct "#include \"exception.h\"\n#include <string.h>"));
+    before.push("#include \"exception.h\"\n#include <string.h>");
   foreach (List entry, state.native_macros.list_free()) {
     (String name, String definition) = entry;
-    before.push(%(c-direct $definition));
-    after.push(%(c-direct "#undef $name"));
+    before.push(definition);
+    after.push(%"#undef $name");
   }
-  return before.list_free().flatten_all().append(code)
-    .append(after.list_free().flatten_all());
+  return before.list_free().append(code).append(after.list_free());
 }

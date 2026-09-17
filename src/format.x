@@ -4,8 +4,7 @@
 
     Converts emitted token `List`s to pretty or compact C text without changing
     token order. Parenthesis depth suppresses statement breaks within
-    expressions, and preprocessor tokens normalize escaped quotes before
-    `Buffer` materializes the final `String`.
+    expressions, and `Buffer` materializes the final `String`.
 */
 
 #pragma once
@@ -30,11 +29,6 @@ static int _need_space(String prev, String curr) {
   if (_is_suffix_punct(c)) return 0;
   if (_is_prefix_punct(p)) return 0;
   return 1;
-}
-
-static String _normalized_token(String token) {
-  if (token && token[0] == '#') return token.replace("\\\"", "\"");
-  return token;
 }
 
 static int _token_is(String token, char ch) =>
@@ -87,9 +81,7 @@ static int _next_is_closing_brace(List rest) {
 /** Returns a canonical formatted C `String` for an emitted token `List`.
     Token order and `code` are unchanged. Braces indent by two spaces,
     semicolons break lines only outside parentheses, and preprocessor tokens
-    occupy their own lines with escaped quotes normalized. A `c-direct`
-    marker precedes an already-emitted directive whose escapes are preserved.
-    An empty `List` returns the empty `String`. Emitted `src-at` markers carry
+    occupy their own lines. An empty `List` returns the empty `String`. Emitted `src-at` markers carry
     existing compiler origin IDs; zero restores `output_file` at its physical
     line.
 
@@ -122,10 +114,7 @@ char *Compiler.code_pretty_string(Compiler cc, List code, String output_file) {
       prev_token = NULL;
       continue;
     }
-    int emitted_directive = lst.car() == <c-direct>;
-    if (emitted_directive) lst = lst.cdr();
     String token = lst.car().str();
-    if (!emitted_directive) token = _normalized_token(token);
     char last = token ? token[-1] : '\0';
 
     /* A directive writes its own newline. The emitter may follow it with a

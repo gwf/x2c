@@ -433,8 +433,8 @@ implicit runtime include are in `greet.h`.
 
 Consumes the C token `List`, produces text. `src/format.x` walks the tokens
 without reordering them: parenthesis depth suppresses statement breaks inside
-expressions, preprocessor tokens get their escaped quotes normalized, and a
-`Buffer` materializes the final `String`. The result is valid, readable C, with
+expressions, preprocessor tokens occupy their own lines, and a `Buffer`
+materializes the final `String`. The result is valid, readable C, with
 spacing determined by the emitter. `src/generate.x` then writes the two files,
 named from the input basename inside the `--out-dir` directory; a write failure
 becomes a diagnostic carrying the target path and the host error.
