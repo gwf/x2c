@@ -10,8 +10,8 @@ int main(void) {
   int x = 1;
   printf("%d %d %d\n", ("abc").len(), (x ? "abc" : "de").len(),
          (x ? ("abc") : "de").len());
-  foreach (Var ch, ("ab")) printf("%s ", ch.repr());
-  foreach (Var ch, x ? "cd" : "e") printf("%s ", ch.repr());
+  foreach (Var ch, ("ab")) printf("%s,", ch.repr());
+  foreach (Var ch, x ? "cd" : "e") printf("%s,", ch.repr());
   printf("\n");
   try raise %(boom (msg ${("text")}));
   catch %(boom (msg ?m)): printf("%s\n", m.repr());
