@@ -51,6 +51,7 @@ static List _parse_variable_reference(Compiler compiler) {
     return NULL;
   compiler.next();
   List expr = compiler.parse_expression();
+  compiler.check_explicit_converter(expr, %("Var"), 0);
   compiler.expect(<"}">);
   return expr;
 }
@@ -818,6 +819,7 @@ static List _parse_string_segment(Compiler c) {
     case <"${">:
       c.next();
       expr = c.parse_expression();
+      c.check_explicit_converter(expr, %("String"), 1);
       expr = c.convert_segment_to_string(expr);
       c.expect(<"}">);
       return %(segexp $expr);

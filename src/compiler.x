@@ -1792,7 +1792,7 @@ static const char *script_main =
   "  }\n"
   "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
   "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
-  "            argv[0], command.repr().str(), status.integer());\n"
+  "            argv[0], command.repr().str(), status);\n"
   "    return (int) status.integer();\n"
   "  }\n"
   "  catch %(?code *detail): {\n"

@@ -1,0 +1,30 @@
+unittest/compiler-fixtures/explicit-converter-warning.x:14:20: warning: unnecessary conversion: .var() where ("Var") is expected
+    Var boxed = s.var();
+                     ^
+  note: remove the call; the destination converts the value
+
+unittest/compiler-fixtures/explicit-converter-warning.x:16:24: warning: unnecessary conversion: .str() where ("String") is expected
+    String name = sym.str();
+                         ^
+  note: remove the call; the destination converts the value
+
+unittest/compiler-fixtures/explicit-converter-warning.x:17:28: warning: unnecessary conversion: .list() where ("List") is expected
+    int count = _count(v.list());
+                             ^
+  note: remove the call; the destination converts the value
+
+unittest/compiler-fixtures/explicit-converter-warning.x:19:32: warning: unnecessary conversion: .str() where ("String") is expected
+    String hole = %"value ${v.str()}";
+                                 ^
+  note: remove the call; the hole renders the value
+
+unittest/compiler-fixtures/explicit-converter-warning.x:20:25: warning: unnecessary conversion: .var() where ("Var") is expected
+    List holes = %(${s.var()});
+                          ^
+  note: remove the call; the destination converts the value
+
+unittest/compiler-fixtures/explicit-converter-warning.x:24:15: warning: unnecessary conversion: .str() where ("String") is expected
+           v.str());
+                ^
+  note: remove the call; the format converts the value
+

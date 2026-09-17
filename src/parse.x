@@ -1037,6 +1037,8 @@ static List _declarator_init(
       return bind;
     }
     List init = c.parse_assignment(), binding = bind.cadr();
+    c.check_explicit_converter(
+      init, %(declare $type (bindings $bind)).type_from_ast(), 0);
     if (binding_identity_try_parts(binding, NULL, NULL)) {
       Token tokens = c.tokenizer.tokens;
       int token_index = origin - tokens;

@@ -155,9 +155,9 @@ Public functions:
 `Diagnostics.entries`, `Diagnostics.has_emitter`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.report_error`, `Compiler.report_warning`, `Compiler.error_count`,
-`Compiler.diagnostics`, `Compiler.dump_tokens`, `Compiler.dump_symbol_table`,
-`Compiler.dump_cache`
+`Compiler.report_error`, `Compiler.report_warning`,
+`Compiler.report_warning_at`, `Compiler.error_count`, `Compiler.diagnostics`,
+`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
@@ -182,15 +182,16 @@ x2c expression parsing.
 Public functions:
 
 `Compiler.complete_iter_chain`, `Compiler.resolve_postfix_member`,
-`Compiler.parse_macro_expression_target`, `Compiler.require_var_tag`,
-`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
-`Compiler.resolve_expression`, `Compiler.parse_variable`,
-`Compiler.parse_conditional`, `Compiler.parse_assignment`,
-`Compiler.parse_primary`, `Compiler.parse_expression`,
-`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
-`Compiler.initializer_slot`, `Compiler.initializer_rows`,
-`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
+`Compiler.parse_macro_expression_target`, `Compiler.check_explicit_converter`,
+`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
+`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
+`Compiler.parse_variable`, `Compiler.parse_conditional`,
+`Compiler.parse_assignment`, `Compiler.parse_primary`,
+`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
+`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
+`Compiler.initializer_rows`, `Compiler.convert_initializer`,
+`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -406,7 +407,8 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`transform_array_literal`, `transform_map_literal`, `Compiler.transform`
+`Compiler.printf_variadic_start`, `transform_array_literal`,
+`transform_map_literal`, `Compiler.transform`
 
 ### [src/type.x](../src/type.x)
 

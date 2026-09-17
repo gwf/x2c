@@ -378,11 +378,21 @@ void Compiler.report_error(
 */
 void Compiler.report_warning(
   Compiler compiler, Symbol code, String message, Token token, List notes) {
+  compiler.report_warning_at(
+    code, message, _compiler_location(compiler, token), notes);
+}
+
+/** Records and emits a warning at a location built earlier by
+    `Compiler.token_location`, for a report raised after its token has been
+    consumed. Defaults match `Compiler.report_warning`.
+*/
+void Compiler.report_warning_at(
+  Compiler compiler, Symbol code, String message, List location,
+  List notes) {
   report_suspend();
   Diagnostics diag = compiler.diagnostics;
   message = message ? message : "compiler warning";
-  List loc = _compiler_location(compiler, token);
-  diag._warn(code ? code : <warning>, message, loc, notes);
+  diag._warn(code ? code : <warning>, message, location, notes);
 }
 
 /* Locations use one-based coordinates while source indexing is zero-based.

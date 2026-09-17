@@ -92,6 +92,14 @@ static const PrintfFn *_printf_family(List callee) {
   return NULL;
 }
 
+/** Returns the index of the first value argument a printf-family `callee`
+    converts by its format, or -1 for any other callee.
+*/
+int Compiler.printf_variadic_start(Compiler compiler, List callee) {
+  const PrintfFn *info = _printf_family(callee);
+  return info ? info->first_arg : -1;
+}
+
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||
          name == "Iter_list" || name == "Iter_array" ||

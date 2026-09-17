@@ -103,8 +103,9 @@ static List _defer_statement(Compiler compiler) {
 */
 List Compiler.finish_return_statement(Compiler compiler, List expression) {
   if (!expression) return %(return);
-  return %(return ${compiler.return_type}
-           ${compiler.resolve_expression(expression, compiler.token)});
+  List resolved = compiler.resolve_expression(expression, compiler.token);
+  compiler.check_explicit_converter(resolved, compiler.return_type, 0);
+  return %(return ${compiler.return_type} $resolved);
 }
 
 static List _return_statement(Compiler compiler) {

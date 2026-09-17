@@ -157,6 +157,59 @@ static List _parse_postfix_index(Compiler c, List expr) {
   return c.resolve_expression(%(expr () (index $expr $index)), c.token);
 }
 
+/* An explicit converter call, `value.str()` or `value.var()`, is the most
+   recent one parsed from source tokens, kept with its spelling and
+   location. A destination parser compares the expression it just parsed
+   against it, so nested calls and calls bound from constructed syntax never
+   match. A converter takes only its receiver and is named for its result:
+   the result spelled in lower case, `str` for String, or a Var numeric
+   reader. */
+static void _note_explicit_converter(
+  Compiler c, List call, String method, Token origin) {
+  Type result = call.cadr();
+  List node = _expression_node(call);
+  if (!result.match(%(?)) || !node.match(%(call ? (args ?)))) return;
+  String spelled = result.car().str().lower();
+  int named = method == spelled ||
+    (method == "str" && result === %("String")) ||
+    (method == "integer" && result === %(long)) ||
+    (method == "floating" && result === %(double));
+  if (!named) return;
+  c.protocol_helpers["explicit-converter"] =
+    %($call $method ${c.token_location(origin)});
+}
+
+int Compiler.printf_variadic_start(Compiler compiler, List callee);
+
+/* Each argument of a call spelled in source is checked against its declared
+   parameter type. A method receiver selects the method and is not a
+   destination, and a call the compiler builds for an operator is not a
+   destination the source spelled. */
+static void _check_explicit_converter_arguments(
+  Compiler compiler, List result, int method) {
+  List callee = NULL, params = NULL, arguments = NULL;
+  match (result) case %(expr ? (call ?called (args *supplied))): {
+    callee = called;
+    arguments = supplied;
+    match (callee) case %(expr ((func ?declared) *) ?): params = declared;
+  }
+  for (List p = params, a = arguments; p && a; p = cdr(p), a = cdr(a)) {
+    if (method && a == arguments) continue;
+    if (!(car(p) is <list>) || !(car(a) is <list>)) continue;
+    List param = car(p), argument = car(a);
+    Type expected = param.car() == <param> ? param.type_from_ast() : param;
+    compiler.check_explicit_converter(argument, expected, 0);
+  }
+  // A printf-family format converts each Var value it consumes.
+  int first = compiler.printf_variadic_start(callee), index = 0;
+  if (first < 0) return;
+  foreach (Var argument, arguments) {
+    if (index++ >= first && argument is <list>)
+      compiler.check_explicit_converter(
+        argument, argument.list().cadr(), 2);
+  }
+}
+
 static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<(>);
@@ -168,8 +221,15 @@ static List _parse_postfix_apply(Compiler c, List expr) {
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
-  return c.resolve_expression(
-    %(expr () (call $expr (args @{arguments.list_free()}))), origin);
+  List supplied = arguments.list_free();
+  List result = c.resolve_expression(
+    %(expr () (call $expr (args @supplied))), origin);
+  int method = !!expr.match(%(expr () (op . ? (?))));
+  _check_explicit_converter_arguments(c, result, method);
+  if (method && supplied === %((expr (void) ())))
+    match (expr) case %(expr () (op . ? (?name))):
+      _note_explicit_converter(c, result, name.str(), origin);
+  return result;
 }
 
 static Type _receiver_relative_signature(
@@ -1555,6 +1615,61 @@ static List _resolve_func_call(
   );
 }
 
+/* The function being defined may be the implicit crossing itself, as
+   `Var.long` is for a `long` destination; its explicit reads are how the
+   crossing is written, not a repetition of it. */
+static int _defines_crossing(Compiler c, Type source, Type target) {
+  if (!c.fn_name || !source.match(%(?)) || !target.match(%(?))) return 0;
+  String from = source.car().str(), to = target.car().str();
+  Type scalar = c.sym.resolve_numeric_type(target);
+  String extractor = scalar ? scalar.var_numeric_extractor() : NULL;
+  return c.fn_name == %"${from}_${to.lower()}" ||
+    c.fn_name == %"${from}_str" || c.fn_name == %"${from}_var" ||
+    (extractor && c.fn_name == extractor);
+}
+
+/** Reports `parsed` when it is the explicit converter call resolved last
+    and `target` converts its receiver on its own: either side is Var, the
+    types share one C type, or the receiver declares a converter to the
+    target. The call then changes nothing but the spelling. `context` is 0
+    for a typed destination, 1 for an interpolation hole, which displays
+    every value through `Var.str`, and 2 for a printf-family value, which
+    the format converts when it is a Var.
+*/
+void Compiler.check_explicit_converter(
+  Compiler c, List parsed, Type target, int context) {
+  Var noted;
+  if (!parsed || !target ||
+      !c.protocol_helpers.try_get("explicit-converter", &noted)) return;
+  (List call, String method, List location) = noted.list();
+  if (!List.equal(call, parsed)) return;
+  // A qualified target, such as `const char *`, is a different crossing.
+  if (target.declared() != target.canonicalize() ||
+      !List.equal(c.sym.resolve_key(call.cadr()), c.sym.resolve_key(target)))
+    return;
+  List receiver = _expression_node(call).caddr().cadr();
+  Type source = receiver.cadr();
+  if (!source) return;
+  int source_is_var = c.sym.is_var_type(source);
+  /* `Var.str` displays any value, while the implicit crossing to String
+     reads the String payload: a different operation for a Symbol or a
+     number. A hole and a format render through `Var.str` and repeat it. */
+  if (source_is_var && method == "str" && context == 0) return;
+  if (context == 2 && !source_is_var) return;
+  int implicit = source_is_var || c.sym.is_var_type(target) ||
+    List.equal(c.sym.resolve_key(source), c.sym.resolve_key(target)) ||
+    !!_converter_call(c, receiver, source, target);
+  if (!implicit || _defines_crossing(c, source, target)) return;
+  c.protocol_helpers.del("explicit-converter");
+  String hint = context == 1 ? "remove the call; the hole renders the value"
+    : context == 2 ? "remove the call; the format converts the value"
+    : "remove the call; the destination converts the value";
+  c.report_warning_at(
+    <warning>,
+    %"unnecessary conversion: .$method() where ${target.repr()} is expected",
+    location, %($hint));
+}
+
 static List _resolve_call(
   Compiler c, Type result_type, List function, List supplied,
   Token origin) {
@@ -2406,6 +2521,7 @@ static List _parse_assignment_tail(Compiler compiler, List lhs) {
   List rhs = compiler.parse_assignment();
   if (targets) match (rhs)
     case %(expr ?type ?): return %(expr $type (dstrasgn $targets $rhs));
+  if (op == <=>) compiler.check_explicit_converter(rhs, lhs.cadr(), 0);
   return compiler.resolve_expression(%(expr () (op $op $lhs $rhs)), origin);
 }
 
