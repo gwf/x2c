@@ -42,17 +42,21 @@ static void system_macro_switch_scopes_and_breaks_each_run(void) {
   EXPECT_INT_EQ(_returns_early(2), -1);
 }
 
+/* A multi-line literal cannot sit inside a function-like C macro invocation,
+   so each block binds a local before the assertion reads it. */
 static void system_macro_dedent_folds_and_defers(void) {
-  EXPECT_TRUE($dedent(%"
+  String folded = $dedent(%"
     alpha
       beta
     gamma
-  ") == "alpha\n  beta\ngamma\n");
+  ");
+  EXPECT_TRUE(folded == "alpha\n  beta\ngamma\n");
   String who = "world";
-  EXPECT_TRUE($dedent(%"
+  String deferred = $dedent(%"
     hello $who
       indented
-  ") == "hello world\n  indented\n");
+  ");
+  EXPECT_TRUE(deferred == "hello world\n  indented\n");
 }
 
 static void system_macro_assert_reports_the_written_check(void) {

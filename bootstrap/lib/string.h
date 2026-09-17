@@ -59,6 +59,7 @@ String String_capitalize(String str);
 String String_lstrip(String str, char * negChars);
 String String_rstrip(String str, char * negChars);
 String String_strip(String str, char * negChars);
+String String_dedent(String str);
 String String_filter(String str, Func fn);
 String String_map(String str, Func fn);
 String String_keep(String str, String chars);

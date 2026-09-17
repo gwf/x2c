@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _2, _1, _0;
+static String _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -87,7 +87,7 @@ Pool String_pool_current(void){
 
 void x2c_pool_values_initialize(void);
 void String_initialize(void){
-  if(_init_guard_) return;  _init_guard_ = 1;  x2c_pool_values_initialize();  _0 = String_new("\"%s\"");  _1 = String_new("\\");  _2 = String_new("\"\"");  Scope_shutdown_hook(String_shutdown);
+  if(_init_guard_) return;  _init_guard_ = 1;  x2c_pool_values_initialize();  _0 = String_new("\n");  _1 = String_new("\"%s\"");  _2 = String_new("\r\n");  _3 = String_new("\n");  _4 = String_new("\\");  _5 = String_new("\"\"");  Scope_shutdown_hook(String_shutdown);
 }
 
 void x2c_pool_values_thread_initialize(void);
@@ -602,6 +602,21 @@ String String_strip(String str, char * negChars){
   return String_new_len(str + start, end - start);
 }
 
+String String_dedent(String str){
+  if(! _init_guard_) String_initialize();
+  if(! String_truth(str)) return NULL;
+  int length = String_len(str);
+  int skip = String_startswith(str, _2) ? 2 :(String_startswith(str, _3) ? 1 : 0);
+  int width = 0;
+  while(skip + width < length &&(String_getindex(str, skip + width) == ' ' || String_getindex(str, skip + width) == '\t')) width ++;
+  String prefix = String_new_len(str + skip, width);
+  String body = width ? String_replace(String_new(str + skip + width), String_join(NULL, cons(String_var(_0), cons(String_var(prefix), NULL))), _3) : String_new(str + skip);
+  int end = String_len(body), tail = end;
+  while(tail > 0 &&(String_getindex(body, tail - 1) == ' ' || String_getindex(body, tail - 1) == '\t')) tail --;
+  if(tail == end ||(tail > 0 && String_getindex(body, tail - 1) != '\n')) return body;
+  return String_new_len(body, tail);
+}
+
 FuncArg FuncArg_value(Var);
 
 Var char_var(char);
@@ -672,7 +687,7 @@ String String_map(String str, Func fn){
       int ch = Var_int(Var_convert(_apply(fn, src[i]), 3453797));
       if(! ch){
         {
-          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "String_map",.line = 881};
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "String_map",.line = 910};
           x2c_error_raise_n(& _x2c_error_site_5, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
@@ -803,14 +818,14 @@ String String_squeeze(String str, String chars){
 
 static String _pad(String str, int width, char fill, int left_padding){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 922};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 951};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_pad",.line = 925};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_pad",.line = 954};
     x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -1119,7 +1134,7 @@ String String_unescape(String str){
   if(! _init_guard_) String_initialize();
   int n = String_len(str);
   if(n == 0) return NULL;
-  if(! String_contains(str, _1)) return str;
+  if(! String_contains(str, _4)) return str;
   String string = String_malloc(n + 1);
   char * dst = string;
   const char * src = str;
@@ -1132,7 +1147,7 @@ String String_unescape(String str){
       if(esc > 0377){
         _free_unchecked(string);
         {
-          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1286};
+          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1315};
           x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
           __builtin_unreachable();
         }
@@ -1189,8 +1204,8 @@ String String_str(String str){
 
 String String_repr(String str){
   if(! _init_guard_) String_initialize();
-  if(! String_truth(str) || ! * str) return _2;
-  return String_printf(_0, String_escape(str));
+  if(! String_truth(str) || ! * str) return _5;
+  return String_printf(_1, String_escape(str));
 }
 
 Buffer Buffer_write(Buffer, const char *);

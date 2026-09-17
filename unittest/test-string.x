@@ -554,11 +554,12 @@ static void string_dedent_normalizes_written_indentation(void) {
     gamma
   ";
   EXPECT_TRUE(block.dedent() == "alpha\n  beta\ngamma\n");
-  EXPECT_TRUE(%"
+  String blanks = %"
     one
 
     two
-  ".dedent() == "one\n\ntwo\n");
+  ";
+  EXPECT_TRUE(blanks.dedent() == "one\n\ntwo\n");
   EXPECT_TRUE("\n\tkeyed\n\t\tdeeper\n".dedent() == "keyed\n\tdeeper\n");
   EXPECT_TRUE("\r\n  first\r\n  second\r\n".dedent() == "first\r\nsecond\r\n");
   EXPECT_TRUE("\n  held\nflush\n".dedent() == "held\nflush\n");
