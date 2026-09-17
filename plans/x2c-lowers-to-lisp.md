@@ -85,6 +85,50 @@ So `C.while` and `C.for` as SDK procedures are the wrong shape. The
 lowering emits the control flow directly; any macro spelling is a macro
 that expands to direct forms.
 
+### Nothing may stand between a loop and its recursive call
+
+Measured 2026-09-17 while starting M0, and it constrains the lowering more
+than anything else. The evaluator reuses a frame only for a **direct self
+tail call**. A tail call to any other lambda retains the caller's
+environment, so a loop whose body reaches its recursive call through one
+more call accumulates environment per iteration:
+
+| loop body shape | 500 | 2,000 | 20,000 |
+|---|---|---|---|
+| direct self tail call | - | - | 25 ms |
+| through an anonymous lambda (`let*`) | 109 ms | 1,682 ms | segfault |
+| through a named global continuation | - | 1,565 ms | segfault |
+
+The cost is superlinear and ends in a stack overflow, so neither shape is
+usable. `let*` sequencing inside a loop body is therefore out, and so is
+the obvious continuation-passing lowering.
+
+The body must instead reduce to one expression per live local, computed
+from the values at the top of the iteration, so the iteration ends in
+`(loop e1 e2 ...)` directly. That is a substitution pass over the block:
+
+- straight-line assignments substitute symbolically, so
+  `t = a % b; a = b; b = t;` becomes `(loop b (_binary a '<"%"> b))`;
+- an `if` puts a complete tail call in each branch, which `cond` expresses
+  and which keeps every path direct;
+- `continue` is the tail call with the current expressions; `break` and
+  normal exit are a single tail call to the continuation, which happens
+  once per loop rather than once per iteration and so costs nothing.
+
+Two cases cannot be substituted and are **declined with a diagnostic**
+rather than lowered wrongly: an impure expression used more than once,
+and more than one live local whose expression has effects, because the
+argument order would reorder them. Both are rare and the refusal names the
+function.
+
+**Locals an inner loop assigns, and locals whose address is taken, stay in
+the frame `Map` instead of becoming parameters.** A nested loop is an
+ordinary non-tail call that returns, and a Lisp function returns one value,
+so it cannot hand several updated locals back to its caller. Routing those
+through memory avoids the problem, and the spike already draws exactly this
+distinction for address-taken locals. Map-backed locals cost a lookup;
+parameter locals cost nothing.
+
 ### Raise `LISP_AUTO_PARAM_MAX` from 8 to 32
 
 Locals-as-parameters has a ceiling. `LISP_AUTO_PARAM_MAX` in `lib/lisp.x`
@@ -147,11 +191,16 @@ All work stays on `x2c-lowers-to-lisp`. No push to `main`, no PR against
 
 ### M0 - prove the lowering on the machine
 
-Port `.context/spike/c-from-ast.xlisp` to a direct-form lowering and
-confirm one representative function runs as a single machine entry at the
-rate measured above. Raise `LISP_AUTO_PARAM_MAX` to 32 with the carried
--locals measurement as its evidence. Proof: the spike's 22 functions still
-match native, and `spin(100000)` runs in under 200 ms.
+Implement the substitution lowering above for the loop shapes it covers,
+keeping the spike's existing path for everything it declines, so the 22
+functions keep passing while the fast path is proved. Raise
+`LISP_AUTO_PARAM_MAX` to 32 with the carried-locals measurement as its
+evidence. Proof: the spike's 22 functions still match native, and
+`spin(100000)` runs in under 200 ms as one machine entry.
+
+The two-path arrangement is scaffolding for this milestone only. M1 either
+extends the substitution lowering to cover everything or records why a
+second path is permanent.
 
 ### M1 - the compile-time function
 
