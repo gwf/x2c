@@ -738,7 +738,12 @@ ProjectBuild project_plan(CliRequest request) {
 */
 int new_command(CliRequest request) {
   Path dir = request.inputs.car();
-  String name = dir.absolute().basename();
+  if (!dir) x2c_driver_error("new: the directory operand is empty");
+  // The operand's own last component names the target, so a symbolic link
+  // is named for the link and not for what it points at.
+  String name = dir.basename();
+  if (name == "." || name == ".." || name == "/")
+    name = Path.absolute(dir).basename();
   if (!_name_ok(name))
     x2c_driver_error(
       %"new: '$name' is not a target name; use letters, digits, '_', and '-'");
