@@ -23,7 +23,9 @@ success_stderr="$BUILD/success.stderr"
     >"$BUILD/success.stdout" 2>"$success_stderr"
 )
 
-grep -Fq '#define PROBE_VALUE 37' "$success_stderr"
+# A requested dump is data on stdout; stderr carries only diagnostics.
+grep -Fq '#define PROBE_VALUE 37' "$BUILD/success.stdout"
+[[ ! -s "$success_stderr" ]]
 grep -Fxq "$SOURCE_NAME" "$args_log"
 grep -Fxq -- '-P' "$args_log"
 grep -Fxq -- '-Wno-pragma-once-outside-header' "$args_log"
