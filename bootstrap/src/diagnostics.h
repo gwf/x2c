@@ -48,6 +48,8 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
 
 void Compiler_report_warning(Compiler compiler, Symbol code, String message, Token token, List notes);
 
+void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes);
+
 int Compiler_error_count(Compiler compiler);
 
 List Compiler_diagnostics(Compiler compiler);

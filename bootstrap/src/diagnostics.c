@@ -500,11 +500,15 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
 
 void Compiler_report_warning(Compiler compiler, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();
+  Compiler_report_warning_at(compiler, code, message, _compiler_location(compiler, token), notes);
+}
+
+void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes){
+  if(! _init_guard_) _file_init_();
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
   message = String_truth(message) ? message : _58;
-  List loc = _compiler_location(compiler, token);
-  Diagnostics__warn(diag, code ? code : 49497918350, message, loc, notes);
+  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
 }
 
 static void Compiler__show_source_context(Compiler compiler, List location){

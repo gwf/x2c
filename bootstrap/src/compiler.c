@@ -118,7 +118,7 @@ static void _push_script_conditionals(Compiler c, Array statements, int first, i
 
 static void _check_script_locals(Compiler c, List ast);
 
-static const char * script_main = "static int x2c_script(int argc, char **argv, List args) {\n" "  (void) argc, (void) argv, (void) args;\n" "  x2c_script_statements\n" "  return 0;\n" "}\n" "int main(int argc, char **argv) {\n" "  try {\n" "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n" "  }\n" "  catch %(cmd-fail (command ?command) (status ?status) *): {\n" "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n" "            argv[0], command.repr().str(), status.integer());\n" "    return (int) status.integer();\n" "  }\n" "  catch %(?code *detail): {\n" "    fprintf(stderr, \"%s: %s %s\\n\",\n" "            argv[0], code.str(), detail.repr().str());\n" "    return 1;\n" "  }\n" "}\n";
+static const char * script_main = "static int x2c_script(int argc, char **argv, List args) {\n" "  (void) argc, (void) argv, (void) args;\n" "  x2c_script_statements\n" "  return 0;\n" "}\n" "int main(int argc, char **argv) {\n" "  try {\n" "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n" "  }\n" "  catch %(cmd-fail (command ?command) (status ?status) *): {\n" "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n" "            argv[0], command.repr().str(), status.integer());\n" "    return (int) status.integer();\n" "  }\n" "  catch %(?code *detail): {\n" "    fprintf(stderr, \"%s: %s %s\\n\",\n" "            argv[0], code, detail.repr().str());\n" "    return 1;\n" "  }\n" "}\n";
 
 static void _append_script_main(Compiler c, Array statements);
 

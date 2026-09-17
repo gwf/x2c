@@ -355,10 +355,16 @@ static List _defer_statement(Compiler compiler){
 
 List Compiler_resolve_expression(Compiler, List, Token);
 
+void Compiler_check_explicit_converter(Compiler, List, Type, int);
+
+Type List_type(List);
+
 List Compiler_finish_return_statement(Compiler compiler, List expression){
   if(! _init_guard_) _file_init_();
   if(! List_truth(expression)) return _7;
-  return cons(_6, cons(List_var(compiler -> return_type), cons(List_var(Compiler_resolve_expression(compiler, expression, compiler -> token)), NULL)));
+  List resolved = Compiler_resolve_expression(compiler, expression, compiler -> token);
+  Compiler_check_explicit_converter(compiler, resolved, List_type(compiler -> return_type), 0);
+  return cons(_6, cons(List_var(compiler -> return_type), cons(List_var(resolved), NULL)));
 }
 
 static List _return_statement(Compiler compiler){
@@ -488,8 +494,6 @@ List Type_list(Type);
 List Sym_introduce(Sym, String);
 
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
-
-Type List_type(List);
 
 static List _match_capture_declaration(Compiler compiler, Type type, String name, List initializer, int temporary){
   List binding;

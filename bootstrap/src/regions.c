@@ -978,7 +978,7 @@ case 50603262308 :{
 if(_returns_fresh(w, callee)) return _195; {
   List row;  List _x2c_macro_object_7 = _parameter_sinks(w, callee);  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
     row = Var_list(_x2c_macro_cursor_output_7); {
-      int index = Var_int(List_car(row));  if(! List_contains(List_cdr(row), Symbol_var(1219800220)) || index >=(int) List_len(arguments)) continue;  Map fact = _fact_of(w, List_getindex(arguments, index), NULL);  if(! Map_truth(fact) || _flag(fact, 386507080)) continue;  Map region = _region_of(fact);  if(Map_truth(region)) return cons(List_var(cons(_215, cons(Map_var(region), NULL))), cons(Map_getindex(fact, Symbol_var(740232)), NULL));
+      int index = Var_int(List_car(row));  if(! List_contains(List_cdr(row), Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Map fact = _fact_of(w, List_getindex(arguments, index), NULL);  if(! Map_truth(fact) || _flag(fact, 386507080)) continue;  Map region = _region_of(fact);  if(Map_truth(region)) return cons(List_var(cons(_215, cons(Map_var(region), NULL))), cons(Map_getindex(fact, Symbol_var(740232)), NULL));
     }
 
   }
@@ -1052,7 +1052,7 @@ static int _alias_parameter(Walk w, Var expression){
   List arguments = NULL;  String callee = _callee_of(expression, & arguments);  if(! String_truth(callee)) return - 1; {
     List row;  List _x2c_macro_object_8 = _parameter_sinks(w, callee);  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
       row = Var_list(_x2c_macro_cursor_output_8); {
-        int index = Var_int(List_car(row));  if(! List_contains(List_cdr(row), Symbol_var(1219800220)) || index >=(int) List_len(arguments)) continue;  Map fact = _fact_of(w, List_getindex(arguments, index), NULL);  if(Map_truth(fact) && _parameter_of(fact) >= 0 && ! _flag(fact, 386507080)) return _parameter_of(fact);
+        int index = Var_int(List_car(row));  if(! List_contains(List_cdr(row), Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Map fact = _fact_of(w, List_getindex(arguments, index), NULL);  if(Map_truth(fact) && _parameter_of(fact) >= 0 && ! _flag(fact, 386507080)) return _parameter_of(fact);
       }
 
     }
@@ -1156,7 +1156,7 @@ static void _scan_call(Walk w, String callee, List arguments){
     }
     return;
   }
-  List rows = _parameter_sinks(w, callee);  int count =(int) List_len(arguments); {
+  List rows = _parameter_sinks(w, callee);  int count = List_len(arguments); {
     List row;  List _x2c_macro_object_11 = rows;  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
       row = Var_list(_x2c_macro_cursor_output_11); {
         int index = Var_int(List_car(row));  if(index >= count) continue;  Var argument = List_getindex(arguments, index); {
@@ -1267,7 +1267,7 @@ if(String_truth(callee) && _role(w, callee) == 7479733066 && List_truth(argument
 default: break;
     }
   }
-for(int i =(int) List_len(node) - 1;  i >= 0;  i --) Array_push(pending, List_getindex(node, i));
+for(int i = List_len(node) - 1;  i >= 0;  i --) Array_push(pending, List_getindex(node, i));
 }
 if(deferred){
   x2c_cleanup_leave(& _x2c_defer_record_1);  x2c_cleanup_leave(& _x2c_defer_record_0);  return;

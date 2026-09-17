@@ -7,6 +7,8 @@
 
 #include "x2c.h"
 #include "compiler.h"
+int Compiler_printf_variadic_start(Compiler compiler, List callee);
+
 List transform_array_literal(Compiler compiler, List ast);
 
 List transform_map_literal(Compiler compiler, List ast);

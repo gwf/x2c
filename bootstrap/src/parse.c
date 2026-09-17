@@ -1322,7 +1322,7 @@ static List _primitive_type(Compiler compiler){
   Type source = List_type(Array_list_free(specs)), scalar = Type_scalar(source);
   if(List_truth(Type_list(scalar))) return Type_list(scalar);
   if(compiler -> shallow) return Type_list(source);
-  Compiler_report_error(compiler, 1362954, List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_38), cons(String_var(List_str(Type_list(source))), NULL))) : _699, start, NULL);
+  Compiler_report_error(compiler, 1362954, List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_38), cons(String_var(List_str(source)), NULL))) : _699, start, NULL);
 }
 
 String Compiler_package_spelling(Compiler, String);
@@ -1776,13 +1776,14 @@ static List _declarator(Compiler compiler, List type, List context, List * metho
 }
 
 int Compiler__at_function_arrow(Compiler);
+void Compiler_check_explicit_converter(Compiler, List, Type, int);
 int binding_identity_try_parts(List, int *, String *);
 static List _declarator_init(Compiler c, List type, List context){
   Token origin = c -> token;  List method = NULL;  Token first = NULL, after = NULL;  List bind = _declarator(c, type, context, & method, & first, & after);  int preserved_self = 0;  bind = _install_declarator_node(c, type, context, bind, method, & preserved_self);  Compiler_record_source_declaration(c, Var_list(List_cadr(bind)), first, after);  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(cons(_39, cons(List_var(type), cons(List_var(cons(_37, cons(List_var(bind), NULL))), NULL)))));  if(! c -> in_proto && ! function_arrow && Compiler_test(c, 123)){
     if(c -> shallow){
       Compiler__skip_shallow_expression(c, 1);  return bind;
     }
-    List init = Compiler_parse_assignment(c), binding = Var_list(List_cadr(bind));  if(binding_identity_try_parts(binding, NULL, NULL)){
+    List init = Compiler_parse_assignment(c), binding = Var_list(List_cadr(bind));  Compiler_check_explicit_converter(c, init, List_type_from_ast(cons(_39, cons(List_var(type), cons(List_var(cons(_37, cons(List_var(bind), NULL))), NULL)))), 0);  if(binding_identity_try_parts(binding, NULL, NULL)){
       Token tokens = c -> tokenizer -> tokens;  int token_index = origin - tokens;  Map_setindex(c -> init_tokens, List_var(binding), int_var(token_index));
     }
     return cons(_30, cons(_31, cons(List_var(bind), cons(List_var(init), NULL))));

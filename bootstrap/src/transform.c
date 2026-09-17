@@ -1226,6 +1226,10 @@ default: break;
 return NULL;
 }
 
+int Compiler_printf_variadic_start(Compiler compiler, List callee){
+  if(! _init_guard_) _file_init_();  const PrintfFn * info = _printf_family(callee);  return info ? info -> first_arg : - 1;
+}
+
 static int _iter_immediate_consumer(String name){
   return String_equal(name, _22) || String_equal(name, _23) || String_equal(name, _24) || String_equal(name, _25) || String_equal(name, _26) || String_equal(name, _27) || String_equal(name, _28) || String_equal(name, _29) || String_equal(name, _30) || String_equal(name, _31) || String_equal(name, _32) || String_equal(name, _33) || String_equal(name, _34) || String_equal(name, _35);
 }

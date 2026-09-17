@@ -14,6 +14,8 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 
 List Compiler_parse_macro_expression_target(Compiler compiler);
 
+void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
+
 Symbol Compiler_require_var_tag(Compiler compiler, Type target, Token origin);
 
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
