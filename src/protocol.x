@@ -1940,7 +1940,7 @@ static List Compiler._generate_native_alias(
   String target = _member_spelling(participant, member);
   List declaration = _declaration_from_signature(
     compiler, target, signature, make_static);
-  if (!make_static) compiler.record_generated_header_symbol(target, signature);
+  if (!make_static) compiler.record_generated_symbol(target, signature);
   List native_binding = compiler.sym.reference(%($source), NULL);
   return compiler.finish_foreign_alias(
     declaration, %(expr $signature (ident $native_binding)));
@@ -2159,7 +2159,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
                   variables, binder, source, forward, NULL)
               );
               if (!make_static)
-                c.record_generated_header_symbol(generated, expected);
+                c.record_generated_symbol(generated, expected);
             }
             case %(
               (!set ?kind (!or linkage conflict))

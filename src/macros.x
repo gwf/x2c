@@ -842,26 +842,12 @@ static Var _sdk_literal_string(Var syntax) {
     %("value: ${syntax.repr()}"));
 }
 
-/* This catches the open failure, so an unreadable compile-time Lisp path
-   becomes a located diagnostic instead of an error transfer. */
-static File _open(
-  Compiler compiler, String path, String message, Token token, List notes) {
-  File source = NULL, int failed = 0;
-  try source = path.open("r");
-  catch %(not-found *): failed = 1;
-  catch %(io-fail *): failed = 1;
-  if (failed) compiler.report_error(<macro>, message, token, notes);
-  return source;
-}
-
+/* An unreadable compile-time source is a located diagnostic. */
 static String _source_text(
-  Compiler compiler, String path, String message, Token token, List notes) {
-  String text;
-  if (compiler.sources) {
-    if (!compiler.read_source(path, &text))
-      compiler.report_error(<macro>, message, token, notes);
-  }
-  else text = _open(compiler, path, message, token, notes).string_close();
+  Compiler c, String path, String message, Token token, List notes) {
+  String text = NULL;
+  if (!c.read_source(path, &text))
+    c.report_error(<macro>, message, token, notes);
   return text;
 }
 

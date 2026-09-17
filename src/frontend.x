@@ -68,7 +68,6 @@ static Token _first_preprocessor_token(Compiler compiler) {
 
 /** Loads process-owned collection support before units. */
 void Frontend.load_support(CliRequest request) {
-  header_symbols_initialize();
   interface_configure(request.out_dir);
 }
 
@@ -302,7 +301,6 @@ int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
     unit.globals = _preprocess_input(frontend, unit);
     if (unit.preprocessor)
       compiler.take_diagnostics(unit.preprocessor);
-    if (!frontend.request.no_cpp) header_symbols_begin_generated();
     compiler.sym.seed_var_tags(unit.globals);
   }
   catch %(malformed *): {

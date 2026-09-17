@@ -12,6 +12,7 @@
 #include "compiler.x"
 
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 #include "buffer.x"
 #include "utils.x"
 #include "snapshot.x"
@@ -21,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 /* Non-include lines yield NULL; `angle` distinguishes <...> from "...". */
@@ -93,14 +93,6 @@ static String _canonical_path(String path) {
   return realpath(path, buffer) ? %"$buffer" : path;
 }
 
-// Include targets must be readable regular files.
-static int _includable_file(SourceView sources, String path) {
-  if (sources) return sources.exists(path);
-  struct stat info;
-  if (access(path, R_OK) || stat(path, &info)) return 0;
-  return S_ISREG(info.st_mode) != 0;
-}
-
 /* Canonical process-wide include roots. */
 static String _cached_canonical(char *cache, String dir) {
   if (!*cache && !realpath(dir, cache))
@@ -141,7 +133,7 @@ static String _resolve_include_dirs(
   int angle, int *covered) {
   *covered = 0;
   if (target.startswith("/"))
-    return _includable_file(sources, target) ? target : NULL;
+    return sources.exists(target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
   Array dirs = [];
   if (!angle && includer_dir) dirs.push(_canonical_path(includer_dir));
@@ -156,7 +148,7 @@ static String _resolve_include_dirs(
   String found = NULL;
   foreach (String dir, dirs) {
     String path = %"$dir/$target";
-    if (!_includable_file(sources, path)) continue;
+    if (!sources.exists(path)) continue;
     found = path;
     *covered = dir == lib_dir || dir == include_dir;
     break;
@@ -175,42 +167,35 @@ static String _resolve_include(
    `(ordered-parts hash definitions dependencies)`. A part is a declaration
    Map or an included source path. Dependencies map macro, Lisp, and
    embedded-text paths to a content hash or 1. Entries outlive per-unit
-   scopes, so every retained key and value belongs to header_cache_scope. */
-static Map header_contributions = NULL, static Scope header_cache_scope = NULL;
-static int record_generated_symbols;
+   scopes, so every retained key and value belongs to process_cache_scope. */
+static Map process_cache = NULL, static Scope process_cache_scope = NULL;
 
 static void _cache_shutdown(void) {
-  Scope.destroy(header_cache_scope);
-  header_cache_scope = NULL;
-  header_contributions = NULL;
+  Scope.destroy(process_cache_scope);
+  process_cache_scope = NULL;
+  process_cache = NULL;
 }
 
-static Map _header_cache(void) {
-  if ((void *) header_contributions != NULL) return header_contributions;
-  Scope.push(&header_cache_scope);
+static Map _process_cache(void) {
+  if ((void *) process_cache != NULL) return process_cache;
+  Scope.push(&process_cache_scope);
   Scope.shutdown_hook(_cache_shutdown);
-  header_contributions = {};
+  process_cache = {};
   Scope.pop();
-  return header_contributions;
+  return process_cache;
 }
 
-/** Initializes the process-wide source-collection cache. */
-void header_symbols_initialize(void) {
-  _header_cache();
-}
-
-/** Enables recording of generated public protocol callables.
-    Recording remains enabled for subsequent translations in this process.
-*/
-void header_symbols_begin_generated(void) {
-  record_generated_symbols = 1;
+/* A file's entry: collected in this process, or read from its interface. */
+static List _entry(Compiler c, String canonical) {
+  Var cached = _process_cache()[canonical];
+  return cached is void ? _interface_read(c, canonical) : cached;
 }
 
 static void _cache_dependency(
   Map dependencies, String path, Var content_hash) {
-  _require_header_cache_owner(path.try_own());
+  _require_retained(path.try_own());
   if (content_hash is <string>)
-    _require_header_cache_owner(content_hash.string().try_own());
+    _require_retained(content_hash.string().try_own());
   dependencies.merge_translation_dependency(path, content_hash);
 }
 
@@ -233,9 +218,7 @@ static int _entry_adds_symbols_visit(
     String dependency = part;
     if (visited.contains(dependency)) continue;
     visited[dependency] = 1;
-    Var cached = _header_cache()[dependency];
-    List resolved = cached is void ? _interface_read(compiler, dependency)
-                                   : cached;
+    List resolved = _entry(compiler, dependency);
     if (resolved &&
         _entry_adds_symbols_visit(compiler, resolved, globs, visited))
       return 1;
@@ -252,13 +235,11 @@ static int _entry_adds_symbols(Compiler compiler, List entry, Map globs) =>
    entries have the same shape and take this same path. */
 static void _replay_cached(
   Compiler compiler, List entry, Map globs, Map visited) {
-  (List parts, Var content_hash, List definitions, Map dependencies) = entry;
-  (void) content_hash;
-  foreach (Var definition, definitions) compiler.fn_defs[definition] = 1;
+  foreach (Var definition, entry.caddr()) compiler.fn_defs[definition] = 1;
   /* Parsing this file read these macro and Lisp files. They are prerequisites
      of every unit that reaches it, not only of the one that parsed it. */
-  compiler.merge_translation_dependencies(dependencies);
-  foreach (Var part, parts) {
+  compiler.merge_translation_dependencies(entry[3]);
+  foreach (Var part, entry.car()) {
     if (part is <map>) {
       globs.merge(part);
       compiler.merge_source_declarations(globs, part);
@@ -268,9 +249,7 @@ static void _replay_cached(
     compiler.add_translation_dependency(dep_path);
     if (visited.contains(dep_path)) continue;
     visited[dep_path] = 1;
-    Var dep_entry = _header_cache()[dep_path];
-    List resolved = dep_entry is void ? _interface_read(compiler, dep_path)
-                                        : dep_entry;
+    List resolved = _entry(compiler, dep_path);
     if (resolved) _replay_cached(compiler, resolved, globs, visited);
     else _walk_cold(compiler, dep_path, dep_path, globs, visited);
   }
@@ -279,30 +258,9 @@ static void _replay_cached(
 /* Read an include's text, reporting an unreadable target as a driver error. */
 static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
-  if (c.sources) {
-    if (!c.read_source(path, &text))
-      c.report_error(<driver>, "cannot read include", c.token,
-                     %("stage: collect" "include: $target" "path: $path"));
-    return text;
-  }
-  File file = NULL;
-  try file = path.open("r");
-  catch %(not-found *): {
-    List notes = %(
-      "stage: collect" "include: $target" "path: $path");
-    c.report_error(<driver>, "cannot read include", c.token, notes);
-  }
-  catch %(io-fail *): {
-    List notes = %(
-      "stage: collect" "include: $target" "path: $path");
-    c.report_error(<driver>, "cannot read include", c.token, notes);
-  }
-  try text = file.string_close();
-  catch %(io-fail *): {
-    List notes = %(
-      "stage: collect" "include: $target" "path: $path");
-    c.report_error(<driver>, "cannot read include", c.token, notes);
-  }
+  if (!c.read_source(path, &text))
+    c.report_error(<driver>, "cannot read include", c.token,
+                   %("stage: collect" "include: $target" "path: $path"));
   return text;
 }
 
@@ -366,7 +324,7 @@ static void _flush_segment(
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
   int *private) {
   if (!segment.len()) return;
-  Scope.push(&header_cache_scope);
+  Scope.push(&process_cache_scope);
   Map overlay = {};
   Scope.pop();
   _parse_segment(
@@ -389,9 +347,7 @@ static void _include(
   if (!path) return;
   if (covered && !x2c_source_file(path)) return;
   String canonical = _canonical_path(path);
-  Var cached = c.source_facts ? void : _header_cache()[canonical];
-  List entry = cached is void ? _interface_read(c, canonical)
-                              : cached;
+  List entry = _entry(c, canonical);
   /* The entry records every include, so it does not depend on what the unit
      that first walked this file had already seen. */
   parts.push(canonical);
@@ -405,47 +361,38 @@ static void _include(
     }
   }
   /* A file still being walked, as in an include cycle, has no entry yet. */
-  Var walked = _header_cache()[canonical];
+  Var walked = _process_cache()[canonical];
   String content_hash = walked is void
     ? "%08x".printf(_include_text(c, target, canonical).hash())
     : walked.list().cadr();
   _cache_dependency(dependencies, canonical, content_hash);
 }
 
-static void _require_header_cache_owner(int owned) {
+static void _require_retained(int owned) {
   if (owned) return;
-  fprintf(stderr, "x2c: could not retain header cache entry\n");
+  fprintf(stderr, "x2c: could not retain process cache entry\n");
   abort();
 }
 
-/* The declaration map this file's own cache entry contributes, or NULL when
-   the file has not been collected in this process. A later recording adds to
-   the same map the interface writer publishes. */
-static Map _own_contribution(Compiler compiler) {
-  Var cached = _header_cache()[_canonical_path(compiler.filename)];
-  if (cached is not <list>) return NULL;
+/** Records one generated public callable in the declaration map that the
+    current file's collected entry contributes, which is the map its
+    interface publishes. A file without a collected declaration map records
+    nothing. The cache retains `signature`.
+*/
+void Compiler.record_generated_symbol(
+  Compiler c, String name, Type signature) {
+  Var cached = _process_cache()[_canonical_path(c.filename)];
+  if (cached is void) return;
   Map contribution = NULL;
   foreach (Var part, cached.list().car())
     if (part is <map>) contribution = part;
-  return contribution;
-}
-
-/** Records one generated public callable in its source file's cached surface.
-    The operation has no effect until generated-symbol recording is enabled.
-    The compiler's current file must already have a collected contribution;
-    the cache retains `signature`.
-*/
-void Compiler.record_generated_header_symbol(
-  Compiler compiler, String name, Type signature) {
-  if (!record_generated_symbols) return;
-  Map contribution = _own_contribution(compiler);
-  if ((void *) contribution == NULL) __builtin_unreachable();
+  if ((void *) contribution == NULL) return;
   List key = %($name), marker_key = %("generated-protocol" $name);
   List marker = %(generated);
-  _require_header_cache_owner(key.try_own());
-  _require_header_cache_owner(marker_key.try_own());
-  _require_header_cache_owner(marker.try_own());
-  _require_header_cache_owner(signature.try_own());
+  _require_retained(key.try_own());
+  _require_retained(marker_key.try_own());
+  _require_retained(marker.try_own());
+  _require_retained(signature.try_own());
   contribution[key] = signature;
   contribution[marker_key] = marker;
 }
@@ -464,7 +411,7 @@ static void _file(
     c.kw_aliases = {};
     c.kw_seen = {};
     Array parts = [], segment = [];
-    Scope.push(&header_cache_scope);
+    Scope.push(&process_cache_scope);
     Map dependencies = {};
     Scope.pop();
     Map definitions = {}, int in_comment = 0;
@@ -498,57 +445,46 @@ static void _file(
     Map generated =
       c.select_declaration_defaults(path, globs, parts, definitions);
     if (generated && generated.len()) {
-      Scope.push(&header_cache_scope);
+      Scope.push(&process_cache_scope);
       Map retained = generated.copy();
       Scope.pop();
       parts.push(retained);
     }
     List part_list = parts.list_free();
-    _require_header_cache_owner(path.try_own());
-    _require_header_cache_owner(part_list.try_own());
+    _require_retained(path.try_own());
     foreach (Var part, part_list) {
       if (part is not <map>) continue;
       Map rows = part;
       foreach (Var (key, value), rows) {
-        if (key is <list>) _require_header_cache_owner(key.list().try_own());
+        if (key is <list>) _require_retained(key.list().try_own());
         if (key is <string>)
-          _require_header_cache_owner(key.string().try_own());
+          _require_retained(key.string().try_own());
         if (value is <list>)
-          _require_header_cache_owner(value.list().try_own());
+          _require_retained(value.list().try_own());
         if (value is <string>)
-          _require_header_cache_owner(value.string().try_own());
+          _require_retained(value.string().try_own());
       }
     }
     Array names = [];
-    foreach (Var definition, definitions.keys()) {
-      _require_header_cache_owner(definition.string().try_own());
-      names.push(definition);
-    }
+    foreach (Var definition, definitions.keys()) names.push(definition);
     names.sort();
     List definition_list = names.list_free();
-    _require_header_cache_owner(definition_list.try_own());
     List entry = %(
       $part_list $content_hash $definition_list $dependencies
     );
-    _require_header_cache_owner(entry.try_own());
+    _require_retained(entry.try_own());
     /* The first walk of a file fixes its contribution. A later walk of the
        same file, such as a unit whose text the prelude already covered,
        does not replace an entry that other units may already have replayed. */
-    if (!_header_cache().contains(path)) _header_cache()[path] = entry;
+    if (!_process_cache().contains(path)) _process_cache()[path] = entry;
     c.kw_aliases = enclosing_aliases;
     c.kw_seen = enclosing_alias_imports;
   }
 }
 
 static String _runtime_text(Compiler c, String runtime) {
-  String text = NULL, int failed = 0;
-  if (c.sources) failed = !c.read_source(runtime, &text);
-  else {
-    try text = runtime.open("r").string_close();
-    catch %(not-found *): failed = 1;
-    catch %(io-fail *): failed = 1;
-  }
-  if (failed)
+  String text = NULL;
+  if (!c.read_source(runtime, &text))
     c.report_error(
       <driver>, "cannot read runtime source", c.token,
       %("path: $runtime"));
@@ -558,16 +494,14 @@ static String _runtime_text(Compiler c, String runtime) {
 /* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
    read from `lib/x2c.xi` beside a stage build, or walked cold once. */
 static List _prelude_entry(Compiler c, String runtime, String canonical) {
-  Var cached = _header_cache()[canonical];
-  if (cached is not void) return cached;
-  List entry = _interface_read(c, canonical);
+  List entry = _entry(c, canonical);
   if (entry) return entry;
   Map scratch = {}, visited = {};
   visited[canonical] = 1;
   _file(
     c, canonical, _runtime_text(c, runtime), Path.dirname(runtime),
     scratch, visited);
-  return _header_cache()[canonical];
+  return _process_cache()[canonical];
 }
 
 /** Collects the current translation unit's declarations into `globs`.
@@ -617,9 +551,8 @@ static String _package_entry(
   foreach (String package_dir, compiler.package_dirs) {
     String root = %"${_canonical_path(package_dir)}/$name";
     String nested = %"$root/src/$name.x";
-    String entry = _includable_file(compiler.sources, nested)
-                 ? nested : %"$root/$name.x";
-    if (!_includable_file(compiler.sources, entry)) continue;
+    String entry = compiler.sources.exists(nested) ? nested : %"$root/$name.x";
+    if (!compiler.sources.exists(entry)) continue;
     if (directory) *directory = root;
     return _canonical_path(entry);
   }
@@ -697,11 +630,8 @@ static void _package_merge(
 static void _package_contributions(
   Compiler compiler, String name, String root, String path, List entry,
   Map merged, Map visited, Token token) {
-  (List parts, Var content_hash, List definitions, Map dependencies) = entry;
-  (void) content_hash;
-  (void) definitions;
-  compiler.merge_translation_dependencies(dependencies);
-  foreach (Var part, parts) {
+  compiler.merge_translation_dependencies(entry[3]);
+  foreach (Var part, entry.car()) {
     match (%($part)) {
       case %(?(Map declarations)): {
         _package_merge(
@@ -714,7 +644,7 @@ static void _package_contributions(
         visited[dependency] = 1;
         _package_contributions(
           compiler, name, root, dependency,
-          _header_cache()[dependency], merged, visited, token);
+          _process_cache()[dependency], merged, visited, token);
         continue;
       }
     }
@@ -744,32 +674,22 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   package.filename = entry;
   Map globs = c.sym.base_symbols(), visited = {};
   visited[entry] = 1;
-  Var cached = c.source_facts ? void : _header_cache()[entry];
-  if (cached is void) {
-    List replayed = _interface_read(c, entry);
-    if (replayed) cached = replayed;
-  }
-  if (cached is void) {
-    String text = NULL, int failed = 0;
-    if (c.sources) failed = !package.read_source(entry, &text);
-    else {
-      try text = entry.open("r").string_close();
-      catch %(not-found *): failed = 1;
-      catch %(io-fail *): failed = 1;
-    }
-    if (failed)
+  List cached = _entry(c, entry);
+  if (cached) _replay_cached(package, cached, globs, visited);
+  else {
+    String text = NULL;
+    if (!package.read_source(entry, &text))
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
         %( "path: $entry" ));
     _file(package, entry, text, Path.dirname(entry), globs, visited);
   }
-  else _replay_cached(package, cached, globs, visited);
   c.fn_defs.merge(package.fn_defs);
   Map merged = {}, walked = {};
   walked[entry] = 1;
   c.add_translation_dependency(entry);
   _package_contributions(
-    c, name, root, entry, _header_cache()[entry],
+    c, name, root, entry, _process_cache()[entry],
     merged, walked, token);
   c.package_roots[name] = root;
   foreach (Var (key, value), merged) {
@@ -803,12 +723,14 @@ static String _absolute_path(String spelling) {
 
 static String interface_out_dir = NULL, interface_mirror = NULL;
 
-/** Names the directories searched for `.xi` interfaces.
-    `out_dir` is the current translation output directory, or NULL. Home
-    files mirror their home-relative path under the compiler's stage
-    directory when it runs from `<home>/builds/`, otherwise under the home.
+/** Creates the process cache and names the directories searched for `.xi`
+    interfaces. `out_dir` is the current translation output directory, or
+    NULL. Home files mirror their home-relative path under the compiler's
+    stage directory when it runs from `<home>/builds/`, otherwise under the
+    home. Call it before opening any translation unit's Context.
 */
 void interface_configure(String out_dir) {
+  _process_cache();
   interface_out_dir = out_dir;
   String root = x2c_get_root(), executable = x2c_get_executable();
   String stage = executable ? Path.dirname(executable) : NULL;
@@ -843,31 +765,23 @@ String interface_prelude(void) {
 
 /* Interfaces name the same sources many times, so a process hashes each
    source once. */
-static Map interface_loading = NULL, static Map source_hashes = NULL;
-static Lisp interface_reader = NULL;
+static Map source_hashes = NULL, static Lisp interface_reader = NULL;
 
 static void _interface_shutdown(void) {
   Lisp.destroy(interface_reader);
   interface_reader = NULL;
-  interface_loading = NULL;
   source_hashes = NULL;
 }
 
 static Lisp _interface_lisp(void) {
   if (interface_reader) return interface_reader;
-  _header_cache();
-  Scope.push(&header_cache_scope);
+  _process_cache();
+  Scope.push(&process_cache_scope);
   interface_reader = Lisp.kernel();
-  interface_loading = {};
   source_hashes = {};
   Scope.shutdown_hook(_interface_shutdown);
   Scope.pop();
   return interface_reader;
-}
-
-static List _interface_reject(String canonical) {
-  interface_loading.del(canonical);
-  return NULL;
 }
 
 static int _hash_matches(Compiler compiler, String path, Var expected) {
@@ -882,19 +796,19 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
     catch %(bad-arg *): return 0;
     catch %(size-limit *): return 0;
     String value = "%08x".printf(text.hash());
-    _require_header_cache_owner(path.try_own());
-    _require_header_cache_owner(value.try_own());
+    _require_retained(path.try_own());
+    _require_retained(value.try_own());
     source_hashes[path] = value;
     hash = value;
   }
   return String.equal(hash, expected);
 }
 
-/* Materialize one interface file only after its source path and hash,
-   included entries, and macro, Lisp, and embedded-text dependencies
-   validate. The entry uses header_cache_scope ownership and the same ordered
-   parts representation as a cold walk. */
-static List _interface_load(Compiler compiler, String canonical, String path) {
+/* Materialize one interface file only after its source path and hash, and
+   the content hashes of the includes, macros, Lisp, and embedded text it
+   depends on, validate. The entry uses process_cache_scope ownership and the
+   same ordered parts representation as a cold walk. */
+static List _interface_load(Compiler c, String canonical, String path) {
   String source = NULL;
   File input = fopen(path, "r");
   if (!input) return NULL;
@@ -907,85 +821,75 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   catch %(incomplete *): return NULL;
   catch %(malformed *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
-  Var (owner, expected_hash, parts_value, definitions_value,
-       dependencies_value) = (List) NULL;
-  match (record) {
-    case %(interface 2 ?(String stored) ?hash ?parts ?definitions ?deps): {
-      owner = stored;
-      expected_hash = hash;
-      parts_value = parts;
-      definitions_value = definitions;
-      dependencies_value = deps;
+  match (record)
+    case %(interface 2 ?(String owner) ?(String hash) ?(List stored_parts)
+           ?(List definitions) ?(List stored_dependencies)): {
+      if (!_absolute_path(owner).equal(canonical) ||
+          !_hash_matches(c, canonical, hash)) return NULL;
+      return _interface_entry(
+        c, canonical, hash, stored_parts, definitions, stored_dependencies);
     }
-    default: return NULL;
-  }
-  if (parts_value is not <list> || definitions_value is not <list> ||
-      dependencies_value is not <list>) return NULL;
-  if (!_absolute_path(owner).equal(canonical)) return NULL;
-  if (!_hash_matches(compiler, canonical, expected_hash)) return NULL;
-  interface_loading[canonical] = 1;
+  return NULL;
+}
+
+/* Rebuild a validated interface's rows as a process cache entry, or return
+   NULL when a row is malformed or a dependency has changed. */
+static List _interface_entry(
+  Compiler c, String canonical, String hash, List stored_parts,
+  List definitions, List stored_dependencies) {
   Array parts = [];
-  foreach (Var part, parts_value.list()) {
+  foreach (Var part, stored_parts) {
     if (part is <string>) {
       parts.push(_canonical_path(_absolute_path(part)));
       continue;
     }
-    if (part is not <list>) return _interface_reject(canonical);
-    Scope.push(&header_cache_scope);
+    if (part is not <list>) return NULL;
+    Scope.push(&process_cache_scope);
     Map contributions = {};
     Scope.pop();
     foreach (Var row, part.list()) {
-      if (row is not <list> || row.list().len() != 2)
-        return _interface_reject(canonical);
+      if (row is not <list> || row.list().len() != 2) return NULL;
       List pair = row;
-      _require_header_cache_owner(pair.try_own());
+      _require_retained(pair.try_own());
       Var (contribution_key, contribution_value) = pair;
       contributions[contribution_key] = contribution_value;
     }
     Var contributions_var = contributions;
     parts.push(contributions_var);
   }
-  Scope.push(&header_cache_scope);
+  Scope.push(&process_cache_scope);
   Map dependencies = {};
   Scope.pop();
-  foreach (Var dependency, dependencies_value.list()) {
-    if (dependency is not <list> || dependency.list().len() != 2)
-      return _interface_reject(canonical);
-    Var (dependency_name, content_hash) = dependency;
-    if (dependency_name is not <string>) return _interface_reject(canonical);
-    String dependency_path =
-      _canonical_path(_absolute_path(dependency_name));
-    if (content_hash.is_integer() && content_hash.integer() == 1) {
-      _cache_dependency(dependencies, dependency_path, content_hash);
-      continue;
-    }
-    if (!_hash_matches(compiler, dependency_path, content_hash))
-      return _interface_reject(canonical);
-    _cache_dependency(dependencies, dependency_path, content_hash);
+  foreach (Var dependency, stored_dependencies) {
+    if (dependency is not <list>) return NULL;
+    match (dependency.list())
+      case %(?(String name) ?content_hash): {
+        String dependency_path = _canonical_path(_absolute_path(name));
+        int unhashed =
+          content_hash.is_integer() && content_hash.integer() == 1;
+        if (!unhashed && !_hash_matches(c, dependency_path, content_hash))
+          return NULL;
+        _cache_dependency(dependencies, dependency_path, content_hash);
+        continue;
+      }
+    return NULL;
   }
-  foreach (Var definition, definitions_value.list())
-    if (definition is not <string>) return _interface_reject(canonical);
+  foreach (Var definition, definitions)
+    if (definition is not <string>) return NULL;
   List part_list = parts.list_free();
-  List entry = %(
-    $part_list $expected_hash $definitions_value $dependencies
-  );
-  _require_header_cache_owner(canonical.try_own());
-  _require_header_cache_owner(entry.try_own());
-  _header_cache()[canonical] = entry;
-  interface_loading.del(canonical);
+  List entry = %($part_list $hash $definitions $dependencies);
+  _require_retained(canonical.try_own());
+  _require_retained(entry.try_own());
+  _process_cache()[canonical] = entry;
   return entry;
 }
 
 /* Find and validate the interface of one canonical source path. A source
    under inspection through a SourceView never reads interfaces. */
-static List _interface_read(Compiler compiler, String canonical) {
-  if (compiler.source_facts || !interface_mirror) return NULL;
-  Var cached = _header_cache()[canonical];
-  if (cached is not void) return cached;
-  _interface_lisp();
-  if (interface_loading.contains(canonical)) return %(interface-pending);
+static List _interface_read(Compiler c, String canonical) {
+  if (c.source_facts || !interface_mirror) return NULL;
   foreach (String path, _interface_candidates(canonical)) {
-    List entry = _interface_load(compiler, canonical, path);
+    List entry = _interface_load(c, canonical, path);
     if (entry) return entry;
   }
   return NULL;
@@ -994,17 +898,15 @@ static List _interface_read(Compiler compiler, String canonical) {
 /* A cold walk numbers bindings from wherever the shared counter stands, which
    depends on the files walked before it. An interface renumbers them in order
    of first appearance, keeping equal bindings equal. */
-static Var _renumber_bindings(Var value, Map identities) {
-  if (value is not <list>) return value;
-  List node = value, String spelling = NULL;
+static List _renumber_bindings(List node, Map identities) {
+  String spelling = NULL;
   if (binding_identity_try_parts(node, NULL, &spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);
     return binding_identity_new(identity, spelling);
   }
-  Array children = [];
-  foreach (Var child, node)
-    children.push(_renumber_bindings(child, identities));
-  return children.list_free();
+  Var child;
+  $ast.rewrite_children(
+    node, child, _renumber_bindings(child, identities));
 }
 
 static int _write_interface_entry(File output, String canonical, List entry) {
@@ -1045,7 +947,7 @@ static int _write_interface_entry(File output, String canonical, List entry) {
 */
 void interface_write(Compiler compiler, String path) {
   String canonical = _canonical_path(compiler.filename);
-  Var cached = _header_cache()[canonical];
+  Var cached = _process_cache()[canonical];
   if (cached is void) return;
   String temporary = %"$path.tmp.%ld".printf((long) getpid());
   File output = fopen(temporary, "w");
