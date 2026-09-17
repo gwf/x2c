@@ -1910,7 +1910,13 @@ static List _typedef(Compiler compiler, List context, int row){
 
 List List_filter(List, Func);
 static List _declaration_types(Compiler c, List storage){
-  List quals = _type_qualifiers(c);  Type spec = List_type(_type_specifier(c));  Array trailing = Array_new();  while(_prefix_macro_words(c, 0, trailing)) continue;  if(Array_len(trailing)) storage = List_append(Array_list_free(trailing), List_append(storage, NULL));  List words = List_filter(storage, _x2c_func_handle_0);  Type binding_type = Sym_local_type(c -> sym, List_type(List_append(words, List_append(quals, List_append(Type_list(spec), NULL)))));  if(Type_is_aggregate_tag_body(spec)){
+  List quals = _type_qualifiers(c);  Type spec = List_type(_type_specifier(c));  Array trailing = Array_new();  while(1){
+    Symbol symbol = Compiler_peek(c, 0);  if(symbol != 44661285196 &&(Symbol_is_storage_class(symbol) || Symbol_is_inline(symbol))){
+      Array_push(trailing, Symbol_var(symbol));  Compiler_next(c);  continue;
+    }
+    if(! _prefix_macro_words(c, 0, trailing)) break;
+  }
+  if(Array_len(trailing)) storage = List_append(Array_list_free(trailing), List_append(storage, NULL));  List words = List_filter(storage, _x2c_func_handle_0);  Type binding_type = Sym_local_type(c -> sym, List_type(List_append(words, List_append(quals, List_append(Type_list(spec), NULL)))));  if(Type_is_aggregate_tag_body(spec)){
     Var aggregate, tag, body;  List _x2c_destructure_3 = Type_list(spec);  aggregate = List_getindex(_x2c_destructure_3, 0);  tag = List_getindex(_x2c_destructure_3, 1);  body = List_getindex(_x2c_destructure_3, 2);  binding_type = List_type(List_append(words, List_append(quals, cons(aggregate, cons(tag, NULL)))));
   }
   return cons(List_var(Sym_local_type(c -> sym, List_type(List_append(storage, List_append(quals, List_append(Type_list(spec), NULL)))))), cons(List_var(binding_type), NULL));
