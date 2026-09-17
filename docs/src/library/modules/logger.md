@@ -323,7 +323,7 @@ down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:852`
+Source: `lib/logger.x:854`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority

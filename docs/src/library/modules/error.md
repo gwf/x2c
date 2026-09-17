@@ -11,7 +11,7 @@ Handler stack and accumulated errors.
 | --- | --- |
 | [`x2c_error_catch_capture`](#x2c_error_catch_capture) | Returns one borrowed capture from a selected catch arm. |
 | [`x2c_error_catch_close`](#x2c_error_catch_close) | Closes and invalidates a transferring-catch handle. |
-| [`x2c_error_catch_detach`](#x2c_error_catch_detach) | Removes the top transferring catch while retaining its selected state. |
+| [`x2c_error_catch_detach`](#x2c_error_catch_detach) | Hides the top transferring catch from dispatch while its arm runs. |
 | [`x2c_error_catch_push`](#x2c_error_catch_push) | Registers one transferring catch from patterns supplied per call. |
 | [`x2c_error_catch_selected`](#x2c_error_catch_selected) | Returns the selected zero-based catch arm, or -1 before selection or for a null handle. |
 | [`x2c_error_catch_site_pending`](#x2c_error_catch_site_pending) | Reports whether one catch site still needs its patterns at registration. |
@@ -59,24 +59,24 @@ Source: `lib/error.x:206`
 `void x2c_error_catch_close(ErrorHandler handle)`
 
 Closes and invalidates a transferring-catch handle.
-A detached handle releases its plans, captures, and retained error records.
-An attached handle additionally removes itself and truncates records above
-its registration watermark. Attached handles must close in stack order;
-violating that order reaches the raw error floor. A null handle does
-nothing.
+The handle releases its plans, captures, and retained error records and
+unregisters itself; an attached handle also truncates records above its
+registration watermark. Handles must close in stack order; violating that
+order reaches the raw error floor. A null handle does nothing.
 
-Source: `lib/error.x:235`
+Source: `lib/error.x:233`
 
 #### x2c_error_catch_detach
 
 `void x2c_error_catch_detach(ErrorHandler handle)`
 
-Removes the top transferring catch while retaining its selected state.
-This lets the catch arm raise outward without matching itself. The caller
-must still close the handle; repeated detach and a null handle do nothing.
-Detaching out of stack order reaches the raw error floor.
+Hides the top transferring catch from dispatch while its arm runs.
+This lets the catch arm raise outward without matching itself. The handle
+stays registered, so shutdown and outer unwinding reclaim its retained
+`Error` if the arm never closes it. Repeated detach and a null handle do
+nothing. Detaching out of stack order reaches the raw error floor.
 
-Source: `lib/error.x:219`
+Source: `lib/error.x:220`
 
 #### x2c_error_catch_push
 
@@ -142,7 +142,7 @@ causes may transfer to a filtered catch but never return here. Invalid
 detail or unavailable, reentrant, or failed `Error` machinery reaches the
 raw error floor.
 
-Source: `lib/error.x:254`
+Source: `lib/error.x:250`
 
 #### x2c_error_raise_n
 
@@ -157,7 +157,7 @@ causes may transfer to a filtered catch but never return here. Invalid
 detail or unavailable, reentrant, or failed `Error` machinery reaches the
 raw error floor.
 
-Source: `lib/error.x:278`
+Source: `lib/error.x:274`
 
 ### `Error`
 
@@ -168,7 +168,7 @@ Source: `lib/error.x:278`
 
 Returns the maximum number of errors that may remain accumulated.
 
-Source: `lib/error.x:844`
+Source: `lib/error.x:840`
 
 <a id="Error.bound_set"></a>
 #### Error.bound_set
@@ -178,7 +178,7 @@ Source: `lib/error.x:844`
 Sets the accumulated-error bound when `bound` is positive.
 A zero or negative value leaves the current bound unchanged.
 
-Source: `lib/error.x:852`
+Source: `lib/error.x:848`
 
 <a id="Error.count"></a>
 #### Error.count
@@ -188,7 +188,7 @@ Source: `lib/error.x:852`
 Returns the number of errors currently accumulated.
 Returns zero before `Error` initialization and after shutdown.
 
-Source: `lib/error.x:659`
+Source: `lib/error.x:655`
 
 <a id="Error.depth"></a>
 #### Error.depth
@@ -199,7 +199,7 @@ Returns the current nested error-dispatch depth.
 This is the nesting depth of error dispatch. `Error.count` returns the
 number of accumulated errors.
 
-Source: `lib/error.x:654`
+Source: `lib/error.x:650`
 
 <a id="Error.handler_depth"></a>
 #### Error.handler_depth
@@ -208,7 +208,7 @@ Source: `lib/error.x:654`
 
 Returns the current thread's number of registered `Error` handlers.
 
-Source: `lib/error.x:293`
+Source: `lib/error.x:289`
 
 <a id="Error.handler_head"></a>
 #### Error.handler_head
@@ -219,7 +219,7 @@ Returns the current thread's borrowed top `Error`-handler pointer.
 Exception frames use this opaque value as a restore watermark; it remains
 valid only while its registration remains live.
 
-Source: `lib/error.x:303`
+Source: `lib/error.x:299`
 
 <a id="Error.initialize_raw"></a>
 #### Error.initialize_raw
@@ -234,7 +234,7 @@ nothing. Initialization owns a private `Scope`, record stack, and policy
 failure before the `Error` runtime becomes ready reaches the raw error
 floor.
 
-Source: `lib/error.x:362`
+Source: `lib/error.x:358`
 
 <a id="Error.mark"></a>
 #### Error.mark
@@ -244,7 +244,7 @@ Source: `lib/error.x:362`
 Captures the current error-stack position.
 Pass the result to `Error.since` to inspect only later errors.
 
-Source: `lib/error.x:664`
+Source: `lib/error.x:660`
 
 <a id="Error.note_rendered"></a>
 #### Error.note_rendered
@@ -256,7 +256,7 @@ This suppresses only `Error`'s fallback report for a `<log>` policy.
 Calling
 outside dispatch has no effect.
 
-Source: `lib/error.x:263`
+Source: `lib/error.x:259`
 
 <a id="Error.policy_get"></a>
 #### Error.policy_get
@@ -266,7 +266,7 @@ Source: `lib/error.x:263`
 Returns the default disposition for `code`.
 Unknown codes and an unavailable `Error` runtime default to `<abort>`.
 
-Source: `lib/error.x:830`
+Source: `lib/error.x:826`
 
 <a id="Error.policy_set"></a>
 #### Error.policy_set
@@ -281,7 +281,7 @@ disposition raises `<bad-arg>` and leaves their policy unchanged. The call
 is a no-op while `Error` is unavailable; failure to update `Error`-owned
 storage reaches the non-reentrant error floor.
 
-Source: `lib/error.x:809`
+Source: `lib/error.x:805`
 
 <a id="Error.pop"></a>
 #### Error.pop
@@ -295,7 +295,7 @@ Handles
 must be popped in stack order. An out-of-order pop reaches the
 non-reentrant error floor; a null handle does nothing.
 
-Source: `lib/error.x:941`
+Source: `lib/error.x:937`
 
 <a id="Error.push"></a>
 #### Error.push
@@ -313,7 +313,7 @@ registering. Raises `<alloc-fail>` if registration storage cannot be
 allocated. `data` is retained by value without copying its referent, so
 any referenced storage must outlive the registration.
 
-Source: `lib/error.x:870`
+Source: `lib/error.x:866`
 
 <a id="Error.raise"></a>
 #### Error.raise
@@ -335,7 +335,7 @@ failure reaches the non-reentrant error floor.
 Prefer the `raise` statement in source so generated location detail is
 retained.
 
-Source: `lib/error.x:1180`
+Source: `lib/error.x:1177`
 
 <a id="Error.ready"></a>
 #### Error.ready
@@ -346,7 +346,7 @@ Reports whether the rich `Error` runtime can currently accept raises.
 This is per-thread state and is false before initialization and after
 shutdown.
 
-Source: `lib/error.x:1192`
+Source: `lib/error.x:1189`
 
 <a id="Error.restore"></a>
 #### Error.restore
@@ -358,7 +358,7 @@ Registrations and records created by that callback are reclaimed toward
 the saved heights before the interrupted unwind continues. State the
 callback itself removed is not reconstructed.
 
-Source: `lib/error.x:348`
+Source: `lib/error.x:344`
 
 <a id="Error.restore_landing"></a>
 #### Error.restore_landing
@@ -371,7 +371,7 @@ depth captured when the frame was pushed. The saved head is restored only
 when the current handler head is still a suffix of its chain; dispatch
 bookkeeping is cleared.
 
-Source: `lib/error.x:321`
+Source: `lib/error.x:317`
 
 <a id="Error.shutdown_raw"></a>
 #### Error.shutdown_raw
@@ -383,7 +383,7 @@ The call reclaims all registrations, records, policies, and private storage
 and makes `Error.ready` false. Repeated calls do nothing; later raises
 reach the raw error floor.
 
-Source: `lib/error.x:382`
+Source: `lib/error.x:378`
 
 <a id="Error.since"></a>
 #### Error.since
@@ -398,7 +398,7 @@ outermost `Scope` and canonical pools and remains live until those owners
 are
 released. Failure to materialize it reaches the non-reentrant error floor.
 
-Source: `lib/error.x:786`
+Source: `lib/error.x:782`
 
 <a id="Error.snapshot"></a>
 #### Error.snapshot
@@ -413,7 +413,7 @@ outermost `Scope`, so nested caller brackets may be released safely.
 Invalid or identity-bearing values and failures while copying reach the raw
 error floor; they never re-enter handler dispatch.
 
-Source: `lib/error.x:709`
+Source: `lib/error.x:705`
 
 <a id="Error.trim"></a>
 #### Error.trim
@@ -425,7 +425,7 @@ Handlers newer than `saved_head` are reclaimed. Records at and above
 `stack_height` are also reclaimed; pass the current height on normal frame
 exit to preserve collected errors.
 
-Source: `lib/error.x:335`
+Source: `lib/error.x:331`
 
 <a id="Error.unwind_head"></a>
 #### Error.unwind_head
@@ -437,7 +437,7 @@ During handler dispatch this is the saved pre-dispatch head, even though
 the active callback is temporarily hidden from nested raises. Exception
 frames store the opaque result as their landing watermark.
 
-Source: `lib/error.x:310`
+Source: `lib/error.x:306`
 
 ## Runtime-internal callables
 
@@ -465,7 +465,7 @@ cases handlers pushed inside the `Context` are reclaimed. Tokens must close
 in nesting order; an out-of-order close reaches the raw error floor. A null
 token does nothing and a closed token is invalid.
 
-Source: `lib/error.x:979`
+Source: `lib/error.x:975`
 
 <a id="Error.context_open"></a>
 #### Error.context_open
@@ -481,7 +481,7 @@ close. An unavailable `Error` runtime returns NULL.
 
 **Raises:** `<alloc-fail>` when the overlay cannot be allocated.
 
-Source: `lib/error.x:959`
+Source: `lib/error.x:955`
 
 <a id="Error.since_in"></a>
 #### Error.since_in
@@ -497,7 +497,7 @@ live until that `Scope` is destroyed. An unavailable runtime or negative
 mark
 returns `nil`. `Null` owners or failures while copying reach the raw floor.
 
-Source: `lib/error.x:748`
+Source: `lib/error.x:744`
 
 <a id="Error.snapshot_in"></a>
 #### Error.snapshot_in
@@ -512,7 +512,7 @@ until their actual owning pool is released. Wide scalar boxes enter
 live until that `Scope` is destroyed. `Null` owners, invalid or
 identity-bearing values, and failures while copying reach the raw floor.
 
-Source: `lib/error.x:725`
+Source: `lib/error.x:721`
 
 ## Public types
 
