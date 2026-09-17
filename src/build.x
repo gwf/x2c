@@ -160,23 +160,21 @@ static uint64_t _state_dependencies(uint64_t hash, String depfile, int *ok) {
   return hash;
 }
 
+static String _state_line(uint64_t hash) =>
+  "x2c-state-v1 %016llx".printf((unsigned long long) hash);
+
 static int _state_matches(String path, uint64_t hash) {
-  File input = fopen(path, "r");
-  if (!input) return 0;
-  char line[80], extra;
-  unsigned long long saved = 0;
-  int matched =
-    fgets(line, sizeof(line), input) &&
-    sscanf(line, "x2c-state-v1 %llx %c", &saved, &extra) == 1;
-  input.close();
-  if (!matched) return 0;
-  return saved == (unsigned long long) hash;
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %(not-found *): return 0;
+  catch %(io-fail *): return 0;
+  return text.split_lines(0).car() == _state_line(hash);
 }
 
 /* Lines after the fingerprint name the files it covers, for a reader that
    must check it without rebuilding the list. */
 static void _state_write_lines(String path, uint64_t hash, List lines) {
-  String text = "x2c-state-v1 %016llx\n".printf((unsigned long long) hash);
+  String text = %"${_state_line(hash)}\n";
   foreach (String line, lines) text = %"$text$line\n";
   try file_publish(%($path $text));
   catch %(not-found *): {}

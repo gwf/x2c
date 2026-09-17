@@ -714,9 +714,7 @@ static void _expand_argument(Array output, String argument, List stack) {
   }
   if (!argument[1]) x2c_driver_error("empty response-file reference '@'");
   String path = String.new(argument + 1);
-  char *resolved = realpath(path, NULL);
-  String identity = resolved ? String.new(resolved) : path;
-  if (resolved) free(resolved);
+  String identity = Path.absolute(path);
   if (_response_on_stack(stack, identity)) {
     fprintf(
       stderr,
