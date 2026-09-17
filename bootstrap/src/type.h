@@ -45,7 +45,7 @@ int Symbol_is_builtin_type(Symbol sym);
 
 int Type_is_aggregate(Type type);
 
-int Type_is_aggregate_tag(Type type);
+int Type_is_aggregate_tag(Type t);
 
 int Type_is_aggregate_tag_body(Type type);
 
@@ -75,7 +75,7 @@ Type Type_numeric_literal(String text, int floating);
 
 List Type_tag(Type type);
 
-List Type_body(Type type);
+List Type_body(Type t);
 
 int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom);
 
@@ -83,7 +83,7 @@ void Type_begin_unit(void);
 
 void Type_end_unit(void);
 
-void Type_register_var_tag(Type type, String name, String converter);
+void Type_register_var_tag(Type t, String name, String converter);
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag);
 

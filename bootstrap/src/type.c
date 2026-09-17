@@ -804,8 +804,8 @@ int Type_is_aggregate(Type type){
   if(! _init_guard_) _file_init_();  return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_9;  x2c_match_site_match(& _x2c_match_site_9, Type_list(type), List_var(_86)); }));
 }
 
-int Type_is_aggregate_tag(Type type){
-  if(! _init_guard_) _file_init_();  return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_10;  x2c_match_site_match(& _x2c_match_site_10, Type_list(type), List_var(_105)); }));
+int Type_is_aggregate_tag(Type t){
+  if(! _init_guard_) _file_init_();  return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_10;  x2c_match_site_match(& _x2c_match_site_10, Type_list(t), List_var(_105)); }));
 }
 
 static int Type__is_aggregate_body(Type type){
@@ -958,8 +958,8 @@ List Type_tag(Type type){
 
 List cdr(List);
 List List_cddr(List);
-List Type_body(Type type){
-  if(! _init_guard_) _file_init_();  if(Type__is_enum_body(type) || Type__is_aggregate_body(type)) return cdr(Type_list(type));  if(Type_is_enum_tag_body(type) || Type_is_aggregate_tag_body(type)) return Type_list(List_cddr(type));  return NULL;
+List Type_body(Type t){
+  if(! _init_guard_) _file_init_();  if(Type__is_enum_body(t) || Type__is_aggregate_body(t)) return cdr(Type_list(t));  if(Type_is_enum_tag_body(t) || Type_is_aggregate_tag_body(t)) return Type_list(List_cddr(t));  return NULL;
 }
 
 int Var_is_void(Var);
@@ -979,8 +979,8 @@ int String_truth(String);
 Var Map_setindex(Map, Var, Var);
 Symbol String_symbol(String);
 String String_lower(String);
-void Type_register_var_tag(Type type, String name, String converter){
-  if(! _init_guard_) _file_init_();  if((void *) declared_typetags == NULL || ! List_truth(Type_list(type)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(String_symbol(String_lower(name))), cons(String_var(converter), NULL))));
+void Type_register_var_tag(Type t, String name, String converter){
+  if(! _init_guard_) _file_init_();  if((void *) declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(String_symbol(String_lower(name))), cons(String_var(converter), NULL))));
 }
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag){

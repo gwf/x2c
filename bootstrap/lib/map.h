@@ -32,7 +32,7 @@ Var Map_getdefault(Map map, Var key, Var defval);
 
 Var Map_setdefault(Map map, Var key, Var defval);
 
-int Map_contains(Map map, Var key);
+int Map_contains(Map m, Var key);
 
 void Map_set(Map map, Var key, Var val);
 

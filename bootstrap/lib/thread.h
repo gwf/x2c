@@ -14,7 +14,7 @@ Thread Thread_start(ThreadFn function, const void * input, size_t input_size);
 
 Var Thread_join(Thread t);
 
-void Thread_free(Thread thread);
+void Thread_free(Thread t);
 
 
 #endif /* __GUARD_0x251C437E__ */

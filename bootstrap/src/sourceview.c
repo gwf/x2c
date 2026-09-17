@@ -227,9 +227,9 @@ Path Path_absolute(Path);
 
 Var int_var(int);
 
-void SourceView_set(SourceView sources, String path, String text, int changed){
-  Map_setindex(sources -> overlays, String_var(Path_absolute(path)), String_var(text));
-  if(changed) Map_setindex(sources -> dirty_paths, String_var(Path_absolute(path)), int_var(1));
+void SourceView_set(SourceView s, String path, String text, int changed){
+  Map_setindex(s -> overlays, String_var(Path_absolute(path)), String_var(text));
+  if(changed) Map_setindex(s -> dirty_paths, String_var(Path_absolute(path)), int_var(1));
 }
 
 int Map_contains(Map, Var);

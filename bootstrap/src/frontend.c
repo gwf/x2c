@@ -531,8 +531,8 @@ int Array_try_next(Array, int *, Var *);
 
 Var Array_push(Array, Var);
 
-int ParsedUnit_parse(ParsedUnit * unit){
-  Compiler compiler = unit -> compiler;
+int ParsedUnit_parse(ParsedUnit * p){
+  Compiler compiler = p -> compiler;
   if(Compiler_error_count(compiler)) return 0;
   Diagnostics diagnostics = compiler -> diagnostics;
   Array collected = diagnostics -> entries;
@@ -546,7 +546,7 @@ int ParsedUnit_parse(ParsedUnit * unit){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_5 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_5);
   }
-  ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)) unit -> ast = Compiler_full_parse(unit -> compiler, unit -> globals, unit -> generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_4); {
+  ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)) p -> ast = Compiler_full_parse(p -> compiler, p -> globals, p -> generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_4); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_4)){
       x2c_error_catch_detach(_x2c_error_handler_4);
       x2c_exception_mark_handled(&_x2c_exception_frame_4);
@@ -583,9 +583,9 @@ diagnostics -> entries = collected;
 return ok && ! Compiler_error_count(compiler);
 }
 
-int Frontend_open(Frontend frontend, String filename, ParsedUnit * unit){
+int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return Frontend_start(frontend, filename, unit) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
+  return Frontend_start(f, filename, unit) && ParsedUnit_collect(unit, f) && ParsedUnit_parse(unit);
 }
 
 void Compiler_free_lisp(Compiler);

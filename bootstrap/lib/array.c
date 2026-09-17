@@ -982,12 +982,12 @@ int Array_equal(Array a, Array b){
   return Array__core_equal(a, b);
 }
 
-Buffer Array_write_repr(Array array, Buffer out){
-  return Array__core_write(array, out, 1190948);
+Buffer Array_write_repr(Array a, Buffer out){
+  return Array__core_write(a, out, 1190948);
 }
 
-Buffer Array_write_str(Array array, Buffer out){
-  return Array__core_write(array, out, 40228);
+Buffer Array_write_str(Array a, Buffer out){
+  return Array__core_write(a, out, 40228);
 }
 
 String Buffer_str(Buffer);

@@ -738,6 +738,7 @@ static List _record_deferred_binding(List name, List mods, List assign, Array in
   Array_push(initializers, List_var(cons(List_var(name), cons(List_var(assign), NULL))));  return cons(_1, cons(List_var(name), cons(List_var(mods), NULL)));
 }
 
+Type Type_declared(Type);
 int ast_contains_head(Var, Symbol);
 static List _defer_one_binding(Compiler compiler, List decltype, Ast bound, Array initializers){
 
@@ -748,7 +749,7 @@ static List _defer_one_binding(Compiler compiler, List decltype, Ast bound, Arra
       case 150408: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_192), &_x2c_match_capture)) {return bound;  break;
 }
 case 992: ;  static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_205), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var mods = _x2c_match_values[1];  Var type = _x2c_match_values[2];  Var value = _x2c_match_values[3]; {
-  List declaration = cons(_4, cons(List_var(decltype), cons(List_var(cons(_6, cons(List_var(cons(_1, cons(name, cons(mods, NULL)))), NULL))), NULL)));  Type declared = Type_canonicalize(List_type_from_ast(declaration));  Type resolved = Sym_resolve_key(compiler -> sym, declared);  if(Type_is_array(resolved)){
+  List declaration = cons(_4, cons(List_var(decltype), cons(List_var(cons(_6, cons(List_var(cons(_1, cons(name, cons(mods, NULL)))), NULL))), NULL)));  Type object = Type_declared(List_type_from_ast(declaration));  if(Var_equal(List_car(Type_list(object)), Symbol_var(7304424))) return bound;  Type declared = Type_canonicalize(object);  Type resolved = Sym_resolve_key(compiler -> sym, declared);  if(Type_is_array(resolved)){
     if(! _contains_cache_ref(value) && ! ast_contains_head(value, 20287107160)) return bound;
   {
     List _x2c_match_expr = Var_list(value);
@@ -1147,14 +1148,14 @@ static List _setup_source_cache_init(Compiler c, List source, Array ids, Array i
   _queue_static_initializers(c, initializers, deferred_kind);  List list_ids, string_ids, var_ids;  List _x2c_destructure_6 = _split_ids(keys, ids);  list_ids = Var_list(List_getindex(_x2c_destructure_6, 0));  string_ids = Var_list(List_getindex(_x2c_destructure_6, 1));  var_ids = Var_list(List_getindex(_x2c_destructure_6, 2));  Array_free(ids);  Array built = Array_new();  List declaration = _generate_cache_declare(list_ids, _337, c, NULL);  if(List_truth(declaration)) Array_push(built, List_var(declaration));  declaration = _generate_cache_declare(string_ids, _338, c, NULL);  if(List_truth(declaration)) Array_push(built, List_var(declaration));  declaration = _generate_cache_declare(var_ids, _339, c, NULL);  if(List_truth(declaration)) Array_push(built, List_var(declaration));  List declarations = Array_list_free(built);  return List_append(declarations, source);
 }
 
-List Compiler_setup_cache_init(Compiler compiler, List header, List source, String prefix, String guard_name, String initializer_name){
-  if(! _init_guard_) _file_init_();  Array initializers = Array_new();  header = _rewrite_file_scope_statics(compiler, header, initializers);  Array header_ids = _cache_ids_in(compiler, header);  Array scan = Array_new();  Array_push(scan, List_var(source)); {
+List Compiler_setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name){
+  if(! _init_guard_) _file_init_();  Array initializers = Array_new();  header = _rewrite_file_scope_statics(c, header, initializers);  Array header_ids = _cache_ids_in(c, header);  Array scan = Array_new();  Array_push(scan, List_var(source)); {
     Var initializer;  Array _x2c_macro_object_20 = initializers;  int _x2c_macro_cursor_21 = 0;  Var _x2c_macro_cursor_output_20;  while(Array_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_21, & _x2c_macro_cursor_output_20)){
       initializer = _x2c_macro_cursor_output_20;  Array_push(scan, initializer);
     }
 
   }
-  Array source_ids = _cache_ids_in(compiler, Array_list_free(scan));  if(Array_truth(header_ids)) header = _setup_header_cache(compiler, header, header_ids, prefix, guard_name, initializer_name);  source = _setup_source_cache_init(compiler, source, source_ids, initializers);  Array_free(initializers);  return cons(List_var(header), cons(List_var(source), NULL));
+  Array source_ids = _cache_ids_in(c, Array_list_free(scan));  if(Array_truth(header_ids)) header = _setup_header_cache(c, header, header_ids, prefix, guard_name, initializer_name);  source = _setup_source_cache_init(c, source, source_ids, initializers);  Array_free(initializers);  return cons(List_var(header), cons(List_var(source), NULL));
 }
 
 void Array_cleanup(Array);

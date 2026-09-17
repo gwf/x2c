@@ -138,16 +138,16 @@ int Context_owns(Context context, void * allocation){
   return allocation && _owns_scope(context, Scope_owner(allocation));
 }
 
-Scope * Context_export_destination(Context context){
+Scope * Context_export_destination(Context c){
   if(! _init_guard_) Context_initialize();
-  return context ? context -> destination_scope : NULL;
+  return c ? c -> destination_scope : NULL;
 }
 
 void Scope_move(void *, Scope *);
 
-void Context_move_allocation(Context context, void * allocation){
+void Context_move_allocation(Context c, void * allocation){
   if(! _init_guard_) Context_initialize();
-  if(Context_owns(context, allocation)) Scope_move(allocation, Context_export_destination(context));
+  if(Context_owns(c, allocation)) Scope_move(allocation, Context_export_destination(c));
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -235,9 +235,9 @@ Context Context_current(void){
   return _thread() -> current;
 }
 
-Var Context_export_nested(Context context, Var value){
+Var Context_export_nested(Context c, Var value){
   if(! _init_guard_) Context_initialize();
-  return _export_value(value, context);
+  return _export_value(value, c);
 }
 
 int Pool_owns(Pool, Var);
@@ -460,7 +460,7 @@ static Var _export_value(Var v, Context source){
   if(Var_try_export_context(v, source, & custom)) return custom;
   Symbol tag = Var_tag(v);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 292};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 289};
     x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -470,7 +470,7 @@ static Var _export_value(Var v, Context source){
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 312};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 309};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -502,22 +502,22 @@ void Scope_destroy(Scope);
 
 void Scope_free(void *);
 
-void Context_close(Context context){
+void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
-  if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 351};
+  if(! c || _thread() -> current != c){
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 348};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
-  MatchCache_context_close(context -> match_state);
-  Error_context_close(context -> error_state, x2c_exception_unwinding());
-  if(context -> pool) String_pool_release();
-  Scope scope = context -> scope;
-  Context parent = context -> parent;
+  MatchCache_context_close(c -> match_state);
+  Error_context_close(c -> error_state, x2c_exception_unwinding());
+  if(c -> pool) String_pool_release();
+  Scope scope = c -> scope;
+  Context parent = c -> parent;
   Scope_pop();
   Scope_destroy(scope);
   _thread() -> current = parent;
-  Scope_free(context);
+  Scope_free(c);
 }
 
 void Context_cleanup(Context value){

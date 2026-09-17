@@ -1799,12 +1799,12 @@ Compiler_expect(c, 119);  Type type = List_type_from_ast(cons(_44, cons(List_var
 }
 
 Map Compiler_macro_definition_locals(Compiler);
-void Compiler_bind_template_local(Compiler compiler, List key, List type, List context){
-  if(! _init_guard_) _file_init_();  Var local = Map_truth(compiler -> macro_holes) && List_truth(key) ? Map_getindex(Compiler_macro_definition_locals(compiler), List_var(key)) :((void) 0, Void);  if(Map_truth(compiler -> macro_holes) && Var_is_row(local, 11, 7, 1) &&(! List_truth(context) || context == _109)){
+void Compiler_bind_template_local(Compiler c, List key, List type, List context){
+  if(! _init_guard_) _file_init_();  Var local = Map_truth(c -> macro_holes) && List_truth(key) ? Map_getindex(Compiler_macro_definition_locals(c), List_var(key)) :((void) 0, Void);  if(Map_truth(c -> macro_holes) && Var_is_row(local, 11, 7, 1) &&(! List_truth(context) || context == _109)){
     List local_key = cons(local, NULL);  Type local_type = Type_declared(List_type_from_ast(type));  if(context == _109){
-      Sym_set(compiler -> sym, local_key, cons(_103, cons(local, NULL)));  Sym_set(compiler -> sym, cons(_103, cons(local, NULL)), Type_list(local_type));
+      Sym_set(c -> sym, local_key, cons(_103, cons(local, NULL)));  Sym_set(c -> sym, cons(_103, cons(local, NULL)), Type_list(local_type));
     }
-    else Sym_bind_identity(compiler -> sym, NULL, key, cons(_44, cons(_112, cons(List_var(cons(_37, cons(List_var(cons(_24, cons(List_var(key), _81))), NULL))), NULL))));
+    else Sym_bind_identity(c -> sym, NULL, key, cons(_44, cons(_112, cons(List_var(cons(_37, cons(List_var(cons(_24, cons(List_var(key), _81))), NULL))), NULL))));
   }
 
 }
@@ -1888,12 +1888,12 @@ static List _declaration_group(Compiler c, int row){
   if(_test_destructure_declaration(c)) return _destructure_declaration(c, Type_list(type), Type_list(binding_type), 0);  List bindings = _declarator_list(c, Type_list(binding_type), NULL, row);  return _finish_declaration(c, 8932560010, Type_list(type), bindings, 0);
 }
 
-int Compiler_test_declaration(Compiler compiler){
-  if(! _init_guard_) _file_init_();  return _test_declaration_start(compiler, 0);
+int Compiler_test_declaration(Compiler c){
+  if(! _init_guard_) _file_init_();  return _test_declaration_start(c, 0);
 }
 
-List Compiler_parse_simple_declaration(Compiler compiler){
-  if(! _init_guard_) _file_init_();  return _declaration_group(compiler, 0);
+List Compiler_parse_simple_declaration(Compiler c){
+  if(! _init_guard_) _file_init_();  return _declaration_group(c, 0);
 }
 
 static List _declaration_rows(Compiler compiler){
@@ -2631,23 +2631,23 @@ void Sym_define_macro(Sym, Atom, List);
 List Compiler_publish_macro_definition_node(Compiler, List);
 void Compiler_begin_catch_arm(Compiler, List, Token);
 void Compiler_begin_match_arm(Compiler, List, Token, int);
-List Compiler_bind_syntax(Compiler compiler, Var syntax, AstPos context, Type return_type){
-  if(! _init_guard_) _file_init_();  Var value = Compiler_evaluate_macro_slot(compiler, syntax);  if(! Var_is_row(value, 9, 7, 4)) Compiler_report_error(compiler, 33658058, _750, compiler -> token, NULL);  List input = Var_list(value);  if(! List_truth(input)) Compiler_report_error(compiler, 33658058, _750, compiler -> token, NULL);  if(context == AST_ENUMERATOR)
+List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type){
+  if(! _init_guard_) _file_init_();  Var value = Compiler_evaluate_macro_slot(c, syntax);  if(! Var_is_row(value, 9, 7, 4)) Compiler_report_error(c, 33658058, _750, c -> token, NULL);  List input = Var_list(value);  if(! List_truth(input)) Compiler_report_error(c, 33658058, _750, c -> token, NULL);  if(context == AST_ENUMERATOR)
   {
     List _x2c_match_expr = input;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_42;  if (x2c_match_site_try_capture(& _x2c_match_site_42, _x2c_match_expr, List_var(_394), &_x2c_match_capture)) {return _publish_enumerator(compiler, input, List_type(compiler -> aggregate_type), compiler -> token);  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_42;  if (x2c_match_site_try_capture(& _x2c_match_site_42, _x2c_match_expr, List_var(_394), &_x2c_match_capture)) {return _publish_enumerator(c, input, List_type(c -> aggregate_type), c -> token);  break;
 }
-static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_398), &_x2c_match_capture)) {Var node = _x2c_match_values[0];  return _publish_enumerator(compiler, Var_list(node), List_type(compiler -> aggregate_type), compiler -> token);  break;
+static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_398), &_x2c_match_capture)) {Var node = _x2c_match_values[0];  return _publish_enumerator(c, Var_list(node), List_type(c -> aggregate_type), c -> token);  break;
 }
-static MatchCaptureSite _x2c_match_site_44;  if (x2c_match_site_try_capture(& _x2c_match_site_44, _x2c_match_expr, List_var(_410), &_x2c_match_capture)) {Var node = _x2c_match_values[0];  return _publish_enumerator(compiler, Var_list(node), List_type(compiler -> aggregate_type), compiler -> token);  break;
+static MatchCaptureSite _x2c_match_site_44;  if (x2c_match_site_try_capture(& _x2c_match_site_44, _x2c_match_expr, List_var(_410), &_x2c_match_capture)) {Var node = _x2c_match_values[0];  return _publish_enumerator(c, Var_list(node), List_type(c -> aggregate_type), c -> token);  break;
 }
 
     }
   }
-if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) && ! Var_equal(List_car(input), Atom_intern(_751))) return Compiler_resolve_map_entry(compiler, input, compiler -> token); {
-  List * _x2c_macro_address_4 = & compiler -> return_type;  List _x2c_macro_previous_4 = * _x2c_macro_address_4; {
+if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) && ! Var_equal(List_car(input), Atom_intern(_751))) return Compiler_resolve_map_entry(c, input, c -> token); {
+  List * _x2c_macro_address_4 = & c -> return_type;  List _x2c_macro_previous_4 = * _x2c_macro_address_4; {
   _x2c_defer_env_7 _x2c_defer_env_22 = {._x2c_defer_capture_12 =(const void *) & _x2c_macro_address_4, ._x2c_defer_capture_13 =(const void *) & _x2c_macro_previous_4};
   X2CCleanup _x2c_defer_record_7 = {
     .fn = _x2c_defer_cleanup_7,
@@ -2662,14 +2662,14 @@ if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) &
     Var _x2c_match_values[6];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 6 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_45;  if (x2c_match_site_try_capture(& _x2c_match_site_45, _x2c_match_expr, List_var(_418), &_x2c_match_capture)) {Var definition = _x2c_match_values[0];  Var arguments = _x2c_match_values[1];  Var invocation = _x2c_match_values[2]; {
-        List _x2c_return_value_0 = Compiler_expand_macro_invocation_node((compiler), definition, Var_list(arguments), Compiler_macro_invocation_site((compiler), invocation), context); {
+        List _x2c_return_value_0 = Compiler_expand_macro_invocation_node((c), definition, Var_list(arguments), Compiler_macro_invocation_site((c), invocation), context); {
           x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_0;
         }
 
       }
       break;
     }
-    static MatchCaptureSite _x2c_match_site_46;  if (x2c_match_site_try_capture(& _x2c_match_site_46, _x2c_match_expr, List_var(_422), &_x2c_match_capture)) {if(Map_truth((compiler) -> macro_holes)){
+    static MatchCaptureSite _x2c_match_site_46;  if (x2c_match_site_try_capture(& _x2c_match_site_46, _x2c_match_expr, List_var(_422), &_x2c_match_capture)) {if(Map_truth((c) -> macro_holes)){
       List _x2c_return_value_1 = input; {
         x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_1;
       }
@@ -2679,7 +2679,7 @@ if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) &
   }
   static MatchCaptureSite _x2c_match_site_47;  if (x2c_match_site_try_capture(& _x2c_match_site_47, _x2c_match_expr, List_var(_426), &_x2c_match_capture)) {Var syntax = _x2c_match_values[0]; {
     {
-      List _x2c_return_value_2 = Compiler_bind_syntax((compiler), syntax, context, List_type((compiler) -> return_type)); {
+      List _x2c_return_value_2 = Compiler_bind_syntax((c), syntax, context, List_type((c) -> return_type)); {
         x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_2;
       }
 
@@ -2691,7 +2691,7 @@ if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) &
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9225486202628787210ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var name = _x2c_match_values[0];  Var type = _x2c_match_values[1]; {
   Var _x2c_match_value_5 = name; {
     String name = Var_string(_x2c_match_value_5); {
-      if(context != AST_UNIT) goto construction_error;  List key = cons(String_var(name), NULL);  if(! List_truth(Sym_get_exact((compiler) -> sym, key))) Sym_define((compiler) -> sym, key, cons(_103, cons(String_var(name), NULL)));  if(! List_truth(Var_list(type))){
+      if(context != AST_UNIT) goto construction_error;  List key = cons(String_var(name), NULL);  if(! List_truth(Sym_get_exact((c) -> sym, key))) Sym_define((c) -> sym, key, cons(_103, cons(String_var(name), NULL)));  if(! List_truth(Var_list(type))){
         List _x2c_return_value_3 = _434; {
           x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_3;
         }
@@ -2703,7 +2703,7 @@ if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) &
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 8932560010: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497945694178442ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var base = _x2c_match_values[0];  Var bindings = _x2c_match_values[1]; {
-        List _x2c_return_value_4 = Compiler_bind_syntax((compiler), List_var(cons(_103, cons(base, cons(bindings, NULL)))), context, NULL); {
+        List _x2c_return_value_4 = Compiler_bind_syntax((c), List_var(cons(_103, cons(base, cons(bindings, NULL)))), context, NULL); {
           x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_4;
         }
 
@@ -2717,11 +2717,11 @@ if(context == AST_MAP_ENTRY && ! Var_equal(List_car(input), Symbol_var(39266)) &
 
 }
 break; } } static MatchCaptureSite _x2c_match_site_48;  if (x2c_match_site_try_capture(& _x2c_match_site_48, _x2c_match_expr, List_var(_383), &_x2c_match_capture)) {List rows = Var_list(_x2c_match_values[0]); {
-  if(context != AST_UNIT) goto construction_error;  if((compiler) -> shallow){
-    (compiler) -> declaration_produced = 1;  Compiler_run_declaration_effects((compiler));
+  if(context != AST_UNIT) goto construction_error;  if((c) -> shallow){
+    (c) -> declaration_produced = 1;  Compiler_run_declaration_effects((c));
   }
   {
-    int * _x2c_macro_address_2 = &(compiler) -> declaration_projection;  int _x2c_macro_previous_2 = * _x2c_macro_address_2; {
+    int * _x2c_macro_address_2 = &(c) -> declaration_projection;  int _x2c_macro_previous_2 = * _x2c_macro_address_2; {
   _x2c_defer_env_8 _x2c_defer_env_23 = {._x2c_defer_capture_14 =(const void *) & _x2c_macro_address_2, ._x2c_defer_capture_15 =(const void *) & _x2c_macro_previous_2};
   X2CCleanup _x2c_defer_record_8 = {
     .fn = _x2c_defer_cleanup_8,
@@ -2729,18 +2729,18 @@ break; } } static MatchCaptureSite _x2c_match_site_48;  if (x2c_match_site_try_c
   };
   x2c_cleanup_push(&_x2c_defer_record_8);
   {
-      * _x2c_macro_address_2 =(compiler) -> declaration_projection + 1; {
+      * _x2c_macro_address_2 =(c) -> declaration_projection + 1; {
         Array projected = Array_new(); {
           List row;  List _x2c_macro_object_25 = rows;  List _x2c_macro_cursor_25 = _x2c_macro_object_25;  Var _x2c_macro_cursor_output_22;  while(List_try_next(_x2c_macro_object_25, & _x2c_macro_cursor_25, & _x2c_macro_cursor_output_22)){
             row = Var_list(_x2c_macro_cursor_output_22); {
-              List bound = Compiler_bind_syntax((compiler), List_var(row), context, List_type((compiler) -> return_type));  _append_declaration_rows(projected, bound);
+              List bound = Compiler_bind_syntax((c), List_var(row), context, List_type((c) -> return_type));  _append_declaration_rows(projected, bound);
             }
 
           }
 
         }
         List result = Array_list_free(projected); {
-          List _x2c_return_value_5 =(compiler) -> shallow ? cons(_378, cons(List_var(cons(_379, List_append(result, NULL))), NULL)) : cons(_58, List_append(result, NULL)); {
+          List _x2c_return_value_5 =(c) -> shallow ? cons(_378, cons(List_var(cons(_379, List_append(result, NULL))), NULL)) : cons(_58, List_append(result, NULL)); {
             x2c_cleanup_leave(& _x2c_defer_record_8);  x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_5;
           }
 
@@ -2757,8 +2757,8 @@ break; } } static MatchCaptureSite _x2c_match_site_48;  if (x2c_match_site_try_c
 break;
 }
 static MatchCaptureSite _x2c_match_site_49;  if (x2c_match_site_try_capture(& _x2c_match_site_49, _x2c_match_expr, List_var(_443), &_x2c_match_capture)) {Var callback = _x2c_match_values[0];  Var arguments = _x2c_match_values[1]; {
-  Var result = Compiler_evaluate_declaration_recipe((compiler), callback, Var_list(arguments)); {
-    List _x2c_return_value_6 = Compiler_bind_syntax((compiler), result, context, List_type((compiler) -> return_type)); {
+  Var result = Compiler_evaluate_declaration_recipe((c), callback, Var_list(arguments)); {
+    List _x2c_return_value_6 = Compiler_bind_syntax((c), result, context, List_type((c) -> return_type)); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_6;
     }
 
@@ -2768,14 +2768,14 @@ static MatchCaptureSite _x2c_match_site_49;  if (x2c_match_site_try_capture(& _x
 break;
 }
 static MatchCaptureSite _x2c_match_site_50;  if (x2c_match_site_try_capture(& _x2c_match_site_50, _x2c_match_expr, List_var(_445), &_x2c_match_capture)) {Var callback = _x2c_match_values[0];  Var arguments = _x2c_match_values[1]; {
-  if(context != AST_UNIT) goto construction_error;  if((compiler) -> shallow){
-    List _x2c_return_value_7 = cons(_446, cons(callback, cons(arguments, cons(Compiler_freeze_declaration_syntax((compiler), List_var((compiler) -> macro_stack)), cons(int_var((compiler) -> source_private), NULL))))); {
+  if(context != AST_UNIT) goto construction_error;  if((c) -> shallow){
+    List _x2c_return_value_7 = cons(_446, cons(callback, cons(arguments, cons(Compiler_freeze_declaration_syntax((c), List_var((c) -> macro_stack)), cons(int_var((c) -> source_private), NULL))))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_7;
     }
 
   }
-  Var result = Compiler_evaluate_declaration_recipe((compiler), callback, Var_list(arguments)); {
-    List _x2c_return_value_8 = Compiler_bind_syntax((compiler), result, context, List_type((compiler) -> return_type)); {
+  Var result = Compiler_evaluate_declaration_recipe((c), callback, Var_list(arguments)); {
+    List _x2c_return_value_8 = Compiler_bind_syntax((c), result, context, List_type((c) -> return_type)); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_8;
     }
 
@@ -2786,7 +2786,7 @@ break;
 }
 static MatchCaptureSite _x2c_match_site_51;  if (x2c_match_site_try_capture(& _x2c_match_site_51, _x2c_match_expr, List_var(_455), &_x2c_match_capture)) {Var child = _x2c_match_values[0];  Var parent = _x2c_match_values[1];  Var member = _x2c_match_values[2];  List fallback = Var_list(_x2c_match_values[3]); {
   if(context != AST_UNIT) goto construction_error; {
-    List _x2c_return_value_9 = cons(_456, cons(child, cons(parent, cons(member, cons(List_var(fallback), cons(int_var((compiler) -> source_private), NULL)))))); {
+    List _x2c_return_value_9 = cons(_456, cons(child, cons(parent, cons(member, cons(List_var(fallback), cons(int_var((c) -> source_private), NULL)))))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_9;
     }
 
@@ -2796,14 +2796,14 @@ static MatchCaptureSite _x2c_match_site_51;  if (x2c_match_site_try_capture(& _x
 break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497945699789608ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var function = _x2c_match_values[0]; {
-  if(context != AST_UNIT) goto construction_error;  if((compiler) -> shallow){
-    List _x2c_return_value_10 = cons(_459, cons(function, cons(Compiler_freeze_declaration_syntax((compiler), List_var((compiler) -> macro_stack)), cons(int_var((compiler) -> source_private), NULL)))); {
+  if(context != AST_UNIT) goto construction_error;  if((c) -> shallow){
+    List _x2c_return_value_10 = cons(_459, cons(function, cons(Compiler_freeze_declaration_syntax((c), List_var((c) -> macro_stack)), cons(int_var((c) -> source_private), NULL)))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_10;
     }
 
   }
   {
-    List _x2c_return_value_11 = Compiler_bind_syntax((compiler), function, context, List_type((compiler) -> return_type)); {
+    List _x2c_return_value_11 = Compiler_bind_syntax((c), function, context, List_type((c) -> return_type)); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_11;
     }
 
@@ -2811,14 +2811,14 @@ break;
 
 }
 break; } } static MatchCaptureSite _x2c_match_site_52;  if (x2c_match_site_try_capture(& _x2c_match_site_52, _x2c_match_expr, List_var(_473), &_x2c_match_capture)) {Var return_type = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Var body = _x2c_match_values[2];  Var construction = _x2c_match_values[3]; {
-  if(context != AST_UNIT) goto construction_error;  if((compiler) -> shallow){
+  if(context != AST_UNIT) goto construction_error;  if((c) -> shallow){
     List _x2c_return_value_12 = input; {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_12;
     }
 
   }
   {
-    List * _x2c_macro_address_3 = &(compiler) -> macro_stack;  List _x2c_macro_previous_3 = * _x2c_macro_address_3; {
+    List * _x2c_macro_address_3 = &(c) -> macro_stack;  List _x2c_macro_previous_3 = * _x2c_macro_address_3; {
   _x2c_defer_env_9 _x2c_defer_env_24 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_address_3, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_previous_3};
   X2CCleanup _x2c_defer_record_9 = {
     .fn = _x2c_defer_cleanup_9,
@@ -2826,9 +2826,9 @@ break; } } static MatchCaptureSite _x2c_match_site_52;  if (x2c_match_site_try_c
   };
   x2c_cleanup_push(&_x2c_defer_record_9);
   {
-      * _x2c_macro_address_3 = Var_list(Compiler_thaw_declaration_syntax((compiler), construction)); {
+      * _x2c_macro_address_3 = Var_list(Compiler_thaw_declaration_syntax((c), construction)); {
         {
-          List _x2c_return_value_13 = Compiler_bind_syntax((compiler), List_var(cons(_214, cons(return_type, cons(declarator, cons(body, NULL))))), context, List_type((compiler) -> return_type)); {
+          List _x2c_return_value_13 = Compiler_bind_syntax((c), List_var(cons(_214, cons(return_type, cons(declarator, cons(body, NULL))))), context, List_type((c) -> return_type)); {
             x2c_cleanup_leave(& _x2c_defer_record_9);  x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_13;
           }
 
@@ -2852,7 +2852,7 @@ static MatchCaptureSite _x2c_match_site_54;  if (x2c_match_site_try_capture(& _x
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_capture(& _x2c_match_site_53, _x2c_match_expr, List_var(_57), &_x2c_match_capture)) {Var only = _x2c_match_values[0]; {
-      List _x2c_return_value_14 = Compiler_bind_syntax((compiler), only, context, List_type((compiler) -> return_type)); {
+      List _x2c_return_value_14 = Compiler_bind_syntax((c), only, context, List_type((c) -> return_type)); {
         x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_14;
       }
 
@@ -2862,12 +2862,12 @@ static MatchCaptureSite _x2c_match_site_54;  if (x2c_match_site_try_capture(& _x
 
     }
   }
-Compiler_report_error((compiler), 33658058, _752, (compiler) -> token, NULL);
+Compiler_report_error((c), 33658058, _752, (c) -> token, NULL);
 }
 Array bound = Array_new(); {
   Var item;  List _x2c_macro_object_27 = items;  List _x2c_macro_cursor_27 = _x2c_macro_object_27;  Var _x2c_macro_cursor_output_24;  while(List_try_next(_x2c_macro_object_27, & _x2c_macro_cursor_27, & _x2c_macro_cursor_output_24)){
     item = _x2c_macro_cursor_output_24; {
-      List value = Compiler_bind_syntax((compiler), item, context, List_type((compiler) -> return_type));  if(Var_equal(List_car(value), Symbol_var(39266))){
+      List value = Compiler_bind_syntax((c), item, context, List_type((c) -> return_type));  if(Var_equal(List_car(value), Symbol_var(39266))){
         Var child;  List _x2c_macro_object_26 = List_cdr(value);  List _x2c_macro_cursor_26 = _x2c_macro_object_26;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_26, & _x2c_macro_cursor_26, & _x2c_macro_cursor_output_23)){
           child = _x2c_macro_cursor_output_23;  Array_push(bound, child);
         }
@@ -2891,7 +2891,7 @@ break;
 static MatchCaptureSite _x2c_match_site_55;  if (x2c_match_site_try_capture(& _x2c_match_site_55, _x2c_match_expr, List_var(_479), &_x2c_match_capture)) {List arguments = Var_list(_x2c_match_values[0]); {
   if(context != AST_EXPRESSION) goto construction_error;  Array bound = Array_new(); {
     List argument;  List _x2c_macro_object_28 = arguments;  List _x2c_macro_cursor_28 = _x2c_macro_object_28;  Var _x2c_macro_cursor_output_25;  while(List_try_next(_x2c_macro_object_28, & _x2c_macro_cursor_28, & _x2c_macro_cursor_output_25)){
-      argument = Var_list(_x2c_macro_cursor_output_25);  Array_push(bound, List_var(Compiler_resolve_expression((compiler), argument, (compiler) -> token)));
+      argument = Var_list(_x2c_macro_cursor_output_25);  Array_push(bound, List_var(Compiler_resolve_expression((c), argument, (c) -> token)));
     }
 
   }
@@ -2907,7 +2907,7 @@ break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224498209600253096ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];  Var message = _x2c_match_values[1]; {
   if(context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD){
-    List _x2c_return_value_17 = cons(_63, cons(List_var(Compiler_resolve_expression((compiler), Var_list(condition), (compiler) -> token)), cons(List_var(Compiler_resolve_expression((compiler), Var_list(message), (compiler) -> token)), NULL))); {
+    List _x2c_return_value_17 = cons(_63, cons(List_var(Compiler_resolve_expression((c), Var_list(condition), (c) -> token)), cons(List_var(Compiler_resolve_expression((c), Var_list(message), (c) -> token)), NULL))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_17;
     }
 
@@ -2915,8 +2915,8 @@ break;
   goto construction_error;
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937167173734ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var declaration = _x2c_match_values[0];  Var native_syntax = _x2c_match_values[1]; {
-  if(context != AST_UNIT) goto construction_error;  declaration = List_var(Compiler_bind_syntax((compiler), declaration, AST_UNIT, List_type((compiler) -> return_type))); {
-    List _x2c_return_value_18 = Compiler_finish_foreign_alias((compiler), Var_list(declaration), Var_list(native_syntax)); {
+  if(context != AST_UNIT) goto construction_error;  declaration = List_var(Compiler_bind_syntax((c), declaration, AST_UNIT, List_type((c) -> return_type))); {
+    List _x2c_return_value_18 = Compiler_finish_foreign_alias((c), Var_list(declaration), Var_list(native_syntax)); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_18;
     }
 
@@ -2925,7 +2925,7 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
 }
 break; } } static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_capture(& _x2c_match_site_56, _x2c_match_expr, List_var(_494), &_x2c_match_capture)) {Var initializer = _x2c_match_values[0]; {
   if(context == AST_EXPRESSION){
-    List _x2c_return_value_19 = Compiler_resolve_expression((compiler), cons(_121, cons(_80, cons(initializer, NULL))), (compiler) -> token); {
+    List _x2c_return_value_19 = Compiler_resolve_expression((c), cons(_121, cons(_80, cons(initializer, NULL))), (c) -> token); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_19;
     }
 
@@ -2935,7 +2935,7 @@ break; } } static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_c
 break;
 }
 static MatchCaptureSite _x2c_match_site_57;  if (x2c_match_site_try_capture(& _x2c_match_site_57, _x2c_match_expr, List_var(_500), &_x2c_match_capture)) {Var expression = _x2c_match_values[0];  if(context == AST_EXPRESSION){
-  List _x2c_return_value_20 = Compiler_resolve_expression((compiler), Var_list(expression), (compiler) -> token); {
+  List _x2c_return_value_20 = Compiler_resolve_expression((c), Var_list(expression), (c) -> token); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_20;
   }
 
@@ -2943,10 +2943,10 @@ static MatchCaptureSite _x2c_match_site_57;  if (x2c_match_site_try_capture(& _x
 break;
 }
 static MatchCaptureSite _x2c_match_site_60;  if (x2c_match_site_try_capture(& _x2c_match_site_60, _x2c_match_expr, List_var(_510), &_x2c_match_capture)) {Var tag = _x2c_match_values[0];  Var base = _x2c_match_values[1];  List declarators = Var_list(_x2c_match_values[2]); {
-  int legal = Var_equal(tag, Symbol_var(44661285196)) ? context == AST_UNIT || context == AST_BLOCK : Var_equal(tag, Symbol_var(272600)) ? context == AST_BLOCK : context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD;  if(! legal) goto construction_error;  base = List_var(_finish_type((compiler), Var_list(base)));  List field_context = context == AST_FIELD ?(compiler) -> aggregate_type : NULL;  List declaration_context = Var_equal(tag, Symbol_var(44661285196)) ? _109 : field_context;  Array output = Array_new();  int preserved_self = 0; {
+  int legal = Var_equal(tag, Symbol_var(44661285196)) ? context == AST_UNIT || context == AST_BLOCK : Var_equal(tag, Symbol_var(272600)) ? context == AST_BLOCK : context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD;  if(! legal) goto construction_error;  base = List_var(_finish_type((c), Var_list(base)));  List field_context = context == AST_FIELD ?(c) -> aggregate_type : NULL;  List declaration_context = Var_equal(tag, Symbol_var(44661285196)) ? _109 : field_context;  Array output = Array_new();  int preserved_self = 0; {
     List declarator;  List _x2c_macro_object_29 = declarators;  List _x2c_macro_cursor_29 = _x2c_macro_object_29;  Var _x2c_macro_cursor_output_26;  while(List_try_next(_x2c_macro_object_29, & _x2c_macro_cursor_29, & _x2c_macro_cursor_output_26)){
       declarator = Var_list(_x2c_macro_cursor_output_26); {
-        declarator = _finish_declarator_parameters((compiler), declarator);  List syntax = declarator;
+        declarator = _finish_declarator_parameters((c), declarator);  List syntax = declarator;
   {
     List _x2c_match_expr = syntax;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -2969,13 +2969,13 @@ static MatchCaptureSite _x2c_match_site_60;  if (x2c_match_site_try_capture(& _x
     default: break;
     }
   }
-Array_push(output, List_var(_install_declarator_node((compiler), Var_list(base), declaration_context, declarator, NULL, & preserved_self)));
+Array_push(output, List_var(_install_declarator_node((c), Var_list(base), declaration_context, declarator, NULL, & preserved_self)));
   }
 
 }
 }
-List result = _finish_declaration((compiler), Var_symbol(tag), Var_list(base), Array_list_free(output), preserved_self);  if(context == AST_UNIT) Compiler_record_declaration_visibility((compiler), result);  if(context == AST_BLOCK && Var_equal(tag, Symbol_var(8932560010))){
-  List _x2c_return_value_21 = Compiler_finish_managed_declaration((compiler), result); {
+List result = _finish_declaration((c), Var_symbol(tag), Var_list(base), Array_list_free(output), preserved_self);  if(context == AST_UNIT) Compiler_record_declaration_visibility((c), result);  if(context == AST_BLOCK && Var_equal(tag, Symbol_var(8932560010))){
+  List _x2c_return_value_21 = Compiler_finish_managed_declaration((c), result); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_21;
   }
 
@@ -2996,7 +2996,7 @@ static MatchCaptureSite _x2c_match_site_63;  if (x2c_match_site_try_capture(& _x
     }
 
   }
-  List declaration = Compiler_bind_syntax((compiler), List_var(cons(_44, cons(base, cons(List_var(cons(_37, List_append(Array_list_free(declarators), NULL))), NULL)))), context, List_type((compiler) -> return_type));
+  List declaration = Compiler_bind_syntax((c), List_var(cons(_44, cons(base, cons(List_var(cons(_37, List_append(Array_list_free(declarators), NULL))), NULL)))), context, List_type((c) -> return_type));
   {
     List _x2c_match_expr = declaration;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -3018,7 +3018,7 @@ static MatchCaptureSite _x2c_match_site_63;  if (x2c_match_site_try_capture(& _x
 
   }
   {
-    List _x2c_return_value_23 = cons(_117, cons(bound_base, cons(List_var(cons(_118, List_append(Array_list_free(bound_targets), NULL))), cons(List_var(Compiler_resolve_expression((compiler), Var_list(source), (compiler) -> token)), NULL)))); {
+    List _x2c_return_value_23 = cons(_117, cons(bound_base, cons(List_var(cons(_118, List_append(Array_list_free(bound_targets), NULL))), cons(List_var(Compiler_resolve_expression((c), Var_list(source), (c) -> token)), NULL)))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_23;
     }
 
@@ -3042,7 +3042,7 @@ static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;  static MatchCaptureSite _x2c_match_site_65;  if (x2c_match_site_try_capture(& _x2c_match_site_65, _x2c_match_expr, List_var(_541), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  Var declarator = _x2c_match_values[1]; {
-        List declaration = Compiler_bind_syntax((compiler), List_var(cons(_44, cons(base, cons(List_var(cons(_37, cons(declarator, NULL))), NULL)))), context, List_type((compiler) -> return_type));
+        List declaration = Compiler_bind_syntax((c), List_var(cons(_44, cons(base, cons(List_var(cons(_37, cons(declarator, NULL))), NULL)))), context, List_type((c) -> return_type));
   {
     List _x2c_match_expr = declaration;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -3061,7 +3061,7 @@ static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x
 }
 }
 {
-  List _x2c_return_value_24 = cons(_117, cons(List_var(cons(_99, List_append(Array_list_free(bound_parameters), NULL))), cons(List_var(Compiler_resolve_expression((compiler), Var_list(source), (compiler) -> token)), NULL))); {
+  List _x2c_return_value_24 = cons(_117, cons(List_var(cons(_99, List_append(Array_list_free(bound_parameters), NULL))), cons(List_var(Compiler_resolve_expression((c), Var_list(source), (c) -> token)), NULL))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_24;
   }
 
@@ -3070,15 +3070,15 @@ static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x
 break;
 }
 static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x2c_match_site_69, _x2c_match_expr, List_var(_571), &_x2c_match_capture)) {Var function = _x2c_match_values[0];  Var return_type = _x2c_match_values[1];  Var function_name = _x2c_match_values[2];  List parameter_values = Var_list(_x2c_match_values[3]);  List return_modifiers = Var_list(_x2c_match_values[4]);  Var body = _x2c_match_values[5]; {
-  if(context != AST_UNIT) goto construction_error;  if((compiler) -> shallow && !(compiler) -> declaration_projection){
+  if(context != AST_UNIT) goto construction_error;  if((c) -> shallow && !(c) -> declaration_projection){
     List _x2c_return_value_25 = Var_list(function); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_25;
     }
 
   }
-  Array parameters = Array_new();  Sym_push_new_scope((compiler) -> sym); {
+  Array parameters = Array_new();  Sym_push_new_scope((c) -> sym); {
     {
-  _x2c_defer_env_10 _x2c_defer_env_25 = {._x2c_defer_capture_18 =(const void *) & compiler};
+  _x2c_defer_env_10 _x2c_defer_env_25 = {._x2c_defer_capture_18 =(const void *) & c};
   X2CCleanup _x2c_defer_record_10 = {
     .fn = _x2c_defer_cleanup_10,
     .env = & _x2c_defer_env_25
@@ -3089,13 +3089,13 @@ static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x
         Var value;  List _x2c_macro_object_34 = parameter_values;  List _x2c_macro_cursor_34 = _x2c_macro_object_34;  Var _x2c_macro_cursor_output_31;  while(List_try_next(_x2c_macro_object_34, & _x2c_macro_cursor_34, & _x2c_macro_cursor_output_31)){
           value = _x2c_macro_cursor_output_31; {
             {
-              Var row;  List _x2c_macro_object_33 = Compiler_evaluate_macro_rows((compiler), value);  List _x2c_macro_cursor_33 = _x2c_macro_object_33;  Var _x2c_macro_cursor_output_30;  while(List_try_next(_x2c_macro_object_33, & _x2c_macro_cursor_33, & _x2c_macro_cursor_output_30)){
+              Var row;  List _x2c_macro_object_33 = Compiler_evaluate_macro_rows((c), value);  List _x2c_macro_cursor_33 = _x2c_macro_object_33;  Var _x2c_macro_cursor_output_30;  while(List_try_next(_x2c_macro_object_33, & _x2c_macro_cursor_33, & _x2c_macro_cursor_output_30)){
                 row = _x2c_macro_cursor_output_30;
   {
     List _x2c_match_expr = Var_list(row);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 1519197: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936763137629ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Array_push(parameters, row);  break; } } case 33656922: ;  static MatchCaptureSite _x2c_match_site_67;  if (x2c_match_site_try_capture(& _x2c_match_site_67, _x2c_match_expr, List_var(_541), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Array_push(parameters, List_var(_finish_parameter((compiler), Var_list(base), Var_list(declarator), NULL, NULL, NULL)));  break;
+      case 1519197: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936763137629ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Array_push(parameters, row);  break; } } case 33656922: ;  static MatchCaptureSite _x2c_match_site_67;  if (x2c_match_site_try_capture(& _x2c_match_site_67, _x2c_match_expr, List_var(_541), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Array_push(parameters, List_var(_finish_parameter((c), Var_list(base), Var_list(declarator), NULL, NULL, NULL)));  break;
               }
               default: break;
     }
@@ -3114,14 +3114,14 @@ static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x
   x2c_cleanup_leave(& _x2c_defer_record_10);
 }
 }
-List parameter_list = Array_list_free(parameters);  List declarator = cons(_24, cons(function_name, cons(List_var(cons(List_var(cons(_100, cons(List_var(cons(_99, List_append(parameter_list, NULL))), NULL))), List_append(return_modifiers, NULL))), NULL)));  List declaration = Compiler_bind_syntax((compiler), List_var(cons(_44, cons(return_type, cons(List_var(cons(_37, cons(List_var(declarator), NULL))), NULL)))), context, List_type((compiler) -> return_type));  if((compiler) -> shallow){
+List parameter_list = Array_list_free(parameters);  List declarator = cons(_24, cons(function_name, cons(List_var(cons(List_var(cons(_100, cons(List_var(cons(_99, List_append(parameter_list, NULL))), NULL))), List_append(return_modifiers, NULL))), NULL)));  List declaration = Compiler_bind_syntax((c), List_var(cons(_44, cons(return_type, cons(List_var(cons(_37, cons(List_var(declarator), NULL))), NULL)))), context, List_type((c) -> return_type));  if((c) -> shallow){
 
   {
     List _x2c_match_expr = declaration;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 8932560010: ;  static MatchCaptureSite _x2c_match_site_68;  if (x2c_match_site_try_capture(& _x2c_match_site_68, _x2c_match_expr, List_var(_576), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var binding = _x2c_match_values[1]; {
-    Map_setindex((compiler) -> fn_defs, String_var(binding_identity_spelling(Var_list(binding))), int_var(1));  Compiler_record_declaration_visibility((compiler), declaration);
+    Map_setindex((c) -> fn_defs, String_var(binding_identity_spelling(Var_list(binding))), int_var(1));  Compiler_record_declaration_visibility((c), declaration);
   }
   break;
 }
@@ -3129,14 +3129,14 @@ default: break;
     }
   }
 {
-  List _x2c_return_value_26 = cons(_460, cons(List_var(declaration), cons(body, cons(Compiler_freeze_declaration_syntax((compiler), List_var((compiler) -> macro_stack)), NULL)))); {
+  List _x2c_return_value_26 = cons(_460, cons(List_var(declaration), cons(body, cons(Compiler_freeze_declaration_syntax((c), List_var((c) -> macro_stack)), NULL)))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_26;
   }
 
 }
 }
 {
-  List _x2c_return_value_27 = _finish_function((compiler), declaration, Var_list(body)); {
+  List _x2c_return_value_27 = _finish_function((c), declaration, Var_list(body)); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_27;
   }
 
@@ -3145,7 +3145,7 @@ default: break;
 break;
 }
 static MatchCaptureSite _x2c_match_site_70;  if (x2c_match_site_try_capture(& _x2c_match_site_70, _x2c_match_expr, List_var(_587), &_x2c_match_capture)) {Var node = _x2c_match_values[0];  if(context == AST_UNIT){
-  List _x2c_return_value_28 = Compiler_publish_protocol_node((compiler), Var_list(node), (compiler) -> token, NULL); {
+  List _x2c_return_value_28 = Compiler_publish_protocol_node((c), Var_list(node), (c) -> token, NULL); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_28;
   }
 
@@ -3155,7 +3155,7 @@ break;
 static MatchCaptureSite _x2c_match_site_71;  if (x2c_match_site_try_capture(& _x2c_match_site_71, _x2c_match_expr, List_var(_593), &_x2c_match_capture)) {Var definition = _x2c_match_values[0]; {
   List macro_definition = Var_list(definition);  if(Var_int(List_assoc(macro_definition, Symbol_var(26155096)))){
     if(context == AST_BLOCK){
-      Sym_define_macro((compiler) -> sym, List_assoc(macro_definition, Symbol_var(920394)), macro_definition); {
+      Sym_define_macro((c) -> sym, List_assoc(macro_definition, Symbol_var(920394)), macro_definition); {
         List _x2c_return_value_29 = _434; {
           x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_29;
         }
@@ -3166,7 +3166,7 @@ static MatchCaptureSite _x2c_match_site_71;  if (x2c_match_site_try_capture(& _x
 
   }
   else if(context == AST_UNIT){
-    List _x2c_return_value_30 = Compiler_publish_macro_definition_node((compiler), macro_definition); {
+    List _x2c_return_value_30 = Compiler_publish_macro_definition_node((c), macro_definition); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_30;
     }
 
@@ -3178,7 +3178,7 @@ break;
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var directive = _x2c_match_values[0]; {
   Var _x2c_match_value_6 = directive; {
     String directive = Var_string(_x2c_match_value_6); {
-      if(context != AST_UNIT && context != AST_BLOCK) goto construction_error;  Compiler_update_source_visibility((compiler), cons(List_var(input), NULL)); {
+      if(context != AST_UNIT && context != AST_BLOCK) goto construction_error;  Compiler_update_source_visibility((c), cons(List_var(input), NULL)); {
         List _x2c_return_value_31 = input; {
           x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_31;
         }
@@ -3191,7 +3191,7 @@ break;
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var origin = _x2c_match_values[0];  Var node = _x2c_match_values[1]; {
-  List bound = Compiler_bind_syntax((compiler), node, context, List_type((compiler) -> return_type));
+  List bound = Compiler_bind_syntax((c), node, context, List_type((c) -> return_type));
   {
     List _x2c_match_expr = bound;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -3199,7 +3199,7 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
       case 39266: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761657698ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var only = _x2c_match_values[0];  bound = Var_list(only);  break; } } default: break;
     }
   }
-Var anchor = Var_equal(origin, Symbol_var(960970177116)) ? int_var((compiler) -> origin) : origin; {
+Var anchor = Var_equal(origin, Symbol_var(960970177116)) ? int_var((c) -> origin) : origin; {
     List _x2c_return_value_32 = cons(_601, cons(anchor, cons(List_var(bound), NULL))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_32;
     }
@@ -3208,13 +3208,13 @@ Var anchor = Var_equal(origin, Symbol_var(960970177116)) ? int_var((compiler) ->
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937981418652ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {if(statement_position){
-  List _x2c_return_value_33 = Compiler_finish_return_statement((compiler), NULL); {
+  List _x2c_return_value_33 = Compiler_finish_return_statement((c), NULL); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_33;
   }
 
 }
 break; } } static MatchCaptureSite _x2c_match_site_72;  if (x2c_match_site_try_capture(& _x2c_match_site_72, _x2c_match_expr, List_var(_611), &_x2c_match_capture)) {Var expression = _x2c_match_values[0];  if(statement_position){
-  List _x2c_return_value_34 = Compiler_finish_return_statement((compiler), Var_list(expression)); {
+  List _x2c_return_value_34 = Compiler_finish_return_statement((c), Var_list(expression)); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_34;
   }
 
@@ -3230,7 +3230,7 @@ static MatchCaptureSite _x2c_match_site_73;  if (x2c_match_site_try_capture(& _x
 break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761818314ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];  if(statement_position){
-  List _x2c_return_value_36 = cons(_622, cons(List_var(Compiler_resolve_expression((compiler), Var_list(expression), (compiler) -> token)), NULL)); {
+  List _x2c_return_value_36 = cons(_622, cons(List_var(Compiler_resolve_expression((c), Var_list(expression), (c) -> token)), NULL)); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_36;
   }
 
@@ -3244,50 +3244,50 @@ break; } } static MatchCaptureSite _x2c_match_site_74;  if (x2c_match_site_try_c
 break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802802600ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];  if(statement_position){
-  List _x2c_return_value_38 = cons(_174, cons(List_var(Compiler_resolve_expression((compiler), Var_list(expression), (compiler) -> token)), NULL)); {
+  List _x2c_return_value_38 = cons(_174, cons(List_var(Compiler_resolve_expression((c), Var_list(expression), (c) -> token)), NULL)); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_38;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936770347364ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var body = _x2c_match_values[0];  if(statement_position){
-  List _x2c_return_value_39 = cons(_173, cons(List_var(Compiler_bind_syntax((compiler), body, AST_STATEMENT, List_type((compiler) -> return_type))), NULL)); {
+  List _x2c_return_value_39 = cons(_173, cons(List_var(Compiler_bind_syntax((c), body, AST_STATEMENT, List_type((c) -> return_type))), NULL)); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_39;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618718ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var body = _x2c_match_values[0];  Var condition = _x2c_match_values[1];  if(statement_position){
-  List _x2c_return_value_40 = cons(_637, cons(List_var(Compiler_bind_syntax((compiler), body, AST_STATEMENT, List_type((compiler) -> return_type))), cons(List_var(Compiler_resolve_expression((compiler), Var_list(condition), (compiler) -> token)), NULL))); {
+  List _x2c_return_value_40 = cons(_637, cons(List_var(Compiler_bind_syntax((c), body, AST_STATEMENT, List_type((c) -> return_type))), cons(List_var(Compiler_resolve_expression((c), Var_list(condition), (c) -> token)), NULL))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_40;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936810396426ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];  Var body = _x2c_match_values[1];  if(statement_position){
-  List _x2c_return_value_41 = cons(_641, cons(List_var(Compiler_resolve_expression((compiler), Var_list(condition), (compiler) -> token)), cons(List_var(Compiler_bind_syntax((compiler), body, AST_STATEMENT, List_type((compiler) -> return_type))), NULL))); {
+  List _x2c_return_value_41 = cons(_641, cons(List_var(Compiler_resolve_expression((c), Var_list(condition), (c) -> token)), cons(List_var(Compiler_bind_syntax((c), body, AST_STATEMENT, List_type((c) -> return_type))), NULL))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_41;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497938085552336ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];  Var body = _x2c_match_values[1];  if(statement_position){
-  List _x2c_return_value_42 = cons(_644, cons(List_var(Compiler_resolve_expression((compiler), Var_list(expression), (compiler) -> token)), cons(List_var(Compiler_bind_syntax((compiler), body, AST_STATEMENT, List_type((compiler) -> return_type))), NULL))); {
+  List _x2c_return_value_42 = cons(_644, cons(List_var(Compiler_resolve_expression((c), Var_list(expression), (c) -> token)), cons(List_var(Compiler_bind_syntax((c), body, AST_STATEMENT, List_type((c) -> return_type))), NULL))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_42;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619020ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];  Var ontrue = _x2c_match_values[1];  if(statement_position){
-  List _x2c_return_value_43 = cons(_647, cons(List_var(Compiler_resolve_expression((compiler), Var_list(condition), (compiler) -> token)), cons(List_var(Compiler_bind_syntax((compiler), ontrue, AST_STATEMENT, List_type((compiler) -> return_type))), NULL))); {
+  List _x2c_return_value_43 = cons(_647, cons(List_var(Compiler_resolve_expression((c), Var_list(condition), (c) -> token)), cons(List_var(Compiler_bind_syntax((c), ontrue, AST_STATEMENT, List_type((c) -> return_type))), NULL))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_43;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619020ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];  Var ontrue = _x2c_match_values[1];  Var onfalse = _x2c_match_values[2];  if(statement_position){
-  List _x2c_return_value_44 = cons(_647, cons(List_var(Compiler_resolve_expression((compiler), Var_list(condition), (compiler) -> token)), cons(List_var(Compiler_bind_syntax((compiler), ontrue, AST_STATEMENT, List_type((compiler) -> return_type))), cons(List_var(Compiler_bind_syntax((compiler), onfalse, AST_STATEMENT, List_type((compiler) -> return_type))), NULL)))); {
+  List _x2c_return_value_44 = cons(_647, cons(List_var(Compiler_resolve_expression((c), Var_list(condition), (c) -> token)), cons(List_var(Compiler_bind_syntax((c), ontrue, AST_STATEMENT, List_type((c) -> return_type))), cons(List_var(Compiler_bind_syntax((c), onfalse, AST_STATEMENT, List_type((c) -> return_type))), NULL)))); {
     x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_44;
   }
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761631716ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[3] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var init = _x2c_match_values[0];  Var condition = _x2c_match_values[1];  Var increment = _x2c_match_values[2];  Var body = _x2c_match_values[3]; {
-  if(! statement_position) goto construction_error;  Sym_push_new_scope((compiler) -> sym); {
-  _x2c_defer_env_11 _x2c_defer_env_26 = {._x2c_defer_capture_19 =(const void *) & compiler};
+  if(! statement_position) goto construction_error;  Sym_push_new_scope((c) -> sym); {
+  _x2c_defer_env_11 _x2c_defer_env_26 = {._x2c_defer_capture_19 =(const void *) & c};
   X2CCleanup _x2c_defer_record_11 = {
     .fn = _x2c_defer_cleanup_11,
     .env = & _x2c_defer_env_26
@@ -3295,10 +3295,10 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
   x2c_cleanup_push(&_x2c_defer_record_11);
   {
     if(Var_is_row(init, 9, 7, 4)){
-      List node = Var_list(init);  init = List_var(Var_equal(List_car(node), Symbol_var(272600)) ? Compiler_bind_syntax((compiler), List_var(node), AST_BLOCK, List_type((compiler) -> return_type)) : Compiler_resolve_expression((compiler), node, (compiler) -> token));
+      List node = Var_list(init);  init = List_var(Var_equal(List_car(node), Symbol_var(272600)) ? Compiler_bind_syntax((c), List_var(node), AST_BLOCK, List_type((c) -> return_type)) : Compiler_resolve_expression((c), node, (c) -> token));
     }
-    if(Var_is_row(condition, 9, 7, 4)) condition = List_var(Compiler_resolve_expression((compiler), Var_list(condition), (compiler) -> token));  if(Var_is_row(increment, 9, 7, 4)) increment = List_var(Compiler_resolve_expression((compiler), Var_list(increment), (compiler) -> token)); {
-      List _x2c_return_value_45 = cons(_657, cons(init, cons(condition, cons(increment, cons(List_var(Compiler_bind_syntax((compiler), body, AST_STATEMENT, List_type((compiler) -> return_type))), NULL))))); {
+    if(Var_is_row(condition, 9, 7, 4)) condition = List_var(Compiler_resolve_expression((c), Var_list(condition), (c) -> token));  if(Var_is_row(increment, 9, 7, 4)) increment = List_var(Compiler_resolve_expression((c), Var_list(increment), (c) -> token)); {
+      List _x2c_return_value_45 = cons(_657, cons(init, cons(condition, cons(increment, cons(List_var(Compiler_bind_syntax((c), body, AST_STATEMENT, List_type((c) -> return_type))), NULL))))); {
         x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_45;
       }
 
@@ -3311,12 +3311,12 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
 break; } } static MatchCaptureSite _x2c_match_site_75;  if (x2c_match_site_try_capture(& _x2c_match_site_75, _x2c_match_expr, List_var(_672), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List details = Var_list(_x2c_match_values[1]); {
   if(! statement_position) goto construction_error;  Array bound = Array_new(); {
     List detail;  List _x2c_macro_object_35 = details;  List _x2c_macro_cursor_35 = _x2c_macro_object_35;  Var _x2c_macro_cursor_output_32;  while(List_try_next(_x2c_macro_object_35, & _x2c_macro_cursor_35, & _x2c_macro_cursor_output_32)){
-      detail = Var_list(_x2c_macro_cursor_output_32);  Array_push(bound, List_var(Compiler_resolve_expression((compiler), detail, (compiler) -> token)));
+      detail = Var_list(_x2c_macro_cursor_output_32);  Array_push(bound, List_var(Compiler_resolve_expression((c), detail, (c) -> token)));
     }
 
   }
   {
-    List _x2c_return_value_46 = cons(_664, cons(List_var(Compiler_resolve_expression((compiler), Var_list(code), (compiler) -> token)), cons(List_var(cons(_169, List_append(Array_list_free(bound), NULL))), NULL))); {
+    List _x2c_return_value_46 = cons(_664, cons(List_var(Compiler_resolve_expression((c), Var_list(code), (c) -> token)), cons(List_var(cons(_169, List_append(Array_list_free(bound), NULL))), NULL))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_46;
     }
 
@@ -3329,16 +3329,16 @@ break;
   if(context != AST_STATEMENT) goto construction_error;  Array bound = Array_new(); {
     List arm;  List _x2c_macro_object_36 = Var_list(arms);  List _x2c_macro_cursor_36 = _x2c_macro_object_36;  Var _x2c_macro_cursor_output_33;  while(List_try_next(_x2c_macro_object_36, & _x2c_macro_cursor_36, & _x2c_macro_cursor_output_33)){
       arm = Var_list(_x2c_macro_cursor_output_33); {
-        List pattern = Var_list(List_car(arm));  Compiler_begin_catch_arm((compiler), pattern, (compiler) -> token); {
+        List pattern = Var_list(List_car(arm));  Compiler_begin_catch_arm((c), pattern, (c) -> token); {
           {
-  _x2c_defer_env_12 _x2c_defer_env_27 = {._x2c_defer_capture_20 =(const void *) & compiler};
+  _x2c_defer_env_12 _x2c_defer_env_27 = {._x2c_defer_capture_20 =(const void *) & c};
   X2CCleanup _x2c_defer_record_12 = {
     .fn = _x2c_defer_cleanup_12,
     .env = & _x2c_defer_env_27
   };
   x2c_cleanup_push(&_x2c_defer_record_12);
   {
-            Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(Compiler_bind_syntax((compiler), List_cadr(arm), AST_STATEMENT, List_type((compiler) -> return_type))), NULL))));
+            Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(Compiler_bind_syntax((c), List_cadr(arm), AST_STATEMENT, List_type((c) -> return_type))), NULL))));
           }
           x2c_cleanup_leave(& _x2c_defer_record_12);
 }
@@ -3358,8 +3358,8 @@ break;
 
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761660594ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var body = _x2c_match_values[0];  Var catches = _x2c_match_values[1];  Var cleanup = _x2c_match_values[2]; {
-  if(! statement_position) goto construction_error;  if(Var_is_row(catches, 9, 7, 4) && List_truth(Var_list(catches))) catches = List_var(Compiler_bind_syntax((compiler), catches, AST_STATEMENT, List_type((compiler) -> return_type)));  if(Var_is_row(cleanup, 9, 7, 4) && List_truth(Var_list(cleanup))) cleanup = List_var(Compiler_bind_syntax((compiler), cleanup, AST_STATEMENT, List_type((compiler) -> return_type))); {
-    List _x2c_return_value_48 = cons(_677, cons(List_var(Compiler_bind_syntax((compiler), body, AST_STATEMENT, List_type((compiler) -> return_type))), cons(catches, cons(cleanup, NULL)))); {
+  if(! statement_position) goto construction_error;  if(Var_is_row(catches, 9, 7, 4) && List_truth(Var_list(catches))) catches = List_var(Compiler_bind_syntax((c), catches, AST_STATEMENT, List_type((c) -> return_type)));  if(Var_is_row(cleanup, 9, 7, 4) && List_truth(Var_list(cleanup))) cleanup = List_var(Compiler_bind_syntax((c), cleanup, AST_STATEMENT, List_type((c) -> return_type))); {
+    List _x2c_return_value_48 = cons(_677, cons(List_var(Compiler_bind_syntax((c), body, AST_STATEMENT, List_type((c) -> return_type))), cons(catches, cons(cleanup, NULL)))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_48;
     }
 
@@ -3370,9 +3370,9 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
   if(! statement_position) goto construction_error;  Array bound = Array_new(); {
     List row;  List _x2c_macro_object_37 = Var_list(cases);  List _x2c_macro_cursor_37 = _x2c_macro_object_37;  Var _x2c_macro_cursor_output_34;  while(List_try_next(_x2c_macro_object_37, & _x2c_macro_cursor_37, & _x2c_macro_cursor_output_34)){
       row = Var_list(_x2c_macro_cursor_output_34); {
-        List pattern = Var_list(List_car(row));  int binds = pattern != _154;  if(binds) pattern = Compiler_resolve_expression((compiler), pattern, (compiler) -> token);  Compiler_begin_match_arm((compiler), pattern, (compiler) -> token, binds); {
+        List pattern = Var_list(List_car(row));  int binds = pattern != _154;  if(binds) pattern = Compiler_resolve_expression((c), pattern, (c) -> token);  Compiler_begin_match_arm((c), pattern, (c) -> token, binds); {
           {
-  _x2c_defer_env_13 _x2c_defer_env_28 = {._x2c_defer_capture_21 =(const void *) & compiler};
+  _x2c_defer_env_13 _x2c_defer_env_28 = {._x2c_defer_capture_21 =(const void *) & c};
   X2CCleanup _x2c_defer_record_13 = {
     .fn = _x2c_defer_cleanup_13,
     .env = & _x2c_defer_env_28
@@ -3384,7 +3384,7 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
     List _x2c_match_expr = body;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 16444957000: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var statements = _x2c_match_values[0];  body = cons(_690, cons(List_var(Compiler_bind_syntax((compiler), statements, AST_STATEMENT, List_type((compiler) -> return_type))), NULL));  break; } } default: ;  body = Compiler_bind_syntax((compiler), List_var(body), AST_STATEMENT, List_type((compiler) -> return_type));  break;
+      case 16444957000: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var statements = _x2c_match_values[0];  body = cons(_690, cons(List_var(Compiler_bind_syntax((c), statements, AST_STATEMENT, List_type((c) -> return_type))), NULL));  break; } } default: ;  body = Compiler_bind_syntax((c), List_var(body), AST_STATEMENT, List_type((c) -> return_type));  break;
     }
   }
 Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(body), NULL))));
@@ -3399,7 +3399,7 @@ Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(body), NULL))))
 
   }
   {
-    List _x2c_return_value_49 = cons(_684, cons(List_var(Compiler_resolve_expression((compiler), Var_list(subject), (compiler) -> token)), cons(List_var(Array_list_free(bound)), NULL))); {
+    List _x2c_return_value_49 = cons(_684, cons(List_var(Compiler_resolve_expression((c), Var_list(subject), (c) -> token)), cons(List_var(Array_list_free(bound)), NULL))); {
       x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_49;
     }
 
@@ -3407,9 +3407,9 @@ Array_push(bound, List_var(cons(List_var(pattern), cons(List_var(body), NULL))))
 
 }
 break; } } static MatchCaptureSite _x2c_match_site_76;  if (x2c_match_site_try_capture(& _x2c_match_site_76, _x2c_match_expr, List_var(_696), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
-  if(! statement_position) goto construction_error;  Array fields = Array_new();  Sym_push_new_scope((compiler) -> sym); {
+  if(! statement_position) goto construction_error;  Array fields = Array_new();  Sym_push_new_scope((c) -> sym); {
     {
-  _x2c_defer_env_14 _x2c_defer_env_29 = {._x2c_defer_capture_22 =(const void *) & compiler};
+  _x2c_defer_env_14 _x2c_defer_env_29 = {._x2c_defer_capture_22 =(const void *) & c};
   X2CCleanup _x2c_defer_record_14 = {
     .fn = _x2c_defer_cleanup_14,
     .env = & _x2c_defer_env_29
@@ -3419,7 +3419,7 @@ break; } } static MatchCaptureSite _x2c_match_site_76;  if (x2c_match_site_try_c
       {
         Var child;  List _x2c_macro_object_39 = children;  List _x2c_macro_cursor_39 = _x2c_macro_object_39;  Var _x2c_macro_cursor_output_36;  while(List_try_next(_x2c_macro_object_39, & _x2c_macro_cursor_39, & _x2c_macro_cursor_output_36)){
           child = _x2c_macro_cursor_output_36; {
-            List bound = Compiler_bind_syntax((compiler), child, AST_BLOCK, List_type((compiler) -> return_type));  if(Var_equal(List_car(bound), Symbol_var(39266))){
+            List bound = Compiler_bind_syntax((c), child, AST_BLOCK, List_type((c) -> return_type));  if(Var_equal(List_car(bound), Symbol_var(39266))){
               Var item;  List _x2c_macro_object_38 = List_cdr(bound);  List _x2c_macro_cursor_38 = _x2c_macro_object_38;  Var _x2c_macro_cursor_output_35;  while(List_try_next(_x2c_macro_object_38, & _x2c_macro_cursor_38, & _x2c_macro_cursor_output_35)){
                 item = _x2c_macro_cursor_output_35;  Array_push(fields, item);
               }
@@ -3449,7 +3449,7 @@ break;
 static MatchCaptureSite _x2c_match_site_77;  if (x2c_match_site_try_capture(& _x2c_match_site_77, _x2c_match_expr, List_var(_698), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
   if(! statement_position) goto construction_error;  Array items = Array_new(); {
     Var child;  List _x2c_macro_object_40 = children;  List _x2c_macro_cursor_40 = _x2c_macro_object_40;  Var _x2c_macro_cursor_output_37;  while(List_try_next(_x2c_macro_object_40, & _x2c_macro_cursor_40, & _x2c_macro_cursor_output_37)){
-      child = _x2c_macro_cursor_output_37;  Array_push(items, List_var(Compiler_bind_syntax((compiler), child, AST_BLOCK, List_type((compiler) -> return_type))));
+      child = _x2c_macro_cursor_output_37;  Array_push(items, List_var(Compiler_bind_syntax((c), child, AST_BLOCK, List_type((c) -> return_type))));
     }
 
   }
@@ -3466,7 +3466,7 @@ break;
 
     }
   }
-construction_error : Compiler_report_error((compiler), 33658058, _702, (compiler) -> token, NULL);
+construction_error : Compiler_report_error((c), 33658058, _702, (c) -> token, NULL);
 }
 }
 x2c_cleanup_leave(& _x2c_defer_record_7);

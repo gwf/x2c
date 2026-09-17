@@ -164,7 +164,7 @@ String String_escape(String);
 
 String Buffer_str_free(Buffer);
 
-char * Compiler_code_pretty_string(Compiler compiler, List code, String output_file){
+char * Compiler_code_pretty_string(Compiler cc, List code, String output_file){
   if(! _init_guard_) _file_init_();
   Buffer buff = Buffer_new(0);
   int indent = 0, paren_depth = 0, directive_break = 0;
@@ -173,7 +173,7 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
   for(List lst = code;  List_truth(lst);  lst = List_cdr(lst)){
     if(Var_equal(List_car(lst), Symbol_var(1313077352))){
       lst = List_cdr(lst);
-      List location = Compiler_origin_location(compiler, Var_int(Var_convert(List_car(lst), 3453797)));
+      List location = Compiler_origin_location(cc, Var_int(Var_convert(List_car(lst), 3453797)));
       while(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
       if(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) != '\n') _write_newline(buff);
       while(scanned < Buffer_len(buff)) if(Buffer_get(buff, scanned ++) == '\n') output_line ++;

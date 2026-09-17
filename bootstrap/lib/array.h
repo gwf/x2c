@@ -88,9 +88,9 @@ String Array_join(Array array, String separator);
 
 int Array_equal(Array a, Array b);
 
-Buffer Array_write_repr(Array array, Buffer out);
+Buffer Array_write_repr(Array a, Buffer out);
 
-Buffer Array_write_str(Array array, Buffer out);
+Buffer Array_write_str(Array a, Buffer out);
 
 String Array_str(Array array);
 

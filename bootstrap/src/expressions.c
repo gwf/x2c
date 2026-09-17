@@ -27,7 +27,7 @@ static int _deferred_receiver(List expr);
 
 static List _parse_slice(Compiler c, List expr, List start);
 
-static List Compiler__postfix_index_expression(Compiler compiler, List expr, List index);
+static List Compiler__postfix_index_expression(Compiler c, List expr, List index);
 
 static List _parse_postfix_index(Compiler c, List expr);
 
@@ -71,7 +71,7 @@ static String _delegate_type_name(Type type);
 
 static String _delegate_path_string(Type receiver, List path, String member);
 
-static void _report_imported_method_ambiguity(Compiler compiler, Type receiver, String member, List packages, String delegate_path, Token origin);
+static void _report_method_ambiguity(Compiler compiler, Type receiver, String member, List packages, String delegate_path, Token origin);
 
 static List _delegate_step(Compiler compiler, Type receiver, String name);
 
@@ -149,7 +149,7 @@ static void _note_fresh_callee(Compiler compiler, List binding);
 
 static int _is_operator_temporary(Compiler c, List expression);
 
-static List Compiler__protocol_operator_expression(Compiler compiler, Symbol op, List lhs, List rhs);
+static List Compiler__protocol_operator_expression(Compiler c, Symbol op, List lhs, List rhs);
 
 static List _binary_op_type_addsub(Compiler compiler, Symbol op, List lhs, List rhs);
 
@@ -197,7 +197,7 @@ static List _parse_binary_ops(Compiler compiler);
 
 static int _destructure_identifier(List expression);
 
-static List _destructure_assignment_targets(Compiler compiler, List lhs);
+static List _destructure_targets(Compiler compiler, List lhs);
 
 static List _parse_comma_list(Compiler compiler);
 
@@ -1954,30 +1954,30 @@ int Type_is_integral(Type);
 int Sym_is_named_value_type(Sym, Type, String);
 Type Sym_resolve_key(Sym, Type);
 int Sym_is_string_type(Sym, Type);
-static List Compiler__postfix_index_expression(Compiler compiler, List expr, List index){
+static List Compiler__postfix_index_expression(Compiler c, List expr, List index){
   Type type = Var_type(List_cadr(expr));  while(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) && Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(type))))) type = List_type(cdr(Type_list(type)));  if(Type_is_pointer(type) || Type_is_array(type)){
     type = Type_dereference(type);  return cons(_0, cons(List_var(type), cons(List_var(cons(_127, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));
   }
-  if(! Type_is_typedef_name(type)) return NULL;  String owner = Var_string(List_car(Type_list(type)));  Type receiver = type;  if(Sym_is_array_type(compiler -> sym, type)){
+  if(! Type_is_typedef_name(type)) return NULL;  String owner = Var_string(List_car(Type_list(type)));  Type receiver = type;  if(Sym_is_array_type(c -> sym, type)){
     owner = _128;  receiver = List_type(_131);
   }
-  else if(Sym_is_map_type(compiler -> sym, type)){
+  else if(Sym_is_map_type(c -> sym, type)){
     owner = _132;  receiver = List_type(_135);
   }
-  String fnname = String_join(NULL, cons(String_var(owner), cons(String_var(_136), NULL)));  List fntype = Sym_get(compiler -> sym, cons(String_var(fnname), NULL));
+  String fnname = String_join(NULL, cons(String_var(owner), cons(String_var(_136), NULL)));  List fntype = Sym_get(c -> sym, cons(String_var(fnname), NULL));
   {
     List _x2c_match_expr = fntype;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(List_var(cons(_73, cons(List_var(cons(_71, cons(_137, cons(List_var(cons(List_var(receiver), _85)), NULL)))), NULL))), _139)), &_x2c_match_capture)) {Var params = _x2c_match_values[0];  Var rtype = _x2c_match_values[1]; {
-    Type key = Var_type(Var_cadr(params)), supplied = Var_type(List_cadr(index));  if(Type_is_integral(key) && Sym_is_named_value_type(compiler -> sym, supplied, _1447)) Compiler_report_error(compiler, 1362954, _1448, compiler -> token, NULL);  return cons(_0, cons(List_var(cons(rtype, NULL)), cons(List_var(cons(_140, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));
+    Type key = Var_type(Var_cadr(params)), supplied = Var_type(List_cadr(index));  if(Type_is_integral(key) && Sym_is_named_value_type(c -> sym, supplied, _1447)) Compiler_report_error(c, 1362954, _1448, c -> token, NULL);  return cons(_0, cons(List_var(cons(rtype, NULL)), cons(List_var(cons(_140, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));
   }
   break;
 }
 
     }
   }
-Type native = Sym_resolve_key(compiler -> sym, type);  if(Type_is_array(native) ||(Type_is_pointer(native) && ! Sym_is_string_type(compiler -> sym, type))) return cons(_0, cons(List_var(Type_dereference(native)), cons(List_var(cons(_127, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));  return NULL;
+Type native = Sym_resolve_key(c -> sym, type);  if(Type_is_array(native) ||(Type_is_pointer(native) && ! Sym_is_string_type(c -> sym, type))) return cons(_0, cons(List_var(Type_dereference(native)), cons(List_var(cons(_127, cons(List_var(expr), cons(List_var(index), NULL)))), NULL)));  return NULL;
 }
 
 static List _parse_postfix_index(Compiler c, List expr){
@@ -2131,7 +2131,7 @@ static String _delegate_path_string(Type receiver, List path, String member){
 }
 
 List List_reverse(List);
-static void _report_imported_method_ambiguity(Compiler compiler, Type receiver, String member, List packages, String delegate_path, Token origin){
+static void _report_method_ambiguity(Compiler compiler, Type receiver, String member, List packages, String delegate_path, Token origin){
   List notes = String_truth(delegate_path) ? cons(String_var(String_join(NULL, cons(String_var(_212), cons(String_var(delegate_path), NULL)))), NULL) : NULL; {
     String package;  List _x2c_macro_object_2 = packages;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
       package = Var_string(_x2c_macro_cursor_output_2);  notes = cons(String_var(String_join(NULL, cons(String_var(_213), cons(String_var(package), cons(String_var(_214), NULL))))), notes);
@@ -2160,7 +2160,7 @@ static void _find_delegate_methods(Compiler compiler, Type receiver, String memb
           List binding = Var_list(List_cadr(resolution));  Type signature = Var_type(List_caddr(resolution));  List path = cons(Symbol_var(1051920), List_reverse(next_path));  Array_push(candidates, List_var(cons(_219, cons(List_var(binding), cons(List_var(signature), cons(List_var(path), NULL))))));
         }
         else if(List_truth(resolution) && Var_equal(List_car(resolution), Symbol_var(3097291488614))){
-          String path = _delegate_path_string(outer, cons(Symbol_var(1051920), List_reverse(next_path)), NULL);  _report_imported_method_ambiguity(compiler, field_type, member, List_cdr(resolution), path, origin);
+          String path = _delegate_path_string(outer, cons(Symbol_var(1051920), List_reverse(next_path)), NULL);  _report_method_ambiguity(compiler, field_type, member, List_cdr(resolution), path, origin);
         }
         else if(! List_truth(resolution)) _find_delegate_methods(compiler, field_type, member, next_path, seen, candidates, first_cycle, outer, origin);
       }
@@ -2474,8 +2474,8 @@ static List _parse_cast(Compiler c){
   c -> token = head;  return _parse_unary_op(c);
 }
 
-List Compiler_parse_macro_expression_target(Compiler compiler){
-  if(! _init_guard_) _file_init_();  return _parse_cast(compiler);
+List Compiler_parse_macro_expression_target(Compiler c){
+  if(! _init_guard_) _file_init_();  return _parse_cast(c);
 }
 
 static inline int _precedence(Symbol op){
@@ -2736,15 +2736,15 @@ return 0;
 }
 
 List Compiler_protocol_discard_helper(Compiler, Type, String, int);
-static List Compiler__protocol_operator_expression(Compiler compiler, Symbol op, List lhs, List rhs){
-  Symbol derived = 0;  List resolved = _resolve_protocol_operator(compiler, op, & lhs, & rhs, & derived);  if(! List_truth(resolved)) return NULL;  List _x2c_destructure_4 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_4, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_4, 1));  Type result = List_cdr(signature);  List arguments = NULL;  int which = 0;  if(! List_truth(rhs)) arguments = cons(_101, cons(List_var(lhs), NULL));  else if(op == 604){
-    List parameters = Var_list(Var_cadr(List_car(Type_list(signature))));  lhs = Compiler_convert_expression(compiler, lhs, Var_type(List_cadr(parameters)));  arguments = cons(_101, cons(List_var(rhs), cons(List_var(lhs), NULL)));
+static List Compiler__protocol_operator_expression(Compiler c, Symbol op, List lhs, List rhs){
+  Symbol derived = 0;  List resolved = _resolve_protocol_operator(c, op, & lhs, & rhs, & derived);  if(! List_truth(resolved)) return NULL;  List _x2c_destructure_4 = resolved;  List binding = Var_list(List_getindex(_x2c_destructure_4, 0));  Type signature = Var_type(List_getindex(_x2c_destructure_4, 1));  Type result = List_cdr(signature);  List arguments = NULL;  int which = 0;  if(! List_truth(rhs)) arguments = cons(_101, cons(List_var(lhs), NULL));  else if(op == 604){
+    List parameters = Var_list(Var_cadr(List_car(Type_list(signature))));  lhs = Compiler_convert_expression(c, lhs, Var_type(List_cadr(parameters)));  arguments = cons(_101, cons(List_var(rhs), cons(List_var(lhs), NULL)));
   }
   else arguments = cons(_101, cons(List_var(lhs), cons(List_var(rhs), NULL)));  if(op != 604){
-    if(_is_operator_temporary(compiler, lhs)) which |= 1;  if(List_truth(rhs) && _is_operator_temporary(compiler, rhs)) which |= 2;
+    if(_is_operator_temporary(c, lhs)) which |= 1;  if(List_truth(rhs) && _is_operator_temporary(c, rhs)) which |= 2;
   }
-  if(! derived && List_truth(Compiler_resolve_protocol_member(compiler, result, _1453))) _note_fresh_callee(compiler, binding);  if(which){
-    Symbol member = List_truth(rhs) ? Compiler_operator_member(compiler, op) : 29006;  if(! member) member = Compiler_derived_member(compiler, op);  Type participant = Var_type(List_cadr(lhs));  List helper = Compiler_protocol_discard_helper(compiler, participant, Symbol_str(member), which);  if(List_truth(helper)){
+  if(! derived && List_truth(Compiler_resolve_protocol_member(c, result, _1453))) _note_fresh_callee(c, binding);  if(which){
+    Symbol member = List_truth(rhs) ? Compiler_operator_member(c, op) : 29006;  if(! member) member = Compiler_derived_member(c, op);  Type participant = Var_type(List_cadr(lhs));  List helper = Compiler_protocol_discard_helper(c, participant, Symbol_str(member), which);  if(List_truth(helper)){
       List _x2c_destructure_5 = helper;  binding = Var_list(List_getindex(_x2c_destructure_5, 0));  signature = Var_type(List_getindex(_x2c_destructure_5, 1));
     }
 
@@ -3017,7 +3017,7 @@ static List _resolve_call(Compiler c, Type result_type, List function, List supp
     List _x2c_match_expr = resolution;
     Var _x2c_match_values[6];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 6 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 3097291488614: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_566), &_x2c_match_capture)) {List packages = Var_list(_x2c_match_values[0]);  _report_imported_method_ambiguity(c, type, method, packages, NULL, origin);  break;
+      case 3097291488614: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_566), &_x2c_match_capture)) {List packages = Var_list(_x2c_match_values[0]);  _report_method_ambiguity(c, type, method, packages, NULL, origin);  break;
   }
   case 884229064: ;  static MatchCaptureSite _x2c_match_site_41;  if (x2c_match_site_try_capture(& _x2c_match_site_41, _x2c_match_expr, List_var(_587), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Var signature = _x2c_match_values[1];  Var parameters = _x2c_match_values[2];  Var declared = _x2c_match_values[3];  List returns = Var_list(_x2c_match_values[4]); {
     receiver = List_var(_method_bind(c, Var_list(receiver), type, Var_type(declared), origin));  Type signature_type = Var_type(signature);  List callee = cons(_0, cons(List_var(cons(List_var(cons(_73, cons(parameters, NULL))), cons(List_var(returns), NULL))), cons(List_var(cons(_88, cons(binding, NULL))), NULL)));  return _finish_call(c, Type_apply(signature_type), callee, signature_type, Var_list(receiver), supplied, origin);
@@ -3470,18 +3470,18 @@ List Compiler_resolve_map_entry(Compiler compiler, List input, Token origin){
 Compiler_report_error(compiler, 33658058, _1475, origin, NULL);
 }
 
-List Compiler_resolve_expression(Compiler compiler, List input, Token origin){
+List Compiler_resolve_expression(Compiler c, List input, Token origin){
   if(! _init_guard_) _file_init_();
   {
     List _x2c_match_expr = input;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 272600: ;  static MatchCaptureSite _x2c_match_site_76;  if (x2c_match_site_try_capture(& _x2c_match_site_76, _x2c_match_expr, List_var(_771), &_x2c_match_capture)) {return Compiler_bind_syntax(compiler, List_var(input), AST_BLOCK, List_type(compiler -> return_type));  break;
+      case 272600: ;  static MatchCaptureSite _x2c_match_site_76;  if (x2c_match_site_try_capture(& _x2c_match_site_76, _x2c_match_expr, List_var(_771), &_x2c_match_capture)) {return Compiler_bind_syntax(c, List_var(input), AST_BLOCK, List_type(c -> return_type));  break;
 }
 case 377892: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var type = _x2c_match_values[0];  Var content = _x2c_match_values[1]; {
   Var _x2c_match_value_6 = content; {
     List content = Var_list(_x2c_match_value_6); {
-      if(Var_truth(type) && ! _expression_requires_resolution(compiler, List_var(input))) return input;  return _resolve_content(compiler, input, Var_type(type), content, origin);
+      if(Var_truth(type) && ! _expression_requires_resolution(c, List_var(input))) return input;  return _resolve_content(c, input, Var_type(type), content, origin);
     }
 
   }
@@ -3528,7 +3528,7 @@ static int _destructure_identifier(List expression){
   return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_77;  x2c_match_site_match(& _x2c_match_site_77, expression, List_var(_912)); }));
 }
 
-static List _destructure_assignment_targets(Compiler compiler, List lhs){
+static List _destructure_targets(Compiler compiler, List lhs){
 
   {
     List _x2c_match_expr = lhs;
@@ -3648,7 +3648,7 @@ List Compiler_parse_conditional(Compiler compiler){
 }
 
 static List _parse_assignment_tail(Compiler compiler, List lhs){
-  Symbol op = Compiler_peek(compiler, 0);  Token origin = compiler -> token;  if(! Symbol_is_assignment_op(op)) return lhs;  List targets = op == 123 ? _destructure_assignment_targets(compiler, lhs) : NULL;  Compiler_next(compiler);  List rhs = Compiler_parse_assignment(compiler);  if(List_truth(targets))
+  Symbol op = Compiler_peek(compiler, 0);  Token origin = compiler -> token;  if(! Symbol_is_assignment_op(op)) return lhs;  List targets = op == 123 ? _destructure_targets(compiler, lhs) : NULL;  Compiler_next(compiler);  List rhs = Compiler_parse_assignment(compiler);  if(List_truth(targets))
   {
     List _x2c_match_expr = rhs;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };

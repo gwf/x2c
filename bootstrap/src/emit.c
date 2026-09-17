@@ -40,7 +40,7 @@ static List Emitter__bitfield_declarator(Emitter emitter, List decl, List bits_l
 
 static List Emitter__array_declarator(Emitter emitter, List decl, List array_list, List mods);
 
-static List Emitter__pointer_declarator(Emitter emitter, List decl, List mods);
+static List Emitter__pointer_declarator(Emitter e, List decl, List mods);
 
 static List Emitter__declarator(Emitter e, List decl, List mods);
 
@@ -1099,10 +1099,10 @@ Var List_car(List);
 
 int Symbol_is_type_qualifier(Symbol);
 
-static List Emitter__pointer_declarator(Emitter emitter, List decl, List mods){
+static List Emitter__pointer_declarator(Emitter e, List decl, List mods){
   Var first = List_car(mods);
-  if(Var_equal(first, Symbol_var(77))) return Emitter__declarator(emitter, cons(Symbol_var(54), decl), List_cdr(mods));
-  if(Var_equal(first, Symbol_var(54)) || Symbol_is_type_qualifier(Var_symbol(first))) return Emitter__declarator(emitter, cons(first, decl), List_cdr(mods));
+  if(Var_equal(first, Symbol_var(77))) return Emitter__declarator(e, cons(Symbol_var(54), decl), List_cdr(mods));
+  if(Var_equal(first, Symbol_var(54)) || Symbol_is_type_qualifier(Var_symbol(first))) return Emitter__declarator(e, cons(first, decl), List_cdr(mods));
   return List_append(mods, List_append(decl, NULL));
 }
 

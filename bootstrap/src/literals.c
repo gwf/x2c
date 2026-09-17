@@ -97,7 +97,7 @@ static List _lambda_parse_typed_params(Compiler compiler, List * out_names);
 
 static List _lambda_parse_bare_params(Compiler compiler);
 
-static List _lambda_param_types_for_signature(Compiler compiler, List entries);
+static List _signature_param_types(Compiler compiler, List entries);
 
 static List _lambda_params_node(List names, List typed_params, int used_typed);
 
@@ -975,7 +975,7 @@ static List _symbol_set_literal_expression(Array symbols){
 
 Array List_array(List);
 
-List Compiler_symbol_set_expression(Compiler compiler, List values, int * duplicate){
+List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate){
   if(! _init_guard_) _file_init_();
   int repeated = _symbol_set_duplicate(values);
   * duplicate = repeated;
@@ -1428,7 +1428,7 @@ static List _lambda_parse_bare_params(Compiler compiler){
 
 Type Type_declared(Type);
 Type List_type_from_ast(List);
-static List _lambda_param_types_for_signature(Compiler compiler, List entries){
+static List _signature_param_types(Compiler compiler, List entries){
   if(! List_truth(entries)) return _211;  Array types = Array_new();
   {
     List entry;
@@ -1757,7 +1757,7 @@ List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures
 
 }
 if(type == _292){
-  Type signature = List_type(cons(List_var(cons(_296, cons(List_var(_lambda_param_types_for_signature(c, List_cdr(parameters))), NULL))), _6)); {
+  Type signature = List_type(cons(List_var(cons(_296, cons(List_var(_signature_param_types(c, List_cdr(parameters))), NULL))), _6)); {
     List _x2c_return_value_3 = Compiler_lift_func_expression(c, cons(_12, cons(List_var(signature), cons(List_var(cons(_294, cons(List_var(parameters), cons(List_var(body), NULL)))), NULL)))); {
       x2c_cleanup_leave(& _x2c_defer_record_4);  x2c_cleanup_leave(& _x2c_defer_record_3);  x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_3;
     }
@@ -1837,7 +1837,7 @@ List Compiler_parse_lambda_literal(Compiler c){
       }
 
     }
-    else body = Compiler_parse_assignment(c);  List rtype = _6;  List params_node = _lambda_params_node(names, typed_params, used_typed);  List param_types = _lambda_param_types_for_signature(c, List_cdr(params_node));  List ftype = cons(List_var(cons(_296, cons(List_var(param_types), NULL))), List_append(rtype, NULL));  List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  if(Map_truth(c -> macro_holes)) captures = Array_list_free(prescribed);  Sym_pop_scope(c -> sym);  if(List_truth(captures)){
+    else body = Compiler_parse_assignment(c);  List rtype = _6;  List params_node = _lambda_params_node(names, typed_params, used_typed);  List param_types = _signature_param_types(c, List_cdr(params_node));  List ftype = cons(List_var(cons(_296, cons(List_var(param_types), NULL))), List_append(rtype, NULL));  List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  if(Map_truth(c -> macro_holes)) captures = Array_list_free(prescribed);  Sym_pop_scope(c -> sym);  if(List_truth(captures)){
       List _x2c_return_value_5 = cons(_12, cons(_293, cons(List_var(cons(_294, cons(List_var(params_node), cons(List_var(cons(_295, List_append(captures, NULL))), cons(List_var(body), NULL))))), NULL))); {
         x2c_cleanup_leave(& _x2c_defer_record_5);  return _x2c_return_value_5;
       }

@@ -63,7 +63,7 @@ Var Var_clone_wide(Var value);
 
 Var Var_move_wide_to(Var value, Scope * scope);
 
-Scope Var_wide_owner(Var value);
+Scope Var_wide_owner(Var v);
 
 Var Var_new(Symbol tag, ...);
 

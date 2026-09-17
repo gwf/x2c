@@ -88,7 +88,7 @@ List MatchCaptureLayout_possible_list(MatchCaptureLayout layout);
 
 int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder);
 
-int MatchCaptureBuffer_has(MatchCaptureBuffer * captures, int index);
+int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index);
 
 int List_try_match(List input, Var pat, List * out_bindings);
 
@@ -110,7 +110,7 @@ MatchPlan MatchPlan_prepare(Var pattern);
 
 void MatchPlan_free(MatchPlan plan);
 
-int MatchPlan_execute_capture(MatchPlan plan, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
+int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
 int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
 

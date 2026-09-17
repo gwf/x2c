@@ -1458,8 +1458,8 @@ Var child;  List _x2c_macro_original_3 = node;  Array _x2c_macro_rewritten_3 = N
 return List_var((void *) _x2c_macro_rewritten_3 ? Array_list_free(_x2c_macro_rewritten_3) : _x2c_macro_original_3);
 }
 
-List Compiler_mark_cleanup_regions(Compiler compiler, List ast){
-  if(! _init_guard_) _file_init_();  return Var_list(_units(compiler, List_var(ast)));
+List Compiler_mark_cleanup_regions(Compiler c, List ast){
+  if(! _init_guard_) _file_init_();  return Var_list(_units(c, List_var(ast)));
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

@@ -34,7 +34,7 @@ static int _declaration_is_private(Compiler compiler, Symbol kind, String name);
 
 static void _record_declaration_binding_visibility(Compiler compiler, List declaration, Symbol kind, int private, int mark, List identity);
 
-static void _record_declaration_rows_visibility(Compiler compiler, List declaration, Symbol kind, int private, int mark, List rows);
+static void _record_rows_visibility(Compiler compiler, List declaration, Symbol kind, int private, int mark, List rows);
 
 static List _occurrence(List record, Symbol storage, List location);
 
@@ -134,7 +134,7 @@ static Type _participant_definition(Compiler compiler, Type participant);
 
 static void _install_native_bindings(Compiler compiler, Type participant, List rows);
 
-static List Compiler__resolve_native_protocol_participant(Compiler compiler, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure);
+static List Compiler__resolve_native_protocol_participant(Compiler c, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure);
 
 static String _reverse_binding(Compiler compiler, Type base, Type participant);
 
@@ -150,7 +150,7 @@ static List _ordinary_requirement(Compiler compiler, Type base, String binder, L
 
 static List Compiler__resolve_ordinary_protocol(Compiler compiler, Type base, Type participant, String binder, List associations, List templates, List * failure);
 
-static void _install_generated_protocol_symbol(Compiler compiler, Type participant, String member, Type signature);
+static void _install_generated_symbol(Compiler compiler, Type participant, String member, Type signature);
 
 static String _definition_location(Compiler compiler, Type base);
 
@@ -255,11 +255,11 @@ static List _string_literal(Compiler compiler, String value);
 
 static void Compiler__generate_descriptor_registration(Compiler compiler, Type participant, String name, Symbol explicit_tag, List thunks, int central_initializer);
 
-static void _report_requirement_at_adoption(Compiler compiler, Type base, Type participant, List failure);
+static void _report_requirement(Compiler compiler, Type base, Type participant, List failure);
 
 static List _guard_value_rendering(Compiler compiler, List function, String member);
 
-static List Compiler__generate_protocol_thunk(Compiler compiler, Type participant, String member, Type expected, Type template, Map variables, Map bindings, String binder, String source, String reverse);
+static List Compiler__generate_protocol_thunk(Compiler c, Type participant, String member, Type expected, Type template, Map variables, Map bindings, String binder, String source, String reverse);
 
 static void Compiler__generate_ordinary_protocol_adapters(Compiler c, Type base, Type participant, String forward, String reverse, Map variables, Map bindings, String binder, List rows, int central_initializer);
 
@@ -1101,7 +1101,7 @@ int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
-static void _record_declaration_rows_visibility(Compiler compiler, List declaration, Symbol kind, int private, int mark, List rows){
+static void _record_rows_visibility(Compiler compiler, List declaration, Symbol kind, int private, int mark, List rows){
   {
     List row;
     List _x2c_macro_object_0 = rows;
@@ -1131,27 +1131,27 @@ static void _record_declaration_rows_visibility(Compiler compiler, List declarat
 
 int Type_is_static(Type);
 Type Var_type(Var);
-void Compiler_record_declaration_visibility(Compiler compiler, List declaration){
-  if(! _init_guard_) _file_init_();  int private = _lexically_private(compiler);
+void Compiler_record_declaration_visibility(Compiler c, List declaration){
+  if(! _init_guard_) _file_init_();  int private = _lexically_private(c);
   {
     List _x2c_match_expr = declaration;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 39266: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_20), &_x2c_match_capture)) {List rows = Var_list(_x2c_match_values[0]); {
     List row;  List _x2c_macro_object_1 = rows;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-      row = Var_list(_x2c_macro_cursor_output_1);  Compiler_record_declaration_visibility(compiler, row);
+      row = Var_list(_x2c_macro_cursor_output_1);  Compiler_record_declaration_visibility(c, row);
     }
 
   }
   break;
 }
 case 458361162716: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var identity = _x2c_match_values[1]; {
-  if(! private && ! Type_is_static(Var_type(type))) return;  String name = binding_identity_spelling(Var_list(identity));  if(String_truth(name)) _mark_private(compiler, 4928588686, name);
+  if(! private && ! Type_is_static(Var_type(type))) return;  String name = binding_identity_spelling(Var_list(identity));  if(String_truth(name)) _mark_private(c, 4928588686, name);
 }
 break;
 }
 default: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_44), &_x2c_match_capture)) {Var kind = _x2c_match_values[0];  Var type = _x2c_match_values[1];  List rows = Var_list(_x2c_match_values[2]); {
-  int mark = private || Type_is_static(Var_type(type));  _record_declaration_rows_visibility(compiler, declaration, Var_symbol(kind), private, mark, rows);
+  int mark = private || Type_is_static(Var_type(type));  _record_rows_visibility(c, declaration, Var_symbol(kind), private, mark, rows);
 }
 break;
 }
@@ -1763,12 +1763,12 @@ break;
 
 Var List_getindex(List, int);
 Map Map_copy(Map);
-static List Compiler__resolve_native_protocol_participant(Compiler compiler, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure){
-  * failure = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(compiler -> conforms, List_var(key), & stored)){
-    if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(compiler, participant, List_cdr(Var_list(List_last(conformance))));  return conformance;
+static List Compiler__resolve_native_protocol_participant(Compiler c, Type base, Type participant, String binder, List associations, List templates, Type participant_definition, List * failure){
+  * failure = NULL;  List key = cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  if(Map_try_get(c -> conforms, List_var(key), & stored)){
+    if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(c, participant, List_cdr(Var_list(List_last(conformance))));  return conformance;
   }
   if(! Type_is_bare_typedef_name(participant) || ! List_truth(Type_list(participant_definition))){
-    Map_setindex(compiler -> conforms, List_var(key), int_var(0));  return NULL;
+    Map_setindex(c -> conforms, List_var(key), int_var(0));  return NULL;
   }
   Map variables = Map_new(), bindings = Map_new();  Map_setindex(variables, String_var(binder), int_var(1));  Map_setindex(bindings, String_var(binder), List_var(participant)); {
     List association;  List _x2c_macro_object_8 = associations;  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_9)){
@@ -1783,7 +1783,7 @@ static List Compiler__resolve_native_protocol_participant(Compiler compiler, Typ
     List template;  List _x2c_macro_object_9 = templates;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_10)){
       template = Var_list(_x2c_macro_cursor_output_10); {
         List _x2c_destructure_1 = template;  String member_name = Var_string(List_getindex(_x2c_destructure_1, 0));  Type template_type = Var_type(List_getindex(_x2c_destructure_1, 1));  String native_name = Var_string(List_getindex(_x2c_destructure_1, 2));  List requirement = _native_requirement(member_name, native_name, template_type, binder, participant_definition, base);  if(List_truth(requirement)){
-          * failure = requirement;  Array_free(members);  Map_setindex(compiler -> conforms, List_var(key), int_var(0));  return NULL;
+          * failure = requirement;  Array_free(members);  Map_setindex(c -> conforms, List_var(key), int_var(0));  return NULL;
         }
         Type expected = _substitute_signature(template_type, variables, bindings);  Map native_bindings = Map_copy(bindings);  Map_setindex(native_bindings, String_var(binder), List_var(base));  Type native_signature = _substitute_signature(template_type, variables, native_bindings);  Type alias_signature = List_equal(Type_list(participant_definition), Type_list(base)) ? expected : native_signature;  Array_push(members, List_var(cons(String_var(member_name), cons(_252, cons(String_var(native_name), cons(List_var(expected), cons(_288, cons(List_var(alias_signature), NULL))))))));
       }
@@ -1791,7 +1791,7 @@ static List Compiler__resolve_native_protocol_participant(Compiler compiler, Typ
     }
 
   }
-  List rows = Array_list_free(members);  List conformance = cons(_289, cons(List_var(base), cons(List_var(participant), cons(_290, cons(_290, cons(Map_var(variables), cons(Map_var(bindings), cons(List_var(cons(_177, List_append(rows, NULL))), NULL))))))));  Map_setindex(compiler -> conforms, List_var(key), List_var(conformance));  return conformance;
+  List rows = Array_list_free(members);  List conformance = cons(_289, cons(List_var(base), cons(List_var(participant), cons(_290, cons(_290, cons(Map_var(variables), cons(Map_var(bindings), cons(List_var(cons(_177, List_append(rows, NULL))), NULL))))))));  Map_setindex(c -> conforms, List_var(key), List_var(conformance));  return conformance;
 }
 
 static String _reverse_binding(Compiler compiler, Type base, Type participant){
@@ -1978,7 +1978,7 @@ void Compiler_resolve_protocols(Compiler compiler){
 
 }
 
-static void _install_generated_protocol_symbol(Compiler compiler, Type participant, String member, Type signature){
+static void _install_generated_symbol(Compiler compiler, Type participant, String member, Type signature){
   String generated = _member_spelling(participant, member);  Sym_define_global(compiler -> sym, cons(_250, cons(String_var(generated), NULL)), _340);  Sym_define_global(compiler -> sym, cons(String_var(generated), NULL), Type_list(signature));
 }
 
@@ -2014,7 +2014,7 @@ if(native){
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_26;  if (x2c_match_site_try_capture(& _x2c_match_site_26, _x2c_match_expr, List_var(cons(List_var(_285), cons(_12, cons(_12, cons(_12, cons(_12, cons(List_var(_287), NULL))))))), &_x2c_match_capture)) {Var member = _x2c_match_values[0];  Var signature = _x2c_match_values[1]; {
                   Var _x2c_match_value_31 = member;  Var _x2c_match_value_32 = signature; {
-                    String member = Var_string(_x2c_match_value_31);  Type signature = Var_type(_x2c_match_value_32);  _install_generated_protocol_symbol(c, participant, member, signature);
+                    String member = Var_string(_x2c_match_value_31);  Type signature = Var_type(_x2c_match_value_32);  _install_generated_symbol(c, participant, member, signature);
                   }
 
                 }
@@ -2043,7 +2043,7 @@ if(native){
     List _x2c_match_expr = decision;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 32993636: ;  static MatchCaptureSite _x2c_match_site_27;  if (x2c_match_site_try_capture(& _x2c_match_site_27, _x2c_match_expr, List_var(_367), &_x2c_match_capture)) {Var signature = _x2c_match_values[0];  _install_generated_protocol_symbol(c, participant, member, Var_type(signature));  break;
+      case 32993636: ;  static MatchCaptureSite _x2c_match_site_27;  if (x2c_match_site_try_capture(& _x2c_match_site_27, _x2c_match_expr, List_var(_367), &_x2c_match_capture)) {Var signature = _x2c_match_values[0];  _install_generated_symbol(c, participant, member, Var_type(signature));  break;
                 }
                 default: break;
     }
@@ -2160,14 +2160,14 @@ static void _resolve_declared_adoption(Compiler compiler, Type base, Type partic
   }
 }
 
-List Compiler_protocol_members_for(Compiler compiler, Type participant, Type base){
-  if(! _init_guard_) _file_init_();  participant = Type_canonicalize(participant);  Type owner = participant;  if(! Compiler__is_adopted(compiler, base, owner)){
-    List ancestry = List_cdr(_ancestry(compiler, participant));  for(;  List_truth(ancestry);  ancestry = List_cdr(ancestry)){
-      owner = Var_type(List_car(ancestry));  if(Compiler__is_adopted(compiler, base, owner)) break;
+List Compiler_protocol_members_for(Compiler c, Type participant, Type base){
+  if(! _init_guard_) _file_init_();  participant = Type_canonicalize(participant);  Type owner = participant;  if(! Compiler__is_adopted(c, base, owner)){
+    List ancestry = List_cdr(_ancestry(c, participant));  for(;  List_truth(ancestry);  ancestry = List_cdr(ancestry)){
+      owner = Var_type(List_car(ancestry));  if(Compiler__is_adopted(c, base, owner)) break;
     }
     if(! List_truth(ancestry)) return NULL;
   }
-  Var stored = Map_getindex(compiler -> conforms, List_var(cons(List_var(base), cons(List_var(owner), NULL))));  if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(compiler, owner, List_cdr(Var_list(List_last(conformance))));  return conformance;
+  Var stored = Map_getindex(c -> conforms, List_var(cons(List_var(base), cons(List_var(owner), NULL))));  if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(c, owner, List_cdr(Var_list(List_last(conformance))));  return conformance;
 }
 
 int Compiler_protocol_rejects_direct_member(Compiler compiler, Type participant, String member){
@@ -2692,7 +2692,7 @@ static void Compiler__generate_descriptor_registration(Compiler compiler, Type p
 
 }
 
-static void _report_requirement_at_adoption(Compiler compiler, Type base, Type participant, List failure){
+static void _report_requirement(Compiler compiler, Type base, Type participant, List failure){
   List dedupe = cons(_610, cons(List_var(base), cons(List_var(participant), cons(List_car(failure), NULL))));  if(Map_contains(compiler -> protocol_helpers, List_var(dedupe))) return;  Map_setindex(compiler -> protocol_helpers, List_var(dedupe), int_var(1));  List row = _visible_adoption_row(compiler, base, participant);  Diagnostics_report(compiler -> diagnostics, 1139215899608, _requirement_detail(base, participant, failure), _adoption_location(row), NULL);
 }
 
@@ -2727,7 +2727,7 @@ return function;
 Iter Map_keys(Map, Iter);
 int Iter_try_next(Iter, Var *);
 Type Sym_normalize_declared_type(Sym, Type);
-static List Compiler__generate_protocol_thunk(Compiler compiler, Type participant, String member, Type expected, Type template, Map variables, Map bindings, String binder, String source, String reverse){
+static List Compiler__generate_protocol_thunk(Compiler c, Type participant, String member, Type expected, Type template, Map variables, Map bindings, String binder, String source, String reverse){
   Map erased = Map_copy(bindings); {
     Var variable;  Iter _x2c_macro_iterator_43 = Map_keys(variables, &(struct Iter){
       int_var(0)
@@ -2737,7 +2737,7 @@ static List Compiler__generate_protocol_thunk(Compiler compiler, Type participan
     }
 
   }
-  Type target = _substitute_signature(template, variables, erased);  String participant_name = String_lower(Var_str(List_car(Type_list(participant))));  String thunk_name = Compiler_fresh_name(compiler, String_join(NULL, cons(String_var(_683), cons(String_var(participant_name), cons(String_var(_156), cons(String_var(member), NULL))))));  List thunk_binding = NULL;  List function = Compiler__generate_protocol_function(compiler, thunk_name, 1, target, expected, template, variables, binder, source, reverse, & thunk_binding);  if((String_equal(member, _647) || String_equal(member, _648) || String_equal(member, _684) || String_equal(member, _685)) && Type_is_aggregate(Sym_normalize_declared_type(compiler -> sym, participant))) function = _guard_value_rendering(compiler, function, member);  Compiler_add_early(compiler, function);  return cons(String_var(member), cons(List_var(thunk_binding), cons(List_var(target), NULL)));
+  Type target = _substitute_signature(template, variables, erased);  String participant_name = String_lower(Var_str(List_car(Type_list(participant))));  String thunk_name = Compiler_fresh_name(c, String_join(NULL, cons(String_var(_683), cons(String_var(participant_name), cons(String_var(_156), cons(String_var(member), NULL))))));  List thunk_binding = NULL;  List function = Compiler__generate_protocol_function(c, thunk_name, 1, target, expected, template, variables, binder, source, reverse, & thunk_binding);  if((String_equal(member, _647) || String_equal(member, _648) || String_equal(member, _684) || String_equal(member, _685)) && Type_is_aggregate(Sym_normalize_declared_type(c -> sym, participant))) function = _guard_value_rendering(c, function, member);  Compiler_add_early(c, function);  return cons(String_var(member), cons(List_var(thunk_binding), cons(List_var(target), NULL)));
 }
 
 static void Compiler__generate_ordinary_protocol_adapters(Compiler c, Type base, Type participant, String forward, String reverse, Map variables, Map bindings, String binder, List rows, int central_initializer){
@@ -2777,7 +2777,7 @@ continue;
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 32993636: ;  static MatchCaptureSite _x2c_match_site_42;  if (x2c_match_site_try_capture(& _x2c_match_site_42, _x2c_match_expr, List_var(_711), &_x2c_match_capture)) {Var owner_expected = _x2c_match_values[0]; {
             List requirement = _descriptor_requirement(c, base, binder, member, template, forward, reverse);  if(List_truth(requirement)){
-              _report_requirement_at_adoption(c, base, participant, requirement);  continue;
+              _report_requirement(c, base, participant, requirement);  continue;
             }
             String inherited = _member_spelling(participant, member);  Type inherited_type = Var_type(owner_expected);  Compiler_add_early(c, _declaration_from_signature(c, inherited, inherited_type, 0));  if(! List_truth(Type_list(Sym_lookup_field(c -> sym, List_type(_324), cons(String_var(member), NULL))))) continue;  Array_push(thunks, List_var(Compiler__generate_protocol_thunk(c, participant, member, inherited_type, template, variables, bindings, binder, inherited, reverse)));
           }

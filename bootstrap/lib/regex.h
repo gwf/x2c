@@ -51,9 +51,9 @@ List Regex_capture_names(Regex regex);
 
 String Regex_escape(String literal);
 
-RegexMatch Regex_match_from(Regex regex, String subject, int offset);
+RegexMatch Regex_match_from(Regex r, String subject, int offset);
 
-RegexMatch Regex_match(Regex regex, String subject);
+RegexMatch Regex_match(Regex r, String subject);
 
 List Regex_find_all(Regex r, String subject);
 

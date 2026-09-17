@@ -41,7 +41,7 @@ static String _note_line(List l);
 
 static String Compiler__json_path(Compiler compiler, String path);
 
-static void Compiler__write_json(Compiler compiler, List entry);
+static void Compiler__write_json(Compiler c, List entry);
 
 static List _compiler_location(Compiler compiler, Token token);
 
@@ -313,7 +313,7 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_int(Var);
 
-static void Compiler__write_json(Compiler compiler, List entry){
+static void Compiler__write_json(Compiler c, List entry){
   Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436))), notes = Var_list(List_assoc(entry, Symbol_var(30384486)));
   Buffer out = Buffer_new(0);
@@ -343,7 +343,7 @@ static void Compiler__write_json(Compiler compiler, List entry){
           Var value = List_assoc(location, Symbol_var(key));
           Buffer_printf(out, ",\"%s\":", Symbol_str(key));
           if(Var_is_void(value)) Buffer_write(out, "null");
-          else if(Var_is_row(value, 11, 7, 1)) report_json_string(out, Compiler__json_path(compiler, Var_string(value)));
+          else if(Var_is_row(value, 11, 7, 1)) report_json_string(out, Compiler__json_path(c, Var_string(value)));
           else Buffer_printf(out, "%d", Var_int(value));
         }
 
@@ -470,16 +470,16 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   List loc = _compiler_location(compiler, token);
   Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 362};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 361};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
   exit(1);
 }
 
-void Compiler_report_warning(Compiler compiler, Symbol code, String message, Token token, List notes){
+void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();
-  Compiler_report_warning_at(compiler, code, message, _compiler_location(compiler, token), notes);
+  Compiler_report_warning_at(c, code, message, _compiler_location(c, token), notes);
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes){

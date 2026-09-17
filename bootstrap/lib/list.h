@@ -103,7 +103,7 @@ List List_reverse(List lst);
 
 Var List_last(List lst);
 
-int List_index(List lst, Var key);
+int List_index(List l, Var key);
 
 int List_contains(List lst, Var key);
 

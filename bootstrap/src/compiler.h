@@ -93,11 +93,11 @@ Var Compiler_var(Compiler compiler);
 
 Compiler Var_compiler(Var value);
 
-void Map_merge_translation_dependency(Map dependencies, String path, Var content_hash);
+void Map_merge_translation_dependency(Map m, String path, Var content_hash);
 
 void Compiler_add_translation_dependency(Compiler compiler, String path);
 
-void Compiler_merge_translation_dependencies(Compiler compiler, Map dependencies);
+void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
 
 void Compiler_free_lisp(Compiler c);
 
@@ -117,7 +117,7 @@ void Compiler_take_unit_state(Compiler compiler, Compiler owner);
 
 void Compiler_return_unit_state(Compiler compiler, Compiler owner);
 
-int Compiler_read_source(Compiler compiler, String path, String volatile * text);
+int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 String Compiler_canonical_path(Compiler c, String path);
 
@@ -127,13 +127,13 @@ String home_absolute_path(String spelling);
 
 void Compiler_copy_source_declaration(Compiler compiler, Map target, Map source, List key);
 
-void Compiler_merge_source_declarations(Compiler compiler, Map target, Map source);
+void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
 
-void Compiler_record_source_declaration(Compiler compiler, List binding, Token first, Token after);
+void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after);
 
-void Compiler_record_source_reference(Compiler compiler, List binding, Type type, Token first, Token after);
+void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
 
-Map Compiler_semantic_binding_facts(Compiler compiler);
+Map Compiler_semantic_binding_facts(Compiler c);
 
 Map Compiler_macro_definition_locals(Compiler compiler);
 
@@ -173,13 +173,13 @@ void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
 
 void Compiler_skip_script_statement(Compiler c);
 
-Var Compiler_freeze_declaration_syntax(Compiler compiler, Var syntax);
+Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
 
-Var Compiler_thaw_declaration_syntax(Compiler compiler, Var syntax);
+Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
 
-void Compiler_queue_declaration_effect(Compiler compiler, String form, Token first, Token after);
+void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
 
-void Compiler_run_declaration_effects(Compiler compiler);
+void Compiler_run_declaration_effects(Compiler c);
 
 Map Compiler_select_declaration_defaults(Compiler compiler, String path, Map symbols, Array parts, Map definitions);
 
@@ -207,7 +207,7 @@ Symbol Compiler_match_pattern_head_symbol(Compiler compiler, List pattern);
 
 Symbol Compiler_match_pattern_flat_head(Compiler compiler, List pattern, List binders, List * tags);
 
-List Compiler_match_pattern_binders(Compiler compiler, List pattern, List * possible);
+List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 
 void Compiler_define_match_binders(Compiler compiler, List pattern);
 
@@ -221,7 +221,7 @@ SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
 void SymTxn_commit(SymTxn s);
 
-int SymTxn_local_macros_changed(SymTxn transaction);
+int SymTxn_local_macros_changed(SymTxn s);
 
 void SymTxn_rollback(SymTxn transaction);
 
@@ -251,7 +251,7 @@ int Sym_scope_count(Sym sym);
 
 List Sym_lookup_macro(Sym sym, Atom name);
 
-void Sym_set(Sym sym, List key, List type);
+void Sym_set(Sym s, List key, List type);
 
 void Sym_seed_var_tags(Sym sym, Map symbols);
 
@@ -291,7 +291,7 @@ String Compiler_imported_spelling(Compiler compiler, String name);
 
 List Sym_declare(Sym sym, List context, List key, List ast);
 
-List Sym_bind_identity(Sym sym, List context, List binding, List ast);
+List Sym_bind_identity(Sym s, List context, List binding, List ast);
 
 Type Sym_resolve_key(Sym sym, Type key);
 
@@ -307,13 +307,13 @@ Type Sym_normalize_declared_type(Sym sym, Type type);
 
 Symbol Sym_var_tag_for_type(Sym sym, Type type, Type * resolved);
 
-int Sym_is_var_type(Sym sym, Type type);
+int Sym_is_var_type(Sym s, Type type);
 
 int Sym_is_string_type(Sym sym, Type type);
 
 int Sym_is_array_type(Sym sym, Type type);
 
-int Sym_is_map_type(Sym sym, Type type);
+int Sym_is_map_type(Sym s, Type type);
 
 int Sym_is_named_value_type(Sym sym, Type type, String name);
 
@@ -327,13 +327,13 @@ void Sym_declare_delegate_field(Sym sym, Type aggregate, String name);
 
 Type Sym_delegate_aggregate(Sym sym, Type type);
 
-List Compiler_gensym(Compiler compiler);
+List Compiler_gensym(Compiler c);
 
 void Sym_push_new_scope(Sym sym);
 
 void Sym_push_scope(Sym sym, SymScope scope);
 
-SymScope Sym_pop_scope(Sym sym);
+SymScope Sym_pop_scope(Sym s);
 
 
 #endif /* __GUARD_0x08246194__ */

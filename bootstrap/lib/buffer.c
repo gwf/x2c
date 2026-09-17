@@ -374,8 +374,8 @@ String Buffer_repr(Buffer buf){
   return String_repr(str);
 }
 
-int Buffer_truth(Buffer buffer){
-  return(void *) buffer != NULL && buffer -> content -> length != 0;
+int Buffer_truth(Buffer b){
+  return(void *) b != NULL && b -> content -> length != 0;
 }
 
 void Buffer_cleanup(Buffer value){

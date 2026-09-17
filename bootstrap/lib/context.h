@@ -10,9 +10,9 @@ void Context_initialize(void);
 
 int Context_owns(Context context, void * allocation);
 
-Scope * Context_export_destination(Context context);
+Scope * Context_export_destination(Context c);
 
-void Context_move_allocation(Context context, void * allocation);
+void Context_move_allocation(Context c, void * allocation);
 
 Context Context_open(void);
 
@@ -24,13 +24,13 @@ Context Context_open_isolated_named(const char * name);
 
 Context Context_current(void);
 
-Var Context_export_nested(Context context, Var value);
+Var Context_export_nested(Context c, Var value);
 
 Var Context_export(Context context, Var value);
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value);
 
-void Context_close(Context context);
+void Context_close(Context c);
 
 void Context_cleanup(Context value);
 

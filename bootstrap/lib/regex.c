@@ -1055,12 +1055,12 @@ String Regex_escape(String literal){
 }
 }
 
-RegexMatch Regex_match_from(Regex regex, String subject, int offset){
-  return offset < 0 || offset > String_len(subject) ? NULL : _search(regex, subject, offset);
+RegexMatch Regex_match_from(Regex r, String subject, int offset){
+  return offset < 0 || offset > String_len(subject) ? NULL : _search(r, subject, offset);
 }
 
-RegexMatch Regex_match(Regex regex, String subject){
-  return _search(regex, subject, 0);
+RegexMatch Regex_match(Regex r, String subject){
+  return _search(r, subject, 0);
 }
 
 Var Array_push(Array, Var);

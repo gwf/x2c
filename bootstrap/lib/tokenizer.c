@@ -10,7 +10,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static inline Symbol Tokenizer__scan_mode(Tokenizer tokenizer);
+static inline Symbol Tokenizer__scan_mode(Tokenizer t);
 
 static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode);
 
@@ -62,7 +62,7 @@ static int Tokenizer__symbol_set_tokens(Tokenizer t);
 
 static int Tokenizer__lisp_tokens(Tokenizer t);
 
-static int Tokenizer__end_of_file(Tokenizer tokenizer);
+static int Tokenizer__end_of_file(Tokenizer t);
 
 static inline String _x2c_proto_token_str_0(Var a0);
 
@@ -108,8 +108,8 @@ __attribute__((constructor)) static void _file_init_(void){
 
 unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
 
-unsigned Token_hash(Token token){
-  return x2c_hash_bytes(0, token, sizeof(struct Token));
+unsigned Token_hash(Token t){
+  return x2c_hash_bytes(0, t, sizeof(struct Token));
 }
 
 int Token_equal(Token a, Token b){
@@ -164,8 +164,8 @@ Tokenizer Tokenizer_new_mode(char * text, Symbol mode){
 
 Var Array_getindex(Array, int);
 
-static inline Symbol Tokenizer__scan_mode(Tokenizer tokenizer){
-  return Var_symbol(Array_getindex(tokenizer -> modes, - 1));
+static inline Symbol Tokenizer__scan_mode(Tokenizer t){
+  return Var_symbol(Array_getindex(t -> modes, - 1));
 }
 
 static inline void Tokenizer__push_mode(Tokenizer tokenizer, Symbol mode){
@@ -207,10 +207,10 @@ int Tokenizer_error(Tokenizer tokenizer){
   return _error(tokenizer, 28682226919752);
 }
 
-int Tokenizer_do_scanner(Tokenizer tokenizer, int(* scanner)(char *), Symbol type){
-  int len = scanner(tokenizer -> text + tokenizer -> pos);
-  if(len > 0) return Tokenizer_tokenize(tokenizer, len, type);
-  if(len < 0) return Tokenizer_error(tokenizer);
+int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type){
+  int len = scanner(t -> text + t -> pos);
+  if(len > 0) return Tokenizer_tokenize(t, len, type);
+  if(len < 0) return Tokenizer_error(t);
   return 0;
 }
 
@@ -606,8 +606,8 @@ static int Tokenizer__lisp_tokens(Tokenizer t){
   return _status_scanner(t, scan_atom_status, list ? 845368370138 : 19147688);
 }
 
-static int Tokenizer__end_of_file(Tokenizer tokenizer){
-  if(tokenizer -> text[tokenizer -> pos] == '\0') return Tokenizer_tokenize(tokenizer, 0, 11212);
+static int Tokenizer__end_of_file(Tokenizer t){
+  if(t -> text[t -> pos] == '\0') return Tokenizer_tokenize(t, 0, 11212);
   return 0;
 }
 
@@ -648,8 +648,8 @@ Token Tokenizer_next(Tokenizer tokenizer){
 
 }
 
-Symbol Tokenizer_status(Tokenizer tokenizer){
-  return tokenizer ? tokenizer -> scan_status : 28682226919752;
+Symbol Tokenizer_status(Tokenizer t){
+  return t ? t -> scan_status : 28682226919752;
 }
 
 static inline String _x2c_proto_token_str_0(Var a0){

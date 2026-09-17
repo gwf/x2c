@@ -515,12 +515,12 @@ List String_split(String, String);
 
 List Array_list_free(Array);
 
-List Toolchain_search_directories(Toolchain toolchain){
+List Toolchain_search_directories(Toolchain t){
   if(! _init_guard_) _file_init_();
   Array directories = Array_new();
-  List flags = toolchain -> cc_args;
+  List flags = t -> cc_args;
   String output = NULL, errors = NULL;
-  if(! tool_capture(cons(String_var(toolchain -> cc), List_append(flags, _44)), & output, & errors)){
+  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _44)), & output, & errors)){
     int listing = 0;
     {
       String line;
@@ -548,7 +548,7 @@ List Toolchain_search_directories(Toolchain toolchain){
     }
 
   }
-  if(! tool_capture(cons(String_var(toolchain -> cc), List_append(flags, _47)), & output, & errors)){
+  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _47)), & output, & errors)){
     String line;
     List _x2c_macro_object_6 = String_split_lines(output, 0);
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
@@ -598,9 +598,9 @@ ToolRun ToolAction_start(ToolAction action){
 
 int Job_ready(Job);
 
-int ToolRun_ready(ToolRun execution){
+int ToolRun_ready(ToolRun t){
   if(! _init_guard_) _file_init_();
-  return ! execution -> job || Job_ready(execution -> job);
+  return ! t -> job || Job_ready(t -> job);
 }
 
 int ToolRun_wait(ToolRun execution){

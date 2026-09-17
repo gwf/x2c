@@ -36,11 +36,11 @@ List Compiler_parse_parameter_list(Compiler c);
 
 List Compiler_parse_named_type(Compiler c);
 
-void Compiler_bind_template_local(Compiler compiler, List key, List type, List context);
+void Compiler_bind_template_local(Compiler c, List key, List type, List context);
 
-int Compiler_test_declaration(Compiler compiler);
+int Compiler_test_declaration(Compiler c);
 
-List Compiler_parse_simple_declaration(Compiler compiler);
+List Compiler_parse_simple_declaration(Compiler c);
 
 List Compiler_parse_declaration_row(Compiler compiler);
 
@@ -66,7 +66,7 @@ List Compiler_parse_top_level(Compiler c);
 
 List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
 
-List Compiler_bind_syntax(Compiler compiler, Var syntax, AstPos context, Type return_type);
+List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
 
 
 #endif /* __GUARD_0x46021D32__ */

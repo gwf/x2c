@@ -52,7 +52,7 @@ int String_endswith(String str, String suffix);
 String String_add(String str, String other);
 String String_repeat(String str, int count);
 String String_withindex(String str, int index, char value);
-String String_getslice(String str, int start, int stop, int step);
+String String_getslice(String s, int start, int stop, int step);
 String String_lower(String str);
 String String_upper(String str);
 String String_capitalize(String str);

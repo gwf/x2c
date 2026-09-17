@@ -31,7 +31,7 @@ static inline Var Token_var(Token x){
   return Var_new(42948956, x);
 }
 
-unsigned Token_hash(Token token);
+unsigned Token_hash(Token t);
 
 int Token_equal(Token a, Token b);
 
@@ -47,13 +47,13 @@ int Tokenizer_tokenize(Tokenizer t, int len, Symbol type);
 
 int Tokenizer_error(Tokenizer tokenizer);
 
-int Tokenizer_do_scanner(Tokenizer tokenizer, int(* scanner)(char *), Symbol type);
+int Tokenizer_do_scanner(Tokenizer t, int(* scanner)(char *), Symbol type);
 
 void Tokenizer_scan(Tokenizer t);
 
 Token Tokenizer_next(Tokenizer tokenizer);
 
-Symbol Tokenizer_status(Tokenizer tokenizer);
+Symbol Tokenizer_status(Tokenizer t);
 
 
 #endif /* __GUARD_0xF0967937__ */

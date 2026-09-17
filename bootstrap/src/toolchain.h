@@ -45,11 +45,11 @@ void ToolAction_as_program(ToolAction action);
 
 int tool_capture(List arguments, String * output, String * errors);
 
-List Toolchain_search_directories(Toolchain toolchain);
+List Toolchain_search_directories(Toolchain t);
 
 ToolRun ToolAction_start(ToolAction action);
 
-int ToolRun_ready(ToolRun execution);
+int ToolRun_ready(ToolRun t);
 
 int ToolRun_wait(ToolRun execution);
 

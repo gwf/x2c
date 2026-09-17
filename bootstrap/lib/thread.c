@@ -392,17 +392,14 @@ Var Thread_join(Thread t){
 }
 }
 
-void Thread_free(Thread thread){
+void Thread_free(Thread t){
   if(! _init_guard_) _file_init_();
-  if(! thread || __atomic_load_n(& thread -> state, __ATOMIC_SEQ_CST) != THREAD_JOINED){
-    {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 253};
-      x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
-      __builtin_unreachable();
-    }
-
+  if(! t || __atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != THREAD_JOINED){
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 251};
+    x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
+    __builtin_unreachable();
   }
-  free(thread);
+  free(t);
 }
 
 void Error_pop(ErrorHandler);

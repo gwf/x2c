@@ -1407,14 +1407,14 @@ void Build_report_success(Build b){
 
 void ToolAction_as_program(ToolAction);
 
-int Build_run_program(Build state){
+int Build_run_program(Build b){
   if(! _init_guard_) _file_init_();
-  report_line(34081994, String_join(NULL, cons(String_var(_83), cons(String_var(state -> output), NULL))));
+  report_line(34081994, String_join(NULL, cons(String_var(_83), cons(String_var(b -> output), NULL))));
   Array arguments = Array_new();
-  Array_push(arguments, String_var(state -> output));
+  Array_push(arguments, String_var(b -> output));
   {
     String argument;
-    List _x2c_macro_object_20 = state -> request -> run_args;
+    List _x2c_macro_object_20 = b -> request -> run_args;
     List _x2c_macro_cursor_20 = _x2c_macro_object_20;
     Var _x2c_macro_cursor_output_20;
     while(List_try_next(_x2c_macro_object_20, & _x2c_macro_cursor_20, & _x2c_macro_cursor_output_20)){
@@ -1423,7 +1423,7 @@ int Build_run_program(Build state){
     }
 
   }
-  ToolAction action = tool_action_new(38236, Array_list_free(arguments), state -> request -> verbose, state -> request -> dry_run);
+  ToolAction action = tool_action_new(38236, Array_list_free(arguments), b -> request -> verbose, b -> request -> dry_run);
   ToolAction_as_program(action);
   return ToolAction_run(action);
 }

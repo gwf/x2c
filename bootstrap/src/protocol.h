@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void Compiler_record_declaration_visibility(Compiler compiler, List declaration);
+void Compiler_record_declaration_visibility(Compiler c, List declaration);
 
 void Compiler_rebuild_protocols(Compiler compiler, Map symbols);
 
@@ -19,7 +19,7 @@ void Compiler_resolve_protocols(Compiler compiler);
 
 void Compiler_install_generated_protocol_symbols(Compiler c);
 
-List Compiler_protocol_members_for(Compiler compiler, Type participant, Type base);
+List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
 
 int Compiler_protocol_rejects_direct_member(Compiler compiler, Type participant, String member);
 

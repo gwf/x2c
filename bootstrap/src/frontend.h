@@ -37,9 +37,9 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);
 
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
 
-int ParsedUnit_parse(ParsedUnit * unit);
+int ParsedUnit_parse(ParsedUnit * p);
 
-int Frontend_open(Frontend frontend, String filename, ParsedUnit * unit);
+int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
 
 void ParsedUnit_close(ParsedUnit * unit);
 

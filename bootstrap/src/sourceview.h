@@ -36,7 +36,7 @@ String SourceView_repr(SourceView value);
 
 void SourceView_init(SourceView sources);
 
-void SourceView_set(SourceView sources, String path, String text, int changed);
+void SourceView_set(SourceView s, String path, String text, int changed);
 
 int SourceView_is_changed(SourceView sources, String path);
 

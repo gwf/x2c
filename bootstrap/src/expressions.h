@@ -20,7 +20,7 @@ const PrintfFn * List_printf_family(List l);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
-List Compiler_parse_macro_expression_target(Compiler compiler);
+List Compiler_parse_macro_expression_target(Compiler c);
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 
@@ -32,7 +32,7 @@ List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
 
 List Compiler_resolve_map_entry(Compiler compiler, List input, Token origin);
 
-List Compiler_resolve_expression(Compiler compiler, List input, Token origin);
+List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
 List Compiler_parse_variable(Compiler c);
 

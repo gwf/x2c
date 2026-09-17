@@ -17,13 +17,13 @@ void Compiler_begin_catch_arm(Compiler compiler, List pattern, Token start);
 
 List Compiler_with_binding(Compiler c);
 
-List Compiler_parse_block_item(Compiler compiler);
+List Compiler_parse_block_item(Compiler c);
 
-List Compiler_parse_statement(Compiler compiler);
+List Compiler_parse_statement(Compiler c);
 
 List Compiler_parse_block_items(Compiler c, int anchor_items);
 
-List Compiler_parse_compound_statement(Compiler compiler);
+List Compiler_parse_compound_statement(Compiler c);
 
 
 #endif /* __GUARD_0x670D7DD9__ */

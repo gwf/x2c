@@ -9,7 +9,7 @@
 #include "compiler.h"
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
 
-List Compiler_mark_cleanup_regions(Compiler compiler, List ast);
+List Compiler_mark_cleanup_regions(Compiler c, List ast);
 
 
 #endif /* __GUARD_0xEF59A7A3__ */

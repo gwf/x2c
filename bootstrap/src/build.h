@@ -50,7 +50,7 @@ int Build_finish(Build b);
 
 void Build_report_success(Build b);
 
-int Build_run_program(Build state);
+int Build_run_program(Build b);
 
 void Build_cleanup(Build b, int success);
 

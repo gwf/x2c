@@ -11,11 +11,11 @@ void Compiler_install_builtin_macros(Compiler compiler);
 
 int Compiler_macro_form_is_definition(Compiler compiler);
 
-int Compiler_local_macro_form_is_definition(Compiler compiler);
+int Compiler_local_macro_form_is_definition(Compiler c);
 
-int Compiler_keyword_form_is_definition(Compiler compiler);
+int Compiler_keyword_form_is_definition(Compiler c);
 
-void Compiler_skip_macro_invocation(Compiler compiler);
+void Compiler_skip_macro_invocation(Compiler c);
 
 int Compiler_macro_invocation_needs_shallow_expansion(Compiler compiler);
 
@@ -43,7 +43,7 @@ List Compiler_peek_macro_hole(Compiler compiler);
 
 int Compiler_macro_lisp_starts_declaration(Compiler compiler);
 
-List Compiler_try_parse_macro_slot(Compiler compiler, Symbol role);
+List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_parse_macro_definition(Compiler c);
 
@@ -57,17 +57,17 @@ int Compiler_keyword_alias_starts_target_at(Compiler compiler, AstPos position);
 
 int Compiler_keyword_alias_needs_shallow_expansion(Compiler compiler);
 
-void Compiler_skip_keyword_alias(Compiler compiler);
+void Compiler_skip_keyword_alias(Compiler c);
 
 int Compiler_skip_named_type_declaration(Compiler compiler);
 
 Token Compiler_macro_invocation_site(Compiler compiler, Var site);
 
-List Compiler_expand_macro_invocation_node(Compiler compiler, Var stored, List arguments, Token invocation, AstPos position);
+List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
 
 List Compiler_try_parse_macro_expression(Compiler c);
 
-List Compiler_try_parse_macro_target_at(Compiler compiler, AstPos position);
+List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
 
 
 #endif /* __GUARD_0x28FCBFDC__ */

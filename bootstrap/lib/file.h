@@ -99,13 +99,13 @@ _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "nativ
 #define File_setbuf setbuf
 _Noreturn void File_path_error(Var operation, String path, int error);
 String File_string_close(File file);
-File String_open(String fname, const char * mode);
+File String_open(String s, const char * mode);
 File File_fdopen(int fildes, const char * mode);
 File File_open(const char * path, const char * mode);
 File File_popen(const char * cmd, const char * mode);
 File File_reopen(File file, const char * path, const char * mode);
-static inline char * File_gets(File file, char * str, int size){
-  return fgets(str, size, file);
+static inline char * File_gets(File f, char * str, int size){
+  return fgets(str, size, f);
 }
 
 static inline int File_putc(File file, int c){

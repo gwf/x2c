@@ -62,7 +62,7 @@ String Buffer_str_free(Buffer buf);
 
 String Buffer_repr(Buffer buf);
 
-int Buffer_truth(Buffer buffer);
+int Buffer_truth(Buffer b);
 
 void Buffer_cleanup(Buffer value);
 
