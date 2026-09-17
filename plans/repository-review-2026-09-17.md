@@ -64,16 +64,23 @@ Files: `src/macros.x` (hole substitution), `lib/autodiff.xmacro`.
 
 ## Group 3: declarations and generated C
 
+> Partly fixed 2026-09-17: public file objects now publish `extern` in the
+> header, and `static const` file objects with runtime initializers build.
+> The `_Generic` row needs `src/expressions.x` and moves to Group 4's files;
+> the `volatile` row is reverted and needs a decision (below).
+
 Files: `src/generate.x`, `src/cache.x`, `src/transform.x` (volatile locals).
 
 | Defect | Reproduction | Cause | R |
 | --- | --- | --- | --- |
 | Public file-scope objects are defined in the generated header. | `int counter = 0;` in `a.x` included by `b.x` and `c.x`: link fails with duplicate `_counter`. `Map registry = {};` in one unit: C rejects `Map_new()` in the header. | `_partition_declaration` and `_header_declaration` (`generate.x`); only the tagged-object path emits `extern`. | me |
 | `static const` file objects with runtime initializers produce invalid C. | `static const String g = "hi";`, `static const String names[] = {...}`, `static List const items = %(1 2);`. | `cache.x:327,332` filter on any `const`, broader than the object check at `:285-287`. | me |
-| An untyped `_Generic` result assigned to `String` stays a raw literal. | `String name = _Generic(s, char *: "charp", default: "other"); name.len();` exits 138/139. | No converter on the untyped selection (4450f6e). | me |
+| An untyped `_Generic` result assigned to `String` stays a raw literal. | `String name = _Generic(s, char *: "charp", default: "other"); name.len();` prints garbage or crashes; `Var boxed = _Generic(s, char *: 1, default: 2);` emits `Var boxed = 1;`. Still open. | `Compiler.convert_expression` (`src/expressions.x`) returns the expression unchanged when the selection has no type. Either convert each association to the target the way the conditional-operator case just above it does, or extend the "cannot convert an unresolved expression" diagnostic to every named x2c type, which is what `language.md` already promises. | me |
 | A `volatile` local's address is passed to a non-volatile `self`. | A struct local modified across `try`, then `counter.step()`: clang warns discards qualifiers; undefined behavior (C11 6.7.3). `examples/programs/literate-lisp` hits it. Twelve fixture `cc.stderr` files hold C warnings that no check reads. | The receiver address is taken without the qualifier. | me |
 
 ## Group 4: warnings
+
+> Fixed 2026-09-17, all seven rows.
 
 Files: `src/expressions.x` (conversion warnings), `src/regions.x`,
 `src/diagnostics.x`.
@@ -89,6 +96,9 @@ Files: `src/expressions.x` (conversion warnings), `src/regions.x`,
 | Identical warnings print twice; `language.md:2757` says they do not. | `keep2(a, a);` in a `$scope()` prints the region warning twice. | f6ef305 removed the error-path dedupe; warnings never had one. Decide which the book states. | me |
 
 ## Group 5: cleanup control flow
+
+> Fixed 2026-09-17. `matchcases` is a break boundary, so an arm's `break`
+> leaves the match without leaving a cleanup region.
 
 Files: `src/cleanup.x`, `src/transform.x` (match lowering).
 
@@ -317,6 +327,17 @@ participation" message points at the token after the declaration, because
 `src/parse.x:1257-1265` reports with an already-advanced token; and defining a
 method on an imported package type fails with "parse: missing closing
 parenthesis" pointing at a parameter name.
+## Group 19: gaps found while fixing Groups 3 and 5
+
+Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
+`src/cleanup.x` (row 3).
+
+| Defect | Reproduction | Cause | R |
+| --- | --- | --- | --- |
+| An expression-bodied `void` function emits `return <expr>;`. | `static void Counter.step(Counter *self) => self.value++;` generates `return self -> value ++;`, which clang rejects with `-Wreturn-mismatch` (an error). | The arrow body always emits a return. | agent |
+| `const` on a named x2c type loses its methods. | `static const String g = "hi"; g.len();` fails with `type (const "String") has no method text/len`. | The qualifier is part of the looked-up type. | agent |
+| `_changed_name` misses indirect writes, so a local written only through a pointer is not preserved across a transfer. | `int *p = &x; try { *p = 5; f(); }` does not qualify `x`; today such locals are `volatile` only when a catch arm happens to write them by name. | `src/cleanup.x` inspects direct assignments to a name. Latent, and the reason the Group 3 `volatile` narrowing was unsafe. | agent |
+
 ## Group 18: merge the two readable-format owners
 
 Files: `src/transform.x`, `src/expressions.x`.
@@ -446,7 +467,18 @@ Decided 2026-09-17 by Gary unless marked open.
 - **Duplicate warnings (Group 4).** Report identical warnings once, as
   `language.md:2757` says.
 - **Concurrent builds (Group 11).** Open: whether two builds in one project
-  are supported. Either way they must not exit 1 silently.
+  are supported. Either way they must not exit 1 silently. Recommended: make
+  them safe through the `file_publish` and `file_lock` owners that landed
+  2026-09-17, giving the fingerprint `.i` a per-process name and never
+  unlinking the output before its replacement exists.
+- **`volatile` locals and non-volatile parameters (Group 3).** Open. A local
+  written across a `try` is `volatile`, and passing its address to an ordinary
+  `self` or callee parameter discards the qualifier (C11 6.7.3 undefined).
+  Narrowing which locals are qualified is not available: restricting it to
+  protected-body writes broke three exception suites, and adding an
+  address-escape rule qualified `foreach` cursors and `sigset_t` locals and
+  produced more warnings than it removed. The decision is how the address is
+  spelled at the call, not which locals carry the qualifier.
 - **`make debug` (Group 13).** Open: the target rewrites tracked
   `etc/build-mode`, which is what it has always done (d7bb8da).
 
