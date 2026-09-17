@@ -26,6 +26,11 @@ values, without vendored headers or hand-written substitutes for missing
 operations. Present an unresolved scope choice to Gary; follow an already
 approved task list directly.
 
+Judge the surface as a client writes it. A handle wrapper that owns native
+storage adopts `protocol Cleanup(T)`, so the client can write
+`$auto(T.open(...))`; without it the client cannot use the macro at all and
+must repeat a release at every call site.
+
 Use source and upstream documentation to form hypotheses, then prove task
 reachability with actual programs. Inspect imported constants and raw options
 before adding redundant convenience methods. For read-only assessment, build

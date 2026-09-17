@@ -288,7 +288,9 @@ compile-time duplicate error.
 nonmember. `contains` is the corresponding membership test. `getindex` maps an
 integer back to its `Symbol`, accepts negative indexes, and returns zero when
 out of range. A `SymbolSet` also supports `foreach(Symbol value, colors)` in
-source order.
+source order. Write the membership test as `colors.contains(<blue>)`: the
+[`in` operator](../reference/language.md#membership-with-in) resolves through
+the `Var(T)` protocol, which a `SymbolSet` does not join.
 
 The compiler generates a perfect hash and the ordered `Symbol` table as one
 read-only byte string. A lookup computes one candidate index and checks the
@@ -1011,7 +1013,9 @@ and may invalidate an outstanding traversal.
 
 `getdefault` reads with a fallback and inserts nothing. `setdefault` inserts
 the fallback and returns it. `contains` reports presence whatever the stored
-value is. `copy` and `merge` combine `Map`s.
+value is, and `key in map` is the operator spelling of that same test, as it
+is for a `List`, an `Array`, and a `String`. `copy` and `merge` combine
+`Map`s.
 
 Nested literals work, and `Symbol`s make readable keys for fixed schemas:
 

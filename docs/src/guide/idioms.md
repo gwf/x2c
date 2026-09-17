@@ -157,20 +157,33 @@ in the result domain and the caller does not need a failure reason.
 
 ## Put cleanup beside acquisition
 
-`Scope` groups allocations by lifetime. `defer` runs cleanup when control
-leaves a block:
+`Scope` groups allocations by lifetime and `$scope()` retains one region
+around a statement. `$auto` attaches an owned local's cleanup to its
+declaration, so the acquisition and its release are one line:
 
 ```x2c
-Scope.retain();
-defer Scope.release();
-
-String path = "/tmp/x2c-idioms.txt";
-File output = File.open(path, "w");
-defer output.close();
+$scope() {
+  String path = "/tmp/x2c-idioms.txt";
+  File output = $auto(File.open(path, "w"));
+  output.puts("ready\n");
+}
 ```
 
-The deferred actions run on ordinary block exit and early transfer. Keep the
-acquisition and its cleanup close enough to review together.
+Both lower to `defer`, which runs on ordinary block exit and on early
+transfer. Reach for `defer` directly where no macro fits: a native release,
+a conditional rollback, a consuming parameter, or cleanup that writes a
+result rather than releasing storage.
+
+```x2c
+~int main(void) {
+int *buffer = malloc(64);
+defer free(buffer);
+~  return buffer ? 0 : 1;
+~}
+```
+
+`$auto` requires the type to participate in `Cleanup(T)`; the runtime's owning
+types already do.
 
 ## Raise failures; return ordinary outcomes
 

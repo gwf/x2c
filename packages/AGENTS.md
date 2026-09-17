@@ -104,8 +104,11 @@ Choose existing x2c facilities according to their documented meaning:
   indexed values; `Map` when unique keys and unordered lookup fit the data.
 - Indexing for real keyed or positional access, and iteration with a stable
   lifetime and exhaustion behavior.
-- `defer` beside native acquisition; Scope for x2c allocations, with the
-  native release function still responsible for native resources.
+- `protocol Cleanup(T)` on every handle wrapper that owns native storage, so a
+  client writes `T handle = $auto(T.open(...))` instead of a release at each
+  call site; `defer` beside a native acquisition the wrapper does not own.
+  Scope for x2c allocations, with the native release function still
+  responsible for native resources.
 - Error for failures; ordinary results for expected absence, kept distinct
   from a present Null value where both are possible.
 

@@ -281,7 +281,7 @@ Var name = "";
 Var full = "ada";
 
 if (!name) printf("no name\n");
-if (full && full.tag() == <string>) printf("name=%s\n", full);
+if (full && full is <string>) printf("name=%s\n", full);
 ```
 
 ```text

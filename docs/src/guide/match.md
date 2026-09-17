@@ -19,9 +19,9 @@ arm runs when nothing matched.
 List reply = %(status ok 200);
 match (reply) {
   case %(status ok ?code):
-    printf("ok with code %d\n", Var_int(code));
+    printf("ok with code %d\n", code);
   case %(status ?state ?code):
-    printf("%s with code %d\n", String_str(Var_str(state)), Var_int(code));
+    printf("%s with code %d\n", state, code);
   default:
     printf("not a status reply\n");
 }
@@ -106,7 +106,7 @@ List command = %(move 10 20 fast quiet);
 match (command) {
   case %(move ?x ?y *flags):
     printf("to %d,%d with %d flag(s)\n",
-           Var_int(x), Var_int(y), List_len(flags));
+           x, y, flags.len());
 }
 match (command) {
   case %(move ? ? *): printf("some move\n");
@@ -133,7 +133,7 @@ structure without any index arithmetic:
 List tree = %(tree (node 3 4) leaf);
 match (tree) {
   case %(tree (node ?a ?b) ?rest):
-    printf("%d\n", Var_int(a) * Var_int(b));
+    printf("%d\n", a * b);
 }
 Symbol wanted = <leaf>;
 match (tree) {
@@ -153,9 +153,9 @@ all of them do, and `(!not a b ...)` when none of them do:
 List reply = %(status created 201);
 match (reply) {
   case %(status (!or ok created) ?code):
-    printf("success %d\n", Var_int(code));
+    printf("success %d\n", code);
   case %(status (!not ok) ?code):
-    printf("failure %d\n", Var_int(code));
+    printf("failure %d\n", code);
 }
 match (%(color green)) {
   case %(color (!and (!not red) (!not blue))):
@@ -177,7 +177,7 @@ captures the slice of input the guard checked:
 match (%(node 7 8)) {
   case %(!set ?whole (node ?a ?b)):
     printf("%s holds %d and %d\n",
-           String_str(Var_str(whole)), Var_int(a), Var_int(b));
+           whole, a, b);
 }
 match (%(key "abc")) {
   case %(key (!is type string)):
@@ -185,7 +185,7 @@ match (%(key "abc")) {
 }
 match (%(key 42)) {
   case %(key (!is ?found atom)):
-    printf("an atom: %s\n", String_str(Var_str(found)));
+    printf("an atom: %s\n", found);
 }
 match (%(tag (a b))) {
   case %(tag (!quote (a b))):
@@ -216,9 +216,9 @@ Var value = 99;
 List input = %(pair 1 2);
 match (input) {
   case %(pair ?value ?other):
-    printf("inside the arm value is %d\n", Var_int(value));
+    printf("inside the arm value is %d\n", value);
 }
-printf("outside the match value is still %d\n", Var_int(value));
+printf("outside the match value is still %d\n", value);
 ```
 
 The same binder name can appear in two different arms, and a binder does not
@@ -299,8 +299,8 @@ List input = %(define x 10);
 List bindings = NULL;
 if (input.try_match(%(define ?name ?value), &bindings))
   printf("%s = %d\n",
-         String_str(bindings.assoc(<?name>).str()),
-         Var_int(bindings.assoc(<?value>)));
+         bindings.assoc(<?name>),
+         bindings.assoc(<?value>));
 List rewritten = input.match_replace(%(define ?name ?value),
                                      %(assign ?name ?value));
 printf("%s\n", rewritten.str());
@@ -320,7 +320,7 @@ List tree = %(root (item 1) (wrapper (item 2)));
 Var node = void;
 List bindings = NULL;
 if (tree.try_search(%(item ?id), &node, &bindings))
-  printf("first id %d\n", Var_int(bindings.assoc(<?id>)));
+  printf("first id %d\n", bindings.assoc(<?id>));
 printf("%d matches in all\n", tree.search(%(item ?id)).len());
 printf("%s\n", tree.search_replace(%(item ?id),
                                     %(entry ?id)).str());
@@ -362,7 +362,7 @@ foreach(Var node, program) {
     case %(set ?name ?value):
       assignments++;
     case %(call ?fn *args):
-      printf("call to %s\n", String_str(Var_str(fn)));
+      printf("call to %s\n", fn);
   }
 }
 printf("%d assignment(s)\n", assignments);

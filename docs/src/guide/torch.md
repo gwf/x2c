@@ -130,9 +130,7 @@ the stronger of the two: its results carry no autograd metadata at all.
 Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT64).reshape(%(8 1));
 Tensor y = 3.0 * x - 1.0;
 Tensor w = Tensor.randn(%(1 1), XT_FLOAT64).requires_grad_(1);
-for (int step = 0; step < 200; step++) {
-  Scope.retain();
-  defer Scope.release();
+for (int step = 0; step < 200; step++) $scope() {
   Tensor error = Tensor.mse_loss(x @ w, y);
   error.backward();
   Torch.no_grad();
@@ -205,9 +203,7 @@ mini-batching is x2c: a permutation and an `index_select`.
 <!-- ignore: an import needs the built torch package archive. -->
 ```x2c,ignore
 Optimizer adam = Optimizer.adam(model, 0.05);
-for (int step = 0; step < 200; step++) {
-  Scope.retain();
-  defer Scope.release();
+for (int step = 0; step < 200; step++) $scope() {
   Tensor pick = Torch.randperm(64).narrow(0, 0, 16);
   adam.zero_grad();
   Tensor error = Tensor.mse_loss(_forward(model, x.index_select(0, pick)),

@@ -1005,9 +1005,49 @@ the promotion. Inside `%()`, a nested `"text $name"` already interpolates.
 Elsewhere keep `%"..."` when interpolation, multiline text, or escape
 decoding requires it. Write Arrays and Maps as
 evaluated literals such as `[item, count + 1]` and `{name: value}`, and keep
-`%[...]` and `%{...}` for quoted data. See
+`%[...]` and `%{...}` for quoted data. Two destinations keep the sigil for a
+reason rather than for quoting: `%{}` and `%[]` at a `Var` or otherwise
+untyped destination, because a bare `{}` there is the native zero, which is
+`Null` and not a container; and `%{ ${...} }` where a constructed row supplies
+the entry. See
 [Collection literals](../docs/src/guide/collections.md#array-and-map-literals)
 for the key, `{}`, and `$` insertion rules.
+
+### Acquire and clean up in one construct
+
+Prefer the shipped system macros to a hand-written acquire-and-`defer` pair:
+`$auto` for an owned local, `$scope()` for a retained region, `$scope(&owner)`
+for a destination, `$lock` for a Mutex, and `$let` for a saved location. Each
+one names the lifetime at the acquisition and cannot be separated from it by a
+later edit.
+
+Prefer:
+
+```x2c
+$scope() {
+  File output = $auto(File.open(path, "w"));
+  output.puts(report);
+}
+```
+
+Avoid the expansion written out by hand:
+
+```x2c
+Scope.retain();
+defer Scope.release();
+File output = File.open(path, "w");
+defer output.close();
+```
+
+`defer` remains the general mechanism, and these cases stay as they are: a
+native release the runtime does not own, a conditional acquisition or
+rollback, a consuming parameter, a counter or other paired state that is not a
+resource, and cleanup that writes a result rather than releasing storage.
+`$auto` requires the type to participate in `Cleanup(T)`; adopt the protocol
+beside the type rather than spelling the release at every call site. Replacing
+an explicit release at the end of a block with `$auto` also runs cleanup on
+error exits, which is a behavior change to decide rather than a cleanup to
+apply.
 
 ### Separate storage ownership from typed crossings
 
@@ -1079,6 +1119,27 @@ An explicit owner call remains valid only when it selects different semantics,
 such as delegating from an Array method to its Block implementation, or when
 the receiver's static type cannot select the callable.
 
+### Reach members with `.`
+
+Write `.` wherever x2c parsed the struct, whether the receiver is a value, a
+`T *` local or parameter, a typedef'd pointer, a class handle, a threaded
+static, or a macro hole. This includes a C header x2c reads, so a native
+record declared in a header on the include path takes `.` like any other.
+
+Keep `->` in four places, where the compiler cannot select the operator:
+
+- a pointer to a struct whose layout x2c never sees, such as one from a system
+  header or a third-party header reached through an include x2c does not
+  resolve; `.` there is emitted verbatim and the C compiler rejects it;
+- a member of an anonymous union or struct through a pointer;
+- a call through a function-pointer field whose name is also a method, where
+  `.` selects the method;
+- inside a `#define` body, which is preprocessor text and is never lowered.
+
+Keep `(*p).field` where one `.` cannot reach: `.` walks a single pointer
+level, so writing `cursor.car()` for a `List *` compiles to a call on the
+wrong pointer and aborts at runtime.
+
 ### Status results
 
 One operation gets one public surface. Do not keep a void adapter that
@@ -1121,7 +1182,7 @@ Use native x2c literals whenever the value family has literal syntax,
 including empty values:
 
 ```x2c
-String text = %"";
+String text = "";
 Array values = [];
 Map index = {};
 ```
@@ -1135,8 +1196,8 @@ Array values = Array.new();
 Map index = Map.new();
 ```
 
-Keep `%""` for an empty String because `""` becomes a static initializer. An
-empty List is `NULL`.
+The empty String and the empty List are both `NULL`, and `""` reaches a String
+destination without the sigil, at block scope and file scope alike.
 
 File-static declarations use these literals too; see
 [File-static literals](../docs/src/guide/collections.md#file-static-literals).
@@ -1250,6 +1311,20 @@ Do not repeat an invariant downstream after a constructor, canonicalizer, or
 typed boundary has established it. If readers need the same explanation in
 many places, the invariant probably lacks one clear owner.
 
+Treat `class` as a budgeted choice, not a better `typedef`. A record or heap
+class reserves one of 32 `Var` descriptor rows in the linked program, whether
+or not a value is ever boxed, and the program that exhausts them aborts during
+startup. Scalar and alias classes, such as `class Count int;` and
+`class Path String;`, cost no row. A hand-written tagged `protocol Var(T);`
+spends one too, so `protocol Var(T) as void *;` is the spelling for a pointer
+that crosses as raw bits. Rows are shared with the typed Array and Map
+families, and a class in `lib/` taxes every program, including the compiler.
+Write `class` when the type needs the whole generated bundle - construction,
+boxing, equality and hashing for a Map key, and cleanup - and `typedef` for a
+type that is never boxed, for function pointers, enums, and unions, and for a
+native handle whose lifetime belongs to its library. See
+[Classes and system macros](../docs/src/guide/system-macros.md).
+
 ## Review checklist
 
 Run [`audit-source.sh`](skills/clean-x2c-source/scripts/audit-source.sh) for
@@ -1272,6 +1347,10 @@ subject names whose length wraps lines. Then check what it cannot:
   points?
 - Do native literals, receiver chains, and target-typed conversions carry the
   construction?
+- Does every acquisition name its lifetime with `$auto`, `$scope`, `$lock`, or
+  `$let`, leaving `defer` for the cases those macros do not cover?
+- Does each `->` and `(*p).field` sit on a layout the compiler cannot reach,
+  rather than on a type x2c declared?
 - Does each operation expose one status surface, with `try_` reserved for
   genuine presence or exhaustion?
 - Do closed vocabularies that need membership or a dense index use a

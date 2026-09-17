@@ -270,19 +270,19 @@ leading indentation of the current line for `push`, `pop`, `indent`, and
 `Buffer` for assembling text.
 
 ```x2c
-Scope.retain();
-Buffer out = Buffer.new(0);
-out.write("case ").printf("%d", 7).write(":").newline_indent();
-String text = out.str();
-out.free();
-Scope.release();
+String text;
+$scope() {
+  Buffer out = $auto(Buffer.new(0));
+  out.write("case ").printf("%d", 7).write(":").newline_indent();
+  text = out.str();
+}
 puts(text);
 ```
 
 `Buffer.str` interns the accumulated text, so `text` is canonical. It is
-still valid after the `Buffer.free` and the `Scope.release` that disposed of
+still valid after the `Buffer` cleanup and the region release that disposed of
 every byte the builder used. Most x2c code is written this way: mutable
-storage in a scope, canonical result outside it.
+storage in a region, canonical result outside it.
 
 ## `defer` for cleanup
 

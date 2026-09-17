@@ -271,6 +271,32 @@ Files: `docs/`, `agents/`, `plans/`, `site/src/`, `examples/`,
   `EXPECT_TRUE(1)`; `test-index-slice.x:80` is empty; `test-func.x:58`
   checks only non-null.
 
+## Group 15: member access, class registration, and one test
+
+Files: `src/expressions.x`, `src/parse.x`, `lib/error.x`, `lib/dispatch.x`,
+`src/compiler.x`, `etc/builtin-macros.xmacro`, `unittest/test-file.x`.
+
+Found by the 2026-09-17 dogfooding survey, which
+[x2c-dogfooding-remediation](x2c-dogfooding-remediation.md) carries; these
+rows are compiler work and stay here. Reproduced at ecdcea9 with
+`builds/0/x2c`.
+
+| Defect | Reproduction | Cause | R |
+| --- | --- | --- | --- |
+| `.` through a pointer to a pointer typedef calls the wrong pointer and aborts at runtime. | `static int first(List *c) { return c.car().int(); }` emits `Var_int(List_car(c))`; only `cc` warns, and running aborts with `<no-convert>`, status 134. | An unresolvable receiver passes through undiagnosed; `.` reaches one pointer level, so this needs a diagnostic or a second dereference. | me |
+| `.` to a member of an anonymous union or struct through a pointer emits uncompilable C. | `unittest/compiler-fixtures/class-layout.x:17,18`; the member is emitted with `.` and the C compiler rejects it. | Same path as the row above: an unresolvable member is emitted verbatim. | me |
+| The 32nd record or heap class aborts during startup with an undecoded code. | 32 `class Pn { int x; int y; };`, never boxed: `x2c error floor: code 0x12e4d3e60a58: raise before initialization`. | `lib/error.x` prints the raw code in the floor path while the ordinary report decodes it; the raise in `lib/dispatch.x` carries the class name and the 32-row limit, and all of it is lost. Decode it and name the registry. | me |
+| `class C enum { ... };` fails and no enum spelling works. | `class Color enum { RED, GREEN };` gives "enumerator 'RED' is already bound in this scope"; naming a declared enum gives "Var representation has no fixed tag". | The enumerators are bound by the capture and again by the re-emitted declaration. Support it, or reject it with a message that names the limit instead of blaming the enumerator. | me |
+| `protocol Var(Compiler);` spends a descriptor row nothing can select. | 31 classes plus this shape aborts as above; the boxed value reports `tag=p48 custom=-1`. | `src/compiler.x:151-156` boxes raw `p64`, so the registered row is unreachable. Use `protocol Var(Compiler) as void *;`, the spelling `lib/iter.x:93` and `lib/logger.x:108` already use, and keep the converters. | me |
+| `unittest/test-file.x` releases the caller's region on eight failure branches. | `$test.scoped()` already defers a release; lines 187, 196, 202, 290, 405, 427, 447, 474 call `Scope.release()` again before an early `return`. | Delete the eight explicit releases. Latent: the branches run only after an `EXPECT` already failed. | me |
+| `x2c` parses `#include` inside a conditional branch that is false. | A header with `#if defined(X2C_NEVER_DEFINED_MACRO)` / `#include "never.h"` / `#endif` fails on the contents of `never.h`. | This is why a real third-party header cannot be made visible to x2c: pointing the compiler at `uv.h` dies inside `uv/win.h`, which sits behind `#if defined(_WIN32)`. It keeps ~190 package `->` sites that `.` would otherwise replace. Scoped in [x2c-header-collection-gaps](x2c-header-collection-gaps.md). | me |
+
+Two diagnostics in the same area: the "managed initializer requires Cleanup
+participation" message points at the token after the declaration, because
+`src/parse.x:1257-1265` reports with an already-advanced token; and defining a
+method on an imported package type fails with "parse: missing closing
+parenthesis" pointing at a parameter name.
+
 ## Assigned elsewhere
 
 The "Simplify x2c source" session owns these, by the 2026-09-17 handoff:

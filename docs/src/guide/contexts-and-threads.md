@@ -113,9 +113,7 @@ static Var count(const void *input, size_t input_size) {
     raise %(bad-arg (owner "count worker"));
 
   for (int i = 0; i < work.iterations; i++) {
-    work.mutex.lock();
-    (*work.counter)++;
-    work.mutex.unlock();
+    $lock(work.mutex) (*work.counter)++;
   }
   return work.iterations;
 }

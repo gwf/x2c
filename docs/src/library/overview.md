@@ -180,9 +180,7 @@ typedef struct CounterWork {
 static Var increment(const void *input, size_t input_size) {
   if (input_size != sizeof(CounterWork)) raise %(bad-arg);
   const CounterWork *work = input;
-  work.mutex.lock();
-  (*work.counter)++;
-  work.mutex.unlock();
+  $lock(work.mutex) (*work.counter)++;
   return work.label.var();
 }
 

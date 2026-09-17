@@ -230,15 +230,14 @@ static int divisible_by_four(Var value) {
 }
 
 int main(void) {
-  Scope.retain();
-  Array values = range(1, 8, 1)
-    .map(double_value)
-    .filter(divisible_by_four)
-    .array();
-  for (size_t i = 0; i < values.len(); i++)
-    printf("%d\n", values[i].int());
-
-  Scope.release();
+  $scope() {
+    Array values = range(1, 8, 1)
+      .map(double_value)
+      .filter(divisible_by_four)
+      .array();
+    for (size_t i = 0; i < values.len(); i++)
+      printf("%d\n", values[i].int());
+  }
   return 0;
 }
 ```

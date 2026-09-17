@@ -195,7 +195,15 @@ x2c keeps C declarations, expressions, operators, functions, structs, unions,
 enums, pointers, arrays, and control flow. It adds language forms around that
 foundation and keeps C's object model.
 
-Raw pointer member access still uses `->`; direct struct members use `.`.
+Member access uses `.` wherever x2c parsed the struct, whether the receiver is
+a value or a pointer, and whether the declaration came from x2c source or from
+a C header x2c reads. `->` remains accepted and is required where the compiler
+cannot select the operator: a pointer to a struct whose layout x2c never sees,
+such as one declared in a system header or in a third-party header reached
+through an include x2c does not resolve; a member of an anonymous union or
+struct through a pointer; and a `#define` body, which is preprocessor text.
+`.` reaches through one pointer level, so a pointer to a pointer typedef keeps
+`(*pointer).field`.
 x2c also recognizes method-style calls such as `list.len()`. The namespaced
 function is selected from the static receiver type. When that function
 declares its first parameter `T *` and the receiver is an addressable `T`, the
@@ -1865,6 +1873,35 @@ sentinel as lowercase `void`.
 
 Hashing, ordering, truthiness, iteration, conversion, arithmetic, compound
 updates, and increment or decrement raise `<void-op>` when they receive it.
+
+### Membership with `in`
+
+The contextual `in` operator tests membership in a collection. It is the
+operator spelling of the receiver's `contains` member, selected through the
+`Var(T)` protocol, and it compiles to that same call:
+
+```x2c
+Map ages = {ada: 36};
+List names = %(ada grace);
+Array counts = [1, 2, 3];
+String text = "hello";
+
+int keyed = <ada> in ages;
+int element = <grace> in names;
+int value = 2 in counts;
+int substring = "ell" in text;
+```
+
+A `Map` tests its keys, a `List` or `Array` its elements, and a `String` a
+substring. The left operand converts to the member's parameter type, so a
+`Var` holding the key works as well as a literal. A receiver whose type does
+not implement a `contains` member is rejected with
+`operator 'in' requires an implemented contains member`; `SymbolSet` is one
+such type today and uses `set.contains(name)`. There is no `not in`
+spelling; write `!(name in ages)`.
+
+`in` is a keyword only between two operands, so `struct buffer *in` and
+`int in = 0` remain ordinary names.
 
 ### Exact Var-tag tests with `is` and `is not`
 

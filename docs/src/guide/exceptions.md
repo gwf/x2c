@@ -290,19 +290,20 @@ the source path.
 
 ## Cleanup and scopes
 
-`Error` transfer does not release a `Scope` automatically. Pair a retained
-scope with `defer` whenever a raising call can cross the release:
+`Error` transfer does not release a `Scope` automatically. Write the region as
+`$scope()` whenever a raising call can cross the release; its deferred release
+runs on the error path too:
 
 ```x2c
 static void render(String text, int width) {
-  Scope.retain();
-  defer Scope.release();
-  char *line = Scope.malloc(width + 1);
-  if (!text) {
-    raise %(bad-arg (operation "render"));
-    return;
+  $scope() {
+    char *line = Scope.malloc(width + 1);
+    if (!text) {
+      raise %(bad-arg (operation "render"));
+      return;
+    }
+    line[0] = 0;
   }
-  line[0] = 0;
 }
 ```
 

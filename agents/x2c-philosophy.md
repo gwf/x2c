@@ -862,9 +862,10 @@ not of the memory-bracket contract.
   the transformation directly.
 - Use explicit traversal when order, state, ownership, or performance makes it
   clearer.  Pattern matching and traversal compose; they are not alternatives.
-- Choose scopes by lifetime.  Pair an inner `Scope.retain` with guaranteed
-  release.  Do not create a scope solely to hold values whose existing owner
-  already provides the required lifetime.
+- Choose scopes by lifetime.  Write an inner region as `$scope()`, which is
+  the retain and its guaranteed release in one construct.  Do not create a
+  scope solely to hold values whose existing owner already provides the
+  required lifetime.
 
 ### Keep the surface honest
 
@@ -938,6 +939,12 @@ Exemplars endorse a property, not every line in a file:
 - `lib/map-generics.xmacro` - one Robin Hood implementation shared by ordinary
   `Map` and explicitly instantiated native numeric families; hashing, equality,
   errors, boxing, and iteration remain visible per-family choices.
+- `examples/programs/literate-lisp.x` - the current language written the way
+  it is meant to be read: `$auto` and `$scope` for lifetimes, `in` and `is`
+  for membership and tags, destructuring, `=>` bodies, bare literals, and `.`
+  through every pointer the compiler owns.
+- `examples/magic/system-macros.x` - `class`, `$let`, and `$lock` in one
+  runnable program.
 
 Related guides: `agents/x2c-coding-style-guide.md` for mechanical style,
 `agents/skills/execute-x2c-plan` for ordinary development,

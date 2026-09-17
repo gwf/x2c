@@ -202,7 +202,47 @@ region. Keep the explicit `free` method either way: it clears the native
 field, so an early release leaves the finalizer nothing to do. See
 [attaching a finalizer](memory.md#attaching-a-finalizer).
 
-The caller puts the release on the line after the acquisition:
+Adopt `Cleanup(T)` beside the type so a caller can write `$auto`. Without it
+the managed initializer is refused and every caller repeats the release:
+
+```x2c
+~typedef struct feed_parser feed_parser;
+~void feed_close(feed_parser *parser);
+~typedef struct Feed *Feed;
+~struct Feed { feed_parser *native; String source; };
+~Feed Feed.close(Feed feed) { return NULL; }
+void Feed.cleanup(Feed feed);
+protocol Cleanup(Feed);
+
+void Feed.cleanup(Feed feed) {
+  feed.close();
+}
+```
+
+The declaration and the protocol row belong above `#pragma private` so the
+package exports them; the body may sit with the other private definitions.
+A borrowed view over storage another handle owns adopts nothing.
+
+The caller then names the lifetime at the acquisition:
+
+```x2c
+~typedef struct feed_parser feed_parser;
+~typedef struct Feed *Feed;
+~struct Feed { feed_parser *native; String source; };
+~Feed Feed.open(String text) { return Scope.calloc(1, sizeof(struct Feed)); }
+~Feed Feed.close(Feed feed) { return NULL; }
+~void Feed.cleanup(Feed feed) { feed.close(); }
+~protocol Cleanup(Feed);
+~List Feed.titles(Feed feed) { return NULL; }
+static int count_titles(String document) {
+  Feed feed = $auto(Feed.open(document));
+  return feed.titles().len();
+}
+```
+
+Where a type has no `Cleanup` adoption, or the acquisition is a native call
+the wrapper does not own, the caller puts the release on the line after the
+acquisition:
 
 ```x2c
 ~typedef struct feed_parser feed_parser;
@@ -388,7 +428,7 @@ static int _feed_visit(const char *title, void *user) {
 }
 
 Array Feed.scan(Feed feed) {
-  struct FeedScan scan = { Array.new(), 0 };
+  struct FeedScan scan = { [], 0 };
   int status = feed_scan(feed.native, _feed_visit, &scan);
 
   if (scan.failed) {

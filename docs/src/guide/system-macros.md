@@ -169,7 +169,7 @@ Var first = point, second = Point.new(3, 4);
 Map labels = $auto({});
 labels[first] = "origin";
 printf("%s\n", labels[second].str());
-~  return labels.contains(second) ? 0 : 1;
+~  return second in labels ? 0 : 1;
 ~}
 ```
 
@@ -191,7 +191,12 @@ outside these operations must manage their own recursion. Readable output
 containing addresses is not a serialization format.
 
 Class boxing uses the existing Var descriptor registry: it has 32 custom rows
-and freezes when worker startup freezes registration. Class tags derive from
+and freezes when worker startup freezes registration. Every record and heap
+class reserves one row for the life of the program, boxed or not, so the 32
+rows are a budget shared with hand-written tagged `protocol Var(T)` adoptions
+and the typed container families; a program that declares more classes than
+remaining rows fails during startup registration. Scalar and alias classes
+reserve nothing. Class tags derive from
 the canonical source file and full name, keeping private classes in different
 files distinct. Tags use deterministic compact spellings, while diagnostics
 retain the full name.

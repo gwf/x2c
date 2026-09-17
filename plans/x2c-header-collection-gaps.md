@@ -35,6 +35,37 @@ A leading attribute or `_Noreturn` is kept in the declaration's specifiers
 as source text, which the type ignores; a trailing attribute stays with its
 declarator, as the corpus plan decided.
 
+## Making a real third-party header visible
+
+Member access reaches a native struct with `.` whenever x2c parsed the
+declaration: verified 2026-09-17 against a local header and against the real
+`termbox2.h`, where `struct tb_event *event; event.type` compiles and runs.
+The reason package sources still write `->` on ~190 handle members is not the
+language but the wiring: a pinned shim such as `packages/libuv/src/uv-152.h`
+is thirteen lines around `#include <uv.h>`, which only the C compiler
+resolves, so x2c never sees the layout and emits `.` verbatim into C.
+
+Two gaps block closing that, both reproduced at ecdcea9:
+
+- Collection reads `#include` directives inside conditional branches that are
+  false. A header with `#if defined(X2C_NEVER_DEFINED_MACRO)` around
+  `#include "never.h"` fails on the contents of `never.h`, which is why
+  pointing x2c at the installed `uv.h` dies inside `uv/win.h` behind
+  `#if defined(_WIN32)`.
+- A struct body far from its forward typedef does not resolve. With the real
+  `yyjson.h` on the include path, `yyjson_read_err *e; e.code` works (the
+  type is defined at line 886) while `yyjson_doc *d; d.read_size` still emits
+  `.`; that struct's forward typedef is at line 693 and its body at 4770, with
+  41 conditionals between them. A minimal forward-typedef-then-body header
+  resolves, so the trigger is not the shape alone and is not isolated.
+
+Closing both would let packages put their pinned headers on x2c's read path
+and delete those arrows, and it is a prerequisite for any `sizeof` or field
+access against an upstream C type. Until then, `->` on a native handle is
+correct and the style guide says so. The dogfooding campaign therefore
+excludes those sites; see
+[x2c-dogfooding-remediation](x2c-dogfooding-remediation.md).
+
 ## Decisions needed
 
 - What collection records for a prefix name with no visible definition.

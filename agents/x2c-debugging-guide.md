@@ -35,10 +35,16 @@ accordingly instead of relying on runtime errors.
 
 ### 1.3 Pointer Access
 
-Use `.` for both struct and pointer member access. C pointer member access
-with `->` is also accepted. The universal dot notation also
-covers method calls, so avoid naming struct fields the same as type
-methods to prevent ambiguity.
+Use `.` for both struct and pointer member access wherever x2c parsed the
+struct, including a C header it reads. C pointer member access with `->` is
+also accepted, and it is required for a layout x2c never sees, such as a
+system header or a third-party header reached through an include x2c does not
+resolve: there `.` is emitted verbatim and the C compiler rejects it. It is
+also required for a member of an anonymous aggregate and inside a `#define`
+body. The dot covers method calls, so avoid naming struct fields the same as
+type methods to prevent ambiguity; a function-pointer field whose name is also
+a method must be called through `->`. `.` walks one pointer level, so a
+pointer to a pointer typedef keeps `(*p).field`.
 
 ---
 
