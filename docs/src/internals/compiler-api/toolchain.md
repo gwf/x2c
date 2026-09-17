@@ -13,6 +13,7 @@ Host preprocessing, compilation, archive, and link actions.
 | Function | Summary |
 | --- | --- |
 | [`tool_action_new`](#tool_action_new) | Creates a `Scope`-owned action that reports nonzero status by default. |
+| [`tool_capture`](#tool_capture) | Runs the host tool `arguments` without a shell, captures both streams, and returns its shell-style status. |
 | [`toolchain_new`](#toolchain_new) | Creates a `Scope`-owned host toolchain and resolves its native layout. |
 | [`ToolAction.as_program`](#ToolAction.as_program) | Inherits the standard streams and suppresses the failure summary. |
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
@@ -37,7 +38,17 @@ The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:240`
+Source: `src/toolchain.x:175`
+
+#### tool_capture
+
+`int tool_capture(List arguments, String *output, String *errors)`
+
+Runs the host tool `arguments` without a shell, captures both streams,
+and returns its shell-style status. A tool that cannot start returns 127
+and leaves the reason in `errors`.
+
+Source: `src/toolchain.x:244`
 
 #### toolchain_new
 
@@ -51,7 +62,7 @@ option `List`s are borrowed.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
 or its canonical layout.
 
-Source: `src/toolchain.x:121`
+Source: `src/toolchain.x:99`
 
 ### `ToolAction`
 
@@ -62,7 +73,7 @@ Source: `src/toolchain.x:121`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:253`
+Source: `src/toolchain.x:188`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -74,7 +85,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:412`
+Source: `src/toolchain.x:351`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -88,7 +99,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:361`
+Source: `src/toolchain.x:300`
 
 ### `ToolRun`
 
@@ -100,7 +111,7 @@ Source: `src/toolchain.x:361`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:379`
+Source: `src/toolchain.x:318`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -115,14 +126,14 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:390`
+Source: `src/toolchain.x:329`
 
 ### `Toolchain`
 
 <a id="Toolchain.archive_action"></a>
 #### Toolchain.archive_action
 
-`ToolAction Toolchain.archive_action( Toolchain toolchain, String output, List objects)`
+`ToolAction Toolchain.archive_action( Toolchain t, String output, List objects)`
 
 Builds but does not start an `ar rcs` action in object-list order.
 The action does not remove an existing archive, so callers requiring exact
@@ -130,12 +141,12 @@ membership must unlink `output` before it runs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:204`
+Source: `src/toolchain.x:153`
 
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
 
-`ToolAction Toolchain.compile_action( Toolchain toolchain, String source, String object, String depfile, List gen_dirs)`
+`ToolAction Toolchain.compile_action( Toolchain t, String source, String object, String depfile, List gen_dirs)`
 
 Builds but does not start one C compilation action.
 Generated include directories precede the x2c include directory and
@@ -144,12 +155,12 @@ configured compiler arguments. The action requests dependency output at
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:163`
+Source: `src/toolchain.x:126`
 
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
 
-`ToolAction Toolchain.link_action( Toolchain toolchain, String output, List inputs)`
+`ToolAction Toolchain.link_action(Toolchain t, String output, List inputs)`
 
 Builds but does not start a host-compiler link action.
 Input order is preserved; configured linker arguments, the matching x2c
@@ -157,12 +168,12 @@ runtime archive, and `-lm` follow the inputs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:221`
+Source: `src/toolchain.x:164`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
 
-`int Toolchain.preprocess( Toolchain toolchain, const char *fname, List include_dirs, const char *imacros, String *output, String *errors, String *dependencies)`
+`int Toolchain.preprocess( Toolchain t, const char *fname, List include_dirs, const char *imacros, String *output, String *errors, String *dependencies)`
 
 Runs the configured C preprocessor without a shell.
 `fname`, `output`, and `errors` are required; output pointers are cleared
@@ -178,12 +189,12 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:436`
+Source: `src/toolchain.x:370`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
 
-`ToolAction Toolchain.preprocess_action( Toolchain toolchain, String source, String output, List gen_dirs)`
+`ToolAction Toolchain.preprocess_action( Toolchain t, String source, String output, List gen_dirs)`
 
 Captures the native preprocessor view used to identify reusable objects.
 Uses the compilation's native flags and include order, retaining line
@@ -191,7 +202,7 @@ markers so source locations also belong to the identity.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:187`
+Source: `src/toolchain.x:140`
 
 <a id="Toolchain.search_directories"></a>
 #### Toolchain.search_directories
@@ -203,7 +214,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:321`
+Source: `src/toolchain.x:260`
 
 ## Public types
 

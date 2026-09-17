@@ -1136,6 +1136,16 @@ set -e
 grep -Fq 'target dependency cycle' "$manifest/cycle.stderr"
 grep -Fq 'unmatched source pattern' "$manifest/unmatched.stderr"
 
+# A glob matches a source that is a link to a file, as naming it does.
+mkdir -p "$manifest/linked/src" "$manifest/linked/real"
+printf 'int main(void) { return 0; }\n' >"$manifest/linked/real/main.x"
+ln -s ../real/main.x "$manifest/linked/src/main.x"
+printf '[target.linked]\nsources = ["src/*.x"]\n' \
+  >"$manifest/linked/x2c.toml"
+"$X2C" build -q --manifest-path "$manifest/linked/x2c.toml" \
+  --output "$manifest/linked/app"
+[[ -x "$manifest/linked/app" ]]
+
 equivalent="$BUILD/equivalent"
 mkdir -p "$equivalent"
 printf 'int main(void) { return 0; }\n' >"$equivalent/main.c"

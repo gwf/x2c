@@ -42,11 +42,11 @@ Typed native build request and artifact graph.
 
 Public functions:
 
-`_build_mkdirs`, `CliRequest.prepare`, `Build.generated_dir`,
-`Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
-`Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
-`Build.finish`, `Build.report_success`, `Build.run_program`,
-`_build_remove_tree`, `_build_lock`, `Build.cleanup`, `Build.script_helpers`,
+`build_hash_bytes`, `build_check_input`, `CliRequest.prepare`,
+`Build.generated_dir`, `Build.translation_current`, `Build.record_translation`,
+`Build.add_generated`, `Build.begin_translation`, `Build.end_translation`,
+`compile_commands_write`, `Build.finish`, `Build.report_success`,
+`Build.run_program`, `Build.cleanup`, `Build.script_helpers`,
 `Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
@@ -224,8 +224,8 @@ Package installation into the x2c home.
 
 Public functions:
 
-`install_command`, `install_version`, `install_require`, `remove_command`,
-`list_command`
+`install_rows`, `install_command`, `install_version`, `install_require`,
+`remove_command`, `list_command`
 
 ### [src/lambda.x](../src/lambda.x)
 
@@ -348,8 +348,9 @@ Command progress and completion receipts.
 Public functions:
 
 `report_now_us`, `report_file_bytes`, `report_duration`, `report_size`,
-`report_json_string`, `report_configure`, `report_receipts`, `report_suspend`,
-`report_line`, `report_progress`, `report_phase`
+`report_json_string`, `report_make_owned`, `report_configure`,
+`report_receipts`, `report_suspend`, `report_line`, `report_progress`,
+`report_phase`
 
 ### [src/script.x](../src/script.x)
 
@@ -398,8 +399,9 @@ Public functions:
 
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
 `Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
-`ToolAction.as_program`, `Toolchain.search_directories`, `ToolAction.start`,
-`ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`, `Toolchain.preprocess`
+`ToolAction.as_program`, `tool_capture`, `Toolchain.search_directories`,
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`,
+`Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 
@@ -444,8 +446,9 @@ Public functions:
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
 `x2c_get_executable`, `x2c_package_directory`, `x2c_source_file`,
 `x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
-`x2c_home_packages`, `x2c_driver_error`, `worker_fork`, `worker_exit`,
-`worker_wait`, `x2c_filename_hash`
+`x2c_home`, `x2c_home_packages`, `x2c_stage_dir`, `x2c_find_program`,
+`x2c_driver_error`, `x2c_host_error`, `file_lock`, `file_publish`,
+`worker_fork`, `worker_exit`, `worker_wait_any`, `x2c_filename_hash`
 
 ## Runtime modules
 

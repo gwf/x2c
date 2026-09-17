@@ -17,6 +17,7 @@ Command progress and completion receipts.
 | [`report_file_bytes`](#report_file_bytes) | Returns the size of a regular file. |
 | [`report_json_string`](#report_json_string) | Writes `text` to `out` as one quoted JSON string. |
 | [`report_line`](#report_line) | Writes one newline-terminated receipt to stderr when receipts are enabled. |
+| [`report_make_owned`](#report_make_owned) | Reports whether a parent Make recipe runs this process, which `MAKELEVEL` set to a positive count shows. |
 | [`report_now_us`](#report_now_us) | Returns monotonic time in microseconds, or zero when the clock read fails. |
 | [`report_phase`](#report_phase) | Writes a muted phase receipt when receipts are enabled. |
 | [`report_progress`](#report_progress) | Updates the terminal's transient progress line when transient mode is active. |
@@ -36,7 +37,7 @@ progress additionally requires terminal stderr, non-plain output, and no
 parent Make recipe. Plain output disables color; automatic color respects
 terminal capability and `NO_COLOR`.
 
-Source: `src/report.x:119`
+Source: `src/report.x:112`
 
 #### report_duration
 
@@ -45,7 +46,7 @@ Source: `src/report.x:119`
 Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
 two decimal places.
 
-Source: `src/report.x:53`
+Source: `src/report.x:55`
 
 #### report_file_bytes
 
@@ -54,7 +55,7 @@ Source: `src/report.x:53`
 Returns the size of a regular file.
 NULL, a failed `stat`, or a non-regular path returns zero.
 
-Source: `src/report.x:44`
+Source: `src/report.x:46`
 
 #### report_json_string
 
@@ -64,7 +65,7 @@ Writes `text` to `out` as one quoted JSON string.
 Quote, backslash, and control bytes are escaped; other bytes, including
 UTF-8 sequences, are copied. A NULL `text` writes `""`.
 
-Source: `src/report.x:72`
+Source: `src/report.x:74`
 
 #### report_line
 
@@ -73,7 +74,17 @@ Source: `src/report.x:72`
 Writes one newline-terminated receipt to stderr when receipts are enabled.
 Any active transient line is cleared first, and `line` must be non-NULL.
 
-Source: `src/report.x:198`
+Source: `src/report.x:193`
+
+#### report_make_owned
+
+`int report_make_owned(void)`
+
+Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
+set to a positive count shows. Parallel recipes share one terminal and
+one job budget without sharing reporter state.
+
+Source: `src/report.x:92`
 
 #### report_now_us
 
@@ -82,7 +93,7 @@ Source: `src/report.x:198`
 Returns monotonic time in microseconds, or zero when the clock read fails.
 The value measures elapsed time; it is not a wall-clock timestamp.
 
-Source: `src/report.x:34`
+Source: `src/report.x:36`
 
 #### report_phase
 
@@ -92,7 +103,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:246`
+Source: `src/report.x:241`
 
 #### report_progress
 
@@ -103,7 +114,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:210`
+Source: `src/report.x:205`
 
 #### report_receipts
 
@@ -111,7 +122,7 @@ Source: `src/report.x:210`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:136`
+Source: `src/report.x:131`
 
 #### report_size
 
@@ -120,7 +131,7 @@ Source: `src/report.x:136`
 Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
 Byte counts are exact; larger units use one decimal place.
 
-Source: `src/report.x:62`
+Source: `src/report.x:64`
 
 #### report_suspend
 
@@ -128,7 +139,7 @@ Source: `src/report.x:62`
 
 Clears the active transient line from stderr, if one exists.
 
-Source: `src/report.x:189`
+Source: `src/report.x:184`
 
 ## Design notes
 

@@ -14,16 +14,12 @@ $(import "../lib/private-keywords.xmacro")
 
 #pragma private
 
-#include <errno.h>
-#include <limits.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
 #include "digest.x"
+#include "json.x"
 
 #define INSTALL_INDEX "https://x2c-lang.dev/packages/index.txt"
 
@@ -33,12 +29,11 @@ static void _error(const char *message) {
 
 // host
 
-static String _home_packages(void) {
-  String home = x2c_get_root();
-  if (!home || home == ".")
-    _error("no x2c home: install the compiler or set X2C_HOME");
-  String packages = %"$home/packages";
-  if (!_build_mkdirs(packages)) _error(%"cannot create $packages");
+static String _home_packages(String command) {
+  String packages = x2c_home_packages();
+  if (!packages)
+    x2c_driver_error(
+      %"$command: no x2c home: install the compiler or set X2C_HOME");
   return packages;
 }
 
@@ -50,27 +45,10 @@ static String _platform(void) {
 
 /* Runs one host tool and returns its stdout, or exits with its stderr. */
 static String _run(List arguments, const char *what) {
-  String tool = arguments.car(), errors = "not found";
-  try {
-    Job job = arguments.job().options({stdout: <capture>, stderr: <capture>});
-    if (!job.status()) return job.output();
-    errors = job.errors();
-  }
-  catch %(not-found *): {}
-  _error(%"$what failed ($tool): ${errors ? errors.strip(" \n") : ""}");
+  String output = NULL, errors = NULL;
+  if (!tool_capture(arguments, &output, &errors)) return output;
+  _error(%"$what failed (${arguments.car()}): ${errors.strip(" \n")}");
   return NULL;
-}
-
-static String _read_text(String path) {
-  File input = fopen(path, "r");
-  if (!input) _error(%"cannot read $path");
-  return input.string_close();
-}
-
-static void _write_text(String path, String text) {
-  File output = fopen(path, "w");
-  if (!output || (text && output.puts(text) == EOF) || output.close())
-    _error(%"cannot write $path");
 }
 
 static List _entries(String directory) =>
@@ -83,6 +61,10 @@ static List _files_with(String directory, String suffix) {
   return paths.list_free();
 }
 
+static int _remote(String spec) =>
+  spec.startswith("http://") || spec.startswith("https://") ||
+  spec.startswith("file://");
+
 // fetch and verify
 
 static String _fetch(String url, String directory, String name) {
@@ -91,35 +73,42 @@ static String _fetch(String url, String directory, String name) {
   return target;
 }
 
-static void _verify(String path, String expected) {
-  File input = fopen(path, "rb");
-  if (!input) _error(%"cannot read $path");
-  defer input.close();
+static void _verify(Path p, String expected) {
+  File input = $auto(File.open(p, "rb"));
   String actual = input.sha256();
   if (actual != expected.lower())
-    _error(%"sha256 mismatch for $path: expected $expected, got $actual");
+    _error(%"sha256 mismatch for $p: expected $expected, got $actual");
 }
 
 // index
 
-/* One index line is `name version kind platform url sha256`; `kind` is
-   `source` or `bundle`, and a source row's platform is `-`. */
+/** Returns the package rows of `text`: its lines holding the six fields
+    `name version kind platform url sha256`, where `kind` is `source` or
+    `bundle` and a source row's platform is `-`. Blank lines, `#` comments,
+    and lines with another field count are skipped. The package index and a
+    project lockfile share this format.
+*/
+List install_rows(String text) {
+  Array rows = [];
+  foreach (String line, text.split_lines(0)) {
+    List fields = line.split(" ").filter(%!(String field) => field != NULL);
+    if (!line.startswith("#") && fields.len() == 6) rows.push(fields);
+  }
+  return rows.list_free();
+}
+
 static List _index_row(CliRequest request, String name, String work) {
   String location = request.index ? request.index : INSTALL_INDEX;
-  String path = location.startswith("http://") ||
-                location.startswith("https://") ||
-                location.startswith("file://")
-    ? _fetch(location, work, "index.txt") : location;
-  String platform = _platform(), List source = NULL;
-  foreach (String line, _read_text(path).split_lines(0)) {
-    if (!line || line.startswith("#")) continue;
-    Array fields = [];
-    foreach (String field, line.split(" "))
-      if (field) fields.push(field);
-    if (fields.len() != 6 || fields[0] != name) continue;
-    String kind = fields[2], target = fields[3];
-    if (kind == "bundle" && target == platform) return fields.list_free();
-    if (kind == "source") source = fields.list_free();
+  String path =
+    _remote(location) ? _fetch(location, work, "index.txt") : location;
+  String platform = _platform(), text = NULL, List source = NULL;
+  try text = Path.read_text(path);
+  catch %(not-found *): _error(%"no package index at $location");
+  foreach (List row, install_rows(text)) {
+    if (row.car() != name) continue;
+    String kind = row.nth_cdr(2).car(), target = row.nth_cdr(3).car();
+    if (kind == "bundle" && target == platform) return row;
+    if (kind == "source") source = row;
   }
   if (source) return source;
   _error(%"no package '$name' for $platform in $location");
@@ -130,8 +119,8 @@ static List _index_row(CliRequest request, String name, String work) {
 
 /* A tarball unpacks to exactly one top directory, the package. */
 static String _unpack(String tarball, String work) {
-  String extracted = %"$work/extracted";
-  if (!_build_mkdirs(extracted)) _error(%"cannot create $extracted");
+  Path extracted = %"$work/extracted";
+  extracted.make_dirs();
   _run(%( "tar" "-xzf" $tarball "-C" $extracted ), "extract");
   List top = _entries(extracted);
   if (!top || top.cdr() || !Path.is_dir(%"$extracted/${top.car()}"))
@@ -139,28 +128,13 @@ static String _unpack(String tarball, String work) {
   return %"$extracted/${top.car()}";
 }
 
-static void _copy_tree(String source, String target) {
-  try Path.copy_tree(source, target);
-  catch %(not-found *): _error(%"cannot copy $source");
-  catch %(io-fail *): _error(%"cannot copy $source");
-}
-
-static String _json_field(String text, const char *key) {
-  String marker = %"\"$key\": \"";
-  int start = text.find(marker);
-  if (start < 0) return NULL;
-  String rest = text[start + marker.len():];
-  int end = rest.find("\"");
-  return end < 0 ? NULL : rest[:end];
-}
-
 static void _check_bundle(CliRequest request, String package, String name) {
-  String text = _read_text(%"$package/BUNDLE.json");
-  String built = _json_field(text, "x2c_version"), current = cli_version();
+  String built = Json.read_file(%"$package/BUNDLE.json")["x2c_version"];
+  String current = cli_version();
   if (built != current && !request.force)
     _error(
       %"bundle $name was built for '$built', not '$current'; use --force");
-  if (access(%"$package/builds/lib$name.a", R_OK))
+  if (!Path.is_file(%"$package/builds/lib$name.a"))
     _error(%"bundle $name has no builds/lib$name.a");
 }
 
@@ -175,8 +149,8 @@ static void _build_source(String package, String name, String spec) {
     if (manifest.endswith("dependency.json") ||
         Path.stem(manifest).startswith("dependency-"))
       _error(%"$name needs native dependencies; install its bundle");
-  String builds = %"$package/builds", x2c = x2c_get_executable();
-  if (!_build_mkdirs(builds)) _error(%"cannot create $builds");
+  Path builds = %"$package/builds", String x2c = x2c_get_executable();
+  builds.make_dirs();
   _run(%( $x2c "translate" "--out-dir" $builds
           "--x-include-dir" "$package/src"
           "--package-dir" ${Path.dirname(package)} )
@@ -186,38 +160,39 @@ static void _build_source(String package, String name, String spec) {
   _run(%( $x2c "build" "--kind" "static-library"
           "--output" "$builds/lib$name.a"
           "--build-dir" "$builds/cc" ).append(inputs), "build");
-  _write_text(%"$builds/$name.link", "");
+  Path.write_text(%"$builds/$name.link", NULL);
 }
 
-static int _installed(String package) =>
-  !access(%"$package/BUNDLE.json", F_OK) ||
-  !access(%"$package/SOURCE.json", F_OK);
+/* `bundle` or `source` for an installed package, or NULL for a directory
+   without an install marker. */
+static String _installed_kind(String package) =>
+  Path.exists(%"$package/BUNDLE.json") ? "bundle" :
+  Path.exists(%"$package/SOURCE.json") ? "source" : NULL;
 
-/* The version an installed package records, or NULL when it is not one. */
+/* The version an installed package's marker records, or NULL. */
 static String _installed_version(String package) {
-  String marker = %"$package/BUNDLE.json", key = "dependency_version";
-  if (access(marker, F_OK)) {
-    marker = %"$package/SOURCE.json";
-    key = "version";
-  }
-  if (access(marker, F_OK)) return NULL;
-  String version = _json_field(_read_text(marker), key);
-  return version ? version : "";
+  String kind = _installed_kind(package);
+  if (!kind) return NULL;
+  Var marker = Json.read_file(%"$package/${kind.upper()}.json");
+  Var version = marker[kind == "bundle" ? "dependency_version" : "version"];
+  return version is <string> ? version : NULL;
 }
 
-/* Returns the home's packages directory, holding its lock until the process
-   exits, so another install or removal waits for this one to finish and,
-   unless `quiet`, says so. */
-static String _locked_packages(int quiet) {
+/* Returns the home's packages directory, created and locked until the
+   process exits, so another install or removal waits for this one to finish
+   and, unless `quiet`, says so. */
+static String _locked_packages(String command, int quiet) {
   static int locked = 0;
-  String packages = _home_packages(), lock = %"$packages/.lock";
+  Path packages = _home_packages(command), lock = %"$packages/.lock";
   if (locked) return packages;
-  if (_build_lock(lock, 0) < 0) {
+  try packages.make_dirs();
+  catch %(io-fail *detail): x2c_host_error(detail);
+  if (file_lock(lock, 0) < 0) {
     if (!quiet)
       fprintf(
         stderr, "x2c: waiting for another install or removal in %s\n",
-        packages.str());
-    _build_lock(lock, 1);
+        packages);
+    file_lock(lock, 1);
   }
   locked = 1;
   return packages;
@@ -226,25 +201,24 @@ static String _locked_packages(int quiet) {
 /* Publishes the staged package with one rename, replacing an installed
    package of the same name; a directory that is not an installed package is
    never replaced. The replaced package moves aside inside the work
-   directory. */
+   directory, which the caller removes. */
 static void _publish(String staged, String packages, String name) {
-  String target = %"$packages/$name", previous = %"$staged.previous";
-  if (!access(target, F_OK)) {
-    if (!_installed(target))
+  Path target = %"$packages/$name";
+  if (target.exists()) {
+    if (!_installed_kind(target))
       _error(%"$target exists and is not an installed package");
-    if (rename(target, previous)) _error(%"cannot replace $target");
+    target.move_to(%"$staged.previous");
   }
-  if (rename(staged, target)) _error(%"cannot publish $target");
-  _build_remove_tree(previous);
+  Path.move_to(staged, target);
 }
 
 /* Staging directories left by an interrupted install are removed first; the
    caller holds the packages lock, so none belongs to a running install. */
 static String _work_directory(String packages) {
   foreach (String name, Path.list_dir(packages))
-    if (name.startswith(".install.")) _build_remove_tree(%"$packages/$name");
-  String work = %"$packages/.install.%ld".printf((long) getpid());
-  if (!_build_mkdirs(work)) _error(%"cannot create $work");
+    if (name.startswith(".install.")) Path.remove_tree(%"$packages/$name");
+  Path work = %"$packages/.install.%ld".printf((long) getpid());
+  work.make_dirs();
   return work;
 }
 
@@ -259,28 +233,23 @@ static String _install(
   }
   else if (sha256 && !Path.is_dir(source)) _verify(source, sha256);
   String package = Path.is_dir(source) ? source : _unpack(source, work);
-  String name = package.split("/").last();
+  String name = Path.basename(package);
   if (!name.is_identifier()) _error(%"'$name' is not a package name");
   String staged = %"$work/$name";
-  _copy_tree(package, staged);
-  if (!access(%"$staged/BUNDLE.json", F_OK))
+  try Path.copy_tree(package, staged);
+  catch %(io-fail *detail): x2c_host_error(detail);
+  if (Path.exists(%"$staged/BUNDLE.json"))
     _check_bundle(request, staged, name);
   else {
     _build_source(staged, name, spec);
-    String origin = url ? url : spec, digest = sha256 ? sha256 : "";
-    String label = version ? version : "";
-    _write_text(%"$staged/SOURCE.json", %"{
-  \"package\": \"$name\",
-  \"version\": \"$label\",
-  \"source\": \"$origin\",
-  \"sha256\": \"$digest\",
-  \"x2c_version\": \"${cli_version()}\"
-}
-");
+    Map record = {
+      "package": name, "version": version, "source": url ? url : spec,
+      "sha256": sha256, "x2c_version": cli_version()
+    };
+    Path.write_text(%"$staged/SOURCE.json", %"${Var.pretty_json(record)}\n");
   }
   _publish(staged, packages, name);
-  if (!request.quiet)
-    printf("x2c: installed %s/%s\n", packages.str(), name.str());
+  if (!request.quiet) printf("x2c: installed %s/%s\n", packages, name);
   return name;
 }
 
@@ -292,17 +261,15 @@ static String _install(
 */
 int install_command(CliRequest request) {
   String spec = request.inputs.car();
-  String packages = _locked_packages(request.quiet);
-  String work = _work_directory(packages);
-  defer _build_remove_tree(work);
+  String packages = _locked_packages("install", request.quiet);
+  Path work = _work_directory(packages);
+  defer work.remove_tree();
   String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
-  int remote = spec.startswith("http://") || spec.startswith("https://") ||
-               spec.startswith("file://");
-  if (remote) {
+  if (_remote(spec)) {
     if (!sha256) _error("a URL needs --sha256 <hex>");
     url = spec;
   }
-  else if (!access(spec, F_OK)) source = spec;
+  else if (Path.exists(spec)) source = spec;
   else if (spec.is_identifier()) {
     List row = _index_row(request, spec, work);
     version = row.nth_cdr(1).car();
@@ -316,22 +283,20 @@ int install_command(CliRequest request) {
 }
 
 /** Returns the version an installed package records, or NULL when no package
-    of that name is installed. A package installed without a recorded version
-    returns the empty string. Reaches no network.
+    of that name is installed or it records no version. Reaches no network.
 */
 String install_version(String name) =>
-  _installed_version(%"${_home_packages()}/$name");
+  _installed_version(%"${_home_packages("install")}/$name");
 
 /** Returns the index row for `name`, installing it under the x2c home first
-    unless an installed package already records `version`. The row is
-    `name version kind platform url sha256`, the same shape the package index
-    and a project lockfile hold. An already satisfied dependency reaches no
-    network. Failures exit with status 2.
+    unless an installed package already records `version`. The row has the
+    `install_rows` shape. An already satisfied dependency reaches no network.
+    Failures exit with status 2.
 */
 List install_require(CliRequest request, String name, String version) {
-  String packages = _locked_packages(request.quiet);
-  String work = _work_directory(packages);
-  defer _build_remove_tree(work);
+  String packages = _locked_packages("install", request.quiet);
+  Path work = _work_directory(packages);
+  defer work.remove_tree();
   List row = _index_row(request, name, work);
   String resolved = row.nth_cdr(1).car();
   if (resolved != version)
@@ -348,32 +313,27 @@ List install_require(CliRequest request, String name, String version) {
 */
 int remove_command(CliRequest request) {
   String name = request.inputs.car();
-  String packages = _locked_packages(request.quiet);
-  String target = %"$packages/$name";
-  if (!name.is_identifier() || access(target, F_OK))
-    _error(%"no installed package '$name'");
-  if (!_installed(target))
-    _error(%"$target is not an installed package; remove it by hand");
-  if (!_build_remove_tree(target)) _error(%"cannot remove $target");
-  if (!request.quiet) printf("x2c: removed %s\n", target.str());
+  String target = %"${_home_packages("remove")}/$name";
+  if (!name.is_identifier() || !Path.exists(target))
+    x2c_driver_error(%"remove: no installed package '$name'");
+  if (!_installed_kind(target))
+    x2c_driver_error(
+      %"remove: $target is not an installed package; remove it by hand");
+  _locked_packages("remove", request.quiet);
+  try Path.remove_tree(target);
+  catch %(io-fail *detail): x2c_host_error(detail);
+  if (!request.quiet) printf("x2c: removed %s\n", target);
   return 0;
 }
 
 /** Lists installed packages as `name version kind` lines and returns 0. */
 int list_command(CliRequest request) {
-  String packages = _home_packages();
-  foreach (String name, _entries(packages)) {
-    String package = %"$packages/$name";
-    if (!_installed(package)) continue;
-    String bundle = %"$package/BUNDLE.json", kind = "bundle";
-    if (access(bundle, F_OK)) {
-      bundle = %"$package/SOURCE.json";
-      kind = "source";
-    }
-    String text = _read_text(bundle);
-    String version = _json_field(
-      text, kind == "bundle" ? "dependency_version" : "version");
-    printf("%s %s %s\n", name.str(), version ? version.str() : "-", kind);
+  String packages = _home_packages("list");
+  foreach (String name, Path.is_dir(packages) ? _entries(packages) : NULL) {
+    String package = %"$packages/$name", kind = _installed_kind(package);
+    if (!kind) continue;
+    String version = _installed_version(package);
+    printf("%s %s %s\n", name, version ? version : "-", kind);
   }
   return 0;
 }

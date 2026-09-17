@@ -14,7 +14,8 @@ Package installation into the x2c home.
 | --- | --- |
 | [`install_command`](#install_command) | Installs the package named by the request's one operand and returns 0. |
 | [`install_require`](#install_require) | Returns the index row for `name`, installing it under the x2c home first unless an installed package already records `version`. |
-| [`install_version`](#install_version) | Returns the version an installed package records, or NULL when no package of that name is installed. |
+| [`install_rows`](#install_rows) | Returns the package rows of `text`: its lines holding the six fields `name version kind platform url sha256`, where `kind` is `source` or `bundle` and a source row's platform is `-`. |
+| [`install_version`](#install_version) | Returns the version an installed package records, or NULL when no package of that name is installed or it records no version. |
 | [`list_command`](#list_command) | Lists installed packages as `name version kind` lines and returns 0. |
 | [`remove_command`](#remove_command) | Removes the installed package named by the request's one operand. |
 
@@ -30,29 +31,39 @@ The operand is a local directory, a local `.tar.gz`, a URL with
 verified against this compiler's version unless `--force`; a pure-x2c
 source package is built by this compiler. Failures exit with status 2.
 
-Source: `src/install.x:293`
+Source: `src/install.x:262`
 
 #### install_require
 
 `List install_require(CliRequest request, String name, String version)`
 
 Returns the index row for `name`, installing it under the x2c home first
-unless an installed package already records `version`. The row is
-`name version kind platform url sha256`, the same shape the package index
-and a project lockfile hold. An already satisfied dependency reaches no
-network. Failures exit with status 2.
+unless an installed package already records `version`. The row has the
+`install_rows` shape. An already satisfied dependency reaches no network.
+Failures exit with status 2.
 
-Source: `src/install.x:331`
+Source: `src/install.x:296`
+
+#### install_rows
+
+`List install_rows(String text)`
+
+Returns the package rows of `text`: its lines holding the six fields
+`name version kind platform url sha256`, where `kind` is `source` or
+`bundle` and a source row's platform is `-`. Blank lines, `#` comments,
+and lines with another field count are skipped. The package index and a
+project lockfile share this format.
+
+Source: `src/install.x:91`
 
 #### install_version
 
 `String install_version(String name)`
 
 Returns the version an installed package records, or NULL when no package
-of that name is installed. A package installed without a recorded version
-returns the empty string. Reaches no network.
+of that name is installed or it records no version. Reaches no network.
 
-Source: `src/install.x:322`
+Source: `src/install.x:288`
 
 #### list_command
 
@@ -60,7 +71,7 @@ Source: `src/install.x:322`
 
 Lists installed packages as `name version kind` lines and returns 0.
 
-Source: `src/install.x:363`
+Source: `src/install.x:330`
 
 #### remove_command
 
@@ -69,7 +80,7 @@ Source: `src/install.x:363`
 Removes the installed package named by the request's one operand.
 A directory without an install marker is left alone. Returns 0.
 
-Source: `src/install.x:349`
+Source: `src/install.x:314`
 
 ## Design notes
 

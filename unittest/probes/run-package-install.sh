@@ -22,11 +22,32 @@ cp "$X2C" "$BUILD/home/bin/x2c"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 
+# A failed removal names its own command and takes no lock.
+set +e
+"$x2c" remove nosuch 2>"$BUILD/remove-nosuch.stderr"
+[[ $? == 2 ]] || fail "removing an absent package succeeded"
+set -e
+grep -q "^x2c: error: remove: no installed package 'nosuch'" \
+  "$BUILD/remove-nosuch.stderr" || fail "remove diagnostic"
+[[ ! -e "$BUILD/home/packages/.lock" ]] || fail "failed removal took the lock"
+
 # A source package from a directory, then through file:// with a digest.
 cp -R "$ROOT/examples/packages/greet" "$BUILD/src/greet"
 rm -rf "$BUILD/src/greet/builds"
 (cd "$BUILD/src" && tar -czf greet.tar.gz greet)
 digest=$(shasum -a 256 "$BUILD/src/greet.tar.gz" | cut -d' ' -f1)
+
+# A host tool that exists but cannot run is a diagnostic, not an abort.
+mkdir -p "$BUILD/broken-tools"
+: >"$BUILD/broken-tools/tar"
+set +e
+PATH="$BUILD/broken-tools" "$x2c" install -q "$BUILD/src/greet.tar.gz" \
+  2>"$BUILD/broken-tar.stderr"
+broken_status=$?
+set -e
+[[ $broken_status == 2 ]] || fail "unrunnable tar exited $broken_status"
+grep -q "extract failed (tar)" "$BUILD/broken-tar.stderr" ||
+  fail "unrunnable tar diagnostic"
 "$x2c" install -q "$BUILD/src/greet"
 [[ "$("$x2c" list)" == "greet - source" ]] || fail "list after directory"
 [[ -f "$BUILD/home/packages/greet/builds/libgreet.a" ]] || fail "no archive"

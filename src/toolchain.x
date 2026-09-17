@@ -44,7 +44,6 @@ typedef struct ToolRun {
 
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,34 +52,23 @@ typedef struct ToolRun {
 #include "report.x"
 #include "utils.x"
 
-static String _tool_selection(
-  String explicit, const char *preferred_env, const char *fallback_env,
-  String installed, const char *fallback) {
+/* The explicit tool, `X2C_<NAME>`, `<NAME>`, the installed toolchain
+   record's `<NAME>=` line, then `fallback`. */
+static String _tool(String explicit, String name, String fallback) {
   if (explicit) return explicit;
-  const char *value = getenv(preferred_env);
-  if (value && *value) return String.new(value);
-  value = getenv(fallback_env);
-  if (value && *value) return String.new(value);
-  if (installed) return installed;
-  return fallback;
-}
-
-static String _installed_tool(const char *name) {
-  String home = x2c_get_root();
-  if (!home || home == ".") return NULL;
-  String path = %"$home/lib/x2c/toolchain", File input = fopen(path, "r");
-  if (!input) return NULL;
-  char line[PATH_MAX], String result = NULL, int name_length = strlen(name);
-  while (fgets(line, sizeof(line), input)) {
-    if (strncmp(line, name, name_length) != 0 || line[name_length] != '=')
-      continue;
-    char *value = line + name_length + 1;
-    value[strcspn(value, "\r\n")] = 0;
-    if (*value) result = String.new(value);
-    break;
+  String home = x2c_home(), record = NULL;
+  String value = Env.get(%"X2C_$name");
+  if (!value) value = Env.get(name);
+  if (!value && home) {
+    try record = Path.read_text(%"$home/lib/x2c/toolchain");
+    catch %(not-found *): {}
+    foreach (String line, record.split_lines(0))
+      if (line.startswith(%"$name=")) {
+        value = line.remove_prefix(%"$name=");
+        break;
+      }
   }
-  input.close();
-  return result;
+  return value ? value : fallback;
 }
 
 /* A staged compiler links its stage-local runtime. A compiler with a home,
@@ -88,26 +76,16 @@ static String _installed_tool(const char *name) {
    checkout's bootstrap fallback. Without a home, the layout is read from
    the executable's own prefix. No compiler links an unrelated runtime.
 */
-static void _toolchain_layout(String *include_dir, String *runtime_lib) {
-  String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage_dir = executable ? Path.dirname(executable) : NULL;
-  if (stage_dir && Path.dirname(stage_dir) == %"$root/builds") {
-    *include_dir = %"$root/include/x2c";
-    *runtime_lib = %"$stage_dir/libx2c.a";
-    return;
-  }
-  if (root && root != ".") {
-    *include_dir = %"$root/include/x2c";
-    String installed = %"$root/lib/libx2c.a";
-    *runtime_lib = !access(installed, R_OK) ?
-                       installed :
-                       %"$root/bootstrap/lib/libx2c.a";
-    return;
-  }
-  String bin_dir = executable ? Path.dirname(executable) : ".";
-  String prefix = Path.dirname(bin_dir);
-  *include_dir = %"$prefix/include/x2c";
-  *runtime_lib = %"$prefix/lib/libx2c.a";
+static void Toolchain._layout(Toolchain t) {
+  String home = x2c_home(), stage = x2c_stage_dir();
+  String executable = x2c_get_executable(), prefix = home;
+  if (!prefix)
+    prefix = Path.dirname(executable ? Path.dirname(executable) : ".");
+  t.include_dir = %"$prefix/include/x2c";
+  t.runtime_lib = %"$prefix/lib/libx2c.a";
+  if (stage) t.runtime_lib = %"$stage/libx2c.a";
+  else if (home && !Path.is_file(t.runtime_lib))
+    t.runtime_lib = %"$home/bootstrap/lib/libx2c.a";
 }
 
 /** Creates a `Scope`-owned host toolchain and resolves its native layout.
@@ -121,37 +99,22 @@ static void _toolchain_layout(String *include_dir, String *runtime_lib) {
 Toolchain toolchain_new(
   String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose,
   int dry_run) {
-  Toolchain toolchain = Scope.calloc(1, sizeof(struct Toolchain));
-  toolchain.cc = _tool_selection(
-    cc, "X2C_CC", "CC", _installed_tool("CC"), "cc");
-  toolchain.ar = _tool_selection(
-    ar, "X2C_AR", "AR", _installed_tool("AR"), "ar");
-  toolchain.cpp_args = cpp_args;
-  toolchain.cc_args = cc_args;
-  toolchain.ld_args = ld_args;
-  toolchain.verbose = verbose;
-  toolchain.dry_run = dry_run;
-  _toolchain_layout(&toolchain.include_dir, &toolchain.runtime_lib);
-  return toolchain;
+  Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
+  t.cc = _tool(cc, "CC", "cc");
+  t.ar = _tool(ar, "AR", "ar");
+  t.cpp_args = cpp_args;
+  t.cc_args = cc_args;
+  t.ld_args = ld_args;
+  t.verbose = verbose;
+  t.dry_run = dry_run;
+  t._layout();
+  return t;
 }
 
-static void _append_list(Array output, List values) {
-  foreach (Var value, values) output.push(value);
-}
-
-static Array _compile_arguments(Toolchain toolchain, List gen_dirs) {
-  Array arguments = [];
-  arguments.push(toolchain.cc);
-  arguments.push("-fsigned-char");
-  foreach (String directory, gen_dirs) {
-    arguments.push("-iquote");
-    arguments.push(directory);
-  }
-  arguments.push("-iquote");
-  arguments.push(toolchain.include_dir);
-  _append_list(arguments, toolchain.cc_args);
-  return arguments;
-}
+static List _compile_arguments(Toolchain t, List gen_dirs) => %(
+  ${t.cc} "-fsigned-char"
+  @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}
+  "-iquote" ${t.include_dir} @{t.cc_args});
 
 /** Builds but does not start one C compilation action.
     Generated include directories precede the x2c include directory and
@@ -161,22 +124,12 @@ static Array _compile_arguments(Toolchain toolchain, List gen_dirs) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.compile_action(
-  Toolchain toolchain, String source, String object, String depfile,
-  List gen_dirs) {
-  Array arguments = _compile_arguments(toolchain, gen_dirs);
-  arguments.push("-MMD");
-  arguments.push("-MP");
-  arguments.push("-MF");
-  arguments.push(depfile);
-  arguments.push("-MT");
-  arguments.push(object);
-  arguments.push("-c");
-  arguments.push(source);
-  arguments.push("-o");
-  arguments.push(object);
-  return tool_action_new(
-    <compile>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
-}
+  Toolchain t, String source, String object, String depfile, List gen_dirs) =>
+  tool_action_new(
+    <compile>,
+    %(@{_compile_arguments(t, gen_dirs)} "-MMD" "-MP" "-MF" $depfile
+      "-MT" $object "-c" $source "-o" $object),
+    t.verbose, t.dry_run);
 
 /** Captures the native preprocessor view used to identify reusable objects.
     Uses the compilation's native flags and include order, retaining line
@@ -185,15 +138,11 @@ ToolAction Toolchain.compile_action(
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.preprocess_action(
-  Toolchain toolchain, String source, String output, List gen_dirs) {
-  Array arguments = _compile_arguments(toolchain, gen_dirs);
-  arguments.push("-E");
-  arguments.push(source);
-  arguments.push("-o");
-  arguments.push(output);
-  return tool_action_new(
-    <preprocess>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
-}
+  Toolchain t, String source, String output, List gen_dirs) =>
+  tool_action_new(
+    <preprocess>,
+    %(@{_compile_arguments(t, gen_dirs)} "-E" $source "-o" $output),
+    t.verbose, t.dry_run);
 
 /** Builds but does not start an `ar rcs` action in object-list order.
     The action does not remove an existing archive, so callers requiring exact
@@ -202,15 +151,9 @@ ToolAction Toolchain.preprocess_action(
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.archive_action(
-  Toolchain toolchain, String output, List objects) {
-  Array arguments = [];
-  arguments.push(toolchain.ar);
-  arguments.push("rcs");
-  arguments.push(output);
-  _append_list(arguments, objects);
-  return tool_action_new(
-    <archive>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
-}
+  Toolchain t, String output, List objects) =>
+  tool_action_new(
+    <archive>, %(${t.ar} "rcs" $output @objects), t.verbose, t.dry_run);
 
 /** Builds but does not start a host-compiler link action.
     Input order is preserved; configured linker arguments, the matching x2c
@@ -218,19 +161,11 @@ ToolAction Toolchain.archive_action(
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
-ToolAction Toolchain.link_action(
-  Toolchain toolchain, String output, List inputs) {
-  Array arguments = [];
-  arguments.push(toolchain.cc);
-  _append_list(arguments, inputs);
-  _append_list(arguments, toolchain.ld_args);
-  arguments.push(toolchain.runtime_lib);
-  arguments.push("-lm");
-  arguments.push("-o");
-  arguments.push(output);
-  return tool_action_new(
-    <link>, arguments.list_free(), toolchain.verbose, toolchain.dry_run);
-}
+ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
+  tool_action_new(
+    <link>,
+    %(${t.cc} @inputs @{t.ld_args} ${t.runtime_lib} "-lm" "-o" $output),
+    t.verbose, t.dry_run);
 
 /** Creates a `Scope`-owned action that reports nonzero status by default.
     The action retains `arguments` without copying them.
@@ -302,14 +237,18 @@ static Job _start_tool(Job command, String program, String *failure) {
   return job;
 }
 
-static int _run_captured(List arguments, String *output, String *errors) {
+/** Runs the host tool `arguments` without a shell, captures both streams,
+    and returns its shell-style status. A tool that cannot start returns 127
+    and leaves the reason in `errors`.
+*/
+int tool_capture(List arguments, String *output, String *errors) {
   Job command =
     arguments.job().options({stdout: <capture>, stderr: <capture>});
-  Job job = _start_tool(command, arguments.car(), errors);
-  if (!job) return 127;
-  int status = job.status();
-  *output = job.output_text;
-  *errors = job.errors_text;
+  Job j = _start_tool(command, arguments.car(), errors);
+  if (!j) return 127;
+  int status = j.status();
+  *output = j.output_text;
+  *errors = j.errors_text;
   return status;
 }
 
@@ -322,8 +261,8 @@ List Toolchain.search_directories(Toolchain toolchain) {
   Array directories = [];
   List flags = toolchain.cc_args;
   String output = NULL, errors = NULL;
-  if (!_run_captured(%(${toolchain.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
-                     &output, &errors)) {
+  if (!tool_capture(%(${toolchain.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
+                    &output, &errors)) {
     int listing = 0;
     foreach (String line, errors.split_lines(0)) {
       if (line.startswith("End of search list")) break;
@@ -340,8 +279,8 @@ List Toolchain.search_directories(Toolchain toolchain) {
         directories.push(Path.dirname(directory).join("lib"));
     }
   }
-  if (!_run_captured(%(${toolchain.cc} @flags "-print-search-dirs"),
-                     &output, &errors))
+  if (!tool_capture(%(${toolchain.cc} @flags "-print-search-dirs"),
+                    &output, &errors))
     foreach (String line, output.split_lines(0)) {
       if (!line.startswith("libraries: ")) continue;
       String list = line.remove_prefix("libraries: ").remove_prefix("=");
@@ -411,13 +350,8 @@ int ToolRun.wait(ToolRun execution) {
 */
 int ToolAction.run(ToolAction action) => action.start().wait();
 
-static void _append_includes(Array arguments, List dirs) {
-  foreach (Var value, dirs) {
-    if (value is not <string>) continue;
-    arguments.push("-I");
-    arguments.push(value);
-  }
-}
+static List _includes(List directories) =>
+  directories.map(%!(directory) => %("-I" $directory)).flatten();
 
 /** Runs the configured C preprocessor without a shell.
     `fname`, `output`, and `errors` are required; output pointers are cleared
@@ -434,70 +368,41 @@ static void _append_includes(Array arguments, List dirs) {
     constructing arguments or reading captured text.
 */
 int Toolchain.preprocess(
-  Toolchain toolchain, const char *fname, List include_dirs,
-  const char *imacros, String *output, String *errors, String *dependencies) {
+  Toolchain t, const char *fname, List include_dirs, const char *imacros,
+  String *output, String *errors, String *dependencies) {
   if (output) *output = NULL;
   if (errors) *errors = NULL;
   if (dependencies) *dependencies = NULL;
   if (!fname || !output || !errors) return -1;
-  if (!toolchain.keep_system_includes) {
+  String source = fname, macros = imacros;
+  if (!t.keep_system_includes) {
     String probe_output = NULL, probe_errors = NULL;
-    toolchain.keep_system_includes = _run_captured(
-      %(${toolchain.cc} "-E" "-x" "c" "-fkeep-system-includes" "/dev/null"),
+    t.keep_system_includes = tool_capture(
+      %(${t.cc} "-E" "-x" "c" "-fkeep-system-includes" "/dev/null"),
       &probe_output, &probe_errors) == 0 ? 1 : -1;
   }
-  char *base[] = {
-    "-E", "-P", "-x", "c",
-    "-D__asm(x)=", "-D__asm__(x)=", "-D__attribute__(x)=",
-    "-D__format__(x)=", "-D__printf__(x)=", "-D__inline__=",
-    "-D__inline=", "-D_Nullable=", "-D_Nonnull=", "-DX2CCPP",
-    "-D__restrict=", "-D__extension__=", "-Wno-unicode",
-    "-Wno-invalid-pp-token", "-Wno-pragma-once-outside-header"
-  };
-  List repo_dirs = x2c_cpp_include_dirs();
-  Array arguments = [], char dependency_path[] = "/tmp/x2c-cpp-deps-XXXXXX";
-  if (dependencies) {
-    int fd = mkstemp(dependency_path);
-    if (fd < 0) {
-      *errors = "unable to create preprocessor dependency file";
-      return -1;
-    }
-    close(fd);
-  }
-  arguments.push(toolchain.cc);
-  for (int i = 0; i < sizeof(base) / sizeof(base[0]); i++)
-    arguments.push(base[i]);
-  if (toolchain.keep_system_includes > 0)
-    arguments.push("-fkeep-system-includes");
-  arguments.push("-I");
-  arguments.push(".");
-  _append_includes(arguments, repo_dirs);
-  _append_includes(arguments, include_dirs);
-  foreach (Var argument, toolchain.cpp_args) arguments.push(argument);
-  if (imacros) {
-    arguments.push("-imacros");
-    arguments.push(imacros);
-  }
-  if (dependencies) {
-    arguments.push("-MMD");
-    arguments.push("-MF");
-    arguments.push(dependency_path);
-    arguments.push("-MT");
-    arguments.push("x2c-dependencies");
-  }
-  arguments.push(fname);
-  List argument_list = arguments.list_free();
-  if (toolchain.verbose) _print_action(<preprocess>, argument_list);
-  int result = _run_captured(argument_list, output, errors);
-  /* The dependency file is consumed and its unlink attempted even after host
-     failure. The returned status tells the caller whether stdout is usable. */
-  if (dependencies) {
-    File dep = fopen(dependency_path, "r");
-    if (dep) {
-      try *dependencies = dep.string_close();
-      catch %(io-fail *): *dependencies = NULL;
-    }
-    unlink(dependency_path);
+  Path scratch = dependencies ? Path.temp_dir() : NULL;
+  String depfile = %"$scratch/cpp.d";
+  List arguments = %(
+    ${t.cc} "-E" "-P" "-x" "c"
+    "-D__asm(x)=" "-D__asm__(x)=" "-D__attribute__(x)="
+    "-D__format__(x)=" "-D__printf__(x)=" "-D__inline__="
+    "-D__inline=" "-D_Nullable=" "-D_Nonnull=" "-DX2CCPP"
+    "-D__restrict=" "-D__extension__=" "-Wno-unicode"
+    "-Wno-invalid-pp-token" "-Wno-pragma-once-outside-header"
+    @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
+    "-I" "." @{_includes(x2c_cpp_include_dirs())} @{_includes(include_dirs)}
+    @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
+    @{scratch ? %("-MMD" "-MF" $depfile "-MT" "x2c-dependencies") : NULL}
+    $source);
+  if (t.verbose) _print_action(<preprocess>, arguments);
+  int result = tool_capture(arguments, output, errors);
+  /* The dependency file is consumed and removed even after host failure. The
+     returned status tells the caller whether stdout is usable. */
+  if (scratch) {
+    try *dependencies = Path.read_text(depfile);
+    catch %(not-found *): {}
+    scratch.remove_tree();
   }
   return result;
 }

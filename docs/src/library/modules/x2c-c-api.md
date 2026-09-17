@@ -38,6 +38,7 @@ prefix.
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
 | `x2c_filename_hash` | `src/utils.x` | `String x2c_filename_hash(String filename)` |
+| `x2c_find_program` | `src/utils.x` | `String x2c_find_program(String name)` |
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
 | [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func.x` | `List x2c_func_reference_type( Func function, unsigned argc, unsigned index)` |
 | [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func.x` | `FuncArg x2c_func_unrepresentable_argument( Func fn, unsigned i, List source)` |
@@ -46,7 +47,9 @@ prefix.
 | `x2c_get_root` | `src/utils.x` | `String x2c_get_root(void)` |
 | [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)` |
 | [`x2c_hash_word`](common.md#x2c_hash_word) | `lib/common.x` | `inline unsigned x2c_hash_word(unsigned long word)` |
+| `x2c_home` | `src/utils.x` | `String x2c_home(void)` |
 | `x2c_home_packages` | `src/utils.x` | `String x2c_home_packages(void)` |
+| `x2c_host_error` | `src/utils.x` | `void x2c_host_error(List detail)` |
 | [`x2c_initialize`](common.md#x2c_initialize) | `lib/common.x` | `void x2c_initialize(void)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
@@ -68,7 +71,7 @@ prefix.
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
-| `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(String root, String path)` |
+| `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(List roots, String path)` |
 | `x2c_package_source` | `src/utils.x` | `int x2c_package_source(String directory, String path)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
@@ -77,6 +80,7 @@ prefix.
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
 | `x2c_source_file` | `src/utils.x` | `int x2c_source_file(String path)` |
+| `x2c_stage_dir` | `src/utils.x` | `String x2c_stage_dir(void)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var.x` | `int x2c_var_descriptor_index(Var value)` |
@@ -96,4 +100,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 84 functions.
+Total: 88 functions.

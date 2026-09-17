@@ -27,14 +27,9 @@ typedef struct ProjectBuild {
 #pragma private
 
 #include <ctype.h>
-#include <dirent.h>
-#include <errno.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include "buffer.x"
 #include "install.x"
@@ -69,28 +64,15 @@ typedef struct Project {
   ProjectBuild tail;
 } *Project;
 
-static void _error(Project project, int line, const char *message) {
-  if (project && project.path && line)
-    fprintf(
-      stderr, "x2c: error: manifest '%s':%d: %s\n",
-      project.path, line, message);
-  else if (project && project.path)
-    fprintf(stderr, "x2c: error: manifest '%s': %s\n", project.path, message);
-  else fprintf(stderr, "x2c: error: %s\n", message);
+static void _error(Project p, int line, String message) {
+  String at = line ? ":%d".printf(line) : NULL;
+  if (p && p.path) message = %"manifest '${p.path}'$at: $message";
+  fprintf(stderr, "x2c: error: %s\n", message);
   exit(2);
 }
 
-static void _error_name(
-  Project project, int line, const char *message, String name) {
-  if (line)
-    fprintf(
-      stderr, "x2c: error: manifest '%s':%d: %s '%s'\n",
-      project.path, line, message, name);
-  else
-    fprintf(
-      stderr, "x2c: error: manifest '%s': %s '%s'\n",
-      project.path, message, name);
-  exit(2);
+static void _error_name(Project p, int line, String message, String name) {
+  _error(p, line, %"$message '$name'");
 }
 
 static char *_trim(char *text) {
@@ -341,22 +323,18 @@ static void _parse_manifest(Project p) {
         profile = NULL;
         continue;
       }
-      List parts = name.split("."), int count = parts.len();
-      String first = parts.car();
-      String second = parts.cdr() ? parts.cdr().car() : NULL;
-      String third = parts.cdr() && parts.cdr().cdr() ?
-                     parts.cdr().cdr().car() : NULL;
-      String fourth =
-        parts.cdr() && parts.cdr().cdr() &&
-        parts.cdr().cdr().cdr() ?
-        parts.cdr().cdr().cdr().car() : NULL;
-      if ((count != 2 && count != 4) ||
-          first != "target" ||
-          !_name_ok(second) ||
-          (count == 4 && (third != "profile" || !_name_ok(fourth))))
+      // `[target.<name>]` or `[target.<name>.profile.<profile>]`
+      String second = name.remove_prefix("target."), fourth = NULL;
+      int split = second.find(".profile.");
+      if (split >= 0) {
+        fourth = second[split + 9:];
+        second = second[:split];
+      }
+      if (!name.startswith("target.") || !_name_ok(second) ||
+          (split >= 0 && !_name_ok(fourth)))
         _error(p, line_number, "unknown manifest section");
       target = _target(p, second, 1);
-      if (count == 2) {
+      if (split < 0) {
         if (target.declared)
           _error_name(p, line_number, "duplicate target section", second);
         target.declared = 1;
@@ -397,71 +375,33 @@ static void _parse_manifest(Project p) {
   if (!p.targets) _error(p, 0, "manifest defines no targets");
 }
 
-static String _absolute(Project project, String path) {
-  if (path && path[0] == '/') return path;
-  return %"${project.root}/$path";
-}
-
 static int _has_glob(String pattern) => pattern && strpbrk(pattern, "*?[");
 
-static void _walk_matches(
-  Project project, String directory, String relative, String pattern,
-  Array matches) {
-  DIR *input = opendir(directory);
-  if (!input) return;
-  struct dirent *entry;
-  while ((entry = readdir(input))) {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
-    String name = String.new(entry->d_name);
-    String child_relative = relative ? %"$relative/$name" : name;
-    String child = %"${project.root}/$child_relative", struct stat info;
-    if (lstat(child, &info)) continue;
-    if (S_ISDIR(info.st_mode)) {
-      if (project.build_root && child == project.build_root) continue;
-      _walk_matches(project, child, child_relative, pattern, matches);
-      continue;
-    }
-    if (S_ISREG(info.st_mode) &&
-        Path.glob_match(pattern, child_relative) &&
-        !matches.contains(child))
-      matches.push(child);
-  }
-  closedir(input);
-}
-
-static Array _expand_pattern(
-  Project project, String pattern, const char *owner) {
+/* A pattern matches the files, or the links to files, that its glob names
+   below the project root, outside the build root, and the overlay files
+   there too. A pattern without a wildcard names one file. */
+static Array _expand_pattern(Project p, String pattern, String owner) {
   Array matches = [];
   if (!_has_glob(pattern)) {
-    String path = _absolute(project, pattern), struct stat info;
-    int present = project.sources ? project.sources.exists(path) :
-      !stat(path, &info) && S_ISREG(info.st_mode);
-    if (present) matches.push(path);
+    String path = Path.join(p.root, pattern);
+    if (p.sources.exists(path)) matches.push(path);
   }
   else {
-    _walk_matches(project, project.root, NULL, pattern, matches);
-    if (project.sources) {
-      String prefix = project.root == "/" ? "/" : %"${project.root}/";
-      foreach (String path, project.sources.overlays.keys()) {
-        if (!path.startswith(prefix)) continue;
-        if (project.build_root &&
-            path.startswith(%"${project.build_root}/")) continue;
-        String relative = path[prefix.len():];
-        if (Path.glob_match(pattern, relative) &&
-            !matches.contains(path))
-          matches.push(path);
-      }
-    }
+    String root = p.root.replace("\\", "\\\\").replace("*", "\\*")
+      .replace("?", "\\?").replace("[", "\\[");
+    String prefix = p.root == "/" ? "/" : %"${p.root}/";
+    List found = Path.glob(Path.join(root, pattern));
+    if (p.sources) found = found.append(p.sources.overlays.keys());
+    foreach (String path, found)
+      if (path.startswith(prefix) &&
+          Path.glob_match(pattern, path.remove_prefix(prefix)) &&
+          !(p.build_root && path.startswith(%"${p.build_root}/")) &&
+          p.sources.exists(path) && !matches.contains(path))
+        matches.push(path);
   }
-  if (!matches.len()) {
-    fprintf(
-      stderr, "x2c: error: manifest '%s': unmatched %s pattern '%s'\n",
-      project.path, owner, pattern);
-    exit(2);
-  }
-  matches.sort();
-  return matches;
+  if (!matches.len())
+    _error_name(p, 0, %"unmatched $owner pattern", pattern);
+  return matches.sort();
 }
 
 static Array _target_sources(
@@ -525,33 +465,24 @@ static void _validate_target(Project project, ProjectTarget target) {
   target.visited = 1;
 }
 
-static void _append_values(Array output, List values) {
-  foreach (Var value, values) output.push(value);
-}
-
-static void _append_c_flags(Project project, Array output, List values) {
-  foreach (String value, values) {
+static List _c_flags(Project p, List values) {
+  foreach (String value, values)
     if (cli_dependency_pass_through(value))
-      _error_name(project, 0, "C dependency option is driver-owned", value);
-    output.push(value);
-  }
+      _error_name(p, 0, "C dependency option is driver-owned", value);
+  return values;
 }
 
-static void _append_defines(Array output, List values) {
-  foreach (String value, values) output.push(%"-D$value");
-}
+static List _defines(List values) => values.map(%!(value) => %"-D$value");
 
-static void _append_paths(
-  Project project, Array output, List values, String option) {
-  foreach (String value, values) {
-    output.push(option);
-    output.push(_absolute(project, value));
-  }
-}
+static List _paths(String root, List values) =>
+  values.map(%!(String value) => Path.join(root, value));
+
+static List _path_options(String root, List values, String option) =>
+  _paths(root, values).map(%!(path) => %($option $path)).flatten();
 
 static String _target_output(
   Project project, ProjectTarget target, String build_root, Symbol kind) {
-  if (target.output) return _absolute(project, target.output);
+  if (target.output) return Path.join(project.root, target.output);
   if (kind == <static-lib>) return %"$build_root/lib${target.name}.a";
   return %"$build_root/${target.name}";
 }
@@ -566,16 +497,13 @@ static CliRequest _target_request(
   ProjectTarget selected, String build_root) {
   CliRequest request = Scope.malloc(sizeof(struct CliRequest));
   *request = *command;
-  request.command = target == selected ? command.command : <build>;
-  request.run_args = target == selected ? command.run_args : NULL;
+  int chosen = target == selected;
+  request.command = chosen ? command.command : <build>;
+  request.run_args = chosen ? command.run_args : NULL;
   request.compile_only = 0;
-  request.kind =
-    target == selected && command.kind_explicit ?
-    command.kind : target.kind;
-  request.output =
-    target == selected && command.output ?
-    command.output :
-    _target_output(p, target, build_root, request.kind);
+  request.kind = chosen && command.kind_explicit ? command.kind : target.kind;
+  request.output = chosen && command.output ?
+    command.output : _target_output(p, target, build_root, request.kind);
   request.build_dir = %"$build_root/.x2c/${target.name}";
   request.save_temps = 0;
   request.temps_dir = NULL;
@@ -595,56 +523,36 @@ static CliRequest _target_request(
     inputs.push(_target_output(p, dependency, build_root, dependency.kind));
   }
   request.inputs = inputs.list_free();
-
-  Array x_paths = [];
-  _append_values(x_paths, command.include_dirs);
-  foreach (String path, target.include_dirs)
-    x_paths.push(_absolute(p, path));
-  request.include_dirs = x_paths.list_free();
-
-  Array package_paths = [];
-  _append_values(package_paths, command.package_dirs);
-  foreach (String path, target.package_dirs)
-    package_paths.push(_absolute(p, path));
-  request.package_dirs = package_paths.list_free();
+  request.include_dirs =
+    %(@{command.include_dirs} @{_paths(p.root, target.include_dirs)});
+  request.package_dirs =
+    %(@{command.package_dirs} @{_paths(p.root, target.package_dirs)});
 
   ProjectProfile profile =
-    target == selected ?
-    _selected_profile(p, target, command.profile) : NULL;
-  Array preprocess = [];
-  _append_defines(preprocess, target.defines);
-  if (profile) _append_defines(preprocess, profile.defines);
-  _append_values(preprocess, command.cpp_args);
-  request.cpp_args = preprocess.list_free();
-
-  Array compile = [];
-  _append_defines(compile, target.defines);
-  _append_c_flags(p, compile, target.c_flags);
+    chosen ? _selected_profile(p, target, command.profile) : NULL;
+  List defines = _defines(target.defines), compile = NULL, link = NULL;
   if (profile) {
-    int has_optimization = 0, has_debug = 0;
-    foreach (String argument, command.cc_args) {
-      if (argument && argument.startswith("-O")) has_optimization = 1;
-      if (argument == "-g") has_debug = 1;
-    }
-    _append_defines(compile, profile.defines);
-    _append_c_flags(p, compile, profile.c_flags);
-    if (profile.optimization && !has_optimization)
-      compile.push(%"-${profile.optimization}");
-    if (profile.seen.contains("debug") && profile.debug &&
-        !has_debug)
-      compile.push("-g");
+    List cc_args = command.cc_args;
+    int optimized = cc_args.any(%!(String flag) => flag.startswith("-O"));
+    int debug = profile.seen.contains("debug") && profile.debug &&
+                !cc_args.contains("-g");
+    defines = defines.append(_defines(profile.defines));
+    compile = %(
+      @{_c_flags(p, profile.c_flags)}
+      @{profile.optimization && !optimized ?
+        %("-${profile.optimization}") : NULL}
+      @{debug ? %("-g") : NULL});
+    link = profile.link_flags;
   }
-  _append_values(compile, command.cc_args);
-  _append_paths(p, compile, target.include_dirs, "-I");
-  request.cc_args = compile.list_free();
-
-  Array link = [];
-  _append_paths(p, link, target.library_dirs, "-L");
-  foreach (String library, target.libraries) link.push(%"-l$library");
-  _append_values(link, target.link_flags);
-  if (profile) _append_values(link, profile.link_flags);
-  _append_values(link, command.ld_args);
-  request.ld_args = link.list_free();
+  request.cpp_args = %(@defines @{command.cpp_args});
+  request.cc_args = %(
+    @{_defines(target.defines)} @{_c_flags(p, target.c_flags)}
+    @{profile ? _defines(profile.defines) : NULL} @compile @{command.cc_args}
+    @{_path_options(p.root, target.include_dirs, "-I")});
+  request.ld_args = %(
+    @{_path_options(p.root, target.library_dirs, "-L")}
+    @{target.libraries.map(%!(library) => %"-l$library")}
+    @{target.link_flags} @link @{command.ld_args});
 
   request.label = target.name;
   request.state_seed =
@@ -681,22 +589,12 @@ static void _plan_target(
   "# x2c lockfile. Written by x2c build; keep it with the manifest.\n" \
   "# name version kind platform url sha256\n"
 
-/* The lockfile's rows, or NULL when it is absent or unreadable. */
+/* The lockfile's rows, or NULL when it is absent. */
 static List _read_lock(String path) {
-  File input = fopen(path, "r");
-  if (!input) return NULL;
   String text = NULL;
-  try text = input.string_close();
-  catch %(io-fail *): return NULL;
-  Array rows = [];
-  foreach (String line, text.split_lines(0)) {
-    if (!line || line.startswith("#")) continue;
-    Array fields = [];
-    foreach (String field, line.split(" "))
-      if (field) fields.push(field);
-    if (fields.len() == 6) rows.push(fields.list_free());
-  }
-  return rows.list_free();
+  try text = Path.read_text(path);
+  catch %(not-found *): return NULL;
+  return install_rows(text);
 }
 
 /* Every dependency is locked at its pinned version and already installed at
@@ -714,20 +612,11 @@ static int _lock_satisfies(Project project, List rows) {
   return 1;
 }
 
-static void _write_lock(Project project, String path, List rows) {
-  File output = fopen(path, "w");
-  if (!output) _error(project, 0, "cannot write x2c.lock");
-  fputs(PROJECT_LOCK_HEADER, output);
-  foreach (List row, rows) {
-    int first = 1;
-    foreach (String field, row) {
-      if (!first) fputc(' ', output);
-      fputs(field, output);
-      first = 0;
-    }
-    fputc('\n', output);
-  }
-  if (fclose(output)) _error(project, 0, "cannot write x2c.lock");
+static void _write_lock(String path, List rows) {
+  String text = PROJECT_LOCK_HEADER;
+  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
+  try file_publish(path, text);
+  catch %(io-fail *detail): x2c_host_error(detail);
 }
 
 /* Installs whatever the manifest pins that the home does not already hold,
@@ -742,28 +631,19 @@ static void _resolve_dependencies(Project project, CliRequest request) {
   for (ProjectDependency entry = project.dependencies; entry;
        entry = entry.next)
     rows.push(install_require(request, entry.name, entry.version));
-  _write_lock(project, path, rows.list_free());
+  _write_lock(path, rows.list_free());
 }
 
 /** Returns the explicit or nearest readable project manifest, or NULL.
     Discovery uses the same request view as project parsing.
 */
-String project_manifest(CliRequest request) {
-  if (request.manifest) return request.manifest;
-  char current[PATH_MAX];
-  if (!getcwd(current, sizeof(current)))
-    _error(NULL, 0, "cannot read current directory");
-  loop {
-    String candidate = %"${String.new(current)}/x2c.toml";
-    if (request.sources ? request.sources.exists(candidate) :
-        !access(candidate, R_OK)) return candidate;
-    if (strcmp(current, "/") == 0) break;
-    char *slash = strrchr(current, '/');
-    if (!slash) break;
-    if (slash == current) current[1] = 0;
-    else *slash = 0;
+String project_manifest(CliRequest c) {
+  if (c.manifest) return c.manifest;
+  for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
+    String candidate = directory.join("x2c.toml");
+    if (c.sources.exists(candidate)) return candidate;
+    if (directory == "/") return NULL;
   }
-  return NULL;
 }
 
 /** Parses a project manifest and returns its selected target's build plan.
@@ -780,19 +660,9 @@ ProjectBuild project_plan(CliRequest request) {
   project.path = project_manifest(request);
   if (!project.path)
     _error(NULL, 0, "no explicit inputs and no x2c.toml found");
-  char resolved[PATH_MAX];
-  if (realpath(project.path, resolved)) project.path = %"$resolved";
-  if (project.sources) {
-    project.path = Path.absolute(project.path);
-    if (!project.sources.read(project.path, &project.text))
-      _error(project, 0, "cannot read manifest");
-  }
-  else {
-    File input = fopen(project.path, "r");
-    if (!input) _error(project, 0, "cannot open manifest");
-    try project.text = input.string_close();
-    catch %(io-fail *): _error(project, 0, "cannot read manifest");
-  }
+  project.path = Path.absolute(project.path);
+  if (!project.sources.read(project.path, &project.text))
+    _error(project, 0, "cannot read manifest");
   project.root = Path.dirname(project.path);
   _parse_manifest(project);
   for (ProjectTarget target = project.targets; target; target = target.next)
@@ -815,15 +685,10 @@ ProjectBuild project_plan(CliRequest request) {
     _error(project, 0, "run requires an executable target");
 
   String build_root = request.build_dir;
-  if (build_root && build_root[0] != '/') {
-    char current[PATH_MAX];
-    if (!getcwd(current, sizeof(current)))
-      _error(project, 0, "cannot read current directory");
-    build_root = %"${String.new(current)}/$build_root";
-  }
-  if (!build_root)
+  if (build_root) build_root = Path.absolute(".").join(build_root);
+  else
     build_root = project.build_dir ?
-                 _absolute(project, project.build_dir) :
+                 Path.join(project.root, project.build_dir) :
                  %"${project.root}/.x2c-build";
   project.build_root = build_root;
   _plan_target(project, selected, request, selected, build_root);

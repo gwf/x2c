@@ -170,20 +170,14 @@ static void _tokenize_input(
    example elsewhere in the package directory is a consumer and reaches the
    package through `import`. */
 static void _configure_package(
-  Compiler compiler, CliRequest request, String filename) {
-  compiler.package_dirs = request.package_roots();
-  String source = compiler.canonical_path(filename);
-  foreach (String directory, compiler.package_dirs) {
-    String root = compiler.canonical_path(directory);
-    String package = x2c_package_directory(root, source);
-    if (!package) continue;
-    String name = package[package.rfind("/") + 1:];
-    if (!name.is_identifier()) continue;
-    if (!x2c_package_source(package, source)) continue;
-    compiler.package = name;
-    compiler.package_roots[name] = package;
-    return;
-  }
+  Compiler c, CliRequest request, String filename) {
+  c.package_dirs = request.package_roots();
+  String source = Path.absolute(filename);
+  String package = x2c_package_directory(c.package_dirs, source);
+  if (!package || !x2c_package_source(package, source)) return;
+  String name = Path.basename(package);
+  c.package = name;
+  c.package_roots[name] = package;
 }
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {

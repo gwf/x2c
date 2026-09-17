@@ -44,6 +44,7 @@ typedef struct CliRequest {
 #include <unistd.h>
 
 #include "buffer.x"
+#include "report.x"
 #include "utils.x"
 
 // cli metadata
@@ -94,21 +95,21 @@ static CliOption cli_options[] = {
     "-h, --help", NULL, "Show help and exit", 0 },
   { <version>, CLI_TOP, <global>, "-V, --version", NULL,
     "Show the x2c version and exit", 0 },
-  { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
+  { <verbose>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "-v, --verbose", NULL,
     "Show commands as they are executed", 0 },
-  { <dry-run>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
+  { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0 },
-  { <quiet>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
+  { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
     CLI_INSTALL | CLI_REMOVE,
     <general>, "-q, --quiet", NULL,
     "Suppress successful progress and receipts", 0 },
-  { <plain>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
+  { <plain>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--plain", NULL,
     "Use stable output without terminal rendering", 0 },
-  { <color>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
+  { <color>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
-  { <debug>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
+  { <debug>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0 },
   { <max-errors>, CLI_TRANSLATE | CLI_NATIVE, <general>, "--max-errors",
     "<count>", "Stop after <count> errors per unit (default: 20)", 0 },
@@ -954,12 +955,7 @@ CliRequest cli_package_options(String path, String package) {
 
 // An outer Make owns concurrency unless the caller explicitly supplies -j.
 static int _default_build_jobs(void) {
-  const char *level = getenv("MAKELEVEL");
-  if (level && *level) {
-    char *end = NULL;
-    long depth = strtol(level, &end, 10);
-    if (end && !*end && depth > 0) return 1;
-  }
+  if (report_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
   return count > 0 && count <= INT_MAX ? (int) count : 1;
 }
@@ -1146,6 +1142,6 @@ int CliRequest.inspects(CliRequest request) => request.dump != 0;
 */
 List CliRequest.package_roots(CliRequest request) {
   String home = x2c_home_packages();
-  if (!home) return request.package_dirs;
+  if (!Path.is_dir(home)) return request.package_dirs;
   return request.package_dirs.append(cons(home, NULL));
 }

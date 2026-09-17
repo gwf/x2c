@@ -20,6 +20,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "process.x"
+
 /* One process-global state holds the transient line. The driver configures it
    before dispatch; diagnostics, tool output, and stable receipts suspend the
    line before writing to stderr. */
@@ -80,34 +82,25 @@ void report_json_string(Buffer out, String text) {
   out.write_char('"');
 }
 
-static int _terminal(void) {
-  if (!isatty(fileno(stderr))) return 0;
-  const char *term = getenv("TERM");
-  return !term || strcmp(term, "dumb") != 0;
-}
+static int _terminal(void) =>
+  isatty(fileno(stderr)) && Env.get("TERM") != "dumb";
 
-// Parallel Make recipes share one terminal without sharing reporter state.
-// Stable receipts remain useful there, but no child can hold a transient
-// line.
-static int _make_owned(void) {
-  const char *level = getenv("MAKELEVEL");
-  if (!level || !*level) return 0;
-  char *end = NULL;
-  long parsed = strtol(level, &end, 10);
-  return end && !*end && parsed > 0;
+/** Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
+    set to a positive count shows. Parallel recipes share one terminal and
+    one job budget without sharing reporter state.
+*/
+int report_make_owned(void) {
+  String level = Env.get("MAKELEVEL");
+  return level.is_digit() && atol(level) > 0;
 }
 
 static int _columns(void) {
   struct winsize size;
   if (ioctl(fileno(stderr), TIOCGWINSZ, &size) == 0 && size.ws_col > 0)
     return size.ws_col;
-  const char *columns = getenv("COLUMNS");
-  if (columns && *columns) {
-    char *end = NULL;
-    long parsed = strtol(columns, &end, 10);
-    if (end && !*end && parsed >= 20 && parsed <= 1000) return (int) parsed;
-  }
-  return 80;
+  String columns = Env.get("COLUMNS");
+  int parsed = columns.is_digit() ? atoi(columns) : 0;
+  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
 }
 
 /** Resets process reporting for one command.
@@ -123,13 +116,15 @@ void report_configure(
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = !quiet && !diagnostic;
+  // Stable receipts remain useful under Make, but no recipe can hold a
+  // transient line.
   report.transient =
-    report.receipts && terminal && !plain && !_make_owned();
+    report.receipts && terminal && !plain && !report_make_owned();
   report.columns = _columns();
   report.start = report_now_us();
   if (plain || color_mode == <never>) report.color = 0;
   else if (color_mode == <always>) report.color = 1;
-  else report.color = terminal && !getenv("NO_COLOR");
+  else report.color = terminal && !Env.get("NO_COLOR");
 }
 
 /** Returns whether stable completion receipts are currently enabled. */

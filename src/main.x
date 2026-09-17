@@ -17,12 +17,9 @@
 #include "toolchain.x"
 #pragma private
 
-#include <ctype.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "report.x"
@@ -164,77 +161,30 @@ static void _compile_file(
 }
 
 static void _preflight_translation(CliRequest c, Map unit_dirs) {
-  struct stat info;
+  String out_dir = c.out_dir;
+  int checked = !c.inspects() && !unit_dirs, Map stems = {};
   if (!c.inspects()) {
-    if (stat(c.out_dir, &info)) {
-      fprintf(
-        stderr, "x2c: error: output directory does not exist: %s\n",
-        c.out_dir);
-      exit(2);
-    }
-    if (!S_ISDIR(info.st_mode)) {
-      fprintf(
-        stderr, "x2c: error: output is not a directory: %s\n",
-        c.out_dir);
-      exit(2);
-    }
-    if (access(c.out_dir, W_OK | X_OK)) {
-      fprintf(
-        stderr, "x2c: error: output directory is not writable: %s\n",
-        c.out_dir);
-      exit(2);
-    }
+    if (!Path.exists(out_dir))
+      x2c_driver_error(%"output directory does not exist: $out_dir");
+    if (!Path.is_dir(out_dir))
+      x2c_driver_error(%"output is not a directory: $out_dir");
+    if (access(out_dir, W_OK | X_OK))
+      x2c_driver_error(%"output directory is not writable: $out_dir");
   }
-  List stems = %(), stem_inputs = %();
   foreach (String input, c.inputs) {
-    if (!input) {
-      fputs("x2c: error: input path is empty\n", stderr);
-      exit(2);
-    }
-    if (stat(input, &info)) {
-      fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
-      if (strpbrk(input, "*?["))
-        fprintf(stderr, "note: x2c does not expand wildcard operands\n");
-      exit(2);
-    }
-    if (S_ISDIR(info.st_mode)) {
-      fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
-      fputs(
-        "note: pass source files, use a shell wildcard, or define a "
-        "manifest target\n",
-        stderr);
-      exit(2);
-    }
-    if (!S_ISREG(info.st_mode)) {
-      fprintf(
-        stderr, "x2c: error: input is not a regular file: %s\n", input);
-      exit(2);
-    }
-    if (!x2c_source_file(input)) {
-      fprintf(
-        stderr, "x2c: error: translation input is not an .x file: %s\n",
-        input);
-      exit(2);
-    }
+    build_check_input(input);
+    if (!x2c_source_file(input))
+      x2c_driver_error(%"translation input is not an .x file: $input");
     String stem = Path.stem(input);
-    if (!c.inspects() && !unit_dirs) {
-      List prior_stem = stems, prior_input = stem_inputs;
-      while (prior_stem) {
-        if (prior_stem.car() == stem) {
-          fprintf(
-            stderr,
-            "x2c: error: inputs produce the same output stem '%s'\n", stem);
-          fprintf(stderr, "  first input: %s\n", prior_input.car().string());
-          fprintf(stderr, "  other input: %s\n", input);
-          fprintf(stderr, "  output: %s/%s.c\n", c.out_dir, stem);
-          exit(2);
-        }
-        prior_stem = prior_stem.cdr();
-        prior_input = prior_input.cdr();
-      }
+    if (checked && stems.contains(stem)) {
+      String first = stems[stem];
+      fprintf(
+        stderr, "x2c: error: inputs produce the same output stem '%s'\n"
+        "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
+        stem, first, input, out_dir, stem);
+      exit(2);
     }
-    stems = cons(stem, stems);
-    stem_inputs = cons(input, stem_inputs);
+    stems[stem] = input;
   }
 }
 
@@ -286,16 +236,14 @@ static int _translate_workers(
       running[running_count++] = pid;
     }
     if (!running_count) continue;
-    int status = worker_wait(running[0]);
+    int status, slot = worker_wait_any(running, running_count, &status);
     if (status) failed++;
-    List slice = carried[0];
+    List slice = carried[slot];
     if (build && !status) build.end_translation(slice.car(), 0);
     done += slice.len();
     running_count--;
-    if (running_count) {
-      memmove(running, running + 1, running_count * sizeof(long));
-      memmove(carried, carried + 1, running_count * sizeof(List));
-    }
+    running[slot] = running[running_count];
+    carried[slot] = carried[running_count];
     if (!request.nested) report_progress(<translate>, done, total, NULL);
   }
   Scope.free(carried);
@@ -504,12 +452,8 @@ static int _run_build(CliRequest request) {
   Array commands =
     request.compile_commands && !request.dry_run ? [] : NULL;
   if (request.inputs) {
-    if (request.manifest) {
-      fputs(
-        "x2c: error: --manifest-path conflicts with explicit inputs\n",
-        stderr);
-      exit(2);
-    }
+    if (request.manifest)
+      x2c_driver_error("--manifest-path conflicts with explicit inputs");
     int result = _run_build_request(request, commands);
     if (result) return result;
   }
@@ -572,38 +516,26 @@ static int _run_bootstrap(CliRequest command) {
   }
   x2c_set_root(payload.prefix);
   _configure_logging(command.debugging);
-  CliRequest runtime_request =
-    bootstrap_build_request(command, payload, <runtime>);
-  runtime_request.label = "runtime";
-  Frontend.load_support(runtime_request);
-  /* A source-bearing APE is one-shot. A nonzero status returned by either
-     build closes build and lock state and flushes stdio before `_Exit`. */
+  Frontend.load_support(bootstrap_build_request(command, payload, <runtime>));
+  /* A source-bearing APE is one-shot: the runtime builds, then the compiler
+     that links it, and either status closes build and lock state and
+     flushes stdio before `_Exit`. */
   Context build = Context.open_isolated_named("bootstrap build");
-  int result = _run_build_request(runtime_request, NULL);
-  if (result) {
-    build.close();
-    bootstrap_release(payload);
-    fflush(NULL);
-    _Exit(result);
+  int result = 0, CliRequest request = NULL;
+  foreach (Symbol component, %(runtime compiler)) {
+    request = bootstrap_build_request(command, payload, component);
+    request.label = component;
+    result = _run_build_request(request, NULL);
+    if (result) break;
   }
-
-  CliRequest compiler_request =
-    bootstrap_build_request(command, payload, <compiler>);
-  compiler_request.label = "compiler";
-  result = _run_build_request(compiler_request, NULL);
-  if (result) {
-    build.close();
-    bootstrap_release(payload);
-    fflush(NULL);
-    _Exit(result);
+  if (!result) {
+    bootstrap_record_install(payload, request.cc, request.ar);
+    printf("x2c: installed native compiler at %s/bin/x2c\n", payload.prefix);
   }
-  bootstrap_record_install(payload, compiler_request.cc, compiler_request.ar);
-  printf("x2c: installed native compiler at %s/bin/x2c\n", payload.prefix);
   build.close();
   bootstrap_release(payload);
   fflush(NULL);
-  _Exit(0);
-  return 0;
+  _Exit(result);
 }
 
 /** Initializes x2c and dispatches one command from `argv`.

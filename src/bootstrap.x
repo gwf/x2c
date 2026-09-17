@@ -25,16 +25,12 @@ typedef struct Bootstrap {
 
 #pragma private
 
-#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #define BOOTSTRAP_MANIFEST "/zip/x2c/.x2c-bootstrap-manifest"
@@ -47,76 +43,27 @@ static void _error_path(const char *message, String path) {
   x2c_driver_error(%"bootstrap: $message: $path");
 }
 
-static String _absolute(String path) {
-  if (!path || !path[0]) _error("empty installation prefix");
-  if (path == "/") _error("refusing root installation prefix");
-  char resolved[PATH_MAX];
-  if (!access(path, F_OK)) {
-    if (!realpath(path, resolved))
-      _error_path("cannot resolve installation prefix", path);
-    return String.new(resolved);
-  }
-  String parent = Path.dirname(path);
-  if (!realpath(parent, resolved))
-    _error_path("installation parent does not exist", parent);
-  const char *base = strrchr(path, '/');
-  base = base ? base + 1 : path;
-  if (!base[0] || strcmp(base, ".") == 0 || strcmp(base, "..") == 0)
-    _error_path("invalid installation prefix", path);
-  return %"${String.new(resolved)}/${String.new(base)}";
+/* A prefix that does not exist yet needs an existing parent, and the root
+   directory is never a prefix however it is spelled. */
+static String _prefix(String path) {
+  if (!path) _error("empty installation prefix");
+  if (!Path.exists(path) && !Path.is_dir(Path.dirname(path)))
+    _error_path("installation parent does not exist", Path.dirname(path));
+  String prefix = Path.absolute(path);
+  if (prefix == "/") _error("refusing root installation prefix");
+  return prefix;
 }
 
-static int _safe_path(const char *path) {
-  if (!path || !path[0] || path[0] == '/') return 0;
-  const char *component = path, *ch = path;
-  loop {
-    if (*ch != '/' && *ch) {
-      ch++;
-      continue;
-    }
-    int length = (int) (ch - component);
-    if (!length ||
-        (length == 1 && component[0] == '.') ||
-        (length == 2 && component[0] == '.' && component[1] == '.'))
-      return 0;
-    if (!*ch) break;
-    component = ch + 1;
-    ch++;
-  }
-  return 1;
-}
+static int _safe_path(String path) =>
+  path && !path.split("/").any(
+    %!(String part) => !part || part == "." || part == "..");
 
-static uint64_t _hash(File input, File output, size_t *length) {
-  uint64_t hash = UINT64_C(1469598103934665603), unsigned char bytes[16384];
-  size_t count, total = 0;
-  while ((count = fread(bytes, 1, sizeof(bytes), input))) {
-    for (size_t i = 0; i < count; i++) {
-      hash ^= bytes[i];
-      hash *= UINT64_C(1099511628211);
-    }
-    if (output && fwrite(bytes, 1, count, output) != count)
-      _error("cannot write extracted payload");
-    total += count;
-  }
-  if (ferror(input)) _error("cannot read embedded payload");
-  if (length) *length = total;
-  return hash;
-}
-
-static int _read_marker(String path, String identity) {
-  File input = fopen(path, "r");
-  if (!input) return 0;
-  char line[128], int matched = fgets(line, sizeof(line), input) != NULL;
-  input.close();
-  if (!matched) return 0;
-  line[strcspn(line, "\r\n")] = 0;
-  return identity == String.new(line);
-}
-
-static void _write_marker(String path, String identity) {
-  File output = fopen(path, "w");
-  if (!output || output.printf("%s\n", identity) < 0 || output.close())
-    _error_path("cannot write installation marker", path);
+static int _marker_matches(String path, String identity) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %(not-found *): return 0;
+  String first = text ? text.split_lines(0).car() : NULL;
+  return text && first == identity;
 }
 
 /* The lock is an ownership token rather than a wait queue. A live recorded PID
@@ -155,106 +102,66 @@ static void _acquire(Bootstrap payload) {
   _error("cannot acquire bootstrap lock");
 }
 
-static char *_manifest(String *identity) {
-  File input = fopen(BOOTSTRAP_MANIFEST, "rb");
-  if (!input)
+/* The embedded manifest's records, after its header supplies the payload
+   identity. */
+static List Bootstrap._manifest(Bootstrap b) {
+  String text = NULL;
+  try text = Path.read_text(BOOTSTRAP_MANIFEST);
+  catch %(not-found *):
     _error("this executable has no embedded source payload");
-  String content = NULL;
-  try content = input.string_close();
-  catch %(io-fail *): _error("cannot read embedded source manifest");
-  char *text = strdup(content ? content : "");
-  if (!text) _error("cannot allocate source manifest");
-  char *newline = strchr(text, '\n');
-  if (!newline) _error("malformed embedded source manifest");
-  *newline = 0;
-  const char *prefix = "x2c-bootstrap-v1 ";
-  if (strncmp(text, prefix, strlen(prefix)) != 0 || !text[strlen(prefix)])
+  if (!text.contains("\n")) _error("malformed embedded source manifest");
+  List lines = text.split_lines(0);
+  String header = lines.car();
+  b.identity = header.remove_prefix("x2c-bootstrap-v1 ");
+  if (!header.startswith("x2c-bootstrap-v1 ") || !b.identity)
     _error("unsupported embedded source manifest");
-  *identity = String.new(text + strlen(prefix));
-  *newline = '\n';
-  return text;
+  return lines.cdr();
 }
 
-static int _record(
-  char *line, unsigned long long *hash, size_t *size, char path[1024]) {
-  char extra;
-  return sscanf(line, "%llx %zu %1023s %c", hash, size, path, &extra) == 3;
-}
-
-static void _collect(Bootstrap payload, String relative) {
-  String installed = %"${payload.prefix}/$relative";
-  if (relative.startswith("lib/") && relative.endswith(".x"))
-    payload.runtime_srcs = cons(installed, payload.runtime_srcs);
-  else if (relative.startswith("src/") && relative.endswith(".x"))
-    payload.compiler_srcs = cons(installed, payload.compiler_srcs);
+/* Verifies the size and hash of every manifest record under `root`, first
+   copying each record there from the payload when `root` is not the prefix,
+   and collects the runtime and compiler sources in manifest order. */
+static void Bootstrap._verify(Bootstrap b, List records, String root) {
+  Array runtime = [], compiler = [];
+  foreach (String record, records) {
+    unsigned long long expected_hash = 0;
+    size_t expected_size = 0;
+    char spelling[1024], extra;
+    if (sscanf(record, "%llx %zu %1023s %c", &expected_hash, &expected_size,
+               spelling, &extra) != 3 || !_safe_path(String.new(spelling)))
+      _error("malformed embedded source record");
+    String relative = String.new(spelling);
+    Path installed = %"$root/$relative";
+    if (root != b.prefix) {
+      installed.dirname().make_dirs();
+      Path.copy_file(%"/zip/x2c/$relative", installed);
+    }
+    String text = installed.read_text();
+    uint64_t hash = build_hash_bytes(
+      UINT64_C(1469598103934665603), text, text.len());
+    if (text.len() != expected_size || hash != (uint64_t) expected_hash)
+      _error_path("source failed verification", installed);
+    String source = %"${b.prefix}/$relative";
+    if (relative.endswith(".x") && relative.startswith("lib/"))
+      runtime.push(source);
+    else if (relative.endswith(".x") && relative.startswith("src/"))
+      compiler.push(source);
+  }
+  b.runtime_srcs = runtime.list_free();
+  b.compiler_srcs = compiler.list_free();
 }
 
 /* Build and verify a complete sibling tree before publishing it with rename.
    A failure before rename cannot expose a partial installation at the prefix.
 */
-static void _extract(Bootstrap payload, char *manifest) {
-  String temporary = %"${payload.prefix}.source.tmp.%ld".printf(
-    (long) getpid());
-  if (access(temporary, F_OK) == 0 && !_build_remove_tree(temporary))
-    _error_path("cannot clear temporary source tree", temporary);
-  if (!_build_mkdirs(temporary))
-    _error_path("cannot create temporary source tree", temporary);
-
-  char *save = NULL;
-  strtok_r(manifest, "\n", &save);
-  char *line = strtok_r(NULL, "\n", &save);
-  while (line) {
-    unsigned long long expected_hash = 0;
-    size_t expected_size = 0, char relative[1024];
-    if (!_record(line, &expected_hash, &expected_size, relative) ||
-        !_safe_path(relative))
-      _error("malformed embedded source record");
-    String source = %"/zip/x2c/${String.new(relative)}";
-    String target = %"$temporary/${String.new(relative)}";
-    String parent = Path.dirname(target);
-    if (!_build_mkdirs(parent))
-      _error_path("cannot create payload directory", parent);
-    File input = fopen(source, "rb"), output = fopen(target, "wb");
-    if (!input || !output)
-      _error_path("cannot extract embedded source", relative);
-    size_t actual_size = 0;
-    uint64_t actual_hash = _hash(input, output, &actual_size);
-    int close_error = input.close() || output.close();
-    if (close_error || actual_size != expected_size ||
-        actual_hash != (uint64_t) expected_hash)
-      _error_path("embedded source failed verification", relative);
-    _collect(payload, String.new(relative));
-    line = strtok_r(NULL, "\n", &save);
-  }
-  if (!payload.runtime_srcs || !payload.compiler_srcs)
+static void Bootstrap._extract(Bootstrap b, List records) {
+  Path temporary = %"${b.prefix}.source.tmp.%ld".printf((long) getpid());
+  temporary.remove_tree();
+  b._verify(records, temporary);
+  if (!b.runtime_srcs || !b.compiler_srcs)
     _error("embedded payload has no compiler or runtime sources");
-  _write_marker(%"$temporary/.x2c-source-id", payload.identity);
-  if (rename(temporary, payload.prefix))
-    _error_path("cannot publish extracted source tree", payload.prefix);
-}
-
-static void _collect_existing(Bootstrap payload, char *manifest) {
-  char *save = NULL;
-  strtok_r(manifest, "\n", &save);
-  char *line = strtok_r(NULL, "\n", &save);
-  while (line) {
-    unsigned long long hash = 0;
-    size_t size = 0, char relative[1024];
-    if (!_record(line, &hash, &size, relative) ||
-        !_safe_path(relative))
-      _error("malformed embedded source record");
-    String installed = %"${payload.prefix}/${String.new(relative)}";
-    File input = fopen(installed, "rb");
-    if (!input)
-      _error_path("materialized source is missing", installed);
-    size_t actual_size = 0;
-    uint64_t actual_hash = _hash(input, NULL, &actual_size);
-    int close_error = input.close();
-    if (close_error || actual_size != size || actual_hash != (uint64_t) hash)
-      _error_path("materialized source failed verification", installed);
-    _collect(payload, String.new(relative));
-    line = strtok_r(NULL, "\n", &save);
-  }
+  Path.write_text(%"$temporary/.x2c-source-id", %"${b.identity}\n");
+  temporary.move_to(b.prefix);
 }
 
 /** Verifies and materializes the APE source payload at `request.prefix`.
@@ -273,33 +180,25 @@ static void _collect_existing(Bootstrap payload, char *manifest) {
     it exits.
 */
 Bootstrap bootstrap_materialize(CliRequest request) {
-  Bootstrap payload = Scope.calloc(1, sizeof(struct Bootstrap));
-  payload.prefix = _absolute(request.prefix);
-  char *manifest = _manifest(&payload.identity);
-  defer free(manifest);
-  _acquire(payload);
-  String source_marker = %"${payload.prefix}/.x2c-source-id";
-  String complete_marker = %"${payload.prefix}/.x2c-bootstrap-complete";
-  if (!access(payload.prefix, F_OK)) {
-    if (!_read_marker(source_marker, payload.identity)) {
-      bootstrap_release(payload);
-      _error_path(
-        "prefix exists but does not contain this source payload",
-        payload.prefix);
-    }
-    _collect_existing(payload, manifest);
+  Bootstrap b = Scope.calloc(1, sizeof(struct Bootstrap));
+  b.prefix = _prefix(request.prefix);
+  List records = b._manifest();
+  _acquire(b);
+  if (!Path.exists(b.prefix)) b._extract(records);
+  else if (_marker_matches(%"${b.prefix}/.x2c-source-id", b.identity))
+    b._verify(records, b.prefix);
+  else {
+    bootstrap_release(b);
+    _error_path(
+      "prefix exists but does not contain this source payload", b.prefix);
   }
-  else _extract(payload, manifest);
-  payload.runtime_srcs = payload.runtime_srcs.reverse();
-  payload.compiler_srcs = payload.compiler_srcs.reverse();
-  payload.complete =
-    _read_marker(complete_marker, payload.identity) &&
-    !access(%"${payload.prefix}/bin/x2c", X_OK) &&
-    !access(%"${payload.prefix}/lib/libx2c.a", R_OK);
-  if (!_build_mkdirs(%"${payload.prefix}/bin") ||
-      !_build_mkdirs(%"${payload.prefix}/lib"))
-    _error_path("cannot create installation directories", payload.prefix);
-  return payload;
+  b.complete =
+    _marker_matches(%"${b.prefix}/.x2c-bootstrap-complete", b.identity) &&
+    Path.is_executable(%"${b.prefix}/bin/x2c") &&
+    Path.is_file(%"${b.prefix}/lib/libx2c.a");
+  Path.make_dirs(%"${b.prefix}/bin");
+  Path.make_dirs(%"${b.prefix}/lib");
+  return b;
 }
 
 /** Builds an ordinary native request for one materialized bootstrap component.
@@ -320,13 +219,11 @@ CliRequest bootstrap_build_request(
   request.kind = component == <runtime> ? <static-lib> : <executable>;
   request.inputs = component == <runtime> ?
                    payload.runtime_srcs : payload.compiler_srcs;
-  request.output = component == <runtime> ?
-    %"${payload.prefix}/lib/libx2c.a" :
-    %"${payload.prefix}/bin/x2c";
-  request.build_dir = component == <runtime> ?
-    %"${payload.prefix}/.x2c-build/runtime" :
-    %"${payload.prefix}/.x2c-build/compiler";
-  request.include_dirs = cons(%"${payload.prefix}/include/x2c", NULL);
+  String prefix = payload.prefix;
+  request.output =
+    component == <runtime> ? %"$prefix/lib/libx2c.a" : %"$prefix/bin/x2c";
+  request.build_dir = %"$prefix/.x2c-build/$component";
+  request.include_dirs = cons(%"$prefix/include/x2c", NULL);
   request.cc_args = command.cc_args;
   request.cc = command.cc;
   request.ar = command.ar;
@@ -344,17 +241,11 @@ CliRequest bootstrap_build_request(
     Raises: `<alloc-fail>` or `<size-limit>` while constructing canonical
     paths.
 */
-void bootstrap_record_install(Bootstrap payload, String cc, String ar) {
-  String directory = %"${payload.prefix}/lib/x2c";
-  if (!_build_mkdirs(directory))
-    _error_path("cannot create toolchain record directory", directory);
-  String record = %"$directory/toolchain", File output = fopen(record, "w");
-  if (!output ||
-      output.printf("CC=%s\nAR=%s\n", cc, ar) < 0 ||
-      output.close())
-    _error_path("cannot write toolchain record", record);
-  _write_marker(
-    %"${payload.prefix}/.x2c-bootstrap-complete", payload.identity);
+void bootstrap_record_install(Bootstrap b, String cc, String ar) {
+  Path directory = %"${b.prefix}/lib/x2c";
+  directory.make_dirs();
+  Path.write_text(%"$directory/toolchain", %"CC=$cc\nAR=$ar\n");
+  Path.write_text(%"${b.prefix}/.x2c-bootstrap-complete", %"${b.identity}\n");
 }
 
 /** Attempts to remove a held bootstrap lock without freeing the payload.

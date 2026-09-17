@@ -15,7 +15,6 @@
 #pragma private
 
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -23,12 +22,10 @@
     or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 */
 String script_cache_root(void) {
-  const char *explicit = getenv("X2C_CACHE_DIR");
-  if (explicit && *explicit) return String.new(explicit);
-  const char *xdg = getenv("XDG_CACHE_HOME");
-  if (xdg && *xdg) return %"${String.new(xdg)}/x2c";
-  const char *home = getenv("HOME");
-  return home && *home ? %"${String.new(home)}/.cache/x2c" : NULL;
+  String explicit = Env.get("X2C_CACHE_DIR"), xdg = Env.get("XDG_CACHE_HOME");
+  String home = Env.get("HOME");
+  return explicit ? explicit : xdg ? %"$xdg/x2c" :
+         home ? %"$home/.cache/x2c" : NULL;
 }
 
 static void _exec(CliRequest c) {
@@ -55,7 +52,7 @@ static void _prune(String scripts) {
     String directory = Path.join(scripts, name);
     Path source = %"$directory/source";
     if (!source.is_file() || Path.is_file(source.read_text())) continue;
-    int lock = _build_lock(%"$directory/lock", 0);
+    int lock = file_lock(%"$directory/lock", 0);
     if (lock < 0) continue;
     try Path.remove_tree(directory);
     catch %(io-fail *): {}
@@ -78,10 +75,9 @@ int script_prepare(CliRequest c) {
     String.hash(script));
   if (c.clean) {
     if (!Path.is_dir(c.build_dir)) return 1;
-    int lock = _build_lock(%"${c.build_dir}/lock", 1);
+    int lock = file_lock(%"${c.build_dir}/lock", 1);
     try Path.remove_tree(c.build_dir);
-    catch %(io-fail *):
-      x2c_driver_error(%"cannot remove script cache: ${c.build_dir}");
+    catch %(io-fail *detail): x2c_host_error(detail);
     close(lock);
     return 1;
   }
@@ -93,9 +89,9 @@ int script_prepare(CliRequest c) {
   c.output = %"${c.build_dir}/run";
   if (c.dry_run) return 0;
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
-  if (!_build_mkdirs(c.build_dir))
-    x2c_driver_error(%"cannot create script cache: ${c.build_dir}");
-  _build_lock(%"${c.build_dir}/lock", 1);
+  try Path.make_dirs(c.build_dir);
+  catch %(io-fail *detail): x2c_host_error(detail);
+  file_lock(%"${c.build_dir}/lock", 1);
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
   Path.write_text(%"${c.build_dir}/source", script);
   _prune(%"$root/scripts");

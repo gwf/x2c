@@ -711,10 +711,8 @@ static String interface_out_dir = NULL, interface_mirror = NULL;
 void interface_configure(String out_dir) {
   _process_cache();
   interface_out_dir = out_dir;
-  String root = x2c_get_root(), executable = x2c_get_executable();
-  String stage = executable ? Path.dirname(executable) : NULL;
-  interface_mirror =
-    stage && Path.dirname(stage) == %"$root/builds" ? stage : root;
+  String stage = x2c_stage_dir();
+  interface_mirror = stage ? stage : x2c_get_root();
 }
 
 /* Candidate interface paths for one canonical source path: the output

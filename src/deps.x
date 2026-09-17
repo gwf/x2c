@@ -14,15 +14,10 @@
 #pragma private
 #include "collect.x"
 
-#include <errno.h>
-#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "buffer.x"
-
-static String _stem(String input) => Path.stem(input);
 
 /** Parses prerequisite words after the first literal colon in `text`.
     Backslash escapes and doubled dollars are decoded in that region. A
@@ -73,81 +68,48 @@ List translation_depfile_parse(String text) {
 /* Backslash-escape space, tab, '#', ':', and backslash as Make word bytes.
    Make expands a single dollar before matching dependencies, so dollars are
    doubled separately. */
-static int _write_word(File output, String word) {
-  if (!word) return output.puts("\\ ");
+static void _write_word(Buffer out, String word) {
+  if (!word) out.write("\\ ");
   foreach (char ch, word) {
-    if (ch == '$') {
-      if (output.puts("$$") == EOF) return 0;
-      continue;
-    }
-    if (ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\')
-      if (output.putc('\\') == EOF) return 0;
-    if (output.putc(ch) == EOF) return 0;
+    if (ch == '$') out.write_char('$');
+    else if (ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\')
+      out.write_char('\\');
+    out.write_char(ch);
   }
-  return 1;
 }
 
-static void _add(Array paths, String path) {
-  if (path && !paths.contains(path)) paths.push(path);
-}
-
-static Array _prerequisites(
-  CliRequest request, Compiler compiler, String input) {
-  /* Collection and cached replay populate a Map with no publication order.
-     Deduplicate and sort paths so both routes write the same depfile. */
-  (void) request;
-  Array paths = [];
-  if (compiler.deps.len())
-    foreach (Var (path, content_hash), compiler.deps) _add(paths, path);
-  else _add(paths, input);
+/* Collection and cached replay populate a Map with no publication order, so
+   paths are sorted to write the same depfile from both routes. */
+static String _contents(
+  CliRequest request, Compiler compiler, String input, String output_dir) {
+  Array paths = $auto([]);
+  foreach (Var (path, content_hash), compiler.deps) paths.push(path);
+  if (!paths.len()) paths.push(input);
   paths.sort();
-  return paths;
-}
-
-static int _write_targets(
-  File output, CliRequest request, String output_dir, String stem) {
-  if (request.dep_target) return _write_word(output, request.dep_target);
-  String base = %"${output_dir.rstrip("/")}/$stem";
-  if (!_write_word(output, %"$base.c")) return 0;
-  if (output.putc(' ') == EOF) return 0;
-  return _write_word(output, %"$base.h");
-}
-
-static int _write_contents(
-  File output, CliRequest request, Compiler compiler, String input,
-  String output_dir, String stem) {
-  Array paths = _prerequisites(request, compiler, input);
-  char primary_buffer[PATH_MAX];
-  String primary = realpath(input, primary_buffer) ?
-                   %"$primary_buffer" : input;
-  int ok = _write_targets(output, request, output_dir, stem);
-  if (ok && output.putc(':') == EOF) ok = 0;
-  foreach (Var value, paths) {
-    if (!ok || output.putc(' ') == EOF) {
-      ok = 0;
-      break;
-    }
-    if (!_write_word(output, value)) {
-      ok = 0;
-      break;
-    }
+  Buffer out = $auto(Buffer.new(0));
+  String base = %"${output_dir.rstrip("/")}/${Path.stem(input)}";
+  _write_word(out, request.dep_target ? request.dep_target : %"$base.c");
+  if (!request.dep_target) {
+    out.write_char(' ');
+    _write_word(out, %"$base.h");
   }
-  if (ok && output.putc('\n') == EOF) ok = 0;
+  out.write_char(':');
+  foreach (String path, paths) {
+    out.write_char(' ');
+    _write_word(out, path);
+  }
+  out.write_char('\n');
   /* Keep the dependency rule first. `translation_depfile_parse` stops at this
      newline so build fingerprints never treat following phony targets as
      prerequisites. */
-  if (ok && !request.no_phony_deps) {
-    foreach (Var value, paths) {
-      String path = value;
-      if (path == primary) continue;
-      if (!_write_word(output, path) || output.puts(":\n") == EOF) {
-        ok = 0;
-        break;
+  String primary = Path.absolute(input);
+  if (!request.no_phony_deps)
+    foreach (String path, paths)
+      if (path != primary) {
+        _write_word(out, path);
+        out.write(":\n");
       }
-    }
-  }
-  paths.free();
-  return ok && !output.error();
+  return out;
 }
 
 /** Publishes the Make depfile for one completed translation.
@@ -165,25 +127,17 @@ static int _write_contents(
 int translation_depfile_write(
   CliRequest request, Compiler compiler, String input, String output_dir) {
   if (request.no_deps || request.inspects()) return 1;
-  String stem = _stem(input);
   String path = request.dep_file ? request.dep_file :
-                %"${output_dir.rstrip("/")}/$stem.d";
-  String temporary = %"$path.tmp.%ld".printf((long) getpid());
-  File output = fopen(temporary, "w");
-  if (!output) {
-    fprintf(stderr, "x2c: error: cannot open dependency file: %s\n", path);
-    fprintf(stderr, "note: %s\n", strerror(errno));
-    return 0;
+    %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
+  long error = 0;
+  try {
+    file_publish(path, _contents(request, compiler, input, output_dir));
+    return 1;
   }
-  int ok = _write_contents(
-    output, request, compiler, input, output_dir, stem);
-  int close_error = output.close();
-  if (!ok || close_error || rename(temporary, path)) {
-    int error = errno;
-    unlink(temporary);
-    fprintf(stderr, "x2c: error: cannot write dependency file: %s\n", path);
-    fprintf(stderr, "note: %s\n", strerror(error));
-    return 0;
-  }
-  return 1;
+  catch %(not-found *failure): error = failure.assoc(<errno>);
+  catch %(io-fail *failure): error = failure.assoc(<errno>);
+  fprintf(
+    stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path,
+    strerror(error));
+  return 0;
 }

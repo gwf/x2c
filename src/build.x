@@ -38,17 +38,13 @@ typedef struct Build {
 
 #pragma private
 
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/file.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
+#include "json.x"
 #include "report.x"
 
 /* Artifact directories and object, dependency, and state paths all use this
@@ -66,7 +62,9 @@ static String _key(String path) {
    output, so changed include resolution and conditional availability count.
    A missing or unreadable input clears `ok`; state writes are best effort and
    use a temporary followed by rename. */
-static uint64_t _state_bytes(uint64_t hash, const void *bytes, size_t length) {
+
+/** Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. */
+uint64_t build_hash_bytes(uint64_t hash, const void *bytes, size_t length) {
   const unsigned char *data = bytes;
   for (size_t i = 0; i < length; i++) {
     hash ^= data[i];
@@ -78,14 +76,14 @@ static uint64_t _state_bytes(uint64_t hash, const void *bytes, size_t length) {
 /* Null text uses 0xff, present text ends with NUL, and each List ends with
    0xfe. These separators distinguish adjacent ordered fingerprint fields. */
 static uint64_t _state_text(uint64_t hash, String text) {
-  if (!text) return _state_bytes(hash, "\xff", 1);
-  hash = _state_bytes(hash, text, strlen(text));
-  return _state_bytes(hash, "\0", 1);
+  if (!text) return build_hash_bytes(hash, "\xff", 1);
+  hash = build_hash_bytes(hash, text, strlen(text));
+  return build_hash_bytes(hash, "\0", 1);
 }
 
 static uint64_t _state_list(uint64_t hash, List values) {
   foreach (String value, values) hash = _state_text(hash, value);
-  return _state_bytes(hash, "\xfe", 1);
+  return build_hash_bytes(hash, "\xfe", 1);
 }
 
 static uint64_t _state_file(uint64_t hash, String path, int *ok) {
@@ -97,7 +95,7 @@ static uint64_t _state_file(uint64_t hash, String path, int *ok) {
   hash = _state_text(hash, path);
   unsigned char buffer[16384], size_t length;
   while ((length = fread(buffer, 1, sizeof(buffer), input)))
-    hash = _state_bytes(hash, buffer, length);
+    hash = build_hash_bytes(hash, buffer, length);
   if (ferror(input)) *ok = 0;
   input.close();
   return hash;
@@ -108,13 +106,8 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
     *ok = 0;
     return hash;
   }
-  if (strchr(tool, '/')) return _state_file(hash, tool, ok);
-  const char *path = getenv("PATH");
-  List dirs = path ? String.new(path).split(":") : NULL;
-  foreach (String dir, dirs) {
-    String candidate = dir && dir[0] ? %"$dir/$tool" : tool;
-    if (!access(candidate, X_OK)) return _state_file(hash, candidate, ok);
-  }
+  String path = tool.contains("/") ? tool : x2c_find_program(tool);
+  if (path) return _state_file(hash, path, ok);
   *ok = 0;
   return _state_text(hash, tool);
 }
@@ -163,45 +156,36 @@ static int _state_matches(String path, uint64_t hash) {
 /* Lines after the fingerprint name the files it covers, for a reader that
    must check it without rebuilding the list. */
 static void _state_write_lines(String path, uint64_t hash, List lines) {
-  String temporary = %"$path.tmp.%ld".printf((long) getpid());
-  File output = fopen(temporary, "w");
-  if (!output) return;
-  int ok = output.printf(
-    "x2c-state-v1 %016llx\n", (unsigned long long) hash) >= 0;
-  foreach (String line, lines)
-    if (output.printf("%s\n", line) < 0) ok = 0;
-  if (output.close()) ok = 0;
-  if (!ok || rename(temporary, path)) unlink(temporary);
+  String text = "x2c-state-v1 %016llx\n".printf((unsigned long long) hash);
+  foreach (String line, lines) text = %"$text$line\n";
+  try file_publish(path, text);
+  catch %(not-found *): {}
+  catch %(io-fail *): {}
 }
 
 static void _state_write(String path, uint64_t hash) {
   _state_write_lines(path, hash, NULL);
 }
 
-/* Creates `path` and missing parents, returning zero when it cannot. */
-int _build_mkdirs(String path) {
-  try Path.make_dirs(path);
-  catch %(not-found *): return 0;
-  catch %(io-fail *): return 0;
-  return 1;
-}
-
-static void _require_directory(String path) {
-  if (!_build_mkdirs(path))
-    x2c_driver_error(%"cannot create build directory: $path");
-}
-
-static void _validate_input(String input) {
-  struct stat info;
-  if (!input || stat(input, &info))
-    x2c_driver_error(%"input does not exist: $input");
-  if (S_ISDIR(info.st_mode))
-    x2c_driver_error(%"input is a directory: $input");
-  if (!S_ISREG(info.st_mode))
+/** Exits with a driver error unless `input` names a regular file.
+    A wildcard or directory operand adds a note on what to pass instead.
+*/
+void build_check_input(String input) {
+  if (!input) x2c_driver_error("input path is empty");
+  if (Path.is_file(input)) return;
+  if (Path.is_dir(input)) {
+    fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
+    fputs(
+      "note: pass source files, use a shell wildcard, or define a "
+      "manifest target\n", stderr);
+    exit(2);
+  }
+  if (Path.exists(input))
     x2c_driver_error(%"input is not a regular file: $input");
-  if (!(x2c_source_file(input) || input.endswith(".c") ||
-        input.endswith(".o") || input.endswith(".a")))
-    x2c_driver_error(%"unsupported build input: $input");
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
+  if (strpbrk(input, "*?["))
+    fputs("note: x2c does not expand wildcard operands\n", stderr);
+  exit(2);
 }
 
 /** Validates a native build request and returns its `Scope`-owned build state.
@@ -216,7 +200,10 @@ Build CliRequest.prepare(CliRequest c) {
   int compilable = 0, input_count = 0;
   foreach (String input, c.inputs) {
     input_count++;
-    _validate_input(input);
+    build_check_input(input);
+    if (!(x2c_source_file(input) || input.endswith(".c") ||
+          input.endswith(".o") || input.endswith(".a")))
+      x2c_driver_error(%"unsupported build input: $input");
     if (x2c_source_file(input) || input.endswith(".c")) compilable++;
     if (c.kind == <static-lib> && input.endswith(".a"))
       x2c_driver_error(
@@ -262,24 +249,19 @@ Build CliRequest.prepare(CliRequest c) {
     state.work_dir = "/tmp/x2c-build-dry-run";
     state.temporary = 1;
   }
-  else {
-    char work[] = "/tmp/x2c-build-XXXXXX", *directory = mkdtemp(work);
-    if (!directory)
-      x2c_driver_error("cannot create temporary build directory");
-    state.work_dir = String.new(directory);
-    state.temporary = 1;
+  else state.temporary = 1;
+  try {
+    if (!state.work_dir) state.work_dir = Path.temp_dir();
+    state.gen_root = %"${state.work_dir}/gen";
+    state.obj_root = %"${state.work_dir}/obj";
+    state.dep_root = %"${state.work_dir}/dep";
+    if (c.build_dir) state.state_root = %"${state.work_dir}/.x2c-state";
+    if (!c.dry_run)
+      foreach (Path directory, %(${state.gen_root} ${state.obj_root}
+                                 ${state.dep_root} ${state.state_root}))
+        if (directory) directory.make_dirs();
   }
-  state.gen_root = %"${state.work_dir}/gen";
-  state.obj_root = %"${state.work_dir}/obj";
-  state.dep_root = %"${state.work_dir}/dep";
-  if (c.build_dir) state.state_root = %"${state.work_dir}/.x2c-state";
-  if (!c.dry_run) {
-    _require_directory(state.work_dir);
-    _require_directory(state.gen_root);
-    _require_directory(state.obj_root);
-    _require_directory(state.dep_root);
-    if (state.state_root) _require_directory(state.state_root);
-  }
+  catch %(io-fail *detail): x2c_host_error(detail);
   foreach (String input, c.inputs) {
     if (x2c_source_file(input)) state.xlat_n++;
     if (input.endswith(".c")) state.c_sources.push(input);
@@ -298,7 +280,7 @@ Build CliRequest.prepare(CliRequest c) {
 */
 String Build.generated_dir(Build state, String input) {
   String directory = %"${state.gen_root}/${_key(input)}";
-  if (!state.request.dry_run) _require_directory(directory);
+  if (!state.request.dry_run) Path.make_dirs(directory);
   return directory;
 }
 
@@ -328,9 +310,8 @@ static uint64_t _translation_fingerprint(
 int Build.translation_current(Build state, String input, String directory) {
   if (!state.state_root || state.request.dry_run) return 0;
   String stem = Path.stem(input);
-  if (access(%"$directory/$stem.c", R_OK)) return 0;
-  if (access(%"$directory/$stem.h", R_OK)) return 0;
-  if (access(%"$directory/$stem.xi", R_OK)) return 0;
+  foreach (String suffix, %(".c" ".h" ".xi"))
+    if (!Path.is_file(%"$directory/$stem$suffix")) return 0;
   int ok = 1;
   uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
   String path = %"${state.state_root}/x-${_key(input)}";
@@ -352,45 +333,18 @@ void Build.record_translation(Build state, String input, String directory) {
   if (ok) _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
 
-/* A file under a registered --package-dir root belongs to the package
-   directory named by the next path component. */
-static String _package_directory(List roots, String path) {
-  char buffer[PATH_MAX];
-  if (!realpath(path, buffer)) return NULL;
-  String canonical = %"$buffer";
-  foreach (String candidate, roots) {
-    if (!realpath(candidate, buffer)) continue;
-    String directory = x2c_package_directory(%"$buffer", canonical);
-    if (directory) return directory;
-  }
-  return NULL;
-}
-
-/* A package's own sources are the files the compiler puts in package mode;
-   a test or example inside the package directory imports it instead, so it
-   links the archive like any other consumer. */
-static String _package_source_directory(List roots, String path) {
-  char buffer[PATH_MAX], String directory = _package_directory(roots, path);
-  if (!directory || !realpath(path, buffer)) return NULL;
-  return x2c_package_source(directory, %"$buffer") ? directory : NULL;
-}
-
 /* The one line of link flags the package needs besides its archive. Both
    files come from the package's build target, so a missing one is the same
    unbuilt-package mistake the archive check above reports; dropping the
    flags instead leaves the consumer with undefined symbols at link. */
-static void _package_link_flags(Build state, String name, String path) {
-  if (access(path, R_OK))
-    x2c_driver_error(%"package '$name' is not built: $path");
-  File input = fopen(path, "r");
-  if (!input) return;
+static void _package_link_flags(Build b, String name, String path) {
   String text = NULL;
-  try text = input.string_close();
-  catch %(io-fail *): return;
-  Toolchain toolchain = state.toolchain;
+  try text = Path.read_text(path);
+  catch %(not-found *):
+    x2c_driver_error(%"package '$name' is not built: $path");
   Array flags = [];
   foreach (Var word, text.words()) flags.push(word);
-  toolchain.ld_args = toolchain.ld_args.append(flags.list_free());
+  b.toolchain.ld_args = b.toolchain.ld_args.append(flags.list_free());
 }
 
 /* Imported packages reach the build through the unit's recorded
@@ -399,15 +353,16 @@ static void _package_link_flags(Build state, String name, String path) {
 static void Build._link_packages(Build state, String input, String directory) {
   List roots = state.request.package_roots();
   if (!roots) return;
-  char buffer[PATH_MAX];
-  String self = realpath(input, buffer) ? %"$buffer" : input;
-  String own = _package_source_directory(roots, input);
+  // A package's own sources link no archive of their own; a test or example
+  // inside the package directory imports the package like any consumer.
+  String self = Path.absolute(input), own = x2c_package_directory(roots, self);
+  if (!x2c_package_source(own, self)) own = NULL;
   String depfile = %"$directory/${Path.stem(input)}.d";
   foreach (String dependency, _state_dep_inputs(depfile)) {
     // A unit under a package directory that is not the package's own
     // source, such as a script kept beside it, consumes nothing by itself.
     if (dependency == self || dependency == input) continue;
-    String package = _package_directory(roots, dependency);
+    String package = x2c_package_directory(roots, dependency);
     if (!package || (own && package == own)) continue;
     String builds = %"$package/builds";
     if (state.gen_dirs.contains(builds)) continue;
@@ -523,55 +478,29 @@ static int _finish_compile(Build state, CcJob *pending) {
 }
 
 static String _compile_command(
-  Build state, ToolAction action, String source, String object) {
-  Buffer out = Buffer.new(0);
-  out.write("  {\"directory\": ");
-  report_json_string(out, state.compile_directory);
-  out.write(", \"file\": ");
-  report_json_string(out, source);
-  out.write(", \"output\": ");
-  report_json_string(out, object);
-  out.write(", \"arguments\": [");
-  int first = 1;
-  foreach (String argument, action.arguments) {
-    if (!first) out.write(", ");
-    report_json_string(out, argument);
-    first = 0;
-  }
-  out.write("]}");
-  return out.str_free();
+  Build b, ToolAction action, String source, String object) {
+  Map entry = {
+    directory: b.compile_directory, file: source, output: object,
+    arguments: action.arguments
+  };
+  return %"  ${Var.json(entry)}";
 }
 
 /** Publishes collected native compilation entries as one JSON database.
     `commands` holds serialized entries from each completed build target.
-    The destination's parent must exist. Writes a process-specific sibling
-    before rename; handled open, write, close, or rename failure preserves
-    the existing database, reports a diagnostic, and returns zero.
+    The destination's parent must exist. A failed write preserves the
+    existing database, reports a diagnostic, and returns zero.
 */
 int compile_commands_write(String path, Array commands) {
-  String temporary = %"$path.tmp.%ld".printf((long) getpid());
-  File output = fopen(temporary, "w");
-  if (!output) {
-    fprintf(
-      stderr, "x2c: error: cannot open compilation database: %s\n", path);
-    return 0;
+  try {
+    file_publish(path, %"[\n${",\n".join(commands)}\n]\n");
+    report_line(<muted>, %"  Compilation database $path");
+    return 1;
   }
-  int ok = output.puts("[\n") != EOF, first = 1;
-  foreach (String entry, commands) {
-    if (!first && output.puts(",\n") == EOF) ok = 0;
-    if (output.puts(entry) == EOF) ok = 0;
-    first = 0;
-  }
-  if (output.puts("\n]\n") == EOF) ok = 0;
-  if (output.close()) ok = 0;
-  if (!ok || rename(temporary, path)) {
-    unlink(temporary);
-    fprintf(
-      stderr, "x2c: error: cannot write compilation database: %s\n", path);
-    return 0;
-  }
-  report_line(<muted>, %"  Compilation database $path");
-  return 1;
+  catch %(not-found *): {}
+  catch %(io-fail *): {}
+  fprintf(stderr, "x2c: error: cannot write compilation database: %s\n", path);
+  return 0;
 }
 
 /* Finish ready owned jobs, optionally waiting for at least one. A lone job
@@ -602,12 +531,8 @@ static int _finish_compiles(
 }
 
 static int _compile_sources(Build b) {
-  if ((void *) b.compile_commands != NULL) {
-    char current[PATH_MAX];
-    if (!getcwd(current, sizeof(current)))
-      x2c_driver_error("cannot read compilation working directory");
-    b.compile_directory = String.new(current);
-  }
+  if ((void *) b.compile_commands != NULL)
+    b.compile_directory = Path.absolute(".");
   CcJob *running = Scope.calloc(b.request.jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
   b.cc_n = b.c_sources.len();
@@ -873,39 +798,17 @@ int Build.run_program(Build state) {
   return action.run();
 }
 
-/* Removes `path` and everything below it, returning zero when any entry
-   could not be removed. An absent path counts as removed. */
-int _build_remove_tree(String path) {
-  try Path.remove_tree(path);
-  catch %(io-fail *): return 0;
-  return 1;
-}
-
-/* Locks the file `path`, creating it, and returns a descriptor that holds
-   the lock until it is closed or the process exits. Returns -1 when `wait`
-   is zero and another process holds the lock. */
-int _build_lock(String path, int wait) {
-  int lock = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if (lock < 0) x2c_driver_error(%"cannot lock $path");
-  int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
-  while (flock(lock, operation)) {
-    if (errno == EINTR) continue;
-    close(lock);
-    return -1;
-  }
-  return lock;
-}
-
 /** Removes the temporary work tree after a successful real build.
     Failed builds, retained directories, and dry runs are left untouched; a
     removal failure emits a warning and is not returned to the caller.
 */
-void Build.cleanup(Build state, int success) {
-  if (!success || !state.temporary || state.request.dry_run) return;
-  if (!_build_remove_tree(state.work_dir)) {
-    fputs("x2c: warning: cannot remove temporary build directory: ", stderr);
-    fprintf(stderr, "%s\n", state.work_dir);
-  }
+void Build.cleanup(Build b, int success) {
+  if (!success || !b.temporary || b.request.dry_run) return;
+  try Path.remove_tree(b.work_dir);
+  catch %(io-fail *):
+    fprintf(
+      stderr, "x2c: warning: cannot remove temporary build directory: %s\n",
+      b.work_dir);
 }
 
 /* A script's executable is reused without translating, preprocessing, or
@@ -925,10 +828,8 @@ static uint64_t _script_fingerprint(
   hash = _state_list(hash, c.cc_args);
   hash = _state_list(hash, c.ld_args);
   hash = _state_text(hash, c.source_map ? "source-map" : "generated-lines");
-  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT")) {
-    const char *value = getenv(name);
-    hash = _state_text(hash, value ? String.new(value) : NULL);
-  }
+  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT"))
+    hash = _state_text(hash, Env.get(name));
   foreach (String path, prerequisites) {
     if (!path.endswith("/")) {
       hash = _state_file(hash, path, ok);
