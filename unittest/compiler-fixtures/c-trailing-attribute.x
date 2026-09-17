@@ -28,7 +28,7 @@ static void release(int *value) { printf("release %d\n", *value); }
 
 static int second(int x __attribute__((unused)), int y) { return y; }
 
-// Specifiers before the type keep their place in the generated C.
+// Leading attributes and `_Noreturn` follow the storage class in the C.
 __attribute__((unused)) static int third(int z) { return z; }
 _Noreturn static void finish(int status) { exit(status); }
 inline static int fourth(int w) { return w; }

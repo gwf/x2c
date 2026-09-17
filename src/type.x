@@ -857,6 +857,20 @@ static List _from_ast_items(List items, List context) {
   $ast.rewrite_children(items, child, _from_ast(child, context));
 }
 
+/* Source specifier text, a leading `("_Noreturn")` or a trailing
+   `("__attribute__((unused))")`, is declaration text with no part in the
+   Type. */
+static List _without_source_text(List items) {
+  List rest = items;
+  while (rest && !(rest.car() is <list> && car(rest.car()) is <string>))
+    rest = rest.cdr();
+  if (!rest) return items;
+  Array typed = [];
+  foreach (Var item, items)
+    if (!(item is <list> && car(item) is <string>)) typed.push(item);
+  return typed.list_free();
+}
+
 /* Private version can take any internal node of a declaration AST.  It
    will also apply modifications to inline sub-types (i.e., a struct field
    that's a pointer). */
@@ -871,18 +885,12 @@ static List _from_ast(List ast, List context) {
     // (declare ?type ?bindings)
     case <declare>: {
       (List source_type, List bindings) = ast.cdr();
-      List type = _from_ast(source_type, NULL);
+      List type = _from_ast(_without_source_text(source_type), NULL);
       return _from_ast(bindings, type);
     }
     // (bind ?ident ?mods)
     case <bind>: {
-      // A source attribute modifier, `("__attribute__((unused))")`, is
-      // declaration text with no part in the Type.
-      Array typed = [];
-      foreach (Var item, ast.caddr())
-        if (!(item is <list> && car(item) is <string>))
-          typed.push(item);
-      List mods = _from_ast(typed.list_free(), context);
+      List mods = _from_ast(_without_source_text(ast.caddr()), context);
       return context.type()._modify(mods);
     }
     // (params ?params), (bindings ?bindings), (fields ?fields)

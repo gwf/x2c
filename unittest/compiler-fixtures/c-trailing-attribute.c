@@ -8,9 +8,9 @@ static void release(int * value);
 
 static int second(int x __attribute__((unused)), int y);
 
-__attribute__((unused)) static int third(int z);
+static __attribute__((unused)) int third(int z);
 
-_Noreturn static void finish(int status);
+static _Noreturn void finish(int status);
 
 inline static int fourth(int w);
 
@@ -39,11 +39,11 @@ static int second(int x __attribute__((unused)), int y){
   return y;
 }
 
-__attribute__((unused)) static int third(int z){
+static __attribute__((unused)) int third(int z){
   return z;
 }
 
-_Noreturn static void finish(int status){
+static _Noreturn void finish(int status){
   exit(status);
 }
 

@@ -200,10 +200,10 @@ static List _lower_self_declaration(Compiler compiler, List declaration) {
    Keep parsed modifiers (and parameter bindings) intact and append only the
    alias's declarators. Storage still belongs on the declaration's base. */
 static List _declaration_base(Type t, List *modifiers) {
-  // Source specifier text, such as `("_Noreturn")`, stays with the storage.
-  Array storage = [], typed = [];
+  // Source specifier text, such as `("_Noreturn")`, follows the storage.
+  Array storage = [], text = [], typed = [];
   foreach (Var item, t)
-    if (item is <list> && car(item) is <string>) storage.push(item);
+    if (item is <list> && car(item) is <string>) text.push(item);
     else typed.push(item);
   List (base, mods) = typed.list_free().type().declared().declaration_parts();
   *modifiers = mods;
@@ -212,7 +212,7 @@ static List _declaration_base(Type t, List *modifiers) {
     if (item is <symbol> &&
         (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
       storage.push(item);
-  return storage.list_free().append(base);
+  return %( @{storage.list_free()} @{text.list_free()} @base );
 }
 
 static List _append_declarator_modifiers(List declarator, List modifiers) {
@@ -294,19 +294,21 @@ static int _prefix_macro_words(Compiler c, int rank, Array words) {
   return !later;
 }
 
-/* Declaration specifiers before the qualifiers and type: storage classes,
-   `inline`, `_Noreturn`, and attributes, in source order. One storage class
-   is allowed, except that `threaded` pairs with another one the way C's
-   thread-local specifier pairs with `static` or `extern`. A second one
-   stops the run, so `static extern` is diagnosed instead of passed to C. */
+/* Declaration specifiers before the qualifiers and type: storage classes
+   and `inline` in source order, then `_Noreturn` and attributes as source
+   text. The storage words lead, where C places them and where a declared
+   type's storage is read. One storage class is allowed, except that
+   `threaded` pairs with another one the way C's thread-local specifier
+   pairs with `static` or `extern`. A second one stops the run, so
+   `static extern` is diagnosed instead of passed to C. */
 static List _storage_class(Compiler c) {
-  Array storage = [], int seen_threaded = 0, seen_ordinary = 0;
+  Array storage = [], text = [], int seen_threaded = 0, seen_ordinary = 0;
   loop {
     Symbol symbol = c.peek(0);
     String attribute = _attribute(c);
-    if (attribute) storage.push(%($attribute));
+    if (attribute) text.push(%($attribute));
     else if (symbol == <ident> && c.token.text == "_Noreturn") {
-      storage.push(%("_Noreturn"));
+      text.push(%("_Noreturn"));
       c.next();
     }
     else if (symbol.is_inline() ||
@@ -319,7 +321,7 @@ static List _storage_class(Compiler c) {
     }
     else if (!_prefix_macro_words(c, 0, storage)) break;
   }
-  return storage.list_free();
+  return %( @{storage.list_free()} @{text.list_free()} );
 }
 
 static List _type_qualifiers(Compiler c) {
@@ -1149,22 +1151,27 @@ static List _typedef(Compiler compiler, List context, int row) {
   return _finish_declaration(compiler, <typedef>, spec, bindings, 0);
 }
 
-static List _declaration_group(Compiler c, int row) {
-  List storage = _storage_class(c);
-  if (storage === %(typedef)) return _typedef(c, storage, row);
-
+/* Reads the qualifiers and type specifier after `storage` and returns the
+   declared type and the type its names are bound to. Source specifier text,
+   such as `("_Noreturn")`, is written with the declaration but is no part of
+   the bound type. An aggregate binds its short tag; the declared type keeps
+   the body. */
+static List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
   Type spec = _type_specifier(c);
-  Type type = c.sym.local_type(%( @storage @quals @spec ));
-  // Source specifier text, such as `("_Noreturn")`, is written with the
-  // declaration but is no part of the type its names are bound to.
   List words = storage.filter(%!(item) => item is <symbol>);
   Type binding_type = c.sym.local_type(%( @words @quals @spec ));
   if (spec.is_aggregate_tag_body()) {
-    // Bind the short aggregate tag, but retain the body on the AST node.
     Var (aggregate, tag, body) = spec;
     binding_type = %( @words @quals $aggregate $tag );
   }
+  return %( ${c.sym.local_type(%( @storage @quals @spec ))} $binding_type );
+}
+
+static List _declaration_group(Compiler c, int row) {
+  List storage = _storage_class(c);
+  if (storage === %(typedef)) return _typedef(c, storage, row);
+  List (type, binding_type) = _declaration_types(c, storage);
   if (_test_destructure_declaration(c))
     return _destructure_declaration(c, type, binding_type, 0);
   List bindings = _declarator_list(c, binding_type, NULL, row);
@@ -1434,20 +1441,10 @@ List Compiler.parse_declaration_argument(Compiler c) {
     c.report_error(
       <parse>, "Decl macro argument cannot be a typedef",
       c.token, NULL);
-  List quals = _type_qualifiers(c);
-  Type spec = _type_specifier(c);
-  Type type = %( @storage @quals @spec );
-  type = c.sym.local_type(type);
-  Type binding_type = type;
-  if (spec.is_aggregate_tag_body()) {
-    Var (aggregate, tag_or_body, body) = spec;
-    binding_type = %( $aggregate $tag_or_body );
-    binding_type = %( @storage @quals @binding_type );
-  }
-  List binding = NULL;
+  List (type, binding_type) = _declaration_types(c, storage);
   if (_test_destructure_declaration(c))
     return _destructure_declaration(c, type, binding_type, 1);
-  binding = _declarator_init(c, binding_type, NULL);
+  List binding = _declarator_init(c, binding_type, NULL);
   List declaration = _finish_declaration(
     c, <declare>, type, %($binding), 0);
   if (declaration.type_from_ast().is_function())

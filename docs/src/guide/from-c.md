@@ -100,8 +100,9 @@ text: `JSMN_API void jsmn_init(...)`, `STBIDEF stbi_uc *stbi_load(...)`,
 `API` defined to `static int` work as in C. A function-like macro that wraps
 its parameter in attributes, `CJSON_PUBLIC(const char *) cJSON_Version(void)`,
 reads as the type inside. An attribute or `_Noreturn` before the type,
-`__attribute__((unused)) static int f(void)`, stays before the type in the
-generated C. An attribute after a declarator or parameter,
+`__attribute__((unused)) static int f(void)`, is written after the storage
+class and before the type in the generated C, and is no part of the type
+that returns, conversions, and prototypes use. An attribute after a declarator or parameter,
 `int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
 declarator. The GNU spellings `__inline`, `__inline__`, `__restrict`, and
 `__restrict__` mean the standard keywords.
